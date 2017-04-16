@@ -22,9 +22,14 @@ public:
 	virtual ~ccCommandLineParser();
 
 	//inherited from ccCommandLineInterface
+	virtual QString getExportFilename(	const CLEntityDesc& entityDesc,
+										QString extension = QString(),
+										QString suffix = QString(),
+										QString* baseOutputFilename = 0,
+										bool forceNoTimestamp = false) const override;
 	virtual QString exportEntity(	CLEntityDesc& entityDesc,
 									QString suffix = QString(),
-									QString* outputFilename = 0,
+									QString* baseOutputFilename = 0,
 									bool forceIsCloud = false,
 									bool forceNoTimestamp = false) override;
 	virtual void removeClouds(bool onlyLast = false) override;

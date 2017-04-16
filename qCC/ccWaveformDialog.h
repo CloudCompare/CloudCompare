@@ -87,11 +87,15 @@ protected: //attributes
 	std::vector<double> m_curveValues;
 	double m_dt;
 	double m_minA, m_maxA;
+	double m_echoPos;
 
 	//vertical indicator
 	QCPBarsWithText* m_vertBar;
 	bool m_drawVerticalIndicator;
 	double m_verticalIndicatorPositionPercent;
+
+	//Peak marker
+	QCPBarsWithText* m_peakBar;
 
 	//! Rendering font
 	QFont m_renderingFont;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>999</width>
-    <height>760</height>
+    <width>1000</width>
+    <height>905</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -117,10 +117,10 @@
               <number>6</number>
              </property>
              <property name="minimum">
-              <double>0.001000000000000</double>
+              <double>0.000010000000000</double>
              </property>
              <property name="maximum">
-              <double>1000.000000000000000</double>
+              <double>100000.000000000000000</double>
              </property>
              <property name="singleStep">
               <double>0.001000000000000</double>
@@ -720,6 +720,16 @@ replaced by the cell's average height!</string>
              </spacer>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="projectContoursOnAltCheckBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>project contours on the altitude layer</string>
+            </property>
+           </widget>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_7">

@@ -269,6 +269,8 @@ protected slots:
 	void setOrthoView();
 	void setCenteredPerspectiveView();
 	void setViewerPerspectiveView();
+	void toggleActiveWindowAutoPickRotCenter(bool);
+	void toggleActiveWindowShowCursorCoords(bool);
 
 	//! Handles new label
 	void handleNewLabel(ccHObject*);

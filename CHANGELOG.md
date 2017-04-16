@@ -8,16 +8,30 @@ v2.9.alpha - XX/XX/XXXX
 
 	* New shortcut: P (pick rotation center)
 
+	* 3D view pivot management:
+		- new option to position the pivot point automatically on the point currently at the screen center (dynamic update)
+			(now the default behavior, can be toggled thanks to the dedicated icon in the 'Viewing tools' toolbar or the 'Shift + P' shortcut)
+		- double clicking on the 3D view will also reposition the pivot point on the point under the cursor
+		
+	* New option: 'Display > Show cursor coordinates'
+		- if activated, the position of the mouse cursor relatively to the 3D view is constantly displayed
+		- the 2D position (in pixels) is always displayed
+		- the 3D position of the point below the cursor is displayed if possible
+
 - enhancements:
+
+	* qAnimation plugin:
+		- new output option 'zoom' (alternative to the existing 'super resolution' option)
+		- the plugin doesn't spam the Console at each frame if the 'super resolution' option is > 1 ;)
 
 	* 'Unroll' tool:
 		- new cone 'unroll' mode (the true 'unroll' mode - the other one has been renamed 'Straightened cone' ;)
 		- option to export the deviation scalar-field (deviation to the theoretical cylinder / cone)
 		- dialog parameters are now saved in persistent settings
 
-
 	* Plugins can now be called in command line mode
 		(the 'ccPluginInterface::registerCommands' method must be reimplemented)
+		(someone still needs to do the job for each plugin ;)
 
 	* [Windows] qLAS_FWF:
 		- the plugin (based on LASlib) can now load most of the standard LAS fields
@@ -30,13 +44,55 @@ v2.9.alpha - XX/XX/XXXX
 		- the tool now works on meshes
 
 	* Command line mode
-		- 2.5D Volume Calculation tool (-VOLUME ...)
+		- the Rasterize tool is now accessible via the command line:
+			'-RASTERIZE -GRID_STEP {value}'
+			* additional options are:
+				-VERT_DIR {0=X/1=Y/2=Z} - default is Z
+				-EMPTY_FILL {MIN_H/MAX_H/CUSTOM_H/INTERP} - default is 'leave cells empty'
+				-CUSTOM_HEIGHT {value} - to define the custom height filling value if the 'CUSTOM_H' stragety is used (see above)
+				-PROJ {MIN/AVG/MAX} - default is AVG (average)
+				-SF_PROJ {MIN/AVG/MAX} - default is AVG (average)
+				-OUTPUT_CLOUD - to output the result as a cloud (default if no other output format is defined)
+				-OUTPUT_MESH - to output the result as a mesh
+				-OUTPUT_RASTER_Z - to output the result as a geotiff raster (altitudes + all SFs by default, no RGB)
+				-OUTPUT_RASTER_RGB - to output the result as a geotiff raster (RGB)
+				-RESAMPLE - to resample the input cloud instead of generating a regular cloud (or mesh)
+		- 2.5D Volume Calculation tool (-VOLUME -GRID_STEP {...} etc. - see the wiki for more details)
+		- Export coord. to SF (-COORD_TO_SF {X, Y or Z})
+		- the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
+		- the ASCII loading dialog shouldn't appear anymore in 'SILENT' mode (only if CC really can't guess anything)
+
+	* Rasterize tool
+		- new option to re-project contour lines computed on a scalar field (i.e. a layer other than the altitudes)
+			on the altitudes layer
+		- the grid step bounds have been widened (between 1E-5 and 1E+5)
+
+	* Edit > SF > Compute Stat. params
+		- the RMS of the active SF is now automatically computed and displayed in the Console
+
+	* LAS I/O filter
+		- the 'Spatial Reference System' of LAS files is now stored as meta-data and restored
+			when exporting the cloud as a LAS/LAZ file.
+
+	* Oculus support
+		- CC now displays in the current 3D view the mirror image of what is displayed in the headset
+
+	* Point List Picking tool
+		- the list can now be exported as a 'global index, x, y, z' text file
+
+	* Other
+		- color scales are now listed in alphabetical order
 
 - Bug fixes:
 
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)
 	* when computing distances, the octree could be modified but the LOD structure was not updated
 		(resulting in potentially heavy display artifacts)
+	* glitch fix: the 'SF > Gradient' tool was mistakenly renaming the input scalar field ('.gradient' appended)
+	* glitch fix: the picking process was ignoring the fact that meshes could be displayed in wireframe mode (they are now ignored in this case)
+	* command line 'CROSS_SECTION' option: the repetition of the cuts (<RepeatDim> option) could be incomplete in some cases (some chunks were missing)
+	* raster loading: rasters loaded as clouds were shifted of half a pixel
+	* the 'Edit > Sensors > Camera > Create' function was broken (input parameters were ignored)
 
 v2.8.1 - 16/02/2017
 ----------------------

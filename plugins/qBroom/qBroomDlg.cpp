@@ -612,8 +612,8 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 		const CCVector3& P03D = m_autoArea.clickedPoints[i];
 		CCVector3d C02D;
 		camera.project(P03D, C02D);
-		C02D.x -= camera.viewport[2]/2.0;
-		C02D.y -= camera.viewport[3]/2.0;
+		C02D.x -= camera.viewport[2] / 2.0;
+		C02D.y -= camera.viewport[3] / 2.0;
 		*const_cast<CCVector3*>(vertices->getPoint(static_cast<unsigned>(i))) = CCVector3::fromArray(C02D.u);
 	}
 
@@ -638,8 +638,8 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 		//simply update the second vertex position
 		CCVector3d C12D;
 		camera.project(P3D, C12D);
-		C12D.x -= camera.viewport[2]/2.0;
-		C12D.y -= camera.viewport[3]/2.0;
+		C12D.x -= camera.viewport[2] / 2.0;
+		C12D.y -= camera.viewport[3] / 2.0;
 		*const_cast<CCVector3*>(vertices->getPoint(1)) = CCVector3::fromArray(C12D.u);
 	}
 	else if (m_autoArea.clickedPoints.size() == 2)
@@ -658,14 +658,14 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 
 		CCVector3d C2D;
 		camera.project(P13D + dist * Yp, C2D);
-		C2D.x -= camera.viewport[2]/2.0;
-		C2D.y -= camera.viewport[3]/2.0;
+		C2D.x -= camera.viewport[2] / 2.0;
+		C2D.y -= camera.viewport[3] / 2.0;
 		*const_cast<CCVector3*>(vertices->getPoint(2)) = CCVector3::fromArray(C2D.u);
 
 		CCVector3d D2D;
 		camera.project(P03D + dist * Yp, D2D);
-		D2D.x -= camera.viewport[2]/2.0;
-		D2D.y -= camera.viewport[3]/2.0;
+		D2D.x -= camera.viewport[2] / 2.0;
+		D2D.y -= camera.viewport[3] / 2.0;
 		*const_cast<CCVector3*>(vertices->getPoint(3)) = CCVector3::fromArray(D2D.u);
 
 		if (m_autoArea.polyline->size() == 2)

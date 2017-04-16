@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/ccPickCenterAuto.png</file>
     <file>images/theme/snowman.png</file>
     <file>images/QTreeView/branch-closed.png</file>
     <file>images/QTreeView/branch-end.png</file>

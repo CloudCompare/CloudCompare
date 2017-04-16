@@ -19,7 +19,6 @@
 
 //Local
 #include "ccColorScalesManager.h"
-#include "ccColorRampShader.h"
 
 //CCLib
 #include <CCConst.h>

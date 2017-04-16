@@ -224,19 +224,20 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	//Read Bundler '.out' file
 	{
 		//progress dialog
-		ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
-		CCLib::NormalizedProgress nprogress(&pdlg, camCount + (importKeypoints || orthoRectifyImages || generateColoredDTM ? ptsCount : 0));
+		QScopedPointer<ccProgressDialog> pDlg(0);
 		if (parameters.parentWidget)
 		{
-			pdlg.setMethodTitle(QObject::tr("Open Bundler file"));
-			pdlg.setInfo(QObject::tr("Cameras: %1\nPoints: %2").arg(camCount).arg(ptsCount));
-			pdlg.start();
+			pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+			pDlg->setMethodTitle(QObject::tr("Open Bundler file"));
+			pDlg->setInfo(QObject::tr("Cameras: %1\nPoints: %2").arg(camCount).arg(ptsCount));
+			pDlg->start();
 		}
+		CCLib::NormalizedProgress nprogress(pDlg.data(), camCount + (importKeypoints || orthoRectifyImages || generateColoredDTM ? ptsCount : 0));
 
 		//read cameras info (whatever the case!)
 		cameras.resize(camCount);
 		unsigned camIndex = 0;
-		for (std::vector<BundlerCamera>::iterator it=cameras.begin(); it!=cameras.end(); ++it,++camIndex)
+		for (std::vector<BundlerCamera>::iterator it = cameras.begin(); it != cameras.end(); ++it, ++camIndex)
 		{
 			//f, k1 and k2
 			currentLine = stream.readLine();
@@ -299,7 +300,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					return CC_FERR_MALFORMED_FILE;
 			}
 
-			if (parameters.parentWidget && !nprogress.oneStep()) //cancel requested?
+			if (pDlg && !nprogress.oneStep()) //cancel requested?
 			{
 				return CC_FERR_CANCELED_BY_USER;
 			}
@@ -496,7 +497,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					}
 				}
 
-				if (parameters.parentWidget && !nprogress.oneStep()) //cancel requested?
+				if (pDlg && !nprogress.oneStep()) //cancel requested?
 				{
 					delete keypointsCloud;
 					return CC_FERR_CANCELED_BY_USER;
@@ -525,9 +526,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				container.addChild(keypointsCloud);
 		}
 
-		if (parameters.parentWidget)
+		if (pDlg)
 		{
-			pdlg.stop();
+			pDlg->stop();
 			QApplication::processEvents();
 		}
 	}
@@ -615,12 +616,16 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	}
 
 	//let's try to open the image corresponding to each camera
-	ccProgressDialog ipdlg(true, parameters.parentWidget); //cancel available
-	CCLib::NormalizedProgress inprogress(&ipdlg, camCount);
-	ipdlg.setMethodTitle(QObject::tr("Open & process images"));
-	ipdlg.setInfo(QObject::tr("Images: %1").arg(camCount));
-	ipdlg.start();
-	QApplication::processEvents();
+	QScopedPointer<ccProgressDialog> ipDlg(0);
+	if (parameters.parentWidget)
+	{
+		ipDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+		ipDlg->setMethodTitle(QObject::tr("Open & process images"));
+		ipDlg->setInfo(QObject::tr("Images: %1").arg(camCount));
+		ipDlg->start();
+		QApplication::processEvents();
+	}
+	CCLib::NormalizedProgress inprogress(ipDlg.data(), camCount);
 
 	assert(imageFilenames.size() >= static_cast<int>(camCount));
 
@@ -631,10 +636,14 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	CCLib::SimpleCloud* mntSamples = 0;
 	if (generateColoredDTM)
 	{
-		ccProgressDialog toDlg(true, parameters.parentWidget); //cancel available
-		toDlg.setMethodTitle(QObject::tr("Preparing colored DTM"));
-		toDlg.start();
-		QApplication::processEvents();
+		QScopedPointer<ccProgressDialog> toDlg(0);
+		if (parameters.parentWidget)
+		{
+			toDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+			toDlg->setMethodTitle(QObject::tr("Preparing colored DTM"));
+			toDlg->start();
+			QApplication::processEvents();
+		}
 
 		//1st step: triangulate keypoints (or use existing one)
 		ccGenericMesh* baseDTMMesh = (altEntity ? ccHObjectCaster::ToGenericMesh(altEntity) : 0);
@@ -658,7 +667,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		if (dummyMesh)
 		{
 			//2nd step: samples points on resulting mesh
-			mntSamples = CCLib::MeshSamplingTools::samplePointsOnMesh((CCLib::GenericMesh*)dummyMesh,coloredDTMVerticesCount);
+			mntSamples = CCLib::MeshSamplingTools::samplePointsOnMesh((CCLib::GenericMesh*)dummyMesh, coloredDTMVerticesCount);
 			if (!baseDTMMesh)
 				delete dummyMesh;
 			dummyMesh = 0;
@@ -667,7 +676,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				//3rd step: project each point in all images and get average color
 				unsigned count = mntSamples->size();
-				mntColors = new int[4*count]; //R + G + B + accum count
+				mntColors = new int[4 * count]; //R + G + B + accum count
 				if (!mntColors)
 				{
 					//not enough memory
@@ -678,7 +687,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				}
 				else
 				{
-					memset(mntColors,0,sizeof(int)*4*count);
+					memset(mntColors, 0, sizeof(int) * 4 * count);
 				}
 			}
 		}
@@ -699,7 +708,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	/*** process each image ***/
 
 	bool cancelledByUser = false;
-	for (unsigned i=0; i<camCount; ++i)
+	for (unsigned i = 0; i < camCount; ++i)
 	{
 		const BundlerCamera& cam = cameras[i];
 		if (!cam.isValid)
@@ -707,7 +716,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 		ccImage* image = new ccImage();
 		QString errorStr;
-		if (!image->load(imageDir.absoluteFilePath(imageFilenames[i]),errorStr))
+		if (!image->load(imageDir.absoluteFilePath(imageFilenames[i]), errorStr))
 		{
 			ccLog::Error(QString("[Bundler] %1 (image '%2')").arg(errorStr).arg(imageFilenames[i]));
 			delete image;
@@ -742,7 +751,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			params.zNear_mm = 0.001f;
 
 			sensor = new ccCameraSensor(params);
-			sensor->setName(QString("Camera #%1").arg(i+1));
+			sensor->setName(QString("Camera #%1").arg(i + 1));
 			sensor->setEnabled(true);
 			sensor->setVisible(true/*false*/);
 			sensor->setGraphicScale(keypointsCloud ? keypointsCloud->getOwnBB().getDiagNorm() / 10 : PC_ONE);
@@ -793,18 +802,18 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				//project alternative cloud in image!
 				_keypointsCloud->placeIteratorAtBegining();
-				int half_w = (image->getW()>>1);
-				int half_h = (image->getH()>>1);
+				int half_w = (image->getW() >> 1);
+				int half_h = (image->getH() >> 1);
 				ccCameraSensor::KeyPoint kp;
 				unsigned keyptsCount = _keypointsCloud->size();
-				for (unsigned k=0; k<keyptsCount; ++k)
+				for (unsigned k = 0; k<keyptsCount; ++k)
 				{
 					CCVector3 P(*_keypointsCloud->getPointPersistentPtr(k));
 					//apply bundler equation
 					cam.trans.apply(P);
 					//convert to keypoint
-					kp.x = -cam.f_pix * static_cast<float>(P.x/P.z);
-					kp.y =  cam.f_pix * static_cast<float>(P.y/P.z);
+					kp.x = -cam.f_pix * static_cast<float>(P.x / P.z);
+					kp.y = cam.f_pix * static_cast<float>(P.y / P.z);
 					if (	static_cast<int>(kp.x) > -half_w && static_cast<int>(kp.x < half_w)
 						&&	static_cast<int>(kp.y) > -half_h && static_cast<int>(kp.y < half_h))
 					{
@@ -850,9 +859,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 							||	orthoRectMethod == BundlerImportDlg::DIRECT_UNDISTORTED );
 
 						//we take the keypoints 'middle altitude' by default
-						CCVector3 bbMin,bbMax;
-						_keypointsCloud->getBoundingBox(bbMin,bbMax);
-						PointCoordinateType Z0 = (bbMin.z + bbMax.z)/2;
+						CCVector3 bbMin, bbMax;
+						_keypointsCloud->getBoundingBox(bbMin, bbMax);
+						PointCoordinateType Z0 = (bbMin.z + bbMax.z) / 2;
 
 						orthoImage = sensor->orthoRectifyAsImageDirect(	image,
 																		Z0,
@@ -1083,7 +1092,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 		QApplication::processEvents();
 
-		if (!inprogress.oneStep())
+		if (ipDlg && !inprogress.oneStep())
 		{
 			cancelledByUser = true;
 			break;

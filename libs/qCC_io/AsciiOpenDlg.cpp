@@ -834,15 +834,15 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 	//two requirements:
 	//- at least 2 coordinates must be defined
 	//- apart from SFs, only one column assignment per property
-	std::vector<unsigned> counters(ASCII_OPEN_DLG_TYPES_NUMBER,0);
+	std::vector<unsigned> counters(ASCII_OPEN_DLG_TYPES_NUMBER, 0);
 	{
-		for (size_t i=0; i<sequence.size(); i++)
+		for (size_t i = 0; i < sequence.size(); i++)
 			++counters[sequence[i].type];
 	}
 
 	//check for doublons
 	{
-		for (size_t i=1; i<ASCII_OPEN_DLG_Scalar; i++)
+		for (size_t i = 1; i < ASCII_OPEN_DLG_Scalar; i++)
 		{
 			if (counters[i] > 1)
 			{
@@ -975,7 +975,7 @@ bool AsciiOpenDlg::safeSequence() const
 	if (headerParts.size() < static_cast<int>(seq.size()))
 		return false;
 
-	for (int i=0; i<headerParts.size(); ++i)
+	for (int i = 0; i < headerParts.size(); ++i)
 	{
 		//column header
 		QString colHeader = headerParts[i].toUpper();

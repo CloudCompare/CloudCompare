@@ -656,13 +656,13 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(QString filename,
 		}
 	}
 
-	ccProgressDialog* progressDlg = 0;
+	QScopedPointer<ccProgressDialog> progressDialog(0);
 	if (parameters.parentWidget)
 	{
-		progressDlg = new ccProgressDialog(parameters.parentWidget);
-		progressDlg->setRange(0, cameras.size() + clouds.size() + meshes.size());
-		progressDlg->setWindowTitle("Loading data");
-		progressDlg->start();
+		progressDialog.reset(new ccProgressDialog(parameters.parentWidget));
+		progressDialog->setRange(0, cameras.size() + clouds.size() + meshes.size());
+		progressDialog->setWindowTitle("Loading data");
+		progressDialog->start();
 	}
 	bool wasCanceled = false;
 	int currentProgress = 0;
@@ -670,17 +670,17 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(QString filename,
 	//end of file: now we can sort the various extracted components
 	QDir dir = QFileInfo(filename).dir();
 	ccHObject* imageGroup = new ccHObject("Images");
-	if (progressDlg && !cameras.empty())
+	if (progressDialog && !cameras.empty())
 	{
-		progressDlg->setInfo(QString("Loading %1 image(s)").arg(cameras.size()));
+		progressDialog->setInfo(QString("Loading %1 image(s)").arg(cameras.size()));
 	}
 	for (CameraDesc& camera : cameras)
 	{
 		//progress
-		if (progressDlg)
+		if (progressDialog)
 		{
-			progressDlg->setValue(++currentProgress);
-			if (progressDlg->wasCanceled())
+			progressDialog->setValue(++currentProgress);
+			if (progressDialog->wasCanceled())
 			{
 				wasCanceled = true;
 				break;
@@ -772,17 +772,17 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(QString filename,
 	//clouds
 	if (!wasCanceled)
 	{
-		if (progressDlg && !clouds.empty())
+		if (progressDialog && !clouds.empty())
 		{
-			progressDlg->setInfo(QString("Loading %1 cloud(s)").arg(cameras.size()));
+			progressDialog->setInfo(QString("Loading %1 cloud(s)").arg(cameras.size()));
 		}
 		for (CloudDesc& desc : clouds)
 		{
 			//progress
-			if (progressDlg)
+			if (progressDialog)
 			{
-				progressDlg->setValue(++currentProgress);
-				if (progressDlg->wasCanceled())
+				progressDialog->setValue(++currentProgress);
+				if (progressDialog->wasCanceled())
 				{
 					wasCanceled = true;
 					break;
@@ -834,17 +834,17 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(QString filename,
 	//meshes
 	if (!wasCanceled)
 	{
-		if (progressDlg && !meshes.empty())
+		if (progressDialog && !meshes.empty())
 		{
-			progressDlg->setInfo(QString("Loading %1 mesh(es)").arg(cameras.size()));
+			progressDialog->setInfo(QString("Loading %1 mesh(es)").arg(cameras.size()));
 		}
 		for (MeshDesc& desc : meshes)
 		{
 			//progress
-			if (progressDlg)
+			if (progressDialog)
 			{
-				progressDlg->setValue(++currentProgress);
-				if (progressDlg->wasCanceled())
+				progressDialog->setValue(++currentProgress);
+				if (progressDialog->wasCanceled())
 				{
 					wasCanceled = true;
 					break;
@@ -917,11 +917,9 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(QString filename,
 		}
 	}
 
-	if (progressDlg)
+	if (progressDialog)
 	{
-		progressDlg->stop();
-		delete progressDlg;
-		progressDlg = 0;
+		progressDialog->stop();
 	}
 
 	return wasCanceled ? CC_FERR_CANCELED_BY_USER : CC_FERR_NO_ERROR;

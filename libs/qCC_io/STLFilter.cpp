@@ -107,12 +107,16 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidg
 	unsigned faceCount = mesh->size();
 
 	//progress
-	ccProgressDialog pDlg(true, parentWidget);
-	CCLib::NormalizedProgress nprogress(&pDlg, faceCount);
-	pDlg.setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
-	pDlg.setInfo(QObject::tr("Number of facets: %1").arg(faceCount));
-	pDlg.start();
-	QApplication::processEvents();
+	QScopedPointer<ccProgressDialog> pDlg(0);
+	if (parentWidget)
+	{
+		pDlg.reset(new ccProgressDialog(true, parentWidget));
+		pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
+		pDlg->setInfo(QObject::tr("Number of facets: %1").arg(faceCount));
+		pDlg->start();
+		QApplication::processEvents();
+	}
+	CCLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
 
 	//header
 	{
@@ -175,11 +179,16 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidg
 		}
 
 		//progress
-		if (!nprogress.oneStep())
+		if (pDlg && !nprogress.oneStep())
+		{
 			return CC_FERR_CANCELED_BY_USER;
+		}
 	}
 
-	pDlg.stop();
+	if (pDlg)
+	{
+		pDlg->stop();
+	}
 
 	return CC_FERR_NO_ERROR;
 }
@@ -190,15 +199,21 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 	unsigned faceCount = mesh->size();
 
 	//progress
-	ccProgressDialog pDlg(true, parentWidget);
-	CCLib::NormalizedProgress nprogress(&pDlg, faceCount);
-	pDlg.setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
-	pDlg.setInfo(QObject::tr("Number of facets: %1").arg(faceCount));
-	pDlg.start();
-	QApplication::processEvents();
+	QScopedPointer<ccProgressDialog> pDlg(0);
+	if (parentWidget)
+	{
+		pDlg.reset(new ccProgressDialog(true, parentWidget));
+		pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
+		pDlg->setInfo(QObject::tr("Number of facets: %1").arg(faceCount));
+		pDlg->start();
+		QApplication::processEvents();
+	}
+	CCLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
 
 	if (fprintf(theFile, "solid %s\n", qPrintable(mesh->getName())) < 0) //empty names are acceptable!
+	{
 		return CC_FERR_WRITING;
+	}
 
 	//vertices
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
@@ -239,20 +254,24 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 			return CC_FERR_WRITING;
 
 		//progress
-		if (!nprogress.oneStep())
+		if (pDlg && !nprogress.oneStep())
+		{
 			return CC_FERR_CANCELED_BY_USER;
+		}
 	}
 
 	if (fprintf(theFile, "endsolid %s\n", qPrintable(mesh->getName())) < 0) //empty names are acceptable!
+	{
 		return CC_FERR_WRITING;
+	}
 
 	return CC_FERR_NO_ERROR;
 }
 
 const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(ZERO_TOLERANCE));
-static bool TagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell,
-	void** additionalParameters,
-	CCLib::NormalizedProgress* nProgress/*=0*/)
+static bool TagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
+									void** additionalParameters,
+									CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	GenericChunkedArray<1, int>* equivalentIndexes = static_cast<GenericChunkedArray<1, int>*>(additionalParameters[0]);
 
@@ -414,9 +433,13 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		const int razValue = -1;
 		if (equivalentIndexes && equivalentIndexes->resize(vertCount, true, razValue))
 		{
-			ccProgressDialog pDlg(true, parameters.parentWidget);
+			QScopedPointer<ccProgressDialog> pDlg(0);
+			if (parameters.parentWidget)
+			{
+				pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+			}
 			ccOctree::Shared octree = ccOctree::Shared(new ccOctree(vertices));
-			if (!octree->build(parameters.parentWidget ? &pDlg : 0))
+			if (!octree->build(pDlg.data()))
 			{
 				octree.clear();
 			}
@@ -424,11 +447,11 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			{
 				void* additionalParameters[] = { static_cast<void*>(equivalentIndexes) };
 				unsigned result = octree->executeFunctionForAllCellsAtLevel(10,
-					TagDuplicatedVertices,
-					additionalParameters,
-					false,
-					parameters.parentWidget ? &pDlg : 0,
-					"Tag duplicated vertices");
+																			TagDuplicatedVertices,
+																			additionalParameters,
+																			false,
+																			pDlg.data(),
+																			"Tag duplicated vertices");
 
 				octree.clear();
 
@@ -588,13 +611,14 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 	mesh->setName(name);
 
 	//progress dialog
-	ccProgressDialog pDlg(true, parameters.parentWidget);
+	QScopedPointer<ccProgressDialog> pDlg(0);
 	if (parameters.parentWidget)
 	{
-		pDlg.setMethodTitle(QObject::tr("(ASCII) STL file"));
-		pDlg.setInfo(QObject::tr("Loading in progress..."));
-		pDlg.setRange(0, 0);
-		pDlg.start();
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg->setMethodTitle(QObject::tr("(ASCII) STL file"));
+		pDlg->setInfo(QObject::tr("Loading in progress..."));
+		pDlg->setRange(0, 0);
+		pDlg->start();
 		QApplication::processEvents();
 	}
 
@@ -853,11 +877,11 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		}
 
 		//progress
-		if (parameters.parentWidget && (faceCount % 1024) == 0)
+		if (pDlg && (faceCount % 1024) == 0)
 		{
-			if (pDlg.wasCanceled())
+			if (pDlg->wasCanceled())
 				break;
-			pDlg.setValue(static_cast<int>(faceCount >> 10));
+			pDlg->setValue(static_cast<int>(faceCount >> 10));
 		}
 	}
 
@@ -866,9 +890,9 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		ccLog::Warning("[STL] Failed to read some 'normal' values!");
 	}
 
-	if (parameters.parentWidget)
+	if (pDlg)
 	{
-		pDlg.close();
+		pDlg->close();
 	}
 
 	return result;
@@ -907,15 +931,16 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	}
 
 	//progress dialog
-	ccProgressDialog pDlg(true, parameters.parentWidget);
-	CCLib::NormalizedProgress nProgress(&pDlg, faceCount);
+	QScopedPointer<ccProgressDialog> pDlg(0);
 	if (parameters.parentWidget)
 	{
-		pDlg.setMethodTitle(QObject::tr("Loading binary STL file"));
-		pDlg.setInfo(QObject::tr("Loading %1 faces").arg(faceCount));
-		pDlg.start();
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg->setMethodTitle(QObject::tr("Loading binary STL file"));
+		pDlg->setInfo(QObject::tr("Loading %1 faces").arg(faceCount));
+		pDlg->start();
 		QApplication::processEvents();
 	}
+	CCLib::NormalizedProgress nProgress(pDlg.data(), faceCount);
 
 	//current vertex shift
 	CCVector3d Pshift(0, 0, 0);
@@ -1012,15 +1037,15 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 		}
 
 		//progress
-		if (parameters.parentWidget && !nProgress.oneStep())
+		if (pDlg && !nProgress.oneStep())
 		{
 			break;
 		}
 	}
 
-	if (parameters.parentWidget)
+	if (pDlg)
 	{
-		pDlg.stop();
+		pDlg->stop();
 	}
 
 	return CC_FERR_NO_ERROR;

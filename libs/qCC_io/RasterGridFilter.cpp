@@ -164,14 +164,14 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 				// A ------ D
 				CCVector3d B = origin + Pshift; //origin is 'top left'
 				CCVector3d C = B;
-				C.x += (rasterX - 1) * adfGeoTransform[1];
-				C.y += (rasterX - 1) * adfGeoTransform[4];
+				C.x += (rasterX - 0.5) * adfGeoTransform[1];
+				C.y += (rasterX - 0.5) * adfGeoTransform[4];
 				CCVector3d D = C;
-				D.x += (rasterY - 1) * adfGeoTransform[2];
-				D.y += (rasterY - 1) * adfGeoTransform[5];
+				D.x += (rasterY - 0.5) * adfGeoTransform[2];
+				D.y += (rasterY - 0.5) * adfGeoTransform[5];
 				CCVector3d A = B;
-				A.x += (rasterY - 1) * adfGeoTransform[2];
-				A.y += (rasterY - 1) * adfGeoTransform[5];
+				A.x += (rasterY - 0.5) * adfGeoTransform[2];
+				A.y += (rasterY - 0.5) * adfGeoTransform[5];
 
 				pc->addPoint(CCVector3::fromArray(A.u));
 				pc->addPoint(CCVector3::fromArray(B.u));

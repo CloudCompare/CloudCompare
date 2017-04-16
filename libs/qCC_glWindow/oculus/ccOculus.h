@@ -37,8 +37,8 @@
 struct OculusHMD
 {
 	OculusHMD()
-		: session(0)
-		, fbo(0)
+		: session(nullptr)
+		, fbo(nullptr)
 		, hasTextureSet(false)
 		, lastOVRPos(0, 0, 0)
 		, hasLastOVRPos(false)
@@ -130,7 +130,7 @@ struct OculusHMD
 
 			int textureCount = 0;
 			ovr_GetTextureSwapChainLength(session, textureSwapChain, &textureCount);			depthTextures.resize(textureCount, 0);
-			for (int i = 0; i<textureCount; ++i)
+			for (int i = 0; i < textureCount; ++i)
 			{
 				//set the color texture
 				{
@@ -193,6 +193,64 @@ struct OculusHMD
 		return true;
 	}
 
+	bool initMirrorTexture(int w, int h, QOpenGLExtension_ARB_framebuffer_object& glExt)
+	{
+		if (!session)
+		{
+			assert(false);
+			return false;
+		}
+
+		//mirrorTexture
+		if (!mirror.texture)
+		{
+			ovrMirrorTextureDesc desc;
+			memset(&desc, 0, sizeof(desc));
+			desc.Width = w;
+			desc.Height = h;
+			desc.Format = OVR_FORMAT_R8G8B8A8_UNORM_SRGB;
+
+			// Create mirror texture and an FBO used to copy mirror texture to back buffer
+			ovrResult result = ovr_CreateMirrorTextureGL(session, &desc, &mirror.texture);
+			if (OVR_SUCCESS(result))
+			{
+				// Configure the mirror read buffer
+				ovr_GetMirrorTextureBufferGL(session, mirror.texture, &mirror.textureID);
+				mirror.size = QSize(w, h);
+
+				// And the FBO
+				glExt.glGenFramebuffers(1, &mirror.fbo);
+				glExt.glBindFramebuffer(GL_READ_FRAMEBUFFER, mirror.fbo);
+				glExt.glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mirror.textureID, 0);
+				glExt.glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+				glExt.glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+			}
+			else
+			{
+				ccLog::Warning("[Oculus] Failed to create the mirror texture");
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	void releaseMirrorTexture(QOpenGLExtension_ARB_framebuffer_object& glExt)
+	{
+		if (mirror.fbo)
+		{
+			glExt.glDeleteFramebuffers(1, &mirror.fbo);
+			mirror.fbo = 0;
+		}
+		
+		if (mirror.texture)
+		{
+			ovr_DestroyMirrorTexture(session, mirror.texture);
+			mirror.texture = nullptr;
+		}
+	}
+
 	void stop(bool autoShutdown = true)
 	{
 		if (session)
@@ -248,6 +306,23 @@ struct OculusHMD
 
 	//! Dedicated FBO
 	ccFrameBufferObject* fbo;
+
+	//! Mirror texture
+	struct Mirror
+	{
+		//! texture
+		ovrMirrorTexture texture = nullptr;
+		//! texture ID
+		GLuint textureID = 0;
+		//! texture size
+		QSize size;
+		//! FBO
+		GLuint fbo = 0;
+
+	};
+	
+	//! Mirror
+	Mirror mirror;
 
 	//! Color texture(s)
 	ovrTextureSwapChain textureSwapChain;

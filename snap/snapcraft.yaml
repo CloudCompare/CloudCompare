@@ -1,5 +1,5 @@
 name: cloudcompare
-version: '2.8.0-1'
+version: '2.9.0-beta'
 summary: 3D point cloud and mesh processing software
 description: |
   CloudCompare is a 3D point cloud (and triangular mesh) processing software.
@@ -18,18 +18,19 @@ confinement: strict
 apps:
   ccViewer:
     command: launch ccViewer
-    plugs: [home, x11, mir, opengl, unity7]
+    plugs: [home, x11, mir, opengl, unity7, removable-media]
   CloudCompare:
     command: launch CloudCompare
-    plugs: [home, x11, mir, opengl, unity7]
+    plugs: [home, x11, mir, opengl, unity7, removable-media]
 
 parts:
   cloudcompare:
     after: [desktop-qt5,eigen]
     plugin: cmake
     source: https://github.com/CloudCompare/CloudCompare.git
-    source-tag: v2.8.0
+    source-branch: master
     build-packages:
+      - build-essential
       - libavcodec-dev
       - libavformat-dev
       - libavutil-dev

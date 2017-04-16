@@ -103,6 +103,7 @@
     <addaction name="actionRefresh"/>
     <addaction name="actionToggleCenteredPerspective"/>
     <addaction name="actionToggleViewerBasedPerspective"/>
+    <addaction name="actionShowCursor3DCoordinates"/>
     <addaction name="actionLockRotationVertAxis"/>
     <addaction name="actionEnterBubbleViewMode"/>
     <addaction name="actionEnableCameraLink"/>
@@ -577,6 +578,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionEditCamera"/>
    <addaction name="actionGlobalZoom"/>
    <addaction name="actionPickRotationCenter"/>
+   <addaction name="actionAutoPickRotationCenter"/>
    <addaction name="actionLevel"/>
    <addaction name="actionZoomAndCenter"/>
    <addaction name="actionSetViewTop"/>
@@ -2958,6 +2960,41 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Mesh scan grids (structured point clouds)</string>
+   </property>
+  </action>
+  <action name="actionAutoPickRotationCenter">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/ccPickCenterAuto.png</normaloff>:/CC/images/ccPickCenterAuto.png</iconset>
+   </property>
+   <property name="text">
+    <string>Auto-pick rotation center</string>
+   </property>
+   <property name="toolTip">
+    <string>Auto-pick rotation center (rotation is always placed at the middle of the screen if possible)</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+P</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionShowCursor3DCoordinates">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show cursor coordinates</string>
+   </property>
+   <property name="toolTip">
+    <string>Show cursor coordinates (2D and 3D if possible)</string>
    </property>
   </action>
  </widget>

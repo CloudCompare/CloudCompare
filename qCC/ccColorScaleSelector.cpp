@@ -34,7 +34,7 @@ ccColorScaleSelector::ccColorScaleSelector(ccColorScalesManager* manager, QWidge
 	assert(m_manager);
 	
 	setLayout(new QHBoxLayout());
-	layout()->setContentsMargins(0,0,0,0);
+	layout()->setContentsMargins(0, 0, 0, 0);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 
 	//combox box
@@ -61,8 +61,19 @@ void ccColorScaleSelector::init()
 		m_comboBox->clear();
 		//add all available color scales
 		assert(m_manager);
+
+		//sort the scales by their name
+		//DGM: See doc about qSort --> "An alternative to using qSort() is to put the items to sort in a QMap, using the sort key as the QMap key."
+		QMap<QString, QString> scales;
 		for (ccColorScalesManager::ScalesMap::const_iterator it = m_manager->map().begin(); it != m_manager->map().end(); ++it)
-			m_comboBox->addItem((*it)->getName(),(*it)->getUuid());
+		{
+			scales.insert((*it)->getName(), (*it)->getUuid());
+		}
+
+		for (QMap<QString, QString>::const_iterator scale = scales.begin(); scale != scales.end(); ++scale)
+		{
+			m_comboBox->addItem(scale.key(), scale.value());
+		}
 
 		connect(m_comboBox, SIGNAL(activated(int)), this, SIGNAL(colorScaleSelected(int)));
 	}

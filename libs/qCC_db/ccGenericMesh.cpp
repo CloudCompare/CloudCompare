@@ -973,6 +973,7 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 				l1 /= l1l2;
 				l2 /= l1l2;
 			}
+
 			GLdouble l3 = 1.0 - l1 - l2;
 			assert(l3 >= -1.0e-12);
 

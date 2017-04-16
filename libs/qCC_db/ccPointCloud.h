@@ -679,6 +679,9 @@ public: //other methods
 	//! Enhances the RGB colors with the current scalar field (assuming it's intensities)
 	bool enhanceRGBWithIntensitySF(int sfIdx, bool useCustomIntensityRange = false, double minI = 0.0, double maxI = 1.0);
 
+	//! Exports the specified coordinate dimension(s) to scalar field(s)
+	bool exportCoordToSF(bool exportDims[3]);
+
 protected:
 
 	//inherited from ccHObject
@@ -744,7 +747,7 @@ protected: // VBO
 	//! VBO set
 	struct vboSet
 	{
-		//! States of th VBO(s)
+		//! States of the VBO(s)
 		enum STATES { NEW, INITIALIZED, FAILED };
 
 		//! Update flags

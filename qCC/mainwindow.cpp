@@ -739,6 +739,7 @@ void MainWindow::connectActions()
 	connect(actionTestFrameRate,				SIGNAL(triggered()),	this,		SLOT(testFrameRate()));
 	connect(actionToggleCenteredPerspective,	SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowCenteredPerspective()));
 	connect(actionToggleViewerBasedPerspective, SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowViewerBasedPerspective()));
+	connect(actionShowCursor3DCoordinates,		SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowShowCursorCoords(bool)));
 	connect(actionLockRotationVertAxis,			SIGNAL(triggered()),	this,		SLOT(toggleRotationAboutVertAxis()));
 	connect(actionEnterBubbleViewMode,			SIGNAL(triggered()),	this,		SLOT(doActionEnableBubbleViewMode()));
 	connect(actionEditCamera,					SIGNAL(triggered()),	this,		SLOT(doActionEditCamera()));
@@ -806,7 +807,8 @@ void MainWindow::connectActions()
 	connect(actionSetViewIso1,					SIGNAL(triggered()),	this,		SLOT(setIsoView1()));
 	connect(actionSetViewIso2,					SIGNAL(triggered()),	this,		SLOT(setIsoView2()));
 	connect(actionEnableStereo,					SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowStereoVision(bool)));
-
+	connect(actionAutoPickRotationCenter,		SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowAutoPickRotCenter(bool)));
+	
 	//hidden
 	connect(actionEnableVisualDebugTraces,		SIGNAL(triggered()),	this,		SLOT(toggleVisualDebugTraces()));
 }
@@ -2117,12 +2119,13 @@ void MainWindow::doActionCreateCameraSensor()
 	}
 
 	ccCamSensorProjectionDlg spDlg(this);
-	spDlg.updateCamSensor(sensor);
+	//spDlg.initWithCamSensor(sensor); //DGM: we'd better leave the default parameters of the dialog!
 	if (!spDlg.exec())
 	{
 		delete sensor;
 		return;
 	}
+	spDlg.updateCamSensor(sensor);
 
 	ccGLWindow* win = 0;
 	if (ent)
@@ -4234,8 +4237,10 @@ void MainWindow::doActionSetSFAsCoord()
 
 void MainWindow::doActionExportCoordToSF()
 {
-	if ( !ccEntityAction::exportCoordToSF(m_selectedEntities, this) )
+	if (!ccEntityAction::exportCoordToSF(m_selectedEntities, this))
+	{
 		return;
+	}
 
 	refreshAll();
 	updateUI();
@@ -7294,12 +7299,12 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 			{
 				m_transTool->setRotationCenter(newPivot);
 				const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
-				s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
-				s_pickingWindow->displayNewMessage(	QString("Point (%1,%2,%3) set as rotation center for interactive transformation")
-														.arg(pickedPoint.x,0,'f',precision)
-														.arg(pickedPoint.y,0,'f',precision)
-														.arg(pickedPoint.z,0,'f',precision),
-													ccGLWindow::LOWER_LEFT_MESSAGE,true);
+				s_pickingWindow->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE, false); //clear previous message
+				s_pickingWindow->displayNewMessage(QString("Point (%1 ; %2 ; %3) set as rotation center for interactive transformation")
+					.arg(pickedPoint.x, 0, 'f', precision)
+					.arg(pickedPoint.y, 0, 'f', precision)
+					.arg(pickedPoint.z, 0, 'f', precision),
+					ccGLWindow::LOWER_LEFT_MESSAGE, true);
 			}
 			else
 			{
@@ -7308,20 +7313,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				{
 					//apply current GL transformation (if any)
 					pi.entity->getGLTransformation().apply(newPivot);
-					//compute the equivalent camera center
-					CCVector3d dP = params.pivotPoint - newPivot;
-					CCVector3d MdP = dP; params.viewMat.applyRotation(MdP);
-					CCVector3d newCameraPos = params.cameraCenter + MdP - dP;
-					s_pickingWindow->setCameraPos(newCameraPos);
-					s_pickingWindow->setPivotPoint(newPivot);
-
-					const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
-					s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
-					s_pickingWindow->displayNewMessage(	QString("Point (%1,%2,%3) set as rotation center")
-															.arg(pickedPoint.x,0,'f',precision)
-															.arg(pickedPoint.y,0,'f',precision)
-															.arg(pickedPoint.z,0,'f',precision),
-														ccGLWindow::LOWER_LEFT_MESSAGE,true);
+					s_pickingWindow->setPivotPoint(newPivot, true, true);
 				}
 			}
 			//s_pickingWindow->redraw(); //already called by 'cancelPreviousPickingOperation' (see below)
@@ -7417,7 +7409,7 @@ void MainWindow::doPickRotationCenter()
 	}
 
 	s_currentPickingOperation = PICKING_ROTATION_CENTER;
-	enablePickingOperation(win,"Pick a point to be used as rotation center (click on icon again to cancel)");
+	enablePickingOperation(win, "Pick a point to be used as rotation center (click on icon again to cancel)");
 }
 
 void MainWindow::toggleSelectedEntitiesActivation()
@@ -8020,7 +8012,7 @@ void MainWindow::doComputeDensity()
 
 void MainWindow::doComputeCurvature()
 {
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_CURVATURE,m_selectedEntities,this))
+	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_CURVATURE, m_selectedEntities, this))
 		return;
 	refreshAll();
 	updateUI();
@@ -8028,7 +8020,7 @@ void MainWindow::doComputeCurvature()
 
 void MainWindow::doActionSFGradient()
 {
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_SF_GRADIENT,m_selectedEntities,this))
+	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_SF_GRADIENT, m_selectedEntities, this))
 		return;
 	refreshAll();
 	updateUI();
@@ -8036,7 +8028,7 @@ void MainWindow::doActionSFGradient()
 
 void MainWindow::doComputeRoughness()
 {
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ROUGHNESS,m_selectedEntities,this))
+	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ROUGHNESS, m_selectedEntities, this))
 		return;
 	refreshAll();
 	updateUI();
@@ -8076,11 +8068,11 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 		std::mt19937 gen(rd());  // to seed mersenne twister.
 		std::uniform_real_distribution<double> dist(0, 1);
 
-		for (unsigned i=0; i<ptsCount; ++i)
+		for (unsigned i = 0; i < ptsCount; ++i)
 		{
-			CCVector3 P(	dist(gen),
-							dist(gen),
-							dist(gen) );
+			CCVector3 P(dist(gen),
+						dist(gen),
+						dist(gen) );
 
 			cloud->addPoint(P);
 		}
@@ -8180,7 +8172,7 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 
 	//look for clouds
 	{
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = m_selectedEntities[i];
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
@@ -8358,7 +8350,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					{
 						minRMS = finalRMS;
 						bestMatrixIndex = static_cast<int>(k);
-						std::swap(bestB,B);
+						std::swap(bestB, B);
 					}
 
 					if (B)
@@ -8714,6 +8706,24 @@ void MainWindow::toggleActiveWindowCustomLight()
 	{
 		win->toggleCustomLight();
 		win->redraw(false);
+	}
+}
+
+void MainWindow::toggleActiveWindowAutoPickRotCenter(bool state)
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		win->setAutoPickPivotAtCenter(state);
+	}
+}
+
+void MainWindow::toggleActiveWindowShowCursorCoords(bool state)
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		win->showCursorCoordinates(state);
 	}
 }
 
@@ -9595,6 +9605,14 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		actionExclusiveFullScreen->blockSignals(true);
 		actionExclusiveFullScreen->setChecked(win->exclusiveFullScreen());
 		actionExclusiveFullScreen->blockSignals(false);
+
+		actionShowCursor3DCoordinates->blockSignals(true);
+		actionShowCursor3DCoordinates->setChecked(win->cursorCoordinatesShown());
+		actionShowCursor3DCoordinates->blockSignals(false);
+
+		actionAutoPickRotationCenter->blockSignals(true);
+		actionAutoPickRotationCenter->setChecked(win->autoPickPivotAtCenter());
+		actionAutoPickRotationCenter->blockSignals(false);
 	}
 
 	actionLockRotationVertAxis->setEnabled(win != 0);

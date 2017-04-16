@@ -1029,19 +1029,23 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		ccExportCoordToSFDlg ectsDlg(parent);
-		
+
 		if (!ectsDlg.exec())
+		{
 			return false;
-		
-		bool exportDim[3] = { ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ() };
-		
-		if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
+		}
+
+		bool exportDims[3] = {	ectsDlg.exportX(),
+								ectsDlg.exportY(),
+								ectsDlg.exportZ() };
+
+		if (!exportDims[0] && !exportDims[1] && !exportDims[2]) //nothing to do?!
+		{
 			return false;
-		
-		const QString defaultSFName[3] = {"Coord. X", "Coord. Y", "Coord. Z"};
+		}
 		
 		//for each selected cloud (or vertices set)
 		for (ccHObject* entity : selectedEntities)
@@ -1052,39 +1056,14 @@ namespace ccEntityAction
 				// TODO do something with error?
 				continue;
 			}
-			
-			unsigned ptsCount = pc->size();
-			
-			//test each dimension
-			for (unsigned d = 0; d < 3; ++d)
+
+			if (!pc->exportCoordToSF(exportDims))
 			{
-				if (!exportDim[d])
-					continue;
-				
-				int sfIndex = pc->getScalarFieldIndexByName(qPrintable(defaultSFName[d]));
-				if (sfIndex < 0)
-					sfIndex = pc->addScalarField(qPrintable(defaultSFName[d]));
-				if (sfIndex < 0)
-				{
-					ccLog::Error("Not enough memory!");
-					return true; //true because we want the UI to be updated anyway
-				}
-				
-				CCLib::ScalarField* sf = pc->getScalarField(sfIndex);
-				Q_ASSERT(sf && sf->currentSize() == ptsCount);
-				if (sf != nullptr)
-				{
-					for (unsigned k = 0; k < ptsCount; ++k)
-					{
-						ScalarType s = static_cast<ScalarType>(pc->getPoint(k)->u[d]);
-						sf->setValue(k,s);
-					}
-					sf->computeMinAndMax();
-					pc->setCurrentDisplayedScalarField(sfIndex);
-					entity->showSF(true);
-					entity->prepareDisplayForRefresh_recursive();
-				}
+				ccLog::Error("The process failed!");
+				return true; //true because we want the UI to be updated anyway
 			}
+
+			entity->prepareDisplayForRefresh_recursive();
 		}
 		
 		return true;
@@ -2186,7 +2165,7 @@ namespace ccEntityAction
 	
 	bool	computeStatParams(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
-		ccPickOneElementDlg pDlg("Distribution","Distribution Fitting",parent);
+		ccPickOneElementDlg pDlg("Distribution", "Distribution Fitting", parent);
 		pDlg.addElement("Gauss");
 		pDlg.addElement("Weibull");
 		pDlg.setDefaultIndex(0);
@@ -2237,39 +2216,41 @@ namespace ccEntityAction
 			if (distrib->computeParameters(pc))
 			{
 				QString description;
-				
 				const unsigned precision = ccGui::Parameters().displayedNumPrecision;
 				switch (pDlg.getSelectedIndex())
 				{
 					case 0: //GAUSS
 					{
 						CCLib::NormalDistribution* normal = static_cast<CCLib::NormalDistribution*>(distrib);
-						description = QString("mean = %1 / std.dev. = %2").arg(normal->getMu(),0,'f',precision).arg(sqrt(normal->getSigma2()),0,'f',precision);
+						description = QString("mean = %1 / std.dev. = %2").arg(normal->getMu(), 0, 'f', precision).arg(sqrt(normal->getSigma2()), 0, 'f', precision);
 					}
-						break;
+					break;
+					
 					case 1: //WEIBULL
 					{
 						CCLib::WeibullDistribution* weibull = static_cast<CCLib::WeibullDistribution*>(distrib);
 						ScalarType a,b;
 						weibull->getParameters(a,b);
-						description = QString("a = %1 / b = %2 / shift = %3").arg(a,0,'f',precision).arg(b,0,'f',precision).arg(weibull->getValueShift(),0,'f',precision);
+						description = QString("a = %1 / b = %2 / shift = %3").arg(a, 0, 'f', precision).arg(b, 0, 'f', precision).arg(weibull->getValueShift(), 0, 'f', precision);
 					}
-						break;
+					break;
+
 					default:
+					{
 						Q_ASSERT(false);
 						return false;
+					}
 				}
 				description.prepend(QString("%1: ").arg(distrib->getName()));
 				ccConsole::Print(QString("[Distribution fitting] %1").arg(description));
 				
-				//Auto Chi2
 				const unsigned numberOfClasses = static_cast<unsigned>(ceil(sqrt(static_cast<double>(pc->size()))));
 				std::vector<unsigned> histo;
 				std::vector<double> npis;
 				try
 				{
-					histo.resize(numberOfClasses,0);
-					npis.resize(numberOfClasses,0.0);
+					histo.resize(numberOfClasses, 0);
+					npis.resize(numberOfClasses, 0.0);
 				}
 				catch (const std::bad_alloc&)
 				{
@@ -2277,32 +2258,57 @@ namespace ccEntityAction
 					continue;
 				}
 				
-				unsigned finalNumberOfClasses = 0;
-				const double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib,pc,0,finalNumberOfClasses,false,0,0,&(histo[0]),&(npis[0]));
-				
-				if (chi2dist >= 0.0)
+				//compute the Chi2 distance
 				{
-					ccConsole::Print("[Distribution fitting] %s: Chi2 Distance = %f",distrib->getName(),chi2dist);
+					unsigned finalNumberOfClasses = 0;
+					const double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib, pc, 0, finalNumberOfClasses, false, 0, 0, &(histo[0]), &(npis[0]));
+
+					if (chi2dist >= 0.0)
+					{
+						ccConsole::Print("[Distribution fitting] %s: Chi2 Distance = %f", distrib->getName(), chi2dist);
+					}
+					else
+					{
+						ccConsole::Warning("[Distribution fitting] Failed to compute Chi2 distance?!");
+						continue;
+					}
 				}
-				else
+
+				//compute RMS
 				{
-					ccConsole::Warning("[Distribution fitting] Failed to compute Chi2 distance?!");
-					continue;
+					unsigned n = pc->size();
+					double squareSum = 0;
+					unsigned counter = 0;
+					for (unsigned i = 0; i < n; ++i)
+					{
+						ScalarType V = pc->getPointScalarValue(i);
+						if (CCLib::ScalarField::ValidValue(V))
+						{
+							squareSum += static_cast<double>(V)* V;
+							++counter;
+						}
+					}
+
+					if (counter != 0)
+					{
+						double rms = sqrt(squareSum / counter);
+						ccConsole::Print(QString("Scalar field RMS = %1").arg(rms));
+					}
 				}
-				
+
 				//show histogram
 				ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(parent);
 				hDlg->setWindowTitle("[Distribution fitting]");
 				
 				ccHistogramWindow* histogram = hDlg->window();
-				histogram->fromBinArray(histo,sf->getMin(),sf->getMax());
+				histogram->fromBinArray(histo, sf->getMin(), sf->getMax());
 				histo.clear();
 				histogram->setCurveValues(npis);
 				npis.clear();
 				histogram->setTitle(description);
 				histogram->setColorScheme(ccHistogramWindow::USE_CUSTOM_COLOR_SCALE);
 				histogram->setColorScale(sf->getColorScale());
-				histogram->setAxisLabels(sf->getName(),"Count");
+				histogram->setAxisLabels(sf->getName(), "Count");
 				histogram->refresh();
 				
 				hDlg->show();

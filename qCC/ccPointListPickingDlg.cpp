@@ -64,6 +64,7 @@ ccPointListPickingDlg::ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* 
 	QMenu* menu = new QMenu(exportToolButton);
 	QAction* exportASCII_xyz = menu->addAction("x,y,z");
 	QAction* exportASCII_ixyz = menu->addAction("local index,x,y,z");
+	QAction* exportASCII_gxyz = menu->addAction("global index,x,y,z");
 	QAction* exportASCII_lxyz = menu->addAction("label name,x,y,z");
 	QAction* exportToNewCloud = menu->addAction("new cloud");
 	QAction* exportToNewPolyline = menu->addAction("new polyline");
@@ -80,6 +81,7 @@ ccPointListPickingDlg::ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* 
 	connect(exportToolButton,			SIGNAL(clicked()),			exportToolButton,	SLOT(showMenu()));
 	connect(exportASCII_xyz,			SIGNAL(triggered()),		this,				SLOT(exportToASCII_xyz()));
 	connect(exportASCII_ixyz,			SIGNAL(triggered()),		this,				SLOT(exportToASCII_ixyz()));
+	connect(exportASCII_gxyz,			SIGNAL(triggered()),		this,				SLOT(exportToASCII_gxyz()));
 	connect(exportASCII_lxyz,			SIGNAL(triggered()),		this,				SLOT(exportToASCII_lxyz()));
 	connect(exportToNewCloud,			SIGNAL(triggered()),		this,				SLOT(exportToNewCloud()));
 	connect(exportToNewPolyline,		SIGNAL(triggered()),		this,				SLOT(exportToNewPolyline()));
@@ -406,7 +408,7 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	settings.setValue("filename", filename);
 	settings.endGroup();
 
-	FILE* fp = fopen(qPrintable(filename),"wt");
+	FILE* fp = fopen(qPrintable(filename), "wt");
 	if (!fp)
 	{
 		ccLog::Error(QString("Failed to open file '%1' for saving!").arg(filename));
@@ -440,10 +442,21 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 		const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
 		const CCVector3* P = PP.cloud->getPoint(PP.index);
 
-		if (format == PLP_ASCII_EXPORT_IXYZ)
+		switch (format)
+		{
+		case PLP_ASCII_EXPORT_IXYZ:
 			fprintf(fp, "%u,", i + startIndex);
-		else if (format == PLP_ASCII_EXPORT_LXYZ)
+			break;
+		case PLP_ASCII_EXPORT_GXYZ:
+			fprintf(fp, "%u,", PP.index);
+			break;
+		case PLP_ASCII_EXPORT_LXYZ:
 			fprintf(fp, "%s,", qPrintable(labels[i]->getName()));
+			break;
+		default:
+			//nothing to do
+			break;
+		}
 
 		fprintf(fp, "%.12f,%.12f,%.12f\n",	static_cast<double>(P->x) / scale - shift.x,
 											static_cast<double>(P->y) / scale - shift.y,

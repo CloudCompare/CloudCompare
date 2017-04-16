@@ -67,7 +67,6 @@ void ccGLUtils::DisplayTexture2DPosition(GLuint texID, int x, int y, int w, int 
 		glFunc->glVertex2i(x + w, y + h);
 		glFunc->glEnd();
 
-		glFunc->glBindTexture(GL_TEXTURE_2D, 0);
 		glFunc->glPopAttrib();
 
 		glFunc->glBindTexture(GL_TEXTURE_2D, 0);

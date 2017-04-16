@@ -735,7 +735,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 	ccPointCloud* cloudGrid = 0;
 	
 	//if we 'resample' the input cloud, we actually resample it (one point in each cell)
-	//and we may have change some things aftewards (height, scalar fields, etc.)
+	//and we may have to change some things aftewards (height, scalar fields, etc.)
 	if (resampleInputCloudXY)
 	{
 		CCLib::ReferenceCloud refCloud(inputCloud);

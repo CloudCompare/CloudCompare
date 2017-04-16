@@ -80,14 +80,15 @@ CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 
 	//Progress dialog
-	ccProgressDialog pdlg(false, parameters.parentWidget); //cancel is not supported
-	CCLib::NormalizedProgress nprogress(&pdlg, nbPointsTotal);
+	QScopedPointer<ccProgressDialog> pDlg(0);
 	if (parameters.parentWidget)
 	{
-		pdlg.setMethodTitle(QObject::tr("Open SOI file"));
-		pdlg.setInfo(QObject::tr("%1 scans / %2 points").arg(nbScansTotal).arg(nbPointsTotal));
-		pdlg.start();
+		pDlg.reset(new ccProgressDialog(false, parameters.parentWidget)); //cancel is not supported
+		pDlg->setMethodTitle(QObject::tr("Open SOI file"));
+		pDlg->setInfo(QObject::tr("%1 scans / %2 points").arg(nbScansTotal).arg(nbPointsTotal));
+		pDlg->start();
 	}
+	CCLib::NormalizedProgress nprogress(pDlg.data(), nbPointsTotal);
 
 	//Scan by scan
 	for (unsigned k = 0; k < nbScansTotal; k++)
@@ -141,7 +142,7 @@ CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			loadedCloud->addPoint(CCVector3::fromArray(P));
 			loadedCloud->addGreyColor(static_cast<ColorCompType>(c<<3)); //<<2 ? <<3 ? we lack some info. here ...
 
-			if (parameters.parentWidget)
+			if (pDlg)
 			{
 				nprogress.oneStep();
 			}

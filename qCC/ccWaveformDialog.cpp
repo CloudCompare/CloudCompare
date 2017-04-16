@@ -48,7 +48,9 @@ ccWaveWidget::ccWaveWidget(QWidget* parent/*=0*/)
 	, m_vertBar(0)
 	, m_drawVerticalIndicator(false)
 	, m_verticalIndicatorPositionPercent(0)
+	, m_peakBar(0)
 	, m_lastMouseClick(0, 0)
+	, m_echoPos(-1.0)
 {
 	setWindowTitle("Waveform");
 	setFocusPolicy(Qt::StrongFocus);
@@ -178,6 +180,7 @@ void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale,
 	}
 
 	m_dt = w.descriptor().samplingRate_ps;
+	m_echoPos = w.echoTime_ps();
 };
 
 void ccWaveWidget::refresh()
@@ -211,6 +214,7 @@ void ccWaveWidget::refresh()
 	//clear previous display
 	m_vertBar = 0;
 	m_curve = 0;
+	m_peakBar = 0;
 	this->clearGraphs();
 	this->clearPlottables();
 
@@ -268,6 +272,33 @@ void ccWaveWidget::refresh()
 		valueStr = QString("= %0").arg(curvePos < curveSize ? m_curveValues[curvePos] : 0);
 		m_vertBar->appendText(valueStr);
 		m_vertBar->setTextAlignment(m_verticalIndicatorPositionPercent > 0.5);
+	}
+
+	if (m_echoPos >= 0)
+	{
+		m_peakBar = new QCPBarsWithText(xAxis, yAxis);
+		addPlottable(m_peakBar);
+
+		// now we can modify properties of vertBar
+		m_peakBar->setName("PeakLine");
+		m_peakBar->setWidth(0);
+		m_peakBar->setBrush(QBrush(Qt::blue));
+		m_peakBar->setPen(QPen(Qt::blue));
+		m_peakBar->setAntialiasedFill(false);
+		QVector<double> keyData(1);
+		QVector<double> valueData(1);
+
+		//horizontal position
+		keyData[0] = m_echoPos;
+		valueData[0] = m_maxA;
+
+		m_peakBar->setData(keyData, valueData);
+
+		//precision
+		int precision = static_cast<int>(ccGui::Parameters().displayedNumPrecision);
+
+		m_peakBar->setText("Peak");
+		m_peakBar->setTextAlignment(m_echoPos > 0.5 * curveSize * m_dt);
 	}
 
 	//rescaleAxes();

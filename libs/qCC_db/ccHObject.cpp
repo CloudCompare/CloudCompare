@@ -833,7 +833,7 @@ void ccHObject::removeChild(int pos)
 	//we can't swap as we want to keep the order!
 	//(DGM: do this BEFORE deleting the object (otherwise
 	//the dependency mechanism can 'backfire' ;)
-	m_children.erase(m_children.begin()+pos);
+	m_children.erase(m_children.begin() + pos);
 
 	//backup dependency flags
 	int flags = getDependencyFlagsWith(child);

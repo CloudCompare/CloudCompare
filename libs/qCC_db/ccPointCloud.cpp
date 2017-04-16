@@ -4660,7 +4660,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 	if (m_vboManager.vbos.size() != chunksCount)
 	{
 		//properly remove the elements that are not needed anymore!
-		for (size_t i=chunksCount; i<m_vboManager.vbos.size(); ++i)
+		for (size_t i = chunksCount; i < m_vboManager.vbos.size(); ++i)
 		{
 			if (m_vboManager.vbos[i])
 			{
@@ -4706,7 +4706,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 #endif
 
 		//process each chunk
-		for (unsigned i=0; i<chunksCount; ++i)
+		for (unsigned i = 0; i < chunksCount; ++i)
 		{
 			int chunkSize = static_cast<int>(m_points->chunkSize(i));
 
@@ -4714,7 +4714,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			bool reallocated = false;
 			if (!m_vboManager.vbos[i])
 			{
-				m_vboManager.vbos[i] = new VBO();
+				m_vboManager.vbos[i] = new VBO;
 			}
 
 			//allocate memory for current VBO
@@ -4754,7 +4754,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 							ColorCompType* _sfColors = s_rgbBuffer3ub;
 							ScalarType* _sf = m_vboManager.sourceSF->chunkStartPtr(i);
 							assert(m_vboManager.sourceSF->chunkSize(i) == chunkSize);
-							for (int j=0; j<chunkSize; j++,_sf++)
+							for (int j = 0; j < chunkSize; j++, _sf++)
 							{
 								//we need to convert scalar value to color into a temporary structure
 								const ColorCompType* col = m_vboManager.sourceSF->getColor(*_sf);
@@ -4871,7 +4871,7 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 	{
 		if (!create())
 		{
-			//no message as it will probably happen on a lof of (old) graphic cards
+			//no message as it will probably happen on a lot on (old) graphic cards
 			return -1;
 		}
 		
@@ -4918,7 +4918,7 @@ void ccPointCloud::releaseVBOs()
 	if (m_currentDisplay)
 	{
 		//'destroy' all vbos
-		for (size_t i=0; i<m_vboManager.vbos.size(); ++i)
+		for (size_t i = 0; i < m_vboManager.vbos.size(); ++i)
 		{
 			if (m_vboManager.vbos[i])
 			{
@@ -5680,3 +5680,56 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 
 	return mesh;
 };
+
+bool ccPointCloud::exportCoordToSF(bool exportDims[3])
+{
+	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
+	{
+		//nothing to do?!
+		assert(false);
+		return true;
+	}
+
+	const QString defaultSFName[3] = { "Coord. X", "Coord. Y", "Coord. Z" };
+
+	unsigned ptsCount = size();
+
+	//test each dimension
+	for (unsigned d = 0; d < 3; ++d)
+	{
+		if (!exportDims[d])
+		{
+			continue;
+		}
+
+		int sfIndex = getScalarFieldIndexByName(qPrintable(defaultSFName[d]));
+		if (sfIndex < 0)
+		{
+			sfIndex = addScalarField(qPrintable(defaultSFName[d]));
+		}
+		if (sfIndex < 0)
+		{
+			ccLog::Warning("[ccPointCloud::exportCoordToSF] Not enough memory!");
+			return false;
+		}
+
+		CCLib::ScalarField* sf = getScalarField(sfIndex);
+		if (!sf)
+		{
+			assert(false);
+			return false;
+		}
+
+		for (unsigned k = 0; k < ptsCount; ++k)
+		{
+			ScalarType s = static_cast<ScalarType>(getPoint(k)->u[d]);
+			sf->setValue(k, s);
+		}
+		sf->computeMinAndMax();
+
+		setCurrentDisplayedScalarField(sfIndex);
+		showSF(true);
+	}
+
+	return true;
+}

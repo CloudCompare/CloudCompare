@@ -554,11 +554,11 @@ ccPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 	if (N.z < 0.0)
 		N *= -1.0;
 
-	//calculate dip/dip direction
-	float strike, dip;
+	//calculate strike/dip/dip direction
+	float strike, dip, dipdir;
+	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
 	ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip);
-	//QString dipAndDipDirStr = ccNormalVectors::ConvertStrikeAndDipToString(s, d);
-	QString dipAndDipDirStr = QString("%1/%2").arg((int)strike, 3, 10, QChar('0')).arg((int)dip, 2, 10, QChar('0'));
+	QString dipAndDipDirStr = QString("%1/%2").arg((int)dip, 2, 10, QChar('0')).arg((int)dipdir, 3, 10, QChar('0'));
 	p->setName(dipAndDipDirStr);
 	//calculate centroid
 	CCVector3 C = p->getCenter();
@@ -567,7 +567,7 @@ ccPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 	QVariantMap* map = new QVariantMap();
 	map->insert("Cx", C.x); map->insert("Cy", C.y); map->insert("Cz", C.z); //centroid
 	map->insert("Nx", N.x); map->insert("Ny", N.y); map->insert("Nz", N.z); //normal
-	map->insert("Strike", strike); map->insert("Dip", dip); //strike & dip
+	map->insert("Strike", strike); map->insert("Dip", dip); map->insert("DipDir", dipdir); //strike & dip
 	map->insert("RMS", rms); //rms
 	map->insert("Radius", m_search_r); //search radius
 	p->setMetaData(*map, true);

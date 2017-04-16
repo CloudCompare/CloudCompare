@@ -36,18 +36,18 @@ namespace ccLibAlgorithms
 	
 	//CCLib algorithms handled by the 'ApplyCCLibAlgorithm' method
 	enum CC_LIB_ALGORITHM { CCLIB_ALGO_CURVATURE = 1,
-									CCLIB_ALGO_SF_GRADIENT,
-									CCLIB_ALGO_ROUGHNESS,
-									CCLIB_ALGO_APPROX_DENSITY,
-									CCLIB_ALGO_ACCURATE_DENSITY,
-									CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST = 255,
-								 };
+							CCLIB_ALGO_SF_GRADIENT,
+							CCLIB_ALGO_ROUGHNESS,
+							CCLIB_ALGO_APPROX_DENSITY,
+							CCLIB_ALGO_ACCURATE_DENSITY,
+							CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST = 255,
+						};
 	
 	//! Applies a standard CCLib algorithm (see CC_LIB_ALGORITHM) on a set of entities
-	bool ApplyCCLibAlgorithm(CC_LIB_ALGORITHM algo,
-									 ccHObject::Container& entities,
-									 QWidget* parent = 0,
-									 void** additionalParameters = 0);
+	bool ApplyCCLibAlgorithm(	CC_LIB_ALGORITHM algo,
+								ccHObject::Container& entities,
+								QWidget* parent = 0,
+								void** additionalParameters = 0);
 	
 	//! Scale matching algorithms
 	enum ScaleMatchingAlgorithm { BB_MAX_DIM, BB_VOLUME, PCA_MAX_DIM, ICP_SCALE };

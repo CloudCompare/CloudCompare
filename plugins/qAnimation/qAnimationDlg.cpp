@@ -89,12 +89,14 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 			bool loop = settings.value("loop", loopCheckBox->isChecked()).toBool();
 			int frameRate = settings.value("frameRate", fpsSpinBox->value()).toInt();
 			int superRes = settings.value("superRes", superResolutionSpinBox->value()).toInt();
+			int renderingMode = settings.value("renderingMode", renderingModeComboBox->currentIndex()).toInt();
 			int bitRate = settings.value("bitRate", bitrateSpinBox->value()).toInt();
 
 			previewFromSelectedCheckBox->setChecked(startPreviewFromSelectedStep);
 			loopCheckBox->setChecked(loop);
 			fpsSpinBox->setValue(frameRate);
 			superResolutionSpinBox->setValue(superRes);
+			renderingModeComboBox->setCurrentIndex(renderingMode);
 			bitrateSpinBox->setValue(bitRate);
 		}
 		
@@ -186,6 +188,7 @@ void qAnimationDlg::onAccept()
 		settings.setValue("previewFromSelected", previewFromSelectedCheckBox->isChecked());
 		settings.setValue("loop", loopCheckBox->isChecked());
 		settings.setValue("frameRate", fpsSpinBox->value());
+		settings.setValue("renderingMode", renderingModeComboBox->currentIndex());
 		settings.setValue("superRes", superResolutionSpinBox->value());
 		settings.setValue("bitRate", bitrateSpinBox->value());
 
@@ -486,7 +489,13 @@ void qAnimationDlg::render(bool asSeparateFrames)
 	//count the total number of frames
 	int frameCount = countFrames(0);
 	int fps = fpsSpinBox->value();
+
+	//super resolution
 	int superRes = superResolutionSpinBox->value();
+	const int SUPER_RESOLUTION = 0;
+	const int ZOOM = 1;
+	int renderingMode = renderingModeComboBox->currentIndex();
+	assert(renderingMode == SUPER_RESOLUTION || renderingMode == ZOOM);
 
 	//show progress dialog
 	QProgressDialog progressDialog(QString("Frames: %1").arg(frameCount), "Cancel", 0, frameCount, this);
@@ -519,7 +528,12 @@ void qAnimationDlg::render(bool asSeparateFrames)
 
 		int bitrate = bitrateSpinBox->value() * 1024;
 		int gop = fps;
-		encoder.reset(new QVideoEncoder(outputFilename, m_view3d->glWidth(), m_view3d->glHeight(), bitrate, gop, static_cast<unsigned>(fpsSpinBox->value())));
+		int animScale = 1;
+		if (renderingMode == ZOOM)
+		{
+			animScale = superRes;
+		}
+		encoder.reset(new QVideoEncoder(outputFilename, m_view3d->glWidth() * animScale, m_view3d->glHeight() * animScale, bitrate, gop, static_cast<unsigned>(fpsSpinBox->value())));
 		QString errorString;
 		if (!encoder->open(&errorString))
 		{
@@ -559,7 +573,7 @@ void qAnimationDlg::render(bool asSeparateFrames)
 			applyViewport ( &current_params );
 
 			//render to image
-			QImage image = m_view3d->renderToImage(superRes, false, false, true );
+			QImage image = m_view3d->renderToImage(superRes, renderingMode == ZOOM, false, true );
 
 			if (image.isNull())
 			{
@@ -568,9 +582,9 @@ void qAnimationDlg::render(bool asSeparateFrames)
 				break;
 			}
 
-			if (superRes > 1)
+			if (renderingMode == SUPER_RESOLUTION && superRes > 1)
 			{
-				image = image.scaled(image.width()/superRes, image.height()/superRes, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+				image = image.scaled(image.width() / superRes, image.height() / superRes, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 			}
 
 			if (asSeparateFrames)

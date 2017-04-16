@@ -51,6 +51,7 @@ struct CLEntityDesc
 	}
 	
 	virtual ccHObject* getEntity() = 0;
+	virtual const ccHObject* getEntity() const = 0;
 };
 
 //! Loaded group description
@@ -65,7 +66,8 @@ struct CLGroupDesc : CLEntityDesc
 		, groupEntity(group)
 	{}
 
-	virtual ccHObject* getEntity() { return groupEntity; }
+	virtual ccHObject* getEntity() override { return groupEntity; }
+	virtual const ccHObject* getEntity() const override { return groupEntity; }
 };
 
 //! Loaded cloud description
@@ -90,7 +92,8 @@ struct CLCloudDesc : CLEntityDesc
 		, pc(cloud)
 	{}
 
-	virtual ccHObject* getEntity() { return static_cast<ccHObject*>(pc); }
+	virtual ccHObject* getEntity() override { return static_cast<ccHObject*>(pc); }
+	virtual const ccHObject* getEntity() const override { return static_cast<ccHObject*>(pc); }
 };
 
 //! Loaded mesh description
@@ -115,7 +118,8 @@ struct CLMeshDesc : CLEntityDesc
 		, mesh(_mesh)
 	{}
 
-	virtual ccHObject* getEntity() { return static_cast<ccHObject*>(mesh); }
+	virtual ccHObject* getEntity() override { return static_cast<ccHObject*>(mesh); }
+	virtual const ccHObject* getEntity() const override { return static_cast<ccHObject*>(mesh); }
 };
 
 //! Command line interface
@@ -166,6 +170,13 @@ public: //virtual methods
 	/** \return success
 	**/
 	virtual bool registerCommand(Command::Shared command) = 0;
+
+	//! Returns the name of a to-be-exported entity
+	virtual QString getExportFilename(	const CLEntityDesc& entityDesc,
+										QString extension = QString(),
+										QString suffix = QString(),
+										QString* baseOutputFilename = 0,
+										bool forceNoTimestamp = false) const = 0;
 
 	//! Exports a cloud or a mesh
 	/** \return error string (if any)

@@ -244,7 +244,9 @@ public:
 	//! Sets pivot point
 	/** Emits the 'pivotPointChanged' signal.
 	**/
-	virtual void setPivotPoint(const CCVector3d& P);
+	virtual void setPivotPoint(	const CCVector3d& P,
+								bool autoUpdateCameraPos = false,
+								bool verbose = false);
 
 	//! Sets camera position
 	/** Emits the 'cameraPosChanged' signal.
@@ -375,7 +377,7 @@ public:
 	//! Sets point size
 	/** \param size point size (between MIN_POINT_SIZE and MAX_POINT_SIZE)
 	**/
-	virtual void setPointSize(float size);
+	virtual void setPointSize(float size, bool silent = false);
 
 	//! Sets line width
 	/** \param width lines width (typically between 1 and 10)
@@ -604,6 +606,16 @@ public: //stereo mode
 	
 	//! Returns the current stereo mode parameters
 	inline const StereoParams& getStereoParams() const { return m_stereoParams; }
+
+	//! Sets whether to display the coordinates of the point below the cursor position
+	void showCursorCoordinates(bool state) { m_showCursorCoordinates = state; }
+	//! Whether the coordinates of the point below the cursor position are displayed or not
+	bool cursorCoordinatesShown() const { return m_showCursorCoordinates; }
+
+	//! Toggles the automatic setting of the pivot point at the center of the screen
+	void setAutoPickPivotAtCenter(bool state) { m_autoPickPivotAtCenter = state; }
+	//! Whether the pivot point is automatically set at the center of the screen
+	bool autoPickPivotAtCenter() const { return m_autoPickPivotAtCenter; }
 
 public slots:
 
@@ -882,10 +894,11 @@ protected: //other methods
 	void setFontPointSize(int pixelSize);
 
 	//events handling
-	void mousePressEvent(QMouseEvent *event) override;
-	void mouseMoveEvent(QMouseEvent *event) override;
-	void mouseReleaseEvent(QMouseEvent *event) override;
-	void wheelEvent(QWheelEvent *event) override;
+	void mousePressEvent(QMouseEvent* event) override;
+	void mouseMoveEvent(QMouseEvent* event) override;
+	void mouseDoubleClickEvent(QMouseEvent* event) override;
+	void mouseReleaseEvent(QMouseEvent* event) override;
+	void wheelEvent(QWheelEvent* event) override;
 	bool event(QEvent* evt) override;
 
 	bool initialize();
@@ -1064,6 +1077,14 @@ protected: //other methods
 
 	//! Toggles auto-refresh mode
 	void toggleAutoRefresh(bool state, int period_ms = 0);
+
+	//! Returns the (relative) depth value at a given pixel position
+	/** \Return the (relative) depth or 1.0 if none is defined
+	**/
+	GLfloat getGLDepth(int x, int y, bool extendToNeighbors = false);
+
+	//! Returns the approximate 3D position of the clicked pixel
+	bool getClick3DPos(int x, int y, CCVector3d& P3D);
 
 protected: //members
 
@@ -1337,6 +1358,15 @@ protected: //members
 
 	//! Hot zone
 	HotZone* m_hotZone;
+
+	//! Whether to display the coordinates of the point below the cursor position
+	bool m_showCursorCoordinates;
+
+	//! Whether the pivot point is automatically picked at the center of the screen (when possible)
+	bool m_autoPickPivotAtCenter;
+
+	//! Candidate pivot point (will be used when the mouse is released)
+	CCVector3d m_autoPivotCandidate;
 
 private:
 

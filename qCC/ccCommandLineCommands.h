@@ -18,6 +18,7 @@
 #include <ccNormalVectors.h>
 #include <ccPolyline.h>
 #include <ccScalarField.h>
+#include <ccVolumeCalcTool.h>
 
 //qCC_io
 #include <BundlerFilter.h>
@@ -97,12 +98,7 @@ static const char COMMAND_DELAUNAY_BF[]						= "BEST_FIT";
 static const char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 static const char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
 static const char COMMAND_SF_OP[]							= "SF_OP";
-static const char COMMAND_VOLUME[]							= "VOLUME";
-static const char COMMAND_VOLUME_VERT_DIR[]					= "VERT_DIR";
-static const char COMMAND_VOLUME_GRID_STEP[]				= "GRID_STEP";
-static const char COMMAND_VOLUME_GROUND_IS_FIRST[]			= "GROUND_IS_FIRST";
-static const char COMMAND_VOLUME_OUTPUT_MESH[]				= "OUTPUT_MESH";
-static const char COMMAND_VOLUME_CONST_HEIGHT[]				= "CONST_HEIGHT";
+static const char COMMAND_COORD_TO_SF[]						= "COORD_TO_SF";
 static const char COMMAND_ICP[]								= "ICP";
 static const char COMMAND_ICP_REFERENCE_IS_FIRST[]			= "REFERENCE_IS_FIRST";
 static const char COMMAND_ICP_MIN_ERROR_DIIF[]				= "MIN_ERROR_DIFF";
@@ -1673,6 +1669,11 @@ struct CommandOrientNormalsMST : public ccCommandLineInterface::Command
 			ccPointCloud* cloud = cmd.clouds()[i].pc;
 			assert(cloud);
 
+			if (!cloud->hasNormals())
+			{
+				continue;
+			}
+
 			//computation
 			if (cloud->orientNormalsWithMST(knn, progressDialog.data()))
 			{
@@ -1939,28 +1940,79 @@ struct CommandCrop : public ccCommandLineInterface::Command
 		}
 
 		//crop meshes
-	{
-		for (size_t i = 0; i < cmd.meshes().size(); ++i)
 		{
-			ccHObject* croppedMesh = ccCropTool::Crop(cmd.meshes()[i].mesh, cropBox, inside);
-			if (croppedMesh)
+			for (size_t i = 0; i < cmd.meshes().size(); ++i)
 			{
-				delete cmd.meshes()[i].mesh;
-				assert(croppedMesh->isA(CC_TYPES::MESH));
-				cmd.meshes()[i].mesh = static_cast<ccMesh*>(croppedMesh);
-				cmd.meshes()[i].basename += "_CROPPED";
+				ccHObject* croppedMesh = ccCropTool::Crop(cmd.meshes()[i].mesh, cropBox, inside);
+				if (croppedMesh)
+				{
+					delete cmd.meshes()[i].mesh;
+					assert(croppedMesh->isA(CC_TYPES::MESH));
+					cmd.meshes()[i].mesh = static_cast<ccMesh*>(croppedMesh);
+					cmd.meshes()[i].basename += "_CROPPED";
+					if (cmd.autoSaveMode())
+					{
+						QString errorStr = cmd.exportEntity(cmd.meshes()[i]);
+						if (!errorStr.isEmpty())
+							return cmd.error(errorStr);
+					}
+				}
+				//otherwise an error message has already been issued
+			}
+		}
+
+		return true;
+	}
+};
+
+struct CommandCoordToSF : public ccCommandLineInterface::Command
+{
+	CommandCoordToSF() : ccCommandLineInterface::Command("Crop", COMMAND_COORD_TO_SF) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		cmd.print("[COORD TO SF]");
+
+		if (cmd.arguments().size() < 1)
+			return cmd.error(QString("Missing parameter after \"-%1\" (DIMENSION)").arg(COMMAND_COORD_TO_SF));
+		if (cmd.clouds().empty())
+			return cmd.error(QString("No point cloud available. Be sure to open or generate one first!"));
+
+		//dimension
+		bool exportDims[3] = { false, false, false };
+		QString dimStr = cmd.arguments().takeFirst().toUpper();
+		{
+			if (dimStr == "X")
+				exportDims[0] = true;
+			else if (dimStr == "Y")
+				exportDims[1] = true;
+			else if (dimStr == "Z")
+				exportDims[2] = true;
+			else
+				return cmd.error(QString("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_COORD_TO_SF));
+		}
+
+		//now we can export the corresponding coordinate
+		for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		{
+			ccPointCloud* pc = cmd.clouds()[i].pc;
+			if (pc->exportCoordToSF(exportDims))
+			{
+				cmd.clouds()[i].basename += QString("_%1_TO_SF").arg(dimStr);
 				if (cmd.autoSaveMode())
 				{
-					QString errorStr = cmd.exportEntity(cmd.meshes()[i]);
+					QString errorStr = cmd.exportEntity(cmd.clouds()[i]);
 					if (!errorStr.isEmpty())
 						return cmd.error(errorStr);
 				}
 			}
-			//otherwise an error message has already been issued
+			else
+			{
+				return cmd.error(QString("Failed to export coord. %1 to SF on cloud '%2'!").arg(dimStr).arg(cmd.clouds()[i].pc->getName()));
+			}
 		}
-	}
 
-	return true;
+		return true;
 	}
 };
 
@@ -2515,7 +2567,7 @@ struct CommandDist : public ccCommandLineInterface::Command
 
 struct CommandC2MDist : public CommandDist
 {
-	CommandC2MDist() : CommandDist(false, "C2M distance", COMMAND_C2M_DIST) {}
+	CommandC2MDist() : CommandDist(true, "C2M distance", COMMAND_C2M_DIST) {}
 };
 
 struct CommandC2CDist : public CommandDist
@@ -2987,250 +3039,6 @@ struct CommandSFOperation : public ccCommandLineInterface::Command
 					}
 				}
 			}
-		}
-
-		return true;
-	}
-};
-
-#include <ccVolumeCalcTool.h>
-
-struct CommandVolume25D : public ccCommandLineInterface::Command
-{
-	CommandVolume25D() : ccCommandLineInterface::Command("2.5D Volume Calculation", COMMAND_VOLUME) {}
-
-	virtual bool process(ccCommandLineInterface& cmd) override
-	{
-		cmd.print("[2.5D VOLUME]");
-
-		//look for local options
-		bool groundIsFirst = false;
-		double gridStep = 0;
-		double constHeight = std::numeric_limits<double>::quiet_NaN();
-		bool outputMesh = false;
-		int vertDir = 2;
-
-		while (!cmd.arguments().empty())
-		{
-			QString argument = cmd.arguments().front();
-			if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_GROUND_IS_FIRST))
-			{
-				//local option confirmed, we can move on
-				cmd.arguments().pop_front();
-
-				groundIsFirst = true;
-			}
-			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_OUTPUT_MESH))
-			{
-				//local option confirmed, we can move on
-				cmd.arguments().pop_front();
-
-				outputMesh = true;
-			}
-			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_GRID_STEP))
-			{
-				//local option confirmed, we can move on
-				cmd.arguments().pop_front();
-
-				bool ok;
-				gridStep = cmd.arguments().takeFirst().toDouble(&ok);
-				if (!ok || gridStep <= 0)
-				{
-					return cmd.error(QString("Invalid grid step value! (after %1)").arg(COMMAND_VOLUME_GRID_STEP));
-				}
-			}
-			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_CONST_HEIGHT))
-			{
-				//local option confirmed, we can move on
-				cmd.arguments().pop_front();
-
-				bool ok;
-				constHeight = cmd.arguments().takeFirst().toDouble(&ok);
-				if (!ok)
-				{
-					return cmd.error(QString("Invalid const. height value! (after %1)").arg(COMMAND_VOLUME_CONST_HEIGHT));
-				}
-			}
-			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_VERT_DIR))
-			{
-				//local option confirmed, we can move on
-				cmd.arguments().pop_front();
-
-				bool ok;
-				vertDir = cmd.arguments().takeFirst().toInt(&ok);
-				if (!ok || vertDir < 0 || vertDir > 2)
-				{
-					return cmd.error(QString("Invalid vert. direction! (after %1)").arg(COMMAND_VOLUME_VERT_DIR));
-				}
-			}
-		}
-
-		if (gridStep == 0)
-		{
-			return cmd.error(QString("Grid step value not defined (use %1)").arg(COMMAND_VOLUME_GRID_STEP));
-		}
-
-		//we'll get the first two clouds
-		CLCloudDesc *ground = 0, *ceil = 0;
-		{
-			CLCloudDesc* clouds[2] = { 0, 0 };
-			int index = 0;
-			if (!cmd.clouds().empty())
-			{
-				clouds[index++] = &cmd.clouds()[0];
-				if (std::isnan(constHeight) && cmd.clouds().size() > 1)
-				{
-					clouds[index++] = &cmd.clouds()[1];
-				}
-			}
-
-			int expectedCount = std::isnan(constHeight) ? 2 : 1;
-			if (index != expectedCount)
-			{
-				return cmd.error(QString("Not enough loaded entities (%1 found, %2 expected)").arg(index).arg(expectedCount));
-			}
-
-			if (index == 2 && groundIsFirst)
-			{
-				//put them in the right order (ground then ceil)
-				std::swap(clouds[0], clouds[1]);
-			}
-
-			ceil = clouds[0];
-			ground = clouds[1];
-		}
-
-		ccBBox gridBBox = ceil ? ceil->pc->getOwnBB() : ccBBox();
-		if (ground)
-		{
-			gridBBox += ground->pc->getOwnBB();
-		}
-
-		//compute the grid size
-		unsigned gridWidth = 0, gridHeight = 0;
-		if (!ccRasterGrid::ComputeGridSize(vertDir, gridBBox, gridStep, gridWidth, gridHeight))
-		{
-			return cmd.error("Failed to compute the grid dimensions (check input cloud(s) bounding-box)");
-		}
-
-		ccRasterGrid grid;
-		ccVolumeCalcTool::ReportInfo reportInfo;
-		if (ccVolumeCalcTool::ComputeVolume(grid,
-											ground ? ground->pc : 0,
-											ceil ? ceil->pc : 0,
-											gridBBox,
-											vertDir,
-											gridStep,
-											gridWidth,
-											gridHeight,
-											ccRasterGrid::PROJ_AVERAGE_VALUE,
-											ccRasterGrid::LEAVE_EMPTY,
-											reportInfo,
-											constHeight,
-											constHeight,
-											cmd.silentMode() ? 0 : cmd.widgetParent()))
-		{	
-			CLCloudDesc* desc = ceil ? ceil : ground;
-			assert(desc);
-
-			//save repot in a separate text file
-			{
-				QString txtFilename = QString("%1/%2").arg(desc->path).arg("VolumeCalculationReport");
-				if (cmd.addTimestamp())
-					txtFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
-				txtFilename += QString(".txt");
-				
-				QFile txtFile(txtFilename);
-				txtFile.open(QIODevice::WriteOnly | QIODevice::Text);
-				QTextStream txtStream(&txtFile);
-				txtStream << reportInfo.toText() << endl;
-				txtFile.close();
-			}
-
-			//generate the result entity (cloud by default)
-			{
-				ccPointCloud* rasterCloud = ccVolumeCalcTool::ConvertGridToCloud(grid, gridBBox, vertDir, true);
-				if (!rasterCloud)
-				{
-					return cmd.error("Failed to output the volume grid");
-				}
-				if (rasterCloud->hasScalarFields())
-				{
-					//convert SF to RGB
-					//rasterCloud->setCurrentDisplayedScalarField(0);
-					rasterCloud->setRGBColorWithCurrentScalarField(false);
-					rasterCloud->showColors(true);
-				}
-
-				ccMesh* rasterMesh = 0;
-				if (outputMesh)
-				{
-					char errorStr[1024];
-					CCLib::GenericIndexedMesh* baseMesh = CCLib::PointProjectionTools::computeTriangulation(rasterCloud,
-						DELAUNAY_2D_AXIS_ALIGNED,
-						0,
-						vertDir,
-						errorStr);
-
-					if (baseMesh)
-					{
-						rasterMesh = new ccMesh(baseMesh, rasterCloud);
-						delete baseMesh;
-						baseMesh = 0;
-					}
-
-					if (rasterMesh)
-					{
-						rasterCloud->setEnabled(false);
-						rasterCloud->setVisible(true);
-						rasterMesh->addChild(rasterCloud);
-						rasterMesh->setName(rasterCloud->getName());
-						rasterCloud->setName("vertices");
-						rasterMesh->showSF(rasterCloud->sfShown());
-						rasterMesh->showColors(rasterCloud->colorsShown());
-
-						cmd.print(QString("[Volume] Mesh '%1' successfully generated").arg(rasterMesh->getName()));
-					}
-					else
-					{
-						delete rasterCloud;
-						return cmd.error(QString("[Voume] Failed to create output mesh ('%1')").arg(errorStr));
-					}
-				}
-
-				CLEntityDesc* outputDesc = 0;
-				if (rasterMesh)
-				{
-					CLMeshDesc meshDesc;
-					meshDesc.mesh = rasterMesh;
-					meshDesc.basename = desc->basename;
-					meshDesc.path = desc->path;
-					cmd.meshes().push_back(meshDesc);
-					outputDesc = &cmd.meshes().back();
-				}
-				else
-				{
-					CLCloudDesc cloudDesc;
-					cloudDesc.pc = rasterCloud;
-					cloudDesc.basename = desc->basename;
-					cloudDesc.path = desc->path;
-					cmd.clouds().push_back(cloudDesc);
-					outputDesc = &cmd.clouds().back();
-				}
-
-				//save result as a PLY file
-				if (outputDesc)
-				{
-					QString outputFilename;
-					QString errorStr = cmd.exportEntity(*outputDesc, "HEIGHT_DIFFERENCE", &outputFilename);
-					if (!errorStr.isEmpty())
-						cmd.warning(errorStr);
-				}
-			}
-		}
-		else
-		{
-			return cmd.error("Failed to compte the volume");
 		}
 
 		return true;

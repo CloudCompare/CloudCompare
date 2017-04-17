@@ -329,7 +329,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 
 	//for each triangle
 	mesh->placeIteratorAtBegining();
-	for (unsigned n=0; n<triCount; ++n)
+	for (unsigned n = 0; n < triCount; ++n)
 	{
 		const GenericTriangle* tri = mesh->_getNextTriangle();
 
@@ -350,13 +350,13 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 		double fPointsToAdd = S*samplingDensity;
 		unsigned pointsToAdd = static_cast<unsigned>(fPointsToAdd);
 
-        //take care of the remaining fractional part
+		//take care of the remaining fractional part
 		double fracPart = fPointsToAdd - static_cast<double>(pointsToAdd);
 		if (fracPart > 0)
 		{
 			//we add a point with the same probability as its (relative) area
 			if (dist(gen) <= fracPart)
-                pointsToAdd += 1;
+				pointsToAdd += 1;
 		}
 
 		if (pointsToAdd)
@@ -377,7 +377,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 				}
 			}
 
-			for (unsigned i=0; i<pointsToAdd; ++i)
+			for (unsigned i = 0; i < pointsToAdd; ++i)
 			{
 				//we generate random points as in:
 				//'Greg Turk. Generating random points in triangles. In A. S. Glassner, editor, Graphics Gems, pages 24-28. Academic Press, 1990.'
@@ -385,10 +385,10 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 				double y = dist(gen);
 
 				//we test if the generated point lies on the right side of (AB)
-				if (x+y > 1.0)
+				if (x + y > 1.0)
 				{
-                    x = 1.0-x;
-                    y = 1.0-y;
+					x = 1.0 - x;
+					y = 1.0 - y;
                 }
 
 				CCVector3 P = (*O) + static_cast<PointCoordinateType>(x) * u + static_cast<PointCoordinateType>(y) * v;

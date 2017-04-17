@@ -80,6 +80,10 @@ v2.9.alpha - XX/XX/XXXX
 	* Point List Picking tool
 		- the list can now be exported as a 'global index, x, y, z' text file
 
+	* Scale / Multiply dialog:
+		- new option to use the same scale for all dimensions
+		- new option to apply the scale to the 'Global shift' (or not)
+
 	* Other
 		- color scales are now listed in alphabetical order
 

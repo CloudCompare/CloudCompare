@@ -111,6 +111,7 @@
 #include "ccWaveformDialog.h"
 #include "ccPlaneEditDlg.h"
 #include "ccPickingHub.h"
+#include "ccScaleDlg.h"
 
 //other
 #include "ccCropTool.h"
@@ -1230,21 +1231,18 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 	refreshAll();
 }
 
-static CCVector3d s_lastMultFactors(1.0, 1.0, 1.0);
-static bool s_lastMultKeepInPlace = true;
 typedef std::pair<ccHObject*, ccGenericPointCloud*> EntityCloudAssociation;
 void MainWindow::doActionApplyScale()
 {
-	ccAskThreeDoubleValuesDlg dlg("fx", "fy", "fz", -1.0e6, 1.0e6, s_lastMultFactors.x, s_lastMultFactors.y, s_lastMultFactors.z, 8, "Scaling", this);
-	dlg.showCheckbox("Keep in place", s_lastMultKeepInPlace, "Whether the cloud (center) should stay at the same place or not (i.e. coordinates are multiplied directly)");
+	ccScaleDlg dlg(this);
 	if (!dlg.exec())
 		return;
+	dlg.saveState();
 
 	//save values for next time
-	double sX = s_lastMultFactors.x = dlg.doubleSpinBox1->value();
-	double sY = s_lastMultFactors.y = dlg.doubleSpinBox2->value();
-	double sZ = s_lastMultFactors.z = dlg.doubleSpinBox3->value();
-	bool keepInPlace = s_lastMultKeepInPlace = dlg.getCheckboxState();
+	CCVector3d scales = dlg.getScales();
+	bool keepInPlace = dlg.keepInPlace();
+	bool rescaleGlobalShift = dlg.rescaleGlobalShift();
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
@@ -1302,9 +1300,9 @@ void MainWindow::doActionApplyScale()
 
 				if (!oldCoordsWereTooBig)
 				{
-					maxx = std::max( fabs((bbMin.x - C.x) * sX + C.x), fabs( (bbMax.x - C.x) * sX + C.x) );
-					maxy = std::max( fabs((bbMin.y - C.y) * sY + C.y), fabs( (bbMax.y - C.y) * sY + C.y) );
-					maxz = std::max( fabs((bbMin.z - C.z) * sZ + C.z), fabs( (bbMax.z - C.z) * sZ + C.z) );
+					maxx = std::max(fabs((bbMin.x - C.x) * scales.x + C.x), fabs((bbMax.x - C.x) * scales.x + C.x));
+					maxy = std::max(fabs((bbMin.y - C.y) * scales.y + C.y), fabs((bbMax.y - C.y) * scales.y + C.y));
+					maxz = std::max(fabs((bbMin.z - C.z) * scales.z + C.z), fabs((bbMax.z - C.z) * scales.z + C.z));
 
 					bool newCoordsAreTooBig = (	maxx > maxCoord
 											||	maxy > maxCoord
@@ -1359,9 +1357,9 @@ void MainWindow::doActionApplyScale()
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::scale
 			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
 
-			cloud->scale(	static_cast<PointCoordinateType>(sX),
-							static_cast<PointCoordinateType>(sY),
-							static_cast<PointCoordinateType>(sZ),
+			cloud->scale(	static_cast<PointCoordinateType>(scales.x),
+							static_cast<PointCoordinateType>(scales.y),
+							static_cast<PointCoordinateType>(scales.z),
 							C );
 
 			putObjectBackIntoDBTree(cloud, objContext);
@@ -1369,12 +1367,12 @@ void MainWindow::doActionApplyScale()
 
 			//don't forget the 'global shift'!
 			//DGM: but not the global scale!
-			if (!keepInPlace)
+			if (rescaleGlobalShift)
 			{
 				const CCVector3d& shift = cloud->getGlobalShift();
-				cloud->setGlobalShift( CCVector3d(	shift.x*sX,
-													shift.y*sY,
-													shift.z*sZ) );
+				cloud->setGlobalShift( CCVector3d(	shift.x*scales.x,
+													shift.y*scales.y,
+													shift.z*scales.z) );
 			}
 
 			ent->prepareDisplayForRefresh_recursive();
@@ -1397,26 +1395,26 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	size_t selNum = m_selectedEntities.size();
 
 	//get the global shift/scale info and bounding box of all selected clouds
-	std::vector< std::pair<ccShiftedObject*,ccHObject*> > shiftedEntities;
-	CCVector3d Pl(0,0,0);
+	std::vector< std::pair<ccShiftedObject*, ccHObject*> > shiftedEntities;
+	CCVector3d Pl(0, 0, 0);
 	double Dl = 1.0;
-	CCVector3d Pg(0,0,0);
+	CCVector3d Pg(0, 0, 0);
 	double Dg = 1.0;
 	//shift and scale (if unique)
-	CCVector3d shift(0,0,0);
+	CCVector3d shift(0, 0, 0);
 	double scale = 1.0;
 	{
 		bool uniqueShift = true;
 		bool uniqueScale = true;
 		ccBBox localBB;
 		//sadly we don't have a double-typed bounding box class yet ;)
-		CCVector3d globalBBmin(0,0,0), globalBBmax(0,0,0);
+		CCVector3d globalBBmin(0, 0, 0), globalBBmax(0, 0, 0);
 
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = m_selectedEntities[i];
 			bool lockedVertices;
-			ccShiftedObject* shifted = ccHObjectCaster::ToShifted(ent,&lockedVertices);
+			ccShiftedObject* shifted = ccHObjectCaster::ToShifted(ent, &lockedVertices);
 			//for (unlocked) entities only
 			if (lockedVertices)
 			{
@@ -1425,7 +1423,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 				ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(ent)->getAssociatedCloud();
 				if (!vertices || !ent->isAncestorOf(vertices))
 				{
-					ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+					ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
 					continue;
 				}
 				ent = vertices;
@@ -1463,14 +1461,14 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 					uniqueScale = (fabs(shifted->getGlobalScale() - scale) < ZERO_TOLERANCE);
 			}
 
-			shiftedEntities.push_back( std::pair<ccShiftedObject*,ccHObject*>(shifted,ent) );
+			shiftedEntities.push_back(std::pair<ccShiftedObject*, ccHObject*>(shifted, ent));
 		}
 
 		Pg = globalBBmin;
-		Dg = (globalBBmax-globalBBmin).norm();
+		Dg = (globalBBmax - globalBBmin).norm();
 
 		Pl = CCVector3d::fromArray(localBB.minCorner().u);
-		Dl = (localBB.maxCorner()-localBB.minCorner()).normd();
+		Dl = (localBB.maxCorner() - localBB.minCorner()).normd();
 
 		if (!uniqueShift)
 			shift = Pl - Pg;
@@ -1481,12 +1479,12 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	if (shiftedEntities.empty())
 		return;
 
-	ccShiftAndScaleCloudDlg sasDlg(Pl,Dl,Pg,Dg,this);
+	ccShiftAndScaleCloudDlg sasDlg(Pl, Dl, Pg, Dg, this);
 	sasDlg.showApplyAllButton(shiftedEntities.size() > 1);
 	sasDlg.showApplyButton(shiftedEntities.size() == 1);
 	sasDlg.showNoButton(false);
 	//add "original" entry
-	int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",shift,scale));
+	int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original", shift, scale));
 	sasDlg.setCurrentProfile(index);
 	//add "last" entry (if available)
 	ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
@@ -1502,12 +1500,12 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	scale = sasDlg.getScale();
 	bool preserveGlobalPos = sasDlg.keepGlobalPos();
 
-	ccLog::Print("[Global Shift/Scale] New shift: (%f, %f, %f)",shift.x,shift.y,shift.z);
-	ccLog::Print("[Global Shift/Scale] New scale: %f",scale);
+	ccLog::Print("[Global Shift/Scale] New shift: (%f, %f, %f)", shift.x, shift.y, shift.z);
+	ccLog::Print("[Global Shift/Scale] New scale: %f", scale);
 
 	//apply new shift
 	{
-		for (size_t i=0; i<shiftedEntities.size(); ++i)
+		for (size_t i = 0; i < shiftedEntities.size(); ++i)
 		{
 			ccShiftedObject* shifted = shiftedEntities[i].first;
 			ccHObject* ent = shiftedEntities[i].second;
@@ -1522,7 +1520,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 				assert(shifted->getGlobalScale() > 0);
 				double scaleCoef = scale / shifted->getGlobalScale();
 
-				if (T.norm() > ZERO_TOLERANCE || fabs(scaleCoef-1.0) > ZERO_TOLERANCE)
+				if (T.norm() > ZERO_TOLERANCE || fabs(scaleCoef - 1.0) > ZERO_TOLERANCE)
 				{
 					ccGLMatrix transMat;
 					transMat.toIdentity();

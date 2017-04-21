@@ -91,6 +91,9 @@ public:
 	//! Returns the byte offset to waveform data
 	inline uint64_t dataOffset() const { return m_dataOffset; }
 
+	//! Sets the byte offset to waveform data
+	inline void setDataOffset(uint64_t offset) { m_dataOffset = offset; }
+
 	//! Gives access to the internal data
 	inline const uint8_t* data(const uint8_t* dataStorage) const { return dataStorage + m_dataOffset; }
 

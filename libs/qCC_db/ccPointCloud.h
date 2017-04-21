@@ -394,15 +394,21 @@ public: //waveform (e.g. from airborne scanners)
 	//! Gives access to the associated FWF data (const version)
 	const std::vector<ccWaveform>& waveforms() const { return m_fwfWaveforms; }
 
+	//! Reserves the FWF table
+	bool reserveTheFWFTable();
+	//! Resizes the FWF table
+	bool resizeTheFWFTable();
+
 	//! Gives access to the associated FWF data container
 	SharedFWFDataContainer& fwfData() { return m_fwfData; }
 	//! Gives access to the associated FWF data container (const version)
 	const SharedFWFDataContainer& fwfData() const { return m_fwfData; }
 
-	//! Reserves the FWF table
-	bool reserveTheFWFTable();
-	//! Resizes the FWF table
-	bool resizeTheFWFTable();
+	//! Compresses the associated FWF data container
+	/** As the container is shared, the compressed version will be potentially added to the memory
+		resulting in a decrease of the available memory...
+	**/
+	bool compressFWFData();
 
 	//! Computes the maximum amplitude of all associated waveforms
 	bool computeFWFAmplitude(double& minVal, double& maxVal, ccProgressDialog* pDlg = 0) const;

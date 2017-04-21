@@ -666,6 +666,7 @@ void MainWindow::connectActions()
 	connect(actionDeleteAllSF,					SIGNAL(triggered()),	this,		SLOT(doActionDeleteAllSF()));
 	//"Edit > Waveform" menu
 	connect(actionShowWaveDialog,				SIGNAL(triggered()),	this,		SLOT(doActionShowWaveDialog()));
+	connect(actionCompressFWFData,				SIGNAL(triggered()),	this,		SLOT(doActionCompressFWFData()));
 	//"Edit" menu
 	connect(actionClone,						SIGNAL(triggered()),	this,		SLOT(doActionClone()));
 	connect(actionMerge,						SIGNAL(triggered()),	this,		SLOT(doActionMerge()));
@@ -10012,6 +10013,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionEditGlobalScale->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionComputeKdTree->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionShowWaveDialog->setEnabled(exactlyOneCloud);
+	actionCompressFWFData->setEnabled(atLeastOneCloud);
 
 	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
 	actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
@@ -10401,6 +10403,20 @@ void MainWindow::doActionGlobalShiftSeetings()
 		settings.setValue(ccPS::MaxAbsCoord(), maxAbsCoord);
 		settings.setValue(ccPS::MaxAbsDiag(), maxAbsDiag);
 		settings.endGroup();
+	}
+}
+
+void MainWindow::doActionCompressFWFData()
+{
+	for (ccHObject* entity : m_selectedEntities)
+	{
+		if (!entity || !entity->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			continue;
+		}
+
+		ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
+		cloud->compressFWFData();
 	}
 }
 

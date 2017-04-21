@@ -299,6 +299,7 @@
       <string>Waveform</string>
      </property>
      <addaction name="actionShowWaveDialog"/>
+     <addaction name="actionCompressFWFData"/>
     </widget>
     <widget class="QMenu" name="menuPlane">
      <property name="title">
@@ -3006,6 +3007,14 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Delete the underlying scan grids</string>
+   </property>
+  </action>
+  <action name="actionCompressFWFData">
+   <property name="text">
+    <string>Compress FWF data</string>
+   </property>
+   <property name="toolTip">
+    <string>Compress the associated FWF data (maybe interesting after interactive segmentation for instance)</string>
    </property>
   </action>
  </widget>

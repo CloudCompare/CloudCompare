@@ -392,6 +392,7 @@ protected slots:
 	void doActionComputeCPS();
 	void doActionDeleteAllSF();
 	void doActionShowWaveDialog();
+	void doActionCompressFWFData();
 	void doActionKMeans();
 	void doActionFrontPropagation();
 	void doActionApplyScale();

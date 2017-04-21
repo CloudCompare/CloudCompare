@@ -1193,7 +1193,7 @@ bool ccPointCloud::resizeTheNormsTable()
 		m_normals->link();
 	}
 
-	if (!m_normals->resize(m_points->currentSize(),true,0))
+	if (!m_normals->resize(m_points->currentSize(), true, 0))
 	{
 		m_normals->release();
 		m_normals = 0;
@@ -1206,6 +1206,83 @@ bool ccPointCloud::resizeTheNormsTable()
 
 	//double check
 	return m_normals && m_normals->currentSize() == m_points->currentSize();
+}
+
+bool ccPointCloud::compressFWFData()
+{
+	if (!m_fwfData || m_fwfData->size() == 0)
+	{
+		return false;
+	}
+
+	try
+	{
+		size_t initialCount = m_fwfData->size();
+		std::vector<size_t> usedIndexes;
+		usedIndexes.resize(initialCount, 0);
+
+		for (const ccWaveform& w : m_fwfWaveforms)
+		{
+			if (w.byteCount() == 0)
+			{
+				assert(false);
+				continue;
+			}
+
+			size_t start = w.dataOffset();
+			size_t end = w.dataOffset() + w.byteCount();
+			for (size_t i = start; i < end; ++i)
+			{
+				usedIndexes[i] = 1;
+			}
+		}
+
+		size_t newIndex = 0;
+		for (size_t& index : usedIndexes)
+		{
+			if (index != 0)
+			{
+				index = ++newIndex; //we need to start at 1 (as 0 means 'not used')
+			}
+		}
+
+		if (newIndex >= initialCount)
+		{
+			//nothing to do
+			ccLog::Print(QString("[ccPointCloud::compressFWFData] Cloud '%1': no need to compress FWF data").arg(getName()));
+			return true;
+		}
+
+		//now create the new container
+		FWFDataContainer* newContainer = new FWFDataContainer;
+		newContainer->reserve(newIndex);
+
+		for (size_t i = 0; i < initialCount; ++i)
+		{
+			if (usedIndexes[i])
+			{
+				newContainer->push_back(m_fwfData->at(i));
+			}
+		}
+
+		//and don't forget to update the waveform descriptors!
+		for (ccWaveform& w : m_fwfWaveforms)
+		{
+			uint64_t offset = w.dataOffset();
+			assert(usedIndexes[offset] != 0);
+			w.setDataOffset(usedIndexes[offset] - 1);
+		}
+		m_fwfData = SharedFWFDataContainer(newContainer);
+
+		ccLog::Print(QString("[ccPointCloud::compressFWFData] Cloud '%1': FWF data compressed --> %2 / %3 (%4%)").arg(getName()).arg(newIndex).arg(initialCount).arg(100.0 - (newIndex * 100.0) / initialCount, 0, 'f', 1));
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("[ccPointCloud::compressFWFData] Not enough memory!");
+		return false;
+	}
+
+	return true;
 }
 
 bool ccPointCloud::reserveTheFWFTable()
@@ -5318,7 +5395,7 @@ bool ccPointCloud::computeNormalsWithOctree(CC_LOCAL_MODEL_TYPES model,
 		return false;
 	}
 	
-	ccLog::Print("[ComputeCloudNormals] Timing: %3.2f s.",eTimer.elapsed()/1000.0);
+	ccLog::Print("[ComputeCloudNormals] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 
 	if (!hasNormals())
 	{
@@ -5335,7 +5412,7 @@ bool ccPointCloud::computeNormalsWithOctree(CC_LOCAL_MODEL_TYPES model,
 
 	//compress the normals
 	{
-		for (unsigned j=0; j<normsIndexes->currentSize(); j++)
+		for (unsigned j = 0; j < normsIndexes->currentSize(); j++)
 		{
 			setPointNormalIndex(j, normsIndexes->getValue(j));
 		}

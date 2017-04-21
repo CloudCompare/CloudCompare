@@ -86,8 +86,14 @@ v2.9.alpha - XX/XX/XXXX
 		- new option to use the same scale for all dimensions
 		- new option to apply the scale to the 'Global shift' (or not)
 
-        * New Menu Entry: Edit > Grid
-                - Delete scan grids: An underlying grid structure can now be deleted
+	* New Menu Entry: Edit > Grid
+		- Delete scan grids: An underlying grid structure can now be deleted
+
+	* New method: 'Edit > Waveforms > Compress FWF data'
+		- To compress FWF data associated to a cloud (useful after a manual segmentation for instance
+			as the FWF data is shared between clouds and remains complete by default)
+		- Compression is done automatically when saving a cloud with the 'LAS 1.3 / 1.4' filter (QLAS_FWF_IO_PLUGIN)
+			(but it's not done when saving the entity as a BIN file)
 
 	* Other
 		- color scales are now listed in alphabetical order

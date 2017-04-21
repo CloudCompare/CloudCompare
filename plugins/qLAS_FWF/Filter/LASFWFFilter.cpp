@@ -116,6 +116,9 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, QString filename, Save
 
 		if (hasFWF)
 		{
+			//try to compress the FWF data before creating the file
+			cloud->compressFWFData();
+
 			//save the FWF data before anything (in case it fails)
 			//we save it in a separate file
 			QFileInfo fi(filename);

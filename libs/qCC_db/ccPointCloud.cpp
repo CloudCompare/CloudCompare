@@ -1235,8 +1235,7 @@ bool ccPointCloud::hasFWF() const
 {
 	return		m_fwfData
 			&&	!m_fwfData->empty()
-			&&	m_fwfWaveforms.size() >= size()
-			&&	size() != 0;
+			&&	m_fwfWaveforms.size();
 }
 
 ccWaveformProxy ccPointCloud::waveformProxy(unsigned index) const

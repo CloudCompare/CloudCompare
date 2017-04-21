@@ -57,6 +57,8 @@ v2.9.alpha - XX/XX/XXXX
 				-OUTPUT_RASTER_Z - to output the result as a geotiff raster (altitudes + all SFs by default, no RGB)
 				-OUTPUT_RASTER_RGB - to output the result as a geotiff raster (RGB)
 				-RESAMPLE - to resample the input cloud instead of generating a regular cloud (or mesh)
+			* if OUTPUT_CLOUD and/or OUTPUT_MESH options are selected, the resulting entities are kept in memory.
+				Moreover if OUTPUT_CLOUD is selected, the resutling raster will replace the original cloud.
 		- 2.5D Volume Calculation tool (-VOLUME -GRID_STEP {...} etc. - see the wiki for more details)
 		- Export coord. to SF (-COORD_TO_SF {X, Y or Z})
 		- the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
@@ -86,6 +88,7 @@ v2.9.alpha - XX/XX/XXXX
 
 	* Other
 		- color scales are now listed in alphabetical order
+		- the DXF format can now be used to export point clouds (their size should be very limited!)
 
 - Bug fixes:
 
@@ -97,6 +100,7 @@ v2.9.alpha - XX/XX/XXXX
 	* command line 'CROSS_SECTION' option: the repetition of the cuts (<RepeatDim> option) could be incomplete in some cases (some chunks were missing)
 	* raster loading: rasters loaded as clouds were shifted of half a pixel
 	* the 'Edit > Sensors > Camera > Create' function was broken (input parameters were ignored)
+	* merging clouds with FWF data would duplicate the waveforms of the first one
 
 v2.8.1 - 16/02/2017
 ----------------------

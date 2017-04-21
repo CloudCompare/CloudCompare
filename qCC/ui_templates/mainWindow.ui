@@ -39,7 +39,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -567,10 +567,6 @@ QTreeView::branch:open:has-children:has-siblings  {
   <widget class="QToolBar" name="toolBarView">
    <property name="windowTitle">
     <string>Viewing tools</string>
-   </property>
-   <property name="windowIcon">
-    <iconset>
-     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="toolTip">
     <string>Viewing tools</string>
@@ -3002,9 +2998,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Show cursor coordinates (2D and 3D if possible)</string>
+   </property>
+  </action>
   <action name="actionDeleteScanGrid">
    <property name="text">
-    <string>Delete scan drids</string>
+    <string>Delete scan grids</string>
    </property>
    <property name="toolTip">
     <string>Delete the underlying scan grids</string>

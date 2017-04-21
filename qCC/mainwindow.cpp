@@ -2230,7 +2230,7 @@ void MainWindow::doActionModifySensor()
 ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=0*/, QString inviteMessage/*=QString()*/)
 {
 	ccHObject::Container clouds;
-	m_ccRoot->getRootEntity()->filterChildren(clouds,true,CC_TYPES::POINT_CLOUD,true);
+	m_ccRoot->getRootEntity()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
 	if (clouds.empty())
 	{
 		ccConsole::Error("No cloud in database!");
@@ -2240,7 +2240,7 @@ ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=
 	int selectedIndex = 0;
 	if (defaultCloudEntity)
 	{
-		for (size_t i=1; i<clouds.size(); ++i)
+		for (size_t i = 1; i < clouds.size(); ++i)
 		{
 			if (clouds[i] == defaultCloudEntity)
 			{
@@ -2816,7 +2816,7 @@ void MainWindow::doRemoveDuplicatePoints()
 				{
 					ccConsole::Warning(QString("Cloud '%1' has %2 duplicate point(s)").arg(cloud->getName()).arg(duplicateCount));
 
-					ccPointCloud* filteredCloud = cloud->filterPointsByScalarValue(0,0);
+					ccPointCloud* filteredCloud = cloud->filterPointsByScalarValue(0, 0);
 					if (filteredCloud)
 					{
 						int sfIdx2 = filteredCloud->getScalarFieldIndexByName(DEFAULT_DUPLICATE_TEMP_SF_NAME);
@@ -2859,7 +2859,7 @@ void MainWindow::doActionFilterByValue()
 	typedef std::pair<ccHObject*,ccPointCloud*> entityAndVerticesType;
 	std::vector<entityAndVerticesType> toFilter;
 	{
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccGenericPointCloud* cloud = 0;
 			ccHObject* ent = selectedEntities[i];
@@ -3175,7 +3175,7 @@ void MainWindow::doActionSubdivideMesh()
 	//pDlg.setAutoClose(false);
 
 	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = m_selectedEntities[i];
 		if (ent->isKindOf(CC_TYPES::MESH))
@@ -8236,7 +8236,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 	std::vector< std::pair<double, double> > matrixAngles;
 	try
 	{
-		rmsMatrix.resize(cloudCount*cloudCount,0);
+		rmsMatrix.resize(cloudCount*cloudCount, 0);
 
 		//init all possible transformations
 		static const double angularStep_deg = 45.0;
@@ -8290,12 +8290,12 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		testSphere->reserve(matrices.size());
 #endif
 
-		for (size_t i=0; i<cloudCount-1; ++i)
+		for (size_t i = 0; i < cloudCount - 1; ++i)
 		{
 			ccPointCloud* A = clouds[i];
 			A->computeOctree();
 
-			for (size_t j=i+1; j<cloudCount; ++j)
+			for (size_t j = i + 1; j < cloudCount; ++j)
 			{
 				ccGLMatrix transBToZero;
 				transBToZero.toIdentity();
@@ -9759,7 +9759,7 @@ void MainWindow::update3DViewsMenu()
 		separator->setSeparator(true);
 		menu3DViews->addAction(separator);
 
-		for (int i=0; i<windows.size(); ++i)
+		for (int i = 0; i < windows.size(); ++i)
 		{
 			ccGLWindow *child = GLWindowFromWidget(windows.at(i)->widget());
 

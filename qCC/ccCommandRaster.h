@@ -230,7 +230,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 		}
 
 		//we'll get the first two clouds
-		for (const CLCloudDesc& cloudDesc : cmd.clouds())
+		for (CLCloudDesc& cloudDesc : cmd.clouds())
 		{
 			if (!cloudDesc.pc)
 			{
@@ -321,14 +321,18 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 
 				if (outputCloud)
 				{
-					CLCloudDesc exportDesc;
-					exportDesc.pc = rasterCloud;
-					exportDesc.basename = cloudDesc.basename;
-					exportDesc.path = cloudDesc.path;
-					QString errorStr = cmd.exportEntity(exportDesc, "RASTER");
-					if (!errorStr.isEmpty())
+					//replace current cloud by the restarized version
+					delete cloudDesc.pc;
+					cloudDesc.pc = rasterCloud;
+					cloudDesc.basename += QString("_RASTER");
+
+					if (cmd.autoSaveMode())
 					{
-						cmd.warning(errorStr);
+						QString errorStr = cmd.exportEntity(cloudDesc);
+						if (!errorStr.isEmpty())
+						{
+							return cmd.error(errorStr);
+						}
 					}
 				}
 
@@ -354,7 +358,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 						rasterCloud->setVisible(true);
 						rasterMesh->addChild(rasterCloud);
 						rasterMesh->setName(rasterCloud->getName());
-						rasterCloud->setName("vertices");
+						//rasterCloud->setName("vertices");
 						rasterMesh->showSF(rasterCloud->sfShown());
 						rasterMesh->showColors(rasterCloud->colorsShown());
 						rasterCloud = 0; //to avoid deleting it later
@@ -363,16 +367,20 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 
 						CLMeshDesc meshDesc;
 						meshDesc.mesh = rasterMesh;
-						meshDesc.basename = cloudDesc.basename;
+						meshDesc.basename = cloudDesc.basename + QString("_RASTER_MESH");
 						meshDesc.path = cloudDesc.path;
-						QString errorStr = cmd.exportEntity(meshDesc, "RASTER_MESH");
+
+						QString errorStr = cmd.exportEntity(meshDesc);
 						if (!errorStr.isEmpty())
 						{
-							cmd.warning(errorStr);
+							delete rasterMesh;
+							return cmd.error(errorStr);
 						}
 
-						delete rasterMesh;
-						rasterMesh = 0;
+						//we keep the mesh loaded
+						cmd.meshes().push_back(meshDesc);
+						//delete rasterMesh;
+						//rasterMesh = 0;
 					}
 					else
 					{

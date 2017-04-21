@@ -44,6 +44,7 @@ struct dbTreeSelectionInfo
 	size_t normalsCount;
 	size_t octreeCount;
 	size_t cloudCount;
+	size_t gridCound;
 	size_t groupCount;
 	size_t polylineCount;
 	size_t planeCount;

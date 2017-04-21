@@ -608,9 +608,14 @@ void MainWindow::connectActions()
 	connect(actionOrientNormalsMST,				SIGNAL(triggered()),	this,		SLOT(doActionOrientNormalsMST()));
 	connect(actionOrientNormalsFM,				SIGNAL(triggered()),	this,		SLOT(doActionOrientNormalsFM()));
 	connect(actionClearNormals,					SIGNAL(triggered()),	this,		SLOT(doActionClearNormals()));
+
 	//"Edit > Octree" menu
 	connect(actionComputeOctree,				SIGNAL(triggered()),	this,		SLOT(doActionComputeOctree()));
 	connect(actionResampleWithOctree,			SIGNAL(triggered()),	this,		SLOT(doActionResampleWithOctree()));
+
+	//"Edit > Grid" menu
+	connect(actionDeleteScanGrid,               SIGNAL(triggered()),	this,		SLOT(doActionDeleteScanGrids()));
+
 	//"Edit > Mesh" menu
 	connect(actionComputeMeshAA,				SIGNAL(triggered()),	this,		SLOT(doActionComputeMeshAA()));
 	connect(actionComputeMeshLS,				SIGNAL(triggered()),	this,		SLOT(doActionComputeMeshLS()));
@@ -4573,6 +4578,28 @@ void MainWindow::doActionRasterize()
 	ccRasterizeTool rasterizeTool(cloud,this);
 	rasterizeTool.exec();
 }
+
+void MainWindow::doActionDeleteScanGrids()
+{
+
+	//look for clouds with scan grids
+	for (ccHObject* ent : m_selectedEntities)
+	{
+		if (!ent || !ent->isA(CC_TYPES::POINT_CLOUD))
+		{
+			continue;
+		}
+
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+		assert(cloud);
+
+		if(cloud->gridCount() > 0)
+			cloud->removeGrids();
+	}
+	refreshAll();
+	updateUI();
+}
+
 
 void MainWindow::doActionMeshScanGrids()
 {
@@ -9863,6 +9890,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	bool atLeastOneNormal = (selInfo.normalsCount > 0);
 	bool atLeastOneColor = (selInfo.colorCount > 0);
 	bool atLeastOneSF = (selInfo.sfCount > 0);
+	bool atLeastOneGrid = (selInfo.gridCound > 0);
+
 	//bool atLeastOneSensor = (selInfo.sensorCount > 0);
 	bool atLeastOneGBLSensor = (selInfo.gblSensorCount > 0);
 	bool atLeastOneCameraSensor = (selInfo.cameraSensorCount > 0);
@@ -9893,11 +9922,12 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionCrop->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
 	actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
+	actionDeleteScanGrid->setEnabled(atLeastOneGrid);
 
 	actionScalarFieldFromColor->setEnabled(atLeastOneEntity && atLeastOneColor);
 	actionComputeMeshAA->setEnabled(atLeastOneCloud);
 	actionComputeMeshLS->setEnabled(atLeastOneCloud);
-	actionMeshScanGrids->setEnabled(atLeastOneCloud);
+	actionMeshScanGrids->setEnabled(atLeastOneGrid);
 	//actionComputeQuadric3D->setEnabled(atLeastOneCloud);
 	actionComputeBestFitBB->setEnabled(atLeastOneEntity);
 	actionComputeDensity->setEnabled(atLeastOneCloud);

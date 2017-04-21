@@ -367,6 +367,7 @@ protected slots:
 	void doActionCreatePlane();
 	void doActionEditPlane();
 
+	void doActionDeleteScanGrids();
 	void doActionDeleteScalarField();
 	void doActionSmoothMeshSF();
 	void doActionEnhanceMeshSF();

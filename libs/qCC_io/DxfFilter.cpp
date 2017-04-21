@@ -44,7 +44,8 @@ bool DxfFilter::canLoadExtension(QString upperCaseExt) const
 bool DxfFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
 	if (	type == CC_TYPES::POLY_LINE
-		||	type == CC_TYPES::MESH )
+		||	type == CC_TYPES::MESH
+		||	type == CC_TYPES::POINT_CLOUD)
 	{
 		multiple = true;
 		exclusive = false;
@@ -67,7 +68,7 @@ public:
 		, m_poly(0)
 		, m_polyVertices(0)
 		, m_firstPoint(true)
-		, m_globalShift(0,0,0)
+		, m_globalShift(0, 0, 0)
 		, m_loadParameters(parameters)
 	{
 		assert(m_root);
@@ -75,12 +76,12 @@ public:
 
 	CCVector3 convertPoint(double x, double y, double z)
 	{
-		CCVector3d P(x,y,z);
+		CCVector3d P(x, y, z);
 		if (m_firstPoint)
 		{
-			if (FileIOFilter::HandleGlobalShift(P,m_globalShift,m_loadParameters))
+			if (FileIOFilter::HandleGlobalShift(P, m_globalShift, m_loadParameters))
 			{
-				ccLog::Warning("[DXF] All points/vertices will been recentered! Translation: (%.2f ; %.2f ; %.2f)",m_globalShift.x,m_globalShift.y,m_globalShift.z);
+				ccLog::Warning("[DXF] All points/vertices will been recentered! Translation: (%.2f ; %.2f ; %.2f)", m_globalShift.x, m_globalShift.y, m_globalShift.z);
 			}
 			m_firstPoint = false;
 		}
@@ -111,13 +112,13 @@ public:
 			m_points = new ccPointCloud("Points");
 			m_root->addChild(m_points);
 		}
-		if (!m_points->reserve(m_points->size()+1))
+		if (!m_points->reserve(m_points->size() + 1))
 		{
 			ccLog::Error("[DxfImporter] Not enough memory!");
 			return;
 		}
 
-		m_points->addPoint(convertPoint(P.x,P.y,P.z));
+		m_points->addPoint(convertPoint(P.x, P.y, P.z));
 
 		ccColor::Rgb col;
 		if (getCurrentColour(col))
@@ -137,7 +138,7 @@ public:
 					return;
 				}
 				m_points->showColors(true);
-				m_points->setPointColor(m_points->size()-1, ccColor::white.rgba); //replace the last color
+				m_points->setPointColor(m_points->size() - 1, ccColor::white.rgba); //replace the last color
 			}
 		}
 		else if (m_points->hasColors())
@@ -183,16 +184,16 @@ public:
 	virtual void addVertex(const DL_VertexData& vertex)
 	{
 		//we assume it's a polyline vertex!
-		if (	m_poly
+		if (m_poly
 			&&	m_polyVertices
 			//&&	m_polyVertices->size() < m_polyVertices->capacity()
 			)
 		{
 			if (m_polyVertices->size() == m_polyVertices->capacity())
-				m_polyVertices->reserve(m_polyVertices->size()+1);
-			
+				m_polyVertices->reserve(m_polyVertices->size() + 1);
+
 			m_poly->addPointIndex(m_polyVertices->size());
-			m_polyVertices->addPoint(convertPoint(vertex.x,vertex.y,vertex.z));
+			m_polyVertices->addPoint(convertPoint(vertex.x, vertex.y, vertex.z));
 
 			if (m_poly->size() == 1)
 				m_root->addChild(m_poly);
@@ -203,11 +204,11 @@ public:
 	{
 		//TODO: understand what this really is?!
 		CCVector3 P[4];
-		for (unsigned i=0; i<4; ++i)
+		for (unsigned i = 0; i < 4; ++i)
 		{
-			P[i] = convertPoint(face.x[i],face.y[i],face.z[i]);
+			P[i] = convertPoint(face.x[i], face.y[i], face.z[i]);
 		}
-		
+
 		//create the 'faces' mesh if necessary
 		if (!m_faces)
 		{
@@ -219,18 +220,18 @@ public:
 			vertices->setEnabled(false);
 			//vertices->setLocked(true);  //DGM: no need to lock it as it is only used by one mesh!
 			vertices->setGlobalShift(m_globalShift);
-			
+
 			m_root->addChild(m_faces);
 		}
-		
+
 		ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(m_faces->getAssociatedCloud());
 		if (!vertices)
 		{
 			assert(false);
 			return;
 		}
-		
-		int vertIndexes[4] = {-1, -1, -1, -1};
+
+		int vertIndexes[4] = { -1, -1, -1, -1 };
 		unsigned addedVertCount = 4;
 		//check if the two last vertices are the same
 		if (P[2].x == P[3].x && P[2].y == P[3].y && P[2].z == P[3].z)
@@ -247,9 +248,9 @@ public:
 		if (vertCount)
 		{
 			//DGM TODO: could we be smarter?
-			for (unsigned i=0; i<addedVertCount; ++i)
+			for (unsigned i = 0; i < addedVertCount; ++i)
 			{
-				for (unsigned j=0; j<vertCount; ++j)
+				for (unsigned j = 0; j < vertCount; ++j)
 				{
 					const CCVector3* Pj = vertices->getPoint(j);
 					if (P[i].x == Pj->x && P[i].y == Pj->y && P[i].z == Pj->z)
@@ -277,7 +278,7 @@ public:
 		//now create new vertices
 		unsigned createdVertCount = 0;
 		{
-			for (unsigned i=0; i<addedVertCount; ++i)
+			for (unsigned i = 0; i < addedVertCount; ++i)
 				if (vertIndexes[i] < 0)
 					++createdVertCount;
 		}
@@ -285,13 +286,13 @@ public:
 		if (createdVertCount != 0)
 		{
 			//reserve memory for the new vertices
-			if (!vertices->reserve(vertCount+createdVertCount))
+			if (!vertices->reserve(vertCount + createdVertCount))
 			{
 				ccLog::Error("[DxfImporter] Not enough memory!");
 				return;
 			}
 
-			for (unsigned i=0; i<addedVertCount; ++i)
+			for (unsigned i = 0; i < addedVertCount; ++i)
 			{
 				if (vertIndexes[i] < 0)
 				{
@@ -321,7 +322,7 @@ public:
 			bool firstTime = false;
 			if (!triNormsTable)
 			{
-				triNormsTable = new NormsIndexesTableType(); 
+				triNormsTable = new NormsIndexesTableType();
 				m_faces->setTriNormsTable(triNormsTable);
 				firstTime = true;
 			}
@@ -333,13 +334,13 @@ public:
 				ccLog::Error("[DxfImporter] Not enough memory!");
 				return;
 			}
-			
-			CCVector3 N = (P[1]-P[0]).cross(P[2]-P[0]);
+
+			CCVector3 N = (P[1] - P[0]).cross(P[2] - P[0]);
 			N.normalize();
 			triNormsTable->addElement(ccNormalVectors::GetNormIndex(N.u));
 			if (addTriCount == 2)
 			{
-				N = (P[2]-P[0]).cross(P[3]-P[0]);
+				N = (P[2] - P[0]).cross(P[3] - P[0]);
 				N.normalize();
 				triNormsTable->addElement(ccNormalVectors::GetNormIndex(N.u));
 			}
@@ -358,7 +359,7 @@ public:
 			m_faces->addTriangleNormalIndexes(n1, n1, n1);
 			if (addTriCount == 2)
 			{
-				int n2 = static_cast<int>(triNormCount+1);
+				int n2 = static_cast<int>(triNormCount + 1);
 				m_faces->addTriangleNormalIndexes(n2, n2, n2);
 			}
 		}
@@ -369,22 +370,22 @@ public:
 			//RGB field already instantiated?
 			if (vertices->hasColors())
 			{
-				for (unsigned i=0; i<createdVertCount; ++i)
+				for (unsigned i = 0; i < createdVertCount; ++i)
 					vertices->addRGBColor(faceCol->rgb);
 			}
 			//otherwise, reserve memory and set all previous points to white by default
 			else if (vertices->setRGBColor(ccColor::white))
 			{
 				//then replace the last color(s) by the current one
-				for (unsigned i=0; i<createdVertCount; ++i)
-					vertices->setPointColor(vertCount-1-i,faceCol->rgb);
+				for (unsigned i = 0; i < createdVertCount; ++i)
+					vertices->setPointColor(vertCount - 1 - i, faceCol->rgb);
 				m_faces->showColors(true);
 			}
 		}
 		else if (vertices->hasColors())
 		{
 			//add default color if none is defined!
-			for (unsigned i=0; i<createdVertCount; ++i)
+			for (unsigned i = 0; i < createdVertCount; ++i)
 				vertices->addRGBColor(ccColor::white.rgba);
 		}
 	}
@@ -404,11 +405,11 @@ public:
 		polyVertices->setEnabled(false);
 		poly->setVisible(true);
 		poly->setName("Line");
-		poly->addPointIndex(0,2);
+		poly->addPointIndex(0, 2);
 		//add first point
-		polyVertices->addPoint(convertPoint(line.x1,line.y1,line.z1));
+		polyVertices->addPoint(convertPoint(line.x1, line.y1, line.z1));
 		//add second point
-		polyVertices->addPoint(convertPoint(line.x2,line.y2,line.z2));
+		polyVertices->addPoint(convertPoint(line.x2, line.y2, line.z2));
 		polyVertices->setGlobalShift(m_globalShift);
 
 		//flags
@@ -442,37 +443,37 @@ protected:
 private:
 
 	//! Returns current colour (either the current data's colour or the current layer's one)
-	bool getCurrentColour( ccColor::Rgb& ccColour )
+	bool getCurrentColour(ccColor::Rgb& ccColour)
 	{
 		const DL_Attributes attributes = getAttributes();
 
 		int colourIndex = attributes.getColor();
 
-		if ( colourIndex == 0 )
+		if (colourIndex == 0)
 		{
 			// TODO Colours BYBLOCK not handled
 			return false;
 		}
-		else if ( colourIndex == 256 )
+		else if (colourIndex == 256)
 		{
 			// an attribute of 256 means the colours are BYLAYER, so grab it from our map instead
 			const int defaultIndex = -1;
-			colourIndex = m_layerColourMap.value( attributes.getLayer().c_str(), defaultIndex );
+			colourIndex = m_layerColourMap.value(attributes.getLayer().c_str(), defaultIndex);
 
 			//if we don't have any information on the current layer
 			if (colourIndex == defaultIndex)
 				return false;
 		}
 
-		ccColour.r = static_cast<ColorCompType>( dxfColors[colourIndex][0] * ccColor::MAX );
-		ccColour.g = static_cast<ColorCompType>( dxfColors[colourIndex][1] * ccColor::MAX );
-		ccColour.b = static_cast<ColorCompType>( dxfColors[colourIndex][2] * ccColor::MAX );
+		ccColour.r = static_cast<ColorCompType>(dxfColors[colourIndex][0] * ccColor::MAX);
+		ccColour.g = static_cast<ColorCompType>(dxfColors[colourIndex][1] * ccColor::MAX);
+		ccColour.b = static_cast<ColorCompType>(dxfColors[colourIndex][2] * ccColor::MAX);
 
 		return true;
 	}
 
 	//! Keep track of the colour of each layer in case the colour attribute is set to BYLAYER
-	QMap<QString,int> m_layerColourMap;
+	QMap<QString, int> m_layerColourMap;
 
 	//! Whether the very first point has been loaded or not
 	bool m_firstPoint;
@@ -506,67 +507,54 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 	root->filterChildren(meshes, true, CC_TYPES::MESH);
 	if (root->isKindOf(CC_TYPES::MESH))
 		meshes.push_back(root);
+	ccHObject::Container clouds;
+	root->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+	if (root->isKindOf(CC_TYPES::POINT_CLOUD))
+		clouds.push_back(root);
 
 	//only polylines and meshes are handled for now
 	size_t polyCount = polylines.size();
 	size_t meshCount = meshes.size();
-	if (polyCount + meshCount == 0)
+	size_t cloudCount = clouds.size();
+	if (polyCount + meshCount + cloudCount == 0)
 		return CC_FERR_NO_SAVE;
 
 	//get global bounding box
 	CCVector3d bbMinCorner, bbMaxCorner;
 	{
+		ccHObject::Container* containers[3] = { &polylines, &meshes, &clouds };
+
 		bool firstEntity = true;
-		for (size_t i = 0; i < polyCount; ++i)
+		for (int j = 0; j < 3; ++j)
 		{
-			CCVector3d minC, maxC;
-			if (polylines[i]->getGlobalBB(minC, maxC))
+			for (size_t i = 0; i < containers[j]->size(); ++i)
 			{
-				//update global BB
-				if (firstEntity)
+				CCVector3d minC, maxC;
+				if (containers[j]->at(i)->getGlobalBB(minC, maxC))
 				{
-					bbMinCorner = minC;
-					bbMaxCorner = maxC;
-					firstEntity = false;
-				}
-				else
-				{
-					bbMinCorner.x = std::min(bbMinCorner.x, minC.x);
-					bbMinCorner.y = std::min(bbMinCorner.y, minC.y);
-					bbMinCorner.z = std::min(bbMinCorner.z, minC.z);
-					bbMaxCorner.x = std::max(bbMaxCorner.x, maxC.x);
-					bbMaxCorner.y = std::max(bbMaxCorner.y, maxC.y);
-					bbMaxCorner.z = std::max(bbMaxCorner.z, maxC.z);
-				}
-			}
-		}
-		for (size_t j = 0; j < meshCount; ++j)
-		{
-			CCVector3d minC, maxC;
-			if (meshes[j]->getGlobalBB(minC, maxC))
-			{
-				//update global BB
-				if (firstEntity)
-				{
-					bbMinCorner = minC;
-					bbMaxCorner = maxC;
-					firstEntity = false;
-				}
-				else
-				{
-					bbMinCorner.x = std::min(bbMinCorner.x, minC.x);
-					bbMinCorner.y = std::min(bbMinCorner.y, minC.y);
-					bbMinCorner.z = std::min(bbMinCorner.z, minC.z);
-					bbMaxCorner.x = std::max(bbMaxCorner.x, maxC.x);
-					bbMaxCorner.y = std::max(bbMaxCorner.y, maxC.y);
-					bbMaxCorner.z = std::max(bbMaxCorner.z, maxC.z);
+					//update global BB
+					if (firstEntity)
+					{
+						bbMinCorner = minC;
+						bbMaxCorner = maxC;
+						firstEntity = false;
+					}
+					else
+					{
+						bbMinCorner.x = std::min(bbMinCorner.x, minC.x);
+						bbMinCorner.y = std::min(bbMinCorner.y, minC.y);
+						bbMinCorner.z = std::min(bbMinCorner.z, minC.z);
+						bbMaxCorner.x = std::max(bbMaxCorner.x, maxC.x);
+						bbMaxCorner.y = std::max(bbMaxCorner.y, maxC.y);
+						bbMaxCorner.z = std::max(bbMaxCorner.z, maxC.z);
+					}
 				}
 			}
 		}
 	}
 
 	CCVector3d diag = bbMaxCorner - bbMinCorner;
-	double baseSize = std::max(diag.x,diag.y);
+	double baseSize = std::max(diag.x, diag.y);
 	double lineWidth = baseSize / 40.0;
 	double pageMargin = baseSize / 20.0;
 
@@ -627,13 +615,14 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 		}
 
 		//Writing the Layers
-		dw->tableLayers(static_cast<int>(polyCount)+1);
+		dw->tableLayers(static_cast<int>(polyCount + meshCount + cloudCount) + 1);
 		QStringList polyLayerNames;
 		QStringList meshLayerNames;
+		QStringList pointLayerNames;
 		{
 			//default layer
-			dxf.writeLayer(*dw, 
-				DL_LayerData("0", 0), 
+			dxf.writeLayer(*dw,
+				DL_LayerData("0", 0),
 				DL_Attributes(
 				std::string(""),		// leave empty
 				DL_Codes::black,		// default color
@@ -649,7 +638,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				QString layerName = QString("POLYLINE_%1").arg(i + 1, 3, 10, QChar('0'));
 
 				polyLayerNames << layerName;
-				dxf.writeLayer(*dw, 
+				dxf.writeLayer(*dw,
 					DL_LayerData(qPrintable(layerName), 0), //DGM: warning, toStdString doesn't preserve "local" characters
 					DL_Attributes(
 					std::string(""),
@@ -657,7 +646,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 					static_cast<int>(lineWidth),
 					"CONTINUOUS"));
 			}
-		
+
 			//mesh layers
 			for (unsigned j = 0; j < meshCount; ++j)
 			{
@@ -667,7 +656,25 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				QString layerName = QString("MESH_%1").arg(j + 1, 3, 10, QChar('0'));
 
 				meshLayerNames << layerName;
-				dxf.writeLayer(*dw, 
+				dxf.writeLayer(*dw,
+					DL_LayerData(qPrintable(layerName), 0), //DGM: warning, toStdString doesn't preserve "local" characters
+					DL_Attributes(
+					std::string(""),
+					DL_Codes::magenta,
+					static_cast<int>(lineWidth),
+					"CONTINUOUS"));
+			}
+
+			//clouds
+			for (unsigned j = 0; j < cloudCount; ++j)
+			{
+				//default layer name
+				//TODO: would be better to use the cloud name!
+				//but it can't be longer than 31 characters (R14 limit)
+				QString layerName = QString("CLOUD_%1").arg(j + 1, 3, 10, QChar('0'));
+
+				pointLayerNames << layerName;
+				dxf.writeLayer(*dw,
 					DL_LayerData(qPrintable(layerName), 0), //DGM: warning, toStdString doesn't preserve "local" characters
 					DL_Attributes(
 					std::string(""),
@@ -691,13 +698,13 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 		dw->tableEnd();
 
 		//Writing Dimension Styles
-		dxf.writeDimStyle(	*dw, 
-							/*arrowSize*/1, 
-							/*extensionLineExtension*/1,
-							/*extensionLineOffset*/1,
-							/*dimensionGap*/1,
-							/*dimensionTextSize*/1);
-	
+		dxf.writeDimStyle(*dw,
+			/*arrowSize*/1,
+			/*extensionLineExtension*/1,
+			/*extensionLineOffset*/1,
+			/*dimensionGap*/1,
+			/*dimensionTextSize*/1);
+
 		//Writing Block Records
 		dxf.writeBlockRecord(*dw);
 		dw->tableEnd();
@@ -709,7 +716,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 		{
 			dw->sectionBlocks();
 
-			dxf.writeBlock(*dw,  DL_BlockData("*Model_Space", 0, 0.0, 0.0, 0.0));
+			dxf.writeBlock(*dw, DL_BlockData("*Model_Space", 0, 0.0, 0.0, 0.0));
 			dxf.writeEndBlock(*dw, "*Model_Space");
 
 			dxf.writeBlock(*dw, DL_BlockData("*Paper_Space", 0, 0.0, 0.0, 0.0));
@@ -733,16 +740,16 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				int flags = poly->isClosed() ? 1 : 0;
 				if (!poly->is2DMode())
 					flags |= 8; //3D polyline
-				dxf.writePolyline(	*dw,
-									DL_PolylineData(static_cast<int>(vertexCount), 0, 0, flags),
-									DL_Attributes(qPrintable(polyLayerNames[i]), DL_Codes::bylayer, -1, "BYLAYER") ); //DGM: warning, toStdString doesn't preserve "local" characters
+				dxf.writePolyline(*dw,
+					DL_PolylineData(static_cast<int>(vertexCount), 0, 0, flags),
+					DL_Attributes(qPrintable(polyLayerNames[i]), DL_Codes::bylayer, -1, "BYLAYER")); //DGM: warning, toStdString doesn't preserve "local" characters
 
-				for (unsigned v=0; v<vertexCount; ++v)
+				for (unsigned v = 0; v < vertexCount; ++v)
 				{
 					CCVector3 Pl;
-					poly->getPoint(v,Pl);
+					poly->getPoint(v, Pl);
 					CCVector3d P = poly->toGlobal3d(Pl);
-					dxf.writeVertex(*dw, DL_VertexData(	P.x, P.y, P.z ) );
+					dxf.writeVertex(*dw, DL_VertexData(P.x, P.y, P.z));
 				}
 
 				dxf.writePolylineEnd(*dw);
@@ -754,7 +761,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(meshes[j]);
 				ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 				assert(vertices);
-				
+
 				unsigned triCount = mesh->size();
 				mesh->placeIteratorAtBegining();
 				for (unsigned f = 0; f < triCount; ++f)
@@ -764,12 +771,27 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 					CCVector3d B = vertices->toGlobal3d(*tri->_getB());
 					CCVector3d C = vertices->toGlobal3d(*tri->_getC());
 					dxf.write3dFace(*dw,
-									DL_3dFaceData(	A.x,A.y,A.z,
-													B.x,B.y,B.z,
-													C.x,C.y,C.z,
-													C.x,C.y,C.z,
-													lineWidth ),
-									DL_Attributes(qPrintable(meshLayerNames[j]), DL_Codes::bylayer, -1, "BYLAYER")); //DGM: warning, toStdString doesn't preserve "local" characters
+						DL_3dFaceData(A.x, A.y, A.z,
+						B.x, B.y, B.z,
+						C.x, C.y, C.z,
+						C.x, C.y, C.z,
+						lineWidth),
+						DL_Attributes(qPrintable(meshLayerNames[j]), DL_Codes::bylayer, -1, "BYLAYER")); //DGM: warning, toStdString doesn't preserve "local" characters
+				}
+			}
+
+			//write points
+			for (unsigned i = 0; i < cloudCount; ++i)
+			{
+				const ccPointCloud* cloud = static_cast<ccPointCloud*>(clouds[i]);
+				unsigned pointCount = cloud->size();
+
+				for (unsigned j = 0; j < pointCount; ++j)
+				{
+					const CCVector3* P = cloud->getPoint(j);
+					dxf.writePoint(*dw,
+						DL_PointData(P->x, P->y, P->z),
+						DL_Attributes(qPrintable(pointLayerNames[i]), DL_Codes::bylayer, -1, "BYLAYER")); //DGM: warning, toStdString doesn't preserve "local" characters
 				}
 			}
 
@@ -823,13 +845,13 @@ CC_FILE_ERROR DxfFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			result = CC_FERR_READING;
 		}
 	}
-	catch(...)
+	catch (...)
 	{
 		ccLog::Warning("[DXF] DxfLib has thrown an unknown exception!");
 		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 #else
-	
+
 	ccLog::Error("[DXF] Not supported in this version!");
 
 #endif

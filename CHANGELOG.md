@@ -86,10 +86,12 @@ v2.9.alpha - XX/XX/XXXX
 		- new option to use the same scale for all dimensions
 		- new option to apply the scale to the 'Global shift' (or not)
 
+        * New Menu Entry: Edit > Grid
+                - Delete scan grids: An underlying grid structure can now be deleted
+
 	* Other
 		- color scales are now listed in alphabetical order
 		- the DXF format can now be used to export point clouds (their size should be very limited!)
-
 - Bug fixes:
 
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)

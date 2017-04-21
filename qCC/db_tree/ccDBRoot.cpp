@@ -1017,9 +1017,11 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 			}
 			else if(obj->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
-				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
+				ccGenericPointCloud* genericCloud = ccHObjectCaster::ToGenericPointCloud(obj);
 				info->cloudCount++;
-				info->octreeCount += cloud->getOctree() != NULL ? 1 : 0;
+				info->octreeCount += genericCloud->getOctree() != NULL ? 1 : 0;
+				ccPointCloud* qccCloud = ccHObjectCaster::ToPointCloud(obj);
+				info->gridCound += qccCloud->gridCount();
 			}
 			else if (obj->isKindOf(CC_TYPES::MESH))
 			{

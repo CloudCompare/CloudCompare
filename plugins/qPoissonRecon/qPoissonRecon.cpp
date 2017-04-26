@@ -103,9 +103,9 @@ public:
 		//normal
 		assert(m_cloud->hasNormals());
 		const CCVector3& N = m_cloud->getPointNormal(m_index);
-		out.n[0] = static_cast<Real>(N.x);
-		out.n[1] = static_cast<Real>(N.y);
-		out.n[2] = static_cast<Real>(N.z);
+		out.n[0] = -static_cast<Real>(N.x);
+		out.n[1] = -static_cast<Real>(N.y);
+		out.n[2] = -static_cast<Real>(N.z);
 
 		//color
 		assert(m_cloud->hasColors());

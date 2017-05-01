@@ -98,8 +98,8 @@ v2.9.alpha - XX/XX/XXXX
 	* Other
 		- color scales are now listed in alphabetical order
 		- the DXF format can now be used to export point clouds (their size should be very limited!)
-- Bug fixes:
 
+- Bug fixes:
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)
 	* when computing distances, the octree could be modified but the LOD structure was not updated
 		(resulting in potentially heavy display artifacts)
@@ -109,6 +109,7 @@ v2.9.alpha - XX/XX/XXXX
 	* raster loading: rasters loaded as clouds were shifted of half a pixel
 	* the 'Edit > Sensors > Camera > Create' function was broken (input parameters were ignored)
 	* merging clouds with FWF data would duplicate the waveforms of the first one
+	* invalid lines in ASCII (text) files could be considered as a valid point with coordinates (0, 0, 0)
 
 v2.8.1 - 16/02/2017
 ----------------------

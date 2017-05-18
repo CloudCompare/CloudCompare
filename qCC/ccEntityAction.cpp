@@ -49,6 +49,8 @@
 #include "ccScalarFieldArithmeticsDlg.h"
 #include "ccScalarFieldFromColorDlg.h"
 #include "ccStatisticalTestDlg.h"
+#include "ccOrderChoiceDlg.h"
+#include "ccItemSelectionDlg.h"
 
 #include "ccCommon.h"
 #include "ccConsole.h"
@@ -310,6 +312,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
+	//! Interpolate colors from on entity and transfer them to another one
 	bool	interpolateColors(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		if (selectedEntities.size() != 2)
@@ -357,22 +360,9 @@ namespace ccEntityAction
 			return false;
 		}
 		
-		bool ok = false;
-		unsigned char defaultLevel = 7;
-		int value = QInputDialog::getInt(	parent,
-											"Interpolate colors", "Octree level",
-											defaultLevel,
-											1, CCLib::DgmOctree::MAX_OCTREE_LEVEL,
-											1,
-											&ok);
-		if (!ok)
-			return false;
-		
-		defaultLevel = static_cast<unsigned char>(value);
-		
 		ccProgressDialog pDlg(true, parent);
 		
-		if (static_cast<ccPointCloud*>(dest)->interpolateColorsFrom(source, &pDlg, defaultLevel))
+		if (static_cast<ccPointCloud*>(dest)->interpolateColorsFrom(source, &pDlg))
 		{
 			ent2->showColors(true);
 			ent2->showSF(false); //just in case
@@ -383,6 +373,115 @@ namespace ccEntityAction
 		}
 		
 		ent2->prepareDisplayForRefresh_recursive();
+		
+		return true;
+	}
+
+	//! Interpolate scalar fields from on entity and transfer them to another one
+	bool	interpolateSFs(const ccHObject::Container &selectedEntities, ccMainAppInterface* app = 0)
+	{
+		if (selectedEntities.size() != 2)
+		{
+			ccConsole::Error("Select 2 entities (clouds or meshes)!");
+			return false;
+		}
+		
+		ccHObject* ent1 = selectedEntities[0];
+		ccHObject* ent2 = selectedEntities[1];
+		
+		ccPointCloud* cloud1 = ccHObjectCaster::ToPointCloud(ent1);
+		ccPointCloud* cloud2 = ccHObjectCaster::ToPointCloud(ent2);
+
+		if (!cloud1 || !cloud2)
+		{
+			ccConsole::Error("Select 2 entities (clouds or meshes)!");
+			return false;
+		}
+		
+		if (!cloud1->hasScalarFields() && !cloud2->hasScalarFields())
+		{
+			ccConsole::Error("None of the selected entities has per-point or per-vertex colors!");
+			return false;
+		}
+		else if (cloud1->hasScalarFields() && cloud2->hasScalarFields())
+		{
+			//ask the user to chose which will be the 'source' cloud
+			ccOrderChoiceDlg ocDlg(cloud1, "Source", cloud2, "Destination", app);
+			if (!ocDlg.exec())
+			{
+				//process cancelled by the user
+				return false;
+			}
+			if (cloud1 != ocDlg.getFirstEntity())
+			{
+				std::swap(cloud1, cloud2);
+			}
+		}
+		else if (cloud2->hasScalarFields())
+		{
+			std::swap(cloud1, cloud2);
+		}
+		
+		ccPointCloud* source = cloud1;
+		ccPointCloud* dest = cloud2;
+
+		//show the list of scalar fields available on the source point cloud
+		std::vector<int> sfIndexes;
+		try
+		{
+			unsigned sfCount = source->getNumberOfScalarFields();
+			if (sfCount == 1)
+			{
+				sfIndexes.push_back(0);
+			}
+			else if (sfCount > 1)
+			{
+				ccItemSelectionDlg isDlg(true, app->getMainWindow(), "entity");
+				QStringList scalarFields;
+				{
+					for (unsigned i = 0; i < sfCount; ++i)
+					{
+						scalarFields << source->getScalarFieldName(i);
+					}
+				}
+				isDlg.setItems(scalarFields, 0);
+				if (!isDlg.exec())
+				{
+					//cancelled by the user
+					return false;
+				}
+				isDlg.getSelectedIndexes(sfIndexes);
+				if (sfIndexes.empty())
+				{
+					ccConsole::Error("No scalar field was selected");
+					return false;
+				}
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+		catch (const std::bad_alloc&)
+		{
+			ccConsole::Error("Not enough memory");
+			return false;
+		}
+
+		ccProgressDialog pDlg(true, app->getMainWindow());
+		
+		unsigned sfCountBefore = dest->getNumberOfScalarFields();
+		if (dest->interpolateScalarFieldsFrom(source, sfIndexes, &pDlg))
+		{
+			dest->setCurrentDisplayedScalarField(static_cast<int>(std::min(sfCountBefore + 1, dest->getNumberOfScalarFields())) - 1);
+			dest->showSF(true);
+		}
+		else
+		{
+			ccConsole::Error("An error occurred! (see console)");
+		}
+		
+		dest->prepareDisplayForRefresh_recursive();
 		
 		return true;
 	}

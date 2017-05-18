@@ -11,35 +11,25 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                    COPYRIGHT: Daniel Girardeau-Montaut                 #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_ENTITY_PICKER_DIALOG_HEADER
-#define CC_ENTITY_PICKER_DIALOG_HEADER
+#ifndef CC_ITEM_SELECTION_DIALOG_HEADER
+#define CC_ITEM_SELECTION_DIALOG_HEADER
 
-#include <ui_pickEntityDlg.h>
+#include <ui_itemSelectionDlg.h>
 
 //qCC_db
 #include <ccHObject.h>
 
+//Qt
+#include <QStringList>
 
-//! Dialog to select one or multiple entities
-class ccEntityPickerDlg : public QDialog, public Ui::PickEntityDlg
+//! Dialog to select one or multiple items
+class ccItemSelectionDlg : public QDialog, public Ui::ItemSelectionDlg
 {
-public:
-	//! Default constructor
-	ccEntityPickerDlg(	const ccHObject::Container& entities,
-						bool multiSelectionEnabled,
-						int defaultSelectedIndex = 0,
-						QWidget* parent = 0,
-						QString label = QString());
-
-	//! Returns selected index (unique selection mode)
-	int getSelectedIndex() const;
-
-	//! Returns selected indexes (multi-selection mode)
-	void getSelectedIndexes(std::vector<int>& indexes) const;
+public: //static shortcuts
 
 	//! Static shortcut: unique selection mode
 	static int SelectEntity(const ccHObject::Container& entities,
@@ -53,6 +43,24 @@ public:
 								QWidget* parent = 0,
 								QString label = QString());
 
+
+public:
+	
+	//! Default constructor
+	ccItemSelectionDlg(	bool multiSelectionEnabled,
+						QWidget* parent = 0,
+						QString itemName = "entities",
+						QString label = QString());
+
+	//! Sets the list of items
+	void setItems(const QStringList& items, int defaultSelectedIndex = 0);
+
+	//! Returns selected index (unique selection mode)
+	int getSelectedIndex() const;
+
+	//! Returns selected indexes (multi-selection mode)
+	void getSelectedIndexes(std::vector<int>& indexes) const;
+
 };
 
-#endif //CC_ENTITY_PICKER_DIALOG_HEADER
+#endif //CC_ITEM_SELECTION_DIALOG_HEADER

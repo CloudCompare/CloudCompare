@@ -156,6 +156,7 @@
      <addaction name="actionAddIdField"/>
      <addaction name="actionExportCoordToSF"/>
      <addaction name="actionSetSFAsCoord"/>
+     <addaction name="actionInterpolateSFs"/>
      <addaction name="actionScalarFieldArithmetic"/>
      <addaction name="separator"/>
      <addaction name="actionOpenColorScalesManager"/>
@@ -3015,6 +3016,14 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Compress the associated FWF data (maybe interesting after interactive segmentation for instance)</string>
+   </property>
+  </action>
+  <action name="actionInterpolateSFs">
+   <property name="text">
+    <string>Interpolate from another entity</string>
+   </property>
+   <property name="toolTip">
+    <string>Interpolate scalar-field(s) from another cloud or mesh</string>
    </property>
   </action>
  </widget>

@@ -19,7 +19,6 @@
 
 //Local
 #include "mainwindow.h"
-#include "ccEntityPickerDlg.h"
 #include "ccPickingHub.h"
 
 //CCLib

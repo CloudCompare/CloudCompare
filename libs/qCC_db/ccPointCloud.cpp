@@ -3471,9 +3471,55 @@ bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*
 	return true;
 }
 
+QSharedPointer<CCLib::ReferenceCloud> ccPointCloud::computeCPSet(	ccGenericPointCloud& otherCloud,
+																	CCLib::GenericProgressCallback* progressCb/*=NULL*/,
+																	unsigned char octreeLevel/*=0*/)
+{
+	int result = 0;
+	QSharedPointer<CCLib::ReferenceCloud> CPSet;
+	CPSet.reset(new CCLib::ReferenceCloud(&otherCloud));
+
+	CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
+	{
+		params.CPSet = CPSet.data();
+		params.octreeLevel = octreeLevel;
+	}
+
+	//create temporary SF for the nearest neighors determination (computeCloud2CloudDistance)
+	//so that we can properly remove it afterwards!
+	static const char s_defaultTempSFName[] = "CPSetComputationTempSF";
+	int sfIdx = getScalarFieldIndexByName(s_defaultTempSFName);
+	if (sfIdx < 0)
+		sfIdx = addScalarField(s_defaultTempSFName);
+	if (sfIdx < 0)
+	{
+		ccLog::Warning("[ccPointCloud::ComputeCPSet] Not enough memory!");
+		return QSharedPointer<CCLib::ReferenceCloud>(0);
+	}
+
+	int currentInSFIndex = m_currentInScalarFieldIndex;
+	int currentOutSFIndex = m_currentOutScalarFieldIndex;
+	setCurrentScalarField(sfIdx);
+
+	result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(this, &otherCloud, params, progressCb);
+
+	//restore previous parameters
+	setCurrentInScalarField(currentInSFIndex);
+	setCurrentOutScalarField(currentOutSFIndex);
+	deleteScalarField(sfIdx);
+
+	if (result < 0)
+	{
+		ccLog::Warning("[ccPointCloud::ComputeCPSet] Closest-point set computation failed!");
+		CPSet.clear();
+	}
+
+	return CPSet;
+}
+
 bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 											CCLib::GenericProgressCallback* progressCb/*=NULL*/,
-											unsigned char octreeLevel/*=7*/)
+											unsigned char octreeLevel/*=0*/)
 {
 	if (!otherCloud || otherCloud->size() == 0)
 	{
@@ -3495,6 +3541,14 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 		return false;
 	}
 
+	//compute the closest-point set of 'this cloud' relatively to 'input cloud'
+	//(to get a mapping between the resulting vertices and the input points)
+	QSharedPointer<CCLib::ReferenceCloud> CPSet = computeCPSet(*otherCloud, progressCb, octreeLevel);
+	if (!CPSet)
+	{
+		return false;
+	}
+
 	bool hadColors = hasColors();
 	if (!resizeTheRGBTable(false))
 	{
@@ -3502,56 +3556,12 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 		return false;
 	}
 
-	//compute the closest-point set of 'this cloud' relatively to 'input cloud'
-	//(to get a mapping between the resulting vertices and the input points)
-	int result = 0;
-	CCLib::ReferenceCloud CPSet(otherCloud);
-	{
-		CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
-		params.CPSet = &CPSet;
-		params.octreeLevel = octreeLevel; //TODO: find a better way to set the right octree level!
-
-		//create temporary SF for the nearest neighors determination (computeCloud2CloudDistance)
-		//so that we can properly remove it afterwards!
-		static const char s_defaultTempSFName[] = "InterpolateColorsFromTempSF";
-		int sfIdx = getScalarFieldIndexByName(s_defaultTempSFName);
-		if (sfIdx < 0)
-			sfIdx = addScalarField(s_defaultTempSFName);
-		if (sfIdx < 0)
-		{
-			ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
-			if (!hadColors)
-			{
-				unallocateColors();
-			}
-			return false;
-		}
-
-		int currentInSFIndex = m_currentInScalarFieldIndex;
-		int currentOutSFIndex = m_currentOutScalarFieldIndex;
-		setCurrentScalarField(sfIdx);
-
-		result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(this, otherCloud, params, progressCb);
-
-		//restore previous parameters
-		setCurrentInScalarField(currentInSFIndex);
-		setCurrentOutScalarField(currentOutSFIndex);
-		deleteScalarField(sfIdx);
-	}
-
-	if (result < 0)
-	{
-		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Closest-point set computation failed!");
-		unallocateColors();
-		return false;
-	}
-
 	//import colors
-	unsigned CPsize = CPSet.size();
-	assert(CPsize == size());
-	for (unsigned i = 0; i < CPsize; ++i)
+	unsigned CPSetSize = CPSet->size();
+	assert(CPSetSize == size());
+	for (unsigned i = 0; i < CPSetSize; ++i)
 	{
-		unsigned index = CPSet.getPointGlobalIndex(i);
+		unsigned index = CPSet->getPointGlobalIndex(i);
 		setPointColor(i, otherCloud->getPointColor(index));
 	}
 
@@ -3560,6 +3570,97 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 
 	return true;
 }
+
+bool ccPointCloud::interpolateScalarFieldsFrom(	ccPointCloud* otherCloud,
+												const std::vector<int>& sfIndexes,
+												CCLib::GenericProgressCallback* progressCb/*=NULL*/,
+												unsigned char octreeLevel/*=0*/)
+{
+	if (!otherCloud || otherCloud->size() == 0 || otherCloud->getNumberOfScalarFields() == 0)
+	{
+		ccLog::Warning("[ccPointCloud::interpolateScalarFieldsFrom] Invalid/empty input cloud!");
+		return false;
+	}
+
+	//check that both bounding boxes intersect!
+	ccBBox box = getOwnBB();
+	ccBBox otherBox = otherCloud->getOwnBB();
+
+	CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
+	CCVector3 dist = box.getCenter() - otherBox.getCenter();
+	if (	fabs(dist.x) > dimSum.x / 2
+		||	fabs(dist.y) > dimSum.y / 2
+		||	fabs(dist.z) > dimSum.z / 2)
+	{
+		ccLog::Warning("[ccPointCloud::interpolateScalarFieldsFrom] Clouds are too far from each other! Can't proceed.");
+		return false;
+	}
+
+	//compute the closest-point set of 'this cloud' relatively to 'input cloud'
+	//(to get a mapping between the resulting vertices and the input points)
+	QSharedPointer<CCLib::ReferenceCloud> CPSet = computeCPSet(*otherCloud, progressCb, octreeLevel);
+	if (!CPSet)
+	{
+		return false;
+	}
+
+	unsigned CPSetSize = CPSet->size();
+	assert(CPSetSize == size());
+
+	bool success = true;
+	bool overwrite = false;
+
+	//now copy the scalar fields
+	for (size_t i = 0; i < sfIndexes.size(); ++i)
+	{
+		int inSFIndex = sfIndexes[i];
+		if (inSFIndex < 0 || inSFIndex >= static_cast<int>(otherCloud->getNumberOfScalarFields()))
+		{
+			//invalid index
+			ccLog::Warning(QString("[ccPointCloud::interpolateScalarFieldsFrom] Source cloud has no scalar field with index #%1").arg(inSFIndex));
+			assert(false);
+			continue;
+		}
+
+		const char* sfName = otherCloud->getScalarFieldName(inSFIndex);
+
+		int outSFIndex = getScalarFieldIndexByName(sfName);
+		if (outSFIndex < 0)
+		{
+			outSFIndex = addScalarField(sfName);
+			if (outSFIndex < 0)
+			{
+				ccLog::Warning("[ccPointCloud::interpolateScalarFieldsFrom] Not enough memory!");
+				success = false;
+				break;
+			}
+		}
+		else
+		{
+			overwrite = true;
+		}
+
+		CCLib::ScalarField* inSF = otherCloud->getScalarField(inSFIndex);
+		CCLib::ScalarField* outSF = getScalarField(outSFIndex);
+		for (unsigned i = 0; i < CPSetSize; ++i)
+		{
+			unsigned pointIndex = CPSet->getPointGlobalIndex(i);
+			outSF->setValue(i, inSF->getValue(pointIndex));
+		}
+		outSF->computeMinAndMax();
+	}
+
+	if (overwrite)
+	{
+		ccLog::Warning("[ccPointCloud::interpolateScalarFieldsFrom] Some scalar fields with the same names have been overwritten");
+	}
+
+	//We must update the VBOs
+	releaseVBOs();
+
+	return success;
+}
+
 
 ccPointCloud* ccPointCloud::unrollOnCylinder(	PointCoordinateType radius,
 												unsigned char coneAxisDim,

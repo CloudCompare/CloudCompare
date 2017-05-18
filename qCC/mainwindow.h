@@ -323,6 +323,7 @@ protected slots:
 	void doActionOpenColorScalesManager();
 	void doActionAddIdField();
 	void doActionSetSFAsCoord();
+	void doActionInterpolateScalarFields();
 
 	void doComputeDensity();
 	void doComputeCurvature();

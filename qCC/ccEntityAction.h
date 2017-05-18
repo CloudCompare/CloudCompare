@@ -22,7 +22,7 @@
 #include "ccMesh.h"
 
 class QWidget;
-
+class ccMainAppInterface;
 
 namespace ccEntityAction
 {
@@ -46,7 +46,8 @@ namespace ccEntityAction
 	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget *parent);
-	
+	bool	interpolateSFs(const ccHObject::Container &selectedEntities, ccMainAppInterface *parent);
+
 	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget *parent);
 	
 	// Normals

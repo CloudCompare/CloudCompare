@@ -463,10 +463,24 @@ public: //other methods
 	//! Returns whether the mesh as an associated sensor or not
 	bool hasSensor() const;
 
+	//! Comptes the closest point of this cloud relatively to another cloud
+	/** The output (reference) clouds will have as many points as this cloud
+		(with the indexes pointing on the closest point in the other cloud)
+	**/
+	QSharedPointer<CCLib::ReferenceCloud> computeCPSet(	ccGenericPointCloud& otherCloud,
+														CCLib::GenericProgressCallback* progressCb = NULL,
+														unsigned char octreeLevel = 0);
+
 	//! Interpolate colors from another cloud
 	bool interpolateColorsFrom(	ccGenericPointCloud* cloud,
 								CCLib::GenericProgressCallback* progressCb = NULL,
-								unsigned char octreeLevel = 7);
+								unsigned char octreeLevel = 0);
+
+	//! Interpolate scalar fields from another cloud
+	bool interpolateScalarFieldsFrom(	ccPointCloud* cloud,
+										const std::vector<int>& sfIndexes,
+										CCLib::GenericProgressCallback* progressCb = NULL,
+										unsigned char octreeLevel = 0);
 
 	//! Sets a particular point color
 	/** WARNING: colors must be enabled.

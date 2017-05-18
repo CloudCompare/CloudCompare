@@ -19,7 +19,7 @@
 
 //Local
 #include "mainwindow.h"
-#include "ccEntityPickerDlg.h"
+#include "ccItemSelectionDlg.h"
 
 //CCLib
 #include <ManualSegmentationTools.h>
@@ -772,11 +772,9 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 
 		if (!polylines.empty())
 		{
-			ccEntityPickerDlg epDlg(polylines, false, 0, this);
-			if (!epDlg.exec())
+			int index = ccItemSelectionDlg::SelectEntity(polylines, 0, this);
+			if (index < 0)
 				return;
-
-			int index = epDlg.getSelectedIndex();
 			assert(index >= 0 && index < static_cast<int>(polylines.size()));
 			assert(polylines[index]->isA(CC_TYPES::POLY_LINE));
 			ccPolyline* poly = static_cast<ccPolyline*>(polylines[index]);

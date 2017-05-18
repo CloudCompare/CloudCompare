@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PickEntityDlg</class>
- <widget class="QDialog" name="PickEntityDlg">
+ <class>ItemSelectionDlg</class>
+ <widget class="QDialog" name="ItemSelectionDlg">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,13 +11,13 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Select an entity</string>
+   <string>Selection</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Please select an entity:</string>
+      <string>Please select one %1:</string>
      </property>
     </widget>
    </item>
@@ -54,7 +54,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>PickEntityDlg</receiver>
+   <receiver>ItemSelectionDlg</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -70,7 +70,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>PickEntityDlg</receiver>
+   <receiver>ItemSelectionDlg</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

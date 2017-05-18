@@ -81,7 +81,7 @@
 #include "ccColorScaleEditorDlg.h"
 #include "ccComparisonDlg.h"
 #include "ccDisplayOptionsDlg.h"
-#include "ccEntityPickerDlg.h"
+#include "ccItemSelectionDlg.h"
 #include "ccGBLSensorProjectionDlg.h"
 #include "ccGraphicalSegmentationTool.h"
 #include "ccGraphicalTransformationTool.h"
@@ -664,6 +664,8 @@ void MainWindow::connectActions()
 	connect(actionSetSFAsCoord,					SIGNAL(triggered()),	this,		SLOT(doActionSetSFAsCoord()));
 	connect(actionDeleteScalarField,			SIGNAL(triggered()),	this,		SLOT(doActionDeleteScalarField()));
 	connect(actionDeleteAllSF,					SIGNAL(triggered()),	this,		SLOT(doActionDeleteAllSF()));
+	connect(actionInterpolateSFs,				SIGNAL(triggered()),	this,		SLOT(doActionInterpolateScalarFields()));
+	
 	//"Edit > Waveform" menu
 	connect(actionShowWaveDialog,				SIGNAL(triggered()),	this,		SLOT(doActionShowWaveDialog()));
 	connect(actionCompressFWFData,				SIGNAL(triggered()),	this,		SLOT(doActionCompressFWFData()));
@@ -864,6 +866,15 @@ void MainWindow::doActionChangeColorLevels()
 void MainWindow::doActionInterpolateColors()
 {
 	if ( !ccEntityAction::interpolateColors(m_selectedEntities, this) )
+		return;
+
+	refreshAll();
+	updateUI();
+}
+
+void MainWindow::doActionInterpolateScalarFields()
+{
+	if (!ccEntityAction::interpolateSFs(m_selectedEntities, this))
 		return;
 
 	refreshAll();
@@ -2257,7 +2268,7 @@ ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=
 	}
 	//ask the user to choose a cloud
 	{
-		selectedIndex = ccEntityPickerDlg::SelectEntity(clouds,selectedIndex,this,inviteMessage);
+		selectedIndex = ccItemSelectionDlg::SelectEntity(clouds, selectedIndex, this, inviteMessage);
 		if (selectedIndex < 0)
 			return 0;
 	}
@@ -9960,6 +9971,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionMultiplySF->setEnabled(/*TODO: atLeastOneSF*/false);
 	actionSFGradient->setEnabled(atLeastOneSF);
 	actionSetSFAsCoord->setEnabled(atLeastOneSF && atLeastOneCloud);
+	actionInterpolateSFs->setEnabled(atLeastOneCloud || atLeastOneMesh);
 
 	actionSamplePoints->setEnabled(atLeastOneMesh);
 	actionMeasureMeshSurface->setEnabled(atLeastOneMesh);

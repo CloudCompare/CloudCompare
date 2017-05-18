@@ -19,7 +19,7 @@
 
 //Local
 #include "mainwindow.h"
-#include "ccEntityPickerDlg.h"
+#include "ccItemSelectionDlg.h"
 #include "ccOrthoSectionGenerationDlg.h"
 #include "ccSectionExtractionSubDlg.h"
 #include "ccContourExtractor.h"
@@ -947,16 +947,16 @@ void ccSectionExtractionTool::doImportPolylinesFromDB()
 
 	if (!polylines.empty())
 	{
-		ccEntityPickerDlg epDlg(polylines, true, 0, this);
-		if (!epDlg.exec())
+		std::vector<int> indexes;
+		if (!ccItemSelectionDlg::SelectEntities(polylines, indexes, this))
+		{
 			return;
+		}
 
 		//set new 'undo' step
 		addUndoStep();
 
 		enableSectionEditingMode(false);
-		std::vector<int> indexes;
-		epDlg.getSelectedIndexes(indexes);
 		for (size_t i = 0; i < indexes.size(); ++i)
 		{
 			int index = indexes[i];

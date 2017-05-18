@@ -660,17 +660,17 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 		return 0;
 
 	CCLib::Neighbourhood Yk(points);
-	CCVector3 O,X,Y; //local base
+	CCVector3 O, X, Y; //local base
 	bool useOXYasBase = false;
 
 	//we project the input points on a plane
 	std::vector<Vertex2D> points2D;
 	PointCoordinateType* planeEq = 0;
 	//if the user has specified a default direction, we'll use it as 'projecting plane'
-	PointCoordinateType preferredPlaneEq[4] = {0, 0, 0, 0};
+	PointCoordinateType preferredPlaneEq[4] = {0, 0, 1, 0};
 	if (preferredNormDim != 0)
 	{
-		const CCVector3* G = points->getPoint(0); //any point through which the point passes is ok
+		const CCVector3* G = points->getPoint(0); //any point through which the plane passes is ok
 		preferredPlaneEq[0] = preferredNormDim[0];
 		preferredPlaneEq[1] = preferredNormDim[1];
 		preferredPlaneEq[2] = preferredNormDim[2];

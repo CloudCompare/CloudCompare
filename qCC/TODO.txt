@@ -53,7 +53,7 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
-
+[*] Set the Cross Section box using a plane entity (http://www.danielgm.net/cc/forum/viewtopic.php?t=2485)
 [*] Apply the qCSF plugin to more than one cloud at once (http://www.cloudcompare.org/forum/viewtopic.php?t=2242)
 [*] Add a shortcut to take a 'snapshot' of the current view (automatic filename and export dir?)
 [*] Drop the old (deprecated) OpenGL based picking for entities and lablels (http://www.danielgm.net/cc/forum/viewtopic.php?t=2009)

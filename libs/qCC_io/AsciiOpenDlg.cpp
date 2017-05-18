@@ -516,6 +516,23 @@ void AsciiOpenDlg::updateTable()
 			//a non-numerical column can't be valid
 			if (!valueIsNumber[i])
 				m_columnType[i] = TEXT;
+			else
+				// we must do this to ensure we can get a right result.
+				// Otherwise, we may fail in such situations:
+				//
+				// FILE:
+				// Line1   : $ gps file
+				// Line2   : $ id name x y z
+				// Line3   : 500
+				// Line4   : 0    0001.JPG  753811.417453   4307200.381522      1957.803955
+				// Linex   : ......
+				// Line503 : 499  0500.JPG  753630.672714   4307195.433217      1957.803955
+				// 
+				// Description:
+				// once we open the file, we will get a %m_columnType with 5 value of "TEXT"
+				// then if we choose to skip 3 lines, we get a %valueIsNumber with 5 vaule of "true"
+				// but the %m_columnType is still with 5 value of "TEXT" which leads to the failure!
+				m_columnType[i] = UNKNOWN;
 		}
 	}
 

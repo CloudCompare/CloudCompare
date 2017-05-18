@@ -33,6 +33,7 @@
 #include "ccFacet.h"
 #include "ccGenericPrimitive.h"
 #include "ccOctreeProxy.h"
+#include "ccPointCloudInterpolator.h"
 
 //qCC_gl
 #include "ccGuiParameters.h"
@@ -51,6 +52,7 @@
 #include "ccStatisticalTestDlg.h"
 #include "ccOrderChoiceDlg.h"
 #include "ccItemSelectionDlg.h"
+#include "ccInterpolationDlg.h"
 
 #include "ccCommon.h"
 #include "ccConsole.h"
@@ -468,10 +470,40 @@ namespace ccEntityAction
 			return false;
 		}
 
+		//semi-persistent parameters
+		static ccPointCloudInterpolator::Parameters::Method s_interpMethod = ccPointCloudInterpolator::Parameters::NEAREST_NEIGHBOR;
+		static int s_interpKNN = 6;
+		static const double s_sigmaFactor = 2.5;
+
+		ccInterpolationDlg iDlg(app->getMainWindow());
+		iDlg.setInterpolationMethd(s_interpMethod);
+		iDlg.knnSpinBox->setValue(s_interpKNN);
+
+		double kernel = dest->getOwnBB().getDiagNormd() / 200;
+		iDlg.radiusDoubleSpinBox->setValue(s_sigmaFactor * kernel);
+		iDlg.kernelDoubleSpinBox->setValue(s_sigmaFactor);
+
+		if (!iDlg.exec())
+		{
+			//process cancelled by the user
+			return false;
+		}
+
+		//setup parameters
+		ccPointCloudInterpolator::Parameters params;
+		params.method = s_interpMethod = iDlg.getInterpolationMethod();
+		params.knn = s_interpKNN = iDlg.knnSpinBox->value();
+		params.radius = iDlg.radiusDoubleSpinBox->value();
+		params.sigma = iDlg.kernelDoubleSpinBox->value();
+		if (params.method == ccPointCloudInterpolator::Parameters::RADIUS)
+		{
+			params.sigma = params.radius / s_sigmaFactor;
+		}
+
 		ccProgressDialog pDlg(true, app->getMainWindow());
-		
 		unsigned sfCountBefore = dest->getNumberOfScalarFields();
-		if (dest->interpolateScalarFieldsFrom(source, sfIndexes, &pDlg))
+
+		if (ccPointCloudInterpolator::InterpolateScalarFieldsFrom(dest, source, sfIndexes, params, &pDlg))
 		{
 			dest->setCurrentDisplayedScalarField(static_cast<int>(std::min(sfCountBefore + 1, dest->getNumberOfScalarFields())) - 1);
 			dest->showSF(true);

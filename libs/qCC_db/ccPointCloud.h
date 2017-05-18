@@ -157,6 +157,13 @@ public: //features deletion/clearing
 	//! Erases the cloud normals
 	void unallocateNorms();
 
+	//! Notify a modification of color / scalar field display parameters or contents
+	inline void colorsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_COLORS; }
+	//! Notify a modification of normals display parameters or contents
+	inline void normalsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; }
+	//! Notify a modification of points display parameters or contents
+	inline void pointsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_POINTS; }
+
 public: //features allocation/resize
 
 	//! Reserves memory to store the points coordinates
@@ -471,16 +478,10 @@ public: //other methods
 														CCLib::GenericProgressCallback* progressCb = NULL,
 														unsigned char octreeLevel = 0);
 
-	//! Interpolate colors from another cloud
+	//! Interpolate colors from another cloud (nearest neighbor only)
 	bool interpolateColorsFrom(	ccGenericPointCloud* cloud,
 								CCLib::GenericProgressCallback* progressCb = NULL,
 								unsigned char octreeLevel = 0);
-
-	//! Interpolate scalar fields from another cloud
-	bool interpolateScalarFieldsFrom(	ccPointCloud* cloud,
-										const std::vector<int>& sfIndexes,
-										CCLib::GenericProgressCallback* progressCb = NULL,
-										unsigned char octreeLevel = 0);
 
 	//! Sets a particular point color
 	/** WARNING: colors must be enabled.

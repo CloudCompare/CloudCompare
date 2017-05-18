@@ -19,7 +19,7 @@ v2.9.alpha - XX/XX/XXXX
 		- the 3D position of the point below the cursor is displayed if possible
 
 	* New tool to import scalar fields from one cloud to another: 'Edit > SFs > Interpolate from another entity'
-		- only one interpolation option for now (nearest neighbor)
+		- 3 interpolation methods are supported (nearest neighbor, inside a sphere or with a given number of neighbors)
 
 - enhancements:
 

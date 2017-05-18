@@ -756,20 +756,20 @@ bool CloudSamplingTools::applyNoiseFilterAtLevel(	const DgmOctree::octreeCell& c
 	//structure for nearest neighbors search
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level = cell.level;
-	nNSS.prepare(kernelRadius,cell.parentOctree->getCellSize(nNSS.level));
+	nNSS.prepare(kernelRadius, cell.parentOctree->getCellSize(nNSS.level));
 	if (useKnn)
 	{
 		nNSS.minNumberOfNeighbors = knn;
 	}
-	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
-	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
+	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
+	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
 
 	unsigned n = cell.points->size(); //number of points in the current cell
 
 	//for each point in the cell
-	for (unsigned i=0; i<n; ++i)
+	for (unsigned i = 0; i < n; ++i)
 	{
-		cell.points->getPoint(i,nNSS.queryPoint);
+		cell.points->getPoint(i, nNSS.queryPoint);
 
 		//look for neighbors (either inside a sphere or the k nearest ones)
 		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (neighborCount)!
@@ -778,7 +778,7 @@ bool CloudSamplingTools::applyNoiseFilterAtLevel(	const DgmOctree::octreeCell& c
 		if (useKnn)
 			neighborCount = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS);
 		else
-			neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,kernelRadius,false);
+			neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, kernelRadius, false);
 
 		if (neighborCount > 3) //we want 3 points or more (other than the point itself!)
 		{
@@ -789,13 +789,13 @@ bool CloudSamplingTools::applyNoiseFilterAtLevel(	const DgmOctree::octreeCell& c
 				++localIndex;
 			//the query point should be in the nearest neighbors set!
 			assert(localIndex < neighborCount);
-			if (localIndex+1 < neighborCount) //no need to swap with another point if it's already at the end!
+			if (localIndex + 1 < neighborCount) //no need to swap with another point if it's already at the end!
 			{
-				std::swap(nNSS.pointsInNeighbourhood[localIndex],nNSS.pointsInNeighbourhood[neighborCount-1]);
+				std::swap(nNSS.pointsInNeighbourhood[localIndex], nNSS.pointsInNeighbourhood[neighborCount - 1]);
 			}
 
-			unsigned realNeighborCount = neighborCount-1;
-			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,realNeighborCount); //we don't take the query point into account!
+			unsigned realNeighborCount = neighborCount - 1;
+			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood, realNeighborCount); //we don't take the query point into account!
 			Neighbourhood Z(&neighboursCloud);
 
 			const PointCoordinateType* lsPlane = Z.getLSPlane();
@@ -807,20 +807,20 @@ bool CloudSamplingTools::applyNoiseFilterAtLevel(	const DgmOctree::octreeCell& c
 					//compute the std. dev. to this plane
 					double sum_d = 0;
 					double sum_d2 = 0;
-					for (unsigned j=0; j<realNeighborCount; ++j)
+					for (unsigned j = 0; j < realNeighborCount; ++j)
 					{
 						const CCVector3* P = neighboursCloud.getPoint(j);
-						double d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(P,lsPlane);
+						double d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(P, lsPlane);
 						sum_d += d;
 						sum_d2 += d*d;
 					}
 
-					double stddev = sqrt(fabs(sum_d2*realNeighborCount - sum_d*sum_d))/realNeighborCount;
+					double stddev = sqrt(fabs(sum_d2*realNeighborCount - sum_d*sum_d)) / realNeighborCount;
 					maxD = stddev * nSigma;
 				}
 
 				//distance from the query point to the plane
-				double d = fabs(CCLib::DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint,lsPlane));
+				double d = fabs(CCLib::DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint, lsPlane));
 
 				if (d <= maxD)
 					cloud->addPointIndex(globalIndex);

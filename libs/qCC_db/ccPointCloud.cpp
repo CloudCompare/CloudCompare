@@ -1113,7 +1113,7 @@ bool ccPointCloud::reserveTheRGBTable()
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 
 	//double check
 	return m_rgbColors && m_rgbColors->capacity() >= m_points->capacity();
@@ -1143,7 +1143,7 @@ bool ccPointCloud::resizeTheRGBTable(bool fillWithWhite/*=false*/)
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 
 	//double check
 	return m_rgbColors && m_rgbColors->currentSize() == m_points->currentSize();
@@ -1173,7 +1173,7 @@ bool ccPointCloud::reserveTheNormsTable()
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	normalsHaveChanged();
 
 	//double check
 	return m_normals && m_normals->capacity() >= m_points->capacity();
@@ -1202,7 +1202,7 @@ bool ccPointCloud::resizeTheNormsTable()
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	normalsHaveChanged();
 
 	//double check
 	return m_normals && m_normals->currentSize() == m_points->currentSize();
@@ -1481,7 +1481,7 @@ void ccPointCloud::setPointColor(unsigned pointIndex, const ColorCompType* col)
 	m_rgbColors->setValue(pointIndex, col);
 
 	//We must update the VBOs
-	m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
+	colorsHaveChanged();
 }
 
 void ccPointCloud::setPointNormalIndex(unsigned pointIndex, CompressedNormType norm)
@@ -1491,7 +1491,7 @@ void ccPointCloud::setPointNormalIndex(unsigned pointIndex, CompressedNormType n
 	m_normals->setValue(pointIndex, norm);
 
 	//We must update the VBOs
-	m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS;
+	normalsHaveChanged();
 }
 
 void ccPointCloud::setPointNormal(unsigned pointIndex, const CCVector3& N)
@@ -1533,7 +1533,7 @@ void ccPointCloud::addGreyColor(ColorCompType g)
 	m_rgbColors->addElement(G);
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 }
 
 void ccPointCloud::addRGBColor(const ColorCompType* C)
@@ -1542,7 +1542,7 @@ void ccPointCloud::addRGBColor(const ColorCompType* C)
 	m_rgbColors->addElement(C);
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 }
 
 void ccPointCloud::addRGBColor(ColorCompType r, ColorCompType g, ColorCompType b)
@@ -1552,7 +1552,7 @@ void ccPointCloud::addRGBColor(ColorCompType r, ColorCompType g, ColorCompType b
 	m_rgbColors->addElement(C);
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 }
 
 void ccPointCloud::addNorm(const CCVector3& N)
@@ -1579,7 +1579,7 @@ void ccPointCloud::addNormAtIndex(const PointCoordinateType* N, unsigned index)
 	m_normals->setValue(index,nIndex);
 
 	//We must update the VBOs
-	releaseVBOs();
+	normalsHaveChanged();
 }
 
 bool ccPointCloud::convertNormalToRGB()
@@ -1609,7 +1609,7 @@ bool ccPointCloud::convertNormalToRGB()
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 
 	return true;
 }
@@ -1633,7 +1633,7 @@ bool ccPointCloud::convertRGBToGreyScale()
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 
 	return true;
 }
@@ -1686,7 +1686,7 @@ void ccPointCloud::setNormsTable(NormsIndexesTableType* norms)
 		m_normals->link();
 
 	//We must update the VBOs
-	releaseVBOs();
+	normalsHaveChanged();
 }
 
 bool ccPointCloud::colorize(float r, float g, float b)
@@ -1722,7 +1722,7 @@ bool ccPointCloud::colorize(float r, float g, float b)
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 
 	return true;
 }
@@ -1760,7 +1760,7 @@ bool ccPointCloud::setRGBColorByBanding(unsigned char dim, double freq)
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 
 	return true;
 }
@@ -1801,7 +1801,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 
 	return true;
 }
@@ -1835,7 +1835,7 @@ bool ccPointCloud::setRGBColor(const ccColor::Rgb& col)
 
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 
 	return true;
 }
@@ -2126,14 +2126,14 @@ void ccPointCloud::invertNormals()
 		return;
 
 	m_normals->placeIteratorAtBegining();
-	for (unsigned i=0; i<m_normals->currentSize(); ++i)
+	for (unsigned i = 0; i < m_normals->currentSize(); ++i)
 	{
 		ccNormalCompressor::InvertNormal(*m_normals->getCurrentValuePtr());
 		m_normals->forwardIterator();
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	normalsHaveChanged();
 }
 
 void ccPointCloud::swapPoints(unsigned firstIndex, unsigned secondIndex)
@@ -3466,7 +3466,7 @@ bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 
 	return true;
 }
@@ -3566,101 +3566,10 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 
 	return true;
 }
-
-bool ccPointCloud::interpolateScalarFieldsFrom(	ccPointCloud* otherCloud,
-												const std::vector<int>& sfIndexes,
-												CCLib::GenericProgressCallback* progressCb/*=NULL*/,
-												unsigned char octreeLevel/*=0*/)
-{
-	if (!otherCloud || otherCloud->size() == 0 || otherCloud->getNumberOfScalarFields() == 0)
-	{
-		ccLog::Warning("[ccPointCloud::interpolateScalarFieldsFrom] Invalid/empty input cloud!");
-		return false;
-	}
-
-	//check that both bounding boxes intersect!
-	ccBBox box = getOwnBB();
-	ccBBox otherBox = otherCloud->getOwnBB();
-
-	CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
-	CCVector3 dist = box.getCenter() - otherBox.getCenter();
-	if (	fabs(dist.x) > dimSum.x / 2
-		||	fabs(dist.y) > dimSum.y / 2
-		||	fabs(dist.z) > dimSum.z / 2)
-	{
-		ccLog::Warning("[ccPointCloud::interpolateScalarFieldsFrom] Clouds are too far from each other! Can't proceed.");
-		return false;
-	}
-
-	//compute the closest-point set of 'this cloud' relatively to 'input cloud'
-	//(to get a mapping between the resulting vertices and the input points)
-	QSharedPointer<CCLib::ReferenceCloud> CPSet = computeCPSet(*otherCloud, progressCb, octreeLevel);
-	if (!CPSet)
-	{
-		return false;
-	}
-
-	unsigned CPSetSize = CPSet->size();
-	assert(CPSetSize == size());
-
-	bool success = true;
-	bool overwrite = false;
-
-	//now copy the scalar fields
-	for (size_t i = 0; i < sfIndexes.size(); ++i)
-	{
-		int inSFIndex = sfIndexes[i];
-		if (inSFIndex < 0 || inSFIndex >= static_cast<int>(otherCloud->getNumberOfScalarFields()))
-		{
-			//invalid index
-			ccLog::Warning(QString("[ccPointCloud::interpolateScalarFieldsFrom] Source cloud has no scalar field with index #%1").arg(inSFIndex));
-			assert(false);
-			continue;
-		}
-
-		const char* sfName = otherCloud->getScalarFieldName(inSFIndex);
-
-		int outSFIndex = getScalarFieldIndexByName(sfName);
-		if (outSFIndex < 0)
-		{
-			outSFIndex = addScalarField(sfName);
-			if (outSFIndex < 0)
-			{
-				ccLog::Warning("[ccPointCloud::interpolateScalarFieldsFrom] Not enough memory!");
-				success = false;
-				break;
-			}
-		}
-		else
-		{
-			overwrite = true;
-		}
-
-		CCLib::ScalarField* inSF = otherCloud->getScalarField(inSFIndex);
-		CCLib::ScalarField* outSF = getScalarField(outSFIndex);
-		for (unsigned i = 0; i < CPSetSize; ++i)
-		{
-			unsigned pointIndex = CPSet->getPointGlobalIndex(i);
-			outSF->setValue(i, inSF->getValue(pointIndex));
-		}
-		outSF->computeMinAndMax();
-	}
-
-	if (overwrite)
-	{
-		ccLog::Warning("[ccPointCloud::interpolateScalarFieldsFrom] Some scalar fields with the same names have been overwritten");
-	}
-
-	//We must update the VBOs
-	releaseVBOs();
-
-	return success;
-}
-
 
 ccPointCloud* ccPointCloud::unrollOnCylinder(	PointCoordinateType radius,
 												unsigned char coneAxisDim,
@@ -4883,7 +4792,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 #endif
 
 		//process each chunk
-		for (unsigned i = 0; i < chunksCount; ++i)
+		for (size_t i = 0; i < chunksCount; ++i)
 		{
 			int chunkSize = static_cast<int>(m_points->chunkSize(i));
 
@@ -5709,7 +5618,7 @@ bool ccPointCloud::enhanceRGBWithIntensitySF(int sfIdx, bool useCustomIntensityR
 	}
 
 	//We must update the VBOs
-	releaseVBOs();
+	colorsHaveChanged();
 
 	return true;
 }

@@ -1011,7 +1011,7 @@ void MainWindow::doActionResampleWithOctree()
 	ccHObject::Container selectedEntities = m_selectedEntities;
 	size_t selNum = selectedEntities.size();
 	bool errors = false;
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccPointCloud* cloud = 0;
 		ccHObject* ent = selectedEntities[i];
@@ -1579,7 +1579,7 @@ void MainWindow::doComputeBestFitBB()
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
 	size_t selNum = selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
@@ -1691,7 +1691,7 @@ void MainWindow::doActionFlagMeshVertices()
 	size_t selNum = m_selectedEntities.size();
 	bool errors = false;
 	bool success = false;
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = m_selectedEntities[i];
 		if (ent->isKindOf(CC_TYPES::MESH))
@@ -2022,7 +2022,7 @@ void MainWindow::doActionCreateGBLSensor()
 	//We create the corresponding sensor for each input cloud (in a perfect world, there should be only one ;)
 	ccHObject::Container selectedEntities = m_selectedEntities;
 	size_t selNum = selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
 		if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -2483,7 +2483,7 @@ void MainWindow::doActionShowDepthBuffer()
 		return;
 
 	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = m_selectedEntities[i];
 		if (ent->isKindOf(CC_TYPES::GBL_SENSOR))
@@ -3252,7 +3252,7 @@ void MainWindow::doActionSmoothMeshLaplacian()
 	pDlg.setAutoClose(false);
 
 	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = m_selectedEntities[i];
 		if (ent->isA(CC_TYPES::MESH) || ent->isA(CC_TYPES::PRIMITIVE)) //FIXME: can we really do this with primitives?
@@ -3347,7 +3347,7 @@ void MainWindow::doActionMerge()
 	try
 	{
 		size_t selNum = m_selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = m_selectedEntities[i];
 			if (!ent)
@@ -4105,7 +4105,7 @@ void MainWindow::doActionLabelConnectedComponents()
 	std::vector<ccGenericPointCloud*> clouds;
 	{
 		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = selectedEntities[i];
 			if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -4765,7 +4765,7 @@ void MainWindow::doActionFitQuadric()
 
 	bool errors = false;
 	//for all selected entities
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
 		//look for clouds
@@ -4984,7 +4984,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 		return;
 
 	size_t selNum = selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
 		if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -5289,7 +5289,7 @@ void MainWindow::doActionMatchScales()
 	ccHObject::Container selectedEntities;
 	try
 	{
-		for (unsigned i=0; i<m_selectedEntities.size(); ++i)
+		for (unsigned i = 0; i < m_selectedEntities.size(); ++i)
 		{
 			ccHObject* ent = m_selectedEntities[i];
 			if (	ent->isKindOf(CC_TYPES::POINT_CLOUD)
@@ -5307,7 +5307,7 @@ void MainWindow::doActionMatchScales()
 
 	ccMatchScalesDlg msDlg(selectedEntities, 0, this);
 	msDlg.setSelectedAlgorithm(s_msAlgorithm);
-	msDlg.rmsDifferenceLineEdit->setText(QString::number(s_msRmsDiff,'e',1));
+	msDlg.rmsDifferenceLineEdit->setText(QString::number(s_msRmsDiff, 'e', 1));
 	msDlg.overlapSpinBox->setValue(s_msFinalOverlap);
 
 	if (!msDlg.exec())
@@ -5336,14 +5336,13 @@ void MainWindow::doActionMatchScales()
 	updateUI();
 }
 
-
-static int s_sorFilterKnn = 6;
-static double s_sorFilterNSigma = 1.0;
 void MainWindow::doActionSORFilter()
 {
 	ccSORFilterDlg sorDlg(this);
 
 	//set semi-persistent/dynamic parameters
+	static int s_sorFilterKnn = 6;
+	static double s_sorFilterNSigma = 1.0;
 	sorDlg.knnSpinBox->setValue(s_sorFilterKnn);
 	sorDlg.nSigmaDoubleSpinBox->setValue(s_sorFilterNSigma);
 	if (!sorDlg.exec())
@@ -5383,7 +5382,7 @@ void MainWindow::doActionSORFilter()
 		{
 			if (selection->size() == cloud->size())
 			{
-				ccLog::Warning(QString("[doActionFilterNoise] No points were removed from cloud '%1'").arg(cloud->getName()));
+				ccLog::Warning(QString("[doActionSORFilter] No points were removed from cloud '%1'").arg(cloud->getName()));
 			}
 			else
 			{
@@ -5406,7 +5405,7 @@ void MainWindow::doActionSORFilter()
 				}
 				else
 				{
-					ccConsole::Warning(QString("[doActionFilterNoise] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
+					ccConsole::Warning(QString("[doActionSORFilter] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
 				}
 			}
 
@@ -5416,7 +5415,7 @@ void MainWindow::doActionSORFilter()
 		else
 		{
 			//no points fall inside selection!
-			ccConsole::Warning(QString("[doActionFilterNoise] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+			ccConsole::Warning(QString("[doActionSORFilter] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
 		}
 	}
 
@@ -5424,12 +5423,6 @@ void MainWindow::doActionSORFilter()
 	updateUI();
 }
 
-static bool s_noiseFilterUseKnn = false;
-static int s_noiseFilterKnn = 6;
-static bool s_noiseFilterUseAbsError = false;
-static double s_noiseFilterAbsError = 1.0;
-static double s_noiseFilterNSigma = 1.0;
-static bool s_noiseFilterRemoveIsolatedPoints = false;
 void MainWindow::doActionFilterNoise()
 {
 	PointCoordinateType kernelRadius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
@@ -5437,6 +5430,12 @@ void MainWindow::doActionFilterNoise()
 	ccNoiseFilterDlg noiseDlg(this);
 
 	//set semi-persistent/dynamic parameters
+	static bool s_noiseFilterUseKnn = false;
+	static int s_noiseFilterKnn = 6;
+	static bool s_noiseFilterUseAbsError = false;
+	static double s_noiseFilterAbsError = 1.0;
+	static double s_noiseFilterNSigma = 1.0;
+	static bool s_noiseFilterRemoveIsolatedPoints = false;
 	noiseDlg.radiusDoubleSpinBox->setValue(kernelRadius);
 	noiseDlg.knnSpinBox->setValue(s_noiseFilterKnn);
 	noiseDlg.nSigmaDoubleSpinBox->setValue(s_noiseFilterNSigma);
@@ -5469,7 +5468,7 @@ void MainWindow::doActionFilterNoise()
 	size_t selNum = m_selectedEntities.size();
 	bool firstCloud = true;
 
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = m_selectedEntities[i];
 
@@ -6257,7 +6256,7 @@ void MainWindow::activateSegmentationMode()
 
 	m_gsTool->linkWith(win);
 
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 		m_gsTool->addEntity(m_selectedEntities[i]);
 
 	if (m_gsTool->getNumberOfValidEntities() == 0)
@@ -6990,7 +6989,7 @@ void MainWindow::zoomOnSelectedEntities()
 
 	ccHObject tempGroup("TempGroup");
 	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		if (i == 0 || !win)
 		{
@@ -7552,7 +7551,7 @@ void MainWindow::spawnHistogramDialog(const std::vector<unsigned>& histoValues, 
 void MainWindow::showSelectedEntitiesHistogram()
 {
 	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		//for "real" point clouds only
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
@@ -7595,7 +7594,7 @@ void MainWindow::doActionCrop()
 	std::vector<ccHObject*> candidates;
 	ccBBox baseBB;
 	{
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = selectedEntities[i];
 			if (	ent->isA(CC_TYPES::POINT_CLOUD)
@@ -7671,7 +7670,7 @@ void MainWindow::doActionClone()
 	size_t selNum = selectedEntities.size();
 
 	ccHObject* lastClone = 0;
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* clone = 0;
 		if (selectedEntities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -8246,7 +8245,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 	std::vector<ccPointCloud*> clouds;
 	try
 	{
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = m_selectedEntities[i];
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
@@ -8496,7 +8495,7 @@ void MainWindow::doActionExportCloudsInfo()
 	std::vector<ccPointCloud*> clouds;
 	unsigned maxSFCount = 0;
 	{
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = m_selectedEntities[i];
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
@@ -9866,7 +9865,7 @@ void MainWindow::expandDBTreeWithSelection(ccHObject::Container& selection)
 		return;
 
 	size_t selNum = selection.size();
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 		m_ccRoot->expandElement(selection[i],true);
 }
 

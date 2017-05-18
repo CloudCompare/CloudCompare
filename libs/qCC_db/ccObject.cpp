@@ -159,17 +159,30 @@ bool ccObject::toFile(QFile& out) const
 
 	//meta data (dataVersion>=30)
 	{
+		//check for valid pieces of meta-data
+		//DGM: some pieces of meta-data can't be properly streamed (the ones relying on 'Q_DECLARE_METATYPE' calls typically)
+		uint32_t validMetaDataCount = 0;
+		for (QVariantMap::const_iterator it = m_metaData.begin(); it != m_metaData.end(); ++it)
+		{
+			if (!it.key().contains(".nosave"))
+			{
+				++validMetaDataCount;
+			}
+		}
+
 		//count
-		uint32_t metaDataCount = (uint32_t)m_metaData.size();
-		if (out.write((const char*)&metaDataCount,4) < 0)
+		if (out.write((const char*)&validMetaDataCount, 4) < 0)
 			return WriteError();
 
 		//"key + value" pairs
 		QDataStream outStream(&out);
 		for (QVariantMap::const_iterator it = m_metaData.begin(); it != m_metaData.end(); ++it)
 		{
-			outStream << it.key();
-			outStream << it.value();
+			if (!it.key().contains(".nosave"))
+			{
+				outStream << it.key();
+				outStream << it.value();
+			}
 		}
 	}
 

@@ -52,7 +52,7 @@ Q_DECLARE_METATYPE(liblas::SpatialReference)
 #include <fstream>				// std::ifstream
 #include <iostream>				// std::cout
 
-static const char s_LAS_SRS_Key[] = "LAS.spatialReference";
+static const char s_LAS_SRS_Key[] = "LAS.spatialReference.nosave"; //DGM: added the '.nosave' suffix because this custom type can't be streamed properly
 
 //! LAS Save dialog
 class LASSaveDlg : public QDialog, public Ui::SaveLASFileDialog

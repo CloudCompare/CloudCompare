@@ -111,7 +111,7 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 															ccPointCloud* srcCloud,
 															const std::vector<int>& inSFIndexes,
 															const Parameters& params,
-															CCLib::GenericProgressCallback* progressCb/*=NULL*/,
+															CCLib::GenericProgressCallback* progressCb/*=0*/,
 															unsigned char octreeLevel/*=0*/)
 {
 	if (!destCloud || !srcCloud || srcCloud->size() == 0 || srcCloud->getNumberOfScalarFields() == 0)

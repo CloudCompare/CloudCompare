@@ -84,7 +84,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		outputFormat = msgBox.clickedButton() == asciiButton ? PLY_ASCII : PLY_DEFAULT;
 	}
 
-	return saveToFile(entity,filename,outputFormat);
+	return saveToFile(entity, filename, outputFormat);
 }
 
 CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_storage_mode storageType)
@@ -137,7 +137,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			assert(materials);
 			if (materials)
 			{
-				for (size_t i=0; i < materials->size(); ++i)
+				for (size_t i = 0; i < materials->size(); ++i)
 				{
 					//texture?
 					if (!materials->at(i)->getTexture().isNull())
@@ -456,19 +456,34 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 
 #define POS_MASK	0x00000003
 
-static CCVector3d s_Point(0,0,0);
 static int s_PointCount = 0;
+static int s_NormalCount = 0;
+static int s_ColorCount = 0;
+static int s_IntensityCount = 0;
+static unsigned s_totalScalarCount = 0;
+static unsigned s_triCount = 0;
 static bool s_PointDataCorrupted = false;
+static bool s_NotEnoughMemory = false;
 static FileIOFilter::LoadParameters s_loadParameters;
-static CCVector3d s_Pshift(0,0,0);
+static CCVector3d s_Pshift(0, 0, 0);
+bool s_hasQuads = false;
+bool s_hasMaterials = false;
+std::vector<bool> s_triIsQuad;
 
 static int vertex_cb(p_ply_argument argument)
 {
+	if (s_NotEnoughMemory)
+	{
+		//skip the next pieces of data
+		return 1;
+	}
 	long flags;
 	ccPointCloud* cloud;
 	ply_get_argument_user_data(argument, (void**)(&cloud), &flags);
 
 	double val = ply_get_argument_value(argument);
+
+	static CCVector3d s_Point(0, 0, 0);
 
 	// This looks like it should always be true, 
 	// but it's false if x is NaN.
@@ -489,10 +504,10 @@ static int vertex_cb(p_ply_argument argument)
 		//first point: check for 'big' coordinates
 		if (s_PointCount == 0)
 		{
-			if (FileIOFilter::HandleGlobalShift(s_Point,s_Pshift,s_loadParameters))
+			if (FileIOFilter::HandleGlobalShift(s_Point, s_Pshift, s_loadParameters))
 			{
 				cloud->setGlobalShift(s_Pshift);
-				ccLog::Warning("[PLYFilter::loadFile] Cloud (vertices) has been recentered! Translation: (%.2f ; %.2f ; %.2f)",s_Pshift.x,s_Pshift.y,s_Pshift.z);
+				ccLog::Warning("[PLYFilter::loadFile] Cloud (vertices) has been recentered! Translation: (%.2f ; %.2f ; %.2f)", s_Pshift.x, s_Pshift.y, s_Pshift.z);
 			}
 		}
 
@@ -507,16 +522,19 @@ static int vertex_cb(p_ply_argument argument)
 	return 1;
 }
 
-static CCVector3 s_Normal(0,0,0);
-static int s_NormalCount = 0;
-
 static int normal_cb(p_ply_argument argument)
 {
+	if (s_NotEnoughMemory)
+	{
+		//skip the next pieces of data
+		return 1;
+	}
 	long flags;
 	ccPointCloud* cloud;
 	ply_get_argument_user_data(argument, (void**)(&cloud), &flags);
 
-	s_Normal.u[flags & POS_MASK] = static_cast<PointCoordinateType>( ply_get_argument_value(argument) );
+	static CCVector3 s_Normal(0, 0, 0);
+	s_Normal.u[flags & POS_MASK] = static_cast<PointCoordinateType>(ply_get_argument_value(argument));
 
 	if (flags & ELEM_EOL)
 	{
@@ -530,11 +548,13 @@ static int normal_cb(p_ply_argument argument)
 	return 1;
 }
 
-static ColorCompType s_color[3] = {0,0,0};
-static int s_ColorCount = 0;
-
 static int rgb_cb(p_ply_argument argument)
 {
+	if (s_NotEnoughMemory)
+	{
+		//skip the next pieces of data
+		return 1;
+	}
 	long flags;
 	ccPointCloud* cloud;
 	ply_get_argument_user_data(argument, (void**)(&cloud), &flags);
@@ -543,6 +563,8 @@ static int rgb_cb(p_ply_argument argument)
 	ply_get_argument_property(argument, &prop, NULL, NULL);
 	e_ply_type type;
 	ply_get_property_info(prop, NULL, &type, NULL, NULL);
+
+	static ColorCompType s_color[3] = { 0, 0, 0 };
 
 	switch(type)
 	{
@@ -575,9 +597,13 @@ static int rgb_cb(p_ply_argument argument)
 	return 1;
 }
 
-static int s_IntensityCount = 0;
 static int grey_cb(p_ply_argument argument)
 {
+	if (s_NotEnoughMemory)
+	{
+		//skip the next pieces of data
+		return 1;
+	}
 	ccPointCloud* cloud;
 	ply_get_argument_user_data(argument, (void**)(&cloud), NULL);
 
@@ -616,9 +642,13 @@ static int grey_cb(p_ply_argument argument)
 	return 1;
 }
 
-static unsigned s_totalScalarCount = 0;
 static int scalar_cb(p_ply_argument argument)
 {
+	if (s_NotEnoughMemory)
+	{
+		//skip the next pieces of data
+		return 1;
+	}
 	CCLib::ScalarField* sf = 0;
 	ply_get_argument_user_data(argument, (void**)(&sf), NULL);
 
@@ -635,33 +665,85 @@ static int scalar_cb(p_ply_argument argument)
 	return 1;
 }
 
-static unsigned s_tri[3];
-static unsigned s_triCount = 0;
 static bool s_unsupportedPolygonType = false;
 static int face_cb(p_ply_argument argument)
 {
-	ccMesh* mesh=0;
-	ply_get_argument_user_data(argument, (void**)(&mesh), NULL);
-	assert(mesh);
-	if (!mesh)
+	if (s_NotEnoughMemory)
+	{
+		//skip the next pieces of data
 		return 1;
+	}
+	ccMesh* mesh = 0;
+	ply_get_argument_user_data(argument, (void**)(&mesh), NULL);
+	if (!mesh)
+	{
+		assert(false);
+		return 1;
+	}
 
 	long length, value_index;
 	ply_get_argument_property(argument, NULL, &length, &value_index);
 	//unsupported polygon type!
-	if (length != 3)
+	if (length != 3 && length != 4)
 	{
 		s_unsupportedPolygonType = true;
 		return 1;
 	}
-	if (value_index < 0 || value_index > 2)
+	if (value_index < 0 || value_index + 1 > length)
+	{
 		return 1;
+	}
 
+	static unsigned s_tri[4];
 	s_tri[value_index] = static_cast<unsigned>(ply_get_argument_value(argument));
+
+	if (value_index < 2)
+	{
+		return 1;
+	}
+
+	if (s_hasQuads && mesh->size() == mesh->capacity())
+	{
+		//we may have more triangles than expected
+		if (!mesh->reserve(mesh->size() + 1024))
+		{
+			s_NotEnoughMemory = true;
+			return 0;
+		}
+	}
 
 	if (value_index == 2)
 	{
 		mesh->addTriangle(s_tri[0], s_tri[1], s_tri[2]);
+		++s_triCount;
+
+		//specifc case: when dealing with quads, we must keep track of the real index(es) of the corresponding triangles
+		if (s_triIsQuad.capacity())
+		{
+			s_triIsQuad.push_back(false);
+		}
+
+		if ((s_triCount % PROCESS_EVENTS_FREQ) == 0)
+			QCoreApplication::processEvents();
+	}
+	else if (value_index == 3)
+	{
+		s_hasQuads = true;
+		if (s_hasMaterials)
+		{
+			//specifc case: when dealing with quads WITH materials, we must keep track of the real index(es) of the corresponding triangles
+			if (s_triIsQuad.capacity() == 0)
+			{
+				if (s_triCount)
+				{
+					s_triIsQuad.resize(s_triCount, false);
+				}
+				s_triIsQuad.reserve(2 * mesh->capacity());
+			}
+			s_triIsQuad.push_back(true);
+		}
+
+		mesh->addTriangle(s_tri[0], s_tri[2], s_tri[3]);
 		++s_triCount;
 
 		if ((s_triCount % PROCESS_EVENTS_FREQ) == 0)
@@ -671,32 +753,48 @@ static int face_cb(p_ply_argument argument)
 	return 1;
 }
 
-static float s_texCoord[6];
 static unsigned s_texCoordCount = 0;
 static bool s_invalidTexCoordinates = false;
 static int texCoords_cb(p_ply_argument argument)
 {
-	TextureCoordsContainer* texCoords = 0;
-	ply_get_argument_user_data(argument, (void**)(&texCoords), NULL);
-	assert(texCoords);
-	if (!texCoords)
+	if (s_NotEnoughMemory)
+	{
+		//skip the next pieces of data
 		return 1;
+	}
 
 	long length, value_index;
 	ply_get_argument_property(argument, NULL, &length, &value_index);
 	//unsupported/invalid coordinates!
-	if (length != 6)
+	if (length != 6 || length != 8)
 	{
 		s_invalidTexCoordinates = true;
 		return 1;
 	}
-	if (value_index < 0 || value_index > 5)
+	if (value_index < 0 || value_index + 1 > length)
+	{
 		return 1;
+	}
 
+	static float s_texCoord[8];
 	s_texCoord[value_index] = static_cast<float>(ply_get_argument_value(argument));
 
-	if (((value_index+1) % 2) == 0)
+	if (((value_index + 1) % 2) == 0)
 	{
+		TextureCoordsContainer* texCoords = 0;
+		ply_get_argument_user_data(argument, (void**)(&texCoords), NULL);
+		assert(texCoords);
+		if (!texCoords)
+			return 1;
+
+		if (texCoords->currentSize() == texCoords->capacity())
+		{
+			if (!texCoords->reserve(texCoords->currentSize() + 1024))
+			{
+				s_NotEnoughMemory = true;
+				return 0;
+			}
+		}
 		texCoords->addElement(s_texCoord + value_index - 1);
 		++s_texCoordCount;
 
@@ -710,12 +808,6 @@ static int texCoords_cb(p_ply_argument argument)
 static int s_maxTextureIndex = -1;
 static int texIndexes_cb(p_ply_argument argument)
 {
-	ccMesh::triangleMaterialIndexesSet* texIndexes = 0;
-	ply_get_argument_user_data(argument, (void**)(&texIndexes), NULL);
-	assert(texIndexes);
-	if (!texIndexes)
-		return 1;
-
 	p_ply_element element;
 	long instance_index;
 	ply_get_argument_element(argument, &element, &instance_index);
@@ -725,6 +817,14 @@ static int texIndexes_cb(p_ply_argument argument)
 	{
 		s_maxTextureIndex = -1;
 	}
+
+	ccMesh::triangleMaterialIndexesSet* texIndexes = 0;
+	ply_get_argument_user_data(argument, (void**)(&texIndexes), NULL);
+	assert(texIndexes);
+	if (!texIndexes)
+	{
+		return 1;
+	}
 	texIndexes->addElement(index);
 
 	if ((texIndexes->currentSize() % PROCESS_EVENTS_FREQ) == 0)
@@ -732,7 +832,6 @@ static int texIndexes_cb(p_ply_argument argument)
 
 	return 1;
 }
-
 
 CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
@@ -752,8 +851,12 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 	s_NormalCount = 0;
 	s_PointCount = 0;
 	s_PointDataCorrupted = false;
+	s_NotEnoughMemory = false;
 	s_loadParameters = parameters;
-	s_Pshift = CCVector3d(0,0,0);
+	s_Pshift = CCVector3d(0, 0, 0);
+	s_hasQuads = false;
+	s_hasMaterials = false;
+	s_triIsQuad.clear();
 
 	/****************/
 	/***  Header  ***/
@@ -856,7 +959,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 			lastProperty.prop = 0;
 			lastProperty.elemIndex = 0;
 
-			while ((lastProperty.prop = ply_get_next_property(lastElement.elem,lastProperty.prop)))
+			while ((lastProperty.prop = ply_get_next_property(lastElement.elem, lastProperty.prop)))
 			{
 				//we get next property info
 				ply_get_property_info(lastProperty.prop, &lastProperty.propName, &lastProperty.type, &lastProperty.length_type, &lastProperty.value_type);
@@ -875,7 +978,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 			if (lastElement.isFace)
 			{
 				//we store its properties in 'listProperties'
-				for (size_t i=0; i<lastElement.properties.size(); ++i)
+				for (size_t i = 0; i < lastElement.properties.size(); ++i)
 				{
 					plyProperty& prop = lastElement.properties[i];
 					prop.elemIndex = static_cast<int>(meshElements.size());
@@ -896,7 +999,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 			else //else if we have a "point-like" element
 			{
 				//we store its properties in 'stdProperties'
-				for (size_t i=0; i<lastElement.properties.size(); ++i)
+				for (size_t i = 0; i < lastElement.properties.size(); ++i)
 				{
 					plyProperty& prop = lastElement.properties[i];
 					prop.elemIndex = (int)pointElements.size();
@@ -926,7 +1029,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		const char* lastObjInfo = NULL;
 		while ((lastObjInfo = ply_get_next_obj_info(ply, lastObjInfo)))
 		{
-			ccLog::Print("[PLY][Info] %s",lastObjInfo);
+			ccLog::Print("[PLY][Info] %s", lastObjInfo);
 		}
 	}
 
@@ -936,7 +1039,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 
 	//properties indexes (0 = unassigned)
 	static const unsigned nStdProp = 10;
-	int stdPropIndexes[nStdProp] = {0,0,0,0,0,0,0,0,0,0};
+	int stdPropIndexes[nStdProp] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	int& xIndex = stdPropIndexes[0];
 	int& yIndex = stdPropIndexes[1];
 	int& zIndex = stdPropIndexes[2];
@@ -952,23 +1055,23 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 	//int& sfIndex = stdPropIndexes[10];
 
 	static const unsigned nListProp = 2;
-	int listPropIndexes[nListProp] = {0,0};
+	int listPropIndexes[nListProp] = { 0, 0 };
 	int& facesIndex = listPropIndexes[0];
 	int& texCoordsIndex = listPropIndexes[1];
 
 	static const unsigned nSingleProp = 1;
-	int singlePropIndexes[nSingleProp] = {0};
+	int singlePropIndexes[nSingleProp] = { 0 };
 	int& texNumberIndex = singlePropIndexes[0];
 
 	//Combo box items for standard properties (coordinates, color components, etc.)
 	QStringList stdPropsText;
 	stdPropsText << QString("None");
 	{
-		for (int i=1; i<=static_cast<int>(stdProperties.size()); ++i)
+		for (int i = 1; i <= static_cast<int>(stdProperties.size()); ++i)
 		{
-			plyProperty& pp = stdProperties[i-1];
+			plyProperty& pp = stdProperties[i - 1];
 			QString itemText = QString("%1 - %2 [%3]").arg(pointElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
-			assert(pp.type!=16); //we don't want any PLY_LIST here
+			assert(pp.type != 16); //we don't want any PLY_LIST here
 			stdPropsText << itemText;
 
 			QString elementName = QString(pointElements[pp.elemIndex].elementName).toUpper();
@@ -1013,7 +1116,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		{
 			plyProperty& pp = listProperties[i];
 			QString itemText = QString("%0 - %1 [%2]").arg(meshElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
-			assert(pp.type==16); //we only want PLY_LIST here
+			assert(pp.type == 16); //we only want PLY_LIST here
 			listPropsText << itemText;
 
 			QString elementName = QString(meshElements[pp.elemIndex].elementName).toUpper();
@@ -1022,9 +1125,9 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 			if (elementName.contains("FACE") || elementName.contains("TRI"))
 			{
 				if (facesIndex == 0 && propName.contains("IND"))
-					facesIndex = i+1;
+					facesIndex = i + 1;
 				if (texCoordsIndex == 0 && propName.contains("COORD") && !textureFileNames.isEmpty()) //no need to assign this value if we don't have any texture!
-					texCoordsIndex = i+1;
+					texCoordsIndex = i + 1;
 			}
 		}
 	}
@@ -1042,11 +1145,11 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 			QString elementName = QString(meshElements[pp.elemIndex].elementName).toUpper();
 			QString propName = QString(pp.propName).toUpper();
 
-			
+
 			if (elementName.contains("FACE") || elementName.contains("TRI"))
 			{
 				if (texNumberIndex == 0 && propName.contains("TEXNUMBER") && !textureFileNames.isEmpty()) //no need to assign this value if we don't have any texture!
-					texNumberIndex = i+1;
+					texNumberIndex = i + 1;
 			}
 		}
 	}
@@ -1096,10 +1199,10 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 					++assignedSingleProperties;
 		}
 
-		if (	parameters.alwaysDisplayLoadDialog
-			||	stdPropsCount > assignedStdProperties+1		//+1 because of the first item in the combo box ('none')
-			||	listPropsCount > assignedListProperties+1
-			||	singlePropsCount > assignedSingleProperties+1)
+		if (parameters.alwaysDisplayLoadDialog
+			|| stdPropsCount > assignedStdProperties + 1		//+1 because of the first item in the combo box ('none')
+			|| listPropsCount > assignedListProperties + 1
+			|| singlePropsCount > assignedSingleProperties + 1)
 		{
 			PlyOpenDlg pod/*(MainWindow::TheInstance())*/;
 
@@ -1131,7 +1234,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 				pod.iComboBox->setCurrentIndex(iIndex);
 
 				pod.sfComboBox->setCurrentIndex(sfPropIndexes.empty() ? 0 : sfPropIndexes.front());
-				for (size_t j=1; j<sfPropIndexes.size(); ++j)
+				for (size_t j = 1; j < sfPropIndexes.size(); ++j)
 					pod.addSFComboBox(sfPropIndexes[j]);
 
 				pod.nxComboBox->setCurrentIndex(nxIndex);
@@ -1172,7 +1275,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 			//get (non null) SF properties
 			sfPropIndexes.clear();
 			{
-				for (size_t j=0; j<pod.m_sfCombos.size(); ++j)
+				for (size_t j = 0; j < pod.m_sfCombos.size(); ++j)
 					if (pod.m_sfCombos[j]->currentIndex() > 0)
 						sfPropIndexes.push_back(pod.m_sfCombos[j]->currentIndex());
 			}
@@ -1199,7 +1302,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		if (xIndex > yIndex && xIndex > zIndex)
 			flags |= ELEM_EOL;
 
-		plyProperty& pp = stdProperties[xIndex-1];
+		plyProperty& pp = stdProperties[xIndex - 1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, vertex_cb, cloud, flags);
 
 		numberOfPoints = pointElements[pp.elemIndex].elementInstances;
@@ -1212,12 +1315,12 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		if (yIndex > xIndex && yIndex > zIndex)
 			flags |= ELEM_EOL;
 
-		plyProperty& pp = stdProperties[yIndex-1];
+		plyProperty& pp = stdProperties[yIndex - 1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, vertex_cb, cloud, flags);
 
 		if (numberOfPoints > 0)
 		{
-			if ((long)numberOfPoints != pointElements[pp.elemIndex].elementInstances)
+			if (static_cast<long>(numberOfPoints) != pointElements[pp.elemIndex].elementInstances)
 			{
 				ccLog::Warning("[PLY] Bad/uncompatible assignation of point properties!");
 				delete cloud;
@@ -1235,7 +1338,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		if (zIndex > xIndex && zIndex > yIndex)
 			flags |= ELEM_EOL;
 
-		plyProperty& pp = stdProperties[zIndex-1];
+		plyProperty& pp = stdProperties[zIndex - 1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, vertex_cb, cloud, flags);
 
 		if (numberOfPoints > 0)
@@ -1273,7 +1376,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		if (nxIndex > nyIndex && nxIndex > nzIndex)
 			flags |= ELEM_EOL;
 
-		plyProperty& pp = stdProperties[nxIndex-1];
+		plyProperty& pp = stdProperties[nxIndex - 1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, normal_cb, cloud, flags);
 
 		numberOfNormals = pointElements[pp.elemIndex].elementInstances;
@@ -1286,7 +1389,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		if (nyIndex > nxIndex && nyIndex > nzIndex)
 			flags |= ELEM_EOL;
 
-		plyProperty& pp = stdProperties[nyIndex-1];
+		plyProperty& pp = stdProperties[nyIndex - 1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, normal_cb, cloud, flags);
 
 		numberOfNormals = std::max(numberOfNormals, (unsigned)pointElements[pp.elemIndex].elementInstances);
@@ -1299,7 +1402,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		if (nzIndex > nxIndex && nzIndex > nyIndex)
 			flags |= ELEM_EOL;
 
-		plyProperty& pp = stdProperties[nzIndex-1];
+		plyProperty& pp = stdProperties[nzIndex - 1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, normal_cb, cloud, flags);
 
 		numberOfNormals = std::max(numberOfNormals, (unsigned)pointElements[pp.elemIndex].elementInstances);
@@ -1338,7 +1441,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		if (rIndex > gIndex && rIndex > bIndex)
 			flags |= ELEM_EOL;
 
-		plyProperty& pp = stdProperties[rIndex-1];
+		plyProperty& pp = stdProperties[rIndex - 1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, rgb_cb, cloud, flags);
 
 		numberOfColors = pointElements[pp.elemIndex].elementInstances;
@@ -1350,7 +1453,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		if (gIndex > rIndex && gIndex > bIndex)
 			flags |= ELEM_EOL;
 
-		plyProperty& pp = stdProperties[gIndex-1];
+		plyProperty& pp = stdProperties[gIndex - 1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, rgb_cb, cloud, flags);
 
 		numberOfColors = std::max(numberOfColors, (unsigned)pointElements[pp.elemIndex].elementInstances);
@@ -1362,7 +1465,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		if (bIndex > rIndex && bIndex > gIndex)
 			flags |= ELEM_EOL;
 
-		plyProperty& pp = stdProperties[bIndex-1];
+		plyProperty& pp = stdProperties[bIndex - 1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, rgb_cb, cloud, flags);
 
 		numberOfColors = std::max(numberOfColors, (unsigned)pointElements[pp.elemIndex].elementInstances);
@@ -1380,7 +1483,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		}
 		else
 		{
-			plyProperty pp = stdProperties[iIndex-1];
+			plyProperty pp = stdProperties[iIndex - 1];
 			ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, grey_cb, cloud, 0);
 
 			numberOfColors = pointElements[pp.elemIndex].elementInstances;
@@ -1408,27 +1511,27 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 
 	/* SCALAR FIELDS (SF) */
 	{
-		for (size_t i=0; i<sfPropIndexes.size(); ++i)
+		for (size_t i = 0; i < sfPropIndexes.size(); ++i)
 		{
 			int sfIndex = sfPropIndexes[i];
-			plyProperty& pp = stdProperties[sfIndex-1];
-			
+			plyProperty& pp = stdProperties[sfIndex - 1];
+
 			unsigned numberOfScalars = pointElements[pp.elemIndex].elementInstances;
 
 			//does the number of scalars matches the number of points?
 			if (numberOfPoints != numberOfScalars)
 			{
-				ccLog::Error(QString("Scalar field #%1: the number of scalars doesn't match the number of points (they will be ignored)!").arg(i+1));
-				ccLog::Warning(QString("[PLY] Scalar field #%1 ignored!").arg(i+1));
+				ccLog::Error(QString("Scalar field #%1: the number of scalars doesn't match the number of points (they will be ignored)!").arg(i + 1));
+				ccLog::Warning(QString("[PLY] Scalar field #%1 ignored!").arg(i + 1));
 				numberOfScalars = 0;
 			}
-			else 
+			else
 			{
 				QString qPropName(pp.propName);
 				if (qPropName.startsWith("scalar_") && qPropName.length() > 7)
 				{
 					//remove the 'scalar_' prefix added when saving SF with CC!
-					qPropName = qPropName.mid(7).replace('_',' ');
+					qPropName = qPropName.mid(7).replace('_', ' ');
 				}
 
 				int sfIdx = cloud->addScalarField(qPrintable(qPropName));
@@ -1446,11 +1549,11 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 						sfIdx = -1;
 					}
 				}
-				
+
 				if (sfIdx < 0)
 				{
-					ccLog::Error(QString("Scalar field #%1: not enough memory to load scalar field (they will be ignored)!").arg(i+1));
-					ccLog::Warning(QString("[PLY] Scalar field #%1 ignored!").arg(i+1));
+					ccLog::Error(QString("Scalar field #%1: not enough memory to load scalar field (they will be ignored)!").arg(i + 1));
+					ccLog::Warning(QString("[PLY] Scalar field #%1 ignored!").arg(i + 1));
 				}
 			}
 		}
@@ -1463,7 +1566,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 
 	if (facesIndex > 0)
 	{
-		plyProperty& pp = listProperties[facesIndex-1];
+		plyProperty& pp = listProperties[facesIndex - 1];
 		assert(pp.type == 16); //we only accept PLY_LIST here!
 
 		mesh = new ccMesh(cloud);
@@ -1486,7 +1589,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 
 	if (texCoordsIndex > 0)
 	{
-		plyProperty& pp = listProperties[texCoordsIndex-1];
+		plyProperty& pp = listProperties[texCoordsIndex - 1];
 		assert(pp.type == 16); //we only accept PLY_LIST here!
 
 		texCoords = new TextureCoordsContainer();
@@ -1495,7 +1598,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		long numberOfCoordinates = meshElements[pp.elemIndex].elementInstances;
 		assert(numberOfCoordinates == numberOfFacets);
 
-		if (!texCoords->reserve(numberOfCoordinates*3))
+		if (!texCoords->reserve(numberOfCoordinates * 3))
 		{
 			ccLog::Error("Not enough memory to load texture coordinates (they will be ignored)!");
 			ccLog::Warning("[PLY] Texture coordinates ignored!");
@@ -1505,12 +1608,13 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		else
 		{
 			ply_set_read_cb(ply, meshElements[pp.elemIndex].elementName, pp.propName, texCoords_cb, texCoords, 0);
+			s_hasMaterials = true;
 		}
 	}
 
 	if (texNumberIndex > 0)
 	{
-		plyProperty& pp = singleProperties[texNumberIndex-1];
+		plyProperty& pp = singleProperties[texNumberIndex - 1];
 
 		texIndexes = new ccMesh::triangleMaterialIndexesSet();
 		texIndexes->link();
@@ -1527,7 +1631,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		}
 		else
 		{
-			s_maxTextureIndex = textureFileNames.size()-1;
+			s_maxTextureIndex = textureFileNames.size() - 1;
 			ply_set_read_cb(ply, meshElements[pp.elemIndex].elementName, pp.propName, texIndexes_cb, texIndexes, 0);
 		}
 	}
@@ -1549,7 +1653,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 	{
 		success = ply_read(ply);
 	}
-	catch(...)
+	catch (...)
 	{
 		success = -1;
 	}
@@ -1561,11 +1665,11 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		pDlg.reset();
 	}
 
-	if (success < 1)
+	if (success < 1 || s_NotEnoughMemory)
 	{
 		if (mesh)
 			delete mesh;
-		delete cloud;
+		delete cloud; 
 		return CC_FERR_READING;
 	}
 
@@ -1594,7 +1698,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		}
 	}
 
-	if (texCoords && (s_invalidTexCoordinates || s_texCoordCount != 3*mesh->size()))
+	if (texCoords && (s_invalidTexCoordinates || (!s_hasQuads && s_texCoordCount != 3 * mesh->size())))
 	{
 		ccLog::Error("Invalid texture coordinates! (they will be ignored)");
 		texCoords->release();
@@ -1603,18 +1707,30 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 
 	if (texIndexes)
 	{
-		if (texIndexes->currentSize() < mesh->size())
-		{
-			ccLog::Error("Invalid texture indexes! (they will be ignored)");
-			texIndexes->release();
-			texIndexes = 0;
-		}
-
 		if (!texCoords)
 		{
 			ccLog::Error("No texture coordinates were loaded (texture indexes will be ignored)");
 			texIndexes->release();
 			texIndexes = 0;
+		}
+		else if (texIndexes->currentSize() < mesh->size())
+		{
+			if (!s_hasQuads)
+			{
+				ccLog::Error("Invalid texture indexes! (they will be ignored)");
+				texIndexes->release();
+				texIndexes = 0;
+			}
+			else
+			{
+				//for quads, we must resize the texture indexes table (as we have more triangles than input 'faces')
+				if (!texIndexes->resize(mesh->size(), false))
+				{
+					ccLog::Warning("Not enough memory to store texture indexes");
+					texIndexes->release();
+					texIndexes = 0;
+				}
+			}
 		}
 	}
 
@@ -1623,7 +1739,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 
 	//we update the scalar field(s)
 	{
-		for (unsigned i=0; i<cloud->getNumberOfScalarFields(); ++i)
+		for (unsigned i = 0; i < cloud->getNumberOfScalarFields(); ++i)
 		{
 			CCLib::ScalarField* sf = cloud->getScalarField(i);
 			assert(sf);
@@ -1645,6 +1761,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 			mesh->resize(s_triCount);
 			ccLog::Warning("[PLY] Some facets couldn't be loaded!");
 		}
+		mesh->shrinkToFit();
 
 		//check that vertex indices start at 0
 		unsigned minVertIndex = numberOfPoints, maxVertIndex = 0;
@@ -1670,7 +1787,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 			if (maxVertIndex == numberOfPoints && minVertIndex > 0)
 			{
 				ccLog::Warning("[PLY] Vertex indexes seem to be shifted (+1)! We will try to 'unshift' indices (otherwise file is corrupted...)");
-				for (unsigned i=0;i<s_triCount;++i)
+				for (unsigned i = 0; i < s_triCount; ++i)
 				{
 					CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
 					--tri->i1;
@@ -1702,7 +1819,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 				materials = new ccMaterialSet("materials");
 
 				QString texturePath = QFileInfo(filename).absolutePath() + QString('/');
-				for (int ti=0; ti<textureFileNames.size(); ++ti)
+				for (int ti = 0; ti < textureFileNames.size(); ++ti)
 				{
 					QString textureFileName = textureFileNames[ti];
 					QString textureFilePath = texturePath + textureFileName;
@@ -1743,11 +1860,45 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 					if (texIndexes)
 						mesh->setTriangleMtlIndexesTable(texIndexes);
 					//generate simple per-triangle texture coordinates indexes
-					for (unsigned i=0; i<mesh->size(); ++i)
+					unsigned lastTexCoordIndex = 0;
+					unsigned lastTexIndexIndex = 0;
+					for (unsigned i = 0; i < mesh->size(); ++i)
 					{
 						if (!texIndexes)
+						{
 							mesh->addTriangleMtlIndex(0);
-						mesh->addTriangleTexCoordIndexes(i*3,i*3+1,i*3+2);
+						}
+
+						if (!s_hasQuads)
+						{
+							assert(s_triIsQuad.empty());
+							mesh->addTriangleTexCoordIndexes(lastTexCoordIndex, lastTexCoordIndex + 1, lastTexCoordIndex + 2);
+							lastTexCoordIndex += 3;
+						}
+						else
+						{
+							assert(i < s_triIsQuad.size());
+							if (texIndexes && i != lastTexIndexIndex)
+							{
+								texIndexes->setValue(i, texIndexes->getValue(lastTexIndexIndex));
+							}
+
+							if (!s_triIsQuad[i])
+							{
+								mesh->addTriangleTexCoordIndexes(lastTexCoordIndex, lastTexCoordIndex + 1, lastTexCoordIndex + 2);
+								if (i + 1 >= s_triIsQuad.size() || !s_triIsQuad[i + 1])
+								{
+									lastTexCoordIndex += 3;
+									lastTexIndexIndex++;
+								}
+							}
+							else
+							{
+								mesh->addTriangleTexCoordIndexes(lastTexCoordIndex, lastTexCoordIndex + 2, lastTexCoordIndex + 3);
+								lastTexCoordIndex += 4;
+								lastTexIndexIndex++;
+							}
+						}
 					}
 					mesh->showMaterials(true);
 				}

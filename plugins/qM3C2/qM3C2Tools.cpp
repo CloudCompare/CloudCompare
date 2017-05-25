@@ -561,12 +561,12 @@ void qM3C2Tools::ComputeStatistics(CCLib::DgmOctree::NeighboursSet& set, bool us
 		{
 			const ScalarType& dist = set[i].squareDistd;
 			sum += static_cast<double>(dist); //should be the projected dist in fact!
-			sum2 += static_cast<double>(dist*dist);
+			sum2 += static_cast<double>(dist) * dist;
 		}
 
 		assert(count > 1);
-		sum /= static_cast<double>(count);
-		sum2 = sqrt(fabs(sum2 / static_cast<double>(count)-sum*sum));
+		sum /= count;
+		sum2 = sqrt(fabs(sum2 / count - sum*sum));
 
 		meanOrMedian = static_cast<ScalarType>(sum);
 		stdDevOrIQR = static_cast<ScalarType>(sum2);

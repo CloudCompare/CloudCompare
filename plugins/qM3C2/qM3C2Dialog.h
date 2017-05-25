@@ -93,7 +93,7 @@ protected slots:
 	void guessParamsSlow() { guessParams(false); }
 	void projDestIndexChanged(int);
 
-protected:
+protected: //methods
 
 	//! Guess parameters from the cloud #1
 	void guessParams(bool fastMode);
@@ -105,6 +105,13 @@ protected:
 	void loadParamsFrom(const QSettings& settings);
 	//! Saves parameters to QSettings
 	void saveParamsTo(QSettings& settings);
+
+	//! Setups the precision maps tab
+	/** \warning 'setClouds' must have been already called
+	**/
+	void setupPrecisionMapsTab();
+
+protected: //members
 
 	ccMainAppInterface* m_app;
 

@@ -27,6 +27,12 @@ v2.9.alpha - XX/XX/XXXX
 		- new output option 'zoom' (alternative to the existing 'super resolution' option)
 		- the plugin doesn't spam the Console at each frame if the 'super resolution' option is > 1 ;)
 
+	* M3C2 plugin:
+		- "Precision Maps" support added (as described in "3D uncertainty-based topographic change detection with SfM
+			photogrammetry: precision maps for ground control and directly georeferenced surveys" by James et al.)
+		- Allows for the computation of the uncertainty based on precision scalar fields (standard deviation along X, Y and Z)
+			instead of the cloud local roughness
+
 	* 'Unroll' tool:
 		- new cone 'unroll' mode (the true 'unroll' mode - the other one has been renamed 'Straightened cone' ;)
 		- option to export the deviation scalar-field (deviation to the theoretical cylinder / cone)

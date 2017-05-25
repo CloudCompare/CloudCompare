@@ -113,7 +113,9 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 		//add list of clouds to the combo-boxes
 		ccHObject::Container clouds;
 		if (m_app->dbRootObject())
+		{
 			m_app->dbRootObject()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+		}
 
 		for (size_t i = 0; i < clouds.size(); ++i)
 		{
@@ -123,6 +125,78 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 				normOriCloudComboBox->addItem(GetEntityName(clouds[i]), QVariant(clouds[i]->getUniqueID()));
 			}
 		}
+	}
+}
+
+bool PopulateSFCombo(QComboBox* combo, const ccPointCloud& cloud, int defaultFieldIndex = -1, QString defaultField = QString())
+{
+	unsigned sfCount = cloud.getNumberOfScalarFields();
+	if (!combo || sfCount == 0)
+	{
+		assert(false);
+		return false;
+	}
+
+	combo->clear();
+	int selectedFieldIndex = -1;
+	bool defaultFieldFound = false;
+	for (unsigned i = 0; i < sfCount; ++i)
+	{
+		QString sfName = cloud.getScalarFieldName(i);
+		combo->addItem(sfName);
+		if (selectedFieldIndex < 0 && !defaultField.isEmpty())
+		{
+			if (sfName.contains(defaultField, Qt::CaseInsensitive))
+			{
+				selectedFieldIndex = static_cast<int>(i);
+				defaultFieldFound = true;
+			}
+		}
+	}
+
+	if (selectedFieldIndex < 0)
+	{
+		selectedFieldIndex = defaultFieldIndex;
+	}
+	combo->setCurrentIndex(selectedFieldIndex);
+
+	return defaultFieldFound;
+}
+
+bool PopulatePMFields(QComboBox* sx, QComboBox* sy, QComboBox* sz, const ccPointCloud& cloud)
+{
+	assert(sx && sy && sz);
+	int sfCount = static_cast<int>(cloud.getNumberOfScalarFields());
+	if (sfCount == 0)
+	{
+		assert(false);
+		return false;
+	}
+
+	bool sxFound = PopulateSFCombo(sx, cloud, std::min<int>(sfCount, 0), "sx");
+	bool syFound = PopulateSFCombo(sy, cloud, std::min<int>(sfCount, 1), "sy");
+	bool szFound = PopulateSFCombo(sz, cloud, std::min<int>(sfCount, 2), "sz");
+
+	return sxFound && syFound && szFound;
+}
+
+void qM3C2Dialog::setupPrecisionMapsTab()
+{
+	precisionMapsGroupBox->setEnabled(false);
+
+	if (!m_cloud1 || !m_cloud2)
+	{
+		assert(false);
+		return;
+	}
+
+	if (m_cloud1->hasScalarFields() && m_cloud2->hasScalarFields())
+	{
+		bool wasChecked = precisionMapsGroupBox->isChecked();
+		bool auto1 = PopulatePMFields(c1SxComboBox, c1SyComboBox, c1SzComboBox, *m_cloud1);
+		bool auto2 = PopulatePMFields(c2SxComboBox, c2SyComboBox, c2SzComboBox, *m_cloud2);
+		precisionMapsGroupBox->setChecked(wasChecked && (auto1 && auto2));
+		precisionMapsGroupBox->setEnabled(true);
 	}
 }
 
@@ -163,6 +237,8 @@ void qM3C2Dialog::setClouds(ccPointCloud* cloud1, ccPointCloud* cloud2)
 		guessParams(true);
 		m_firstTimeInit = false;
 	}
+
+	setupPrecisionMapsTab();
 }
 
 void qM3C2Dialog::ifUseOtherCloudForCorePoints(bool state)
@@ -326,6 +402,10 @@ void qM3C2Dialog::loadParamsFrom(const QSettings& settings)
 
 	int maxThreadCount = settings.value("MaxThreadCount", maxThreadCountSpinBox->maximum()).toInt();
 
+	bool usePrecisionMaps = settings.value("UsePrecisionMaps", precisionMapsGroupBox->isChecked()).toBool();
+	double pm1Scale = settings.value("PM1Scale", pm1ScaleDoubleSpinBox->value()).toDouble();
+	double pm2Scale = settings.value("PM2Scale", pm2ScaleDoubleSpinBox->value()).toDouble();
+
 	//apply parameters
 	normalScaleDoubleSpinBox->setValue(normalScale);
 	switch(normModeInt)
@@ -381,6 +461,10 @@ void qM3C2Dialog::loadParamsFrom(const QSettings& settings)
 	exportDensityAtProjScaleCheckBox->setChecked(exportDensityAtProjScale);
 
 	maxThreadCountSpinBox->setValue(maxThreadCount);
+
+	precisionMapsGroupBox->setChecked(usePrecisionMaps);
+	pm1ScaleDoubleSpinBox->setValue(pm1Scale);
+	pm2ScaleDoubleSpinBox->setValue(pm2Scale);
 }
 
 void qM3C2Dialog::saveParamsToPersistentSettings()
@@ -423,6 +507,10 @@ void qM3C2Dialog::saveParamsTo(QSettings& settings)
 	settings.setValue("ExportDensityAtProjScale",exportDensityAtProjScaleCheckBox->isChecked());
 
 	settings.setValue("MaxThreadCount", maxThreadCountSpinBox->value());
+
+	settings.setValue("UsePrecisionMaps", precisionMapsGroupBox->isChecked());
+	settings.setValue("PM1Scale", pm1ScaleDoubleSpinBox->value());
+	settings.setValue("PM2Scale", pm2ScaleDoubleSpinBox->value());
 }
 
 void qM3C2Dialog::loadParamsFromFile()

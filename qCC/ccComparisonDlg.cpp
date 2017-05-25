@@ -519,7 +519,8 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	}
 
 	//we skip the lowest subdivision levels (useless + incompatible with below formulas ;)
-	int theBestOctreeLevel = 2;
+	static const int s_minOctreeLevel = 6;
+	int theBestOctreeLevel = s_minOctreeLevel;
 
 	//we don't test the very first and very last level
 	ccProgressDialog progressCb(false, this);
@@ -533,7 +534,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	PointCoordinateType maxDistance = static_cast<PointCoordinateType>(maxDistanceDefined ? maxSearchDistSpinBox->value() : 0);
 
 	//for each level
-	for (int level=2; level<MAX_OCTREE_LEVEL; ++level)
+	for (int level = s_minOctreeLevel; level < MAX_OCTREE_LEVEL; ++level)
 	{
 		const unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
 		unsigned numberOfPointsInCell = 0;

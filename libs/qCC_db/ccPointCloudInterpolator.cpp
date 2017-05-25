@@ -62,9 +62,9 @@ bool cellSFInterpolator(const CCLib::DgmOctree::octreeCell& cell,
 		unsigned neighborCount = 0;
 
 		if (useKNN)
-			neighborCount = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS);
+			neighborCount = srcOctree->findNearestNeighborsStartingFromCell(nNSS);
 		else
-			neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, params->radius, false);
+			neighborCount = srcOctree->findNeighborsInASphereStartingFromCell(nNSS, params->radius, false);
 
 		if (neighborCount)
 		{
@@ -235,10 +235,16 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 			return false;
 		}
 
-		//if necessary we try to guess the best octree level for distances computation
 		if (octreeLevel == 0)
 		{
-			octreeLevel = destOctree->findBestLevelForComparisonWithOctree(srcOctree.data());
+			if (params.method == ccPointCloudInterpolator::Parameters::K_NEAREST_NEIGHBORS)
+			{
+				octreeLevel = srcOctree->findBestLevelForAGivenPopulationPerCell(params.knn);
+			}
+			else
+			{
+				octreeLevel = srcOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(params.radius);
+			}
 		}
 
 		//additional parameters

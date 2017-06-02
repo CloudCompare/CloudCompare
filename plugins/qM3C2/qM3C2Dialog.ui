@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>567</width>
-    <height>372</height>
+    <height>377</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -603,44 +603,49 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QCheckBox" name="useMinPoints4StatCheckBox">
-           <property name="text">
-            <string>Specify minimum number of points for statistics computation</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="minPoints4StatSpinBox">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>1000000000</number>
-           </property>
-           <property name="value">
-            <number>5</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_5">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
+        <widget class="QFrame" name="minPoints4StatsFrame">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="useMinPoints4StatCheckBox">
+            <property name="text">
+             <string>Specify minimum number of points for statistics computation</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="minPoints4StatSpinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>1000000000</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <widget class="QFrame" name="frame">
@@ -734,7 +739,7 @@ p, li { white-space: pre-wrap; }
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Use precision maps instead of roughness-based uncertainty estimates</string>
+          <string>Use precision information in scalar fields instead of roughness-based uncertainty estimates</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -1181,22 +1186,6 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>useMinPoints4StatCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>minPoints4StatSpinBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>259</x>
-     <y>160</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>416</x>
-     <y>162</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>rmsCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>rmsDoubleSpinBox</receiver>
@@ -1209,6 +1198,38 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>263</x>
      <y>308</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>precisionMapsGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>useMedianCheckBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>282</x>
+     <y>248</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>282</x>
+     <y>150</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>precisionMapsGroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>minPoints4StatsFrame</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>282</x>
+     <y>248</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>282</x>
+     <y>174</y>
     </hint>
    </hints>
   </connection>

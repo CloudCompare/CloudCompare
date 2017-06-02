@@ -158,7 +158,9 @@ static double ComputePMUncertainty(CCLib::DgmOctree::NeighboursSet& set, const C
 					PM.sY->getValue(pointIndex),
 					PM.sZ->getValue(pointIndex));
 
-	return sigma.dot(N) * PM.scale;
+	CCVector3 NS(N.x * sigma.x, N.y * sigma.y, N.z * sigma.z);
+	
+	return NS.normd();
 }
 
 // Structure for parallel call to ComputeM3C2DistForPoint

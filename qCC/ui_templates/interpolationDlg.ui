@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>480</width>
-    <height>160</height>
+    <width>400</width>
+    <height>260</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,13 +17,13 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Interpolation algorithm</string>
+      <string>Neighbors extraction</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="3">
-       <widget class="QDoubleSpinBox" name="kernelDoubleSpinBox">
-        <property name="enabled">
-         <bool>false</bool>
+      <item row="1" column="2">
+       <widget class="QDoubleSpinBox" name="radiusDoubleSpinBox">
+        <property name="toolTip">
+         <string>Radius of the sphere inside which neighbors will be extracted</string>
         </property>
         <property name="decimals">
          <number>6</number>
@@ -31,8 +31,18 @@
         <property name="maximum">
          <double>1000000000.000000000000000</double>
         </property>
-        <property name="value">
-         <double>1.000000000000000</double>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QRadioButton" name="radiusRadioButton">
+        <property name="toolTip">
+         <string>Extracts the neighbors inside a sphere</string>
+        </property>
+        <property name="text">
+         <string>Radius (Sphere)</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -46,10 +56,24 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
+      <item row="0" column="1">
+       <widget class="QRadioButton" name="knnRadioButton">
+        <property name="toolTip">
+         <string>Use the 'k' nearest neighbors
+(faster than 'radius' based search, but more approximate)</string>
+        </property>
+        <property name="text">
+         <string>Nearest neighbors</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="QSpinBox" name="knnSpinBox">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Number of neighbors to extract</string>
         </property>
         <property name="minimum">
          <number>3</number>
@@ -62,38 +86,101 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
-       <widget class="QRadioButton" name="knnRadioButton">
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="algoGroupBox">
+     <property name="title">
+      <string>Interpolation algorithm</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="medianRadioButton">
         <property name="toolTip">
-         <string>interpolates with the 'k' nearest neighbors
-(a Normal distribution kernel must also be provided)</string>
+         <string>Keep the median of the neighbors SF values</string>
         </property>
         <property name="text">
-         <string>Points (kNN)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QDoubleSpinBox" name="radiusDoubleSpinBox">
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="maximum">
-         <double>1000000000.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QRadioButton" name="radiusRadioButton">
-        <property name="toolTip">
-         <string>Interpolates inside a sphere</string>
-        </property>
-        <property name="text">
-         <string>Radius (Sphere)</string>
+         <string>Median</string>
         </property>
         <property name="checked">
          <bool>true</bool>
         </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QRadioButton" name="averageRadioButton">
+        <property name="toolTip">
+         <string>Keep the average of the neighbors SF values</string>
+        </property>
+        <property name="text">
+         <string>Average</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QRadioButton" name="normalDistribRadioButton">
+        <property name="toolTip">
+         <string>Compute a weighted average of the neighbors SF values
+(the weights will follow a Normal distribution)</string>
+        </property>
+        <property name="text">
+         <string>Normal distribution</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QFrame" name="kernelFrame">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>81</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>sigma</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="kernelDoubleSpinBox">
+           <property name="toolTip">
+            <string>Kernel of the Normal distribution</string>
+           </property>
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="maximum">
+            <double>1000000000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -191,18 +278,34 @@
    </hints>
   </connection>
   <connection>
-   <sender>knnRadioButton</sender>
+   <sender>normalDistribRadioButton</sender>
    <signal>toggled(bool)</signal>
-   <receiver>kernelDoubleSpinBox</receiver>
+   <receiver>kernelFrame</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>389</x>
+     <x>74</x>
+     <y>168</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>258</x>
+     <y>170</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nnRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>algoGroupBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>76</x>
      <y>40</y>
     </hint>
     <hint type="destinationlabel">
-     <x>389</x>
-     <y>90</y>
+     <x>199</x>
+     <y>141</y>
     </hint>
    </hints>
   </connection>

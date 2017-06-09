@@ -25,6 +25,8 @@ ccInterpolationDlg::ccInterpolationDlg(QWidget* parent/*=0*/)
 	, Ui::InterpolationDlg()
 {
 	setupUi(this);
+
+	connect(radiusDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(onRadiusUpdated(double)));
 }
 
 ccPointCloudInterpolator::Parameters::Method ccInterpolationDlg::getInterpolationMethod() const
@@ -40,7 +42,7 @@ ccPointCloudInterpolator::Parameters::Method ccInterpolationDlg::getInterpolatio
 	return ccPointCloudInterpolator::Parameters::NEAREST_NEIGHBOR;
 }
 
-void ccInterpolationDlg::setInterpolationMethd(ccPointCloudInterpolator::Parameters::Method method)
+void ccInterpolationDlg::setInterpolationMethod(ccPointCloudInterpolator::Parameters::Method method)
 {
 	switch (method)
 	{
@@ -56,4 +58,40 @@ void ccInterpolationDlg::setInterpolationMethd(ccPointCloudInterpolator::Paramet
 	default:
 		assert(false);
 	}
+}
+
+ccPointCloudInterpolator::Parameters::Algo ccInterpolationDlg::getInterpolationAlgorithm() const
+{
+	if (averageRadioButton->isChecked())
+		return ccPointCloudInterpolator::Parameters::AVERAGE;
+	else if (medianRadioButton->isChecked())
+		return ccPointCloudInterpolator::Parameters::MEDIAN;
+	else if (normalDistribRadioButton->isChecked())
+		return ccPointCloudInterpolator::Parameters::NORMAL_DIST;
+
+	assert(false);
+	return ccPointCloudInterpolator::Parameters::AVERAGE;
+}
+
+void ccInterpolationDlg::setInterpolationAlgorithm(ccPointCloudInterpolator::Parameters::Algo algo)
+{
+	switch (algo)
+	{
+	case ccPointCloudInterpolator::Parameters::AVERAGE:
+		averageRadioButton->setChecked(true);
+		break;
+	case ccPointCloudInterpolator::Parameters::MEDIAN:
+		medianRadioButton->setChecked(true);
+		break;
+	case ccPointCloudInterpolator::Parameters::NORMAL_DIST:
+		normalDistribRadioButton->setChecked(true);
+		break;
+	default:
+		assert(false);
+	}
+}
+
+void ccInterpolationDlg::onRadiusUpdated(double radius)
+{
+	kernelDoubleSpinBox->setValue(radius / 2.5);
 }

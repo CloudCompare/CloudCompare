@@ -471,17 +471,15 @@ namespace ccEntityAction
 		}
 
 		//semi-persistent parameters
-		static ccPointCloudInterpolator::Parameters::Method s_interpMethod = ccPointCloudInterpolator::Parameters::NEAREST_NEIGHBOR;
+		static ccPointCloudInterpolator::Parameters::Method s_interpMethod = ccPointCloudInterpolator::Parameters::RADIUS;
+		static ccPointCloudInterpolator::Parameters::Algo s_interpAlgo = ccPointCloudInterpolator::Parameters::NORMAL_DIST;
 		static int s_interpKNN = 6;
-		static const double s_sigmaFactor = 2.5;
 
 		ccInterpolationDlg iDlg(app->getMainWindow());
-		iDlg.setInterpolationMethd(s_interpMethod);
+		iDlg.setInterpolationMethod(s_interpMethod);
+		iDlg.setInterpolationAlgorithm(s_interpAlgo);
 		iDlg.knnSpinBox->setValue(s_interpKNN);
-
-		double kernel = dest->getOwnBB().getDiagNormd() / 200;
-		iDlg.radiusDoubleSpinBox->setValue(s_sigmaFactor * kernel);
-		iDlg.kernelDoubleSpinBox->setValue(s_sigmaFactor);
+		iDlg.radiusDoubleSpinBox->setValue(dest->getOwnBB().getDiagNormd() / 100);
 
 		if (!iDlg.exec())
 		{
@@ -492,13 +490,10 @@ namespace ccEntityAction
 		//setup parameters
 		ccPointCloudInterpolator::Parameters params;
 		params.method = s_interpMethod = iDlg.getInterpolationMethod();
+		params.algo = s_interpAlgo = iDlg.getInterpolationAlgorithm();
 		params.knn = s_interpKNN = iDlg.knnSpinBox->value();
 		params.radius = iDlg.radiusDoubleSpinBox->value();
 		params.sigma = iDlg.kernelDoubleSpinBox->value();
-		if (params.method == ccPointCloudInterpolator::Parameters::RADIUS)
-		{
-			params.sigma = params.radius / s_sigmaFactor;
-		}
 
 		ccProgressDialog pDlg(true, app->getMainWindow());
 		unsigned sfCountBefore = dest->getNumberOfScalarFields();

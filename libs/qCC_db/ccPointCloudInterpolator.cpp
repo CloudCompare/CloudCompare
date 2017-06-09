@@ -25,8 +25,13 @@ bool cellSFInterpolator(const CCLib::DgmOctree::octreeCell& cell,
 	std::vector<SFPair>* scalarFields = reinterpret_cast<std::vector< SFPair >*>(additionalParameters[2]);
 	const ccPointCloudInterpolator::Parameters* params = (const ccPointCloudInterpolator::Parameters*)(additionalParameters[3]);
 	
-	double interpSigma2x2 = 2 * params->sigma * params->sigma;
-	assert(interpSigma2x2 > 0);
+	bool normalDistWeighting = false;
+	double interpSigma2x2 = 0;
+	if (params->algo == ccPointCloudInterpolator::Parameters::NORMAL_DIST)
+	{
+		interpSigma2x2 = 2 * params->sigma * params->sigma;
+		normalDistWeighting = (interpSigma2x2 > 0);
+	}
 
 	//structure for nearest neighbors search
 	bool useKNN = (params->method == ccPointCloudInterpolator::Parameters::K_NEAREST_NEIGHBORS);
@@ -52,7 +57,7 @@ bool cellSFInterpolator(const CCLib::DgmOctree::octreeCell& cell,
 
 	//for each point of the current cell (destination octree) we look for its nearest neighbours in the source cloud
 	unsigned pointCount = cell.points->size();
-	for (unsigned i = 0; i<pointCount; i++)
+	for (unsigned i = 0; i < pointCount; i++)
 	{
 		unsigned outPointIndex = cell.points->getPointGlobalIndex(i);
 		cell.points->getPoint(i, nNSS.queryPoint);
@@ -62,35 +67,69 @@ bool cellSFInterpolator(const CCLib::DgmOctree::octreeCell& cell,
 		unsigned neighborCount = 0;
 
 		if (useKNN)
+		{
 			neighborCount = srcOctree->findNearestNeighborsStartingFromCell(nNSS);
+			neighborCount = std::min(neighborCount, params->knn);
+		}
 		else
+		{
 			neighborCount = srcOctree->findNeighborsInASphereStartingFromCell(nNSS, params->radius, false);
+		}
 
 		if (neighborCount)
 		{
-			double sumW = 0;
-			std::fill(sumValues.begin(), sumValues.end(), 0);
-			for (const CCLib::DgmOctree::PointDescriptor& P : nNSS.pointsInNeighbourhood)
+			if (params->algo == ccPointCloudInterpolator::Parameters::MEDIAN)
 			{
-				double w = exp(-P.squareDistd / interpSigma2x2);
-				sumW += w;
-				for (unsigned j = 0; j < sfCount; ++j)
-				{
-					sumValues[j] += w * scalarFields->at(j).in->getValue(P.pointIndex);
-				}
-			}
+				//median
+				std::vector<ScalarType> values;
+				values.resize(neighborCount);
+				unsigned medianIndex = std::max(neighborCount / 2, 1u) - 1;
 
-			if (sumW > 0)
-			{
 				for (unsigned j = 0; j < sfCount; ++j)
 				{
-					ScalarType s = static_cast<ScalarType>(sumValues[j] / sumW);
-					scalarFields->at(j).out->setValue(outPointIndex, s);
+					const CCLib::ScalarField* sf = scalarFields->at(j).in;
+					for (unsigned k = 0; k < neighborCount; ++k)
+					{
+						CCLib::DgmOctree::PointDescriptor& P = nNSS.pointsInNeighbourhood[k];
+						values[k] = sf->getValue(P.pointIndex);
+					}
+					std::sort(values.begin(), values.end());
+					
+					ScalarType median = values[medianIndex];
+					scalarFields->at(j).out->setValue(outPointIndex, median);
 				}
 			}
-			else
+			else //average or weighted average
 			{
-				//we assume the scalar fields have all been initialized to NAN_VALUE
+				double sumW = 0;
+				std::fill(sumValues.begin(), sumValues.end(), 0);
+				for (unsigned k = 0; k < neighborCount; ++k)
+				{
+					CCLib::DgmOctree::PointDescriptor& P = nNSS.pointsInNeighbourhood[k];
+					double w = 1.0;
+					if (normalDistWeighting)
+					{
+						w = exp(-P.squareDistd / interpSigma2x2);
+					}
+					sumW += w;
+					for (unsigned j = 0; j < sfCount; ++j)
+					{
+						sumValues[j] += w * scalarFields->at(j).in->getValue(P.pointIndex);
+					}
+				}
+
+				if (sumW > 0)
+				{
+					for (unsigned j = 0; j < sfCount; ++j)
+					{
+						ScalarType s = static_cast<ScalarType>(sumValues[j] / sumW);
+						scalarFields->at(j).out->setValue(outPointIndex, s);
+					}
+				}
+				else
+				{
+					//we assume the scalar fields have all been initialized to NAN_VALUE
+				}
 			}
 		}
 		else
@@ -254,16 +293,25 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 											(void*)(&params)
 		};
 
-		if (destOctree->executeFunctionForAllCellsAtLevel(	octreeLevel,
-															cellSFInterpolator,
-															additionalParameters,
-															true,
-															progressCb,
-															"Scalar field interpolation",
-															0) == 0)
+		try
 		{
-			//something went wrong
-			ccLog::Warning("[InterpolateScalarFieldsFrom] Failed to perform the interpolation");
+			if (destOctree->executeFunctionForAllCellsAtLevel(	octreeLevel,
+																cellSFInterpolator,
+																additionalParameters,
+																true,
+																progressCb,
+																"Scalar field interpolation",
+																0) == 0)
+			{
+				//something went wrong
+				ccLog::Warning("[InterpolateScalarFieldsFrom] Failed to perform the interpolation");
+				return false;
+			}
+		}
+		catch (const std::bad_alloc&)
+		{
+			//not enough memory
+			ccLog::Warning("[InterpolateScalarFieldsFrom] Not enough memory");
 			return false;
 		}
 	}

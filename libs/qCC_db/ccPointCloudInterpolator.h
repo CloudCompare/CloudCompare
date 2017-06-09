@@ -20,8 +20,10 @@ public:
 	struct Parameters
 	{
 		enum Method { NEAREST_NEIGHBOR, K_NEAREST_NEIGHBORS, RADIUS };
+		enum Algo { AVERAGE, MEDIAN, NORMAL_DIST };
 
 		Method method = NEAREST_NEIGHBOR;
+		Algo algo = AVERAGE;
 		unsigned knn = 0;
 		float radius = 0;
 		double sigma = 0;

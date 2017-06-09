@@ -498,12 +498,12 @@ static double Median(const CCLib::DgmOctree::NeighboursSet& set, size_t begin = 
 			return NAN_VALUE;
 	}
 
-	size_t nd2 = count/2;
-	double midValue = set[begin+nd2].squareDistd;
-	
+	size_t nd2 = count / 2;
+	double midValue = set[begin + nd2].squareDistd;
+
 	if ((count & 1) == 0) //even case
-	{ 
-		midValue = (midValue + set[begin+nd2-1].squareDistd) / 2;
+	{
+		midValue = (midValue + set[begin + nd2 - 1].squareDistd) / 2;
 	}
 
 	return midValue;

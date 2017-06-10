@@ -392,7 +392,7 @@ void ComputeM3C2DistForPoint(unsigned index)
 							LODStdDev = (stdDev1*stdDev1) / n1 + (stdDev2*stdDev2) / n2;
 						}
 
-						if (!isnan(LODStdDev))
+						if (!std::isnan(LODStdDev))
 						{
 							//distance uncertainty (see eq. (1) in M3C2 article)
 							ScalarType LOD = static_cast<ScalarType>(1.96 * (sqrt(LODStdDev) + s_M3C2Params.registrationRms));

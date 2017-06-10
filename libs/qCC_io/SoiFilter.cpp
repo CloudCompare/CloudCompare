@@ -137,7 +137,12 @@ CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		{
 			float P[3];
 			int c = 0;
-			fscanf(fp,"%f %f %f %i",P,P+1,P+2,&c);
+			if (fscanf(fp, "%f %f %f %i", P, P + 1, P + 2, &c) < 4)
+			{
+				fclose(fp);
+				delete loadedCloud;
+				return CC_FERR_MALFORMED_FILE;
+			}
 
 			loadedCloud->addPoint(CCVector3::fromArray(P));
 			loadedCloud->addGreyColor(static_cast<ColorCompType>(c<<3)); //<<2 ? <<3 ? we lack some info. here ...

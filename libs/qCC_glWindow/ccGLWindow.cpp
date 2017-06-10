@@ -159,6 +159,13 @@ struct HotZone
 	//point size row width
 	int psi_totalWidth;
 
+	//line size label
+	QString lsi_label;
+	//line size label rect.
+	QRect lsi_labelRect;
+	//line size row width
+	int lsi_totalWidth;
+
 	int margin;
 	int iconSize;
 	QPoint topCorner;
@@ -169,6 +176,7 @@ struct HotZone
 		, bbv_label("bubble-view mode")
 		, fs_label("fullscreen mode")
 		, psi_label("default point size")
+		, lsi_label("default line width")
 		, margin(16)
 		, iconSize(16)
 		, topCorner(0, 0)
@@ -192,12 +200,15 @@ struct HotZone
 		bbv_labelRect = metrics.boundingRect(bbv_label);
 		fs_labelRect = metrics.boundingRect(fs_label);
 		psi_labelRect = metrics.boundingRect(psi_label);
+		lsi_labelRect = metrics.boundingRect(lsi_label);
 
 		psi_totalWidth = /*margin() + */psi_labelRect.width() + margin + iconSize + margin + iconSize/* + margin*/;
+		lsi_totalWidth = /*margin() + */lsi_labelRect.width() + margin + iconSize + margin + iconSize/* + margin*/;
 		bbv_totalWidth = /*margin() + */bbv_labelRect.width() + margin + iconSize/* + margin*/;
 		fs_totalWidth  = /*margin() + */fs_labelRect.width()  + margin + iconSize/* + margin*/;
 
 		textHeight = std::max(psi_labelRect.height(), bbv_labelRect.height());
+		textHeight = std::max(lsi_labelRect.height(), textHeight);
 		textHeight = std::max(fs_labelRect.height(), textHeight);
 		textHeight = (3 * textHeight) / 4; // --> factor: to recenter the baseline a little
 		yTextBottomLineShift = (iconSize / 2) + (textHeight / 2);
@@ -208,7 +219,7 @@ struct HotZone
 		//total hot zone area size (without margin)
 		int totalWidth = 0;
 		if (clickableItemsVisible)
-			totalWidth = psi_totalWidth;
+			totalWidth = std::max(psi_totalWidth, lsi_totalWidth);
 		if (bubbleViewModeEnabled)
 			totalWidth = std::max(totalWidth, bbv_totalWidth);
 		if (fullScreenEnabled)
@@ -216,7 +227,7 @@ struct HotZone
 
 		QPoint minAreaCorner(0         , std::min(0, yTextBottomLineShift - textHeight));
 		QPoint maxAreaCorner(totalWidth, std::max(iconSize, yTextBottomLineShift));
-		int rowCount = clickableItemsVisible ? 1 : 0;
+		int rowCount = clickableItemsVisible ? 2 : 0;
 		rowCount += bubbleViewModeEnabled ? 1 : 0;
 		rowCount += fullScreenEnabled ? 1 : 0;
 		maxAreaCorner.setY(maxAreaCorner.y() + (iconSize + margin) * (rowCount - 1));
@@ -1271,42 +1282,86 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 
 	if (m_clickableItemsVisible)
 	{
-		int xStart = m_hotZone->topCorner.x();
+		static const QImage c_minusPix = QImage(":/CC/images/ccMinus.png").mirrored();
+		static const QImage c_plusPix = QImage(":/CC/images/ccPlus.png").mirrored();
 
-		//label
-		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
-		renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->psi_label, m_hotZone->font);
-
-		//icons
-		xStart += m_hotZone->psi_labelRect.width() + m_hotZone->margin;
-
-		//"minus" icon
+		//default point size
 		{
-			static const QImage c_psi_minusPix = QImage(":/CC/images/ccMinus.png").mirrored();
-			ccGLUtils::DisplayTexture2DPosition(c_psi_minusPix, -halfW + xStart, halfH - (yStart + m_hotZone->iconSize), m_hotZone->iconSize, m_hotZone->iconSize);
-			m_clickableItems.push_back(ClickableItem(ClickableItem::DECREASE_POINT_SIZE, QRect(xStart, yStart, m_hotZone->iconSize, m_hotZone->iconSize)));
-			xStart += m_hotZone->iconSize;
-		}
+			int xStart = m_hotZone->topCorner.x();
 
-		//separator
-		{
 			glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
-			glFunc->glBegin(GL_POINTS);
-			glFunc->glVertex2i(-halfW + xStart + m_hotZone->margin / 2, halfH - (yStart + m_hotZone->iconSize / 2));
-			glFunc->glEnd();
-			xStart += m_hotZone->margin;
-		}
+			renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->psi_label, m_hotZone->font);
 
-		//"plus" icon
+			//icons
+			xStart += m_hotZone->psi_labelRect.width() + m_hotZone->margin;
+
+			//"minus" icon
+			{
+				ccGLUtils::DisplayTexture2DPosition(c_minusPix, -halfW + xStart, halfH - (yStart + m_hotZone->iconSize), m_hotZone->iconSize, m_hotZone->iconSize);
+				m_clickableItems.push_back(ClickableItem(ClickableItem::DECREASE_POINT_SIZE, QRect(xStart, yStart, m_hotZone->iconSize, m_hotZone->iconSize)));
+				xStart += m_hotZone->iconSize;
+			}
+
+			//separator
+			{
+				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
+				glFunc->glBegin(GL_POINTS);
+				glFunc->glVertex2i(-halfW + xStart + m_hotZone->margin / 2, halfH - (yStart + m_hotZone->iconSize / 2));
+				glFunc->glEnd();
+				xStart += m_hotZone->margin;
+			}
+
+			//"plus" icon
+			{
+				ccGLUtils::DisplayTexture2DPosition(c_plusPix, -halfW + xStart, halfH - (yStart + m_hotZone->iconSize), m_hotZone->iconSize, m_hotZone->iconSize);
+				m_clickableItems.push_back(ClickableItem(ClickableItem::INCREASE_POINT_SIZE, QRect(xStart, yStart, m_hotZone->iconSize, m_hotZone->iconSize)));
+				xStart += m_hotZone->iconSize;
+			}
+
+			yStart += m_hotZone->iconSize;
+			yStart += m_hotZone->margin;
+		}
+		
+		//default line size
 		{
-			static const QImage c_psi_plusPix = QImage(":/CC/images/ccPlus.png").mirrored();
-			ccGLUtils::DisplayTexture2DPosition(c_psi_plusPix, -halfW + xStart, halfH - (yStart + m_hotZone->iconSize), m_hotZone->iconSize, m_hotZone->iconSize);
-			m_clickableItems.push_back(ClickableItem(ClickableItem::INCREASE_POINT_SIZE, QRect(xStart, yStart, m_hotZone->iconSize, m_hotZone->iconSize)));
-			xStart += m_hotZone->iconSize;
-		}
+			int xStart = m_hotZone->topCorner.x();
 
-		yStart += m_hotZone->iconSize;
-		yStart += m_hotZone->margin;
+			glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
+			renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->lsi_label, m_hotZone->font);
+
+			//icons
+			xStart += m_hotZone->lsi_labelRect.width() + m_hotZone->margin;
+
+			//"minus" icon
+			{
+				ccGLUtils::DisplayTexture2DPosition(c_minusPix, -halfW + xStart, halfH - (yStart + m_hotZone->iconSize), m_hotZone->iconSize, m_hotZone->iconSize);
+				m_clickableItems.push_back(ClickableItem(ClickableItem::DECREASE_LINE_WIDTH, QRect(xStart, yStart, m_hotZone->iconSize, m_hotZone->iconSize)));
+				xStart += m_hotZone->iconSize;
+			}
+
+			//separator
+			{
+				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
+				//we use a point to represent the line thickness
+				glFunc->glPushAttrib(GL_POINT_BIT);
+				glFunc->glPointSize(m_viewportParams.defaultLineWidth);
+				glFunc->glBegin(GL_POINTS);
+				glFunc->glVertex2i(-halfW + xStart + m_hotZone->margin / 2, halfH - (yStart + m_hotZone->iconSize / 2));
+				glFunc->glEnd();
+				glFunc->glPopAttrib();
+				xStart += m_hotZone->margin;
+			}
+
+			//"plus" icon
+			{
+				ccGLUtils::DisplayTexture2DPosition(c_plusPix, -halfW + xStart, halfH - (yStart + m_hotZone->iconSize), m_hotZone->iconSize, m_hotZone->iconSize);
+				m_clickableItems.push_back(ClickableItem(ClickableItem::INCREASE_LINE_WIDTH, QRect(xStart, yStart, m_hotZone->iconSize, m_hotZone->iconSize)));
+				xStart += m_hotZone->iconSize;
+			}
+
+			yStart += m_hotZone->iconSize;
+			yStart += m_hotZone->margin;
+		}
 	}
 
 	glFunc->glPopAttrib();
@@ -3925,35 +3980,58 @@ bool ccGLWindow::processClickableItems(int x, int y)
 	switch (clickedItem)
 	{
 	case ClickableItem::NO_ROLE:
+	{
 		//nothing to do
-		break;
+	}
+	break;
+	
 	case ClickableItem::INCREASE_POINT_SIZE:
-		{
-			setPointSize(m_viewportParams.defaultPointSize + 1.0f);
-			redraw();
-		}
-		return true;
+	{
+		setPointSize(m_viewportParams.defaultPointSize + 1.0f);
+		redraw();
+	}
+	return true;
+	
 	case ClickableItem::DECREASE_POINT_SIZE:
-		{
-			setPointSize(m_viewportParams.defaultPointSize - 1.0f);
-			redraw();
-		}
-		return true;
+	{
+		setPointSize(m_viewportParams.defaultPointSize - 1.0f);
+		redraw();
+	}
+	return true;
+	
+	case ClickableItem::INCREASE_LINE_WIDTH:
+	{
+		setLineWidth(m_viewportParams.defaultLineWidth + 1.0f);
+		redraw();
+	}
+	return true;
+	
+	case ClickableItem::DECREASE_LINE_WIDTH:
+	{
+		setLineWidth(m_viewportParams.defaultLineWidth - 1.0f);
+		redraw();
+	}
+	return true;
+	
 	case ClickableItem::LEAVE_BUBBLE_VIEW_MODE:
 	{
 		setBubbleViewMode(false);
 		redraw();
 	}
 	return true;
+	
 	case ClickableItem::LEAVE_FULLSCREEN_MODE:
 	{
 		toggleExclusiveFullScreen(false);
 	}
 	return true;
+	
 	default:
+	{
 		//unhandled item?!
 		assert(false);
-		break;
+	}
+	break;
 	}
 
 	return false;

@@ -22,6 +22,8 @@ v2.9.alpha - XX/XX/XXXX
 		- 3 neighbor extraction methods are supported (nearest neighbor, inside a sphere or with a given number of neighbors)
 		- 3 algorithms are available: average, median and weighted average
 
+	* New interactor to change the default line width (via the 'hot zone' in the upper-left corner of 3D views)
+
 - enhancements:
 
 	* qAnimation plugin:

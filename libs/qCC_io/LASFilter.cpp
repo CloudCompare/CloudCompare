@@ -44,6 +44,15 @@ Q_DECLARE_METATYPE(liblas::SpatialReference)
 #include <QSharedPointer>
 #include <QInputDialog>
 
+//pdal
+#include <memory>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/io/LasReader.hpp>
+#include <pdal/io/LasHeader.hpp>
+#include <pdal/Options.hpp>
+using namespace pdal::Dimension;
+
 //Qt gui
 #include <ui_saveLASFileDlg.h>
 
@@ -695,8 +704,366 @@ protected:
 	std::vector<LASWriter*> tileFiles;
 };
 
+CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadParameters& parameters)
+{
+	pdal::Options las_opts;
+	las_opts.add("filename", filename.toStdString());
+
+	pdal::PointTable table;
+	pdal::LasReader las_reader;
+	pdal::PointViewSet point_view_set;
+	pdal::PointViewPtr point_view;
+	pdal::Dimension::IdList dims;
+	pdal::LasHeader las_header;
+
+	las_reader.setOptions(las_opts);
+	las_reader.prepare(table);
+
+	try
+	{
+		point_view_set = las_reader.execute(table);
+		point_view = *point_view_set.begin();
+		dims = point_view->dims();
+		las_header = las_reader.header();
+	}
+	catch (const pdal::pdal_error& e)
+	{
+		ccLog::Error(QString("PDAL exception '%1'").arg(e.what()));
+		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
+	}
+	catch (...)
+	{
+		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+	}
+
+	CCVector3d bbMin(las_header.minX(), las_header.minY(), las_header.minZ());
+	CCVector3d bbMax(las_header.maxX(), las_header.maxY(), las_header.maxZ());
+
+	//schema ici ?
+
+	CCVector3d lasScale =  CCVector3d(las_header.scaleX(), las_header.scaleY(), las_header.scaleZ());
+	CCVector3d lasShift = -CCVector3d(las_header.offsetX(), las_header.offsetY(), las_header.offsetZ());
+
+	// ccLog::Print(QString("my Dimensions: %1").arg(QString::number(dims.size())));
+
+	unsigned int nbOfPoints = las_header.pointCount();
+	if (nbOfPoints == 0)
+	{
+		//strange file ;)
+		return CC_FERR_NO_LOAD;
+	}
+
+	std::vector<std::string> dimensions;
+	for (auto &dimId: dims)
+	{
+		dimensions.push_back(pdal::Dimension::name(dimId));
+		std::cerr << "dim: " << pdal::Dimension::name(dimId) << " -> " << point_view->hasDim(dimId) << std::endl;
+
+	}
+
+	if (!s_lasOpenDlg)
+	{
+		s_lasOpenDlg = QSharedPointer<LASOpenDlg>(new LASOpenDlg());
+	}
+	s_lasOpenDlg->setDimensions(dimensions);
+	s_lasOpenDlg->clearEVLRs();
+	s_lasOpenDlg->setInfos(filename, nbOfPoints, bbMin, bbMax);
+
+	// if (extraDimension)
+	// {
+	// 	assert(!evlrs.empty());
+	// 	for (const EVLR& evlr : evlrs)
+	// 	{
+	// 		s_lasOpenDlg->addEVLR(QString("%1 (%2)").arg(evlr.getName()).arg(evlr.getDescription()));
+	// 	}
+	// }
+
+	if (parameters.alwaysDisplayLoadDialog && !s_lasOpenDlg->autoSkipMode() && !s_lasOpenDlg->exec())
+	{
+		return CC_FERR_CANCELED_BY_USER;
+	}
+
+	bool ignoreDefaultFields = s_lasOpenDlg->ignoreDefaultFieldsCheckBox->isChecked();
+
+	//ICI le BORDEL DU TILING
+
+	//RGB color
+	liblas::Color rgbColorMask; //(0,0,0) on construction
+	if (s_lasOpenDlg->doLoad(LAS_RED))
+		rgbColorMask.SetRed(~0);
+	if (s_lasOpenDlg->doLoad(LAS_GREEN))
+		rgbColorMask.SetGreen(~0);
+	if (s_lasOpenDlg->doLoad(LAS_BLUE))
+		rgbColorMask.SetBlue(~0);
+	bool loadColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
+
+	unsigned pointsRead = 0;
+	CCVector3d Pshift(0, 0, 0);
+
+	//by default we read colors as triplets of 8 bits integers but we might dynamically change this
+	//if we encounter values using 16 bits (16 bits is the standard!)
+	unsigned char colorCompBitShift = 0;
+	bool forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
+	ColorCompType rgb[3] = { 0, 0, 0 };
+
+	ccPointCloud* loadedCloud = 0;
+	loadedCloud = new ccPointCloud();
+	unsigned int fileChunkSize = std::min(nbOfPoints, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
+	if (!loadedCloud->reserveThePointsTable(fileChunkSize))
+	{
+		ccLog::Warning("[LAS] Not enough memory!");
+		delete loadedCloud;
+		return CC_FERR_NOT_ENOUGH_MEMORY;
+	}
+	//check memory
+	loadedCloud->setGlobalShift(Pshift);
+	std::vector< LasField::Shared > fieldsToLoad;
+
+	//DGM: from now on, we only enable scalar fields when we detect a valid value!
+	if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIFICATION, 0, 0, 255))); //unsigned char: between 0 and 255
+	if (s_lasOpenDlg->doLoad(LAS_CLASSIF_VALUE))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_VALUE, 0, 0, 31))); //5 bits: between 0 and 31
+	if (s_lasOpenDlg->doLoad(LAS_CLASSIF_SYNTHETIC))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1))); //1 bit: 0 or 1
+	if (s_lasOpenDlg->doLoad(LAS_CLASSIF_KEYPOINT))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1))); //1 bit: 0 or 1
+	if (s_lasOpenDlg->doLoad(LAS_CLASSIF_WITHHELD))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1))); //1 bit: 0 or 1
+	if (s_lasOpenDlg->doLoad(LAS_INTENSITY))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_INTENSITY, 0, 0, 65535))); //16 bits: between 0 and 65536
+	if (s_lasOpenDlg->doLoad(LAS_TIME))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_TIME, 0, 0, -1.0))); //8 bytes (double) --> we use global shift!
+	if (s_lasOpenDlg->doLoad(LAS_RETURN_NUMBER))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_RETURN_NUMBER, 1, 1, 7))); //3 bits: between 1 and 7
+	if (s_lasOpenDlg->doLoad(LAS_NUMBER_OF_RETURNS))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_NUMBER_OF_RETURNS, 1, 1, 7))); //3 bits: between 1 and 7
+	if (s_lasOpenDlg->doLoad(LAS_SCAN_DIRECTION))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_DIRECTION, 0, 0, 1))); //1 bit: 0 or 1
+	if (s_lasOpenDlg->doLoad(LAS_FLIGHT_LINE_EDGE))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_FLIGHT_LINE_EDGE, 0, 0, 1))); //1 bit: 0 or 1
+	if (s_lasOpenDlg->doLoad(LAS_SCAN_ANGLE_RANK))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_ANGLE_RANK, 0, -90, 90))); //signed char: between -90 and +90
+	if (s_lasOpenDlg->doLoad(LAS_USER_DATA))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_USER_DATA, 0, 0, 255))); //unsigned char: between 0 and 255
+	if (s_lasOpenDlg->doLoad(LAS_POINT_SOURCE_ID))
+		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535))); //16 bits: between 0 and 65536
+
+	//first point: check for 'big' coordinates
+	CCVector3d P(point_view->getFieldAs<double>(Id::X, 0), 
+				 point_view->getFieldAs<double>(Id::Y, 0),
+				 point_view->getFieldAs<double>(Id::Z, 0));
+	//backup input global parameters
+	ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
+	bool useLasShift = false;
+	//set the LAS shift as default shift (if none was provided)
+	if (lasShift.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
+	{
+		useLasShift = true;
+		Pshift = lasShift;
+		if (	csModeBackup != ccGlobalShiftManager::NO_DIALOG
+			&&	csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
+		{
+			parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
+		}
+	}
+	if (HandleGlobalShift(P, Pshift, parameters, useLasShift))
+	{
+		loadedCloud->setGlobalShift(Pshift);
+		ccLog::Warning("[LAS] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+	}
+
+	//restore previous parameters
+	parameters.shiftHandlingMode = csModeBackup;
+
+
+	QScopedPointer<ccProgressDialog> pDlg(0);
+	if (parameters.parentWidget)
+	{
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+		pDlg->setMethodTitle(QObject::tr("Open LAS file"));
+		pDlg->setInfo(QObject::tr("Points: %1").arg(nbOfPoints));
+		pDlg->start();
+	}
+	CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
+
+	unsigned int count = 0;
+	for (pdal::PointId idx = 0; idx < point_view->size(); ++idx) {
+		CCVector3 P(static_cast<PointCoordinateType>(point_view->getFieldAs<double>(Id::X, idx) + Pshift.x),
+					static_cast<PointCoordinateType>(point_view->getFieldAs<double>(Id::Y, idx) + Pshift.y),
+					static_cast<PointCoordinateType>(point_view->getFieldAs<double>(Id::Z, idx) + Pshift.z));
+		loadedCloud->addPoint(P);
+
+		for (LasField::Shared field: fieldsToLoad)
+		{
+			double value = 0.0;
+			switch (field->type)
+			{
+			case LAS_INTENSITY:
+				value = point_view->getFieldAs<double>(Id::Intensity, idx);
+				break;
+			case LAS_RETURN_NUMBER:
+				value = point_view->getFieldAs<double>(Id::ReturnNumber, idx);
+				break;
+			case LAS_NUMBER_OF_RETURNS:
+				value = point_view->getFieldAs<double>(Id::NumberOfReturns, idx);
+				break;
+			case LAS_SCAN_DIRECTION:
+				value = point_view->getFieldAs<double>(Id::ScanDirectionFlag, idx);
+				break;
+			case LAS_FLIGHT_LINE_EDGE:
+				value = point_view->getFieldAs<double>(Id::EdgeOfFlightLine, idx);
+				break;
+			case LAS_CLASSIFICATION:
+				value = point_view->getFieldAs<double>(Id::Classification, idx);
+				count++;
+				break;
+			case LAS_SCAN_ANGLE_RANK:
+				value = point_view->getFieldAs<double>(Id::ScanAngleRank, idx);
+				break;
+			case LAS_USER_DATA:
+				value = point_view->getFieldAs<double>(Id::UserData, idx);
+				break;
+			case LAS_POINT_SOURCE_ID:
+				value = point_view->getFieldAs<double>(Id::PointSourceId, idx);
+				break;
+			case LAS_TIME:
+				value = point_view->getFieldAs<double>(Id::GpsTime, idx);
+				if (field->sf)
+				{
+					//shift time values (so as to avoid losing accuracy)
+					value -= field->sf->getGlobalShift();
+				}
+				break;
+			case LAS_CLASSIF_VALUE:
+				value = (point_view->getFieldAs<int>(Id::Classification, idx) & 31); //5 bits
+				break;
+			case LAS_CLASSIF_SYNTHETIC:
+				value = (point_view->getFieldAs<int>(Id::Classification, idx) & 32); //bit #6
+				break;
+			case LAS_CLASSIF_KEYPOINT:
+				value = (point_view->getFieldAs<int>(Id::Classification, idx) & 64); //bit #7
+				break;
+			case LAS_CLASSIF_WITHHELD:
+				value = (point_view->getFieldAs<int>(Id::Classification, idx) & 128); //bit #8
+				break;
+			default:
+				//ignored
+				assert(false);
+				continue;
+			}
+			if (field->sf)
+			{
+				ScalarType s = static_cast<ScalarType>(value);
+				field->sf->addElement(s);
+			}
+			else
+			{
+				//first point? we track its value
+				if (loadedCloud->size() == 1)
+				{
+					field->firstValue = value;
+				}
+				if (	!ignoreDefaultFields
+					||	value != field->firstValue
+					||	(field->firstValue != field->defaultValue && field->firstValue >= field->minValue))
+				{
+					field->sf = new ccScalarField(qPrintable(field->getName()));
+					std::cerr<<"created: "<<field->getName().toStdString()<<std::endl;
+					std::cerr<< value<< std::endl;
+					if (field->sf->reserve(fileChunkSize))
+					{
+						field->sf->link();
+
+						if (field->type == LAS_TIME)
+						{
+							//we use the first value as 'global shift' (otherwise we will lose accuracy)
+							field->sf->setGlobalShift(field->firstValue);
+							value -= field->firstValue;
+							ccLog::Warning("[LAS] Time SF has been shifted to prevent a loss of accuracy (%.2f)",field->firstValue);
+							field->firstValue = 0;
+						}
+
+						for (int i = 0; i < idx; ++i) {
+							field->sf->addElement(static_cast<ScalarType>(field->defaultValue)); 
+						}
+						ScalarType s = static_cast<ScalarType>(value);
+						field->sf->addElement(s);
+					}
+					else
+					{
+						ccLog::Warning(QString("[LAS] Not enough memory: '%1' field will be ignored!").arg(LAS_FIELD_NAMES[field->type]));
+						field->sf->release();
+						field->sf = 0;
+					}
+				}
+				
+			}
+
+		}
+		nProgress.oneStep();
+	}
+	std::cerr<<"count: "<<count<<std::endl;
+
+	container.addChild(loadedCloud);
+
+	while (!fieldsToLoad.empty())
+	{
+		LasField::Shared& field = fieldsToLoad.back();
+		if (field && field->sf)
+		{
+			field->sf->computeMinAndMax();
+
+			if (	field->type == LAS_CLASSIFICATION
+				||	field->type == LAS_CLASSIF_VALUE
+				||	field->type == LAS_CLASSIF_SYNTHETIC
+				||	field->type == LAS_CLASSIF_KEYPOINT
+				||	field->type == LAS_CLASSIF_WITHHELD
+				||	field->type == LAS_RETURN_NUMBER
+				||	field->type == LAS_NUMBER_OF_RETURNS)
+			{
+				int cMin = static_cast<int>(field->sf->getMin());
+				int cMax = static_cast<int>(field->sf->getMax());
+				field->sf->setColorRampSteps(std::min<int>(cMax - cMin + 1, 256));
+				//classifSF->setMinSaturation(cMin);
+				
+			}
+			else if (field->type == LAS_INTENSITY)
+			{
+				field->sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
+			}
+			std::cerr << field->getName().toStdString() << " len: " << field->sf->currentSize() << std::endl;
+
+			int sfIndex = loadedCloud->addScalarField(field->sf);
+			if (!loadedCloud->hasDisplayedScalarField())
+			{
+				loadedCloud->setCurrentDisplayedScalarField(sfIndex);
+				// loadedCloud->showSF(!thisChunkHasColors);
+			}
+			field->sf->release();
+			field->sf = 0;
+		}
+		else
+		{
+			ccLog::Warning(QString("[LAS] All '%1' values were the same (%2)! We ignored them...").arg(field->type == LAS_EXTRA ? field->getName() : QString(LAS_FIELD_NAMES[field->type])).arg(field->firstValue));
+		}
+
+		fieldsToLoad.pop_back();
+		//nProgress.oneStep();
+	}
+
+
+	if (loadColor)
+	{
+
+	}
+}
+
+
 CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
+	return pdal_load( filename, container, parameters);
+
 	//opening file
 	std::ifstream ifs;
 	ifs.open(qPrintable(filename), std::ios::in | std::ios::binary); //DGM: warning, toStdString doesn't preserve "local" characters
@@ -777,7 +1144,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				{
 					dimensions.push_back(it->GetName());
 				}
-				ccLog::PrintDebug(QString("\tDimension: %1 (size: %2 - type: %3)").arg(QString::fromStdString(it->GetName())).arg(it->GetByteSize()).arg(it->IsNumeric() ? (it->IsInteger() ? "integer" : "Float") : "Non numeric"));
+				ccLog::Print(QString("\tDimension: %1 (size: %2 - type: %3)").arg(QString::fromStdString(it->GetName())).arg(it->GetByteSize()).arg(it->IsNumeric() ? (it->IsInteger() ? "integer" : "Float") : "Non numeric"));
 				++it;
 			}
 		}
@@ -1432,8 +1799,8 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 
 	ifs.close();
-
 	return result;
 }
+
 
 #endif

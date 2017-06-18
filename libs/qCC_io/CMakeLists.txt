@@ -36,6 +36,14 @@ qt5_use_modules(${PROJECT_NAME} Core)
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} )
 
+# pdal
+find_package(PDAL 1.0.0 REQUIRED CONFIG)
+include_directories(${PDAL_INCLUDE_DIRS})
+link_directories(${PDAL_LIBRARY_DIRS})
+add_definitions(${PDAL_DEFINITIONS})
+target_link_libraries(${PROJECT_NAME} ${PDAL_LIBRARIES})
+
+
 # Add custom preprocessor definitions
 if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_IO_USE_AS_DLL )

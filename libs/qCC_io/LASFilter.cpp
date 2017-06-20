@@ -787,15 +787,7 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 
 	//ICI le BORDEL DU TILING
 
-	//RGB color
-	liblas::Color rgbColorMask; //(0,0,0) on construction
-	if (s_lasOpenDlg->doLoad(LAS_RED))
-		rgbColorMask.SetRed(~0);
-	if (s_lasOpenDlg->doLoad(LAS_GREEN))
-		rgbColorMask.SetGreen(~0);
-	if (s_lasOpenDlg->doLoad(LAS_BLUE))
-		rgbColorMask.SetBlue(~0);
-	bool loadColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
+	bool loadColor = (s_lasOpenDlg->doLoad(LAS_RED) || s_lasOpenDlg->doLoad(LAS_GREEN) || s_lasOpenDlg->doLoad(LAS_BLUE));
 
 	unsigned pointsRead = 0;
 	CCVector3d Pshift(0, 0, 0);
@@ -893,6 +885,37 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 					static_cast<PointCoordinateType>(point_view->getFieldAs<double>(Id::Y, idx) + Pshift.y),
 					static_cast<PointCoordinateType>(point_view->getFieldAs<double>(Id::Z, idx) + Pshift.z));
 		loadedCloud->addPoint(P);
+
+		if (loadColor && point_view->hasDim(Id::Red) && point_view->hasDim(Id::Green) && point_view->hasDim(Id::Blue)) // To much since loadCloud can only be true if colors are present
+		{
+			unsigned short red = point_view->getFieldAs<unsigned short>(Id::Red, idx);
+			unsigned short green = point_view->getFieldAs<unsigned short>(Id::Green, idx);
+			unsigned short blue = point_view->getFieldAs<unsigned short>(Id::Blue, idx);
+
+			if (!loadedCloud->hasColors())
+			{
+				if (red || green || blue)
+				{
+					if (loadedCloud->reserveTheRGBTable())
+					{
+						for (int i = 0; i < idx - 1; ++i)
+						{
+							loadedCloud->addRGBColor(ccColor::black.rgba);
+						}
+					}
+					else
+					{
+						ccLog::Warning("[LAS]: Not enough memory, color field will be ignored!");
+						loadColor = false;
+					}
+				}
+			}
+			ColorCompType rgb[3] = { 0 , 0, 0 };
+			rgb[0] = red;
+			rgb[1] = green;
+			rgb[2] = blue;
+			loadedCloud->addRGBColor(rgb);
+		}
 
 		for (LasField::Shared field: fieldsToLoad)
 		{
@@ -1005,6 +1028,10 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 	}
 	std::cerr<<"count: "<<count<<std::endl;
 
+	loadedCloud->setMetaData(LAS_SCALE_X_META_DATA, QVariant(lasScale.x));
+	loadedCloud->setMetaData(LAS_SCALE_Y_META_DATA, QVariant(lasScale.y));
+	loadedCloud->setMetaData(LAS_SCALE_Z_META_DATA, QVariant(lasScale.z));
+
 	container.addChild(loadedCloud);
 
 	while (!fieldsToLoad.empty())
@@ -1038,7 +1065,7 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 			if (!loadedCloud->hasDisplayedScalarField())
 			{
 				loadedCloud->setCurrentDisplayedScalarField(sfIndex);
-				// loadedCloud->showSF(!thisChunkHasColors);
+				loadedCloud->showSF(!loadedCloud->hasColors());
 			}
 			field->sf->release();
 			field->sf = 0;
@@ -1049,14 +1076,10 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 		}
 
 		fieldsToLoad.pop_back();
-		//nProgress.oneStep();
 	}
 
 
-	if (loadColor)
-	{
 
-	}
 }
 
 

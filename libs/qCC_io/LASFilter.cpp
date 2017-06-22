@@ -757,7 +757,7 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 	for (auto &dimId: dims)
 	{
 		dimensions.push_back(pdal::Dimension::name(dimId));
-		std::cerr << "dim: " << pdal::Dimension::name(dimId) << " -> " << point_view->hasDim(dimId) << std::endl;
+		// std::cerr << "dim: " << pdal::Dimension::name(dimId) << " -> " << point_view->hasDim(dimId) << std::endl;
 
 	}
 
@@ -789,7 +789,6 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 
 	bool loadColor = (s_lasOpenDlg->doLoad(LAS_RED) || s_lasOpenDlg->doLoad(LAS_GREEN) || s_lasOpenDlg->doLoad(LAS_BLUE));
 
-	unsigned pointsRead = 0;
 	CCVector3d Pshift(0, 0, 0);
 
 	//by default we read colors as triplets of 8 bits integers but we might dynamically change this
@@ -798,48 +797,8 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 	bool forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
 	ColorCompType rgb[3] = { 0, 0, 0 };
 
-	ccPointCloud* loadedCloud = 0;
-	loadedCloud = new ccPointCloud();
-	unsigned int fileChunkSize = std::min(nbOfPoints, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
-	if (!loadedCloud->reserveThePointsTable(fileChunkSize))
-	{
-		ccLog::Warning("[LAS] Not enough memory!");
-		delete loadedCloud;
-		return CC_FERR_NOT_ENOUGH_MEMORY;
-	}
-	//check memory
-	loadedCloud->setGlobalShift(Pshift);
-	std::vector< LasField::Shared > fieldsToLoad;
 
-	//DGM: from now on, we only enable scalar fields when we detect a valid value!
-	if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIFICATION, 0, 0, 255))); //unsigned char: between 0 and 255
-	if (s_lasOpenDlg->doLoad(LAS_CLASSIF_VALUE))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_VALUE, 0, 0, 31))); //5 bits: between 0 and 31
-	if (s_lasOpenDlg->doLoad(LAS_CLASSIF_SYNTHETIC))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1))); //1 bit: 0 or 1
-	if (s_lasOpenDlg->doLoad(LAS_CLASSIF_KEYPOINT))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1))); //1 bit: 0 or 1
-	if (s_lasOpenDlg->doLoad(LAS_CLASSIF_WITHHELD))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1))); //1 bit: 0 or 1
-	if (s_lasOpenDlg->doLoad(LAS_INTENSITY))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_INTENSITY, 0, 0, 65535))); //16 bits: between 0 and 65536
-	if (s_lasOpenDlg->doLoad(LAS_TIME))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_TIME, 0, 0, -1.0))); //8 bytes (double) --> we use global shift!
-	if (s_lasOpenDlg->doLoad(LAS_RETURN_NUMBER))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_RETURN_NUMBER, 1, 1, 7))); //3 bits: between 1 and 7
-	if (s_lasOpenDlg->doLoad(LAS_NUMBER_OF_RETURNS))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_NUMBER_OF_RETURNS, 1, 1, 7))); //3 bits: between 1 and 7
-	if (s_lasOpenDlg->doLoad(LAS_SCAN_DIRECTION))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_DIRECTION, 0, 0, 1))); //1 bit: 0 or 1
-	if (s_lasOpenDlg->doLoad(LAS_FLIGHT_LINE_EDGE))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_FLIGHT_LINE_EDGE, 0, 0, 1))); //1 bit: 0 or 1
-	if (s_lasOpenDlg->doLoad(LAS_SCAN_ANGLE_RANK))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_ANGLE_RANK, 0, -90, 90))); //signed char: between -90 and +90
-	if (s_lasOpenDlg->doLoad(LAS_USER_DATA))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_USER_DATA, 0, 0, 255))); //unsigned char: between 0 and 255
-	if (s_lasOpenDlg->doLoad(LAS_POINT_SOURCE_ID))
-		fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535))); //16 bits: between 0 and 65536
+	std::vector< LasField::Shared > fieldsToLoad;
 
 	//first point: check for 'big' coordinates
 	CCVector3d P(point_view->getFieldAs<double>(Id::X, 0), 
@@ -859,16 +818,9 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 			parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
 		}
 	}
-	if (HandleGlobalShift(P, Pshift, parameters, useLasShift))
-	{
-		loadedCloud->setGlobalShift(Pshift);
-		ccLog::Warning("[LAS] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
-	}
 
 	//restore previous parameters
 	parameters.shiftHandlingMode = csModeBackup;
-
-
 	QScopedPointer<ccProgressDialog> pDlg(0);
 	if (parameters.parentWidget)
 	{
@@ -880,11 +832,168 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 	CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
 
 	unsigned int count = 0;
-	for (pdal::PointId idx = 0; idx < point_view->size(); ++idx) {
+	unsigned int fileChunkPos = 0;
+	unsigned int fileChunkSize = 0;
+
+	ccPointCloud* loadedCloud = 0;
+
+	for (pdal::PointId idx = 0; idx < point_view->size()+1; ++idx) {
+
+		if (idx == point_view->size() || idx == fileChunkPos + fileChunkSize)
+		{
+			//asert tilin
+			if (loadedCloud)
+			{
+				if (loadedCloud->size())
+				{
+					
+					bool thisChunkHasColors = loadedCloud->hasColors();
+					loadedCloud->showColors(thisChunkHasColors);
+					if (loadColor && !thisChunkHasColors)
+					{
+						ccLog::Warning("[LAS] Color field was all black! We ignored it...");
+					}
+
+					while (!fieldsToLoad.empty())
+					{
+						LasField::Shared& field = fieldsToLoad.back();
+						if (field && field->sf)
+						{
+							field->sf->computeMinAndMax();
+
+							if (	field->type == LAS_CLASSIFICATION
+								||	field->type == LAS_CLASSIF_VALUE
+								||	field->type == LAS_CLASSIF_SYNTHETIC
+								||	field->type == LAS_CLASSIF_KEYPOINT
+								||	field->type == LAS_CLASSIF_WITHHELD
+								||	field->type == LAS_RETURN_NUMBER
+								||	field->type == LAS_NUMBER_OF_RETURNS)
+							{
+								int cMin = static_cast<int>(field->sf->getMin());
+								int cMax = static_cast<int>(field->sf->getMax());
+								field->sf->setColorRampSteps(std::min<int>(cMax - cMin + 1, 256));
+								//classifSF->setMinSaturation(cMin);
+								
+							}
+							else if (field->type == LAS_INTENSITY)
+							{
+								field->sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
+							}
+
+							int sfIndex = loadedCloud->addScalarField(field->sf);
+							if (!loadedCloud->hasDisplayedScalarField())
+							{
+								loadedCloud->setCurrentDisplayedScalarField(sfIndex);
+								loadedCloud->showSF(!loadedCloud->hasColors());
+							}
+							field->sf->release();
+							field->sf = 0;
+						}
+						else
+						{
+							ccLog::Warning(QString("[LAS] All '%1' values were the same (%2)! We ignored them...").arg(field->type == LAS_EXTRA ? field->getName() : QString(LAS_FIELD_NAMES[field->type])).arg(field->firstValue));
+						}
+
+						fieldsToLoad.pop_back();
+					}
+
+				
+					// if we had reserved too much memory
+					if (loadedCloud->size() < loadedCloud->capacity())
+					{
+						loadedCloud->resize(loadedCloud->size());
+					}
+
+					QString chunkName("unnamed - Cloud");
+					unsigned n = container.getChildrenNumber();
+					if (n != 0)
+					{
+						if (n == 1)
+						{
+							container.getChild(0)->setName(chunkName + QString(" #1"));
+						}
+						chunkName += QString(" #%1").arg(n + 1);
+					}
+					loadedCloud->setName(chunkName);
+
+					loadedCloud->setMetaData(LAS_SCALE_X_META_DATA, QVariant(lasScale.x));
+					loadedCloud->setMetaData(LAS_SCALE_Y_META_DATA, QVariant(lasScale.y));
+					loadedCloud->setMetaData(LAS_SCALE_Z_META_DATA, QVariant(lasScale.z));
+
+					container.addChild(loadedCloud);
+					loadedCloud = 0;
+				}
+				else
+				{
+					//empty cloud?!
+					delete loadedCloud;
+					loadedCloud = 0;
+				}
+			}
+
+			if (idx == point_view->size())
+			{
+				break;
+			}
+			
+			// otherwise, we must create a new cloud
+			fileChunkPos = idx;
+			unsigned int pointsToRead = static_cast<unsigned int>(point_view->size()) - idx;
+			fileChunkSize = std::min(pointsToRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
+			loadedCloud = new ccPointCloud();
+			
+			if (!loadedCloud->reserveThePointsTable(fileChunkSize))
+			{
+				ccLog::Warning("[LAS] Not enough memory!");
+				delete loadedCloud;
+				return CC_FERR_NOT_ENOUGH_MEMORY;
+			}
+			loadedCloud->setGlobalShift(Pshift);
+
+			//save the Spatial reference as meta-data
+			//loadedCloud->setMetaData(s_LAS_SRS_Key, QVariant::fromValue(header.GetSRS()));
+
+
+			//DGM: from now on, we only enable scalar fields when we detect a valid value!
+			if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIFICATION, 0, 0, 255))); //unsigned char: between 0 and 255
+			if (s_lasOpenDlg->doLoad(LAS_CLASSIF_VALUE))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_VALUE, 0, 0, 31))); //5 bits: between 0 and 31
+			if (s_lasOpenDlg->doLoad(LAS_CLASSIF_SYNTHETIC))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1))); //1 bit: 0 or 1
+			if (s_lasOpenDlg->doLoad(LAS_CLASSIF_KEYPOINT))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1))); //1 bit: 0 or 1
+			if (s_lasOpenDlg->doLoad(LAS_CLASSIF_WITHHELD))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1))); //1 bit: 0 or 1
+			if (s_lasOpenDlg->doLoad(LAS_INTENSITY))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_INTENSITY, 0, 0, 65535))); //16 bits: between 0 and 65536
+			if (s_lasOpenDlg->doLoad(LAS_TIME))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_TIME, 0, 0, -1.0))); //8 bytes (double) --> we use global shift!
+			if (s_lasOpenDlg->doLoad(LAS_RETURN_NUMBER))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_RETURN_NUMBER, 1, 1, 7))); //3 bits: between 1 and 7
+			if (s_lasOpenDlg->doLoad(LAS_NUMBER_OF_RETURNS))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_NUMBER_OF_RETURNS, 1, 1, 7))); //3 bits: between 1 and 7
+			if (s_lasOpenDlg->doLoad(LAS_SCAN_DIRECTION))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_DIRECTION, 0, 0, 1))); //1 bit: 0 or 1
+			if (s_lasOpenDlg->doLoad(LAS_FLIGHT_LINE_EDGE))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_FLIGHT_LINE_EDGE, 0, 0, 1))); //1 bit: 0 or 1
+			if (s_lasOpenDlg->doLoad(LAS_SCAN_ANGLE_RANK))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_ANGLE_RANK, 0, -90, 90))); //signed char: between -90 and +90
+			if (s_lasOpenDlg->doLoad(LAS_USER_DATA))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_USER_DATA, 0, 0, 255))); //unsigned char: between 0 and 255
+			if (s_lasOpenDlg->doLoad(LAS_POINT_SOURCE_ID))
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535))); //16 bits: between 0 and 65536
+			
+			// extra fields
+		}
+
+
+
 		CCVector3 P(static_cast<PointCoordinateType>(point_view->getFieldAs<double>(Id::X, idx) + Pshift.x),
 					static_cast<PointCoordinateType>(point_view->getFieldAs<double>(Id::Y, idx) + Pshift.y),
 					static_cast<PointCoordinateType>(point_view->getFieldAs<double>(Id::Z, idx) + Pshift.z));
 		loadedCloud->addPoint(P);
+		
 
 		if (loadColor && point_view->hasDim(Id::Red) && point_view->hasDim(Id::Green) && point_view->hasDim(Id::Blue)) // To much since loadCloud can only be true if colors are present
 		{
@@ -917,6 +1026,7 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 			loadedCloud->addRGBColor(rgb);
 		}
 
+		// additional fields
 		for (LasField::Shared field: fieldsToLoad)
 		{
 			double value = 0.0;
@@ -977,6 +1087,7 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 			}
 			if (field->sf)
 			{
+				
 				ScalarType s = static_cast<ScalarType>(value);
 				field->sf->addElement(s);
 			}
@@ -992,12 +1103,10 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 					||	(field->firstValue != field->defaultValue && field->firstValue >= field->minValue))
 				{
 					field->sf = new ccScalarField(qPrintable(field->getName()));
-					std::cerr<<"created: "<<field->getName().toStdString()<<std::endl;
-					std::cerr<< value<< std::endl;
 					if (field->sf->reserve(fileChunkSize))
 					{
 						field->sf->link();
-
+						
 						if (field->type == LAS_TIME)
 						{
 							//we use the first value as 'global shift' (otherwise we will lose accuracy)
@@ -1007,7 +1116,7 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 							field->firstValue = 0;
 						}
 
-						for (int i = 0; i < idx; ++i) {
+						for (int i = 0; i < loadedCloud->size() - 1; ++i) {
 							field->sf->addElement(static_cast<ScalarType>(field->defaultValue)); 
 						}
 						ScalarType s = static_cast<ScalarType>(value);
@@ -1026,60 +1135,6 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 		}
 		nProgress.oneStep();
 	}
-	std::cerr<<"count: "<<count<<std::endl;
-
-	loadedCloud->setMetaData(LAS_SCALE_X_META_DATA, QVariant(lasScale.x));
-	loadedCloud->setMetaData(LAS_SCALE_Y_META_DATA, QVariant(lasScale.y));
-	loadedCloud->setMetaData(LAS_SCALE_Z_META_DATA, QVariant(lasScale.z));
-
-	container.addChild(loadedCloud);
-
-	while (!fieldsToLoad.empty())
-	{
-		LasField::Shared& field = fieldsToLoad.back();
-		if (field && field->sf)
-		{
-			field->sf->computeMinAndMax();
-
-			if (	field->type == LAS_CLASSIFICATION
-				||	field->type == LAS_CLASSIF_VALUE
-				||	field->type == LAS_CLASSIF_SYNTHETIC
-				||	field->type == LAS_CLASSIF_KEYPOINT
-				||	field->type == LAS_CLASSIF_WITHHELD
-				||	field->type == LAS_RETURN_NUMBER
-				||	field->type == LAS_NUMBER_OF_RETURNS)
-			{
-				int cMin = static_cast<int>(field->sf->getMin());
-				int cMax = static_cast<int>(field->sf->getMax());
-				field->sf->setColorRampSteps(std::min<int>(cMax - cMin + 1, 256));
-				//classifSF->setMinSaturation(cMin);
-				
-			}
-			else if (field->type == LAS_INTENSITY)
-			{
-				field->sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
-			}
-			std::cerr << field->getName().toStdString() << " len: " << field->sf->currentSize() << std::endl;
-
-			int sfIndex = loadedCloud->addScalarField(field->sf);
-			if (!loadedCloud->hasDisplayedScalarField())
-			{
-				loadedCloud->setCurrentDisplayedScalarField(sfIndex);
-				loadedCloud->showSF(!loadedCloud->hasColors());
-			}
-			field->sf->release();
-			field->sf = 0;
-		}
-		else
-		{
-			ccLog::Warning(QString("[LAS] All '%1' values were the same (%2)! We ignored them...").arg(field->type == LAS_EXTRA ? field->getName() : QString(LAS_FIELD_NAMES[field->type])).arg(field->firstValue));
-		}
-
-		fieldsToLoad.pop_back();
-	}
-
-
-
 }
 
 

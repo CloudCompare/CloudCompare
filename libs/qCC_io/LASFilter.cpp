@@ -48,9 +48,13 @@ Q_DECLARE_METATYPE(liblas::SpatialReference)
 #include <memory>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/Dimension.hpp>
 #include <pdal/io/LasReader.hpp>
 #include <pdal/io/LasHeader.hpp>
-#include <pdal/Options.hpp>
+#include <pdal/io/LasWriter.hpp>
+#include <pdal/io/BufferReader.hpp>
+
 using namespace pdal::Dimension;
 
 //Qt gui
@@ -233,8 +237,29 @@ protected:
     size_t writeCounter;
 };
 
+
+//class PDALLASWriter
+//{
+//public:
+//    PDALLASWriter()
+//        :w(0)
+//        ,writeCounter(0)
+//    {}
+
+
+//    virtual ~PDALLASWriter()
+//    {}
+
+//    bool open(const QString& _filename, const pdal::LasHeader& header)
+//    {
+
+//    }
+
+//};
+
 CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
+    return pdalSaveToFile(entity,filename, parameters);
     if (!entity || filename.isEmpty())
         return CC_FERR_BAD_ARGUMENT;
 
@@ -521,6 +546,207 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
     return result;
 }
 
+  CC_FILE_ERROR LASFilter::pdalSaveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+  {
+    if (!entity || filename.isEmpty())
+        return CC_FERR_BAD_ARGUMENT;
+
+    ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(entity);
+    if (!theCloud)
+    {
+        ccLog::Warning("[LAS] This filter can only save one cloud at a time");
+        return CC_FERR_BAD_ENTITY_TYPE;
+    }
+
+    unsigned numberOfPoints = theCloud->size();
+    if (numberOfPoints == 0)
+    {
+        ccLog::Warning("[LAS] Cloud is empty!");
+        return CC_FERR_NO_SAVE;
+    }
+
+    //colors
+    bool hasColors = theCloud->hasColors();
+
+    //additional fields (as scalar fields)
+    std::vector<LasField> fieldsToSave;
+
+    if (theCloud->isA(CC_TYPES::POINT_CLOUD))
+    {
+        ccPointCloud* pc = static_cast<ccPointCloud*>(theCloud);
+
+        //match cloud SFs with official LASfields
+        LasField::GetLASFields(pc, fieldsToSave);
+    }
+
+    //progress dialog
+    QScopedPointer<ccProgressDialog> pDlg(0);
+    if (parameters.parentWidget)
+    {
+        pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+        pDlg->setMethodTitle(QObject::tr("Save LAS file"));
+        pDlg->setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
+        pDlg->start();
+    }
+    CCLib::NormalizedProgress nProgress(pDlg.data(), numberOfPoints);
+
+    pdal::LasWriter writer;
+    pdal::Options writerOptions;
+    pdal::PointTable table;
+    pdal::BufferReader bufferReader;
+
+    pdal::Dimension::IdList dimsToSave;
+    for (LasField &lasField: fieldsToSave)
+    {
+        dimsToSave.push_back(pdal::Dimension::id(lasField.getName().toStdString()));
+        table.layout()->registerDim(pdal::Dimension::id(lasField.getName().toStdString()));
+    }
+    if (hasColors)
+    {
+        table.layout()->registerDim(Id::Red);
+        table.layout()->registerDim(Id::Green);
+        table.layout()->registerDim(Id::Blue);
+    }
+
+    pdal::Dimension::IdList dims = table.layout()->dims();
+    for (auto &dimId: dims)
+    {
+         std::cerr << "dim: " << pdal::Dimension::name(dimId) << std::endl;
+    }
+    table.layout()->registerDim(Id::X);
+    table.layout()->registerDim(Id::Y);
+    table.layout()->registerDim(Id::Z);
+
+    pdal::PointViewPtr point_view(new pdal::PointView(table));
+
+    for (unsigned i = 0; i < numberOfPoints; ++i)
+    {
+        const CCVector3* P = theCloud->getPoint(i);
+        {
+            CCVector3d Pglobal = theCloud->toGlobal3d<PointCoordinateType>(*P);
+            point_view->setField(Id::X, i, Pglobal.x);
+            point_view->setField(Id::Y, i, Pglobal.y);
+            point_view->setField(Id::Z, i, Pglobal.z);
+        }
+        nProgress.oneStep();
+
+
+        if (hasColors)
+        {
+            //DGM: LAS colors are stored on 16 bits!
+            const ColorCompType* rgb = theCloud->getPointColor(i);
+            point_view->setField(Id::Red,   i, static_cast<uint16_t>(rgb[0]) << 8);
+            point_view->setField(Id::Green, i, static_cast<uint16_t>(rgb[1]) << 8);
+            point_view->setField(Id::Blue,  i, static_cast<uint16_t>(rgb[2]) << 8);
+        }
+
+        //additional fields
+        for (std::vector<LasField>::const_iterator it = fieldsToSave.begin(); it != fieldsToSave.end(); ++it)
+        {
+            assert(it->sf);
+            switch(it->type)
+            {
+            case LAS_X:
+            case LAS_Y:
+            case LAS_Z:
+                assert(false);
+                break;
+            case LAS_INTENSITY:
+                point_view->setField(Id::Intensity, i, static_cast<boost::uint16_t>(it->sf->getValue(i)));
+                break;
+            case LAS_RETURN_NUMBER:
+                point_view->setField(Id::ReturnNumber, i, static_cast<boost::uint16_t>(it->sf->getValue(i)));
+                break;
+            case LAS_NUMBER_OF_RETURNS:
+                point_view->setField(Id::NumberOfReturns, i, static_cast<boost::uint16_t>(it->sf->getValue(i)));
+                break;
+            case LAS_SCAN_DIRECTION:
+                point_view->setField(Id::ScanDirectionFlag, i, static_cast<boost::uint16_t>(it->sf->getValue(i)));
+                break;
+            case LAS_FLIGHT_LINE_EDGE:
+                point_view->setField(Id::EdgeOfFlightLine, i, static_cast<boost::uint16_t>(it->sf->getValue(i)));
+                break;
+            case LAS_CLASSIFICATION:
+            {
+                boost::uint32_t val = static_cast<boost::uint32_t>(it->sf->getValue(i));
+                point_view->setField(Id::Classification, i, val);
+
+                // How to set the flags with pdal ?
+                // Point format >6 :classifation takes the full 8 bits
+
+//                classif.SetClass(val & 31);		//first 5 bits
+//                classif.SetSynthetic(val & 32); //6th bit
+//                classif.SetKeyPoint(val & 64);	//7th bit
+//                classif.SetWithheld(val & 128);	//8th bit
+            }
+                break;
+            case LAS_SCAN_ANGLE_RANK:
+                point_view->setField(Id::ScanAngleRank, i, static_cast<boost::uint8_t>(it->sf->getValue(i)));
+                break;
+            case LAS_USER_DATA:
+                point_view->setField(Id::UserData, i, static_cast<boost::uint8_t>(it->sf->getValue(i)));
+                break;
+            case LAS_POINT_SOURCE_ID:
+                point_view->setField(Id::PointSourceId, i, static_cast<boost::uint16_t>(it->sf->getValue(i)));
+                break;
+            case LAS_RED:
+            case LAS_GREEN:
+            case LAS_BLUE:
+                assert(false);
+                break;
+            case LAS_TIME:
+                point_view->setField(Id::GpsTime, i, static_cast<double>(it->sf->getValue(i)) + it->sf->getGlobalShift());
+                break;
+//            case LAS_CLASSIF_VALUE:
+//                classif.SetClass(static_cast<boost::uint32_t>(it->sf->getValue(i)));
+//                break;
+//            case LAS_CLASSIF_SYNTHETIC:
+//                classif.SetSynthetic(static_cast<boost::uint32_t>(it->sf->getValue(i)));
+//                break;
+//            case LAS_CLASSIF_KEYPOINT:
+//                classif.SetKeyPoint(static_cast<boost::uint32_t>(it->sf->getValue(i)));
+//                break;
+//            case LAS_CLASSIF_WITHHELD:
+//                classif.SetWithheld(static_cast<boost::uint32_t>(it->sf->getValue(i)));
+//                break;
+            case LAS_INVALID:
+            default:
+                assert(false);
+                break;
+            }
+        }
+    }
+
+    writerOptions.add("filename", filename.toStdString());
+
+    dims = point_view->dims();
+    for (auto &dimId: dims)
+    {
+         std::cerr << "dim: " << pdal::Dimension::name(dimId) << std::endl;
+    }
+
+    try
+    {
+        bufferReader.addView(point_view);
+        writer.setInput(bufferReader);
+        writer.setOptions(writerOptions);
+        writer.prepare(table);
+        writer.execute(table);
+    }
+    catch (const pdal::pdal_error& e)
+    {
+        ccLog::Error(QString("PDAL exception '%1'").arg(e.what()));
+        return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
+    }
+    catch (...)
+    {
+        return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+    }
+
+    return CC_FERR_NO_ERROR;
+  }
+
+
 QSharedPointer<LASOpenDlg> s_lasOpenDlg(0);
 
 //! LAS 1.4 EVLR record
@@ -744,8 +970,6 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
     CCVector3d lasScale =  CCVector3d(las_header.scaleX(), las_header.scaleY(), las_header.scaleZ());
     CCVector3d lasShift = -CCVector3d(las_header.offsetX(), las_header.offsetY(), las_header.offsetZ());
 
-    // ccLog::Print(QString("my Dimensions: %1").arg(QString::number(dims.size())));
-
     unsigned int nbOfPoints = las_header.pointCount();
     if (nbOfPoints == 0)
     {
@@ -757,8 +981,7 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
     for (auto &dimId: dims)
     {
         dimensions.push_back(pdal::Dimension::name(dimId));
-        // std::cerr << "dim: " << pdal::Dimension::name(dimId) << " -> " << point_view->hasDim(dimId) << std::endl;
-
+        std::cerr << "dim: " << pdal::Dimension::name(dimId) << " -> " << point_view->hasDim(dimId) << std::endl;
     }
 
     if (!s_lasOpenDlg)
@@ -877,7 +1100,6 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
     ccPointCloud* loadedCloud = 0;
 
     for (pdal::PointId idx = 0; idx < point_view->size()+1; ++idx) {
-
         if (idx == point_view->size() || idx == fileChunkPos + fileChunkSize)
         {
             //asert tilin
@@ -974,7 +1196,6 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
             {
                 break;
             }
-
             // otherwise, we must create a new cloud
             fileChunkPos = idx;
             unsigned int pointsToRead = static_cast<unsigned int>(point_view->size()) - idx;
@@ -1066,7 +1287,7 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
                     pushColor = false;
                 }
             }
-            if (1)
+            if (pushColor)
             {
                 //we test if the color components are on 16 bits (standard) or only on 8 bits (it happens ;)
                 if (!forced8bitRgbMode && colorCompBitShift == 0)

@@ -36,6 +36,7 @@ public:
 	virtual bool exportSupported() const override { return true; }
 	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters) override;
 	CC_FILE_ERROR pdal_load(QString filename, ccHObject& container, LoadParameters& parameters);
+    CC_FILE_ERROR pdalSaveToFile(ccHObject* entity, QString filename, SaveParameters& parameters);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters) override;
 	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
 	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }

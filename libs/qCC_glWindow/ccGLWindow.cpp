@@ -1378,6 +1378,10 @@ void ccGLWindow::refresh(bool only2D/*=false*/)
 {
 	if (m_shouldBeRefreshed && isVisible())
 	{
+		if (!only2D)
+		{
+			invalidateVisualization();
+		}
 		redraw(only2D);
 	}
 }

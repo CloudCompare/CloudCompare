@@ -728,6 +728,10 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glPushName(0); //fake ID, will be replaced by the arrows one if any
 		}
 
+		//force the light on
+		glFunc->glPushAttrib(GL_LIGHTING_BIT);
+		glFunc->glEnable(GL_LIGHT0);
+
 		DrawUnitArrow(X_MINUS_ARROW*pushName, CCVector3(minC.x, center.y, center.z), CCVector3(-1.0, 0.0, 0.0), scale, ccColor::red, componentContext);
 		DrawUnitArrow(X_PLUS_ARROW*pushName, CCVector3(maxC.x, center.y, center.z), CCVector3(1.0, 0.0, 0.0), scale, ccColor::red, componentContext);
 		DrawUnitArrow(Y_MINUS_ARROW*pushName, CCVector3(center.x, minC.y, center.z), CCVector3(0.0, -1.0, 0.0), scale, ccColor::green, componentContext);
@@ -742,6 +746,8 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		DrawUnitTorus(X_PLUS_TORUS*pushName, CCVector3(maxC.x, center.y, center.z), CCVector3(1.0, 0.0, 0.0), scale, c_lightRed, componentContext);
 		DrawUnitTorus(Y_PLUS_TORUS*pushName, CCVector3(center.x, maxC.y, center.z), CCVector3(0.0, 1.0, 0.0), scale, c_lightGreen, componentContext);
 		DrawUnitTorus(Z_PLUS_TORUS*pushName, CCVector3(center.x, center.y, maxC.z), CCVector3(0.0, 0.0, 1.0), scale, c_lightBlue, componentContext);
+
+		glFunc->glPopAttrib();
 
 		if (pushName)
 		{

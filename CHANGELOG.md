@@ -140,6 +140,7 @@ v2.8.1 - 16/02/2017
 	* [macOS] Fix the packaging of the qAnimation plugin so it can find the correct libraries
 	* qAnimation plugin: the export to separate frames was broken
 	* the polyline width was not correctly set in the properties dialog (always set to 'Default')
+	* the clipping box arrows were not displayed correctly when the lights were turned off
 
 v2.8 - 12/18/2016
 ----------------------

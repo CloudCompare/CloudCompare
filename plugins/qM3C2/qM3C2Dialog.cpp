@@ -370,35 +370,35 @@ void qM3C2Dialog::loadParamsFromPersistentSettings()
 void qM3C2Dialog::loadParamsFrom(const QSettings& settings)
 {
 	//read out parameters
-	double normalScale = settings.value("NormalScale",normalScaleDoubleSpinBox->value()).toDouble();
-	int normModeInt = settings.value("NormalMode",static_cast<int>(getNormalsComputationMode())).toInt();
-	double normMinScale = settings.value("NormalMinScale",minScaleDoubleSpinBox->value()).toDouble();
-	double normStep = settings.value("NormalStep",stepScaleDoubleSpinBox->value()).toDouble();
-	double normMaxScale = settings.value("NormalMaxScale",maxScaleDoubleSpinBox->value()).toDouble();
-	bool normUseCorePoints = settings.value("NormalUseCorePoints",normUseCorePointsCheckBox->isChecked()).toBool();
-	int normPreferredOri = settings.value("NormalPreferedOri",normOriPreferredComboBox->currentIndex()).toInt();
+	double normalScale = settings.value("NormalScale", normalScaleDoubleSpinBox->value()).toDouble();
+	int normModeInt = settings.value("NormalMode", static_cast<int>(getNormalsComputationMode())).toInt();
+	double normMinScale = settings.value("NormalMinScale", minScaleDoubleSpinBox->value()).toDouble();
+	double normStep = settings.value("NormalStep", stepScaleDoubleSpinBox->value()).toDouble();
+	double normMaxScale = settings.value("NormalMaxScale", maxScaleDoubleSpinBox->value()).toDouble();
+	bool normUseCorePoints = settings.value("NormalUseCorePoints", normUseCorePointsCheckBox->isChecked()).toBool();
+	int normPreferredOri = settings.value("NormalPreferedOri", normOriPreferredComboBox->currentIndex()).toInt();
 
-	double seachScale = settings.value("SearchScale",cylDiameterDoubleSpinBox->value()).toDouble();
-	double searchDepth = settings.value("SearchDepth",cylHalfHeightDoubleSpinBox->value()).toDouble();
-	
-	double subsampleRadius = settings.value("SubsampleRadius",cpSubsamplingDoubleSpinBox->value()).toDouble();
-	bool subsampleEnabled = settings.value("SubsampleEnabled",cpSubsampleRadioButton->isChecked()).toBool();
-	
-	double registrationError = settings.value("RegistrationError",rmsDoubleSpinBox->value()).toDouble();
-	bool registrationErrorEnabled = settings.value("RegistrationErrorEnabled",rmsCheckBox->isChecked()).toBool();
+	double seachScale = settings.value("SearchScale", cylDiameterDoubleSpinBox->value()).toDouble();
+	double searchDepth = settings.value("SearchDepth", cylHalfHeightDoubleSpinBox->value()).toDouble();
 
-	bool useSinglePass4Depth = settings.value("UseSinglePass4Depth",useSinglePass4DepthCheckBox->isChecked()).toBool();
-	bool positiveSearchOnly = settings.value("PositiveSearchOnly",positiveSearchOnlyCheckBox->isChecked()).toBool();
-	bool useMedian = settings.value("UseMedian",useMedianCheckBox->isChecked()).toBool();
-	
-	bool useMinPoints4Stat = settings.value("UseMinPoints4Stat",useMinPoints4StatCheckBox->isChecked()).toBool();
-	int minPoints4Stat = settings.value("MinPoints4Stat",minPoints4StatSpinBox->value()).toInt();
+	double subsampleRadius = settings.value("SubsampleRadius", cpSubsamplingDoubleSpinBox->value()).toDouble();
+	bool subsampleEnabled = settings.value("SubsampleEnabled", cpSubsampleRadioButton->isChecked()).toBool();
 
-	int projDestIndex = settings.value("ProjDestIndex",projDestComboBox->currentIndex()).toInt();
-	bool useOriginalCloud = settings.value("UseOriginalCloud",useOriginalCloudCheckBox->isChecked()).toBool();
+	double registrationError = settings.value("RegistrationError", rmsDoubleSpinBox->value()).toDouble();
+	bool registrationErrorEnabled = settings.value("RegistrationErrorEnabled", rmsCheckBox->isChecked()).toBool();
 
-	bool exportStdDevInfo = settings.value("ExportStdDevInfo",exportStdDevInfoCheckBox->isChecked()).toBool();
-	bool exportDensityAtProjScale = settings.value("ExportDensityAtProjScale",exportDensityAtProjScaleCheckBox->isChecked()).toBool();
+	bool useSinglePass4Depth = settings.value("UseSinglePass4Depth", useSinglePass4DepthCheckBox->isChecked()).toBool();
+	bool positiveSearchOnly = settings.value("PositiveSearchOnly", positiveSearchOnlyCheckBox->isChecked()).toBool();
+	bool useMedian = settings.value("UseMedian", useMedianCheckBox->isChecked()).toBool();
+
+	bool useMinPoints4Stat = settings.value("UseMinPoints4Stat", useMinPoints4StatCheckBox->isChecked()).toBool();
+	int minPoints4Stat = settings.value("MinPoints4Stat", minPoints4StatSpinBox->value()).toInt();
+
+	int projDestIndex = settings.value("ProjDestIndex", projDestComboBox->currentIndex()).toInt();
+	bool useOriginalCloud = settings.value("UseOriginalCloud", useOriginalCloudCheckBox->isChecked()).toBool();
+
+	bool exportStdDevInfo = settings.value("ExportStdDevInfo", exportStdDevInfoCheckBox->isChecked()).toBool();
+	bool exportDensityAtProjScale = settings.value("ExportDensityAtProjScale", exportDensityAtProjScaleCheckBox->isChecked()).toBool();
 
 	int maxThreadCount = settings.value("MaxThreadCount", maxThreadCountSpinBox->maximum()).toInt();
 
@@ -476,35 +476,35 @@ void qM3C2Dialog::saveParamsToPersistentSettings()
 void qM3C2Dialog::saveParamsTo(QSettings& settings)
 {
 	//save parameters
-	settings.setValue("NormalScale",normalScaleDoubleSpinBox->value());
-	settings.setValue("NormalMode",static_cast<int>(getNormalsComputationMode()));
-	settings.setValue("NormalMinScale",minScaleDoubleSpinBox->value());
-	settings.setValue("NormalStep",stepScaleDoubleSpinBox->value());
-	settings.setValue("NormalMaxScale",maxScaleDoubleSpinBox->value());
-	settings.setValue("NormalUseCorePoints",normUseCorePointsCheckBox->isChecked());
-	settings.setValue("NormalPreferedOri",normOriPreferredComboBox->currentIndex());
+	settings.setValue("NormalScale", normalScaleDoubleSpinBox->value());
+	settings.setValue("NormalMode", static_cast<int>(getNormalsComputationMode()));
+	settings.setValue("NormalMinScale", minScaleDoubleSpinBox->value());
+	settings.setValue("NormalStep", stepScaleDoubleSpinBox->value());
+	settings.setValue("NormalMaxScale", maxScaleDoubleSpinBox->value());
+	settings.setValue("NormalUseCorePoints", normUseCorePointsCheckBox->isChecked());
+	settings.setValue("NormalPreferedOri", normOriPreferredComboBox->currentIndex());
 
-	settings.setValue("SearchScale",cylDiameterDoubleSpinBox->value());
-	settings.setValue("SearchDepth",cylHalfHeightDoubleSpinBox->value());
-	
-	settings.setValue("SubsampleRadius",cpSubsamplingDoubleSpinBox->value());
-	settings.setValue("SubsampleEnabled",cpSubsampleRadioButton->isChecked());
-	
-	settings.setValue("RegistrationError",rmsDoubleSpinBox->value());
-	settings.setValue("RegistrationErrorEnabled",rmsCheckBox->isChecked());
+	settings.setValue("SearchScale", cylDiameterDoubleSpinBox->value());
+	settings.setValue("SearchDepth", cylHalfHeightDoubleSpinBox->value());
 
-	settings.setValue("UseSinglePass4Depth",useSinglePass4DepthCheckBox->isChecked());
-	settings.setValue("PositiveSearchOnly",positiveSearchOnlyCheckBox->isChecked());
-	settings.setValue("UseMedian",useMedianCheckBox->isChecked());
-	
-	settings.setValue("UseMinPoints4Stat",useMinPoints4StatCheckBox->isChecked());
-	settings.setValue("MinPoints4Stat",minPoints4StatSpinBox->value());
+	settings.setValue("SubsampleRadius", cpSubsamplingDoubleSpinBox->value());
+	settings.setValue("SubsampleEnabled", cpSubsampleRadioButton->isChecked());
 
-	settings.setValue("ProjDestIndex",projDestComboBox->currentIndex());
-	settings.setValue("UseOriginalCloud",useOriginalCloudCheckBox->isChecked());
+	settings.setValue("RegistrationError", rmsDoubleSpinBox->value());
+	settings.setValue("RegistrationErrorEnabled", rmsCheckBox->isChecked());
 
-	settings.setValue("ExportStdDevInfo",exportStdDevInfoCheckBox->isChecked());
-	settings.setValue("ExportDensityAtProjScale",exportDensityAtProjScaleCheckBox->isChecked());
+	settings.setValue("UseSinglePass4Depth", useSinglePass4DepthCheckBox->isChecked());
+	settings.setValue("PositiveSearchOnly", positiveSearchOnlyCheckBox->isChecked());
+	settings.setValue("UseMedian", useMedianCheckBox->isChecked());
+
+	settings.setValue("UseMinPoints4Stat", useMinPoints4StatCheckBox->isChecked());
+	settings.setValue("MinPoints4Stat", minPoints4StatSpinBox->value());
+
+	settings.setValue("ProjDestIndex", projDestComboBox->currentIndex());
+	settings.setValue("UseOriginalCloud", useOriginalCloudCheckBox->isChecked());
+
+	settings.setValue("ExportStdDevInfo", exportStdDevInfoCheckBox->isChecked());
+	settings.setValue("ExportDensityAtProjScale", exportDensityAtProjScaleCheckBox->isChecked());
 
 	settings.setValue("MaxThreadCount", maxThreadCountSpinBox->value());
 

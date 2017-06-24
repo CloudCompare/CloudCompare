@@ -924,6 +924,36 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 				ccLog::Warning("[Segmentation] Failed to convert 2D polyline to 3D! (internal inconsistency)");
 				mode2D = false;
 			}
+
+			//export Global Shift & Scale info (if any)
+			bool hasGlobalShift = false;
+			CCVector3d globalShift(0, 0, 0);
+			double globalScale = 1.0;
+			{
+				for (QSet<ccHObject*>::const_iterator it = m_toSegment.begin(); it != m_toSegment.end(); ++it)
+				{
+					ccShiftedObject* shifted = ccHObjectCaster::ToShifted(*it);
+					bool isShifted = (shifted && shifted->isShifted());
+					if (isShifted)
+					{
+						globalShift = shifted->getGlobalShift();
+						globalScale = shifted->getGlobalScale();
+						hasGlobalShift = true;
+						break;
+					}
+				}
+			}
+
+			if (hasGlobalShift && m_toSegment.size() != 1)
+			{
+				hasGlobalShift = (QMessageBox::question(MainWindow::TheInstance(), "Apply Global Shift", "At least one of the segmented entity has been shifted. Apply the same shift to the polyline?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes);
+			}
+
+			if (hasGlobalShift)
+			{
+				poly->setGlobalShift(globalShift);
+				poly->setGlobalScale(globalScale);
+			}
 		}
 		
 		QString polyName = QString("Segmentation polyline #%1").arg(++s_polylineExportCount);

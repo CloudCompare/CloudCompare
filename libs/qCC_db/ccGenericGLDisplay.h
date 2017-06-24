@@ -182,6 +182,11 @@ public:
 	**/
 	virtual void invalidateViewport() = 0;
 
+	//! Invalidates the 3D layer (FBO)
+	/** On next redraw, the 3D layer will be updated
+	**/
+	virtual void deprecate3DLayer() = 0;
+
 	//! Returns defaul text display font
 	/** Warning: already takes rendering zoom into account!
 	**/

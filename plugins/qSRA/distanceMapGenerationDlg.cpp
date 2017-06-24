@@ -569,6 +569,7 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 
 		m_window->invalidateViewport();
 		m_window->invalidateVisualization();
+		m_window->deprecate3DLayer();
 	}
 
 	m_window->redraw();

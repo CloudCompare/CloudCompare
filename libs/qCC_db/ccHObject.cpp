@@ -101,7 +101,10 @@ void ccHObject::notifyGeometryUpdate()
 {
 	//the associated display bounding-box is (potentially) deprecated!!!
 	if (m_currentDisplay)
+	{
 		m_currentDisplay->invalidateViewport();
+		m_currentDisplay->deprecate3DLayer();
+	}
 
 	//process dependencies
 	for (std::map<ccHObject*, int>::const_iterator it = m_dependencies.begin(); it != m_dependencies.end(); ++it)

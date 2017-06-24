@@ -170,6 +170,7 @@ public:
 	virtual void toBeRefreshed() override;
 	virtual void refresh(bool only2D = false) override;
 	virtual void invalidateViewport() override;
+	virtual void deprecate3DLayer() override;
 	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont()) override;
 	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0) override;
 	virtual QFont getTextDisplayFont() const override; //takes rendering zoom into account!

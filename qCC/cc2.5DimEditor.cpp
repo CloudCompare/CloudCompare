@@ -193,6 +193,7 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 
 	m_glWindow->invalidateViewport();
 	m_glWindow->invalidateVisualization();
+	m_glWindow->deprecate3DLayer();
 	m_glWindow->redraw();
 }
 

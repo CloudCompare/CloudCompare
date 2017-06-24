@@ -705,7 +705,8 @@ bool ccGLWindow::initialize()
 		//set viewport and visu. as invalid
 		invalidateViewport();
 		invalidateVisualization();
-
+		deprecate3DLayer();
+		
 		//FBO support (TODO: catch error?)
 		m_glExtFuncSupported = m_glExtFunc.initializeOpenGLFunctions();
 
@@ -1067,6 +1068,7 @@ void ccGLWindow::resizeGL(int w, int h)
 
 	invalidateViewport();
 	invalidateVisualization();
+	deprecate3DLayer();
 
 	if (m_initialized)
 	{
@@ -1372,16 +1374,13 @@ void ccGLWindow::toBeRefreshed()
 	m_shouldBeRefreshed = true;
 
 	invalidateViewport();
+	invalidateVisualization();
 }
 
 void ccGLWindow::refresh(bool only2D/*=false*/)
 {
 	if (m_shouldBeRefreshed && isVisible())
 	{
-		if (!only2D)
-		{
-			invalidateVisualization();
-		}
 		redraw(only2D);
 	}
 }
@@ -1398,7 +1397,8 @@ void ccGLWindow::redraw(bool only2D/*=false*/, bool resetLOD/*=true*/)
 
 	if (!only2D)
 	{
-		m_updateFBO = true;
+		//force the 3D layer to be redrawn
+		deprecate3DLayer();
 	}
 
 	if (isVisible() && !m_autoRefresh)
@@ -2747,6 +2747,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 
 	invalidateViewport();
 	invalidateVisualization();
+	deprecate3DLayer();
 
 	redraw();
 }
@@ -2824,16 +2825,21 @@ void ccGLWindow::setZoom(float value)
 		m_viewportParams.zoom = value;
 		invalidateViewport();
 		invalidateVisualization();
+		deprecate3DLayer();
 	}
 }
 
 void ccGLWindow::setCameraPos(const CCVector3d& P)
 {
-	m_viewportParams.cameraCenter = P;
-	emit cameraPosChanged(m_viewportParams.cameraCenter);
+	if ((m_viewportParams.cameraCenter - P).norm2d() != 0)
+	{
+		m_viewportParams.cameraCenter = P;
+		emit cameraPosChanged(m_viewportParams.cameraCenter);
 
-	invalidateViewport();
-	invalidateVisualization();
+		invalidateViewport();
+		invalidateVisualization();
+		deprecate3DLayer();
+	}
 }
 
 void ccGLWindow::moveCamera(float dx, float dy, float dz)
@@ -2900,6 +2906,7 @@ void ccGLWindow::setPixelSize(float pixelSize)
 
 	invalidateViewport();
 	invalidateVisualization();
+	deprecate3DLayer();
 }
 
 void ccGLWindow::setSceneDB(ccHObject* root)
@@ -3089,7 +3096,6 @@ void ccGLWindow::getVisibleObjectsBB(ccBBox& box) const
 void ccGLWindow::invalidateViewport()
 {
 	m_validProjectionMatrix = false;
-	m_updateFBO = true;
 }
 
 ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, bool withGLfeatures, ProjectionMetrics* metrics/*=0*/, double* eyeOffset/*=0*/) const
@@ -3241,10 +3247,14 @@ void ccGLWindow::updateProjectionMatrix()
 	m_validProjectionMatrix = true;
 }
 
+void ccGLWindow::deprecate3DLayer()
+{
+	m_updateFBO = true;
+}
+
 void ccGLWindow::invalidateVisualization()
 {
 	m_validModelviewMatrix = false;
-	m_updateFBO = true;
 }
 
 ccGLMatrixd ccGLWindow::computeModelViewMatrix(const CCVector3d& cameraCenter) const
@@ -3780,6 +3790,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					m_customLightPos[1] += static_cast<float>(u.y);
 					m_customLightPos[2] += static_cast<float>(u.z);
 					invalidateViewport();
+					deprecate3DLayer();
 				}
 			}
 			else //camera moving mode
@@ -3831,10 +3842,14 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 			for (std::list<ccInteractor*>::iterator it = m_activeItems.begin(); it != m_activeItems.end(); ++it)
 			{
-				if ((*it)->move2D(x * retinaScale, y * retinaScale, dx * retinaScale, dy * retinaScale, glWidth(), glHeight()) || (*it)->move3D(u))
+				if ((*it)->move2D(x * retinaScale, y * retinaScale, dx * retinaScale, dy * retinaScale, glWidth(), glHeight()))
 				{
 					invalidateViewport();
-					//m_updateFBO = true; //already done by invalidateViewport
+				}
+				else if ((*it)->move3D(u))
+				{
+					invalidateViewport();
+					deprecate3DLayer();
 				}
 			}
 		}
@@ -3924,7 +3939,6 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					rotMat = ccGLMatrixd::FromToRotation(m_lastMouseOrientation, m_currentMouseOrientation);
 				}
 				m_lastMouseOrientation = m_currentMouseOrientation;
-				m_updateFBO = true;
 
 				if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 				{
@@ -4913,7 +4927,7 @@ void ccGLWindow::setPointSize(float size, bool silent/*=false*/)
 	if (m_viewportParams.defaultPointSize != newSize)
 	{
 		m_viewportParams.defaultPointSize = newSize;
-		m_updateFBO = true;
+		deprecate3DLayer();
 	
 		if (!silent)
 		{
@@ -4928,8 +4942,11 @@ void ccGLWindow::setPointSize(float size, bool silent/*=false*/)
 
 void ccGLWindow::setLineWidth(float width)
 {
-	m_viewportParams.defaultLineWidth = width;
-	m_updateFBO = true;
+	if (m_viewportParams.defaultLineWidth != width)
+	{
+		m_viewportParams.defaultLineWidth = width;
+		deprecate3DLayer();
+	}
 }
 
 int FontSizeModifier(int fontSize, float zoomFactor)
@@ -5043,6 +5060,7 @@ void ccGLWindow::setCustomLight(bool state)
 						CUSTOM_LIGHT_STATE_MESSAGE);
 
 	invalidateViewport();
+	deprecate3DLayer();
 	redraw();
 
 	//save parameter
@@ -5128,6 +5146,7 @@ void ccGLWindow::showPivotSymbol(bool state)
 	if (state && !m_pivotSymbolShown && m_viewportParams.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
 	{
 		invalidateViewport();
+		deprecate3DLayer();
 	}
 
 	m_pivotSymbolShown = state;
@@ -5381,6 +5400,7 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 	m_bubbleViewModeEnabled = false;
 	invalidateViewport();
 	invalidateVisualization();
+	deprecate3DLayer();
 }
 
 void ccGLWindow::setAspectRatio(float ar)
@@ -5401,6 +5421,7 @@ void ccGLWindow::setAspectRatio(float ar)
 		{
 			invalidateViewport();
 			invalidateVisualization();
+			deprecate3DLayer();
 		}
 	}
 }
@@ -5427,6 +5448,7 @@ void ccGLWindow::setFov(float fov_deg)
 		{
 			invalidateViewport();
 			invalidateVisualization();
+			deprecate3DLayer();
 
 			displayNewMessage(	QString("F.O.V. = %1 deg.").arg(fov_deg, 0, 'f', 1),
 								ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
@@ -5457,6 +5479,7 @@ void ccGLWindow::setBubbleViewFov(float fov_deg)
 		{
 			invalidateViewport();
 			invalidateVisualization();
+			deprecate3DLayer();
 			emit fovChanged(m_bubbleViewFov_deg);
 		}
 	}
@@ -5483,6 +5506,8 @@ void ccGLWindow::setZNearCoef(double coef)
 			//DGM: we update the projection matrix directly so as to get an up-to-date estimation of zNear
 			updateProjectionMatrix();
 
+			deprecate3DLayer();
+
 			displayNewMessage(	QString("Near clipping = %1% of max depth (= %2)").arg(m_viewportParams.zNearCoef * 100.0, 0, 'f', 1).arg(m_viewportParams.zNear),
 								ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
 								false,
@@ -5501,6 +5526,7 @@ void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
 
 	invalidateViewport();
 	invalidateVisualization();
+	deprecate3DLayer();
 
 	emit baseViewMatChanged(m_viewportParams.viewMat);
 	emit pivotPointChanged(m_viewportParams.pivotPoint);
@@ -5516,6 +5542,7 @@ void ccGLWindow::rotateBaseViewMat(const ccGLMatrixd& rotMat)
 	emit baseViewMatChanged(m_viewportParams.viewMat);
 
 	invalidateVisualization();
+	deprecate3DLayer();
 }
 
 void ccGLWindow::updateZoom(float zoomFactor)
@@ -5595,6 +5622,7 @@ void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=tru
 		setPerspectiveState(m_viewportParams.perspectiveView, false);
 
 	invalidateVisualization();
+	deprecate3DLayer();
 
 	//we emit the 'baseViewMatChanged' signal
 	emit baseViewMatChanged(m_viewportParams.viewMat);
@@ -5958,7 +5986,7 @@ bool ccGLWindow::initFBO(int w, int h)
 		}
 	}
 
-	m_updateFBO = true;
+	deprecate3DLayer();
 	return true;
 }
 

@@ -238,25 +238,6 @@ protected:
 };
 
 
-//class PDALLASWriter
-//{
-//public:
-//    PDALLASWriter()
-//        :w(0)
-//        ,writeCounter(0)
-//    {}
-
-
-//    virtual ~PDALLASWriter()
-//    {}
-
-//    bool open(const QString& _filename, const pdal::LasHeader& header)
-//    {
-
-//    }
-
-//};
-
 CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
     return pdalSaveToFile(entity,filename, parameters);
@@ -669,6 +650,14 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
     writerOptions.add("scale_x", lasScale.x);
     writerOptions.add("scale_y", lasScale.y);
     writerOptions.add("scale_z", lasScale.z);
+
+
+    if (theCloud->hasMetaData(s_LAS_SRS_Key))
+    {
+        //restore the SRS if possible
+        QString srs = theCloud->getMetaData(s_LAS_SRS_Key).value<QString>();
+        writerOptions.add("a_srs", srs.toStdString());
+    }
 
 
     pdal::Dimension::IdList dimsToSave;

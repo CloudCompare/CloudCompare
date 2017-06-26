@@ -595,6 +595,82 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
     pdal::PointTable table;
     pdal::BufferReader bufferReader;
 
+
+
+    CCVector3d bbMin, bbMax;
+    if (!theCloud->getGlobalBB(bbMin, bbMax))
+    {
+        return CC_FERR_NO_SAVE;
+    }
+    //Set offset & scale, as points will be stored as boost::int32_t values (between 0 and 4294967296)
+    //int_value = (double_value-offset)/scale
+    writerOptions.add("offset_x", bbMin.x);
+    writerOptions.add("offset_y", bbMin.y);
+    writerOptions.add("offset_z", bbMin.z);
+    CCVector3d diag = bbMax - bbMin;
+
+
+    //let the user choose between the original scale and the 'optimal' one (for accuracy, not for compression ;)
+    bool hasScaleMetaData = false;
+    CCVector3d lasScale(0, 0, 0);
+    lasScale.x = theCloud->getMetaData(LAS_SCALE_X_META_DATA).toDouble(&hasScaleMetaData);
+    if (hasScaleMetaData)
+    {
+        lasScale.y = theCloud->getMetaData(LAS_SCALE_Y_META_DATA).toDouble(&hasScaleMetaData);
+        if (hasScaleMetaData)
+        {
+            lasScale.z = theCloud->getMetaData(LAS_SCALE_Z_META_DATA).toDouble(&hasScaleMetaData);
+        }
+    }
+
+    //optimal scale (for accuracy) --> 1e-9 because the maximum integer is roughly +/-2e+9
+    CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, ZERO_TOLERANCE),
+                            1.0e-9 * std::max<double>(diag.y, ZERO_TOLERANCE),
+                            1.0e-9 * std::max<double>(diag.z, ZERO_TOLERANCE));
+
+    if (parameters.alwaysDisplaySaveDialog)
+    {
+        if (!s_saveDlg)
+            s_saveDlg = QSharedPointer<LASSaveDlg>(new LASSaveDlg(0));
+        s_saveDlg->bestAccuracyLabel->setText(QString("(%1, %2, %3)").arg(optimalScale.x).arg(optimalScale.y).arg(optimalScale.z));
+
+        if (hasScaleMetaData)
+        {
+            s_saveDlg->origAccuracyLabel->setText(QString("(%1, %2, %3)").arg(lasScale.x).arg(lasScale.y).arg(lasScale.z));
+        }
+        else
+        {
+            s_saveDlg->origAccuracyLabel->setText("none");
+            if (s_saveDlg->origRadioButton->isChecked())
+                s_saveDlg->bestRadioButton->setChecked(true);
+            s_saveDlg->origRadioButton->setEnabled(false);
+        }
+
+        s_saveDlg->exec();
+
+        if (s_saveDlg->bestRadioButton->isChecked())
+        {
+            lasScale = optimalScale;
+        }
+        else if (s_saveDlg->customRadioButton->isChecked())
+        {
+            double s = s_saveDlg->customScaleDoubleSpinBox->value();
+            lasScale = CCVector3d(s, s, s);
+        }
+        //else
+        //{
+        //	lasScale = lasScale;
+        //}
+    }
+    else if (!hasScaleMetaData)
+    {
+        lasScale = optimalScale;
+    }
+    writerOptions.add("scale_x", lasScale.x);
+    writerOptions.add("scale_y", lasScale.y);
+    writerOptions.add("scale_z", lasScale.z);
+
+
     pdal::Dimension::IdList dimsToSave;
     for (LasField &lasField: fieldsToSave)
     {
@@ -717,7 +793,11 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
         }
     }
 
+
+
+    // spatial reference
     writerOptions.add("filename", filename.toStdString());
+
 
     dims = point_view->dims();
     for (auto &dimId: dims)

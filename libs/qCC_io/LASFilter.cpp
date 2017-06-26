@@ -1022,11 +1022,10 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
     pdal::Dimension::IdList dims;
     pdal::LasHeader las_header;
 
-    las_reader.setOptions(las_opts);
-    las_reader.prepare(table);
-
     try
     {
+        las_reader.setOptions(las_opts);
+        las_reader.prepare(table);
         point_view_set = las_reader.execute(table);
         point_view = *point_view_set.begin();
         dims = point_view->dims();

@@ -53,7 +53,9 @@ Q_DECLARE_METATYPE(liblas::SpatialReference)
 #include <pdal/io/LasReader.hpp>
 #include <pdal/io/LasHeader.hpp>
 #include <pdal/io/LasWriter.hpp>
+#include <pdal/io/LasVLR.hpp>
 #include <pdal/io/BufferReader.hpp>
+Q_DECLARE_METATYPE(pdal::SpatialReference)
 
 using namespace pdal::Dimension;
 
@@ -1060,14 +1062,16 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
     s_lasOpenDlg->clearEVLRs();
     s_lasOpenDlg->setInfos(filename, nbOfPoints, bbMin, bbMax);
 
-    // if (extraDimension)
-    // {
-    // 	assert(!evlrs.empty());
-    // 	for (const EVLR& evlr : evlrs)
-    // 	{
-    // 		s_lasOpenDlg->addEVLR(QString("%1 (%2)").arg(evlr.getName()).arg(evlr.getDescription()));
-    // 	}
-    // }
+    // it also reads evlrs
+    // But how to 'put' them into cloud compare ?
+    pdal::VlrList vlrs = las_header.vlrs();
+    if (vlrs.size())
+    {
+        for (const pdal::LasVLR &vlr : vlrs)
+        {
+            s_lasOpenDlg->addEVLR(QString("%1 (%2)").arg(QString::fromStdString(vlr.userId())).arg(QString::fromStdString(vlr.description())));
+        }
+    }
 
     if (parameters.alwaysDisplayLoadDialog && !s_lasOpenDlg->autoSkipMode() && !s_lasOpenDlg->exec())
     {
@@ -1279,6 +1283,7 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
             loadedCloud->setGlobalShift(Pshift);
 
             //save the Spatial reference as meta-data
+            loadedCloud->setMetaData(s_LAS_SRS_Key, QVariant::fromValue(las_header.srs()));
             //loadedCloud->setMetaData(s_LAS_SRS_Key, QVariant::fromValue(header.GetSRS()));
 
 

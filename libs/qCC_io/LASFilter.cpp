@@ -1187,11 +1187,6 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
             extraFieldsToLoad.push_back(extraDimensionsIds[i]);
     }
 
-    for (unsigned i = 0; i < extraFieldsToLoad.size(); ++i)
-    {
-        std::cerr << "extraFieldToLoad: " << point_view->dimName(extraFieldsToLoad[i]) << std::endl;
-    }
-
     for (pdal::PointId idx = 0; idx < point_view->size()+1; ++idx) {
         if (idx == point_view->size() || idx == fileChunkPos + fileChunkSize)
         {
@@ -1338,6 +1333,13 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
             if (s_lasOpenDlg->doLoad(LAS_POINT_SOURCE_ID))
                 fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535))); //16 bits: between 0 and 65536
 
+            //extra fields
+            for (Id &extraFieldId: extraFieldsToLoad)
+            {
+                pdal::Dimension::Detail detail = point_view->layout()->dimDetail(extraFieldId);
+
+                //double value = point_view->getFieldAs<double>(extraFieldId, idx);
+            }
 
         }
 
@@ -1488,7 +1490,10 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
                     if (field->sf->reserve(fileChunkSize))
                     {
                         field->sf->link();
-
+                        for (unsigned i = 0; i < extraFieldsToLoad.size(); ++i)
+                        {
+                            std::cerr << "extraFieldToLoad: " << point_view->dimName(extraFieldsToLoad[i]) << std::endl;
+                        }
                         if (field->type == LAS_TIME)
                         {
                             //we use the first value as 'global shift' (otherwise we will lose accuracy)
@@ -1928,7 +1933,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
                                         const unsigned char options = evlrs[i].options;
 
-                                        //read the first optional informations
+                                        //read the first optional information
                                         double defaultVal = 0;
                                         double minVal = 0;
                                         double maxVal = -1.0;

@@ -1048,10 +1048,22 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
     }
 
     std::vector<std::string> dimensions;
+    std::vector<std::string> extraDimensions;
+    IdList extraDimensionsIds;
     for (auto &dimId: dims)
     {
-        dimensions.push_back(pdal::Dimension::name(dimId));
-        std::cerr << "dim: " << pdal::Dimension::name(dimId) << " -> " << point_view->hasDim(dimId) << std::endl;
+        // Extra dimensions names are only known by the point_view as
+        // they are not standard
+        if (pdal::Dimension::name(dimId).empty())
+        {
+            extraDimensions.push_back(point_view->dimName(dimId));
+            extraDimensionsIds.push_back(dimId);
+        }
+        else
+        {
+            dimensions.push_back(pdal::Dimension::name(dimId));
+        }
+        //std::cerr << "dim: " << pdal::Dimension::name(dimId) << " -> " << point_view->dimName(dimId) << std::endl;
     }
 
     if (!s_lasOpenDlg)
@@ -1062,15 +1074,9 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
     s_lasOpenDlg->clearEVLRs();
     s_lasOpenDlg->setInfos(filename, nbOfPoints, bbMin, bbMax);
 
-    // it also reads evlrs
-    // But how to 'put' them into cloud compare ?
-    pdal::VlrList vlrs = las_header.vlrs();
-    if (vlrs.size())
+    for (std::string &extraDimension: extraDimensions)
     {
-        for (const pdal::LasVLR &vlr : vlrs)
-        {
-            s_lasOpenDlg->addEVLR(QString("%1 (%2)").arg(QString::fromStdString(vlr.userId())).arg(QString::fromStdString(vlr.description())));
-        }
+        s_lasOpenDlg->addEVLR(QString("%1 (%2)").arg(QString::fromStdString(extraDimension)).arg(QString::fromStdString("")));
     }
 
     if (parameters.alwaysDisplayLoadDialog && !s_lasOpenDlg->autoSkipMode() && !s_lasOpenDlg->exec())
@@ -1133,6 +1139,8 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 
 
     std::vector< LasField::Shared > fieldsToLoad;
+    IdList extraFieldsToLoad;
+
 
     //first point: check for 'big' coordinates
     CCVector3d P(point_view->getFieldAs<double>(Id::X, 0),
@@ -1153,6 +1161,8 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
         }
     }
 
+
+
     //restore previous parameters
     parameters.shiftHandlingMode = csModeBackup;
     QScopedPointer<ccProgressDialog> pDlg(0);
@@ -1170,6 +1180,17 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
     unsigned int fileChunkSize = 0;
 
     ccPointCloud* loadedCloud = 0;
+
+    for (unsigned i = 0; i < extraDimensionsIds.size(); ++i)
+    {
+        if (s_lasOpenDlg->doLoadEVLR(i))
+            extraFieldsToLoad.push_back(extraDimensionsIds[i]);
+    }
+
+    for (unsigned i = 0; i < extraFieldsToLoad.size(); ++i)
+    {
+        std::cerr << "extraFieldToLoad: " << point_view->dimName(extraFieldsToLoad[i]) << std::endl;
+    }
 
     for (pdal::PointId idx = 0; idx < point_view->size()+1; ++idx) {
         if (idx == point_view->size() || idx == fileChunkPos + fileChunkSize)
@@ -1317,7 +1338,7 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
             if (s_lasOpenDlg->doLoad(LAS_POINT_SOURCE_ID))
                 fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535))); //16 bits: between 0 and 65536
 
-            // extra fields
+
         }
 
 
@@ -1549,6 +1570,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
                 //specific case: 'extra bytes' field
                 if (it->GetName() == "extra")
                 {
+
                     //look for the corresponding EVLRs
                     const std::vector<liblas::VariableRecord>& vlrs = header.GetVLRs();
                     {

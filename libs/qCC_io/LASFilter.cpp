@@ -167,6 +167,27 @@ struct ExtraLasField : LasField
 	double offset;
 };
 
+//! Custom ("Extra bytes") field
+struct ExtraLasField2 : LasField
+{
+    //! Default constructor
+    ExtraLasField2(QString name, pdal::Dimension::Id id, double defaultVal = 0, double min = 0.0, double max = -1.0)
+        : LasField(LAS_EXTRA,defaultVal,min,max)
+        , fieldName(name)
+        , pdalId(id)
+        , scale(1.0)
+        , offset(0.0)
+    {}
+
+    //reimplemented from LasField
+    virtual inline QString getName() const	{ return fieldName; }
+
+    QString fieldName;
+    pdal::Dimension::Id pdalId;
+    double scale;
+    double offset;
+};
+
 //! Semi persistent save dialog
 QSharedPointer<LASSaveDlg> s_saveDlg(0);
 
@@ -654,12 +675,12 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
     writerOptions.add("scale_z", lasScale.z);
 
 
-    if (theCloud->hasMetaData(s_LAS_SRS_Key))
-    {
-        //restore the SRS if possible
-        QString srs = theCloud->getMetaData(s_LAS_SRS_Key).value<QString>();
-        writerOptions.add("a_srs", srs.toStdString());
-    }
+//    if (theCloud->hasMetaData(s_LAS_SRS_Key))
+//    {
+//        //restore the SRS if possible
+//        QString srs = theCloud->getMetaData(s_LAS_SRS_Key).value<QString>();
+//        writerOptions.add("a_srs", srs.toStdString());
+//    }
 
 
     pdal::Dimension::IdList dimsToSave;
@@ -1336,9 +1357,12 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
             //extra fields
             for (Id &extraFieldId: extraFieldsToLoad)
             {
-                pdal::Dimension::Detail detail = point_view->layout()->dimDetail(extraFieldId);
+                QString name = QString::fromStdString(point_view->dimName(extraFieldId));
+                ExtraLasField2 *eField = new ExtraLasField2(name, extraFieldId);
+                //pdal::Dimension::Detail detail = point_view->layout()->dimDetail(extraFieldId);
 
                 //double value = point_view->getFieldAs<double>(extraFieldId, idx);
+                fieldsToLoad.push_back(LasField::Shared(eField));
             }
 
         }
@@ -1411,8 +1435,10 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
         }
 
         // additional fields
-        for (LasField::Shared field: fieldsToLoad)
+        for (std::vector<LasField::Shared>::iterator it = fieldsToLoad.begin(); it != fieldsToLoad.end(); ++it)
         {
+            LasField::Shared field = *it;
+
             double value = 0.0;
             switch (field->type)
             {
@@ -1444,6 +1470,12 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
             case LAS_POINT_SOURCE_ID:
                 value = point_view->getFieldAs<double>(Id::PointSourceId, idx);
                 break;
+            case LAS_EXTRA:
+            {
+                ExtraLasField2* extraField = static_cast<ExtraLasField2*>((*it).data());
+                value = point_view->getFieldAs<double>(extraField->pdalId, idx);
+                break;
+            }
             case LAS_TIME:
                 value = point_view->getFieldAs<double>(Id::GpsTime, idx);
                 if (field->sf)
@@ -1490,10 +1522,6 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
                     if (field->sf->reserve(fileChunkSize))
                     {
                         field->sf->link();
-                        for (unsigned i = 0; i < extraFieldsToLoad.size(); ++i)
-                        {
-                            std::cerr << "extraFieldToLoad: " << point_view->dimName(extraFieldsToLoad[i]) << std::endl;
-                        }
                         if (field->type == LAS_TIME)
                         {
                             //we use the first value as 'global shift' (otherwise we will lose accuracy)

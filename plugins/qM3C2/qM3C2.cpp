@@ -634,7 +634,7 @@ void qM3C2Plugin::doAction()
 	}
 
 	//output
-	QString outputName("M3C2 output");
+	QString outputName(s_M3C2Params.usePrecisionMaps ? "M3C2-PM output" : "M3C2 output");
 	
 	if (!error)
 	{

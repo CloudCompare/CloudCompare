@@ -1022,6 +1022,129 @@ protected:
     std::vector<LASWriter*> tileFiles;
 };
 
+//! Structure describing the current tiling process
+struct PDALTilingStruct
+{
+    PDALTilingStruct()
+        : w(1)
+        , h(1)
+        , X(0)
+        , Y(1)
+        , Z(2)
+    {}
+
+    ~PDALTilingStruct()
+    {
+    }
+
+    inline size_t tileCount() const { return tilePointViews.size(); }
+
+    bool init(	unsigned width,
+                unsigned height,
+                unsigned Zdim,
+                QString absoluteBaseFilename,
+                const CCVector3d& bbMin,
+                const CCVector3d& bbMax,
+                const pdal::PointTableRef table)
+    {
+        //init tiling dimensions
+        assert(Zdim < 3);
+        Z = Zdim;
+        X = (Z == 2 ? 0 : Z+1);
+        Y = (X == 2 ? 0 : X+1);
+
+        bbMinCorner = bbMin;
+        tileDiag = bbMax - bbMin;
+        tileDiag.u[X] /= width;
+        tileDiag.u[Y] /= height;
+
+
+        unsigned count = width * height;
+        try
+        {
+            tilePointViews.resize(count);
+            fileNames.resize(count);
+        }
+        catch (const std::bad_alloc&)
+        {
+            //not enough memory
+            return false;
+        }
+
+        w = width;
+        h = height;
+
+        //File extension
+//        QString ext = (header.Compressed() ? "laz" : "las");
+
+        for (unsigned i = 0; i < width; ++i)
+        {
+            for (unsigned j = 0; j < height; ++j)
+            {
+                unsigned ii = index(i, j);
+                //TODO: Don't forget to change the ext to be able to write .laz
+                QString filename = absoluteBaseFilename + QString("_%1_%2.%3").arg(QString::number(i), QString::number(j), QString("las"));
+
+                fileNames[ii] = filename;
+                tilePointViews[ii] = pdal::PointViewPtr(new pdal::PointView(table));
+            }
+        }
+
+        return true;
+    }
+
+    void addPoint(const pdal::PointViewPtr buffer, unsigned pointIndex)
+    {
+        //determine the right tile
+        CCVector3d Prel = CCVector3d(buffer->getFieldAs<double>(Id::X, pointIndex),
+                                     buffer->getFieldAs<double>(Id::Y, pointIndex),
+                                     buffer->getFieldAs<double>(Id::Z, pointIndex));
+        Prel -= bbMinCorner;
+        int ii = static_cast<int>(floor(Prel.u[X] / tileDiag.u[X]));
+        int ji = static_cast<int>(floor(Prel.u[Y] / tileDiag.u[Y]));
+        unsigned i = std::min( static_cast<unsigned>(std::max(ii, 0)), w-1);
+        unsigned j = std::min( static_cast<unsigned>(std::max(ji, 0)), h-1);
+        pdal::PointViewPtr outputView = tilePointViews[index(i,j)];
+        outputView->appendPoint(*buffer, pointIndex);
+    }
+
+    void writeAll()
+    {
+
+        for (unsigned i = 0; i < tilePointViews.size(); ++i)
+        {
+            pdal::LasWriter writer;
+            pdal::Options writerOptions;
+            pdal::PointTable table;
+            pdal::BufferReader bufferReader;
+
+            writerOptions.add("filename", fileNames[i].toStdString());
+            try
+            {
+                bufferReader.addView(tilePointViews[i]);
+                writer.setInput(bufferReader);
+                writer.setOptions(writerOptions);
+                writer.prepare(table);
+                writer.execute(table);
+            }
+            catch (const pdal::pdal_error& e)
+            {
+                ccLog::Error(QString("PDAL exception '%1'").arg(e.what()));
+            }
+        }
+    }
+
+protected:
+
+    inline unsigned index(unsigned i, unsigned j) const { return i + j * w; }
+
+    unsigned w, h;
+    unsigned X, Y, Z;
+    CCVector3d bbMinCorner, tileDiag;
+    std::vector<pdal::PointViewPtr> tilePointViews;
+    std::vector<QString> fileNames;
+};
+
 CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadParameters& parameters)
 {
     pdal::Options las_opts;
@@ -1084,7 +1207,6 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
         {
             dimensions.push_back(pdal::Dimension::name(dimId));
         }
-        //std::cerr << "dim: " << pdal::Dimension::name(dimId) << " -> " << point_view->dimName(dimId) << std::endl;
     }
 
     if (!s_lasOpenDlg)
@@ -1107,8 +1229,8 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 
     bool ignoreDefaultFields = s_lasOpenDlg->ignoreDefaultFieldsCheckBox->isChecked();
 
-    TilingStruct tiler;
-    bool tiling = s_lasOpenDlg->ignoreDefaultFieldsCheckBox->isChecked();
+    PDALTilingStruct tiler;
+    bool tiling = s_lasOpenDlg->tileGroupBox->isChecked();
     if (tiling)
     {
         // tiling (vertical) dimension
@@ -1133,12 +1255,12 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
         unsigned h = static_cast<unsigned>(s_lasOpenDlg->hTileSpinBox->value());
 
         QString outputBaseName = s_lasOpenDlg->outputPathLineEdit->text() + "/" + QFileInfo(filename).baseName();
-        // Need a pdal_write to do the tiling
-        //            if (!tiler.init(w, h, vertDim, outputBaseName, bbMin, bbMax, header))
-        //            {
-        //                // failed to open at least one file!
-        //                return CC_FERR_WRITING;
-        //            }
+        if (!tiler.init(w, h, vertDim, outputBaseName, bbMin, bbMax, table))
+        {
+            // FIXME: This error won't happen since no file are opened durring init()
+            // failed to open at least one file!
+            return CC_FERR_WRITING;
+        }
     }
 
     unsigned short rgbColorMask[3] = {0, 0, 0};
@@ -1209,9 +1331,16 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
     }
 
     for (pdal::PointId idx = 0; idx < point_view->size()+1; ++idx) {
+        // special operation: tiling mode
+        if (tiling && idx < point_view->size())
+        {
+            tiler.addPoint(point_view, idx);
+            nProgress.oneStep();
+            continue;
+        }
         if (idx == point_view->size() || idx == fileChunkPos + fileChunkSize)
         {
-            //asert tilin
+
             if (loadedCloud)
             {
                 if (loadedCloud->size())
@@ -1359,9 +1488,6 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
             {
                 QString name = QString::fromStdString(point_view->dimName(extraFieldId));
                 ExtraLasField2 *eField = new ExtraLasField2(name, extraFieldId);
-                //pdal::Dimension::Detail detail = point_view->layout()->dimDetail(extraFieldId);
-
-                //double value = point_view->getFieldAs<double>(extraFieldId, idx);
                 fieldsToLoad.push_back(LasField::Shared(eField));
             }
 
@@ -1485,17 +1611,18 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
                 }
                 break;
             case LAS_CLASSIF_VALUE:
-                value = (point_view->getFieldAs<int>(Id::Classification, idx) & 31); //5 bits
+                value = point_view->getFieldAs<int>(Id::Classification, idx); //5 bits
                 break;
             case LAS_CLASSIF_SYNTHETIC:
-                value = (point_view->getFieldAs<int>(Id::Classification, idx) & 32); //bit #6
+                value = (point_view->getFieldAs<int>(Id::ClassFlags, idx) & 1); //bit #1
                 break;
             case LAS_CLASSIF_KEYPOINT:
-                value = (point_view->getFieldAs<int>(Id::Classification, idx) & 64); //bit #7
+                value = (point_view->getFieldAs<int>(Id::ClassFlags, idx) & 2); //bit #2
                 break;
             case LAS_CLASSIF_WITHHELD:
-                value = (point_view->getFieldAs<int>(Id::Classification, idx) & 128); //bit #8
+                value = (point_view->getFieldAs<int>(Id::Classification, idx) & 4); //bit #3
                 break;
+             // Overlap flag is the 4 bit (new in las 1.4)
             default:
                 //ignored
                 assert(false);
@@ -1549,6 +1676,12 @@ CC_FILE_ERROR LASFilter::pdal_load(QString filename, ccHObject& container, LoadP
 
         }
         nProgress.oneStep();
+    }
+
+    // Now the tiler will actually write the points
+    if(tiling)
+    {
+        tiler.writeAll();
     }
 }
 

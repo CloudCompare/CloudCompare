@@ -7631,7 +7631,7 @@ void MainWindow::doActionCrop()
 	bool errors = false;
 	bool successes = false;
 	{
-		for (size_t i=0; i<candidates.size(); ++i)
+		for (size_t i = 0; i < candidates.size(); ++i)
 		{
 			ccHObject* ent = candidates[i];
 			ccHObject* croppedEnt = ccCropTool::Crop(ent,box,true);

@@ -93,6 +93,7 @@ v2.9.alpha - XX/XX/XXXX
 
 	* Oculus support
 		- CC now displays in the current 3D view the mirror image of what is displayed in the headset
+		- using SDK 1.15
 
 	* Point List Picking tool
 		- the list can now be exported as a 'global index, x, y, z' text file
@@ -101,7 +102,7 @@ v2.9.alpha - XX/XX/XXXX
 		- new option to use the same scale for all dimensions
 		- new option to apply the scale to the 'Global shift' (or not)
 
-	* New Menu Entry: Edit > Grid
+	* New Menu Entry: 'Edit > Grid'
 		- Delete scan grids: An underlying grid structure can now be deleted
 
 	* New method: 'Edit > Waveforms > Compress FWF data'
@@ -114,6 +115,7 @@ v2.9.alpha - XX/XX/XXXX
 		- color scales are now listed in alphabetical order
 		- the DXF format can now be used to export point clouds (their size should be very limited!)
 		- polylines exported from the 'Interactive Segmentation' tool will now use the same Global Shift as the segmented entity(ies)
+		- when changing the dip and dip direction of plane parallel with XY, the resulting plane shouldn't rotate in an arbitrary way anymore
 
 - Bug fixes:
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)

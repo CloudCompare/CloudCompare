@@ -914,7 +914,7 @@ CCVector3 ccNormalVectors::ConvertDipAndDipDirToNormal(PointCoordinateType dip_d
 	//internal consistency test
 	PointCoordinateType dip2, dipDir2;
 	ConvertNormalToDipAndDipDir(N, dip2, dipDir2);
-	assert(fabs(dip2 - dip_deg) < 1.0e-3 && fabs(dipDir2 - dipDir_deg) < 1.0e-3);
+	assert(fabs(dip2 - dip_deg) < 1.0e-3 && (dip2 == 0 || fabs(dipDir2 - dipDir_deg) < 1.0e-3));
 #endif
 
 	if (!upward)

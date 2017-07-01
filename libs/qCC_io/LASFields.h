@@ -61,28 +61,6 @@ enum LAS_FIELDS {
 	LAS_INVALID = 255
 };
 
-const char LAS_FIELD_NAMESORI[][28] = {"X",
-									"Y",
-									"Z",
-									"Intensity",
-									"Return Number",
-									"Number of Returns",
-									"Scan Direction",
-									"Flightline Edge",
-									"Classification",
-									"Scan Angle Rank",
-									"User Data",
-									"Point Source ID",
-									"Red",
-									"Green",
-									"Blue",
-									"Time",
-									"extra",
-									"[Classif] Value",
-									"[Classif] Synthetic flag",
-									"[Classif] Key-point flag",
-									"[Classif] Withheld flag",
-};
 const char LAS_FIELD_NAMES[][28] = {"X",
 									"Y",
 									"Z",

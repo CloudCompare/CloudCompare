@@ -32,13 +32,6 @@
 //CCLib
 #include <CCPlatform.h>
 
-//Liblas
-//#include <liblas/point.hpp>
-//#include <liblas/reader.hpp>
-//#include <liblas/writer.hpp>
-//#include <liblas/factory.hpp>	// liblas::ReaderFactory
-//Q_DECLARE_METATYPE(liblas::SpatialReference)
-
 //Qt
 #include <QFileInfo>
 #include <QSharedPointer>
@@ -99,10 +92,10 @@ bool LASFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 
 
 //! Custom ("Extra bytes") field
-struct ExtraLasField2 : LasField
+struct ExtraLasField : LasField
 {
     //! Default constructor
-    ExtraLasField2(QString name, pdal::Dimension::Id id, double defaultVal = 0, double min = 0.0, double max = -1.0)
+    ExtraLasField(QString name, pdal::Dimension::Id id, double defaultVal = 0, double min = 0.0, double max = -1.0)
         : LasField(LAS_EXTRA,defaultVal,min,max)
         , fieldName(name)
         , pdalId(id)
@@ -234,10 +227,6 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
             double s = s_saveDlg->customScaleDoubleSpinBox->value();
             lasScale = CCVector3d(s, s, s);
         }
-        //else
-        //{
-        //	lasScale = lasScale;
-        //}
     }
     else if (!hasScaleMetaData)
     {
@@ -328,17 +317,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
                 point_view->setField(Id::EdgeOfFlightLine, i, it->sf->getValue(i));
                 break;
             case LAS_CLASSIFICATION:
-            {
                 point_view->setField(Id::Classification, i, it->sf->getValue(i));
-
-                // How to set the flags with pdal ? -> Seems like its the Id::ClassFlag thing
-                // Point format >6 :classifation takes the full 8 bits
-
-//                classif.SetClass(val & 31);		//first 5 bits
-//                classif.SetSynthetic(val & 32); //6th bit
-//                classif.SetKeyPoint(val & 64);	//7th bit
-//                classif.SetWithheld(val & 128);	//8th bit
-            }
                 break;
             case LAS_SCAN_ANGLE_RANK:
                 point_view->setField(Id::ScanAngleRank, i, it->sf->getValue(i));
@@ -542,20 +521,21 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
     las_opts.add("filename", filename.toStdString());
 
     pdal::PointTable table;
-    pdal::LasReader las_reader;
-    pdal::PointViewSet point_view_set;
-    pdal::PointViewPtr point_view;
+    pdal::LasReader lasReader;
+    pdal::LasHeader lasHeader;
+    pdal::PointViewSet pointViewSet;
+    pdal::PointViewPtr pointView;
     pdal::Dimension::IdList dims;
-    pdal::LasHeader las_header;
+
 
     try
     {
-        las_reader.setOptions(las_opts);
-        las_reader.prepare(table);
-        point_view_set = las_reader.execute(table);
-        point_view = *point_view_set.begin();
-        dims = point_view->dims();
-        las_header = las_reader.header();
+        lasReader.setOptions(las_opts);
+        lasReader.prepare(table);
+        pointViewSet = lasReader.execute(table);
+        pointView = *pointViewSet.begin();
+        dims = pointView->dims();
+        lasHeader = lasReader.header();
     }
     catch (const pdal::pdal_error& e)
     {
@@ -567,15 +547,13 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         return CC_FERR_THIRD_PARTY_LIB_FAILURE;
     }
 
-    CCVector3d bbMin(las_header.minX(), las_header.minY(), las_header.minZ());
-    CCVector3d bbMax(las_header.maxX(), las_header.maxY(), las_header.maxZ());
+    CCVector3d bbMin(lasHeader.minX(), lasHeader.minY(), lasHeader.minZ());
+    CCVector3d bbMax(lasHeader.maxX(), lasHeader.maxY(), lasHeader.maxZ());
 
-    //schema ici ?
+    CCVector3d lasScale =  CCVector3d(lasHeader.scaleX(), lasHeader.scaleY(), lasHeader.scaleZ());
+    CCVector3d lasShift = -CCVector3d(lasHeader.offsetX(), lasHeader.offsetY(), lasHeader.offsetZ());
 
-    CCVector3d lasScale =  CCVector3d(las_header.scaleX(), las_header.scaleY(), las_header.scaleZ());
-    CCVector3d lasShift = -CCVector3d(las_header.offsetX(), las_header.offsetY(), las_header.offsetZ());
-
-    unsigned int nbOfPoints = las_header.pointCount();
+    unsigned int nbOfPoints = lasHeader.pointCount();
     if (nbOfPoints == 0)
     {
         //strange file ;)
@@ -591,7 +569,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         // they are not standard
         if (pdal::Dimension::name(dimId).empty())
         {
-            extraDimensions.push_back(point_view->dimName(dimId));
+            extraDimensions.push_back(pointView->dimName(dimId));
             extraDimensionsIds.push_back(dimId);
         }
         else
@@ -648,9 +626,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         QString outputBaseName = s_lasOpenDlg->outputPathLineEdit->text() + "/" + QFileInfo(filename).baseName();
         if (!tiler.init(w, h, vertDim, outputBaseName, bbMin, bbMax, table))
         {
-            // FIXME: This error won't happen since no file are opened durring init()
-            // failed to open at least one file!
-            return CC_FERR_WRITING;
+            return CC_FERR_NOT_ENOUGH_MEMORY;
         }
     }
 
@@ -677,9 +653,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 
     //first point: check for 'big' coordinates
-    CCVector3d P(point_view->getFieldAs<double>(Id::X, 0),
-                 point_view->getFieldAs<double>(Id::Y, 0),
-                 point_view->getFieldAs<double>(Id::Z, 0));
+    CCVector3d P(pointView->getFieldAs<double>(Id::X, 0),
+                 pointView->getFieldAs<double>(Id::Y, 0),
+                 pointView->getFieldAs<double>(Id::Z, 0));
     //backup input global parameters
     ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
     bool useLasShift = false;
@@ -694,8 +670,6 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
             parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
         }
     }
-
-
 
     //restore previous parameters
     parameters.shiftHandlingMode = csModeBackup;
@@ -720,16 +694,16 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
             extraFieldsToLoad.push_back(extraDimensionsIds[i]);
     }
 
-    for (pdal::PointId idx = 0; idx < point_view->size()+1; ++idx)
+    for (pdal::PointId idx = 0; idx < pointView->size()+1; ++idx)
     {
         // special operation: tiling mode
-        if (tiling && idx < point_view->size())
+        if (tiling && idx < pointView->size())
         {
-            tiler.addPoint(point_view, idx);
+            tiler.addPoint(pointView, idx);
             nProgress.oneStep();
             continue;
         }
-        if (idx == point_view->size() || idx == fileChunkPos + fileChunkSize)
+        if (idx == pointView->size() || idx == fileChunkPos + fileChunkSize)
         {
 
             if (loadedCloud)
@@ -821,13 +795,13 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
                 }
             }
 
-            if (idx == point_view->size())
+            if (idx == pointView->size())
             {
                 break;
             }
             // otherwise, we must create a new cloud
             fileChunkPos = idx;
-            unsigned int pointsToRead = static_cast<unsigned int>(point_view->size()) - idx;
+            unsigned int pointsToRead = static_cast<unsigned int>(pointView->size()) - idx;
             fileChunkSize = std::min(pointsToRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
             loadedCloud = new ccPointCloud();
 
@@ -840,9 +814,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
             loadedCloud->setGlobalShift(Pshift);
 
             //save the Spatial reference as meta-data
-            loadedCloud->setMetaData(s_LAS_SRS_Key, QVariant::fromValue(las_header.srs()));
-            //loadedCloud->setMetaData(s_LAS_SRS_Key, QVariant::fromValue(header.GetSRS()));
-
+            loadedCloud->setMetaData(s_LAS_SRS_Key, QVariant::fromValue(lasHeader.srs()));
 
             //DGM: from now on, we only enable scalar fields when we detect a valid value!
             if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
@@ -877,26 +849,25 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
             //extra fields
             for (Id &extraFieldId: extraFieldsToLoad)
             {
-                QString name = QString::fromStdString(point_view->dimName(extraFieldId));
-                ExtraLasField2 *eField = new ExtraLasField2(name, extraFieldId);
+                QString name = QString::fromStdString(pointView->dimName(extraFieldId));
+                ExtraLasField *eField = new ExtraLasField(name, extraFieldId);
                 fieldsToLoad.push_back(LasField::Shared(eField));
             }
-
         }
 
 
 
-        CCVector3 P(static_cast<PointCoordinateType>(point_view->getFieldAs<double>(Id::X, idx) + Pshift.x),
-                    static_cast<PointCoordinateType>(point_view->getFieldAs<double>(Id::Y, idx) + Pshift.y),
-                    static_cast<PointCoordinateType>(point_view->getFieldAs<double>(Id::Z, idx) + Pshift.z));
+        CCVector3 P(static_cast<PointCoordinateType>(pointView->getFieldAs<double>(Id::X, idx) + Pshift.x),
+                    static_cast<PointCoordinateType>(pointView->getFieldAs<double>(Id::Y, idx) + Pshift.y),
+                    static_cast<PointCoordinateType>(pointView->getFieldAs<double>(Id::Z, idx) + Pshift.z));
         loadedCloud->addPoint(P);
 
 
         if (loadColor)
         {
-            unsigned short red = point_view->getFieldAs<unsigned short>(Id::Red, idx) & rgbColorMask[0];
-            unsigned short green = point_view->getFieldAs<unsigned short>(Id::Green, idx) & rgbColorMask[1];
-            unsigned short blue = point_view->getFieldAs<unsigned short>(Id::Blue, idx) & rgbColorMask[2];
+            unsigned short red = pointView->getFieldAs<unsigned short>(Id::Red, idx) & rgbColorMask[0];
+            unsigned short green = pointView->getFieldAs<unsigned short>(Id::Green, idx) & rgbColorMask[1];
+            unsigned short blue = pointView->getFieldAs<unsigned short>(Id::Blue, idx) & rgbColorMask[2];
 
             // if we don't have reserved a color field yet, we check that color is not black
             bool pushColor = true;
@@ -930,8 +901,8 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
                 if (!forced8bitRgbMode && colorCompBitShift == 0)
                 {
                     if (   (red   & 0xFF00)
-                           || (green  & 0xFF00)
-                           || (blue & 0xFF00))
+                        || (green  & 0xFF00)
+                        || (blue & 0xFF00))
                     {
                         //the color components are on 16 bits!
                         ccLog::Print("[LAS] Color components are coded on 16 bits");
@@ -960,40 +931,40 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
             switch (field->type)
             {
             case LAS_INTENSITY:
-                value = point_view->getFieldAs<double>(Id::Intensity, idx);
+                value = pointView->getFieldAs<double>(Id::Intensity, idx);
                 break;
             case LAS_RETURN_NUMBER:
-                value = point_view->getFieldAs<double>(Id::ReturnNumber, idx);
+                value = pointView->getFieldAs<double>(Id::ReturnNumber, idx);
                 break;
             case LAS_NUMBER_OF_RETURNS:
-                value = point_view->getFieldAs<double>(Id::NumberOfReturns, idx);
+                value = pointView->getFieldAs<double>(Id::NumberOfReturns, idx);
                 break;
             case LAS_SCAN_DIRECTION:
-                value = point_view->getFieldAs<double>(Id::ScanDirectionFlag, idx);
+                value = pointView->getFieldAs<double>(Id::ScanDirectionFlag, idx);
                 break;
             case LAS_FLIGHT_LINE_EDGE:
-                value = point_view->getFieldAs<double>(Id::EdgeOfFlightLine, idx);
+                value = pointView->getFieldAs<double>(Id::EdgeOfFlightLine, idx);
                 break;
             case LAS_CLASSIFICATION:
-                value = point_view->getFieldAs<double>(Id::Classification, idx);
+                value = pointView->getFieldAs<double>(Id::Classification, idx);
                 break;
             case LAS_SCAN_ANGLE_RANK:
-                value = point_view->getFieldAs<double>(Id::ScanAngleRank, idx);
+                value = pointView->getFieldAs<double>(Id::ScanAngleRank, idx);
                 break;
             case LAS_USER_DATA:
-                value = point_view->getFieldAs<double>(Id::UserData, idx);
+                value = pointView->getFieldAs<double>(Id::UserData, idx);
                 break;
             case LAS_POINT_SOURCE_ID:
-                value = point_view->getFieldAs<double>(Id::PointSourceId, idx);
+                value = pointView->getFieldAs<double>(Id::PointSourceId, idx);
                 break;
             case LAS_EXTRA:
             {
-                ExtraLasField2* extraField = static_cast<ExtraLasField2*>((*it).data());
-                value = point_view->getFieldAs<double>(extraField->pdalId, idx);
+                ExtraLasField* extraField = static_cast<ExtraLasField*>((*it).data());
+                value = pointView->getFieldAs<double>(extraField->pdalId, idx);
                 break;
             }
             case LAS_TIME:
-                value = point_view->getFieldAs<double>(Id::GpsTime, idx);
+                value = pointView->getFieldAs<double>(Id::GpsTime, idx);
                 if (field->sf)
                 {
                     //shift time values (so as to avoid losing accuracy)
@@ -1001,16 +972,16 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
                 }
                 break;
             case LAS_CLASSIF_VALUE:
-                value = point_view->getFieldAs<int>(Id::Classification, idx); //5 bits
+                value = pointView->getFieldAs<int>(Id::Classification, idx); //5 bits
                 break;
             case LAS_CLASSIF_SYNTHETIC:
-                value = (point_view->getFieldAs<int>(Id::ClassFlags, idx) & 1); //bit #1
+                value = (pointView->getFieldAs<int>(Id::ClassFlags, idx) & 1); //bit #1
                 break;
             case LAS_CLASSIF_KEYPOINT:
-                value = (point_view->getFieldAs<int>(Id::ClassFlags, idx) & 2); //bit #2
+                value = (pointView->getFieldAs<int>(Id::ClassFlags, idx) & 2); //bit #2
                 break;
             case LAS_CLASSIF_WITHHELD:
-                value = (point_view->getFieldAs<int>(Id::Classification, idx) & 4); //bit #3
+                value = (pointView->getFieldAs<int>(Id::Classification, idx) & 4); //bit #3
                 break;
              // Overlap flag is the 4 bit (new in las 1.4)
             default:

@@ -6,6 +6,7 @@ if ( ${OPTION_PDAL_LAS} )
         message( SEND_ERROR "PDAL package not found!")
     else()
         include_directories(${PDAL_INCLUDE_DIRS})
+        link_directories(${PDAL_LIBRARY_DIRS})
     endif()
 endif()
 

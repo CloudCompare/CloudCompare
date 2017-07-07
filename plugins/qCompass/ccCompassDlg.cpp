@@ -45,6 +45,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 
 	//setup "algorithm" dropdown
 	m_cost_algorithm_menu = new QMenu(this);
+	m_cost_algorithm_menu->setTitle("Algorithm");
 	m_dark = new QAction("Darkness", this); m_dark->setCheckable(true); m_dark->setChecked(true);
 	m_light = new QAction("Lightness", this); m_light->setCheckable(true);
 	m_rgb = new QAction("RGB Similarity", this); m_rgb->setCheckable(true);
@@ -64,8 +65,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_dist->setToolTip("Traces take the shortest euclidean path (how booring...)");
 	m_scalar->setToolTip("Use the active scalar field to define path cost (i.e. the path follows low scalar values).");
 	m_scalar_inv->setToolTip("Use the inverse of the active scalar field to define path cost (i.e. the path follows high scalar values).");
-	m_plane_fit->setToolTip("If checked, a plane will automatically be fitted to traces matching the criteria defined in the ccCompass description.");
-	
+
 	//add to menu
 	m_cost_algorithm_menu->addAction(m_dark);
 	m_cost_algorithm_menu->addAction(m_light);
@@ -76,10 +76,29 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_cost_algorithm_menu->addAction(m_scalar);
 	m_cost_algorithm_menu->addAction(m_scalar_inv);
 	m_cost_algorithm_menu->addSeparator();
-	m_cost_algorithm_menu->addAction(m_plane_fit);
+
+	//setup settings menu
+	m_settings_menu = new QMenu(this);
+	m_plane_fit = new QAction("Fit Planes", this); m_plane_fit->setCheckable(true); m_plane_fit->setChecked(true);
+	m_showStippled = new QAction("Show Stippled", this); m_showStippled->setCheckable(true); m_showStippled->setChecked(true);
+	m_showNormals = new QAction("Show Normals", this); m_showNormals->setCheckable(true); m_showNormals->setChecked(true);
+	m_showNames = new QAction("Show Names", this); m_showNames->setCheckable(true); m_showNames->setChecked(false);
+
+	m_plane_fit->setToolTip("If checked, a plane will automatically be fitted to traces matching the criteria defined in the ccCompass description.");
+	m_showStippled->setToolTip("If checked, planes will be drawn partially transparent (stippled).");
+	m_showNormals->setToolTip("If checked, plane normals will be drawn.");
+	m_showNames->setToolTip("If checked, plane orientations will be displayed in the 3D view.");
+
+	m_settings_menu->addAction(m_plane_fit);
+	m_settings_menu->addAction(m_showStippled);
+	m_settings_menu->addAction(m_showNormals);
+	m_settings_menu->addAction(m_showNames);
+	m_settings_menu->addSeparator();
+	m_settings_menu->addMenu(m_cost_algorithm_menu);
 
 	algorithmButton->setPopupMode(QToolButton::InstantPopup);
-	//N.B. the menu is added to the algorithm button in the functions that are called with "mode" (plane, trace, lineation) changes - see ccCompass
+	algorithmButton->setMenu(m_settings_menu); //add settings menu
+	algorithmButton->setEnabled(true);
 
 	//set background color
 	QPalette p;

@@ -15,64 +15,27 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_COMPASS_DIALOG_HEADER
-#define CC_COMPASS_DIALOG_HEADER
 
-//Qt
-#include <QDialog>
-#include <QList>
-#include <QAction>
+#ifndef CC_GEOOBJECT_HEADER
+#define CC_GEOOBJECT_HEADER
 
-//CC
-#include <ccGLWindow.h>
-#include <ccOverlayDialog.h>
+#include <ccHObject.h>
+#include <ccPointCloud.h>
 
-//Local
-#include <ui_compassDlg.h>
-#include "ccTrace.h"
-
-
-class ccCompassDlg : public ccOverlayDialog, public Ui::compassDlg
+class ccGeoObject : public ccHObject
 {
-	Q_OBJECT
-
 public:
-	//! Default constructor
-	explicit ccCompassDlg(QWidget* parent = 0);
+	ccGeoObject(ccPointCloud* associatedCloud);
 
-	/*
-	Returns a flag describing the currently selected ccTrace::COST_MODE (used to build the cost function for optimisation)
-	*/
-	int getCostMode();
-	/*
-	Returns true if the m_plane_fit action is checked -> used to check if the user expects us to fit a plane to finished traces.
-	*/
-	bool planeFitMode();
+	void setType(QString type);
+	QString getType();
 
-	QMenu *m_cost_algorithm_menu;
-	QMenu *m_settings_menu;
+	ccPointCloud* getAssociatedCloud();
 
-	//settings menu
-	QAction *m_plane_fit;
-	QAction *m_showStippled;
-	QAction *m_showNormals;
-	QAction *m_showNames;
-protected slots:
-	//! To capture overridden shortcuts (pause button, etc.)
-	void onShortcutTriggered(int);
+protected:
+	ccPointCloud* m_associatedCloud; //the dataset this object "belongs" too
 
-private:
-	//algorithm menu
-	QAction *m_dark;
-	QAction *m_light;
-	QAction *m_rgb;
-	QAction *m_grad;
-	QAction *m_curve;
-	QAction *m_dist;
-	QAction *m_scalar;
-	QAction *m_scalar_inv;
-
-	
 };
+
 
 #endif

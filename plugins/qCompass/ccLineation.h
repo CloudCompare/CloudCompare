@@ -28,9 +28,7 @@
 class ccLineation : public ccPolyline
 {
 public:
-	ccLineation(ccPointCloud* associatedCloud)
-		: ccPolyline(associatedCloud)
-	{ }
+	ccLineation(ccPointCloud* associatedCloud);
 
 	virtual ~ccLineation() {}
 
@@ -58,6 +56,10 @@ protected:
 
 	//overidden from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+
+//static functions
+public:
+	static bool ccLineation::isLineation(ccHObject* object);
 
 };
 

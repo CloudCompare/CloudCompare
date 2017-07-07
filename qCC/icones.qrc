@@ -140,6 +140,7 @@
     <file>images/typeYCoordinate.png</file>
     <file>images/typeZCoordinate.png</file>
     <file>images/ccTracePolyline.png</file>
+    <file>images/qCompass.png</file>
   </qresource>
   <qresource prefix="/CC/Icons">
     <file>images/icon/cc_viewer_icon_16.png</file>

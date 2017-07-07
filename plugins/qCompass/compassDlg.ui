@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
+    <width>790</width>
     <height>33</height>
    </rect>
   </property>
@@ -33,15 +33,86 @@
     <number>2</number>
    </property>
    <item>
+    <widget class="QLabel" name="modeLabel_2">
+     <property name="text">
+      <string>Mode:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="compassMode">
+     <property name="toolTip">
+      <string>Activate compass mode to make structural measurements</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../qCC/icones.qrc">
+       <normaloff>:/CC/images/qCompass.png</normaloff>:/CC/images/qCompass.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="default">
+      <bool>false</bool>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="mapMode">
+     <property name="toolTip">
+      <string>Activate map mode to define geological features</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../qCC/icones.qrc">
+       <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_4">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QLabel" name="modeLabel">
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
      <property name="text">
-      <string>Mode:</string>
+      <string>Tool:</string>
      </property>
      <property name="scaledContents">
       <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="paintModeButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../qCC/icones.qrc">
+       <normaloff>:/CC/images/ccPencil.png</normaloff>:/CC/images/ccPencil.png</iconset>
      </property>
     </widget>
    </item>
@@ -98,7 +169,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="lineationModeButton">
+    <widget class="QPushButton" name="pairModeButton">
      <property name="toolTip">
       <string>Measure lineation</string>
      </property>
@@ -160,19 +231,19 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Algorithm:</string>
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QToolButton" name="algorithmButton">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="toolTip">
-      <string>Change the algorithm used to calculate/extract structures in &amp;quot;trace&amp;quot; mode</string>
+      <string>Change tool and visibility settings</string>
      </property>
      <property name="text">
       <string/>
@@ -190,59 +261,9 @@
     </widget>
    </item>
    <item>
-    <widget class="Line" name="line_2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="showNameToggle">
-     <property name="toolTip">
-      <string>Label all planes with orientation?</string>
-     </property>
-     <property name="text">
-      <string>3D Labels</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="showStippledToggle">
-     <property name="toolTip">
-      <string>Draw planes with stippling?</string>
-     </property>
-     <property name="text">
-      <string>Stippled</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="showNormalsToggle">
-     <property name="toolTip">
-      <string>Draw normal vectors to planes?</string>
-     </property>
-     <property name="text">
-      <string>Normals</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line_3">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QToolButton" name="saveButton">
      <property name="toolTip">
-      <string>Save planes/traces associated with selected point cloud</string>
+      <string>Export interpretation and measurements</string>
      </property>
      <property name="statusTip">
       <string>Save current label (added to cloud children)</string>
@@ -253,6 +274,23 @@
      <property name="icon">
       <iconset resource="../../qCC/icones.qrc">
        <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="toolButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Import interpretation and measurements</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../qCC/icones.qrc">
+       <normaloff>:/CC/images/ccOpen.png</normaloff>:/CC/images/ccOpen.png</iconset>
      </property>
     </widget>
    </item>

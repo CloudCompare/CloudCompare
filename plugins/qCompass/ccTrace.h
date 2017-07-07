@@ -33,6 +33,8 @@
 #include <Jacobi.h>
 #include <ccScalarField.h>
 
+#include "ccFitPlane.h"
+
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
@@ -138,7 +140,7 @@ public:
 	@Return
 	The plane that was fitted, or a null pointer (0) if the plane is not considered valid (by the above criterion)
 	*/
-	ccPlane* fitPlane(int surface_effect_tolerance = 10, float min_planarity = 0.75f);
+	ccFitPlane* fitPlane(int surface_effect_tolerance = 10, float min_planarity = 0.75f);
 
 	void setTraceColor(ccColor::Rgba col) { m_trace_colour = col; }
 	void setWaypointColor(ccColor::Rgba col) { m_waypoint_colour = col; }
@@ -245,6 +247,10 @@ private:
 	(1) appended to the end of the trace [falls outside of all segment-circles], or (2) inserted to split a segment [falls into a segment-circle]
 	*/
 	bool inCircle(const CCVector3* segStart, const CCVector3* segEnd, const CCVector3* query);
+
+//static functions
+public:
+	static bool isTrace(ccHObject* object); //return true if object is a valid trace [regardless of it's class type]
 };
 
 #endif

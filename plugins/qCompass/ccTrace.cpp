@@ -28,6 +28,7 @@ ccTrace::ccTrace(ccPointCloud* associatedCloud) : ccPolyline(associatedCloud)
 	//store these info as object attributes
 	//object->hasMetaData("search_r") && object->hasMetaData("cost_function");
 	QVariantMap* map = new QVariantMap();
+	map->insert("ccCompassType", "Trace");
 	map->insert("search_r", m_search_r); 
 	QString cost_function = "";
 	if (COST_MODE & MODE::RGB)
@@ -49,7 +50,6 @@ ccTrace::ccTrace(ccPointCloud* associatedCloud) : ccPolyline(associatedCloud)
 	cost_function = cost_function.remove(cost_function.size() - 1, 1); //remove trailing comma
 	map->insert("cost_function", cost_function);
 	setMetaData(*map, true);
-
 }
 
 int ccTrace::insertWaypoint(int pointId)
@@ -513,7 +513,7 @@ int ccTrace::getSegmentCostScalarInv(int p1, int p2)
 	return (sf->getMax() - sf->getValue(p2)) * (765 / (sf->getMax() - sf->getMin())); //return inverted scalar field value mapped to range 0 - 765
 }
 
-ccPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
+ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 {
 	//put all "trace" points into the cloud
 	finalizePath();
@@ -539,38 +539,20 @@ ccPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 		float planarity = 1.0f - z / y;
 		if (planarity < min_planarity)
 		{
-			return 0;
+			return nullptr;
 		}
 	}
 
 	//fit plane
 	double rms = 0.0; //output for rms
-	ccPlane* p = ccPlane::Fit(this, &rms);
-    
-	//calculate and store plane attributes
-	//get plane normal vector
-	CCVector3 N(p->getNormal());
-	//We always consider the normal with a positive 'Z' by default!
-	if (N.z < 0.0)
-		N *= -1.0;
+	ccFitPlane* p = ccFitPlane::Fit(this, &rms);
 
-	//calculate strike/dip/dip direction
-	float strike, dip, dipdir;
-	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
-	ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip);
-	QString dipAndDipDirStr = QString("%1/%2").arg((int)dip, 2, 10, QChar('0')).arg((int)dipdir, 3, 10, QChar('0'));
-	p->setName(dipAndDipDirStr);
-	//calculate centroid
-	CCVector3 C = p->getCenter();
+	if (!p)
+	{
+		return nullptr; //return null for invalid planes
+	}
 
-	//store attributes (centroid, strike, dip, RMS) on plane
-	QVariantMap* map = new QVariantMap();
-	map->insert("Cx", C.x); map->insert("Cy", C.y); map->insert("Cz", C.z); //centroid
-	map->insert("Nx", N.x); map->insert("Ny", N.y); map->insert("Nz", N.z); //normal
-	map->insert("Strike", strike); map->insert("Dip", dip); map->insert("DipDir", dipdir); //strike & dip
-	map->insert("RMS", rms); //rms
-	map->insert("Radius", m_search_r); //search radius
-	p->setMetaData(*map, true);
+	p->updateAttributes(rms, m_search_r);
 
 	//test for 'surface effect'
 	if (m_cloud->hasNormals())
@@ -745,4 +727,16 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glEnd();
 		}
 	}
+}
+
+bool ccTrace::isTrace(ccHObject* object) //return true if object is a valid trace [regardless of it's class type]
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("Trace");
+	}
+	return false;
+	/*return object->isKindOf(CC_TYPES::POLY_LINE) //traces are polylines
+	&& object->hasMetaData("search_r") //ensure polyline has correct metadata for trace
+	&& object->hasMetaData("cost_function");*/
 }

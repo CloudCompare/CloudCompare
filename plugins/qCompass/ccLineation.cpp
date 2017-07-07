@@ -22,6 +22,17 @@ static QSharedPointer<ccSphere> c_unitPointMarker(nullptr);
 static QSharedPointer<ccCylinder> c_bodyMarker(nullptr);
 
 static QSharedPointer<ccCone> c_headMarker(nullptr);
+
+//ctor
+ccLineation::ccLineation(ccPointCloud* associatedCloud) 
+	: ccPolyline(associatedCloud)
+{
+	//add metadata tag defining the ccCompass class type
+	QVariantMap* map = new QVariantMap();
+	map->insert("ccCompassType", "Lineation");
+	setMetaData(*map, true);
+}
+
 //overidden from ccHObject
 void ccLineation::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
@@ -136,4 +147,23 @@ void ccLineation::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glPopMatrix();
 		}
 	}
+}
+
+//returns true if object is a lineation
+bool ccLineation::isLineation(ccHObject* object)
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("Lineation");
+	}
+	return false;
+	/*return object->isKindOf(CC_TYPES::POLY_LINE) //lineations are polylines
+	&& object->hasMetaData("Sx") //ensure polyline has correct metadata for lineation
+	&& object->hasMetaData("Sy")
+	&& object->hasMetaData("Sz")
+	&& object->hasMetaData("Ex")
+	&& object->hasMetaData("Ey")
+	&& object->hasMetaData("Ez")
+	&& object->hasMetaData("Trend")
+	&& object->hasMetaData("Plunge");*/
 }

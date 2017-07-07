@@ -47,6 +47,13 @@
 #include "ccTrace.h"
 #include "ccLineation.h"
 #include "ccCompassInfo.h"
+#include "ccGeoObject.h"
+
+//tools
+#include "ccTool.h"
+#include "ccFitPlaneTool.h"
+#include "ccTraceTool.h"
+#include "ccLineationTool.h"
 
 //other
 #include <math.h>
@@ -96,36 +103,31 @@ protected slots:
 	void onAccept();
 	void onSave();
 	void onUndo();
-	void setLineationMode();
-	void setPlaneMode();
-	void setTraceMode();
+	void setLineationMode(); //activates the lineation tool
+	void setPlaneMode(); //activates the plane tool
+	void setTraceMode(); //activates the trace tool
+
+	//updates drawing properites of fit planes etc.
 	void toggleStipple(bool checked);
 	void recurseStipple(ccHObject* object, bool checked);
 	void toggleLabels(bool checked);
 	void recurseLabels(ccHObject* object, bool checked);
 	void toggleNormals(bool checked);
 	void recurseNormals(ccHObject* object, bool checked);
+
+	//change the m_category property
 	void changeType();
+
+	//display the help dialog
 	void showHelp();
 
 protected:
 
 	//event to get mouse-move updates & trigger repaint of overlay circle
 	virtual bool eventFilter(QObject* obj, QEvent* event) override;
-
-	//used while exporting plane data
-	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());
-	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = QString());
-	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString());
-
-	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)
-	bool madeByMe(ccHObject* object);
-	//returns true if object is a lineation object created by ccCompass
-	bool isLineation(ccHObject* object);
-	//returns true if object is a plane created by ccCompass (has the associated data)
-	bool isFitPlane(ccHObject* object);
-	//returns true if object is a trace created by ccCompass (has the associated data)
-	bool isTrace(ccHObject* object);
+	
+	//used to get the place/object that new measurements or interpretation should be stored
+	ccHObject* getInsertPoint();
 
 	//cleans up pointers etc before changing tools
 	void cleanupBeforeToolChange();
@@ -137,33 +139,40 @@ protected:
 	ccGLWindow* m_window = nullptr;
 	QMainWindow* m_main_window = nullptr;
 
-	//2D-circle for selection during plane-mode
-	ccMouseCircle* m_mouseCircle = nullptr;
-
 	//ccCompass toolbar gui
 	ccCompassDlg* m_dlg = nullptr;
 	
-	enum MODE
-	{
-		PLANE_MODE,
-		TRACE_MODE,
-		LINEATION_MODE
-	};
-	MODE m_pickingMode = MODE::PLANE_MODE;
+	//tools
+	ccTool* m_activeTool = nullptr;
+	ccFitPlaneTool* m_fitPlaneTool;
+	ccTraceTool* m_traceTool;
+	ccLineationTool* m_lineationTool;
 
-	//active trace for trace mode
-	ccTrace* m_trace = nullptr;
-	int m_trace_id=-1; //used to check if m_trace has been deleted
-	ccLineation* m_lineation = nullptr;
-	int m_lineation_id = -1; //used to check if m_lineation has been deleted
+	//currently selected/active geoObject
+	ccGeoObject* m_geoObject = nullptr; //the GeoObject currently being written to
+	int m_geoObject_id = -1; //used to check if m_geoObject has been deleted
 
-	//name of structure currently being digitized
+	//name/category of structure currently being digitized
 	QString m_category = "Bedding";
 
+	//used while exporting data
+	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());
+	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = QString());
+	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString());
+
+	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)
+	bool madeByMe(ccHObject* object);
+
+//static flags used to define simple behaviours
+public:
 	//drawing properties
-	bool m_drawName = false;
-	bool m_drawStippled = true;
-	bool m_drawNormals = true;
+	static bool drawName;
+	static bool drawStippled;
+	static bool drawNormals;
+
+	//calculation properties
+	static bool fitPlanes;
+	static int costMode;
 };
 
 #endif

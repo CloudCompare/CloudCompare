@@ -492,8 +492,8 @@ void ccColorScalesManager::addScale(ccColorScale::Shared scale)
 
 void ccColorScalesManager::removeScale(QString UUID)
 {
-	ScalesMap::const_iterator it = m_scales.find(UUID);
-	if (it != m_scales.end())
+	ScalesMap::const_iterator it = m_scales.constFind(UUID);
+	if (it != m_scales.constEnd())
 	{
 		if ((*it)->isLocked())
 		{

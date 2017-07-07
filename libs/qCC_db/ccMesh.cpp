@@ -3476,8 +3476,8 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 		unsigned indexG1 = 0;
 		{
 			qint64 key = GenerateKey(indexA, indexB);
-			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
-			if (it == s_alreadyCreatedVertices.end())
+			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(key);
+			if (it == s_alreadyCreatedVertices.constEnd())
 			{
 				//generate new vertex
 				indexG1 = vertices->size();
@@ -3508,8 +3508,8 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 		unsigned indexG2 = 0;
 		{
 			qint64 key = GenerateKey(indexB, indexC);
-			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
-			if (it == s_alreadyCreatedVertices.end())
+			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(key);
+			if (it == s_alreadyCreatedVertices.constEnd())
 			{
 				//generate new vertex
 				indexG2 = vertices->size();
@@ -3540,8 +3540,8 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 		unsigned indexG3 = vertices->size();
 		{
 			qint64 key = GenerateKey(indexC, indexA);
-			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
-			if (it == s_alreadyCreatedVertices.end())
+			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(key);
+			if (it == s_alreadyCreatedVertices.constEnd())
 			{
 				//generate new vertex
 				indexG3 = vertices->size();
@@ -3670,20 +3670,20 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 			//test all edges
 			int indexG1 = -1;
 			{
-				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexA, indexB));
-				if (it != s_alreadyCreatedVertices.end())
+				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(GenerateKey(indexA, indexB));
+				if (it != s_alreadyCreatedVertices.constEnd())
 					indexG1 = (int)it.value();
 			}
 			int indexG2 = -1;
 			{
-				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexB, indexC));
-				if (it != s_alreadyCreatedVertices.end())
+				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(GenerateKey(indexB, indexC));
+				if (it != s_alreadyCreatedVertices.constEnd())
 					indexG2 = (int)it.value();
 			}
 			int indexG3 = -1;
 			{
-				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexC, indexA));
-				if (it != s_alreadyCreatedVertices.end())
+				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(GenerateKey(indexC, indexA));
+				if (it != s_alreadyCreatedVertices.constEnd())
 					indexG3 = (int)it.value();
 			}
 

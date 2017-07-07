@@ -280,7 +280,7 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			}
 
 			CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-			ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(subFileName), parameters, filter, result);
+			ccHObject* entities = FileIOFilter::LoadFromFile(QString("%1/%2").arg(path,subFileName), parameters, filter, result);
 			if (entities)
 			{
 				ccGLMatrix rot;

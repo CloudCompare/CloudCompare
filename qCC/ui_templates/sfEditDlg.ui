@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>259</width>
+    <width>291</width>
     <height>200</height>
    </rect>
   </property>
@@ -88,6 +88,9 @@
                 <height>0</height>
                </size>
               </property>
+              <property name="keyboardTracking">
+               <bool>false</bool>
+              </property>
               <property name="decimals">
                <number>8</number>
               </property>
@@ -107,6 +110,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="keyboardTracking">
+               <bool>false</bool>
               </property>
               <property name="decimals">
                <number>8</number>
@@ -135,6 +141,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="keyboardTracking">
+               <bool>false</bool>
+              </property>
               <property name="decimals">
                <number>8</number>
               </property>
@@ -154,6 +163,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="keyboardTracking">
+               <bool>false</bool>
               </property>
               <property name="decimals">
                <number>8</number>

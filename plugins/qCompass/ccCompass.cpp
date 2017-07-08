@@ -27,7 +27,8 @@ bool ccCompass::drawStippled = true;
 bool ccCompass::drawNormals = true;
 bool ccCompass::fitPlanes = true;
 int ccCompass::costMode = ccTrace::DARK;
-
+bool ccCompass::mapMode = false;
+int ccCompass::mapTo = ccGeoObject::LOWER_BOUNDARY;
 ccCompass::ccCompass(QObject* parent/*=0*/)
 	: QObject(parent)
 	, m_action(0)
@@ -52,9 +53,58 @@ ccCompass::~ccCompass()
 
 void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 {
+	if (!m_dlg | !m_mapDlg)
+	{
+		return; //not initialized yet - ignore callback
+	}
+
 	if (m_activeTool)
 	{
 		m_activeTool->onNewSelection(selectedEntities); //pass on to the active tool
+	}
+
+	//clear GeoObject selection & disable associated GUI
+	m_geoObject = nullptr;
+	m_geoObject_id = -1;
+	if (m_mapDlg)
+	{
+		m_mapDlg->setLowerButton->setEnabled(false);
+		m_mapDlg->setUpperButton->setEnabled(false);
+		m_mapDlg->setInteriorButton->setEnabled(false);
+		m_mapDlg->selectionLabel->setEnabled(false);
+		m_mapDlg->selectionLabel->setText("No Selection");
+	}
+	//has a GeoObject (or a child of one?) been selected?
+	for (ccHObject* obj : selectedEntities)
+	{
+		//recurse upwards looking for geoObject
+		ccHObject* o = obj;
+		while (o)
+		{
+			//have we found a geoObject?
+			if (ccGeoObject::isGeoObject(o))
+			{
+				//found one!
+				m_geoObject = static_cast<ccGeoObject*>(o);
+				if (m_geoObject) //cast succeded
+				{
+					m_geoObject_id = m_geoObject->getUniqueID(); //store id
+
+					//activate GUI
+					m_mapDlg->setLowerButton->setEnabled(true);
+					m_mapDlg->setUpperButton->setEnabled(true);
+					m_mapDlg->setInteriorButton->setEnabled(true);
+					m_mapDlg->selectionLabel->setEnabled(true);
+					m_mapDlg->selectionLabel->setText(m_geoObject->getName());
+
+					//done!
+					return; 
+				}
+			}
+
+			//next parent
+			o = o->getParent();
+		}
 	}
 }
 
@@ -120,8 +170,28 @@ void ccCompass::doAction()
 		ccCompassDlg::connect(m_dlg->m_showNames, SIGNAL(toggled(bool)), this, SLOT(toggleLabels(bool)));
 		ccCompassDlg::connect(m_dlg->m_showStippled, SIGNAL(toggled(bool)), this, SLOT(toggleStipple(bool)));
 		ccCompassDlg::connect(m_dlg->m_showNormals, SIGNAL(toggled(bool)), this, SLOT(toggleNormals(bool)));
+
+		ccCompassDlg::connect(m_dlg->mapMode, SIGNAL(clicked()), this, SLOT(enableMapMode()));
+		ccCompassDlg::connect(m_dlg->compassMode, SIGNAL(clicked()), this, SLOT(enableMeasureMode()));
 	}
+
+	if (!m_mapDlg)
+	{
+		m_mapDlg = new ccMapDlg(m_app->getMainWindow());
+
+		ccCompassDlg::connect(m_mapDlg->addObjectButton, SIGNAL(clicked()), this, SLOT(addGeoObject()));
+		ccCompassDlg::connect(m_mapDlg->pickObjectButton, SIGNAL(clicked()), this, SLOT(pickGeoObject()));
+		ccCompassDlg::connect(m_mapDlg->clearObjectButton, SIGNAL(clicked()), this, SLOT(clearGeoObject()));
+		ccCompassDlg::connect(m_mapDlg->setInteriorButton, SIGNAL(clicked()), this, SLOT(writeToInterior()));
+		ccCompassDlg::connect(m_mapDlg->setUpperButton, SIGNAL(clicked()), this, SLOT(writeToUpper()));
+		ccCompassDlg::connect(m_mapDlg->setLowerButton, SIGNAL(clicked()), this, SLOT(writeToLower()));
+	}
+
 	m_dlg->linkWith(m_window);
+	m_mapDlg->linkWith(m_window);
+
+	//start in measure mode
+	enableMeasureMode();
 
 	//begin measuring
 	startMeasuring();
@@ -196,6 +266,12 @@ bool ccCompass::stopMeasuring()
 		m_app->unregisterOverlayDialog(m_dlg);
 	}
 
+	if (m_mapDlg)
+	{
+		m_mapDlg->stop(true);
+		m_app->unregisterOverlayDialog(m_mapDlg);
+	}
+
 	//forget last measurement
 	if (m_activeTool)
 	{
@@ -216,54 +292,79 @@ bool ccCompass::stopMeasuring()
 ccHObject* ccCompass::getInsertPoint()
 {
 
-	//check if there is an active GeoObject
-	if (false)
+	//check if there is an active GeoObject and we are in mapMode
+	if (ccCompass::mapMode)
 	{
-		//todo
-	}
-	else //if not, find/create a group called "measurements"
-	{
-		ccHObject* measurement_group = nullptr;
-
-		//search for a "measurements" group
-		for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++) 
+		//check there is an active GeoObject
+		if (!m_geoObject)
 		{
-			if (m_app->dbRootObject()->getChild(i)->getName() == "measurements")
+			m_app->dispToConsole("[ccCompass] Error: Please select a GeoObject to digitize to.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		}
+
+		//check it actually exists/hasn't been deleted
+		if (!m_app->dbRootObject()->find(m_geoObject_id))
+		{
+			//object has been deleted
+			m_geoObject = nullptr;
+			m_geoObject_id = -1;
+		}
+		else
+		{
+			//object exists - we can use it to find the insert point
+			ccHObject* insertPoint = m_geoObject->getRegion(ccCompass::mapTo);
+			if (!insertPoint) //something went wrong?
 			{
-				measurement_group = m_app->dbRootObject()->getChild(i);
-				break;
+				m_app->dispToConsole("[ccCompass] Warning: Could not retrieve valid mapping region for the active GeoObject.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			}
+			else
+			{
+				return insertPoint; // :)
 			}
 		}
-
-		//didn't find it - create a new one!
-		if (!measurement_group)
-		{
-			measurement_group = new ccHObject("measurements");
-			m_app->dbRootObject()->addChild(measurement_group);
-			m_app->addToDB(measurement_group, false, true, false, false);
-		}
-
-		//search for relevant category group within this
-		ccHObject* category_group = nullptr;
-		for (unsigned i = 0; i < measurement_group->getChildrenNumber(); i++) //check if a category group exists
-		{
-			if (measurement_group->getChild(i)->getName() == m_category)
-			{
-				category_group = measurement_group->getChild(i);
-				break;
-			}
-		}
-
-		//didn't find it... create it!
-		if (!category_group)
-		{
-			category_group = new ccHObject(m_category);
-			measurement_group->addChild(category_group);
-			m_app->addToDB(category_group, false, true, false, false);
-		}
-
-		return category_group; //this is the insert point
 	}
+	
+	//otherwise, we're in "Compass" mode, so...
+	//find/create a group called "measurements"
+	ccHObject* measurement_group = nullptr;
+
+	//search for a "measurements" group
+	for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++) 
+	{
+		if (m_app->dbRootObject()->getChild(i)->getName() == "measurements")
+		{
+			measurement_group = m_app->dbRootObject()->getChild(i);
+			break;
+		}
+	}
+
+	//didn't find it - create a new one!
+	if (!measurement_group)
+	{
+		measurement_group = new ccHObject("measurements");
+		m_app->dbRootObject()->addChild(measurement_group);
+		m_app->addToDB(measurement_group, false, true, false, false);
+	}
+
+	//search for relevant category group within this
+	ccHObject* category_group = nullptr;
+	for (unsigned i = 0; i < measurement_group->getChildrenNumber(); i++) //check if a category group exists
+	{
+		if (measurement_group->getChild(i)->getName() == m_category)
+		{
+			category_group = measurement_group->getChild(i);
+			break;
+		}
+	}
+
+	//didn't find it... create it!
+	if (!category_group)
+	{
+		category_group = new ccHObject(m_category);
+		measurement_group->addChild(category_group);
+		m_app->addToDB(category_group, false, true, false, false);
+	}
+
+	return category_group; //this is the insert point
 }
 
 //This function is called when a point is picked (through the picking hub)
@@ -385,6 +486,7 @@ void ccCompass::cleanupBeforeToolChange()
 	m_dlg->pairModeButton->setChecked(false);
 	m_dlg->planeModeButton->setChecked(false);
 	m_dlg->traceModeButton->setChecked(false);
+	m_dlg->paintModeButton->setChecked(false);
 	m_dlg->undoButton->setEnabled(false);
 	m_dlg->acceptButton->setEnabled(false);
 }
@@ -400,6 +502,7 @@ void ccCompass::setLineationMode()
 	m_activeTool->toolActivated();
 
 	//update GUI
+	m_dlg->undoButton->setEnabled(m_lineationTool->canUndo());
 	m_dlg->pairModeButton->setChecked(true);
 	m_window->redraw(true, false);
 }
@@ -415,6 +518,7 @@ void ccCompass::setPlaneMode()
 	m_activeTool->toolActivated();
 
 	//update GUI
+	m_dlg->undoButton->setEnabled(m_fitPlaneTool->canUndo());
 	m_dlg->planeModeButton->setChecked(true);
 	m_window->redraw(true, false);
 }
@@ -431,10 +535,18 @@ void ccCompass::setTraceMode()
 
 	//update GUI
 	m_dlg->traceModeButton->setChecked(true);
-	m_dlg->undoButton->setEnabled(true);
+	m_dlg->undoButton->setEnabled( m_traceTool->canUndo() );
 	m_dlg->acceptButton->setEnabled(true);
 	//m_dlg->m_cost_algorithm_menu->setEnabled(true); //add algorithm menu
 	m_window->redraw(true, false);
+}
+
+void ccCompass::setPaintMode()
+{
+	m_dlg->paintModeButton->setChecked(true);
+	
+	//do nothing more for now (paint mode not yet availiable
+
 }
 
 //toggle stippling
@@ -635,6 +747,110 @@ void ccCompass::onSave()
 	{
 		m_app->dispToConsole("[ccCompass] Could not open output files... ensure CC has write access to this location.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	}
+}
+
+//enter or turn off map mode
+void ccCompass::enableMapMode() //turns on/off map mode
+{
+	//m_app->dispToConsole("ccCompass: Changing to Map mode. Measurements will be associated with GeoObjects.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_dlg->mapMode->setChecked(true);
+	m_dlg->compassMode->setChecked(false);
+	m_dlg->paintModeButton->setEnabled(true);
+
+	ccCompass::mapMode = true;
+
+	//start gui
+	m_app->registerOverlayDialog(m_mapDlg, Qt::Corner::TopLeftCorner);
+	m_mapDlg->start();
+	m_app->updateOverlayDialogsPlacement();
+	m_window->redraw(true, false);
+}
+
+//enter or turn off map mode
+void ccCompass::enableMeasureMode() //turns on/off map mode
+{
+	//m_app->dispToConsole("ccCompass: Changing to Compass mode. Measurements will be stored in the \"Measurements\" folder.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_dlg->mapMode->setChecked(false);
+	m_dlg->compassMode->setChecked(true);
+	ccCompass::mapMode = false;
+	m_window->redraw(true, false);
+	m_dlg->paintModeButton->setEnabled(false);
+
+	//turn off map mode dialog
+	m_mapDlg->stop(true);
+	m_app->unregisterOverlayDialog(m_mapDlg);
+	m_app->updateOverlayDialogsPlacement();
+}
+
+void ccCompass::addGeoObject() //creates a new GeoObject
+{
+	//get name
+	QString name = QInputDialog::getText(m_dlg, "New GeoObject", "GeoObject Name:", QLineEdit::Normal, "DefaultName");
+	if (name == "") //user clicked cancel
+	{
+		return;
+	}
+
+	//search for a "interpretation" group [where the new unit will be added]
+	ccHObject* interp_group = nullptr;
+	for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
+	{
+		if (m_app->dbRootObject()->getChild(i)->getName() == "interpretation")
+		{
+			interp_group = m_app->dbRootObject()->getChild(i);
+			break;
+		}
+	}
+
+	//didn't find it - create a new one!
+	if (!interp_group)
+	{
+		interp_group = new ccHObject("interpretation");
+		m_app->dbRootObject()->addChild(interp_group);
+		m_app->addToDB(interp_group, false, true, false, false);
+	}
+
+	//create the new GeoObject
+	ccGeoObject* newGeoObject = new ccGeoObject(name,m_app);
+	interp_group->addChild(newGeoObject);
+	m_app->addToDB(newGeoObject, false, true, false, false);
+
+	//set it to selected (this will then make it "active" via the selection change callback)
+	m_app->setSelectedInDB(newGeoObject, true);
+}
+
+void ccCompass::pickGeoObject() //uses a "picking tool" to select GeoObjects
+{
+	//todo
+}
+
+void ccCompass::clearGeoObject()  //clears the selected GeoObject
+{
+	//todo
+}
+
+void ccCompass::writeToInterior() //new digitization will be added to the GeoObjects interior
+{
+	ccCompass::mapTo = ccGeoObject::INTERIOR;
+	m_mapDlg->setInteriorButton->setChecked(true);
+	m_mapDlg->setUpperButton->setChecked(false);
+	m_mapDlg->setLowerButton->setChecked(false);
+}
+
+void ccCompass::writeToUpper() //new digitization will be added to the GeoObjects upper boundary
+{
+	ccCompass::mapTo = ccGeoObject::UPPER_BOUNDARY;
+	m_mapDlg->setInteriorButton->setChecked(false);
+	m_mapDlg->setUpperButton->setChecked(true);
+	m_mapDlg->setLowerButton->setChecked(false);
+}
+
+void ccCompass::writeToLower() //new digitiziation will be added to the GeoObjects lower boundary
+{
+	ccCompass::mapTo = ccGeoObject::LOWER_BOUNDARY;
+	m_mapDlg->setInteriorButton->setChecked(false);
+	m_mapDlg->setUpperButton->setChecked(false);
+	m_mapDlg->setLowerButton->setChecked(true);
 }
 
 //write plane data

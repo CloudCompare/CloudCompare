@@ -15,51 +15,34 @@
 //#                                                                        #
 //##########################################################################
 
+#include "ccMapDlg.h"
 
-#ifndef CC_GEOOBJECT_HEADER
-#define CC_GEOOBJECT_HEADER
+//Local
+#include "ccGLWindow.h"
 
-#include <ccHObject.h>
-#include <ccPointCloud.h>
-#include <ccMainAppInterface.h>
+//qCC_db
+#include <ccLog.h>
 
-class ccGeoObject : public ccHObject
+//Qt
+#include <QEvent>
+#include <QKeyEvent>
+#include <QApplication>
+#include <qmenu.h>
+#include <qaction.h>
+
+//system
+#include <assert.h>
+
+ccMapDlg::ccMapDlg(QWidget* parent/*=0*/)
+	: ccOverlayDialog(parent)
+	, Ui::mapDlg()
 {
-public:
-	ccGeoObject(QString name, ccMainAppInterface* app);
+	setupUi(this);
 
-	void setType(QString type);
-	QString getType();
+	//set background color
+	QPalette p;
+	p.setColor(backgroundRole(), QColor(240, 240, 240, 200));
+	setPalette(p);
+	setAutoFillBackground(true);
 
-	ccPointCloud* getAssociatedCloud();
-	
-	ccHObject* getRegion(int mappingRegion);
-
-	//flags defining different mapping regions
-	static const int INTERIOR = 0;
-	static const int UPPER_BOUNDARY = 1;
-	static const int LOWER_BOUNDARY = 2;
-
-protected:
-	ccMainAppInterface* m_app;
-	ccPointCloud* m_associatedCloud = nullptr; //the dataset this object "belongs" too. Assigned when an "interior" gets defined.
-	ccHObject* m_interior; //group containing interior point set and associated measurments
-	int m_interior_id = -1;
-
-	ccHObject* m_upper; //group containing upper boundary polylines and associated measurments
-	int m_upper_id = -1;
-
-	ccHObject* m_lower; //group containing lower boundary polylines/traces and associated measurments
-	int m_lower_id = -1;
-
-	void generateInterior();
-	void generateUpper();
-	void generateLower();
-
-//static functions
-public:
-	static bool isGeoObject(ccHObject* object);
-};
-
-
-#endif
+}

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>compassDlg</class>
- <widget class="QDialog" name="compassDlg">
+ <class>mapDlg</class>
+ <widget class="QDialog" name="mapDlg">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>539</width>
+    <width>593</width>
     <height>33</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Compass</string>
+   <string>Map</string>
   </property>
   <layout class="QHBoxLayout">
    <property name="leftMargin">
@@ -94,14 +94,70 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="segmentModeLabel">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QLabel" name="selectionLabel">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="font">
+      <font>
+       <italic>true</italic>
+      </font>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
      <property name="text">
-      <string>Segment:</string>
+      <string>No Selection</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="setLowerButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Delineate lower-contact of GeoObject</string>
+     </property>
+     <property name="text">
+      <string>Lower</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QPushButton" name="setUpperButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="toolTip">
       <string>Delineate upper-contact of GeoObject</string>
      </property>
@@ -112,7 +168,7 @@
       <bool>true</bool>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="default">
       <bool>false</bool>
@@ -123,20 +179,10 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="setLowerButton">
-     <property name="toolTip">
-      <string>Delineate lower-contact of GeoObject</string>
-     </property>
-     <property name="text">
-      <string>Lower</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QPushButton" name="setInteriorButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="toolTip">
       <string>Define interior of geo-object</string>
      </property>

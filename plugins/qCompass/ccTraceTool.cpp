@@ -164,7 +164,7 @@ void ccTraceTool::finishCurrentTrace()
 				}
 			}
 		}
-		m_app->setSelectedInDB(m_trace, false); //deselect this trace
+		//m_app->setSelectedInDB(m_trace, false); //deselect this trace
 	}
 	m_trace = nullptr;
 	m_window->redraw();

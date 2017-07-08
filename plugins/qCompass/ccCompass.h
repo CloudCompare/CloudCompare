@@ -44,6 +44,7 @@
 //this plugin
 #include "ccMouseCircle.h"
 #include "ccCompassDlg.h"
+#include "ccMapDlg.h"
 #include "ccTrace.h"
 #include "ccLineation.h"
 #include "ccCompassInfo.h"
@@ -106,6 +107,15 @@ protected slots:
 	void setLineationMode(); //activates the lineation tool
 	void setPlaneMode(); //activates the plane tool
 	void setTraceMode(); //activates the trace tool
+	void setPaintMode(); //activates the paint tool
+	void enableMapMode(); //turns on/off map mode
+	void enableMeasureMode(); //turns on/off map mode
+	void addGeoObject(); //creates a new GeoObject
+	void pickGeoObject(); //uses a "picking tool" to select GeoObjects
+	void clearGeoObject();  //clears the selected GeoObject
+	void writeToInterior(); //new digitization will be added to the GeoObjects interior
+	void writeToUpper(); //new digitization will be added to the GeoObjects upper boundary
+	void writeToLower(); //new digitiziation will be added to the GeoObjects lower boundary
 
 	//updates drawing properites of fit planes etc.
 	void toggleStipple(bool checked);
@@ -141,7 +151,8 @@ protected:
 
 	//ccCompass toolbar gui
 	ccCompassDlg* m_dlg = nullptr;
-	
+	ccMapDlg* m_mapDlg = nullptr;
+
 	//tools
 	ccTool* m_activeTool = nullptr;
 	ccFitPlaneTool* m_fitPlaneTool;
@@ -151,7 +162,7 @@ protected:
 	//currently selected/active geoObject
 	ccGeoObject* m_geoObject = nullptr; //the GeoObject currently being written to
 	int m_geoObject_id = -1; //used to check if m_geoObject has been deleted
-
+	
 	//name/category of structure currently being digitized
 	QString m_category = "Bedding";
 
@@ -173,6 +184,13 @@ public:
 	//calculation properties
 	static bool fitPlanes;
 	static int costMode;
+
+	//digitization mode
+	static bool mapMode; //true if map mode, false if measure mode
+	static int mapTo; //see flags in ccGeoObject.h for definition of different mapping locations
+
+	 
+
 };
 
 #endif

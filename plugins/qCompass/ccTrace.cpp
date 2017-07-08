@@ -663,8 +663,8 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
 		//set draw colour
-		c_unitPointMarker->setTempColor(m_waypoint_colour);
-		
+		c_unitPointMarker->setTempColor(getMeasurementColour());
+
 		//draw key-points
 		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
 		for (unsigned i = 0; i < m_waypoints.size(); i++)
@@ -674,7 +674,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			const CCVector3* P = m_cloud->getPoint(m_waypoints[i]);
 			ccGL::Translate(glFunc, P->x, P->y, P->z);
-			float scale = context.labelMarkerSize * m_relMarkerScale * 0.15;
+			float scale = context.labelMarkerSize * m_relMarkerScale * 0.2;
 			if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 			{
 				//in perspective view, the actual scale depends on the distance to the camera!
@@ -687,10 +687,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 			c_unitPointMarker->draw(markerContext);
 			glFunc->glPopMatrix();
 		}
-
-		//set draw colour
-		c_unitPointMarker->setTempColor(m_trace_colour);
-
+		
 		//draw trace points
 		for (std::deque<int> seg : m_trace)
 		{

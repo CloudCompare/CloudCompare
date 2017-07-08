@@ -23,17 +23,22 @@
 #include <ccPointCloud.h>
 #include <ccMainAppInterface.h>
 
+#include "ccTrace.h"
+
 class ccGeoObject : public ccHObject
 {
 public:
 	ccGeoObject(QString name, ccMainAppInterface* app);
 
-	void setType(QString type);
-	QString getType();
-
+	//returns the pointCloud associated with this ccGeoObject's interior (or null if the interior is undefined)
 	ccPointCloud* getAssociatedCloud();
 	
+	//returns the ccHObject parent of the specified mapping region (see below for mapping region consts)
 	ccHObject* getRegion(int mappingRegion);
+
+	//draws all children objects in "highlighted" mode
+	void setActive(bool active);
+	void recurseChildren(ccHObject* par, bool highlight);
 
 	//flags defining different mapping regions
 	static const int INTERIOR = 0;

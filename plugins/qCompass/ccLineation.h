@@ -25,7 +25,12 @@
 #include <GenericIndexedCloudPersist.h>
 #include <ccPointCloud.h>
 
-class ccLineation : public ccPolyline
+
+#include "ccMeasurement.h"
+
+class ccLineation : 
+	public ccPolyline, 
+	public ccMeasurement
 {
 public:
 	ccLineation(ccPointCloud* associatedCloud);
@@ -48,8 +53,6 @@ public:
 			return end - start;
 		}
 	}
-
-	ccColor::Rgba colour = ccColor::green;
 
 protected:
 	float m_relMarkerScale = 5.0f;

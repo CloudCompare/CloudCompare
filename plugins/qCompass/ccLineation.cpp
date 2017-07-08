@@ -93,7 +93,7 @@ void ccLineation::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
 		//set draw colour
-		c_unitPointMarker->setTempColor(colour);
+		c_unitPointMarker->setTempColor(getMeasurementColour());
 
 		//draw points
 		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
@@ -118,6 +118,8 @@ void ccLineation::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//draw arrow
+		c_bodyMarker->setTempColor(getMeasurementColour());
+		c_headMarker->setTempColor(getMeasurementColour());
 		if (size() == 2) //two points
 		{
 			const CCVector3 start = *getPoint(0);

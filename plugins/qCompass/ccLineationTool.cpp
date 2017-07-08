@@ -74,8 +74,12 @@ void ccLineationTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 		m_lineation->setMetaData(*map, true);
 
 		//rename lineation
-		QString trendAndPlungeStr = QString("%1->%2").arg((int)plunge, 2, 10, QChar('0')).arg((int)trend, 3, 10, QChar('0'));
-		m_lineation->setName(trendAndPlungeStr);
+		float length = sqrt((s.x - e.x)*(s.x - e.x) + (s.y - e.y)*(s.y - e.y) + (s.z - e.z)*(s.z - e.z));
+		QString lengthstr = QString("").asprintf("%.1f on ", length);
+		QString trendAndPlungeStr = QString("%2->%3").arg((int)plunge, 2, 10, QChar('0')).arg((int)trend, 3, 10, QChar('0'));
+		QString namestr = lengthstr + trendAndPlungeStr;
+
+		m_lineation->setName(namestr);
 		m_lineation->showNameIn3D(ccCompass::drawName);
 
 		//report orientation to console for convenience

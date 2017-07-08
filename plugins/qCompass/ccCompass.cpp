@@ -64,6 +64,10 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 	}
 
 	//clear GeoObject selection & disable associated GUI
+	if (m_geoObject)
+	{
+		m_geoObject->setActive(false);
+	}
 	m_geoObject = nullptr;
 	m_geoObject_id = -1;
 	if (m_mapDlg)
@@ -89,6 +93,7 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 				if (m_geoObject) //cast succeded
 				{
 					m_geoObject_id = m_geoObject->getUniqueID(); //store id
+					m_geoObject->setActive(true); //display as "active"
 
 					//activate GUI
 					m_mapDlg->setLowerButton->setEnabled(true);
@@ -322,49 +327,53 @@ ccHObject* ccCompass::getInsertPoint()
 			}
 		}
 	}
-	
-	//otherwise, we're in "Compass" mode, so...
-	//find/create a group called "measurements"
-	ccHObject* measurement_group = nullptr;
-
-	//search for a "measurements" group
-	for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++) 
+	else
 	{
-		if (m_app->dbRootObject()->getChild(i)->getName() == "measurements")
+
+		//otherwise, we're in "Compass" mode, so...
+		//find/create a group called "measurements"
+		ccHObject* measurement_group = nullptr;
+
+		//search for a "measurements" group
+		for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
 		{
-			measurement_group = m_app->dbRootObject()->getChild(i);
-			break;
+			if (m_app->dbRootObject()->getChild(i)->getName() == "measurements")
+			{
+				measurement_group = m_app->dbRootObject()->getChild(i);
+				break;
+			}
 		}
-	}
 
-	//didn't find it - create a new one!
-	if (!measurement_group)
-	{
-		measurement_group = new ccHObject("measurements");
-		m_app->dbRootObject()->addChild(measurement_group);
-		m_app->addToDB(measurement_group, false, true, false, false);
-	}
-
-	//search for relevant category group within this
-	ccHObject* category_group = nullptr;
-	for (unsigned i = 0; i < measurement_group->getChildrenNumber(); i++) //check if a category group exists
-	{
-		if (measurement_group->getChild(i)->getName() == m_category)
+		//didn't find it - create a new one!
+		if (!measurement_group)
 		{
-			category_group = measurement_group->getChild(i);
-			break;
+			measurement_group = new ccHObject("measurements");
+			m_app->dbRootObject()->addChild(measurement_group);
+			m_app->addToDB(measurement_group, false, true, false, false);
 		}
-	}
 
-	//didn't find it... create it!
-	if (!category_group)
-	{
-		category_group = new ccHObject(m_category);
-		measurement_group->addChild(category_group);
-		m_app->addToDB(category_group, false, true, false, false);
-	}
+		//search for relevant category group within this
+		ccHObject* category_group = nullptr;
+		for (unsigned i = 0; i < measurement_group->getChildrenNumber(); i++) //check if a category group exists
+		{
+			if (measurement_group->getChild(i)->getName() == m_category)
+			{
+				category_group = measurement_group->getChild(i);
+				break;
+			}
+		}
 
-	return category_group; //this is the insert point
+		//didn't find it... create it!
+		if (!category_group)
+		{
+			category_group = new ccHObject(m_category);
+			measurement_group->addChild(category_group);
+			m_app->addToDB(category_group, false, true, false, false);
+		}
+
+		return category_group; //this is the insert point
+	}
+	return nullptr; //no valid insert point
 }
 
 //This function is called when a point is picked (through the picking hub)
@@ -385,8 +394,14 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 
 	//find relevant node to add data to
 	ccHObject* parentNode = getInsertPoint();
-	assert(parentNode); //n.b. this *should* never return null
-	parentNode->setEnabled(true); //ensure category_group and measurement_group are enabled (avoids confusion if it is turned off...)
+	
+	if (parentNode == nullptr) //could not get insert point for some reason
+	{
+		return; //bail
+	}
+
+	//ensure what we are writing too is visible (avoids confusion if it is turned off...)
+	parentNode->setEnabled(true); 
 
 	//call generic "point-picked" function of active tool
 	m_activeTool->pointPicked(parentNode, itemIdx, entity, P);

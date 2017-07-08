@@ -44,7 +44,8 @@ void ccTraceTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointC
 		m_trace_id = m_trace->getUniqueID();
 		insertPoint->addChild(m_trace);
 		m_app->addToDB(m_trace, false, false, false, false);
-		m_app->setSelectedInDB(m_trace, true);
+		//m_app->setSelectedInDB(m_trace, true);
+		m_trace->setActive(true);
 	}
 
 	//add point
@@ -123,8 +124,7 @@ void ccTraceTool::finishCurrentTrace()
 		}
 
 		m_trace->finalizePath();
-		m_trace->setWaypointColor(ccColor::red);
-		m_trace->setTraceColor(ccColor::red);
+		m_trace->setActive(false);
 
 		//fit plane
 		if (ccCompass::fitPlanes)
@@ -184,8 +184,7 @@ void ccTraceTool::pickupTrace(ccHObject* obj)
 
 		//activate selected trace
 		m_trace = t;
-		m_trace->setTraceColor(ccColor::yellow);
-		m_trace->setWaypointColor(ccColor::green);
+		m_trace->setActive(true);
 	}
 }
 

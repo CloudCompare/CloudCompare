@@ -22,6 +22,9 @@
 
 #include <ccHObject.h>
 #include <ccPolyline.h>
+
+#include "ccMeasurement.h"
+
 #include <ccSphere.h>
 #include <DgmOctree.h>
 #include <DgmOctreeReferenceCloud.h>
@@ -51,7 +54,9 @@ If treated as a ccTrace object, then the waypoints can be manipulated and the un
 the waypoints are also drawn as bubbles.
 
 */
-class ccTrace : public ccPolyline
+class ccTrace : 
+	public ccPolyline, 
+	public ccMeasurement
 {
 public:
 	ccTrace(ccPointCloud* associatedCloud);
@@ -142,8 +147,6 @@ public:
 	*/
 	ccFitPlane* fitPlane(int surface_effect_tolerance = 10, float min_planarity = 0.75f);
 
-	void setTraceColor(ccColor::Rgba col) { m_trace_colour = col; }
-	void setWaypointColor(ccColor::Rgba col) { m_waypoint_colour = col; }
 
 	enum MODE 
 	{
@@ -198,9 +201,6 @@ protected:
 	std::vector<std::deque<int>> m_trace; //contains an ordered list of indices which define this trace. Note that indices representing nodes MAY be inserted twice.
 	std::vector<int> m_waypoints; //list of waypoint indices
 	int m_previous=-1; //for undoing waypoints
-
-	ccColor::Rgba m_waypoint_colour = ccColor::green;
-	ccColor::Rgba m_trace_colour = ccColor::yellow;
 
 private:
 

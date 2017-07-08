@@ -18,26 +18,6 @@ ccGeoObject::ccGeoObject(QString name, ccMainAppInterface* app)
 
 }
 
-void ccGeoObject::setType(QString type)
-{
-	//store attributes (centroid, strike, dip, RMS) on plane
-	QVariantMap* map = new QVariantMap();
-	map->insert("Type", type);
-	setMetaData(*map, true);
-}
-
-QString ccGeoObject::getType()
-{
-	if (hasMetaData("Type"))
-	{
-		return getMetaData("Type").toString(); //return type
-	}
-	else
-	{
-		return "Unknown";
-	}
-}
-
 ccPointCloud* ccGeoObject::getAssociatedCloud()
 {
 	return m_associatedCloud;
@@ -76,6 +56,36 @@ ccHObject* ccGeoObject::getRegion(int mappingRegion)
 	}
 }
 
+void ccGeoObject::setActive(bool active)
+{
+	for (ccHObject* c : m_children)
+	{
+		recurseChildren(c,active);
+	}
+}
+
+void ccGeoObject::recurseChildren(ccHObject* par, bool highlight)
+{
+	//set if par is a measurement
+	ccMeasurement* m = dynamic_cast<ccMeasurement*>(par);
+	if (m)
+	{
+		m->setHighlight(highlight);
+
+		//draw labels (except for trace objects, when the child plane object will hold the useful info)
+		if (!ccTrace::isTrace(par))
+		{
+			par->showNameIn3D(highlight);
+		}
+	}
+
+	//recurse
+	for (int i = 0; i < par->getChildrenNumber(); i++)
+	{
+		ccHObject* c = par->getChild(i);
+		recurseChildren(c, highlight);
+	}
+}
 void ccGeoObject::generateInterior()
 {
 	m_interior = new ccHObject("Interior");

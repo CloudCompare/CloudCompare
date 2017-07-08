@@ -5,8 +5,11 @@
 #include <ccPlane.h>
 #include <ccNormalVectors.h>
 
+#include "ccMeasurement.h"
+
 class ccFitPlane :
-	public ccPlane
+	public ccPlane, 
+	public ccMeasurement
 {
 public:
 	ccFitPlane(ccPlane* p);

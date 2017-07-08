@@ -106,7 +106,7 @@ CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	FileIOFilter::Shared filter = FileIOFilter::FindBestFilterForExtension(subFileType);
 	if (!filter)
 	{
-		ccLog::Warning(QString("[ICM] No I/O filter found for loading file '%1' (type = '%2')").arg(cloudFileName).arg(subFileType));
+		ccLog::Warning(QString("[ICM] No I/O filter found for loading file '%1' (type = '%2')").arg(cloudFileName,subFileType));
 		fclose(fp);
 		return CC_FERR_UNKNOWN_FILE;
 	}
@@ -186,7 +186,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			QString errorStr;
 			if (!CI->load(QString("%1/%2").arg(path,imageFileName),errorStr))
 			{
-				ccLog::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped...").arg(imageFileName).arg(errorStr));
+				ccLog::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped...").arg(imageFileName,errorStr));
 				delete CI;
 				fclose(fp);
 				return loadedImages;

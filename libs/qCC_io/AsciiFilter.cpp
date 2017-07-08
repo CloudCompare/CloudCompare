@@ -148,7 +148,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 						}
 						else
 						{
-							ccLog::Print(QString("[ASCII] Cloud '%1' has been saved in: %2").arg(child->getName()).arg(subFilename));
+							ccLog::Print(QString("[ASCII] Cloud '%1' has been saved in: %2").arg(child->getName(),subFilename));
 						}
 					}
 					else

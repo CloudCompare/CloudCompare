@@ -274,7 +274,7 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			FileIOFilter::Shared filter = FileIOFilter::FindBestFilterForExtension(subFileType);
 			if (!filter)
 			{
-				ccLog::Warning(QString("[POV] No I/O filter found for loading file '%1' (type = '%2')").arg(subFileName).arg(subFileType));
+				ccLog::Warning(QString("[POV] No I/O filter found for loading file '%1' (type = '%2')").arg(subFileName,subFileType));
 				fclose(fp);
 				return CC_FERR_UNKNOWN_FILE;
 			}

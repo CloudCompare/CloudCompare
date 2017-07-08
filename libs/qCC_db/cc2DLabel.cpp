@@ -112,7 +112,7 @@ QString cc2DLabel::getTitle(int precision) const
 		if (info.hasSF)
 		{
 			QString sfVal = GetSFValueAsString(info, precision);
-			title = QString("%1 = %2").arg(info.sfName).arg(sfVal);
+			title = QString("%1 = %2").arg(info.sfName,sfVal);
 		}
 	}
 	else if (count == 2)
@@ -401,7 +401,7 @@ void AddPointCoordinates(QStringList& body, unsigned pointIndex, ccGenericPointC
 
 	QString coordStr = QString("P#%0:").arg(pointIndex);
 	if (!pointName.isEmpty())
-		coordStr = QString("%1 (%2)").arg(pointName).arg(coordStr);
+		coordStr = QString("%1 (%2)").arg(pointName,coordStr);
 	if (isShifted)
 	{
 		body << coordStr;
@@ -569,7 +569,7 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			if (info.hasSF)
 			{
 				QString sfVal = GetSFValueAsString(info, precision);
-				QString sfStr = QString("%1 = %2").arg(info.sfName).arg(sfVal);
+				QString sfStr = QString("%1 = %2").arg(info.sfName,sfVal);
 				body << sfStr;
 			}
 		}

@@ -39,6 +39,8 @@ static float s_packedColormapf[CC_MAX_SHADER_COLOR_RAMP_SIZE];
 
 class ccColorRampShader : public ccShader
 {
+	Q_OBJECT
+	
 public:
 
 	//! Default constructor

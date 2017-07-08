@@ -1070,7 +1070,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		for (int i = 1; i <= static_cast<int>(stdProperties.size()); ++i)
 		{
 			plyProperty& pp = stdProperties[i - 1];
-			QString itemText = QString("%1 - %2 [%3]").arg(pointElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
+			QString itemText = QString("%1 - %2 [%3]").arg(pointElements[pp.elemIndex].elementName,pp.propName,e_ply_type_names[pp.type]);
 			assert(pp.type != 16); //we don't want any PLY_LIST here
 			stdPropsText << itemText;
 

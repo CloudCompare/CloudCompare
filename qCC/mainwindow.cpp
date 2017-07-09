@@ -236,6 +236,7 @@ MainWindow::MainWindow()
 		setCentralWidget(m_mdiArea);
 		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(updateMenus()));
 		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(on3DViewActivated(QMdiSubWindow*)));
+		m_mdiArea->installEventFilter(this);
 	}
 
 	//picking hub
@@ -5948,6 +5949,23 @@ void MainWindow::unregisterOverlayDialog(ccOverlayDialog* dialog)
 			break;
 		}
 	}
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+	switch (event->type())
+	{
+	case QEvent::Resize:
+	case QEvent::Move:
+		updateOverlayDialogsPlacement();
+		break;
+	default:
+		//nothing to do
+		break;
+	}
+
+	// standard event processing
+	return QObject::eventFilter(obj, event);
 }
 
 void MainWindow::updateOverlayDialogsPlacement()

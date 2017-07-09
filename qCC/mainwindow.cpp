@@ -8242,7 +8242,7 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 
 	if (centers->size() == 0)
 	{
-		ccLog::Error("Not cloud in selection?!");
+		ccLog::Error("No cloud in selection?!");
 		delete centers;
 		centers = 0;
 	}

@@ -128,6 +128,9 @@ v2.9.alpha - XX/XX/XXXX
 	* the 'Edit > Sensors > Camera > Create' function was broken (input parameters were ignored)
 	* merging clouds with FWF data would duplicate the waveforms of the first one
 	* invalid lines in ASCII (text) files could be considered as a valid point with coordinates (0, 0, 0)
+	* Point-pair based alignment tool:
+		- extracting spheres on a cloud with Global Shift would create the sphere in the global coordinate system instead of the local one (i.e. the sphere was not visible)
+		- deleting a point would remove all the detected spheres
 
 v2.8.1 - 16/02/2017
 ----------------------

@@ -2827,7 +2827,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
 					assert(steps != 0);
 
-					if (steps > CC_MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < static_cast<GLint>(steps))
+					if (steps > ccColorRampShader::MaxColorRampSize() || maxComponents < static_cast<GLint>(steps))
 					{
 						ccLog::WarningDebug("Color ramp steps exceed shader limits!");
 						colorRampShader = 0;

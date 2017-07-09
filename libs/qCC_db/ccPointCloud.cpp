@@ -1917,7 +1917,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 	{
 		ccGLMatrixd transd(trans.data());
 
-		for (Grid::Shared grid : m_grids)
+		for (Grid::Shared &grid : m_grids)
 		{
 			if (!grid)
 			{
@@ -2080,7 +2080,7 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 
 	//update the grids as well
 	{
-		for (Grid::Shared grid : m_grids)
+		for (Grid::Shared &grid : m_grids)
 		{
 			if (grid)
 			{
@@ -3348,7 +3348,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 
 			//and reset the invalid (empty) ones
 			//(DGM: we don't erase them as they may still be useful?)
-			for (Grid::Shared grid : m_grids)
+			for (Grid::Shared &grid : m_grids)
 			{
 				if (grid->validCount == 0)
 				{

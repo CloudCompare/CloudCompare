@@ -26,6 +26,8 @@
 //! Generic dialog to query 3 (double) values
 class ccAskThreeDoubleValuesDlg : public QDialog, public Ui::AskThreeDoubleValuesDialog
 {
+	Q_OBJECT
+
 public:
 	
 	//! Default constructor

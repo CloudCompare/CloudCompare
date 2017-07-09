@@ -23,6 +23,8 @@
 //! Dialog: points sampling on a mesh
 class ccPtsSamplingDlg : public QDialog, public Ui::PointsSamplingDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

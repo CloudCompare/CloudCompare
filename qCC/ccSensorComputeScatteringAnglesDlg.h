@@ -24,6 +24,8 @@
 //! Dialog for scattering angles computation
 class ccSensorComputeScatteringAnglesDlg : public QDialog, public Ui::sensorComputeScatteringAnglesDlg
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

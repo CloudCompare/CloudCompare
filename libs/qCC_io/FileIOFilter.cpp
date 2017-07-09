@@ -145,7 +145,7 @@ void FileIOFilter::Register(Shared filter)
 				if (otherFilters.contains(fileFilters[i]))
 				{
 					const QString otherFilterName = (*it)->getDefaultExtension().toUpper();;
-					ccLog::Warning(QStringLiteral("[FileIOFilter::Register] Internal error: file filter '%1' of filter '%2' is already handled by another filter ('%3')!").arg(fileFilters[i]).arg(filterName).arg(otherFilterName));
+					ccLog::Warning(QStringLiteral("[FileIOFilter::Register] Internal error: file filter '%1' of filter '%2' is already handled by another filter ('%3')!").arg(fileFilters[i],filterName,otherFilterName));
 					error = true;
 					break;
 				}
@@ -254,7 +254,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	if (childCount != 0)
 	{
 		//we set the main container name as the full filename (with path)
-		container->setName(QString("%1 (%2)").arg(fi.fileName()).arg(fi.absolutePath()));
+		container->setName(QString("%1 (%2)").arg(fi.fileName(),fi.absolutePath()));
 		for (unsigned i = 0; i < childCount; ++i)
 		{
 			ccHObject* child = container->getChild(i);
@@ -439,7 +439,7 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
 		return; //no message will be displayed!
 	}
 
-	QString outputString = QString("An error occurred while %1 '%2': ").arg(action).arg(filename) + errorStr;
+	QString outputString = QString("An error occurred while %1 '%2': ").arg(action,filename) + errorStr;
 	if (warning)
 		ccLog::Warning(outputString);
 	else

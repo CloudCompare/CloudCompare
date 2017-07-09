@@ -42,6 +42,8 @@ class QTextStream;
 //! Custom QListWidget to allow for the copy of all selected elements when using CTRL+C
 class ccCustomQListWidget : public QListWidget
 {
+	Q_OBJECT
+	
 public:
 
 	ccCustomQListWidget(QWidget* parent = 0) : QListWidget(parent) {}

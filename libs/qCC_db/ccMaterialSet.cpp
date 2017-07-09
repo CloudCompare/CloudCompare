@@ -357,7 +357,7 @@ bool ccMaterialSet::saveAsMTL(QString path, const QString& baseFilename, QString
 				}
 				else
 				{
-					errors << QString("Failed to save the texture of material '%1' to file '%2'!").arg(mtl->getName()).arg(destFilename);
+					errors << QString("Failed to save the texture of material '%1' to file '%2'!").arg(mtl->getName(),destFilename);
 				}
 			}
 

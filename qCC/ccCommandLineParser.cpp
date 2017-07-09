@@ -99,7 +99,7 @@ int ccCommandLineParser::Parse(int nargs, char** args, tPluginInfoList* plugins/
 	//load the plugins commands
 	if (plugins)
 	{
-		for (tPluginInfo pluginInfo : *plugins)
+		for (tPluginInfo &pluginInfo : *plugins)
 		{
 			if (!pluginInfo.object)
 			{

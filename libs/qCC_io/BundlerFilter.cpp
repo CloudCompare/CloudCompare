@@ -718,7 +718,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		QString errorStr;
 		if (!image->load(imageDir.absoluteFilePath(imageFilenames[i]), errorStr))
 		{
-			ccLog::Error(QString("[Bundler] %1 (image '%2')").arg(errorStr).arg(imageFilenames[i]));
+			ccLog::Error(QString("[Bundler] %1 (image '%2')").arg(errorStr,imageFilenames[i]));
 			delete image;
 			image = 0;
 			break;

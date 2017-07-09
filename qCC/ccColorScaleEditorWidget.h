@@ -29,6 +29,8 @@
 //! Color scale element as a widget
 class ColorScaleElementSlider : public QWidget, public ccColorScaleElement
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor
@@ -92,6 +94,8 @@ typedef QSharedPointer<ColorScaleElementSliders> SharedColorScaleElementSliders;
 **/
 class ColorScaleEditorBaseWidget : public QWidget
 {
+	Q_OBJECT
+
 public:
 
 	//! Defautl constructor
@@ -200,6 +204,8 @@ protected:
 //! All sliders labels widget
 class SliderLabelWidget : public ColorScaleEditorBaseWidget
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

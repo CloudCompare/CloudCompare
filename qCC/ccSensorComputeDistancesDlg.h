@@ -23,6 +23,8 @@
 //! Dialog for sensor range computation
 class ccSensorComputeDistancesDlg : public QDialog, public Ui::sensorComputeDistancesDlg
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

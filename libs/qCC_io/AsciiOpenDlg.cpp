@@ -137,11 +137,11 @@ void AsciiOpenDlg::setFilename(QString filename)
 
 void AsciiOpenDlg::autoFindBestSeparator()
 {
-	QList<QChar> separators;
-	separators << QChar(' ');
-	separators << QChar('\t');
-	separators << QChar(',');
-	separators << QChar(';');
+	const QList<QChar> separators{ QChar(' '),
+									QChar('\t'),
+									QChar(','),
+									QChar(';'),
+								 };
 
 	//We try all default separators...
 	size_t maxValidColumnCount = 0;

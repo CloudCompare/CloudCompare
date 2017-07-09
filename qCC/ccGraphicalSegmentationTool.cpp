@@ -235,7 +235,7 @@ void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArr
 {
 	if (unallocateVisibilityArrays)
 	{
-		for (QSet<ccHObject*>::const_iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
+		for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 		{
 			ccHObjectCaster::ToGenericPointCloud(*p)->unallocateVisibilityArray();
 		}
@@ -269,7 +269,7 @@ void ccGraphicalSegmentationTool::reset()
 {
 	if (m_somethingHasChanged)
 	{
-		for (QSet<ccHObject*>::const_iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
+		for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 		{
 			ccHObjectCaster::ToGenericPointCloud(*p)->resetVisibilityArray();
 		}
@@ -345,7 +345,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 
 			//first, we must check that there's no mesh and at least one of its sub-mesh mixed in the current selection!
-			for (QSet<ccHObject*>::const_iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
+			for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 			{
 				if ((*p)->isKindOf(CC_TYPES::MESH))
 				{
@@ -630,7 +630,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 	const double half_h = camera.viewport[3] / 2.0;
 
 	//for each selected entity
-	for (QSet<ccHObject*>::const_iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
+	for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(*p);
 		assert(cloud);
@@ -930,7 +930,7 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 			CCVector3d globalShift(0, 0, 0);
 			double globalScale = 1.0;
 			{
-				for (QSet<ccHObject*>::const_iterator it = m_toSegment.begin(); it != m_toSegment.end(); ++it)
+				for (QSet<ccHObject*>::const_iterator it = m_toSegment.constBegin(); it != m_toSegment.constEnd(); ++it)
 				{
 					ccShiftedObject* shifted = ccHObjectCaster::ToShifted(*it);
 					bool isShifted = (shifted && shifted->isShifted());

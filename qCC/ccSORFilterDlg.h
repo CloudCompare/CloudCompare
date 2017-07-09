@@ -23,6 +23,8 @@
 //! Dialog to choose which dimension(s) (X, Y or Z) should be exported as SF(s)
 class ccSORFilterDlg : public QDialog, public Ui::SorFilterDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

@@ -40,7 +40,7 @@ ImageFileFilter::ImageFileFilter()
 		//we convert this list into a proper "filters" string
 		for (int i = 0; i < formats.size(); ++i)
 		{
-			m_outputFilters.append(QString("%1 image (*.%2)").arg(QString(formats[i].data()).toUpper()).arg(formats[i].data()));
+			m_outputFilters.append(QString("%1 image (*.%2)").arg(QString(formats[i].data()).toUpper(),formats[i].data()));
 		}
 	}
 
@@ -79,7 +79,7 @@ QString ImageFileFilter::GetSaveFilename(QString dialogTitle, QString baseName, 
 	for (int i = 0; i < formats.size(); ++i)
 	{
 		QString ext = QString(formats[i].data()).toUpper();
-		QString filter = QString("%1 image (*.%2)").arg(ext).arg(formats[i].data());
+		QString filter = QString("%1 image (*.%2)").arg(ext,formats[i].data());
 		filters.append(filter + QString("\n"));
 
 		//find PNG by default
@@ -91,7 +91,7 @@ QString ImageFileFilter::GetSaveFilename(QString dialogTitle, QString baseName, 
 
 	QString outputFilename = QFileDialog::getSaveFileName(	parentWidget,
 															dialogTitle,
-															imageSavePath + QString("/%1.%2").arg(baseName).arg(pngFilter.isEmpty() ? QString(formats[0].data()) : QString("png")),
+															imageSavePath + QString("/%1.%2").arg(baseName, pngFilter.isEmpty() ? QString(formats[0].data()) : QString("png")),
 															filters,
 															pngFilter.isEmpty() ? static_cast<QString*>(0) : &pngFilter);
 

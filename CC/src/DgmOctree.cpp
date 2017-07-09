@@ -3282,12 +3282,10 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 			{
 				s_progressCb_MT->setInfo("Cancelling...");
 			}
-			QApplication::processEvents();
 		}
 
 		//if (s_normProgressCb_MT)
 		//{
-		//	//QApplication::processEvents(); //let the application breath!
 		//	if (!s_normProgressCb_MT->oneStep())
 		//	{
 		//		s_cellFunc_MT_success = false;

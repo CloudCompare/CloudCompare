@@ -82,9 +82,6 @@ static void InitProgress(GenericProgressCallback* progressCb, unsigned totalCoun
 			s_progressCb->setInfo(info);
 		}
 		s_progressCb->start();
-#ifdef USE_QT
-		QCoreApplication::processEvents();
-#endif
 	}
 }
 
@@ -100,9 +97,6 @@ static inline void UpdateProgress(unsigned increment)
 		{
 			s_progressCb->update(fPercent);
 			s_lastProgress = uiPercent;
-#ifdef USE_QT
-			QCoreApplication::processEvents();
-#endif
 		}
 	}
 }

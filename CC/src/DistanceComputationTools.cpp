@@ -1114,14 +1114,10 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 		return;
 	}
 
-	if (s_normProgressCb_MT)
+	if (s_normProgressCb_MT && !s_normProgressCb_MT->oneStep())
 	{
-		QApplication::processEvents(); //let the application breath!
-		if (!s_normProgressCb_MT->oneStep())
-		{
-			s_cellFunc_MT_success = false;
-			return;
-		}
+		s_cellFunc_MT_success = false;
+		return;
 	}
 
 	ReferenceCloud Yk(s_octree_MT->associatedCloud());

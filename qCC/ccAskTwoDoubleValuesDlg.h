@@ -23,6 +23,8 @@
 //! Dialog to input 2 values with custom labels
 class ccAskTwoDoubleValuesDlg : public QDialog, public Ui::AskTwoDoubleValuesDialog
 {
+	Q_OBJECT
+	
 public:
 	//! Default constructor
 	ccAskTwoDoubleValuesDlg(const char* vName1,

@@ -46,6 +46,8 @@
 
 class ccApplication : public QApplication
 {
+	Q_OBJECT
+
 public:
 	ccApplication( int &argc, char **argv ) :
 		QApplication( argc, argv )
@@ -246,3 +248,5 @@ int main(int argc, char *argv[])
 
 	return result;
 }
+
+#include "main.moc"

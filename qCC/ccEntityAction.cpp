@@ -2441,7 +2441,7 @@ namespace ccEntityAction
 			}
 			else
 			{
-				ccConsole::Warning(QString("[Entity: %1]-[SF: %2] Couldn't compute distribution parameters!").arg(pc->getName()).arg(pc->getScalarFieldName(outSfIdx)));
+				ccConsole::Warning(QString("[Entity: %1]-[SF: %2] Couldn't compute distribution parameters!").arg(pc->getName(),pc->getScalarFieldName(outSfIdx)));
 			}
 		}
 		

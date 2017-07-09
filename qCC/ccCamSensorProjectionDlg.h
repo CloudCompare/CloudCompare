@@ -25,6 +25,8 @@ class ccCameraSensor;
 //! Camera sensor parameters dialog
 class ccCamSensorProjectionDlg : public QDialog, public Ui::CamSensorProjectDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

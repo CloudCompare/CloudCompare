@@ -25,6 +25,8 @@
 //! Validator class (accepts only double numbers and replaces the comma by a point automatically)
 class ccCustomDoubleValidator : public QValidator
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

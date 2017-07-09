@@ -5147,7 +5147,7 @@ void MainWindow::doActionComputeCPS()
 		//will also get its attributes
 		newCloud = srcCloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(srcCloud)->partialClone(&CPSet) : ccPointCloud::From(&CPSet,srcCloud);
 
-		newCloud->setName(QString("[%1]->CPSet(%2)").arg(srcCloud->getName()).arg(compCloud->getName()));
+		newCloud->setName(QString("[%1]->CPSet(%2)").arg(srcCloud->getName(),compCloud->getName()));
 		newCloud->setDisplay(compCloud->getDisplay());
 		newCloud->prepareDisplayForRefresh();
 		addToDB(newCloud);
@@ -5250,7 +5250,7 @@ void MainWindow::doActionMatchBBCenters()
 		glTrans += T;
 
 		forceConsoleDisplay();
-		ccConsole::Print(QString("[Synchronize] Transformation matrix (%1 --> %2):").arg(ent->getName()).arg(selectedEntities[0]->getName()));
+		ccConsole::Print(QString("[Synchronize] Transformation matrix (%1 --> %2):").arg(ent->getName(),selectedEntities[0]->getName()));
 		ccConsole::Print(glTrans.toString(12,' ')); //full precision
 		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 

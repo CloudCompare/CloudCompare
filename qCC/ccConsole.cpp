@@ -190,7 +190,7 @@ void ccConsole::refresh()
 	
 	if ((m_textDisplay || m_logStream) && !m_queue.isEmpty())
 	{
-		for (QVector<ConsoleItemType>::const_iterator it=m_queue.begin(); it!=m_queue.end(); ++it)
+		for (QVector<ConsoleItemType>::const_iterator it=m_queue.constBegin(); it!=m_queue.constEnd(); ++it)
 		{
 			 //it->second = message severity
 			bool debugMessage = (it->second & LOG_DEBUG);

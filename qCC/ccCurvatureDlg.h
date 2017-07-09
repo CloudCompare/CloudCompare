@@ -26,6 +26,8 @@
 //! Dialog to define curvature computation parameters
 class ccCurvatureDlg : public QDialog, public Ui::CurvatureDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

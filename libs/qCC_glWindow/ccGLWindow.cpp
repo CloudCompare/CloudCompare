@@ -6572,7 +6572,9 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 			glFunc->glTranslatef(x, m_glViewport.height() - 1 - y, 0);
 
 			glFunc->glEnable(GL_TEXTURE_2D);         
-			QOpenGLTexture textTex(textImage);
+			QOpenGLTexture textTex( textImage, QOpenGLTexture::DontGenerateMipMaps );
+			textTex.setMinificationFilter( QOpenGLTexture::Linear );
+			textTex.setMagnificationFilter( QOpenGLTexture::Linear );
 			textTex.bind();
 
 			glFunc->glColor4f(1.0f, 1.0f, 1.0f, 1.0f); //DGM: warning must be float colors to work properly?!

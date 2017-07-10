@@ -3,6 +3,25 @@
 ccGeoObject::ccGeoObject(QString name, ccMainAppInterface* app)
 	: ccHObject(name)
 {
+	init(name, app);
+
+	//add "interior", "upper" and "lower" HObjects
+	generateInterior();
+	generateUpper();
+	generateLower();
+}
+
+ccGeoObject::ccGeoObject(ccHObject* obj, ccMainAppInterface* app)
+{
+	init(obj->getName(), app);
+
+	//n.b. object should already have upper, inner and lower children
+}
+
+void ccGeoObject::init(QString name, ccMainAppInterface* app)
+{
+	setName(name);
+
 	//store reference to app so we can manipulate the database
 	m_app = app;
 
@@ -10,12 +29,6 @@ ccGeoObject::ccGeoObject(QString name, ccMainAppInterface* app)
 	QVariantMap* map = new QVariantMap();
 	map->insert("ccCompassType", "GeoObject");
 	setMetaData(*map, true);
-
-	//add "interior", "upper" and "lower" HObjects
-	generateInterior();
-	generateUpper();
-	generateLower();
-
 }
 
 ccPointCloud* ccGeoObject::getAssociatedCloud()
@@ -86,8 +99,18 @@ void ccGeoObject::recurseChildren(ccHObject* par, bool highlight)
 		recurseChildren(c, highlight);
 	}
 }
+
 void ccGeoObject::generateInterior()
 {
+	//check interior doesn't already exist
+	for (ccHObject* c : m_children)
+	{
+		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoInterior"))
+		{
+			return;
+		}
+	}
+
 	m_interior = new ccHObject("Interior");
 	
 	//give them associated property flags
@@ -102,11 +125,20 @@ void ccGeoObject::generateInterior()
 
 void ccGeoObject::generateUpper()
 {
+	//check upper doesn't already exist
+	for (ccHObject* c : m_children)
+	{
+		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoUpperBoundary"))
+		{
+			return;
+		}
+	}
+
 	m_upper = new ccHObject("Upper Boundary");
 
 	QVariantMap* map = new QVariantMap();
 	map->insert("ccCompassType", "GeoUpperBoundary");
-	m_interior->setMetaData(*map, true);
+	m_upper->setMetaData(*map, true);
 
 	addChild(m_upper);
 	m_upper_id = m_upper->getUniqueID();
@@ -114,16 +146,24 @@ void ccGeoObject::generateUpper()
 
 void ccGeoObject::generateLower()
 {
+	//check upper doesn't already exist
+	for (ccHObject* c : m_children)
+	{
+		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoLowerBoundary"))
+		{
+			return;
+		}
+	}
+
 	m_lower = new ccHObject("Lower Boundary");
 
 	QVariantMap* map = new QVariantMap();
 	map->insert("ccCompassType", "GeoLowerBoundary");
-	m_interior->setMetaData(*map, true);
+	m_lower->setMetaData(*map, true);
 
 	addChild(m_lower);
 	m_lower_id = m_lower->getUniqueID();
 }
-
 
 bool ccGeoObject::isGeoObject(ccHObject* object)
 {
@@ -133,3 +173,49 @@ bool ccGeoObject::isGeoObject(ccHObject* object)
 	}
 	return false;
 }
+
+bool ccGeoObject::isGeoObjectUpper(ccHObject* object)
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("GeoUpperBoundary");
+	}
+	return false;
+}
+
+bool ccGeoObject::isGeoObjectLower(ccHObject* object)
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("GeoLowerBoundary");
+	}
+	return false;
+}
+
+bool ccGeoObject::isGeoObjectInterior(ccHObject* object)
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("GeoInterior");
+	}
+	return false;
+}
+
+/*
+
+bool ccGeoObject::isGeoObjectUpper(ccHObject* object)
+{
+return object->getName().contains("Upper Boundary"); //n.b. these are just special folders really...
+}
+
+bool ccGeoObject::isGeoObjectLower(ccHObject* object)
+{
+return object->getName().contains("Lower Boundary");
+}
+
+bool ccGeoObject::isGeoObjectInterior(ccHObject* object)
+{
+return object->getName().contains("Interior");
+}
+
+*/

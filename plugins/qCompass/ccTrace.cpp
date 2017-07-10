@@ -21,6 +21,46 @@
 
 ccTrace::ccTrace(ccPointCloud* associatedCloud) : ccPolyline(associatedCloud)
 {
+	init(associatedCloud);
+}
+
+ccTrace::ccTrace(ccPolyline* obj) : ccPolyline(obj->getAssociatedCloud())
+{
+	ccPointCloud* cld = dynamic_cast<ccPointCloud*>(obj->getAssociatedCloud());
+	assert(cld != nullptr); //should never be null
+	init(cld);
+
+	//load waypoints from metadata
+	if (obj->hasMetaData("waypoints"))
+	{
+		QString waypoints = obj->getMetaData("waypoints").toString();
+		for (QString str : waypoints.split(","))
+		{
+			if (str != "")
+			{
+				int pID = str.toInt();
+				m_waypoints.push_back(pID); //add waypoint
+			}
+		}
+	}
+
+	setName(obj->getName());
+
+	//copy polyline into trace points
+	std::deque<int> seg;
+	for (int i = 0; i < obj->size(); i++)
+	{
+		int pId = obj->getPointGlobalIndex(i); //get global point ID
+		seg.push_back(pId);
+	}
+	m_trace.push_back(seg);
+
+	//recalculate trace from the waypoints
+	//optimizePath(); //TODO: simply copy polyline rather than re-optimizing path [slow...]!
+}
+
+void ccTrace::init(ccPointCloud* associatedCloud)
+{
 	setAssociatedCloud(associatedCloud); //the ccPolyline c'tor should do this, but just to be sure...
 	m_cloud = associatedCloud; //store pointer ourselves also
 	m_search_r = calculateOptimumSearchRadius(); //estimate the search radius we want to use
@@ -29,7 +69,7 @@ ccTrace::ccTrace(ccPointCloud* associatedCloud) : ccPolyline(associatedCloud)
 	//object->hasMetaData("search_r") && object->hasMetaData("cost_function");
 	QVariantMap* map = new QVariantMap();
 	map->insert("ccCompassType", "Trace");
-	map->insert("search_r", m_search_r); 
+	map->insert("search_r", m_search_r);
 	QString cost_function = "";
 	if (COST_MODE & MODE::RGB)
 		cost_function += "RGB,";
@@ -51,7 +91,6 @@ ccTrace::ccTrace(ccPointCloud* associatedCloud) : ccPolyline(associatedCloud)
 	map->insert("cost_function", cost_function);
 	setMetaData(*map, true);
 }
-
 int ccTrace::insertWaypoint(int pointId)
 {
 	if (m_waypoints.size() >= 2)
@@ -162,6 +201,18 @@ bool ccTrace::optimizePath(int maxIterations)
 	CCLib::ScalarField * f = m_cloud->getScalarField(idx);
 	f->computeMinAndMax();
 	#endif
+
+	//write control points to property (for reloading)
+	QVariantMap* map = new QVariantMap();
+	QString waypoints = "";
+
+	for (unsigned i = 0; i < m_waypoints.size(); i++)
+	{
+		waypoints += QString::number(m_waypoints[i]) + ",";
+	}
+
+	map->insert("waypoints", waypoints);
+	setMetaData(*map, true);
 
 	return success;
 }

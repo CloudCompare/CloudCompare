@@ -21,9 +21,6 @@ public:
 	{
 	}
 
-	//template function for "taking-over" objects in the DB_Tree (after loading from bin files)
-	virtual ccHObject* assimilate(ccHObject* object) { return nullptr; };
-
 	//drawing stuff
 	void setDefaultColor(ccColor::Rgba col) { m_normal_colour = col; }
 	void setHighlightColor(ccColor::Rgba col) { m_highlight_colour = col; }

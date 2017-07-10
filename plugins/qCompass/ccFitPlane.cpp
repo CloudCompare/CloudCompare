@@ -84,7 +84,9 @@ ccFitPlane* ccFitPlane::Fit(CCLib::GenericIndexedCloudPersist* cloud, double *rm
 	ccPlane* p = ccPlane::Fit(cloud, rms);
 	if (p) //valid plane
 	{
-		return new ccFitPlane(p);
+		ccFitPlane* fp = new ccFitPlane(p);
+		p->transferChildren(*fp);
+		return fp;
 	}
 	else
 	{

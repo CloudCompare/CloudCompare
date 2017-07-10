@@ -142,6 +142,9 @@ protected:
 	//cleans up pointers etc before changing tools
 	void cleanupBeforeToolChange();
 
+	//checks if the passed object, or any of it's children, represent unloaded ccCompass objects (e.g. traces, fitplanes etc).
+	void tryLoading(ccHObject* obj, std::vector<ccHObject*>* originals, std::vector<ccHObject*>* replacements);
+
 	//Action to start ccCompass
 	QAction* m_action = nullptr;
 
@@ -165,6 +168,7 @@ protected:
 	
 	//name/category of structure currently being digitized
 	QString m_category = "Bedding";
+	QString m_lastGeoObjectName = "GeoObject"; //used to 'guess' the name of new GeoObjects
 
 	//used while exporting data
 	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());

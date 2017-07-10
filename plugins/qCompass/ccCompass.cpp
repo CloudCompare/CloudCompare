@@ -81,10 +81,17 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 	//has a GeoObject (or a child of one?) been selected?
 	for (ccHObject* obj : selectedEntities)
 	{
-		//recurse upwards looking for geoObject
+		//recurse upwards looking for geoObject & relevant part (interior, upper, lower)
 		ccHObject* o = obj;
+		bool interior = false;
+		bool upper = false;
+		bool lower = false;
 		while (o)
 		{
+			interior = interior || ccGeoObject::isGeoObjectInterior(o);
+			upper = upper || ccGeoObject::isGeoObjectUpper(o);
+			lower = lower || ccGeoObject::isGeoObjectLower(o);
+
 			//have we found a geoObject?
 			if (ccGeoObject::isGeoObject(o))
 			{
@@ -101,6 +108,20 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 					m_mapDlg->setInteriorButton->setEnabled(true);
 					m_mapDlg->selectionLabel->setEnabled(true);
 					m_mapDlg->selectionLabel->setText(m_geoObject->getName());
+
+					//set appropriate upper/lower/interior setting on gui
+					if (interior)
+					{
+						writeToInterior();
+					}
+					else if (upper)
+					{
+						writeToUpper();
+					}
+					else if (lower)
+					{
+						writeToLower();
+					}
 
 					//done!
 					return; 
@@ -195,11 +216,118 @@ void ccCompass::doAction()
 	m_dlg->linkWith(m_window);
 	m_mapDlg->linkWith(m_window);
 
+	//loop through DB_Tree and find any ccCompass objects
+	std::vector<ccHObject*> originals;
+	std::vector<ccHObject*> replacements;
+	for (int i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
+	{
+		ccHObject* c = m_app->dbRootObject()->getChild(i);
+		tryLoading(c,&originals,&replacements);
+	}
+
+	//replace all "originals" with their corresponding "duplicates"
+	for (int i = 0; i < originals.size(); i++)
+	{
+		//originals[i]->transferChildren(*replacements[i]); 
+		//steal all the children!
+		for (int c = 0; c < originals[i]->getChildrenNumber(); c++)
+		{
+			replacements[i]->addChild(originals[i]->getChild(c));
+		}
+
+		//add replacement
+		originals[i]->getParent()->addChild(replacements[i]);
+
+		//remove original from scene graph/db tree
+		originals[i]->getParent()->detachChild(originals[i]);
+
+		//m_app->dbRootObject()->addChild(replacements[i]);
+		//m_app->addToDB(replacements[i], false, true, false, false);
+	}
+
 	//start in measure mode
 	enableMeasureMode();
 
+	//trigger selection changed
+	onNewSelection(m_app->getSelectedEntities());
+
 	//begin measuring
 	startMeasuring();
+}
+
+void ccCompass::tryLoading(ccHObject* obj, std::vector<ccHObject*>* originals, std::vector<ccHObject*>* replacements)
+{
+	//is object already represented by a ccCompass class?
+	if (dynamic_cast<ccFitPlane*>(obj)
+		|| dynamic_cast<ccTrace*>(obj)
+		|| dynamic_cast<ccLineation*>(obj)
+		|| dynamic_cast<ccGeoObject*>(obj))
+	{
+		return; //we need do nothing!
+	}
+
+	//recurse on children
+	for (int i = 0; i < obj->getChildrenNumber(); i++)
+	{
+		tryLoading(obj->getChild(i), originals, replacements);
+	}
+
+	//store parent of this object
+	ccHObject* parent = obj->getParent();
+
+	//are we a geoObject
+	if (ccGeoObject::isGeoObject(obj))
+	{
+		ccHObject* geoObj = new ccGeoObject(obj,m_app);
+
+		//add to originals/duplicates list [these are used later to overwrite the originals]
+		originals->push_back(obj);
+		replacements->push_back(geoObj);
+		return;
+
+	}
+
+	//are we a fit plane?
+	if (ccFitPlane::isFitPlane(obj))
+	{
+		//cast to plane
+		ccPlane* p = dynamic_cast<ccPlane*>(obj);
+		if (p)
+		{
+			//create equivalent fit plane object
+			ccHObject* plane = new ccFitPlane(p);
+
+			//add to originals/duplicates list [these are used later to overwrite the originals]
+			originals->push_back(obj);
+			replacements->push_back(plane);
+			return;
+		}
+	}
+
+	//is the HObject a polyline? (this will be the case for lineations & traces)
+	ccPolyline* p = dynamic_cast<ccPolyline*>(obj);
+	if (p)
+	{
+		//are we a trace?
+		if (ccTrace::isTrace(obj))
+		{
+
+			ccHObject* trace = new ccTrace(p);
+			//add to originals/duplicates list [these are used later to overwrite the originals]
+			originals->push_back(obj);
+			replacements->push_back(trace);
+			return;
+		}
+
+		//are we a lineation?
+		if (ccLineation::isLineation(obj))
+		{
+			ccHObject* lin = new ccLineation(p);
+			originals->push_back(obj);
+			replacements->push_back(lin);
+			return;
+		}
+	}
 }
 
 //Begin measuring 
@@ -434,6 +562,9 @@ bool ccCompass::eventFilter(QObject* obj, QEvent* event)
 	ccCompass::fitPlanes = m_dlg->planeFitMode();
 	ccTrace::COST_MODE = ccCompass::costMode;
 
+	//reorder menu's (sloppy, but works for now?)
+	m_app->updateOverlayDialogsPlacement();
+
 	if (event->type() == QEvent::MouseButtonDblClick)
 	{
 		QMouseEvent* mouseEvent = static_cast<QMouseEvent *>(event);
@@ -516,6 +647,9 @@ void ccCompass::setLineationMode()
 	m_activeTool = m_lineationTool;
 	m_activeTool->toolActivated();
 
+	//trigger selection changed
+	onNewSelection(m_app->getSelectedEntities());
+
 	//update GUI
 	m_dlg->undoButton->setEnabled(m_lineationTool->canUndo());
 	m_dlg->pairModeButton->setChecked(true);
@@ -532,6 +666,9 @@ void ccCompass::setPlaneMode()
 	m_activeTool = m_fitPlaneTool;
 	m_activeTool->toolActivated();
 
+	//trigger selection changed
+	onNewSelection(m_app->getSelectedEntities());
+
 	//update GUI
 	m_dlg->undoButton->setEnabled(m_fitPlaneTool->canUndo());
 	m_dlg->planeModeButton->setChecked(true);
@@ -547,6 +684,9 @@ void ccCompass::setTraceMode()
 	//activate trace tool
 	m_activeTool = m_traceTool;
 	m_activeTool->toolActivated();
+
+	//trigger selection changed
+	onNewSelection(m_app->getSelectedEntities());
 
 	//update GUI
 	m_dlg->traceModeButton->setChecked(true);
@@ -799,12 +939,16 @@ void ccCompass::enableMeasureMode() //turns on/off map mode
 
 void ccCompass::addGeoObject() //creates a new GeoObject
 {
+	//calculate default name
+	QString name = m_lastGeoObjectName;
+
 	//get name
-	QString name = QInputDialog::getText(m_dlg, "New GeoObject", "GeoObject Name:", QLineEdit::Normal, "DefaultName");
+	name = QInputDialog::getText(m_dlg, "New GeoObject", "GeoObject Name:", QLineEdit::Normal, name);
 	if (name == "") //user clicked cancel
 	{
 		return;
 	}
+	m_lastGeoObjectName = name;
 
 	//search for a "interpretation" group [where the new unit will be added]
 	ccHObject* interp_group = nullptr;

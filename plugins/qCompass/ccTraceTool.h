@@ -38,6 +38,7 @@ protected:
 	//the active trace
 	ccTrace* m_trace = nullptr;
 	int m_trace_id = -1; //active trace id
+	bool m_preExisting = false; //set to true when a trace is picked up from a selection (so we don't delete it on cancel).
 };
 
 #endif

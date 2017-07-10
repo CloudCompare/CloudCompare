@@ -29,6 +29,7 @@ class ccGeoObject : public ccHObject
 {
 public:
 	ccGeoObject(QString name, ccMainAppInterface* app);
+	ccGeoObject(ccHObject* obj, ccMainAppInterface* app);
 
 	//returns the pointCloud associated with this ccGeoObject's interior (or null if the interior is undefined)
 	ccPointCloud* getAssociatedCloud();
@@ -61,9 +62,15 @@ protected:
 	void generateUpper();
 	void generateLower();
 
+private:
+	void init(QString name, ccMainAppInterface* app);
+
 //static functions
 public:
 	static bool isGeoObject(ccHObject* object);
+	static bool isGeoObjectUpper(ccHObject* object);
+	static bool isGeoObjectLower(ccHObject* object);
+	static bool isGeoObjectInterior(ccHObject* object);
 };
 
 

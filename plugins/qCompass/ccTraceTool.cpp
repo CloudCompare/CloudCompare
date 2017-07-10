@@ -31,6 +31,7 @@ void ccTraceTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointC
 	{
 		//item has been deleted...
 		m_trace = nullptr;
+		m_trace_id = -1;
 	}
 
 	if (!m_trace)
@@ -44,8 +45,9 @@ void ccTraceTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointC
 		m_trace_id = m_trace->getUniqueID();
 		insertPoint->addChild(m_trace);
 		m_app->addToDB(m_trace, false, false, false, false);
-		//m_app->setSelectedInDB(m_trace, true);
 		m_trace->setActive(true);
+		m_app->setSelectedInDB(m_trace, true);
+		m_preExisting = false;
 	}
 
 	//add point
@@ -88,26 +90,32 @@ void ccTraceTool::cancel()
 {
 	if (m_trace)
 	{
-		if (m_app->dbRootObject()->find(m_trace_id))
+		m_trace->setActive(false); //disactivate trace
+		
+		if (!m_preExisting) //delete new traces (i.e. that were "picked-up" by changing the selection)
 		{
-			m_app->removeFromDB(m_trace); //delete trace object
+			if (m_app->dbRootObject()->find(m_trace_id))
+			{
+				m_app->removeFromDB(m_trace); //delete trace object
+			}
+			m_trace = nullptr;
+			m_trace_id = -1;
 		}
-		m_trace = nullptr;
 	}
 }
 
 void ccTraceTool::onNewSelection(const ccHObject::Container& selectedEntities)
 {
-		//can we pick up a new one?
-		for (size_t i = 0; i < selectedEntities.size(); i++)
+	//can we pick up a new one?
+	for (size_t i = 0; i < selectedEntities.size(); i++)
+	{
+		if (selectedEntities[i] != m_trace) //can't pick up the already active trace...
 		{
-			if (selectedEntities[i] != m_trace) //can't pick up the already active trace...
-			{
-				pickupTrace(selectedEntities[i]);
-				if (m_trace)
-					break; //bail as we've found an active trace object
-			}
+			pickupTrace(selectedEntities[i]);
+			if (m_trace)
+				break; //bail as we've found an active trace object
 		}
+	}
 }
 
 void ccTraceTool::finishCurrentTrace()
@@ -120,6 +128,7 @@ void ccTraceTool::finishCurrentTrace()
 		{
 			//item has been deleted...
 			m_trace = nullptr;
+			m_trace_id = -1;
 			return;
 		}
 
@@ -164,10 +173,12 @@ void ccTraceTool::finishCurrentTrace()
 				}
 			}
 		}
-		//m_app->setSelectedInDB(m_trace, false); //deselect this trace
+		m_app->setSelectedInDB(m_trace, false); //deselect this trace
+		m_app->setSelectedInDB(m_trace->getParent(), false); //select it's parent instead
+		m_trace = nullptr;
+		m_trace_id = -1;
+		m_window->redraw();
 	}
-	m_trace = nullptr;
-	m_window->redraw();
 }
 
 void ccTraceTool::pickupTrace(ccHObject* obj)
@@ -185,6 +196,8 @@ void ccTraceTool::pickupTrace(ccHObject* obj)
 		//activate selected trace
 		m_trace = t;
 		m_trace->setActive(true);
+		m_trace_id = m_trace->getUniqueID();
+		m_preExisting = true;
 	}
 }
 

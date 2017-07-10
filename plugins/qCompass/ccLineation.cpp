@@ -27,12 +27,31 @@ static QSharedPointer<ccCone> c_headMarker(nullptr);
 ccLineation::ccLineation(ccPointCloud* associatedCloud) 
 	: ccPolyline(associatedCloud)
 {
+	init();
+}
+
+ccLineation::ccLineation(ccPolyline* obj)
+	: ccPolyline(obj->getAssociatedCloud())
+{
+	init();
+
+	setName(obj->getName());
+
+	//load points
+	for (int i = 0; i < obj->size(); i++)
+	{
+		int pId = obj->getPointGlobalIndex(i); //get global point ID
+		addPointIndex(pId); //add point to this polyline
+	}
+}
+
+void ccLineation::init()
+{
 	//add metadata tag defining the ccCompass class type
 	QVariantMap* map = new QVariantMap();
 	map->insert("ccCompassType", "Lineation");
 	setMetaData(*map, true);
 }
-
 //overidden from ccHObject
 void ccLineation::drawMeOnly(CC_DRAW_CONTEXT& context)
 {

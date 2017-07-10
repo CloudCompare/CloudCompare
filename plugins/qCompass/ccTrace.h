@@ -60,6 +60,7 @@ class ccTrace :
 {
 public:
 	ccTrace(ccPointCloud* associatedCloud);
+	ccTrace(ccPolyline* obj); //used for constructing from polylines with the correct metadata
 	virtual ~ccTrace() {}
 
 	//inherited from ccHObject
@@ -248,6 +249,8 @@ private:
 	*/
 	bool inCircle(const CCVector3* segStart, const CCVector3* segEnd, const CCVector3* query);
 
+	//used by various constructors to do initialization
+	void init(ccPointCloud* associatedCloud);
 //static functions
 public:
 	static bool isTrace(ccHObject* object); //return true if object is a valid trace [regardless of it's class type]

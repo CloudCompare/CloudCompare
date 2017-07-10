@@ -34,11 +34,12 @@ class ccLineation :
 {
 public:
 	ccLineation(ccPointCloud* associatedCloud);
+	ccLineation(ccPolyline* obj); //used to construct from a polyline with the correct data
 
 	virtual ~ccLineation() {}
 
 	//inherited from ccHObject
-	inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POLY_LINE; }
+	//inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POLY_LINE; }
 
 	//get the direction of this lineation (not normalized) 
 	CCVector3 getDirection()
@@ -59,6 +60,9 @@ protected:
 
 	//overidden from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	
+private:
+	void init(); //used by ctors
 
 //static functions
 public:

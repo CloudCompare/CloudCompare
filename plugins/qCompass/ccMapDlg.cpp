@@ -44,5 +44,4 @@ ccMapDlg::ccMapDlg(QWidget* parent/*=0*/)
 	p.setColor(backgroundRole(), QColor(240, 240, 240, 200));
 	setPalette(p);
 	setAutoFillBackground(true);
-
 }

@@ -64,7 +64,9 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 void ccCompass::pickupTrace(ccHObject* obj)
 {
 	//"pick-up" selected trace
-	if (m_trace = dynamic_cast<ccTrace*>(obj)) //try casting to ccTrace - if succesfull ccTrace is updated. If not, ccTrace becomes null.
+	m_trace = dynamic_cast<ccTrace*>(obj);
+	
+	if (m_trace != nullptr) //try casting to ccTrace - if succesfull ccTrace is updated. If not, ccTrace becomes null.
 	{
 		//change color
 		m_trace->setTraceColor(ccColor::yellow);

@@ -145,7 +145,7 @@ struct ModelCloud
 struct DataCloud
 {
 	DataCloud() : cloud(0), rotatedCloud(0), weights(0), CPSetRef(0), CPSetPlain(0) {}
-	DataCloud(const DataCloud& d) : cloud(d.cloud), rotatedCloud(d.rotatedCloud), weights(d.weights), CPSetRef(d.CPSetRef), CPSetPlain(d.CPSetPlain) {}
+	
 	ReferenceCloud* cloud;
 	SimpleCloud* rotatedCloud;
 	ScalarField* weights;

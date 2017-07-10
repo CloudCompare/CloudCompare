@@ -57,9 +57,6 @@ namespace ccColor
 
 		//! Constructor from an array of 3 values
 		explicit inline RgbTpl(const Type col[3]) : r(col[0]), g(col[1]), b(col[2]) {}
-	
-		//! Copy constructor
-		inline RgbTpl(const RgbTpl& c) : r(c.r), g(c.g), b(c.b) {}
 
 		//! Comparison operator
 		inline bool operator != (const RgbTpl<Type>& t) const { return (r != t.r || g != t.g || b != t.b); }
@@ -100,8 +97,6 @@ namespace ccColor
 		//! RgbaTpl from an array of 3 values and a transparency value
 		explicit inline RgbaTpl(const Type col[3], Type alpha) : r(col[0]), g(col[1]), b(col[2]), a(alpha) {}
 	
-		//! Copy constructor
-		inline RgbaTpl(const RgbaTpl<Type>& c) : r(c.r), g(c.g), b(c.b), a(c.a) {}
 		//! Copy constructor
 		inline RgbaTpl(const RgbTpl<Type>& c, Type alpha) : r(c.r), g(c.g), b(c.b), a(alpha) {}
 

@@ -53,9 +53,6 @@ public:
 
 	//! Constructor from an array of 4 elements
 	inline explicit Tuple4Tpl(const Type p[]) : x(p[0]), y(p[1]), z(p[2]), w(p[3]) {}
-	
-	//! Copy constructor
-	inline Tuple4Tpl(const Tuple4Tpl& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 
 	//! Inverse operator
 	inline Tuple4Tpl operator - () const { Tuple4Tpl V(-x,-y,-z, -w); return V; }
@@ -104,9 +101,6 @@ public:
 
 	//! Constructor from an array of 3 elements
 	inline explicit Tuple3Tpl(const Type p[]) : x(p[0]),y(p[1]),z(p[2]) {}
-	
-	//! Copy constructor
-	inline Tuple3Tpl(const Tuple3Tpl& v) : x(v.x),y(v.y),z(v.z) {}
 
 	//! Inverse operator
 	inline Tuple3Tpl operator - () const { Tuple3Tpl V(-x,-y,-z); return V; }
@@ -161,9 +155,6 @@ public:
 
 	//! Constructor from an array of 3 elements
 	inline explicit Vector3Tpl(const Type p[]) : Tuple3Tpl<Type>(p) {}
-	
-	//! Copy constructor
-	inline Vector3Tpl(const Vector3Tpl& v) : Tuple3Tpl<Type>(v) {}
 
 	//! Constructor from an int array
 	static inline Vector3Tpl fromArray(const int a[3]) { return Vector3Tpl(static_cast<Type>(a[0]),static_cast<Type>(a[1]),static_cast<Type>(a[2])); }
@@ -209,8 +200,6 @@ public:
 	inline Vector3Tpl operator / (Type s) const { return Vector3Tpl(x/s, y/s, z/s); }
 	//! Cross product operator
 	inline Vector3Tpl operator * (const Vector3Tpl& v) const { return cross(v); }
-	//! Copy operator
-	inline Vector3Tpl& operator = (const Vector3Tpl &v) { x=v.x; y=v.y; z=v.z; return *this; }
 	//! Dot product operator
 	inline Type operator && (const Vector3Tpl &v) const { return dot(v); }
 	//! Direct coordinate access
@@ -289,9 +278,6 @@ public:
 	**/
 	inline Vector2Tpl(Type _x, Type _y) : x(_x), y(_y) {}
 
-	//! Copy constructor
-	inline Vector2Tpl(const Vector2Tpl& v) : x(v.x),y(v.y) {}
-
 	//! Returns vector square norm
 	inline Type norm2() const { return (x*x)+(y*y); }
 	//! Returns vector norm
@@ -324,8 +310,6 @@ public:
 	inline Vector2Tpl operator * (Type s) const {return Vector2Tpl(x*s, y*s);}
 	//! Division operator
 	inline Vector2Tpl operator / (Type s) const {return Vector2Tpl(x/s, y/s);}
-	//! Copy operator
-	inline Vector2Tpl& operator = (const Vector2Tpl &v) {x=v.x; y=v.y; return *this;}
 	//! Direct coordinate access
 	inline Type& operator [] (unsigned i) {return u[i];}
 	//! Direct coordinate access (const)

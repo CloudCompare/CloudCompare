@@ -1300,7 +1300,6 @@ void ccPointPairRegistrationDlg::apply()
 		m_aligned.entity->applyGLTransformation_recursive();
 		m_alignedPoints.setGLTransformation(transMat);
 
-		QString matString = transMat.toString();
 		summary << QString("Transformation matrix");
 		summary << transMat.toString(3,'\t'); //low precision, just for display
 		summary << "----------------";

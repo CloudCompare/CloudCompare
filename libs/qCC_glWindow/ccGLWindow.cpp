@@ -6523,34 +6523,31 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 	assert(glFunc);
 
 	//compute the text bounding rect
-	QRect rect = QFontMetrics(font).boundingRect(str);
+	// This adjustment and the change to x & y are to work around a crash with Qt 5.9.
+	// At the time I (Andy) could not determine if it is a bug in CC or Qt.
+	//		https://bugreports.qt.io/browse/QTBUG-61863
+	//		https://github.com/CloudCompare/CloudCompare/issues/543
+	QRect rect = QFontMetrics(font).boundingRect(str).adjusted( -1, -2, 1, 2 );
+	
+	x -= 1;	// magic number!
+	y += 3;	// magic number!
 
 	//first we create a QImage from the text
-	//QRect textRect = rect;
-	//if (devicePixelRatio() > 1)
-	//{
-	//	textRect.setWidth(rect.width() + devicePixelRatio());
-	//	textRect.setHeight(rect.height() + devicePixelRatio());
-	//}
 	QImage textImage(rect.width(), rect.height(), QImage::Format::Format_RGBA8888);
+	rect = textImage.rect();
+	
+	textImage.fill(Qt::transparent);
 	{
 		QPainter painter(&textImage);
-		painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-		textImage.fill(Qt::transparent);
 
 		float glColor[4];
 		glFunc->glGetFloatv(GL_CURRENT_COLOR, glColor);
 		QColor color;
-		{
-			color.setRedF(glColor[0]);
-			color.setGreenF(glColor[1]);
-			color.setBlueF(glColor[2]);
-			color.setAlphaF(glColor[3]);
-		}
-		QPen pen(color);
-		painter.setPen(pen);
-		painter.setFont(font);
-		painter.drawText(-rect.x() - (devicePixelRatio() - 1) * 2, -rect.y() - (devicePixelRatio() - 1) * 2, str); //DGM: works (otherwise the rendered text is truncated)... but why?!
+		color.setRgbF( glColor[0], glColor[1], glColor[2], glColor[3] );
+		
+		painter.setPen( color );
+		painter.setFont( font );
+		painter.drawText( rect, Qt::AlignCenter, str );
 	}
 	
 	//and then we convert this QImage to a texture!

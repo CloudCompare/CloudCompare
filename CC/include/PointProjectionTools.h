@@ -151,8 +151,6 @@ public:
 		IndexedCCVector2(PointCoordinateType x, PointCoordinateType y, unsigned i) : CCVector2(x,y), index(i) {}
 		//! Copy constructor
 		IndexedCCVector2(const CCVector2& v) : CCVector2(v), index(0) {}
-		//! Copy constructor
-		IndexedCCVector2(const IndexedCCVector2& v) : CCVector2(v), index(v.index) {}
 
 		//! Point index
 		unsigned index;

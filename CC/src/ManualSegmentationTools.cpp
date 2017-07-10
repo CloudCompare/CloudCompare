@@ -306,7 +306,6 @@ struct InsideOutsideIndexes
 {
 	InsideOutsideIndexes() : insideIndex(0), outsideIndex(0) {}
 	InsideOutsideIndexes(unsigned inside, unsigned outside) : insideIndex(inside), outsideIndex(outside) {}
-	InsideOutsideIndexes(const InsideOutsideIndexes& pmi) : insideIndex(pmi.insideIndex), outsideIndex(pmi.outsideIndex){}
 	unsigned insideIndex;
 	unsigned outsideIndex;
 };

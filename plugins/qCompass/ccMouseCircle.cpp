@@ -94,13 +94,9 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 		m_winTotalZoom = params.zoom / params.pixelSize;
 		relativeZoom = m_winTotalZoom / totalZoom;
 
-		CCVector3d dC = m_params.cameraCenter - params.cameraCenter;
-		
+		//CCVector3d dC = m_params.cameraCenter - params.cameraCenter;
 		CCVector3d P = m_params.pivotPoint - params.pivotPoint;
 		m_params.viewMat.apply(P);
-
-		static_cast<float>(dC.x + P.x);
-		static_cast<float>(dC.y + P.y);
 
 		dx *= m_winTotalZoom;
 		dy *= m_winTotalZoom;

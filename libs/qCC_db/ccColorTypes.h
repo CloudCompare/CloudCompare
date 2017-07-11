@@ -117,36 +117,36 @@ namespace ccColor
 	typedef RgbaTpl<ColorCompType> Rgba;
 
 	// Predefined colors (default type)
-	static const Rgba white						(MAX,MAX,MAX,MAX);
-	static const Rgba lightGrey					(static_cast<ColorCompType>(MAX*0.8),static_cast<ColorCompType>(MAX*0.8),static_cast<ColorCompType>(MAX*0.8),MAX);
-	static const Rgba darkGrey					(MAX/2,MAX/2,MAX/2,MAX);
-	static const Rgba red						(MAX,0,0,MAX);
-	static const Rgba green						(0,MAX,0,MAX);
-	static const Rgba blue						(0,0,MAX,MAX);
-	static const Rgba darkBlue					(0,0,MAX/2,MAX);
-	static const Rgba magenta					(MAX,0,MAX,MAX);
-	static const Rgba cyan						(0,MAX,MAX,MAX);
-	static const Rgba orange					(MAX,MAX/2,0,MAX);
-	static const Rgba black						(0,0,0,MAX);
-	static const Rgba yellow					(MAX,MAX,0,MAX);
+	extern const Rgba white;
+	extern const Rgba lightGrey;
+	extern const Rgba darkGrey;
+	extern const Rgba red;
+	extern const Rgba green;
+	extern const Rgba blue;
+	extern const Rgba darkBlue;
+	extern const Rgba magenta;
+	extern const Rgba cyan;
+	extern const Rgba orange;
+	extern const Rgba black;
+	extern const Rgba yellow;
 
 	// Predefined materials (float)
-	static const Rgbaf bright					(1.00f, 1.00f, 1.00f, 1.00f);
-	static const Rgbaf lighter					(0.83f, 0.83f, 0.83f, 1.00f);
-	static const Rgbaf light					(0.66f, 0.66f, 0.66f, 1.00f);
-	static const Rgbaf middle					(0.50f, 0.50f, 0.50f, 1.00f);
-	static const Rgbaf dark						(0.34f, 0.34f, 0.34f, 1.00f);
-	static const Rgbaf darker					(0.17f, 0.17f, 0.17f, 1.00f);
-	static const Rgbaf darkest					(0.08f, 0.08f, 0.08f, 1.00f);
-	static const Rgbaf night					(0.00f, 0.00f, 0.00f, 1.00F);
-	static const Rgbaf defaultMeshFrontDiff		(0.00f, 0.90f, 0.27f, 1.00f);
-	static const Rgbaf defaultMeshBackDiff		(0.27f, 0.90f, 0.90f, 1.00f);
+	extern const Rgbaf bright;
+	extern const Rgbaf lighter;
+	extern const Rgbaf light;
+	extern const Rgbaf middle;
+	extern const Rgbaf dark;
+	extern const Rgbaf darker;
+	extern const Rgbaf darkest;
+	extern const Rgbaf night;
+	extern const Rgbaf defaultMeshFrontDiff;
+	extern const Rgbaf defaultMeshBackDiff;
 
 	// Default foreground color (unsigned byte)
-	static const Rgbub defaultColor				(255, 255, 255); //white
-	static const Rgbub defaultBkgColor			( 10, 102, 151); //dark blue
-	static const Rgbub defaultLabelBkgColor		(255, 255, 255); //white
-	static const Rgbub defaultLabelMarkerColor	(255,   0, 255); //magenta
+	extern const Rgbub defaultColor;			//white
+	extern const Rgbub defaultBkgColor;			//dark blue
+	extern const Rgbub defaultLabelBkgColor;	//white
+	extern const Rgbub defaultLabelMarkerColor;	//magenta
 
 	//! Colors generator
 	class Generator

@@ -38,7 +38,7 @@ target_link_contrib( ${PROJECT_NAME} )
 
 # Add custom preprocessor definitions
 if (WIN32)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_IO_USE_AS_DLL )
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL QCC_IO_USE_AS_DLL )
 elseif( APPLE )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES
 		INSTALL_RPATH "." )

@@ -18,6 +18,9 @@
 #ifndef CC_COLOR_TYPES_HEADER
 #define CC_COLOR_TYPES_HEADER
 
+//Local
+#include "qCC_db.h"
+
 //system
 #include <stdlib.h>
 #include <random>
@@ -117,36 +120,36 @@ namespace ccColor
 	typedef RgbaTpl<ColorCompType> Rgba;
 
 	// Predefined colors (default type)
-	extern const Rgba white;
-	extern const Rgba lightGrey;
-	extern const Rgba darkGrey;
-	extern const Rgba red;
-	extern const Rgba green;
-	extern const Rgba blue;
-	extern const Rgba darkBlue;
-	extern const Rgba magenta;
-	extern const Rgba cyan;
-	extern const Rgba orange;
-	extern const Rgba black;
-	extern const Rgba yellow;
+	QCC_DB_LIB_API extern const Rgba white;
+	QCC_DB_LIB_API extern const Rgba lightGrey;
+	QCC_DB_LIB_API extern const Rgba darkGrey;
+	QCC_DB_LIB_API extern const Rgba red;
+	QCC_DB_LIB_API extern const Rgba green;
+	QCC_DB_LIB_API extern const Rgba blue;
+	QCC_DB_LIB_API extern const Rgba darkBlue;
+	QCC_DB_LIB_API extern const Rgba magenta;
+	QCC_DB_LIB_API extern const Rgba cyan;
+	QCC_DB_LIB_API extern const Rgba orange;
+	QCC_DB_LIB_API extern const Rgba black;
+	QCC_DB_LIB_API extern const Rgba yellow;
 
 	// Predefined materials (float)
-	extern const Rgbaf bright;
-	extern const Rgbaf lighter;
-	extern const Rgbaf light;
-	extern const Rgbaf middle;
-	extern const Rgbaf dark;
-	extern const Rgbaf darker;
-	extern const Rgbaf darkest;
-	extern const Rgbaf night;
-	extern const Rgbaf defaultMeshFrontDiff;
-	extern const Rgbaf defaultMeshBackDiff;
+	QCC_DB_LIB_API extern const Rgbaf bright;
+	QCC_DB_LIB_API extern const Rgbaf lighter;
+	QCC_DB_LIB_API extern const Rgbaf light;
+	QCC_DB_LIB_API extern const Rgbaf middle;
+	QCC_DB_LIB_API extern const Rgbaf dark;
+	QCC_DB_LIB_API extern const Rgbaf darker;
+	QCC_DB_LIB_API extern const Rgbaf darkest;
+	QCC_DB_LIB_API extern const Rgbaf night;
+	QCC_DB_LIB_API extern const Rgbaf defaultMeshFrontDiff;
+	QCC_DB_LIB_API extern const Rgbaf defaultMeshBackDiff;
 
 	// Default foreground color (unsigned byte)
-	extern const Rgbub defaultColor;			//white
-	extern const Rgbub defaultBkgColor;			//dark blue
-	extern const Rgbub defaultLabelBkgColor;	//white
-	extern const Rgbub defaultLabelMarkerColor;	//magenta
+	QCC_DB_LIB_API extern const Rgbub defaultColor;				//white
+	QCC_DB_LIB_API extern const Rgbub defaultBkgColor;			//dark blue
+	QCC_DB_LIB_API extern const Rgbub defaultLabelBkgColor;		//white
+	QCC_DB_LIB_API extern const Rgbub defaultLabelMarkerColor;	//magenta
 
 	//! Colors generator
 	class Generator

@@ -55,6 +55,8 @@
 #include "ccFitPlaneTool.h"
 #include "ccTraceTool.h"
 #include "ccLineationTool.h"
+#include "ccFloodTool.h"
+#include "ccThicknessTool.h"
 
 //other
 #include <math.h>
@@ -108,6 +110,7 @@ protected slots:
 	void setPlaneMode(); //activates the plane tool
 	void setTraceMode(); //activates the trace tool
 	void setPaintMode(); //activates the paint tool
+	void setThicknessMode(); //activates the thickness tool
 	void enableMapMode(); //turns on/off map mode
 	void enableMeasureMode(); //turns on/off map mode
 	void addGeoObject(); //creates a new GeoObject
@@ -116,6 +119,7 @@ protected slots:
 	void writeToInterior(); //new digitization will be added to the GeoObjects interior
 	void writeToUpper(); //new digitization will be added to the GeoObjects upper boundary
 	void writeToLower(); //new digitiziation will be added to the GeoObjects lower boundary
+	void recalculateSelectedTraces();
 
 	//updates drawing properites of fit planes etc.
 	void toggleStipple(bool checked);
@@ -143,7 +147,7 @@ protected:
 	void cleanupBeforeToolChange();
 
 	//checks if the passed object, or any of it's children, represent unloaded ccCompass objects (e.g. traces, fitplanes etc).
-	void tryLoading(ccHObject* obj, std::vector<ccHObject*>* originals, std::vector<ccHObject*>* replacements);
+	void tryLoading(ccHObject* obj, std::vector<int>* originals, std::vector<ccHObject*>* replacements);
 
 	//Action to start ccCompass
 	QAction* m_action = nullptr;
@@ -161,6 +165,8 @@ protected:
 	ccFitPlaneTool* m_fitPlaneTool;
 	ccTraceTool* m_traceTool;
 	ccLineationTool* m_lineationTool;
+	ccFloodTool* m_floodTool;
+	ccThicknessTool* m_thicknessTool;
 
 	//currently selected/active geoObject
 	ccGeoObject* m_geoObject = nullptr; //the GeoObject currently being written to

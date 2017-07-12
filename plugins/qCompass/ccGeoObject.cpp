@@ -12,10 +12,12 @@ ccGeoObject::ccGeoObject(QString name, ccMainAppInterface* app)
 }
 
 ccGeoObject::ccGeoObject(ccHObject* obj, ccMainAppInterface* app)
+	: ccHObject(obj->getName())
 {
 	init(obj->getName(), app);
 
 	//n.b. object should already have upper, inner and lower children
+
 }
 
 void ccGeoObject::init(QString name, ccMainAppInterface* app)
@@ -42,7 +44,7 @@ ccHObject* ccGeoObject::getRegion(int mappingRegion)
 	{
 	case ccGeoObject::INTERIOR:
 		//check region hasn't been deleted...
-		if (m_interior && !m_app->dbRootObject()->find(m_interior_id))
+		if (!m_app->dbRootObject()->find(m_interior_id))
 		{
 			//item has been deleted... make a new one
 			generateInterior();
@@ -50,7 +52,7 @@ ccHObject* ccGeoObject::getRegion(int mappingRegion)
 		return m_interior;
 	case ccGeoObject::UPPER_BOUNDARY:
 		//check region hasn't been deleted...
-		if (m_upper && !m_app->dbRootObject()->find(m_upper_id))
+		if (!m_app->dbRootObject()->find(m_upper_id))
 		{
 			//item has been deleted... make a new one
 			generateUpper();
@@ -58,7 +60,7 @@ ccHObject* ccGeoObject::getRegion(int mappingRegion)
 		return m_upper;
 	case ccGeoObject::LOWER_BOUNDARY:
 		//check region hasn't been deleted...
-		if (m_lower && !m_app->dbRootObject()->find(m_lower_id))
+		if (!m_app->dbRootObject()->find(m_lower_id))
 		{
 			//item has been deleted... make a new one
 			generateLower();
@@ -107,6 +109,8 @@ void ccGeoObject::generateInterior()
 	{
 		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoInterior"))
 		{
+			m_interior = c;
+			m_interior_id = c->getUniqueID();
 			return;
 		}
 	}
@@ -130,6 +134,8 @@ void ccGeoObject::generateUpper()
 	{
 		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoUpperBoundary"))
 		{
+			m_upper = c;
+			m_upper_id = c->getUniqueID();
 			return;
 		}
 	}
@@ -151,6 +157,8 @@ void ccGeoObject::generateLower()
 	{
 		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoLowerBoundary"))
 		{
+			m_lower = c;
+			m_lower_id = c->getUniqueID();
 			return;
 		}
 	}

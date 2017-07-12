@@ -1,15 +1,17 @@
 #include "ccFitPlane.h"
 #include "ccCompass.h"
 ccFitPlane::ccFitPlane(ccPlane* p)
-	: ccPlane(*p) //copy the passed ccPlane object
+	: ccPlane(p->getXWidth(), p->getYWidth(), &p->getTransformation(), p->getName()) //create an identical plane
 {
+	p->clone();
+
 	//add metadata tag defining the ccCompass class type
 	QVariantMap* map = new QVariantMap();
 	map->insert("ccCompassType", "FitPlane");
 	setMetaData(*map, true);
 
 	//update name
-	CCVector3 N(getNormal());
+	/*CCVector3 N(getNormal());
 	//We always consider the normal with a positive 'Z' by default!
 	if (N.z < 0.0)
 		N *= -1.0;
@@ -19,7 +21,7 @@ ccFitPlane::ccFitPlane(ccPlane* p)
 	ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip);
 	QString dipAndDipDirStr = QString("%1/%2").arg((int)dip, 2, 10, QChar('0')).arg((int)dipdir, 3, 10, QChar('0'));
 
-	setName(dipAndDipDirStr);
+	setName(dipAndDipDirStr);*/
 
 	//update drawing properties based on ccCompass state
 	enableStippling(ccCompass::drawStippled);

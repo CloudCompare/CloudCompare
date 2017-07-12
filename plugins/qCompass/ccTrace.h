@@ -121,20 +121,13 @@ public:
 	/*
 	Applies the optimized path to the underlying polyline object (allows saving etc.).
 	*/
-	void finalizePath()
-	{
-		//clear existing points in background "polyline"
-		clear();
+	void finalizePath();
 
-		//push trace buffer to said polyline (for save/export etc.)
-		for (std::deque<int> seg : m_trace)
-		{
-			for (int p : seg)
-			{
-				addPointIndex(p);
-			}
-		}
-	}
+	/*
+	Recalculates the path from scratch
+	*/
+	void recalculatePath();
+
 
 	/*
 	Fit a plane to this trace. Returns true if a plane was succesfully fitted.
@@ -148,6 +141,10 @@ public:
 	*/
 	ccFitPlane* fitPlane(int surface_effect_tolerance = 10, float min_planarity = 0.75f);
 
+	/*
+	Assigns the ID of this object to active scalar field (for each trace point).
+	*/
+	void bakePathToScalarField();
 
 	enum MODE 
 	{
@@ -251,6 +248,10 @@ private:
 
 	//used by various constructors to do initialization
 	void init(ccPointCloud* associatedCloud);
+
+	//used to update metadata flags
+	void updateMetadata();
+
 //static functions
 public:
 	static bool isTrace(ccHObject* object); //return true if object is a valid trace [regardless of it's class type]

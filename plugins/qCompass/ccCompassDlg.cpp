@@ -54,6 +54,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_dist = new QAction("Distance", this); m_dist->setCheckable(true);
 	m_scalar = new QAction("Scalar Field", this); m_scalar->setCheckable(true);
 	m_scalar_inv = new QAction("Inverse Scalar Field", this); m_scalar_inv->setCheckable(true);
+	m_recalculate = new QAction("Recalculate Selection", this); //used to recalculate selected traces with new cost function
 	m_plane_fit = new QAction("Fit Planes", this); m_plane_fit->setCheckable(true); m_plane_fit->setChecked(true);
 
 	//setup tool-tips
@@ -65,6 +66,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_dist->setToolTip("Traces take the shortest euclidean path (how booring...)");
 	m_scalar->setToolTip("Use the active scalar field to define path cost (i.e. the path follows low scalar values).");
 	m_scalar_inv->setToolTip("Use the inverse of the active scalar field to define path cost (i.e. the path follows high scalar values).");
+	m_recalculate->setToolTip("Recalculate the selected traces using the latest cost function");
 
 	//add to menu
 	m_cost_algorithm_menu->addAction(m_dark);
@@ -76,6 +78,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_cost_algorithm_menu->addAction(m_scalar);
 	m_cost_algorithm_menu->addAction(m_scalar_inv);
 	m_cost_algorithm_menu->addSeparator();
+	m_cost_algorithm_menu->addAction(m_recalculate);
 
 	//setup settings menu
 	m_settings_menu = new QMenu(this);
@@ -99,6 +102,24 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	algorithmButton->setPopupMode(QToolButton::InstantPopup);
 	algorithmButton->setMenu(m_settings_menu); //add settings menu
 	algorithmButton->setEnabled(true);
+	
+	//setup pair picking menu
+	m_pairpicking_menu = new QMenu(this);
+
+	m_measure_thickness = new QAction("Measure Thickness", this);
+	m_crosscutting = new QAction("Assign Crosscutting Relationship", this);
+	m_younging = new QAction("Assign Younging Relationship", this);
+	
+	m_measure_thickness->setToolTip("Select a plane and then a point to measure plane-perpendicular thickness.");
+	m_crosscutting->setToolTip("Select two GeoObjects to assign a crosscutting relationship");
+	m_younging->setToolTip("Select two GeoObjects to assign a conformable younging relationship and copy across relevant boundaries");
+
+	m_pairpicking_menu->addAction(m_measure_thickness);
+	m_pairpicking_menu->addAction(m_crosscutting);
+	m_pairpicking_menu->addAction(m_younging);
+
+	extraModeButton->setPopupMode(QToolButton::InstantPopup);
+	extraModeButton->setMenu(m_pairpicking_menu);
 
 	//set background color
 	QPalette p;

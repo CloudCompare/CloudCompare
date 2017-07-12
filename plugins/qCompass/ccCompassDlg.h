@@ -51,12 +51,20 @@ public:
 
 	QMenu *m_cost_algorithm_menu;
 	QMenu *m_settings_menu;
+	QMenu *m_pairpicking_menu;
 
 	//settings menu
 	QAction *m_plane_fit;
 	QAction *m_showStippled;
 	QAction *m_showNormals;
 	QAction *m_showNames;
+	QAction *m_recalculate;
+
+	//pair picking menu
+	QAction *m_measure_thickness;
+	QAction *m_crosscutting;
+	QAction *m_younging;
+
 protected slots:
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
@@ -71,7 +79,6 @@ private:
 	QAction *m_dist;
 	QAction *m_scalar;
 	QAction *m_scalar_inv;
-
 	
 };
 

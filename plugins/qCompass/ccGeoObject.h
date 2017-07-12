@@ -49,13 +49,13 @@ public:
 protected:
 	ccMainAppInterface* m_app;
 	ccPointCloud* m_associatedCloud = nullptr; //the dataset this object "belongs" too. Assigned when an "interior" gets defined.
-	ccHObject* m_interior; //group containing interior point set and associated measurments
+	ccHObject* m_interior = nullptr; //group containing interior point set and associated measurments
 	int m_interior_id = -1;
 
-	ccHObject* m_upper; //group containing upper boundary polylines and associated measurments
+	ccHObject* m_upper = nullptr; //group containing upper boundary polylines and associated measurments
 	int m_upper_id = -1;
 
-	ccHObject* m_lower; //group containing lower boundary polylines/traces and associated measurments
+	ccHObject* m_lower = nullptr; //group containing lower boundary polylines/traces and associated measurments
 	int m_lower_id = -1;
 
 	void generateInterior();

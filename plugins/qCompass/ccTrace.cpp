@@ -24,7 +24,8 @@ ccTrace::ccTrace(ccPointCloud* associatedCloud) : ccPolyline(associatedCloud)
 	init(associatedCloud);
 }
 
-ccTrace::ccTrace(ccPolyline* obj) : ccPolyline(obj->getAssociatedCloud())
+ccTrace::ccTrace(ccPolyline* obj)
+	: ccPolyline(obj->getAssociatedCloud())
 {
 	ccPointCloud* cld = dynamic_cast<ccPointCloud*>(obj->getAssociatedCloud());
 	assert(cld != nullptr); //should never be null
@@ -42,6 +43,11 @@ ccTrace::ccTrace(ccPolyline* obj) : ccPolyline(obj->getAssociatedCloud())
 				m_waypoints.push_back(pID); //add waypoint
 			}
 		}
+
+		//store waypoints metadata
+		QVariantMap* map = new QVariantMap();
+		map->insert("waypoints", waypoints);
+		setMetaData(*map, true);
 	}
 
 	setName(obj->getName());
@@ -50,13 +56,24 @@ ccTrace::ccTrace(ccPolyline* obj) : ccPolyline(obj->getAssociatedCloud())
 	std::deque<int> seg;
 	for (int i = 0; i < obj->size(); i++)
 	{
+		//copy into "trace" object
 		int pId = obj->getPointGlobalIndex(i); //get global point ID
 		seg.push_back(pId);
+
+		//also copy into polyline object
+		addPointIndex(pId);
 	}
 	m_trace.push_back(seg);
 
+	//recalculate trace if polyline data somehow lost [redundancy thing..]
+	if (obj->size() == 0)
+	{
+		m_trace.clear();
+		optimizePath(); //[slooooow...!]
+	}
+
+	computeBB(); //update bounding box (for picking)
 	//recalculate trace from the waypoints
-	//optimizePath(); //TODO: simply copy polyline rather than re-optimizing path [slow...]!
 }
 
 void ccTrace::init(ccPointCloud* associatedCloud)
@@ -66,26 +83,30 @@ void ccTrace::init(ccPointCloud* associatedCloud)
 	m_search_r = calculateOptimumSearchRadius(); //estimate the search radius we want to use
 
 	//store these info as object attributes
-	//object->hasMetaData("search_r") && object->hasMetaData("cost_function");
+	updateMetadata();
+}
+
+void ccTrace::updateMetadata()
+{
 	QVariantMap* map = new QVariantMap();
 	map->insert("ccCompassType", "Trace");
 	map->insert("search_r", m_search_r);
 	QString cost_function = "";
-	if (COST_MODE & MODE::RGB)
+	if (ccTrace::COST_MODE & MODE::RGB)
 		cost_function += "RGB,";
-	if (COST_MODE & MODE::DARK)
+	if (ccTrace::COST_MODE & MODE::DARK)
 		cost_function += "Dark,";
-	if (COST_MODE & MODE::LIGHT)
+	if (ccTrace::COST_MODE & MODE::LIGHT)
 		cost_function += "Light,";
-	if (COST_MODE & MODE::CURVE)
+	if (ccTrace::COST_MODE & MODE::CURVE)
 		cost_function += "Curve,";
-	if (COST_MODE & MODE::GRADIENT)
+	if (ccTrace::COST_MODE & MODE::GRADIENT)
 		cost_function += "Grad,";
-	if (COST_MODE & MODE::DISTANCE)
+	if (ccTrace::COST_MODE & MODE::DISTANCE)
 		cost_function += "Dist,";
-	if (COST_MODE & MODE::SCALAR)
+	if (ccTrace::COST_MODE & MODE::SCALAR)
 		cost_function += "Scalar,";
-	if (COST_MODE & MODE::INV_SCALAR)
+	if (ccTrace::COST_MODE & MODE::INV_SCALAR)
 		cost_function += "Inv_Scalar,";
 	cost_function = cost_function.remove(cost_function.size() - 1, 1); //remove trailing comma
 	map->insert("cost_function", cost_function);
@@ -162,7 +183,10 @@ bool ccTrace::optimizePath(int maxIterations)
 		idx=m_cloud->addScalarField("Search");
 	m_cloud->setCurrentScalarField(idx);
 	#endif
-	
+
+	//update stored cost function etc.
+	updateMetadata();
+
 	//loop through segments and build/rebuild trace
 	int start, end, tID; //declare vars
 	for (unsigned i = 1; i < m_waypoints.size(); i++)
@@ -214,7 +238,34 @@ bool ccTrace::optimizePath(int maxIterations)
 	map->insert("waypoints", waypoints);
 	setMetaData(*map, true);
 
+	//push points onto underlying polyline object (for picking & save/load)
+	finalizePath();
+
 	return success;
+}
+
+void ccTrace::finalizePath()
+{
+	//clear existing points in background "polyline"
+	clear();
+
+	//push trace buffer to said polyline (for save/export etc.)
+	for (std::deque<int> seg : m_trace)
+	{
+		for (int p : seg)
+		{
+			addPointIndex(p);
+		}
+	}
+
+	//invalidate bb
+	invalidateBoundingBox();
+}
+
+void ccTrace::recalculatePath()
+{
+	m_trace.clear();
+	optimizePath();
 }
 
 int ccTrace::COST_MODE = ccTrace::MODE::DARK; //set default cost mode
@@ -630,6 +681,18 @@ ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 
 	//all is good! Return the plane :)
 	return p;
+}
+
+void ccTrace::bakePathToScalarField()
+{
+	//bake points
+	for (std::deque<int> seg : m_trace)
+	{
+		for (int p : seg)
+		{
+			m_cloud->setPointScalarValue(p, getUniqueID());
+		}
+	}
 }
 
 float ccTrace::calculateOptimumSearchRadius()

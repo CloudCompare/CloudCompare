@@ -37,9 +37,11 @@ ccCompass::ccCompass(QObject* parent/*=0*/)
 	m_fitPlaneTool = new ccFitPlaneTool();
 	m_traceTool = new ccTraceTool();
 	m_lineationTool = new ccLineationTool();
+	m_floodTool = new ccFloodTool();
+	m_thicknessTool = new ccThicknessTool();
 
 	//activate plane tool by default
-	m_activeTool = m_fitPlaneTool;
+	//m_activeTool = m_fitPlaneTool;
 }
 
 //deconstructor
@@ -166,6 +168,8 @@ void ccCompass::doAction()
 	m_traceTool->initializeTool(m_app);
 	m_fitPlaneTool->initializeTool(m_app);
 	m_lineationTool->initializeTool(m_app);
+	m_floodTool->initializeTool(m_app);
+	m_thicknessTool->initializeTool(m_app);
 
 	//Get handle to ccGLWindow
 	m_window = m_app->getActiveGLWindow();
@@ -190,12 +194,15 @@ void ccCompass::doAction()
 		ccCompassDlg::connect(m_dlg->pairModeButton, SIGNAL(clicked()), this, SLOT(setLineationMode()));
 		ccCompassDlg::connect(m_dlg->planeModeButton, SIGNAL(clicked()), this, SLOT(setPlaneMode()));
 		ccCompassDlg::connect(m_dlg->traceModeButton, SIGNAL(clicked()), this, SLOT(setTraceMode()));
+		ccCompassDlg::connect(m_dlg->paintModeButton, SIGNAL(clicked()), this, SLOT(setPaintMode()));
+		ccCompassDlg::connect(m_dlg->m_measure_thickness, SIGNAL(triggered()), this, SLOT(setThicknessMode()));
 		ccCompassDlg::connect(m_dlg->categoryBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(changeType()));
 		ccCompassDlg::connect(m_dlg->infoButton, SIGNAL(clicked()), this, SLOT(showHelp()));
 
 		ccCompassDlg::connect(m_dlg->m_showNames, SIGNAL(toggled(bool)), this, SLOT(toggleLabels(bool)));
 		ccCompassDlg::connect(m_dlg->m_showStippled, SIGNAL(toggled(bool)), this, SLOT(toggleStipple(bool)));
 		ccCompassDlg::connect(m_dlg->m_showNormals, SIGNAL(toggled(bool)), this, SLOT(toggleNormals(bool)));
+		ccCompassDlg::connect(m_dlg->m_recalculate, SIGNAL(triggered()), this, SLOT(recalculateSelectedTraces()));
 
 		ccCompassDlg::connect(m_dlg->mapMode, SIGNAL(clicked()), this, SLOT(enableMapMode()));
 		ccCompassDlg::connect(m_dlg->compassMode, SIGNAL(clicked()), this, SLOT(enableMeasureMode()));
@@ -217,8 +224,8 @@ void ccCompass::doAction()
 	m_mapDlg->linkWith(m_window);
 
 	//loop through DB_Tree and find any ccCompass objects
-	std::vector<ccHObject*> originals;
-	std::vector<ccHObject*> replacements;
+	std::vector<int> originals; //ids of original objects
+	std::vector<ccHObject*> replacements; //pointers to objects that will replace the originals
 	for (int i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
 	{
 		ccHObject* c = m_app->dbRootObject()->getChild(i);
@@ -228,21 +235,30 @@ void ccCompass::doAction()
 	//replace all "originals" with their corresponding "duplicates"
 	for (int i = 0; i < originals.size(); i++)
 	{
-		//originals[i]->transferChildren(*replacements[i]); 
-		//steal all the children!
-		for (int c = 0; c < originals[i]->getChildrenNumber(); c++)
+		ccHObject* original = m_app->dbRootObject()->find(originals[i]);
+		ccHObject* replacement = replacements[i];
+
+		if (!original) //can't find for some reason?
+			continue;
+		if (!replacement) //can't find for some reason?
+			continue;
+
+		//steal all the children
+		for (int c = 0; c < original->getChildrenNumber(); c++)
 		{
-			replacements[i]->addChild(originals[i]->getChild(c));
+			replacement->addChild(original->getChild(c));
 		}
 
-		//add replacement
-		originals[i]->getParent()->addChild(replacements[i]);
+		//remove them from the orignal parent
+		original->detatchAllChildren(); 
 
-		//remove original from scene graph/db tree
-		originals[i]->getParent()->detachChild(originals[i]);
+		//add new parent to scene graph
+		original->getParent()->addChild(replacement);
 
-		//m_app->dbRootObject()->addChild(replacements[i]);
-		//m_app->addToDB(replacements[i], false, true, false, false);
+		//delete originals
+		m_app->removeFromDB(original);
+
+		m_app->addToDB(replacement, false, true, false, false);
 	}
 
 	//start in measure mode
@@ -255,7 +271,7 @@ void ccCompass::doAction()
 	startMeasuring();
 }
 
-void ccCompass::tryLoading(ccHObject* obj, std::vector<ccHObject*>* originals, std::vector<ccHObject*>* replacements)
+void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vector<ccHObject*>* replacements)
 {
 	//is object already represented by a ccCompass class?
 	if (dynamic_cast<ccFitPlane*>(obj)
@@ -281,7 +297,7 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<ccHObject*>* originals, s
 		ccHObject* geoObj = new ccGeoObject(obj,m_app);
 
 		//add to originals/duplicates list [these are used later to overwrite the originals]
-		originals->push_back(obj);
+		originals->push_back(obj->getUniqueID());
 		replacements->push_back(geoObj);
 		return;
 
@@ -298,7 +314,7 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<ccHObject*>* originals, s
 			ccHObject* plane = new ccFitPlane(p);
 
 			//add to originals/duplicates list [these are used later to overwrite the originals]
-			originals->push_back(obj);
+			originals->push_back(obj->getUniqueID());
 			replacements->push_back(plane);
 			return;
 		}
@@ -314,7 +330,7 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<ccHObject*>* originals, s
 
 			ccHObject* trace = new ccTrace(p);
 			//add to originals/duplicates list [these are used later to overwrite the originals]
-			originals->push_back(obj);
+			originals->push_back(obj->getUniqueID());
 			replacements->push_back(trace);
 			return;
 		}
@@ -323,7 +339,7 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<ccHObject*>* originals, s
 		if (ccLineation::isLineation(obj))
 		{
 			ccHObject* lin = new ccLineation(p);
-			originals->push_back(obj);
+			originals->push_back(obj->getUniqueID());
 			replacements->push_back(lin);
 			return;
 		}
@@ -425,8 +441,8 @@ bool ccCompass::stopMeasuring()
 ccHObject* ccCompass::getInsertPoint()
 {
 
-	//check if there is an active GeoObject and we are in mapMode
-	if (ccCompass::mapMode)
+	//check if there is an active GeoObject or we are in mapMode
+	if (ccCompass::mapMode || m_geoObject)
 	{
 		//check there is an active GeoObject
 		if (!m_geoObject)
@@ -514,11 +530,16 @@ void ccCompass::onItemPicked(const ccPickingListener::PickedItem& pi)
 void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3& P)
 {
 	if (!entity) //null pick
+	{
 		return;
+	}
 
-	//no active tool - disregard pick
+	//no active tool - set object as selected then disregard pick
 	if (!m_activeTool)
+	{
+		m_app->setSelectedInDB(entity, true);
 		return;
+	}
 
 	//find relevant node to add data to
 	ccHObject* parentNode = getInsertPoint();
@@ -626,13 +647,17 @@ void ccCompass::onUndo()
 void ccCompass::cleanupBeforeToolChange()
 {
 	//finish current tool
-	m_activeTool->toolDisactivated();
+	if (m_activeTool)
+	{
+		m_activeTool->toolDisactivated();
+	}
 
 	//uncheck/disable gui components (the relevant ones will be activated later)
 	m_dlg->pairModeButton->setChecked(false);
 	m_dlg->planeModeButton->setChecked(false);
 	m_dlg->traceModeButton->setChecked(false);
 	m_dlg->paintModeButton->setChecked(false);
+	m_dlg->extraModeButton->setChecked(false);
 	m_dlg->undoButton->setEnabled(false);
 	m_dlg->acceptButton->setEnabled(false);
 }
@@ -692,16 +717,56 @@ void ccCompass::setTraceMode()
 	m_dlg->traceModeButton->setChecked(true);
 	m_dlg->undoButton->setEnabled( m_traceTool->canUndo() );
 	m_dlg->acceptButton->setEnabled(true);
-	//m_dlg->m_cost_algorithm_menu->setEnabled(true); //add algorithm menu
 	m_window->redraw(true, false);
 }
 
+//activate the paint tool
 void ccCompass::setPaintMode()
 {
-	m_dlg->paintModeButton->setChecked(true);
-	
-	//do nothing more for now (paint mode not yet availiable
+	cleanupBeforeToolChange();
 
+	m_activeTool = m_floodTool;
+	m_activeTool->toolActivated();
+
+	m_dlg->paintModeButton->setChecked(true);
+	m_dlg->undoButton->setEnabled(m_activeTool->canUndo());
+	m_dlg->acceptButton->setEnabled(true);
+	m_window->redraw(true, false);
+
+}
+
+//activates the thickness tool
+void ccCompass::setThicknessMode() 
+{
+	cleanupBeforeToolChange();
+
+	//activate trace tool
+	m_activeTool = m_thicknessTool;
+	m_activeTool->toolActivated();
+
+	//trigger selection changed
+	onNewSelection(m_app->getSelectedEntities());
+
+	//update GUI
+	m_dlg->extraModeButton->setChecked(true);
+	m_dlg->undoButton->setEnabled(m_activeTool->canUndo());
+	m_window->redraw(true, false);
+}
+
+void ccCompass::recalculateSelectedTraces()
+{
+	ccTrace::COST_MODE = m_dlg->getCostMode(); //update cost mode
+
+	for (ccHObject* obj : m_app->getSelectedEntities())
+	{
+		if (ccTrace::isTrace(obj))
+		{
+			ccTrace* trc = static_cast<ccTrace*>(obj);
+			trc->recalculatePath();
+		}
+	}
+
+	m_window->redraw(); //repaint window
 }
 
 //toggle stippling

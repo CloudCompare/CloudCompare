@@ -51,6 +51,13 @@ ccCompass::~ccCompass()
 	delete m_fitPlaneTool;
 	delete m_traceTool;
 	delete m_lineationTool;
+	delete m_floodTool;
+	delete m_thicknessTool;
+
+	if (m_dlg)
+		delete m_dlg;
+	if (m_mapDlg)
+		delete m_mapDlg;
 }
 
 void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
@@ -258,6 +265,7 @@ void ccCompass::doAction()
 		//delete originals
 		m_app->removeFromDB(original);
 
+		//add replacement to dbTree
 		m_app->addToDB(replacement, false, true, false, false);
 	}
 
@@ -386,10 +394,6 @@ bool ccCompass::startMeasuring()
 		m_activeTool->toolActivated();
 	}
 	
-
-	//safety: auto stop if the window is deleted
-	connect(m_window, &QObject::destroyed, [&]() { m_window = 0; stopMeasuring(); });
-
 	return true;
 }
 

@@ -114,8 +114,7 @@ int main(int argc, char **argv)
 		format.setStereo(true);
 #endif
 #ifdef Q_OS_MAC
-		format.setStereo(false);
-		format.setVersion( 2, 1 );
+		format.setVersion( 2, 1 );	// must be 2.1 - see ccGLWindow::functions()
 		format.setProfile( QSurfaceFormat::CoreProfile );
 #endif
 #ifdef QT_DEBUG

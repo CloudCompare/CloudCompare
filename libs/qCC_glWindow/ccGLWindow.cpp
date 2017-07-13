@@ -38,6 +38,7 @@
 #include <QLayout>
 #include <QMessageBox>
 #include <QMimeData>
+#include <QMouseEvent>
 #include <QPushButton>
 #include <QSettings>
 #ifdef CC_GL_WINDOW_USE_QWINDOW

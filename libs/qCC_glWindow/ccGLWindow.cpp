@@ -35,6 +35,7 @@
 
 //Qt
 #include <QApplication>
+#include <QDir>
 #include <QLayout>
 #include <QMessageBox>
 #include <QMimeData>

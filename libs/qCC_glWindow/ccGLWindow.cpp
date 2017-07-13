@@ -15,18 +15,13 @@
 //#                                                                        #
 //##########################################################################
 
-//CCLib
-#include <CCPlatform.h>
-
 //qCC
 #include "ccGLWindow.h"
-#include "ccGuiParameters.h"
 #include "ccRenderingTools.h"
 
 //qCC_db
 #include <ccHObjectCaster.h>
 #include <cc2DLabel.h>
-#include <ccGenericPointCloud.h>
 #include <ccSphere.h> //for the pivot symbol
 #include <ccPolyline.h>
 #include <ccPointCloud.h>
@@ -35,17 +30,14 @@
 #include <ccSubMesh.h>
 
 //CCFbo
-#include <ccShader.h>
 #include <ccGlFilter.h>
 #include <ccFrameBufferObject.h>
 
 //Qt
 #include <QApplication>
-#include <QDir>
 #include <QLayout>
 #include <QMessageBox>
 #include <QMimeData>
-#include <QMouseEvent>
 #include <QPushButton>
 #include <QSettings>
 #ifdef CC_GL_WINDOW_USE_QWINDOW

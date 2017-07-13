@@ -22,14 +22,10 @@
 #include "ccIncludeGL.h"
 
 //Local
-#include "ccSerializableObject.h"
 #include "ccGLMatrix.h"
-#include "ccMaterial.h"
 
 //Qt
-#include <QFont>
-
-
+class QFont;
 class QWidget;
 
 //! Standard parameters for GL displays/viewports

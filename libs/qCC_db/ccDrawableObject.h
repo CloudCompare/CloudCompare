@@ -21,7 +21,6 @@
 //Local
 #include "ccGLDrawContext.h"
 #include "qCC_db.h"
-#include "ccColorTypes.h"
 
 //CCLib
 #include <CCGeom.h>

@@ -24,6 +24,7 @@
 //CCLib
 #include <CCGeom.h>
 #include <DgmOctreeReferenceCloud.h>
+#include <GenericProgressCallback.h>
 #include <Neighbourhood.h>
 
 //System

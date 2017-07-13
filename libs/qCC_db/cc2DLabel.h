@@ -22,9 +22,6 @@
 #include "ccHObject.h"
 #include "ccInteractor.h"
 
-//Qt
-#include <QFontMetrics>
-
 class ccGenericPointCloud;
 
 //! 2D label (typically attached to points)

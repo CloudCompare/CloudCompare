@@ -18,8 +18,10 @@
 #include "ccGenericPointCloud.h"
 
 //CCLib
-#include <Neighbourhood.h>
 #include <DistanceComputationTools.h>
+#include <GenericProgressCallback.h>
+#include <Neighbourhood.h>
+#include <ReferenceCloud.h>
 
 //Local
 #include "ccOctreeProxy.h"

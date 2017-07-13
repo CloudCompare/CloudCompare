@@ -177,6 +177,7 @@ public: //static methods
 		\param filename filename
 		\param parameters generic loading parameters
 		\param filter input filter
+		\param[out] result file error code
 		\return loaded entities (or 0 if an error occurred)
 	**/
 	QCC_IO_LIB_API static ccHObject* LoadFromFile(	const QString& filename,
@@ -188,6 +189,7 @@ public: //static methods
 	/** Shortcut to the other version of FileIOFilter::LoadFromFile
 		\param filename filename
 		\param parameters generic loading parameters
+		\param[out] result file error code
 		\param fileFilter input filter 'file filter' (if empty, the best I/O filter will be guessed from the file extension)
 		\return loaded entities (or 0 if an error occurred)
 	**/

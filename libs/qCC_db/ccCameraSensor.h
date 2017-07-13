@@ -565,7 +565,7 @@ public:
 		\param center 3D coordinates of the frustum center (global coordinates system) ; this is the center of the circumscribed sphere
 	**/
 	void computeFrustumIntersectionWithOctree(	std::vector< std::pair<unsigned, CCVector3> >& pointsToTest,
-												std::vector<unsigned>& inCameraFrustumrustum,
+												std::vector<unsigned>& inCameraFrustum,
 												const float planesCoefficients[6][4],
 												const CCVector3 ptsFrustum[8],
 												const CCVector3 edges[6],

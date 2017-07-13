@@ -50,7 +50,7 @@ static int gcd(int num1, int num2)
 	WARNING: returned array is on the user responsibilty!
 
 	\param N number of desired sampled directions
-	\param[out] rays set of N points
+	\param[out] dirs set of N points
 	\return success
 **/
 static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)

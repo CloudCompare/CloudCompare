@@ -19,14 +19,9 @@
 #include "RegistrationTools.h"
 
 //local
-#include "SquareMatrix.h"
 #include "GenericProgressCallback.h"
-#include "GenericCloud.h"
-#include "GenericIndexedCloudPersist.h"
 #include "ReferenceCloud.h"
-#include "DgmOctree.h"
 #include "DistanceComputationTools.h"
-#include "CCConst.h"
 #include "CloudSamplingTools.h"
 #include "ScalarFieldTools.h"
 #include "NormalDistribution.h"
@@ -41,8 +36,6 @@
 
 //system
 #include <time.h>
-#include <algorithm>
-#include <assert.h>
 
 using namespace CCLib;
 

@@ -19,18 +19,12 @@
 #include "ScalarFieldTools.h"
 
 //local
-#include "GenericCloud.h"
-#include "GenericIndexedCloudPersist.h"
 #include "ReferenceCloud.h"
 #include "GenericProgressCallback.h"
-#include "GenericChunkedArray.h"
 #include "ScalarField.h"
 
 //system
-#include <string.h>
-#include <assert.h>
 #include <stdio.h>
-#include <vector>
 
 using namespace CCLib;
 

@@ -19,8 +19,6 @@
 #include "CloudSamplingTools.h"
 
 //local
-#include "GenericIndexedCloudPersist.h"
-#include "GenericIndexedMesh.h"
 #include "SimpleCloud.h"
 #include "ReferenceCloud.h"
 #include "Neighbourhood.h"
@@ -32,7 +30,6 @@
 #include "ScalarFieldTools.h"
 
 //system
-#include <assert.h>
 #include <random>
 
 using namespace CCLib;

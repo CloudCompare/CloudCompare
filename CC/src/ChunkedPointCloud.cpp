@@ -21,9 +21,6 @@
 //local
 #include "ScalarField.h"
 
-//system
-#include <string.h>
-#include <assert.h>
 
 using namespace CCLib;
 

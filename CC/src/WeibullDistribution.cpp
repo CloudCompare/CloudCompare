@@ -25,14 +25,9 @@
 
 //local
 #include "GenericCloud.h"
-#include "CCConst.h"
 #include "ScalarFieldTools.h"
 #include "ScalarField.h"
 
-//system
-#include <math.h>
-#include <string.h>
-#include <assert.h>
 
 using namespace CCLib;
 

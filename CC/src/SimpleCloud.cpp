@@ -19,9 +19,6 @@
 #include "ScalarField.h"
 #include "SimpleCloud.h"
 
-//system
-#include <string.h>
-#include <assert.h>
 
 using namespace CCLib;
 

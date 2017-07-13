@@ -25,15 +25,10 @@
 #include "NormalDistribution.h"
 #include "GenericCloud.h"
 #include "ErrorFunction.h"
-#include "CCConst.h"
 #include "DistanceComputationTools.h"
 #include "ScalarFieldTools.h"
 #include "ScalarField.h"
 
-//system
-#include <math.h>
-#include <string.h>
-#include <assert.h>
 
 using namespace CCLib;
 

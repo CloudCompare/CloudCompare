@@ -16,20 +16,14 @@
 //#                                                                        #
 //##########################################################################
 
-#include "GenericChunkedArray.h"
 #include "AutoSegmentationTools.h"
 
 //local
-#include "GenericIndexedCloudPersist.h"
 #include "GenericProgressCallback.h"
 #include "ReferenceCloud.h"
-#include "DgmOctree.h"
 #include "FastMarchingForPropagation.h"
 #include "ScalarFieldTools.h"
 #include "ScalarField.h"
-
-//system
-#include <assert.h>
 
 using namespace CCLib;
 

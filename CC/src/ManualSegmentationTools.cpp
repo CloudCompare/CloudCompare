@@ -19,19 +19,15 @@
 #include "ManualSegmentationTools.h"
 
 //local
-#include "SquareMatrix.h"
-#include "CCTypes.h"
 #include "GenericProgressCallback.h"
-#include "GenericIndexedCloudPersist.h"
-#include "ReferenceCloud.h"
-#include "GenericIndexedMesh.h"
 #include "SimpleMesh.h"
 #include "Polyline.h"
 #include "ChunkedPointCloud.h"
 
 //system
-#include <string.h>
-#include <assert.h>
+#include <map>
+#include <stdint.h> //for uint fixed-sized types
+
 
 using namespace CCLib;
 
@@ -298,9 +294,6 @@ const unsigned c_origIndexFlag = 0x80000000; //original index flag (bit 31)
 const unsigned c_srcIndexFlag  = 0x40000000; //source index flag (bit 30)
 const unsigned c_realIndexMask = 0x3FFFFFFF; //original index mask (bit 0 to 29) --> max allowed index = 1073741823 ;)
 const unsigned c_defaultArrayGrowth = 100;
-
-#include <map>
-#include <stdint.h> //for uint fixed-sized types
 
 struct InsideOutsideIndexes
 {

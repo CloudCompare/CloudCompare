@@ -21,8 +21,6 @@
 //local
 #include "CCConst.h"
 
-//system
-#include <math.h>
 
 using namespace CCLib;
 

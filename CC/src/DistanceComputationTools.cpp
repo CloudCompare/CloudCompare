@@ -19,29 +19,19 @@
 #include "DistanceComputationTools.h"
 
 //local
-#include "GenericCloud.h"
-#include "GenericIndexedCloudPersist.h"
 #include "ChunkedPointCloud.h"
 #include "DgmOctreeReferenceCloud.h"
 #include "ReferenceCloud.h"
-#include "Neighbourhood.h"
-#include "GenericTriangle.h"
-#include "GenericIndexedMesh.h"
-#include "GenericProgressCallback.h"
 #include "SaitoSquaredDistanceTransform.h"
 #include "FastMarchingForPropagation.h"
 #include "ScalarFieldTools.h"
-#include "CCConst.h"
-#include "CCMiscTools.h"
 #include "LocalModel.h"
 #include "SimpleTriangle.h"
 #include "ScalarField.h"
 
 //system
 #include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits>
+
 
 #ifdef USE_QT
 #ifndef QT_DEBUG

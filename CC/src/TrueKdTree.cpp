@@ -20,13 +20,9 @@
 
 //local
 #include "GenericProgressCallback.h"
-#include "GenericIndexedCloudPersist.h"
 #include "Neighbourhood.h"
 #include "SortAlgo.h"
 
-//system
-#include <algorithm>
-#include <assert.h>
 
 //Qt
 #ifdef USE_QT

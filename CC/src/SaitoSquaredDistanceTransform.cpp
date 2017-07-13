@@ -18,16 +18,11 @@
 #include "../include/SaitoSquaredDistanceTransform.h"
 
 //Local
-#include "GenericProgressCallback.h"
-#include "GenericIndexedMesh.h"
 #include "DistanceComputationTools.h"
 
 //system
 #include <algorithm>
-#include <string.h>
-#include <assert.h>
 #include <stdint.h>
-#include <stdio.h> //for sprintf
 
 using namespace CCLib;
 

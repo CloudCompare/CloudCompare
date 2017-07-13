@@ -19,9 +19,6 @@
 #include "../include/Neighbourhood.h"
 
 //local
-#include "GenericIndexedMesh.h"
-#include "GenericIndexedCloudPersist.h"
-#include "SquareMatrix.h"
 #include "Delaunay2dMesh.h"
 #include "ConjugateGradient.h"
 #include "DistanceComputationTools.h"
@@ -35,10 +32,6 @@
 #else
 #include "Jacobi.h"
 #endif
-
-//system
-#include <string.h>
-#include <assert.h>
 
 using namespace CCLib;
 

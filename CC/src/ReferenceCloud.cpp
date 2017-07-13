@@ -19,7 +19,6 @@
 #include "ReferenceCloud.h"
 
 //system
-#include <assert.h>
 #include <algorithm>
 
 using namespace CCLib;

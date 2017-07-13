@@ -21,16 +21,12 @@
 //local
 #include "ReferenceCloud.h"
 #include "GenericProgressCallback.h"
-#include "GenericIndexedCloudPersist.h"
 #include "CCMiscTools.h"
 #include "ScalarField.h"
 #include "RayAndBox.h"
 #include "SortAlgo.h"
 
 //system
-#include <algorithm>
-#include <string.h>
-#include <assert.h>
 #include <stdio.h>
 #include <set>
 

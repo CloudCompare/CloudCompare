@@ -37,6 +37,7 @@
 //qCC_db
 #include <ccFileUtils.h>
 #include <ccHObjectCaster.h>
+#include <ccMesh.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 #include <ccOctree.h> //for ComputeAverageNorm

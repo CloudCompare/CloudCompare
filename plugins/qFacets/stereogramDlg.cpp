@@ -32,6 +32,7 @@
 #include <ccColorScalesManager.h>
 #include <ccColorScaleSelector.h>
 #include <ccColorScaleEditorDlg.h>
+#include <ccMesh.h>
 #include <ccProgressDialog.h>
 
 //! Density grid

@@ -23,7 +23,9 @@
 #include <QApplication>
 
 //qCC_db
-#include <ccFacet.h>
+#include "ccFacet.h"
+#include "ccPointCloud.h"
+#include "ccPolyline.h"
 
 static const QString s_OriFamilyKey = "orientation.family.index";
 static const QString s_OriFamilyNameKey = "orientation.family.name";

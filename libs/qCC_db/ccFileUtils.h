@@ -18,7 +18,6 @@
 //##########################################################################
 
 #include <QStandardPaths>
-#include <QString>
 
 namespace ccFileUtils
 {

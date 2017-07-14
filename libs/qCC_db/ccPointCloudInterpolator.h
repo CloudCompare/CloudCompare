@@ -6,11 +6,13 @@ class ccPointCloud;
 //Local
 #include "qCC_db.h"
 
-//CCLib
-#include <GenericProgressCallback.h>
-
 //System
 #include <vector>
+
+namespace CCLib
+{
+	class GenericProgressCallback;
+}
 
 class QCC_DB_LIB_API ccPointCloudInterpolator
 {

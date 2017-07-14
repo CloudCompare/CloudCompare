@@ -4,9 +4,10 @@
 #include "ccPointCloud.h"
 
 //CCLib
-#include <ScalarField.h>
 #include <DgmOctree.h>
 #include <DistanceComputationTools.h>
+#include <GenericProgressCallback.h>
+#include <ScalarField.h>
 
 struct SFPair
 {

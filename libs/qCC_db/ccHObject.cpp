@@ -40,6 +40,8 @@
 #include "ccQuadric.h"
 #include "ccCustomObject.h"
 #include "ccExternalFactory.h"
+#include "ccPointCloud.h"
+#include "ccPolyline.h"
 
 //Qt
 #include <QIcon>

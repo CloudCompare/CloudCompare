@@ -31,8 +31,10 @@
 #include "ccGenericGLDisplay.h"
 
 //CCLib
+#include <GenericProgressCallback.h>
 #include <GenericTriangle.h>
 #include <MeshSamplingTools.h>
+#include <ReferenceCloud.h>
 #include <SimpleCloud.h>
 
 //system

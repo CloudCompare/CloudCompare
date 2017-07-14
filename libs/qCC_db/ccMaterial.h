@@ -23,10 +23,10 @@
 #include "ccColorTypes.h"
 
 //Qt
-#include <QImage>
-#include <QStringList>
+#include <QString>
 #include <QSharedPointer>
 
+class QImage;
 class QOpenGLContext;
 
 //! Mesh (triangle) material

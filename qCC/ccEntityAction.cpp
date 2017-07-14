@@ -33,6 +33,8 @@
 #include "ccFacet.h"
 #include "ccGenericPrimitive.h"
 #include "ccOctreeProxy.h"
+#include "ccPointCloud.h"
+#include "ccPolyline.h"
 #include "ccPointCloudInterpolator.h"
 
 //qCC_gl

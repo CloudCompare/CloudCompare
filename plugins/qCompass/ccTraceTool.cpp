@@ -14,52 +14,42 @@ ccTraceTool::~ccTraceTool()
 //called when the tool is set to active (for initialization)
 void ccTraceTool::toolActivated()
 {
-	//"pick-up" selected trace
-	for (ccHObject* obj : m_app->getSelectedEntities())
-	{
-		pickupTrace(obj);
-		if (m_trace)
-			break; //bail as we've found an active trace object
-	}
+	//try "pick-up" selected trace
+	onNewSelection(m_app->getSelectedEntities());
 }
 
 //called when a point in a point cloud gets picked while this tool is active
 void ccTraceTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCloud* cloud, const CCVector3& P)
 {
-	//check that m_trace hasn't been deleted...
-	if (m_trace && !m_app->dbRootObject()->find(m_trace_id))
-	{
-		//item has been deleted...
-		m_trace = nullptr;
-		m_trace_id = -1;
-	}
+	//try and fetch the trace object (returns null if the id is invalid)
+	ccTrace* t = dynamic_cast<ccTrace*>(m_app->dbRootObject()->find(m_trace_id));
 
-	if (!m_trace)
+	//no active trace -> make a new one
+	if (!t)
 	{
-		//no active trace -> make a new one
-		m_trace = new ccTrace(cloud);
-		m_trace->setDisplay(m_window);
-		m_trace->setVisible(true);
-		m_trace->setName("Trace");
-		m_trace->prepareDisplayForRefresh_recursive();
-		m_trace_id = m_trace->getUniqueID();
-		insertPoint->addChild(m_trace);
-		m_app->addToDB(m_trace, false, false, false, false);
-		m_trace->setActive(true);
-		m_app->setSelectedInDB(m_trace, true);
+		t = new ccTrace(cloud);
+		t->setDisplay(m_window);
+		t->setVisible(true);
+		t->setName("Trace");
+		t->prepareDisplayForRefresh_recursive();
+		m_trace_id = t->getUniqueID();
+		insertPoint->addChild(t);
+		m_app->addToDB(t, false, false, false, false);
+		t->setActive(true);
+		m_app->setSelectedInDB(t, true);
 		m_preExisting = false;
 	}
 
 	//add point
-	int index = m_trace->insertWaypoint(itemIdx);
+	int index = t->insertWaypoint(itemIdx);
 
 	//optimise points
-	if (m_trace->waypoint_count() >= 2)
+	if (t->waypoint_count() >= 2)
 	{
 		//check if m_trace has previously fitted planes before optimizing (and delete them if so)
-		for (unsigned idx = 0; idx < m_trace->getChildrenNumber(); idx++)
+		for (unsigned idx = 0; idx < t->getChildrenNumber(); idx++)
 		{
-			ccHObject* child = m_trace->getChild(idx);
+			ccHObject* child = t->getChild(idx);
 			if (child->hasMetaData("ccCompassType"))
 			{
 				if (child->getMetaData("ccCompassType").toString().contains("FitPlane")) //we've found a best-fit-plane -> remove this as it will no longer be valid.
@@ -69,11 +59,17 @@ void ccTraceTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointC
 			}
 		}
 
-		if (!m_trace->optimizePath())
+		if (!t->optimizePath()) //optimize the path!
 		{
+			//... problem?
 			m_app->dispToConsole(QString("[ccCompass] Failed to optimize trace path... please try again."), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-			m_app->removeFromDB(m_trace);
-			m_trace = nullptr; //kill trace
+			t->undoLast(); //go back a step
+
+			if (t->size() < 2) //degenerate trace - delete
+			{
+				m_app->removeFromDB(t);
+				m_trace_id = -1; //start from scratch next time
+			}
 		}
 	}
 }
@@ -88,17 +84,15 @@ void ccTraceTool::accept()
 //called when the "Escape" is pressed, or the "Cancel" button is clicked
 void ccTraceTool::cancel()
 {
-	if (m_trace)
+	ccTrace* t = dynamic_cast<ccTrace*>(m_app->dbRootObject()->find(m_trace_id));
+
+	if (t)
 	{
-		m_trace->setActive(false); //disactivate trace
+		t->setActive(false); //disactivate trace
 		
 		if (!m_preExisting) //delete new traces (i.e. that were "picked-up" by changing the selection)
 		{
-			if (m_app->dbRootObject()->find(m_trace_id))
-			{
-				m_app->removeFromDB(m_trace); //delete trace object
-			}
-			m_trace = nullptr;
+			m_app->removeFromDB(t); //delete trace object
 			m_trace_id = -1;
 		}
 	}
@@ -106,43 +100,50 @@ void ccTraceTool::cancel()
 
 void ccTraceTool::onNewSelection(const ccHObject::Container& selectedEntities)
 {
-	//can we pick up a new one?
-	for (size_t i = 0; i < selectedEntities.size(); i++)
+	//can we pick up a new trace?
+	if (selectedEntities.size() > 0) //non-empty selection
 	{
-		if (selectedEntities[i] != m_trace) //can't pick up the already active trace...
+		m_app->dispToConsole(selectedEntities[0]->getName(), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
+		//selection is the already active trace?
+		if (selectedEntities[0]->getUniqueID() == m_trace_id) 
 		{
-			pickupTrace(selectedEntities[i]);
-			if (m_trace)
-				break; //bail as we've found an active trace object
+			return; //we're already on it
+		}
+		else if (pickupTrace(selectedEntities[0])) //try pick-up the selection
+		{
+			return; //bail - we've found our new active trace object
+		}
+		else if (selectedEntities[0]->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			m_app->dispToConsole("can I delete this?");
+			return; //entity is a point cloud -> this often happens during standard picking
 		}
 	}
+
+	// new selection is not a trace - finish the last one
+	finishCurrentTrace();
+	m_trace_id = -1; 
 }
 
 void ccTraceTool::finishCurrentTrace()
 {
-	//finish current trace [if there is one]
-	if (m_trace)
-	{
-		//check that m_trace hasn't been deleted...
-		if (!m_app->dbRootObject()->find(m_trace_id))
-		{
-			//item has been deleted...
-			m_trace = nullptr;
-			m_trace_id = -1;
-			return;
-		}
+	//find current trace [if there is one]
+	ccTrace* t = dynamic_cast<ccTrace*>(m_app->dbRootObject()->find(m_trace_id));
 
-		m_trace->finalizePath();
-		m_trace->setActive(false);
+	if (t)
+	{
+		t->finalizePath();
+		t->setActive(false);
 
 		//fit plane
 		if (ccCompass::fitPlanes)
 		{
 			//check if a fit-plane already exists (and bail if it does)
 			bool calculateFitPlane = true;
-			for (unsigned idx = 0; idx < m_trace->getChildrenNumber(); idx++)
+			for (unsigned idx = 0; idx < t->getChildrenNumber(); idx++)
 			{
-				ccHObject* child = m_trace->getChild(idx);
+				ccHObject* child = t->getChild(idx);
 
 				if (child->hasMetaData("ccCompassType"))
 				{
@@ -157,13 +158,13 @@ void ccTraceTool::finishCurrentTrace()
 
 			if (calculateFitPlane) //plane has not (yet) been calculated - go ahead and do some magic
 			{
-				ccPlane* p = m_trace->fitPlane();
+				ccPlane* p = t->fitPlane();
 				if (p)
 				{
 					p->setVisible(true);
 					p->setSelectionBehavior(ccHObject::SELECTION_IGNORED);
 					p->showNormals(true);
-					m_trace->addChild(p);
+					t->addChild(p);
 
 					//report orientation to console for convenience
 					m_app->dispToConsole(QString("[ccCompass] Trace orientation estimate = " + p->getName()), ccMainAppInterface::STD_CONSOLE_MESSAGE);
@@ -173,32 +174,31 @@ void ccTraceTool::finishCurrentTrace()
 				}
 			}
 		}
-		m_app->setSelectedInDB(m_trace, false); //deselect this trace
-		m_app->setSelectedInDB(m_trace->getParent(), false); //select it's parent instead
-		m_trace = nullptr;
+		m_app->setSelectedInDB(t, false); //deselect this trace
+		m_app->setSelectedInDB(t->getParent(), true); //select it's parent instead
+
 		m_trace_id = -1;
 		m_window->redraw();
 	}
 }
 
-void ccTraceTool::pickupTrace(ccHObject* obj)
+bool ccTraceTool::pickupTrace(ccHObject* obj)
 {
 	//is selected object a ccTrace?
 	ccTrace* t = dynamic_cast<ccTrace*>(obj); //try casting to ccTrace
 	if (t) //the object is a ccTrace!
 	{
 		//finish the previous trace
-		if (m_trace)
-		{
-			finishCurrentTrace();
-		}
+		finishCurrentTrace();
 
 		//activate selected trace
-		m_trace = t;
-		m_trace->setActive(true);
-		m_trace_id = m_trace->getUniqueID();
+		t->setActive(true);
+		m_trace_id = t->getUniqueID();
 		m_preExisting = true;
+
+		return true;
 	}
+	return false;
 }
 
 //if this returns true, the undo button is enabled in the gui
@@ -210,16 +210,11 @@ boolean ccTraceTool::canUndo()
 //called when the undo button is clicked
 void ccTraceTool::undo()
 {
-	//check not deleted
-	if (!m_app->dbRootObject()->find(m_trace_id))
+	ccTrace* t = dynamic_cast<ccTrace*>(m_app->dbRootObject()->find(m_trace_id));
+	if (t)
 	{
-		m_trace = 0;
+		t->undoLast();
+		t->optimizePath();
+		m_window->redraw();
 	}
-
-	if (m_trace)
-	{
-		m_trace->undoLast();
-		m_trace->optimizePath();
-	}
-	m_window->redraw();
 }

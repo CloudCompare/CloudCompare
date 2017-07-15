@@ -62,6 +62,7 @@ public:
 
 	//pair picking menu
 	QAction *m_measure_thickness;
+	QAction *m_measure_thickness_twoPoint;
 	QAction *m_crosscutting;
 	QAction *m_younging;
 

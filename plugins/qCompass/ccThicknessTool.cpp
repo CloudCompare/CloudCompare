@@ -2,6 +2,8 @@
 #include "ccCompass.h"
 
 ccColor::Rgb ccThicknessTool::ACTIVE_COLOR = ccColor::red;
+bool ccThicknessTool::TWO_POINT_MODE = false;
+
 ccThicknessTool::ccThicknessTool()
 	: ccTool()
 {
@@ -17,7 +19,7 @@ void ccThicknessTool::onNewSelection(const ccHObject::Container& selectedEntitie
 	for (ccHObject* h : selectedEntities)
 	{
 		ccPlane* p = dynamic_cast<ccPlane*>(h);
-		if (p) //this is a plane?
+		if (p && p->isDisplayed()) //this is a plane? [and it's shown - avoids confusion]
 		{
 			if (m_referencePlane)
 			{
@@ -32,13 +34,21 @@ void ccThicknessTool::onNewSelection(const ccHObject::Container& selectedEntitie
 			m_referencePlane->enableTempColor(true);
 
 			//make all point clouds visible again
-			for (int i : m_hiddenPointClouds)
+			for (int i : m_hiddenObjects)
 			{
 				ccHObject* cld = m_app->dbRootObject()->find(i);
 				cld->setVisible(true);
 			}
+			m_hiddenObjects.clear();
 
-			m_hiddenPointClouds.clear();
+			//now hide all visible planes
+			recurseChildren(m_app->dbRootObject(), false, true);
+
+			//make the reference plane visible
+			m_referencePlane->setVisible(true);
+
+			//display instructions
+			m_app->getActiveGLWindow()->displayNewMessage("Select measurement point.", ccGLWindow::LOWER_LEFT_MESSAGE);
 
 			//redraw
 			m_app->getActiveGLWindow()->refresh();
@@ -72,110 +82,183 @@ void ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 		return;
 	}
 
-	//plane to point distance
-	if (m_endPoint == -1)
+	//get modified insert point (thicknesses are always added to GeoObject interiors if possible)
+	insertPoint = getInsertInterior(insertPoint);
+
+	if (!ccThicknessTool::TWO_POINT_MODE) //one point mode - calculate plane to point distance and finish
 	{
 		float dist = planeToPointDistance(m_referencePlane, P);
 
-		//back calculate the start point
-		CCVector3 start = P - m_referencePlane->getNormal() * dist;
-
-		//create point cloud and add start/end points too it
-		ccPointCloud* verts = new ccPointCloud("vertices");
-
-		assert(verts);
-
-		verts->reserve(2);
-		verts->addPoint(start);
-		verts->addPoint(P);
-
-		//create a "lineation" graphic to display
-		m_graphic = new ccLineation(verts);
-		m_graphic->addPointIndex(0);
-		m_graphic->addPointIndex(1);
-		m_graphic->addChild(verts); //store the verts
-		m_graphic->invalidateBoundingBox();
-		m_graphic->setName(QString::asprintf("Thickness: %.3f", dist));
-		m_graphic->showNameIn3D(ccCompass::drawName);
+		//build graphic
+		ccHObject* g = buildGraphic(P, dist);
 
 		//add to scene graph
-		insertPoint->addChild(m_graphic);
-		m_app->addToDB(m_graphic, false, true, false, true);
-
-		//finish
-		accept();
-	} else 
+		insertPoint->addChild(g);
+		m_app->addToDB(g, false, true, false, true);
+	} else //two point mode... which points have been defined?
 	{
-		//get ready to make next measurement
-		accept();
+		if (!m_startPoint) //first point not yet defined - store it
+		{
+			m_startPoint = new CCVector3(P);
+
+			//display instructions
+			m_app->getActiveGLWindow()->displayNewMessage("Select second measurement point.", ccGLWindow::LOWER_LEFT_MESSAGE);
+
+		}
+		else
+		{
+			//calculate distance
+			float dist = planeToPointDistance(m_referencePlane, P) - planeToPointDistance(m_referencePlane, *m_startPoint);
+
+			ccHObject* g = buildGraphic(P, dist);
+
+			//add to scene graph
+			insertPoint->addChild(g);
+			m_app->addToDB(g, false, true, false, true);
+
+			//finish
+			delete m_startPoint;
+			m_startPoint = nullptr;
+		}
+	} 
+}
+
+ccHObject* ccThicknessTool::getInsertInterior(ccHObject* insertPoint)
+{
+	ccHObject* p = insertPoint;
+	while (p != nullptr)
+	{
+		//object is a geoObject
+		if (ccGeoObject::isGeoObject(p))
+		{
+			ccGeoObject* obj = dynamic_cast<ccGeoObject*> (p);
+			if (obj)
+			{
+				return obj->getRegion(ccGeoObject::INTERIOR); //return the interior
+			}
+		}
+
+		//try next parent
+		p = p->getParent();
 	}
+
+	//haven't found a geoObject - use the supplied insertPoint
+	return insertPoint; //todo
+}
+
+ccHObject* ccThicknessTool::buildGraphic(CCVector3 endPoint, float thickness)
+{
+	//back calculate the start point
+	CCVector3 start = endPoint - m_referencePlane->getNormal() * thickness;
+
+	//create point cloud and add start/end points too it
+	ccPointCloud* verts = new ccPointCloud("vertices");
+	assert(verts);
+	verts->reserve(2);
+	verts->addPoint(start);
+	verts->addPoint(endPoint);
+	verts->invalidateBoundingBox();
+	verts->computeOctree();
+
+	//create a "lineation" graphic to display
+	ccLineation* graphic = new ccLineation(verts);
+	graphic->addPointIndex(0);
+	graphic->addPointIndex(1);
+	graphic->addChild(verts); //store the verts
+	graphic->invalidateBoundingBox();
+	graphic->setName(QString::asprintf("%.3fT", abs(thickness)));
+	graphic->showNameIn3D(ccCompass::drawName);
+
+	//return
+	return graphic;
 }
 
 //called when the tool is set to active (for initialization)
 void ccThicknessTool::toolActivated() 
 { 
 	//hide all visible point clouds
-	recurseChildren(m_app->dbRootObject());
+	recurseChildren(m_app->dbRootObject(), true, false);
+
+	//display instructions
+	m_app->getActiveGLWindow()->displayNewMessage("Select reference plane for thickness measurement.", ccGLWindow::LOWER_LEFT_MESSAGE);
+
 	//redraw
 	m_app->getActiveGLWindow()->refresh();
 }
 
-void ccThicknessTool::recurseChildren(ccHObject* obj)
-{
-	if (obj->isA(CC_TYPES::POINT_CLOUD))
-	{
-		if (obj->isVisible())
-		{
-			obj->setVisible(false);
-			m_hiddenPointClouds.push_back(obj->getUniqueID());
-		}
-		return;
-	}
-
-	for (int i = 0; i < obj->getChildrenNumber(); i++)
-	{
-		recurseChildren(obj->getChild(i));
-	}
-}
-
 //called when the tool is set to disactive (for cleanup)
-void ccThicknessTool::toolDisactivated() 
+void ccThicknessTool::toolDisactivated()
 {
+	//delete start point object
+	if (m_startPoint)
+	{
+		delete m_startPoint;
+		m_startPoint = nullptr;
+	}
+
 	if (m_referencePlane)
 	{
 		m_referencePlane->enableTempColor(false); //go back to normal colour
+		m_referencePlane = nullptr;
 	}
 
 	//make all point clouds visible again
-	for (int i : m_hiddenPointClouds)
+	for (int i : m_hiddenObjects)
 	{
 		ccHObject* cld = m_app->dbRootObject()->find(i);
 		cld->setVisible(true);
 	}
+	m_hiddenObjects.clear();
 
 	//redraw
 	m_app->getActiveGLWindow()->refresh();
+}
 
-	m_hiddenPointClouds.clear();
+void ccThicknessTool::recurseChildren(ccHObject* obj, bool hidePointClouds, bool hidePlanes)
+{
+	//is this a point cloud?
+	if (hidePointClouds && obj->isA(CC_TYPES::POINT_CLOUD))
+	{
+		if (obj->isVisible())
+		{
+			obj->setVisible(false);
+			m_hiddenObjects.push_back(obj->getUniqueID());
+		}
+		return;
+	}
 
-	//reset
-	m_referencePlane = nullptr;
-	m_endPoint = -1;
-	m_endPoint2 = -1;
+	//is this a plane?
+	if (hidePlanes && obj->isA(CC_TYPES::PLANE))
+	{
+		if (obj->isVisible())
+		{
+			obj->setVisible(false);
+			m_hiddenObjects.push_back(obj->getUniqueID());
+		}
+		return;
+	}
+
+	//recurse on children
+	for (int i = 0; i < obj->getChildrenNumber(); i++)
+	{
+		recurseChildren(obj->getChild(i), hidePointClouds, hidePlanes);
+	}
 }
 
 //called when "Return" or "Space" is pressed, or the "Accept Button" is clicked
 void ccThicknessTool::accept()
 {
-	//Reset the tool (but keep the plane so multiple thickness measurements can be made)
-	m_endPoint = -1;
-	m_endPoint2 = -1;
+	//Reset the tool
+	toolDisactivated();
+
+	//go back to "plane pick mode"
+	toolActivated();
 }
 
 //called when the "Escape" is pressed, or the "Cancel" button is clicked
 void ccThicknessTool::cancel()
 {
-	
+	toolDisactivated();
 }
 
 float ccThicknessTool::planeToPointDistance(ccPlane* plane, CCVector3 P)

@@ -37,20 +37,21 @@ public:
 	void cancel() override; //do nothing
 protected:
 	ccPlane* m_referencePlane = nullptr; //plane used to calculate thickness
-	int m_endPoint = -1; //point used to calculate thickness
-	int m_endPoint2 = -1; //point used in 2-point + plane thickness calculations
-	ccLineation* m_graphic = nullptr;
-	std::vector<int> m_hiddenPointClouds;
+	CCVector3* m_startPoint = nullptr; //first point used to calculate thickness in two-point mode
+	std::vector<int> m_hiddenObjects; //used to hide all point clouds (first), then all planes (second).
 
 private:
 	float planeToPointDistance(ccPlane* plane, CCVector3 P);
+	ccHObject* buildGraphic(CCVector3 endPoint, float thickness);
 
 	//recurses children looking for point clouds & making them invisible
-	void recurseChildren(ccHObject* obj);
+	void recurseChildren(ccHObject* obj, bool hidePointClouds, bool hidePlanes);
 
+	//gets the interior part of the currently selected GeoObject (or returns the insertPoint if it's not a GeoObject)
+	ccHObject* getInsertInterior(ccHObject* insertPoint);
 public:
 	static ccColor::Rgb ACTIVE_COLOR;
-
+	static bool TWO_POINT_MODE; //if true, two points + planar orientation used to calculate thickness.
 };
 
 #endif

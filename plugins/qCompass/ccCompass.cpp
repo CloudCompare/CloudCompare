@@ -203,6 +203,7 @@ void ccCompass::doAction()
 		ccCompassDlg::connect(m_dlg->traceModeButton, SIGNAL(clicked()), this, SLOT(setTraceMode()));
 		ccCompassDlg::connect(m_dlg->paintModeButton, SIGNAL(clicked()), this, SLOT(setPaintMode()));
 		ccCompassDlg::connect(m_dlg->m_measure_thickness, SIGNAL(triggered()), this, SLOT(setThicknessMode()));
+		ccCompassDlg::connect(m_dlg->m_measure_thickness_twoPoint, SIGNAL(triggered()), this, SLOT(setThicknessMode2()));
 		ccCompassDlg::connect(m_dlg->categoryBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(changeType()));
 		ccCompassDlg::connect(m_dlg->infoButton, SIGNAL(clicked()), this, SLOT(showHelp()));
 
@@ -411,6 +412,13 @@ bool ccCompass::stopMeasuring()
 	{
 		m_app->pickingHub()->removeListener(this);
 	}
+
+	//reset gui
+	cleanupBeforeToolChange();
+
+	//set active tool to null (avoids tools "doing stuff" when the gui isn't shown)
+	m_activeTool = nullptr;
+
 
 	//remove overlay GUI
 	if (m_dlg)
@@ -744,9 +752,10 @@ void ccCompass::setThicknessMode()
 {
 	cleanupBeforeToolChange();
 
-	//activate trace tool
+	//activate thickness tool
 	m_activeTool = m_thicknessTool;
 	m_activeTool->toolActivated();
+	ccThicknessTool::TWO_POINT_MODE = false; //one-point mode (unless changed later)
 
 	//trigger selection changed
 	onNewSelection(m_app->getSelectedEntities());
@@ -754,9 +763,18 @@ void ccCompass::setThicknessMode()
 	//update GUI
 	m_dlg->extraModeButton->setChecked(true);
 	m_dlg->undoButton->setEnabled(m_activeTool->canUndo());
+	m_dlg->acceptButton->setEnabled(true);
 	m_window->redraw(true, false);
 }
 
+//activates the thickness tool in two-point mode
+void ccCompass::setThicknessMode2()
+{
+	setThicknessMode();
+	ccThicknessTool::TWO_POINT_MODE = true; //now set the tool to operate in two-point mode
+}
+
+//recompute entirely each selected trace (useful if the cost function has changed)
 void ccCompass::recalculateSelectedTraces()
 {
 	ccTrace::COST_MODE = m_dlg->getCostMode(); //update cost mode

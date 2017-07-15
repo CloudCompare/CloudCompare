@@ -111,6 +111,7 @@ protected slots:
 	void setTraceMode(); //activates the trace tool
 	void setPaintMode(); //activates the paint tool
 	void setThicknessMode(); //activates the thickness tool
+	void setThicknessMode2(); //activates the thickness tool in two-point mode
 	void enableMapMode(); //turns on/off map mode
 	void enableMeasureMode(); //turns on/off map mode
 	void addGeoObject(); //creates a new GeoObject

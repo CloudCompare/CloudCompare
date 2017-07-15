@@ -9,32 +9,39 @@ ccLineationTool::ccLineationTool()
 
 ccLineationTool::~ccLineationTool()
 {
+
 }
 
 //called when a point in a point cloud gets picked while this tool is active
 void ccLineationTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCloud* cloud, const CCVector3& P)
 {
-	if (!m_lineation)
+	//try retrieve active lineation (will fail if there isn't one)
+	ccLineation* l = dynamic_cast<ccLineation*>(m_app->dbRootObject()->find(m_lineation_id));
+	if (!l) //make a new one
 	{
 		//no active trace -> make a new one
-		m_lineation = new ccLineation(cloud);
-		m_lineation_id = m_lineation->getUniqueID();
-		m_lineation->setDisplay(m_window);
-		m_lineation->setVisible(true);
-		m_lineation->setName("Lineation");
-		m_lineation->prepareDisplayForRefresh_recursive();
-		insertPoint->addChild(m_lineation);
-		m_app->addToDB(m_lineation, false, false, false, false);
-	}
+		l = new ccLineation(cloud);
+		m_lineation_id = l->getUniqueID();
+
+		//set drawing properties
+		l->setDisplay(m_window);
+		l->setVisible(true);
+		l->setName("Lineation");
+		l->prepareDisplayForRefresh_recursive();
+
+		//add to DB Tree
+		insertPoint->addChild(l);
+		m_app->addToDB(l, false, false, false, false);
+	} 
 
 	//add point
-	int index = m_lineation->addPointIndex(itemIdx);
+	int index = l->addPointIndex(itemIdx);
 
 	//is this the end point?
-	if (m_lineation->size() == 2)
+	if (l->size() == 2)
 	{
 		//calculate trace orientation (trend/plunge)
-		CCVector3f dir = m_lineation->getDirection(); dir.normalize();
+		CCVector3f dir = l->getDirection(); dir.normalize();
 		float trend, plunge;
 		//special case: dir is vertical
 		if (dir.z > 0.9999999) //vector = 0,0,1
@@ -66,12 +73,12 @@ void ccLineationTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 
 		//store trend and plunge info
 		QVariantMap* map = new QVariantMap();
-		CCVector3 s = *m_lineation->getPoint(0);
-		CCVector3 e = *m_lineation->getPoint(1);
+		CCVector3 s = *l->getPoint(0);
+		CCVector3 e = *l->getPoint(1);
 		map->insert("Sx", s.x); map->insert("Sy", s.y); map->insert("Sz", s.z);
 		map->insert("Ex", e.x); map->insert("Ey", e.y); map->insert("Ez", e.z);
 		map->insert("Trend", trend); map->insert("Plunge", plunge);
-		m_lineation->setMetaData(*map, true);
+		l->setMetaData(*map, true);
 
 		//rename lineation
 		float length = sqrt((s.x - e.x)*(s.x - e.x) + (s.y - e.y)*(s.y - e.y) + (s.z - e.z)*(s.z - e.z));
@@ -79,14 +86,14 @@ void ccLineationTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 		QString trendAndPlungeStr = QString("%2->%3").arg((int)plunge, 2, 10, QChar('0')).arg((int)trend, 3, 10, QChar('0'));
 		QString namestr = lengthstr + trendAndPlungeStr;
 
-		m_lineation->setName(namestr);
-		m_lineation->showNameIn3D(ccCompass::drawName);
+		l->setName(namestr);
+		l->showNameIn3D(ccCompass::drawName);
 
 		//report orientation to console for convenience
 		m_app->dispToConsole(QString("[ccCompass] Lineation = " + trendAndPlungeStr), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
-		//start new one
-		m_lineation = nullptr;
+		//start new lineation
+		m_lineation_id = -1;
 	}
 }
 
@@ -99,13 +106,14 @@ void ccLineationTool::accept()
 //called when the "Escape" is pressed, or the "Cancel" button is clicked
 void ccLineationTool::cancel()
 {
-	if (m_lineation)
+	if (m_lineation_id != -1) //there is an active lineation
 	{
-		if (m_app->dbRootObject()->find(m_lineation_id) && m_lineation->size() < 2) //if lineation is incomplete and it exists in the database still
+		ccLineation* l = dynamic_cast<ccLineation*>(m_app->dbRootObject()->find(m_lineation_id));
+		if (l && l->size() < 2)
 		{
-			m_app->removeFromDB(m_lineation); //remove incomplete lineation
+			m_app->removeFromDB(l); //remove incomplete lineation
+			m_lineation_id = -1;
 		}
-		m_lineation = nullptr;
 	}
 }
 

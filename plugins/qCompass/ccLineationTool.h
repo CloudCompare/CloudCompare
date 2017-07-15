@@ -20,8 +20,7 @@ public:
 	//called when the "Escape" is pressed, or the "Cancel" button is clicked
 	void cancel() override; //do nothing
 protected:
-	ccLineation* m_lineation = nullptr; //active lineation object
-	int m_lineation_id = -1; //used to check if m_lineation has been deleted
+	int m_lineation_id = -1; //ID of the lineation object being written to 
 
 };
 

@@ -107,14 +107,17 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_pairpicking_menu = new QMenu(this);
 
 	m_measure_thickness = new QAction("Measure Thickness", this);
+	m_measure_thickness_twoPoint = new QAction("Measure Two-Point Thickness");
 	m_crosscutting = new QAction("Assign Crosscutting Relationship", this);
 	m_younging = new QAction("Assign Younging Relationship", this);
 	
 	m_measure_thickness->setToolTip("Select a plane and then a point to measure plane-perpendicular thickness.");
+	m_measure_thickness_twoPoint->setToolTip("Measure the plane-perpendicular distance between two points");
 	m_crosscutting->setToolTip("Select two GeoObjects to assign a crosscutting relationship");
 	m_younging->setToolTip("Select two GeoObjects to assign a conformable younging relationship and copy across relevant boundaries");
 
 	m_pairpicking_menu->addAction(m_measure_thickness);
+	m_pairpicking_menu->addAction(m_measure_thickness_twoPoint);
 	m_pairpicking_menu->addAction(m_crosscutting);
 	m_pairpicking_menu->addAction(m_younging);
 

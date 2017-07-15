@@ -39,7 +39,7 @@ protected:
 	ccPlane* m_referencePlane = nullptr; //plane used to calculate thickness
 	CCVector3* m_startPoint = nullptr; //first point used to calculate thickness in two-point mode
 	std::vector<int> m_hiddenObjects; //used to hide all point clouds (first), then all planes (second).
-
+	int m_graphic_id = -1; //used to store partially completed lineation graphics
 private:
 	float planeToPointDistance(ccPlane* plane, CCVector3 P);
 	ccHObject* buildGraphic(CCVector3 endPoint, float thickness);

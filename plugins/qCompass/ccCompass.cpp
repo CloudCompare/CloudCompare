@@ -1028,9 +1028,17 @@ void ccCompass::addGeoObject() //creates a new GeoObject
 {
 	//calculate default name
 	QString name = m_lastGeoObjectName;
+	int number = 0;
+	if (name.contains("_"))
+	{
+		number = name.split("_")[1].toInt(); //counter
+		name = name.split("_")[0]; //initial part
+	}
+	number++;
+	name += QString::asprintf("_%d", number);
 
 	//get name
-	name = QInputDialog::getText(m_dlg, "New GeoObject", "GeoObject Name:", QLineEdit::Normal, name);
+	name = QInputDialog::getText(m_app->getMainWindow(), "New GeoObject", "GeoObject Name:", QLineEdit::Normal, name);
 	if (name == "") //user clicked cancel
 	{
 		return;

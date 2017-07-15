@@ -99,7 +99,16 @@ void ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 	{
 		if (!m_startPoint) //first point not yet defined - store it
 		{
+			//store point
 			m_startPoint = new CCVector3(P);
+
+			//create temporary graphic
+			ccLineation* temp = new ccLineation(cloud);
+			temp->addPointIndex(itemIdx);
+			temp->showNameIn3D(false);
+			m_graphic_id = temp->getUniqueID();
+			insertPoint->addChild(temp);
+			m_app->addToDB(temp, false, false, false, true);
 
 			//display instructions
 			m_app->getActiveGLWindow()->displayNewMessage("Select second measurement point.", ccGLWindow::LOWER_LEFT_MESSAGE);
@@ -107,6 +116,9 @@ void ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 		}
 		else
 		{
+			//delete temporary graphic
+			m_app->removeFromDB(m_app->dbRootObject()->find(m_graphic_id));
+
 			//calculate distance
 			float dist = planeToPointDistance(m_referencePlane, P) - planeToPointDistance(m_referencePlane, *m_startPoint);
 

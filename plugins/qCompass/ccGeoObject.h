@@ -71,6 +71,8 @@ public:
 	static bool isGeoObjectUpper(ccHObject* object);
 	static bool isGeoObjectLower(ccHObject* object);
 	static bool isGeoObjectInterior(ccHObject* object);
+	static ccGeoObject* getGeoObjectParent(ccHObject* object); //return the GeoObject parent of the given object (or null if there is none)
+
 };
 
 

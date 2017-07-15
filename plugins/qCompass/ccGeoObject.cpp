@@ -209,21 +209,18 @@ bool ccGeoObject::isGeoObjectInterior(ccHObject* object)
 	return false;
 }
 
-/*
-
-bool ccGeoObject::isGeoObjectUpper(ccHObject* object)
+ccGeoObject* ccGeoObject::getGeoObjectParent(ccHObject* object)
 {
-return object->getName().contains("Upper Boundary"); //n.b. these are just special folders really...
-}
+	while (object != nullptr)
+	{
+		//is this a GeoObject?
+		if (ccGeoObject::isGeoObject(object))
+		{
+			return dynamic_cast<ccGeoObject*> (object);
+		}
 
-bool ccGeoObject::isGeoObjectLower(ccHObject* object)
-{
-return object->getName().contains("Lower Boundary");
-}
+		object = object->getParent();
+	}
 
-bool ccGeoObject::isGeoObjectInterior(ccHObject* object)
-{
-return object->getName().contains("Interior");
+	return nullptr;
 }
-
-*/

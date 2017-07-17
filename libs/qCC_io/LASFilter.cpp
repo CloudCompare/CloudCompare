@@ -58,6 +58,7 @@ using namespace pdal::Dimension;
 //System
 #include <string.h>
 #include <iostream>				// std::cout
+#include <bitset>
 
 static const char s_LAS_SRS_Key[] = "LAS.spatialReference.nosave"; //DGM: added the '.nosave' suffix because this custom type can't be streamed properly
 
@@ -293,6 +294,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
         //additional fields
         for (std::vector<LasField>::const_iterator it = fieldsToSave.begin(); it != fieldsToSave.end(); ++it)
         {
+			std::bitset<8> classFlags;
             assert(it->sf);
             switch(it->type)
             {
@@ -336,23 +338,25 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
             case LAS_TIME:
                 pointView->setField(Id::GpsTime, i, it->sf->getValue(i) + it->sf->getGlobalShift());
                 break;
-                //            case LAS_CLASSIF_VALUE:
-                //                classif.SetClass(static_cast<boost::uint32_t>(it->sf->getValue(i)));
-                //                break;
-                //            case LAS_CLASSIF_SYNTHETIC:
-                //                classif.SetSynthetic(static_cast<boost::uint32_t>(it->sf->getValue(i)));
-                //                break;
-                //            case LAS_CLASSIF_KEYPOINT:
-                //                classif.SetKeyPoint(static_cast<boost::uint32_t>(it->sf->getValue(i)));
-                //                break;
-                //            case LAS_CLASSIF_WITHHELD:
-                //                classif.SetWithheld(static_cast<boost::uint32_t>(it->sf->getValue(i)));
-                //                break;
+            case LAS_CLASSIF_VALUE:
+				pointView->setField(Id::Classification, i, it->sf->getValue(i));
+                break;
+            case LAS_CLASSIF_SYNTHETIC:
+				classFlags.set(0);
+                break;
+            case LAS_CLASSIF_KEYPOINT:
+				classFlags.set(1);
+				break;
+            case LAS_CLASSIF_WITHHELD:
+				classFlags.set(2);
+				break;
+			//TODO: Overlap flag (new in las 1.4)
             case LAS_INVALID:
             default:
                 assert(false);
                 break;
             }
+			pointView->setField(Id::ClassFlags, i, classFlags.to_ulong());
         }
     }
 
@@ -873,7 +877,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
                     if (loadedCloud->reserveTheRGBTable())
                     {
                         // we must set the color (black) of all previously skipped points
-                        for (int i = 0; i < loadedCloud->size() - 1; ++i)
+                        for (unsigned i = 0; i < loadedCloud->size() - 1; ++i)
                         {
                             loadedCloud->addRGBColor(ccColor::black.rgba);
                         }
@@ -1014,7 +1018,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
                             field->firstValue = 0;
                         }
 
-                        for (int i = 0; i < loadedCloud->size() - 1; ++i) {
+                        for (unsigned i = 0; i < loadedCloud->size() - 1; ++i) {
                             field->sf->addElement(static_cast<ScalarType>(field->defaultValue));
                         }
                         ScalarType s = static_cast<ScalarType>(value);

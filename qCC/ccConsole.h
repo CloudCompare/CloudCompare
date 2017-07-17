@@ -97,7 +97,9 @@ public:
 						MainWindow* parentWindow = 0);
 
 	//! Returns the (unique) static instance
-	static ccConsole* TheInstance();
+	/** \param autoInit automatically initialize the console instance (with no widget!) if not done already
+	**/
+	static ccConsole* TheInstance(bool autoInit = true);
 
 	//! Releases unique instance
 	static void ReleaseInstance();

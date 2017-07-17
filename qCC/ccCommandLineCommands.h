@@ -3475,13 +3475,13 @@ struct CommandLogFile : public ccCommandLineInterface::Command
 			return cmd.error(QString("Missing parameter: filename after '%1'").arg(COMMAND_LOG_FILE));
 
 		QString filename = cmd.arguments().takeFirst();
-		if (!ccConsole::TheInstance())
+		if (!ccConsole::TheInstance(false))
 		{
 			assert(cmd.silentMode());
 			ccConsole::Init();
 		}
 
-		return ccConsole::TheInstance() ? ccConsole::TheInstance()->setLogFile(filename) : false;
+		return ccConsole::TheInstance()->setLogFile(filename);
 	}
 };
 

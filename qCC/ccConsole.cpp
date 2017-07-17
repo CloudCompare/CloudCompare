@@ -46,11 +46,10 @@ static ccSingleton<ccConsole> s_console;
 
 bool ccConsole::s_showQtMessagesInConsole = false;
 
-ccConsole* ccConsole::TheInstance()
+ccConsole* ccConsole::TheInstance(bool autoInit/*=true*/)
 {
-	if (!s_console.instance)
+	if (!s_console.instance && autoInit)
 	{
-		assert(false); //Init should have already be called!
 		s_console.instance = new ccConsole;
 		ccLog::RegisterInstance(s_console.instance);
 	}

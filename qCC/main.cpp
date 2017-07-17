@@ -144,10 +144,6 @@ int main(int argc, char **argv)
 #endif
 	}
 
-#ifdef USE_VLD
-	VLDEnable();
-#endif
-
 	QDir  workingDir = QCoreApplication::applicationDirPath();
 	
 #ifdef Q_OS_MAC

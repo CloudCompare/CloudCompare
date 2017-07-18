@@ -1,27 +1,35 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h1>About ccCompass</h1>
+<h1>About ccCompass 2.0</h1>
 
-<p>ccCompass is a structural geology toolbox for the interpretation and analysis of virtual outcrop models. It can be used 
-to digitise and measure both exposed surfaces and intersection traces of fractures, bedding, cleavages or other foliations and lineations. 
-The plugin comprises three tools, one for measuring surfaces, one for traces and one for lineations. These roughly correspond to the functionality 
-of a good field geologist (armed with a trusty compass and notebook), but require less beer and sunscreen. They are described in detail below.</p>
+<p>ccCompass is a structural geology toolbox for the interpretation and analysis of virtual outcrop models. It combines a flexible data structure
+for organising geological interpretation with a series of tools for intuitive and computer-assisted digitisation and measurement. Broadly, the tool
+comprises two modes: <i>Map Mode</i>, for delineating geological units, and <i>Compass Mode</i> for measuring orientations and thicknesses. Additionally,
+topological features such as crosscutting relationships and younging directions can also be defined and stored for later analysis. 
 
-<h2>Plane Tool: Measure surface orientations</h2>
+The combination of these two modes roughly correspond to the functionality of a good field geologist (armed with a trusty compass and notebook), 
+but require less beer and sunscreen. They are described in detail below.</p>
+
+<h2>Compass Mode: Creating structural measurements</h2>
+
+<p>The compass mode, activated by clicking the "compass" icon in the main dialog, contains three tools for measuring orientations: the Plane Tool, Trace Tool
+and Lineation Tool. Additionally, several extra tools are included in the <i>Extra tools</i> menu.</p>
+
+<h3>Plane Tool: Measure surface orientations</h3>
 <p>The plane tool is used to measure the orientations of fully exposed planar structures, such as joint or bedding surfaces. 
 When it is activated, a red circle is shown in the 3D window. On picking a point in the virtual outcrop model (<i>left-click</i>), 
 a plane is fitted to all points sitting within the circle (using least squares), giving an orientation estimate (dip/dip direction). The circle radius 
 can be changed with <i>ctrl-scroll weel</i>. Note that for this to work correctly, Cloud Compare needs to be using orthographic projection 
 (<i>Display->Toggle Centered Perspective</i>).</p>
 
-<h2>Trace Tool: Digitise and measure traces and contacts</h2>
-<p>The trace tool allows rapid computer-assisted digitisation of fracture traces and lithological contacts. It uses a least-cost path algorithm 
-to 'follow' fracture traces and contacts between user defined start and end points. To use, select the tool and then <i>left click</i> 
-the start and end of a fracture you would like to digitise/measure. The tool will then try to find a fracture trace that links these points. 
-Generally this works remarkably well, though if the desired result is not achieved, intermediate 'waypoints' can be added (also using <i>left click</i>) 
+<h3>Trace Tool: Digitise and measure traces and contacts</h3>
+<p>The trace tool allows the estimation of a structure or contact's orientation based on its intersection with a non-flat surface. It uses a least-cost path
+algorithm to 'follow' these intersection traces along the surface between user defined start and end points, and then calculates the best fit plane to estimate
+the orientation. To use, select the tool and then <i>left click</i> the start and end of the structure you would like to digitise/measure. The tool will then try 
+to find a fracture trace that links these points. Generally this works remarkably well, though, intermediate 'waypoints' can be added (also using <i>left click</i>) 
 to modify the trace. To finish a segment click <i>'Accept'</i> (green tick) or press the <i>Space Key</i>. To cancel a segment, click <i>'Close'</i> 
-or press the <i>Escape key</i></p> 
+or press the <i>Escape key</i>.</p>
 
 <p>The results of this tool depend on the cost function used by the least-cost path algorithm. A variety of these have been 
 implemented, and can be activated by clicking the <i>algorithm</i> dropdown (settings icon). Note that cost functions can be used simultaneously. 
@@ -29,39 +37,71 @@ The different cost functions that have been implemented are: <ul>
 <li>Darkness [default] - traces follow dark points in the cloud. This is good for fracture traces defined by shadow.</li>
 <li>Lightness - traces follow light points in the cloud. This is good for light-coloured structures such as veins.</li>
 <li>RGB - traces avoid colour contrasts, following points with a similar colour to the start and end points.</li>
-<li>Curvature - traces follow points on ridges and valleys. This can be good for fracture traces with high relief but can be slow and sensitive to noise. 
-For better performance, use the <i>Curvature</i> and <i>Gaussian Filter</i> tools to create a scalar field which highlights areas of high curvature, then use 
-the <i>Inverse Scalar Field</i> cost function.</li>
-<li>Gradient - traces follow colour boundaries such as lithological contacts. Note that this can be slow and is very sensitive to noise. 
-For better performance, use the <i>Gradient</i> tool and <i>Inverse Scalar Field</i> cost function as described above.</li>
-<li>Distance - traces take the shortest path. I'm not sure what this is good for.</li>
-<li>Scalar Field - traces follow low values in the active (displayed) scalar field. Use this to implement custom cost functions. </li>
-<li>Inverse Scalar Field - traces follow high values in the active (displayed) scalar field. Use this to implement custom cost functions. </li>
+<li>Curvature - traces follow points on ridges and valleys. This can be good for fracture traces with high relief. Note that for performance reasons, the 
+tool will pre-compute a scalar field describing the curvature. This can be slow for large datasets.
+<li>Gradient - traces follow colour boundaries such as lithological contacts. As above, the gradient will be precomputed as a scalar field, which can be slow.</li>
+<li>Distance - traces take the shortest path. This can be useful if you simply need "straight" lines.</li>
+<li>Scalar Field - traces follow low values in the active (displayed) scalar field. Use this to implement custom cost functions! </li>
+<li>Inverse Scalar Field - traces follow high values in the active (displayed) scalar field. Use this to implement custom cost functions! </li>
 </ul></p>
 
 <p>When using this tool it is important to note that its <b>performance (i.e. speed) scales with trace length</b>. 
 Hence, it can be used with large point clouds if trace lengths are kept small (though long traces can be 
 quickly digitised as multiple segments). Asking the tool to find long traces may result in system crashes.</p>
 
-<p>A plane is fitted to each trace (using least squares) when it is finalized (<i>green tick</i>), though note that this plane is rejected if 
-points on the trace are approximately co-linear. Furthermore, if the point cloud being interpreted has previously calculated 
-point normals, best-fit planes are also rejected if they fall within 10 degrees of the average surface orientation along the trace. 
-Plane fitting can be enabled/disabled in the <i>algorithm</i> menu (settings icon). Plane orientations are expressed using the dip/dip direction convention.</p>
+<p>Once a trace has been accepted, it is replaced by the computed best-fit plane. However, the actual trace object will be stored
+as a child to this plane, and by selecting it (with the Trace Tool active), modifications can be made as desired. Also note that if
+the points on the trace are approximately co-linear (i.e. there is not enough topography to provide a good orientation estimate) the fit-plane
+is automatically rejected and the trace object kept as-is for reference/further editing. Furthermore, if the point cloud being interpreted has previously calculated 
+point normals, best-fit planes are also rejected if they fall within 10 degrees of the average surface orientation along the trace.</p>
 
-<h2>Lineation Tool: Measure lineations</h2>
-<p>This tool measures the trend and plunge of a (straight) line between two points. <i>Left-click</i> selects points (as above). </p>
+<p>Automatic plane fitting can be enabled/disabled in the <i>algorithm</i> menu (settings icon) or holding the <i>shift</i> key when accepting the trace. Plane orientations 
+are expressed using the dip/dip direction convention.</p>
 
-<h2>Exporting data</h2>
-<p> Interpretation generated using this tool is represented internally by Cloud Compare as planes and polygons, and so can be natively stored in CC's .bin files. 
-For ease of use, a <i>save</i> tool has also been included. This tool exports plane and trace data to .csv files, from which data can be easily imported 
-into other software packages for further analysis. Polylines created by the <i>Trace</i> and <i>Lineation</i> tools can also be exported as shapefiles through the normal 
-save dialog.</p>
+<h3>Lineation Tool: Measure lineations</h3>
+<p>This tool measures the length, trend and plunge of a (straight) line between two points. <i>Left-click</i> selects points (as above). </p>
+
+<h3>Other Tools</h3>
+<p>The <i>Other Tools</i> dropdown (<i>Plus</i> icon) contains several useful, though less used tools. Most of these are used in <i>Map Mode</i> (discussed below), however the
+<i>Measure One-Point Thickness</i> and <i>Measure Two-Point Thickness</i> tools can be used in compass mode. These allow you to select a plane representing the orientation of 
+a geological unit use it to estimate "true thickness". <i>Measure One-Point Thickness</i> will measure the plane-perpendicular distance between the selected plane and each
+successively chosen points (use if the fit-plane represents one of the contacts). <i>Measure Two-Point Thickness</i> measures the plane-perpendicular distance between pairs of 
+successively chosen points (use if the fit-plane doesn't fall on one of the contacts, hence the two points fall on either side of the unit of interest).  </p>
+
+<h2>Map Mode</h2>
+<p><i>Map Mode</i> provides functionality for larger projects where many geological features are of interest, and so interpretation and measurements need to be 
+organised into a "map". On entering <i>Map Mode</i> (map icon), a second dialog appears. This contains functionality for creating and managing the <i>GeoObjects</i>
+that form the building blocks of our map.</p>
+
+<h3>The GeoObject Concept</h3>
+<p> <i>GeoObjects</i> are a data structure for organising and describing geological features in a flexible way. Each <i>GeoObject</i> comprises an <i>Interior</i>, <i>Upper Boundary</i> and
+<i>Lower Boundary</i>. Hence, measurements from a dyke for example, can be assigned such that they are representative of either contact (nominatively called <i>upper</i> and <i>lower</i>) or the 
+<i>interior</i>. The GeoObject dialog contains functionality for creating GeoObjects and defining their active part (<i>upper</i>, <i>lower</i> or <i>interior</i>), to which any new measurements
+get assigned. 
+
+<p>The <i>Compass</i> functionality described above remains as described, the only difference being than any new measurements are stored in the active GeoObject. Traces defined using
+the <i>Trace</i> tool are also kept visible in this mode, so the <i>Trace</i> tool can be used to map the contacts defining a GeoObject.</p>
+
+<p>Additionally, a <i>Paint Tool</i> becomes available. This tool allows points in the dataset to be assigned to GeoObject interiors and... [TODO once tool written]</p>
+
+<p>Finally, crosscutting and younging relationships can be defined using the <i>XXXX</i> and <i>XXXXX</i> tools in the <i>Other Tools</i> dropdown. When a younging relationship is defined,
+the appropriate boundaries (<i>Upper</i> or <i>Lower</i>) are copied between the GeoObjects to ensure conformable stratigraphic relationships. Crosscutting relationships, along with younging relationships,
+ are stored in the data structure and can be automatically analysed to constrain timing relationships. </p>
+ 
+<h2>Saving and Exporting data</h2>
+<p> Interpretation generated using this tool is represented internally by standard planes and polygons, and so can be natively stored in CC's .bin files. Each time the plugin is loaded it searches the
+CloudCompare database to look for any custom ccCompass objects, so interpretations can be saved and retrieved from disk, provided ccCompass is restarted (closed and then re-opened) each time new .bin files are
+loaded.</p>
+
+<p>For ease of use, an <i>export</i> tool has also been included. This tool exports plane, trace and lineation data to .csv files, from which data can be easily imported 
+into other software packages for further analysis. The <i>GeoObject</i> data structure is encoded via the object names. Polylines created by the <i>Trace</i> and <i>Lineation</i> tools can also be exported as 
+shapefiles through the normal save dialog.</p>
 
 <h2>Further Reading and Citation</h2>
-<p>If you found this tool useful, please cite <i>Thiele et al., 2017</i>. The publication (currently in prep.) also contains a more detailed 
+<p>If you found this tool useful, please cite <i>Thiele et al., 2017</i>. The publication (currently in prep.) contains a more detailed 
 description of the methods employed by this plugin.</p>
 <p>
-<i>Thiele, ST., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, SA. &amp; Cruden, S., 2017, 'A computer-assisted approach to structural interpretation of point clouds and rasters', Journal TBA </i>
+<i>Thiele, ST., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, SA. &amp; Cruden, S., 2017, 'A computer-assisted approach to structural interpretation of point clouds and rasters', In Prep. </i>
 </p>
 <p></p><p></p>
 </body>

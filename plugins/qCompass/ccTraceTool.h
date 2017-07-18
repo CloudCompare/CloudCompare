@@ -39,6 +39,8 @@ protected:
 	//properties of the active trace
 	int m_trace_id = -1; //active trace id (stored rather than a pointer to avoid dead pointers after users delete objects in the DB_Tree)
 	bool m_preExisting = false; //set to true when a trace is picked up from a selection (so we don't delete it on cancel).
+	bool m_precompute_gradient = true; //do we want to precompute gradient for cost function?
+	bool m_precompute_curvature = true; //do we want to precompute curvature for cost functions?
 };
 
 #endif

@@ -178,6 +178,7 @@ ccHObject* ccThicknessTool::buildGraphic(CCVector3 endPoint, float thickness)
 	graphic->addPointIndex(1);
 	graphic->addChild(verts); //store the verts
 	graphic->invalidateBoundingBox();
+	graphic->updateMetadata();
 	graphic->setName(QString::asprintf("%.3fT", abs(thickness)));
 	graphic->showNameIn3D(ccCompass::drawName);
 

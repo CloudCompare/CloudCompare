@@ -65,7 +65,7 @@
    <item>
     <widget class="QToolButton" name="pickObjectButton">
      <property name="toolTip">
-      <string>Pick GeoObject using the mouse</string>
+      <string>Select GeoObjects using the mouse</string>
      </property>
      <property name="statusTip">
       <string>Save current label (added to cloud children)</string>
@@ -140,7 +140,7 @@
       <bool>false</bool>
      </property>
      <property name="toolTip">
-      <string>Delineate lower-contact of GeoObject</string>
+      <string>Digitise to lower-contact of GeoObject</string>
      </property>
      <property name="text">
       <string>Lower</string>
@@ -159,7 +159,7 @@
       <bool>false</bool>
      </property>
      <property name="toolTip">
-      <string>Delineate upper-contact of GeoObject</string>
+      <string>Digitise to upper-contact of GeoObject</string>
      </property>
      <property name="text">
       <string>Upper</string>
@@ -184,7 +184,7 @@
       <bool>false</bool>
      </property>
      <property name="toolTip">
-      <string>Define interior of geo-object</string>
+      <string>Digitise to interior of geo-object</string>
      </property>
      <property name="text">
       <string>Interior</string>

@@ -42,6 +42,41 @@ void ccTraceTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointC
 		m_preExisting = false;
 	}
 
+	//if cost function is gradient/curvature then check appropriate SFs have been defined
+	if (ccTrace::COST_MODE & ccTrace::GRADIENT) //gradient cost is active
+	{
+		if (m_precompute_gradient & !t->isGradientPrecomputed()) //not already computed
+		{
+			//give user a chance to bail - computations can take looooong
+			QMessageBox::StandardButton q;
+			q = QMessageBox::question(m_app->getMainWindow(), "Calculate gradient?", "Precompute Gradient? This can be slow, but once complete will greatly decrease future computation times.", QMessageBox::Yes | QMessageBox::No);
+			if (q == QMessageBox::Yes) //do compute
+			{
+				t->buildGradientCost(m_app->getMainWindow());
+			}
+			else
+			{
+				m_precompute_gradient = false; //only need to do this once
+			}
+		}
+	}
+	if (ccTrace::COST_MODE & ccTrace::CURVE) //curvature cost is active
+	{
+		if (m_precompute_curvature & !t->isCurvaturePrecomputed()) //not already computed?
+		{
+			QMessageBox::StandardButton q;
+			q = QMessageBox::question(m_app->getMainWindow(), "Calculate curvature?", "Precompute Curvature? This can be slow, but once complte will greatly decrease future computation times.", QMessageBox::Yes | QMessageBox::No);
+			if (q == QMessageBox::Yes) //do compute
+			{
+				t->buildCurvatureCost(m_app->getMainWindow());
+			}
+			else
+			{
+				m_precompute_curvature = false; //only need to do once
+			}
+		}
+	}
+
 	//add point
 	int index = t->insertWaypoint(itemIdx);
 
@@ -102,11 +137,6 @@ void ccTraceTool::onNewSelection(const ccHObject::Container& selectedEntities)
 		else if (pickupTrace(selectedEntities[0])) //try pick-up the selection
 		{
 			return; //bail - we've found our new active trace object
-		}
-		else if (selectedEntities[0]->isKindOf(CC_TYPES::POINT_CLOUD))
-		{
-			m_app->dispToConsole("can I delete this?");
-			return; //entity is a point cloud -> this often happens during standard picking
 		}
 
 		// new selection is not a trace - finish the last one

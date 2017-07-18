@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>790</width>
+    <width>575</width>
     <height>33</height>
    </rect>
   </property>
@@ -75,7 +75,7 @@
      </property>
      <property name="icon">
       <iconset resource="../../qCC/icones.qrc">
-       <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png</iconset>
+       <normaloff>:/CC/images/mapIcon.png</normaloff>:/CC/images/mapIcon.png</iconset>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -103,23 +103,9 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="paintModeButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="../../qCC/icones.qrc">
-       <normaloff>:/CC/images/ccPencil.png</normaloff>:/CC/images/ccPencil.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QPushButton" name="planeModeButton">
      <property name="toolTip">
-      <string>Measure surface orientation</string>
+      <string>Plane Tool: Measure surface orientations</string>
      </property>
      <property name="text">
       <string/>
@@ -148,7 +134,7 @@
    <item>
     <widget class="QPushButton" name="traceModeButton">
      <property name="toolTip">
-      <string>Measure orientation from structure trace</string>
+      <string>Trace Tool: Measure orientation from structure trace</string>
      </property>
      <property name="text">
       <string/>
@@ -170,6 +156,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="pairModeButton">
+     <property name="toolTip">
+      <string>Lineation Tool: Measure distances and directions</string>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -186,7 +175,27 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="paintModeButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Paint Tool (WIP)</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../qCC/icones.qrc">
+       <normaloff>:/CC/images/ccPencil.png</normaloff>:/CC/images/ccPencil.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QToolButton" name="extraModeButton">
+     <property name="toolTip">
+      <string>Other Tools</string>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -199,42 +208,6 @@
      </property>
      <property name="checked">
       <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="categoryLabel">
-     <property name="text">
-      <string>Type:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QComboBox" name="categoryBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="toolTip">
-      <string>What type of structure is being measured?</string>
-     </property>
-     <property name="editable">
-      <bool>false</bool>
-     </property>
-     <property name="currentText">
-      <string/>
-     </property>
-     <property name="insertPolicy">
-      <enum>QComboBox::InsertAtTop</enum>
      </property>
     </widget>
    </item>
@@ -342,7 +315,7 @@
    <item>
     <widget class="QToolButton" name="closeButton">
      <property name="toolTip">
-      <string>Exit qCompas plugin. Thanks for visiting :)</string>
+      <string>Exit ccCompass plugin. Thanks for visiting :)</string>
      </property>
      <property name="text">
       <string>...</string>

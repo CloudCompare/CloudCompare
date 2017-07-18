@@ -38,6 +38,8 @@ public:
 
 	virtual ~ccLineation() {}
 
+	void updateMetadata();
+
 	//inherited from ccHObject
 	//inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POLY_LINE; }
 

@@ -50,6 +50,12 @@ ccTrace::ccTrace(ccPolyline* obj)
 		setMetaData(*map, true);
 	}
 
+	//load cost function from metadata
+	if (obj->hasMetaData("cost_function"))
+	{
+		ccTrace::COST_MODE = obj->getMetaData("cost_function").toInt();
+	}
+
 	setName(obj->getName());
 
 	//copy polyline into trace points
@@ -91,25 +97,7 @@ void ccTrace::updateMetadata()
 	QVariantMap* map = new QVariantMap();
 	map->insert("ccCompassType", "Trace");
 	map->insert("search_r", m_search_r);
-	QString cost_function = "";
-	if (ccTrace::COST_MODE & MODE::RGB)
-		cost_function += "RGB,";
-	if (ccTrace::COST_MODE & MODE::DARK)
-		cost_function += "Dark,";
-	if (ccTrace::COST_MODE & MODE::LIGHT)
-		cost_function += "Light,";
-	if (ccTrace::COST_MODE & MODE::CURVE)
-		cost_function += "Curve,";
-	if (ccTrace::COST_MODE & MODE::GRADIENT)
-		cost_function += "Grad,";
-	if (ccTrace::COST_MODE & MODE::DISTANCE)
-		cost_function += "Dist,";
-	if (ccTrace::COST_MODE & MODE::SCALAR)
-		cost_function += "Scalar,";
-	if (ccTrace::COST_MODE & MODE::INV_SCALAR)
-		cost_function += "Inv_Scalar,";
-	cost_function = cost_function.remove(cost_function.size() - 1, 1); //remove trailing comma
-	map->insert("cost_function", cost_function);
+	map->insert("cost_function", ccTrace::COST_MODE);
 	setMetaData(*map, true);
 }
 int ccTrace::insertWaypoint(int pointId)
@@ -187,6 +175,9 @@ bool ccTrace::optimizePath(int maxIterations)
 	//update stored cost function etc.
 	updateMetadata();
 
+	//update internal vars
+	m_maxIterations = maxIterations;
+
 	//loop through segments and build/rebuild trace
 	int start, end, tID; //declare vars
 	for (unsigned i = 1; i < m_waypoints.size(); i++)
@@ -199,7 +190,7 @@ bool ccTrace::optimizePath(int maxIterations)
 		//are we adding to the end of the trace?
 		if (tID >= m_trace.size()) 
 		{
-			std::deque<int> segment = optimizeSegment(start, end, m_search_r, maxIterations); //calculate segment
+			std::deque<int> segment = optimizeSegment(start, end, m_search_r); //calculate segment
 			m_trace.push_back(segment); //store segment
 			success = success && !segment.empty(); //if the queue is empty, we failed
 		} else //no... we're somewhere in the middle - update segment if necessary
@@ -209,7 +200,7 @@ bool ccTrace::optimizePath(int maxIterations)
 			else
 			{
 				//calculate segment
-				std::deque<int> segment = optimizeSegment(start, end, m_search_r, maxIterations); //calculate segment
+				std::deque<int> segment = optimizeSegment(start, end, m_search_r); //calculate segment
 				success = success && !segment.empty(); //if the queue is empty, we failed
 
 				//add trace
@@ -269,7 +260,7 @@ void ccTrace::recalculatePath()
 }
 
 int ccTrace::COST_MODE = ccTrace::MODE::DARK; //set default cost mode
-std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int maxIterations, int offset)
+std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 {
 	//check handle to point cloud
 	if (!m_cloud)
@@ -322,7 +313,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	{
 		oct = m_cloud->computeOctree(); //if the user clicked "no" when asked to compute the octree then tough....
 	}
-	unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(search_r);
+	unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(m_search_r);
 
 	//initialize start node on node_buffer and add to openQueue
 	node_buffer[0].set(start, 0, nullptr);
@@ -334,7 +325,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	while (openQueue.size() > 0) //while unvisited nodes exist
 	{
 		//check if we excede max iterations
-		if (iter_count > maxIterations)
+		if (iter_count > m_maxIterations)
 		{
 			//cleanup buffers
 			for (Node* n : nodes)
@@ -387,7 +378,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 
 		//fill "neighbours" with nodes - essentially get results of a "sphere" search around active current point
 		m_neighbours.clear();
-		int n = oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(search_r), m_neighbours, level);
+		int n = oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(m_search_r), m_neighbours, level);
 
 		//loop through neighbours
 		for (size_t i = 0; i < m_neighbours.size(); i++)
@@ -406,7 +397,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 				continue;
 
 			//calculate cost to this neighbour
-			cost = getSegmentCost(current_idx, m_p.pointIndex, search_r);
+			cost = getSegmentCost(current_idx, m_p.pointIndex);
 
 			#ifdef DEBUG_PATH
 			m_cloud->setPointScalarValue(m_p.pointIndex, static_cast<ScalarType>(cost)); //STORE VISITED NODES (AND COST) FOR DEBUG VISUALISATIONS
@@ -442,7 +433,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	return std::deque<int>(); //shouldn't come here?
 }
 
-int ccTrace::getSegmentCost(int p1, int p2, float search_r)
+int ccTrace::getSegmentCost(int p1, int p2)
 {
 	int cost=1; //n.b. default value is 1 so that if no cost functions are used, the function doesn't crash (and returns the unweighted shortest path)
 	if (m_cloud->hasColors()) //check cloud has colour data
@@ -454,7 +445,7 @@ int ccTrace::getSegmentCost(int p1, int p2, float search_r)
 		if (COST_MODE & MODE::LIGHT)
 			cost += getSegmentCostLight(p1, p2);
 		if (COST_MODE & MODE::GRADIENT)
-			cost += getSegmentCostGrad(p1, p2, search_r);
+			cost += getSegmentCostGrad(p1, p2, m_search_r);
 	}
 	if (m_cloud->hasDisplayedScalarField()) //check cloud has scalar field data
 	{
@@ -522,68 +513,92 @@ int ccTrace::getSegmentCostLight(int p1, int p2)
 
 int ccTrace::getSegmentCostCurve(int p1, int p2)
 {
-	//put neighbourhood in a CCLib::Neighbourhood structure
-	if (m_neighbours.size() > 4) //need at least 4 points to calculate curvature....
+	int idx = m_cloud->getScalarFieldIndexByName("Curvature"); //look for pre-existing gradient SF
+	if (isCurvaturePrecomputed()) //scalar field found - return from precomputed cost]
 	{
+		//activate SF
+		m_cloud->setCurrentScalarField(idx);
+
+		//return inverse of p2 value
+		return m_cloud->getScalarField(idx)->getMax() - m_cloud->getPointScalarValue(p2);
+	}
+	else //scalar field not found - do slow calculation...
+	{
+		//put neighbourhood in a CCLib::Neighbourhood structure
+		if (m_neighbours.size() > 4) //need at least 4 points to calculate curvature....
+		{
 		m_neighbours.push_back(m_p); //add center point onto end of neighbourhood
 
 		//compute curvature
 		CCLib::DgmOctreeReferenceCloud nCloud(&m_neighbours, static_cast<unsigned>(m_neighbours.size()));
 		CCLib::Neighbourhood Z(&nCloud);
 		float c = Z.computeCurvature(0, CCLib::Neighbourhood::CC_CURVATURE_TYPE::MEAN_CURV);
-		
+
 		m_neighbours.erase(m_neighbours.end()-1); //remove center point from neighbourhood (so as not to screw up loops)
 
 		//curvature tends to range between 0 (high cost) and 10 (low cost), though it can be greater than 10 in extreme cases
 		//hence we need to map to domain 0 - 10 and then transform that to the (integer) domain 0 - 884 to meet the cost function spec
 		if (c > 10)
-			c = 10;
+		c = 10;
 
 		//scale curvature to range 0, 765
 		c *= 76.5;
 
 		//note that high curvature = low cost, hence subtract curvature from 765
 		return 765 - c;
-		
+
+		}
+		return 765; //unknown curvature - this point is high cost.
 	}
-	return 765; //unknown curvature - this point is high cost.
 }
 
 int ccTrace::getSegmentCostGrad(int p1, int p2, float search_r)
 {
-	CCVector3 p = *m_cloud->getPoint(p2);
-	const ColorCompType* p2_rgb = m_cloud->getPointColor(p2);
-	int p_value = p2_rgb[0] + p2_rgb[1] + p2_rgb[2];
-
-	if (m_neighbours.size() > 2) //need at least 2 points to calculate gradient....
+	int idx = m_cloud->getScalarFieldIndexByName("Gradient"); //look for pre-existing gradient SF
+	if (idx != -1) //found precomputed gradient
 	{
+		//activate SF
+		m_cloud->setCurrentScalarField(idx);
+
+		//return inverse of p2 value
+		return m_cloud->getScalarField(idx)->getMax() - m_cloud->getPointScalarValue(p2);
+	}
+	else //not found... do expensive calculation
+	{
+
+		CCVector3 p = *m_cloud->getPoint(p2);
+		const ColorCompType* p2_rgb = m_cloud->getPointColor(p2);
+		int p_value = p2_rgb[0] + p2_rgb[1] + p2_rgb[2];
+
+		if (m_neighbours.size() > 2) //need at least 2 points to calculate gradient....
+		{
 		//N.B. The following code is mostly stolen from the computeGradient function in CloudCompare
 		CCVector3d sum(0, 0, 0);
 		CCLib::DgmOctree::PointDescriptor n;
 		for (int i = 0; i < m_neighbours.size(); i++)
 		{
-			n = m_neighbours[i];
+		n = m_neighbours[i];
 
-			//vector from p1 to m_p
-			CCVector3 deltaPos = *n.point - p;
-			double norm2 = deltaPos.norm2d();
+		//vector from p1 to m_p
+		CCVector3 deltaPos = *n.point - p;
+		double norm2 = deltaPos.norm2d();
 
-			//colour
-			const ColorCompType* c = m_cloud->getPointColor(n.pointIndex);
-			int c_value = c[0] + c[1] + c[2];
+		//colour
+		const ColorCompType* c = m_cloud->getPointColor(n.pointIndex);
+		int c_value = c[0] + c[1] + c[2];
 
-			//calculate gradient weighted by distance to the point (i.e. divide by distance^2)
-			if (norm2 > ZERO_TOLERANCE)
-			{
-				//color magnitude difference
-				int deltaValue = p_value - c_value;
-				//divide by norm^2 to get distance-weighted gradient
-				deltaValue /= norm2; //we divide by 'norm' to get the normalized direction, and by 'norm' again to get the gradient (hence we use the squared norm)
-				//sum stuff
-				sum.x += deltaPos.x * deltaValue; //warning: here 'deltaValue'= deltaValue / squaredNorm(deltaPos) ;)
-				sum.y += deltaPos.y * deltaValue;
-				sum.z += deltaPos.z * deltaValue;
-			}
+		//calculate gradient weighted by distance to the point (i.e. divide by distance^2)
+		if (norm2 > ZERO_TOLERANCE)
+		{
+		//color magnitude difference
+		int deltaValue = p_value - c_value;
+		//divide by norm^2 to get distance-weighted gradient
+		deltaValue /= norm2; //we divide by 'norm' to get the normalized direction, and by 'norm' again to get the gradient (hence we use the squared norm)
+		//sum stuff
+		sum.x += deltaPos.x * deltaValue; //warning: here 'deltaValue'= deltaValue / squaredNorm(deltaPos) ;)
+		sum.y += deltaPos.y * deltaValue;
+		sum.z += deltaPos.z * deltaValue;
+		}
 		}
 
 		float gradient = sum.norm() / m_neighbours.size();
@@ -593,8 +608,9 @@ int ccTrace::getSegmentCostGrad(int p1, int p2, float search_r)
 		gradient = std::min(gradient, 765 / search_r);
 		gradient *= search_r; //scale between 0 and 765
 		return 765 - gradient; //return inverse gradient (high gradient = low cost)
+		}
+		return 765; //no gradient = high cost
 	}
-	return 765; //no gradient = high cost
 }
 
 int ccTrace::getSegmentCostDist(int p1, int p2)
@@ -613,6 +629,139 @@ int ccTrace::getSegmentCostScalarInv(int p1, int p2)
 {
 	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
 	return (sf->getMax() - sf->getValue(p2)) * (765 / (sf->getMax() - sf->getMin())); //return inverted scalar field value mapped to range 0 - 765
+}
+
+
+//functions for calculating cost SFs
+void ccTrace::buildGradientCost(QWidget* parent)
+{
+	//is there already a gradient SF?
+	if (isGradientPrecomputed()) //already done :)
+		return;
+
+	//create new SF for greyscale
+	int idx = m_cloud->addScalarField("Greyscale");
+	m_cloud->setCurrentScalarField(idx);
+
+	//make colours greyscale and push to SF (otherwise copy active SF)
+	for (int i = 0; i < m_cloud->size(); i++)
+	{
+		m_cloud->setPointScalarValue(i, static_cast<ScalarType>(m_cloud->getPointColor(i)[0] + m_cloud->getPointColor(i)[1] + m_cloud->getPointColor(i)[2]));
+	}
+	//compute min/max
+	m_cloud->getScalarField(idx)->computeMinAndMax();
+
+	//calculate new SF with gradient of the old one
+	float roughnessKernelSize = m_search_r;
+	m_cloud->setCurrentOutScalarField(idx); //set out gradient field - values are read from here for calc
+
+	//make gradient sf
+	int gIdx = m_cloud->addScalarField("Gradient");
+	m_cloud->setCurrentInScalarField(gIdx); //set in scalar field - gradient is written here
+
+	//get/build octree
+	ccProgressDialog* pDlg = new ccProgressDialog(true , parent);
+	pDlg->show();
+
+	ccOctree::Shared octree = m_cloud->getOctree();
+	if (!octree)
+	{
+		octree = m_cloud->computeOctree(pDlg);
+	}
+
+	//calculate gradient
+	int result = CCLib::ScalarFieldTools::computeScalarFieldGradient(m_cloud,
+		m_search_r, //auto --> FIXME: should be properly set by the user!
+		false,
+		false,
+		pDlg,
+		octree.data());
+
+	pDlg->close();
+	delete pDlg;
+
+	//calculate bounds
+	m_cloud->getScalarField(gIdx)->computeMinAndMax();
+	
+	//normalize and log-transform
+	m_cloud->setCurrentScalarField(gIdx);
+	float logMax = log(m_cloud->getScalarField(gIdx)->getMax() + 10);
+	for (int i = 0; i < m_cloud->size(); i++)
+	{
+		int nVal = 765 * log(m_cloud->getPointScalarValue(i) + 10) / logMax;
+		if (nVal < 0) //this is caused by isolated points that were assigned "null" value gradients
+			nVal = 1; //set to low gradient by default
+		m_cloud->setPointScalarValue(i, nVal);
+	}
+
+	//recompute min-max...
+	m_cloud->getScalarField(gIdx)->computeMinAndMax();
+}
+
+void ccTrace::buildCurvatureCost(QWidget* parent)
+{
+	if (isCurvaturePrecomputed()) //already done
+		return;
+
+	//create curvature SF
+	//make gradient sf
+	int idx = m_cloud->addScalarField("Curvature");
+	m_cloud->setCurrentInScalarField(idx); //set in scalar field - curvature is written here
+	m_cloud->setCurrentScalarField(idx);
+
+	//get/build octree
+	ccProgressDialog* pDlg = new ccProgressDialog(true, parent);
+	pDlg->show();
+
+	ccOctree::Shared octree = m_cloud->getOctree();
+	if (!octree)
+	{
+		octree = m_cloud->computeOctree(pDlg);
+	}
+
+	//calculate curvature
+	int result = CCLib::GeometricalAnalysisTools::computeCurvature(m_cloud,
+		CCLib::Neighbourhood::CC_CURVATURE_TYPE::MEAN_CURV,
+		m_search_r,
+		pDlg,
+		octree.data());
+
+	pDlg->close();
+	delete pDlg;
+
+	//calculate minmax
+	m_cloud->getScalarField(idx)->computeMinAndMax();
+
+	//normalize and log-transform
+	float logMax = log(m_cloud->getScalarField(idx)->getMax() + 10);
+	for (int i = 0; i < m_cloud->size(); i++)
+	{
+		int nVal = 765 * log(m_cloud->getPointScalarValue(i) + 10) / logMax;
+		if (nVal < 0) //this is caused by isolated points that were assigned "null" value curvatures
+			nVal = 1; //set to low gradient by default
+		m_cloud->setPointScalarValue(i, nVal);
+	}
+
+	//recompute min-max...
+	m_cloud->getScalarField(idx)->computeMinAndMax();
+
+	/*ccHObject::Container c;
+	c.push_back(m_cloud);
+	ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_SF_GRADIENT, c, nullptr);
+
+	//rename active sf
+	m_cloud->getCurrentDisplayedScalarField()->setName("Curvature");*/
+}
+
+bool ccTrace::isGradientPrecomputed()
+{
+	int idx = m_cloud->getScalarFieldIndexByName("Gradient"); //look for pre-existing gradient SF
+	return idx != -1; //was something found?
+}
+bool ccTrace::isCurvaturePrecomputed()
+{
+	int idx = m_cloud->getScalarFieldIndexByName("Curvature"); //look for pre-existing gradient SF
+	return idx != -1; //was something found?
 }
 
 ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)

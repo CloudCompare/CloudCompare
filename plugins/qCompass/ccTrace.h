@@ -35,6 +35,8 @@
 #include <ccPlane.h>
 #include <Jacobi.h>
 #include <ccScalarField.h>
+#include <ccProgressDialog.h>
+#include <ScalarFieldTools.h>
 
 #include "ccFitPlane.h"
 
@@ -42,6 +44,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <deque>
+#include <qmessagebox.h>
 
 /*
 A ccTrace object is essentially a ccPolyline that is controlled/created by "waypoints" and a least-cost path algorithm
@@ -146,6 +149,17 @@ public:
 	*/
 	void bakePathToScalarField();
 
+	/*
+	Get the edge cost of going from p1 to p2 (this containts the "cost function" to define what is "fracture like" and what is not)
+	*/
+	int getSegmentCost(int p1, int p2);
+
+	//functions for calculating cost SFs
+	void buildGradientCost(QWidget* parent);
+	void buildCurvatureCost(QWidget* parent);
+	bool isGradientPrecomputed();
+	bool isCurvaturePrecomputed();
+
 	enum MODE 
 	{
 		RGB = 1, //default: cost function minimises local colour gradient & difference to start/end points
@@ -170,10 +184,7 @@ protected:
 	int getClosestWaypoint(int pointID);
 
 	//contains grunt of shortest path algorithm. "offset" inserts points at the specified distance from the END of the trace (used for updating)
-	std::deque<int> optimizeSegment(int start, int end, float search_r, int maxIterations, int offset=0);
-
-	//get the edge cost of going from p1 to p2 (this containts the "cost function" to define what is "fracture like" and what is not)
-	int getSegmentCost(int p1, int p2, float search_r);
+	std::deque<int> optimizeSegment(int start, int end, int offset=0);
 
 	//specific cost algorithms (getSegmentCost(...) sums combinations of these depending on the COST_MODE flag.
 	//NOTE: to ensure each cost function makes an equal contribution to the result (when multiples are being used), each
@@ -188,7 +199,7 @@ protected:
 	int getSegmentCostDist(int p1, int p2);
 	int getSegmentCostScalar(int p1, int p2);
 	int getSegmentCostScalarInv(int p1, int p2);
-	
+
 	//calculate the search radius that should be used for the shortest path calcs
 	float calculateOptimumSearchRadius();
 
@@ -239,6 +250,7 @@ private:
 	CCLib::DgmOctree::NeighboursSet m_neighbours;
 	CCLib::DgmOctree::PointDescriptor m_p;
 	float m_search_r;
+	float m_maxIterations;
 
 	/*
 	Test if a point falls within a circle who's diameter equals the line from segStart to segEnd. This is used to test if a newly added point should be

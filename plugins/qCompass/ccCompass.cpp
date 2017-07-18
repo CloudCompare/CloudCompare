@@ -204,7 +204,6 @@ void ccCompass::doAction()
 		ccCompassDlg::connect(m_dlg->paintModeButton, SIGNAL(clicked()), this, SLOT(setPaintMode()));
 		ccCompassDlg::connect(m_dlg->m_measure_thickness, SIGNAL(triggered()), this, SLOT(setThicknessMode()));
 		ccCompassDlg::connect(m_dlg->m_measure_thickness_twoPoint, SIGNAL(triggered()), this, SLOT(setThicknessMode2()));
-		ccCompassDlg::connect(m_dlg->categoryBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(changeType()));
 		ccCompassDlg::connect(m_dlg->infoButton, SIGNAL(clicked()), this, SLOT(showHelp()));
 
 		ccCompassDlg::connect(m_dlg->m_showNames, SIGNAL(toggled(bool)), this, SLOT(toggleLabels(bool)));
@@ -508,26 +507,7 @@ ccHObject* ccCompass::getInsertPoint()
 			m_app->addToDB(measurement_group, false, true, false, false);
 		}
 
-		//search for relevant category group within this
-		ccHObject* category_group = nullptr;
-		for (unsigned i = 0; i < measurement_group->getChildrenNumber(); i++) //check if a category group exists
-		{
-			if (measurement_group->getChild(i)->getName() == m_category)
-			{
-				category_group = measurement_group->getChild(i);
-				break;
-			}
-		}
-
-		//didn't find it... create it!
-		if (!category_group)
-		{
-			category_group = new ccHObject(m_category);
-			measurement_group->addChild(category_group);
-			m_app->addToDB(category_group, false, true, false, false);
-		}
-
-		return category_group; //this is the insert point
+		return measurement_group; //this is the insert point
 	}
 	return nullptr; //no valid insert point
 }
@@ -865,130 +845,12 @@ void ccCompass::recurseNormals(ccHObject* object, bool checked)
 	}
 }
 
-//called when the "structure type" combo is changed
-void ccCompass::changeType()
-{
-	if (m_dlg->categoryBox->currentText().contains("Custom"))
-	{
-		m_dlg->categoryBox->blockSignals(true);
-
-		//get name
-		QString name = QInputDialog::getText(m_dlg, "Custom type", "Structure type:");
-
-		//add to category box & set active
-		if (name != "")
-			m_dlg->categoryBox->insertItem(0, name);
-
-		//set first category (normally the new one) to active
-		m_dlg->categoryBox->setCurrentIndex(0);
-
-		m_dlg->categoryBox->blockSignals(false);
-	}
-	m_category = m_dlg->categoryBox->currentText();
-}
-
 //displays the info dialog
 void ccCompass::showHelp()
 {
 	//create new qt window
 	ccCompassInfo info(m_app->getMainWindow());
 	info.exec();
-}
-
-//export the selected layer to CSV file
-void ccCompass::onSave()
-{
-	//get output file path
-	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("CSV files (*.csv *.txt)"));
-	if (filename.isEmpty())
-	{
-		//process cancelled by the user
-		return;
-	}
-	int planes = 0; //keep track of how many objects are being written (used to delete empty files)
-	int traces = 0;
-	int lineations = 0;
-
-	//build filenames
-	QFileInfo fi(filename);
-	QString baseName = fi.absolutePath() + "/" + fi.completeBaseName();
-	QString ext = fi.suffix();
-	if (!ext.isEmpty())
-	{
-		ext.prepend('.');
-	}
-	QString plane_fn = baseName + "_planes" + ext;
-	QString trace_fn = baseName + "_traces" + ext;
-	QString lineation_fn = baseName + "_lineations" + ext;
-
-	//create files
-	QFile plane_file(plane_fn);
-	QFile trace_file(trace_fn);
-	QFile lineation_file(lineation_fn);
-
-	//open files
-	if (plane_file.open(QIODevice::WriteOnly) && trace_file.open(QIODevice::WriteOnly) && lineation_file.open(QIODevice::WriteOnly))
-	{
-		//create text streams for each file
-		QTextStream plane_stream(&plane_file);
-		QTextStream trace_stream(&trace_file);
-		QTextStream lineation_stream(&lineation_file);
-
-		//write headers
-		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS" << endl;
-		trace_stream << "name,trace_id,point_id,start_x,start_y,start_z,end_x,end_y,end_z" << endl;
-		lineation_stream << "name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge" << endl;
-
-		//write data for all objects in the db tree (n.b. we loop through the dbRoots children rathern than just passing db_root so the naming is correct)
-		for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
-		{
-			ccHObject* o = m_app->dbRootObject()->getChild(i);
-			planes += writePlanes(o, &plane_stream);
-			traces += writeTraces(o, &trace_stream);
-			lineations += writeLineations(o, &lineation_stream);
-		}
-
-		//cleanup
-		plane_stream.flush();
-		plane_file.close();
-		trace_stream.flush();
-		trace_file.close();
-		lineation_stream.flush();
-		lineation_file.close();
-
-		//ensure data has been written (and if not, delete the file)
-		if (planes)
-		{
-			m_app->dispToConsole("[ccCompass] Successfully exported plane data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
-		}
-		else
-		{
-			m_app->dispToConsole("[ccCompass] No plane data found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-			plane_file.remove();
-		}
-		if (traces)
-		{
-			m_app->dispToConsole("[ccCompass] Successfully exported trace data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
-		}
-		else
-		{
-			m_app->dispToConsole("[ccCompass] No trace data found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-			trace_file.remove();
-		}
-		if (lineations)
-		{
-			m_app->dispToConsole("[ccCompass] Successfully exported lineation data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
-		}
-		else
-		{
-			m_app->dispToConsole("[ccCompass] No lineation data found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-			lineation_file.remove();
-		}
-	}
-	else
-	{
-		m_app->dispToConsole("[ccCompass] Could not open output files... ensure CC has write access to this location.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-	}
 }
 
 //enter or turn off map mode
@@ -1107,6 +969,103 @@ void ccCompass::writeToLower() //new digitiziation will be added to the GeoObjec
 	m_mapDlg->setLowerButton->setChecked(true);
 }
 
+
+//export the selected layer to CSV file
+void ccCompass::onSave()
+{
+	//get output file path
+	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("CSV files (*.csv *.txt)"));
+	if (filename.isEmpty())
+	{
+		//process cancelled by the user
+		return;
+	}
+	int planes = 0; //keep track of how many objects are being written (used to delete empty files)
+	int traces = 0;
+	int lineations = 0;
+
+	//build filenames
+	QFileInfo fi(filename);
+	QString baseName = fi.absolutePath() + "/" + fi.completeBaseName();
+	QString ext = fi.suffix();
+	if (!ext.isEmpty())
+	{
+		ext.prepend('.');
+	}
+	QString plane_fn = baseName + "_planes" + ext;
+	QString trace_fn = baseName + "_traces" + ext;
+	QString lineation_fn = baseName + "_lineations" + ext;
+
+	//create files
+	QFile plane_file(plane_fn);
+	QFile trace_file(trace_fn);
+	QFile lineation_file(lineation_fn);
+
+	//open files
+	if (plane_file.open(QIODevice::WriteOnly) && trace_file.open(QIODevice::WriteOnly) && lineation_file.open(QIODevice::WriteOnly))
+	{
+		//create text streams for each file
+		QTextStream plane_stream(&plane_file);
+		QTextStream trace_stream(&trace_file);
+		QTextStream lineation_stream(&lineation_file);
+
+		//write headers
+		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS" << endl;
+		trace_stream << "Name,Trace_id,Point_id,Start_x,Start_y,Start_z,End_x,End_y,End_z,Cost,Cost_Mode" << endl;
+		lineation_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Length" << endl;
+
+		//write data for all objects in the db tree (n.b. we loop through the dbRoots children rathern than just passing db_root so the naming is correct)
+		for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
+		{
+			ccHObject* o = m_app->dbRootObject()->getChild(i);
+			planes += writePlanes(o, &plane_stream);
+			traces += writeTraces(o, &trace_stream);
+			lineations += writeLineations(o, &lineation_stream);
+		}
+
+		//cleanup
+		plane_stream.flush();
+		plane_file.close();
+		trace_stream.flush();
+		trace_file.close();
+		lineation_stream.flush();
+		lineation_file.close();
+
+		//ensure data has been written (and if not, delete the file)
+		if (planes)
+		{
+			m_app->dispToConsole("[ccCompass] Successfully exported plane data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		}
+		else
+		{
+			m_app->dispToConsole("[ccCompass] No plane data found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			plane_file.remove();
+		}
+		if (traces)
+		{
+			m_app->dispToConsole("[ccCompass] Successfully exported trace data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		}
+		else
+		{
+			m_app->dispToConsole("[ccCompass] No trace data found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			trace_file.remove();
+		}
+		if (lineations)
+		{
+			m_app->dispToConsole("[ccCompass] Successfully exported lineation data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		}
+		else
+		{
+			m_app->dispToConsole("[ccCompass] No lineation data found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			lineation_file.remove();
+		}
+	}
+	else
+	{
+		m_app->dispToConsole("[ccCompass] Could not open output files... ensure CC has write access to this location.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+	}
+}
+
 //write plane data
 int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentName)
 {
@@ -1185,21 +1144,31 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 	//is object a polyline
 	int tID = object->getUniqueID();
 	int n = 0;
-	if (object->isKindOf(CC_TYPES::POLY_LINE)) //ensure this is a polyline
+	if (ccTrace::isTrace(object)) //ensure this is a trace
 	{
-		ccPolyline* p = static_cast<ccPolyline*>(object);
+		ccTrace* p = static_cast<ccTrace*>(object);
 
 		//loop through points
 		CCVector3 start, end;
+		int cost;
 		int tID = object->getUniqueID();
 		if (p->size() >= 2)
 		{
+			//set cost function
+			ccTrace::COST_MODE = p->getMetaData("cost_function").toInt();
+
+			//loop through segments
 			for (unsigned i = 1; i < p->size(); i++)
 			{
+				//get points
 				p->getPoint(i - 1, start);
 				p->getPoint(i, end);
+				
+				//calculate segment cost
+				cost = p->getSegmentCost(p->getPointGlobalIndex(i - 1), p->getPointGlobalIndex(i));
+				
 				//write data
-				//n.b. csv columns are name,trace_id,seg_id,start_x,start_y,start_z,end_x,end_y,end_z
+				//n.b. csv columns are name,trace_id,seg_id,start_x,start_y,start_z,end_x,end_y,end_z, cost, cost_mode
 				*out << name << ","; //name
 				*out << tID << ",";
 				*out << i - 1 << ",";
@@ -1208,7 +1177,9 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 				*out << start.z << ",";
 				*out << end.x << ",";
 				*out << end.y << ",";
-				*out << end.z << endl;
+				*out << end.z << ",";
+				*out << cost << ",";
+				*out << ccTrace::COST_MODE << endl;
 			}
 		}
 		n++;
@@ -1245,7 +1216,7 @@ int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString pare
 		*out << name << ",";
 		*out << object->getMetaData("Sx").toString() << "," << object->getMetaData("Sy").toString() << "," << object->getMetaData("Sz").toString() << ",";
 		*out << object->getMetaData("Ex").toString() << "," << object->getMetaData("Ey").toString() << "," << object->getMetaData("Ez").toString() << ",";
-		*out << object->getMetaData("Trend").toString() << "," << object->getMetaData("Plunge").toString() << endl;
+		*out << object->getMetaData("Trend").toString() << "," << object->getMetaData("Plunge").toString() << "," << object->getMetaData("Length").toString() << endl;
 		n++;
 	}
 

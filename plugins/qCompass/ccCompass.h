@@ -130,9 +130,6 @@ protected slots:
 	void toggleNormals(bool checked);
 	void recurseNormals(ccHObject* object, bool checked);
 
-	//change the m_category property
-	void changeType();
-
 	//display the help dialog
 	void showHelp();
 
@@ -173,9 +170,8 @@ protected:
 	ccGeoObject* m_geoObject = nullptr; //the GeoObject currently being written to
 	int m_geoObject_id = -1; //used to check if m_geoObject has been deleted
 	
-	//name/category of structure currently being digitized
-	QString m_category = "Bedding";
-	QString m_lastGeoObjectName = "GeoObject"; //used to 'guess' the name of new GeoObjects
+	//used to 'guess' the name of new GeoObjects
+	QString m_lastGeoObjectName = "GeoObject"; 
 
 	//used while exporting data
 	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());

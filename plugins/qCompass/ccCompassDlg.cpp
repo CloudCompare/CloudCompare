@@ -39,10 +39,6 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 {
 	setupUi(this);
 
-	//setup combo box
-	categoryBox->clear();
-	categoryBox->addItems(QStringList() << "S0 (Bedding)" << "S1" << "S2" << "L1" << "L2" << "Custom..."); //default items
-
 	//setup "algorithm" dropdown
 	m_cost_algorithm_menu = new QMenu(this);
 	m_cost_algorithm_menu->setTitle("Algorithm");
@@ -106,7 +102,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	//setup pair picking menu
 	m_pairpicking_menu = new QMenu(this);
 
-	m_measure_thickness = new QAction("Measure Thickness", this);
+	m_measure_thickness = new QAction("Measure One-Point Thickness", this);
 	m_measure_thickness_twoPoint = new QAction("Measure Two-Point Thickness");
 	m_crosscutting = new QAction("Assign Crosscutting Relationship", this);
 	m_younging = new QAction("Assign Younging Relationship", this);

@@ -522,6 +522,7 @@ protected:
 	virtual void moveEvent(QMoveEvent* event) override;
 	virtual void resizeEvent(QResizeEvent* event) override;
 	virtual bool eventFilter(QObject *obj, QEvent *event) override;
+	virtual void keyPressEvent(QKeyEvent *event) override;
 
 	//! Makes the window including an entity zoom on it (helper)
 	void zoomOn(ccHObject* object);

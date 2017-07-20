@@ -23,6 +23,8 @@ v2.9.alpha - XX/XX/XXXX
 		- 3 algorithms are available: average, median and weighted average
 
 	* New interactor to change the default line width (via the 'hot zone' in the upper-left corner of 3D views)
+	
+	* When a picking operation is active, the ESC key will cancel it.
 
 - enhancements:
 

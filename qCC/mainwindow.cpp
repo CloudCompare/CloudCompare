@@ -146,6 +146,17 @@ static const QString s_allFilesFilter("All (*.*)");
 //default file filter separator
 static const QString s_fileFilterSeparator(";;");
 
+enum PickingOperation {	NO_PICKING_OPERATION,
+						PICKING_ROTATION_CENTER,
+						PICKING_LEVEL_POINTS,
+					  };
+static ccGLWindow* s_pickingWindow = nullptr;
+static PickingOperation s_currentPickingOperation = NO_PICKING_OPERATION;
+static std::vector<cc2DLabel*> s_levelLabels;
+static ccPointCloud* s_levelMarkersCloud = nullptr;
+static ccHObject* s_levelEntity = nullptr;
+
+
 MainWindow::MainWindow()
 	: m_ccRoot(0)
 	, m_uiFrozen(false)
@@ -5968,6 +5979,24 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 	return QObject::eventFilter(obj, event);
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+	switch (event->key())
+	{
+		case Qt::Key_Escape:
+		{
+			if ( s_pickingWindow != nullptr )
+			{
+				cancelPreviousPickingOperation( true );
+			}
+			break;
+		}
+			
+		default:
+			QMainWindow::keyPressEvent(event);
+	}	
+}
+
 void MainWindow::updateOverlayDialogsPlacement()
 {
 	for (ccMDIDialogs& mdiDlg : m_mdiDialogs)
@@ -7159,16 +7188,6 @@ void MainWindow::setViewerPerspectiveView(ccGLWindow* win)
 	}
 }
 
-enum PickingOperation {	NO_PICKING_OPERATION,
-						PICKING_ROTATION_CENTER,
-						PICKING_LEVEL_POINTS,
-};
-static ccGLWindow* s_pickingWindow = 0;
-static PickingOperation s_currentPickingOperation = NO_PICKING_OPERATION;
-static std::vector<cc2DLabel*> s_levelLabels;
-static ccPointCloud* s_levelMarkersCloud = 0;
-static ccHObject* s_levelEntity = 0;
-
 void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
 {
 	if (!win)
@@ -7428,7 +7447,7 @@ void MainWindow::doLevel()
 	s_levelLabels.clear();
 	s_currentPickingOperation = PICKING_LEVEL_POINTS;
 
-	enablePickingOperation(win,"Pick three points on the floor plane (click on icon/menu entry again to cancel)");
+	enablePickingOperation(win,"Pick three points on the floor plane (click the Level button or press Escape to cancel)");
 }
 
 void MainWindow::doPickRotationCenter()

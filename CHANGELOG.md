@@ -113,6 +113,9 @@ v2.9.alpha - XX/XX/XXXX
 		- Compression is done automatically when saving a cloud with the 'LAS 1.3 / 1.4' filter (QLAS_FWF_IO_PLUGIN)
 			(but it's not done when saving the entity as a BIN file)
 
+	* qEllipser dialog:
+		- option to export the image as a (potentially scaled) point cloud
+
 	* Other
 		- color scales are now listed in alphabetical order
 		- the DXF format can now be used to export point clouds (their size should be very limited!)

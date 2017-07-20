@@ -21,6 +21,9 @@
 //Local
 #include "qCC_db.h"
 
+//Qt
+#include <QColor>
+
 //system
 #include <stdlib.h>
 #include <random>
@@ -195,12 +198,12 @@ namespace ccColor
 			H /= 360;
 			float q = L < 0.5f ? L * (1.0f + S) : L + S - L * S;
 			float p = 2 * L - q;
-			
-			float r = hue2rgb(p, q, H + 1.0f/3.0f);
-			float g = hue2rgb(p, q, H);
-			float b = hue2rgb(p, q, H - 1.0f/3.0f);
 
-			return Rgb (static_cast<ColorCompType>(r * ccColor::MAX),
+			float r = hue2rgb(p, q, H + 1.0f / 3.0f);
+			float g = hue2rgb(p, q, H);
+			float b = hue2rgb(p, q, H - 1.0f / 3.0f);
+
+			return Rgb(	static_cast<ColorCompType>(r * ccColor::MAX),
 						static_cast<ColorCompType>(g * ccColor::MAX),
 						static_cast<ColorCompType>(b * ccColor::MAX));
 
@@ -215,33 +218,33 @@ namespace ccColor
 		static Rgb hsv2rgb(float H, float S, float V)
 		{
 			double hi = 0;
-			double f = modf(H/60.0, &hi);
+			double f = modf(H / 60.0, &hi);
 
 			float l = static_cast<float>(V*(1.0 - S));
 			float m = static_cast<float>(V*(1.0 - f*S));
 			float n = static_cast<float>(V*(1.0 - (1.0 - f)*S));
 
-			Rgbf rgb(0,0,0);
+			Rgbf rgb(0, 0, 0);
 
 			switch (static_cast<int>(hi) % 6)
 			{
 			case 0:
-				rgb.r=V; rgb.g=n; rgb.b=l;
+				rgb.r = V; rgb.g = n; rgb.b = l;
 				break;
 			case 1:
-				rgb.r=m; rgb.g=V; rgb.b=l;
+				rgb.r = m; rgb.g = V; rgb.b = l;
 				break;
 			case 2:
-				rgb.r=l; rgb.g=V; rgb.b=n;
+				rgb.r = l; rgb.g = V; rgb.b = n;
 				break;
 			case 3:
-				rgb.r=l; rgb.g=m; rgb.b=V;
+				rgb.r = l; rgb.g = m; rgb.b = V;
 				break;
 			case 4:
-				rgb.r=n; rgb.g=l; rgb.b=V;
+				rgb.r = n; rgb.g = l; rgb.b = V;
 				break;
 			case 5:
-				rgb.r=V; rgb.g=l; rgb.b=m;
+				rgb.r = V; rgb.g = l; rgb.b = m;
 				break;
 			}
 
@@ -269,9 +272,50 @@ namespace ccColor
 			else
 				return m1;
 		}
-
-
 	};
+
+	//! Conversion from Rgbf
+	static Rgb FromRgbf(const Rgbf& color) { return Rgb(static_cast<ColorCompType>(color.r * MAX),
+														static_cast<ColorCompType>(color.g * MAX),
+														static_cast<ColorCompType>(color.b * MAX)); }
+
+	//! Conversion from Rgbaf
+	static Rgb FromRgbf(const Rgbaf& color) { return Rgb(	static_cast<ColorCompType>(color.r * MAX),
+															static_cast<ColorCompType>(color.g * MAX),
+															static_cast<ColorCompType>(color.b * MAX)); }
+
+	//! Conversion from QRgb
+	static Rgb FromQRgb(QRgb qColor) { return Rgb(	static_cast<unsigned char>(qRed(qColor)),
+													static_cast<unsigned char>(qGreen(qColor)),
+													static_cast<unsigned char>(qBlue(qColor))); }
+
+	//! Conversion from QRgb'a'
+	static Rgba FromQRgba(QRgb qColor) { return Rgba(	static_cast<unsigned char>(qRed(qColor)),
+														static_cast<unsigned char>(qGreen(qColor)),
+														static_cast<unsigned char>(qBlue(qColor)),
+														static_cast<unsigned char>(qAlpha(qColor))); }
+
+	//! Conversion from QColor
+	static Rgb FromQColor(QColor qColor) { return Rgb(	static_cast<unsigned char>(qColor.red()),
+														static_cast<unsigned char>(qColor.green()),
+														static_cast<unsigned char>(qColor.blue())); }
+
+	//! Conversion from QColor'a'
+	static Rgba FromQColora(QColor qColor) { return Rgba(	static_cast<unsigned char>(qColor.red()),
+															static_cast<unsigned char>(qColor.green()),
+															static_cast<unsigned char>(qColor.blue()),
+															static_cast<unsigned char>(qColor.alpha())); }
+
+	//! Conversion from QColor (floating point)
+	static Rgbf FromQColorf(QColor qColor) { return Rgbf(	static_cast<unsigned char>(qColor.redF()),
+															static_cast<unsigned char>(qColor.greenF()),
+															static_cast<unsigned char>(qColor.blueF())); }
+	//! Conversion from QColor'a' (floating point)
+	static Rgbaf FromQColoraf(QColor qColor) { return Rgbaf(	static_cast<unsigned char>(qColor.redF()),
+																static_cast<unsigned char>(qColor.greenF()),
+																static_cast<unsigned char>(qColor.blueF()),
+																static_cast<unsigned char>(qColor.alphaF()));
+	}
 };
 
 #endif //CC_COLOR_TYPES_HEADER

@@ -1040,7 +1040,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		{
 			assert(mntSamples && mntColors);
 			unsigned sampleCount = mntSamples->size();
-			const QRgb blackValue = QColor( Qt::black ).rgb();
+			const QRgb blackValue = qRgb(0, 0, 0);
 
 			ccGLMatrix sensorMatrix = sensor->getRigidTransformation().inverse();
 
@@ -1053,22 +1053,22 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				sensorMatrix.apply(P);
 				if (fabs(P.z) > ZERO_TOLERANCE)
 				{
-					CCVector3 p(-P.x/P.z,-P.y/P.z,0.0);
+					CCVector3 p(-P.x / P.z, -P.y / P.z, 0.0);
 					//float norm_p2 = p.norm2();
 					//float rp = 1.0+norm_p2*(cam.k1+cam.k2*norm_p2); //images are already undistorted
 					float rp = 1.0f;
 					CCVector3 pprime = cam.f_pix * rp * p;
 
-					int px = static_cast<int>(0.5f*static_cast<float>(image->getW()) + pprime.x);
-					if (px >=0 && px < static_cast<int>(image->getW()))
+					int px = static_cast<int>(image->getW() / 2.0f + pprime.x);
+					if (px >= 0 && px < static_cast<int>(image->getW()))
 					{
-						int py = static_cast<int>(0.5f*static_cast<float>(image->getH()) - pprime.y);
-						if (py >=0 && py < static_cast<int>(image->getH()))
+						int py = static_cast<int>(image->getH() / 2.0f - pprime.y);
+						if (py >= 0 && py < static_cast<int>(image->getH()))
 						{
-							QRgb rgb = image->data().pixel(px,py);
-							if (qAlpha(rgb)!=0 && rgb != blackValue) //black pixels are ignored
+							QRgb rgb = image->data().pixel(px, py);
+							if (qAlpha(rgb) != 0 && rgb != blackValue) //black pixels are ignored
 							{
-								int* col = mntColors+4*k;
+								int* col = mntColors + 4 * k;
 								col[0] += qRed(rgb);
 								col[1] += qGreen(rgb);
 								col[2] += qBlue(rgb);

@@ -333,23 +333,23 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 	//pen
 	QPen pen;
 	pen.setStyle(Qt::SolidLine);
-	pen.setBrush(QColor(Qt::black));
+	pen.setBrush(Qt::black);
 
-	int diameter = std::min(width(),height());
-	int halfW = width()/2;
-	int halfH = height()/2;
-	QPoint center(halfW,halfH);
+	int diameter = std::min(width(), height());
+	int halfW = width() / 2;
+	int halfH = height() / 2;
+	QPoint center(halfW, halfH);
 
 	int hsvThickness = 0;
 	if (m_showHSVRing)
 	{
-		int newDiameter = static_cast<int>(ceil(0.9*static_cast<double>(diameter))); 
+		int newDiameter = static_cast<int>(ceil(0.9 * diameter));
 		hsvThickness = diameter - newDiameter;
 
 		//TODO
 		if (hsvThickness > 0)
 		{
-			QRect rectangle(center.x()-diameter/2+1,center.y()-diameter/2+1,diameter-2,diameter-2);
+			QRect rectangle(center.x() - diameter / 2 + 1, center.y() - diameter / 2 + 1, diameter - 2, diameter - 2);
 			int angle_span = static_cast<int>(m_angularStep_deg * 16.0); //see QPainter::drawPie
 			QBrush brush;
 			brush.setStyle(Qt::SolidPattern);
@@ -357,7 +357,7 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 
 			//dip direction steps (dip dir. in [0,360])
 			unsigned ddSteps = static_cast<unsigned>(ceil(360.0 / std::max(m_angularStep_deg,1.0)));
-			for (unsigned j=0; j<ddSteps; ++j)
+			for (unsigned j = 0; j < ddSteps; ++j)
 			{
 				double dipDir_deg = static_cast<double>(j) * m_angularStep_deg;
 
@@ -371,7 +371,7 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 				painter.setBrush(brush);
 
 				int angle_start = static_cast<int>((360.0 - dipDir_deg - m_angularStep_deg + 90.0) * 16.0); //see QPainter::drawPie
-				painter.drawPie(rectangle,angle_start,angle_span);
+				painter.drawPie(rectangle, angle_start, angle_span);
 			}
 		}
 
@@ -382,7 +382,7 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 	pen.setWidth(2);
 	painter.setPen(pen);
 	painter.setBrush(Qt::white);
-	int radius = diameter/2 - 2;
+	int radius = diameter / 2 - 2;
 	painter.drawEllipse(center,radius,radius);
 	painter.setBrush(Qt::NoBrush);
 
@@ -391,8 +391,8 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 	m_center = center;
 
 	//main axes
-	painter.drawLine(center-QPoint(radius,0),center+QPoint(radius,0));
-	painter.drawLine(center-QPoint(0,radius),center+QPoint(0,radius));
+	painter.drawLine(center - QPoint(radius, 0), center + QPoint(radius, 0));
+	painter.drawLine(center - QPoint(0, radius), center + QPoint(0, radius));
 
 	//draw circles
 	if (m_angularStep_deg > 0)
@@ -406,31 +406,31 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 		pen.setWidth(1);
 		pen.setColor(Qt::gray);
 		painter.setPen(pen);
-		for (unsigned i=1; i<dSteps; ++i)
+		for (unsigned i = 1; i < dSteps; ++i)
 		{
-			double dip_deg = static_cast<double>(i) * m_angularStep_deg;
+			double dip_deg = i * m_angularStep_deg;
 			if (dip_deg < 90.0)
 			{
-				int R = static_cast<int>(static_cast<double>(radius) * (dip_deg/90.0));
+				int R = static_cast<int>(radius * (dip_deg / 90.0));
 				if (R > 1)
-					painter.drawEllipse(center,R-1,R-1);
+					painter.drawEllipse(center, R - 1, R - 1);
 			}
 		}
 
 		//draw rays (+ 'm_ticksFreq' times more ticks)
-		int ticksFreq = std::max(m_ticksFreq,1);
-		for (unsigned j=1; j<=ddSteps*ticksFreq; ++j)
+		int ticksFreq = std::max(m_ticksFreq, 1);
+		for (unsigned j = 1; j <= ddSteps*ticksFreq; ++j)
 		{
-			double dipDir_deg = static_cast<double>(j) * m_angularStep_deg / static_cast<double>(ticksFreq);
+			double dipDir_deg = j * m_angularStep_deg / ticksFreq;
 			if (dipDir_deg < 360.0)
 			{
-				QPoint X(	 static_cast<int>(sin(dipDir_deg * CC_DEG_TO_RAD) * static_cast<double>(radius)),
-					-static_cast<int>(cos(dipDir_deg * CC_DEG_TO_RAD) * static_cast<double>(radius)) );
+				QPoint X(	 static_cast<int>(sin(dipDir_deg * CC_DEG_TO_RAD) * radius),
+							-static_cast<int>(cos(dipDir_deg * CC_DEG_TO_RAD) * radius) );
 
 				if ((j % ticksFreq) == 0) //long ticks
-					painter.drawLine(center,center+X);
+					painter.drawLine(center, center + X);
 				else
-					painter.drawLine(center+X*0.93,center+X);
+					painter.drawLine(center + X*0.93, center + X);
 			}
 		}
 	}
@@ -447,39 +447,35 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 		QPolygon poly(4);
 
 		const double* d = m_densityGrid->grid;
-		for (unsigned j=0; j<m_densityGrid->ddSteps; ++j)
+		for (unsigned j = 0; j < m_densityGrid->ddSteps; ++j)
 		{
-			double dipDir0_rad = static_cast<double>(j) * m_densityGrid->step_deg * CC_DEG_TO_RAD;
-			double dipDir1_rad = static_cast<double>(j+1) * m_densityGrid->step_deg * CC_DEG_TO_RAD;
+			double dipDir0_rad = (j    ) * m_densityGrid->step_deg * CC_DEG_TO_RAD;
+			double dipDir1_rad = (j + 1) * m_densityGrid->step_deg * CC_DEG_TO_RAD;
 			double cos_dipDir0 = cos(dipDir0_rad);
 			double sin_dipDir0 = sin(dipDir0_rad);
 			double cos_dipDir1 = cos(dipDir1_rad);
 			double sin_dipDir1 = sin(dipDir1_rad);
 
-			for (unsigned i=0; i<m_densityGrid->rSteps; ++i, ++d)
+			for (unsigned i = 0; i < m_densityGrid->rSteps; ++i, ++d)
 			{
 				if (*d != 0)
 				{
-					double relPos = static_cast<double>(*d)/static_cast<double>(m_densityGrid->minMaxDensity[1]);
-					const ColorCompType* col = m_densityColorScale->getColorByRelativePos(relPos,m_densityColorScaleSteps);
+					double relPos = (*d)/ m_densityGrid->minMaxDensity[1];
+					const ColorCompType* col = m_densityColorScale->getColorByRelativePos(relPos, m_densityColorScaleSteps);
 					brush.setColor(QColor(	static_cast<int>(col[0]),
-						static_cast<int>(col[1]),
-						static_cast<int>(col[2]),
-						255));
+											static_cast<int>(col[1]),
+											static_cast<int>(col[2]),
+											255));
 					painter.setBrush(brush);
 
 					//stereographic projection
-					//double dip0_rad = static_cast<double>(i) * m_densityGrid->step_deg * CC_DEG_TO_RAD;
-					//double dip1_rad = static_cast<double>(i+1) * m_densityGrid->step_deg * CC_DEG_TO_RAD;
-					//double R0 = static_cast<double>(radius) * cos(dip0_rad) / (1.0 + sin(dip0_rad));
-					//double R1 = static_cast<double>(radius) * cos(dip1_rad) / (1.0 + sin(dip1_rad));
-					double R0 = static_cast<double>(radius) * static_cast<double>(i) * m_densityGrid->step_R;
-					double R1 = static_cast<double>(radius) * static_cast<double>(i+1) * m_densityGrid->step_R;
+					double R0 = radius * ((i    ) * m_densityGrid->step_R);
+					double R1 = radius * ((i + 1) * m_densityGrid->step_R);
 
-					poly.setPoint(0,center+QPoint(static_cast<int>(sin_dipDir0 * R0),-static_cast<int>(cos_dipDir0 * R0)));
-					poly.setPoint(1,center+QPoint(static_cast<int>(sin_dipDir0 * R1),-static_cast<int>(cos_dipDir0 * R1)));
-					poly.setPoint(2,center+QPoint(static_cast<int>(sin_dipDir1 * R1),-static_cast<int>(cos_dipDir1 * R1)));
-					poly.setPoint(3,center+QPoint(static_cast<int>(sin_dipDir1 * R0),-static_cast<int>(cos_dipDir1 * R0)));
+					poly.setPoint(0, center + QPoint(static_cast<int>(sin_dipDir0 * R0), -static_cast<int>(cos_dipDir0 * R0)));
+					poly.setPoint(1, center + QPoint(static_cast<int>(sin_dipDir0 * R1), -static_cast<int>(cos_dipDir0 * R1)));
+					poly.setPoint(2, center + QPoint(static_cast<int>(sin_dipDir1 * R1), -static_cast<int>(cos_dipDir1 * R1)));
+					poly.setPoint(3, center + QPoint(static_cast<int>(sin_dipDir1 * R0), -static_cast<int>(cos_dipDir1 * R0)));
 
 					painter.drawPolygon(poly);
 				}
@@ -494,15 +490,15 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 		pen.setColor(Qt::red);
 		painter.setPen(pen);
 		//draw main direction
-		QPoint X(	 static_cast<int>(sin(m_meanDipDir_deg * CC_DEG_TO_RAD) * static_cast<double>(radius)),
-			-static_cast<int>(cos(m_meanDipDir_deg * CC_DEG_TO_RAD) * static_cast<double>(radius)) );
+		QPoint X(	 static_cast<int>(sin(m_meanDipDir_deg * CC_DEG_TO_RAD) * radius),
+					-static_cast<int>(cos(m_meanDipDir_deg * CC_DEG_TO_RAD) * radius) );
 		pen.setStyle(Qt::DashLine);
 		painter.setPen(pen);
 		painter.drawLine(center,center+X);
 
 		//draw orthogonal to main direction
-		QPoint Y(	static_cast<int>(cos(m_meanDipDir_deg * CC_DEG_TO_RAD) * static_cast<double>(radius)),
-			static_cast<int>(sin(m_meanDipDir_deg * CC_DEG_TO_RAD) * static_cast<double>(radius)) );
+		QPoint Y(	static_cast<int>(cos(m_meanDipDir_deg * CC_DEG_TO_RAD) * radius),
+					static_cast<int>(sin(m_meanDipDir_deg * CC_DEG_TO_RAD) * radius) );
 		pen.setStyle(Qt::SolidLine);
 		painter.setPen(pen);
 		painter.drawLine(center-Y,center+Y);
@@ -520,23 +516,23 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 		//painter.setBrush(brush);
 		painter.setBrush(Qt::NoBrush);
 
-		double R0 = static_cast<double>(radius) * (std::max(0.0,m_clickDip_deg-m_clickDipSpan_deg/2)/90.0);
-		double R1 = static_cast<double>(radius) * (std::min(90.0,m_clickDip_deg+m_clickDipSpan_deg/2)/90.0);
+		double R0 = radius * (std::max(0.0, m_clickDip_deg - m_clickDipSpan_deg / 2) / 90.0);
+		double R1 = radius * (std::min(90.0, m_clickDip_deg + m_clickDipSpan_deg / 2) / 90.0);
 
 		//draw radial limits
 		{
-			QPoint X0(	 static_cast<int>(sin((m_clickDipDir_deg-m_clickDipDirSpan_deg/2) * CC_DEG_TO_RAD) * R0),
-				-static_cast<int>(cos((m_clickDipDir_deg-m_clickDipDirSpan_deg/2) * CC_DEG_TO_RAD) * R0) );
-			QPoint X1(	 static_cast<int>(sin((m_clickDipDir_deg-m_clickDipDirSpan_deg/2) * CC_DEG_TO_RAD) * R1),
-				-static_cast<int>(cos((m_clickDipDir_deg-m_clickDipDirSpan_deg/2) * CC_DEG_TO_RAD) * R1) );
-			painter.drawLine(center+X0,center+X1);
+			QPoint X0(	 static_cast<int>(sin((m_clickDipDir_deg - m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R0),
+						-static_cast<int>(cos((m_clickDipDir_deg - m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R0));
+			QPoint X1(	 static_cast<int>(sin((m_clickDipDir_deg - m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R1),
+						-static_cast<int>(cos((m_clickDipDir_deg - m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R1));
+			painter.drawLine(center + X0, center + X1);
 		}
 		{
-			QPoint X0(	 static_cast<int>(sin((m_clickDipDir_deg+m_clickDipDirSpan_deg/2) * CC_DEG_TO_RAD) * R0),
-				-static_cast<int>(cos((m_clickDipDir_deg+m_clickDipDirSpan_deg/2) * CC_DEG_TO_RAD) * R0) );
-			QPoint X1(	 static_cast<int>(sin((m_clickDipDir_deg+m_clickDipDirSpan_deg/2) * CC_DEG_TO_RAD) * R1),
-				-static_cast<int>(cos((m_clickDipDir_deg+m_clickDipDirSpan_deg/2) * CC_DEG_TO_RAD) * R1) );
-			painter.drawLine(center+X0,center+X1);
+			QPoint X0(	 static_cast<int>(sin((m_clickDipDir_deg + m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R0),
+						-static_cast<int>(cos((m_clickDipDir_deg + m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R0));
+			QPoint X1(	 static_cast<int>(sin((m_clickDipDir_deg + m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R1),
+						-static_cast<int>(cos((m_clickDipDir_deg + m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R1));
+			painter.drawLine(center + X0, center + X1);
 		}
 
 		//draw concentric limits
@@ -544,15 +540,15 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 			int angle_start = static_cast<int>((360.0 - m_clickDipDir_deg - m_clickDipDirSpan_deg/2 + 90.0) * 16.0); //see QPainter::drawPie
 			int angle_span = static_cast<int>(m_clickDipDirSpan_deg * 16.0); //see QPainter::drawPie
 
-			QRectF rect0(static_cast<double>(center.x()) - R0,
-				static_cast<double>(center.y()) - R0,
-				2*R0, 2*R0);
-			painter.drawArc(rect0,angle_start,angle_span);
+			QRectF rect0(	center.x() - R0,
+							center.y() - R0,
+							2*R0, 2*R0);
+			painter.drawArc(rect0, angle_start, angle_span);
 
-			QRectF rect1(static_cast<double>(center.x()) - R1,
-				static_cast<double>(center.y()) - R1,
-				2*R1, 2*R1);
-			painter.drawArc(rect1,angle_start,angle_span);
+			QRectF rect1(	center.x() - R1,
+							center.y() - R1,
+							2*R1, 2*R1);
+			painter.drawArc(rect1, angle_start, angle_span);
 		}
 	}
 }
@@ -731,11 +727,11 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		ccHObject::Container facets;
-		entity->filterChildren(facets,true,CC_TYPES::FACET);
+		entity->filterChildren(facets, true, CC_TYPES::FACET);
 		if (facets.empty())
 			return;
 
-		for (size_t i=0; i<facets.size(); ++i)
+		for (size_t i = 0; i < facets.size(); ++i)
 		{
 			ccFacet* facet = static_cast<ccFacet*>(facets[i]);
 
@@ -743,8 +739,8 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 			if (enable)
 			{
 				CCVector3 N = facet->getNormal();
-				PointCoordinateType dip,dipDir;
-				ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
+				PointCoordinateType dip, dipDir;
+				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 				double dDip = fabs(dip - dipFilter);
 				double dDipDir = fabs(dipDir - dipDirFilter);
@@ -787,11 +783,11 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 			ccPointCloud::VisibilityTableType* visTable = cloud->getTheVisibilityArray();
 			assert(visTable);
 
-			for (unsigned i=0; i<static_cast<unsigned>(count); ++i)
+			for (unsigned i = 0; i < static_cast<unsigned>(count); ++i)
 			{
 				CCVector3 N = cloud->getPointNormal(i);
-				PointCoordinateType dip,dipDir;
-				ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
+				PointCoordinateType dip, dipDir;
+				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 				double dDip = fabs(dip - dipFilter);
 				double dDipDir = fabs(dipDir - dipDirFilter);
@@ -826,10 +822,10 @@ void StereogramDialog::exportCurrentSelection()
 	PointCoordinateType dipFilter = static_cast<PointCoordinateType>(dipDoubleSpinBox->value());
 	PointCoordinateType dipDirFilter = static_cast<PointCoordinateType>(dipDirDoubleSpinBox->value());
 
-	PointCoordinateType halfDipSpan = static_cast<PointCoordinateType>(dipSpanDoubleSpinBox->value())/2;
-	PointCoordinateType halfDipDirSpan = static_cast<PointCoordinateType>(dipDirSpanDoubleSpinBox->value())/2;
+	PointCoordinateType halfDipSpan = static_cast<PointCoordinateType>(dipSpanDoubleSpinBox->value()) / 2;
+	PointCoordinateType halfDipDirSpan = static_cast<PointCoordinateType>(dipDirSpanDoubleSpinBox->value()) / 2;
 
-	QString selectionSuffix = QString(" [dip=(%1 - %2)][dipDir=(%3 - %4)]").arg(dipFilter-halfDipSpan).arg(dipFilter+halfDipSpan).arg(dipDirFilter-halfDipDirSpan).arg(dipDirFilter+halfDipDirSpan);
+	QString selectionSuffix = QString(" [dip=(%1 - %2)][dipDir=(%3 - %4)]").arg(dipFilter - halfDipSpan).arg(dipFilter + halfDipSpan).arg(dipDirFilter - halfDipDirSpan).arg(dipDirFilter + halfDipDirSpan);
 
 	//a set of facets?
 	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
@@ -840,13 +836,13 @@ void StereogramDialog::exportCurrentSelection()
 			return;
 		ccHObject* newGroup = new ccHObject(entity->getName() + selectionSuffix);
 
-		for (size_t i=0; i<facets.size(); ++i)
+		for (size_t i = 0; i < facets.size(); ++i)
 		{
 			ccFacet* facet = static_cast<ccFacet*>(facets[i]);
 
 			CCVector3 N = facet->getNormal();
-			PointCoordinateType dip,dipDir;
-			ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
+			PointCoordinateType dip, dipDir;
+			ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 			double dDip = fabs(dip - dipFilter);
 			double dDipDir = fabs(dipDir - dipDirFilter);

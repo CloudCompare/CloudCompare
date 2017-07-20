@@ -4741,12 +4741,12 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		m_vboManager.updateFlags = vboSet::UPDATE_ALL;
 	}
 
-	size_t chunksCount = m_points->chunksCount();
+	unsigned chunksCount = m_points->chunksCount();
 	//allocate per-chunk descriptors if necessary
 	if (m_vboManager.vbos.size() != chunksCount)
 	{
 		//properly remove the elements that are not needed anymore!
-		for (size_t i = chunksCount; i < m_vboManager.vbos.size(); ++i)
+		for (unsigned i = chunksCount; i < m_vboManager.vbos.size(); ++i)
 		{
 			if (m_vboManager.vbos[i])
 			{
@@ -4792,7 +4792,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 #endif
 
 		//process each chunk
-		for (size_t i = 0; i < chunksCount; ++i)
+		for (unsigned i = 0; i < chunksCount; ++i)
 		{
 			int chunkSize = static_cast<int>(m_points->chunkSize(i));
 

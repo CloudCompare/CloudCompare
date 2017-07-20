@@ -21,6 +21,9 @@ function( target_link_PDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = base 
 
             #Win32 copy dll?!
             if( WIN32 )
+                if ( MSVC_VERSION EQUAL 1910 ) # Visual Studio 2017
+                    add_definitions(-DWIN32_LEAN_AND_MEAN)
+                endif()
                 target_link_libraries(${ARGV0} "pdal_util")
             endif()
 

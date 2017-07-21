@@ -275,43 +275,43 @@ namespace ccColor
 	};
 
 	//! Conversion from Rgbf
-	static Rgb FromRgbf(const Rgbf& color) { return Rgb(static_cast<ColorCompType>(color.r * MAX),
+	inline Rgb FromRgbf(const Rgbf& color) { return Rgb(static_cast<ColorCompType>(color.r * MAX),
 														static_cast<ColorCompType>(color.g * MAX),
 														static_cast<ColorCompType>(color.b * MAX)); }
 
 	//! Conversion from Rgbaf
-	static Rgb FromRgbf(const Rgbaf& color) { return Rgb(	static_cast<ColorCompType>(color.r * MAX),
+	inline Rgb FromRgbf(const Rgbaf& color) { return Rgb(	static_cast<ColorCompType>(color.r * MAX),
 															static_cast<ColorCompType>(color.g * MAX),
 															static_cast<ColorCompType>(color.b * MAX)); }
 
 	//! Conversion from QRgb
-	static Rgb FromQRgb(QRgb qColor) { return Rgb(	static_cast<unsigned char>(qRed(qColor)),
+	inline Rgb FromQRgb(QRgb qColor) { return Rgb(	static_cast<unsigned char>(qRed(qColor)),
 													static_cast<unsigned char>(qGreen(qColor)),
 													static_cast<unsigned char>(qBlue(qColor))); }
 
 	//! Conversion from QRgb'a'
-	static Rgba FromQRgba(QRgb qColor) { return Rgba(	static_cast<unsigned char>(qRed(qColor)),
+	inline Rgba FromQRgba(QRgb qColor) { return Rgba(	static_cast<unsigned char>(qRed(qColor)),
 														static_cast<unsigned char>(qGreen(qColor)),
 														static_cast<unsigned char>(qBlue(qColor)),
 														static_cast<unsigned char>(qAlpha(qColor))); }
 
 	//! Conversion from QColor
-	static Rgb FromQColor(QColor qColor) { return Rgb(	static_cast<unsigned char>(qColor.red()),
+	inline Rgb FromQColor(QColor qColor) { return Rgb(	static_cast<unsigned char>(qColor.red()),
 														static_cast<unsigned char>(qColor.green()),
 														static_cast<unsigned char>(qColor.blue())); }
 
 	//! Conversion from QColor'a'
-	static Rgba FromQColora(QColor qColor) { return Rgba(	static_cast<unsigned char>(qColor.red()),
+	inline Rgba FromQColora(QColor qColor) { return Rgba(	static_cast<unsigned char>(qColor.red()),
 															static_cast<unsigned char>(qColor.green()),
 															static_cast<unsigned char>(qColor.blue()),
 															static_cast<unsigned char>(qColor.alpha())); }
 
 	//! Conversion from QColor (floating point)
-	static Rgbf FromQColorf(QColor qColor) { return Rgbf(	static_cast<unsigned char>(qColor.redF()),
+	inline Rgbf FromQColorf(QColor qColor) { return Rgbf(	static_cast<unsigned char>(qColor.redF()),
 															static_cast<unsigned char>(qColor.greenF()),
 															static_cast<unsigned char>(qColor.blueF())); }
 	//! Conversion from QColor'a' (floating point)
-	static Rgbaf FromQColoraf(QColor qColor) { return Rgbaf(	static_cast<unsigned char>(qColor.redF()),
+	inline Rgbaf FromQColoraf(QColor qColor) { return Rgbaf(	static_cast<unsigned char>(qColor.redF()),
 																static_cast<unsigned char>(qColor.greenF()),
 																static_cast<unsigned char>(qColor.blueF()),
 																static_cast<unsigned char>(qColor.alphaF()));

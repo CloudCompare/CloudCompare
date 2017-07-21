@@ -5789,80 +5789,42 @@ void MainWindow::showEvent(QShowEvent* event)
 {
 	QMainWindow::showEvent( event );
 
-	if ( m_FirstShow )
+	if ( !m_FirstShow )
 	{
-		QSettings settings;
-		QVariant  geometry = settings.value(ccPS::MainWinGeom());
-
-		if ( geometry.isValid() )
-		{
-			restoreGeometry(geometry.toByteArray());
-			restoreState(settings.value(ccPS::MainWinState()).toByteArray());
-		}
-
-		m_FirstShow = false;
-
-		if ( !geometry.isValid() )
-		{
-			showMaximized();
-		}
-
-		if ( isFullScreen() )
-		{
-			actionFullScreen->setChecked( true );
-		}
-
-#ifdef Q_OS_MAC
-		if ( isFullScreen() )
-		{
-			actionFullScreen->setText( tr( "Exit Full Screen" ) );
-		}
-		else
-		{
-			actionFullScreen->setText( tr( "Enter Full Screen" ) );
-		}
-#endif
-
-		//special warning message for high DPI (Retina) displays
-		if (devicePixelRatio() != 1.0)
-		{
-			//we always show a warning in the console
-			ccLog::Warning("High pixel density screen detected: point picking and label display won't work properly!");
-			//but the first time we also show an annoying warning popup ;)
-			QMetaObject::invokeMethod(this, "showHighDPIScreenWarning", Qt::QueuedConnection);
-		}
-	}
-}
-
-void MainWindow::showHighDPIScreenWarning()
-{
-	QSettings settings;
-	if (settings.value("HighDPIScreenWarningIssued", false).toBool())
-	{
-		//message already issued
 		return;
 	}
-
-	QMessageBox* msgBox = new QMessageBox(this);
-	msgBox->setWindowTitle("High DPI screen detected");
-	msgBox->setIcon(QMessageBox::Warning);
-	msgBox->setText("Your screen (Apple Retina?) seems to have a high pixel density: point picking and label display won't work properly!");
-	msgBox->setInformativeText("(Note from Daniel: if you want this issue to be solved fast, you should send a Retina screen to Andy ;)");
-	msgBox->setStandardButtons(QMessageBox::Ignore | QMessageBox::Ok);
-	msgBox->setDefaultButton(QMessageBox::Ignore);
-
-	//Man, I love lambdas!
-	connect(msgBox->button(QMessageBox::Ok), &QAbstractButton::clicked, []()
-		{
-			//don't annoy the user ever again
-			QSettings settings;
-			settings.setValue("HighDPIScreenWarningIssued", true);
-		}
-	);
-
-	//DGM: don't 'exec' this dialog, otherwise it will block the main loop
-	//and it will prevent the spash screen from disappearing!
-	msgBox->show();
+	
+	QSettings settings;
+	QVariant  geometry = settings.value(ccPS::MainWinGeom());
+	
+	if ( geometry.isValid() )
+	{
+		restoreGeometry(geometry.toByteArray());
+		restoreState(settings.value(ccPS::MainWinState()).toByteArray());
+	}
+	
+	m_FirstShow = false;
+	
+	if ( !geometry.isValid() )
+	{
+		showMaximized();
+	}
+	
+	if ( isFullScreen() )
+	{
+		actionFullScreen->setChecked( true );
+	}
+	
+#ifdef Q_OS_MAC
+	if ( isFullScreen() )
+	{
+		actionFullScreen->setText( tr( "Exit Full Screen" ) );
+	}
+	else
+	{
+		actionFullScreen->setText( tr( "Enter Full Screen" ) );
+	}
+#endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

@@ -4668,6 +4668,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	int nearestElementIndex = -1;
 	double nearestElementSquareDist = -1.0;
 	CCVector3 nearestPoint(0, 0, 0);
+	static const unsigned MIN_POINTS_FOR_OCTREE_COMPUTATION = 128;
 
 	static ccGui::ParamStruct::ComputeOctreeForPicking autoComputeOctreeThisSession = ccGui::ParamStruct::ASK_USER;
 	bool autoComputeOctree = false;
@@ -4702,7 +4703,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 				{
 					ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
 
-					if (firstCloudWithoutOctree && !cloud->getOctree())
+					if (firstCloudWithoutOctree && !cloud->getOctree() && cloud->size() > MIN_POINTS_FOR_OCTREE_COMPUTATION) //no need to use the octree for a few points!
 					{
 						//can we compute an octree for picking?
 						ccGui::ParamStruct::ComputeOctreeForPicking behavior = getDisplayParameters().autoComputeOctree;
@@ -4776,7 +4777,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 						nearestSquareDist,
 						params.pickWidth,
 						params.pickHeight,
-						autoComputeOctree))
+						autoComputeOctree && cloud->size() > MIN_POINTS_FOR_OCTREE_COMPUTATION))
 					{
 						if (nearestElementIndex < 0 || (nearestPointIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{

@@ -2691,7 +2691,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 
 	ccBBox zoomedBox;
 
-	//the user has provided a valid bouding box
+	//the user has provided a valid bounding box
 	if (aBox)
 	{
 		zoomedBox = (*aBox);

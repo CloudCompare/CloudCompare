@@ -91,7 +91,7 @@ void ccCompass::getActions(QActionGroup& group)
 	}
 	group.addAction(m_action);
 
-	m_app->dispToConsole("[ccCompass] ccCompass plugin initialized succesfully.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_app->dispToConsole("[ccCompass] ccCompass plugin initialized successfully.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 }
 

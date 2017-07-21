@@ -112,7 +112,7 @@ protected:
 	ScalarType sigma2;
 
 	//! internal function for parameters evaluation from sample points
-	/** inverseVmax can be optionnaly specified for overflow-safe version
+	/** inverseVmax can be optionally specified for overflow-safe version
 	**/
 	ScalarType computeG(const GenericCloud* Yk, ScalarType a, ScalarType* inverseVmax = 0) const;
 	//! internal function for parameters evaluation from sample points

@@ -290,7 +290,7 @@ DistanceComputationTools::SOReturnCode
 
 	if (maxDist > 0)
 	{
-		//we reduce the bouding box to the intersection of both bounding-boxes enlarged by 'maxDist'
+		//we reduce the bounding box to the intersection of both bounding-boxes enlarged by 'maxDist'
 		for (unsigned char k=0; k<3; k++)
 		{
 			minD.u[k] = std::max(minD.u[k], std::max(minsA.u[k], minsB.u[k]) - maxDist);

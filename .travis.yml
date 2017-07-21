@@ -3,41 +3,45 @@ dist: trusty
 group: deprecated-2017Q2
 cache: ccache
 language: cpp
+
 compiler:
-- clang
-- gcc
+  - clang
+  - gcc
+
 install:
-- sudo add-apt-repository --yes ppa:george-edison55/cmake-3.x
-- sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
-- sudo apt-get update -qq
-- sudo apt-get install -qy cmake qt55base libgdal1-dev libfreenect-dev libvxl1-dev
-  libeigen3-dev
-- git submodule init && git submodule update
+  - sudo add-apt-repository --yes ppa:george-edison55/cmake-3.x
+  - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
+  - sudo apt-get update -qq
+  - sudo apt-get install -qy cmake qt55base libgdal1-dev libfreenect-dev libvxl1-dev libeigen3-dev
+  - git submodule init && git submodule update
+
 before_script:
-- mkdir build
-- cd build
-- cmake -DCMAKE_BUILD_TYPE=Release -DQT5_ROOT_PATH=/opt/qt55 -DOPTION_USE_DXF_LIB=ON
-  -DOPTION_USE_SHAPE_LIB=ON -DINSTALL_QANIMATION_PLUGIN=ON -DINSTALL_QBLUR_PLUGIN=ON
-  -DINSTALL_QCOMPASS_PLUGIN=ON -DINSTALL_QDUMMY_PLUGIN=ON -DINSTALL_QEDL_PLUGIN=ON
-  -DINSTALL_QFACETS_PLUGIN=ON -DINSTALL_QHPR_PLUGIN=ON -DINSTALL_QPOISSON_RECON_PLUGIN=ON
-  -DINSTALL_QSRA_PLUGIN=ON -DINSTALL_QSSAO_PLUGIN=ON -DINSTALL_QGMMREG_PLUGIN=ON -DINSTALL_QCSF_PLUGIN=ON
-  -DINSTALL_QPHOTOSCAN_IO_PLUGIN=ON -DINSTALL_QM3C2_PLUGIN=ON -DINSTALL_QBROOM_PLUGIN=ON
-  -DINSTALL_QHOUGH_NORMALS_PLUGIN=ON -DEIGEN_ROOT_DIR=/usr/include/eigen3 -DINSTALL_QPCV_PLUGIN=ON
-  ..
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=Release -DQT5_ROOT_PATH=/opt/qt55 -DOPTION_USE_DXF_LIB=ON
+    -DOPTION_USE_SHAPE_LIB=ON -DINSTALL_QANIMATION_PLUGIN=ON -DINSTALL_QBLUR_PLUGIN=ON
+    -DINSTALL_QCOMPASS_PLUGIN=ON -DINSTALL_QDUMMY_PLUGIN=ON -DINSTALL_QEDL_PLUGIN=ON
+    -DINSTALL_QFACETS_PLUGIN=ON -DINSTALL_QHPR_PLUGIN=ON -DINSTALL_QPOISSON_RECON_PLUGIN=ON
+    -DINSTALL_QSRA_PLUGIN=ON -DINSTALL_QSSAO_PLUGIN=ON -DINSTALL_QGMMREG_PLUGIN=ON -DINSTALL_QCSF_PLUGIN=ON
+    -DINSTALL_QPHOTOSCAN_IO_PLUGIN=ON -DINSTALL_QM3C2_PLUGIN=ON -DINSTALL_QBROOM_PLUGIN=ON
+    -DINSTALL_QHOUGH_NORMALS_PLUGIN=ON -DEIGEN_ROOT_DIR=/usr/include/eigen3 -DINSTALL_QPCV_PLUGIN=ON
+    ..
+  
 script:
-- make -j2
-- cd ..
+  - make -j2
+  - cd ..
+
 after_success:
-- openssl aes-256-cbc -K $encrypted_553dcb22e689_key -iv $encrypted_553dcb22e689_iv
-  -in .snapcraft/travis_snapcraft.cfg -out .snapcraft/snapcraft.cfg -d
+  - openssl aes-256-cbc -K $encrypted_553dcb22e689_key -iv $encrypted_553dcb22e689_iv
+    -in .snapcraft/travis_snapcraft.cfg -out .snapcraft/snapcraft.cfg -d
+  
 services:
-- docker
+  - docker
+
 deploy:
-  'on':
+  on:
     branch: master
-    condition: "$CC = gcc"
+    condition: $CC = gcc
   provider: script
-  script: docker run -v $(pwd):$(pwd) -t ubuntu:xenial sh -c "apt update -qq && apt
-    install snapcraft -y && cd $(pwd) && snapcraft && snapcraft push *.snap --release
-    edge"
+  script: scripts/snap_deploy.sh $(pwd)
   skip_cleanup: true

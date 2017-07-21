@@ -489,9 +489,6 @@ protected slots:
 	//! Creates a cloud with the (bounding-box) centers of all selected entities
 	void doActionCreateCloudFromEntCenters();
 
-	//! Show high DPI (Retina) screen warning
-	void showHighDPIScreenWarning();
-
 protected:
 
 	//! Apply transformation to the selected entities

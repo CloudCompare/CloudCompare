@@ -43,5 +43,5 @@ deploy:
     branch: master
     condition: $CC = gcc
   provider: script
-  script: scripts/snap_deploy.sh $(pwd)
+  script: scripts/linux/snap_deploy.sh $(pwd)
   skip_cleanup: true

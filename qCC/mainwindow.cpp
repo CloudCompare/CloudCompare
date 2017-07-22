@@ -5427,7 +5427,14 @@ void MainWindow::doActionSORFilter()
 		else
 		{
 			//no points fall inside selection!
-			ccConsole::Warning(QString("[doActionSORFilter] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+			if ( cloud != nullptr )
+			{
+				ccConsole::Warning(QString("[doActionSORFilter] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+			}
+			else
+			{
+				ccConsole::Warning( "[doActionSORFilter] Trying to apply the noise filter to null cloud" );
+			}
 		}
 	}
 
@@ -5542,7 +5549,14 @@ void MainWindow::doActionFilterNoise()
 		else
 		{
 			//no points fall inside selection!
-			ccConsole::Warning(QString("[doActionFilterNoise] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+			if ( cloud != nullptr )
+			{
+				ccConsole::Warning(QString("[doActionFilterNoise] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+			}
+			else
+			{
+				ccConsole::Warning( "[doActionFilterNoise] Trying to apply the noise filter to null cloud" );
+			}
 		}
 	}
 
@@ -6993,7 +7007,7 @@ void MainWindow::doActionSaveViewportAsCamera()
 
 void MainWindow::zoomOnSelectedEntities()
 {
-	ccGLWindow* win = 0;
+	ccGLWindow* win = nullptr;
 
 	ccHObject tempGroup("TempGroup");
 	size_t selNum = m_selectedEntities.size();
@@ -7028,7 +7042,10 @@ void MainWindow::zoomOnSelectedEntities()
 		}
 		else
 		{
-			win->updateConstellationCenterAndZoom(&box);
+			if ( win != nullptr )
+			{
+				win->updateConstellationCenterAndZoom(&box);
+			}
 		}
 	}
 
@@ -9133,6 +9150,9 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 {
 	//we simply update the fullscreen action method icon (whatever the window)
 	ccGLWindow* win = getActiveGLWindow();
+	
+	if ( win == nullptr )
+		return;
 
 	actionExclusiveFullScreen->blockSignals(true);
 	actionExclusiveFullScreen->setChecked(win ? win->exclusiveFullScreen() : false);

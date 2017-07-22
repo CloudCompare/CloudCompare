@@ -632,7 +632,10 @@ void ccViewer::doActionEditCamera()
 
 void ccViewer::reflectPerspectiveState()
 {
-	bool objectCentered;
+	if ( m_glWindow == nullptr )
+		return;
+	
+	bool objectCentered = false;
 	bool perspectiveEnabled = m_glWindow->getPerspectiveState(objectCentered);
 
 	ui.actionSetOrthoView->setChecked(!perspectiveEnabled);
@@ -694,6 +697,9 @@ void ccViewer::setViewerPerspectiveView()
 
 void ccViewer::reflectPivotVisibilityState()
 {
+	if ( m_glWindow == nullptr )
+		return;
+	
 	ccGLWindow::PivotVisibility vis = m_glWindow->getPivotVisibility();
 
 	ui.actionSetPivotAlwaysOn->setChecked(vis == ccGLWindow::PIVOT_ALWAYS_SHOW);
@@ -733,6 +739,9 @@ void ccViewer::setPivotOff()
 
 void ccViewer::reflectLightsState()
 {
+	if ( m_glWindow == nullptr )
+		return;
+	
 	ui.actionToggleSunLight->blockSignals(true);
 	ui.actionToggleCustomLight->blockSignals(true);
 

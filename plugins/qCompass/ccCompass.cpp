@@ -914,10 +914,13 @@ void ccCompass::onUndo()
 	{
 		if (!m_app->dbRootObject()->find(m_trace_id))
 		{
-			m_trace = 0;
+			m_trace = nullptr;
 		}
-		m_trace->undoLast();
-		m_trace->optimizePath();
+		else
+		{
+			m_trace->undoLast();
+			m_trace->optimizePath();
+		}
 	}
 	m_window->redraw();
 }

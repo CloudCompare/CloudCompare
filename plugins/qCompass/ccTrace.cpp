@@ -103,7 +103,7 @@ bool ccTrace::inCircle(const CCVector3* segStart, const CCVector3* segEnd, const
 	
 	//is angle between these vectors obtuce (i.e. QS dot QE) < 0)? If so we are inside a circle between start&end, otherwise we are not
 	QS.normalize();QE.normalize();
-	float dot = QS.dot(QE);
+
 	return QS.dot(QE) < 0;
 }
 
@@ -285,7 +285,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 
 		//fill "neighbours" with nodes - essentially get results of a "sphere" search around active current point
 		m_neighbours.clear();
-		int n = oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(search_r), m_neighbours, level);
+		oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(search_r), m_neighbours, level);
 
 		//loop through neighbours
 		for (size_t i = 0; i < m_neighbours.size(); i++)
@@ -626,7 +626,7 @@ float ccTrace::calculateOptimumSearchRadius()
 
 		//find nearest neighbour for point
 		nCloud->clear(false);
-		int n = oct->findPointNeighbourhood(m_cloud->getPoint(r), nCloud, 2, level, d);
+		oct->findPointNeighbourhood(m_cloud->getPoint(r), nCloud, 2, level, d);
 
 		if (d != -1) //if a point was found
 		{
@@ -696,7 +696,6 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 			{
 				//in perspective view, the actual scale depends on the distance to the camera!
-				const double* M = camera.modelViewMat.data();
 				double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
 				double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
 				scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
@@ -723,7 +722,6 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 				{
 					//in perspective view, the actual scale depends on the distance to the camera!
-					const double* M = camera.modelViewMat.data();
 					double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
 					double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
 					scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())

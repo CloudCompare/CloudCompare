@@ -84,7 +84,6 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	const ccViewportParameters& params = context.display->getViewportParameters();
 	glFunc->glPushAttrib(GL_LINE_BIT);
 
-	float relativeZoom = 1.0f;
 	float dx = 0.0f;
 	float dy = 0.0f;
 	if (!m_params.perspectiveView) //ortho mode
@@ -92,15 +91,11 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 		//Screen pan & pivot compensation
 		float totalZoom = m_params.zoom / m_params.pixelSize;
 		m_winTotalZoom = params.zoom / params.pixelSize;
-		relativeZoom = m_winTotalZoom / totalZoom;
 
 		CCVector3d dC = m_params.cameraCenter - params.cameraCenter;
 		
 		CCVector3d P = m_params.pivotPoint - params.pivotPoint;
 		m_params.viewMat.apply(P);
-
-		static_cast<float>(dC.x + P.x);
-		static_cast<float>(dC.y + P.y);
 
 		dx *= m_winTotalZoom;
 		dy *= m_winTotalZoom;
@@ -111,7 +106,6 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	glFunc->glLineStipple(1, 0xAAAA);
 	glFunc->glEnable(GL_LINE_STIPPLE);
 
-	const unsigned char* defaultColor = m_selected ? ccColor::red.rgba : context.textDefaultCol.rgb;
 	glFunc->glColor3ubv(ccColor::red.rgba);
 
 	//get height & width

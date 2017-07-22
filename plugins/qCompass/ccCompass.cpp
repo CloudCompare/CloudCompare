@@ -419,7 +419,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 			ccTrace::COST_MODE = m_dlg->getCostMode();
 
 			//add point
-			int index = m_trace->insertWaypoint(itemIdx);
+			m_trace->insertWaypoint(itemIdx);
 
 			//optimise points
 			if (m_trace->waypoint_count() >= 2)
@@ -458,7 +458,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 			}
 
 			//add point
-			int index = m_lineation->addPointIndex(itemIdx);
+			m_lineation->addPointIndex(itemIdx);
 
 			//is this the end point?
 			if (m_lineation->size()==2)
@@ -787,7 +787,6 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 	}
 
 	//is object a polyline
-	int tID = object->getUniqueID();
 	int n = 0;
 	if (object->isKindOf(CC_TYPES::POLY_LINE)) //ensure this is a polyline
 	{

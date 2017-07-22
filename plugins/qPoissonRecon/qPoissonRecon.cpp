@@ -208,17 +208,16 @@ void qPoissonRecon::doAction()
 		return;
 	}
 
-	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-
 	//we need one point cloud
-	size_t selNum = selectedEntities.size();
-	if (selNum != 1)
+	if (!m_app->haveOneSelection())
 	{
 		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
 	//a real point cloud
+	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
+	
 	ccHObject* ent = selectedEntities[0];
 	if (!ent->isA(CC_TYPES::POINT_CLOUD))
 	{

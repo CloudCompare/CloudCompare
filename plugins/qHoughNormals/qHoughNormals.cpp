@@ -83,8 +83,7 @@ void qHoughNormals::doAction()
 		return;
 	}
 
-	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	if (selectedEntities.empty())
+	if (!m_app->haveSelection())
 	{
 		assert(false);
 		return;
@@ -99,7 +98,7 @@ void qHoughNormals::doAction()
 
 	try
 	{
-		for (ccHObject* entity : selectedEntities)
+		for (ccHObject* entity : m_app->getSelectedEntities())
 		{
 			if (!entity || !entity->isA(CC_TYPES::POINT_CLOUD))
 			{

@@ -192,7 +192,7 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 
 	//we expect a unique cloud as input
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	ccPointCloud* pc = (selectedEntities.size() == 1 ? ccHObjectCaster::ToPointCloud(selectedEntities.back()) : 0);
+	ccPointCloud* pc = (m_app->haveOneSelection() ? ccHObjectCaster::ToPointCloud(selectedEntities.back()) : nullptr);
 	if (!pc)
 	{
 		m_app->dispToConsole("Select one and only one point cloud!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -533,12 +533,8 @@ void qFacets::getFacetsInCurrentSelection(FacetSet& facets) const
 	facets.clear();
 
 	//look for potential facets
-	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-
-	for (size_t i = 0; i < selectedEntities.size(); ++i)
+	for ( ccHObject *entity : m_app->getSelectedEntities() )
 	{
-		ccHObject* entity = selectedEntities[i];
-
 		if (entity->isA(CC_TYPES::FACET))
 		{
 			ccFacet* facet = static_cast<ccFacet*>(entity);
@@ -549,11 +545,14 @@ void qFacets::getFacetsInCurrentSelection(FacetSet& facets) const
 		{
 			ccHObject::Container childFacets;
 			entity->filterChildren(childFacets, true, CC_TYPES::FACET);
-			for (size_t j = 0; j < childFacets.size(); ++j)
+			
+			for ( ccHObject *childFacet : childFacets )
 			{
-				ccFacet* facet = static_cast<ccFacet*>(childFacets[j]);
+				ccFacet* facet = static_cast<ccFacet*>(childFacet);
 				if (facet->getContour()) //if no contour, we won't be able to save it?!
+				{
 					facets.insert(facet);
+				}
 			}
 		}
 	}
@@ -926,7 +925,7 @@ void qFacets::showStereogram()
 
 	//we expect a facet group or a cloud
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	if (selectedEntities.size() != 1
+	if (!m_app->haveOneSelection()
 		|| (!selectedEntities.back()->isA(CC_TYPES::HIERARCHY_OBJECT)
 		&& !selectedEntities.back()->isA(CC_TYPES::POINT_CLOUD))
 		)
@@ -965,7 +964,7 @@ void qFacets::classifyFacetsByAngle()
 
 	//we expect a facet group
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	if (selectedEntities.size() != 1 || !selectedEntities.back()->isA(CC_TYPES::HIERARCHY_OBJECT))
+	if (!m_app->haveOneSelection() || !selectedEntities.back()->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		m_app->dispToConsole("Select a group of facets!");
 		return;

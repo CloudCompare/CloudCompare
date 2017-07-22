@@ -216,9 +216,8 @@ void qHPR::doAction()
 		return;
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	size_t selNum = selectedEntities.size();
-	if (	selNum != 1
-		||	!selectedEntities.front()->isA(CC_TYPES::POINT_CLOUD))
+
+	if ( !m_app->haveOneSelection() || !selectedEntities.front()->isA(CC_TYPES::POINT_CLOUD))
 	{
 		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;

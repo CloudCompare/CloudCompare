@@ -131,7 +131,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(QString filename, ccHObject& container
 	CCVector3d Pshift(0,0,0);
 	bool firstPoint = true;
 
-	ccPointCloud* currentVertices = 0;
+	ccPointCloud* currentVertices = nullptr;
 	unsigned index = 0;
 	while (true)
 	{
@@ -144,7 +144,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(QString filename, ccHObject& container
 				if (currentVertices->size() < 2)
 				{
 					delete currentVertices;
-					currentVertices = 0;
+					currentVertices = nullptr;
 					ccLog::Warning("[Salome Hydro] An invalid polyline (single vertex) will be ignored");
 				}
 				else
@@ -166,7 +166,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(QString filename, ccHObject& container
 					newPoly->addPointIndex(0,currentVertices->size());
 					currentVertices->setEnabled(false);
 					container.addChild(newPoly);
-					currentVertices = 0;
+					currentVertices = nullptr;
 				}
 			}
 
@@ -225,6 +225,9 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(QString filename, ccHObject& container
 			}
 		}
 	}
-
+	
+	delete currentVertices;
+	currentVertices = nullptr;
+	
 	return result;
 }

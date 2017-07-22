@@ -89,7 +89,7 @@ parts:
       make install
   eigen:
     plugin: cmake
-    source: http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2
+    source: http://bitbucket.org/eigen/eigen/get/3.2.10.tar.bz2
     prime: [ -* ]
   launcher:
     plugin: dump

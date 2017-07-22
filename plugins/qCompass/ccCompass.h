@@ -57,6 +57,7 @@
 #include "ccLineationTool.h"
 #include "ccFloodTool.h"
 #include "ccThicknessTool.h"
+#include "ccNoteTool.h"
 
 //other
 #include <math.h>
@@ -112,6 +113,7 @@ protected slots:
 	void setPaintMode(); //activates the paint tool
 	void setThicknessMode(); //activates the thickness tool
 	void setThicknessMode2(); //activates the thickness tool in two-point mode
+	void setNoteMode(); //activates the note tool
 	void enableMapMode(); //turns on/off map mode
 	void enableMeasureMode(); //turns on/off map mode
 	void addGeoObject(); //creates a new GeoObject
@@ -165,6 +167,7 @@ protected:
 	ccLineationTool* m_lineationTool;
 	ccFloodTool* m_floodTool;
 	ccThicknessTool* m_thicknessTool;
+	ccNoteTool* m_noteTool;
 
 	//currently selected/active geoObject
 	ccGeoObject* m_geoObject = nullptr; //the GeoObject currently being written to

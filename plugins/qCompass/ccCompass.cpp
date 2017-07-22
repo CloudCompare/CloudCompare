@@ -39,7 +39,7 @@ ccCompass::ccCompass(QObject* parent/*=0*/)
 	m_lineationTool = new ccLineationTool();
 	m_floodTool = new ccFloodTool();
 	m_thicknessTool = new ccThicknessTool();
-
+	m_noteTool = new ccNoteTool();
 	//activate plane tool by default
 	//m_activeTool = m_fitPlaneTool;
 }
@@ -53,6 +53,7 @@ ccCompass::~ccCompass()
 	delete m_lineationTool;
 	delete m_floodTool;
 	delete m_thicknessTool;
+	delete m_noteTool;
 
 	if (m_dlg)
 		delete m_dlg;
@@ -177,7 +178,7 @@ void ccCompass::doAction()
 	m_lineationTool->initializeTool(m_app);
 	m_floodTool->initializeTool(m_app);
 	m_thicknessTool->initializeTool(m_app);
-
+	m_noteTool->initializeTool(m_app);
 	//Get handle to ccGLWindow
 	m_window = m_app->getActiveGLWindow();
 
@@ -204,6 +205,7 @@ void ccCompass::doAction()
 		ccCompassDlg::connect(m_dlg->paintModeButton, SIGNAL(clicked()), this, SLOT(setPaintMode()));
 		ccCompassDlg::connect(m_dlg->m_measure_thickness, SIGNAL(triggered()), this, SLOT(setThicknessMode()));
 		ccCompassDlg::connect(m_dlg->m_measure_thickness_twoPoint, SIGNAL(triggered()), this, SLOT(setThicknessMode2()));
+		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNoteMode()));
 		ccCompassDlg::connect(m_dlg->infoButton, SIGNAL(clicked()), this, SLOT(showHelp()));
 
 		ccCompassDlg::connect(m_dlg->m_showNames, SIGNAL(toggled(bool)), this, SLOT(toggleLabels(bool)));
@@ -575,9 +577,6 @@ bool ccCompass::eventFilter(QObject* obj, QEvent* event)
 	ccCompass::fitPlanes = m_dlg->planeFitMode();
 	ccTrace::COST_MODE = ccCompass::costMode;
 
-	//reorder menu's (sloppy, but works for now?)
-	m_app->updateOverlayDialogsPlacement();
-
 	if (event->type() == QEvent::MouseButtonDblClick)
 	{
 		QMouseEvent* mouseEvent = static_cast<QMouseEvent *>(event);
@@ -744,6 +743,21 @@ void ccCompass::setThicknessMode()
 	m_dlg->extraModeButton->setChecked(true);
 	m_dlg->undoButton->setEnabled(m_activeTool->canUndo());
 	m_dlg->acceptButton->setEnabled(true);
+	m_window->redraw(true, false);
+}
+
+void ccCompass::setNoteMode()
+{
+	cleanupBeforeToolChange();
+
+	//activate thickness tool
+	m_activeTool = m_noteTool;
+	m_activeTool->toolActivated();
+
+	//update GUI
+	m_dlg->extraModeButton->setChecked(true);
+	m_dlg->undoButton->setEnabled(m_activeTool->canUndo());
+	m_dlg->acceptButton->setEnabled(false);
 	m_window->redraw(true, false);
 }
 

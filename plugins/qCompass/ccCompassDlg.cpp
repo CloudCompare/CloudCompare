@@ -76,6 +76,16 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_cost_algorithm_menu->addSeparator();
 	m_cost_algorithm_menu->addAction(m_recalculate);
 
+	//add callbacks
+	ccCompassDlg::connect(m_dark, SIGNAL(triggered()), this, SLOT(setDarkCost()));
+	ccCompassDlg::connect(m_light, SIGNAL(triggered()), this, SLOT(setLightCost()));
+	ccCompassDlg::connect(m_rgb, SIGNAL(triggered()), this, SLOT(setRGBCost()));
+	ccCompassDlg::connect(m_grad, SIGNAL(triggered()), this, SLOT(setGradCost()));
+	ccCompassDlg::connect(m_curve, SIGNAL(triggered()), this, SLOT(setCurveCost()));
+	ccCompassDlg::connect(m_dist, SIGNAL(triggered()), this, SLOT(setDistCost()));
+	ccCompassDlg::connect(m_scalar, SIGNAL(triggered()), this, SLOT(setScalarCost()));
+	ccCompassDlg::connect(m_scalar_inv, SIGNAL(triggered()), this, SLOT(setInvScalarCost()));
+
 	//setup settings menu
 	m_settings_menu = new QMenu(this);
 	m_plane_fit = new QAction("Fit Planes", this); m_plane_fit->setCheckable(true); m_plane_fit->setChecked(true);
@@ -102,16 +112,19 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	//setup pair picking menu
 	m_pairpicking_menu = new QMenu(this);
 
+	m_noteTool = new QAction("Add note", this);
 	m_measure_thickness = new QAction("Measure One-Point Thickness", this);
 	m_measure_thickness_twoPoint = new QAction("Measure Two-Point Thickness");
 	m_crosscutting = new QAction("Assign Crosscutting Relationship", this);
 	m_younging = new QAction("Assign Younging Relationship", this);
 	
+	m_noteTool->setToolTip("Add short notes to a point in a point cloud for future reference.");
 	m_measure_thickness->setToolTip("Select a plane and then a point to measure plane-perpendicular thickness.");
 	m_measure_thickness_twoPoint->setToolTip("Measure the plane-perpendicular distance between two points");
 	m_crosscutting->setToolTip("Select two GeoObjects to assign a crosscutting relationship");
 	m_younging->setToolTip("Select two GeoObjects to assign a conformable younging relationship and copy across relevant boundaries");
 
+	m_pairpicking_menu->addAction(m_noteTool);
 	m_pairpicking_menu->addAction(m_measure_thickness);
 	m_pairpicking_menu->addAction(m_measure_thickness_twoPoint);
 	m_pairpicking_menu->addAction(m_crosscutting);

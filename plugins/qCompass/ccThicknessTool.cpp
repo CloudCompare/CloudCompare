@@ -105,7 +105,8 @@ void ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 			//create temporary graphic
 			ccLineation* temp = new ccLineation(cloud);
 			temp->addPointIndex(itemIdx);
-			temp->showNameIn3D(false);
+			temp->showNameIn3D(true);
+			temp->setName("P1");
 			m_graphic_id = temp->getUniqueID();
 			insertPoint->addChild(temp);
 			m_app->addToDB(temp, false, false, false, true);
@@ -170,7 +171,8 @@ ccHObject* ccThicknessTool::buildGraphic(CCVector3 endPoint, float thickness)
 	verts->addPoint(start);
 	verts->addPoint(endPoint);
 	verts->invalidateBoundingBox();
-	verts->computeOctree();
+	verts->setEnabled(false); //this is used for storage only!
+	verts->setVisible(false); //this is used for storage only!
 
 	//create a "lineation" graphic to display
 	ccLineation* graphic = new ccLineation(verts);

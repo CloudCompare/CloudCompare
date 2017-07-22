@@ -65,7 +65,7 @@ void ccTraceTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointC
 		if (m_precompute_curvature & !t->isCurvaturePrecomputed()) //not already computed?
 		{
 			QMessageBox::StandardButton q;
-			q = QMessageBox::question(m_app->getMainWindow(), "Calculate curvature?", "Precompute Curvature? This can be slow, but once complte will greatly decrease future computation times.", QMessageBox::Yes | QMessageBox::No);
+			q = QMessageBox::question(m_app->getMainWindow(), "Calculate curvature?", "Precompute Curvature? This can be slow, but once complete will greatly decrease future computation times.", QMessageBox::Yes | QMessageBox::No);
 			if (q == QMessageBox::Yes) //do compute
 			{
 				t->buildCurvatureCost(m_app->getMainWindow());

@@ -123,6 +123,11 @@ void ccLineation::drawMeOnly(CC_DRAW_CONTEXT& context)
 			return;
 		}
 
+		//push name for picking
+		bool pushName = MACRO_DrawEntityNames(context);
+		if (pushName)
+			glFunc->glPushName(getUniqueIDForDisplay());
+
 		//check sphere exists
 		if (!c_unitPointMarker)
 		{
@@ -220,6 +225,10 @@ void ccLineation::drawMeOnly(CC_DRAW_CONTEXT& context)
 			c_headMarker->draw(markerContext);
 			glFunc->glPopMatrix();
 		}
+
+		//finish picking name
+		if (pushName)
+			glFunc->glPopName();
 	}
 }
 

@@ -31,7 +31,6 @@
 #include <ui_compassDlg.h>
 #include "ccTrace.h"
 
-
 class ccCompassDlg : public ccOverlayDialog, public Ui::compassDlg
 {
 	Q_OBJECT
@@ -44,6 +43,7 @@ public:
 	Returns a flag describing the currently selected ccTrace::COST_MODE (used to build the cost function for optimisation)
 	*/
 	int getCostMode();
+
 	/*
 	Returns true if the m_plane_fit action is checked -> used to check if the user expects us to fit a plane to finished traces.
 	*/
@@ -63,6 +63,7 @@ public:
 	//pair picking menu
 	QAction *m_measure_thickness;
 	QAction *m_measure_thickness_twoPoint;
+	QAction *m_noteTool;
 	QAction *m_crosscutting;
 	QAction *m_younging;
 
@@ -70,6 +71,15 @@ protected slots:
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
 
+	//callbacks to update cost
+	void setDarkCost() { clearCost(); m_dark->setChecked(true); }
+	void setLightCost() { clearCost(); m_light->setChecked(true); }
+	void setRGBCost() { clearCost(); m_rgb->setChecked(true); }
+	void setGradCost() { clearCost(); m_grad->setChecked(true); }
+	void setCurveCost() { clearCost(); m_curve->setChecked(true); }
+	void setDistCost() { clearCost(); m_dist->setChecked(true); }
+	void setScalarCost() { clearCost(); m_scalar->setChecked(true); }
+	void setInvScalarCost() { clearCost(); m_scalar_inv->setChecked(true); }
 private:
 	//algorithm menu
 	QAction *m_dark;
@@ -81,6 +91,20 @@ private:
 	QAction *m_scalar;
 	QAction *m_scalar_inv;
 	
+
+	//disactivates all cost function checkboxes
+	void clearCost()
+	{
+		m_dark->setChecked(false);
+		m_light->setChecked(false);
+		m_rgb->setChecked(false);
+		m_grad->setChecked(false);
+		m_curve->setChecked(false);
+		m_dist->setChecked(false);
+		m_scalar->setChecked(false);
+		m_scalar_inv->setChecked(false);
+	}
+
 };
 
 #endif

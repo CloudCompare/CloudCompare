@@ -6700,8 +6700,7 @@ void MainWindow::deactivatePointPickingMode(bool state)
 
 void MainWindow::activateClippingBoxMode()
 {
-	size_t selNum = m_selectedEntities.size();
-	if (selNum == 0)
+	if ( !haveSelection() )
 	{
 		return;
 	}

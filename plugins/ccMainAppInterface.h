@@ -103,6 +103,12 @@ public:
 
 	//! Returns currently selected entities ("read only")
 	virtual const ccHObject::Container& getSelectedEntities() const = 0;
+	
+	//! Checks if we have any selections
+	bool	haveSelection() const { return !getSelectedEntities().empty(); }
+	
+	//! Checks if we have exactly one selection
+	bool	haveOneSelection() const { return getSelectedEntities().size() == 1; }
 
 	//! Console message level (see dispToConsole)
 	enum ConsoleMessageLevel

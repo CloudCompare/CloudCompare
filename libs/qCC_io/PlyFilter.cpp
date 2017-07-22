@@ -1523,7 +1523,6 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 			{
 				ccLog::Error(QString("Scalar field #%1: the number of scalars doesn't match the number of points (they will be ignored)!").arg(i + 1));
 				ccLog::Warning(QString("[PLY] Scalar field #%1 ignored!").arg(i + 1));
-				numberOfScalars = 0;
 			}
 			else
 			{

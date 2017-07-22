@@ -347,7 +347,6 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 						if (isPalette && !colTable)
 						{
 							ccLog::Warning(QString("Band is declared as a '%1' but no palette is associated!").arg(GDALGetColorInterpretationName(colorInterp)));
-							isPalette = false;
 						}
 						else
 						{

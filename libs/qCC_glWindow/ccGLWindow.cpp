@@ -4897,7 +4897,6 @@ void ccGLWindow::displayNewMessage(	const QString& message,
 		if (pos == SCREEN_CENTER_MESSAGE)
 		{
 			ccLog::Warning("[ccGLWindow::displayNewMessage] Append is not supported for center screen messages!");
-			append = false;
 		}
 	}
 

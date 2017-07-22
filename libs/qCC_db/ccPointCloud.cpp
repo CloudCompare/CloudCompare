@@ -3549,7 +3549,6 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 		return false;
 	}
 
-	bool hadColors = hasColors();
 	if (!resizeTheRGBTable(false))
 	{
 		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
@@ -3775,10 +3774,6 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 		return 0;
 	}
 
-	PointCoordinateType alpha_rad = coneAngle_deg * CC_DEG_TO_RAD;
-	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>( cos(alpha_rad) );
-	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>( sin(alpha_rad) );
-
 	CCLib::ScalarField* deviationSF = 0;
 	if (exportDeviationSF)
 	{
@@ -3799,6 +3794,9 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 		clone->setCurrentDisplayedScalarField(sfIdx);
 		clone->showSF(true);
 	}
+	
+	PointCoordinateType alpha_rad = coneAngle_deg * CC_DEG_TO_RAD;
+	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>( sin(alpha_rad) );
 
 	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
@@ -3823,7 +3821,6 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 		else
 		{
 			//unrolling
-			PointCoordinateType rho = s * sin_alpha;
 			PointCoordinateType theta_rad = phi_rad * sin_alpha;
 
 			//project the point
@@ -3854,7 +3851,6 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 			else
 			{
 				//unrolling
-				PointCoordinateType rho2 = s2 * sin_alpha;
 				PointCoordinateType theta2_rad = phi2_rad * sin_alpha;
 
 				//project the point

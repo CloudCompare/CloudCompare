@@ -395,7 +395,7 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 			}
 
 			//add actions
-			foreach (QAction* action, actions.actions())
+			for (QAction* action : actions.actions())
 			{
 				//add to menu (if any)
 				if (destMenu)
@@ -444,7 +444,6 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 		case CC_IO_FILTER_PLUGIN: //I/O filter
 		{
 			//not handled by the MainWindow instance
-			continue;
 		}
 		break;
 
@@ -1369,10 +1368,10 @@ void MainWindow::doActionApplyScale()
 
 	//now do the real scaling work
 	{
-		for (size_t i = 0; i < candidates.size(); ++i)
+		for ( auto &candidate : candidates )
 		{
-			ccHObject* ent = candidates[i].first;
-			ccGenericPointCloud* cloud = candidates[i].second;
+			ccHObject* ent = candidate.first;
+			ccGenericPointCloud* cloud = candidate.second;
 
 			CCVector3 C(0, 0, 0);
 			if (keepInPlace)
@@ -1419,8 +1418,6 @@ void MainWindow::doActionApplyScale()
 
 void MainWindow::doActionEditGlobalShiftAndScale()
 {
-	size_t selNum = m_selectedEntities.size();
-
 	//get the global shift/scale info and bounding box of all selected clouds
 	std::vector< std::pair<ccShiftedObject*, ccHObject*> > shiftedEntities;
 	CCVector3d Pl(0, 0, 0);
@@ -2460,9 +2457,9 @@ void MainWindow::doActionCheckPointsInsideFrustum()
 
 				const ScalarType c_insideValue = static_cast<ScalarType>(1);
 
-				for (size_t i = 0; i < inCameraFrustum.size(); i++)
+				for ( unsigned int index : inCameraFrustum )
 				{
-					sf->setValue(inCameraFrustum[i], c_insideValue);
+					sf->setValue(index, c_insideValue);
 				}
 
 				sf->computeMinAndMax();
@@ -2726,31 +2723,28 @@ void MainWindow::doActionSamplePoints()
 
 	bool errors = false;
 
-	ccHObject::Container selectedEntities = m_selectedEntities;
-
-	for (size_t i=0; i<selectedEntities.size() ;++i)
+	for ( ccHObject *entity : getSelectedEntities() )
 	{
-		ccHObject* ent = selectedEntities[i];
-		if (ent->isKindOf(CC_TYPES::MESH))
+		if (!entity->isKindOf(CC_TYPES::MESH))
+			continue;
+		
+		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
+		assert(mesh);
+		
+		ccPointCloud* cloud = mesh->samplePoints(	useDensity,
+													useDensity ? s_ptsSamplingDensity : s_ptsSamplingCount,
+													withNormals,
+													withRGB,
+													withTexture,
+													&pDlg );
+		
+		if (cloud)
 		{
-			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(ent);
-			assert(mesh);
-
-			ccPointCloud* cloud = mesh->samplePoints(	useDensity,
-														useDensity ? s_ptsSamplingDensity : s_ptsSamplingCount,
-														withNormals,
-														withRGB,
-														withTexture,
-														&pDlg );
-
-			if (cloud)
-			{
-				addToDB(cloud);
-			}
-			else
-			{
-				errors = true;
-			}
+			addToDB(cloud);
+		}
+		else
+		{
+			errors = true;
 		}
 	}
 
@@ -2818,8 +2812,12 @@ void MainWindow::doRemoveDuplicatePoints()
 				if (flagSF)
 				{
 					for (unsigned j=0; j<flagSF->currentSize(); ++j)
+					{
 						if (flagSF->getValue(j) != 0)
+						{
 							++duplicateCount;
+						}
+					}
 				}
 
 				if (duplicateCount == 0)
@@ -2875,7 +2873,7 @@ void MainWindow::doActionFilterByValue()
 		ccGenericPointCloud* cloud = nullptr;
 
 		cloud = ccHObjectCaster::ToGenericPointCloud(entity);
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
+		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 			//la methode est activee sur le champ scalaire affiche
@@ -2932,10 +2930,10 @@ void MainWindow::doActionFilterByValue()
 
 	ccHObject::Container results;
 	{
-		for (size_t i = 0; i < toFilter.size(); ++i)
+		for ( auto &item : toFilter )
 		{
-			ccHObject* ent = toFilter[i].first;
-			ccPointCloud* pc = toFilter[i].second;
+			ccHObject* ent = item.first;
+			ccPointCloud* pc = item.second;
 			//CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
 			//assert(sf);
 
@@ -3468,10 +3466,9 @@ void MainWindow::doActionMerge()
 		baseMesh->setName("Merged mesh");
 		baseMesh->addChild(baseVertices);
 		baseVertices->setEnabled(false);
-		for (size_t i = 0; i < meshes.size(); ++i)
-		{
-			ccMesh* mesh = meshes[i];
 
+		for ( ccMesh *mesh : meshes )
+		{
 			//if (mesh->isA(CC_TYPES::PRIMITIVE))
 			//{
 			//	mesh = mesh->ccMesh::cloneMesh(); //we want a clone of the mesh part, not the primitive!
@@ -4087,16 +4084,13 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 
 void MainWindow::doActionLabelConnectedComponents()
 {
-	ccHObject::Container selectedEntities = m_selectedEntities;
 	//keep only the point clouds!
 	std::vector<ccGenericPointCloud*> clouds;
 	{
-		size_t selNum = selectedEntities.size();
-		for (size_t i = 0; i < selNum; ++i)
+		for ( ccHObject *entity : getSelectedEntities() )
 		{
-			ccHObject* ent = selectedEntities[i];
-			if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
-				clouds.push_back(ccHObjectCaster::ToGenericPointCloud(ent));
+			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
+				clouds.push_back(ccHObjectCaster::ToGenericPointCloud(entity));
 		}
 	}
 
@@ -4124,11 +4118,9 @@ void MainWindow::doActionLabelConnectedComponents()
 		m_ccRoot->unselectAllEntities();
 	}
 
-	for (size_t i = 0; i < count; ++i)
+	for ( ccGenericPointCloud *cloud : clouds )
 	{
-		ccGenericPointCloud* cloud = clouds[i];
-
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
+		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
@@ -4357,9 +4349,8 @@ void MainWindow::doConvertPolylinesToMesh()
 	unsigned segmentCount = 0;
 	unsigned vertexCount = 0;
 	{
-		for (size_t i = 0; i < polylines.size(); ++i)
+		for ( ccPolyline *poly : polylines )
 		{
-			ccPolyline* poly = polylines[i];
 			if (poly)
 			{
 				//count the total number of vertices and segments
@@ -4393,30 +4384,29 @@ void MainWindow::doConvertPolylinesToMesh()
 
 	//fill arrays
 	{
-		for (size_t i = 0; i < polylines.size(); ++i)
+		for ( ccPolyline *poly : polylines )
 		{
-			ccPolyline* poly = polylines[i];
-			if (poly)
+			if (poly == nullptr)
+				continue;
+			
+			unsigned vertCount = poly->size();
+			int vertIndex0 = static_cast<int>(points2D.size());
+			bool closed = poly->isClosed();
+			for (unsigned v = 0; v < vertCount; ++v)
 			{
-				unsigned vertCount = poly->size();
-				int vertIndex0 = static_cast<int>(points2D.size());
-				bool closed = poly->isClosed();
-				for (unsigned v = 0; v < vertCount; ++v)
-				{
-					const CCVector3* P = poly->getPoint(v);
-					int vertIndex = static_cast<int>(points2D.size());
-					points2D.push_back(CCVector2(P->u[X], P->u[Y]));
+				const CCVector3* P = poly->getPoint(v);
+				int vertIndex = static_cast<int>(points2D.size());
+				points2D.push_back(CCVector2(P->u[X], P->u[Y]));
 
-					if (v + 1 < vertCount)
-					{
-						segments2D.push_back(vertIndex);
-						segments2D.push_back(vertIndex + 1);
-					}
-					else if (closed)
-					{
-						segments2D.push_back(vertIndex);
-						segments2D.push_back(vertIndex0);
-					}
+				if (v + 1 < vertCount)
+				{
+					segments2D.push_back(vertIndex);
+					segments2D.push_back(vertIndex + 1);
+				}
+				else if (closed)
+				{
+					segments2D.push_back(vertIndex);
+					segments2D.push_back(vertIndex0);
 				}
 			}
 		}
@@ -4445,9 +4435,8 @@ void MainWindow::doConvertPolylinesToMesh()
 
 	//fill vertices cloud
 	{
-		for (size_t i = 0; i < polylines.size(); ++i)
+		for ( ccPolyline *poly : polylines )
 		{
-			ccPolyline* poly = polylines[i];
 			unsigned vertCount = poly->size();
 			for (unsigned v = 0; v < vertCount; ++v)
 			{
@@ -6019,8 +6008,10 @@ void MainWindow::freezeUI(bool state)
 
 	//freeze plugin toolbars
 	{
-		for (int i=0; i<m_stdPluginsToolbars.size(); ++i)
-			m_stdPluginsToolbars[i]->setDisabled(state);
+		for ( QToolBar *toolbar : m_stdPluginsToolbars )
+		{
+			toolbar->setDisabled(state);
+		}
 	}
 
 	DockableDBTree->setDisabled(state);
@@ -6232,7 +6223,9 @@ void MainWindow::activateSegmentationMode()
 	m_gsTool->linkWith(win);
 
 	for ( ccHObject *entity : getSelectedEntities() )
+	{
 		m_gsTool->addEntity(entity);
+	}
 
 	if (m_gsTool->getNumberOfValidEntities() == 0)
 	{
@@ -6477,9 +6470,9 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 		//specific actions
 		{
-			for (std::unordered_set<ccGenericPointCloud*>::const_iterator p = verticesToReset.begin(); p != verticesToReset.end(); ++p)
+			for ( ccGenericPointCloud *cloud : verticesToReset )
 			{
-				(*p)->resetVisibilityArray();
+				cloud->resetVisibilityArray();
 			}
 		}
 
@@ -7591,18 +7584,17 @@ void MainWindow::doActionCrop()
 	bool errors = false;
 	bool successes = false;
 	{
-		for (size_t i = 0; i < candidates.size(); ++i)
+		for ( ccHObject *entity : candidates )
 		{
-			ccHObject* ent = candidates[i];
-			ccHObject* croppedEnt = ccCropTool::Crop(ent,box,true);
+			ccHObject* croppedEnt = ccCropTool::Crop(entity,box,true);
 			if (croppedEnt)
 			{
-				croppedEnt->setName(ent->getName() + QString(".cropped"));
-				croppedEnt->setDisplay(ent->getDisplay());
+				croppedEnt->setName(entity->getName() + QString(".cropped"));
+				croppedEnt->setDisplay(entity->getDisplay());
 				croppedEnt->prepareDisplayForRefresh();
-				if (ent->getParent())
-					ent->getParent()->addChild(croppedEnt);
-				ent->setEnabled(false);
+				if (entity->getParent())
+					entity->getParent()->addChild(croppedEnt);
+				entity->setEnabled(false);
 				addToDB(croppedEnt);
 				//select output entity
 				m_ccRoot->selectEntity(croppedEnt, true);
@@ -8410,10 +8402,10 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 			//header
 			{
 				stream << "RMS";
-				for (size_t i=0; i<cloudCount; ++i)
+				for ( ccPointCloud *cloud : clouds )
 				{
 					stream << ";";
-					stream << clouds[i]->getName();
+					stream << cloud->getName();
 				}
 				stream << endl;
 			}
@@ -8505,42 +8497,39 @@ void MainWindow::doActionExportCloudsInfo()
 
 	//write one line per cloud
 	{
-		for (size_t i=0; i<clouds.size(); ++i)
+		for ( ccPointCloud *cloud : clouds )
 		{
-			ccPointCloud* cloud = clouds[i];
+			CCVector3 G = *CCLib::Neighbourhood(cloud).getGravityCenter();
+			csvStream << cloud->getName() << ";" /*"Name;"*/;
+			csvStream << cloud->size() << ";" /*"Points;"*/;
+			csvStream << G.x << ";" /*"meanX;"*/;
+			csvStream << G.y << ";" /*"meanY;"*/;
+			csvStream << G.z << ";" /*"meanZ;"*/;
+			for (unsigned j=0; j<cloud->getNumberOfScalarFields(); ++j)
 			{
-				CCVector3 G = *CCLib::Neighbourhood(cloud).getGravityCenter();
-				csvStream << cloud->getName() << ";" /*"Name;"*/;
-				csvStream << cloud->size() << ";" /*"Points;"*/;
-				csvStream << G.x << ";" /*"meanX;"*/;
-				csvStream << G.y << ";" /*"meanY;"*/;
-				csvStream << G.z << ";" /*"meanZ;"*/;
-				for (unsigned j=0; j<cloud->getNumberOfScalarFields(); ++j)
-				{
-					CCLib::ScalarField* sf = cloud->getScalarField(j);
-					csvStream << sf->getName() << ";" /*"SF name;"*/;
+				CCLib::ScalarField* sf = cloud->getScalarField(j);
+				csvStream << sf->getName() << ";" /*"SF name;"*/;
 
-					unsigned validCount = 0;
-					double sfSum = 0;
-					double sfSum2 = 0;
-					for (unsigned k=0; k<sf->currentSize(); ++k)
+				unsigned validCount = 0;
+				double sfSum = 0;
+				double sfSum2 = 0;
+				for (unsigned k=0; k<sf->currentSize(); ++k)
+				{
+					const ScalarType& val = sf->getValue(k);
+					if (CCLib::ScalarField::ValidValue(val))
 					{
-						const ScalarType& val = sf->getValue(k);
-						if (CCLib::ScalarField::ValidValue(val))
-						{
-							++validCount;
-							sfSum += val;
-							sfSum2 += val*val;
-						}
+						++validCount;
+						sfSum += val;
+						sfSum2 += val*val;
 					}
-					csvStream << validCount << ";" /*"SF valid values;"*/;
-					double mean = sfSum/validCount;
-					csvStream << mean << ";" /*"SF mean;"*/;
-					csvStream << sqrt(fabs(sfSum2/validCount - mean*mean)) << ";" /*"SF std.dev.;"*/;
-					csvStream << sfSum << ";" /*"SF sum;"*/;
 				}
-				csvStream << endl;
+				csvStream << validCount << ";" /*"SF valid values;"*/;
+				double mean = sfSum/validCount;
+				csvStream << mean << ";" /*"SF mean;"*/;
+				csvStream << sqrt(fabs(sfSum2/validCount - mean*mean)) << ";" /*"SF std.dev.;"*/;
+				csvStream << sfSum << ";" /*"SF sum;"*/;
 			}
+			csvStream << endl;
 		}
 	}
 
@@ -9125,10 +9114,10 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
 	CCVector3d addCoordinatesShift(0, 0, 0);
 
-	for (int i = 0; i < filenames.size(); ++i)
+	for ( const QString &filename : filenames )
 	{
 		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i], parameters, result, fileFilter);
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(filename, parameters, result, fileFilter);
 
 		if (newGroup)
 		{
@@ -9138,7 +9127,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 			}
 			addToDB(newGroup, true, true, false);
 
-			m_recentFiles->addFilePath( filenames[i] );
+			m_recentFiles->addFilePath( filename );
 		}
 
 		if (result == CC_FERR_CANCELED_BY_USER)
@@ -9204,17 +9193,15 @@ void MainWindow::doActionLoadFile()
 	fileFilters.append(s_allFilesFilter);
 	bool defaultFilterFound = false;
 	{
-		const FileIOFilter::FilterContainer& filters = FileIOFilter::GetFilters();
-		for (size_t i=0; i<filters.size(); ++i)
+		for ( const FileIOFilter::Shared &filter : FileIOFilter::GetFilters() )
 		{
-			if (filters[i]->importSupported())
+			if (filter->importSupported())
 			{
-				QStringList ff = filters[i]->getFileFilters(true);
-				for (int j=0; j<ff.size(); ++j)
+				for ( const QString &fileFilter : filter->getFileFilters(true) )
 				{
-					fileFilters.append(ff[j]);
+					fileFilters.append( fileFilter );
 					//is it the (last) default filter?
-					if (!defaultFilterFound && currentOpenDlgFilter == ff[j])
+					if (!defaultFilterFound && (currentOpenDlgFilter == fileFilter))
 					{
 						defaultFilterFound = true;
 					}
@@ -9341,13 +9328,9 @@ void MainWindow::doActionSaveFile()
 	//entities type (cloud, mesh, etc.).
 	QStringList fileFilters;
 	{
-		const FileIOFilter::FilterContainer& filters = FileIOFilter::GetFilters();
-		for (size_t i=0; i<filters.size(); ++i)
+		for ( const FileIOFilter::Shared &filter : FileIOFilter::GetFilters() )
 		{
 			bool atLeastOneExclusive = false;
-
-			//current I/O filter
-			const FileIOFilter::Shared filter = filters[i];
 
 			//does this filter can export one or several clouds?
 			bool canExportClouds = true;
@@ -9771,16 +9754,18 @@ void MainWindow::setActiveSubWindow(QWidget *window)
 
 void MainWindow::redrawAll(bool only2D/*=false*/)
 {
-	QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
-	for (int i=0; i<windows.size(); ++i)
-		GLWindowFromWidget(windows.at(i)->widget())->redraw(only2D);
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	{
+		GLWindowFromWidget(window->widget())->redraw(only2D);
+	}
 }
 
 void MainWindow::refreshAll(bool only2D/*=false*/)
 {
-	QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
-	for (int i = 0; i < windows.size(); ++i)
-		GLWindowFromWidget(windows.at(i)->widget())->refresh(only2D);
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	{
+		GLWindowFromWidget(window->widget())->refresh(only2D);
+	}
 }
 
 void MainWindow::updateUI()
@@ -9815,32 +9800,36 @@ void MainWindow::expandDBTreeWithSelection(ccHObject::Container& selection)
 	if (!m_ccRoot)
 		return;
 
-	size_t selNum = selection.size();
-	for (size_t i = 0; i < selNum; ++i)
-		m_ccRoot->expandElement(selection[i],true);
+	for ( ccHObject *entity : selection )
+		m_ccRoot->expandElement(entity,true);
 }
 
 void MainWindow::enableAll()
 {
-	QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
-	for (int i=0; i<windows.size(); ++i)
-		windows.at(i)->setEnabled(true);
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	{
+		window->setEnabled( true );
+	}
 }
 
 void MainWindow::disableAll()
 {
-	QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
-	for (int i=0; i<windows.size(); ++i)
-		windows.at(i)->setEnabled(false);
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	{
+		window->setEnabled( false );
+	}
 }
 
 void MainWindow::disableAllBut(ccGLWindow* win)
 {
 	//we disable all other windows
-	QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
-	for (int i=0; i<windows.size(); ++i)
-		if (GLWindowFromWidget(windows.at(i)->widget()) != win)
-			windows.at(i)->setEnabled(false);
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	{
+		if (GLWindowFromWidget(window->widget()) != win)
+		{
+			window->setEnabled(false);
+		}
+	}
 }
 
 void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
@@ -10030,10 +10019,9 @@ void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 	if (!sendingWindow)
 		return;
 
-	QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
-	for (int i=0; i<windows.size(); ++i)
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	{
-		ccGLWindow *child = GLWindowFromWidget(windows.at(i)->widget());
+		ccGLWindow *child = GLWindowFromWidget(window->widget());
 		if (child != sendingWindow)
 		{
 			child->blockSignals(true);
@@ -10053,10 +10041,9 @@ void MainWindow::echoCameraDisplaced(float ddx, float ddy)
 	if (!sendingWindow)
 		return;
 
-	QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
-	for (int i=0; i<windows.size(); ++i)
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	{
-		ccGLWindow *child = GLWindowFromWidget(windows.at(i)->widget());
+		ccGLWindow *child = GLWindowFromWidget(window->widget());
 		if (child != sendingWindow)
 		{
 			child->blockSignals(true);
@@ -10076,10 +10063,9 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	if (!sendingWindow)
 		return;
 
-	QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
-	for (int i=0; i<windows.size(); ++i)
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	{
-		ccGLWindow *child = GLWindowFromWidget(windows.at(i)->widget());
+		ccGLWindow *child = GLWindowFromWidget(window->widget());
 		if (child != sendingWindow)
 		{
 			child->blockSignals(true);
@@ -10099,10 +10085,10 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 if (!sendingWindow)
 		 return;
 
-	 QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
-	 for (int i=0; i<windows.size(); ++i)
+
+	 for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	 {
-		 ccGLWindow *child = GLWindowFromWidget(windows.at(i)->widget());
+		 ccGLWindow *child = GLWindowFromWidget(window->widget());
 		 if (child != sendingWindow)
 		 {
 			 child->blockSignals(true);
@@ -10122,10 +10108,9 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 if (!sendingWindow)
 		 return;
 
-	 QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
-	 for (int i=0; i<windows.size(); ++i)
+	 for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	 {
-		 ccGLWindow *child = GLWindowFromWidget(windows.at(i)->widget());
+		 ccGLWindow *child = GLWindowFromWidget(window->widget());
 		 if (child != sendingWindow)
 		 {
 			 child->blockSignals(true);
@@ -10145,10 +10130,9 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 if (!sendingWindow)
 		 return;
 
-	 QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
-	 for (int i=0; i<windows.size(); ++i)
+	 for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	 {
-		 ccGLWindow *child = GLWindowFromWidget(windows.at(i)->widget());
+		 ccGLWindow *child = GLWindowFromWidget(window->widget());
 		 if (child != sendingWindow)
 		 {
 			 child->blockSignals(true);
@@ -10208,18 +10192,17 @@ void MainWindow::DestroyInstance()
 
 void MainWindow::GetGLWindows(std::vector<ccGLWindow*>& glWindows)
 {
-	QList<QMdiSubWindow*> windows = TheInstance()->m_mdiArea->subWindowList();
-	int winNum = windows.size();
+	const QList<QMdiSubWindow*> windows = TheInstance()->m_mdiArea->subWindowList();
 
-	if (winNum == 0)
+	if ( windows.empty() )
 		return;
 
 	glWindows.clear();
-	glWindows.reserve(winNum);
+	glWindows.reserve( windows.size() );
 
-	for (int i = 0; i < winNum; ++i)
+	for ( QMdiSubWindow *window : windows )
 	{
-		glWindows.push_back(GLWindowFromWidget(windows.at(i)->widget()));
+		glWindows.push_back(GLWindowFromWidget(window->widget()));
 	}
 }
 
@@ -10230,20 +10213,19 @@ ccGLWindow* MainWindow::GetActiveGLWindow()
 
 ccGLWindow* MainWindow::GetGLWindow(const QString& title)
 {
-	QList<QMdiSubWindow *> windows = TheInstance()->m_mdiArea->subWindowList();
-	int winNum = windows.size();
+	const QList<QMdiSubWindow *> windows = TheInstance()->m_mdiArea->subWindowList();
 
-	if (winNum == 0)
-		return 0;
+	if ( windows.empty() )
+		return nullptr;
 
-	for (int i=0; i<winNum; ++i)
+	for ( QMdiSubWindow *window : windows )
 	{
-		ccGLWindow* win = GLWindowFromWidget(windows.at(i)->widget());
+		ccGLWindow* win = GLWindowFromWidget(window->widget());
 		if (win->windowTitle() == title)
 			return win;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void MainWindow::RefreshAllGLWindow(bool only2D/*=false*/)

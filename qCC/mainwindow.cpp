@@ -7360,11 +7360,10 @@ void MainWindow::clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY p
 void MainWindow::setView( CC_VIEW_ORIENTATION view )
 {
 	ccGLWindow* win = getActiveGLWindow();
-	
-	if ( win == nullptr )
-		return;
-	
-	win->setView( view );
+	if (win)
+	{
+		win->setView(view);
+	}
 }
 
 void MainWindow::spawnHistogramDialog(const std::vector<unsigned>& histoValues, double minVal, double maxVal, QString title, QString xAxisLabel)

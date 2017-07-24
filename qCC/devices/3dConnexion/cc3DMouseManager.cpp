@@ -124,22 +124,22 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 		}
 			break;
 		case Mouse3DInput::V3DK_TOP:
-			m_appInterface->setTopView();
+			m_appInterface->setView(CC_TOP_VIEW);
 			break;
 		case Mouse3DInput::V3DK_LEFT:
-			m_appInterface->setLeftView();
+			m_appInterface->setView(CC_LEFT_VIEW);
 			break;
 		case Mouse3DInput::V3DK_RIGHT:
-			m_appInterface->setRightView();
+			m_appInterface->setView(CC_RIGHT_VIEW);
 			break;
 		case Mouse3DInput::V3DK_FRONT:
-			m_appInterface->setFrontView();
+			m_appInterface->setView(CC_FRONT_VIEW);
 			break;
 		case Mouse3DInput::V3DK_BOTTOM:
-			m_appInterface->setBottomView();
+			m_appInterface->setView(CC_BOTTOM_VIEW);
 			break;
 		case Mouse3DInput::V3DK_BACK:
-			m_appInterface->setBackView();
+			m_appInterface->setView(CC_BACK_VIEW);
 			break;
 		case Mouse3DInput::V3DK_ROTATE:
 			//should be handled by the driver now!
@@ -148,10 +148,10 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 			//should be handled by the driver now!
 			break;
 		case Mouse3DInput::V3DK_ISO1:
-			m_appInterface->setIsoView1();
+			m_appInterface->setView(CC_ISO_VIEW_1);
 			break;
 		case Mouse3DInput::V3DK_ISO2:
-			m_appInterface->setIsoView2();
+			m_appInterface->setView(CC_ISO_VIEW_2);
 			break;
 		case Mouse3DInput::V3DK_PLUS:
 			//should be handled by the driver now!

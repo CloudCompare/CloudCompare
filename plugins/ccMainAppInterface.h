@@ -23,8 +23,8 @@
 
 //qCC_db
 #include <ccHObject.h>
-
-#include "ccGLUtils.h"
+//qCC_gl
+#include <ccGLUtils.h>
 
 class QMainWindow;
 class QWidget;

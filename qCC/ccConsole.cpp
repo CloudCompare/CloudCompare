@@ -36,6 +36,9 @@
 
 //system
 #include <assert.h>
+#ifdef QT_DEBUG
+#include <iostream>
+#endif
 
 /***************
  *** Globals ***
@@ -83,12 +86,12 @@ ccConsole::~ccConsole()
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+#ifndef QT_DEBUG
 	if (!ccConsole::QtMessagesEnabled())
 	{
 		return;
 	}
 
-#ifndef QT_DEBUG
 	if (type == QtDebugMsg)
 	{
 		return;
@@ -122,6 +125,27 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 		break;
 #endif
 	}
+	
+#ifdef QT_DEBUG
+	// Also send the message to the console so we can look at the output when CC has quit
+	//	(in Qt Creator's Application Output for example)
+	switch (type)
+	{
+		case QtDebugMsg:
+		case QtWarningMsg:
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
+		case QtInfoMsg:
+#endif
+			std::cout << message.toStdString() << std::endl;
+			break;
+			
+		case QtCriticalMsg:
+		case QtFatalMsg:
+			std::cerr << message.toStdString() << std::endl;
+			break;
+	}
+	
+#endif
 }
 
 void ccConsole::EnableQtMessages(bool state)

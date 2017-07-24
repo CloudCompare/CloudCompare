@@ -628,7 +628,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 					unsigned pointCount = cloud->size();
 
 					QString infos = tr("Cloud '%1").arg(cloud->getName());
-					infos += tr("Points: %1").arg( QLocale::system().toString( pointCount ));
+					infos += tr("Points: %L1").arg( pointCount );
 					if (progressDialog)
 					{
 						progressDialog->setInfo(infos);
@@ -684,7 +684,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 				if (progressDialog)
 				{
 					progressDialog->setWindowTitle(QObject::tr("Section extraction"));
-					progressDialog->setInfo(QObject::tr("Section(s): %1").arg(subCloudsCount));
+					progressDialog->setInfo(QObject::tr("Section(s): %L1").arg(subCloudsCount));
 					progressDialog->setMaximum(static_cast<int>(subCloudsCount));
 					progressDialog->setValue(0);
 					QApplication::processEvents();
@@ -888,7 +888,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 			if (progressDialog)
 			{
 				progressDialog->setWindowTitle("Contour extraction");
-				progressDialog->setInfo(QObject::tr("Contour(s): %1").arg(cloudSliceCount));
+				progressDialog->setInfo(QObject::tr("Contour(s): %L1").arg(cloudSliceCount));
 				progressDialog->setMaximum(static_cast<int>(cloudSliceCount));
 				if (!visualDebugMode)
 				{

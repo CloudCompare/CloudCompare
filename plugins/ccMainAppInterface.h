@@ -24,6 +24,8 @@
 //qCC_db
 #include <ccHObject.h>
 
+#include "ccGLUtils.h"
+
 class QMainWindow;
 class QWidget;
 class ccGLWindow;
@@ -174,6 +176,8 @@ public:
 	virtual ccPickingHub* pickingHub() { return nullptr; }
 
 	//other useful methods
+	virtual void setView( CC_VIEW_ORIENTATION view ) = 0;
+	
 	virtual void toggleActiveWindowCenteredPerspective() = 0;
 	virtual void toggleActiveWindowCustomLight() = 0;
 	virtual void toggleActiveWindowSunLight() = 0;

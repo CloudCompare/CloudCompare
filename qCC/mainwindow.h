@@ -20,7 +20,6 @@
 
 //Local
 #include "ccEntityAction.h"
-#include "ccGLUtils.h"
 #include "ccPickingListener.h"
 
 //qCC_plugins
@@ -475,7 +474,7 @@ protected:
 	void	toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY property );
 	void	clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY property );
 	
-	void	setView( CC_VIEW_ORIENTATION view );
+	virtual void setView( CC_VIEW_ORIENTATION view ) override;
 	
 	//! Apply transformation to the selected entities
 	void applyTransformation(const ccGLMatrixd& transMat);

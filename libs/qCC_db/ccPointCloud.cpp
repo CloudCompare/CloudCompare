@@ -5093,7 +5093,7 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 	if (pDlg)
 	{
 		pDlg->setWindowTitle(QObject::tr("Normals computation"));
-		pDlg->setLabelText(QObject::tr("Points: ") + QString::number(pointCount));
+		pDlg->setLabelText(QObject::tr("Points: %1").arg( QLocale::system().toString( pointCount ) ) );
 		pDlg->setRange(0, static_cast<int>(pointCount));
 		pDlg->show();
 		QCoreApplication::processEvents();
@@ -5300,7 +5300,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=0*/)
 	if (pDlg)
 	{
 		pDlg->setWindowTitle(QObject::tr("Orienting normals"));
-		pDlg->setLabelText(QObject::tr("Points: ") + QString::number(pointCount));
+		pDlg->setLabelText(QObject::tr("Points: %1").arg( QLocale::system().toString( pointCount ) ) );
 		pDlg->setRange(0, static_cast<int>(pointCount));
 		pDlg->show();
 		QCoreApplication::processEvents();

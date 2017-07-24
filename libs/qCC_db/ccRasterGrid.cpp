@@ -216,7 +216,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	if (progressDialog)
 	{
 		progressDialog->setMethodTitle(QObject::tr("Grid generation"));
-		progressDialog->setInfo(QObject::tr("Points: %1\nCells: %2 x %3").arg(pointCount).arg(width).arg(height));
+		progressDialog->setInfo(QObject::tr("Points: %1\nCells: %2 x %3").arg( QLocale::system().toString( pointCount ) ).arg(width).arg(height));
 		progressDialog->start();
 		progressDialog->show();
 		QCoreApplication::processEvents();

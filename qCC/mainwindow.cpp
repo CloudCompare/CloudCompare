@@ -260,15 +260,6 @@ MainWindow::MainWindow()
 	m_windowMapper = new QSignalMapper(this);
 	connect(m_windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
 
-	//Keyboard shortcuts
-	connect(actionToggleActivation,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesActivation()));	//'A': toggles selected items activation
-	connect(actionToggleVisibility,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesVisibility()));	//'V': toggles selected items visibility
-	connect(actionToggleNormals,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesNormals()));		//'N': toggles selected items normals visibility
-	connect(actionToggleColors,		SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesColors()));		//'C': toggles selected items colors visibility
-	connect(actionToggleSF,			SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesSF()));			//'S': toggles selected items SF visibility
-	connect(actionToggleShowName,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntities3DName()));		//'D': toggles selected items '3D name' visibility
-	connect(actionToggleMaterials,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesMaterials()));	//'M': toggles selected items materials/textures visibility
-
 	connectActions();
 
 	new3DView();
@@ -584,6 +575,43 @@ void MainWindow::connectActions()
 {
 	assert(m_ccRoot);
 	assert(m_mdiArea);
+	
+	//Keyboard shortcuts
+	
+	//'A': toggles selected items activation
+	connect(actionToggleActivation, &QAction::triggered, [=]() {
+		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::ACTIVE );
+	});
+
+	//'V': toggles selected items visibility
+	connect(actionToggleVisibility, &QAction::triggered, [=]() {
+		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::VISIBLE );
+	});
+
+	//'N': toggles selected items normals visibility
+	connect(actionToggleNormals, &QAction::triggered, [=]() {
+		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::NORMALS );
+	});
+
+	//'C': toggles selected items colors visibility
+	connect(actionToggleColors,	&QAction::triggered, [=]() {
+		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::COLOR );
+	});
+
+	//'S': toggles selected items SF visibility
+	connect(actionToggleSF, &QAction::triggered, [=]() {
+		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD );
+	});
+
+	//'D': toggles selected items '3D name' visibility
+	connect(actionToggleShowName, &QAction::triggered, [=]() {
+		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::NAME );
+	});
+
+	//'M': toggles selected items materials/textures visibility
+	connect(actionToggleMaterials, &QAction::triggered, [=]() {
+		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::MATERIAL );
+	});
 
 	//TODO... but not ready yet ;)
 	actionLoadShader->setVisible(false);
@@ -607,9 +635,11 @@ void MainWindow::connectActions()
 	connect(actionChangeColorLevels,			SIGNAL(triggered()),	this,		SLOT(doActionChangeColorLevels()));
 	connect(actionColorize,						SIGNAL(triggered()),	this,		SLOT(doActionColorize()));
 	connect(actionRGBToGreyScale,				SIGNAL(triggered()),	this,		SLOT(doActionRGBToGreyScale()));
-	connect(actionClearColor,					SIGNAL(triggered()),	this,		SLOT(doActionClearColor()));
 	connect(actionInterpolateColors,			SIGNAL(triggered()),	this,		SLOT(doActionInterpolateColors()));
 	connect(actionEnhanceRGBWithIntensities,	SIGNAL(triggered()),	this,		SLOT(doActionEnhanceRGBWithIntensities()));
+	connect(actionClearColor, &QAction::triggered, [=]() {
+		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::COLORS );
+	});
 
 	//"Edit > Normals" menu
 	connect(actionComputeNormals,				SIGNAL(triggered()),	this,		SLOT(doActionComputeNormals()));
@@ -618,7 +648,9 @@ void MainWindow::connectActions()
 	connect(actionConvertNormalToDipDir,		SIGNAL(triggered()),	this,		SLOT(doActionConvertNormalsToDipDir()));
 	connect(actionOrientNormalsMST,				SIGNAL(triggered()),	this,		SLOT(doActionOrientNormalsMST()));
 	connect(actionOrientNormalsFM,				SIGNAL(triggered()),	this,		SLOT(doActionOrientNormalsFM()));
-	connect(actionClearNormals,					SIGNAL(triggered()),	this,		SLOT(doActionClearNormals()));
+	connect(actionClearNormals, &QAction::triggered, [=]() {
+		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::NORMALS );
+	});
 
 	//"Edit > Octree" menu
 	connect(actionComputeOctree,				SIGNAL(triggered()),	this,		SLOT(doActionComputeOctree()));
@@ -673,9 +705,14 @@ void MainWindow::connectActions()
 	connect(actionOpenColorScalesManager,		SIGNAL(triggered()),	this,		SLOT(doActionOpenColorScalesManager()));
 	connect(actionAddIdField,					SIGNAL(triggered()),	this,		SLOT(doActionAddIdField()));
 	connect(actionSetSFAsCoord,					SIGNAL(triggered()),	this,		SLOT(doActionSetSFAsCoord()));
-	connect(actionDeleteScalarField,			SIGNAL(triggered()),	this,		SLOT(doActionDeleteScalarField()));
 	connect(actionDeleteAllSF,					SIGNAL(triggered()),	this,		SLOT(doActionDeleteAllSF()));
 	connect(actionInterpolateSFs,				SIGNAL(triggered()),	this,		SLOT(doActionInterpolateScalarFields()));
+	connect(actionDeleteScalarField, &QAction::triggered, [=]() {
+		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD );
+	});
+	connect(actionDeleteAllSF, &QAction::triggered, [=]() {
+		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS );
+	});
 	
 	//"Edit > Waveform" menu
 	connect(actionShowWaveDialog,				SIGNAL(triggered()),	this,		SLOT(doActionShowWaveDialog()));
@@ -818,16 +855,17 @@ void MainWindow::connectActions()
 	connect(actionSetOrthoView,					SIGNAL(triggered()),	this,		SLOT(setOrthoView()));
 	connect(actionSetCenteredPerspectiveView,	SIGNAL(triggered()),	this,		SLOT(setCenteredPerspectiveView()));
 	connect(actionSetViewerPerspectiveView,		SIGNAL(triggered()),	this,		SLOT(setViewerPerspectiveView()));
-	connect(actionSetViewTop,					SIGNAL(triggered()),	this,		SLOT(setTopView()));
-	connect(actionSetViewBottom,				SIGNAL(triggered()),	this,		SLOT(setBottomView()));
-	connect(actionSetViewFront,					SIGNAL(triggered()),	this,		SLOT(setFrontView()));
-	connect(actionSetViewBack,					SIGNAL(triggered()),	this,		SLOT(setBackView()));
-	connect(actionSetViewLeft,					SIGNAL(triggered()),	this,		SLOT(setLeftView()));
-	connect(actionSetViewRight,					SIGNAL(triggered()),	this,		SLOT(setRightView()));
-	connect(actionSetViewIso1,					SIGNAL(triggered()),	this,		SLOT(setIsoView1()));
-	connect(actionSetViewIso2,					SIGNAL(triggered()),	this,		SLOT(setIsoView2()));
 	connect(actionEnableStereo,					SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowStereoVision(bool)));
 	connect(actionAutoPickRotationCenter,		SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowAutoPickRotCenter(bool)));
+	
+	connect(actionSetViewTop, &QAction::triggered, [=]() { setView( CC_TOP_VIEW ); });
+	connect(actionSetViewBottom, &QAction::triggered, [=]() { setView( CC_BOTTOM_VIEW ); });
+	connect(actionSetViewFront, &QAction::triggered, [=]() { setView( CC_FRONT_VIEW ); });
+	connect(actionSetViewBack, &QAction::triggered, [=]() { setView( CC_BACK_VIEW ); });
+	connect(actionSetViewLeft, &QAction::triggered, [=]() { setView( CC_LEFT_VIEW ); });
+	connect(actionSetViewRight, &QAction::triggered, [=]() { setView( CC_RIGHT_VIEW ); });
+	connect(actionSetViewIso1, &QAction::triggered, [=]() { setView( CC_ISO_VIEW_1 ); });
+	connect(actionSetViewIso2, &QAction::triggered, [=]() { setView( CC_ISO_VIEW_2 ); });
 	
 	//hidden
 	connect(actionEnableVisualDebugTraces,		SIGNAL(triggered()),	this,		SLOT(toggleVisualDebugTraces()));
@@ -1637,58 +1675,6 @@ void MainWindow::doComputeBestFitBB()
 	}
 
 	refreshAll();
-}
-
-void MainWindow::doActionClearColor()
-{
-	if ( !ccEntityAction::clearProperty( m_selectedEntities,
-													 ccEntityAction::CLEAR_PROPERTY::COLORS,
-													 this) )
-	{
-		return;
-	}
-
-	refreshAll();
-	updateUI();
-}
-
-void MainWindow::doActionClearNormals()
-{
-	if ( !ccEntityAction::clearProperty( m_selectedEntities,
-													 ccEntityAction::CLEAR_PROPERTY::NORMALS,
-													 this) )
-	{
-		return;
-	}
-
-	refreshAll();
-	updateUI();
-}
-
-void MainWindow::doActionDeleteScalarField()
-{
-	if ( !ccEntityAction::clearProperty( m_selectedEntities,
-													 ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD,
-													 this) )
-	{
-		return;
-	}
-
-	refreshAll();
-	updateUI();
-}
-
-void MainWindow::doActionDeleteAllSF()
-{
-	if ( !ccEntityAction::clearProperty( m_selectedEntities,
-													 ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS,
-													 this) )
-	{
-		return;
-	}
-
-	refreshAll();
-	updateUI();
 }
 
 void MainWindow::doActionFlagMeshVertices()
@@ -6804,62 +6790,6 @@ void MainWindow::testFrameRate()
 		win->startFrameRateTest();
 }
 
-void MainWindow::setTopView()
-{
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-		win->setView(CC_TOP_VIEW);
-}
-
-void MainWindow::setBottomView()
-{
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-		win->setView(CC_BOTTOM_VIEW);
-}
-
-void MainWindow::setFrontView()
-{
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-		win->setView(CC_FRONT_VIEW);
-}
-
-void MainWindow::setBackView()
-{
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-		win->setView(CC_BACK_VIEW);
-}
-
-void MainWindow::setLeftView()
-{
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-		win->setView(CC_LEFT_VIEW);
-}
-
-void MainWindow::setRightView()
-{
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-		win->setView(CC_RIGHT_VIEW);
-}
-
-void MainWindow::setIsoView1()
-{
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-		win->setView(CC_ISO_VIEW_1);
-}
-
-void MainWindow::setIsoView2()
-{
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-		win->setView(CC_ISO_VIEW_2);
-}
-
 void MainWindow::setLightsAndMaterials()
 {
 	ccDisplayOptionsDlg colorsDlg(this);
@@ -7406,10 +7336,20 @@ void MainWindow::doPickRotationCenter()
 	enablePickingOperation(win, "Pick a point to be used as rotation center (click on icon again to cancel)");
 }
 
-void MainWindow::toggleSelectedEntitiesActivation()
+void MainWindow::toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY property )
 {
-	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
-											ccEntityAction::TOGGLE_PROPERTY::ACTIVE) )
+	if ( !ccEntityAction::toggleProperty( m_selectedEntities, property ) )
+	{
+		return;
+	}
+	
+	refreshAll();
+	updateUI();
+}
+
+void MainWindow::clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY property )
+{
+	if ( !ccEntityAction::clearProperty( m_selectedEntities, property, this ) )
 	{
 		return;
 	}
@@ -7418,76 +7358,14 @@ void MainWindow::toggleSelectedEntitiesActivation()
 	updateUI();
 }
 
-void MainWindow::toggleSelectedEntitiesVisibility()
+void MainWindow::setView( CC_VIEW_ORIENTATION view )
 {
-	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
-											ccEntityAction::TOGGLE_PROPERTY::VISIBLE) )
-	{
+	ccGLWindow* win = getActiveGLWindow();
+	
+	if ( win == nullptr )
 		return;
-	}
-
-	refreshAll();
-	updateUI();
-}
-
-void MainWindow::toggleSelectedEntitiesColors()
-{
-	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
-											ccEntityAction::TOGGLE_PROPERTY::COLOR) )
-	{
-		return;
-	}
-
-	refreshAll();
-	updateUI();
-}
-
-void MainWindow::toggleSelectedEntitiesNormals()
-{
-	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
-											ccEntityAction::TOGGLE_PROPERTY::NORMALS) )
-	{
-		return;
-	}
-
-	refreshAll();
-	updateUI();
-}
-
-void MainWindow::toggleSelectedEntitiesSF()
-{
-	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
-											ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD) )
-	{
-		return;
-	}
-
-	refreshAll();
-	updateUI();
-}
-
-void MainWindow::toggleSelectedEntitiesMaterials()
-{
-	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
-											ccEntityAction::TOGGLE_PROPERTY::MATERIAL) )
-	{
-		return;
-	}
-
-	refreshAll();
-	updateUI();
-}
-
-void MainWindow::toggleSelectedEntities3DName()
-{
-	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
-											ccEntityAction::TOGGLE_PROPERTY::NAME) )
-	{
-		return;
-	}
-
-	refreshAll();
-	updateUI();
+	
+	win->setView( view );
 }
 
 void MainWindow::spawnHistogramDialog(const std::vector<unsigned>& histoValues, double minVal, double maxVal, QString title, QString xAxisLabel)

@@ -174,15 +174,6 @@ public:
 	virtual ccPickingHub* pickingHub() { return nullptr; }
 
 	//other useful methods
-	virtual void setFrontView() = 0;
-	virtual void setBottomView() = 0;
-	virtual void setTopView() = 0;
-	virtual void setBackView() = 0;
-	virtual void setLeftView() = 0;
-	virtual void setRightView() = 0;
-	virtual void setIsoView1() = 0;
-	virtual void setIsoView2() = 0;
-
 	virtual void toggleActiveWindowCenteredPerspective() = 0;
 	virtual void toggleActiveWindowCustomLight() = 0;
 	virtual void toggleActiveWindowSunLight() = 0;

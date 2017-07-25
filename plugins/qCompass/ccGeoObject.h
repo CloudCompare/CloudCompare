@@ -24,6 +24,10 @@
 #include <ccMainAppInterface.h>
 
 #include "ccTrace.h"
+#include "ccPointPair.h"
+#include "ccfitPlane.h"
+
+class ccTopologyRelation;
 
 class ccGeoObject : public ccHObject
 {
@@ -39,7 +43,12 @@ public:
 
 	//draws all children objects in "highlighted" mode
 	void setActive(bool active);
-	void recurseChildren(ccHObject* par, bool highlight);
+
+	//gets the topological relationship between this GeoObject and another
+	int getRelationTo(ccGeoObject* obj, ccTopologyRelation** out = nullptr);
+
+	//adds a topological relationship between this GeoObject and another
+	ccTopologyRelation* addRelationTo(ccGeoObject* obj2, int type, ccMainAppInterface* app);
 
 	//flags defining different mapping regions
 	static const int INTERIOR = 0;
@@ -64,6 +73,8 @@ protected:
 
 private:
 	void init(QString name, ccMainAppInterface* app);
+	void recurseChildren(ccHObject* par, bool highlight);
+	ccTopologyRelation* getRelation(ccHObject* obj, int id1, int id2);
 
 //static functions
 public:

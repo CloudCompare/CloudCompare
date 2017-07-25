@@ -15,23 +15,37 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#include "ccNote.h"
 
-#include "ccPointPair.h"
-
-#include <ccPointCloud.h>
-
-class ccLineation : public ccPointPair
+//pass ctors straight to PointPair
+ccNote::ccNote(ccPointCloud* associatedCloud)
+	: ccPointPair(associatedCloud)
 {
-public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	updateMetadata();
+}
 
-	//write metadata specific to this object
-	void updateMetadata() override;
+ccNote::ccNote(ccPolyline* obj)
+	: ccPointPair(obj)
+{ 
+	updateMetadata();
+}
 
-	static bool isLineation(ccHObject* obj);
-};
-#endif
+void ccNote::updateMetadata()
+{
+	//add metadata tag defining the ccCompass class type
+	QVariantMap* map = new QVariantMap();
+	map->insert("ccCompassType", "Note");
+	setMetaData(*map, true);
+
+	showNameIn3D(true);
+}
+
+//returns true if object is a lineation
+bool ccNote::isNote(ccHObject* object)
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("Note");
+	}
+	return false;
+}

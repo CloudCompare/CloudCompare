@@ -20,11 +20,19 @@ void ccTraceTool::toolActivated()
 	onNewSelection(m_app->getSelectedEntities());
 }
 
+void ccTraceTool::toolDisactivated()
+{
+	accept(); //accept any changes
+}
+
+
 //called when a point in a point cloud gets picked while this tool is active
 void ccTraceTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCloud* cloud, const CCVector3& P)
 {
 	//try and fetch the trace object (returns null if the id is invalid)
 	ccTrace* t = dynamic_cast<ccTrace*>(m_app->dbRootObject()->find(m_trace_id));
+
+	m_changed = true; //trace has been modified
 
 	//no active trace -> make a new one
 	if (!t)
@@ -98,7 +106,7 @@ void ccTraceTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointC
 	}
 }
 
-//called when "Return" or "Space" is pressed, or the "Accept Button" is clicked
+//called when "Return" or "Space" is pressed, or the "Accept Button" is clicked or the tool is disactivated
 void ccTraceTool::accept()
 {
 	//finish trace
@@ -127,8 +135,6 @@ void ccTraceTool::onNewSelection(const ccHObject::Container& selectedEntities)
 	//can we pick up a new trace?
 	if (selectedEntities.size() > 0) //non-empty selection
 	{
-		m_app->dispToConsole(selectedEntities[0]->getName(), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-
 		//selection is the already active trace?
 		if (selectedEntities[0]->getUniqueID() == m_trace_id) 
 		{
@@ -151,21 +157,25 @@ void ccTraceTool::finishCurrentTrace()
 
 	if (t)
 	{
-		t->finalizePath();
 		t->setActive(false);
+		t->finalizePath();
 
 		//check for shift key modifier (flips the fitPlane modifier)
 		bool fitPlane = ccCompass::fitPlanes;
-		if (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) //shift is pressed
+		bool shift = QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier); //shift is pressed
+		if (shift) 
 		{
 			fitPlane = !fitPlane;
+			m_parentPlaneDeleted = false; //probably want different outcome to before
+			m_childPlaneDeleted = false; 
+			m_changed = true;
 		}
 
 		//fit plane
-		if (fitPlane)
+		if ( (fitPlane && m_changed) || (m_parentPlaneDeleted || m_childPlaneDeleted))
 		{
 			//check if a fit-plane already exists (and bail if it does)
-			bool calculateFitPlane = true;
+			/*bool calculateFitPlane = true;
 
 			//is one of our children the fit plane (planes made in map mode)?
 			for (unsigned idx = 0; idx < t->getChildrenNumber(); idx++)
@@ -174,9 +184,9 @@ void ccTraceTool::finishCurrentTrace()
 
 				if (ccFitPlane::isFitPlane(child)) //we've found a fit plane - bail
 				{
-						m_app->dispToConsole(QString("[ccCompass] Trace orientation estimate already exists ( " + child->getName() + ")"), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-						calculateFitPlane = false;
-						break;
+					m_app->dispToConsole(QString("[ccCompass] Trace orientation estimate already exists ( " + child->getName() + ")"), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+					calculateFitPlane = false;
+					break;
 				}
 			}
 
@@ -188,42 +198,55 @@ void ccTraceTool::finishCurrentTrace()
 			}
 
 			if (calculateFitPlane) //plane has not (yet) been calculated - go ahead and do some magic
+			{*/
+
+			//calculate fit plane
+			ccPlane* p = t->fitPlane();
+			if (p)
 			{
-				ccPlane* p = t->fitPlane();
-				if (p)
-				{
-					p->setVisible(true);
-					p->setSelectionBehavior(ccHObject::SELECTION_IGNORED);
-					p->showNormals(true);
+				p->setVisible(true);
+				p->setSelectionBehavior(ccHObject::SELECTION_IGNORED);
+				p->showNormals(true);
 
-					//are we associated with a geoObject and in compass mode?
-
-					if (!ccCompass::mapMode) //compass mode - trace becomes a child of the plane
-					{
-						//yes - add trace as child of plane
-						ccHObject* parent = t->getParent();
-						parent->detachChild(t); //remove trace from it's parent
-						p->addChild(t); //add trace as child of plane
-						t->setVisible(false); //hide trace
-						parent->addChild(p); //add plane as child
-						m_app->addToDB(p);
-					}
-					else  //map mode - plane becomes a child of trace
-					{
-						t->addChild(p);
-					}
-					
-					//report orientation to console for convenience
-					m_app->dispToConsole(QString("[ccCompass] Trace orientation estimate = " + p->getName()), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-				}
-				else
+				//figure out where to store the fit plane
+				bool child = ccCompass::mapMode; //in map mode, plane is stored as a child; in compass mode, plane is stored as parent
+				
+				if (m_childPlaneDeleted) //existing planes over-rule
 				{
-					m_app->dispToConsole(QString("[ccCompass] Not enough topography to fit plane to trace."), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+					child = true;
+				} else if (m_parentPlaneDeleted)
+				{
+					child = false;
 				}
+
+
+				if (child) //compass mode - trace becomes a child of the plane
+				{
+					t->addChild(p);
+				}
+				else {
+					//yes - add trace as child of plane
+					ccHObject* parent = t->getParent();
+					parent->detachChild(t); //remove trace from it's parent
+					p->addChild(t); //add trace as child of plane
+					t->setVisible(false); //hide trace
+					parent->addChild(p); //add plane as child
+					m_app->addToDB(p);
+				}
+
+				//report orientation to console for convenience
+				m_app->dispToConsole(QString("[ccCompass] Trace orientation estimate = " + p->getName()), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+			}
+			else
+			{
+				m_app->dispToConsole(QString("[ccCompass] Not enough topography to fit plane to trace."), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 			}
 		}
 
 		m_trace_id = -1; //forget previous trace
+		m_childPlaneDeleted = false;
+		m_parentPlaneDeleted = false;
+		m_changed = false;
 		m_app->setSelectedInDB(t, false); //deselect this trace
 		m_app->setSelectedInDB(t->getParent(), true); //select it's parent instead
 
@@ -252,6 +275,7 @@ bool ccTraceTool::pickupTrace(ccHObject* obj)
 			parent->getParent()->addChild(t); //add trace to the plane's parent
 			m_app->removeFromDB(parent); //delete plane
 			m_app->addToDB(t); //add trace to db
+			m_parentPlaneDeleted = true;
 		}
 		else
 		{
@@ -261,6 +285,7 @@ bool ccTraceTool::pickupTrace(ccHObject* obj)
 				if (ccFitPlane::isFitPlane(child))
 				{
 					m_app->removeFromDB(child); //n.b. removeFromDB also deletes the child
+					m_childPlaneDeleted = true;
 				}
 			}
 		}

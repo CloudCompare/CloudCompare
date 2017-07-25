@@ -11,6 +11,9 @@ public:
 	ccLineationTool();
 	~ccLineationTool();
 
+	//called when the tool is set to disactive (for cleanup)
+	void toolDisactivated() override;
+
 	//called when a point in a point cloud gets picked while this tool is active
 	void pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCloud* cloud, const CCVector3& P) override;
 

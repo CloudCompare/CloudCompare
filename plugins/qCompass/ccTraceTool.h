@@ -14,6 +14,9 @@ public:
 	//called when the tool is set to active (for initialization)
 	void toolActivated() override;
 
+	//called when the tool is disactivated by a tool change or similar
+	void toolDisactivated() override;
+
 	//called when a point in a point cloud gets picked while this tool is active
 	void pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCloud* cloud, const CCVector3& P) override;
 
@@ -39,6 +42,11 @@ protected:
 	//properties of the active trace
 	int m_trace_id = -1; //active trace id (stored rather than a pointer to avoid dead pointers after users delete objects in the DB_Tree)
 	bool m_preExisting = false; //set to true when a trace is picked up from a selection (so we don't delete it on cancel).
+	bool m_changed = false; //becomes true if changes have been made. Used to update fit planes
+
+	bool m_parentPlaneDeleted = false; //true if parent plane was deleted
+	bool m_childPlaneDeleted = false; //true if child plane was deleted
+
 	bool m_precompute_gradient = true; //do we want to precompute gradient for cost function?
 	bool m_precompute_curvature = true; //do we want to precompute curvature for cost functions?
 };

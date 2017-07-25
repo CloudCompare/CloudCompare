@@ -22,7 +22,7 @@ void ccNoteTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCl
 	}
 
 	//create a 1-point lineation object (highlights note-location)
-	ccLineation* l = new ccLineation(cloud);
+	ccPointPair* l = new ccPointPair(cloud);
 	l->setName(note);
 	l->showNameIn3D(true);
 	l->addPointIndex(itemIdx);
@@ -30,7 +30,23 @@ void ccNoteTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCl
 	l->setActiveColor(ccColor::red);
 
 	//add to scene graph
-	insertPoint->addChild(l);
+	ccHObject* notesFolder = nullptr;
+	for (int i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
+	{
+		if (m_app->dbRootObject()->getChild(i)->getName() == "Notes")
+		{
+			notesFolder = m_app->dbRootObject()->getChild(i);
+			break;
+		}
+	}
+	if (!notesFolder)
+	{
+		notesFolder = new ccHObject("Notes");
+		m_app->dbRootObject()->addChild(notesFolder);
+		m_app->addToDB(notesFolder, false, false, false, false);
+	}
+
+	notesFolder->addChild(l);
 	m_app->addToDB(l);
 }
 

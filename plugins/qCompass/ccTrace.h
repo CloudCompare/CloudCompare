@@ -206,7 +206,7 @@ protected:
 	//ccTrace variables
 	float m_relMarkerScale = 1.0f;
 	ccPointCloud* m_cloud=0; //pointer to ccPointCloud object this is linked to (slightly different to polylines as we know this data is sampled from a real cloud)
-	
+
 	std::vector<std::deque<int>> m_trace; //contains an ordered list of indices which define this trace. Note that indices representing nodes MAY be inserted twice.
 	std::vector<int> m_waypoints; //list of waypoint indices
 	int m_previous=-1; //for undoing waypoints

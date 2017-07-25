@@ -15,23 +15,43 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_POINTPAIR_HEADER
+#define CC_POINTPAIR_HEADER
 
-#include "ccPointPair.h"
-
+#include <ccPolyline.h>
+#include <ccSphere.h>
+#include <ccCylinder.h>
+#include <ccCone.h>
+#include <GenericIndexedCloudPersist.h>
 #include <ccPointCloud.h>
 
-class ccLineation : public ccPointPair
+
+#include "ccMeasurement.h"
+
+class ccPointPair : 
+	public ccPolyline, 
+	public ccMeasurement
 {
 public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	ccPointPair(ccPointCloud* associatedCloud);
+	ccPointPair(ccPolyline* obj); //used to construct from a polyline with the correct data
 
-	//write metadata specific to this object
-	void updateMetadata() override;
+	virtual ~ccPointPair() {}
 
-	static bool isLineation(ccHObject* obj);
+	virtual void updateMetadata() { }; //overriding by actual data classes (see bottom of file)
+
+	//get the direction of this pair (not normalized) 
+	CCVector3 getDirection();
+
+protected:
+	float m_relMarkerScale = 5.0f;
+
+	//overidden from ccHObject
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+
+//static functions
+public:
+	static bool isPointPair(ccHObject* object);
 };
+
 #endif

@@ -46,18 +46,22 @@
 #include "ccCompassDlg.h"
 #include "ccMapDlg.h"
 #include "ccTrace.h"
-#include "ccLineation.h"
+#include "ccPointPair.h"
 #include "ccCompassInfo.h"
 #include "ccGeoObject.h"
+#include "ccLineation.h"
+#include "ccThickness.h"
+#include "ccTopologyRelation.h"
+#include "ccNote.h"
 
 //tools
 #include "ccTool.h"
 #include "ccFitPlaneTool.h"
 #include "ccTraceTool.h"
 #include "ccLineationTool.h"
-#include "ccFloodTool.h"
 #include "ccThicknessTool.h"
 #include "ccNoteTool.h"
+#include "ccTopologyTool.h"
 
 //other
 #include <math.h>
@@ -102,29 +106,42 @@ protected slots:
 	//inherited from ccPickingListener
 	virtual void onItemPicked(const ccPickingListener::PickedItem& pi) override;
 
-	//GUI actions
+	//**************
+	//GUI actions:
+	//**************
+	//general
 	void onClose();
 	void onAccept();
 	void onSave();
 	void onUndo();
-	void setLineationMode(); //activates the lineation tool
-	void setPlaneMode(); //activates the plane tool
-	void setTraceMode(); //activates the trace tool
-	void setPaintMode(); //activates the paint tool
-	void setThicknessMode(); //activates the thickness tool
-	void setThicknessMode2(); //activates the thickness tool in two-point mode
-	void setNoteMode(); //activates the note tool
+
+	//modes
 	void enableMapMode(); //turns on/off map mode
 	void enableMeasureMode(); //turns on/off map mode
-	void addGeoObject(); //creates a new GeoObject
-	void pickGeoObject(); //uses a "picking tool" to select GeoObjects
-	void clearGeoObject();  //clears the selected GeoObject
+
+	//tools
+	void setPick(); //activates the picking tool
+	void setLineation(); //activates the lineation tool
+	void setPlane(); //activates the plane tool
+	void setTrace(); //activates the trace tool
+
+	//extra tools
+	void setThickness(); //activates the thickness tool
+	void setThickness2(); //activates the thickness tool in two-point mode
+	void setYoungerThan(); //activates topology tool in "younger-than" mode
+	void setFollows(); //activates topology tool in "follows" mode
+	void setEquivalent(); //activates topology mode in "equivalent" mode
+	void setNote(); //activates the note tool
+	void recalculateSelectedTraces(); //recalculate any selected traces (for updating with a different cost function)
+
+	//map mode dialog
 	void writeToInterior(); //new digitization will be added to the GeoObjects interior
 	void writeToUpper(); //new digitization will be added to the GeoObjects upper boundary
 	void writeToLower(); //new digitiziation will be added to the GeoObjects lower boundary
-	void recalculateSelectedTraces();
-
-	//updates drawing properites of fit planes etc.
+	void addGeoObject(); //creates a new GeoObject
+	
+	//drawing options
+	void hideAllPointClouds(ccHObject* o); //hides all point clouds and adds them to the m_hiddenObjects list
 	void toggleStipple(bool checked);
 	void recurseStipple(ccHObject* object, bool checked);
 	void toggleLabels(bool checked);
@@ -146,6 +163,12 @@ protected:
 	//cleans up pointers etc before changing tools
 	void cleanupBeforeToolChange();
 
+	//registers this plugin with the picking hub
+	bool startPicking();
+
+	//removes this plugin from the picking hub
+	void stopPicking();
+
 	//checks if the passed object, or any of it's children, represent unloaded ccCompass objects (e.g. traces, fitplanes etc).
 	void tryLoading(ccHObject* obj, std::vector<int>* originals, std::vector<ccHObject*>* replacements);
 
@@ -153,8 +176,10 @@ protected:
 	QAction* m_action = nullptr;
 
 	//link to application windows
-	ccGLWindow* m_window = nullptr;
 	QMainWindow* m_main_window = nullptr;
+
+	//picking or not?
+	bool m_picking = false;
 
 	//ccCompass toolbar gui
 	ccCompassDlg* m_dlg = nullptr;
@@ -165,14 +190,15 @@ protected:
 	ccFitPlaneTool* m_fitPlaneTool;
 	ccTraceTool* m_traceTool;
 	ccLineationTool* m_lineationTool;
-	ccFloodTool* m_floodTool;
 	ccThicknessTool* m_thicknessTool;
+	ccTopologyTool* m_topologyTool;
 	ccNoteTool* m_noteTool;
 
 	//currently selected/active geoObject
 	ccGeoObject* m_geoObject = nullptr; //the GeoObject currently being written to
 	int m_geoObject_id = -1; //used to check if m_geoObject has been deleted
-	
+	std::vector<int> m_hiddenObjects; //used to hide objects (for picking)
+
 	//used to 'guess' the name of new GeoObjects
 	QString m_lastGeoObjectName = "GeoObject"; 
 

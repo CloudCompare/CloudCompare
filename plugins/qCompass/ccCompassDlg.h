@@ -61,11 +61,12 @@ public:
 	QAction *m_recalculate;
 
 	//pair picking menu
-	QAction *m_measure_thickness;
-	QAction *m_measure_thickness_twoPoint;
-	QAction *m_noteTool;
-	QAction *m_crosscutting;
-	QAction *m_younging;
+	QAction *m_measure_thickness; //thickness tool
+	QAction *m_measure_thickness_twoPoint; //thickness tool
+	QAction *m_youngerThan; //topology tool - crosscutting relations
+	QAction *m_follows; //topology tool - stratigraphic younging relations
+	QAction *m_equivalent;
+	QAction *m_noteTool; //note tool
 
 protected slots:
 	//! To capture overridden shortcuts (pause button, etc.)

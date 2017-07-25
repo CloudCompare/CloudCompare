@@ -1,5 +1,7 @@
 #include "ccGeoObject.h"
 
+#include "ccTopologyRelation.h"
+
 ccGeoObject::ccGeoObject(QString name, ccMainAppInterface* app)
 	: ccHObject(name)
 {
@@ -71,6 +73,116 @@ ccHObject* ccGeoObject::getRegion(int mappingRegion)
 	}
 }
 
+//gets the topological relationship between this GeoObject and another
+int ccGeoObject::getRelationTo(ccGeoObject* obj, ccTopologyRelation** out)
+{
+	ccTopologyRelation* r = getRelation(this, getUniqueID(), obj->getUniqueID()); //search for a relation belonging to us
+	bool invert = false;
+	if (!r) //not found - search for a relation belonging to obj
+	{
+		r = getRelation(obj, getUniqueID(), obj->getUniqueID());
+		invert = true; //we need to invert backwards relationships (i.e. Obj OLDER THAN this, so this YOUNGER THAN Obj)
+	}
+
+	if (r) //a relation was found
+	{
+		*out = r; //set out pointer
+
+		if (!invert)
+		{
+			return r->getType();
+		}
+		else
+		{   //we need to invert backwards relationships (i.e. Obj OLDER THAN this, so this YOUNGER THAN Obj)
+			return ccTopologyRelation::invertType(r->getType());
+		}
+	}
+	else
+	{
+		*out = nullptr;
+		return ccTopologyRelation::UNKNOWN;
+	}
+}
+
+//recurse down the tree looking for the specified topology relationship
+ccTopologyRelation* ccGeoObject::getRelation(ccHObject* obj, int id1, int id2)
+{
+	//is this object the relation we are looking for?
+	if (ccTopologyRelation::isTopologyRelation(obj))
+	{
+		ccTopologyRelation* r = dynamic_cast<ccTopologyRelation*> (obj);
+		if (r)
+		{
+			if ( (r->getOlderID() == id1 && r->getYoungerID() == id2) || 
+				 (r->getOlderID() == id2 && r->getYoungerID() == id1) )
+			{
+				return r; //already has relationship between these objects
+			}
+		}
+	}
+
+	//search children
+	for (int i = 0; i < obj->getChildrenNumber(); i++)
+	{
+		ccTopologyRelation* r = getRelation(obj->getChild(i), id1, id2);
+		if (r)
+		{
+			return r; //cascade positive respones up
+		}
+	}
+
+	return nullptr; //nothing found
+}
+
+//adds a topological relationship between this GeoObject and another
+ccTopologyRelation* ccGeoObject::addRelationTo(ccGeoObject* obj2, int type, ccMainAppInterface* app)
+{
+	//does this relation already exist??
+	ccTopologyRelation* out = nullptr;
+	getRelationTo(obj2, &out);
+
+	if (out)
+	{
+		//todo: ask if relation should be replaced?
+		app->dispToConsole("Relation already exists!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return nullptr;
+	}
+	
+	//all good - create and add a new one  (assume relation is in the younger form)
+	ccGeoObject* younger = this;
+	ccGeoObject* older = obj2;
+
+	//if relation is in older form, invert it
+	if (type == ccTopologyRelation::OLDER_THAN ||
+		type == ccTopologyRelation::IMMEDIATELY_PRECEDES ||
+		type == ccTopologyRelation::NOT_OLDER_THAN)
+	{
+		type = ccTopologyRelation::invertType(type); //invert type
+
+		//flip start and end (i.e. we are older than obj2)
+		younger = obj2;
+		older = this; 
+	}
+
+
+	//build point cloud for TopologyRelation
+	ccPointCloud* verts = new ccPointCloud("vertices");
+	assert(verts);
+	verts->setEnabled(false); //this is used for storage only!
+	verts->setVisible(false); //this is used for storage only!
+
+	//build TopologyRelation
+	ccTopologyRelation* t = new ccTopologyRelation(verts, older->getUniqueID(), younger->getUniqueID(), type);
+	t->constructGraphic(older, younger);
+	
+	//always store with younger member
+	younger->getRegion(ccGeoObject::INTERIOR)->addChild(t);
+	m_app->addToDB(this, false, false, false, true);
+
+	return t;
+}
+
+
 void ccGeoObject::setActive(bool active)
 {
 	for (ccHObject* c : m_children)
@@ -86,11 +198,24 @@ void ccGeoObject::recurseChildren(ccHObject* par, bool highlight)
 	if (m)
 	{
 		m->setHighlight(highlight);
-
+		
 		//draw labels (except for trace objects, when the child plane object will hold the useful info)
 		if (!ccTrace::isTrace(par))
 		{
 			par->showNameIn3D(highlight);
+
+			if (highlight) //show active objects...
+			{
+				par->setVisible(true);
+			}
+			else
+			{
+				//hide annoying graphics (we basically only want traces to be visible)
+				if (ccPointPair::isPointPair(par) || ccFitPlane::isFitPlane(par))
+				{
+					par->setVisible(false);
+				}
+			}
 		}
 	}
 

@@ -103,6 +103,29 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="pickModeButton">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="toolTip">
+      <string>Picking Tool. Use this to select GeoObjects or measurements.</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../qCC/icones.qrc">
+       <normaloff>:/CC/images/dbGBLSensorSymbol.png</normaloff>:/CC/images/dbGBLSensorSymbol.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="planeModeButton">
      <property name="toolTip">
       <string>Plane Tool: Measure surface orientations</string>
@@ -171,23 +194,6 @@
      </property>
      <property name="autoDefault">
       <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="paintModeButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="toolTip">
-      <string>Paint Tool (WIP)</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="../../qCC/icones.qrc">
-       <normaloff>:/CC/images/ccPencil.png</normaloff>:/CC/images/ccPencil.png</iconset>
      </property>
     </widget>
    </item>

@@ -6,10 +6,15 @@ ccLineationTool::ccLineationTool()
 {
 }
 
-
 ccLineationTool::~ccLineationTool()
 {
 
+}
+
+//called when the tool is set to disactive (for cleanup)
+void ccLineationTool::toolDisactivated()
+{
+	cancel();
 }
 
 //called when a point in a point cloud gets picked while this tool is active
@@ -62,7 +67,7 @@ void ccLineationTool::cancel()
 {
 	if (m_lineation_id != -1) //there is an active lineation
 	{
-		ccLineation* l = dynamic_cast<ccLineation*>(m_app->dbRootObject()->find(m_lineation_id));
+		ccPointPair* l = dynamic_cast<ccPointPair*>(m_app->dbRootObject()->find(m_lineation_id));
 		if (l && l->size() < 2)
 		{
 			m_app->removeFromDB(l); //remove incomplete lineation

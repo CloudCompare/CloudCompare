@@ -29,6 +29,7 @@ bool ccCompass::fitPlanes = true;
 int ccCompass::costMode = ccTrace::DARK;
 bool ccCompass::mapMode = false;
 int ccCompass::mapTo = ccGeoObject::LOWER_BOUNDARY;
+
 ccCompass::ccCompass(QObject* parent/*=0*/)
 	: QObject(parent)
 	, m_action(0)
@@ -37,11 +38,9 @@ ccCompass::ccCompass(QObject* parent/*=0*/)
 	m_fitPlaneTool = new ccFitPlaneTool();
 	m_traceTool = new ccTraceTool();
 	m_lineationTool = new ccLineationTool();
-	m_floodTool = new ccFloodTool();
 	m_thicknessTool = new ccThicknessTool();
+	m_topologyTool = new ccTopologyTool();
 	m_noteTool = new ccNoteTool();
-	//activate plane tool by default
-	//m_activeTool = m_fitPlaneTool;
 }
 
 //deconstructor
@@ -51,8 +50,8 @@ ccCompass::~ccCompass()
 	delete m_fitPlaneTool;
 	delete m_traceTool;
 	delete m_lineationTool;
-	delete m_floodTool;
 	delete m_thicknessTool;
+	delete m_topologyTool;
 	delete m_noteTool;
 
 	if (m_dlg)
@@ -176,14 +175,12 @@ void ccCompass::doAction()
 	m_traceTool->initializeTool(m_app);
 	m_fitPlaneTool->initializeTool(m_app);
 	m_lineationTool->initializeTool(m_app);
-	m_floodTool->initializeTool(m_app);
 	m_thicknessTool->initializeTool(m_app);
+	m_topologyTool->initializeTool(m_app);
 	m_noteTool->initializeTool(m_app);
-	//Get handle to ccGLWindow
-	m_window = m_app->getActiveGLWindow();
 
 	//check valid window
-	if (!m_window)
+	if (!m_app->getActiveGLWindow())
 	{
 		m_app->dispToConsole("[ccCompass] Could not find valid 3D window.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
@@ -195,26 +192,38 @@ void ccCompass::doAction()
 		//bind GUI events
 		m_dlg = new ccCompassDlg(m_app->getMainWindow());
 
+		//general
 		ccCompassDlg::connect(m_dlg->closeButton, SIGNAL(clicked()), this, SLOT(onClose()));
 		ccCompassDlg::connect(m_dlg->acceptButton, SIGNAL(clicked()), this, SLOT(onAccept()));
 		ccCompassDlg::connect(m_dlg->saveButton, SIGNAL(clicked()), this, SLOT(onSave()));
 		ccCompassDlg::connect(m_dlg->undoButton, SIGNAL(clicked()), this, SLOT(onUndo()));
-		ccCompassDlg::connect(m_dlg->pairModeButton, SIGNAL(clicked()), this, SLOT(setLineationMode()));
-		ccCompassDlg::connect(m_dlg->planeModeButton, SIGNAL(clicked()), this, SLOT(setPlaneMode()));
-		ccCompassDlg::connect(m_dlg->traceModeButton, SIGNAL(clicked()), this, SLOT(setTraceMode()));
-		ccCompassDlg::connect(m_dlg->paintModeButton, SIGNAL(clicked()), this, SLOT(setPaintMode()));
-		ccCompassDlg::connect(m_dlg->m_measure_thickness, SIGNAL(triggered()), this, SLOT(setThicknessMode()));
-		ccCompassDlg::connect(m_dlg->m_measure_thickness_twoPoint, SIGNAL(triggered()), this, SLOT(setThicknessMode2()));
-		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNoteMode()));
 		ccCompassDlg::connect(m_dlg->infoButton, SIGNAL(clicked()), this, SLOT(showHelp()));
 
+		//modes
+		ccCompassDlg::connect(m_dlg->mapMode, SIGNAL(clicked()), this, SLOT(enableMapMode()));
+		ccCompassDlg::connect(m_dlg->compassMode, SIGNAL(clicked()), this, SLOT(enableMeasureMode()));
+
+		//tools
+		ccCompassDlg::connect(m_dlg->pickModeButton, SIGNAL(clicked()), this, SLOT(setPick()));
+		ccCompassDlg::connect(m_dlg->pairModeButton, SIGNAL(clicked()), this, SLOT(setLineation()));
+		ccCompassDlg::connect(m_dlg->planeModeButton, SIGNAL(clicked()), this, SLOT(setPlane()));
+		ccCompassDlg::connect(m_dlg->traceModeButton, SIGNAL(clicked()), this, SLOT(setTrace()));
+
+		//extra tools
+		ccCompassDlg::connect(m_dlg->m_measure_thickness, SIGNAL(triggered()), this, SLOT(setThickness()));
+		ccCompassDlg::connect(m_dlg->m_measure_thickness_twoPoint, SIGNAL(triggered()), this, SLOT(setThickness2()));
+
+		ccCompassDlg::connect(m_dlg->m_youngerThan, SIGNAL(triggered()), this, SLOT(setYoungerThan()));
+		ccCompassDlg::connect(m_dlg->m_follows, SIGNAL(triggered()), this, SLOT(setFollows()));
+		ccCompassDlg::connect(m_dlg->m_equivalent, SIGNAL(triggered()), this, SLOT(setEquivalent()));
+
+		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNote()));
+
+		//settings menu
 		ccCompassDlg::connect(m_dlg->m_showNames, SIGNAL(toggled(bool)), this, SLOT(toggleLabels(bool)));
 		ccCompassDlg::connect(m_dlg->m_showStippled, SIGNAL(toggled(bool)), this, SLOT(toggleStipple(bool)));
 		ccCompassDlg::connect(m_dlg->m_showNormals, SIGNAL(toggled(bool)), this, SLOT(toggleNormals(bool)));
 		ccCompassDlg::connect(m_dlg->m_recalculate, SIGNAL(triggered()), this, SLOT(recalculateSelectedTraces()));
-
-		ccCompassDlg::connect(m_dlg->mapMode, SIGNAL(clicked()), this, SLOT(enableMapMode()));
-		ccCompassDlg::connect(m_dlg->compassMode, SIGNAL(clicked()), this, SLOT(enableMeasureMode()));
 	}
 
 	if (!m_mapDlg)
@@ -222,15 +231,13 @@ void ccCompass::doAction()
 		m_mapDlg = new ccMapDlg(m_app->getMainWindow());
 
 		ccCompassDlg::connect(m_mapDlg->addObjectButton, SIGNAL(clicked()), this, SLOT(addGeoObject()));
-		ccCompassDlg::connect(m_mapDlg->pickObjectButton, SIGNAL(clicked()), this, SLOT(pickGeoObject()));
-		ccCompassDlg::connect(m_mapDlg->clearObjectButton, SIGNAL(clicked()), this, SLOT(clearGeoObject()));
 		ccCompassDlg::connect(m_mapDlg->setInteriorButton, SIGNAL(clicked()), this, SLOT(writeToInterior()));
 		ccCompassDlg::connect(m_mapDlg->setUpperButton, SIGNAL(clicked()), this, SLOT(writeToUpper()));
 		ccCompassDlg::connect(m_mapDlg->setLowerButton, SIGNAL(clicked()), this, SLOT(writeToLower()));
 	}
 
-	m_dlg->linkWith(m_window);
-	m_mapDlg->linkWith(m_window);
+	m_dlg->linkWith(m_app->getActiveGLWindow());
+	m_mapDlg->linkWith(m_app->getActiveGLWindow());
 
 	//loop through DB_Tree and find any ccCompass objects
 	std::vector<int> originals; //ids of original objects
@@ -268,7 +275,14 @@ void ccCompass::doAction()
 		m_app->removeFromDB(original);
 
 		//add replacement to dbTree
-		m_app->addToDB(replacement, false, true, false, false);
+		m_app->addToDB(replacement, false, false, false, false);
+
+		//is replacement a GeoObject? If so, "disactivate" it
+		if (ccGeoObject::isGeoObject(replacement))
+		{
+			ccGeoObject* g = static_cast<ccGeoObject*>(replacement);
+			g->setActive(false);
+		}
 	}
 
 	//start in measure mode
@@ -286,7 +300,7 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 	//is object already represented by a ccCompass class?
 	if (dynamic_cast<ccFitPlane*>(obj)
 		|| dynamic_cast<ccTrace*>(obj)
-		|| dynamic_cast<ccLineation*>(obj)
+		|| dynamic_cast<ccPointPair*>(obj)
 		|| dynamic_cast<ccGeoObject*>(obj))
 	{
 		return; //we need do nothing!
@@ -353,6 +367,28 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 			replacements->push_back(lin);
 			return;
 		}
+
+		//are we a thickness?
+		if (ccThickness::isThickness(obj))
+		{
+			ccHObject* t = new ccThickness(p);
+			originals->push_back(obj->getUniqueID());
+			replacements->push_back(t);
+			return;
+		}
+
+		//are we a topology relation?
+
+
+		//are we a note?
+		if (ccNote::isNote(obj))
+		{
+			ccHObject* n = new ccNote(p);
+			originals->push_back(obj->getUniqueID());
+			replacements->push_back(n);
+			return;
+		}
+
 	}
 }
 
@@ -360,31 +396,18 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 bool ccCompass::startMeasuring()
 {
 	//check valid gl window
-	if (!m_window)
+	if (!m_app->getActiveGLWindow())
 	{
 		//invalid pointer error
 		m_app->dispToConsole("Error: ccCompass could not find the Cloud Compare window. Abort!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 
-	//activate "point picking mode"
-	if (!m_app->pickingHub())  //no valid picking hub
-	{
-		m_app->dispToConsole("[ccCompass] Could not retrieve valid picking hub. Measurement aborted.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return false;
-	}
-
-	if (!m_app->pickingHub()->addListener(this, true, true))
-	{
-		m_app->dispToConsole("Another tool is already using the picking mechanism. Stop it first", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return false;
-	}
-
 	//setup listener for mouse events
-	m_window->installEventFilter(this);
+	m_app->getActiveGLWindow()->installEventFilter(this);
 
 	//refresh window
-	m_window->redraw(true, false);
+	m_app->getActiveGLWindow()->redraw(true, false);
 
 	//start GUI
 	m_app->registerOverlayDialog(m_dlg, Qt::TopRightCorner);
@@ -403,23 +426,19 @@ bool ccCompass::startMeasuring()
 bool ccCompass::stopMeasuring()
 {
 	//remove click listener
-	if (m_window)
+	if (m_app->getActiveGLWindow())
 	{
-		m_window->removeEventFilter(this);
-	}
-
-	//stop picking
-	if (m_app->pickingHub())
-	{
-		m_app->pickingHub()->removeListener(this);
+		m_app->getActiveGLWindow()->removeEventFilter(this);
 	}
 
 	//reset gui
 	cleanupBeforeToolChange();
 
+	//stop picking
+	stopPicking();
+
 	//set active tool to null (avoids tools "doing stuff" when the gui isn't shown)
 	m_activeTool = nullptr;
-
 
 	//remove overlay GUI
 	if (m_dlg)
@@ -442,12 +461,47 @@ bool ccCompass::stopMeasuring()
 	}
 
 	//redraw
-	if (m_window)
+	if (m_app->getActiveGLWindow())
 	{
-		m_window->redraw(true, false);
+		m_app->getActiveGLWindow()->redraw(true, false);
 	}
 
 	return true;
+}
+
+//registers this plugin with the picking hub
+bool ccCompass::startPicking()
+{
+	if (m_picking) //already picking... don't need to add again
+		return true;
+
+	//activate "point picking mode"
+	if (!m_app->pickingHub())  //no valid picking hub
+	{
+		m_app->dispToConsole("[ccCompass] Could not retrieve valid picking hub. Measurement aborted.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return false;
+	}
+
+	if (!m_app->pickingHub()->addListener(this, true, true))
+	{
+		m_app->dispToConsole("Another tool is already using the picking mechanism. Stop it first", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return false;
+	}
+
+	m_picking = true;
+	return true;
+}
+
+//removes this plugin from the picking hub
+void  ccCompass::stopPicking()
+{
+	//stop picking
+	if (m_app->pickingHub())
+	{
+		m_app->pickingHub()->removeListener(this);
+	}
+
+	m_picking = false;
 }
 
 //Get the place/object that new measurements or interpretation should be stored
@@ -528,7 +582,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 		return;
 	}
 
-	//no active tool - set object as selected then disregard pick
+	//no active tool (i.e. picking mode) - set selected object as active
 	if (!m_activeTool)
 	{
 		m_app->setSelectedInDB(entity, true);
@@ -567,7 +621,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 
 	//redraw
 	m_app->updateUI();
-	m_window->redraw();
+	m_app->getActiveGLWindow()->redraw();
 }
 
 bool ccCompass::eventFilter(QObject* obj, QEvent* event)
@@ -643,18 +697,40 @@ void ccCompass::cleanupBeforeToolChange()
 		m_activeTool->toolDisactivated();
 	}
 
+	//clear m_hiddenObjects buffer
+	if (!m_hiddenObjects.empty())
+	{
+		for (int i : m_hiddenObjects)
+		{
+			ccHObject* o = m_app->dbRootObject()->find(i);
+			if (o)
+			{
+				o->setVisible(true);
+			}
+		}
+		m_hiddenObjects.clear();
+		m_app->getActiveGLWindow()->redraw(false, false);
+	}
+	
+
 	//uncheck/disable gui components (the relevant ones will be activated later)
-	m_dlg->pairModeButton->setChecked(false);
-	m_dlg->planeModeButton->setChecked(false);
-	m_dlg->traceModeButton->setChecked(false);
-	m_dlg->paintModeButton->setChecked(false);
-	m_dlg->extraModeButton->setChecked(false);
-	m_dlg->undoButton->setEnabled(false);
-	m_dlg->acceptButton->setEnabled(false);
+	if (m_dlg)
+	{
+		m_dlg->pairModeButton->setChecked(false);
+		m_dlg->planeModeButton->setChecked(false);
+		m_dlg->traceModeButton->setChecked(false);
+		m_dlg->pickModeButton->setChecked(false);
+		m_dlg->extraModeButton->setChecked(false);
+		m_dlg->undoButton->setEnabled(false);
+		m_dlg->acceptButton->setEnabled(false);
+	}
+
+	//check picking is engaged
+	startPicking();
 }
 
 //activate lineation mode
-void ccCompass::setLineationMode()
+void ccCompass::setLineation()
 {
 	//cleanup
 	cleanupBeforeToolChange();
@@ -669,11 +745,11 @@ void ccCompass::setLineationMode()
 	//update GUI
 	m_dlg->undoButton->setEnabled(m_lineationTool->canUndo());
 	m_dlg->pairModeButton->setChecked(true);
-	m_window->redraw(true, false);
+	m_app->getActiveGLWindow()->redraw(true, false);
 }
 
 //activate plane mode
-void ccCompass::setPlaneMode()
+void ccCompass::setPlane()
 {
 	//cleanup
 	cleanupBeforeToolChange();
@@ -688,11 +764,11 @@ void ccCompass::setPlaneMode()
 	//update GUI
 	m_dlg->undoButton->setEnabled(m_fitPlaneTool->canUndo());
 	m_dlg->planeModeButton->setChecked(true);
-	m_window->redraw(true, false);
+	m_app->getActiveGLWindow()->redraw(true, false);
 }
 
 //activate trace mode
-void ccCompass::setTraceMode()
+void ccCompass::setTrace()
 {
 	//cleanup
 	cleanupBeforeToolChange();
@@ -708,26 +784,28 @@ void ccCompass::setTraceMode()
 	m_dlg->traceModeButton->setChecked(true);
 	m_dlg->undoButton->setEnabled( m_traceTool->canUndo() );
 	m_dlg->acceptButton->setEnabled(true);
-	m_window->redraw(true, false);
+	m_app->getActiveGLWindow()->redraw(true, false);
 }
 
 //activate the paint tool
-void ccCompass::setPaintMode()
+void ccCompass::setPick()
 {
 	cleanupBeforeToolChange();
 
-	m_activeTool = m_floodTool;
-	m_activeTool->toolActivated();
+	m_activeTool = nullptr; //picking tool is default - so no tool class
+	stopPicking(); //let CC handle picks now
 
-	m_dlg->paintModeButton->setChecked(true);
-	m_dlg->undoButton->setEnabled(m_activeTool->canUndo());
-	m_dlg->acceptButton->setEnabled(true);
-	m_window->redraw(true, false);
+	//hide point clouds
+	hideAllPointClouds(m_app->dbRootObject());
 
+	m_dlg->pickModeButton->setChecked(true);
+	m_dlg->undoButton->setEnabled(false);
+	m_dlg->acceptButton->setEnabled(false);
+	m_app->getActiveGLWindow()->redraw(true, false);
 }
 
 //activates the thickness tool
-void ccCompass::setThicknessMode() 
+void ccCompass::setThickness() 
 {
 	cleanupBeforeToolChange();
 
@@ -743,10 +821,51 @@ void ccCompass::setThicknessMode()
 	m_dlg->extraModeButton->setChecked(true);
 	m_dlg->undoButton->setEnabled(m_activeTool->canUndo());
 	m_dlg->acceptButton->setEnabled(true);
-	m_window->redraw(true, false);
+	m_app->getActiveGLWindow()->redraw(true, false);
 }
 
-void ccCompass::setNoteMode()
+//activates the thickness tool in two-point mode
+void ccCompass::setThickness2()
+{
+	setThickness();
+	ccThicknessTool::TWO_POINT_MODE = true; //now set the tool to operate in two-point mode
+}
+
+void ccCompass::setYoungerThan() //activates topology tool in "older-than" mode
+{
+	cleanupBeforeToolChange();
+
+	m_activeTool = m_topologyTool; //activate topology tool
+	stopPicking(); //let CC handle picks now - this tool only needs "selection changed" callbacks
+
+	//hide point clouds
+	hideAllPointClouds(m_app->dbRootObject());
+
+	//update gui
+	m_dlg->undoButton->setEnabled(false);
+	m_dlg->acceptButton->setEnabled(false);
+	m_app->getActiveGLWindow()->redraw(true, false);
+
+	//set topology tool mode
+	ccTopologyTool::RELATIONSHIP = ccTopologyRelation::YOUNGER_THAN;
+}
+
+void ccCompass::setFollows() //activates topology tool in "follows" mode
+{
+	setYoungerThan();
+	//set topology tool mode
+	ccTopologyTool::RELATIONSHIP = ccTopologyRelation::IMMEDIATELY_FOLLOWS;
+}
+
+void ccCompass::setEquivalent() //activates topology mode in "equivalent" mode
+{
+	setYoungerThan();
+	//set topology tool mode
+	ccTopologyTool::RELATIONSHIP = ccTopologyRelation::EQUIVALENCE;
+}
+
+//activates note mode
+void ccCompass::setNote()
 {
 	cleanupBeforeToolChange();
 
@@ -758,14 +877,7 @@ void ccCompass::setNoteMode()
 	m_dlg->extraModeButton->setChecked(true);
 	m_dlg->undoButton->setEnabled(m_activeTool->canUndo());
 	m_dlg->acceptButton->setEnabled(false);
-	m_window->redraw(true, false);
-}
-
-//activates the thickness tool in two-point mode
-void ccCompass::setThicknessMode2()
-{
-	setThicknessMode();
-	ccThicknessTool::TWO_POINT_MODE = true; //now set the tool to operate in two-point mode
+	m_app->getActiveGLWindow()->redraw(true, false);
 }
 
 //recompute entirely each selected trace (useful if the cost function has changed)
@@ -782,7 +894,23 @@ void ccCompass::recalculateSelectedTraces()
 		}
 	}
 
-	m_window->redraw(); //repaint window
+	m_app->getActiveGLWindow()->redraw(); //repaint window
+}
+
+//recurse and hide visisble point clouds
+void ccCompass::hideAllPointClouds(ccHObject* o)
+{
+	if (o->isKindOf(CC_TYPES::POINT_CLOUD) & o->isVisible())
+	{
+		o->setVisible(false);
+		m_hiddenObjects.push_back(o->getUniqueID());
+		return;
+	}
+
+	for (int i = 0; i < o->getChildrenNumber(); i++)
+	{
+		hideAllPointClouds(o->getChild(i));
+	}
 }
 
 //toggle stippling
@@ -790,7 +918,7 @@ void ccCompass::toggleStipple(bool checked)
 {
 	ccCompass::drawStippled = checked; //change stippling for newly created planes
 	recurseStipple(m_app->dbRootObject(), checked); //change stippling for existing planes
-	m_window->redraw(); //redraw
+	m_app->getActiveGLWindow()->redraw(); //redraw
 }
 
 void ccCompass::recurseStipple(ccHObject* object,bool checked)
@@ -815,13 +943,13 @@ void ccCompass::toggleLabels(bool checked)
 {
 	recurseLabels(m_app->dbRootObject(), checked); //change labels for existing planes
 	ccCompass::drawName = checked; //change labels for newly created planes
-	m_window->redraw(); //redraw
+	m_app->getActiveGLWindow()->redraw(); //redraw
 }
 
 void ccCompass::recurseLabels(ccHObject* object, bool checked)
 {
 	//check this object
-	if (ccFitPlane::isFitPlane(object) | ccLineation::isLineation(object))
+	if (ccFitPlane::isFitPlane(object) | ccPointPair::isPointPair(object))
 	{
 		object->showNameIn3D(checked);
 	}
@@ -839,7 +967,7 @@ void ccCompass::toggleNormals(bool checked)
 {
 	recurseNormals(m_app->dbRootObject(), checked); //change labels for existing planes
 	ccCompass::drawNormals = checked; //change labels for newly created planes
-	m_window->redraw(); //redraw
+	m_app->getActiveGLWindow()->redraw(); //redraw
 }
 
 void ccCompass::recurseNormals(ccHObject* object, bool checked)
@@ -873,7 +1001,6 @@ void ccCompass::enableMapMode() //turns on/off map mode
 	//m_app->dispToConsole("ccCompass: Changing to Map mode. Measurements will be associated with GeoObjects.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 	m_dlg->mapMode->setChecked(true);
 	m_dlg->compassMode->setChecked(false);
-	m_dlg->paintModeButton->setEnabled(true);
 
 	ccCompass::mapMode = true;
 
@@ -881,7 +1008,7 @@ void ccCompass::enableMapMode() //turns on/off map mode
 	m_app->registerOverlayDialog(m_mapDlg, Qt::Corner::TopLeftCorner);
 	m_mapDlg->start();
 	m_app->updateOverlayDialogsPlacement();
-	m_window->redraw(true, false);
+	m_app->getActiveGLWindow()->redraw(true, false);
 }
 
 //enter or turn off map mode
@@ -891,8 +1018,7 @@ void ccCompass::enableMeasureMode() //turns on/off map mode
 	m_dlg->mapMode->setChecked(false);
 	m_dlg->compassMode->setChecked(true);
 	ccCompass::mapMode = false;
-	m_window->redraw(true, false);
-	m_dlg->paintModeButton->setEnabled(false);
+	m_app->getActiveGLWindow()->redraw(true, false);
 
 	//turn off map mode dialog
 	m_mapDlg->stop(true);
@@ -947,16 +1073,6 @@ void ccCompass::addGeoObject() //creates a new GeoObject
 
 	//set it to selected (this will then make it "active" via the selection change callback)
 	m_app->setSelectedInDB(newGeoObject, true);
-}
-
-void ccCompass::pickGeoObject() //uses a "picking tool" to select GeoObjects
-{
-	//todo
-}
-
-void ccCompass::clearGeoObject()  //clears the selected GeoObject
-{
-	//todo
 }
 
 void ccCompass::writeToInterior() //new digitization will be added to the GeoObjects interior

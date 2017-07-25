@@ -2,7 +2,7 @@
 #define CC_NOTETOOL_HEADER
 
 #include "cctool.h"
-#include "ccLineation.h"
+#include "ccPointPair.h"
 
 #include <qinputdialog.h>
 #include <qmainwindow.h>

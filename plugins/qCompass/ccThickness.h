@@ -15,23 +15,24 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_THICKNESS_HEADER
+#define CC_THICKNESS_HEADER
 
 #include "ccPointPair.h"
 
 #include <ccPointCloud.h>
 
-class ccLineation : public ccPointPair
+class ccThickness : public ccPointPair
 {
 public:
 	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	ccThickness(ccPointCloud* associatedCloud);
+	ccThickness(ccPolyline* obj);
 
 	//write metadata specific to this object
 	void updateMetadata() override;
 
-	static bool isLineation(ccHObject* obj);
+	static bool isThickness(ccHObject* obj);
 };
+
 #endif

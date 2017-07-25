@@ -2,7 +2,7 @@
 #define CC_THICKNESSTOOL_HEADER
 
 #include "cctool.h"
-#include "ccLineation.h"
+#include "ccThickness.h"
 #include "ccPlane.h"
 
 #include <ccColorTypes.h>

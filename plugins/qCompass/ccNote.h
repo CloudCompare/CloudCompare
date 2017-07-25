@@ -15,23 +15,24 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_NOTE_HEADER
+#define CC_NOTE_HEADER
 
 #include "ccPointPair.h"
 
 #include <ccPointCloud.h>
 
-class ccLineation : public ccPointPair
+class ccNote : public ccPointPair
 {
 public:
 	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	ccNote(ccPointCloud* associatedCloud);
+	ccNote(ccPolyline* obj);
 
 	//write metadata specific to this object
 	void updateMetadata() override;
 
-	static bool isLineation(ccHObject* obj);
+	static bool isNote(ccHObject* obj);
 };
+
 #endif

@@ -15,23 +15,45 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#include "ccThickness.h"
 
-#include "ccPointPair.h"
+//pass ctors straight to PointPair
+ccThickness::ccThickness(ccPointCloud* associatedCloud)
+	: ccPointPair(associatedCloud)
+{ 
+	updateMetadata();
+}
 
-#include <ccPointCloud.h>
+ccThickness::ccThickness(ccPolyline* obj)
+	: ccPointPair(obj)
+{ 
+	updateMetadata();
+}
 
-class ccLineation : public ccPointPair
+void ccThickness::updateMetadata()
 {
-public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	QVariantMap* map = new QVariantMap();
 
-	//write metadata specific to this object
-	void updateMetadata() override;
+	//add metadata tag defining the ccCompass class type
+	map->insert("ccCompassType", "Thickness");
 
-	static bool isLineation(ccHObject* obj);
-};
-#endif
+	//add metadata tag defining length
+	float length = getDirection().norm();
+	map->insert("length", length);
+
+	//update name
+	setName(QString::asprintf("%.3fT", length));
+
+	//store
+	setMetaData(*map, true);
+}
+
+//returns true if object is a lineation
+bool ccThickness::isThickness(ccHObject* object)
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("Thickness");
+	}
+	return false;
+}

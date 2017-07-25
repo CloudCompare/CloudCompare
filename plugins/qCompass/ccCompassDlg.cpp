@@ -115,20 +115,25 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_noteTool = new QAction("Add note", this);
 	m_measure_thickness = new QAction("Measure One-Point Thickness", this);
 	m_measure_thickness_twoPoint = new QAction("Measure Two-Point Thickness");
-	m_crosscutting = new QAction("Assign Crosscutting Relationship", this);
-	m_younging = new QAction("Assign Younging Relationship", this);
-	
+	m_youngerThan = new QAction("Assign \"Younger-Than\" Relationship", this);
+	m_follows = new QAction("Assign \"Follows\" Relationship", this);
+	m_equivalent = new QAction("Assign \"Equivalent\" Relationship", this);
+
 	m_noteTool->setToolTip("Add short notes to a point in a point cloud for future reference.");
 	m_measure_thickness->setToolTip("Select a plane and then a point to measure plane-perpendicular thickness.");
-	m_measure_thickness_twoPoint->setToolTip("Measure the plane-perpendicular distance between two points");
-	m_crosscutting->setToolTip("Select two GeoObjects to assign a crosscutting relationship");
-	m_younging->setToolTip("Select two GeoObjects to assign a conformable younging relationship and copy across relevant boundaries");
+	m_measure_thickness_twoPoint->setToolTip("Measure the plane-perpendicular distance between two points.");
+	m_youngerThan->setToolTip("Pick two GeoObjects to assign a \"younger-than\" (i.e. crosscutting, superposition) relationshi.p");
+	m_follows->setToolTip("Select two GeoObjects to assign a \"follows\" (i.e. conformable) relationship.");
+	m_equivalent->setToolTip("Select two GeoObjects to assign an \"equivalent\" (i.e. coeval) relationship.");
 
-	m_pairpicking_menu->addAction(m_noteTool);
 	m_pairpicking_menu->addAction(m_measure_thickness);
 	m_pairpicking_menu->addAction(m_measure_thickness_twoPoint);
-	m_pairpicking_menu->addAction(m_crosscutting);
-	m_pairpicking_menu->addAction(m_younging);
+	m_pairpicking_menu->addSeparator();
+	m_pairpicking_menu->addAction(m_youngerThan);
+	m_pairpicking_menu->addAction(m_follows);
+	m_pairpicking_menu->addAction(m_equivalent);
+	m_pairpicking_menu->addSeparator();
+	m_pairpicking_menu->addAction(m_noteTool);
 
 	extraModeButton->setPopupMode(QToolButton::InstantPopup);
 	extraModeButton->setMenu(m_pairpicking_menu);

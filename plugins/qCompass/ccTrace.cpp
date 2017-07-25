@@ -100,6 +100,7 @@ void ccTrace::updateMetadata()
 	map->insert("cost_function", ccTrace::COST_MODE);
 	setMetaData(*map, true);
 }
+
 int ccTrace::insertWaypoint(int pointId)
 {
 	if (m_waypoints.size() >= 2)
@@ -744,13 +745,6 @@ void ccTrace::buildCurvatureCost(QWidget* parent)
 
 	//recompute min-max...
 	m_cloud->getScalarField(idx)->computeMinAndMax();
-
-	/*ccHObject::Container c;
-	c.push_back(m_cloud);
-	ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_SF_GRADIENT, c, nullptr);
-
-	//rename active sf
-	m_cloud->getCurrentDisplayedScalarField()->setName("Curvature");*/
 }
 
 bool ccTrace::isGradientPrecomputed()
@@ -931,6 +925,16 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
 
+		//push name for picking
+		bool pushName = MACRO_DrawEntityNames(context);
+		if (pushName)
+		{
+			glFunc->glPushName(getUniqueIDForDisplay());
+			//minimal display for picking mode!
+			glParams.showNorms = false;
+			glParams.showColors = false;
+		}
+
 		//set draw colour
 		ccColor::Rgba color = getMeasurementColour();
 		c_unitPointMarker->setTempColor(color);
@@ -949,7 +953,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				const CCVector3* P = m_cloud->getPoint(m_waypoints[i]);
 				ccGL::Translate(glFunc, P->x, P->y, P->z);
-				float scale = context.labelMarkerSize * m_relMarkerScale * 0.4 * pSize;
+				float scale = m_relMarkerScale * 0.3 * fmin(pSize,4);
 				if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 				{
 					//in perspective view, the actual scale depends on the distance to the camera!
@@ -965,16 +969,6 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else //just draw lines
 		{
-			//push name for picking
-			bool pushName = MACRO_DrawEntityNames(context);
-			if (pushName)
-			{
-				glFunc->glPushName(getUniqueIDForDisplay());
-				//minimal display for picking mode!
-				glParams.showNorms = false;
-				glParams.showColors = false;
-			}
-
 			//draw lines
 			for (std::deque<int> seg : m_trace)
 			{
@@ -990,37 +984,40 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glFunc->glEnd();
 				glFunc->glLineWidth(lineWidth);
 			}
-
-			//finish picking name
-			if (pushName)
-				glFunc->glPopName();
 		}
 
-		//draw trace points
-		for (std::deque<int> seg : m_trace)
+		//draw trace points if trace is active OR point size is large (otherwise line gets hidden)
+		if (m_isActive || pSize > 8)
 		{
-			for (int p : seg)
+
+			for (std::deque<int> seg : m_trace)
 			{
-				glFunc->glMatrixMode(GL_MODELVIEW);
-				glFunc->glPushMatrix();
-
-				const CCVector3* P = m_cloud->getPoint(p);
-				ccGL::Translate(glFunc, P->x, P->y, P->z);
-				float scale = context.labelMarkerSize * m_relMarkerScale * pSize * 0.2;
-				if (viewportParams.perspectiveView && viewportParams.zFar > 0)
+				for (int p : seg)
 				{
-					//in perspective view, the actual scale depends on the distance to the camera!
-					const double* M = camera.modelViewMat.data();
-					double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
-					double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
-					scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
-				}
+					glFunc->glMatrixMode(GL_MODELVIEW);
+					glFunc->glPushMatrix();
 
-				glFunc->glScalef(scale, scale, scale);
-				c_unitPointMarker->draw(markerContext);
-				glFunc->glPopMatrix();
+					const CCVector3* P = m_cloud->getPoint(p);
+					ccGL::Translate(glFunc, P->x, P->y, P->z);
+					float scale = m_relMarkerScale * fmin(pSize,4) * 0.2;
+					if (viewportParams.perspectiveView && viewportParams.zFar > 0)
+					{
+						//in perspective view, the actual scale depends on the distance to the camera!
+						const double* M = camera.modelViewMat.data();
+						double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
+						double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
+						scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
+					}
+
+					glFunc->glScalef(scale, scale, scale);
+					c_unitPointMarker->draw(markerContext);
+					glFunc->glPopMatrix();
+				}
 			}
 		}
+		//finish picking name
+		if (pushName)
+			glFunc->glPopName();
 	}
 }
 

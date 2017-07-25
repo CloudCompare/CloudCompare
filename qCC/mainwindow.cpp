@@ -2629,7 +2629,7 @@ void MainWindow::doActionComputePointsVisibility()
 		ccProgressDialog pdlg(true);
 		CCLib::NormalizedProgress nprogress(&pdlg,pointCloud->size());
 		pdlg.setMethodTitle(tr("Compute visibility"));
-		pdlg.setInfo(tr("Points: %1").arg(pointCloud->size()));
+		pdlg.setInfo(tr("Points: %L1").arg( pointCloud->size() ));
 		pdlg.start();
 		QApplication::processEvents();
 

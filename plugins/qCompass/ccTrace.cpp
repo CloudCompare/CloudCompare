@@ -79,7 +79,6 @@ ccTrace::ccTrace(ccPolyline* obj)
 	}
 
 	computeBB(); //update bounding box (for picking)
-	//recalculate trace from the waypoints
 }
 
 void ccTrace::init(ccPointCloud* associatedCloud)
@@ -953,7 +952,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				const CCVector3* P = m_cloud->getPoint(m_waypoints[i]);
 				ccGL::Translate(glFunc, P->x, P->y, P->z);
-				float scale = m_relMarkerScale * 0.3 * fmin(pSize,4);
+				float scale = context.labelMarkerSize * m_relMarkerScale * 0.3 * fmin(pSize,4);
 				if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 				{
 					//in perspective view, the actual scale depends on the distance to the camera!
@@ -999,7 +998,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					const CCVector3* P = m_cloud->getPoint(p);
 					ccGL::Translate(glFunc, P->x, P->y, P->z);
-					float scale = m_relMarkerScale * fmin(pSize,4) * 0.2;
+					float scale = context.labelMarkerSize * m_relMarkerScale * fmin(pSize, 4) * 0.2;
 					if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 					{
 						//in perspective view, the actual scale depends on the distance to the camera!

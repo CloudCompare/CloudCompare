@@ -133,6 +133,7 @@ protected slots:
 	void setEquivalent(); //activates topology mode in "equivalent" mode
 	void setNote(); //activates the note tool
 	void recalculateSelectedTraces(); //recalculate any selected traces (for updating with a different cost function)
+	void exportToSVG(); //exports current view to SVG
 
 	//map mode dialog
 	void writeToInterior(); //new digitization will be added to the GeoObjects interior
@@ -206,7 +207,7 @@ protected:
 	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());
 	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = QString());
 	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString());
-
+	int writeTracesSVG(ccHObject* object, QTextStream* out, int height);
 	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)
 	bool madeByMe(ccHObject* object);
 

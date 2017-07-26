@@ -219,6 +219,8 @@ void ccCompass::doAction()
 
 		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNote()));
 
+		ccCompassDlg::connect(m_dlg->m_toSVG, SIGNAL(triggered()), this, SLOT(exportToSVG()));
+
 		//settings menu
 		ccCompassDlg::connect(m_dlg->m_showNames, SIGNAL(toggled(bool)), this, SLOT(toggleLabels(bool)));
 		ccCompassDlg::connect(m_dlg->m_showStippled, SIGNAL(toggled(bool)), this, SLOT(toggleStipple(bool)));
@@ -388,7 +390,6 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 			replacements->push_back(n);
 			return;
 		}
-
 	}
 }
 
@@ -1099,6 +1100,118 @@ void ccCompass::writeToLower() //new digitiziation will be added to the GeoObjec
 	m_mapDlg->setLowerButton->setChecked(true);
 }
 
+//save the current view to an SVG file
+void ccCompass::exportToSVG()
+{
+	//get output file path
+	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("SVG files (*.svg)"));
+	if (filename.isEmpty())
+	{
+		//process cancelled by the user
+		return;
+	}
+
+	QFileInfo fi(filename);
+	if (fi.suffix() != "svg")
+	{
+		filename += ".svg";
+	}
+
+	//create file
+	QFile svg_file(filename);
+
+	//open file & create text stream
+	if (svg_file.open(QIODevice::WriteOnly))
+	{
+		QTextStream svg_stream(&svg_file);
+
+		int width = m_app->getActiveGLWindow()->glWidth();
+		int height = m_app->getActiveGLWindow()->glHeight();
+
+		//write svg header
+		svg_stream << QString::asprintf("<svg width=\"%d\" height=\"%d\">", width, height) << endl;
+
+		//recursively write traces
+		int count = writeTracesSVG(m_app->dbRootObject(), &svg_stream, height);
+
+		//write end tag for svg file
+		svg_stream << "</svg>" << endl; 
+
+		//close file
+		svg_stream.flush();
+		svg_file.close();
+
+		if (count > 0)
+		{
+			m_app->dispToConsole(QString::asprintf("[ccCompass] Succesfully saved %d polylines to .svg file.", count));
+		}
+		else
+		{
+			//remove file
+			svg_file.remove();
+			m_app->dispToConsole(QString::asprintf("[ccCompass] Could not write polylines to .svg - no polylines found!", count),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		}
+	}
+}
+
+int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
+{
+	int n = 0;
+
+	//is this a drawable polyline?
+	if (object->isA(CC_TYPES::POLY_LINE) || ccTrace::isTrace(object))
+	{
+		//get polyline object
+		ccPolyline* line = static_cast<ccPolyline*>(object);
+
+		if (!line->isVisible())
+		{
+			return 0; //as soon as something is not visible we bail
+		}
+
+		//write polyline header
+		*out << "<polyline fill=\"none\" stroke=\"black\" points=\"";
+
+		//get projection params
+		ccGLCameraParameters params;
+		m_app->getActiveGLWindow()->getGLCameraParameters(params);
+		if (params.perspective)
+		{
+			m_app->getActiveGLWindow()->setPerspectiveState(false, true);
+			m_app->getActiveGLWindow()->redraw(false, false); //not sure if this is needed or not?
+			m_app->getActiveGLWindow()->getGLCameraParameters(params); //get updated params
+		}
+
+		//write point string
+		for (int i = 0; i < line->size(); i++)
+		{
+
+			//get point in world coordinates
+			CCVector3 P = *line->getPoint(i);
+
+			//project 3D point into 2D
+			CCVector3d coords2D;
+			params.project(P, coords2D);
+			
+			//write point
+			*out << QString::asprintf("%.3f,%.3f ", coords2D.x, height - coords2D.y); //n.b. we need to flip y-axis
+
+		}
+
+		//end polyline
+		*out << "\"/>" << endl;
+
+		n++; //a polyline has been written
+	}
+
+	//recurse on children
+	for (int i = 0; i < object->getChildrenNumber(); i++)
+	{
+		n += writeTracesSVG(object->getChild(i), out, height);
+	}
+
+	return n;
+}
 
 //export the selected layer to CSV file
 void ccCompass::onSave()

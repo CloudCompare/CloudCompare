@@ -112,6 +112,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	//setup pair picking menu
 	m_pairpicking_menu = new QMenu(this);
 
+	m_toSVG = new QAction("Export SVG", this);
 	m_noteTool = new QAction("Add note", this);
 	m_measure_thickness = new QAction("Measure One-Point Thickness", this);
 	m_measure_thickness_twoPoint = new QAction("Measure Two-Point Thickness");
@@ -119,6 +120,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_follows = new QAction("Assign \"Follows\" Relationship", this);
 	m_equivalent = new QAction("Assign \"Equivalent\" Relationship", this);
 
+	m_toSVG->setToolTip("Export the currently visible trace to a SVG vector graphic using an orthographic projection of the current view.");
 	m_noteTool->setToolTip("Add short notes to a point in a point cloud for future reference.");
 	m_measure_thickness->setToolTip("Select a plane and then a point to measure plane-perpendicular thickness.");
 	m_measure_thickness_twoPoint->setToolTip("Measure the plane-perpendicular distance between two points.");
@@ -134,6 +136,8 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_pairpicking_menu->addAction(m_equivalent);
 	m_pairpicking_menu->addSeparator();
 	m_pairpicking_menu->addAction(m_noteTool);
+	m_pairpicking_menu->addSeparator();
+	m_pairpicking_menu->addAction(m_toSVG);
 
 	extraModeButton->setPopupMode(QToolButton::InstantPopup);
 	extraModeButton->setMenu(m_pairpicking_menu);

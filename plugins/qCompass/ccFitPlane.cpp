@@ -23,6 +23,19 @@ ccFitPlane::ccFitPlane(ccPlane* p)
 
 	setName(dipAndDipDirStr);
 
+	//update metadata
+	float rms = -1;
+	float search_r = -1;
+	if (p->hasMetaData("RMS"))
+	{
+		rms = p->getMetaData("RMS").toFloat();
+	}
+	if (p->hasMetaData("Radius"))
+	{
+		search_r = p->getMetaData("Radius").toFloat();
+	}
+	updateAttributes(rms,search_r);
+
 	//update drawing properties based on ccCompass state
 	enableStippling(ccCompass::drawStippled);
 	showNameIn3D(ccCompass::drawName);

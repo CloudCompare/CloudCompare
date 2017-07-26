@@ -67,6 +67,7 @@ public:
 	QAction *m_follows; //topology tool - stratigraphic younging relations
 	QAction *m_equivalent;
 	QAction *m_noteTool; //note tool
+	QAction *m_toSVG; //export to svg
 
 protected slots:
 	//! To capture overridden shortcuts (pause button, etc.)

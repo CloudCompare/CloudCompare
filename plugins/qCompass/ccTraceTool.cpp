@@ -174,32 +174,6 @@ void ccTraceTool::finishCurrentTrace()
 		//fit plane
 		if ( (fitPlane && m_changed) || (m_parentPlaneDeleted || m_childPlaneDeleted))
 		{
-			//check if a fit-plane already exists (and bail if it does)
-			/*bool calculateFitPlane = true;
-
-			//is one of our children the fit plane (planes made in map mode)?
-			for (unsigned idx = 0; idx < t->getChildrenNumber(); idx++)
-			{
-				ccHObject* child = t->getChild(idx);
-
-				if (ccFitPlane::isFitPlane(child)) //we've found a fit plane - bail
-				{
-					m_app->dispToConsole(QString("[ccCompass] Trace orientation estimate already exists ( " + child->getName() + ")"), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-					calculateFitPlane = false;
-					break;
-				}
-			}
-
-			//is our parent the fit plane (planes made in Compass mode)?
-			if (ccFitPlane::isFitPlane(t->getParent()))
-			{
-				m_app->dispToConsole(QString("[ccCompass] Trace orientation estimate already exists ( " + t->getParent()->getName() + ")"), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-				calculateFitPlane = false;
-			}
-
-			if (calculateFitPlane) //plane has not (yet) been calculated - go ahead and do some magic
-			{*/
-
 			//calculate fit plane
 			ccPlane* p = t->fitPlane();
 			if (p)

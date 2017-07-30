@@ -48,6 +48,7 @@
 #include <pdal/io/LasWriter.hpp>
 #include <pdal/io/LasVLR.hpp>
 #include <pdal/io/BufferReader.hpp>
+#include <pdal/Filter.hpp>
 Q_DECLARE_METATYPE(pdal::SpatialReference)
 
 using namespace pdal::Dimension;
@@ -111,6 +112,24 @@ struct ExtraLasField : LasField
     pdal::Dimension::Id pdalId;
     double scale;
     double offset;
+};
+
+class CCLasStreamFilter : public pdal::Filter
+{
+public:
+    std::string getName() const override { return "CCLasStreamFilter"; }
+    CCLasStreamFilter(pdal::Dimension::IdList fieldsToLoad, pdal::Dimension::IdList extrasToLoad)
+            : m_fieldsToLoad(fieldsToLoad), m_extrasToLoad(extrasToLoad) {};
+
+private:
+    pdal::Dimension::IdList m_fieldsToLoad;
+    pdal::Dimension::IdList m_extrasToLoad;
+
+    bool processOne(pdal::PointRef& point)
+    {
+        return true;
+    }
+
 };
 
 //! Semi persistent save dialog
@@ -512,6 +531,99 @@ protected:
     std::vector<QString> fileNames;
 };
 
+
+pdal::Dimension::Id typeToId(LAS_FIELDS sfType)
+{
+    switch (sfType) {
+        case LAS_FIELDS::LAS_X:
+            return pdal::Dimension::Id::X;
+        case LAS_FIELDS::LAS_Y:
+            return pdal::Dimension::Id::Y;
+        case LAS_FIELDS::LAS_Z:
+            return pdal::Dimension::Id::Z;
+        case LAS_FIELDS::LAS_INTENSITY:
+            return pdal::Dimension::Id::Intensity;
+        case LAS_FIELDS::LAS_RETURN_NUMBER:
+            return pdal::Dimension::Id::ReturnNumber;
+        case LAS_FIELDS::LAS_NUMBER_OF_RETURNS:
+            return pdal::Dimension::Id::NumberOfReturns;
+        case LAS_FIELDS::LAS_SCAN_DIRECTION:
+            return pdal::Dimension::Id::ScanDirectionFlag;
+        case LAS_FIELDS::LAS_SCAN_ANGLE_RANK:
+            return pdal::Dimension::Id::ScanAngleRank;
+        case LAS_FIELDS::LAS_USER_DATA:
+            return pdal::Dimension::Id::UserData;
+        case LAS_FIELDS::LAS_POINT_SOURCE_ID:
+            return pdal::Dimension::Id::PointSourceId;
+        case LAS_FIELDS::LAS_RED:
+            return pdal::Dimension::Id::Red;
+        case LAS_FIELDS::LAS_GREEN:
+            return pdal::Dimension::Id::Green;
+        case LAS_FIELDS::LAS_BLUE:
+            return pdal::Dimension::Id::Blue;
+        case LAS_FIELDS::LAS_TIME:
+            return pdal::Dimension::Id::GpsTime;
+        case LAS_FIELDS::LAS_EXTRA:
+            return pdal::Dimension::Id::Unknown;
+        //Sub fields
+        case LAS_FIELDS::LAS_CLASSIF_VALUE:
+            return pdal::Dimension::Id::Classification;
+        case LAS_FIELDS::LAS_CLASSIF_SYNTHETIC:
+            return pdal::Dimension::Id::ClassFlags;
+        case LAS_FIELDS::LAS_CLASSIF_KEYPOINT:
+            return pdal::Dimension::Id::ClassFlags;
+        case LAS_FIELDS::LAS_CLASSIF_WITHHELD:
+            return pdal::Dimension::Id::ClassFlags;
+        //Invald flag
+        case LAS_FIELDS::LAS_INVALID:
+            return pdal::Dimension::Id::Unknown;
+    };
+
+}
+
+//Todo: Use a map<std::string, pdal::id>
+void createFieldsToLoad(std::vector< LasField::Shared > &fieldsToLoad, IdList extraFieldsToLoad, pdal::StringList extraNamesToLoad)
+{
+    //DGM: from now on, we only enable scalar fields when we detect a valid value!
+    if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIFICATION, 0, 0, 255))); //unsigned char: between 0 and 255
+    if (s_lasOpenDlg->doLoad(LAS_CLASSIF_VALUE))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_VALUE, 0, 0, 31))); //5 bits: between 0 and 31
+    if (s_lasOpenDlg->doLoad(LAS_CLASSIF_SYNTHETIC))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1))); //1 bit: 0 or 1
+    if (s_lasOpenDlg->doLoad(LAS_CLASSIF_KEYPOINT))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1))); //1 bit: 0 or 1
+    if (s_lasOpenDlg->doLoad(LAS_CLASSIF_WITHHELD))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1))); //1 bit: 0 or 1
+    if (s_lasOpenDlg->doLoad(LAS_INTENSITY))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_INTENSITY, 0, 0, 65535))); //16 bits: between 0 and 65536
+    if (s_lasOpenDlg->doLoad(LAS_TIME))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_TIME, 0, 0, -1.0))); //8 bytes (double) --> we use global shift!
+    if (s_lasOpenDlg->doLoad(LAS_RETURN_NUMBER))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_RETURN_NUMBER, 1, 1, 7))); //3 bits: between 1 and 7
+    if (s_lasOpenDlg->doLoad(LAS_NUMBER_OF_RETURNS))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_NUMBER_OF_RETURNS, 1, 1, 7))); //3 bits: between 1 and 7
+    if (s_lasOpenDlg->doLoad(LAS_SCAN_DIRECTION))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_DIRECTION, 0, 0, 1))); //1 bit: 0 or 1
+    if (s_lasOpenDlg->doLoad(LAS_FLIGHT_LINE_EDGE))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_FLIGHT_LINE_EDGE, 0, 0, 1))); //1 bit: 0 or 1
+    if (s_lasOpenDlg->doLoad(LAS_SCAN_ANGLE_RANK))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_ANGLE_RANK, 0, -90, 90))); //signed char: between -90 and +90
+    if (s_lasOpenDlg->doLoad(LAS_USER_DATA))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_USER_DATA, 0, 0, 255))); //unsigned char: between 0 and 255
+    if (s_lasOpenDlg->doLoad(LAS_POINT_SOURCE_ID))
+        fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535))); //16 bits: between 0 and 65536
+
+    //extra fields
+    for (unsigned i = 0; i < extraNamesToLoad.size(); ++i)
+    {
+        QString name = QString::fromStdString(extraNamesToLoad[i]);
+        ExtraLasField *eField = new ExtraLasField(name, extraFieldsToLoad[i]);
+        fieldsToLoad.push_back(LasField::Shared(eField));
+    }
+}
+
+
 CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
     pdal::Options las_opts;
@@ -532,9 +644,6 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         lasReader.prepare(table);
         lasHeader = lasReader.header();
         file_info = lasReader.preview();
-
-//        pointViewSet = lasReader.execute(table);
-//        pointView = *pointViewSet.begin();
     }
     catch (const pdal::pdal_error& e)
     {
@@ -567,14 +676,12 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
     for (std::string &dimName: allDims)
     {
         if (pdal::Dimension::id(dimName) == pdal::Dimension::Id::Unknown)
+        {
             extraDimensions.push_back(dimName);
+            extraDimensionsIds.push_back(layout->findProprietaryDim(dimName));
+        }
         else
             dimensions.push_back(dimName);
-    }
-
-    for (std::string &eDimName: extraDimensions)
-    {
-        extraDimensionsIds.push_back(layout->findProprietaryDim(eDimName));
     }
 
     if (!s_lasOpenDlg)
@@ -648,7 +755,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 
     std::vector< LasField::Shared > fieldsToLoad;
-    IdList extraFieldsToLoad;
+
 
     // Actual file reading happens here
     try
@@ -702,10 +809,14 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
     ccPointCloud* loadedCloud = nullptr;
 
+    IdList extraFieldsToLoad;
+    pdal::StringList extraNamesToLoad;
     for (unsigned i = 0; i < extraDimensionsIds.size(); ++i)
     {
-        if (s_lasOpenDlg->doLoadEVLR(i))
+        if (s_lasOpenDlg->doLoadEVLR(i)) {
             extraFieldsToLoad.push_back(extraDimensionsIds[i]);
+            extraNamesToLoad.push_back(extraDimensions[i]);
+        }
     }
 
     for (pdal::PointId idx = 0; idx < pointView->size()+1; ++idx)
@@ -830,43 +941,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
             //save the Spatial reference as meta-data
             loadedCloud->setMetaData(s_LAS_SRS_Key, QVariant::fromValue(lasHeader.srs()));
 
-            //DGM: from now on, we only enable scalar fields when we detect a valid value!
-            if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIFICATION, 0, 0, 255))); //unsigned char: between 0 and 255
-            if (s_lasOpenDlg->doLoad(LAS_CLASSIF_VALUE))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_VALUE, 0, 0, 31))); //5 bits: between 0 and 31
-            if (s_lasOpenDlg->doLoad(LAS_CLASSIF_SYNTHETIC))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1))); //1 bit: 0 or 1
-            if (s_lasOpenDlg->doLoad(LAS_CLASSIF_KEYPOINT))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1))); //1 bit: 0 or 1
-            if (s_lasOpenDlg->doLoad(LAS_CLASSIF_WITHHELD))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1))); //1 bit: 0 or 1
-            if (s_lasOpenDlg->doLoad(LAS_INTENSITY))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_INTENSITY, 0, 0, 65535))); //16 bits: between 0 and 65536
-            if (s_lasOpenDlg->doLoad(LAS_TIME))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_TIME, 0, 0, -1.0))); //8 bytes (double) --> we use global shift!
-            if (s_lasOpenDlg->doLoad(LAS_RETURN_NUMBER))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_RETURN_NUMBER, 1, 1, 7))); //3 bits: between 1 and 7
-            if (s_lasOpenDlg->doLoad(LAS_NUMBER_OF_RETURNS))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_NUMBER_OF_RETURNS, 1, 1, 7))); //3 bits: between 1 and 7
-            if (s_lasOpenDlg->doLoad(LAS_SCAN_DIRECTION))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_DIRECTION, 0, 0, 1))); //1 bit: 0 or 1
-            if (s_lasOpenDlg->doLoad(LAS_FLIGHT_LINE_EDGE))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_FLIGHT_LINE_EDGE, 0, 0, 1))); //1 bit: 0 or 1
-            if (s_lasOpenDlg->doLoad(LAS_SCAN_ANGLE_RANK))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_ANGLE_RANK, 0, -90, 90))); //signed char: between -90 and +90
-            if (s_lasOpenDlg->doLoad(LAS_USER_DATA))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_USER_DATA, 0, 0, 255))); //unsigned char: between 0 and 255
-            if (s_lasOpenDlg->doLoad(LAS_POINT_SOURCE_ID))
-                fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535))); //16 bits: between 0 and 65536
-
-            //extra fields
-            for (Id &extraFieldId: extraFieldsToLoad)
-            {
-                QString name = QString::fromStdString(pointView->dimName(extraFieldId));
-                ExtraLasField *eField = new ExtraLasField(name, extraFieldId);
-                fieldsToLoad.push_back(LasField::Shared(eField));
-            }
+            createFieldsToLoad(fieldsToLoad, extraDimensionsIds, extraNamesToLoad);
         }
 
 
@@ -940,35 +1015,10 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         for (auto &field : fieldsToLoad) {
 
             double value = 0.0;
+            Id pdalId = typeToId(field->type);
+            value = pointView->getFieldAs<double>(pdalId, idx);
             switch (field->type)
             {
-            case LAS_INTENSITY:
-                value = pointView->getFieldAs<double>(Id::Intensity, idx);
-                break;
-            case LAS_RETURN_NUMBER:
-                value = pointView->getFieldAs<double>(Id::ReturnNumber, idx);
-                break;
-            case LAS_NUMBER_OF_RETURNS:
-                value = pointView->getFieldAs<double>(Id::NumberOfReturns, idx);
-                break;
-            case LAS_SCAN_DIRECTION:
-                value = pointView->getFieldAs<double>(Id::ScanDirectionFlag, idx);
-                break;
-            case LAS_FLIGHT_LINE_EDGE:
-                value = pointView->getFieldAs<double>(Id::EdgeOfFlightLine, idx);
-                break;
-            case LAS_CLASSIFICATION:
-                value = pointView->getFieldAs<double>(Id::Classification, idx);
-                break;
-            case LAS_SCAN_ANGLE_RANK:
-                value = pointView->getFieldAs<double>(Id::ScanAngleRank, idx);
-                break;
-            case LAS_USER_DATA:
-                value = pointView->getFieldAs<double>(Id::UserData, idx);
-                break;
-            case LAS_POINT_SOURCE_ID:
-                value = pointView->getFieldAs<double>(Id::PointSourceId, idx);
-                break;
             case LAS_EXTRA:
             {
                 ExtraLasField* extraField = static_cast<ExtraLasField*>(field.data());
@@ -993,13 +1043,12 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
                 value = (pointView->getFieldAs<int>(Id::ClassFlags, idx) & 2); //bit #2
                 break;
             case LAS_CLASSIF_WITHHELD:
-                value = (pointView->getFieldAs<int>(Id::Classification, idx) & 4); //bit #3
+                value = (pointView->getFieldAs<int>(Id::ClassFlags, idx) & 4); //bit #3
                 break;
                 // Overlap flag is the 4 bit (new in las 1.4)
             default:
                 //ignored
-                assert(false);
-                continue;
+                break;
             }
             if (field->sf)
             {

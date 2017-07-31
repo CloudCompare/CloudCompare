@@ -49,6 +49,7 @@
 #include <pdal/io/LasVLR.hpp>
 #include <pdal/io/BufferReader.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/filters/StreamCallbackFilter.hpp>
 Q_DECLARE_METATYPE(pdal::SpatialReference)
 
 using namespace pdal::Dimension;
@@ -77,8 +78,8 @@ public:
 
 bool LASFilter::canLoadExtension(QString upperCaseExt) const
 {
-    return (	upperCaseExt == "LAS"
-                ||	upperCaseExt == "LAZ");
+    return (	upperCaseExt == "LAS" ||
+                upperCaseExt == "LAZ");
 }
 
 bool LASFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
@@ -118,18 +119,34 @@ class CCLasStreamFilter : public pdal::Filter
 {
 public:
     std::string getName() const override { return "CCLasStreamFilter"; }
-    CCLasStreamFilter(pdal::Dimension::IdList fieldsToLoad, pdal::Dimension::IdList extrasToLoad)
-            : m_fieldsToLoad(fieldsToLoad), m_extrasToLoad(extrasToLoad) {};
+    CCLasStreamFilter(pdal::Dimension::IdList fieldsToLoad, pdal::Dimension::IdList extrasToLoad, unsigned nbPoints)
+            : m_fieldsToLoad(fieldsToLoad), m_extrasToLoad(extrasToLoad), m_loadedCloud(nullptr),
+            m_count(0), m_nbPoinst(nbPoints), m_fileChunkPos(0), m_fileChunkSize(0), m_chunkHasColors(false) {}
 
 private:
     pdal::Dimension::IdList m_fieldsToLoad;
     pdal::Dimension::IdList m_extrasToLoad;
+    ccPointCloud *m_loadedCloud;
+    unsigned m_count;
+    unsigned m_nbPoinst;
+    unsigned m_fileChunkPos;
+    unsigned m_fileChunkSize;
+    bool m_chunkHasColors;
 
     bool processOne(pdal::PointRef& point)
     {
-        return true;
-    }
+        if (m_count == m_nbPoinst || m_count == m_fileChunkPos + m_fileChunkSize)
+        {
+            if (m_loadedCloud)
+            {
+                if (m_loadedCloud->size())
+                {
+                   //TODO: Colors
+                }
+            }
 
+        }
+    }
 };
 
 //! Semi persistent save dialog
@@ -549,6 +566,10 @@ pdal::Dimension::Id typeToId(LAS_FIELDS sfType)
             return pdal::Dimension::Id::NumberOfReturns;
         case LAS_FIELDS::LAS_SCAN_DIRECTION:
             return pdal::Dimension::Id::ScanDirectionFlag;
+        case LAS_FIELDS::LAS_FLIGHT_LINE_EDGE:
+            return pdal::Dimension::Id::EdgeOfFlightLine;
+        case LAS_FIELDS::LAS_CLASSIFICATION:
+            return  pdal::Dimension::Id::Classification;
         case LAS_FIELDS::LAS_SCAN_ANGLE_RANK:
             return pdal::Dimension::Id::ScanAngleRank;
         case LAS_FIELDS::LAS_USER_DATA:
@@ -629,19 +650,17 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
     pdal::Options las_opts;
     las_opts.add("filename", filename.toStdString());
 
+    pdal::FixedPointTable t(100);
     pdal::PointTable table;
     pdal::LasReader lasReader;
     pdal::LasHeader lasHeader;
-    pdal::PointViewSet pointViewSet;
-    pdal::PointViewPtr pointView;
-    pdal::Dimension::IdList dims;
     pdal::QuickInfo file_info;
-    pdal::PointLayoutPtr layout(table.layout());
+    pdal::PointLayoutPtr layout(t.layout());
 
     try
     {
         lasReader.setOptions(las_opts);
-        lasReader.prepare(table);
+        lasReader.prepare(t);
         lasHeader = lasReader.header();
         file_info = lasReader.preview();
     }
@@ -756,44 +775,6 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
     std::vector< LasField::Shared > fieldsToLoad;
 
-
-    // Actual file reading happens here
-    try
-    {
-        pointViewSet = lasReader.execute(table);
-        pointView = *pointViewSet.begin();
-    }
-    catch (const pdal::pdal_error& e)
-    {
-        ccLog::Error(QString("PDAL exception '%1'").arg(e.what()));
-        return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
-    }
-    catch (...)
-    {
-        return CC_FERR_THIRD_PARTY_LIB_FAILURE;
-    }
-
-    //first point: check for 'big' coordinates
-    CCVector3d P(pointView->getFieldAs<double>(Id::X, 0),
-                 pointView->getFieldAs<double>(Id::Y, 0),
-                 pointView->getFieldAs<double>(Id::Z, 0));
-    //backup input global parameters
-    ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
-    bool useLasShift = false;
-    //set the LAS shift as default shift (if none was provided)
-    if (lasShift.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
-    {
-        useLasShift = true;
-        Pshift = lasShift;
-        if (	csModeBackup != ccGlobalShiftManager::NO_DIALOG
-                &&	csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
-        {
-            parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
-        }
-    }
-
-    //restore previous parameters
-    parameters.shiftHandlingMode = csModeBackup;
     QScopedPointer<ccProgressDialog> pDlg(0);
     if (parameters.parentWidget)
     {
@@ -806,6 +787,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
     unsigned int fileChunkPos = 0;
     unsigned int fileChunkSize = 0;
+    unsigned int npPointsRead = 0;
 
     ccPointCloud* loadedCloud = nullptr;
 
@@ -819,16 +801,13 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         }
     }
 
-    for (pdal::PointId idx = 0; idx < pointView->size()+1; ++idx)
+
+    pdal::StreamCallbackFilter f;
+    f.setInput(lasReader);
+
+    auto ccProcessOne = [&](pdal::PointRef& point)
     {
-        // special operation: tiling mode
-        if (tiling && idx < pointView->size())
-        {
-            tiler.addPoint(pointView, idx);
-            nProgress.oneStep();
-            continue;
-        }
-        if (idx == pointView->size() || idx == fileChunkPos + fileChunkSize)
+        if (npPointsRead == nbOfPoints - 1 || npPointsRead == fileChunkPos + fileChunkSize)
         {
 
             if (loadedCloud)
@@ -920,13 +899,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
                 }
             }
 
-            if (idx == pointView->size())
-            {
-                break;
-            }
             // otherwise, we must create a new cloud
-            fileChunkPos = idx;
-            unsigned int pointsToRead = static_cast<unsigned int>(pointView->size()) - idx;
+            fileChunkPos = npPointsRead;
+            unsigned int pointsToRead = static_cast<unsigned int>(nbOfPoints) - npPointsRead;
             fileChunkSize = std::min(pointsToRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
             loadedCloud = new ccPointCloud();
 
@@ -945,18 +920,52 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         }
 
 
+        //first point check for 'big' coordinates
+        if (npPointsRead == 0)
+        {
 
-        CCVector3 P(static_cast<PointCoordinateType>(pointView->getFieldAs<double>(Id::X, idx) + Pshift.x),
-                    static_cast<PointCoordinateType>(pointView->getFieldAs<double>(Id::Y, idx) + Pshift.y),
-                    static_cast<PointCoordinateType>(pointView->getFieldAs<double>(Id::Z, idx) + Pshift.z));
+            CCVector3d P(static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::X)),
+                         static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Y)),
+                         static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Z)));
+            //backup input global parameters
+            ccGlobalShiftManager::Mode csBackupMode = parameters.shiftHandlingMode;
+            bool useLasShift = false;
+            //set the lasShift as default if none was provided
+            if (lasShift.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
+            {
+                useLasShift = true;
+                Pshift = lasShift;
+
+                if (csBackupMode != ccGlobalShiftManager::Mode::NO_DIALOG_AUTO_SHIFT &&
+                    csBackupMode != ccGlobalShiftManager::Mode::NO_DIALOG)
+                {
+                    parameters.shiftHandlingMode = ccGlobalShiftManager::Mode::ALWAYS_DISPLAY_DIALOG;
+                }
+
+                if (HandleGlobalShift(P, Pshift, parameters, useLasShift))
+                {
+                    loadedCloud->setGlobalShift(Pshift);
+                    ccLog::Warning("[LAS] Cloud has been recentered! Translastion: (%0.2f; %0.2f; %0.2f)", Pshift.x, Pshift.y, Pshift.z);
+                }
+
+            }
+            //restore previous parameters
+            parameters.shiftHandlingMode = csBackupMode;
+
+        }
+
+
+        CCVector3 P(static_cast<PointCoordinateType>(point.getFieldAs<double>(Id::X) + Pshift.x),
+                    static_cast<PointCoordinateType>(point.getFieldAs<double>(Id::Y) + Pshift.y),
+                    static_cast<PointCoordinateType>(point.getFieldAs<double>(Id::Z) + Pshift.z));
         loadedCloud->addPoint(P);
 
 
         if (loadColor)
         {
-            unsigned short red = pointView->getFieldAs<unsigned short>(Id::Red, idx) & rgbColorMask[0];
-            unsigned short green = pointView->getFieldAs<unsigned short>(Id::Green, idx) & rgbColorMask[1];
-            unsigned short blue = pointView->getFieldAs<unsigned short>(Id::Blue, idx) & rgbColorMask[2];
+            unsigned short red = point.getFieldAs<unsigned short>(Id::Red) & rgbColorMask[0];
+            unsigned short green = point.getFieldAs<unsigned short>(Id::Green) & rgbColorMask[1];
+            unsigned short blue = point.getFieldAs<unsigned short>(Id::Blue) & rgbColorMask[2];
 
             // if we don't have reserved a color field yet, we check that color is not black
             bool pushColor = true;
@@ -1016,17 +1025,17 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
             double value = 0.0;
             Id pdalId = typeToId(field->type);
-            value = pointView->getFieldAs<double>(pdalId, idx);
+
             switch (field->type)
             {
             case LAS_EXTRA:
             {
                 ExtraLasField* extraField = static_cast<ExtraLasField*>(field.data());
-                value = pointView->getFieldAs<double>(extraField->pdalId, idx);
+                value = point.getFieldAs<double>(extraField->pdalId);
                 break;
             }
             case LAS_TIME:
-                value = pointView->getFieldAs<double>(Id::GpsTime, idx);
+                value = point.getFieldAs<double>(Id::GpsTime);
                 if (field->sf)
                 {
                     //shift time values (so as to avoid losing accuracy)
@@ -1034,20 +1043,20 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
                 }
                 break;
             case LAS_CLASSIF_VALUE:
-                value = pointView->getFieldAs<int>(Id::Classification, idx); //5 bits
+                value = point.getFieldAs<int>(Id::Classification); //5 bits
                 break;
             case LAS_CLASSIF_SYNTHETIC:
-                value = (pointView->getFieldAs<int>(Id::ClassFlags, idx) & 1); //bit #1
+                value = (point.getFieldAs<int>(Id::ClassFlags) & 1); //bit #1
                 break;
             case LAS_CLASSIF_KEYPOINT:
-                value = (pointView->getFieldAs<int>(Id::ClassFlags, idx) & 2); //bit #2
+                value = (point.getFieldAs<int>(Id::ClassFlags) & 2); //bit #2
                 break;
             case LAS_CLASSIF_WITHHELD:
-                value = (pointView->getFieldAs<int>(Id::ClassFlags, idx) & 4); //bit #3
+                value = (point.getFieldAs<int>(Id::ClassFlags) & 4); //bit #3
                 break;
                 // Overlap flag is the 4 bit (new in las 1.4)
             default:
-                //ignored
+                value = point.getFieldAs<double>(pdalId);
                 break;
             }
             if (field->sf)
@@ -1097,8 +1106,13 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
             }
 
         }
+        ++npPointsRead;
         nProgress.oneStep();
-    }
+    };
+
+    f.setCallback(ccProcessOne);
+    f.prepare(t);
+    f.execute(t);
 
     // Now the tiler will actually write the points
     if(tiling)

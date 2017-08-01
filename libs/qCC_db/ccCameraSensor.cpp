@@ -1121,7 +1121,7 @@ ccImage* ccCameraSensor::undistort(ccImage* image, bool inplace/*=true*/) const
 	}
 }
 
-bool ccCameraSensor::isGlobalCoordInFrustum(const CCVector3& globalCoord/*, bool withLensCorrection*/)
+bool ccCameraSensor::isGlobalCoordInFrustum(const CCVector3& globalCoord/*, bool withLensCorrection*/) const
 {
 	CCVector3 localCoord;
 

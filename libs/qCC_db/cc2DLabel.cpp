@@ -532,7 +532,7 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 	info.angles.u[2] = GetAngle_deg(-P1P3, -P2P3); //angleAtP3 (should be equal to 180-a1-a2!)
 }
 
-QStringList cc2DLabel::getLabelContent(int precision)
+QStringList cc2DLabel::getLabelContent(int precision) const
 {
 	QStringList body;
 

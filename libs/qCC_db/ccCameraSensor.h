@@ -455,7 +455,7 @@ public: //misc
 		//TODO withLensCorrection if we want to take the lens distortion into consideration
 		\return if operation has succeeded
 	**/
-	bool isGlobalCoordInFrustum(const CCVector3& globalCoord/*, bool withLensCorrection*/);
+	bool isGlobalCoordInFrustum(const CCVector3& globalCoord/*, bool withLensCorrection*/) const;
 
 	//! Compute the coefficients of the 6 planes frustum in the global coordinates system (normal vector are headed the frustum inside), the edges direction vectors and the frustum center
 	/** \param planeCoefficients coefficients of the six planes

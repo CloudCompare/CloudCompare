@@ -63,7 +63,7 @@ public:
 	}
 
 	//! Returns a pre-defined color scale
-	ccColorScale::Shared getDefaultScale(DEFAULT_SCALES scale) { return getScale(GetDefaultScaleUUID(scale)); }
+	ccColorScale::Shared getDefaultScale(DEFAULT_SCALES scale) const { return getScale(GetDefaultScaleUUID(scale)); }
 
 	//! Returns a color scale based on its UUID
 	ccColorScale::Shared getScale(QString UUID) const;

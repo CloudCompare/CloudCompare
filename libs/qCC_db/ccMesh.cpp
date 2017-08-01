@@ -1021,7 +1021,8 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 				for (; A != hullPoints.end(); ++A)
 				{
 					//current hull segment
-					std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::iterator B = A; B++;
+					std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::iterator B = A;
+					++B;
 					if (B == hullPoints.end())
 					{
 						B = hullPoints.begin();

@@ -109,11 +109,9 @@ void ccPointPickingGenericInterface::onItemPicked(const PickedItem& pi)
 	if (!m_processing || !pi.entity)
 		return;
 
-	ccPointCloud* cloud = 0;
-
 	if (pi.entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		cloud = static_cast<ccPointCloud*>(pi.entity);
+		ccPointCloud* cloud = static_cast<ccPointCloud*>(pi.entity);
 		if (!cloud)
 		{
 			assert(false);

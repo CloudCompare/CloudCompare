@@ -601,7 +601,6 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 		{
 			//not enough memory
 			return SendError("Not enough memory", parentWidget);
-			return false;
 		}
 
 		if (ceilRaster.fillWith(ceil,

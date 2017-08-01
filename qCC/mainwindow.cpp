@@ -2855,9 +2855,7 @@ void MainWindow::doActionFilterByValue()
 	
 	for ( ccHObject *entity : getSelectedEntities() )
 	{
-		ccGenericPointCloud* cloud = nullptr;
-
-		cloud = ccHObjectCaster::ToGenericPointCloud(entity);
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
@@ -4992,7 +4990,6 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 				assert(sf);
 
 				//FILE* fp = fopen("doActionComputeQuadric3D_trace.txt","wt");
-				unsigned count = 0;
 				for (int x=0; x<steps; ++x)
 				{
 					CCVector3 P;

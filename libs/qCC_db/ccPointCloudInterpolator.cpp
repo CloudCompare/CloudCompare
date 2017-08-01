@@ -21,10 +21,10 @@ bool cellSFInterpolator(const CCLib::DgmOctree::octreeCell& cell,
 						CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//additional parameters
-	const ccPointCloud* srcCloud = reinterpret_cast<ccPointCloud*>(additionalParameters[0]);
+//	const ccPointCloud* srcCloud = reinterpret_cast<ccPointCloud*>(additionalParameters[0]);
 	const CCLib::DgmOctree* srcOctree = reinterpret_cast<CCLib::DgmOctree*>(additionalParameters[1]);
 	std::vector<SFPair>* scalarFields = reinterpret_cast<std::vector< SFPair >*>(additionalParameters[2]);
-	const ccPointCloudInterpolator::Parameters* params = (const ccPointCloudInterpolator::Parameters*)(additionalParameters[3]);
+	const ccPointCloudInterpolator::Parameters* params = reinterpret_cast<const ccPointCloudInterpolator::Parameters*>(additionalParameters[3]);
 	
 	bool normalDistWeighting = false;
 	double interpSigma2x2 = 0;
@@ -287,15 +287,15 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 			}
 		}
 
-		//additional parameters
-		void* additionalParameters[] = {	reinterpret_cast<void*>(srcCloud),
-											reinterpret_cast<void*>(srcOctree.data()),
-											reinterpret_cast<void*>(&scalarFields),
-											(void*)(&params)
-		};
-
 		try
 		{
+			//additional parameters
+			void* additionalParameters[] = {	reinterpret_cast<void*>(srcCloud),
+												reinterpret_cast<void*>(srcOctree.data()),
+												reinterpret_cast<void*>(&scalarFields),
+												(void*)(&params)
+			};
+
 			if (destOctree->executeFunctionForAllCellsAtLevel(	octreeLevel,
 																cellSFInterpolator,
 																additionalParameters,

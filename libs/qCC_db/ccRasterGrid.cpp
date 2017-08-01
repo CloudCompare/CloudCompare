@@ -224,7 +224,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	CCLib::NormalizedProgress nProgress(progressDialog, pointCount);
 
 	//vertical dimension
-	assert(Z >= 0 && Z <= 2);
+	assert(Z <= 2);
 	const unsigned char X = Z == 2 ? 0 : Z + 1;
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 

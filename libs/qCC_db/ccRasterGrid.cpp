@@ -176,8 +176,8 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	}
 
 	//input cloud as a ccPointCloud
-	ccPointCloud* pc = 0;
-	if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
+	ccPointCloud* pc = nullptr;
+	if (cloud->isA(CC_TYPES::POINT_CLOUD))
 	{
 		pc = static_cast<ccPointCloud*>(cloud);
 	}

@@ -1887,7 +1887,13 @@ namespace ccEntityAction
 			//specific test for locked vertices
 			bool lockedVertices = false;
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
-			if (cloud && lockedVertices)
+			
+			if (cloud == nullptr)
+			{
+			   continue;
+			}
+			
+			if (lockedVertices)
 			{
 				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;

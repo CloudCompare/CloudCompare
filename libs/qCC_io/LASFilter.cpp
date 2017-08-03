@@ -348,7 +348,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 	auto convertOne = [&](PointRef& point)
 	{
-		if (ptsWritten == numberOfPoints || !pDlg)
+		if (ptsWritten == numberOfPoints || pDlg->isCancelRequested())
 			return false;
 
 		const CCVector3* P = theCloud->getPoint(ptsWritten);
@@ -884,6 +884,8 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	CC_FILE_ERROR callbackError = CC_FERR_NO_ERROR;
     auto ccProcessOne = [&](PointRef& point)
     {
+		if (pDlg->isCancelRequested())
+			return false;
 
 		CloudChunk &pointChunk = chunks[nbPointsRead / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD];
 

@@ -708,7 +708,6 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
     las_opts.add("filename", filename.toStdString());
 
     FixedPointTable t(100);
-    PointTable table;
     LasReader lasReader;
     LasHeader lasHeader;
     QuickInfo file_info;
@@ -780,10 +779,51 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
     bool ignoreDefaultFields = s_lasOpenDlg->ignoreDefaultFieldsCheckBox->isChecked();
 
-    PDALTilingStruct tiler;
+    unsigned short rgbColorMask[3] = {0, 0, 0};
+    if (s_lasOpenDlg->doLoad(LAS_RED))
+        rgbColorMask[0] = (~0);
+    if (s_lasOpenDlg->doLoad(LAS_GREEN))
+        rgbColorMask[1] = (~0);
+    if (s_lasOpenDlg->doLoad(LAS_BLUE))
+        rgbColorMask[2] = (~0);
+    bool loadColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
+
+	//by default we read colors as triplets of 8 bits integers but we might dynamically change this
+	//if we encounter values using 16 bits (16 bits is the standard!)
+	unsigned char colorCompBitShift = 0;
+	bool forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
+	ColorCompType rgb[3] = { 0, 0, 0 };
+
+	IdList extraFieldsToLoad;
+	StringList extraNamesToLoad;
+	for (unsigned i = 0; i < extraDimensionsIds.size(); ++i)
+	{
+		if (s_lasOpenDlg->doLoadEVLR(i)) {
+			extraFieldsToLoad.push_back(extraDimensionsIds[i]);
+			extraNamesToLoad.push_back(extraDimensions[i]);
+		}
+	}
+
     bool tiling = s_lasOpenDlg->tileGroupBox->isChecked();
-    if (tiling)
+   
+
+    QScopedPointer<ccProgressDialog> pDlg(0);
+    if (parameters.parentWidget)
     {
+        pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+        pDlg->setMethodTitle(QObject::tr("Open LAS file"));
+        pDlg->setInfo(QObject::tr("Points: %1").arg(nbOfPoints));
+        pDlg->start();
+    }
+
+	if (tiling)
+    {
+		CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints + 2);
+		PDALTilingStruct tiler;
+		PointTable table;
+		PointViewPtr pointView;
+		PointViewSet pointViewSet;
+
         // tiling (vertical) dimension
         unsigned vertDim = 2;
         switch (s_lasOpenDlg->tileDimComboBox->currentIndex())
@@ -810,50 +850,27 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         {
             return CC_FERR_NOT_ENOUGH_MEMORY;
         }
-    }
 
-    unsigned short rgbColorMask[3] = {0, 0, 0};
-    if (s_lasOpenDlg->doLoad(LAS_RED))
-        rgbColorMask[0] = (~0);
-    if (s_lasOpenDlg->doLoad(LAS_GREEN))
-        rgbColorMask[1] = (~0);
-    if (s_lasOpenDlg->doLoad(LAS_BLUE))
-        rgbColorMask[2] = (~0);
-    bool loadColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
+		lasReader.prepare(table);
+		pointViewSet = lasReader.execute(table);
+		pointView = *pointViewSet.begin();
+		nProgress.oneStep();
 
-    CCVector3d Pshift(0, 0, 0);
-
-    //by default we read colors as triplets of 8 bits integers but we might dynamically change this
-    //if we encounter values using 16 bits (16 bits is the standard!)
-    unsigned char colorCompBitShift = 0;
-    bool forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
-    ColorCompType rgb[3] = { 0, 0, 0 };
-
-
-    std::vector< LasField::Shared > fieldsToLoad;
-
-    QScopedPointer<ccProgressDialog> pDlg(0);
-    if (parameters.parentWidget)
-    {
-        pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
-        pDlg->setMethodTitle(QObject::tr("Open LAS file"));
-        pDlg->setInfo(QObject::tr("Points: %1").arg(nbOfPoints));
-        pDlg->start();
-    }
-
-
-    IdList extraFieldsToLoad;
-    StringList extraNamesToLoad;
-    for (unsigned i = 0; i < extraDimensionsIds.size(); ++i)
-    {
-        if (s_lasOpenDlg->doLoadEVLR(i)) {
-            extraFieldsToLoad.push_back(extraDimensionsIds[i]);
-            extraNamesToLoad.push_back(extraDimensions[i]);
-        }
+		for (PointId idx = 0; idx < pointView->size(); ++idx)
+		{
+			tiler.addPoint(pointView, idx);
+			nProgress.oneStep();
+		}
+		// Now the tiler will actually write the points
+		tiler.writeAll();
+		nProgress.oneStep();
+		return CC_FERR_NO_ERROR;
     }
 
     CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
     ccPointCloud* loadedCloud = nullptr;
+    std::vector< LasField::Shared > fieldsToLoad;
+    CCVector3d Pshift(0, 0, 0);
 
     unsigned int fileChunkSize = 0;
     unsigned int nbPointsRead = 0;
@@ -1137,11 +1154,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		}
 	}
 
-    // Now the tiler will actually write the points
-    if(tiling)
-    {
-        tiler.writeAll();
-    }
+
     return CC_FERR_NO_ERROR;
 }
 

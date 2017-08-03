@@ -259,11 +259,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
     {
         return CC_FERR_NO_SAVE;
     }
-    //Set offset & scale, as points will be stored as boost::int32_t values (between 0 and 4294967296)
-    //int_value = (double_value-offset)/scale
-    writerOptions.add("offset_x", bbMin.x);
-    writerOptions.add("offset_y", bbMin.y);
-    writerOptions.add("offset_z", bbMin.z);
+
     CCVector3d diag = bbMax - bbMin;
 
 
@@ -319,25 +315,19 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
     {
         lasScale = optimalScale;
     }
-    writerOptions.add("scale_x", lasScale.x);
-    writerOptions.add("scale_y", lasScale.y);
-    writerOptions.add("scale_z", lasScale.z);
 
+	if (theCloud->hasMetaData(s_LAS_SRS_Key))
+	{
+		//restore the SRS if possible
+		QString srs = theCloud->getMetaData(s_LAS_SRS_Key).value<QString>();
+		writerOptions.add("a_srs", srs.toStdString());
+	}
 
-    //    if (theCloud->hasMetaData(s_LAS_SRS_Key))
-    //    {
-    //        //restore the SRS if possible
-    //        QString srs = theCloud->getMetaData(s_LAS_SRS_Key).value<QString>();
-    //        writerOptions.add("a_srs", srs.toStdString());
-    //    }
-
-
-    IdList dimsToSave;
     for (LasField &lasField: fieldsToSave)
     {
-        dimsToSave.push_back(id(lasField.getName().toStdString()));
         table.layout()->registerDim(id(lasField.getName().toStdString()));
     }
+
     if (hasColors)
     {
         table.layout()->registerDim(Id::Red);
@@ -354,13 +344,11 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
     table.layout()->registerDim(Id::Y);
     table.layout()->registerDim(Id::Z);
 
-    PointViewPtr pointView(new PointView(table));
-
 	unsigned ptsWritten = 0;
 
 	auto convertOne = [&](PointRef& point)
 	{
-		if (ptsWritten == numberOfPoints)
+		if (ptsWritten == numberOfPoints || !pDlg)
 			return false;
 
 		const CCVector3* P = theCloud->getPoint(ptsWritten);
@@ -413,7 +401,8 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 				break;
 			//TODO: Overlap flag (new in las 1.4)
 			case LAS_INVALID:
-				default:
+				break;
+			default:
 				point.setField(pdalId, it->sf->getValue(ptsWritten));
 				break;
 			}
@@ -426,6 +415,15 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		return true;
 	};
 
+	//Set offset & scale, as points will be stored as boost::int32_t values (between 0 and 4294967296)
+	//int_value = (double_value-offset)/scale
+	writerOptions.add("offset_x", bbMin.x);
+	writerOptions.add("offset_y", bbMin.y);
+	writerOptions.add("offset_z", bbMin.z);
+
+	writerOptions.add("scale_x", lasScale.x);
+    writerOptions.add("scale_y", lasScale.y);
+    writerOptions.add("scale_z", lasScale.z);
 
     writerOptions.add("filename", filename.toStdString());
     //make a dialog for this ?
@@ -435,12 +433,10 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	StreamCallbackFilter f;
 	f.setCallback(convertOne);
 	writer.setInput(f);
+	writer.setOptions(writerOptions);
 
     try
     {
-        writer.setOptions(writerOptions);
-
-
 		writer.prepare(table);
 		writer.execute(table);
     }
@@ -654,6 +650,8 @@ struct CloudChunk
 		}
 	}
 
+
+
 	void addLasFieldsToCloud()
 	{
 		if (loadedCloud == nullptr)
@@ -842,12 +840,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         pDlg->setInfo(QObject::tr("Points: %1").arg(nbOfPoints));
         pDlg->start();
     }
-    CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
 
-    unsigned int fileChunkSize = 0;
-    unsigned int nbPointsRead = 0;
-
-    ccPointCloud* loadedCloud = nullptr;
 
     IdList extraFieldsToLoad;
     StringList extraNamesToLoad;
@@ -859,18 +852,25 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         }
     }
 
+    CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
+    ccPointCloud* loadedCloud = nullptr;
+
+    unsigned int fileChunkSize = 0;
+    unsigned int nbPointsRead = 0;
+
     StreamCallbackFilter f;
     f.setInput(lasReader);
 	
 	unsigned nbOfChunks = std::max(1u, nbOfPoints / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 	std::vector<CloudChunk> chunks(nbOfChunks, CloudChunk());
 
+	CC_FILE_ERROR callbackError = CC_FERR_NO_ERROR;
     auto ccProcessOne = [&](PointRef& point)
     {
 
 		CloudChunk &pointChunk = chunks[nbPointsRead / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD];
 
-		if (pointChunk.loadedCloud == nullptr)
+		if (pointChunk.getLoadedCloud() == nullptr)
 		{
 			// create a new cloud
 			unsigned int pointsToRead = static_cast<unsigned int>(nbOfPoints) - nbPointsRead;
@@ -878,14 +878,16 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			if (!pointChunk.reserveSize(fileChunkSize))
 			{
 				ccLog::Warning("[LAS] Not enough memory!");
-				//return CC_FERR_NOT_ENOUGH_MEMORY;
+				callbackError = CC_FERR_NOT_ENOUGH_MEMORY;
 				return false;
 			}
 
 			pointChunk.loadedCloud->setGlobalShift(Pshift);
 
 			//save the Spatial reference as meta-data
-			pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, QVariant::fromValue(lasHeader.srs()));
+			SpatialReference srs = lasHeader.srs();
+			if (!srs.empty())
+				pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, QVariant::fromValue(srs));
 
 			pointChunk.createFieldsToLoad(extraDimensionsIds, extraNamesToLoad);
 		}
@@ -1076,6 +1078,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         }
         ++nbPointsRead;
         nProgress.oneStep();
+		return true;
     };
 
     f.setCallback(ccProcessOne);

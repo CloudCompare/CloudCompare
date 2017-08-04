@@ -99,11 +99,11 @@ public:
 	*/
 	void undoLast()
 	{
-		if (m_previous != -1)
+		if (!m_previous.empty())
 		{
-			m_waypoints.erase(m_waypoints.begin() + m_previous);
+			m_waypoints.erase(m_waypoints.begin() + m_previous.at(m_previous.size() - 1));
 			m_trace.clear(); //need to recalculate whole trace
-			m_previous = -1;
+			m_previous.pop_back(); //remove waypoint
 		}
 	}
 
@@ -209,7 +209,7 @@ protected:
 
 	std::vector<std::deque<int>> m_trace; //contains an ordered list of indices which define this trace. Note that indices representing nodes MAY be inserted twice.
 	std::vector<int> m_waypoints; //list of waypoint indices
-	int m_previous=-1; //for undoing waypoints
+	std::vector<int> m_previous; //for undoing waypoints
 
 private:
 

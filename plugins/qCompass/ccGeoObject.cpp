@@ -197,8 +197,35 @@ void ccGeoObject::recurseChildren(ccHObject* par, bool highlight)
 	ccMeasurement* m = dynamic_cast<ccMeasurement*>(par);
 	if (m)
 	{
-		m->setHighlight(highlight);
-		
+		//is this object in the upper boundary?
+		bool upperBoundary = false;
+		ccHObject* p = par->getParent();
+		while (p && highlight) //if highlight is set to false, we don't need to bother
+		{
+			if (ccGeoObject::isGeoObjectUpper(p))
+			{
+				//yes!
+				upperBoundary = true;
+				break;
+			}
+			else if (ccGeoObject::isGeoObjectLower(p) | ccGeoObject::isGeoObjectInterior(p))
+			{
+				//different region - bail
+				break;
+			}
+			p = p->getParent(); //continue looking/recursing upwards
+		}
+
+		if (upperBoundary)
+		{
+			m->setAlternate(highlight); //upper boundary drawn in cyan
+		}
+		else
+		{
+			m->setAlternate(false); //disable alternate colour if it was previously active
+			m->setHighlight(highlight); //other boundaries/regions drawn in green
+		}
+
 		//draw labels (except for trace objects, when the child plane object will hold the useful info)
 		if (!ccTrace::isTrace(par))
 		{

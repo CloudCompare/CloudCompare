@@ -33,6 +33,10 @@ public:
 		{
 			return m_active_colour;
 		}
+		else if (m_isAlternate)
+		{
+			return m_alternate_colour;
+		}
 		else if (m_isHighlighted)
 		{
 			return m_highlight_colour;
@@ -42,15 +46,17 @@ public:
 
 	void setActive(bool isActive) { m_isActive = isActive; }
 	void setHighlight(bool isActive) { m_isHighlighted = isActive; }
-	void setNormal() { m_isActive = false; m_isHighlighted = false; }
-
+	void setAlternate(bool isActive) { m_isAlternate = isActive;  }
+	void setNormal() { m_isActive = false; m_isHighlighted = false; m_isAlternate = false; }
 
 protected:
 	//drawing stuff
 	bool m_isActive = false;
 	bool m_isHighlighted = false;
+	bool m_isAlternate = false;
 	ccColor::Rgba m_active_colour = ccColor::yellow;
 	ccColor::Rgba m_highlight_colour = ccColor::green;
+	ccColor::Rgba m_alternate_colour = ccColor::cyan;
 	ccColor::Rgba m_normal_colour = ccColor::blue;
 };
 

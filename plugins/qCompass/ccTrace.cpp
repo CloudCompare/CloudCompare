@@ -120,7 +120,7 @@ int ccTrace::insertWaypoint(int pointId)
 			{
 				//insert waypoint
 				m_waypoints.insert(m_waypoints.begin() + i, pointId);
-				m_previous = i;
+				m_previous.push_back(i);
 				return i;
 			}
 		}
@@ -131,15 +131,16 @@ int ccTrace::insertWaypoint(int pointId)
 		if (sp.norm2() < ep.norm2())
 		{
 			m_waypoints.insert(m_waypoints.begin(), pointId);
-			m_previous = 0;
+			m_previous.push_back(0);
 			return 0;
 		}
 	}
 
 	//add point to end of the trace
 	m_waypoints.push_back(pointId);
-	m_previous = static_cast<int>(m_waypoints.size()) - 1;
-	return m_previous;
+	int id = static_cast<int>(m_waypoints.size()) - 1;
+	m_previous.push_back(id); //store for undo options
+	return id;
 }
 
 //test if the query point is within a circle bound by segStart & segEnd

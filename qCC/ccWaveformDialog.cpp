@@ -34,6 +34,7 @@
 
 //System
 #include <assert.h>
+#include <cmath>
 
 //Gui
 #include "ui_waveDlg.h"
@@ -120,7 +121,7 @@ void ccWaveWidget::setAxisLabels(const QString& xLabel, const QString& yLabel)
 	}
 }
 
-static double AbsLog(double c) { return (c >= 0 ? log(1.0 + c) : -log(1.0 - c)); }
+static double AbsLog(double c) { return (c >= 0 ? log1p(c) : -log1p(-c)); }
 
 void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale, double maxValue/*=0.0*/)
 {

@@ -36,6 +36,8 @@
 #include <QFileInfo>
 #include <QSharedPointer>
 #include <QInputDialog>
+#include <QFuture>
+#include <QtConcurrent>
 
 //pdal
 #include <memory>
@@ -583,10 +585,15 @@ protected:
 
 
 
+PointViewSet execute(LasReader lasReader, PointTable t) {
+	lasReader.prepare(t);
+	PointViewSet a = lasReader.execute(t);
+	return a;
+}
 
-struct CloudChunk 
+struct LasCloudChunk 
 {
-	CloudChunk() : loadedCloud(nullptr), size(0) {}
+	LasCloudChunk() : loadedCloud(nullptr), size(0) {}
 
 	ccPointCloud* loadedCloud;
 	std::vector< LasField::Shared > lasFields;
@@ -818,10 +825,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 	if (tiling)
     {
-		CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints + 2);
 		PDALTilingStruct tiler;
+		//PointViewPtr pointView;
 		PointTable table;
-		PointViewPtr pointView;
 		PointViewSet pointViewSet;
 
         // tiling (vertical) dimension
@@ -850,20 +856,86 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         {
             return CC_FERR_NOT_ENOUGH_MEMORY;
         }
+		if (parameters.parentWidget)
+		{
+			pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
+			pDlg->setMethodTitle(QObject::tr("LAS file"));
+			pDlg->setInfo(QObject::tr("Please wait... reading in progress"));
+			pDlg->setRange(0, 0);
+			pDlg->setModal(true);
+			pDlg->start();
+		}
 
-		lasReader.prepare(table);
-		pointViewSet = lasReader.execute(table);
-		pointView = *pointViewSet.begin();
-		nProgress.oneStep();
+		PointViewSet viewSet;
+		PointViewPtr pointView;
+
+		auto e = [&lasReader, &table]() -> PointViewSet {
+			//PointTable t;
+			lasReader.prepare(table);
+			lasReader.prepare(table);
+			return lasReader.execute(table);
+		};
+
+		QFuture<PointViewSet> reader = QtConcurrent::run(e);
+		while (!reader.isFinished())
+		{
+#if defined(CC_WINDOWS)
+			::Sleep(50);
+#else
+			usleep(500 * 100);
+#endif
+			if (pDlg)
+			{
+				pDlg->setValue(pDlg->value() + 1);
+			}
+			QApplication::processEvents();
+		}
+
+		viewSet = reader.result();
+		pointView = *viewSet.begin();
+
+		if (parameters.parentWidget)
+		{
+			pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+			pDlg->setMethodTitle(QObject::tr("Tiling points"));
+			pDlg->setInfo(QObject::tr("Points: %1").arg(nbOfPoints));
+			pDlg->start();
+		}
+		CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
 
 		for (PointId idx = 0; idx < pointView->size(); ++idx)
 		{
+			if (pDlg->isCancelRequested())
+				return CC_FERR_CANCELED_BY_USER;
 			tiler.addPoint(pointView, idx);
 			nProgress.oneStep();
 		}
+
 		// Now the tiler will actually write the points
-		tiler.writeAll();
-		nProgress.oneStep();
+		if (parameters.parentWidget)
+		{
+			pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
+			pDlg->setMethodTitle(QObject::tr("LAS file"));
+			pDlg->setInfo(QObject::tr("Please wait... writing in progress"));
+			pDlg->setRange(0, 0);
+			pDlg->setModal(true);
+			pDlg->start();
+		}
+
+		QFuture<void> writer = QtConcurrent::run([&tiler]() {tiler.writeAll(); });
+		while (!writer.isFinished())
+		{
+#if defined(CC_WINDOWS)
+			::Sleep(50);
+#else
+			usleep(500 * 100);
+#endif
+			if (pDlg)
+			{
+				pDlg->setValue(pDlg->value() + 1);
+			}
+			QApplication::processEvents();
+		}
 		return CC_FERR_NO_ERROR;
     }
 
@@ -879,7 +951,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
     f.setInput(lasReader);
 	
 	unsigned nbOfChunks = std::max(1u, nbOfPoints / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
-	std::vector<CloudChunk> chunks(nbOfChunks, CloudChunk());
+	std::vector<LasCloudChunk> chunks(nbOfChunks, LasCloudChunk());
 
 	CC_FILE_ERROR callbackError = CC_FERR_NO_ERROR;
     auto ccProcessOne = [&](PointRef& point)
@@ -887,7 +959,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		if (pDlg->isCancelRequested())
 			return false;
 
-		CloudChunk &pointChunk = chunks[nbPointsRead / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD];
+		LasCloudChunk &pointChunk = chunks[nbPointsRead / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD];
 
 		if (pointChunk.getLoadedCloud() == nullptr)
 		{

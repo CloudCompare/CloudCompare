@@ -118,40 +118,6 @@ struct ExtraLasField : LasField
     double offset;
 };
 
-class CCLasStreamFilter : public Filter
-{
-public:
-    std::string getName() const override { return "CCLasStreamFilter"; }
-    CCLasStreamFilter(IdList fieldsToLoad, IdList extrasToLoad, unsigned nbPoints)
-            : m_fieldsToLoad(fieldsToLoad), m_extrasToLoad(extrasToLoad), m_loadedCloud(nullptr),
-            m_count(0), m_nbPoinst(nbPoints), m_fileChunkPos(0), m_fileChunkSize(0), m_chunkHasColors(false) {}
-
-private:
-    IdList m_fieldsToLoad;
-    IdList m_extrasToLoad;
-    ccPointCloud *m_loadedCloud;
-    unsigned m_count;
-    unsigned m_nbPoinst;
-    unsigned m_fileChunkPos;
-    unsigned m_fileChunkSize;
-    bool m_chunkHasColors;
-
-    bool processOne(PointRef& point)
-    {
-        if (m_count == m_nbPoinst || m_count == m_fileChunkPos + m_fileChunkSize)
-        {
-            if (m_loadedCloud)
-            {
-                if (m_loadedCloud->size())
-                {
-                   //TODO: Colors
-                }
-            }
-
-        }
-    }
-};
-
 //! Semi persistent save dialog
 QSharedPointer<LASSaveDlg> s_saveDlg(0);
 pdal::Dimension::Id typeToId(LAS_FIELDS sfType)
@@ -458,10 +424,11 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 QSharedPointer<LASOpenDlg> s_lasOpenDlg(0);
 
-//! Structure describing the current tiling process
-struct PDALTilingStruct
+//! Class describing the current tiling process
+class Tiler
 {
-    PDALTilingStruct()
+public:
+    Tiler()
         : w(1)
         , h(1)
         , X(0)
@@ -469,7 +436,7 @@ struct PDALTilingStruct
         , Z(2)
     {}
 
-    ~PDALTilingStruct() = default;
+    ~Tiler() = default;
 
     inline size_t tileCount() const { return tilePointViews.size(); }
 
@@ -580,17 +547,6 @@ protected:
 };
 
 
-
-//Todo: Use a map<std::string, pdal::id>
-
-
-
-PointViewSet execute(LasReader lasReader, PointTable t) {
-	lasReader.prepare(t);
-	PointViewSet a = lasReader.execute(t);
-	return a;
-}
-
 struct LasCloudChunk 
 {
 	LasCloudChunk() : loadedCloud(nullptr), size(0) {}
@@ -598,8 +554,6 @@ struct LasCloudChunk
 	ccPointCloud* loadedCloud;
 	std::vector< LasField::Shared > lasFields;
 	unsigned size;
-
-
 
 	ccPointCloud* getLoadedCloud() const { return loadedCloud; }
 
@@ -825,8 +779,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 	if (tiling)
     {
-		PDALTilingStruct tiler;
-		//PointViewPtr pointView;
+		Tiler tiler;
 		PointTable table;
 		PointViewSet pointViewSet;
 
@@ -856,6 +809,18 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
         {
             return CC_FERR_NOT_ENOUGH_MEMORY;
         }
+
+
+		PointViewSet viewSet;
+		PointViewPtr pointView;
+
+		auto prepareAndExecture = [&lasReader, &table]() -> PointViewSet {
+			lasReader.prepare(table);
+			lasReader.prepare(table);
+			return lasReader.execute(table);
+		};
+
+		QFuture<PointViewSet> reader = QtConcurrent::run(prepareAndExecture);
 		if (parameters.parentWidget)
 		{
 			pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
@@ -865,18 +830,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			pDlg->setModal(true);
 			pDlg->start();
 		}
-
-		PointViewSet viewSet;
-		PointViewPtr pointView;
-
-		auto e = [&lasReader, &table]() -> PointViewSet {
-			//PointTable t;
-			lasReader.prepare(table);
-			lasReader.prepare(table);
-			return lasReader.execute(table);
-		};
-
-		QFuture<PointViewSet> reader = QtConcurrent::run(e);
+		
 		while (!reader.isFinished())
 		{
 #if defined(CC_WINDOWS)
@@ -912,6 +866,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		}
 
 		// Now the tiler will actually write the points
+		QFuture<void> writer = QtConcurrent::run([&tiler]() {tiler.writeAll(); });
 		if (parameters.parentWidget)
 		{
 			pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
@@ -921,8 +876,6 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			pDlg->setModal(true);
 			pDlg->start();
 		}
-
-		QFuture<void> writer = QtConcurrent::run([&tiler]() {tiler.writeAll(); });
 		while (!writer.isFinished())
 		{
 #if defined(CC_WINDOWS)

@@ -67,10 +67,10 @@ public:
 	***/
 	void removeListener(ccPickingListener* listener, bool autoStopPickingIfLast = true);
 
-	//! Sets the default picking mode
-	/** \param mode picking mode
-		\param autoEnableOnActivatedWindow whether picking mode should be enabled automatically on newly activated windows (if listeners are present only)
-	**/
+	//	//! Sets the default picking mode
+	//	/** \param mode picking mode
+	//		\param autoEnableOnActivatedWindow whether picking mode should be enabled automatically on newly activated windows (if listeners are present only)
+	//	**/
 	//DGM: too dangerous, we can't change this behavior on the fly
 	//void setPickingMode(ccGLWindow::PICKING_MODE mode, bool autoEnableOnActivatedWindow = true);
 	

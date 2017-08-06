@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unordered_set>
+#include <iterator>
 
 //qCC_db
 //#include <ccLog.h>
@@ -71,7 +72,7 @@ void PdmsObjects::Stack::Clear()
 	s_elementsStack.clear();
 }
 
-void PdmsObjects::Stack::Detroy(GenericItem* &item)
+void PdmsObjects::Stack::Destroy(GenericItem* &item)
 {
 	if (item)
 	{
@@ -103,7 +104,7 @@ bool NumericalValue::isValid() const
 
 PointCoordinateType NumericalValue::getValue() const
 {
-	switch(command)
+	switch (command)
 	{
 	case PDMS_ANGLE:
 	case PDMS_X_TOP_SHEAR:
@@ -208,18 +209,19 @@ bool Reference::execute(PdmsObjects::GenericItem* &item) const
 	{
 		if (s_elementsStack.size() < 2)
 			return false;
-		ElementsStack::const_reverse_iterator it = s_elementsStack.rbegin(); ++it;
+		ElementsStack::iterator it = s_elementsStack.end(); --it;
 		if (isSet() == 1)
 		{
-			for( ; it != s_elementsStack.rend(); ++it)
+			while (true)
 			{
-				if (isNameReference() && strcmp(refname,(*it)->name) == 0)
+				if (isNameReference() && strcmp(refname, (*it)->name) == 0)
 					break;
 				if (isTokenReference() && (*it)->getType() == token)
 					break;
+				if (it == s_elementsStack.begin())
+					return false;
+				--it;
 			}
-			if (it == s_elementsStack.rend())
-				return false;
 		}
 		item = *it;
 		return true;
@@ -249,7 +251,7 @@ bool Reference::execute(PdmsObjects::GenericItem* &item) const
 		{
 			//Go up in the hierarchy to find a matching, or the first group which can own the request item
 			result = item;
-			while (result && result->getType()>token)
+			while (result && result->getType() > token)
 				result = result->owner;
 			if (!result)
 				result = &defaultWorld;
@@ -258,7 +260,7 @@ bool Reference::execute(PdmsObjects::GenericItem* &item) const
 		{
 			//Go up in the hierarchy until we meet the requested type
 			result = item;
-			while (result && result->getType()!=token)
+			while (result && result->getType() != token)
 				result = result->owner;
 		}
 		else
@@ -329,17 +331,17 @@ bool Coordinates::isValid() const
 
 bool Coordinates::getVector(CCVector3 &u) const
 {
-	bool ok[3] = {false, false, false};
-	u = CCVector3(0,0,0);
+	bool ok[3] = { false, false, false };
+	u = CCVector3(0, 0, 0);
 
 	int nb = getNbComponents();
-	for (int i=0; i<nb; i++)
+	for (int i = 0; i < nb; i++)
 	{
 		if (!coords[i].isValid())
 			return false;
 		if (ok[i])
 			return false;
-		switch(coords[i].command)
+		switch (coords[i].command)
 		{
 		case PDMS_X:
 		case PDMS_EST:
@@ -384,7 +386,7 @@ bool Coordinates::getVector(CCVector3 &u) const
 int Coordinates::getNbComponents(bool onlyset) const
 {
 	int nb = 0;
-	for (int i=0; i<3; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		if (PdmsToken::isCoordinate(coords[i].command))
 		{
@@ -513,7 +515,7 @@ bool Orientation::handle(Token t)
 	//Handle coordinates ID : here, we should create a new orientation axis (since no current element is activ)
 	if (PdmsToken::isCoordinate(t))
 	{
-		if (++component>=3)
+		if (++component >= 3)
 			return false;
 		orientation[component].command = t;
 		current = NULL;
@@ -538,7 +540,7 @@ bool Orientation::isValid() const
 	if (nb <= 0)
 		return false;
 
-	for (int i=0; i<nb; i++)
+	for (int i = 0; i < nb; i++)
 	{
 		if (PdmsToken::isCoordinate(orientation[i].command))
 			return false;
@@ -553,48 +555,48 @@ bool Orientation::isValid() const
 
 bool Orientation::getAxes(CCVector3 &x, CCVector3 &y, CCVector3 &z) const
 {
-	x = y = z = CCVector3(0,0,0);
+	x = y = z = CCVector3(0, 0, 0);
 
 	int nb = getNbComponents();
-	for (int i=0; i<nb; i++)
+	for (int i = 0; i < nb; i++)
 	{
 		if (!orientation[i].isValid())
 			return false;
 
-		switch(orientation[i].command)
+		switch (orientation[i].command)
 		{
 		case PDMS_X:
 		case PDMS_EST:
-			if (!axisFromCoords(orientation[i],x))
+			if (!axisFromCoords(orientation[i], x))
 				return false;
 			break;
 
 		case PDMS_WEST:
-			if (!axisFromCoords(orientation[i],x))
+			if (!axisFromCoords(orientation[i], x))
 				return false;
 			x *= -1.;
 			break;
 
 		case PDMS_Y:
 		case PDMS_NORTH:
-			if (!axisFromCoords(orientation[i],y))
+			if (!axisFromCoords(orientation[i], y))
 				return false;
 			break;
 
 		case PDMS_SOUTH:
-			if (!axisFromCoords(orientation[i],y))
+			if (!axisFromCoords(orientation[i], y))
 				return false;
 			y *= -1.;
 			break;
 
 		case PDMS_Z:
 		case PDMS_UP:
-			if (!axisFromCoords(orientation[i],z))
+			if (!axisFromCoords(orientation[i], z))
 				return false;
 			break;
 
 		case PDMS_DOWN:
-			if (!axisFromCoords(orientation[i],z))
+			if (!axisFromCoords(orientation[i], z))
 				return false;
 			z *= -1.;
 			break;
@@ -627,7 +629,7 @@ bool Orientation::axisFromCoords(const Coordinates &coords, CCVector3 &u)
 int Orientation::getNbComponents() const
 {
 	int nb = 0;
-	while (nb<3 && orientation[nb].command)
+	while (nb < 3 && orientation[nb].command)
 		nb++;
 	return nb;
 }
@@ -638,7 +640,7 @@ bool Orientation::execute(PdmsObjects::GenericItem* &item) const
 		return false;
 
 	//Resolve reference if needed
-	for (unsigned i=0; i<3; i++)
+	for (unsigned i = 0; i < 3; i++)
 	{
 		GenericItem* refori = NULL;
 		if (refs[i].isValid())
@@ -697,7 +699,7 @@ bool ElementCreation::isValid() const
 
 const char* ElementCreation::GetDefaultElementName(Token token)
 {
-	switch(token)
+	switch (token)
 	{
 	case PDMS_GROUP:
 		return "Group";
@@ -750,67 +752,79 @@ const char* ElementCreation::GetDefaultElementName(Token token)
 
 bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 {
-	GenericItem* newElement = NULL;
-	switch (elementType)
-	{
-	case PDMS_GROUP:
-	case PDMS_WORLD:
-	case PDMS_SITE:
-	case PDMS_ZONE:
-	case PDMS_EQUIPMENT:
-	case PDMS_STRUCTURE:
-	case PDMS_SUBSTRUCTURE:
-		try { newElement = new GroupElement(elementType); } catch(std::exception &nex) {memalert(nex,1); return false;}
-		break;
+	GenericItem* newElement = nullptr;
 
-	//PDMS elements
-	case PDMS_SCYLINDER:
-		try { newElement = new SCylinder; } catch(std::exception &nex) {memalert(nex,1); return false;}
-		break;
-	case PDMS_CTORUS:
-		try { newElement = new CTorus; } catch(std::exception &nex) {memalert(nex,1); return false;}
-		break;
-	case PDMS_RTORUS:
-		try { newElement = new RTorus; } catch(std::exception &nex) {memalert(nex,1); return false;}
-		break;
-	case PDMS_DISH:
-		try { newElement = new Dish; } catch(std::exception &nex) {memalert(nex,1); return false;}
-		break;
-	case PDMS_CONE:
-		try { newElement = new Cone; } catch(std::exception &nex) {memalert(nex,1); return false;}
-		break;
-	case PDMS_BOX:
-	case PDMS_NBOX:
-		try { newElement = new Box; } catch(std::exception &nex) {memalert(nex,1); return false;}
-		static_cast<Box*>(newElement)->negative = (elementType == PDMS_NBOX);
-		break;
-	case PDMS_PYRAMID:
-		try { newElement = new Pyramid; } catch(std::exception &nex) {memalert(nex,1); return false;}
-		break;
-	case PDMS_SNOUT:
-		try { newElement = new Snout; } catch(std::exception &nex) {memalert(nex,1); return false;}
-		break;
-	case PDMS_EXTRU:
-	case PDMS_NEXTRU:
-		try { newElement = new Extrusion; } catch(std::exception &nex) {memalert(nex,1); return false;}
-		static_cast<Extrusion*>(newElement)->negative = (elementType == PDMS_NEXTRU);
-		break;
-	case PDMS_LOOP:
-		try { newElement = new Loop; } catch(std::exception &nex) {memalert(nex,1); return false;}
-		break;
-	case PDMS_VERTEX:
-		try { newElement = new Vertex; } catch(std::exception &nex) {memalert(nex,1); return false;}
-		break;
-	default:
-		break;
+	try
+	{
+		switch (elementType)
+		{
+		case PDMS_GROUP:
+		case PDMS_WORLD:
+		case PDMS_SITE:
+		case PDMS_ZONE:
+		case PDMS_EQUIPMENT:
+		case PDMS_STRUCTURE:
+		case PDMS_SUBSTRUCTURE:
+			newElement = new GroupElement(elementType);
+			break;
+			//PDMS elements
+		case PDMS_SCYLINDER:
+			newElement = new SCylinder;
+			break;
+		case PDMS_CTORUS:
+			newElement = new CTorus;
+			break;
+		case PDMS_RTORUS:
+			newElement = new RTorus;
+			break;
+		case PDMS_DISH:
+			newElement = new Dish;
+			break;
+		case PDMS_CONE:
+			newElement = new Cone;
+			break;
+		case PDMS_BOX:
+		case PDMS_NBOX:
+			newElement = new Box;
+			static_cast<Box*>(newElement)->negative = (elementType == PDMS_NBOX);
+			break;
+		case PDMS_PYRAMID:
+			newElement = new Pyramid;
+			break;
+		case PDMS_SNOUT:
+			newElement = new Snout;
+			break;
+		case PDMS_EXTRU:
+		case PDMS_NEXTRU:
+			newElement = new Extrusion;
+			static_cast<Extrusion*>(newElement)->negative = (elementType == PDMS_NEXTRU);
+			break;
+		case PDMS_LOOP:
+			newElement = new Loop;
+			break;
+		case PDMS_VERTEX:
+			newElement = new Vertex;
+			break;
+		default:
+			break;
+		}
+	}
+	catch (std::exception &nex)
+	{
+		memalert(nex, 1);
+		return false;
 	}
 
 	if (!newElement)
+	{
 		return false;
+	}
 
 	const char* name = GetDefaultElementName(elementType);
 	if (name)
-		strcpy(newElement->name,name);
+	{
+		strcpy(newElement->name, name);
+	}
 
 	//If the path is changed during the creation, do it now
 	if (path.size() > 1)
@@ -818,17 +832,17 @@ bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 		if (!item)
 		{
 			//delete newElement;
-			PdmsObjects::Stack::Detroy(newElement);
+			PdmsObjects::Stack::Destroy(newElement);
 			return false;
 		}
 		PdmsObjects::GenericItem* mitem = item->getRoot();
-		for (unsigned i=0; i+1<path.size(); i++)
+		for (unsigned i = 0; i + 1 < path.size(); i++)
 		{
 			mitem = mitem->scan(path[i].c_str());
 			if (!mitem)
 			{
 				//delete newElement;
-				PdmsObjects::Stack::Detroy(newElement);
+				PdmsObjects::Stack::Destroy(newElement);
 				return false;
 			}
 		}
@@ -839,21 +853,24 @@ bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 	if (item && !item->push(newElement))
 	{
 		//delete newElement;
-		PdmsObjects::Stack::Detroy(newElement);
+		PdmsObjects::Stack::Destroy(newElement);
 		return false;
 	}
 
 	newElement->creator = newElement->owner;
 	if (path.size())
+	{
 		strcpy(newElement->name, path.back().c_str());
+	}
+
 	try
 	{
 		s_elementsStack.insert(newElement);
 	}
-	catch(std::exception &pex)
+	catch (std::exception &pex)
 	{
-		memalert(pex,1);
-		PdmsObjects::Stack::Detroy(newElement);
+		memalert(pex, 1);
+		PdmsObjects::Stack::Destroy(newElement);
 		//delete newElement;
 		return false;
 	}
@@ -909,7 +926,7 @@ bool ElementCreation::splitPath(const char *str)
 		{
 			if (i != 0)
 				path.push_back(std::string(str, i));
-			str = &str[i+1];
+			str = &str[i + 1];
 			i = 0;
 		}
 		else
@@ -933,7 +950,7 @@ bool HierarchyNavigation::execute(PdmsObjects::GenericItem* &item) const
 		return true;
 
 	//Go back to the first creator object that matches or can contain the command hierarchy level
-	while (result && command<result->getType())
+	while (result && command < result->getType())
 		result = result->creator;
 
 	//If we went to the root, we have to create a new hierarchy level and set it as the new root
@@ -945,7 +962,7 @@ bool HierarchyNavigation::execute(PdmsObjects::GenericItem* &item) const
 		}
 		catch (std::exception &nex)
 		{
-			memfail(nex,1);
+			memfail(nex, 1);
 			return false;
 		}
 		result->push(item);
@@ -958,67 +975,74 @@ bool HierarchyNavigation::execute(PdmsObjects::GenericItem* &item) const
 
 Command* Command::Create(Token t)
 {
-	Command *result = NULL;
-	switch(t)
+	try
 	{
-	case PDMS_CREATE:
-		try { result = new ElementCreation; } catch(std::exception &nex) {memfail(nex,1);}
-		break;
-	case PDMS_END:
-	case PDMS_LAST:
-		try { result = new ElementEnding(t); } catch(std::exception &nex) {memfail(nex,1);}
-		break;
-	case PDMS_WRT:
-	case PDMS_OWNER:
-		try { result = new Reference(t); } catch(std::exception &nex) {memfail(nex,1);}
-		break;
-	case PDMS_NAME:
-		try { result = new Name; } catch(std::exception &nex) {memfail(nex,1);}
-		break;
-		//Attributes
-	case PDMS_DIAMETER:
-	case PDMS_HEIGHT:
-	case PDMS_RADIUS:
-	case PDMS_INSIDE_RADIUS:
-	case PDMS_OUTSIDE_RADIUS:
-	case PDMS_TOP_DIAMETER:
-	case PDMS_BOTTOM_DIAMETER:
-	case PDMS_XLENGTH:
-	case PDMS_YLENGTH:
-	case PDMS_ZLENGTH:
-	case PDMS_X_OFF:
-	case PDMS_Y_OFF:
-	case PDMS_X_BOTTOM:
-	case PDMS_Y_BOTTOM:
-	case PDMS_X_TOP:
-	case PDMS_Y_TOP:
-		try { result = new DistanceValue(t); } catch(std::exception &nex) {memfail(nex,1);}
-		break;
-	case PDMS_X_TOP_SHEAR:
-	case PDMS_X_BOTTOM_SHEAR:
-	case PDMS_Y_TOP_SHEAR:
-	case PDMS_Y_BOTTOM_SHEAR:
-	case PDMS_ANGLE:
-		try { result = new NumericalValue(t); } catch(std::exception &nex) {memfail(nex,1);}
-		break;
-	case PDMS_POSITION:
-		try { result = new Position; } catch(std::exception &nex) {memfail(nex,1);}
-		break;
-	case PDMS_ORIENTATION:
-		try { result = new Orientation; } catch(std::exception &nex) {memfail(nex,1);}
-		break;
-	case PDMS_WORLD:
-	case PDMS_SITE:
-	case PDMS_ZONE:
-	case PDMS_EQUIPMENT:
-	case PDMS_STRUCTURE:
-	case PDMS_SUBSTRUCTURE:
-		try { result = new HierarchyNavigation(t); } catch(std::exception &nex) {memfail(nex,1);}
-		break;
-	default: break;
+		Command *result = NULL;
+		switch (t)
+		{
+		case PDMS_CREATE:
+			result = new ElementCreation;
+			break;
+		case PDMS_END:
+		case PDMS_LAST:
+			result = new ElementEnding(t);
+			break;
+		case PDMS_WRT:
+		case PDMS_OWNER:
+			result = new Reference(t);
+			break;
+		case PDMS_NAME:
+			result = new Name;
+			break;
+			//Attributes
+		case PDMS_DIAMETER:
+		case PDMS_HEIGHT:
+		case PDMS_RADIUS:
+		case PDMS_INSIDE_RADIUS:
+		case PDMS_OUTSIDE_RADIUS:
+		case PDMS_TOP_DIAMETER:
+		case PDMS_BOTTOM_DIAMETER:
+		case PDMS_XLENGTH:
+		case PDMS_YLENGTH:
+		case PDMS_ZLENGTH:
+		case PDMS_X_OFF:
+		case PDMS_Y_OFF:
+		case PDMS_X_BOTTOM:
+		case PDMS_Y_BOTTOM:
+		case PDMS_X_TOP:
+		case PDMS_Y_TOP:
+			result = new DistanceValue(t);
+			break;
+		case PDMS_X_TOP_SHEAR:
+		case PDMS_X_BOTTOM_SHEAR:
+		case PDMS_Y_TOP_SHEAR:
+		case PDMS_Y_BOTTOM_SHEAR:
+		case PDMS_ANGLE:
+			result = new NumericalValue(t);
+			break;
+		case PDMS_POSITION:
+			result = new Position;
+			break;
+		case PDMS_ORIENTATION:
+			result = new Orientation;
+			break;
+		case PDMS_WORLD:
+		case PDMS_SITE:
+		case PDMS_ZONE:
+		case PDMS_EQUIPMENT:
+		case PDMS_STRUCTURE:
+		case PDMS_SUBSTRUCTURE:
+			result = new HierarchyNavigation(t);
+			break;
+		default: break;
+		}
+		return result;
 	}
-
-	return result;
+	catch (std::exception &nex)
+	{
+		memfail(nex, 1);
+		return nullptr;
+	}
 }
 
 ///////////////////////////////
@@ -1028,14 +1052,14 @@ Command* Command::Create(Token t)
 GenericItem::GenericItem()
 	: owner(NULL)
 	, creator(NULL)
-	, position(0,0,0)
+	, position(0, 0, 0)
 	, isCoordinateSystemUpToDate(false)
 	, positionReference(NULL)
 {
 	orientationReferences[0] = orientationReferences[1] = orientationReferences[2] = NULL;
-	orientation[0] = CCVector3(0,0,0); orientation[0][0] = 1;
-	orientation[1] = CCVector3(0,0,0); orientation[1][1] = 1;
-	orientation[2] = CCVector3(0,0,0); orientation[2][2] = 1;
+	orientation[0] = CCVector3(0, 0, 0); orientation[0][0] = 1;
+	orientation[1] = CCVector3(0, 0, 0); orientation[1][1] = 1;
+	orientation[2] = CCVector3(0, 0, 0); orientation[2][2] = 1;
 	name[0] = '\0';
 }
 
@@ -1060,24 +1084,24 @@ bool GenericItem::isOrientationValid(unsigned i) const
 
 bool GenericItem::completeOrientation()
 {
-	bool ok[3] = {	isOrientationValid(0),
+	bool ok[3] = { isOrientationValid(0),
 					isOrientationValid(1),
 					isOrientationValid(2) };
 
-	unsigned nb =	  static_cast<unsigned>(ok[0])
-					+ static_cast<unsigned>(ok[1])
-					+ static_cast<unsigned>(ok[2]);
+	unsigned nb = static_cast<unsigned>(ok[0])
+		+ static_cast<unsigned>(ok[1])
+		+ static_cast<unsigned>(ok[2]);
 
-	switch(nb)
+	switch (nb)
 	{
 	case 0:
 		return false;
 
 	case 1:
 
-		if (ok[0]) { orientation[0].normalize(); orientation[1] = orientation[0].orthogonal(); orientation[2] = orientation[0].cross(orientation[1]); break;}
-		if (ok[1]) { orientation[1].normalize(); orientation[2] = orientation[1].orthogonal(); orientation[0] = orientation[1].cross(orientation[2]); break;}
-		if (ok[2]) { orientation[2].normalize(); orientation[0] = orientation[2].orthogonal(); orientation[1] = orientation[2].cross(orientation[0]); break;}
+		if (ok[0]) { orientation[0].normalize(); orientation[1] = orientation[0].orthogonal(); orientation[2] = orientation[0].cross(orientation[1]); break; }
+		if (ok[1]) { orientation[1].normalize(); orientation[2] = orientation[1].orthogonal(); orientation[0] = orientation[1].cross(orientation[2]); break; }
+		if (ok[2]) { orientation[2].normalize(); orientation[0] = orientation[2].orthogonal(); orientation[1] = orientation[2].cross(orientation[0]); break; }
 
 	case 2:
 
@@ -1104,7 +1128,7 @@ bool GenericItem::convertCoordinateSystem()
 		positionReference = owner;
 	//init orientationReferences
 	{
-		for (unsigned k=0; k<3; k++)
+		for (unsigned k = 0; k < 3; k++)
 			if (!orientationReferences[k])
 				orientationReferences[k] = owner;
 	}
@@ -1118,12 +1142,12 @@ bool GenericItem::convertCoordinateSystem()
 		if (!ref->isCoordinateSystemUpToDate && ref->owner == this)
 			return false;
 		CCVector3 p = position;
-		for (unsigned i=0; i<3; i++)
-			position[i] = ref->orientation[0][i]*p[0]+ref->orientation[1][i]*p[1]+ref->orientation[2][i]*p[2];
+		for (unsigned i = 0; i < 3; i++)
+			position[i] = ref->orientation[0][i] * p[0] + ref->orientation[1][i] * p[1] + ref->orientation[2][i] * p[2];
 		position += ref->position;
 	}
 	//The same for orientation
-	for (unsigned k=0; k<3; k++)
+	for (unsigned k = 0; k < 3; k++)
 	{
 		if (!isOrientationValid(k))
 			continue;
@@ -1138,13 +1162,13 @@ bool GenericItem::convertCoordinateSystem()
 
 			CCVector3 axis[3];
 			{
-				for (unsigned j=0; j<3; j++)
+				for (unsigned j = 0; j < 3; j++)
 					axis[j] = orientation[j];
 			}
 			{
-				for (unsigned j=0; j<3; j++)
-					for (unsigned i=0; i<3; i++)
-						orientation[j][i] = ref->orientation[0][i]*axis[j][0]+ref->orientation[1][i]*axis[j][1]+ref->orientation[2][i]*axis[j][2];
+				for (unsigned j = 0; j < 3; j++)
+					for (unsigned i = 0; i < 3; i++)
+						orientation[j][i] = ref->orientation[0][i] * axis[j][0] + ref->orientation[1][i] * axis[j][1] + ref->orientation[2][i] * axis[j][2];
 			}
 		}
 	}
@@ -1164,9 +1188,9 @@ bool GenericItem::scan(Token t, std::vector<GenericItem *> &array)
 		{
 			array.push_back(this);
 		}
-		catch(std::exception &pex)
+		catch (std::exception &pex)
 		{
-			memfail(pex,array.size());
+			memfail(pex, array.size());
 		}
 		return true;
 	}
@@ -1176,12 +1200,12 @@ bool GenericItem::scan(Token t, std::vector<GenericItem *> &array)
 
 DesignElement::~DesignElement()
 {
-	for (std::list<DesignElement*>::iterator it=nelements.begin(); it!=nelements.end(); ++it)
+	for (std::list<DesignElement*>::iterator it = nelements.begin(); it != nelements.end(); ++it)
 	{
 		GenericItem* item = *it;
 		if (item)
 		{
-			Stack::Detroy(item);
+			Stack::Destroy(item);
 		}
 	}
 	nelements.clear();
@@ -1198,9 +1222,9 @@ bool DesignElement::push(GenericItem *i)
 			{
 				nelements.push_back(element);
 			}
-			catch(std::exception &pex)
+			catch (std::exception &pex)
 			{
-				memalert(pex,nelements.size());
+				memalert(pex, nelements.size());
 				return false;
 			}
 			if (element->owner)
@@ -1219,7 +1243,7 @@ bool DesignElement::push(GenericItem *i)
 
 void DesignElement::remove(GenericItem *i)
 {
-	for (std::list<DesignElement*>::iterator it=nelements.begin(); it!= nelements.end();)
+	for (std::list<DesignElement*>::iterator it = nelements.begin(); it != nelements.end();)
 	{
 		if (*it == i)
 			nelements.erase(it);
@@ -1233,7 +1257,7 @@ GroupElement::GroupElement(Token l)
 	level = l;
 	elements.clear();
 	subhierarchy.clear();
-	memset(name,0,c_max_str_length);
+	memset(name, 0, c_max_str_length);
 }
 
 GroupElement::~GroupElement()
@@ -1249,13 +1273,13 @@ void GroupElement::clear(bool del)
 		{
 			GenericItem* item = *eit;
 			if (*eit)
-				Stack::Detroy(item);
+				Stack::Destroy(item);
 		}
 		for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
 		{
 			GenericItem* item = *hit;
 			if (*hit)
-				Stack::Detroy(item);
+				Stack::Destroy(item);
 		}
 	}
 	elements.clear();
@@ -1271,7 +1295,7 @@ bool GroupElement::push(GenericItem *i)
 	{
 		//If this group can contain the request item, then insert it in the group list
 		GroupElement *group = dynamic_cast<GroupElement*>(i);
-		if (group->level == PDMS_GROUP || group->level>level)
+		if (group->level == PDMS_GROUP || group->level > level)
 		{
 			if (group->owner)
 				group->owner->remove(group);
@@ -1281,9 +1305,9 @@ bool GroupElement::push(GenericItem *i)
 			{
 				subhierarchy.push_back(group);
 			}
-			catch(std::exception &pex)
+			catch (std::exception &pex)
 			{
-				memalert(pex,subhierarchy.size());
+				memalert(pex, subhierarchy.size());
 				return false;
 			}
 		}
@@ -1303,9 +1327,9 @@ bool GroupElement::push(GenericItem *i)
 		{
 			elements.push_back(dynamic_cast<DesignElement*>(i));
 		}
-		catch(std::exception &pex)
+		catch (std::exception &pex)
 		{
-			memalert(pex,elements.size());
+			memalert(pex, elements.size());
 			return false;
 		}
 		return true;
@@ -1355,7 +1379,7 @@ bool GroupElement::convertCoordinateSystem()
 GenericItem* GroupElement::scan(const char* str)
 {
 	//scan all elements contained in this group, beginning with this one, while none matches the requested name
-	GenericItem *item=GenericItem::scan(str);
+	GenericItem *item = GenericItem::scan(str);
 	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end() && !item; ++eit)
 		item = (*eit)->scan(str);
 	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end() && !item; ++hit)
@@ -1367,22 +1391,22 @@ bool GroupElement::scan(Token t, std::vector<GenericItem*> &items)
 {
 	GenericItem::scan(t, items);
 	size_t size = items.size();
-	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit!=elements.end(); ++eit)
+	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); ++eit)
 		(*eit)->scan(t, items);
 	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
 		(*hit)->scan(t, items);
 	return (items.size() > size);
 }
 
-std::pair<int,int> GroupElement::write(std::ostream &output, int nbtabs) const
+std::pair<int, int> GroupElement::write(std::ostream &output, int nbtabs) const
 {
 	{
-		for (int i=0; i<nbtabs; i++)
+		for (int i = 0; i < nbtabs; i++)
 			output << "\t";
 	}
 	output << "NEW ";
 
-	switch(level)
+	switch (level)
 	{
 	case PDMS_GROUP: output << "GROUP"; break;
 	case PDMS_WORLD: output << "WORLD"; break;
@@ -1391,33 +1415,33 @@ std::pair<int,int> GroupElement::write(std::ostream &output, int nbtabs) const
 	case PDMS_EQUIPMENT: output << "EQUIPMENT"; break;
 	case PDMS_STRUCTURE: output << "STRUCTURE"; break;
 	case PDMS_SUBSTRUCTURE: output << "SUBSTRUCTURE"; break;
-	default :
+	default:
 		std::cout << "Error : cannot write group " << level << std::endl;
-		return std::pair<int,int>(0,0);
+		return std::pair<int, int>(0, 0);
 	}
 
 	if (strlen(name))
 		output << " /" << name;
 	output << std::endl;
 
-	std::pair<int,int> nb(1,0);
+	std::pair<int, int> nb(1, 0);
 
 	for (std::list<GroupElement*>::const_iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
 	{
-		std::pair<int,int> n = (*hit)->write(output, nbtabs+1);
+		std::pair<int, int> n = (*hit)->write(output, nbtabs + 1);
 		nb.first += n.first;
 		nb.second += n.second;
 	}
 
 	for (std::list<DesignElement*>::const_iterator eit = elements.begin(); eit != elements.end(); ++eit)
 	{
-		std::pair<int,int> n = (*eit)->write(output, nbtabs+1);
+		std::pair<int, int> n = (*eit)->write(output, nbtabs + 1);
 		nb.first += n.first;
 		nb.second += n.second;
 	}
 
 	{
-		for (int i=0; i<nbtabs; i++)
+		for (int i = 0; i < nbtabs; i++)
 			output << "\t";
 	}
 	output << "END" << std::endl;
@@ -1426,14 +1450,14 @@ std::pair<int,int> GroupElement::write(std::ostream &output, int nbtabs) const
 
 bool SCylinder::setValue(Token t, PointCoordinateType value)
 {
-	switch(t)
+	switch (t)
 	{
 	case PDMS_DIAMETER: diameter = value; break;
-	case PDMS_HEIGHT: height=value; break;
-	case PDMS_X_TOP_SHEAR: xtshear=value; if (fabs(xtshear)>90.) return false; break;
-	case PDMS_Y_TOP_SHEAR: ytshear=value; if (fabs(ytshear)>90.) return false; break;
-	case PDMS_X_BOTTOM_SHEAR: xbshear=value; if (fabs(xbshear)>90.) return false; break;
-	case PDMS_Y_BOTTOM_SHEAR: ybshear=value; if (fabs(ybshear)>90.) return false; break;
+	case PDMS_HEIGHT: height = value; break;
+	case PDMS_X_TOP_SHEAR: xtshear = value; if (fabs(xtshear) > 90.) return false; break;
+	case PDMS_Y_TOP_SHEAR: ytshear = value; if (fabs(ytshear) > 90.) return false; break;
+	case PDMS_X_BOTTOM_SHEAR: xbshear = value; if (fabs(xbshear) > 90.) return false; break;
+	case PDMS_Y_BOTTOM_SHEAR: ybshear = value; if (fabs(ybshear) > 90.) return false; break;
 	default: return false;
 	}
 	return true;
@@ -1447,55 +1471,55 @@ PointCoordinateType SCylinder::surface() const
 std::pair<int, int> SCylinder::write(std::ostream &output, int nbtabs) const
 {
 	int i;
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "NEW SLCYLINDER";
 	if (strlen(name))
 		output << " /" << name;
 	output << std::endl;
 
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "DIAMETER " << diameter << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "HEIGHT " << height << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "XTSHEAR " << (CC_RAD_TO_DEG)*xtshear << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "XBSHEAR " << (CC_RAD_TO_DEG)*xbshear << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "YTSHEAR " << (CC_RAD_TO_DEG)*ytshear << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "YBSHEAR " << (CC_RAD_TO_DEG)*ybshear << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
 	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
 
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 
 	output << "END" << std::endl;
 
-	return std::pair<int,int>(0,1);
+	return std::pair<int, int>(0, 1);
 }
 
 bool CTorus::setValue(Token t, PointCoordinateType value)
 {
-	switch(t)
+	switch (t)
 	{
-	case PDMS_ANGLE: angle=value; if (fabs(angle)>(2.*M_PI)) return false; break;
-	case PDMS_INSIDE_RADIUS: inside_radius=value; break;
-	case PDMS_OUTSIDE_RADIUS: outside_radius=value; break;
+	case PDMS_ANGLE: angle = value; if (fabs(angle) > (2.*M_PI)) return false; break;
+	case PDMS_INSIDE_RADIUS: inside_radius = value; break;
+	case PDMS_OUTSIDE_RADIUS: outside_radius = value; break;
 	default: return false;
 	}
 	return true;
@@ -1503,55 +1527,55 @@ bool CTorus::setValue(Token t, PointCoordinateType value)
 
 PointCoordinateType CTorus::surface() const
 {
-	PointCoordinateType r = static_cast<PointCoordinateType>(0.5)*(outside_radius-inside_radius);
-	PointCoordinateType R = outside_radius-r;
-	return (angle/static_cast<PointCoordinateType>(2.0*M_PI))*(static_cast<PointCoordinateType>(4.0*PDMS_SQR(M_PI))*r*R);
+	PointCoordinateType r = static_cast<PointCoordinateType>(0.5)*(outside_radius - inside_radius);
+	PointCoordinateType R = outside_radius - r;
+	return (angle / static_cast<PointCoordinateType>(2.0*M_PI))*(static_cast<PointCoordinateType>(4.0*PDMS_SQR(M_PI))*r*R);
 }
 
-std::pair<int,int> CTorus::write(std::ostream &output, int nbtabs) const
+std::pair<int, int> CTorus::write(std::ostream &output, int nbtabs) const
 {
 	int i;
 
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "NEW CTORUS";
 	if (strlen(name))
 		output << " /" << name;
 	output << std::endl;
 
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "RINSIDE " << inside_radius << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ROUTSIDE " << outside_radius << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ANGLE " << static_cast<PointCoordinateType>(CC_RAD_TO_DEG)*angle << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
 	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
 
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "END" << std::endl;
 
-	return std::pair<int,int>(0,1);
+	return std::pair<int, int>(0, 1);
 }
 
 bool RTorus::setValue(Token t, PointCoordinateType value)
 {
-	switch(t)
+	switch (t)
 	{
-	case PDMS_ANGLE: angle=value; if (fabs(angle)>(2.*M_PI)) return false; break;
-	case PDMS_INSIDE_RADIUS: inside_radius=value; break;
-	case PDMS_OUTSIDE_RADIUS: outside_radius=value; break;
-	case PDMS_HEIGHT: height=value; break;
+	case PDMS_ANGLE: angle = value; if (fabs(angle) > (2.*M_PI)) return false; break;
+	case PDMS_INSIDE_RADIUS: inside_radius = value; break;
+	case PDMS_OUTSIDE_RADIUS: outside_radius = value; break;
+	case PDMS_HEIGHT: height = value; break;
 	default: return false;
 	}
 	return true;
@@ -1561,47 +1585,47 @@ PointCoordinateType RTorus::surface() const
 {
 	PointCoordinateType inside = static_cast<PointCoordinateType>(2.0*M_PI)*inside_radius*height;
 	PointCoordinateType outside = static_cast<PointCoordinateType>(2.0*M_PI)*outside_radius*height;
-	PointCoordinateType updown = static_cast<PointCoordinateType>(2.0*M_PI)*(PDMS_SQR(outside_radius)-PDMS_SQR(inside_radius));
-	return (angle/static_cast<PointCoordinateType>(2.0*M_PI))*(inside+outside+updown);
+	PointCoordinateType updown = static_cast<PointCoordinateType>(2.0*M_PI)*(PDMS_SQR(outside_radius) - PDMS_SQR(inside_radius));
+	return (angle / static_cast<PointCoordinateType>(2.0*M_PI))*(inside + outside + updown);
 }
 
-std::pair<int,int> RTorus::write(std::ostream &output, int nbtabs) const
+std::pair<int, int> RTorus::write(std::ostream &output, int nbtabs) const
 {
 	int i;
 
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "NEW RTORUS";
 	if (strlen(name))
 		output << " /" << name;
 	output << std::endl;
 
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "RINSIDE " << inside_radius << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ROUTSIDE " << outside_radius << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "HEIGHT " << height << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ANGLE " << static_cast<PointCoordinateType>(CC_RAD_TO_DEG)*angle << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
 	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
 
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "END" << std::endl;
 
-	return std::pair<int,int>(0,1);
+	return std::pair<int, int>(0, 1);
 }
 
 Dish::Dish()
@@ -1613,11 +1637,11 @@ Dish::Dish()
 
 bool Dish::setValue(Token t, PointCoordinateType value)
 {
-	switch(t)
+	switch (t)
 	{
-	case PDMS_HEIGHT: height=value; break;
-	case PDMS_RADIUS: radius=value; break;
-	case PDMS_DIAMETER: diameter=value; break;
+	case PDMS_HEIGHT: height = value; break;
+	case PDMS_RADIUS: radius = value; break;
+	case PDMS_DIAMETER: diameter = value; break;
 	default: return false;
 	}
 	return true;
@@ -1628,65 +1652,65 @@ PointCoordinateType Dish::surface() const
 	if (radius > ZERO_TOLERANCE)
 	{
 		PointCoordinateType r = static_cast<PointCoordinateType>(0.5f*diameter);
-		if (fabs(2*height - diameter) < ZERO_TOLERANCE)
+		if (fabs(2 * height - diameter) < ZERO_TOLERANCE)
 			return static_cast<PointCoordinateType>(2.0*M_PI)*PDMS_SQR(r);
-		if (2*height > diameter)
+		if (2 * height > diameter)
 		{
-			PointCoordinateType a = acos(r/height);
-			return static_cast<PointCoordinateType>(M_PI)*(PDMS_SQR(r)+(a*r*height/sin(a)));
+			PointCoordinateType a = acos(r / height);
+			return static_cast<PointCoordinateType>(M_PI)*(PDMS_SQR(r) + (a*r*height / sin(a)));
 		}
 		else
 		{
-			PointCoordinateType a = acos(height/r);
-			return static_cast<PointCoordinateType>(M_PI)*(PDMS_SQR(r)+((PDMS_SQR(height)/sin(a))*log((1+sin(a))/cos(a))));
+			PointCoordinateType a = acos(height / r);
+			return static_cast<PointCoordinateType>(M_PI)*(PDMS_SQR(r) + ((PDMS_SQR(height) / sin(a))*log((1 + sin(a)) / cos(a))));
 		}
 	}
 	return static_cast<PointCoordinateType>(M_PI)*diameter*height;
 }
 
-std::pair<int,int> Dish::write(std::ostream &output, int nbtabs) const
+std::pair<int, int> Dish::write(std::ostream &output, int nbtabs) const
 {
 	int i;
 
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "NEW DISH";
 	if (strlen(name))
 		output << " /" << name;
 	output << std::endl;
 
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "HEIGHT " << height << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "RADIUS " << radius << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "DIAMETER " << diameter << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
 	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
 
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "END" << std::endl;
 
-	return std::pair<int,int>(0,1);
+	return std::pair<int, int>(0, 1);
 }
 
 bool Cone::setValue(Token t, PointCoordinateType value)
 {
-	switch(t)
+	switch (t)
 	{
-	case PDMS_TOP_DIAMETER: dtop=value; break;
-	case PDMS_BOTTOM_DIAMETER: dbottom=value; break;
-	case PDMS_HEIGHT: height=value; break;
+	case PDMS_TOP_DIAMETER: dtop = value; break;
+	case PDMS_BOTTOM_DIAMETER: dbottom = value; break;
+	case PDMS_HEIGHT: height = value; break;
 	default: return false;
 	}
 	return true;
@@ -1695,77 +1719,77 @@ bool Cone::setValue(Token t, PointCoordinateType value)
 PointCoordinateType Cone::surface() const
 {
 	PointCoordinateType r1, r2;
-	if (dtop<dbottom)
+	if (dtop < dbottom)
 	{
-		r1=dtop;
-		r2=dbottom;
+		r1 = dtop;
+		r2 = dbottom;
 	}
 	else
 	{
-		r1=dbottom;
-		r2=dtop;
+		r1 = dbottom;
+		r2 = dtop;
 	}
 
-	PointCoordinateType h1 = (r1*height)/(r2-r1);
-	PointCoordinateType a1 = static_cast<PointCoordinateType>(M_PI)*r1*sqrt(PDMS_SQR(r1)+PDMS_SQR(h1));
-	PointCoordinateType a2 = static_cast<PointCoordinateType>(M_PI)*r2*sqrt(PDMS_SQR(r2)+PDMS_SQR(h1+height));
+	PointCoordinateType h1 = (r1*height) / (r2 - r1);
+	PointCoordinateType a1 = static_cast<PointCoordinateType>(M_PI)*r1*sqrt(PDMS_SQR(r1) + PDMS_SQR(h1));
+	PointCoordinateType a2 = static_cast<PointCoordinateType>(M_PI)*r2*sqrt(PDMS_SQR(r2) + PDMS_SQR(h1 + height));
 
-	return a2-a1;
+	return a2 - a1;
 }
 
-std::pair<int,int> Cone::write(std::ostream &output, int nbtabs) const
+std::pair<int, int> Cone::write(std::ostream &output, int nbtabs) const
 {
 	int i;
 
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "NEW CONE";
 	if (strlen(name))
 		output << " /" << name;
 	output << std::endl;
 
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "HEIGHT " << height << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "DBOTTOM " << dbottom << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "DTOP " << dtop << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
 	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
 
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "END" << std::endl;
 
-	return std::pair<int,int>(0,1);
+	return std::pair<int, int>(0, 1);
 }
 
 Box::Box()
-	: lengths(0,0,0)
+	: lengths(0, 0, 0)
 {
 }
 
 bool Box::setValue(Token t, PointCoordinateType value)
 {
-	switch(t)
+	switch (t)
 	{
 	case PDMS_XLENGTH:
-		lengths[0]=value;
+		lengths[0] = value;
 		break;
 	case PDMS_YLENGTH:
-		lengths[1]=value;
+		lengths[1] = value;
 		break;
 	case PDMS_ZLENGTH:
-		lengths[2]=value;
+		lengths[2] = value;
 		break;
 	default: return false;
 	}
@@ -1774,14 +1798,14 @@ bool Box::setValue(Token t, PointCoordinateType value)
 
 PointCoordinateType Box::surface() const
 {
-	return 2*((lengths[0]*lengths[1])+(lengths[1]*lengths[2])+(lengths[2]*lengths[0]));
+	return 2 * ((lengths[0] * lengths[1]) + (lengths[1] * lengths[2]) + (lengths[2] * lengths[0]));
 }
 
-std::pair<int,int> Box::write(std::ostream &output, int nbtabs) const
+std::pair<int, int> Box::write(std::ostream &output, int nbtabs) const
 {
 	int i;
 
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 	if (negative)
 		output << "NEW NBOX";
@@ -1791,34 +1815,34 @@ std::pair<int,int> Box::write(std::ostream &output, int nbtabs) const
 		output << " /" << name;
 	output << std::endl;
 
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "XLENGTH " << lengths[0] << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "YLENGTH " << lengths[1] << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ZLENGTH " << lengths[2] << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
-	for (i=0; i<=nbtabs; i++)
+	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
 	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
 
-	for (i=0; i<nbtabs; i++)
+	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "END" << std::endl;
 
-	return std::pair<int,int>(0,1);
+	return std::pair<int, int>(0, 1);
 }
 
-std::pair<int,int> Vertex::write(std::ostream &output, int nbtabs) const
+std::pair<int, int> Vertex::write(std::ostream &output, int nbtabs) const
 {
-	return std::pair<int,int>(0,0);
+	return std::pair<int, int>(0, 0);
 }
 
 bool Loop::push(GenericItem *i)
@@ -1845,9 +1869,9 @@ void Loop::remove(GenericItem *i)
 	}
 }
 
-std::pair<int,int> Loop::write(std::ostream &output, int nbtabs) const
+std::pair<int, int> Loop::write(std::ostream &output, int nbtabs) const
 {
-	return std::pair<int,int>(0,0);
+	return std::pair<int, int>(0, 0);
 }
 
 bool Extrusion::push(GenericItem *l)
@@ -1878,7 +1902,7 @@ PointCoordinateType Extrusion::surface() const
 		{
 			if (it2 == loop->loop.end())
 				it2 = loop->loop.begin();
-			p += ((*it1)->v-(*it2)->v).norm();
+			p += ((*it1)->v - (*it2)->v).norm();
 			++it1;
 			++it2;
 		}
@@ -1887,22 +1911,22 @@ PointCoordinateType Extrusion::surface() const
 	return p * static_cast<PointCoordinateType>(height);
 }
 
-std::pair<int,int> Extrusion::write(std::ostream &output, int nbtabs) const
+std::pair<int, int> Extrusion::write(std::ostream &output, int nbtabs) const
 {
-	return std::pair<int,int>(0,0);
+	return std::pair<int, int>(0, 0);
 }
 
 bool Pyramid::setValue(Token t, PointCoordinateType value)
 {
-	switch(t)
+	switch (t)
 	{
-	case PDMS_X_BOTTOM:xbot=value; break;
-	case PDMS_Y_BOTTOM:ybot=value; break;
-	case PDMS_X_TOP:xtop=value; break;
-	case PDMS_Y_TOP:ytop=value; break;
-	case PDMS_X_OFF:xoff=value; break;
-	case PDMS_Y_OFF:yoff=value; break;
-	case PDMS_HEIGHT:height=value; break;
+	case PDMS_X_BOTTOM:xbot = value; break;
+	case PDMS_Y_BOTTOM:ybot = value; break;
+	case PDMS_X_TOP:xtop = value; break;
+	case PDMS_Y_TOP:ytop = value; break;
+	case PDMS_X_OFF:xoff = value; break;
+	case PDMS_Y_OFF:yoff = value; break;
+	case PDMS_HEIGHT:height = value; break;
 	default:
 		return false;
 	}
@@ -1915,20 +1939,20 @@ PointCoordinateType Pyramid::surface() const
 	return 0;
 }
 
-std::pair<int,int> Pyramid::write(std::ostream &output, int nbtabs) const
+std::pair<int, int> Pyramid::write(std::ostream &output, int nbtabs) const
 {
-	return std::pair<int,int>(0,0);
+	return std::pair<int, int>(0, 0);
 }
 
 bool Snout::setValue(Token t, PointCoordinateType value)
 {
-	switch(t)
+	switch (t)
 	{
-	case PDMS_BOTTOM_DIAMETER:dbottom=value; break;
-	case PDMS_TOP_DIAMETER:dtop=value; break;
-	case PDMS_X_OFF:xoff=value; break;
-	case PDMS_Y_OFF:yoff=value; break;
-	case PDMS_HEIGHT:height=value; break;
+	case PDMS_BOTTOM_DIAMETER:dbottom = value; break;
+	case PDMS_TOP_DIAMETER:dtop = value; break;
+	case PDMS_X_OFF:xoff = value; break;
+	case PDMS_Y_OFF:yoff = value; break;
+	case PDMS_HEIGHT:height = value; break;
 	default:
 		return false;
 	}
@@ -1941,7 +1965,7 @@ PointCoordinateType Snout::surface() const
 	return 0;
 }
 
-std::pair<int,int> Snout::write(std::ostream &output, int nbtabs) const
+std::pair<int, int> Snout::write(std::ostream &output, int nbtabs) const
 {
-	return std::pair<int,int>(0,0);
+	return std::pair<int, int>(0, 0);
 }

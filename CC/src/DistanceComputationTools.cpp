@@ -19,29 +19,19 @@
 #include "DistanceComputationTools.h"
 
 //local
-#include "GenericCloud.h"
-#include "GenericIndexedCloudPersist.h"
 #include "ChunkedPointCloud.h"
 #include "DgmOctreeReferenceCloud.h"
 #include "ReferenceCloud.h"
-#include "Neighbourhood.h"
-#include "GenericTriangle.h"
-#include "GenericIndexedMesh.h"
-#include "GenericProgressCallback.h"
 #include "SaitoSquaredDistanceTransform.h"
 #include "FastMarchingForPropagation.h"
 #include "ScalarFieldTools.h"
-#include "CCConst.h"
-#include "CCMiscTools.h"
 #include "LocalModel.h"
 #include "SimpleTriangle.h"
 #include "ScalarField.h"
 
 //system
 #include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits>
+
 
 #ifdef USE_QT
 #ifndef QT_DEBUG
@@ -300,7 +290,7 @@ DistanceComputationTools::SOReturnCode
 
 	if (maxDist > 0)
 	{
-		//we reduce the bouding box to the intersection of both bounding-boxes enlarged by 'maxDist'
+		//we reduce the bounding box to the intersection of both bounding-boxes enlarged by 'maxDist'
 		for (unsigned char k=0; k<3; k++)
 		{
 			minD.u[k] = std::max(minD.u[k], std::max(minsA.u[k], minsB.u[k]) - maxDist);
@@ -1114,14 +1104,10 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 		return;
 	}
 
-	if (s_normProgressCb_MT)
+	if (s_normProgressCb_MT && !s_normProgressCb_MT->oneStep())
 	{
-		QApplication::processEvents(); //let the application breath!
-		if (!s_normProgressCb_MT->oneStep())
-		{
-			s_cellFunc_MT_success = false;
-			return;
-		}
+		s_cellFunc_MT_success = false;
+		return;
 	}
 
 	ReferenceCloud Yk(s_octree_MT->associatedCloud());

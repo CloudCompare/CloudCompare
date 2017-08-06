@@ -123,14 +123,14 @@ namespace PdmsTools
 
 	namespace PdmsToken
 	{
-		static bool isCommand(Token t) {return (t>=PDMS_NAME && t<=PDMS_RETURN);}
-		static bool isDesignElement(Token t) {return (t>=PDMS_SCYLINDER && t<=PDMS_VERTEX);}
-		static bool isGroupElement(Token t) {return (t>=PDMS_GROUP && t<=PDMS_SUBSTRUCTURE);}
-		static bool isElement(Token t) {return (isDesignElement(t) || isGroupElement(t));}
-		static bool isCoordinate(Token t) {return (t>=PDMS_EST && t<=PDMS_Z);}
-		static bool isParameter(Token t) {return (t>=PDMS_DIAMETER && t<=PDMS_BOTTOM_DIAMETER);}
-		static bool isSpaceSystem(Token t) {return (t>=PDMS_POSITION && t<=PDMS_ORIENTATION);}
-		static bool isUnit(Token t) {return (t==PDMS_MILLIMETRE || t==PDMS_METRE);}
+		static bool isCommand(Token t) { return (t >= PDMS_NAME && t <= PDMS_RETURN); }
+		static bool isDesignElement(Token t) { return (t >= PDMS_SCYLINDER && t <= PDMS_VERTEX); }
+		static bool isGroupElement(Token t) { return (t >= PDMS_GROUP && t <= PDMS_SUBSTRUCTURE); }
+		static bool isElement(Token t) { return (isDesignElement(t) || isGroupElement(t)); }
+		static bool isCoordinate(Token t) { return (t >= PDMS_EST && t <= PDMS_Z); }
+		static bool isParameter(Token t) { return (t >= PDMS_DIAMETER && t <= PDMS_BOTTOM_DIAMETER); }
+		static bool isSpaceSystem(Token t) { return (t >= PDMS_POSITION && t <= PDMS_ORIENTATION); }
+		static bool isUnit(Token t) { return (t == PDMS_MILLIMETRE || t == PDMS_METRE); }
 	};
 
 	namespace PdmsObjects
@@ -170,22 +170,22 @@ namespace PdmsTools
 			virtual bool convertCoordinateSystem();
 
 			//tree structure
-			virtual GenericItem* getRoot() {GenericItem *item = this; while(item->owner) item=item->owner; return item;}
+			virtual GenericItem* getRoot() { GenericItem *item = this; while (item->owner) item = item->owner; return item; }
 			virtual bool push(GenericItem *i) = 0;
 			virtual void remove(GenericItem *i) {}
 
 			//type management
-			virtual bool isGroupElement() {return false;}
-			virtual bool isDesignElement() {return false;}
-			virtual Token getType() const {return PDMS_INVALID_TOKEN;}
+			virtual bool isGroupElement() { return false; }
+			virtual bool isDesignElement() { return false; }
+			virtual Token getType() const { return PDMS_INVALID_TOKEN; }
 
 			//attributes
-			virtual bool setValue(Token t, PointCoordinateType value) {return false;}
+			virtual bool setValue(Token t, PointCoordinateType value) { return false; }
 
 			//other
-			virtual GenericItem* scan(const char* str) {return strcmp(name, str)==0 ? this : NULL;}
+			virtual GenericItem* scan(const char* str) { return strcmp(name, str) == 0 ? this : NULL; }
 			virtual bool scan(Token t, std::vector<GenericItem*> &array);
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const=0;
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const = 0;
 
 		protected:
 			bool isOrientationValid(unsigned i) const;
@@ -198,13 +198,13 @@ namespace PdmsTools
 		public:
 			static void Init();
 			static void Clear();
-			static void Detroy(GenericItem* &item);
+			static void Destroy(GenericItem* &item);
 		};
 
 		//! Design element
 		class DesignElement : public GenericItem
 		{
-		public :
+		public:
 			bool negative;
 			std::list<DesignElement*> nelements;
 
@@ -212,18 +212,18 @@ namespace PdmsTools
 			virtual ~DesignElement();
 
 			//reimplemented from GenericItem
-			virtual bool isDesignElement() {return true;}
+			virtual bool isDesignElement() { return true; }
 			virtual bool push(GenericItem *i);
 			virtual void remove(GenericItem *i);
 
 			//virtual Shape* toShape() {return NULL;}
-			virtual PointCoordinateType surface() const {return 0;}
+			virtual PointCoordinateType surface() const { return 0; }
 		};
 
 		//! Group of elements
 		class GroupElement : public GenericItem
 		{
-		public :
+		public:
 			Token level;
 			std::list<DesignElement*> elements;
 			std::list<GroupElement*> subhierarchy;
@@ -234,17 +234,17 @@ namespace PdmsTools
 			//GroupElement(const Model* model);
 			//virtual bool push(const Shape* shape);
 
-			virtual void clear(bool del=false);
+			virtual void clear(bool del = false);
 
 			//reimplemented from GenericItem
 			virtual bool push(GenericItem *i);
 			virtual void remove(GenericItem *i);
-			virtual bool isGroupElement() {return true;}
+			virtual bool isGroupElement() { return true; }
 			virtual bool convertCoordinateSystem();
 			virtual GenericItem* scan(const char* str);
 			virtual bool scan(Token t, std::vector<GenericItem*> &array);
-			virtual Token getType() const {return level;}
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
+			virtual Token getType() const { return level; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
 		};
 
 		//! Cylinder
@@ -271,8 +271,8 @@ namespace PdmsTools
 
 			//reimplemented from GenericItem
 			virtual bool setValue(Token t, PointCoordinateType value);
-			virtual Token getType() const {return PDMS_SCYLINDER;}
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
+			virtual Token getType() const { return PDMS_SCYLINDER; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
 			virtual PointCoordinateType surface() const;
 		};
 
@@ -284,15 +284,15 @@ namespace PdmsTools
 			PointCoordinateType outside_radius;
 			PointCoordinateType angle;
 
-				CTorus() : inside_radius(0), outside_radius(0), angle(0) {}
+			CTorus() : inside_radius(0), outside_radius(0), angle(0) {}
 
-				//virtual Shape* toShape();
+			//virtual Shape* toShape();
 
-				//reimplemented from GenericItem
-				virtual bool setValue(Token t, PointCoordinateType value);
-				virtual Token getType() const {return PDMS_CTORUS;}
-				virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
-				virtual PointCoordinateType surface() const;
+			//reimplemented from GenericItem
+			virtual bool setValue(Token t, PointCoordinateType value);
+			virtual Token getType() const { return PDMS_CTORUS; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
+			virtual PointCoordinateType surface() const;
 		};
 
 		// Torus (rectangular section)
@@ -305,8 +305,8 @@ namespace PdmsTools
 
 			//reimplemented from GenericItem
 			virtual bool setValue(Token t, PointCoordinateType value);
-			virtual Token getType() const {return PDMS_RTORUS;}
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
+			virtual Token getType() const { return PDMS_RTORUS; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
 			virtual PointCoordinateType surface() const;
 		};
 
@@ -322,8 +322,8 @@ namespace PdmsTools
 
 			//reimplemented from GenericItem
 			virtual bool setValue(Token t, PointCoordinateType value);
-			virtual Token getType() const {return PDMS_DISH;}
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
+			virtual Token getType() const { return PDMS_DISH; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
 			virtual PointCoordinateType surface() const;
 		};
 
@@ -339,8 +339,8 @@ namespace PdmsTools
 
 			//reimplemented from GenericItem
 			virtual bool setValue(Token t, PointCoordinateType value);
-			virtual Token getType() const {return PDMS_CONE;}
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
+			virtual Token getType() const { return PDMS_CONE; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
 			virtual PointCoordinateType surface() const;
 		};
 
@@ -354,8 +354,8 @@ namespace PdmsTools
 
 			//reimplemented from GenericItem
 			virtual bool setValue(Token t, PointCoordinateType value);
-			virtual Token getType() const {return PDMS_PYRAMID;}
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
+			virtual Token getType() const { return PDMS_PYRAMID; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
 			virtual PointCoordinateType surface() const;
 		};
 
@@ -369,8 +369,8 @@ namespace PdmsTools
 
 			//reimplemented from GenericItem
 			virtual bool setValue(Token t, PointCoordinateType value);
-			virtual Token getType() const {return PDMS_SNOUT;}
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
+			virtual Token getType() const { return PDMS_SNOUT; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
 			virtual PointCoordinateType surface() const;
 		};
 
@@ -384,8 +384,8 @@ namespace PdmsTools
 
 			//reimplemented from GenericItem
 			virtual bool setValue(Token t, PointCoordinateType value);
-			virtual Token getType() const {return negative ? PDMS_NBOX : PDMS_BOX;}
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
+			virtual Token getType() const { return negative ? PDMS_NBOX : PDMS_BOX; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
 			virtual PointCoordinateType surface() const;
 		};
 
@@ -398,9 +398,9 @@ namespace PdmsTools
 			Vertex() : v(0.) {}
 
 			//reimplemented from GenericItem
-			bool setPosition(const CCVector3 &p) {v.x=p.x; v.y=p.y; return true;}
-			virtual Token getType() const {return PDMS_VERTEX;}
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
+			bool setPosition(const CCVector3 &p) { v.x = p.x; v.y = p.y; return true; }
+			virtual Token getType() const { return PDMS_VERTEX; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
 		};
 
 		//! Loop
@@ -415,7 +415,7 @@ namespace PdmsTools
 				while (!loop.empty())
 				{
 					GenericItem* v = loop.back();
-					Stack::Detroy(v);
+					Stack::Destroy(v);
 					loop.pop_back();
 				}
 			}
@@ -423,8 +423,8 @@ namespace PdmsTools
 			//reimplemented from GenericItem
 			virtual bool push(GenericItem *i);
 			virtual void remove(GenericItem *i);
-			virtual Token getType() const {return PDMS_LOOP;}
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
+			virtual Token getType() const { return PDMS_LOOP; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
 		};
 
 		//! Extrusion
@@ -435,15 +435,15 @@ namespace PdmsTools
 			PointCoordinateType height;
 
 			Extrusion() : loop(0), height(0.0f) {}
-			virtual ~Extrusion() {if(loop) { GenericItem* i = loop; Stack::Detroy(i); } }
+			virtual ~Extrusion() { if (loop) { GenericItem* i = loop; Stack::Destroy(i); } }
 
 			//reimplemented from GenericItem
-			virtual void remove(Loop *l) {if (l==loop) loop=NULL;}
+			virtual void remove(Loop *l) { if (l == loop) loop = NULL; }
 			virtual bool push(GenericItem *l);
-			virtual void remove(GenericItem *i) {if (loop==i) loop=NULL;}
-			virtual bool setValue(Token t, PointCoordinateType value) {if (t==PDMS_HEIGHT) {height=value; return true;} return false;}
-			virtual Token getType() const {return negative ? PDMS_NEXTRU : PDMS_EXTRU;}
-			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
+			virtual void remove(GenericItem *i) { if (loop == i) loop = NULL; }
+			virtual bool setValue(Token t, PointCoordinateType value) { if (t == PDMS_HEIGHT) { height = value; return true; } return false; }
+			virtual Token getType() const { return negative ? PDMS_NEXTRU : PDMS_EXTRU; }
+			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
 			virtual PointCoordinateType surface() const;
 		};
 
@@ -458,18 +458,18 @@ namespace PdmsTools
 		public:
 			Token command;
 
-			explicit Command(Token t) {command=t;}
-			Command(const Command &com) {command=com.command;}
+			explicit Command(Token t) { command = t; }
+			Command(const Command &com) { command = com.command; }
 			virtual ~Command() {}
 
 			//! Factory
 			static Command* Create(Token t);
 
-			virtual bool handle(PointCoordinateType numvalue) {return false;}
-			virtual bool handle(const char* str) {return false;}
-			virtual bool handle(Token t) {return false;}
-			virtual bool isValid() const {return false;}
-			virtual bool execute(PdmsObjects::GenericItem* &item) const {return false;}
+			virtual bool handle(PointCoordinateType numvalue) { return false; }
+			virtual bool handle(const char* str) { return false; }
+			virtual bool handle(Token t) { return false; }
+			virtual bool isValid() const { return false; }
+			virtual bool execute(PdmsObjects::GenericItem* &item) const { return false; }
 		};
 
 		class NumericalValue : public Command
@@ -492,9 +492,9 @@ namespace PdmsTools
 			static Token workingUnit;
 
 			explicit DistanceValue(Token t = PDMS_INVALID_TOKEN) : NumericalValue(t), unit(PDMS_INVALID_TOKEN) {}
-			static void setWorkingUnit(Token wu) {workingUnit=wu;}
+			static void setWorkingUnit(Token wu) { workingUnit = wu; }
 			virtual bool handle(Token t);
-			virtual bool handle(PointCoordinateType numvalue) {return NumericalValue::handle(numvalue);}
+			virtual bool handle(PointCoordinateType numvalue) { return NumericalValue::handle(numvalue); }
 			PointCoordinateType getValueInWorkingUnit() const;
 			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 		};
@@ -525,12 +525,12 @@ namespace PdmsTools
 			DistanceValue coords[3];
 			int current;
 
-			explicit Coordinates(Token t = PDMS_INVALID_TOKEN) : Command(t) {current = -1;}
+			explicit Coordinates(Token t = PDMS_INVALID_TOKEN) : Command(t) { current = -1; }
 			virtual bool handle(Token t);
 			virtual bool handle(PointCoordinateType numvalue);
 			virtual bool isValid() const;
 			bool getVector(CCVector3 &u) const;
-			int getNbComponents(bool onlyset=false) const;
+			int getNbComponents(bool onlyset = false) const;
 		};
 
 		class Position : public Command
@@ -540,7 +540,7 @@ namespace PdmsTools
 			Reference ref;
 			Command *current;
 
-			Position() : Command(PDMS_POSITION) {current = NULL;}
+			Position() : Command(PDMS_POSITION) { current = NULL; }
 			virtual bool handle(Token t);
 			virtual bool handle(PointCoordinateType numvalue);
 			virtual bool handle(const char* str);
@@ -556,7 +556,7 @@ namespace PdmsTools
 			Command *current;
 			int component;
 
-			Orientation() : Command(PDMS_ORIENTATION) {current = NULL; component = -1;}
+			Orientation() : Command(PDMS_ORIENTATION) { current = NULL; component = -1; }
 			virtual bool handle(Token t);
 			virtual bool handle(PointCoordinateType numvalue);
 			virtual bool handle(const char* str);
@@ -574,7 +574,7 @@ namespace PdmsTools
 		public:
 			char name[c_max_str_length];
 
-			Name() : Command(PDMS_NAME) {memset(name, 0, c_max_str_length);}
+			Name() : Command(PDMS_NAME) { memset(name, 0, c_max_str_length); }
 			virtual bool handle(const char* str)
 			{
 				if (strlen(name) > 0)
@@ -595,7 +595,7 @@ namespace PdmsTools
 			Token elementType;
 			std::vector<std::string> path;
 
-			ElementCreation() : Command(PDMS_CREATE) {elementType=PDMS_INVALID_TOKEN;}
+			ElementCreation() : Command(PDMS_CREATE) { elementType = PDMS_INVALID_TOKEN; }
 			virtual bool handle(const char*str);
 			virtual bool handle(Token t);
 			bool isValid() const;
@@ -613,9 +613,9 @@ namespace PdmsTools
 			Reference end;
 
 			explicit ElementEnding(Token t = PDMS_END) : Command(t) {}
-			virtual bool handle(Token t) {end.command=command; return end.handle(t);}
-			virtual bool handle(const char* str) {end.command=command; return end.handle(str);}
-			virtual bool isValid() const {if(!end.command) return true; return end.isValid();}
+			virtual bool handle(Token t) { end.command = command; return end.handle(t); }
+			virtual bool handle(const char* str) { end.command = command; return end.handle(str); }
+			virtual bool isValid() const { if (!end.command) return true; return end.isValid(); }
 			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 		};
 
@@ -623,7 +623,7 @@ namespace PdmsTools
 		{
 		public:
 			explicit HierarchyNavigation(Token t) : Command(t) {}
-			virtual bool isValid() const {return (PdmsToken::isGroupElement(command));}
+			virtual bool isValid() const { return (PdmsToken::isGroupElement(command)); }
 			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 		};
 

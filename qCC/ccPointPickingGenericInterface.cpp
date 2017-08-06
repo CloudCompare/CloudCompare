@@ -94,8 +94,11 @@ void ccPointPickingGenericInterface::stop(bool state)
 		//deactivate "point picking mode" in all GL windows
 		m_pickingHub->removeListener(this);
 
-		m_associatedWin->setUnclosable(false);
-		m_associatedWin->redraw(true, false);
+		if ( m_associatedWin != nullptr )
+		{
+			m_associatedWin->setUnclosable(false);
+			m_associatedWin->redraw(true, false);
+		}
 	}
 
 	ccOverlayDialog::stop(state);
@@ -106,11 +109,9 @@ void ccPointPickingGenericInterface::onItemPicked(const PickedItem& pi)
 	if (!m_processing || !pi.entity)
 		return;
 
-	ccPointCloud* cloud = 0;
-
 	if (pi.entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		cloud = static_cast<ccPointCloud*>(pi.entity);
+		ccPointCloud* cloud = static_cast<ccPointCloud*>(pi.entity);
 		if (!cloud)
 		{
 			assert(false);

@@ -79,7 +79,7 @@ public:
 	Tries to insert/append the given waypoint based on its location. If the point is within a "circle" including the start and end of the closest segment
 	then it "inserts" the point. Otherwise the point is appended onto the end of the trace.
 
-	Returns True if the point new waypoint was succesfully added/inserted and the path succesfully updated.
+	Returns True if the point new waypoint was successfully added/inserted and the path successfully updated.
 	*/
 	int insertWaypoint(int pointId);
 
@@ -129,7 +129,7 @@ public:
 	}
 
 	/*
-	Fit a plane to this trace. Returns true if a plane was succesfully fitted.
+	Fit a plane to this trace. Returns true if a plane was fit successfully.
 
 	@Args
 	*surface_effect_tolerance* = the minimum allowable angle (in degrees) between the average surface normals of the points [if they exist] and the plane. This gets rid of fit planes that simply represent the outcrop surface.

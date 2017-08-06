@@ -154,13 +154,15 @@ static double ComputePMUncertainty(CCLib::DgmOctree::NeighboursSet& set, const C
 	
 	assert(minIndex >= 0);
 	unsigned pointIndex = set[minIndex].pointIndex;
-	CCVector3 sigma(PM.sX->getValue(pointIndex),
-					PM.sY->getValue(pointIndex),
-					PM.sZ->getValue(pointIndex));
+	CCVector3d sigma(	PM.sX->getValue(pointIndex) * PM.scale,
+						PM.sY->getValue(pointIndex) * PM.scale,
+						PM.sZ->getValue(pointIndex) * PM.scale);
 
-	CCVector3 NS(N.x * sigma.x, N.y * sigma.y, N.z * sigma.z);
+	CCVector3d NS(	N.x * sigma.x,
+					N.y * sigma.y,
+					N.z * sigma.z);
 	
-	return NS.normd();
+	return NS.norm();
 }
 
 // Structure for parallel call to ComputeM3C2DistForPoint
@@ -259,7 +261,7 @@ void ComputeM3C2DistForPoint(unsigned index)
 					//do we have enough points for computing stats?
 					if (neighbourCount >= s_M3C2Params.minPoints4Stats)
 					{
-						qM3C2Tools::ComputeStatistics(cn1.neighbours,s_M3C2Params.useMedian,mean1,stdDev1);
+						qM3C2Tools::ComputeStatistics(cn1.neighbours, s_M3C2Params.useMedian, mean1, stdDev1);
 						validStats1 = true;
 						//do we have a sharp enough 'mean' to stop?
 						if (fabs(mean1) + 2 * stdDev1 < static_cast<double>(cn1.currentHalfLength))
@@ -281,6 +283,12 @@ void ComputeM3C2DistForPoint(unsigned index)
 			if (!validStats1)
 			{
 				qM3C2Tools::ComputeStatistics(cn1.neighbours, s_M3C2Params.useMedian, mean1, stdDev1);
+			}
+
+			if (s_M3C2Params.usePrecisionMaps && (s_M3C2Params.computeConfidence || s_M3C2Params.stdDevCloud1SF))
+			{
+				//compute the Precision Maps derived sigma
+				stdDev1 = ComputePMUncertainty(cn1.neighbours, N, s_M3C2Params.cloud1PM);
 			}
 
 			if (s_M3C2Params.exportOption == qM3C2Dialog::PROJECT_ON_CLOUD1)
@@ -366,6 +374,12 @@ void ComputeM3C2DistForPoint(unsigned index)
 					outputP += static_cast<PointCoordinateType>(mean2) * N;
 				}
 
+				if (s_M3C2Params.usePrecisionMaps && (s_M3C2Params.computeConfidence || s_M3C2Params.stdDevCloud2SF))
+				{
+					//compute the Precision Maps derived sigma
+					stdDev2 = ComputePMUncertainty(cn2.neighbours, N, s_M3C2Params.cloud2PM);
+				}
+
 				if (n1 != 0)
 				{
 					//m3c2 dist = distance between i1 and i2 (i.e. either the mean or the median of both neighborhoods)
@@ -378,13 +392,7 @@ void ComputeM3C2DistForPoint(unsigned index)
 						ScalarType LODStdDev = NAN_VALUE;
 						if (s_M3C2Params.usePrecisionMaps)
 						{
-							if (n1 >= 1 && n2 >= 1)
-							{
-								double s1 = ComputePMUncertainty(cn1.neighbours, N, s_M3C2Params.cloud1PM);
-								double s2 = ComputePMUncertainty(cn2.neighbours, N, s_M3C2Params.cloud2PM);
-								LODStdDev = s1*s1 + s2*s2; //equation (2) in M3C2-PM article
-							}
-
+							LODStdDev = stdDev1*stdDev1 + stdDev2*stdDev2; //equation (2) in M3C2-PM article
 						}
 						//standard M3C2 algortihm: have we enough points for computing the confidence interval?
 						else if (n1 >= s_M3C2Params.minPoints4Stats && n2 >= s_M3C2Params.minPoints4Stats)
@@ -492,7 +500,6 @@ void qM3C2Plugin::doAction()
 
 	//normals computation parameters
 	double normalScale = dlg.normalScaleDoubleSpinBox->value();
-	bool useCloud1Normals = dlg.useCloud1NormalsCheckBox->isChecked() && dlg.useCloud1NormalsCheckBox->isEnabled();
 	double projectionScale = dlg.cylDiameterDoubleSpinBox->value();
 	qM3C2Normals::ComputationMode normMode = dlg.getNormalsComputationMode();
 	double samplingDist = dlg.cpSubsamplingDoubleSpinBox->value();
@@ -626,7 +633,7 @@ void qM3C2Plugin::doAction()
 	}
 
 	//output
-	QString outputName("M3C2 output");
+	QString outputName(s_M3C2Params.usePrecisionMaps ? "M3C2-PM output" : "M3C2 output");
 	
 	if (!error)
 	{
@@ -859,8 +866,18 @@ void qM3C2Plugin::doAction()
 
 		if (dlg.exportStdDevInfoCheckBox->isChecked())
 		{
+			QString prefix("STD");
+			if (s_M3C2Params.usePrecisionMaps)
+			{
+				prefix = "SigmaN";
+			}
+			else if (s_M3C2Params.useMedian)
+			{
+				prefix = "IQR";
+			}
 			//allocate cloud #1 std. dev. SF
-			s_M3C2Params.stdDevCloud1SF = new ccScalarField(qPrintable(QString(STD_DEV_CLOUD1_SF_NAME).arg(s_M3C2Params.useMedian ? "IQR" : "STD")));
+			QString stdDevSFName1 = QString(STD_DEV_CLOUD1_SF_NAME).arg(prefix);
+			s_M3C2Params.stdDevCloud1SF = new ccScalarField(qPrintable(stdDevSFName1));
 			s_M3C2Params.stdDevCloud1SF->link();
 			if (!s_M3C2Params.stdDevCloud1SF->resize(corePointCount, true, NAN_VALUE))
 			{
@@ -869,7 +886,8 @@ void qM3C2Plugin::doAction()
 				s_M3C2Params.stdDevCloud1SF = 0;
 			}
 			//allocate cloud #2 std. dev. SF
-			s_M3C2Params.stdDevCloud2SF = new ccScalarField(qPrintable(QString(STD_DEV_CLOUD2_SF_NAME).arg(s_M3C2Params.useMedian ? "IQR" : "STD")));
+			QString stdDevSFName2 = QString(STD_DEV_CLOUD2_SF_NAME).arg(prefix);
+			s_M3C2Params.stdDevCloud2SF = new ccScalarField(qPrintable(stdDevSFName2));
 			s_M3C2Params.stdDevCloud2SF->link();
 			if (!s_M3C2Params.stdDevCloud2SF->resize(corePointCount, true, NAN_VALUE))
 			{
@@ -903,10 +921,10 @@ void qM3C2Plugin::doAction()
 		//get best levels for neighbourhood extraction on both octrees
 		assert(s_M3C2Params.cloud1Octree && s_M3C2Params.cloud2Octree);
 
-		s_M3C2Params.level1 = s_M3C2Params.cloud1Octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(2.5)*s_M3C2Params.projectionRadius); //2.5 = empirical!
+		s_M3C2Params.level1 = s_M3C2Params.cloud1Octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(2.5 * s_M3C2Params.projectionRadius)); //2.5 = empirical!
 		m_app->dispToConsole(QString("[M3C2] Working subdivision level (cloud #1): %1").arg(s_M3C2Params.level1), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
-		s_M3C2Params.level2 = s_M3C2Params.cloud2Octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(2.5)*s_M3C2Params.projectionRadius); //2.5 = empirical!
+		s_M3C2Params.level2 = s_M3C2Params.cloud2Octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(2.5 * s_M3C2Params.projectionRadius)); //2.5 = empirical!
 		m_app->dispToConsole(QString("[M3C2] Working subdivision level (cloud #2): %1").arg(s_M3C2Params.level2), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 		//other options

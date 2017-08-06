@@ -21,7 +21,7 @@
 #include "ccGenericGLDisplay.h"
 
 ccDrawableObject::ccDrawableObject()
-	: m_currentDisplay(0)
+	: m_currentDisplay(nullptr)
 {
 	setVisible(true);
 	setSelected(false);
@@ -72,15 +72,37 @@ void ccDrawableObject::prepareDisplayForRefresh()
 void ccDrawableObject::setDisplay(ccGenericGLDisplay* win)
 {
 	if (win && m_currentDisplay != win)
+	{
 		win->invalidateViewport();
+		win->deprecate3DLayer();
+	}
 
 	m_currentDisplay = win;
+	if (m_currentDisplay)
+	{
+		m_currentDisplay->deprecate3DLayer();
+	}
 }
 
 void ccDrawableObject::removeFromDisplay(const ccGenericGLDisplay* win)
 {
 	if (m_currentDisplay == win)
-		setDisplay(0);
+	{
+		if (m_currentDisplay)
+		{
+			m_currentDisplay->deprecate3DLayer();
+		}
+		setDisplay(nullptr);
+	}
+}
+
+void ccDrawableObject::enableGLTransformation(bool state)
+{
+	m_glTransEnabled = state;
+	if (m_currentDisplay)
+	{
+		m_currentDisplay->deprecate3DLayer();
+	}
 }
 
 void ccDrawableObject::setGLTransformation(const ccGLMatrix& trans)

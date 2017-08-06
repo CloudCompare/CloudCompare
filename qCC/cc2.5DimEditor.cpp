@@ -193,6 +193,7 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 
 	m_glWindow->invalidateViewport();
 	m_glWindow->invalidateVisualization();
+	m_glWindow->deprecate3DLayer();
 	m_glWindow->redraw();
 }
 
@@ -208,7 +209,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<ccRaster
 {
 	//projection dimension
 	const unsigned char Z = getProjectionDimension();
-	assert(Z >= 0 && Z <= 2);
+	assert(Z <= 2);
 
 	//cloud bounding-box
 	ccBBox box = getCustomBBox();

@@ -705,7 +705,7 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	
 	//vertical dimension
 	const unsigned char Z = getProjectionDimension();
-	assert(Z >= 0 && Z <= 2);
+	assert(Z <= 2);
 
 	ccProgressDialog pDlg(true, this);
 	if (!m_grid.fillWith(	m_cloud,
@@ -1023,7 +1023,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 	}
 
 	//vertical dimension
-	assert(Z >= 0 && Z <= 2);
+	assert(Z <= 2);
 	const unsigned char X = Z == 2 ? 0 : Z + 1;
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 
@@ -1628,7 +1628,7 @@ void ccRasterizeTool::generateContours()
 
 		//vertical dimension
 		const unsigned char Z = getProjectionDimension();
-		assert(Z >= 0 && Z <= 2);
+		assert(Z <= 2);
 		const unsigned char X = (Z == 2 ? 0 : Z + 1);
 		const unsigned char Y = (X == 2 ? 0 : X + 1);
 
@@ -1801,7 +1801,7 @@ void ccRasterizeTool::exportContourLines()
 
 	//vertical dimension
 	const unsigned char Z = getProjectionDimension();
-	assert(Z >= 0 && Z <= 2);
+	assert(Z <= 2);
 	const unsigned char X = (Z == 2 ? 0 : Z + 1);
 	const unsigned char Y = (X == 2 ? 0 : X + 1);
 

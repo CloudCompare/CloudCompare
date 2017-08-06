@@ -18,6 +18,7 @@
 #include "kdTreeForFacetExtraction.h"
 
 //CCLib
+#include <GenericProgressCallback.h>
 #include <SortAlgo.h>
 
 //qCC_db

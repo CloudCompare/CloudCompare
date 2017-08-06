@@ -23,9 +23,6 @@
 //qCC_io
 #include <FileIOFilter.h>
 
-//qCC
-#include "ccMainAppInterface.h"
-
 //! I/O filter plugin interface
 /** Version 1.0
 **/

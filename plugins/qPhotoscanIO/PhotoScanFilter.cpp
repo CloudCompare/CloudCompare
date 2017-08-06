@@ -652,7 +652,13 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(QString filename,
 			}
 			break;
 
-		break;
+		case TRANSFORM:
+			//not handled
+			stream.skipCurrentElement();
+			break;
+
+		default:
+			break;
 		}
 	}
 

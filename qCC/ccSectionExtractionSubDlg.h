@@ -29,6 +29,8 @@
 //! Dialog for generating sections along one or several 2D polylines (Section Extraction Tool)
 class ccSectionExtractionSubDlg : public QDialog, public Ui::SectionExtractionSubDlg
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

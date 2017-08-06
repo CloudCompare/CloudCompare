@@ -20,13 +20,9 @@
 
 //local
 #include "GenericProgressCallback.h"
-#include "GenericIndexedCloudPersist.h"
 #include "Neighbourhood.h"
 #include "SortAlgo.h"
 
-//system
-#include <algorithm>
-#include <assert.h>
 
 //Qt
 #ifdef USE_QT
@@ -82,9 +78,6 @@ static void InitProgress(GenericProgressCallback* progressCb, unsigned totalCoun
 			s_progressCb->setInfo(info);
 		}
 		s_progressCb->start();
-#ifdef USE_QT
-		QCoreApplication::processEvents();
-#endif
 	}
 }
 
@@ -100,9 +93,6 @@ static inline void UpdateProgress(unsigned increment)
 		{
 			s_progressCb->update(fPercent);
 			s_lastProgress = uiPercent;
-#ifdef USE_QT
-			QCoreApplication::processEvents();
-#endif
 		}
 	}
 }

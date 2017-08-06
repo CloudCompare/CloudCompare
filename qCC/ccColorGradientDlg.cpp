@@ -42,8 +42,8 @@ ccColorGradientDlg::ccColorGradientDlg(QWidget* parent)
 	connect(secondColorButton, SIGNAL(clicked()), this, SLOT(changeSecondColor()));
 
 	//restore previous parameters
-	ccQtHelpers::SetButtonColor(secondColorButton,s_secondColor);
-	ccQtHelpers::SetButtonColor(firstColorButton,s_firstColor);
+	ccQtHelpers::SetButtonColor(secondColorButton, s_secondColor);
+	ccQtHelpers::SetButtonColor(firstColorButton, s_firstColor);
 	setType(s_lastType);
 	bandingFreqSpinBox->setValue(s_lastFreq);
 }
@@ -106,7 +106,7 @@ void ccColorGradientDlg::changeFirstColor()
 	if (newCol.isValid())
 	{
 		s_firstColor = newCol;
-		ccQtHelpers::SetButtonColor(firstColorButton,s_firstColor);
+		ccQtHelpers::SetButtonColor(firstColorButton, s_firstColor);
 	}
 }
 
@@ -116,6 +116,6 @@ void ccColorGradientDlg::changeSecondColor()
 	if (newCol.isValid())
 	{
 		s_secondColor = newCol;
-		ccQtHelpers::SetButtonColor(secondColorButton,s_secondColor);
+		ccQtHelpers::SetButtonColor(secondColorButton, s_secondColor);
 	}
 }

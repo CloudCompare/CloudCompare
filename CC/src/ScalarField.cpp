@@ -18,9 +18,6 @@
 
 #include "ScalarField.h"
 
-//system
-#include <assert.h>
-#include <string.h>
 
 using namespace CCLib;
 

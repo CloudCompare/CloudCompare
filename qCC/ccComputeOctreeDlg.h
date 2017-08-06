@@ -28,6 +28,8 @@ class ccBoundingBoxEditorDlg;
 //! Dialog for octree computation
 class ccComputeOctreeDlg : public QDialog, public Ui::ComputeOctreeDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

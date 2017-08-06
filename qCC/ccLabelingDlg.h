@@ -23,6 +23,8 @@
 //! Dialog to define connected components labelinng parameters
 class ccLabelingDlg : public QDialog, public Ui::LabelingDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

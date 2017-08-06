@@ -42,10 +42,8 @@ ccAlignDlg::ccAlignDlg(ccGenericPointCloud *data, ccGenericPointCloud *model, QW
 	samplingMethod->addItem("Octree");
 	samplingMethod->setCurrentIndex(NONE);
 
-	QColor qRed(255,0,0);
-	QColor qYellow(255,255,0);
-	ccQtHelpers::SetButtonColor(dataColorButton,qRed);
-	ccQtHelpers::SetButtonColor(modelColorButton,qYellow);
+	ccQtHelpers::SetButtonColor(dataColorButton, Qt::red);
+	ccQtHelpers::SetButtonColor(modelColorButton, Qt::yellow);
 
 	dataObject = data;
 	modelObject = model;

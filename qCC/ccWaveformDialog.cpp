@@ -34,23 +34,24 @@
 
 //System
 #include <assert.h>
+#include <cmath>
 
 //Gui
 #include "ui_waveDlg.h"
 
 ccWaveWidget::ccWaveWidget(QWidget* parent/*=0*/)
 	: QCustomPlot(parent)
-	, m_titlePlot(0)
-	, m_curve(0)
-	, m_dt(0)
-	, m_minA(0)
-	, m_maxA(0)
-	, m_vertBar(0)
-	, m_drawVerticalIndicator(false)
-	, m_verticalIndicatorPositionPercent(0)
-	, m_peakBar(0)
-	, m_lastMouseClick(0, 0)
+	, m_titlePlot(nullptr)
+	, m_curve(nullptr)
+	, m_dt(0.0)
+	, m_minA(0.0)
+	, m_maxA(0.0)
 	, m_echoPos(-1.0)
+	, m_vertBar(nullptr)
+	, m_drawVerticalIndicator(false)
+	, m_verticalIndicatorPositionPercent(0.0)
+	, m_peakBar(nullptr)
+	, m_lastMouseClick(0, 0)
 {
 	setWindowTitle("Waveform");
 	setFocusPolicy(Qt::StrongFocus);
@@ -120,7 +121,7 @@ void ccWaveWidget::setAxisLabels(const QString& xLabel, const QString& yLabel)
 	}
 }
 
-static double AbsLog(double c) { return (c >= 0 ? log(1.0 + c) : -log(1.0 - c)); }
+static double AbsLog(double c) { return (c >= 0 ? log1p(c) : -log1p(-c)); }
 
 void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale, double maxValue/*=0.0*/)
 {
@@ -264,9 +265,7 @@ void ccWaveWidget::refresh()
 
 		m_vertBar->setData(keyData, valueData);
 
-		//precision
-		int precision = static_cast<int>(ccGui::Parameters().displayedNumPrecision);
-		
+		//precision		
 		QString valueStr = QString("Sample %0").arg(curvePos);
 		m_vertBar->setText(valueStr);
 		valueStr = QString("= %0").arg(curvePos < curveSize ? m_curveValues[curvePos] : 0);
@@ -295,8 +294,6 @@ void ccWaveWidget::refresh()
 		m_peakBar->setData(keyData, valueData);
 
 		//precision
-		int precision = static_cast<int>(ccGui::Parameters().displayedNumPrecision);
-
 		m_peakBar->setText("Peak");
 		m_peakBar->setTextAlignment(m_echoPos > 0.5 * curveSize * m_dt);
 	}

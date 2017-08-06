@@ -24,6 +24,8 @@
 //CCLib
 #include <CCGeom.h>
 #include <DgmOctreeReferenceCloud.h>
+#include <GenericIndexedMesh.h>
+#include <GenericProgressCallback.h>
 #include <Neighbourhood.h>
 
 //System
@@ -292,7 +294,6 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 		double aimedPop = s_aimedPop;
 		PointCoordinateType radius = bestRadius;
 		PointCoordinateType lastRadius = radius;
-		double bestMeanPop = 0;
 		double lastMeanPop = 0;
 
 		std::random_device rd;   // non-deterministic generator
@@ -357,7 +358,6 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 			{
 				//we have found a correct radius
 				bestRadius = radius;
-				bestMeanPop = meanPop;
 
 				if (aboveMinPopRatio < s_minAboveMinRatio)
 				{
@@ -379,9 +379,8 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 			{
 				//this is our best (only) guess for the moment
 				bestRadius = radius;
-				bestMeanPop = meanPop;
 
-				newRadius = radius * sqrt(aimedPop/meanPop);
+				newRadius = radius * sqrt(aimedPop / meanPop);
 			}
 			else
 			{
@@ -389,7 +388,6 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 				if (fabs(meanPop - aimedPop) < fabs(bestRadius - aimedPop))
 				{
 					bestRadius = radius;
-					bestMeanPop = meanPop;
 				}
 
 				double slope = (radius*radius - lastRadius*lastRadius) / (meanPop - lastMeanPop);
@@ -914,7 +912,7 @@ CCVector3 ccNormalVectors::ConvertDipAndDipDirToNormal(PointCoordinateType dip_d
 	//internal consistency test
 	PointCoordinateType dip2, dipDir2;
 	ConvertNormalToDipAndDipDir(N, dip2, dipDir2);
-	assert(fabs(dip2 - dip_deg) < 1.0e-3 && fabs(dipDir2 - dipDir_deg) < 1.0e-3);
+	assert(fabs(dip2 - dip_deg) < 1.0e-3 && (dip2 == 0 || fabs(dipDir2 - dipDir_deg) < 1.0e-3));
 #endif
 
 	if (!upward)

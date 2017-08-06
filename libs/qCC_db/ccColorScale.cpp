@@ -469,7 +469,7 @@ ccColorScale::Shared ccColorScale::LoadFromXML(QString filename)
 			stream.readNextStartElement();
 			QStringRef itemName = stream.name();
 			QString itemValue = stream.readElementText();
-			ccLog::Print(QString("[XML] Item '%1': '%2'").arg(itemName.toString()).arg(itemValue));
+			ccLog::Print(QString("[XML] Item '%1': '%2'").arg(itemName.toString(),itemValue));
 
 			if (itemName == "name")
 			{

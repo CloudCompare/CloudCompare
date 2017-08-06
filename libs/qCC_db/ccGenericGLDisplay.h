@@ -22,14 +22,10 @@
 #include "ccIncludeGL.h"
 
 //Local
-#include "ccSerializableObject.h"
 #include "ccGLMatrix.h"
-#include "ccMaterial.h"
 
 //Qt
-#include <QFont>
-
-
+class QFont;
 class QWidget;
 
 //! Standard parameters for GL displays/viewports
@@ -181,6 +177,11 @@ public:
 	/** On next redraw, viewport information will be recomputed.
 	**/
 	virtual void invalidateViewport() = 0;
+
+	//! Invalidates the 3D layer (FBO)
+	/** On next redraw, the 3D layer will be updated
+	**/
+	virtual void deprecate3DLayer() = 0;
 
 	//! Returns defaul text display font
 	/** Warning: already takes rendering zoom into account!

@@ -26,6 +26,8 @@ class Ui_PickOneElementDialog;
 //! Minimal dialog to pick one element in a list (combox box)
 class ccPickOneElementDlg : public QDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

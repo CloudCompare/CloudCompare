@@ -38,6 +38,8 @@ class ccPickingHub;
 **/
 class ccPointPickingGenericInterface : public ccOverlayDialog, public ccPickingListener
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

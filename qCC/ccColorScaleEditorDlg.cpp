@@ -136,7 +136,7 @@ void ccColorScaleEditorDialog::updateMainComboBox()
 
 	//populate combo box with scale names (and UUID)
 	assert(m_manager);
-	for (ccColorScalesManager::ScalesMap::const_iterator it = m_manager->map().begin(); it != m_manager->map().end(); ++it)
+	for (ccColorScalesManager::ScalesMap::const_iterator it = m_manager->map().constBegin(); it != m_manager->map().constEnd(); ++it)
 		rampComboBox->addItem((*it)->getName(),(*it)->getUuid());
 
 	//find the currently selected scale in the new 'list'
@@ -810,7 +810,7 @@ void ccColorScaleEditorDialog::exportCurrentScale()
 	//try to save the file
 	if (m_colorScale->saveAsXML(filename))
 	{
-		ccLog::Print(QString("[ColorScale] Scale '%1' successfully exported in '%2'").arg(m_colorScale->getName()).arg(filename));
+		ccLog::Print(QString("[ColorScale] Scale '%1' successfully exported in '%2'").arg(m_colorScale->getName(),filename));
 	}
 }
 

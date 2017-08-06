@@ -36,6 +36,9 @@
 
 //system
 #include <assert.h>
+#ifdef QT_DEBUG
+#include <iostream>
+#endif
 
 /***************
  *** Globals ***
@@ -46,11 +49,10 @@ static ccSingleton<ccConsole> s_console;
 
 bool ccConsole::s_showQtMessagesInConsole = false;
 
-ccConsole* ccConsole::TheInstance()
+ccConsole* ccConsole::TheInstance(bool autoInit/*=true*/)
 {
-	if (!s_console.instance)
+	if (!s_console.instance && autoInit)
 	{
-		assert(false); //Init should have already be called!
 		s_console.instance = new ccConsole;
 		ccLog::RegisterInstance(s_console.instance);
 	}
@@ -84,12 +86,12 @@ ccConsole::~ccConsole()
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+#ifndef QT_DEBUG
 	if (!ccConsole::QtMessagesEnabled())
 	{
 		return;
 	}
 
-#ifndef QT_DEBUG
 	if (type == QtDebugMsg)
 	{
 		return;
@@ -123,6 +125,27 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 		break;
 #endif
 	}
+	
+#ifdef QT_DEBUG
+	// Also send the message to the console so we can look at the output when CC has quit
+	//	(in Qt Creator's Application Output for example)
+	switch (type)
+	{
+		case QtDebugMsg:
+		case QtWarningMsg:
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
+		case QtInfoMsg:
+#endif
+			std::cout << message.toStdString() << std::endl;
+			break;
+			
+		case QtCriticalMsg:
+		case QtFatalMsg:
+			std::cerr << message.toStdString() << std::endl;
+			break;
+	}
+	
+#endif
 }
 
 void ccConsole::EnableQtMessages(bool state)
@@ -190,7 +213,7 @@ void ccConsole::refresh()
 	
 	if ((m_textDisplay || m_logStream) && !m_queue.isEmpty())
 	{
-		for (QVector<ConsoleItemType>::const_iterator it=m_queue.begin(); it!=m_queue.end(); ++it)
+		for (QVector<ConsoleItemType>::const_iterator it=m_queue.constBegin(); it!=m_queue.constEnd(); ++it)
 		{
 			 //it->second = message severity
 			bool debugMessage = (it->second & LOG_DEBUG);

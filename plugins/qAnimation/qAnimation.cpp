@@ -76,12 +76,11 @@ void qAnimation::doAction()
 	std::vector<cc2DViewportObject*> selectedViewports;
 	try
 	{
-		const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-		for (ccHObject::Container::const_iterator entity_iterator = selectedEntities.begin(); entity_iterator != selectedEntities.end(); ++entity_iterator)
+		for ( ccHObject *object : m_app->getSelectedEntities() )
 		{
-			if ((*(entity_iterator))->getClassID() == CC_TYPES::VIEWPORT_2D_OBJECT)
+			if (object->getClassID() == CC_TYPES::VIEWPORT_2D_OBJECT)
 			{
-				selectedViewports.push_back(static_cast<cc2DViewportObject*>(*entity_iterator));
+				selectedViewports.push_back(static_cast<cc2DViewportObject*>(object));
 			}
 		}
 	}

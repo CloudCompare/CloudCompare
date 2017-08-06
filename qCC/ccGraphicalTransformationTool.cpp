@@ -262,7 +262,7 @@ void ccGraphicalTransformationTool::glRotate(const ccGLMatrixd& rotMat)
 void ccGraphicalTransformationTool::reset()
 {
 	m_rotation.toIdentity();
-	m_translation = CCVector3d(0,0,0);
+	m_translation = CCVector3d(0, 0, 0);
 
 	updateAllGLTransformations();
 }
@@ -282,11 +282,12 @@ void ccGraphicalTransformationTool::updateAllGLTransformations()
 	newTrans += m_rotationCenter + m_translation - m_rotation * m_rotationCenter;
 
 	ccGLMatrix newTransf(newTrans.data());
-	for (unsigned i=0; i<m_toTransform.getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < m_toTransform.getChildrenNumber(); ++i)
 	{
 		ccHObject* child = m_toTransform.getChild(i);
 		child->setGLTransformation(newTransf);
 		child->prepareDisplayForRefresh_recursive();
+
 	}
 
 	MainWindow::RefreshAllGLWindow(false);

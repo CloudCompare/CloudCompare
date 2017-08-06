@@ -51,10 +51,8 @@ ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
 	m_gui->firstlabel->setText(firstRole);
 	m_gui->secondlabel->setText(secondRole);
 
-	QColor qRed(255,0,0);
-	QColor qYellow(255,255,0);
-	ccQtHelpers::SetButtonColor(m_gui->firstColorButton,qRed);
-	ccQtHelpers::SetButtonColor(m_gui->secondColorButton,qYellow);
+	ccQtHelpers::SetButtonColor(m_gui->firstColorButton, Qt::red);
+	ccQtHelpers::SetButtonColor(m_gui->secondColorButton, Qt::yellow);
 
 	setColorsAndLabels();
 }

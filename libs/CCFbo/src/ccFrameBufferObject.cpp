@@ -17,9 +17,6 @@
 
 #include "ccFrameBufferObject.h"
 
-//Qt
-#include <QOpenGLFunctions_2_1>
-
 //system
 #include <assert.h>
 

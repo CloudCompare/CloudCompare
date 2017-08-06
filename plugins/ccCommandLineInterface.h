@@ -75,7 +75,10 @@ struct CLCloudDesc : CLEntityDesc
 {
 	ccPointCloud* pc;
 
-	CLCloudDesc() : CLEntityDesc("Unnamed cloud") {}
+	CLCloudDesc()
+		: CLEntityDesc("Unnamed cloud")
+		, pc( nullptr )
+	{}
 
 	CLCloudDesc(ccPointCloud* cloud,
 				QString filename = QString(),
@@ -101,7 +104,10 @@ struct CLMeshDesc : CLEntityDesc
 {
 	ccGenericMesh* mesh;
 
-	CLMeshDesc() : CLEntityDesc("Unnamed mesh") {}
+	CLMeshDesc()
+		: CLEntityDesc("Unnamed mesh")
+		, mesh( nullptr )
+	{}
 
 	CLMeshDesc(	ccGenericMesh* _mesh,
 				QString filename = QString(),

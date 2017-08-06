@@ -1641,6 +1641,13 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		SetComboBoxIndex(editor, static_cast<int>(cloud->getPointSize()));
 		break;
 	}
+	case OBJECT_POLYLINE_WIDTH:
+	{
+		ccPolyline* poly = ccHObjectCaster::ToPolyline(m_currentObject);
+		assert(poly);
+		SetComboBoxIndex(editor, static_cast<int>(poly->getWidth()));
+		break;
+	}
 	case OBJECT_COLOR_SOURCE:
 	{
 		int currentIndex = 0; //no color

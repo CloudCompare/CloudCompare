@@ -85,8 +85,6 @@ bool ccQuadric::buildUp()
 	PointCoordinateType stepX = areaSize.x/static_cast<PointCoordinateType>(m_drawPrecision-1);
 	PointCoordinateType stepY = areaSize.y/static_cast<PointCoordinateType>(m_drawPrecision-1);
 
-	m_minZ = m_minZ = 0;
-
 	for (unsigned x=0; x<m_drawPrecision; ++x)
 	{
 		CCVector3 P(m_minCorner.x + stepX * x, 0, 0);

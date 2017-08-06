@@ -19,6 +19,7 @@
 #define CC_MAIN_WINDOW_HEADER
 
 //Local
+#include "ccEntityAction.h"
 #include "ccPickingListener.h"
 
 //qCC_plugins
@@ -241,14 +242,6 @@ protected slots:
 	virtual void disableAll() override;
 	virtual void disableAllBut(ccGLWindow* win) override;
 	virtual void updateUI() override;
-	virtual void setFrontView() override;
-	virtual void setBottomView() override;
-	virtual void setTopView() override;
-	virtual void setBackView() override;
-	virtual void setLeftView() override;
-	virtual void setRightView() override;
-	virtual void setIsoView1() override;
-	virtual void setIsoView2() override;
 	
 	virtual void toggleActiveWindowStereoVision(bool);
 	virtual void toggleActiveWindowCenteredPerspective() override;
@@ -294,14 +287,6 @@ protected slots:
 	void echoCameraPosChanged(const CCVector3d&);
 	void echoPivotPointChanged(const CCVector3d&);
 	void echoPixelSizeChanged(float);
-
-	void toggleSelectedEntitiesActivation();
-	void toggleSelectedEntitiesVisibility();
-	void toggleSelectedEntitiesNormals();
-	void toggleSelectedEntitiesColors();
-	void toggleSelectedEntitiesSF();
-	void toggleSelectedEntities3DName();
-	void toggleSelectedEntitiesMaterials();
 
 	void doActionRenderToFile();
 
@@ -369,16 +354,13 @@ protected slots:
 	void doActionEditPlane();
 
 	void doActionDeleteScanGrids();
-	void doActionDeleteScalarField();
 	void doActionSmoothMeshSF();
 	void doActionEnhanceMeshSF();
 	void doActionAddConstantSF();
 	void doActionScalarFieldArithmetic();
 	void doActionScalarFieldFromColor();
-	void doActionClearColor();
 	void doActionOrientNormalsFM();
 	void doActionOrientNormalsMST();
-	void doActionClearNormals();
 	void doActionResampleWithOctree();
 	void doActionComputeMeshAA();
 	void doActionComputeMeshLS();
@@ -391,7 +373,6 @@ protected slots:
 	void doActionSmoothMeshLaplacian();
 	void doActionSubdivideMesh();
 	void doActionComputeCPS();
-	void doActionDeleteAllSF();
 	void doActionShowWaveDialog();
 	void doActionCompressFWFData();
 	void doActionKMeans();
@@ -489,11 +470,12 @@ protected slots:
 	//! Creates a cloud with the (bounding-box) centers of all selected entities
 	void doActionCreateCloudFromEntCenters();
 
-	//! Show high DPI (Retina) screen warning
-	void showHighDPIScreenWarning();
-
 protected:
-
+	void	toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY property );
+	void	clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY property );
+	
+	virtual void setView( CC_VIEW_ORIENTATION view ) override;
+	
 	//! Apply transformation to the selected entities
 	void applyTransformation(const ccGLMatrixd& transMat);
 
@@ -521,6 +503,8 @@ protected:
 	virtual void closeEvent(QCloseEvent* event) override;
 	virtual void moveEvent(QMoveEvent* event) override;
 	virtual void resizeEvent(QResizeEvent* event) override;
+	virtual bool eventFilter(QObject *obj, QEvent *event) override;
+	virtual void keyPressEvent(QKeyEvent *event) override;
 
 	//! Makes the window including an entity zoom on it (helper)
 	void zoomOn(ccHObject* object);

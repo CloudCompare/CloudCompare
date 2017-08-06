@@ -213,7 +213,19 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 	}
 	if (fabs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon())
 	{
-		trans = ccGLMatrix::FromToRotation(N, Nd) * trans;
+		ccGLMatrix rotation;
+		//special case: plane parallel to XY
+		if (fabs(N.z) > PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
+		{
+			ccGLMatrix rotX; rotX.initFromParameters(-dip * CC_DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
+			ccGLMatrix rotZ; rotZ.initFromParameters(dipDir * CC_DEG_TO_RAD, CCVector3(0, 0, -1), CCVector3(0, 0, 0));
+			rotation = rotZ * rotX;
+		}
+		else //general case
+		{
+			rotation = ccGLMatrix::FromToRotation(N, Nd);
+		}
+		trans = rotation * trans;
 		needToApplyRot = true;
 	}
 	if (needToApplyTrans)

@@ -78,13 +78,13 @@ void qPCV::doAction()
 	if (!m_app)
 		return;
 
-	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	size_t selNum = selectedEntities.size();
-	if (selNum != 1)
+	if (!m_app->haveOneSelection())
 	{
 		m_app->dispToConsole("Select only one cloud or one mesh!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
+
+	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 
 	ccHObject* ent = selectedEntities[0];
 

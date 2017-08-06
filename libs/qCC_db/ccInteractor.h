@@ -21,14 +21,18 @@
 //Local
 #include "qCC_db.h"
 
+#include "CCGeom.h"
+
 //Qt
-#include <QString>
+#include <Qt>
 
 //! Interactor interface (entity that can be dragged or clicked in a 3D view)
 class QCC_DB_LIB_API ccInteractor
 {
 public:
 
+	virtual ~ccInteractor() = default;
+	
 	//! Called on mouse click
 	virtual bool acceptClick(int x, int y, Qt::MouseButton button) { return false; }
 

@@ -21,15 +21,12 @@
 //local
 #include "SimpleCloud.h"
 #include "Delaunay2dMesh.h"
-#include "GenericIndexedMesh.h"
 #include "GenericProgressCallback.h"
 #include "Neighbourhood.h"
 #include "SimpleMesh.h"
 #include "DistanceComputationTools.h"
 
 //system
-#include <assert.h>
-#include <string.h>
 #include <set>
 
 using namespace CCLib;

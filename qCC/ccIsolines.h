@@ -108,7 +108,7 @@ public:
 	inline bool isContourClosed(int contour) const { return m_contourClosed[contour]; }
 
 	//! Returns the given point (x,y) of a given contour
-	void getContourPoint(int contour, size_t index, double& x, double& y)
+	void getContourPoint(int contour, size_t index, double& x, double& y) const
 	{
 		assert(static_cast<int>(index) < getContourLength(contour));
 		x = getContourX(contour, index);
@@ -949,10 +949,10 @@ public:
 		return true;
 	}
 
-	inline double getBBMinX(int contour) { return m_minx[contour]; }
-	inline double getBBMaxX(int contour) { return m_maxx[contour]; }
-	inline double getBBMinY(int contour) { return m_miny[contour]; }
-	inline double getBBMaxY(int contour) { return m_maxy[contour]; }
+	inline double getBBMinX(int contour) const { return m_minx[contour]; }
+	inline double getBBMaxX(int contour) const { return m_maxx[contour]; }
+	inline double getBBMinY(int contour) const { return m_miny[contour]; }
+	inline double getBBMaxY(int contour) const { return m_maxy[contour]; }
 
 	bool contains(int k, double x, double y) const
 	{

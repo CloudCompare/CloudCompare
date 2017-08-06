@@ -18,6 +18,12 @@
 #ifndef CC_COLOR_TYPES_HEADER
 #define CC_COLOR_TYPES_HEADER
 
+//Local
+#include "qCC_db.h"
+
+//Qt
+#include <QColor>
+
 //system
 #include <stdlib.h>
 #include <random>
@@ -57,9 +63,6 @@ namespace ccColor
 
 		//! Constructor from an array of 3 values
 		explicit inline RgbTpl(const Type col[3]) : r(col[0]), g(col[1]), b(col[2]) {}
-	
-		//! Copy constructor
-		inline RgbTpl(const RgbTpl& c) : r(c.r), g(c.g), b(c.b) {}
 
 		//! Comparison operator
 		inline bool operator != (const RgbTpl<Type>& t) const { return (r != t.r || g != t.g || b != t.b); }
@@ -101,8 +104,6 @@ namespace ccColor
 		explicit inline RgbaTpl(const Type col[3], Type alpha) : r(col[0]), g(col[1]), b(col[2]), a(alpha) {}
 	
 		//! Copy constructor
-		inline RgbaTpl(const RgbaTpl<Type>& c) : r(c.r), g(c.g), b(c.b), a(c.a) {}
-		//! Copy constructor
 		inline RgbaTpl(const RgbTpl<Type>& c, Type alpha) : r(c.r), g(c.g), b(c.b), a(alpha) {}
 
 		//! Cast operator
@@ -122,36 +123,36 @@ namespace ccColor
 	typedef RgbaTpl<ColorCompType> Rgba;
 
 	// Predefined colors (default type)
-	static const Rgba white						(MAX,MAX,MAX,MAX);
-	static const Rgba lightGrey					(static_cast<ColorCompType>(MAX*0.8),static_cast<ColorCompType>(MAX*0.8),static_cast<ColorCompType>(MAX*0.8),MAX);
-	static const Rgba darkGrey					(MAX/2,MAX/2,MAX/2,MAX);
-	static const Rgba red						(MAX,0,0,MAX);
-	static const Rgba green						(0,MAX,0,MAX);
-	static const Rgba blue						(0,0,MAX,MAX);
-	static const Rgba darkBlue					(0,0,MAX/2,MAX);
-	static const Rgba magenta					(MAX,0,MAX,MAX);
-	static const Rgba cyan						(0,MAX,MAX,MAX);
-	static const Rgba orange					(MAX,MAX/2,0,MAX);
-	static const Rgba black						(0,0,0,MAX);
-	static const Rgba yellow					(MAX,MAX,0,MAX);
+	QCC_DB_LIB_API extern const Rgba white;
+	QCC_DB_LIB_API extern const Rgba lightGrey;
+	QCC_DB_LIB_API extern const Rgba darkGrey;
+	QCC_DB_LIB_API extern const Rgba red;
+	QCC_DB_LIB_API extern const Rgba green;
+	QCC_DB_LIB_API extern const Rgba blue;
+	QCC_DB_LIB_API extern const Rgba darkBlue;
+	QCC_DB_LIB_API extern const Rgba magenta;
+	QCC_DB_LIB_API extern const Rgba cyan;
+	QCC_DB_LIB_API extern const Rgba orange;
+	QCC_DB_LIB_API extern const Rgba black;
+	QCC_DB_LIB_API extern const Rgba yellow;
 
 	// Predefined materials (float)
-	static const Rgbaf bright					(1.00f, 1.00f, 1.00f, 1.00f);
-	static const Rgbaf lighter					(0.83f, 0.83f, 0.83f, 1.00f);
-	static const Rgbaf light					(0.66f, 0.66f, 0.66f, 1.00f);
-	static const Rgbaf middle					(0.50f, 0.50f, 0.50f, 1.00f);
-	static const Rgbaf dark						(0.34f, 0.34f, 0.34f, 1.00f);
-	static const Rgbaf darker					(0.17f, 0.17f, 0.17f, 1.00f);
-	static const Rgbaf darkest					(0.08f, 0.08f, 0.08f, 1.00f);
-	static const Rgbaf night					(0.00f, 0.00f, 0.00f, 1.00F);
-	static const Rgbaf defaultMeshFrontDiff		(0.00f, 0.90f, 0.27f, 1.00f);
-	static const Rgbaf defaultMeshBackDiff		(0.27f, 0.90f, 0.90f, 1.00f);
+	QCC_DB_LIB_API extern const Rgbaf bright;
+	QCC_DB_LIB_API extern const Rgbaf lighter;
+	QCC_DB_LIB_API extern const Rgbaf light;
+	QCC_DB_LIB_API extern const Rgbaf middle;
+	QCC_DB_LIB_API extern const Rgbaf dark;
+	QCC_DB_LIB_API extern const Rgbaf darker;
+	QCC_DB_LIB_API extern const Rgbaf darkest;
+	QCC_DB_LIB_API extern const Rgbaf night;
+	QCC_DB_LIB_API extern const Rgbaf defaultMeshFrontDiff;
+	QCC_DB_LIB_API extern const Rgbaf defaultMeshBackDiff;
 
 	// Default foreground color (unsigned byte)
-	static const Rgbub defaultColor				(255, 255, 255); //white
-	static const Rgbub defaultBkgColor			( 10, 102, 151); //dark blue
-	static const Rgbub defaultLabelBkgColor		(255, 255, 255); //white
-	static const Rgbub defaultLabelMarkerColor	(255,   0, 255); //magenta
+	QCC_DB_LIB_API extern const Rgbub defaultColor;				//white
+	QCC_DB_LIB_API extern const Rgbub defaultBkgColor;			//dark blue
+	QCC_DB_LIB_API extern const Rgbub defaultLabelBkgColor;		//white
+	QCC_DB_LIB_API extern const Rgbub defaultLabelMarkerColor;	//magenta
 
 	//! Colors generator
 	class Generator
@@ -197,12 +198,12 @@ namespace ccColor
 			H /= 360;
 			float q = L < 0.5f ? L * (1.0f + S) : L + S - L * S;
 			float p = 2 * L - q;
-			
-			float r = hue2rgb(p, q, H + 1.0f/3.0f);
-			float g = hue2rgb(p, q, H);
-			float b = hue2rgb(p, q, H - 1.0f/3.0f);
 
-			return Rgb (static_cast<ColorCompType>(r * ccColor::MAX),
+			float r = hue2rgb(p, q, H + 1.0f / 3.0f);
+			float g = hue2rgb(p, q, H);
+			float b = hue2rgb(p, q, H - 1.0f / 3.0f);
+
+			return Rgb(	static_cast<ColorCompType>(r * ccColor::MAX),
 						static_cast<ColorCompType>(g * ccColor::MAX),
 						static_cast<ColorCompType>(b * ccColor::MAX));
 
@@ -217,33 +218,33 @@ namespace ccColor
 		static Rgb hsv2rgb(float H, float S, float V)
 		{
 			double hi = 0;
-			double f = modf(H/60.0, &hi);
+			double f = modf(H / 60.0, &hi);
 
 			float l = static_cast<float>(V*(1.0 - S));
 			float m = static_cast<float>(V*(1.0 - f*S));
 			float n = static_cast<float>(V*(1.0 - (1.0 - f)*S));
 
-			Rgbf rgb(0,0,0);
+			Rgbf rgb(0, 0, 0);
 
 			switch (static_cast<int>(hi) % 6)
 			{
 			case 0:
-				rgb.r=V; rgb.g=n; rgb.b=l;
+				rgb.r = V; rgb.g = n; rgb.b = l;
 				break;
 			case 1:
-				rgb.r=m; rgb.g=V; rgb.b=l;
+				rgb.r = m; rgb.g = V; rgb.b = l;
 				break;
 			case 2:
-				rgb.r=l; rgb.g=V; rgb.b=n;
+				rgb.r = l; rgb.g = V; rgb.b = n;
 				break;
 			case 3:
-				rgb.r=l; rgb.g=m; rgb.b=V;
+				rgb.r = l; rgb.g = m; rgb.b = V;
 				break;
 			case 4:
-				rgb.r=n; rgb.g=l; rgb.b=V;
+				rgb.r = n; rgb.g = l; rgb.b = V;
 				break;
 			case 5:
-				rgb.r=V; rgb.g=l; rgb.b=m;
+				rgb.r = V; rgb.g = l; rgb.b = m;
 				break;
 			}
 
@@ -271,9 +272,50 @@ namespace ccColor
 			else
 				return m1;
 		}
-
-
 	};
+
+	//! Conversion from Rgbf
+	inline Rgb FromRgbf(const Rgbf& color) { return Rgb(static_cast<ColorCompType>(color.r * MAX),
+														static_cast<ColorCompType>(color.g * MAX),
+														static_cast<ColorCompType>(color.b * MAX)); }
+
+	//! Conversion from Rgbaf
+	inline Rgb FromRgbf(const Rgbaf& color) { return Rgb(	static_cast<ColorCompType>(color.r * MAX),
+															static_cast<ColorCompType>(color.g * MAX),
+															static_cast<ColorCompType>(color.b * MAX)); }
+
+	//! Conversion from QRgb
+	inline Rgb FromQRgb(QRgb qColor) { return Rgb(	static_cast<unsigned char>(qRed(qColor)),
+													static_cast<unsigned char>(qGreen(qColor)),
+													static_cast<unsigned char>(qBlue(qColor))); }
+
+	//! Conversion from QRgb'a'
+	inline Rgba FromQRgba(QRgb qColor) { return Rgba(	static_cast<unsigned char>(qRed(qColor)),
+														static_cast<unsigned char>(qGreen(qColor)),
+														static_cast<unsigned char>(qBlue(qColor)),
+														static_cast<unsigned char>(qAlpha(qColor))); }
+
+	//! Conversion from QColor
+	inline Rgb FromQColor(QColor qColor) { return Rgb(	static_cast<unsigned char>(qColor.red()),
+														static_cast<unsigned char>(qColor.green()),
+														static_cast<unsigned char>(qColor.blue())); }
+
+	//! Conversion from QColor'a'
+	inline Rgba FromQColora(QColor qColor) { return Rgba(	static_cast<unsigned char>(qColor.red()),
+															static_cast<unsigned char>(qColor.green()),
+															static_cast<unsigned char>(qColor.blue()),
+															static_cast<unsigned char>(qColor.alpha())); }
+
+	//! Conversion from QColor (floating point)
+	inline Rgbf FromQColorf(QColor qColor) { return Rgbf(	static_cast<unsigned char>(qColor.redF()),
+															static_cast<unsigned char>(qColor.greenF()),
+															static_cast<unsigned char>(qColor.blueF())); }
+	//! Conversion from QColor'a' (floating point)
+	inline Rgbaf FromQColoraf(QColor qColor) { return Rgbaf(	static_cast<unsigned char>(qColor.redF()),
+																static_cast<unsigned char>(qColor.greenF()),
+																static_cast<unsigned char>(qColor.blueF()),
+																static_cast<unsigned char>(qColor.alphaF()));
+	}
 };
 
 #endif //CC_COLOR_TYPES_HEADER

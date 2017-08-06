@@ -23,6 +23,8 @@
 //! Dialog to choose which dimension(s) (X, Y or Z) should be exported as SF(s)
 class ccExportCoordToSFDlg : public QDialog, public Ui::ExportCoordToSFDlg
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

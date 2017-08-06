@@ -19,15 +19,10 @@
 #include "FastMarchingForPropagation.h"
 
 //local
-#include "GenericIndexedCloudPersist.h"
 #include "DgmOctree.h"
 #include "ReferenceCloud.h"
 #include "ScalarFieldTools.h"
 
-//system
-#include <string.h>
-#include <assert.h>
-#include <math.h> //expm1
 
 using namespace CCLib;
 

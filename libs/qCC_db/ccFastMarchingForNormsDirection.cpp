@@ -366,8 +366,11 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 {
 	if (!cloud || !cloud->normals())
 	{
-		ccLog::Warning(QString("[orientNormalsWithFM] Cloud '%1' is invalid (or cloud has no normals)").arg(cloud->getName()));
+		const QString	name( (cloud == nullptr) ? QStringLiteral("[unnamed]") : cloud->getName() );
+		
+		ccLog::Warning(QString("[orientNormalsWithFM] Cloud '%1' is invalid (or cloud has no normals)").arg( name ));
 		assert(false);
+		return 0;
 	}
 	NormsIndexesTableType* theNorms = cloud->normals();
 
@@ -381,7 +384,7 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 		if (!cloud->computeOctree(progressCb))
 		{
 			ccLog::Warning(QString("[orientNormalsWithFM] Could not compute octree on cloud '%1'").arg(cloud->getName()));
-			return false;
+			return 0;
 		}
 	}
 	ccOctree::Shared octree = cloud->getOctree();
@@ -514,7 +517,7 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 		progressCb->stop();
 
 	resolved->release();
-	resolved = 0;
+	resolved = nullptr;
 
 	cloud->showNormals(true);
 #ifdef QT_DEBUG
@@ -527,5 +530,5 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 	cloud->showSF(sfWasDisplayed);
 #endif
 
-	return success;
+	return (success ? 1 : 0);
 }

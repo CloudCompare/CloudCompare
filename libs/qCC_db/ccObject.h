@@ -22,9 +22,9 @@
 #include "ccSerializableObject.h"
 
 //Qt
-#include <qglobal.h>
-#include <QVariant>
 #include <QSharedPointer>
+#include <QString>
+#include <QVariant>
 
 
 //! Object state flag

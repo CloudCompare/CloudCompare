@@ -41,11 +41,11 @@ class PCVContext
 		virtual ~PCVContext();
 
 		//! Initialization
-		/** \param OpenGL render context width (pixels)
-			\param OpenGL render context height (pixels)
-			\param associated cloud (or mesh vertices)
-			\param associated mesh (if any)
-			\param whether mesh is closed (faster) or not (need more memory)
+		/** \param W OpenGL render context width (pixels)
+			\param H OpenGL render context height (pixels)
+			\param cloud associated cloud (or mesh vertices)
+			\param mesh associated mesh (if any)
+			\param closedMesh whether mesh is closed (faster) or not (need more memory)
 			\return initialization success
 		**/
 		bool init(	unsigned W,

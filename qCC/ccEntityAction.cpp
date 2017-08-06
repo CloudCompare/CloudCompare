@@ -33,6 +33,8 @@
 #include "ccFacet.h"
 #include "ccGenericPrimitive.h"
 #include "ccOctreeProxy.h"
+#include "ccPointCloud.h"
+#include "ccPolyline.h"
 #include "ccPointCloudInterpolator.h"
 
 //qCC_gl
@@ -104,7 +106,7 @@ namespace ccEntityAction
 			if (ent->isA(CC_TYPES::HIERARCHY_OBJECT))
 			{
 				//automatically parse a group's children set
-				for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
+				for (unsigned i = 0; i < ent->getChildrenNumber(); ++i)
 					selectedEntities.push_back(ent->getChild(i));
 			}
 			else if (ent->isA(CC_TYPES::POINT_CLOUD) || ent->isA(CC_TYPES::MESH))
@@ -137,9 +139,7 @@ namespace ccEntityAction
 				}
 				else
 				{
-					cloud->setRGBColor(	static_cast<ColorCompType>(colour.red()),
-										static_cast<ColorCompType>(colour.green()),
-										static_cast<ColorCompType>(colour.blue()) );
+					cloud->setRGBColor(	ccColor::FromQColor(colour) );
 				}
 				cloud->showColors(true);
 				cloud->showSF(false); //just in case
@@ -160,8 +160,8 @@ namespace ccEntityAction
 			{
 				ccGenericPrimitive* prim = ccHObjectCaster::ToPrimitive(ent);
 				ccColor::Rgb col(	static_cast<ColorCompType>(colour.red()),
-										static_cast<ColorCompType>(colour.green()),
-										static_cast<ColorCompType>(colour.blue()) );
+									static_cast<ColorCompType>(colour.green()),
+									static_cast<ColorCompType>(colour.blue()) );
 				prim->setColor(col);
 				ent->showColors(true);
 				ent->showSF(false); //just in case
@@ -170,10 +170,7 @@ namespace ccEntityAction
 			else if (ent->isA(CC_TYPES::POLY_LINE))
 			{
 				ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
-				ccColor::Rgb col(	static_cast<ColorCompType>(colour.red()),
-									static_cast<ColorCompType>(colour.green()),
-									static_cast<ColorCompType>(colour.blue()) );
-				poly->setColor(col);
+				poly->setColor(ccColor::FromQColor(colour));
 				ent->showColors(true);
 				ent->showSF(false); //just in case
 				ent->prepareDisplayForRefresh();
@@ -181,10 +178,7 @@ namespace ccEntityAction
 			else if (ent->isA(CC_TYPES::FACET))
 			{
 				ccFacet* facet = ccHObjectCaster::ToFacet(ent);
-				ccColor::Rgb col(	static_cast<ColorCompType>(colour.red()),
-									static_cast<ColorCompType>(colour.green()),
-									static_cast<ColorCompType>(colour.blue()) );
-				facet->setColor(col);
+				facet->setColor(ccColor::FromQColor(colour));
 				ent->showColors(true);
 				ent->showSF(false); //just in case
 				ent->prepareDisplayForRefresh();
@@ -1893,7 +1887,13 @@ namespace ccEntityAction
 			//specific test for locked vertices
 			bool lockedVertices = false;
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
-			if (cloud && lockedVertices)
+			
+			if (cloud == nullptr)
+			{
+			   continue;
+			}
+			
+			if (lockedVertices)
 			{
 				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;
@@ -2441,7 +2441,7 @@ namespace ccEntityAction
 			}
 			else
 			{
-				ccConsole::Warning(QString("[Entity: %1]-[SF: %2] Couldn't compute distribution parameters!").arg(pc->getName()).arg(pc->getScalarFieldName(outSfIdx)));
+				ccConsole::Warning(QString("[Entity: %1]-[SF: %2] Couldn't compute distribution parameters!").arg(pc->getName(),pc->getScalarFieldName(outSfIdx)));
 			}
 		}
 		

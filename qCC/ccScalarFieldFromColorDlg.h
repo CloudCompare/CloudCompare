@@ -25,6 +25,8 @@ class ccPointCloud;
 //! Dialog to choose 2 scalar fields (SF) and one operation for arithmetics processing
 class ccScalarFieldFromColorDlg : public QDialog, public Ui::scalarFieldFromColorDlg
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

@@ -15,18 +15,13 @@
 //#                                                                        #
 //##########################################################################
 
-//CCLib
-#include <CCPlatform.h>
-
 //qCC
 #include "ccGLWindow.h"
-#include "ccGuiParameters.h"
 #include "ccRenderingTools.h"
 
 //qCC_db
 #include <ccHObjectCaster.h>
 #include <cc2DLabel.h>
-#include <ccGenericPointCloud.h>
 #include <ccSphere.h> //for the pivot symbol
 #include <ccPolyline.h>
 #include <ccPointCloud.h>
@@ -35,7 +30,6 @@
 #include <ccSubMesh.h>
 
 //CCFbo
-#include <ccShader.h>
 #include <ccGlFilter.h>
 #include <ccFrameBufferObject.h>
 
@@ -705,7 +699,8 @@ bool ccGLWindow::initialize()
 		//set viewport and visu. as invalid
 		invalidateViewport();
 		invalidateVisualization();
-
+		deprecate3DLayer();
+		
 		//FBO support (TODO: catch error?)
 		m_glExtFuncSupported = m_glExtFunc.initializeOpenGLFunctions();
 
@@ -1067,6 +1062,7 @@ void ccGLWindow::resizeGL(int w, int h)
 
 	invalidateViewport();
 	invalidateVisualization();
+	deprecate3DLayer();
 
 	if (m_initialized)
 	{
@@ -1372,6 +1368,7 @@ void ccGLWindow::toBeRefreshed()
 	m_shouldBeRefreshed = true;
 
 	invalidateViewport();
+	invalidateVisualization();
 }
 
 void ccGLWindow::refresh(bool only2D/*=false*/)
@@ -1394,7 +1391,8 @@ void ccGLWindow::redraw(bool only2D/*=false*/, bool resetLOD/*=true*/)
 
 	if (!only2D)
 	{
-		m_updateFBO = true;
+		//force the 3D layer to be redrawn
+		deprecate3DLayer();
 	}
 
 	if (isVisible() && !m_autoRefresh)
@@ -2693,7 +2691,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 
 	ccBBox zoomedBox;
 
-	//the user has provided a valid bouding box
+	//the user has provided a valid bounding box
 	if (aBox)
 	{
 		zoomedBox = (*aBox);
@@ -2743,6 +2741,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 
 	invalidateViewport();
 	invalidateVisualization();
+	deprecate3DLayer();
 
 	redraw();
 }
@@ -2820,16 +2819,21 @@ void ccGLWindow::setZoom(float value)
 		m_viewportParams.zoom = value;
 		invalidateViewport();
 		invalidateVisualization();
+		deprecate3DLayer();
 	}
 }
 
 void ccGLWindow::setCameraPos(const CCVector3d& P)
 {
-	m_viewportParams.cameraCenter = P;
-	emit cameraPosChanged(m_viewportParams.cameraCenter);
+	if ((m_viewportParams.cameraCenter - P).norm2d() != 0)
+	{
+		m_viewportParams.cameraCenter = P;
+		emit cameraPosChanged(m_viewportParams.cameraCenter);
 
-	invalidateViewport();
-	invalidateVisualization();
+		invalidateViewport();
+		invalidateVisualization();
+		deprecate3DLayer();
+	}
 }
 
 void ccGLWindow::moveCamera(float dx, float dy, float dz)
@@ -2896,6 +2900,7 @@ void ccGLWindow::setPixelSize(float pixelSize)
 
 	invalidateViewport();
 	invalidateVisualization();
+	deprecate3DLayer();
 }
 
 void ccGLWindow::setSceneDB(ccHObject* root)
@@ -3085,7 +3090,6 @@ void ccGLWindow::getVisibleObjectsBB(ccBBox& box) const
 void ccGLWindow::invalidateViewport()
 {
 	m_validProjectionMatrix = false;
-	m_updateFBO = true;
 }
 
 ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, bool withGLfeatures, ProjectionMetrics* metrics/*=0*/, double* eyeOffset/*=0*/) const
@@ -3237,10 +3241,14 @@ void ccGLWindow::updateProjectionMatrix()
 	m_validProjectionMatrix = true;
 }
 
+void ccGLWindow::deprecate3DLayer()
+{
+	m_updateFBO = true;
+}
+
 void ccGLWindow::invalidateVisualization()
 {
 	m_validModelviewMatrix = false;
-	m_updateFBO = true;
 }
 
 ccGLMatrixd ccGLWindow::computeModelViewMatrix(const CCVector3d& cameraCenter) const
@@ -3776,6 +3784,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					m_customLightPos[1] += static_cast<float>(u.y);
 					m_customLightPos[2] += static_cast<float>(u.z);
 					invalidateViewport();
+					deprecate3DLayer();
 				}
 			}
 			else //camera moving mode
@@ -3827,10 +3836,14 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 			for (std::list<ccInteractor*>::iterator it = m_activeItems.begin(); it != m_activeItems.end(); ++it)
 			{
-				if ((*it)->move2D(x * retinaScale, y * retinaScale, dx * retinaScale, dy * retinaScale, glWidth(), glHeight()) || (*it)->move3D(u))
+				if ((*it)->move2D(x * retinaScale, y * retinaScale, dx * retinaScale, dy * retinaScale, glWidth(), glHeight()))
 				{
 					invalidateViewport();
-					//m_updateFBO = true; //already done by invalidateViewport
+				}
+				else if ((*it)->move3D(u))
+				{
+					invalidateViewport();
+					deprecate3DLayer();
 				}
 			}
 		}
@@ -3920,7 +3933,6 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					rotMat = ccGLMatrixd::FromToRotation(m_lastMouseOrientation, m_currentMouseOrientation);
 				}
 				m_lastMouseOrientation = m_currentMouseOrientation;
-				m_updateFBO = true;
 
 				if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 				{
@@ -4656,6 +4668,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	int nearestElementIndex = -1;
 	double nearestElementSquareDist = -1.0;
 	CCVector3 nearestPoint(0, 0, 0);
+	static const unsigned MIN_POINTS_FOR_OCTREE_COMPUTATION = 128;
 
 	static ccGui::ParamStruct::ComputeOctreeForPicking autoComputeOctreeThisSession = ccGui::ParamStruct::ASK_USER;
 	bool autoComputeOctree = false;
@@ -4690,7 +4703,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 				{
 					ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
 
-					if (firstCloudWithoutOctree && !cloud->getOctree())
+					if (firstCloudWithoutOctree && !cloud->getOctree() && cloud->size() > MIN_POINTS_FOR_OCTREE_COMPUTATION) //no need to use the octree for a few points!
 					{
 						//can we compute an octree for picking?
 						ccGui::ParamStruct::ComputeOctreeForPicking behavior = getDisplayParameters().autoComputeOctree;
@@ -4764,7 +4777,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 						nearestSquareDist,
 						params.pickWidth,
 						params.pickHeight,
-						autoComputeOctree))
+						autoComputeOctree && cloud->size() > MIN_POINTS_FOR_OCTREE_COMPUTATION))
 					{
 						if (nearestElementIndex < 0 || (nearestPointIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
@@ -4884,7 +4897,6 @@ void ccGLWindow::displayNewMessage(	const QString& message,
 		if (pos == SCREEN_CENTER_MESSAGE)
 		{
 			ccLog::Warning("[ccGLWindow::displayNewMessage] Append is not supported for center screen messages!");
-			append = false;
 		}
 	}
 
@@ -4909,7 +4921,7 @@ void ccGLWindow::setPointSize(float size, bool silent/*=false*/)
 	if (m_viewportParams.defaultPointSize != newSize)
 	{
 		m_viewportParams.defaultPointSize = newSize;
-		m_updateFBO = true;
+		deprecate3DLayer();
 	
 		if (!silent)
 		{
@@ -4924,8 +4936,11 @@ void ccGLWindow::setPointSize(float size, bool silent/*=false*/)
 
 void ccGLWindow::setLineWidth(float width)
 {
-	m_viewportParams.defaultLineWidth = width;
-	m_updateFBO = true;
+	if (m_viewportParams.defaultLineWidth != width)
+	{
+		m_viewportParams.defaultLineWidth = width;
+		deprecate3DLayer();
+	}
 }
 
 int FontSizeModifier(int fontSize, float zoomFactor)
@@ -5039,6 +5054,7 @@ void ccGLWindow::setCustomLight(bool state)
 						CUSTOM_LIGHT_STATE_MESSAGE);
 
 	invalidateViewport();
+	deprecate3DLayer();
 	redraw();
 
 	//save parameter
@@ -5124,6 +5140,7 @@ void ccGLWindow::showPivotSymbol(bool state)
 	if (state && !m_pivotSymbolShown && m_viewportParams.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
 	{
 		invalidateViewport();
+		deprecate3DLayer();
 	}
 
 	m_pivotSymbolShown = state;
@@ -5377,6 +5394,7 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 	m_bubbleViewModeEnabled = false;
 	invalidateViewport();
 	invalidateVisualization();
+	deprecate3DLayer();
 }
 
 void ccGLWindow::setAspectRatio(float ar)
@@ -5397,6 +5415,7 @@ void ccGLWindow::setAspectRatio(float ar)
 		{
 			invalidateViewport();
 			invalidateVisualization();
+			deprecate3DLayer();
 		}
 	}
 }
@@ -5423,6 +5442,7 @@ void ccGLWindow::setFov(float fov_deg)
 		{
 			invalidateViewport();
 			invalidateVisualization();
+			deprecate3DLayer();
 
 			displayNewMessage(	QString("F.O.V. = %1 deg.").arg(fov_deg, 0, 'f', 1),
 								ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
@@ -5453,6 +5473,7 @@ void ccGLWindow::setBubbleViewFov(float fov_deg)
 		{
 			invalidateViewport();
 			invalidateVisualization();
+			deprecate3DLayer();
 			emit fovChanged(m_bubbleViewFov_deg);
 		}
 	}
@@ -5479,6 +5500,8 @@ void ccGLWindow::setZNearCoef(double coef)
 			//DGM: we update the projection matrix directly so as to get an up-to-date estimation of zNear
 			updateProjectionMatrix();
 
+			deprecate3DLayer();
+
 			displayNewMessage(	QString("Near clipping = %1% of max depth (= %2)").arg(m_viewportParams.zNearCoef * 100.0, 0, 'f', 1).arg(m_viewportParams.zNear),
 								ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
 								false,
@@ -5497,6 +5520,7 @@ void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
 
 	invalidateViewport();
 	invalidateVisualization();
+	deprecate3DLayer();
 
 	emit baseViewMatChanged(m_viewportParams.viewMat);
 	emit pivotPointChanged(m_viewportParams.pivotPoint);
@@ -5512,6 +5536,7 @@ void ccGLWindow::rotateBaseViewMat(const ccGLMatrixd& rotMat)
 	emit baseViewMatChanged(m_viewportParams.viewMat);
 
 	invalidateVisualization();
+	deprecate3DLayer();
 }
 
 void ccGLWindow::updateZoom(float zoomFactor)
@@ -5591,6 +5616,7 @@ void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=tru
 		setPerspectiveState(m_viewportParams.perspectiveView, false);
 
 	invalidateVisualization();
+	deprecate3DLayer();
 
 	//we emit the 'baseViewMatChanged' signal
 	emit baseViewMatChanged(m_viewportParams.viewMat);
@@ -5954,7 +5980,7 @@ bool ccGLWindow::initFBO(int w, int h)
 		}
 	}
 
-	m_updateFBO = true;
+	deprecate3DLayer();
 	return true;
 }
 
@@ -6491,34 +6517,31 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 	assert(glFunc);
 
 	//compute the text bounding rect
-	QRect rect = QFontMetrics(font).boundingRect(str);
+	// This adjustment and the change to x & y are to work around a crash with Qt 5.9.
+	// At the time I (Andy) could not determine if it is a bug in CC or Qt.
+	//		https://bugreports.qt.io/browse/QTBUG-61863
+	//		https://github.com/CloudCompare/CloudCompare/issues/543
+	QRect rect = QFontMetrics(font).boundingRect(str).adjusted( -1, -2, 1, 2 );
+	
+	x -= 1;	// magic number!
+	y += 3;	// magic number!
 
 	//first we create a QImage from the text
-	//QRect textRect = rect;
-	//if (devicePixelRatio() > 1)
-	//{
-	//	textRect.setWidth(rect.width() + devicePixelRatio());
-	//	textRect.setHeight(rect.height() + devicePixelRatio());
-	//}
 	QImage textImage(rect.width(), rect.height(), QImage::Format::Format_RGBA8888);
+	rect = textImage.rect();
+	
+	textImage.fill(Qt::transparent);
 	{
 		QPainter painter(&textImage);
-		painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-		textImage.fill(Qt::transparent);
 
 		float glColor[4];
 		glFunc->glGetFloatv(GL_CURRENT_COLOR, glColor);
 		QColor color;
-		{
-			color.setRedF(glColor[0]);
-			color.setGreenF(glColor[1]);
-			color.setBlueF(glColor[2]);
-			color.setAlphaF(glColor[3]);
-		}
-		QPen pen(color);
-		painter.setPen(pen);
-		painter.setFont(font);
-		painter.drawText(-rect.x() - (devicePixelRatio() - 1) * 2, -rect.y() - (devicePixelRatio() - 1) * 2, str); //DGM: works (otherwise the rendered text is truncated)... but why?!
+		color.setRgbF( glColor[0], glColor[1], glColor[2], glColor[3] );
+		
+		painter.setPen( color );
+		painter.setFont( font );
+		painter.drawText( rect, Qt::AlignCenter, str );
 	}
 	
 	//and then we convert this QImage to a texture!
@@ -6540,7 +6563,9 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 			glFunc->glTranslatef(x, m_glViewport.height() - 1 - y, 0);
 
 			glFunc->glEnable(GL_TEXTURE_2D);         
-			QOpenGLTexture textTex(textImage);
+			QOpenGLTexture textTex( textImage, QOpenGLTexture::DontGenerateMipMaps );
+			textTex.setMinificationFilter( QOpenGLTexture::Linear );
+			textTex.setMagnificationFilter( QOpenGLTexture::Linear );
 			textTex.bind();
 
 			glFunc->glColor4f(1.0f, 1.0f, 1.0f, 1.0f); //DGM: warning must be float colors to work properly?!

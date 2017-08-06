@@ -114,8 +114,7 @@ int main(int argc, char **argv)
 		format.setStereo(true);
 #endif
 #ifdef Q_OS_MAC
-		format.setStereo(false);
-		format.setVersion( 2, 1 );
+		format.setVersion( 2, 1 );	// must be 2.1 - see ccGLWindow::functions()
 		format.setProfile( QSurfaceFormat::CoreProfile );
 #endif
 #ifdef QT_DEBUG
@@ -134,20 +133,14 @@ int main(int argc, char **argv)
 	//Locale management
 	{
 		//Force 'english' locale so as to get a consistent behavior everywhere
-		QLocale locale = QLocale(QLocale::English);
-		locale.setNumberOptions(QLocale::c().numberOptions());
-		QLocale::setDefault(locale);
+		QLocale::setDefault( QLocale( QLocale::English ) );
 
 #ifdef Q_OS_UNIX
 		//We reset the numeric locale for POSIX functions
-		//See http://qt-project.org/doc/qt-5/qcoreapplication.html#locale-settings
+		//See https://doc.qt.io/qt-5/qcoreapplication.html#locale-settings
 		setlocale(LC_NUMERIC, "C");
 #endif
 	}
-
-#ifdef USE_VLD
-	VLDEnable();
-#endif
 
 	QDir  workingDir = QCoreApplication::applicationDirPath();
 	

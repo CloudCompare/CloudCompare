@@ -1917,7 +1917,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 	{
 		ccGLMatrixd transd(trans.data());
 
-		for (Grid::Shared grid : m_grids)
+		for (Grid::Shared &grid : m_grids)
 		{
 			if (!grid)
 			{
@@ -2080,7 +2080,7 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 
 	//update the grids as well
 	{
-		for (Grid::Shared grid : m_grids)
+		for (Grid::Shared &grid : m_grids)
 		{
 			if (grid)
 			{
@@ -2827,7 +2827,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
 					assert(steps != 0);
 
-					if (steps > CC_MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < static_cast<GLint>(steps))
+					if (steps > ccColorRampShader::MaxColorRampSize() || maxComponents < static_cast<GLint>(steps))
 					{
 						ccLog::WarningDebug("Color ramp steps exceed shader limits!");
 						colorRampShader = 0;
@@ -3348,7 +3348,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 
 			//and reset the invalid (empty) ones
 			//(DGM: we don't erase them as they may still be useful?)
-			for (Grid::Shared grid : m_grids)
+			for (Grid::Shared &grid : m_grids)
 			{
 				if (grid->validCount == 0)
 				{
@@ -3549,7 +3549,6 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 		return false;
 	}
 
-	bool hadColors = hasColors();
 	if (!resizeTheRGBTable(false))
 	{
 		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
@@ -3775,10 +3774,6 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 		return 0;
 	}
 
-	PointCoordinateType alpha_rad = coneAngle_deg * CC_DEG_TO_RAD;
-	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>( cos(alpha_rad) );
-	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>( sin(alpha_rad) );
-
 	CCLib::ScalarField* deviationSF = 0;
 	if (exportDeviationSF)
 	{
@@ -3799,6 +3794,9 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 		clone->setCurrentDisplayedScalarField(sfIdx);
 		clone->showSF(true);
 	}
+	
+	PointCoordinateType alpha_rad = coneAngle_deg * CC_DEG_TO_RAD;
+	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>( sin(alpha_rad) );
 
 	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
@@ -3823,7 +3821,6 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 		else
 		{
 			//unrolling
-			PointCoordinateType rho = s * sin_alpha;
 			PointCoordinateType theta_rad = phi_rad * sin_alpha;
 
 			//project the point
@@ -3854,7 +3851,6 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 			else
 			{
 				//unrolling
-				PointCoordinateType rho2 = s2 * sin_alpha;
 				PointCoordinateType theta2_rad = phi2_rad * sin_alpha;
 
 				//project the point
@@ -4741,12 +4737,12 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		m_vboManager.updateFlags = vboSet::UPDATE_ALL;
 	}
 
-	size_t chunksCount = m_points->chunksCount();
+	unsigned chunksCount = m_points->chunksCount();
 	//allocate per-chunk descriptors if necessary
 	if (m_vboManager.vbos.size() != chunksCount)
 	{
 		//properly remove the elements that are not needed anymore!
-		for (size_t i = chunksCount; i < m_vboManager.vbos.size(); ++i)
+		for (unsigned i = chunksCount; i < m_vboManager.vbos.size(); ++i)
 		{
 			if (m_vboManager.vbos[i])
 			{
@@ -4792,7 +4788,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 #endif
 
 		//process each chunk
-		for (size_t i = 0; i < chunksCount; ++i)
+		for (unsigned i = 0; i < chunksCount; ++i)
 		{
 			int chunkSize = static_cast<int>(m_points->chunkSize(i));
 
@@ -5097,7 +5093,7 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 	if (pDlg)
 	{
 		pDlg->setWindowTitle(QObject::tr("Normals computation"));
-		pDlg->setLabelText(QObject::tr("Points: ") + QString::number(pointCount));
+		pDlg->setLabelText(QObject::tr("Points: %L1").arg( pointCount ) );
 		pDlg->setRange(0, static_cast<int>(pointCount));
 		pDlg->show();
 		QCoreApplication::processEvents();
@@ -5304,7 +5300,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=0*/)
 	if (pDlg)
 	{
 		pDlg->setWindowTitle(QObject::tr("Orienting normals"));
-		pDlg->setLabelText(QObject::tr("Points: ") + QString::number(pointCount));
+		pDlg->setLabelText(QObject::tr("Points: %L1").arg( pointCount ) );
 		pDlg->setRange(0, static_cast<int>(pointCount));
 		pDlg->show();
 		QCoreApplication::processEvents();

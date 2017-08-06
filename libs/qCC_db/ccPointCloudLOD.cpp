@@ -27,6 +27,8 @@
 //! Thread for background computation
 class ccPointCloudLODThread : public QThread
 {
+	Q_OBJECT
+	
 public:
 	
 	//! Default constructor
@@ -967,3 +969,5 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 	m_lastIndexMap = m_indexMap;
 	return m_indexMap;
 }
+
+#include "ccPointCloudLOD.moc"

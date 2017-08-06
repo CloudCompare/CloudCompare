@@ -23,6 +23,8 @@
 
 //qCC_db
 #include <ccHObject.h>
+//qCC_gl
+#include <ccGLUtils.h>
 
 class QMainWindow;
 class QWidget;
@@ -103,6 +105,12 @@ public:
 
 	//! Returns currently selected entities ("read only")
 	virtual const ccHObject::Container& getSelectedEntities() const = 0;
+	
+	//! Checks if we have any selections
+	bool	haveSelection() const { return !getSelectedEntities().empty(); }
+	
+	//! Checks if we have exactly one selection
+	bool	haveOneSelection() const { return getSelectedEntities().size() == 1; }
 
 	//! Console message level (see dispToConsole)
 	enum ConsoleMessageLevel
@@ -168,15 +176,8 @@ public:
 	virtual ccPickingHub* pickingHub() { return nullptr; }
 
 	//other useful methods
-	virtual void setFrontView() = 0;
-	virtual void setBottomView() = 0;
-	virtual void setTopView() = 0;
-	virtual void setBackView() = 0;
-	virtual void setLeftView() = 0;
-	virtual void setRightView() = 0;
-	virtual void setIsoView1() = 0;
-	virtual void setIsoView2() = 0;
-
+	virtual void setView( CC_VIEW_ORIENTATION view ) = 0;
+	
 	virtual void toggleActiveWindowCenteredPerspective() = 0;
 	virtual void toggleActiveWindowCustomLight() = 0;
 	virtual void toggleActiveWindowSunLight() = 0;

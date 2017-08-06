@@ -23,7 +23,13 @@ function( target_link_PDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = base 
             if( WIN32 )
                 if ( MSVC_VERSION EQUAL 1910 ) # Visual Studio 2017
                     add_definitions(-DWIN32_LEAN_AND_MEAN)
+					
                 endif()
+				if (ARGV1)
+					set(PDAL_DLL_DIR ${PDAL_LIBRARY_DIRS}/../bin)
+					file( GLOB PDAL_DLL_FILES ${PDAL_DLL_DIR}/pdal*.dll )
+					copy_files("${PDAL_DLL_FILES}" ${ARGV1})
+				endif()
                 target_link_libraries(${ARGV0} "pdal_util")
             endif()
 

@@ -213,7 +213,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
     {
         pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
         pDlg->setMethodTitle(QObject::tr("Save LAS file"));
-        pDlg->setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
+        pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
         pDlg->start();
     }
     CCLib::NormalizedProgress nProgress(pDlg.data(), numberOfPoints);
@@ -314,10 +314,17 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 	unsigned ptsWritten = 0;
 
+	CC_FILE_ERROR callbackError = CC_FERR_NO_ERROR;
 	auto convertOne = [&](PointRef& point)
 	{
-		if (ptsWritten == numberOfPoints || pDlg->isCancelRequested())
+		if (ptsWritten == numberOfPoints )
 			return false;
+
+		if (pDlg->isCancelRequested())
+		{
+			callbackError = CC_FERR_CANCELED_BY_USER;
+			return false;
+		}
 
 		const CCVector3* P = theCloud->getPoint(ptsWritten);
 		{
@@ -418,7 +425,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
         return CC_FERR_THIRD_PARTY_LIB_FAILURE;
     }
 
-    return CC_FERR_NO_ERROR;
+    return callbackError;
 }
 
 
@@ -910,7 +917,10 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
     auto ccProcessOne = [&](PointRef& point)
     {
 		if (pDlg->isCancelRequested())
+		{
+			callbackError = CC_FERR_CANCELED_BY_USER;
 			return false;
+		}
 
 		LasCloudChunk &pointChunk = chunks[nbPointsRead / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD];
 
@@ -1182,7 +1192,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 
 
-    return CC_FERR_NO_ERROR;
+    return callbackError;
 }
 
 #endif

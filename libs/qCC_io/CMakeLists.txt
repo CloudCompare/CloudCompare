@@ -36,7 +36,6 @@ qt5_use_modules(${PROJECT_NAME} Core)
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} )
 
-
 # Add custom preprocessor definitions
 if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL QCC_IO_USE_AS_DLL )

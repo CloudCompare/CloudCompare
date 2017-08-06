@@ -903,7 +903,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
     StreamCallbackFilter f;
     f.setInput(lasReader);
 	
-	unsigned nbOfChunks = std::max(1u, nbOfPoints / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
+	unsigned nbOfChunks = (nbOfPoints / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD) + 1;
 	std::vector<LasCloudChunk> chunks(nbOfChunks, LasCloudChunk());
 
 	CC_FILE_ERROR callbackError = CC_FERR_NO_ERROR;

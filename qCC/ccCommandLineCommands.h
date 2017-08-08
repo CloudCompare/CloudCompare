@@ -479,15 +479,18 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 		CC_LOCAL_MODEL_TYPES model = QUADRIC;
 		ccNormalVectors::Orientation  orientation = ccNormalVectors::Orientation::UNDEFINED;
 		PointCoordinateType defaultRadius = radius;
-        for (const CLCloudDesc& thisCloudDesc : cmd.clouds())
-		{
+		for (const CLCloudDesc& thisCloudDesc : cmd.clouds())
+			{
 			ccPointCloud* cloud = thisCloudDesc.pc;
 			cmd.print("computeNormalsWithOctree started...\n");
 			bool success = cloud->computeNormalsWithOctree(QUADRIC, orientation, defaultRadius, nullptr);
-			if(success){
+			if(success)
+			{
 				cmd.print("computeNormalsWithOctree success");
 				cmd.print(QString("cloud->hasNormals: %1").arg(cloud->hasNormals()));
-			}else{
+			}
+			else
+			{
 				cmd.print("computeNormalsWithOctree failed");
 			}
 			cloud->setName(cloud->getName() + QString(".OctreeNormal"));

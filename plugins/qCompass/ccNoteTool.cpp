@@ -24,16 +24,13 @@ void ccNoteTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCl
 	//create a 1-point lineation object (highlights note-location)
 	ccPointPair* l = new ccNote(cloud);
 	l->setName(note);
-	l->showNameIn3D(true);
 	l->addPointIndex(itemIdx);
-	l->setDefaultColor(ccColor::cyan);
-	l->setActiveColor(ccColor::red);
 
 	//find insert point
 	ccHObject* notesFolder = nullptr;
 	for (int i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
 	{
-		if (m_app->dbRootObject()->getChild(i)->getName() == "Notes")
+		if (m_app->dbRootObject()->getChild(i)->getName() == "notes")
 		{
 			notesFolder = m_app->dbRootObject()->getChild(i);
 		}
@@ -42,7 +39,7 @@ void ccNoteTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCl
 			//also search first-level children of root node (when files are re-loaded this is where things will sit)
 			for (unsigned c = 0; c < m_app->dbRootObject()->getChild(i)->getChildrenNumber(); c++)
 			{
-				if (m_app->dbRootObject()->getChild(i)->getChild(c)->getName() == "Notes")
+				if (m_app->dbRootObject()->getChild(i)->getChild(c)->getName() == "notes")
 				{
 					notesFolder = m_app->dbRootObject()->getChild(i)->getChild(c);
 					break;
@@ -56,7 +53,7 @@ void ccNoteTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCl
 	}
 	if (!notesFolder)
 	{
-		notesFolder = new ccHObject("Notes");
+		notesFolder = new ccHObject("notes");
 		m_app->dbRootObject()->addChild(notesFolder);
 		m_app->addToDB(notesFolder, false, false, false, false);
 	}

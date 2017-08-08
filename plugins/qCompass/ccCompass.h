@@ -53,6 +53,7 @@
 #include "ccThickness.h"
 #include "ccTopologyRelation.h"
 #include "ccNote.h"
+#include "ccPinchNode.h"
 
 //tools
 #include "ccTool.h"

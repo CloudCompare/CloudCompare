@@ -36,6 +36,12 @@ void ccPinchNode::updateMetadata()
 	QVariantMap* map = new QVariantMap();
 	map->insert("ccCompassType", "PinchNode");
 	setMetaData(*map, true);
+
+	//set drawing stuff (not really metadata, but hey!)
+	setDefaultColor(ccColor::blue);
+	setActiveColor(ccColor::orange);
+	setHighlightColor(ccColor::orange);
+	setAlternateColor(ccColor::orange);
 }
 
 //returns true if object is a lineation

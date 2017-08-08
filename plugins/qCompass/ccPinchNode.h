@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_NOTE_HEADER
-#define CC_NOTE_HEADER
+#ifndef CC_NODE_HEADER
+#define CC_NODE_HEADER
 
 #include "ccPointPair.h"
 

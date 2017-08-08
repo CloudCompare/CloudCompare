@@ -198,7 +198,7 @@ void ccThicknessTool::toolActivated()
 	m_app->getActiveGLWindow()->displayNewMessage("Select reference plane for thickness measurement.", ccGLWindow::LOWER_LEFT_MESSAGE);
 
 	//redraw
-	m_app->getActiveGLWindow()->refresh();
+	m_app->getActiveGLWindow()->redraw(false, false);
 }
 
 //called when the tool is set to disactive (for cleanup)

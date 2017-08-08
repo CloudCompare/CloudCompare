@@ -309,7 +309,7 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 	//is object already represented by a ccCompass class?
 	if (dynamic_cast<ccFitPlane*>(obj)
 		|| dynamic_cast<ccTrace*>(obj)
-		|| dynamic_cast<ccPointPair*>(obj)
+		|| dynamic_cast<ccPointPair*>(obj) //n.b. several classes inherit from PointPair, so this cast will still succede for them
 		|| dynamic_cast<ccGeoObject*>(obj))
 	{
 		return; //we need do nothing!
@@ -387,7 +387,16 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 		}
 
 		//are we a topology relation?
+		//todo
 
+		//are we a pinchpiont
+		if (ccPinchNode::isPinchNode(obj))
+		{
+			ccHObject* n = new ccPinchNode(p);
+			originals->push_back(obj->getUniqueID());
+			replacements->push_back(n);
+			return;
+		}
 
 		//are we a note?
 		if (ccNote::isNote(obj))

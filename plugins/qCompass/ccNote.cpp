@@ -37,7 +37,10 @@ void ccNote::updateMetadata()
 	map->insert("ccCompassType", "Note");
 	setMetaData(*map, true);
 
+	//update drawing stuff
 	showNameIn3D(true);
+	setDefaultColor(ccColor::cyan);
+	setActiveColor(ccColor::red);
 }
 
 //returns true if object is a lineation

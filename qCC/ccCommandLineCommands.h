@@ -457,7 +457,6 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
 		cmd.print("[OCTREE NORMALS CALCULATION]");
-		ccLog::Error("OCTREE NORMALS CALCULATION");
 		if (cmd.clouds().empty())
 		{
 			return cmd.error(QString("No point cloud to normal calculation (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_SUBSAMPLE));
@@ -480,9 +479,9 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 		CC_LOCAL_MODEL_TYPES model = QUADRIC;
 		ccNormalVectors::Orientation  orientation = ccNormalVectors::Orientation::UNDEFINED;
 		PointCoordinateType defaultRadius = radius;
-		for (size_t i = 0; i < cmd.clouds().size(); ++i)
+        for (const CLCloudDesc& cloudDesc : cmd.clouds())
 		{
-			ccPointCloud* cloud = cmd.clouds()[i].pc;
+			ccPointCloud* cloud = cloudDesc.pc;
 			cmd.print("computeNormalsWithOctree started...\n");
 			bool success = cloud->computeNormalsWithOctree(QUADRIC, orientation, defaultRadius, nullptr);
 			if(success){
@@ -492,7 +491,7 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 				cmd.print("computeNormalsWithOctree failed");
 			}
 			cloud->setName(cloud->getName() + QString(".OctreeNormal"));
-			CLCloudDesc cloudDesc(cloud, cmd.clouds()[i].basename, cmd.clouds()[i].path, cmd.clouds()[i].indexInFile);
+			CLCloudDesc cloudDesc(cloud, cloudDesc.basename, cloudDesc.path, cloudDesc.indexInFile);
 			QString errorStr = cmd.exportEntity(cloudDesc, "OCTREE_NORMALS");
 			if (!errorStr.isEmpty())
 			{

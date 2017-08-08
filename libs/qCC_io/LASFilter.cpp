@@ -811,16 +811,12 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
 
-		PointViewSet viewSet;
-		PointViewPtr pointView;
-
 		auto prepareAndExecture = [&lasReader, &table]() -> PointViewSet {
 			lasReader.prepare(table);
 			lasReader.prepare(table);
 			return lasReader.execute(table);
 		};
 
-		QFuture<PointViewSet> reader = QtConcurrent::run(prepareAndExecture);
 		if (parameters.parentWidget)
 		{
 			pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
@@ -831,22 +827,15 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			pDlg->start();
 		}
 
-		while (!reader.isFinished())
-		{
-#if defined(CC_WINDOWS)
-			::Sleep(50);
-#else
-			usleep(500 * 100);
-#endif
-			if (pDlg)
-			{
-				pDlg->setValue(pDlg->value() + 1);
-			}
-			QApplication::processEvents();
-		}
+		QFutureWatcher<PointViewSet> reader;
+		QObject::connect(&reader, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
+		reader.setFuture(QtConcurrent::run(prepareAndExecture));
 
-		viewSet = reader.result();
-		pointView = *viewSet.begin();
+		pDlg->exec();
+		reader.waitForFinished();
+		
+		PointViewSet viewSet = reader.result();
+		PointViewPtr pointView = *viewSet.begin();
 
 		if (parameters.parentWidget)
 		{
@@ -866,7 +855,6 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		}
 
 		// Now the tiler will actually write the points
-		QFuture<void> writer = QtConcurrent::run([&tiler]() {tiler.writeAll(); });
 		if (parameters.parentWidget)
 		{
 			pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
@@ -876,19 +864,14 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			pDlg->setModal(true);
 			pDlg->start();
 		}
-		while (!writer.isFinished())
-		{
-#if defined(CC_WINDOWS)
-			::Sleep(50);
-#else
-			usleep(500 * 100);
-#endif
-			if (pDlg)
-			{
-				pDlg->setValue(pDlg->value() + 1);
-			}
-			QApplication::processEvents();
-		}
+
+		QFutureWatcher<void> writer;
+		QObject::connect(&writer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
+		writer.setFuture(QtConcurrent::run([&tiler]() {tiler.writeAll(); }));
+
+		pDlg->exec();
+		writer.waitForFinished();
+
 		return CC_FERR_NO_ERROR;
 	}
 

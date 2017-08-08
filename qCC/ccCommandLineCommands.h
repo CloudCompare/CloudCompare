@@ -10,6 +10,7 @@
 #include <StatisticalTestingTools.h>
 #include <Neighbourhood.h>
 #include <AutoSegmentationTools.h>
+#include <CCConst.h>
 
 //qCC_db
 #include <ccProgressDialog.h>
@@ -19,6 +20,7 @@
 #include <ccPolyline.h>
 #include <ccScalarField.h>
 #include <ccVolumeCalcTool.h>
+#include <ccLog.h>
 
 //qCC_io
 #include <BundlerFilter.h>
@@ -35,8 +37,7 @@
 #include "ccLibAlgorithms.h"
 #include "ccRegistrationTools.h"
 #include "ccScalarFieldArithmeticsDlg.h"
-#include "CCConst.h"
-#include "ccLog.h"
+
 //Qt
 #include <QDateTime>
 #include <QStringList>

@@ -453,7 +453,7 @@ struct CommandLoad : public ccCommandLineInterface::Command
 
 struct CommandOctreeNormal : public ccCommandLineInterface::Command
 {
-	CommandOctreeNormal() : ccCommandLineInterface::Command("OCTREE_NORMALS", COMMAND_COMPUTE_OCTREE_NORMALS) {}
+	CommandOctreeNormal() : ccCommandLineInterface::Command("Compute normals with octree", COMMAND_COMPUTE_OCTREE_NORMALS) {}
 
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
@@ -465,26 +465,26 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 
 		if (cmd.arguments().empty())
 		{
-			return cmd.error(QString("Missing parameter: calculation method after \"-%1\"").arg(COMMAND_COMPUTE_OCTREE_NORMALS));
+			return cmd.error(QString("Missing parameter: radius after \"-%1\"").arg(COMMAND_COMPUTE_OCTREE_NORMALS));
 		}
 
 		bool ok;
 		float radius = cmd.arguments().takeFirst().toFloat(&ok);
 		if (!ok)
 		{
-			return cmd.error(QString("Missing radius parameter"));
+			return cmd.error(QString("Invalid radius"));
 		}
 
 		cmd.print(QString("\tRadius: %1").arg(radius));
 
 		CC_LOCAL_MODEL_TYPES model = QUADRIC;
 		ccNormalVectors::Orientation  orientation = ccNormalVectors::Orientation::UNDEFINED;
-		PointCoordinateType defaultRadius = radius;
+
 		for (const CLCloudDesc& thisCloudDesc : cmd.clouds())
-			{
+		{
 			ccPointCloud* cloud = thisCloudDesc.pc;
 			cmd.print("computeNormalsWithOctree started...\n");
-			bool success = cloud->computeNormalsWithOctree(QUADRIC, orientation, defaultRadius, nullptr);
+			bool success = cloud->computeNormalsWithOctree(QUADRIC, orientation, radius, nullptr);
 			if(success)
 			{
 				cmd.print("computeNormalsWithOctree success");
@@ -492,8 +492,9 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 			}
 			else
 			{
-				cmd.print("computeNormalsWithOctree failed");
+				return cmd.error("computeNormalsWithOctree failed");
 			}
+			
 			cloud->setName(cloud->getName() + QString(".OctreeNormal"));
 			CLCloudDesc cloudDesc(cloud, thisCloudDesc.basename, thisCloudDesc.path, thisCloudDesc.indexInFile);
 			QString errorStr = cmd.exportEntity(cloudDesc, "OCTREE_NORMALS");

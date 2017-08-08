@@ -59,7 +59,7 @@ v2.9.alpha - XX/XX/XXXX
 
 	* Command line mode
 		- the Rasterize tool is now accessible via the command line:
-			'-RASTERIZE -GRID_STEP {value}'
+			* '-RASTERIZE -GRID_STEP {value}'
 			* additional options are:
 				-VERT_DIR {0=X/1=Y/2=Z} - default is Z
 				-EMPTY_FILL {MIN_H/MAX_H/CUSTOM_H/INTERP} - default is 'leave cells empty'
@@ -73,10 +73,16 @@ v2.9.alpha - XX/XX/XXXX
 				-RESAMPLE - to resample the input cloud instead of generating a regular cloud (or mesh)
 			* if OUTPUT_CLOUD and/or OUTPUT_MESH options are selected, the resulting entities are kept in memory.
 				Moreover if OUTPUT_CLOUD is selected, the resutling raster will replace the original cloud.
-		- 2.5D Volume Calculation tool (-VOLUME -GRID_STEP {...} etc. - see the wiki for more details)
-		- Export coord. to SF (-COORD_TO_SF {X, Y or Z})
-		- the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
-		- the ASCII loading dialog shouldn't appear anymore in 'SILENT' mode (only if CC really can't guess anything)
+		- 2.5D Volume Calculation tool
+			* '-VOLUME -GRID_STEP {...} etc.' (see the wiki for more details)
+		- Export coord. to SF
+			* '-COORD_TO_SF {X, Y or Z}'
+		- Compute unstructured cloud normals:
+			* '-OCTREE_NORMALS {radius}'
+			* for now the local model is 'Height Function' and no default orientation is specified
+		- Other improvements:
+			* the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
+			* the ASCII loading dialog shouldn't appear anymore in 'SILENT' mode (only if CC really can't guess anything)
 
 	* Rasterize tool
 		- new option to re-project contour lines computed on a scalar field (i.e. a layer other than the altitudes)

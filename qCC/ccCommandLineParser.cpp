@@ -189,6 +189,7 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandSetNoTimestamp));
 	registerCommand(Command::Shared(new CommandVolume25D));
 	registerCommand(Command::Shared(new CommandRasterize));
+	registerCommand(Command::Shared(new CommandOctreeNormal));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));

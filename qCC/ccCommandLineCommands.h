@@ -35,7 +35,8 @@
 #include "ccLibAlgorithms.h"
 #include "ccRegistrationTools.h"
 #include "ccScalarFieldArithmeticsDlg.h"
-
+#include "CCConst.h"
+#include "ccLog.h"
 //Qt
 #include <QDateTime>
 #include <QStringList>
@@ -112,6 +113,7 @@ static const char COMMAND_ICP_USE_DATA_SF_AS_WEIGHT[]		= "DATA_SF_AS_WEIGHTS";
 static const char COMMAND_FBX_EXPORT_FORMAT[]				= "FBX_EXPORT_FMT";
 static const char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 static const char COMMAND_COMPUTE_GRIDDED_NORMALS[]			= "COMPUTE_NORMALS";
+static const char COMMAND_COMPUTE_OCTREE_NORMALS[]			= "OCTREE_NORMALS";
 static const char COMMAND_SAVE_CLOUDS[]						= "SAVE_CLOUDS";
 static const char COMMAND_SAVE_MESHES[]						= "SAVE_MESHES";
 static const char COMMAND_AUTO_SAVE[]						= "AUTO_SAVE";
@@ -445,6 +447,62 @@ struct CommandLoad : public ccCommandLineInterface::Command
 		//open specified file
 		QString filename(cmd.arguments().takeFirst());
 		return cmd.importFile(filename);
+	}
+};
+
+struct CommandOctreeNormal : public ccCommandLineInterface::Command
+{
+	CommandOctreeNormal() : ccCommandLineInterface::Command("OCTREE_NORMALS", COMMAND_COMPUTE_OCTREE_NORMALS) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		cmd.print("[OCTREE NORMALS CALCULATION]");
+		if (cmd.clouds().empty())
+		{
+			return cmd.error(QString("No point cloud to normal calculation (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_SUBSAMPLE));
+		}
+
+		if (cmd.arguments().empty())
+		{
+			return cmd.error(QString("Missing parameter: calculation method after \"-%1\"").arg(COMMAND_COMPUTE_OCTREE_NORMALS));
+		}
+
+		bool ok;
+		float radius = cmd.arguments().takeFirst().toFloat(&ok);
+		if (!ok)
+		{
+			return cmd.error(QString("Missing radius parameter"));
+		}
+
+		cmd.print(QString("\tRadius: %1").arg(radius));
+
+		CC_LOCAL_MODEL_TYPES model = QUADRIC;
+		ccNormalVectors::Orientation  orientation = ccNormalVectors::Orientation::UNDEFINED;
+		PointCoordinateType defaultRadius = radius;
+		for (const CLCloudDesc& thisCloudDesc : cmd.clouds())
+			{
+			ccPointCloud* cloud = thisCloudDesc.pc;
+			cmd.print("computeNormalsWithOctree started...\n");
+			bool success = cloud->computeNormalsWithOctree(QUADRIC, orientation, defaultRadius, nullptr);
+			if(success)
+			{
+				cmd.print("computeNormalsWithOctree success");
+				cmd.print(QString("cloud->hasNormals: %1").arg(cloud->hasNormals()));
+			}
+			else
+			{
+				cmd.print("computeNormalsWithOctree failed");
+			}
+			cloud->setName(cloud->getName() + QString(".OctreeNormal"));
+			CLCloudDesc cloudDesc(cloud, thisCloudDesc.basename, thisCloudDesc.path, thisCloudDesc.indexInFile);
+			QString errorStr = cmd.exportEntity(cloudDesc, "OCTREE_NORMALS");
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
+
+		return true;
 	}
 };
 

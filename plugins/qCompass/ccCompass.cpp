@@ -41,6 +41,7 @@ ccCompass::ccCompass(QObject* parent/*=0*/)
 	m_thicknessTool = new ccThicknessTool();
 	m_topologyTool = new ccTopologyTool();
 	m_noteTool = new ccNoteTool();
+	m_pinchNodeTool = new ccPinchNodeTool();
 }
 
 //deconstructor
@@ -53,6 +54,7 @@ ccCompass::~ccCompass()
 	delete m_thicknessTool;
 	delete m_topologyTool;
 	delete m_noteTool;
+	delete m_pinchNodeTool;
 
 	if (m_dlg)
 		delete m_dlg;
@@ -178,6 +180,7 @@ void ccCompass::doAction()
 	m_thicknessTool->initializeTool(m_app);
 	m_topologyTool->initializeTool(m_app);
 	m_noteTool->initializeTool(m_app);
+	m_pinchNodeTool->initializeTool(m_app);
 
 	//check valid window
 	if (!m_app->getActiveGLWindow())
@@ -210,12 +213,16 @@ void ccCompass::doAction()
 		ccCompassDlg::connect(m_dlg->traceModeButton, SIGNAL(clicked()), this, SLOT(setTrace()));
 
 		//extra tools
+		ccCompassDlg::connect(m_dlg->m_pinchTool, SIGNAL(triggered()), this, SLOT(addPinchNode()));
 		ccCompassDlg::connect(m_dlg->m_measure_thickness, SIGNAL(triggered()), this, SLOT(setThickness()));
 		ccCompassDlg::connect(m_dlg->m_measure_thickness_twoPoint, SIGNAL(triggered()), this, SLOT(setThickness2()));
 
 		ccCompassDlg::connect(m_dlg->m_youngerThan, SIGNAL(triggered()), this, SLOT(setYoungerThan()));
 		ccCompassDlg::connect(m_dlg->m_follows, SIGNAL(triggered()), this, SLOT(setFollows()));
 		ccCompassDlg::connect(m_dlg->m_equivalent, SIGNAL(triggered()), this, SLOT(setEquivalent()));
+
+		ccCompassDlg::connect(m_dlg->m_mergeSelected, SIGNAL(triggered()), this, SLOT(mergeGeoObjects()));
+		ccCompassDlg::connect(m_dlg->m_fitPlaneToGeoObject, SIGNAL(triggered()), this, SLOT(fitPlaneToGeoObject()));
 
 		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNote()));
 
@@ -524,6 +531,7 @@ ccHObject* ccCompass::getInsertPoint()
 			//object has been deleted
 			m_geoObject = nullptr;
 			m_geoObject_id = -1;
+			m_app->dispToConsole("[ccCompass] Error: Please select a GeoObject to digitize to.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		}
 		else
 		{
@@ -552,6 +560,23 @@ ccHObject* ccCompass::getInsertPoint()
 			if (m_app->dbRootObject()->getChild(i)->getName() == "measurements")
 			{
 				measurement_group = m_app->dbRootObject()->getChild(i);
+			}
+			else
+			{
+				//also search first-level children of root node (when files are re-loaded this is where things will sit)
+				for (unsigned c = 0; c < m_app->dbRootObject()->getChild(i)->getChildrenNumber(); c++)
+				{
+					if (m_app->dbRootObject()->getChild(i)->getChild(c)->getName() == "measurements")
+					{
+						measurement_group = m_app->dbRootObject()->getChild(i)->getChild(c);
+						break;
+					}
+				}
+			}
+
+			//found a valid group :)
+			if (measurement_group)
+			{
 				break;
 			}
 		}
@@ -805,6 +830,21 @@ void ccCompass::setPick()
 	m_app->getActiveGLWindow()->redraw(true, false);
 }
 
+//activate the pinch-node tool
+void ccCompass::addPinchNode()
+{
+	cleanupBeforeToolChange();
+
+	//activate thickness tool
+	m_activeTool = m_pinchNodeTool;
+	m_activeTool->toolActivated();
+
+	//update GUI
+	m_dlg->extraModeButton->setChecked(true);
+	m_dlg->undoButton->setEnabled(m_activeTool->canUndo());
+	m_dlg->acceptButton->setEnabled(false);
+	m_app->getActiveGLWindow()->redraw(true, false);
+}
 //activates the thickness tool
 void ccCompass::setThickness() 
 {
@@ -879,6 +919,163 @@ void ccCompass::setNote()
 	m_dlg->undoButton->setEnabled(m_activeTool->canUndo());
 	m_dlg->acceptButton->setEnabled(false);
 	m_app->getActiveGLWindow()->redraw(true, false);
+}
+
+//merges the selected GeoObjects
+void ccCompass::mergeGeoObjects()
+{
+	//get selected GeoObjects
+	std::vector<ccGeoObject*> objs;
+
+	for (ccHObject* o : m_app->getSelectedEntities())
+	{
+		if (ccGeoObject::isGeoObject(o))
+		{
+			ccGeoObject* g = dynamic_cast<ccGeoObject*> (o);
+			if (g) //could possibly be null if non-loaded geo-objects exist
+			{
+				objs.push_back(g);
+			}
+		}
+	}
+
+
+	if (objs.size() < 2) //not enough geoObjects
+	{
+		m_app->dispToConsole("[Compass] Select several GeoObjects to merge.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return; //nothing to merge
+	}
+
+	//merge geo-objects with first one
+	ccGeoObject* dest = objs[0];
+	ccHObject* d_interior = dest->getRegion(ccGeoObject::INTERIOR);
+	ccHObject* d_upper = dest->getRegion(ccGeoObject::UPPER_BOUNDARY);
+	ccHObject* d_lower = dest->getRegion(ccGeoObject::LOWER_BOUNDARY);
+	for (int i = 1; i < objs.size(); i++)
+	{
+		ccHObject* interior = objs[i]->getRegion(ccGeoObject::INTERIOR);
+		ccHObject* upper = objs[i]->getRegion(ccGeoObject::UPPER_BOUNDARY);
+		ccHObject* lower = objs[i]->getRegion(ccGeoObject::LOWER_BOUNDARY);
+
+		//add children to destination
+		upper->transferChildren(*d_upper, true);
+		lower->transferChildren(*d_lower, true);
+		interior->transferChildren(*d_interior, true);
+
+		//delete un-needed objects
+		objs[i]->removeChild(interior);
+		objs[i]->removeChild(upper);
+		objs[i]->removeChild(lower);
+		objs[i]->getParent()->removeChild(objs[i]);
+		
+		//delete
+		m_app->removeFromDB(objs[i]);
+		m_app->removeFromDB(upper);
+		m_app->removeFromDB(lower);
+		m_app->removeFromDB(interior);
+	}
+
+	m_app->setSelectedInDB(dest, true);
+	m_app->redrawAll(true); //redraw gui + 3D view
+
+	m_app->dispToConsole(QString().asprintf("[Compass] Merged selected GeoObjects to %s.",dest->getName().toStdString()), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+}
+
+//calculates best-fit plane for the upper and lower surfaces of the selected GeoObject
+void ccCompass::fitPlaneToGeoObject()
+{
+
+	m_app->dispToConsole("[Compass] fitPlane", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
+
+	//loop selected GeoObject
+	ccHObject* o = m_app->dbRootObject()->find(m_geoObject_id);
+	if (!o)
+	{
+		m_geoObject_id = -1;
+		return; //invalid id
+	}
+
+	ccGeoObject* obj = static_cast<ccGeoObject*>(o); //get as geoObject
+
+	//fit upper plane
+	ccHObject* upper = obj->getRegion(ccGeoObject::UPPER_BOUNDARY);
+	ccPointCloud* points = new ccPointCloud(); //create point cloud for storing points
+	double rms; //float for storing rms values
+	for (int i = 0; i < upper->getChildrenNumber(); i++)
+	{
+		if (ccTrace::isTrace(upper->getChild(i)))
+		{
+			ccTrace* t = dynamic_cast<ccTrace*> (upper->getChild(i));
+			points->reserve(points->size() + t->size()); //make space
+			if (t) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
+			{
+				for (int p = 0; p < t->size(); p++)
+				{
+					points->addPoint(*t->getPoint(p)); //add point to 
+				}
+			}
+		}
+	}
+
+	//calculate and store upper fitplane
+	if (points->size() > 0)
+	{
+		ccFitPlane* p = ccFitPlane::Fit(points, &rms);
+		if (p)
+		{
+			QVariantMap map;
+			map.insert("RMS", rms);
+			p->setMetaData(map, true);
+			upper->addChild(p);
+			m_app->addToDB(p, false, false, false, false);
+		}
+		else
+		{
+			m_app->dispToConsole("[Compass] Not enough 3D information to generate sensible fit plane.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		}
+	}
+
+	//rinse and repeat for lower
+	points->clear();
+	ccHObject* lower = obj->getRegion(ccGeoObject::LOWER_BOUNDARY);
+	for (int i = 0; i < lower->getChildrenNumber(); i++)
+	{
+		if (ccTrace::isTrace(lower->getChild(i)))
+		{
+			ccTrace* t = dynamic_cast<ccTrace*> (lower->getChild(i));
+			points->reserve(points->size() + t->size()); //make space
+			if (t) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
+			{
+				for (int p = 0; p < t->size(); p++)
+				{
+					points->addPoint(*t->getPoint(p)); //add point to cloud
+				}
+			}
+		}
+	}
+
+	//calculate and store lower fitplane
+	if (points->size() > 0)
+	{
+		ccFitPlane* p = ccFitPlane::Fit(points, &rms);
+		if (p)
+		{
+			QVariantMap map;
+			map.insert("RMS", rms);
+			p->setMetaData(map, true);
+			lower->addChild(p);
+			m_app->addToDB(p, false, false, false, true);
+		}
+		else
+		{
+			m_app->dispToConsole("[Compass] Not enough 3D information to generate sensible fit plane.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		}
+	}
+
+	//clean up point cloud
+	delete(points); 
+
 }
 
 //recompute entirely each selected trace (useful if the cost function has changed)
@@ -1055,6 +1252,21 @@ void ccCompass::addGeoObject() //creates a new GeoObject
 		if (m_app->dbRootObject()->getChild(i)->getName() == "interpretation")
 		{
 			interp_group = m_app->dbRootObject()->getChild(i);
+		}
+		else
+		{
+			//also search first-level children of root node (when files are re-loaded this is where things will sit)
+			for (unsigned c = 0; c < m_app->dbRootObject()->getChild(i)->getChildrenNumber(); c++)
+			{
+				if (m_app->dbRootObject()->getChild(i)->getChild(c)->getName() == "interpretation")
+				{
+					interp_group = m_app->dbRootObject()->getChild(i)->getChild(c);
+					break;
+				}
+			}
+		}
+		if (interp_group) //found one :)
+		{
 			break;
 		}
 	}

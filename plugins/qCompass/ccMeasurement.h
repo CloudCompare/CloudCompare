@@ -25,7 +25,7 @@ public:
 	void setDefaultColor(ccColor::Rgba col) { m_normal_colour = col; }
 	void setHighlightColor(ccColor::Rgba col) { m_highlight_colour = col; }
 	void setActiveColor(ccColor::Rgba col) { m_active_colour = col; }
-
+	void setAlternateColor(ccColor::Rgba col) { m_alternate_colour = col; }
 	//returns the colour of this measurment object given the active/highlighted state
 	ccColor::Rgba getMeasurementColour()
 	{

@@ -114,12 +114,16 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 
 	m_toSVG = new QAction("Export SVG", this);
 	m_noteTool = new QAction("Add note", this);
+	m_pinchTool = new QAction("Add pinch nodes", this);
 	m_measure_thickness = new QAction("Measure One-Point Thickness", this);
 	m_measure_thickness_twoPoint = new QAction("Measure Two-Point Thickness");
 	m_youngerThan = new QAction("Assign \"Younger-Than\" Relationship", this);
 	m_follows = new QAction("Assign \"Follows\" Relationship", this);
 	m_equivalent = new QAction("Assign \"Equivalent\" Relationship", this);
+	m_fitPlaneToGeoObject = new QAction("Fit plane to GeoObject", this);
+	m_mergeSelected = new QAction("Merge selected GeoObjects", this);
 
+	m_pinchTool->setToolTip("Add Pinch Node objects to record features such as dyke tips or sedimentary units that pinch-out.");
 	m_toSVG->setToolTip("Export the currently visible trace to a SVG vector graphic using an orthographic projection of the current view.");
 	m_noteTool->setToolTip("Add short notes to a point in a point cloud for future reference.");
 	m_measure_thickness->setToolTip("Select a plane and then a point to measure plane-perpendicular thickness.");
@@ -127,15 +131,20 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_youngerThan->setToolTip("Pick two GeoObjects to assign a \"younger-than\" (i.e. crosscutting, superposition) relationshi.p");
 	m_follows->setToolTip("Select two GeoObjects to assign a \"follows\" (i.e. conformable) relationship.");
 	m_equivalent->setToolTip("Select two GeoObjects to assign an \"equivalent\" (i.e. coeval) relationship.");
+	m_fitPlaneToGeoObject->setToolTip("Calculates best fit planes for the entire upper/lower surfaces of the GeoObject.");
+	m_mergeSelected->setToolTip("Merge all selected GeoObjects into a single GeoObject.");
 
+	m_pairpicking_menu->addAction(m_pinchTool);
 	m_pairpicking_menu->addAction(m_measure_thickness);
 	m_pairpicking_menu->addAction(m_measure_thickness_twoPoint);
+	m_pairpicking_menu->addAction(m_noteTool);
 	m_pairpicking_menu->addSeparator();
 	m_pairpicking_menu->addAction(m_youngerThan);
 	m_pairpicking_menu->addAction(m_follows);
 	m_pairpicking_menu->addAction(m_equivalent);
 	m_pairpicking_menu->addSeparator();
-	m_pairpicking_menu->addAction(m_noteTool);
+	m_pairpicking_menu->addAction(m_fitPlaneToGeoObject);
+	m_pairpicking_menu->addAction(m_mergeSelected);
 	m_pairpicking_menu->addSeparator();
 	m_pairpicking_menu->addAction(m_toSVG);
 

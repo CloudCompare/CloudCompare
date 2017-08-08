@@ -61,12 +61,18 @@ public:
 	QAction *m_recalculate;
 
 	//pair picking menu
-	QAction *m_measure_thickness; //thickness tool
-	QAction *m_measure_thickness_twoPoint; //thickness tool
-	QAction *m_youngerThan; //topology tool - crosscutting relations
-	QAction *m_follows; //topology tool - stratigraphic younging relations
-	QAction *m_equivalent;
-	QAction *m_noteTool; //note tool
+	QAction *m_pinchTool;
+	QAction *m_measure_thickness; //activates thickness tool
+	QAction *m_measure_thickness_twoPoint; //activates thickness tool
+	//--
+	QAction *m_youngerThan; //activates topology tool - crosscutting relations
+	QAction *m_follows; //activates topology tool - stratigraphic younging relations
+	QAction *m_equivalent; //activates topology tool - coeval/equivalent relations
+	//--
+	QAction *m_fitPlaneToGeoObject; //fits a plane to the upper/lower surfaces of all points in a GeoObject
+	QAction *m_mergeSelected; //merges the selected geoObjects
+	//--
+	QAction *m_noteTool; //activates note tool
 	QAction *m_toSVG; //export to svg
 
 protected slots:

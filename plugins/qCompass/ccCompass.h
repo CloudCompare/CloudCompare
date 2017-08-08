@@ -62,6 +62,7 @@
 #include "ccThicknessTool.h"
 #include "ccNoteTool.h"
 #include "ccTopologyTool.h"
+#include "ccPinchNodeTool.h"
 
 //other
 #include <math.h>
@@ -126,6 +127,7 @@ protected slots:
 	void setTrace(); //activates the trace tool
 
 	//extra tools
+	void addPinchNode(); //activates the pinch node tool
 	void setThickness(); //activates the thickness tool
 	void setThickness2(); //activates the thickness tool in two-point mode
 	void setYoungerThan(); //activates topology tool in "younger-than" mode
@@ -133,6 +135,8 @@ protected slots:
 	void setEquivalent(); //activates topology mode in "equivalent" mode
 	void setNote(); //activates the note tool
 	void recalculateSelectedTraces(); //recalculate any selected traces (for updating with a different cost function)
+	void mergeGeoObjects(); //merges the selected GeoObjects
+	void fitPlaneToGeoObject(); //calculates best-fit plane for the upper and lower surfaces of the selected GeoObject
 	void exportToSVG(); //exports current view to SVG
 
 	//map mode dialog
@@ -194,6 +198,7 @@ protected:
 	ccThicknessTool* m_thicknessTool;
 	ccTopologyTool* m_topologyTool;
 	ccNoteTool* m_noteTool;
+	ccPinchNodeTool* m_pinchNodeTool;
 
 	//currently selected/active geoObject
 	ccGeoObject* m_geoObject = nullptr; //the GeoObject currently being written to

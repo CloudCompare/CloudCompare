@@ -136,7 +136,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glMatrixMode(GL_MODELVIEW);
 			glFunc->glPushMatrix();
 			ccGL::Translate(glFunc, P->x, P->y, P->z);
-			float scale = context.labelMarkerSize * m_relMarkerScale * 0.15 * pSize;
+			float scale = context.labelMarkerSize * m_relMarkerScale * 0.2 * fmin(pSize, 4);
 			if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 			{
 				//in perspective view, the actual scale depends on the distance to the camera!

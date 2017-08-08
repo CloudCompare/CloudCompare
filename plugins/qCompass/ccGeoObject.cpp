@@ -1,6 +1,7 @@
 #include "ccGeoObject.h"
 
 #include "ccTopologyRelation.h"
+#include "ccPinchNode.h"
 
 ccGeoObject::ccGeoObject(QString name, ccMainAppInterface* app)
 	: ccHObject(name)
@@ -226,22 +227,21 @@ void ccGeoObject::recurseChildren(ccHObject* par, bool highlight)
 			m->setHighlight(highlight); //other boundaries/regions drawn in green
 		}
 
-		//draw labels (except for trace objects, when the child plane object will hold the useful info)
-		if (!ccTrace::isTrace(par))
+		//draw labels (except for trace objects and tips, when the child plane object will hold the useful info)
+		if (!ccTrace::isTrace(par) && !ccPinchNode::isPinchNode(par))
 		{
 			par->showNameIn3D(highlight);
+		}
 
-			if (highlight) //show active objects...
+		if (highlight) //show active objects...
+		{
+			par->setVisible(true);
+		}
+		else //hide annoying graphics on leaving traceMode (we basically only want traces to be visible)
+		{
+			if (ccPointPair::isPointPair(par) || ccFitPlane::isFitPlane(par))
 			{
-				par->setVisible(true);
-			}
-			else
-			{
-				//hide annoying graphics (we basically only want traces to be visible)
-				if (ccPointPair::isPointPair(par) || ccFitPlane::isFitPlane(par))
-				{
-					par->setVisible(false);
-				}
+				par->setVisible(false);
 			}
 		}
 	}

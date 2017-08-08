@@ -1,18 +1,19 @@
-#ifndef CC_NOTETOOL_HEADER
-#define CC_NOTETOOL_HEADER
+#ifndef CC_NODETOOL_HEADER
+#define CC_NODETOOL_HEADER
 
 #include "cctool.h"
-#include "ccNote.h"
+#include "ccGeoObject.h"
+#include "ccPinchNode.h"
 
 #include <qinputdialog.h>
 #include <qmainwindow.h>
 
-class ccNoteTool :
+class ccPinchNodeTool :
 	public ccTool
 {
 public:
-	ccNoteTool();
-	~ccNoteTool();
+	ccPinchNodeTool();
+	~ccPinchNodeTool();
 
 	//called when the tool is set to active (for initialization)
 	virtual void toolActivated() override;

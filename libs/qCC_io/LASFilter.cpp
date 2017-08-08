@@ -523,6 +523,8 @@ public:
 			BufferReader bufferReader;
 
 			writerOptions.add("filename", fileNames[i].toStdString());
+			if (tilePointViews[i]->empty())
+				continue;
 			try
 			{
 				bufferReader.addView(tilePointViews[i]);

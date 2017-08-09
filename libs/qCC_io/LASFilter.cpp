@@ -441,12 +441,13 @@ public:
 	inline size_t tileCount() const { return tilePointViews.size(); }
 
 	bool init(unsigned int width,
-			unsigned int height,
-			unsigned int Zdim,
-			QString absoluteBaseFilename,
-			const CCVector3d& bbMin,
-			const CCVector3d& bbMax,
-			const PointTableRef table)
+		unsigned int height,
+		unsigned int Zdim,
+		QString absoluteBaseFilename,
+		const CCVector3d& bbMin,
+		const CCVector3d& bbMax,
+		const PointTableRef table,
+		const LasHeader& header)
 	{
 		//init tiling dimensions
 		assert(Zdim < 3);
@@ -475,15 +476,14 @@ public:
 		h = height;
 
 		//File extension
-		//QString ext = (header.Compressed() ? "laz" : "las");
+		QString ext = (header.compressed() ? "laz" : "las");
 
 		for (unsigned int i = 0; i < width; ++i)
 		{
 			for (unsigned int j = 0; j < height; ++j)
 			{
 				unsigned int ii = index(i, j);
-				//TODO: Don't forget to change the ext to be able to write .laz
-				QString filename = absoluteBaseFilename + QString("_%1_%2.%3").arg(QString::number(i), QString::number(j), QString("las"));
+				QString filename = absoluteBaseFilename + QString("_%1_%2.%3").arg(QString::number(i), QString::number(j), ext);
 
 				fileNames[ii] = filename;
 				tilePointViews[ii] = PointViewPtr(new PointView(table));
@@ -770,7 +770,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
 		pDlg->setMethodTitle(QObject::tr("Open LAS file"));
-		pDlg->setInfo(QObject::tr("Points: %1").arg(nbOfPoints));
+		pDlg->setInfo(QObject::tr("Points: %L1").arg(nbOfPoints));
 		pDlg->start();
 	}
 
@@ -802,7 +802,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		unsigned int h = static_cast<unsigned int>(s_lasOpenDlg->hTileSpinBox->value());
 
 		QString outputBaseName = s_lasOpenDlg->outputPathLineEdit->text() + "/" + QFileInfo(filename).baseName();
-		if (!tiler.init(w, h, vertDim, outputBaseName, bbMin, bbMax, table))
+		if (!tiler.init(w, h, vertDim, outputBaseName, bbMin, bbMax, table, lasHeader))
 		{
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}

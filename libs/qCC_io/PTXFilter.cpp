@@ -484,7 +484,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				//by default we don't compute normals without asking the user
 				if (parameters.autoComputeNormals)
 				{
-					cloud->computeNormalsWithGrids(LS, 2, true, normalsProgressDlg.data());
+					cloud->computeNormalsWithGrids(1.0, normalsProgressDlg.data());
 				}
 			}
 
@@ -509,7 +509,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			validIntensityRange = false;
 		}
 
-		for (unsigned i=0; i<container.getChildrenNumber(); ++i)
+		for (unsigned i = 0; i < container.getChildrenNumber(); ++i)
 		{
 			ccHObject* obj = container.getChild(i);
 			assert(obj && obj->isA(CC_TYPES::POINT_CLOUD));

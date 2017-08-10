@@ -60,11 +60,11 @@ public:
 	//! Returns whether scan grids should be used for computation
 	bool useScanGridsForComputation() const;
 
-	//! Returns the kernel grid size (for scan grids) if scan grids are to be used
-	int getGridKernelSize() const;
+	//! Returns the min angle for grid triangles
+	double getMinGridAngle_deg() const;
 
-	//! Sets the kernel grid size (for scan grids)
-	void setGridKernelSize(int value);
+	//! Sets the min angle for grid triangles
+	void setMinGridAngle_deg(double value);
 
 	//! Returns local neighbourhood radius
 	PointCoordinateType getRadius() const;

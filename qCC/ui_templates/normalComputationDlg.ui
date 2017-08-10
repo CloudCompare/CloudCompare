@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>362</height>
+    <width>418</width>
+    <height>387</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -117,7 +117,16 @@
            <bool>false</bool>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout">
-           <property name="margin">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
             <number>0</number>
            </property>
            <item>
@@ -126,23 +135,26 @@
               <string>Each normal will be computed using the (2p+1)*(2p+1) neighbors in the grid</string>
              </property>
              <property name="text">
-              <string>kernel size</string>
+              <string>min angle</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="gridKernelSpinBox">
+            <widget class="QDoubleSpinBox" name="gridAngleDoubleSpinBox">
              <property name="toolTip">
-              <string>Each normal will be computed using the (2p+1)*(2p+1) neighbors in the grid</string>
+              <string>Min angle of local triangles (in degrees)</string>
              </property>
              <property name="minimum">
-              <number>1</number>
+              <double>0.000000000000000</double>
              </property>
              <property name="maximum">
-              <number>10</number>
+              <double>90.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
              </property>
              <property name="value">
-              <number>2</number>
+              <double>1.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -160,7 +172,16 @@
          </sizepolicy>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_9">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
         </layout>
@@ -197,7 +218,16 @@
         <item>
          <widget class="QFrame" name="localRadiusFrame">
           <layout class="QHBoxLayout" name="horizontalLayout_8">
-           <property name="margin">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
             <number>0</number>
            </property>
            <item>

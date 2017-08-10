@@ -354,9 +354,7 @@ public: //normals computation/orientation
 	//! Compute the normals with the associated grid structure(s)
 	/** Can also orient the normals in the same run.
 	**/
-	bool computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
-									int kernelWidth,
-									bool orientNormals = true,
+	bool computeNormalsWithGrids(	double minTriangleAngle_deg = 1.0,
 									ccProgressDialog* pDlg = 0 );
 
 	//! Orient the normals with the associated grid structure(s)

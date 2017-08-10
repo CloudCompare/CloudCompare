@@ -122,6 +122,10 @@ v2.9.alpha - XX/XX/XXXX
 	* qEllipser dialog:
 		- option to export the image as a (potentially scaled) point cloud
 
+	* Normal computation tools:
+		- new algorithm to compute the normals based on scan grids (faster, and more robust)
+		- the 'kernel size' parameter is replaced by 'the minimum angle of triangles' used in the internal triangulation process
+
 	* Other
 		- color scales are now listed in alphabetical order
 		- the DXF format can now be used to export point clouds (their size should be very limited!)
@@ -142,6 +146,7 @@ v2.9.alpha - XX/XX/XXXX
 	* Point-pair based alignment tool:
 		- extracting spheres on a cloud with Global Shift would create the sphere in the global coordinate system instead of the local one (i.e. the sphere was not visible)
 		- deleting a point would remove all the detected spheres
+	* The FARO I/O plugin was associating a wrong transformation to the scan grids, resulting into weird results when computing normals or constructing a mesh based on scan grids
 
 v2.8.1 - 16/02/2017
 ----------------------

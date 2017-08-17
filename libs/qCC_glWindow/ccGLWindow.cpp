@@ -1518,7 +1518,9 @@ void ccGLWindow::paintGL()
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	if (	!m_stereoModeEnabled
 		||	m_stereoParams.glassType != StereoParams::OCULUS
+#ifdef CC_OCULUS_SUPPORT
 		||	s_oculus.mirror.texture
+#endif
 		)
 	{
 		m_context->swapBuffers(this);

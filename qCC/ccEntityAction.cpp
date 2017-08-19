@@ -2017,6 +2017,11 @@ namespace ccEntityAction
 			if (property == CLEAR_PROPERTY::NORMALS && ( ent->isA(CC_TYPES::MESH) /*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/ )) //TODO
 			{
 				ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
+				if (!mesh)
+				{
+					assert(false);
+					continue;
+				}
 				if (mesh->hasTriNormals())
 				{
 					mesh->showNormals(false);

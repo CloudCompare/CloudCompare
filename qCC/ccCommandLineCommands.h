@@ -115,6 +115,7 @@ static const char COMMAND_FBX_EXPORT_FORMAT[]				= "FBX_EXPORT_FMT";
 static const char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 static const char COMMAND_COMPUTE_GRIDDED_NORMALS[]			= "COMPUTE_NORMALS";
 static const char COMMAND_COMPUTE_OCTREE_NORMALS[]			= "OCTREE_NORMALS";
+static const char COMMAND_CLEAR_NORMALS[]					= "CLEAR_NORMALS";
 static const char COMMAND_SAVE_CLOUDS[]						= "SAVE_CLOUDS";
 static const char COMMAND_SAVE_MESHES[]						= "SAVE_MESHES";
 static const char COMMAND_AUTO_SAVE[]						= "AUTO_SAVE";
@@ -451,6 +452,59 @@ struct CommandLoad : public ccCommandLineInterface::Command
 	}
 };
 
+
+struct CommandClearNormals : public ccCommandLineInterface::Command
+{
+	CommandClearNormals() : ccCommandLineInterface::Command("Clears normals", COMMAND_CLEAR_NORMALS) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		cmd.print("[CLEAR NORMALS]");
+		if (cmd.clouds().empty() && cmd.meshes().empty())
+		{
+			return cmd.error(QString("No entity loaded (be sure to open at least one file with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_CLEAR_NORMALS));
+		}
+
+		for (const CLCloudDesc& thisCloudDesc : cmd.clouds())
+		{
+			ccPointCloud* cloud = thisCloudDesc.pc;
+			if (cloud)
+			{
+				cloud->unallocateNorms();
+			}
+		}
+
+		for (const CLMeshDesc& thisMeshDesc : cmd.meshes())
+		{
+			ccMesh* mesh = ccHObjectCaster::ToMesh(thisMeshDesc.mesh);
+			if (!mesh)
+			{
+				assert(false);
+				continue;
+			}
+
+			mesh->clearTriNormals();
+
+			if (mesh->getParent()
+				&& (mesh->getParent()->isA(CC_TYPES::MESH)/*|| mesh->getParent()->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
+				&& ccHObjectCaster::ToMesh(mesh->getParent())->getAssociatedCloud() == mesh->getAssociatedCloud())
+			{
+				//Can't remove per-vertex normals on a sub mesh!
+			}
+			else
+			{
+				//mesh is alone, we can freely remove normals
+				if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD))
+				{
+					static_cast<ccPointCloud*>(mesh->getAssociatedCloud())->unallocateNorms();
+				}
+			}
+		}
+
+		return true;
+	}
+};
+
 struct CommandOctreeNormal : public ccCommandLineInterface::Command
 {
 	CommandOctreeNormal() : ccCommandLineInterface::Command("Compute normals with octree", COMMAND_COMPUTE_OCTREE_NORMALS) {}
@@ -460,7 +514,7 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 		cmd.print("[OCTREE NORMALS CALCULATION]");
 		if (cmd.clouds().empty())
 		{
-			return cmd.error(QString("No point cloud to normal calculation (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_SUBSAMPLE));
+			return cmd.error(QString("No point cloud to normal calculation (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_COMPUTE_OCTREE_NORMALS));
 		}
 
 		if (cmd.arguments().empty())

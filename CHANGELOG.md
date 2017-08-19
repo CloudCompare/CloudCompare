@@ -80,6 +80,8 @@ v2.9.alpha - XX/XX/XXXX
 		- Compute unstructured cloud normals:
 			* '-OCTREE_NORMALS {radius}'
 			* for now the local model is 'Height Function' and no default orientation is specified
+		- Clear normals
+			* '-CLEAR_NORMALS'
 		- Other improvements:
 			* the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
 			* the ASCII loading dialog shouldn't appear anymore in 'SILENT' mode (only if CC really can't guess anything)

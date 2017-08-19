@@ -18,6 +18,9 @@
 #ifndef CC_MAIN_WINDOW_HEADER
 #define CC_MAIN_WINDOW_HEADER
 
+//Qt
+#include <QMainWindow>
+
 //Local
 #include "ccEntityAction.h"
 #include "ccPickingListener.h"
@@ -26,49 +29,43 @@
 #include <ccMainAppInterface.h>
 #include <ccPluginInfo.h>
 
-//Qt
-#include <QMainWindow>
-#include <QDir>
-
 //CCLib
 #include <AutoSegmentationTools.h>
-#include <PointProjectionTools.h>
 
 //GUI (generated with Qt Designer)
 #include <ui_mainWindow.h>
 
-//qCC_io
-#include <FileIOFilter.h>
-
 //internal db
 #include "db_tree/ccDBRoot.h"
 
-class QMdiArea;
-class QSignalMapper;
-class QToolButton;
 class QAction;
+class QMdiArea;
+class QMdiSubWindow;
+class QSignalMapper;
 class QToolBar;
-class ccGLWindow;
-class ccHObject;
-class ccComparisonDlg;
-class ccGraphicalSegmentationTool;
-class ccSectionExtractionTool;
-class ccGraphicalTransformationTool;
-class ccTracePolylineTool;
-class ccClippingBoxTool;
-class ccPluginInterface;
-class ccStdPluginInterface;
-class ccPointPropertiesDlg;
+class QToolButton;
+
+class cc3DMouseManager;
 class ccCameraParamEditDlg;
+class ccClippingBoxTool;
+class ccComparisonDlg;
+class ccDrawableObject;
+class ccGamepadManager;
+class ccGLWindow;
+class ccGraphicalSegmentationTool;
+class ccGraphicalTransformationTool;
+class ccHObject;
+class ccOverlayDialog;
+class ccPluginInterface;
 class ccPointListPickingDlg;
 class ccPointPairRegistrationDlg;
+class ccPointPropertiesDlg;
 class ccPrimitiveFactoryDlg;
-class ccDrawableObject;
-class ccOverlayDialog;
-class QMdiSubWindow;
-class cc3DMouseManager;
-class ccGamepadManager;
 class ccRecentFiles;
+class ccSectionExtractionTool;
+class ccStdPluginInterface;
+class ccTracePolylineTool;
+
 
 //! Main window
 class MainWindow : public QMainWindow, public ccMainAppInterface, public ccPickingListener, public Ui::MainWindow
@@ -112,6 +109,15 @@ public:
 
 	//! Returns active GL sub-window (if any)
 	virtual ccGLWindow* getActiveGLWindow() override;
+	
+	//! Returns MDI area subwindow corresponding to a given 3D view
+	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
+
+	//! Returns a given views
+	ccGLWindow* getGLWindow(int index) const;
+
+	//! Returns the number of 3D views
+	int getGLWindowCount() const;
 
 	//! Tries to load several files (and then pushes them into main DB)
 	/** \param filenames list of all filenames
@@ -120,7 +126,7 @@ public:
 	**/
 	virtual void addToDB(	const QStringList& filenames,
 							QString fileFilter = QString(),
-							ccGLWindow* destWin = 0);
+							ccGLWindow* destWin = nullptr);
 
 	//inherited from ccMainAppInterface
 	virtual void addToDB(	ccHObject* obj,
@@ -132,7 +138,6 @@ public:
 	virtual void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
 	virtual void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
 	virtual void updateOverlayDialogsPlacement() override;
-	void updateOverlayDialogPlacement(ccOverlayDialog* dlg);
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
 	virtual void setSelectedInDB(ccHObject* obj, bool selected) override;
 	virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
@@ -154,15 +159,6 @@ public:
 
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
-
-	//! Returns MDI area subwindow corresponding to a given 3D view
-	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
-
-	//! Returns a given views
-	ccGLWindow* getGLWindow(int index) const;
-
-	//! Returns the number of 3D views
-	int getGLWindowCount() const;
 
 	//! Backup "context" for an object
 	/** Used with removeObjectTemporarilyFromDBTree/putObjectBackIntoDBTree.
@@ -187,20 +183,13 @@ public:
 	**/
 	void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context);
 
-	//! Shortcut: asks the user to select one cloud
-	/** \param defaultCloudEntity a cloud to select by default (optional)
-		\param inviteMessage invite message (default is something like 'Please select an entity:') (optional)
-		\return the selected cloud (or null if the user cancelled the operation)
-	**/
-	ccPointCloud* askUserToSelectACloud(ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
-
 	//! Dispatches the (loaded) plugins in the UI
 	void dispatchPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths);
 
 	//! Updates the 'Properties' view
 	void updatePropertiesView();
 	
-protected slots:
+private slots:
 
 	//! Creates a new 3D GL sub-window
 	ccGLWindow* new3DView();
@@ -470,7 +459,14 @@ protected slots:
 	//! Creates a cloud with the (bounding-box) centers of all selected entities
 	void doActionCreateCloudFromEntCenters();
 
-protected:
+private:
+	//! Shortcut: asks the user to select one cloud
+	/** \param defaultCloudEntity a cloud to select by default (optional)
+		\param inviteMessage invite message (default is something like 'Please select an entity:') (optional)
+		\return the selected cloud (or null if the user cancelled the operation)
+	**/
+	ccPointCloud* askUserToSelectACloud(ccHObject* defaultCloudEntity = nullptr, QString inviteMessage = QString());
+
 	void	toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY property );
 	void	clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY property );
 	
@@ -478,11 +474,6 @@ protected:
 	
 	//! Apply transformation to the selected entities
 	void applyTransformation(const ccGLMatrixd& transMat);
-
-	//! Removes from a list all elements that are sibling of others
-	/** List is updated in place.
-	**/
-	static void RemoveSiblingsFromCCObjectList(ccHObject::Container& ccObjects);
 
 	//! Creates point clouds from multiple 'components'
 	void createComponentsClouds(ccGenericPointCloud* cloud,
@@ -537,9 +528,6 @@ protected:
 
 	//! Enables menu entires based on the current selection
 	void enableUIItems(dbTreeSelectionInfo& selInfo);
-
-	//! Expands DB tree for selected items
-	void expandDBTreeWithSelection(ccHObject::Container& selection);
 
 	//! Updates the view mode pop-menu based for a given window (or an absence of!)
 	virtual void updateViewModePopUpMenu(ccGLWindow* win);
@@ -607,7 +595,6 @@ protected:
 	std::vector<ccMDIDialogs> m_mdiDialogs;
 
 	/*** dialogs ***/
-
 	//! Camera params dialog
 	ccCameraParamEditDlg* m_cpeDlg;
 	//! Graphical segmentation dialog

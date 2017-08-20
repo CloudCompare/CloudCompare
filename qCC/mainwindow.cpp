@@ -5940,7 +5940,7 @@ void MainWindow::freezeUI(bool state)
 
 	//freeze plugin toolbars
 	{
-		for ( QToolBar *toolbar : qAsConst( m_stdPluginsToolbars ) )
+		for ( QToolBar *toolbar : m_stdPluginsToolbars )
 		{
 			toolbar->setDisabled(state);
 		}

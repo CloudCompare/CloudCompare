@@ -133,6 +133,7 @@
 //Qt UI files
 #include <ui_distanceMapDlg.h>
 #include <ui_globalShiftSettingsDlg.h>
+#include <ui_mainWindow.h>
 
 //System
 #include <iostream>
@@ -158,7 +159,8 @@ static ccHObject* s_levelEntity = nullptr;
 
 
 MainWindow::MainWindow()
-	: m_ccRoot(nullptr)
+	: m_UI( new Ui::MainWindow )
+	, m_ccRoot(nullptr)
 	, m_uiFrozen(false)
 	, m_recentFiles(new ccRecentFiles(this))
 	, m_3DMouseManager(nullptr)
@@ -180,21 +182,21 @@ MainWindow::MainWindow()
 	, m_pfDlg(nullptr)
 	, m_glFilterActions(this)
 {
-	setupUi(this);
+	m_UI->setupUi( this );
 
 #ifdef Q_OS_MAC
-	actionAbout->setMenuRole( QAction::AboutRole );
-	actionAboutPlugins->setMenuRole( QAction::NoRole );
+	m_UI->actionAbout->setMenuRole( QAction::AboutRole );
+	m_UI->actionAboutPlugins->setMenuRole( QAction::NoRole );
 
-	actionFullScreen->setText( tr( "Enter Full Screen" ) );
-	actionFullScreen->setShortcut( QKeySequence( Qt::CTRL + Qt::META + Qt::Key_F ) );
+	m_UI->actionFullScreen->setText( tr( "Enter Full Screen" ) );
+	m_UI->actionFullScreen->setShortcut( QKeySequence( Qt::CTRL + Qt::META + Qt::Key_F ) );
 #endif
 
-	menuFile->insertMenu(actionSave, m_recentFiles->menu());
+	m_UI->menuFile->insertMenu(m_UI->actionSave, m_recentFiles->menu());
 
 	//Console
-	ccConsole::Init(consoleWidget, this, this);
-	actionEnableQtWarnings->setChecked(ccConsole::QtMessagesEnabled());
+	ccConsole::Init(m_UI->consoleWidget, this, this);
+	m_UI->actionEnableQtWarnings->setChecked(ccConsole::QtMessagesEnabled());
 
 	setWindowTitle(QString("CloudCompare v")+ccCommon::GetCCVersion(false));
 
@@ -204,15 +206,15 @@ MainWindow::MainWindow()
 		{
 			m_viewModePopupButton = new QToolButton();
 			QMenu* menu = new QMenu(m_viewModePopupButton);
-			menu->addAction(actionSetOrthoView);
-			menu->addAction(actionSetCenteredPerspectiveView);
-			menu->addAction(actionSetViewerPerspectiveView);
+			menu->addAction(m_UI->actionSetOrthoView);
+			menu->addAction(m_UI->actionSetCenteredPerspectiveView);
+			menu->addAction(m_UI->actionSetViewerPerspectiveView);
 
 			m_viewModePopupButton->setMenu(menu);
 			m_viewModePopupButton->setPopupMode(QToolButton::InstantPopup);
 			m_viewModePopupButton->setToolTip("Set current view mode");
 			m_viewModePopupButton->setStatusTip(m_viewModePopupButton->toolTip());
-			toolBarView->insertWidget(actionZoomAndCenter, m_viewModePopupButton);
+			m_UI->toolBarView->insertWidget(m_UI->actionZoomAndCenter, m_viewModePopupButton);
 			m_viewModePopupButton->setEnabled(false);
 		}
 
@@ -220,15 +222,15 @@ MainWindow::MainWindow()
 		{
 			m_pivotVisibilityPopupButton = new QToolButton();
 			QMenu* menu = new QMenu(m_pivotVisibilityPopupButton);
-			menu->addAction(actionSetPivotAlwaysOn);
-			menu->addAction(actionSetPivotRotationOnly);
-			menu->addAction(actionSetPivotOff);
+			menu->addAction(m_UI->actionSetPivotAlwaysOn);
+			menu->addAction(m_UI->actionSetPivotRotationOnly);
+			menu->addAction(m_UI->actionSetPivotOff);
 
 			m_pivotVisibilityPopupButton->setMenu(menu);
 			m_pivotVisibilityPopupButton->setPopupMode(QToolButton::InstantPopup);
 			m_pivotVisibilityPopupButton->setToolTip("Set pivot visibility");
 			m_pivotVisibilityPopupButton->setStatusTip(m_pivotVisibilityPopupButton->toolTip());
-			toolBarView->insertWidget(actionZoomAndCenter,m_pivotVisibilityPopupButton);
+			m_UI->toolBarView->insertWidget(m_UI->actionZoomAndCenter,m_pivotVisibilityPopupButton);
 			m_pivotVisibilityPopupButton->setEnabled(false);
 		}
 	}
@@ -237,7 +239,7 @@ MainWindow::MainWindow()
 
 	//db-tree
 	{
-		m_ccRoot = new ccDBRoot(dbTreeView, propertiesTreeView, this);
+		m_ccRoot = new ccDBRoot(m_UI->dbTreeView, m_UI->propertiesTreeView, this);
 		connect(m_ccRoot, SIGNAL(selectionChanged()), this, SLOT(updateUIWithSelection()));
 	}
 
@@ -325,10 +327,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths)
 {
-	menuPlugins->setEnabled(false);
-	menuShadersAndFilters->setEnabled(false);
-	toolBarPluginTools->setVisible(false);
-	toolBarGLFilters->setVisible(false);
+	m_UI->menuPlugins->setEnabled(false);
+	m_UI->menuShadersAndFilters->setEnabled(false);
+	m_UI->toolBarPluginTools->setVisible(false);
+	m_UI->toolBarGLFilters->setVisible(false);
 
 	m_pluginInfoList = plugins;
 	m_pluginPaths = pluginPaths;
@@ -365,7 +367,7 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 			stdPlugin->getActions(actions);
 			if (actions.actions().size() > 1) //more than one action? We create it's own menu and toolbar
 			{
-				destMenu = (menuPlugins ? menuPlugins->addMenu(pluginName) : 0);
+				destMenu = (m_UI->menuPlugins ? m_UI->menuPlugins->addMenu(pluginName) : 0);
 				if (destMenu)
 					destMenu->setIcon(stdPlugin->getIcon());
 				destToolBar = addToolBar(pluginName + QString(" toolbar"));
@@ -381,8 +383,8 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 			}
 			else //default destination
 			{
-				destMenu = menuPlugins;
-				destToolBar = toolBarPluginTools;
+				destMenu = m_UI->menuPlugins;
+				destToolBar = m_UI->toolBarPluginTools;
 			}
 
 			//add actions
@@ -421,11 +423,11 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 			//connect default signal
 			connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
 
-			menuShadersAndFilters->addAction(action);
-			menuShadersAndFilters->setEnabled(true);
-			toolBarGLFilters->addAction(action);
-			toolBarGLFilters->setVisible(true);
-			toolBarGLFilters->setEnabled(true);
+			m_UI->menuShadersAndFilters->addAction(action);
+			m_UI->menuShadersAndFilters->setEnabled(true);
+			m_UI->toolBarGLFilters->addAction(action);
+			m_UI->toolBarGLFilters->setVisible(true);
+			m_UI->toolBarGLFilters->setEnabled(true);
 
 			//add to GL filter (actions) list
 			m_glFilterActions.addAction(action);
@@ -444,15 +446,15 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 		}
 	}
 
-	if (menuPlugins)
+	if (m_UI->menuPlugins)
 	{
-		menuPlugins->setEnabled(!m_stdPlugins.empty());
+		m_UI->menuPlugins->setEnabled(!m_stdPlugins.empty());
 	}
 
-	if (toolBarPluginTools->isEnabled())
+	if (m_UI->toolBarPluginTools->isEnabled())
 	{
-		actionDisplayPluginTools->setEnabled(true);
-		actionDisplayPluginTools->setChecked(true);
+		m_UI->actionDisplayPluginTools->setEnabled(true);
+		m_UI->actionDisplayPluginTools->setChecked(true);
 	}
 	else
 	{
@@ -460,10 +462,10 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 		//actionDisplayPluginTools->setChecked(false);
 	}
 
-	if (toolBarGLFilters->isEnabled())
+	if (m_UI->toolBarGLFilters->isEnabled())
 	{
-		actionDisplayGLFiltersTools->setEnabled(true);
-		actionDisplayGLFiltersTools->setChecked(true);
+		m_UI->actionDisplayGLFiltersTools->setEnabled(true);
+		m_UI->actionDisplayGLFiltersTools->setChecked(true);
 	}
 	else
 	{
@@ -545,16 +547,16 @@ void MainWindow::setupInputDevices()
 {
 #ifdef CC_3DXWARE_SUPPORT
 	m_3DMouseManager = new cc3DMouseManager( this, this );
-	menuFile->insertMenu(actionCloseAll, m_3DMouseManager->menu());
+	m_UI->menuFile->insertMenu(m_UI->actionCloseAll, m_3DMouseManager->menu());
 #endif
 
 #ifdef CC_GAMEPADS_SUPPORT
 	m_gamepadManager = new ccGamepadManager( this, this );
-	menuFile->insertMenu(actionCloseAll, m_gamepadManager->menu());
+	m_UI->menuFile->insertMenu(m_UI->actionCloseAll, m_gamepadManager->menu());
 #endif
 
 #if defined(CC_3DXWARE_SUPPORT) || defined(CC_GAMEPADS_SUPPORT)
-	menuFile->insertSeparator(actionCloseAll);
+	m_UI->menuFile->insertSeparator(m_UI->actionCloseAll);
 #endif
 }
 
@@ -579,265 +581,265 @@ void MainWindow::connectActions()
 	//Keyboard shortcuts
 	
 	//'A': toggles selected items activation
-	connect(actionToggleActivation, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleActivation, &QAction::triggered, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::ACTIVE );
 	});
 
 	//'V': toggles selected items visibility
-	connect(actionToggleVisibility, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleVisibility, &QAction::triggered, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::VISIBLE );
 	});
 
 	//'N': toggles selected items normals visibility
-	connect(actionToggleNormals, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleNormals, &QAction::triggered, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::NORMALS );
 	});
 
 	//'C': toggles selected items colors visibility
-	connect(actionToggleColors,	&QAction::triggered, [=]() {
+	connect(m_UI->actionToggleColors,	&QAction::triggered, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::COLOR );
 	});
 
 	//'S': toggles selected items SF visibility
-	connect(actionToggleSF, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleSF, &QAction::triggered, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD );
 	});
 
 	//'D': toggles selected items '3D name' visibility
-	connect(actionToggleShowName, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleShowName, &QAction::triggered, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::NAME );
 	});
 
 	//'M': toggles selected items materials/textures visibility
-	connect(actionToggleMaterials, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleMaterials, &QAction::triggered, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::MATERIAL );
 	});
 
 	//TODO... but not ready yet ;)
-	actionLoadShader->setVisible(false);
-	actionDeleteShader->setVisible(false);
-	actionKMeans->setVisible(false);
-	actionFrontPropagation->setVisible(false);
+	m_UI->actionLoadShader->setVisible(false);
+	m_UI->actionDeleteShader->setVisible(false);
+	m_UI->actionKMeans->setVisible(false);
+	m_UI->actionFrontPropagation->setVisible(false);
 
 	/*** MAIN MENU ***/
 
 	//"File" menu
-	connect(actionOpen,							SIGNAL(triggered()),	this,		SLOT(doActionLoadFile()));
-	connect(actionSave,							SIGNAL(triggered()),	this,		SLOT(doActionSaveFile()));
-	connect(actionGlobalShiftSettings,			SIGNAL(triggered()),	this,		SLOT(doActionGlobalShiftSeetings()));
-	connect(actionPrimitiveFactory,				SIGNAL(triggered()),	this,		SLOT(doShowPrimitiveFactory()));
-	connect(actionCloseAll,						SIGNAL(triggered()),	this,		SLOT(closeAll()));
-	connect(actionQuit,							SIGNAL(triggered()),	this,		SLOT(close()));
+	connect(m_UI->actionOpen,					SIGNAL(triggered()),	this,		SLOT(doActionLoadFile()));
+	connect(m_UI->actionSave,					SIGNAL(triggered()),	this,		SLOT(doActionSaveFile()));
+	connect(m_UI->actionGlobalShiftSettings,	SIGNAL(triggered()),	this,		SLOT(doActionGlobalShiftSeetings()));
+	connect(m_UI->actionPrimitiveFactory,		SIGNAL(triggered()),	this,		SLOT(doShowPrimitiveFactory()));
+	connect(m_UI->actionCloseAll,				SIGNAL(triggered()),	this,		SLOT(closeAll()));
+	connect(m_UI->actionQuit,					SIGNAL(triggered()),	this,		SLOT(close()));
 
 	//"Edit > Colors" menu
-	connect(actionSetUniqueColor,				SIGNAL(triggered()),	this,		SLOT(doActionSetUniqueColor()));
-	connect(actionSetColorGradient,				SIGNAL(triggered()),	this,		SLOT(doActionSetColorGradient()));
-	connect(actionChangeColorLevels,			SIGNAL(triggered()),	this,		SLOT(doActionChangeColorLevels()));
-	connect(actionColorize,						SIGNAL(triggered()),	this,		SLOT(doActionColorize()));
-	connect(actionRGBToGreyScale,				SIGNAL(triggered()),	this,		SLOT(doActionRGBToGreyScale()));
-	connect(actionInterpolateColors,			SIGNAL(triggered()),	this,		SLOT(doActionInterpolateColors()));
-	connect(actionEnhanceRGBWithIntensities,	SIGNAL(triggered()),	this,		SLOT(doActionEnhanceRGBWithIntensities()));
-	connect(actionClearColor, &QAction::triggered, [=]() {
+	connect(m_UI->actionSetUniqueColor,				SIGNAL(triggered()),	this,		SLOT(doActionSetUniqueColor()));
+	connect(m_UI->actionSetColorGradient,			SIGNAL(triggered()),	this,		SLOT(doActionSetColorGradient()));
+	connect(m_UI->actionChangeColorLevels,			SIGNAL(triggered()),	this,		SLOT(doActionChangeColorLevels()));
+	connect(m_UI->actionColorize,					SIGNAL(triggered()),	this,		SLOT(doActionColorize()));
+	connect(m_UI->actionRGBToGreyScale,				SIGNAL(triggered()),	this,		SLOT(doActionRGBToGreyScale()));
+	connect(m_UI->actionInterpolateColors,			SIGNAL(triggered()),	this,		SLOT(doActionInterpolateColors()));
+	connect(m_UI->actionEnhanceRGBWithIntensities,	SIGNAL(triggered()),	this,		SLOT(doActionEnhanceRGBWithIntensities()));
+	connect(m_UI->actionClearColor, &QAction::triggered, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::COLORS );
 	});
 
 	//"Edit > Normals" menu
-	connect(actionComputeNormals,				SIGNAL(triggered()),	this,		SLOT(doActionComputeNormals()));
-	connect(actionInvertNormals,				SIGNAL(triggered()),	this,		SLOT(doActionInvertNormals()));
-	connect(actionConvertNormalToHSV,			SIGNAL(triggered()),	this,		SLOT(doActionConvertNormalsToHSV()));
-	connect(actionConvertNormalToDipDir,		SIGNAL(triggered()),	this,		SLOT(doActionConvertNormalsToDipDir()));
-	connect(actionOrientNormalsMST,				SIGNAL(triggered()),	this,		SLOT(doActionOrientNormalsMST()));
-	connect(actionOrientNormalsFM,				SIGNAL(triggered()),	this,		SLOT(doActionOrientNormalsFM()));
-	connect(actionClearNormals, &QAction::triggered, [=]() {
+	connect(m_UI->actionComputeNormals,				SIGNAL(triggered()),	this,		SLOT(doActionComputeNormals()));
+	connect(m_UI->actionInvertNormals,				SIGNAL(triggered()),	this,		SLOT(doActionInvertNormals()));
+	connect(m_UI->actionConvertNormalToHSV,			SIGNAL(triggered()),	this,		SLOT(doActionConvertNormalsToHSV()));
+	connect(m_UI->actionConvertNormalToDipDir,		SIGNAL(triggered()),	this,		SLOT(doActionConvertNormalsToDipDir()));
+	connect(m_UI->actionOrientNormalsMST,			SIGNAL(triggered()),	this,		SLOT(doActionOrientNormalsMST()));
+	connect(m_UI->actionOrientNormalsFM,			SIGNAL(triggered()),	this,		SLOT(doActionOrientNormalsFM()));
+	connect(m_UI->actionClearNormals, &QAction::triggered, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::NORMALS );
 	});
 
 	//"Edit > Octree" menu
-	connect(actionComputeOctree,				SIGNAL(triggered()),	this,		SLOT(doActionComputeOctree()));
-	connect(actionResampleWithOctree,			SIGNAL(triggered()),	this,		SLOT(doActionResampleWithOctree()));
+	connect(m_UI->actionComputeOctree,				SIGNAL(triggered()),	this,		SLOT(doActionComputeOctree()));
+	connect(m_UI->actionResampleWithOctree,			SIGNAL(triggered()),	this,		SLOT(doActionResampleWithOctree()));
 
 	//"Edit > Grid" menu
-	connect(actionDeleteScanGrid,               SIGNAL(triggered()),	this,		SLOT(doActionDeleteScanGrids()));
+	connect(m_UI->actionDeleteScanGrid,				SIGNAL(triggered()),	this,		SLOT(doActionDeleteScanGrids()));
 
 	//"Edit > Mesh" menu
-	connect(actionComputeMeshAA,				SIGNAL(triggered()),	this,		SLOT(doActionComputeMeshAA()));
-	connect(actionComputeMeshLS,				SIGNAL(triggered()),	this,		SLOT(doActionComputeMeshLS()));
-	connect(actionMeshScanGrids,				SIGNAL(triggered()),	this,		SLOT(doActionMeshScanGrids()));
-	connect(actionConvertTextureToColor,		SIGNAL(triggered()),	this,		SLOT(doActionConvertTextureToColor()));
-	connect(actionSamplePoints,					SIGNAL(triggered()),	this,		SLOT(doActionSamplePoints()));
-	connect(actionSmoothMeshLaplacian,			SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshLaplacian()));
-	connect(actionSubdivideMesh,				SIGNAL(triggered()),	this,		SLOT(doActionSubdivideMesh()));
-	connect(actionMeasureMeshSurface,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshSurface()));
-	connect(actionMeasureMeshVolume,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshVolume()));
-	connect(actionFlagMeshVertices,				SIGNAL(triggered()),	this,		SLOT(doActionFlagMeshVertices()));
+	connect(m_UI->actionComputeMeshAA,				SIGNAL(triggered()),	this,		SLOT(doActionComputeMeshAA()));
+	connect(m_UI->actionComputeMeshLS,				SIGNAL(triggered()),	this,		SLOT(doActionComputeMeshLS()));
+	connect(m_UI->actionMeshScanGrids,				SIGNAL(triggered()),	this,		SLOT(doActionMeshScanGrids()));
+	connect(m_UI->actionConvertTextureToColor,		SIGNAL(triggered()),	this,		SLOT(doActionConvertTextureToColor()));
+	connect(m_UI->actionSamplePoints,				SIGNAL(triggered()),	this,		SLOT(doActionSamplePoints()));
+	connect(m_UI->actionSmoothMeshLaplacian,		SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshLaplacian()));
+	connect(m_UI->actionSubdivideMesh,				SIGNAL(triggered()),	this,		SLOT(doActionSubdivideMesh()));
+	connect(m_UI->actionMeasureMeshSurface,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshSurface()));
+	connect(m_UI->actionMeasureMeshVolume,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshVolume()));
+	connect(m_UI->actionFlagMeshVertices,			SIGNAL(triggered()),	this,		SLOT(doActionFlagMeshVertices()));
 	//"Edit > Mesh > Scalar Field" menu
-	connect(actionSmoothMeshSF,					SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshSF()));
-	connect(actionEnhanceMeshSF,				SIGNAL(triggered()),	this,		SLOT(doActionEnhanceMeshSF()));
+	connect(m_UI->actionSmoothMeshSF,				SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshSF()));
+	connect(m_UI->actionEnhanceMeshSF,				SIGNAL(triggered()),	this,		SLOT(doActionEnhanceMeshSF()));
 	//"Edit > Plane" menu
-	connect(actionCreatePlane,					SIGNAL(triggered()),	this,		SLOT(doActionCreatePlane()));
-	connect(actionEditPlane,					SIGNAL(triggered()),	this,		SLOT(doActionEditPlane()));
+	connect(m_UI->actionCreatePlane,				SIGNAL(triggered()),	this,		SLOT(doActionCreatePlane()));
+	connect(m_UI->actionEditPlane,					SIGNAL(triggered()),	this,		SLOT(doActionEditPlane()));
 	//"Edit > Sensor > Ground-Based lidar" menu
-	connect(actionShowDepthBuffer,				SIGNAL(triggered()),	this,		SLOT(doActionShowDepthBuffer()));
-	connect(actionExportDepthBuffer,			SIGNAL(triggered()),	this,		SLOT(doActionExportDepthBuffer()));
-	connect(actionComputePointsVisibility,		SIGNAL(triggered()),	this,		SLOT(doActionComputePointsVisibility()));
+	connect(m_UI->actionShowDepthBuffer,			SIGNAL(triggered()),	this,		SLOT(doActionShowDepthBuffer()));
+	connect(m_UI->actionExportDepthBuffer,			SIGNAL(triggered()),	this,		SLOT(doActionExportDepthBuffer()));
+	connect(m_UI->actionComputePointsVisibility,	SIGNAL(triggered()),	this,		SLOT(doActionComputePointsVisibility()));
 	//"Edit > Sensor" menu
-	connect(actionCreateGBLSensor,				SIGNAL(triggered()),	this,		SLOT(doActionCreateGBLSensor()));
-	connect(actionCreateCameraSensor,			SIGNAL(triggered()),	this,		SLOT(doActionCreateCameraSensor()));
-	connect(actionModifySensor,					SIGNAL(triggered()),	this,		SLOT(doActionModifySensor()));
-	connect(actionProjectUncertainty,			SIGNAL(triggered()),	this,		SLOT(doActionProjectUncertainty()));
-	connect(actionCheckPointsInsideFrustum,		SIGNAL(triggered()),	this,		SLOT(doActionCheckPointsInsideFrustum()));
-	connect(actionComputeDistancesFromSensor,	SIGNAL(triggered()),	this,		SLOT(doActionComputeDistancesFromSensor()));
-	connect(actionComputeScatteringAngles,		SIGNAL(triggered()),	this,		SLOT(doActionComputeScatteringAngles()));
-	connect(actionViewFromSensor,				SIGNAL(triggered()),	this,		SLOT(doActionSetViewFromSensor()));
+	connect(m_UI->actionCreateGBLSensor,			SIGNAL(triggered()),	this,		SLOT(doActionCreateGBLSensor()));
+	connect(m_UI->actionCreateCameraSensor,			SIGNAL(triggered()),	this,		SLOT(doActionCreateCameraSensor()));
+	connect(m_UI->actionModifySensor,				SIGNAL(triggered()),	this,		SLOT(doActionModifySensor()));
+	connect(m_UI->actionProjectUncertainty,			SIGNAL(triggered()),	this,		SLOT(doActionProjectUncertainty()));
+	connect(m_UI->actionCheckPointsInsideFrustum,	SIGNAL(triggered()),	this,		SLOT(doActionCheckPointsInsideFrustum()));
+	connect(m_UI->actionComputeDistancesFromSensor,	SIGNAL(triggered()),	this,		SLOT(doActionComputeDistancesFromSensor()));
+	connect(m_UI->actionComputeScatteringAngles,	SIGNAL(triggered()),	this,		SLOT(doActionComputeScatteringAngles()));
+	connect(m_UI->actionViewFromSensor,				SIGNAL(triggered()),	this,		SLOT(doActionSetViewFromSensor()));
 	//"Edit > Scalar fields" menu
-	connect(actionShowHistogram,				SIGNAL(triggered()),	this,		SLOT(showSelectedEntitiesHistogram()));
-	connect(actionComputeStatParams,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams()));
-	connect(actionSFGradient,					SIGNAL(triggered()),	this,		SLOT(doActionSFGradient()));
-	connect(actionGaussianFilter,				SIGNAL(triggered()),	this,		SLOT(doActionSFGaussianFilter()));
-	connect(actionBilateralFilter,				SIGNAL(triggered()),	this,		SLOT(doActionSFBilateralFilter()));
-	connect(actionFilterByValue,				SIGNAL(triggered()),	this,		SLOT(doActionFilterByValue()));
-	connect(actionAddConstantSF,				SIGNAL(triggered()),	this,		SLOT(doActionAddConstantSF()));
-	connect(actionScalarFieldArithmetic,		SIGNAL(triggered()),	this,		SLOT(doActionScalarFieldArithmetic()));
-	connect(actionScalarFieldFromColor,			SIGNAL(triggered()),	this,		SLOT(doActionScalarFieldFromColor()));
-	connect(actionConvertToRGB,					SIGNAL(triggered()),	this,		SLOT(doActionSFConvertToRGB()));
-	connect(actionConvertToRandomRGB,			SIGNAL(triggered()),	this,		SLOT(doActionSFConvertToRandomRGB()));
-	connect(actionRenameSF,						SIGNAL(triggered()),	this,		SLOT(doActionRenameSF()));
-	connect(actionOpenColorScalesManager,		SIGNAL(triggered()),	this,		SLOT(doActionOpenColorScalesManager()));
-	connect(actionAddIdField,					SIGNAL(triggered()),	this,		SLOT(doActionAddIdField()));
-	connect(actionSetSFAsCoord,					SIGNAL(triggered()),	this,		SLOT(doActionSetSFAsCoord()));
-	connect(actionInterpolateSFs,				SIGNAL(triggered()),	this,		SLOT(doActionInterpolateScalarFields()));
-	connect(actionDeleteScalarField, &QAction::triggered, [=]() {
+	connect(m_UI->actionShowHistogram,				SIGNAL(triggered()),	this,		SLOT(showSelectedEntitiesHistogram()));
+	connect(m_UI->actionComputeStatParams,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams()));
+	connect(m_UI->actionSFGradient,					SIGNAL(triggered()),	this,		SLOT(doActionSFGradient()));
+	connect(m_UI->actionGaussianFilter,				SIGNAL(triggered()),	this,		SLOT(doActionSFGaussianFilter()));
+	connect(m_UI->actionBilateralFilter,			SIGNAL(triggered()),	this,		SLOT(doActionSFBilateralFilter()));
+	connect(m_UI->actionFilterByValue,				SIGNAL(triggered()),	this,		SLOT(doActionFilterByValue()));
+	connect(m_UI->actionAddConstantSF,				SIGNAL(triggered()),	this,		SLOT(doActionAddConstantSF()));
+	connect(m_UI->actionScalarFieldArithmetic,		SIGNAL(triggered()),	this,		SLOT(doActionScalarFieldArithmetic()));
+	connect(m_UI->actionScalarFieldFromColor,		SIGNAL(triggered()),	this,		SLOT(doActionScalarFieldFromColor()));
+	connect(m_UI->actionConvertToRGB,				SIGNAL(triggered()),	this,		SLOT(doActionSFConvertToRGB()));
+	connect(m_UI->actionConvertToRandomRGB,			SIGNAL(triggered()),	this,		SLOT(doActionSFConvertToRandomRGB()));
+	connect(m_UI->actionRenameSF,					SIGNAL(triggered()),	this,		SLOT(doActionRenameSF()));
+	connect(m_UI->actionOpenColorScalesManager,		SIGNAL(triggered()),	this,		SLOT(doActionOpenColorScalesManager()));
+	connect(m_UI->actionAddIdField,					SIGNAL(triggered()),	this,		SLOT(doActionAddIdField()));
+	connect(m_UI->actionSetSFAsCoord,				SIGNAL(triggered()),	this,		SLOT(doActionSetSFAsCoord()));
+	connect(m_UI->actionInterpolateSFs,				SIGNAL(triggered()),	this,		SLOT(doActionInterpolateScalarFields()));
+	connect(m_UI->actionDeleteScalarField, &QAction::triggered, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD );
 	});
-	connect(actionDeleteAllSF, &QAction::triggered, [=]() {
+	connect(m_UI->actionDeleteAllSF, &QAction::triggered, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS );
 	});
 	
 	//"Edit > Waveform" menu
-	connect(actionShowWaveDialog,				SIGNAL(triggered()),	this,		SLOT(doActionShowWaveDialog()));
-	connect(actionCompressFWFData,				SIGNAL(triggered()),	this,		SLOT(doActionCompressFWFData()));
+	connect(m_UI->actionShowWaveDialog,				SIGNAL(triggered()),	this,		SLOT(doActionShowWaveDialog()));
+	connect(m_UI->actionCompressFWFData,			SIGNAL(triggered()),	this,		SLOT(doActionCompressFWFData()));
 	//"Edit" menu
-	connect(actionClone,						SIGNAL(triggered()),	this,		SLOT(doActionClone()));
-	connect(actionMerge,						SIGNAL(triggered()),	this,		SLOT(doActionMerge()));
-	connect(actionApplyTransformation,			SIGNAL(triggered()),	this,		SLOT(doActionApplyTransformation()));
-	connect(actionApplyScale,					SIGNAL(triggered()),	this,		SLOT(doActionApplyScale()));
-	connect(actionTranslateRotate,				SIGNAL(triggered()),	this,		SLOT(activateTranslateRotateMode()));
-	connect(actionSegment,						SIGNAL(triggered()),	this,		SLOT(activateSegmentationMode()));
-    connect(actionTracePolyline,				SIGNAL(triggered()),	this,		SLOT(activateTracePolylineMode()));
+	connect(m_UI->actionClone,						SIGNAL(triggered()),	this,		SLOT(doActionClone()));
+	connect(m_UI->actionMerge,						SIGNAL(triggered()),	this,		SLOT(doActionMerge()));
+	connect(m_UI->actionApplyTransformation,		SIGNAL(triggered()),	this,		SLOT(doActionApplyTransformation()));
+	connect(m_UI->actionApplyScale,					SIGNAL(triggered()),	this,		SLOT(doActionApplyScale()));
+	connect(m_UI->actionTranslateRotate,			SIGNAL(triggered()),	this,		SLOT(activateTranslateRotateMode()));
+	connect(m_UI->actionSegment,					SIGNAL(triggered()),	this,		SLOT(activateSegmentationMode()));
+    connect(m_UI->actionTracePolyline,				SIGNAL(triggered()),	this,		SLOT(activateTracePolylineMode()));
 
-	connect(actionCrop,							SIGNAL(triggered()),	this,		SLOT(doActionCrop()));
-	connect(actionEditGlobalShiftAndScale,		SIGNAL(triggered()),	this,		SLOT(doActionEditGlobalShiftAndScale()));
-	connect(actionSubsample,					SIGNAL(triggered()),	this,		SLOT(doActionSubsample()));
-	connect(actionMatchBBCenters,				SIGNAL(triggered()),	this,		SLOT(doActionMatchBBCenters()));
-	connect(actionMatchScales,					SIGNAL(triggered()),	this,		SLOT(doActionMatchScales()));
-	connect(actionDelete,						SIGNAL(triggered()),	m_ccRoot,	SLOT(deleteSelectedEntities()));
+	connect(m_UI->actionCrop,						SIGNAL(triggered()),	this,		SLOT(doActionCrop()));
+	connect(m_UI->actionEditGlobalShiftAndScale,	SIGNAL(triggered()),	this,		SLOT(doActionEditGlobalShiftAndScale()));
+	connect(m_UI->actionSubsample,					SIGNAL(triggered()),	this,		SLOT(doActionSubsample()));
+	connect(m_UI->actionMatchBBCenters,				SIGNAL(triggered()),	this,		SLOT(doActionMatchBBCenters()));
+	connect(m_UI->actionMatchScales,				SIGNAL(triggered()),	this,		SLOT(doActionMatchScales()));
+	connect(m_UI->actionDelete,						SIGNAL(triggered()),	m_ccRoot,	SLOT(deleteSelectedEntities()));
 
 	//"Tools > Clean" menu
-	connect(actionSORFilter,					SIGNAL(triggered()),	this,		SLOT(doActionSORFilter()));
-	connect(actionNoiseFilter,					SIGNAL(triggered()),	this,		SLOT(doActionFilterNoise()));
+	connect(m_UI->actionSORFilter,					SIGNAL(triggered()),	this,		SLOT(doActionSORFilter()));
+	connect(m_UI->actionNoiseFilter,				SIGNAL(triggered()),	this,		SLOT(doActionFilterNoise()));
 
 	//"Tools > Projection" menu
-	connect(actionUnroll,						SIGNAL(triggered()),	this,		SLOT(doActionUnroll()));
-	connect(actionRasterize,					SIGNAL(triggered()),	this,		SLOT(doActionRasterize()));
-	connect(actionConvertPolylinesToMesh,		SIGNAL(triggered()),	this,		SLOT(doConvertPolylinesToMesh()));
-	connect(actionMeshTwoPolylines,				SIGNAL(triggered()),	this,		SLOT(doMeshTwoPolylines()));
-	connect(actionExportCoordToSF,				SIGNAL(triggered()),	this,		SLOT(doActionExportCoordToSF()));
+	connect(m_UI->actionUnroll,						SIGNAL(triggered()),	this,		SLOT(doActionUnroll()));
+	connect(m_UI->actionRasterize,					SIGNAL(triggered()),	this,		SLOT(doActionRasterize()));
+	connect(m_UI->actionConvertPolylinesToMesh,		SIGNAL(triggered()),	this,		SLOT(doConvertPolylinesToMesh()));
+	connect(m_UI->actionMeshTwoPolylines,			SIGNAL(triggered()),	this,		SLOT(doMeshTwoPolylines()));
+	connect(m_UI->actionExportCoordToSF,			SIGNAL(triggered()),	this,		SLOT(doActionExportCoordToSF()));
 	//"Tools > Registration" menu
-	connect(actionRegister,						SIGNAL(triggered()),	this,		SLOT(doActionRegister()));
-	connect(actionPointPairsAlign,				SIGNAL(triggered()),	this,		SLOT(activateRegisterPointPairTool()));
+	connect(m_UI->actionRegister,					SIGNAL(triggered()),	this,		SLOT(doActionRegister()));
+	connect(m_UI->actionPointPairsAlign,			SIGNAL(triggered()),	this,		SLOT(activateRegisterPointPairTool()));
 	//"Tools > Distances" menu
-	connect(actionCloudCloudDist,				SIGNAL(triggered()),	this,		SLOT(doActionCloudCloudDist()));
-	connect(actionCloudMeshDist,				SIGNAL(triggered()),	this,		SLOT(doActionCloudMeshDist()));
-	connect(actionCPS,							SIGNAL(triggered()),	this,		SLOT(doActionComputeCPS()));
+	connect(m_UI->actionCloudCloudDist,				SIGNAL(triggered()),	this,		SLOT(doActionCloudCloudDist()));
+	connect(m_UI->actionCloudMeshDist,				SIGNAL(triggered()),	this,		SLOT(doActionCloudMeshDist()));
+	connect(m_UI->actionCPS,						SIGNAL(triggered()),	this,		SLOT(doActionComputeCPS()));
 	//"Tools > Volume" menu
-	connect(actionCompute2HalfDimVolume,		SIGNAL(triggered()),	this,		SLOT(doCompute2HalfDimVolume()));
+	connect(m_UI->actionCompute2HalfDimVolume,		SIGNAL(triggered()),	this,		SLOT(doCompute2HalfDimVolume()));
 	//"Tools > Statistics" menu
-	connect(actionComputeStatParams2,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams())); //duplicated action --> we can't use the same otherwise we get an ugly console warning on Linux :(
-	connect(actionStatisticalTest,				SIGNAL(triggered()),	this,		SLOT(doActionStatisticalTest()));
+	connect(m_UI->actionComputeStatParams2,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams())); //duplicated action --> we can't use the same otherwise we get an ugly console warning on Linux :(
+	connect(m_UI->actionStatisticalTest,			SIGNAL(triggered()),	this,		SLOT(doActionStatisticalTest()));
 	//"Tools > Segmentation" menu
-	connect(actionLabelConnectedComponents,		SIGNAL(triggered()),	this,		SLOT(doActionLabelConnectedComponents()));
-	connect(actionKMeans,						SIGNAL(triggered()),	this,		SLOT(doActionKMeans()));
-	connect(actionFrontPropagation,				SIGNAL(triggered()),	this,		SLOT(doActionFrontPropagation()));
-	connect(actionCrossSection,					SIGNAL(triggered()),	this,		SLOT(activateClippingBoxMode()));
-	connect(actionExtractSections,				SIGNAL(triggered()),	this,		SLOT(activateSectionExtractionMode()));
+	connect(m_UI->actionLabelConnectedComponents,	SIGNAL(triggered()),	this,		SLOT(doActionLabelConnectedComponents()));
+	connect(m_UI->actionKMeans,						SIGNAL(triggered()),	this,		SLOT(doActionKMeans()));
+	connect(m_UI->actionFrontPropagation,			SIGNAL(triggered()),	this,		SLOT(doActionFrontPropagation()));
+	connect(m_UI->actionCrossSection,				SIGNAL(triggered()),	this,		SLOT(activateClippingBoxMode()));
+	connect(m_UI->actionExtractSections,			SIGNAL(triggered()),	this,		SLOT(activateSectionExtractionMode()));
 	//"Tools > Fit" menu
-	connect(actionFitPlane,						SIGNAL(triggered()),	this,		SLOT(doActionFitPlane()));
-	connect(actionFitSphere,					SIGNAL(triggered()),	this,		SLOT(doActionFitSphere()));
-	connect(actionFitFacet,						SIGNAL(triggered()),	this,		SLOT(doActionFitFacet()));
-	connect(actionFitQuadric,					SIGNAL(triggered()),	this,		SLOT(doActionFitQuadric()));
+	connect(m_UI->actionFitPlane,					SIGNAL(triggered()),	this,		SLOT(doActionFitPlane()));
+	connect(m_UI->actionFitSphere,					SIGNAL(triggered()),	this,		SLOT(doActionFitSphere()));
+	connect(m_UI->actionFitFacet,					SIGNAL(triggered()),	this,		SLOT(doActionFitFacet()));
+	connect(m_UI->actionFitQuadric,					SIGNAL(triggered()),	this,		SLOT(doActionFitQuadric()));
 	//"Tools > Other" menu
-	connect(actionComputeDensity,				SIGNAL(triggered()),	this,		SLOT(doComputeDensity()));
-	connect(actionCurvature,					SIGNAL(triggered()),	this,		SLOT(doComputeCurvature()));
-	connect(actionRoughness,					SIGNAL(triggered()),	this,		SLOT(doComputeRoughness()));
-	connect(actionRemoveDuplicatePoints,		SIGNAL(triggered()),	this,		SLOT(doRemoveDuplicatePoints()));
+	connect(m_UI->actionComputeDensity,				SIGNAL(triggered()),	this,		SLOT(doComputeDensity()));
+	connect(m_UI->actionCurvature,					SIGNAL(triggered()),	this,		SLOT(doComputeCurvature()));
+	connect(m_UI->actionRoughness,					SIGNAL(triggered()),	this,		SLOT(doComputeRoughness()));
+	connect(m_UI->actionRemoveDuplicatePoints,		SIGNAL(triggered()),	this,		SLOT(doRemoveDuplicatePoints()));
 	//"Tools"
-	connect(actionLevel,						SIGNAL(triggered()),	this,		SLOT(doLevel()));
-	connect(actionPointListPicking,				SIGNAL(triggered()),	this,		SLOT(activatePointListPickingMode()));
-	connect(actionPointPicking,					SIGNAL(triggered()),	this,		SLOT(activatePointPickingMode()));
+	connect(m_UI->actionLevel,						SIGNAL(triggered()),	this,		SLOT(doLevel()));
+	connect(m_UI->actionPointListPicking,			SIGNAL(triggered()),	this,		SLOT(activatePointListPickingMode()));
+	connect(m_UI->actionPointPicking,				SIGNAL(triggered()),	this,		SLOT(activatePointPickingMode()));
 
 	//"Tools > Sand box (research)" menu
-	connect(actionComputeKdTree,				SIGNAL(triggered()),	this,		SLOT(doActionComputeKdTree()));
-	connect(actionDistanceMap,					SIGNAL(triggered()),	this,		SLOT(doActionComputeDistanceMap()));
-	connect(actionDistanceToBestFitQuadric3D,	SIGNAL(triggered()),	this,		SLOT(doActionComputeDistToBestFitQuadric3D()));
-	connect(actionComputeBestFitBB,				SIGNAL(triggered()),	this,		SLOT(doComputeBestFitBB()));
-	connect(actionAlign,						SIGNAL(triggered()),	this,		SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
-	connect(actionSNETest,						SIGNAL(triggered()),	this,		SLOT(doSphericalNeighbourhoodExtractionTest()));
-	connect(actionCNETest,						SIGNAL(triggered()),	this,		SLOT(doCylindricalNeighbourhoodExtractionTest()));
-	connect(actionFindBiggestInnerRectangle,	SIGNAL(triggered()),	this,		SLOT(doActionFindBiggestInnerRectangle()));
-	connect(actionExportCloudsInfo,				SIGNAL(triggered()),	this,		SLOT(doActionExportCloudsInfo()));
-	connect(actionCreateCloudFromEntCenters,	SIGNAL(triggered()),	this,		SLOT(doActionCreateCloudFromEntCenters()));
-	connect(actionComputeBestICPRmsMatrix,		SIGNAL(triggered()),	this,		SLOT(doActionComputeBestICPRmsMatrix()));
+	connect(m_UI->actionComputeKdTree,				SIGNAL(triggered()),	this,		SLOT(doActionComputeKdTree()));
+	connect(m_UI->actionDistanceMap,				SIGNAL(triggered()),	this,		SLOT(doActionComputeDistanceMap()));
+	connect(m_UI->actionDistanceToBestFitQuadric3D,	SIGNAL(triggered()),	this,		SLOT(doActionComputeDistToBestFitQuadric3D()));
+	connect(m_UI->actionComputeBestFitBB,			SIGNAL(triggered()),	this,		SLOT(doComputeBestFitBB()));
+	connect(m_UI->actionAlign,						SIGNAL(triggered()),	this,		SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
+	connect(m_UI->actionSNETest,					SIGNAL(triggered()),	this,		SLOT(doSphericalNeighbourhoodExtractionTest()));
+	connect(m_UI->actionCNETest,					SIGNAL(triggered()),	this,		SLOT(doCylindricalNeighbourhoodExtractionTest()));
+	connect(m_UI->actionFindBiggestInnerRectangle,	SIGNAL(triggered()),	this,		SLOT(doActionFindBiggestInnerRectangle()));
+	connect(m_UI->actionExportCloudsInfo,			SIGNAL(triggered()),	this,		SLOT(doActionExportCloudsInfo()));
+	connect(m_UI->actionCreateCloudFromEntCenters,	SIGNAL(triggered()),	this,		SLOT(doActionCreateCloudFromEntCenters()));
+	connect(m_UI->actionComputeBestICPRmsMatrix,	SIGNAL(triggered()),	this,		SLOT(doActionComputeBestICPRmsMatrix()));
 
 	//"Display" menu
-	connect(actionFullScreen,					SIGNAL(toggled(bool)),	this,		SLOT(toggleFullScreen(bool)));
-	connect(actionExclusiveFullScreen,			SIGNAL(toggled(bool)),	this,		SLOT(toggleExclusiveFullScreen(bool)));
-	connect(actionRefresh,						SIGNAL(triggered()),	this,		SLOT(refreshAll()));
-	connect(actionTestFrameRate,				SIGNAL(triggered()),	this,		SLOT(testFrameRate()));
-	connect(actionToggleCenteredPerspective,	SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowCenteredPerspective()));
-	connect(actionToggleViewerBasedPerspective, SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowViewerBasedPerspective()));
-	connect(actionShowCursor3DCoordinates,		SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowShowCursorCoords(bool)));
-	connect(actionLockRotationVertAxis,			SIGNAL(triggered()),	this,		SLOT(toggleRotationAboutVertAxis()));
-	connect(actionEnterBubbleViewMode,			SIGNAL(triggered()),	this,		SLOT(doActionEnableBubbleViewMode()));
-	connect(actionEditCamera,					SIGNAL(triggered()),	this,		SLOT(doActionEditCamera()));
-	connect(actionAdjustZoom,					SIGNAL(triggered()),	this,		SLOT(doActionAdjustZoom()));
-	connect(actionSaveViewportAsObject,			SIGNAL(triggered()),	this,		SLOT(doActionSaveViewportAsCamera()));
+	connect(m_UI->actionFullScreen,						SIGNAL(toggled(bool)),	this,		SLOT(toggleFullScreen(bool)));
+	connect(m_UI->actionExclusiveFullScreen,			SIGNAL(toggled(bool)),	this,		SLOT(toggleExclusiveFullScreen(bool)));
+	connect(m_UI->actionRefresh,						SIGNAL(triggered()),	this,		SLOT(refreshAll()));
+	connect(m_UI->actionTestFrameRate,					SIGNAL(triggered()),	this,		SLOT(testFrameRate()));
+	connect(m_UI->actionToggleCenteredPerspective,		SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowCenteredPerspective()));
+	connect(m_UI->actionToggleViewerBasedPerspective,	SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowViewerBasedPerspective()));
+	connect(m_UI->actionShowCursor3DCoordinates,		SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowShowCursorCoords(bool)));
+	connect(m_UI->actionLockRotationVertAxis,			SIGNAL(triggered()),	this,		SLOT(toggleRotationAboutVertAxis()));
+	connect(m_UI->actionEnterBubbleViewMode,			SIGNAL(triggered()),	this,		SLOT(doActionEnableBubbleViewMode()));
+	connect(m_UI->actionEditCamera,						SIGNAL(triggered()),	this,		SLOT(doActionEditCamera()));
+	connect(m_UI->actionAdjustZoom,						SIGNAL(triggered()),	this,		SLOT(doActionAdjustZoom()));
+	connect(m_UI->actionSaveViewportAsObject,			SIGNAL(triggered()),	this,		SLOT(doActionSaveViewportAsCamera()));
 
 	//"Display > Lights & Materials" menu
-	connect(actionDisplayOptions,				SIGNAL(triggered()),	this,		SLOT(setLightsAndMaterials()));
-	connect(actionToggleSunLight,				SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowSunLight()));
-	connect(actionToggleCustomLight,			SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowCustomLight()));
-	connect(actionRenderToFile,					SIGNAL(triggered()),	this,		SLOT(doActionRenderToFile()));
+	connect(m_UI->actionDisplayOptions,				SIGNAL(triggered()),	this,		SLOT(setLightsAndMaterials()));
+	connect(m_UI->actionToggleSunLight,				SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowSunLight()));
+	connect(m_UI->actionToggleCustomLight,			SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowCustomLight()));
+	connect(m_UI->actionRenderToFile,				SIGNAL(triggered()),	this,		SLOT(doActionRenderToFile()));
 	//"Display > Shaders & filters" menu
-	connect(actionLoadShader,					SIGNAL(triggered()),	this,		SLOT(doActionLoadShader()));
-	connect(actionDeleteShader,					SIGNAL(triggered()),	this,		SLOT(doActionDeleteShader()));
-	connect(actionNoFilter,						SIGNAL(triggered()),	this,		SLOT(doDisableGLFilter()));
+	connect(m_UI->actionLoadShader,					SIGNAL(triggered()),	this,		SLOT(doActionLoadShader()));
+	connect(m_UI->actionDeleteShader,				SIGNAL(triggered()),	this,		SLOT(doActionDeleteShader()));
+	connect(m_UI->actionNoFilter,					SIGNAL(triggered()),	this,		SLOT(doDisableGLFilter()));
 
 	//"Display > Active SF" menu
-	connect(actionToggleActiveSFColorScale,		SIGNAL(triggered()),	this,		SLOT(doActionToggleActiveSFColorScale()));
-	connect(actionShowActiveSFPrevious,			SIGNAL(triggered()),	this,		SLOT(doActionShowActiveSFPrevious()));
-	connect(actionShowActiveSFNext,				SIGNAL(triggered()),	this,		SLOT(doActionShowActiveSFNext()));
+	connect(m_UI->actionToggleActiveSFColorScale,	SIGNAL(triggered()),	this,		SLOT(doActionToggleActiveSFColorScale()));
+	connect(m_UI->actionShowActiveSFPrevious,		SIGNAL(triggered()),	this,		SLOT(doActionShowActiveSFPrevious()));
+	connect(m_UI->actionShowActiveSFNext,			SIGNAL(triggered()),	this,		SLOT(doActionShowActiveSFNext()));
 
 	//"Display" menu
-	connect(actionResetGUIElementsPos,			SIGNAL(triggered()),	this,		SLOT(doActionResetGUIElementsPos()));
+	connect(m_UI->actionResetGUIElementsPos,		SIGNAL(triggered()),	this,		SLOT(doActionResetGUIElementsPos()));
 
 	//"3D Views" menu
-	connect(menu3DViews,						SIGNAL(aboutToShow()),	this,		SLOT(update3DViewsMenu()));
-	connect(actionNew3DView,					SIGNAL(triggered()),	this,		SLOT(new3DView()));
-	connect(actionZoomIn,						SIGNAL(triggered()),	this,		SLOT(zoomIn()));
-	connect(actionZoomOut,						SIGNAL(triggered()),	this,		SLOT(zoomOut()));
-	connect(actionClose3DView,					SIGNAL(triggered()),	m_mdiArea,	SLOT(closeActiveSubWindow()));
-	connect(actionCloseAll3DViews,				SIGNAL(triggered()),	m_mdiArea,	SLOT(closeAllSubWindows()));
-	connect(actionTile3DViews,					SIGNAL(triggered()),	m_mdiArea,	SLOT(tileSubWindows()));
-	connect(actionCascade3DViews,				SIGNAL(triggered()),	m_mdiArea,	SLOT(cascadeSubWindows()));
-	connect(actionNext3DView,					SIGNAL(triggered()),	m_mdiArea,	SLOT(activateNextSubWindow()));
-	connect(actionPrevious3DView,				SIGNAL(triggered()),	m_mdiArea,	SLOT(activatePreviousSubWindow()));
+	connect(m_UI->menu3DViews,						SIGNAL(aboutToShow()),	this,		SLOT(update3DViewsMenu()));
+	connect(m_UI->actionNew3DView,					SIGNAL(triggered()),	this,		SLOT(new3DView()));
+	connect(m_UI->actionZoomIn,						SIGNAL(triggered()),	this,		SLOT(zoomIn()));
+	connect(m_UI->actionZoomOut,					SIGNAL(triggered()),	this,		SLOT(zoomOut()));
+	connect(m_UI->actionClose3DView,				SIGNAL(triggered()),	m_mdiArea,	SLOT(closeActiveSubWindow()));
+	connect(m_UI->actionCloseAll3DViews,			SIGNAL(triggered()),	m_mdiArea,	SLOT(closeAllSubWindows()));
+	connect(m_UI->actionTile3DViews,				SIGNAL(triggered()),	m_mdiArea,	SLOT(tileSubWindows()));
+	connect(m_UI->actionCascade3DViews,				SIGNAL(triggered()),	m_mdiArea,	SLOT(cascadeSubWindows()));
+	connect(m_UI->actionNext3DView,					SIGNAL(triggered()),	m_mdiArea,	SLOT(activateNextSubWindow()));
+	connect(m_UI->actionPrevious3DView,				SIGNAL(triggered()),	m_mdiArea,	SLOT(activatePreviousSubWindow()));
 
 	//"About" menu entry
-	connect(actionHelp,							SIGNAL(triggered()),	this,		SLOT(doActionShowHelpDialog()));
-	connect(actionAboutPlugins,					SIGNAL(triggered()),	this,		SLOT(doActionShowAboutPluginsDialog()));
-	connect(actionEnableQtWarnings,				SIGNAL(toggled(bool)),	this,		SLOT(doEnableQtWarnings(bool)));
+	connect(m_UI->actionHelp,						SIGNAL(triggered()),	this,		SLOT(doActionShowHelpDialog()));
+	connect(m_UI->actionAboutPlugins,				SIGNAL(triggered()),	this,		SLOT(doActionShowAboutPluginsDialog()));
+	connect(m_UI->actionEnableQtWarnings,			SIGNAL(toggled(bool)),	this,		SLOT(doEnableQtWarnings(bool)));
 
-	connect(actionAbout,	&QAction::triggered, [this] () {
+	connect(m_UI->actionAbout,	&QAction::triggered, [this] () {
 		ccAboutDialog* aboutDialog = new ccAboutDialog(this);
 		aboutDialog->exec();
 	});
@@ -845,29 +847,29 @@ void MainWindow::connectActions()
 	/*** Toolbars ***/
 
 	//View toolbar
-	connect(actionGlobalZoom,					SIGNAL(triggered()),	this,		SLOT(setGlobalZoom()));
-	connect(actionPickRotationCenter,			SIGNAL(triggered()),	this,		SLOT(doPickRotationCenter()));
-	connect(actionZoomAndCenter,				SIGNAL(triggered()),	this,		SLOT(zoomOnSelectedEntities()));
-	connect(actionSetPivotAlwaysOn,				SIGNAL(triggered()),	this,		SLOT(setPivotAlwaysOn()));
-	connect(actionSetPivotRotationOnly,			SIGNAL(triggered()),	this,		SLOT(setPivotRotationOnly()));
-	connect(actionSetPivotOff,					SIGNAL(triggered()),	this,		SLOT(setPivotOff()));
-	connect(actionSetOrthoView,					SIGNAL(triggered()),	this,		SLOT(setOrthoView()));
-	connect(actionSetCenteredPerspectiveView,	SIGNAL(triggered()),	this,		SLOT(setCenteredPerspectiveView()));
-	connect(actionSetViewerPerspectiveView,		SIGNAL(triggered()),	this,		SLOT(setViewerPerspectiveView()));
-	connect(actionEnableStereo,					SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowStereoVision(bool)));
-	connect(actionAutoPickRotationCenter,		SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowAutoPickRotCenter(bool)));
+	connect(m_UI->actionGlobalZoom,					SIGNAL(triggered()),	this,		SLOT(setGlobalZoom()));
+	connect(m_UI->actionPickRotationCenter,			SIGNAL(triggered()),	this,		SLOT(doPickRotationCenter()));
+	connect(m_UI->actionZoomAndCenter,				SIGNAL(triggered()),	this,		SLOT(zoomOnSelectedEntities()));
+	connect(m_UI->actionSetPivotAlwaysOn,			SIGNAL(triggered()),	this,		SLOT(setPivotAlwaysOn()));
+	connect(m_UI->actionSetPivotRotationOnly,		SIGNAL(triggered()),	this,		SLOT(setPivotRotationOnly()));
+	connect(m_UI->actionSetPivotOff,				SIGNAL(triggered()),	this,		SLOT(setPivotOff()));
+	connect(m_UI->actionSetOrthoView,				SIGNAL(triggered()),	this,		SLOT(setOrthoView()));
+	connect(m_UI->actionSetCenteredPerspectiveView,	SIGNAL(triggered()),	this,		SLOT(setCenteredPerspectiveView()));
+	connect(m_UI->actionSetViewerPerspectiveView,	SIGNAL(triggered()),	this,		SLOT(setViewerPerspectiveView()));
+	connect(m_UI->actionEnableStereo,				SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowStereoVision(bool)));
+	connect(m_UI->actionAutoPickRotationCenter,		SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowAutoPickRotCenter(bool)));
 	
-	connect(actionSetViewTop, &QAction::triggered, [=]() { setView( CC_TOP_VIEW ); });
-	connect(actionSetViewBottom, &QAction::triggered, [=]() { setView( CC_BOTTOM_VIEW ); });
-	connect(actionSetViewFront, &QAction::triggered, [=]() { setView( CC_FRONT_VIEW ); });
-	connect(actionSetViewBack, &QAction::triggered, [=]() { setView( CC_BACK_VIEW ); });
-	connect(actionSetViewLeft, &QAction::triggered, [=]() { setView( CC_LEFT_VIEW ); });
-	connect(actionSetViewRight, &QAction::triggered, [=]() { setView( CC_RIGHT_VIEW ); });
-	connect(actionSetViewIso1, &QAction::triggered, [=]() { setView( CC_ISO_VIEW_1 ); });
-	connect(actionSetViewIso2, &QAction::triggered, [=]() { setView( CC_ISO_VIEW_2 ); });
+	connect(m_UI->actionSetViewTop, &QAction::triggered, [=]() { setView( CC_TOP_VIEW ); });
+	connect(m_UI->actionSetViewBottom, &QAction::triggered, [=]() { setView( CC_BOTTOM_VIEW ); });
+	connect(m_UI->actionSetViewFront, &QAction::triggered, [=]() { setView( CC_FRONT_VIEW ); });
+	connect(m_UI->actionSetViewBack, &QAction::triggered, [=]() { setView( CC_BACK_VIEW ); });
+	connect(m_UI->actionSetViewLeft, &QAction::triggered, [=]() { setView( CC_LEFT_VIEW ); });
+	connect(m_UI->actionSetViewRight, &QAction::triggered, [=]() { setView( CC_RIGHT_VIEW ); });
+	connect(m_UI->actionSetViewIso1, &QAction::triggered, [=]() { setView( CC_ISO_VIEW_1 ); });
+	connect(m_UI->actionSetViewIso2, &QAction::triggered, [=]() { setView( CC_ISO_VIEW_2 ); });
 	
 	//hidden
-	connect(actionEnableVisualDebugTraces,		SIGNAL(triggered()),	this,		SLOT(toggleVisualDebugTraces()));
+	connect(m_UI->actionEnableVisualDebugTraces,	SIGNAL(triggered()),	this,		SLOT(toggleVisualDebugTraces()));
 }
 
 void MainWindow::doActionColorize()
@@ -5684,17 +5686,17 @@ void MainWindow::showEvent(QShowEvent* event)
 	
 	if ( isFullScreen() )
 	{
-		actionFullScreen->setChecked( true );
+		m_UI->actionFullScreen->setChecked( true );
 	}
 	
 #ifdef Q_OS_MAC
 	if ( isFullScreen() )
 	{
-		actionFullScreen->setText( tr( "Exit Full Screen" ) );
+		m_UI->actionFullScreen->setText( tr( "Exit Full Screen" ) );
 	}
 	else
 	{
-		actionFullScreen->setText( tr( "Enter Full Screen" ) );
+		m_UI->actionFullScreen->setText( tr( "Enter Full Screen" ) );
 	}
 #endif
 }
@@ -5890,11 +5892,11 @@ void MainWindow::toggleFullScreen(bool state)
 #ifdef Q_OS_MAC
 	if ( state )
 	{
-		actionFullScreen->setText( tr( "Exit Full Screen" ) );
+		m_UI->actionFullScreen->setText( tr( "Exit Full Screen" ) );
 	}
 	else
 	{
-		actionFullScreen->setText( tr( "Enter Full Screen" ) );
+		m_UI->actionFullScreen->setText( tr( "Enter Full Screen" ) );
 	}
 #endif
 }
@@ -5916,9 +5918,9 @@ void MainWindow::doActionShowHelpDialog()
 void MainWindow::freezeUI(bool state)
 {
 	//freeze standard plugins
-	toolBarMainTools->setDisabled(state);
-	toolBarSFTools->setDisabled(state);
-	toolBarPluginTools->setDisabled(state);
+	m_UI->toolBarMainTools->setDisabled(state);
+	m_UI->toolBarSFTools->setDisabled(state);
+	m_UI->toolBarPluginTools->setDisabled(state);
 	//toolBarGLFilters->setDisabled(state);
 	//toolBarView->setDisabled(state);
 
@@ -5930,13 +5932,13 @@ void MainWindow::freezeUI(bool state)
 		}
 	}
 
-	DockableDBTree->setDisabled(state);
-	menubar->setDisabled(state);
+	m_UI->DockableDBTree->setDisabled(state);
+	m_UI->menubar->setDisabled(state);
 
 	if (state)
 	{
-		menuEdit->setDisabled(true);
-		menuTools->setDisabled(true);
+		m_UI->menuEdit->setDisabled(true);
+		m_UI->menuTools->setDisabled(true);
 	}
 	else
 	{
@@ -6086,7 +6088,7 @@ void MainWindow::activateSectionExtractionMode()
 	m_seTool->linkWith(win);
 
 	freezeUI(true);
-	toolBarView->setDisabled(true);
+	m_UI->toolBarView->setDisabled(true);
 
 	//we disable all other windows
 	disableAllBut(win);
@@ -6110,7 +6112,7 @@ void MainWindow::deactivateSectionExtractionMode(bool state)
 		subWindowList[0]->showMaximized();
 
 	freezeUI(false);
-	toolBarView->setDisabled(false);
+	m_UI->toolBarView->setDisabled(false);
 
 	updateUI();
 
@@ -6150,7 +6152,7 @@ void MainWindow::activateSegmentationMode()
 	}
 
 	freezeUI(true);
-	toolBarView->setDisabled(false);
+	m_UI->toolBarView->setDisabled(false);
 
 	//we disable all other windows
 	disableAllBut(win);
@@ -6435,7 +6437,7 @@ void MainWindow::activateTracePolylineMode()
 	m_tplTool->linkWith(win);
 
 	freezeUI(true);
-	toolBarView->setDisabled(false);
+	m_UI->toolBarView->setDisabled(false);
 
 	//we disable all other windows
 	disableAllBut(win);
@@ -6873,7 +6875,7 @@ void MainWindow::setPivotAlwaysOn()
 
 		//update pop-up menu 'top' icon
 		if (m_pivotVisibilityPopupButton)
-			m_pivotVisibilityPopupButton->setIcon(actionSetPivotAlwaysOn->icon());
+			m_pivotVisibilityPopupButton->setIcon(m_UI->actionSetPivotAlwaysOn->icon());
 	}
 }
 
@@ -6887,7 +6889,7 @@ void MainWindow::setPivotRotationOnly()
 
 		//update pop-up menu 'top' icon
 		if (m_pivotVisibilityPopupButton)
-			m_pivotVisibilityPopupButton->setIcon(actionSetPivotRotationOnly->icon());
+			m_pivotVisibilityPopupButton->setIcon(m_UI->actionSetPivotRotationOnly->icon());
 	}
 }
 
@@ -6901,7 +6903,7 @@ void MainWindow::setPivotOff()
 
 		//update pop-up menu 'top' icon
 		if (m_pivotVisibilityPopupButton)
-			m_pivotVisibilityPopupButton->setIcon(actionSetPivotOff->icon());
+			m_pivotVisibilityPopupButton->setIcon(m_UI->actionSetPivotOff->icon());
 	}
 }
 
@@ -6923,7 +6925,7 @@ void MainWindow::setOrthoView(ccGLWindow* win)
 
 		//update pop-up menu 'top' icon
 		if (m_viewModePopupButton)
-			m_viewModePopupButton->setIcon(actionSetOrthoView->icon());
+			m_viewModePopupButton->setIcon(m_UI->actionSetOrthoView->icon());
 		if (m_pivotVisibilityPopupButton)
 			m_pivotVisibilityPopupButton->setEnabled(true);
 	}
@@ -6944,7 +6946,7 @@ void MainWindow::setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw/*=t
 
 		//update pop-up menu 'top' icon
 		if (m_viewModePopupButton)
-			m_viewModePopupButton->setIcon(actionSetCenteredPerspectiveView->icon());
+			m_viewModePopupButton->setIcon(m_UI->actionSetCenteredPerspectiveView->icon());
 		if (m_pivotVisibilityPopupButton)
 			m_pivotVisibilityPopupButton->setEnabled(true);
 	}
@@ -6964,7 +6966,7 @@ void MainWindow::setViewerPerspectiveView(ccGLWindow* win)
 
 		//update pop-up menu 'top' icon
 		if (m_viewModePopupButton)
-			m_viewModePopupButton->setIcon(actionSetViewerPerspectiveView->icon());
+			m_viewModePopupButton->setIcon(m_UI->actionSetViewerPerspectiveView->icon());
 		if (m_pivotVisibilityPopupButton)
 			m_pivotVisibilityPopupButton->setEnabled(false);
 	}
@@ -8560,7 +8562,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			if (win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
 			{
 				//disable (exclusive) full screen
-				actionExclusiveFullScreen->setChecked(false);
+				m_UI->actionExclusiveFullScreen->setChecked(false);
 			}
 		}
 		else
@@ -8571,9 +8573,9 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			if (!smDlg.exec())
 			{
 				//cancelled by the user
-				actionEnableStereo->blockSignals(true);
-				actionEnableStereo->setChecked(false);
-				actionEnableStereo->blockSignals(false);
+				m_UI->actionEnableStereo->blockSignals(true);
+				m_UI->actionEnableStereo->setChecked(false);
+				m_UI->actionEnableStereo->blockSignals(false);
 				return;
 			}
 
@@ -8583,9 +8585,9 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			{
 				ccLog::Error("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead.");
 				//activation of the stereo mode failed: cancel selection
-				actionEnableStereo->blockSignals(true);
-				actionEnableStereo->setChecked(false);
-				actionEnableStereo->blockSignals(false);
+				m_UI->actionEnableStereo->blockSignals(true);
+				m_UI->actionEnableStereo->setChecked(false);
+				m_UI->actionEnableStereo->blockSignals(false);
 				return;
 			}
 #endif
@@ -8599,7 +8601,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			if (params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
 			{
 				//force (exclusive) full screen
-				actionExclusiveFullScreen->setChecked(true);
+				m_UI->actionExclusiveFullScreen->setChecked(true);
 			}
 
 			if (!win->enableStereoMode(params))
@@ -8607,13 +8609,13 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 				if (params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
 				{
 					//disable (exclusive) full screen
-					actionExclusiveFullScreen->setChecked(false);
+					m_UI->actionExclusiveFullScreen->setChecked(false);
 				}
 
 				//activation of the stereo mode failed: cancel selection
-				actionEnableStereo->blockSignals(true);
-				actionEnableStereo->setChecked(false);
-				actionEnableStereo->blockSignals(false);
+				m_UI->actionEnableStereo->blockSignals(true);
+				m_UI->actionEnableStereo->setChecked(false);
+				m_UI->actionEnableStereo->blockSignals(false);
 			}
 		}
 		win->redraw();
@@ -8651,14 +8653,14 @@ bool MainWindow::checkStereoMode(ccGLWindow* win)
 		{
 			if (win == getActiveGLWindow())
 			{
-				actionEnableStereo->setChecked(false);
+				m_UI->actionEnableStereo->setChecked(false);
 			}
 			else
 			{
 				assert(false);
-				actionEnableStereo->blockSignals(true);
-				actionEnableStereo->setChecked(false);
-				actionEnableStereo->blockSignals(false);
+				m_UI->actionEnableStereo->blockSignals(true);
+				m_UI->actionEnableStereo->setChecked(false);
+				m_UI->actionEnableStereo->blockSignals(false);
 			}
 		}
 	}
@@ -8710,9 +8712,9 @@ void MainWindow::toggleRotationAboutVertAxis()
 
 		win->lockVerticalRotation(isLocked);
 
-		actionLockRotationVertAxis->blockSignals(true);
-		actionLockRotationVertAxis->setChecked(isLocked);
-		actionLockRotationVertAxis->blockSignals(false);
+		m_UI->actionLockRotationVertAxis->blockSignals(true);
+		m_UI->actionLockRotationVertAxis->setChecked(isLocked);
+		m_UI->actionLockRotationVertAxis->blockSignals(false);
 
 		if (isLocked)
 		{
@@ -8917,14 +8919,14 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 	if ( win == nullptr )
 		return;
 
-	actionExclusiveFullScreen->blockSignals(true);
-	actionExclusiveFullScreen->setChecked(win ? win->exclusiveFullScreen() : false);
-	actionExclusiveFullScreen->blockSignals(false);
+	m_UI->actionExclusiveFullScreen->blockSignals(true);
+	m_UI->actionExclusiveFullScreen->setChecked(win ? win->exclusiveFullScreen() : false);
+	m_UI->actionExclusiveFullScreen->blockSignals(false);
 
 	if (!state && win->stereoModeIsEnabled() && win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
 	{
 		//auto disable stereo mode as NVidia Vision only works in full screen mode!
-		actionEnableStereo->setChecked(false);
+		m_UI->actionEnableStereo->setChecked(false);
 	}
 }
 
@@ -8996,9 +8998,9 @@ void MainWindow::handleNewLabel(ccHObject* entity)
 void MainWindow::forceConsoleDisplay()
 {
 	//if the console is hidden, we autoamtically display it!
-	if (DockableConsole && DockableConsole->isHidden())
+	if (m_UI->DockableConsole && m_UI->DockableConsole->isHidden())
 	{
-		DockableConsole->show();
+		m_UI->DockableConsole->show();
 		QApplication::processEvents();
 	}
 }
@@ -9405,30 +9407,30 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		updateViewModePopUpMenu(win);
 		updatePivotVisibilityPopUpMenu(win);
 
-		actionLockRotationVertAxis->blockSignals(true);
-		actionLockRotationVertAxis->setChecked(win->isVerticalRotationLocked());
-		actionLockRotationVertAxis->blockSignals(false);
+		m_UI->actionLockRotationVertAxis->blockSignals(true);
+		m_UI->actionLockRotationVertAxis->setChecked(win->isVerticalRotationLocked());
+		m_UI->actionLockRotationVertAxis->blockSignals(false);
 
-		actionEnableStereo->blockSignals(true);
-		actionEnableStereo->setChecked(win->stereoModeIsEnabled());
-		actionEnableStereo->blockSignals(false);
+		m_UI->actionEnableStereo->blockSignals(true);
+		m_UI->actionEnableStereo->setChecked(win->stereoModeIsEnabled());
+		m_UI->actionEnableStereo->blockSignals(false);
 
-		actionExclusiveFullScreen->blockSignals(true);
-		actionExclusiveFullScreen->setChecked(win->exclusiveFullScreen());
-		actionExclusiveFullScreen->blockSignals(false);
+		m_UI->actionExclusiveFullScreen->blockSignals(true);
+		m_UI->actionExclusiveFullScreen->setChecked(win->exclusiveFullScreen());
+		m_UI->actionExclusiveFullScreen->blockSignals(false);
 
-		actionShowCursor3DCoordinates->blockSignals(true);
-		actionShowCursor3DCoordinates->setChecked(win->cursorCoordinatesShown());
-		actionShowCursor3DCoordinates->blockSignals(false);
+		m_UI->actionShowCursor3DCoordinates->blockSignals(true);
+		m_UI->actionShowCursor3DCoordinates->setChecked(win->cursorCoordinatesShown());
+		m_UI->actionShowCursor3DCoordinates->blockSignals(false);
 
-		actionAutoPickRotationCenter->blockSignals(true);
-		actionAutoPickRotationCenter->setChecked(win->autoPickPivotAtCenter());
-		actionAutoPickRotationCenter->blockSignals(false);
+		m_UI->actionAutoPickRotationCenter->blockSignals(true);
+		m_UI->actionAutoPickRotationCenter->setChecked(win->autoPickPivotAtCenter());
+		m_UI->actionAutoPickRotationCenter->blockSignals(false);
 	}
 
-	actionLockRotationVertAxis->setEnabled(win != nullptr);
-	actionEnableStereo->setEnabled(win != nullptr);
-	actionExclusiveFullScreen->setEnabled(win != nullptr);
+	m_UI->actionLockRotationVertAxis->setEnabled(win != nullptr);
+	m_UI->actionEnableStereo->setEnabled(win != nullptr);
+	m_UI->actionExclusiveFullScreen->setEnabled(win != nullptr);
 }
 
 void MainWindow::updateViewModePopUpMenu(ccGLWindow* win)
@@ -9444,11 +9446,17 @@ void MainWindow::updateViewModePopUpMenu(ccGLWindow* win)
 
 		QAction* currentModeAction = nullptr;
 		if (!perspectiveEnabled)
-			currentModeAction = actionSetOrthoView;
+		{
+			currentModeAction = m_UI->actionSetOrthoView;
+		}
 		else if (objectCentered)
-			currentModeAction = actionSetCenteredPerspectiveView;
+		{
+			currentModeAction = m_UI->actionSetCenteredPerspectiveView;
+		}
 		else
-			currentModeAction = actionSetViewerPerspectiveView;
+		{
+			currentModeAction = m_UI->actionSetViewerPerspectiveView;
+		}
 
 		assert(currentModeAction);
 		m_viewModePopupButton->setIcon(currentModeAction->icon());
@@ -9473,13 +9481,13 @@ void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindow* win)
 		switch(win->getPivotVisibility())
 		{
 		case ccGLWindow::PIVOT_HIDE:
-			visibilityAction = actionSetPivotOff;
+			visibilityAction = m_UI->actionSetPivotOff;
 			break;
 		case ccGLWindow::PIVOT_SHOW_ON_MOVE:
-			visibilityAction = actionSetPivotRotationOnly;
+			visibilityAction = m_UI->actionSetPivotRotationOnly;
 			break;
 		case ccGLWindow::PIVOT_ALWAYS_SHOW:
-			visibilityAction = actionSetPivotAlwaysOn;
+			visibilityAction = m_UI->actionSetPivotAlwaysOn;
 			break;
 		default:
 			assert(false);
@@ -9508,61 +9516,63 @@ void MainWindow::updateMenus()
 	bool hasSelectedEntities = (m_ccRoot && m_ccRoot->countSelectedEntities() > 0);
 
 	//General Menu
-	menuEdit->setEnabled(true/*hasSelectedEntities*/);
-	menuTools->setEnabled(true/*hasSelectedEntities*/);
+	m_UI->menuEdit->setEnabled(true/*hasSelectedEntities*/);
+	m_UI->menuTools->setEnabled(true/*hasSelectedEntities*/);
 
 	//3D Views Menu
-	actionClose3DView    ->setEnabled(hasMdiChild);
-	actionCloseAll3DViews->setEnabled(mdiChildCount != 0);
-	actionTile3DViews    ->setEnabled(mdiChildCount > 1);
-	actionCascade3DViews ->setEnabled(mdiChildCount > 1);
-	actionNext3DView     ->setEnabled(mdiChildCount > 1);
-	actionPrevious3DView ->setEnabled(mdiChildCount > 1);
+	m_UI->actionClose3DView    ->setEnabled(hasMdiChild);
+	m_UI->actionCloseAll3DViews->setEnabled(mdiChildCount != 0);
+	m_UI->actionTile3DViews    ->setEnabled(mdiChildCount > 1);
+	m_UI->actionCascade3DViews ->setEnabled(mdiChildCount > 1);
+	m_UI->actionNext3DView     ->setEnabled(mdiChildCount > 1);
+	m_UI->actionPrevious3DView ->setEnabled(mdiChildCount > 1);
 
 	//Shaders & Filters display Menu
 	bool shadersEnabled = (win ? win->areShadersEnabled() : false);
-	actionLoadShader->setEnabled(shadersEnabled);
-	actionDeleteShader->setEnabled(shadersEnabled);
+	m_UI->actionLoadShader->setEnabled(shadersEnabled);
+	m_UI->actionDeleteShader->setEnabled(shadersEnabled);
 
 	bool filtersEnabled = (win ? win->areGLFiltersEnabled() : false);
-	actionNoFilter->setEnabled(filtersEnabled);
+	m_UI->actionNoFilter->setEnabled(filtersEnabled);
 
 	//View Menu
-	toolBarView->setEnabled(hasMdiChild);
+	m_UI->toolBarView->setEnabled(hasMdiChild);
 
 	//oher actions
-	actionSegment->setEnabled(hasMdiChild && hasSelectedEntities);
-	actionTranslateRotate->setEnabled(hasMdiChild && hasSelectedEntities);
-	actionPointPicking->setEnabled(hasMdiChild);
+	m_UI->actionSegment->setEnabled(hasMdiChild && hasSelectedEntities);
+	m_UI->actionTranslateRotate->setEnabled(hasMdiChild && hasSelectedEntities);
+	m_UI->actionPointPicking->setEnabled(hasMdiChild);
 	//actionPointListPicking->setEnabled(hasMdiChild);
-	actionTestFrameRate->setEnabled(hasMdiChild);
-	actionRenderToFile->setEnabled(hasMdiChild);
-	actionToggleSunLight->setEnabled(hasMdiChild);
-	actionToggleCustomLight->setEnabled(hasMdiChild);
-	actionToggleCenteredPerspective->setEnabled(hasMdiChild);
-	actionToggleViewerBasedPerspective->setEnabled(hasMdiChild);
+	m_UI->actionTestFrameRate->setEnabled(hasMdiChild);
+	m_UI->actionRenderToFile->setEnabled(hasMdiChild);
+	m_UI->actionToggleSunLight->setEnabled(hasMdiChild);
+	m_UI->actionToggleCustomLight->setEnabled(hasMdiChild);
+	m_UI->actionToggleCenteredPerspective->setEnabled(hasMdiChild);
+	m_UI->actionToggleViewerBasedPerspective->setEnabled(hasMdiChild);
 
 	//plugins
-	foreach (QAction* act, m_glFilterActions.actions())
+	for (QAction* act : m_glFilterActions.actions())
+	{
 		act->setEnabled(hasMdiChild);
+	}
 }
 
 void MainWindow::update3DViewsMenu()
 {
-	menu3DViews->clear();
-	menu3DViews->addAction(actionNew3DView);
-	menu3DViews->addSeparator();
-	menu3DViews->addAction(actionZoomIn);
-	menu3DViews->addAction(actionZoomOut);
-	menu3DViews->addSeparator();
-	menu3DViews->addAction(actionClose3DView);
-	menu3DViews->addAction(actionCloseAll3DViews);
-	menu3DViews->addSeparator();
-	menu3DViews->addAction(actionTile3DViews);
-	menu3DViews->addAction(actionCascade3DViews);
-	menu3DViews->addSeparator();
-	menu3DViews->addAction(actionNext3DView);
-	menu3DViews->addAction(actionPrevious3DView);
+	m_UI->menu3DViews->clear();
+	m_UI->menu3DViews->addAction(m_UI->actionNew3DView);
+	m_UI->menu3DViews->addSeparator();
+	m_UI->menu3DViews->addAction(m_UI->actionZoomIn);
+	m_UI->menu3DViews->addAction(m_UI->actionZoomOut);
+	m_UI->menu3DViews->addSeparator();
+	m_UI->menu3DViews->addAction(m_UI->actionClose3DView);
+	m_UI->menu3DViews->addAction(m_UI->actionCloseAll3DViews);
+	m_UI->menu3DViews->addSeparator();
+	m_UI->menu3DViews->addAction(m_UI->actionTile3DViews);
+	m_UI->menu3DViews->addAction(m_UI->actionCascade3DViews);
+	m_UI->menu3DViews->addSeparator();
+	m_UI->menu3DViews->addAction(m_UI->actionNext3DView);
+	m_UI->menu3DViews->addAction(m_UI->actionPrevious3DView);
 
 	QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
 	if (!windows.isEmpty())
@@ -9570,14 +9580,14 @@ void MainWindow::update3DViewsMenu()
 		//Dynamic Separator
 		QAction* separator = new QAction(this);
 		separator->setSeparator(true);
-		menu3DViews->addAction(separator);
+		m_UI->menu3DViews->addAction(separator);
 
 		for (int i = 0; i < windows.size(); ++i)
 		{
 			ccGLWindow *child = GLWindowFromWidget(windows.at(i)->widget());
 
 			QString text = QString("&%1 %2").arg(i + 1).arg(child->windowTitle());
-			QAction *action = menu3DViews->addAction(text);
+			QAction *action = m_UI->menu3DViews->addAction(text);
 			action->setCheckable(true);
 			action ->setChecked(child == getActiveGLWindow());
 			connect(action, SIGNAL(triggered()), m_windowMapper, SLOT(map()));
@@ -9683,89 +9693,88 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	//menuEdit->setEnabled(atLeastOneEntity);
 	//menuTools->setEnabled(atLeastOneEntity);
 
-	actionZoomAndCenter->setEnabled(atLeastOneEntity && activeWindow);
-	actionSave->setEnabled(atLeastOneEntity);
-	actionClone->setEnabled(atLeastOneEntity);
-	actionDelete->setEnabled(atLeastOneEntity);
-	actionExportCoordToSF->setEnabled(atLeastOneEntity);
-	actionSegment->setEnabled(atLeastOneEntity && activeWindow);
-	actionTranslateRotate->setEnabled(atLeastOneEntity && activeWindow);
-	actionShowDepthBuffer->setEnabled(atLeastOneGBLSensor);
-	actionExportDepthBuffer->setEnabled(atLeastOneGBLSensor);
-	actionComputePointsVisibility->setEnabled(atLeastOneGBLSensor);
-	actionResampleWithOctree->setEnabled(atLeastOneCloud);
-	actionApplyScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
-	actionApplyTransformation->setEnabled(atLeastOneEntity);
-	actionComputeOctree->setEnabled(atLeastOneCloud || atLeastOneMesh);
-	actionComputeNormals->setEnabled(atLeastOneCloud || atLeastOneMesh);
-	actionSetColorGradient->setEnabled(atLeastOneCloud || atLeastOneMesh);
-	actionChangeColorLevels->setEnabled(atLeastOneCloud || atLeastOneMesh);
-	actionEditGlobalShiftAndScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
-	actionCrop->setEnabled(atLeastOneCloud || atLeastOneMesh);
-	actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
-	actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
-	actionDeleteScanGrid->setEnabled(atLeastOneGrid);
+	m_UI->actionZoomAndCenter->setEnabled(atLeastOneEntity && activeWindow);
+	m_UI->actionSave->setEnabled(atLeastOneEntity);
+	m_UI->actionClone->setEnabled(atLeastOneEntity);
+	m_UI->actionDelete->setEnabled(atLeastOneEntity);
+	m_UI->actionExportCoordToSF->setEnabled(atLeastOneEntity);
+	m_UI->actionSegment->setEnabled(atLeastOneEntity && activeWindow);
+	m_UI->actionTranslateRotate->setEnabled(atLeastOneEntity && activeWindow);
+	m_UI->actionShowDepthBuffer->setEnabled(atLeastOneGBLSensor);
+	m_UI->actionExportDepthBuffer->setEnabled(atLeastOneGBLSensor);
+	m_UI->actionComputePointsVisibility->setEnabled(atLeastOneGBLSensor);
+	m_UI->actionResampleWithOctree->setEnabled(atLeastOneCloud);
+	m_UI->actionApplyScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
+	m_UI->actionApplyTransformation->setEnabled(atLeastOneEntity);
+	m_UI->actionComputeOctree->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	m_UI->actionComputeNormals->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	m_UI->actionChangeColorLevels->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	m_UI->actionEditGlobalShiftAndScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
+	m_UI->actionCrop->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	m_UI->actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
+	m_UI->actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
+	m_UI->actionDeleteScanGrid->setEnabled(atLeastOneGrid);
 
-	actionScalarFieldFromColor->setEnabled(atLeastOneEntity && atLeastOneColor);
-	actionComputeMeshAA->setEnabled(atLeastOneCloud);
-	actionComputeMeshLS->setEnabled(atLeastOneCloud);
-	actionMeshScanGrids->setEnabled(atLeastOneGrid);
+	m_UI->actionScalarFieldFromColor->setEnabled(atLeastOneEntity && atLeastOneColor);
+	m_UI->actionComputeMeshAA->setEnabled(atLeastOneCloud);
+	m_UI->actionComputeMeshLS->setEnabled(atLeastOneCloud);
+	m_UI->actionMeshScanGrids->setEnabled(atLeastOneGrid);
 	//actionComputeQuadric3D->setEnabled(atLeastOneCloud);
-	actionComputeBestFitBB->setEnabled(atLeastOneEntity);
-	actionComputeDensity->setEnabled(atLeastOneCloud);
-	actionCurvature->setEnabled(atLeastOneCloud);
-	actionRoughness->setEnabled(atLeastOneCloud);
-	actionRemoveDuplicatePoints->setEnabled(atLeastOneCloud);
-	actionFitPlane->setEnabled(atLeastOneEntity);
-	actionFitSphere->setEnabled(atLeastOneCloud);
-	actionLevel->setEnabled(atLeastOneEntity);
-	actionFitFacet->setEnabled(atLeastOneEntity);
-	actionFitQuadric->setEnabled(atLeastOneCloud);
-	actionSubsample->setEnabled(atLeastOneCloud);
+	m_UI->actionComputeBestFitBB->setEnabled(atLeastOneEntity);
+	m_UI->actionComputeDensity->setEnabled(atLeastOneCloud);
+	m_UI->actionCurvature->setEnabled(atLeastOneCloud);
+	m_UI->actionRoughness->setEnabled(atLeastOneCloud);
+	m_UI->actionRemoveDuplicatePoints->setEnabled(atLeastOneCloud);
+	m_UI->actionFitPlane->setEnabled(atLeastOneEntity);
+	m_UI->actionFitSphere->setEnabled(atLeastOneCloud);
+	m_UI->actionLevel->setEnabled(atLeastOneEntity);
+	m_UI->actionFitFacet->setEnabled(atLeastOneEntity);
+	m_UI->actionFitQuadric->setEnabled(atLeastOneCloud);
+	m_UI->actionSubsample->setEnabled(atLeastOneCloud);
 
-	actionSNETest->setEnabled(atLeastOneCloud);
-	actionExportCloudsInfo->setEnabled(atLeastOneCloud);
+	m_UI->actionSNETest->setEnabled(atLeastOneCloud);
+	m_UI->actionExportCloudsInfo->setEnabled(atLeastOneCloud);
 
-	actionFilterByValue->setEnabled(atLeastOneSF);
-	actionConvertToRGB->setEnabled(atLeastOneSF);
-	actionConvertToRandomRGB->setEnabled(atLeastOneSF);
-	actionRenameSF->setEnabled(atLeastOneSF);
-	actionAddIdField->setEnabled(atLeastOneCloud);
-	actionComputeStatParams->setEnabled(atLeastOneSF);
-	actionComputeStatParams2->setEnabled(atLeastOneSF);
-	actionShowHistogram->setEnabled(atLeastOneSF);
-	actionGaussianFilter->setEnabled(atLeastOneSF);
-	actionBilateralFilter->setEnabled(atLeastOneSF);
-	actionDeleteScalarField->setEnabled(atLeastOneSF);
-	actionDeleteAllSF->setEnabled(atLeastOneSF);
-	actionMultiplySF->setEnabled(/*TODO: atLeastOneSF*/false);
-	actionSFGradient->setEnabled(atLeastOneSF);
-	actionSetSFAsCoord->setEnabled(atLeastOneSF && atLeastOneCloud);
-	actionInterpolateSFs->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	m_UI->actionFilterByValue->setEnabled(atLeastOneSF);
+	m_UI->actionConvertToRGB->setEnabled(atLeastOneSF);
+	m_UI->actionConvertToRandomRGB->setEnabled(atLeastOneSF);
+	m_UI->actionRenameSF->setEnabled(atLeastOneSF);
+	m_UI->actionAddIdField->setEnabled(atLeastOneCloud);
+	m_UI->actionComputeStatParams->setEnabled(atLeastOneSF);
+	m_UI->actionComputeStatParams2->setEnabled(atLeastOneSF);
+	m_UI->actionShowHistogram->setEnabled(atLeastOneSF);
+	m_UI->actionGaussianFilter->setEnabled(atLeastOneSF);
+	m_UI->actionBilateralFilter->setEnabled(atLeastOneSF);
+	m_UI->actionDeleteScalarField->setEnabled(atLeastOneSF);
+	m_UI->actionDeleteAllSF->setEnabled(atLeastOneSF);
+	m_UI->actionMultiplySF->setEnabled(/*TODO: atLeastOneSF*/false);
+	m_UI->actionSFGradient->setEnabled(atLeastOneSF);
+	m_UI->actionSetSFAsCoord->setEnabled(atLeastOneSF && atLeastOneCloud);
+	m_UI->actionInterpolateSFs->setEnabled(atLeastOneCloud || atLeastOneMesh);
 
-	actionSamplePoints->setEnabled(atLeastOneMesh);
-	actionMeasureMeshSurface->setEnabled(atLeastOneMesh);
-	actionMeasureMeshVolume->setEnabled(atLeastOneMesh);
-	actionFlagMeshVertices->setEnabled(atLeastOneMesh);
-	actionSmoothMeshLaplacian->setEnabled(atLeastOneMesh);
-	actionConvertTextureToColor->setEnabled(atLeastOneMesh);
-	actionSubdivideMesh->setEnabled(atLeastOneMesh);
-	actionDistanceToBestFitQuadric3D->setEnabled(atLeastOneCloud);
-	actionDistanceMap->setEnabled(atLeastOneMesh || atLeastOneCloud);
+	m_UI->actionSamplePoints->setEnabled(atLeastOneMesh);
+	m_UI->actionMeasureMeshSurface->setEnabled(atLeastOneMesh);
+	m_UI->actionMeasureMeshVolume->setEnabled(atLeastOneMesh);
+	m_UI->actionFlagMeshVertices->setEnabled(atLeastOneMesh);
+	m_UI->actionSmoothMeshLaplacian->setEnabled(atLeastOneMesh);
+	m_UI->actionConvertTextureToColor->setEnabled(atLeastOneMesh);
+	m_UI->actionSubdivideMesh->setEnabled(atLeastOneMesh);
+	m_UI->actionDistanceToBestFitQuadric3D->setEnabled(atLeastOneCloud);
+	m_UI->actionDistanceMap->setEnabled(atLeastOneMesh || atLeastOneCloud);
 
-	menuMeshScalarField->setEnabled(atLeastOneSF && atLeastOneMesh);
+	m_UI->menuMeshScalarField->setEnabled(atLeastOneSF && atLeastOneMesh);
 	//actionSmoothMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);
 	//actionEnhanceMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);
 
-	actionOrientNormalsMST->setEnabled(atLeastOneCloud && atLeastOneNormal);
-	actionOrientNormalsFM->setEnabled(atLeastOneCloud && atLeastOneNormal);
-	actionClearNormals->setEnabled(atLeastOneNormal);
-	actionInvertNormals->setEnabled(atLeastOneNormal);
-	actionConvertNormalToHSV->setEnabled(atLeastOneNormal);
-	actionConvertNormalToDipDir->setEnabled(atLeastOneNormal);
-	actionClearColor->setEnabled(atLeastOneColor);
-	actionRGBToGreyScale->setEnabled(atLeastOneColor);
-	actionEnhanceRGBWithIntensities->setEnabled(atLeastOneColor);
+	m_UI->actionOrientNormalsMST->setEnabled(atLeastOneCloud && atLeastOneNormal);
+	m_UI->actionOrientNormalsFM->setEnabled(atLeastOneCloud && atLeastOneNormal);
+	m_UI->actionClearNormals->setEnabled(atLeastOneNormal);
+	m_UI->actionInvertNormals->setEnabled(atLeastOneNormal);
+	m_UI->actionConvertNormalToHSV->setEnabled(atLeastOneNormal);
+	m_UI->actionConvertNormalToDipDir->setEnabled(atLeastOneNormal);
+	m_UI->actionClearColor->setEnabled(atLeastOneColor);
+	m_UI->actionRGBToGreyScale->setEnabled(atLeastOneColor);
+	m_UI->actionEnhanceRGBWithIntensities->setEnabled(atLeastOneColor);
 
 	// == 1
 	bool exactlyOneEntity = (selInfo.selCount == 1);
@@ -9776,63 +9785,63 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	bool exactlyOneSensor = (selInfo.sensorCount == 1);
 	bool exactlyOneCameraSensor = (selInfo.cameraSensorCount == 1);
 
-	actionConvertPolylinesToMesh->setEnabled(atLeastOnePolyline || exactlyOneGroup);
-	actionMeshTwoPolylines->setEnabled(selInfo.selCount == 2 && selInfo.polylineCount == 2);
-	actionModifySensor->setEnabled(exactlyOneSensor);
-	actionComputeDistancesFromSensor->setEnabled(atLeastOneCameraSensor || atLeastOneGBLSensor);
-	actionComputeScatteringAngles->setEnabled(exactlyOneSensor);
-	actionViewFromSensor->setEnabled(exactlyOneSensor);
-	actionCreateGBLSensor->setEnabled(atLeastOneCloud);
-	actionCreateCameraSensor->setEnabled(selInfo.selCount <= 1); //free now
-	actionProjectUncertainty->setEnabled(exactlyOneCameraSensor);
-	actionCheckPointsInsideFrustum->setEnabled(exactlyOneCameraSensor);
-	actionLabelConnectedComponents->setEnabled(atLeastOneCloud);
-	actionSORFilter->setEnabled(atLeastOneCloud);
-	actionNoiseFilter->setEnabled(atLeastOneCloud);
-	actionUnroll->setEnabled(exactlyOneEntity);
-	actionStatisticalTest->setEnabled(exactlyOneEntity && exactlyOneSF);
-	actionAddConstantSF->setEnabled(exactlyOneCloud || exactlyOneMesh);
-	actionEditGlobalScale->setEnabled(exactlyOneCloud || exactlyOneMesh);
-	actionComputeKdTree->setEnabled(exactlyOneCloud || exactlyOneMesh);
-	actionShowWaveDialog->setEnabled(exactlyOneCloud);
-	actionCompressFWFData->setEnabled(atLeastOneCloud);
+	m_UI->actionConvertPolylinesToMesh->setEnabled(atLeastOnePolyline || exactlyOneGroup);
+	m_UI->actionMeshTwoPolylines->setEnabled(selInfo.selCount == 2 && selInfo.polylineCount == 2);
+	m_UI->actionModifySensor->setEnabled(exactlyOneSensor);
+	m_UI->actionComputeDistancesFromSensor->setEnabled(atLeastOneCameraSensor || atLeastOneGBLSensor);
+	m_UI->actionComputeScatteringAngles->setEnabled(exactlyOneSensor);
+	m_UI->actionViewFromSensor->setEnabled(exactlyOneSensor);
+	m_UI->actionCreateGBLSensor->setEnabled(atLeastOneCloud);
+	m_UI->actionCreateCameraSensor->setEnabled(selInfo.selCount <= 1); //free now
+	m_UI->actionProjectUncertainty->setEnabled(exactlyOneCameraSensor);
+	m_UI->actionCheckPointsInsideFrustum->setEnabled(exactlyOneCameraSensor);
+	m_UI->actionLabelConnectedComponents->setEnabled(atLeastOneCloud);
+	m_UI->actionSORFilter->setEnabled(atLeastOneCloud);
+	m_UI->actionNoiseFilter->setEnabled(atLeastOneCloud);
+	m_UI->actionUnroll->setEnabled(exactlyOneEntity);
+	m_UI->actionStatisticalTest->setEnabled(exactlyOneEntity && exactlyOneSF);
+	m_UI->actionAddConstantSF->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	m_UI->actionEditGlobalScale->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	m_UI->actionComputeKdTree->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	m_UI->actionShowWaveDialog->setEnabled(exactlyOneCloud);
+	m_UI->actionCompressFWFData->setEnabled(atLeastOneCloud);
 
-	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
-	actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
+	m_UI->actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
+	m_UI->actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
 
 	//actionCreatePlane->setEnabled(true);
-	actionEditPlane->setEnabled(selInfo.planeCount == 1);
+	m_UI->actionEditPlane->setEnabled(selInfo.planeCount == 1);
 
-	actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
+	m_UI->actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
 
-	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount > 0);
-	actionCrossSection->setEnabled(atLeastOneCloud || atLeastOneMesh);
-	actionExtractSections->setEnabled(atLeastOneCloud);
-	actionRasterize->setEnabled(exactlyOneCloud);
-	actionCompute2HalfDimVolume->setEnabled(selInfo.cloudCount == selInfo.selCount && selInfo.cloudCount >= 1 && selInfo.cloudCount <= 2); //one or two clouds!
+	m_UI->menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount > 0);
+	m_UI->actionCrossSection->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	m_UI->actionExtractSections->setEnabled(atLeastOneCloud);
+	m_UI->actionRasterize->setEnabled(exactlyOneCloud);
+	m_UI->actionCompute2HalfDimVolume->setEnabled(selInfo.cloudCount == selInfo.selCount && selInfo.cloudCount >= 1 && selInfo.cloudCount <= 2); //one or two clouds!
 
-	actionPointListPicking->setEnabled(exactlyOneEntity);
+	m_UI->actionPointListPicking->setEnabled(exactlyOneEntity);
 
 	// == 2
 	bool exactlyTwoEntities = (selInfo.selCount == 2);
 	bool exactlyTwoClouds = (selInfo.cloudCount == 2);
 	//bool exactlyTwoSF = (selInfo.sfCount == 2);
 
-	actionRegister->setEnabled(exactlyTwoEntities);
-	actionInterpolateColors->setEnabled(exactlyTwoEntities && atLeastOneColor);
-	actionPointPairsAlign->setEnabled(exactlyOneEntity || exactlyTwoEntities);
-	actionAlign->setEnabled(exactlyTwoEntities); //Aurelien BEY le 13/11/2008
-	actionCloudCloudDist->setEnabled(exactlyTwoClouds);
-	actionCloudMeshDist->setEnabled(exactlyTwoEntities && atLeastOneMesh);
-	actionCPS->setEnabled(exactlyTwoClouds);
-	actionScalarFieldArithmetic->setEnabled(exactlyOneEntity && atLeastOneSF);
+	m_UI->actionRegister->setEnabled(exactlyTwoEntities);
+	m_UI->actionInterpolateColors->setEnabled(exactlyTwoEntities && atLeastOneColor);
+	m_UI->actionPointPairsAlign->setEnabled(exactlyOneEntity || exactlyTwoEntities);
+	m_UI->actionAlign->setEnabled(exactlyTwoEntities); //Aurelien BEY le 13/11/2008
+	m_UI->actionCloudCloudDist->setEnabled(exactlyTwoClouds);
+	m_UI->actionCloudMeshDist->setEnabled(exactlyTwoEntities && atLeastOneMesh);
+	m_UI->actionCPS->setEnabled(exactlyTwoClouds);
+	m_UI->actionScalarFieldArithmetic->setEnabled(exactlyOneEntity && atLeastOneSF);
 
 	//>1
 	bool atLeastTwoEntities = (selInfo.selCount > 1);
 
-	actionMerge->setEnabled(atLeastTwoEntities);
-	actionMatchBBCenters->setEnabled(atLeastTwoEntities);
-	actionMatchScales->setEnabled(atLeastTwoEntities);
+	m_UI->actionMerge->setEnabled(atLeastTwoEntities);
+	m_UI->actionMatchBBCenters->setEnabled(atLeastTwoEntities);
+	m_UI->actionMatchScales->setEnabled(atLeastTwoEntities);
 
 	//standard plugins
 	foreach (ccStdPluginInterface* plugin, m_stdPlugins)
@@ -9843,7 +9852,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 {
-	if (!actionEnableCameraLink->isChecked())
+	if (!m_UI->actionEnableCameraLink->isChecked())
 		return;
 
 	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
@@ -9865,7 +9874,7 @@ void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 
 void MainWindow::echoCameraDisplaced(float ddx, float ddy)
 {
-	if (!actionEnableCameraLink->isChecked())
+	if (!m_UI->actionEnableCameraLink->isChecked())
 		return;
 
 	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
@@ -9887,7 +9896,7 @@ void MainWindow::echoCameraDisplaced(float ddx, float ddy)
 
 void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 {
-	if (!actionEnableCameraLink->isChecked())
+	if (!m_UI->actionEnableCameraLink->isChecked())
 		return;
 
 	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
@@ -9909,7 +9918,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 
  void MainWindow::echoCameraPosChanged(const CCVector3d& P)
  {
-	 if (!actionEnableCameraLink->isChecked())
+	 if (!m_UI->actionEnableCameraLink->isChecked())
 		 return;
 
 	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
@@ -9932,7 +9941,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 
  void MainWindow::echoPivotPointChanged(const CCVector3d& P)
  {
-	 if (!actionEnableCameraLink->isChecked())
+	 if (!m_UI->actionEnableCameraLink->isChecked())
 		 return;
 
 	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
@@ -9954,7 +9963,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 
  void MainWindow::echoPixelSizeChanged(float pixelSize)
  {
-	 if (!actionEnableCameraLink->isChecked())
+	 if (!m_UI->actionEnableCameraLink->isChecked())
 		 return;
 
 	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
@@ -10072,6 +10081,11 @@ void MainWindow::UpdateUI()
 ccDBRoot* MainWindow::db()
 {
 	return m_ccRoot;
+}
+
+void MainWindow::addEditPlaneAction( QMenu &menu ) const
+{
+	menu.addAction( m_UI->actionEditPlane );
 }
 
 ccHObject* MainWindow::dbRootObject()

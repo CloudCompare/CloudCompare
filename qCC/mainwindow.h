@@ -32,9 +32,6 @@
 //CCLib
 #include <AutoSegmentationTools.h>
 
-//GUI (generated with Qt Designer)
-#include <ui_mainWindow.h>
-
 //internal db
 #include "db_tree/ccDBRoot.h"
 
@@ -66,9 +63,12 @@ class ccSectionExtractionTool;
 class ccStdPluginInterface;
 class ccTracePolylineTool;
 
+namespace Ui {
+	class MainWindow;
+} 
 
 //! Main window
-class MainWindow : public QMainWindow, public ccMainAppInterface, public ccPickingListener, public Ui::MainWindow
+class MainWindow : public QMainWindow, public ccMainAppInterface, public ccPickingListener 
 {
 	Q_OBJECT
 
@@ -160,6 +160,12 @@ public:
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
 
+	//! Adds the "Edit Plane" action to the given menu.
+	/**
+	 * This is the only MainWindow UI action used externally (by ccDBRoot).
+	**/
+	void  addEditPlaneAction( QMenu &menu ) const;
+	
 	//! Backup "context" for an object
 	/** Used with removeObjectTemporarilyFromDBTree/putObjectBackIntoDBTree.
 	**/
@@ -538,6 +544,8 @@ private:
 	//! Checks whether stereo mode can be stopped (if necessary) or not
 	bool checkStereoMode(ccGLWindow* win);
 
+	Ui::MainWindow	*m_UI;
+	
 	//DB & DB Tree
 	ccDBRoot* m_ccRoot;
 

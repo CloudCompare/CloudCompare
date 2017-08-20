@@ -24,6 +24,7 @@
 #include <QTreeView>
 #include <QStandardItemModel>
 #include <QHeaderView>
+#include <QMenu>
 #include <QMimeData>
 #include <QMessageBox>
 #include <QRegExp>
@@ -1982,7 +1983,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			}
 			if (hasExactlyOnePlane)
 			{
-				menu.addAction(MainWindow::TheInstance()->actionEditPlane);
+				MainWindow::TheInstance()->addEditPlaneAction( menu );
 			}
 			if (hasExacltyOneGBLSenor)
 			{

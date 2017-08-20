@@ -582,37 +582,37 @@ void MainWindow::connectActions()
 	//Keyboard shortcuts
 	
 	//'A': toggles selected items activation
-	connect(m_UI->actionToggleActivation, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleActivation, &QAction::triggered, this, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::ACTIVE );
 	});
 
 	//'V': toggles selected items visibility
-	connect(m_UI->actionToggleVisibility, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleVisibility, &QAction::triggered, this, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::VISIBLE );
 	});
 
 	//'N': toggles selected items normals visibility
-	connect(m_UI->actionToggleNormals, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleNormals, &QAction::triggered, this, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::NORMALS );
 	});
 
 	//'C': toggles selected items colors visibility
-	connect(m_UI->actionToggleColors,	&QAction::triggered, [=]() {
+	connect(m_UI->actionToggleColors,	&QAction::triggered, this, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::COLOR );
 	});
 
 	//'S': toggles selected items SF visibility
-	connect(m_UI->actionToggleSF, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleSF, &QAction::triggered, this, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD );
 	});
 
 	//'D': toggles selected items '3D name' visibility
-	connect(m_UI->actionToggleShowName, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleShowName, &QAction::triggered, this, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::NAME );
 	});
 
 	//'M': toggles selected items materials/textures visibility
-	connect(m_UI->actionToggleMaterials, &QAction::triggered, [=]() {
+	connect(m_UI->actionToggleMaterials, &QAction::triggered, this, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::MATERIAL );
 	});
 
@@ -640,7 +640,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionRGBToGreyScale,				&QAction::triggered, this, &MainWindow::doActionRGBToGreyScale);
 	connect(m_UI->actionInterpolateColors,			&QAction::triggered, this, &MainWindow::doActionInterpolateColors);
 	connect(m_UI->actionEnhanceRGBWithIntensities,	&QAction::triggered, this, &MainWindow::doActionEnhanceRGBWithIntensities);
-	connect(m_UI->actionClearColor, &QAction::triggered, [=]() {
+	connect(m_UI->actionClearColor, &QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::COLORS );
 	});
 
@@ -651,7 +651,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionConvertNormalToDipDir,		&QAction::triggered, this, &MainWindow::doActionConvertNormalsToDipDir);
 	connect(m_UI->actionOrientNormalsMST,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsMST);
 	connect(m_UI->actionOrientNormalsFM,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsFM);
-	connect(m_UI->actionClearNormals, &QAction::triggered, [=]() {
+	connect(m_UI->actionClearNormals, &QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::NORMALS );
 	});
 
@@ -709,10 +709,10 @@ void MainWindow::connectActions()
 	connect(m_UI->actionAddIdField,					&QAction::triggered, this, &MainWindow::doActionAddIdField);
 	connect(m_UI->actionSetSFAsCoord,				&QAction::triggered, this, &MainWindow::doActionSetSFAsCoord);
 	connect(m_UI->actionInterpolateSFs,				&QAction::triggered, this, &MainWindow::doActionInterpolateScalarFields);
-	connect(m_UI->actionDeleteScalarField, &QAction::triggered, [=]() {
+	connect(m_UI->actionDeleteScalarField, &QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD );
 	});
-	connect(m_UI->actionDeleteAllSF, &QAction::triggered, [=]() {
+	connect(m_UI->actionDeleteAllSF, &QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS );
 	});
 	
@@ -840,7 +840,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionAboutPlugins,				&QAction::triggered, this, &MainWindow::doActionShowAboutPluginsDialog);
 	connect(m_UI->actionEnableQtWarnings,			&QAction::toggled, this, &MainWindow::doEnableQtWarnings);
 
-	connect(m_UI->actionAbout,	&QAction::triggered, [this] () {
+	connect(m_UI->actionAbout,	&QAction::triggered, this, [this] () {
 		ccAboutDialog* aboutDialog = new ccAboutDialog(this);
 		aboutDialog->exec();
 	});
@@ -868,14 +868,14 @@ void MainWindow::connectActions()
 	connect(m_UI->actionEnableStereo,				&QAction::toggled, this, &MainWindow::toggleActiveWindowStereoVision);
 	connect(m_UI->actionAutoPickRotationCenter,		&QAction::toggled, this, &MainWindow::toggleActiveWindowAutoPickRotCenter);
 	
-	connect(m_UI->actionSetViewTop, &QAction::triggered, [=]() { setView( CC_TOP_VIEW ); });
-	connect(m_UI->actionSetViewBottom, &QAction::triggered, [=]() { setView( CC_BOTTOM_VIEW ); });
-	connect(m_UI->actionSetViewFront, &QAction::triggered, [=]() { setView( CC_FRONT_VIEW ); });
-	connect(m_UI->actionSetViewBack, &QAction::triggered, [=]() { setView( CC_BACK_VIEW ); });
-	connect(m_UI->actionSetViewLeft, &QAction::triggered, [=]() { setView( CC_LEFT_VIEW ); });
-	connect(m_UI->actionSetViewRight, &QAction::triggered, [=]() { setView( CC_RIGHT_VIEW ); });
-	connect(m_UI->actionSetViewIso1, &QAction::triggered, [=]() { setView( CC_ISO_VIEW_1 ); });
-	connect(m_UI->actionSetViewIso2, &QAction::triggered, [=]() { setView( CC_ISO_VIEW_2 ); });
+	connect(m_UI->actionSetViewTop, &QAction::triggered, this, [=]() { setView( CC_TOP_VIEW ); });
+	connect(m_UI->actionSetViewBottom, &QAction::triggered, this, [=]() { setView( CC_BOTTOM_VIEW ); });
+	connect(m_UI->actionSetViewFront, &QAction::triggered, this, [=]() { setView( CC_FRONT_VIEW ); });
+	connect(m_UI->actionSetViewBack, &QAction::triggered, this, [=]() { setView( CC_BACK_VIEW ); });
+	connect(m_UI->actionSetViewLeft, &QAction::triggered, this, [=]() { setView( CC_LEFT_VIEW ); });
+	connect(m_UI->actionSetViewRight, &QAction::triggered, this, [=]() { setView( CC_RIGHT_VIEW ); });
+	connect(m_UI->actionSetViewIso1, &QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_1 ); });
+	connect(m_UI->actionSetViewIso2, &QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_2 ); });
 	
 	//hidden
 	connect(m_UI->actionEnableVisualDebugTraces,	&QAction::triggered, this, &MainWindow::toggleVisualDebugTraces);

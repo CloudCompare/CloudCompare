@@ -36,7 +36,7 @@ ccRecentFiles::ccRecentFiles( QWidget *parent ) :
 	
 	m_actionClearMenu = new QAction( tr("Clear Menu"), this );
 	
-	connect( m_actionClearMenu, &QAction::triggered, [this]() {
+	connect( m_actionClearMenu, &QAction::triggered, this, [this]() {
 		m_settings.remove( s_settingKey );
 		
 		updateMenu();		

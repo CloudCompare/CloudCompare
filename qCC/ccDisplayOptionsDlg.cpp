@@ -46,14 +46,14 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(pointsColorButton,               SIGNAL(clicked()),         this, SLOT(changePointsColor()));
 	connect(textColorButton,                 SIGNAL(clicked()),         this, SLOT(changeTextColor()));
 
-	connect(doubleSidedCheckBox,             &QCheckBox::clicked, [&]() { parameters.lightDoubleSided = doubleSidedCheckBox->isChecked(); });
-	connect(enableGradientCheckBox,          &QCheckBox::clicked, [&]() { parameters.drawBackgroundGradient = enableGradientCheckBox->isChecked(); });
-	connect(showCrossCheckBox,               &QCheckBox::clicked, [&]() { parameters.displayCross = showCrossCheckBox->isChecked(); });
-	connect(colorScaleShowHistogramCheckBox, &QCheckBox::clicked, [&]() { parameters.colorScaleShowHistogram = colorScaleShowHistogramCheckBox->isChecked(); });
-	connect(useColorScaleShaderCheckBox,     &QCheckBox::clicked, [&]() { parameters.colorScaleUseShader = useColorScaleShaderCheckBox->isChecked(); });
-	connect(decimateMeshBox,                 &QCheckBox::clicked, [&]() { parameters.decimateMeshOnMove = decimateMeshBox->isChecked(); });
-	connect(decimateCloudBox,                &QCheckBox::clicked, [&]() { parameters.decimateCloudOnMove = decimateCloudBox->isChecked(); });
-	connect(drawRoundedPointsCheckBox,       &QCheckBox::clicked, [&]() { parameters.drawRoundedPoints = drawRoundedPointsCheckBox->isChecked(); });
+	connect(doubleSidedCheckBox,             &QCheckBox::clicked, this, [&]() { parameters.lightDoubleSided = doubleSidedCheckBox->isChecked(); });
+	connect(enableGradientCheckBox,          &QCheckBox::clicked, this, [&]() { parameters.drawBackgroundGradient = enableGradientCheckBox->isChecked(); });
+	connect(showCrossCheckBox,               &QCheckBox::clicked, this, [&]() { parameters.displayCross = showCrossCheckBox->isChecked(); });
+	connect(colorScaleShowHistogramCheckBox, &QCheckBox::clicked, this, [&]() { parameters.colorScaleShowHistogram = colorScaleShowHistogramCheckBox->isChecked(); });
+	connect(useColorScaleShaderCheckBox,     &QCheckBox::clicked, this, [&]() { parameters.colorScaleUseShader = useColorScaleShaderCheckBox->isChecked(); });
+	connect(decimateMeshBox,                 &QCheckBox::clicked, this, [&]() { parameters.decimateMeshOnMove = decimateMeshBox->isChecked(); });
+	connect(decimateCloudBox,                &QCheckBox::clicked, this, [&]() { parameters.decimateCloudOnMove = decimateCloudBox->isChecked(); });
+	connect(drawRoundedPointsCheckBox,       &QCheckBox::clicked, this, [&]() { parameters.drawRoundedPoints = drawRoundedPointsCheckBox->isChecked(); });
 
 	connect(useVBOCheckBox,                  SIGNAL(clicked()),         this, SLOT(changeVBOUsage()));
 

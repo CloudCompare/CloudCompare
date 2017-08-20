@@ -47,7 +47,7 @@ struct CommandCrossSection : public ccCommandLineInterface::Command
 
 			if (!ok)
 			{
-				return cmd.error(QString("Invalid XML file (numerical attribute expected for attribute '%1' of element '<%2>')").arg(name).arg(element));
+				return cmd.error(QString("Invalid XML file (numerical attribute expected for attribute '%1' of element '<%2>')").arg(name, element));
 			}
 		}
 

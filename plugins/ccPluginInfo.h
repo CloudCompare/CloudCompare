@@ -152,7 +152,7 @@ public:
 				if (filter)
 				{
 					FileIOFilter::Register(filter);
-					ccLog::Print(QString("[Plugin][%1] New file extension(s) registered: %2").arg(ioPlugin->getName()).arg(filter->getDefaultExtension().toUpper()));
+					ccLog::Print(QString("[Plugin][%1] New file extension(s) registered: %2").arg(ioPlugin->getName(), filter->getDefaultExtension().toUpper()));
 				}
 			}
 			break;
@@ -195,7 +195,7 @@ public:
 
 				if (plugin == nullptr)
 				{
-					ccLog::Warning(QString("[Plugin] File '%1' doesn't seem to be a valid plugin\t(%2)").arg(filename).arg(loader.errorString()));
+					ccLog::Warning(QString("[Plugin] File '%1' doesn't seem to be a valid plugin\t(%2)").arg(filename, loader.errorString()));
 					continue;
 				}
 
@@ -207,7 +207,7 @@ public:
 					continue;
 				}
 
-				ccLog::Print(QString("Found plugin: %1 (%2)").arg(ccPlugin->getName()).arg(filename));
+				ccLog::Print(QString("Found plugin: %1 (%2)").arg(ccPlugin->getName(), filename));
 				plugins.push_back(tPluginInfo(pluginPath, ccPlugin, plugin));
 			}
 		}

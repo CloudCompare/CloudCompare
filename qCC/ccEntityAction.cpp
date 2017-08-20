@@ -1264,7 +1264,7 @@ namespace ccEntityAction
 			{
 				if (sf && !sf->reserve(count))
 				{
-					ccLog::Warning(QString("[sfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(sf->getName()).arg(cloud->getName()));
+					ccLog::Warning(QString("[sfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(sf->getName(), cloud->getName()));
 					sf->release();
 					sf = nullptr;
 				}
@@ -1319,14 +1319,14 @@ namespace ccEntityAction
 				}
 				else
 				{
-					ccConsole::Warning(QString("[sfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(sf->getName()).arg(cloud->getName()));
+					ccConsole::Warning(QString("[sfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(sf->getName(), cloud->getName()));
 					sf->release();
 					sf = nullptr;
 				}
 			}
 			
 			if (!fieldsStr.isEmpty())
-				ccLog::Print(QString("[sfFromColor] New scalar fields (%1) added to '%2'").arg(fieldsStr).arg(cloud->getName()));
+				ccLog::Print(QString("[sfFromColor] New scalar fields (%1) added to '%2'").arg(fieldsStr, cloud->getName()));
 		}
 
 		return true;

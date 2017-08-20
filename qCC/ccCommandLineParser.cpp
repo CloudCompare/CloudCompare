@@ -220,7 +220,7 @@ bool ccCommandLineParser::registerCommand(Command::Shared command)
 	if (m_commands.contains(command->m_keyword))
 	{
 		assert(false);
-		warning(QString("Internal error: keyword '%' already registered (by command '%2')").arg(command->m_keyword).arg(m_commands[command->m_keyword]->m_name));
+		warning(QString("Internal error: keyword '%' already registered (by command '%2')").arg(command->m_keyword, m_commands[command->m_keyword]->m_name));
 		return false;
 	}
 
@@ -664,7 +664,7 @@ int ccCommandLineParser::start(QDialog* parent/*=0*/)
 			print("Available commands:");
 			for (auto it = m_commands.constBegin(); it != m_commands.constEnd(); ++it)
 			{
-				print(QString("-%1: %2").arg(it.key().toUpper()).arg(it.value()->m_name));
+				print(QString("-%1: %2").arg(it.key().toUpper(), it.value()->m_name));
 			}
 		}
 		else

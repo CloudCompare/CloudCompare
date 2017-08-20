@@ -575,7 +575,7 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 
 			//save repot in a separate text file
 			{
-				QString txtFilename = QString("%1/%2").arg(desc->path).arg("VolumeCalculationReport");
+				QString txtFilename = QString("%1/VolumeCalculationReport").arg(desc->path);
 				if (cmd.addTimestamp())
 					txtFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
 				txtFilename += QString(".txt");

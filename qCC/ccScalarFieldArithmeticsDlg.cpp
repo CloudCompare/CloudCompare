@@ -141,16 +141,16 @@ QString ccScalarFieldArithmeticsDlg::GetOperationName(Operation op, QString sf1,
 	switch (op)
 	{
 	case PLUS:
-		return QString("%1 + %2").arg(sf1).arg(sf2);
+		return QString("%1 + %2").arg(sf1, sf2);
 	case MINUS:
-		return QString("%1 - %2").arg(sf1).arg(sf2);
+		return QString("%1 - %2").arg(sf1, sf2);
 	case MULTIPLY:
-		return QString("%1 * %2").arg(sf1).arg(sf2);
+		return QString("%1 * %2").arg(sf1, sf2);
 	case DIVIDE:
-		return QString("%1 / %2").arg(sf1).arg(sf2);
+		return QString("%1 / %2").arg(sf1, sf2);
 	default:
 		if (op != INVALID)
-			return QString("%1(%2)").arg(s_opNames[op]).arg(sf1);
+			return QString("%1(%2)").arg(s_opNames[op], sf1);
 		else
 			assert(false);
 		break;

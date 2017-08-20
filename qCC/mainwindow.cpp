@@ -6230,7 +6230,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 							if (removeLabel && label->getParent())
 							{
-								ccLog::Warning(QString("[Segmentation] Label %1 depends on cloud %2 and will be removed").arg(label->getName()).arg(cloud->getName()));
+								ccLog::Warning(QString("[Segmentation] Label %1 depends on cloud %2 and will be removed").arg(label->getName(), cloud->getName()));
 								ccHObject* labelParent = label->getParent();
 								ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(labelParent);
 								labelParent->removeChild(label);

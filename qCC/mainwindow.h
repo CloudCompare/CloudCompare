@@ -254,9 +254,6 @@ private slots:
 	void setPivotAlwaysOn();
 	void setPivotRotationOnly();
 	void setPivotOff();
-	void setOrthoView();
-	void setCenteredPerspectiveView();
-	void setViewerPerspectiveView();
 	void toggleActiveWindowAutoPickRotCenter(bool);
 	void toggleActiveWindowShowCursorCoords(bool);
 

@@ -240,27 +240,28 @@ MainWindow::MainWindow()
 	//db-tree
 	{
 		m_ccRoot = new ccDBRoot(m_UI->dbTreeView, m_UI->propertiesTreeView, this);
-		connect(m_ccRoot, SIGNAL(selectionChanged()), this, SLOT(updateUIWithSelection()));
+		connect(m_ccRoot, &ccDBRoot::selectionChanged, this, &MainWindow::updateUIWithSelection);
 	}
 
 	//MDI Area
 	{
 		m_mdiArea = new QMdiArea(this);
 		setCentralWidget(m_mdiArea);
-		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(updateMenus()));
-		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(on3DViewActivated(QMdiSubWindow*)));
+		connect(m_mdiArea, &QMdiArea::subWindowActivated, this, &MainWindow::updateMenus);
+		connect(m_mdiArea, &QMdiArea::subWindowActivated, this, &MainWindow::on3DViewActivated);
 		m_mdiArea->installEventFilter(this);
 	}
 
 	//picking hub
 	{
 		m_pickingHub = new ccPickingHub(this, this);
-		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), m_pickingHub, SLOT(onActiveWindowChanged(QMdiSubWindow*)));
+		connect(m_mdiArea, &QMdiArea::subWindowActivated, m_pickingHub, &ccPickingHub::onActiveWindowChanged);
 	}
 
 	//Window Mapper
 	m_windowMapper = new QSignalMapper(this);
-	connect(m_windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
+	connect(m_windowMapper, static_cast<void (QSignalMapper::*)(QWidget *)>(&QSignalMapper::mapped),
+			this, &MainWindow::setActiveSubWindow);
 
 	connectActions();
 
@@ -421,7 +422,7 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 			action->setToolTip(plugin.object->getDescription());
 			action->setIcon(plugin.object->getIcon());
 			//connect default signal
-			connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
+			connect(action, &QAction::triggered, this, &MainWindow::doEnableGLFilter);
 
 			m_UI->menuShadersAndFilters->addAction(action);
 			m_UI->menuShadersAndFilters->setEnabled(true);
@@ -624,90 +625,90 @@ void MainWindow::connectActions()
 	/*** MAIN MENU ***/
 
 	//"File" menu
-	connect(m_UI->actionOpen,					SIGNAL(triggered()),	this,		SLOT(doActionLoadFile()));
-	connect(m_UI->actionSave,					SIGNAL(triggered()),	this,		SLOT(doActionSaveFile()));
-	connect(m_UI->actionGlobalShiftSettings,	SIGNAL(triggered()),	this,		SLOT(doActionGlobalShiftSeetings()));
-	connect(m_UI->actionPrimitiveFactory,		SIGNAL(triggered()),	this,		SLOT(doShowPrimitiveFactory()));
-	connect(m_UI->actionCloseAll,				SIGNAL(triggered()),	this,		SLOT(closeAll()));
-	connect(m_UI->actionQuit,					SIGNAL(triggered()),	this,		SLOT(close()));
+	connect(m_UI->actionOpen,					&QAction::triggered, this, &MainWindow::doActionLoadFile);
+	connect(m_UI->actionSave,					&QAction::triggered, this, &MainWindow::doActionSaveFile);
+	connect(m_UI->actionGlobalShiftSettings,	&QAction::triggered, this, &MainWindow::doActionGlobalShiftSeetings);
+	connect(m_UI->actionPrimitiveFactory,		&QAction::triggered, this, &MainWindow::doShowPrimitiveFactory);
+	connect(m_UI->actionCloseAll,				&QAction::triggered, this, &MainWindow::closeAll);
+	connect(m_UI->actionQuit,					&QAction::triggered, this, &QWidget::close);
 
 	//"Edit > Colors" menu
-	connect(m_UI->actionSetUniqueColor,				SIGNAL(triggered()),	this,		SLOT(doActionSetUniqueColor()));
-	connect(m_UI->actionSetColorGradient,			SIGNAL(triggered()),	this,		SLOT(doActionSetColorGradient()));
-	connect(m_UI->actionChangeColorLevels,			SIGNAL(triggered()),	this,		SLOT(doActionChangeColorLevels()));
-	connect(m_UI->actionColorize,					SIGNAL(triggered()),	this,		SLOT(doActionColorize()));
-	connect(m_UI->actionRGBToGreyScale,				SIGNAL(triggered()),	this,		SLOT(doActionRGBToGreyScale()));
-	connect(m_UI->actionInterpolateColors,			SIGNAL(triggered()),	this,		SLOT(doActionInterpolateColors()));
-	connect(m_UI->actionEnhanceRGBWithIntensities,	SIGNAL(triggered()),	this,		SLOT(doActionEnhanceRGBWithIntensities()));
+	connect(m_UI->actionSetUniqueColor,				&QAction::triggered, this, &MainWindow::doActionSetUniqueColor);
+	connect(m_UI->actionSetColorGradient,			&QAction::triggered, this, &MainWindow::doActionSetColorGradient);
+	connect(m_UI->actionChangeColorLevels,			&QAction::triggered, this, &MainWindow::doActionChangeColorLevels);
+	connect(m_UI->actionColorize,					&QAction::triggered, this, &MainWindow::doActionColorize);
+	connect(m_UI->actionRGBToGreyScale,				&QAction::triggered, this, &MainWindow::doActionRGBToGreyScale);
+	connect(m_UI->actionInterpolateColors,			&QAction::triggered, this, &MainWindow::doActionInterpolateColors);
+	connect(m_UI->actionEnhanceRGBWithIntensities,	&QAction::triggered, this, &MainWindow::doActionEnhanceRGBWithIntensities);
 	connect(m_UI->actionClearColor, &QAction::triggered, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::COLORS );
 	});
 
 	//"Edit > Normals" menu
-	connect(m_UI->actionComputeNormals,				SIGNAL(triggered()),	this,		SLOT(doActionComputeNormals()));
-	connect(m_UI->actionInvertNormals,				SIGNAL(triggered()),	this,		SLOT(doActionInvertNormals()));
-	connect(m_UI->actionConvertNormalToHSV,			SIGNAL(triggered()),	this,		SLOT(doActionConvertNormalsToHSV()));
-	connect(m_UI->actionConvertNormalToDipDir,		SIGNAL(triggered()),	this,		SLOT(doActionConvertNormalsToDipDir()));
-	connect(m_UI->actionOrientNormalsMST,			SIGNAL(triggered()),	this,		SLOT(doActionOrientNormalsMST()));
-	connect(m_UI->actionOrientNormalsFM,			SIGNAL(triggered()),	this,		SLOT(doActionOrientNormalsFM()));
+	connect(m_UI->actionComputeNormals,				&QAction::triggered, this, &MainWindow::doActionComputeNormals);
+	connect(m_UI->actionInvertNormals,				&QAction::triggered, this, &MainWindow::doActionInvertNormals);
+	connect(m_UI->actionConvertNormalToHSV,			&QAction::triggered, this, &MainWindow::doActionConvertNormalsToHSV);
+	connect(m_UI->actionConvertNormalToDipDir,		&QAction::triggered, this, &MainWindow::doActionConvertNormalsToDipDir);
+	connect(m_UI->actionOrientNormalsMST,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsMST);
+	connect(m_UI->actionOrientNormalsFM,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsFM);
 	connect(m_UI->actionClearNormals, &QAction::triggered, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::NORMALS );
 	});
 
 	//"Edit > Octree" menu
-	connect(m_UI->actionComputeOctree,				SIGNAL(triggered()),	this,		SLOT(doActionComputeOctree()));
-	connect(m_UI->actionResampleWithOctree,			SIGNAL(triggered()),	this,		SLOT(doActionResampleWithOctree()));
+	connect(m_UI->actionComputeOctree,		&QAction::triggered, this, &MainWindow::doActionComputeOctree);
+	connect(m_UI->actionResampleWithOctree,	&QAction::triggered, this, &MainWindow::doActionResampleWithOctree);
 
 	//"Edit > Grid" menu
-	connect(m_UI->actionDeleteScanGrid,				SIGNAL(triggered()),	this,		SLOT(doActionDeleteScanGrids()));
+	connect(m_UI->actionDeleteScanGrid,		&QAction::triggered, this, &MainWindow::doActionDeleteScanGrids);
 
 	//"Edit > Mesh" menu
-	connect(m_UI->actionComputeMeshAA,				SIGNAL(triggered()),	this,		SLOT(doActionComputeMeshAA()));
-	connect(m_UI->actionComputeMeshLS,				SIGNAL(triggered()),	this,		SLOT(doActionComputeMeshLS()));
-	connect(m_UI->actionMeshScanGrids,				SIGNAL(triggered()),	this,		SLOT(doActionMeshScanGrids()));
-	connect(m_UI->actionConvertTextureToColor,		SIGNAL(triggered()),	this,		SLOT(doActionConvertTextureToColor()));
-	connect(m_UI->actionSamplePoints,				SIGNAL(triggered()),	this,		SLOT(doActionSamplePoints()));
-	connect(m_UI->actionSmoothMeshLaplacian,		SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshLaplacian()));
-	connect(m_UI->actionSubdivideMesh,				SIGNAL(triggered()),	this,		SLOT(doActionSubdivideMesh()));
-	connect(m_UI->actionMeasureMeshSurface,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshSurface()));
-	connect(m_UI->actionMeasureMeshVolume,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshVolume()));
-	connect(m_UI->actionFlagMeshVertices,			SIGNAL(triggered()),	this,		SLOT(doActionFlagMeshVertices()));
+	connect(m_UI->actionComputeMeshAA,				&QAction::triggered, this, &MainWindow::doActionComputeMeshAA);
+	connect(m_UI->actionComputeMeshLS,				&QAction::triggered, this, &MainWindow::doActionComputeMeshLS);
+	connect(m_UI->actionMeshScanGrids,				&QAction::triggered, this, &MainWindow::doActionMeshScanGrids);
+	connect(m_UI->actionConvertTextureToColor,		&QAction::triggered, this, &MainWindow::doActionConvertTextureToColor);
+	connect(m_UI->actionSamplePoints,				&QAction::triggered, this, &MainWindow::doActionSamplePoints);
+	connect(m_UI->actionSmoothMeshLaplacian,		&QAction::triggered, this, &MainWindow::doActionSmoothMeshLaplacian);
+	connect(m_UI->actionSubdivideMesh,				&QAction::triggered, this, &MainWindow::doActionSubdivideMesh);
+	connect(m_UI->actionMeasureMeshSurface,			&QAction::triggered, this, &MainWindow::doActionMeasureMeshSurface);
+	connect(m_UI->actionMeasureMeshVolume,			&QAction::triggered, this, &MainWindow::doActionMeasureMeshVolume);
+	connect(m_UI->actionFlagMeshVertices,			&QAction::triggered, this, &MainWindow::doActionFlagMeshVertices);
 	//"Edit > Mesh > Scalar Field" menu
-	connect(m_UI->actionSmoothMeshSF,				SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshSF()));
-	connect(m_UI->actionEnhanceMeshSF,				SIGNAL(triggered()),	this,		SLOT(doActionEnhanceMeshSF()));
+	connect(m_UI->actionSmoothMeshSF,				&QAction::triggered, this, &MainWindow::doActionSmoothMeshSF);
+	connect(m_UI->actionEnhanceMeshSF,				&QAction::triggered, this, &MainWindow::doActionEnhanceMeshSF);
 	//"Edit > Plane" menu
-	connect(m_UI->actionCreatePlane,				SIGNAL(triggered()),	this,		SLOT(doActionCreatePlane()));
-	connect(m_UI->actionEditPlane,					SIGNAL(triggered()),	this,		SLOT(doActionEditPlane()));
+	connect(m_UI->actionCreatePlane,				&QAction::triggered, this, &MainWindow::doActionCreatePlane);
+	connect(m_UI->actionEditPlane,					&QAction::triggered, this, &MainWindow::doActionEditPlane);
 	//"Edit > Sensor > Ground-Based lidar" menu
-	connect(m_UI->actionShowDepthBuffer,			SIGNAL(triggered()),	this,		SLOT(doActionShowDepthBuffer()));
-	connect(m_UI->actionExportDepthBuffer,			SIGNAL(triggered()),	this,		SLOT(doActionExportDepthBuffer()));
-	connect(m_UI->actionComputePointsVisibility,	SIGNAL(triggered()),	this,		SLOT(doActionComputePointsVisibility()));
+	connect(m_UI->actionShowDepthBuffer,			&QAction::triggered, this, &MainWindow::doActionShowDepthBuffer);
+	connect(m_UI->actionExportDepthBuffer,			&QAction::triggered, this, &MainWindow::doActionExportDepthBuffer);
+	connect(m_UI->actionComputePointsVisibility,	&QAction::triggered, this, &MainWindow::doActionComputePointsVisibility);
 	//"Edit > Sensor" menu
-	connect(m_UI->actionCreateGBLSensor,			SIGNAL(triggered()),	this,		SLOT(doActionCreateGBLSensor()));
-	connect(m_UI->actionCreateCameraSensor,			SIGNAL(triggered()),	this,		SLOT(doActionCreateCameraSensor()));
-	connect(m_UI->actionModifySensor,				SIGNAL(triggered()),	this,		SLOT(doActionModifySensor()));
-	connect(m_UI->actionProjectUncertainty,			SIGNAL(triggered()),	this,		SLOT(doActionProjectUncertainty()));
-	connect(m_UI->actionCheckPointsInsideFrustum,	SIGNAL(triggered()),	this,		SLOT(doActionCheckPointsInsideFrustum()));
-	connect(m_UI->actionComputeDistancesFromSensor,	SIGNAL(triggered()),	this,		SLOT(doActionComputeDistancesFromSensor()));
-	connect(m_UI->actionComputeScatteringAngles,	SIGNAL(triggered()),	this,		SLOT(doActionComputeScatteringAngles()));
-	connect(m_UI->actionViewFromSensor,				SIGNAL(triggered()),	this,		SLOT(doActionSetViewFromSensor()));
+	connect(m_UI->actionCreateGBLSensor,			&QAction::triggered, this, &MainWindow::doActionCreateGBLSensor);
+	connect(m_UI->actionCreateCameraSensor,			&QAction::triggered, this, &MainWindow::doActionCreateCameraSensor);
+	connect(m_UI->actionModifySensor,				&QAction::triggered, this, &MainWindow::doActionModifySensor);
+	connect(m_UI->actionProjectUncertainty,			&QAction::triggered, this, &MainWindow::doActionProjectUncertainty);
+	connect(m_UI->actionCheckPointsInsideFrustum,	&QAction::triggered, this, &MainWindow::doActionCheckPointsInsideFrustum);
+	connect(m_UI->actionComputeDistancesFromSensor,	&QAction::triggered, this, &MainWindow::doActionComputeDistancesFromSensor);
+	connect(m_UI->actionComputeScatteringAngles,	&QAction::triggered, this, &MainWindow::doActionComputeScatteringAngles);
+	connect(m_UI->actionViewFromSensor,				&QAction::triggered, this, &MainWindow::doActionSetViewFromSensor);
 	//"Edit > Scalar fields" menu
-	connect(m_UI->actionShowHistogram,				SIGNAL(triggered()),	this,		SLOT(showSelectedEntitiesHistogram()));
-	connect(m_UI->actionComputeStatParams,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams()));
-	connect(m_UI->actionSFGradient,					SIGNAL(triggered()),	this,		SLOT(doActionSFGradient()));
-	connect(m_UI->actionGaussianFilter,				SIGNAL(triggered()),	this,		SLOT(doActionSFGaussianFilter()));
-	connect(m_UI->actionBilateralFilter,			SIGNAL(triggered()),	this,		SLOT(doActionSFBilateralFilter()));
-	connect(m_UI->actionFilterByValue,				SIGNAL(triggered()),	this,		SLOT(doActionFilterByValue()));
-	connect(m_UI->actionAddConstantSF,				SIGNAL(triggered()),	this,		SLOT(doActionAddConstantSF()));
-	connect(m_UI->actionScalarFieldArithmetic,		SIGNAL(triggered()),	this,		SLOT(doActionScalarFieldArithmetic()));
-	connect(m_UI->actionScalarFieldFromColor,		SIGNAL(triggered()),	this,		SLOT(doActionScalarFieldFromColor()));
-	connect(m_UI->actionConvertToRGB,				SIGNAL(triggered()),	this,		SLOT(doActionSFConvertToRGB()));
-	connect(m_UI->actionConvertToRandomRGB,			SIGNAL(triggered()),	this,		SLOT(doActionSFConvertToRandomRGB()));
-	connect(m_UI->actionRenameSF,					SIGNAL(triggered()),	this,		SLOT(doActionRenameSF()));
-	connect(m_UI->actionOpenColorScalesManager,		SIGNAL(triggered()),	this,		SLOT(doActionOpenColorScalesManager()));
-	connect(m_UI->actionAddIdField,					SIGNAL(triggered()),	this,		SLOT(doActionAddIdField()));
-	connect(m_UI->actionSetSFAsCoord,				SIGNAL(triggered()),	this,		SLOT(doActionSetSFAsCoord()));
-	connect(m_UI->actionInterpolateSFs,				SIGNAL(triggered()),	this,		SLOT(doActionInterpolateScalarFields()));
+	connect(m_UI->actionShowHistogram,				&QAction::triggered, this, &MainWindow::showSelectedEntitiesHistogram);
+	connect(m_UI->actionComputeStatParams,			&QAction::triggered, this, &MainWindow::doActionComputeStatParams);
+	connect(m_UI->actionSFGradient,					&QAction::triggered, this, &MainWindow::doActionSFGradient);
+	connect(m_UI->actionGaussianFilter,				&QAction::triggered, this, &MainWindow::doActionSFGaussianFilter);
+	connect(m_UI->actionBilateralFilter,			&QAction::triggered, this, &MainWindow::doActionSFBilateralFilter);
+	connect(m_UI->actionFilterByValue,				&QAction::triggered, this, &MainWindow::doActionFilterByValue);
+	connect(m_UI->actionAddConstantSF,				&QAction::triggered, this, &MainWindow::doActionAddConstantSF);
+	connect(m_UI->actionScalarFieldArithmetic,		&QAction::triggered, this, &MainWindow::doActionScalarFieldArithmetic);
+	connect(m_UI->actionScalarFieldFromColor,		&QAction::triggered, this, &MainWindow::doActionScalarFieldFromColor);
+	connect(m_UI->actionConvertToRGB,				&QAction::triggered, this, &MainWindow::doActionSFConvertToRGB);
+	connect(m_UI->actionConvertToRandomRGB,			&QAction::triggered, this, &MainWindow::doActionSFConvertToRandomRGB);
+	connect(m_UI->actionRenameSF,					&QAction::triggered, this, &MainWindow::doActionRenameSF);
+	connect(m_UI->actionOpenColorScalesManager,		&QAction::triggered, this, &MainWindow::doActionOpenColorScalesManager);
+	connect(m_UI->actionAddIdField,					&QAction::triggered, this, &MainWindow::doActionAddIdField);
+	connect(m_UI->actionSetSFAsCoord,				&QAction::triggered, this, &MainWindow::doActionSetSFAsCoord);
+	connect(m_UI->actionInterpolateSFs,				&QAction::triggered, this, &MainWindow::doActionInterpolateScalarFields);
 	connect(m_UI->actionDeleteScalarField, &QAction::triggered, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD );
 	});
@@ -716,128 +717,128 @@ void MainWindow::connectActions()
 	});
 	
 	//"Edit > Waveform" menu
-	connect(m_UI->actionShowWaveDialog,				SIGNAL(triggered()),	this,		SLOT(doActionShowWaveDialog()));
-	connect(m_UI->actionCompressFWFData,			SIGNAL(triggered()),	this,		SLOT(doActionCompressFWFData()));
+	connect(m_UI->actionShowWaveDialog,				&QAction::triggered, this, &MainWindow::doActionShowWaveDialog);
+	connect(m_UI->actionCompressFWFData,			&QAction::triggered, this, &MainWindow::doActionCompressFWFData);
 	//"Edit" menu
-	connect(m_UI->actionClone,						SIGNAL(triggered()),	this,		SLOT(doActionClone()));
-	connect(m_UI->actionMerge,						SIGNAL(triggered()),	this,		SLOT(doActionMerge()));
-	connect(m_UI->actionApplyTransformation,		SIGNAL(triggered()),	this,		SLOT(doActionApplyTransformation()));
-	connect(m_UI->actionApplyScale,					SIGNAL(triggered()),	this,		SLOT(doActionApplyScale()));
-	connect(m_UI->actionTranslateRotate,			SIGNAL(triggered()),	this,		SLOT(activateTranslateRotateMode()));
-	connect(m_UI->actionSegment,					SIGNAL(triggered()),	this,		SLOT(activateSegmentationMode()));
-    connect(m_UI->actionTracePolyline,				SIGNAL(triggered()),	this,		SLOT(activateTracePolylineMode()));
+	connect(m_UI->actionClone,						&QAction::triggered, this, &MainWindow::doActionClone);
+	connect(m_UI->actionMerge,						&QAction::triggered, this, &MainWindow::doActionMerge);
+	connect(m_UI->actionApplyTransformation,		&QAction::triggered, this, &MainWindow::doActionApplyTransformation);
+	connect(m_UI->actionApplyScale,					&QAction::triggered, this, &MainWindow::doActionApplyScale);
+	connect(m_UI->actionTranslateRotate,			&QAction::triggered, this, &MainWindow::activateTranslateRotateMode);
+	connect(m_UI->actionSegment,					&QAction::triggered, this, &MainWindow::activateSegmentationMode);
+    connect(m_UI->actionTracePolyline,				&QAction::triggered, this, &MainWindow::activateTracePolylineMode);
 
-	connect(m_UI->actionCrop,						SIGNAL(triggered()),	this,		SLOT(doActionCrop()));
-	connect(m_UI->actionEditGlobalShiftAndScale,	SIGNAL(triggered()),	this,		SLOT(doActionEditGlobalShiftAndScale()));
-	connect(m_UI->actionSubsample,					SIGNAL(triggered()),	this,		SLOT(doActionSubsample()));
-	connect(m_UI->actionMatchBBCenters,				SIGNAL(triggered()),	this,		SLOT(doActionMatchBBCenters()));
-	connect(m_UI->actionMatchScales,				SIGNAL(triggered()),	this,		SLOT(doActionMatchScales()));
-	connect(m_UI->actionDelete,						SIGNAL(triggered()),	m_ccRoot,	SLOT(deleteSelectedEntities()));
+	connect(m_UI->actionCrop,						&QAction::triggered, this, &MainWindow::doActionCrop);
+	connect(m_UI->actionEditGlobalShiftAndScale,	&QAction::triggered, this, &MainWindow::doActionEditGlobalShiftAndScale);
+	connect(m_UI->actionSubsample,					&QAction::triggered, this, &MainWindow::doActionSubsample);
+	connect(m_UI->actionMatchBBCenters,				&QAction::triggered, this, &MainWindow::doActionMatchBBCenters);
+	connect(m_UI->actionMatchScales,				&QAction::triggered, this, &MainWindow::doActionMatchScales);
+	connect(m_UI->actionDelete,						&QAction::triggered,	m_ccRoot,	&ccDBRoot::deleteSelectedEntities);
 
 	//"Tools > Clean" menu
-	connect(m_UI->actionSORFilter,					SIGNAL(triggered()),	this,		SLOT(doActionSORFilter()));
-	connect(m_UI->actionNoiseFilter,				SIGNAL(triggered()),	this,		SLOT(doActionFilterNoise()));
+	connect(m_UI->actionSORFilter,					&QAction::triggered, this, &MainWindow::doActionSORFilter);
+	connect(m_UI->actionNoiseFilter,				&QAction::triggered, this, &MainWindow::doActionFilterNoise);
 
 	//"Tools > Projection" menu
-	connect(m_UI->actionUnroll,						SIGNAL(triggered()),	this,		SLOT(doActionUnroll()));
-	connect(m_UI->actionRasterize,					SIGNAL(triggered()),	this,		SLOT(doActionRasterize()));
-	connect(m_UI->actionConvertPolylinesToMesh,		SIGNAL(triggered()),	this,		SLOT(doConvertPolylinesToMesh()));
-	connect(m_UI->actionMeshTwoPolylines,			SIGNAL(triggered()),	this,		SLOT(doMeshTwoPolylines()));
-	connect(m_UI->actionExportCoordToSF,			SIGNAL(triggered()),	this,		SLOT(doActionExportCoordToSF()));
+	connect(m_UI->actionUnroll,						&QAction::triggered, this, &MainWindow::doActionUnroll);
+	connect(m_UI->actionRasterize,					&QAction::triggered, this, &MainWindow::doActionRasterize);
+	connect(m_UI->actionConvertPolylinesToMesh,		&QAction::triggered, this, &MainWindow::doConvertPolylinesToMesh);
+	connect(m_UI->actionMeshTwoPolylines,			&QAction::triggered, this, &MainWindow::doMeshTwoPolylines);
+	connect(m_UI->actionExportCoordToSF,			&QAction::triggered, this, &MainWindow::doActionExportCoordToSF);
 	//"Tools > Registration" menu
-	connect(m_UI->actionRegister,					SIGNAL(triggered()),	this,		SLOT(doActionRegister()));
-	connect(m_UI->actionPointPairsAlign,			SIGNAL(triggered()),	this,		SLOT(activateRegisterPointPairTool()));
+	connect(m_UI->actionRegister,					&QAction::triggered, this, &MainWindow::doActionRegister);
+	connect(m_UI->actionPointPairsAlign,			&QAction::triggered, this, &MainWindow::activateRegisterPointPairTool);
 	//"Tools > Distances" menu
-	connect(m_UI->actionCloudCloudDist,				SIGNAL(triggered()),	this,		SLOT(doActionCloudCloudDist()));
-	connect(m_UI->actionCloudMeshDist,				SIGNAL(triggered()),	this,		SLOT(doActionCloudMeshDist()));
-	connect(m_UI->actionCPS,						SIGNAL(triggered()),	this,		SLOT(doActionComputeCPS()));
+	connect(m_UI->actionCloudCloudDist,				&QAction::triggered, this, &MainWindow::doActionCloudCloudDist);
+	connect(m_UI->actionCloudMeshDist,				&QAction::triggered, this, &MainWindow::doActionCloudMeshDist);
+	connect(m_UI->actionCPS,						&QAction::triggered, this, &MainWindow::doActionComputeCPS);
 	//"Tools > Volume" menu
-	connect(m_UI->actionCompute2HalfDimVolume,		SIGNAL(triggered()),	this,		SLOT(doCompute2HalfDimVolume()));
+	connect(m_UI->actionCompute2HalfDimVolume,		&QAction::triggered, this, &MainWindow::doCompute2HalfDimVolume);
 	//"Tools > Statistics" menu
-	connect(m_UI->actionComputeStatParams2,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams())); //duplicated action --> we can't use the same otherwise we get an ugly console warning on Linux :(
-	connect(m_UI->actionStatisticalTest,			SIGNAL(triggered()),	this,		SLOT(doActionStatisticalTest()));
+	connect(m_UI->actionComputeStatParams2,			&QAction::triggered, this, &MainWindow::doActionComputeStatParams); //duplicated action --> we can't use the same otherwise we get an ugly console warning on Linux :(
+	connect(m_UI->actionStatisticalTest,			&QAction::triggered, this, &MainWindow::doActionStatisticalTest);
 	//"Tools > Segmentation" menu
-	connect(m_UI->actionLabelConnectedComponents,	SIGNAL(triggered()),	this,		SLOT(doActionLabelConnectedComponents()));
-	connect(m_UI->actionKMeans,						SIGNAL(triggered()),	this,		SLOT(doActionKMeans()));
-	connect(m_UI->actionFrontPropagation,			SIGNAL(triggered()),	this,		SLOT(doActionFrontPropagation()));
-	connect(m_UI->actionCrossSection,				SIGNAL(triggered()),	this,		SLOT(activateClippingBoxMode()));
-	connect(m_UI->actionExtractSections,			SIGNAL(triggered()),	this,		SLOT(activateSectionExtractionMode()));
+	connect(m_UI->actionLabelConnectedComponents,	&QAction::triggered, this, &MainWindow::doActionLabelConnectedComponents);
+	connect(m_UI->actionKMeans,						&QAction::triggered, this, &MainWindow::doActionKMeans);
+	connect(m_UI->actionFrontPropagation,			&QAction::triggered, this, &MainWindow::doActionFrontPropagation);
+	connect(m_UI->actionCrossSection,				&QAction::triggered, this, &MainWindow::activateClippingBoxMode);
+	connect(m_UI->actionExtractSections,			&QAction::triggered, this, &MainWindow::activateSectionExtractionMode);
 	//"Tools > Fit" menu
-	connect(m_UI->actionFitPlane,					SIGNAL(triggered()),	this,		SLOT(doActionFitPlane()));
-	connect(m_UI->actionFitSphere,					SIGNAL(triggered()),	this,		SLOT(doActionFitSphere()));
-	connect(m_UI->actionFitFacet,					SIGNAL(triggered()),	this,		SLOT(doActionFitFacet()));
-	connect(m_UI->actionFitQuadric,					SIGNAL(triggered()),	this,		SLOT(doActionFitQuadric()));
+	connect(m_UI->actionFitPlane,					&QAction::triggered, this, &MainWindow::doActionFitPlane);
+	connect(m_UI->actionFitSphere,					&QAction::triggered, this, &MainWindow::doActionFitSphere);
+	connect(m_UI->actionFitFacet,					&QAction::triggered, this, &MainWindow::doActionFitFacet);
+	connect(m_UI->actionFitQuadric,					&QAction::triggered, this, &MainWindow::doActionFitQuadric);
 	//"Tools > Other" menu
-	connect(m_UI->actionComputeDensity,				SIGNAL(triggered()),	this,		SLOT(doComputeDensity()));
-	connect(m_UI->actionCurvature,					SIGNAL(triggered()),	this,		SLOT(doComputeCurvature()));
-	connect(m_UI->actionRoughness,					SIGNAL(triggered()),	this,		SLOT(doComputeRoughness()));
-	connect(m_UI->actionRemoveDuplicatePoints,		SIGNAL(triggered()),	this,		SLOT(doRemoveDuplicatePoints()));
+	connect(m_UI->actionComputeDensity,				&QAction::triggered, this, &MainWindow::doComputeDensity);
+	connect(m_UI->actionCurvature,					&QAction::triggered, this, &MainWindow::doComputeCurvature);
+	connect(m_UI->actionRoughness,					&QAction::triggered, this, &MainWindow::doComputeRoughness);
+	connect(m_UI->actionRemoveDuplicatePoints,		&QAction::triggered, this, &MainWindow::doRemoveDuplicatePoints);
 	//"Tools"
-	connect(m_UI->actionLevel,						SIGNAL(triggered()),	this,		SLOT(doLevel()));
-	connect(m_UI->actionPointListPicking,			SIGNAL(triggered()),	this,		SLOT(activatePointListPickingMode()));
-	connect(m_UI->actionPointPicking,				SIGNAL(triggered()),	this,		SLOT(activatePointPickingMode()));
+	connect(m_UI->actionLevel,						&QAction::triggered, this, &MainWindow::doLevel);
+	connect(m_UI->actionPointListPicking,			&QAction::triggered, this, &MainWindow::activatePointListPickingMode);
+	connect(m_UI->actionPointPicking,				&QAction::triggered, this, &MainWindow::activatePointPickingMode);
 
 	//"Tools > Sand box (research)" menu
-	connect(m_UI->actionComputeKdTree,				SIGNAL(triggered()),	this,		SLOT(doActionComputeKdTree()));
-	connect(m_UI->actionDistanceMap,				SIGNAL(triggered()),	this,		SLOT(doActionComputeDistanceMap()));
-	connect(m_UI->actionDistanceToBestFitQuadric3D,	SIGNAL(triggered()),	this,		SLOT(doActionComputeDistToBestFitQuadric3D()));
-	connect(m_UI->actionComputeBestFitBB,			SIGNAL(triggered()),	this,		SLOT(doComputeBestFitBB()));
-	connect(m_UI->actionAlign,						SIGNAL(triggered()),	this,		SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
-	connect(m_UI->actionSNETest,					SIGNAL(triggered()),	this,		SLOT(doSphericalNeighbourhoodExtractionTest()));
-	connect(m_UI->actionCNETest,					SIGNAL(triggered()),	this,		SLOT(doCylindricalNeighbourhoodExtractionTest()));
-	connect(m_UI->actionFindBiggestInnerRectangle,	SIGNAL(triggered()),	this,		SLOT(doActionFindBiggestInnerRectangle()));
-	connect(m_UI->actionExportCloudsInfo,			SIGNAL(triggered()),	this,		SLOT(doActionExportCloudsInfo()));
-	connect(m_UI->actionCreateCloudFromEntCenters,	SIGNAL(triggered()),	this,		SLOT(doActionCreateCloudFromEntCenters()));
-	connect(m_UI->actionComputeBestICPRmsMatrix,	SIGNAL(triggered()),	this,		SLOT(doActionComputeBestICPRmsMatrix()));
+	connect(m_UI->actionComputeKdTree,				&QAction::triggered, this, &MainWindow::doActionComputeKdTree);
+	connect(m_UI->actionDistanceMap,				&QAction::triggered, this, &MainWindow::doActionComputeDistanceMap);
+	connect(m_UI->actionDistanceToBestFitQuadric3D,	&QAction::triggered, this, &MainWindow::doActionComputeDistToBestFitQuadric3D);
+	connect(m_UI->actionComputeBestFitBB,			&QAction::triggered, this, &MainWindow::doComputeBestFitBB);
+	connect(m_UI->actionAlign,						&QAction::triggered, this, &MainWindow::doAction4pcsRegister); //Aurelien BEY le 13/11/2008
+	connect(m_UI->actionSNETest,					&QAction::triggered, this, &MainWindow::doSphericalNeighbourhoodExtractionTest);
+	connect(m_UI->actionCNETest,					&QAction::triggered, this, &MainWindow::doCylindricalNeighbourhoodExtractionTest);
+	connect(m_UI->actionFindBiggestInnerRectangle,	&QAction::triggered, this, &MainWindow::doActionFindBiggestInnerRectangle);
+	connect(m_UI->actionExportCloudsInfo,			&QAction::triggered, this, &MainWindow::doActionExportCloudsInfo);
+	connect(m_UI->actionCreateCloudFromEntCenters,	&QAction::triggered, this, &MainWindow::doActionCreateCloudFromEntCenters);
+	connect(m_UI->actionComputeBestICPRmsMatrix,	&QAction::triggered, this, &MainWindow::doActionComputeBestICPRmsMatrix);
 
 	//"Display" menu
-	connect(m_UI->actionFullScreen,						SIGNAL(toggled(bool)),	this,		SLOT(toggleFullScreen(bool)));
-	connect(m_UI->actionExclusiveFullScreen,			SIGNAL(toggled(bool)),	this,		SLOT(toggleExclusiveFullScreen(bool)));
-	connect(m_UI->actionRefresh,						SIGNAL(triggered()),	this,		SLOT(refreshAll()));
-	connect(m_UI->actionTestFrameRate,					SIGNAL(triggered()),	this,		SLOT(testFrameRate()));
-	connect(m_UI->actionToggleCenteredPerspective,		SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowCenteredPerspective()));
-	connect(m_UI->actionToggleViewerBasedPerspective,	SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowViewerBasedPerspective()));
-	connect(m_UI->actionShowCursor3DCoordinates,		SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowShowCursorCoords(bool)));
-	connect(m_UI->actionLockRotationVertAxis,			SIGNAL(triggered()),	this,		SLOT(toggleRotationAboutVertAxis()));
-	connect(m_UI->actionEnterBubbleViewMode,			SIGNAL(triggered()),	this,		SLOT(doActionEnableBubbleViewMode()));
-	connect(m_UI->actionEditCamera,						SIGNAL(triggered()),	this,		SLOT(doActionEditCamera()));
-	connect(m_UI->actionAdjustZoom,						SIGNAL(triggered()),	this,		SLOT(doActionAdjustZoom()));
-	connect(m_UI->actionSaveViewportAsObject,			SIGNAL(triggered()),	this,		SLOT(doActionSaveViewportAsCamera()));
+	connect(m_UI->actionFullScreen,						&QAction::toggled, this, &MainWindow::toggleFullScreen);
+	connect(m_UI->actionExclusiveFullScreen,			&QAction::toggled, this, &MainWindow::toggleExclusiveFullScreen);
+	connect(m_UI->actionRefresh,						&QAction::triggered, this, &MainWindow::refreshAll);
+	connect(m_UI->actionTestFrameRate,					&QAction::triggered, this, &MainWindow::testFrameRate);
+	connect(m_UI->actionToggleCenteredPerspective,		&QAction::triggered, this, &MainWindow::toggleActiveWindowCenteredPerspective);
+	connect(m_UI->actionToggleViewerBasedPerspective,	&QAction::triggered, this, &MainWindow::toggleActiveWindowViewerBasedPerspective);
+	connect(m_UI->actionShowCursor3DCoordinates,		&QAction::toggled, this, &MainWindow::toggleActiveWindowShowCursorCoords);
+	connect(m_UI->actionLockRotationVertAxis,			&QAction::triggered, this, &MainWindow::toggleRotationAboutVertAxis);
+	connect(m_UI->actionEnterBubbleViewMode,			&QAction::triggered, this, &MainWindow::doActionEnableBubbleViewMode);
+	connect(m_UI->actionEditCamera,						&QAction::triggered, this, &MainWindow::doActionEditCamera);
+	connect(m_UI->actionAdjustZoom,						&QAction::triggered, this, &MainWindow::doActionAdjustZoom);
+	connect(m_UI->actionSaveViewportAsObject,			&QAction::triggered, this, &MainWindow::doActionSaveViewportAsCamera);
 
 	//"Display > Lights & Materials" menu
-	connect(m_UI->actionDisplayOptions,				SIGNAL(triggered()),	this,		SLOT(setLightsAndMaterials()));
-	connect(m_UI->actionToggleSunLight,				SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowSunLight()));
-	connect(m_UI->actionToggleCustomLight,			SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowCustomLight()));
-	connect(m_UI->actionRenderToFile,				SIGNAL(triggered()),	this,		SLOT(doActionRenderToFile()));
+	connect(m_UI->actionDisplayOptions,				&QAction::triggered, this, &MainWindow::setLightsAndMaterials);
+	connect(m_UI->actionToggleSunLight,				&QAction::triggered, this, &MainWindow::toggleActiveWindowSunLight);
+	connect(m_UI->actionToggleCustomLight,			&QAction::triggered, this, &MainWindow::toggleActiveWindowCustomLight);
+	connect(m_UI->actionRenderToFile,				&QAction::triggered, this, &MainWindow::doActionRenderToFile);
 	//"Display > Shaders & filters" menu
-	connect(m_UI->actionLoadShader,					SIGNAL(triggered()),	this,		SLOT(doActionLoadShader()));
-	connect(m_UI->actionDeleteShader,				SIGNAL(triggered()),	this,		SLOT(doActionDeleteShader()));
-	connect(m_UI->actionNoFilter,					SIGNAL(triggered()),	this,		SLOT(doDisableGLFilter()));
+	connect(m_UI->actionLoadShader,					&QAction::triggered, this, &MainWindow::doActionLoadShader);
+	connect(m_UI->actionDeleteShader,				&QAction::triggered, this, &MainWindow::doActionDeleteShader);
+	connect(m_UI->actionNoFilter,					&QAction::triggered, this, &MainWindow::doDisableGLFilter);
 
 	//"Display > Active SF" menu
-	connect(m_UI->actionToggleActiveSFColorScale,	SIGNAL(triggered()),	this,		SLOT(doActionToggleActiveSFColorScale()));
-	connect(m_UI->actionShowActiveSFPrevious,		SIGNAL(triggered()),	this,		SLOT(doActionShowActiveSFPrevious()));
-	connect(m_UI->actionShowActiveSFNext,			SIGNAL(triggered()),	this,		SLOT(doActionShowActiveSFNext()));
+	connect(m_UI->actionToggleActiveSFColorScale,	&QAction::triggered, this, &MainWindow::doActionToggleActiveSFColorScale);
+	connect(m_UI->actionShowActiveSFPrevious,		&QAction::triggered, this, &MainWindow::doActionShowActiveSFPrevious);
+	connect(m_UI->actionShowActiveSFNext,			&QAction::triggered, this, &MainWindow::doActionShowActiveSFNext);
 
 	//"Display" menu
-	connect(m_UI->actionResetGUIElementsPos,		SIGNAL(triggered()),	this,		SLOT(doActionResetGUIElementsPos()));
+	connect(m_UI->actionResetGUIElementsPos,		&QAction::triggered, this, &MainWindow::doActionResetGUIElementsPos);
 
 	//"3D Views" menu
-	connect(m_UI->menu3DViews,						SIGNAL(aboutToShow()),	this,		SLOT(update3DViewsMenu()));
-	connect(m_UI->actionNew3DView,					SIGNAL(triggered()),	this,		SLOT(new3DView()));
-	connect(m_UI->actionZoomIn,						SIGNAL(triggered()),	this,		SLOT(zoomIn()));
-	connect(m_UI->actionZoomOut,					SIGNAL(triggered()),	this,		SLOT(zoomOut()));
-	connect(m_UI->actionClose3DView,				SIGNAL(triggered()),	m_mdiArea,	SLOT(closeActiveSubWindow()));
-	connect(m_UI->actionCloseAll3DViews,			SIGNAL(triggered()),	m_mdiArea,	SLOT(closeAllSubWindows()));
-	connect(m_UI->actionTile3DViews,				SIGNAL(triggered()),	m_mdiArea,	SLOT(tileSubWindows()));
-	connect(m_UI->actionCascade3DViews,				SIGNAL(triggered()),	m_mdiArea,	SLOT(cascadeSubWindows()));
-	connect(m_UI->actionNext3DView,					SIGNAL(triggered()),	m_mdiArea,	SLOT(activateNextSubWindow()));
-	connect(m_UI->actionPrevious3DView,				SIGNAL(triggered()),	m_mdiArea,	SLOT(activatePreviousSubWindow()));
+	connect(m_UI->menu3DViews,						&QMenu::aboutToShow, this, &MainWindow::update3DViewsMenu);
+	connect(m_UI->actionNew3DView,					&QAction::triggered, this, &MainWindow::new3DView);
+	connect(m_UI->actionZoomIn,						&QAction::triggered, this, &MainWindow::zoomIn);
+	connect(m_UI->actionZoomOut,					&QAction::triggered, this, &MainWindow::zoomOut);
+	connect(m_UI->actionClose3DView,				&QAction::triggered, m_mdiArea, &QMdiArea::closeActiveSubWindow);
+	connect(m_UI->actionCloseAll3DViews,			&QAction::triggered, m_mdiArea, &QMdiArea::closeAllSubWindows);
+	connect(m_UI->actionTile3DViews,				&QAction::triggered, m_mdiArea, &QMdiArea::tileSubWindows);
+	connect(m_UI->actionCascade3DViews,				&QAction::triggered, m_mdiArea, &QMdiArea::cascadeSubWindows);
+	connect(m_UI->actionNext3DView,					&QAction::triggered, m_mdiArea, &QMdiArea::activateNextSubWindow);
+	connect(m_UI->actionPrevious3DView,				&QAction::triggered, m_mdiArea, &QMdiArea::activatePreviousSubWindow);
 
 	//"About" menu entry
-	connect(m_UI->actionHelp,						SIGNAL(triggered()),	this,		SLOT(doActionShowHelpDialog()));
-	connect(m_UI->actionAboutPlugins,				SIGNAL(triggered()),	this,		SLOT(doActionShowAboutPluginsDialog()));
-	connect(m_UI->actionEnableQtWarnings,			SIGNAL(toggled(bool)),	this,		SLOT(doEnableQtWarnings(bool)));
+	connect(m_UI->actionHelp,						&QAction::triggered, this, &MainWindow::doActionShowHelpDialog);
+	connect(m_UI->actionAboutPlugins,				&QAction::triggered, this, &MainWindow::doActionShowAboutPluginsDialog);
+	connect(m_UI->actionEnableQtWarnings,			&QAction::toggled, this, &MainWindow::doEnableQtWarnings);
 
 	connect(m_UI->actionAbout,	&QAction::triggered, [this] () {
 		ccAboutDialog* aboutDialog = new ccAboutDialog(this);
@@ -847,17 +848,25 @@ void MainWindow::connectActions()
 	/*** Toolbars ***/
 
 	//View toolbar
-	connect(m_UI->actionGlobalZoom,					SIGNAL(triggered()),	this,		SLOT(setGlobalZoom()));
-	connect(m_UI->actionPickRotationCenter,			SIGNAL(triggered()),	this,		SLOT(doPickRotationCenter()));
-	connect(m_UI->actionZoomAndCenter,				SIGNAL(triggered()),	this,		SLOT(zoomOnSelectedEntities()));
-	connect(m_UI->actionSetPivotAlwaysOn,			SIGNAL(triggered()),	this,		SLOT(setPivotAlwaysOn()));
-	connect(m_UI->actionSetPivotRotationOnly,		SIGNAL(triggered()),	this,		SLOT(setPivotRotationOnly()));
-	connect(m_UI->actionSetPivotOff,				SIGNAL(triggered()),	this,		SLOT(setPivotOff()));
-	connect(m_UI->actionSetOrthoView,				SIGNAL(triggered()),	this,		SLOT(setOrthoView()));
-	connect(m_UI->actionSetCenteredPerspectiveView,	SIGNAL(triggered()),	this,		SLOT(setCenteredPerspectiveView()));
-	connect(m_UI->actionSetViewerPerspectiveView,	SIGNAL(triggered()),	this,		SLOT(setViewerPerspectiveView()));
-	connect(m_UI->actionEnableStereo,				SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowStereoVision(bool)));
-	connect(m_UI->actionAutoPickRotationCenter,		SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowAutoPickRotCenter(bool)));
+	connect(m_UI->actionGlobalZoom,					&QAction::triggered, this, &MainWindow::setGlobalZoom);
+	connect(m_UI->actionPickRotationCenter,			&QAction::triggered, this, &MainWindow::doPickRotationCenter);
+	connect(m_UI->actionZoomAndCenter,				&QAction::triggered, this, &MainWindow::zoomOnSelectedEntities);
+	connect(m_UI->actionSetPivotAlwaysOn,			&QAction::triggered, this, &MainWindow::setPivotAlwaysOn);
+	connect(m_UI->actionSetPivotRotationOnly,		&QAction::triggered, this, &MainWindow::setPivotRotationOnly);
+	connect(m_UI->actionSetPivotOff,				&QAction::triggered, this, &MainWindow::setPivotOff);
+	
+	connect(m_UI->actionSetOrthoView, &QAction::triggered, this, [this] () {
+		setOrthoView( getActiveGLWindow() );
+	});
+	connect(m_UI->actionSetCenteredPerspectiveView, &QAction::triggered, this, [this] () {
+		setCenteredPerspectiveView( getActiveGLWindow() );
+	});
+	connect(m_UI->actionSetViewerPerspectiveView, &QAction::triggered, this, [this] () {
+		setViewerPerspectiveView( getActiveGLWindow() );
+	});
+	
+	connect(m_UI->actionEnableStereo,				&QAction::toggled, this, &MainWindow::toggleActiveWindowStereoVision);
+	connect(m_UI->actionAutoPickRotationCenter,		&QAction::toggled, this, &MainWindow::toggleActiveWindowAutoPickRotCenter);
 	
 	connect(m_UI->actionSetViewTop, &QAction::triggered, [=]() { setView( CC_TOP_VIEW ); });
 	connect(m_UI->actionSetViewBottom, &QAction::triggered, [=]() { setView( CC_BOTTOM_VIEW ); });
@@ -869,7 +878,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSetViewIso2, &QAction::triggered, [=]() { setView( CC_ISO_VIEW_2 ); });
 	
 	//hidden
-	connect(m_UI->actionEnableVisualDebugTraces,	SIGNAL(triggered()),	this,		SLOT(toggleVisualDebugTraces()));
+	connect(m_UI->actionEnableVisualDebugTraces,	&QAction::triggered, this, &MainWindow::toggleVisualDebugTraces);
 }
 
 void MainWindow::doActionColorize()
@@ -5596,26 +5605,30 @@ ccGLWindow* MainWindow::new3DView()
 
 	m_mdiArea->addSubWindow(viewWidget);
 
-	connect(view3D,	SIGNAL(entitySelectionChanged(ccHObject*)),					m_ccRoot,	SLOT(selectEntity(ccHObject*)));
-	connect(view3D,	SIGNAL(entitiesSelectionChanged(std::unordered_set<int>)),	m_ccRoot,	SLOT(selectEntities(std::unordered_set<int>)));
+	connect(view3D,	&ccGLWindow::entitySelectionChanged, this, [=] (ccHObject *entity) {
+		m_ccRoot->selectEntity( entity );
+	});
+	connect(view3D,	&ccGLWindow::entitiesSelectionChanged, this, [=] (std::unordered_set<int> entities){
+		m_ccRoot->selectEntities( entities );
+	});
 
 	//'echo' mode
-	connect(view3D,	SIGNAL(mouseWheelRotated(float)),					this,		SLOT(echoMouseWheelRotate(float)));
-	connect(view3D,	SIGNAL(cameraDisplaced(float,float)),				this,		SLOT(echoCameraDisplaced(float,float)));
-	connect(view3D,	SIGNAL(viewMatRotated(const ccGLMatrixd&)),			this,		SLOT(echoBaseViewMatRotation(const ccGLMatrixd&)));
-	connect(view3D,	SIGNAL(cameraPosChanged(const CCVector3d&)),		this,		SLOT(echoCameraPosChanged(const CCVector3d&)));
-	connect(view3D,	SIGNAL(pivotPointChanged(const CCVector3d&)),		this,		SLOT(echoPivotPointChanged(const CCVector3d&)));
-	connect(view3D,	SIGNAL(pixelSizeChanged(float)),					this,		SLOT(echoPixelSizeChanged(float)));
+	connect(view3D,	&ccGLWindow::mouseWheelRotated, this, &MainWindow::echoMouseWheelRotate);
+	connect(view3D,	&ccGLWindow::cameraDisplaced, this, &MainWindow::echoCameraDisplaced);
+	connect(view3D,	&ccGLWindow::viewMatRotated, this, &MainWindow::echoBaseViewMatRotation);
+	connect(view3D,	&ccGLWindow::cameraPosChanged, this, &MainWindow::echoCameraPosChanged);
+	connect(view3D,	&ccGLWindow::pivotPointChanged, this, &MainWindow::echoPivotPointChanged);
+	connect(view3D,	&ccGLWindow::pixelSizeChanged, this, &MainWindow::echoPixelSizeChanged);
 
-	connect(view3D,	SIGNAL(destroyed(QObject*)),						this,		SLOT(prepareWindowDeletion(QObject*)));
-	connect(view3D,	SIGNAL(filesDropped(const QStringList&)),			this,		SLOT(addToDBAuto(QStringList)), Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
-	connect(view3D,	SIGNAL(newLabel(ccHObject*)),						this,		SLOT(handleNewLabel(ccHObject*)));
-	connect(view3D,	SIGNAL(exclusiveFullScreenToggled(bool)),			this,		SLOT(onExclusiveFullScreenToggled(bool)));
+	connect(view3D,	&QObject::destroyed, this, &MainWindow::prepareWindowDeletion);
+	connect(view3D,	&ccGLWindow::filesDropped, this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
+	connect(view3D,	&ccGLWindow::newLabel, this, &MainWindow::handleNewLabel);
+	connect(view3D,	&ccGLWindow::exclusiveFullScreenToggled, this, &MainWindow::onExclusiveFullScreenToggled);
 
 	if (m_pickingHub)
 	{
 		//we must notify the picking hub as well if the window is destroyed
-		connect(view3D, SIGNAL(destroyed(QObject*)), m_pickingHub, SLOT(onActiveWindowDeleted(QObject*)));
+		connect(view3D, &QObject::destroyed, m_pickingHub, &ccPickingHub::onActiveWindowDeleted);
 	}
 
 	view3D->setSceneDB(m_ccRoot->getRootEntity());
@@ -5986,7 +5999,7 @@ void MainWindow::activateRegisterPointPairTool()
 	if (!m_pprDlg)
 	{
 		m_pprDlg = new ccPointPairRegistrationDlg(m_pickingHub, this);
-		connect(m_pprDlg, SIGNAL(processFinished(bool)), this, SLOT(deactivateRegisterPointPairTool(bool)));
+		connect(m_pprDlg, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateRegisterPointPairTool);
 		registerOverlayDialog(m_pprDlg, Qt::TopRightCorner);
 	}
 
@@ -6035,7 +6048,7 @@ void MainWindow::activateSectionExtractionMode()
 	if (!m_seTool)
 	{
 		m_seTool = new ccSectionExtractionTool(this);
-		connect(m_seTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateSectionExtractionMode(bool)));
+		connect(m_seTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateSectionExtractionMode);
 
 		registerOverlayDialog(m_seTool, Qt::TopRightCorner);
 	}
@@ -6133,7 +6146,7 @@ void MainWindow::activateSegmentationMode()
 	if (!m_gsTool)
 	{
 		m_gsTool = new ccGraphicalSegmentationTool(this);
-		connect(m_gsTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateSegmentationMode(bool)));
+		connect(m_gsTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateSegmentationMode);
 
 		registerOverlayDialog(m_gsTool, Qt::TopRightCorner);
 	}
@@ -6430,7 +6443,7 @@ void MainWindow::activateTracePolylineMode()
 	if (!m_tplTool)
 	{
 		m_tplTool = new ccTracePolylineTool(m_pickingHub, this);
-		connect(m_tplTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateTracePolylineMode(bool)));
+		connect(m_tplTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateTracePolylineMode);
 		registerOverlayDialog(m_tplTool, Qt::TopRightCorner);
 	}
 
@@ -6493,7 +6506,7 @@ void MainWindow::activatePointListPickingMode()
 	if (!m_plpDlg)
 	{
 		m_plpDlg = new ccPointListPickingDlg(m_pickingHub, this);
-		connect(m_plpDlg, SIGNAL(processFinished(bool)), this, SLOT(deactivatePointListPickingMode(bool)));
+		connect(m_plpDlg, &ccOverlayDialog::processFinished, this, &MainWindow::deactivatePointListPickingMode);
 
 		registerOverlayDialog(m_plpDlg, Qt::TopRightCorner);
 	}
@@ -6543,8 +6556,8 @@ void MainWindow::activatePointPickingMode()
 	if (!m_ppDlg)
 	{
 		m_ppDlg = new ccPointPropertiesDlg(m_pickingHub, this);
-		connect(m_ppDlg, SIGNAL(processFinished(bool)),	this, SLOT(deactivatePointPickingMode(bool)));
-		connect(m_ppDlg, SIGNAL(newLabel(ccHObject*)),	this, SLOT(handleNewLabel(ccHObject*)));
+		connect(m_ppDlg, &ccOverlayDialog::processFinished,	this, &MainWindow::deactivatePointPickingMode);
+		connect(m_ppDlg, &ccPointPropertiesDlg::newLabel,	this, &MainWindow::handleNewLabel);
 
 		registerOverlayDialog(m_ppDlg, Qt::TopRightCorner);
 	}
@@ -6591,7 +6604,7 @@ void MainWindow::activateClippingBoxMode()
 	if (!m_clipTool)
 	{
 		m_clipTool = new ccClippingBoxTool(this);
-		connect(m_clipTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateClippingBoxMode(bool)));
+		connect(m_clipTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateClippingBoxMode);
 	}
 	m_clipTool->linkWith(win);
 
@@ -6668,7 +6681,7 @@ void MainWindow::activateTranslateRotateMode()
 	//try to activate "moving mode" in current GL window
 	if (m_transTool->start())
 	{
-		connect(m_transTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateTranslateRotateMode(bool)));
+		connect(m_transTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateTranslateRotateMode);
 		registerOverlayDialog(m_transTool, Qt::TopRightCorner);
 		freezeUI(true);
 		updateOverlayDialogsPlacement();
@@ -6725,8 +6738,10 @@ void MainWindow::testFrameRate()
 void MainWindow::setLightsAndMaterials()
 {
 	ccDisplayOptionsDlg colorsDlg(this);
-	connect(&colorsDlg, SIGNAL(aspectHasChanged()), this, SLOT(redrawAll()));
-
+	connect(&colorsDlg, &ccDisplayOptionsDlg::aspectHasChanged, this, [=] () {
+		redrawAll();
+	});
+			
 	colorsDlg.exec();
 
 	disconnect(&colorsDlg, 0, 0, 0);
@@ -6759,7 +6774,8 @@ void MainWindow::doActionEditCamera()
 		m_cpeDlg = new ccCameraParamEditDlg(qWin, m_pickingHub);
 		//m_cpeDlg->makeFrameless(); //does not work on linux
 
-		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), m_cpeDlg, SLOT(linkWith(QMdiSubWindow*)));
+		connect(m_mdiArea, &QMdiArea::subWindowActivated,
+				m_cpeDlg, static_cast<void (ccCameraParamEditDlg::*)(QMdiSubWindow *)>(&ccCameraParamEditDlg::linkWith));
 
 		registerOverlayDialog(m_cpeDlg, Qt::BottomLeftCorner);
 	}
@@ -6907,11 +6923,6 @@ void MainWindow::setPivotOff()
 	}
 }
 
-void MainWindow::setOrthoView()
-{
-	setOrthoView(getActiveGLWindow());
-}
-
 void MainWindow::setOrthoView(ccGLWindow* win)
 {
 	if (win)
@@ -6931,11 +6942,6 @@ void MainWindow::setOrthoView(ccGLWindow* win)
 	}
 }
 
-void MainWindow::setCenteredPerspectiveView()
-{
-	setCenteredPerspectiveView(getActiveGLWindow());
-}
-
 void MainWindow::setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw/*=true*/)
 {
 	if (win)
@@ -6950,11 +6956,6 @@ void MainWindow::setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw/*=t
 		if (m_pivotVisibilityPopupButton)
 			m_pivotVisibilityPopupButton->setEnabled(true);
 	}
-}
-
-void MainWindow::setViewerPerspectiveView()
-{
-	setViewerPerspectiveView(getActiveGLWindow());
 }
 
 void MainWindow::setViewerPerspectiveView(ccGLWindow* win)
@@ -8408,7 +8409,7 @@ void MainWindow::doActionCloudCloudDist()
 	if (m_compDlg)
 		delete m_compDlg;
 	m_compDlg = new ccComparisonDlg(compCloud, refCloud, ccComparisonDlg::CLOUDCLOUD_DIST, this);
-	connect(m_compDlg, SIGNAL(finished(int)), this, SLOT(deactivateComparisonMode(int)));
+	connect(m_compDlg, &QDialog::finished, this, &MainWindow::deactivateComparisonMode);
 	m_compDlg->show();
 	//cDlg.setModal(false);
 	//cDlg.exec();
@@ -8474,7 +8475,7 @@ void MainWindow::doActionCloudMeshDist()
 	if (m_compDlg)
 		delete m_compDlg;
 	m_compDlg = new ccComparisonDlg(compEnt, refMesh, ccComparisonDlg::CLOUDMESH_DIST, this);
-	connect(m_compDlg, SIGNAL(finished(int)), this, SLOT(deactivateComparisonMode(int)));
+	connect(m_compDlg, &QDialog::finished, this, &MainWindow::deactivateComparisonMode);
 	m_compDlg->show();
 
 	freezeUI(true);
@@ -9590,7 +9591,8 @@ void MainWindow::update3DViewsMenu()
 			QAction *action = m_UI->menu3DViews->addAction(text);
 			action->setCheckable(true);
 			action ->setChecked(child == getActiveGLWindow());
-			connect(action, SIGNAL(triggered()), m_windowMapper, SLOT(map()));
+			connect(action, &QAction::triggered,
+					m_windowMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
 			m_windowMapper->setMapping(action, windows.at(i));
 		}
 	}

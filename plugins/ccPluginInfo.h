@@ -105,7 +105,9 @@ public:
 							int filter = CC_STD_PLUGIN | CC_GL_FILTER_PLUGIN | CC_IO_FILTER_PLUGIN)
 	{
 		//"static" plugins
-		for (QObject* plugin : QPluginLoader::staticInstances())
+		const QObjectList	pluginInstances = QPluginLoader::staticInstances();
+		
+		for (QObject* plugin : pluginInstances)
 		{
 			ccPluginInterface* ccPlugin = ToValidPlugin(plugin, filter);
 			if (ccPlugin == nullptr)
@@ -180,7 +182,9 @@ public:
 			QDir pluginsDir(path);
 			pluginsDir.setNameFilters(dirFilters);
 
-			for (const QString &filename : pluginsDir.entryList())
+			const QStringList	fileNames = pluginsDir.entryList();
+			
+			for (const QString &filename : fileNames)
 			{
 				const QString pluginPath = pluginsDir.absoluteFilePath(filename);
 

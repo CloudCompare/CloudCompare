@@ -706,6 +706,7 @@ bool ccGLWindow::initialize()
 
 		//OpenGL version
 		const char* vendorName = reinterpret_cast<const char*>(glFunc->glGetString(GL_VENDOR));
+		const QString vendorNameStr = QString(vendorName).toUpper();
 		if (!m_silentInitialization)
 		{
 			ccLog::Print("[3D View %i] Graphics card manufacturer: %s", m_uniqueID, vendorName);
@@ -719,7 +720,7 @@ bool ccGLWindow::initialize()
 		//VBO support
 		if (context()->hasExtension(QByteArrayLiteral("GL_ARB_vertex_buffer_object")))
 		{
-			if (params.useVBOs && (!vendorName || QString(vendorName).toUpper().startsWith("ATI")))
+			if (params.useVBOs && (!vendorName || vendorNameStr.startsWith("ATI")))
 			{
 				if (!m_silentInitialization)
 					ccLog::Warning("[3D View %i] VBO support has been disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)", m_uniqueID, vendorName);
@@ -801,7 +802,7 @@ bool ccGLWindow::initialize()
 						if (!getDisplayParameters().isInPersistentSettings("colorScaleUseShader"))
 						{
 							bool shouldUseShader = true;
-							if (!vendorName || QString(vendorName).toUpper().startsWith("ATI") || QString(vendorName).toUpper().startsWith("VMWARE"))
+							if (!vendorName || vendorNameStr.startsWith("ATI") || vendorNameStr.startsWith("VMWARE"))
 							{
 								if (!m_silentInitialization)
 								{

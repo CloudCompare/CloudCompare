@@ -63,7 +63,7 @@ struct AsciiOpenContext
 	{
 		extractSFNameFrom1stLine = ui->extractSFNamesFrom1stLineCheckBox->isChecked();
 		maxPointCountPerCloud = ui->maxCloudSizeDoubleSpinBox->value();
-		separator = ui->lineEditSeparator->text()[0];
+		separator = ui->lineEditSeparator->text().at( 0 );
 		skipLines = ui->spinBoxSkipLines->value();
 	}
 

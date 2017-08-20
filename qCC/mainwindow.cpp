@@ -389,7 +389,9 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 			}
 
 			//add actions
-			for (QAction* action : actions.actions())
+			const QList<QAction *>	actionList = actions.actions();
+			
+			for (QAction* action : actionList)
 			{
 				//add to menu (if any)
 				if (destMenu)
@@ -3529,7 +3531,6 @@ void MainWindow::doActionRegister()
 
 		//transformation matrix
 		{
-			QString matString = transMat.toString();
 			summary << "Transformation matrix";
 			summary << transMat.toString(3,'\t'); //low precision, just for display
 			summary << "----------------";
@@ -5939,7 +5940,7 @@ void MainWindow::freezeUI(bool state)
 
 	//freeze plugin toolbars
 	{
-		for ( QToolBar *toolbar : m_stdPluginsToolbars )
+		for ( QToolBar *toolbar : qAsConst( m_stdPluginsToolbars ) )
 		{
 			toolbar->setDisabled(state);
 		}
@@ -9041,7 +9042,9 @@ void MainWindow::doActionLoadFile()
 		{
 			if (filter->importSupported())
 			{
-				for ( const QString &fileFilter : filter->getFileFilters(true) )
+				const QStringList	fileFilterList = filter->getFileFilters(true);
+				
+				for ( const QString &fileFilter : fileFilterList )
 				{
 					fileFilters.append( fileFilter );
 					//is it the (last) default filter?
@@ -9552,9 +9555,11 @@ void MainWindow::updateMenus()
 	m_UI->actionToggleViewerBasedPerspective->setEnabled(hasMdiChild);
 
 	//plugins
-	for (QAction* act : m_glFilterActions.actions())
+	const QList<QAction *>	actionList = m_glFilterActions.actions();
+	
+	for (QAction* action : actionList)
 	{
-		act->setEnabled(hasMdiChild);
+		action->setEnabled(hasMdiChild);
 	}
 }
 

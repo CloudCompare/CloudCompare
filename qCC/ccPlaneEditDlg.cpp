@@ -108,7 +108,14 @@ void ccPlaneEditDlg::saveParamsAndAccept()
 			plane->setDisplay(m_pickingWin);
 		}
 		if (MainWindow::TheInstance())
+		{
 			MainWindow::TheInstance()->addToDB(plane);
+		}
+		else
+		{
+			delete plane;
+			plane = nullptr;
+		}
 	}
 
 	accept();

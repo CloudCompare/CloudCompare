@@ -26,7 +26,6 @@
 #include "ccPickingListener.h"
 
 //qCC_plugins
-#include <ccMainAppInterface.h>
 #include <ccPluginInfo.h>
 
 //CCLib

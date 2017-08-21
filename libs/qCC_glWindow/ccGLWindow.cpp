@@ -41,6 +41,12 @@
 #include <QOpenGLDebugLogger>
 #include <QPushButton>
 #include <QSettings>
+#include <QTouchEvent>
+#include <QWheelEvent>
+
+#ifdef Q_OS_LINUX
+#include <QDir>
+#endif
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 #include <QOpenGLPaintDevice>

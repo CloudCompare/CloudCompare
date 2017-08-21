@@ -20,6 +20,9 @@
 //Qt
 #include <QUuid>
 
+//CCLib
+#include <CCGeom.h>
+
 //Local
 #include "ccLog.h"
 

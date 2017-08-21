@@ -19,13 +19,12 @@
 #define CC_COLOR_SCALE_HEADER
 
 //Local
-#include "ccBasicTypes.h"
+#include "ccColorTypes.h"
 #include "ccSerializableObject.h"
 
 //Qt
-#include <QSharedPointer>
-#include <QColor>
 #include <QList>
+#include <QSharedPointer>
 
 //System
 #include <set>

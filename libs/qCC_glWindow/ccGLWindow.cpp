@@ -39,6 +39,7 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QOpenGLDebugLogger>
+#include <QOpenGLTexture>
 #include <QPushButton>
 #include <QSettings>
 #include <QTouchEvent>

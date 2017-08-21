@@ -26,6 +26,7 @@
 //Qt
 #include <QImageReader>
 #include <QFileInfo>
+#include <QOpenGLTexture>
 
 
 ccImage::ccImage()

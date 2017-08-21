@@ -17,6 +17,8 @@
 
 #include "ccGLUtils.h"
 
+#include <QOpenGLTexture>
+
 //*********** OPENGL TEXTURES ***********//
 
 void ccGLUtils::DisplayTexture2DPosition(QImage image, int x, int y, int w, int h, unsigned char alpha/*=255*/)

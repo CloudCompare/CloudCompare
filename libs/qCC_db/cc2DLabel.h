@@ -22,6 +22,9 @@
 #include "ccHObject.h"
 #include "ccInteractor.h"
 
+//Qt
+#include <QRect>
+
 class ccGenericPointCloud;
 
 //! 2D label (typically attached to points)

@@ -21,11 +21,10 @@
 //Always first
 #include "ccIncludeGL.h"
 
-//Local
-#include "ccGLMatrix.h"
+#include <QFont>
 
 //Qt
-class QFont;
+class QFile;
 class QWidget;
 
 //! Standard parameters for GL displays/viewports

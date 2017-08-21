@@ -34,6 +34,8 @@
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 #include <QWidget>
 #include <QWindow>
+#else
+#include <QOpenGLWidget>
 #endif
 
 //system

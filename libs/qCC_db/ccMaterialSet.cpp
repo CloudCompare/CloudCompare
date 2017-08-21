@@ -26,6 +26,7 @@
 #include <QString>
 #include <QFile>
 #include <QFileInfo>
+#include <QImage>
 #include <QTextStream>
 #include <QMap>
 #include <QSet>

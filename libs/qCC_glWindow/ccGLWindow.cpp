@@ -62,27 +62,23 @@ static OculusHMD s_oculus;
 #endif
 
 //Min and max zoom ratio (relative)
-const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
-const float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
+constexpr float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
+constexpr float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
 
 //Vaious overlay elements dimensions
-const double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8; //percentage of the smallest screen dimension
-const double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0;
-const float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
-const float  CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
-
-//Hot zone (interactors) triggering area
-const int CC_HOT_ZONE_TRIGGER_WIDTH = 270;
-const int CC_HOT_ZONE_TRIGGER_HEIGHT = 100;
+constexpr double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8; //percentage of the smallest screen dimension
+constexpr double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0;
+constexpr float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
+constexpr float  CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
 
 //Max click duration for enabling picking mode (in ms)
-const int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
+constexpr int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
 
 //invalid GL list index
-const GLuint GL_INVALID_LIST_ID = (~0);
+constexpr GLuint GL_INVALID_LIST_ID = (~0);
 
 //GL filter banner margin (height = 2*margin + current font height)
-const int CC_GL_FILTER_BANNER_MARGIN = 5;
+constexpr int CC_GL_FILTER_BANNER_MARGIN = 5;
 
 //default interaction flags
 ccGLWindow::INTERACTION_FLAGS ccGLWindow::PAN_ONLY()           { ccGLWindow::INTERACTION_FLAGS flags = INTERACT_PAN | INTERACT_ZOOM_CAMERA | INTERACT_2D_ITEMS | INTERACT_CLICKABLE_ITEMS; return flags; }
@@ -410,9 +406,11 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	}
 
 	//signal/slot connections
-	connect(this, SIGNAL(itemPickedFast(ccHObject*, int, int, int)), this, SLOT(onItemPickedFast(ccHObject*, int, int, int)), Qt::DirectConnection);
-	connect(&m_scheduleTimer, SIGNAL(timeout()), this, SLOT(checkScheduledRedraw()));
-	connect(&m_autoRefreshTimer, SIGNAL(timeout()), this, SLOT(update()));
+	connect(this, &ccGLWindow::itemPickedFast, this, &ccGLWindow::onItemPickedFast, Qt::DirectConnection);
+	connect(&m_scheduleTimer, &QTimer::timeout, this, &ccGLWindow::checkScheduledRedraw);
+	connect(&m_autoRefreshTimer, &QTimer::timeout, this, [=] () {
+		update();
+	});
 
 #ifndef CC_GL_WINDOW_USE_QWINDOW
 	setAcceptDrops(true);
@@ -578,7 +576,6 @@ void ccGLWindow::handleLoggedMessage(const QOpenGLDebugMessage& message)
 	case QOpenGLDebugMessage::LowSeverity:
 		sevStr = "low";
 		return; //don't care about them! they flood the console in Debug mode :(
-		break;
 	case QOpenGLDebugMessage::NotificationSeverity:
 	default:
 		sevStr = "notification";
@@ -839,7 +836,7 @@ bool ccGLWindow::initialize()
 			QOpenGLDebugLogger* logger = new QOpenGLDebugLogger(this);
 			logger->initialize();
 
-			connect(logger, SIGNAL(messageLogged(const QOpenGLDebugMessage&)), this, SLOT(handleLoggedMessage(const QOpenGLDebugMessage&)));
+			connect(logger, &QOpenGLDebugLogger::messageLogged, this, &ccGLWindow::handleLoggedMessage);
 			logger->enableMessages();
 			logger->disableMessages(QOpenGLDebugMessage::AnySource,
 									QOpenGLDebugMessage::DeprecatedBehaviorType
@@ -1141,7 +1138,9 @@ void ccGLWindow::startFrameRateTest()
 	//we save the current view matrix
 	s_frameRateBackupMat = m_viewportParams.viewMat;
 
-	connect(&s_frameRateTimer, SIGNAL(timeout()), this, SLOT(redraw()), Qt::QueuedConnection);
+	connect(&s_frameRateTimer, &QTimer::timeout, this, [=] () {
+		redraw();
+	}, Qt::QueuedConnection);
 
 	displayNewMessage("[Framerate test in progress]",
 		ccGLWindow::UPPER_CENTER_MESSAGE,
@@ -1584,7 +1583,7 @@ void ccGLWindow::paintGL()
 				m_LODPendingIgnore = false;
 
 				ccLog::PrintDebug(QString("[QPaintGL] New LOD pass scheduled with timer"));
-				QTimer::singleShot(std::max<int>(baseLODRefreshTime_ms - displayTime_ms, 0), this, SLOT(renderNextLODLevel()));
+				QTimer::singleShot(std::max<int>(baseLODRefreshTime_ms - displayTime_ms, 0), this, &ccGLWindow::renderNextLODLevel);
 			}
 		}
 		else
@@ -1692,6 +1691,7 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 
 	//draw 2D background primitives
 	//DGM: useless for now
+#if 0
 	if (false)
 	{
 		//we draw 2D entities
@@ -1700,7 +1700,8 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 		if (m_winDBRoot)
 			m_winDBRoot->draw(CONTEXT);
 	}
-
+#endif
+	
 	logGLError("ccGLWindow::drawBackground");
 }
 
@@ -2731,7 +2732,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	{
 		//we must go backward so as to see the object!
 		float currentFov_deg = getFov();
-		assert(currentFov_deg > ZERO_TOLERANCE);
+		assert(currentFov_deg > FLT_EPSILON);
 		double d = bbDiag / tan(currentFov_deg * CC_DEG_TO_RAD);
 
 		CCVector3d cameraDir(0, 0, -1);
@@ -3178,7 +3179,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 
 		//DGM: take now 'frustumAsymmetry' into account (for stereo rendering)
 		//return ccGLUtils::Perspective(currentFov_deg,ar,zNear,zFar);
-		double yMax = zNear * tanf(currentFov_deg / 2 * CC_DEG_TO_RAD);
+		double yMax = zNear * tanf(currentFov_deg / 2.0f * CC_DEG_TO_RAD);
 		double xMax = yMax * ar;
 
 		double frustumAsymmetry = 0.0;
@@ -3299,7 +3300,7 @@ ccGLMatrixd ccGLWindow::computeModelViewMatrix(const CCVector3d& cameraCenter) c
 	else //ortho. mode
 	{
 		//apply zoom
-		float totalZoom = m_viewportParams.zoom / m_viewportParams.pixelSize;
+		double totalZoom = static_cast<double>(m_viewportParams.zoom / m_viewportParams.pixelSize);
 		//glScalef(totalZoom,totalZoom,totalZoom);
 		scaleMatd.data()[0] = totalZoom;
 		scaleMatd.data()[5] = totalZoom;
@@ -4235,7 +4236,7 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 			int newIncrement = std::min(std::max(0, increment + (event->delta() < 0 ? -1 : 1)), MAX_INCREMENT); //the zNearCoef must be < 1! 
 			if (newIncrement != increment)
 			{
-				float newCoef = ccViewportParameters::IncrementToZNearCoef(newIncrement, MAX_INCREMENT+1);
+				double newCoef = ccViewportParameters::IncrementToZNearCoef(newIncrement, MAX_INCREMENT+1);
 				setZNearCoef(newCoef);
 				doRedraw = true;
 			}
@@ -4293,7 +4294,7 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 		{
 			//convert degrees in 'constant' walking speed in ... pixels ;)
 			const double& deg2PixConversion = getDisplayParameters().zoomSpeed;
-			double delta = static_cast<float>(deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize;
+			float delta = static_cast<float>(deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize;
 
 			//if we are (clearly) outisde of the displayed objects bounding-box
 			if (m_cameraToBBCenterDist > m_bbHalfDiag)
@@ -5243,7 +5244,7 @@ double ccGLWindow::computeActualPixelSize() const
 {
 	if (!m_viewportParams.perspectiveView)
 	{
-		return static_cast<double>(m_viewportParams.pixelSize) / m_viewportParams.zoom;
+		return static_cast<double>(m_viewportParams.pixelSize / m_viewportParams.zoom);
 	}
 
 	int minScreenDim = std::min(m_glViewport.width(), m_glViewport.height());
@@ -5265,7 +5266,7 @@ float ccGLWindow::computePerspectiveZoom() const
 
 	//we compute the zoom equivalent to the corresponding camera position (inverse of above calculus)
 	float currentFov_deg = getFov();
-	if (currentFov_deg < ZERO_TOLERANCE)
+	if (currentFov_deg < FLT_EPSILON)
 		return 1.0f;
 
 	//Camera center to pivot vector
@@ -5330,7 +5331,7 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 			//(i.e. we replace the zoom by setting the camera at the right distance from
 			//the pivot point)
 			float currentFov_deg = getFov();
-			assert(currentFov_deg > ZERO_TOLERANCE);
+			assert(currentFov_deg > FLT_EPSILON);
 			double screenSize = std::min(m_glViewport.width(), m_glViewport.height()) * m_viewportParams.pixelSize; //see how pixelSize is computed!
 			if (screenSize > 0)
 			{
@@ -5419,7 +5420,7 @@ void ccGLWindow::setAspectRatio(float ar)
 
 void ccGLWindow::setFov(float fov_deg)
 {
-	if (fov_deg < ZERO_TOLERANCE || fov_deg > 180.0f)
+	if (fov_deg < FLT_EPSILON || fov_deg > 180.0f)
 	{
 		ccLog::Warning("[ccGLWindow::setFov] Invalid FOV value!");
 		return;
@@ -5459,7 +5460,7 @@ float ccGLWindow::getFov() const
 
 void ccGLWindow::setBubbleViewFov(float fov_deg)
 {
-	if (fov_deg < ZERO_TOLERANCE || fov_deg > 180.0f)
+	if (fov_deg < FLT_EPSILON || fov_deg > 180.0f)
 		return;
 
 	if (fov_deg != m_bubbleViewFov_deg)

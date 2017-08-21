@@ -4,44 +4,40 @@
 #include "ccCommandLineInterface.h"
 
 //CCLib
-#include <CloudSamplingTools.h>
-#include <WeibullDistribution.h>
-#include <NormalDistribution.h>
-#include <StatisticalTestingTools.h>
-#include <Neighbourhood.h>
 #include <AutoSegmentationTools.h>
 #include <CCConst.h>
+#include <CloudSamplingTools.h>
+#include <NormalDistribution.h>
+#include <StatisticalTestingTools.h>
+#include <WeibullDistribution.h>
 
 //qCC_db
-#include <ccProgressDialog.h>
-#include <ccOctree.h>
-#include <ccPlane.h>
 #include <ccNormalVectors.h>
+#include <ccPlane.h>
 #include <ccPolyline.h>
+#include <ccProgressDialog.h>
 #include <ccScalarField.h>
 #include <ccVolumeCalcTool.h>
-#include <ccLog.h>
 
 //qCC_io
-#include <BundlerFilter.h>
 #include <AsciiFilter.h>
+#include <BundlerFilter.h>
 #include <FBXFilter.h>
 #include <PlyFilter.h>
 
 //qCC
 #include "ccCommon.h"
-#include <ui_commandLineDlg.h>
-#include "ccConsole.h"
 #include "ccComparisonDlg.h"
+#include "ccConsole.h"
 #include "ccCropTool.h"
 #include "ccLibAlgorithms.h"
 #include "ccRegistrationTools.h"
 #include "ccScalarFieldArithmeticsDlg.h"
 
+#include <ui_commandLineDlg.h>
+
 //Qt
 #include <QDateTime>
-#include <QStringList>
-#include <QTextStream>
 
 //commands
 static const char COMMAND_CLOUD_EXPORT_FORMAT[]				= "C_EXPORT_FMT";

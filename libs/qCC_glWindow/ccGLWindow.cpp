@@ -20,42 +20,38 @@
 #include "ccRenderingTools.h"
 
 //qCC_db
-#include <ccHObjectCaster.h>
 #include <cc2DLabel.h>
-#include <ccSphere.h> //for the pivot symbol
-#include <ccPolyline.h>
-#include <ccPointCloud.h>
-#include <ccColorRampShader.h>
 #include <ccClipBox.h>
+#include <ccColorRampShader.h>
+#include <ccHObjectCaster.h>
+#include <ccPointCloud.h>
+#include <ccPolyline.h>
+#include <ccSphere.h> //for the pivot symbol
 #include <ccSubMesh.h>
 
 //CCFbo
-#include <ccGlFilter.h>
 #include <ccFrameBufferObject.h>
+#include <ccGlFilter.h>
 
 //Qt
 #include <QApplication>
-#include <QDir>
 #include <QLayout>
 #include <QMessageBox>
 #include <QMimeData>
-#include <QMouseEvent>
+#include <QOpenGLDebugLogger>
 #include <QPushButton>
 #include <QSettings>
+
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 #include <QOpenGLPaintDevice>
 #endif
 
-//Oculus
 #ifdef CC_OCULUS_SUPPORT
-
 #include "oculus/ccOculus.h"
 static OculusHMD s_oculus;
-
 #endif //CC_OCULUS_SUPPORT
 
 #ifdef USE_VLD
-//VLD
 #include <vld.h>
 #endif
 

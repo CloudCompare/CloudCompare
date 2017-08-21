@@ -28,27 +28,29 @@
 
 //Qt
 #include <QElapsedTimer>
-#include <QTimer>
-#include <QByteArray>
-#include <QOpenGLDebugLogger>
 #include <QOpenGLExtensions>
+#include <QTimer>
+
 #ifdef CC_GL_WINDOW_USE_QWINDOW
-#include <QWindow>
 #include <QWidget>
+#include <QWindow>
 #endif
 
 //system
-#include <unordered_set>
 #include <list>
+#include <unordered_set>
 
-class ccHObject;
+class QOpenGLDebugMessage;
+
 class ccBBox;
-class ccShader;
 class ccColorRampShader;
-class ccGlFilter;
 class ccFrameBufferObject;
+class ccGlFilter;
+class ccHObject;
 class ccInteractor;
 class ccPolyline;
+class ccShader;
+
 struct HotZone;
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW

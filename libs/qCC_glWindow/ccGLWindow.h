@@ -135,7 +135,7 @@ public:
 	};
 
 	//! Default constructor
-	ccGLWindow(QSurfaceFormat* format = 0, ccGLWindowParent* parent = 0, bool silentInitialization = false);
+	ccGLWindow(QSurfaceFormat* format = nullptr, ccGLWindowParent* parent = nullptr, bool silentInitialization = false);
 
 	//! Destructor
 	virtual ~ccGLWindow();
@@ -171,8 +171,8 @@ public:
 	virtual void refresh(bool only2D = false) override;
 	virtual void invalidateViewport() override;
 	virtual void deprecate3DLayer() override;
-	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont()) override;
-	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0) override;
+	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = nullptr, const QFont& font = QFont()) override;
+	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0.0f, const unsigned char* rgbColor = nullptr, const QFont* font = nullptr) override;
 	virtual QFont getTextDisplayFont() const override; //takes rendering zoom into account!
 	virtual QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
@@ -308,7 +308,7 @@ public:
 	/** If no bounding box is defined, the current displayed 'scene graph'
 		bounding box is taken.
 	**/
-	virtual void updateConstellationCenterAndZoom(const ccBBox* aBox = 0);
+	virtual void updateConstellationCenterAndZoom(const ccBBox* aBox = nullptr);
 
 	//! Returns the visible objects bounding-box
 	void getVisibleObjectsBB(ccBBox& box) const;
@@ -335,7 +335,7 @@ public:
 		- the rotation around the camera center in viewer-centered mode
 		(see setPerspectiveState).
 	**/
-	virtual const void setBaseViewMat(ccGLMatrixd& mat);
+	virtual void setBaseViewMat(ccGLMatrixd& mat);
 
 	//! Sets camera to a predefined view (top, bottom, etc.)
 	virtual void setView(CC_VIEW_ORIENTATION orientation, bool redraw = true);
@@ -425,14 +425,14 @@ public:
 	virtual void invalidateVisualization();
 
 	//! Renders screen to an image
-	virtual QImage renderToImage(	float zoomFactor = 1.0,
+	virtual QImage renderToImage(	float zoomFactor = 1.0f,
 									bool dontScaleFeatures = false,
 									bool renderOverlayItems = false,
 									bool silent = false);
 
 	//! Renders screen to a file
 	virtual bool renderToFile(	QString filename,
-								float zoomFactor = 1.0,
+								float zoomFactor = 1.0f,
 								bool dontScaleFeatures = false,
 								bool renderOverlayItems = false);
 
@@ -452,7 +452,7 @@ public:
 	float computePerspectiveZoom() const;
 
 	//! Returns whether the ColorRamp shader is supported or not
-	bool hasColorRampShader() const { return m_colorRampShader != 0; }
+	bool hasColorRampShader() const { return m_colorRampShader != nullptr; }
 
 	//! Returns whether rectangular picking is allowed or not
 	bool isRectangularPickingAllowed() const { return m_allowRectangularEntityPicking; }
@@ -928,15 +928,24 @@ protected: //other methods
 	//! Optional output metrics (from computeProjectionMatrix)
 	struct ProjectionMetrics
 	{
-		ProjectionMetrics() : zNear(0), zFar(0), cameraToBBCenterDist(0), bbHalfDiag(0) {}
-		double zNear, zFar, cameraToBBCenterDist, bbHalfDiag;
+		ProjectionMetrics()
+			: zNear(0.0)
+			, zFar(0.0)
+			, cameraToBBCenterDist(0.0)
+			, bbHalfDiag(0.0)
+		{}
+		
+		double zNear;
+		double zFar;
+		double cameraToBBCenterDist;
+		double bbHalfDiag;
 	};
 
 	//! Computes the projection matrix
 	ccGLMatrixd computeProjectionMatrix(	const CCVector3d& cameraCenter,
 											bool withGLfeatures, 
-											ProjectionMetrics* metrics = 0, 
-											double* eyeOffset = 0) const;
+											ProjectionMetrics* metrics = nullptr, 
+											double* eyeOffset = nullptr) const;
 	void updateModelViewMatrix();
 	void updateProjectionMatrix();
 	void setStandardOrthoCenter();
@@ -996,8 +1005,8 @@ protected: //other methods
 	void processPickingResult(	const PickingParameters& params,
 								ccHObject* pickedEntity,
 								int pickedItemIndex,
-								const CCVector3* nearestPoint = 0,
-								const std::unordered_set<int>* selectedIDs = 0);
+								const CCVector3* nearestPoint = nullptr,
+								const std::unordered_set<int>* selectedIDs = nullptr);
 	
 	//! Updates currently active items list (m_activeItems)
 	/** The items must be currently displayed in this context

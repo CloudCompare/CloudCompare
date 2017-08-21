@@ -24,8 +24,8 @@
 #include "ccCameraSensor.h"
 
 //Qt
-#include <QImageReader>
 #include <QFileInfo>
+#include <QImageReader>
 #include <QOpenGLTexture>
 
 

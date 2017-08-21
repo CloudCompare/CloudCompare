@@ -23,7 +23,6 @@
 
 //Qt
 #include <QSharedPointer>
-#include <QString>
 #include <QVariant>
 
 

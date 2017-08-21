@@ -19,7 +19,6 @@
 #define CC_FRUSTUM_HEADER
 
 //CCLib
-#include <CCGeom.h>
 #include <RayAndBox.h>
 
 //Local

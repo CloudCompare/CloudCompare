@@ -20,18 +20,10 @@
 
 //Local
 #include "ccMaterial.h"
-#include "ccBasicTypes.h"
-#include "ccLog.h"
 
 //Qt
-#include <QMap>
-#include <QUuid>
-#include <QFileInfo>
-#include <QDataStream>
 #include <QOpenGLTexture>
-
-//System
-#include <assert.h>
+#include <QUuid>
 
 //Textures DB
 QMap<QString, QImage> s_textureDB;

@@ -25,9 +25,8 @@
 #include <QColor>
 
 //system
-#include <stdlib.h>
-#include <random>
 #include <math.h> //for modf
+#include <random>
 
 //! Default color components type (R,G and B)
 typedef unsigned char ColorCompType;

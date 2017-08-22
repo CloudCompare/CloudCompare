@@ -1689,7 +1689,7 @@ void ccRasterizeTool::generateContours()
 								{
 									int xi = std::min(std::max(static_cast<int>(x), 0), static_cast<int>(m_grid.width) - 1);
 									int yi = std::min(std::max(static_cast<int>(y), 0), static_cast<int>(m_grid.height) - 1);
-									double h = m_grid.rows[y][x].h;
+									double h = m_grid.rows[yi][xi].h;
 									if (std::isfinite(h))
 									{
 										/*P.u[Z] = */P.z = static_cast<PointCoordinateType>(h);

@@ -38,7 +38,6 @@ Big ones:
 [*] Volume calculation
 	- between clouds (from distances)
 	- between meshes (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
-[*] Update qKinect with the Kinect for Windows SDK (1.8)
 [*] Use PDAL instead of libLAS (http://www.cloudcompare.org/forum/viewtopic.php?t=437)
 
 qAnimation plugin:
@@ -52,6 +51,8 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Ability to change the mouse buttons mapping (http://www.cloudcompare.org/forum/viewtopic.php?t=2676)
+[*] Ability to define custom shortcuts for some methods (http://www.cloudcompare.org/forum/viewtopic.php?t=2676)
 [*] Set the Cross Section box using a plane entity (http://www.danielgm.net/cc/forum/viewtopic.php?t=2485)
 [*] Apply the qCSF plugin to more than one cloud at once (http://www.cloudcompare.org/forum/viewtopic.php?t=2242)
 [*] Add a shortcut to take a 'snapshot' of the current view (automatic filename and export dir?)

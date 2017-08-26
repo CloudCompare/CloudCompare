@@ -1509,15 +1509,9 @@ extern int ZEXPORT zipWriteInFileInZip (zipFile file,const void* buf,unsigned in
 
           if ((zi->ci.method == Z_DEFLATED) && (!zi->ci.raw))
           {
-              uLong uTotalOutBefore = zi->ci.stream.total_out;
+              uInt uAvailOutBefore = zi->ci.stream.avail_out;
               err=deflate(&zi->ci.stream,  Z_NO_FLUSH);
-              if(uTotalOutBefore > zi->ci.stream.total_out)
-              {
-                int bBreak = 0;
-                bBreak++;
-              }
-
-              zi->ci.pos_in_buffered_data += (uInt)(zi->ci.stream.total_out - uTotalOutBefore) ;
+              zi->ci.pos_in_buffered_data += uAvailOutBefore - zi->ci.stream.avail_out;
           }
           else
           {
@@ -1571,7 +1565,7 @@ extern int ZEXPORT zipCloseFileInZipRaw64 (zipFile file, ZPOS64_T uncompressed_s
                 {
                         while (err==ZIP_OK)
                         {
-                                uLong uTotalOutBefore;
+                                uLong uAvailOutBefore;
                                 if (zi->ci.stream.avail_out == 0)
                                 {
                                         if (zip64FlushWriteBuffer(zi) == ZIP_ERRNO)
@@ -1579,9 +1573,9 @@ extern int ZEXPORT zipCloseFileInZipRaw64 (zipFile file, ZPOS64_T uncompressed_s
                                         zi->ci.stream.avail_out = (uInt)Z_BUFSIZE;
                                         zi->ci.stream.next_out = zi->ci.buffered_data;
                                 }
-                                uTotalOutBefore = zi->ci.stream.total_out;
+                                uAvailOutBefore = zi->ci.stream.avail_out;
                                 err=deflate(&zi->ci.stream,  Z_FINISH);
-                                zi->ci.pos_in_buffered_data += (uInt)(zi->ci.stream.total_out - uTotalOutBefore) ;
+                                zi->ci.pos_in_buffered_data += uAvailOutBefore - zi->ci.stream.avail_out;
                         }
                 }
     else if ((zi->ci.method == Z_BZIP2ED) && (!zi->ci.raw))

@@ -36,11 +36,15 @@ quazip/doc/* files for the more detailed documentation.
 For Windows, it's essentially the same, but you may have to adjust
 settings for different environments.
 
-If you want to include QuaZIP sources directly in your project or if
-you want to use QuaZIP compiled as a static library using
-"qmake CONFIG+=statliclib", you have to define the QUAZIP_STATIC macro,
-otherwise you're likely to run into problems as QuaZIP symbols will be
-marked as dllimported.
+If linking statically (either a static lib or just using the source code
+directly in your project), then QUAZIP_STATIC should be defined. This is
+done automatically when you build QuaZIP as a static library. However,
+when _using_ a static lib (or source code, for that matter) you must
+also define QUAZIP_STATIC in your project (that uses QuaZIP) to tell
+quazip_global.h that you use a static version because otherwise the
+compiler wouldn't know that and will mark QuaZIP symbols as dllimported.
+Linking problems among the lines of “undefined reference” are usually
+caused by this.
 
 Copyright notice:
 

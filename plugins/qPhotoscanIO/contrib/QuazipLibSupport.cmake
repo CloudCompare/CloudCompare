@@ -23,7 +23,7 @@ ENDIF()
 
 project( quazip_static )
 
-set(LOCAL_PATH contrib/quazip-0.7.2/quazip)
+set(LOCAL_PATH contrib/quazip-0.7.3/quazip)
 set(GLOBAL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${LOCAL_PATH})
 
 # set all include directories for in and out of source builds

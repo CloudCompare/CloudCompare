@@ -323,6 +323,9 @@ MainWindow::~MainWindow()
 	if (ccRoot)
 		delete ccRoot;
 
+	delete m_UI;
+	m_UI = nullptr;
+	
 	ccConsole::ReleaseInstance();
 }
 

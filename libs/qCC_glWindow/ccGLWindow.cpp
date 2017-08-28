@@ -62,6 +62,10 @@ static OculusHMD s_oculus;
 #include <vld.h>
 #endif
 
+#ifndef constexpr
+#define constexpr const
+#endif
+
 //Min and max zoom ratio (relative)
 constexpr float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
 constexpr float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;

@@ -37,7 +37,6 @@
 class QAction;
 class QMdiArea;
 class QMdiSubWindow;
-class QSignalMapper;
 class QToolBar;
 class QToolButton;
 
@@ -577,7 +576,6 @@ private:
 	/******************************/
 
 	QMdiArea* m_mdiArea;
-	QSignalMapper* m_windowMapper;
 
 	//! CloudCompare MDI area overlay dialogs
 	struct ccMDIDialogs

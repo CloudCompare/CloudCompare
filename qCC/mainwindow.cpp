@@ -258,11 +258,6 @@ MainWindow::MainWindow()
 		connect(m_mdiArea, &QMdiArea::subWindowActivated, m_pickingHub, &ccPickingHub::onActiveWindowChanged);
 	}
 
-	//Window Mapper
-	m_windowMapper = new QSignalMapper(this);
-	connect(m_windowMapper, static_cast<void (QSignalMapper::*)(QWidget *)>(&QSignalMapper::mapped),
-			this, &MainWindow::setActiveSubWindow);
-
 	connectActions();
 
 	new3DView();
@@ -283,10 +278,9 @@ MainWindow::~MainWindow()
 
 	cancelPreviousPickingOperation(false); //just in case
 
-	assert(m_ccRoot && m_mdiArea && m_windowMapper);
+	assert(m_ccRoot && m_mdiArea);
 	m_ccRoot->disconnect();
 	m_mdiArea->disconnect();
-	m_windowMapper->disconnect();
 
 	//we don't want any other dialog/function to use the following structures
 	ccDBRoot* ccRoot = m_ccRoot;
@@ -9591,17 +9585,21 @@ void MainWindow::update3DViewsMenu()
 		separator->setSeparator(true);
 		m_UI->menu3DViews->addAction(separator);
 
-		for (int i = 0; i < windows.size(); ++i)
+		int i = 0;
+		
+		for ( QMdiSubWindow *window : windows )
 		{
-			ccGLWindow *child = GLWindowFromWidget(windows.at(i)->widget());
+			ccGLWindow *child = GLWindowFromWidget(window->widget());
 
-			QString text = QString("&%1 %2").arg(i + 1).arg(child->windowTitle());
+			QString text = QString("&%1 %2").arg(++i).arg(child->windowTitle());
 			QAction *action = m_UI->menu3DViews->addAction(text);
+			
 			action->setCheckable(true);
-			action ->setChecked(child == getActiveGLWindow());
-			connect(action, &QAction::triggered,
-					m_windowMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
-			m_windowMapper->setMapping(action, windows.at(i));
+			action->setChecked(child == getActiveGLWindow());
+			
+			connect(action, &QAction::triggered, this, [=] () {
+				setActiveSubWindow( window );
+			} );
 		}
 	}
 }

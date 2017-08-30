@@ -11,17 +11,17 @@ topological features such as crosscutting relationships and younging directions 
 The combination of these two modes roughly correspond to the functionality of a good field geologist (armed with a trusty compass and notebook), 
 but require less beer and sunscreen. They are described in detail below.</p>
 
-<h2>Compass Mode: Creating structural measurements</h2>
+<h2>Compass Mode: Extracting structural measurements</h2>
 
 <p>The compass mode, activated by clicking the "compass" icon in the main dialog, contains three tools for measuring orientations: the Plane Tool, Trace Tool
-and Lineation Tool. Additionally, several extra tools are included in the <i>Extra tools</i> menu.</p>
+and Lineation Tool. A self-explanatory <i>Picking Tool</i> is also included for convenience.</p>
 
 <h3>Plane Tool: Measure surface orientations</h3>
 <p>The plane tool is used to measure the orientations of fully exposed planar structures, such as joint or bedding surfaces. 
 When it is activated, a red circle is shown in the 3D window. On picking a point in the virtual outcrop model (<i>left-click</i>), 
 a plane is fitted to all points sitting within the circle (using least squares), giving an orientation estimate (dip/dip direction). The circle radius 
-can be changed with <i>ctrl-scroll weel</i>. Note that for this to work correctly, Cloud Compare needs to be using orthographic projection 
-(<i>Display->Toggle Centered Perspective</i>).</p>
+can be changed with <i>ctrl-scroll wheel</i>. Note that for this to work correctly, Cloud Compare needs to be using orthographic projection 
+(<i>Display->Toggle Centred Perspective</i>).</p>
 
 <h3>Trace Tool: Digitise and measure traces and contacts</h3>
 <p>The trace tool allows the estimation of a structure or contact's orientation based on its intersection with a non-flat surface. It uses a least-cost path
@@ -55,40 +55,53 @@ the points on the trace are approximately co-linear (i.e. there is not enough to
 is automatically rejected and the trace object kept as-is for reference/further editing. Furthermore, if the point cloud being interpreted has previously calculated 
 point normals, best-fit planes are also rejected if they fall within 10 degrees of the average surface orientation along the trace.</p>
 
-<p>Automatic plane fitting can be enabled/disabled in the <i>algorithm</i> menu (settings icon) or holding the <i>shift</i> key when accepting the trace. Plane orientations 
+<p>Automatic plane fitting can be enabled/disabled (it is disabled by default) in the <i>algorithm</i> menu (settings icon) or holding the <i>shift</i> key when accepting the trace. Plane orientations 
 are expressed using the dip/dip direction convention.</p>
 
 <h3>Lineation Tool: Measure lineations</h3>
 <p>This tool measures the length, trend and plunge of a (straight) line between two points. <i>Left-click</i> selects points (as above). </p>
 
-<h3>Other Tools</h3>
-<p>The <i>Other Tools</i> dropdown (<i>Plus</i> icon) contains several useful, though less used tools. Most of these are used in <i>Map Mode</i> (discussed below), however the
-<i>Measure One-Point Thickness</i> and <i>Measure Two-Point Thickness</i> tools can be used in compass mode. These allow you to select a plane representing the orientation of 
-a geological unit use it to estimate "true thickness". <i>Measure One-Point Thickness</i> will measure the plane-perpendicular distance between the selected plane and each
-successively chosen points (use if the fit-plane represents one of the contacts). <i>Measure Two-Point Thickness</i> measures the plane-perpendicular distance between pairs of 
-successively chosen points (use if the fit-plane doesn't fall on one of the contacts, hence the two points fall on either side of the unit of interest).  </p>
-
 <h2>Map Mode</h2>
-<p><i>Map Mode</i> provides functionality for larger projects where many geological features are of interest, and so interpretation and measurements need to be 
-organised into a "map". On entering <i>Map Mode</i> (map icon), a second dialog appears. This contains functionality for creating and managing the <i>GeoObjects</i>
-that form the building blocks of our map.</p>
-
-<h3>The GeoObject Concept</h3>
-<p> <i>GeoObjects</i> are a data structure for organising and describing geological features in a flexible way. Each <i>GeoObject</i> comprises an <i>Interior</i>, <i>Upper Boundary</i> and
-<i>Lower Boundary</i>. Hence, measurements from a dyke for example, can be assigned such that they are representative of either contact (nominatively called <i>upper</i> and <i>lower</i>) or the 
+<p><i>Map Mode</i> provides functionality for storing and organising interpretations in larger projects, where many different geological features need to be recorded. On entering <i>Map Mode</i> (map icon), 
+a second dialog contains functionality for creating and managing <i>GeoObjects</i> appears. <i>GeoObjects</i> are a data structure for organising and describing geological features in a flexible way, and are comprised of an <i>Interior</i>, <i>Upper Boundary</i> and
+<i>Lower Boundary</i>. Hence, measurements from a dyke for example, can be assigned such that they are representative of either contact (somewhat arbitrarily called <i>upper</i> and <i>lower</i>) or the 
 <i>interior</i>. The GeoObject dialog contains functionality for creating GeoObjects and defining their active part (<i>upper</i>, <i>lower</i> or <i>interior</i>), to which any new measurements
 get assigned. 
 
-<p>The <i>Compass</i> functionality described above remains as described, the only difference being than any new measurements are stored in the active GeoObject. Traces defined using
-the <i>Trace</i> tool are also kept visible in this mode, so the <i>Trace</i> tool can be used to map the contacts defining a GeoObject.</p>
+<p>When <i>Map Mode</i> is active, the <i>Compass</i> functionality described above remains as described above with a few subtle difference. As already mentioned, new measurements are stored in the active GeoObject rather than in 
+a <i>Measurements</i> folder. Furthermore, traces defined using the <i>Trace</i> tool are also kept visible in this mode (rather than converted to planes), so the <i>Trace</i> tool can be used to digitise contacts.</p>
 
-<p>Additionally, a <i>Paint Tool</i> becomes available. This tool allows points in the dataset to be assigned to GeoObject interiors and... [TODO once tool written]</p>
+<h2>Other Tools</h2>
+<p>The <i>Other Tools</i> dropdown (<i>Plus</i> icon) contains additional functionality, and includes tools for measuring true thicknesses, recording notes and exporting interpretation
+for 2D visualisation. These <i>Other Tools</i> are summarised in the order they appear below.</p>
 
-<p>Finally, crosscutting and younging relationships can be defined using the <i>XXXX</i> and <i>XXXXX</i> tools in the <i>Other Tools</i> dropdown. When a younging relationship is defined,
-the appropriate boundaries (<i>Upper</i> or <i>Lower</i>) are copied between the GeoObjects to ensure conformable stratigraphic relationships. Crosscutting relationships, along with younging relationships,
- are stored in the data structure and can be automatically analysed to constrain timing relationships. </p>
- 
-<h2>Saving and Exporting data</h2>
+<h3>Add Pinch Node</h3>
+<p>Pinch nodes are used to record locations were the upper and lower surfaces of a GeoObject meet, such as at dyke tips or were sedimentary layers pinch-out. Pinch nodes are simply represented
+by a single point, but in being assigned to a GeoObject can record important information.</p>
+
+<h3>Measure One-Point/Two-Point Thickness</h3>
+<p>The <i>Measure One-Point Thickness</i> and <i>Measure Two-Point Thickness</i> tools can be used to measure the true-thickness of geological units by selecting a plane representing the orientation of 
+a unit and one or two points on its boundary. <i>Measure One-Point Thickness</i> will measure the plane-perpendicular distance between the selected plane and each
+successively chosen points (use this if the fit-plane represents one of the contacts). <i>Measure Two-Point Thickness</i> measures the plane-perpendicular distance between pairs of 
+successively chosen points (used when the fit-plane doesn't fall on one of the contacts).  </p>
+
+<h3>Add note</h3>
+<p>The <i>Add Note</i> tool allows short notes to be placed on a point cloud. After activating this tool, left-click on the location the note should be associated with and a prompt should appear,
+in which the note can be added. As always, short notes are best.</p>
+
+<h3>Fit Plane to GeoObject</h3>
+<p>On some occasions, a GeoObject comprised of multiple different trace objects will define a well-constrained plane. As the trace-tool only allows plane-fitting to an individual
+trace, the <i>Fit Plane to GeoObject</i> tool will calculate a fit plane for all traces defining the upper and lower surfaces of a GeoObject. Use with care, as this can often 
+produce spurious results.</p>
+
+<h3>Merge selected GeoObjects</h3>
+<p>Merges all of the GeoObjects selected in the DB Tree into the currently active (most recently selected) GeoObject.</p>
+
+<h3>Export SVG</h3>
+<p>Exports trace objects to a .svg file for "beautification" in vector-graphics packages such as Inkscape or Adobe Illustrator. Traces will projected into 2D using the current view-direction
+and camera settings, so should appear as viewed on the screen. Other objects (e.g. point clouds) can be included by rendering an image with standard CloudCompare functionality (<i>Display->Render to File</i>)</p>
+
+<h2>Saving and Exporting Measurements</h2>
 <p> Interpretation generated using this tool is represented internally by standard planes and polygons, and so can be natively stored in CC's .bin files. Each time the plugin is loaded it searches the
 CloudCompare database to look for any custom Compass objects, so interpretations can be saved and retrieved from disk, provided Compass is restarted (closed and then re-opened) each time new .bin files are
 loaded.</p>
@@ -98,10 +111,10 @@ into other software packages for further analysis. The <i>GeoObject</i> data str
 shapefiles through the normal save dialog.</p>
 
 <h2>Further Reading and Citation</h2>
-<p>If you found this tool useful, please cite <i>Thiele et al., 2017</i>. The publication (currently in prep.) contains a more detailed 
+<p>If you found this tool useful, please cite <i>Thiele et al., 2017</i>. The publication contains a more detailed 
 description of the methods employed by this plugin.</p>
 <p>
-<i>Thiele, ST., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, SA. &amp; Cruden, S., 2017, 'A computer-assisted approach to structural interpretation of point clouds and rasters', In Prep. </i>
+<i>Thiele, S. T., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, S. A., and Cruden, A. R.: Rapid, semi-automatic fracture and contact mapping for point clouds, images and geophysical data, Solid Earth Discuss., https://doi.org/10.5194/se-2017-83, in review, 2017</i>
 </p>
 <p></p><p></p>
 </body>

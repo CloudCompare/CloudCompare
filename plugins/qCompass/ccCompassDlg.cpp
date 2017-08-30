@@ -88,7 +88,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 
 	//setup settings menu
 	m_settings_menu = new QMenu(this);
-	m_plane_fit = new QAction("Fit Planes", this); m_plane_fit->setCheckable(true); m_plane_fit->setChecked(true);
+	m_plane_fit = new QAction("Fit Planes", this); m_plane_fit->setCheckable(true); m_plane_fit->setChecked(false);
 	m_showStippled = new QAction("Show Stippled", this); m_showStippled->setCheckable(true); m_showStippled->setChecked(true);
 	m_showNormals = new QAction("Show Normals", this); m_showNormals->setCheckable(true); m_showNormals->setChecked(true);
 	m_showNames = new QAction("Show Names", this); m_showNames->setCheckable(true); m_showNames->setChecked(false);

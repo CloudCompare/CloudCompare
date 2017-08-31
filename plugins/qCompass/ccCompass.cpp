@@ -987,7 +987,7 @@ void ccCompass::mergeGeoObjects()
 	m_app->setSelectedInDB(dest, true);
 	m_app->redrawAll(true); //redraw gui + 3D view
 
-	m_app->dispToConsole(QString().asprintf("[Compass] Merged selected GeoObjects to %s.",dest->getName().toStdString()), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_app->dispToConsole("[Compass] Merged selected GeoObjects to " + dest->getName(), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 }
 
 //calculates best-fit plane for the upper and lower surfaces of the selected GeoObject
@@ -1370,7 +1370,7 @@ void ccCompass::exportToSVG()
 		{
 			//remove file
 			svg_file.remove();
-			m_app->dispToConsole(QString::asprintf("[ccCompass] Could not write polylines to .svg - no polylines found!", count),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			m_app->dispToConsole("[ccCompass] Could not write polylines to .svg - no polylines found!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 		}
 	}
 }

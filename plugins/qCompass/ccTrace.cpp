@@ -380,13 +380,13 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 		//fill "neighbours" with nodes - essentially get results of a "sphere" search around active current point
 		m_neighbours.clear();
     
-		oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(search_r), m_neighbours, level);
+		oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(m_search_r), m_neighbours, level);
 
 		//loop through neighbours
 		for (size_t i = 0; i < m_neighbours.size(); i++)
 		{
 			m_p = m_neighbours[i];
-
+			
 			if (visited[m_p.pointIndex]) //Has this node been visited before? If so then bail.
 				continue;
 

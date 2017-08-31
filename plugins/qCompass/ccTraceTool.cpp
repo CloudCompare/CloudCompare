@@ -289,7 +289,7 @@ bool ccTraceTool::pickupTrace(ccHObject* obj)
 }
 
 //if this returns true, the undo button is enabled in the gui
-boolean ccTraceTool::canUndo()
+bool ccTraceTool::canUndo()
 {
 	return true; //yes - we can undo!
 }

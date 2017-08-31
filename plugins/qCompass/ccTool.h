@@ -65,7 +65,7 @@ public:
 	virtual void cancel() { }
 
 	//if this returns true, the undo button is enabled in the gui
-	virtual boolean canUndo() { return false; }
+	virtual bool canUndo() { return false; }
 
 	//called when the undo button is clicked
 	virtual void undo()	{ }

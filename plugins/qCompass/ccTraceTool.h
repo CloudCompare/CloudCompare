@@ -50,7 +50,7 @@ public:
 	void cancel() override;
 
 	//if this returns true, the undo button is enabled in the gui
-	boolean canUndo() override;
+	bool canUndo() override;
 
 	//called when the undo button is clicked
 	void undo() override;

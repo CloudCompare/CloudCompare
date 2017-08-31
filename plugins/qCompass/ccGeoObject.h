@@ -25,7 +25,7 @@
 
 #include "ccTrace.h"
 #include "ccPointPair.h"
-#include "ccfitPlane.h"
+#include "ccFitPlane.h"
 
 class ccTopologyRelation;
 

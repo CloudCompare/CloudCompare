@@ -18,7 +18,7 @@
 #ifndef CC_THICKNESSTOOL_HEADER
 #define CC_THICKNESSTOOL_HEADER
 
-#include "cctool.h"
+#include "ccTool.h"
 #include "ccThickness.h"
 #include "ccPlane.h"
 

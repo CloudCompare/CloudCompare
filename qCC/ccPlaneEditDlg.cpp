@@ -213,12 +213,16 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 	ccGLMatrix trans;
 	bool needToApplyTrans = false;
 	bool needToApplyRot = false;
-	if ((C - Cd).norm2d() != 0)
+
+	needToApplyRot = (fabs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
+	needToApplyTrans = needToApplyRot || ((C - Cd).norm2d() != 0);
+
+	if (needToApplyTrans)
 	{
 		trans.setTranslation(-C);
 		needToApplyTrans = true;
 	}
-	if (fabs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon())
+	if (needToApplyRot)
 	{
 		ccGLMatrix rotation;
 		//special case: plane parallel to XY
@@ -233,7 +237,6 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 			rotation = ccGLMatrix::FromToRotation(N, Nd);
 		}
 		trans = rotation * trans;
-		needToApplyRot = true;
 	}
 	if (needToApplyTrans)
 	{
@@ -242,6 +245,9 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 	if (needToApplyRot || needToApplyTrans)
 	{
 		plane->applyGLTransformation_recursive(&trans);
+
+		ccLog::Print("[Plane edit] Applied transformation matrix:");
+		ccLog::Print(trans.toString(12, ' ')); //full precision
 	}
 
 	if (	plane->getXWidth() != width

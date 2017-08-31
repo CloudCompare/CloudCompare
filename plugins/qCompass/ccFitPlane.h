@@ -15,27 +15,33 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_FITPLANE_HEADER
+#define CC_FITPLANE_HEADER
 
-#include "ccPointPair.h"
+#include <ccPlane.h>
+#include <ccNormalVectors.h>
 
-#include <ccPointCloud.h>
+#include "ccMeasurement.h"
 
 /*
-Class for representing/drawing lineations measured with qCompass.
+ccFitPlane is a class that wraps around ccPlane and is used for storing the planes-of-best-fit created using qCompass.
 */
-class ccLineation : public ccPointPair
+class ccFitPlane :
+	public ccPlane, 
+	public ccMeasurement
 {
 public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	ccFitPlane(ccPlane* p);
+	~ccFitPlane();
 
-	//write metadata specific to this object
-	void updateMetadata() override;
+	//update the metadata attributes of this plane
+	void updateAttributes(float rms, float search_r);
 
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
+	//create a FitPlane object from a point cloud
+	static ccFitPlane* Fit(CCLib::GenericIndexedCloudPersist* cloud, double *rms);
+
+	//returns true if object is a plane created by ccCompass (has the associated data)
+	static bool isFitPlane(ccHObject* object);
 };
+
 #endif

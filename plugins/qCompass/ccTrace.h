@@ -22,6 +22,9 @@
 
 #include <ccHObject.h>
 #include <ccPolyline.h>
+
+#include "ccMeasurement.h"
+
 #include <ccSphere.h>
 #include <DgmOctree.h>
 #include <DgmOctreeReferenceCloud.h>
@@ -32,11 +35,16 @@
 #include <ccPlane.h>
 #include <Jacobi.h>
 #include <ccScalarField.h>
+#include <ccProgressDialog.h>
+#include <ScalarFieldTools.h>
+
+#include "ccFitPlane.h"
 
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
 #include <deque>
+#include <qmessagebox.h>
 
 /*
 A ccTrace object is essentially a ccPolyline that is controlled/created by "waypoints" and a least-cost path algorithm
@@ -49,10 +57,13 @@ If treated as a ccTrace object, then the waypoints can be manipulated and the un
 the waypoints are also drawn as bubbles.
 
 */
-class ccTrace : public ccPolyline
+class ccTrace : 
+	public ccPolyline, 
+	public ccMeasurement
 {
 public:
 	ccTrace(ccPointCloud* associatedCloud);
+	ccTrace(ccPolyline* obj); //used for constructing from polylines with the correct metadata
 	virtual ~ccTrace() {}
 
 	//inherited from ccHObject
@@ -88,11 +99,11 @@ public:
 	*/
 	void undoLast()
 	{
-		if (m_previous != -1)
+		if (!m_previous.empty())
 		{
-			m_waypoints.erase(m_waypoints.begin() + m_previous);
+			m_waypoints.erase(m_waypoints.begin() + m_previous.at(m_previous.size() - 1));
 			m_trace.clear(); //need to recalculate whole trace
-			m_previous = -1;
+			m_previous.pop_back(); //remove waypoint
 		}
 	}
 
@@ -113,20 +124,13 @@ public:
 	/*
 	Applies the optimized path to the underlying polyline object (allows saving etc.).
 	*/
-	void finalizePath()
-	{
-		//clear existing points in background "polyline"
-		clear();
+	void finalizePath();
 
-		//push trace buffer to said polyline (for save/export etc.)
-		for (std::deque<int> seg : m_trace)
-		{
-			for (int p : seg)
-			{
-				addPointIndex(p);
-			}
-		}
-	}
+	/*
+	Recalculates the path from scratch
+	*/
+	void recalculatePath();
+
 
 	/*
 	Fit a plane to this trace. Returns true if a plane was fit successfully.
@@ -138,10 +142,23 @@ public:
 	@Return
 	The plane that was fitted, or a null pointer (0) if the plane is not considered valid (by the above criterion)
 	*/
-	ccPlane* fitPlane(int surface_effect_tolerance = 10, float min_planarity = 0.75f);
+	ccFitPlane* fitPlane(int surface_effect_tolerance = 10, float min_planarity = 0.75f);
 
-	void setTraceColor(ccColor::Rgba col) { m_trace_colour = col; }
-	void setWaypointColor(ccColor::Rgba col) { m_waypoint_colour = col; }
+	/*
+	Assigns the ID of this object to active scalar field (for each trace point).
+	*/
+	void bakePathToScalarField();
+
+	/*
+	Get the edge cost of going from p1 to p2 (this containts the "cost function" to define what is "fracture like" and what is not)
+	*/
+	int getSegmentCost(int p1, int p2);
+
+	//functions for calculating cost SFs
+	void buildGradientCost(QWidget* parent);
+	void buildCurvatureCost(QWidget* parent);
+	bool isGradientPrecomputed();
+	bool isCurvaturePrecomputed();
 
 	enum MODE 
 	{
@@ -167,10 +184,7 @@ protected:
 	int getClosestWaypoint(int pointID);
 
 	//contains grunt of shortest path algorithm. "offset" inserts points at the specified distance from the END of the trace (used for updating)
-	std::deque<int> optimizeSegment(int start, int end, float search_r, int maxIterations, int offset=0);
-
-	//get the edge cost of going from p1 to p2 (this containts the "cost function" to define what is "fracture like" and what is not)
-	int getSegmentCost(int p1, int p2, float search_r);
+	std::deque<int> optimizeSegment(int start, int end, int offset=0);
 
 	//specific cost algorithms (getSegmentCost(...) sums combinations of these depending on the COST_MODE flag.
 	//NOTE: to ensure each cost function makes an equal contribution to the result (when multiples are being used), each
@@ -185,20 +199,17 @@ protected:
 	int getSegmentCostDist(int p1, int p2);
 	int getSegmentCostScalar(int p1, int p2);
 	int getSegmentCostScalarInv(int p1, int p2);
-	
+
 	//calculate the search radius that should be used for the shortest path calcs
 	float calculateOptimumSearchRadius();
 
 	//ccTrace variables
-	float m_relMarkerScale = 5.0f;
+	float m_relMarkerScale = 1.0f;
 	ccPointCloud* m_cloud=0; //pointer to ccPointCloud object this is linked to (slightly different to polylines as we know this data is sampled from a real cloud)
-	
+
 	std::vector<std::deque<int>> m_trace; //contains an ordered list of indices which define this trace. Note that indices representing nodes MAY be inserted twice.
 	std::vector<int> m_waypoints; //list of waypoint indices
-	int m_previous=-1; //for undoing waypoints
-
-	ccColor::Rgba m_waypoint_colour = ccColor::green;
-	ccColor::Rgba m_trace_colour = ccColor::yellow;
+	std::vector<int> m_previous; //for undoing waypoints
 
 private:
 
@@ -239,12 +250,23 @@ private:
 	CCLib::DgmOctree::NeighboursSet m_neighbours;
 	CCLib::DgmOctree::PointDescriptor m_p;
 	float m_search_r;
+	float m_maxIterations;
 
 	/*
 	Test if a point falls within a circle who's diameter equals the line from segStart to segEnd. This is used to test if a newly added point should be
 	(1) appended to the end of the trace [falls outside of all segment-circles], or (2) inserted to split a segment [falls into a segment-circle]
 	*/
 	bool inCircle(const CCVector3* segStart, const CCVector3* segEnd, const CCVector3* query);
+
+	//used by various constructors to do initialization
+	void init(ccPointCloud* associatedCloud);
+
+	//used to update metadata flags
+	void updateMetadata();
+
+//static functions
+public:
+	static bool isTrace(ccHObject* object); //return true if object is a valid trace [regardless of it's class type]
 };
 
 #endif

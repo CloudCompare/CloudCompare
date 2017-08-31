@@ -15,27 +15,40 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#include "ccNote.h"
 
-#include "ccPointPair.h"
-
-#include <ccPointCloud.h>
-
-/*
-Class for representing/drawing lineations measured with qCompass.
-*/
-class ccLineation : public ccPointPair
+//pass ctors straight to PointPair
+ccNote::ccNote(ccPointCloud* associatedCloud)
+	: ccPointPair(associatedCloud)
 {
-public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	updateMetadata();
+}
 
-	//write metadata specific to this object
-	void updateMetadata() override;
+ccNote::ccNote(ccPolyline* obj)
+	: ccPointPair(obj)
+{ 
+	updateMetadata();
+}
 
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
-};
-#endif
+void ccNote::updateMetadata()
+{
+	//add metadata tag defining the ccCompass class type
+	QVariantMap* map = new QVariantMap();
+	map->insert("ccCompassType", "Note");
+	setMetaData(*map, true);
+
+	//update drawing stuff
+	showNameIn3D(true);
+	setDefaultColor(ccColor::cyan);
+	setActiveColor(ccColor::red);
+}
+
+//returns true if object is a lineation
+bool ccNote::isNote(ccHObject* object)
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("Note");
+	}
+	return false;
+}

@@ -15,27 +15,27 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccLineation.h"
+#include "ccThickness.h"
 
 //pass ctors straight to PointPair
-ccLineation::ccLineation(ccPointCloud* associatedCloud)
+ccThickness::ccThickness(ccPointCloud* associatedCloud)
 	: ccPointPair(associatedCloud)
 { 
 	updateMetadata();
 }
 
-ccLineation::ccLineation(ccPolyline* obj)
+ccThickness::ccThickness(ccPolyline* obj)
 	: ccPointPair(obj)
 { 
 	updateMetadata();
 }
 
-void ccLineation::updateMetadata()
+void ccThickness::updateMetadata()
 {
 	QVariantMap* map = new QVariantMap();
 
 	//add metadata tag defining the ccCompass class type
-	map->insert("ccCompassType", "Lineation");
+	map->insert("ccCompassType", "Thickness");
 
 	//calculate trace orientation (trend/plunge)
 	if (size() == 2) //can't calculate orientation of something smaller than this...
@@ -88,19 +88,19 @@ void ccLineation::updateMetadata()
 		setMetaData(*map, true);
 
 		//update name
-		QString lengthstr = QString("").asprintf("%.1f on ", length);
-		QString trendAndPlungeStr = QString("%2->%3").arg((int)plunge, 2, 10, QChar('0')).arg((int)trend, 3, 10, QChar('0'));
-		QString namestr = lengthstr + trendAndPlungeStr;
-		setName(namestr);
+		setName(QString::asprintf("%.3fT", length));
 	}
+
+	//store
+	setMetaData(*map, true);
 }
 
 //returns true if object is a lineation
-bool ccLineation::isLineation(ccHObject* object)
+bool ccThickness::isThickness(ccHObject* object)
 {
 	if (object->hasMetaData("ccCompassType"))
 	{
-		return object->getMetaData("ccCompassType").toString().contains("Lineation");
+		return object->getMetaData("ccCompassType").toString().contains("Thickness");
 	}
 	return false;
 }

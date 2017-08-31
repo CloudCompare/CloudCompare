@@ -15,27 +15,28 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_THICKNESS_HEADER
+#define CC_THICKNESS_HEADER
 
 #include "ccPointPair.h"
 
 #include <ccPointCloud.h>
 
 /*
-Class for representing/drawing lineations measured with qCompass.
+Objects representing thickness measurements
 */
-class ccLineation : public ccPointPair
+class ccThickness : public ccPointPair
 {
 public:
 	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	ccThickness(ccPointCloud* associatedCloud);
+	ccThickness(ccPolyline* obj);
 
 	//write metadata specific to this object
 	void updateMetadata() override;
 
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
+	//returns true if obj was/is a thickness measurement (as defined by the objects metadata)
+	static bool isThickness(ccHObject* obj);
 };
+
 #endif

@@ -15,27 +15,31 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_MAP_DIALOG_HEADER
+#define CC_MAP_DIALOG_HEADER
 
-#include "ccPointPair.h"
+//Qt
+#include <QDialog>
+#include <QList>
+#include <QAction>
 
-#include <ccPointCloud.h>
+//CC
+#include <ccGLWindow.h>
+#include <ccOverlayDialog.h>
 
-/*
-Class for representing/drawing lineations measured with qCompass.
-*/
-class ccLineation : public ccPointPair
+//Local
+#include <ui_mapDlg.h>
+#include "ccTrace.h"
+
+//class encapsulating the map-mode overlay dialog
+class ccMapDlg : public ccOverlayDialog, public Ui::mapDlg
 {
+	Q_OBJECT
+
 public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	//! Default constructor
+	explicit ccMapDlg(QWidget* parent = 0);
 
-	//write metadata specific to this object
-	void updateMetadata() override;
-
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
 };
+
 #endif

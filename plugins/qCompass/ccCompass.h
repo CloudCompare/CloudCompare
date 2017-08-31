@@ -44,9 +44,26 @@
 //this plugin
 #include "ccMouseCircle.h"
 #include "ccCompassDlg.h"
+#include "ccMapDlg.h"
 #include "ccTrace.h"
-#include "ccLineation.h"
+#include "ccPointPair.h"
 #include "ccCompassInfo.h"
+#include "ccGeoObject.h"
+#include "ccLineation.h"
+#include "ccThickness.h"
+#include "ccTopologyRelation.h"
+#include "ccNote.h"
+#include "ccPinchNode.h"
+
+//tools
+#include "ccTool.h"
+#include "ccFitPlaneTool.h"
+#include "ccTraceTool.h"
+#include "ccLineationTool.h"
+#include "ccThicknessTool.h"
+#include "ccNoteTool.h"
+#include "ccTopologyTool.h"
+#include "ccPinchNodeTool.h"
 
 //other
 #include <math.h>
@@ -69,7 +86,7 @@ public:
 	virtual QString getName() const override { return "Compass"; }
 	virtual QString getDescription() const override { return "A virtual 'compass' for measuring outcrop orientations"; }
 	virtual QIcon getIcon() const override;
-	virtual void stop() override { stopMeasuring(); m_dlg = nullptr; ccStdPluginInterface::stop(); }
+	virtual void stop() override { stopMeasuring(); m_dlg = nullptr; ccStdPluginInterface::stop(); } //called when the plugin is being stopped
 
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;
@@ -80,90 +97,147 @@ public:
 
 protected slots:
 
+	//initialise the plugin
 	void doAction();
 
-	bool startMeasuring(); //start picking mode
-	bool stopMeasuring(); //stop picking mode
+	//start picking mode
+	bool startMeasuring();
 
-	//picked point callbacks
-	void pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3& P);
+	//stop picking mode
+	bool stopMeasuring();
 	
 	//inherited from ccPickingListener
 	virtual void onItemPicked(const ccPickingListener::PickedItem& pi) override;
 
-	//GUI actions
+	//picked point callback (called by the above function)
+	void pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3& P);
+
+	//**************
+	//GUI actions:
+	//**************
+	//general
 	void onClose();
 	void onAccept();
 	void onSave();
 	void onUndo();
-	void setLineationMode();
-	void setPlaneMode();
-	void setTraceMode();
+
+	//modes
+	void enableMapMode(); //turns on/off map mode
+	void enableMeasureMode(); //turns on/off map mode
+
+	//tools
+	void setPick(); //activates the picking tool
+	void setLineation(); //activates the lineation tool
+	void setPlane(); //activates the plane tool
+	void setTrace(); //activates the trace tool
+
+	//extra tools
+	void addPinchNode(); //activates the pinch node tool
+	void setThickness(); //activates the thickness tool
+	void setThickness2(); //activates the thickness tool in two-point mode
+	void setYoungerThan(); //activates topology tool in "younger-than" mode
+	void setFollows(); //activates topology tool in "follows" mode
+	void setEquivalent(); //activates topology mode in "equivalent" mode
+	void setNote(); //activates the note tool
+	void recalculateSelectedTraces(); //recalculate any selected traces (for updating with a different cost function)
+	void mergeGeoObjects(); //merges the selected GeoObjects
+	void fitPlaneToGeoObject(); //calculates best-fit plane for the upper and lower surfaces of the selected GeoObject
+	void exportToSVG(); //exports current view to SVG
+
+	//map mode dialog
+	void writeToInterior(); //new digitization will be added to the GeoObjects interior
+	void writeToUpper(); //new digitization will be added to the GeoObjects upper boundary
+	void writeToLower(); //new digitiziation will be added to the GeoObjects lower boundary
+	void addGeoObject(); //creates a new GeoObject
+	
+	//drawing options
+	void hideAllPointClouds(ccHObject* o); //hides all point clouds and adds them to the m_hiddenObjects list
 	void toggleStipple(bool checked);
 	void recurseStipple(ccHObject* object, bool checked);
 	void toggleLabels(bool checked);
 	void recurseLabels(ccHObject* object, bool checked);
 	void toggleNormals(bool checked);
 	void recurseNormals(ccHObject* object, bool checked);
-	void changeType();
+
+	//display the help dialog
 	void showHelp();
 
 protected:
 
 	//event to get mouse-move updates & trigger repaint of overlay circle
 	virtual bool eventFilter(QObject* obj, QEvent* event) override;
-
-	//used while exporting plane data
-	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());
-	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = QString());
-	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString());
-
-	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)
-	bool madeByMe(ccHObject* object);
-	//returns true if object is a lineation object created by ccCompass
-	bool isLineation(ccHObject* object);
-	//returns true if object is a plane created by ccCompass (has the associated data)
-	bool isFitPlane(ccHObject* object);
-	//returns true if object is a trace created by ccCompass (has the associated data)
-	bool isTrace(ccHObject* object);
+	
+	//used to get the place/object that new measurements or interpretation should be stored
+	ccHObject* getInsertPoint();
 
 	//cleans up pointers etc before changing tools
 	void cleanupBeforeToolChange();
+
+	//registers this plugin with the picking hub
+	bool startPicking();
+
+	//removes this plugin from the picking hub
+	void stopPicking();
+
+	//checks if the passed object, or any of it's children, represent unloaded ccCompass objects (e.g. traces, fitplanes etc).
+	void tryLoading(ccHObject* obj, std::vector<int>* originals, std::vector<ccHObject*>* replacements);
 
 	//Action to start ccCompass
 	QAction* m_action = nullptr;
 
 	//link to application windows
-	ccGLWindow* m_window = nullptr;
 	QMainWindow* m_main_window = nullptr;
 
-	//2D-circle for selection during plane-mode
-	ccMouseCircle* m_mouseCircle = nullptr;
+	//picking or not?
+	bool m_picking = false;
 
 	//ccCompass toolbar gui
 	ccCompassDlg* m_dlg = nullptr;
-	
-	enum MODE
-	{
-		PLANE_MODE,
-		TRACE_MODE,
-		LINEATION_MODE
-	};
-	MODE m_pickingMode = MODE::PLANE_MODE;
+	ccMapDlg* m_mapDlg = nullptr;
 
-	//active trace for trace mode
-	ccTrace* m_trace = nullptr;
-	int m_trace_id=-1; //used to check if m_trace has been deleted
-	ccLineation* m_lineation = nullptr;
-	int m_lineation_id = -1; //used to check if m_lineation has been deleted
+	//tools
+	ccTool* m_activeTool = nullptr;
+	ccFitPlaneTool* m_fitPlaneTool;
+	ccTraceTool* m_traceTool;
+	ccLineationTool* m_lineationTool;
+	ccThicknessTool* m_thicknessTool;
+	ccTopologyTool* m_topologyTool;
+	ccNoteTool* m_noteTool;
+	ccPinchNodeTool* m_pinchNodeTool;
 
-	//name of structure currently being digitized
-	QString m_category = "Bedding";
+	//currently selected/active geoObject
+	ccGeoObject* m_geoObject = nullptr; //the GeoObject currently being written to
+	int m_geoObject_id = -1; //used to check if m_geoObject has been deleted
+	std::vector<int> m_hiddenObjects; //used to hide objects (for picking)
 
+	//used to 'guess' the name of new GeoObjects
+	QString m_lastGeoObjectName = "GeoObject"; 
+
+	//used while exporting data
+	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());
+	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = QString());
+	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString(), bool thickness=false); //if thickness is true this will write "thickness lineations" rather than orientation lineations
+	int writeTracesSVG(ccHObject* object, QTextStream* out, int height);
+	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)
+	bool madeByMe(ccHObject* object);
+
+//static flags used to define simple behaviours
+public:
 	//drawing properties
-	bool m_drawName = false;
-	bool m_drawStippled = true;
-	bool m_drawNormals = true;
+	static bool drawName;
+	static bool drawStippled;
+	static bool drawNormals;
+
+	//calculation properties
+	static bool fitPlanes;
+	static int costMode;
+
+	//digitization mode
+	static bool mapMode; //true if map mode, false if measure mode
+	static int mapTo; //see flags in ccGeoObject.h for definition of different mapping locations
+
+	 
+
 };
 
 #endif

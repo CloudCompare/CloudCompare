@@ -15,27 +15,33 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_NOTETOOL_HEADER
+#define CC_NOTETOOL_HEADER
 
-#include "ccPointPair.h"
+#include "ccTool.h"
+#include "ccNote.h"
 
-#include <ccPointCloud.h>
+#include <qinputdialog.h>
+#include <qmainwindow.h>
 
 /*
-Class for representing/drawing lineations measured with qCompass.
+Tool used to create notes and associated them with points in a cloud.
 */
-class ccLineation : public ccPointPair
+class ccNoteTool :
+	public ccTool
 {
 public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	ccNoteTool();
+	~ccNoteTool();
 
-	//write metadata specific to this object
-	void updateMetadata() override;
+	//called when the tool is set to active (for initialization)
+	virtual void toolActivated() override;
 
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
+	//called when the tool is set to disactive (for cleanup)
+	virtual void toolDisactivated() override;
+
+	//called when a point in a point cloud gets picked while this tool is active
+	void pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCloud* cloud, const CCVector3& P) override;
 };
+
 #endif

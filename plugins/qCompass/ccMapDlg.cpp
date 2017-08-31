@@ -15,27 +15,33 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#include "ccMapDlg.h"
 
-#include "ccPointPair.h"
+//Local
+#include "ccGLWindow.h"
 
-#include <ccPointCloud.h>
+//qCC_db
+#include <ccLog.h>
 
-/*
-Class for representing/drawing lineations measured with qCompass.
-*/
-class ccLineation : public ccPointPair
+//Qt
+#include <QEvent>
+#include <QKeyEvent>
+#include <QApplication>
+#include <qmenu.h>
+#include <qaction.h>
+
+//system
+#include <assert.h>
+
+ccMapDlg::ccMapDlg(QWidget* parent/*=0*/)
+	: ccOverlayDialog(parent)
+	, Ui::mapDlg()
 {
-public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	setupUi(this);
 
-	//write metadata specific to this object
-	void updateMetadata() override;
-
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
-};
-#endif
+	//set background color
+	QPalette p;
+	p.setColor(backgroundRole(), QColor(240, 240, 240, 200));
+	setPalette(p);
+	setAutoFillBackground(true);
+}

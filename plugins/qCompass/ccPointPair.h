@@ -15,27 +15,48 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_POINTPAIR_HEADER
+#define CC_POINTPAIR_HEADER
 
-#include "ccPointPair.h"
-
+#include <ccPolyline.h>
+#include <ccSphere.h>
+#include <ccCylinder.h>
+#include <ccCone.h>
+#include <GenericIndexedCloudPersist.h>
 #include <ccPointCloud.h>
 
+
+#include "ccMeasurement.h"
+
 /*
-Class for representing/drawing lineations measured with qCompass.
+Template class, based around ccPolyline, that measurements comprising individual or pairs of points can derive from.
 */
-class ccLineation : public ccPointPair
+class ccPointPair : 
+	public ccPolyline, 
+	public ccMeasurement
 {
 public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	ccPointPair(ccPointCloud* associatedCloud);
+	ccPointPair(ccPolyline* obj); //used to construct from a polyline with the correct data
 
-	//write metadata specific to this object
-	void updateMetadata() override;
+	virtual ~ccPointPair() {}
 
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
+	virtual void updateMetadata() { };
+
+	//get the direction of this pair (not normalized) 
+	CCVector3 getDirection();
+
+protected:
+	//size that the point-markers are drawn
+	float m_relMarkerScale = 5.0f;
+
+	//overidden from ccHObject
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+
+//static functions
+public:
+	//returns true if object is/was a ccPointPair (as defined by its MetaData)
+	static bool isPointPair(ccHObject* object);
 };
+
 #endif

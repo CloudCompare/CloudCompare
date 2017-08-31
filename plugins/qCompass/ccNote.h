@@ -15,27 +15,27 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_NOTE_HEADER
+#define CC_NOTE_HEADER
 
 #include "ccPointPair.h"
 
 #include <ccPointCloud.h>
 
 /*
-Class for representing/drawing lineations measured with qCompass.
+Simple class used to represent notes created with qCompass
 */
-class ccLineation : public ccPointPair
+class ccNote : public ccPointPair
 {
 public:
 	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	ccNote(ccPointCloud* associatedCloud);
+	ccNote(ccPolyline* obj);
 
 	//write metadata specific to this object
 	void updateMetadata() override;
 
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
+	static bool isNote(ccHObject* obj);
 };
+
 #endif

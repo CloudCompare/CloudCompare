@@ -23,6 +23,7 @@
 
 //qCC_db
 #include <ccColorScale.h>
+#include <ccPlane.h>
 
 // Qt
 #include <QDialog>

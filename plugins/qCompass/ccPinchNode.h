@@ -15,27 +15,28 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_NODE_HEADER
+#define CC_NODE_HEADER
 
 #include "ccPointPair.h"
 
 #include <ccPointCloud.h>
 
 /*
-Class for representing/drawing lineations measured with qCompass.
+Simple class used to create/represent/draw pinch-nodes created using qCompass
 */
-class ccLineation : public ccPointPair
+class ccPinchNode : public ccPointPair
 {
 public:
 	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	ccPinchNode(ccPointCloud* associatedCloud);
+	ccPinchNode(ccPolyline* obj);
 
 	//write metadata specific to this object
 	void updateMetadata() override;
 
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
+	//returns true if obj is/was a pinchNode (as recorded by its metadata)
+	static bool isPinchNode(ccHObject* obj);
 };
+
 #endif

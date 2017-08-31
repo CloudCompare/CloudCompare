@@ -15,27 +15,36 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_FITPLANETOOL_HEADER
+#define CC_FITPLANETOOL_HEADER
 
-#include "ccPointPair.h"
+#include <DgmOctreeReferenceCloud.h>
 
-#include <ccPointCloud.h>
+#include "ccTool.h"
+#include "ccMouseCircle.h"
+#include "ccFitPlane.h"
 
 /*
-Class for representing/drawing lineations measured with qCompass.
+Tool that is activated during "Plane Mode", generating fit planes from point-picks
 */
-class ccLineation : public ccPointPair
+class ccFitPlaneTool :
+	public ccTool
 {
 public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	ccFitPlaneTool();
+	~ccFitPlaneTool();
 
-	//write metadata specific to this object
-	void updateMetadata() override;
+	//called when the tool is set to active (for initialization)
+	void toolActivated() override;
 
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
+	//called when the tool is set to disactive (for cleanup)
+	void toolDisactivated() override;
+
+	//called when a point in a point cloud gets picked while this tool is active
+	void pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCloud* cloud, const CCVector3& P) override;
+
+	//mouse circle element used for the selection
+	ccMouseCircle* m_mouseCircle = nullptr;
 };
+
 #endif

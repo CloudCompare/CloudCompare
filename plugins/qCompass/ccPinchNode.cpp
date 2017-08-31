@@ -15,27 +15,41 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#include "ccPinchNode.h"
 
-#include "ccPointPair.h"
-
-#include <ccPointCloud.h>
-
-/*
-Class for representing/drawing lineations measured with qCompass.
-*/
-class ccLineation : public ccPointPair
+//pass ctors straight to PointPair
+ccPinchNode::ccPinchNode(ccPointCloud* associatedCloud)
+	: ccPointPair(associatedCloud)
 {
-public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	updateMetadata();
+}
 
-	//write metadata specific to this object
-	void updateMetadata() override;
+ccPinchNode::ccPinchNode(ccPolyline* obj)
+	: ccPointPair(obj)
+{ 
+	updateMetadata();
+}
 
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
-};
-#endif
+void ccPinchNode::updateMetadata()
+{
+	//add metadata tag defining the ccCompass class type
+	QVariantMap* map = new QVariantMap();
+	map->insert("ccCompassType", "PinchNode");
+	setMetaData(*map, true);
+
+	//set drawing stuff (not really metadata, but hey!)
+	setDefaultColor(ccColor::blue);
+	setActiveColor(ccColor::orange);
+	setHighlightColor(ccColor::orange);
+	setAlternateColor(ccColor::orange);
+}
+
+//returns true if object is a lineation
+bool ccPinchNode::isPinchNode(ccHObject* object)
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("PinchNode");
+	}
+	return false;
+}

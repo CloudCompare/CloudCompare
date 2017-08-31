@@ -15,27 +15,44 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LINEATION_HEADER
-#define CC_LINEATION_HEADER
+#ifndef CC_TOPOLOGYTOOL_HEADER
+#define CC_TOPOLOGYTOOL_HEADER
 
-#include "ccPointPair.h"
+#include "ccTool.h"
+#include "ccGeoObject.h"
+#include "ccTopologyRelation.h"
 
-#include <ccPointCloud.h>
+#include <ccColorTypes.h>
+#include <DistanceComputationTools.h>
 
 /*
-Class for representing/drawing lineations measured with qCompass.
+Tool used to assign topology (timing) relationships between different GeoObjects.
 */
-class ccLineation : public ccPointPair
+class ccTopologyTool :
+	public ccTool
 {
 public:
-	//ctors
-	ccLineation(ccPointCloud* associatedCloud);
-	ccLineation(ccPolyline* obj);
+	ccTopologyTool();
+	~ccTopologyTool();
 
-	//write metadata specific to this object
-	void updateMetadata() override;
+	//called when the tool is set to active (for initialization)
+	virtual void toolActivated() override;
 
-	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
-	static bool isLineation(ccHObject* obj);
+	//called when the tool is set to disactive (for cleanup)
+	virtual void toolDisactivated() override;
+
+	//called when the selection is changed while this tool is active
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
+
+	//called when "Return" or "Space" is pressed, or the "Accept Button" is clicked
+	void accept() override; //do nothing
+
+	//called when the "Escape" is pressed, or the "Cancel" button is clicked
+	void cancel() override; //do nothing
+protected:
+	int m_firstPick = -1; //first object of a (pairwise) topology relationship
+public:
+	static int RELATIONSHIP; //used to define the topology relationship being assigned (possible values are in ccTopologyRelation)
 };
+
 #endif

@@ -778,7 +778,7 @@ void ccCompass::setLineation()
 	onNewSelection(m_app->getSelectedEntities());
 
 	//update GUI
-	m_dlg->undoButton->setEnabled(m_lineationTool->canUndo());
+	m_dlg->undoButton->setEnabled(false);
 	m_dlg->pairModeButton->setChecked(true);
 	m_app->getActiveGLWindow()->redraw(true, false);
 }
@@ -1447,6 +1447,7 @@ void ccCompass::onSave()
 	int planes = 0; //keep track of how many objects are being written (used to delete empty files)
 	int traces = 0;
 	int lineations = 0;
+	int thicknesses = 0;
 
 	//build filenames
 	QFileInfo fi(filename);
@@ -1459,24 +1460,28 @@ void ccCompass::onSave()
 	QString plane_fn = baseName + "_planes" + ext;
 	QString trace_fn = baseName + "_traces" + ext;
 	QString lineation_fn = baseName + "_lineations" + ext;
+	QString thickness_fn = baseName + "_thickness" + ext;
 
 	//create files
 	QFile plane_file(plane_fn);
 	QFile trace_file(trace_fn);
 	QFile lineation_file(lineation_fn);
-
+	QFile thickness_file(thickness_fn);
+	
 	//open files
-	if (plane_file.open(QIODevice::WriteOnly) && trace_file.open(QIODevice::WriteOnly) && lineation_file.open(QIODevice::WriteOnly))
+	if (plane_file.open(QIODevice::WriteOnly) && trace_file.open(QIODevice::WriteOnly) && lineation_file.open(QIODevice::WriteOnly) && thickness_file.open(QIODevice::WriteOnly))
 	{
 		//create text streams for each file
 		QTextStream plane_stream(&plane_file);
 		QTextStream trace_stream(&trace_file);
 		QTextStream lineation_stream(&lineation_file);
+		QTextStream thickness_stream(&thickness_file);
 
 		//write headers
 		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS" << endl;
 		trace_stream << "Name,Trace_id,Point_id,Start_x,Start_y,Start_z,End_x,End_y,End_z,Cost,Cost_Mode" << endl;
 		lineation_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Length" << endl;
+		thickness_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Thickness" << endl;
 
 		//write data for all objects in the db tree (n.b. we loop through the dbRoots children rathern than just passing db_root so the naming is correct)
 		for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
@@ -1484,7 +1489,8 @@ void ccCompass::onSave()
 			ccHObject* o = m_app->dbRootObject()->getChild(i);
 			planes += writePlanes(o, &plane_stream);
 			traces += writeTraces(o, &trace_stream);
-			lineations += writeLineations(o, &lineation_stream);
+			lineations += writeLineations(o, &lineation_stream, QString(), false);
+			thicknesses += writeLineations(o, &thickness_stream, QString(), true);
 		}
 
 		//cleanup
@@ -1494,6 +1500,8 @@ void ccCompass::onSave()
 		trace_file.close();
 		lineation_stream.flush();
 		lineation_file.close();
+		thickness_stream.flush();
+		thickness_file.close();
 
 		//ensure data has been written (and if not, delete the file)
 		if (planes)
@@ -1522,6 +1530,15 @@ void ccCompass::onSave()
 		{
 			m_app->dispToConsole("[ccCompass] No lineation data found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 			lineation_file.remove();
+		}
+		if (thicknesses)
+		{
+			m_app->dispToConsole("[ccCompass] Successfully exported thickness data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		}
+		else
+		{
+			m_app->dispToConsole("[ccCompass] No thickness data found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			thickness_file.remove();
 		}
 	}
 	else
@@ -1659,7 +1676,7 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 }
 
 //write lineation data
-int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString parentName)
+int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString parentName, bool thicknesses)
 {
 	//get object name
 	QString name;
@@ -1674,7 +1691,8 @@ int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString pare
 
 	//is object a lineation made by ccCompass?
 	int n = 0;
-	if (ccLineation::isLineation(object))
+	if (((thicknesses==false) && ccLineation::isLineation(object)) | //lineation measurement
+		((thicknesses==true) && ccThickness::isThickness(object)))    //or thickness measurement
 	{
 		//Write object as Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge
 		*out << name << ",";
@@ -1688,7 +1706,7 @@ int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString pare
 	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
 		ccHObject* o = object->getChild(i);
-		n += writeLineations(o, out, name);
+		n += writeLineations(o, out, name, thicknesses);
 	}
 	return n;
 }

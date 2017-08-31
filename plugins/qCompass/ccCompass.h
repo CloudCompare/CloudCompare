@@ -212,7 +212,7 @@ protected:
 	//used while exporting data
 	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());
 	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = QString());
-	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString());
+	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString(), bool thickness=false); //if thickness is true this will write "thickness lineations" rather than orientation lineations
 	int writeTracesSVG(ccHObject* object, QTextStream* out, int height);
 	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)
 	bool madeByMe(ccHObject* object);

@@ -117,9 +117,9 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_pinchTool = new QAction("Add pinch nodes", this);
 	m_measure_thickness = new QAction("Measure One-Point Thickness", this);
 	m_measure_thickness_twoPoint = new QAction("Measure Two-Point Thickness");
-	m_youngerThan = new QAction("Assign \"Younger-Than\" Relationship", this);
-	m_follows = new QAction("Assign \"Follows\" Relationship", this);
-	m_equivalent = new QAction("Assign \"Equivalent\" Relationship", this);
+	m_youngerThan = new QAction("Assign \"Younger-Than\" Relationship", this); m_youngerThan->setEnabled(false); //todo
+	m_follows = new QAction("Assign \"Follows\" Relationship", this); m_follows->setEnabled(false);
+	m_equivalent = new QAction("Assign \"Equivalent\" Relationship", this); m_equivalent->setEnabled(false);
 	m_fitPlaneToGeoObject = new QAction("Fit plane to GeoObject", this);
 	m_mergeSelected = new QAction("Merge selected GeoObjects", this);
 

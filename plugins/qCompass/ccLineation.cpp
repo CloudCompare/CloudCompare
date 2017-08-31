@@ -38,58 +38,61 @@ void ccLineation::updateMetadata()
 	map->insert("ccCompassType", "Lineation");
 
 	//calculate trace orientation (trend/plunge)
-	CCVector3f dir = getDirection(); dir.normalize();
-	float trend, plunge;
-	
-	if (dir.x + dir.y + dir.z == 0) //special case: null direction
+	if (size() == 2) //can't calculate orientation of something smaller than this...
 	{
-		trend = 0;
-		plunge = 0;
-	} 
-	else if (dir.z > 0.9999999 || dir.z < -0.9999999) //special case: dir is vertical (= 0,0,1 or 0,0,-1)
-	{
-		trend = 0;
-		if (dir.z < 0)
-			plunge = 90;
-		else
-			plunge = -90;
+		CCVector3f dir = getDirection(); dir.normalize();
+		float trend, plunge;
+
+		if (dir.x + dir.y + dir.z == 0) //special case: null direction
+		{
+			trend = 0;
+			plunge = 0;
+		}
+		else if (dir.z > 0.9999999 || dir.z < -0.9999999) //special case: dir is vertical (= 0,0,1 or 0,0,-1)
+		{
+			trend = 0;
+			if (dir.z < 0)
+				plunge = 90;
+			else
+				plunge = -90;
+		}
+		else //normal cases...
+		{
+			CCVector3f hzComp = CCVector3f(dir.x, dir.y, 0); hzComp.normalize();
+
+			//calculate plunge: plunge = angle between vector & vector projected onto horizontal (x,y) plane
+			plunge = std::acos(dir.dot(hzComp)) * (180 / M_PI); //plunge measured from horizontal (in degrees)
+			if (dir.z > 0) //lineations pointing towards the sky have negative plunges
+				plunge *= -1;
+
+			//calculate trend (N.B. I have very little idea how exactly this code work, it's kinda magic)
+			//[c.f. http://stackoverflow.com/questions/14066933/direct-way-of-computing-clockwise-angle-between-2-vectors ]
+			CCVector3f N(0, 1, 0); //north vector
+			float dot = hzComp.dot(N);
+			float det = CCVector3f(0, 0, 1).dot(hzComp.cross(N));
+			trend = std::atan2(det, dot) * (180 / M_PI); //heading measured clockwise from north (in degrees)
+			if (trend < 0)
+				trend += 360;
+		}
+
+		//store trend and plunge info
+		CCVector3 s = *getPoint(0); //start point
+		CCVector3 e = *getPoint(1); //end point
+		float length = (s - e).norm();
+
+		map->insert("Sx", s.x); map->insert("Sy", s.y); map->insert("Sz", s.z);
+		map->insert("Ex", e.x); map->insert("Ey", e.y); map->insert("Ez", e.z);
+		map->insert("Trend", trend); map->insert("Plunge", plunge); map->insert("Length", length);
+
+		//store metadata
+		setMetaData(*map, true);
+
+		//update name
+		QString lengthstr = QString("").asprintf("%.1f on ", length);
+		QString trendAndPlungeStr = QString("%2->%3").arg((int)plunge, 2, 10, QChar('0')).arg((int)trend, 3, 10, QChar('0'));
+		QString namestr = lengthstr + trendAndPlungeStr;
+		setName(namestr);
 	}
-	else //normal cases...
-	{
-		CCVector3f hzComp = CCVector3f(dir.x, dir.y, 0); hzComp.normalize();
-
-		//calculate plunge: plunge = angle between vector & vector projected onto horizontal (x,y) plane
-		plunge = std::acos(dir.dot(hzComp)) * (180 / M_PI); //plunge measured from horizontal (in degrees)
-		if (dir.z > 0) //lineations pointing towards the sky have negative plunges
-			plunge *= -1;
-
-		//calculate trend (N.B. I have very little idea how exactly this code work, it's kinda magic)
-		//[c.f. http://stackoverflow.com/questions/14066933/direct-way-of-computing-clockwise-angle-between-2-vectors ]
-		CCVector3f N(0, 1, 0); //north vector
-		float dot = hzComp.dot(N);
-		float det = CCVector3f(0, 0, 1).dot(hzComp.cross(N));
-		trend = std::atan2(det, dot) * (180 / M_PI); //heading measured clockwise from north (in degrees)
-		if (trend < 0)
-			trend += 360;
-	}
-
-	//store trend and plunge info
-	CCVector3 s = *getPoint(0); //start point
-	CCVector3 e = *getPoint(1); //end point
-	float length = (s - e).norm();
-
-	map->insert("Sx", s.x); map->insert("Sy", s.y); map->insert("Sz", s.z);
-	map->insert("Ex", e.x); map->insert("Ey", e.y); map->insert("Ez", e.z);
-	map->insert("Trend", trend); map->insert("Plunge", plunge); map->insert("Length", length);
-	
-	//store metadata
-	setMetaData(*map, true);
-
-	//update name
-	QString lengthstr = QString("").asprintf("%.1f on ", length);
-	QString trendAndPlungeStr = QString("%2->%3").arg((int)plunge, 2, 10, QChar('0')).arg((int)trend, 3, 10, QChar('0'));
-	QString namestr = lengthstr + trendAndPlungeStr;
-	setName(namestr);
 }
 
 

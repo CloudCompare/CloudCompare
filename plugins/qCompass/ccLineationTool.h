@@ -18,7 +18,7 @@
 #ifndef CC_LINEATIONTOOL_HEADER
 #define CC_LINEATIONTOOL_HEADER
 
-#include "cctool.h"
+#include "ccTool.h"
 #include "ccLineation.h"
 
 /*

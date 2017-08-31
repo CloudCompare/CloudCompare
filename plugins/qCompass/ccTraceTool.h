@@ -18,7 +18,7 @@
 #ifndef CC_TRACETOOL_HEADER
 #define CC_TRACETOOL_HEADER
 
-#include "cctool.h"
+#include "ccTool.h"
 #include "ccTrace.h"
 
 /*

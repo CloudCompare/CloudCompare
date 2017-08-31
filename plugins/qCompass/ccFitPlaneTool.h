@@ -20,7 +20,7 @@
 
 #include <DgmOctreeReferenceCloud.h>
 
-#include "cctool.h"
+#include "ccTool.h"
 #include "ccMouseCircle.h"
 #include "ccFitPlane.h"
 

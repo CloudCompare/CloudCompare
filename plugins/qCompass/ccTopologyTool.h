@@ -18,7 +18,7 @@
 #ifndef CC_TOPOLOGYTOOL_HEADER
 #define CC_TOPOLOGYTOOL_HEADER
 
-#include "cctool.h"
+#include "ccTool.h"
 #include "ccGeoObject.h"
 #include "ccTopologyRelation.h"
 

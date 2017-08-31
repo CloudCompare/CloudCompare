@@ -18,7 +18,7 @@
 #ifndef CC_NODETOOL_HEADER
 #define CC_NODETOOL_HEADER
 
-#include "cctool.h"
+#include "ccTool.h"
 #include "ccGeoObject.h"
 #include "ccPinchNode.h"
 

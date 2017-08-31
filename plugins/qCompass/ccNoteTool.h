@@ -18,7 +18,7 @@
 #ifndef CC_NOTETOOL_HEADER
 #define CC_NOTETOOL_HEADER
 
-#include "cctool.h"
+#include "ccTool.h"
 #include "ccNote.h"
 
 #include <qinputdialog.h>

@@ -20,14 +20,10 @@
 
 //Local
 #include "ccGLDrawContext.h"
-#include "qCC_db.h"
-#include "ccColorTypes.h"
 
 //CCLib
 #include <CCGeom.h>
 
-//system
-#include <vector>
 
 class ccGenericGLDisplay;
 
@@ -198,7 +194,7 @@ public: //Transformation matrix management (for display only)
 	//! Enables/disables associated GL transformation
 	/** See ccDrawableObject::setGLTransformation.
 	**/
-	inline virtual void enableGLTransformation(bool state);
+	virtual void enableGLTransformation(bool state);
 
 	//! Returns whether a GL transformation is enabled or not
 	inline virtual bool isGLTransEnabled() const { return m_glTransEnabled; }

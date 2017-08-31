@@ -61,6 +61,7 @@ public:
 		\param maxError maximum error allowed by 'propagated' facet
 		\param errorMeasure error measure
 		\param useRetroProjectionError whether to use retro-projection error in propagation
+		\param progressCb progeress callback
 		\return a negative value if something went wrong
 	**/
 	int init(	ccGenericPointCloud* cloud,

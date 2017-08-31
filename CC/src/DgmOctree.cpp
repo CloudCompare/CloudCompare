@@ -21,16 +21,12 @@
 //local
 #include "ReferenceCloud.h"
 #include "GenericProgressCallback.h"
-#include "GenericIndexedCloudPersist.h"
 #include "CCMiscTools.h"
 #include "ScalarField.h"
 #include "RayAndBox.h"
 #include "SortAlgo.h"
 
 //system
-#include <algorithm>
-#include <string.h>
-#include <assert.h>
 #include <stdio.h>
 #include <set>
 
@@ -3282,12 +3278,10 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 			{
 				s_progressCb_MT->setInfo("Cancelling...");
 			}
-			QApplication::processEvents();
 		}
 
 		//if (s_normProgressCb_MT)
 		//{
-		//	//QApplication::processEvents(); //let the application breath!
 		//	if (!s_normProgressCb_MT->oneStep())
 		//	{
 		//		s_cellFunc_MT_success = false;

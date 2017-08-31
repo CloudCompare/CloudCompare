@@ -106,14 +106,14 @@ CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	FileIOFilter::Shared filter = FileIOFilter::FindBestFilterForExtension(subFileType);
 	if (!filter)
 	{
-		ccLog::Warning(QString("[ICM] No I/O filter found for loading file '%1' (type = '%2')").arg(cloudFileName).arg(subFileType));
+		ccLog::Warning(QString("[ICM] No I/O filter found for loading file '%1' (type = '%2')").arg(cloudFileName,subFileType));
 		fclose(fp);
 		return CC_FERR_UNKNOWN_FILE;
 	}
 
 	//load the corresponding file (potentially containing several clouds)
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(cloudFileName), parameters, filter, result);
+	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%1/%2").arg(path,cloudFileName), parameters, filter, result);
 	if (!entities)
 	{
 		fclose(fp);
@@ -152,11 +152,11 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 	assert(entities);
 
 	//ouverture du fichier
-	QString completeImageDescFilename = QString("%0/%1").arg(path).arg(imageDescFilename);
+	QString completeImageDescFilename = QString("%1/%2").arg(path,imageDescFilename);
 
 	if (CheckForSpecialChars(completeImageDescFilename))
 	{
-		ccLog::Warning(QString("[FBX] File '%1' contains special characters. It might be rejected by the I/O filter...").arg(completeImageDescFilename));
+		ccLog::Warning(QString("[ICM] File '%1' contains special characters. It might be rejected by the I/O filter...").arg(completeImageDescFilename));
 	}
 
 	FILE* fp = fopen(qPrintable(completeImageDescFilename), "rt");
@@ -184,9 +184,9 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			//add absolute path
 			ccImage* CI = new ccImage();
 			QString errorStr;
-			if (!CI->load(QString("%0/%1").arg(path).arg(imageFileName),errorStr))
+			if (!CI->load(QString("%1/%2").arg(path,imageFileName),errorStr))
 			{
-				ccLog::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped...").arg(imageFileName).arg(errorStr));
+				ccLog::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped...").arg(imageFileName,errorStr));
 				delete CI;
 				fclose(fp);
 				return loadedImages;

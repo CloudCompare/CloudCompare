@@ -21,15 +21,10 @@
 //Always first
 #include "ccIncludeGL.h"
 
-//Local
-#include "ccSerializableObject.h"
-#include "ccGLMatrix.h"
-#include "ccMaterial.h"
-
-//Qt
 #include <QFont>
 
-
+//Qt
+class QFile;
 class QWidget;
 
 //! Standard parameters for GL displays/viewports
@@ -123,8 +118,8 @@ struct ccGLCameraParameters
 {
 	ccGLCameraParameters()
 		: perspective(false)
-		, fov_deg(0)
-		, pixelSize(0)
+		, fov_deg(0.0f)
+		, pixelSize(0.0f)
 	{
 	   memset(viewport, 0, 4 * sizeof(int));
 	}
@@ -221,9 +216,9 @@ public:
 								int x,
 								int y,
 								unsigned char align = ALIGN_DEFAULT,
-								float bkgAlpha = 0,
-								const unsigned char* rgbColor = 0,
-								const QFont* font = 0) = 0;
+								float bkgAlpha = 0.0f,
+								const unsigned char* rgbColor = nullptr,
+								const QFont* font = nullptr) = 0;
 
 	//! Displays a string at a given 3D position
 	/** This method should be called solely during 3D pass rendering (see paintGL).
@@ -234,7 +229,7 @@ public:
 	**/
 	virtual void display3DLabel(const QString& str,
 								const CCVector3& pos3D,
-								const unsigned char* rgbColor = 0,
+								const unsigned char* rgbColor = nullptr,
 								const QFont& font=QFont()) = 0;
 
 	//! Returns the current OpenGL camera parameters
@@ -262,7 +257,7 @@ public:
 											bool bubbleViewMode = false) = 0;
 
 	//! Returns this window as a proper Qt widget
-	virtual QWidget* asWidget() { return 0; }
+	virtual QWidget* asWidget() { return nullptr; }
 };
 
 #endif //CC_GENERIC_GL_DISPLAY

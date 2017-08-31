@@ -36,7 +36,7 @@ ccRecentFiles::ccRecentFiles( QWidget *parent ) :
 	
 	m_actionClearMenu = new QAction( tr("Clear Menu"), this );
 	
-	connect( m_actionClearMenu, &QAction::triggered, [this]() {
+	connect( m_actionClearMenu, &QAction::triggered, this, [this]() {
 		m_settings.remove( s_settingKey );
 		
 		updateMenu();		
@@ -72,7 +72,9 @@ void ccRecentFiles::updateMenu()
 {
 	m_menu->clear();
 	
-	for ( const QString &recentFile : listRecent() )
+	const QStringList	recentList = listRecent();
+	
+	for ( const QString &recentFile : recentList )
 	{
 		QAction  *recentAction = new QAction( contractFilePath( recentFile ), this );
 		

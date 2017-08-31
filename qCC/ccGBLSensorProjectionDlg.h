@@ -25,6 +25,8 @@ class ccGBLSensor;
 //! Ground-based (lidar) sensor parameters dialog
 class ccGBLSensorProjectionDlg : public QDialog, public Ui::GBLSensorProjectDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

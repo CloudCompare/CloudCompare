@@ -382,7 +382,7 @@ qint64 QuaZipFile::pos()const
       // QIODevice::pos() is broken for sequential devices,
       // but thankfully bytesAvailable() returns the number of
       // bytes buffered, so we know how far ahead we are.
-    return unztell(p->zip->getUnzFile()) - QIODevice::bytesAvailable();
+    return unztell64(p->zip->getUnzFile()) - QIODevice::bytesAvailable();
   else
     return p->writePos;
 }

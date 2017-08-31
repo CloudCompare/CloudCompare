@@ -33,6 +33,8 @@
 #include "ccFacet.h"
 #include "ccGenericPrimitive.h"
 #include "ccOctreeProxy.h"
+#include "ccPointCloud.h"
+#include "ccPolyline.h"
 #include "ccPointCloudInterpolator.h"
 
 //qCC_gl
@@ -104,7 +106,7 @@ namespace ccEntityAction
 			if (ent->isA(CC_TYPES::HIERARCHY_OBJECT))
 			{
 				//automatically parse a group's children set
-				for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
+				for (unsigned i = 0; i < ent->getChildrenNumber(); ++i)
 					selectedEntities.push_back(ent->getChild(i));
 			}
 			else if (ent->isA(CC_TYPES::POINT_CLOUD) || ent->isA(CC_TYPES::MESH))
@@ -137,9 +139,7 @@ namespace ccEntityAction
 				}
 				else
 				{
-					cloud->setRGBColor(	static_cast<ColorCompType>(colour.red()),
-										static_cast<ColorCompType>(colour.green()),
-										static_cast<ColorCompType>(colour.blue()) );
+					cloud->setRGBColor(	ccColor::FromQColor(colour) );
 				}
 				cloud->showColors(true);
 				cloud->showSF(false); //just in case
@@ -160,8 +160,8 @@ namespace ccEntityAction
 			{
 				ccGenericPrimitive* prim = ccHObjectCaster::ToPrimitive(ent);
 				ccColor::Rgb col(	static_cast<ColorCompType>(colour.red()),
-										static_cast<ColorCompType>(colour.green()),
-										static_cast<ColorCompType>(colour.blue()) );
+									static_cast<ColorCompType>(colour.green()),
+									static_cast<ColorCompType>(colour.blue()) );
 				prim->setColor(col);
 				ent->showColors(true);
 				ent->showSF(false); //just in case
@@ -170,10 +170,7 @@ namespace ccEntityAction
 			else if (ent->isA(CC_TYPES::POLY_LINE))
 			{
 				ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
-				ccColor::Rgb col(	static_cast<ColorCompType>(colour.red()),
-									static_cast<ColorCompType>(colour.green()),
-									static_cast<ColorCompType>(colour.blue()) );
-				poly->setColor(col);
+				poly->setColor(ccColor::FromQColor(colour));
 				ent->showColors(true);
 				ent->showSF(false); //just in case
 				ent->prepareDisplayForRefresh();
@@ -181,10 +178,7 @@ namespace ccEntityAction
 			else if (ent->isA(CC_TYPES::FACET))
 			{
 				ccFacet* facet = ccHObjectCaster::ToFacet(ent);
-				ccColor::Rgb col(	static_cast<ColorCompType>(colour.red()),
-									static_cast<ColorCompType>(colour.green()),
-									static_cast<ColorCompType>(colour.blue()) );
-				facet->setColor(col);
+				facet->setColor(ccColor::FromQColor(colour));
 				ent->showColors(true);
 				ent->showSF(false); //just in case
 				ent->prepareDisplayForRefresh();
@@ -1270,7 +1264,7 @@ namespace ccEntityAction
 			{
 				if (sf && !sf->reserve(count))
 				{
-					ccLog::Warning(QString("[sfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(sf->getName()).arg(cloud->getName()));
+					ccLog::Warning(QString("[sfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(sf->getName(), cloud->getName()));
 					sf->release();
 					sf = nullptr;
 				}
@@ -1325,14 +1319,14 @@ namespace ccEntityAction
 				}
 				else
 				{
-					ccConsole::Warning(QString("[sfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(sf->getName()).arg(cloud->getName()));
+					ccConsole::Warning(QString("[sfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(sf->getName(), cloud->getName()));
 					sf->release();
 					sf = nullptr;
 				}
 			}
 			
 			if (!fieldsStr.isEmpty())
-				ccLog::Print(QString("[sfFromColor] New scalar fields (%1) added to '%2'").arg(fieldsStr).arg(cloud->getName()));
+				ccLog::Print(QString("[sfFromColor] New scalar fields (%1) added to '%2'").arg(fieldsStr, cloud->getName()));
 		}
 
 		return true;
@@ -1453,14 +1447,14 @@ namespace ccEntityAction
 			static CC_LOCAL_MODEL_TYPES s_lastModelType = LS;
 			static ccNormalVectors::Orientation s_lastNormalOrientation = ccNormalVectors::UNDEFINED;
 			static int s_lastMSTNeighborCount = 6;
-			static int s_lastKernelSize = 2;
+			static double s_lastMinGridAngle_deg = 1.0;
 			
 			ccNormalComputationDlg ncDlg(selectionMode, parent);
 			ncDlg.setLocalModel(s_lastModelType);
 			ncDlg.setRadius(defaultRadius);
 			ncDlg.setPreferredOrientation(s_lastNormalOrientation);
 			ncDlg.setMSTNeighborCount(s_lastMSTNeighborCount);
-			ncDlg.setGridKernelSize(s_lastKernelSize);
+			ncDlg.setMinGridAngle_deg(s_lastMinGridAngle_deg);
 			if (clouds.size() == 1)
 			{
 				ncDlg.setCloud(clouds.front());
@@ -1473,7 +1467,7 @@ namespace ccEntityAction
 			CC_LOCAL_MODEL_TYPES model = s_lastModelType = ncDlg.getLocalModel();
 			bool useGridStructure = cloudsWithScanGrids && ncDlg.useScanGridsForComputation();
 			defaultRadius = ncDlg.getRadius();
-			int kernelSize = s_lastKernelSize = ncDlg.getGridKernelSize();
+			double minGridAngle_deg = s_lastMinGridAngle_deg = ncDlg.getMinGridAngle_deg();
 			
 			//normals orientation
 			bool orientNormals = ncDlg.orientNormals();
@@ -1486,13 +1480,13 @@ namespace ccEntityAction
 			pDlg.setAutoClose(false);
 
 			size_t errors = 0;
-			for (size_t i=0; i<clouds.size(); i++)
+			for (size_t i = 0; i < clouds.size(); i++)
 			{
 				ccPointCloud* cloud = clouds[i];
 				Q_ASSERT(cloud != nullptr);
 				
 				bool result = false;
-				bool orientNormalsForThisCloud = false;
+				bool normalsAlreadyOriented = false;
 				if (useGridStructure && cloud->gridCount())
 				{
 #if 0
@@ -1509,9 +1503,9 @@ namespace ccEntityAction
 						ccGLMatrixd toSensor = scanGrid->sensorPosition.inverse();
 						
 						const int* _indexGrid = &(scanGrid->indexes[0]);
-						for (int j=0; j<static_cast<int>(scanGrid->h); ++j)
+						for (int j = 0; j < static_cast<int>(scanGrid->h); ++j)
 						{
-							for (int i=0; i<static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
+							for (int i = 0; i < static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
 							{
 								if (*_indexGrid >= 0)
 								{
@@ -1528,18 +1522,18 @@ namespace ccEntityAction
 #endif
 					
 					//compute normals with the associated scan grid(s)
-					orientNormalsForThisCloud = orientNormals && orientNormalsWithGrids;
-					result = cloud->computeNormalsWithGrids(model, kernelSize, orientNormalsForThisCloud, &pDlg);
+					normalsAlreadyOriented = true;
+					result = cloud->computeNormalsWithGrids(minGridAngle_deg, &pDlg);
 				}
 				else
 				{
 					//compute normals with the octree
-					orientNormalsForThisCloud = orientNormals && (preferredOrientation != ccNormalVectors::UNDEFINED);
+					normalsAlreadyOriented = orientNormals && (preferredOrientation != ccNormalVectors::UNDEFINED);
 					result = cloud->computeNormalsWithOctree(model, orientNormals ? preferredOrientation : ccNormalVectors::UNDEFINED, defaultRadius, &pDlg);
 				}
 				
 				//do we need to orient the normals? (this may have been already done if 'orientNormalsForThisCloud' is true)
-				if (result && orientNormals && !orientNormalsForThisCloud)
+				if (result && orientNormals && !normalsAlreadyOriented)
 				{
 					if (cloud->gridCount() && orientNormalsWithGrids)
 					{
@@ -1893,7 +1887,13 @@ namespace ccEntityAction
 			//specific test for locked vertices
 			bool lockedVertices = false;
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
-			if (cloud && lockedVertices)
+			
+			if (cloud == nullptr)
+			{
+			   continue;
+			}
+			
+			if (lockedVertices)
 			{
 				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;
@@ -2017,6 +2017,11 @@ namespace ccEntityAction
 			if (property == CLEAR_PROPERTY::NORMALS && ( ent->isA(CC_TYPES::MESH) /*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/ )) //TODO
 			{
 				ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
+				if (!mesh)
+				{
+					assert(false);
+					continue;
+				}
 				if (mesh->hasTriNormals())
 				{
 					mesh->showNormals(false);
@@ -2441,7 +2446,7 @@ namespace ccEntityAction
 			}
 			else
 			{
-				ccConsole::Warning(QString("[Entity: %1]-[SF: %2] Couldn't compute distribution parameters!").arg(pc->getName()).arg(pc->getScalarFieldName(outSfIdx)));
+				ccConsole::Warning(QString("[Entity: %1]-[SF: %2] Couldn't compute distribution parameters!").arg(pc->getName(),pc->getScalarFieldName(outSfIdx)));
 			}
 		}
 		

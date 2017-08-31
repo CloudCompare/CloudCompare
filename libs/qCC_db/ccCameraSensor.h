@@ -455,7 +455,7 @@ public: //misc
 		//TODO withLensCorrection if we want to take the lens distortion into consideration
 		\return if operation has succeeded
 	**/
-	bool isGlobalCoordInFrustum(const CCVector3& globalCoord/*, bool withLensCorrection*/);
+	bool isGlobalCoordInFrustum(const CCVector3& globalCoord/*, bool withLensCorrection*/) const;
 
 	//! Compute the coefficients of the 6 planes frustum in the global coordinates system (normal vector are headed the frustum inside), the edges direction vectors and the frustum center
 	/** \param planeCoefficients coefficients of the six planes
@@ -565,7 +565,7 @@ public:
 		\param center 3D coordinates of the frustum center (global coordinates system) ; this is the center of the circumscribed sphere
 	**/
 	void computeFrustumIntersectionWithOctree(	std::vector< std::pair<unsigned, CCVector3> >& pointsToTest,
-												std::vector<unsigned>& inCameraFrustumrustum,
+												std::vector<unsigned>& inCameraFrustum,
 												const float planesCoefficients[6][4],
 												const CCVector3 ptsFrustum[8],
 												const CCVector3 edges[6],

@@ -20,34 +20,19 @@
 #include "ccviewer.h"
 
 //Qt
-#include <QVBoxLayout>
 #include <QMessageBox>
-#include <QString>
-
-//plugins handling
-#include <QPluginLoader>
-#include <QDir>
-#include <ccGLFilterPluginInterface.h>
-#include <ccIOFilterPluginInterface.h>
 
 //qCC_glWindow
-#include <ccGLWindow.h>
 #include <ccGLWidget.h>
-#include <ccGuiParameters.h>
-
-//qCC_io
-#include <FileIOFilter.h>
 
 //dialogs
-#include <ccDisplayOptionsDlg.h>
 #include <ccCameraParamEditDlg.h>
+#include <ccDisplayOptionsDlg.h>
 #include <ccStereoModeDlg.h>
 
 //qCC_db
-#include <ccHObjectCaster.h>
-#include <ccHObject.h>
-#include <ccPointCloud.h>
 #include <ccGenericMesh.h>
+#include <ccPointCloud.h>
 
 //plugins
 #include <ccPluginInfo.h>
@@ -56,9 +41,6 @@
 #ifdef CC_3DXWARE_SUPPORT
 #include <devices/3dConnexion/Mouse3DInput.h>
 #endif
-
-//system
-#include <assert.h>
 
 //! Current version
 struct VerInfo
@@ -632,7 +614,10 @@ void ccViewer::doActionEditCamera()
 
 void ccViewer::reflectPerspectiveState()
 {
-	bool objectCentered;
+	if ( m_glWindow == nullptr )
+		return;
+	
+	bool objectCentered = false;
 	bool perspectiveEnabled = m_glWindow->getPerspectiveState(objectCentered);
 
 	ui.actionSetOrthoView->setChecked(!perspectiveEnabled);
@@ -694,6 +679,9 @@ void ccViewer::setViewerPerspectiveView()
 
 void ccViewer::reflectPivotVisibilityState()
 {
+	if ( m_glWindow == nullptr )
+		return;
+	
 	ccGLWindow::PivotVisibility vis = m_glWindow->getPivotVisibility();
 
 	ui.actionSetPivotAlwaysOn->setChecked(vis == ccGLWindow::PIVOT_ALWAYS_SHOW);
@@ -733,6 +721,9 @@ void ccViewer::setPivotOff()
 
 void ccViewer::reflectLightsState()
 {
+	if ( m_glWindow == nullptr )
+		return;
+	
 	ui.actionToggleSunLight->blockSignals(true);
 	ui.actionToggleCustomLight->blockSignals(true);
 

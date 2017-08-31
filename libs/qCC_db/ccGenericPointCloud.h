@@ -18,16 +18,17 @@
 #ifndef CC_GENERIC_POINT_CLOUD_HEADER
 #define CC_GENERIC_POINT_CLOUD_HEADER
 
-//CCLib
-#include <GenericProgressCallback.h>
-#include <ReferenceCloud.h>
-
 //Local
-#include "ccGenericGLDisplay.h"
 #include "ccShiftedObject.h"
 #include "ccAdvancedTypes.h"
 #include "ccOctree.h"
 
+namespace CCLib
+{
+	class GenericProgressCallback;
+	class ReferenceCloud;
+}
+	
 class ccOctreeProxy;
 
 /***************************************************

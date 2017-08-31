@@ -18,9 +18,6 @@
 #ifndef CC_BBOX_HEADER
 #define CC_BBOX_HEADER
 
-//CCLib
-#include <SquareMatrix.h>
-
 //Local
 #include "ccDrawableObject.h"
 
@@ -34,8 +31,6 @@ public:
 
 	//! Default constructor
 	ccBBox();
-	//! Copy constructor
-	ccBBox(const ccBBox& aBBox);
 	//! Constructor from two vectors (lower min. and upper max. corners)
 	ccBBox(const CCVector3& bbMinCorner, const CCVector3& bbMaxCorner);
 

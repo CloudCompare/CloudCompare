@@ -1517,7 +1517,7 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 		//not enough memory
 		delete cloud;
 		sf->release();
-		return 0;
+		return nullptr;
 	}
 
 	//number of vertices
@@ -1525,14 +1525,18 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 	unsigned polyVertCount = polyVertices->size();
 	if (polyVertCount < 2)
 	{
-		return 0;
+		delete cloud;
+		sf->release();
+		return nullptr;
 	}
 
 	//profile meta-data
 	ProfileMetaData profileDesc;
 	if (!GetPoylineMetaData(profile, profileDesc))
 	{
-		return 0;
+		delete cloud;
+		sf->release();
+		return nullptr;
 	}
 
 	unsigned char Z = static_cast<unsigned char>(profileDesc.revolDim);

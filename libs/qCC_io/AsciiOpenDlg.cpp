@@ -63,7 +63,7 @@ struct AsciiOpenContext
 	{
 		extractSFNameFrom1stLine = ui->extractSFNamesFrom1stLineCheckBox->isChecked();
 		maxPointCountPerCloud = ui->maxCloudSizeDoubleSpinBox->value();
-		separator = ui->lineEditSeparator->text()[0];
+		separator = ui->lineEditSeparator->text().at( 0 );
 		skipLines = ui->spinBoxSkipLines->value();
 	}
 
@@ -137,11 +137,11 @@ void AsciiOpenDlg::setFilename(QString filename)
 
 void AsciiOpenDlg::autoFindBestSeparator()
 {
-	QList<QChar> separators;
-	separators << QChar(' ');
-	separators << QChar('\t');
-	separators << QChar(',');
-	separators << QChar(';');
+	const QList<QChar> separators{ QChar(' '),
+									QChar('\t'),
+									QChar(','),
+									QChar(';'),
+								 };
 
 	//We try all default separators...
 	size_t maxValidColumnCount = 0;

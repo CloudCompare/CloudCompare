@@ -326,7 +326,7 @@ namespace ccLibAlgorithms
 							{
 								//we set as 'output' SF the currently displayed scalar field
 								pc->setCurrentOutScalarField(outSfIdx);
-								sfName = QString("%1(%2)").arg(CC_GRADIENT_NORMS_FIELD_NAME).arg(pc->getScalarFieldName(outSfIdx));
+								sfName = QString("%1(%2)").arg(CC_GRADIENT_NORMS_FIELD_NAME, pc->getScalarFieldName(outSfIdx));
 							}
 						}
 						else //if (!cloud->hasDisplayedScalarField()) //TODO: displayed but not necessarily set as OUTPUT!

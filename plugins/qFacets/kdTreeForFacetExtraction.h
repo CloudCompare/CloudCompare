@@ -35,6 +35,7 @@ public:
 		\param errorMeasure error measure type
 		\param maxAngle_deg maximum angle between two sets to allow fusion (in degrees)
 		\param overlapCoef maximum relative distance between two sets to accept fusion (1 = no distance, < 1 = overlap, > 1 = gap)
+		\param closestFirst
 		\param progressCb for progress notifications (optional)
 	**/
 	static bool FuseCells(	ccKdTree* kdTree,

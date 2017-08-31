@@ -45,7 +45,7 @@
 #include <assert.h>
 #include <cmath> //for std::modf
 
-static CCVector3 s_blankNorm(0,0,0);
+static CCVector3 s_blankNorm(0, 0, 0);
 
 ccMesh::ccMesh(ccGenericPointCloud* vertices)
 	: ccGenericMesh("Mesh")
@@ -284,7 +284,7 @@ bool ccMesh::computePerTriangleNormals()
 
 	//for each triangle
 	{
-		for (unsigned i=0; i<triCount; ++i)
+		for (unsigned i = 0; i < triCount; ++i)
 		{
 			const unsigned* tri = m_triVertIndexes->getValue(i);
 			const CCVector3* A = m_associatedCloud->getPoint(tri[0]);
@@ -310,8 +310,8 @@ bool ccMesh::computePerTriangleNormals()
 
 		setTriNormsTable(normIndexes);
 
-		for (int i=0; i<static_cast<int>(triCount); ++i)
-			addTriangleNormalIndexes(i,i,i);
+		for (int i = 0; i < static_cast<int>(triCount); ++i)
+			addTriangleNormalIndexes(i, i, i);
 	}
 
 	//apply it also to sub-meshes!
@@ -351,7 +351,7 @@ bool ccMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 
 	//init arrays
 	{
-		for (unsigned i=0; i<nPts; ++i)
+		for (unsigned i = 0; i < nPts; ++i)
 		{
 			meanSF[i] = m_associatedCloud->getPointScalarValue(i);
 			count[i] = 1;
@@ -362,7 +362,7 @@ bool ccMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 	unsigned nTri = size();
 	{
 		placeIteratorAtBegining();
-		for (unsigned i=0; i<nTri; ++i)
+		for (unsigned i = 0; i < nTri; ++i)
 		{
 			const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 
@@ -380,8 +380,8 @@ bool ccMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 
 	//normalize
 	{
-		for (unsigned i=0; i<nPts; ++i)
-			meanSF[i] /= (ScalarType)count[i];
+		for (unsigned i = 0; i < nPts; ++i)
+			meanSF[i] /= count[i];
 	}
 
 	switch (process)
@@ -389,17 +389,17 @@ bool ccMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 	case SMOOTH_MESH_SF:
 		{
 			//Smooth = mean value
-			for (unsigned i=0; i<nPts; ++i)
-				m_associatedCloud->setPointScalarValue(i,meanSF[i]);
+			for (unsigned i = 0; i < nPts; ++i)
+				m_associatedCloud->setPointScalarValue(i, meanSF[i]);
 		}
 		break;
 	case ENHANCE_MESH_SF:
 		{
 			//Enhance = old value + (old value - mean value)
-			for (unsigned i=0; i<nPts; ++i)
+			for (unsigned i = 0; i < nPts; ++i)
 			{
-				ScalarType v = 2.0f*m_associatedCloud->getPointScalarValue(i) - meanSF[i];
-				m_associatedCloud->setPointScalarValue(i,v > 0.0f ? v : 0.0f);
+				ScalarType v = 2 * m_associatedCloud->getPointScalarValue(i) - meanSF[i];
+				m_associatedCloud->setPointScalarValue(i, v > 0 ? v : 0);
 			}
 		}
 		break;
@@ -1021,7 +1021,8 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 				for (; A != hullPoints.end(); ++A)
 				{
 					//current hull segment
-					std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::iterator B = A; B++;
+					std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::iterator B = A;
+					++B;
 					if (B == hullPoints.end())
 					{
 						B = hullPoints.begin();
@@ -3293,19 +3294,14 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 
 				QRgb pixel = texture.pixel(xPix, yPix);
 
-				rgb.r = static_cast<ColorCompType>(qRed(pixel));
-				rgb.g = static_cast<ColorCompType>(qGreen(pixel));
-				rgb.b = static_cast<ColorCompType>(qBlue(pixel));
-
+				rgb = ccColor::FromQRgb(pixel);
 				foundMaterial = true;
 			}
 		}
 		else
 		{
 			const ccColor::Rgbaf& diffuse = material->getDiffuseFront();
-			rgb.r = static_cast<ColorCompType>(diffuse.r * ccColor::MAX);
-			rgb.g = static_cast<ColorCompType>(diffuse.g * ccColor::MAX);
-			rgb.b = static_cast<ColorCompType>(diffuse.b * ccColor::MAX);
+			rgb = ccColor::FromRgbf(diffuse);
 
 			foundMaterial = true;
 		}
@@ -3407,8 +3403,8 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	//get color from texture image
 	{
 		const QImage texture = material->getTexture();
-		int xPix = std::min(static_cast<int>(floor(x*texture.width())),texture.width()-1);
-		int yPix = std::min(static_cast<int>(floor(y*texture.height())),texture.height()-1);
+		int xPix = std::min(static_cast<int>(floor(x*texture.width())), texture.width() - 1);
+		int yPix = std::min(static_cast<int>(floor(y*texture.height())), texture.height() - 1);
 
 		QRgb pixel = texture.pixel(xPix,yPix);
 
@@ -3428,10 +3424,10 @@ static QMap<qint64,unsigned> s_alreadyCreatedVertices; //map to store already cr
 
 static qint64 GenerateKey(unsigned edgeIndex1, unsigned edgeIndex2)
 {
-	if (edgeIndex1>edgeIndex2)
-		std::swap(edgeIndex1,edgeIndex2);
+	if (edgeIndex1 > edgeIndex2)
+		std::swap(edgeIndex1, edgeIndex2);
 
-	return ((((qint64)edgeIndex1)<<32) | (qint64)edgeIndex2);
+	return (static_cast<qint64>(edgeIndex1) << 32) | static_cast<qint64>(edgeIndex2);
 }
 
 bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC)
@@ -3476,12 +3472,12 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 		unsigned indexG1 = 0;
 		{
 			qint64 key = GenerateKey(indexA, indexB);
-			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
-			if (it == s_alreadyCreatedVertices.end())
+			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(key);
+			if (it == s_alreadyCreatedVertices.constEnd())
 			{
 				//generate new vertex
 				indexG1 = vertices->size();
-				CCVector3 G1 = (*A + *B) / (PointCoordinateType)2.0;
+				CCVector3 G1 = (*A + *B) / 2;
 				vertices->addPoint(G1);
 				//interpolate other features?
 				//if (vertices->hasNormals())
@@ -3508,12 +3504,12 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 		unsigned indexG2 = 0;
 		{
 			qint64 key = GenerateKey(indexB, indexC);
-			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
-			if (it == s_alreadyCreatedVertices.end())
+			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(key);
+			if (it == s_alreadyCreatedVertices.constEnd())
 			{
 				//generate new vertex
 				indexG2 = vertices->size();
-				CCVector3 G2 = (*B + *C) / (PointCoordinateType)2.0;
+				CCVector3 G2 = (*B + *C) / 2;
 				vertices->addPoint(G2);
 				//interpolate other features?
 				//if (vertices->hasNormals())
@@ -3540,12 +3536,12 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 		unsigned indexG3 = vertices->size();
 		{
 			qint64 key = GenerateKey(indexC, indexA);
-			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
-			if (it == s_alreadyCreatedVertices.end())
+			QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(key);
+			if (it == s_alreadyCreatedVertices.constEnd())
 			{
 				//generate new vertex
 				indexG3 = vertices->size();
-				CCVector3 G3 = (*C + *A) / (PointCoordinateType)2.0;
+				CCVector3 G3 = (*C + *A) / 2.0;
 				vertices->addPoint(G3);
 				//interpolate other features?
 				//if (vertices->hasNormals())
@@ -3670,20 +3666,20 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 			//test all edges
 			int indexG1 = -1;
 			{
-				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexA, indexB));
-				if (it != s_alreadyCreatedVertices.end())
+				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(GenerateKey(indexA, indexB));
+				if (it != s_alreadyCreatedVertices.constEnd())
 					indexG1 = (int)it.value();
 			}
 			int indexG2 = -1;
 			{
-				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexB, indexC));
-				if (it != s_alreadyCreatedVertices.end())
+				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(GenerateKey(indexB, indexC));
+				if (it != s_alreadyCreatedVertices.constEnd())
 					indexG2 = (int)it.value();
 			}
 			int indexG3 = -1;
 			{
-				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexC, indexA));
-				if (it != s_alreadyCreatedVertices.end())
+				QMap<qint64, unsigned>::const_iterator it = s_alreadyCreatedVertices.constFind(GenerateKey(indexC, indexA));
+				if (it != s_alreadyCreatedVertices.constEnd())
 					indexG3 = (int)it.value();
 			}
 

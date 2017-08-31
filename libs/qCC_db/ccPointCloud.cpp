@@ -1917,7 +1917,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 	{
 		ccGLMatrixd transd(trans.data());
 
-		for (Grid::Shared grid : m_grids)
+		for (Grid::Shared &grid : m_grids)
 		{
 			if (!grid)
 			{
@@ -2080,7 +2080,7 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 
 	//update the grids as well
 	{
-		for (Grid::Shared grid : m_grids)
+		for (Grid::Shared &grid : m_grids)
 		{
 			if (grid)
 			{
@@ -2827,7 +2827,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
 					assert(steps != 0);
 
-					if (steps > CC_MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < static_cast<GLint>(steps))
+					if (steps > ccColorRampShader::MaxColorRampSize() || maxComponents < static_cast<GLint>(steps))
 					{
 						ccLog::WarningDebug("Color ramp steps exceed shader limits!");
 						colorRampShader = 0;
@@ -3348,7 +3348,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 
 			//and reset the invalid (empty) ones
 			//(DGM: we don't erase them as they may still be useful?)
-			for (Grid::Shared grid : m_grids)
+			for (Grid::Shared &grid : m_grids)
 			{
 				if (grid->validCount == 0)
 				{
@@ -3549,7 +3549,6 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 		return false;
 	}
 
-	bool hadColors = hasColors();
 	if (!resizeTheRGBTable(false))
 	{
 		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
@@ -3775,10 +3774,6 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 		return 0;
 	}
 
-	PointCoordinateType alpha_rad = coneAngle_deg * CC_DEG_TO_RAD;
-	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>( cos(alpha_rad) );
-	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>( sin(alpha_rad) );
-
 	CCLib::ScalarField* deviationSF = 0;
 	if (exportDeviationSF)
 	{
@@ -3799,6 +3794,9 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 		clone->setCurrentDisplayedScalarField(sfIdx);
 		clone->showSF(true);
 	}
+	
+	PointCoordinateType alpha_rad = coneAngle_deg * CC_DEG_TO_RAD;
+	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>( sin(alpha_rad) );
 
 	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
@@ -3823,7 +3821,6 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 		else
 		{
 			//unrolling
-			PointCoordinateType rho = s * sin_alpha;
 			PointCoordinateType theta_rad = phi_rad * sin_alpha;
 
 			//project the point
@@ -3854,7 +3851,6 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 			else
 			{
 				//unrolling
-				PointCoordinateType rho2 = s2 * sin_alpha;
 				PointCoordinateType theta2_rad = phi2_rad * sin_alpha;
 
 				//project the point
@@ -4741,12 +4737,12 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		m_vboManager.updateFlags = vboSet::UPDATE_ALL;
 	}
 
-	size_t chunksCount = m_points->chunksCount();
+	unsigned chunksCount = m_points->chunksCount();
 	//allocate per-chunk descriptors if necessary
 	if (m_vboManager.vbos.size() != chunksCount)
 	{
 		//properly remove the elements that are not needed anymore!
-		for (size_t i = chunksCount; i < m_vboManager.vbos.size(); ++i)
+		for (unsigned i = chunksCount; i < m_vboManager.vbos.size(); ++i)
 		{
 			if (m_vboManager.vbos[i])
 			{
@@ -4792,7 +4788,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 #endif
 
 		//process each chunk
-		for (size_t i = 0; i < chunksCount; ++i)
+		for (unsigned i = 0; i < chunksCount; ++i)
 		{
 			int chunkSize = static_cast<int>(m_points->chunkSize(i));
 
@@ -5039,18 +5035,9 @@ void ccPointCloud::removeFromDisplay(const ccGenericGLDisplay* win)
 	ccGenericPointCloud::removeFromDisplay(win);
 }
 
-bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
-											int kernelWidth,
-											bool orientNormals/*=true*/,
+bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 											ccProgressDialog* pDlg/*=0*/)
 {
-	if (kernelWidth < 1)
-	{
-		assert(false);
-		ccLog::Warning("[computeNormalsWithGrids] Invalid input parameter");
-		return false;
-	}
-
 	unsigned pointCount = size();
 	if (pointCount < 3)
 	{
@@ -5058,27 +5045,18 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 		return false;
 	}
 
-	//neighborhood 'half-width' (total width = 1 + 2*kernelWidth) 
-	//max number of neighbours: (1+2*nw)^2
-	CCLib::ReferenceCloud knn(this);
-	if (!knn.reserve((1 + 2 * kernelWidth)*(1 + 2 * kernelWidth)))
-	{
-		ccLog::Warning("[computeNormalsWithGrids] Not enough memory");
-		return false;
-	}
-
-	//neighbors distances
-	std::vector<double> distances;
+	//we instantiate a temporary structure to store each vertex normal (uncompressed)
+	std::vector<CCVector3> theNorms;
 	try
 	{
-		distances.resize((2 * kernelWidth + 1)*(2 * kernelWidth + 1));
+		CCVector3 blankNorm(0, 0, 0);
+		theNorms.resize(pointCount, blankNorm);
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccLog::Warning("[computeNormalsWithGrids] Not enough memory");
+		ccLog::Warning("[ccMesh::computePerVertexNormals] Not enough memory!");
 		return false;
 	}
-	distances[0] = 0.0; //central point
 
 	//and we also reserve the memory for the (compressed) normals
 	if (!hasNormals())
@@ -5097,14 +5075,15 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 	if (pDlg)
 	{
 		pDlg->setWindowTitle(QObject::tr("Normals computation"));
-		pDlg->setLabelText(QObject::tr("Points: ") + QString::number(pointCount));
-		pDlg->setRange(0, static_cast<int>(pointCount));
+		pDlg->setAutoClose(false);
 		pDlg->show();
 		QCoreApplication::processEvents();
 	}
 
+	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(minTriangleAngle_deg * CC_DEG_TO_RAD));
+	//double minTriangleAngle_rad = minTriangleAngle_deg * CC_DEG_TO_RAD;
+
 	//for each grid cell
-	int progressIndex = 0;
 	for (size_t gi = 0; gi < gridCount(); ++gi)
 	{
 		const Grid::Shared& scanGrid = grid(gi);
@@ -5120,159 +5099,167 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 			continue;
 		}
 
-		ccGLMatrixd toSensor = scanGrid->sensorPosition.inverse();
-
-//#define TEST_LOCAL
-#ifdef TEST_LOCAL
-		setRGBColor(ccColor::white);
-		unsigned validIndex = 0;
-#endif
-
-		const int* _indexGrid = &(scanGrid->indexes[0]);
-		for (int j = 0; j < static_cast<int>(scanGrid->h); ++j)
+		//progress dialog
+		if (pDlg)
 		{
-			for (int i = 0; i < static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
+			pDlg->setLabelText(QObject::tr("Grid: %1 x %2").arg(scanGrid->w).arg(scanGrid->h));
+			pDlg->setValue(0);
+			pDlg->setRange(0, static_cast<int>(scanGrid->indexes.size()));
+			QCoreApplication::processEvents();
+		}
+
+		//the code below has been kindly provided by Romain Janvier
+		CCVector3 sensorOrigin = CCVector3::fromArray((scanGrid->sensorPosition.getTranslationAsVec3D()/* + m_globalShift*/).u);
+
+		for (int j = 0; j < static_cast<int>(scanGrid->h) - 1; ++j)
+		{
+			for (int i = 0; i < static_cast<int>(scanGrid->w) - 1; ++i)
 			{
-				if (*_indexGrid >= 0)
+				//form the triangles with the nearest neighbors
+				//and accumulate the corresponding normals
+				const int& v0 = scanGrid->indexes[j * scanGrid->w + i];
+				const int& v1 = scanGrid->indexes[j * scanGrid->w + (i + 1)];
+				const int& v2 = scanGrid->indexes[(j + 1) * scanGrid->w + i];
+				const int& v3 = scanGrid->indexes[(j + 1) * scanGrid->w + (i + 1)];
+
+				bool topo[4] = { v0 >= 0, v1 >= 0, v2 >= 0, v3 >= 0 };
+
+				int mask = 0;
+				int pixels = 0;
+
+				for (int j = 0; j < 4; ++j)
 				{
-					unsigned pointIndex = static_cast<unsigned>(*_indexGrid);
-					assert(pointIndex <= pointCount);
-					const CCVector3* P = getPoint(pointIndex);
-					CCVector3 Q = toSensor * (*P);
-
-					knn.clear(false);
-					knn.addPointIndex(pointIndex); //the central point itself
-
-					//look for neighbors
-					int vmin = std::max(0, j - kernelWidth);
-					int vmax = std::min<int>(scanGrid->h - 1, j + kernelWidth);
-
-					int umin = std::max(0, i - kernelWidth);
-					int umax = std::min<int>(scanGrid->w - 1, i + kernelWidth);
-
-#ifdef TEST_LOCAL
-					++validIndex;
-					bool flag = ((validIndex % 1000) == 0);
-					if (flag)
+					if (topo[j])
 					{
-						setPointColor(pointIndex, ccColor::green.rgba);
+						mask |= 1 << j;
+						pixels += 1;
 					}
-#endif
-					
-					double sumDist = 0;
-					double sumDist2 = 0;
-					unsigned neighborIndex = 1;
-					for (int v = vmin; v <= vmax; ++v)
-					{
-						for (int u = umin; u <= umax; ++u)
-						{
-							int indexN = scanGrid->indexes[v*scanGrid->w + u];
-							if (indexN >= 0 && (u != i || v != j))
-							{
-#ifdef TEST_LOCAL
-								if (flag)
-									setPointColor(indexN, ccColor::red.rgba);
-#endif
-								//we don't consider points with a depth too different from the central point depth
-								const CCVector3* Pn = getPoint(static_cast<unsigned>(indexN));
-								CCVector3 deltaP = *Pn - *P;
-								double d2 = deltaP.norm2d();
-								sumDist2 += d2;
-								double d = sqrt(d2);
-								sumDist += d;
-								distances[neighborIndex++] = d;
+				}
 
-								knn.addPointIndex(static_cast<unsigned>(indexN));
-							}
-						}
+				if (pixels < 3)
+				{
+					continue;
+				}
+
+				Tuple3i tris[4] =
+				{
+					{ v0, v2, v1 },
+					{ v0, v3, v1 },
+					{ v0, v2, v3 },
+					{ v1, v2, v3 }
+				};
+
+				int tri[2] = { -1, -1 };
+
+				switch (mask)
+				{
+				case  7: tri[0] = 0; break;
+				case 11: tri[0] = 1; break;
+				case 13: tri[0] = 2; break;
+				case 14: tri[0] = 3; break;
+				case 15:
+				{
+					/* Choose the triangulation with smaller diagonal. */
+					double d0 = (*getPoint(v0) - sensorOrigin).normd();
+					double d1 = (*getPoint(v1) - sensorOrigin).normd();
+					double d2 = (*getPoint(v2) - sensorOrigin).normd();
+					double d3 = (*getPoint(v3) - sensorOrigin).normd();
+					float ddiff1 = std::abs(d0 - d3);
+					float ddiff2 = std::abs(d1 - d2);
+					if (ddiff1 < ddiff2)
+					{
+						tri[0] = 1; tri[1] = 2;
 					}
-
-					if (knn.size() > 1)
+					else
 					{
-						//we ignore the farthest points
-						unsigned neighborCount = knn.size()-1; //we don't use the central point!
-						double meanDist = sumDist / neighborCount;
-						double stdDevDist = sqrt(fabs(sumDist2 / neighborCount - meanDist*meanDist));
-						double maxDist = meanDist + 2.0 * stdDevDist;
-						//update knn
-						{
-							unsigned newIndex = 1;
-							for (unsigned k = 1; k <= neighborCount; ++k)
-							{
-								if (distances[k] <= maxDist)
-								{
-									if (newIndex != k)
-										knn.setPointIndex(newIndex, knn.getPointGlobalIndex(k));
-									++newIndex;
-								}
-							}
-							if (newIndex + 1 < knn.size())
-							{
-								int toto = 1;
-							}
-							knn.resize(newIndex);
-						}
+						tri[0] = 0; tri[1] = 3;
 					}
+					break;
+				}
 
-					if (knn.size() >= 3)
+				default:
+					continue;
+				}
+
+				for (int trCount = 0; trCount < 2; ++trCount)
+				{
+					int idx = tri[trCount];
+					if (idx < 0)
 					{
-						CCVector3 N(0, 0, 0);
-						bool normalIsValid = false;
+						continue;
+					}
+					const Tuple3i& t = tris[idx];
 
-						switch (localModel)
+					const CCVector3* A = getPoint(t.u[0]);
+					const CCVector3* B = getPoint(t.u[1]);
+					const CCVector3* C = getPoint(t.u[2]);
+
+					//now check the triangle angles
+					if (minTriangleAngle_deg > 0)
+					{
+						CCVector3 uAB = (*B - *A); uAB.normalize();
+						CCVector3 uCA = (*A - *C); uCA.normalize();
+
+						PointCoordinateType cosA = -uCA.dot(uAB);
+						if (cosA > minAngleCos)
 						{
-						case LS:
-							//compute normal with best fit plane
-							normalIsValid = ccNormalVectors::ComputeNormalWithLS(&knn, N);
-							break;
-
-						case TRI:
-							//compute normal with Delaunay 2.5D
-							normalIsValid = ccNormalVectors::ComputeNormalWithTri(&knn, N);
-							break;
-
-						case QUADRIC:
-							//compute normal with Quadric
-							normalIsValid = ccNormalVectors::ComputeNormalWithQuadric(&knn, *P, N);
-							break;
-
-						default:
-							assert(false);
-							break;
+							continue;
 						}
 
-						if (normalIsValid && orientNormals)
+						CCVector3 uBC = (*C - *B); uBC.normalize();
+						PointCoordinateType cosB = -uAB.dot(uBC);
+						if (cosB > minAngleCos)
 						{
-							//check normal vector sign
-							CCVector3 Nsensor(N);
-							toSensor.applyRotation(Nsensor);
-							if (Q.dot(Nsensor) > 0)
-							{
-								N = -N;
-							}
+							continue;
 						}
-
-						setPointNormalIndex(pointIndex, ccNormalVectors::GetNormIndex(N));
+						
+						PointCoordinateType cosC = -uBC.dot(uCA);
+						if (cosC > minAngleCos)
+						{
+							continue;
+						}
 					}
 
-					if (pDlg)
-					{
-						//update progress dialog
-						if (pDlg->wasCanceled())
-						{
-							unallocateNorms();
-							ccLog::Warning("[computeNormalsWithGrids] Process cancelled by user");
-							return false;
-						}
-						else
-						{
-							pDlg->setValue(++progressIndex);
-						}
-					}
+					//compute face normal (right hand rule)
+					CCVector3 N = (*B - *A).cross(*C - *A);
+
+					//we add this normal to all triangle vertices
+					theNorms[t.u[0]] += N;
+					theNorms[t.u[1]] += N;
+					theNorms[t.u[2]] += N;
+				}
+			}
+
+			if (pDlg)
+			{
+				//update progress dialog
+				if (pDlg->wasCanceled())
+				{
+					unallocateNorms();
+					ccLog::Warning("[computeNormalsWithGrids] Process cancelled by user");
+					return false;
+				}
+				else
+				{
+					pDlg->setValue(static_cast<unsigned>(j + 1) * scanGrid->w);
 				}
 			}
 		}
 	}
+
+	//for each vertex
+	{
+		for (unsigned i = 0; i < pointCount; i++)
+		{
+			CCVector3& N = theNorms[i];
+			//normalize the 'mean' normal
+			N.normalize();
+			setPointNormal(i, N);
+		}
+	}
+
+	//We must update the VBOs
+	normalsHaveChanged();
 
 	//we restore the normals
 	showNormals(true);
@@ -5304,7 +5291,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=0*/)
 	if (pDlg)
 	{
 		pDlg->setWindowTitle(QObject::tr("Orienting normals"));
-		pDlg->setLabelText(QObject::tr("Points: ") + QString::number(pointCount));
+		pDlg->setLabelText(QObject::tr("Points: %L1").arg( pointCount ) );
 		pDlg->setRange(0, static_cast<int>(pointCount));
 		pDlg->show();
 		QCoreApplication::processEvents();
@@ -5327,7 +5314,8 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=0*/)
 			continue;
 		}
 
-		ccGLMatrixd toSensor = scanGrid->sensorPosition.inverse();
+		//ccGLMatrixd toSensorCS = scanGrid->sensorPosition.inverse();
+		CCVector3 sensorOrigin = CCVector3::fromArray((scanGrid->sensorPosition.getTranslationAsVec3D()/* + m_globalShift*/).u);
 
 		const int* _indexGrid = &(scanGrid->indexes[0]);
 		for (int j = 0; j < static_cast<int>(scanGrid->h); ++j)
@@ -5339,14 +5327,17 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=0*/)
 					unsigned pointIndex = static_cast<unsigned>(*_indexGrid);
 					assert(pointIndex <= pointCount);
 					const CCVector3* P = getPoint(pointIndex);
-					CCVector3 Q = toSensor * (*P);
+					//CCVector3 PinSensorCS = toSensorCS * (*P);
 
 					CCVector3 N = getPointNormal(pointIndex);
 
 					//check normal vector sign
-					CCVector3 Nsensor(N);
-					toSensor.applyRotation(Nsensor);
-					if (Q.dot(Nsensor) > 0)
+					//CCVector3 NinSensorCS(N);
+					//toSensorCS.applyRotation(NinSensorCS);
+					CCVector3 OP = *P - sensorOrigin;
+					OP.normalize();
+					PointCoordinateType dotProd = OP.dot(N);
+					if (dotProd > 0)
 					{
 						N = -N;
 						setPointNormalIndex(pointIndex, ccNormalVectors::GetNormIndex(N));
@@ -5637,7 +5628,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 	}
 
 	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(minTriangleAngle_deg * CC_DEG_TO_RAD));
-//	double minTriangleAngle_rad = minTriangleAngle_deg * CC_DEG_TO_RAD;
+	//double minTriangleAngle_rad = minTriangleAngle_deg * CC_DEG_TO_RAD;
 	
 	for (int j = 0; j < static_cast<int>(grid.h) - 1; ++j)
 	{
@@ -5702,7 +5693,9 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 				}
 				break;
 			}
-			default: continue;
+			
+			default:
+				continue;
 			}
 
 			for (int trCount = 0; trCount < 2; ++trCount)
@@ -5722,24 +5715,23 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 					const CCVector3* C = getPoint(t.u[2]);
 
 					CCVector3 uAB = (*B - *A); uAB.normalize();
-					CCVector3 uBC = (*C - *B); uBC.normalize();
 					CCVector3 uCA = (*A - *C); uCA.normalize();
 
 					PointCoordinateType cosA = -uCA.dot(uAB);
 					if (cosA > minAngleCos)
-					//if (acos(cosA) < minTriangleAngle_rad)
 					{
 						continue;
 					}
+
+					CCVector3 uBC = (*C - *B); uBC.normalize();
 					PointCoordinateType cosB = -uAB.dot(uBC);
 					if (cosB > minAngleCos)
-					//if (acos(cosB) < minTriangleAngle_rad)
 					{
 						continue;
 					}
+
 					PointCoordinateType cosC = -uBC.dot(uCA);
 					if (cosC > minAngleCos)
-					//if (acos(cosC) < minTriangleAngle_rad)
 					{
 						continue;
 					}

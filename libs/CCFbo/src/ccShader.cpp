@@ -41,8 +41,8 @@ bool ccShader::fromFile(QString shaderBasePath, QString shaderBaseFilename, QStr
 		return false;
 	}
 
-	QString vertFilename = QString("%1/%2.vert").arg(shaderBasePath).arg(shaderBaseFilename);
-	QString fragFilename = QString("%1/%2.frag").arg(shaderBasePath).arg(shaderBaseFilename);
+	QString vertFilename = QString("%1/%2.vert").arg(shaderBasePath, shaderBaseFilename);
+	QString fragFilename = QString("%1/%2.frag").arg(shaderBasePath, shaderBaseFilename);
 
 	return loadProgram(vertFilename, fragFilename, error);
 }

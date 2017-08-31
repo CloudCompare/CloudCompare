@@ -162,7 +162,7 @@ void ccCompass::getActions(QActionGroup& group)
 	}
 	group.addAction(m_action);
 
-	m_app->dispToConsole("[ccCompass] ccCompass plugin initialized succesfully.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_app->dispToConsole("[ccCompass] ccCompass plugin initialized successfully.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 }
 
@@ -1623,7 +1623,6 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 	}
 
 	//is object a polyline
-	int tID = object->getUniqueID();
 	int n = 0;
 	if (ccTrace::isTrace(object)) //ensure this is a trace
 	{

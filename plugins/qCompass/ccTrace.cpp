@@ -152,7 +152,7 @@ bool ccTrace::inCircle(const CCVector3* segStart, const CCVector3* segEnd, const
 	
 	//is angle between these vectors obtuce (i.e. QS dot QE) < 0)? If so we are inside a circle between start&end, otherwise we are not
 	QS.normalize();QE.normalize();
-	float dot = QS.dot(QE);
+
 	return QS.dot(QE) < 0;
 }
 
@@ -269,7 +269,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 		return std::deque<int>(); //error -> no cloud
 	}
 
-	//retreive and store start & end rgb
+	//retrieve and store start & end rgb
 	if (m_cloud->hasColors())
 	{
 		const ColorCompType* s = m_cloud->getPointColor(start);
@@ -286,7 +286,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 	//get location of target node - used to optimise algorithm to stop searching paths leading away from the target
 	const CCVector3* end_v = m_cloud->getPoint(end);
 
-	//code essentialy taken from wikipedia page for Djikstra: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
+	//code essentially taken from wikipedia page for Djikstra: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
 	std::vector<bool> visited; //an array of bits to check if node has been visited
 	std::priority_queue<Node*,std::vector<Node*>,Compare> openQueue; //priority queue that stores nodes that haven't yet been explored/opened
 	std::vector<Node*> nodes; //list of visited nodes. Used to cleanup memory after re-constructing shortest path.
@@ -379,7 +379,8 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 
 		//fill "neighbours" with nodes - essentially get results of a "sphere" search around active current point
 		m_neighbours.clear();
-		int n = oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(m_search_r), m_neighbours, level);
+    
+		oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(search_r), m_neighbours, level);
 
 		//loop through neighbours
 		for (size_t i = 0; i < m_neighbours.size(); i++)
@@ -865,7 +866,7 @@ float ccTrace::calculateOptimumSearchRadius()
 
 		//find nearest neighbour for point
 		nCloud->clear(false);
-		int n = oct->findPointNeighbourhood(m_cloud->getPoint(r), nCloud, 2, level, d);
+		oct->findPointNeighbourhood(m_cloud->getPoint(r), nCloud, 2, level, d);
 
 		if (d != -1) //if a point was found
 		{
@@ -924,7 +925,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
 		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
-
+    
 		//push name for picking
 		bool pushName = MACRO_DrawEntityNames(context);
 		if (pushName)
@@ -957,7 +958,6 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 				{
 					//in perspective view, the actual scale depends on the distance to the camera!
-					const double* M = camera.modelViewMat.data();
 					double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
 					double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
 					scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
@@ -1028,7 +1028,4 @@ bool ccTrace::isTrace(ccHObject* object) //return true if object is a valid trac
 		return object->getMetaData("ccCompassType").toString().contains("Trace");
 	}
 	return false;
-	/*return object->isKindOf(CC_TYPES::POLY_LINE) //traces are polylines
-	&& object->hasMetaData("search_r") //ensure polyline has correct metadata for trace
-	&& object->hasMetaData("cost_function");*/
 }

@@ -44,6 +44,8 @@ static int s_currentFormIndex = 0;
 //! Dialog to define a dip / dip dir. transformation
 class DipDirTransformationDialog : public QDialog, public Ui::DipDirTransformationDialog
 {
+	Q_OBJECT
+	
 public:
 
 	DipDirTransformationDialog(QWidget* parent = 0) : QDialog(parent) { setupUi(this); }
@@ -346,3 +348,5 @@ void ccApplyTransformationDlg::buttonClicked(QAbstractButton* button)
 		inverseCheckBox->setChecked(false);
 	}
 }
+
+#include "ccApplyTransformationDlg.moc"

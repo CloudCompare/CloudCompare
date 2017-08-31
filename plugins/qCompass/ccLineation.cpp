@@ -95,7 +95,6 @@ void ccLineation::updateMetadata()
 	}
 }
 
-
 //returns true if object is a lineation
 bool ccLineation::isLineation(ccHObject* object)
 {

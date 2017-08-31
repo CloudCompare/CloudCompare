@@ -1070,7 +1070,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		for (int i = 1; i <= static_cast<int>(stdProperties.size()); ++i)
 		{
 			plyProperty& pp = stdProperties[i - 1];
-			QString itemText = QString("%1 - %2 [%3]").arg(pointElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
+			QString itemText = QString("%1 - %2 [%3]").arg(pointElements[pp.elemIndex].elementName,pp.propName,e_ply_type_names[pp.type]);
 			assert(pp.type != 16); //we don't want any PLY_LIST here
 			stdPropsText << itemText;
 
@@ -1115,7 +1115,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		for (int i = 0; i < static_cast<int>(listProperties.size()); ++i)
 		{
 			plyProperty& pp = listProperties[i];
-			QString itemText = QString("%0 - %1 [%2]").arg(meshElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
+			QString itemText = QString("%1 - %2 [%3]").arg(meshElements[pp.elemIndex].elementName,pp.propName,e_ply_type_names[pp.type]);
 			assert(pp.type == 16); //we only want PLY_LIST here
 			listPropsText << itemText;
 
@@ -1139,7 +1139,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		for (int i = 0; i < static_cast<int>(singleProperties.size()); ++i)
 		{
 			plyProperty& pp = singleProperties[i];
-			QString itemText = QString("%0 - %1 [%2]").arg(meshElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
+			QString itemText = QString("%1 - %2 [%3]").arg(meshElements[pp.elemIndex].elementName,pp.propName,e_ply_type_names[pp.type]);
 			singlePropsText << itemText;
 
 			QString elementName = QString(meshElements[pp.elemIndex].elementName).toUpper();
@@ -1523,7 +1523,6 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 			{
 				ccLog::Error(QString("Scalar field #%1: the number of scalars doesn't match the number of points (they will be ignored)!").arg(i + 1));
 				ccLog::Warning(QString("[PLY] Scalar field #%1 ignored!").arg(i + 1));
-				numberOfScalars = 0;
 			}
 			else
 			{

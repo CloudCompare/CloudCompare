@@ -69,7 +69,7 @@ public:
 	};
 
 	//! Returns the whole set of meta-data associated to a given polyline/profile
-	/** \retrun whether the profile is valid or not
+	/** \return whether the profile is valid or not
 	**/
 	static bool GetPoylineMetaData(const ccPolyline* polyline, ProfileMetaData& data);
 
@@ -80,7 +80,7 @@ public:
 
 	//! Returns the origin associated to a given polyline/profile
 	/** Requires the right meta-data to be set (see SetPoylineOrigin).
-		\retrun whether an origin is defined or not
+		\return whether an origin is defined or not
 	**/
 	static bool GetPoylineOrigin(const ccPolyline* polyline, CCVector3& origin);
 
@@ -91,7 +91,7 @@ public:
 
 	//! Returns the revolution 'dimension' associated to a given profile (polyline)
 	/** Requires the right meta-data to be set (see SetPoylineRevolDim).
-		\retrun 0 (X), 1 (Y), 2 (Z) or -1 if no revolution dimension is defined
+		\return 0 (X), 1 (Y), 2 (Z) or -1 if no revolution dimension is defined
 	**/
 	static int GetPoylineRevolDim(const ccPolyline* polyline);
 
@@ -102,7 +102,7 @@ public:
 
 	//! Returns the revolution axis associated to a given profile (polyline)
 	/** Requires the right meta-data to be set (see SetPoylineAxis).
-		\retrun whether an axis is defined or not
+		\return whether an axis is defined or not
 	**/
 	static bool GetPoylineAxis(const ccPolyline* polyline, CCVector3& axis);
 
@@ -113,7 +113,7 @@ public:
 
 	//! Returns the profile 'height shift' (i.e. along the revolution axis)
 	/** Requires the right meta-data to be set (see SetPolylineHeightShift).
-		\retrun whether a height shift is defined or not
+		\return whether a height shift is defined or not
 	**/
 	static bool GetPolylineHeightShift(const ccPolyline* polyline, PointCoordinateType& heightShift);
 

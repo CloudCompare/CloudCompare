@@ -32,12 +32,6 @@ ccBBox::ccBBox(const CCVector3& bbMinCorner, const CCVector3& bbMaxCorner)
 	, m_valid(true)
 {}
 
-ccBBox::ccBBox(const ccBBox& aBox)
-	: m_bbMin(aBox.m_bbMin)
-	, m_bbMax(aBox.m_bbMax)
-	, m_valid(aBox.m_valid)
-{}
-
 void ccBBox::clear()
 {
 	m_bbMin = m_bbMax = CCVector3(0,0,0);

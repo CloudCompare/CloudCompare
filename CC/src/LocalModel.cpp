@@ -23,11 +23,7 @@
 #include "GenericMesh.h"
 #include "GenericIndexedMesh.h"
 #include "DistanceComputationTools.h"
-#include "Neighbourhood.h"
 
-//system
-#include <string.h>
-#include <math.h>
 
 using namespace CCLib;
 

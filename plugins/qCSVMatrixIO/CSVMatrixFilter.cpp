@@ -257,10 +257,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(QString filename,
 							for (unsigned i=0; i<colCount; ++i)
 							{
 								QRgb col = texture.pixel(static_cast<int>(i),static_cast<int>(j));
-								ColorCompType rgb[3] = {	static_cast<ColorCompType>(qRed(col)),
-														static_cast<ColorCompType>(qGreen(col)),
-														static_cast<ColorCompType>(qBlue(col)) };
-								cloud->addRGBColor(rgb);
+								cloud->addRGBColor(ccColor::FromQRgb(col).rgb);
 							}
 						}
 						cloud->showColors(true);

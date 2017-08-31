@@ -12,7 +12,6 @@
 //system
 #include <stdint.h>
 #include <stdlib.h>
-#include <assert.h>
 
 //! Waveform descriptor
 class QCC_DB_LIB_API WaveformDescriptor : public ccSerializableObject

@@ -19,10 +19,17 @@
 #define CC_FACET_HEADER
 
 //Local
-#include "ccMesh.h"
-#include "ccPolyline.h"
-#include "ccPointCloud.h"
+#include "ccHObject.h"
 #include "ccPlanarEntityInterface.h"
+
+namespace CCLib
+{
+	class GenericIndexedCloudPersist;
+}
+
+class ccMesh;
+class ccPolyline;
+class ccPointCloud;
 
 //! Facet
 /** Composite object: point cloud + 2D1/2 contour polyline + 2D1/2 surface mesh

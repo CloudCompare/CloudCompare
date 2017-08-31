@@ -17,18 +17,7 @@
 
 #include "ccGLUtils.h"
 
-//Local
-#include "ccLog.h"
-
-//CCLib
-#include <CCConst.h>
-
-//Qt
-#include <QOpenGLContext>
-#include <QOpenGLFunctions_2_1>
-
-//system
-#include <assert.h>
+#include <QOpenGLTexture>
 
 //*********** OPENGL TEXTURES ***********//
 

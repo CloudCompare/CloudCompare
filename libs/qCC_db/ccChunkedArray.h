@@ -21,9 +21,6 @@
 //Local
 #include "ccHObject.h"
 
-//CCLib
-#include <GenericChunkedArray.h>
-
 //! Shareable 'chunked' array that can be properly inserted in the DB tree
 template <int N, class ElementType> class ccChunkedArray : public GenericChunkedArray<N,ElementType>, public ccHObject
 {

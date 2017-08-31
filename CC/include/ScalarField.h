@@ -58,7 +58,7 @@ public:
 	//! Returns the specific NaN value
 	static inline ScalarType NaN() { return NAN_VALUE; }
 
-	//! Computes the mean value (and optionnaly the variance value) of the scalar field
+	//! Computes the mean value (and optionally the variance value) of the scalar field
 	/** \param mean a field to store the mean value
 		\param variance if not void, the variance will be computed and stored here
 	**/

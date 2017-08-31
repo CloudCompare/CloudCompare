@@ -19,18 +19,14 @@
 #include "GeometricalAnalysisTools.h"
 
 //local
-#include "GenericIndexedCloudPersist.h"
-#include "Neighbourhood.h"
 #include "ReferenceCloud.h"
 #include "GenericProgressCallback.h"
-#include "GenericCloud.h"
 #include "DistanceComputationTools.h"
 #include "DgmOctreeReferenceCloud.h"
 #include "ScalarField.h"
 #include "ScalarFieldTools.h"
 
 //system
-#include <assert.h>
 #include <random>
 
 using namespace CCLib;

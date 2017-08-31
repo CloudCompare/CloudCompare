@@ -21,18 +21,12 @@
 //local
 #include "ReferenceCloud.h"
 #include "DgmOctreeReferenceCloud.h"
-#include "GenericCloud.h"
-#include "GenericIndexedCloudPersist.h"
-#include "GenericDistribution.h"
-#include "DgmOctree.h"
 #include "GenericProgressCallback.h"
 #include "Chi2Helper.h"
 #include "ScalarField.h"
 #include "NormalDistribution.h"
 
 //system
-#include <string.h>
-#include <assert.h>
 #include <list>
 
 using namespace CCLib;

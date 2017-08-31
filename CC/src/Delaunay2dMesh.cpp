@@ -19,7 +19,6 @@
 #include "Delaunay2dMesh.h"
 
 //local
-#include "GenericIndexedCloud.h"
 #include "ManualSegmentationTools.h"
 #include "Polyline.h"
 #include "ChunkedPointCloud.h"
@@ -32,9 +31,6 @@
 #include <CGAL/Delaunay_triangulation_2.h>
 #endif
 
-//system
-#include <assert.h>
-#include <string.h>
 
 using namespace CCLib;
 

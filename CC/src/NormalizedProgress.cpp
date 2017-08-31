@@ -20,7 +20,6 @@
 
 //system
 #include <assert.h>
-#include <math.h>
 
 #ifdef USE_QT
 

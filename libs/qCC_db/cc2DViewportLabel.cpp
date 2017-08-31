@@ -25,6 +25,7 @@
 
 //Qt
 #include <QDataStream>
+#include <QFontMetrics>
 
 //system
 #include <string.h>

@@ -20,16 +20,12 @@
 
 //local
 #include "GenericProgressCallback.h"
-#include "GenericIndexedCloud.h"
 #include "GenericIndexedMesh.h"
-#include "GenericMesh.h"
 #include "GenericTriangle.h"
 #include "ScalarField.h"
 #include "SimpleCloud.h"
-#include "CCConst.h"
 
 //system
-#include <assert.h>
 #include <random>
 
 using namespace CCLib;

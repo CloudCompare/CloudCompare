@@ -20,18 +20,18 @@
 //Local
 #include "cc2DLabel.h"
 #include "ccBasicTypes.h"
+#include "ccGenericGLDisplay.h"
 #include "ccGenericPointCloud.h"
 #include "ccPointCloud.h"
-#include "ccSphere.h"
-#include "ccGenericGLDisplay.h"
 #include "ccScalarField.h"
+#include "ccSphere.h"
 
 //Qt
 #include <QSharedPointer>
 
 //System
-#include <string.h>
 #include <assert.h>
+#include <string.h>
 
 //'Delta' character
 static const QChar MathSymbolDelta(0x0394);
@@ -112,7 +112,7 @@ QString cc2DLabel::getTitle(int precision) const
 		if (info.hasSF)
 		{
 			QString sfVal = GetSFValueAsString(info, precision);
-			title = QString("%1 = %2").arg(info.sfName).arg(sfVal);
+			title = QString("%1 = %2").arg(info.sfName,sfVal);
 		}
 	}
 	else if (count == 2)
@@ -401,7 +401,7 @@ void AddPointCoordinates(QStringList& body, unsigned pointIndex, ccGenericPointC
 
 	QString coordStr = QString("P#%0:").arg(pointIndex);
 	if (!pointName.isEmpty())
-		coordStr = QString("%1 (%2)").arg(pointName).arg(coordStr);
+		coordStr = QString("%1 (%2)").arg(pointName,coordStr);
 	if (isShifted)
 	{
 		body << coordStr;
@@ -532,7 +532,7 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 	info.angles.u[2] = GetAngle_deg(-P1P3, -P2P3); //angleAtP3 (should be equal to 180-a1-a2!)
 }
 
-QStringList cc2DLabel::getLabelContent(int precision)
+QStringList cc2DLabel::getLabelContent(int precision) const
 {
 	QStringList body;
 
@@ -569,7 +569,7 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			if (info.hasSF)
 			{
 				QString sfVal = GetSFValueAsString(info, precision);
-				QString sfStr = QString("%1 = %2").arg(info.sfName).arg(sfVal);
+				QString sfStr = QString("%1 = %2").arg(info.sfName,sfVal);
 				body << sfStr;
 			}
 		}

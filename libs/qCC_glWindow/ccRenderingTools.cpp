@@ -16,30 +16,21 @@
 //##########################################################################
 
 #include "ccRenderingTools.h"
-#include "ccGuiParameters.h"
 
 //qCC
 #include "ccGLWindow.h"
 
 //qCC_db
-#include <ccIncludeGL.h>
 #include <ccGenericPointCloud.h>
 #include <ccGBLSensor.h>
 #include <ccColorScalesManager.h>
 #include <ccScalarField.h>
-
-//CCLib
-#include <ScalarField.h>
 
 //Qt
 #include <QLabel>
 #include <QDialog>
 #include <QVBoxLayout>
 
-//system
-#include <assert.h>
-#include <cmath>
-#include <limits>
 
 void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*/, unsigned maxDim/*=1024*/)
 {

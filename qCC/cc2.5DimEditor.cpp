@@ -209,7 +209,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<ccRaster
 {
 	//projection dimension
 	const unsigned char Z = getProjectionDimension();
-	assert(Z >= 0 && Z <= 2);
+	assert(Z <= 2);
 
 	//cloud bounding-box
 	ccBBox box = getCustomBBox();

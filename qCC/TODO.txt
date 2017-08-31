@@ -8,9 +8,8 @@ Methods not yet migrated back to V2:
 - void MainWindow::doActionLoadShader
 
 File I/O:
-- PDF 3D
-- POD files (Pointools)
-- LEICA files
+- Export PTX files
+- Generate PDF 3D
 - OpenCTM format (https://github.com/cloudcompare/trunk/issues/146)
 - Visual SFM format (http://www.cloudcompare.org/forum/viewtopic.php?t=550)
 
@@ -29,17 +28,16 @@ Big ones:
 	- save the plane orientation as a text file after best plane fitting
 	- option to apply the inverse transformation
 	- change the default output directory (http://www.danielgm.net/cc/forum/viewtopic.php?t=1240)
-	- rasterize tool (http://www.cloudcompare.org/forum/viewtopic.php?t=786)
 	- clean filter
 	- let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
 	- set the output file name (http://www.danielgm.net/cc/forum/viewtopic.php?t=1089)
 	- export the history transformation (or the barycenter translation - see http://www.danielgm.net/cc/forum/viewtopic.php?t=1242)
+	- choose the format of STL output (acsii / binary - see http://www.danielgm.net/cc/forum/viewtopic.php?f=13)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 [*] Volume calculation
 	- between clouds (from distances)
 	- between meshes (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
-[*] Update qKinect with the Kinect for Windows SDK (1.8)
 [*] Use PDAL instead of libLAS (http://www.cloudcompare.org/forum/viewtopic.php?t=437)
 
 qAnimation plugin:
@@ -53,6 +51,8 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Ability to change the mouse buttons mapping (http://www.cloudcompare.org/forum/viewtopic.php?t=2676)
+[*] Ability to define custom shortcuts for some methods (http://www.cloudcompare.org/forum/viewtopic.php?t=2676)
 [*] Set the Cross Section box using a plane entity (http://www.danielgm.net/cc/forum/viewtopic.php?t=2485)
 [*] Apply the qCSF plugin to more than one cloud at once (http://www.cloudcompare.org/forum/viewtopic.php?t=2242)
 [*] Add a shortcut to take a 'snapshot' of the current view (automatic filename and export dir?)

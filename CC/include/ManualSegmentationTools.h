@@ -87,8 +87,8 @@ public:
 		\param pointsIndexes the vertices indexes as a set of references
 		\param pointsWillBeInside specifies if the points corresponding to the input indexes should be the new mesh vertices, or the opposite
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\param destCloud optionnaly, a cloud object can be specified to be associated to the new created mesh object, instead of the cloud associated to the ReferenceCloud "pointsIndexes"
-		\param indexShift optionnaly, a shift can be added to all vertex indexes of the new mesh
+		\param destCloud optionally, a cloud object can be specified to be associated to the new created mesh object, instead of the cloud associated to the ReferenceCloud "pointsIndexes"
+		\param indexShift optionally, a shift can be added to all vertex indexes of the new mesh
 		\return a new mesh structure, or 0 if something went wrong
 	**/
 	static GenericIndexedMesh* segmentMesh(	GenericIndexedMesh* theMesh,

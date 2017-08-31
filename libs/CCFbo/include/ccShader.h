@@ -29,6 +29,8 @@ class QObject;
 **/
 class ccShader : public QOpenGLShaderProgram
 {
+	Q_OBJECT
+	
 public:
 
 	//! Default constructor

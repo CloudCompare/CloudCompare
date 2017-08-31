@@ -20,12 +20,16 @@
 
 //CCLib
 #include <GenericIndexedMesh.h>
-#include <ReferenceCloud.h>
-#include <GenericProgressCallback.h>
 
 //Local
 #include "ccGenericGLDisplay.h"
 #include "ccAdvancedTypes.h"
+
+namespace CCLib
+{
+	class GenericProgressCallback;
+	class ReferenceCloud;
+}
 
 class ccGenericPointCloud;
 class ccPointCloud;

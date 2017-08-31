@@ -35,6 +35,8 @@
 //! Mascaret File Save dialog
 class SaveMascaretFileDlg : public QDialog, public Ui::SaveMascaretFileDlg
 {
+	Q_OBJECT
+	
 public:
 	//! Default constructor
 	SaveMascaretFileDlg(QWidget* parent = 0)
@@ -308,3 +310,5 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 
 	return result;
 }
+
+#include "MascaretFilter.moc"

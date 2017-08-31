@@ -27,9 +27,9 @@
 
 //Qt
 #include <QMutex>
+
 //system
 #include <stdint.h>
-#include <assert.h>
 #include <array>
 #include <functional>
 

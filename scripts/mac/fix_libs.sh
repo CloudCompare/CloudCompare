@@ -6,10 +6,12 @@ FRAMEWORK_DIR=$1
 
 # This is specific to my (Andy's) build setup because I install all my homebrew stuff here.
 # If you are trying to package things yourself for general deployment, you'll have to change this path.
-PATH_PREFIX=${HOME}/dev
+HOMEBREW_PATH_PREFIX=${HOME}/dev
 
-echo "  fixing: ${FRAMEWORK_DIR}/libCGAL_Core.12.dylib"
-install_name_tool -change "${PATH_PREFIX}/lib/libCGAL.12.dylib" "@executable_path/../Frameworks/libCGAL.12.dylib" "${FRAMEWORK_DIR}/libCGAL_Core.12.dylib"
+if [ -f "${FRAMEWORK_DIR}/libCGAL_Core.12.dylib" ]; then
+   echo "  fixing: ${FRAMEWORK_DIR}/libCGAL_Core.12.dylib"
+   install_name_tool -change "${HOMEBREW_PATH_PREFIX}/lib/libCGAL.12.dylib" "@executable_path/../Frameworks/libCGAL.12.dylib" "${FRAMEWORK_DIR}/libCGAL_Core.12.dylib"
+fi
 
 echo "  fixing: ${FRAMEWORK_DIR}/libboost_chrono-mt.dylib"
 install_name_tool -change "@loader_path/libboost_system-mt.dylib" "@executable_path/../Frameworks/libboost_system-mt.dylib" "${FRAMEWORK_DIR}/libboost_chrono-mt.dylib"
@@ -22,7 +24,7 @@ install_name_tool -change "@loader_path/libboost_system-mt.dylib" "@executable_p
 
 if [ -f "${FRAMEWORK_DIR}/libavcodec.57.dylib" ]; then
   FFMPEG_VERSION=`ffmpeg -version | head -n1 | sed "s/^.*version \([0-9.]*\) Copyright.*/\1/"`
-  FFMPEG_DIR="${PATH_PREFIX}/Cellar/ffmpeg/${FFMPEG_VERSION}/lib"
+  FFMPEG_DIR="${HOMEBREW_PATH_PREFIX}/Cellar/ffmpeg/${FFMPEG_VERSION}/lib"
 
   echo "  fixing: ${FRAMEWORK_DIR}/libavcodec.57.dylib"
   install_name_tool -change "${FFMPEG_DIR}/libavutil.55.dylib" "@executable_path/../Frameworks/libavutil.55.dylib" "${FRAMEWORK_DIR}/libavcodec.57.dylib"

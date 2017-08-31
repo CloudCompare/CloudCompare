@@ -16,6 +16,9 @@
 //##########################################################################
 
 #include "ccFacet.h"
+#include "ccMesh.h"
+#include "ccPolyline.h"
+#include "ccPointCloud.h"
 
 //CCLib
 #include <Delaunay2dMesh.h>

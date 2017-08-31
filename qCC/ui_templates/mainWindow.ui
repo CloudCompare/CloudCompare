@@ -2618,10 +2618,10 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionResetGUIElementsPos">
    <property name="text">
-    <string>Reset all GUI elements positions</string>
+    <string>Reset all GUI element positions</string>
    </property>
    <property name="toolTip">
-    <string>Reset all GUI elements positions (after restart)</string>
+    <string>Reset all GUI element positions (after restart)</string>
    </property>
   </action>
   <action name="actionConvertToRandomRGB">

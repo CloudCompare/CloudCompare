@@ -64,6 +64,8 @@ struct dbTreeSelectionInfo
 //! Custom QTreeView widget (for advanced selection behavior)
 class ccCustomQTreeView : public QTreeView
 {
+	Q_OBJECT
+	
 public:
 
 	//! Default constructor

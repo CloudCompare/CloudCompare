@@ -142,7 +142,7 @@ bool ccPickingHub::addListener(	ccPickingListener* listener,
 		{
 			if (m_listeners.size() > 1 || m_listeners.find(listener) == m_listeners.end())
 			{
-				ccLog::Warning("[ccPickingHub::addListener] Other listners are already registered with a different picking mode");
+				ccLog::Warning("[ccPickingHub::addListener] Other listeners are already registered with a different picking mode");
 				return false;
 			}
 		}

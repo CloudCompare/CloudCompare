@@ -40,6 +40,8 @@
 #include "ccQuadric.h"
 #include "ccCustomObject.h"
 #include "ccExternalFactory.h"
+#include "ccPointCloud.h"
+#include "ccPolyline.h"
 
 //Qt
 #include <QIcon>
@@ -447,7 +449,7 @@ void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent
 		int childDependencyFlags = child->getDependencyFlagsWith(this);
 		int fatherDependencyFlags = getDependencyFlagsWith(child);
 	
-		//we must explicitely remove any depedency with the child as we don't call 'detachChild'
+		//we must explicitely remove any dependency with the child as we don't call 'detachChild'
 		removeDependencyWith(child);
 		child->removeDependencyWith(this);
 

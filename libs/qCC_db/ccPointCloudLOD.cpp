@@ -27,6 +27,8 @@
 //! Thread for background computation
 class ccPointCloudLODThread : public QThread
 {
+	Q_OBJECT
+	
 public:
 	
 	//! Default constructor
@@ -212,7 +214,7 @@ protected:
 		}
 
 		//make sure we deprecate the LOD structure when this octree is modified!
-		QObject::connect(m_octree.data(), &ccOctree::updated, [&](){ m_cloud.clearLOD(); });
+		QObject::connect(m_octree.data(), &ccOctree::updated, this, [&](){ m_cloud.clearLOD(); });
 
 		m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
 		assert(m_maxLevel <= CCLib::DgmOctree::MAX_OCTREE_LEVEL);
@@ -967,3 +969,5 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 	m_lastIndexMap = m_indexMap;
 	return m_indexMap;
 }
+
+#include "ccPointCloudLOD.moc"

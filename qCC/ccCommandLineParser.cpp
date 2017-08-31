@@ -99,7 +99,7 @@ int ccCommandLineParser::Parse(int nargs, char** args, tPluginInfoList* plugins/
 	//load the plugins commands
 	if (plugins)
 	{
-		for (tPluginInfo pluginInfo : *plugins)
+		for (tPluginInfo &pluginInfo : *plugins)
 		{
 			if (!pluginInfo.object)
 			{
@@ -189,6 +189,8 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandSetNoTimestamp));
 	registerCommand(Command::Shared(new CommandVolume25D));
 	registerCommand(Command::Shared(new CommandRasterize));
+	registerCommand(Command::Shared(new CommandOctreeNormal));
+	registerCommand(Command::Shared(new CommandClearNormals));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));
@@ -218,7 +220,7 @@ bool ccCommandLineParser::registerCommand(Command::Shared command)
 	if (m_commands.contains(command->m_keyword))
 	{
 		assert(false);
-		warning(QString("Internal error: keyword '%' already registered (by command '%2')").arg(command->m_keyword).arg(m_commands[command->m_keyword]->m_name));
+		warning(QString("Internal error: keyword '%' already registered (by command '%2')").arg(command->m_keyword, m_commands[command->m_keyword]->m_name));
 		return false;
 	}
 
@@ -662,7 +664,7 @@ int ccCommandLineParser::start(QDialog* parent/*=0*/)
 			print("Available commands:");
 			for (auto it = m_commands.constBegin(); it != m_commands.constEnd(); ++it)
 			{
-				print(QString("-%1: %2").arg(it.key().toUpper()).arg(it.value()->m_name));
+				print(QString("-%1: %2").arg(it.key().toUpper(), it.value()->m_name));
 			}
 		}
 		else

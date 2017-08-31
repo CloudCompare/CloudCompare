@@ -105,7 +105,9 @@ public:
 							int filter = CC_STD_PLUGIN | CC_GL_FILTER_PLUGIN | CC_IO_FILTER_PLUGIN)
 	{
 		//"static" plugins
-		for (QObject* plugin : QPluginLoader::staticInstances())
+		const QObjectList	pluginInstances = QPluginLoader::staticInstances();
+		
+		for (QObject* plugin : pluginInstances)
 		{
 			ccPluginInterface* ccPlugin = ToValidPlugin(plugin, filter);
 			if (ccPlugin == nullptr)
@@ -152,7 +154,7 @@ public:
 				if (filter)
 				{
 					FileIOFilter::Register(filter);
-					ccLog::Print(QString("[Plugin][%1] New file extension(s) registered: %2").arg(ioPlugin->getName()).arg(filter->getDefaultExtension().toUpper()));
+					ccLog::Print(QString("[Plugin][%1] New file extension(s) registered: %2").arg(ioPlugin->getName(), filter->getDefaultExtension().toUpper()));
 				}
 			}
 			break;
@@ -180,7 +182,9 @@ public:
 			QDir pluginsDir(path);
 			pluginsDir.setNameFilters(dirFilters);
 
-			for (const QString &filename : pluginsDir.entryList())
+			const QStringList	fileNames = pluginsDir.entryList();
+			
+			for (const QString &filename : fileNames)
 			{
 				const QString pluginPath = pluginsDir.absoluteFilePath(filename);
 
@@ -195,7 +199,7 @@ public:
 
 				if (plugin == nullptr)
 				{
-					ccLog::Warning(QString("[Plugin] File '%1' doesn't seem to be a valid plugin\t(%2)").arg(filename).arg(loader.errorString()));
+					ccLog::Warning(QString("[Plugin] File '%1' doesn't seem to be a valid plugin\t(%2)").arg(filename, loader.errorString()));
 					continue;
 				}
 
@@ -207,7 +211,7 @@ public:
 					continue;
 				}
 
-				ccLog::Print(QString("Found plugin: %1 (%2)").arg(ccPlugin->getName()).arg(filename));
+				ccLog::Print(QString("Found plugin: %1 (%2)").arg(ccPlugin->getName(), filename));
 				plugins.push_back(tPluginInfo(pluginPath, ccPlugin, plugin));
 			}
 		}

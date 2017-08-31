@@ -77,6 +77,7 @@ parts:
         -DINSTALL_QM3C2_PLUGIN=ON \
         -DINSTALL_QBROOM_PLUGIN=true \
         -DINSTALL_QHOUGH_NORMALS_PLUGIN=true \
+        -DINSTALL_QCOMPASS_PLUGIN=ON \
         -DEIGEN_ROOT_DIR=$SNAPCRAFT_STAGE/include/eigen3 \
         -DLIBLAS_INCLUDE_DIR="/usr/include" \
         -DLIBLAS_RELEASE_LIBRARY_FILE="/usr/lib/liblas.so" \
@@ -97,5 +98,3 @@ parts:
       launch: bin/launch
     prime:
       - bin/*
-
-

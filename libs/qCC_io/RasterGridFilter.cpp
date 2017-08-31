@@ -256,7 +256,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 					zMinMax[0] = adfMinMax[0];
 					zMinMax[1] = adfMinMax[1];
 
-					double* scanline = (double*) CPLMalloc(sizeof(double)*nXSize);
+					double* scanline = (double*)CPLMalloc(sizeof(double)*nXSize);
 					//double* scanline = new double[nXSize];
 					memset(scanline, 0, sizeof(double)*nXSize);
 
@@ -347,7 +347,6 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 						if (isPalette && !colTable)
 						{
 							ccLog::Warning(QString("Band is declared as a '%1' but no palette is associated!").arg(GDALGetColorInterpretationName(colorInterp)));
-							isPalette = false;
 						}
 						else
 						{
@@ -360,7 +359,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 							{
 								assert(poBand->GetRasterDataType() <= GDT_Int32);
 
-								int* colIndexes = (int*) CPLMalloc(sizeof(int)*nXSize);
+								int* colIndexes = (int*)CPLMalloc(sizeof(int)*nXSize);
 								//double* scanline = new double[nXSize];
 								memset(colIndexes, 0, sizeof(int)*nXSize);
 
@@ -385,7 +384,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 											if (loadAsTexturedQuad)
 											{
 												QRgb origColor = quadTexture.pixel(k, j);
-												C = ccColor::Rgba(qRed(origColor), qGreen(origColor), qBlue(origColor), qAlpha(origColor));
+												C = ccColor::FromQRgba(origColor);
 											}
 											else
 											{

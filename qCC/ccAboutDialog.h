@@ -26,6 +26,8 @@ namespace Ui {
 
 class ccAboutDialog : public QDialog
 {
+	Q_OBJECT
+
 public:
 	ccAboutDialog(QWidget *parent = nullptr);
 	~ccAboutDialog();

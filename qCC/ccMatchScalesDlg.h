@@ -28,6 +28,8 @@
 //! Scales matching tool dialog
 class ccMatchScalesDlg : public QDialog, public Ui::MatchScalesDialog
 {
+	Q_OBJECT
+
 public:
 	//! Default constructor
 	ccMatchScalesDlg(	const ccHObject::Container& entities,

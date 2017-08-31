@@ -23,6 +23,8 @@
 //! Dialog for noise filtering (based on the distance to the implicit local surface)
 class ccNoiseFilterDlg : public QDialog, public Ui::NoiseFilterDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor

@@ -53,7 +53,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 		if (selection->size() == 0)
 		{
 			//no points fall inside selection!
-			ccLog::Warning(QString("[Crop] No point of the cloud '%1' falls %2side the input box!").arg(cloud->getName()).arg(inside ? "in" : "out"));
+			ccLog::Warning(QString("[Crop] No point of the cloud '%1' falls %2side the input box!").arg(cloud->getName(), (inside ? "in" : "out")));
 			delete selection;
 			return 0;
 		}
@@ -125,7 +125,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 				if (croppedMesh->size() == 0)
 				{
 					//no points fall inside selection!
-					ccLog::Warning(QString("[Crop] No triangle of the mesh '%1' falls %2side the input box!").arg(mesh->getName()).arg(inside ? "in" : "out"));
+					ccLog::Warning(QString("[Crop] No triangle of the mesh '%1' falls %2side the input box!").arg(mesh->getName(), (inside ? "in" : "out")));
 					delete croppedMesh;
 					croppedMesh = 0;
 				}

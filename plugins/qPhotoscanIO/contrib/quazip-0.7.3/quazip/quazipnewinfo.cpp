@@ -29,9 +29,18 @@ see quazip/(un)zip.h files for details. Basically it's the zlib license.
 #include <string.h>
 
 static void QuaZipNewInfo_setPermissions(QuaZipNewInfo *info,
-        QFile::Permissions perm, bool isDir)
+        QFile::Permissions perm, bool isDir, bool isSymLink = false)
 {
     quint32 uPerm = isDir ? 0040000 : 0100000;
+
+    if ( isSymLink ) {
+#ifdef Q_OS_WIN
+        uPerm = 0200000;
+#else
+        uPerm = 0120000;
+#endif
+    }
+
     if ((perm & QFile::ReadOwner) != 0)
         uPerm |= 0400;
     if ((perm & QFile::WriteOwner) != 0)
@@ -91,7 +100,7 @@ QuaZipNewInfo::QuaZipNewInfo(const QString& name, const QString& file):
     dateTime = QDateTime::currentDateTime();
   } else {
     dateTime = lm;
-    QuaZipNewInfo_setPermissions(this, info.permissions(), info.isDir());
+    QuaZipNewInfo_setPermissions(this, info.permissions(), info.isDir(), info.isSymLink());
   }
 }
 
@@ -107,7 +116,7 @@ void QuaZipNewInfo::setFilePermissions(const QString &file)
 {
     QFileInfo info = QFileInfo(file);
     QFile::Permissions perm = info.permissions();
-    QuaZipNewInfo_setPermissions(this, perm, info.isDir());
+    QuaZipNewInfo_setPermissions(this, perm, info.isDir(), info.isSymLink());
 }
 
 void QuaZipNewInfo::setPermissions(QFile::Permissions permissions)

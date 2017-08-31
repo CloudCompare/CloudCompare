@@ -27,22 +27,14 @@
 //Local
 #include "ccColorScale.h"
 
-
-//! Maximum color ramp size
-/** 252 so as to get 1024 bytes as total required memory
-(see MinRequiredBytes).
-**/
-static const unsigned CC_MAX_SHADER_COLOR_RAMP_SIZE = 256;
-
-//! Buffer for converting a color scale to packed values before sending it to shader
-static float s_packedColormapf[CC_MAX_SHADER_COLOR_RAMP_SIZE];
-
-class ccColorRampShader : public ccShader
+class QCC_DB_LIB_API ccColorRampShader : public ccShader
 {
+	Q_OBJECT
+	
 public:
 
 	//! Default constructor
-	ccColorRampShader() : ccShader() {}
+	ccColorRampShader();
 
 	//! Destructor
 	virtual ~ccColorRampShader() {}
@@ -50,46 +42,15 @@ public:
 	//! Setups shader
 	/** Shader must have already been stared!
 	**/
-	bool setup(QOpenGLFunctions_2_1* glFunc, float minSatRel, float maxSatRel, unsigned colorSteps, const ccColorScale::Shared& colorScale)
-	{
-		assert(glFunc);
+	bool setup(QOpenGLFunctions_2_1* glFunc, float minSatRel, float maxSatRel, unsigned colorSteps, const ccColorScale::Shared& colorScale);
 
-		if (colorSteps > CC_MAX_SHADER_COLOR_RAMP_SIZE)
-		{
-			colorSteps = CC_MAX_SHADER_COLOR_RAMP_SIZE;
-		}
-
-		setUniformValue("uf_minSaturation", minSatRel);
-		setUniformValue("uf_maxSaturation", maxSatRel);
-		setUniformValue("uf_colormapSize", static_cast<float>(colorSteps));
-
-		static const unsigned resolution = (1 << 24);
-
-		//set 'grayed' points color as a float-packed value
-		{
-			int rgb = (ccColor::lightGrey.r << 16) | (ccColor::lightGrey.g << 8) | ccColor::lightGrey.b;
-			float packedColorGray = static_cast<float>(static_cast<double>(rgb) / resolution);
-			setUniformValue("uf_colorGray", packedColorGray);
-		}
-
-		//send colormap to shader
-		assert(colorScale);
-		for (unsigned i = 0; i < colorSteps; ++i)
-		{
-			const ColorCompType* col = colorScale->getColorByRelativePos(static_cast<double>(i) / (colorSteps - 1), colorSteps);
-			//set ramp colors as float-packed values
-			int rgb = (col[0] << 16) | (col[1] << 8) | col[2];
-			s_packedColormapf[i] = static_cast<float>(static_cast<double>(rgb) / resolution);
-		}
-		setUniformValueArray("uf_colormapTable", s_packedColormapf, colorSteps, 1);
-
-		return (glFunc->glGetError() == 0);
-	}
+	//! Returns the maximum color ramp size
+	static unsigned MaxColorRampSize();
 
 	//! Returns the minimum memory required on the shader side
 	/** See GL_MAX_FRAGMENT_UNIFORM_COMPONENTS
 	**/
-	static GLint MinRequiredBytes() { return (CC_MAX_SHADER_COLOR_RAMP_SIZE + 4) * 4; }
+	static GLint MinRequiredBytes();
 
 };
 

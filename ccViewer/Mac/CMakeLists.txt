@@ -7,6 +7,6 @@ if( APPLE )
    install( FILES ../images/icon/cc_viewer_icon.icns DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Resources COMPONENT Runtime )
 
    # remove any dev-machine specific lib paths
-   install( CODE "execute_process( COMMAND \"${CMAKE_SOURCE_DIR}/mac_scripts/fix_libs.sh\"
+   install( CODE "execute_process( COMMAND \"${CMAKE_SOURCE_DIR}/scripts/mac/fix_libs.sh\"
        \"${CCVIEWER_MAC_FRAMEWORK_DIR}\" )" COMPONENT Runtime )
 endif( APPLE )

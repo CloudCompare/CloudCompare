@@ -312,6 +312,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="keyboardTracking">
+         <bool>false</bool>
+        </property>
         <property name="decimals">
          <number>6</number>
         </property>

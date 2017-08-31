@@ -21,9 +21,6 @@
 //local
 #include "GenericIndexedCloud.h"
 
-//system
-#include <assert.h>
-
 using namespace CCLib;
 
 SimpleMesh::SimpleMesh(GenericIndexedCloud* _theVertices, bool linkVerticesWithMesh)

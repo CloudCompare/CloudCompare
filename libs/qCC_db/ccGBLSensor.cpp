@@ -682,7 +682,7 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 			ccProgressDialog pdlg(true);
 			CCLib::NormalizedProgress nprogress(&pdlg,pointCount);
 			pdlg.setMethodTitle(QObject::tr("Depth buffer"));
-			pdlg.setInfo(QObject::tr("Points: %1").arg(pointCount));
+			pdlg.setInfo(QObject::tr("Points: %L1").arg( pointCount ));
 			pdlg.start();
 			QCoreApplication::processEvents();
 

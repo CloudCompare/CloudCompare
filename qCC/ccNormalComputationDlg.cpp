@@ -51,8 +51,7 @@ ccNormalComputationDlg::ccNormalComputationDlg(SelectionMode selectionMode, QWid
 		{
 		case WITH_SCAN_GRIDS:
 			{
-				//useScanGridRadioButton->setChecked(true); //DGM: not so interesting in fact!
-				useOctreeRadioButton->setChecked(true);
+				useScanGridRadioButton->setChecked(true);
 				scanGridsOrientRadioButton->setChecked(true);
 			}
 			break;
@@ -167,14 +166,14 @@ bool ccNormalComputationDlg::useScanGridsForComputation() const
 	return useScanGridRadioButton->isChecked();
 }
 
-int ccNormalComputationDlg::getGridKernelSize() const
+double ccNormalComputationDlg::getMinGridAngle_deg() const
 {
-	return gridKernelSpinBox->value();
+	return gridAngleDoubleSpinBox->value();
 }
 
-void ccNormalComputationDlg::setGridKernelSize(int value)
+void ccNormalComputationDlg::setMinGridAngle_deg(double value)
 {
-	gridKernelSpinBox->setValue(value);
+	gridAngleDoubleSpinBox->setValue(value);
 }
 
 bool ccNormalComputationDlg::orientNormals() const

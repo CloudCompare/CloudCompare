@@ -38,7 +38,8 @@ namespace GfxTL
 	template< class Cell >
 	inline bool BaseTree< Cell >::IsLeaf(const CellType &cell) const
 	{
-		return &(cell[0]) == NULL;
+		volatile const CellType* st = (&(cell[0]));
+		return st == nullptr;
 	}
 
 	template< class Cell >

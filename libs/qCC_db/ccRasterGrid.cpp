@@ -176,8 +176,8 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	}
 
 	//input cloud as a ccPointCloud
-	ccPointCloud* pc = 0;
-	if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
+	ccPointCloud* pc = nullptr;
+	if (cloud->isA(CC_TYPES::POINT_CLOUD))
 	{
 		pc = static_cast<ccPointCloud*>(cloud);
 	}
@@ -216,7 +216,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	if (progressDialog)
 	{
 		progressDialog->setMethodTitle(QObject::tr("Grid generation"));
-		progressDialog->setInfo(QObject::tr("Points: %1\nCells: %2 x %3").arg(pointCount).arg(width).arg(height));
+		progressDialog->setInfo(QObject::tr("Points: %L1\nCells: %L2 x %L3").arg( pointCount ).arg(width).arg(height));
 		progressDialog->start();
 		progressDialog->show();
 		QCoreApplication::processEvents();
@@ -224,7 +224,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	CCLib::NormalizedProgress nProgress(progressDialog, pointCount);
 
 	//vertical dimension
-	assert(Z >= 0 && Z <= 2);
+	assert(Z <= 2);
 	const unsigned char X = Z == 2 ? 0 : Z + 1;
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 

@@ -500,7 +500,6 @@ void qM3C2Plugin::doAction()
 
 	//normals computation parameters
 	double normalScale = dlg.normalScaleDoubleSpinBox->value();
-	bool useCloud1Normals = dlg.useCloud1NormalsCheckBox->isChecked() && dlg.useCloud1NormalsCheckBox->isEnabled();
 	double projectionScale = dlg.cylDiameterDoubleSpinBox->value();
 	qM3C2Normals::ComputationMode normMode = dlg.getNormalsComputationMode();
 	double samplingDist = dlg.cpSubsamplingDoubleSpinBox->value();

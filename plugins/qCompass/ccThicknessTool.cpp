@@ -271,7 +271,7 @@ void ccThicknessTool::recurseChildren(ccHObject* obj, bool hidePointClouds, bool
 	}
 
 	//recurse on children
-	for (int i = 0; i < obj->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < obj->getChildrenNumber(); i++)
 	{
 		recurseChildren(obj->getChild(i), hidePointClouds, hidePlanes);
 	}

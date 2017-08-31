@@ -251,14 +251,14 @@ void ccCompass::doAction()
 	//loop through DB_Tree and find any ccCompass objects
 	std::vector<int> originals; //ids of original objects
 	std::vector<ccHObject*> replacements; //pointers to objects that will replace the originals
-	for (int i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
 	{
 		ccHObject* c = m_app->dbRootObject()->getChild(i);
-		tryLoading(c,&originals,&replacements);
+		tryLoading(c, &originals, &replacements);
 	}
 
 	//replace all "originals" with their corresponding "duplicates"
-	for (int i = 0; i < originals.size(); i++)
+	for (size_t i = 0; i < originals.size(); i++)
 	{
 		ccHObject* original = m_app->dbRootObject()->find(originals[i]);
 		ccHObject* replacement = replacements[i];
@@ -269,7 +269,7 @@ void ccCompass::doAction()
 			continue;
 
 		//steal all the children
-		for (int c = 0; c < original->getChildrenNumber(); c++)
+		for (unsigned c = 0; c < original->getChildrenNumber(); c++)
 		{
 			replacement->addChild(original->getChild(c));
 		}
@@ -316,7 +316,7 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 	}
 
 	//recurse on children
-	for (int i = 0; i < obj->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < obj->getChildrenNumber(); i++)
 	{
 		tryLoading(obj->getChild(i), originals, replacements);
 	}
@@ -1011,7 +1011,7 @@ void ccCompass::fitPlaneToGeoObject()
 	ccHObject* upper = obj->getRegion(ccGeoObject::UPPER_BOUNDARY);
 	ccPointCloud* points = new ccPointCloud(); //create point cloud for storing points
 	double rms; //float for storing rms values
-	for (int i = 0; i < upper->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < upper->getChildrenNumber(); i++)
 	{
 		if (ccTrace::isTrace(upper->getChild(i)))
 		{
@@ -1019,7 +1019,7 @@ void ccCompass::fitPlaneToGeoObject()
 			points->reserve(points->size() + t->size()); //make space
 			if (t) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
 			{
-				for (int p = 0; p < t->size(); p++)
+				for (unsigned p = 0; p < t->size(); p++)
 				{
 					points->addPoint(*t->getPoint(p)); //add point to 
 				}
@@ -1048,7 +1048,7 @@ void ccCompass::fitPlaneToGeoObject()
 	//rinse and repeat for lower
 	points->clear();
 	ccHObject* lower = obj->getRegion(ccGeoObject::LOWER_BOUNDARY);
-	for (int i = 0; i < lower->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < lower->getChildrenNumber(); i++)
 	{
 		if (ccTrace::isTrace(lower->getChild(i)))
 		{
@@ -1056,7 +1056,7 @@ void ccCompass::fitPlaneToGeoObject()
 			points->reserve(points->size() + t->size()); //make space
 			if (t) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
 			{
-				for (int p = 0; p < t->size(); p++)
+				for (unsigned p = 0; p < t->size(); p++)
 				{
 					points->addPoint(*t->getPoint(p)); //add point to cloud
 				}
@@ -1114,7 +1114,7 @@ void ccCompass::hideAllPointClouds(ccHObject* o)
 		return;
 	}
 
-	for (int i = 0; i < o->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < o->getChildrenNumber(); i++)
 	{
 		hideAllPointClouds(o->getChild(i));
 	}
@@ -1404,7 +1404,7 @@ int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
 		}
 
 		//write point string
-		for (int i = 0; i < line->size(); i++)
+		for (unsigned i = 0; i < line->size(); i++)
 		{
 
 			//get point in world coordinates
@@ -1426,7 +1426,7 @@ int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
 	}
 
 	//recurse on children
-	for (int i = 0; i < object->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
 		n += writeTracesSVG(object->getChild(i), out, height);
 	}

@@ -60,7 +60,7 @@ ccTrace::ccTrace(ccPolyline* obj)
 
 	//copy polyline into trace points
 	std::deque<int> seg;
-	for (int i = 0; i < obj->size(); i++)
+	for (unsigned i = 0; i < obj->size(); i++)
 	{
 		//copy into "trace" object
 		int pId = obj->getPointGlobalIndex(i); //get global point ID
@@ -646,7 +646,7 @@ void ccTrace::buildGradientCost(QWidget* parent)
 	m_cloud->setCurrentScalarField(idx);
 
 	//make colours greyscale and push to SF (otherwise copy active SF)
-	for (int i = 0; i < m_cloud->size(); i++)
+	for (unsigned i = 0; i < m_cloud->size(); i++)
 	{
 		m_cloud->setPointScalarValue(i, static_cast<ScalarType>(m_cloud->getPointColor(i)[0] + m_cloud->getPointColor(i)[1] + m_cloud->getPointColor(i)[2]));
 	}
@@ -688,7 +688,7 @@ void ccTrace::buildGradientCost(QWidget* parent)
 	//normalize and log-transform
 	m_cloud->setCurrentScalarField(gIdx);
 	float logMax = log(m_cloud->getScalarField(gIdx)->getMax() + 10);
-	for (int i = 0; i < m_cloud->size(); i++)
+	for (unsigned i = 0; i < m_cloud->size(); i++)
 	{
 		int nVal = 765 * log(m_cloud->getPointScalarValue(i) + 10) / logMax;
 		if (nVal < 0) //this is caused by isolated points that were assigned "null" value gradients
@@ -736,7 +736,7 @@ void ccTrace::buildCurvatureCost(QWidget* parent)
 
 	//normalize and log-transform
 	float logMax = log(m_cloud->getScalarField(idx)->getMax() + 10);
-	for (int i = 0; i < m_cloud->size(); i++)
+	for (unsigned i = 0; i < m_cloud->size(); i++)
 	{
 		int nVal = 765 * log(m_cloud->getPointScalarValue(i) + 10) / logMax;
 		if (nVal < 0) //this is caused by isolated points that were assigned "null" value curvatures

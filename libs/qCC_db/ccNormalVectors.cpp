@@ -698,6 +698,12 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCLib::DgmOctree::oc
 
 		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
 		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, false);
+		float cur_radius = radius;
+		while (k < NUMBER_OF_POINTS_FOR_NORM_WITH_QUADRIC && cur_radius < 16*radius)
+		{
+			cur_radius *= 1.189207115f;
+			k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, cur_radius, false);
+		}
 		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_QUADRIC)
 		{
 			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
@@ -749,6 +755,12 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 
 		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
 		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, false);
+		float cur_radius = radius;
+		while (k < NUMBER_OF_POINTS_FOR_NORM_WITH_LS && cur_radius < 16*radius)
+		{
+			cur_radius *= 1.189207115f;
+			k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, cur_radius, false);
+		}
 		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_LS)
 		{
 			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);

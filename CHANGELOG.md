@@ -127,6 +127,7 @@ v2.9.alpha - XX/XX/XXXX
 	* Normal computation tools:
 		- new algorithm to compute the normals based on scan grids (faster, and more robust)
 		- the 'kernel size' parameter is replaced by 'the minimum angle of triangles' used in the internal triangulation process
+		- Plane and Quadric mode increase the radius adaptively to reach minimum number of points
 
 	* Other
 		- color scales are now listed in alphabetical order

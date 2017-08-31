@@ -22,6 +22,9 @@
 
 #include <ccPointCloud.h>
 
+/*
+Simple class used to represent notes created with qCompass
+*/
 class ccNote : public ccPointPair
 {
 public:

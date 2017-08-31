@@ -22,6 +22,9 @@
 
 #include <ccPointCloud.h>
 
+/*
+Simple class used to create/represent/draw pinch-nodes created using qCompass
+*/
 class ccPinchNode : public ccPointPair
 {
 public:
@@ -32,6 +35,7 @@ public:
 	//write metadata specific to this object
 	void updateMetadata() override;
 
+	//returns true if obj is/was a pinchNode (as recorded by its metadata)
 	static bool isPinchNode(ccHObject* obj);
 };
 

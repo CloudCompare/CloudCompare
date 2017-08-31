@@ -31,6 +31,7 @@
 #include <ui_mapDlg.h>
 #include "ccTrace.h"
 
+//class encapsulating the map-mode overlay dialog
 class ccMapDlg : public ccOverlayDialog, public Ui::mapDlg
 {
 	Q_OBJECT
@@ -38,11 +39,6 @@ class ccMapDlg : public ccOverlayDialog, public Ui::mapDlg
 public:
 	//! Default constructor
 	explicit ccMapDlg(QWidget* parent = 0);
-
-protected slots:
-	
-
-private:
 
 };
 

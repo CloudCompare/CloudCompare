@@ -22,6 +22,9 @@
 
 #include <ccPointCloud.h>
 
+/*
+Class for representing/drawing lineations measured with qCompass.
+*/
 class ccLineation : public ccPointPair
 {
 public:
@@ -32,6 +35,7 @@ public:
 	//write metadata specific to this object
 	void updateMetadata() override;
 
+	//returns true if the given ccHObject is/was a ccLineation (as defined by the objects metadata)
 	static bool isLineation(ccHObject* obj);
 };
 #endif

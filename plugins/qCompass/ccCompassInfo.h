@@ -27,6 +27,9 @@
 #include <QFile>
 #include <QTextStream>
 
+/*
+Simple class for displaying the help dialog.
+*/
 class ccCompassInfo : public QDialog
 {
 

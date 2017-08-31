@@ -22,6 +22,9 @@
 
 #include <ccPointCloud.h>
 
+/*
+Objects representing thickness measurements
+*/
 class ccThickness : public ccPointPair
 {
 public:
@@ -32,6 +35,7 @@ public:
 	//write metadata specific to this object
 	void updateMetadata() override;
 
+	//returns true if obj was/is a thickness measurement (as defined by the objects metadata)
 	static bool isThickness(ccHObject* obj);
 };
 

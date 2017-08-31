@@ -49,18 +49,19 @@ public:
 	*/
 	bool planeFitMode();
 
+	//menus
 	QMenu *m_cost_algorithm_menu;
 	QMenu *m_settings_menu;
 	QMenu *m_pairpicking_menu;
 
-	//settings menu
+	//settings menu actions
 	QAction *m_plane_fit;
 	QAction *m_showStippled;
 	QAction *m_showNormals;
 	QAction *m_showNames;
 	QAction *m_recalculate;
 
-	//pair picking menu
+	//pair picking menu actions
 	QAction *m_pinchTool;
 	QAction *m_measure_thickness; //activates thickness tool
 	QAction *m_measure_thickness_twoPoint; //activates thickness tool
@@ -99,7 +100,6 @@ private:
 	QAction *m_scalar;
 	QAction *m_scalar_inv;
 	
-
 	//disactivates all cost function checkboxes
 	void clearCost()
 	{
@@ -112,7 +112,6 @@ private:
 		m_scalar->setChecked(false);
 		m_scalar_inv->setChecked(false);
 	}
-
 };
 
 #endif

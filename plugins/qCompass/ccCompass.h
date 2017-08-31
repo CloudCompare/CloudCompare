@@ -97,16 +97,20 @@ public:
 
 protected slots:
 
+	//initialise the plugin
 	void doAction();
 
-	bool startMeasuring(); //start picking mode
-	bool stopMeasuring(); //stop picking mode
+	//start picking mode
+	bool startMeasuring();
 
-	//picked point callbacks
-	void pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3& P);
+	//stop picking mode
+	bool stopMeasuring();
 	
 	//inherited from ccPickingListener
 	virtual void onItemPicked(const ccPickingListener::PickedItem& pi) override;
+
+	//picked point callback (called by the above function)
+	void pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3& P);
 
 	//**************
 	//GUI actions:

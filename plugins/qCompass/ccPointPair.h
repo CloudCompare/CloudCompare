@@ -28,6 +28,9 @@
 
 #include "ccMeasurement.h"
 
+/*
+Template class, based around ccPolyline, that measurements comprising individual or pairs of points can derive from.
+*/
 class ccPointPair : 
 	public ccPolyline, 
 	public ccMeasurement
@@ -38,12 +41,13 @@ public:
 
 	virtual ~ccPointPair() {}
 
-	virtual void updateMetadata() { }; //overriding by actual data classes (see bottom of file)
+	virtual void updateMetadata() { };
 
 	//get the direction of this pair (not normalized) 
 	CCVector3 getDirection();
 
 protected:
+	//size that the point-markers are drawn
 	float m_relMarkerScale = 5.0f;
 
 	//overidden from ccHObject
@@ -51,6 +55,7 @@ protected:
 
 //static functions
 public:
+	//returns true if object is/was a ccPointPair (as defined by its MetaData)
 	static bool isPointPair(ccHObject* object);
 };
 

@@ -29,6 +29,11 @@
 
 class ccTopologyRelation;
 
+/*
+ccGeoObjects are a data-organisation structure comprised of four ccHObjects, a parent (representing the "GeoObject") and 3 children,
+representing the "upper boundary", "lower boundary" and "interior" of the GeoObject.
+*/
+
 class ccGeoObject : public ccHObject
 {
 public:
@@ -56,35 +61,55 @@ public:
 	static const int LOWER_BOUNDARY = 2;
 
 protected:
+	//link back to the main plugin interface
 	ccMainAppInterface* m_app;
-	ccPointCloud* m_associatedCloud = nullptr; //the dataset this object "belongs" too. Assigned when an "interior" gets defined.
-	ccHObject* m_interior = nullptr; //group containing interior point set and associated measurments
+
+	//the dataset this object "belongs" too. Assigned when an "interior" gets defined.
+	ccPointCloud* m_associatedCloud = nullptr;
+
+	//group containing interior point set and associated measurments
+	ccHObject* m_interior = nullptr; 
 	int m_interior_id = -1;
 
-	ccHObject* m_upper = nullptr; //group containing upper boundary polylines and associated measurments
+	//group containing upper boundary polylines and associated measurments
+	ccHObject* m_upper = nullptr; 
 	int m_upper_id = -1;
 
-	ccHObject* m_lower = nullptr; //group containing lower boundary polylines/traces and associated measurments
+	//group containing lower boundary polylines/traces and associated measurments
+	ccHObject* m_lower = nullptr; 
 	int m_lower_id = -1;
 
+	//protected functions for generating the above objects
 	void generateInterior();
 	void generateUpper();
 	void generateLower();
 
 private:
+	//builds this GeoObject and its ccHObject components
 	void init(QString name, ccMainAppInterface* app);
+
+	//searches and activates/disactivates children belonging to the ccHObject. This is used when the DBTree selection changes.
 	void recurseChildren(ccHObject* par, bool highlight);
+
+	//return the topology relationship between this ccHObject and another (WIP).
 	ccTopologyRelation* getRelation(ccHObject* obj, int id1, int id2);
 
 //static functions
 public:
+	//returns true if object is a ccGeoObject
 	static bool isGeoObject(ccHObject* object);
+
+	//returns true if object is the upper component of a ccGeoObject
 	static bool isGeoObjectUpper(ccHObject* object);
+
+	//returns true if object is the lower component of a ccGeoObject
 	static bool isGeoObjectLower(ccHObject* object);
+
+	//returns ture if object is the interior component of a ccGeoObject
 	static bool isGeoObjectInterior(ccHObject* object);
-	static ccGeoObject* getGeoObjectParent(ccHObject* object); //return the GeoObject parent of the given object (or null if there is none)
 
+	//traverses up the DbTree, starting at object, until a ccHObject is found. If none is found this will return null.
+	static ccGeoObject* getGeoObjectParent(ccHObject* object);
 };
-
 
 #endif

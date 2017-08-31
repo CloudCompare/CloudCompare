@@ -24,6 +24,9 @@
 
 class ccGeoObject;
 
+/*
+Class/object used to define topological (timing) relationships between different ccGeoObjects [WIP]
+*/
 class ccTopologyRelation : public ccPointPair
 {
 public:

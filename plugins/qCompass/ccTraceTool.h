@@ -1,9 +1,29 @@
+//##########################################################################
+//#                                                                        #
+//#                    CLOUDCOMPARE PLUGIN: ccCompass                      #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#                     COPYRIGHT: Sam Thiele  2017                        #
+//#                                                                        #
+//##########################################################################
+
 #ifndef CC_TRACETOOL_HEADER
 #define CC_TRACETOOL_HEADER
 
 #include "cctool.h"
 #include "ccTrace.h"
 
+/*
+Tool used to digitise traces
+*/
 class ccTraceTool :
 	public ccTool
 {
@@ -36,6 +56,7 @@ public:
 	void undo() override;
 
 protected:
+	//finishes and finalises the trace currently being digitised to
 	void finishCurrentTrace();
 	bool pickupTrace(ccHObject* obj); //if obj is a ccTrace, it becomes the active trace. Returns true if succesfull
 	

@@ -5605,7 +5605,7 @@ ccGLWindow* MainWindow::new3DView()
 	{
 		ccLog::Error("Failed to create the 3D view");
 		assert(false);
-		return false;
+		return nullptr;
 	}
 
 	//restore options

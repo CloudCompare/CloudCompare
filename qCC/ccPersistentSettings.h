@@ -44,6 +44,7 @@ public:
 	static inline const QString GlobalShift                 () { return "GlobalShift"; }
 	static inline const QString MaxAbsCoord                 () { return "MaxAbsCoord"; }
 	static inline const QString MaxAbsDiag                  () { return "MaxAbsDiag"; }
+	static inline const QString AutoPickRotationCenter      () { return "AutoPickRotationCenter"; }
 };
 
 #endif //CC_PERSISTENT_SETTINGS_HEADER

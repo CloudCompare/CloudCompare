@@ -2898,6 +2898,21 @@ void ccGLWindow::setPivotPoint(	const CCVector3d& P,
 	invalidateVisualization();
 }
 
+void ccGLWindow::setAutoPickPivotAtCenter(bool state)
+{
+	if (m_autoPickPivotAtCenter != state)
+	{
+		m_autoPickPivotAtCenter = state;
+
+		if (state)
+		{
+			//force 3D redraw to update the coordinates of the 'auto' pivot center
+			m_autoPivotCandidate = CCVector3d(0, 0, 0);
+			redraw(false);
+		}
+	}
+}
+
 void ccGLWindow::setPixelSize(float pixelSize)
 {
 	if (m_viewportParams.pixelSize != pixelSize)

@@ -616,7 +616,7 @@ public: //stereo mode
 	bool cursorCoordinatesShown() const { return m_showCursorCoordinates; }
 
 	//! Toggles the automatic setting of the pivot point at the center of the screen
-	void setAutoPickPivotAtCenter(bool state) { m_autoPickPivotAtCenter = state; }
+	void setAutoPickPivotAtCenter(bool state);
 	//! Whether the pivot point is automatically set at the center of the screen
 	bool autoPickPivotAtCenter() const { return m_autoPickPivotAtCenter; }
 

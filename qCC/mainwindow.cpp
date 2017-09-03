@@ -5599,8 +5599,21 @@ ccGLWindow* MainWindow::new3DView()
 
 	QWidget* viewWidget = nullptr;
 	ccGLWindow* view3D = nullptr;
+	
 	createGLWindow(view3D, viewWidget);
-	assert(viewWidget && view3D);
+	if (!viewWidget || !view3D)
+	{
+		ccLog::Error("Failed to create the 3D view");
+		assert(false);
+		return false;
+	}
+
+	//restore options
+	{
+		QSettings settings;
+		bool autoPickRotationCenter = settings.value(ccPS::AutoPickRotationCenter(), true).toBool();
+		view3D->setAutoPickPivotAtCenter(autoPickRotationCenter);
+	}
 
 	viewWidget->setMinimumSize(400, 300);
 
@@ -5728,7 +5741,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 			|| QMessageBox::question(	this,
 										"Quit",
 										"Are you sure you want to quit?",
-										QMessageBox::Ok,QMessageBox::Cancel ) != QMessageBox::Cancel)
+										QMessageBox::Ok, QMessageBox::Cancel) != QMessageBox::Cancel)
 		{
 			event->accept();
 		}
@@ -5739,7 +5752,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	}
 
 	if (s_autoSaveGuiElementPos)
+	{
 		saveGUIElementsPos();
+	}
 }
 
 void MainWindow::saveGUIElementsPos()
@@ -8542,6 +8557,12 @@ void MainWindow::toggleActiveWindowAutoPickRotCenter(bool state)
 	if (win)
 	{
 		win->setAutoPickPivotAtCenter(state);
+
+		//save the option
+		{
+			QSettings settings;
+			settings.setValue(ccPS::AutoPickRotationCenter(), state);
+		}
 	}
 }
 

@@ -12,6 +12,7 @@ v2.9.alpha - XX/XX/XXXX
 		- new option to position the pivot point automatically on the point currently at the screen center (dynamic update)
 			(now the default behavior, can be toggled thanks to the dedicated icon in the 'Viewing tools' toolbar or the 'Shift + P' shortcut)
 		- double clicking on the 3D view will also reposition the pivot point on the point under the cursor
+		- the state of this option is automatically saved and restored when CC starts
 		
 	* New option: 'Display > Show cursor coordinates'
 		- if activated, the position of the mouse cursor relatively to the 3D view is constantly displayed

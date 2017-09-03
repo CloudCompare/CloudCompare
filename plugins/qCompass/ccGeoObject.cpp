@@ -140,7 +140,7 @@ ccTopologyRelation* ccGeoObject::getRelation(ccHObject* obj, int id1, int id2)
 	}
 
 	//search children
-	for (int i = 0; i < obj->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < obj->getChildrenNumber(); i++)
 	{
 		ccTopologyRelation* r = getRelation(obj->getChild(i), id1, id2);
 		if (r)
@@ -264,7 +264,7 @@ void ccGeoObject::recurseChildren(ccHObject* par, bool highlight)
 	}
 
 	//recurse
-	for (int i = 0; i < par->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < par->getChildrenNumber(); i++)
 	{
 		ccHObject* c = par->getChild(i);
 		recurseChildren(c, highlight);

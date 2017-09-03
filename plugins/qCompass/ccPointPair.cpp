@@ -33,7 +33,7 @@ ccPointPair::ccPointPair(ccPolyline* obj)
 	: ccPolyline(obj->getAssociatedCloud())
 {
 	//load points
-	for (int i = 0; i < obj->size(); i++)
+	for (unsigned i = 0; i < obj->size(); i++)
 	{
 		int pId = obj->getPointGlobalIndex(i); //get global point ID
 		addPointIndex(pId); //add point to this polyline

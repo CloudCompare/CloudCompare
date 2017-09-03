@@ -45,7 +45,7 @@ void ccNoteTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCl
 
 	//find insert point
 	ccHObject* notesFolder = nullptr;
-	for (int i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
 	{
 		if (m_app->dbRootObject()->getChild(i)->getName() == "notes")
 		{

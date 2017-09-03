@@ -64,6 +64,9 @@ ccCompass::~ccCompass()
 
 void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 {
+	//disable the main plugin icon if no entity is loaded
+	m_action->setEnabled(m_app && m_app->dbRootObject() && m_app->dbRootObject()->getChildrenNumber() != 0);
+
 	if (!m_dlg | !m_mapDlg)
 	{
 		return; //not initialized yet - ignore callback

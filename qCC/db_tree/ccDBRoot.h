@@ -221,6 +221,8 @@ protected slots:
 
 signals:
 	void selectionChanged();
+	void dbIsEmpty();
+	void dbIsNotEmptyAnymore();
 
 protected:
 

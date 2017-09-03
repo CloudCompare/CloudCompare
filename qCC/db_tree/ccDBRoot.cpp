@@ -189,7 +189,9 @@ ccDBRoot::~ccDBRoot()
 void ccDBRoot::unloadAll()
 {
 	if (!m_treeRoot)
+	{
 		return;
+	}
 
 	while (m_treeRoot->getChildrenNumber() > 0)
 	{
@@ -204,6 +206,8 @@ void ccDBRoot::unloadAll()
 		endRemoveRows();
 	}
 
+	emit dbIsEmpty();
+
 	updatePropertiesView();
 
 	MainWindow::RefreshAllGLWindow(false);
@@ -216,8 +220,18 @@ ccHObject* ccDBRoot::getRootEntity()
 
 void ccDBRoot::addElement(ccHObject* object, bool autoExpand/*=true*/)
 {
-	if (!object)
+	if (!m_treeRoot)
+	{
+		assert(false);
 		return;
+	}
+	if (!object)
+	{
+		assert(false);
+		return;
+	}
+
+	bool wasEmpty = (m_treeRoot->getChildrenNumber() == 0);
 
 	//look for object's parent
 	ccHObject* parentObject = object->getParent();
@@ -260,14 +274,21 @@ void ccDBRoot::addElement(ccHObject* object, bool autoExpand/*=true*/)
 	{
 		m_dbTreeWidget->expand(insertNodeIndex);
 	}
+
+	if (wasEmpty && m_treeRoot->getChildrenNumber() != 0)
+	{
+		emit dbIsNotEmptyAnymore();
+	}
 }
 
 void ccDBRoot::expandElement(ccHObject* object, bool state)
 {
 	if (!object || !m_dbTreeWidget)
+	{
 		return;
+	}
 
-	m_dbTreeWidget->setExpanded(index(object),state);
+	m_dbTreeWidget->setExpanded(index(object), state);
 }
 
 void ccDBRoot::removeElements(ccHObject::Container& objects)
@@ -282,9 +303,8 @@ void ccDBRoot::removeElements(ccHObject::Container& objects)
 	hidePropertiesView();
 
 	//every object in tree must have a parent!
-	for (size_t i=0; i<objects.size(); ++i)
+	for (ccHObject* object : objects)
 	{
-		ccHObject* object = objects[i];
 		ccHObject* parent = object->getParent();
 		if (!parent)
 		{
@@ -299,7 +319,7 @@ void ccDBRoot::removeElements(ccHObject::Container& objects)
 		assert(childPos >= 0);
 		{
 			//row removal operation (start)
-			beginRemoveRows(index(parent),childPos,childPos);
+			beginRemoveRows(index(parent), childPos, childPos);
 
 			parent->removeChild(childPos);
 
@@ -310,6 +330,11 @@ void ccDBRoot::removeElements(ccHObject::Container& objects)
 
 	//we restore properties view
 	updatePropertiesView();
+
+	if (m_treeRoot->getChildrenNumber() == 0)
+	{
+		emit dbIsEmpty();
+	}
 }
 
 void ccDBRoot::removeElement(ccHObject* object)
@@ -338,7 +363,7 @@ void ccDBRoot::removeElement(ccHObject* object)
 	assert(childPos >= 0);
 	{
 		//row removal operation (start)
-		beginRemoveRows(index(parent),childPos,childPos);
+		beginRemoveRows(index(parent), childPos, childPos);
 
 		parent->removeChild(childPos);
 
@@ -348,6 +373,11 @@ void ccDBRoot::removeElement(ccHObject* object)
 
 	//we restore properties view
 	updatePropertiesView();
+
+	if (m_treeRoot->getChildrenNumber() == 0)
+	{
+		emit dbIsEmpty();
+	}
 }
 
 void ccDBRoot::deleteSelectedEntities()
@@ -355,7 +385,9 @@ void ccDBRoot::deleteSelectedEntities()
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
 	if (selectedIndexes.size() < 1)
+	{
 		return;
+	}
 	unsigned selCount = static_cast<unsigned>(selectedIndexes.size());
 
 	hidePropertiesView();
@@ -365,7 +397,7 @@ void ccDBRoot::deleteSelectedEntities()
 	//(otherwise we may delete the parent before the child!)
 	//TODO DGM: not sure this is still necessary with the new dependency mechanism
 	std::vector<ccHObject*> toBeDeleted;
-	for (unsigned i=0; i<selCount; ++i)
+	for (unsigned i = 0; i < selCount; ++i)
 	{
 		ccHObject* obj = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 		//we don't take care of parent-less objects (i.e. the tree root)
@@ -377,7 +409,7 @@ void ccDBRoot::deleteSelectedEntities()
 
 		//we don't consider objects that are 'descendent' of others in the selection
 		bool isDescendent = false;
-		for (unsigned j=0; j<selCount; ++j)
+		for (unsigned j = 0; j < selCount; ++j)
 		{
 			if (i != j)
 			{
@@ -422,19 +454,26 @@ void ccDBRoot::deleteSelectedEntities()
 			//specific case: the object is a mesh and its parent is its vertices!
 			//(can happen if a Delaunay mesh is computed directly in CC)
 			if (object->getParent() && object->getParent() == ccHObjectCaster::ToGenericMesh(object)->getAssociatedCloud())
+			{
 				object->getParent()->setVisible(true);
+			}
 		}
 
 		ccHObject* parent = object->getParent();
 		int childPos = parent->getChildIndex(object);
 		assert(childPos >= 0);
 
-		beginRemoveRows(index(object).parent(),childPos,childPos);
+		beginRemoveRows(index(object).parent(), childPos, childPos);
 		parent->removeChild(childPos);
 		endRemoveRows();
 	}
 
 	updatePropertiesView();
+
+	if (m_treeRoot->getChildrenNumber() == 0)
+	{
+		emit dbIsEmpty();
+	}
 
 	MainWindow::RefreshAllGLWindow(false);
 }
@@ -442,14 +481,20 @@ void ccDBRoot::deleteSelectedEntities()
 QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
+	{
 		return QVariant();
+	}
 
 	const ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
 	assert(item);
 	if (!item)
+	{
 		return QVariant();
+	}
 
-	if (role == Qt::DisplayRole)
+	switch (role)
+	{
+	case Qt::DisplayRole:
 	{
 		QString baseName(item->getName());
 		if (baseName.isEmpty())
@@ -462,16 +507,20 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 
 		return QVariant(baseName);
 	}
-	if (role == Qt::EditRole)
+	
+	case Qt::EditRole:
 	{
 		return QVariant(item->getName());
 	}
-	else if (role == Qt::DecorationRole)
+
+	case Qt::DecorationRole:
 	{
 		// does the object have an "embedded icon"? - It may be the case for ccHObject defined in plugins
 		QIcon icon = item->getIcon();
 		if (!icon.isNull())
+		{
 			return icon;
+		}
 
 		bool locked = item->isLocked();
 		switch (item->getClassID())
@@ -551,13 +600,20 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 			else
 				return QVariant();
 		}
+		break;
 	}
-	else if (role == Qt::CheckStateRole)
+
+	case Qt::CheckStateRole:
 	{
 		if (item->isEnabled())
 			return Qt::Checked;
 		else
 			return Qt::Unchecked;
+	}
+
+	default:
+		//unhandled role
+		break;
 	}
 
 	return QVariant();
@@ -570,7 +626,9 @@ bool ccDBRoot::setData(const QModelIndex &index, const QVariant &value, int role
 		if (role == Qt::EditRole)
 		{
 			if (value.toString().isEmpty())
+			{
 				return false;
+			}
 
 			ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
 			assert(item);
@@ -618,17 +676,19 @@ bool ccDBRoot::setData(const QModelIndex &index, const QVariant &value, int role
 QModelIndex ccDBRoot::index(int row, int column, const QModelIndex &parentIndex) const
 {
 	if (!hasIndex(row, column, parentIndex))
+	{
 		return QModelIndex();
+	}
 
 	ccHObject *parent = (parentIndex.isValid() ? static_cast<ccHObject*>(parentIndex.internalPointer()) : m_treeRoot);
 	assert(parent);
 	if (!parent)
+	{
 		return QModelIndex();
+	}
+	
 	ccHObject *child = parent->getChild(row);
-	if (child)
-		return createIndex(row, column, child);
-	else
-		return QModelIndex();
+	return child ? createIndex(row, column, child) : QModelIndex();
 }
 
 QModelIndex ccDBRoot::index(ccHObject* object)
@@ -636,7 +696,9 @@ QModelIndex ccDBRoot::index(ccHObject* object)
 	assert(object);
 
 	if (object == m_treeRoot)
+	{
 		return QModelIndex();
+	}
 
 	ccHObject* parent = object->getParent();
 	if (!parent)
@@ -648,23 +710,29 @@ QModelIndex ccDBRoot::index(ccHObject* object)
 	int pos = parent->getChildIndex(object);
 	assert(pos >= 0);
 
-	return createIndex(pos,0,object);
+	return createIndex(pos, 0, object);
 }
 
 QModelIndex ccDBRoot::parent(const QModelIndex &index) const
 {
 	if (!index.isValid())
+	{
 		return QModelIndex();
+	}
 
 	ccHObject *childItem = static_cast<ccHObject*>(index.internalPointer());
-	assert(childItem);
 	if (!childItem)
+	{
+		assert(false);
 		return QModelIndex();
+	}
 	ccHObject *parentItem = childItem->getParent();
 
 	assert(parentItem);
 	if (!parentItem || parentItem == m_treeRoot)
+	{
 		return QModelIndex();
+	}
 
 	return createIndex(parentItem->getIndex(), 0, parentItem);
 }
@@ -710,7 +778,7 @@ void ccDBRoot::changeSelection(const QItemSelection & selected, const QItemSelec
 	//then select
 	QModelIndexList selectedItems = selected.indexes();
 	{
-		for (int i=0; i<selectedItems.count(); ++i)
+		for (int i = 0; i < selectedItems.count(); ++i)
 		{
 			ccHObject* element = static_cast<ccHObject*>(selectedItems.at(i).internalPointer());
 			assert(element);
@@ -738,7 +806,7 @@ void ccDBRoot::unselectEntity(ccHObject* obj)
 		{
 			QItemSelectionModel* selectionModel = m_dbTreeWidget->selectionModel();
 			assert(selectionModel);
-			selectionModel->select(objIndex,QItemSelectionModel::Deselect);
+			selectionModel->select(objIndex, QItemSelectionModel::Deselect);
 		}
 	}
 }
@@ -829,7 +897,7 @@ void ccDBRoot::selectEntities(std::unordered_set<int> entIDs)
 		}
 	}
 
-	selectEntities(entities,ctrlPushed);
+	selectEntities(entities, ctrlPushed);
 }
 
 void ccDBRoot::selectEntities(const ccHObject::Container& entities, bool incremental/*=false*/)
@@ -1400,7 +1468,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 			CCVector3 N = (*_B-*_A).cross(*_C-*_A);
 			planeNormal = CCVector3d::fromArray(N.u);
 			planeVertDir = /*(*_B-*_A)*/win->getCurrentUpDir();
-			center = (*_A + *_B + *_C)/3;
+			center = (*_A + *_B + *_C) / 3;
 		}
 		else
 		{
@@ -1420,7 +1488,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	{
 		ccFacet* facet = static_cast<ccFacet*>(obj);
 		planeNormal = CCVector3d::fromArray(facet->getNormal().u);
-		CCVector3d planeHorizDir(0,1,0);
+		CCVector3d planeHorizDir(0, 1, 0);
 		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal,planeHorizDir,planeVertDir);
 		center = facet->getBB_recursive(false,false).getCenter();
 	}
@@ -1474,9 +1542,10 @@ void ccDBRoot::gatherRecursiveInformation()
 		unsigned imageCount;
 		unsigned sensorCount;
 		unsigned labelCount;
-	} info;
+	}
+	info;
 
-	memset(&info,0,sizeof(GlobalInfo));
+	memset(&info, 0, sizeof(GlobalInfo));
 
 	//init the list of entities to process
 	ccHObject::Container toProcess;
@@ -1489,8 +1558,9 @@ void ccDBRoot::gatherRecursiveInformation()
 		ccLog::Error("Not engough memory");
 		return;
 	}
+
+	for (int i = 0; i < selCount; ++i)
 	{
-		for (int i=0; i<selCount; ++i)
 			toProcess[i] = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 	}
 
@@ -1502,7 +1572,9 @@ void ccDBRoot::gatherRecursiveInformation()
 
 		//we don't process entities twice!
 		if (std::find(alreadyProcessed.begin(), alreadyProcessed.end(), ent) != alreadyProcessed.end())
+		{
 			continue;
+		}
 
 		//gather information from current entity
 		if (ent->isA(CC_TYPES::POINT_CLOUD))
@@ -1546,8 +1618,10 @@ void ccDBRoot::gatherRecursiveInformation()
 		//we can add its children to the 'toProcess' list and itself to the 'processed' list
 		try
 		{
-			for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
+			for (unsigned i = 0; i < ent->getChildrenNumber(); ++i)
+			{
 				toProcess.push_back(ent->getChild(i));
+			}
 			alreadyProcessed.push_back(ent);
 		}
 		catch (const std::bad_alloc&)
@@ -1618,30 +1692,30 @@ void ccDBRoot::sortSelectedEntitiesChildren(SortRules sortRule)
 	if (selCount == 0)
 		return;
 
-	for (int i=0; i<selCount; ++i)
+	for (int i = 0; i < selCount; ++i)
 	{
 		ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 		unsigned childCount = (item ? item->getChildrenNumber() : 0);
 		if (childCount > 1)
 		{
 			//remove all children from DB tree
-			beginRemoveRows(selectedIndexes[i],0,childCount-1);
+			beginRemoveRows(selectedIndexes[i], 0, childCount - 1);
 
 			//row removal operation (end)
 			endRemoveRows();
 
 			//sort
-			for (unsigned k=0; k<childCount-1; ++k)
+			for (unsigned k = 0; k < childCount - 1; ++k)
 			{
 				unsigned firstChildIndex = k;
 				ccHObject* firstChild = item->getChild(k);
 				QString firstChildName = firstChild->getName().toUpper();
 
-				for (unsigned j=k+1; j<childCount; ++j)
+				for (unsigned j = k + 1; j < childCount; ++j)
 				{
 					bool swap = false;
 					QString currentName = item->getChild(j)->getName().toUpper();
-					switch(sortRule)
+					switch (sortRule)
 					{
 					case SORT_A2Z:
 						swap = (firstChildName.compare(currentName) > 0);
@@ -1651,7 +1725,7 @@ void ccDBRoot::sortSelectedEntitiesChildren(SortRules sortRule)
 						break;
 					case SORT_BY_TYPE:
 						if (firstChild->getClassID() == item->getChild(j)->getClassID())
-							swap = (firstChildName.compare(currentName)>0); //A2Z in second choice
+							swap = (firstChildName.compare(currentName) > 0); //A2Z in second choice
 						else
 							swap = (firstChild->getClassID() > item->getChild(j)->getClassID());
 						break;
@@ -1665,11 +1739,11 @@ void ccDBRoot::sortSelectedEntitiesChildren(SortRules sortRule)
 				}
 
 				if (k != firstChildIndex)
-					item->swapChildren(k,firstChildIndex);
+					item->swapChildren(k, firstChildIndex);
 			}
 
 			//add children back
-			beginInsertRows(selectedIndexes[i],0,childCount-1);
+			beginInsertRows(selectedIndexes[i], 0, childCount - 1);
 
 			//row insertion operation (end)
 			endInsertRows();

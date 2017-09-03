@@ -240,7 +240,9 @@ MainWindow::MainWindow()
 	//db-tree
 	{
 		m_ccRoot = new ccDBRoot(m_UI->dbTreeView, m_UI->propertiesTreeView, this);
-		connect(m_ccRoot, &ccDBRoot::selectionChanged, this, &MainWindow::updateUIWithSelection);
+		connect(m_ccRoot, &ccDBRoot::selectionChanged,    this, &MainWindow::updateUIWithSelection);
+		connect(m_ccRoot, &ccDBRoot::dbIsEmpty,           [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+		connect(m_ccRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
 	}
 
 	//MDI Area
@@ -266,7 +268,7 @@ MainWindow::MainWindow()
 
 	freezeUI(false);
 
-	updateUIWithSelection();
+	updateUI();
 
 	QMainWindow::statusBar()->showMessage(QString("Ready"));
 	ccConsole::Print("CloudCompare started!");
@@ -9521,9 +9523,10 @@ void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindow* win)
 
 void MainWindow::updateMenus()
 {
-	ccGLWindow* win = getActiveGLWindow();
-	bool hasMdiChild = (win != nullptr);
+	ccGLWindow* active3DView = getActiveGLWindow();
+	bool hasMdiChild = (active3DView != nullptr);
 	int mdiChildCount = getGLWindowCount();
+	bool hasLoadedEntities = (m_ccRoot && m_ccRoot->getRootEntity() && m_ccRoot->getRootEntity()->getChildrenNumber() != 0);
 	bool hasSelectedEntities = (m_ccRoot && m_ccRoot->countSelectedEntities() > 0);
 
 	//General Menu
@@ -9539,11 +9542,11 @@ void MainWindow::updateMenus()
 	m_UI->actionPrevious3DView ->setEnabled(mdiChildCount > 1);
 
 	//Shaders & Filters display Menu
-	bool shadersEnabled = (win ? win->areShadersEnabled() : false);
+	bool shadersEnabled = (active3DView ? active3DView->areShadersEnabled() : false);
 	m_UI->actionLoadShader->setEnabled(shadersEnabled);
 	m_UI->actionDeleteShader->setEnabled(shadersEnabled);
 
-	bool filtersEnabled = (win ? win->areGLFiltersEnabled() : false);
+	bool filtersEnabled = (active3DView ? active3DView->areGLFiltersEnabled() : false);
 	m_UI->actionNoFilter->setEnabled(filtersEnabled);
 
 	//View Menu
@@ -9552,7 +9555,7 @@ void MainWindow::updateMenus()
 	//oher actions
 	m_UI->actionSegment->setEnabled(hasMdiChild && hasSelectedEntities);
 	m_UI->actionTranslateRotate->setEnabled(hasMdiChild && hasSelectedEntities);
-	m_UI->actionPointPicking->setEnabled(hasMdiChild);
+	m_UI->actionPointPicking->setEnabled(hasMdiChild && hasLoadedEntities);
 	//actionPointListPicking->setEnabled(hasMdiChild);
 	m_UI->actionTestFrameRate->setEnabled(hasMdiChild);
 	m_UI->actionRenderToFile->setEnabled(hasMdiChild);
@@ -9562,8 +9565,7 @@ void MainWindow::updateMenus()
 	m_UI->actionToggleViewerBasedPerspective->setEnabled(hasMdiChild);
 
 	//plugins
-	const QList<QAction *>	actionList = m_glFilterActions.actions();
-	
+	const QList<QAction*> actionList = m_glFilterActions.actions();
 	for (QAction* action : actionList)
 	{
 		action->setEnabled(hasMdiChild);
@@ -9651,6 +9653,7 @@ void MainWindow::updatePropertiesView()
 		m_ccRoot->updatePropertiesView();
 	}
 }
+
 void MainWindow::updateUIWithSelection()
 {
 	dbTreeSelectionInfo selInfo;
@@ -9658,7 +9661,9 @@ void MainWindow::updateUIWithSelection()
 	m_selectedEntities.clear();
 
 	if (m_ccRoot)
+	{
 		m_ccRoot->getSelectedEntities(m_selectedEntities, CC_TYPES::OBJECT, &selInfo);
+	}
 
 	enableUIItems(selInfo);
 }
@@ -9693,6 +9698,7 @@ void MainWindow::disableAllBut(ccGLWindow* win)
 
 void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 {
+	bool dbIsEmpty = (!m_ccRoot || !m_ccRoot->getRootEntity() || m_ccRoot->getRootEntity()->getChildrenNumber() == 0);
 	bool atLeastOneEntity = (selInfo.selCount > 0);
 	bool atLeastOneCloud = (selInfo.cloudCount > 0);
 	bool atLeastOneMesh = (selInfo.meshCount > 0);
@@ -9711,6 +9717,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	//menuEdit->setEnabled(atLeastOneEntity);
 	//menuTools->setEnabled(atLeastOneEntity);
 
+	m_UI->actionTracePolyline->setEnabled(!dbIsEmpty);
 	m_UI->actionZoomAndCenter->setEnabled(atLeastOneEntity && activeWindow);
 	m_UI->actionSave->setEnabled(atLeastOneEntity);
 	m_UI->actionClone->setEnabled(atLeastOneEntity);
@@ -9862,7 +9869,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionMatchScales->setEnabled(atLeastTwoEntities);
 
 	//standard plugins
-	foreach (ccStdPluginInterface* plugin, m_stdPlugins)
+	for (ccStdPluginInterface* plugin : m_stdPlugins)
 	{
 		plugin->onNewSelection(m_selectedEntities);
 	}

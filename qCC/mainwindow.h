@@ -188,7 +188,7 @@ public:
 	void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context);
 
 	//! Dispatches the (loaded) plugins in the UI
-	void dispatchPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths);
+	void setupPluginDispatch(const tPluginInfoList& plugins, const QStringList& pluginPaths);
 
 	//! Updates the 'Properties' view
 	void updatePropertiesView();

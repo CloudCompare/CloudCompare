@@ -184,6 +184,8 @@ MainWindow::MainWindow()
 {
 	m_UI->setupUi( this );
 
+	m_glFilterActions.setExclusive( true );
+	
 #ifdef Q_OS_MAC
 	m_UI->actionAbout->setMenuRole( QAction::AboutRole );
 	m_UI->actionAboutPlugins->setMenuRole( QAction::NoRole );
@@ -325,7 +327,7 @@ MainWindow::~MainWindow()
 	ccConsole::ReleaseInstance();
 }
 
-void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths)
+void MainWindow::setupPluginDispatch(const tPluginInfoList& plugins, const QStringList& pluginPaths)
 {
 	m_UI->menuPlugins->setEnabled(false);
 	m_UI->menuShadersAndFilters->setEnabled(false);
@@ -376,7 +378,7 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 				{
 					m_stdPluginsToolbars.push_back(destToolBar);
 					//not sure why but it seems that we must specifically set the object name.
-					//if not the QSettings thing will complain about a not-setted name
+					//if not the QSettings thing will complain about an unset name
 					//when saving settings of qCC mainwindow
 					destToolBar->setObjectName(pluginName);
 				}
@@ -419,10 +421,12 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 		{
 			//(auto)create action
 			plugin.qObject->setParent(this);
+			
 			QAction* action = new QAction(pluginName, plugin.qObject);
 			action->setToolTip(plugin.object->getDescription());
 			action->setIcon(plugin.object->getIcon());
-			//connect default signal
+			action->setCheckable( true );
+			
 			connect(action, &QAction::triggered, this, &MainWindow::doEnableGLFilter);
 
 			m_UI->menuShadersAndFilters->addAction(action);
@@ -510,6 +514,7 @@ void MainWindow::doEnableGLFilter()
 		if (filter)
 		{
 			win->setGlFilter(filter);
+			
 			m_UI->actionNoFilter->setEnabled( true );
 			
 			ccConsole::Print("Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter");
@@ -8821,6 +8826,8 @@ void MainWindow::doDisableGLFilter()
 		win->redraw(false);
 		
 		m_UI->actionNoFilter->setEnabled( false );
+		
+		m_glFilterActions.checkedAction()->setChecked( false );
 	}
 }
 

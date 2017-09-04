@@ -510,6 +510,8 @@ void MainWindow::doEnableGLFilter()
 		if (filter)
 		{
 			win->setGlFilter(filter);
+			m_UI->actionNoFilter->setEnabled( true );
+			
 			ccConsole::Print("Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter");
 		}
 		else
@@ -8815,8 +8817,10 @@ void MainWindow::doDisableGLFilter()
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
-		win->setGlFilter(0);
+		win->setGlFilter(nullptr);
 		win->redraw(false);
+		
+		m_UI->actionNoFilter->setEnabled( false );
 	}
 }
 
@@ -9566,9 +9570,6 @@ void MainWindow::updateMenus()
 	bool shadersEnabled = (active3DView ? active3DView->areShadersEnabled() : false);
 	m_UI->actionLoadShader->setEnabled(shadersEnabled);
 	m_UI->actionDeleteShader->setEnabled(shadersEnabled);
-
-	bool filtersEnabled = (active3DView ? active3DView->areGLFiltersEnabled() : false);
-	m_UI->actionNoFilter->setEnabled(filtersEnabled);
 
 	//View Menu
 	m_UI->toolBarView->setEnabled(hasMdiChild);

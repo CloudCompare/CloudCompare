@@ -720,23 +720,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionScalarFieldArithmetic"/>
    <addaction name="actionOpenColorScalesManager"/>
   </widget>
-  <widget class="QToolBar" name="toolBarPluginTools">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="windowTitle">
-    <string>Plugins</string>
-   </property>
-   <property name="toolTip">
-    <string>Plugins</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
   <widget class="QDockWidget" name="DockableProperties">
    <property name="minimumSize">
     <size>
@@ -803,13 +786,29 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>GL filters</string>
    </property>
    <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
+    <enum>RightToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
    <addaction name="actionNoFilter"/>
-   <addaction name="separator"/>
+  </widget>
+  <widget class="QToolBar" name="toolBarPluginTools">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Plugins</string>
+   </property>
+   <property name="toolTip">
+    <string>Plugins</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
   </widget>
   <action name="actionOpen">
    <property name="icon">
@@ -1897,8 +1896,15 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionNoFilter">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/noFilter.png</normaloff>:/CC/images/noFilter.png</iconset>
+   </property>
    <property name="text">
-    <string>Remove filter</string>
+    <string>Remove Filter</string>
    </property>
   </action>
   <action name="actionDeleteShader">

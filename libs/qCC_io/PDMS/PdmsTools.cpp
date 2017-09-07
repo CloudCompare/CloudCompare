@@ -15,15 +15,15 @@
 //#                                                                        #
 //##########################################################################
 
+#include <QSet>
+
 #include "PdmsTools.h"
 
 //System
-#include <string.h>
+#include <assert.h>
 #include <iostream>
 #include <stdlib.h>
-#include <assert.h>
-#include <unordered_set>
-#include <iterator>
+#include <string.h>
 
 //qCC_db
 //#include <ccLog.h>
@@ -47,8 +47,8 @@ static GroupElement defaultWorld(PDMS_WORLD);
 ///////////////////////////////
 // ITEM STACK
 ///////////////////////////////
-typedef std::unordered_set<PdmsObjects::GenericItem*> ElementsStack;
-ElementsStack s_elementsStack;
+typedef QSet<PdmsObjects::GenericItem*> ElementsStack;
+static ElementsStack s_elementsStack;
 
 void PdmsObjects::Stack::Init()
 {
@@ -62,27 +62,26 @@ void PdmsObjects::Stack::Clear()
 	while (!s_elementsStack.empty())
 	{
 		GenericItem* item = *(s_elementsStack.begin());
-		s_elementsStack.erase(item);
+		
+		s_elementsStack.remove( item );
+		
 		if (item)
 		{
 			//ccLog::Print(QString("[PDMS] Should be deleting %1").arg(item->name));
 			delete item;
 		}
 	}
+	
 	s_elementsStack.clear();
 }
 
 void PdmsObjects::Stack::Destroy(GenericItem* &item)
 {
-	if (item)
+	if ( item && s_elementsStack.remove( item ) )
 	{
 		//ccLog::Print(QString("[PDMS] Destroying %1").arg((item)->name));
-		if (s_elementsStack.find(item) != s_elementsStack.end())
-		{
-			s_elementsStack.erase(item);
-			delete item;
-		}
-		item = 0;
+		delete item;
+		item = nullptr;
 	}
 }
 

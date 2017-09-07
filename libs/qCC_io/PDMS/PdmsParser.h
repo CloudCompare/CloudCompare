@@ -21,8 +21,8 @@
 #include "PdmsTools.h"
 
 //system
-#include <string>
 #include <map>
+#include <string>
 
 using namespace PdmsTools;
 
@@ -59,12 +59,13 @@ protected:
 
 	PdmsObjects::GenericItem *loadedObject;
 	Token currentToken;
-	char tokenBuffer[c_max_buff_size], nextBuffer[c_max_buff_size];
-	std::map<std::string, Token> dictionnary;
+	char tokenBuffer[c_max_buff_size];
+	char nextBuffer[c_max_buff_size];
+	std::map<std::string, Token> dictionary;
 	bool stop;
 	char metaGroupMask;
 
-	void pushIntoDictionnary(const char *str, Token token, int minSize=0);
+	void pushIntoDictionary(const char *str, Token token, int minSize=0);
 	virtual void parseCurrentToken();
 	virtual void skipComment() = 0;
 	virtual void skipHandleCommand() = 0;
@@ -76,21 +77,22 @@ class PdmsFileSession : public PdmsLexer
 {
 protected:
 	std::string m_filename;
-	unsigned m_currentLine;
-	bool m_eol, m_eof;
+	int m_currentLine;
+	bool m_eol;
+	bool m_eof;
 	FILE* m_file;
 
 public:
 	PdmsFileSession(const std::string &filename);
 	virtual ~PdmsFileSession() {closeSession();}
-	virtual bool initializeSession();
-	virtual void closeSession(bool destroyLoadedObject=false);
-	virtual void printWarning(const char* str);
+	virtual bool initializeSession() override;
+	virtual void closeSession(bool destroyLoadedObject=false) override;
+	virtual void printWarning(const char* str) override;
 protected:
-	virtual void parseCurrentToken();
-	virtual bool moveForward();
-	virtual void skipComment();
-	virtual void skipHandleCommand();
+	virtual void parseCurrentToken() override;
+	virtual bool moveForward() override;
+	virtual void skipComment() override;
+	virtual void skipHandleCommand() override;
 };
 
 //PDMS Parser
@@ -119,7 +121,8 @@ protected:
 
 	PdmsLexer *session;
 	PdmsCommands::Command *currentCommand;
-	PdmsObjects::GenericItem *currentItem, *root;
+	PdmsObjects::GenericItem *currentItem;
+	PdmsObjects::GenericItem *root;
 };
 
 #endif //PDMS_PARSER_HEADER

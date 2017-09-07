@@ -111,7 +111,7 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 			{
 				//found one!
 				m_geoObject = static_cast<ccGeoObject*>(o);
-				if (m_geoObject) //cast succeded
+				if (m_geoObject) //cast succeeded
 				{
 					m_geoObject_id = m_geoObject->getUniqueID(); //store id
 					m_geoObject->setActive(true); //display as "active"
@@ -1367,7 +1367,7 @@ void ccCompass::exportToSVG()
 
 		if (count > 0)
 		{
-			m_app->dispToConsole(QString::asprintf("[ccCompass] Succesfully saved %d polylines to .svg file.", count));
+			m_app->dispToConsole(QString::asprintf("[ccCompass] Successfully saved %d polylines to .svg file.", count));
 		}
 		else
 		{

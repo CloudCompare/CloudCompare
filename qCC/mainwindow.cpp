@@ -1176,7 +1176,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 
 	bool firstCloud = true;
 
-	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change durring this loop!
+	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
 	{
 		//we don't test primitives (it's always ok while the 'vertices lock' test would fail)
 		if (!entity->isKindOf(CC_TYPES::PRIMITIVE))
@@ -1336,7 +1336,7 @@ void MainWindow::doActionApplyScale()
 		bool testBigCoordinates = true;
 		//size_t processNum = 0;
 
-		for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change durring this loop!
+		for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
 		{
 			bool lockedVertices;
 			//try to get the underlying cloud (or the vertices set for a mesh)
@@ -1641,7 +1641,7 @@ void MainWindow::doComputeBestFitBB()
 	//backup selected entities as removeObjectTemporarilyFromDBTree can modify them
 	ccHObject::Container selectedEntities = getSelectedEntities();
 
-	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change durring this loop!
+	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 
@@ -5137,7 +5137,7 @@ void MainWindow::doActionMatchBBCenters()
 	ccHObject* refEnt = selectedEntities[0];
 	CCVector3 refCenter = refEnt->getBB_recursive().getCenter();
 
-	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change durring this loop!
+	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
 	{
 		CCVector3 center = entity->getBB_recursive().getCenter();
 
@@ -7729,7 +7729,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 	ccHObject::Container selectedEntities = getSelectedEntities();
 	bool firstEntity = true;
 	
-	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change durring this loop!
+	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
 	{
 		ccShiftedObject* shifted = nullptr;
 		CCLib::GenericIndexedCloudPersist* cloud = nullptr;

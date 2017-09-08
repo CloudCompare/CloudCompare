@@ -21,14 +21,14 @@
 #include "ccGLWindow.h"
 
 //qCC_db
-#include <ccGenericPointCloud.h>
-#include <ccGBLSensor.h>
 #include <ccColorScalesManager.h>
+#include <ccGBLSensor.h>
+#include <ccGenericPointCloud.h>
 #include <ccScalarField.h>
 
 //Qt
-#include <QLabel>
 #include <QDialog>
+#include <QLabel>
 #include <QVBoxLayout>
 
 
@@ -42,11 +42,12 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 		return;
 
 	//determine min and max depths
-	ScalarType minDist = 0, maxDist = 0;
+	ScalarType minDist = 0.0f;
+	ScalarType maxDist = 0.0f;
 	{
 		const ScalarType* _zBuff = &(depthBuffer.zBuff.front());
-		double sumDist = 0;
-		double sumDist2 = 0;
+		double sumDist = 0.0;
+		double sumDist2 = 0.0;
 		unsigned count = 0;
 		for (unsigned x=0; x<depthBuffer.height*depthBuffer.width; ++x,++_zBuff)
 		{

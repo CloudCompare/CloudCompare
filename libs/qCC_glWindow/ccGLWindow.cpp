@@ -62,28 +62,24 @@ static OculusHMD s_oculus;
 #include <vld.h>
 #endif
 
-#ifndef constexpr
-#define constexpr const
-#endif
-
 //Min and max zoom ratio (relative)
-constexpr float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
-constexpr float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
+static const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
+static const float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
 
 //Vaious overlay elements dimensions
-constexpr double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8; //percentage of the smallest screen dimension
-constexpr double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0;
-constexpr float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
-constexpr float  CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
+static const double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8; //percentage of the smallest screen dimension
+static const double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0;
+static const float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
+static const float  CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
 
 //Max click duration for enabling picking mode (in ms)
-constexpr int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
+static const int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
 
 //invalid GL list index
-constexpr GLuint GL_INVALID_LIST_ID = (~0);
+static const GLuint GL_INVALID_LIST_ID = (~0);
 
 //GL filter banner margin (height = 2*margin + current font height)
-constexpr int CC_GL_FILTER_BANNER_MARGIN = 5;
+static const int CC_GL_FILTER_BANNER_MARGIN = 5;
 
 //default interaction flags
 ccGLWindow::INTERACTION_FLAGS ccGLWindow::PAN_ONLY()           { ccGLWindow::INTERACTION_FLAGS flags = INTERACT_PAN | INTERACT_ZOOM_CAMERA | INTERACT_2D_ITEMS | INTERACT_CLICKABLE_ITEMS; return flags; }

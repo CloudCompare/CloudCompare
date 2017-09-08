@@ -562,6 +562,20 @@ const ccGui::ParamStruct& ccGLWindow::getDisplayParameters() const
 	return m_overridenDisplayParametersEnabled ? m_overridenDisplayParameters : ccGui::Parameters();
 }
 
+void ccGLWindow::setDisplayParameters(const ccGui::ParamStruct &params, bool thisWindowOnly)
+{
+	if (thisWindowOnly)
+	{
+		m_overridenDisplayParametersEnabled = true;
+		m_overridenDisplayParameters = params;
+	}
+	else
+	{
+		m_overridenDisplayParametersEnabled = false;
+		ccGui::Set(params);
+	}
+}
+
 void ccGLWindow::handleLoggedMessage(const QOpenGLDebugMessage& message)
 {
 	//Decode severity

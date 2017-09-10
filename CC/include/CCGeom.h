@@ -24,7 +24,7 @@
 #include "CCTypes.h"
 
 //system
-#include <math.h> //for sqrt, fabs
+#include <cmath>
 
 //! 4-Tuple structure (templated version)
 template <class Type> class Tuple4Tpl
@@ -172,11 +172,11 @@ public:
 	//! Returns vector square norm (forces double precision output)
 	inline double norm2d() const { return static_cast<double>(x)*x + static_cast<double>(y)*y + static_cast<double>(z)*z; }
 	//! Returns vector norm
-	inline Type norm() const { return static_cast<Type>(sqrt(norm2d())); }
+	inline Type norm() const { return static_cast<Type>(std::sqrt(norm2d())); }
 	//! Returns vector norm (forces double precision output)
-	inline double normd() const { return sqrt(norm2d()); }
+	inline double normd() const { return std::sqrt(norm2d()); }
 	//! Sets vector norm to unity
-	inline void normalize() { double n = norm2d(); if (n>0) *this /= static_cast<Type>(sqrt(n)); }
+	inline void normalize() { double n = norm2d(); if (n>0) *this /= static_cast<Type>(std::sqrt(n)); }
 	//! Returns a normalized vector which is orthogonal to this one
 	inline Vector3Tpl orthogonal() const { Vector3Tpl ort; vorthogonal(u, ort.u); return ort; }
 
@@ -221,19 +221,19 @@ public:
 	static inline void vsubstract(const Type p[], const Type q[], Type r[]) {r[0]=p[0]-q[0]; r[1]=p[1]-q[1]; r[2]=p[2]-q[2];}
 	static inline void vcombination(Type a, const Type p[], Type b, const Type q[], Type r[]) {r[0]=(a*p[0])+(b*q[0]); r[1]=(a*p[1])+(b*q[1]); r[2]=(a*p[2])+(b*q[2]);}
 	static inline void vcombination(const Type p[], Type b, const Type q[], Type r[]) {r[0]=p[0]+(b*q[0]); r[1]=p[1]+(b*q[1]); r[2]=p[2]+(b*q[2]);}
-	static inline void vnormalize(Type p[]) {Type n = vnorm2(p); if (n>0) vdivide(p, sqrt(n));}
+	static inline void vnormalize(Type p[]) {Type n = vnorm2(p); if (n>0) vdivide(p, std::sqrt(n));}
 	static inline Type vnorm2(const Type p[]) {return (p[0]*p[0])+(p[1]*p[1])+(p[2]*p[2]);}
 	static inline Type vdistance2(const Type p[], const Type q[]) {return ((p[0]-q[0])*(p[0]-q[0]))+((p[1]-q[1])*(p[1]-q[1]))+((p[2]-q[2])*(p[2]-q[2]));}
-	static inline Type vnorm(const Type p[]) {return sqrt(vnorm2(p));}
-	static inline Type vdistance(const Type p[], const Type q[]) {return sqrt(vdistance2(p, q));}
+	static inline Type vnorm(const Type p[]) {return std::sqrt(vnorm2(p));}
+	static inline Type vdistance(const Type p[], const Type q[]) {return std::sqrt(vdistance2(p, q));}
 
 	static inline void vorthogonal(const Type p[], Type q[])
 	{
-		if (fabs(p[0]) <= fabs(p[1]) && fabs(p[0]) <= fabs(p[2]))
+		if (std::abs(p[0]) <= std::abs(p[1]) && std::abs(p[0]) <= std::abs(p[2]))
 		{
 			q[0]=0; q[1]=p[2]; q[2]=-p[1];
 		}
-		else if (fabs(p[1]) <= fabs(p[0]) && fabs(p[1]) <= fabs(p[2]))
+		else if (std::abs(p[1]) <= std::abs(p[0]) && std::abs(p[1]) <= std::abs(p[2]))
 		{
 			q[0]=-p[2]; q[1]=0; q[2]=p[0];
 		}
@@ -281,9 +281,9 @@ public:
 	//! Returns vector square norm
 	inline Type norm2() const { return (x*x)+(y*y); }
 	//! Returns vector norm
-	inline Type norm() const { return sqrt(norm2()); }
+	inline Type norm() const { return std::sqrt(norm2()); }
 	//! Sets vector norm to unity
-	inline void normalize() { Type n = norm2(); if (n>0) *this /= sqrt(n); }
+	inline void normalize() { Type n = norm2(); if (n>0) *this /= std::sqrt(n); }
 
 	//! Dot product
 	inline Type dot(const Vector2Tpl& v) const { return (x*v.x)+(y*v.y); }

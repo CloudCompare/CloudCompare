@@ -21,22 +21,22 @@
 #include "ccContourExtractorDlg.h"
 
 //qCC_db
+#include <cc2DLabel.h>
 #include <ccLog.h>
 #include <ccPointCloud.h>
-#include <cc2DLabel.h>
 
 //qCC_gl
 #include <ccGLWindow.h>
 
 //CCLib
-#include <Neighbourhood.h>
 #include <DistanceComputationTools.h>
+#include <Neighbourhood.h>
 #include <PointProjectionTools.h>
 
 //System
 #include <assert.h>
+#include <cmath>
 #include <set>
-#include <math.h>
 
 //list of already used point to avoid hull's inner loops
 enum HullPointFlags {	POINT_NOT_USED	= 0,
@@ -110,7 +110,7 @@ PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
 		{
 			CCVector2 PB = **itB - P;
 			PointCoordinateType dotProd = AP.x * PB.x + AP.y * PB.y;
-			PointCoordinateType minDotProd = static_cast<PointCoordinateType>(minCosAngle * sqrt(AP.norm2() * PB.norm2()));
+			PointCoordinateType minDotProd = static_cast<PointCoordinateType>(minCosAngle * std::sqrt(AP.norm2() * PB.norm2()));
 			if (dotProd < minDotProd)
 			{
 				continue;
@@ -172,7 +172,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 		return false;
 	}
 
-	double minCosAngle = maxAngleDeg <= 0 ? -1.0 : cos(maxAngleDeg * M_PI / 180.0);
+	double minCosAngle = maxAngleDeg <= 0 ? -1.0 : std::cos(maxAngleDeg * M_PI / 180.0);
 
 	//hack: compute the theoretical 'minimal' edge length
 	PointCoordinateType minSquareEdgeLength = 0;
@@ -800,5 +800,4 @@ bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* p
 	basePoly = 0;
 
 	return success;
-
 }

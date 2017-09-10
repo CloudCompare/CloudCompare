@@ -18,7 +18,7 @@
 #include "ccOrthoSectionGenerationDlg.h"
 
 //system
-#include <math.h>
+#include <cmath>
 
 ccOrthoSectionGenerationDlg::ccOrthoSectionGenerationDlg(QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::Tool)
@@ -73,6 +73,6 @@ void ccOrthoSectionGenerationDlg::onStepChanged(double step)
 	if (step < 0)
 		return;
 
-	unsigned count = step < 1.0e-6 ? 1 : 1+static_cast<unsigned>(floor(m_pathLength / step));
+	unsigned count = step < 1.0e-6 ? 1 : 1+static_cast<unsigned>(std::floor(m_pathLength / step));
 	sectionCountLineEdit->setText(QString::number(count));
 }

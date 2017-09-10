@@ -66,7 +66,6 @@
 #include "ccPinchNodeTool.h"
 
 //other
-#include <math.h>
 #include <vector>
 
 class ccCompass : public QObject, public ccStdPluginInterface, public ccPickingListener
@@ -235,9 +234,6 @@ public:
 	//digitization mode
 	static bool mapMode; //true if map mode, false if measure mode
 	static int mapTo; //see flags in ccGeoObject.h for definition of different mapping locations
-
-	 
-
 };
 
 #endif

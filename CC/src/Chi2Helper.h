@@ -20,7 +20,7 @@
 #define CHI2_HELPER_HEADER
 
 //system
-#include <math.h>
+#include <cmath>
 
 #ifndef LOG_SQRT_PI
 #define LOG_SQRT_PI 0.5723649429247000870717135 /* log(sqrt(pi)) */
@@ -58,7 +58,7 @@ public:
 		}
 		else
 		{
-			double y = 0.5 * fabs(z);
+			double y = 0.5 * std::abs(z);
 			if (y >= 3.0) /* Maximum meaningful z value (6) divided by 2 */
 			{
 				x = 1.0;
@@ -107,27 +107,27 @@ public:
 		bool even = !(df & 1); /* True if df is an even number */
 		double y = 0;
 		if (df > 1) {
-			y = exp(-a);
+			y = std::exp(-a);
 		}
-		double s = (even ? y : (2.0 * poz(-sqrt(x))));
+		double s = (even ? y : (2.0 * poz(-std::sqrt(x))));
 		if (df > 2) {
 			x = 0.5 * (df - 1.0);
 			double z = (even ? 1.0 : 0.5);
 			if (a > EXP_MAX_A_VALUE())
 			{
 				double e = (even ? 0.0 : LOG_SQRT_PI);
-				double c = log(a);
+				double c = std::log(a);
 				while (z <= x)
 				{
-					e = log(z)+e;
-					s += exp(c*z-a-e);
+					e = std::log(z)+e;
+					s += std::exp(c*z-a-e);
 					z += 1.0;
 				}
 				return s;
 			}
 			else
 			{
-				double e = (even ? 1.0 : (I_SQRT_PI / sqrt(a)));
+				double e = (even ? 1.0 : (I_SQRT_PI / std::sqrt(a)));
 				double c = 0.0;
 				while (z <= x)
 				{
@@ -158,7 +158,7 @@ public:
 		else if (p >= 1.0)
 			return 0.0;
 
-		chisqval = df / sqrt(p);    /* fair first value */
+		chisqval = df / std::sqrt(p);    /* fair first value */
 		while ((maxchisq - minchisq) > CHI_EPSILON)
 		{
 			if (pochisq(chisqval, df) < p)

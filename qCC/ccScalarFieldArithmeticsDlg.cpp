@@ -402,11 +402,11 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				val = std::tan(val1);
 				break;
 			case ACOS:
-				if (val1 >= -1 && val1 <= 1.0f)
+				if (val1 >= -1 && val1 <= 1)
 					val = std::acos(val1);
 				break;
 			case ASIN:
-				if (val1 >= -1 && val1 <= 1.0f)
+				if (val1 >= -1 && val1 <= 1)
 					val = std::asin(val1);
 				break;
 			case ATAN:
@@ -416,7 +416,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				val = static_cast<ScalarType>(static_cast<int>(val1)); //integer part ('round' doesn't seem to be available on MSVC?!)
 				break;
 			case INVERSE:
-				val = std::abs(val1) < ZERO_TOLERANCE ? NAN_VALUE : static_cast<ScalarType>(1.0f/val1);
+				val = std::abs(val1) < ZERO_TOLERANCE ? NAN_VALUE : static_cast<ScalarType>(1.0/val1);
 				break;
 			default:
 				assert(false);

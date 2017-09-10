@@ -219,9 +219,9 @@ namespace ccColor
 			float hi = 0;
 			float f = std::modf(H / 60.0f, &hi);
 
-			float l = static_cast<float>(V*(1.0 - S));
-			float m = static_cast<float>(V*(1.0 - f*S));
-			float n = static_cast<float>(V*(1.0 - (1.0 - f)*S));
+			float l = V*(1.0f - S);
+			float m = V*(1.0f - f*S);
+			float n = V*(1.0f - (1.0f - f)*S);
 
 			Rgbf rgb(0, 0, 0);
 

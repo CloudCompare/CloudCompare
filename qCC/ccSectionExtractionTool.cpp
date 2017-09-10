@@ -1626,7 +1626,7 @@ void ccSectionExtractionTool::unfoldPoints()
 				//longitudinal 'distance'
 				PointCoordinateType dotprod = s.u.dot(AP2D);
 
-				PointCoordinateType squareDist = 0.0f;
+				PointCoordinateType squareDist = 0;
 				if (dotprod < 0.0f)
 				{
 					//dist to nearest vertex
@@ -1815,7 +1815,7 @@ void ccSectionExtractionTool::extractPoints()
 	int yDim = (xDim < 2 ? xDim + 1 : 0);
 
 	//we consider half of the total thickness as points can be on both sides!
-	double sectionThicknessSq = std::pow(s_defaultSectionThickness / 2, 2.0);
+	double sectionThicknessSq = std::pow(s_defaultSectionThickness / 2.0, 2.0);
 	bool error = false;
 
 	unsigned generatedContours = 0;
@@ -1873,7 +1873,7 @@ void ccSectionExtractionTool::extractPoints()
 						}
 
 						//now test each point and see if it's close to the current polyline (in 2D)
-						PointCoordinateType s = 0.0f;
+						PointCoordinateType s = 0;
 						for (unsigned j = 0; j < polyMaxCount; ++j)
 						{
 							//current polyline segment

@@ -187,8 +187,8 @@ void ConvertToLogScale(ScalarType& dispMin, ScalarType& dispMax)
 {
 	ScalarType absDispMin = (dispMax < 0 ? std::min(-dispMax, -dispMin) : std::max<ScalarType>(dispMin, 0)); 
 	ScalarType absDispMax = std::max(std::abs(dispMin), std::abs(dispMax));
-	dispMin = std::log10(qMax(absDispMin, FLT_EPSILON));
-	dispMax = std::log10(qMax(absDispMax, FLT_EPSILON));
+	dispMin = std::log10(std::max(absDispMin, FLT_EPSILON));
+	dispMax = std::log10(std::max(absDispMax, FLT_EPSILON));
 }
 
 void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)

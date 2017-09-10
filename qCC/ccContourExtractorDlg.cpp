@@ -93,7 +93,7 @@ void ccContourExtractorDlg::zoomOn(const ccBBox& box)
 	m_glWindow->setCameraPos(CCVector3d::fromArray(box.getCenter().u));
 }
 
-bool ccContourExtractorDlg::isSkipepd() const
+bool ccContourExtractorDlg::isSkipped() const
 {
 	return skipPushButton->isChecked();
 }

@@ -65,7 +65,7 @@ public:
 	void removFromDisplay(ccHObject* obj);
 
 	//! Returns whether the dialog has been 'skipped' or not
-	bool isSkipepd() const;
+	bool isSkipped() const;
 
 protected slots:
 

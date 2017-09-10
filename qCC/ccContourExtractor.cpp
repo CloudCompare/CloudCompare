@@ -410,7 +410,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 				//create labels
 				cc2DLabel* edgeLabel = 0;
 				cc2DLabel* label = 0;
-				if (enableVisualDebugMode && !debugDialog.isSkipepd())
+				if (enableVisualDebugMode && !debugDialog.isSkipped())
 				{
 					edgeLabel = new cc2DLabel("edge");
 					unsigned indexA = 0;
@@ -485,7 +485,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 
 					somethingHasChanged = true;
 
-					if (enableVisualDebugMode && !debugDialog.isSkipepd())
+					if (enableVisualDebugMode && !debugDialog.isSkipped())
 					{
 						if (debugContour)
 						{

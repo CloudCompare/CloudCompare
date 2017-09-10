@@ -30,7 +30,7 @@
 #ifdef _MSC_VER
 #include <windows.h>
 #endif
-#include <math.h>
+#include <cmath>
 
 //number of valid operations
 static const unsigned s_opCount = 18;
@@ -130,8 +130,12 @@ ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::GetOperation
 
 	//test all known names...
 	for (unsigned i=0; i<s_opCount; ++i)
+	{
 		if (name == QString(s_opNames[i]).toUpper())
+		{
 			return static_cast<ccScalarFieldArithmeticsDlg::Operation>(i);
+		}
+	}
 
 	return INVALID;
 }
@@ -362,14 +366,14 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 					else
 					{
 						const ScalarType& val2 = sf2->getValue(i);
-						if (ccScalarField::ValidValue(val2) && fabs(val2) > ZERO_TOLERANCE )
+						if (ccScalarField::ValidValue(val2) && std::abs(val2) > ZERO_TOLERANCE )
 							val = val1 / val2;
 					}
 				}
 				break;
 			case SQRT:
 				if (val1 >= 0)
-					val = sqrt(val1);
+					val = std::sqrt(val1);
 				break;
 			case POW2:
 				val = val1*val1;
@@ -378,41 +382,41 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				val = val1*val1*val1;
 				break;
 			case EXP:
-				val = exp(val1);
+				val = std::exp(val1);
 				break;
 			case LOG:
 				if (val1 >= 0)
-					val = log(val1);
+					val = std::log(val1);
 				break;
 			case LOG10:
 				if (val1 >= 0)
-					val = log10(val1);
+					val = std::log10(val1);
 				break;
 			case COS:
-				val = cos(val1);
+				val = std::cos(val1);
 				break;
 			case SIN:
-				val = sin(val1);
+				val = std::sin(val1);
 				break;
 			case TAN:
-				val = tan(val1);
+				val = std::tan(val1);
 				break;
 			case ACOS:
-				if (val1 >= -1 && val1 <= 1.0)
-					val = acos(val1);
+				if (val1 >= -1 && val1 <= 1)
+					val = std::acos(val1);
 				break;
 			case ASIN:
-				if (val1 >= -1 && val1 <= 1.0)
-					val = asin(val1);
+				if (val1 >= -1 && val1 <= 1)
+					val = std::asin(val1);
 				break;
 			case ATAN:
-				val = atan(val1);
+				val = std::atan(val1);
 				break;
 			case INT:
 				val = static_cast<ScalarType>(static_cast<int>(val1)); //integer part ('round' doesn't seem to be available on MSVC?!)
 				break;
 			case INVERSE:
-				val = fabs(val1) < ZERO_TOLERANCE ? NAN_VALUE : static_cast<ScalarType>(1.0/val1);
+				val = std::abs(val1) < ZERO_TOLERANCE ? NAN_VALUE : static_cast<ScalarType>(1.0/val1);
 				break;
 			default:
 				assert(false);

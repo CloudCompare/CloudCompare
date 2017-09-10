@@ -46,7 +46,7 @@
 
 //System
 #include <assert.h>
-#include <math.h>
+#include <cmath>
 
 //default parameters
 static const ccColor::Rgba& s_defaultPolylineColor = ccColor::magenta;
@@ -1515,7 +1515,7 @@ void ccSectionExtractionTool::unfoldPoints()
 	static double s_defaultThickness = -1.0;
 	if (s_defaultThickness <= 0)
 	{
-		s_defaultThickness = box.getMaxBoxDim() / 10;
+		s_defaultThickness = box.getMaxBoxDim() / 10.0;
 	}
 
 	bool ok;
@@ -1627,7 +1627,7 @@ void ccSectionExtractionTool::unfoldPoints()
 				PointCoordinateType dotprod = s.u.dot(AP2D);
 
 				PointCoordinateType squareDist = 0;
-				if (dotprod < 0)
+				if (dotprod < 0.0f)
 				{
 					//dist to nearest vertex
 					squareDist = AP2D.norm2();
@@ -1815,7 +1815,7 @@ void ccSectionExtractionTool::extractPoints()
 	int yDim = (xDim < 2 ? xDim + 1 : 0);
 
 	//we consider half of the total thickness as points can be on both sides!
-	double sectionThicknessSq = pow(s_defaultSectionThickness / 2, 2.0);
+	double sectionThicknessSq = std::pow(s_defaultSectionThickness / 2.0, 2.0);
 	bool error = false;
 
 	unsigned generatedContours = 0;

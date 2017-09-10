@@ -27,8 +27,8 @@
 #include <CCConst.h>
 
 //system
-#include <math.h>
 #include <assert.h>
+#include <cmath>
 
 //! Default number of steps for spin-boxes
 const int SPIN_BOX_STEPS = 1000;

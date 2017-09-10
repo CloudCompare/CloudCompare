@@ -77,7 +77,6 @@ PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
 											const std::vector<Vertex2D>& points,
 											const std::vector<HullPointFlags>& pointFlags,
 											PointCoordinateType minSquareEdgeLength,
-											PointCoordinateType maxSquareEdgeLength,
 											bool allowLongerChunks = false,
 											double minCosAngle = -1.0)
 {
@@ -193,8 +192,8 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 				minP = maxP = P;
 			}
 		}
-		minSquareEdgeLength = (maxP-minP).norm2() / static_cast<PointCoordinateType>(1.0e7); //10^-7 of the max bounding rectangle side
-		minSquareEdgeLength = std::min(minSquareEdgeLength, maxSquareEdgeLength/10);
+		minSquareEdgeLength = (maxP - minP).norm2() / static_cast<PointCoordinateType>(1.0e7); //10^-7 of the max bounding rectangle side
+		minSquareEdgeLength = std::min(minSquareEdgeLength, maxSquareEdgeLength / 10);
 
 		//we remove very small edges
 		for (VertexIterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA)
@@ -370,13 +369,12 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 						points,
 						pointFlags,
 						minSquareEdgeLength,
-						maxSquareEdgeLength,
 						step > 1,
 						minCosAngle);
 
 					if (minSquareDist >= 0)
 					{
-						Edge e(itA,nearestPointIndex,minSquareDist);
+						Edge e(itA, nearestPointIndex, minSquareDist);
 						edges.insert(e);
 					}
 				}
@@ -532,7 +530,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 						}
 
 						//update the removed edges info and put them back in the main list
-						for (size_t i=0; i<removed.size(); ++i)
+						for (size_t i = 0; i < removed.size(); ++i)
 						{
 							VertexIterator itC = removed[i];
 							VertexIterator itD = itC; ++itD;
@@ -547,13 +545,12 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 								points,
 								pointFlags,
 								minSquareEdgeLength,
-								maxSquareEdgeLength,
 								false,
 								minCosAngle);
 
 							if (minSquareDist >= 0)
 							{
-								Edge e(itC,nearestPointIndex,minSquareDist);
+								Edge e(itC, nearestPointIndex, minSquareDist);
 								edges.insert(e);
 							}
 						}
@@ -570,7 +567,6 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 							points,
 							pointFlags,
 							minSquareEdgeLength,
-							maxSquareEdgeLength,
 							false,
 							minCosAngle);
 
@@ -590,7 +586,6 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 							points,
 							pointFlags,
 							minSquareEdgeLength,
-							maxSquareEdgeLength,
 							false,
 							minCosAngle);
 

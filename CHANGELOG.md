@@ -153,6 +153,8 @@ v2.9.alpha - XX/XX/XXXX
 		- deleting a point would remove all the detected spheres
 	* The FARO I/O plugin was associating a wrong transformation to the scan grids, resulting in weird results when computing normals or constructing a mesh based on scan grids
 	* When editing only the dip / dip direction of a plane, the rotation was not made about the plane center
+	* qSRA plugin: profile polyline automatically generated from cylinders or cone were shifted (half of the cylinder/cone height), resulting in a 'shifted' distance map
+		(half of the cloud was 'ignored')
 
 v2.8.1 - 16/02/2017
 ----------------------

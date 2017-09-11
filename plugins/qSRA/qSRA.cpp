@@ -103,7 +103,7 @@ void qSRA::onNewSelection(const ccHObject::Container& selectedEntities)
 		if (cloudIndex != -1)
 		{
 			//... and either a polyline or a cone/cylinder
-			validSelection = (selectedEntities[1-cloudIndex]->isA(CC_TYPES::POLY_LINE) || selectedEntities[1-cloudIndex]->isKindOf(CC_TYPES::CONE));
+			validSelection = (selectedEntities[1 - cloudIndex]->isA(CC_TYPES::POLY_LINE) || selectedEntities[1 - cloudIndex]->isKindOf(CC_TYPES::CONE));
 		}
 	}
 
@@ -131,7 +131,7 @@ ccHObject* GetDefaultContainer(ccMainAppInterface* app)
 	//we look in qCC database for a group with the right name (i.e. if it has already been created)
 	ccHObject::Container groups;
 	app->dbRootObject()->filterChildren(groups,true,CC_TYPES::HIERARCHY_OBJECT);
-	for (unsigned j=0; j<groups.size(); ++j)
+	for (size_t j = 0; j < groups.size(); ++j)
 	{
 		if (groups[j]->getName() == QSRA_DEFAULT_CONTAINER_NAME)
 			return groups[j];
@@ -166,21 +166,21 @@ void qSRA::loadProfile() const
 	QString filename = piDlg.getFilename();
 	if (filename.isEmpty())
 		return;
-	
+
 	//save current import path to persistent settings
-	settings.setValue("importPath",QFileInfo(filename).absolutePath());
+	settings.setValue("importPath", QFileInfo(filename).absolutePath());
 
 	//get the user defined global axis
 	int axisDim = piDlg.getAxisDimension();
 	assert(axisDim >= 0 && axisDim <= 2);
 
 	//load profile as a (2D) polyline
-	CCVector3 origin(0,0,0);
+	CCVector3 origin(0, 0, 0);
 	ccPolyline* polyline = ProfileLoader::Load(filename, origin, m_app);
 	if (!polyline)
 	{
 		if (m_app)
-			m_app->dispToConsole(QString("Failed to load file '%1'!").arg(filename),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole(QString("Failed to load file '%1'!").arg(filename), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
@@ -190,7 +190,7 @@ void qSRA::loadProfile() const
 	{
 		heightShift = -origin.u[axisDim];
 	}
-	
+
 	//apply a visual transformation to see the polyline in the right place
 	{
 		ccGLMatrix trans;
@@ -220,9 +220,9 @@ void qSRA::loadProfile() const
 	}
 
 	//set meta-data
-	DistanceMapGenerationTool::SetPoylineOrigin(polyline,origin);
-	DistanceMapGenerationTool::SetPoylineRevolDim(polyline,axisDim);
-	DistanceMapGenerationTool::SetPolylineHeightShift(polyline,heightShift);
+	DistanceMapGenerationTool::SetPoylineOrigin(polyline, origin);
+	DistanceMapGenerationTool::SetPoylineRevolDim(polyline, axisDim);
+	DistanceMapGenerationTool::SetPolylineHeightShift(polyline, heightShift);
 
 	//default destination container
 	ccHObject* defaultContainer = GetDefaultContainer(m_app);
@@ -231,9 +231,9 @@ void qSRA::loadProfile() const
 		defaultContainer->addChild(polyline);
 	}
 
-	m_app->addToDB(polyline,true,false,true);
+	m_app->addToDB(polyline, true, false, true);
 
-	m_app->dispToConsole(QString("[qSRA] File '%1' successfully loaded").arg(filename),ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_app->dispToConsole(QString("[qSRA] File '%1' successfully loaded").arg(filename), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 }
 
 //helper
@@ -253,7 +253,7 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 	PointCoordinateType height = cone->getHeight();
 	//we'll use the 'largest' axis dimension as 'revolution dimension'
 	int revolDim = 0;
-	for (int i=1; i<3; ++i)
+	for (int i = 1; i<3; ++i)
 		if (fabs(axis.u[i]) > fabs(axis.u[revolDim]))
 			revolDim = i;
 
@@ -280,16 +280,16 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 			ccLog::Error("Not enough memory");
 			return 0;
 		}
-		polyline->addPointIndex(0,2);
+		polyline->addPointIndex(0, 2);
 		polyline->setClosed(false);
 	}
 
 	//apply a visual transformation to see the polyline in the right place
 	{
-		CCVector3 y(0,1,0);
-		CCVector3 Z(0,0,0);
+		CCVector3 y(0, 1, 0);
+		CCVector3 Z(0, 0, 0);
 		Z.u[revolDim] = PC_ONE;
-		ccGLMatrix axisTrans = ccGLMatrix::FromToRotation(y,Z);
+		ccGLMatrix axisTrans = ccGLMatrix::FromToRotation(y, Z);
 		assert(((axisTrans * y) - Z).norm() < ZERO_TOLERANCE);
 		ccGLMatrix polyMat = coneTrans * axisTrans;
 		polyline->setGLTransformation(polyMat);
@@ -298,7 +298,7 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 	//set meta-data
 	DistanceMapGenerationTool::SetPoylineOrigin(polyline, origin);
 	DistanceMapGenerationTool::SetPoylineAxis(polyline, axis);
-	DistanceMapGenerationTool::SetPolylineHeightShift(polyline, height/2);
+	DistanceMapGenerationTool::SetPolylineHeightShift(polyline, 0/*height / 2*/);
 	DistanceMapGenerationTool::SetPoylineRevolDim(polyline, revolDim);
 
 	return polyline;
@@ -324,7 +324,7 @@ void qSRA::computeCloud2ProfileRadialDist() const
 	ccPolyline* polyline = 0;
 	bool tempPolyline = false;
 	{
-		for (unsigned i=0; i<2; ++i)
+		for (unsigned i = 0; i < 2; ++i)
 		{
 			if (selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
 			{
@@ -374,7 +374,7 @@ void qSRA::computeCloud2ProfileRadialDist() const
 										QMessageBox::Yes,
 										QMessageBox::No) == QMessageBox::Yes)
 			{
-				doProjectCloudDistsInGrid(cloud,polyline);
+				doProjectCloudDistsInGrid(cloud, polyline);
 			}
 		}
 	}
@@ -438,7 +438,7 @@ void qSRA::projectCloudDistsInGrid() const
 	ccPolyline* polyline = 0;
 	bool tempPolyline = false;
 	{
-		for (size_t i=0; i<selectCount; ++i)
+		for (size_t i = 0; i < selectCount; ++i)
 		{
 			if (selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
 			{

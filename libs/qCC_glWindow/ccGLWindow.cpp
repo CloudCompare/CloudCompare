@@ -998,7 +998,7 @@ bool ccGLWindow::event(QEvent* evt)
 			if (touchPoints.size() == 2)
 			{
 				QPointF D = (touchPoints[1].pos() - touchPoints[0].pos());
-				qreal dist = sqrt(D.x()*D.x() + D.y()*D.y());
+				qreal dist = std::sqrt(D.x()*D.x() + D.y()*D.y());
 				if (m_touchBaseDist != 0.0)
 				{
 					float zoomFactor = dist / m_touchBaseDist;
@@ -1598,7 +1598,7 @@ void ccGLWindow::paintGL()
 				m_LODPendingIgnore = false;
 
 				ccLog::PrintDebug(QString("[QPaintGL] New LOD pass scheduled with timer"));
-				QTimer::singleShot(std::max<int>(baseLODRefreshTime_ms - displayTime_ms, 0), this, &ccGLWindow::renderNextLODLevel);
+				QTimer::singleShot(std::max(baseLODRefreshTime_ms - displayTime_ms, Q_INT64_C(0)), this, &ccGLWindow::renderNextLODLevel);
 			}
 		}
 		else
@@ -2549,7 +2549,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 										textCol.rgb[1] * intensity,
 										textCol.rgb[2] * intensity };
 					glFunc->glColor3fv(col);
-					glFunc->glVertex3f(cx + radius*cos(i*alpha), static_cast<float>(cy)+radius*sin(i*alpha), 0);
+					glFunc->glVertex3f(cx + radius*std::cos(i*alpha), cy+radius*std::sin(i*alpha), 0);
 				}
 				glFunc->glEnd();
 
@@ -3004,7 +3004,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	}
 	float trihedronLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor;
 	float dW = 2.0f * trihedronLength + 20.0f;
-	float dH = std::max<float>(fm.height() * 1.25f, trihedronLength + 5.0f);
+	float dH = std::max(fm.height() * 1.25f, trihedronLength + 5.0f);
 	float w = m_glViewport.width() / 2.0f - dW;
 	float h = m_glViewport.height() / 2.0f - dH;
 	float tick = 3 * m_captureMode.zoomFactor;
@@ -3172,7 +3172,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 	{
 		double pivotActualRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * std::min(m_glViewport.width(), m_glViewport.height()) / 2;
 		double pivotSymbolScale = pivotActualRadius * computeActualPixelSize();
-		MP = std::max<double>(MP, pivotSymbolScale);
+		MP = std::max(MP, pivotSymbolScale);
 	}
 	MP *= 1.01; //for round-off issues
 
@@ -3180,7 +3180,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 	{
 		//distance from custom light to pivot point
 		double distToCustomLight = (pivotPoint - CCVector3d::fromArray(m_customLightPos)).norm();
-		MP = std::max<double>(MP, distToCustomLight);
+		MP = std::max(MP, distToCustomLight);
 	}
 
 	if (m_viewportParams.perspectiveView)
@@ -3209,7 +3209,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 
 		//DGM: take now 'frustumAsymmetry' into account (for stereo rendering)
 		//return ccGLUtils::Perspective(currentFov_deg,ar,zNear,zFar);
-		double yMax = zNear * tanf(currentFov_deg / 2.0f * CC_DEG_TO_RAD);
+		double yMax = zNear * std::tan(currentFov_deg / 2.0 * CC_DEG_TO_RAD);
 		double xMax = yMax * ar;
 
 		double frustumAsymmetry = 0.0;
@@ -3222,7 +3222,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 			double convergence = m_stereoParams.focalDist;
 			if (m_stereoParams.autoFocal)
 			{
-				convergence = fabs((cameraCenter - pivotPoint).dot(getCurrentViewDir())) / 2;
+				convergence = std::fabs((cameraCenter - pivotPoint).dot(getCurrentViewDir())) / 2.0;
 			}
 			*eyeOffset = frustumAsymmetry * convergence / zNear;
 		}
@@ -3235,7 +3235,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 		double maxDist = CP + MP;
 
 		double maxDist_pix = maxDist / m_viewportParams.pixelSize * m_viewportParams.zoom;
-		maxDist_pix = std::max<double>(maxDist_pix, 1.0);
+		maxDist_pix = std::max(maxDist_pix, 1.0);
 
 		double halfW = m_glViewport.width() / 2.0;
 		double halfH = m_glViewport.height() / 2.0 * m_viewportParams.orthoAspectRatio;
@@ -3555,16 +3555,16 @@ CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 		}
 
 		//we set the virtual rotation pivot closer to the actual one (but we always stay in the central part of the screen!)
-		Q2D.x = std::min<GLdouble>(Q2D.x, 3 * width() / 4);
-		Q2D.x = std::max<GLdouble>(Q2D.x, width() / 4);
+		Q2D.x = std::min(Q2D.x, 3.0 * width() / 4.0);
+		Q2D.x = std::max(Q2D.x, width() / 4.0);
 
-		Q2D.y = std::min<GLdouble>(Q2D.y, 3 * height() / 4);
-		Q2D.y = std::max<GLdouble>(Q2D.y, height() / 4);
+		Q2D.y = std::min(Q2D.y, 3.0 * height() / 4.0);
+		Q2D.y = std::max(Q2D.y, height() / 4.0);
 	}
 	else
 	{
-		Q2D.x = static_cast<GLdouble>(xc);
-		Q2D.y = static_cast<GLdouble>(yc);
+		Q2D.x = xc;
+		Q2D.y = yc;
 	}
 
 	//invert y
@@ -3572,8 +3572,8 @@ CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 
 	CCVector3d v(x - Q2D.x, y - Q2D.y, 0);
 
-	v.x = std::max<double>(std::min<double>(v.x / xc, 1), -1);
-	v.y = std::max<double>(std::min<double>(v.y / yc, 1), -1);
+	v.x = std::max(std::min(v.x / xc, 1.0), -1.0);
+	v.y = std::max(std::min(v.y / yc, 1.0), -1.0);
 
 	if (m_verticalRotationLocked || m_bubbleViewModeEnabled)
 	{
@@ -3586,13 +3586,13 @@ CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 	//projection on the unit sphere
 	if (d2 > 1)
 	{
-		double d = sqrt(d2);
+		double d = std::sqrt(d2);
 		v.x /= d;
 		v.y /= d;
 	}
 	else
 	{
-		v.z = sqrt(1.0 - d2);
+		v.z = std::sqrt(1.0 - d2);
 	}
 
 	return v;
@@ -3944,7 +3944,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 				{
 					QPoint posDelta = m_lastMousePos - event->pos();
 
-					if (abs(posDelta.x()) != 0)
+					if (std::abs(posDelta.x()) != 0)
 					{
 						double delta_deg = (posDelta.x() * static_cast<double>(m_bubbleViewFov_deg)) / height();
 						//rotation about the sensor Z axis
@@ -3952,7 +3952,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 						rotMat.initFromParameters(delta_deg * CC_DEG_TO_RAD, axis, CCVector3d(0, 0, 0));
 					}
 					//else if (m_bubbleViewDirection == VERT)
-					if (abs(posDelta.y()) != 0)
+					if (std::abs(posDelta.y()) != 0)
 					{
 						double delta_deg = (posDelta.y() * static_cast<double>(m_bubbleViewFov_deg)) / height();
 						//rotation about the local X axis
@@ -4148,8 +4148,8 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 
 				int pickX = static_cast<int>(A->x + C->x) / 2;
 				int pickY = static_cast<int>(A->y + C->y) / 2;
-				int pickW = static_cast<int>(fabs(C->x - A->x));
-				int pickH = static_cast<int>(fabs(C->y - A->y));
+				int pickW = static_cast<int>(std::abs(C->x - A->x));
+				int pickH = static_cast<int>(std::abs(C->y - A->y));
 
 				removeFromOwnDB(m_rectPickingPoly);
 				m_rectPickingPoly = nullptr;
@@ -4330,7 +4330,7 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 			if (m_cameraToBBCenterDist > m_bbHalfDiag)
 			{
 				//we go faster if we are far from the entities
-				delta *= 1.0 + log(m_cameraToBBCenterDist / m_bbHalfDiag);
+				delta *= 1.0 + std::log(m_cameraToBBCenterDist / m_bbHalfDiag);
 			}
 
 			moveCamera(0, 0, -delta);
@@ -4340,7 +4340,7 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 	{
 		//convert degrees in zoom 'power'
 		static const float c_defaultDeg2Zoom = 20.0f;
-		float zoomFactor = pow(1.1f, wheelDelta_deg / c_defaultDeg2Zoom);
+		float zoomFactor = std::pow(1.1f, wheelDelta_deg / c_defaultDeg2Zoom);
 		updateZoom(zoomFactor);
 	}
 

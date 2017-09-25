@@ -1371,9 +1371,9 @@ void MainWindow::doActionApplyScale()
 				CCVector3 bbMin = bbox.minCorner();
 				CCVector3 bbMax = bbox.maxCorner();
 
-				double maxx = std::max(fabs(bbMin.x), fabs(bbMax.x));
-				double maxy = std::max(fabs(bbMin.y), fabs(bbMax.y));
-				double maxz = std::max(fabs(bbMin.z), fabs(bbMax.z));
+				double maxx = std::max(std::abs(bbMin.x), std::abs(bbMax.x));
+				double maxy = std::max(std::abs(bbMin.y), std::abs(bbMax.y));
+				double maxz = std::max(std::abs(bbMin.z), std::abs(bbMax.z));
 
 				const double maxCoord = ccGlobalShiftManager::MaxCoordinateAbsValue();
 				bool oldCoordsWereTooBig = (	maxx > maxCoord
@@ -1382,9 +1382,9 @@ void MainWindow::doActionApplyScale()
 
 				if (!oldCoordsWereTooBig)
 				{
-					maxx = std::max(fabs((bbMin.x - C.x) * scales.x + C.x), fabs((bbMax.x - C.x) * scales.x + C.x));
-					maxy = std::max(fabs((bbMin.y - C.y) * scales.y + C.y), fabs((bbMax.y - C.y) * scales.y + C.y));
-					maxz = std::max(fabs((bbMin.z - C.z) * scales.z + C.z), fabs((bbMax.z - C.z) * scales.z + C.z));
+					maxx = std::max(std::abs((bbMin.x - C.x) * scales.x + C.x), std::abs((bbMax.x - C.x) * scales.x + C.x));
+					maxy = std::max(std::abs((bbMin.y - C.y) * scales.y + C.y), std::abs((bbMax.y - C.y) * scales.y + C.y));
+					maxz = std::max(std::abs((bbMin.z - C.z) * scales.z + C.z), std::abs((bbMax.z - C.z) * scales.z + C.z));
 
 					bool newCoordsAreTooBig = (	maxx > maxCoord
 											||	maxy > maxCoord
@@ -1537,7 +1537,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 				if (uniqueShift)
 					uniqueShift = ((shifted->getGlobalShift() - shift).norm() < ZERO_TOLERANCE);
 				if (uniqueScale)
-					uniqueScale = (fabs(shifted->getGlobalScale() - scale) < ZERO_TOLERANCE);
+					uniqueScale = (std::abs(shifted->getGlobalScale() - scale) < ZERO_TOLERANCE);
 			}
 
 			shiftedEntities.push_back(std::pair<ccShiftedObject*, ccHObject*>(shifted, entity));
@@ -1599,7 +1599,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 				assert(shifted->getGlobalScale() > 0);
 				double scaleCoef = scale / shifted->getGlobalScale();
 
-				if (T.norm() > ZERO_TOLERANCE || fabs(scaleCoef - 1.0) > ZERO_TOLERANCE)
+				if (T.norm() > ZERO_TOLERANCE || std::abs(scaleCoef - 1.0) > ZERO_TOLERANCE)
 				{
 					ccGLMatrix transMat;
 					transMat.toIdentity();
@@ -1972,7 +1972,7 @@ void MainWindow::doActionComputeScatteringAngles()
 
 		//compute the angle
 		PointCoordinateType cosTheta = ray.dot(normal);
-		ScalarType theta = static_cast<ScalarType>(acos(std::min<PointCoordinateType>(fabs(cosTheta), 1)));
+		ScalarType theta = std::acos(std::min(std::abs(cosTheta), 1.0f));
 
 		if (toDegreeFlag)
 			theta *= static_cast<ScalarType>(CC_RAD_TO_DEG);
@@ -4847,7 +4847,7 @@ void MainWindow::doActionComputeDistanceMap()
 				{
 					for (unsigned k = 0; k < steps; ++k)
 					{
-						ScalarType d = sqrt(static_cast<ScalarType>(cdt.getValue(i, j, k))) * cellDim;
+						ScalarType d = std::sqrt(static_cast<ScalarType>(cdt.getValue(i, j, k))) * cellDim;
 
 						if (!filterRange || (d >= range[0] && d <= range[1]))
 						{
@@ -8100,9 +8100,9 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		//init all possible transformations
 		static const double angularStep_deg = 45.0;
 		unsigned phiSteps = static_cast<unsigned>(360.0 / angularStep_deg);
-		assert(fabs(360.0 - phiSteps * angularStep_deg) < ZERO_TOLERANCE);
+		assert(std::abs(360.0 - phiSteps * angularStep_deg) < ZERO_TOLERANCE);
 		unsigned thetaSteps = static_cast<unsigned>(180.0 / angularStep_deg);
-		assert(fabs(180.0 - thetaSteps * angularStep_deg) < ZERO_TOLERANCE);
+		assert(std::abs(180.0 - thetaSteps * angularStep_deg) < ZERO_TOLERANCE);
 		unsigned rotCount = phiSteps * (thetaSteps - 1) + 2;
 		matrices.reserve(rotCount);
 		matrixAngles.reserve(rotCount);
@@ -8402,7 +8402,7 @@ void MainWindow::doActionExportCloudsInfo()
 				csvStream << validCount << ";" /*"SF valid values;"*/;
 				double mean = sfSum/validCount;
 				csvStream << mean << ";" /*"SF mean;"*/;
-				csvStream << sqrt(fabs(sfSum2/validCount - mean*mean)) << ";" /*"SF std.dev.;"*/;
+				csvStream << sqrt(std::abs(sfSum2/validCount - mean*mean)) << ";" /*"SF std.dev.;"*/;
 				csvStream << sfSum << ";" /*"SF sum;"*/;
 			}
 			csvStream << endl;

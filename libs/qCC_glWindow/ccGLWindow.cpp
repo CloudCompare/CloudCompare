@@ -329,16 +329,16 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 
 	//lights
 	m_sunLightEnabled = true;
-	m_sunLightPos[0] = 0;
-	m_sunLightPos[1] = 0;
-	m_sunLightPos[2] = 1;
-	m_sunLightPos[3] = 0;
+	m_sunLightPos[0] = 0.0f;
+	m_sunLightPos[1] = 0.0f;
+	m_sunLightPos[2] = 1.0f;
+	m_sunLightPos[3] = 0.0f;
 
 	m_customLightEnabled = false;
-	m_customLightPos[0] = 0;
-	m_customLightPos[1] = 0;
-	m_customLightPos[2] = 0;
-	m_customLightPos[3] = 1; //positional light
+	m_customLightPos[0] = 0.0f;
+	m_customLightPos[1] = 0.0f;
+	m_customLightPos[2] = 0.0f;
+	m_customLightPos[3] = 1.0f; //positional light
 
 	//matrices
 	m_viewportParams.viewMat.toIdentity();
@@ -1572,7 +1572,7 @@ void ccGLWindow::paintGL()
 		s_frameRateElapsedTime_ms = s_frameRateElapsedTimer.elapsed();
 		if (++s_frameRateCurrentFrame > FRAMERATE_TEST_MIN_FRAMES && s_frameRateElapsedTime_ms > FRAMERATE_TEST_DURATION_MSEC)
 		{
-			QTimer::singleShot(0, this, SLOT(stopFrameRateTest()));
+			QTimer::singleShot(0, this, &ccGLWindow::stopFrameRateTest);
 		}
 		else
 		{
@@ -1683,10 +1683,10 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 			{
 				//use plain color as specified by the user
 				const ccColor::Rgbub& bkgCol = displayParams.backgroundCol;
-				ccColor::Rgbaf backgroundColor(	bkgCol.r / 255.0f,
-												bkgCol.g / 255.0f,
-												bkgCol.b / 255.0f,
-												1.0f);
+				const ccColor::Rgbaf backgroundColor(	bkgCol.r / 255.0f,
+														bkgCol.g / 255.0f,
+														bkgCol.b / 255.0f,
+														1.0f);
 
 				glFunc->glClearColor(	backgroundColor.r,
 										backgroundColor.g,
@@ -2010,7 +2010,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				//apply shader
 				m_activeGLFilter->shade(depthTex, colorTex, parameters);
 				logGLError("ccGLWindow::paintGL/glFilter shade");
-				bindFBO(0); //in case the active filter has used a FBOs!
+				bindFBO(nullptr); //in case the active filter has used a FBOs!
 
 				//if capture mode is ON: we only want to capture it, not to display it
 				if (!m_captureMode.enabled)
@@ -2440,9 +2440,9 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 			showGLFilterRibbon &= !exclusiveFullScreen(); //we hide it in fullscreen mode!
 			if (showGLFilterRibbon)
 			{
-				float w = m_glViewport.width() / 2.0f;
-				float h = m_glViewport.height() / 2.0f;
-				int borderHeight = getGlFilterBannerHeight();
+				const float w = m_glViewport.width() / 2.0f;
+				const float h = m_glViewport.height() / 2.0f;
+				const int borderHeight = getGlFilterBannerHeight();
 
 				glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
 				glFunc->glEnable(GL_BLEND);
@@ -2451,8 +2451,8 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				glFunc->glBegin(GL_QUADS);
 				glFunc->glVertex2f(w, h);
 				glFunc->glVertex2f(-w, h);
-				glFunc->glVertex2f(-w, h - static_cast<float>(borderHeight));
-				glFunc->glVertex2f(w, h - static_cast<float>(borderHeight));
+				glFunc->glVertex2f(-w, h - borderHeight);
+				glFunc->glVertex2f(w, h - borderHeight);
 				glFunc->glEnd();
 
 				glFunc->glPopAttrib();
@@ -2602,17 +2602,16 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 		QByteArray data = mimeData->data("text/uri-list");
 		QStringList fileNames = QUrl::fromPercentEncoding(data).split(QRegExp("\\n+"), QString::SkipEmptyParts);
 
-		for (int i = 0; i < fileNames.size(); ++i)
+		for ( QString &fileName : fileNames )
 		{
-			fileNames[i] = fileNames[i].trimmed();
+			fileName = fileName.trimmed();
 #if defined(CC_WINDOWS)
-			fileNames[i].remove("file:///");
+			fileName.remove("file:///");
 #else
-			fileNames[i].remove("file://");
+			fileName.remove("file://");
 #endif
-			//fileNames[i] = QUrl(fileNames[i].trimmed()).toLocalFile(); //toLocalFile removes the end of filenames sometimes!
 #ifdef QT_DEBUG
-			ccLog::Print(QString("File dropped: %1").arg(fileNames[i]));
+			ccLog::Print(QString("File dropped: %1").arg(fileName));
 #endif
 		}
 
@@ -2623,21 +2622,6 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 
 		event->acceptProposedAction();
 	}
-
-	//QString filename("none");
-	//if (event->mimeData()->hasFormat("FileNameW"))
-	//{
-	//	QByteArray data = event->mimeData()->data("FileNameW");
-	//	filename = QString::fromUtf16((ushort*)data.data(), data.size() / 2);
-	//	event->acceptProposedAction();
-	//}
-	//else if (event->mimeData()->hasFormat("FileName"))
-	//{
-	//	filename = event->mimeData()->data("FileNameW");
-	//	event->acceptProposedAction();
-	//}
-
-	//ccLog::Print(QString("Drop file(s): %1").arg(filename));
 
 	event->ignore();
 }
@@ -2955,10 +2939,10 @@ void ccGLWindow::drawCross()
 	//cross OpenGL drawing
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey.rgba);
 	glFunc->glBegin(GL_LINES);
-	glFunc->glVertex3f(0.0, -CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0);
-	glFunc->glVertex3f(0.0, CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0);
-	glFunc->glVertex3f(-CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0, 0.0);
-	glFunc->glVertex3f(CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0, 0.0);
+	glFunc->glVertex3f(0.0f, -CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
+	glFunc->glVertex3f(0.0f, CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
+	glFunc->glVertex3f(-CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
+	glFunc->glVertex3f(CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
 	glFunc->glEnd();
 }
 
@@ -3007,7 +2991,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	float dH = std::max(fm.height() * 1.25f, trihedronLength + 5.0f);
 	float w = m_glViewport.width() / 2.0f - dW;
 	float h = m_glViewport.height() / 2.0f - dH;
-	float tick = 3 * m_captureMode.zoomFactor;
+	float tick = 3.0f * m_captureMode.zoomFactor;
 
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
@@ -3015,12 +2999,12 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	//scale OpenGL drawing
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
 	glFunc->glBegin(GL_LINES);
-	glFunc->glVertex3f(w - scaleW_pix, -h, 0.0);
-	glFunc->glVertex3f(w, -h, 0.0);
-	glFunc->glVertex3f(w - scaleW_pix, -h - tick, 0.0);
-	glFunc->glVertex3f(w - scaleW_pix, -h + tick, 0.0);
-	glFunc->glVertex3f(w, -h + tick, 0.0);
-	glFunc->glVertex3f(w, -h - tick, 0.0);
+	glFunc->glVertex3f(w - scaleW_pix, -h, 0.0f);
+	glFunc->glVertex3f(w, -h, 0.0f);
+	glFunc->glVertex3f(w - scaleW_pix, -h - tick, 0.0f);
+	glFunc->glVertex3f(w - scaleW_pix, -h + tick, 0.0f);
+	glFunc->glVertex3f(w, -h + tick, 0.0f);
+	glFunc->glVertex3f(w, -h - tick, 0.0f);
 	glFunc->glEnd();
 
 	QString text = QString::number(equivalentWidth);
@@ -3040,7 +3024,7 @@ void ccGLWindow::drawTrihedron()
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
-	glFunc->glTranslatef(w, -h, 0);
+	glFunc->glTranslatef(w, -h, 0.0f);
 	glFunc->glMultMatrixd(m_viewportParams.viewMat.data());
 
 	//on first call, compile the GL list once and for all
@@ -3205,7 +3189,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 		//compute the aspect ratio
 		double ar = static_cast<double>(m_glViewport.width()) / m_glViewport.height();
 
-		float currentFov_deg = getFov();
+		double currentFov_deg = static_cast<double>(getFov());
 
 		//DGM: take now 'frustumAsymmetry' into account (for stereo rendering)
 		//return ccGLUtils::Perspective(currentFov_deg,ar,zNear,zFar);
@@ -3217,7 +3201,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 		{
 			//see 'NVIDIA 3D VISION PRO AND STEREOSCOPIC 3D' White paper (Oct 2010, p. 12)
 			//on input 'eyeOffset' should be -1 or +1
-			frustumAsymmetry = *eyeOffset * (2 * xMax) * (m_stereoParams.eyeSepFactor / 100.0);
+			frustumAsymmetry = *eyeOffset * (2.0 * xMax) * (m_stereoParams.eyeSepFactor / 100.0);
 
 			double convergence = m_stereoParams.focalDist;
 			if (m_stereoParams.autoFocal)
@@ -3423,7 +3407,7 @@ void ccGLWindow::setStandardOrthoCorner()
 
 	glFunc->glMatrixMode(GL_PROJECTION);
 	glFunc->glLoadIdentity();
-	glFunc->glOrtho(0, m_glViewport.width(), 0, m_glViewport.height(), 0, 1);
+	glFunc->glOrtho(0.0, m_glViewport.width(), 0.0, m_glViewport.height(), 0.0, 1.0);
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glLoadIdentity();
 }
@@ -3511,7 +3495,7 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 	//is the picking mode locked?
 	if (m_pickingModeLocked)
 	{
-		if (mode != m_pickingMode && mode != DEFAULT_PICKING)
+		if ((mode != m_pickingMode) && (mode != DEFAULT_PICKING))
 			ccLog::Warning("[ccGLWindow::setPickingMode] Picking mode is locked! Can't change it...");
 		return;
 	}
@@ -3570,14 +3554,14 @@ CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 	//invert y
 	y = height() - 1 - y;
 
-	CCVector3d v(x - Q2D.x, y - Q2D.y, 0);
+	CCVector3d v(x - Q2D.x, y - Q2D.y, 0.0);
 
 	v.x = std::max(std::min(v.x / xc, 1.0), -1.0);
 	v.y = std::max(std::min(v.y / yc, 1.0), -1.0);
 
 	if (m_verticalRotationLocked || m_bubbleViewModeEnabled)
 	{
-		v.y = 0;
+		v.y = 0.0;
 	}
 
 	//square 'radius'
@@ -3790,7 +3774,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		{
 			//displacement vector (in "3D")
 			double pixSize = computeActualPixelSize();
-			CCVector3d u(dx * pixSize, -dy * pixSize, 0);
+			CCVector3d u(dx * pixSize, -dy * pixSize, 0.0);
 			if (!m_viewportParams.perspectiveView)
 			{
 				u.y *= m_viewportParams.orthoAspectRatio;
@@ -3861,7 +3845,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		{
 			//displacement vector (in "3D")
 			double pixSize = computeActualPixelSize();
-			CCVector3d u(dx*pixSize, -dy*pixSize, 0);
+			CCVector3d u(dx*pixSize, -dy*pixSize, 0.0);
 			m_viewportParams.viewMat.transposed().applyRotation(u);
 
 			const int retinaScale = devicePixelRatio();
@@ -4318,13 +4302,13 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 		//to zoom in and out we simply change the fov in bubble-view mode!
 		if (m_bubbleViewModeEnabled)
 		{
-			setBubbleViewFov(m_bubbleViewFov_deg - wheelDelta_deg / 3.6); //1 turn = 100 degrees
+			setBubbleViewFov(m_bubbleViewFov_deg - wheelDelta_deg / 3.6f); //1 turn = 100 degrees
 		}
 		else
 		{
 			//convert degrees in 'constant' walking speed in ... pixels ;)
 			const double& deg2PixConversion = getDisplayParameters().zoomSpeed;
-			float delta = static_cast<float>(deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize;
+			double delta = deg2PixConversion * static_cast<double>(wheelDelta_deg * m_viewportParams.pixelSize);
 
 			//if we are (clearly) outisde of the displayed objects bounding-box
 			if (m_cameraToBBCenterDist > m_bbHalfDiag)
@@ -4333,7 +4317,7 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 				delta *= 1.0 + std::log(m_cameraToBBCenterDist / m_bbHalfDiag);
 			}
 
-			moveCamera(0, 0, -delta);
+			moveCamera(0.0f, 0.0f, static_cast<float>(-delta));
 		}
 	}
 	else //ortho. mode
@@ -4463,7 +4447,7 @@ void ccGLWindow::processPickingResult(const PickingParameters& params,
 	}
 }
 
-//DGM: warning, OpenGL picking with the picking buffer is depreacted.
+//DGM: WARNING: OpenGL picking with the picking buffer is depreacted.
 //We need to get rid of this code or change it to color-based selection...
 void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 {
@@ -4666,7 +4650,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		ccLog::Warning("[Picking] Not enough memory!");
 	}
 
-	ccHObject* pickedEntity = 0;
+	ccHObject* pickedEntity = nullptr;
 	if (selectedID >= 0)
 	{
 		if (params.pickInSceneDB && m_globalDBRoot)
@@ -4978,7 +4962,7 @@ void ccGLWindow::setLineWidth(float width)
 
 int FontSizeModifier(int fontSize, float zoomFactor)
 {
-	int scaledFontSize = static_cast<int>(floor(fontSize * zoomFactor));
+	int scaledFontSize = static_cast<int>(std::floor(fontSize * zoomFactor));
 	if (zoomFactor >= 2.0f)
 		scaledFontSize -= static_cast<int>(zoomFactor);
 	if (scaledFontSize < 1)
@@ -5137,8 +5121,8 @@ static void glDrawUnitCircle(QOpenGLContext* context, unsigned char dim, unsigne
 	for (unsigned i = 0; i < steps; ++i)
 	{
 		double theta = thetaStep * i;
-		P.u[dimX] = cos(theta);
-		P.u[dimY] = sin(theta);
+		P.u[dimX] = std::cos(theta);
+		P.u[dimY] = std::sin(theta);
 		glFunc->glVertex3dv(P.u);
 	}
 	glFunc->glEnd();
@@ -5176,12 +5160,12 @@ void ccGLWindow::showPivotSymbol(bool state)
 
 void ccGLWindow::drawPivot()
 {
-	if (!m_viewportParams.objectCenteredView)
+	if (!m_viewportParams.objectCenteredView ||
+			(m_pivotVisibility == PIVOT_HIDE) ||
+			(m_pivotVisibility == PIVOT_SHOW_ON_MOVE && !m_pivotSymbolShown))
+	{
 		return;
-
-	if (m_pivotVisibility == PIVOT_HIDE ||
-		(m_pivotVisibility == PIVOT_SHOW_ON_MOVE && !m_pivotSymbolShown))
-		return;
+	}
 
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
@@ -5193,7 +5177,7 @@ void ccGLWindow::drawPivot()
 	glFunc->glTranslated(m_viewportParams.pivotPoint.x, m_viewportParams.pivotPoint.y, m_viewportParams.pivotPoint.z);
 
 	//compute actual symbol radius
-	double symbolRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * std::min(m_glViewport.width(), m_glViewport.height()) / 2;
+	double symbolRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * std::min(m_glViewport.width(), m_glViewport.height()) / 2.0;
 
 	if (m_pivotGLList == GL_INVALID_LIST_ID)
 	{
@@ -5213,7 +5197,7 @@ void ccGLWindow::drawPivot()
 			CC_DRAW_CONTEXT CONTEXT;
 			getContext(CONTEXT);
 			CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
-			CONTEXT.display = 0;
+			CONTEXT.display = nullptr;
 			sphere.draw(CONTEXT);
 			glFunc->glPopAttrib();
 		}
@@ -5254,7 +5238,7 @@ void ccGLWindow::drawPivot()
 	}
 
 	//constant scale
-	double scale = symbolRadius * computeActualPixelSize();
+	const double scale = symbolRadius * computeActualPixelSize();
 	glFunc->glScaled(scale, scale, scale);
 
 	glFunc->glCallList(m_pivotGLList);
@@ -5305,7 +5289,7 @@ float ccGLWindow::computePerspectiveZoom() const
 		return 1.0f;
 
 	float screenSize = std::min(m_glViewport.width(), m_glViewport.height()) * m_viewportParams.pixelSize; //see how pixelSize is computed!
-	return screenSize / static_cast<float>(zoomEquivalentDist * tan(currentFov_deg * CC_DEG_TO_RAD));
+	return screenSize / static_cast<float>(zoomEquivalentDist * std::tan(currentFov_deg * CC_DEG_TO_RAD));
 }
 
 void ccGLWindow::setBubbleViewMode(bool state)
@@ -5327,7 +5311,7 @@ void ccGLWindow::setBubbleViewMode(bool state)
 		m_bubbleViewModeEnabled = true;
 
 		//when entering this mode, we reset the f.o.v.
-		m_bubbleViewFov_deg = 0; //to trick the signal emission mechanism
+		m_bubbleViewFov_deg = 0.0f; //to trick the signal emission mechanism
 		setBubbleViewFov(90.0f);
 	}
 	else if (bubbleViewModeWasEnabled)
@@ -5572,7 +5556,7 @@ void ccGLWindow::updateZoom(float zoomFactor)
 	//no 'zoom' in viewer based perspective
 	assert(!m_viewportParams.perspectiveView);
 
-	if (zoomFactor > 0.0 && zoomFactor != 1.0f)
+	if (zoomFactor > 0.0f && zoomFactor != 1.0f)
 	{
 		setZoom(m_viewportParams.zoom*zoomFactor);
 	}
@@ -5896,7 +5880,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 		setStandardOrthoCorner();
 		ccGLUtils::DisplayTexture2DPosition(glFilter->getTexture(), 0, 0, CONTEXT.glW, CONTEXT.glH);
 
-		bindFBO(0);
+		bindFBO(nullptr);
 	}
 
 	bindFBO(fbo);
@@ -6016,7 +6000,7 @@ void ccGLWindow::removeGLFilter()
 {
 	//we "disconnect" current glFilter, to avoid wrong display/errors
 	//if QT tries to redraw window during object destruction
-	ccGlFilter* _filter = 0;
+	ccGlFilter* _filter = nullptr;
 	std::swap(_filter, m_activeGLFilter);
 
 	if (_filter)
@@ -6723,7 +6707,7 @@ bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 	w *= retinaScale;
 	h *= retinaScale;
 
-	if (fbo && fbo->width() == w && fbo->height() == h)
+	if (fbo && (fbo->width() == w) && (fbo->height() == h))
 	{
 		//nothing to do
 		return true;

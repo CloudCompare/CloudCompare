@@ -130,6 +130,11 @@ v2.9.alpha - XX/XX/XXXX
 		- the 'kernel size' parameter is replaced by 'the minimum angle of triangles' used in the internal triangulation process
 		- Plane and Quadric mode increase the radius adaptively to reach minimum number of points
 
+	* Edit the scalar value of a single point
+		- create a label on the point (SHIFT + click)
+		- make sure a scalar field is active
+		- right click on the label entry in the DB tree and select 'Edit scalar value'
+
 	* Other
 		- color scales are now listed in alphabetical order
 		- the DXF format can now be used to export point clouds (their size should be very limited!)

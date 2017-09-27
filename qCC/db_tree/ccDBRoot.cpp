@@ -28,6 +28,7 @@
 #include <QMimeData>
 #include <QMessageBox>
 #include <QRegExp>
+#include <QInputDialog>
 
 //qCC_db
 #include <ccLog.h>
@@ -42,6 +43,7 @@
 #include <ccPolyline.h>
 #include <ccFacet.h>
 #include <ccGBLSensor.h>
+#include <ccScalarField.h>
 
 //CClib
 #include <CCMiscTools.h>
@@ -107,25 +109,26 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 
 	//context menu on DB tree elements
 	m_dbTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-	m_expandBranch = new QAction("Expand branch",this);
-	m_collapseBranch = new QAction("Collapse branch",this);
-	m_gatherInformation = new QAction("Information (recursive)",this);
-	m_sortChildrenType = new QAction("Sort children by type",this);
-	m_sortChildrenAZ = new QAction("Sort children by name (A-Z)",this);
-	m_sortChildrenZA = new QAction("Sort children by name (Z-A)",this);
-	m_selectByTypeAndName = new QAction("Select children by type and/or name",this);
-	m_deleteSelectedEntities = new QAction("Delete",this);
-	m_toggleSelectedEntities = new QAction("Toggle",this);
-	m_toggleSelectedEntitiesVisibility = new QAction("Toggle visibility",this);
-	m_toggleSelectedEntitiesColor = new QAction("Toggle color",this);
-	m_toggleSelectedEntitiesNormals = new QAction("Toggle normals",this);
-	m_toggleSelectedEntitiesMat = new QAction("Toggle materials/textures",this);
-	m_toggleSelectedEntitiesSF = new QAction("Toggle SF",this);
-	m_toggleSelectedEntities3DName = new QAction("Toggle 3D name",this);
-	m_addEmptyGroup = new QAction("Add empty group",this);
-	m_alignCameraWithEntity = new QAction("Align camera",this);
-	m_alignCameraWithEntityReverse = new QAction("Align camera (reverse)",this);
-	m_enableBubbleViewMode = new QAction("Bubble-view",this);
+	m_expandBranch = new QAction("Expand branch", this);
+	m_collapseBranch = new QAction("Collapse branch", this);
+	m_gatherInformation = new QAction("Information (recursive)", this);
+	m_sortChildrenType = new QAction("Sort children by type", this);
+	m_sortChildrenAZ = new QAction("Sort children by name (A-Z)", this);
+	m_sortChildrenZA = new QAction("Sort children by name (Z-A)", this);
+	m_selectByTypeAndName = new QAction("Select children by type and/or name", this);
+	m_deleteSelectedEntities = new QAction("Delete", this);
+	m_toggleSelectedEntities = new QAction("Toggle", this);
+	m_toggleSelectedEntitiesVisibility = new QAction("Toggle visibility", this);
+	m_toggleSelectedEntitiesColor = new QAction("Toggle color", this);
+	m_toggleSelectedEntitiesNormals = new QAction("Toggle normals", this);
+	m_toggleSelectedEntitiesMat = new QAction("Toggle materials/textures", this);
+	m_toggleSelectedEntitiesSF = new QAction("Toggle SF", this);
+	m_toggleSelectedEntities3DName = new QAction("Toggle 3D name", this);
+	m_addEmptyGroup = new QAction("Add empty group", this);
+	m_alignCameraWithEntity = new QAction("Align camera", this);
+	m_alignCameraWithEntityReverse = new QAction("Align camera (reverse)", this);
+	m_enableBubbleViewMode = new QAction("Bubble-view", this);
+	m_editLabelScalarValue = new QAction("Edit scalar value", this);
 
 	m_contextMenuPos = QPoint(-1,-1);
 
@@ -150,6 +153,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_alignCameraWithEntity,			SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityDirect()));
 	connect(m_alignCameraWithEntityReverse,		SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityIndirect()));
 	connect(m_enableBubbleViewMode,				SIGNAL(triggered()),								this, SLOT(enableBubbleViewMode()));
+	connect(m_editLabelScalarValue,				SIGNAL(triggered()),								this, SLOT(editLabelScalarValue()));
 
 	//other DB tree signals/slots connection
 	connect(m_dbTreeWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(changeSelection(const QItemSelection&, const QItemSelection&)));
@@ -1465,7 +1469,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 			const CCVector3* _B = B.cloud->getPoint(B.index);
 			const cc2DLabel::PickedPoint& C = label->getPoint(2);
 			const CCVector3* _C = C.cloud->getPoint(C.index);
-			CCVector3 N = (*_B-*_A).cross(*_C-*_A);
+			CCVector3 N = (*_B - *_A).cross(*_C - *_A);
 			planeNormal = CCVector3d::fromArray(N.u);
 			planeVertDir = /*(*_B-*_A)*/win->getCurrentUpDir();
 			center = (*_A + *_B + *_C) / 3;
@@ -1979,6 +1983,63 @@ void ccDBRoot::enableBubbleViewMode()
 	MainWindow::RefreshAllGLWindow(false);
 }
 
+void ccDBRoot::editLabelScalarValue()
+{
+	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
+	QModelIndexList selectedIndexes = qism->selectedIndexes();
+	int selCount = selectedIndexes.size();
+	if (selCount == 0)
+	{
+		return;
+	}
+
+	ccHObject* obj = static_cast<ccHObject*>(selectedIndexes[0].internalPointer());
+	cc2DLabel* label = ccHObjectCaster::To2DLabel(obj);
+	if (!label || label->size() != 1)
+	{
+		return;
+	}
+
+	const cc2DLabel::PickedPoint& P = label->getPoint(0);
+	if (!P.cloud)
+	{
+		assert(false);
+		return;
+	}
+
+	if (!P.cloud->isA(CC_TYPES::POINT_CLOUD) || !P.cloud->hasScalarFields())
+	{
+		return;
+	}
+	
+	ccPointCloud* pc = static_cast<ccPointCloud*>(P.cloud);
+	ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+	if (!sf)
+	{
+		ccLog::Warning("[editLabelScalarValue] No active scalar field");
+		return;
+	}
+
+	ScalarType s = sf->getValue(P.index);
+
+	bool ok = false;
+	double newValue = QInputDialog::getDouble(MainWindow::TheInstance(), "Edit scalar value", QString("%1 (%2) =").arg(sf->getName()).arg(P.index), s, -2147483647, 2147483647, 6, &ok);
+	if (!ok)
+	{
+		//process cancelled by the user
+		return;
+	}
+
+	ScalarType newS = static_cast<ScalarType>(newValue);
+	if (s != newS)
+	{
+		//update the value and update the display
+		sf->setValue(P.index, newS);
+		sf->computeMinAndMax();
+		pc->redrawDisplay();
+	}
+}
+
 void ccDBRoot::showContextMenu(const QPoint& menuPos)
 {
 	m_contextMenuPos = menuPos;
@@ -2004,6 +2065,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			bool leafObject = false;
 			bool hasExacltyOneGBLSenor = false;
 			bool hasExactlyOnePlane = false;
+			bool canEditLabelScalarValue = false;
 			for (int i = 0; i < selCount; ++i)
 			{
 				ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
@@ -2035,6 +2097,20 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 						if (item->isA(CC_TYPES::LABEL_2D))
 						{
 							hasExactlyOnePlanarEntity = (static_cast<cc2DLabel*>(item)->size() == 3);
+							cc2DLabel* label = ccHObjectCaster::To2DLabel(item);
+							if (label)
+							{
+								canEditLabelScalarValue = (	label->size() == 1
+														&&	label->getPoint(0).cloud
+														&&	label->getPoint(0).cloud->hasScalarFields()
+														&&	label->getPoint(0).cloud->isA(CC_TYPES::POINT_CLOUD)
+														&&	static_cast<ccPointCloud*>(label->getPoint(0).cloud)->getCurrentDisplayedScalarField() != 0
+														);
+							}
+							else
+							{
+								assert(false);
+							}
 						}
 						else if (item->isA(CC_TYPES::PLANE) || item->isA(CC_TYPES::FACET))
 						{
@@ -2063,11 +2139,14 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			{
 				menu.addAction(m_enableBubbleViewMode);
 			}
+			
 			menu.addAction(m_gatherInformation);
 			menu.addSeparator();
 			menu.addAction(m_toggleSelectedEntities);
 			if (toggleVisibility)
+			{
 				menu.addAction(m_toggleSelectedEntitiesVisibility);
+			}
 			if (toggleOtherProperties)
 			{
 				menu.addAction(m_toggleSelectedEntitiesColor);
@@ -2096,6 +2175,13 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				menu.addSeparator();
 				menu.addAction(m_addEmptyGroup);
 			}
+
+			if (canEditLabelScalarValue)
+			{
+				menu.addSeparator();
+				menu.addAction(m_editLabelScalarValue);
+			}
+
 			menu.addSeparator();
 		}
 

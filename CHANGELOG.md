@@ -142,6 +142,7 @@ v2.9.alpha - XX/XX/XXXX
 		- when changing the dip and dip direction of plane parallel with XY, the resulting plane shouldn't rotate in an arbitrary way anymore
 		- the filter and single-button plugin toolbars are now on the right side of the window by default (to reset to the default layouts, use "Reset all GUI element positions" at the bottom of the Display menu)
 		- the Plane edition dialog now lest the user specify the normal plane in addition to its dip and dip direction
+		- new 'Clone' icon with a colored background so as to more clearly spot when the icon is enabled (Nyan sheeps!)
 
 - Bug fixes:
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)

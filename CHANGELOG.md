@@ -86,6 +86,8 @@ v2.9.alpha - XX/XX/XXXX
 		- Other improvements:
 			* the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
 			* the ASCII loading dialog shouldn't appear anymore in 'SILENT' mode (only if CC really can't guess anything)
+			* the default timestamp resolution has been increased (with milliseconds) in order to avoid overwriting files
+				when saving very small file (too quickly!)
 
 	* Rasterize tool
 		- new option to re-project contour lines computed on a scalar field (i.e. a layer other than the altitudes)

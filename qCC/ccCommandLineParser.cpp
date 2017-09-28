@@ -262,7 +262,7 @@ QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 	QString outputFilename = baseName;
 	if (m_addTimestamp && !forceNoTimestamp)
 	{
-		outputFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss"));
+		outputFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss_zzz"));
 	}
 
 	if (!extension.isEmpty())
@@ -532,9 +532,9 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 		{
 			ccHObject tempContainer("Clouds");
 			{
-				for (size_t i = 0; i < m_clouds.size(); ++i)
+				for (CLCloudDesc& desc : m_clouds)
 				{
-					tempContainer.addChild(m_clouds[i].getEntity(), ccHObject::DP_NONE);
+					tempContainer.addChild(desc.getEntity(), ccHObject::DP_NONE);
 				}
 			}
 
@@ -555,10 +555,10 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 
 	//standard way: one file per cloud
 	{
-		for (size_t i = 0; i < m_clouds.size(); ++i)
+		for (CLCloudDesc& desc : m_clouds)
 		{
 			//save output
-			QString errorStr = exportEntity(m_clouds[i], suffix);
+			QString errorStr = exportEntity(desc, suffix);
 			if (!errorStr.isEmpty())
 				return error(errorStr);
 		}

@@ -155,7 +155,6 @@ public:
 	//shortcuts
 	void setWindowTitle(QString title) { setTitle(title); }
 	QString windowTitle() const { return title(); }
-
 #endif
 
 	//! Sets 'scene graph' root
@@ -1164,16 +1163,16 @@ protected: //members
 	//! Display capturing mode options
 	struct CaptureModeOptions
 	{
-		bool enabled;
-		float zoomFactor;
-		bool renderOverlayItems;
-
 		//! Default constructor
 		CaptureModeOptions()
 			: enabled(false)
 			, zoomFactor(1.0f)
 			, renderOverlayItems(false)
 		{}
+
+		bool enabled;
+		float zoomFactor;
+		bool renderOverlayItems;
 	};
 
 	//! Display capturing mode options
@@ -1182,6 +1181,12 @@ protected: //members
 	//! Temporary Message to display in the lower-left corner
 	struct MessageToDisplay
 	{
+		MessageToDisplay()
+			: messageValidity_sec(0)
+			, position(LOWER_LEFT_MESSAGE)
+			, type(CUSTOM_MESSAGE)
+		{}
+		
 		//! Message
 		QString message;
 		//! Message end time (sec)
@@ -1196,7 +1201,7 @@ protected: //members
 	std::list<MessageToDisplay> m_messagesToDisplay;
 
 	//! Last click time (msec)
-	int m_lastClickTime_ticks;
+	qint64 m_lastClickTime_ticks;
 
 	//! Sun light position
 	/** Relative to screen.
@@ -1224,12 +1229,13 @@ protected: //members
 					LEAVE_FULLSCREEN_MODE,
 		};
 
+		ClickableItem(): role(NO_ROLE) {}
+		ClickableItem(Role _role, QRect _area) : role(_role), area(_area) {}
+
 		Role role;
 		QRect area;
-		
-		ClickableItem() : role(NO_ROLE) {}
-		ClickableItem(Role _role, QRect _area) : role(_role), area(_area) {}
 	};
+	
 	//! Currently displayed clickable items
 	std::vector<ClickableItem> m_clickableItems;
 

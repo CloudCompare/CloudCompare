@@ -1,10 +1,14 @@
 CloudCompare version history
 ============================
 
-v2.9.alpha - XX/XX/XXXX
+v2.9.beta - XX/XX/XXXX
 ----------------------
 
 - New features:
+
+	* New plugin: qCompass
+		- structural geology toolbox for the interpretation and analysis of virtual outcrop models (by Sam Thiele)
+		- see http://www.cloudcompare.org/doc/wiki/index.php?title=Compass_(plugin)
 
 	* New shortcut: P (pick rotation center)
 

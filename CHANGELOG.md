@@ -57,6 +57,8 @@ v2.9.alpha - XX/XX/XXXX
 
 	* Trace polyline tool
 		- the tool now works on meshes
+		- Holding CTRL while pressing the right mouse button will pan the view instead of closing the polyline
+		- new 'Continue' button, in case the user has mistakenly closed the polyline and wants to continue
 
 	* Command line mode
 		- the Rasterize tool is now accessible via the command line:

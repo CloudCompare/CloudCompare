@@ -57,8 +57,9 @@ protected slots:
 
 	void apply();
 	void cancel();
-	void resetLine();
 	void exportLine();
+	inline void continueEdition()  { restart(false); }
+	inline void resetLine() { restart(true); }
 
 	//void handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&);
 	//void addPointToPolyline(int x, int y);
@@ -74,6 +75,9 @@ protected slots:
 	virtual void onItemPicked(const PickedItem& pi) override;
 
 protected:
+
+	//! Restarts the edition mode
+	void restart(bool reset);
 
 	//! Viewport parameters (used for picking)
 	struct SegmentGLParams

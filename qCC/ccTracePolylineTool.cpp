@@ -75,6 +75,7 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 
 	connect(saveToolButton, SIGNAL(clicked()), this, SLOT(exportLine()));
 	connect(resetToolButton, SIGNAL(clicked()), this, SLOT(resetLine()));
+	connect(continueToolButton, SIGNAL(clicked()), this, SLOT(continueEdition()));
 	connect(validButton, SIGNAL(clicked()), this, SLOT(apply()));
 	connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
 	connect(widthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onWidthSizeChanged(int)));
@@ -335,7 +336,10 @@ bool ccTracePolylineTool::start()
 		m_pickingHub->removeListener(this);
 	}
 	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
-	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA() | ccGLWindow::INTERACT_SIG_RB_CLICKED | ccGLWindow::INTERACT_SIG_MOUSE_MOVED);
+	m_associatedWin->setInteractionMode(	ccGLWindow::TRANSFORM_CAMERA()
+										|	ccGLWindow::INTERACT_SIG_RB_CLICKED
+										|	ccGLWindow::INTERACT_CTRL_PAN
+										|	ccGLWindow::INTERACT_SIG_MOUSE_MOVED);
 	m_associatedWin->setCursor(Qt::CrossCursor);
 
 	snapSizeSpinBox->blockSignals(true);
@@ -519,7 +523,7 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 
 void ccTracePolylineTool::closePolyLine(int, int)
 {
-	if (!m_poly3D)
+	if (!m_poly3D || (QApplication::keyboardModifiers() & Qt::ControlModifier)) //CTRL + right click = panning
 	{
 		return;
 	}
@@ -541,6 +545,7 @@ void ccTracePolylineTool::closePolyLine(int, int)
 		validButton->setEnabled(true);
 		saveToolButton->setEnabled(true);
 		resetToolButton->setEnabled(true);
+		continueToolButton->setEnabled(true);
 		if (m_pickingHub)
 		{
 			m_pickingHub->removeListener(this);
@@ -555,26 +560,37 @@ void ccTracePolylineTool::closePolyLine(int, int)
 	}
 }
 
-void ccTracePolylineTool::resetLine()
+void ccTracePolylineTool::restart(bool reset)
 {
 	if (m_poly3D)
 	{
-		//discard this polyline
-		if (m_associatedWin)
+		if (reset)
 		{
-			m_associatedWin->removeFromOwnDB(m_poly3D);
-		}
-		//hide the tip
-		if (m_polyTip)
-		{
-			m_polyTip->setEnabled(false);
-		}
+			if (m_associatedWin)
+			{
+				//discard this polyline
+				m_associatedWin->removeFromOwnDB(m_poly3D);
+			}
+			if (m_polyTip)
+			{
+				//hide the tip
+				m_polyTip->setEnabled(false);
+			}
 
-		delete m_poly3D;
-		m_segmentParams.clear();
-		//delete m_poly3DVertices;
-		m_poly3D = 0;
-		m_poly3DVertices = 0;
+			delete m_poly3D;
+			m_segmentParams.clear();
+			//delete m_poly3DVertices;
+			m_poly3D = 0;
+			m_poly3DVertices = 0;
+		}
+		else
+		{
+			if (m_polyTip)
+			{
+				//show the tip
+				m_polyTip->setEnabled(true);
+			}
+		}
 	}
 
 	//enable picking
@@ -591,6 +607,7 @@ void ccTracePolylineTool::resetLine()
 	validButton->setEnabled(false);
 	saveToolButton->setEnabled(false);
 	resetToolButton->setEnabled(false);
+	continueToolButton->setEnabled(false);
 	m_done = false;
 }
 

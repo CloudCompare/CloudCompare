@@ -15,11 +15,24 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccCompass.h"
-
 //Qt
-#include <QtGui>
+#include <QFileDialog>
 #include <QFileInfo>
+
+#include <ccPickingHub.h>
+
+#include "ccCompass.h"
+#include "ccCompassDlg.h"
+#include "ccCompassInfo.h"
+#include "ccFitPlaneTool.h"
+#include "ccGeoObject.h"
+#include "ccLineationTool.h"
+#include "ccMapDlg.h"
+#include "ccNoteTool.h"
+#include "ccPinchNodeTool.h"
+#include "ccThicknessTool.h"
+#include "ccTopologyTool.h"
+#include "ccTraceTool.h"
 
 //initialize default static pars
 bool ccCompass::drawName = false;

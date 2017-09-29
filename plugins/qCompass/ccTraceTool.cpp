@@ -15,19 +15,21 @@
 //#                                                                        #
 //##########################################################################
 
+#include <QApplication>
+#include <QMainWindow>
+#include <QMessageBox>
+
 #include "ccTraceTool.h"
 #include "ccCompass.h"
 
 ccTraceTool::ccTraceTool()
 	: ccTool( )
 {
-
 }
 
 
 ccTraceTool::~ccTraceTool()
 {
-	
 }
 
 //called when the tool is set to active (for initialization)

@@ -15,8 +15,9 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccThicknessTool.h"
 #include "ccCompass.h"
+#include "ccGeoObject.h"
+#include "ccThicknessTool.h"
 
 ccColor::Rgb ccThicknessTool::ACTIVE_COLOR = ccColor::red;
 bool ccThicknessTool::TWO_POINT_MODE = false;

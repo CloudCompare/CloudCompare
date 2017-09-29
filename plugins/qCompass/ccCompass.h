@@ -18,55 +18,24 @@
 #ifndef CC_COMPASS_HEADER
 #define CC_COMPASS_HEADER
 
-//cc
-#include <DgmOctree.h>
-#include <DgmOctreeReferenceCloud.h>
-#include <ccFacet.h>
-#include <ccPlane.h>
-#include <ccScalarField.h>
+#include <QObject>
 
 //qCC
 #include "../ccStdPluginInterface.h"
-#include <cc2DLabel.h>
-#include <ccPointCloud.h>
-#include <qmainwindow.h>
 #include <ccPickingListener.h>
-#include <ccPickingHub.h>
-#include <ccGLWindow.h>
 
-//qt
-#include <QFileDialog>
-#include <QFile>
-#include <QTextStream>
-#include <QInputDialog>
-#include <QVariant>
+class ccCompassDlg;
+class ccFitPlaneTool;
+class ccGeoObject;
+class ccLineationTool;
+class ccMapDlg;
+class ccNoteTool;
+class ccPinchNodeTool;
+class ccThicknessTool;
+class ccTool;
+class ccTopologyTool;
+class ccTraceTool;
 
-//this plugin
-#include "ccMouseCircle.h"
-#include "ccCompassDlg.h"
-#include "ccMapDlg.h"
-#include "ccTrace.h"
-#include "ccPointPair.h"
-#include "ccCompassInfo.h"
-#include "ccGeoObject.h"
-#include "ccLineation.h"
-#include "ccThickness.h"
-#include "ccTopologyRelation.h"
-#include "ccNote.h"
-#include "ccPinchNode.h"
-
-//tools
-#include "ccTool.h"
-#include "ccFitPlaneTool.h"
-#include "ccTraceTool.h"
-#include "ccLineationTool.h"
-#include "ccThicknessTool.h"
-#include "ccNoteTool.h"
-#include "ccTopologyTool.h"
-#include "ccPinchNodeTool.h"
-
-//other
-#include <vector>
 
 class ccCompass : public QObject, public ccStdPluginInterface, public ccPickingListener
 {
@@ -76,7 +45,7 @@ class ccCompass : public QObject, public ccStdPluginInterface, public ccPickingL
 
 public:
 	//! Default constructor
-	explicit ccCompass(QObject* parent = 0);
+	explicit ccCompass(QObject* parent = nullptr);
 
 	//deconstructor
 	~ccCompass();

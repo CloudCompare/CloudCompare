@@ -139,6 +139,10 @@ v2.9.alpha - XX/XX/XXXX
 		- make sure a scalar field is active
 		- right click on the label entry in the DB tree and select 'Edit scalar value'
 
+	* DXF export
+		- now based on dxflib 3.17.0
+		- see fixed bugs below
+
 	* Other
 		- color scales are now listed in alphabetical order
 		- the DXF format can now be used to export point clouds (their size should be very limited!)
@@ -167,6 +171,9 @@ v2.9.alpha - XX/XX/XXXX
 	* When editing only the dip / dip direction of a plane, the rotation was not made about the plane center
 	* qSRA plugin: profile polyline automatically generated from cylinders or cone were shifted (half of the cylinder/cone height), resulting in a 'shifted' distance map
 		(half of the cloud was 'ignored')
+	* DXF export
+		- the I/O filter was mistakenly exporting the vertices of polylines and meshes as separate clouds
+		- the I/O filter was not exporting the shifted point clouds at the right location
 
 v2.8.1 - 16/02/2017
 ----------------------

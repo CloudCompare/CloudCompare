@@ -70,6 +70,16 @@ public:
     virtual void addLayer(const DL_LayerData& data) = 0;
 
     /**
+     * Called for every linetype.
+     */
+    virtual void addLinetype(const DL_LinetypeData& data) = 0;
+
+    /**
+      * Called for every dash in linetype pattern
+      */
+    virtual void addLinetypeDash(double length) = 0;
+
+    /**
      * Called for every block. Note: all entities added after this
      * command go into this block until endBlock() is called.
     *
@@ -88,6 +98,12 @@ public:
 
     /** Called for every line */
     virtual void addLine(const DL_LineData& data) = 0;
+
+    /** Called for every xline */
+    virtual void addXLine(const DL_XLineData& data) = 0;
+
+    /** Called for every ray */
+    virtual void addRay(const DL_RayData& data) = 0;
 
     /** Called for every arc */
     virtual void addArc(const DL_ArcData& data) = 0;
@@ -129,7 +145,7 @@ public:
     virtual void addSolid(const DL_SolidData& data) = 0;
 
 
-    /** Called for every Multi Text entity. */
+    /** Called for every multi Text entity. */
     virtual void addMText(const DL_MTextData& data) = 0;
 
     /**
@@ -139,8 +155,14 @@ public:
      */
     virtual void addMTextChunk(const std::string& text) = 0;
 
-    /** Called for every Text entity. */
+    /** Called for every text entity. */
     virtual void addText(const DL_TextData& data) = 0;
+
+    /** Called for every arc aligned text entity. */
+    virtual void addArcAlignedText(const DL_ArcAlignedTextData& data) = 0;
+
+    /** Called for every block Attribute entity. */
+    virtual void addAttribute(const DL_AttributeData& data) = 0;
 
     /**
      * Called for every aligned dimension entity. 

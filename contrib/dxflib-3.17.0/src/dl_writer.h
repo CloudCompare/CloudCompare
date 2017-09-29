@@ -67,6 +67,7 @@ public:
     }
 
     virtual ~DL_Writer() {}
+    ;
 
     /** Generic section for section 'name'.
      *
@@ -235,8 +236,8 @@ public:
      *      num
      * </pre>
      */
-    void tableLineTypes(int num) const {
-        //lineTypeHandle = 5;
+    void tableLinetypes(int num) const {
+        //linetypeHandle = 5;
         table("LTYPE", num, 5);
     }
 
@@ -357,10 +358,13 @@ public:
         if (version>=DL_VERSION_2000) {
             dxfInt(370, attrib.getWidth());
         }
-        std::string lineType = attrib.getLineType();
-        std::transform(lineType.begin(), lineType.end(), lineType.begin(), ::toupper);
-        if (version>=DL_VERSION_2000 || lineType=="BYLAYER") {
-            dxfString(6, attrib.getLineType());
+        if (version>=DL_VERSION_2000) {
+            dxfReal(48, attrib.getLinetypeScale());
+        }
+        std::string linetype = attrib.getLinetype();
+        std::transform(linetype.begin(), linetype.end(), linetype.begin(), ::toupper);
+        if (version>=DL_VERSION_2000 || linetype=="BYLAYER") {
+            dxfString(6, attrib.getLinetype());
         }
     }
 
@@ -400,7 +404,7 @@ public:
      *  LTYPE
      * </pre>
      */
-    void tableLineTypeEntry(unsigned long int h=0)  const {
+    void tableLinetypeEntry(unsigned long int h=0)  const {
         dxfString(0, "LTYPE");
         if (version>=DL_VERSION_2000) {
             if (h==0) {
@@ -491,10 +495,10 @@ public:
     void color(int col=256) const {
         dxfInt(62, col);
     }
-    void lineType(const char *lt) const {
+    void linetype(const char *lt) const {
         dxfString(6, lt);
     }
-    void lineTypeScale(double scale) const {
+    void linetypeScale(double scale) const {
         dxfReal(48, scale);
     }
     void lineWeight(int lw) const {

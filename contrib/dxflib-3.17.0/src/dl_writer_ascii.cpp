@@ -60,7 +60,12 @@ bool DL_WriterA::openFailed() const {
  */
 void DL_WriterA::dxfReal(int gc, double value) const {
     char str[256];
-    sprintf(str, "%.16lf", value);
+    if (version==DL_Codes::AC1009_MIN) {
+        sprintf(str, "%.6lf", value);
+    }
+    else {
+        sprintf(str, "%.16lf", value);
+    }
     
     // fix for german locale:
     strReplace(str, ',', '.');

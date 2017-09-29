@@ -27,6 +27,7 @@
 
 #include "dl_global.h"
 
+#include <limits>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -48,15 +49,19 @@
 #define M_PI 3.1415926535897932384626433832795
 #endif
 
+#ifndef DL_NANDOUBLE
+#define DL_NANDOUBLE std::numeric_limits<double>::quiet_NaN()
+#endif
+
 class DL_CreationInterface;
 class DL_WriterA;
 
 
-#define DL_VERSION "3.3.4.0"
+#define DL_VERSION "3.17.0.0"
 
 #define DL_VERSION_MAJOR    3
-#define DL_VERSION_MINOR    3
-#define DL_VERSION_REV      4
+#define DL_VERSION_MINOR    17
+#define DL_VERSION_REV      0
 #define DL_VERSION_BUILD    0
 
 #define DL_UNKNOWN               0
@@ -89,7 +94,10 @@ class DL_WriterA;
 #define DL_ENTITY_TRACE        120
 #define DL_ENTITY_SOLID        121
 #define DL_ENTITY_3DFACE       122
-#define DL_ENTITY_SEQEND       123
+#define DL_ENTITY_XLINE        123
+#define DL_ENTITY_RAY          124
+#define DL_ENTITY_ARCALIGNEDTEXT 125
+#define DL_ENTITY_SEQEND       126
 #define DL_XRECORD             200
 #define DL_DICTIONARY          210
 
@@ -121,27 +129,30 @@ public:
     bool readDxfGroups(FILE* fp,
                        DL_CreationInterface* creationInterface);
     static bool getStrippedLine(std::string& s, unsigned int size,
-                               FILE* stream);
+                               FILE* stream, bool stripSpace = true);
     
     bool readDxfGroups(std::stringstream& stream,
                        DL_CreationInterface* creationInterface);
     bool in(std::stringstream &stream,
             DL_CreationInterface* creationInterface);
     static bool getStrippedLine(std::string& s, unsigned int size,
-                               std::stringstream& stream);
+                               std::stringstream& stream, bool stripSpace = true);
 
-    static bool stripWhiteSpace(char** s);
+    static bool stripWhiteSpace(char** s, bool stripSpaces = true);
 
     bool processDXFGroup(DL_CreationInterface* creationInterface,
                          int groupCode, const std::string& groupValue);
     void addSetting(DL_CreationInterface* creationInterface);
     void addLayer(DL_CreationInterface* creationInterface);
+    void addLinetype(DL_CreationInterface *creationInterface);
     void addBlock(DL_CreationInterface* creationInterface);
     void endBlock(DL_CreationInterface* creationInterface);
     void addTextStyle(DL_CreationInterface* creationInterface);
 
     void addPoint(DL_CreationInterface* creationInterface);
     void addLine(DL_CreationInterface* creationInterface);
+    void addXLine(DL_CreationInterface* creationInterface);
+    void addRay(DL_CreationInterface* creationInterface);
     
     void addPolyline(DL_CreationInterface* creationInterface);
     void addVertex(DL_CreationInterface* creationInterface);
@@ -159,8 +170,9 @@ public:
 
     void addMText(DL_CreationInterface* creationInterface);
     void addText(DL_CreationInterface* creationInterface);
+    void addArcAlignedText(DL_CreationInterface* creationInterface);
 
-    void addAttrib(DL_CreationInterface* creationInterface);
+    void addAttribute(DL_CreationInterface* creationInterface);
 
     DL_DimensionData getDimData();
     void addDimLinear(DL_CreationInterface* creationInterface);
@@ -194,6 +206,7 @@ public:
     bool handleLWPolylineData(DL_CreationInterface* creationInterface);
     bool handleSplineData(DL_CreationInterface* creationInterface);
     bool handleLeaderData(DL_CreationInterface* creationInterface);
+    bool handleLinetypeData(DL_CreationInterface* creationInterface);
 
     void endEntity(DL_CreationInterface* creationInterface);
     
@@ -212,6 +225,12 @@ public:
     void writeLine(DL_WriterA& dw,
                    const DL_LineData& data,
                    const DL_Attributes& attrib);
+    void writeXLine(DL_WriterA& dw,
+                   const DL_XLineData& data,
+                   const DL_Attributes& attrib);
+    void writeRay(DL_WriterA& dw,
+                    const DL_RayData& data,
+                    const DL_Attributes& attrib);
     void writePolyline(DL_WriterA& dw,
                        const DL_PolylineData& data,
                        const DL_Attributes& attrib);
@@ -239,6 +258,9 @@ public:
     void writeSolid(DL_WriterA& dw,
                    const DL_SolidData& data,
                    const DL_Attributes& attrib);
+    void writeTrace(DL_WriterA& dw,
+                    const DL_TraceData& data,
+                    const DL_Attributes& attrib);
     void write3dFace(DL_WriterA& dw,
                    const DL_3dFaceData& data,
                    const DL_Attributes& attrib);
@@ -249,8 +271,11 @@ public:
                     const DL_MTextData& data,
                     const DL_Attributes& attrib);
     void writeText(DL_WriterA& dw,
-                    const DL_TextData& data,
-                    const DL_Attributes& attrib);
+                   const DL_TextData& data,
+                   const DL_Attributes& attrib);
+    void writeAttribute(DL_WriterA& dw,
+                   const DL_AttributeData& data,
+                   const DL_Attributes& attrib);
     void writeDimStyleOverrides(DL_WriterA& dw,
                              const DL_DimensionData& data);
     void writeDimAligned(DL_WriterA& dw,
@@ -310,8 +335,8 @@ public:
                     const DL_LayerData& data,
                     const DL_Attributes& attrib);
 
-    void writeLineType(DL_WriterA& dw,
-                       const DL_LineTypeData& data);
+    void writeLinetype(DL_WriterA& dw,
+                       const DL_LinetypeData& data);
 
     void writeAppid(DL_WriterA& dw, const std::string& name);
 
@@ -395,6 +420,18 @@ public:
         return strtol(str.c_str(), &p, 10);
     }
 
+    int getInt16Value(int code, int def) {
+        if (!hasValue(code)) {
+            return def;
+        }
+        return toInt16(values[code]);
+    }
+
+    int toInt16(const std::string& str) {
+        char* p;
+        return strtol(str.c_str(), &p, 16);
+    }
+
     bool toBool(const std::string& str) {
         char* p;
         return (bool)strtol(str.c_str(), &p, 10);
@@ -421,7 +458,7 @@ public:
         std::replace(str2.begin(), str2.end(), ',', '.');
         // make sure c++ expects '.' not ',':
         std::istringstream istr(str2);
-        istr.imbue(std::locale("C"));
+        //istr.imbue(std::locale("C"));
         istr >> ret;
         return ret;
     }

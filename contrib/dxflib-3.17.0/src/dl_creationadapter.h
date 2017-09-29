@@ -43,11 +43,16 @@ public:
     virtual void processCodeValuePair(unsigned int, const std::string&) {}
     virtual void endSection() {}
     virtual void addLayer(const DL_LayerData&) {}
+    virtual void addLinetype(const DL_LinetypeData&) {}
+    virtual void addLinetypeDash(double) {}
     virtual void addBlock(const DL_BlockData&) {}
     virtual void endBlock() {}
     virtual void addTextStyle(const DL_StyleData&) {}
     virtual void addPoint(const DL_PointData&) {}
     virtual void addLine(const DL_LineData&) {}
+    virtual void addXLine(const DL_XLineData&) {}
+    virtual void addRay(const DL_RayData&) {}
+
     virtual void addArc(const DL_ArcData&) {}
     virtual void addCircle(const DL_CircleData&) {}
     virtual void addEllipse(const DL_EllipseData&) {}
@@ -65,6 +70,8 @@ public:
     virtual void addMText(const DL_MTextData&) {}
     virtual void addMTextChunk(const std::string&) {}
     virtual void addText(const DL_TextData&) {}
+    virtual void addArcAlignedText(const DL_ArcAlignedTextData&) {}
+    virtual void addAttribute(const DL_AttributeData&) {}
     
     virtual void addDimAlign(const DL_DimensionData&,
                              const DL_DimAlignedData&) {}

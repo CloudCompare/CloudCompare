@@ -28,6 +28,7 @@
 #include "dl_global.h"
 
 #include <string>
+#include <vector>
 
 #include "dl_codes.h"
 
@@ -49,8 +50,10 @@ public:
         color(0),
         color24(-1),
         width(0),
-        lineType("BYLAYER"),
-        handle(-1) {
+        linetype("BYLAYER"),
+        linetypeScale(1.0),
+        handle(-1),
+        inPaperSpace(false) {
     }
 
     /**
@@ -61,18 +64,21 @@ public:
      * @param color Color number (0..256). 0 = BYBLOCK, 256 = BYLAYER.
      * @param width Line thickness. Defaults to zero. -1 = BYLAYER, 
      *               -2 = BYBLOCK, -3 = default width
-     * @param lineType Line type name or "BYLAYER" or "BYBLOCK". Defaults
+     * @param linetype Line type name or "BYLAYER" or "BYBLOCK". Defaults
      *              to "BYLAYER"
      */
     DL_Attributes(const std::string& layer,
                   int color, int width,
-                  const std::string& lineType) :
+                  const std::string& linetype,
+                  double linetypeScale) :
         layer(layer),
         color(color),
         color24(-1),
         width(width),
-        lineType(lineType),
-        handle(-1) {
+        linetype(linetype),
+        linetypeScale(linetypeScale),
+        handle(-1),
+        inPaperSpace(false) {
 
     }
     
@@ -82,22 +88,24 @@ public:
      * @param layer Layer name for this entity or NULL for no layer
      *              (every entity should be on a named layer!).
      * @param color Color number (0..256). 0 = BYBLOCK, 256 = BYLAYER.
-     * @param color24 24 bit color (see DXF reference).
+     * @param color24 24 bit color (0x00RRGGBB, see DXF reference).
      * @param width Line thickness. Defaults to zero. -1 = BYLAYER, 
      *               -2 = BYBLOCK, -3 = default width
-     * @param lineType Line type name or "BYLAYER" or "BYBLOCK". Defaults
+     * @param linetype Line type name or "BYLAYER" or "BYBLOCK". Defaults
      *              to "BYLAYER"
      */
     DL_Attributes(const std::string& layer,
                   int color, int color24, int width,
-                  const std::string& lineType,
+                  const std::string& linetype,
                   int handle=-1)  :
         layer(layer),
         color(color),
         color24(color24),
         width(width),
-        lineType(lineType),
-        handle(handle) {
+        linetype(linetype),
+        linetypeScale(1.0),
+        handle(handle),
+        inPaperSpace(false) {
     }
 
     /**
@@ -169,18 +177,29 @@ public:
      * Sets the line type. This can be any string and is not
      *  checked to be a valid line type. 
      */
-    void setLineType(const std::string& lineType) {
-        this->lineType = lineType;
+    void setLinetype(const std::string& linetype) {
+        this->linetype = linetype;
+    }
+
+    /**
+     * Sets the entity specific line type scale.
+     */
+    void setLinetypeScale(double linetypeScale) {
+        this->linetypeScale = linetypeScale;
+    }
+
+    double getLinetypeScale() const {
+        return linetypeScale;
     }
 
     /**
      * @return Line type.
      */
-    std::string getLineType() const {
-        if (lineType.length()==0) {
+    std::string getLinetype() const {
+        if (linetype.length()==0) {
             return "BYLAYER";
         } else {
-            return lineType;
+            return linetype;
         }
     }
 
@@ -192,13 +211,25 @@ public:
         return handle;
     }
 
+    void setInPaperSpace(bool on) {
+        inPaperSpace = on;
+    }
+
+    bool isInPaperSpace() const {
+        return inPaperSpace;
+    }
+
 private:
     std::string layer;
     int color;
     int color24;
     int width;
-    std::string lineType;
+    std::string linetype;
+    double linetypeScale;
     int handle;
+
+    // DXF code 67 (true: entity in paper space, false: entity in model space (default):
+    bool inPaperSpace;
 };
 
 #endif

@@ -372,12 +372,12 @@ public:
 	virtual void getContext(CC_DRAW_CONTEXT& context);
 
 	//! Minimum point size
-	static const unsigned MIN_POINT_SIZE = 1;
+	static const float MIN_POINT_SIZE_F;
 	//! Maximum point size
-	static const unsigned MAX_POINT_SIZE = 10;
+	static const float MAX_POINT_SIZE_F;
 
 	//! Sets point size
-	/** \param size point size (between MIN_POINT_SIZE and MAX_POINT_SIZE)
+	/** \param size point size (between MIN_POINT_SIZE_F and MAX_POINT_SIZE_F)
 	**/
 	virtual void setPointSize(float size, bool silent = false);
 

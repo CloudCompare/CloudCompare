@@ -62,6 +62,9 @@ static OculusHMD s_oculus;
 #include <vld.h>
 #endif
 
+const float ccGLWindow::MIN_POINT_SIZE_F = 1.0f;
+const float ccGLWindow::MAX_POINT_SIZE_F = 10.0f;
+
 //Min and max zoom ratio (relative)
 static const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
 static const float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
@@ -4929,7 +4932,7 @@ void ccGLWindow::displayNewMessage(	const QString& message,
 
 void ccGLWindow::setPointSize(float size, bool silent/*=false*/)
 {
-	float newSize = std::max<float>(std::min<float>(size, MAX_POINT_SIZE), MIN_POINT_SIZE);
+	float newSize = std::max(std::min(size, MAX_POINT_SIZE_F), MIN_POINT_SIZE_F);
 	if (!silent)
 	{
 		ccLog::Print(QString("New point size: %1").arg(newSize));

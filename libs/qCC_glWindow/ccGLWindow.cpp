@@ -1948,12 +1948,12 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 
 		//draw black background
 		{
-			int heigth = (diagStrings.size() + 1) * 10;
+			int height = (diagStrings.size() + 1) * 10;
 			glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
 			glFunc->glBegin(GL_QUADS);
 			glFunc->glVertex2i(x, m_glViewport.height() - y);
-			glFunc->glVertex2i(x, m_glViewport.height() - (y + heigth));
-			glFunc->glVertex2i(x + 200, m_glViewport.height() - (y + heigth));
+			glFunc->glVertex2i(x, m_glViewport.height() - (y + height));
+			glFunc->glVertex2i(x + 200, m_glViewport.height() - (y + height));
 			glFunc->glVertex2i(x + 200, m_glViewport.height() - y);
 			glFunc->glEnd();
 		}
@@ -2708,7 +2708,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 		return;
 
 	//we get the bounding-box diagonal length
-	double bbDiag = zoomedBox.getDiagNorm();
+	double bbDiag = static_cast<double>(zoomedBox.getDiagNorm());
 
 	if (bbDiag < ZERO_TOLERANCE)
 	{
@@ -2732,7 +2732,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 		//we must go backward so as to see the object!
 		float currentFov_deg = getFov();
 		assert(currentFov_deg > FLT_EPSILON);
-		double d = bbDiag / tan(currentFov_deg * CC_DEG_TO_RAD);
+		double d = bbDiag / std::tan(static_cast<double>(currentFov_deg) * CC_DEG_TO_RAD);
 
 		CCVector3d cameraDir(0, 0, -1);
 		if (!m_viewportParams.objectCenteredView)
@@ -2946,13 +2946,13 @@ void ccGLWindow::drawCross()
 	glFunc->glEnd();
 }
 
-float RoundScale(float equivalentWidth)
+inline float RoundScale(float equivalentWidth)
 {
 	//we compute the scale granularity (to avoid width values with a lot of decimals)
-	int k = int(floor(log(static_cast<float>(equivalentWidth)) / log(10.0f)));
-	float granularity = pow(10.0f, static_cast<float>(k)) / 2;
+	int k = static_cast<int>(std::floor(std::log(equivalentWidth) / std::log(10.0f)));
+	float granularity = std::pow(10.0f, static_cast<float>(k)) / 2.0f;
 	//we choose the value closest to equivalentWidth with the right granularity
-	return floor(std::max(equivalentWidth / granularity, 1.0f))*granularity;
+	return std::floor(std::max(equivalentWidth / granularity, 1.0f))*granularity;
 }
 
 void ccGLWindow::drawScale(const ccColor::Rgbub& color)
@@ -3302,8 +3302,8 @@ ccGLMatrixd ccGLWindow::computeModelViewMatrix(const CCVector3d& cameraCenter) c
 		//for proper aspect ratio handling
 		if (m_glViewport.height() != 0)
 		{
-			float ar = m_glViewport.width() / (m_glViewport.height() * m_viewportParams.perspectiveAspectRatio);
-			if (ar < 1.0f)
+			double ar = static_cast<double>(m_glViewport.width() / (m_glViewport.height() * m_viewportParams.perspectiveAspectRatio));
+			if (ar < 1.0)
 			{
 				//glScalef(ar, ar, 1.0);
 				scaleMatd.data()[0] = ar;
@@ -5268,8 +5268,8 @@ double ccGLWindow::computeActualPixelSize() const
 	//Camera center to pivot vector
 	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
 
-	float currentFov_deg = getFov();
-	return zoomEquivalentDist * tan(std::min(currentFov_deg, 75.0f) * CC_DEG_TO_RAD) / static_cast<double>(minScreenDim); //tan(75) = 3.73 (then it quickly increases!)
+	double currentFov_deg = static_cast<double>(getFov());
+	return zoomEquivalentDist * std::tan(std::min(currentFov_deg, 75.0) * CC_DEG_TO_RAD) / minScreenDim; //tan(75) = 3.73 (then it quickly increases!)
 }
 
 float ccGLWindow::computePerspectiveZoom() const
@@ -5344,12 +5344,12 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 			//we compute the camera position that gives 'quite' the same view as the ortho one
 			//(i.e. we replace the zoom by setting the camera at the right distance from
 			//the pivot point)
-			float currentFov_deg = getFov();
-			assert(currentFov_deg > FLT_EPSILON);
+			double currentFov_deg = static_cast<double>(getFov());
+			assert(currentFov_deg > ZERO_TOLERANCE);
 			double screenSize = std::min(m_glViewport.width(), m_glViewport.height()) * m_viewportParams.pixelSize; //see how pixelSize is computed!
-			if (screenSize > 0)
+			if (screenSize > 0.0)
 			{
-				PC.z = screenSize / (m_viewportParams.zoom*tan(currentFov_deg*CC_DEG_TO_RAD));
+				PC.z = screenSize / (m_viewportParams.zoom*std::tan(currentFov_deg*CC_DEG_TO_RAD));
 			}
 		}
 

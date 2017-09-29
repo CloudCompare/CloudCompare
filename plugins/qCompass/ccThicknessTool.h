@@ -33,7 +33,7 @@ class ccThicknessTool :
 {
 public:
 	ccThicknessTool();
-	~ccThicknessTool();
+	virtual ~ccThicknessTool();
 
 	//called when the tool is set to active (for initialization)
 	virtual void toolActivated() override;

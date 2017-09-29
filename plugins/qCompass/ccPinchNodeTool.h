@@ -33,7 +33,7 @@ class ccPinchNodeTool :
 {
 public:
 	ccPinchNodeTool();
-	~ccPinchNodeTool();
+	virtual ~ccPinchNodeTool();
 
 	//called when the tool is set to active (for initialization)
 	virtual void toolActivated() override;

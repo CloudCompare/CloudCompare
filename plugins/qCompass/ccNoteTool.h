@@ -32,7 +32,7 @@ class ccNoteTool :
 {
 public:
 	ccNoteTool();
-	~ccNoteTool();
+	virtual ~ccNoteTool();
 
 	//called when the tool is set to active (for initialization)
 	virtual void toolActivated() override;

@@ -29,7 +29,7 @@ class ccLineationTool :
 {
 public:
 	ccLineationTool();
-	~ccLineationTool();
+	virtual ~ccLineationTool();
 
 	//called when the tool is set to disactive (for cleanup)
 	void toolDisactivated() override;

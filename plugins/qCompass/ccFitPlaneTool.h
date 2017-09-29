@@ -32,7 +32,7 @@ class ccFitPlaneTool :
 {
 public:
 	ccFitPlaneTool();
-	~ccFitPlaneTool();
+	virtual ~ccFitPlaneTool();
 
 	//called when the tool is set to active (for initialization)
 	void toolActivated() override;

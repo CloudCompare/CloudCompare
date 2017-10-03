@@ -87,6 +87,14 @@ public:
 	}
 
 	/*
+	Retrieves the global point index of the n'th waypoint
+	*/
+	int getWaypoint(int n)
+	{
+		return m_waypoints[n];
+	}
+
+	/*
 	Tries to insert/append the given waypoint based on its location. If the point is within a "circle" including the start and end of the closest segment
 	then it "inserts" the point. Otherwise the point is appended onto the end of the trace.
 

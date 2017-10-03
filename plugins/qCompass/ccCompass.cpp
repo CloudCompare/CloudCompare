@@ -1450,23 +1450,37 @@ int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
 	return n;
 }
 
-//export the selected layer to CSV file
+//export interpretations to csv or xml
 void ccCompass::onSave()
 {
 	//get output file path
-	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("CSV files (*.csv *.txt)"));
+	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("CSV files (*.csv *.txt);;XML (*.xml)"));
 	if (filename.isEmpty())
 	{
 		//process cancelled by the user
 		return;
 	}
+
+	//is this an xml file?
+	QFileInfo fi(filename);
+	if (fi.suffix() == "xml")
+	{
+		writeToXML(filename); //write xml file
+		return;
+	}
+
+	//otherwise write a whole bunch of .csv files
+
 	int planes = 0; //keep track of how many objects are being written (used to delete empty files)
 	int traces = 0;
 	int lineations = 0;
 	int thicknesses = 0;
 
+	/*
+	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("XML files (*.xml *.txt)"));
+	*/
 	//build filenames
-	QFileInfo fi(filename);
+
 	QString baseName = fi.absolutePath() + "/" + fi.completeBaseName();
 	QString ext = fi.suffix();
 	if (!ext.isEmpty())
@@ -1483,7 +1497,7 @@ void ccCompass::onSave()
 	QFile trace_file(trace_fn);
 	QFile lineation_file(lineation_fn);
 	QFile thickness_file(thickness_fn);
-	
+
 	//open files
 	if (plane_file.open(QIODevice::WriteOnly) && trace_file.open(QIODevice::WriteOnly) && lineation_file.open(QIODevice::WriteOnly) && thickness_file.open(QIODevice::WriteOnly))
 	{
@@ -1562,6 +1576,7 @@ void ccCompass::onSave()
 		m_app->dispToConsole("[ccCompass] Could not open output files... ensure CC has write access to this location.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	}
 }
+
 
 //write plane data
 int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentName)
@@ -1723,5 +1738,170 @@ int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString pare
 		ccHObject* o = object->getChild(i);
 		n += writeLineations(o, out, name, thicknesses);
 	}
+	return n;
+}
+
+
+int ccCompass::writeToXML(QString filename)
+{
+	int n = 0;
+
+	//open output stream
+	QFile file(filename);
+	if (file.open(QIODevice::WriteOnly)) //open the file
+	{
+		//QTextStream plane_stream(&plane_file);
+		QXmlStreamWriter xmlWriter(&file); //open xml stream;
+
+		xmlWriter.setAutoFormatting(true);
+		xmlWriter.writeStartDocument();
+
+		//find root node
+		ccHObject* root = m_app->dbRootObject();
+		if (root->getChildrenNumber() == 1)
+		{
+			root = root->getChild(0); //HACK - often the root only has one child (a .bin file); if so, move down a level
+		}
+
+		/*ccHObject::Container pointClouds;
+		m_app->dbRootObject()->filterChildren(&pointClouds, true, CC_TYPES::POINT_CLOUD, true);*/
+
+		//write data tree
+		n += writeObjectXML(root, &xmlWriter);
+
+		//write end of document
+		xmlWriter.writeEndDocument();
+
+		//close
+		file.flush();
+		file.close();
+
+		m_app->dispToConsole("[ccCompass] Successfully exported data-tree to xml.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	}
+	else
+	{
+		m_app->dispToConsole("[ccCompass] Could not open output files... ensure CC has write access to this location.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+	}
+
+	return n;
+}
+
+//recursively write the provided ccHObject and its children
+int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
+{
+	int n = 1;
+	//write object header based on type
+	if (ccGeoObject::isGeoObject(object))
+	{
+		//write GeoObject
+		out->writeStartElement("GEO_OBJECT");
+	}
+	else if (ccFitPlane::isFitPlane(object))
+	{
+		//write fitPlane
+		out->writeStartElement("PLANE");
+	}
+	else if (ccTrace::isTrace(object))
+	{
+		//write trace
+		out->writeStartElement("TRACE");
+	}
+	else if (ccThickness::isThickness(object))
+	{
+		//write thickness
+		out->writeStartElement("THICKNESS");
+	}
+	else if (ccLineation::isLineation(object))
+	{
+		//write lineation
+		out->writeStartElement("LINEATION");
+	}
+	else if (object->isA(CC_TYPES::HIERARCHY_OBJECT))
+	{
+		//write container
+		out->writeStartElement("CONTAINER"); //QString::asprintf("CONTAINER name = '%s' id = %d", object->getName(), object->getUniqueID())
+	}
+	else //we don't care about this object
+	{
+		return 0;
+	}
+
+	//write name and oid attributes
+	out->writeAttribute("name", object->getName());
+	out->writeAttribute("id", QString::asprintf("%d", object->getUniqueID()));
+
+	//write metadata tags (these contain the data)
+	for (QMap<QString, QVariant>::const_iterator it = object->metaData().begin(); it != object->metaData().end(); it++)
+	{
+		out->writeTextElement(it.key(), it.value().toString());
+	}
+
+	//if object is a trace, write the trace points
+	if (ccTrace::isTrace(object))
+	{
+		//get point & waypoint data from trace and store in string buffers
+		//write trace points to buffers
+		QString x, y, z, nx, ny, nz, cost; //trace points
+		QString wIDs; //waypoint ids
+		QString comma = ",";
+		ccTrace* trace = static_cast<ccTrace*>(object);
+		//loop through points
+		CCVector3 p1, p2; //position
+		CCVector3 n; //normal vector (if defined)
+		if (trace->size() >= 2)
+		{
+			//loop through segments
+			for (unsigned i = 1; i < trace->size(); i++)
+			{
+				//get points
+				trace->getPoint(i - 1, p1); //segment start point
+				trace->getPoint(i, p2); //segment end point
+
+				//calculate segment cost
+				int c = trace->getSegmentCost(trace->getPointGlobalIndex(i - 1), trace->getPointGlobalIndex(i));
+
+				//store data to buffers
+				x += QString::asprintf("%f,", p1.x);
+				y += QString::asprintf("%f,", p1.y);
+				z += QString::asprintf("%f,", p1.z);
+				cost += QString::asprintf("%d,", c);
+
+				//are point normals availiable? [TODO]
+			}
+
+			//loop through waypoints
+			for (int w = 0; w < trace->waypoint_count(); w++)
+			{
+				wIDs += QString::asprintf("%d,", trace->getWaypoint(w));
+			}
+		}
+
+		//store last point
+		x += QString::asprintf("%f", p2.x);
+		y += QString::asprintf("%f", p2.y);
+		z += QString::asprintf("%f", p2.z);
+		cost += "0";
+
+		//write points
+		out->writeStartElement("POINTS");
+		out->writeTextElement("x", x);
+		out->writeTextElement("y", y);
+		out->writeTextElement("z", z);
+		out->writeTextElement("cost", cost);
+		out->writeEndElement();
+
+		//write waypoints
+		out->writeTextElement("control_point_ids", wIDs);
+	}
+
+	//write children
+	for (int i = 0; i < object->getChildrenNumber(); i++)
+	{
+		n += writeObjectXML(object->getChild(i), out);
+	}
+
+	//close this object
+	out->writeEndElement();
+
 	return n;
 }

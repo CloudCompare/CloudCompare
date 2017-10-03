@@ -19,6 +19,7 @@
 #define CC_COMPASS_HEADER
 
 #include <QObject>
+#include <QXmlStreamWriter>
 
 //qCC
 #include "../ccStdPluginInterface.h"
@@ -185,7 +186,12 @@ protected:
 	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());
 	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = QString());
 	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString(), bool thickness=false); //if thickness is true this will write "thickness lineations" rather than orientation lineations
+	
 	int writeTracesSVG(ccHObject* object, QTextStream* out, int height);
+
+	int writeToXML(QString filename); //exports Compass interpretation tree to xml
+	int writeObjectXML(ccHObject* object, QXmlStreamWriter* out); //writes the provided object (recursive)
+
 	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)
 	bool madeByMe(ccHObject* object);
 

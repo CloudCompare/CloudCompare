@@ -152,6 +152,7 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandDropGlobalShift));
 	registerCommand(Command::Shared(new CommandFilterBySFValue));
 	registerCommand(Command::Shared(new CommandMergeClouds));
+	registerCommand(Command::Shared(new CommandMergeMeshes));
 	registerCommand(Command::Shared(new CommandSetActiveSF));
 	registerCommand(Command::Shared(new CommandRemoveAllSF));
 	registerCommand(Command::Shared(new CommandMatchBBCenters));

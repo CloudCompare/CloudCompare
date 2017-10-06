@@ -3397,7 +3397,7 @@ void MainWindow::doActionMerge()
 	else if (!meshes.empty())
 	{
 		bool createSubMeshes = true;
-		//createSubMeshes = (QMessageBox::question(this,"Create sub-meshes","Do you want to create sub-mesh entities corresponding to each source mesh? (requires more memory)",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes);
+		//createSubMeshes = (QMessageBox::question(this, "Create sub-meshes", "Do you want to create sub-mesh entities corresponding to each source mesh? (requires more memory)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes);
 
 		//meshes are merged
 		ccPointCloud* baseVertices = new ccPointCloud("vertices");
@@ -3406,44 +3406,17 @@ void MainWindow::doActionMerge()
 		baseMesh->addChild(baseVertices);
 		baseVertices->setEnabled(false);
 
-		for ( ccMesh *mesh : meshes )
+		for (ccMesh *mesh : meshes)
 		{
 			//if (mesh->isA(CC_TYPES::PRIMITIVE))
 			//{
 			//	mesh = mesh->ccMesh::cloneMesh(); //we want a clone of the mesh part, not the primitive!
 			//}
 
-			unsigned sizeBefore = baseMesh->size();
-			if (!baseMesh->merge(mesh))
+			if (!baseMesh->merge(mesh, createSubMeshes))
 			{
 				ccConsole::Error("Fusion failed! (not enough memory?)");
 				break;
-			}
-			unsigned sizeAfter = baseMesh->size();
-
-			//create corresponding sub-mesh
-			if (createSubMeshes)
-			{
-				ccSubMesh* subMesh = new ccSubMesh(baseMesh);
-				if (subMesh->reserve(sizeAfter-sizeBefore))
-				{
-					subMesh->addTriangleIndex(sizeBefore,sizeAfter);
-					subMesh->setName(mesh->getName());
-					subMesh->showMaterials(baseMesh->materialsShown());
-					subMesh->showNormals(baseMesh->normalsShown());
-					subMesh->showTriNorms(baseMesh->triNormsShown());
-					subMesh->showColors(baseMesh->colorsShown());
-					subMesh->showWired(baseMesh->isShownAsWire());
-					subMesh->enableStippling(baseMesh->stipplingEnabled());
-					subMesh->setEnabled(false);
-					baseMesh->addChild(subMesh);
-				}
-				else
-				{
-					ccConsole::Warning(QString("[Merge] Not enough memory to create the sub-mesh corresponding to mesh '%1'!").arg(mesh->getName()));
-					delete subMesh;
-					subMesh = nullptr;
-				}
 			}
 		}
 

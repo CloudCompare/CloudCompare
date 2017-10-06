@@ -63,6 +63,7 @@ static const char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
 static const char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
 static const char COMMAND_FILTER_SF_BY_VALUE[]				= "FILTER_SF";
 static const char COMMAND_MERGE_CLOUDS[]					= "MERGE_CLOUDS";
+static const char COMMAND_MERGE_MESHES[]                    = "MERGE_MESHES";
 static const char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
 static const char COMMAND_REMOVE_ALL_SFS[]					= "REMOVE_ALL_SFS";
 static const char COMMAND_MATCH_BB_CENTERS[]				= "MATCH_CENTERS";
@@ -1450,6 +1451,83 @@ struct CommandFilterBySFValue : public ccCommandLineInterface::Command
 	}
 };
 
+
+struct CommandMergeMeshes : public ccCommandLineInterface::Command
+{
+	CommandMergeMeshes() : ccCommandLineInterface::Command("Merge meshes", COMMAND_MERGE_MESHES) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		cmd.print("[MERGE MESHES]");
+
+		if (cmd.meshes().size() < 2)
+		{
+			cmd.warning("Less than 2 meshes are loaded! Nothing to do...");
+			return true;
+		}
+
+		CLMeshDesc mergedMeshDesc;
+		bool firstValidMesh = true;
+
+		//create the destination mesh
+		ccPointCloud* vertices = new ccPointCloud("vertices");
+		QScopedPointer<ccMesh> mergedMesh(new ccMesh(vertices));
+		mergedMesh->setName("Merged mesh");
+		mergedMesh->addChild(vertices);
+		vertices->setEnabled(false);
+
+		//merge meshes
+		for (CLMeshDesc& meshDesc : cmd.meshes())
+		{
+			//get the mesh
+			ccMesh* mesh = dynamic_cast<ccMesh*>(meshDesc.mesh);
+			if (!mesh)
+			{
+				ccLog::Error(QString("Can't merge mesh '%1' (unhandled type)").arg(mesh->getName()));
+			}
+			
+			if (mergedMesh->merge(mesh, true)) //merge it
+			{
+				if (firstValidMesh)
+				{
+					//copy the first valid mesh description
+					mergedMeshDesc = meshDesc;
+					mergedMeshDesc.mesh = nullptr;
+					firstValidMesh = false;
+				}
+			}
+			else
+			{
+				return cmd.error("Merge operation failed");
+			}
+
+			delete meshDesc.mesh;
+			meshDesc.mesh = nullptr;
+		}
+
+		if (mergedMesh->size() == 0)
+		{
+			return cmd.error("Result is empty");
+		}
+
+		//clean the 'cmd.meshes()' vector
+		cmd.removeMeshes();
+		//add the new mesh
+		mergedMeshDesc.basename += QString("_MERGED");
+		mergedMeshDesc.mesh = mergedMesh.take();
+		cmd.meshes().push_back(mergedMeshDesc);
+
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(mergedMeshDesc);
+			if (!errorStr.isEmpty())
+				return cmd.error(errorStr);
+		}
+
+		return true;
+	}
+};
+
 struct CommandMergeClouds : public ccCommandLineInterface::Command
 {
 	CommandMergeClouds() : ccCommandLineInterface::Command("Merge clouds", COMMAND_MERGE_CLOUDS) {}
@@ -1460,7 +1538,7 @@ struct CommandMergeClouds : public ccCommandLineInterface::Command
 
 		if (cmd.clouds().size() < 2)
 		{
-			cmd.warning("Less than 2 clouds! Nothing to do...");
+			cmd.warning("Less than 2 clouds are loaded! Nothing to do...");
 			return true;
 		}
 
@@ -1476,7 +1554,7 @@ struct CommandMergeClouds : public ccCommandLineInterface::Command
 				if (cmd.clouds().front().pc->size() == beforePts + newPts)
 				{
 					delete cmd.clouds()[i].pc;
-					cmd.clouds()[i].pc = 0;
+					cmd.clouds()[i].pc = nullptr;
 				}
 				else
 				{

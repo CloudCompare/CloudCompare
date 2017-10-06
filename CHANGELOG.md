@@ -149,6 +149,9 @@ v2.9.beta - XX/XX/XXXX
 		- now based on dxflib 3.17.0
 		- see fixed bugs below
 
+	* Merge (clouds)
+		- new option to generate a scalar field with the index of the original cloud for each point
+
 	* Other
 		- color scales are now listed in alphabetical order
 		- the DXF format can now be used to export point clouds (their size should be very limited!)

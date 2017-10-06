@@ -3334,6 +3334,10 @@ void MainWindow::doActionMerge()
 		ccPointCloud* firstCloud = nullptr;
 		ccHObjectContext firstCloudContext;
 
+		//whether to generate the 'original cloud index' scalar field or not
+		CCLib::ScalarField* ocIndexSF = nullptr;
+		size_t cloudIndex = 0;
+
 		for (size_t i = 0; i < clouds.size(); ++i)
 		{
 			ccPointCloud* pc = clouds[i];
@@ -3344,6 +3348,26 @@ void MainWindow::doActionMerge()
 				//we still have to temporarily detach the first cloud, as it may undergo
 				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::operator +=
 				firstCloudContext = removeObjectTemporarilyFromDBTree(firstCloud);
+
+				if (QMessageBox::question(this, "Original cloud index", "Do you want to generate a scalar field with the original cloud index?") == QMessageBox::Yes)
+				{
+					int sfIdx = pc->getScalarFieldIndexByName(CC_ORIGINAL_CLOUD_INDEX_SF_NAME);
+					if (sfIdx < 0)
+					{
+						sfIdx = pc->addScalarField(CC_ORIGINAL_CLOUD_INDEX_SF_NAME);
+					}
+					if (sfIdx < 0)
+					{
+						ccConsole::Error("Couldn't allocate a new scalar field for storing the original cloud index! Try to free some memory ...");
+						return;
+					}
+					else
+					{
+						ocIndexSF = pc->getScalarField(sfIdx);
+						ocIndexSF->fill(0);
+						firstCloud->setCurrentDisplayedScalarField(sfIdx);
+					}
+				}
 			}
 			else
 			{
@@ -3365,6 +3389,15 @@ void MainWindow::doActionMerge()
 						toRemove = pc;
 
 					AddToRemoveList(toRemove, toBeRemoved);
+
+					if (ocIndexSF)
+					{
+						ScalarType index = static_cast<ScalarType>(++cloudIndex);
+						for (unsigned i = 0; i < countAdded; ++i)
+						{
+							ocIndexSF->setValue(countBefore + i, index);
+						}
+					}
 				}
 				else
 				{
@@ -3373,6 +3406,12 @@ void MainWindow::doActionMerge()
 				}
 				pc = nullptr;
 			}
+		}
+
+		if (ocIndexSF)
+		{
+			ocIndexSF->computeMinAndMax();
+			firstCloud->showSF(true);
 		}
 
 		//something to remove?

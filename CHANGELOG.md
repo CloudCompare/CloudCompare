@@ -33,6 +33,9 @@ v2.9.beta - XX/XX/XXXX
 
 - enhancements:
 
+	* Contour lines generation (Rasterize tool)
+		- now using GDAL for a more robust generation of contour lines (proper handling of empty cells, etc.)
+
 	* qAnimation plugin:
 		- new output option 'zoom' (alternative to the existing 'super resolution' option)
 		- the plugin doesn't spam the Console at each frame if the 'super resolution' option is > 1 ;)

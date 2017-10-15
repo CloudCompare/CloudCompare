@@ -21,7 +21,9 @@
 #include "ccPersistentSettings.h"
 #include "ccCommon.h"
 #include "mainwindow.h"
-#include "ccIsolines.h"
+#ifndef CC_GDAL_SUPPORT
+#include "ccIsolines.h" //old alternative code to generate contour lines (doesn't work very well :( )
+#endif
 
 //qCC_db
 #include <ccFileUtils.h>
@@ -1521,6 +1523,8 @@ void ccRasterizeTool::generateHillshade()
 	}
 }
 
+#ifdef CC_GDAL_SUPPORT
+
 struct ContourGenerationParameters
 {
 	std::vector<ccPolyline*> contourLines;
@@ -1620,6 +1624,8 @@ static CPLErr ContourWriter(	double dfLevel,
 
 	return CE_None;
 }
+
+#endif //CC_GDAL_SUPPORT
 
 void ccRasterizeTool::addNewContour(ccPolyline* poly, double height, unsigned subIndex)
 {

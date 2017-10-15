@@ -1806,8 +1806,8 @@ void ccRasterizeTool::generateContours()
 					//DGM: we will only do the dimension mapping at export time
 					//(otherwise the contour lines appear in the wrong orientation compared to the grid/raster which
 					// is in the XY plane by default!)
-					/*P.u[X] = */P.x = static_cast<PointCoordinateType>((P2D->x + 0.5) * m_grid.gridStep + gridBBox.minCorner().u[X]);
-					/*P.u[Y] = */P.y = static_cast<PointCoordinateType>((P2D->y + 0.5) * m_grid.gridStep + gridBBox.minCorner().u[Y]);
+					/*P.u[X] = */P.x = static_cast<PointCoordinateType>(P2D->x * m_grid.gridStep + gridBBox.minCorner().u[X]);
+					/*P.u[Y] = */P.y = static_cast<PointCoordinateType>(P2D->y * m_grid.gridStep + gridBBox.minCorner().u[Y]);
 					/*P.u[Z] = */P.z = P2D->z;
 
 					*P2D = P;

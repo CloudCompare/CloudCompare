@@ -94,6 +94,9 @@ v2.9.beta - XX/XX/XXXX
 			* '-CLEAR_NORMALS'
 		- New mesh merging option
 			* '-MERGE_MESHES'
+		- Compute mesh volume:
+			* '-MESH_VOLUME'
+			* optional argument: '-TO_FILE {filename}' to output the volume(s) in a file
 		- Other improvements:
 			* the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
 			* the ASCII loading dialog shouldn't appear anymore in 'SILENT' mode (only if CC really can't guess anything)

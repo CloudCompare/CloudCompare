@@ -10,6 +10,7 @@
 #include <NormalDistribution.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
+#include <MeshSamplingTools.h>
 
 //qCC_db
 #include <ccNormalVectors.h>
@@ -53,7 +54,7 @@ static const char COMMAND_OPEN_SHIFT_ON_LOAD[]				= "GLOBAL_SHIFT";	//+global sh
 static const char COMMAND_OPEN_SHIFT_ON_LOAD_AUTO[]			= "AUTO";			//"AUTO" keyword
 static const char COMMAND_SUBSAMPLE[]						= "SS";				//+ method (RANDOM/SPATIAL/OCTREE) + parameter (resp. point count / spatial step / octree level)
 static const char COMMAND_EXTRACT_CC[]						= "EXTRACT_CC";
-static const char COMMAND_CURVATURE[]						= "CURV";			//+ curvature type (MEAN/GAUSS) +
+static const char COMMAND_CURVATURE[]						= "CURV";			//+ curvature type (MEAN/GAUSS)
 static const char COMMAND_DENSITY[]							= "DENSITY";		//+ sphere radius
 static const char COMMAND_DENSITY_TYPE[]					= "TYPE";			//+ density type
 static const char COMMAND_APPROX_DENSITY[]					= "APPROX_DENSITY";
@@ -113,6 +114,8 @@ static const char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 static const char COMMAND_COMPUTE_GRIDDED_NORMALS[]			= "COMPUTE_NORMALS";
 static const char COMMAND_COMPUTE_OCTREE_NORMALS[]			= "OCTREE_NORMALS";
 static const char COMMAND_CLEAR_NORMALS[]					= "CLEAR_NORMALS";
+static const char COMMAND_MESH_VOLUME[]                     = "MESH_VOLUME";
+static const char COMMAND_VOLUME_TO_FILE[]					= "TO_FILE";
 static const char COMMAND_SAVE_CLOUDS[]						= "SAVE_CLOUDS";
 static const char COMMAND_SAVE_MESHES[]						= "SAVE_MESHES";
 static const char COMMAND_AUTO_SAVE[]						= "AUTO_SAVE";
@@ -1451,6 +1454,79 @@ struct CommandFilterBySFValue : public ccCommandLineInterface::Command
 	}
 };
 
+struct CommandComputeMeshVolume : public ccCommandLineInterface::Command
+{
+	CommandComputeMeshVolume() : ccCommandLineInterface::Command("Compute mesh volume", COMMAND_MESH_VOLUME) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		cmd.print("[COMPUTE MESH VOLUME]");
+
+		if (cmd.meshes().empty())
+		{
+			cmd.warning("No mesh loaded! Nothing to do...");
+			return true;
+		}
+
+		//optional parameters
+		QString outputFilename;
+		if (!cmd.arguments().empty())
+		{
+			QString argument = cmd.arguments().front();
+			if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_TO_FILE))
+			{
+				//local option confirmed, we can move on
+				cmd.arguments().pop_front();
+
+				if (!cmd.arguments().empty())
+				{
+					outputFilename = cmd.arguments().front();
+					cmd.arguments().pop_front();
+					cmd.print("Volume report file: " + outputFilename);
+				}
+				else
+				{
+					return cmd.error(QString("Missing argument: filename after '%1'").arg(COMMAND_VOLUME_TO_FILE));
+				}
+			}
+		}
+
+		QFile outFile;
+		QTextStream outStream(&outFile);
+		if (!outputFilename.isEmpty())
+		{
+			outFile.setFileName(outputFilename);
+			if (!outFile.open(QFile::WriteOnly | QFile::Text))
+			{
+				return cmd.error("Failed to create/open volume report file");
+			}
+		}
+
+		//for each meshe
+		for (CLMeshDesc& meshDesc : cmd.meshes())
+		{
+			//we compute the mesh volume
+			double V = CCLib::MeshSamplingTools::computeMeshVolume(meshDesc.mesh);
+
+			QString titleStr = QString("Mesh '%1'").arg(meshDesc.basename);
+			if (meshDesc.indexInFile >= 0)
+			{
+				titleStr += QString(" (#%2)").arg(meshDesc.indexInFile);
+			}
+			cmd.print(titleStr);
+			QString volumeStr = QString("V = %2").arg(V, 0, 'f', 8);
+			cmd.print(volumeStr);
+
+			if (outFile.isOpen())
+			{
+				outStream << titleStr << endl;
+				outStream << volumeStr << endl;
+			}
+		}
+
+		return true;
+	}
+};
 
 struct CommandMergeMeshes : public ccCommandLineInterface::Command
 {

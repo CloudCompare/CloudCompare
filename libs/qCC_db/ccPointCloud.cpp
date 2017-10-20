@@ -2732,11 +2732,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (context.drawRoundedPoints)
 		{
 			//DGM: alpha/blending doesn't work well because it creates a halo around points with a potentially wrong color (due to the display order)
-			//glFunc->glEnable(GL_ALPHA_TEST);
-			//glFunc->glAlphaFunc(GL_NOTEQUAL, 0);
-			//glFunc->glEnable(GL_BLEND);
-			//glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glFunc->glDisable(GL_BLEND);
 			glFunc->glEnable(GL_POINT_SMOOTH);
+			//glFunc->glEnable(GL_ALPHA_TEST);
+			//glFunc->glAlphaFunc(GL_GREATER, 0.5);
+			//glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			//glFunc->glEnable(GL_BLEND);
 		}
 
 		//custom point size?
@@ -3187,6 +3188,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		/*** END DISPLAY ***/
 
+		if (context.drawRoundedPoints)
+		{
+			glFunc->glDisable(GL_POINT_SPRITE);
+		}
 		glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT | GL_POINT_BIT
 
 		if (colorMaterialEnabled)

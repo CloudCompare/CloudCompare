@@ -164,6 +164,7 @@ v2.9.beta - XX/XX/XXXX
 		- the Plane edition dialog now lest the user specify the normal plane in addition to its dip and dip direction
 		- new 'Clone' icon with a colored background so as to more clearly spot when the icon is enabled (Nyan sheep!)
 		- now using PoissonRecon 9.011
+		- maximum point size increased to 16 pixels
 
 - Bug fixes:
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)
@@ -186,6 +187,8 @@ v2.9.beta - XX/XX/XXXX
 	* DXF export
 		- the I/O filter was mistakenly exporting the vertices of polylines and meshes as separate clouds
 		- the I/O filter was not exporting the shifted point clouds at the right location
+	* Render to file:
+		- when the 'draw rounded points' option was enabled, pixel transparency could cause a strange effect when exported to PNG images
 
 v2.8.1 - 16/02/2017
 ----------------------

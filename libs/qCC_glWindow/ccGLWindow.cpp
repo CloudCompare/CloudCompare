@@ -1326,6 +1326,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 			{
 				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
 				glFunc->glPushAttrib(GL_POINT_BIT);
+				glFunc->glPointSize(m_viewportParams.defaultPointSize);
 				glFunc->glEnable(GL_POINT_SMOOTH);
 				glFunc->glBegin(GL_POINTS);
 				glFunc->glVertex2i(-halfW + xStart + m_hotZone->margin / 2, halfH - (yStart + m_hotZone->iconSize / 2));

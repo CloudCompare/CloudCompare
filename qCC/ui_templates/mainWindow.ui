@@ -392,7 +392,7 @@
      <addaction name="actionRasterize"/>
      <addaction name="actionConvertPolylinesToMesh"/>
      <addaction name="actionExportCoordToSF"/>
-     <addaction name="actionCreate_surface_between_two_polylines"/>
+     <addaction name="actionCreateSurfaceBetweenTwoPolylines"/>
     </widget>
     <widget class="QMenu" name="menuStatistics">
      <property name="title">
@@ -2945,7 +2945,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Edit the plane parameters</string>
    </property>
   </action>
-  <action name="actionCreate_surface_between_two_polylines">
+  <action name="actionCreateSurfaceBetweenTwoPolylines">
    <property name="text">
     <string>Create surface between two polylines</string>
    </property>
@@ -3168,6 +3168,22 @@ QTreeView::branch:open:has-children:has-siblings  {
    <sender>actionFitPlaneProxy</sender>
    <signal>triggered()</signal>
    <receiver>actionFitPlane</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCreateSurfaceBetweenTwoPolylines</sender>
+   <signal>triggered()</signal>
+   <receiver>actionMeshTwoPolylines</receiver>
    <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">

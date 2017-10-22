@@ -673,6 +673,7 @@ void MainWindow::connectActions()
 	//"Edit > Mesh" menu
 	connect(m_UI->actionComputeMeshAA,				&QAction::triggered, this, &MainWindow::doActionComputeMeshAA);
 	connect(m_UI->actionComputeMeshLS,				&QAction::triggered, this, &MainWindow::doActionComputeMeshLS);
+	connect(m_UI->actionMeshTwoPolylines,			&QAction::triggered, this, &MainWindow::doMeshTwoPolylines);
 	connect(m_UI->actionMeshScanGrids,				&QAction::triggered, this, &MainWindow::doActionMeshScanGrids);
 	connect(m_UI->actionConvertTextureToColor,		&QAction::triggered, this, &MainWindow::doActionConvertTextureToColor);
 	connect(m_UI->actionSamplePoints,				&QAction::triggered, this, &MainWindow::doActionSamplePoints);
@@ -751,7 +752,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionUnroll,						&QAction::triggered, this, &MainWindow::doActionUnroll);
 	connect(m_UI->actionRasterize,					&QAction::triggered, this, &MainWindow::doActionRasterize);
 	connect(m_UI->actionConvertPolylinesToMesh,		&QAction::triggered, this, &MainWindow::doConvertPolylinesToMesh);
-	connect(m_UI->actionMeshTwoPolylines,			&QAction::triggered, this, &MainWindow::doMeshTwoPolylines);
+	//connect(m_UI->actionCreateSurfaceBetweenTwoPolylines, &QAction::triggered, this, &MainWindow::doMeshTwoPolylines); //DGM: already connected to actionMeshTwoPolylines
 	connect(m_UI->actionExportCoordToSF,			&QAction::triggered, this, &MainWindow::doActionExportCoordToSF);
 	//"Tools > Registration" menu
 	connect(m_UI->actionRegister,					&QAction::triggered, this, &MainWindow::doActionRegister);
@@ -9853,6 +9854,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	m_UI->actionConvertPolylinesToMesh->setEnabled(atLeastOnePolyline || exactlyOneGroup);
 	m_UI->actionMeshTwoPolylines->setEnabled(selInfo.selCount == 2 && selInfo.polylineCount == 2);
+	m_UI->actionCreateSurfaceBetweenTwoPolylines->setEnabled(m_UI->actionMeshTwoPolylines->isEnabled()); //clone of actionMeshTwoPolylines
 	m_UI->actionModifySensor->setEnabled(exactlyOneSensor);
 	m_UI->actionComputeDistancesFromSensor->setEnabled(atLeastOneCameraSensor || atLeastOneGBLSensor);
 	m_UI->actionComputeScatteringAngles->setEnabled(exactlyOneSensor);

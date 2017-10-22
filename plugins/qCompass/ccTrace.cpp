@@ -830,11 +830,15 @@ ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 void ccTrace::bakePathToScalarField()
 {
 	//bake points
-	for (std::deque<int> seg : m_trace)
+	int vertexCount = static_cast<int>(m_cloud->size());
+	for (const std::deque<int>& seg : m_trace)
 	{
 		for (int p : seg)
 		{
-			m_cloud->setPointScalarValue(p, getUniqueID());
+			if (p >= 0 && p < vertexCount)
+			{
+				m_cloud->setPointScalarValue(static_cast<unsigned>(p), getUniqueID());
+			}
 		}
 	}
 }
@@ -855,30 +859,30 @@ float ccTrace::calculateOptimumSearchRadius()
 	CCLib::ReferenceCloud* nCloud = new  CCLib::ReferenceCloud(m_cloud);
 
 	//pick 15 random points
-	int r;
 	unsigned int npoints = m_cloud->size();
-	double d,dsum=0;
+	double dsum = 0;
 	srand(npoints); //set seed as n for repeatability
 	for (unsigned int i = 0; i < 30; i++)
 	{
 		//int rn = rand() * rand(); //need to make bigger than rand max...
-		r = (rand()*rand()) % npoints; //random(ish) number between 0 and n
+		int r = (rand()*rand()) % npoints; //random(ish) number between 0 and n
 
 		//find nearest neighbour for point
 		nCloud->clear(false);
+		double d = -1.0;
 		oct->findPointNeighbourhood(m_cloud->getPoint(r), nCloud, 2, level, d);
 
-		if (d != -1) //if a point was found
+		if (d != -1.0) //if a point was found
 		{
 			dsum += sqrt(d);
 		}
 	}
 	
 	//average nearest-neighbour distances
-	d = dsum / 30;
+	double d = dsum / 30;
 	
 	//return a number slightly larger than the average distance
-	return d*1.5;
+	return d * 1.5;
 }
 
 static QSharedPointer<ccSphere> c_unitPointMarker(0);
@@ -889,7 +893,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (MACRO_Draw3D(context))
 	{
-		if (m_waypoints.size() == 0) //no points -> bail!
+		if (m_waypoints.empty()) //no points -> bail!
 			return;
 
 		//get the set of OpenGL functions (version 2.1)
@@ -947,7 +951,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//draw key-points
 		if (m_isActive)
 		{
-			for (unsigned i = 0; i < m_waypoints.size(); i++)
+			for (size_t i = 0; i < m_waypoints.size(); i++)
 			{
 				glFunc->glMatrixMode(GL_MODELVIEW);
 				glFunc->glPushMatrix();
@@ -970,11 +974,13 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		else //just draw lines
 		{
 			//draw lines
-			for (std::deque<int> seg : m_trace)
+			for (const std::deque<int>& seg : m_trace)
 			{
-				float lineWidth;
-				glFunc->glGetFloatv(GL_LINE_WIDTH, &lineWidth);
-				glFunc->glLineWidth(pSize * 2); //n.b. - this causes problems at max point size
+				if (m_width != 0)
+				{
+					glFunc->glPushAttrib(GL_LINE_BIT);
+					glFunc->glLineWidth(static_cast<GLfloat>(m_width));
+				}
 				glFunc->glBegin(GL_LINE_STRIP);
 				glFunc->glColor3f(color.r, color.g, color.b);
 				for (int p : seg)
@@ -982,7 +988,10 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 					ccGL::Vertex3v(glFunc, m_cloud->getPoint(p)->u);
 				}
 				glFunc->glEnd();
-				glFunc->glLineWidth(lineWidth);
+				if (m_width != 0)
+				{
+					glFunc->glPopAttrib();
+				}
 			}
 		}
 
@@ -990,7 +999,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (m_isActive || pSize > 8)
 		{
 
-			for (std::deque<int> seg : m_trace)
+			for (const std::deque<int>& seg : m_trace)
 			{
 				for (int p : seg)
 				{

@@ -97,7 +97,7 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 	m_polyTip->set2DMode(true);
 	m_polyTip->reserve(2);
 	m_polyTip->addPointIndex(0, 2);
-	m_polyTip->setWidth(widthSpinBox->value());
+	m_polyTip->setWidth(widthSpinBox->value() < 2 ? 0 : widthSpinBox->value()); //'1' is equivalent to the default line size
 	m_polyTip->addChild(m_polyTipVertices);
 
 	validButton->setEnabled(false);
@@ -151,15 +151,14 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	}
 
 	ccHObject::Container clouds;
-	if (m_associatedWin->getSceneDB()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, false, m_associatedWin) == 0)
-	{
-		//no cloud is currently displayed?!
-		return 0;
-	}
+	m_associatedWin->getSceneDB()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, false, m_associatedWin);
 	ccHObject::Container meshes;
-	if (m_associatedWin->getSceneDB()->filterChildren(meshes, true, CC_TYPES::MESH, false, m_associatedWin) == 0)
+	m_associatedWin->getSceneDB()->filterChildren(meshes, true, CC_TYPES::MESH, false, m_associatedWin);
+
+	if (clouds.empty() && meshes.empty())
 	{
-		//no cloud is currently displayed?!
+		//no entity is currently displayed?!
+		assert(false);
 		return 0;
 	}
 
@@ -477,7 +476,7 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 		m_poly3D->setTempColor(ccColor::green);
 		m_poly3D->set2DMode(false);
 		m_poly3D->addChild(m_poly3DVertices);
-		m_poly3D->setWidth(widthSpinBox->value());
+		m_poly3D->setWidth(widthSpinBox->value() < 2 ? 0 : widthSpinBox->value()); //'1' is equivalent to the default line size
 
 		m_segmentParams.clear(); //just in case
 

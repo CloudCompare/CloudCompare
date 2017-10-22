@@ -64,6 +64,8 @@ static OculusHMD s_oculus;
 
 const float ccGLWindow::MIN_POINT_SIZE_F = 1.0f;
 const float ccGLWindow::MAX_POINT_SIZE_F = 16.0f;
+const float ccGLWindow::MIN_LINE_WIDTH_F = 1.0f;
+const float ccGLWindow::MAX_LINE_WIDTH_F = 10.0f;
 
 //Min and max zoom ratio (relative)
 static const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
@@ -4977,9 +4979,11 @@ void ccGLWindow::setPointSize(float size, bool silent/*=false*/)
 
 void ccGLWindow::setLineWidth(float width)
 {
-	if (m_viewportParams.defaultLineWidth != width)
+	float newWidth = std::max(std::min(width, MAX_LINE_WIDTH_F), MIN_LINE_WIDTH_F);
+	
+	if (m_viewportParams.defaultLineWidth != newWidth)
 	{
-		m_viewportParams.defaultLineWidth = width;
+		m_viewportParams.defaultLineWidth = newWidth;
 		deprecate3DLayer();
 	}
 }

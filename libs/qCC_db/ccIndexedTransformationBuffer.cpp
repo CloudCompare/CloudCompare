@@ -315,6 +315,10 @@ void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glPushMatrix();
 			glFunc->glMultMatrixf(it->data());
 
+			//force line width
+			glFunc->glPushAttrib(GL_LINE_BIT);
+			glFunc->glLineWidth(2.0f);
+
 			glFunc->glBegin(GL_LINES);
 			glFunc->glColor3f(1.0f,0.0f,0.0f);
 			glFunc->glVertex3f(0.0f,0.0f,0.0f);
@@ -326,6 +330,8 @@ void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glVertex3f(0.0f,0.0f,0.0f);
 			glFunc->glVertex3f(0.0f,0.0f,m_trihedronsScale);
 			glFunc->glEnd();
+
+			glFunc->glPopAttrib(); //GL_LINE_BIT
 
 			glFunc->glPopMatrix();
 		}

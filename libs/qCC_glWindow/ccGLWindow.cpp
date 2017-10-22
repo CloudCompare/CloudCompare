@@ -2945,6 +2945,10 @@ void ccGLWindow::drawCross()
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 	
+	//force line width
+	glFunc->glPushAttrib(GL_LINE_BIT);
+	glFunc->glLineWidth(1.0f);
+
 	//cross OpenGL drawing
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey.rgba);
 	glFunc->glBegin(GL_LINES);
@@ -2953,6 +2957,8 @@ void ccGLWindow::drawCross()
 	glFunc->glVertex3f(-CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
 	glFunc->glVertex3f(CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
 	glFunc->glEnd();
+
+	glFunc->glPopAttrib(); //GL_LINE_BIT
 }
 
 inline float RoundScale(float equivalentWidth)
@@ -3005,6 +3011,10 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
+	//force line width
+	glFunc->glPushAttrib(GL_LINE_BIT);
+	glFunc->glLineWidth(1.0f);
+
 	//scale OpenGL drawing
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
 	glFunc->glBegin(GL_LINES);
@@ -3015,6 +3025,8 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	glFunc->glVertex3f(w, -h + tick, 0.0f);
 	glFunc->glVertex3f(w, -h - tick, 0.0f);
 	glFunc->glEnd();
+
+	glFunc->glPopAttrib(); //GL_LINE_BIT
 
 	QString text = QString::number(equivalentWidth);
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
@@ -5102,6 +5114,10 @@ void ccGLWindow::drawCustomLight()
 	//ensure that the star size is constant (in pixels)
 	GLfloat d = static_cast<GLfloat>(CC_DISPLAYED_CUSTOM_LIGHT_LENGTH * computeActualPixelSize());
 
+	//force line width
+	glFunc->glPushAttrib(GL_LINE_BIT);
+	glFunc->glLineWidth(1.0f);
+
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(m_customLightPos[0] - d, m_customLightPos[1], m_customLightPos[2]);
 	glFunc->glVertex3f(m_customLightPos[0] + d, m_customLightPos[1], m_customLightPos[2]);
@@ -5110,6 +5126,8 @@ void ccGLWindow::drawCustomLight()
 	glFunc->glVertex3f(m_customLightPos[0], m_customLightPos[1], m_customLightPos[2] - d);
 	glFunc->glVertex3f(m_customLightPos[0], m_customLightPos[1], m_customLightPos[2] + d);
 	glFunc->glEnd();
+
+	glFunc->glPopAttrib(); //GL_LINE_BIT
 }
 
 //draw a unit circle in a given plane (0=YZ, 1 = XZ, 2=XY) 

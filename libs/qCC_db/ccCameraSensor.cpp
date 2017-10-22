@@ -1383,6 +1383,10 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	ccGL::Vertex3(glFunc,  upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
 	glFunc->glEnd();
 
+	//force line size
+	glFunc->glPushAttrib(GL_LINE_BIT);
+	glFunc->glLineWidth(1.0f);
+
 	//side lines
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
@@ -1394,6 +1398,8 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 	ccGL::Vertex3(glFunc,  upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
 	glFunc->glEnd();
+
+	glFunc->glPopAttrib(); //GL_LINE_BIT
 
 	//base
 	glFunc->glBegin(GL_QUADS);
@@ -1498,7 +1504,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (!pushName)
 	{
 		glFunc->glPushAttrib(GL_LINE_BIT);
-		glFunc->glLineWidth(2.0);
+		glFunc->glLineWidth(2.0f);
 
 		float l = static_cast<float>(fabs(upperLeftPoint.z)/2);
 
@@ -1523,7 +1529,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glVertex3f(0.0f, 0.0f, -l);
 		glFunc->glEnd();
 
-		glFunc->glPopAttrib();
+		glFunc->glPopAttrib(); //GL_LINE_BIT
 	}
 
 	if (pushName)

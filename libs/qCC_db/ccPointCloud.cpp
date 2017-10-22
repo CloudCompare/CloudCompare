@@ -974,6 +974,11 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		for (unsigned c = 0; c < childrenCount; ++c)
 		{
 			ccHObject* child = addedCloud->getChild(c);
+			if (!child)
+			{
+				assert(false);
+				continue;
+			}
 			if (child->isA(CC_TYPES::MESH)) //mesh --> FIXME: what for the other types of MESH?
 			{
 				ccMesh* mesh = static_cast<ccMesh*>(child);

@@ -821,7 +821,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 								{
 									if (generateRandomColors)
 									{
-										ccPointCloud* croppedVertices = ccHObjectCaster::ToPointCloud(croppedVertices);
+										ccPointCloud* croppedVertices = ccHObjectCaster::ToPointCloud(mesh->getAssociatedCloud());
 										if (croppedVertices)
 										{
 											ccColor::Rgb col = ccColor::Generator::Random();
@@ -834,6 +834,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 												k = indexMaxs[2];
 											}
 											croppedVertices->showColors(true);
+											mesh->showColors(true);
 										}
 									}
 

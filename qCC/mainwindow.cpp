@@ -2751,7 +2751,9 @@ void MainWindow::doRemoveDuplicatePoints()
 	ccProgressDialog pDlg(true, this);
 	pDlg.setAutoClose(false);
 
-	for ( ccHObject *entity : getSelectedEntities() )
+	ccHObject::Container selectedEntities = getSelectedEntities(); //we have to use a local copy: 'unselectAllEntities' and 'selectEntity' will change the set of currently selected entities!
+
+	for (ccHObject *entity : selectedEntities)
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 		if (cloud)
@@ -3428,7 +3430,7 @@ void MainWindow::doActionMerge()
 		//put back first cloud in DB
 		if (firstCloud)
 		{
-			putObjectBackIntoDBTree(firstCloud,firstCloudContext);
+			putObjectBackIntoDBTree(firstCloud, firstCloudContext);
 			if (m_ccRoot)
 				m_ccRoot->selectEntity(firstCloud);
 		}
@@ -3958,7 +3960,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		ccPointCloud* pc = cloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud) : 0;
 
 		//we create a new group to store all CCs
-		ccHObject* ccGroup = new ccHObject(cloud->getName()+QString(" [CCs]"));
+		ccHObject* ccGroup = new ccHObject(cloud->getName() + QString(" [CCs]"));
 
 		//for each component
 		for (size_t i = 0; i < components.size(); ++i)
@@ -5265,7 +5267,9 @@ void MainWindow::doActionSORFilter()
 
 	bool firstCloud = true;
 
-	for ( ccHObject *entity : getSelectedEntities() )
+	ccHObject::Container selectedEntities = getSelectedEntities(); //we have to use a local copy: 'selectEntity' will change the set of currently selected entities!
+
+	for ( ccHObject *entity : selectedEntities )
 	{
 		//specific test for locked vertices
 		bool lockedVertices;
@@ -5378,8 +5382,10 @@ void MainWindow::doActionFilterNoise()
 	pDlg.setAutoClose(false);
 
 	bool firstCloud = true;
-
-	for ( ccHObject *entity : getSelectedEntities() )
+	
+	ccHObject::Container selectedEntities = getSelectedEntities(); //we have to use a local copy: and 'selectEntity' will change the set of currently selected entities!
+	
+	for ( ccHObject *entity : selectedEntities )
 	{
 		//specific test for locked vertices
 		bool lockedVertices;
@@ -6093,7 +6099,7 @@ void MainWindow::activateSectionExtractionMode()
 	ccGLWindow* firstDisplay = nullptr;
 	{
 		unsigned validCount = 0;
-		for ( ccHObject *entity : getSelectedEntities() )
+		for (ccHObject *entity : getSelectedEntities())
 		{
 			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
@@ -6118,7 +6124,9 @@ void MainWindow::activateSectionExtractionMode()
 
 	//deselect all entities
 	if (m_ccRoot)
+	{
 		m_ccRoot->unselectAllEntities();
+	}
 
 	ccGLWindow* win = new3DView();
 	if (!win)
@@ -6584,10 +6592,14 @@ void MainWindow::activatePointPickingMode()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
+	{
 		return;
+	}
 
 	if (m_ccRoot)
+	{
 		m_ccRoot->unselectAllEntities(); //we don't want any entity selected (especially existing labels!)
+	}
 
 	if (!m_ppDlg)
 	{
@@ -6644,7 +6656,8 @@ void MainWindow::activateClippingBoxMode()
 	}
 	m_clipTool->linkWith(win);
 
-	for ( ccHObject *entity : getSelectedEntities() )
+	ccHObject::Container selectedEntities = getSelectedEntities(); //we have to use a local copy: 'unselectEntity' will change the set of currently selected entities!
+	for (ccHObject *entity : selectedEntities)
 	{
 		if (m_clipTool->addAssociatedEntity(entity))
 		{
@@ -7427,7 +7440,8 @@ void MainWindow::doActionCrop()
 	std::vector<ccHObject*> candidates;
 	ccBBox baseBB;
 	{
-		for ( ccHObject *entity : getSelectedEntities() )
+		const ccHObject::Container& selectedEntities = getSelectedEntities();
+		for ( ccHObject *entity : selectedEntities )
 		{
 			if (	entity->isA(CC_TYPES::POINT_CLOUD)
 				||	entity->isKindOf(CC_TYPES::MESH) )
@@ -7450,11 +7464,16 @@ void MainWindow::doActionCrop()
 	bbeDlg.setWindowTitle("Crop");
 
 	if (!bbeDlg.exec())
+	{
+		//process cancelled by user
 		return;
+	}
 
 	//deselect all entities
 	if (m_ccRoot)
+	{
 		m_ccRoot->unselectAllEntities();
+	}
 
 	//cropping box
 	ccBBox box = bbeDlg.getBox();
@@ -7465,7 +7484,7 @@ void MainWindow::doActionCrop()
 	{
 		for ( ccHObject *entity : candidates )
 		{
-			ccHObject* croppedEnt = ccCropTool::Crop(entity,box,true);
+			ccHObject* croppedEnt = ccCropTool::Crop(entity, box, true);
 			if (croppedEnt)
 			{
 				croppedEnt->setName(entity->getName() + QString(".cropped"));
@@ -7739,10 +7758,10 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 		s_polygonMaxEdgeLength = maxEdgeLength;
 	}
 
-	ccHObject::Container selectedEntities = getSelectedEntities();
+	ccHObject::Container selectedEntities = getSelectedEntities(); //warning, getSelectedEntites may change during this loop!
 	bool firstEntity = true;
 	
-	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
+	for (ccHObject *entity : selectedEntities) 
 	{
 		ccShiftedObject* shifted = nullptr;
 		CCLib::GenericIndexedCloudPersist* cloud = nullptr;

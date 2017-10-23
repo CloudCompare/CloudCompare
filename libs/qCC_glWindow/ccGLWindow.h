@@ -381,9 +381,14 @@ public:
 	/** \param size point size (between MIN_POINT_SIZE_F and MAX_POINT_SIZE_F)
 	**/
 	virtual void setPointSize(float size, bool silent = false);
+	
+	//! Minimum line width
+	static const float MIN_LINE_WIDTH_F;
+	//! Maximum line width
+	static const float MAX_LINE_WIDTH_F;
 
 	//! Sets line width
-	/** \param width lines width (typically between 1 and 10)
+	/** \param width lines width (between MIN_LINE_WIDTH_F and MAX_LINE_WIDTH_F)
 	**/
 	virtual void setLineWidth(float width);
 

@@ -65,7 +65,7 @@ static OculusHMD s_oculus;
 const float ccGLWindow::MIN_POINT_SIZE_F = 1.0f;
 const float ccGLWindow::MAX_POINT_SIZE_F = 16.0f;
 const float ccGLWindow::MIN_LINE_WIDTH_F = 1.0f;
-const float ccGLWindow::MAX_LINE_WIDTH_F = 10.0f;
+const float ccGLWindow::MAX_LINE_WIDTH_F = 16.0f;
 
 //Min and max zoom ratio (relative)
 static const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;

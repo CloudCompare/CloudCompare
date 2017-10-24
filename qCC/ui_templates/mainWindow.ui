@@ -445,7 +445,6 @@
      <addaction name="separator"/>
      <addaction name="actionFindBiggestInnerRectangle"/>
      <addaction name="separator"/>
-     <addaction name="actionExportCloudsInfo"/>
      <addaction name="actionCreateCloudFromEntCenters"/>
      <addaction name="separator"/>
      <addaction name="actionComputeBestICPRmsMatrix"/>
@@ -474,6 +473,13 @@
      </property>
      <addaction name="actionCompute2HalfDimVolume"/>
     </widget>
+    <widget class="QMenu" name="menuBatchExport">
+     <property name="title">
+      <string>Batch export</string>
+     </property>
+     <addaction name="actionExportCloudsInfo"/>
+     <addaction name="actionExportPlanesInfo"/>
+    </widget>
     <addaction name="menuClean"/>
     <addaction name="menuProjection"/>
     <addaction name="menuRegistration"/>
@@ -482,6 +488,7 @@
     <addaction name="menuStatistics"/>
     <addaction name="menuSegmentation"/>
     <addaction name="menuFit"/>
+    <addaction name="menuBatchExport"/>
     <addaction name="menuOther"/>
     <addaction name="separator"/>
     <addaction name="actionLevel"/>
@@ -2595,6 +2602,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="text">
     <string>Export cloud(s) info</string>
    </property>
+   <property name="toolTip">
+    <string>Export cloud(s) info to a CSV file (name, size, barycenter, scalar fields info, etc.)</string>
+   </property>
   </action>
   <action name="actionInterpolateColors">
    <property name="text">
@@ -3033,6 +3043,14 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Interpolate scalar-field(s) from another cloud or mesh</string>
+   </property>
+  </action>
+  <action name="actionExportPlanesInfo">
+   <property name="text">
+    <string>Export plane(s) info</string>
+   </property>
+   <property name="toolTip">
+    <string>Export plane(s) info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</string>
    </property>
   </action>
  </widget>

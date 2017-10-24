@@ -1,7 +1,7 @@
 CloudCompare version history
 ============================
 
-v2.9.beta - XX/XX/XXXX
+v2.9 - 10/22/2017
 ----------------------
 
 - New features:
@@ -19,6 +19,15 @@ v2.9.beta - XX/XX/XXXX
 	* New tool to import scalar fields from one cloud to another: 'Edit > SFs > Interpolate from another entity'
 		- 3 neighbor extraction methods are supported (nearest neighbor, inside a sphere or with a given number of neighbors)
 		- 3 algorithms are available: average, median and weighted average
+
+	* New sub-menu 'Tools > Batch export'
+		- 'Export cloud(s) info' (formerly in the 'Sand-box' sub-menu)
+			* exports various pieces of information about selected clouds in a CSV file
+			* Name, point count, barycenter
+			+ for each scalar field: name, mean value, std. dev. and sum
+		- 'Export plane(s) info'
+			* exports various pieces of information about selected planes in a CSV file
+			* Name, width, height, center, normal, dip and dip direction
 
 	* New interactor to change the default line width (via the 'hot zone' in the upper-left corner of 3D views)
 	

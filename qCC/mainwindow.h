@@ -453,6 +453,8 @@ private slots:
 
 	//! Batch export some pieces of info from a set of selected clouds
 	void doActionExportCloudsInfo();
+	//! Batch export some pieces of info from a set of selected planes
+	void doActionExportPlanesInfo();
 
 	//! Generates a matrix with the best (registration) RMS for all possible couple among the selected entities
 	void doActionComputeBestICPRmsMatrix();

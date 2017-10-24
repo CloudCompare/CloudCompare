@@ -777,6 +777,9 @@ void MainWindow::connectActions()
 	connect(m_UI->actionFitSphere,					&QAction::triggered, this, &MainWindow::doActionFitSphere);
 	connect(m_UI->actionFitFacet,					&QAction::triggered, this, &MainWindow::doActionFitFacet);
 	connect(m_UI->actionFitQuadric,					&QAction::triggered, this, &MainWindow::doActionFitQuadric);
+	//"Tools > Batch export" menu
+	connect(m_UI->actionExportCloudsInfo,			&QAction::triggered, this, &MainWindow::doActionExportCloudsInfo);
+	connect(m_UI->actionExportPlanesInfo,			&QAction::triggered, this, &MainWindow::doActionExportPlanesInfo);
 	//"Tools > Other" menu
 	connect(m_UI->actionComputeDensity,				&QAction::triggered, this, &MainWindow::doComputeDensity);
 	connect(m_UI->actionCurvature,					&QAction::triggered, this, &MainWindow::doComputeCurvature);
@@ -796,7 +799,6 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSNETest,					&QAction::triggered, this, &MainWindow::doSphericalNeighbourhoodExtractionTest);
 	connect(m_UI->actionCNETest,					&QAction::triggered, this, &MainWindow::doCylindricalNeighbourhoodExtractionTest);
 	connect(m_UI->actionFindBiggestInnerRectangle,	&QAction::triggered, this, &MainWindow::doActionFindBiggestInnerRectangle);
-	connect(m_UI->actionExportCloudsInfo,			&QAction::triggered, this, &MainWindow::doActionExportCloudsInfo);
 	connect(m_UI->actionCreateCloudFromEntCenters,	&QAction::triggered, this, &MainWindow::doActionCreateCloudFromEntCenters);
 	connect(m_UI->actionComputeBestICPRmsMatrix,	&QAction::triggered, this, &MainWindow::doActionComputeBestICPRmsMatrix);
 
@@ -8340,19 +8342,121 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 	}
 }
 
+void MainWindow::doActionExportPlanesInfo()
+{
+	ccHObject::Container planes;
+
+	const ccHObject::Container& selectedEntities = getSelectedEntities();
+	if (selectedEntities.size() == 1 && selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
+	{
+		//a group
+		selectedEntities.front()->filterChildren(planes, true, CC_TYPES::PLANE, false);
+	}
+	else
+	{
+		for (ccHObject* ent : selectedEntities)
+		{
+			if (ent->isKindOf(CC_TYPES::PLANE))
+			{
+				//a single plane
+				planes.push_back(static_cast<ccPlane*>(ent));
+			}
+		}
+	}
+
+	if (planes.size() == 0)
+	{
+		ccLog::Error("No plane in selection");
+		return;
+	}
+
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+
+	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
+	if (outputFilename.isEmpty())
+	{
+		//process cancelled by the user
+		return;
+	}
+
+	QFile csvFile(outputFilename);
+	if (!csvFile.open(QFile::WriteOnly | QFile::Text))
+	{
+		ccConsole::Error("Failed to open file for writing! (check file permissions)");
+		return;
+	}
+
+	//save last saving location
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(outputFilename).absolutePath());
+	settings.endGroup();
+
+	//write CSV header
+	QTextStream csvStream(&csvFile);
+	csvStream << "Name;";
+	csvStream << "Width;";
+	csvStream << "Height;";
+	csvStream << "Cx;";
+	csvStream << "Cy;";
+	csvStream << "Cz;";
+	csvStream << "Nx;";
+	csvStream << "Ny;";
+	csvStream << "Nz;";
+	csvStream << "Dip;";
+	csvStream << "Dip dir;";
+	csvStream << endl;
+
+	QChar separator(';');
+
+	//write one line per plane
+	for (ccHObject* ent : planes)
+	{
+		ccPlane* plane = static_cast<ccPlane*>(ent);
+			
+		CCVector3 C = plane->getOwnBB().getCenter();
+		CCVector3 N = plane->getNormal();
+		PointCoordinateType dip_deg = 0, dipDir_deg = 0;
+		ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip_deg, dipDir_deg);
+
+		csvStream << plane->getName() << separator;		//Name
+		csvStream << plane->getXWidth() << separator;	//Width
+		csvStream << plane->getYWidth() << separator;	//Height
+		csvStream << C.x << separator;					//Cx
+		csvStream << C.y << separator;					//Cy
+		csvStream << C.z << separator;					//Cz
+		csvStream << N.x << separator;					//Nx
+		csvStream << N.y << separator;					//Ny
+		csvStream << N.z << separator;					//Nz
+		csvStream << dip_deg << separator;				//Dip
+		csvStream << dipDir_deg << separator;			//Dip direction
+		csvStream << endl;
+	}
+
+	ccConsole::Print(QString("[I/O] File '%1' successfully saved (%2 plane(s))").arg(outputFilename).arg(planes.size()));
+	csvFile.close();
+}
+
 void MainWindow::doActionExportCloudsInfo()
 {
 	//look for clouds
-	std::vector<ccPointCloud*> clouds;
-	unsigned maxSFCount = 0;
+	ccHObject::Container clouds;
+
+	const ccHObject::Container& selectedEntities = getSelectedEntities();
+	if (selectedEntities.size() == 1 && selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
-		for ( ccHObject *entity : getSelectedEntities() )
+		//a group
+		selectedEntities.front()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
+	}
+	else
+	{
+		for (ccHObject* entity : selectedEntities)
 		{
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 			if (cloud)
 			{
 				clouds.push_back(cloud);
-				maxSFCount = std::max<unsigned>(maxSFCount,cloud->getNumberOfScalarFields());
 			}
 		}
 	}
@@ -8370,18 +8474,28 @@ void MainWindow::doActionExportCloudsInfo()
 
 	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
 	if (outputFilename.isEmpty())
+	{
+		//process cancelled by the user
 		return;
+	}
 
 	QFile csvFile(outputFilename);
-	if (!csvFile.open(QFile::WriteOnly))
+	if (!csvFile.open(QFile::WriteOnly | QFile::Text))
 	{
 		ccConsole::Error("Failed to open file for writing! (check file permissions)");
 		return;
 	}
 
 	//save last saving location
-	settings.setValue(ccPS::CurrentPath(),QFileInfo(outputFilename).absolutePath());
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(outputFilename).absolutePath());
 	settings.endGroup();
+
+	//determine the maximum number of SFs
+	unsigned maxSFCount = 0;
+	for (ccHObject* entity : clouds)
+	{
+		maxSFCount = std::max<unsigned>(maxSFCount, static_cast<ccPointCloud*>(entity)->getNumberOfScalarFields());
+	}
 
 	//write CSV header
 	QTextStream csvStream(&csvFile);
@@ -8393,7 +8507,7 @@ void MainWindow::doActionExportCloudsInfo()
 	{
 		for (unsigned i = 0; i < maxSFCount; ++i)
 		{
-			QString sfIndex = QString("SF#%1").arg(i+1);
+			QString sfIndex = QString("SF#%1").arg(i + 1);
 			csvStream << sfIndex << " name;";
 			csvStream << sfIndex << " valid values;";
 			csvStream << sfIndex << " mean;";
@@ -8405,8 +8519,10 @@ void MainWindow::doActionExportCloudsInfo()
 
 	//write one line per cloud
 	{
-		for ( ccPointCloud *cloud : clouds )
+		for (ccHObject* entity : clouds)
 		{
+			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
+
 			CCVector3 G = *CCLib::Neighbourhood(cloud).getGravityCenter();
 			csvStream << cloud->getName() << ";" /*"Name;"*/;
 			csvStream << cloud->size() << ";" /*"Points;"*/;
@@ -9819,7 +9935,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionSubsample->setEnabled(atLeastOneCloud);
 
 	m_UI->actionSNETest->setEnabled(atLeastOneCloud);
-	m_UI->actionExportCloudsInfo->setEnabled(atLeastOneCloud);
+	m_UI->actionExportCloudsInfo->setEnabled(atLeastOneEntity);
+	m_UI->actionExportPlanesInfo->setEnabled(atLeastOneEntity);
 
 	m_UI->actionFilterByValue->setEnabled(atLeastOneSF);
 	m_UI->actionConvertToRGB->setEnabled(atLeastOneSF);

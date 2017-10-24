@@ -99,6 +99,9 @@ v2.9 - 10/22/2017
 		- Compute mesh volume:
 			* '-MESH_VOLUME'
 			* optional argument: '-TO_FILE {filename}' to output the volume(s) in a file
+		- LAS files:
+			* when loading LAS files without any specification about Global Shift, no shift will be applied, not even the LAS file internal 'shift' (to avoid confusion)
+			* however, it is highly recommanded to always specifiy a Global Shift (AUTO or a specific vector) to avoid losing precision when dealing with big coordinates!
 		- Other improvements:
 			* the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
 			* the ASCII loading dialog shouldn't appear anymore in 'SILENT' mode (only if CC really can't guess anything)

@@ -1159,12 +1159,14 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				//set the LAS shift as default shift (if none was provided)
 				if (lasShift.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
 				{
-					useLasShift = true;
-					Pshift = lasShift;
-					if (	csModeBackup != ccGlobalShiftManager::NO_DIALOG
-						&&	csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
+					if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
 					{
-						parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
+						useLasShift = true;
+						Pshift = lasShift;
+						if (csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
+						{
+							parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
+						}
 					}
 				}
 				if (HandleGlobalShift(P, Pshift, parameters, useLasShift))

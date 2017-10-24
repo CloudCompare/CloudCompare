@@ -205,7 +205,9 @@ v2.9 - 10/22/2017
 		- the I/O filter was not exporting the shifted point clouds at the right location
 	* Render to file:
 		- when the 'draw rounded points' option was enabled, pixel transparency could cause a strange effect when exported to PNG images
-	* Octree rendering: the 'Cube' mode was not functional
+	* Octree rendering:
+		- the 'Cube' mode was not functional
+		- the 'Point' mode with normals was not functional
 
 v2.8.1 - 16/02/2017
 ----------------------

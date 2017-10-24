@@ -200,11 +200,28 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 													reinterpret_cast<void*>(glFunc)
 				};
 
+				if (glParams.showNorms)
+				{
+					glFunc->glEnable(GL_RESCALE_NORMAL);
+					glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, CC_DEFAULT_CLOUD_AMBIENT_COLOR.rgba);
+					glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, CC_DEFAULT_CLOUD_SPECULAR_COLOR.rgba);
+					glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CC_DEFAULT_CLOUD_DIFFUSE_COLOR.rgba);
+					glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, CC_DEFAULT_CLOUD_EMISSION_COLOR.rgba);
+					glFunc->glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, CC_DEFAULT_CLOUD_SHININESS);
+					glFunc->glPushAttrib(GL_LIGHTING_BIT);
+					glFunc->glEnable(GL_LIGHTING);
+				}
+
 				glFunc->glBegin(GL_POINTS);
 				executeFunctionForAllCellsAtLevel(	m_displayedLevel,
 													&DrawCellAsAPoint,
 													additionalParameters);
 				glFunc->glEnd();
+
+				if (glParams.showNorms)
+				{
+					glFunc->glPopAttrib(); //GL_LIGHTING_BIT
+				}
 			}
 			else if (m_displayMode == MEAN_CUBES)
 			{

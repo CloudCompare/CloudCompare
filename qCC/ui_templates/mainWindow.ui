@@ -477,8 +477,8 @@
      <property name="title">
       <string>Batch export</string>
      </property>
-     <addaction name="actionExportCloudsInfo"/>
-     <addaction name="actionExportPlanesInfo"/>
+     <addaction name="actionExportCloudInfo"/>
+     <addaction name="actionExportPlaneInfo"/>
     </widget>
     <addaction name="menuClean"/>
     <addaction name="menuProjection"/>
@@ -2598,12 +2598,12 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Dip/Dip direction SFs</string>
    </property>
   </action>
-  <action name="actionExportCloudsInfo">
+  <action name="actionExportCloudInfo">
    <property name="text">
-    <string>Export cloud(s) info</string>
+    <string>Export cloud info</string>
    </property>
    <property name="toolTip">
-    <string>Export cloud(s) info to a CSV file (name, size, barycenter, scalar fields info, etc.)</string>
+    <string>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</string>
    </property>
   </action>
   <action name="actionInterpolateColors">
@@ -3045,12 +3045,12 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Interpolate scalar-field(s) from another cloud or mesh</string>
    </property>
   </action>
-  <action name="actionExportPlanesInfo">
+  <action name="actionExportPlaneInfo">
    <property name="text">
-    <string>Export plane(s) info</string>
+    <string>Export plane info</string>
    </property>
    <property name="toolTip">
-    <string>Export plane(s) info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</string>
+    <string>Export plane info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</string>
    </property>
   </action>
  </widget>

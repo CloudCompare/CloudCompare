@@ -21,7 +21,7 @@ v2.9 - 10/22/2017
 		- 3 algorithms are available: average, median and weighted average
 
 	* New sub-menu 'Tools > Batch export'
-		- 'Export cloud(s) info' (formerly in the 'Sand-box' sub-menu)
+		- 'Export cloud info' (formerly in the 'Sand-box' sub-menu)
 			* exports various pieces of information about selected clouds in a CSV file
 			* Name, point count, barycenter
 			+ for each scalar field: name, mean value, std. dev. and sum
@@ -1357,7 +1357,7 @@ v2.5.4 04/19/2014
 		- for each point, the best fit plane is computed on all the neighbors except the point itself
 			(this gives a less biased measure). The roughness value is then computed as the distance
 			between the point and this plane.
-	* New 'sand box' method: "Export cloud(s) info"
+	* New 'sand box' method: "Export cloud info"
 		- exports various pieces of information for all selected clouds in a CSV file (cloud name, size,
 			mean, std.dev. and sum of all scalar fields, etc.)
 	* 'Camera link' feature enhanced:

@@ -778,8 +778,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionFitFacet,					&QAction::triggered, this, &MainWindow::doActionFitFacet);
 	connect(m_UI->actionFitQuadric,					&QAction::triggered, this, &MainWindow::doActionFitQuadric);
 	//"Tools > Batch export" menu
-	connect(m_UI->actionExportCloudsInfo,			&QAction::triggered, this, &MainWindow::doActionExportCloudsInfo);
-	connect(m_UI->actionExportPlanesInfo,			&QAction::triggered, this, &MainWindow::doActionExportPlanesInfo);
+	connect(m_UI->actionExportCloudInfo,			&QAction::triggered, this, &MainWindow::doActionExportCloudInfo);
+	connect(m_UI->actionExportPlaneInfo,			&QAction::triggered, this, &MainWindow::doActionExportPlaneInfo);
 	//"Tools > Other" menu
 	connect(m_UI->actionComputeDensity,				&QAction::triggered, this, &MainWindow::doComputeDensity);
 	connect(m_UI->actionCurvature,					&QAction::triggered, this, &MainWindow::doComputeCurvature);
@@ -8342,7 +8342,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 	}
 }
 
-void MainWindow::doActionExportPlanesInfo()
+void MainWindow::doActionExportPlaneInfo()
 {
 	ccHObject::Container planes;
 
@@ -8438,7 +8438,7 @@ void MainWindow::doActionExportPlanesInfo()
 	csvFile.close();
 }
 
-void MainWindow::doActionExportCloudsInfo()
+void MainWindow::doActionExportCloudInfo()
 {
 	//look for clouds
 	ccHObject::Container clouds;
@@ -9935,8 +9935,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionSubsample->setEnabled(atLeastOneCloud);
 
 	m_UI->actionSNETest->setEnabled(atLeastOneCloud);
-	m_UI->actionExportCloudsInfo->setEnabled(atLeastOneEntity);
-	m_UI->actionExportPlanesInfo->setEnabled(atLeastOneEntity);
+	m_UI->actionExportCloudInfo->setEnabled(atLeastOneEntity);
+	m_UI->actionExportPlaneInfo->setEnabled(atLeastOneEntity);
 
 	m_UI->actionFilterByValue->setEnabled(atLeastOneSF);
 	m_UI->actionConvertToRGB->setEnabled(atLeastOneSF);

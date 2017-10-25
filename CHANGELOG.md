@@ -25,7 +25,7 @@ v2.9 - 10/22/2017
 			* exports various pieces of information about selected clouds in a CSV file
 			* Name, point count, barycenter
 			+ for each scalar field: name, mean value, std. dev. and sum
-		- 'Export plane(s) info'
+		- 'Export plane info'
 			* exports various pieces of information about selected planes in a CSV file
 			* Name, width, height, center, normal, dip and dip direction
 

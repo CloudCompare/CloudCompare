@@ -133,8 +133,8 @@ void qPCV::doAction()
 	if (root)
 	{
 		ccHObject::Container clouds;
-		root->filterChildren(clouds,true,CC_TYPES::POINT_CLOUD);
-		for (size_t i=0; i<clouds.size(); ++i)
+		root->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+		for (size_t i = 0; i < clouds.size(); ++i)
 		{
 			//we keep only clouds with normals
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(clouds[i]);
@@ -195,15 +195,17 @@ void qPCV::doAction()
 		std::vector<CCVector3> rays;
 		unsigned count = pc->size();
 		rays.resize(count);
-		for (unsigned i=0; i<count; ++i)
+		for (unsigned i = 0; i < count; ++i)
+		{
 			rays[i] = CCVector3(pc->getPointNormal(i));
+		}
 
 		success = PCV::Launch(rays,cloud,mesh,meshIsClosed,res,res,&progressCb);
 	}
 	else
 	{
 		//Version with rays sampled on a sphere
-		success = (PCV::Launch(raysNumber,cloud,mesh,meshIsClosed,mode360,res,res,&progressCb) > 0);
+		success = (PCV::Launch(raysNumber, cloud, mesh, meshIsClosed, mode360, res, res, &progressCb) > 0);
 	}
 
 	if (!success)

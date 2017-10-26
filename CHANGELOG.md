@@ -1,7 +1,7 @@
 CloudCompare version history
 ============================
 
-v2.9.beta - XX/XX/XXXX
+v2.9 - 10/22/2017
 ----------------------
 
 - New features:
@@ -10,31 +10,40 @@ v2.9.beta - XX/XX/XXXX
 		- structural geology toolbox for the interpretation and analysis of virtual outcrop models (by Sam Thiele)
 		- see http://www.cloudcompare.org/doc/wiki/index.php?title=Compass_(plugin)
 
-	* New shortcut: P (pick rotation center)
-
 	* 3D view pivot management:
 		- new option to position the pivot point automatically on the point currently at the screen center (dynamic update)
 			(now the default behavior, can be toggled thanks to the dedicated icon in the 'Viewing tools' toolbar or the 'Shift + P' shortcut)
 		- double clicking on the 3D view will also reposition the pivot point on the point under the cursor
 		- the state of this option is automatically saved and restored when CC starts
 		
+	* New tool to import scalar fields from one cloud to another: 'Edit > SFs > Interpolate from another entity'
+		- 3 neighbor extraction methods are supported (nearest neighbor, inside a sphere or with a given number of neighbors)
+		- 3 algorithms are available: average, median and weighted average
+
+	* New sub-menu 'Tools > Batch export'
+		- 'Export cloud info' (formerly in the 'Sand-box' sub-menu)
+			* exports various pieces of information about selected clouds in a CSV file
+			* Name, point count, barycenter
+			+ for each scalar field: name, mean value, std. dev. and sum
+		- 'Export plane info'
+			* exports various pieces of information about selected planes in a CSV file
+			* Name, width, height, center, normal, dip and dip direction
+
+	* New interactor to change the default line width (via the 'hot zone' in the upper-left corner of 3D views)
+	
 	* New option: 'Display > Show cursor coordinates'
 		- if activated, the position of the mouse cursor relatively to the 3D view is constantly displayed
 		- the 2D position (in pixels) is always displayed
 		- the 3D position of the point below the cursor is displayed if possible
 
-	* New tool to import scalar fields from one cloud to another: 'Edit > SFs > Interpolate from another entity'
-		- 3 neighbor extraction methods are supported (nearest neighbor, inside a sphere or with a given number of neighbors)
-		- 3 algorithms are available: average, median and weighted average
-
-	* New interactor to change the default line width (via the 'hot zone' in the upper-left corner of 3D views)
-	
-	* When a picking operation is active, the ESC key will cancel it.
+	* New shortcut: P (pick rotation center)
 
 - enhancements:
 
-	* Contour lines generation (Rasterize tool)
-		- now using GDAL for a more robust generation of contour lines (proper handling of empty cells, etc.)
+	* When a picking operation is active, the ESC key will cancel it.
+
+	* qBroom plugin:
+		- now has a wiki documentation: http://www.cloudcompare.org/doc/wiki/index.php?title=Virtual_broom_(plugin)
 
 	* qAnimation plugin:
 		- new output option 'zoom' (alternative to the existing 'super resolution' option)
@@ -54,13 +63,6 @@ v2.9.beta - XX/XX/XXXX
 	* Plugins can now be called in command line mode
 		(the 'ccPluginInterface::registerCommands' method must be reimplemented)
 		(someone still needs to do the job for each plugin ;)
-
-	* [Windows] qLAS_FWF:
-		- the plugin (based on LASlib) can now load most of the standard LAS fields
-		- the plugin can now save files (with or without waveforms)
-		- the plugin can now be called in command line mode:
-			-FWF_O: open a LAS 1.3+ file
-			-FWF_SAVE_CLOUDS: save cloud(s) to LAS 1.3+ file(s) (options are 'ALL_AT_ONCE' and 'COMPRESSED' to save LAZ files instead of LAS)
 
 	* Trace polyline tool
 		- the tool now works on meshes
@@ -94,6 +96,12 @@ v2.9.beta - XX/XX/XXXX
 			* '-CLEAR_NORMALS'
 		- New mesh merging option
 			* '-MERGE_MESHES'
+		- Compute mesh volume:
+			* '-MESH_VOLUME'
+			* optional argument: '-TO_FILE {filename}' to output the volume(s) in a file
+		- LAS files:
+			* when loading LAS files without any specification about Global Shift, no shift will be applied, not even the LAS file internal 'shift' (to avoid confusion)
+			* however, it is highly recommanded to always specifiy a Global Shift (AUTO or a specific vector) to avoid losing precision when dealing with big coordinates!
 		- Other improvements:
 			* the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
 			* the ASCII loading dialog shouldn't appear anymore in 'SILENT' mode (only if CC really can't guess anything)
@@ -101,6 +109,7 @@ v2.9.beta - XX/XX/XXXX
 				when saving very small file (too quickly!)
 
 	* Rasterize tool
+		- contour lines generation is now based on GDAL (more robust, proper handling of empty cells, etc.)
 		- new option to re-project contour lines computed on a scalar field (i.e. a layer other than the altitudes)
 			on the altitudes layer
 		- the grid step bounds have been widened (between 1E-5 and 1E+5)
@@ -108,12 +117,30 @@ v2.9.beta - XX/XX/XXXX
 	* Edit > SF > Compute Stat. params
 		- the RMS of the active SF is now automatically computed and displayed in the Console
 
+	* PLY I/O filter
+		- now supports quads (quads are loaded as 2 triangles)
+
+	* DXF I/O filter
+		- now based on dxflib 3.17.0
+		- point clouds can now be exported to DXF (the number of points should remain very limited)
+		- see fixed bugs below
+
 	* LAS I/O filter
 		- the 'Spatial Reference System' of LAS files is now stored as meta-data and restored
 			when exporting the cloud as a LAS/LAZ file.
 
-	* PLY I/O filter
-		- now supports quads (quads are loaded as 2 triangles)
+	* [Windows] qLAS_FWF:
+		- the plugin (based on LASlib) can now load most of the standard LAS fields
+		- the plugin can now save files (with or without waveforms)
+		- the plugin can now be called in command line mode:
+			-FWF_O: open a LAS 1.3+ file
+			-FWF_SAVE_CLOUDS: save cloud(s) to LAS 1.3+ file(s) (options are 'ALL_AT_ONCE' and 'COMPRESSED' to save LAZ files instead of LAS)
+
+	* New method: 'Edit > Waveforms > Compress FWF data'
+		- To compress FWF data associated to a cloud (useful after a manual segmentation for instance
+			as the FWF data is shared between clouds and remains complete by default)
+		- Compression is done automatically when saving a cloud with the 'LAS 1.3 / 1.4' filter (QLAS_FWF_IO_PLUGIN)
+			(but it's not done when saving the entity as a BIN file)
 
 	* Oculus support
 		- CC now displays in the current 3D view the mirror image of what is displayed in the headset
@@ -126,44 +153,34 @@ v2.9.beta - XX/XX/XXXX
 		- new option to use the same scale for all dimensions
 		- new option to apply the scale to the 'Global shift' (or not)
 
-	* New Menu Entry: 'Edit > Grid'
-		- Delete scan grids: An underlying grid structure can now be deleted
+	* New Menu Entry: 'Edit > Grid > Delete scan grids'
+		- scan grids associated to a cloud can now be deleted (to save space when saving the cloud to a BIN file for instance)
 
-	* New method: 'Edit > Waveforms > Compress FWF data'
-		- To compress FWF data associated to a cloud (useful after a manual segmentation for instance
-			as the FWF data is shared between clouds and remains complete by default)
-		- Compression is done automatically when saving a cloud with the 'LAS 1.3 / 1.4' filter (QLAS_FWF_IO_PLUGIN)
-			(but it's not done when saving the entity as a BIN file)
-
-	* qEllipser dialog:
+	* qEllipser plugin:
 		- option to export the image as a (potentially scaled) point cloud
 
-	* Normal computation tools:
+	* Normal computation tool:
 		- new algorithm to compute the normals based on scan grids (faster, and more robust)
 		- the 'kernel size' parameter is replaced by 'the minimum angle of triangles' used in the internal triangulation process
-		- Plane and Quadric mode increase the radius adaptively to reach minimum number of points
+		- Plane and Quadric modes will now automatically increase the radius adaptively to reach a minimum number of points and to avoid creating 'zero' (invalid) normals
 
 	* Edit the scalar value of a single point
 		- create a label on the point (SHIFT + click)
 		- make sure a scalar field is active
 		- right click on the label entry in the DB tree and select 'Edit scalar value'
 
-	* DXF export
-		- now based on dxflib 3.17.0
-		- see fixed bugs below
-
 	* Merge (clouds)
 		- new option to generate a scalar field with the index of the original cloud for each point
 
 	* Other
 		- color scales are now listed in alphabetical order
-		- the DXF format can now be used to export point clouds (their size should be very limited!)
 		- polylines exported from the 'Interactive Segmentation' tool will now use the same Global Shift as the segmented entity(ies)
 		- when changing the dip and dip direction of plane parallel with XY, the resulting plane shouldn't rotate in an arbitrary way anymore
 		- the filter and single-button plugin toolbars are now on the right side of the window by default (to reset to the default layouts, use "Reset all GUI element positions" at the bottom of the Display menu)
 		- the Plane edition dialog now lest the user specify the normal plane in addition to its dip and dip direction
 		- new 'Clone' icon with a colored background so as to more clearly spot when the icon is enabled (Nyan sheep!)
 		- now using PoissonRecon 9.011
+		- the default maximum point size and maximum line width increased to 16 pixels
 
 - Bug fixes:
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)
@@ -186,6 +203,11 @@ v2.9.beta - XX/XX/XXXX
 	* DXF export
 		- the I/O filter was mistakenly exporting the vertices of polylines and meshes as separate clouds
 		- the I/O filter was not exporting the shifted point clouds at the right location
+	* Render to file:
+		- when the 'draw rounded points' option was enabled, pixel transparency could cause a strange effect when exported to PNG images
+	* Octree rendering:
+		- the 'Cube' mode was not functional
+		- the 'Point' mode with normals was not functional
 
 v2.8.1 - 16/02/2017
 ----------------------
@@ -1335,7 +1357,7 @@ v2.5.4 04/19/2014
 		- for each point, the best fit plane is computed on all the neighbors except the point itself
 			(this gives a less biased measure). The roughness value is then computed as the distance
 			between the point and this plane.
-	* New 'sand box' method: "Export cloud(s) info"
+	* New 'sand box' method: "Export cloud info"
 		- exports various pieces of information for all selected clouds in a CSV file (cloud name, size,
 			mean, std.dev. and sum of all scalar fields, etc.)
 	* 'Camera link' feature enhanced:

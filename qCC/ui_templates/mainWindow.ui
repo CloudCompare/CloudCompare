@@ -392,7 +392,7 @@
      <addaction name="actionRasterize"/>
      <addaction name="actionConvertPolylinesToMesh"/>
      <addaction name="actionExportCoordToSF"/>
-     <addaction name="actionCreate_surface_between_two_polylines"/>
+     <addaction name="actionCreateSurfaceBetweenTwoPolylines"/>
     </widget>
     <widget class="QMenu" name="menuStatistics">
      <property name="title">
@@ -445,7 +445,6 @@
      <addaction name="separator"/>
      <addaction name="actionFindBiggestInnerRectangle"/>
      <addaction name="separator"/>
-     <addaction name="actionExportCloudsInfo"/>
      <addaction name="actionCreateCloudFromEntCenters"/>
      <addaction name="separator"/>
      <addaction name="actionComputeBestICPRmsMatrix"/>
@@ -474,6 +473,13 @@
      </property>
      <addaction name="actionCompute2HalfDimVolume"/>
     </widget>
+    <widget class="QMenu" name="menuBatchExport">
+     <property name="title">
+      <string>Batch export</string>
+     </property>
+     <addaction name="actionExportCloudInfo"/>
+     <addaction name="actionExportPlaneInfo"/>
+    </widget>
     <addaction name="menuClean"/>
     <addaction name="menuProjection"/>
     <addaction name="menuRegistration"/>
@@ -482,6 +488,7 @@
     <addaction name="menuStatistics"/>
     <addaction name="menuSegmentation"/>
     <addaction name="menuFit"/>
+    <addaction name="menuBatchExport"/>
     <addaction name="menuOther"/>
     <addaction name="separator"/>
     <addaction name="actionLevel"/>
@@ -2591,9 +2598,12 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Dip/Dip direction SFs</string>
    </property>
   </action>
-  <action name="actionExportCloudsInfo">
+  <action name="actionExportCloudInfo">
    <property name="text">
-    <string>Export cloud(s) info</string>
+    <string>Export cloud info</string>
+   </property>
+   <property name="toolTip">
+    <string>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</string>
    </property>
   </action>
   <action name="actionInterpolateColors">
@@ -2945,7 +2955,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Edit the plane parameters</string>
    </property>
   </action>
-  <action name="actionCreate_surface_between_two_polylines">
+  <action name="actionCreateSurfaceBetweenTwoPolylines">
    <property name="text">
     <string>Create surface between two polylines</string>
    </property>
@@ -3033,6 +3043,14 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Interpolate scalar-field(s) from another cloud or mesh</string>
+   </property>
+  </action>
+  <action name="actionExportPlaneInfo">
+   <property name="text">
+    <string>Export plane info</string>
+   </property>
+   <property name="toolTip">
+    <string>Export plane info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</string>
    </property>
   </action>
  </widget>
@@ -3168,6 +3186,22 @@ QTreeView::branch:open:has-children:has-siblings  {
    <sender>actionFitPlaneProxy</sender>
    <signal>triggered()</signal>
    <receiver>actionFitPlane</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCreateSurfaceBetweenTwoPolylines</sender>
+   <signal>triggered()</signal>
+   <receiver>actionMeshTwoPolylines</receiver>
    <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">

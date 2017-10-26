@@ -377,7 +377,8 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 		if (ccTrace::isTrace(obj))
 		{
 
-			ccHObject* trace = new ccTrace(p);
+			ccTrace* trace = new ccTrace(p);
+			trace->setWidth(2);
 			//add to originals/duplicates list [these are used later to overwrite the originals]
 			originals->push_back(obj->getUniqueID());
 			replacements->push_back(trace);

@@ -1296,7 +1296,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		QComboBox *comboBox = new QComboBox(parent);
 
 		comboBox->addItem(c_defaultPointSizeString); //size = 0
-		for (unsigned i = 1; i <= 10; ++i)
+		for (int i = static_cast<int>(ccGLWindow::MIN_POINT_SIZE_F); i <= static_cast<int>(ccGLWindow::MAX_POINT_SIZE_F); ++i)
 			comboBox->addItem(QString::number(i));
 
 		connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(cloudPointSizeChanged(int)));
@@ -1309,7 +1309,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		QComboBox *comboBox = new QComboBox(parent);
 
 		comboBox->addItem(c_defaultPolyWidthSizeString); //size = 0
-		for (unsigned i = 1; i <= 10; ++i)
+		for (int i = static_cast<int>(ccGLWindow::MIN_LINE_WIDTH_F); i <= static_cast<int>(ccGLWindow::MAX_LINE_WIDTH_F); ++i)
 			comboBox->addItem(QString::number(i));
 
 		connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(polyineWidthChanged(int)));

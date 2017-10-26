@@ -196,7 +196,7 @@ void qM3C2Dialog::setupPrecisionMapsTab()
 		bool auto1 = PopulatePMFields(c1SxComboBox, c1SyComboBox, c1SzComboBox, *m_cloud1);
 		bool auto2 = PopulatePMFields(c2SxComboBox, c2SyComboBox, c2SzComboBox, *m_cloud2);
 		precisionMapsGroupBox->setChecked(wasChecked && (auto1 && auto2));
-		//precisionMapsGroupBox->setEnabled(true);
+		precisionMapsGroupBox->setEnabled(true);
 	}
 }
 

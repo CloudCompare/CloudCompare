@@ -818,14 +818,12 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	const PointCoordinateType halfHeadSize = static_cast<PointCoordinateType>(0.3);
 
+	//force line width
+	glFunc->glPushAttrib(GL_LINE_BIT);
+	glFunc->glLineWidth(2.0f);
+
 	//sensor axes
 	{
-		//increased width
-		glFunc->glPushAttrib(GL_LINE_BIT);
-		GLfloat width;
-		glFunc->glGetFloatv(GL_LINE_WIDTH,&width);
-		glFunc->glLineWidth(width+1);
-
 		PointCoordinateType axisLength = halfHeadSize * m_scale;
 		ccGL::Color3v(glFunc, ccColor::red.rgba);
 		CCVector3 C(0, 0, 0);
@@ -843,8 +841,6 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		ccGL::Vertex3v(glFunc, C.u);
 		ccGL::Vertex3(glFunc, C.x, C.y, C.z + axisLength);
 		glFunc->glEnd();
-
-		glFunc->glPopAttrib();
 	}
 
 	//sensor head
@@ -870,6 +866,8 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		ccGL::Vertex3(glFunc, m_scale, 0, -m_scale);
 		glFunc->glEnd();
 	}
+
+	glFunc->glPopAttrib(); //GL_LINE_BIT
 
 	if (pushName)
 		glFunc->glPopName();

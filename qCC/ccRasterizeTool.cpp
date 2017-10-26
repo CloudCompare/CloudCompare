@@ -1635,7 +1635,7 @@ void ccRasterizeTool::addNewContour(ccPolyline* poly, double height, unsigned su
 		poly->setName(QString("Contour line value = %1 (#%2)").arg(height).arg(subIndex));
 		poly->setGlobalScale(m_cloud->getGlobalScale());
 		poly->setGlobalShift(m_cloud->getGlobalShift());
-		poly->setWidth(contourWidthSpinBox->value());
+		poly->setWidth(contourWidthSpinBox->value() < 2 ? 0 : contourWidthSpinBox->value()); //size 1 is equivalent to the default size
 		poly->setColor(ccColor::darkGrey);
 		//poly->setClosed(isClosed);
 		if (colorizeContoursCheckBox->isChecked())

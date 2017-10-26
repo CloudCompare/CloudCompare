@@ -8,6 +8,7 @@
 
 //Qt
 #include <QString>
+#include <QMessageBox>
 
 //qCC_db
 #include <ccProgressDialog.h>
@@ -244,6 +245,25 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 			if (!ccRasterGrid::ComputeGridSize(vertDir, gridBBox, gridStep, gridWidth, gridHeight))
 			{
 				return cmd.error("Failed to compute the grid dimensions (check input cloud(s) bounding-box)");
+			}
+
+			cmd.print(QString("Grid size: %1 x %2").arg(gridWidth).arg(gridHeight));
+
+			if (gridWidth * gridHeight > (1 << 26)) //64 million of cells
+			{
+				if (cmd.silentMode())
+				{
+					ccLog::Warning("Huge grid detected!");
+				}
+				else
+				{
+					static bool s_firstTime = true;
+					if (s_firstTime && QMessageBox::warning(cmd.widgetParent(), "Raster grid", "Grid size is huge. Are you sure you want to proceed?\n(you can avoid this message by running in SILENT mode)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+					{
+						return ccLog::Warning("Process cancelled");
+					}
+					s_firstTime = false;
+				}
 			}
 
 			ccRasterGrid grid;
@@ -550,6 +570,25 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 		if (!ccRasterGrid::ComputeGridSize(vertDir, gridBBox, gridStep, gridWidth, gridHeight))
 		{
 			return cmd.error("Failed to compute the grid dimensions (check input cloud(s) bounding-box)");
+		}
+
+		cmd.print(QString("Grid size: %1 x %2").arg(gridWidth).arg(gridHeight));
+
+		if (gridWidth * gridHeight > (1 << 26)) //64 million of cells
+		{
+			if (cmd.silentMode())
+			{
+				ccLog::Warning("Huge grid detected!");
+			}
+			else
+			{
+				static bool s_firstTime = true;
+				if (s_firstTime && QMessageBox::warning(cmd.widgetParent(), "Volume grid", "Grid size is huge. Are you sure you want to proceed?\n(you can avoid this message by running in SILENT mode)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+				{
+					return ccLog::Warning("Process cancelled");
+				}
+				s_firstTime = false;
+			}
 		}
 
 		ccRasterGrid grid;

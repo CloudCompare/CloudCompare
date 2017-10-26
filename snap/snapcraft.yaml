@@ -1,5 +1,5 @@
 name: cloudcompare
-version: '2.9.0-beta'
+version: '2.10-beta'
 summary: 3D point cloud and mesh processing software
 description: |
   CloudCompare is a 3D point cloud (and triangular mesh) processing software.

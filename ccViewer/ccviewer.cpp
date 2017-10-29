@@ -61,13 +61,13 @@ struct VerInfo
 static const VerInfo CC_VIEWER_VERSION;
 
 //Camera parameters dialog
-ccCameraParamEditDlg* s_cpeDlg = 0;
+static ccCameraParamEditDlg* s_cpeDlg = nullptr;
 
 ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	: QMainWindow(parent, flags)
-	, m_glWindow(0)
-	, m_selectedObject(0)
-	, m_3dMouseInput(0)
+	, m_glWindow(nullptr)
+	, m_selectedObject(nullptr)
+	, m_3dMouseInput(nullptr)
 {
 	ui.setupUi(this);
 

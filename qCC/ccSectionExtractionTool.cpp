@@ -1931,7 +1931,7 @@ void ccSectionExtractionTool::extractPoints()
 								const Segment2D& seg2D = polySegments2D[j];
 								CCVector2 AP2D = P2D - seg2D.A;
 
-								//sqaure distance to the polyline
+								//square distance to the polyline
 								PointCoordinateType squareDist = 0;
 
 								//longitudinal 'distance'

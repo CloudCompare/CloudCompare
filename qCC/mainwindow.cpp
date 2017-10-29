@@ -9121,7 +9121,7 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 	}
 }
 
-void MainWindow::addToDBAuto(QStringList filenames)
+void MainWindow::addToDBAuto(const QStringList& filenames)
 {
 	ccGLWindow* win = qobject_cast<ccGLWindow*>(QObject::sender());
 

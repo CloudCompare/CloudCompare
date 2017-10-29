@@ -269,7 +269,7 @@ private slots:
 	void updateMenus();
 	void on3DViewActivated(QMdiSubWindow*);
 	void updateUIWithSelection();
-	void addToDBAuto(QStringList);
+	void addToDBAuto(const QStringList& filenames);
 
 	void echoMouseWheelRotate(float);
 	void echoCameraDisplaced(float ddx, float ddy);

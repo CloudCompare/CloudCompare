@@ -60,7 +60,7 @@ public slots:
 	//! Tries to load (and then adds to main db) a list of entity (files)
 	/** \param filenames filenames to load
 	**/
-	void addToDB(QStringList filenames);
+	void addToDB(const QStringList& filenames);
 
 protected slots:
 

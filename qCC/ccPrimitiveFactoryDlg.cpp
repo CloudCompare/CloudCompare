@@ -136,7 +136,7 @@ void ccPrimitiveFactoryDlg::setSpherePositionFromClipboard()
 		{
 			CCVector3d vec;
 			bool success;
-			for (unsigned i = 0; i<3; ++i)
+			for (unsigned i = 0; i < 3; ++i)
 			{
 				vec[i] = valuesStr[i].toDouble(&success);
 				if (!success)

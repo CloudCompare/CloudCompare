@@ -4,6 +4,11 @@ CloudCompare version history
 v2.9.1 - 11/03/2017
 ----------------------
 
+- enhancements:
+	
+	* Primitive factory
+		- sphere center can now be set before its creation (either manually, or via the clipboard if the string is 'x y z')
+
 - Bug fixes:
 	
 	* DXF export was broken (styles table was not properly declared)

@@ -1,6 +1,14 @@
 CloudCompare version history
 ============================
 
+v2.9.1 - 11/03/2017
+----------------------
+
+- Bug fixes:
+	
+	* DXF export was broken (styles table was not properly declared)
+	* PLY files with texture indexes were not correctly read
+
 v2.9 - 10/22/2017
 ----------------------
 

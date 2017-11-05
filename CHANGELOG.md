@@ -4,9 +4,6 @@ CloudCompare version history
 v2.10.alpha - XX/XX/201X
 ----------------------
 
-v2.9.1 - 11/03/2017
-----------------------
-
 - enhancements:
 
 	* Labels can now be imported from ASCII files:
@@ -15,6 +12,12 @@ v2.9.1 - 11/03/2017
 		- one "2D label" entity is created per point (don't try to load too many of them ;)
 		- labels are displayed in 3D by default (i.e. next to each point), but they can also be displayed in 2D (see the dedicated check-box)
 	
+
+v2.9.1 - 11/03/2017
+----------------------
+
+- enhancements:
+
 	* Primitive factory
 		- sphere center can now be set before its creation (either manually, or via the clipboard if the string is 'x y z')
 

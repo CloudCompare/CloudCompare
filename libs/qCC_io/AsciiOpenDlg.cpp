@@ -868,17 +868,14 @@ void AsciiOpenDlg::checkSelectedColumnsValidity()
 		{
 			QComboBox* columnHeaderWidget = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0, i));
 
-			if (m_columnType[i] == TEXT)
+			if (columnHeaderWidget->currentIndex() == ASCII_OPEN_DLG_Label)
 			{
-				//text columns shouldn't be selected other than for Labels
-				if (columnHeaderWidget->currentIndex() == ASCII_OPEN_DLG_Label)
-				{
-					m_ui->show2DLabelsCheckBox->setEnabled(true);
-				}
-				else if (columnHeaderWidget->currentIndex() != 0)
-				{
-					m_selectedInvalidColumns |= true;
-				}
+				m_ui->show2DLabelsCheckBox->setEnabled(true);
+			}
+			else if (m_columnType[i] == TEXT && columnHeaderWidget->currentIndex() != 0)
+			{
+				//text columns shouldn't be selected (other than for Labels)
+				m_selectedInvalidColumns |= true;
 			}
 		}
 	}

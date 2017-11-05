@@ -12,6 +12,9 @@ v2.10.alpha - XX/XX/201X
 		- one "2D label" entity is created per point (don't try to load too many of them ;)
 		- labels are displayed in 3D by default (i.e. next to each point), but they can also be displayed in 2D (see the dedicated check-box)
 	
+- Bug fix:
+
+	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values
 
 v2.9.1 - 11/03/2017
 ----------------------

@@ -161,6 +161,17 @@
          </property>
         </spacer>
        </item>
+       <item>
+        <widget class="QCheckBox" name="show2DLabelsCheckBox">
+         <property name="toolTip">
+          <string>Show labels in 2D (not recommended over 50).
+Otherwise labels are shown in 3D.</string>
+         </property>
+         <property name="text">
+          <string>Show labels in 2D</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>
@@ -238,16 +249,7 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
+      <property name="margin">
        <number>0</number>
       </property>
       <item>

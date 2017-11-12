@@ -802,19 +802,19 @@ bool ccGLWindow::initialize()
 				else
 				{
 					ccColorRampShader* colorRampShader = new ccColorRampShader();
-					QString shadersPath = ccGLWindow::getShadersPath();
+					QString shaderPath = ccGLWindow::getShadersPath() + QString("/ColorRamp/color_ramp.frag");
 					QString error;
-					if (!colorRampShader->loadProgram(QString(), shadersPath + QString("/ColorRamp/color_ramp.frag"), error))
+					if (!colorRampShader->loadProgram(QString(), shaderPath, error))
 					{
 						if (!m_silentInitialization)
-							ccLog::Warning(QString("[3D View %1] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
+							ccLog::Warning(QString("[3D View %1] Failed to load color ramp shader '%2': '%3'").arg(m_uniqueID).arg(shaderPath).arg(error));
 						delete colorRampShader;
 						colorRampShader = nullptr;
 					}
 					else
 					{
 						if (!m_silentInitialization)
-							ccLog::Print("[3D View %i] Color ramp shader loaded successfully", m_uniqueID);
+							ccLog::Print(QString("[3D View %1] Color ramp shader '%2' loaded successfully").arg(m_uniqueID).arg(shaderPath));
 						m_colorRampShader = colorRampShader;
 						params.colorScaleShaderSupported = true;
 
@@ -6211,6 +6211,13 @@ QString ccGLWindow::getShadersPath()
 		theDir.cdUp();
 		
 		shaderPath = (theDir.absolutePath() + "/share/cloudcompare/shaders");
+	}
+	else if ( theDir.dirName() == "qCC" ) // when running from build dir
+	{
+		theDir.cdUp();
+		theDir.cdUp();
+		
+		shaderPath = (theDir.absolutePath() + "/qCC/shaders");
 	}
 	else
 	{

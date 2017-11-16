@@ -15,6 +15,8 @@ v2.10.alpha - XX/XX/201X
 - Bug fix:
 
 	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values
+	* Point picking was performed on each click, even when double-clicking. This could actually prevent the double-click from
+		being recognized as such (as the picking could be too slow!)
 
 v2.9.1 - 11/03/2017
 ----------------------

@@ -525,6 +525,7 @@ void ccPointCloudLOD::clear()
 	if (m_thread && m_thread->isRunning())
 	{
 		m_thread->terminate();
+		m_thread->wait();
 	}
 	
 	m_mutex.lock();

@@ -42,18 +42,6 @@
 //default name for the Global Shift List file
 static QString s_defaultGlobalShiftListFilename("global_shift_list.txt");
 
-//semi-persistent settings
-struct LastShiftInfo : ccShiftAndScaleCloudDlg::ShiftInfo
-{
-	bool valid;
-
-	LastShiftInfo()
-		: ccShiftAndScaleCloudDlg::ShiftInfo("Last input")
-		, valid(false)
-	{}
-};
-static LastShiftInfo s_lastInfo;
-
 ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pg,
 												 double Dg/*=0*/,
 												 QWidget* parent/*=0*/)
@@ -193,7 +181,7 @@ bool ccShiftAndScaleCloudDlg::loadInfoFromFile(QString filename)
 		//decode items
 		bool ok = true;
 		unsigned errors = 0;
-		ShiftInfo info;
+		ccGlobalShiftManager::ShiftInfo info;
 		info.name = tokens[0].trimmed();
 		info.shift.x = tokens[1].toDouble(&ok);
 		if (!ok) ++errors;
@@ -382,30 +370,8 @@ void ccShiftAndScaleCloudDlg::onGlobalPosCheckBoxToggled(bool state)
 
 void ccShiftAndScaleCloudDlg::onClick(QAbstractButton* button)
 {
-	bool saveInfo = false;
-	m_applyAll = false;
-	m_cancel = false;
-
-	if (button == m_ui->buttonBox->button(QDialogButtonBox::Yes))
-	{
-		saveInfo = true;
-	}
-	else if (button == m_ui->buttonBox->button(QDialogButtonBox::YesToAll))
-	{
-		saveInfo = true;
-		m_applyAll = true;
-	}
-	else if (button == m_ui->buttonBox->button(QDialogButtonBox::Cancel))
-	{
-		m_cancel = true;
-	}
-
-	if (saveInfo)
-	{
-		s_lastInfo.valid = true;
-		s_lastInfo.shift = getShift();
-		s_lastInfo.scale = getScale();
-	}
+	m_applyAll = (button == m_ui->buttonBox->button(QDialogButtonBox::YesToAll));
+	m_cancel   = (button == m_ui->buttonBox->button(QDialogButtonBox::Cancel  ));
 }
 
 void ccShiftAndScaleCloudDlg::onLoadIndexChanged(int index)
@@ -418,13 +384,7 @@ void ccShiftAndScaleCloudDlg::onLoadIndexChanged(int index)
 		setScale(m_defaultInfos[index].scale);
 }
 
-bool ccShiftAndScaleCloudDlg::getLast(ShiftInfo& info) const
-{
-	info = s_lastInfo;
-	return s_lastInfo.valid;
-}
-
-bool ccShiftAndScaleCloudDlg::getInfo(size_t index, ShiftInfo& info) const
+bool ccShiftAndScaleCloudDlg::getInfo(size_t index, ccGlobalShiftManager::ShiftInfo& info) const
 {
 	if (index >= m_defaultInfos.size())
 		return false;
@@ -442,7 +402,7 @@ void ccShiftAndScaleCloudDlg::setCurrentProfile(int index)
 	}
 }
 
-int ccShiftAndScaleCloudDlg::addShiftInfo(const ShiftInfo& info)
+int ccShiftAndScaleCloudDlg::addShiftInfo(const ccGlobalShiftManager::ShiftInfo& info)
 {
 	try
 	{
@@ -458,11 +418,4 @@ int ccShiftAndScaleCloudDlg::addShiftInfo(const ShiftInfo& info)
 	m_ui->loadComboBox->setEnabled(m_defaultInfos.size() >= 2);
 
 	return static_cast<int>(m_defaultInfos.size())-1;
-}
-
-void ccShiftAndScaleCloudDlg::SetLastInfo(const CCVector3d& shift, double scale)
-{
-	s_lastInfo.valid = true;
-	s_lastInfo.shift = shift;
-	s_lastInfo.scale = scale;
 }

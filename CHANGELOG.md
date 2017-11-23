@@ -17,6 +17,7 @@ v2.10.alpha - XX/XX/201X
 	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values
 	* Point picking was performed on each click, even when double-clicking. This could actually prevent the double-click from
 		being recognized as such (as the picking could be too slow!)
+	* Command line mode: when loading at least two LAS files with the 'GLOBAL_SHIFT AUTO' option, if the LAS files had different AND small LAS Shift
 
 v2.9.1 - 11/03/2017
 ----------------------

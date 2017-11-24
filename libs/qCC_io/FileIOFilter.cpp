@@ -20,6 +20,7 @@
 //file wrappers
 //CLOUDS
 #include "BinFilter.h"
+#include "SimpleBinFilter.h"
 #include "IcmFilter.h"
 #include "AsciiFilter.h"
 #include "SoiFilter.h"
@@ -81,6 +82,7 @@ void FileIOFilter::InitInternalFilters()
 	Register(Shared(new E57Filter()));
 #endif
 	Register(Shared(new PTXFilter()));
+	Register(Shared(new SimpleBinFilter()));
 	Register(Shared(new PlyFilter()));
 	Register(Shared(new ObjFilter()));
 	Register(Shared(new VTKFilter()));

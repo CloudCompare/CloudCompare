@@ -30,7 +30,7 @@
 #include <assert.h>
 
 //header: 32 first bytes
-static const size_t c_headerSize = 32;
+static const size_t c_headerSize = 64;
 //header flag
 static const uint16_t s_headerFlagSBF = (static_cast<uint16_t>(42) | static_cast<uint16_t>(42 << 8));
 
@@ -65,11 +65,11 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, QString filename, Sav
 
 	ccLog::Print(QString("[SBF] Saving file '%1'...").arg(headerFilename));
 
-	//read the text file as an INI file
-	if (QFileInfo(headerFilename).exists())
+	//write the text file as an INI file
 	{
 		QSettings headerFile(headerFilename, QSettings::IniFormat);
-		
+
+		headerFile.beginGroup("SBF");
 		headerFile.setValue("Points", cloud->size());
 
 		//save the global shift (if any)
@@ -81,6 +81,12 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, QString filename, Sav
 			strGlobalShift << QString::number(globalShift.y, 'f', 6);
 			strGlobalShift << QString::number(globalShift.z, 'f', 6);
 			headerFile.setValue("GlobalShift", strGlobalShift);
+		}
+
+		double globalScale = cloud->getGlobalScale();
+		if (globalScale != 1.0)
+		{
+			headerFile.setValue("GlobalScale", globalScale);
 		}
 
 		//save the scalar field names (if any)
@@ -112,9 +118,12 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, QString filename, Sav
 				headerFile.setValue(key, tokens);
 			}
 		}
+
+		headerFile.endGroup();
+		headerFile.sync();
 	}
 
-	//we can now load the data file
+	//we can now save the data file
 	QFile dataFile(dataFilename);
 	if (!dataFile.open(QFile::WriteOnly))
 	{
@@ -123,9 +132,16 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, QString filename, Sav
 	}
 
 	QDataStream dataStream(&dataFile);
-	size_t writtenBytes = 0;
+
+	//internal coordinate shift (to avoid losing precision)
+	//warning: may be different from the cloud 'Global Shift'
+	CCVector3d coordinatesShift = cloud->toGlobal3d(*cloud->getPoint(0));
+
 	//header
 	{
+		size_t writtenBytes = 0;
+		dataStream.setFloatingPointPrecision(QDataStream::DoublePrecision); //we write real 'double' values in the header
+
 		//2 bytes = header flag
 		{
 			dataStream << s_headerFlagSBF;
@@ -146,11 +162,19 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, QString filename, Sav
 		}
 		writtenBytes += 2;
 
+		//8 bytes = internal coordinates shift
+		{
+			dataStream << coordinatesShift.x;
+			dataStream << coordinatesShift.y;
+			dataStream << coordinatesShift.z;
+		}
+		writtenBytes += 24;
+
 		//remaining bytes (empty for now)
 		for (; writtenBytes < c_headerSize; ++writtenBytes)
 		{
 			uint8_t byte = 0;
-			dataStream >> byte;
+			dataStream << byte;
 		}
 	}
 
@@ -170,10 +194,12 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, QString filename, Sav
 	CCLib::NormalizedProgress nProgress(pDlg.data(), pointCount);
 
 	//we can eventually save the data
+	dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision); //we wave only 'float' values in the data
 	for (unsigned i = 0; i < pointCount; ++i)
 	{
 		//save the point coordinates
-		CCVector3d coords = cloud->toGlobal3d(*cloud->getPoint(i));
+		CCVector3d Pd = cloud->toGlobal3d(*cloud->getPoint(i));
+		CCVector3f coords = CCVector3f::fromArray((Pd - coordinatesShift).u);
 		dataStream << coords.x;
 		dataStream << coords.y;
 		dataStream << coords.z;
@@ -183,7 +209,7 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, QString filename, Sav
 		{
 			ScalarType val = cloud->getScalarField(j)->getValue(i);
 			float fVal = static_cast<float>(val);
-			dataStream >> fVal;
+			dataStream << fVal;
 		}
 
 		if (!nProgress.oneStep())
@@ -207,6 +233,7 @@ struct GlobalDescriptor
 {
 	size_t pointCount;
 	CCVector3d globalShift;
+	double globalScale = 1.0;
 	std::vector<SFDescriptor> SFs;
 };
 
@@ -238,14 +265,28 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 	ccLog::Print(QString("[SBF] Loading file '%1'...").arg(headerFilename));
 	GlobalDescriptor descriptor;
 
-	//save the text file as an INI file
+	//read the text file as an INI file
+	if (QFileInfo(headerFilename).exists())
 	{
 		QSettings headerFile(headerFilename, QSettings::IniFormat);
-		QVariant varPointCount = headerFile.value("Points");
-		if (varPointCount.isValid())
+
+		if (!headerFile.childGroups().contains("SBF"))
+		{
+			ccLog::Error("[SBF] Missing SBF section");
+			return CC_FERR_MALFORMED_FILE;
+		}
+		headerFile.beginGroup("SBF");
+
+		if (headerFile.contains("Points"))
 		{
 			//only indicative (we don't use it!)
-			descriptor.pointCount = varPointCount.toLongLong();
+			bool ok = false;
+			descriptor.pointCount = headerFile.value("Points").toLongLong(&ok);
+			if (!ok)
+			{
+				ccLog::Error("[SBF] Invalid number of points");
+				return CC_FERR_MALFORMED_FILE;
+			}
 		}
 
 		//read the global shift (if any)
@@ -268,6 +309,18 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 					ccLog::Error("[SBF] Invalid global shift");
 					return CC_FERR_MALFORMED_FILE;
 				}
+			}
+		}
+
+		//read the global scale (if any)
+		if (headerFile.contains("GlobalScale"))
+		{
+			bool ok = false;
+			descriptor.globalScale = headerFile.value("GlobalScale").toDouble(&ok);
+			if (!ok || descriptor.globalScale <= 0.0)
+			{
+				ccLog::Error("[SBF] Invalid global scale value");
+				return CC_FERR_MALFORMED_FILE;
 			}
 		}
 
@@ -300,7 +353,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 				if (tokens.size() > 0)
 				{
 					descriptor.SFs[i].name = tokens[0];
-					if (tokens.size() > 0)
+					if (tokens.size() > 1)
 					{
 						descriptor.SFs[i].precision = tokens[1].toDouble(&ok);
 						if (!ok)
@@ -311,7 +364,13 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 					}
 				}
 			}
+
+			headerFile.endGroup();
 		}
+	}
+	else
+	{
+		ccLog::Warning("[SBF] Missing header file");
 	}
 
 	//we can now load the data file
@@ -322,11 +381,17 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 		return CC_FERR_READING;
 	}
 
+	//internal coordinate shift (to avoid losing precision)
+	//warning: may be different from the cloud 'Global Shift'
+	CCVector3d coordinatesShift(0, 0, 0);
+
 	QDataStream dataStream(&dataFile);
-	size_t readBytes = 0;
+
 	//header
-	static const size_t c_headerSize = 32;
 	{
+		size_t readBytes = 0;
+		dataStream.setFloatingPointPrecision(QDataStream::DoublePrecision); //we expect real 'double' values in the header
+
 		//2 bytes = header flag
 		{
 			uint16_t headerFlag = 0;
@@ -374,6 +439,14 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 		}
 		readBytes += 2;
 
+		//8 bytes = internal coordinates shift
+		{
+			dataStream >> coordinatesShift.x;
+			dataStream >> coordinatesShift.y;
+			dataStream >> coordinatesShift.z;
+		}
+		readBytes += 24;
+
 		//remaining bytes (empty for now)
 		for (; readBytes < c_headerSize; ++readBytes)
 		{
@@ -383,7 +456,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 	}
 
 	//check data consistency
-	size_t sizePerPoint = 3 * 8 + descriptor.SFs.size() * 4; //8 bytes (double) for coordinates + 4 bytes (float) for scalars
+	size_t sizePerPoint = (3 + descriptor.SFs.size()) * 4; //3 * 4 bytes (float) for coordinates + 4 bytes (float) for scalars
 	size_t totalSize = sizePerPoint * descriptor.pointCount + c_headerSize;
 	if (totalSize != dataFile.size())
 	{
@@ -432,18 +505,51 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 		}
 	}
 
-	//set global shift
-	cloud->setGlobalShift(descriptor.globalShift);
-
 	//we can eventually load the data
+	dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision); //we expect only 'float' values in the data
 	for (size_t i = 0; i < descriptor.pointCount; ++i)
 	{
 		//read the point coordinates
-		CCVector3d coords;
-		dataStream >> coords.x;
-		dataStream >> coords.y;
-		dataStream >> coords.z;
-		CCVector3 P = CCVector3::fromArray((coords - descriptor.globalShift).u);
+		CCVector3f Pf;
+		dataStream >> Pf.x;
+		dataStream >> Pf.y;
+		dataStream >> Pf.z;
+
+		CCVector3d Pd = coordinatesShift + CCVector3d::fromArray(Pf.u);
+
+		if (i == 0)
+		{
+			//backup input global parameters
+			ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
+			bool useGlobalShift = false;
+			CCVector3d Pshift(0, 0, 0);
+			//set the LAS shift as default shift (if none was provided)
+			if ((descriptor.globalShift.norm2() != 0 || descriptor.globalScale != 1.0) && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
+			{
+				if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
+				{
+					useGlobalShift = true;
+					Pshift = descriptor.globalShift;
+					if (csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
+					{
+						parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
+					}
+				}
+			}
+
+			if (HandleGlobalShift(Pd, Pshift, parameters, true))
+			{
+				//set global shift
+				descriptor.globalShift = Pshift;
+				cloud->setGlobalShift(descriptor.globalShift);
+				ccLog::Warning("[SBF] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", descriptor.globalShift.x, descriptor.globalShift.y, descriptor.globalShift.z);
+			}
+
+			//restore previous parameters
+			parameters.shiftHandlingMode = csModeBackup;
+		}
+
+		CCVector3 P = CCVector3::fromArray((Pd + descriptor.globalShift).u);
 		cloud->addPoint(P);
 
 		//and now for the scalar values
@@ -479,6 +585,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 			descriptor.SFs[i].sf->computeMinAndMax();
 		}
 		cloud->setCurrentDisplayedScalarField(0);
+		cloud->showSF(true);
 	}
 
 	container.addChild(cloud.take());

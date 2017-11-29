@@ -32,7 +32,7 @@
 //header: 32 first bytes
 static const size_t c_headerSize = 64;
 //header flag
-static const uint16_t s_headerFlagSBF = (static_cast<uint16_t>(42) | static_cast<uint16_t>(42 << 8));
+static const quint16 s_headerFlagSBF = (static_cast<quint16>(42) | static_cast<quint16>(42 << 8));
 
 bool SimpleBinFilter::canLoadExtension(QString upperCaseExt) const
 {
@@ -150,14 +150,14 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, QString filename, Sav
 
 		//8 bytes = point count
 		{
-			uint64_t pointCount = cloud->size();
+			quint64 pointCount = cloud->size();
 			dataStream << pointCount;
 		}
 		writtenBytes += 8;
 
 		//2 bytes = sf count
 		{
-			uint16_t sfCount = static_cast<uint16_t>(cloud->getNumberOfScalarFields());
+			quint16 sfCount = static_cast<uint16_t>(cloud->getNumberOfScalarFields());
 			dataStream << sfCount;
 		}
 		writtenBytes += 2;
@@ -173,7 +173,7 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, QString filename, Sav
 		//remaining bytes (empty for now)
 		for (; writtenBytes < c_headerSize; ++writtenBytes)
 		{
-			uint8_t byte = 0;
+			quint8 byte = 0;
 			dataStream << byte;
 		}
 	}
@@ -394,7 +394,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 
 		//2 bytes = header flag
 		{
-			uint16_t headerFlag = 0;
+			quint16 headerFlag = 0;
 			dataStream >> headerFlag;
 			if (headerFlag != s_headerFlagSBF)
 			{
@@ -405,7 +405,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 
 		//8 bytes = point count
 		{
-			uint64_t pointCount = 0;
+			quint64 pointCount = 0;
 			dataStream >> pointCount;
 			//check consistency
 			if (descriptor.pointCount != pointCount)
@@ -419,7 +419,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 
 		//2 bytes = sf count
 		{
-			uint16_t sfCount = 0;
+			quint16 sfCount = 0;
 			dataStream >> sfCount;
 			//check consistency
 			if (sfCount != descriptor.SFs.size())
@@ -450,7 +450,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 		//remaining bytes (empty for now)
 		for (; readBytes < c_headerSize; ++readBytes)
 		{
-			uint8_t byte = 0;
+			quint8 byte = 0;
 			dataStream >> byte;
 		}
 	}

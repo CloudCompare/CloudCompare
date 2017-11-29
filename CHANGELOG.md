@@ -11,6 +11,11 @@ v2.10.alpha - XX/XX/201X
 		- labels can be created from textual or numerical columns
 		- one "2D label" entity is created per point (don't try to load too many of them ;)
 		- labels are displayed in 3D by default (i.e. next to each point), but they can also be displayed in 2D (see the dedicated check-box)
+
+	* FBX units:
+		- default FBX units are 'cm'
+		- if a FBX file with other units is imported, CC will now store this information as meta-data and will set it correctly
+			if the corresponding meshes are exported as FBX again
 	
 - Bug fix:
 

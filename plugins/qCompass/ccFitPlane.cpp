@@ -33,9 +33,8 @@ ccFitPlane::ccFitPlane(ccPlane* p)
 	if (N.z < 0.0)
 		N *= -1.0;
 	//calculate strike/dip/dip direction
-	float strike, dip, dipdir;
+	float dip, dipdir;
 	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
-	ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip);
 	QString dipAndDipDirStr = QString("%1/%2").arg((int)dip, 2, 10, QChar('0')).arg((int)dipdir, 3, 10, QChar('0'));
 
 	setName(dipAndDipDirStr);
@@ -75,7 +74,7 @@ void ccFitPlane::updateAttributes(float rms, float search_r)
 	//calculate strike/dip/dip direction
 	float strike, dip, dipdir;
 	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
-	ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip);
+	ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip); //n.b. this returns result using the british RHR?!?)
 
 	//calculate centroid
 	CCVector3 C = getCenter();

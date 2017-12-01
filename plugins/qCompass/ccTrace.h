@@ -103,6 +103,19 @@ public:
 	int insertWaypoint(int pointId);
 
 	/*
+	Returns the normal of the point at the specified index in this trace. If no normal exists, it returns the vector 0,0,0.
+	*/
+	CCVector3f getPointNormal(int pointIdx)
+	{
+		if (!m_cloud->hasNormals())
+		{
+			return CCVector3f(0, 0, 0);
+		}
+
+		return m_cloud->getPointNormal(getPointGlobalIndex(pointIdx));
+	}
+
+	/*
 	Undo last action
 	*/
 	void undoLast()

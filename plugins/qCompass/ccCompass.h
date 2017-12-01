@@ -111,6 +111,7 @@ protected slots:
 	void recalculateSelectedTraces(); //recalculate any selected traces (for updating with a different cost function)
 	void mergeGeoObjects(); //merges the selected GeoObjects
 	void fitPlaneToGeoObject(); //calculates best-fit plane for the upper and lower surfaces of the selected GeoObject
+	void recalculateFitPlanes(); //recalcs fit planes for traces and GeoObjects
 	void exportToSVG(); //exports current view to SVG
 
 	//map mode dialog

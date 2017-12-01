@@ -71,6 +71,7 @@ public:
 	QAction *m_equivalent; //activates topology tool - coeval/equivalent relations
 	//--
 	QAction *m_fitPlaneToGeoObject; //fits a plane to the upper/lower surfaces of all points in a GeoObject
+	QAction *m_recalculateFitPlanes;
 	QAction *m_mergeSelected; //merges the selected geoObjects
 	//--
 	QAction *m_noteTool; //activates note tool

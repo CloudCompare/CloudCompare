@@ -121,6 +121,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_follows = new QAction("Assign \"Follows\" Relationship", this); m_follows->setEnabled(false);
 	m_equivalent = new QAction("Assign \"Equivalent\" Relationship", this); m_equivalent->setEnabled(false);
 	m_fitPlaneToGeoObject = new QAction("Fit plane to GeoObject", this);
+	m_recalculateFitPlanes = new QAction("Recalculate Fit-Planes", this);
 	m_mergeSelected = new QAction("Merge selected GeoObjects", this);
 
 	m_pinchTool->setToolTip("Add Pinch Node objects to record features such as dyke tips or sedimentary units that pinch-out.");
@@ -132,6 +133,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_follows->setToolTip("Select two GeoObjects to assign a \"follows\" (i.e. conformable) relationship.");
 	m_equivalent->setToolTip("Select two GeoObjects to assign an \"equivalent\" (i.e. coeval) relationship.");
 	m_fitPlaneToGeoObject->setToolTip("Calculates best fit planes for the entire upper/lower surfaces of the GeoObject.");
+	m_recalculateFitPlanes->setToolTip("Recalculates all fit-planes deriving from traces and GeoObjects (but not those calculated with the Plane Tool).");
 	m_mergeSelected->setToolTip("Merge all selected GeoObjects into a single GeoObject.");
 
 	m_pairpicking_menu->addAction(m_pinchTool);
@@ -144,6 +146,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_pairpicking_menu->addAction(m_equivalent);
 	m_pairpicking_menu->addSeparator();
 	m_pairpicking_menu->addAction(m_fitPlaneToGeoObject);
+	m_pairpicking_menu->addAction(m_recalculateFitPlanes);
 	m_pairpicking_menu->addAction(m_mergeSelected);
 	m_pairpicking_menu->addSeparator();
 	m_pairpicking_menu->addAction(m_toSVG);

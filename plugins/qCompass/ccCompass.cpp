@@ -239,7 +239,7 @@ void ccCompass::doAction()
 
 		ccCompassDlg::connect(m_dlg->m_mergeSelected, SIGNAL(triggered()), this, SLOT(mergeGeoObjects()));
 		ccCompassDlg::connect(m_dlg->m_fitPlaneToGeoObject, SIGNAL(triggered()), this, SLOT(fitPlaneToGeoObject()));
-
+		ccCompassDlg::connect(m_dlg->m_recalculateFitPlanes, SIGNAL(triggered()), this, SLOT(recalculateFitPlanes()));
 		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNote()));
 
 		ccCompassDlg::connect(m_dlg->m_toSVG, SIGNAL(triggered()), this, SLOT(exportToSVG()));
@@ -1103,6 +1103,131 @@ void ccCompass::fitPlaneToGeoObject()
 
 }
 
+//recalculates all fit planes in the DB Tree, except those generated using the Plane Tool
+void ccCompass::recalculateFitPlanes()
+{
+	//get all plane objects
+	ccHObject::Container planes;
+	m_app->dbRootObject()->filterChildren(planes, true, CC_TYPES::PLANE, true);
+
+	std::vector<ccHObject*> garbage; //planes that need to be deleted
+	for (ccHObject::Container::iterator it = planes.begin(); it != planes.end(); it++)
+	{
+		if (!ccFitPlane::isFitPlane((*it)))
+			continue; //only deal with FitPlane objects
+
+		//is parent of the plane a trace object?
+		ccHObject* parent = (*it)->getParent();
+
+		if (ccTrace::isTrace(parent)) //add to recalculate list
+		{
+			//recalculate the fit plane
+			ccTrace* t = static_cast<ccTrace*>(parent);
+			ccFitPlane* p = t->fitPlane();
+			if (p)
+			{
+				t->addChild(p); //add the new fit-plane
+				m_app->addToDB(p, false, false, false, false);
+			}
+
+			//add the old plane to the garbage list (to be deleted later)
+			garbage.push_back((*it));
+
+			continue; //next
+		}
+
+		//is the parent a upper/lower boundary? (i.e. is this plane created using FitPlaneToGeoObject)
+		/*if (ccGeoObject::isGeoObjectLower(parent) || ccGeoObject::isGeoObjectUpper(parent))
+		{
+
+			//does the fitPlane have any polyline children? (If so it wasn't created by FitPlaneToGeoObject)
+			ccHObject::Container c;
+			(*it)->filterChildren(c, true, CC_TYPES::POLY_LINE, false);
+
+			//is the "radius" set to -1 (if not, it wasn't created by FitPlaneToGeoObject)
+			int radius = (*it)->getMetaData("Radius").toInt();
+
+			if (c.size() == 0 && radius == -1)
+			{
+				
+				//gather points and calculate new fit-plane
+				ccPointCloud* points = new ccPointCloud(); //create point cloud for storing points
+				double rms; //float for storing rms values
+				for (unsigned i = 0; i < parent->getChildrenNumber(); i++) //n.b. "parent" will be either the "upper" or "lower" section
+				{
+					if (ccTrace::isTrace(parent->getChild(i)))
+					{
+						ccTrace* t = dynamic_cast<ccTrace*> (parent->getChild(i));
+						if (t) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
+						{
+							points->reserve(points->size() + t->size()); //make space
+							for (unsigned p = 0; p < t->size(); p++)
+							{
+								points->addPoint(*t->getPoint(p)); //add point to 
+							}
+						}
+					}
+				}
+
+				//calculate and store fitplane
+				if (points->size() > 0)
+				{
+					ccFitPlane* p = ccFitPlane::Fit(points, &rms);
+					if (p)
+					{
+						QVariantMap map;
+						map.insert("RMS", rms);
+						p->setMetaData(map, true);
+						parent->addChild(p);
+						m_app->addToDB(p, false, false, false, false);
+					}
+				}
+
+				//add the old plane to the garbage list (to be deleted later)
+				garbage.push_back((*it));
+				continue;
+			}
+		}*/
+
+		//otherwise - does the plane have a child that is a trace object (i.e. it was created in Compass mode)
+		for (int c = 0; c < (*it)->getChildrenNumber(); c++)
+		{
+			ccHObject* child = (*it)->getChild(c);
+			if (ccTrace::isTrace(child)) //add to recalculate list
+			{
+				//recalculate the fit plane
+				ccTrace* t = static_cast<ccTrace*>(child);
+				ccFitPlane* p = t->fitPlane();
+				
+				if (p)
+				{
+					//... do some jiggery pokery
+					parent->addChild(p); //add fit-plane to the original fit-plane's parent (as we are replacing it)
+					m_app->addToDB(p, false, false, false, false);
+
+					//remove the trace from the original fit-plane
+					(*it)->detachChild(t);
+
+					//add it to the new one
+					p->addChild(t);
+
+					//add the old plane to the garbage list (to be deleted later)
+					garbage.push_back((*it));
+
+					break;
+				}
+			}
+		}
+	}
+
+	//delete all the objects in the garbage
+	for (int i = 0; i < garbage.size(); i++)
+	{
+		garbage[i]->getParent()->removeChild(garbage[i]);
+	}
+}
+
+
 //recompute entirely each selected trace (useful if the cost function has changed)
 void ccCompass::recalculateSelectedTraces()
 {
@@ -1839,15 +1964,24 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 	//if object is a trace, write the trace points
 	if (ccTrace::isTrace(object))
 	{
+		//get trace & cloud objects
+		ccTrace* t = dynamic_cast<ccTrace*>(object);
+
 		//get point & waypoint data from trace and store in string buffers
 		//write trace points to buffers
 		QString x, y, z, nx, ny, nz, cost; //trace points
 		QString wIDs; //waypoint ids
 		QString comma = ",";
 		ccTrace* trace = static_cast<ccTrace*>(object);
+		
 		//loop through points
 		CCVector3 p1, p2; //position
-		CCVector3 n; //normal vector (if defined)
+		CCVector3 n1, n2; //normal vector (if defined)
+		
+		//becomes true if any valid normals are recieved
+		bool hasNormals = false;
+
+
 		if (trace->size() >= 2)
 		{
 			//loop through segments
@@ -1866,7 +2000,16 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 				z += QString::asprintf("%f,", p1.z);
 				cost += QString::asprintf("%d,", c);
 
-				//are point normals availiable? [TODO]
+				//write point normals
+				n1 = trace->getPointNormal(i);
+				n2 = trace->getPointNormal(i);
+				nx += QString::asprintf("%f,", n1.x);
+				ny += QString::asprintf("%f,", n1.y);
+				nz += QString::asprintf("%f,", n1.z);
+				if (!hasNormals && !(n1.x == 0 && n1.y == 0 && n1.z == 0 ))
+				{
+					hasNormals = true; //this was a non-null normal estimate - we will write normals now
+				}
 			}
 
 			//loop through waypoints
@@ -1880,13 +2023,38 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 		x += QString::asprintf("%f", p2.x);
 		y += QString::asprintf("%f", p2.y);
 		z += QString::asprintf("%f", p2.z);
+		if (hasNormals) //normal
+		{
+			nx += QString::asprintf("%f", n2.x);
+			ny += QString::asprintf("%f", n2.y);
+			nz += QString::asprintf("%f", n2.z);
+		}
 		cost += "0";
 
 		//write points
 		out->writeStartElement("POINTS");
+		out->writeAttribute("count", QString::asprintf("%d", trace->size()));
+
+		if (hasNormals)
+		{
+			out->writeAttribute("normals", "True");
+		}
+		else
+		{
+			out->writeAttribute("normals", "False");
+		}
+
 		out->writeTextElement("x", x);
 		out->writeTextElement("y", y);
 		out->writeTextElement("z", z);
+
+		if (hasNormals)
+		{
+			out->writeTextElement("nx", nx);
+			out->writeTextElement("ny", ny);
+			out->writeTextElement("nz", nz);
+		}
+
 		out->writeTextElement("cost", cost);
 		out->writeEndElement();
 

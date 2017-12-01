@@ -278,7 +278,7 @@ void ccPointListPickingDlg::exportToNewPolyline()
 		polyline->addChild(vertices);
 		polyline->setDisplay_recursive(m_associatedCloud->getDisplay());
 
-		MainWindow::TheInstance()->db()->addElement(polyline, true);
+		MainWindow::TheInstance()->addToDB(polyline);
 	}
 	else
 	{

@@ -81,8 +81,10 @@ public:
 
 	//! Merges another mesh into this one
 	/** \param mesh mesh to be merged in this one
+		\param createSubMesh whether to create a submesh entity corresponding to the added mesh
+		\return success
 	**/
-	bool merge(const ccMesh* mesh);
+	bool merge(const ccMesh* mesh, bool createSubMesh);
 
 	//inherited methods (ccHObject)
 	virtual unsigned getUniqueIDForDisplay() const override;

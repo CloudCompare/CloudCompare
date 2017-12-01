@@ -63,7 +63,9 @@ static OculusHMD s_oculus;
 #endif
 
 const float ccGLWindow::MIN_POINT_SIZE_F = 1.0f;
-const float ccGLWindow::MAX_POINT_SIZE_F = 10.0f;
+const float ccGLWindow::MAX_POINT_SIZE_F = 16.0f;
+const float ccGLWindow::MIN_LINE_WIDTH_F = 1.0f;
+const float ccGLWindow::MAX_LINE_WIDTH_F = 16.0f;
 
 //Min and max zoom ratio (relative)
 static const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
@@ -310,6 +312,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_hotZone(nullptr)
 	, m_showCursorCoordinates(false)
 	, m_autoPickPivotAtCenter(true)
+	, m_ignoreMouseReleaseEvent(false)
 {
 	//start internal timer
 	m_timer.start();
@@ -409,12 +412,14 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 			displayNewMessage("Warning: sun light is OFF", ccGLWindow::LOWER_LEFT_MESSAGE, false, 2, SUN_LIGHT_STATE_MESSAGE);
 	}
 
+	m_deferredPickingTimer.setSingleShot(true);
+	m_deferredPickingTimer.setInterval(100);
+
 	//signal/slot connections
 	connect(this, &ccGLWindow::itemPickedFast, this, &ccGLWindow::onItemPickedFast, Qt::DirectConnection);
 	connect(&m_scheduleTimer, &QTimer::timeout, this, &ccGLWindow::checkScheduledRedraw);
-	connect(&m_autoRefreshTimer, &QTimer::timeout, this, [=] () {
-		update();
-	});
+	connect(&m_autoRefreshTimer, &QTimer::timeout, this, [=] () { update();	});
+	connect(&m_deferredPickingTimer, SIGNAL(timeout()), SLOT(doPicking()));
 
 #ifndef CC_GL_WINDOW_USE_QWINDOW
 	setAcceptDrops(true);
@@ -908,6 +913,9 @@ bool ccGLWindow::initialize()
 	glFunc->glDisable(GL_BLEND);
 	glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	//nicest rendering for points by default (when GL_POINT_SMOOTH is enabled)
+	glFunc->glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+
 	//no global ambient
 	glFunc->glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ccColor::night.rgba);
 
@@ -1322,9 +1330,13 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 			//separator
 			{
 				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
+				glFunc->glPushAttrib(GL_POINT_BIT);
+				glFunc->glPointSize(m_viewportParams.defaultPointSize);
+				glFunc->glEnable(GL_POINT_SMOOTH);
 				glFunc->glBegin(GL_POINTS);
 				glFunc->glVertex2i(-halfW + xStart + m_hotZone->margin / 2, halfH - (yStart + m_hotZone->iconSize / 2));
 				glFunc->glEnd();
+				glFunc->glPopAttrib(); //GL_POINT_BIT
 				xStart += m_hotZone->margin;
 			}
 
@@ -1365,7 +1377,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 				glFunc->glBegin(GL_POINTS);
 				glFunc->glVertex2i(-halfW + xStart + m_hotZone->margin / 2, halfH - (yStart + m_hotZone->iconSize / 2));
 				glFunc->glEnd();
-				glFunc->glPopAttrib();
+				glFunc->glPopAttrib(); //GL_POINT_BIT
 				xStart += m_hotZone->margin;
 			}
 
@@ -1381,7 +1393,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 		}
 	}
 
-	glFunc->glPopAttrib();
+	glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
 }
 
 void ccGLWindow::toBeRefreshed()
@@ -1968,7 +1980,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 			y += 10;
 		}
 
-		glFunc->glPopAttrib();
+		glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
 	}
 
 	//restore viewport if necessary
@@ -2059,7 +2071,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				//warning: we must set the original FBO texture as default
 				glFunc->glBindTexture(GL_TEXTURE_2D, this->defaultQtFBO());
 
-				glFunc->glPopAttrib();
+				glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
 
 				//we don't need the depth info anymore!
 				//glFunc->glClear(GL_DEPTH_BUFFER_BIT);
@@ -2458,7 +2470,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				glFunc->glVertex2f(w, h - borderHeight);
 				glFunc->glEnd();
 
-				glFunc->glPopAttrib();
+				glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
 
 				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
 				renderText(	10,
@@ -2556,7 +2568,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				}
 				glFunc->glEnd();
 
-				glFunc->glPopAttrib();
+				glFunc->glPopAttrib(); //GL_POINT_BIT | GL_DEPTH_BUFFER_BIT
 
 				yStart += lodIconSize + margin;
 			}
@@ -2939,6 +2951,10 @@ void ccGLWindow::drawCross()
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 	
+	//force line width
+	glFunc->glPushAttrib(GL_LINE_BIT);
+	glFunc->glLineWidth(1.0f);
+
 	//cross OpenGL drawing
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey.rgba);
 	glFunc->glBegin(GL_LINES);
@@ -2947,6 +2963,8 @@ void ccGLWindow::drawCross()
 	glFunc->glVertex3f(-CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
 	glFunc->glVertex3f(CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
 	glFunc->glEnd();
+
+	glFunc->glPopAttrib(); //GL_LINE_BIT
 }
 
 inline float RoundScale(float equivalentWidth)
@@ -2999,6 +3017,10 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
+	//force line width
+	glFunc->glPushAttrib(GL_LINE_BIT);
+	glFunc->glLineWidth(1.0f);
+
 	//scale OpenGL drawing
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
 	glFunc->glBegin(GL_LINES);
@@ -3009,6 +3031,8 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	glFunc->glVertex3f(w, -h + tick, 0.0f);
 	glFunc->glVertex3f(w, -h - tick, 0.0f);
 	glFunc->glEnd();
+
+	glFunc->glPopAttrib(); //GL_LINE_BIT
 
 	QString text = QString::number(equivalentWidth);
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
@@ -3656,6 +3680,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 {
 	m_mouseMoved = false;
 	m_mouseButtonPressed = true;
+	m_ignoreMouseReleaseEvent = false;
 	m_lastMousePos = event->pos();
 
 	if ((event->buttons() & Qt::RightButton)
@@ -3702,6 +3727,9 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 void ccGLWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
+	m_deferredPickingTimer.stop(); //prevent the picking process from starting
+	m_ignoreMouseReleaseEvent = true;
+
 	const int x = event->x();
 	const int y = event->y();
 
@@ -4073,6 +4101,12 @@ bool ccGLWindow::processClickableItems(int x, int y)
 
 void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 {
+	if (m_ignoreMouseReleaseEvent)
+	{
+		m_ignoreMouseReleaseEvent = false;
+		return;
+	}
+	
 	bool mouseHasMoved = m_mouseMoved;
 	//setLODEnabled(false, false); //DGM: why?
 
@@ -4156,69 +4190,9 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 			//picking?
 			if (m_timer.elapsed() < m_lastClickTime_ticks + CC_MAX_PICKING_CLICK_DURATION_MS) //in msec
 			{
-				int x = event->x();
-				int y = event->y();
-
-				//first test if the user has clicked on a particular item on the screen
-				if (processClickableItems(x, y))
-				{
-					event->accept();
-				}
-				else if ((m_pickingMode != NO_PICKING)
-					|| (m_interactionFlags & INTERACT_2D_ITEMS))
-				{
-					if (m_interactionFlags & INTERACT_2D_ITEMS)
-					{
-						//label selection
-						updateActiveItemsList(event->x(), event->y(), false);
-						if (!m_activeItems.empty())
-						{
-							if (m_activeItems.size() == 1)
-							{
-								ccInteractor* pickedObj = m_activeItems.front();
-								cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
-								if (label && !label->isSelected())
-								{
-									emit entitySelectionChanged(label);
-									QApplication::processEvents();
-								}
-							}
-
-							//interaction with item(s) such as labels, etc.
-							//DGM TODO: to activate only if some items take left clicks into account!
-							//for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
-							//if ((*it)->acceptClick(x,y,Qt::LeftButton))
-							//{
-							//	event->accept();
-							//	redraw();
-							//	return;
-							//}
-
-							event->accept();
-						}
-					}
-					else
-					{
-						assert(m_activeItems.empty());
-					}
-
-					if (m_activeItems.empty() && m_pickingMode != NO_PICKING)
-					{
-						//perform standard picking
-						PICKING_MODE pickingMode = m_pickingMode;
-
-						//shift+click = point/triangle picking
-						if (pickingMode == ENTITY_PICKING && (QApplication::keyboardModifiers() & Qt::ShiftModifier))
-						{
-							pickingMode = LABEL_PICKING;
-						}
-
-						PickingParameters params(pickingMode, event->x(), event->y(), m_pickRadius, m_pickRadius);
-						startPicking(params);
-
-						event->accept();
-					}
-				}
+				m_lastMousePos = event->pos(); //just in case (it should be already at this position)
+				m_deferredPickingTimer.start();
+				//doPicking();
 			}
 		}
 
@@ -4226,6 +4200,76 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	}
 
 	refresh(false);
+}
+
+void ccGLWindow::doPicking()
+{
+	int x = m_lastMousePos.x();
+	int y = m_lastMousePos.y();
+
+	if (x < 0 || y < 0)
+	{
+		assert(false);
+		return;
+	}
+
+	//first test if the user has clicked on a particular item on the screen
+	if (processClickableItems(x, y))
+	{
+		return;
+	}
+	
+	if (	(m_pickingMode != NO_PICKING)
+		||	(m_interactionFlags & INTERACT_2D_ITEMS))
+	{
+		if (m_interactionFlags & INTERACT_2D_ITEMS)
+		{
+			//label selection
+			updateActiveItemsList(x, y, false);
+			if (!m_activeItems.empty())
+			{
+				if (m_activeItems.size() == 1)
+				{
+					ccInteractor* pickedObj = m_activeItems.front();
+					cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
+					if (label && !label->isSelected())
+					{
+						emit entitySelectionChanged(label);
+						QApplication::processEvents();
+					}
+				}
+
+				//interaction with item(s) such as labels, etc.
+				//DGM TODO: to activate only if some items take left clicks into account!
+				//for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
+				//if ((*it)->acceptClick(x,y,Qt::LeftButton))
+				//{
+				//	event->accept();
+				//	redraw();
+				//	return;
+				//}
+			}
+		}
+		else
+		{
+			assert(m_activeItems.empty());
+		}
+
+		if (m_activeItems.empty() && m_pickingMode != NO_PICKING)
+		{
+			//perform standard picking
+			PICKING_MODE pickingMode = m_pickingMode;
+
+			//shift+click = point/triangle picking
+			if (pickingMode == ENTITY_PICKING && (QApplication::keyboardModifiers() & Qt::ShiftModifier))
+			{
+				pickingMode = LABEL_PICKING;
+			}
+
+			PickingParameters params(pickingMode, x, y, m_pickRadius, m_pickRadius);
+			startPicking(params);
+		}
+	}
 }
 
 void ccGLWindow::wheelEvent(QWheelEvent* event)
@@ -4958,9 +5002,11 @@ void ccGLWindow::setPointSize(float size, bool silent/*=false*/)
 
 void ccGLWindow::setLineWidth(float width)
 {
-	if (m_viewportParams.defaultLineWidth != width)
+	float newWidth = std::max(std::min(width, MAX_LINE_WIDTH_F), MIN_LINE_WIDTH_F);
+	
+	if (m_viewportParams.defaultLineWidth != newWidth)
 	{
-		m_viewportParams.defaultLineWidth = width;
+		m_viewportParams.defaultLineWidth = newWidth;
 		deprecate3DLayer();
 	}
 }
@@ -5096,6 +5142,10 @@ void ccGLWindow::drawCustomLight()
 	//ensure that the star size is constant (in pixels)
 	GLfloat d = static_cast<GLfloat>(CC_DISPLAYED_CUSTOM_LIGHT_LENGTH * computeActualPixelSize());
 
+	//force line width
+	glFunc->glPushAttrib(GL_LINE_BIT);
+	glFunc->glLineWidth(1.0f);
+
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(m_customLightPos[0] - d, m_customLightPos[1], m_customLightPos[2]);
 	glFunc->glVertex3f(m_customLightPos[0] + d, m_customLightPos[1], m_customLightPos[2]);
@@ -5104,6 +5154,8 @@ void ccGLWindow::drawCustomLight()
 	glFunc->glVertex3f(m_customLightPos[0], m_customLightPos[1], m_customLightPos[2] - d);
 	glFunc->glVertex3f(m_customLightPos[0], m_customLightPos[1], m_customLightPos[2] + d);
 	glFunc->glEnd();
+
+	glFunc->glPopAttrib(); //GL_LINE_BIT
 }
 
 //draw a unit circle in a given plane (0=YZ, 1 = XZ, 2=XY) 
@@ -5204,7 +5256,7 @@ void ccGLWindow::drawPivot()
 			CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
 			CONTEXT.display = nullptr;
 			sphere.draw(CONTEXT);
-			glFunc->glPopAttrib();
+			glFunc->glPopAttrib(); //GL_LIGHTING_BIT
 		}
 
 		//draw 3 circles
@@ -5237,7 +5289,7 @@ void ccGLWindow::drawPivot()
 		glFunc->glVertex3f(0.0f, 0.0f, 1.0f);
 		glFunc->glEnd();
 
-		glFunc->glPopAttrib();
+		glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT | GL_LINE_BIT
 
 		glFunc->glEndList();
 	}
@@ -5660,7 +5712,13 @@ bool ccGLWindow::renderToFile(	QString filename,
 		return false;
 	}
 
-	bool success = outputImage.save(filename);
+	if (getDisplayParameters().drawRoundedPoints)
+	{
+		//convert the image to plain RGB to avoid issues with points transparency when saving to PNG
+		outputImage = outputImage.convertToFormat(QImage::Format_RGB32);
+	}
+
+	bool success = outputImage.convertToFormat(QImage::Format_RGB32).save(filename);
 	if (success)
 	{
 		ccLog::Print(QString("[Snapshot] File '%1' saved! (%2 x %3 pixels)").arg(filename).arg(outputImage.width()).arg(outputImage.height()));
@@ -6138,7 +6196,8 @@ void ccGLWindow::displayText(	QString text,
 			glFunc->glPopMatrix();
 			glFunc->glMatrixMode(GL_MODELVIEW);
 			glFunc->glPopMatrix();
-			glFunc->glPopAttrib();
+			
+			glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
 		}
 	}
 
@@ -6600,7 +6659,8 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 		glFunc->glPopMatrix();
 		glFunc->glMatrixMode(GL_MODELVIEW);
 		glFunc->glPopMatrix();
-		glFunc->glPopAttrib();
+		
+		glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT
 	}
 }
 

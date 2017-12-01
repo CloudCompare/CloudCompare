@@ -21,7 +21,9 @@
 #include "ccPersistentSettings.h"
 #include "ccCommon.h"
 #include "mainwindow.h"
-#include "ccIsolines.h"
+#ifndef CC_GDAL_SUPPORT
+#include "ccIsolines.h" //old alternative code to generate contour lines (doesn't work very well :( )
+#endif
 
 //qCC_db
 #include <ccFileUtils.h>
@@ -59,7 +61,9 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 {
 	setupUi(this);
 
-#ifndef CC_GDAL_SUPPORT
+#ifdef CC_GDAL_SUPPORT
+	ignoreContourBordersCheckBox->setVisible(false);
+#else
 	generateRasterPushButton->setDisabled(true);
 	generateRasterPushButton->setChecked(false);
 #endif
@@ -867,7 +871,8 @@ void ccRasterizeTool::generateMesh() const
 #include <gdal.h>
 #include <gdal_priv.h>
 #include <cpl_string.h>
-
+#include <gdal_alg.h>
+#include <ogr_api.h>
 //local
 #include "ui_rasterExportOptionsDlg.h"
 
@@ -1046,7 +1051,6 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 		stepY /= scale;
 	}
 
-
 	int totalBands = 0;
 	bool onlyRGBA = true;
 
@@ -1103,7 +1107,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 	GDALAllRegister();
 	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
 
-	const char *pszFormat = "GTiff";
+	const char pszFormat[] = "GTiff";
 	GDALDriver *poDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
 	if (!poDriver)
 	{
@@ -1168,7 +1172,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 		if (!cLine)
 		{
 			ccLog::Error("[GDAL] Not enough memory");
-			GDALClose((GDALDatasetH)poDstDS);
+			GDALClose(poDstDS);
 			return false;
 		}
 
@@ -1224,7 +1228,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 		if (error)
 		{
 			ccLog::Error("[GDAL] An error occurred while writing the color bands!");
-			GDALClose((GDALDatasetH)poDstDS);
+			GDALClose(poDstDS);
 			return false;
 		}
 	}
@@ -1233,7 +1237,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 	if (!scanline)
 	{
 		ccLog::Error("[GDAL] Not enough memory");
-		GDALClose((GDALDatasetH)poDstDS);
+		GDALClose(poDstDS);
 		return false;
 	}
 
@@ -1281,7 +1285,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 				ccLog::Error("[GDAL] An error occurred while writing the height band!");
 				if (scanline)
 					CPLFree(scanline);
-				GDALClose((GDALDatasetH)poDstDS);
+				GDALClose(poDstDS);
 				return false;
 			}
 		}
@@ -1306,7 +1310,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 				ccLog::Error("[GDAL] An error occurred while writing the height band!");
 				if (scanline)
 					CPLFree(scanline);
-				GDALClose( (GDALDatasetH) poDstDS );
+				GDALClose(poDstDS);
 				return false;
 			}
 		}
@@ -1362,7 +1366,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 	scanline = 0;
 
 	/* Once we're done, close properly the dataset */
-	GDALClose( (GDALDatasetH) poDstDS );
+	GDALClose(poDstDS);
 
 	ccLog::Print(QString("[Rasterize] Raster '%1' successfully saved").arg(outputFilename));
 	return true;
@@ -1519,6 +1523,143 @@ void ccRasterizeTool::generateHillshade()
 	}
 }
 
+#ifdef CC_GDAL_SUPPORT
+
+struct ContourGenerationParameters
+{
+	std::vector<ccPolyline*> contourLines;
+	const ccRasterGrid* grid = 0;
+	bool projectContourOnAltitudes = false;
+};
+
+static CPLErr ContourWriter(	double dfLevel,
+								int nPoints,
+								double *padfX,
+								double *padfY,
+								void * userData)
+{
+	if (nPoints < 2)
+	{
+		//nothing to do
+		assert(false);
+		return CE_None;
+	}
+
+	ContourGenerationParameters* params = (ContourGenerationParameters*)userData;
+	if (!params || !params->grid)
+	{
+		assert(false);
+		return CE_Failure;
+	}
+
+	ccPointCloud* vertices = nullptr;
+	ccPolyline* poly = nullptr;
+
+	unsigned subIndex = 0;
+	for (int i = 0; i < nPoints; ++i)
+	{
+		CCVector3 P(padfX[i], padfY[i], dfLevel);
+
+		if (params->projectContourOnAltitudes)
+		{
+			int xi = std::min(std::max(static_cast<int>(padfX[i]), 0), static_cast<int>(params->grid->width) - 1);
+			int yi = std::min(std::max(static_cast<int>(padfY[i]), 0), static_cast<int>(params->grid->height) - 1);
+			double h = params->grid->rows[yi][xi].h;
+			if (std::isfinite(h))
+			{
+				P.z = static_cast<PointCoordinateType>(h);
+			}
+			else
+			{
+				//DGM: we stop the current polyline
+				if (poly)
+				{
+					if (poly->size() < 2)
+					{
+						delete poly;
+						params->contourLines.pop_back();
+					}
+					poly = nullptr;
+					vertices = nullptr;
+				}
+				continue;
+			}
+		}
+
+		if (!poly)
+		{
+			//we need to instantiate a new polyline
+			vertices = new ccPointCloud("vertices");
+			vertices->setEnabled(false);
+			poly = new ccPolyline(vertices);
+			poly->addChild(vertices);
+			poly->setMetaData("SubIndex", ++subIndex);
+			poly->setClosed(false);
+
+			//add the 'const altitude' meta-data as well
+			poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(dfLevel));
+
+			if (!vertices->reserve(nPoints - i) || !poly->reserve(nPoints - i))
+			{
+				//not enough memory
+				delete poly;
+				poly = 0;
+				return CE_Failure;
+			}
+
+			try
+			{
+				params->contourLines.push_back(poly);
+			}
+			catch (const std::bad_alloc&)
+			{
+				return CE_Failure;
+			}
+		}
+
+		assert(vertices);
+		poly->addPointIndex(vertices->size());
+		vertices->addPoint(P);
+	}
+
+	return CE_None;
+}
+
+#endif //CC_GDAL_SUPPORT
+
+void ccRasterizeTool::addNewContour(ccPolyline* poly, double height, unsigned subIndex)
+{
+	assert(poly);
+	if (poly->size() > 1)
+	{
+		poly->setName(QString("Contour line value = %1 (#%2)").arg(height).arg(subIndex));
+		poly->setGlobalScale(m_cloud->getGlobalScale());
+		poly->setGlobalShift(m_cloud->getGlobalShift());
+		poly->setWidth(contourWidthSpinBox->value() < 2 ? 0 : contourWidthSpinBox->value()); //size 1 is equivalent to the default size
+		poly->setColor(ccColor::darkGrey);
+		//poly->setClosed(isClosed);
+		if (colorizeContoursCheckBox->isChecked())
+		{
+			ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
+			if (activeLayer)
+			{
+				const ColorCompType* col = activeLayer->getColor(height);
+				if (col)
+				{
+					poly->setColor(ccColor::Rgb(col));
+				}
+			}
+		}
+		poly->showColors(true);
+		//vertices->setEnabled(false);
+
+		if (m_glWindow)
+			m_glWindow->addToOwnDB(poly);
+
+		m_contourLines.push_back(poly);
+	}
+}
+
 void ccRasterizeTool::generateContours()
 {
 	if (!m_grid.isValid() || !m_rasterCloud)
@@ -1527,47 +1668,164 @@ void ccRasterizeTool::generateContours()
 		return;
 	}
 
+	//read options
 	bool projectContourOnAltitudes = false;
-	switch (activeLayerComboBox->currentData().toInt())
 	{
-	case LAYER_HEIGHT:
-	{
-		//nothing to do
-		break;
+		switch (activeLayerComboBox->currentData().toInt())
+		{
+		case LAYER_HEIGHT:
+			//nothing to do
+			break;
+		case LAYER_RGB:
+			ccLog::Error("Can't generate contours from RGB colors");
+			return;
+		default:
+			projectContourOnAltitudes = projectContoursOnAltCheckBox->isChecked();
+			break;
+		}
 	}
-	case LAYER_RGB:
-	{
-		ccLog::Error("Can't generate contours from RGB colors");
-		return;
-	}
-	default:
-	{
-		projectContourOnAltitudes = projectContoursOnAltCheckBox->isChecked();
-		break;
-	}
-	}
+	
+	//current layer
 	ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
 	if (!activeLayer)
 	{
 		ccLog::Error("No valid/active layer!");
 		return;
 	}
+	const double emptyCellsValue = activeLayer->getMin() - 1.0;
 
+	//first contour level
 	double startValue = contourStartDoubleSpinBox->value();
 	if (startValue > activeLayer->getMax())
 	{
 		ccLog::Error("Start value is above the layer maximum value!");
 		return;
 	}
+
+	//gap between levels
 	double step = contourStepDoubleSpinBox->value();
 	assert(step > 0);
 	unsigned levelCount = 1 + static_cast<unsigned>(floor((activeLayer->getMax() - startValue) / step));
 
-	removeContourLines();
-	bool ignoreBorders = ignoreContourBordersCheckBox->isChecked();
+	//minimum number of vertices per contour line
+	int minVertexCount = minVertexCountSpinBox->value();
+	assert(minVertexCount >= 3);
 
+	removeContourLines();
+
+	bool memoryError = false;
+
+#ifdef CC_GDAL_SUPPORT //use GDAL (more robust) - otherwise we will use an old code found on the Internet (with a strange behavior)
+
+	//invoke the GDAL 'Contour Generator'
+	ContourGenerationParameters params;
+	params.grid = &m_grid;
+	params.projectContourOnAltitudes = projectContourOnAltitudes;
+	GDALContourGeneratorH hCG = GDAL_CG_Create(m_grid.width, m_grid.height, 1, emptyCellsValue, step, startValue, ContourWriter, &params);
+	if (!hCG)
+	{
+		ccLog::Error("[GDAL] Failed to create contour generator");
+		return;
+	}
+
+	//feed the scan lines
+	{
+		double* scanline = (double*)CPLMalloc(sizeof(double) * m_grid.width);
+		if (!scanline)
+		{
+			ccLog::Error("[GDAL] Not enough memory");
+			return;
+		}
+
+		bool sparseLayer = (activeLayer->currentSize() != m_grid.height * m_grid.width);
+		unsigned layerIndex = 0;
+
+		for (unsigned j = 0; j < m_grid.height; ++j)
+		{
+			const ccRasterGrid::Row& cellRow = m_grid.rows[j];
+			for (unsigned i = 0; i < m_grid.width; ++i)
+			{
+				if (cellRow[i].nbPoints || !sparseLayer)
+				{
+					ScalarType value = activeLayer->getValue(layerIndex++);
+					scanline[i] = ccScalarField::ValidValue(value) ? value : emptyCellsValue;
+
+				}
+				else
+				{
+					scanline[i] = emptyCellsValue;
+				}
+			}
+
+			CPLErr error = GDAL_CG_FeedLine(hCG, scanline);
+			if (error != CE_None)
+			{
+				ccLog::Error("[GDAL] An error occurred during countour lines generation");
+				break;
+			}
+		}
+
+		if (scanline)
+		{
+			CPLFree(scanline);
+		}
+		scanline = nullptr;
+
+		//have we generated any contour line?
+		if (!params.contourLines.empty())
+		{
+			//vertical dimension
+			const unsigned char Z = getProjectionDimension();
+			assert(Z <= 2);
+			const unsigned char X = Z == 2 ? 0 : Z + 1;
+			const unsigned char Y = X == 2 ? 0 : X + 1;
+
+			ccBBox gridBBox = getCustomBBox();
+			assert(gridBBox.isValid());
+
+			//reproject contour lines from raster C.S. to the cloud C.S.
+			for (ccPolyline*& poly : params.contourLines)
+			{
+				if (static_cast<int>(poly->size()) < minVertexCount)
+				{
+					delete poly;
+					poly = nullptr;
+					continue;
+				}
+
+				double height = std::numeric_limits<double>::quiet_NaN();
+				for (unsigned i = 0; i < poly->size(); ++i)
+				{
+					CCVector3* P2D = const_cast<CCVector3*>(poly->getAssociatedCloud()->getPoint(i));
+					if (i == 0)
+					{
+						height = P2D->z;
+					}
+
+					CCVector3 P;
+					//DGM: we will only do the dimension mapping at export time
+					//(otherwise the contour lines appear in the wrong orientation compared to the grid/raster which
+					// is in the XY plane by default!)
+					/*P.u[X] = */P.x = static_cast<PointCoordinateType>(P2D->x * m_grid.gridStep + gridBBox.minCorner().u[X]);
+					/*P.u[Y] = */P.y = static_cast<PointCoordinateType>(P2D->y * m_grid.gridStep + gridBBox.minCorner().u[Y]);
+					/*P.u[Z] = */P.z = P2D->z;
+
+					*P2D = P;
+				}
+
+				addNewContour(poly, height, poly->getMetaData("SubIndex").toUInt());
+			}
+
+			params.contourLines.clear(); //just in case
+		}
+	}
+
+#else
+
+	bool ignoreBorders = ignoreContourBordersCheckBox->isChecked();
 	unsigned xDim = m_grid.width;
 	unsigned yDim = m_grid.height;
+
 	int margin = 0;
 	if (!ignoreBorders)
 	{
@@ -1591,12 +1849,11 @@ void ccRasterizeTool::generateContours()
 	//fill grid
 	{
 		bool sparseLayer = (activeLayer->currentSize() != m_grid.height * m_grid.width);
-		double emptyCellsValue = activeLayer->getMin()-1.0;
 
 		unsigned layerIndex = 0;
 		for (unsigned j = 0; j < m_grid.height; ++j)
 		{
-			ccRasterGrid::Row& cellRow = m_grid.rows[j];
+			const ccRasterGrid::Row& cellRow = m_grid.rows[j];
 			double* row = &(grid[(j + margin)*xDim + margin]);
 			for (unsigned i = 0; i < m_grid.width; ++i)
 			{
@@ -1612,8 +1869,6 @@ void ccRasterizeTool::generateContours()
 			}
 		}
 	}
-
-	bool memoryError = false;
 
 	try
 	{
@@ -1631,9 +1886,6 @@ void ccRasterizeTool::generateContours()
 		assert(Z <= 2);
 		const unsigned char X = (Z == 2 ? 0 : Z + 1);
 		const unsigned char Y = (X == 2 ? 0 : X + 1);
-
-		int minVertexCount = minVertexCountSpinBox->value();
-		assert(minVertexCount >= 3);
 
 		ccProgressDialog pDlg(true,this);
 		pDlg.setMethodTitle(tr("Contour plot"));
@@ -1714,27 +1966,13 @@ void ccRasterizeTool::generateContours()
 							assert(poly);
 							if (poly->size() > 1)
 							{
-								poly->setName(QString("Contour line value = %1 (#%2)").arg(v).arg(++realCount));
-								poly->setGlobalScale(m_cloud->getGlobalScale());
-								poly->setGlobalShift(m_cloud->getGlobalShift());
-								poly->setWidth(lineWidth);
 								poly->setClosed(isClosed); //if we have less vertices, it means we have 'chopped' the original contour
-								poly->setColor(ccColor::darkGrey);
-								if (colorize)
-								{
-									const ColorCompType* col = activeLayer->getColor(v);
-									if (col)
-										poly->setColor(ccColor::Rgb(col));
-								}
-								poly->showColors(true);
 								vertices->setEnabled(false);
+
 								//add the 'const altitude' meta-data as well
 								poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(v));
 
-								if (m_glWindow)
-									m_glWindow->addToOwnDB(poly);
-
-								m_contourLines.push_back(poly);
+								addNewContour(poly, v, ++realCount);
 							}
 							else
 							{
@@ -1766,6 +2004,7 @@ void ccRasterizeTool::generateContours()
 	{
 		ccLog::Error("Not enough memory!");
 	}
+#endif
 
 	ccLog::Print(QString("[Rasterize] %1 iso-lines generated (%2 levels)").arg(m_contourLines.size()).arg(levelCount));
 

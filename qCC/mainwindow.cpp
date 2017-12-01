@@ -673,6 +673,7 @@ void MainWindow::connectActions()
 	//"Edit > Mesh" menu
 	connect(m_UI->actionComputeMeshAA,				&QAction::triggered, this, &MainWindow::doActionComputeMeshAA);
 	connect(m_UI->actionComputeMeshLS,				&QAction::triggered, this, &MainWindow::doActionComputeMeshLS);
+	connect(m_UI->actionMeshTwoPolylines,			&QAction::triggered, this, &MainWindow::doMeshTwoPolylines);
 	connect(m_UI->actionMeshScanGrids,				&QAction::triggered, this, &MainWindow::doActionMeshScanGrids);
 	connect(m_UI->actionConvertTextureToColor,		&QAction::triggered, this, &MainWindow::doActionConvertTextureToColor);
 	connect(m_UI->actionSamplePoints,				&QAction::triggered, this, &MainWindow::doActionSamplePoints);
@@ -751,7 +752,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionUnroll,						&QAction::triggered, this, &MainWindow::doActionUnroll);
 	connect(m_UI->actionRasterize,					&QAction::triggered, this, &MainWindow::doActionRasterize);
 	connect(m_UI->actionConvertPolylinesToMesh,		&QAction::triggered, this, &MainWindow::doConvertPolylinesToMesh);
-	connect(m_UI->actionMeshTwoPolylines,			&QAction::triggered, this, &MainWindow::doMeshTwoPolylines);
+	//connect(m_UI->actionCreateSurfaceBetweenTwoPolylines, &QAction::triggered, this, &MainWindow::doMeshTwoPolylines); //DGM: already connected to actionMeshTwoPolylines
 	connect(m_UI->actionExportCoordToSF,			&QAction::triggered, this, &MainWindow::doActionExportCoordToSF);
 	//"Tools > Registration" menu
 	connect(m_UI->actionRegister,					&QAction::triggered, this, &MainWindow::doActionRegister);
@@ -776,6 +777,9 @@ void MainWindow::connectActions()
 	connect(m_UI->actionFitSphere,					&QAction::triggered, this, &MainWindow::doActionFitSphere);
 	connect(m_UI->actionFitFacet,					&QAction::triggered, this, &MainWindow::doActionFitFacet);
 	connect(m_UI->actionFitQuadric,					&QAction::triggered, this, &MainWindow::doActionFitQuadric);
+	//"Tools > Batch export" menu
+	connect(m_UI->actionExportCloudInfo,			&QAction::triggered, this, &MainWindow::doActionExportCloudInfo);
+	connect(m_UI->actionExportPlaneInfo,			&QAction::triggered, this, &MainWindow::doActionExportPlaneInfo);
 	//"Tools > Other" menu
 	connect(m_UI->actionComputeDensity,				&QAction::triggered, this, &MainWindow::doComputeDensity);
 	connect(m_UI->actionCurvature,					&QAction::triggered, this, &MainWindow::doComputeCurvature);
@@ -795,7 +799,6 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSNETest,					&QAction::triggered, this, &MainWindow::doSphericalNeighbourhoodExtractionTest);
 	connect(m_UI->actionCNETest,					&QAction::triggered, this, &MainWindow::doCylindricalNeighbourhoodExtractionTest);
 	connect(m_UI->actionFindBiggestInnerRectangle,	&QAction::triggered, this, &MainWindow::doActionFindBiggestInnerRectangle);
-	connect(m_UI->actionExportCloudsInfo,			&QAction::triggered, this, &MainWindow::doActionExportCloudsInfo);
 	connect(m_UI->actionCreateCloudFromEntCenters,	&QAction::triggered, this, &MainWindow::doActionCreateCloudFromEntCenters);
 	connect(m_UI->actionComputeBestICPRmsMatrix,	&QAction::triggered, this, &MainWindow::doActionComputeBestICPRmsMatrix);
 
@@ -1236,17 +1239,19 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							sasDlg.showKeepGlobalPosCheckbox(false); //we don't want the user to mess with this!
 
 							//add "original" entry
-							int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original", globalShift, globalScale));
+							int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", globalShift, globalScale));
 							//sasDlg.setCurrentProfile(index);
 							//add "suggested" entry
 							CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
 							double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
-							index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested", suggestedShift, suggestedScale));
+							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Suggested", suggestedShift, suggestedScale));
 							sasDlg.setCurrentProfile(index);
 							//add "last" entry (if available)
-							ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
-							if (sasDlg.getLast(lastInfo))
+							ccGlobalShiftManager::ShiftInfo lastInfo;
+							if (ccGlobalShiftManager::GetLast(lastInfo))
+							{
 								sasDlg.addShiftInfo(lastInfo);
+							}
 							//add entries from file (if any)
 							sasDlg.addFileInfo();
 
@@ -1563,12 +1568,14 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	sasDlg.showApplyButton(shiftedEntities.size() == 1);
 	sasDlg.showNoButton(false);
 	//add "original" entry
-	int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original", shift, scale));
+	int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", shift, scale));
 	sasDlg.setCurrentProfile(index);
 	//add "last" entry (if available)
-	ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
-	if (sasDlg.getLast(lastInfo))
+	ccGlobalShiftManager::ShiftInfo lastInfo;
+	if (ccGlobalShiftManager::GetLast(lastInfo))
+	{
 		sasDlg.addShiftInfo(lastInfo);
+	}
 	//add entries from file (if any)
 	sasDlg.addFileInfo();
 
@@ -2750,7 +2757,9 @@ void MainWindow::doRemoveDuplicatePoints()
 	ccProgressDialog pDlg(true, this);
 	pDlg.setAutoClose(false);
 
-	for ( ccHObject *entity : getSelectedEntities() )
+	ccHObject::Container selectedEntities = getSelectedEntities(); //we have to use a local copy: 'unselectAllEntities' and 'selectEntity' will change the set of currently selected entities!
+
+	for (ccHObject *entity : selectedEntities)
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 		if (cloud)
@@ -3334,6 +3343,10 @@ void MainWindow::doActionMerge()
 		ccPointCloud* firstCloud = nullptr;
 		ccHObjectContext firstCloudContext;
 
+		//whether to generate the 'original cloud index' scalar field or not
+		CCLib::ScalarField* ocIndexSF = nullptr;
+		size_t cloudIndex = 0;
+
 		for (size_t i = 0; i < clouds.size(); ++i)
 		{
 			ccPointCloud* pc = clouds[i];
@@ -3344,6 +3357,26 @@ void MainWindow::doActionMerge()
 				//we still have to temporarily detach the first cloud, as it may undergo
 				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::operator +=
 				firstCloudContext = removeObjectTemporarilyFromDBTree(firstCloud);
+
+				if (QMessageBox::question(this, "Original cloud index", "Do you want to generate a scalar field with the original cloud index?") == QMessageBox::Yes)
+				{
+					int sfIdx = pc->getScalarFieldIndexByName(CC_ORIGINAL_CLOUD_INDEX_SF_NAME);
+					if (sfIdx < 0)
+					{
+						sfIdx = pc->addScalarField(CC_ORIGINAL_CLOUD_INDEX_SF_NAME);
+					}
+					if (sfIdx < 0)
+					{
+						ccConsole::Error("Couldn't allocate a new scalar field for storing the original cloud index! Try to free some memory ...");
+						return;
+					}
+					else
+					{
+						ocIndexSF = pc->getScalarField(sfIdx);
+						ocIndexSF->fill(0);
+						firstCloud->setCurrentDisplayedScalarField(sfIdx);
+					}
+				}
 			}
 			else
 			{
@@ -3365,6 +3398,15 @@ void MainWindow::doActionMerge()
 						toRemove = pc;
 
 					AddToRemoveList(toRemove, toBeRemoved);
+
+					if (ocIndexSF)
+					{
+						ScalarType index = static_cast<ScalarType>(++cloudIndex);
+						for (unsigned i = 0; i < countAdded; ++i)
+						{
+							ocIndexSF->setValue(countBefore + i, index);
+						}
+					}
 				}
 				else
 				{
@@ -3373,6 +3415,12 @@ void MainWindow::doActionMerge()
 				}
 				pc = nullptr;
 			}
+		}
+
+		if (ocIndexSF)
+		{
+			ocIndexSF->computeMinAndMax();
+			firstCloud->showSF(true);
 		}
 
 		//something to remove?
@@ -3388,7 +3436,7 @@ void MainWindow::doActionMerge()
 		//put back first cloud in DB
 		if (firstCloud)
 		{
-			putObjectBackIntoDBTree(firstCloud,firstCloudContext);
+			putObjectBackIntoDBTree(firstCloud, firstCloudContext);
 			if (m_ccRoot)
 				m_ccRoot->selectEntity(firstCloud);
 		}
@@ -3397,7 +3445,7 @@ void MainWindow::doActionMerge()
 	else if (!meshes.empty())
 	{
 		bool createSubMeshes = true;
-		//createSubMeshes = (QMessageBox::question(this,"Create sub-meshes","Do you want to create sub-mesh entities corresponding to each source mesh? (requires more memory)",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes);
+		//createSubMeshes = (QMessageBox::question(this, "Create sub-meshes", "Do you want to create sub-mesh entities corresponding to each source mesh? (requires more memory)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes);
 
 		//meshes are merged
 		ccPointCloud* baseVertices = new ccPointCloud("vertices");
@@ -3406,44 +3454,17 @@ void MainWindow::doActionMerge()
 		baseMesh->addChild(baseVertices);
 		baseVertices->setEnabled(false);
 
-		for ( ccMesh *mesh : meshes )
+		for (ccMesh *mesh : meshes)
 		{
 			//if (mesh->isA(CC_TYPES::PRIMITIVE))
 			//{
 			//	mesh = mesh->ccMesh::cloneMesh(); //we want a clone of the mesh part, not the primitive!
 			//}
 
-			unsigned sizeBefore = baseMesh->size();
-			if (!baseMesh->merge(mesh))
+			if (!baseMesh->merge(mesh, createSubMeshes))
 			{
 				ccConsole::Error("Fusion failed! (not enough memory?)");
 				break;
-			}
-			unsigned sizeAfter = baseMesh->size();
-
-			//create corresponding sub-mesh
-			if (createSubMeshes)
-			{
-				ccSubMesh* subMesh = new ccSubMesh(baseMesh);
-				if (subMesh->reserve(sizeAfter-sizeBefore))
-				{
-					subMesh->addTriangleIndex(sizeBefore,sizeAfter);
-					subMesh->setName(mesh->getName());
-					subMesh->showMaterials(baseMesh->materialsShown());
-					subMesh->showNormals(baseMesh->normalsShown());
-					subMesh->showTriNorms(baseMesh->triNormsShown());
-					subMesh->showColors(baseMesh->colorsShown());
-					subMesh->showWired(baseMesh->isShownAsWire());
-					subMesh->enableStippling(baseMesh->stipplingEnabled());
-					subMesh->setEnabled(false);
-					baseMesh->addChild(subMesh);
-				}
-				else
-				{
-					ccConsole::Warning(QString("[Merge] Not enough memory to create the sub-mesh corresponding to mesh '%1'!").arg(mesh->getName()));
-					delete subMesh;
-					subMesh = nullptr;
-				}
 			}
 		}
 
@@ -3945,7 +3966,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		ccPointCloud* pc = cloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud) : 0;
 
 		//we create a new group to store all CCs
-		ccHObject* ccGroup = new ccHObject(cloud->getName()+QString(" [CCs]"));
+		ccHObject* ccGroup = new ccHObject(cloud->getName() + QString(" [CCs]"));
 
 		//for each component
 		for (size_t i = 0; i < components.size(); ++i)
@@ -5252,7 +5273,9 @@ void MainWindow::doActionSORFilter()
 
 	bool firstCloud = true;
 
-	for ( ccHObject *entity : getSelectedEntities() )
+	ccHObject::Container selectedEntities = getSelectedEntities(); //we have to use a local copy: 'selectEntity' will change the set of currently selected entities!
+
+	for ( ccHObject *entity : selectedEntities )
 	{
 		//specific test for locked vertices
 		bool lockedVertices;
@@ -5365,8 +5388,10 @@ void MainWindow::doActionFilterNoise()
 	pDlg.setAutoClose(false);
 
 	bool firstCloud = true;
-
-	for ( ccHObject *entity : getSelectedEntities() )
+	
+	ccHObject::Container selectedEntities = getSelectedEntities(); //we have to use a local copy: and 'selectEntity' will change the set of currently selected entities!
+	
+	for ( ccHObject *entity : selectedEntities )
 	{
 		//specific test for locked vertices
 		bool lockedVertices;
@@ -6080,7 +6105,7 @@ void MainWindow::activateSectionExtractionMode()
 	ccGLWindow* firstDisplay = nullptr;
 	{
 		unsigned validCount = 0;
-		for ( ccHObject *entity : getSelectedEntities() )
+		for (ccHObject *entity : getSelectedEntities())
 		{
 			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
@@ -6105,7 +6130,9 @@ void MainWindow::activateSectionExtractionMode()
 
 	//deselect all entities
 	if (m_ccRoot)
+	{
 		m_ccRoot->unselectAllEntities();
+	}
 
 	ccGLWindow* win = new3DView();
 	if (!win)
@@ -6571,10 +6598,14 @@ void MainWindow::activatePointPickingMode()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
+	{
 		return;
+	}
 
 	if (m_ccRoot)
+	{
 		m_ccRoot->unselectAllEntities(); //we don't want any entity selected (especially existing labels!)
+	}
 
 	if (!m_ppDlg)
 	{
@@ -6631,7 +6662,8 @@ void MainWindow::activateClippingBoxMode()
 	}
 	m_clipTool->linkWith(win);
 
-	for ( ccHObject *entity : getSelectedEntities() )
+	ccHObject::Container selectedEntities = getSelectedEntities(); //we have to use a local copy: 'unselectEntity' will change the set of currently selected entities!
+	for (ccHObject *entity : selectedEntities)
 	{
 		if (m_clipTool->addAssociatedEntity(entity))
 		{
@@ -7414,7 +7446,8 @@ void MainWindow::doActionCrop()
 	std::vector<ccHObject*> candidates;
 	ccBBox baseBB;
 	{
-		for ( ccHObject *entity : getSelectedEntities() )
+		const ccHObject::Container& selectedEntities = getSelectedEntities();
+		for ( ccHObject *entity : selectedEntities )
 		{
 			if (	entity->isA(CC_TYPES::POINT_CLOUD)
 				||	entity->isKindOf(CC_TYPES::MESH) )
@@ -7437,11 +7470,16 @@ void MainWindow::doActionCrop()
 	bbeDlg.setWindowTitle("Crop");
 
 	if (!bbeDlg.exec())
+	{
+		//process cancelled by user
 		return;
+	}
 
 	//deselect all entities
 	if (m_ccRoot)
+	{
 		m_ccRoot->unselectAllEntities();
+	}
 
 	//cropping box
 	ccBBox box = bbeDlg.getBox();
@@ -7452,7 +7490,7 @@ void MainWindow::doActionCrop()
 	{
 		for ( ccHObject *entity : candidates )
 		{
-			ccHObject* croppedEnt = ccCropTool::Crop(entity,box,true);
+			ccHObject* croppedEnt = ccCropTool::Crop(entity, box, true);
 			if (croppedEnt)
 			{
 				croppedEnt->setName(entity->getName() + QString(".cropped"));
@@ -7726,10 +7764,10 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 		s_polygonMaxEdgeLength = maxEdgeLength;
 	}
 
-	ccHObject::Container selectedEntities = getSelectedEntities();
+	ccHObject::Container selectedEntities = getSelectedEntities(); //warning, getSelectedEntites may change during this loop!
 	bool firstEntity = true;
 	
-	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
+	for (ccHObject *entity : selectedEntities) 
 	{
 		ccShiftedObject* shifted = nullptr;
 		CCLib::GenericIndexedCloudPersist* cloud = nullptr;
@@ -8308,19 +8346,121 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 	}
 }
 
-void MainWindow::doActionExportCloudsInfo()
+void MainWindow::doActionExportPlaneInfo()
+{
+	ccHObject::Container planes;
+
+	const ccHObject::Container& selectedEntities = getSelectedEntities();
+	if (selectedEntities.size() == 1 && selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
+	{
+		//a group
+		selectedEntities.front()->filterChildren(planes, true, CC_TYPES::PLANE, false);
+	}
+	else
+	{
+		for (ccHObject* ent : selectedEntities)
+		{
+			if (ent->isKindOf(CC_TYPES::PLANE))
+			{
+				//a single plane
+				planes.push_back(static_cast<ccPlane*>(ent));
+			}
+		}
+	}
+
+	if (planes.size() == 0)
+	{
+		ccLog::Error("No plane in selection");
+		return;
+	}
+
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+
+	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
+	if (outputFilename.isEmpty())
+	{
+		//process cancelled by the user
+		return;
+	}
+
+	QFile csvFile(outputFilename);
+	if (!csvFile.open(QFile::WriteOnly | QFile::Text))
+	{
+		ccConsole::Error("Failed to open file for writing! (check file permissions)");
+		return;
+	}
+
+	//save last saving location
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(outputFilename).absolutePath());
+	settings.endGroup();
+
+	//write CSV header
+	QTextStream csvStream(&csvFile);
+	csvStream << "Name;";
+	csvStream << "Width;";
+	csvStream << "Height;";
+	csvStream << "Cx;";
+	csvStream << "Cy;";
+	csvStream << "Cz;";
+	csvStream << "Nx;";
+	csvStream << "Ny;";
+	csvStream << "Nz;";
+	csvStream << "Dip;";
+	csvStream << "Dip dir;";
+	csvStream << endl;
+
+	QChar separator(';');
+
+	//write one line per plane
+	for (ccHObject* ent : planes)
+	{
+		ccPlane* plane = static_cast<ccPlane*>(ent);
+			
+		CCVector3 C = plane->getOwnBB().getCenter();
+		CCVector3 N = plane->getNormal();
+		PointCoordinateType dip_deg = 0, dipDir_deg = 0;
+		ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip_deg, dipDir_deg);
+
+		csvStream << plane->getName() << separator;		//Name
+		csvStream << plane->getXWidth() << separator;	//Width
+		csvStream << plane->getYWidth() << separator;	//Height
+		csvStream << C.x << separator;					//Cx
+		csvStream << C.y << separator;					//Cy
+		csvStream << C.z << separator;					//Cz
+		csvStream << N.x << separator;					//Nx
+		csvStream << N.y << separator;					//Ny
+		csvStream << N.z << separator;					//Nz
+		csvStream << dip_deg << separator;				//Dip
+		csvStream << dipDir_deg << separator;			//Dip direction
+		csvStream << endl;
+	}
+
+	ccConsole::Print(QString("[I/O] File '%1' successfully saved (%2 plane(s))").arg(outputFilename).arg(planes.size()));
+	csvFile.close();
+}
+
+void MainWindow::doActionExportCloudInfo()
 {
 	//look for clouds
-	std::vector<ccPointCloud*> clouds;
-	unsigned maxSFCount = 0;
+	ccHObject::Container clouds;
+
+	const ccHObject::Container& selectedEntities = getSelectedEntities();
+	if (selectedEntities.size() == 1 && selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
-		for ( ccHObject *entity : getSelectedEntities() )
+		//a group
+		selectedEntities.front()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
+	}
+	else
+	{
+		for (ccHObject* entity : selectedEntities)
 		{
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 			if (cloud)
 			{
 				clouds.push_back(cloud);
-				maxSFCount = std::max<unsigned>(maxSFCount,cloud->getNumberOfScalarFields());
 			}
 		}
 	}
@@ -8338,18 +8478,28 @@ void MainWindow::doActionExportCloudsInfo()
 
 	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
 	if (outputFilename.isEmpty())
+	{
+		//process cancelled by the user
 		return;
+	}
 
 	QFile csvFile(outputFilename);
-	if (!csvFile.open(QFile::WriteOnly))
+	if (!csvFile.open(QFile::WriteOnly | QFile::Text))
 	{
 		ccConsole::Error("Failed to open file for writing! (check file permissions)");
 		return;
 	}
 
 	//save last saving location
-	settings.setValue(ccPS::CurrentPath(),QFileInfo(outputFilename).absolutePath());
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(outputFilename).absolutePath());
 	settings.endGroup();
+
+	//determine the maximum number of SFs
+	unsigned maxSFCount = 0;
+	for (ccHObject* entity : clouds)
+	{
+		maxSFCount = std::max<unsigned>(maxSFCount, static_cast<ccPointCloud*>(entity)->getNumberOfScalarFields());
+	}
 
 	//write CSV header
 	QTextStream csvStream(&csvFile);
@@ -8361,7 +8511,7 @@ void MainWindow::doActionExportCloudsInfo()
 	{
 		for (unsigned i = 0; i < maxSFCount; ++i)
 		{
-			QString sfIndex = QString("SF#%1").arg(i+1);
+			QString sfIndex = QString("SF#%1").arg(i + 1);
 			csvStream << sfIndex << " name;";
 			csvStream << sfIndex << " valid values;";
 			csvStream << sfIndex << " mean;";
@@ -8373,8 +8523,10 @@ void MainWindow::doActionExportCloudsInfo()
 
 	//write one line per cloud
 	{
-		for ( ccPointCloud *cloud : clouds )
+		for (ccHObject* entity : clouds)
 		{
+			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
+
 			CCVector3 G = *CCLib::Neighbourhood(cloud).getGravityCenter();
 			csvStream << cloud->getName() << ";" /*"Name;"*/;
 			csvStream << cloud->size() << ";" /*"Points;"*/;
@@ -8973,7 +9125,7 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 	}
 }
 
-void MainWindow::addToDBAuto(QStringList filenames)
+void MainWindow::addToDBAuto(const QStringList& filenames)
 {
 	ccGLWindow* win = qobject_cast<ccGLWindow*>(QObject::sender());
 
@@ -9787,7 +9939,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionSubsample->setEnabled(atLeastOneCloud);
 
 	m_UI->actionSNETest->setEnabled(atLeastOneCloud);
-	m_UI->actionExportCloudsInfo->setEnabled(atLeastOneCloud);
+	m_UI->actionExportCloudInfo->setEnabled(atLeastOneEntity);
+	m_UI->actionExportPlaneInfo->setEnabled(atLeastOneEntity);
 
 	m_UI->actionFilterByValue->setEnabled(atLeastOneSF);
 	m_UI->actionConvertToRGB->setEnabled(atLeastOneSF);
@@ -9841,6 +9994,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	m_UI->actionConvertPolylinesToMesh->setEnabled(atLeastOnePolyline || exactlyOneGroup);
 	m_UI->actionMeshTwoPolylines->setEnabled(selInfo.selCount == 2 && selInfo.polylineCount == 2);
+	m_UI->actionCreateSurfaceBetweenTwoPolylines->setEnabled(m_UI->actionMeshTwoPolylines->isEnabled()); //clone of actionMeshTwoPolylines
 	m_UI->actionModifySensor->setEnabled(exactlyOneSensor);
 	m_UI->actionComputeDistancesFromSensor->setEnabled(atLeastOneCameraSensor || atLeastOneGBLSensor);
 	m_UI->actionComputeScatteringAngles->setEnabled(exactlyOneSensor);

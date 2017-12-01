@@ -940,7 +940,7 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 		const CCVector3* B3D = vertices->getPoint(tsi->i2);
 		const CCVector3* C3D = vertices->getPoint(tsi->i3);
 
-		CCVector3d A2D,B2D,C2D; 
+		CCVector3d A2D, B2D, C2D;
 		if (noGLTrans)
 		{
 			camera.project(*A3D, A2D);
@@ -961,9 +961,9 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 		}
 
 		//barycentric coordinates
-		GLdouble detT =  (B2D.y-C2D.y) *      (A2D.x-C2D.x) + (C2D.x-B2D.x) *      (A2D.y-C2D.y);
-		GLdouble l1   = ((B2D.y-C2D.y) * (clickPos.x-C2D.x) + (C2D.x-B2D.x) * (clickPos.y-C2D.y)) / detT;
-		GLdouble l2   = ((C2D.y-A2D.y) * (clickPos.x-C2D.x) + (A2D.x-C2D.x) * (clickPos.y-C2D.y)) / detT;
+		GLdouble detT =  (B2D.y - C2D.y) *      (A2D.x - C2D.x) + (C2D.x - B2D.x) *      (A2D.y - C2D.y);
+		GLdouble l1   = ((B2D.y - C2D.y) * (clickPos.x - C2D.x) + (C2D.x - B2D.x) * (clickPos.y - C2D.y)) / detT;
+		GLdouble l2   = ((C2D.y - A2D.y) * (clickPos.x - C2D.x) + (A2D.x - C2D.x) * (clickPos.y - C2D.y)) / detT;
 
 		//does the point falls inside the triangle?
 		if (l1 >= 0 && l1 <= 1.0 && l2 >= 0.0 && l2 <= 1.0)
@@ -972,8 +972,8 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 			assert(l1l2 >= 0);
 			if (l1l2 > 1.0)
 			{
-				l1 /= l1l2;
-				l2 /= l1l2;
+				//we fall outside of the triangle!
+				continue;
 			}
 
 			GLdouble l3 = 1.0 - l1 - l2;
@@ -983,7 +983,7 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 			CCVector3d P(	l1 * A3D->x + l2 * B3D->x + l3 * C3D->x,
 							l1 * A3D->y + l2 * B3D->y + l3 * C3D->y,
 							l1 * A3D->z + l2 * B3D->z + l3 * C3D->z);
-			double squareDist = (X-P).norm2d();
+			double squareDist = (X - P).norm2d();
 			if (nearestTriIndex < 0 || squareDist < nearestSquareDist)
 			{
 				nearestSquareDist = squareDist;

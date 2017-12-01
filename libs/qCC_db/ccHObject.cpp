@@ -580,6 +580,15 @@ bool ccHObject::isBranchEnabled() const
 
 void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 {
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
+	glFunc->glPushAttrib(GL_LINE_BIT);
+	glFunc->glLineWidth(1.0f);
+
 	switch (m_selectionBehavior)
 	{
 	case SELECTION_AA_BBOX:
@@ -614,6 +623,8 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 	default:
 		assert(false);
 	}
+
+	glFunc->glPopAttrib(); //GL_LINE_BIT
 }
 
 void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)

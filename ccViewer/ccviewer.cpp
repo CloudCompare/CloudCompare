@@ -46,9 +46,9 @@
 struct VerInfo
 {
 	VerInfo()
-		: number(1.37)
+		: number(1.38)
 	{
-		title = QString::number(number,'f',2) + ".alpha";
+		title = QString::number(number, 'f', 2) + ".alpha";
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 		title += " Stereo";
 #endif
@@ -61,13 +61,13 @@ struct VerInfo
 static const VerInfo CC_VIEWER_VERSION;
 
 //Camera parameters dialog
-ccCameraParamEditDlg* s_cpeDlg = 0;
+static ccCameraParamEditDlg* s_cpeDlg = nullptr;
 
 ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	: QMainWindow(parent, flags)
-	, m_glWindow(0)
-	, m_selectedObject(0)
-	, m_3dMouseInput(0)
+	, m_glWindow(nullptr)
+	, m_selectedObject(nullptr)
+	, m_3dMouseInput(nullptr)
 {
 	ui.setupUi(this);
 
@@ -113,7 +113,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 #endif
 
 	//Signals & slots connection
-	connect(m_glWindow,								SIGNAL(filesDropped(QStringList)),			this,		SLOT(addToDB(QStringList)));
+	connect(m_glWindow,								SIGNAL(filesDropped(const QStringList&)),			this,		SLOT(addToDB(const QStringList&)), Qt::QueuedConnection);
 	connect(m_glWindow,								SIGNAL(entitySelectionChanged(ccHObject*)),	this,		SLOT(selectEntity(ccHObject*)));
 	connect(m_glWindow,								SIGNAL(exclusiveFullScreenToggled(bool)),	this,		SLOT(onExclusiveFullScreenToggled(bool)));
 	//connect(m_glWindow,							SIGNAL(entitiesSelectionChanged(std::unordered_set<int>)),	this,		SLOT(selectEntities(std::unordered_set<int>))); //not supported!
@@ -493,7 +493,7 @@ void ccViewer::updateGLFrameGradient()
 	ui.GLframe->setStyleSheet(styleSheet);
 }
 
-void ccViewer::addToDB(QStringList filenames)
+void ccViewer::addToDB(const QStringList& filenames)
 {
 	ccHObject* currentRoot = m_glWindow->getSceneDB();
 	if (currentRoot)

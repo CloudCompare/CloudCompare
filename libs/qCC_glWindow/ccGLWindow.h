@@ -381,9 +381,14 @@ public:
 	/** \param size point size (between MIN_POINT_SIZE_F and MAX_POINT_SIZE_F)
 	**/
 	virtual void setPointSize(float size, bool silent = false);
+	
+	//! Minimum line width
+	static const float MIN_LINE_WIDTH_F;
+	//! Maximum line width
+	static const float MAX_LINE_WIDTH_F;
 
 	//! Sets line width
-	/** \param width lines width (typically between 1 and 10)
+	/** \param width lines width (between MIN_LINE_WIDTH_F and MAX_LINE_WIDTH_F)
 	**/
 	virtual void setLineWidth(float width);
 
@@ -654,6 +659,9 @@ protected slots:
 	//! OpenGL KHR debug log
 	void handleLoggedMessage(const QOpenGLDebugMessage&);
 
+	//! Performs standard picking at the last clicked mouse position (see m_lastMousePos)
+	void doPicking();
+
 signals:
 
 	//! Signal emitted when an entity is selected in the 3D view
@@ -752,7 +760,7 @@ signals:
 	void drawing3D();
 
 	//! Signal emitted when files are dropped on the window
-	void filesDropped(QStringList files);
+	void filesDropped(const QStringList& filenames);
 
 	//! Signal emitted when a new label is created
 	void newLabel(ccHObject* obj);
@@ -1376,6 +1384,12 @@ protected: //members
 
 	//! Candidate pivot point (will be used when the mouse is released)
 	CCVector3d m_autoPivotCandidate;
+
+	//! Deferred picking
+	QTimer m_deferredPickingTimer;
+
+	//! Ignore next mouse release event
+	bool m_ignoreMouseReleaseEvent;
 
 private:
 

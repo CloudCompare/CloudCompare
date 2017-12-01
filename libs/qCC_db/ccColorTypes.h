@@ -306,14 +306,14 @@ namespace ccColor
 															static_cast<unsigned char>(qColor.alpha())); }
 
 	//! Conversion from QColor (floating point)
-	inline Rgbf FromQColorf(QColor qColor) { return Rgbf(	static_cast<unsigned char>(qColor.redF()),
-															static_cast<unsigned char>(qColor.greenF()),
-															static_cast<unsigned char>(qColor.blueF())); }
+	inline Rgbf FromQColorf(QColor qColor) { return Rgbf(	static_cast<float>(qColor.redF()),
+															static_cast<float>(qColor.greenF()),
+															static_cast<float>(qColor.blueF())); }
 	//! Conversion from QColor'a' (floating point)
-	inline Rgbaf FromQColoraf(QColor qColor) { return Rgbaf(	static_cast<unsigned char>(qColor.redF()),
-																static_cast<unsigned char>(qColor.greenF()),
-																static_cast<unsigned char>(qColor.blueF()),
-																static_cast<unsigned char>(qColor.alphaF()));
+	inline Rgbaf FromQColoraf(QColor qColor) { return Rgbaf(	static_cast<float>(qColor.redF()),
+																static_cast<float>(qColor.greenF()),
+																static_cast<float>(qColor.blueF()),
+																static_cast<float>(qColor.alphaF()));
 	}
 };
 

@@ -23,33 +23,57 @@
 ccGeoObject::ccGeoObject(QString name, ccMainAppInterface* app)
 	: ccHObject(name)
 {
-	init(name, app);
+	m_app = app;
 
 	//add "interior", "upper" and "lower" HObjects
 	generateInterior();
 	generateUpper();
 	generateLower();
+
+	//generate GID
+	assignGID();
+
+	init();
 }
 
 ccGeoObject::ccGeoObject(ccHObject* obj, ccMainAppInterface* app)
 	: ccHObject(obj->getName())
 {
-	init(obj->getName(), app);
+	m_app = app;
 
 	//n.b. object should already have upper, inner and lower children
 
+	//copy GID key
+	QVariant GID = obj->getMetaData("GID");
+	if (GID.isValid())
+	{
+		_gID = GID.toUInt();
+	}
+	else
+	{
+		assignGID(); //no GID defined, assign a new one
+	}
+
+	init();
 }
 
-void ccGeoObject::init(QString name, ccMainAppInterface* app)
+void ccGeoObject::assignGID()
 {
-	setName(name);
+	//get uniquely descriptive data to hash
+	int iID = getRegion(ccGeoObject::INTERIOR)->getUniqueID();
+	int uID = getRegion(ccGeoObject::UPPER_BOUNDARY)->getUniqueID();
+	int lID = getRegion(ccGeoObject::LOWER_BOUNDARY)->getUniqueID();
+	
+	//combine with object name and hash
+	_gID = std::hash<std::string>{}(QString::asprintf("%s%d%d%d", getName(), iID, uID, lID).toStdString());
+}
 
-	//store reference to app so we can manipulate the database
-	m_app = app;
-
+void ccGeoObject::init()
+{
 	//add metadata tag defining the ccCompass class type
 	QVariantMap* map = new QVariantMap();
 	map->insert("ccCompassType", "GeoObject");
+	map->insert("GID", getGID());
 	setMetaData(*map, true);
 }
 

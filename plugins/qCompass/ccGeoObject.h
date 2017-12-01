@@ -55,6 +55,10 @@ public:
 	//adds a topological relationship between this GeoObject and another
 	ccTopologyRelation* addRelationTo(ccGeoObject* obj2, int type, ccMainAppInterface* app);
 
+	//returns the GID of this geo-object
+	unsigned int getGID() { return _gID; };
+
+
 	//flags defining different mapping regions
 	static const int INTERIOR = 0;
 	static const int UPPER_BOUNDARY = 1;
@@ -86,7 +90,7 @@ protected:
 
 private:
 	//builds this GeoObject and its ccHObject components
-	void init(QString name, ccMainAppInterface* app);
+	void init();
 
 	//searches and activates/disactivates children belonging to the ccHObject. This is used when the DBTree selection changes.
 	void recurseChildren(ccHObject* par, bool highlight);
@@ -94,6 +98,9 @@ private:
 	//return the topology relationship between this ccHObject and another (WIP).
 	ccTopologyRelation* getRelation(ccHObject* obj, int id1, int id2);
 
+	void assignGID();
+
+	unsigned int _gID; //unique and persistent id for this geoObject
 //static functions
 public:
 	//returns true if object is a ccGeoObject

@@ -25,6 +25,7 @@ v2.10.alpha - XX/XX/201X
 	* Command line mode: when loading at least two LAS files with the 'GLOBAL_SHIFT AUTO' option, if the LAS files had different AND small LAS Shift
 	* Point picking on a mesh (i.e. mainly in the point-pair based registration tool) could select the wrong point on the triangle, or even a wrong triangle
 	* Raster I/O: when importing a raster file, the corresponding point cloud was shifted of half a pixel
+	* The RASTERIZE command line could make CC crash at the end of the process
 
 v2.9.1 - 11/03/2017
 ----------------------

@@ -28,10 +28,13 @@ if( ${OPTION_USE_LIBE57} )
 	endif()
 	
 	# Find Xerces
-	set( Xerces_INCLUDE_DIR "" CACHE PATH "Xerces include directory" )
-	set( Xerces_LIBRARY_RELEASE "" CACHE FILEPATH "Xerces (release) library file" )
+	include(FindXercesC)
+	find_package(XercesC REQUIRED)
+
+	set( Xerces_INCLUDE_DIR ${XercesC_INCLUDE_DIR} CACHE PATH "Xerces include directory" )
+	set( Xerces_LIBRARY_RELEASE ${XercesC_LIBRARY} CACHE FILEPATH "Xerces (release) library file" )
 	if( CMAKE_CONFIGURATION_TYPES )
-		set( Xerces_LIBRARY_DEBUG "" CACHE FILEPATH "Xerces (debug) library file" )
+		set( Xerces_LIBRARY_DEBUG ${XercesC_LIBRARY} CACHE FILEPATH "Xerces (debug) library file" )
 	endif()
 
 	if ( NOT Xerces_INCLUDE_DIR )

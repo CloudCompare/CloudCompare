@@ -6,6 +6,12 @@ v2.10.alpha - XX/XX/201X
 
 - enhancements:
 
+	* The M3C2 plugin can now be called from the command line:
+		- you'll need the configuration file saved with the GUI tool (M3C2 dialog > 'save parameters' button)
+		- then load 2 files (cloud 1 and cloud2), optionally a 3rd cloud that will be used as core points
+		- and eventually call the -M3C2 option with the parameters file as argument:
+			CloudCompare -O cloud1 -O cloud2 -O core_points -M3C2 parameters_file
+
 	* Labels can now be imported from ASCII files:
 		- new column role in the ASCII loading dialog: "Labels"
 		- labels can be created from textual or numerical columns

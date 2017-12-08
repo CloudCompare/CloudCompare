@@ -32,8 +32,9 @@
 #include <QMessageBox>
 #include <QThread>
 
-/*** HELPERS ***/
+static bool s_firstTimeInit = true;
 
+/*** HELPERS ***/
 static QString GetEntityName(ccHObject* obj)
 {
 	if (!obj)
@@ -66,7 +67,7 @@ static ccPointCloud* GetCloudFromCombo(QComboBox* comboBox, ccHObject* dbRoot)
 		assert(false);
 		return 0;
 	}
-	assert(comboBox->userData(index));
+	assert(comboBox->itemData(index).isValid());
 	unsigned uniqueID = comboBox->itemData(index).toUInt();
 	ccHObject* item = dbRoot->find(uniqueID);
 	if (!item || !item->isA(CC_TYPES::POINT_CLOUD))
@@ -85,7 +86,6 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 	, m_app(app)
 	, m_cloud1(0)
 	, m_cloud2(0)
-	, m_firstTimeInit(true)
 {
 	setupUi(this);
 
@@ -231,11 +231,11 @@ void qM3C2Dialog::setClouds(ccPointCloud* cloud1, ccPointCloud* cloud2)
 	showCloud2CheckBox->setChecked(cloud2->isVisible());
 	showCloud2CheckBox->blockSignals(false);
 
-	if (m_firstTimeInit)
+	if (s_firstTimeInit)
 	{
 		//on initialization, try to guess some parameters from the input clouds
 		guessParams(true);
-		m_firstTimeInit = false;
+		s_firstTimeInit = false;
 	}
 
 	setupPrecisionMapsTab();

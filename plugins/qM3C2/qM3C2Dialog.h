@@ -117,8 +117,6 @@ protected: //members
 
 	ccPointCloud* m_cloud1;
 	ccPointCloud* m_cloud2;
-
-	bool m_firstTimeInit;
 };
 
 #endif //Q_M3C2_DIALOG_HEADER

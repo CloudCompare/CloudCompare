@@ -257,9 +257,9 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 															GenericProgressCallback* progressCb/*=0*/)
 {
 	assert(inputCloud);
-    unsigned cloudSize = inputCloud->size();
+	unsigned cloudSize = inputCloud->size();
 
-    DgmOctree* octree = inputOctree;
+	DgmOctree* octree = inputOctree;
 	if (!octree)
 	{
 		octree = new DgmOctree(inputCloud);
@@ -274,15 +274,15 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	//output cloud
 	ReferenceCloud* sampledCloud = new ReferenceCloud(inputCloud);
 	const unsigned c_reserveStep = 65536;
-	if (!sampledCloud->reserve(std::min(cloudSize,c_reserveStep)))
+	if (!sampledCloud->reserve(std::min(cloudSize, c_reserveStep)))
 	{
 		if (!inputOctree)
 			delete octree;
 		return 0;
 	}
 
-	GenericChunkedArray<1,char>* markers = new GenericChunkedArray<1,char>(); //DGM: upgraded from vector, as this can be quite huge!
-	if (!markers->resize(cloudSize,true,1)) //true by default
+	GenericChunkedArray<1, char>* markers = new GenericChunkedArray<1, char>(); //DGM: upgraded from vector, as this can be quite huge!
+	if (!markers->resize(cloudSize, true, 1)) //true by default
 	{
 		markers->release();
 		if (!inputOctree)
@@ -300,7 +300,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 		if (modParams.enabled)
 		{
 			//compute min and max sf values
-			ScalarFieldTools::computeScalarFieldExtremas(inputCloud,sfMin,sfMax);
+			ScalarFieldTools::computeScalarFieldExtremas(inputCloud, sfMin, sfMax);
 
 			if (!ScalarField::ValidValue(sfMin))
 			{
@@ -319,12 +319,12 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 				if (level1 != level0)
 				{
 					//add intermediate levels if necessary
-					size_t levelCount = (level1 < level0 ? level0-level1 : level1-level0) + 1;
+					size_t levelCount = (level1 < level0 ? level0 - level1 : level1 - level0) + 1;
 					assert(levelCount != 0);
-					
-					for (size_t i=1; i<levelCount-1; ++i) //we already know level0 and level1!
+
+					for (size_t i = 1; i < levelCount - 1; ++i) //we already know level0 and level1!
 					{
-						ScalarType sfVal = sfMin + i*((sfMax-sfMin)/levelCount);
+						ScalarType sfVal = sfMin + i*((sfMax - sfMin) / levelCount);
 						PointCoordinateType dist = static_cast<PointCoordinateType>(sfVal * modParams.a + modParams.b);
 						unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(dist);
 						bestOctreeLevel.push_back(level);
@@ -375,7 +375,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	unsigned char octreeLevel = bestOctreeLevel.front();
 	//default distance between points
 	PointCoordinateType minDistBetweenPoints = minDistance;
-	for (unsigned i=0; i<cloudSize; i++, markers->forwardIterator())
+	for (unsigned i = 0; i < cloudSize; i++, markers->forwardIterator())
 	{
 		//no mark? we skip this point
 		if (markers->getCurrentValue() != 0)
@@ -392,7 +392,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 					//modulate minDistance
 					minDistBetweenPoints = static_cast<PointCoordinateType>(sfVal * modParams.a + modParams.b);
 					//get (approximate) best level
-					size_t levelIndex = static_cast<size_t>(bestOctreeLevel.size() * (sfVal / (sfMax-sfMin)));
+					size_t levelIndex = static_cast<size_t>(bestOctreeLevel.size() * ((sfVal - sfMin) / (sfMax - sfMin)));
 					if (levelIndex == bestOctreeLevel.size())
 						--levelIndex;
 					octreeLevel = bestOctreeLevel[levelIndex];
@@ -407,10 +407,10 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 			//look for neighbors and 'de-mark' them
 			{
 				DgmOctree::NeighboursSet neighbours;
-				octree->getPointsInSphericalNeighbourhood(*P,minDistBetweenPoints,neighbours,octreeLevel);
+				octree->getPointsInSphericalNeighbourhood(*P, minDistBetweenPoints, neighbours, octreeLevel);
 				for (DgmOctree::NeighboursSet::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
 					if (it->pointIndex != i)
-						markers->setValue(it->pointIndex,0);
+						markers->setValue(it->pointIndex, 0);
 			}
 
 			//At this stage, the ith point is the only one marked in a radius of <minDistance>.
@@ -428,7 +428,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 				break;
 			}
 		}
-			
+
 		//progress indicator
 		if (progressCb && !normProgress.oneStep())
 		{

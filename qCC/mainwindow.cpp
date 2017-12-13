@@ -1239,17 +1239,19 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							sasDlg.showKeepGlobalPosCheckbox(false); //we don't want the user to mess with this!
 
 							//add "original" entry
-							int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original", globalShift, globalScale));
+							int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", globalShift, globalScale));
 							//sasDlg.setCurrentProfile(index);
 							//add "suggested" entry
 							CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
 							double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
-							index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested", suggestedShift, suggestedScale));
+							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Suggested", suggestedShift, suggestedScale));
 							sasDlg.setCurrentProfile(index);
 							//add "last" entry (if available)
-							ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
-							if (sasDlg.getLast(lastInfo))
+							ccGlobalShiftManager::ShiftInfo lastInfo;
+							if (ccGlobalShiftManager::GetLast(lastInfo))
+							{
 								sasDlg.addShiftInfo(lastInfo);
+							}
 							//add entries from file (if any)
 							sasDlg.addFileInfo();
 
@@ -1566,12 +1568,14 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	sasDlg.showApplyButton(shiftedEntities.size() == 1);
 	sasDlg.showNoButton(false);
 	//add "original" entry
-	int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original", shift, scale));
+	int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", shift, scale));
 	sasDlg.setCurrentProfile(index);
 	//add "last" entry (if available)
-	ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
-	if (sasDlg.getLast(lastInfo))
+	ccGlobalShiftManager::ShiftInfo lastInfo;
+	if (ccGlobalShiftManager::GetLast(lastInfo))
+	{
 		sasDlg.addShiftInfo(lastInfo);
+	}
 	//add entries from file (if any)
 	sasDlg.addFileInfo();
 

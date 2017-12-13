@@ -31,6 +31,7 @@
 #include <ccProgressDialog.h>
 #include <ccLog.h>
 #include <ccScalarField.h>
+#include <cc2DLabel.h>
 
 //System
 #include <string.h>
@@ -410,6 +411,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 	char separator = static_cast<char>(openDialog->getSeparator());
 	unsigned maxCloudSize = openDialog->getMaxCloudSize();
 	unsigned skipLineCount = openDialog->getSkippedLinesCount();
+	bool showLabelsIn2D = openDialog->showLabelsIn2D();
 
 	s_openDialog.release(); //release the 'source' dialog (so as to be sure to reset it next time)
 
@@ -421,13 +423,14 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 											fileSize,
 											maxCloudSize,
 											skipLineCount,
-											parameters);
+											parameters,
+											showLabelsIn2D);
 }
 
 struct cloudAttributesDescriptor
 {
 	ccPointCloud* cloud;
-	static const unsigned c_attribCount = 12;
+	static const unsigned c_attribCount = 13;
 	union
 	{
 		struct{	int xCoordIndex;
@@ -442,6 +445,7 @@ struct cloudAttributesDescriptor
 				int iRgbaIndex;
 				int fRgbaIndex;
 				int greyIndex;
+				int labelIndex;
 		};
 		int indexes[c_attribCount];
 	};
@@ -459,8 +463,10 @@ struct cloudAttributesDescriptor
 	void reset()
 	{
 		cloud = 0;
-		for (unsigned i=0; i<c_attribCount; ++i)
+		for (unsigned i = 0; i < c_attribCount; ++i)
+		{
 			indexes[i] = -1;
+		}
 		hasNorms = false;
 		hasRGBColors = false;
 		hasFloatRGBColors[0] = hasFloatRGBColors[1] = hasFloatRGBColors[2] = false;
@@ -471,13 +477,13 @@ struct cloudAttributesDescriptor
 
 	void updateMaxIndex(int& maxIndex)
 	{
-		for (unsigned i=0; i<c_attribCount; ++i)
-			if (indexes[i] > maxIndex)
-				maxIndex = indexes[i];
+		for (int attribIndex : indexes)
+			if (attribIndex > maxIndex)
+				maxIndex = attribIndex;
 
-		for (size_t j=0; j<scalarIndexes.size(); ++j)
-			if (scalarIndexes[j] > maxIndex)
-				maxIndex = scalarIndexes[j];
+		for (int sfIndex : scalarIndexes)
+			if (sfIndex > maxIndex)
+				maxIndex = sfIndex;
 	}
 
 };
@@ -513,7 +519,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 	cloudDesc.cloud = cloud;
 
 	int seqSize = static_cast<int>(openSequence.size());
-	for (int i=0; i<seqSize; ++i)
+	for (int i = 0; i < seqSize; ++i)
 	{
 		switch (openSequence[i].type)
 		{
@@ -566,7 +572,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 			break;
 		case ASCII_OPEN_DLG_Scalar:
 			{
-				int sfIndex = cloud->getNumberOfScalarFields()+1;
+				int sfIndex = cloud->getNumberOfScalarFields() + 1;
 				QString sfName = openSequence[i].header;
 				if (sfName.isEmpty())
 				{
@@ -665,6 +671,14 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 				ccLog::Warning("Failed to allocate memory for colors! (skipped)");
 			}
 			break;
+		case ASCII_OPEN_DLG_Label:
+			assert(cloudDesc.labelIndex < 0); //There Can Be Only One
+			cloudDesc.labelIndex = i;
+			break;
+		default:
+			//unhandled case?
+			assert(false);
+			break;
 		}
 	}
 
@@ -683,7 +697,8 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 															qint64 fileSize,
 															unsigned maxCloudSize,
 															unsigned skipLines,
-															LoadParameters& parameters)
+															LoadParameters& parameters,
+															bool showLabelsIn2D/*=false*/)
 {
 	//we may have to "slice" clouds when opening them if they are too big!
 	maxCloudSize = std::min(maxCloudSize, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
@@ -696,7 +711,9 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 	cloudAttributesDescriptor cloudDesc = prepareCloud(openSequence, cloudChunkSize, maxPartIndex, separator, chunkRank);
 
 	if (!cloudDesc.cloud)
+	{
 		return CC_FERR_NOT_ENOUGH_MEMORY;
+	}
 
 	//we re-open the file (ASCII mode)
 	QFile file(filename);
@@ -872,94 +889,105 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 				lineIsCorrupted = false;
 			}
 
-			if (!lineIsCorrupted)
-			{
-				//first point: check for 'big' coordinates
-				if (pointsRead == 0)
-				{
-					if (HandleGlobalShift(P, Pshift, parameters))
-					{
-						cloudDesc.cloud->setGlobalShift(Pshift);
-						ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
-					}
-				}
-
-				//add point
-				cloudDesc.cloud->addPoint(CCVector3::fromArray((P + Pshift).u));
-
-				//Normal vector
-				if (cloudDesc.hasNorms)
-				{
-					if (cloudDesc.xNormIndex >= 0)
-						N.x = static_cast<PointCoordinateType>(parts[cloudDesc.xNormIndex].toDouble());
-					if (cloudDesc.yNormIndex >= 0)
-						N.y = static_cast<PointCoordinateType>(parts[cloudDesc.yNormIndex].toDouble());
-					if (cloudDesc.zNormIndex >= 0)
-						N.z = static_cast<PointCoordinateType>(parts[cloudDesc.zNormIndex].toDouble());
-					cloudDesc.cloud->addNorm(N);
-				}
-
-				//Colors
-				if (cloudDesc.hasRGBColors)
-				{
-					if (cloudDesc.iRgbaIndex >= 0)
-					{
-						const uint32_t rgb = parts[cloudDesc.iRgbaIndex].toInt();
-						col.r = ((rgb >> 16) & 0x0000ff);
-						col.g = ((rgb >> 8) & 0x0000ff);
-						col.b = ((rgb)& 0x0000ff);
-
-					}
-					else if (cloudDesc.fRgbaIndex >= 0)
-					{
-						const float rgbf = parts[cloudDesc.fRgbaIndex].toFloat();
-						const uint32_t rgb = (uint32_t)(*((uint32_t*)&rgbf));
-						col.r = ((rgb >> 16) & 0x0000ff);
-						col.g = ((rgb >> 8) & 0x0000ff);
-						col.b = ((rgb)& 0x0000ff);
-					}
-					else
-					{
-						if (cloudDesc.redIndex >= 0)
-						{
-							float multiplier = cloudDesc.hasFloatRGBColors[0] ? static_cast<float>(ccColor::MAX) : 1.0f;
-							col.r = static_cast<ColorCompType>(parts[cloudDesc.redIndex].toFloat() * multiplier);
-						}
-						if (cloudDesc.greenIndex >= 0)
-						{
-							float multiplier = cloudDesc.hasFloatRGBColors[1] ? static_cast<float>(ccColor::MAX) : 1.0f;
-							col.g = static_cast<ColorCompType>(parts[cloudDesc.greenIndex].toFloat() * multiplier);
-						}
-						if (cloudDesc.blueIndex >= 0)
-						{
-							float multiplier = cloudDesc.hasFloatRGBColors[2] ? static_cast<float>(ccColor::MAX) : 1.0f;
-							col.b = static_cast<ColorCompType>(parts[cloudDesc.blueIndex].toFloat() * multiplier);
-						}
-					}
-					cloudDesc.cloud->addRGBColor(col.rgb);
-				}
-				else if (cloudDesc.greyIndex >= 0)
-				{
-					col.r = col.r = col.b = static_cast<ColorCompType>(parts[cloudDesc.greyIndex].toInt());
-					cloudDesc.cloud->addRGBColor(col.rgb);
-				}
-
-				//Scalar distance
-				if (!cloudDesc.scalarIndexes.empty())
-				{
-					for (size_t j = 0; j < cloudDesc.scalarIndexes.size(); ++j)
-					{
-						D = static_cast<ScalarType>(parts[cloudDesc.scalarIndexes[j]].toDouble());
-						cloudDesc.scalarFields[j]->setValue(pointsRead - cloudChunkPos, D);
-					}
-				}
-
-				++pointsRead;
-			}
-			else
+			if (lineIsCorrupted)
 			{
 				ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (non numerical value found)", linesRead);
+				continue;
 			}
+
+			//first point: check for 'big' coordinates
+			if (pointsRead == 0)
+			{
+				if (HandleGlobalShift(P, Pshift, parameters))
+				{
+					cloudDesc.cloud->setGlobalShift(Pshift);
+					ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+				}
+			}
+
+			//add point
+			cloudDesc.cloud->addPoint(CCVector3::fromArray((P + Pshift).u));
+
+			//Normal vector
+			if (cloudDesc.hasNorms)
+			{
+				if (cloudDesc.xNormIndex >= 0)
+					N.x = static_cast<PointCoordinateType>(parts[cloudDesc.xNormIndex].toDouble());
+				if (cloudDesc.yNormIndex >= 0)
+					N.y = static_cast<PointCoordinateType>(parts[cloudDesc.yNormIndex].toDouble());
+				if (cloudDesc.zNormIndex >= 0)
+					N.z = static_cast<PointCoordinateType>(parts[cloudDesc.zNormIndex].toDouble());
+				cloudDesc.cloud->addNorm(N);
+			}
+
+			//Colors
+			if (cloudDesc.hasRGBColors)
+			{
+				if (cloudDesc.iRgbaIndex >= 0)
+				{
+					const uint32_t rgb = parts[cloudDesc.iRgbaIndex].toInt();
+					col.r = ((rgb >> 16) & 0x0000ff);
+					col.g = ((rgb >>  8) & 0x0000ff);
+					col.b = ((rgb      ) & 0x0000ff);
+
+				}
+				else if (cloudDesc.fRgbaIndex >= 0)
+				{
+					const float rgbf = parts[cloudDesc.fRgbaIndex].toFloat();
+					const uint32_t rgb = (uint32_t)(*((uint32_t*)&rgbf));
+					col.r = ((rgb >> 16) & 0x0000ff);
+					col.g = ((rgb >>  8) & 0x0000ff);
+					col.b = ((rgb      ) & 0x0000ff);
+				}
+				else
+				{
+					if (cloudDesc.redIndex >= 0)
+					{
+						float multiplier = cloudDesc.hasFloatRGBColors[0] ? static_cast<float>(ccColor::MAX) : 1.0f;
+						col.r = static_cast<ColorCompType>(parts[cloudDesc.redIndex].toFloat() * multiplier);
+					}
+					if (cloudDesc.greenIndex >= 0)
+					{
+						float multiplier = cloudDesc.hasFloatRGBColors[1] ? static_cast<float>(ccColor::MAX) : 1.0f;
+						col.g = static_cast<ColorCompType>(parts[cloudDesc.greenIndex].toFloat() * multiplier);
+					}
+					if (cloudDesc.blueIndex >= 0)
+					{
+						float multiplier = cloudDesc.hasFloatRGBColors[2] ? static_cast<float>(ccColor::MAX) : 1.0f;
+						col.b = static_cast<ColorCompType>(parts[cloudDesc.blueIndex].toFloat() * multiplier);
+					}
+				}
+				cloudDesc.cloud->addRGBColor(col.rgb);
+			}
+			else if (cloudDesc.greyIndex >= 0)
+			{
+				col.r = col.r = col.b = static_cast<ColorCompType>(parts[cloudDesc.greyIndex].toInt());
+				cloudDesc.cloud->addRGBColor(col.rgb);
+			}
+
+			//Scalar distance
+			if (!cloudDesc.scalarIndexes.empty())
+			{
+				for (size_t j = 0; j < cloudDesc.scalarIndexes.size(); ++j)
+				{
+					D = static_cast<ScalarType>(parts[cloudDesc.scalarIndexes[j]].toDouble());
+					cloudDesc.scalarFields[j]->setValue(pointsRead - cloudChunkPos, D);
+				}
+			}
+
+			//Label
+			if (cloudDesc.labelIndex >= 0)
+			{
+				cc2DLabel* label = new cc2DLabel();
+				label->addPoint(cloudDesc.cloud, cloudDesc.cloud->size() - 1);
+				label->setName(parts[cloudDesc.labelIndex]);
+				label->setDisplayedIn2D(showLabelsIn2D);
+				label->displayPointLegend(!showLabelsIn2D);
+				label->setVisible(true);
+				cloudDesc.cloud->addChild(label);
+			}
+
+			++pointsRead;
 		}
 		else
 		{
@@ -994,6 +1022,23 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 			}
 			cloudDesc.cloud->setCurrentDisplayedScalarField(0);
 			cloudDesc.cloud->showSF(true);
+		}
+
+		//position the labels
+		if (cloudDesc.labelIndex >= 0)
+		{
+			ccHObject::Container labels;
+			cloudDesc.cloud->filterChildren(labels, false, CC_TYPES::LABEL_2D, true);
+
+			if (labels.size() > 1)
+			{
+				double angle_rad = (M_PI * 2) / labels.size();
+				for (size_t i = 0; i < labels.size(); ++i)
+				{
+					//position the labels on a circle
+					static_cast<cc2DLabel*>(labels[i])->setPosition(0.5 + 0.4 * cos(i * angle_rad), 0.5 + 0.4 * sin(i * angle_rad));
+				}
+			}
 		}
 
 		container.addChild(cloudDesc.cloud);

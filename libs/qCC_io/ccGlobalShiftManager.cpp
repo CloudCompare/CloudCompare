@@ -29,6 +29,24 @@
 double ccGlobalShiftManager::MAX_COORDINATE_ABS_VALUE = 1.0e4;
 double ccGlobalShiftManager::MAX_DIAGONAL_LENGTH = 1.0e6;
 
+//semi-persistent settings
+struct LastShiftInfo : ccGlobalShiftManager::ShiftInfo
+{
+	bool valid;
+
+	LastShiftInfo()
+		: ccGlobalShiftManager::ShiftInfo("Last input")
+		, valid(false)
+	{}
+};
+static LastShiftInfo s_lastInfo;
+
+bool ccGlobalShiftManager::GetLast(ShiftInfo& info)
+{
+	info = s_lastInfo;
+	return s_lastInfo.valid;
+}
+
 bool ccGlobalShiftManager::NeedShift(const CCVector3d& P)
 {
 	return	NeedShift(P.x) || NeedShift(P.y) || NeedShift(P.z);
@@ -93,6 +111,28 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 				//or we are in interactive mode and existing shift is pertinent
 				|| (!NeedShift(P*scale + coordinatesShift) && !NeedRescale(diagonal*scale)) )
 			{
+				//do we have already stored shift info?
+				if (mode == NO_DIALOG_AUTO_SHIFT && s_lastInfo.valid)
+				{
+					//in "auto shift" mode, we may want to use it (to synchronize multiple clouds!)
+					if (!NeedShift(P*s_lastInfo.scale + s_lastInfo.shift) && !NeedRescale(diagonal*s_lastInfo.scale))
+					{
+						coordinatesShift = s_lastInfo.shift;
+						if (coordinatesScale)
+						{
+							*coordinatesScale = scale;
+						}
+						return true;
+					}
+				}
+				
+				//save info for next time
+				if (coordinatesShift.norm2() != 0 || scale != 1.0)
+				{
+					s_lastInfo.valid = true;
+					s_lastInfo.shift = coordinatesShift;
+					s_lastInfo.scale = scale;
+				}
 				//user should use the provided shift information
 				return true;
 			}
@@ -106,11 +146,25 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 			if (needShift)
 			{
 				coordinatesShift = BestShift(P);
+
+				//save info for next time
+				s_lastInfo.valid = true;
+				s_lastInfo.shift = coordinatesShift;
+				s_lastInfo.scale = 1.0;
 			}
 			if (coordinatesScale && needRescale)
 			{
 				*coordinatesScale = BestScale(diagonal);
+
+				//save info for next time
+				if (!s_lastInfo.valid)
+				{
+					s_lastInfo.shift = CCVector3d(0, 0, 0);
+				}
+				s_lastInfo.valid = true;
+				s_lastInfo.scale = *coordinatesScale;
 			}
+
 			return true;
 		}
 
@@ -154,25 +208,23 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		}
 
 		//add "suggested" entry
-		int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested", shift, scale));
+		int index = sasDlg.addShiftInfo(ShiftInfo("Suggested", shift, scale));
 		sasDlg.setCurrentProfile(index);
 		//add "last" entry (if available)
+		if (s_lastInfo.valid)
 		{
-			ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
-			if (sasDlg.getLast(lastInfo))
-			{
-				sasDlg.addShiftInfo(lastInfo);
-			}
+			sasDlg.addShiftInfo(s_lastInfo);
 		}
 		//add entries from file (if any)
 		sasDlg.addFileInfo();
+		
 		//automatically make the first available shift that works
 		//(different than the suggested one) active
 		{
-			for (size_t i=static_cast<size_t>(std::max(0,index+1)); i<sasDlg.infoCount(); ++i)
+			for (size_t i = static_cast<size_t>(std::max(0, index + 1)); i < sasDlg.infoCount(); ++i)
 			{
-				ccShiftAndScaleCloudDlg::ShiftInfo info;
-				if (sasDlg.getInfo(i,info))
+				ShiftInfo info;
+				if (sasDlg.getInfo(i, info))
 				{
 					//check if they work
 					if (	!NeedShift((CCVector3d(P) + info.shift) * info.scale )
@@ -187,6 +239,11 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		sasDlg.showTitle(needShift || needRescale);
 		if (sasDlg.exec())
 		{
+			//save info for next time
+			s_lastInfo.valid = true;
+			s_lastInfo.shift = sasDlg.getShift();
+			s_lastInfo.scale = sasDlg.getScale();
+
 			coordinatesShift = sasDlg.getShift();
 			if (coordinatesScale)
 			{
@@ -196,6 +253,7 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 			{
 				*applyAll = sasDlg.applyAll();
 			}
+			
 			return true;
 		}
 	}

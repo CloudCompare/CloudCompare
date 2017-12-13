@@ -312,6 +312,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_hotZone(nullptr)
 	, m_showCursorCoordinates(false)
 	, m_autoPickPivotAtCenter(true)
+	, m_ignoreMouseReleaseEvent(false)
 {
 	//start internal timer
 	m_timer.start();
@@ -411,12 +412,14 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 			displayNewMessage("Warning: sun light is OFF", ccGLWindow::LOWER_LEFT_MESSAGE, false, 2, SUN_LIGHT_STATE_MESSAGE);
 	}
 
+	m_deferredPickingTimer.setSingleShot(true);
+	m_deferredPickingTimer.setInterval(100);
+
 	//signal/slot connections
 	connect(this, &ccGLWindow::itemPickedFast, this, &ccGLWindow::onItemPickedFast, Qt::DirectConnection);
 	connect(&m_scheduleTimer, &QTimer::timeout, this, &ccGLWindow::checkScheduledRedraw);
-	connect(&m_autoRefreshTimer, &QTimer::timeout, this, [=] () {
-		update();
-	});
+	connect(&m_autoRefreshTimer, &QTimer::timeout, this, [=] () { update();	});
+	connect(&m_deferredPickingTimer, SIGNAL(timeout()), SLOT(doPicking()));
 
 #ifndef CC_GL_WINDOW_USE_QWINDOW
 	setAcceptDrops(true);
@@ -3677,6 +3680,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 {
 	m_mouseMoved = false;
 	m_mouseButtonPressed = true;
+	m_ignoreMouseReleaseEvent = false;
 	m_lastMousePos = event->pos();
 
 	if ((event->buttons() & Qt::RightButton)
@@ -3723,6 +3727,9 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 void ccGLWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
+	m_deferredPickingTimer.stop(); //prevent the picking process from starting
+	m_ignoreMouseReleaseEvent = true;
+
 	const int x = event->x();
 	const int y = event->y();
 
@@ -4094,6 +4101,12 @@ bool ccGLWindow::processClickableItems(int x, int y)
 
 void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 {
+	if (m_ignoreMouseReleaseEvent)
+	{
+		m_ignoreMouseReleaseEvent = false;
+		return;
+	}
+	
 	bool mouseHasMoved = m_mouseMoved;
 	//setLODEnabled(false, false); //DGM: why?
 
@@ -4177,69 +4190,9 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 			//picking?
 			if (m_timer.elapsed() < m_lastClickTime_ticks + CC_MAX_PICKING_CLICK_DURATION_MS) //in msec
 			{
-				int x = event->x();
-				int y = event->y();
-
-				//first test if the user has clicked on a particular item on the screen
-				if (processClickableItems(x, y))
-				{
-					event->accept();
-				}
-				else if ((m_pickingMode != NO_PICKING)
-					|| (m_interactionFlags & INTERACT_2D_ITEMS))
-				{
-					if (m_interactionFlags & INTERACT_2D_ITEMS)
-					{
-						//label selection
-						updateActiveItemsList(event->x(), event->y(), false);
-						if (!m_activeItems.empty())
-						{
-							if (m_activeItems.size() == 1)
-							{
-								ccInteractor* pickedObj = m_activeItems.front();
-								cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
-								if (label && !label->isSelected())
-								{
-									emit entitySelectionChanged(label);
-									QApplication::processEvents();
-								}
-							}
-
-							//interaction with item(s) such as labels, etc.
-							//DGM TODO: to activate only if some items take left clicks into account!
-							//for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
-							//if ((*it)->acceptClick(x,y,Qt::LeftButton))
-							//{
-							//	event->accept();
-							//	redraw();
-							//	return;
-							//}
-
-							event->accept();
-						}
-					}
-					else
-					{
-						assert(m_activeItems.empty());
-					}
-
-					if (m_activeItems.empty() && m_pickingMode != NO_PICKING)
-					{
-						//perform standard picking
-						PICKING_MODE pickingMode = m_pickingMode;
-
-						//shift+click = point/triangle picking
-						if (pickingMode == ENTITY_PICKING && (QApplication::keyboardModifiers() & Qt::ShiftModifier))
-						{
-							pickingMode = LABEL_PICKING;
-						}
-
-						PickingParameters params(pickingMode, event->x(), event->y(), m_pickRadius, m_pickRadius);
-						startPicking(params);
-
-						event->accept();
-					}
-				}
+				m_lastMousePos = event->pos(); //just in case (it should be already at this position)
+				m_deferredPickingTimer.start();
+				//doPicking();
 			}
 		}
 
@@ -4247,6 +4200,76 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	}
 
 	refresh(false);
+}
+
+void ccGLWindow::doPicking()
+{
+	int x = m_lastMousePos.x();
+	int y = m_lastMousePos.y();
+
+	if (x < 0 || y < 0)
+	{
+		assert(false);
+		return;
+	}
+
+	//first test if the user has clicked on a particular item on the screen
+	if (processClickableItems(x, y))
+	{
+		return;
+	}
+	
+	if (	(m_pickingMode != NO_PICKING)
+		||	(m_interactionFlags & INTERACT_2D_ITEMS))
+	{
+		if (m_interactionFlags & INTERACT_2D_ITEMS)
+		{
+			//label selection
+			updateActiveItemsList(x, y, false);
+			if (!m_activeItems.empty())
+			{
+				if (m_activeItems.size() == 1)
+				{
+					ccInteractor* pickedObj = m_activeItems.front();
+					cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
+					if (label && !label->isSelected())
+					{
+						emit entitySelectionChanged(label);
+						QApplication::processEvents();
+					}
+				}
+
+				//interaction with item(s) such as labels, etc.
+				//DGM TODO: to activate only if some items take left clicks into account!
+				//for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
+				//if ((*it)->acceptClick(x,y,Qt::LeftButton))
+				//{
+				//	event->accept();
+				//	redraw();
+				//	return;
+				//}
+			}
+		}
+		else
+		{
+			assert(m_activeItems.empty());
+		}
+
+		if (m_activeItems.empty() && m_pickingMode != NO_PICKING)
+		{
+			//perform standard picking
+			PICKING_MODE pickingMode = m_pickingMode;
+
+			//shift+click = point/triangle picking
+			if (pickingMode == ENTITY_PICKING && (QApplication::keyboardModifiers() & Qt::ShiftModifier))
+			{
+				pickingMode = LABEL_PICKING;
+			}
+
+			PickingParameters params(pickingMode, x, y, m_pickRadius, m_pickRadius);
+			startPicking(params);
+		}
+	}
 }
 
 void ccGLWindow::wheelEvent(QWheelEvent* event)

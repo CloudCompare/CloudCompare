@@ -2389,19 +2389,19 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 unsigned char DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordinateType radius) const
 {
 	static const PointCoordinateType c_neighbourhoodSizeExtractionFactor = static_cast<PointCoordinateType>(2.5);
-	PointCoordinateType aim = radius / c_neighbourhoodSizeExtractionFactor;
+	PointCoordinateType aim = std::max<PointCoordinateType>(0, radius / c_neighbourhoodSizeExtractionFactor);
 	
 	int level = 1;
-	PointCoordinateType minValue = getCellSize(1)-aim;
+	PointCoordinateType minValue = getCellSize(1) - aim;
 	minValue *= minValue;
-	for (int i=2; i<=MAX_OCTREE_LEVEL; ++i)
+	for (int i = 2; i <= MAX_OCTREE_LEVEL; ++i)
 	{
 		//we need two points per cell ideally
 		if (m_averageCellPopulation[i] < 1.5)
 			break;
-		
+
 		//The level with cell size as near as possible to the aim
-		PointCoordinateType cellSizeDelta = getCellSize(i)-aim;
+		PointCoordinateType cellSizeDelta = getCellSize(i) - aim;
 		cellSizeDelta *= cellSizeDelta;
 
 		if (cellSizeDelta < minValue)

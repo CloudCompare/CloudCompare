@@ -24,6 +24,9 @@
 //local
 #include "qCC_io.h"
 
+//Qt
+#include <QString>
+
 class ccHObject;
 
 //! Helper class to handle big coordinates shift/scale (typically while loading entities)
@@ -64,6 +67,23 @@ public:
 	static double MaxBoundgBoxDiagonal() { return MAX_DIAGONAL_LENGTH; }
 	//! Sets the max bounding-box diagonal
 	static void SetMaxBoundgBoxDiagonal(double value) { MAX_DIAGONAL_LENGTH = value; }
+
+public: //Shift and scale info
+
+	//! Shift and scale info
+	struct ShiftInfo
+	{
+		CCVector3d shift;
+		double scale;
+		QString name;
+
+		//! Default constructor
+		ShiftInfo(QString str = QString("unnamed")) : shift(0, 0, 0), scale(1.0), name(str) {}
+		//! Constructor from a vector and a scale value
+		ShiftInfo(QString str, const CCVector3d& T, double s = 1.0) : shift(T), scale(s), name(str) {}
+	};
+
+	static bool GetLast(ShiftInfo& info);
 
 protected:
 	

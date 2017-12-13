@@ -16,15 +16,15 @@
 //##########################################################################
 
 #include "ccGraphicalTransformationTool.h"
-
-#include "ccMesh.h"
-
-#include "ccGLWindow.h"
 #include "mainwindow.h"
+
+#include <ccGLUtils.h>
+#include <ccGLWindow.h>
 
 //qCC_db
 #include <ccLog.h>
-#include <ccGLUtils.h>
+#include <ccMesh.h>
+
 
 ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 	: ccOverlayDialog(parent)
@@ -33,16 +33,16 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 {
 	setupUi(this);
 
-	connect(pauseButton,	SIGNAL(toggled(bool)),	this, SLOT(pause(bool)));
-	connect(okButton,		SIGNAL(clicked()),		this, SLOT(apply()));
-	connect(razButton,		SIGNAL(clicked()),		this, SLOT(reset()));
-	connect(cancelButton,	SIGNAL(clicked()),		this, SLOT(cancel()));
+	connect(pauseButton,    &QAbstractButton::toggled,	this, &ccGraphicalTransformationTool::pause);
+	connect(okButton,       &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::apply);
+	connect(razButton,	  &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::reset);
+	connect(cancelButton,   &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::cancel);
 
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Space); //space bar for the "pause" button
 	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
 	addOverridenShortcut(Qt::Key_Return); //return key for the "ok" button
-	connect(this, SIGNAL(shortcutTriggered(int)), this, SLOT(onShortcutTriggered(int)));
+	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalTransformationTool::onShortcutTriggered);
 }
 
 ccGraphicalTransformationTool::~ccGraphicalTransformationTool()
@@ -200,8 +200,8 @@ bool ccGraphicalTransformationTool::start()
 	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
-	connect(m_associatedWin, SIGNAL(rotation(const ccGLMatrixd&)),		this, SLOT(glRotate(const ccGLMatrixd&)));
-	connect(m_associatedWin, SIGNAL(translation(const CCVector3d&)),	this, SLOT(glTranslate(const CCVector3d&)));
+	connect(m_associatedWin, &ccGLWindow::rotation, this, &ccGraphicalTransformationTool::glRotate);
+	connect(m_associatedWin, &ccGLWindow::translation, this, &ccGraphicalTransformationTool::glTranslate);
 	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
 	m_associatedWin->displayNewMessage("[Rotation/Translation mode]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 	m_associatedWin->redraw(true, false);

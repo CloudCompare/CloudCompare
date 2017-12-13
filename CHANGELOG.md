@@ -1,11 +1,37 @@
 CloudCompare version history
 ============================
 
+v2.10.alpha - XX/XX/201X
+----------------------
+
+- enhancements:
+
+	* Labels can now be imported from ASCII files:
+		- new column role in the ASCII loading dialog: "Labels"
+		- labels can be created from textual or numerical columns
+		- one "2D label" entity is created per point (don't try to load too many of them ;)
+		- labels are displayed in 3D by default (i.e. next to each point), but they can also be displayed in 2D (see the dedicated check-box)
+
+	* FBX units:
+		- default FBX units are 'cm'
+		- if a FBX file with other units is imported, CC will now store this information as meta-data and will set it correctly
+			if the corresponding meshes are exported as FBX again
+	
+- Bug fix:
+
+	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values
+	* Point picking was performed on each click, even when double-clicking. This could actually prevent the double-click from
+		being recognized as such (as the picking could be too slow!)
+	* Command line mode: when loading at least two LAS files with the 'GLOBAL_SHIFT AUTO' option, if the LAS files had different AND small LAS Shift
+	* Point picking on a mesh (i.e. mainly in the point-pair based registration tool) could select the wrong point on the triangle, or even a wrong triangle
+	* Raster I/O: when importing a raster file, the corresponding point cloud was shifted of half a pixel
+	* The RASTERIZE command line could make CC crash at the end of the process
+
 v2.9.1 - 11/03/2017
 ----------------------
 
 - enhancements:
-	
+
 	* Primitive factory
 		- sphere center can now be set before its creation (either manually, or via the clipboard if the string is 'x y z')
 

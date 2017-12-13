@@ -659,6 +659,9 @@ protected slots:
 	//! OpenGL KHR debug log
 	void handleLoggedMessage(const QOpenGLDebugMessage&);
 
+	//! Performs standard picking at the last clicked mouse position (see m_lastMousePos)
+	void doPicking();
+
 signals:
 
 	//! Signal emitted when an entity is selected in the 3D view
@@ -1381,6 +1384,12 @@ protected: //members
 
 	//! Candidate pivot point (will be used when the mouse is released)
 	CCVector3d m_autoPivotCandidate;
+
+	//! Deferred picking
+	QTimer m_deferredPickingTimer;
+
+	//! Ignore next mouse release event
+	bool m_ignoreMouseReleaseEvent;
 
 private:
 

@@ -15,55 +15,30 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_M3C2_PLUGIN_HEADER
-#define Q_M3C2_PLUGIN_HEADER
+#ifndef Q_M3C2_PROCESS_HEADER
+#define Q_M3C2_PROCESS_HEADER
 
-//qCC
-#include "../ccStdPluginInterface.h"
+//Local
+#include "qM3C2Dialog.h"
 
-//qCC_db
-#include <ccHObject.h>
+class ccMainAppInterface;
 
-//Qt
-#include <QObject>
-
-//! M3C2 plugin
+//! M3C2 process
 /** See "Accurate 3D comparison of complex topography with terrestrial laser scanner:
 	application to the Rangitikei canyon (N-Z)", Lague, D., Brodu, N. and Leroux, J.,
 	2013, ISPRS journal of Photogrammmetry and Remote Sensing
 **/
-class qM3C2Plugin : public QObject, public ccStdPluginInterface
+class qM3C2Process
 {
-	Q_OBJECT
-	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qM3C2")
-
 public:
+	
+	static bool Compute(const qM3C2Dialog& dlg,
+						QString& errorMessage,
+						ccPointCloud*& outputCloud,
+						bool allowDialogs,
+						QWidget* parentWidget = nullptr,
+						ccMainAppInterface* app = nullptr);
 
-	//! Default constructor
-	qM3C2Plugin(QObject* parent = nullptr);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "M3C2 distance"; }
-	virtual QString getDescription() const { return "Multiscale Model to Model Cloud Comparison (M3C2)"; }
-	virtual QIcon getIcon() const;
-
-	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
-	virtual void getActions(QActionGroup& group) override;
-	virtual void registerCommands(ccCommandLineInterface* cmd) override;
-
-protected slots:
-
-	void doAction();
-
-protected:
-
-	//! Default action
-	QAction* m_action;
-
-	//! Currently selected entities
-	ccHObject::Container m_selectedEntities;
 };
 
-#endif //Q_M3C2_PLUGIN_HEADER
+#endif //Q_M3C2_PROCESS_HEADER

@@ -32,8 +32,9 @@
 #include <QMessageBox>
 #include <QThread>
 
-/*** HELPERS ***/
+static bool s_firstTimeInit = true;
 
+/*** HELPERS ***/
 static QString GetEntityName(ccHObject* obj)
 {
 	if (!obj)
@@ -66,7 +67,7 @@ static ccPointCloud* GetCloudFromCombo(QComboBox* comboBox, ccHObject* dbRoot)
 		assert(false);
 		return 0;
 	}
-	assert(comboBox->userData(index));
+	assert(comboBox->itemData(index).isValid());
 	unsigned uniqueID = comboBox->itemData(index).toUInt();
 	ccHObject* item = dbRoot->find(uniqueID);
 	if (!item || !item->isA(CC_TYPES::POINT_CLOUD))
@@ -83,9 +84,9 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 	: QDialog(app ? app->getMainWindow() : 0)
 	, Ui::M3C2Dialog()
 	, m_app(app)
-	, m_cloud1(0)
-	, m_cloud2(0)
-	, m_firstTimeInit(true)
+	, m_cloud1(nullptr)
+	, m_cloud2(nullptr)
+	, m_corePointsCloud(nullptr)
 {
 	setupUi(this);
 
@@ -231,11 +232,11 @@ void qM3C2Dialog::setClouds(ccPointCloud* cloud1, ccPointCloud* cloud2)
 	showCloud2CheckBox->setChecked(cloud2->isVisible());
 	showCloud2CheckBox->blockSignals(false);
 
-	if (m_firstTimeInit)
+	if (s_firstTimeInit)
 	{
 		//on initialization, try to guess some parameters from the input clouds
 		guessParams(true);
-		m_firstTimeInit = false;
+		s_firstTimeInit = false;
 	}
 
 	setupPrecisionMapsTab();
@@ -247,9 +248,13 @@ void qM3C2Dialog::ifUseOtherCloudForCorePoints(bool state)
 	normParamsFrame->setEnabled(!useCloud1NormalsCheckBox->isEnabled() || !useCloud1NormalsCheckBox->isChecked());
 }
 
-ccPointCloud* qM3C2Dialog::getCorePointsCloud()
+ccPointCloud* qM3C2Dialog::getCorePointsCloud() const
 {
-	if (cpUseCloud1RadioButton->isChecked())
+	if (m_corePointsCloud)
+	{
+		return m_corePointsCloud;
+	}
+	else if (cpUseCloud1RadioButton->isChecked())
 	{
 		return m_cloud1;
 	}
@@ -260,11 +265,11 @@ ccPointCloud* qM3C2Dialog::getCorePointsCloud()
 	}
 	else
 	{
-		return 0;
+		return nullptr;
 	}
 }
 
-ccPointCloud* qM3C2Dialog::getNormalsOrientationCloud()
+ccPointCloud* qM3C2Dialog::getNormalsOrientationCloud() const
 {
 	if (normOriUseCloudRadioButton->isChecked())
 	{
@@ -273,7 +278,7 @@ ccPointCloud* qM3C2Dialog::getNormalsOrientationCloud()
 	}
 	else
 	{
-		return 0;
+		return nullptr;
 	}
 }
 
@@ -530,18 +535,22 @@ void qM3C2Dialog::loadParamsFromFile()
 		settings.setValue("currentPath", currentPath);
 	}
 
-	//load file
-	{
-		QSettings fileSettings(filename, QSettings::IniFormat);
-		//check validity
-		if (!fileSettings.contains("M3C2VER"))
-		{
-			QMessageBox::critical(this, "Invalid file", "File doesn't seem to be a valid M3C2 parameters file ('M3C2VER' not found)!");
-			return;
-		}
+	loadParamsFromFile(filename);
+}
 
-		loadParamsFrom(fileSettings);
+bool qM3C2Dialog::loadParamsFromFile(QString filename)
+{
+	QSettings fileSettings(filename, QSettings::IniFormat);
+	//check validity
+	if (!fileSettings.contains("M3C2VER"))
+	{
+		QMessageBox::critical(this, "Invalid file", "File doesn't seem to be a valid M3C2 parameters file ('M3C2VER' not found)!");
+		return false;
 	}
+
+	loadParamsFrom(fileSettings);
+
+	return true;
 }
 
 void qM3C2Dialog::saveParamsToFile()

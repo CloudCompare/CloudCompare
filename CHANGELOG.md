@@ -14,6 +14,16 @@ v2.10.alpha - XX/XX/201X
 		- and eventually call the -M3C2 option with the parameter file as argument:
 			CloudCompare -O cloud1 -O cloud2 (-O core_points) -M3C2 parameters_file
 
+	* The "Classify" option of the Canupo plugin can now be called from the command line:
+		- you'll need a trained classifier (.prm file)
+		- main option: -CANUPO_CLASSIFY classifier.prm
+		- confidence threshold:
+			* -USE_CONFIDENCE {threshold}  (threshold must be between 0 and 1)
+			* (use the 'SET_ACTIVE_SF' after loading a cloud to set the active scalar field if
+				you want it to be used to refine the classification)
+		- syntax:
+			CloudCompare -O cloud1 ... -O cloudN -CANUPO_CLASSIFY (-USE_CONFIDENCE 0.9) classifier.prm
+
 	* Labels can now be imported from ASCII files:
 		- new column role in the ASCII loading dialog: "Labels"
 		- labels can be created from textual or numerical columns

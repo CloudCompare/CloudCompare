@@ -499,7 +499,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, 
 		cloud->addScalarField(sfDesc.sf);
 
 		//for now we save the 'precision' info as meta-data of the cloud
-		if (!isnan(sfDesc.precision))
+		if (!std::isnan(sfDesc.precision))
 		{
 			cloud->setMetaData(QString("{%1}.precision").arg(sfDesc.name), sfDesc.precision);
 		}

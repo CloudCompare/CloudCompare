@@ -496,9 +496,9 @@ public:
 	void addPoint(const PointViewPtr buffer, unsigned int pointIndex)
 	{
 		//determine the right tile
-		CCVector3d Prel = CCVector3d(buffer->getFieldAs<double>(Id::X, pointIndex),
-			buffer->getFieldAs<double>(Id::Y, pointIndex),
-			buffer->getFieldAs<double>(Id::Z, pointIndex));
+		CCVector3d Prel = CCVector3d(	buffer->getFieldAs<double>(Id::X, pointIndex),
+										buffer->getFieldAs<double>(Id::Y, pointIndex),
+										buffer->getFieldAs<double>(Id::Z, pointIndex));
 		Prel -= bbMinCorner;
 		int ii = static_cast<int>(floor(Prel.u[X] / tileDiag.u[X]));
 		int ji = static_cast<int>(floor(Prel.u[Y] / tileDiag.u[Y]));
@@ -928,8 +928,8 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Y)),
 						static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Z)));
 
-      //backup input global parameters 
-			ccGlobalShiftManager::Mode csBackupMode = parameters.shiftHandlingMode;
+			//backup input global parameters 
+			ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
 			bool useLasShift = false;
 			//set the lasShift as default if none was provided 
 			if (lasShift.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
@@ -952,7 +952,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			}
 
 			//restore previous parameters
-			parameters.shiftHandlingMode = csBackupMode;
+			parameters.shiftHandlingMode = csModeBackup;
 		}
 
 		CCVector3 P(static_cast<PointCoordinateType>(point.getFieldAs<double>(Id::X) + Pshift.x),

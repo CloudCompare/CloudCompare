@@ -927,20 +927,22 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			CCVector3d P(static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::X)),
 						static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Y)),
 						static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Z)));
-			//backup input global parameters 
+
+      //backup input global parameters 
 			ccGlobalShiftManager::Mode csBackupMode = parameters.shiftHandlingMode;
 			bool useLasShift = false;
 			//set the lasShift as default if none was provided 
 			if (lasShift.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
 			{
-				useLasShift = true;
-				Pshift = lasShift;
-
-				if (csBackupMode != ccGlobalShiftManager::Mode::NO_DIALOG_AUTO_SHIFT &&
-					csBackupMode != ccGlobalShiftManager::Mode::NO_DIALOG)
-				{
-					parameters.shiftHandlingMode = ccGlobalShiftManager::Mode::ALWAYS_DISPLAY_DIALOG;
-				}
+					if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
+					{
+						useLasShift = true;
+						Pshift = lasShift;
+						if (csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
+						{
+							parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
+						}
+					}
 			}
 
 			if (HandleGlobalShift(P, Pshift, parameters, useLasShift))

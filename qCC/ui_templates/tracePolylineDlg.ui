@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>406</width>
+    <width>433</width>
     <height>26</height>
    </rect>
   </property>
@@ -150,6 +150,23 @@
      <property name="icon">
       <iconset resource="../icones.qrc">
        <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="continueToolButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Continue the current polyline edition</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/images/ccAddConstSF.png</normaloff>:/CC/images/ccAddConstSF.png</iconset>
+     </property>
+     <property name="shortcut">
+      <string>C</string>
      </property>
     </widget>
    </item>

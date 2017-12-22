@@ -18,32 +18,20 @@
 #include "ccClippingBoxTool.h"
 
 //Local
-#include "ccGLWindow.h"
-#include "mainwindow.h"
-#include "ccClippingBoxRepeatDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
+#include "ccClippingBoxRepeatDlg.h"
 #include "ccContourExtractor.h"
 #include "ccCropTool.h"
+#include "ccGLWindow.h"
+#include "mainwindow.h"
 
 //qCC_db
-#include <ccLog.h>
-#include <ccHObject.h>
 #include <ccClipBox.h>
-#include <ccGenericPointCloud.h>
-#include <ccGenericMesh.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
-#include <ccPolyline.h>
-#include <ccProgressDialog.h>
-
-//CCLib
-#include <ReferenceCloud.h>
-#include <Neighbourhood.h>
 
 //Qt
 #include <QMessageBox>
-#include <QInputDialog>
-#include <QElapsedTimer>
 
 //Last contour unique ID
 static std::vector<unsigned> s_lastContourUniqueIDs;
@@ -833,7 +821,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 								{
 									if (generateRandomColors)
 									{
-										ccPointCloud* croppedVertices = ccHObjectCaster::ToPointCloud(croppedVertices);
+										ccPointCloud* croppedVertices = ccHObjectCaster::ToPointCloud(mesh->getAssociatedCloud());
 										if (croppedVertices)
 										{
 											ccColor::Rgb col = ccColor::Generator::Random();
@@ -846,6 +834,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 												k = indexMaxs[2];
 											}
 											croppedVertices->showColors(true);
+											mesh->showColors(true);
 										}
 									}
 

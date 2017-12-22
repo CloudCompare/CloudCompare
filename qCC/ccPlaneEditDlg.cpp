@@ -55,15 +55,24 @@ ccPlaneEditDlg::ccPlaneEditDlg(ccPickingHub* pickingHub, QWidget* parent)
 	dipDoubleSpinBox->setValue(s_dip);
 	dipDirDoubleSpinBox->setValue(s_dipDir);
 	upwardCheckBox->setChecked(s_upward);
+	onDipDirChanged(0); //0 = fake argument
 	wDoubleSpinBox->setValue(s_width);
 	hDoubleSpinBox->setValue(s_height);
 	cxAxisDoubleSpinBox->setValue(s_center.x);
 	cyAxisDoubleSpinBox->setValue(s_center.y);
 	czAxisDoubleSpinBox->setValue(s_center.z);
 
-	connect(pickCenterToolButton, SIGNAL(toggled(bool)), this, SLOT(pickPointAsCenter(bool)));
+	connect(pickCenterToolButton,	SIGNAL(toggled(bool)),			this, SLOT(pickPointAsCenter(bool)));
+	connect(dipDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onDipDirChanged(double)));
+	connect(dipDirDoubleSpinBox,	SIGNAL(valueChanged(double)),	this, SLOT(onDipDirChanged(double)));
+	connect(upwardCheckBox,			SIGNAL(toggled(bool)),			this, SLOT(onDipDirModified(bool)));
+	connect(nxDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onNormalChanged(double)));
+	connect(nyDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onNormalChanged(double)));
+	connect(nzDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onNormalChanged(double)));
+
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveParamsAndAccept()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(deleteLater()));
+
 	//auto disable picking mode on quit
 	connect(this, &QDialog::finished, [&]()
 	{
@@ -108,12 +117,68 @@ void ccPlaneEditDlg::saveParamsAndAccept()
 			plane->setDisplay(m_pickingWin);
 		}
 		if (MainWindow::TheInstance())
+		{
 			MainWindow::TheInstance()->addToDB(plane);
+		}
+		else
+		{
+			delete plane;
+			plane = nullptr;
+		}
 	}
 
 	accept();
 
 	deleteLater();
+}
+
+void ccPlaneEditDlg::onDipDirModified(bool)
+{
+	onDipDirChanged(0); //0 = fake argument
+}
+
+void ccPlaneEditDlg::onDipDirChanged(double)
+{
+	double dip = dipDoubleSpinBox->value();
+	double dipDir = dipDirDoubleSpinBox->value();
+	bool upward = upwardCheckBox->isChecked();
+	CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(static_cast<PointCoordinateType>(dip), static_cast<PointCoordinateType>(dipDir), upward);
+
+	nxDoubleSpinBox->blockSignals(true);
+	nyDoubleSpinBox->blockSignals(true);
+	nzDoubleSpinBox->blockSignals(true);
+	
+	nxDoubleSpinBox->setValue(Nd.x);
+	nyDoubleSpinBox->setValue(Nd.y);
+	nzDoubleSpinBox->setValue(Nd.z);
+	
+	nxDoubleSpinBox->blockSignals(false);
+	nyDoubleSpinBox->blockSignals(false);
+	nzDoubleSpinBox->blockSignals(false);
+}
+
+void ccPlaneEditDlg::onNormalChanged(double)
+{
+	CCVector3 Nd;
+	Nd.x = nxDoubleSpinBox->value();
+	Nd.y = nyDoubleSpinBox->value();
+	Nd.z = nzDoubleSpinBox->value();
+	Nd.normalize();
+
+	PointCoordinateType dip = 0, dipDir = 0;
+	ccNormalVectors::ConvertNormalToDipAndDipDir(Nd, dip, dipDir);
+
+	dipDoubleSpinBox->blockSignals(true);
+	dipDirDoubleSpinBox->blockSignals(true);
+	upwardCheckBox->blockSignals(true);
+	
+	dipDoubleSpinBox->setValue(dip);
+	dipDirDoubleSpinBox->setValue(dipDir);
+	upwardCheckBox->setChecked(Nd.z >= 0);
+	
+	dipDoubleSpinBox->blockSignals(false);
+	dipDirDoubleSpinBox->blockSignals(false);
+	upwardCheckBox->blockSignals(false);
 }
 
 void ccPlaneEditDlg::pickPointAsCenter(bool state)
@@ -166,12 +231,28 @@ void ccPlaneEditDlg::initWithPlane(ccPlane* plane)
 	}
 	
 	CCVector3 N = plane->getNormal();
-	PointCoordinateType dip = 0, dipDir = 0;
-	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
-	dipDoubleSpinBox->setValue(dip);
-	dipDirDoubleSpinBox->setValue(dipDir);
-	upwardCheckBox->setChecked(N.z >= 0);
+	//init the dialog
+	nxDoubleSpinBox->blockSignals(true);
+	nyDoubleSpinBox->blockSignals(true);
+	nzDoubleSpinBox->blockSignals(true);
+
+	nxDoubleSpinBox->setValue(N.x);
+	nyDoubleSpinBox->setValue(N.y);
+	nzDoubleSpinBox->setValue(N.z);
+
+	nxDoubleSpinBox->blockSignals(false);
+	nyDoubleSpinBox->blockSignals(false);
+	nzDoubleSpinBox->blockSignals(false);
+
+	onNormalChanged(0);
+	//PointCoordinateType dip = 0, dipDir = 0;
+	//ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
+
+	//dipDoubleSpinBox->setValue(dip);
+	//dipDirDoubleSpinBox->setValue(dipDir);
+	//upwardCheckBox->setChecked(N.z >= 0);
+
 	wDoubleSpinBox->setValue(plane->getXWidth());
 	hDoubleSpinBox->setValue(plane->getYWidth());
 	
@@ -206,12 +287,16 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 	ccGLMatrix trans;
 	bool needToApplyTrans = false;
 	bool needToApplyRot = false;
-	if ((C - Cd).norm2d() != 0)
+
+	needToApplyRot = (fabs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
+	needToApplyTrans = needToApplyRot || ((C - Cd).norm2d() != 0);
+
+	if (needToApplyTrans)
 	{
 		trans.setTranslation(-C);
 		needToApplyTrans = true;
 	}
-	if (fabs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon())
+	if (needToApplyRot)
 	{
 		ccGLMatrix rotation;
 		//special case: plane parallel to XY
@@ -226,7 +311,6 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 			rotation = ccGLMatrix::FromToRotation(N, Nd);
 		}
 		trans = rotation * trans;
-		needToApplyRot = true;
 	}
 	if (needToApplyTrans)
 	{
@@ -235,6 +319,9 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 	if (needToApplyRot || needToApplyTrans)
 	{
 		plane->applyGLTransformation_recursive(&trans);
+
+		ccLog::Print("[Plane edit] Applied transformation matrix:");
+		ccLog::Print(trans.toString(12, ' ')); //full precision
 	}
 
 	if (	plane->getXWidth() != width

@@ -21,6 +21,9 @@
 //Local
 #include "ccHObject.h"
 
+//Qt
+#include <QImage>
+
 class ccCameraSensor;
 
 //! Generic image

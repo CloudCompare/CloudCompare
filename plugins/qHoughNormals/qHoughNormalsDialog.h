@@ -24,10 +24,7 @@
 #include <QDialog>
 
 //System
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
-#include <math.h>
+#include <cmath>
 
 //! Dialog for Hough Normals dialog
 class qHoughNormalsDialog : public QDialog, public Ui::HoughNormalsDialog
@@ -59,7 +56,7 @@ public:
 		tSpinBox->setValue(params.T);
 		nPhiSpinBox->setValue(params.n_phi);
 		nRotSpinBox->setValue(params.n_rot);
-		tolAngleSpinBox->setValue(params.tol_angle_rad * 180 / M_PI);
+		tolAngleSpinBox->setValue(params.tol_angle_rad * 180.0 / M_PI);
 		kDensitySpinBox->setValue(params.k_density);
 		useDensityCheckBox->setChecked(params.use_density);
 	}
@@ -70,7 +67,7 @@ public:
 		params.T = tSpinBox->value();
 		params.n_phi = nPhiSpinBox->value();
 		params.n_rot = nRotSpinBox->value();
-		params.tol_angle_rad = tolAngleSpinBox->value() * M_PI / 180;
+		params.tol_angle_rad = tolAngleSpinBox->value() * M_PI / 180.0;
 		params.k_density = kDensitySpinBox->value();
 		params.use_density = useDensityCheckBox->isChecked();
 	}

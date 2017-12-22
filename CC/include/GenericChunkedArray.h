@@ -231,15 +231,17 @@ public:
 #ifdef CC_ENV_64
 		try
 		{
-			m_data.resize(capacity * N);
+			if (m_capacity < capacity)
+			{
+				m_data.resize(capacity * N);
+				m_capacity = capacity;
+			}
 		}
 		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			return false;
 		}
-
-		m_capacity = capacity;
 #else
 		while (m_capacity < capacity)
 		{
@@ -889,15 +891,17 @@ public:
 #ifdef CC_ENV_64
 		try
 		{
-			m_data.resize(capacity);
+			if (m_capacity < capacity)
+			{
+				m_data.resize(capacity);
+				m_capacity = capacity;
+			}
 		}
 		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			return false;
 		}
-
-		m_capacity = capacity;
 #else
 		while (m_capacity < capacity)
 		{

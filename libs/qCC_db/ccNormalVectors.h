@@ -19,7 +19,6 @@
 #define CC_NORMAL_VECTORS_HEADER
 
 //CCLib
-#include <DgmOctree.h>
 #include <GeometricalAnalysisTools.h>
 
 //Local

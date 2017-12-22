@@ -23,8 +23,6 @@
 //qCC_db
 #include <ccHObject.h>
 
-//Qt
-#include <QStringList>
 
 //! Dialog to select one or multiple items
 class ccItemSelectionDlg : public QDialog, public Ui::ItemSelectionDlg

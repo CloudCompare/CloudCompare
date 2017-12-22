@@ -17,6 +17,9 @@
 
 #include "ccPrimitiveFactoryDlg.h"
 
+//Qt
+#include <QClipboard>
+
 //qCC
 #include <mainwindow.h>
 
@@ -40,10 +43,12 @@ ccPrimitiveFactoryDlg::ccPrimitiveFactoryDlg(MainWindow* win)
 {
 	assert(m_win);
 
-	setupUi(this);	
+	setupUi(this);
 
 	connect(createPushButton, SIGNAL(clicked()), this, SLOT(createPrimitive()));
 	connect(closePushButton, SIGNAL(clicked()), this, SLOT(accept()));
+	connect(spherePosFromClipboardButton, &QPushButton::clicked, this, &ccPrimitiveFactoryDlg::setSpherePositionFromClipboard);
+	connect(spherePosToOriginButton, &QPushButton::clicked, this, &ccPrimitiveFactoryDlg::setSpherePositionToOrigin);
 }
 
 void ccPrimitiveFactoryDlg::createPrimitive()
@@ -73,7 +78,9 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 		//Sphere
 		case 2:
 			{
-				primitive = new ccSphere(static_cast<PointCoordinateType>(sphereRadiusDoubleSpinBox->value()));
+				ccGLMatrix transMat;
+				transMat.setTranslation(CCVector3f(spherePosXDoubleSpinBox->value(), spherePosYDoubleSpinBox->value(), spherePosZDoubleSpinBox->value()));
+				primitive = new ccSphere(static_cast<PointCoordinateType>(sphereRadiusDoubleSpinBox->value()), &transMat);
 			}
 			break;
 		//Cylinder
@@ -117,4 +124,37 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 	{
 		m_win->addToDB(primitive, true, true, true);
 	}
+}
+
+void ccPrimitiveFactoryDlg::setSpherePositionFromClipboard()
+{
+	QClipboard *clipboard = QApplication::clipboard();
+	if (clipboard != nullptr)
+	{
+		QStringList valuesStr = clipboard->text().split(QRegExp("\\s+"), QString::SkipEmptyParts);
+		if (valuesStr.size() == 3)
+		{
+			CCVector3d vec;
+			bool success;
+			for (unsigned i = 0; i < 3; ++i)
+			{
+				vec[i] = valuesStr[i].toDouble(&success);
+				if (!success)
+					break;
+			}
+			if (success)
+			{
+				spherePosXDoubleSpinBox->setValue(vec.x);
+				spherePosYDoubleSpinBox->setValue(vec.y);
+				spherePosZDoubleSpinBox->setValue(vec.z);
+			}
+		}
+	}
+}
+
+void ccPrimitiveFactoryDlg::setSpherePositionToOrigin()
+{
+	spherePosXDoubleSpinBox->setValue(0);
+	spherePosYDoubleSpinBox->setValue(0);
+	spherePosZDoubleSpinBox->setValue(0);
 }

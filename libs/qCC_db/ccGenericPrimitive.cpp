@@ -64,19 +64,20 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 	bool primHasFaceNorms = prim.hasTriNormals();
 
 	//reserve memory
-	if (verts->reserve(newVertCount)
-		&& (!primHasVertNorms || verts->reserveTheNormsTable())
-		&& reserve(newFacesCount)
-		&& (!primHasFaceNorms || m_triNormalIndexes || reservePerTriangleNormalIndexes()))
+	if (	verts->reserve(newVertCount)
+		&&	(!primHasVertNorms || verts->reserveTheNormsTable())
+		&&	reserve(newFacesCount)
+		&&	(!primHasFaceNorms || m_triNormalIndexes || reservePerTriangleNormalIndexes()))
 	{
 		//copy vertices & normals
 		ccGenericPointCloud* cloud = prim.getAssociatedCloud();
-		unsigned i;
-		for (i=0;i<cloud->size();++i)
+		for (unsigned i = 0; i < cloud->size(); ++i)
 		{
 			verts->addPoint(*cloud->getPoint(i));
 			if (primHasVertNorms)
+			{
 				verts->addNormIndex(cloud->getPointNormalIndex(i));
+			}
 		}
 
 		//copy face normals
@@ -87,7 +88,7 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 			unsigned primTriNormCount = primNorms->currentSize();
 
 			NormsIndexesTableType* normsTable = (m_triNormals ? m_triNormals : new NormsIndexesTableType());
-			if (!normsTable || !normsTable->reserve(triFacesNormCount+primTriNormCount))
+			if (!normsTable || !normsTable->reserve(triFacesNormCount + primTriNormCount))
 			{
 				ccLog::Error("[ccGenericPrimitive::operator +] Not enough memory!");
 				return *this;
@@ -100,20 +101,22 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 				assert(m_triNormals);
 			}
 
-			for (unsigned i=0; i<primTriNormCount; ++i)
+			for (unsigned i = 0; i < primTriNormCount; ++i)
+			{
 				normsTable->addElement(primNorms->getValue(i));
+			}
 		}
 
 		//copy faces
-		for (i=0;i<prim.size();++i)
+		for (unsigned i = 0; i < prim.size(); ++i)
 		{
 			const CCLib::VerticesIndexes* tsi = prim.getTriangleVertIndexes(i);
-			addTriangle(vertCount+tsi->i1,vertCount+tsi->i2,vertCount+tsi->i3);
+			addTriangle(vertCount + tsi->i1, vertCount + tsi->i2, vertCount + tsi->i3);
 			if (primHasFaceNorms)
 			{
 				const int* normIndexes = prim.m_triNormalIndexes->getValue(i);
 				assert(normIndexes);
-				addTriangleNormalIndexes(triFacesNormCount+normIndexes[0],triFacesNormCount+normIndexes[1],triFacesNormCount+normIndexes[2]);
+				addTriangleNormalIndexes(triFacesNormCount + normIndexes[0], triFacesNormCount + normIndexes[1], triFacesNormCount + normIndexes[2]);
 			}
 		}
 	}

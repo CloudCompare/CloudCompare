@@ -40,8 +40,8 @@
 
 //system
 #include <assert.h>
+#include <cmath>
 #include <vector>
-#include <math.h>
 
 template< typename T > class Isolines
 {
@@ -782,7 +782,7 @@ protected:
 	{
 		double dx = getContourX(contour, first) - getContourX(contour, second);
 		double dy = getContourY(contour, first) - getContourY(contour, second);
-		return sqrt(dx * dx + dy * dy);
+		return std::sqrt(dx * dx + dy * dy);
 	}
 
 	// return length from i to i + 1
@@ -798,7 +798,7 @@ protected:
 		double aftx = m_contourX[v2] - m_contourX[v1];
 		double afty = m_contourY[v2] - m_contourY[v1];
 
-		return sqrt(aftx * aftx + afty * afty);
+		return std::sqrt(aftx * aftx + afty * afty);
 	}
 
 	// return the relative angle change in radians
@@ -810,10 +810,10 @@ protected:
 		double aftx = getContourX(contour, i + 1) - getContourX(contour, i + 0);
 		double afty = getContourY(contour, i + 1) - getContourY(contour, i + 0);
 
-		double befl = sqrt(befx * befx + befy * befy); 
+		double befl = std::sqrt(befx * befx + befy * befy); 
 		befx /= befl;
 		befy /= befl;
-		double aftl = sqrt(aftx * aftx + afty * afty);
+		double aftl = std::sqrt(aftx * aftx + afty * afty);
 		aftx /= aftl;
 		afty /= aftl;		
 
@@ -822,7 +822,7 @@ protected:
 			dot = 1.0;
 		else if (dot < 0)
 			dot = 0;
-		double rads = acos(dot);
+		double rads = std::acos(dot);
 		assert(rads == rads); //otherwise it means that rads is NaN!!!
 
 		if (aftx * befy - afty * befx < 0)
@@ -1073,8 +1073,8 @@ public:
 		return w * h;
 	}
 
-	inline double getBBCenterX(int k) const { return (getBBMinX(k) + getBBMaxX(k)) / 2; }
-	inline double getBBCenterY(int k) const { return (getBBMinY(k) + getBBMaxY(k)) / 2; }
+	inline double getBBCenterX(int k) const { return (getBBMinX(k) + getBBMaxX(k)) / 2.0; }
+	inline double getBBCenterY(int k) const { return (getBBMinY(k) + getBBMaxY(k)) / 2.0; }
 };
 
 #endif //ISOLINES_HEADER

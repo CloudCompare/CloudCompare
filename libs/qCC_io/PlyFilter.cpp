@@ -766,7 +766,7 @@ static int texCoords_cb(p_ply_argument argument)
 	long length, value_index;
 	ply_get_argument_property(argument, NULL, &length, &value_index);
 	//unsupported/invalid coordinates!
-	if (length != 6 || length != 8)
+	if (length != 6 && length != 8)
 	{
 		s_invalidTexCoordinates = true;
 		return 1;

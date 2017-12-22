@@ -128,7 +128,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 			ccPointCloud* pc = new ccPointCloud();
 
 			CCVector3d origin(adfGeoTransform[0], adfGeoTransform[3], 0.0);
-			CCVector3d Pshift(0,0,0);
+			CCVector3d Pshift(0, 0, 0);
 			//check for 'big' coordinates
 			{
 				if (HandleGlobalShift(origin, Pshift, parameters))
@@ -164,14 +164,14 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 				// A ------ D
 				CCVector3d B = origin + Pshift; //origin is 'top left'
 				CCVector3d C = B;
-				C.x += (rasterX - 0.5) * adfGeoTransform[1];
-				C.y += (rasterX - 0.5) * adfGeoTransform[4];
+				C.x += rasterX * adfGeoTransform[1];
+				C.y += rasterX * adfGeoTransform[4];
 				CCVector3d D = C;
-				D.x += (rasterY - 0.5) * adfGeoTransform[2];
-				D.y += (rasterY - 0.5) * adfGeoTransform[5];
+				D.x += rasterY * adfGeoTransform[2];
+				D.y += rasterY * adfGeoTransform[5];
 				CCVector3d A = B;
-				A.x += (rasterY - 0.5) * adfGeoTransform[2];
-				A.y += (rasterY - 0.5) * adfGeoTransform[5];
+				A.x += rasterY * adfGeoTransform[2];
+				A.y += rasterY * adfGeoTransform[5];
 
 				pc->addPoint(CCVector3::fromArray(A.u));
 				pc->addPoint(CCVector3::fromArray(B.u));
@@ -194,8 +194,8 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 				{
 					for (int i = 0; i < rasterX; ++i)
 					{
-						double x = adfGeoTransform[0] + static_cast<double>(i) * adfGeoTransform[1] + static_cast<double>(j) * adfGeoTransform[2] + Pshift.x;
-						double y = adfGeoTransform[3] + static_cast<double>(i) * adfGeoTransform[4] + static_cast<double>(j) * adfGeoTransform[5] + Pshift.y;
+						double x = adfGeoTransform[0] + (static_cast<double>(i) + 0.5) * adfGeoTransform[1] + (static_cast<double>(j) + 0.5) * adfGeoTransform[2] + Pshift.x;
+						double y = adfGeoTransform[3] + (static_cast<double>(i) + 0.5) * adfGeoTransform[4] + (static_cast<double>(j) + 0.5) * adfGeoTransform[5] + Pshift.y;
 						CCVector3 P(static_cast<PointCoordinateType>(x), static_cast<PointCoordinateType>(y), static_cast<PointCoordinateType>(z));
 						pc->addPoint(P);
 					}

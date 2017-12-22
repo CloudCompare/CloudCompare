@@ -23,12 +23,12 @@
 #include <CCPlatform.h>
 
 #define CC_VER_NUM "2"
-#define CC_SUB_VER "9.beta" //2017-XX-XX
+#define CC_SUB_VER "10.alpha" //201X-XX-XX
 
 //! Returns current version as a string
 QString ccCommon::GetCCVersion(bool full/*=true*/)
 {
-	QString verStr = QString("%1.%2").arg(CC_VER_NUM).arg(CC_SUB_VER);
+	QString verStr = QString("%1.%2").arg(CC_VER_NUM, CC_SUB_VER);
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	verStr += " Stereo";
 #endif
@@ -53,7 +53,7 @@ QString ccCommon::GetCCVersion(bool full/*=true*/)
 		QString platform = "Unknown OS";
 #endif
 
-		verStr += QString(" [%1 %2]").arg(platform).arg(arch);
+		verStr += QString(" [%1 %2]").arg(platform, arch);
 	}
 	else
 	{

@@ -8,6 +8,7 @@
 
 //Qt
 #include <QString>
+#include <QMessageBox>
 
 //qCC_db
 #include <ccProgressDialog.h>
@@ -118,14 +119,28 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 				//local option confirmed, we can move on
 				cmd.arguments().pop_front();
 
-				outputCloud = true;
+				if (outputMesh)
+				{
+					cmd.warning("Can't output the grid as a mesh AND a cloud at the same time");
+				}
+				else
+				{
+					outputCloud = true;
+				}
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_MESH))
 			{
 				//local option confirmed, we can move on
 				cmd.arguments().pop_front();
 
-				outputMesh = true;
+				if (outputCloud)
+				{
+					cmd.warning("Can't output the grid as a mesh AND a cloud at the same time");
+				}
+				else
+				{
+					outputMesh = true;
+				}
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_RASTER_Z))
 			{
@@ -214,7 +229,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 
 		if (emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT && std::isnan(customHeight))
 		{
-			cmd.warning("[Rasterize] The filling stragety is set to 'fill with custom height' but not custom height was defined...");
+			cmd.warning("[Rasterize] The filling stragety is set to 'fill with custom height' but no custom height was defined...");
 			emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;
 		}
 
@@ -223,6 +238,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 			//if no export target is specified, we chose the cloud by default
 			outputCloud = true;
 		}
+		assert(outputCloud || outputMesh);
 
 		if (resample && !outputCloud && !outputMesh)
 		{
@@ -244,6 +260,25 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 			if (!ccRasterGrid::ComputeGridSize(vertDir, gridBBox, gridStep, gridWidth, gridHeight))
 			{
 				return cmd.error("Failed to compute the grid dimensions (check input cloud(s) bounding-box)");
+			}
+
+			cmd.print(QString("Grid size: %1 x %2").arg(gridWidth).arg(gridHeight));
+
+			if (gridWidth * gridHeight > (1 << 26)) //64 million of cells
+			{
+				if (cmd.silentMode())
+				{
+					ccLog::Warning("Huge grid detected!");
+				}
+				else
+				{
+					static bool s_firstTime = true;
+					if (s_firstTime && QMessageBox::warning(cmd.widgetParent(), "Raster grid", "Grid size is huge. Are you sure you want to proceed?\n(you can avoid this message by running in SILENT mode)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+					{
+						return ccLog::Warning("Process cancelled");
+					}
+					s_firstTime = false;
+				}
 			}
 
 			ccRasterGrid grid;
@@ -321,10 +356,13 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 
 				if (outputCloud)
 				{
+					assert(!outputMesh);
 					//replace current cloud by the restarized version
 					delete cloudDesc.pc;
 					cloudDesc.pc = rasterCloud;
 					cloudDesc.basename += QString("_RASTER");
+
+					rasterCloud = nullptr;
 
 					if (cmd.autoSaveMode())
 					{
@@ -335,8 +373,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 						}
 					}
 				}
-
-				if (outputMesh)
+				else if (outputMesh)
 				{
 					char errorStr[1024];
 					CCLib::GenericIndexedMesh* baseMesh = CCLib::PointProjectionTools::computeTriangulation
@@ -391,7 +428,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 				if (rasterCloud)
 				{
 					delete rasterCloud;
-					rasterCloud = 0;
+					rasterCloud = nullptr;
 				}
 			}
 
@@ -552,6 +589,25 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 			return cmd.error("Failed to compute the grid dimensions (check input cloud(s) bounding-box)");
 		}
 
+		cmd.print(QString("Grid size: %1 x %2").arg(gridWidth).arg(gridHeight));
+
+		if (gridWidth * gridHeight > (1 << 26)) //64 million of cells
+		{
+			if (cmd.silentMode())
+			{
+				ccLog::Warning("Huge grid detected!");
+			}
+			else
+			{
+				static bool s_firstTime = true;
+				if (s_firstTime && QMessageBox::warning(cmd.widgetParent(), "Volume grid", "Grid size is huge. Are you sure you want to proceed?\n(you can avoid this message by running in SILENT mode)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+				{
+					return ccLog::Warning("Process cancelled");
+				}
+				s_firstTime = false;
+			}
+		}
+
 		ccRasterGrid grid;
 		ccVolumeCalcTool::ReportInfo reportInfo;
 		if (ccVolumeCalcTool::ComputeVolume(
@@ -575,7 +631,7 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 
 			//save repot in a separate text file
 			{
-				QString txtFilename = QString("%1/%2").arg(desc->path).arg("VolumeCalculationReport");
+				QString txtFilename = QString("%1/VolumeCalculationReport").arg(desc->path);
 				if (cmd.addTimestamp())
 					txtFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
 				txtFilename += QString(".txt");

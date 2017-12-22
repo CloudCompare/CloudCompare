@@ -60,7 +60,8 @@ public:
 													qint64 fileSize,
 													unsigned maxCloudSize,
 													unsigned skipLines,
-													LoadParameters& parameters);
+													LoadParameters& parameters,
+													bool showLabelsIn2D = false);
 
 	//! Returns associated dialog (creates it if necessary)
 	static AsciiOpenDlg* GetOpenDialog(QWidget* parentWidget = 0);

@@ -21,35 +21,83 @@
 
 ccTrace::ccTrace(ccPointCloud* associatedCloud) : ccPolyline(associatedCloud)
 {
+	init(associatedCloud);
+}
+
+ccTrace::ccTrace(ccPolyline* obj)
+	: ccPolyline(obj->getAssociatedCloud())
+{
+	ccPointCloud* cld = dynamic_cast<ccPointCloud*>(obj->getAssociatedCloud());
+	assert(cld != nullptr); //should never be null
+	init(cld);
+
+	//load waypoints from metadata
+	if (obj->hasMetaData("waypoints"))
+	{
+		QString waypoints = obj->getMetaData("waypoints").toString();
+		for (QString str : waypoints.split(","))
+		{
+			if (str != "")
+			{
+				int pID = str.toInt();
+				m_waypoints.push_back(pID); //add waypoint
+			}
+		}
+
+		//store waypoints metadata
+		QVariantMap* map = new QVariantMap();
+		map->insert("waypoints", waypoints);
+		setMetaData(*map, true);
+	}
+
+	//load cost function from metadata
+	if (obj->hasMetaData("cost_function"))
+	{
+		ccTrace::COST_MODE = obj->getMetaData("cost_function").toInt();
+	}
+
+	setName(obj->getName());
+
+	//copy polyline into trace points
+	std::deque<int> seg;
+	for (unsigned i = 0; i < obj->size(); i++)
+	{
+		//copy into "trace" object
+		int pId = obj->getPointGlobalIndex(i); //get global point ID
+		seg.push_back(pId);
+
+		//also copy into polyline object
+		addPointIndex(pId);
+	}
+	m_trace.push_back(seg);
+
+	//recalculate trace if polyline data somehow lost [redundancy thing..]
+	if (obj->size() == 0)
+	{
+		m_trace.clear();
+		optimizePath(); //[slooooow...!]
+	}
+
+	computeBB(); //update bounding box (for picking)
+}
+
+void ccTrace::init(ccPointCloud* associatedCloud)
+{
 	setAssociatedCloud(associatedCloud); //the ccPolyline c'tor should do this, but just to be sure...
 	m_cloud = associatedCloud; //store pointer ourselves also
 	m_search_r = calculateOptimumSearchRadius(); //estimate the search radius we want to use
 
 	//store these info as object attributes
-	//object->hasMetaData("search_r") && object->hasMetaData("cost_function");
-	QVariantMap* map = new QVariantMap();
-	map->insert("search_r", m_search_r); 
-	QString cost_function = "";
-	if (COST_MODE & MODE::RGB)
-		cost_function += "RGB,";
-	if (COST_MODE & MODE::DARK)
-		cost_function += "Dark,";
-	if (COST_MODE & MODE::LIGHT)
-		cost_function += "Light,";
-	if (COST_MODE & MODE::CURVE)
-		cost_function += "Curve,";
-	if (COST_MODE & MODE::GRADIENT)
-		cost_function += "Grad,";
-	if (COST_MODE & MODE::DISTANCE)
-		cost_function += "Dist,";
-	if (COST_MODE & MODE::SCALAR)
-		cost_function += "Scalar,";
-	if (COST_MODE & MODE::INV_SCALAR)
-		cost_function += "Inv_Scalar,";
-	cost_function = cost_function.remove(cost_function.size() - 1, 1); //remove trailing comma
-	map->insert("cost_function", cost_function);
-	setMetaData(*map, true);
+	updateMetadata();
+}
 
+void ccTrace::updateMetadata()
+{
+	QVariantMap* map = new QVariantMap();
+	map->insert("ccCompassType", "Trace");
+	map->insert("search_r", m_search_r);
+	map->insert("cost_function", ccTrace::COST_MODE);
+	setMetaData(*map, true);
 }
 
 int ccTrace::insertWaypoint(int pointId)
@@ -72,7 +120,7 @@ int ccTrace::insertWaypoint(int pointId)
 			{
 				//insert waypoint
 				m_waypoints.insert(m_waypoints.begin() + i, pointId);
-				m_previous = i;
+				m_previous.push_back(i);
 				return i;
 			}
 		}
@@ -83,15 +131,16 @@ int ccTrace::insertWaypoint(int pointId)
 		if (sp.norm2() < ep.norm2())
 		{
 			m_waypoints.insert(m_waypoints.begin(), pointId);
-			m_previous = 0;
+			m_previous.push_back(0);
 			return 0;
 		}
 	}
 
 	//add point to end of the trace
 	m_waypoints.push_back(pointId);
-	m_previous = static_cast<int>(m_waypoints.size()) - 1;
-	return m_previous;
+	int id = static_cast<int>(m_waypoints.size()) - 1;
+	m_previous.push_back(id); //store for undo options
+	return id;
 }
 
 //test if the query point is within a circle bound by segStart & segEnd
@@ -123,7 +172,13 @@ bool ccTrace::optimizePath(int maxIterations)
 		idx=m_cloud->addScalarField("Search");
 	m_cloud->setCurrentScalarField(idx);
 	#endif
-	
+
+	//update stored cost function etc.
+	updateMetadata();
+
+	//update internal vars
+	m_maxIterations = maxIterations;
+
 	//loop through segments and build/rebuild trace
 	int start, end, tID; //declare vars
 	for (unsigned i = 1; i < m_waypoints.size(); i++)
@@ -136,7 +191,7 @@ bool ccTrace::optimizePath(int maxIterations)
 		//are we adding to the end of the trace?
 		if (tID >= m_trace.size()) 
 		{
-			std::deque<int> segment = optimizeSegment(start, end, m_search_r, maxIterations); //calculate segment
+			std::deque<int> segment = optimizeSegment(start, end, m_search_r); //calculate segment
 			m_trace.push_back(segment); //store segment
 			success = success && !segment.empty(); //if the queue is empty, we failed
 		} else //no... we're somewhere in the middle - update segment if necessary
@@ -146,7 +201,7 @@ bool ccTrace::optimizePath(int maxIterations)
 			else
 			{
 				//calculate segment
-				std::deque<int> segment = optimizeSegment(start, end, m_search_r, maxIterations); //calculate segment
+				std::deque<int> segment = optimizeSegment(start, end, m_search_r); //calculate segment
 				success = success && !segment.empty(); //if the queue is empty, we failed
 
 				//add trace
@@ -163,11 +218,50 @@ bool ccTrace::optimizePath(int maxIterations)
 	f->computeMinAndMax();
 	#endif
 
+	//write control points to property (for reloading)
+	QVariantMap* map = new QVariantMap();
+	QString waypoints = "";
+
+	for (unsigned i = 0; i < m_waypoints.size(); i++)
+	{
+		waypoints += QString::number(m_waypoints[i]) + ",";
+	}
+
+	map->insert("waypoints", waypoints);
+	setMetaData(*map, true);
+
+	//push points onto underlying polyline object (for picking & save/load)
+	finalizePath();
+
 	return success;
 }
 
+void ccTrace::finalizePath()
+{
+	//clear existing points in background "polyline"
+	clear();
+
+	//push trace buffer to said polyline (for save/export etc.)
+	for (std::deque<int> seg : m_trace)
+	{
+		for (int p : seg)
+		{
+			addPointIndex(p);
+		}
+	}
+
+	//invalidate bb
+	invalidateBoundingBox();
+}
+
+void ccTrace::recalculatePath()
+{
+	m_trace.clear();
+	optimizePath();
+}
+
 int ccTrace::COST_MODE = ccTrace::MODE::DARK; //set default cost mode
-std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int maxIterations, int offset)
+std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 {
 	//check handle to point cloud
 	if (!m_cloud)
@@ -220,7 +314,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	{
 		oct = m_cloud->computeOctree(); //if the user clicked "no" when asked to compute the octree then tough....
 	}
-	unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(search_r);
+	unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(m_search_r);
 
 	//initialize start node on node_buffer and add to openQueue
 	node_buffer[0].set(start, 0, nullptr);
@@ -232,7 +326,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	while (openQueue.size() > 0) //while unvisited nodes exist
 	{
 		//check if we excede max iterations
-		if (iter_count > maxIterations)
+		if (iter_count > m_maxIterations)
 		{
 			//cleanup buffers
 			for (Node* n : nodes)
@@ -285,13 +379,14 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 
 		//fill "neighbours" with nodes - essentially get results of a "sphere" search around active current point
 		m_neighbours.clear();
-		oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(search_r), m_neighbours, level);
+    
+		oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(m_search_r), m_neighbours, level);
 
 		//loop through neighbours
 		for (size_t i = 0; i < m_neighbours.size(); i++)
 		{
 			m_p = m_neighbours[i];
-
+			
 			if (visited[m_p.pointIndex]) //Has this node been visited before? If so then bail.
 				continue;
 
@@ -304,7 +399,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 				continue;
 
 			//calculate cost to this neighbour
-			cost = getSegmentCost(current_idx, m_p.pointIndex, search_r);
+			cost = getSegmentCost(current_idx, m_p.pointIndex);
 
 			#ifdef DEBUG_PATH
 			m_cloud->setPointScalarValue(m_p.pointIndex, static_cast<ScalarType>(cost)); //STORE VISITED NODES (AND COST) FOR DEBUG VISUALISATIONS
@@ -340,7 +435,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	return std::deque<int>(); //shouldn't come here?
 }
 
-int ccTrace::getSegmentCost(int p1, int p2, float search_r)
+int ccTrace::getSegmentCost(int p1, int p2)
 {
 	int cost=1; //n.b. default value is 1 so that if no cost functions are used, the function doesn't crash (and returns the unweighted shortest path)
 	if (m_cloud->hasColors()) //check cloud has colour data
@@ -352,7 +447,7 @@ int ccTrace::getSegmentCost(int p1, int p2, float search_r)
 		if (COST_MODE & MODE::LIGHT)
 			cost += getSegmentCostLight(p1, p2);
 		if (COST_MODE & MODE::GRADIENT)
-			cost += getSegmentCostGrad(p1, p2, search_r);
+			cost += getSegmentCostGrad(p1, p2, m_search_r);
 	}
 	if (m_cloud->hasDisplayedScalarField()) //check cloud has scalar field data
 	{
@@ -420,68 +515,92 @@ int ccTrace::getSegmentCostLight(int p1, int p2)
 
 int ccTrace::getSegmentCostCurve(int p1, int p2)
 {
-	//put neighbourhood in a CCLib::Neighbourhood structure
-	if (m_neighbours.size() > 4) //need at least 4 points to calculate curvature....
+	int idx = m_cloud->getScalarFieldIndexByName("Curvature"); //look for pre-existing gradient SF
+	if (isCurvaturePrecomputed()) //scalar field found - return from precomputed cost]
 	{
+		//activate SF
+		m_cloud->setCurrentScalarField(idx);
+
+		//return inverse of p2 value
+		return m_cloud->getScalarField(idx)->getMax() - m_cloud->getPointScalarValue(p2);
+	}
+	else //scalar field not found - do slow calculation...
+	{
+		//put neighbourhood in a CCLib::Neighbourhood structure
+		if (m_neighbours.size() > 4) //need at least 4 points to calculate curvature....
+		{
 		m_neighbours.push_back(m_p); //add center point onto end of neighbourhood
 
 		//compute curvature
 		CCLib::DgmOctreeReferenceCloud nCloud(&m_neighbours, static_cast<unsigned>(m_neighbours.size()));
 		CCLib::Neighbourhood Z(&nCloud);
 		float c = Z.computeCurvature(0, CCLib::Neighbourhood::CC_CURVATURE_TYPE::MEAN_CURV);
-		
+
 		m_neighbours.erase(m_neighbours.end()-1); //remove center point from neighbourhood (so as not to screw up loops)
 
 		//curvature tends to range between 0 (high cost) and 10 (low cost), though it can be greater than 10 in extreme cases
 		//hence we need to map to domain 0 - 10 and then transform that to the (integer) domain 0 - 884 to meet the cost function spec
 		if (c > 10)
-			c = 10;
+		c = 10;
 
 		//scale curvature to range 0, 765
 		c *= 76.5;
 
 		//note that high curvature = low cost, hence subtract curvature from 765
 		return 765 - c;
-		
+
+		}
+		return 765; //unknown curvature - this point is high cost.
 	}
-	return 765; //unknown curvature - this point is high cost.
 }
 
 int ccTrace::getSegmentCostGrad(int p1, int p2, float search_r)
 {
-	CCVector3 p = *m_cloud->getPoint(p2);
-	const ColorCompType* p2_rgb = m_cloud->getPointColor(p2);
-	int p_value = p2_rgb[0] + p2_rgb[1] + p2_rgb[2];
-
-	if (m_neighbours.size() > 2) //need at least 2 points to calculate gradient....
+	int idx = m_cloud->getScalarFieldIndexByName("Gradient"); //look for pre-existing gradient SF
+	if (idx != -1) //found precomputed gradient
 	{
+		//activate SF
+		m_cloud->setCurrentScalarField(idx);
+
+		//return inverse of p2 value
+		return m_cloud->getScalarField(idx)->getMax() - m_cloud->getPointScalarValue(p2);
+	}
+	else //not found... do expensive calculation
+	{
+
+		CCVector3 p = *m_cloud->getPoint(p2);
+		const ColorCompType* p2_rgb = m_cloud->getPointColor(p2);
+		int p_value = p2_rgb[0] + p2_rgb[1] + p2_rgb[2];
+
+		if (m_neighbours.size() > 2) //need at least 2 points to calculate gradient....
+		{
 		//N.B. The following code is mostly stolen from the computeGradient function in CloudCompare
 		CCVector3d sum(0, 0, 0);
 		CCLib::DgmOctree::PointDescriptor n;
 		for (int i = 0; i < m_neighbours.size(); i++)
 		{
-			n = m_neighbours[i];
+		n = m_neighbours[i];
 
-			//vector from p1 to m_p
-			CCVector3 deltaPos = *n.point - p;
-			double norm2 = deltaPos.norm2d();
+		//vector from p1 to m_p
+		CCVector3 deltaPos = *n.point - p;
+		double norm2 = deltaPos.norm2d();
 
-			//colour
-			const ColorCompType* c = m_cloud->getPointColor(n.pointIndex);
-			int c_value = c[0] + c[1] + c[2];
+		//colour
+		const ColorCompType* c = m_cloud->getPointColor(n.pointIndex);
+		int c_value = c[0] + c[1] + c[2];
 
-			//calculate gradient weighted by distance to the point (i.e. divide by distance^2)
-			if (norm2 > ZERO_TOLERANCE)
-			{
-				//color magnitude difference
-				int deltaValue = p_value - c_value;
-				//divide by norm^2 to get distance-weighted gradient
-				deltaValue /= norm2; //we divide by 'norm' to get the normalized direction, and by 'norm' again to get the gradient (hence we use the squared norm)
-				//sum stuff
-				sum.x += deltaPos.x * deltaValue; //warning: here 'deltaValue'= deltaValue / squaredNorm(deltaPos) ;)
-				sum.y += deltaPos.y * deltaValue;
-				sum.z += deltaPos.z * deltaValue;
-			}
+		//calculate gradient weighted by distance to the point (i.e. divide by distance^2)
+		if (norm2 > ZERO_TOLERANCE)
+		{
+		//color magnitude difference
+		int deltaValue = p_value - c_value;
+		//divide by norm^2 to get distance-weighted gradient
+		deltaValue /= norm2; //we divide by 'norm' to get the normalized direction, and by 'norm' again to get the gradient (hence we use the squared norm)
+		//sum stuff
+		sum.x += deltaPos.x * deltaValue; //warning: here 'deltaValue'= deltaValue / squaredNorm(deltaPos) ;)
+		sum.y += deltaPos.y * deltaValue;
+		sum.z += deltaPos.z * deltaValue;
+		}
 		}
 
 		float gradient = sum.norm() / m_neighbours.size();
@@ -491,8 +610,9 @@ int ccTrace::getSegmentCostGrad(int p1, int p2, float search_r)
 		gradient = std::min(gradient, 765 / search_r);
 		gradient *= search_r; //scale between 0 and 765
 		return 765 - gradient; //return inverse gradient (high gradient = low cost)
+		}
+		return 765; //no gradient = high cost
 	}
-	return 765; //no gradient = high cost
 }
 
 int ccTrace::getSegmentCostDist(int p1, int p2)
@@ -513,7 +633,133 @@ int ccTrace::getSegmentCostScalarInv(int p1, int p2)
 	return (sf->getMax() - sf->getValue(p2)) * (765 / (sf->getMax() - sf->getMin())); //return inverted scalar field value mapped to range 0 - 765
 }
 
-ccPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
+
+//functions for calculating cost SFs
+void ccTrace::buildGradientCost(QWidget* parent)
+{
+	//is there already a gradient SF?
+	if (isGradientPrecomputed()) //already done :)
+		return;
+
+	//create new SF for greyscale
+	int idx = m_cloud->addScalarField("Greyscale");
+	m_cloud->setCurrentScalarField(idx);
+
+	//make colours greyscale and push to SF (otherwise copy active SF)
+	for (unsigned i = 0; i < m_cloud->size(); i++)
+	{
+		m_cloud->setPointScalarValue(i, static_cast<ScalarType>(m_cloud->getPointColor(i)[0] + m_cloud->getPointColor(i)[1] + m_cloud->getPointColor(i)[2]));
+	}
+	//compute min/max
+	m_cloud->getScalarField(idx)->computeMinAndMax();
+
+	//calculate new SF with gradient of the old one
+	float roughnessKernelSize = m_search_r;
+	m_cloud->setCurrentOutScalarField(idx); //set out gradient field - values are read from here for calc
+
+	//make gradient sf
+	int gIdx = m_cloud->addScalarField("Gradient");
+	m_cloud->setCurrentInScalarField(gIdx); //set in scalar field - gradient is written here
+
+	//get/build octree
+	ccProgressDialog* pDlg = new ccProgressDialog(true , parent);
+	pDlg->show();
+
+	ccOctree::Shared octree = m_cloud->getOctree();
+	if (!octree)
+	{
+		octree = m_cloud->computeOctree(pDlg);
+	}
+
+	//calculate gradient
+	int result = CCLib::ScalarFieldTools::computeScalarFieldGradient(m_cloud,
+		m_search_r, //auto --> FIXME: should be properly set by the user!
+		false,
+		false,
+		pDlg,
+		octree.data());
+
+	pDlg->close();
+	delete pDlg;
+
+	//calculate bounds
+	m_cloud->getScalarField(gIdx)->computeMinAndMax();
+	
+	//normalize and log-transform
+	m_cloud->setCurrentScalarField(gIdx);
+	float logMax = log(m_cloud->getScalarField(gIdx)->getMax() + 10);
+	for (unsigned i = 0; i < m_cloud->size(); i++)
+	{
+		int nVal = 765 * log(m_cloud->getPointScalarValue(i) + 10) / logMax;
+		if (nVal < 0) //this is caused by isolated points that were assigned "null" value gradients
+			nVal = 1; //set to low gradient by default
+		m_cloud->setPointScalarValue(i, nVal);
+	}
+
+	//recompute min-max...
+	m_cloud->getScalarField(gIdx)->computeMinAndMax();
+}
+
+void ccTrace::buildCurvatureCost(QWidget* parent)
+{
+	if (isCurvaturePrecomputed()) //already done
+		return;
+
+	//create curvature SF
+	//make gradient sf
+	int idx = m_cloud->addScalarField("Curvature");
+	m_cloud->setCurrentInScalarField(idx); //set in scalar field - curvature is written here
+	m_cloud->setCurrentScalarField(idx);
+
+	//get/build octree
+	ccProgressDialog* pDlg = new ccProgressDialog(true, parent);
+	pDlg->show();
+
+	ccOctree::Shared octree = m_cloud->getOctree();
+	if (!octree)
+	{
+		octree = m_cloud->computeOctree(pDlg);
+	}
+
+	//calculate curvature
+	int result = CCLib::GeometricalAnalysisTools::computeCurvature(m_cloud,
+		CCLib::Neighbourhood::CC_CURVATURE_TYPE::MEAN_CURV,
+		m_search_r,
+		pDlg,
+		octree.data());
+
+	pDlg->close();
+	delete pDlg;
+
+	//calculate minmax
+	m_cloud->getScalarField(idx)->computeMinAndMax();
+
+	//normalize and log-transform
+	float logMax = log(m_cloud->getScalarField(idx)->getMax() + 10);
+	for (unsigned i = 0; i < m_cloud->size(); i++)
+	{
+		int nVal = 765 * log(m_cloud->getPointScalarValue(i) + 10) / logMax;
+		if (nVal < 0) //this is caused by isolated points that were assigned "null" value curvatures
+			nVal = 1; //set to low gradient by default
+		m_cloud->setPointScalarValue(i, nVal);
+	}
+
+	//recompute min-max...
+	m_cloud->getScalarField(idx)->computeMinAndMax();
+}
+
+bool ccTrace::isGradientPrecomputed()
+{
+	int idx = m_cloud->getScalarFieldIndexByName("Gradient"); //look for pre-existing gradient SF
+	return idx != -1; //was something found?
+}
+bool ccTrace::isCurvaturePrecomputed()
+{
+	int idx = m_cloud->getScalarFieldIndexByName("Curvature"); //look for pre-existing gradient SF
+	return idx != -1; //was something found?
+}
+
+ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 {
 	//put all "trace" points into the cloud
 	finalizePath();
@@ -539,38 +785,20 @@ ccPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 		float planarity = 1.0f - z / y;
 		if (planarity < min_planarity)
 		{
-			return 0;
+			return nullptr;
 		}
 	}
 
 	//fit plane
 	double rms = 0.0; //output for rms
-	ccPlane* p = ccPlane::Fit(this, &rms);
-    
-	//calculate and store plane attributes
-	//get plane normal vector
-	CCVector3 N(p->getNormal());
-	//We always consider the normal with a positive 'Z' by default!
-	if (N.z < 0.0)
-		N *= -1.0;
+	ccFitPlane* p = ccFitPlane::Fit(this, &rms);
 
-	//calculate strike/dip/dip direction
-	float strike, dip, dipdir;
-	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
-	ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip);
-	QString dipAndDipDirStr = QString("%1/%2").arg((int)dip, 2, 10, QChar('0')).arg((int)dipdir, 3, 10, QChar('0'));
-	p->setName(dipAndDipDirStr);
-	//calculate centroid
-	CCVector3 C = p->getCenter();
+	if (!p)
+	{
+		return nullptr; //return null for invalid planes
+	}
 
-	//store attributes (centroid, strike, dip, RMS) on plane
-	QVariantMap* map = new QVariantMap();
-	map->insert("Cx", C.x); map->insert("Cy", C.y); map->insert("Cz", C.z); //centroid
-	map->insert("Nx", N.x); map->insert("Ny", N.y); map->insert("Nz", N.z); //normal
-	map->insert("Strike", strike); map->insert("Dip", dip); map->insert("DipDir", dipdir); //strike & dip
-	map->insert("RMS", rms); //rms
-	map->insert("Radius", m_search_r); //search radius
-	p->setMetaData(*map, true);
+	p->updateAttributes(rms, m_search_r);
 
 	//test for 'surface effect'
 	if (m_cloud->hasNormals())
@@ -599,6 +827,22 @@ ccPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 	return p;
 }
 
+void ccTrace::bakePathToScalarField()
+{
+	//bake points
+	int vertexCount = static_cast<int>(m_cloud->size());
+	for (const std::deque<int>& seg : m_trace)
+	{
+		for (int p : seg)
+		{
+			if (p >= 0 && p < vertexCount)
+			{
+				m_cloud->setPointScalarValue(static_cast<unsigned>(p), getUniqueID());
+			}
+		}
+	}
+}
+
 float ccTrace::calculateOptimumSearchRadius()
 {
 	CCLib::DgmOctree::NeighboursSet neighbours;
@@ -615,30 +859,30 @@ float ccTrace::calculateOptimumSearchRadius()
 	CCLib::ReferenceCloud* nCloud = new  CCLib::ReferenceCloud(m_cloud);
 
 	//pick 15 random points
-	int r;
 	unsigned int npoints = m_cloud->size();
-	double d,dsum=0;
+	double dsum = 0;
 	srand(npoints); //set seed as n for repeatability
 	for (unsigned int i = 0; i < 30; i++)
 	{
 		//int rn = rand() * rand(); //need to make bigger than rand max...
-		r = (rand()*rand()) % npoints; //random(ish) number between 0 and n
+		int r = (rand()*rand()) % npoints; //random(ish) number between 0 and n
 
 		//find nearest neighbour for point
 		nCloud->clear(false);
+		double d = -1.0;
 		oct->findPointNeighbourhood(m_cloud->getPoint(r), nCloud, 2, level, d);
 
-		if (d != -1) //if a point was found
+		if (d != -1.0) //if a point was found
 		{
 			dsum += sqrt(d);
 		}
 	}
 	
 	//average nearest-neighbour distances
-	d = dsum / 30;
+	double d = dsum / 30;
 	
 	//return a number slightly larger than the average distance
-	return d*1.5;
+	return d * 1.5;
 }
 
 static QSharedPointer<ccSphere> c_unitPointMarker(0);
@@ -649,7 +893,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (MACRO_Draw3D(context))
 	{
-		if (m_waypoints.size() == 0) //no points -> bail!
+		if (m_waypoints.empty()) //no points -> bail!
 			return;
 
 		//get the set of OpenGL functions (version 2.1)
@@ -667,12 +911,16 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 			c_unitPointMarker->showColors(true);
 			c_unitPointMarker->setVisible(true);
 			c_unitPointMarker->setEnabled(true);
+			c_unitPointMarker->showNormals(false);
 		}
+
+		glDrawParams glParams;
+		getDrawingParameters(glParams);
 
 		//not sure what this does, but it looks like fun
 		CC_DRAW_CONTEXT markerContext = context; //build-up point maker own 'context'
-		markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
 		markerContext.display = 0;
+		markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
 
 		//get camera info
 		ccGLCameraParameters camera;
@@ -680,45 +928,37 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
 		glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
-		//set draw colour
-		c_unitPointMarker->setTempColor(m_waypoint_colour);
-		
-		//draw key-points
 		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
-		for (unsigned i = 0; i < m_waypoints.size(); i++)
+    
+		//push name for picking
+		bool pushName = MACRO_DrawEntityNames(context);
+		if (pushName)
 		{
-			glFunc->glMatrixMode(GL_MODELVIEW);
-			glFunc->glPushMatrix();
-
-			const CCVector3* P = m_cloud->getPoint(m_waypoints[i]);
-			ccGL::Translate(glFunc, P->x, P->y, P->z);
-			float scale = context.labelMarkerSize * m_relMarkerScale * 0.15;
-			if (viewportParams.perspectiveView && viewportParams.zFar > 0)
-			{
-				//in perspective view, the actual scale depends on the distance to the camera!
-				double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
-				double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
-				scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
-			}
-			glFunc->glScalef(scale, scale, scale);
-			c_unitPointMarker->draw(markerContext);
-			glFunc->glPopMatrix();
+			glFunc->glPushName(getUniqueIDForDisplay());
+			//minimal display for picking mode!
+			glParams.showNorms = false;
+			glParams.showColors = false;
 		}
 
 		//set draw colour
-		c_unitPointMarker->setTempColor(m_trace_colour);
+		ccColor::Rgba color = getMeasurementColour();
+		c_unitPointMarker->setTempColor(color);
 
-		//draw trace points
-		for (std::deque<int> seg : m_trace)
+		//get point size for drawing
+		float pSize;
+		glFunc->glGetFloatv(GL_POINT_SIZE, &pSize);
+
+		//draw key-points
+		if (m_isActive)
 		{
-			for (int p : seg)
+			for (size_t i = 0; i < m_waypoints.size(); i++)
 			{
 				glFunc->glMatrixMode(GL_MODELVIEW);
 				glFunc->glPushMatrix();
 
-				const CCVector3* P = m_cloud->getPoint(p);
+				const CCVector3* P = m_cloud->getPoint(m_waypoints[i]);
 				ccGL::Translate(glFunc, P->x, P->y, P->z);
-				float scale = context.labelMarkerSize * m_relMarkerScale * 0.1;
+				float scale = context.labelMarkerSize * m_relMarkerScale * 0.3 * fmin(pSize,4);
 				if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 				{
 					//in perspective view, the actual scale depends on the distance to the camera!
@@ -731,16 +971,70 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glFunc->glPopMatrix();
 			}
 		}
-
-		//draw lines
-		for (std::deque<int> seg : m_trace)
+		else //just draw lines
 		{
-			glFunc->glBegin(GL_LINE_STRIP);
-			for (int p : seg)
+			//draw lines
+			for (const std::deque<int>& seg : m_trace)
 			{
-				ccGL::Vertex3v(glFunc, m_cloud->getPoint(p)->u);
+				if (m_width != 0)
+				{
+					glFunc->glPushAttrib(GL_LINE_BIT);
+					glFunc->glLineWidth(static_cast<GLfloat>(m_width));
+				}
+				glFunc->glBegin(GL_LINE_STRIP);
+				glFunc->glColor3f(color.r, color.g, color.b);
+				for (int p : seg)
+				{
+					ccGL::Vertex3v(glFunc, m_cloud->getPoint(p)->u);
+				}
+				glFunc->glEnd();
+				if (m_width != 0)
+				{
+					glFunc->glPopAttrib();
+				}
 			}
-			glFunc->glEnd();
 		}
+
+		//draw trace points if trace is active OR point size is large (otherwise line gets hidden)
+		if (m_isActive || pSize > 8)
+		{
+
+			for (const std::deque<int>& seg : m_trace)
+			{
+				for (int p : seg)
+				{
+					glFunc->glMatrixMode(GL_MODELVIEW);
+					glFunc->glPushMatrix();
+
+					const CCVector3* P = m_cloud->getPoint(p);
+					ccGL::Translate(glFunc, P->x, P->y, P->z);
+					float scale = context.labelMarkerSize * m_relMarkerScale * fmin(pSize, 4) * 0.2;
+					if (viewportParams.perspectiveView && viewportParams.zFar > 0)
+					{
+						//in perspective view, the actual scale depends on the distance to the camera!
+						const double* M = camera.modelViewMat.data();
+						double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
+						double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
+						scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
+					}
+
+					glFunc->glScalef(scale, scale, scale);
+					c_unitPointMarker->draw(markerContext);
+					glFunc->glPopMatrix();
+				}
+			}
+		}
+		//finish picking name
+		if (pushName)
+			glFunc->glPopName();
 	}
+}
+
+bool ccTrace::isTrace(ccHObject* object) //return true if object is a valid trace [regardless of it's class type]
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("Trace");
+	}
+	return false;
 }

@@ -21,18 +21,11 @@
 #include "ccGenericGLDisplay.h"
 
 //Qt
-#include <QDataStream>
-#include <QStringList>
-#include <QString>
-#include <QFile>
 #include <QFileInfo>
-#include <QTextStream>
-#include <QMap>
+#include <QImage>
 #include <QSet>
 
 //System
-#include <string.h>
-#include <assert.h>
 #include <set>
 
 ccMaterialSet::ccMaterialSet(QString name/*=QString()*/)

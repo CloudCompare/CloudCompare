@@ -41,7 +41,7 @@ class qM3C2Plugin : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qM3C2Plugin(QObject* parent=0);
+	qM3C2Plugin(QObject* parent = nullptr);
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "M3C2 distance"; }
@@ -49,8 +49,9 @@ public:
 	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface
-	void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual void getActions(QActionGroup& group) override;
+	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 
 protected slots:
 

@@ -18,9 +18,9 @@
 #include "ccBilateralFilter.h"
 
 //system
-#include <math.h>
-#include <assert.h>
 #include <algorithm>
+#include <assert.h>
+#include <cmath>
 
 //! Max kernel size
 /** Can't add this as a static const definition (in the header file)
@@ -230,7 +230,7 @@ void ccBilateralFilter::updateDampingTable()
 		for (unsigned d = 0; d <= m_halfSpatialSize; d++)
 		{
 			//pixel distance based damping
-			m_dampingPixelDist[c*(m_halfSpatialSize + 1) + d] = exp((c*c + d*d) / (-q));
+			m_dampingPixelDist[c*(m_halfSpatialSize + 1) + d] = std::exp((c*c + d*d) / (-q));
 		}
 	}
 }

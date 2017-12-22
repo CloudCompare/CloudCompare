@@ -28,27 +28,31 @@
 
 //Qt
 #include <QElapsedTimer>
-#include <QTimer>
-#include <QByteArray>
-#include <QOpenGLDebugLogger>
 #include <QOpenGLExtensions>
+#include <QTimer>
+
 #ifdef CC_GL_WINDOW_USE_QWINDOW
-#include <QWindow>
 #include <QWidget>
+#include <QWindow>
+#else
+#include <QOpenGLWidget>
 #endif
 
 //system
-#include <unordered_set>
 #include <list>
+#include <unordered_set>
 
-class ccHObject;
+class QOpenGLDebugMessage;
+
 class ccBBox;
-class ccShader;
 class ccColorRampShader;
-class ccGlFilter;
 class ccFrameBufferObject;
+class ccGlFilter;
+class ccHObject;
 class ccInteractor;
 class ccPolyline;
+class ccShader;
+
 struct HotZone;
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
@@ -87,9 +91,10 @@ public:
 		//camera interactions
 		INTERACT_ROTATE          =  1,
 		INTERACT_PAN             =  2,
-		INTERACT_ZOOM_CAMERA     =  4,
-		INTERACT_2D_ITEMS        =  8, //labels, etc.
-		INTERACT_CLICKABLE_ITEMS = 16, //hot zone
+		INTERACT_CTRL_PAN        =  4,
+		INTERACT_ZOOM_CAMERA     =  8,
+		INTERACT_2D_ITEMS        = 16, //labels, etc.
+		INTERACT_CLICKABLE_ITEMS = 32, //hot zone
 
 		//options / modifiers
 		INTERACT_TRANSFORM_ENTITIES = 64,
@@ -133,7 +138,7 @@ public:
 	};
 
 	//! Default constructor
-	ccGLWindow(QSurfaceFormat* format = 0, ccGLWindowParent* parent = 0, bool silentInitialization = false);
+	ccGLWindow(QSurfaceFormat* format = nullptr, ccGLWindowParent* parent = nullptr, bool silentInitialization = false);
 
 	//! Destructor
 	virtual ~ccGLWindow();
@@ -151,7 +156,6 @@ public:
 	//shortcuts
 	void setWindowTitle(QString title) { setTitle(title); }
 	QString windowTitle() const { return title(); }
-
 #endif
 
 	//! Sets 'scene graph' root
@@ -169,8 +173,8 @@ public:
 	virtual void refresh(bool only2D = false) override;
 	virtual void invalidateViewport() override;
 	virtual void deprecate3DLayer() override;
-	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont()) override;
-	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0) override;
+	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = nullptr, const QFont& font = QFont()) override;
+	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0.0f, const unsigned char* rgbColor = nullptr, const QFont* font = nullptr) override;
 	virtual QFont getTextDisplayFont() const override; //takes rendering zoom into account!
 	virtual QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
@@ -306,7 +310,7 @@ public:
 	/** If no bounding box is defined, the current displayed 'scene graph'
 		bounding box is taken.
 	**/
-	virtual void updateConstellationCenterAndZoom(const ccBBox* aBox = 0);
+	virtual void updateConstellationCenterAndZoom(const ccBBox* aBox = nullptr);
 
 	//! Returns the visible objects bounding-box
 	void getVisibleObjectsBB(ccBBox& box) const;
@@ -333,7 +337,7 @@ public:
 		- the rotation around the camera center in viewer-centered mode
 		(see setPerspectiveState).
 	**/
-	virtual const void setBaseViewMat(ccGLMatrixd& mat);
+	virtual void setBaseViewMat(ccGLMatrixd& mat);
 
 	//! Sets camera to a predefined view (top, bottom, etc.)
 	virtual void setView(CC_VIEW_ORIENTATION orientation, bool redraw = true);
@@ -369,17 +373,22 @@ public:
 	virtual void getContext(CC_DRAW_CONTEXT& context);
 
 	//! Minimum point size
-	static const unsigned MIN_POINT_SIZE = 1;
+	static const float MIN_POINT_SIZE_F;
 	//! Maximum point size
-	static const unsigned MAX_POINT_SIZE = 10;
+	static const float MAX_POINT_SIZE_F;
 
 	//! Sets point size
-	/** \param size point size (between MIN_POINT_SIZE and MAX_POINT_SIZE)
+	/** \param size point size (between MIN_POINT_SIZE_F and MAX_POINT_SIZE_F)
 	**/
 	virtual void setPointSize(float size, bool silent = false);
+	
+	//! Minimum line width
+	static const float MIN_LINE_WIDTH_F;
+	//! Maximum line width
+	static const float MAX_LINE_WIDTH_F;
 
 	//! Sets line width
-	/** \param width lines width (typically between 1 and 10)
+	/** \param width lines width (between MIN_LINE_WIDTH_F and MAX_LINE_WIDTH_F)
 	**/
 	virtual void setLineWidth(float width);
 
@@ -423,14 +432,14 @@ public:
 	virtual void invalidateVisualization();
 
 	//! Renders screen to an image
-	virtual QImage renderToImage(	float zoomFactor = 1.0,
+	virtual QImage renderToImage(	float zoomFactor = 1.0f,
 									bool dontScaleFeatures = false,
 									bool renderOverlayItems = false,
 									bool silent = false);
 
 	//! Renders screen to a file
 	virtual bool renderToFile(	QString filename,
-								float zoomFactor = 1.0,
+								float zoomFactor = 1.0f,
 								bool dontScaleFeatures = false,
 								bool renderOverlayItems = false);
 
@@ -450,7 +459,7 @@ public:
 	float computePerspectiveZoom() const;
 
 	//! Returns whether the ColorRamp shader is supported or not
-	bool hasColorRampShader() const { return m_colorRampShader != 0; }
+	bool hasColorRampShader() const { return m_colorRampShader != nullptr; }
 
 	//! Returns whether rectangular picking is allowed or not
 	bool isRectangularPickingAllowed() const { return m_allowRectangularEntityPicking; }
@@ -476,19 +485,7 @@ public:
 	const ccGui::ParamStruct& getDisplayParameters() const;
 
 	//! Sets current parameters for this display
-	void setDisplayParameters(const ccGui::ParamStruct& params, bool thisWindowOnly = false)
-	{
-		if (thisWindowOnly)
-		{
-			m_overridenDisplayParametersEnabled = true;
-			m_overridenDisplayParameters = params;
-		}
-		else
-		{
-			m_overridenDisplayParametersEnabled = false;
-			ccGui::Set(params);
-		}
-	}
+	void setDisplayParameters(const ccGui::ParamStruct& params, bool thisWindowOnly = false);
 
 	//! Whether display parameters are overidden for this window
 	bool hasOverridenDisplayParameters() const { return m_overridenDisplayParametersEnabled; }
@@ -612,7 +609,7 @@ public: //stereo mode
 	bool cursorCoordinatesShown() const { return m_showCursorCoordinates; }
 
 	//! Toggles the automatic setting of the pivot point at the center of the screen
-	void setAutoPickPivotAtCenter(bool state) { m_autoPickPivotAtCenter = state; }
+	void setAutoPickPivotAtCenter(bool state);
 	//! Whether the pivot point is automatically set at the center of the screen
 	bool autoPickPivotAtCenter() const { return m_autoPickPivotAtCenter; }
 
@@ -662,10 +659,13 @@ protected slots:
 	//! OpenGL KHR debug log
 	void handleLoggedMessage(const QOpenGLDebugMessage&);
 
+	//! Performs standard picking at the last clicked mouse position (see m_lastMousePos)
+	void doPicking();
+
 signals:
 
 	//! Signal emitted when an entity is selected in the 3D view
-	void entitySelectionChanged(ccHObject*);
+	void entitySelectionChanged(ccHObject* entity);
 	//! Signal emitted when multiple entities are selected in the 3D view
 	void entitiesSelectionChanged(std::unordered_set<int> entIDs);
 
@@ -705,13 +705,13 @@ signals:
 	void baseViewMatChanged(const ccGLMatrixd& newViewMat);
 
 	//! Signal emitted when the pixel size is changed
-	void pixelSizeChanged(float);
+	void pixelSizeChanged(float pixelSize);
 
 	//! Signal emitted when the f.o.v. changes
-	void fovChanged(float);
+	void fovChanged(float fov);
 
 	//! Signal emitted when the zNear coef changes
-	void zNearCoefChanged(float);
+	void zNearCoefChanged(float coef);
 
 	//! Signal emitted when the pivot point is changed
 	void pivotPointChanged(const CCVector3d&);
@@ -730,23 +730,23 @@ signals:
 	//! Signal emitted when the left mouse button is cliked on the window
 	/** See INTERACT_SIG_LB_CLICKED.
 		Arguments correspond to the clicked point coordinates (x,y) in
-		pixels and relatively to the window corner!
+		pixels relative to the window corner!
 	**/
-	void leftButtonClicked(int, int);
+	void leftButtonClicked(int x, int y);
 
 	//! Signal emitted when the right mouse button is cliked on the window
 	/** See INTERACT_SIG_RB_CLICKED.
 		Arguments correspond to the clicked point coordinates (x,y) in
-		pixels and relatively to the window corner!
+		pixels relative to the window corner!
 	**/
-	void rightButtonClicked(int, int);
+	void rightButtonClicked(int x, int y);
 
 	//! Signal emitted when the mouse is moved
 	/** See INTERACT_SIG_MOUSE_MOVED.
 		The two first arguments correspond to the current cursor coordinates (x,y)
-		relatively to the window corner!
+		relative to the window corner!
 	**/
-	void mouseMoved(int, int, Qt::MouseButtons);
+	void mouseMoved(int x, int y, Qt::MouseButtons buttons);
 
 	//! Signal emitted when a mouse button is released (cursor on the window)
 	/** See INTERACT_SIG_BUTTON_RELEASED.
@@ -760,13 +760,13 @@ signals:
 	void drawing3D();
 
 	//! Signal emitted when files are dropped on the window
-	void filesDropped(QStringList);
+	void filesDropped(const QStringList& filenames);
 
 	//! Signal emitted when a new label is created
 	void newLabel(ccHObject* obj);
 
 	//! Signal emitted when the exclusive fullscreen is toggled
-	void exclusiveFullScreenToggled(bool);
+	void exclusiveFullScreenToggled(bool exclusive);
 
 protected: //rendering
 
@@ -926,15 +926,24 @@ protected: //other methods
 	//! Optional output metrics (from computeProjectionMatrix)
 	struct ProjectionMetrics
 	{
-		ProjectionMetrics() : zNear(0), zFar(0), cameraToBBCenterDist(0), bbHalfDiag(0) {}
-		double zNear, zFar, cameraToBBCenterDist, bbHalfDiag;
+		ProjectionMetrics()
+			: zNear(0.0)
+			, zFar(0.0)
+			, cameraToBBCenterDist(0.0)
+			, bbHalfDiag(0.0)
+		{}
+		
+		double zNear;
+		double zFar;
+		double cameraToBBCenterDist;
+		double bbHalfDiag;
 	};
 
 	//! Computes the projection matrix
 	ccGLMatrixd computeProjectionMatrix(	const CCVector3d& cameraCenter,
 											bool withGLfeatures, 
-											ProjectionMetrics* metrics = 0, 
-											double* eyeOffset = 0) const;
+											ProjectionMetrics* metrics = nullptr, 
+											double* eyeOffset = nullptr) const;
 	void updateModelViewMatrix();
 	void updateProjectionMatrix();
 	void setStandardOrthoCenter();
@@ -994,8 +1003,8 @@ protected: //other methods
 	void processPickingResult(	const PickingParameters& params,
 								ccHObject* pickedEntity,
 								int pickedItemIndex,
-								const CCVector3* nearestPoint = 0,
-								const std::unordered_set<int>* selectedIDs = 0);
+								const CCVector3* nearestPoint = nullptr,
+								const std::unordered_set<int>* selectedIDs = nullptr);
 	
 	//! Updates currently active items list (m_activeItems)
 	/** The items must be currently displayed in this context
@@ -1163,16 +1172,16 @@ protected: //members
 	//! Display capturing mode options
 	struct CaptureModeOptions
 	{
-		bool enabled;
-		float zoomFactor;
-		bool renderOverlayItems;
-
 		//! Default constructor
 		CaptureModeOptions()
 			: enabled(false)
 			, zoomFactor(1.0f)
 			, renderOverlayItems(false)
 		{}
+
+		bool enabled;
+		float zoomFactor;
+		bool renderOverlayItems;
 	};
 
 	//! Display capturing mode options
@@ -1181,6 +1190,12 @@ protected: //members
 	//! Temporary Message to display in the lower-left corner
 	struct MessageToDisplay
 	{
+		MessageToDisplay()
+			: messageValidity_sec(0)
+			, position(LOWER_LEFT_MESSAGE)
+			, type(CUSTOM_MESSAGE)
+		{}
+		
 		//! Message
 		QString message;
 		//! Message end time (sec)
@@ -1195,7 +1210,7 @@ protected: //members
 	std::list<MessageToDisplay> m_messagesToDisplay;
 
 	//! Last click time (msec)
-	int m_lastClickTime_ticks;
+	qint64 m_lastClickTime_ticks;
 
 	//! Sun light position
 	/** Relative to screen.
@@ -1223,12 +1238,13 @@ protected: //members
 					LEAVE_FULLSCREEN_MODE,
 		};
 
+		ClickableItem(): role(NO_ROLE) {}
+		ClickableItem(Role _role, QRect _area) : role(_role), area(_area) {}
+
 		Role role;
 		QRect area;
-		
-		ClickableItem() : role(NO_ROLE) {}
-		ClickableItem(Role _role, QRect _area) : role(_role), area(_area) {}
 	};
+	
 	//! Currently displayed clickable items
 	std::vector<ClickableItem> m_clickableItems;
 
@@ -1368,6 +1384,12 @@ protected: //members
 
 	//! Candidate pivot point (will be used when the mouse is released)
 	CCVector3d m_autoPivotCandidate;
+
+	//! Deferred picking
+	QTimer m_deferredPickingTimer;
+
+	//! Ignore next mouse release event
+	bool m_ignoreMouseReleaseEvent;
 
 private:
 

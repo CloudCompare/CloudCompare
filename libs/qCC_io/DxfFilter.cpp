@@ -508,9 +508,48 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 	if (root->isKindOf(CC_TYPES::MESH))
 		meshes.push_back(root);
 	ccHObject::Container clouds;
-	root->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+	root->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true); //we don't want polylines!
 	if (root->isKindOf(CC_TYPES::POINT_CLOUD))
 		clouds.push_back(root);
+
+	if (!clouds.empty())
+	{
+		//remove the polylines vertices
+		ccHObject::Container realClouds;
+		try
+		{
+			for (ccHObject* cloud : clouds)
+			{
+				ccHObject* parent = cloud->getParent();
+				if (parent)
+				{
+					if (parent->isA(CC_TYPES::POLY_LINE))
+					{
+						if (std::find(polylines.begin(), polylines.end(), parent) != polylines.end())
+						{
+							//the parent is already in the 'polylines' set
+							continue;
+						}
+					}
+					else if (parent->isKindOf(CC_TYPES::MESH))
+					{
+						if (std::find(meshes.begin(), meshes.end(), parent) != meshes.end())
+						{
+							//the parent is already in the 'meshes' set
+							continue;
+						}
+					}
+				}
+
+				realClouds.push_back(cloud);
+			}
+			clouds = realClouds;
+		}
+		catch (const std::bad_alloc&)
+		{
+			return CC_FERR_NOT_ENOUGH_MEMORY;
+		}
+	}
 
 	//only polylines and meshes are handled for now
 	size_t polyCount = polylines.size();
@@ -607,10 +646,10 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 
 		//Writing the Linetypes (all by default)
 		{
-			dw->tableLineTypes(25);
-			dxf.writeLineType(*dw, DL_LineTypeData("BYBLOCK", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("BYLAYER", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("CONTINUOUS", 0));
+			dw->tableLinetypes(3);
+			dxf.writeLinetype(*dw, DL_LinetypeData("BYBLOCK", "BYBLOCK", 0, 0, 0.0));
+			dxf.writeLinetype(*dw, DL_LinetypeData("BYLAYER", "BYLAYER", 0, 0, 0.0));
+			dxf.writeLinetype(*dw, DL_LinetypeData("CONTINUOUS", "Continuous", 0, 0, 0.0));
 			dw->tableEnd();
 		}
 
@@ -627,7 +666,9 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				std::string(""),		// leave empty
 				DL_Codes::black,		// default color
 				100,					// default width (in 1/100 mm)
-				"CONTINUOUS"));			// default line style
+				"CONTINUOUS",			// default line style
+				1.0						// linetypeScale
+				));			
 
 			//polylines layers
 			for (unsigned i = 0; i < polyCount; ++i)
@@ -644,7 +685,8 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 					std::string(""),
 					DL_Codes::green,
 					static_cast<int>(lineWidth),
-					"CONTINUOUS"));
+					"CONTINUOUS",
+					1.0));
 			}
 
 			//mesh layers
@@ -662,7 +704,8 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 					std::string(""),
 					DL_Codes::magenta,
 					static_cast<int>(lineWidth),
-					"CONTINUOUS"));
+					"CONTINUOUS",
+					1.0));
 			}
 
 			//clouds
@@ -680,14 +723,18 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 					std::string(""),
 					DL_Codes::magenta,
 					static_cast<int>(lineWidth),
-					"CONTINUOUS"));
+					"CONTINUOUS",
+					1.0));
 			}
 		}
 		dw->tableEnd();
 
 		//Writing Various Other Tables
 		//dxf.writeStyle(*dw); //DXFLIB V2.5
+		dw->tableStyle(1);
 		dxf.writeStyle(*dw, DL_StyleData("Standard", 0, 0.0, 0.75, 0.0, 0, 2.5, "txt", "")); //DXFLIB V3.3
+		dw->tableEnd();
+
 		dxf.writeView(*dw);
 		dxf.writeUcs(*dw);
 
@@ -742,7 +789,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 					flags |= 8; //3D polyline
 				dxf.writePolyline(*dw,
 					DL_PolylineData(static_cast<int>(vertexCount), 0, 0, flags),
-					DL_Attributes(qPrintable(polyLayerNames[i]), DL_Codes::bylayer, -1, "BYLAYER")); //DGM: warning, toStdString doesn't preserve "local" characters
+					DL_Attributes(qPrintable(polyLayerNames[i]), DL_Codes::bylayer, -1, "BYLAYER", 1.0)); //DGM: warning, toStdString doesn't preserve "local" characters
 
 				for (unsigned v = 0; v < vertexCount; ++v)
 				{
@@ -776,7 +823,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 						C.x, C.y, C.z,
 						C.x, C.y, C.z,
 						lineWidth),
-						DL_Attributes(qPrintable(meshLayerNames[j]), DL_Codes::bylayer, -1, "BYLAYER")); //DGM: warning, toStdString doesn't preserve "local" characters
+						DL_Attributes(qPrintable(meshLayerNames[j]), DL_Codes::bylayer, -1, "BYLAYER", 1.0)); //DGM: warning, toStdString doesn't preserve "local" characters
 				}
 			}
 
@@ -789,9 +836,10 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				for (unsigned j = 0; j < pointCount; ++j)
 				{
 					const CCVector3* P = cloud->getPoint(j);
+					CCVector3d Pg = cloud->toGlobal3d(*P);
 					dxf.writePoint(*dw,
-						DL_PointData(P->x, P->y, P->z),
-						DL_Attributes(qPrintable(pointLayerNames[i]), DL_Codes::bylayer, -1, "BYLAYER")); //DGM: warning, toStdString doesn't preserve "local" characters
+						DL_PointData(Pg.x, Pg.y, Pg.z),
+						DL_Attributes(qPrintable(pointLayerNames[i]), DL_Codes::bylayer, -1, "BYLAYER", 1.0)); //DGM: warning, toStdString doesn't preserve "local" characters
 				}
 			}
 

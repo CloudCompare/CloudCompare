@@ -23,8 +23,8 @@
 
 //system
 #include <cfloat>
+#include <cmath>
 #include <limits>
-#include <math.h>
 
 //! Pi
 #ifndef M_PI

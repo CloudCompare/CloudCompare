@@ -24,7 +24,6 @@
 #include "ccPointCloud.h"
 #include "ccCone.h"
 
-
 ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 	: Polyline(associatedCloud)
 	, ccShiftedObject("Polyline")
@@ -37,7 +36,7 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 	showVertices(false);
 	setVertexMarkerWidth(3);
 	setWidth(0);
-	showArrow(false,0,0);
+	showArrow(false, 0, 0);
 
 	ccGenericPointCloud* cloud = dynamic_cast<ccGenericPointCloud*>(associatedCloud);
 	if (cloud)
@@ -564,4 +563,28 @@ unsigned ccPolyline::segmentCount() const
 		--count;
 	}
 	return count;
+}
+
+void ccPolyline::setGlobalShift(const CCVector3d& shift)
+{
+	ccShiftedObject::setGlobalShift(shift);
+
+	ccPointCloud* pc = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
+	if (pc && pc->getParent() == this)
+	{
+		//auto transfer the global shift info to the vertices
+		pc->setGlobalShift(shift);
+	}
+}
+
+void ccPolyline::setGlobalScale(double scale)
+{
+	ccShiftedObject::setGlobalScale(scale);
+
+	ccPointCloud* pc = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
+	if (pc && pc->getParent() == this)
+	{
+		//auto transfer the global scale info to the vertices
+		pc->setGlobalScale(scale);
+	}
 }

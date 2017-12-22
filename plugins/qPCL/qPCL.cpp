@@ -83,7 +83,7 @@ int qPCL::addFilter(BaseFilter* filter)
 		return 0;
 
 	//filter already inserted?
-	if (std::find(m_filters.begin(),m_filters.end(),filter) != m_filters.end())
+	if (std::find(m_filters.begin(), m_filters.end(), filter) != m_filters.end())
 		return 0;
 
 	m_filters.push_back(filter);

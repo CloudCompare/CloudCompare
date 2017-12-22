@@ -1538,8 +1538,11 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 							static_cast<ColorCompType>(m_symbolColor.green()),
 							static_cast<ColorCompType>(m_symbolColor.blue()) );
 		symbolCloud->setTempColor(rgb, true);
-		m_window->addToOwnDB(symbolCloud, false);
-		m_window->redraw();
+		if (m_window != nullptr)
+		{
+			m_window->addToOwnDB(symbolCloud, false);
+			m_window->redraw();
+		}
 
 		clearLabelsPushButton->setEnabled(true);
 		clearLabelsPushButton->setText(QString("Clear (%1)").arg(symbolCloud->size()));

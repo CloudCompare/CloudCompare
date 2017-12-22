@@ -28,8 +28,8 @@
 #include <QOpenGLContext>
 
 //system
-#include <math.h>
 #include <assert.h>
+#include <cmath>
 
 //For MSVC
 #ifndef M_PI
@@ -69,13 +69,13 @@ ccEDLFilter::ccEDLFilter()
 	m_bilateralFilters[2].sigma    = 2.0f;
 	m_bilateralFilters[2].sigmaZ   = 0.4f;
 
-	setLightDir(static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 2));
+	setLightDir(static_cast<float>(M_PI / 2.0), static_cast<float>(M_PI / 2.0));
 
 	memset(m_neighbours, 0, sizeof(float) * 8 * 2);
 	for (unsigned c = 0; c < 8; c++)
 	{
-		m_neighbours[2 * c]     = static_cast<float>(cos(static_cast<double>(c) * M_PI / 4));
-		m_neighbours[2 * c + 1] = static_cast<float>(sin(static_cast<double>(c) * M_PI / 4));
+		m_neighbours[2 * c]     = static_cast<float>(std::cos(c * M_PI / 4.0));
+		m_neighbours[2 * c + 1] = static_cast<float>(std::sin(c * M_PI / 4.0));
 	}
 }
 
@@ -252,7 +252,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 	//perspective mode
 	int perspectiveMode = parameters.perspectiveMode ? 1 : 0;
 	//light-balancing based on the current zoom (for ortho. mode only)
-	float lightMod = perspectiveMode ? 3.0f : static_cast<float>(sqrt(2 * std::max<double>(parameters.zoom, 0.7))); //1.41 ~ sqrt(2)
+	float lightMod = perspectiveMode ? 3.0f : static_cast<float>(std::sqrt(2.0 * std::max(parameters.zoom, 0.7))); //1.41 ~ sqrt(2)
 
 	//we must use corner-based screen coordinates
 	m_glFunc.glMatrixMode(GL_PROJECTION);
@@ -375,7 +375,7 @@ GLuint ccEDLFilter::getTexture()
 
 void ccEDLFilter::setLightDir(float theta_rad, float phi_rad)
 {
-	m_lightDir[0] = sin(phi_rad)*cos(theta_rad);
-	m_lightDir[1] = cos(phi_rad);
-	m_lightDir[2] = sin(phi_rad)*sin(theta_rad);
+	m_lightDir[0] = std::sin(phi_rad)*std::cos(theta_rad);
+	m_lightDir[1] = std::cos(phi_rad);
+	m_lightDir[2] = std::sin(phi_rad)*std::sin(theta_rad);
 }

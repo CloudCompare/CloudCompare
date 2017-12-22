@@ -41,6 +41,13 @@ protected slots:
 	void createPrimitive();
 
 protected:
+	//! Set sphere position from clipboard
+	void setSpherePositionFromClipboard();
+
+	//! Set sphere position to origin
+	void setSpherePositionToOrigin();
+
+protected:
 
 	//! Associated main window
 	MainWindow* m_win;

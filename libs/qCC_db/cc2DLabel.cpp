@@ -20,18 +20,18 @@
 //Local
 #include "cc2DLabel.h"
 #include "ccBasicTypes.h"
+#include "ccGenericGLDisplay.h"
 #include "ccGenericPointCloud.h"
 #include "ccPointCloud.h"
-#include "ccSphere.h"
-#include "ccGenericGLDisplay.h"
 #include "ccScalarField.h"
+#include "ccSphere.h"
 
 //Qt
 #include <QSharedPointer>
 
 //System
-#include <string.h>
 #include <assert.h>
+#include <string.h>
 
 //'Delta' character
 static const QChar MathSymbolDelta(0x0394);
@@ -732,7 +732,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		}
 	}
 
-//	bool loop = false;
+	//bool loop = false;
 	switch (count)
 	{
 	case 3:
@@ -749,7 +749,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			glFunc->glEnd();
 
 			glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
-//			loop = true;
+			//loop = true;
 		}
 	case 2:
 		{

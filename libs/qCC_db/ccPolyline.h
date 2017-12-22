@@ -55,6 +55,10 @@ public:
 	virtual void applyGLTransformation(const ccGLMatrix& trans);
 	virtual unsigned getUniqueIDForDisplay() const;
 
+	//inherited methods (ccShiftedObject)
+	virtual void setGlobalShift(const CCVector3d& shift);
+	virtual void setGlobalScale(double scale);
+
 	//! Defines if the polyline is considered as 2D or 3D
 	/** \param state if true, the polyline is 2D
 	**/

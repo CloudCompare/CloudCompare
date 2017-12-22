@@ -25,9 +25,8 @@
 #include <QColor>
 
 //system
-#include <stdlib.h>
+#include <cmath>
 #include <random>
-#include <math.h> //for modf
 
 //! Default color components type (R,G and B)
 typedef unsigned char ColorCompType;
@@ -217,12 +216,12 @@ namespace ccColor
 		**/
 		static Rgb hsv2rgb(float H, float S, float V)
 		{
-			double hi = 0;
-			double f = modf(H / 60.0, &hi);
+			float hi = 0;
+			float f = std::modf(H / 60.0f, &hi);
 
-			float l = static_cast<float>(V*(1.0 - S));
-			float m = static_cast<float>(V*(1.0 - f*S));
-			float n = static_cast<float>(V*(1.0 - (1.0 - f)*S));
+			float l = V*(1.0f - S);
+			float m = V*(1.0f - f*S);
+			float n = V*(1.0f - (1.0f - f)*S);
 
 			Rgbf rgb(0, 0, 0);
 
@@ -307,14 +306,14 @@ namespace ccColor
 															static_cast<unsigned char>(qColor.alpha())); }
 
 	//! Conversion from QColor (floating point)
-	inline Rgbf FromQColorf(QColor qColor) { return Rgbf(	static_cast<unsigned char>(qColor.redF()),
-															static_cast<unsigned char>(qColor.greenF()),
-															static_cast<unsigned char>(qColor.blueF())); }
+	inline Rgbf FromQColorf(QColor qColor) { return Rgbf(	static_cast<float>(qColor.redF()),
+															static_cast<float>(qColor.greenF()),
+															static_cast<float>(qColor.blueF())); }
 	//! Conversion from QColor'a' (floating point)
-	inline Rgbaf FromQColoraf(QColor qColor) { return Rgbaf(	static_cast<unsigned char>(qColor.redF()),
-																static_cast<unsigned char>(qColor.greenF()),
-																static_cast<unsigned char>(qColor.blueF()),
-																static_cast<unsigned char>(qColor.alphaF()));
+	inline Rgbaf FromQColoraf(QColor qColor) { return Rgbaf(	static_cast<float>(qColor.redF()),
+																static_cast<float>(qColor.greenF()),
+																static_cast<float>(qColor.blueF()),
+																static_cast<float>(qColor.alphaF()));
 	}
 };
 

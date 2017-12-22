@@ -20,9 +20,6 @@
 
 #include <cmath>
 
-//CCLib
-#include <CCPlatform.h>
-
 //Local
 #include "ccGLMatrix.h"
 
@@ -33,11 +30,6 @@
 #if (QT_VERSION < QT_VERSION_CHECK(5, 4, 0))
 #error	Error: CloudCompare does not support versions of Qt prior to 5.4 anymore!
 #endif
-
-#include <QOpenGLContext>
-#include <QOpenGLWidget>
-#include <QSurfaceFormat>
-#include <QOpenGLTexture>
 
 //! Shortcuts to OpenGL commands independent on the input type
 class ccGL
@@ -122,7 +114,7 @@ public: //GLU equivalent methods
 		{
 			double* matrix = outMatrix.data();
 
-			double ymax = znear * tanf(fovyInDegrees/2 * CC_DEG_TO_RAD);
+			double ymax = znear * std::tan(fovyInDegrees/2 * CC_DEG_TO_RAD);
 			double xmax = ymax * aspectRatio;
 
 			double dZ = zfar - znear;

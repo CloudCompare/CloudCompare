@@ -18,10 +18,10 @@
 //##########################################################################
 
 #include "ccColorScale.h"
-#include "ccHObject.h"
 #include "ccMesh.h"
 
 class QWidget;
+
 class ccMainAppInterface;
 
 namespace ccEntityAction

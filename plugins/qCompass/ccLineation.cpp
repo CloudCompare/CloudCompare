@@ -17,122 +17,90 @@
 
 #include "ccLineation.h"
 
-//static sphere for drawing with
-static QSharedPointer<ccSphere> c_unitPointMarker(nullptr);
-static QSharedPointer<ccCylinder> c_bodyMarker(nullptr);
+//pass ctors straight to PointPair
+ccLineation::ccLineation(ccPointCloud* associatedCloud)
+	: ccPointPair(associatedCloud)
+{ 
+	updateMetadata();
+}
 
-static QSharedPointer<ccCone> c_headMarker(nullptr);
-//overidden from ccHObject
-void ccLineation::drawMeOnly(CC_DRAW_CONTEXT& context)
+ccLineation::ccLineation(ccPolyline* obj)
+	: ccPointPair(obj)
+{ 
+	updateMetadata();
+}
+
+void ccLineation::updateMetadata()
 {
-	if (!MACRO_Foreground(context)) //2D foreground only
-		return; //do nothing
+	QVariantMap* map = new QVariantMap();
 
-	if (MACRO_Draw3D(context))
+	//add metadata tag defining the ccCompass class type
+	map->insert("ccCompassType", "Lineation");
+
+	//calculate trace orientation (trend/plunge)
+	if (size() == 2) //can't calculate orientation of something smaller than this...
 	{
-		if (size() == 0) //no points -> bail!
-			return;
+		CCVector3f dir = getDirection(); dir.normalize();
+		float trend, plunge;
 
-		//get the set of OpenGL functions (version 2.1)
-		QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-		if (glFunc == nullptr) {
-			assert(false);
-			return;
-		}
-
-		//check sphere exists
-		if (!c_unitPointMarker)
+		if (dir.x + dir.y + dir.z == 0) //special case: null direction
 		{
-			c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, 0, "PointMarker", 6));
-
-			c_unitPointMarker->showColors(true);
-			c_unitPointMarker->setVisible(true);
-			c_unitPointMarker->setEnabled(true);
+			trend = 0;
+			plunge = 0;
 		}
-
-		//check arrow parts exist
-		if (!c_bodyMarker)
+		else if (dir.z > 0.9999999 || dir.z < -0.9999999) //special case: dir is vertical (= 0,0,1 or 0,0,-1)
 		{
-			c_bodyMarker = QSharedPointer<ccCylinder>(new ccCylinder(0.02f, 0.9f, 0, "UnitNormal", 12));
-			c_bodyMarker->showColors(true);
-			c_bodyMarker->setVisible(true);
-			c_bodyMarker->setEnabled(true);
-			c_bodyMarker->setTempColor(ccColor::green);
-			c_bodyMarker->showNormals(false);
+			trend = 0;
+			if (dir.z < 0)
+				plunge = 90;
+			else
+				plunge = -90;
 		}
-		if (!c_headMarker)
+		else //normal cases...
 		{
-			c_headMarker = QSharedPointer<ccCone>(new ccCone(0.05f, 0.0f, 0.1f, 0, 0, 0, "UnitNormalHead", 12));
-			c_headMarker->showColors(true);
-			c_headMarker->setVisible(true);
-			c_headMarker->setEnabled(true);
-			c_headMarker->setTempColor(ccColor::green);
-			c_headMarker->showNormals(false);
+			CCVector3f hzComp = CCVector3f(dir.x, dir.y, 0); hzComp.normalize();
+
+			//calculate plunge: plunge = angle between vector & vector projected onto horizontal (x,y) plane
+			plunge = std::acos(dir.dot(hzComp)) * (180 / M_PI); //plunge measured from horizontal (in degrees)
+			if (dir.z > 0) //lineations pointing towards the sky have negative plunges
+				plunge *= -1;
+
+			//calculate trend (N.B. I have very little idea how exactly this code work, it's kinda magic)
+			//[c.f. http://stackoverflow.com/questions/14066933/direct-way-of-computing-clockwise-angle-between-2-vectors ]
+			CCVector3f N(0, 1, 0); //north vector
+			float dot = hzComp.dot(N);
+			float det = CCVector3f(0, 0, 1).dot(hzComp.cross(N));
+			trend = std::atan2(det, dot) * (180 / M_PI); //heading measured clockwise from north (in degrees)
+			if (trend < 0)
+				trend += 360;
 		}
 
-		//not sure what this does, but it looks like fun
-		CC_DRAW_CONTEXT markerContext = context; //build-up point maker own 'context'
-		markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-		markerContext.display = 0;
+		//store trend and plunge info
+		CCVector3 s = *getPoint(0); //start point
+		CCVector3 e = *getPoint(1); //end point
+		float length = (s - e).norm();
 
-		//get camera info
-		ccGLCameraParameters camera;
-		glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
-		glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
-		glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
+		map->insert("Sx", s.x); map->insert("Sy", s.y); map->insert("Sz", s.z);
+		map->insert("Ex", e.x); map->insert("Ey", e.y); map->insert("Ez", e.z);
+		map->insert("Trend", trend); map->insert("Plunge", plunge); map->insert("Length", length);
 
-		//set draw colour
-		c_unitPointMarker->setTempColor(colour);
+		//store metadata
+		setMetaData(*map, true);
 
-		//draw points
-		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
-		for (unsigned i = 0; i < size(); i++)
-		{
-			const CCVector3* P = getPoint(i);
-			glFunc->glMatrixMode(GL_MODELVIEW);
-			glFunc->glPushMatrix();
-			ccGL::Translate(glFunc, P->x, P->y, P->z);
-			float scale = context.labelMarkerSize * m_relMarkerScale * 0.15;
-			if (viewportParams.perspectiveView && viewportParams.zFar > 0)
-			{
-				//in perspective view, the actual scale depends on the distance to the camera!
-				double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
-				double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
-				scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
-			}
-			glFunc->glScalef(scale, scale, scale);
-			c_unitPointMarker->draw(markerContext);
-			glFunc->glPopMatrix();
-		}
-
-		//draw arrow
-		if (size() == 2) //two points
-		{
-			const CCVector3 start = *getPoint(0);
-			const CCVector3 end = *getPoint(1);
-
-			CCVector3 disp = end - start;
-			float length = disp.norm();
-			float width = length / 3; //round to nearest order of magnitude (works for any unit down to mm)
-			CCVector3 dir = disp / length;
-
-			//transform into coord space with origin at start and arrow head at 0,0,1
-			//(unashamedly pilfered from ccPlanarEntityInterface::glDrawNormal(...)
-			glFunc->glMatrixMode(GL_MODELVIEW);
-			glFunc->glPushMatrix();
-			ccGL::Translate(glFunc, start.x, start.y, start.z);
-			ccGLMatrix mat = ccGLMatrix::FromToRotation(CCVector3(0, 0, PC_ONE), dir);
-			glFunc->glMultMatrixf(mat.data());
-			ccGL::Scale(glFunc, width, width, length);
-
-			//draw arrow body
-			glFunc->glTranslatef(0, 0, 0.45f);
-			c_bodyMarker->draw(markerContext);
-
-			//draw arrow head
-			glFunc->glTranslatef(0, 0, 0.45f);
-			c_headMarker->draw(markerContext);
-			glFunc->glPopMatrix();
-		}
+		//update name
+		QString lengthstr = QString("").asprintf("%.1f on ", length);
+		QString trendAndPlungeStr = QString("%2->%3").arg((int)plunge, 2, 10, QChar('0')).arg((int)trend, 3, 10, QChar('0'));
+		QString namestr = lengthstr + trendAndPlungeStr;
+		setName(namestr);
 	}
+}
+
+//returns true if object is a lineation
+bool ccLineation::isLineation(ccHObject* object)
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("Lineation");
+	}
+	return false;
 }

@@ -20,13 +20,10 @@
 
 //Local
 #include "ccGLDrawContext.h"
-#include "qCC_db.h"
 
 //CCLib
 #include <CCGeom.h>
 
-//system
-#include <vector>
 
 class ccGenericGLDisplay;
 

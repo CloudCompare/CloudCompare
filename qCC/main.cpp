@@ -299,7 +299,7 @@ int main(int argc, char **argv)
 			QMessageBox::critical(0, "Error", "Failed to initialize the main application window?!");
 			return EXIT_FAILURE;
 		}
-		mainWindow->dispatchPlugins(plugins, pluginPaths);
+		mainWindow->setupPluginDispatch(plugins, pluginPaths);
 		mainWindow->show();
 		QApplication::processEvents();
 

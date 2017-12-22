@@ -39,7 +39,7 @@ class ccGLWidget : public QWidget
 
 public:
 
-	ccGLWidget(ccGLWindow* window, QWidget* parent = 0)
+	ccGLWidget(ccGLWindow* window, QWidget* parent = nullptr)
 		: QWidget(parent)
 	{
 		setLayout(new QHBoxLayout);
@@ -55,7 +55,7 @@ public:
 	{
 		if (m_associatedWindow)
 		{
-			m_associatedWindow->setParent(0);
+			m_associatedWindow->setParent(nullptr);
 			m_associatedWindow->close();
 		}
 	}
@@ -72,7 +72,7 @@ public:
 		else
 		{
 			assert(false);
-			return 0;
+			return nullptr;
 		}
 	}
 
@@ -100,13 +100,13 @@ protected:
 
 #endif
 
-static void CreateGLWindow(ccGLWindow*& window, QWidget*& widget, bool stereoMode = false, bool silentInitialization = false)
+inline void CreateGLWindow(ccGLWindow*& window, QWidget*& widget, bool stereoMode = false, bool silentInitialization = false)
 {
 	QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 	format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 	format.setStereo(stereoMode);
 
-	window = new ccGLWindow(&format, 0, silentInitialization);
+	window = new ccGLWindow(&format, nullptr, silentInitialization);
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	widget = new ccGLWidget(window);
@@ -115,7 +115,7 @@ static void CreateGLWindow(ccGLWindow*& window, QWidget*& widget, bool stereoMod
 #endif
 }
 
-static ccGLWindow* GLWindowFromWidget(QWidget* widget)
+inline ccGLWindow* GLWindowFromWidget(QWidget* widget)
 {
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	ccGLWidget* myWidget = qobject_cast<ccGLWidget*>(widget);
@@ -133,10 +133,8 @@ static ccGLWindow* GLWindowFromWidget(QWidget* widget)
 	else
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 }
-
-
 
 #endif //CC_GL_WIDGET_HEADER

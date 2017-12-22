@@ -18,9 +18,6 @@
 #ifndef CC_BBOX_HEADER
 #define CC_BBOX_HEADER
 
-//CCLib
-#include <SquareMatrix.h>
-
 //Local
 #include "ccDrawableObject.h"
 

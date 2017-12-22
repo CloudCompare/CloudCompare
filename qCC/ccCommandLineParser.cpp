@@ -152,6 +152,7 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandDropGlobalShift));
 	registerCommand(Command::Shared(new CommandFilterBySFValue));
 	registerCommand(Command::Shared(new CommandMergeClouds));
+	registerCommand(Command::Shared(new CommandMergeMeshes));
 	registerCommand(Command::Shared(new CommandSetActiveSF));
 	registerCommand(Command::Shared(new CommandRemoveAllSF));
 	registerCommand(Command::Shared(new CommandMatchBBCenters));
@@ -189,7 +190,9 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandSetNoTimestamp));
 	registerCommand(Command::Shared(new CommandVolume25D));
 	registerCommand(Command::Shared(new CommandRasterize));
-	//registerCommand(Command::Shared(new XXX));
+	registerCommand(Command::Shared(new CommandOctreeNormal));
+	registerCommand(Command::Shared(new CommandClearNormals));
+	registerCommand(Command::Shared(new CommandComputeMeshVolume));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));
@@ -218,7 +221,7 @@ bool ccCommandLineParser::registerCommand(Command::Shared command)
 	if (m_commands.contains(command->m_keyword))
 	{
 		assert(false);
-		warning(QString("Internal error: keyword '%' already registered (by command '%2')").arg(command->m_keyword).arg(m_commands[command->m_keyword]->m_name));
+		warning(QString("Internal error: keyword '%' already registered (by command '%2')").arg(command->m_keyword, m_commands[command->m_keyword]->m_name));
 		return false;
 	}
 
@@ -260,7 +263,7 @@ QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 	QString outputFilename = baseName;
 	if (m_addTimestamp && !forceNoTimestamp)
 	{
-		outputFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss"));
+		outputFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss_zzz"));
 	}
 
 	if (!extension.isEmpty())
@@ -530,9 +533,9 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 		{
 			ccHObject tempContainer("Clouds");
 			{
-				for (size_t i = 0; i < m_clouds.size(); ++i)
+				for (CLCloudDesc& desc : m_clouds)
 				{
-					tempContainer.addChild(m_clouds[i].getEntity(), ccHObject::DP_NONE);
+					tempContainer.addChild(desc.getEntity(), ccHObject::DP_NONE);
 				}
 			}
 
@@ -553,10 +556,10 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 
 	//standard way: one file per cloud
 	{
-		for (size_t i = 0; i < m_clouds.size(); ++i)
+		for (CLCloudDesc& desc : m_clouds)
 		{
 			//save output
-			QString errorStr = exportEntity(m_clouds[i], suffix);
+			QString errorStr = exportEntity(desc, suffix);
 			if (!errorStr.isEmpty())
 				return error(errorStr);
 		}
@@ -662,7 +665,7 @@ int ccCommandLineParser::start(QDialog* parent/*=0*/)
 			print("Available commands:");
 			for (auto it = m_commands.constBegin(); it != m_commands.constEnd(); ++it)
 			{
-				print(QString("-%1: %2").arg(it.key().toUpper()).arg(it.value()->m_name));
+				print(QString("-%1: %2").arg(it.key().toUpper(), it.value()->m_name));
 			}
 		}
 		else

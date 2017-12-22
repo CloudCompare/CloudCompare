@@ -168,6 +168,9 @@ protected: //standard methods
 	//! Tests if the dialog can be safely closed
 	bool canClose();
 
+	//! Adds a new contour line
+	void addNewContour(ccPolyline* poly, double height, unsigned subIndex);
+
 protected: //raster grid related stuff
 
 	//! Converts the grid to a cloud with scalar field(s)

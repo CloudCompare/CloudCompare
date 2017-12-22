@@ -19,8 +19,8 @@
 #define CC_OCTREE_HEADER
 
 //Local
-#include "ccHObject.h"
 #include "ccGenericGLDisplay.h"
+#include "ccHObject.h"
 
 //CCLib
 #include <DgmOctree.h>
@@ -28,10 +28,6 @@
 
 //Qt
 #include <QObject>
-#include <QSharedPointer>
-
-//system
-#include <vector>
 
 class ccGenericPointCloud;
 class ccOctreeFrustumIntersector;

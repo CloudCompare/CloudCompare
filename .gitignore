@@ -126,3 +126,6 @@ pip-log.txt
 .DS_Store
 /build_64bits_msvc10/
 /test/
+private_plugins
+/data/
+/misc/

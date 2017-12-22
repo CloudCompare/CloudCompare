@@ -17,7 +17,7 @@
 
 #include "ccMouseCircle.h"
 
-#include <math.h>
+#include <cmath>
 
 ccMouseCircle::ccMouseCircle(ccGLWindow* owner, QString name) 
 	: cc2DViewportObject(name.isEmpty() ? "label" : name)
@@ -29,8 +29,8 @@ ccMouseCircle::ccMouseCircle(ccGLWindow* owner, QString name)
 	for (int n = 0; n < ccMouseCircle::RESOLUTION; n++)
 	{
 		float heading = n * (2 * M_PI / (float) ccMouseCircle::RESOLUTION); //heading in radians
-		ccMouseCircle::UNIT_CIRCLE[n][0] = cos(heading);
-		ccMouseCircle::UNIT_CIRCLE[n][1] = sin(heading);
+		ccMouseCircle::UNIT_CIRCLE[n][0] = std::cos(heading);
+		ccMouseCircle::UNIT_CIRCLE[n][1] = std::sin(heading);
 	}
 
 	//attach to owner
@@ -89,11 +89,9 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	if (!m_params.perspectiveView) //ortho mode
 	{
 		//Screen pan & pivot compensation
-		float totalZoom = m_params.zoom / m_params.pixelSize;
 		m_winTotalZoom = params.zoom / params.pixelSize;
 
-		CCVector3d dC = m_params.cameraCenter - params.cameraCenter;
-		
+		//CCVector3d dC = m_params.cameraCenter - params.cameraCenter;
 		CCVector3d P = m_params.pivotPoint - params.pivotPoint;
 		m_params.viewMat.apply(P);
 

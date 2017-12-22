@@ -45,7 +45,7 @@
 #include <assert.h>
 #include <cmath> //for std::modf
 
-static CCVector3 s_blankNorm(0,0,0);
+static CCVector3 s_blankNorm(0, 0, 0);
 
 ccMesh::ccMesh(ccGenericPointCloud* vertices)
 	: ccGenericMesh("Mesh")
@@ -284,7 +284,7 @@ bool ccMesh::computePerTriangleNormals()
 
 	//for each triangle
 	{
-		for (unsigned i=0; i<triCount; ++i)
+		for (unsigned i = 0; i < triCount; ++i)
 		{
 			const unsigned* tri = m_triVertIndexes->getValue(i);
 			const CCVector3* A = m_associatedCloud->getPoint(tri[0]);
@@ -310,8 +310,8 @@ bool ccMesh::computePerTriangleNormals()
 
 		setTriNormsTable(normIndexes);
 
-		for (int i=0; i<static_cast<int>(triCount); ++i)
-			addTriangleNormalIndexes(i,i,i);
+		for (int i = 0; i < static_cast<int>(triCount); ++i)
+			addTriangleNormalIndexes(i, i, i);
 	}
 
 	//apply it also to sub-meshes!
@@ -636,7 +636,11 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 			//this is a "persistent" pointer and we know what type of cloud is behind ;)
 			CCVector3* P = const_cast<CCVector3*>(m_associatedCloud->getPointPersistentPtr(i));
 			const CCVector3* d = (const CCVector3*)verticesDisplacement->getValue(i);
-			(*P) += (*d) * (factor / edgesCount[i]);
+			
+			if (edgesCount[i])
+			{
+				(*P) += (*d) * (factor / edgesCount[i]);
+			}
 		}
 	}
 
@@ -1159,7 +1163,7 @@ ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
 	return mesh;
 }
 
-bool ccMesh::merge(const ccMesh* mesh)
+bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 {
 	if (!mesh)
 	{
@@ -1178,14 +1182,14 @@ bool ccMesh::merge(const ccMesh* mesh)
 	}
 	ccPointCloud* vertices = static_cast<ccPointCloud*>(mesh->getAssociatedCloud());
 
-	//vertices
-	unsigned vertNumBefore = m_associatedCloud->size();
-	//triangles
-	unsigned triNumBefore = size();
+	//vertices count (before merge)
+	const unsigned vertNumBefore = m_associatedCloud->size();
+	//triangles count (before merge)
+	const unsigned triNumBefore = size();
 
 	bool success = false;
 
-	while (true) //fake loop for easy breaking/cleaning
+	for (int iteration = 0; iteration < 1; ++iteration) //fake loop for easy breaking/cleaning
 	{
 		//merge vertices
 		unsigned vertIndexShift = 0;
@@ -1292,7 +1296,7 @@ bool ccMesh::merge(const ccMesh* mesh)
 				assert(m_triNormalIndexes->capacity() >= triNumBefore + triAdded);
 				//fill the indexes table with default values
 				{
-					int defaultElement[3] = {-1,-1,-1};
+					int defaultElement[3] = { -1, -1, -1 };
 					for (unsigned i = 0; i < mesh->m_triNormalIndexes->currentSize(); ++i)
 						m_triNormalIndexes->addElement(defaultElement);
 				}
@@ -1329,7 +1333,7 @@ bool ccMesh::merge(const ccMesh* mesh)
 						break;
 					}
 					//update map table
-					for (size_t m=0; m!=otherMatSetSize; ++m)
+					for (size_t m = 0; m != otherMatSetSize; ++m)
 					{
 						materialIndexMap[m] = m_materials->addMaterial(mesh->m_materials->at(m));
 					}
@@ -1339,7 +1343,7 @@ bool ccMesh::merge(const ccMesh* mesh)
 				assert(m_triMtlIndexes->capacity() >= triNumBefore + triAdded);
 				//copy the values
 				{
-					for (unsigned i=0; i<mesh->m_triMtlIndexes->currentSize(); ++i)
+					for (unsigned i = 0; i < mesh->m_triMtlIndexes->currentSize(); ++i)
 					{
 						int index = mesh->m_triMtlIndexes->getValue(i);
 						assert(index < static_cast<int>(materialIndexMap.size()));
@@ -1355,7 +1359,7 @@ bool ccMesh::merge(const ccMesh* mesh)
 				//fill the indexes table with default values
 				{
 					int defaultValue = -1;
-					for (unsigned i=0; i<mesh->m_triMtlIndexes->currentSize(); ++i)
+					for (unsigned i = 0; i < mesh->m_triMtlIndexes->currentSize(); ++i)
 						m_triMtlIndexes->addElement(defaultValue);
 				}
 			}
@@ -1387,8 +1391,8 @@ bool ccMesh::merge(const ccMesh* mesh)
 					}
 					//copy the values
 					{
-						static const float TxDef[2] = {-1.0f,-1.0f};
-						for (unsigned i=0; i<mesh->m_texCoords->currentSize(); ++i)
+						static const float TxDef[2] = { -1.0f, -1.0f };
+						for (unsigned i = 0; i < mesh->m_texCoords->currentSize(); ++i)
 						{
 							const float* Tx = mesh->m_texCoords->getValue(i);
 							assert(Tx);
@@ -1402,7 +1406,7 @@ bool ccMesh::merge(const ccMesh* mesh)
 				assert(m_texCoordIndexes->capacity() >= triNumBefore + triAdded);
 				//copy the values
 				{
-					for (unsigned i=0; i<mesh->m_texCoordIndexes->currentSize(); ++i)
+					for (unsigned i = 0; i < mesh->m_texCoordIndexes->currentSize(); ++i)
 					{
 						const int* indexes = mesh->m_texCoordIndexes->getValue(i);
 						int newIndexes[3] = {	!indexes || indexes[0] < 0 ? -1 : indexes[0] + static_cast<int>(texCoordIndexShift),
@@ -1418,8 +1422,8 @@ bool ccMesh::merge(const ccMesh* mesh)
 				assert(m_texCoordIndexes->capacity() >= triNumBefore + triAdded);
 				//fill the indexes table with default values
 				{
-					int defaultElement[3] = {-1,-1,-1};
-					for (unsigned i=0; i<mesh->m_texCoordIndexes->currentSize(); ++i)
+					int defaultElement[3] = { -1, -1, -1 };
+					for (unsigned i = 0; i < mesh->m_texCoordIndexes->currentSize(); ++i)
 						m_texCoordIndexes->addElement(defaultElement);
 				}
 			}
@@ -1429,7 +1433,33 @@ bool ccMesh::merge(const ccMesh* mesh)
 		showWired(this->isShownAsWire() || mesh->isShownAsWire());
 		enableStippling(this->stipplingEnabled() || mesh->stipplingEnabled());
 		success = true;
-		break;
+	}
+
+	if (createSubMesh)
+	{
+		//triangles count (after merge)
+		const unsigned triNumAfter = size();
+
+		ccSubMesh* subMesh = new ccSubMesh(this);
+		if (subMesh->reserve(triNumAfter - triNumBefore))
+		{
+			subMesh->addTriangleIndex(triNumBefore, triNumAfter);
+			subMesh->setName(mesh->getName());
+			subMesh->showMaterials(materialsShown());
+			subMesh->showNormals(normalsShown());
+			subMesh->showTriNorms(triNormsShown());
+			subMesh->showColors(colorsShown());
+			subMesh->showWired(isShownAsWire());
+			subMesh->enableStippling(stipplingEnabled());
+			subMesh->setEnabled(false);
+			addChild(subMesh);
+		}
+		else
+		{
+			ccLog::Warning(QString("[Merge] Not enough memory to create the sub-mesh corresponding to mesh '%1'!").arg(mesh->getName()));
+			delete subMesh;
+			subMesh = nullptr;
+		}
 	}
 
 	if (!success)

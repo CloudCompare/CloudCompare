@@ -218,9 +218,12 @@ protected slots:
 	void alignCameraWithEntityDirect() { alignCameraWithEntity(false); }
 	void alignCameraWithEntityIndirect() { alignCameraWithEntity(true); }
 	void enableBubbleViewMode();
+	void editLabelScalarValue();
 
 signals:
 	void selectionChanged();
+	void dbIsEmpty();
+	void dbIsNotEmptyAnymore();
 
 protected:
 
@@ -299,6 +302,8 @@ protected:
 	QAction* m_alignCameraWithEntityReverse;
 	//! Context menu action: enable bubble-view (on a sensor)
 	QAction* m_enableBubbleViewMode;
+	//! Context menu action: change current scalar value (via a 2D label)
+	QAction* m_editLabelScalarValue;
 
 	//! Last context menu pos
 	QPoint m_contextMenuPos;

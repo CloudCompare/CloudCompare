@@ -127,13 +127,20 @@ bool StereogramWidget::init(double angularStep_deg,
 
 	size_t count = 0;
 	ccHObject::Container facets;
+	ccHObject::Container planes;
 	ccPointCloud* cloud = 0;
 
-	//a set of facets?
+	//a set of facets or planes?
 	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
+		//check for facets first
 		entity->filterChildren(facets,true,CC_TYPES::FACET);
 		count = facets.size();
+		if (count == 0) //if no facets, look for planes instead
+		{
+			entity->filterChildren(planes, true, CC_TYPES::PLANE);
+			count = planes.size();
+		}
 	}
 	//or a cloud?
 	else if (entity->isA(CC_TYPES::POINT_CLOUD))
@@ -174,15 +181,21 @@ bool StereogramWidget::init(double angularStep_deg,
 		{
 			CCVector3 N;
 			double weight = 1.0;
-			if (cloud)
+			if (cloud) //we're using cloud normals
 			{
 				N = cloud->getPointNormal(static_cast<unsigned>(i));
 			}
-			else
+			else if (facets.size() != 0) //we're using facets
 			{
 				ccFacet* facet = static_cast<ccFacet*>(facets[i]);
 				N = facet->getNormal();
 				weight = facet->getSurface();
+			}
+			else if (planes.size() != 0) //we're using planes
+			{
+				ccPlane* p = static_cast<ccPlane*>(planes[i]);
+				N = p->getNormal();
+				//n.b. planes all carry equal weight
 			}
 
 			Nmean.x += static_cast<double>(N.x) * weight;

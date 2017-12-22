@@ -8,7 +8,15 @@ if ( ${OPTION_PDAL_LAS} )
 		include_directories(${PDAL_INCLUDE_DIRS})
 		link_directories(${PDAL_LIBRARY_DIRS})
 	endif()
-endif()
+
+	set( JSON_ROOT_DIR "" CACHE PATH "Jsoncpp root dir (PDAL/vendor/jsoncpp/dist)" )
+	if( NOT JSON_ROOT_DIR )
+		message( WARNING "Jsoncpp root dir is not specified (JSON_ROOT_DIR)" )
+	else()
+		include_directories( ${JSON_ROOT_DIR} )
+	endif()
+
+	endif()
 
 
 # Link project with PDAL library
@@ -20,7 +28,7 @@ function( target_link_PDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = base 
 			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_LAS_SUPPORT )
 
 			if( WIN32 )
-				if ( MSVC_VERSION EQUAL 1910 ) # Visual Studio 2017
+				if ( MSVC_VERSION GREATER_EQUAL 1900 ) # Visual Studio 2017
 					add_definitions(-DWIN32_LEAN_AND_MEAN)
 				endif()
 

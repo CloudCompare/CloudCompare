@@ -113,9 +113,9 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 #endif
 
 	//Signals & slots connection
-	connect(m_glWindow,								SIGNAL(filesDropped(const QStringList&)),			this,		SLOT(addToDB(const QStringList&)), Qt::QueuedConnection);
-	connect(m_glWindow,								SIGNAL(entitySelectionChanged(ccHObject*)),	this,		SLOT(selectEntity(ccHObject*)));
-	connect(m_glWindow,								SIGNAL(exclusiveFullScreenToggled(bool)),	this,		SLOT(onExclusiveFullScreenToggled(bool)));
+	connect(m_glWindow,								SIGNAL(filesDropped(const QStringList&)),	this,	SLOT(addToDB(QStringList)), Qt::QueuedConnection);
+	connect(m_glWindow,								SIGNAL(entitySelectionChanged(ccHObject*)),	this,	SLOT(selectEntity(ccHObject*)));
+	connect(m_glWindow,								SIGNAL(exclusiveFullScreenToggled(bool)),	this,	SLOT(onExclusiveFullScreenToggled(bool)));
 	//connect(m_glWindow,							SIGNAL(entitiesSelectionChanged(std::unordered_set<int>)),	this,		SLOT(selectEntities(std::unordered_set<int>))); //not supported!
 	//connect(m_glWindow,							SIGNAL(newLabel(ccHObject*),						this,		SLOT(handleNewEntity(ccHObject*))); //nothing to do in ccViewer!
 
@@ -493,7 +493,7 @@ void ccViewer::updateGLFrameGradient()
 	ui.GLframe->setStyleSheet(styleSheet);
 }
 
-void ccViewer::addToDB(const QStringList& filenames)
+void ccViewer::addToDB(QStringList filenames)
 {
 	ccHObject* currentRoot = m_glWindow->getSceneDB();
 	if (currentRoot)

@@ -35,6 +35,12 @@ v2.10.alpha - XX/XX/201X
 		- if a FBX file with other units is imported, CC will now store this information as meta-data and will set it correctly
 			if the corresponding meshes are exported as FBX again
 	
+	* Command line mode:
+		- Scalar field convert to RGB:
+			* '-SF_CONVERT_TO_RGB {mixWithExistingColors bool}'
+		- Scalar field set color scale:
+			* '-SF_COLOR_SCALE {filename}'
+
 - Bug fix:
 
 	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values

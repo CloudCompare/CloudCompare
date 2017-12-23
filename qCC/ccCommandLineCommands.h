@@ -63,6 +63,7 @@ static const char COMMAND_ROUGHNESS[]						= "ROUGH";
 static const char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
 static const char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
 static const char COMMAND_SF_COLOR_SCALE[]					= "SF_COLOR_SCALE";
+static const char COMMAND_SF_CONVERT_TO_RGB[]				= "SF_CONVERT_TO_RGB";
 static const char COMMAND_FILTER_SF_BY_VALUE[]				= "FILTER_SF";
 static const char COMMAND_MERGE_CLOUDS[]					= "MERGE_CLOUDS";
 static const char COMMAND_MERGE_MESHES[]                    = "MERGE_MESHES";
@@ -1332,6 +1333,52 @@ struct CommandSFColorScale : public ccCommandLineInterface::Command
 		}
 
 		if (cmd.autoSaveMode() && !cmd.saveClouds("COLOR_SCALE"))
+			return false;
+
+		return true;
+	}
+};
+
+struct CommandSFConvertToRGB : public ccCommandLineInterface::Command
+{
+	CommandSFConvertToRGB() : ccCommandLineInterface::Command("SF convert to RGB", COMMAND_SF_CONVERT_TO_RGB) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		cmd.print("[SF CONVERT TO RGB]");
+
+		if (cmd.arguments().empty())
+			return cmd.error(QString("Missing parameter: boolean (whether to mix with existing colors or not) after \"-%1\"").arg(COMMAND_SF_CONVERT_TO_RGB));
+
+		QString mixWithExistingColorsStr = cmd.arguments().takeFirst().toUpper();
+		bool mixWithExistingColors = false;
+		if (mixWithExistingColorsStr == "TRUE")
+		{
+			mixWithExistingColors = true;
+		}
+		else if (mixWithExistingColorsStr != "FALSE")
+		{
+			return cmd.error(QString("Invalid boolean value after \"-%1\". Got '%2' instead of TRUE or FALSE.").arg(COMMAND_SF_CONVERT_TO_RGB, mixWithExistingColorsStr));
+		}
+
+		if (cmd.clouds().empty())
+			return cmd.error(QString("No point cloud on which to compute SF gradient! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_CONVERT_TO_RGB));
+
+		for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		{
+			ccHObject* ent = cmd.clouds()[i].getEntity();
+			ccPointCloud* pc = cmd.clouds()[i].pc;
+			if (pc->getCurrentDisplayedScalarField())
+			{
+				if (pc->setRGBColorWithCurrentScalarField(mixWithExistingColors))
+				{
+					ent->showColors(true);
+					ent->showSF(false);
+				}
+			}
+		}
+
+		if (cmd.autoSaveMode() && !cmd.saveClouds("SF_CONVERT_TO_RGB"))
 			return false;
 
 		return true;

@@ -62,6 +62,7 @@ static const char COMMAND_SF_GRADIENT[]						= "SF_GRAD";
 static const char COMMAND_ROUGHNESS[]						= "ROUGH";
 static const char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
 static const char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
+static const char COMMAND_SF_COLOR_SCALE[]					= "SF_COLOR_SCALE";
 static const char COMMAND_FILTER_SF_BY_VALUE[]				= "FILTER_SF";
 static const char COMMAND_MERGE_CLOUDS[]					= "MERGE_CLOUDS";
 static const char COMMAND_MERGE_MESHES[]                    = "MERGE_MESHES";
@@ -1295,6 +1296,43 @@ struct CommandDropGlobalShift : public ccCommandLineInterface::Command
 				shifted->setGlobalShift(0, 0, 0);
 			}
 		}
+
+		return true;
+	}
+};
+
+struct CommandSFColorScale : public ccCommandLineInterface::Command
+{
+	CommandSFColorScale() : ccCommandLineInterface::Command("SF color scale", COMMAND_SF_COLOR_SCALE) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		cmd.print("[SF COLOR SCALE]");
+
+		if (cmd.arguments().empty())
+			return cmd.error(QString("Missing parameter: color scale file after \"-%1\"").arg(COMMAND_SF_COLOR_SCALE));
+
+		QString filename = cmd.arguments().takeFirst();
+
+		ccColorScale::Shared scale = ccColorScale::LoadFromXML(filename);
+
+		if (!scale)
+			return cmd.error(QString("Failed to read color scale file '%1'!").arg(filename));
+
+		if (cmd.clouds().empty())
+			return cmd.error(QString("No point cloud on which to compute SF gradient! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_COLOR_SCALE));
+
+		for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		{
+			ccScalarField* sf = cmd.clouds()[i].pc->getCurrentDisplayedScalarField();
+			if (sf)
+			{
+				sf->setColorScale(scale);
+			}
+		}
+
+		if (cmd.autoSaveMode() && !cmd.saveClouds("COLOR_SCALE"))
+			return false;
 
 		return true;
 	}

@@ -193,6 +193,7 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandOctreeNormal));
 	registerCommand(Command::Shared(new CommandClearNormals));
 	registerCommand(Command::Shared(new CommandComputeMeshVolume));
+	registerCommand(Command::Shared(new CommandSFColorScale));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));

@@ -1366,14 +1366,30 @@ struct CommandSFConvertToRGB : public ccCommandLineInterface::Command
 
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{
-			ccHObject* ent = cmd.clouds()[i].getEntity();
 			ccPointCloud* pc = cmd.clouds()[i].pc;
-			if (pc->getCurrentDisplayedScalarField())
+			unsigned sfCount = pc->getNumberOfScalarFields();
+			int activeSFIndex = pc->getCurrentOutScalarFieldIndex();
+
+			if (sfCount == 0)
 			{
+				cmd.warning(QString("cmd.warning: cloud '%1' has no scalar field (it will be ignored)").arg(pc->getName()));
+			}
+			else if (activeSFIndex >= 0)
+			{
+				cmd.warning(QString("cmd.warning: cloud '%1' has no active scalar field (it will be ignored)").arg(pc->getName()));
+			}
+			else
+			{
+				pc->setCurrentDisplayedScalarField(activeSFIndex);
+
 				if (pc->setRGBColorWithCurrentScalarField(mixWithExistingColors))
 				{
-					ent->showColors(true);
-					ent->showSF(false);
+					pc->showColors(true);
+					pc->showSF(false);
+				}
+				else
+				{
+					cmd.warning(QString("cmd.warning: cloud '%1' failed to convert SF to RGB").arg(pc->getName()));
 				}
 			}
 		}

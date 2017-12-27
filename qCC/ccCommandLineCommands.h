@@ -1325,7 +1325,7 @@ struct CommandSFColorScale : public ccCommandLineInterface::Command
 
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{
-			ccScalarField* sf = cmd.clouds()[i].pc->getCurrentDisplayedScalarField();
+			ccScalarField* sf = static_cast<ccScalarField*>(cmd.clouds()[i].pc->getCurrentOutScalarField());
 			if (sf)
 			{
 				sf->setColorScale(scale);

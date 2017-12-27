@@ -34,7 +34,7 @@ v2.10.alpha - XX/XX/201X
 		- default FBX units are 'cm'
 		- if a FBX file with other units is imported, CC will now store this information as meta-data and will set it correctly
 			if the corresponding meshes are exported as FBX again
-	
+
 	* Command line mode:
 		- Scalar field convert to RGB:
 			* '-SF_CONVERT_TO_RGB {mixWithExistingColors bool}'

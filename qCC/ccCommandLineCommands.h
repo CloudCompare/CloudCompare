@@ -1380,6 +1380,7 @@ struct CommandSFConvertToRGB : public ccCommandLineInterface::Command
 			}
 			else
 			{
+				int displaySFIndex = pc->getCurrentDisplayedScalarFieldIndex();
 				pc->setCurrentDisplayedScalarField(activeSFIndex);
 
 				if (pc->setRGBColorWithCurrentScalarField(mixWithExistingColors))
@@ -1391,6 +1392,8 @@ struct CommandSFConvertToRGB : public ccCommandLineInterface::Command
 				{
 					cmd.warning(QString("cmd.warning: cloud '%1' failed to convert SF to RGB").arg(pc->getName()));
 				}
+
+				pc->setCurrentDisplayedScalarField(displaySFIndex);
 			}
 		}
 

@@ -1374,7 +1374,7 @@ struct CommandSFConvertToRGB : public ccCommandLineInterface::Command
 			{
 				cmd.warning(QString("cmd.warning: cloud '%1' has no scalar field (it will be ignored)").arg(pc->getName()));
 			}
-			else if (activeSFIndex >= 0)
+			else if (activeSFIndex < 0)
 			{
 				cmd.warning(QString("cmd.warning: cloud '%1' has no active scalar field (it will be ignored)").arg(pc->getName()));
 			}

@@ -1321,7 +1321,7 @@ struct CommandSFColorScale : public ccCommandLineInterface::Command
 			return cmd.error(QString("Failed to read color scale file '%1'!").arg(filename));
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud on which to compute SF gradient! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_COLOR_SCALE));
+			return cmd.error(QString("No point cloud on which to change the SF color scale! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_COLOR_SCALE));
 
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{
@@ -1362,7 +1362,7 @@ struct CommandSFConvertToRGB : public ccCommandLineInterface::Command
 		}
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud on which to compute SF gradient! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_CONVERT_TO_RGB));
+			return cmd.error(QString("No point cloud on which to convert SF to RGB! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_CONVERT_TO_RGB));
 
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{

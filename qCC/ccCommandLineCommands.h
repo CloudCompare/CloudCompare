@@ -1165,8 +1165,11 @@ struct CommandSFGradient : public ccCommandLineInterface::Command
 				if (sfCount > 1)
 					cmd.warning(QString("cmd.warning: cloud '%1' has several scalar fields (the active one will be used by default, or the first one if none is active)").arg(cmd.clouds()[i].pc->getName()));
 
-				if (!cmd.clouds()[i].pc->getCurrentDisplayedScalarField())
-					cmd.clouds()[i].pc->setCurrentDisplayedScalarField(0);
+				int activeSFIndex = cmd.clouds()[i].pc->getCurrentOutScalarFieldIndex();
+				if (activeSFIndex < 0)
+					activeSFIndex = 0;
+
+				cmd.clouds()[i].pc->setCurrentDisplayedScalarField(activeSFIndex);
 
 				entities.push_back(cmd.clouds()[i].pc);
 			}

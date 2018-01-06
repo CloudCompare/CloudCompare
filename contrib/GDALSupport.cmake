@@ -10,6 +10,9 @@ if( ${OPTION_USE_GDAL} )
 		message( SEND_ERROR "GDAL package not found!" )
 	else()
 		include_directories( ${GDAL_INCLUDE_DIR} )
+		if( WIN32 )
+			set( GDAL_BIN_DIR ${GDAL_INCLUDE_DIR}/../bin CACHE PATH "GDAL DLLs folder" )
+		endif()
 	endif()
 endif()
 
@@ -23,7 +26,10 @@ function( target_link_GDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = base 
 			if( WIN32 )
 				#install DLLs
 				if ( ARGV1 )
-					file( GLOB GDAL_DLL_FILES ${GDAL_INCLUDE_DIR}/../bin/*.dll )
+					file( GLOB GDAL_DLL_FILES ${GDAL_BIN_DIR}/*.dll )
+					#message( "GDAL DLLs" )
+					#message( "Looked in: "${GDAL_BIN_DIR} )
+					#message( ${GDAL_DLL_FILES} )
 					copy_files("${GDAL_DLL_FILES}" ${ARGV1} ) #mind the quotes!
 				endif()
 			endif()

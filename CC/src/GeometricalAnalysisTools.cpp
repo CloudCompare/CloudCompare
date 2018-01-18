@@ -241,7 +241,7 @@ bool GeometricalAnalysisTools::flagDuplicatePointsInACellAtLevel(	const DgmOctre
 	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
 
 	unsigned n = cell.points->size(); //number of points in the current cell
-	
+
 	//for each point in the cell
 	for (unsigned i = 0; i < n; ++i)
 	{
@@ -334,7 +334,7 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
 {
 	//extract additional parameter(s)
 	Density densityType = *static_cast<Density*>(additionalParameters[0]);
-	
+
 	DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level								= cell.level;
 	nNSS.alreadyVisitedNeighbourhoodSize	= 0;
@@ -472,14 +472,14 @@ int GeometricalAnalysisTools::computeLocalDensity(	GenericIndexedCloudPersist* t
 //ADDITIONNAL PARAMETERS (2):
 // [0] -> (PointCoordinateType*) kernelRadius : spherical neighborhood radius
 // [1] -> (ScalarType*) sphereVolume : spherical neighborhood volume
-bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctree::octreeCell& cell, 
+bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctree::octreeCell& cell,
 																	void** additionalParameters,
 																	NormalizedProgress* nProgress/*=0*/)
 {
 	//parameter(s)
 	PointCoordinateType radius = *static_cast<PointCoordinateType*>(additionalParameters[0]);
 	double dimensionalCoef = *static_cast<double*>(additionalParameters[1]);
-	
+
 	assert(dimensionalCoef > 0);
 
 	//structure for nearest neighbors search
@@ -490,7 +490,7 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctr
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
 	unsigned n = cell.points->size(); //number of points in the current cell
-	
+
 	//for each point in the cell
 	for (unsigned i = 0; i < n; ++i)
 	{
@@ -561,7 +561,7 @@ int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCl
 //"PER-CELL" METHOD: ROUGHNESS ESTIMATION (LEAST SQUARES PLANE FIT)
 //ADDITIONNAL PARAMETERS (1):
 // [0] -> (PointCoordinateType*) kernelRadius : neighbourhood radius
-bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOctree::octreeCell& cell, 
+bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOctree::octreeCell& cell,
 																	void** additionalParameters,
 																	NormalizedProgress* nProgress/*=0*/)
 {
@@ -576,7 +576,7 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
 	unsigned n = cell.points->size(); //number of points in the current cell
-	
+
 	//for each point in the cell
 	for (unsigned i=0; i<n; ++i)
 	{
@@ -628,7 +628,7 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 CCVector3 GeometricalAnalysisTools::computeGravityCenter(GenericCloud* theCloud)
 {
 	assert(theCloud);
-	
+
 	unsigned count = theCloud->size();
 	if (count == 0)
 		return CCVector3();
@@ -832,7 +832,7 @@ bool GeometricalAnalysisTools::refineSphereLS(	GenericIndexedCloudPersist* cloud
 		//invalid input
 		return false;
 	}
-	
+
 	CCVector3d c = CCVector3d::fromArray(center.u);
 
 	unsigned count = cloud->size();
@@ -892,7 +892,8 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 													PointCoordinateType& radius,
 													double& rms,
 													GenericProgressCallback* progressCb/*=0*/,
-													double confidence/*=0.99*/)
+													double confidence/*=0.99*/,
+													unsigned seed/*=0*/)
 {
 	if (!cloud || cloud->size() < 4)
 	{
@@ -920,7 +921,9 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 	//number of samples
 	unsigned m = 1;
 	if (n > p)
+	{
 		m = static_cast<unsigned>(log(1.0 - confidence) / log(1.0 - pow(1.0 - outliersRatio, static_cast<double>(p))));
+	}
 
 	//for progress notification
 	NormalizedProgress nProgress(progressCb, m);
@@ -938,8 +941,12 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 	}
 
 	//now we are going to randomly extract a subset of 4 points and test the resulting sphere each time
-	std::random_device rd;   // non-deterministic generator
-	std::mt19937 gen(rd());  // to seed mersenne twister.
+	if (seed == 0)
+	{
+		std::random_device randomGenerator;   // non-deterministic generator
+		seed = randomGenerator();
+	}
+	std::mt19937 gen(seed);  // to seed mersenne twister.
 	std::uniform_int_distribution<unsigned> dist(0, n - 1);
 	unsigned sampleCount = 0;
 	unsigned attempts = 0;
@@ -965,7 +972,7 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 		const CCVector3* B = cloud->getPoint(indexes[1]);
 		const CCVector3* C = cloud->getPoint(indexes[2]);
 		const CCVector3* D = cloud->getPoint(indexes[3]);
-		
+
 		++attempts;
 		CCVector3 thisCenter;
 		PointCoordinateType thisRadius;
@@ -1005,7 +1012,7 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 	{
 		return false;
 	}
-	
+
 	//last step: robust estimation
 	ReferenceCloud candidates(cloud);
 	if (n > p)
@@ -1026,7 +1033,7 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 					candidates.addPointIndex(i);
 			}
 			candidates.resize(candidates.size());
-			
+
 			//eventually estimate the robust sphere parameters with least squares (iterative)
 			if (refineSphereLS(&candidates,center,radius))
 			{
@@ -1053,7 +1060,7 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 		}
 		rms = sqrt(residuals/n);
 	}
-	
+
 	return true;
 }
 

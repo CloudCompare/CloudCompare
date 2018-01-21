@@ -1093,6 +1093,6 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 	if (s_M3C2Params.densityCloud2SF)
 		s_M3C2Params.densityCloud2SF->release();
 
-	return error;
+	return !error;
 }
 

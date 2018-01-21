@@ -4,7 +4,8 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU Library General Public License as       #
-//#  published by the Free Software Foundation; version 2 or later of the License.  #
+//#  published by the Free Software Foundation; version 2 or later of the  #
+//#  License.                                                              #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
@@ -24,13 +25,14 @@
 // QCC_DB_LIB_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 #ifdef QCC_DB_LIB_EXPORTS
+
 #define QCC_DB_LIB_API __declspec(dllexport)
-#else
+#else //NOT QCC_DB_LIB_EXPORTS
 #define QCC_DB_LIB_API __declspec(dllimport)
-#endif
+#endif //NOT QCC_DB_LIB_EXPORTS
 
 #else //NOT QCC_DB_USE_AS_DLL
 
 #define QCC_DB_LIB_API
 
-#endif //QCC_DB_LIB_API
+#endif //NOT QCC_DB_USE_AS_DLL

@@ -4,7 +4,8 @@ CloudCompare
 Homepage: http://www.cloudcompare.org/
 
 [![GitHub release](https://img.shields.io/github/release/cloudcompare/trunk.svg)](https://github.com/cloudcompare/trunk/releases)
-[![Build Status](https://travis-ci.org/CloudCompare/CloudCompare.svg)](https://travis-ci.org/CloudCompare/CloudCompare) 
+[![Build Status](https://travis-ci.org/CloudCompare/CloudCompare.svg)](https://travis-ci.org/CloudCompare/CloudCompare)
+[![Releases](https://coderelease.io/badge/CloudCompare/CloudCompare)](https://coderelease.io/github/repository/CloudCompare/CloudCompare)
 
 Introduction
 ------------
@@ -42,7 +43,7 @@ If you want to help us improve CloudCompare or create a new plugin you can start
 Supporting the project
 ----------------------
 
-If you want to help us in another way, you can make donations via [pledgie](http://pledgie.com/campaigns/19052)  
+If you want to help us in another way, you can make donations via [pledgie](http://pledgie.com/campaigns/19052)
 Thanks!
 
 <a href='https://pledgie.com/campaigns/19052'>

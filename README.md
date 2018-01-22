@@ -43,9 +43,7 @@ If you want to help us improve CloudCompare or create a new plugin you can start
 Supporting the project
 ----------------------
 
-If you want to help us in another way, you can make donations via [pledgie](http://pledgie.com/campaigns/19052)
+If you want to help us in another way, you can make donations via [donorbox](https://donorbox.org/support-cloudcompare)
 Thanks!
 
-<a href='https://pledgie.com/campaigns/19052'>
-    <img alt='Click here to lend your support to: CloudCompare and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/19052.png?skin_name=chrome' border='0'>
-</a>
+<a href='https://donorbox.org/support-cloudcompare' target="_blank"><img src="https://d1iczxrky3cnb2.cloudfront.net/button-medium-blue.png"></a>

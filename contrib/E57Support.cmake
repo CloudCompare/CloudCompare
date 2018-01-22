@@ -19,6 +19,17 @@ if( ${OPTION_USE_LIBE57} )
 	endif()
 
 	# Find Boost
+	# Boost (using static, multithreaded libraries)
+	if ( WIN32 )
+		if ( MSVC )
+			set(Boost_USE_STATIC_LIBS   ON)
+			set(Boost_USE_MULTITHREADED ON)
+		endif() 
+	elseif( APPLE )
+		set(Boost_USE_STATIC_LIBS   ON)
+		set(Boost_USE_MULTITHREADED ON)
+	endif()
+
 	find_package( Boost COMPONENTS system QUIET ) #DGM: not sure why, but "system" lib doesn't show up otherwise...
 	if( Boost_FOUND )
 		include_directories( ${Boost_INCLUDE_DIR} )

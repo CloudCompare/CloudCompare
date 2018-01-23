@@ -1,5 +1,5 @@
 # pdal
-OPTION( OPTION_PDAL_LAS "Build with PDAL to support las format" OFF)
+OPTION( OPTION_PDAL_LAS "Build with PDAL to support the LAS format" OFF)
 if ( ${OPTION_PDAL_LAS} )
 	find_package(PDAL 1.0.0 REQUIRED CONFIG)
 	if ( NOT PDAL_FOUND )
@@ -15,9 +15,7 @@ if ( ${OPTION_PDAL_LAS} )
 	else()
 		include_directories( ${JSON_ROOT_DIR} )
 	endif()
-
-	endif()
-
+endif()
 
 # Link project with PDAL library
 function( target_link_PDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = base lib export folder (optional)

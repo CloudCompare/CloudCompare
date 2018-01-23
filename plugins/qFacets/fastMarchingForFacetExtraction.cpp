@@ -56,18 +56,22 @@ const int c_3dNeighboursPosShift[] = {-1,-1,-1,
 
 FastMarchingForFacetExtraction::FastMarchingForFacetExtraction()
 	: CCLib::FastMarching()
-	, m_currentFacetPoints(0)
+	, m_currentFacetPoints(nullptr)
 	, m_currentFacetError(0)
 	, m_maxError(0)
 	, m_errorMeasure(CCLib::DistanceComputationTools::RMS)
 	, m_useRetroProjectionError(false)
+	, m_propagateProgressCb(nullptr)
+	, m_propagateProgress(0)
 {
 }
 
 FastMarchingForFacetExtraction::~FastMarchingForFacetExtraction()
 {
 	if (m_currentFacetPoints)
+	{
 		delete m_currentFacetPoints;
+	}
 }
 
 static bool ComputeCellStats(	CCLib::ReferenceCloud* subset,
@@ -130,7 +134,7 @@ int FastMarchingForFacetExtraction::init(	ccGenericPointCloud* cloud,
 
 	//fill the grid with the octree
 	CCLib::DgmOctree::cellCodesContainer cellCodes;
-	theOctree->getCellCodes(level,cellCodes,true);
+	theOctree->getCellCodes(level, cellCodes, true);
 	size_t cellCount = cellCodes.size();
 
 	CCLib::NormalizedProgress nProgress(progressCb, static_cast<unsigned>(cellCount));
@@ -142,15 +146,15 @@ int FastMarchingForFacetExtraction::init(	ccGenericPointCloud* cloud,
 	CCLib::ReferenceCloud Yk(theOctree->associatedCloud());
 	while (!cellCodes.empty())
 	{
-		if (theOctree->getPointsInCell(cellCodes.back(),level,&Yk,true))
+		if (theOctree->getPointsInCell(cellCodes.back(), level, &Yk, true))
 		{
 			//convert the octree cell code to grid position
 			Tuple3i cellPos;
-			theOctree->getCellPos(cellCodes.back(),level,cellPos,true);
+			theOctree->getCellPos(cellCodes.back(), level, cellPos, true);
 
 			CCVector3 N,C;
 			ScalarType error;
-			if (ComputeCellStats(&Yk,N,C,error,m_errorMeasure))
+			if (ComputeCellStats(&Yk, N, C, error, m_errorMeasure))
 			{
 				//convert octree cell pos to FM cell pos index
 				unsigned gridPos = pos2index(cellPos);
@@ -229,7 +233,7 @@ int FastMarchingForFacetExtraction::step()
 				addActiveCell(minTCellIndex);
 
 				//add its neighbors to the TRIAL set
-				for (unsigned i=0; i<m_numberOfNeighbours; ++i)
+				for (unsigned i = 0; i < m_numberOfNeighbours; ++i)
 				{
 					//get neighbor cell
 					unsigned nIndex = minTCellIndex + m_neighboursIndexShift[i];
@@ -252,6 +256,12 @@ int FastMarchingForFacetExtraction::step()
 								nCell->T = t_new;
 						}
 					}
+				}
+
+				m_propagateProgress += (m_currentFacetPoints->size() - sizeBefore);
+				if (m_propagateProgressCb)
+				{
+					m_propagateProgressCb->update((100.0f * m_propagateProgress) / m_currentFacetPoints->getAssociatedCloud()->size());
 				}
 			}
 		}
@@ -286,7 +296,7 @@ float FastMarchingForFacetExtraction::computeTCoefApprox(CCLib::FastMarching::Ce
 
 		float psOri = fabs(static_cast<float>(AB.dot(oCell->N))); //ideal: 90 degrees
 		float psDest = fabs(static_cast<float>(AB.dot(dCell->N))); //ideal: 90 degrees
-		orientationConfidence = (psOri + psDest)/2; //between 0 and 1 (ideal: 0)
+		orientationConfidence = (psOri + psDest) / 2; //between 0 and 1 (ideal: 0)
 	}
 
 	//add reprojection error into balance
@@ -299,15 +309,15 @@ float FastMarchingForFacetExtraction::computeTCoefApprox(CCLib::FastMarching::Ce
 		theLSQPlaneEquation[3] = oCell->C.dot(oCell->N);
 
 		CCLib::ReferenceCloud Yk(m_octree->associatedCloud());
-		if (m_octree->getPointsInCell(oCell->cellCode,m_gridLevel,&Yk,true))
+		if (m_octree->getPointsInCell(oCell->cellCode, m_gridLevel, &Yk, true))
 		{
-			ScalarType reprojError = CCLib::DistanceComputationTools::ComputeCloud2PlaneDistance(&Yk,theLSQPlaneEquation,m_errorMeasure);
+			ScalarType reprojError = CCLib::DistanceComputationTools::ComputeCloud2PlaneDistance(&Yk, theLSQPlaneEquation, m_errorMeasure);
 			if (reprojError >= 0)
-				return (1.0f-orientationConfidence) * static_cast<float>(reprojError);
+				return (1.0f - orientationConfidence) * static_cast<float>(reprojError);
 		}
 	}
 
-	return (1.0f-orientationConfidence) /** oCell->planarError*/;
+	return (1.0f - orientationConfidence) /** oCell->planarError*/;
 }
 
 int FastMarchingForFacetExtraction::propagate()
@@ -319,49 +329,55 @@ int FastMarchingForFacetExtraction::propagate()
 	while (result > 0)
 	{
 		result = step();
+
+		if (result > 0 && m_propagateProgressCb && m_propagateProgressCb->isCancelRequested())
+		{
+			return -1;
+		}
 	}
 
 	return result;
 }
 
 unsigned FastMarchingForFacetExtraction::updateFlagsTable(	ccGenericPointCloud* theCloud,
-																GenericChunkedArray<1,unsigned char> &flags,
-																unsigned facetIndex)
+															GenericChunkedArray<1, unsigned char>& flags,
+															unsigned facetIndex)
 {
 	if (!m_initialized || !m_currentFacetPoints)
 		return 0;
 
 	unsigned pointCount = m_currentFacetPoints->size();
-	for (unsigned k=0; k<pointCount; ++k)
+	for (unsigned k = 0; k < pointCount; ++k)
 	{
 		unsigned index = m_currentFacetPoints->getPointGlobalIndex(k);
-		flags.setValue(index,1);
+		flags.setValue(index, 1);
 
-		theCloud->setPointScalarValue(index,static_cast<ScalarType>(facetIndex));
+		theCloud->setPointScalarValue(index, static_cast<ScalarType>(facetIndex));
 	}
 
 	if (m_currentFacetPoints)
-		m_currentFacetPoints->clear(false);
-
-	/*for (size_t i=0; i<m_activeCells.size(); ++i)
 	{
-		//we remove the processed cell so as to be sure not to consider them again!
-		CCLib::FastMarching::Cell* cell = m_theGrid[m_activeCells[i]];
-		m_theGrid[m_activeCells[i]] = 0;
-		if (cell)
-			delete cell;
+		m_currentFacetPoints->clear(false);
 	}
-	//*/
+
+	//for (size_t i = 0; i < m_activeCells.size(); ++i)
+	//{
+	//	//we remove the processed cell so as to be sure not to consider them again!
+	//	CCLib::FastMarching::Cell* cell = m_theGrid[m_activeCells[i]];
+	//	m_theGrid[m_activeCells[i]] = 0;
+	//	if (cell)
+	//		delete cell;
+	//}
 	
 	//unsigned pointCount = 0;
 	CCLib::ReferenceCloud Yk(m_octree->associatedCloud());
-	for (size_t i=0; i<m_activeCells.size(); ++i)
+	for (size_t i = 0; i < m_activeCells.size(); ++i)
 	{
 		PlanarCell* aCell = static_cast<PlanarCell*>(m_theGrid[m_activeCells[i]]);
-		if (!m_octree->getPointsInCell(aCell->cellCode,m_gridLevel,&Yk,true))
+		if (!m_octree->getPointsInCell(aCell->cellCode, m_gridLevel, &Yk, true))
 			continue;
 
-		for (unsigned k=0; k<Yk.size(); ++k)
+		for (unsigned k = 0; k < Yk.size(); ++k)
 		{
 			unsigned index = Yk.getPointGlobalIndex(k);
 			assert(flags.getValue(index) == 1);
@@ -379,7 +395,9 @@ unsigned FastMarchingForFacetExtraction::updateFlagsTable(	ccGenericPointCloud* 
 bool FastMarchingForFacetExtraction::setSeedCell(const Tuple3i& pos)
 {
 	if (!CCLib::FastMarching::setSeedCell(pos))
+	{
 		return false;
+	}
 
 	if (m_octree)
 	{
@@ -387,11 +405,14 @@ bool FastMarchingForFacetExtraction::setSeedCell(const Tuple3i& pos)
 		{
 			m_currentFacetPoints = new CCLib::ReferenceCloud(m_octree->associatedCloud());
 		}
+		assert(m_currentFacetPoints->size() == 0);
 
 		unsigned index = pos2index(pos);
 		m_currentFacetError = addCellToCurrentFacet(index);
 		if (m_currentFacetError < 0) //invalid error?
 			return false;
+
+		m_propagateProgress += m_currentFacetPoints->size();
 	}
 
 	return true;
@@ -407,7 +428,7 @@ ScalarType FastMarchingForFacetExtraction::addCellToCurrentFacet(unsigned index)
 		return -1;
 
 	CCLib::ReferenceCloud Yk(m_octree->associatedCloud());
-	if (!m_octree->getPointsInCell(cell->cellCode,m_gridLevel,&Yk,true))
+	if (!m_octree->getPointsInCell(cell->cellCode, m_gridLevel, &Yk, true))
 		return -1;
 
 	if (!m_currentFacetPoints->add(Yk))
@@ -417,9 +438,9 @@ ScalarType FastMarchingForFacetExtraction::addCellToCurrentFacet(unsigned index)
 	}
 
 	//update error
-	CCVector3 N,C;
+	CCVector3 N, C;
 	ScalarType error;
-	ComputeCellStats(m_currentFacetPoints,N,C,error,m_errorMeasure);
+	ComputeCellStats(m_currentFacetPoints, N, C, error, m_errorMeasure);
 
 	return error;
 }
@@ -439,7 +460,7 @@ void FastMarchingForFacetExtraction::initTrialCells()
 		assert(seedCell->T == 0);
 
 		//add all its neighbour cells to the TRIAL set
-		for (unsigned i=0; i<m_numberOfNeighbours; ++i)
+		for (unsigned i = 0; i < m_numberOfNeighbours; ++i)
 		{
 			unsigned nIndex = index + m_neighboursIndexShift[i];
 			PlanarCell* nCell = (PlanarCell*)m_theGrid[nIndex];
@@ -484,12 +505,13 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 
 	//we compute the octree if none is provided
 	CCLib::DgmOctree* theOctree = _theOctree;
+	QScopedPointer<CCLib::DgmOctree> tempOctree;
 	if (!theOctree)
 	{
 		theOctree = new CCLib::DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1)
+		tempOctree.reset(theOctree);
+		if (theOctree->build(progressCb) < 1)
 		{
-			delete theOctree;
 			return -3;
 		}
 	}
@@ -507,24 +529,20 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 	if (!theCloud->enableScalarField())
 	{
 		ccLog::Warning("[FastMarchingForFacetExtraction] Couldn't enable scalar field! Not enough memory?");
-		if (!_theOctree)
-			delete theOctree;
 		return -4;
 	}
 
 	//raz SF values
 	{
-		for (unsigned i=0; i!=theCloud->size(); ++i)
-			theCloud->setPointScalarValue(i,0);
+		for (unsigned i = 0; i != theCloud->size(); ++i)
+			theCloud->setPointScalarValue(i, 0);
 	}
 
 	//flags indicating if each point has been processed or not
-	GenericChunkedArray<1,unsigned char>* flags = new GenericChunkedArray<1,unsigned char>();
-	if (!flags->resize(numberOfPoints,true,0)) //defaultFlagValue = 0
+	GenericChunkedArray<1, unsigned char>* flags = new GenericChunkedArray<1, unsigned char>();
+	if (!flags->resize(numberOfPoints, true, 0)) //defaultFlagValue = 0
 	{
 		ccLog::Warning("[FastMarchingForFacetExtraction] Not enough memory!");
-		if (!_theOctree)
-			delete theOctree;
 		flags->release();
 		return -5;
 	}
@@ -543,8 +561,6 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 	{
 		ccLog::Error("[FastMarchingForFacetExtraction] Something went wrong during initialization...");
 		flags->release();
-		if (!_theOctree)
-			delete theOctree;
 		return -6;
 	}
 
@@ -559,9 +575,11 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 		}
 		progressCb->start();
 		QApplication::processEvents();
+
+		fm.setPropagateCallback(progressCb);
 	}
 
-	const int octreeWidth = (1<<octreeLevel)-1;
+	const int octreeWidth = (1 << octreeLevel) - 1;
 
 	//enable 26-connectivity mode
 	//fm.setExtendedConnectivity(true);
@@ -581,10 +599,12 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 
 		//all points have been processed? Then we can stop.
 		if (lastProcessedPoint == static_cast<int>(numberOfPoints))
+		{
 			break;
+		}
 
 		//we start the propagation from this point
-		//its corresponding cell in fact ;)
+		//(from its corresponding cell in fact ;)
 		const CCVector3 *thePoint = theCloud->getPoint(lastProcessedPoint);
 		Tuple3i pos;
 		theOctree->getTheCellPosWhichIncludesThePoint(thePoint, pos, octreeLevel);
@@ -605,35 +625,40 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 
 		//launch propagation
 		int propagationResult = fm.propagate();
+		if (propagationResult < 0)
+		{
+			//an error occurred or the process was cancelled by the user
+			result = -7;
+			break;
+		}
 
 		//compute the number of points processed during this pass
-		unsigned count = fm.updateFlagsTable(theCloud,*flags,propagationResult >= 0 ? ++facetIndex : 0); //0 = invalid facet index
+		unsigned count = fm.updateFlagsTable(theCloud, *flags, ++facetIndex);
 
 		if (count != 0)
 		{
 			resolvedPoints += count;
-			if (progressCb)
-			{
-				if (progressCb->isCancelRequested())
-				{
-					result = -7;
-					break;
-				}
-				progressCb->update(static_cast<float>(resolvedPoints)/static_cast<float>(numberOfPoints)*100.0f);
-			}
+			//if (progressCb)
+			//{
+			//	if (progressCb->isCancelRequested())
+			//	{
+			//		result = -7;
+			//		break;
+			//	}
+			//	progressCb->update((resolvedPoints * 100.0f) / numberOfPoints);
+			//}
 		}
 
 		fm.cleanLastPropagation();
 	}
+
+	fm.setPropagateCallback(nullptr);
 
 	if (progressCb)
 		progressCb->stop();
 
 	flags->release();
 	flags = 0;
-
-	if (!_theOctree)
-		delete theOctree;
 
 	return result;
 }

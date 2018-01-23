@@ -79,6 +79,9 @@ public:
 								GenericChunkedArray<1,unsigned char>& flags,
 								unsigned facetIndex);
 
+	//! Sets the propagation progress callback
+	void setPropagateCallback(CCLib::GenericProgressCallback* propagateProgressCb) { m_propagateProgressCb = propagateProgressCb; m_propagateProgress = 0; }
+
 	//inherited methods (see FastMarchingAlgorithm)
 	virtual int propagate() override;
 	virtual bool setSeedCell(const Tuple3i& pos) override;
@@ -92,8 +95,8 @@ protected:
 		//! Default constructor
 		PlanarCell()
 			: Cell()
-			, N(0,0,0)
-			, C(0,0,0)
+			, N(0, 0, 0)
+			, C(0, 0, 0)
 			, cellCode(0)
 			, planarError(0)
 		{}
@@ -117,11 +120,6 @@ protected:
 	virtual void initTrialCells() override;
 	virtual bool instantiateGrid(unsigned size) override { return instantiateGridTpl<PlanarCell*>(size); }
 
-	//! Sets the propagation timings as distances for each point
-	/** \return true if ok, false otherwise
-	**/
-	bool setPropagationTimingsAsDistances();
-
 	//! Adds a given cell's points to the current facet and returns the resulting RMS
 	ScalarType addCellToCurrentFacet(unsigned index);
 
@@ -139,6 +137,11 @@ protected:
 
 	//! Whether to use retro-projection error in propagation
 	bool m_useRetroProjectionError;
+
+	//! Propagation progress callback
+	CCLib::GenericProgressCallback* m_propagateProgressCb;
+	//! Propagation progress
+	unsigned m_propagateProgress;
 };
 
 #endif //QFACET_FAST_MARCHING_FOR_FACET_EXTRACTION_HEADER

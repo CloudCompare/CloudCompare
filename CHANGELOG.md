@@ -50,6 +50,8 @@ v2.10.alpha - XX/XX/201X
 	* Point picking on a mesh (i.e. mainly in the point-pair based registration tool) could select the wrong point on the triangle, or even a wrong triangle
 	* Raster I/O: when importing a raster file, the corresponding point cloud was shifted of half a pixel
 	* The RASTERIZE command line could make CC crash at the end of the process
+	* Hitting the 'Apply all' button of the ASCII open dialog would not restore the previous load configuration correctly in all cases
+		(the header line may not be extracted the second time, etc.)
 
 v2.9.1 - 11/03/2017
 ----------------------

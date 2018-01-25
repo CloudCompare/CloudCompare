@@ -382,7 +382,7 @@ void ccPointPairRegistrationDlg::addManualRefPoint()
 	//(if there's no reference entity, we use a 'global'	one by default)
 	bool refIsShifted = (m_reference.entity && ccHObjectCaster::ToGenericPointCloud(m_reference.entity)->isShifted());
 	if (refIsShifted)
-		ptsDlg.showCheckbox("Not shifted",s_last_r_isGlobal,s_aligned_tooltip);
+		ptsDlg.showCheckbox("Not shifted", s_last_r_isGlobal, s_aligned_tooltip);
 
 	if (!ptsDlg.exec())
 		return;
@@ -398,9 +398,9 @@ void ccPointPairRegistrationDlg::addManualRefPoint()
 		shifted = !s_last_r_isGlobal;
 	}
 
-	CCVector3d P(s_last_rx,s_last_ry,s_last_rz);
+	CCVector3d P(s_last_rx, s_last_ry, s_last_rz);
 
-	addReferencePoint(P,0,shifted);
+	addReferencePoint(P, 0, shifted);
 }
 
 void ccPointPairRegistrationDlg::pause(bool state)
@@ -611,15 +611,15 @@ void ccPointPairRegistrationDlg::addPointToTable(QTableWidget* tableWidget, int 
 		return;
 
 	//add corresponding row in table
-	tableWidget->setRowCount(std::max<int>(rowIndex+1,tableWidget->rowCount()));
-	tableWidget->setVerticalHeaderItem(rowIndex,new QTableWidgetItem(pointName));
+	tableWidget->setRowCount(std::max<int>(rowIndex + 1, tableWidget->rowCount()));
+	tableWidget->setVerticalHeaderItem(rowIndex, new QTableWidgetItem(pointName));
 
 	//add point coordinates
-	for (int d=0; d<3; ++d)
+	for (int d = 0; d < 3; ++d)
 	{
 		QTableWidgetItem* item = new QTableWidgetItem();
-		item->setData(Qt::EditRole, P.u[d]); 
-		tableWidget->setItem(rowIndex, XYZ_COL_INDEX+d, item);
+		item->setData(Qt::EditRole, QString::number(P.u[d], 'f', 6));
+		tableWidget->setItem(rowIndex, XYZ_COL_INDEX + d, item);
 	}
 
 	//add 'remove' button

@@ -9152,6 +9152,8 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
 	CCVector3d addCoordinatesShift(0, 0, 0);
 
+	const ccOptions& options = ccOptions::Instance();
+
 	for ( const QString &filename : filenames )
 	{
 		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -9159,6 +9161,20 @@ void MainWindow::addToDB(	const QStringList& filenames,
 
 		if (newGroup)
 		{
+			if (!options.normalsDisplayedByDefault)
+			{
+				//disable the normals on all loaded clouds!
+				ccHObject::Container clouds;
+				newGroup->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+				for (ccHObject* cloud : clouds)
+				{
+					if (cloud)
+					{
+						static_cast<ccGenericPointCloud*>(cloud)->showNormals(false);
+					}
+				}
+			}
+			
 			if (destWin)
 			{
 				newGroup->setDisplay_recursive(destWin);
@@ -9279,7 +9295,7 @@ void MainWindow::doActionLoadFile()
 		currentOpenDlgFilter.clear(); //this way FileIOFilter will try to guess the file type automatically!
 
 	//load files
-	addToDB(selectedFiles,currentOpenDlgFilter);
+	addToDB(selectedFiles, currentOpenDlgFilter);
 }
 
 //Helper: check for a filename validity

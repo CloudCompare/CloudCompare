@@ -41,6 +41,9 @@ v2.10.alpha - XX/XX/201X
 		- Scalar field set color scale:
 			* '-SF_COLOR_SCALE {filename}'
 
+	* New option:
+		- the user can now control whether normals should be enabled on loaded clouds by default or not (default state is now 'off')
+
 - Bug fix:
 
 	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values

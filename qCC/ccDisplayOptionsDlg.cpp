@@ -46,14 +46,15 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(pointsColorButton,               SIGNAL(clicked()),         this, SLOT(changePointsColor()));
 	connect(textColorButton,                 SIGNAL(clicked()),         this, SLOT(changeTextColor()));
 
-	connect(doubleSidedCheckBox,             &QCheckBox::clicked, this, [&]() { parameters.lightDoubleSided = doubleSidedCheckBox->isChecked(); });
-	connect(enableGradientCheckBox,          &QCheckBox::clicked, this, [&]() { parameters.drawBackgroundGradient = enableGradientCheckBox->isChecked(); });
-	connect(showCrossCheckBox,               &QCheckBox::clicked, this, [&]() { parameters.displayCross = showCrossCheckBox->isChecked(); });
-	connect(colorScaleShowHistogramCheckBox, &QCheckBox::clicked, this, [&]() { parameters.colorScaleShowHistogram = colorScaleShowHistogramCheckBox->isChecked(); });
-	connect(useColorScaleShaderCheckBox,     &QCheckBox::clicked, this, [&]() { parameters.colorScaleUseShader = useColorScaleShaderCheckBox->isChecked(); });
-	connect(decimateMeshBox,                 &QCheckBox::clicked, this, [&]() { parameters.decimateMeshOnMove = decimateMeshBox->isChecked(); });
-	connect(decimateCloudBox,                &QCheckBox::clicked, this, [&]() { parameters.decimateCloudOnMove = decimateCloudBox->isChecked(); });
-	connect(drawRoundedPointsCheckBox,       &QCheckBox::clicked, this, [&]() { parameters.drawRoundedPoints = drawRoundedPointsCheckBox->isChecked(); });
+	connect(doubleSidedCheckBox,             &QCheckBox::toggled, this, [&](bool state) { parameters.lightDoubleSided = state; });
+	connect(enableGradientCheckBox,          &QCheckBox::toggled, this, [&](bool state) { parameters.drawBackgroundGradient = state; });
+	connect(showCrossCheckBox,               &QCheckBox::toggled, this, [&](bool state) { parameters.displayCross = state; });
+	connect(colorScaleShowHistogramCheckBox, &QCheckBox::toggled, this, [&](bool state) { parameters.colorScaleShowHistogram = state; });
+	connect(useColorScaleShaderCheckBox,     &QCheckBox::toggled, this, [&](bool state) { parameters.colorScaleUseShader = state; });
+	connect(decimateMeshBox,                 &QCheckBox::toggled, this, [&](bool state) { parameters.decimateMeshOnMove = state; });
+	connect(decimateCloudBox,                &QCheckBox::toggled, this, [&](bool state) { parameters.decimateCloudOnMove = state; });
+	connect(drawRoundedPointsCheckBox,       &QCheckBox::toggled, this, [&](bool state) { parameters.drawRoundedPoints = state; });
+	connect(autoDisplayNormalsCheckBox,      &QCheckBox::toggled, this, [&](bool state) { options.normalsDisplayedByDefault = state; });
 
 	connect(useVBOCheckBox,                  SIGNAL(clicked()),         this, SLOT(changeVBOUsage()));
 
@@ -77,6 +78,7 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(cancelButton,                    SIGNAL(clicked()),         this, SLOT(doReject()));
 
 	oldParameters = parameters = ccGui::Parameters();
+	oldOptions = options = ccOptions::Instance();
 
 	refresh();
 
@@ -155,7 +157,9 @@ void ccDisplayOptionsDlg::refresh()
 	labelMarkerSizeSpinBox->setValue(parameters.labelMarkerSize);
 
 	zoomSpeedDoubleSpinBox->setValue(parameters.zoomSpeed);
-
+	
+	autoDisplayNormalsCheckBox->setChecked(options.normalsDisplayedByDefault);
+	
 	autoComputeOctreeComboBox->setCurrentIndex(parameters.autoComputeOctree);
 
 	update();
@@ -393,6 +397,7 @@ void ccDisplayOptionsDlg::changeLabelMarkerSize(int val)
 void ccDisplayOptionsDlg::doReject()
 {
 	ccGui::Set(oldParameters);
+	ccOptions::Set(oldOptions);
 
 	emit aspectHasChanged();
 
@@ -402,12 +407,14 @@ void ccDisplayOptionsDlg::doReject()
 void ccDisplayOptionsDlg::reset()
 {
 	parameters.reset();
+	options.reset();
 	refresh();
 }
 
 void ccDisplayOptionsDlg::apply()
 {
 	ccGui::Set(parameters);
+	ccOptions::Set(options);
 
 	emit aspectHasChanged();
 }

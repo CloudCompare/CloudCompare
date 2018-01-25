@@ -19,7 +19,10 @@
 #define CC_DISPLAY_OPTIONS_DIALOG_HEADER
 
 //Local
-#include "ccGuiParameters.h"
+#include "ccOptions.h"
+
+//qCC_gl
+#include <ccGuiParameters.h>
 
 //CCLib
 #include <CCPlatform.h>
@@ -96,11 +99,15 @@ protected:
 	QColor labelMarkerCol;
 	QColor bbDefaultCol;
 
-	//! Current parameters
+	//! Current GUI parameters
 	ccGui::ParamStruct parameters;
+	//! Current options
+	ccOptions options;
 
 	//! Old parameters (for restore)
 	ccGui::ParamStruct oldParameters;
+	//! Old options (for restore)
+	ccOptions oldOptions;
 };
 
 #endif

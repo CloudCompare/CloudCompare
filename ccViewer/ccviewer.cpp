@@ -512,20 +512,36 @@ void ccViewer::addToDB(QStringList filenames)
 	parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
 	parameters.parentWidget = this;
 
+	const ccOptions& options = ccOptions::Instance();
+
 	for (int i = 0; i < filenames.size(); ++i)
 	{
 		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-		ccHObject* newEntities = FileIOFilter::LoadFromFile(filenames[i], parameters, result);
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i], parameters, result);
 
-		if (newEntities)
+		if (newGroup)
 		{
-			addToDB(newEntities);
+			if (!options.normalsDisplayedByDefault)
+			{
+				//disable the normals on all loaded clouds!
+				ccHObject::Container clouds;
+				newGroup->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+				for (ccHObject* cloud : clouds)
+				{
+					if (cloud)
+					{
+						static_cast<ccGenericPointCloud*>(cloud)->showNormals(false);
+					}
+				}
+			}
+
+			addToDB(newGroup);
 
 			if (!scaleAlreadyDisplayed)
 			{
-				for (unsigned i = 0; i < newEntities->getChildrenNumber(); ++i)
+				for (unsigned i = 0; i < newGroup->getChildrenNumber(); ++i)
 				{
-					ccHObject* ent = newEntities->getChild(i);
+					ccHObject* ent = newGroup->getChild(i);
 					if (ent->isA(CC_TYPES::POINT_CLOUD))
 					{
 						ccPointCloud* pc = static_cast<ccPointCloud*>(ent);

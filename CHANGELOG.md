@@ -59,6 +59,8 @@ v2.10.alpha - XX/XX/201X
 	* Hitting the 'Apply all' button of the ASCII open dialog would not restore the previous load configuration correctly in all cases
 		(the header line may not be extracted the second time, etc.)
 	* Align tool: large coordinates of manually input points were rounded off (only when displayed)
+	* When applying an orthographic viewport while the 'stereo' mode is enabled, the stereo mode was broken (now a warning message is disabled and
+		the stereo mode is automatically disabled)
 
 v2.9.1 - 11/03/2017
 ----------------------

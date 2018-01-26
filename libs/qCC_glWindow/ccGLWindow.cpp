@@ -5587,6 +5587,12 @@ void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
 	ccViewportParameters oldParams = m_viewportParams;
 	m_viewportParams = params;
 
+	if (m_stereoModeEnabled && !params.perspectiveView)
+	{
+		ccLog::Warning("Applied viewport projeciton is not perspective: stereo mode will be automatically disabled");
+		disableStereoMode();
+	}
+
 	invalidateViewport();
 	invalidateVisualization();
 	deprecate3DLayer();

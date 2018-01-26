@@ -29,7 +29,6 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	, m_lastRefreshValue(-1)
 {
 	setAutoClose(true);
-	setWindowModality(Qt::ApplicationModal);
 
 	resize(400, 200);
 	setRange(0, 100);

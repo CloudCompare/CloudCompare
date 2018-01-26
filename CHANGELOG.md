@@ -41,6 +41,10 @@ v2.10.alpha - XX/XX/201X
 		- Scalar field set color scale:
 			* '-SF_COLOR_SCALE {filename}'
 
+	* Unroll tool:
+		- the cylindrical unrolling can be performed inside an arbitrary angular range (between -3600 and +3600 degrees)
+		- this means that the shape can be unrolled on more than 360 degrees, and from an arbitrary orientation
+
 	* New option:
 		- the user can now control whether normals should be enabled on loaded clouds by default or not (default state is now 'off')
 

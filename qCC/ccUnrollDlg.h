@@ -40,8 +40,9 @@ public:
 	int getAxisDimension() const;
 	bool isAxisPositionAuto() const;
 	CCVector3 getAxisPosition() const;
+	void getAngleRange(double& start_deg, double& stop_deg) const;
 	double getRadius() const;
-	double getAngle() const;
+	double getConeHalfAngle() const;
 	bool exportDeviationSF() const;
 
 	void toPersistentSettings() const;

@@ -641,6 +641,8 @@ public: //other methods
 									unsigned char coneAxisDim,
 									CCVector3* center = 0,
 									bool exportDeviationSF = false,
+									double startAngle_deg = 0.0,
+									double stopAngle_deg = 360.0,
 									CCLib::GenericProgressCallback* progressCb = NULL) const;
 
 	//! Unrolls the cloud (and its normals) on a cone

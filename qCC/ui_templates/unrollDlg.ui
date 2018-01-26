@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>220</height>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -55,128 +55,33 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QCheckBox" name="exportDeviationSFCheckBox">
+       <property name="toolTip">
+        <string>Deviation from the theoretical shape (i.e. cone or cylinder)</string>
+       </property>
+       <property name="text">
+        <string>Export deviation scalar field</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Axis</string>
-       </property>
-       <property name="scaledContents">
-        <bool>false</bool>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="comboBoxAxisDimension">
-       <property name="currentIndex">
-        <number>2</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>X</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Y</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Z</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QFrame" name="angleFrame">
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="margin">
-         <number>0</number>
-        </property>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Shape</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <layout class="QHBoxLayout">
         <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="labelAngle">
-          <property name="toolTip">
-           <string>Cone angle (0-180°)</string>
-          </property>
+         <widget class="QLabel" name="label">
           <property name="text">
-           <string>Half angle (degrees)</string>
+           <string>Axis</string>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="angleDoubleSpinBox">
-          <property name="toolTip">
-           <string>Cone angle (0-180°)</string>
-          </property>
-          <property name="statusTip">
-           <string/>
-          </property>
-          <property name="decimals">
-           <number>2</number>
-          </property>
-          <property name="maximum">
-           <double>180.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>15.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QFrame" name="radiusFrame">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <property name="margin">
-         <number>0</number>
-        </property>
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="radiusLabel">
-          <property name="toolTip">
-           <string>Cylinder (or cone base) radius</string>
-          </property>
-          <property name="text">
-           <string>Radius</string>
+          <property name="scaledContents">
+           <bool>false</bool>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -184,25 +89,142 @@
          </widget>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="radiusDoubleSpinBox">
-          <property name="toolTip">
-           <string>Cylinder (or cone base) radius</string>
+         <widget class="QComboBox" name="comboBoxAxisDimension">
+          <property name="currentIndex">
+           <number>2</number>
           </property>
-          <property name="decimals">
-           <number>6</number>
+          <item>
+           <property name="text">
+            <string>X</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Y</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Z</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="angleFrame">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
           </property>
-          <property name="maximum">
-           <double>1000000000.000000000000000</double>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
           </property>
-          <property name="value">
-           <double>100.000000000000000</double>
-          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <property name="margin">
+            <number>0</number>
+           </property>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelAngle">
+             <property name="toolTip">
+              <string>Cone angle (0-180°)</string>
+             </property>
+             <property name="text">
+              <string>Half angle</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="halfAngleDoubleSpinBox">
+             <property name="toolTip">
+              <string>Cone angle (0-180°)</string>
+             </property>
+             <property name="statusTip">
+              <string/>
+             </property>
+             <property name="suffix">
+              <string> deg</string>
+             </property>
+             <property name="decimals">
+              <number>2</number>
+             </property>
+             <property name="maximum">
+              <double>180.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>15.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="radiusFrame">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <property name="margin">
+            <number>0</number>
+           </property>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="radiusLabel">
+             <property name="toolTip">
+              <string>Cylinder (or cone base) radius</string>
+             </property>
+             <property name="text">
+              <string>Radius</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="radiusDoubleSpinBox">
+             <property name="toolTip">
+              <string>Cylinder (or cone base) radius</string>
+             </property>
+             <property name="decimals">
+              <number>6</number>
+             </property>
+             <property name="maximum">
+              <double>1000000000.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>100.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
-      </widget>
-     </item>
-    </layout>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QGroupBox" name="groupBoxAxisPosition">
@@ -222,7 +244,7 @@
             <string>X</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
            </property>
           </widget>
          </item>
@@ -368,13 +390,99 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="exportDeviationSFCheckBox">
+    <widget class="QGroupBox" name="unrollRangeGroupBox">
      <property name="toolTip">
-      <string>Deviation from the theoretical shape (i.e. cone or cylinder)</string>
+      <string>Unroll range (can do multiple turns)</string>
      </property>
-     <property name="text">
-      <string>Export deviation scalar field</string>
+     <property name="title">
+      <string>Unroll range</string>
      </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Start angle</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="startAngleDoubleSpinBox">
+        <property name="toolTip">
+         <string>Starting angle (can be negative)</string>
+        </property>
+        <property name="suffix">
+         <string> deg</string>
+        </property>
+        <property name="minimum">
+         <double>-3600.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>3600.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>15.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Stop angle</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="stopAngleDoubleSpinBox">
+        <property name="toolTip">
+         <string>Stop angle (can be negative)</string>
+        </property>
+        <property name="suffix">
+         <string> deg</string>
+        </property>
+        <property name="minimum">
+         <double>-3600.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>3600.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>15.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>360.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>

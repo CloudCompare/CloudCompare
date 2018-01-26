@@ -5500,7 +5500,6 @@ void MainWindow::doActionUnroll()
 
 	ccUnrollDlg::Type mode = unrollDlg.getType();
 	PointCoordinateType radius = static_cast<PointCoordinateType>(unrollDlg.getRadius());
-	double angle_deg = unrollDlg.getAngle();
 	unsigned char dim = static_cast<unsigned char>(unrollDlg.getAxisDimension());
 	bool exportDeviationSF = unrollDlg.exportDeviationSF();
 	CCVector3* pCenter = nullptr;
@@ -5519,14 +5518,32 @@ void MainWindow::doActionUnroll()
 	switch (mode)
 	{
 	case ccUnrollDlg::CYLINDER:
-		output = pc->unrollOnCylinder(radius, dim, pCenter, exportDeviationSF, &pDlg);
-		break;
+	{
+		double startAngle_deg = 0.0, stopAngle_deg = 360.0;
+		unrollDlg.getAngleRange(startAngle_deg, stopAngle_deg);
+		if (startAngle_deg >= stopAngle_deg)
+		{
+			QMessageBox::critical(this, "Error", "Invalid angular range");
+			return;
+		}
+		output = pc->unrollOnCylinder(radius, dim, pCenter, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
+	}
+	break;
+
 	case ccUnrollDlg::CONE:
-		output = pc->unrollOnCone(angle_deg, center, dim, false, 0, exportDeviationSF, &pDlg);
-		break;
+	{
+		double coneHalfAngle_deg = unrollDlg.getConeHalfAngle();
+		output = pc->unrollOnCone(coneHalfAngle_deg, center, dim, false, 0, exportDeviationSF, &pDlg);
+	}
+	break;
+	
 	case ccUnrollDlg::STRAIGHTENED_CONE:
-		output = pc->unrollOnCone(angle_deg, center, dim, true, radius, exportDeviationSF, &pDlg);
-		break;
+	{
+		double coneHalfAngle_deg = unrollDlg.getConeHalfAngle();
+		output = pc->unrollOnCone(coneHalfAngle_deg, center, dim, true, radius, exportDeviationSF, &pDlg);
+	}
+	break;
+	
 	default:
 		assert(false);
 		break;

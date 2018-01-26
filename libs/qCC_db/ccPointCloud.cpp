@@ -56,6 +56,8 @@
 #include <assert.h>
 #include <queue>
 
+static const char s_deviationSFName[] = "Deviation";
+
 ccPointCloud::ccPointCloud(QString name) throw()
 	: ChunkedPointCloud()
 	, ccGenericPointCloud(name)
@@ -127,10 +129,10 @@ ccPointCloud* ccPointCloud::From(const CCLib::GenericIndexedCloud* cloud, const 
 		else
 		{
 			//import points
-			for (unsigned i=0; i<n; i++)
+			for (unsigned i = 0; i < n; i++)
 			{
 				CCVector3 P;
-				cloud->getPoint(i,P);
+				cloud->getPoint(i, P);
 				pc->addPoint(P);
 			}
 		}
@@ -3531,61 +3533,69 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 											CCLib::GenericProgressCallback* progressCb/*=NULL*/,
 											unsigned char octreeLevel/*=0*/)
 {
-	if (!otherCloud || otherCloud->size() == 0)
-	{
-		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Invalid/empty input cloud!");
-		return false;
-	}
-
-	//check that both bounding boxes intersect!
-	ccBBox box = getOwnBB();
-	ccBBox otherBox = otherCloud->getOwnBB();
-
-	CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
-	CCVector3 dist = box.getCenter() - otherBox.getCenter();
-	if (	fabs(dist.x) > dimSum.x / 2
-		||	fabs(dist.y) > dimSum.y / 2
-		||	fabs(dist.z) > dimSum.z / 2)
-	{
-		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Clouds are too far from each other! Can't proceed.");
-		return false;
-	}
-
-	//compute the closest-point set of 'this cloud' relatively to 'input cloud'
-	//(to get a mapping between the resulting vertices and the input points)
-	QSharedPointer<CCLib::ReferenceCloud> CPSet = computeCPSet(*otherCloud, progressCb, octreeLevel);
-	if (!CPSet)
-	{
-		return false;
-	}
-
-	if (!resizeTheRGBTable(false))
-	{
-		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
-		return false;
-	}
-
-	//import colors
-	unsigned CPSetSize = CPSet->size();
-	assert(CPSetSize == size());
-	for (unsigned i = 0; i < CPSetSize; ++i)
-	{
-		unsigned index = CPSet->getPointGlobalIndex(i);
-		setPointColor(i, otherCloud->getPointColor(index));
-	}
-
-	//We must update the VBOs
-	colorsHaveChanged();
-
-	return true;
+if (!otherCloud || otherCloud->size() == 0)
+{
+	ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Invalid/empty input cloud!");
+	return false;
 }
 
-ccPointCloud* ccPointCloud::unrollOnCylinder(	PointCoordinateType radius,
-												unsigned char coneAxisDim,
-												CCVector3* center,
-												bool exportDeviationSF/*=false*/,
-												CCLib::GenericProgressCallback* progressCb/*=NULL*/) const
+//check that both bounding boxes intersect!
+ccBBox box = getOwnBB();
+ccBBox otherBox = otherCloud->getOwnBB();
+
+CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
+CCVector3 dist = box.getCenter() - otherBox.getCenter();
+if (fabs(dist.x) > dimSum.x / 2
+	|| fabs(dist.y) > dimSum.y / 2
+	|| fabs(dist.z) > dimSum.z / 2)
 {
+	ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Clouds are too far from each other! Can't proceed.");
+	return false;
+}
+
+//compute the closest-point set of 'this cloud' relatively to 'input cloud'
+//(to get a mapping between the resulting vertices and the input points)
+QSharedPointer<CCLib::ReferenceCloud> CPSet = computeCPSet(*otherCloud, progressCb, octreeLevel);
+if (!CPSet)
+{
+	return false;
+}
+
+if (!resizeTheRGBTable(false))
+{
+	ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
+	return false;
+}
+
+//import colors
+unsigned CPSetSize = CPSet->size();
+assert(CPSetSize == size());
+for (unsigned i = 0; i < CPSetSize; ++i)
+{
+	unsigned index = CPSet->getPointGlobalIndex(i);
+	setPointColor(i, otherCloud->getPointColor(index));
+}
+
+//We must update the VBOs
+colorsHaveChanged();
+
+return true;
+}
+
+ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
+	unsigned char coneAxisDim,
+	CCVector3* center,
+	bool exportDeviationSF/*=false*/,
+	double startAngle_deg/*=0.0*/,
+	double stopAngle_deg/*=360.0*/,
+	CCLib::GenericProgressCallback* progressCb/*=NULL*/) const
+{
+
+	if (startAngle_deg >= stopAngle_deg)
+	{
+		assert(false);
+		return nullptr;
+	}
 	if (coneAxisDim > 2)
 	{
 		assert(false);
@@ -3611,12 +3621,32 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(	PointCoordinateType radius,
 		progressCb->start();
 	}
 
-	ccPointCloud* clone = const_cast<ccPointCloud*>(this)->cloneThis(0, true);
-	if (!clone)
-	{
-		return 0;
-	}
+	//ccPointCloud* clone = const_cast<ccPointCloud*>(this)->cloneThis(0, true);
+	//if (!clone)
+	//{
+	//	return 0;
+	//}
+	CCLib::ReferenceCloud duplicatedPoints(const_cast<ccPointCloud*>(this));
+	std::vector<CCVector3> unrolledPoints, unrolledNormals;
+	std::vector<ScalarType> deviationValues;
+	size_t pointCount = 0;
 
+	if (hasNormals())
+	{
+		//for normals, we can simply store at most one unrolled normal per original one
+		//same thing for deviation values
+		try
+		{
+			unrolledNormals.resize(size());
+			deviationValues.resize(size());
+		}
+		catch (const std::bad_alloc&)
+		{
+			//not enough memory
+			return nullptr;
+		}
+	}
+	
 	//compute cylinder center (if none was provided)
 	CCVector3 C;
 	if (!center)
@@ -3625,26 +3655,8 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(	PointCoordinateType radius,
 		center = &C;
 	}
 
-	CCLib::ScalarField* deviationSF = 0;
-	if (exportDeviationSF)
-	{
-		static const char s_deviationSFName[] = "Deviation";
-		int sfIdx = clone->getScalarFieldIndexByName(s_deviationSFName);
-		if (sfIdx < 0)
-		{
-			sfIdx = clone->addScalarField(s_deviationSFName);
-			if (sfIdx < 0)
-			{
-				ccLog::Warning("[unrollOnCylinder] Not enough memory to init the deviation scalar field");
-			}
-		}
-		if (sfIdx >= 0)
-		{
-			deviationSF = clone->getScalarField(sfIdx);
-		}
-		clone->setCurrentDisplayedScalarField(sfIdx);
-		clone->showSF(true);
-	}
+	double startAngle_rad = startAngle_deg * CC_DEG_TO_RAD;
+	double stopAngle_rad = stopAngle_deg * CC_DEG_TO_RAD;
 
 	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
@@ -3653,45 +3665,80 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(	PointCoordinateType radius,
 		CCVector3 CP = *Pin - *center;
 
 		PointCoordinateType u = sqrt(CP.u[dim.x] * CP.u[dim.x] + CP.u[dim.y] * CP.u[dim.y]);
-		PointCoordinateType lon = atan2(CP.u[dim.x], CP.u[dim.y]);
+		double longitude_rad = atan2(static_cast<double>(CP.u[dim.x]), static_cast<double>(CP.u[dim.y]));
 
 		//we project the point
 		CCVector3 Pout;
-		Pout.u[dim.x] = lon*radius;
+		//Pout.u[dim.x] = longitude_rad * radius;
 		Pout.u[dim.y] = u - radius;
 		Pout.u[dim.z] = Pin->u[dim.z];
 
-		//replace the point in the destination cloud
-		*clone->point(i) = Pout;
-
-		if (deviationSF)
+		// first unroll its normal if necessary
+		if (hasNormals())
 		{
-			deviationSF->setValue(i, Pout.u[dim.y]);
-		}
-
-		// and its normal if necessary
-		if (clone->hasNormals())
-		{
-			const CCVector3& N = clone->getPointNormal(i);
+			const CCVector3& N = getPointNormal(i);
 
 			PointCoordinateType px = CP.u[dim.x] + N.u[dim.x];
 			PointCoordinateType py = CP.u[dim.y] + N.u[dim.y];
-			PointCoordinateType nlon = atan2(px, py);
 			PointCoordinateType nu = sqrt(px*px + py*py);
+			double nLongitude_rad = atan2(static_cast<double>(px), static_cast<double>(py));
 
 			CCVector3 N2;
-			N2.u[dim.x] = (nlon - lon)*radius;
+			N2.u[dim.x] = static_cast<PointCoordinateType>((nLongitude_rad - longitude_rad) * radius);
 			N2.u[dim.y] = nu - u;
 			N2.u[dim.z] = N.u[dim.z];
 			N2.normalize();
-			clone->setPointNormal(i, N2);
+			unrolledNormals[i] = N2;
+			//clone->setPointNormal(i, N2);
+		}
+
+		//then compute the deviation (if necessary)
+		if (exportDeviationSF)
+		{
+			deviationValues[i] = static_cast<ScalarType>(Pout.u[dim.y]);
+		}
+
+		//then repeat the unrolling process for the coordinates
+		//1) poition the 'point' at the beginning of the angular range
+		while (longitude_rad >= startAngle_rad)
+		{
+			longitude_rad -= 2 * M_PI;
+		}
+		longitude_rad += 2 * M_PI;
+
+		//2) repeat the unrolling process
+		for (; longitude_rad < stopAngle_rad; longitude_rad += 2 * M_PI)
+		{
+			//do we need to reserve more memory?
+			if (duplicatedPoints.size() == duplicatedPoints.capacity())
+			{
+				unsigned newSize = duplicatedPoints.size() + 1024;
+				if (!duplicatedPoints.reserve(newSize))
+				{
+					//not enough memory
+					return nullptr;
+				}
+
+				try
+				{
+					unrolledPoints.reserve(newSize);
+				}
+				catch (const std::bad_alloc&)
+				{
+					//not enough memory
+					return nullptr;
+				}
+			}
+
+			//add the point
+			Pout.u[dim.x] = longitude_rad * radius;
+			unrolledPoints.push_back(Pout);
+			duplicatedPoints.addPointIndex(i);
 		}
 
 		//process canceled by user?
 		if (progressCb && !nprogress.oneStep())
 		{
-			delete clone;
-			clone = nullptr;
 			break;
 		}
 	}
@@ -3701,8 +3748,44 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(	PointCoordinateType radius,
 		progressCb->stop();
 	}
 
+	//now create the real cloud
+	ccPointCloud* clone = partialClone(&duplicatedPoints);
 	if (clone)
 	{
+		CCLib::ScalarField* deviationSF = nullptr;
+		if (exportDeviationSF)
+		{
+			int sfIdx = clone->getScalarFieldIndexByName(s_deviationSFName);
+			if (sfIdx < 0)
+			{
+				sfIdx = clone->addScalarField(s_deviationSFName);
+				if (sfIdx < 0)
+				{
+					ccLog::Warning("[unrollOnCylinder] Not enough memory to init the deviation scalar field");
+				}
+			}
+			if (sfIdx >= 0)
+			{
+				deviationSF = clone->getScalarField(sfIdx);
+				clone->setCurrentDisplayedScalarField(sfIdx);
+				clone->showSF(true);
+			}
+		}
+
+		//update the coordinates, the normals and the deviation SF
+		for (unsigned i = 0; i < duplicatedPoints.size(); ++i)
+		{
+			CCVector3* P = clone->point(i);
+			*P = unrolledPoints[i];
+
+			unsigned globalIndex = duplicatedPoints.getPointGlobalIndex(i);
+			clone->setPointNormal(i, unrolledNormals[globalIndex]);
+			if (deviationSF)
+			{
+				deviationSF->setValue(i, deviationValues[globalIndex]);
+			}
+		}
+
 		if (deviationSF)
 		{
 			deviationSF->computeMinAndMax();
@@ -3787,7 +3870,6 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 	CCLib::ScalarField* deviationSF = 0;
 	if (exportDeviationSF)
 	{
-		static const char s_deviationSFName[] = "Deviation";
 		int sfIdx = clone->getScalarFieldIndexByName(s_deviationSFName);
 		if (sfIdx < 0)
 		{

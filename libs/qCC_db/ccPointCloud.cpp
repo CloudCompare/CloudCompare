@@ -3627,11 +3627,33 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 	//	return 0;
 	//}
 	CCLib::ReferenceCloud duplicatedPoints(const_cast<ccPointCloud*>(this));
-	std::vector<CCVector3> unrolledPoints, unrolledNormals;
-	std::vector<ScalarType> deviationValues;
-	size_t pointCount = 0;
+	std::vector<CCVector3> unrolledPoints;
+	{
+		//compute an estimate of the final point count
+		unsigned newSize = static_cast<unsigned>(std::ceil((stopAngle_deg - startAngle_deg) / 360.0 * size()));
+		if (!duplicatedPoints.reserve(newSize))
+		{
+			ccLog::Error("Not enough memory");
+			return nullptr;
+		}
 
-	if (hasNormals())
+		try
+		{
+			unrolledPoints.reserve(newSize);
+		}
+		catch (const std::bad_alloc&)
+		{
+			ccLog::Error("Not enough memory");
+			return nullptr;
+		}
+	}
+
+	
+	std::vector<CCVector3> unrolledNormals;
+	std::vector<ScalarType> deviationValues;
+
+	bool withNormals = hasNormals();
+	if (withNormals)
 	{
 		//for normals, we can simply store at most one unrolled normal per original one
 		//same thing for deviation values
@@ -3674,7 +3696,7 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 		Pout.u[dim.z] = Pin->u[dim.z];
 
 		// first unroll its normal if necessary
-		if (hasNormals())
+		if (withNormals)
 		{
 			const CCVector3& N = getPointNormal(i);
 
@@ -3712,10 +3734,10 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 			//do we need to reserve more memory?
 			if (duplicatedPoints.size() == duplicatedPoints.capacity())
 			{
-				unsigned newSize = duplicatedPoints.size() + 1024;
+				unsigned newSize = duplicatedPoints.size() + (1 << 20);
 				if (!duplicatedPoints.reserve(newSize))
 				{
-					//not enough memory
+					ccLog::Error("Not enough memory");
 					return nullptr;
 				}
 
@@ -3725,7 +3747,7 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 				}
 				catch (const std::bad_alloc&)
 				{
-					//not enough memory
+					ccLog::Error("Not enough memory");
 					return nullptr;
 				}
 			}
@@ -3739,7 +3761,8 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 		//process canceled by user?
 		if (progressCb && !nprogress.oneStep())
 		{
-			break;
+			ccLog::Warning("Process cancelled by user");
+			return nullptr;
 		}
 	}
 
@@ -3779,7 +3802,10 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 			*P = unrolledPoints[i];
 
 			unsigned globalIndex = duplicatedPoints.getPointGlobalIndex(i);
-			clone->setPointNormal(i, unrolledNormals[globalIndex]);
+			if (withNormals)
+			{
+				clone->setPointNormal(i, unrolledNormals[globalIndex]);
+			}
 			if (deviationSF)
 			{
 				deviationSF->setValue(i, deviationValues[globalIndex]);

@@ -70,6 +70,7 @@ public: //initialization
 			, coordinatesShift(0)
 			, autoComputeNormals(false)
 			, parentWidget(0)
+			, sessionStart(true)
 		{}
 
 		//! How to handle big coordinates
@@ -84,6 +85,8 @@ public: //initialization
 		bool autoComputeNormals;
 		//! Parent widget (if any)
 		QWidget* parentWidget;
+		//! Session start (whether the load action is the first of a session)
+		bool sessionStart;
 	};
 
 	//! Generic saving parameters
@@ -247,6 +250,16 @@ public: //static methods
 
 	//! Returns whether special characters are present in the input string
 	QCC_IO_LIB_API static bool CheckForSpecialChars(QString filename);
+
+public: //loading "sessions" management
+
+	//! Indicates to the I/O filters that a new loading/saving session has started (for "Apply all" buttons for instance)
+	QCC_IO_LIB_API static void ResetSesionCounter();
+
+	//! Indicates to the I/O filters that a new loading/saving action has started
+	/** \return the updated session counter
+	**/
+	QCC_IO_LIB_API static unsigned IncreaseSesionCounter();
 
 public: //global filters registration mechanism
 

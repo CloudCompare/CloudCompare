@@ -731,6 +731,14 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		s_lasOpenDlg->addEVLR(QString("%1").arg(QString::fromStdString(extraDimension)));
 	}
 
+	if (parameters.sessionStart)
+	{
+		//we do this AFTER restoring the previous context because it may still be
+		//good that the previous configuration is restored even though the user needs
+		//to confirm it
+		s_lasOpenDlg->resetApplyAll();
+	}
+
 	if (parameters.alwaysDisplayLoadDialog && !s_lasOpenDlg->autoSkipMode() && !s_lasOpenDlg->exec())
 	{
 		return CC_FERR_CANCELED_BY_USER;
@@ -757,7 +765,8 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	StringList extraNamesToLoad;
 	for (unsigned i = 0; i < extraDimensionsIds.size(); ++i)
 	{
-		if (s_lasOpenDlg->doLoadEVLR(i)) {
+		if (s_lasOpenDlg->doLoadEVLR(i))
+		{
 			extraFieldsToLoad.push_back(extraDimensionsIds[i]);
 			extraNamesToLoad.push_back(extraDimensions[i]);
 		}

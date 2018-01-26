@@ -9153,6 +9153,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	CCVector3d addCoordinatesShift(0, 0, 0);
 
 	const ccOptions& options = ccOptions::Instance();
+	FileIOFilter::ResetSesionCounter();
 
 	for ( const QString &filename : filenames )
 	{

@@ -68,6 +68,9 @@ public:
 	//! Whether 8-bit RGB mode is forced or not
 	bool forced8bitRgbMode() const;
 
+	//! Resets the "apply all" flag (if set)
+	void resetApplyAll();
+
 protected slots:
 
 	void onApplyAll();

@@ -60,6 +60,9 @@ public:
 	**/
 	bool restorePreviousContext(bool& hasAPreviousContext);
 
+	//! Resets the "apply all" flag (if set)
+	static void ResetApplyAll();
+
 	//! Returns whether the dialog can be 'skipped'
 	/** i.e. 'Apply all' button has been previously clicked
 		and the configuration is valid.

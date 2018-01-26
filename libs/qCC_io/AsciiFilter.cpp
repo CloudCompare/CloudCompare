@@ -383,9 +383,18 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 	//		forceDialogDisplay = true;
 	//	}
 	//}
+
 	if (openDialog->restorePreviousContext())
 	{
 		//if we can/should use the previous sequence ('Apply all')
+		forceDialogDisplay = false;
+	}
+
+	if (parameters.sessionStart)
+	{
+		//we do this AFTER calling restorePreviousContext because it may still be good that the previous
+		//configuration is restored even though the user needs to confirm it
+		AsciiOpenDlg::ResetApplyAll();
 		forceDialogDisplay = false;
 	}
 

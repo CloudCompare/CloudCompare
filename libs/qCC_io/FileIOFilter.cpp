@@ -70,6 +70,18 @@
 **/
 FileIOFilter::FilterContainer s_ioFilters;
 
+static unsigned s_sessionCounter = 0;
+
+void FileIOFilter::ResetSesionCounter()
+{
+	s_sessionCounter = 0;
+}
+
+unsigned FileIOFilter::IncreaseSesionCounter()
+{
+	return ++s_sessionCounter;
+}
+
 void FileIOFilter::InitInternalFilters()
 {
 	//from the most useful to the less one!
@@ -229,17 +241,24 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	//load file
 	ccHObject* container = new ccHObject();
 	result = CC_FERR_NO_ERROR;
+	
+	//we start a new 'action' inside the current sessions
+	unsigned sessionCounter = IncreaseSesionCounter();
+	loadParameters.sessionStart = (sessionCounter == 1);
+
 	try
 	{
 		result = filter->loadFile(	filename,
 									*container,
 									loadParameters);
 	}
-	catch(...)
+	catch (...)
 	{
 		ccLog::Warning(QString("[I/O] CC has caught an unhandled exception while loading file '%1'").arg(filename));
 		if (container)
+		{
 			container->removeAllChildren();
+		}
 		result = CC_FERR_CONSOLE_ERROR;
 	}
 

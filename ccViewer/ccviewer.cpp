@@ -513,6 +513,7 @@ void ccViewer::addToDB(QStringList filenames)
 	parameters.parentWidget = this;
 
 	const ccOptions& options = ccOptions::Instance();
+	FileIOFilter::ResetSesionCounter();
 
 	for (int i = 0; i < filenames.size(); ++i)
 	{

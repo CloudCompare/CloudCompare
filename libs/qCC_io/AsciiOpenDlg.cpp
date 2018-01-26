@@ -954,6 +954,11 @@ void AsciiOpenDlg::applyAll()
 	s_asciiOpenContext.applyAll = true;
 }
 
+void AsciiOpenDlg::ResetApplyAll()
+{
+	s_asciiOpenContext.applyAll = false;
+}
+
 bool AsciiOpenDlg::restorePreviousContext()
 {
 	if (!s_asciiOpenContext.applyAll)

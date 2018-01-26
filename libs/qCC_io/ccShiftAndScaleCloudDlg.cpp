@@ -52,7 +52,7 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pg,
 	, m_activeInfoIndex(-1)
 	, m_originalPoint(Pg)
 	, m_originalDiagonal(Dg)
-	, m_localPoint(0,0,0)
+	, m_localPoint(0, 0, 0)
 	, m_localDiagonal(-1.0)
 	, m_reversedMode(false)
 {

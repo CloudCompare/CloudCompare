@@ -1297,7 +1297,7 @@ bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 				//fill the indexes table with default values
 				{
 					int defaultElement[3] = { -1, -1, -1 };
-					for (unsigned i = 0; i < mesh->m_triNormalIndexes->currentSize(); ++i)
+					for (unsigned i = 0; i < mesh->size(); ++i)
 						m_triNormalIndexes->addElement(defaultElement);
 				}
 			}

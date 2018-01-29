@@ -11,7 +11,7 @@
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="38"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/CC/Icons/images/icon/cc_icon_64.png&quot;/&gt;&lt;br/&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;CloudCompare &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;???&lt;/span&gt;&lt;br/&gt;Version: %1&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org/donate&quot;&gt;&lt;img src=&quot;:/CC/images/donate.png&quot; width=&quot;200&quot;/&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;www.cloudcompare.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;License: GNU GPL (General Public Licence)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/CC/Icons/images/icon/cc_icon_64.png&quot;/&gt;&lt;br/&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;CloudCompare &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;???&lt;/span&gt;&lt;br/&gt;Версия: %1&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org/donate&quot;&gt;&lt;img src=&quot;:/CC/images/donate.png&quot; width=&quot;200&quot;/&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;www.cloudcompare.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;Лицензия: GNU GPL (General Public Licence)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="78"/>
@@ -258,12 +258,13 @@
         <location filename="../ui_templates/applyTransformationDlg.ui" line="72"/>
         <source>Inits the matrix from dip/dip direction values
 --&gt; assuming an initial position of (0,0)</source>
-        <translation type="unfinished"></translation>
+        <translation>Инициализация матрицы по значениям угла падения и азимута
+--&gt;предполагается исходное положение (0,0)</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="76"/>
         <source>dip / dip direction</source>
-        <translation type="unfinished"></translation>
+        <translation>падение/азим.</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="83"/>
@@ -289,7 +290,7 @@ R31   R32   R33   Tz
 
 где R - стандартная матрица углов вращения 3x3, а T - вектор смещения.
 
-Пусть P будет точкой 3D, тогда трасформированная точка P&apos; будет вычислена как: P&apos; = R*P + T.</translation>
+Пусть P будет точкой 3D, тогда трансформированная точка P&apos; будет вычислена как: P&apos; = R*P + T.</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="165"/>
@@ -518,22 +519,22 @@ R31   R32   R33   Tz
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="227"/>
         <source>Orientation</source>
-        <translation type="unfinished">Ориентация</translation>
+        <translation>Ориентация</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="488"/>
         <source>automatically compute Z if checked</source>
-        <translation type="unfinished"></translation>
+        <translation>автоматически вычислять Z, если отмечено</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="504"/>
         <source>automatically compute Y if checked</source>
-        <translation type="unfinished"></translation>
+        <translation>автоматически вычислять Y, если отмечено</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="517"/>
         <source>automatically compute X if checked</source>
-        <translation type="unfinished"></translation>
+        <translation>автоматически вычислять X, если отмечено</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="548"/>
@@ -602,7 +603,7 @@ R31   R32   R33   Tz
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="130"/>
         <source>X (right)</source>
-        <translation type="unfinished"></translation>
+        <translation>X (вправо)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="140"/>
@@ -641,17 +642,17 @@ R31   R32   R33   Tz
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="143"/>
         <source>Y (up)</source>
-        <translation type="unfinished"></translation>
+        <translation>Y (вверх)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="156"/>
         <source>Z (inv. view dir.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Z (обр. лин. визир.)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="169"/>
         <source>Center</source>
-        <translation type="unfinished">Центр</translation>
+        <translation>Центр</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="180"/>
@@ -661,12 +662,12 @@ R31   R32   R33   Tz
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="186"/>
         <source>vert. focal</source>
-        <translation type="unfinished"></translation>
+        <translation>верт. фокус</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="193"/>
         <source>vertical focal (in pixels)</source>
-        <translation type="unfinished"></translation>
+        <translation>верт. фокус (в пикселях)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="196"/>
@@ -704,7 +705,7 @@ R31   R32   R33   Tz
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="435"/>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="464"/>
         <source> pix.</source>
-        <translation type="unfinished"></translation>
+        <translation> пикс.</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="263"/>
@@ -741,22 +742,22 @@ R31   R32   R33   Tz
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="370"/>
         <source>zNear</source>
-        <translation type="unfinished"></translation>
+        <translation>видимость от</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="377"/>
         <source>Near cutting plane (CCD pixel width (metric units - for display)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ближняя секущая плоскость (ширина пикселя CCD (метрические единицы - для экрана))</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="390"/>
         <source>zFar</source>
-        <translation type="unfinished"></translation>
+        <translation>видимость до</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="397"/>
         <source>Far cutting plane (CCD pixel width (metric units - for display)</source>
-        <translation type="unfinished"></translation>
+        <translation>Дальняя секущая плоскость (ширина пикселя CCD (метрические единицы - для экрана))</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="413"/>
@@ -771,17 +772,17 @@ R31   R32   R33   Tz
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="432"/>
         <source>Principal point X coordinate (in pixels)</source>
-        <translation type="unfinished"></translation>
+        <translation>Координата X главной точки (в пикс.)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="461"/>
         <source>Principal point Y coordinate (in pixels)</source>
-        <translation type="unfinished"></translation>
+        <translation>Координата Y главной точки (в пикс.)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="498"/>
         <source>principal point</source>
-        <translation type="unfinished"></translation>
+        <translation>Главная точка</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="506"/>
@@ -976,17 +977,17 @@ R31   R32   R33   Tz
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="28"/>
         <source>Show/hide bounding box</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать/скрыть рамку границ</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="48"/>
         <source>Show/hide interactors</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать/скрыть манипуляторы</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="84"/>
         <source>Restore the last clipping box used with this cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Восстановить последние рамки границ для этого облака</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="101"/>
@@ -1223,22 +1224,22 @@ R31   R32   R33   Tz
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="127"/>
         <source>split the generated contour(s) in smaller parts to avoid creating edges longer than the specified max edge length.</source>
-        <translation type="unfinished"></translation>
+        <translation>разбивать создаваемые сечения на мелкие части во избежании создания линий более длинных, чем заданная максимальная длина краев.</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="130"/>
         <source>split contour(s) on longer edges</source>
-        <translation type="unfinished"></translation>
+        <translation>разбивать сечения на длинных краях</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="137"/>
         <source>Display a dialog with step-by-step execution of the algorithm (debug mode - very slow)</source>
-        <translation type="unfinished"></translation>
+        <translation>Показывать диалог с пошаговым выполнением алгоритма (режим отладки - очень медленный)</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="140"/>
         <source>visual debug mode</source>
-        <translation type="unfinished"></translation>
+        <translation>показать режим отладки</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="150"/>
@@ -1263,7 +1264,7 @@ R31   R32   R33   Tz
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="183"/>
         <source>random colors per slice (will overwrite existing color!)</source>
-        <translation type="unfinished"></translation>
+        <translation>слои случайным цветом (старые цвета пропадут!)</translation>
     </message>
 </context>
 <context>
@@ -1312,7 +1313,7 @@ R31   R32   R33   Tz
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="136"/>
         <source>Period</source>
-        <translation type="unfinished"></translation>
+        <translation>Период</translation>
     </message>
     <message>
         <source>Frequency</source>
@@ -1585,18 +1586,19 @@ that could not have been seen (hidden/out of range/out of field of view).</sourc
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="215"/>
         <source>max thread count</source>
-        <translation type="unfinished"></translation>
+        <translation>кол-во потоков</translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="222"/>
         <source>Maximum number of threads/cores to be used
 (CC or your computer might not respond for a while if you use all available cores)</source>
-        <translation type="unfinished"></translation>
+        <translation>Максимальное число используемых потоков/ядер процессора
+(При использовании CC всех ядер ПК может не отвечать на дайствия пользователя)</translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="226"/>
         <source> / 8</source>
-        <translation type="unfinished"></translation>
+        <translation> / 8</translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="252"/>
@@ -1704,32 +1706,32 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/contourExtractorDlg.ui" line="14"/>
         <source>Contour Extractor Visual Debug</source>
-        <translation type="unfinished"></translation>
+        <translation>Режим отладки построения сечений</translation>
     </message>
     <message>
         <location filename="../ui_templates/contourExtractorDlg.ui" line="44"/>
         <source>Message</source>
-        <translation type="unfinished"></translation>
+        <translation>Сообщение</translation>
     </message>
     <message>
         <location filename="../ui_templates/contourExtractorDlg.ui" line="57"/>
         <source>no message</source>
-        <translation type="unfinished"></translation>
+        <translation>нет сообщений</translation>
     </message>
     <message>
         <location filename="../ui_templates/contourExtractorDlg.ui" line="64"/>
         <source>auto</source>
-        <translation type="unfinished"></translation>
+        <translation>авто</translation>
     </message>
     <message>
         <location filename="../ui_templates/contourExtractorDlg.ui" line="71"/>
         <source>Next</source>
-        <translation type="unfinished"></translation>
+        <translation>Следующий</translation>
     </message>
     <message>
         <location filename="../ui_templates/contourExtractorDlg.ui" line="78"/>
         <source>Skip</source>
-        <translation type="unfinished"></translation>
+        <translation>Пропустить</translation>
     </message>
 </context>
 <context>
@@ -1738,27 +1740,27 @@ to help you set the general parameters</source>
         <location filename="../ui_templates/curvatureDlg.ui" line="14"/>
         <location filename="../ui_templates/curvatureDlg.ui" line="22"/>
         <source>Curvature</source>
-        <translation type="unfinished">Кривизна</translation>
+        <translation>Кривизна</translation>
     </message>
     <message>
         <location filename="../ui_templates/curvatureDlg.ui" line="33"/>
         <source>Gaussian</source>
-        <translation type="unfinished"></translation>
+        <translation>Гауссова</translation>
     </message>
     <message>
         <location filename="../ui_templates/curvatureDlg.ui" line="38"/>
         <source>Mean</source>
-        <translation type="unfinished"></translation>
+        <translation>Средняя</translation>
     </message>
     <message>
         <location filename="../ui_templates/curvatureDlg.ui" line="43"/>
         <source>Normal change rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Норм. скорость изменения</translation>
     </message>
     <message>
         <location filename="../ui_templates/curvatureDlg.ui" line="55"/>
         <source>kernel</source>
-        <translation type="unfinished"></translation>
+        <translation>ядро</translation>
     </message>
 </context>
 <context>
@@ -1766,77 +1768,77 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="14"/>
         <source>Cloud Density</source>
-        <translation type="unfinished"></translation>
+        <translation>Плотность облака</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="20"/>
         <source>Method</source>
-        <translation type="unfinished"></translation>
+        <translation>Метод</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="26"/>
         <source>Compute the density by determining the number of neighbors inside a sphere of given radius around each point</source>
-        <translation type="unfinished"></translation>
+        <translation>Вычислять плотность путем определения числа соседей внутри сферы заданного радиуса, создаваемой вокруг каждой точки</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="29"/>
         <source>Precise</source>
-        <translation type="unfinished"></translation>
+        <translation>Точно</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="60"/>
         <source>radius</source>
-        <translation type="unfinished">радиус</translation>
+        <translation>радиус</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="70"/>
         <source>Neighborhood sphere radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Радиус поиска соседей</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="86"/>
         <source>Estimate the density by computing the distance to the nearest neighbor (much faster but less accurate)</source>
-        <translation type="unfinished"></translation>
+        <translation>Примерная плотность по расстоянию до ближайшей точки (быстро, но менее точно)</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="89"/>
         <source>Approximate</source>
-        <translation type="unfinished"></translation>
+        <translation>Грубо</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="99"/>
         <source>Output</source>
-        <translation type="unfinished"></translation>
+        <translation>Вывод</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="105"/>
         <source>Simply returns the number of neighbors</source>
-        <translation type="unfinished"></translation>
+        <translation>Просто возвратить число соседей</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="108"/>
         <source>Number of neighbors</source>
-        <translation type="unfinished"></translation>
+        <translation>Количество соседей</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="115"/>
         <source>Output the surface density (neighborhood is admitted to always be flat)</source>
-        <translation type="unfinished"></translation>
+        <translation>Вывод плотности на плоскости (полагать, что соседние точки находятся в одной плоскости)</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="118"/>
         <source>Surface density</source>
-        <translation type="unfinished"></translation>
+        <translation>Плотность поверхности</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="125"/>
         <source>Output the volume density (3D)</source>
-        <translation type="unfinished"></translation>
+        <translation>Вывод объемной плотности (3D)</translation>
     </message>
     <message>
         <location filename="../ui_templates/densityDlg.ui" line="128"/>
         <source>Volume density</source>
-        <translation type="unfinished"></translation>
+        <translation>Объемная плотность</translation>
     </message>
 </context>
 <context>
@@ -1844,28 +1846,28 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="14"/>
         <source>Dip / dip dir. transformation</source>
-        <translation type="unfinished"></translation>
+        <translation>Преобразование: угол падения/азимут</translation>
     </message>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="22"/>
         <source>Dip</source>
-        <translation type="unfinished"></translation>
+        <translation>Угол падения</translation>
     </message>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="29"/>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="49"/>
         <source> deg.</source>
-        <translation type="unfinished">°</translation>
+        <translation>°</translation>
     </message>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="42"/>
         <source>Dip direction</source>
-        <translation type="unfinished"></translation>
+        <translation>Азимут</translation>
     </message>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="64"/>
         <source>rotate about selection center</source>
-        <translation type="unfinished"></translation>
+        <translation>вращать вокруг центра выделения</translation>
     </message>
 </context>
 <context>
@@ -1919,12 +1921,12 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/displayOptionsDlg.ui" line="123"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether to use a double-sided light model or not&lt;/p&gt;&lt;p&gt;(if disabled, triangles will appear black when looked from behind)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Использовать или нет двухстороннюю модель освещения&lt;/p&gt;&lt;p&gt;(если выключено, треугольники с обратной стороны будут черными)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../ui_templates/displayOptionsDlg.ui" line="126"/>
         <source>double-sided</source>
-        <translation type="unfinished"></translation>
+        <translation>двухсторонний</translation>
     </message>
     <message>
         <location filename="../ui_templates/displayOptionsDlg.ui" line="152"/>
@@ -2046,32 +2048,37 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/displayOptionsDlg.ui" line="592"/>
         <source>Other options</source>
-        <translation type="unfinished">Прочие параметры</translation>
+        <translation>Прочие параметры</translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="877"/>
-        <source>Auto-compute octree for picking</source>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="875"/>
+        <source>Automatically display normals at loading time (when available)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/displayOptionsDlg.ui" line="884"/>
-        <source>Octree computation can be long but the picking is then much faster</source>
-        <translation type="unfinished"></translation>
+        <source>Auto-compute octree for picking</source>
+        <translation>Авторасчет октодерева при отборе</translation>
     </message>
     <message>
         <location filename="../ui_templates/displayOptionsDlg.ui" line="891"/>
+        <source>Octree computation can be long but the picking is then much faster</source>
+        <translation>Расчет октодерева может быть долгим, но последующий отбор выполняется быстрее</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="898"/>
         <source>Always</source>
-        <translation type="unfinished"></translation>
+        <translation>Всегда</translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="896"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="903"/>
         <source>Ask each time</source>
-        <translation type="unfinished"></translation>
+        <translation>Спрашивать</translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="901"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="908"/>
         <source>Never</source>
-        <translation type="unfinished"></translation>
+        <translation>Никогда</translation>
     </message>
     <message>
         <source>Other display options</source>
@@ -2154,7 +2161,7 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/displayOptionsDlg.ui" line="842"/>
         <source>Draw rounded points (slower)</source>
-        <translation type="unfinished"></translation>
+        <translation>Рисовать округлые точки (медленнее)</translation>
     </message>
     <message>
         <location filename="../ui_templates/displayOptionsDlg.ui" line="849"/>
@@ -2182,22 +2189,22 @@ to help you set the general parameters</source>
         <translation type="vanished">Исполь. OpenGL для определения точек</translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="956"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="963"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="963"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="970"/>
         <source>Apply</source>
         <translation>Применить</translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="970"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="977"/>
         <source>Reset</source>
         <translation>Сброс</translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="977"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="984"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
@@ -2207,44 +2214,46 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="14"/>
         <source>Distance Map</source>
-        <translation type="unfinished"></translation>
+        <translation>Карта отклонений</translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="22"/>
         <source>Steps</source>
-        <translation type="unfinished"></translation>
+        <translation>Дискретность</translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="29"/>
         <source>Map steps (in each direction).
 The bigger the more accurate the map will be
 (but the more points will be created)</source>
-        <translation type="unfinished"></translation>
+        <translation>Дискретность карты (по каждой оси координат).
+Большее значение - более детальная карта
+(но будет создано больше точек)</translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="63"/>
         <source>Outer margin</source>
-        <translation type="unfinished"></translation>
+        <translation>Внешняя граница</translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="70"/>
         <source>Margin added around the cloud bounding-box</source>
-        <translation type="unfinished"></translation>
+        <translation>Граница добавляется вокруг рамок границ облака</translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="87"/>
         <source>reduce result to the specified range</source>
-        <translation type="unfinished"></translation>
+        <translation>отображать результат в заданном диапазоне</translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="90"/>
         <source>Range</source>
-        <translation type="unfinished"></translation>
+        <translation>Диапазон</translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="131"/>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
 </context>
 <context>
@@ -2252,32 +2261,32 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="14"/>
         <source>Export coordinates to SF</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт координат в скалярное поле</translation>
     </message>
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="29"/>
         <source>Export</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт</translation>
     </message>
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="36"/>
         <source>X</source>
-        <translation type="unfinished">X</translation>
+        <translation>X</translation>
     </message>
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="43"/>
         <source>Y</source>
-        <translation type="unfinished">Y</translation>
+        <translation>Y</translation>
     </message>
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="50"/>
         <source>Z</source>
-        <translation type="unfinished">Z</translation>
+        <translation>Z</translation>
     </message>
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="71"/>
         <source>Warning, already existing SF(s) with same name will be overwritten</source>
-        <translation type="unfinished"></translation>
+        <translation>Внимание: одноименные скалярные поля будут перезаписаны</translation>
     </message>
 </context>
 <context>
@@ -2285,53 +2294,54 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="14"/>
         <source>Filter by value</source>
-        <translation type="unfinished"></translation>
+        <translation>Фильтр по значению</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="22"/>
         <source>Range</source>
-        <translation type="unfinished"></translation>
+        <translation>Диапазон</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="29"/>
         <source>Min range value</source>
-        <translation type="unfinished"></translation>
+        <translation>Минимальное значение диапазона</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="51"/>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="61"/>
         <source>Max range value</source>
-        <translation type="unfinished"></translation>
+        <translation>Максимальное значение диапазона</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="81"/>
         <source>Exports the points falling inside the specified range.</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт точек, попавших в диапазон.</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="84"/>
         <source>Export</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="91"/>
         <source>Creates two clouds: one with the points falling inside the specified range,
 the other with the points falling outside.</source>
-        <translation type="unfinished"></translation>
+        <translation>Создает два облака: одно с точками, попавшими в диапазон,
+другое - для оставшихся вне диапазона.</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="95"/>
         <source>Split</source>
-        <translation type="unfinished"></translation>
+        <translation>Разделить</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="102"/>
         <source>Cancel</source>
-        <translation type="unfinished">Отмена</translation>
+        <translation>Отмена</translation>
     </message>
 </context>
 <context>
@@ -2339,50 +2349,50 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="14"/>
         <source>Sensor parameters</source>
-        <translation type="unfinished">Параметры датчика</translation>
+        <translation>Параметры датчика</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="35"/>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="51"/>
         <source>theta=longitudinal (E-W) / phi=latitudinal (N-S)</source>
-        <translation type="unfinished"></translation>
+        <translation>theta=долготный (В-З) / phi=широтный (С-Ю)</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="38"/>
         <source>rotation order</source>
-        <translation type="unfinished"></translation>
+        <translation>порядок вращения</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="61"/>
         <source>yaw then pitch (default)</source>
-        <translation type="unfinished"></translation>
+        <translation>курс, тангаж (по умолчанию)</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="66"/>
         <source>pitch then yaw</source>
-        <translation type="unfinished"></translation>
+        <translation>тангаж, курс</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="90"/>
         <source>Position + Orientation</source>
-        <translation type="unfinished">Положение и ориентация</translation>
+        <translation>Положение и ориентация</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="96"/>
         <source>sensor front direction (yaw = 0)</source>
-        <translation type="unfinished">фронтальное направление датчика (курс=0)</translation>
+        <translation>фронтальное направление датчика (курс=0)</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="99"/>
         <source>X</source>
-        <translation type="unfinished">X</translation>
+        <translation>X</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="106"/>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="144"/>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="182"/>
         <source>1</source>
-        <translation type="unfinished">1</translation>
+        <translation>1</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="113"/>
@@ -2392,94 +2402,94 @@ the other with the points falling outside.</source>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="168"/>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="175"/>
         <source>0</source>
-        <translation type="unfinished">0</translation>
+        <translation>0</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="127"/>
         <source>sensor lateral direction</source>
-        <translation type="unfinished">боковое направление датчика</translation>
+        <translation>боковое направление датчика</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="130"/>
         <source>Y</source>
-        <translation type="unfinished">Y</translation>
+        <translation>Y</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="158"/>
         <source>sensor vertical direction (pitch = 0)</source>
-        <translation type="unfinished">вертикальное направление датчика (тангаж=0)</translation>
+        <translation>вертикальное направление датчика (тангаж=0)</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="161"/>
         <source>Z</source>
-        <translation type="unfinished">Z</translation>
+        <translation>Z</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="202"/>
         <source>sensor center</source>
-        <translation type="unfinished">центр датчика</translation>
+        <translation>центр датчика</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="205"/>
         <source>C</source>
-        <translation type="unfinished">C</translation>
+        <translation>Ц</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="212"/>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="219"/>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="226"/>
         <source>0.0</source>
-        <translation type="unfinished">0.0</translation>
+        <translation>0.0</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="234"/>
         <source>Angular steps</source>
-        <translation type="unfinished"></translation>
+        <translation>Угловые интервалы</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="242"/>
         <source>Rotation around the vertical axis</source>
-        <translation type="unfinished"></translation>
+        <translation>Вращение вокруг вертикальной оси</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="245"/>
         <source>Yaw (degrees)</source>
-        <translation type="unfinished"></translation>
+        <translation>Курс (°)</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="272"/>
         <source>Rotation around the lateral axis</source>
-        <translation type="unfinished"></translation>
+        <translation>Наклон относительно боковой оси</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="275"/>
         <source>Pitch (degrees)</source>
-        <translation type="unfinished"></translation>
+        <translation>Тангаж (°)</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="314"/>
         <source>Other</source>
-        <translation type="unfinished">Дополнительно</translation>
+        <translation>Дополнительно</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="322"/>
         <source>Depth buffer &apos;uncertainty&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Точность буфера глубины</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="325"/>
         <source>Uncertainty</source>
-        <translation type="unfinished"></translation>
+        <translation>Точность</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="349"/>
         <source>Sensor max range</source>
-        <translation type="unfinished"></translation>
+        <translation>Макс. диапазон датчика</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="352"/>
         <source>Max. range</source>
-        <translation type="unfinished"></translation>
+        <translation>Макс. диапазон</translation>
     </message>
 </context>
 <context>
@@ -2487,7 +2497,7 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="14"/>
         <source>Global Shift settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Настройки глобального сдвига</translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="26"/>
@@ -2498,38 +2508,44 @@ As CloudCompare and most graphic cards work with 32 bits floating point values, 
 Here below you can set the limits above which the &apos;Global Shift &amp; Scale&apos; mechanism will be triggered.
 
 Note: the diagonal is not tested at loading time.</source>
-        <translation type="unfinished"></translation>
+        <translation>Механизм глобального сдвига и масштаба призван устранить потери в точности расчетов при работе с большими значениями координат.
+
+CloudCompare как и большинство графических адаптеров используют 32-битную адресацию. Их разрешающая способность и точность расчетов ограничены. Чем больше числа, тем больше ограничений на них накладывается.
+
+Ниже можно установить допуски для включения механизма &apos;Глобального сдвига и масштаба&apos;.
+
+Примечание: диагональ не проверяется во время загрузки данных.</translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="42"/>
         <source>Global Shift &amp; Scale triggering limits:</source>
-        <translation type="unfinished"></translation>
+        <translation>Включать Глобальный сдвиг и масштаб:</translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="51"/>
         <source>Max absolute coordinate</source>
-        <translation type="unfinished"></translation>
+        <translation>Макс. знач. координат</translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="58"/>
         <source>CloudCompare will suggest to apply a Global Shift to the loaded entities if their coordinates are above this limit</source>
-        <translation type="unfinished"></translation>
+        <translation>CloudCompare будет предлагать применить глобальный сдвиг к загружаемым данным, если значения координат превышают этот допуск</translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="64"/>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="93"/>
         <source>10^</source>
-        <translation type="unfinished">10^</translation>
+        <translation>10^</translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="80"/>
         <source>Max entity diagonal</source>
-        <translation type="unfinished"></translation>
+        <translation>Макс. размер объекта</translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="87"/>
         <source>CloudCompare will suggest to apply a Global Scale to the loaded entities if their bounding-box diagonal is above this limit</source>
-        <translation type="unfinished"></translation>
+        <translation>CloudCompare будет предлагать применить глобальный масштаб к загружаемым данным, если диагональ рамки границ превышает этот допуск</translation>
     </message>
 </context>
 <context>
@@ -2537,151 +2553,151 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="20"/>
         <source>Segmentation</source>
-        <translation type="unfinished">Сегментация</translation>
+        <translation>Сегментирование</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="41"/>
         <source>Pause segmentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Пауза сегментирования</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="44"/>
         <source>Pause segmentation  (allow rotation/panning of 3D view)</source>
-        <translation type="unfinished"></translation>
+        <translation>Пауза сегментирования (допускает повороты/сдвиги в 3D-виде)</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="47"/>
         <source>pause</source>
-        <translation type="unfinished"></translation>
+        <translation>пауза</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="64"/>
         <source>Load / save segmentation polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Загрузить/сохранить полилинию сегментирования</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="67"/>
         <source>load/save segmentation polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Загрузить/сохранить полилинию сегментирования</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="81"/>
         <source>Polyline selection mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Режим выделения полилинией</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="84"/>
         <source>polyline selection</source>
-        <translation type="unfinished"></translation>
+        <translation>выделение полилинией</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="98"/>
         <source>Segment In</source>
-        <translation type="unfinished"></translation>
+        <translation>Сегмент внутри</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="101"/>
         <source>Segment (keep points inside)</source>
-        <translation type="unfinished"></translation>
+        <translation>Сегмент (оставить точки внутри контура)</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="104"/>
         <source>in</source>
-        <translation type="unfinished"></translation>
+        <translation>внутри</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="115"/>
         <source>Segment Out</source>
-        <translation type="unfinished"></translation>
+        <translation>Сегмент снаружи</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="118"/>
         <source>Segment (keep points outside)</source>
-        <translation type="unfinished"></translation>
+        <translation>Сегмент (оставить точки вне контура)</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="121"/>
         <source>out</source>
-        <translation type="unfinished"></translation>
+        <translation>снаружи</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="135"/>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="138"/>
         <source>Clear segmentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Сбросить сегментирование</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="141"/>
         <source>raz</source>
-        <translation type="unfinished"></translation>
+        <translation>вернуться</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="152"/>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="155"/>
         <source>Confirm segmentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Подтвердить сегментирование</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="158"/>
         <source>OK</source>
-        <translation type="unfinished">OK</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="169"/>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="172"/>
         <source>Confirm and delete hidden points</source>
-        <translation type="unfinished"></translation>
+        <translation>Подтвердить и удалить невидимые точки</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="183"/>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="189"/>
         <source>Cancel</source>
-        <translation type="unfinished">Отмена</translation>
+        <translation>Отмена</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="186"/>
         <source>Cancel segentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Отменить сегментирование</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="204"/>
         <source>Rectangular selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Прямоугольное выделение</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="207"/>
         <source>Activates rectangular selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Включает выделение прямоугольной рамкой</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="216"/>
         <source>Polygonal selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Выделение полигоном</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="219"/>
         <source>Activaites polyline selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Включает выделение полилинией</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="228"/>
         <source>Use existing polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Использовать существующую полилинию</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="231"/>
         <source>Import polyline from DB for segmentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Импорт полилинии из базы данных для сегментирования</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="240"/>
         <source>Export segmentation polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт полилинии сегментирования</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="243"/>
         <source>Export segmentation polyline as new entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт полилинии сегментирования как нового объекта</translation>
     </message>
 </context>
 <context>
@@ -2689,69 +2705,69 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="20"/>
         <source>Graphical Transformation</source>
-        <translation type="unfinished"></translation>
+        <translation>Графическая трансформация</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="63"/>
         <source>Pause segmentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Пауза трансформации</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="66"/>
         <source>Pause transformation (allow rotation/panning of 3D view)</source>
-        <translation type="unfinished"></translation>
+        <translation>Пауза трансформации (допускает повороты/сдвиги в 3D-виде)</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="69"/>
         <source>pause</source>
-        <translation type="unfinished"></translation>
+        <translation>пауза</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="92"/>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="109"/>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="126"/>
         <source>...</source>
-        <translation type="unfinished">...</translation>
+        <translation>...</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="148"/>
         <source>Rotation</source>
-        <translation type="unfinished">Вращение</translation>
+        <translation>Вращение</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="168"/>
         <source>XYZ</source>
-        <translation type="unfinished">XYZ</translation>
+        <translation>XYZ</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="173"/>
         <source>X</source>
-        <translation type="unfinished">X</translation>
+        <translation>X</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="178"/>
         <source>Y</source>
-        <translation type="unfinished">Y</translation>
+        <translation>Y</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="183"/>
         <source>Z</source>
-        <translation type="unfinished">Z</translation>
+        <translation>Z</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="204"/>
         <source>Tx</source>
-        <translation type="unfinished">Tx</translation>
+        <translation>Tx</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="220"/>
         <source>Ty</source>
-        <translation type="unfinished">Ty</translation>
+        <translation>Ty</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="236"/>
         <source>Tz</source>
-        <translation type="unfinished">Tz</translation>
+        <translation>Tz</translation>
     </message>
 </context>
 <context>
@@ -2759,181 +2775,181 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="17"/>
         <source>Height grid generation</source>
-        <translation type="unfinished"></translation>
+        <translation>Создание высотной сетки</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="26"/>
         <source>Grid</source>
-        <translation type="unfinished">Сетка</translation>
+        <translation>Сетка</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="32"/>
         <source>step</source>
-        <translation type="unfinished">интервал</translation>
+        <translation>интервал</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="39"/>
         <source>size of step of the grid generated (in the same units as the coordinates of the point cloud)</source>
-        <translation type="unfinished">интерал точек сетки (в тех же единицах, что и координаты облака)</translation>
+        <translation>интерал точек сетки (в тех же единицах, что и координаты облака)</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="61"/>
         <source>Edit grid</source>
-        <translation type="unfinished">Правка</translation>
+        <translation>Правка</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="71"/>
         <source>Projection</source>
-        <translation type="unfinished">Проекция</translation>
+        <translation>Проекция</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="79"/>
         <source>type</source>
-        <translation type="unfinished"></translation>
+        <translation>тип</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="86"/>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="162"/>
         <source>choose the height (z coordinate) projected : maximum = highest point in the cell or average)</source>
-        <translation type="unfinished"></translation>
+        <translation>выберите проекцию высоты (координаты z): максимум = самая высокая точка в ячейке или средняя</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="93"/>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="215"/>
         <source>minimum height</source>
-        <translation type="unfinished">минимальная высота</translation>
+        <translation>минимальная высота</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="98"/>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="220"/>
         <source>average height</source>
-        <translation type="unfinished">средняя высота</translation>
+        <translation>средняя высота</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="103"/>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="225"/>
         <source>maximum height</source>
-        <translation type="unfinished">максимальная высота</translation>
+        <translation>максимальная высота</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="115"/>
         <source>direction</source>
-        <translation type="unfinished">направление</translation>
+        <translation>направление</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="126"/>
         <source>X</source>
-        <translation type="unfinished">X</translation>
+        <translation>X</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="131"/>
         <source>Y</source>
-        <translation type="unfinished">Y</translation>
+        <translation>Y</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="136"/>
         <source>Z</source>
-        <translation type="unfinished">Z</translation>
+        <translation>Z</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="152"/>
         <source>interpolate scalar field(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>интерполир. СкаПол</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="169"/>
         <source>minimum value</source>
-        <translation type="unfinished">минимальное значение</translation>
+        <translation>минимальное значение</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="174"/>
         <source>average value</source>
-        <translation type="unfinished">среднее значение</translation>
+        <translation>среднее значение</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="179"/>
         <source>maximum value</source>
-        <translation type="unfinished"></translation>
+        <translation>максимальное значение</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="193"/>
         <source>Empty cells</source>
-        <translation type="unfinished">Пустые ячейки</translation>
+        <translation>Пустые ячейки</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="199"/>
         <source>Fill with</source>
-        <translation type="unfinished"></translation>
+        <translation>Заполнить</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="206"/>
         <source>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</source>
-        <translation type="unfinished">выбрать значение для заполнения ячеек без точек внутри: минимальная высота по всему облаку или средняя высота (также по всему облаку)</translation>
+        <translation>выбрать значение для заполнения ячеек без точек внутри: минимальная высота по всему облаку или средняя высота (также по всему облаку)</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="210"/>
         <source>leave empty</source>
-        <translation type="unfinished">оставить пустыми</translation>
+        <translation>оставить пустыми</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="230"/>
         <source>user specified value</source>
-        <translation type="unfinished">ввести значение</translation>
+        <translation>ввести значение</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="266"/>
         <source>Generate</source>
-        <translation type="unfinished"></translation>
+        <translation>Построить</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="272"/>
         <source>Grid as a point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Сетка как облако точек</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="281"/>
         <source>Adds a scalar field with the grid density (= number of points falling in each cell)</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавить скалярное поле с плотностью точек (= по числу точек, попадающих в каждую ячейку)</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="284"/>
         <source>save per-cell count as SF</source>
-        <translation type="unfinished"></translation>
+        <translation>сохр. плотность точек как скаляр. поле</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="291"/>
         <source>Keeps the nearest point in each cell instead of the cell center</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранять ближайшую точку в каждой ячейке вместо центра ячейки</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="294"/>
         <source>resample original cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>проредить исходное облако</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="307"/>
         <source>Grid as a raster (geotiff)</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить как растр (GeoTIFF)</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="314"/>
         <source>image is automatically generated in the application directory</source>
-        <translation type="unfinished"></translation>
+        <translation>изображение создается автоматически в папке программы</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="317"/>
         <source>Grid as an image</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить как изображение</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="324"/>
         <source>file is automatically generated in the application directory</source>
-        <translation type="unfinished"></translation>
+        <translation>файл создается автоматически в папке программы</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="327"/>
         <source>Grid as a matrix (text file)</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить как матрицу (текст. файл)</translation>
     </message>
 </context>
 <context>
@@ -2941,17 +2957,17 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/histogramDlg.ui" line="14"/>
         <source>Histogram</source>
-        <translation type="unfinished"></translation>
+        <translation>Гистограмма</translation>
     </message>
     <message>
         <location filename="../ui_templates/histogramDlg.ui" line="60"/>
         <source>Export histogram to a CSV file (can be imported into Excel ;)</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт гистограммы в файл CSV (можно импортировать в Excel)</translation>
     </message>
     <message>
         <location filename="../ui_templates/histogramDlg.ui" line="71"/>
         <source>Export histogram to an image file</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт гистограммы в файл изображения</translation>
     </message>
 </context>
 <context>
@@ -2959,99 +2975,101 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="14"/>
         <source>Interpolation</source>
-        <translation type="unfinished"></translation>
+        <translation>Интерполяция</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="20"/>
         <source>Neighbors extraction</source>
-        <translation type="unfinished"></translation>
+        <translation>Поиск соседей</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="26"/>
         <source>Radius of the sphere inside which neighbors will be extracted</source>
-        <translation type="unfinished"></translation>
+        <translation>Радиус сферы, внутри которой производится поиск соседей</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="39"/>
         <source>Extracts the neighbors inside a sphere</source>
-        <translation type="unfinished"></translation>
+        <translation>Поиск соседей внутри сферы</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="42"/>
         <source>Radius (Sphere)</source>
-        <translation type="unfinished">Радиус (Сфера)</translation>
+        <translation>Радиус (Сфера)</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="52"/>
         <source>Use only the nearest neighbor (fast)</source>
-        <translation type="unfinished"></translation>
+        <translation>Использовать только ближайшего соседа (быстро)</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="55"/>
         <source>Nearest neighbor</source>
-        <translation type="unfinished"></translation>
+        <translation>Ближ. сосед</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="62"/>
         <source>Use the &apos;k&apos; nearest neighbors
 (faster than &apos;radius&apos; based search, but more approximate)</source>
-        <translation type="unfinished"></translation>
+        <translation>Использовать &apos;k&apos; ближайших соседей
+(быстрее чем поиск по радиусу, но менее точно)</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="66"/>
         <source>Nearest neighbors</source>
-        <translation type="unfinished"></translation>
+        <translation>Ближ. соседи</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="76"/>
         <source>Number of neighbors to extract</source>
-        <translation type="unfinished"></translation>
+        <translation>Число соседей для поиска</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="95"/>
         <source>Interpolation algorithm</source>
-        <translation type="unfinished"></translation>
+        <translation>Алгоритм интерполяции</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="101"/>
         <source>Keep the median of the neighbors SF values</source>
-        <translation type="unfinished"></translation>
+        <translation>Вычислять медиану значений скал. поля соседей</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="104"/>
         <source>Median</source>
-        <translation type="unfinished"></translation>
+        <translation>Медиана</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="114"/>
         <source>Keep the average of the neighbors SF values</source>
-        <translation type="unfinished"></translation>
+        <translation>Вычислять среднее из значений скал. поля соседей</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="117"/>
         <source>Average</source>
-        <translation type="unfinished"></translation>
+        <translation>Среднее значение</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="124"/>
         <source>Compute a weighted average of the neighbors SF values
 (the weights will follow a Normal distribution)</source>
-        <translation type="unfinished"></translation>
+        <translation>Вычислять среднее весовое значений скалярного поля соседей
+(веса будут соответствовать нормальному распределению)</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="128"/>
         <source>Normal distribution</source>
-        <translation type="unfinished"></translation>
+        <translation>Нормальное распределение</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="163"/>
         <source>sigma</source>
-        <translation type="unfinished"></translation>
+        <translation>сигма</translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="170"/>
         <source>Kernel of the Normal distribution</source>
-        <translation type="unfinished"></translation>
+        <translation>Ядро нормального распределения</translation>
     </message>
 </context>
 <context>
@@ -3059,12 +3077,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/itemSelectionDlg.ui" line="14"/>
         <source>Selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Выбор</translation>
     </message>
     <message>
         <location filename="../ui_templates/itemSelectionDlg.ui" line="20"/>
         <source>Please select one %1:</source>
-        <translation type="unfinished"></translation>
+        <translation>Выберите один элемент %1:</translation>
     </message>
 </context>
 <context>
@@ -3072,32 +3090,32 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="20"/>
         <source>Connected Components</source>
-        <translation type="unfinished"></translation>
+        <translation>Связные компоненты</translation>
     </message>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="28"/>
         <source>Grid subdivision level: the greater, the finest</source>
-        <translation type="unfinished"></translation>
+        <translation>Уровень подразделения сетки: чем больше, тем лучше</translation>
     </message>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="31"/>
         <source>Octree Level</source>
-        <translation type="unfinished"></translation>
+        <translation>Уровней октодерева</translation>
     </message>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="57"/>
         <source>Minimum number of points per component</source>
-        <translation type="unfinished"></translation>
+        <translation>Минимум точек на компонент</translation>
     </message>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="60"/>
         <source>Min. points per component</source>
-        <translation type="unfinished"></translation>
+        <translation>Минимум точек на компонент</translation>
     </message>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="91"/>
         <source>random colors (warning: overwrites existing ones)</source>
-        <translation type="unfinished"></translation>
+        <translation>случайные цвета (старые перезаписываются)</translation>
     </message>
 </context>
 <context>
@@ -3226,12 +3244,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="300"/>
         <source>Waveform</source>
-        <translation type="unfinished"></translation>
+        <translation>Форма волны</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="315"/>
         <source>Grid</source>
-        <translation type="unfinished">Сетка</translation>
+        <translation>Сетка</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="348"/>
@@ -3254,7 +3272,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="378"/>
         <source>Segmentation</source>
-        <translation>Сегментация</translation>
+        <translation>Сегментирование</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="389"/>
@@ -3305,12 +3323,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="478"/>
         <source>Batch export</source>
-        <translation type="unfinished"></translation>
+        <translation>Пакетный экспорт</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="524"/>
         <source>DB Tree</source>
-        <translation>Структура данных</translation>
+        <translation>База данных</translation>
     </message>
     <message>
         <source>Link all 3D views cameras</source>
@@ -3430,12 +3448,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="903"/>
         <source>Display options</source>
-        <translation type="unfinished">Параметры отображения</translation>
+        <translation>Параметры отображения</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="906"/>
         <source>Set various display options</source>
-        <translation type="unfinished"></translation>
+        <translation>Задать различные параметры отображения</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="914"/>
@@ -3571,7 +3589,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1069"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clone the selected entities&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(yes Claire ... these are Nyan sheep!)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Дублировать выделенные элементы&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(yes Claire ... these are Nyan sheep!)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1078"/>
@@ -3725,12 +3743,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1288"/>
         <source>Arithmetic</source>
-        <translation type="unfinished"></translation>
+        <translation>Арифметические операции</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1291"/>
         <source>SF arithmetic</source>
-        <translation type="unfinished"></translation>
+        <translation>Арифметические операции со скалярными полями</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1294"/>
@@ -3837,7 +3855,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1415"/>
         <source>Closest Point Set</source>
-        <translation>Набо ближайших точек</translation>
+        <translation>Набор ближайших точек</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1418"/>
@@ -3870,24 +3888,24 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1451"/>
         <source>K-Means</source>
-        <translation type="unfinished"></translation>
+        <translation>Метод k-средних</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1454"/>
         <location filename="../ui_templates/mainWindow.ui" line="1457"/>
         <source>classify point (K-Means applied on a scalar field)</source>
-        <translation type="unfinished"></translation>
+        <translation>Классифицировать точку (Метод k-средних применяется к скалярному полю)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1465"/>
         <source>Front propagation</source>
-        <translation type="unfinished"></translation>
+        <translation>Распространение фронта</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1468"/>
         <location filename="../ui_templates/mainWindow.ui" line="1471"/>
         <source>Classify points by propagating a front on a scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Классифицировать точки распространением фронта на скалярное поле</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1476"/>
@@ -3903,13 +3921,13 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1487"/>
         <source>Match bounding-box centers</source>
-        <translation type="unfinished"></translation>
+        <translation>Совместить центры рамок границ</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1490"/>
         <location filename="../ui_templates/mainWindow.ui" line="1493"/>
         <source>Synchronize selected entities bbox centers</source>
-        <translation type="unfinished"></translation>
+        <translation>Синхронизировать центры рамок границ выделенных объектов</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1498"/>
@@ -4113,13 +4131,13 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1769"/>
         <source>Toggle Centered Perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Вид перспективы (центр-объект)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1772"/>
         <location filename="../ui_templates/mainWindow.ui" line="1775"/>
         <source>Toggle perspective view (centered on objects) in current window</source>
-        <translation type="unfinished"></translation>
+        <translation>Переключиться в перспективный вид (центрированный на объектах) в текущем окне</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1778"/>
@@ -4129,13 +4147,13 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1790"/>
         <source>Toggle Viewer Based Perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Вид перспективы (центр-камера)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1793"/>
         <location filename="../ui_templates/mainWindow.ui" line="1796"/>
         <source>Toggle perspective view (centered on viewer) in current window</source>
-        <translation type="unfinished"></translation>
+        <translation>Переключиться в перспективный вид (центрированный в точке камеры) в текущем окне</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1799"/>
@@ -4190,7 +4208,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1868"/>
         <source>Rasterize (and contour plot)</source>
-        <translation type="unfinished"></translation>
+        <translation>Растеризовать (с контурным изображением)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1871"/>
@@ -4222,204 +4240,205 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1905"/>
         <source>Load shader</source>
-        <translation type="unfinished"></translation>
+        <translation>Загрузить шейдер</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1917"/>
         <source>Remove Filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить фильтр</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2007"/>
         <location filename="../ui_templates/mainWindow.ui" line="2973"/>
         <source>Fit a plane on a set of point</source>
-        <translation type="unfinished"></translation>
+        <translation>Вписать плоскость в набор точек</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2603"/>
         <source>Export cloud info</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт информации об облаке</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2606"/>
         <source>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт информации об облаке в файл CSV (имя, размер, центр тяжести, сводка по скалярным полям, и т.д.)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2640"/>
         <source>Reset all GUI element positions</source>
-        <translation type="unfinished"></translation>
+        <translation>Восстановить положение элементов интерфейса</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2643"/>
         <source>Reset all GUI element positions (after restart)</source>
-        <translation type="unfinished"></translation>
+        <translation>Восстановить исходное положение элементов интерфейса (после перезапуска)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2745"/>
         <source>Extract sections / Unfold</source>
-        <translation type="unfinished"></translation>
+        <translation>Построение сечений / Развертка</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2748"/>
         <source>Extract cloud sections along polylines or unfold a cloud along a polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Извлечение сечений облака вдоль полилиний и развертка облака вдоль полилинии</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2808"/>
         <source>Distance map</source>
-        <translation type="unfinished"></translation>
+        <translation>Карта отклонений</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2888"/>
         <source>Convert to grey scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Конвертировать в оттенки серого</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2891"/>
         <source>Convert RGB colors to grey scale colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Конвертировать цвета RGB в оттенки серого</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2900"/>
         <source>Trace Polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Чертить полилинию</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2903"/>
         <source>Trace a polyline by point picking</source>
-        <translation type="unfinished"></translation>
+        <translation>Вычерчивание полилинии, щелкая по точкам</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2906"/>
         <source>Ctrl+P</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+P</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2914"/>
         <source>Enable Qt warnings in Console</source>
-        <translation type="unfinished"></translation>
+        <translation>Включить сообщения Qt в консоли</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2919"/>
         <source>Global Shift settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Глобальный сдвиг</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2922"/>
         <source>Set Global Shift &amp; Scale mechanism parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Настроить параметры механизма Глобального сдвига и масштаба</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2930"/>
         <source>Camera link</source>
-        <translation type="unfinished"></translation>
+        <translation>Синхронизация камер</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2933"/>
         <source>Link the cameras of all 3D views
 (so that they all move in the same way and at the same time)</source>
-        <translation type="unfinished"></translation>
+        <translation>Связать камеры всех 3D-видов
+(так, чтобы все они смещались в одну и ту же сторону и в то же время)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2939"/>
         <source>2D Waveform viewer</source>
-        <translation type="unfinished"></translation>
+        <translation>Просмотр формы волны 2D</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2947"/>
         <source>Create a plane</source>
-        <translation type="unfinished"></translation>
+        <translation>Создать плоскость</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2955"/>
         <source>Edit the plane parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Правка параметров плоскости</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2960"/>
         <source>Create surface between two polylines</source>
-        <translation type="unfinished"></translation>
+        <translation>Создать поверхность по двум полилиниям</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2965"/>
         <source>Surface between 2 polylines</source>
-        <translation type="unfinished"></translation>
+        <translation>Поверхность между двумя полилиниями</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2978"/>
         <source>Enhance with intensities</source>
-        <translation type="unfinished"></translation>
+        <translation>Смешать с интенсивностью</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2983"/>
         <source>Mesh scan grids</source>
-        <translation type="unfinished"></translation>
+        <translation>Модель по сетке скана</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2986"/>
         <source>Mesh scan grids (structured point clouds)</source>
-        <translation type="unfinished"></translation>
+        <translation>Построить цифровую модель сетки скана (структурные облака точек)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3001"/>
         <source>Auto-pick rotation center</source>
-        <translation type="unfinished"></translation>
+        <translation>Автовыбор центра вращения</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3004"/>
         <source>Auto-pick rotation center (rotation is always placed at the middle of the screen if possible)</source>
-        <translation type="unfinished"></translation>
+        <translation>Автовыбор центра вращения (центр вращения всегда по возможности располагается в середине экрана)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3007"/>
         <source>Shift+P</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+P</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3018"/>
         <source>Show cursor coordinates</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать координаты курсора</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3021"/>
         <source>Show cursor coordinates (2D and 3D if possible)</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать координаты курсора (2D и 3D, если возможно)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3026"/>
         <source>Delete scan grids</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить сетки сканов</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3029"/>
         <source>Delete the underlying scan grids</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить подлежащие сетки сканов</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3034"/>
         <source>Compress FWF data</source>
-        <translation type="unfinished"></translation>
+        <translation>Сжать данные полной волны FWF</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3037"/>
         <source>Compress the associated FWF data (maybe interesting after interactive segmentation for instance)</source>
-        <translation type="unfinished"></translation>
+        <translation>Сжать связанные данные полной волны FWF (может быть интересно, например, после сегментирования)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3045"/>
         <source>Interpolate scalar-field(s) from another cloud or mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Интерполировать скаляр. поле(я) из другого облака или модели</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3050"/>
         <source>Export plane info</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт информации о плоскости</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3053"/>
         <source>Export plane info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт информации о плоскости в файл CSV (имя, ширина, высота, центр, нормаль, угол падения и азимут,...)</translation>
     </message>
     <message>
         <source>Remove filter</source>
@@ -4428,7 +4447,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1925"/>
         <source>Delete shader</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить шейдер</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1934"/>
@@ -4444,13 +4463,13 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1956"/>
         <source>Bounding box P.C.A. fit</source>
-        <translation type="unfinished"></translation>
+        <translation>Вписать рамки границ (PCA)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1959"/>
         <location filename="../ui_templates/mainWindow.ui" line="1962"/>
         <source>Makes BB fit principal components (rotates entity!)</source>
-        <translation type="unfinished"></translation>
+        <translation>Вписать рамки границ в главные компоненты (только вращение!)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1971"/>
@@ -4496,18 +4515,18 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2017"/>
         <source>2.5D quadric</source>
-        <translation type="unfinished"></translation>
+        <translation>Квадратическая 2.5D</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2022"/>
         <source>SNE test</source>
-        <translation type="unfinished"></translation>
+        <translation>Тест ИСО</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2025"/>
         <location filename="../ui_templates/mainWindow.ui" line="2028"/>
         <source>Spherical Neighbourhood Extraction test</source>
-        <translation type="unfinished"></translation>
+        <translation>Тест на извлечение сферической окрестности</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2033"/>
@@ -4572,7 +4591,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2095"/>
         <source>Ctrl+T</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+T</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2100"/>
@@ -4602,7 +4621,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2132"/>
         <source>P</source>
-        <translation type="unfinished"></translation>
+        <translation>P</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2140"/>
@@ -4711,7 +4730,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2248"/>
         <source>Subdivide</source>
-        <translation type="unfinished"></translation>
+        <translation>Сгустить</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2253"/>
@@ -4721,7 +4740,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2256"/>
         <source>Toggle selected entities 3D name display (recursive)</source>
-        <translation type="unfinished"></translation>
+        <translation>Переключить отображение имени объекта в 3D-виде (рекурсивно)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2259"/>
@@ -4766,24 +4785,24 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2309"/>
         <source>Object-centered perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Вид перспективы (центр-объект)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2312"/>
         <location filename="../ui_templates/mainWindow.ui" line="2315"/>
         <source>Set object-centered perspective for current 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Задать перспективный вид (центрированный на объектах) в текущем окне</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2324"/>
         <source>Viewer-based perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Вид перспективы (центр-камера)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2327"/>
         <location filename="../ui_templates/mainWindow.ui" line="2330"/>
         <source>Set viewer-based perspective for current 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Задать перспективный вид (центрированный на камере) в текущем окне</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2339"/>
@@ -4827,28 +4846,28 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/mainWindow.ui" line="2387"/>
         <location filename="../ui_templates/mainWindow.ui" line="2390"/>
         <source>Set view to &apos;front&apos; isometric</source>
-        <translation type="unfinished"></translation>
+        <translation>Задать вид как изометрический спереди</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2393"/>
         <source>7</source>
-        <translation type="unfinished">7</translation>
+        <translation>7</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2405"/>
         <source>Iso 2</source>
-        <translation type="unfinished">Iso 2</translation>
+        <translation>Iso 2</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2408"/>
         <location filename="../ui_templates/mainWindow.ui" line="2411"/>
         <source>Set view to &apos;back&apos; isometric</source>
-        <translation type="unfinished"></translation>
+        <translation>Задать вид как изометрический сзади</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2414"/>
         <source>9</source>
-        <translation type="unfinished">9</translation>
+        <translation>9</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2426"/>
@@ -4858,18 +4877,18 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2435"/>
         <source>Color Scales Manager</source>
-        <translation type="unfinished"></translation>
+        <translation>Диспетчер цветовых палитр</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2438"/>
         <source>Open Color Scales Manager dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть диалог диспетчера цветовых палитр</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2450"/>
         <location filename="../ui_templates/mainWindow.ui" line="2453"/>
         <source>Cross Section</source>
-        <translation type="unfinished"></translation>
+        <translation>Сечение</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2458"/>
@@ -4899,12 +4918,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2481"/>
         <source>Adds a scalar field with ordered integers for each point in the cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавляет скаларное поле с упорядоченными номерами для каждой точки облака</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2486"/>
         <source>2D polygon (facet)</source>
-        <translation type="unfinished">2D-полигон ()</translation>
+        <translation>2D-полигон (грань)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2491"/>
@@ -4934,7 +4953,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2510"/>
         <source>Remove all entities currently loaded in the DB tree</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить все объекты, находящиеся в древе базы данных</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2515"/>
@@ -4981,13 +5000,13 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2564"/>
         <source>CNE test</source>
-        <translation type="unfinished"></translation>
+        <translation>Тест ИЦО</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2567"/>
         <location filename="../ui_templates/mainWindow.ui" line="2570"/>
         <source>Cylindrical Neighbourhood Extraction test</source>
-        <translation type="unfinished"></translation>
+        <translation>Тест на извлечение цилиндической окрестности</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2575"/>
@@ -5027,7 +5046,7 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/mainWindow.ui" line="2611"/>
         <location filename="../ui_templates/mainWindow.ui" line="3042"/>
         <source>Interpolate from another entity</source>
-        <translation>Интерполировать из другого элемента</translation>
+        <translation>Интерполировать из другого объекта</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2614"/>
@@ -5080,12 +5099,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2681"/>
         <source>Flag vertices by type</source>
-        <translation type="unfinished"></translation>
+        <translation>Пометить вершины по типу</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2684"/>
         <source>Flag vertices by type: normal (0), border (1), non-manifold (2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Пометить вершины по типу: обычная (0), край (1), плохая (2)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2689"/>
@@ -5135,7 +5154,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2733"/>
         <source>Enter bubble-view mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Режим пузырькового вида</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2736"/>
@@ -5153,12 +5172,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2753"/>
         <source>Contour plot (polylines) to mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Контур. изобр. (полилинии) на модель</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2756"/>
         <source>Contour plot (set of polylines) to a 2.5D mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Наложить контурное изображение (набор полилиний) на 2.5D-модель</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2765"/>
@@ -5183,7 +5202,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2781"/>
         <source>Match scales</source>
-        <translation type="unfinished"></translation>
+        <translation>Сведение масштабов</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2786"/>
@@ -5227,12 +5246,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2820"/>
         <source>Statistical Outlier Filter (remove the points far from their neighbors)</source>
-        <translation type="unfinished"></translation>
+        <translation>Фильтр статистических выбросов (удалять точки, удаленные от соседей)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2832"/>
         <source>actionEnableStereo</source>
-        <translation type="unfinished"></translation>
+        <translation>действиеВключитьСтерео</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2835"/>
@@ -5272,65 +5291,65 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2877"/>
         <source>Enable Visual Debug Traces</source>
-        <translation type="unfinished"></translation>
+        <translation>Включить визуальный отладчик</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2880"/>
         <source>Enables visual debug traces (active 3D view)</source>
-        <translation type="unfinished"></translation>
+        <translation>Включает отслеживание визуального отладчика (активный 3D-вид)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2883"/>
         <source>Ctrl+D</source>
-        <translation type="unfinished">Ctrl+D</translation>
+        <translation>Ctrl+D</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="193"/>
-        <location filename="../mainwindow.cpp" line="5758"/>
-        <location filename="../mainwindow.cpp" line="5960"/>
+        <location filename="../mainwindow.cpp" line="5775"/>
+        <location filename="../mainwindow.cpp" line="5977"/>
         <source>Enter Full Screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Переключиться на полный экран</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2624"/>
         <source>Compute visibility</source>
-        <translation type="unfinished"></translation>
+        <translation>Вычислить видиимость</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2625"/>
         <source>Points: %L1</source>
-        <translation type="unfinished"></translation>
+        <translation>Точек: %L1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3833"/>
         <source>Subsampling</source>
-        <translation type="unfinished"></translation>
+        <translation>Прореживание</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4649"/>
         <source>Triangulation</source>
-        <translation type="unfinished">Триангуляция</translation>
+        <translation>Триангуляция</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4650"/>
         <source>Triangulation in progress...</source>
-        <translation type="unfinished"></translation>
+        <translation>Выполняется построение триангуляции...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5754"/>
-        <location filename="../mainwindow.cpp" line="5956"/>
+        <location filename="../mainwindow.cpp" line="5771"/>
+        <location filename="../mainwindow.cpp" line="5973"/>
         <source>Exit Full Screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Выйти из полного экрана</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8178"/>
+        <location filename="../mainwindow.cpp" line="8195"/>
         <source>Testing all possible positions</source>
-        <translation type="unfinished"></translation>
+        <translation>Тестирование всех возможных позиций</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8179"/>
+        <location filename="../mainwindow.cpp" line="8196"/>
         <source>%1 clouds and %2 positions</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 облаков и %2 позиций</translation>
     </message>
 </context>
 <context>
@@ -5338,104 +5357,105 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="14"/>
         <source>Match scales</source>
-        <translation type="unfinished"></translation>
+        <translation>Сведение масштабов</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="20"/>
         <source>Choose the reference entity (its scale won&apos;t change)</source>
-        <translation type="unfinished"></translation>
+        <translation>Выберите опорный объект (его масштаб меняться не будет)</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="23"/>
         <source>Reference entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Опорный объект</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="35"/>
         <source>Matching criterion</source>
-        <translation type="unfinished"></translation>
+        <translation>Критерий сведения</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="41"/>
         <source>The scaling ratio will be deduced from the largest bounding-box dimension</source>
-        <translation type="unfinished"></translation>
+        <translation>Множитель масштаба будет происходить от наибольшей стороны рамки границ объекта</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="44"/>
         <source>max bounding-box dimension</source>
-        <translation type="unfinished"></translation>
+        <translation>макс. размер рамки границ</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="51"/>
         <source>The scaling ratio will be deduced from the bounding-box volume</source>
-        <translation type="unfinished"></translation>
+        <translation>Множитель масштаба будет происходить от объема рамок границ объекта</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="54"/>
         <source>bounding-box volume</source>
-        <translation type="unfinished"></translation>
+        <translation>объем рамок границ</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="61"/>
         <source>The scaling ratio will be deduced from the principal cloud dimension (by PCA analysis)</source>
-        <translation type="unfinished"></translation>
+        <translation>Множитель масштаба будет происходить от главного размера облака (анализ PCA - метод главных компонент)</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="64"/>
         <source>principal dimension (PCA)</source>
-        <translation type="unfinished"></translation>
+        <translation>главный размер (PCA)</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="74"/>
         <source>The scaling ratio will be deduced from automatic registration (with unconstrained scale).
 Should be used after one of the previous methods!</source>
-        <translation type="unfinished"></translation>
+        <translation>Множитель масштаба будет происходить из результатов автоматической сшивки (с нефиксированным масштабом).
+Должен быть использован после одного из предыдущих методов!</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="78"/>
         <source>ICP (only the scale will be applied)</source>
-        <translation type="unfinished"></translation>
+        <translation>алгоритм ближайших точек (ICP)</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="91"/>
         <source>Parameters for ICP registration</source>
-        <translation type="unfinished"></translation>
+        <translation>Параметры для сшивки ICP</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="94"/>
         <source>ICP parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Параметры ICP</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="100"/>
         <source>RMS difference</source>
-        <translation type="unfinished">Сходимость СКО</translation>
+        <translation>Сходимость СКО</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="113"/>
         <source>Set the minimum RMS improvement between 2 consecutive iterations (below which the registration process will stop).</source>
-        <translation type="unfinished"></translation>
+        <translation>Установить допуск на изменение СКО в двух последовательных итерациях (при значении ниже заданного процесс сшивки останавливается).</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="119"/>
         <source>1.0e-5</source>
-        <translation type="unfinished">1.0e-5</translation>
+        <translation>1.0e-5</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="129"/>
         <location filename="../ui_templates/matchScalesDlg.ui" line="154"/>
         <source>Rough estimation of the final overlap ratio of the data cloud (the smaller, the better the initial registration should be!)</source>
-        <translation type="unfinished"></translation>
+        <translation>Примерная оценка зоны перекрытия двух облаков (начинать сшивку лучше с небольших значений!)</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="135"/>
         <source>%</source>
-        <translation type="unfinished">%</translation>
+        <translation>%</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="157"/>
         <source>Final overlap</source>
-        <translation type="unfinished">Зона перекрытия</translation>
+        <translation>Зона перекрытия</translation>
     </message>
 </context>
 <context>
@@ -5444,7 +5464,7 @@ Should be used after one of the previous methods!</source>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="17"/>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="39"/>
         <source>Matrix</source>
-        <translation type="unfinished"></translation>
+        <translation>Матрица</translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="57"/>
@@ -5457,57 +5477,68 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 0 1 0&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 0 0 1&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1 0 0 0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 1 0 0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 0 1 0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 0 0 1&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="73"/>
         <source>Axis/Angle</source>
-        <translation type="unfinished"></translation>
+        <translation>Ось/Угол</translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="79"/>
         <source>Axis</source>
-        <translation type="unfinished"></translation>
+        <translation>Ось</translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="86"/>
         <source>Angle</source>
-        <translation type="unfinished"></translation>
+        <translation>Угол</translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="93"/>
         <source>Center</source>
-        <translation type="unfinished">Центр</translation>
+        <translation>Центр</translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="100"/>
         <source>0 ; 0 ; 1</source>
-        <translation type="unfinished"></translation>
+        <translation>0 ; 0 ; 1</translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="110"/>
         <source>15.65 deg.</source>
-        <translation type="unfinished"></translation>
+        <translation>15.65°</translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="120"/>
         <source>0 ; 0;  0</source>
-        <translation type="unfinished"></translation>
+        <translation>0 ; 0;  0</translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="131"/>
         <source>Export</source>
-        <translation type="unfinished"></translation>
+        <translation variants="yes">
+            <lengthvariant>Экспорт</lengthvariant>
+            <lengthvariant></lengthvariant>
+        </translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="137"/>
         <source>ASCII</source>
-        <translation type="unfinished"></translation>
+        <translation>ASCII</translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="144"/>
         <source>Clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Буфер обмена</translation>
     </message>
 </context>
 <context>
@@ -5622,12 +5653,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="138"/>
         <source>min angle</source>
-        <translation type="unfinished"></translation>
+        <translation>мин. угол</translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="145"/>
         <source>Min angle of local triangles (in degrees)</source>
-        <translation type="unfinished"></translation>
+        <translation>Допуск на значение минимального угола в треугольниках (°)</translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="195"/>
@@ -5761,57 +5792,57 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="14"/>
         <source>Orthogonal sections generation</source>
-        <translation type="unfinished"></translation>
+        <translation>Построение ортогональных сечений</translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="22"/>
         <source>Selected path length</source>
-        <translation type="unfinished"></translation>
+        <translation>Длина выбранной трассы</translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="25"/>
         <source>path length</source>
-        <translation type="unfinished"></translation>
+        <translation>длина трассы</translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="42"/>
         <source>sections</source>
-        <translation type="unfinished"></translation>
+        <translation>сечений</translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="52"/>
         <source>Number of sections that will be generated (depends on the &apos;step&apos; parameter)</source>
-        <translation type="unfinished"></translation>
+        <translation>Кол-во сечений, которые будут созданы (зависит от параметра &apos;интервал&apos;)</translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="66"/>
         <source>step</source>
-        <translation type="unfinished">интервал</translation>
+        <translation>интервал</translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="73"/>
         <source>Section generation step</source>
-        <translation type="unfinished"></translation>
+        <translation>Интервал создаваемых сечений</translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="89"/>
         <source>width</source>
-        <translation type="unfinished"></translation>
+        <translation>ширина</translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="96"/>
         <source>Total width of each orthogonal section (centered on the path line)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ширина каждого ортогонального сечения (с центром по линии трассы)</translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="114"/>
         <source>Automatically save then remove the generatrix polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Автоматически сохранять и затем удалять образующую полилинию</translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="117"/>
         <source>auto save and remove generatrix</source>
-        <translation type="unfinished"></translation>
+        <translation>авто сохранять и удалять образующую</translation>
     </message>
 </context>
 <context>
@@ -5819,12 +5850,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/pickOneElementDlg.ui" line="25"/>
         <source>Choose parameter</source>
-        <translation type="unfinished"></translation>
+        <translation>Выбрать параметр</translation>
     </message>
     <message>
         <location filename="../ui_templates/pickOneElementDlg.ui" line="33"/>
         <source>Elements</source>
-        <translation type="unfinished"></translation>
+        <translation>Элементы</translation>
     </message>
 </context>
 <context>
@@ -5832,108 +5863,108 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="14"/>
         <source>Plane properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Свойства плоскости</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="24"/>
         <source>Dip / dip direction</source>
-        <translation type="unfinished"></translation>
+        <translation>УголПадения/Азимут</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="30"/>
         <source>dip</source>
-        <translation type="unfinished"></translation>
+        <translation>угол падения</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="37"/>
         <location filename="../ui_templates/planeEditDlg.ui" line="60"/>
         <source> deg.</source>
-        <translation type="unfinished">°</translation>
+        <translation>°</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="53"/>
         <source>dip direction</source>
-        <translation type="unfinished"></translation>
+        <translation>азимут</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="76"/>
         <source>Whether the plane normal should point upward (Z+) or backward (Z-)</source>
-        <translation type="unfinished"></translation>
+        <translation>Нормаль к плоскости должна быть направлена вверх (Z+) или в обратно (Z-)</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="79"/>
         <source>upward</source>
-        <translation type="unfinished"></translation>
+        <translation>вверх</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="90"/>
         <source>Normal</source>
-        <translation type="unfinished"></translation>
+        <translation>Нормаль</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="96"/>
         <source>Nx = </source>
-        <translation type="unfinished"></translation>
+        <translation>Nx = </translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="112"/>
         <source>Ny = </source>
-        <translation type="unfinished"></translation>
+        <translation>Ny = </translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="128"/>
         <source>Nz = </source>
-        <translation type="unfinished"></translation>
+        <translation>Nz = </translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="148"/>
         <source>Dimensions</source>
-        <translation type="unfinished"></translation>
+        <translation>Размеры</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="157"/>
         <source>width</source>
-        <translation type="unfinished"></translation>
+        <translation>ширина</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="164"/>
         <source>Plane width</source>
-        <translation type="unfinished"></translation>
+        <translation>Ширина плоскости</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="183"/>
         <source>height</source>
-        <translation type="unfinished">высота</translation>
+        <translation>высота</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="190"/>
         <source>Plane height</source>
-        <translation type="unfinished"></translation>
+        <translation>Высота плоскости</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="212"/>
         <source>Center</source>
-        <translation type="unfinished">Центр</translation>
+        <translation>Центр</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="221"/>
         <source>X:</source>
-        <translation type="unfinished">X:</translation>
+        <translation>X:</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="237"/>
         <source>Pick the plane center (click again to cancel)</source>
-        <translation type="unfinished"></translation>
+        <translation>Щелчком выберите центр плоскости (щелкните повторно для отмены)</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="251"/>
         <source>Y:</source>
-        <translation type="unfinished">Y:</translation>
+        <translation>Y:</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="267"/>
         <source>Z:</source>
-        <translation type="unfinished">Z:</translation>
+        <translation>Z:</translation>
     </message>
 </context>
 <context>
@@ -5941,86 +5972,86 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="20"/>
         <source>Point list picking</source>
-        <translation type="unfinished">Создать  список точек</translation>
+        <translation>Создать список точек</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="31"/>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="34"/>
         <source>Remove last entry</source>
-        <translation type="unfinished"></translation>
+        <translation>Отменить последний ввод</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="37"/>
         <source>remove last</source>
-        <translation type="unfinished"></translation>
+        <translation>удалить последний ввод</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="48"/>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="51"/>
         <source>export to ASCII file</source>
-        <translation type="unfinished"></translation>
+        <translation>экспорт в файл ASCII</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="68"/>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="71"/>
         <source>Convert list to new cloud (and close dialog)</source>
-        <translation type="unfinished"></translation>
+        <translation>Конвертировать список в новое облако (и закрыть диалог)</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="74"/>
         <source>to cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>в облако</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="85"/>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="88"/>
         <source>Close dialog (list will be lost)</source>
-        <translation type="unfinished"></translation>
+        <translation>Закрыть диалог (список не сохранится)</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="91"/>
         <source>stop</source>
-        <translation type="unfinished"></translation>
+        <translation>стоп</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="115"/>
         <source>count</source>
-        <translation type="unfinished"></translation>
+        <translation>кол-во</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="134"/>
         <source>0</source>
-        <translation type="unfinished">0</translation>
+        <translation>0</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="168"/>
         <source>Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Индекс</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="173"/>
         <source>X</source>
-        <translation type="unfinished">X</translation>
+        <translation>X</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="178"/>
         <source>Y</source>
-        <translation type="unfinished">Y</translation>
+        <translation>Y</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="183"/>
         <source>Z</source>
-        <translation type="unfinished">Z</translation>
+        <translation>Z</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="193"/>
         <source>marker size</source>
-        <translation type="unfinished"></translation>
+        <translation>размер маркера</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="226"/>
         <source>start index</source>
-        <translation type="unfinished"></translation>
+        <translation>начать с </translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="262"/>
@@ -6187,42 +6218,42 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="284"/>
         <source>Position</source>
-        <translation type="unfinished"></translation>
+        <translation>Положение</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="290"/>
         <source>y</source>
-        <translation type="unfinished"></translation>
+        <translation>y</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="336"/>
         <source>z</source>
-        <translation type="unfinished"></translation>
+        <translation>z</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="343"/>
         <source>x</source>
-        <translation type="unfinished">x</translation>
+        <translation>x</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="358"/>
         <source>Set position to origin</source>
-        <translation type="unfinished"></translation>
+        <translation>Установить положение в начало</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="361"/>
         <source>clear</source>
-        <translation type="unfinished"></translation>
+        <translation>сброс</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="368"/>
         <source>Try to interpret clipboard contents as position (&quot;x y z&quot;)</source>
-        <translation type="unfinished"></translation>
+        <translation>Попытаться распознать содержимое буфера обмена как положение (&quot;x y z&quot;)</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="371"/>
         <source>clipboard</source>
-        <translation type="unfinished">буф.обмена</translation>
+        <translation>буф.обмена</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="388"/>
@@ -6350,52 +6381,52 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../cc2.5DimEditor.cpp" line="136"/>
         <source>invalid grid box</source>
-        <translation type="unfinished"></translation>
+        <translation>неверный размер сетки</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="674"/>
         <source>Section extraction</source>
-        <translation type="unfinished"></translation>
+        <translation>Построение сечений</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="675"/>
         <source>Section(s): %L1</source>
-        <translation type="unfinished"></translation>
+        <translation>Сечение(я):%L1</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="798"/>
         <source>Up to (%1 x %2 x %3) = %4 section(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>До (%1 x %2 x %3) = %4 сечения(ий)</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="880"/>
         <source>Contour(s): %L1</source>
-        <translation type="unfinished"></translation>
+        <translation>Горизонталь(и): %L1</translation>
     </message>
     <message>
         <location filename="../ccLibAlgorithms.cpp" line="530"/>
         <source>Computing entities scales</source>
-        <translation type="unfinished"></translation>
+        <translation>Расчет масштабов объектов</translation>
     </message>
     <message>
         <location filename="../ccLibAlgorithms.cpp" line="531"/>
         <source>Entities: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Объектов: %1</translation>
     </message>
     <message>
         <location filename="../ccLibAlgorithms.cpp" line="659"/>
         <source>Rescaling entities</source>
-        <translation type="unfinished"></translation>
+        <translation>Масштабирование объектов</translation>
     </message>
     <message>
         <location filename="../ccVolumeCalcTool.cpp" line="626"/>
         <source>Volume computation</source>
-        <translation type="unfinished"></translation>
+        <translation>Расчет объема</translation>
     </message>
     <message>
         <location filename="../ccVolumeCalcTool.cpp" line="627"/>
         <source>Cells: %1 x %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Ячеек: %1 x %2</translation>
     </message>
 </context>
 <context>
@@ -6418,7 +6449,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="64"/>
         <source>Export RGB colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт цветов RGB</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="71"/>
@@ -6428,7 +6459,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="81"/>
         <source>Export active layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт активного слоя</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="95"/>
@@ -6617,293 +6648,294 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="289"/>
         <source>maximum value</source>
-        <translation type="unfinished"></translation>
+        <translation>максимальное значение</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="300"/>
         <source>Use the nearest point of the input cloud in each cell instead of the cell center</source>
-        <translation type="unfinished"></translation>
+        <translation>Использовать ближайшую точку входного (исходного) облака в каждой ячейке вместо центра ячейки</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="303"/>
         <source>resample input cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>проредить исходное облако</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="316"/>
         <source>Warning: the original point&apos;s height will be
 replaced by the cell&apos;s average height!</source>
-        <translation type="unfinished"></translation>
+        <translation>Внимание: исходная высот точки будет
+заменена средней по ячейке!</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="588"/>
         <source>Contour plot</source>
-        <translation type="unfinished"></translation>
+        <translation>Контурное изображение</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="602"/>
         <source>The contour plot is computed on the active layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Контурное изображение вычисляется по активному слою</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="775"/>
         <source>Hillshade</source>
-        <translation type="unfinished"></translation>
+        <translation>Отмывка рельефа</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="789"/>
         <source>Hillshade is computed on the height layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Отмывка рельефа выполняется по высотам</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="798"/>
         <source>Sun zenith</source>
-        <translation type="unfinished"></translation>
+        <translation>Зенит солнца</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="805"/>
         <source>Zenith angle (in degrees) = 90 - altitude angle</source>
-        <translation type="unfinished"></translation>
+        <translation>Зенитное расстояние (в градусах) = 90° - угол возвышения</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="808"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="834"/>
         <source> deg.</source>
-        <translation type="unfinished">°</translation>
+        <translation>°</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="824"/>
         <source>Sun azimuth</source>
-        <translation type="unfinished"></translation>
+        <translation>Азимут солнца</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="831"/>
         <source>Azimuth angle (in degrees)</source>
-        <translation type="unfinished"></translation>
+        <translation>Азимут (в градусах)</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="873"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="879"/>
         <source>Volume</source>
-        <translation type="unfinished">Объем</translation>
+        <translation>Объем</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="893"/>
         <source>Non empty cells</source>
-        <translation type="unfinished"></translation>
+        <translation>Непустых ячеек</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="900"/>
         <source>0%</source>
-        <translation type="unfinished">0%</translation>
+        <translation>0%</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="330"/>
         <source>Empty cells</source>
-        <translation type="unfinished">Пустые ячейки</translation>
+        <translation>Пустые ячейки</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="336"/>
         <source>Fill with</source>
-        <translation type="unfinished"></translation>
+        <translation>Заполнить</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="343"/>
         <source>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</source>
-        <translation type="unfinished">выбрать значение для заполнения ячеек без точек внутри: минимальная высота по всему облаку или средняя высота (также по всему облаку)</translation>
+        <translation>выбрать значение для заполнения ячеек без точек внутри: минимальная высота по всему облаку или средняя высота (также по всему облаку)</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="347"/>
         <source>leave empty</source>
-        <translation type="unfinished">оставить пустыми</translation>
+        <translation>оставить пустыми</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="367"/>
         <source>user specified value</source>
-        <translation type="unfinished">ввести значение</translation>
+        <translation>ввести значение</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="372"/>
         <source>interpolate</source>
-        <translation type="unfinished">интерполяция</translation>
+        <translation>интерполировать</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="389"/>
         <source>Custom value for empty cells</source>
-        <translation type="unfinished">Собственное значение для пустых ячеек</translation>
+        <translation>Задать собственное значение для пустых ячеек</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="415"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="758"/>
         <source>Export</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="423"/>
         <source>Export grid as a point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт сетки как облака точек</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="433"/>
         <source>Export grid as a mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт сетки как цифровой модели</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="436"/>
         <source>Mesh</source>
-        <translation type="unfinished">Цифровая модель</translation>
+        <translation>Цифровая модель</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="445"/>
         <source>Export per-cell statistics as SF(s):</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт статист. ячеек как скаляр. поле(я):</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="470"/>
         <source>Adds a scalar field with the grid density (= number of points inside each cell)</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавить скалярное поле с плотностью точек по ячейкам (= кол-во точек внутри каждой ячейки)</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="473"/>
         <source>population</source>
-        <translation type="unfinished"></translation>
+        <translation>популяция</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="480"/>
         <source>Adds a scalar field with the min. height of the points inside the cell</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавить скалярное поле с высотой самой нижней точки внутри ячейки</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="483"/>
         <source>min height</source>
-        <translation type="unfinished"></translation>
+        <translation>мин. высота</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="490"/>
         <source>Adds a scalar field with the average height of the points inside the cell</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавить скалярное поле со средней высотой точек внутри ячейки</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="500"/>
         <source>Adds a scalar field with the max. height of the points inside the cell</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавить скалярное поле с высотой самой верхней точки внутри ячейки</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="503"/>
         <source>max height</source>
-        <translation type="unfinished"></translation>
+        <translation>макс. высота</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="510"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="520"/>
         <source>Adds a scalar field with the standard deviation of the heights of the points inside the cell</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавить скалярное поле со стандартным отклонением высот точек внутри ячейки</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="513"/>
         <source>height std. dev.</source>
-        <translation type="unfinished"></translation>
+        <translation>стандарт высот</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="523"/>
         <source>height range</source>
-        <translation type="unfinished"></translation>
+        <translation>диапазон высот</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="542"/>
         <source>Export grid as a raster (geotiff)</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт сетки в виде растра (GeoTIFF)</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="545"/>
         <source>Raster</source>
-        <translation type="unfinished"></translation>
+        <translation>Растр</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="552"/>
         <source>Export grid as an image</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт сетки в виде изображения</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="555"/>
         <source>Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Изображение</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="562"/>
         <source>Export grid as a matrix (text file)</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт сетки в виде матрицы (текст. файл)</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="565"/>
         <source>Matrix</source>
-        <translation type="unfinished"></translation>
+        <translation>Матрица</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="611"/>
         <source>Start value</source>
-        <translation type="unfinished"></translation>
+        <translation>Начать с</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="631"/>
         <source>Step</source>
-        <translation type="unfinished"></translation>
+        <translation>с шагом</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="651"/>
         <source>Min. vertex count</source>
-        <translation type="unfinished"></translation>
+        <translation>Минимум вершин</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="658"/>
         <source>Min vertex count per iso-line (to ignore the smallest ones)</source>
-        <translation type="unfinished"></translation>
+        <translation>Минимально допустимое количество вершин-узлов изолинии (для игнорирования небольших изолиний)</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="671"/>
         <source>Line width</source>
-        <translation type="unfinished"></translation>
+        <translation>Толщина линий</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="678"/>
         <source>Default contour lines width</source>
-        <translation type="unfinished"></translation>
+        <translation>Толщина горизонталей по умолчанию</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="695"/>
         <source>colorize</source>
-        <translation type="unfinished"></translation>
+        <translation>заливка</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="702"/>
         <source>ignore borders</source>
-        <translation type="unfinished"></translation>
+        <translation>игнорировать границы</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="730"/>
         <source>project contours on the altitude layer</source>
-        <translation type="unfinished"></translation>
+        <translation>проекция горизонталей на слой высот</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="742"/>
         <source>Remove all contour lines</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить все горизонтали</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="745"/>
         <source>Clear</source>
-        <translation type="unfinished">Очистить</translation>
+        <translation>Очистить</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="755"/>
         <source>Export contour lines to the DB tree</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт горизонталей в базу (древо) данных</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="765"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="865"/>
         <source>Generate</source>
-        <translation type="unfinished"></translation>
+        <translation>Создать</translation>
     </message>
 </context>
 <context>
@@ -6921,18 +6953,18 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="45"/>
         <source>the data cloud is the entity to align with the model cloud : it will be displaced (red cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>объект облака для сшивки с опорной моделью-облаком: будет изменять свое положение (показан красным цветом)</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="88"/>
         <source>the model cloud is the reference : it won&apos;t move (yellow cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>опорное облако-модель: оно не будет двигаться (показано желтым цветом)</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="98"/>
         <location filename="../ui_templates/registrationDlg.ui" line="101"/>
         <source>press once to exchange model and data clouds</source>
-        <translation type="unfinished">щелкните, чтобы поменять облака местами</translation>
+        <translation>щелкните, чтобы поменять облака местами</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="104"/>
@@ -6942,13 +6974,13 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="121"/>
         <source>Parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Параметры</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="129"/>
         <location filename="../ui_templates/registrationDlg.ui" line="132"/>
         <source>By choosing this criterion, you can control the computation time.</source>
-        <translation type="unfinished"></translation>
+        <translation>Этим параметром вы настраиваете длительность расчета.</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="135"/>
@@ -6958,12 +6990,12 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="145"/>
         <source>Set the maximal number of step for the algorithm regsitration computation .</source>
-        <translation type="unfinished"></translation>
+        <translation>Установить предел шагов работы алгоритма сшивки.</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="164"/>
         <source>By choosing this criterion, you can control the quality of the result.</source>
-        <translation type="unfinished"></translation>
+        <translation>Эти параметром вы настраиваете качество получаемого результата.</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="167"/>
@@ -6973,7 +7005,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="183"/>
         <source>Set the minimum RMS improvement between 2 consecutive iterations (below which the registration process will stop).</source>
-        <translation type="unfinished"></translation>
+        <translation>Установить допуск на изменение СКО в двух последовательных итерациях (при значении ниже заданного расчет сшивки останавливается).</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="189"/>
@@ -6984,7 +7016,7 @@ replaced by the cell&apos;s average height!</source>
         <location filename="../ui_templates/registrationDlg.ui" line="199"/>
         <location filename="../ui_templates/registrationDlg.ui" line="212"/>
         <source>Rough estimation of the final overlap ratio of the data cloud (the smaller, the better the initial registration should be!)</source>
-        <translation type="unfinished"></translation>
+        <translation>Примерная оценка зоны перекрытия двух облаков (начинать сшивку лучше с небольших значений!)</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="205"/>
@@ -6994,7 +7026,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="221"/>
         <source>%</source>
-        <translation type="unfinished">%</translation>
+        <translation>%</translation>
     </message>
     <message>
         <source>Adjust scale</source>
@@ -7003,73 +7035,74 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="32"/>
         <source>&apos;data&apos; entity</source>
-        <translation type="unfinished"></translation>
+        <translation>выравниваемый/подгоняемый объект данных</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="35"/>
         <source>aligned</source>
-        <translation type="unfinished"></translation>
+        <translation>сшиваемый</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="42"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;entity to align (will be displaced)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;выравниваемый объект (будет двигаться)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="75"/>
         <source>&apos;model&apos; entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Опорный неизменяемый объект данных</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="78"/>
         <source>reference</source>
-        <translation type="unfinished"></translation>
+        <translation>опорный</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="85"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;reference entity (won&apos;t move)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;опорный объект (остается неподвижным)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="255"/>
         <source>Whether to adjust the scale of the &apos;data&apos; entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Нужно ли исправлять масштаб сшиваемого объекта</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="258"/>
         <source>adjust scale</source>
-        <translation type="unfinished"></translation>
+        <translation>исправлять масштаб</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="288"/>
         <source>max thread count</source>
-        <translation type="unfinished"></translation>
+        <translation>кол-во потоков</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="295"/>
         <source>Maximum number of threads/cores to be used
 (CC or your computer might not respond for a while if you use all available cores)</source>
-        <translation type="unfinished"></translation>
+        <translation>Максимальное число используемых потоков/ядер процессора
+(При использовании CC всех ядер ПК может не отвечать на дайствия пользователя)</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="299"/>
         <source> / 8</source>
-        <translation type="unfinished"></translation>
+        <translation> / 8</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="325"/>
         <source>Research</source>
-        <translation type="unfinished"></translation>
+        <translation>Эксперт</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="333"/>
         <source>Random sampling limit</source>
-        <translation type="unfinished"></translation>
+        <translation>Предел случайного прореживания</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="340"/>
         <source>Above this limit, clouds are randomly resampled at each iteration</source>
-        <translation type="unfinished"></translation>
+        <translation>При большом количестве точек, они будут прорежаться до заданного предела при каждой итерации</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="365"/>
@@ -7131,17 +7164,17 @@ replaced by the cell&apos;s average height!</source>
         <location filename="../ui_templates/registrationDlg.ui" line="504"/>
         <location filename="../ui_templates/registrationDlg.ui" line="514"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the displayed scalar field as weights (the bigger its associated scalar value/weight is, the more influence the point will have).&lt;/p&gt;&lt;p&gt;Note that only absolute distances are considered (i.e. minimal weight is 0).&lt;/p&gt;&lt;p&gt;Weights are automatically normalized.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Использовать текущее скалярное поле как веса (чем больше назначенное скалярное значение/вес, тем большее влияние будет иметь точка).&lt;/p&gt;&lt;p&gt;Помните, что рассматриваются только абсолютные отклонения (минимальный вес - 0).&lt;/p&gt;&lt;p&gt;Веса автоматически нормализуются.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="507"/>
         <source>Data: use displayed S.F. as weights</source>
-        <translation type="unfinished"></translation>
+        <translation>Сшиваемый: его скаляр. поле как веса</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="517"/>
         <source>Model: use displayed S.F. as weights (only for clouds)</source>
-        <translation type="unfinished"></translation>
+        <translation>Опорный: его скаляр. поле как веса (только облака)</translation>
     </message>
 </context>
 <context>
@@ -7179,7 +7212,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/renderToFileDialog.ui" line="89"/>
         <source>Don&apos;t scale features (e.g. points size, lines thickness, text, etc.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Не масштабировать атрибуты (разм. точек, толщ. линий,...)</translation>
     </message>
     <message>
         <location filename="../ui_templates/renderToFileDialog.ui" line="96"/>
@@ -7192,17 +7225,17 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/roleChoiceDlg.ui" line="14"/>
         <source>Choose role</source>
-        <translation type="unfinished"></translation>
+        <translation>Назначить роли</translation>
     </message>
     <message>
         <location filename="../ui_templates/roleChoiceDlg.ui" line="29"/>
         <source>Compared</source>
-        <translation type="unfinished">Сравниваемое</translation>
+        <translation>Сравниваемое</translation>
     </message>
     <message>
         <location filename="../ui_templates/roleChoiceDlg.ui" line="50"/>
         <source>Reference</source>
-        <translation type="unfinished">Опорное</translation>
+        <translation>Опорное</translation>
     </message>
     <message>
         <location filename="../ui_templates/roleChoiceDlg.ui" line="94"/>
@@ -7215,122 +7248,122 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="14"/>
         <source>Scalar fields arithmetics</source>
-        <translation type="unfinished"></translation>
+        <translation>Арифметические операции со скалярными полями</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="28"/>
         <source>SF 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Поле 1</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="51"/>
         <source>operation</source>
-        <translation type="unfinished"></translation>
+        <translation>операция</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="65"/>
         <source>plus</source>
-        <translation type="unfinished"></translation>
+        <translation>сложить</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="70"/>
         <source>minus</source>
-        <translation type="unfinished"></translation>
+        <translation>вычесть</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="75"/>
         <source>multiply</source>
-        <translation type="unfinished"></translation>
+        <translation>умножить</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="80"/>
         <source>divided by</source>
-        <translation type="unfinished"></translation>
+        <translation>разделить на</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="85"/>
         <source>square root</source>
-        <translation type="unfinished"></translation>
+        <translation>кв.корень</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="90"/>
         <source>power of 2</source>
-        <translation type="unfinished"></translation>
+        <translation>в степень 2</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="95"/>
         <source>power of 3</source>
-        <translation type="unfinished"></translation>
+        <translation>в степень 3</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="100"/>
         <source>exp</source>
-        <translation type="unfinished"></translation>
+        <translation>exp</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="105"/>
         <source>log</source>
-        <translation type="unfinished"></translation>
+        <translation>log</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="110"/>
         <source>log10</source>
-        <translation type="unfinished"></translation>
+        <translation>log10</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="115"/>
         <source>cos</source>
-        <translation type="unfinished"></translation>
+        <translation>cos</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="120"/>
         <source>sin</source>
-        <translation type="unfinished"></translation>
+        <translation>sin</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="125"/>
         <source>tan</source>
-        <translation type="unfinished"></translation>
+        <translation>tan</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="130"/>
         <source>acos</source>
-        <translation type="unfinished"></translation>
+        <translation>arccos</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="135"/>
         <source>asin</source>
-        <translation type="unfinished"></translation>
+        <translation>arcsin</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="140"/>
         <source>atan</source>
-        <translation type="unfinished"></translation>
+        <translation>arctan</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="145"/>
         <source>integer part</source>
-        <translation type="unfinished"></translation>
+        <translation>целая часть</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="150"/>
         <source>inverse (1/x)</source>
-        <translation type="unfinished"></translation>
+        <translation>обратное (1/x)</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="164"/>
         <source>SF 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Поле 2</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="202"/>
         <source>Update the first scalar field directly (instead of creating a new SF)</source>
-        <translation type="unfinished"></translation>
+        <translation>Обновить непостредственно первое скалярное поле (вместо создания нового скал. поля)</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="205"/>
         <source>Update SF1 directly</source>
-        <translation type="unfinished"></translation>
+        <translation>Обновить только &apos;Поле 1&apos;</translation>
     </message>
 </context>
 <context>
@@ -7338,52 +7371,52 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="17"/>
         <source>SF Values</source>
-        <translation type="unfinished"></translation>
+        <translation>Значения скалярных полей</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="42"/>
         <source>Display ranges</source>
-        <translation type="unfinished"></translation>
+        <translation>Диапазоны</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="102"/>
         <source>displayed</source>
-        <translation type="unfinished"></translation>
+        <translation>показаны</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="155"/>
         <source>saturation</source>
-        <translation type="unfinished"></translation>
+        <translation>насыщенность</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="184"/>
         <source>Parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Параметры</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="190"/>
         <source>hidden otherwise...</source>
-        <translation type="unfinished"></translation>
+        <translation>сделать невидимыми в противном случае...</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="193"/>
         <source>show NaN/out of range values in grey</source>
-        <translation type="unfinished"></translation>
+        <translation>значения вне диапазона серым цветом</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="203"/>
         <source>always show 0 in color scale</source>
-        <translation type="unfinished"></translation>
+        <translation>всегда показывать 0 на палитре</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="210"/>
         <source>symmetrical color scale</source>
-        <translation type="unfinished"></translation>
+        <translation>симметричный масштаб цвета</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="217"/>
         <source>log scale</source>
-        <translation type="unfinished"></translation>
+        <translation>логарифмический масштаб</translation>
     </message>
 </context>
 <context>
@@ -7391,48 +7424,48 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="14"/>
         <source>Scale / multiply</source>
-        <translation type="unfinished"></translation>
+        <translation>Масштабирование</translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="22"/>
         <source>Scale(x)</source>
-        <translation type="unfinished"></translation>
+        <translation>Масштаб(x)</translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="55"/>
         <source>Scale(y)</source>
-        <translation type="unfinished"></translation>
+        <translation>Масштаб(y)</translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="88"/>
         <source>Scale(z)</source>
-        <translation type="unfinished"></translation>
+        <translation>Масштаб(z)</translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="110"/>
         <location filename="../ui_templates/scaleDlg.ui" line="113"/>
         <source>Same scale for all dimensions</source>
-        <translation type="unfinished"></translation>
+        <translation>Одинаковый масштаб по всем осям координат</translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="120"/>
         <source>Whether the cloud (center) should stay at the same place or not (i.e. coordinates are multiplied directly)</source>
-        <translation type="unfinished"></translation>
+        <translation>Менять или нет координаты центра облака (координаты умножаются напрямую)</translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="123"/>
         <source>Keep entity in place</source>
-        <translation type="unfinished"></translation>
+        <translation>Зафиксировать координаты центра облака</translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="130"/>
         <source>To apply the same scale(s) to the &apos;Global Shift&apos; as well</source>
-        <translation type="unfinished"></translation>
+        <translation>Применить также масштаб(ы) и к Глобальному сдвигу</translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="133"/>
         <source>Rescale Global shift</source>
-        <translation type="unfinished"></translation>
+        <translation>Пересчитать Глобальный сдвиг</translation>
     </message>
 </context>
 <context>
@@ -7440,47 +7473,47 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="14"/>
         <source>Section Extraction</source>
-        <translation type="unfinished"></translation>
+        <translation>Построение сечения</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="23"/>
         <source>Create polyline by clicking on the screen</source>
-        <translation>Создать полилинию, щелкая но экране</translation>
+        <translation>Создать полилинию, щелкая на экране</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="43"/>
         <source>Import one or several polylines from DB</source>
-        <translation type="unfinished"></translation>
+        <translation>Импорт одной/нескольких полилиний их базы данных</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="57"/>
         <source>Generate orthogonal sections along a path</source>
-        <translation type="unfinished"></translation>
+        <translation>Создавать ортогональные сечения вдоль трассы</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="71"/>
         <source>Extract points along active sections</source>
-        <translation type="unfinished"></translation>
+        <translation>Отбор точек вдоль активных сечений</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="85"/>
         <source>Unfold the points along the selected polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Развертывать точки вдоль выделенной полилинии</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="99"/>
         <source>Export manually defined sections to DB</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт вручную заданных сечений в базу данных</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="113"/>
         <source>Undo last polyline(s) addition</source>
-        <translation type="unfinished"></translation>
+        <translation>Отменить добавление последней полилинии</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="116"/>
         <source>raz</source>
-        <translation type="unfinished"></translation>
+        <translation>вернуться</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="135"/>
@@ -7496,22 +7529,22 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="152"/>
         <source>Vert.</source>
-        <translation type="unfinished"></translation>
+        <translation>Верт.</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="163"/>
         <source>X</source>
-        <translation type="unfinished">X</translation>
+        <translation>X</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="168"/>
         <source>Y</source>
-        <translation type="unfinished">Y</translation>
+        <translation>Y</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="173"/>
         <source>Z</source>
-        <translation type="unfinished">Z</translation>
+        <translation>Z</translation>
     </message>
 </context>
 <context>
@@ -7519,119 +7552,123 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="14"/>
         <source>Extract Sections</source>
-        <translation type="unfinished"></translation>
+        <translation>Построить сечения</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="23"/>
         <source>Active section(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Активное сечение(я)</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="30"/>
         <source>0</source>
-        <translation type="unfinished">0</translation>
+        <translation>0</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="37"/>
         <source>Sections thickness</source>
-        <translation type="unfinished"></translation>
+        <translation>Толщина сечений</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="44"/>
         <source>Thickness of each section (depends on the cloud density)</source>
-        <translation type="unfinished"></translation>
+        <translation>Толщина каждого сечения (зависит от плотности облака)</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="60"/>
         <source>To extract each section as a point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Извлечь каждое сечение как облако</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="63"/>
         <source>Extract section cloud(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Извлечь облако(а) сечений</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="75"/>
         <source>No parameter</source>
-        <translation type="unfinished"></translation>
+        <translation>Нет параметра</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="85"/>
         <source>To extract the contour of each section as a polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Построить горизонталь на каждое сечение в виде полилинии</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="88"/>
         <source>Extract section profile(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Построить профиль(и) по сечению</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="112"/>
         <source>type</source>
-        <translation type="unfinished"></translation>
+        <translation>строить линии</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="119"/>
         <source>Section type (lower or upper part, or both)</source>
-        <translation type="unfinished"></translation>
+        <translation>Строить полилинии по (нижней или верхней границе слоя сечения, или по обеим)</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="123"/>
         <source>Lower</source>
-        <translation type="unfinished"></translation>
+        <translation>По нижней границе</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="128"/>
         <source>Upper</source>
-        <translation type="unfinished"></translation>
+        <translation>По верхней границе</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="133"/>
         <source>Both</source>
-        <translation type="unfinished"></translation>
+        <translation>По обеим границам</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="141"/>
         <source>max edge length</source>
-        <translation type="unfinished"></translation>
+        <translation>длины сторон &lt;</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="148"/>
         <source>Max output polyline edge length (the smaller, the closer to the points the contour will be).
 Warning: if 0, generates the convex hull.</source>
-        <translation type="unfinished"></translation>
+        <translation>Максимальная длина сегмента полилинии (чем меньше значение, тем ближе полилиния к точкам сечения).
+Внимание: при значении 0 полилиния создается по алгоритму convex hull.</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="165"/>
         <source>Multi-pass process where longer edges may be temporarily created to obtain a better fit... or a worst one ;)</source>
-        <translation type="unfinished">Обработка в несколько проходов может временно создавать длинные линии на краях для лучшего вписывания..., но может получиться и наоборот</translation>
+        <translation>Обработка в несколько проходов может временно создавать длинные линии на краях для лучшего вписывания..., но может получиться и наоборот</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="168"/>
         <source>multi-pass</source>
-        <translation type="unfinished">несколько проходов</translation>
+        <translation>несколько проходов</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="175"/>
         <source>split the generated profile(s) in smaller parts to avoid creating too long edges (10 times the specified max edge length).
 Warning: may not be compatible with Mascaret export.</source>
-        <translation type="unfinished"></translation>
+        <translation>разбивать создаваемые профили на мелкие части во избежании создания слишком длинных краев
+(в 10 раз больших, чем заданная максимальная длина сторон).
+Внимание: может быть несовместимо с экспортом Mascaret.
+</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="179"/>
         <source>split profile on longer edges</source>
-        <translation type="unfinished"></translation>
+        <translation>делить профиль на длинных краях</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="186"/>
         <source>Display a dialog with step-by-step execution of the algorithm (debug mode - very slow)</source>
-        <translation type="unfinished"></translation>
+        <translation>Показывать диалог с пошаговым выполнением алгоритма (режим отладки - очень медленный)</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="189"/>
         <source>visual debug mode</source>
-        <translation type="unfinished"></translation>
+        <translation>показать режим отладки</translation>
     </message>
 </context>
 <context>
@@ -7639,32 +7676,32 @@ Warning: may not be compatible with Mascaret export.</source>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="14"/>
         <source>Select children by type and/or name</source>
-        <translation type="unfinished"></translation>
+        <translation>Выбрать дочерние объекты по типу и/или имени</translation>
     </message>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="20"/>
         <source>Select children...</source>
-        <translation type="unfinished"></translation>
+        <translation>Выбрать дочерние объекты...</translation>
     </message>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="29"/>
         <source>of type</source>
-        <translation type="unfinished"></translation>
+        <translation>по типу</translation>
     </message>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="39"/>
         <source>with name</source>
-        <translation type="unfinished"></translation>
+        <translation>по имени</translation>
     </message>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="64"/>
         <source>regex</source>
-        <translation type="unfinished"></translation>
+        <translation>regex</translation>
     </message>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="99"/>
         <source>strict</source>
-        <translation type="unfinished"></translation>
+        <translation>строго</translation>
     </message>
 </context>
 <context>
@@ -7672,29 +7709,32 @@ Warning: may not be compatible with Mascaret export.</source>
     <message>
         <location filename="../ui_templates/sorFilterDlg.ui" line="14"/>
         <source>Statistical Outlier Removal</source>
-        <translation type="unfinished"></translation>
+        <translation>Удаление статистических выбросов</translation>
     </message>
     <message>
         <location filename="../ui_templates/sorFilterDlg.ui" line="22"/>
         <source>Number of points to use for
 mean distance estimation</source>
-        <translation type="unfinished"></translation>
+        <translation>Кол-во точек для расчета
+среднего интервала</translation>
     </message>
     <message>
         <location filename="../ui_templates/sorFilterDlg.ui" line="30"/>
         <source>Number of neighbors (used to compute the average distance of each point to its neighbors)</source>
-        <translation type="unfinished"></translation>
+        <translation>Количество соседей (для расчете среднего расстояния от каждой точки до соседних)</translation>
     </message>
     <message>
         <location filename="../ui_templates/sorFilterDlg.ui" line="46"/>
         <source>Standard deviation
 multiplier threshold (nSigma)</source>
-        <translation type="unfinished"></translation>
+        <translation>Множитель стандартного
+отклонения (nSigma)</translation>
     </message>
     <message>
         <location filename="../ui_templates/sorFilterDlg.ui" line="74"/>
         <source>(max distance = average distance + nSigma * std. dev.)</source>
-        <translation type="unfinished"></translation>
+        <translation>(макс. интервал = средний интервал + 
+nSigma * стандартное отклонение)</translation>
     </message>
 </context>
 <context>
@@ -7702,47 +7742,47 @@ multiplier threshold (nSigma)</source>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="14"/>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Диалог</translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="20"/>
         <source>Noise model</source>
-        <translation type="unfinished"></translation>
+        <translation>Модель шума</translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="26"/>
         <source>param1</source>
-        <translation type="unfinished"></translation>
+        <translation>парам1</translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="68"/>
         <source>param2</source>
-        <translation type="unfinished"></translation>
+        <translation>парам2</translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="135"/>
         <source>param3</source>
-        <translation type="unfinished"></translation>
+        <translation>парам3</translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="160"/>
         <source>false rejection probability</source>
-        <translation type="unfinished"></translation>
+        <translation>ложная вероятность отказа</translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="163"/>
         <source>p(Chi2)</source>
-        <translation type="unfinished"></translation>
+        <translation>p(Chi2)</translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="206"/>
         <source>neighbors used to compute observed local dist.</source>
-        <translation type="unfinished"></translation>
+        <translation>количество соседей для расчета локальных интервалов.</translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="209"/>
         <source>Neighbors</source>
-        <translation type="unfinished">Соседи</translation>
+        <translation>Соседей</translation>
     </message>
 </context>
 <context>
@@ -7750,72 +7790,72 @@ multiplier threshold (nSigma)</source>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="14"/>
         <source>Stereo mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Стерео режим</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="22"/>
         <source>Glasses</source>
-        <translation type="unfinished"></translation>
+        <translation>Очки</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="30"/>
         <source>Red-Blue</source>
-        <translation type="unfinished"></translation>
+        <translation>Красный-Синий</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="39"/>
         <source>Blue-Red</source>
-        <translation type="unfinished"></translation>
+        <translation>Синий-Красный</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="48"/>
         <source>Red-Cyan</source>
-        <translation type="unfinished"></translation>
+        <translation>Красный-Голубой</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="57"/>
         <source>Cyan-Red</source>
-        <translation type="unfinished"></translation>
+        <translation>Голубой-Красный</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="66"/>
         <source>NVidia Vision</source>
-        <translation type="unfinished"></translation>
+        <translation>NVidia Vision</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="75"/>
         <source>Oculus</source>
-        <translation type="unfinished"></translation>
+        <translation>Фасеточный</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="106"/>
         <source>Parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Параметры</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="159"/>
         <source>Focal distance</source>
-        <translation type="unfinished"></translation>
+        <translation>Фокусное расстояние</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="172"/>
         <source>auto</source>
-        <translation type="unfinished"></translation>
+        <translation>авто</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="152"/>
         <source>Eyes separation</source>
-        <translation type="unfinished"></translation>
+        <translation>Глазной базис</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="133"/>
         <source>%</source>
-        <translation type="unfinished">%</translation>
+        <translation>%</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="212"/>
         <source>Note: the focus will depend on the distance to the rotation center</source>
-        <translation type="unfinished"></translation>
+        <translation>Примечание: фокус зависит от расстояния до центра вращения</translation>
     </message>
     <message>
         <location filename="../ui_templates/stereoModeDlg.ui" line="89"/>
@@ -7830,7 +7870,17 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- the glasses are switched on&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Note: the current 3D view will be automatically displayed in exclusive full screen mode - press F11 to quit this mode&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Чтобы данный режим работал правильно, убедитесь что:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- ИК-передатчик NVidia Vision подключен и задействован (зеленый индикатор)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- стерео режим 3D активирован в панели управления NVidia&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- частота экрана установлена в 120Гц&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- очки включены&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Примечание: текущий 3D-вид будет автоматически переключен в режим полного экрана - для выхода нажмите F11&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -7848,32 +7898,32 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="40"/>
         <source>method</source>
-        <translation>способ</translation>
+        <translation>метод</translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="54"/>
         <source>none</source>
-        <translation type="unfinished"></translation>
+        <translation>мало</translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="77"/>
         <source>all</source>
-        <translation type="unfinished"></translation>
+        <translation>много</translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="89"/>
         <source>The more on the left, the less points will be kept</source>
-        <translation type="unfinished"></translation>
+        <translation>Чем дальше ползунок в лево, тем меньше точек на выходе</translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="113"/>
         <source>value</source>
-        <translation type="unfinished"></translation>
+        <translation>значение</translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="166"/>
         <source>To modulate the sampling distance with a scalar field value</source>
-        <translation type="unfinished"></translation>
+        <translation>Для модуляции интервала прореживания значениями скалярного поля</translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="169"/>
@@ -7883,12 +7933,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="184"/>
         <source>SF value</source>
-        <translation type="unfinished"></translation>
+        <translation>скал. значение</translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="191"/>
         <source>Spacing value</source>
-        <translation type="unfinished"></translation>
+        <translation>Диапазон</translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="198"/>
@@ -7898,7 +7948,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="211"/>
         <source>0</source>
-        <translation type="unfinished">0</translation>
+        <translation>0</translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="234"/>
@@ -7908,7 +7958,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="247"/>
         <source>100</source>
-        <translation type="unfinished">100</translation>
+        <translation>100</translation>
     </message>
 </context>
 <context>
@@ -7916,58 +7966,58 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="20"/>
         <source>Segmentation</source>
-        <translation type="unfinished">Сегментация</translation>
+        <translation>Сегментирование</translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="32"/>
         <source>Width</source>
-        <translation type="unfinished">Ширина</translation>
+        <translation>Ширина</translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="71"/>
         <source>Snap size</source>
-        <translation type="unfinished"></translation>
+        <translation>ЗонаЗахвата</translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="101"/>
         <source>Oversample</source>
-        <translation type="unfinished"></translation>
+        <translation>ДопЗапас</translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="134"/>
         <source>Export current polyline to the main DB</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт текущей полилинии в базу данных</translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="148"/>
         <source>Reset current polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Сбросить текущую полилинию</translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="162"/>
         <source>Continue the current polyline edition</source>
-        <translation type="unfinished"></translation>
+        <translation>Продолжить правку текущей полилинии</translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="169"/>
         <source>C</source>
-        <translation type="unfinished">C</translation>
+        <translation>C</translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="185"/>
         <source>Confirm polyline creation and exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Подтвердить создание полилинии и выйти</translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="188"/>
         <source>OK</source>
-        <translation type="unfinished">OK</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="205"/>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="208"/>
         <source>Cancel</source>
-        <translation type="unfinished">Отмена</translation>
+        <translation>Отмена</translation>
     </message>
 </context>
 <context>
@@ -7975,92 +8025,138 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="14"/>
         <source>Unroll</source>
-        <translation type="unfinished">Развертка</translation>
+        <translation>Развертка</translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="22"/>
         <source>Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Тип</translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="30"/>
         <source>Cylinder</source>
-        <translation type="unfinished">Цилиндр</translation>
+        <translation>Цилиндр</translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="35"/>
         <source>Cone</source>
-        <translation type="unfinished">Конус</translation>
+        <translation>Конус</translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="40"/>
         <source>Straightened cone</source>
+        <translation>Выпрямленный конус</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="73"/>
+        <source>Shape</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="65"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="81"/>
         <source>Axis</source>
-        <translation type="unfinished"></translation>
+        <translation>Ось</translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="82"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="222"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="98"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="244"/>
         <source>X</source>
-        <translation type="unfinished">X</translation>
+        <translation>X</translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="87"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="264"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="103"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="286"/>
         <source>Y</source>
-        <translation type="unfinished">Y</translation>
+        <translation>Y</translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="92"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="306"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="108"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="328"/>
         <source>Z</source>
-        <translation type="unfinished">Z</translation>
+        <translation>Z</translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="125"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="135"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="141"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="151"/>
         <source>Cone angle (0-180°)</source>
+        <translation>Угол конуса (0-180°) и равен двум углам уклона</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="144"/>
+        <source>Half angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="128"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="157"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="414"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="456"/>
+        <source> deg</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="395"/>
+        <source>Unroll range (can do multiple turns)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="398"/>
+        <source>Unroll range</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="404"/>
+        <source>Start angle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="411"/>
+        <source>Starting angle (can be negative)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="446"/>
+        <source>Stop angle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="453"/>
+        <source>Stop angle (can be negative)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Half angle (degrees)</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">Угол уклона (°)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="176"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="189"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="195"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="208"/>
         <source>Cylinder (or cone base) radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Радиус цилиндра (или основания конуса)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="179"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="198"/>
         <source>Radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Радиус</translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="210"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="232"/>
         <source>Axis position</source>
-        <translation type="unfinished"></translation>
+        <translation>Положение оси</translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="344"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="366"/>
         <source>Auto (gravity center)</source>
-        <translation type="unfinished"></translation>
+        <translation>Авто (центр тяжести)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="373"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="61"/>
         <source>Deviation from the theoretical shape (i.e. cone or cylinder)</source>
-        <translation type="unfinished"></translation>
+        <translation>Отклонение от теоретической формы (напр. конуса или цилиндра)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="376"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="64"/>
         <source>Export deviation scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт скалярного поля отклонений</translation>
     </message>
 </context>
 <context>
@@ -8141,7 +8237,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="168"/>
         <source>Swap</source>
-        <translation type="unfinished">Поменять</translation>
+        <translation>Поменять</translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="171"/>
@@ -8260,12 +8356,13 @@ You should fill the empty cells...</source>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="489"/>
         <source>Export the grid as a point cloud
 (warning, the points heights will be the difference of altitude!)</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт сетки как облака точек
+(внимание: высоты точек будут разницами отметок!)</translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="493"/>
         <source>Export grid as a cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт сетки как облака</translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="515"/>
@@ -8283,32 +8380,32 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="14"/>
         <source>Waveform</source>
-        <translation type="unfinished"></translation>
+        <translation>Форма волны</translation>
     </message>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="22"/>
         <source>Point index</source>
-        <translation type="unfinished"></translation>
+        <translation>Индекс точки</translation>
     </message>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="32"/>
         <source>Pick a 3D point (click again to cancel)</source>
-        <translation type="unfinished"></translation>
+        <translation>Щелкните по точке 3D (повторите для отмены)</translation>
     </message>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="59"/>
         <source>log scale</source>
-        <translation type="unfinished"></translation>
+        <translation>масштаб</translation>
     </message>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="66"/>
         <source>fixed amplitude</source>
-        <translation type="unfinished"></translation>
+        <translation>фикс. амплитуда</translation>
     </message>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="76"/>
         <source>Export wave as CSV file</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт волны в файл CSV</translation>
     </message>
 </context>
 <context>
@@ -8316,7 +8413,7 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../devices/3dConnexion/cc3DMouseManager.cpp" line="224"/>
         <source>Enable</source>
-        <translation type="unfinished">Включить</translation>
+        <translation>Включить</translation>
     </message>
 </context>
 <context>
@@ -8324,17 +8421,17 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="604"/>
         <source>Preparing extraction</source>
-        <translation type="unfinished"></translation>
+        <translation>Подготовка извлечения</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="618"/>
         <source>Cloud &apos;%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Облако &apos;%1&apos;</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="619"/>
         <source>Points: %L1</source>
-        <translation type="unfinished"></translation>
+        <translation>Точек: %L1</translation>
     </message>
 </context>
 <context>
@@ -8342,12 +8439,12 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ccComparisonDlg.cpp" line="527"/>
         <source>Determining optimal octree level</source>
-        <translation type="unfinished"></translation>
+        <translation>Подбор оптимального уровня октодерева</translation>
     </message>
     <message>
         <location filename="../ccComparisonDlg.cpp" line="528"/>
         <source>Testing %1 levels...</source>
-        <translation type="unfinished"></translation>
+        <translation>Тест %1 уровней...</translation>
     </message>
 </context>
 <context>
@@ -8355,7 +8452,7 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../devices/gamepad/ccGamepadManager.cpp" line="242"/>
         <source>Enable</source>
-        <translation type="unfinished">Включить</translation>
+        <translation>Включить</translation>
     </message>
 </context>
 <context>
@@ -8364,22 +8461,23 @@ You should fill the empty cells...</source>
         <location filename="../ccItemSelectionDlg.cpp" line="36"/>
         <source>Please select one or several %1:
 (press CTRL+A to select all)</source>
-        <translation type="unfinished"></translation>
+        <translation>Выберите один или несколько %1:
+(нажмите CTRL+A, чтобы выбрать все)</translation>
     </message>
     <message>
         <location filename="../ccItemSelectionDlg.cpp" line="41"/>
         <source>Please select one %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Выберите один %1</translation>
     </message>
     <message>
         <location filename="../ccItemSelectionDlg.cpp" line="98"/>
         <source>entity</source>
-        <translation type="unfinished"></translation>
+        <translation>объект</translation>
     </message>
     <message>
         <location filename="../ccItemSelectionDlg.cpp" line="124"/>
         <source>entities</source>
-        <translation type="unfinished"></translation>
+        <translation>объектов</translation>
     </message>
 </context>
 <context>
@@ -8387,13 +8485,14 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ccRasterizeTool.cpp" line="1891"/>
         <source>Contour plot</source>
-        <translation type="unfinished"></translation>
+        <translation>Контурное изображение</translation>
     </message>
     <message>
         <location filename="../ccRasterizeTool.cpp" line="1892"/>
         <source>Levels: %1
 Cells: %2 x %3</source>
-        <translation type="unfinished"></translation>
+        <translation>Уровней: %1
+Ячеек: %2 x %3</translation>
     </message>
 </context>
 <context>
@@ -8401,12 +8500,12 @@ Cells: %2 x %3</source>
     <message>
         <location filename="../ccRecentFiles.cpp" line="35"/>
         <source>Open Recent...</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть из недавнего...</translation>
     </message>
     <message>
         <location filename="../ccRecentFiles.cpp" line="37"/>
         <source>Clear Menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Очистить меню</translation>
     </message>
 </context>
 <context>
@@ -8414,7 +8513,7 @@ Cells: %2 x %3</source>
     <message>
         <location filename="../ccRenderToFileDlg.cpp" line="107"/>
         <source>Save Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить изображение</translation>
     </message>
 </context>
 <context>
@@ -8422,24 +8521,26 @@ Cells: %2 x %3</source>
     <message>
         <location filename="../ccSectionExtractionTool.cpp" line="1578"/>
         <source>Unfold cloud(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Развернуть облако(а)</translation>
     </message>
     <message>
         <location filename="../ccSectionExtractionTool.cpp" line="1579"/>
         <source>Number of segments: %1
 Number of points: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Кол-во сегментов: %1
+Кол-во точек: %2</translation>
     </message>
     <message>
         <location filename="../ccSectionExtractionTool.cpp" line="1816"/>
         <source>Extract sections</source>
-        <translation type="unfinished">Построить сечения</translation>
+        <translation>Построить сечения</translation>
     </message>
     <message>
         <location filename="../ccSectionExtractionTool.cpp" line="1817"/>
         <source>Number of sections: %1
 Number of points: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Кол-во сечений: %1
+Кол-во точек: %2</translation>
     </message>
 </context>
 <context>
@@ -8455,177 +8556,177 @@ Number of points: %2</source>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="14"/>
         <source>Point list picking</source>
-        <translation type="unfinished">Создать  список точек</translation>
+        <translation>Создать  список точек</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="25"/>
         <source>show &apos;to align&apos; cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>показ выравн. облака</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="64"/>
         <source>Pick spheres instead of single points (for clouds only)</source>
-        <translation type="unfinished"></translation>
+        <translation>Распознавать сферы вместо отдельных точек (только для облаков)</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="81"/>
         <source>search radius (or the spheres radius if you know it)</source>
-        <translation type="unfinished"></translation>
+        <translation>радиус поиска (или радиус сфер, если известен)</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="84"/>
         <source>r = </source>
-        <translation type="unfinished"></translation>
+        <translation>r = </translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="106"/>
         <source>Max RMS (as a percentage of the radius)</source>
-        <translation type="unfinished"></translation>
+        <translation>Макс СКО (как процент от радиуса)</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="109"/>
         <source>%</source>
-        <translation type="unfinished">%</translation>
+        <translation>%</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="112"/>
         <source>RMS &lt; </source>
-        <translation type="unfinished"></translation>
+        <translation>СКО &lt; </translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="149"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="259"/>
         <source>1</source>
-        <translation type="unfinished">1</translation>
+        <translation>1</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="154"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="264"/>
         <source>2</source>
-        <translation type="unfinished">2</translation>
+        <translation>2</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="159"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="269"/>
         <source>3</source>
-        <translation type="unfinished">3</translation>
+        <translation>3</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="164"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="274"/>
         <source>4</source>
-        <translation type="unfinished">4</translation>
+        <translation>4</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="169"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="279"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="363"/>
         <source>X</source>
-        <translation type="unfinished">X</translation>
+        <translation>X</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="174"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="284"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="368"/>
         <source>Y</source>
-        <translation type="unfinished">Y</translation>
+        <translation>Y</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="179"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="289"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="373"/>
         <source>Z</source>
-        <translation type="unfinished">Z</translation>
+        <translation>Z</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="184"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="294"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Невязка</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="202"/>
         <source>show &apos;reference&apos; cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>показ опорного облака</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="309"/>
         <source>adjust scale</source>
-        <translation type="unfinished"></translation>
+        <translation>подогнать масштаб</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="335"/>
         <source>Rotation</source>
-        <translation type="unfinished">Вращение</translation>
+        <translation>Вращение</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="351"/>
         <source>Constrains the rotation around a single axis (warning: experimental)</source>
-        <translation type="unfinished"></translation>
+        <translation>Принудительное вращение вокруг одной оси (внимание: экспериментально)</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="358"/>
         <source>XYZ</source>
-        <translation type="unfinished">XYZ</translation>
+        <translation>XYZ</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="403"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="422"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="441"/>
         <source>Constrains the translation along particular axes (warning: experimental)</source>
-        <translation type="unfinished"></translation>
+        <translation>Принудительное смещение вдоль выбранных осей (внимание: экспериментально)</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="406"/>
         <source>Tx</source>
-        <translation type="unfinished">Tx</translation>
+        <translation>Tx</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="425"/>
         <source>Ty</source>
-        <translation type="unfinished">Ty</translation>
+        <translation>Ty</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="444"/>
         <source>Tz</source>
-        <translation type="unfinished">Tz</translation>
+        <translation>Tz</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="458"/>
         <source>auto update zoom</source>
-        <translation type="unfinished"></translation>
+        <translation>автообновление масштаба на экране</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="490"/>
         <source>align</source>
-        <translation type="unfinished"></translation>
+        <translation>сшить</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="500"/>
         <source>reset</source>
-        <translation type="unfinished"></translation>
+        <translation>сброс</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="510"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="513"/>
         <source>Convert list to new cloud (and close dialog)</source>
-        <translation type="unfinished"></translation>
+        <translation>Конвертировать список в новое облако (и закрыть диалог)</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="516"/>
         <source>to cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>в облако</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="527"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="530"/>
         <source>Close dialog (list will be lost)</source>
-        <translation type="unfinished"></translation>
+        <translation>Закрыть диалог (список будет потерян)</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="533"/>
         <source>stop</source>
-        <translation type="unfinished"></translation>
+        <translation>стоп</translation>
     </message>
 </context>
 <context>
@@ -8661,12 +8762,12 @@ Number of points: %2</source>
     <message>
         <location filename="../ui_templates/sensorComputeDistancesDlg.ui" line="14"/>
         <source>Sensor range computation</source>
-        <translation type="unfinished"></translation>
+        <translation>Вычисление диапазона датчика</translation>
     </message>
     <message>
         <location filename="../ui_templates/sensorComputeDistancesDlg.ui" line="20"/>
         <source>Squared distances</source>
-        <translation type="unfinished"></translation>
+        <translation>квадраты расстояний</translation>
     </message>
 </context>
 <context>
@@ -8674,12 +8775,12 @@ Number of points: %2</source>
     <message>
         <location filename="../ui_templates/sensorComputeScatteringAnglesDlg.ui" line="14"/>
         <source>Compute scattering angles</source>
-        <translation type="unfinished"></translation>
+        <translation>Вычислить углы расхождения</translation>
     </message>
     <message>
         <location filename="../ui_templates/sensorComputeScatteringAnglesDlg.ui" line="20"/>
         <source>Convert angles to degree</source>
-        <translation type="unfinished"></translation>
+        <translation>Конвертировать углы в градусы</translation>
     </message>
 </context>
 </TS>

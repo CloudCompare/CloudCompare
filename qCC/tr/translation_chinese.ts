@@ -2011,27 +2011,32 @@ to help you set the general parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="877"/>
-        <source>Auto-compute octree for picking</source>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="875"/>
+        <source>Automatically display normals at loading time (when available)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/displayOptionsDlg.ui" line="884"/>
-        <source>Octree computation can be long but the picking is then much faster</source>
+        <source>Auto-compute octree for picking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/displayOptionsDlg.ui" line="891"/>
+        <source>Octree computation can be long but the picking is then much faster</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="898"/>
         <source>Always</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="896"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="903"/>
         <source>Ask each time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="901"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="908"/>
         <source>Never</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2131,22 +2136,22 @@ to help you set the general parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="956"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="963"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="963"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="970"/>
         <source>Apply</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="970"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="977"/>
         <source>Reset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="977"/>
+        <location filename="../ui_templates/displayOptionsDlg.ui" line="984"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5174,8 +5179,8 @@ Note: the diagonal is not tested at loading time.</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="193"/>
-        <location filename="../mainwindow.cpp" line="5758"/>
-        <location filename="../mainwindow.cpp" line="5960"/>
+        <location filename="../mainwindow.cpp" line="5775"/>
+        <location filename="../mainwindow.cpp" line="5977"/>
         <source>Enter Full Screen</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5205,18 +5210,18 @@ Note: the diagonal is not tested at loading time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5754"/>
-        <location filename="../mainwindow.cpp" line="5956"/>
+        <location filename="../mainwindow.cpp" line="5771"/>
+        <location filename="../mainwindow.cpp" line="5973"/>
         <source>Exit Full Screen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8178"/>
+        <location filename="../mainwindow.cpp" line="8195"/>
         <source>Testing all possible positions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8179"/>
+        <location filename="../mainwindow.cpp" line="8196"/>
         <source>%1 clouds and %2 positions</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7871,67 +7876,109 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="65"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="73"/>
+        <source>Shape</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="81"/>
         <source>Axis</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="82"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="222"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="98"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="244"/>
         <source>X</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="87"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="264"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="103"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="286"/>
         <source>Y</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="92"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="306"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="108"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="328"/>
         <source>Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="125"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="135"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="141"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="151"/>
         <source>Cone angle (0-180°)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="128"/>
-        <source>Half angle (degrees)</source>
+        <location filename="../ui_templates/unrollDlg.ui" line="144"/>
+        <source>Half angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="176"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="189"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="157"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="414"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="456"/>
+        <source> deg</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="395"/>
+        <source>Unroll range (can do multiple turns)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="398"/>
+        <source>Unroll range</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="404"/>
+        <source>Start angle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="411"/>
+        <source>Starting angle (can be negative)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="446"/>
+        <source>Stop angle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="453"/>
+        <source>Stop angle (can be negative)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/unrollDlg.ui" line="195"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="208"/>
         <source>Cylinder (or cone base) radius</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="179"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="198"/>
         <source>Radius</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="210"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="232"/>
         <source>Axis position</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="344"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="366"/>
         <source>Auto (gravity center)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="373"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="61"/>
         <source>Deviation from the theoretical shape (i.e. cone or cylinder)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="376"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="64"/>
         <source>Export deviation scalar field</source>
         <translation type="unfinished"></translation>
     </message>

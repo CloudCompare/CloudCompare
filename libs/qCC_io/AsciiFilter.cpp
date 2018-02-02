@@ -395,7 +395,6 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 		//we do this AFTER calling restorePreviousContext because it may still be good that the previous
 		//configuration is restored even though the user needs to confirm it
 		AsciiOpenDlg::ResetApplyAll();
-		forceDialogDisplay = false;
 	}
 
 	QString dummyStr;

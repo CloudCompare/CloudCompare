@@ -767,22 +767,22 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 
 	//main process
 	unsigned nextLimit = /*cloudChunkPos+*/cloudChunkSize;
-	QString currentLine = stream.readLine();
+	QString currentLine = "not empty";
 	while (!currentLine.isNull())
 	{
+		//read next line
+		currentLine = stream.readLine();
 		++linesRead;
 
 		//comment
 		if (currentLine.startsWith("//"))
 		{
-			currentLine = stream.readLine();
 			continue;
 		}
 
 		if (currentLine.size() == 0)
 		{
 			ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (empty)!",linesRead);
-			currentLine = stream.readLine();
 			continue;
 		}
 
@@ -859,7 +859,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 		}
 
 		//we split current line
-		QStringList parts = currentLine.split(separator,QString::SkipEmptyParts);
+		QStringList parts = currentLine.split(separator, QString::SkipEmptyParts);
 
 		int nParts = parts.size();
 		if (nParts > maxPartIndex) //fake loop for easy break
@@ -1008,9 +1008,6 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 			result = CC_FERR_CANCELED_BY_USER;
 			break;
 		}
-
-		//read next line
-		currentLine = stream.readLine();
 	}
 
 	file.close();

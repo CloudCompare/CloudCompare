@@ -51,6 +51,9 @@ v2.10.alpha - XX/XX/201X
 	* New behavior:
 		- Some load dialogs 'Apply all' button will only apply to the set of selected files (ASCII, PLY and LAS)
 
+	* PCV:
+		- the PCV plugin can now be applied on several clouds (batch mode)
+
 - Bug fix:
 
 	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values

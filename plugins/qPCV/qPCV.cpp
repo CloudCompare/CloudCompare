@@ -31,8 +31,10 @@
 #include <ccScalarField.h>
 #include <ccColorScalesManager.h>
 
+//Qt
 #include <QtGui>
 #include <QMainWindow>
+#include <QProgressBar>
 
 #ifndef CC_PCV_FIELD_LABEL_NAME
 #define CC_PCV_FIELD_LABEL_NAME "Illuminance (PCV)"
@@ -47,7 +49,18 @@ qPCV::qPCV(QObject* parent/*=0*/)
 void qPCV::onNewSelection(const ccHObject::Container& selectedEntities)
 {
 	if (m_action)
-		m_action->setEnabled(selectedEntities.size()==1);
+	{
+		bool elligibleEntitiies = false;
+		for (ccHObject* obj : selectedEntities)
+		{
+			if (obj && obj->isKindOf(CC_TYPES::POINT_CLOUD) || obj->isKindOf(CC_TYPES::MESH))
+			{
+				elligibleEntitiies = true;
+				break;
+			}
+		}
+		m_action->setEnabled(elligibleEntitiies);
+	}
 }
 
 void qPCV::getActions(QActionGroup& group)
@@ -78,39 +91,36 @@ void qPCV::doAction()
 	if (!m_app)
 		return;
 
-	if (!m_app->haveOneSelection())
-	{
-		m_app->dispToConsole("Select only one cloud or one mesh!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 
 	ccHObject* ent = selectedEntities[0];
 
-	ccGenericPointCloud* cloud = NULL;
-	ccGenericMesh* mesh = NULL;
-	if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
+	ccHObject::Container candidates;
+	bool hasMeshes = false;
+	for (ccHObject* obj : selectedEntities)
 	{
-		cloud = ccHObjectCaster::ToGenericPointCloud(ent);
+		if (!obj)
+		{
+			assert(false);
+			continue;
+		}
+		
+		if (obj->isA(CC_TYPES::POINT_CLOUD))
+		{
+			//we need a real point cloud
+			candidates.push_back(obj);
+		}
+		else if (obj->isKindOf(CC_TYPES::MESH))
+		{
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(obj);
+			if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD))
+			{
+				//we need a mesh with a real point cloud
+				candidates.push_back(obj);
+				hasMeshes = true;
+			}
+		}
 	}
-	else if (ent->isKindOf(CC_TYPES::MESH))
-	{
-		mesh = static_cast<ccGenericMesh*>(ent);
-		cloud = mesh->getAssociatedCloud();
-	}
-	else
-	{
-		m_app->dispToConsole("Select a point cloud or a mesh!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
-	if (!cloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
-	{
-		m_app->dispToConsole("Select a real point cloud (or a mesh associated to a real point cloud)!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-	ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
 	ccPcvDlg dlg(m_app->getMainWindow());
 
@@ -123,9 +133,7 @@ void qPCV::doAction()
 		dlg.closedMeshCheckBox->setChecked(s_closedMeshCheckBoxState);
 	}
 
-	//for meshes only
-	if (!mesh)
-		dlg.closedMeshCheckBox->setEnabled(false);
+	dlg.closedMeshCheckBox->setEnabled(hasMeshes); //for meshes only
 
 	//for using clouds normals as rays
 	std::vector<ccGenericPointCloud*> cloudsWithNormals;
@@ -143,17 +151,23 @@ void qPCV::doAction()
 				cloudsWithNormals.push_back(cloud);
 				QString cloudTitle = QString("%1 - %2 points").arg(cloud->getName()).arg(cloud->size());
 				if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
+				{
 					cloudTitle.append(QString(" (%1)").arg(cloud->getParent()->getName()));
+				}
 
 				dlg.cloudsComboBox->addItem(cloudTitle);
 			}
 		}
 	}
 	if (cloudsWithNormals.empty())
+	{
 		dlg.useCloudRadioButton->setEnabled(false);
+	}
 
 	if (!dlg.exec())
+	{
 		return;
+	}
 
 	//save dialog state
 	{
@@ -164,67 +178,142 @@ void qPCV::doAction()
 		s_closedMeshCheckBoxState	= dlg.closedMeshCheckBox->isChecked();
 	}
 
-	//we get the PCV field if it already exists
-	int sfIdx = pc->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
-	//otherwise we create it
-	if (sfIdx < 0)
-		sfIdx = pc->addScalarField(CC_PCV_FIELD_LABEL_NAME);
-	if (sfIdx < 0)
+	for (ccHObject* obj : selectedEntities)
 	{
-		m_app->dispToConsole("Couldn't allocate a new scalar field for computing PCV field ! Try to free some memory ...",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
+		//we get the PCV field if it already exists
+		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(obj);
+		if (!pc)
+		{
+			assert(false);
+			continue;
+		}
+		int sfIdx = pc->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
+		//otherwise we create it
+		if (sfIdx < 0)
+		{
+			sfIdx = pc->addScalarField(CC_PCV_FIELD_LABEL_NAME);
+		}
+		if (sfIdx < 0)
+		{
+			m_app->dispToConsole("Couldn't allocate a new scalar field for computing PCV field ! Try to free some memory ...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
+		pc->setCurrentScalarField(sfIdx);
 	}
 
-	pc->setCurrentScalarField(sfIdx);
-
 	unsigned raysNumber = dlg.raysSpinBox->value();
-	unsigned res = dlg.resSpinBox->value();
-	bool meshIsClosed = (mesh ? dlg.closedMeshCheckBox->checkState()==Qt::Checked : false);
+	unsigned resolution = dlg.resSpinBox->value();
+	bool meshIsClosed = (hasMeshes ? dlg.closedMeshCheckBox->isChecked() : false);
 	bool mode360 = !dlg.mode180CheckBox->isChecked();
 
-	//progress dialog
-	ccProgressDialog progressCb(true,m_app->getMainWindow());
-
 	//PCV type ShadeVis
-	bool success = false;
+	std::vector<CCVector3> rays;
 	if (!cloudsWithNormals.empty() && dlg.useCloudRadioButton->isChecked())
 	{
 		//Version with cloud normals as light rays
-		assert(dlg.cloudsComboBox->currentIndex() < (int)cloudsWithNormals.size());
+		assert(dlg.cloudsComboBox->currentIndex() < static_cast<int>(cloudsWithNormals.size()));
 		ccGenericPointCloud* pc = cloudsWithNormals[dlg.cloudsComboBox->currentIndex()];
-		std::vector<CCVector3> rays;
 		unsigned count = pc->size();
-		rays.resize(count);
+		try
+		{
+			m_app->dispToConsole("Not enough memory to generate the set of rays", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			rays.resize(count);
+		}
+		catch (std::bad_alloc)
+		{
+			return;
+		}
 		for (unsigned i = 0; i < count; ++i)
 		{
 			rays[i] = CCVector3(pc->getPointNormal(i));
 		}
-
-		success = PCV::Launch(rays,cloud,mesh,meshIsClosed,res,res,&progressCb);
-	}
-	else
-	{
-		//Version with rays sampled on a sphere
-		success = (PCV::Launch(raysNumber, cloud, mesh, meshIsClosed, mode360, res, res, &progressCb) > 0);
 	}
 
-	if (!success)
+	ccProgressDialog pcvProgressCb(true, m_app->getMainWindow());
+	pcvProgressCb.setAutoClose(false);
+
+	size_t count = 0;
+	for (ccHObject* obj : selectedEntities)
 	{
-		pc->deleteScalarField(sfIdx);
-		m_app->dispToConsole("En error occurred during the PCV field computation!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
+		ccPointCloud* cloud = nullptr;
+		ccGenericMesh* mesh = nullptr;
+		QString objName = "unknown";
+
+		assert(obj);
+		if (obj->isA(CC_TYPES::POINT_CLOUD))
+		{
+			//we need a real point cloud
+			cloud = ccHObjectCaster::ToPointCloud(obj);
+			objName = cloud->getName();
+		}
+		else if (obj->isKindOf(CC_TYPES::MESH))
+		{
+			mesh = ccHObjectCaster::ToGenericMesh(obj);
+			cloud = ccHObjectCaster::ToPointCloud(mesh->getAssociatedCloud());
+			objName = mesh->getName();
+		}
+
+		bool success = false;
+		QString objNameForPorgressDialog = objName;
+		if (selectedEntities.size() > 1)
+		{
+			objNameForPorgressDialog += QString("(%1/%2)").arg(++count).arg(selectedEntities.size());
+		}
+
+		bool wasEnabled = obj->isEnabled();
+		bool wasVisible = obj->isVisible();
+		obj->setEnabled(true);
+		obj->setVisible(true);
+		if (!rays.empty())
+		{
+			//Version with rays sampled on a sphere
+			success = PCV::Launch(rays, cloud, mesh, meshIsClosed, resolution, resolution, &pcvProgressCb, objNameForPorgressDialog);
+		}
+		else
+		{
+			success = (PCV::Launch(raysNumber, cloud, mesh, meshIsClosed, mode360, resolution, resolution, &pcvProgressCb, objNameForPorgressDialog) > 0);
+		}
+		obj->setEnabled(wasEnabled);
+		obj->setVisible(wasVisible);
+
+		int sfIdx = cloud->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
+		if (!success)
+		{
+			cloud->deleteScalarField(sfIdx);
+			m_app->dispToConsole(tr("En error occurred during entity '%1' illumination!").arg(objName), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		}
+		else
+		{
+			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
+			if (sf)
+			{
+				sf->computeMinAndMax();
+				cloud->setCurrentDisplayedScalarField(sfIdx);
+				sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
+				if (obj->hasNormals() && obj->normalsShown())
+				{
+					m_app->dispToConsole(tr("Entity '%1' normals have been automatically disabled").arg(objName), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				}
+				obj->showSF(true);
+				if (obj != ent)
+					ent->showSF(true);
+				obj->showNormals(false);
+				obj->prepareDisplayForRefresh_recursive();
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+
+		if (pcvProgressCb.wasCanceled())
+		{
+			m_app->dispToConsole(tr("Process has been cancelled by the user"), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			break;
+		}
 	}
-	else
-	{
-		pc->getCurrentInScalarField()->computeMinAndMax();
-		pc->setCurrentDisplayedScalarField(sfIdx);
-		ccScalarField* sf = static_cast<ccScalarField*>(pc->getScalarField(sfIdx));
-		if (sf)
-			sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
-		ent->showSF(true);
-		ent->showNormals(false);
-		ent->prepareDisplayForRefresh_recursive();
-	}
+
+	pcvProgressCb.close();
 
 	//currently selected entities parameters may have changed!
 	m_app->updateUI();

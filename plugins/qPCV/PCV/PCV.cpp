@@ -4,7 +4,8 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU Library General Public License as       #
-//#  published by the Free Software Foundation; version 2 or later of the License.  #
+//#  published by the Free Software Foundation; version 2 or later of the  #
+//#  License.                                                              #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
@@ -38,7 +39,7 @@ static int gcd(int num1, int num2)
 {
 	int remainder = (num2 % num1);
 
-	return (remainder != 0 ? gcd(remainder,num1) : num1);
+	return (remainder != 0 ? gcd(remainder, num1) : num1);
 }
 
 //! Sample points on the unit sphere
@@ -192,19 +193,20 @@ int PCV::Launch(unsigned numberOfRays,
 				bool mode360/*=true*/,
 				unsigned width/*=1024*/,
 				unsigned height/*=1024*/,
-				CCLib::GenericProgressCallback* progressCb/*=0*/)
+				CCLib::GenericProgressCallback* progressCb/*=0*/,
+				QString entityName/*=QString()*/)
 {
 	//generates light directions
 	unsigned rayCount = numberOfRays * (mode360 ? 1 : 2);
 	std::vector<CCVector3> rays;
-	if (!SampleSphere(rayCount,rays))
+	if (!SampleSphere(rayCount, rays))
 		return -2;
 
 	//we keep only the light directions that meets input parameters (non predictible if not in 360° mode!)
 	if (!mode360)
 	{
 		unsigned lastIndex = 0;
-		for (size_t i=0; i<rays.size(); ++i)
+		for (size_t i = 0; i < rays.size(); ++i)
 		{
 			if (rays[i].z < 0)
 			{
@@ -217,7 +219,7 @@ int PCV::Launch(unsigned numberOfRays,
 		rays.resize(rayCount);
 	}
 
-	if (!Launch(rays, vertices, mesh, meshIsClosed, width, height, progressCb))
+	if (!Launch(rays, vertices, mesh, meshIsClosed, width, height, progressCb, entityName))
 		return -1;
 
 	return static_cast<int>(rayCount);
@@ -229,7 +231,8 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 				 bool meshIsClosed/*=false*/,
 				 unsigned width/*=1024*/,
 				 unsigned height/*=1024*/,
-				 CCLib::GenericProgressCallback* progressCb/*=0*/)
+				 CCLib::GenericProgressCallback* progressCb/*=0*/,
+				 QString entityName/*=QString()*/)
 {
 	if (rays.empty())
 		return false;
@@ -262,7 +265,10 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 		if (progressCb->textCanBeEdited())
 		{
 			progressCb->setMethodTitle("ShadeVis");
-			QString infoStr = QString("Rays: %1").arg(numberOfRays);
+			QString infoStr;
+			if (!entityName.isEmpty())
+				infoStr = entityName + "\n";
+			infoStr.append(QString("Rays: %1").arg(numberOfRays));
 			if (mesh)
 				infoStr.append(QString("\nFaces: %1").arg(mesh->size()));
 			else
@@ -279,7 +285,7 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 	PCVContext win;
 	if (win.init(width, height, vertices, mesh, meshIsClosed))
 	{
-		for (unsigned i=0; i<numberOfRays; ++i)
+		for (unsigned i = 0; i < numberOfRays; ++i)
 		{
 			//set current 'light' direction
 			win.setViewDirection(rays[i]);
@@ -297,9 +303,9 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 		if (success)
 		{
 			//we convert per-vertex accumulators to an 'intensity' scalar field
-			for (unsigned j=0; j<numberOfPoints; ++j)
+			for (unsigned j = 0; j < numberOfPoints; ++j)
 			{
-				ScalarType visValue = static_cast<ScalarType>(visibilityCount[j]) / static_cast<ScalarType>(numberOfRays);
+				ScalarType visValue = static_cast<ScalarType>(visibilityCount[j]) / numberOfRays;
 				vertices->setPointScalarValue(j,visValue);
 			}
 		}

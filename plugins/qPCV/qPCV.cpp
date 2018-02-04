@@ -93,8 +93,6 @@ void qPCV::doAction()
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 
-	ccHObject* ent = selectedEntities[0];
-
 	ccHObject::Container candidates;
 	bool hasMeshes = false;
 	for (ccHObject* obj : selectedEntities)
@@ -178,29 +176,6 @@ void qPCV::doAction()
 		s_closedMeshCheckBoxState	= dlg.closedMeshCheckBox->isChecked();
 	}
 
-	for (ccHObject* obj : selectedEntities)
-	{
-		//we get the PCV field if it already exists
-		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(obj);
-		if (!pc)
-		{
-			assert(false);
-			continue;
-		}
-		int sfIdx = pc->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
-		//otherwise we create it
-		if (sfIdx < 0)
-		{
-			sfIdx = pc->addScalarField(CC_PCV_FIELD_LABEL_NAME);
-		}
-		if (sfIdx < 0)
-		{
-			m_app->dispToConsole("Couldn't allocate a new scalar field for computing PCV field ! Try to free some memory ...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			return;
-		}
-		pc->setCurrentScalarField(sfIdx);
-	}
-
 	unsigned raysNumber = dlg.raysSpinBox->value();
 	unsigned resolution = dlg.resSpinBox->value();
 	bool meshIsClosed = (hasMeshes ? dlg.closedMeshCheckBox->isChecked() : false);
@@ -228,12 +203,28 @@ void qPCV::doAction()
 			rays[i] = CCVector3(pc->getPointNormal(i));
 		}
 	}
+	else
+	{
+		//generates light directions
+		if (!PCV::GenerateRays(raysNumber, rays, mode360))
+		{
+			m_app->dispToConsole("Failed to generate the set of rays", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
+	}
+
+	if (rays.empty())
+	{
+		assert(false);
+		m_app->dispToConsole("No ray was generated?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		return;
+	}
 
 	ccProgressDialog pcvProgressCb(true, m_app->getMainWindow());
 	pcvProgressCb.setAutoClose(false);
 
 	size_t count = 0;
-	for (ccHObject* obj : selectedEntities)
+	for (ccHObject* obj : candidates)
 	{
 		ccPointCloud* cloud = nullptr;
 		ccGenericMesh* mesh = nullptr;
@@ -252,31 +243,36 @@ void qPCV::doAction()
 			cloud = ccHObjectCaster::ToPointCloud(mesh->getAssociatedCloud());
 			objName = mesh->getName();
 		}
+		assert(cloud);
 
-		bool success = false;
-		QString objNameForPorgressDialog = objName;
-		if (selectedEntities.size() > 1)
+		//we get the PCV field if it already exists
+		int sfIdx = cloud->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
+		//otherwise we create it
+		if (sfIdx < 0)
 		{
-			objNameForPorgressDialog += QString("(%1/%2)").arg(++count).arg(selectedEntities.size());
+			sfIdx = cloud->addScalarField(CC_PCV_FIELD_LABEL_NAME);
+		}
+		if (sfIdx < 0)
+		{
+			m_app->dispToConsole("Couldn't allocate a new scalar field for computing PCV field ! Try to free some memory ...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
+		cloud->setCurrentScalarField(sfIdx);
+
+		QString objNameForPorgressDialog = objName;
+		if (candidates.size() > 1)
+		{
+			objNameForPorgressDialog += QString("(%1/%2)").arg(++count).arg(candidates.size());
 		}
 
 		bool wasEnabled = obj->isEnabled();
 		bool wasVisible = obj->isVisible();
 		obj->setEnabled(true);
 		obj->setVisible(true);
-		if (!rays.empty())
-		{
-			//Version with rays sampled on a sphere
-			success = PCV::Launch(rays, cloud, mesh, meshIsClosed, resolution, resolution, &pcvProgressCb, objNameForPorgressDialog);
-		}
-		else
-		{
-			success = (PCV::Launch(raysNumber, cloud, mesh, meshIsClosed, mode360, resolution, resolution, &pcvProgressCb, objNameForPorgressDialog) > 0);
-		}
+		bool success = PCV::Launch(rays, cloud, mesh, meshIsClosed, resolution, resolution, &pcvProgressCb, objNameForPorgressDialog);
 		obj->setEnabled(wasEnabled);
 		obj->setVisible(wasVisible);
 
-		int sfIdx = cloud->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
 		if (!success)
 		{
 			cloud->deleteScalarField(sfIdx);
@@ -294,10 +290,12 @@ void qPCV::doAction()
 				{
 					m_app->dispToConsole(tr("Entity '%1' normals have been automatically disabled").arg(objName), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				}
-				obj->showSF(true);
-				if (obj != ent)
-					ent->showSF(true);
 				obj->showNormals(false);
+				obj->showSF(true);
+				if (obj != cloud)
+				{
+					cloud->showSF(true);
+				}
 				obj->prepareDisplayForRefresh_recursive();
 			}
 			else

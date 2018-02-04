@@ -50,15 +50,15 @@ public:
 		\param entityName entity name (optional)
 		\return number of 'light' directions actually used (or a value <0 if an error occurred)
 	**/
-	static int Launch(unsigned numberOfRays,
-							CCLib::GenericCloud* vertices,
-							CCLib::GenericMesh* mesh = nullptr,
-							bool meshIsClosed = false,
-							bool mode360 = true,
-							unsigned width = 1024,
-							unsigned height = 1024,
-							CCLib::GenericProgressCallback* progressCb = nullptr,
-							QString entityName = QString());
+	static int Launch(	unsigned numberOfRays,
+						CCLib::GenericCloud* vertices,
+						CCLib::GenericMesh* mesh = nullptr,
+						bool meshIsClosed = false,
+						bool mode360 = true,
+						unsigned width = 1024,
+						unsigned height = 1024,
+						CCLib::GenericProgressCallback* progressCb = nullptr,
+						QString entityName = QString());
 
 	//! Simulates global illumination on a cloud (or a mesh) with OpenGL
 	/** Computes per-vertex illumination intensity as a scalar field.
@@ -72,14 +72,19 @@ public:
 		\param entityName entity name (optional)
 		\return success
 	**/
-	static bool Launch(std::vector<CCVector3>& rays,
-							CCLib::GenericCloud* vertices,
-							CCLib::GenericMesh* mesh = nullptr,
-							bool meshIsClosed = false,
-							unsigned width = 1024,
-							unsigned height = 1024,
-							CCLib::GenericProgressCallback* progressCb = nullptr,
-							QString entityName = QString());
+	static bool Launch(	std::vector<CCVector3>& rays,
+						CCLib::GenericCloud* vertices,
+						CCLib::GenericMesh* mesh = nullptr,
+						bool meshIsClosed = false,
+						unsigned width = 1024,
+						unsigned height = 1024,
+						CCLib::GenericProgressCallback* progressCb = nullptr,
+						QString entityName = QString());
+
+	//! Generates a given number of rays
+	static bool GenerateRays(	unsigned numberOfRays,
+								std::vector<CCVector3>& rays,
+								bool mode360 = true);
 };
 
 #endif

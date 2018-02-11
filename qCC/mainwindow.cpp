@@ -4464,9 +4464,9 @@ void MainWindow::doConvertPolylinesToMesh()
 
 void MainWindow::doCompute2HalfDimVolume()
 {
-	if (m_selectedEntities.size() != 2)
+	if (m_selectedEntities.empty() || m_selectedEntities.size() > 2)
 	{
-		ccConsole::Error("Select two point clouds!");
+		ccConsole::Error("Select one or two point clouds!");
 		return;
 	}
 

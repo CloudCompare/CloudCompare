@@ -70,6 +70,7 @@ v2.10.alpha - XX/XX/201X
 	* Align tool: large coordinates of manually input points were rounded off (only when displayed)
 	* When applying an orthographic viewport while the 'stereo' mode is enabled, the stereo mode was broken (now a warning message is disabled and
 		the stereo mode is automatically disabled)
+	* The global shift along vertical dimension (e.g. Z) was not applied when exporting a raster grid to a raster file (geotiff)
 
 v2.9.1 - 11/03/2017
 ----------------------

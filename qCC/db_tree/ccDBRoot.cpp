@@ -707,7 +707,8 @@ QModelIndex ccDBRoot::index(ccHObject* object)
 	ccHObject* parent = object->getParent();
 	if (!parent)
 	{
-		ccLog::Error(QString("An error occurred while creating DB tree index: object '%1' has no parent").arg(object->getName()));
+		//DGM: actually, it can happen (for instance if the entity is displayed in the local DB of a 3D view)
+		//ccLog::Error(QString("An error occurred while creating DB tree index: object '%1' has no parent").arg(object->getName()));
 		return QModelIndex();
 	}
 

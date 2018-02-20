@@ -24,6 +24,7 @@
 //qCC
 #include "../ccStdPluginInterface.h"
 #include <ccPickingListener.h>
+#include <qbuffer.h>
 
 class ccCompassDlg;
 class ccFitPlaneTool;
@@ -36,7 +37,6 @@ class ccThicknessTool;
 class ccTool;
 class ccTopologyTool;
 class ccTraceTool;
-
 
 class ccCompass : public QObject, public ccStdPluginInterface, public ccPickingListener
 {
@@ -188,7 +188,7 @@ protected:
 	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = QString());
 	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString(), bool thickness=false); //if thickness is true this will write "thickness lineations" rather than orientation lineations
 	
-	int writeTracesSVG(ccHObject* object, QTextStream* out, int height);
+	int writeTracesSVG(ccHObject* object, QTextStream* out, int height, float zoom);
 
 	int writeToXML(QString filename); //exports Compass interpretation tree to xml
 	int writeObjectXML(ccHObject* object, QXmlStreamWriter* out); //writes the provided object (recursive)

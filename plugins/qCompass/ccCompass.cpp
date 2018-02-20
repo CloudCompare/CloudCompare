@@ -1466,21 +1466,55 @@ void ccCompass::writeToLower() //new digitiziation will be added to the GeoObjec
 //save the current view to an SVG file
 void ccCompass::exportToSVG()
 {
-	//get output file path
-	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("SVG files (*.svg)"));
+	float zoom = 2.0; //TODO: create popup box
+
+	//get filename for the svg file
+	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("SVG Output file"), "", tr("SVG files (*.svg)"));
 	if (filename.isEmpty())
 	{
 		//process cancelled by the user
 		return;
 	}
 
-	QFileInfo fi(filename);
-	if (fi.suffix() != "svg")
+	if (QFileInfo(filename).suffix() != "svg")
 	{
 		filename += ".svg";
 	}
 
-	//create file
+
+	//set all objects except the point clouds invisible
+	std::vector<ccHObject*> hidden; //store objects we hide so we can turn them back on after!
+	ccHObject::Container objects;
+	m_app->dbRootObject()->filterChildren(objects, true, CC_TYPES::OBJECT, false); //get list of all children!
+	for (ccHObject* o : objects)
+	{
+		if (!o->isA(CC_TYPES::POINT_CLOUD))
+		{
+			if (o->isVisible())
+			{
+				hidden.push_back(o);
+				o->setVisible(false);
+			}
+		}
+	}
+
+	//render the scene
+	QImage img = m_app->getActiveGLWindow()->renderToImage(zoom);
+
+	//restore visibility
+	for (ccHObject* o : hidden)
+	{
+		o->setVisible(true);
+	}
+
+	//convert image to base64 (png format) to write in svg file
+	QByteArray ba;
+	QBuffer bu(&ba);
+	bu.open(QIODevice::WriteOnly);
+	img.save(&bu, "PNG");
+	bu.close();
+
+	//create .svg file
 	QFile svg_file(filename);
 
 	//open file & create text stream
@@ -1488,14 +1522,19 @@ void ccCompass::exportToSVG()
 	{
 		QTextStream svg_stream(&svg_file);
 
-		int width = m_app->getActiveGLWindow()->glWidth();
-		int height = m_app->getActiveGLWindow()->glHeight();
+		int width = m_app->getActiveGLWindow()->glWidth()*zoom;
+		int height = m_app->getActiveGLWindow()->glHeight()*zoom;
 
 		//write svg header
 		svg_stream << QString::asprintf("<svg width=\"%d\" height=\"%d\">", width, height) << endl;
 
+		//write the image
+		svg_stream << QString::asprintf("<image height = \"%d\" width = \"%d\" xlink:href = \"data:image/png;base64,", height, width) << ba.toBase64() << "\" / >" << endl;
+
 		//recursively write traces
-		int count = writeTracesSVG(m_app->dbRootObject(), &svg_stream, height);
+		int count = writeTracesSVG(m_app->dbRootObject(), &svg_stream, height,zoom);
+
+		//TODO: write scale bar
 
 		//write end tag for svg file
 		svg_stream << "</svg>" << endl; 
@@ -1517,7 +1556,7 @@ void ccCompass::exportToSVG()
 	}
 }
 
-int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
+int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height, float zoom)
 {
 	int n = 0;
 
@@ -1541,7 +1580,7 @@ int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
 		if (params.perspective)
 		{
 			m_app->getActiveGLWindow()->setPerspectiveState(false, true);
-			m_app->getActiveGLWindow()->redraw(false, false); //not sure if this is needed or not?
+			//m_app->getActiveGLWindow()->redraw(false, false); //not sure if this is needed or not?
 			m_app->getActiveGLWindow()->getGLCameraParameters(params); //get updated params
 		}
 
@@ -1557,7 +1596,7 @@ int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
 			params.project(P, coords2D);
 			
 			//write point
-			*out << QString::asprintf("%.3f,%.3f ", coords2D.x, height - coords2D.y); //n.b. we need to flip y-axis
+			*out << QString::asprintf("%.3f,%.3f ", coords2D.x*zoom, height - (coords2D.y*zoom)); //n.b. we need to flip y-axis
 
 		}
 
@@ -1570,7 +1609,7 @@ int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
 	//recurse on children
 	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
-		n += writeTracesSVG(object->getChild(i), out, height);
+		n += writeTracesSVG(object->getChild(i), out, height, zoom);
 	}
 
 	return n;

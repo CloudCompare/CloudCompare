@@ -1981,6 +1981,11 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 		//write lineation
 		out->writeStartElement("LINEATION");
 	}
+	else if (object->isA(CC_TYPES::POLY_LINE))
+	{
+		//write polyline (note that this will ignore "trace" polylines as they have been grabbed earlier)
+		out->writeStartElement("POLYLINE");
+	}
 	else if (object->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		//write container
@@ -2001,105 +2006,117 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 		out->writeTextElement(it.key(), it.value().toString());
 	}
 
-	//if object is a trace, write the trace points
-	if (ccTrace::isTrace(object))
+	//if object is a polyline object (or a trace) write trace points and normals
+	if (object->isA(CC_TYPES::POLY_LINE))
 	{
-		//get trace & cloud objects
-		ccTrace* t = dynamic_cast<ccTrace*>(object);
+		ccPolyline* poly = static_cast<ccPolyline*>(object);
+		ccTrace* trace = nullptr;
+		if (ccTrace::isTrace(object))
+		{
+			trace = static_cast<ccTrace*>(object);
+		}
 
-		//get point & waypoint data from trace and store in string buffers
-		//write trace points to buffers
-		QString x, y, z, nx, ny, nz, cost; //trace points
-		QString wIDs; //waypoint ids
-		QString comma = ",";
-		ccTrace* trace = static_cast<ccTrace*>(object);
-		
+		QString x, y, z, nx, ny, nz, cost, wIDs;
+
+
 		//loop through points
 		CCVector3 p1, p2; //position
 		CCVector3 n1, n2; //normal vector (if defined)
-		
+
 		//becomes true if any valid normals are recieved
 		bool hasNormals = false;
 
-
-		if (trace->size() >= 2)
+		if (poly->size() >= 2)
 		{
 			//loop through segments
-			for (unsigned i = 1; i < trace->size(); i++)
+			for (unsigned i = 1; i < poly->size(); i++)
 			{
 				//get points
-				trace->getPoint(i - 1, p1); //segment start point
-				trace->getPoint(i, p2); //segment end point
-
-				//calculate segment cost
-				int c = trace->getSegmentCost(trace->getPointGlobalIndex(i - 1), trace->getPointGlobalIndex(i));
+				poly->getPoint(i - 1, p1); //segment start point
+				poly->getPoint(i, p2); //segment end point
 
 				//store data to buffers
 				x += QString::asprintf("%f,", p1.x);
 				y += QString::asprintf("%f,", p1.y);
 				z += QString::asprintf("%f,", p1.z);
-				cost += QString::asprintf("%d,", c);
 
-				//write point normals
-				n1 = trace->getPointNormal(i);
-				n2 = trace->getPointNormal(i);
-				nx += QString::asprintf("%f,", n1.x);
-				ny += QString::asprintf("%f,", n1.y);
-				nz += QString::asprintf("%f,", n1.z);
-				if (!hasNormals && !(n1.x == 0 && n1.y == 0 && n1.z == 0 ))
+				//write data specific to traces
+				if (trace)
 				{
-					hasNormals = true; //this was a non-null normal estimate - we will write normals now
+					int c = trace->getSegmentCost(trace->getPointGlobalIndex(i - 1), trace->getPointGlobalIndex(i));
+					cost += QString::asprintf("%d,", c);
+
+					//write point normals (if this is a trace)
+					n2 = trace->getPointNormal(i);
+					nx += QString::asprintf("%f,", n1.x);
+					ny += QString::asprintf("%f,", n1.y);
+					nz += QString::asprintf("%f,", n1.z);
+					if (!hasNormals && !(n1.x == 0 && n1.y == 0 && n1.z == 0))
+					{
+						hasNormals = true; //this was a non-null normal estimate - we will write normals now
+					}
 				}
+
 			}
 
-			//loop through waypoints
-			for (int w = 0; w < trace->waypoint_count(); w++)
+			//store last point
+			x += QString::asprintf("%f", p2.x);
+			y += QString::asprintf("%f", p2.y);
+			z += QString::asprintf("%f", p2.z);
+			if (hasNormals) //normal
 			{
-				wIDs += QString::asprintf("%d,", trace->getWaypoint(w));
+				nx += QString::asprintf("%f", n2.x);
+				ny += QString::asprintf("%f", n2.y);
+				nz += QString::asprintf("%f", n2.z);
 			}
+			if (trace) //cost
+			{
+				cost += "0";
+			}
+
+			//if this is a trace also write the waypoints
+			if (trace)
+			{
+				for (int w = 0; w < trace->waypoint_count(); w++)
+				{
+					wIDs += QString::asprintf("%d,", trace->getWaypoint(w));
+				}
+
+			}
+			//write points
+			out->writeStartElement("POINTS");
+			out->writeAttribute("count", QString::asprintf("%d", poly->size()));
+
+			if (hasNormals)
+			{
+				out->writeAttribute("normals", "True");
+			}
+			else
+			{
+				out->writeAttribute("normals", "False");
+			}
+
+			out->writeTextElement("x", x);
+			out->writeTextElement("y", y);
+			out->writeTextElement("z", z);
+
+			if (hasNormals)
+			{
+				out->writeTextElement("nx", nx);
+				out->writeTextElement("ny", ny);
+				out->writeTextElement("nz", nz);
+			}
+
+			if (trace)
+			{
+				//write waypoints
+				out->writeTextElement("cost", cost);
+				out->writeTextElement("control_point_ids", wIDs);
+			}
+
+			//fin!
+			out->writeEndElement();
 		}
-
-		//store last point
-		x += QString::asprintf("%f", p2.x);
-		y += QString::asprintf("%f", p2.y);
-		z += QString::asprintf("%f", p2.z);
-		if (hasNormals) //normal
-		{
-			nx += QString::asprintf("%f", n2.x);
-			ny += QString::asprintf("%f", n2.y);
-			nz += QString::asprintf("%f", n2.z);
-		}
-		cost += "0";
-
-		//write points
-		out->writeStartElement("POINTS");
-		out->writeAttribute("count", QString::asprintf("%d", trace->size()));
-
-		if (hasNormals)
-		{
-			out->writeAttribute("normals", "True");
-		}
-		else
-		{
-			out->writeAttribute("normals", "False");
-		}
-
-		out->writeTextElement("x", x);
-		out->writeTextElement("y", y);
-		out->writeTextElement("z", z);
-
-		if (hasNormals)
-		{
-			out->writeTextElement("nx", nx);
-			out->writeTextElement("ny", ny);
-			out->writeTextElement("nz", nz);
-		}
-
-		out->writeTextElement("cost", cost);
-		out->writeEndElement();
-
-		//write waypoints
-		out->writeTextElement("control_point_ids", wIDs);
 	}
 
 	//write children

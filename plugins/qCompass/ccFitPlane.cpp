@@ -74,7 +74,18 @@ void ccFitPlane::updateAttributes(float rms, float search_r)
 	//calculate strike/dip/dip direction
 	float strike, dip, dipdir;
 	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
-	ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip); //n.b. this returns result using the british RHR?!?)
+	//ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip); //n.b. this returns result using the british RHR?!?)
+
+	//calculate strike using American RHR
+	strike = dipdir - 90;
+	while (strike < 0) //ensure strike > 0
+	{
+		strike += 360;
+	}
+	while (strike >= 360) //ensure strike < 360
+	{
+		strike -= 360;
+	}
 
 	//calculate centroid
 	CCVector3 C = getCenter();

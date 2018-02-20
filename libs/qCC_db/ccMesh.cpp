@@ -636,7 +636,11 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 			//this is a "persistent" pointer and we know what type of cloud is behind ;)
 			CCVector3* P = const_cast<CCVector3*>(m_associatedCloud->getPointPersistentPtr(i));
 			const CCVector3* d = (const CCVector3*)verticesDisplacement->getValue(i);
-			(*P) += (*d) * (factor / edgesCount[i]);
+			
+			if (edgesCount[i])
+			{
+				(*P) += (*d) * (factor / edgesCount[i]);
+			}
 		}
 	}
 

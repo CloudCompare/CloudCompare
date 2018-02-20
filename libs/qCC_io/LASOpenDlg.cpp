@@ -48,6 +48,11 @@ LASOpenDlg::LASOpenDlg(QWidget* parent)
 	}
 }
 
+void LASOpenDlg::resetApplyAll()
+{
+	m_autoSkip = false;
+}
+
 void LASOpenDlg::onApplyAll()
 {
 	m_autoSkip = true;

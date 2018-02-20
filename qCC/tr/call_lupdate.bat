@@ -4,3 +4,4 @@ echo %QT_DIR%
 %call lupdate
 %QT_DIR%\lupdate.exe .. -ts translation_french.ts
 %QT_DIR%\lupdate.exe .. -ts translation_chinese.ts
+%QT_DIR%\lupdate.exe .. -ts translation_russian.ts

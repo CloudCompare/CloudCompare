@@ -92,18 +92,18 @@ void PlyOpenDlg::setDefaultComboItems(const QStringList& stdPropsText)
 	m_stdPropsText = stdPropsText;
 	int stdPropsCount = stdPropsText.count();
 
-	for (size_t i=0; i<m_standardCombos.size(); ++i)
+	for (QComboBox* combo : m_standardCombos)
 	{
-		assert(m_standardCombos[i]);
-		m_standardCombos[i]->addItems(m_stdPropsText);
-		m_standardCombos[i]->setMaxVisibleItems(stdPropsCount);
+		assert(combo);
+		combo->addItems(m_stdPropsText);
+		combo->setMaxVisibleItems(stdPropsCount);
 	}
 
-	for (size_t j=0; j<m_sfCombos.size(); ++j)
+	for (QComboBox* combo : m_sfCombos)
 	{
-		assert(m_sfCombos[j]);
-		m_sfCombos[j]->addItems(m_stdPropsText);
-		m_sfCombos[j]->setMaxVisibleItems(stdPropsCount);
+		assert(combo);
+		combo->addItems(m_stdPropsText);
+		combo->setMaxVisibleItems(stdPropsCount);
 	}
 }
 
@@ -112,11 +112,11 @@ void PlyOpenDlg::setListComboItems(const QStringList& listPropsText)
 	m_listPropsText = listPropsText;
 	int listPropsCount = listPropsText.count();
 
-	for (size_t i=0; i<m_listCombos.size(); ++i)
+	for (QComboBox* combo : m_listCombos)
 	{
-		assert(m_listCombos[i]);
-		m_listCombos[i]->addItems(m_listPropsText);
-		m_listCombos[i]->setMaxVisibleItems(listPropsCount);
+		assert(combo);
+		combo->addItems(m_listPropsText);
+		combo->setMaxVisibleItems(listPropsCount);
 	}
 }
 
@@ -125,12 +125,17 @@ void PlyOpenDlg::setSingleComboItems(const QStringList& singlePropsText)
 	m_singlePropsText = singlePropsText;
 	int singlePropsCount = singlePropsText.count();
 
-	for (size_t i=0; i<m_singleCombos.size(); ++i)
+	for (QComboBox* combo : m_singleCombos)
 	{
-		assert(m_singleCombos[i]);
-		m_singleCombos[i]->addItems(m_singlePropsText);
-		m_singleCombos[i]->setMaxVisibleItems(singlePropsCount);
+		assert(combo);
+		combo->addItems(m_singlePropsText);
+		combo->setMaxVisibleItems(singlePropsCount);
 	}
+}
+
+void PlyOpenDlg::ResetApplyAll()
+{
+	s_lastContext.applyAll = false;
 }
 
 bool PlyOpenDlg::restorePreviousContext(bool& hasAPreviousContext)
@@ -138,7 +143,6 @@ bool PlyOpenDlg::restorePreviousContext(bool& hasAPreviousContext)
 	hasAPreviousContext = s_lastContext.valid;
 	if (!hasAPreviousContext)
 		return false;
-
 
 	int unassignedProps = 0;
 	int mismatchProps = 0;
@@ -167,15 +171,15 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 	context->allProperties.clear();
 	assert(m_standardCombos.front());
 	if (m_standardCombos.front())
-		for (int i=1; i<m_standardCombos.front()->count(); ++i) //the first item is always 'NONE'
+		for (int i = 1; i < m_standardCombos.front()->count(); ++i) //the first item is always 'NONE'
 			context->allProperties.append(m_standardCombos.front()->itemText(i));
 	assert(m_listCombos.front());
 	if (m_listCombos.front())
-		for (int i=1; i<m_listCombos.front()->count(); ++i) //the first item is always 'NONE'
+		for (int i = 1; i < m_listCombos.front()->count(); ++i) //the first item is always 'NONE'
 			context->allProperties.append(m_listCombos.front()->itemText(i));
 	assert(m_singleCombos.front());
 	if (m_singleCombos.front())
-		for (int i=1; i<m_singleCombos.front()->count(); ++i) //the first item is always 'NONE'
+		for (int i = 1; i < m_singleCombos.front()->count(); ++i) //the first item is always 'NONE'
 			context->allProperties.append(m_singleCombos.front()->itemText(i));
 
 	//now remember how each combo-box is mapped
@@ -186,7 +190,7 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 		{
 			context->standardCombosProperties.resize(m_standardCombos.size());
 			std::fill(context->standardCombosProperties.begin(), context->standardCombosProperties.end(), QString());
-			for (size_t i=0; i<m_standardCombos.size(); ++i)
+			for (size_t i = 0; i < m_standardCombos.size(); ++i)
 			{
 				if (m_standardCombos[i] && m_standardCombos[i]->currentIndex() > 0) //currentIndex == 0 means 'NONE'!!!
 				{
@@ -199,7 +203,7 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 		{
 			context->listCombosProperties.resize(m_listCombos.size());
 			std::fill(context->listCombosProperties.begin(), context->listCombosProperties.end(), QString());
-			for (size_t i=0; i<m_listCombos.size(); ++i)
+			for (size_t i = 0; i < m_listCombos.size(); ++i)
 			{
 				if (m_listCombos[i] && m_listCombos[i]->currentIndex() > 0)
 				{
@@ -212,7 +216,7 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 		{
 			context->singleCombosProperties.resize(m_singleCombos.size());
 			std::fill(context->singleCombosProperties.begin(), context->singleCombosProperties.end(), QString());
-			for (size_t i=0; i<m_singleCombos.size(); ++i)
+			for (size_t i = 0; i < m_singleCombos.size(); ++i)
 			{
 				if (m_singleCombos[i] && m_singleCombos[i]->currentIndex() > 0)
 				{
@@ -224,7 +228,7 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 		//additional SF combos
 		{
 			context->sfCombosProperties.clear();
-			for (size_t i=0; i<m_sfCombos.size(); ++i)
+			for (size_t i = 0; i < m_sfCombos.size(); ++i)
 			{
 				//we only copy the valid ones!
 				if (m_sfCombos[i] && m_sfCombos[i]->currentIndex() > 0)
@@ -259,7 +263,7 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 	{
 		assert(m_standardCombos.front());
 		if (m_standardCombos.front())
-			for (int i=1; i<m_standardCombos.front()->count(); ++i) //the first item is always 'NONE'
+			for (int i = 1; i < m_standardCombos.front()->count(); ++i) //the first item is always 'NONE'
 			{
 				++totalProps;
 				if (!context->allProperties.contains(m_standardCombos.front()->itemText(i)))
@@ -267,7 +271,7 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 			}
 		assert(m_listCombos.front());
 		if (m_listCombos.front())
-			for (int i=1; i<m_listCombos.front()->count(); ++i) //the first item is always 'NONE'
+			for (int i = 1; i < m_listCombos.front()->count(); ++i) //the first item is always 'NONE'
 			{
 				++totalProps;
 				if (!context->allProperties.contains(m_listCombos.front()->itemText(i)))
@@ -275,7 +279,7 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 			}
 		assert(m_singleCombos.front());
 		if (m_singleCombos.front())
-			for (int i=1; i<m_singleCombos.front()->count(); ++i) //the first item is always 'NONE'
+			for (int i = 1; i < m_singleCombos.front()->count(); ++i) //the first item is always 'NONE'
 			{
 				++totalProps;
 				if (!context->allProperties.contains(m_singleCombos.front()->itemText(i)))
@@ -288,7 +292,8 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 	//standard combos
 	assert(m_standardCombos.size() == context->standardCombosProperties.size());
 	{
-		for (size_t i=0; i<m_standardCombos.size(); ++i)
+		for (size_t i = 0; i < m_standardCombos.size(); ++i)
+		{
 			if (m_standardCombos[i])
 			{
 				m_standardCombos[i]->setCurrentIndex(0);
@@ -304,12 +309,14 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 					}
 				}
 			}
+		}
 	}
-	
+
 	//list combos
 	assert(m_listCombos.size() == context->listCombosProperties.size());
 	{
-		for (size_t i=0; i<m_listCombos.size(); ++i)
+		for (size_t i = 0; i < m_listCombos.size(); ++i)
+		{
 			if (m_listCombos[i])
 			{
 				m_listCombos[i]->setCurrentIndex(0);
@@ -325,12 +332,14 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 					}
 				}
 			}
+		}
 	}
 
 	//single combox
 	assert(m_singleCombos.size() == context->singleCombosProperties.size());
 	{
-		for (size_t i=0; i<m_singleCombos.size(); ++i)
+		for (size_t i = 0; i < m_singleCombos.size(); ++i)
+		{
 			if (m_singleCombos[i])
 			{
 				m_singleCombos[i]->setCurrentIndex(0);
@@ -346,6 +355,7 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 					}
 				}
 			}
+		}
 	}
 	
 	//additional SF combos
@@ -353,7 +363,7 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 	{
 		m_sfCombos.front()->setCurrentIndex(0);
 		bool firstSF = true;
-		for (size_t i=0; i<context->sfCombosProperties.size(); ++i)
+		for (size_t i = 0; i < context->sfCombosProperties.size(); ++i)
 		{
 			//try to find it in the new property list!
 			int idx = m_sfCombos.front()->findText(context->sfCombosProperties[i]);

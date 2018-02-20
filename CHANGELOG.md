@@ -6,6 +6,24 @@ v2.10.alpha - XX/XX/201X
 
 - enhancements:
 
+	* The M3C2 plugin can now be called from the command line:
+		- the first time you'll need the configuration file saved with the GUI tool
+			(Use the 'Save parameters to file' button in the bottom-left corner of the M3C2 dialog --> the floppy icon)
+		- then load 2 files (cloud 1 and cloud2)
+		- optionally load a 3rd cloud that will be used as core points
+		- and eventually call the -M3C2 option with the parameter file as argument:
+			CloudCompare -O cloud1 -O cloud2 (-O core_points) -M3C2 parameters_file
+
+	* The "Classify" option of the Canupo plugin can now be called from the command line:
+		- you'll need a trained classifier (.prm file)
+		- main option: -CANUPO_CLASSIFY classifier.prm
+		- confidence threshold:
+			* -USE_CONFIDENCE {threshold}  (threshold must be between 0 and 1)
+			* (use the 'SET_ACTIVE_SF' after loading a cloud to set the active scalar field if
+				you want it to be used to refine the classification)
+		- syntax:
+			CloudCompare -O cloud1 ... -O cloudN -CANUPO_CLASSIFY (-USE_CONFIDENCE 0.9) classifier.prm
+
 	* Labels can now be imported from ASCII files:
 		- new column role in the ASCII loading dialog: "Labels"
 		- labels can be created from textual or numerical columns
@@ -16,7 +34,28 @@ v2.10.alpha - XX/XX/201X
 		- default FBX units are 'cm'
 		- if a FBX file with other units is imported, CC will now store this information as meta-data and will set it correctly
 			if the corresponding meshes are exported as FBX again
-	
+
+	* Command line mode:
+		- Scalar field convert to RGB:
+			* '-SF_CONVERT_TO_RGB {mixWithExistingColors bool}'
+		- Scalar field set color scale:
+			* '-SF_COLOR_SCALE {filename}'
+		- Extract all loaded mesh vertices as standalone 'clouds' (the mesh is discarded)
+			* '-EXTRACT_VERTICES'
+
+	* Unroll tool:
+		- the cylindrical unrolling can be performed inside an arbitrary angular range (between -3600 and +3600 degrees)
+		- this means that the shape can be unrolled on more than 360 degrees, and from an arbitrary orientation
+
+	* New option:
+		- the user can now control whether normals should be enabled on loaded clouds by default or not (default state is now 'off')
+
+	* New behavior:
+		- Some load dialogs 'Apply all' button will only apply to the set of selected files (ASCII, PLY and LAS)
+
+	* PCV:
+		- the PCV plugin can now be applied on several clouds (batch mode)
+
 - Bug fix:
 
 	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values
@@ -25,6 +64,13 @@ v2.10.alpha - XX/XX/201X
 	* Command line mode: when loading at least two LAS files with the 'GLOBAL_SHIFT AUTO' option, if the LAS files had different AND small LAS Shift
 	* Point picking on a mesh (i.e. mainly in the point-pair based registration tool) could select the wrong point on the triangle, or even a wrong triangle
 	* Raster I/O: when importing a raster file, the corresponding point cloud was shifted of half a pixel
+	* The RASTERIZE command line could make CC crash at the end of the process
+	* Hitting the 'Apply all' button of the ASCII open dialog would not restore the previous load configuration correctly in all cases
+		(the header line may not be extracted the second time, etc.)
+	* Align tool: large coordinates of manually input points were rounded off (only when displayed)
+	* When applying an orthographic viewport while the 'stereo' mode is enabled, the stereo mode was broken (now a warning message is disabled and
+		the stereo mode is automatically disabled)
+	* The global shift along vertical dimension (e.g. Z) was not applied when exporting a raster grid to a raster file (geotiff)
 
 v2.9.1 - 11/03/2017
 ----------------------

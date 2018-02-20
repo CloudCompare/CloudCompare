@@ -1654,7 +1654,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 	boost::int64_t realCount = 0;
 	while (size = dataReader.read())
 	{
-		for (unsigned i=0; i<size; i++)
+		for (unsigned i = 0; i < size; i++)
 		{
 			//we skip invalid points!
 			if (!arrays.isInvalidData.empty() && arrays.isInvalidData[i] != 0)
@@ -1662,7 +1662,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 				continue;
 			}
 
-			CCVector3d Pd(0,0,0);
+			CCVector3d Pd(0, 0, 0);
 			if (sphericalMode)
 			{
 				double r = (arrays.xData.empty() ? 0 : arrays.xData[i]);
@@ -1712,7 +1712,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 
 			if (hasNormals)
 			{
-				CCVector3 N(0,0,0);
+				CCVector3 N(0, 0, 0);
 				if (!arrays.xNormData.empty())
 					N.x = static_cast<PointCoordinateType>(arrays.xNormData[i]);
 				if (!arrays.yNormData.empty())
@@ -2130,14 +2130,14 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		//unroll structure in tree (it's a quick to check structure + informative for user)
 		ccHObject* fileStructureTree = new ccHObject("File structure");
-		if (!NodeStructureToTree(fileStructureTree,rootStruct))
+		if (!NodeStructureToTree(fileStructureTree, rootStruct))
 				return CC_FERR_MALFORMED_FILE;
 		container.addChild(fileStructureTree);
 
 		//we store (temporarily) the loaded scans associated with
 		//their unique GUID in a map (to retrieve them later if
 		//necessary - for example to associate them with images)
-		QMap<QString,ccHObject*> scans;
+		QMap<QString, ccHObject*> scans;
 
 		//3D data?
 		if (root.isDefined("/data3D"))

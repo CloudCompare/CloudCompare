@@ -25,9 +25,7 @@
   - click the `Configure` button
   - select the generator for the project  
     The following generators have been tested:
-      - Visual 2013 (32/64 bits)
-      - Visual 2015 (64 bits)
-      - Code::Blocks + gcc 4.9.2 (Windows 32 bits)
+      - Visual 2013, 2015, 2017 (64 bits)
       - gcc (Linux 64 bits)
       - Unix Makefiles (Mac OS X)
       - CodeBlocks - Unix Makefiles (Mac OS X)

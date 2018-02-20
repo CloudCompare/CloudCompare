@@ -130,7 +130,7 @@ public:
 														GenericCloud* Q,
 														const CCVector3& pGravityCenter,
 														const CCVector3& qGravityCenter);
-	
+
 	//! Computes the cross covariance matrix between two clouds (same size) - weighted version
 	/** Used in the ICP algorithm between the cloud to register and the "Closest Points Set"
 		determined from the reference cloud.
@@ -182,6 +182,7 @@ public:
 		\param[out] rms residuals RMS for the detected sphere
 		\param[in] progressCb for progress notification (optional)
 		\param[in] confidence probability that the detected sphere is the right one (strictly below 1)
+		\param[in] seed if different than 0, this seed will be used for random numbers generation (instead of a random one)
 		\result success
 	**/
 	static bool detectSphereRobust(	GenericIndexedCloudPersist* cloud,
@@ -190,7 +191,8 @@ public:
 									PointCoordinateType& radius,
 									double& rms,
 									GenericProgressCallback* progressCb = 0,
-									double confidence = 0.99);
+									double confidence = 0.99,
+									unsigned seed = 0);
 
 	//! Computes the center and radius of a sphere passing through 4 points
 	/** \param[in] A first point

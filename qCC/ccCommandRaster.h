@@ -119,14 +119,28 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 				//local option confirmed, we can move on
 				cmd.arguments().pop_front();
 
-				outputCloud = true;
+				if (outputMesh)
+				{
+					cmd.warning("Can't output the grid as a mesh AND a cloud at the same time");
+				}
+				else
+				{
+					outputCloud = true;
+				}
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_MESH))
 			{
 				//local option confirmed, we can move on
 				cmd.arguments().pop_front();
 
-				outputMesh = true;
+				if (outputCloud)
+				{
+					cmd.warning("Can't output the grid as a mesh AND a cloud at the same time");
+				}
+				else
+				{
+					outputMesh = true;
+				}
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_RASTER_Z))
 			{
@@ -215,7 +229,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 
 		if (emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT && std::isnan(customHeight))
 		{
-			cmd.warning("[Rasterize] The filling stragety is set to 'fill with custom height' but not custom height was defined...");
+			cmd.warning("[Rasterize] The filling stragety is set to 'fill with custom height' but no custom height was defined...");
 			emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;
 		}
 
@@ -224,6 +238,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 			//if no export target is specified, we chose the cloud by default
 			outputCloud = true;
 		}
+		assert(outputCloud || outputMesh);
 
 		if (resample && !outputCloud && !outputMesh)
 		{
@@ -341,10 +356,13 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 
 				if (outputCloud)
 				{
+					assert(!outputMesh);
 					//replace current cloud by the restarized version
 					delete cloudDesc.pc;
 					cloudDesc.pc = rasterCloud;
 					cloudDesc.basename += QString("_RASTER");
+
+					rasterCloud = nullptr;
 
 					if (cmd.autoSaveMode())
 					{
@@ -355,8 +373,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 						}
 					}
 				}
-
-				if (outputMesh)
+				else if (outputMesh)
 				{
 					char errorStr[1024];
 					CCLib::GenericIndexedMesh* baseMesh = CCLib::PointProjectionTools::computeTriangulation
@@ -411,7 +428,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 				if (rasterCloud)
 				{
 					delete rasterCloud;
-					rasterCloud = 0;
+					rasterCloud = nullptr;
 				}
 			}
 

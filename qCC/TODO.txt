@@ -51,6 +51,7 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Add the options to constrain ICP (rotation and/or translation) via the command line (http://www.cloudcompare.org/forum/viewtopic.php?t=2920)
 [*] Ability to change the mouse buttons mapping (http://www.cloudcompare.org/forum/viewtopic.php?t=2676)
 [*] Ability to define custom shortcuts for some methods (http://www.cloudcompare.org/forum/viewtopic.php?t=2676)
 [*] Set the Cross Section box using a plane entity (http://www.danielgm.net/cc/forum/viewtopic.php?t=2485)

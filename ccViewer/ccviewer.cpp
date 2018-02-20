@@ -113,9 +113,9 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 #endif
 
 	//Signals & slots connection
-	connect(m_glWindow,								SIGNAL(filesDropped(const QStringList&)),			this,		SLOT(addToDB(const QStringList&)), Qt::QueuedConnection);
-	connect(m_glWindow,								SIGNAL(entitySelectionChanged(ccHObject*)),	this,		SLOT(selectEntity(ccHObject*)));
-	connect(m_glWindow,								SIGNAL(exclusiveFullScreenToggled(bool)),	this,		SLOT(onExclusiveFullScreenToggled(bool)));
+	connect(m_glWindow,								SIGNAL(filesDropped(const QStringList&)),	this,	SLOT(addToDB(QStringList)), Qt::QueuedConnection);
+	connect(m_glWindow,								SIGNAL(entitySelectionChanged(ccHObject*)),	this,	SLOT(selectEntity(ccHObject*)));
+	connect(m_glWindow,								SIGNAL(exclusiveFullScreenToggled(bool)),	this,	SLOT(onExclusiveFullScreenToggled(bool)));
 	//connect(m_glWindow,							SIGNAL(entitiesSelectionChanged(std::unordered_set<int>)),	this,		SLOT(selectEntities(std::unordered_set<int>))); //not supported!
 	//connect(m_glWindow,							SIGNAL(newLabel(ccHObject*),						this,		SLOT(handleNewEntity(ccHObject*))); //nothing to do in ccViewer!
 
@@ -493,7 +493,7 @@ void ccViewer::updateGLFrameGradient()
 	ui.GLframe->setStyleSheet(styleSheet);
 }
 
-void ccViewer::addToDB(const QStringList& filenames)
+void ccViewer::addToDB(QStringList filenames)
 {
 	ccHObject* currentRoot = m_glWindow->getSceneDB();
 	if (currentRoot)
@@ -512,20 +512,37 @@ void ccViewer::addToDB(const QStringList& filenames)
 	parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
 	parameters.parentWidget = this;
 
+	const ccOptions& options = ccOptions::Instance();
+	FileIOFilter::ResetSesionCounter();
+
 	for (int i = 0; i < filenames.size(); ++i)
 	{
 		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-		ccHObject* newEntities = FileIOFilter::LoadFromFile(filenames[i], parameters, result);
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i], parameters, result);
 
-		if (newEntities)
+		if (newGroup)
 		{
-			addToDB(newEntities);
+			if (!options.normalsDisplayedByDefault)
+			{
+				//disable the normals on all loaded clouds!
+				ccHObject::Container clouds;
+				newGroup->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+				for (ccHObject* cloud : clouds)
+				{
+					if (cloud)
+					{
+						static_cast<ccGenericPointCloud*>(cloud)->showNormals(false);
+					}
+				}
+			}
+
+			addToDB(newGroup);
 
 			if (!scaleAlreadyDisplayed)
 			{
-				for (unsigned i = 0; i < newEntities->getChildrenNumber(); ++i)
+				for (unsigned i = 0; i < newGroup->getChildrenNumber(); ++i)
 				{
-					ccHObject* ent = newEntities->getChild(i);
+					ccHObject* ent = newGroup->getChild(i);
 					if (ent->isA(CC_TYPES::POINT_CLOUD))
 					{
 						ccPointCloud* pc = static_cast<ccPointCloud*>(ent);

@@ -221,8 +221,8 @@ bool ReferenceCloud::add(const ReferenceCloud& cloud)
 		return false;
 
 	//copy new indexes (warning: no duplicate check!)
-	for (unsigned i=0; i<newCount; ++i)
-		(*m_theIndexes)[count+i] = (*cloud.m_theIndexes)[i];
+	for (unsigned i = 0; i < newCount; ++i)
+		(*m_theIndexes)[count + i] = (*cloud.m_theIndexes)[i];
 
 	invalidateBoundingBox();
 	return true;

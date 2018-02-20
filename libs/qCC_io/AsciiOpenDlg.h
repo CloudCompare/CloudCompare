@@ -177,6 +177,9 @@ public:
 	**/
 	static bool CheckOpenSequence(const Sequence& sequence, QString& errorMessage);
 
+	//! Resets the "apply all" flag (if set)
+	static void ResetApplyAll();
+
 public slots:
 	//! Slot called when separator changes
 	void onSeparatorChange(const QString& separator);

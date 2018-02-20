@@ -25,11 +25,11 @@ if (INSTALL_QCOMPASS_PLUGIN)
 	#not sure this is the correcrt way of doing this but adding in 
 	#qCC build file so it knows where the ui_*.h files are
 
-	#list( APPEND CC_PLUGIN_CUSTOM_UI_LIST ${CMAKE_CURRENT_SOURCE_DIR}/ui/mapDlg.ui )
-	#list( APPEND CC_PLUGIN_CUSTOM_UI_LIST ${CMAKE_CURRENT_SOURCE_DIR}/ui/compassDlg.ui )
+	#list( APPEND CC_PLUGIN_CUSTOM_UI_LIST ${CMAKE_CURRENT_SOURCE_DIR}/mapDlg.ui )
+	#list( APPEND CC_PLUGIN_CUSTOM_UI_LIST ${CMAKE_CURRENT_SOURCE_DIR}/compassDlg.ui )
 
-	set( CC_PLUGIN_CUSTOM_UI_LIST	${CMAKE_CURRENT_SOURCE_DIR}/ui/mapDlg.ui )
-	set( CC_PLUGIN_CUSTOM_UI_LIST	${CMAKE_CURRENT_SOURCE_DIR}/ui/compassDlg.ui )
+	set( CC_PLUGIN_CUSTOM_UI_LIST ${CMAKE_CURRENT_SOURCE_DIR}/mapDlg.ui )
+	set( CC_PLUGIN_CUSTOM_UI_LIST ${CMAKE_CURRENT_SOURCE_DIR}/compassDlg.ui )
 
 	include( ../CMakePluginTpl.cmake  )
 

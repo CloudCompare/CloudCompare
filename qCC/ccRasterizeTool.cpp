@@ -1036,6 +1036,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 	assert(gridBBox.isValid());
 	double shiftX = gridBBox.minCorner().u[X];
 	double shiftY = gridBBox.maxCorner().u[Y];
+	double shiftZ = 0.0;
 
 	double stepX = grid.gridStep;
 	double stepY = grid.gridStep;
@@ -1044,6 +1045,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 		const CCVector3d& shift = originCloud->getGlobalShift();
 		shiftX -= shift.u[X];
 		shiftY -= shift.u[Y];
+		shiftZ -= shift.u[Z];
 
 		double scale = originCloud->getGlobalScale();
 		assert(scale != 0);
@@ -1272,12 +1274,14 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 			assert(false);
 		}
 
+		emptyCellHeight += shiftZ;
+
 		for (unsigned j = 0; j < grid.height; ++j)
 		{
 			const ccRasterGrid::Row& row = grid.rows[grid.height - 1 - j];
 			for (unsigned i = 0; i<grid.width; ++i)
 			{
-				scanline[i] = std::isfinite(row[i].h) ? row[i].h : emptyCellHeight;
+				scanline[i] = std::isfinite(row[i].h) ? row[i].h + shiftZ : emptyCellHeight;
 			}
 
 			if (poBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(grid.width), 1, scanline, static_cast<int>(grid.width), 1, GDT_Float64, 0, 0) != CE_None)

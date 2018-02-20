@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                              CLOUDCOMPARE                              #
+//#                       CLOUDCOMPARE PLUGIN: qM3C2                       #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,51 +11,34 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#            COPYRIGHT: UNIVERSITE EUROPEENNE DE BRETAGNE                #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_UNROLL_DLG_HEADER
-#define CC_UNROLL_DLG_HEADER
+#ifndef Q_M3C2_PROCESS_HEADER
+#define Q_M3C2_PROCESS_HEADER
 
-#include <ui_unrollDlg.h>
+//Local
+#include "qM3C2Dialog.h"
 
-//CCLib
-#include <CCGeom.h>
+class ccMainAppInterface;
 
-//! Dialog: unroll clould on a cylinder or a cone
-class ccUnrollDlg : public QDialog, public Ui::UnrollDialog
+//! M3C2 process
+/** See "Accurate 3D comparison of complex topography with terrestrial laser scanner:
+	application to the Rangitikei canyon (N-Z)", Lague, D., Brodu, N. and Leroux, J.,
+	2013, ISPRS journal of Photogrammmetry and Remote Sensing
+**/
+class qM3C2Process
 {
-	Q_OBJECT
-
 public:
-
-	//! Default constructor
-	explicit ccUnrollDlg(QWidget* parent = 0);
-
-	//! Projection type
-	enum Type { CYLINDER, CONE, STRAIGHTENED_CONE };
-
-	Type getType() const;
-	int getAxisDimension() const;
-	bool isAxisPositionAuto() const;
-	CCVector3 getAxisPosition() const;
-	void getAngleRange(double& start_deg, double& stop_deg) const;
-	double getRadius() const;
-	double getConeHalfAngle() const;
-	bool exportDeviationSF() const;
-
-	void toPersistentSettings() const;
-	void fromPersistentSettings();
-
-protected slots:
-	void shapeTypeChanged(int index);
-	void axisDimensionChanged(int index);
-	void axisAutoStateChanged(int checkState);
-
-protected:
-	bool coneMode;
+	
+	static bool Compute(const qM3C2Dialog& dlg,
+						QString& errorMessage,
+						ccPointCloud*& outputCloud,
+						bool allowDialogs,
+						QWidget* parentWidget = nullptr,
+						ccMainAppInterface* app = nullptr);
 
 };
 
-#endif
+#endif //Q_M3C2_PROCESS_HEADER

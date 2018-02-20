@@ -4464,9 +4464,9 @@ void MainWindow::doConvertPolylinesToMesh()
 
 void MainWindow::doCompute2HalfDimVolume()
 {
-	if (m_selectedEntities.size() != 2)
+	if (m_selectedEntities.empty() || m_selectedEntities.size() > 2)
 	{
-		ccConsole::Error("Select two point clouds!");
+		ccConsole::Error("Select one or two point clouds!");
 		return;
 	}
 
@@ -5500,7 +5500,6 @@ void MainWindow::doActionUnroll()
 
 	ccUnrollDlg::Type mode = unrollDlg.getType();
 	PointCoordinateType radius = static_cast<PointCoordinateType>(unrollDlg.getRadius());
-	double angle_deg = unrollDlg.getAngle();
 	unsigned char dim = static_cast<unsigned char>(unrollDlg.getAxisDimension());
 	bool exportDeviationSF = unrollDlg.exportDeviationSF();
 	CCVector3* pCenter = nullptr;
@@ -5519,14 +5518,32 @@ void MainWindow::doActionUnroll()
 	switch (mode)
 	{
 	case ccUnrollDlg::CYLINDER:
-		output = pc->unrollOnCylinder(radius, dim, pCenter, exportDeviationSF, &pDlg);
-		break;
+	{
+		double startAngle_deg = 0.0, stopAngle_deg = 360.0;
+		unrollDlg.getAngleRange(startAngle_deg, stopAngle_deg);
+		if (startAngle_deg >= stopAngle_deg)
+		{
+			QMessageBox::critical(this, "Error", "Invalid angular range");
+			return;
+		}
+		output = pc->unrollOnCylinder(radius, dim, pCenter, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
+	}
+	break;
+
 	case ccUnrollDlg::CONE:
-		output = pc->unrollOnCone(angle_deg, center, dim, false, 0, exportDeviationSF, &pDlg);
-		break;
+	{
+		double coneHalfAngle_deg = unrollDlg.getConeHalfAngle();
+		output = pc->unrollOnCone(coneHalfAngle_deg, center, dim, false, 0, exportDeviationSF, &pDlg);
+	}
+	break;
+	
 	case ccUnrollDlg::STRAIGHTENED_CONE:
-		output = pc->unrollOnCone(angle_deg, center, dim, true, radius, exportDeviationSF, &pDlg);
-		break;
+	{
+		double coneHalfAngle_deg = unrollDlg.getConeHalfAngle();
+		output = pc->unrollOnCone(coneHalfAngle_deg, center, dim, true, radius, exportDeviationSF, &pDlg);
+	}
+	break;
+	
 	default:
 		assert(false);
 		break;
@@ -9152,6 +9169,9 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
 	CCVector3d addCoordinatesShift(0, 0, 0);
 
+	const ccOptions& options = ccOptions::Instance();
+	FileIOFilter::ResetSesionCounter();
+
 	for ( const QString &filename : filenames )
 	{
 		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -9159,6 +9179,20 @@ void MainWindow::addToDB(	const QStringList& filenames,
 
 		if (newGroup)
 		{
+			if (!options.normalsDisplayedByDefault)
+			{
+				//disable the normals on all loaded clouds!
+				ccHObject::Container clouds;
+				newGroup->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+				for (ccHObject* cloud : clouds)
+				{
+					if (cloud)
+					{
+						static_cast<ccGenericPointCloud*>(cloud)->showNormals(false);
+					}
+				}
+			}
+			
 			if (destWin)
 			{
 				newGroup->setDisplay_recursive(destWin);
@@ -9279,7 +9313,7 @@ void MainWindow::doActionLoadFile()
 		currentOpenDlgFilter.clear(); //this way FileIOFilter will try to guess the file type automatically!
 
 	//load files
-	addToDB(selectedFiles,currentOpenDlgFilter);
+	addToDB(selectedFiles, currentOpenDlgFilter);
 }
 
 //Helper: check for a filename validity

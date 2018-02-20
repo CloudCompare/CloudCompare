@@ -51,6 +51,12 @@ bool ccUnrollDlg::isAxisPositionAuto() const
 	return (checkBoxAuto->checkState() == Qt::Checked);
 }
 
+void ccUnrollDlg::getAngleRange(double& start_deg, double& stop_deg) const
+{
+	start_deg = startAngleDoubleSpinBox->value();
+	stop_deg = stopAngleDoubleSpinBox->value();
+}
+
 CCVector3 ccUnrollDlg::getAxisPosition() const
 {
 	return CCVector3(	static_cast<PointCoordinateType>(doubleSpinBoxAxisX->value()),
@@ -63,9 +69,9 @@ double ccUnrollDlg::getRadius() const
 	return radiusDoubleSpinBox->value();
 }
 
-double ccUnrollDlg::getAngle() const
+double ccUnrollDlg::getConeHalfAngle() const
 {
-	return angleDoubleSpinBox->value();
+	return halfAngleDoubleSpinBox->value();
 }
 
 bool ccUnrollDlg::exportDeviationSF() const
@@ -85,6 +91,7 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 		groupBoxAxisPosition->setTitle("Axis position");
 		radiusLabel->setText("Radius");
 		axisAutoStateChanged(checkBoxAuto->checkState());
+		unrollRangeGroupBox->setVisible(true);
 	}
 	break;
 	case CONE: //cone
@@ -95,6 +102,7 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 		radiusLabel->setText("Base radius");
 		groupBoxAxisPosition->setTitle("Cone apex");
 		axisAutoStateChanged(Qt::Unchecked);
+		unrollRangeGroupBox->setVisible(false);
 	}
 	break;
 	case STRAIGHTENED_CONE: //straightened cone
@@ -104,6 +112,7 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 		autoCenterFrame->setVisible(false);
 		groupBoxAxisPosition->setTitle("Cone apex");
 		axisAutoStateChanged(Qt::Unchecked);
+		unrollRangeGroupBox->setVisible(false);
 	}
 	break;
 	};
@@ -138,23 +147,27 @@ void ccUnrollDlg::axisDimensionChanged(int index)
 
 //semi-persistent settings
 static CCVector3d s_axisCenter(0, 0, 0);
+static double s_startAngle_deg = 0.0;
+static double s_stopAngle_deg = 360.0;
 
 void ccUnrollDlg::toPersistentSettings() const
 {
 	QSettings settings;
 	settings.beginGroup("Unroll");
 	{
-		settings.setValue("shapeType", comboBoxUnrollShapeType->currentIndex());
-		settings.setValue("axisDimension", comboBoxAxisDimension->currentIndex());
-		settings.setValue("angle", angleDoubleSpinBox->value());
-		settings.setValue("radius", radiusDoubleSpinBox->value());
-		settings.setValue("autoCenter", checkBoxAuto->isChecked());
-		settings.setValue("exportDeviationSF", exportDeviationSFCheckBox->isChecked());
+		settings.setValue("shapeType",			comboBoxUnrollShapeType->currentIndex());
+		settings.setValue("axisDimension",		comboBoxAxisDimension->currentIndex());
+		settings.setValue("angle",				halfAngleDoubleSpinBox->value());
+		settings.setValue("radius",				radiusDoubleSpinBox->value());
+		settings.setValue("autoCenter",			checkBoxAuto->isChecked());
+		settings.setValue("exportDeviationSF",	exportDeviationSFCheckBox->isChecked());
 
 		//save the axis center as semi-persistent only
 		s_axisCenter.x = doubleSpinBoxAxisX->value();
 		s_axisCenter.y = doubleSpinBoxAxisY->value();
 		s_axisCenter.z = doubleSpinBoxAxisZ->value();
+
+		getAngleRange(s_startAngle_deg, s_stopAngle_deg);
 	}
 	settings.endGroup();
 }
@@ -166,14 +179,14 @@ void ccUnrollDlg::fromPersistentSettings()
 	{
 		int shapeType   = settings.value("shapeType",     comboBoxUnrollShapeType->currentIndex()).toInt();
 		int axisDim     = settings.value("axisDimension", comboBoxAxisDimension->currentIndex()).toInt();
-		double angle    = settings.value("angle",         angleDoubleSpinBox->value()).toDouble();
+		double angle    = settings.value("angle",         halfAngleDoubleSpinBox->value()).toDouble();
 		double radius   = settings.value("radius",        radiusDoubleSpinBox->value()).toDouble();
 		bool autoCenter = settings.value("autoCenter",    checkBoxAuto->isChecked()).toBool();
 		bool exportDeviationSF = settings.value("exportDeviationSF", exportDeviationSFCheckBox->isChecked()).toBool();
 
 		comboBoxUnrollShapeType->setCurrentIndex(shapeType);
 		comboBoxAxisDimension->setCurrentIndex(axisDim);
-		angleDoubleSpinBox->setValue(angle);
+		halfAngleDoubleSpinBox->setValue(angle);
 		radiusDoubleSpinBox->setValue(radius);
 		checkBoxAuto->setChecked(autoCenter);
 		exportDeviationSFCheckBox->setChecked(exportDeviationSF);
@@ -181,6 +194,9 @@ void ccUnrollDlg::fromPersistentSettings()
 		doubleSpinBoxAxisX->setValue(s_axisCenter.x);
 		doubleSpinBoxAxisY->setValue(s_axisCenter.y);
 		doubleSpinBoxAxisZ->setValue(s_axisCenter.z);
+
+		startAngleDoubleSpinBox->setValue(s_startAngle_deg);
+		stopAngleDoubleSpinBox ->setValue(s_stopAngle_deg);
 	}
 	settings.endGroup();
 }

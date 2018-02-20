@@ -1,3 +1,5 @@
+<!--- If you are reporting a security issue, please email security@cloucompare.org directly -->
+
 ## Current Behavior
 <!--- If describing a bug, tell us what happens instead of the expected behavior -->
 <!--- If suggesting a change/improvement, explain the difference from current behavior -->
@@ -16,7 +18,7 @@
 <!--- Providing context helps us come up with a solution that is most useful in the real world -->
 
 ## Your Environment
-<!--- Include any relevant details about your environment -->
-* OS & Version:
-* CC Version:
-* Graphics card:
+* CC Version: 
+* OS & Version: 
+* Graphics card: 
+<!--- Include any other relevant details about your environment -->

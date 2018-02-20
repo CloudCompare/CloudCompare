@@ -151,6 +151,8 @@ public:
 												 double minVal, double maxVal,
 												 QString title, QString xAxisLabel) override;
 	virtual ccPickingHub* pickingHub() override { return m_pickingHub; }
+	virtual ccHObjectContext removeObjectTemporarilyFromDBTree(ccHObject* obj) override;
+	virtual void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context) override;
 
 	//! Inherited from ccPickingListener
 	virtual void onItemPicked(const PickedItem& pi) override;
@@ -164,29 +166,6 @@ public:
 	**/
 	void  addEditPlaneAction( QMenu &menu ) const;
 	
-	//! Backup "context" for an object
-	/** Used with removeObjectTemporarilyFromDBTree/putObjectBackIntoDBTree.
-	**/
-	struct ccHObjectContext
-	{
-		ccHObjectContext() : parent(0), childFlags(0), parentFlags(0) {}
-		ccHObject* parent;
-		int childFlags;
-		int parentFlags;
-	};
-
-	//! Removes object temporarily from DB tree
-	/** This method must be called before any modification to the db tree
-		WARNING: may change 'selectedEntities' container!
-	**/
-	ccHObjectContext removeObjectTemporarilyFromDBTree(ccHObject* obj);
-
-	//! Adds back object to DB tree
-	/** This method should be called once modifications to the db tree are finished
-		(see removeObjectTemporarilyFromDBTree).
-	**/
-	void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context);
-
 	//! Dispatches the (loaded) plugins in the UI
 	void setupPluginDispatch(const tPluginInfoList& plugins, const QStringList& pluginPaths);
 

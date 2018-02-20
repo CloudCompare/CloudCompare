@@ -251,7 +251,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 void AsciiOpenDlg::updateTable()
 {
 	m_ui->tableWidget->setEnabled(false);
-	m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false);
+	//m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false); //we can't do that here (as we may have restored the state of this checkbox before calling updateTable)
 
 	bool hadValidHeader = !m_headerLine.isEmpty();
 	m_headerLine.clear();
@@ -259,6 +259,7 @@ void AsciiOpenDlg::updateTable()
 	if (m_filename.isEmpty())
 	{
 		m_ui->tableWidget->clear();
+		m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false);
 		return;
 	}
 	//we open the file in ASCII mode
@@ -267,6 +268,7 @@ void AsciiOpenDlg::updateTable()
 	{
 		m_ui->tableWidget->clear();
 		m_columnType.clear();
+		m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false);
 		return;
 	}
 	QTextStream stream(&file);
@@ -391,6 +393,7 @@ void AsciiOpenDlg::updateTable()
 				//if the very first line is a comment, then we force the user to skip it!
 				//this way it will be considered as a header
 				m_ui->spinBoxSkipLines->setMinimum(1);
+				m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false);
 				return;
 			}
 			++commentLines;
@@ -523,8 +526,11 @@ void AsciiOpenDlg::updateTable()
 
 			//a non-numerical column can't be valid
 			if (!valueIsNumber[i])
+			{
 				m_columnType[i] = TEXT;
+			}
 			else
+			{
 				// we must do this to ensure we can get a correct result.
 				// Otherwise, we may fail in such situations:
 				//
@@ -541,6 +547,7 @@ void AsciiOpenDlg::updateTable()
 				// then if we choose to skip the 3 first lines, we get a %valueIsNumber with 5 "true"
 				// but the %m_columnType is still with 5 values of "TEXT" which leads to the failure!
 				m_columnType[i] = UNKNOWN;
+			}
 		}
 	}
 
@@ -947,6 +954,11 @@ void AsciiOpenDlg::applyAll()
 	s_asciiOpenContext.applyAll = true;
 }
 
+void AsciiOpenDlg::ResetApplyAll()
+{
+	s_asciiOpenContext.applyAll = false;
+}
+
 bool AsciiOpenDlg::restorePreviousContext()
 {
 	if (!s_asciiOpenContext.applyAll)
@@ -954,6 +966,7 @@ bool AsciiOpenDlg::restorePreviousContext()
 
 	//restore previous dialog state
 	s_asciiOpenContext.load(m_ui);
+	m_skippedLines = static_cast<unsigned>(std::max(0, s_asciiOpenContext.skipLines));
 	updateTable();
 
 	//saved sequence and cloud content don't match!!!

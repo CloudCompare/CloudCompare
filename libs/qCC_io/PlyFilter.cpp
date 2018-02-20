@@ -1199,10 +1199,10 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 					++assignedSingleProperties;
 		}
 
-		if (parameters.alwaysDisplayLoadDialog
-			|| stdPropsCount > assignedStdProperties + 1		//+1 because of the first item in the combo box ('none')
-			|| listPropsCount > assignedListProperties + 1
-			|| singlePropsCount > assignedSingleProperties + 1)
+		if (	parameters.alwaysDisplayLoadDialog
+			||	stdPropsCount > assignedStdProperties + 1		//+1 because of the first item in the combo box ('none')
+			||	listPropsCount > assignedListProperties + 1
+			||	singlePropsCount > assignedSingleProperties + 1)
 		{
 			PlyOpenDlg pod/*(MainWindow::TheInstance())*/;
 
@@ -1221,7 +1221,10 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 			if (!pod.restorePreviousContext(hasAPreviousContext))
 			{
 				if (hasAPreviousContext)
+				{
 					ccLog::Warning("[PLY] Too many differences with the previous file, we reset the dialog.");
+				}
+				
 				//Set default/guessed element
 				pod.xComboBox->setCurrentIndex(xIndex);
 				pod.yComboBox->setCurrentIndex(yIndex);
@@ -1235,7 +1238,9 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 
 				pod.sfComboBox->setCurrentIndex(sfPropIndexes.empty() ? 0 : sfPropIndexes.front());
 				for (size_t j = 1; j < sfPropIndexes.size(); ++j)
+				{
 					pod.addSFComboBox(sfPropIndexes[j]);
+				}
 
 				pod.nxComboBox->setCurrentIndex(nxIndex);
 				pod.nyComboBox->setCurrentIndex(nyIndex);
@@ -1244,6 +1249,13 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 				pod.facesComboBox->setCurrentIndex(facesIndex);
 				pod.textCoordsComboBox->setCurrentIndex(texCoordsIndex);
 				pod.texIndexComboBox->setCurrentIndex(texNumberIndex);
+			}
+
+			if (parameters.sessionStart)
+			{
+				//we do this AFTER calling restorePreviousContext because it may still be good that the previous
+				//configuration is restored even though the user needs to confirm it
+				PlyOpenDlg::ResetApplyAll();
 			}
 
 			//We show the dialog (or we try to skip it ;)

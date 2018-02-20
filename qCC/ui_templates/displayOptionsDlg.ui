@@ -870,6 +870,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="autoDisplayNormalsCheckBox">
+         <property name="text">
+          <string>Automatically display normals at loading time (when available)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_10">
          <item>
           <widget class="QLabel" name="label_22">

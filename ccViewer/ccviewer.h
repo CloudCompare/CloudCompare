@@ -22,6 +22,7 @@
 
 //Qt
 #include <QMainWindow>
+#include <QStringList>
 
 //GUIs
 #include <ui_ccviewer.h>
@@ -60,7 +61,7 @@ public slots:
 	//! Tries to load (and then adds to main db) a list of entity (files)
 	/** \param filenames filenames to load
 	**/
-	void addToDB(const QStringList& filenames);
+	void addToDB(QStringList filenames);
 
 protected slots:
 

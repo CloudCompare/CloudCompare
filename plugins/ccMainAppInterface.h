@@ -97,6 +97,29 @@ public:
 	**/
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true) = 0;
 
+	//! Backup "context" for an object
+	/** Used with removeObjectTemporarilyFromDBTree/putObjectBackIntoDBTree.
+	**/
+	struct ccHObjectContext
+	{
+		ccHObjectContext() : parent(0), childFlags(0), parentFlags(0) {}
+		ccHObject* parent;
+		int childFlags;
+		int parentFlags;
+	};
+
+	//! Removes object temporarily from DB tree
+	/** This method must be called before any modification to the db tree
+		\warning May change the set of currently selected entities
+	**/
+	virtual ccHObjectContext removeObjectTemporarilyFromDBTree(ccHObject* obj) = 0;
+
+	//! Adds back object to DB tree
+	/** This method should be called once modifications to the db tree are finished
+		(see removeObjectTemporarilyFromDBTree).
+	**/
+	virtual void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context) = 0;
+
 	//! Selects or unselects an entity (in db tree)
 	/** \param obj entity
 		\param selected whether entity should be selected or not

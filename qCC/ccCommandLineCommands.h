@@ -62,6 +62,8 @@ static const char COMMAND_SF_GRADIENT[]						= "SF_GRAD";
 static const char COMMAND_ROUGHNESS[]						= "ROUGH";
 static const char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
 static const char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
+static const char COMMAND_SF_COLOR_SCALE[]					= "SF_COLOR_SCALE";
+static const char COMMAND_SF_CONVERT_TO_RGB[]				= "SF_CONVERT_TO_RGB";
 static const char COMMAND_FILTER_SF_BY_VALUE[]				= "FILTER_SF";
 static const char COMMAND_MERGE_CLOUDS[]					= "MERGE_CLOUDS";
 static const char COMMAND_MERGE_MESHES[]                    = "MERGE_MESHES";
@@ -99,6 +101,7 @@ static const char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 static const char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
 static const char COMMAND_SF_OP[]							= "SF_OP";
 static const char COMMAND_COORD_TO_SF[]						= "COORD_TO_SF";
+static const char COMMAND_EXTRACT_VERTICES[]				= "EXTRACT_VERTICES";
 static const char COMMAND_ICP[]								= "ICP";
 static const char COMMAND_ICP_REFERENCE_IS_FIRST[]			= "REFERENCE_IS_FIRST";
 static const char COMMAND_ICP_MIN_ERROR_DIIF[]				= "MIN_ERROR_DIFF";
@@ -152,7 +155,7 @@ struct CommandChangeOutputFormat : public ccCommandLineInterface::Command
 			const FileIOFilter::FilterContainer& filters = FileIOFilter::GetFilters();
 			for (size_t i = 0; i < filters.size(); ++i)
 			{
-				if (argument == QString(filters[i]->getDefaultExtension()).toUpper())
+				if (argument == filters[i]->getDefaultExtension().toUpper())
 				{
 					//found
 					fileFilter = filters[i]->getFileFilters(false).first(); //Take the first 'output' file filter by default (could we be smarter?)
@@ -164,7 +167,7 @@ struct CommandChangeOutputFormat : public ccCommandLineInterface::Command
 			//haven't found anything?
 			if (fileFilter.isEmpty())
 			{
-				cmd.error(QString("Unhandled format specifier (%1)").arg(argument));
+				cmd.error(QObject::tr("Unhandled format specifier (%1)").arg(argument));
 			}
 		}
 		else
@@ -188,7 +191,7 @@ struct CommandChangeCloudOutputFormat : public CommandChangeOutputFormat
 			return false;
 
 		cmd.setCloudExportFormat(fileFilter, defaultExt);
-		cmd.print(QString("Output export format (clouds) set to: %1").arg(defaultExt.toUpper()));
+		cmd.print(QObject::tr("Output export format (clouds) set to: %1").arg(defaultExt.toUpper()));
 
 		//default options for ASCII output
 		if (fileFilter == AsciiFilter::GetFileFilter())
@@ -213,10 +216,10 @@ struct CommandChangeCloudOutputFormat : public CommandChangeOutputFormat
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION));
+					return cmd.error(QObject::tr("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION));
 
 				cmd.setCloudExportFormat(cmd.cloudExportFormat(), cmd.arguments().takeFirst());
-				cmd.print(QString("New output extension for clouds: %1").arg(cmd.cloudExportExt()));
+				cmd.print(QObject::tr("New output extension for clouds: %1").arg(cmd.cloudExportExt()));
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ASCII_EXPORT_PRECISION))
 			{
@@ -224,14 +227,14 @@ struct CommandChangeCloudOutputFormat : public CommandChangeOutputFormat
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: precision value after '%1'").arg(COMMAND_ASCII_EXPORT_PRECISION));
+					return cmd.error(QObject::tr("Missing parameter: precision value after '%1'").arg(COMMAND_ASCII_EXPORT_PRECISION));
 				bool ok;
 				int precision = cmd.arguments().takeFirst().toInt(&ok);
 				if (!ok || precision < 0)
-					return cmd.error(QString("Invalid value for precision! (%1)").arg(COMMAND_ASCII_EXPORT_PRECISION));
+					return cmd.error(QObject::tr("Invalid value for precision! (%1)").arg(COMMAND_ASCII_EXPORT_PRECISION));
 
 				if (fileFilter != AsciiFilter::GetFileFilter())
-					cmd.warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
+					cmd.warning(QObject::tr("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
 				AsciiSaveDlg* saveDialog = AsciiFilter::GetSaveDialog();
 				assert(saveDialog);
@@ -247,10 +250,10 @@ struct CommandChangeCloudOutputFormat : public CommandChangeOutputFormat
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: separator character after '%1'").arg(COMMAND_ASCII_EXPORT_SEPARATOR));
+					return cmd.error(QObject::tr("Missing parameter: separator character after '%1'").arg(COMMAND_ASCII_EXPORT_SEPARATOR));
 
 				if (fileFilter != AsciiFilter::GetFileFilter())
-					cmd.warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
+					cmd.warning(QObject::tr("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
 				QString separatorStr = cmd.arguments().takeFirst().toUpper();
 				//printf("%s\n",qPrintable(separatorStr));
@@ -264,7 +267,7 @@ struct CommandChangeCloudOutputFormat : public CommandChangeOutputFormat
 				else if (separatorStr == "TAB")
 					index = 3;
 				else
-					return cmd.error(QString("Invalid separator! ('%1')").arg(separatorStr));
+					return cmd.error(QObject::tr("Invalid separator! ('%1')").arg(separatorStr));
 
 				AsciiSaveDlg* saveDialog = AsciiFilter::GetSaveDialog();
 				assert(saveDialog);
@@ -279,7 +282,7 @@ struct CommandChangeCloudOutputFormat : public CommandChangeOutputFormat
 				cmd.arguments().pop_front();
 
 				if (fileFilter != AsciiFilter::GetFileFilter())
-					cmd.warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
+					cmd.warning(QObject::tr("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
 				AsciiSaveDlg* saveDialog = AsciiFilter::GetSaveDialog();
 				assert(saveDialog);
@@ -294,7 +297,7 @@ struct CommandChangeCloudOutputFormat : public CommandChangeOutputFormat
 				cmd.arguments().pop_front();
 
 				if (fileFilter != AsciiFilter::GetFileFilter())
-					cmd.warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
+					cmd.warning(QObject::tr("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
 				AsciiSaveDlg* saveDialog = AsciiFilter::GetSaveDialog();
 				assert(saveDialog);
@@ -325,7 +328,7 @@ struct CommandChangeMeshOutputFormat : public CommandChangeOutputFormat
 			return false;
 
 		cmd.setMeshExportFormat(fileFilter, defaultExt);
-		cmd.print(QString("Output export format (meshes) set to: %1").arg(defaultExt.toUpper()));
+		cmd.print(QObject::tr("Output export format (meshes) set to: %1").arg(defaultExt.toUpper()));
 
 		//look for additional parameters
 		while (!cmd.arguments().empty())
@@ -338,10 +341,10 @@ struct CommandChangeMeshOutputFormat : public CommandChangeOutputFormat
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION));
+					return cmd.error(QObject::tr("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION));
 
 				cmd.setMeshExportFormat(cmd.meshExportFormat(), cmd.arguments().takeFirst());
-				cmd.print(QString("New output extension for meshes: %1").arg(cmd.meshExportExt()));
+				cmd.print(QObject::tr("New output extension for meshes: %1").arg(cmd.meshExportExt()));
 			}
 			else
 			{
@@ -361,7 +364,7 @@ struct CommandLoad : public ccCommandLineInterface::Command
 	{
 		cmd.print("[LOADING]");
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: filename after \"-%1\"").arg(COMMAND_OPEN));
+			return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_OPEN));
 
 		//optional parameters
 		int skipLines = 0;
@@ -375,17 +378,17 @@ struct CommandLoad : public ccCommandLineInterface::Command
 
 				if (cmd.arguments().empty())
 				{
-					return cmd.error(QString("Missing parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES));
+					return cmd.error(QObject::tr("Missing parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES));
 				}
 
 				bool ok;
 				skipLines = cmd.arguments().takeFirst().toInt(&ok);
 				if (!ok)
 				{
-					return cmd.error(QString("Invalid parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES));
+					return cmd.error(QObject::tr("Invalid parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES));
 				}
 
-				cmd.print(QString("Will skip %1 lines").arg(skipLines));
+				cmd.print(QObject::tr("Will skip %1 lines").arg(skipLines));
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_OPEN_SHIFT_ON_LOAD))
 			{
@@ -394,7 +397,7 @@ struct CommandLoad : public ccCommandLineInterface::Command
 
 				if (cmd.arguments().empty())
 				{
-					return cmd.error(QString("Missing parameter: global shift vector or %1 after '%2'").arg(COMMAND_OPEN_SHIFT_ON_LOAD_AUTO, COMMAND_OPEN_SHIFT_ON_LOAD));
+					return cmd.error(QObject::tr("Missing parameter: global shift vector or %1 after '%2'").arg(COMMAND_OPEN_SHIFT_ON_LOAD_AUTO, COMMAND_OPEN_SHIFT_ON_LOAD));
 				}
 
 				QString firstParam = cmd.arguments().takeFirst();
@@ -411,7 +414,7 @@ struct CommandLoad : public ccCommandLineInterface::Command
 				}
 				else if (cmd.arguments().size() < 2)
 				{
-					return cmd.error(QString("Missing parameter: global shift vector after '%1' (3 values expected)").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
+					return cmd.error(QObject::tr("Missing parameter: global shift vector after '%1' (3 values expected)").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
 				}
 				else
 				{
@@ -419,13 +422,13 @@ struct CommandLoad : public ccCommandLineInterface::Command
 					CCVector3d shiftOnLoadVec;
 					shiftOnLoadVec.x = firstParam.toDouble(&ok);
 					if (!ok)
-						return cmd.error(QString("Invalid parameter: X coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
+						return cmd.error(QObject::tr("Invalid parameter: X coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
 					shiftOnLoadVec.y = cmd.arguments().takeFirst().toDouble(&ok);
 					if (!ok)
-						return cmd.error(QString("Invalid parameter: Y coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
+						return cmd.error(QObject::tr("Invalid parameter: Y coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
 					shiftOnLoadVec.z = cmd.arguments().takeFirst().toDouble(&ok);
 					if (!ok)
-						return cmd.error(QString("Invalid parameter: Z coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
+						return cmd.error(QObject::tr("Invalid parameter: Z coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
 
 					//set the user defined shift vector as default shift information
 					ccCommandLineInterface::CLLoadParameters& loadParams = cmd.fileLoadingParams();
@@ -462,7 +465,7 @@ struct CommandClearNormals : public ccCommandLineInterface::Command
 		cmd.print("[CLEAR NORMALS]");
 		if (cmd.clouds().empty() && cmd.meshes().empty())
 		{
-			return cmd.error(QString("No entity loaded (be sure to open at least one file with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CLEAR_NORMALS));
+			return cmd.error(QObject::tr("No entity loaded (be sure to open at least one file with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CLEAR_NORMALS));
 		}
 
 		for (const CLCloudDesc& thisCloudDesc : cmd.clouds())
@@ -514,22 +517,22 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 		cmd.print("[OCTREE NORMALS CALCULATION]");
 		if (cmd.clouds().empty())
 		{
-			return cmd.error(QString("No point cloud to normal calculation (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_COMPUTE_OCTREE_NORMALS));
+			return cmd.error(QObject::tr("No point cloud to normal calculation (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_COMPUTE_OCTREE_NORMALS));
 		}
 
 		if (cmd.arguments().empty())
 		{
-			return cmd.error(QString("Missing parameter: radius after \"-%1\"").arg(COMMAND_COMPUTE_OCTREE_NORMALS));
+			return cmd.error(QObject::tr("Missing parameter: radius after \"-%1\"").arg(COMMAND_COMPUTE_OCTREE_NORMALS));
 		}
 
 		bool ok;
 		float radius = cmd.arguments().takeFirst().toFloat(&ok);
 		if (!ok)
 		{
-			return cmd.error(QString("Invalid radius"));
+			return cmd.error(QObject::tr("Invalid radius"));
 		}
 
-		cmd.print(QString("\tRadius: %1").arg(radius));
+		cmd.print(QObject::tr("\tRadius: %1").arg(radius));
 
 		CC_LOCAL_MODEL_TYPES model = QUADRIC;
 		ccNormalVectors::Orientation  orientation = ccNormalVectors::Orientation::UNDEFINED;
@@ -542,14 +545,14 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 			if(success)
 			{
 				cmd.print("computeNormalsWithOctree success");
-				cmd.print(QString("cloud->hasNormals: %1").arg(cloud->hasNormals()));
+				cmd.print(QObject::tr("cloud->hasNormals: %1").arg(cloud->hasNormals()));
 			}
 			else
 			{
 				return cmd.error("computeNormalsWithOctree failed");
 			}
 			
-			cloud->setName(cloud->getName() + QString(".OctreeNormal"));
+			cloud->setName(cloud->getName() + QObject::tr(".OctreeNormal"));
 			CLCloudDesc cloudDesc(cloud, thisCloudDesc.basename, thisCloudDesc.path, thisCloudDesc.indexInFile);
 			QString errorStr = cmd.exportEntity(cloudDesc, "OCTREE_NORMALS");
 			if (!errorStr.isEmpty())
@@ -571,21 +574,21 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 		cmd.print("[SUBSAMPLING]");
 		if (cmd.clouds().empty())
 		{
-			return cmd.error(QString("No point cloud to resample (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SUBSAMPLE));
+			return cmd.error(QObject::tr("No point cloud to resample (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SUBSAMPLE));
 		}
 
 		if (cmd.arguments().empty())
 		{
-			return cmd.error(QString("Missing parameter: resampling method after \"-%1\"").arg(COMMAND_SUBSAMPLE));
+			return cmd.error(QObject::tr("Missing parameter: resampling method after \"-%1\"").arg(COMMAND_SUBSAMPLE));
 		}
 
 		QString method = cmd.arguments().takeFirst().toUpper();
-		cmd.print(QString("\tMethod: ") + method);
+		cmd.print(QObject::tr("\tMethod: ") + method);
 		if (method == "RANDOM")
 		{
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QString("Missing parameter: number of points after \"-%1 RANDOM\"").arg(COMMAND_SUBSAMPLE));
+				return cmd.error(QObject::tr("Missing parameter: number of points after \"-%1 RANDOM\"").arg(COMMAND_SUBSAMPLE));
 			}
 
 			bool ok;
@@ -594,19 +597,19 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 			{
 				return cmd.error("Invalid number of points for random resampling!");
 			}
-			cmd.print(QString("\tOutput points: %1").arg(count));
+			cmd.print(QObject::tr("\tOutput points: %1").arg(count));
 
 			for (size_t i = 0; i < cmd.clouds().size(); ++i)
 			{
 				ccPointCloud* cloud = cmd.clouds()[i].pc;
-				cmd.print(QString("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
+				cmd.print(QObject::tr("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 				CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(cloud, count, cmd.progressDialog());
 				if (!refCloud)
 				{
 					return cmd.error("Subsampling process failed!");
 				}
-				cmd.print(QString("\tResult: %1 points").arg(refCloud->size()));
+				cmd.print(QObject::tr("\tResult: %1 points").arg(refCloud->size()));
 
 				//save output
 				ccPointCloud* result = cloud->partialClone(refCloud);
@@ -615,7 +618,7 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 
 				if (result)
 				{
-					result->setName(cmd.clouds()[i].pc->getName() + QString(".subsampled"));
+					result->setName(cmd.clouds()[i].pc->getName() + QObject::tr(".subsampled"));
 					if (cmd.autoSaveMode())
 					{
 						CLCloudDesc cloudDesc(result, cmd.clouds()[i].basename, cmd.clouds()[i].path, cmd.clouds()[i].indexInFile);
@@ -629,7 +632,7 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 					//replace current cloud by this one
 					delete cmd.clouds()[i].pc;
 					cmd.clouds()[i].pc = result;
-					cmd.clouds()[i].basename += QString("_SUBSAMPLED");
+					cmd.clouds()[i].basename += QObject::tr("_SUBSAMPLED");
 					//delete result;
 					//result = 0;
 				}
@@ -643,7 +646,7 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 		{
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QString("Missing parameter: spatial step after \"-%1 SPATIAL\"").arg(COMMAND_SUBSAMPLE));
+				return cmd.error(QObject::tr("Missing parameter: spatial step after \"-%1 SPATIAL\"").arg(COMMAND_SUBSAMPLE));
 			}
 			bool ok;
 			double step = cmd.arguments().takeFirst().toDouble(&ok);
@@ -651,12 +654,12 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 			{
 				return cmd.error("Invalid step value for spatial resampling!");
 			}
-			cmd.print(QString("\tSpatial step: %1").arg(step));
+			cmd.print(QObject::tr("\tSpatial step: %1").arg(step));
 
 			for (size_t i = 0; i < cmd.clouds().size(); ++i)
 			{
 				ccPointCloud* cloud = cmd.clouds()[i].pc;
-				cmd.print(QString("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
+				cmd.print(QObject::tr("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 				CCLib::CloudSamplingTools::SFModulationParams modParams(false);
 				CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(cloud, static_cast<PointCoordinateType>(step), modParams, 0, cmd.progressDialog());
@@ -664,7 +667,7 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 				{
 					return cmd.error("Subsampling process failed!");
 				}
-				cmd.print(QString("\tResult: %1 points").arg(refCloud->size()));
+				cmd.print(QObject::tr("\tResult: %1 points").arg(refCloud->size()));
 
 				//save output
 				ccPointCloud* result = cloud->partialClone(refCloud);
@@ -673,7 +676,7 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 
 				if (result)
 				{
-					result->setName(cmd.clouds()[i].pc->getName() + QString(".subsampled"));
+					result->setName(cmd.clouds()[i].pc->getName() + QObject::tr(".subsampled"));
 					if (cmd.autoSaveMode())
 					{
 						CLCloudDesc cloudDesc(result, cmd.clouds()[i].basename, cmd.clouds()[i].path, cmd.clouds()[i].indexInFile);
@@ -687,7 +690,7 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 					//replace current cloud by this one
 					delete cmd.clouds()[i].pc;
 					cmd.clouds()[i].pc = result;
-					cmd.clouds()[i].basename += QString("_SUBSAMPLED");
+					cmd.clouds()[i].basename += QObject::tr("_SUBSAMPLED");
 					//delete result;
 					//result = 0;
 				}
@@ -701,7 +704,7 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 		{
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QString("Missing parameter: octree level after \"-%1 OCTREE\"").arg(COMMAND_SUBSAMPLE));
+				return cmd.error(QObject::tr("Missing parameter: octree level after \"-%1 OCTREE\"").arg(COMMAND_SUBSAMPLE));
 			}
 
 			bool ok = false;
@@ -710,7 +713,7 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 			{
 				return cmd.error("Invalid octree level!");
 			}
-			cmd.print(QString("\tOctree level: %1").arg(octreeLevel));
+			cmd.print(QObject::tr("\tOctree level: %1").arg(octreeLevel));
 
 			QScopedPointer<ccProgressDialog> progressDialog(0);
 			if (!cmd.silentMode())
@@ -722,7 +725,7 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 			for (size_t i = 0; i < cmd.clouds().size(); ++i)
 			{
 				ccPointCloud* cloud = cmd.clouds()[i].pc;
-				cmd.print(QString("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
+				cmd.print(QObject::tr("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 				CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
 																												static_cast<unsigned char>(octreeLevel),
@@ -732,7 +735,7 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 				{
 					return cmd.error("Subsampling process failed!");
 				}
-				cmd.print(QString("\tResult: %1 points").arg(refCloud->size()));
+				cmd.print(QObject::tr("\tResult: %1 points").arg(refCloud->size()));
 
 				//save output
 				ccPointCloud* result = cloud->partialClone(refCloud);
@@ -741,11 +744,11 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 
 				if (result)
 				{
-					result->setName(cmd.clouds()[i].pc->getName() + QString(".subsampled"));
+					result->setName(cmd.clouds()[i].pc->getName() + QObject::tr(".subsampled"));
 					if (cmd.autoSaveMode())
 					{
 						CLCloudDesc cloudDesc(result, cmd.clouds()[i].basename, cmd.clouds()[i].path, cmd.clouds()[i].indexInFile);
-						QString errorStr = cmd.exportEntity(cloudDesc, QString("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
+						QString errorStr = cmd.exportEntity(cloudDesc, QObject::tr("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
 						if (!errorStr.isEmpty())
 						{
 							delete result;
@@ -755,7 +758,7 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 					//replace current cloud by this one
 					delete cmd.clouds()[i].pc;
 					cmd.clouds()[i].pc = result;
-					cmd.clouds()[i].basename += QString("_SUBSAMPLED");
+					cmd.clouds()[i].basename += QObject::tr("_SUBSAMPLED");
 					//delete result;
 					//result = 0;
 				}
@@ -789,13 +792,13 @@ struct CommandExtractCCs : public ccCommandLineInterface::Command
 		cmd.print("[CONNECTED COMPONENTS EXTRACTION]");
 		if (cmd.clouds().empty())
 		{
-			return cmd.error(QString("No point cloud loaded (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_EXTRACT_CC));
+			return cmd.error(QObject::tr("No point cloud loaded (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_EXTRACT_CC));
 		}
 
 		//octree level
 		if (cmd.arguments().empty())
 		{
-			return cmd.error(QString("Missing parameter: octree level after \"-%1\"").arg(COMMAND_EXTRACT_CC));
+			return cmd.error(QObject::tr("Missing parameter: octree level after \"-%1\"").arg(COMMAND_EXTRACT_CC));
 		}
 		bool ok;
 		unsigned char octreeLevel = std::min<unsigned char>(cmd.arguments().takeFirst().toUShort(&ok), CCLib::DgmOctree::MAX_OCTREE_LEVEL);
@@ -803,19 +806,19 @@ struct CommandExtractCCs : public ccCommandLineInterface::Command
 		{
 			return cmd.error("Invalid octree level!");
 		}
-		cmd.print(QString("\tOctree level: %1").arg(octreeLevel));
+		cmd.print(QObject::tr("\tOctree level: %1").arg(octreeLevel));
 
 		//min number of points
 		if (cmd.arguments().empty())
 		{
-			return cmd.error(QString("Missing parameter: minimum number of points per component after \"-%1 [octree level]\"").arg(COMMAND_EXTRACT_CC));
+			return cmd.error(QObject::tr("Missing parameter: minimum number of points per component after \"-%1 [octree level]\"").arg(COMMAND_EXTRACT_CC));
 		}
 		unsigned minPointCount = cmd.arguments().takeFirst().toUInt(&ok);
 		if (!ok)
 		{
 			return cmd.error("Invalid min. number of points!");
 		}
-		cmd.print(QString("\tMin number of points per component: %1").arg(minPointCount));
+		cmd.print(QObject::tr("\tMin number of points per component: %1").arg(minPointCount));
 
 		try
 		{
@@ -831,7 +834,7 @@ struct CommandExtractCCs : public ccCommandLineInterface::Command
 			for (size_t i = 0; i < inputClouds.size(); ++i)
 			{
 				ccPointCloud* cloud = inputClouds[i].pc;
-				cmd.print(QString("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
+				cmd.print(QObject::tr("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 				//we create/activate CCs label scalar field
 				int sfIdx = cloud->getScalarFieldIndexByName(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
@@ -888,7 +891,7 @@ struct CommandExtractCCs : public ccCommandLineInterface::Command
 							compCloud->setGlobalScale(cloud->getGlobalScale());
 							compCloud->setName(QString(cloud->getName() + "_CC#%1").arg(j + 1));
 
-							CLCloudDesc cloudDesc(compCloud, inputClouds[i].basename + QString("_COMPONENT_%1").arg(++realIndex), inputClouds[i].path);
+							CLCloudDesc cloudDesc(compCloud, inputClouds[i].basename + QObject::tr("_COMPONENT_%1").arg(++realIndex), inputClouds[i].path);
 							if (cmd.autoSaveMode())
 							{
 								QString errorStr = cmd.exportEntity(cloudDesc, QString(), 0, false, true);
@@ -902,7 +905,7 @@ struct CommandExtractCCs : public ccCommandLineInterface::Command
 						}
 						else
 						{
-							cmd.warning(QString("Failed to create component #%1! (not enough memory)").arg(j + 1));
+							cmd.warning(QObject::tr("Failed to create component #%1! (not enough memory)").arg(j + 1));
 						}
 					}
 
@@ -918,7 +921,7 @@ struct CommandExtractCCs : public ccCommandLineInterface::Command
 				}
 				else
 				{
-					cmd.print(QString("%1 component(s) were created").arg(cmd.clouds().size()));
+					cmd.print(QObject::tr("%1 component(s) were created").arg(cmd.clouds().size()));
 				}
 			}
 
@@ -947,7 +950,7 @@ struct CommandCurvature : public ccCommandLineInterface::Command
 		cmd.print("[CURVATURE]");
 
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: curvature type after \"-%1\"").arg(COMMAND_CURVATURE));
+			return cmd.error(QObject::tr("Missing parameter: curvature type after \"-%1\"").arg(COMMAND_CURVATURE));
 
 		QString curvTypeStr = cmd.arguments().takeFirst().toUpper();
 		CCLib::Neighbourhood::CC_CURVATURE_TYPE curvType = CCLib::Neighbourhood::MEAN_CURV;
@@ -961,7 +964,7 @@ struct CommandCurvature : public ccCommandLineInterface::Command
 		}
 		else
 		{
-			return cmd.error(QString("Invalid curvature type after \"-%1\". Got '%2' instead of MEAN or GAUSS.").arg(COMMAND_CURVATURE, curvTypeStr));
+			return cmd.error(QObject::tr("Invalid curvature type after \"-%1\". Got '%2' instead of MEAN or GAUSS.").arg(COMMAND_CURVATURE, curvTypeStr));
 		}
 
 		if (cmd.arguments().empty())
@@ -971,11 +974,11 @@ struct CommandCurvature : public ccCommandLineInterface::Command
 		QString kernelStr = cmd.arguments().takeFirst();
 		PointCoordinateType kernelSize = static_cast<PointCoordinateType>(kernelStr.toDouble(&paramOk));
 		if (!paramOk)
-			return cmd.error(QString("Failed to read a numerical parameter: kernel size (after curvature type). Got '%1' instead.").arg(kernelStr));
-		cmd.print(QString("\tKernel size: %1").arg(kernelSize));
+			return cmd.error(QObject::tr("Failed to read a numerical parameter: kernel size (after curvature type). Got '%1' instead.").arg(kernelStr));
+		cmd.print(QObject::tr("\tKernel size: %1").arg(kernelSize));
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud on which to compute curvature! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CURVATURE));
+			return cmd.error(QObject::tr("No point cloud on which to compute curvature! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CURVATURE));
 
 		//Call MainWindow generic method
 		void* additionalParameters[2] = { &curvType, &kernelSize };
@@ -987,7 +990,7 @@ struct CommandCurvature : public ccCommandLineInterface::Command
 		if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_CURVATURE, entities, cmd.widgetParent(), additionalParameters))
 		{
 			//save output
-			if (cmd.autoSaveMode() && !cmd.saveClouds(QString("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize)))
+			if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize)))
 				return false;
 		}
 		return true;
@@ -997,7 +1000,7 @@ struct CommandCurvature : public ccCommandLineInterface::Command
 static bool ReadDensityType(ccCommandLineInterface& cmd, CCLib::GeometricalAnalysisTools::Density& density)
 {
 	if (cmd.arguments().empty())
-		return cmd.error(QString("Missing parameter: density type after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
+		return cmd.error(QObject::tr("Missing parameter: density type after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
 	
 	//read option confirmed, we can move on
 	QString typeArg = cmd.arguments().takeFirst().toUpper();
@@ -1015,7 +1018,7 @@ static bool ReadDensityType(ccCommandLineInterface& cmd, CCLib::GeometricalAnaly
 	}
 	else
 	{
-		return cmd.error(QString("Invalid parameter: density type is expected after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
+		return cmd.error(QObject::tr("Invalid parameter: density type is expected after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
 	}
 
 	return true;
@@ -1029,7 +1032,7 @@ struct CommandApproxDensity : public ccCommandLineInterface::Command
 	{
 		cmd.print("[APPROX DENSITY]");
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud on which to compute approx. density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_APPROX_DENSITY));
+			return cmd.error(QObject::tr("No point cloud on which to compute approx. density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_APPROX_DENSITY));
 
 		//Call MainWindow generic method
 		ccHObject::Container entities;
@@ -1047,7 +1050,7 @@ struct CommandApproxDensity : public ccCommandLineInterface::Command
 				//local option confirmed, we can move on
 				cmd.arguments().pop_front();
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: density type after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
+					return cmd.error(QObject::tr("Missing parameter: density type after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
 				//read option confirmed, we can move on
 				if (!ReadDensityType(cmd, densityType))
 					return false;
@@ -1075,14 +1078,14 @@ struct CommandDensity : public ccCommandLineInterface::Command
 		cmd.print("[DENSITY]");
 
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: sphere radius after \"-%1\"").arg(COMMAND_DENSITY));
+			return cmd.error(QObject::tr("Missing parameter: sphere radius after \"-%1\"").arg(COMMAND_DENSITY));
 
 		bool paramOk = false;
 		QString kernelStr = cmd.arguments().takeFirst();
 		PointCoordinateType kernelSize = static_cast<PointCoordinateType>(kernelStr.toDouble(&paramOk));
 		if (!paramOk)
-			return cmd.error(QString("Failed to read a numerical parameter: sphere radius (after \"-%1\"). Got '%2' instead.").arg(COMMAND_DENSITY).arg(kernelStr));
-		cmd.print(QString("\tSphere radius: %1").arg(kernelSize));
+			return cmd.error(QObject::tr("Failed to read a numerical parameter: sphere radius (after \"-%1\"). Got '%2' instead.").arg(COMMAND_DENSITY).arg(kernelStr));
+		cmd.print(QObject::tr("\tSphere radius: %1").arg(kernelSize));
 
 		//optional parameter: density type
 		CCLib::GeometricalAnalysisTools::Density densityType = CCLib::GeometricalAnalysisTools::DENSITY_3D;
@@ -1094,7 +1097,7 @@ struct CommandDensity : public ccCommandLineInterface::Command
 				//local option confirmed, we can move on
 				cmd.arguments().pop_front();
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: density type after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
+					return cmd.error(QObject::tr("Missing parameter: density type after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
 				//read option confirmed, we can move on
 				if (!ReadDensityType(cmd, densityType))
 					return false;
@@ -1102,7 +1105,7 @@ struct CommandDensity : public ccCommandLineInterface::Command
 		}
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud on which to compute density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DENSITY));
+			return cmd.error(QObject::tr("No point cloud on which to compute density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DENSITY));
 
 		//Call MainWindow generic method
 		void* additionalParameters[] = { &kernelSize, &densityType };
@@ -1131,7 +1134,7 @@ struct CommandSFGradient : public ccCommandLineInterface::Command
 		cmd.print("[SF GRADIENT]");
 
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: boolean (whether SF is euclidean or not) after \"-%1\"").arg(COMMAND_SF_GRADIENT));
+			return cmd.error(QObject::tr("Missing parameter: boolean (whether SF is euclidean or not) after \"-%1\"").arg(COMMAND_SF_GRADIENT));
 
 		QString euclideanStr = cmd.arguments().takeFirst().toUpper();
 		bool euclidean = false;
@@ -1141,11 +1144,11 @@ struct CommandSFGradient : public ccCommandLineInterface::Command
 		}
 		else if (euclideanStr != "FALSE")
 		{
-			return cmd.error(QString("Invalid boolean value after \"-%1\". Got '%2' instead of TRUE or FALSE.").arg(COMMAND_SF_GRADIENT, euclideanStr));
+			return cmd.error(QObject::tr("Invalid boolean value after \"-%1\". Got '%2' instead of TRUE or FALSE.").arg(COMMAND_SF_GRADIENT, euclideanStr));
 		}
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud on which to compute SF gradient! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_GRADIENT));
+			return cmd.error(QObject::tr("No point cloud on which to compute SF gradient! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_GRADIENT));
 
 		//Call MainWindow generic method
 		void* additionalParameters[1] = { &euclidean };
@@ -1156,15 +1159,18 @@ struct CommandSFGradient : public ccCommandLineInterface::Command
 			unsigned sfCount = cmd.clouds()[i].pc->getNumberOfScalarFields();
 			if (sfCount == 0)
 			{
-				cmd.warning(QString("cmd.warning: cloud '%1' has no scalar field (it will be ignored)").arg(cmd.clouds()[i].pc->getName()));
+				cmd.warning(QObject::tr("cmd.warning: cloud '%1' has no scalar field (it will be ignored)").arg(cmd.clouds()[i].pc->getName()));
 			}
 			else
 			{
 				if (sfCount > 1)
-					cmd.warning(QString("cmd.warning: cloud '%1' has several scalar fields (the active one will be used by default, or the first one if none is active)").arg(cmd.clouds()[i].pc->getName()));
+					cmd.warning(QObject::tr("cmd.warning: cloud '%1' has several scalar fields (the active one will be used by default, or the first one if none is active)").arg(cmd.clouds()[i].pc->getName()));
 
-				if (!cmd.clouds()[i].pc->getCurrentDisplayedScalarField())
-					cmd.clouds()[i].pc->setCurrentDisplayedScalarField(0);
+				int activeSFIndex = cmd.clouds()[i].pc->getCurrentOutScalarFieldIndex();
+				if (activeSFIndex < 0)
+					activeSFIndex = 0;
+
+				cmd.clouds()[i].pc->setCurrentDisplayedScalarField(activeSFIndex);
 
 				entities.push_back(cmd.clouds()[i].pc);
 			}
@@ -1190,17 +1196,17 @@ struct CommandRoughness : public ccCommandLineInterface::Command
 		cmd.print("[ROUGHNESS]");
 
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: kernel size after \"-%1\"").arg(COMMAND_ROUGHNESS));
+			return cmd.error(QObject::tr("Missing parameter: kernel size after \"-%1\"").arg(COMMAND_ROUGHNESS));
 
 		bool paramOk = false;
 		QString kernelStr = cmd.arguments().takeFirst();
 		PointCoordinateType kernelSize = static_cast<PointCoordinateType>(kernelStr.toDouble(&paramOk));
 		if (!paramOk)
-			return cmd.error(QString("Failed to read a numerical parameter: kernel size (after \"-%1\"). Got '%2' instead.").arg(COMMAND_ROUGHNESS, kernelStr));
-		cmd.print(QString("\tKernel size: %1").arg(kernelSize));
+			return cmd.error(QObject::tr("Failed to read a numerical parameter: kernel size (after \"-%1\"). Got '%2' instead.").arg(COMMAND_ROUGHNESS, kernelStr));
+		cmd.print(QObject::tr("\tKernel size: %1").arg(kernelSize));
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud on which to compute roughness! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_ROUGHNESS));
+			return cmd.error(QObject::tr("No point cloud on which to compute roughness! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_ROUGHNESS));
 
 		//Call MainWindow generic method
 		void* additionalParameters[1] = { &kernelSize };
@@ -1212,7 +1218,7 @@ struct CommandRoughness : public ccCommandLineInterface::Command
 		if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ROUGHNESS, entities, cmd.widgetParent(), additionalParameters))
 		{
 			//save output
-			if (cmd.autoSaveMode() && !cmd.saveClouds(QString("ROUGHNESS_KERNEL_%2").arg(kernelSize)))
+			if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("ROUGHNESS_KERNEL_%2").arg(kernelSize)))
 				return false;
 		}
 
@@ -1229,17 +1235,17 @@ struct CommandApplyTransformation : public ccCommandLineInterface::Command
 		cmd.print("[APPLY TRANSFORMATION]");
 
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: transformation file after \"-%1\"").arg(COMMAND_APPLY_TRANSFORMATION));
+			return cmd.error(QObject::tr("Missing parameter: transformation file after \"-%1\"").arg(COMMAND_APPLY_TRANSFORMATION));
 
 		QString filename = cmd.arguments().takeFirst();
 		ccGLMatrix mat;
 		if (!mat.fromAsciiFile(filename))
-			return cmd.error(QString("Failed to read transformation matrix file '%1'!").arg(filename));
+			return cmd.error(QObject::tr("Failed to read transformation matrix file '%1'!").arg(filename));
 
-		cmd.print(QString("Transformation:\n") + mat.toString(6));
+		cmd.print(QObject::tr("Transformation:\n") + mat.toString(6));
 
 		if (cmd.clouds().empty() && cmd.meshes().empty())
-			return cmd.error(QString("No entity on which to apply the transformation! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_APPLY_TRANSFORMATION));
+			return cmd.error(QObject::tr("No entity on which to apply the transformation! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_APPLY_TRANSFORMATION));
 
 		//apply transformation
 		if (!cmd.clouds().empty())
@@ -1278,7 +1284,7 @@ struct CommandDropGlobalShift : public ccCommandLineInterface::Command
 		cmd.print("[DROP GLOBAL SHIFT]");
 
 		if (cmd.clouds().empty() && cmd.meshes().empty())
-			return cmd.error(QString("No loaded entity! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DROP_GLOBAL_SHIFT));
+			return cmd.error(QObject::tr("No loaded entity! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DROP_GLOBAL_SHIFT));
 
 		//process clouds
 		for (const CLCloudDesc& desc : cmd.clouds())
@@ -1295,6 +1301,108 @@ struct CommandDropGlobalShift : public ccCommandLineInterface::Command
 				shifted->setGlobalShift(0, 0, 0);
 			}
 		}
+
+		return true;
+	}
+};
+
+struct CommandSFColorScale : public ccCommandLineInterface::Command
+{
+	CommandSFColorScale() : ccCommandLineInterface::Command("SF color scale", COMMAND_SF_COLOR_SCALE) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		cmd.print("[SF COLOR SCALE]");
+
+		if (cmd.arguments().empty())
+			return cmd.error(QObject::tr("Missing parameter: color scale file after \"-%1\"").arg(COMMAND_SF_COLOR_SCALE));
+
+		QString filename = cmd.arguments().takeFirst();
+
+		ccColorScale::Shared scale = ccColorScale::LoadFromXML(filename);
+
+		if (!scale)
+			return cmd.error(QObject::tr("Failed to read color scale file '%1'!").arg(filename));
+
+		if (cmd.clouds().empty())
+			return cmd.error(QObject::tr("No point cloud on which to change the SF color scale! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_COLOR_SCALE));
+
+		for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		{
+			ccScalarField* sf = static_cast<ccScalarField*>(cmd.clouds()[i].pc->getCurrentOutScalarField());
+			if (sf)
+			{
+				sf->setColorScale(scale);
+			}
+		}
+
+		if (cmd.autoSaveMode() && !cmd.saveClouds("COLOR_SCALE"))
+			return false;
+
+		return true;
+	}
+};
+
+struct CommandSFConvertToRGB : public ccCommandLineInterface::Command
+{
+	CommandSFConvertToRGB() : ccCommandLineInterface::Command("SF convert to RGB", COMMAND_SF_CONVERT_TO_RGB) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		cmd.print("[SF CONVERT TO RGB]");
+
+		if (cmd.arguments().empty())
+			return cmd.error(QObject::tr("Missing parameter: boolean (whether to mix with existing colors or not) after \"-%1\"").arg(COMMAND_SF_CONVERT_TO_RGB));
+
+		QString mixWithExistingColorsStr = cmd.arguments().takeFirst().toUpper();
+		bool mixWithExistingColors = false;
+		if (mixWithExistingColorsStr == "TRUE")
+		{
+			mixWithExistingColors = true;
+		}
+		else if (mixWithExistingColorsStr != "FALSE")
+		{
+			return cmd.error(QObject::tr("Invalid boolean value after \"-%1\". Got '%2' instead of TRUE or FALSE.").arg(COMMAND_SF_CONVERT_TO_RGB, mixWithExistingColorsStr));
+		}
+
+		if (cmd.clouds().empty())
+			return cmd.error(QObject::tr("No point cloud on which to convert SF to RGB! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_CONVERT_TO_RGB));
+
+		for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		{
+			ccPointCloud* pc = cmd.clouds()[i].pc;
+			unsigned sfCount = pc->getNumberOfScalarFields();
+			int activeSFIndex = pc->getCurrentOutScalarFieldIndex();
+
+			if (sfCount == 0)
+			{
+				cmd.warning(QObject::tr("cmd.warning: cloud '%1' has no scalar field (it will be ignored)").arg(pc->getName()));
+			}
+			else if (activeSFIndex < 0)
+			{
+				cmd.warning(QObject::tr("cmd.warning: cloud '%1' has no active scalar field (it will be ignored)").arg(pc->getName()));
+			}
+			else
+			{
+				int displaySFIndex = pc->getCurrentDisplayedScalarFieldIndex();
+				pc->setCurrentDisplayedScalarField(activeSFIndex);
+
+				if (pc->setRGBColorWithCurrentScalarField(mixWithExistingColors))
+				{
+					pc->showColors(true);
+					pc->showSF(false);
+				}
+				else
+				{
+					cmd.warning(QObject::tr("cmd.warning: cloud '%1' failed to convert SF to RGB").arg(pc->getName()));
+				}
+
+				pc->setCurrentDisplayedScalarField(displaySFIndex);
+			}
+		}
+
+		if (cmd.autoSaveMode() && !cmd.saveClouds("SF_CONVERT_TO_RGB"))
+			return false;
 
 		return true;
 	}
@@ -1325,7 +1433,7 @@ struct CommandFilterBySFValue : public ccCommandLineInterface::Command
 		QString minValStr;
 		{
 			if (cmd.arguments().empty())
-				return cmd.error(QString("Missing parameter: min value after \"-%1\"").arg(COMMAND_FILTER_SF_BY_VALUE));
+				return cmd.error(QObject::tr("Missing parameter: min value after \"-%1\"").arg(COMMAND_FILTER_SF_BY_VALUE));
 
 			bool paramOk = false;
 			minValStr = cmd.arguments().takeFirst();
@@ -1345,7 +1453,7 @@ struct CommandFilterBySFValue : public ccCommandLineInterface::Command
 			{
 				minVal = static_cast<ScalarType>(minValStr.toDouble(&paramOk));
 				if (!paramOk)
-					return cmd.error(QString("Failed to read a numerical parameter: min value (after \"-%1\"). Got '%2' instead.").arg(COMMAND_FILTER_SF_BY_VALUE).arg(minValStr));
+					return cmd.error(QObject::tr("Failed to read a numerical parameter: min value (after \"-%1\"). Got '%2' instead.").arg(COMMAND_FILTER_SF_BY_VALUE).arg(minValStr));
 			}
 		}
 
@@ -1354,7 +1462,7 @@ struct CommandFilterBySFValue : public ccCommandLineInterface::Command
 		QString maxValStr;
 		{
 			if (cmd.arguments().empty())
-				return cmd.error(QString("Missing parameter: max value after \"-%1\" {min}").arg(COMMAND_FILTER_SF_BY_VALUE));
+				return cmd.error(QObject::tr("Missing parameter: max value after \"-%1\" {min}").arg(COMMAND_FILTER_SF_BY_VALUE));
 
 			bool paramOk = false;
 			maxValStr = cmd.arguments().takeFirst();
@@ -1374,14 +1482,14 @@ struct CommandFilterBySFValue : public ccCommandLineInterface::Command
 			{
 				maxVal = static_cast<ScalarType>(maxValStr.toDouble(&paramOk));
 				if (!paramOk)
-					return cmd.error(QString("Failed to read a numerical parameter: max value (after min value). Got '%1' instead.").arg(COMMAND_FILTER_SF_BY_VALUE, maxValStr));
+					return cmd.error(QObject::tr("Failed to read a numerical parameter: max value (after min value). Got '%1' instead.").arg(COMMAND_FILTER_SF_BY_VALUE, maxValStr));
 			}
 		}
 
-		cmd.print(QString("\tInterval: [%1 - %2]").arg(minValStr, maxValStr));
+		cmd.print(QObject::tr("\tInterval: [%1 - %2]").arg(minValStr, maxValStr));
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud on which to filter SF! (be sure to open one or generate one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_FILTER_SF_BY_VALUE));
+			return cmd.error(QObject::tr("No point cloud on which to filter SF! (be sure to open one or generate one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_FILTER_SF_BY_VALUE));
 
 
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
@@ -1430,13 +1538,13 @@ struct CommandFilterBySFValue : public ccCommandLineInterface::Command
 				ccPointCloud* fitleredCloud = cmd.clouds()[i].pc->filterPointsByScalarValue(thisMinVal, thisMaxVal);
 				if (fitleredCloud)
 				{
-					cmd.print(QString("\t\tCloud '%1' --> %2/%3 points remaining").arg(cmd.clouds()[i].pc->getName()).arg(fitleredCloud->size()).arg(cmd.clouds()[i].pc->size()));
+					cmd.print(QObject::tr("\t\tCloud '%1' --> %2/%3 points remaining").arg(cmd.clouds()[i].pc->getName()).arg(fitleredCloud->size()).arg(cmd.clouds()[i].pc->size()));
 
 					CLCloudDesc resultDesc(fitleredCloud, cmd.clouds()[i].basename, cmd.clouds()[i].path, cmd.clouds()[i].indexInFile);
 					//replace current cloud by this one
 					delete cmd.clouds()[i].pc;
 					cmd.clouds()[i].pc = fitleredCloud;
-					cmd.clouds()[i].basename += QString("_FILTERED_[%1_%2]").arg(thisMinVal).arg(thisMaxVal);
+					cmd.clouds()[i].basename += QObject::tr("_FILTERED_[%1_%2]").arg(thisMinVal).arg(thisMaxVal);
 					if (cmd.autoSaveMode())
 					{
 						QString errorStr = cmd.exportEntity(resultDesc);
@@ -1486,7 +1594,7 @@ struct CommandComputeMeshVolume : public ccCommandLineInterface::Command
 				}
 				else
 				{
-					return cmd.error(QString("Missing argument: filename after '%1'").arg(COMMAND_VOLUME_TO_FILE));
+					return cmd.error(QObject::tr("Missing argument: filename after '%1'").arg(COMMAND_VOLUME_TO_FILE));
 				}
 			}
 		}
@@ -1508,13 +1616,13 @@ struct CommandComputeMeshVolume : public ccCommandLineInterface::Command
 			//we compute the mesh volume
 			double V = CCLib::MeshSamplingTools::computeMeshVolume(meshDesc.mesh);
 
-			QString titleStr = QString("Mesh '%1'").arg(meshDesc.basename);
+			QString titleStr = QObject::tr("Mesh '%1'").arg(meshDesc.basename);
 			if (meshDesc.indexInFile >= 0)
 			{
-				titleStr += QString(" (#%2)").arg(meshDesc.indexInFile);
+				titleStr += QObject::tr(" (#%2)").arg(meshDesc.indexInFile);
 			}
 			cmd.print(titleStr);
-			QString volumeStr = QString("V = %2").arg(V, 0, 'f', 8);
+			QString volumeStr = QObject::tr("V = %2").arg(V, 0, 'f', 8);
 			cmd.print(volumeStr);
 
 			if (outFile.isOpen())
@@ -1559,7 +1667,7 @@ struct CommandMergeMeshes : public ccCommandLineInterface::Command
 			ccMesh* mesh = dynamic_cast<ccMesh*>(meshDesc.mesh);
 			if (!mesh)
 			{
-				ccLog::Error(QString("Can't merge mesh '%1' (unhandled type)").arg(mesh->getName()));
+				ccLog::Error(QObject::tr("Can't merge mesh '%1' (unhandled type)").arg(mesh->getName()));
 			}
 			
 			if (mergedMesh->merge(mesh, true)) //merge it
@@ -1589,7 +1697,7 @@ struct CommandMergeMeshes : public ccCommandLineInterface::Command
 		//clean the 'cmd.meshes()' vector
 		cmd.removeMeshes();
 		//add the new mesh
-		mergedMeshDesc.basename += QString("_MERGED");
+		mergedMeshDesc.basename += QObject::tr("_MERGED");
 		mergedMeshDesc.mesh = mergedMesh.take();
 		cmd.meshes().push_back(mergedMeshDesc);
 
@@ -1642,7 +1750,7 @@ struct CommandMergeClouds : public ccCommandLineInterface::Command
 		//clean the 'cmd.clouds()' vector
 		cmd.clouds().resize(1);
 		//update the first one
-		cmd.clouds().front().basename += QString("_MERGED");
+		cmd.clouds().front().basename += QObject::tr("_MERGED");
 		if (cmd.autoSaveMode())
 		{
 			QString errorStr = cmd.exportEntity(cmd.clouds().front());
@@ -1660,17 +1768,17 @@ struct CommandSetActiveSF : public ccCommandLineInterface::Command
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: scalar field index after \"-%1\"").arg(COMMAND_SET_ACTIVE_SF));
+			return cmd.error(QObject::tr("Missing parameter: scalar field index after \"-%1\"").arg(COMMAND_SET_ACTIVE_SF));
 
 		bool paramOk = false;
 		QString sfIndexStr = cmd.arguments().takeFirst();
 		int sfIndex = sfIndexStr.toInt(&paramOk);
 		if (!paramOk)
-			return cmd.error(QString("Failed to read a numerical parameter: S.F. index (after \"-%1\"). Got '%2' instead.").arg(COMMAND_SET_ACTIVE_SF, sfIndexStr));
-		cmd.print(QString("Set active S.F. index: %1").arg(sfIndex));
+			return cmd.error(QObject::tr("Failed to read a numerical parameter: S.F. index (after \"-%1\"). Got '%2' instead.").arg(COMMAND_SET_ACTIVE_SF, sfIndexStr));
+		cmd.print(QObject::tr("Set active S.F. index: %1").arg(sfIndex));
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud loaded! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SET_ACTIVE_SF));
+			return cmd.error(QObject::tr("No point cloud loaded! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SET_ACTIVE_SF));
 
 		for (size_t i = 0; i<cmd.clouds().size(); ++i)
 		{
@@ -1679,7 +1787,7 @@ struct CommandSetActiveSF : public ccCommandLineInterface::Command
 				if (static_cast<int>(cmd.clouds()[i].pc->getNumberOfScalarFields()) > sfIndex)
 					cmd.clouds()[i].pc->setCurrentScalarField(sfIndex);
 				else
-					cmd.warning(QString("Cloud '%1' has less scalar fields than the index to select!").arg(cmd.clouds()[i].pc->getName()));
+					cmd.warning(QObject::tr("Cloud '%1' has less scalar fields than the index to select!").arg(cmd.clouds()[i].pc->getName()));
 			}
 		}
 
@@ -1757,7 +1865,7 @@ struct CommandMatchBBCenters : public ccCommandLineInterface::Command
 
 			//apply translation matrix
 			ent->applyGLTransformation_recursive(&glTrans);
-			cmd.print(QString("Entity '%1' has been translated: (%2,%3,%4)").arg(ent->getName()).arg(T.x).arg(T.y).arg(T.z));
+			cmd.print(QObject::tr("Entity '%1' has been translated: (%2,%3,%4)").arg(ent->getName()).arg(T.x).arg(T.y).arg(T.z));
 			if (cmd.autoSaveMode())
 			{
 				QString errorStr = cmd.exportEntity(*entities[i]);
@@ -1806,7 +1914,7 @@ struct CommandMatchBestFitPlane : public ccCommandLineInterface::Command
 		}
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No cloud available. Be sure to open one first!"));
+			return cmd.error(QObject::tr("No cloud available. Be sure to open one first!"));
 
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{
@@ -1817,7 +1925,7 @@ struct CommandMatchBestFitPlane : public ccCommandLineInterface::Command
 			ccPlane* pPlane = ccPlane::Fit(pc, &rms);
 			if (pPlane)
 			{
-				cmd.print(QString("Plane successfully fitted: rms = %1").arg(rms));
+				cmd.print(QObject::tr("Plane successfully fitted: rms = %1").arg(rms));
 
 				CCVector3 N = pPlane->getNormal();
 				CCVector3 C = *CCLib::Neighbourhood(pc).getGravityCenter();
@@ -1834,23 +1942,23 @@ struct CommandMatchBestFitPlane : public ccCommandLineInterface::Command
 					cmd.warning(errorStr);
 
 				//open text file to save plane related information
-				QString txtFilename = QString("%1/%2_BEST_FIT_PLANE_INFO").arg(cmd.clouds()[i].path, cmd.clouds()[i].basename);
+				QString txtFilename = QObject::tr("%1/%2_BEST_FIT_PLANE_INFO").arg(cmd.clouds()[i].path, cmd.clouds()[i].basename);
 				if (cmd.addTimestamp())
-					txtFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
-				txtFilename += QString(".txt");
+					txtFilename += QObject::tr("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+				txtFilename += QObject::tr(".txt");
 				QFile txtFile(txtFilename);
 				txtFile.open(QIODevice::WriteOnly | QIODevice::Text);
 				QTextStream txtStream(&txtFile);
 
-				txtStream << QString("Filename: %1").arg(outputFilename) << endl;
-				txtStream << QString("Fitting RMS: %1").arg(rms) << endl;
+				txtStream << QObject::tr("Filename: %1").arg(outputFilename) << endl;
+				txtStream << QObject::tr("Fitting RMS: %1").arg(rms) << endl;
 
 				//We always consider the normal with a positive 'Z' by default!
 				if (N.z < 0.0)
 					N *= -1.0;
 
 				int precision = cmd.numericalPrecision();
-				txtStream << QString("Normal: (%1,%2,%3)").arg(N.x, 0, 'f', precision).arg(N.y, 0, 'f', precision).arg(N.z, 0, 'f', precision) << endl;
+				txtStream << QObject::tr("Normal: (%1,%2,%3)").arg(N.x, 0, 'f', precision).arg(N.y, 0, 'f', precision).arg(N.z, 0, 'f', precision) << endl;
 
 				//we compute strike & dip by the way
 				{
@@ -1881,8 +1989,8 @@ struct CommandMatchBestFitPlane : public ccCommandLineInterface::Command
 				{
 					//apply 'horizontal' matrix
 					pc->applyGLTransformation_recursive(&makeZPosMatrix);
-					cmd.print(QString("Cloud '%1' has been transformed with the above matrix").arg(pc->getName()));
-					cmd.clouds()[i].basename += QString("_HORIZ");
+					cmd.print(QObject::tr("Cloud '%1' has been transformed with the above matrix").arg(pc->getName()));
+					cmd.clouds()[i].basename += QObject::tr("_HORIZ");
 					if (cmd.autoSaveMode())
 					{
 						QString errorStr = cmd.exportEntity(cmd.clouds()[i]);
@@ -1893,7 +2001,7 @@ struct CommandMatchBestFitPlane : public ccCommandLineInterface::Command
 			}
 			else
 			{
-				cmd.warning(QString("Failed to compute best fit plane for cloud '%1'").arg(cmd.clouds()[i].pc->getName()));
+				cmd.warning(QObject::tr("Failed to compute best fit plane for cloud '%1'").arg(cmd.clouds()[i].pc->getName()));
 			}
 		}
 
@@ -1910,16 +2018,16 @@ struct CommandOrientNormalsMST : public ccCommandLineInterface::Command
 		cmd.print("[ORIENT NORMALS (MST)]");
 
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: number of neighbors after \"-%1\"").arg(COMMAND_ORIENT_NORMALS));
+			return cmd.error(QObject::tr("Missing parameter: number of neighbors after \"-%1\"").arg(COMMAND_ORIENT_NORMALS));
 
 		QString knnStr = cmd.arguments().takeFirst();
 		bool ok;
 		int knn = knnStr.toInt(&ok);
 		if (!ok || knn <= 0)
-			return cmd.error(QString("Invalid parameter: number of neighbors (%1)").arg(knnStr));
+			return cmd.error(QObject::tr("Invalid parameter: number of neighbors (%1)").arg(knnStr));
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No cloud available. Be sure to open one first!"));
+			return cmd.error(QObject::tr("No cloud available. Be sure to open one first!"));
 
 		QScopedPointer<ccProgressDialog> progressDialog(0);
 		if (!cmd.silentMode())
@@ -1941,7 +2049,7 @@ struct CommandOrientNormalsMST : public ccCommandLineInterface::Command
 			//computation
 			if (cloud->orientNormalsWithMST(knn, progressDialog.data()))
 			{
-				cmd.clouds()[i].basename += QString("_NORMS_REORIENTED");
+				cmd.clouds()[i].basename += QObject::tr("_NORMS_REORIENTED");
 				if (cmd.autoSaveMode())
 				{
 					QString errorStr = cmd.exportEntity(cmd.clouds()[i]);
@@ -1951,7 +2059,7 @@ struct CommandOrientNormalsMST : public ccCommandLineInterface::Command
 			}
 			else
 			{
-				return cmd.error(QString("Failed to orient the normals of cloud '%1'!").arg(cloud->getName()));
+				return cmd.error(QObject::tr("Failed to orient the normals of cloud '%1'!").arg(cloud->getName()));
 			}
 		}
 
@@ -1974,23 +2082,23 @@ struct CommandSORFilter : public ccCommandLineInterface::Command
 		cmd.print("[SOR FILTER]");
 
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: number of neighbors mode after \"-%1\"").arg(COMMAND_SOR_FILTER));
+			return cmd.error(QObject::tr("Missing parameter: number of neighbors mode after \"-%1\"").arg(COMMAND_SOR_FILTER));
 
 		QString knnStr = cmd.arguments().takeFirst();
 		bool ok;
 		int knn = knnStr.toInt(&ok);
 		if (!ok || knn <= 0)
-			return cmd.error(QString("Invalid parameter: number of neighbors (%1)").arg(knnStr));
+			return cmd.error(QObject::tr("Invalid parameter: number of neighbors (%1)").arg(knnStr));
 
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: sigma multiplier after number of neighbors (SOR)"));
+			return cmd.error(QObject::tr("Missing parameter: sigma multiplier after number of neighbors (SOR)"));
 		QString sigmaStr = cmd.arguments().takeFirst();
 		double nSigma = sigmaStr.toDouble(&ok);
 		if (!ok || nSigma < 0)
-			return cmd.error(QString("Invalid parameter: sigma multiplier (%1)").arg(nSigma));
+			return cmd.error(QObject::tr("Invalid parameter: sigma multiplier (%1)").arg(nSigma));
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No cloud available. Be sure to open one first!"));
+			return cmd.error(QObject::tr("No cloud available. Be sure to open one first!"));
 
 		QScopedPointer<ccProgressDialog> progressDialog(0);
 		if (!cmd.silentMode())
@@ -2016,7 +2124,7 @@ struct CommandSORFilter : public ccCommandLineInterface::Command
 				ccPointCloud* cleanCloud = cloud->partialClone(selection);
 				if (cleanCloud)
 				{
-					cleanCloud->setName(cloud->getName() + QString(".clean"));
+					cleanCloud->setName(cloud->getName() + QObject::tr(".clean"));
 					if (cmd.autoSaveMode())
 					{
 						CLCloudDesc cloudDesc(cleanCloud, cmd.clouds()[i].basename, cmd.clouds()[i].path, cmd.clouds()[i].indexInFile);
@@ -2030,13 +2138,13 @@ struct CommandSORFilter : public ccCommandLineInterface::Command
 					//replace current cloud by this one
 					delete cmd.clouds()[i].pc;
 					cmd.clouds()[i].pc = cleanCloud;
-					cmd.clouds()[i].basename += QString("_SOR");
+					cmd.clouds()[i].basename += QObject::tr("_SOR");
 					//delete cleanCloud;
 					//cleanCloud = 0;
 				}
 				else
 				{
-					return cmd.error(QString("Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
+					return cmd.error(QObject::tr("Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
 				}
 
 				delete selection;
@@ -2045,7 +2153,7 @@ struct CommandSORFilter : public ccCommandLineInterface::Command
 			else
 			{
 				//no points fall inside selection!
-				return cmd.error(QString("Failed to apply SOR filter on cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+				return cmd.error(QObject::tr("Failed to apply SOR filter on cloud '%1'! (not enough memory?)").arg(cloud->getName()));
 			}
 		}
 
@@ -2054,6 +2162,50 @@ struct CommandSORFilter : public ccCommandLineInterface::Command
 			progressDialog->close();
 			QCoreApplication::processEvents();
 		}
+
+		return true;
+	}
+};
+
+struct CommandExtractVertices : public ccCommandLineInterface::Command
+{
+	CommandExtractVertices() : ccCommandLineInterface::Command("Extract vertices (as a standalone 'cloud')", COMMAND_EXTRACT_VERTICES) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		cmd.print("[EXTRACT VERTICES]");
+
+		if (cmd.meshes().empty())
+		{
+			cmd.warning(QObject::tr("No mesh available. Be sure to open one first!"));
+			return false;
+		}
+
+		for (size_t i = 0; i < cmd.meshes().size(); ++i)
+		{
+			ccGenericPointCloud* cloud = cmd.meshes()[i].mesh->getAssociatedCloud();
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(cloud);
+			if (!pc)
+			{
+				assert(false);
+				continue;
+			}
+
+			//add the resulting cloud to the main set
+			cmd.clouds().push_back(CLCloudDesc(pc, cmd.meshes()[i].basename + QObject::tr(".vertices"), cmd.meshes()[i].path));
+
+			//save it as well
+			if (cmd.autoSaveMode())
+			{
+				QString errorStr = cmd.exportEntity(cmd.clouds().back());
+				if (!errorStr.isEmpty())
+				{
+					return cmd.error(errorStr);
+				}
+			}
+		}
+
+		cmd.removeMeshes(false);
 
 		return true;
 	}
@@ -2068,7 +2220,7 @@ struct CommandSampleMesh : public ccCommandLineInterface::Command
 		cmd.print("[SAMPLE POINTS ON MESH]");
 
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: sampling mode after \"-%1\" (POINTS/DENSITY)").arg(COMMAND_SAMPLE_MESH));
+			return cmd.error(QObject::tr("Missing parameter: sampling mode after \"-%1\" (POINTS/DENSITY)").arg(COMMAND_SAMPLE_MESH));
 
 		bool useDensity = false;
 		double parameter = 0;
@@ -2079,17 +2231,17 @@ struct CommandSampleMesh : public ccCommandLineInterface::Command
 		else if (sampleMode == "DENSITY")
 			useDensity = true;
 		else
-			return cmd.error(QString("Invalid parameter: unknown sampling mode \"%1\"").arg(sampleMode));
+			return cmd.error(QObject::tr("Invalid parameter: unknown sampling mode \"%1\"").arg(sampleMode));
 
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: value after sampling mode"));
+			return cmd.error(QObject::tr("Missing parameter: value after sampling mode"));
 		bool conversionOk = false;
 		parameter = cmd.arguments().takeFirst().toDouble(&conversionOk);
 		if (!conversionOk)
-			return cmd.error(QString("Invalid parameter: value after sampling mode"));
+			return cmd.error(QObject::tr("Invalid parameter: value after sampling mode"));
 
 		if (cmd.meshes().empty())
-			return cmd.error(QString("No mesh available. Be sure to open one first!"));
+			return cmd.error(QObject::tr("No mesh available. Be sure to open one first!"));
 
 		QScopedPointer<ccProgressDialog> progressDialog(0);
 		if (!cmd.silentMode())
@@ -2104,12 +2256,12 @@ struct CommandSampleMesh : public ccCommandLineInterface::Command
 
 			if (!cloud)
 			{
-				return cmd.error(QString("Cloud sampling failed!"));
+				return cmd.error(QObject::tr("Cloud sampling failed!"));
 			}
 
 			//add the resulting cloud to the main set
-			cmd.print(QString("Sampled cloud created: %1 points").arg(cloud->size()));
-			cmd.clouds().push_back(CLCloudDesc(cloud, cmd.meshes()[i].basename + QString("_SAMPLED_POINTS"), cmd.meshes()[i].path));
+			cmd.print(QObject::tr("Sampled cloud created: %1 points").arg(cloud->size()));
+			cmd.clouds().push_back(CLCloudDesc(cloud, cmd.meshes()[i].basename + QObject::tr("_SAMPLED_POINTS"), cmd.meshes()[i].path));
 
 			//save it as well
 			if (cmd.autoSaveMode())
@@ -2139,9 +2291,9 @@ struct CommandCrop : public ccCommandLineInterface::Command
 		cmd.print("[CROP]");
 
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: box extents after \"-%1\" (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)").arg(COMMAND_CROP));
+			return cmd.error(QObject::tr("Missing parameter: box extents after \"-%1\" (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)").arg(COMMAND_CROP));
 		if (cmd.clouds().empty() && cmd.meshes().empty())
-			return cmd.error(QString("No point cloud or mesh available. Be sure to open or generate one first!"));
+			return cmd.error(QObject::tr("No point cloud or mesh available. Be sure to open or generate one first!"));
 
 		//decode box extents
 		CCVector3 boxMin, boxMax;
@@ -2149,7 +2301,7 @@ struct CommandCrop : public ccCommandLineInterface::Command
 			QString boxBlock = cmd.arguments().takeFirst();
 			QStringList tokens = boxBlock.split(':');
 			if (tokens.size() != 6)
-				return cmd.error(QString("Invalid parameter: box extents (expected format is 'Xmin:Ymin:Zmin:Xmax:Ymax:Zmax')").arg(COMMAND_CROP));
+				return cmd.error(QObject::tr("Invalid parameter: box extents (expected format is 'Xmin:Ymin:Zmin:Xmax:Ymax:Zmax')").arg(COMMAND_CROP));
 
 			for (int i = 0; i < 6; ++i)
 			{
@@ -2158,7 +2310,7 @@ struct CommandCrop : public ccCommandLineInterface::Command
 				vec->u[i % 3] = static_cast<PointCoordinateType>(tokens[i].toDouble(&ok));
 				if (!ok)
 				{
-					return cmd.error(QString("Invalid parameter: box extents (component #%1 is not a valid number)").arg(i + 1));
+					return cmd.error(QObject::tr("Invalid parameter: box extents (component #%1 is not a valid number)").arg(i + 1));
 				}
 			}
 		}
@@ -2238,9 +2390,9 @@ struct CommandCoordToSF : public ccCommandLineInterface::Command
 		cmd.print("[COORD TO SF]");
 
 		if (cmd.arguments().size() < 1)
-			return cmd.error(QString("Missing parameter after \"-%1\" (DIMENSION)").arg(COMMAND_COORD_TO_SF));
+			return cmd.error(QObject::tr("Missing parameter after \"-%1\" (DIMENSION)").arg(COMMAND_COORD_TO_SF));
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud available. Be sure to open or generate one first!"));
+			return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
 
 		//dimension
 		bool exportDims[3] = { false, false, false };
@@ -2253,7 +2405,7 @@ struct CommandCoordToSF : public ccCommandLineInterface::Command
 			else if (dimStr == "Z")
 				exportDims[2] = true;
 			else
-				return cmd.error(QString("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_COORD_TO_SF));
+				return cmd.error(QObject::tr("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_COORD_TO_SF));
 		}
 
 		//now we can export the corresponding coordinate
@@ -2262,7 +2414,7 @@ struct CommandCoordToSF : public ccCommandLineInterface::Command
 			ccPointCloud* pc = cmd.clouds()[i].pc;
 			if (pc->exportCoordToSF(exportDims))
 			{
-				cmd.clouds()[i].basename += QString("_%1_TO_SF").arg(dimStr);
+				cmd.clouds()[i].basename += QObject::tr("_%1_TO_SF").arg(dimStr);
 				if (cmd.autoSaveMode())
 				{
 					QString errorStr = cmd.exportEntity(cmd.clouds()[i]);
@@ -2272,7 +2424,7 @@ struct CommandCoordToSF : public ccCommandLineInterface::Command
 			}
 			else
 			{
-				return cmd.error(QString("Failed to export coord. %1 to SF on cloud '%2'!").arg(dimStr, cmd.clouds()[i].pc->getName()));
+				return cmd.error(QObject::tr("Failed to export coord. %1 to SF on cloud '%2'!").arg(dimStr, cmd.clouds()[i].pc->getName()));
 			}
 		}
 
@@ -2289,9 +2441,9 @@ struct CommandCrop2D : public ccCommandLineInterface::Command
 		cmd.print("[CROP 2D]");
 
 		if (cmd.arguments().size() < 6)
-			return cmd.error(QString("Missing parameter(s) after \"-%1\" (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)").arg(COMMAND_CROP_2D));
+			return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)").arg(COMMAND_CROP_2D));
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud available. Be sure to open or generate one first!"));
+			return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
 
 		//decode poyline extents
 		ccPointCloud vertices("polyline.vertices");
@@ -2308,7 +2460,7 @@ struct CommandCrop2D : public ccCommandLineInterface::Command
 			else if (orthoDimStr == "Z")
 				orthoDim = 2;
 			else
-				return cmd.error(QString("Invalid parameter: orthogonal dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_CROP_2D));
+				return cmd.error(QObject::tr("Invalid parameter: orthogonal dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_CROP_2D));
 		}
 
 		//number of vertices
@@ -2318,7 +2470,7 @@ struct CommandCrop2D : public ccCommandLineInterface::Command
 			QString countStr = cmd.arguments().takeFirst();
 			N = countStr.toUInt(&ok);
 			if (!ok)
-				return cmd.error(QString("Invalid parameter: number of vertices for the 2D polyline after \"-%1\"").arg(COMMAND_CROP_2D));
+				return cmd.error(QObject::tr("Invalid parameter: number of vertices for the 2D polyline after \"-%1\"").arg(COMMAND_CROP_2D));
 		}
 
 		//now read the vertices
@@ -2333,7 +2485,7 @@ struct CommandCrop2D : public ccCommandLineInterface::Command
 		{
 			if (cmd.arguments().size() < 2)
 			{
-				return cmd.error(QString("Missing parameter(s): vertex #%1 data and following").arg(i + 1));
+				return cmd.error(QObject::tr("Missing parameter(s): vertex #%1 data and following").arg(i + 1));
 			}
 
 			CCVector3 P(0, 0, 0);
@@ -2341,11 +2493,11 @@ struct CommandCrop2D : public ccCommandLineInterface::Command
 			QString coordStr = cmd.arguments().takeFirst();
 			P.x = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
 			if (!ok)
-				return cmd.error(QString("Invalid parameter: X-coordinate of vertex #%1").arg(i + 1));
+				return cmd.error(QObject::tr("Invalid parameter: X-coordinate of vertex #%1").arg(i + 1));
 			/*QString */coordStr = cmd.arguments().takeFirst();
 			P.y = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
 			if (!ok)
-				return cmd.error(QString("Invalid parameter: Y-coordinate of vertex #%1").arg(i + 1));
+				return cmd.error(QObject::tr("Invalid parameter: Y-coordinate of vertex #%1").arg(i + 1));
 
 			vertices.addPoint(P); //the polyline must be defined in the XY plane!
 		}
@@ -2386,7 +2538,7 @@ struct CommandCrop2D : public ccCommandLineInterface::Command
 				{
 					delete cmd.clouds()[i].pc;
 					cmd.clouds()[i].pc = croppedCloud;
-					croppedCloud->setName(cmd.clouds()[i].pc->getName() + QString(".cropped"));
+					croppedCloud->setName(cmd.clouds()[i].pc->getName() + QObject::tr(".cropped"));
 					cmd.clouds()[i].basename += "_CROPPED";
 					if (cmd.autoSaveMode())
 					{
@@ -2397,19 +2549,19 @@ struct CommandCrop2D : public ccCommandLineInterface::Command
 				}
 				else
 				{
-					return cmd.error(QString("Not enough memory to crop cloud '%1'!").arg(cmd.clouds()[i].pc->getName()));
+					return cmd.error(QObject::tr("Not enough memory to crop cloud '%1'!").arg(cmd.clouds()[i].pc->getName()));
 				}
 			}
 			else
 			{
 				delete ref;
 				ref = 0;
-				cmd.warning(QString("No point of cloud '%1' falls inside the input box!").arg(cmd.clouds()[i].pc->getName()));
+				cmd.warning(QObject::tr("No point of cloud '%1' falls inside the input box!").arg(cmd.clouds()[i].pc->getName()));
 			}
 		}
 		else
 		{
-			return cmd.error(QString("Crop process failed! (not enough memory)"));
+			return cmd.error(QObject::tr("Crop process failed! (not enough memory)"));
 		}
 	}
 
@@ -2426,9 +2578,9 @@ struct CommandColorBanding : public ccCommandLineInterface::Command
 		cmd.print("[COLOR BANDING]");
 
 		if (cmd.arguments().size() < 2)
-			return cmd.error(QString("Missing parameter(s) after \"-%1\" (DIM FREQUENCY)").arg(COMMAND_COLOR_BANDING));
+			return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (DIM FREQUENCY)").arg(COMMAND_COLOR_BANDING));
 		if (cmd.clouds().empty() && cmd.meshes().empty())
-			return cmd.error(QString("No entity available. Be sure to open or generate one first!"));
+			return cmd.error(QObject::tr("No entity available. Be sure to open or generate one first!"));
 
 		//dimension
 		unsigned char dim = 2;
@@ -2442,7 +2594,7 @@ struct CommandColorBanding : public ccCommandLineInterface::Command
 			else if (dimStr == "Z")
 				dim = 2;
 			else
-				return cmd.error(QString("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_COLOR_BANDING));
+				return cmd.error(QObject::tr("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_COLOR_BANDING));
 		}
 
 		//frequency
@@ -2452,7 +2604,7 @@ struct CommandColorBanding : public ccCommandLineInterface::Command
 			QString countStr = cmd.arguments().takeFirst();
 			freq = countStr.toDouble(&ok);
 			if (!ok)
-				return cmd.error(QString("Invalid parameter: frequency after \"-%1 DIM\" (in Hz, integer value)").arg(COMMAND_COLOR_BANDING));
+				return cmd.error(QObject::tr("Invalid parameter: frequency after \"-%1 DIM\" (in Hz, integer value)").arg(COMMAND_COLOR_BANDING));
 		}
 
 		//process clouds
@@ -2466,7 +2618,7 @@ struct CommandColorBanding : public ccCommandLineInterface::Command
 			}
 
 			//save output
-			if (cmd.autoSaveMode() && !cmd.saveClouds(QString("COLOR_BANDING_%1_%2").arg(dimStr).arg(freq)))
+			if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("COLOR_BANDING_%1_%2").arg(dimStr).arg(freq)))
 				return false;
 		}
 
@@ -2485,12 +2637,12 @@ struct CommandColorBanding : public ccCommandLineInterface::Command
 				}
 				else
 				{
-					cmd.warning(QString("Vertices of mesh '%1' are locked (they may be shared by multiple entities for instance). Can't apply the current command on them.").arg(cmd.meshes()[i].mesh->getName()));
+					cmd.warning(QObject::tr("Vertices of mesh '%1' are locked (they may be shared by multiple entities for instance). Can't apply the current command on them.").arg(cmd.meshes()[i].mesh->getName()));
 				}
 			}
 
 			//save output
-			if (hasMeshes && cmd.autoSaveMode() && !cmd.saveMeshes(QString("COLOR_BANDING_%1_%2").arg(dimStr).arg(freq)))
+			if (hasMeshes && cmd.autoSaveMode() && !cmd.saveMeshes(QObject::tr("COLOR_BANDING_%1_%2").arg(dimStr).arg(freq)))
 				return false;
 		}
 
@@ -2506,11 +2658,11 @@ struct CommandBundler : public ccCommandLineInterface::Command
 	{
 		cmd.print("[BUNDLER]");
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: filename after \"-%1\"").arg(COMMAND_BUNDLER));
+			return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_BUNDLER));
 
 		//open specified file
 		QString bundlerFilename(cmd.arguments().takeFirst());
-		cmd.print(QString("Importing Bundler file: '%1'").arg(bundlerFilename));
+		cmd.print(QObject::tr("Importing Bundler file: '%1'").arg(bundlerFilename));
 
 		QString altKeypointsFilename;
 		bool undistortImages = false;
@@ -2528,7 +2680,7 @@ struct CommandBundler : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: filename after \"-%1\"").arg(COMMAND_BUNDLER_ALT_KEYPOINTS));
+					return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_BUNDLER_ALT_KEYPOINTS));
 				altKeypointsFilename = cmd.arguments().takeFirst();
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_BUNDLER_SCALE_FACTOR))
@@ -2537,11 +2689,11 @@ struct CommandBundler : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: value after \"-%1\"").arg(COMMAND_BUNDLER_SCALE_FACTOR));
+					return cmd.error(QObject::tr("Missing parameter: value after \"-%1\"").arg(COMMAND_BUNDLER_SCALE_FACTOR));
 				bool conversionOk = false;
 				scaleFactor = cmd.arguments().takeFirst().toFloat(&conversionOk);
 				if (!conversionOk)
-					return cmd.error(QString("Invalid parameter: value after \"-%1\"").arg(COMMAND_BUNDLER_SCALE_FACTOR));
+					return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_BUNDLER_SCALE_FACTOR));
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_BUNDLER_UNDISTORT))
 			{
@@ -2556,11 +2708,11 @@ struct CommandBundler : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: vertices count after \"-%1\"").arg(COMMAND_BUNDLER_COLOR_DTM));
+					return cmd.error(QObject::tr("Missing parameter: vertices count after \"-%1\"").arg(COMMAND_BUNDLER_COLOR_DTM));
 				bool conversionOk = false;
 				coloredDTMVerticesCount = cmd.arguments().takeFirst().toUInt(&conversionOk);
 				if (!conversionOk)
-					return cmd.error(QString("Invalid parameter: vertices count after \"-%1\"").arg(COMMAND_BUNDLER_COLOR_DTM));
+					return cmd.error(QObject::tr("Invalid parameter: vertices count after \"-%1\"").arg(COMMAND_BUNDLER_COLOR_DTM));
 				generateColoredDTM = true;
 			}
 			else
@@ -2597,7 +2749,7 @@ struct CommandDist : public ccCommandLineInterface::Command
 
 		//compared cloud
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No point cloud available. Be sure to open or generate one first!"));
+			return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
 		else if (m_cloud2meshDist && cmd.clouds().size() != 1)
 			cmd.warning("Multiple point clouds loaded! We take the first one by default");
 		CLCloudDesc& compCloud = cmd.clouds().front();
@@ -2607,7 +2759,7 @@ struct CommandDist : public ccCommandLineInterface::Command
 		if (m_cloud2meshDist)
 		{
 			if (cmd.meshes().empty())
-				return cmd.error(QString("No mesh available. Be sure to open one first!"));
+				return cmd.error(QObject::tr("No mesh available. Be sure to open one first!"));
 			else if (cmd.meshes().size() != 1)
 				cmd.warning("Multiple meshes loaded! We take the first one by default");
 			refEntity = cmd.meshes().front().mesh;
@@ -2615,7 +2767,7 @@ struct CommandDist : public ccCommandLineInterface::Command
 		else
 		{
 			if (cmd.clouds().size() < 2)
-				return cmd.error(QString("Only one point cloud available. Be sure to open or generate a second one before performing C2C distance!"));
+				return cmd.error(QObject::tr("Only one point cloud available. Be sure to open or generate a second one before performing C2C distance!"));
 			else if (cmd.clouds().size() > 2)
 				cmd.warning("More than 3 point clouds loaded! We take the second one as reference by default");
 			refEntity = cmd.clouds()[1].pc;
@@ -2651,11 +2803,11 @@ struct CommandDist : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: value after \"-%1\"").arg(COMMAND_C2X_MAX_DISTANCE));
+					return cmd.error(QObject::tr("Missing parameter: value after \"-%1\"").arg(COMMAND_C2X_MAX_DISTANCE));
 				bool conversionOk = false;
 				maxDist = cmd.arguments().takeFirst().toDouble(&conversionOk);
 				if (!conversionOk)
-					return cmd.error(QString("Invalid parameter: value after \"-%1\"").arg(COMMAND_C2X_MAX_DISTANCE));
+					return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_C2X_MAX_DISTANCE));
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2X_OCTREE_LEVEL))
 			{
@@ -2663,11 +2815,11 @@ struct CommandDist : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: value after \"-%1\"").arg(COMMAND_C2X_OCTREE_LEVEL));
+					return cmd.error(QObject::tr("Missing parameter: value after \"-%1\"").arg(COMMAND_C2X_OCTREE_LEVEL));
 				bool conversionOk = false;
 				octreeLevel = cmd.arguments().takeFirst().toUInt(&conversionOk);
 				if (!conversionOk)
-					return cmd.error(QString("Invalid parameter: value after \"-%1\"").arg(COMMAND_C2X_OCTREE_LEVEL));
+					return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_C2X_OCTREE_LEVEL));
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2C_SPLIT_XYZ))
 			{
@@ -2694,11 +2846,11 @@ struct CommandDist : public ccCommandLineInterface::Command
 					else if (modelType == "HF")
 						modelIndex = 3;
 					else
-						return cmd.error(QString("Invalid parameter: unknown model type \"%1\"").arg(modelType));
+						return cmd.error(QObject::tr("Invalid parameter: unknown model type \"%1\"").arg(modelType));
 				}
 				else
 				{
-					return cmd.error(QString("Missing parameter: model type after \"-%1\" (LS/TRI/HF)").arg(COMMAND_C2C_LOCAL_MODEL));
+					return cmd.error(QObject::tr("Missing parameter: model type after \"-%1\" (LS/TRI/HF)").arg(COMMAND_C2C_LOCAL_MODEL));
 				}
 
 				if (!cmd.arguments().empty())
@@ -2709,11 +2861,11 @@ struct CommandDist : public ccCommandLineInterface::Command
 					else if (nType == "SPHERE")
 						useKNN = false;
 					else
-						return cmd.error(QString("Invalid parameter: unknown neighborhood type \"%1\"").arg(nType));
+						return cmd.error(QObject::tr("Invalid parameter: unknown neighborhood type \"%1\"").arg(nType));
 				}
 				else
 				{
-					return cmd.error(QString("Missing parameter: expected neighborhood type after model type (KNN/SPHERE)"));
+					return cmd.error(QObject::tr("Missing parameter: expected neighborhood type after model type (KNN/SPHERE)"));
 				}
 
 				//neighborhood size
@@ -2722,11 +2874,11 @@ struct CommandDist : public ccCommandLineInterface::Command
 					bool conversionOk = false;
 					nSize = cmd.arguments().takeFirst().toDouble(&conversionOk);
 					if (!conversionOk)
-						return cmd.error(QString("Invalid parameter: neighborhood size"));
+						return cmd.error(QObject::tr("Invalid parameter: neighborhood size"));
 				}
 				else
 				{
-					return cmd.error(QString("Missing parameter: expected neighborhood size after neighborhood type (neighbor count/sphere radius)"));
+					return cmd.error(QObject::tr("Missing parameter: expected neighborhood size after neighborhood type (neighbor count/sphere radius)"));
 				}
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_MAX_THREAD_COUNT))
@@ -2735,12 +2887,12 @@ struct CommandDist : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: max thread count after '%1'").arg(COMMAND_MAX_THREAD_COUNT));
+					return cmd.error(QObject::tr("Missing parameter: max thread count after '%1'").arg(COMMAND_MAX_THREAD_COUNT));
 
 				bool ok;
 				maxThreadCount = cmd.arguments().takeFirst().toInt(&ok);
 				if (!ok || maxThreadCount < 0)
-					return cmd.error(QString("Invalid thread count! (after %1)").arg(COMMAND_MAX_THREAD_COUNT));
+					return cmd.error(QObject::tr("Invalid thread count! (after %1)").arg(COMMAND_MAX_THREAD_COUNT));
 			}
 			else
 			{
@@ -2812,7 +2964,7 @@ struct CommandDist : public ccCommandLineInterface::Command
 
 		QString suffix(m_cloud2meshDist ? "_C2M_DIST" : "_C2C_DIST");
 		if (maxDist > 0)
-			suffix += QString("_MAX_DIST_%1").arg(maxDist);
+			suffix += QObject::tr("_MAX_DIST_%1").arg(maxDist);
 
 		compCloud.basename += suffix;
 
@@ -2851,25 +3003,25 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 		CCLib::GenericDistribution* distrib = 0;
 		{
 			if (cmd.arguments().empty())
-				return cmd.error(QString("Missing parameter: distribution type after \"-%1\" (GAUSS/WEIBULL)").arg(COMMAND_STAT_TEST));
+				return cmd.error(QObject::tr("Missing parameter: distribution type after \"-%1\" (GAUSS/WEIBULL)").arg(COMMAND_STAT_TEST));
 
 			QString distribStr = cmd.arguments().takeFirst().toUpper();
 			if (distribStr == "GAUSS")
 			{
 				//mu
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: mean value after \"GAUSS\""));
+					return cmd.error(QObject::tr("Missing parameter: mean value after \"GAUSS\""));
 				bool conversionOk = false;
 				double mu = cmd.arguments().takeFirst().toDouble(&conversionOk);
 				if (!conversionOk)
-					return cmd.error(QString("Invalid parameter: mean value after \"GAUSS\""));
+					return cmd.error(QObject::tr("Invalid parameter: mean value after \"GAUSS\""));
 				//sigma
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: sigma value after \"GAUSS\" {mu}"));
+					return cmd.error(QObject::tr("Missing parameter: sigma value after \"GAUSS\" {mu}"));
 				conversionOk = false;
 				double sigma = cmd.arguments().takeFirst().toDouble(&conversionOk);
 				if (!conversionOk)
-					return cmd.error(QString("Invalid parameter: sigma value after \"GAUSS\" {mu}"));
+					return cmd.error(QObject::tr("Invalid parameter: sigma value after \"GAUSS\" {mu}"));
 
 				CCLib::NormalDistribution* N = new CCLib::NormalDistribution();
 				N->setParameters(static_cast<ScalarType>(mu), static_cast<ScalarType>(sigma*sigma)); //warning: we input sigma2 here (not sigma)
@@ -2879,25 +3031,25 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 			{
 				//a
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: a value after \"WEIBULL\""));
+					return cmd.error(QObject::tr("Missing parameter: a value after \"WEIBULL\""));
 				bool conversionOk = false;
 				double a = cmd.arguments().takeFirst().toDouble(&conversionOk);
 				if (!conversionOk)
-					return cmd.error(QString("Invalid parameter: a value after \"WEIBULL\""));
+					return cmd.error(QObject::tr("Invalid parameter: a value after \"WEIBULL\""));
 				//b
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: b value after \"WEIBULL\" {a}"));
+					return cmd.error(QObject::tr("Missing parameter: b value after \"WEIBULL\" {a}"));
 				conversionOk = false;
 				double b = cmd.arguments().takeFirst().toDouble(&conversionOk);
 				if (!conversionOk)
-					return cmd.error(QString("Invalid parameter: b value after \"WEIBULL\" {a}"));
+					return cmd.error(QObject::tr("Invalid parameter: b value after \"WEIBULL\" {a}"));
 				//c
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: shift value after \"WEIBULL\" {a} {b}"));
+					return cmd.error(QObject::tr("Missing parameter: shift value after \"WEIBULL\" {a} {b}"));
 				conversionOk = false;
 				double shift = cmd.arguments().takeFirst().toDouble(&conversionOk);
 				if (!conversionOk)
-					return cmd.error(QString("Invalid parameter: shift value after \"WEIBULL\" {a} {b}"));
+					return cmd.error(QObject::tr("Invalid parameter: shift value after \"WEIBULL\" {a} {b}"));
 
 				CCLib::WeibullDistribution* N = new CCLib::WeibullDistribution();
 				N->setParameters(static_cast<ScalarType>(a), static_cast<ScalarType>(b), static_cast<ScalarType>(shift));
@@ -2905,7 +3057,7 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 			}
 			else
 			{
-				return cmd.error(QString("Invalid parameter: unknown distribution \"%1\"").arg(distribStr));
+				return cmd.error(QObject::tr("Invalid parameter: unknown distribution \"%1\"").arg(distribStr));
 			}
 		}
 
@@ -2913,26 +3065,26 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 		double pValue = 0.0005;
 		{
 			if (cmd.arguments().empty())
-				return cmd.error(QString("Missing parameter: p-value after distribution"));
+				return cmd.error(QObject::tr("Missing parameter: p-value after distribution"));
 			bool conversionOk = false;
 			pValue = cmd.arguments().takeFirst().toDouble(&conversionOk);
 			if (!conversionOk)
-				return cmd.error(QString("Invalid parameter: p-value after distribution"));
+				return cmd.error(QObject::tr("Invalid parameter: p-value after distribution"));
 		}
 
 		//kNN
 		unsigned kNN = 16;
 		{
 			if (cmd.arguments().empty())
-				return cmd.error(QString("Missing parameter: neighbors after p-value"));
+				return cmd.error(QObject::tr("Missing parameter: neighbors after p-value"));
 			bool conversionOk = false;
 			kNN = cmd.arguments().takeFirst().toUInt(&conversionOk);
 			if (!conversionOk)
-				return cmd.error(QString("Invalid parameter: neighbors after p-value"));
+				return cmd.error(QObject::tr("Invalid parameter: neighbors after p-value"));
 		}
 
 		if (cmd.clouds().empty())
-			return cmd.error(QString("No cloud available. Be sure to open one first!"));
+			return cmd.error(QObject::tr("No cloud available. Be sure to open one first!"));
 
 		QScopedPointer<ccProgressDialog> progressDialog(0);
 		if (!cmd.silentMode())
@@ -2972,14 +3124,14 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 					{
 						if (distrib)
 							delete distrib;
-						cmd.error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
+						cmd.error(QObject::tr("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
 						break;
 					}
 				}
 
 				double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib, pc, kNN, pValue, progressDialog.data(), theOctree.data());
 
-				cmd.print(QString("[Chi2 Test] %1 test result = %2").arg(distrib->getName()).arg(chi2dist));
+				cmd.print(QObject::tr("[Chi2 Test] %1 test result = %2").arg(distrib->getName()).arg(chi2dist));
 
 				//we set the theoretical Chi2 distance limit as the minimum displayed SF value so that all points below are grayed
 				{
@@ -2995,7 +3147,7 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 					pc->showSF(true);
 				}
 
-				cmd.clouds()[i].basename += QString("_STAT_TEST_%1").arg(distrib->getName());
+				cmd.clouds()[i].basename += QObject::tr("_STAT_TEST_%1").arg(distrib->getName());
 				if (cmd.autoSaveMode())
 				{
 					QString errorStr = cmd.exportEntity(cmd.clouds()[i]);
@@ -3047,12 +3199,12 @@ struct CommandDelaunayTri : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: max edge length value after '%1'").arg(COMMAND_DELAUNAY_MAX_EDGE_LENGTH));
+					return cmd.error(QObject::tr("Missing parameter: max edge length value after '%1'").arg(COMMAND_DELAUNAY_MAX_EDGE_LENGTH));
 				bool ok;
 				maxEdgeLength = cmd.arguments().takeFirst().toDouble(&ok);
 				if (!ok)
-					return cmd.error(QString("Invalid value for max edge length! (after %1)").arg(COMMAND_DELAUNAY_MAX_EDGE_LENGTH));
-				cmd.print(QString("Max edge length: %1").arg(maxEdgeLength));
+					return cmd.error(QObject::tr("Invalid value for max edge length! (after %1)").arg(COMMAND_DELAUNAY_MAX_EDGE_LENGTH));
+				cmd.print(QObject::tr("Max edge length: %1").arg(maxEdgeLength));
 			}
 			else
 			{
@@ -3060,13 +3212,13 @@ struct CommandDelaunayTri : public ccCommandLineInterface::Command
 			}
 		}
 
-		cmd.print(QString("Axis aligned: %1").arg(axisAligned ? "yes" : "no"));
+		cmd.print(QObject::tr("Axis aligned: %1").arg(axisAligned ? "yes" : "no"));
 
 		//try to triangulate each cloud
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{
 			ccPointCloud* cloud = cmd.clouds()[i].pc;
-			cmd.print(QString("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
+			cmd.print(QObject::tr("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 			ccMesh* mesh = ccMesh::Triangulate(cloud,
 				axisAligned ? DELAUNAY_2D_AXIS_ALIGNED : DELAUNAY_2D_BEST_LS_PLANE,
@@ -3077,7 +3229,7 @@ struct CommandDelaunayTri : public ccCommandLineInterface::Command
 
 			if (mesh)
 			{
-				cmd.print(QString("\tResulting mesh: #%1 faces, %2 vertices").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()));
+				cmd.print(QObject::tr("\tResulting mesh: #%1 faces, %2 vertices").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()));
 
 				CLMeshDesc meshDesc;
 				meshDesc.mesh = mesh;
@@ -3121,7 +3273,7 @@ struct CommandSFArithmetic : public ccCommandLineInterface::Command
 
 		if (cmd.arguments().size() < 2)
 		{
-			return cmd.error(QString("Missing parameter(s): SF index and/or operation after '%1' (2 values expected)").arg(COMMAND_SF_ARITHMETIC));
+			return cmd.error(QObject::tr("Missing parameter(s): SF index and/or operation after '%1' (2 values expected)").arg(COMMAND_SF_ARITHMETIC));
 		}
 
 		//read sf index
@@ -3134,7 +3286,7 @@ struct CommandSFArithmetic : public ccCommandLineInterface::Command
 			else
 				sfIndex = sfIndex.toInt(&ok);
 			if (!ok || sfIndex < 0)
-				return cmd.error(QString("Invalid SF index! (after %1)").arg(COMMAND_SF_ARITHMETIC));
+				return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_ARITHMETIC));
 		}
 
 		//read operation type
@@ -3144,11 +3296,11 @@ struct CommandSFArithmetic : public ccCommandLineInterface::Command
 			operation = ccScalarFieldArithmeticsDlg::GetOperationByName(opName);
 			if (operation == ccScalarFieldArithmeticsDlg::INVALID)
 			{
-				return cmd.error(QString("Unknown operation! (%1)").arg(opName));
+				return cmd.error(QObject::tr("Unknown operation! (%1)").arg(opName));
 			}
 			else if (operation <= ccScalarFieldArithmeticsDlg::DIVIDE)
 			{
-				return cmd.error(QString("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_ARITHMETIC));
+				return cmd.error(QObject::tr("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_ARITHMETIC));
 			}
 		}
 
@@ -3160,7 +3312,7 @@ struct CommandSFArithmetic : public ccCommandLineInterface::Command
 			{
 				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, false))
 				{
-					return cmd.error(QString("Failed top apply operation on cloud '%1'").arg(cloud->getName()));
+					return cmd.error(QObject::tr("Failed top apply operation on cloud '%1'").arg(cloud->getName()));
 				}
 				else if (cmd.autoSaveMode())
 				{
@@ -3183,7 +3335,7 @@ struct CommandSFArithmetic : public ccCommandLineInterface::Command
 			{
 				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, false))
 				{
-					return cmd.error(QString("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
+					return cmd.error(QObject::tr("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
 				}
 				else if (cmd.autoSaveMode())
 				{
@@ -3210,7 +3362,7 @@ struct CommandSFOperation : public ccCommandLineInterface::Command
 
 		if (cmd.arguments().size() < 3)
 		{
-			return cmd.error(QString("Missing parameter(s): SF index and/or operation and/or scalar value after '%1' (3 values expected)").arg(COMMAND_SF_OP));
+			return cmd.error(QObject::tr("Missing parameter(s): SF index and/or operation and/or scalar value after '%1' (3 values expected)").arg(COMMAND_SF_OP));
 		}
 
 		//read sf index
@@ -3225,7 +3377,7 @@ struct CommandSFOperation : public ccCommandLineInterface::Command
 
 			if (!ok || sfIndex < 0)
 			{
-				return cmd.error(QString("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
+				return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
 			}
 		}
 
@@ -3236,11 +3388,11 @@ struct CommandSFOperation : public ccCommandLineInterface::Command
 			operation = ccScalarFieldArithmeticsDlg::GetOperationByName(opName);
 			if (operation == ccScalarFieldArithmeticsDlg::INVALID)
 			{
-				return cmd.error(QString("Unknown operation! (%1)").arg(opName));
+				return cmd.error(QObject::tr("Unknown operation! (%1)").arg(opName));
 			}
 			else if (operation > ccScalarFieldArithmeticsDlg::DIVIDE)
 			{
-				return cmd.error(QString("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_OP));
+				return cmd.error(QObject::tr("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_OP));
 			}
 		}
 
@@ -3251,7 +3403,7 @@ struct CommandSFOperation : public ccCommandLineInterface::Command
 			value = cmd.arguments().takeFirst().toDouble(&ok);
 			if (!ok)
 			{
-				return cmd.error(QString("Invalid scalar value! (after %1)").arg(COMMAND_SF_OP));
+				return cmd.error(QObject::tr("Invalid scalar value! (after %1)").arg(COMMAND_SF_OP));
 			}
 		}
 
@@ -3269,7 +3421,7 @@ struct CommandSFOperation : public ccCommandLineInterface::Command
 			{
 				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, true, &sf2))
 				{
-					return cmd.error(QString("Failed top apply operation on cloud '%1'").arg(cloud->getName()));
+					return cmd.error(QObject::tr("Failed top apply operation on cloud '%1'").arg(cloud->getName()));
 				}
 				else if (cmd.autoSaveMode())
 				{
@@ -3292,7 +3444,7 @@ struct CommandSFOperation : public ccCommandLineInterface::Command
 			{
 				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, true, &sf2))
 				{
-					return cmd.error(QString("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
+					return cmd.error(QObject::tr("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
 				}
 				else if (cmd.autoSaveMode())
 				{
@@ -3359,11 +3511,11 @@ struct CommandICP : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: min error difference after '%1'").arg(COMMAND_ICP_MIN_ERROR_DIIF));
+					return cmd.error(QObject::tr("Missing parameter: min error difference after '%1'").arg(COMMAND_ICP_MIN_ERROR_DIIF));
 				bool ok;
 				minErrorDiff = cmd.arguments().takeFirst().toDouble(&ok);
 				if (!ok || minErrorDiff <= 0)
-					return cmd.error(QString("Invalid value for min. error difference! (after %1)").arg(COMMAND_ICP_MIN_ERROR_DIIF));
+					return cmd.error(QObject::tr("Invalid value for min. error difference! (after %1)").arg(COMMAND_ICP_MIN_ERROR_DIIF));
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_ITERATION_COUNT))
 			{
@@ -3371,12 +3523,12 @@ struct CommandICP : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: number of iterations after '%1'").arg(COMMAND_ICP_ITERATION_COUNT));
+					return cmd.error(QObject::tr("Missing parameter: number of iterations after '%1'").arg(COMMAND_ICP_ITERATION_COUNT));
 				bool ok;
 				QString arg = cmd.arguments().takeFirst();
 				iterationCount = arg.toUInt(&ok);
 				if (!ok || iterationCount == 0)
-					return cmd.error(QString("Invalid number of iterations! (%1)").arg(arg));
+					return cmd.error(QObject::tr("Invalid number of iterations! (%1)").arg(arg));
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_OVERLAP))
 			{
@@ -3384,12 +3536,12 @@ struct CommandICP : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: overlap percentage after '%1'").arg(COMMAND_ICP_OVERLAP));
+					return cmd.error(QObject::tr("Missing parameter: overlap percentage after '%1'").arg(COMMAND_ICP_OVERLAP));
 				bool ok;
 				QString arg = cmd.arguments().takeFirst();
 				overlap = arg.toUInt(&ok);
 				if (!ok || overlap < 10 || overlap > 100)
-					return cmd.error(QString("Invalid overlap value! (%1 --> should be between 10 and 100)").arg(arg));
+					return cmd.error(QObject::tr("Invalid overlap value! (%1 --> should be between 10 and 100)").arg(arg));
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_RANDOM_SAMPLING_LIMIT))
 			{
@@ -3397,11 +3549,11 @@ struct CommandICP : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: random sampling limit value after '%1'").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
+					return cmd.error(QObject::tr("Missing parameter: random sampling limit value after '%1'").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
 				bool ok;
 				randomSamplingLimit = cmd.arguments().takeFirst().toUInt(&ok);
 				if (!ok || randomSamplingLimit < 3)
-					return cmd.error(QString("Invalid random sampling limit! (after %1)").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
+					return cmd.error(QObject::tr("Invalid random sampling limit! (after %1)").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT))
 			{
@@ -3409,7 +3561,7 @@ struct CommandICP : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
+					return cmd.error(QObject::tr("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
 				QString sfIndex = cmd.arguments().takeFirst();
 				if (sfIndex.toUpper() == OPTION_LAST)
 				{
@@ -3420,7 +3572,7 @@ struct CommandICP : public ccCommandLineInterface::Command
 					bool ok;
 					modelSFAsWeights = sfIndex.toInt(&ok);
 					if (!ok || modelSFAsWeights < 0)
-						return cmd.error(QString("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
+						return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
 				}
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_USE_DATA_SF_AS_WEIGHT))
@@ -3429,7 +3581,7 @@ struct CommandICP : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
+					return cmd.error(QObject::tr("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
 				QString sfIndex = cmd.arguments().takeFirst();
 				if (sfIndex.toUpper() == OPTION_LAST)
 				{
@@ -3440,7 +3592,7 @@ struct CommandICP : public ccCommandLineInterface::Command
 					bool ok;
 					dataSFAsWeights = sfIndex.toInt(&ok);
 					if (!ok || dataSFAsWeights < 0)
-						return cmd.error(QString("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
+						return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
 				}
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_MAX_THREAD_COUNT))
@@ -3449,12 +3601,12 @@ struct CommandICP : public ccCommandLineInterface::Command
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
-					return cmd.error(QString("Missing parameter: max thread count after '%1'").arg(COMMAND_MAX_THREAD_COUNT));
+					return cmd.error(QObject::tr("Missing parameter: max thread count after '%1'").arg(COMMAND_MAX_THREAD_COUNT));
 
 				bool ok;
 				maxThreadCount = cmd.arguments().takeFirst().toInt(&ok);
 				if (!ok || maxThreadCount < 0)
-					return cmd.error(QString("Invalid thread count! (after %1)").arg(COMMAND_MAX_THREAD_COUNT));
+					return cmd.error(QObject::tr("Invalid thread count! (after %1)").arg(COMMAND_MAX_THREAD_COUNT));
 			}
 			else
 			{
@@ -3495,13 +3647,13 @@ struct CommandICP : public ccCommandLineInterface::Command
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(dataAndModel[0]->getEntity());
 			if (!cloud || cloud->getNumberOfScalarFields() == 0 || dataSFAsWeights >= static_cast<int>(cloud->getNumberOfScalarFields()))
 			{
-				return cmd.error(QString("Invalid SF index for data entity! (%1)").arg(dataSFAsWeights));
+				return cmd.error(QObject::tr("Invalid SF index for data entity! (%1)").arg(dataSFAsWeights));
 			}
 			else
 			{
 				if (dataSFAsWeights < 0) //last SF
 					dataSFAsWeights = static_cast<int>(cloud->getNumberOfScalarFields()) - 1;
-				cmd.print(QString("[ICP] SF #%1 (data entity) will be used as weights").arg(dataSFAsWeights));
+				cmd.print(QObject::tr("[ICP] SF #%1 (data entity) will be used as weights").arg(dataSFAsWeights));
 				cloud->setCurrentDisplayedScalarField(dataSFAsWeights);
 			}
 
@@ -3511,13 +3663,13 @@ struct CommandICP : public ccCommandLineInterface::Command
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(dataAndModel[1]->getEntity());
 			if (!cloud || cloud->getNumberOfScalarFields() == 0 || modelSFAsWeights >= static_cast<int>(cloud->getNumberOfScalarFields()))
 			{
-				return cmd.error(QString("Invalid SF index for model entity! (%1)").arg(modelSFAsWeights));
+				return cmd.error(QObject::tr("Invalid SF index for model entity! (%1)").arg(modelSFAsWeights));
 			}
 			else
 			{
 				if (modelSFAsWeights < 0) //last SF
 					modelSFAsWeights = static_cast<int>(cloud->getNumberOfScalarFields()) - 1;
-				cmd.print(QString("[ICP] SF #%1 (model entity) will be used as weights").arg(modelSFAsWeights));
+				cmd.print(QObject::tr("[ICP] SF #%1 (model entity) will be used as weights").arg(modelSFAsWeights));
 				cloud->setCurrentDisplayedScalarField(modelSFAsWeights);
 			}
 		}
@@ -3547,16 +3699,16 @@ struct CommandICP : public ccCommandLineInterface::Command
 		{
 			ccHObject* data = dataAndModel[0]->getEntity();
 			data->applyGLTransformation_recursive(&transMat);
-			cmd.print(QString("Entity '%1' has been registered").arg(data->getName()));
-			cmd.print(QString("RMS: %1").arg(finalError));
-			cmd.print(QString("Number of points used for final step: %1").arg(finalPointCount));
+			cmd.print(QObject::tr("Entity '%1' has been registered").arg(data->getName()));
+			cmd.print(QObject::tr("RMS: %1").arg(finalError));
+			cmd.print(QObject::tr("Number of points used for final step: %1").arg(finalPointCount));
 
 			//save matrix in a separate text file
 			{
-				QString txtFilename = QString("%1/%2_REGISTRATION_MATRIX").arg(dataAndModel[0]->path, dataAndModel[0]->basename);
+				QString txtFilename = QObject::tr("%1/%2_REGISTRATION_MATRIX").arg(dataAndModel[0]->path, dataAndModel[0]->basename);
 				if (cmd.addTimestamp())
-					txtFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
-				txtFilename += QString(".txt");
+					txtFilename += QObject::tr("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+				txtFilename += QObject::tr(".txt");
 				QFile txtFile(txtFilename);
 				txtFile.open(QIODevice::WriteOnly | QIODevice::Text);
 				QTextStream txtStream(&txtFile);
@@ -3564,7 +3716,7 @@ struct CommandICP : public ccCommandLineInterface::Command
 				txtFile.close();
 			}
 
-			dataAndModel[0]->basename += QString("_REGISTERED");
+			dataAndModel[0]->basename += QObject::tr("_REGISTERED");
 			if (cmd.autoSaveMode())
 			{
 				QString errorStr = cmd.exportEntity(*dataAndModel[0]);
@@ -3588,10 +3740,10 @@ struct CommandChangeFBXOutputFormat : public ccCommandLineInterface::Command
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: FBX format (string) after '%1'").arg(COMMAND_FBX_EXPORT_FORMAT));
+			return cmd.error(QObject::tr("Missing parameter: FBX format (string) after '%1'").arg(COMMAND_FBX_EXPORT_FORMAT));
 
 		QString formatStr = cmd.arguments().takeFirst();
-		cmd.print(QString("FBX format: %1").arg(formatStr));
+		cmd.print(QObject::tr("FBX format: %1").arg(formatStr));
 
 #ifdef CC_FBX_SUPPORT
 		FBXFilter::SetDefaultOutputFormat(formatStr);
@@ -3608,10 +3760,10 @@ struct CommandChangePLYExportFormat : public ccCommandLineInterface::Command
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: format (ASCII, BINARY_LE, or BINARY_BE) after '%1'").arg(COMMAND_PLY_EXPORT_FORMAT));
+			return cmd.error(QObject::tr("Missing parameter: format (ASCII, BINARY_LE, or BINARY_BE) after '%1'").arg(COMMAND_PLY_EXPORT_FORMAT));
 
 		//if (fileFilter != PlyFilter::GetFileFilter())
-		//	cmd.warning(QString("Argument '%1' is only applicable to PLY format!").arg(argument));
+		//	cmd.warning(QObject::tr("Argument '%1' is only applicable to PLY format!").arg(argument));
 
 		QString plyFormat = cmd.arguments().takeFirst().toUpper();
 		//printf("%s\n",qPrintable(plyFormat));
@@ -3623,7 +3775,7 @@ struct CommandChangePLYExportFormat : public ccCommandLineInterface::Command
 		else if (plyFormat == "BINARY_LE")
 			PlyFilter::SetDefaultOutputFormat(PLY_LITTLE_ENDIAN);
 		else
-			return cmd.error(QString("Invalid PLY format! ('%1')").arg(plyFormat));
+			return cmd.error(QObject::tr("Invalid PLY format! ('%1')").arg(plyFormat));
 
 		return true;
 	}
@@ -3707,7 +3859,7 @@ struct CommandAutoSave : public ccCommandLineInterface::Command
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: option after '%1' (%2/%3)").arg(COMMAND_AUTO_SAVE, OPTION_ON, OPTION_OFF));
+			return cmd.error(QObject::tr("Missing parameter: option after '%1' (%2/%3)").arg(COMMAND_AUTO_SAVE, OPTION_ON, OPTION_OFF));
 
 		QString option = cmd.arguments().takeFirst().toUpper();
 		if (option == OPTION_ON)
@@ -3722,7 +3874,7 @@ struct CommandAutoSave : public ccCommandLineInterface::Command
 		}
 		else
 		{
-			return cmd.error(QString("Unrecognized option afer '%1' (%2 or %3 expected)").arg(COMMAND_AUTO_SAVE, OPTION_ON, OPTION_OFF));
+			return cmd.error(QObject::tr("Unrecognized option afer '%1' (%2 or %3 expected)").arg(COMMAND_AUTO_SAVE, OPTION_ON, OPTION_OFF));
 		}
 
 		return true;
@@ -3736,7 +3888,7 @@ struct CommandLogFile : public ccCommandLineInterface::Command
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
 		if (cmd.arguments().empty())
-			return cmd.error(QString("Missing parameter: filename after '%1'").arg(COMMAND_LOG_FILE));
+			return cmd.error(QObject::tr("Missing parameter: filename after '%1'").arg(COMMAND_LOG_FILE));
 
 		QString filename = cmd.arguments().takeFirst();
 		if (!ccConsole::TheInstance(false))

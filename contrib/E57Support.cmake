@@ -19,6 +19,17 @@ if( ${OPTION_USE_LIBE57} )
 	endif()
 
 	# Find Boost
+	# Boost (using static, multithreaded libraries)
+	if ( WIN32 )
+		if ( MSVC )
+			set(Boost_USE_STATIC_LIBS   ON)
+			set(Boost_USE_MULTITHREADED ON)
+		endif() 
+	elseif( APPLE )
+		set(Boost_USE_STATIC_LIBS   ON)
+		set(Boost_USE_MULTITHREADED ON)
+	endif()
+
 	find_package( Boost COMPONENTS system QUIET ) #DGM: not sure why, but "system" lib doesn't show up otherwise...
 	if( Boost_FOUND )
 		include_directories( ${Boost_INCLUDE_DIR} )
@@ -28,10 +39,21 @@ if( ${OPTION_USE_LIBE57} )
 	endif()
 	
 	# Find Xerces
-	set( Xerces_INCLUDE_DIR "" CACHE PATH "Xerces include directory" )
-	set( Xerces_LIBRARY_RELEASE "" CACHE FILEPATH "Xerces (release) library file" )
-	if( CMAKE_CONFIGURATION_TYPES )
-		set( Xerces_LIBRARY_DEBUG "" CACHE FILEPATH "Xerces (debug) library file" )
+	if (WIN32)
+		set( Xerces_INCLUDE_DIR "" CACHE PATH "Xerces include directory" )
+		set( Xerces_LIBRARY_RELEASE "" CACHE FILEPATH "Xerces (release) library file" )
+ 		if( CMAKE_CONFIGURATION_TYPES )
+			set( Xerces_LIBRARY_DEBUG "" CACHE FILEPATH "Xerces (debug) library file" )
+		endif()
+	else ()
+		include(FindXercesC)
+		find_package(XercesC REQUIRED)
+
+		set( Xerces_INCLUDE_DIR ${XercesC_INCLUDE_DIR} CACHE PATH "Xerces include directory" )
+		set( Xerces_LIBRARY_RELEASE ${XercesC_LIBRARY} CACHE FILEPATH "Xerces (release) library file" )
+		if( CMAKE_CONFIGURATION_TYPES )
+			set( Xerces_LIBRARY_DEBUG ${XercesC_LIBRARY} CACHE FILEPATH "Xerces (debug) library file" )
+		endif()
 	endif()
 
 	if ( NOT Xerces_INCLUDE_DIR )

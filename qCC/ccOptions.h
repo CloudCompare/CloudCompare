@@ -11,51 +11,53 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                 COPYRIGHT: Daniel Girardeau-Montaut                    #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_UNROLL_DLG_HEADER
-#define CC_UNROLL_DLG_HEADER
+#ifndef CC_OPTIONS_HEADER
+#define CC_OPTIONS_HEADER
 
-#include <ui_unrollDlg.h>
+//Qt
+#include <QString>
 
-//CCLib
-#include <CCGeom.h>
-
-//! Dialog: unroll clould on a cylinder or a cone
-class ccUnrollDlg : public QDialog, public Ui::UnrollDialog
+//! Main application options
+class ccOptions
 {
-	Q_OBJECT
+public: //parameters
 
-public:
+	//! Whether to display the normals by default or not
+	bool normalsDisplayedByDefault;
+
+public: //methods
 
 	//! Default constructor
-	explicit ccUnrollDlg(QWidget* parent = 0);
+	ccOptions();
 
-	//! Projection type
-	enum Type { CYLINDER, CONE, STRAIGHTENED_CONE };
+	//! Resets parameters to default values
+	void reset();
 
-	Type getType() const;
-	int getAxisDimension() const;
-	bool isAxisPositionAuto() const;
-	CCVector3 getAxisPosition() const;
-	void getAngleRange(double& start_deg, double& stop_deg) const;
-	double getRadius() const;
-	double getConeHalfAngle() const;
-	bool exportDeviationSF() const;
-
-	void toPersistentSettings() const;
+	//! Loads from persistent DB
 	void fromPersistentSettings();
 
-protected slots:
-	void shapeTypeChanged(int index);
-	void axisDimensionChanged(int index);
-	void axisAutoStateChanged(int checkState);
+	//! Saves to persistent DB
+	void toPersistentSettings() const;
 
-protected:
-	bool coneMode;
+public: //static methods
 
+	//! Returns the stored values of each parameter.
+	static const ccOptions& Instance() { return InstanceNonConst(); }
+
+	//! Release unique instance (if any)
+	static void ReleaseInstance();
+
+	//! Sets parameters
+	static void Set(const ccOptions& options);
+
+protected: //methods
+	
+   //! Returns the stored values of each parameter.
+	static ccOptions& InstanceNonConst();
 };
 
-#endif
+#endif //CC_OPTIONS_HEADER

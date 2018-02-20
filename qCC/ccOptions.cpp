@@ -11,51 +11,68 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                 COPYRIGHT: Daniel Girardeau-Montaut                    #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_UNROLL_DLG_HEADER
-#define CC_UNROLL_DLG_HEADER
+#include "ccOptions.h"
 
-#include <ui_unrollDlg.h>
+//Qt
+#include <QSettings>
 
-//CCLib
-#include <CCGeom.h>
+//qCC_db
+#include <ccSingleton.h>
 
-//! Dialog: unroll clould on a cylinder or a cone
-class ccUnrollDlg : public QDialog, public Ui::UnrollDialog
+//! Unique instance of ccOptions
+static ccSingleton<ccOptions> s_options;
+
+ccOptions& ccOptions::InstanceNonConst()
 {
-	Q_OBJECT
+	if (!s_options.instance)
+	{
+		s_options.instance = new ccOptions();
+		s_options.instance->fromPersistentSettings();
+	}
 
-public:
+	return *s_options.instance;
+}
 
-	//! Default constructor
-	explicit ccUnrollDlg(QWidget* parent = 0);
+void ccOptions::ReleaseInstance()
+{
+	s_options.release();
+}
 
-	//! Projection type
-	enum Type { CYLINDER, CONE, STRAIGHTENED_CONE };
+void ccOptions::Set(const ccOptions& params)
+{
+	InstanceNonConst() = params;
+}
 
-	Type getType() const;
-	int getAxisDimension() const;
-	bool isAxisPositionAuto() const;
-	CCVector3 getAxisPosition() const;
-	void getAngleRange(double& start_deg, double& stop_deg) const;
-	double getRadius() const;
-	double getConeHalfAngle() const;
-	bool exportDeviationSF() const;
+ccOptions::ccOptions()
+{
+	reset();
+}
 
-	void toPersistentSettings() const;
-	void fromPersistentSettings();
+void ccOptions::reset()
+{
+	normalsDisplayedByDefault = false;
+}
 
-protected slots:
-	void shapeTypeChanged(int index);
-	void axisDimensionChanged(int index);
-	void axisAutoStateChanged(int checkState);
+void ccOptions::fromPersistentSettings()
+{
+	QSettings settings;
+	settings.beginGroup("Options");
+	{
+		normalsDisplayedByDefault = settings.value("normalsDisplayedByDefault", false).toBool();
+	}
+	settings.endGroup();
+}
 
-protected:
-	bool coneMode;
-
-};
-
-#endif
+void ccOptions::toPersistentSettings() const
+{
+	QSettings settings;
+	settings.beginGroup("Options");
+	{
+		settings.setValue("normalsDisplayedByDefault", normalsDisplayedByDefault);
+	}
+	settings.endGroup();
+}

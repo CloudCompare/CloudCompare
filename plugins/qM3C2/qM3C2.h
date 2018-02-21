@@ -44,9 +44,9 @@ public:
 	qM3C2Plugin(QObject* parent = nullptr);
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "M3C2 distance"; }
-	virtual QString getDescription() const { return "Multiscale Model to Model Cloud Comparison (M3C2)"; }
-	virtual QIcon getIcon() const;
+	virtual QString getName() const override { return "M3C2 distance"; }
+	virtual QString getDescription() const override { return "Multiscale Model to Model Cloud Comparison (M3C2)"; }
+	virtual QIcon getIcon() const override;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;

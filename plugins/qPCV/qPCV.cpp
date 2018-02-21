@@ -53,7 +53,7 @@ void qPCV::onNewSelection(const ccHObject::Container& selectedEntities)
 		bool elligibleEntitiies = false;
 		for (ccHObject* obj : selectedEntities)
 		{
-			if (obj && obj->isKindOf(CC_TYPES::POINT_CLOUD) || obj->isKindOf(CC_TYPES::MESH))
+			if (obj && (obj->isKindOf(CC_TYPES::POINT_CLOUD) || obj->isKindOf(CC_TYPES::MESH)))
 			{
 				elligibleEntitiies = true;
 				break;

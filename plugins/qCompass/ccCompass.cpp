@@ -2016,7 +2016,7 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 			trace = static_cast<ccTrace*>(object);
 		}
 
-		QString x, y, z, nx, ny, nz, cost, wIDs;
+		QString x, y, z, nx, ny, nz, cost, wIDs,w_local_ids;
 
 
 		//loop through points
@@ -2077,9 +2077,31 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 			//if this is a trace also write the waypoints
 			if (trace)
 			{
+				//get ids (on the cloud) for waypoints
 				for (int w = 0; w < trace->waypoint_count(); w++)
 				{
 					wIDs += QString::asprintf("%d,", trace->getWaypoint(w));
+				}
+
+				//get ids (vertex # in polyline) for waypoints
+				for (int w = 0; w < trace->waypoint_count(); w++)
+				{
+					
+					//get id of waypoint in cloud
+					int globalID = trace->getWaypoint(w);
+
+					//find corresponding point in trace
+					int i = 0;
+					for (i; i < trace->size(); i++)
+					{
+						if (trace->getPointGlobalIndex(i) == globalID)
+						{
+							break; //found it!;
+						}
+					}
+
+					//write this points local index
+					w_local_ids += QString::asprintf("%d,",i);
 				}
 
 			}
@@ -2111,7 +2133,8 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 			{
 				//write waypoints
 				out->writeTextElement("cost", cost);
-				out->writeTextElement("control_point_ids", wIDs);
+				out->writeTextElement("control_point_cloud_ids", wIDs);
+				out->writeTextElement("control_point_local_ids", w_local_ids);
 			}
 
 			//fin!

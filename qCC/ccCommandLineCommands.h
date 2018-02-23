@@ -3906,7 +3906,7 @@ struct CommandAutoSave : public ccCommandLineInterface::Command
 		}
 		else
 		{
-			return cmd.error(QObject::tr("Unrecognized option afer '%1' (%2 or %3 expected)").arg(COMMAND_AUTO_SAVE, OPTION_ON, OPTION_OFF));
+			return cmd.error(QObject::tr("Unrecognized option after '%1' (%2 or %3 expected)").arg(COMMAND_AUTO_SAVE, OPTION_ON, OPTION_OFF));
 		}
 
 		return true;

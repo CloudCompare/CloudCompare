@@ -155,6 +155,7 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandMergeMeshes));
 	registerCommand(Command::Shared(new CommandSetActiveSF));
 	registerCommand(Command::Shared(new CommandRemoveAllSF));
+	registerCommand(Command::Shared(new CommandRemoveScanGrids));
 	registerCommand(Command::Shared(new CommandMatchBBCenters));
 	registerCommand(Command::Shared(new CommandMatchBestFitPlane));
 	registerCommand(Command::Shared(new CommandOrientNormalsMST));

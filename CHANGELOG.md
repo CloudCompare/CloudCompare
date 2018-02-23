@@ -42,6 +42,8 @@ v2.10.alpha - XX/XX/201X
 			* '-SF_COLOR_SCALE {filename}'
 		- Extract all loaded mesh vertices as standalone 'clouds' (the mesh is discarded)
 			* '-EXTRACT_VERTICES'
+		- Remove all scan grids
+			* '-REMOVE_SCAN_GRIDS'
 
 	* Unroll tool:
 		- the cylindrical unrolling can be performed inside an arbitrary angular range (between -3600 and +3600 degrees)

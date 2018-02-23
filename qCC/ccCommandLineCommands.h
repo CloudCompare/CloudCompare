@@ -69,6 +69,7 @@ static const char COMMAND_MERGE_CLOUDS[]					= "MERGE_CLOUDS";
 static const char COMMAND_MERGE_MESHES[]                    = "MERGE_MESHES";
 static const char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
 static const char COMMAND_REMOVE_ALL_SFS[]					= "REMOVE_ALL_SFS";
+static const char COMMAND_REMOVE_SCAN_GRIDS[]				= "REMOVE_SCAN_GRIDS";
 static const char COMMAND_MATCH_BB_CENTERS[]				= "MATCH_CENTERS";
 static const char COMMAND_BEST_FIT_PLANE[]					= "BEST_FIT_PLANE";
 static const char COMMAND_BEST_FIT_PLANE_MAKE_HORIZ[]		= "MAKE_HORIZ";
@@ -1827,6 +1828,37 @@ struct CommandRemoveAllSF : public ccCommandLineInterface::Command
 		return true;
 	}
 };
+
+struct CommandRemoveScanGrids : public ccCommandLineInterface::Command
+{
+	CommandRemoveScanGrids() : ccCommandLineInterface::Command("Remove scan grids", COMMAND_REMOVE_SCAN_GRIDS) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		//no argument required
+		for (CLCloudDesc& cloudDesc : cmd.clouds())
+		{
+			if (cloudDesc.pc)
+			{
+				cloudDesc.pc->removeGrids();
+			}
+		}
+
+		for (CLMeshDesc& meshDesc : cmd.meshes())
+		{
+			if (meshDesc.mesh)
+			{
+				ccGenericPointCloud* cloud = meshDesc.mesh->getAssociatedCloud();
+				if (cloud->isA(CC_TYPES::POINT_CLOUD))
+				{
+					static_cast<ccPointCloud*>(cloud)->removeGrids();
+				}
+			}
+		}
+
+		return true;
+	}
+}; 
 
 struct CommandMatchBBCenters : public ccCommandLineInterface::Command
 {

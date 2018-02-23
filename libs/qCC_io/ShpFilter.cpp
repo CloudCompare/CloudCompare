@@ -49,6 +49,7 @@
 
 //System
 #include <string.h>
+#include <array>
 
 //Specific value for NaN
 static const double ESRI_NO_DATA = -1.0e38;

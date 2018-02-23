@@ -227,7 +227,7 @@
 - Optimized = CC will use the keypoints to optimize the parameters of the 'collinearity equation'
   that make the image and the keypoints match as best as possible. The equation parameters are then
   used to project the image on the horizontal plane (by default). This method compensate for the
-  image distortion in its own way (i.e. whithout using the distortion model provided by Bundler)
+  image distortion in its own way (i.e. without using the distortion model provided by Bundler)
 - Direct = CC will only use Bundler's output information (camera extrinsic and intrinsic parameters).
   The camera distortion parameters can be applied or not. Pay attention that those parameters are
   sometimes very poorly estimated by Bundler.</string>

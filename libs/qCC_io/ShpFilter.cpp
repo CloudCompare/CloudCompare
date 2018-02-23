@@ -72,18 +72,33 @@ enum ESRI_SHAPE_TYPE {	SHP_NULL_SHAPE		= 0 ,
 						SHP_MULTI_PATCH		= 31
 };
 
-//DGM: by default qToLittleEndian only works for integer types!
-double qToLittleEndianD(double in)
+//DGM: by default qToLittleEndian and qFromLittleEndian only works for integer types!
+double swapD(double in)
+{
+	//! Change the endianness (see https://stackoverflow.com/questions/41012414/convert-double-value-from-little-endian-to-big-endian)
+	std::array<char, sizeof(double)> p;
+	memcpy(&p[0], &in, sizeof(double));
+	std::reverse(p.begin(), p.end());
+	memcpy(&in, &p[0], sizeof(double));
+	return in;
+}
+
+double qFromLittleEndianD(double in)
 {
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
-	//! Change the endianness (see https://stackoverflow.com/questions/41012414/convert-double-value-from-little-endian-to-big-endian)
-	std::array<char, sizeof(T)> p;
-	memcpy(&p[0], &in, sizeof(T));
-	std::reverse(p.begin(), p.end());
-	memcpy(&in, &p[0], sizeof(T));
+	return swapD(in);
 #endif
 	return in;
 }
+
+double qToLittleEndianD(double in)
+{
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+	return swapD(in);
+#endif
+	return in;
+}
+
 
 //! Shape File Save dialog
 class SaveSHPFileDialog : public QDialog, public Ui::SaveSHPFileDlg
@@ -284,10 +299,10 @@ CC_FILE_ERROR LoadPolyline(QFile& file,
 	{
 		//The Bounding Box for the PolyLine stored in the order Xmin, Ymin, Xmax, Ymax
 		//DGM: ignored
-		//double xMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header   ));
-		//double xMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+ 8));
-		//double yMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+16));
-		//double yMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+24));
+		//double xMin = qFromLittleEndianD(*reinterpret_cast<double*>(header   ));
+		//double xMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+ 8));
+		//double yMin = qFromLittleEndianD(*reinterpret_cast<double*>(header+16));
+		//double yMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+24));
 	}
 
 	//Byte 32: NumParts (The number of parts in the PolyLine)
@@ -334,8 +349,8 @@ CC_FILE_ERROR LoadPolyline(QFile& file,
 			//check for errors
 			if (file.error() != QFile::NoError)
 				return CC_FERR_READING;
-			double x = qFromLittleEndian<double>(*reinterpret_cast<double*>(header));
-			double y = qFromLittleEndian<double>(*reinterpret_cast<double*>(header + 8));
+			double x = qFromLittleEndianD(*reinterpret_cast<double*>(header));
+			double y = qFromLittleEndianD(*reinterpret_cast<double*>(header + 8));
 			points[i].x = static_cast<PointCoordinateType>(x + PShift.x);
 			points[i].y = static_cast<PointCoordinateType>(y + PShift.y);
 			points[i].z = 0;
@@ -350,8 +365,8 @@ CC_FILE_ERROR LoadPolyline(QFile& file,
 		{
 			file.read(header, 16);
 			//DGM: ignored
-			//double zMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header  ));
-			//double zMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+8));
+			//double zMin = qFromLittleEndianD(*reinterpret_cast<double*>(header  ));
+			//double zMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+8));
 		}
 
 		//Z coordinates (an array of length NumPoints)
@@ -362,7 +377,7 @@ CC_FILE_ERROR LoadPolyline(QFile& file,
 				//check for errors
 				if (file.error() != QFile::NoError)
 					return CC_FERR_READING;
-				double z = qFromLittleEndian<double>(*reinterpret_cast<double*>(header));
+				double z = qFromLittleEndianD(*reinterpret_cast<double*>(header));
 				points[i].z = static_cast<PointCoordinateType>(z + PShift.z);
 			}
 		}
@@ -378,8 +393,8 @@ CC_FILE_ERROR LoadPolyline(QFile& file,
 			//check for errors
 			if (file.error() != QFile::NoError)
 				return CC_FERR_READING;
-			double mMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header));
-			double mMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header + 8));
+			double mMin = qFromLittleEndianD(*reinterpret_cast<double*>(header));
+			double mMax = qFromLittleEndianD(*reinterpret_cast<double*>(header + 8));
 
 			if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
 			{
@@ -404,7 +419,7 @@ CC_FILE_ERROR LoadPolyline(QFile& file,
 				//check for errors
 				if (file.error() != QFile::NoError)
 					return CC_FERR_READING;
-				double m = qFromLittleEndian<double>(*reinterpret_cast<double*>(header));
+				double m = qFromLittleEndianD(*reinterpret_cast<double*>(header));
 				scalarValues[i] = (m == ESRI_NO_DATA ? NAN_VALUE : static_cast<ScalarType>(m));
 			}
 		}
@@ -608,8 +623,8 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 			const CCVector3* P = vertices->getPoint(ii % realNumPoints); //warning: handle loop if polyline is closed
 			CCVector3d Pg = poly->toGlobal3d(*P);
 
-			double x = qToLittleEndian<double>(Pg.u[X]);
-			double y = qToLittleEndian<double>(Pg.u[Y]);
+			double x = qToLittleEndianD(Pg.u[X]);
+			double y = qToLittleEndianD(Pg.u[Y]);
 			/*Byte 0*/file.write((const char*)&x, 8);
 			/*Byte 8*/file.write((const char*)&y, 8);
 			bytesWritten += 16;
@@ -621,8 +636,8 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	{
 		//Z boundaries
 		{
-			double zMin = qToLittleEndian<double>(bbMing.u[Z]);
-			double zMax = qToLittleEndian<double>(bbMaxg.u[Z]);
+			double zMin = qToLittleEndianD(bbMing.u[Z]);
+			double zMax = qToLittleEndianD(bbMaxg.u[Z]);
 			file.write((const char*)&zMin, 8);
 			file.write((const char*)&zMax, 8);
 			bytesWritten += 16;
@@ -635,7 +650,7 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 				int32_t ii = (inverseOrder ? numPoints - 1 - i : i);
 				const CCVector3* P = vertices->getPoint(ii % realNumPoints); //warning: handle loop if polyline is closed
 				CCVector3d Pg = poly->toGlobal3d(*P);
-				double z = qToLittleEndian<double>(Pg.u[Z]);
+				double z = qToLittleEndianD(Pg.u[Z]);
 				file.write((const char*)&z, 8);
 				bytesWritten += 8;
 			}
@@ -664,8 +679,8 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 					}
 				}
 			}
-			mMin = qToLittleEndian<double>(mMin);
-			mMax = qToLittleEndian<double>(mMax);
+			mMin = qToLittleEndianD(mMin);
+			mMax = qToLittleEndianD(mMax);
 			file.write((const char*)&mMin, 8);
 			file.write((const char*)&mMax, 8);
 			bytesWritten += 16;
@@ -673,13 +688,13 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 
 		//M values (for each part - just one here)
 		{
-			double scalar = qToLittleEndian<double>(ESRI_NO_DATA);
+			double scalar = qToLittleEndianD(ESRI_NO_DATA);
 			for (int32_t i = 0; i < numPoints; ++i)
 			{
 				if (hasSF)
 				{
 					scalar = static_cast<double>(vertices->getPointScalarValue(i % realNumPoints)); //warning: handle loop if polyline is closed
-					scalar = qToLittleEndian<double>(scalar);
+					scalar = qToLittleEndianD(scalar);
 				}
 				file.write((const char*)&scalar, 8);
 				bytesWritten += 8;
@@ -699,10 +714,10 @@ CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_S
 	{
 		//The Bounding Box for the Cloud stored in the order Xmin, Ymin, Xmax, Ymax
 		//DGM: ignored
-		//double xMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header   ));
-		//double xMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+ 8));
-		//double yMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+16));
-		//double yMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+24));
+		//double xMin = qFromLittleEndianD(*reinterpret_cast<double*>(header   ));
+		//double xMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+ 8));
+		//double yMin = qFromLittleEndianD(*reinterpret_cast<double*>(header+16));
+		//double yMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+24));
 	}
 
 	//Byte 32: NumPoints (The total number of points)
@@ -721,8 +736,8 @@ CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_S
 		for (int32_t i = 0; i < numPoints; ++i)
 		{
 			file.read(header, 16);
-			double x = qFromLittleEndian<double>(*reinterpret_cast<double*>(header));
-			double y = qFromLittleEndian<double>(*reinterpret_cast<double*>(header + 8));
+			double x = qFromLittleEndianD(*reinterpret_cast<double*>(header));
+			double y = qFromLittleEndianD(*reinterpret_cast<double*>(header + 8));
 			CCVector3 P(static_cast<PointCoordinateType>(x + PShift.x),
 				static_cast<PointCoordinateType>(y + PShift.y),
 				0);
@@ -737,8 +752,8 @@ CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_S
 		{
 			file.read(header, 16);
 			//DGM: ignored
-			//double zMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header  ));
-			//double zMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+8));
+			//double zMin = qFromLittleEndianD(*reinterpret_cast<double*>(header  ));
+			//double zMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+8));
 		}
 
 		//Z coordinates (an array of length NumPoints)
@@ -746,7 +761,7 @@ CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_S
 			for (int32_t i = 0; i < numPoints; ++i)
 			{
 				file.read(header, 8);
-				double z = qFromLittleEndian<double>(*reinterpret_cast<double*>(header));
+				double z = qFromLittleEndianD(*reinterpret_cast<double*>(header));
 				const CCVector3* P = cloud->getPoint(i);
 				const_cast<CCVector3*>(P)->z = static_cast<PointCoordinateType>(z + PShift.z);
 			}
@@ -762,8 +777,8 @@ CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_S
 		ccScalarField* sf = 0;
 		{
 			file.read(header, 16);
-			double mMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header));
-			double mMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header + 8));
+			double mMin = qFromLittleEndianD(*reinterpret_cast<double*>(header));
+			double mMax = qFromLittleEndianD(*reinterpret_cast<double*>(header + 8));
 
 			if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
 			{
@@ -783,7 +798,7 @@ CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_S
 			for (int32_t i = 0; i < numPoints; ++i)
 			{
 				file.read(header, 8);
-				double m = qFromLittleEndian<double>(*reinterpret_cast<double*>(header));
+				double m = qFromLittleEndianD(*reinterpret_cast<double*>(header));
 				ScalarType s = m == ESRI_NO_DATA ? NAN_VALUE : static_cast<ScalarType>(m);
 				sf->addElement(s);
 			}
@@ -822,10 +837,10 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 
 	//Byte 4: Box
 	{
-		double xMin = qToLittleEndian<double>(bbMing.x);
-		double xMax = qToLittleEndian<double>(bbMaxg.x);
-		double yMin = qToLittleEndian<double>(bbMing.y);
-		double yMax = qToLittleEndian<double>(bbMaxg.y);
+		double xMin = qToLittleEndianD(bbMing.x);
+		double xMax = qToLittleEndianD(bbMaxg.x);
+		double yMin = qToLittleEndianD(bbMing.y);
+		double yMax = qToLittleEndianD(bbMaxg.y);
 		//The Bounding Box for the Cloud stored in the order Xmin, Ymin, Xmax, Ymax
 		/*Byte  4*/file.write((const char*)&xMin, 8);
 		/*Byte 12*/file.write((const char*)&yMin, 8);
@@ -849,8 +864,8 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 			const CCVector3* P = cloud->getPoint(i);
 			CCVector3d Pg = cloud->toGlobal3d(*P);
 
-			double x = qToLittleEndian<double>(Pg.x);
-			double y = qToLittleEndian<double>(Pg.y);
+			double x = qToLittleEndianD(Pg.x);
+			double y = qToLittleEndianD(Pg.y);
 			/*Byte 0*/file.write((const char*)&x, 8);
 			/*Byte 8*/file.write((const char*)&y, 8);
 			bytesWritten += 16;
@@ -859,8 +874,8 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 
 	//Z boundaries
 	{
-		double zMin = qToLittleEndian<double>(bbMing.z);
-		double zMax = qToLittleEndian<double>(bbMaxg.z);
+		double zMin = qToLittleEndianD(bbMing.z);
+		double zMax = qToLittleEndianD(bbMaxg.z);
 		file.write((const char*)&zMin, 8);
 		file.write((const char*)&zMax, 8);
 		bytesWritten += 16;
@@ -872,7 +887,7 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 		{
 			const CCVector3* P = cloud->getPoint(i);
 			CCVector3d Pg = cloud->toGlobal3d(*P);
-			double z = qToLittleEndian<double>(Pg.z);
+			double z = qToLittleEndianD(Pg.z);
 			file.write((const char*)&z, 8);
 			bytesWritten += 8;
 		}
@@ -901,8 +916,8 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 				}
 			}
 		}
-		mMin = qToLittleEndian<double>(mMin);
-		mMax = qToLittleEndian<double>(mMax);
+		mMin = qToLittleEndianD(mMin);
+		mMax = qToLittleEndianD(mMax);
 		file.write((const char*)&mMin, 8);
 		file.write((const char*)&mMax, 8);
 		bytesWritten += 16;
@@ -910,13 +925,13 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 
 	//M values
 	{
-		double scalar = qToLittleEndian<double>(ESRI_NO_DATA);
+		double scalar = qToLittleEndianD(ESRI_NO_DATA);
 		for (int32_t i = 0; i < numPoints; ++i)
 		{
 			if (hasSF)
 			{
 				scalar = static_cast<double>(cloud->getPointScalarValue(i));
-				scalar = qToLittleEndian<double>(scalar);
+				scalar = qToLittleEndianD(scalar);
 			}
 			file.write((const char*)&scalar, 8);
 			bytesWritten += 8;
@@ -931,8 +946,8 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 	char buffer[16];
 	file.read(buffer, 16);
 
-	double x = qFromLittleEndian<double>(*reinterpret_cast<double*>(buffer));
-	double y = qFromLittleEndian<double>(*reinterpret_cast<double*>(buffer + 8));
+	double x = qFromLittleEndianD(*reinterpret_cast<double*>(buffer));
+	double y = qFromLittleEndianD(*reinterpret_cast<double*>(buffer + 8));
 	CCVector3 P(static_cast<PointCoordinateType>(x + PShift.x),
 		static_cast<PointCoordinateType>(y + PShift.y),
 		0);
@@ -943,7 +958,7 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 		//Z coordinate
 		{
 			file.read(buffer, 8);
-			double z = qFromLittleEndian<double>(*reinterpret_cast<double*>(buffer));
+			double z = qFromLittleEndianD(*reinterpret_cast<double*>(buffer));
 			P.z = static_cast<PointCoordinateType>(z + PShift.z);
 		}
 	}
@@ -970,7 +985,7 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 		//Measure
 		{
 			file.read(buffer, 8);
-			double m = qFromLittleEndian<double>(*reinterpret_cast<double*>(buffer));
+			double m = qFromLittleEndianD(*reinterpret_cast<double*>(buffer));
 			if (m != ESRI_NO_DATA)
 			{
 				s = static_cast<ScalarType>(m);
@@ -1157,10 +1172,10 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		_header += 4;
 
 		//X and Y bounaries
-		double xMin = qToLittleEndian<double>(bbMinCorner.u[X]);
-		double xMax = qToLittleEndian<double>(bbMaxCorner.u[X]);
-		double yMin = qToLittleEndian<double>(bbMinCorner.u[Y]);
-		double yMax = qToLittleEndian<double>(bbMaxCorner.u[Y]);
+		double xMin = qToLittleEndianD(bbMinCorner.u[X]);
+		double xMax = qToLittleEndianD(bbMaxCorner.u[X]);
+		double yMin = qToLittleEndianD(bbMinCorner.u[Y]);
+		double yMax = qToLittleEndianD(bbMaxCorner.u[Y]);
 		//Byte 36: box X min
 		memcpy(_header, (const char*)&xMin, 8);
 		_header += 8;
@@ -1176,8 +1191,8 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 		//Z bounaries
 		//Unused, with value 0.0, if not Measured or Z type
-		double zMin = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndian<double>(bbMinCorner.u[Z]);
-		double zMax = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndian<double>(bbMaxCorner.u[Z]);
+		double zMin = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndianD(bbMinCorner.u[Z]);
+		double zMax = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndianD(bbMaxCorner.u[Z]);
 		//Byte 68: box Z min
 		memcpy(_header, (const char*)&zMin, 8);
 		_header += 8;
@@ -1460,25 +1475,25 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		//X and Y bounaries
 		//Byte 36: box X min
-		double xMin = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		double xMin = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 44: box Y min
-		double yMin = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		double yMin = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 52: box X max
-		//double xMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		//double xMax = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 60: box Y max
-		//double yMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		//double yMax = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 
 		//Z bounaries
 		//Unused, with value 0.0, if not Measured or Z type
 		//Byte 68: box Z min
-		double zMin = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		double zMin = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 76: box Z max
-		//double zMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		//double zMax = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 
 		if (std::isnan(zMin))
@@ -1495,10 +1510,10 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		//M bounaries (M = measures)
 		//Byte 84: M min
-		//double mMin = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		//double mMin = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 92: M max
-		//double mMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		//double mMax = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 	}
 	assert(fileLength >= 100);

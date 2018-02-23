@@ -72,6 +72,19 @@ enum ESRI_SHAPE_TYPE {	SHP_NULL_SHAPE		= 0 ,
 						SHP_MULTI_PATCH		= 31
 };
 
+//DGM: by default qToLittleEndian only works for integer types!
+double qToLittleEndianD(double in)
+{
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+	//! Change the endianness (see https://stackoverflow.com/questions/41012414/convert-double-value-from-little-endian-to-big-endian)
+	std::array<char, sizeof(T)> p;
+	memcpy(&p[0], &in, sizeof(T));
+	std::reverse(p.begin(), p.end());
+	memcpy(&in, &p[0], sizeof(T));
+#endif
+	return in;
+}
+
 //! Shape File Save dialog
 class SaveSHPFileDialog : public QDialog, public Ui::SaveSHPFileDlg
 {
@@ -509,10 +522,10 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 
 	//Byte 4: Box
 	{
-		double xMin = qToLittleEndian<double>(bbMing.u[X]);
-		double xMax = qToLittleEndian<double>(bbMaxg.u[X]);
-		double yMin = qToLittleEndian<double>(bbMing.u[Y]);
-		double yMax = qToLittleEndian<double>(bbMaxg.u[Y]);
+		double xMin = qToLittleEndianD(bbMing.u[X]);
+		double xMax = qToLittleEndianD(bbMaxg.u[X]);
+		double yMin = qToLittleEndianD(bbMing.u[Y]);
+		double yMax = qToLittleEndianD(bbMaxg.u[Y]);
 		//The Bounding Box for the PolyLine stored in the order Xmin, Ymin, Xmax, Ymax
 		/*Byte  4*/file.write((const char*)&xMin, 8);
 		/*Byte 12*/file.write((const char*)&yMin, 8);

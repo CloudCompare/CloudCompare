@@ -1400,7 +1400,7 @@ void MainWindow::doActionApplyScale()
 						if (QMessageBox::question(
 							this,
 							"Big coordinates",
-							"Resutling coordinates will be too big (original precision may be lost!). Proceeed anyway?",
+							"Resutling coordinates will be too big (original precision may be lost!). Proceed anyway?",
 							QMessageBox::Yes,
 							QMessageBox::No) == QMessageBox::Yes)
 						{
@@ -9555,7 +9555,7 @@ void MainWindow::doActionSaveFile()
 	//ignored items
 	if (hasOther)
 	{
-		ccConsole::Warning("[I/O] The following selected entites won't be saved:");
+		ccConsole::Warning("[I/O] The following selected entities won't be saved:");
 		for (unsigned i = 0; i < other.getChildrenNumber(); ++i)
 		{
 			ccConsole::Warning(QString("\t- %1s").arg(other.getChild(i)->getName()));

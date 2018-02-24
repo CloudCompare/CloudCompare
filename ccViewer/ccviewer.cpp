@@ -870,10 +870,10 @@ void ccViewer::toggleRotationAboutVertAxis()
 	if (!m_glWindow)
 		return;
 
-	bool wasLocked = m_glWindow->isVerticalRotationLocked();
+	bool wasLocked = m_glWindow->isRotationAxisLocked();
 	bool isLocked = !wasLocked;
 
-	m_glWindow->lockVerticalRotation(isLocked);
+	m_glWindow->lockRotationAxis(isLocked, CCVector3d(0.0, 0.0, 1.0));
 
 	ui.actionLockRotationVertAxis->blockSignals(true);
 	ui.actionLockRotationVertAxis->setChecked(isLocked);

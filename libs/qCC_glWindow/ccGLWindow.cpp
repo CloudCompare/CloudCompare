@@ -251,8 +251,6 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_trihedronGLList(GL_INVALID_LIST_ID)
 	, m_pivotGLList(GL_INVALID_LIST_ID)
 	, m_lastMousePos(-1, -1)
-	, m_lastMouseOrientation(1, 0, 0)
-	, m_currentMouseOrientation(1, 0, 0)
 	, m_validModelviewMatrix(false)
 	, m_validProjectionMatrix(false)
 	, m_cameraToBBCenterDist(0.0)
@@ -295,7 +293,6 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_overridenDisplayParametersEnabled(false)
 	, m_displayOverlayEntities(true)
 	, m_silentInitialization(silentInitialization)
-	, m_verticalRotationLocked(false)
 	, m_bubbleViewModeEnabled(false)
 	, m_bubbleViewFov_deg(90.0f)
 	, m_LODPendingRefresh(false)
@@ -313,6 +310,8 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_showCursorCoordinates(false)
 	, m_autoPickPivotAtCenter(true)
 	, m_ignoreMouseReleaseEvent(false)
+	, m_rotationAxisLocked(false)
+	, m_lockedRotationAxis(0, 0, 1)
 {
 	//start internal timer
 	m_timer.start();
@@ -3586,11 +3585,6 @@ CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 	v.x = std::max(std::min(v.x / xc, 1.0), -1.0);
 	v.y = std::max(std::min(v.y / yc, 1.0), -1.0);
 
-	if (m_verticalRotationLocked || m_bubbleViewModeEnabled)
-	{
-		v.y = 0.0;
-	}
-
 	//square 'radius'
 	double d2 = v.x*v.x + v.y*v.y;
 
@@ -3709,8 +3703,6 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 		//left click = rotation
 		if (m_interactionFlags & INTERACT_ROTATE)
 		{
-			m_lastMouseOrientation = convertMousePositionToOrientation(event->x(), event->y());
-
 			QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
 		}
 
@@ -3954,10 +3946,21 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			}
 			else if (m_interactionFlags & INTERACT_ROTATE) //standard rotation around the current pivot
 			{
-				m_currentMouseOrientation = convertMousePositionToOrientation(x, y);
+				//choose the right rotation mode
+				enum RotationMode { StandardMode, BubbleViewMode, LockedAxisMode };
+				RotationMode rotationMode = StandardMode;
+				if ((m_interactionFlags & INTERACT_TRANSFORM_ENTITIES) != INTERACT_TRANSFORM_ENTITIES)
+				{
+					if (m_bubbleViewModeEnabled)
+						rotationMode = BubbleViewMode;
+					else if (m_rotationAxisLocked)
+						rotationMode = LockedAxisMode;
+				}
 
 				ccGLMatrixd rotMat;
-				if (m_bubbleViewModeEnabled)
+				switch (rotationMode)
+				{
+				case BubbleViewMode:
 				{
 					QPoint posDelta = m_lastMousePos - event->pos();
 
@@ -3968,7 +3971,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 						CCVector3d axis = m_viewportParams.viewMat.getColumnAsVec3D(2);
 						rotMat.initFromParameters(delta_deg * CC_DEG_TO_RAD, axis, CCVector3d(0, 0, 0));
 					}
-					//else if (m_bubbleViewDirection == VERT)
+
 					if (std::abs(posDelta.y()) != 0)
 					{
 						double delta_deg = (posDelta.y() * static_cast<double>(m_bubbleViewFov_deg)) / height();
@@ -3978,11 +3981,117 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 						rotMat = rotX * rotMat;
 					}
 				}
-				else
+				break;
+
+				case StandardMode:
+				//case LockedAxisMode:
 				{
-					rotMat = ccGLMatrixd::FromToRotation(m_lastMouseOrientation, m_currentMouseOrientation);
+					static CCVector3d s_lastMouseOrientation;
+					if (!m_mouseMoved)
+					{
+						//on the first time, we must compute the previous orientation (the camera hasn't moved yet)
+						s_lastMouseOrientation = convertMousePositionToOrientation(m_lastMousePos.x(), m_lastMousePos.y());
+					}
+
+					CCVector3d currentMouseOrientation = convertMousePositionToOrientation(x, y);
+					rotMat = ccGLMatrixd::FromToRotation(s_lastMouseOrientation, currentMouseOrientation);
+
+					//if (rotationMode == LockedAxisMode)
+					//{
+					//	CCVector3d upAxis = m_lockedRotationAxis;
+					//	getBaseViewMat().applyRotation(upAxis);
+					//	upAxis.normalize();
+
+					//	ccGLMatrixd upAxisToZ = ccGLMatrixd::FromToRotation(upAxis, CCVector3d(0, 0, 1));
+					//	ccGLMatrixd rotMatInTempCS = upAxisToZ * rotMat;
+					//	ccGLMatrixd rotMatInTempCSFiltered = rotMatInTempCS/*.zRotation()*/;
+					//	ccGLMatrixd rotMatFiltered = upAxisToZ.inverse() * rotMatInTempCSFiltered;
+					//	rotMat = rotMatFiltered;
+					//}
+
+					s_lastMouseOrientation = currentMouseOrientation;
 				}
-				m_lastMouseOrientation = m_currentMouseOrientation;
+				break;
+
+				case LockedAxisMode:
+				{
+					//apply rotation about the locked axis
+					CCVector3d axis = m_lockedRotationAxis;
+					getBaseViewMat().applyRotation(axis);
+
+
+					//determine whether we are in a side or top view
+					bool topView = (std::abs(axis.z) > 0.5);
+
+					//m_viewportParams.objectCenteredView
+					ccGLCameraParameters camera;
+					getGLCameraParameters(camera);
+
+					if (topView)
+					{
+						//rotation origin
+						CCVector3d C2D;
+						if (m_viewportParams.objectCenteredView)
+						{
+							//project the current pivot point on screen
+							camera.project(m_viewportParams.pivotPoint, C2D);
+							C2D.z = 0.0;
+						}
+						else
+						{
+							C2D = CCVector3d(width() / 2.0, height() / 2.0, 0.0);
+						}
+
+						CCVector3d previousMousePos(static_cast<double>(m_lastMousePos.x()), static_cast<double>(height() - m_lastMousePos.y()), 0.0);
+						CCVector3d currentMousePos(static_cast<double>(x), static_cast<double>(height() - y), 0.0);
+
+						CCVector3d a = (currentMousePos - C2D);
+						CCVector3d b = (previousMousePos - C2D);
+						CCVector3d u = a * b;
+						double u_norm = std::abs(u.z); //a and b are in the XY plane
+						if (u_norm > 1.0e-6)
+						{
+							double sin_angle = u_norm / (a.norm() * b.norm());
+
+							//determine the rotation direction
+							if (u.z * m_lockedRotationAxis.z > 0)
+							{
+								sin_angle = -sin_angle;
+							}
+
+							double angle_rad = asin(sin_angle); //in [-pi/2 ; pi/2]
+							rotMat.initFromParameters(angle_rad, axis, CCVector3d(0, 0, 0));
+						}
+					}
+					else //side view
+					{
+						//project the current pivot point on screen
+						CCVector3d A2D, B2D;
+						if (	camera.project(m_viewportParams.pivotPoint, A2D)
+							&&	camera.project(m_viewportParams.pivotPoint + m_viewportParams.zFar * m_lockedRotationAxis, B2D))
+						{
+							CCVector3d lockedRotationAxis2D = B2D - A2D;
+							lockedRotationAxis2D.z = 0; //just in case
+							lockedRotationAxis2D.normalize();
+
+							CCVector3d mouseShift(static_cast<double>(dx), -static_cast<double>(dy), 0.0);
+							mouseShift -= mouseShift.dot(lockedRotationAxis2D) * lockedRotationAxis2D; //we only keep the orthogonal part
+							double angle_rad = 2.0 * M_PI * mouseShift.norm() / (width() + height());
+							if ((lockedRotationAxis2D * mouseShift).z > 0.0)
+							{
+								angle_rad = -angle_rad;
+							}
+
+							rotMat.initFromParameters(angle_rad, axis, CCVector3d(0, 0, 0));
+						}
+					}
+				}
+				break;
+
+				default:
+					assert(false);
+					break;
+				}
 
 				if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 				{
@@ -6885,4 +6994,11 @@ bool ccGLWindow::getClick3DPos(int x, int y, CCVector3d& P3D)
 	
 	CCVector3d P2D(x, y, glDepth);
 	return camera.unproject(P2D, P3D);
+}
+
+void ccGLWindow::lockRotationAxis(bool state, const CCVector3d& axis)
+{
+	m_rotationAxisLocked = state;
+	m_lockedRotationAxis = axis;
+	m_lockedRotationAxis.normalize();
 }

@@ -810,7 +810,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionToggleCenteredPerspective,		&QAction::triggered, this, &MainWindow::toggleActiveWindowCenteredPerspective);
 	connect(m_UI->actionToggleViewerBasedPerspective,	&QAction::triggered, this, &MainWindow::toggleActiveWindowViewerBasedPerspective);
 	connect(m_UI->actionShowCursor3DCoordinates,		&QAction::toggled, this, &MainWindow::toggleActiveWindowShowCursorCoords);
-	connect(m_UI->actionLockRotationVertAxis,			&QAction::triggered, this, &MainWindow::toggleRotationAboutVertAxis);
+	connect(m_UI->actionLockRotationAxis,				&QAction::triggered, this, &MainWindow::toggleLockRotationAxis);
 	connect(m_UI->actionEnterBubbleViewMode,			&QAction::triggered, this, &MainWindow::doActionEnableBubbleViewMode);
 	connect(m_UI->actionEditCamera,						&QAction::triggered, this, &MainWindow::doActionEditCamera);
 	connect(m_UI->actionAdjustZoom,						&QAction::triggered, this, &MainWindow::doActionAdjustZoom);
@@ -8910,19 +8910,31 @@ void MainWindow::toggleActiveWindowViewerBasedPerspective()
 	}
 }
 
-void MainWindow::toggleRotationAboutVertAxis()
+void MainWindow::toggleLockRotationAxis()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
-		bool wasLocked = win->isVerticalRotationLocked();
+		bool wasLocked = win->isRotationAxisLocked();
 		bool isLocked = !wasLocked;
 
-		win->lockVerticalRotation(isLocked);
+		static CCVector3d s_lastAxis(0.0, 0.0, 1.0);
+		if (isLocked)
+		{
+			ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lastAxis.x, s_lastAxis.y, s_lastAxis.z, 4, "Lock rotation axis", this);
+			if (axisDlg.buttonBox->button(QDialogButtonBox::Ok))
+				axisDlg.buttonBox->button(QDialogButtonBox::Ok)->setFocus();
+			if (!axisDlg.exec())
+				return;
+			s_lastAxis.x = axisDlg.doubleSpinBox1->value();
+			s_lastAxis.y = axisDlg.doubleSpinBox2->value();
+			s_lastAxis.z = axisDlg.doubleSpinBox3->value();
+		}
+		win->lockRotationAxis(isLocked, s_lastAxis);
 
-		m_UI->actionLockRotationVertAxis->blockSignals(true);
-		m_UI->actionLockRotationVertAxis->setChecked(isLocked);
-		m_UI->actionLockRotationVertAxis->blockSignals(false);
+		m_UI->actionLockRotationAxis->blockSignals(true);
+		m_UI->actionLockRotationAxis->setChecked(isLocked);
+		m_UI->actionLockRotationAxis->blockSignals(false);
 
 		if (isLocked)
 		{
@@ -9638,9 +9650,9 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		updateViewModePopUpMenu(win);
 		updatePivotVisibilityPopUpMenu(win);
 
-		m_UI->actionLockRotationVertAxis->blockSignals(true);
-		m_UI->actionLockRotationVertAxis->setChecked(win->isVerticalRotationLocked());
-		m_UI->actionLockRotationVertAxis->blockSignals(false);
+		m_UI->actionLockRotationAxis->blockSignals(true);
+		m_UI->actionLockRotationAxis->setChecked(win->isRotationAxisLocked());
+		m_UI->actionLockRotationAxis->blockSignals(false);
 
 		m_UI->actionEnableStereo->blockSignals(true);
 		m_UI->actionEnableStereo->setChecked(win->stereoModeIsEnabled());
@@ -9659,7 +9671,7 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		m_UI->actionAutoPickRotationCenter->blockSignals(false);
 	}
 
-	m_UI->actionLockRotationVertAxis->setEnabled(win != nullptr);
+	m_UI->actionLockRotationAxis->setEnabled(win != nullptr);
 	m_UI->actionEnableStereo->setEnabled(win != nullptr);
 	m_UI->actionExclusiveFullScreen->setEnabled(win != nullptr);
 }

@@ -226,7 +226,7 @@ private slots:
 	virtual void increasePointSize() override;
 	virtual void decreasePointSize() override;
 
-	void toggleRotationAboutVertAxis();
+	void toggleLockRotationAxis();
 	void doActionEnableBubbleViewMode();
 	void setPivotAlwaysOn();
 	void setPivotRotationOnly();

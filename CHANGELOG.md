@@ -6,6 +6,9 @@ v2.10.alpha - XX/XX/201X
 
 - enhancements:
 
+	* The 'Display > Lock vertical rotation' option has been renamed 'Display > Lock rotation about an axis' (Shortcut: L)
+		- CC will now ask for the rotation axis to be locked (default: Z)
+
 	* The M3C2 plugin can now be called from the command line:
 		- the first time you'll need the configuration file saved with the GUI tool
 			(Use the 'Save parameters to file' button in the bottom-left corner of the M3C2 dialog --> the floppy icon)

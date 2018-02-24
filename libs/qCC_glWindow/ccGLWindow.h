@@ -504,12 +504,6 @@ public:
 	//! Returns whether overlay entities (scale, tetrahedron, etc.) are displayed or not
 	bool overlayEntitiesAreDisplayed() const { return m_displayOverlayEntities; }
 
-	//! Locks the manual rotation around the vertical (screen) axis
-	void lockVerticalRotation(bool state) { m_verticalRotationLocked = state; }
-
-	//! Returns whether the manual rotation around the vertical (screen) axis is locked or not
-	bool isVerticalRotationLocked() const { return m_verticalRotationLocked; }
-
 	//! Backprojects a 2D points on a 3D triangle
 	/** \warning Uses the current display parameters!
 		\param P2D point on the screen
@@ -612,6 +606,13 @@ public: //stereo mode
 	void setAutoPickPivotAtCenter(bool state);
 	//! Whether the pivot point is automatically set at the center of the screen
 	bool autoPickPivotAtCenter() const { return m_autoPickPivotAtCenter; }
+
+	//! Lock the rotation axis
+	void lockRotationAxis(bool state, const CCVector3d& axis);
+
+	//! Returns whether the rotation axis is locaked or not
+	bool isRotationAxisLocked() const { return m_rotationAxisLocked; }
+
 
 public slots:
 
@@ -1129,10 +1130,6 @@ protected: //members
 
     //! Last mouse position
 	QPoint m_lastMousePos;
-	//! Last mouse orientation
-	CCVector3d m_lastMouseOrientation;
-	//! Current mouse orientation
-	CCVector3d m_currentMouseOrientation;
 
 	//! Complete visualization matrix (GL style - double version)
 	ccGLMatrixd m_viewMatd;
@@ -1310,9 +1307,6 @@ protected: //members
 	//! Whether initialization should be silent or not (i.e. no message to console)
 	bool m_silentInitialization;
 
-	//! To lock the manual rotation around the (screen) vertical axis
-	bool m_verticalRotationLocked;
-
 	//! Bubble-view mode state
 	bool m_bubbleViewModeEnabled;
 	//! Bubble-view mode f.o.v. (degrees)
@@ -1390,6 +1384,11 @@ protected: //members
 
 	//! Ignore next mouse release event
 	bool m_ignoreMouseReleaseEvent;
+
+	//! Wheter the rotation axis is locked or not
+	bool m_rotationAxisLocked;
+	//! Locked rotation axis
+	CCVector3d m_lockedRotationAxis;
 
 private:
 

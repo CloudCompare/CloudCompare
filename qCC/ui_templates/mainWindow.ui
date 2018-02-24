@@ -104,7 +104,7 @@
     <addaction name="actionToggleCenteredPerspective"/>
     <addaction name="actionToggleViewerBasedPerspective"/>
     <addaction name="actionShowCursor3DCoordinates"/>
-    <addaction name="actionLockRotationVertAxis"/>
+    <addaction name="actionLockRotationAxis"/>
     <addaction name="actionEnterBubbleViewMode"/>
     <addaction name="actionEnableCameraLink"/>
     <addaction name="separator"/>
@@ -2698,15 +2698,15 @@ QTreeView::branch:open:has-children:has-siblings  {
     <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
-  <action name="actionLockRotationVertAxis">
+  <action name="actionLockRotationAxis">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Lock rotation about vert. axis</string>
+    <string>Lock rotation about an axis</string>
    </property>
    <property name="toolTip">
-    <string>Lock manual rotation about the vertical (screen) axis</string>
+    <string>Lock 3D camera rotation about an axis</string>
    </property>
    <property name="shortcut">
     <string>L</string>
@@ -3051,6 +3051,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Export plane info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</string>
+   </property>
+  </action>
+  <action name="actionLock_rotation_about_arbitrary_axis">
+   <property name="text">
+    <string>Lock rotation about arbitrary axis</string>
    </property>
   </action>
  </widget>

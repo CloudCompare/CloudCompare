@@ -664,7 +664,7 @@ struct LasCloudChunk
 CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	Options las_opts;
-	las_opts.add("filename", filename.toStdString());
+	las_opts.add("filename", filename.toLocal8Bit().toStdString());
 
 	FixedPointTable t(100);
 	LasReader lasReader;

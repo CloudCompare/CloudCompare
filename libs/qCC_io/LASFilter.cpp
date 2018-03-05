@@ -923,9 +923,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			SpatialReference srs = lasHeader.srs();
 			if (!srs.empty())
 			{
-				QString a_srs = QString::fromStdString(srs.getWKT());
-				ccLog::Warning("[LAS] Spatial reference: " + a_srs);
-				pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, a_srs);
+				QString proj4 = QString::fromStdString(srs.getProj4());
+				ccLog::Print("[LAS] Spatial reference: " + proj4);
+				pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, proj4);
 			}
 
 			pointChunk.createFieldsToLoad(extraDimensionsIds, extraNamesToLoad);

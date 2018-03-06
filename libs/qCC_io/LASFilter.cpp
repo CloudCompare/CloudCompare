@@ -394,7 +394,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	writerOptions.add("scale_y", lasScale.y);
 	writerOptions.add("scale_z", lasScale.z);
 
-	writerOptions.add("filename", filename.toStdString());
+	writerOptions.add("filename", filename.toLocal8Bit().toStdString());
 	//make a dialog for this ?
 	//writerOptions.add("minor_version", )
 	//writerOptions.add("dataformat_id", );
@@ -517,7 +517,7 @@ public:
 			PointTable table;
 			BufferReader bufferReader;
 
-			writerOptions.add("filename", fileNames[i].toStdString());
+			writerOptions.add("filename", fileNames[i].toLocal8Bit().toStdString());
 			if (tilePointViews[i]->empty())
 				continue;
 			try

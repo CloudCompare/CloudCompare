@@ -2613,17 +2613,10 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 
 	if (mimeData && mimeData->hasFormat("text/uri-list"))
 	{
-		QByteArray data = mimeData->data("text/uri-list");
-		QStringList fileNames = QUrl::fromPercentEncoding(data).split(QRegExp("\\n+"), QString::SkipEmptyParts);
-
-		for ( QString &fileName : fileNames )
-		{
-			fileName = fileName.trimmed();
-#if defined(CC_WINDOWS)
-			fileName.remove("file:///");
-#else
-			fileName.remove("file://");
-#endif
+		QStringList fileNames;
+		for (const QUrl &url : mimeData->urls()) {
+			QString fileName = url.toLocalFile();
+			fileNames.append(fileName);
 #ifdef QT_DEBUG
 			ccLog::Print(QString("File dropped: %1").arg(fileName));
 #endif

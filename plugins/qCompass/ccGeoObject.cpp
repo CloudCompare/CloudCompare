@@ -91,7 +91,7 @@ ccHObject* ccGeoObject::getRegion(int mappingRegion)
 {
 	if (ccGeoObject::isSingleSurfaceGeoObject(this))
 	{
-		return this; //SingleSurface GeoObjects don't have regions
+		return this; //SingleSurface GeoObjects only have a single region; this is essentially a combined upper, lower and interior
 	}
 
 	//for normal GeoObjects, look for the specific region

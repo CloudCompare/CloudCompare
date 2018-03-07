@@ -991,10 +991,10 @@ void ccCompass::mergeGeoObjects()
 		ccHObject* lower = objs[i]->getRegion(ccGeoObject::LOWER_BOUNDARY);
 
 		//add children to destination
+		interior->transferChildren(*d_interior, true);
 		upper->transferChildren(*d_upper, true);
 		lower->transferChildren(*d_lower, true);
-		interior->transferChildren(*d_interior, true);
-
+		
 		//delete un-needed objects
 		objs[i]->removeChild(interior);
 		objs[i]->removeChild(upper);
@@ -1069,43 +1069,45 @@ void ccCompass::fitPlaneToGeoObject()
 		}
 	}
 
-	//rinse and repeat for lower
-	points->clear();
-	ccHObject* lower = obj->getRegion(ccGeoObject::LOWER_BOUNDARY);
-	for (unsigned i = 0; i < lower->getChildrenNumber(); i++)
+	//rinse and repeat for lower (assuming normal GeoObject; skip this step for single-surface object)
+	if (!ccGeoObject::isSingleSurfaceGeoObject(obj)) 
 	{
-		if (ccTrace::isTrace(lower->getChild(i)))
+		points->clear();
+		ccHObject* lower = obj->getRegion(ccGeoObject::LOWER_BOUNDARY);
+		for (unsigned i = 0; i < lower->getChildrenNumber(); i++)
 		{
-			ccTrace* t = dynamic_cast<ccTrace*> (lower->getChild(i));
-			points->reserve(points->size() + t->size()); //make space
-			if (t) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
+			if (ccTrace::isTrace(lower->getChild(i)))
 			{
-				for (unsigned p = 0; p < t->size(); p++)
+				ccTrace* t = dynamic_cast<ccTrace*> (lower->getChild(i));
+				points->reserve(points->size() + t->size()); //make space
+				if (t) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
 				{
-					points->addPoint(*t->getPoint(p)); //add point to cloud
+					for (unsigned p = 0; p < t->size(); p++)
+					{
+						points->addPoint(*t->getPoint(p)); //add point to cloud
+					}
 				}
 			}
 		}
-	}
 
-	//calculate and store lower fitplane
-	if (points->size() > 0)
-	{
-		ccFitPlane* p = ccFitPlane::Fit(points, &rms);
-		if (p)
+		//calculate and store lower fitplane
+		if (points->size() > 0)
 		{
-			QVariantMap map;
-			map.insert("RMS", rms);
-			p->setMetaData(map, true);
-			lower->addChild(p);
-			m_app->addToDB(p, false, false, false, true);
-		}
-		else
-		{
-			m_app->dispToConsole("[Compass] Not enough 3D information to generate sensible fit plane.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			ccFitPlane* p = ccFitPlane::Fit(points, &rms);
+			if (p)
+			{
+				QVariantMap map;
+				map.insert("RMS", rms);
+				p->setMetaData(map, true);
+				lower->addChild(p);
+				m_app->addToDB(p, false, false, false, true);
+			}
+			else
+			{
+				m_app->dispToConsole("[Compass] Not enough 3D information to generate sensible fit plane.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			}
 		}
 	}
-
 	//clean up point cloud
 	delete(points); 
 
@@ -1294,7 +1296,12 @@ void ccCompass::convertToPointCloud()
 		CCLib::ScalarField* sf = points->getScalarField(sfid);
 
 		//convert traces in each region
-		for (unsigned int i = 0; i < 3; i++)
+		int nRegions = 3;
+		if (ccGeoObject::isSingleSurfaceGeoObject(o))
+		{
+			nRegions = 1; //single surface objects only have one region
+		}
+		for (unsigned int i = 0; i < nRegions; i++)
 		{
 			ccHObject* region = regions[i];
 			

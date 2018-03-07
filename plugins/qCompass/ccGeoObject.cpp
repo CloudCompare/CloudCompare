@@ -20,20 +20,22 @@
 #include "ccTopologyRelation.h"
 #include "ccPinchNode.h"
 
-ccGeoObject::ccGeoObject(QString name, ccMainAppInterface* app)
+ccGeoObject::ccGeoObject(QString name, ccMainAppInterface* app, bool singleSurface)
 	: ccHObject(name)
 {
 	m_app = app;
 
 	//add "interior", "upper" and "lower" HObjects
-	generateInterior();
-	generateUpper();
-	generateLower();
-
+	if (!singleSurface)
+	{
+		generateInterior();
+		generateUpper();
+		generateLower();
+	}
 	//generate GID
 	assignGID();
 
-	init();
+	init(singleSurface);
 }
 
 ccGeoObject::ccGeoObject(ccHObject* obj, ccMainAppInterface* app)
@@ -55,7 +57,7 @@ ccGeoObject::ccGeoObject(ccHObject* obj, ccMainAppInterface* app)
 		assignGID(); //no GID defined, assign a new one
 	}
 
-	init();
+	init(ccGeoObject::isSingleSurfaceGeoObject(obj));
 }
 
 void ccGeoObject::assignGID()
@@ -64,11 +66,18 @@ void ccGeoObject::assignGID()
 	_gID = std::hash<std::string>{}(QString::asprintf("%s%d", getName(), getUniqueID()).toStdString());
 }
 
-void ccGeoObject::init()
+void ccGeoObject::init(bool singleSurface)
 {
 	//add metadata tag defining the ccCompass class type
 	QVariantMap* map = new QVariantMap();
-	map->insert("ccCompassType", "GeoObject");
+	if (singleSurface)
+	{
+		map->insert("ccCompassType", "GeoObjectSS"); //single-surface GeoObject
+	}
+	else
+	{
+		map->insert("ccCompassType", "GeoObject");
+	}
 	map->insert("GID", getGID());
 	setMetaData(*map, true);
 }
@@ -80,6 +89,12 @@ ccPointCloud* ccGeoObject::getAssociatedCloud()
 
 ccHObject* ccGeoObject::getRegion(int mappingRegion)
 {
+	if (ccGeoObject::isSingleSurfaceGeoObject(this))
+	{
+		return this; //SingleSurface GeoObjects don't have regions
+	}
+
+	//for normal GeoObjects, look for the specific region
 	switch (mappingRegion)
 	{
 	case ccGeoObject::INTERIOR:
@@ -219,7 +234,6 @@ ccTopologyRelation* ccGeoObject::addRelationTo(ccGeoObject* obj2, int type, ccMa
 
 	return t;
 }
-
 
 void ccGeoObject::setActive(bool active)
 {
@@ -397,6 +411,15 @@ bool ccGeoObject::isGeoObjectInterior(ccHObject* object)
 	if (object->hasMetaData("ccCompassType"))
 	{
 		return object->getMetaData("ccCompassType").toString().contains("GeoInterior");
+	}
+	return false;
+}
+
+bool ccGeoObject::isSingleSurfaceGeoObject(ccHObject* object)
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("GeoObjectSS");
 	}
 	return false;
 }

@@ -120,8 +120,9 @@ protected slots:
 	void writeToInterior(); //new digitization will be added to the GeoObjects interior
 	void writeToUpper(); //new digitization will be added to the GeoObjects upper boundary
 	void writeToLower(); //new digitiziation will be added to the GeoObjects lower boundary
-	void addGeoObject(); //creates a new GeoObject
-	
+	void addGeoObject(bool singleSurface=false); //creates a new GeoObject
+	void addGeoObjectSS(); //creates a new single surface GeoObject
+
 	//drawing options
 	void hideAllPointClouds(ccHObject* o); //hides all point clouds and adds them to the m_hiddenObjects list
 	void toggleStipple(bool checked);

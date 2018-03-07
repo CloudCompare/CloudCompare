@@ -37,7 +37,7 @@ representing the "upper boundary", "lower boundary" and "interior" of the GeoObj
 class ccGeoObject : public ccHObject
 {
 public:
-	ccGeoObject(QString name, ccMainAppInterface* app);
+	ccGeoObject(QString name, ccMainAppInterface* app, bool singleSurface);
 	ccGeoObject(ccHObject* obj, ccMainAppInterface* app);
 
 	//returns the pointCloud associated with this ccGeoObject's interior (or null if the interior is undefined)
@@ -57,7 +57,6 @@ public:
 
 	//returns the GID of this geo-object
 	unsigned int getGID() { return _gID; };
-
 
 	//flags defining different mapping regions
 	static const int INTERIOR = 0;
@@ -90,7 +89,7 @@ protected:
 
 private:
 	//builds this GeoObject and its ccHObject components
-	void init();
+	void init(bool singleSurface);
 
 	//searches and activates/disactivates children belonging to the ccHObject. This is used when the DBTree selection changes.
 	void recurseChildren(ccHObject* par, bool highlight);
@@ -114,6 +113,9 @@ public:
 
 	//returns ture if object is the interior component of a ccGeoObject
 	static bool isGeoObjectInterior(ccHObject* object);
+
+	//returns true if object is a single-surface GeoObject rather than a generic GeoObject
+	static bool isSingleSurfaceGeoObject(ccHObject* object);
 
 	//traverses up the DbTree, starting at object, until a ccHObject is found. If none is found this will return null.
 	static ccGeoObject* getGeoObjectParent(ccHObject* object);

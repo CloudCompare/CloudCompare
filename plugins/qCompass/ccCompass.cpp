@@ -130,9 +130,12 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 					m_geoObject->setActive(true); //display as "active"
 
 					//activate GUI
-					m_mapDlg->setLowerButton->setEnabled(true);
-					m_mapDlg->setUpperButton->setEnabled(true);
-					m_mapDlg->setInteriorButton->setEnabled(true);
+					if (!ccGeoObject::isSingleSurfaceGeoObject(m_geoObject))
+					{
+						m_mapDlg->setLowerButton->setEnabled(true);
+						m_mapDlg->setUpperButton->setEnabled(true);
+						m_mapDlg->setInteriorButton->setEnabled(true);
+					}
 					m_mapDlg->selectionLabel->setEnabled(true);
 					m_mapDlg->selectionLabel->setText(m_geoObject->getName());
 
@@ -258,7 +261,8 @@ void ccCompass::doAction()
 	{
 		m_mapDlg = new ccMapDlg(m_app->getMainWindow());
 
-		ccCompassDlg::connect(m_mapDlg->addObjectButton, SIGNAL(clicked()), this, SLOT(addGeoObject()));
+		ccCompassDlg::connect(m_mapDlg->m_create_geoObject, SIGNAL(triggered()), this, SLOT(addGeoObject()));
+		ccCompassDlg::connect(m_mapDlg->m_create_geoObjectSS, SIGNAL(triggered()), this, SLOT(addGeoObjectSS()));
 		ccCompassDlg::connect(m_mapDlg->setInteriorButton, SIGNAL(clicked()), this, SLOT(writeToInterior()));
 		ccCompassDlg::connect(m_mapDlg->setUpperButton, SIGNAL(clicked()), this, SLOT(writeToUpper()));
 		ccCompassDlg::connect(m_mapDlg->setLowerButton, SIGNAL(clicked()), this, SLOT(writeToLower()));
@@ -1591,7 +1595,7 @@ void ccCompass::enableMeasureMode() //turns on/off map mode
 	m_app->updateOverlayDialogsPlacement();
 }
 
-void ccCompass::addGeoObject() //creates a new GeoObject
+void ccCompass::addGeoObject(bool singleSurface) //creates a new GeoObject
 {
 	//calculate default name
 	QString name = m_lastGeoObjectName;
@@ -1647,12 +1651,17 @@ void ccCompass::addGeoObject() //creates a new GeoObject
 	}
 
 	//create the new GeoObject
-	ccGeoObject* newGeoObject = new ccGeoObject(name,m_app);
+	ccGeoObject* newGeoObject = new ccGeoObject(name, m_app, singleSurface);
 	interp_group->addChild(newGeoObject);
 	m_app->addToDB(newGeoObject, false, true, false, false);
 
 	//set it to selected (this will then make it "active" via the selection change callback)
 	m_app->setSelectedInDB(newGeoObject, true);
+}
+
+void ccCompass::addGeoObjectSS()
+{
+	addGeoObject(true);
 }
 
 void ccCompass::writeToInterior() //new digitization will be added to the GeoObjects interior

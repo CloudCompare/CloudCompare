@@ -394,7 +394,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	writerOptions.add("scale_y", lasScale.y);
 	writerOptions.add("scale_z", lasScale.z);
 
-	writerOptions.add("filename", filename.toStdString());
+	writerOptions.add("filename", filename.toLocal8Bit().toStdString());
 	//make a dialog for this ?
 	//writerOptions.add("minor_version", )
 	//writerOptions.add("dataformat_id", );
@@ -517,7 +517,7 @@ public:
 			PointTable table;
 			BufferReader bufferReader;
 
-			writerOptions.add("filename", fileNames[i].toStdString());
+			writerOptions.add("filename", fileNames[i].toLocal8Bit().toStdString());
 			if (tilePointViews[i]->empty())
 				continue;
 			try
@@ -664,7 +664,7 @@ struct LasCloudChunk
 CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	Options las_opts;
-	las_opts.add("filename", filename.toStdString());
+	las_opts.add("filename", filename.toLocal8Bit().toStdString());
 
 	FixedPointTable t(100);
 	LasReader lasReader;
@@ -923,9 +923,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			SpatialReference srs = lasHeader.srs();
 			if (!srs.empty())
 			{
-				QString a_srs = QString::fromStdString(srs.getWKT());
-				ccLog::Warning("[LAS] Spatial reference: " + a_srs);
-				pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, a_srs);
+				QString proj4 = QString::fromStdString(srs.getProj4());
+				ccLog::Print("[LAS] Spatial reference: " + proj4);
+				pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, proj4);
 			}
 
 			pointChunk.createFieldsToLoad(extraDimensionsIds, extraNamesToLoad);

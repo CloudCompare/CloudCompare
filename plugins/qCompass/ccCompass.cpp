@@ -240,6 +240,9 @@ void ccCompass::doAction()
 		ccCompassDlg::connect(m_dlg->m_mergeSelected, SIGNAL(triggered()), this, SLOT(mergeGeoObjects()));
 		ccCompassDlg::connect(m_dlg->m_fitPlaneToGeoObject, SIGNAL(triggered()), this, SLOT(fitPlaneToGeoObject()));
 		ccCompassDlg::connect(m_dlg->m_recalculateFitPlanes, SIGNAL(triggered()), this, SLOT(recalculateFitPlanes()));
+		ccCompassDlg::connect(m_dlg->m_toPointCloud, SIGNAL(triggered()), this, SLOT(convertToPointCloud()));
+		ccCompassDlg::connect(m_dlg->m_distributeSelection, SIGNAL(triggered()), this, SLOT(distributeSelection()));
+
 		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNote()));
 
 		ccCompassDlg::connect(m_dlg->m_toSVG, SIGNAL(triggered()), this, SLOT(exportToSVG()));
@@ -1228,6 +1231,219 @@ void ccCompass::recalculateFitPlanes()
 	}
 }
 
+//converts selected traces or geoObjects to point clouds
+void ccCompass::convertToPointCloud()
+{
+	//get selected objects
+	std::vector<ccGeoObject*> objs;
+	std::vector<ccPolyline*> lines;
+
+	for (ccHObject* o : m_app->getSelectedEntities())
+	{
+		if (ccGeoObject::isGeoObject(o))
+		{
+			ccGeoObject* g = dynamic_cast<ccGeoObject*> (o);
+			if (g) //could possibly be null if non-loaded geo-objects exist
+			{
+				objs.push_back(g);
+			}
+		}
+		else if (o->isA(CC_TYPES::POLY_LINE))
+		{
+			lines.push_back(static_cast<ccPolyline*> (o));
+		}
+		else
+		{
+			//search children for geo-objects and polylines
+			ccHObject::Container objs;
+			o->filterChildren(objs, true, CC_TYPES::POLY_LINE | CC_TYPES::HIERARCHY_OBJECT);
+			for (ccHObject* c : objs)
+			{
+				if (ccGeoObject::isGeoObject(c))
+				{
+					ccGeoObject* g = dynamic_cast<ccGeoObject*> (c);
+					if (g) //could possibly be null if non-loaded geo-objects exist
+					{
+						objs.push_back(g);
+					}
+				}
+				if (c->isA(CC_TYPES::POLY_LINE))
+				{
+					lines.push_back(static_cast<ccPolyline*>(c));
+				}
+			}
+
+		}
+	}
+
+	//convert GeoObjects
+	for (ccGeoObject* o : objs)
+	{
+		//get regions
+		ccHObject* regions[3] = { o->getRegion(ccGeoObject::INTERIOR), 
+								  o->getRegion(ccGeoObject::LOWER_BOUNDARY), 
+								  o->getRegion(ccGeoObject::UPPER_BOUNDARY)};
+		
+		//make point cloud
+		ccPointCloud* points = new ccPointCloud("ConvertedLines"); //create point cloud for storing points
+		int sfid = points->addScalarField(new ccScalarField("Region")); //add scalar field containing region info
+		CCLib::ScalarField* sf = points->getScalarField(sfid);
+
+		//convert traces in each region
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			ccHObject* region = regions[i];
+			
+			//get polylines/traces
+			ccHObject::Container poly;
+			region->filterChildren(poly, true, CC_TYPES::POLY_LINE);
+			
+			for (ccHObject::Container::const_iterator it = poly.begin(); it != poly.end(); it++)
+			{
+				ccPolyline* t = static_cast<ccPolyline*>(*it);
+				points->reserve(points->size() + t->size()); //make space
+				sf->reserve(points->size() + t->size());
+				for (unsigned int p = 0; p < t->size(); p++)
+				{
+					points->addPoint(*t->getPoint(p)); //add point to cloud
+					sf->addElement(i);
+				}
+			}
+		}
+
+		//save 
+		if (points->size() > 0)
+		{
+			sf->computeMinAndMax();
+			points->setCurrentDisplayedScalarField(sfid);
+			points->showSF(true);
+
+			regions[2]->addChild(points);
+			m_app->addToDB(points, false, true, false, false);
+		}
+		else
+		{
+			m_app->dispToConsole("[Compass] No polylines or traces converted - none found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			delete points;
+		}
+	}
+
+	//convert traces not associated with a GeoObject
+	if (objs.empty())
+	{
+		//make point cloud
+		ccPointCloud* points = new ccPointCloud("ConvertedLines"); //create point cloud for storing points
+		int sfid = points->addScalarField(new ccScalarField("Region")); //add scalar field containing region info
+		CCLib::ScalarField* sf = points->getScalarField(sfid);
+		int number = 0;
+		for (ccPolyline* t : lines)
+		{
+			number++;
+			points->reserve(points->size() + t->size()); //make space
+			sf->reserve(points->size() + t->size());
+			for (unsigned p = 0; p < t->size(); p++)
+			{
+				points->addPoint(*t->getPoint(p)); //add point to cloud
+				sf->addElement(number);
+			}
+		}
+		if (points->size() > 0)
+		{
+
+			sf->computeMinAndMax();
+			points->setCurrentDisplayedScalarField(sfid);
+			points->showSF(true);
+
+			m_app->dbRootObject()->addChild(points);
+			m_app->addToDB(points, false, true, false, true);
+		}
+		else
+		{
+			delete points;
+		}
+	}
+}
+
+//distributes selected objects into GeoObjects with the same name
+void ccCompass::distributeSelection()
+{
+
+	//get selection
+	ccHObject::Container selection = m_app->getSelectedEntities();
+	if (selection.size() == 0)
+	{
+		m_app->dispToConsole("[Compass] No objects selected.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+	}
+
+	//build list of GeoObjects
+	std::vector<ccGeoObject*> geoObjs;
+	ccHObject::Container search;
+	m_app->dbRootObject()->filterChildren(search, true, CC_TYPES::HIERARCHY_OBJECT, false);
+	for (ccHObject* obj : search)
+	{
+		if (ccGeoObject::isGeoObject(obj))
+		{
+			ccGeoObject* g = dynamic_cast<ccGeoObject*>(obj);
+			if (g)
+			{
+				geoObjs.push_back(g);
+			}
+		}
+	}
+
+	//loop through selection and try to match with a GeoObject
+	for (ccHObject* obj : selection)
+	{
+		//try to match name
+		ccGeoObject* bestMatch = nullptr;
+		int matchingChars = 0; //size of match
+		for (ccGeoObject* g : geoObjs)
+		{
+			//find geoObject with biggest matching name (this avoids issues with Object_1 and Object_11 matching)
+			if (obj->getName().contains(g->getName())) //object name contains a GeoObject name
+			{
+				if (g->getName().size() > matchingChars)
+				{
+					matchingChars = g->getName().size();
+					bestMatch = g;
+				}
+			}
+		}
+
+		//was a match found?
+		if (bestMatch)
+		{
+			//detach child from parent and DB Tree
+			m_app->removeFromDB(obj, false);
+
+			//look for upper or low (otherwise put in interior)
+			if (obj->getName().contains("upper"))
+			{
+				bestMatch->getRegion(ccGeoObject::UPPER_BOUNDARY)->addChild(obj); //add to GeoObject upper
+			}
+			else if (obj->getName().contains("lower"))
+			{
+				bestMatch->getRegion(ccGeoObject::LOWER_BOUNDARY)->addChild(obj); //add to GeoObject lower
+			}
+			else
+			{
+				bestMatch->getRegion(ccGeoObject::INTERIOR)->addChild(obj); //add to GeoObject interior
+			}
+
+			//deselect and update
+			obj->setSelected(false);
+			m_app->addToDB(obj, false, true, false, false);
+		}
+		else //a best match was not found...
+		{
+			m_app->dispToConsole(QString::asprintf("[Compass] Warning: No GeoObject could be found that matches %s.",obj->getName()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		}
+	}
+	
+	m_app->updateUI();
+	m_app->redrawAll();
+}
+
 
 //recompute entirely each selected trace (useful if the cost function has changed)
 void ccCompass::recalculateSelectedTraces()
@@ -1961,7 +2177,7 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 		//write GeoObject
 		out->writeStartElement("GEO_OBJECT");
 	}
-	else if (ccFitPlane::isFitPlane(object))
+	else if (object->isA(CC_TYPES::PLANE))
 	{
 		//write fitPlane
 		out->writeStartElement("PLANE");
@@ -2004,6 +2220,22 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 	for (QMap<QString, QVariant>::const_iterator it = object->metaData().begin(); it != object->metaData().end(); it++)
 	{
 		out->writeTextElement(it.key(), it.value().toString());
+	}
+
+	//special case - we can calculate all metadata from a plane
+	if (object->isA(CC_TYPES::PLANE) && !ccFitPlane::isFitPlane(object))
+	{
+		//build fitplane object
+		ccFitPlane* temp = new ccFitPlane(static_cast<ccPlane*> (object));
+
+		//write metadata
+		for (QMap<QString, QVariant>::const_iterator it = temp->metaData().begin(); it != temp->metaData().end(); it++)
+		{
+			out->writeTextElement(it.key(), it.value().toString());
+		}
+
+		//cleanup
+		delete temp;
 	}
 
 	//if object is a polyline object (or a trace) write trace points and normals

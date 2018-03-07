@@ -104,13 +104,15 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_settings_menu->addAction(m_showNames);
 	m_settings_menu->addSeparator();
 	m_settings_menu->addMenu(m_cost_algorithm_menu);
-
+	
 	algorithmButton->setPopupMode(QToolButton::InstantPopup);
 	algorithmButton->setMenu(m_settings_menu); //add settings menu
 	algorithmButton->setEnabled(true);
 	
 	//setup pair picking menu
 	m_pairpicking_menu = new QMenu(this);
+	m_research_menu = new QMenu(this);
+	m_research_menu->setTitle("Research");
 
 	m_toSVG = new QAction("Export SVG", this);
 	m_noteTool = new QAction("Add note", this);
@@ -121,7 +123,6 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_follows = new QAction("Assign \"Follows\" Relationship", this); m_follows->setEnabled(false);
 	m_equivalent = new QAction("Assign \"Equivalent\" Relationship", this); m_equivalent->setEnabled(false);
 	m_fitPlaneToGeoObject = new QAction("Fit plane to GeoObject", this);
-	m_recalculateFitPlanes = new QAction("Recalculate Fit-Planes", this);
 	m_mergeSelected = new QAction("Merge selected GeoObjects", this);
 
 	m_pinchTool->setToolTip("Add Pinch Node objects to record features such as dyke tips or sedimentary units that pinch-out.");
@@ -133,8 +134,8 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_follows->setToolTip("Select two GeoObjects to assign a \"follows\" (i.e. conformable) relationship.");
 	m_equivalent->setToolTip("Select two GeoObjects to assign an \"equivalent\" (i.e. coeval) relationship.");
 	m_fitPlaneToGeoObject->setToolTip("Calculates best fit planes for the entire upper/lower surfaces of the GeoObject.");
-	m_recalculateFitPlanes->setToolTip("Recalculates all fit-planes deriving from traces and GeoObjects (but not those calculated with the Plane Tool).");
 	m_mergeSelected->setToolTip("Merge all selected GeoObjects into a single GeoObject.");
+
 
 	m_pairpicking_menu->addAction(m_pinchTool);
 	m_pairpicking_menu->addAction(m_measure_thickness);
@@ -146,10 +147,26 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_pairpicking_menu->addAction(m_equivalent);
 	m_pairpicking_menu->addSeparator();
 	m_pairpicking_menu->addAction(m_fitPlaneToGeoObject);
-	m_pairpicking_menu->addAction(m_recalculateFitPlanes);
 	m_pairpicking_menu->addAction(m_mergeSelected);
+	m_pairpicking_menu->addMenu(m_research_menu);
 	m_pairpicking_menu->addSeparator();
 	m_pairpicking_menu->addAction(m_toSVG);
+	
+	
+	//Add tools to research menu
+	m_recalculateFitPlanes = new QAction("Recalculate Fit-Planes", this);
+	m_toPointCloud = new QAction("Convert to point cloud", this);
+	m_distributeSelection = new QAction("Distribute to GeoObjects", this);
+
+	m_recalculateFitPlanes->setToolTip("Recalculates all fit-planes deriving from traces and GeoObjects (but not those calculated with the Plane Tool).");
+	m_toPointCloud->setToolTip("Converts the selected GeoObject(s) or individual traces to a point cloud (typically for proximity analysis).");
+	m_distributeSelection->setToolTip("Distributes the selected objects into GeoObjects that have matching names.");
+
+	m_research_menu->addAction(m_recalculateFitPlanes);
+	m_research_menu->addAction(m_distributeSelection);
+	m_research_menu->addAction(m_toPointCloud);
+
+
 
 	extraModeButton->setPopupMode(QToolButton::InstantPopup);
 	extraModeButton->setMenu(m_pairpicking_menu);

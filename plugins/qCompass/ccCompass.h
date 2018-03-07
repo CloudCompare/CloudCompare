@@ -112,6 +112,8 @@ protected slots:
 	void mergeGeoObjects(); //merges the selected GeoObjects
 	void fitPlaneToGeoObject(); //calculates best-fit plane for the upper and lower surfaces of the selected GeoObject
 	void recalculateFitPlanes(); //recalcs fit planes for traces and GeoObjects
+	void convertToPointCloud(); //converts selected traces or geoObjects to point clouds
+	void distributeSelection(); //distributes selected objects into GeoObjects with the same name
 	void exportToSVG(); //exports current view to SVG
 
 	//map mode dialog

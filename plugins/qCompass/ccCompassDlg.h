@@ -53,6 +53,7 @@ public:
 	QMenu *m_cost_algorithm_menu;
 	QMenu *m_settings_menu;
 	QMenu *m_pairpicking_menu;
+	QMenu *m_research_menu;
 
 	//settings menu actions
 	QAction *m_plane_fit;
@@ -73,9 +74,13 @@ public:
 	QAction *m_fitPlaneToGeoObject; //fits a plane to the upper/lower surfaces of all points in a GeoObject
 	QAction *m_recalculateFitPlanes;
 	QAction *m_mergeSelected; //merges the selected geoObjects
+	QAction *m_toPointCloud; //converts geoObject data to point cloud
+	QAction *m_distributeSelection; //tool for distributing imported data (meshes etc.) into GeoObjects based on shared names.
+
 	//--
 	QAction *m_noteTool; //activates note tool
 	QAction *m_toSVG; //export to svg
+	
 
 protected slots:
 	//! To capture overridden shortcuts (pause button, etc.)

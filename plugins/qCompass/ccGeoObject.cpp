@@ -42,6 +42,7 @@ ccGeoObject::ccGeoObject(ccHObject* obj, ccMainAppInterface* app)
 	m_app = app;
 
 	//n.b. object should already have upper, inner and lower children
+	//n.b.b sometimes it doesn't as children are stripped before the object is created!
 
 	//copy GID key
 	QVariant GID = obj->getMetaData("GID");
@@ -59,13 +60,8 @@ ccGeoObject::ccGeoObject(ccHObject* obj, ccMainAppInterface* app)
 
 void ccGeoObject::assignGID()
 {
-	//get uniquely descriptive data to hash
-	int iID = getRegion(ccGeoObject::INTERIOR)->getUniqueID();
-	int uID = getRegion(ccGeoObject::UPPER_BOUNDARY)->getUniqueID();
-	int lID = getRegion(ccGeoObject::LOWER_BOUNDARY)->getUniqueID();
-	
-	//combine with object name and hash
-	_gID = std::hash<std::string>{}(QString::asprintf("%s%d%d%d", getName(), iID, uID, lID).toStdString());
+	//get uniquely descriptive hash
+	_gID = std::hash<std::string>{}(QString::asprintf("%s%d", getName(), getUniqueID()).toStdString());
 }
 
 void ccGeoObject::init()
@@ -90,7 +86,7 @@ ccHObject* ccGeoObject::getRegion(int mappingRegion)
 		//check region hasn't been deleted...
 		if (!m_app->dbRootObject()->find(m_interior_id))
 		{
-			//item has been deleted... make a new one
+			//not found - make or find a new one
 			generateInterior();
 		}
 		return m_interior;
@@ -98,7 +94,7 @@ ccHObject* ccGeoObject::getRegion(int mappingRegion)
 		//check region hasn't been deleted...
 		if (!m_app->dbRootObject()->find(m_upper_id))
 		{
-			//item has been deleted... make a new one
+			//not found - make or find a new one
 			generateUpper();
 		}
 		return m_upper;
@@ -106,7 +102,7 @@ ccHObject* ccGeoObject::getRegion(int mappingRegion)
 		//check region hasn't been deleted...
 		if (!m_app->dbRootObject()->find(m_lower_id))
 		{
-			//item has been deleted... make a new one
+			//item has been deleted... make or find a new one
 			generateLower();
 		}
 		return  m_lower;
@@ -298,9 +294,10 @@ void ccGeoObject::recurseChildren(ccHObject* par, bool highlight)
 void ccGeoObject::generateInterior()
 {
 	//check interior doesn't already exist
-	for (ccHObject* c : m_children)
+	for (int i = 0; i < getChildrenNumber(); i++)
 	{
-		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoInterior"))
+		ccHObject* c = getChild(i);
+		if (ccGeoObject::isGeoObjectInterior(c))
 		{
 			m_interior = c;
 			m_interior_id = c->getUniqueID();
@@ -323,9 +320,10 @@ void ccGeoObject::generateInterior()
 void ccGeoObject::generateUpper()
 {
 	//check upper doesn't already exist
-	for (ccHObject* c : m_children)
+	for (int i = 0; i < getChildrenNumber(); i++)
 	{
-		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoUpperBoundary"))
+		ccHObject* c = getChild(i);
+		if (ccGeoObject::isGeoObjectUpper(c))
 		{
 			m_upper = c;
 			m_upper_id = c->getUniqueID();
@@ -345,10 +343,11 @@ void ccGeoObject::generateUpper()
 
 void ccGeoObject::generateLower()
 {
-	//check upper doesn't already exist
-	for (ccHObject* c : m_children)
+	//check lower doesn't already exist
+	for (int i = 0; i < getChildrenNumber(); i++)
 	{
-		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoLowerBoundary"))
+		ccHObject* c = getChild(i);
+		if (ccGeoObject::isGeoObjectLower(c))
 		{
 			m_lower = c;
 			m_lower_id = c->getUniqueID();

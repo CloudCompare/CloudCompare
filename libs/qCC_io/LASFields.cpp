@@ -86,12 +86,6 @@ bool LasField::GetLASFields(ccPointCloud* cloud, std::vector<LasField>& fieldsTo
 					break;
 				}
 			}
-
-			//no correspondance was found?
-			if (!outBounds && (fieldsToSave.empty() || fieldsToSave.back().sf != sf))
-			{
-				ccLog::Warning(QString("[LAS] Found a '%1' scalar field, but it doesn't match with any of the official LAS fields... we will ignore it!").arg(sf->getName()));
-			}
 		}
 	}
 	catch (const std::bad_alloc&)

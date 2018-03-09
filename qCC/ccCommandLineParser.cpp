@@ -465,7 +465,7 @@ bool ccCommandLineParser::importFile(QString filename, FileIOFilter::Shared filt
 	return true;
 }
 
-bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnce/*=false*/)
+bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnce/*=false*/, const QString* allAtOnceFileName/*=0*/)
 {
 	//all-at-once: all clouds in a single file
 	if (allAtOnce)
@@ -490,6 +490,11 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 
 			//save output
 			CLGroupDesc desc(&tempContainer, "AllClouds", m_clouds.front().path);
+			if (allAtOnceFileName)
+			{
+				CommandSave::SetFileDesc(desc, *allAtOnceFileName);
+			}
+
 			QString errorStr = exportEntity(desc, suffix, 0, true);
 			if (!errorStr.isEmpty())
 				return error(errorStr);
@@ -517,7 +522,7 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 	return true;
 }
 
-bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnce/*=false*/)
+bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnce/*=false*/, const QString* allAtOnceFileName/*=0*/)
 {
 	//all-at-once: all meshes in a single file
 	if (allAtOnce)
@@ -537,8 +542,14 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 				for (size_t i = 0; i < m_meshes.size(); ++i)
 					tempContainer.addChild(m_meshes[i].getEntity(), ccHObject::DP_NONE);
 			}
+
 			//save output
 			CLGroupDesc desc(&tempContainer, "AllMeshes", m_meshes.front().path);
+			if (allAtOnceFileName)
+			{
+				CommandSave::SetFileDesc(desc, *allAtOnceFileName);
+			}
+
 			QString errorStr = exportEntity(desc, suffix, 0, false);
 			if (!errorStr.isEmpty())
 				return error(errorStr);

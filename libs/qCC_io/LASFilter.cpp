@@ -75,6 +75,35 @@ public:
 		, Ui::SaveLASFileDialog()
 	{
 		setupUi(this);
+		clearEVLRs();
+	}
+
+
+	void LASSaveDlg::clearEVLRs()
+	{
+		evlrListWidget->clear();
+		extraFieldGroupBox->setEnabled(false);
+		extraFieldGroupBox->setChecked(false);
+	}
+
+	void LASSaveDlg::addEVLR(QString description)
+	{
+		QListWidgetItem* item = new QListWidgetItem(description);
+		evlrListWidget->addItem(item);
+		//auto select the entry
+		item->setSelected(true);
+		//auto enable the extraFieldGroupBox
+		extraFieldGroupBox->setEnabled(true);
+		extraFieldGroupBox->setChecked(false);
+	}
+
+	bool LASSaveDlg::doSaveEVLR(size_t index) const
+	{
+		if (!extraFieldGroupBox->isChecked())
+			return false;
+
+		QListWidgetItem* item = evlrListWidget->item(static_cast<int>(index));
+		return item && item->isSelected();
 	}
 };
 
@@ -106,6 +135,8 @@ struct ExtraLasField : LasField
 		, scale(1.0)
 		, offset(0.0)
 	{}
+
+	typedef QSharedPointer<ExtraLasField> Shared;
 
 	//reimplemented from LasField
 	virtual inline QString getName() const { return fieldName; }
@@ -194,7 +225,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	//colors
 	bool hasColors = theCloud->hasColors();
 
-	//additional fields (as scalar fields)
+	//standard las fields (as scalar fields)
 	std::vector<LasField> fieldsToSave;
 
 	if (theCloud->isA(CC_TYPES::POINT_CLOUD))
@@ -203,6 +234,36 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 		//match cloud SFs with official LASfields
 		LasField::GetLASFields(pc, fieldsToSave);
+	}
+
+	//extra las fields (as scalar fields)
+	std::vector<ExtraLasField::Shared> extraFields;
+
+	if (theCloud->isA(CC_TYPES::POINT_CLOUD))
+	{
+		ccPointCloud* pc = static_cast<ccPointCloud*>(theCloud);
+
+		for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
+		{
+			ccScalarField* sf = static_cast<ccScalarField*>(pc->getScalarField(i));
+			//find an equivalent in official LAS fields
+			QString sfName = QString(sf->getName()).toUpper();
+			bool matched = false;
+			for (size_t j = 0; j < fieldsToSave.size(); ++j)
+			{
+				if (sfName == fieldsToSave[j].getName().toUpper())
+				{
+					matched = true;
+					break;
+				}
+			}
+			if (!matched)
+			{
+				ExtraLasField *extraField = new ExtraLasField(QString(sf->getName()), Id::Unknown);
+				extraFields.push_back(ExtraLasField::Shared(extraField));
+				extraFields.back()->sf = sf;
+			}
+		}
 	}
 
 	//progress dialog
@@ -264,6 +325,13 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			s_saveDlg->origRadioButton->setEnabled(false);
 		}
 
+		s_saveDlg->clearEVLRs();
+
+		for (ExtraLasField::Shared extraField : extraFields)
+		{
+			s_saveDlg->addEVLR(QString("%1").arg(extraField->getName()));
+		}
+
 		s_saveDlg->exec();
 
 		if (s_saveDlg->bestRadioButton->isChecked())
@@ -288,9 +356,29 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		writerOptions.add("a_srs", srs.toStdString());
 	}
 
+	Id pdalId;
+	std::string dimName;
+
 	for (LasField &lasField : fieldsToSave)
 	{
-		table.layout()->registerDim(id(lasField.getName().toStdString()));
+		dimName = lasField.getName().toStdString();
+		pdalId = id(dimName);
+		table.layout()->registerDim(pdalId);
+	}
+	
+	std::vector<ExtraLasField::Shared> extraFieldsToSave;
+
+	for (unsigned int i = 0; i < extraFields.size(); ++i)
+	{
+		if (!s_saveDlg || s_saveDlg->doSaveEVLR(i))
+		{
+			dimName = extraFields[i]->getName().toStdString();
+			// All extra scalar fields are written as double. 
+			// A more specific solution would be welcome.
+			Type t = Type::Double;
+			extraFields[i]->pdalId = table.layout()->registerOrAssignDim(dimName, t);
+			extraFieldsToSave.push_back(extraFields[i]);
+		}
 	}
 
 	if (hasColors)
@@ -337,7 +425,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			point.setField(Id::Blue, static_cast<uint16_t>(rgb[2]) << 8);
 		}
 
-		//additional fields
+		// standard las fields
 		for (std::vector<LasField>::const_iterator it = fieldsToSave.begin(); it != fieldsToSave.end(); ++it)
 		{
 			std::bitset<8> classFlags;
@@ -377,6 +465,11 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			}
 			point.setField(Id::ClassFlags, classFlags.to_ulong());
 		}
+		// extra las fields
+		for (ExtraLasField::Shared extraField : extraFieldsToSave)
+		{
+			point.setField(extraField->pdalId, extraField->sf->getValue(ptsWritten) + extraField->sf->getGlobalShift());
+		}
 
 		nProgress.oneStep();
 
@@ -395,6 +488,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	writerOptions.add("scale_z", lasScale.z);
 
 	writerOptions.add("filename", filename.toLocal8Bit().toStdString());
+	writerOptions.add("extra_dims", "all");
 	//make a dialog for this ?
 	//writerOptions.add("minor_version", )
 	//writerOptions.add("dataformat_id", );
@@ -661,6 +755,138 @@ struct LasCloudChunk
 	}
 };
 
+/*
+	The following functions until readExtraBytesVlr are copied from PDAL with slight modifications.
+*/
+
+using DT = Dimension::Type;
+const Dimension::Type lastypes[] = {
+	DT::None, DT::Unsigned8, DT::Signed8, DT::Unsigned16, DT::Signed16,
+	DT::Unsigned32, DT::Signed32, DT::Unsigned64, DT::Signed64,
+	DT::Float, DT::Double
+};
+
+
+void ExtraBytesIf::setType(uint8_t lastype)
+{
+	m_fieldCnt = 1;
+	while (lastype > 10)
+	{
+		m_fieldCnt++;
+		lastype -= 10;
+	}
+
+	m_type = lastypes[lastype];
+	if (m_type == Dimension::Type::None)
+		m_fieldCnt = 0;
+}
+
+
+void ExtraBytesIf::readFrom(const char *buf)
+{
+	LeExtractor extractor(buf, sizeof(ExtraBytesSpec));
+	uint16_t dummy16;
+	uint32_t dummy32;
+	uint64_t dummy64;
+	double dummyd;
+	uint8_t options;
+	uint8_t type;
+
+	uint8_t SCALE_MASK = 1 << 3;
+	uint8_t OFFSET_MASK = 1 << 4;
+
+	extractor >> dummy16 >> type >> options;
+	extractor.get(m_name, 32);
+	extractor >> dummy32;
+	for (size_t i = 0; i < 3; ++i)
+		extractor >> dummy64;  // No data field.
+	for (size_t i = 0; i < 3; ++i)
+		extractor >> dummyd;  // Min.
+	for (size_t i = 0; i < 3; ++i)
+		extractor >> dummyd;  // Max.
+	for (size_t i = 0; i < 3; ++i)
+		extractor >> m_scale[i];
+	for (size_t i = 0; i < 3; ++i)
+		extractor >> m_offset[i];
+	extractor.get(m_description, 32);
+
+	setType(type);
+	if (m_type == Dimension::Type::None)
+		m_size = options;
+	if (!(options & SCALE_MASK))
+		for (size_t i = 0; i < 3; ++i)
+			m_scale[i] = 1.0;
+	if (!(options & OFFSET_MASK))
+		for (size_t i = 0; i < 3; ++i)
+			m_offset[i] = 0.0;
+}
+
+
+std::vector<ExtraDim> ExtraBytesIf::toExtraDims()
+{
+	std::vector<ExtraDim> eds;
+
+	if (m_type == Dimension::Type::None)
+	{
+		ExtraDim ed(m_name, Dimension::Type::None);
+		ed.m_size = m_size;
+		eds.push_back(ed);
+	}
+	else if (m_fieldCnt == 1)
+	{
+		ExtraDim ed(m_name, m_type, m_scale[0], m_offset[0]);
+		eds.push_back(ed);
+	}
+	else
+	{
+		for (size_t i = 0; i < m_fieldCnt; ++i)
+		{
+			ExtraDim ed(m_name + std::to_string(i), m_type,
+				m_scale[i], m_offset[i]);
+			eds.push_back(ed);
+		}
+	}
+	return eds;
+}
+
+std::vector<ExtraDim> readExtraBytesVlr(LasHeader header)
+{
+	std::vector<ExtraDim> extraDims;
+
+	const LasVLR *vlr = header.findVlr(SPEC_USER_ID,
+		EXTRA_BYTES_RECORD_ID);
+	if (!vlr)
+	{
+		return extraDims;
+	}
+	const char *pos = vlr->data();
+	size_t size = vlr->dataLen();
+	if (size % sizeof(ExtraBytesSpec) != 0)
+	{
+		ccLog::Warning("Bad size for extra bytes VLR. Ignoring.");
+		return extraDims;
+	}
+	size /= sizeof(ExtraBytesSpec);
+
+	std::vector<ExtraBytesIf> ebList;
+
+	while (size--)
+	{
+		ExtraBytesIf eb;
+		eb.readFrom(pos);
+		ebList.push_back(eb);
+		pos += sizeof(ExtraBytesSpec);
+	}
+
+	for (ExtraBytesIf& eb : ebList)
+	{
+		std::vector<ExtraDim> eds = eb.toExtraDims();
+		for (auto& ed : eds)
+			extraDims.push_back(std::move(ed));
+	}
+	return extraDims;
+}
+
 CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	Options las_opts;
@@ -670,6 +896,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	LasReader lasReader;
 	LasHeader lasHeader;
 	QuickInfo file_info;
+	std::vector<ExtraDim> extraDims;
 	PointLayoutPtr layout(t.layout());
 
 	try
@@ -677,6 +904,14 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		lasReader.setOptions(las_opts);
 		lasReader.prepare(t);
 		lasHeader = lasReader.header();
+
+		/* The VLR record describing the extra bytes has been added to LAS 1.4 to formalize
+		a process that has been used in prior versions of LAS.
+		So PDAL doesn't read this VLR if the version is <= 1.3.
+		The idea is to read the VLR manually, make a string of the names and data types,
+		and pass that back to the PDAL reader.*/
+		extraDims = readExtraBytesVlr(lasHeader);
+
 		file_info = lasReader.preview();
 	}
 	catch (const pdal_error& e)
@@ -702,33 +937,17 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		return CC_FERR_NO_LOAD;
 	}
 
-	StringList allDims = file_info.m_dimNames;
-	StringList dimensions;
-	StringList extraDimensions;
-	IdList extraDimensionsIds;
-
-	for (std::string &dimName : allDims)
-	{
-		if (id(dimName) == Id::Unknown)
-		{
-			extraDimensions.push_back(dimName);
-			extraDimensionsIds.push_back(layout->findProprietaryDim(dimName));
-		}
-		else
-			dimensions.push_back(dimName);
-	}
-
 	if (!s_lasOpenDlg)
 	{
 		s_lasOpenDlg = QSharedPointer<LASOpenDlg>(new LASOpenDlg());
 	}
-	s_lasOpenDlg->setDimensions(dimensions);
+	s_lasOpenDlg->setDimensions(file_info.m_dimNames);
 	s_lasOpenDlg->clearEVLRs();
 	s_lasOpenDlg->setInfos(filename, nbOfPoints, bbMin, bbMax);
 
-	for (std::string &extraDimension : extraDimensions)
+	for (ExtraDim &dim : extraDims)
 	{
-		s_lasOpenDlg->addEVLR(QString("%1").arg(QString::fromStdString(extraDimension)));
+		s_lasOpenDlg->addEVLR(QString("%1").arg(QString::fromStdString(dim.m_name)));
 	}
 
 	if (parameters.sessionStart)
@@ -761,15 +980,43 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	bool forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
 	ColorCompType rgb[3] = { 0, 0, 0 };
 
-	IdList extraFieldsToLoad;
 	StringList extraNamesToLoad;
-	for (unsigned i = 0; i < extraDimensionsIds.size(); ++i)
+	std::string extraDimsArg;
+	for (unsigned i = 0; i < extraDims.size(); ++i)
 	{
 		if (s_lasOpenDlg->doLoadEVLR(i))
 		{
-			extraFieldsToLoad.push_back(extraDimensionsIds[i]);
-			extraNamesToLoad.push_back(extraDimensions[i]);
+			extraDimsArg += extraDims[i].m_name + "=" + interpretationName(extraDims[i].m_dimType.m_type) + ",";
+			extraNamesToLoad.push_back(extraDims[i].m_name);
 		}
+	}
+
+	if (extraNamesToLoad.size())
+	{
+		// If extra fields are requested, reload the file with the new extra_dims parameters
+		Options las_opts2;
+		las_opts2.add("extra_dims", extraDimsArg);
+
+		try
+		{
+			lasReader.addOptions(las_opts2);
+			lasReader.prepare(t);
+		}
+		catch (const pdal_error& e)
+		{
+			ccLog::Error(QString("PDAL exception '%1'").arg(e.what()));
+			return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
+		}
+		catch (...)
+		{
+			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+		}
+	}
+
+	std::vector<Id> extraDimensionsIds;
+	for (std::string &dim : extraNamesToLoad)
+	{
+		extraDimensionsIds.push_back(layout->findDim(dim));
 	}
 
 	bool tiling = s_lasOpenDlg->tileGroupBox->isChecked();

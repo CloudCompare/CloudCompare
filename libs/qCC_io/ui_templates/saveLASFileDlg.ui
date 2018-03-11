@@ -219,6 +219,28 @@
      </property>
     </widget>
    </item>
+    <item>
+      <widget class="QGroupBox" name="extraFieldGroupBox">
+        <property name="title">
+          <string>Save additional field(s)</string>
+        </property>
+        <property name="checkable">
+          <bool>true</bool>
+        </property>
+        <property name="checked">
+          <bool>false</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+            <widget class="QListWidget" name="evlrListWidget">
+              <property name="selectionMode">
+                <enum>QAbstractItemView::MultiSelection</enum>
+              </property>
+            </widget>
+          </item>
+        </layout>
+      </widget>
+    </item>
    <item>
     <spacer name="verticalSpacer">
      <property name="orientation">

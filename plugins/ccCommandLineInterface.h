@@ -198,14 +198,14 @@ public: //virtual methods
 		\param allAtOnce whether to save all clouds in the same file or one cloud per file
 		\return success
 	**/
-	virtual bool saveClouds(QString suffix = QString(), bool allAtOnce = false) = 0;
+	virtual bool saveClouds(QString suffix = QString(), bool allAtOnce = false, const QString* allAtOnceFileName = 0) = 0;
 
 	//! Saves all meshes
 	/** \param suffix optional suffix
 		\param allAtOnce whether to save all meshes in the same file or one mesh per file
 		\return success
 	**/
-	virtual bool saveMeshes(QString suffix = QString(), bool allAtOnce = false) = 0;
+	virtual bool saveMeshes(QString suffix = QString(), bool allAtOnce = false, const QString* allAtOnceFileName = 0) = 0;
 
 	//! Removes all clouds (or only the last one ;)
 	virtual void removeClouds(bool onlyLast = false) = 0;

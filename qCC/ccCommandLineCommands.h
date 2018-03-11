@@ -137,6 +137,7 @@ static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 static const char OPTION_ON[]								= "ON";
 static const char OPTION_OFF[]								= "OFF";
 static const char OPTION_LAST[]								= "LAST";
+static const char OPTION_FILE_NAMES[]						= "FILE";
 
 struct CommandChangeOutputFormat : public ccCommandLineInterface::Command
 {
@@ -3826,53 +3827,76 @@ struct CommandForceNormalsComputation : public ccCommandLineInterface::Command
 	}
 };
 
-struct CommandSaveClouds : public ccCommandLineInterface::Command
+struct CommandSave : public ccCommandLineInterface::Command
 {
-	CommandSaveClouds() : ccCommandLineInterface::Command("Save clouds", COMMAND_SAVE_CLOUDS) {}
+	CommandSave(QString name, QString keyword) : ccCommandLineInterface::Command(name, keyword) {}
 
-	virtual bool process(ccCommandLineInterface& cmd) override
+	static bool ParseFileNames(ccCommandLineInterface& cmd, QStringList& fileNames)
 	{
-		bool allAtOnce = false;
-
-		//look for additional parameters
-		while (!cmd.arguments().empty())
+		//
+		// File list is space separated, but can use quotes to include spaces in the file names
+		//
+		auto argument = cmd.arguments().takeFirst();
+		while (!argument.isEmpty())
 		{
-			QString argument = cmd.arguments().front();
-
-			if (argument.toUpper() == OPTION_ALL_AT_ONCE)
+			auto firstChar = argument.at(0);
+			if (firstChar == '\'' || firstChar == '\"')
 			{
-				//local option confirmed, we can move on
-				cmd.arguments().pop_front();
-				allAtOnce = true;
+				auto end = argument.indexOf(firstChar, 1);
+				if (end == -1)
+					return cmd.error(QString("A file starting with %1 does not have a closing %1").arg(firstChar));
+
+				fileNames.push_back(argument.mid(1, end - 1));
+				argument.remove(0, end + 1);
+				if (argument.startsWith(' '))
+					argument.remove(0, 1);
 			}
 			else
 			{
-				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
+				auto end = argument.indexOf(' ');
+				if (end == -1)
+					end = argument.length();
+				fileNames.push_back(argument.left(end));
+				argument.remove(0, end + 1);
 			}
 		}
+		return true;
+	}
 
-		return cmd.saveClouds(QString(), allAtOnce);
+	static void SetFileDesc(CLEntityDesc& desc, const QString& fileName)
+	{
+		QFileInfo fInfo(fileName);
+		desc.basename = fInfo.fileName();
+		desc.path = fInfo.filePath().left(fInfo.filePath().length() - fInfo.fileName().length());
 	}
 };
 
-struct CommandSaveMeshes : public ccCommandLineInterface::Command
+struct CommandSaveClouds : public CommandSave
 {
-	CommandSaveMeshes() : ccCommandLineInterface::Command("Save meshes", COMMAND_SAVE_MESHES) {}
+	CommandSaveClouds() : CommandSave("Save clouds", COMMAND_SAVE_CLOUDS) {}
 
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
 		bool allAtOnce = false;
+		bool setFileNames = false;
+		QStringList fileNames;
 
 		//look for additional parameters
 		while (!cmd.arguments().empty())
 		{
 			QString argument = cmd.arguments().front();
-
 			if (argument.toUpper() == OPTION_ALL_AT_ONCE)
 			{
 				//local option confirmed, we can move on
 				cmd.arguments().pop_front();
 				allAtOnce = true;
+			}
+			else if (argument.left(sizeof(OPTION_FILE_NAMES) - 1).toUpper() == OPTION_FILE_NAMES)
+			{
+				cmd.arguments().pop_front();
+				setFileNames = true;
+				if (!ParseFileNames(cmd, fileNames))
+					return false;
 			}
 			else
 			{
@@ -3880,7 +3904,102 @@ struct CommandSaveMeshes : public ccCommandLineInterface::Command
 			}
 		}
 
-		return cmd.saveMeshes(QString(), allAtOnce);
+		if(setFileNames && allAtOnce && fileNames.size() != 1)
+			return cmd.error(QString("Invalid parameter: specified %1 file names, but ALL_AT_ONCE is on").arg(fileNames.size()));
+		if(setFileNames && !allAtOnce && fileNames.size() != cmd.clouds().size())
+			return cmd.error(QString("Invalid parameter: specified %1 file names, but there are %2 clouds").arg(fileNames.size()).arg(cmd.clouds().size()));
+
+		QString ext = cmd.cloudExportExt();
+		bool timestamp = cmd.addTimestamp();
+		if (setFileNames)
+		{
+			cmd.toggleAddTimestamp(false);
+			cmd.setCloudExportFormat(cmd.cloudExportFormat(), QString());
+
+			if (!allAtOnce)
+			{
+				for (int i = 0; i < fileNames.size(); ++i)
+				{
+					SetFileDesc(cmd.clouds()[i], fileNames[i]);
+				}
+			}
+		}
+
+		auto res = cmd.saveClouds(QString(), allAtOnce, setFileNames ? &fileNames[0] : 0);
+
+		if (setFileNames)
+		{
+			cmd.toggleAddTimestamp(timestamp);
+			cmd.setCloudExportFormat(cmd.cloudExportFormat(), ext);
+		}
+
+		return res;
+	}
+};
+
+struct CommandSaveMeshes : public CommandSave
+{
+	CommandSaveMeshes() : CommandSave("Save meshes", COMMAND_SAVE_MESHES) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		bool allAtOnce = false;
+		bool setFileNames = false;
+		QStringList fileNames;
+
+		//look for additional parameters
+		while (!cmd.arguments().empty())
+		{
+			QString argument = cmd.arguments().front();
+			if (argument.toUpper() == OPTION_ALL_AT_ONCE)
+			{
+				//local option confirmed, we can move on
+				cmd.arguments().pop_front();
+				allAtOnce = true;
+			}
+			else if (argument.left(sizeof(OPTION_FILE_NAMES) - 1).toUpper() == OPTION_FILE_NAMES)
+			{
+				cmd.arguments().pop_front();
+				setFileNames = true;
+				if (!ParseFileNames(cmd, fileNames))
+					return false;
+			}
+			else
+			{
+				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
+			}
+		}
+
+		if (setFileNames && allAtOnce && fileNames.size() != 1)
+			return cmd.error(QString("Invalid parameter: specified %1 file names, but ALL_AT_ONCE is on").arg(fileNames.size()));
+		if (setFileNames && !allAtOnce && fileNames.size() != cmd.meshes().size())
+			return cmd.error(QString("Invalid parameter: specified %1 file names, but there are %2 meshes").arg(fileNames.size()).arg(cmd.meshes().size()));
+
+		QString ext = cmd.meshExportExt();
+		bool timestamp = cmd.addTimestamp();
+		if (setFileNames)
+		{
+			cmd.toggleAddTimestamp(false);
+			cmd.setMeshExportFormat(cmd.meshExportFormat(), QString());
+
+			if (!allAtOnce)
+			{
+				for (int i = 0; i < fileNames.size(); ++i)
+				{
+					SetFileDesc(cmd.meshes()[i], fileNames[i]);
+				}
+			}
+		}
+
+		auto res = cmd.saveMeshes(QString(), allAtOnce, setFileNames ? &fileNames[0] : 0);
+
+		if (setFileNames)
+		{
+			cmd.toggleAddTimestamp(timestamp);
+			cmd.setMeshExportFormat(cmd.meshExportFormat(), ext);
+		}
+
+		return res;
 	}
 };
 

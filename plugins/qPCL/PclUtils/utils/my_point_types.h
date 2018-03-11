@@ -19,7 +19,7 @@
 #define Q_PCL_PLUGIN_MY_POINT_TYPES_H
 
 //PCL
-#include <pcl/ros/register_point_struct.h>
+#include <pcl/register_point_struct.h>
 #include <pcl/point_types.h>
 
 //! PCL custom point type used for reading RGB data

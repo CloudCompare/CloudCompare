@@ -1754,14 +1754,14 @@ void ccCompass::exportToSVG()
 	{
 		QTextStream svg_stream(&svg_file);
 
-		int width = m_app->getActiveGLWindow()->glWidth()*zoom;
-		int height = m_app->getActiveGLWindow()->glHeight()*zoom;
+		int width = abs(m_app->getActiveGLWindow()->glWidth()*zoom); //glWidth and glHeight are negative on some machines??
+		int height = abs(m_app->getActiveGLWindow()->glHeight()*zoom); 
 
 		//write svg header
 		svg_stream << QString::asprintf("<svg width=\"%d\" height=\"%d\">", width, height) << endl;
 
 		//write the image
-		svg_stream << QString::asprintf("<image height = \"%d\" width = \"%d\" xlink:href = \"data:image/png;base64,", height, width) << ba.toBase64() << "\" / >" << endl;
+		svg_stream << QString::asprintf("<image height = \"%d\" width = \"%d\" xlink:href = \"data:image/png;base64,", height, width) << ba.toBase64() << "\"/>" << endl;
 
 		//recursively write traces
 		int count = writeTracesSVG(m_app->dbRootObject(), &svg_stream, height,zoom);

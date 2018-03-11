@@ -47,6 +47,7 @@ v2.10.alpha - XX/XX/201X
 			* '-EXTRACT_VERTICES'
 		- Remove all scan grids
 			* '-REMOVE_SCAN_GRIDS'
+		- New sub-option of 'SAVE_CLOUDS' to set the output filename(s) (e.g. -SAVE_CLOUDS FILE "cloud1.bin cloud2.bin ..."
 
 	* Unroll tool:
 		- the cylindrical unrolling can be performed inside an arbitrary angular range (between -3600 and +3600 degrees)
@@ -60,6 +61,9 @@ v2.10.alpha - XX/XX/201X
 
 	* PCV:
 		- the PCV plugin can now be applied on several clouds (batch mode)
+
+	* LAS I/O:
+		- CloudCompare can now read and save extra dimensions (for any file version) - see https://github.com/CloudCompare/CloudCompare/pull/666
 
 - Bug fix:
 

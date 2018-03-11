@@ -621,6 +621,7 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 			gridHeight,
 			ccRasterGrid::PROJ_AVERAGE_VALUE,
 			ccRasterGrid::LEAVE_EMPTY,
+			ccRasterGrid::LEAVE_EMPTY,
 			reportInfo,
 			constHeight,
 			constHeight,

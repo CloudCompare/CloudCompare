@@ -511,7 +511,8 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 										unsigned gridWidth,
 										unsigned gridHeight,
 										ccRasterGrid::ProjectionType projectionType,
-										ccRasterGrid::EmptyCellFillOption emptyCellFillStrategy,
+										ccRasterGrid::EmptyCellFillOption groundEmptyCellFillStrategy,
+										ccRasterGrid::EmptyCellFillOption ceilEmptyCellFillStrategy,
 										ccVolumeCalcTool::ReportInfo& reportInfo,
 										double groundHeight = std::numeric_limits<double>::quiet_NaN(),
 										double ceilHeight = std::numeric_limits<double>::quiet_NaN(),
@@ -580,11 +581,11 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 		if (groundRaster.fillWith(	ground,
 									vertDim,
 									projectionType,
-									emptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
+									groundEmptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
 									ccRasterGrid::INVALID_PROJECTION_TYPE,
 									pDlg.data()))
 		{
-			groundRaster.fillEmptyCells(emptyCellFillStrategy, groundHeight);
+			groundRaster.fillEmptyCells(groundEmptyCellFillStrategy, groundHeight);
 			ccLog::Print(QString("[Volume] Ground raster grid: size: %1 x %2 / heights: [%3 ; %4]").arg(groundRaster.width).arg(groundRaster.height).arg(groundRaster.minHeight).arg(groundRaster.maxHeight));
 		}
 		else
@@ -606,11 +607,11 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 		if (ceilRaster.fillWith(ceil,
 								vertDim,
 								projectionType,
-								emptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
+								ceilEmptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
 								ccRasterGrid::INVALID_PROJECTION_TYPE,
 								pDlg.data()))
 		{
-			ceilRaster.fillEmptyCells(emptyCellFillStrategy, ceilHeight);
+			ceilRaster.fillEmptyCells(ceilEmptyCellFillStrategy, ceilHeight);
 			ccLog::Print(QString("[Volume] Ceil raster grid: size: %1 x %2 / heights: [%3 ; %4]").arg(ceilRaster.width).arg(ceilRaster.height).arg(ceilRaster.minHeight).arg(ceilRaster.maxHeight));
 		}
 		else
@@ -832,6 +833,7 @@ bool ccVolumeCalcTool::updateGrid()
 						gridHeight,
 						getTypeOfProjection(),
 						getFillEmptyCellsStrategy(fillGroundEmptyCellsComboBox),
+						getFillEmptyCellsStrategy(fillCeilEmptyCellsComboBox),
 						reportInfo,
 						groundHeight,
 						ceilHeight,

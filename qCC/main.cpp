@@ -350,7 +350,7 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					filenames << arg;
+					filenames << QString::fromLocal8Bit(argv[i]);
 				}
 			}
 

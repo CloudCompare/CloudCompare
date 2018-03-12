@@ -308,7 +308,7 @@ void ccGeoObject::recurseChildren(ccHObject* par, bool highlight)
 void ccGeoObject::generateInterior()
 {
 	//check interior doesn't already exist
-	for (int i = 0; i < getChildrenNumber(); i++)
+	for (unsigned i = 0; i < getChildrenNumber(); i++)
 	{
 		ccHObject* c = getChild(i);
 		if (ccGeoObject::isGeoObjectInterior(c))
@@ -334,7 +334,7 @@ void ccGeoObject::generateInterior()
 void ccGeoObject::generateUpper()
 {
 	//check upper doesn't already exist
-	for (int i = 0; i < getChildrenNumber(); i++)
+	for (unsigned i = 0; i < getChildrenNumber(); i++)
 	{
 		ccHObject* c = getChild(i);
 		if (ccGeoObject::isGeoObjectUpper(c))
@@ -358,7 +358,7 @@ void ccGeoObject::generateUpper()
 void ccGeoObject::generateLower()
 {
 	//check lower doesn't already exist
-	for (int i = 0; i < getChildrenNumber(); i++)
+	for (unsigned i = 0; i < getChildrenNumber(); i++)
 	{
 		ccHObject* c = getChild(i);
 		if (ccGeoObject::isGeoObjectLower(c))

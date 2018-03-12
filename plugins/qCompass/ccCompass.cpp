@@ -1200,7 +1200,7 @@ void ccCompass::recalculateFitPlanes()
 		}*/
 
 		//otherwise - does the plane have a child that is a trace object (i.e. it was created in Compass mode)
-		for (int c = 0; c < (*it)->getChildrenNumber(); c++)
+		for (unsigned c = 0; c < (*it)->getChildrenNumber(); c++)
 		{
 			ccHObject* child = (*it)->getChild(c);
 			if (ccTrace::isTrace(child)) //add to recalculate list
@@ -1301,7 +1301,7 @@ void ccCompass::convertToPointCloud()
 		{
 			nRegions = 1; //single surface objects only have one region
 		}
-		for (unsigned int i = 0; i < nRegions; i++)
+		for (int i = 0; i < nRegions; i++)
 		{
 			ccHObject* region = regions[i];
 			
@@ -2339,8 +2339,8 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 					int globalID = trace->getWaypoint(w);
 
 					//find corresponding point in trace
-					int i = 0;
-					for (i; i < trace->size(); i++)
+					unsigned i = 0;
+					for (; i < trace->size(); i++)
 					{
 						if (trace->getPointGlobalIndex(i) == globalID)
 						{
@@ -2349,7 +2349,7 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 					}
 
 					//write this points local index
-					w_local_ids += QString::asprintf("%d,",i);
+					w_local_ids += QString::asprintf("%d,", i);
 				}
 
 			}
@@ -2391,7 +2391,7 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 	}
 
 	//write children
-	for (int i = 0; i < object->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
 		n += writeObjectXML(object->getChild(i), out);
 	}

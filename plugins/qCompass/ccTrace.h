@@ -87,12 +87,33 @@ public:
 	}
 
 	/*
+	Retrieves the global point index of the n'th waypoint
+	*/
+	int getWaypoint(int n)
+	{
+		return m_waypoints[n];
+	}
+
+	/*
 	Tries to insert/append the given waypoint based on its location. If the point is within a "circle" including the start and end of the closest segment
 	then it "inserts" the point. Otherwise the point is appended onto the end of the trace.
 
 	Returns True if the point new waypoint was successfully added/inserted and the path successfully updated.
 	*/
 	int insertWaypoint(int pointId);
+
+	/*
+	Returns the normal of the point at the specified index in this trace. If no normal exists, it returns the vector 0,0,0.
+	*/
+	CCVector3f getPointNormal(int pointIdx)
+	{
+		if (!m_cloud->hasNormals())
+		{
+			return CCVector3f(0, 0, 0);
+		}
+
+		return m_cloud->getPointNormal(getPointGlobalIndex(pointIdx));
+	}
 
 	/*
 	Undo last action

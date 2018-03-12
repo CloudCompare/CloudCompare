@@ -104,13 +104,15 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_settings_menu->addAction(m_showNames);
 	m_settings_menu->addSeparator();
 	m_settings_menu->addMenu(m_cost_algorithm_menu);
-
+	
 	algorithmButton->setPopupMode(QToolButton::InstantPopup);
 	algorithmButton->setMenu(m_settings_menu); //add settings menu
 	algorithmButton->setEnabled(true);
 	
 	//setup pair picking menu
 	m_pairpicking_menu = new QMenu(this);
+	m_research_menu = new QMenu(this);
+	m_research_menu->setTitle("Research");
 
 	m_toSVG = new QAction("Export SVG", this);
 	m_noteTool = new QAction("Add note", this);
@@ -134,6 +136,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_fitPlaneToGeoObject->setToolTip("Calculates best fit planes for the entire upper/lower surfaces of the GeoObject.");
 	m_mergeSelected->setToolTip("Merge all selected GeoObjects into a single GeoObject.");
 
+
 	m_pairpicking_menu->addAction(m_pinchTool);
 	m_pairpicking_menu->addAction(m_measure_thickness);
 	m_pairpicking_menu->addAction(m_measure_thickness_twoPoint);
@@ -145,8 +148,25 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_pairpicking_menu->addSeparator();
 	m_pairpicking_menu->addAction(m_fitPlaneToGeoObject);
 	m_pairpicking_menu->addAction(m_mergeSelected);
+	m_pairpicking_menu->addMenu(m_research_menu);
 	m_pairpicking_menu->addSeparator();
 	m_pairpicking_menu->addAction(m_toSVG);
+	
+	
+	//Add tools to research menu
+	m_recalculateFitPlanes = new QAction("Recalculate Fit-Planes", this);
+	m_toPointCloud = new QAction("Convert to point cloud", this);
+	m_distributeSelection = new QAction("Distribute to GeoObjects", this);
+
+	m_recalculateFitPlanes->setToolTip("Recalculates all fit-planes deriving from traces and GeoObjects (but not those calculated with the Plane Tool).");
+	m_toPointCloud->setToolTip("Converts the selected GeoObject(s) or individual traces to a point cloud (typically for proximity analysis).");
+	m_distributeSelection->setToolTip("Distributes the selected objects into GeoObjects that have matching names.");
+
+	m_research_menu->addAction(m_recalculateFitPlanes);
+	m_research_menu->addAction(m_distributeSelection);
+	m_research_menu->addAction(m_toPointCloud);
+
+
 
 	extraModeButton->setPopupMode(QToolButton::InstantPopup);
 	extraModeButton->setMenu(m_pairpicking_menu);

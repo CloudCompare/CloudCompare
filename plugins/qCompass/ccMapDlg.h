@@ -40,6 +40,13 @@ public:
 	//! Default constructor
 	explicit ccMapDlg(QWidget* parent = 0);
 
+	//menus
+	QMenu *m_createObject_menu;
+
+	//actions
+	QAction *m_create_geoObject; //create a normal GeoObject
+	QAction *m_create_geoObjectSS; //create a single surface GeoObject
+
 };
 
 #endif

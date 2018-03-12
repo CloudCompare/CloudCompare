@@ -130,9 +130,12 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 					m_geoObject->setActive(true); //display as "active"
 
 					//activate GUI
-					m_mapDlg->setLowerButton->setEnabled(true);
-					m_mapDlg->setUpperButton->setEnabled(true);
-					m_mapDlg->setInteriorButton->setEnabled(true);
+					if (!ccGeoObject::isSingleSurfaceGeoObject(m_geoObject))
+					{
+						m_mapDlg->setLowerButton->setEnabled(true);
+						m_mapDlg->setUpperButton->setEnabled(true);
+						m_mapDlg->setInteriorButton->setEnabled(true);
+					}
 					m_mapDlg->selectionLabel->setEnabled(true);
 					m_mapDlg->selectionLabel->setText(m_geoObject->getName());
 
@@ -239,6 +242,9 @@ void ccCompass::doAction()
 
 		ccCompassDlg::connect(m_dlg->m_mergeSelected, SIGNAL(triggered()), this, SLOT(mergeGeoObjects()));
 		ccCompassDlg::connect(m_dlg->m_fitPlaneToGeoObject, SIGNAL(triggered()), this, SLOT(fitPlaneToGeoObject()));
+		ccCompassDlg::connect(m_dlg->m_recalculateFitPlanes, SIGNAL(triggered()), this, SLOT(recalculateFitPlanes()));
+		ccCompassDlg::connect(m_dlg->m_toPointCloud, SIGNAL(triggered()), this, SLOT(convertToPointCloud()));
+		ccCompassDlg::connect(m_dlg->m_distributeSelection, SIGNAL(triggered()), this, SLOT(distributeSelection()));
 
 		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNote()));
 
@@ -255,7 +261,8 @@ void ccCompass::doAction()
 	{
 		m_mapDlg = new ccMapDlg(m_app->getMainWindow());
 
-		ccCompassDlg::connect(m_mapDlg->addObjectButton, SIGNAL(clicked()), this, SLOT(addGeoObject()));
+		ccCompassDlg::connect(m_mapDlg->m_create_geoObject, SIGNAL(triggered()), this, SLOT(addGeoObject()));
+		ccCompassDlg::connect(m_mapDlg->m_create_geoObjectSS, SIGNAL(triggered()), this, SLOT(addGeoObjectSS()));
 		ccCompassDlg::connect(m_mapDlg->setInteriorButton, SIGNAL(clicked()), this, SLOT(writeToInterior()));
 		ccCompassDlg::connect(m_mapDlg->setUpperButton, SIGNAL(clicked()), this, SLOT(writeToUpper()));
 		ccCompassDlg::connect(m_mapDlg->setLowerButton, SIGNAL(clicked()), this, SLOT(writeToLower()));
@@ -984,10 +991,10 @@ void ccCompass::mergeGeoObjects()
 		ccHObject* lower = objs[i]->getRegion(ccGeoObject::LOWER_BOUNDARY);
 
 		//add children to destination
+		interior->transferChildren(*d_interior, true);
 		upper->transferChildren(*d_upper, true);
 		lower->transferChildren(*d_lower, true);
-		interior->transferChildren(*d_interior, true);
-
+		
 		//delete un-needed objects
 		objs[i]->removeChild(interior);
 		objs[i]->removeChild(upper);
@@ -1062,47 +1069,392 @@ void ccCompass::fitPlaneToGeoObject()
 		}
 	}
 
-	//rinse and repeat for lower
-	points->clear();
-	ccHObject* lower = obj->getRegion(ccGeoObject::LOWER_BOUNDARY);
-	for (unsigned i = 0; i < lower->getChildrenNumber(); i++)
+	//rinse and repeat for lower (assuming normal GeoObject; skip this step for single-surface object)
+	if (!ccGeoObject::isSingleSurfaceGeoObject(obj)) 
 	{
-		if (ccTrace::isTrace(lower->getChild(i)))
+		points->clear();
+		ccHObject* lower = obj->getRegion(ccGeoObject::LOWER_BOUNDARY);
+		for (unsigned i = 0; i < lower->getChildrenNumber(); i++)
 		{
-			ccTrace* t = dynamic_cast<ccTrace*> (lower->getChild(i));
-			points->reserve(points->size() + t->size()); //make space
-			if (t) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
+			if (ccTrace::isTrace(lower->getChild(i)))
 			{
-				for (unsigned p = 0; p < t->size(); p++)
+				ccTrace* t = dynamic_cast<ccTrace*> (lower->getChild(i));
+				points->reserve(points->size() + t->size()); //make space
+				if (t) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
 				{
-					points->addPoint(*t->getPoint(p)); //add point to cloud
+					for (unsigned p = 0; p < t->size(); p++)
+					{
+						points->addPoint(*t->getPoint(p)); //add point to cloud
+					}
+				}
+			}
+		}
+
+		//calculate and store lower fitplane
+		if (points->size() > 0)
+		{
+			ccFitPlane* p = ccFitPlane::Fit(points, &rms);
+			if (p)
+			{
+				QVariantMap map;
+				map.insert("RMS", rms);
+				p->setMetaData(map, true);
+				lower->addChild(p);
+				m_app->addToDB(p, false, false, false, true);
+			}
+			else
+			{
+				m_app->dispToConsole("[Compass] Not enough 3D information to generate sensible fit plane.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			}
+		}
+	}
+	//clean up point cloud
+	delete(points); 
+
+}
+
+//recalculates all fit planes in the DB Tree, except those generated using the Plane Tool
+void ccCompass::recalculateFitPlanes()
+{
+	//get all plane objects
+	ccHObject::Container planes;
+	m_app->dbRootObject()->filterChildren(planes, true, CC_TYPES::PLANE, true);
+
+	std::vector<ccHObject*> garbage; //planes that need to be deleted
+	for (ccHObject::Container::iterator it = planes.begin(); it != planes.end(); it++)
+	{
+		if (!ccFitPlane::isFitPlane((*it)))
+			continue; //only deal with FitPlane objects
+
+		//is parent of the plane a trace object?
+		ccHObject* parent = (*it)->getParent();
+
+		if (ccTrace::isTrace(parent)) //add to recalculate list
+		{
+			//recalculate the fit plane
+			ccTrace* t = static_cast<ccTrace*>(parent);
+			ccFitPlane* p = t->fitPlane();
+			if (p)
+			{
+				t->addChild(p); //add the new fit-plane
+				m_app->addToDB(p, false, false, false, false);
+			}
+
+			//add the old plane to the garbage list (to be deleted later)
+			garbage.push_back((*it));
+
+			continue; //next
+		}
+
+		//is the parent a upper/lower boundary? (i.e. is this plane created using FitPlaneToGeoObject)
+		/*if (ccGeoObject::isGeoObjectLower(parent) || ccGeoObject::isGeoObjectUpper(parent))
+		{
+
+			//does the fitPlane have any polyline children? (If so it wasn't created by FitPlaneToGeoObject)
+			ccHObject::Container c;
+			(*it)->filterChildren(c, true, CC_TYPES::POLY_LINE, false);
+
+			//is the "radius" set to -1 (if not, it wasn't created by FitPlaneToGeoObject)
+			int radius = (*it)->getMetaData("Radius").toInt();
+
+			if (c.size() == 0 && radius == -1)
+			{
+				
+				//gather points and calculate new fit-plane
+				ccPointCloud* points = new ccPointCloud(); //create point cloud for storing points
+				double rms; //float for storing rms values
+				for (unsigned i = 0; i < parent->getChildrenNumber(); i++) //n.b. "parent" will be either the "upper" or "lower" section
+				{
+					if (ccTrace::isTrace(parent->getChild(i)))
+					{
+						ccTrace* t = dynamic_cast<ccTrace*> (parent->getChild(i));
+						if (t) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
+						{
+							points->reserve(points->size() + t->size()); //make space
+							for (unsigned p = 0; p < t->size(); p++)
+							{
+								points->addPoint(*t->getPoint(p)); //add point to 
+							}
+						}
+					}
+				}
+
+				//calculate and store fitplane
+				if (points->size() > 0)
+				{
+					ccFitPlane* p = ccFitPlane::Fit(points, &rms);
+					if (p)
+					{
+						QVariantMap map;
+						map.insert("RMS", rms);
+						p->setMetaData(map, true);
+						parent->addChild(p);
+						m_app->addToDB(p, false, false, false, false);
+					}
+				}
+
+				//add the old plane to the garbage list (to be deleted later)
+				garbage.push_back((*it));
+				continue;
+			}
+		}*/
+
+		//otherwise - does the plane have a child that is a trace object (i.e. it was created in Compass mode)
+		for (int c = 0; c < (*it)->getChildrenNumber(); c++)
+		{
+			ccHObject* child = (*it)->getChild(c);
+			if (ccTrace::isTrace(child)) //add to recalculate list
+			{
+				//recalculate the fit plane
+				ccTrace* t = static_cast<ccTrace*>(child);
+				ccFitPlane* p = t->fitPlane();
+				
+				if (p)
+				{
+					//... do some jiggery pokery
+					parent->addChild(p); //add fit-plane to the original fit-plane's parent (as we are replacing it)
+					m_app->addToDB(p, false, false, false, false);
+
+					//remove the trace from the original fit-plane
+					(*it)->detachChild(t);
+
+					//add it to the new one
+					p->addChild(t);
+
+					//add the old plane to the garbage list (to be deleted later)
+					garbage.push_back((*it));
+
+					break;
 				}
 			}
 		}
 	}
 
-	//calculate and store lower fitplane
-	if (points->size() > 0)
+	//delete all the objects in the garbage
+	for (int i = 0; i < garbage.size(); i++)
 	{
-		ccFitPlane* p = ccFitPlane::Fit(points, &rms);
-		if (p)
+		garbage[i]->getParent()->removeChild(garbage[i]);
+	}
+}
+
+//converts selected traces or geoObjects to point clouds
+void ccCompass::convertToPointCloud()
+{
+	//get selected objects
+	std::vector<ccGeoObject*> objs;
+	std::vector<ccPolyline*> lines;
+
+	for (ccHObject* o : m_app->getSelectedEntities())
+	{
+		if (ccGeoObject::isGeoObject(o))
 		{
-			QVariantMap map;
-			map.insert("RMS", rms);
-			p->setMetaData(map, true);
-			lower->addChild(p);
-			m_app->addToDB(p, false, false, false, true);
+			ccGeoObject* g = dynamic_cast<ccGeoObject*> (o);
+			if (g) //could possibly be null if non-loaded geo-objects exist
+			{
+				objs.push_back(g);
+			}
+		}
+		else if (o->isA(CC_TYPES::POLY_LINE))
+		{
+			lines.push_back(static_cast<ccPolyline*> (o));
 		}
 		else
 		{
-			m_app->dispToConsole("[Compass] Not enough 3D information to generate sensible fit plane.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			//search children for geo-objects and polylines
+			ccHObject::Container objs;
+			o->filterChildren(objs, true, CC_TYPES::POLY_LINE | CC_TYPES::HIERARCHY_OBJECT);
+			for (ccHObject* c : objs)
+			{
+				if (ccGeoObject::isGeoObject(c))
+				{
+					ccGeoObject* g = dynamic_cast<ccGeoObject*> (c);
+					if (g) //could possibly be null if non-loaded geo-objects exist
+					{
+						objs.push_back(g);
+					}
+				}
+				if (c->isA(CC_TYPES::POLY_LINE))
+				{
+					lines.push_back(static_cast<ccPolyline*>(c));
+				}
+			}
+
 		}
 	}
 
-	//clean up point cloud
-	delete(points); 
+	//convert GeoObjects
+	for (ccGeoObject* o : objs)
+	{
+		//get regions
+		ccHObject* regions[3] = { o->getRegion(ccGeoObject::INTERIOR), 
+								  o->getRegion(ccGeoObject::LOWER_BOUNDARY), 
+								  o->getRegion(ccGeoObject::UPPER_BOUNDARY)};
+		
+		//make point cloud
+		ccPointCloud* points = new ccPointCloud("ConvertedLines"); //create point cloud for storing points
+		int sfid = points->addScalarField(new ccScalarField("Region")); //add scalar field containing region info
+		CCLib::ScalarField* sf = points->getScalarField(sfid);
 
+		//convert traces in each region
+		int nRegions = 3;
+		if (ccGeoObject::isSingleSurfaceGeoObject(o))
+		{
+			nRegions = 1; //single surface objects only have one region
+		}
+		for (unsigned int i = 0; i < nRegions; i++)
+		{
+			ccHObject* region = regions[i];
+			
+			//get polylines/traces
+			ccHObject::Container poly;
+			region->filterChildren(poly, true, CC_TYPES::POLY_LINE);
+			
+			for (ccHObject::Container::const_iterator it = poly.begin(); it != poly.end(); it++)
+			{
+				ccPolyline* t = static_cast<ccPolyline*>(*it);
+				points->reserve(points->size() + t->size()); //make space
+				sf->reserve(points->size() + t->size());
+				for (unsigned int p = 0; p < t->size(); p++)
+				{
+					points->addPoint(*t->getPoint(p)); //add point to cloud
+					sf->addElement(i);
+				}
+			}
+		}
+
+		//save 
+		if (points->size() > 0)
+		{
+			sf->computeMinAndMax();
+			points->setCurrentDisplayedScalarField(sfid);
+			points->showSF(true);
+
+			regions[2]->addChild(points);
+			m_app->addToDB(points, false, true, false, false);
+		}
+		else
+		{
+			m_app->dispToConsole("[Compass] No polylines or traces converted - none found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			delete points;
+		}
+	}
+
+	//convert traces not associated with a GeoObject
+	if (objs.empty())
+	{
+		//make point cloud
+		ccPointCloud* points = new ccPointCloud("ConvertedLines"); //create point cloud for storing points
+		int sfid = points->addScalarField(new ccScalarField("Region")); //add scalar field containing region info
+		CCLib::ScalarField* sf = points->getScalarField(sfid);
+		int number = 0;
+		for (ccPolyline* t : lines)
+		{
+			number++;
+			points->reserve(points->size() + t->size()); //make space
+			sf->reserve(points->size() + t->size());
+			for (unsigned p = 0; p < t->size(); p++)
+			{
+				points->addPoint(*t->getPoint(p)); //add point to cloud
+				sf->addElement(number);
+			}
+		}
+		if (points->size() > 0)
+		{
+
+			sf->computeMinAndMax();
+			points->setCurrentDisplayedScalarField(sfid);
+			points->showSF(true);
+
+			m_app->dbRootObject()->addChild(points);
+			m_app->addToDB(points, false, true, false, true);
+		}
+		else
+		{
+			delete points;
+		}
+	}
 }
+
+//distributes selected objects into GeoObjects with the same name
+void ccCompass::distributeSelection()
+{
+
+	//get selection
+	ccHObject::Container selection = m_app->getSelectedEntities();
+	if (selection.size() == 0)
+	{
+		m_app->dispToConsole("[Compass] No objects selected.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+	}
+
+	//build list of GeoObjects
+	std::vector<ccGeoObject*> geoObjs;
+	ccHObject::Container search;
+	m_app->dbRootObject()->filterChildren(search, true, CC_TYPES::HIERARCHY_OBJECT, false);
+	for (ccHObject* obj : search)
+	{
+		if (ccGeoObject::isGeoObject(obj))
+		{
+			ccGeoObject* g = dynamic_cast<ccGeoObject*>(obj);
+			if (g)
+			{
+				geoObjs.push_back(g);
+			}
+		}
+	}
+
+	//loop through selection and try to match with a GeoObject
+	for (ccHObject* obj : selection)
+	{
+		//try to match name
+		ccGeoObject* bestMatch = nullptr;
+		int matchingChars = 0; //size of match
+		for (ccGeoObject* g : geoObjs)
+		{
+			//find geoObject with biggest matching name (this avoids issues with Object_1 and Object_11 matching)
+			if (obj->getName().contains(g->getName())) //object name contains a GeoObject name
+			{
+				if (g->getName().size() > matchingChars)
+				{
+					matchingChars = g->getName().size();
+					bestMatch = g;
+				}
+			}
+		}
+
+		//was a match found?
+		if (bestMatch)
+		{
+			//detach child from parent and DB Tree
+			m_app->removeFromDB(obj, false);
+
+			//look for upper or low (otherwise put in interior)
+			if (obj->getName().contains("upper"))
+			{
+				bestMatch->getRegion(ccGeoObject::UPPER_BOUNDARY)->addChild(obj); //add to GeoObject upper
+			}
+			else if (obj->getName().contains("lower"))
+			{
+				bestMatch->getRegion(ccGeoObject::LOWER_BOUNDARY)->addChild(obj); //add to GeoObject lower
+			}
+			else
+			{
+				bestMatch->getRegion(ccGeoObject::INTERIOR)->addChild(obj); //add to GeoObject interior
+			}
+
+			//deselect and update
+			obj->setSelected(false);
+			m_app->addToDB(obj, false, true, false, false);
+		}
+		else //a best match was not found...
+		{
+			m_app->dispToConsole(QString::asprintf("[Compass] Warning: No GeoObject could be found that matches %s.",obj->getName().toLatin1().data()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		}
+	}
+	
+	m_app->updateUI();
+	m_app->redrawAll();
+}
+
 
 //recompute entirely each selected trace (useful if the cost function has changed)
 void ccCompass::recalculateSelectedTraces()
@@ -1250,7 +1602,7 @@ void ccCompass::enableMeasureMode() //turns on/off map mode
 	m_app->updateOverlayDialogsPlacement();
 }
 
-void ccCompass::addGeoObject() //creates a new GeoObject
+void ccCompass::addGeoObject(bool singleSurface) //creates a new GeoObject
 {
 	//calculate default name
 	QString name = m_lastGeoObjectName;
@@ -1306,12 +1658,17 @@ void ccCompass::addGeoObject() //creates a new GeoObject
 	}
 
 	//create the new GeoObject
-	ccGeoObject* newGeoObject = new ccGeoObject(name,m_app);
+	ccGeoObject* newGeoObject = new ccGeoObject(name, m_app, singleSurface);
 	interp_group->addChild(newGeoObject);
 	m_app->addToDB(newGeoObject, false, true, false, false);
 
 	//set it to selected (this will then make it "active" via the selection change callback)
 	m_app->setSelectedInDB(newGeoObject, true);
+}
+
+void ccCompass::addGeoObjectSS()
+{
+	addGeoObject(true);
 }
 
 void ccCompass::writeToInterior() //new digitization will be added to the GeoObjects interior
@@ -1341,21 +1698,55 @@ void ccCompass::writeToLower() //new digitiziation will be added to the GeoObjec
 //save the current view to an SVG file
 void ccCompass::exportToSVG()
 {
-	//get output file path
-	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("SVG files (*.svg)"));
+	float zoom = 2.0; //TODO: create popup box
+
+	//get filename for the svg file
+	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("SVG Output file"), "", tr("SVG files (*.svg)"));
 	if (filename.isEmpty())
 	{
 		//process cancelled by the user
 		return;
 	}
 
-	QFileInfo fi(filename);
-	if (fi.suffix() != "svg")
+	if (QFileInfo(filename).suffix() != "svg")
 	{
 		filename += ".svg";
 	}
 
-	//create file
+
+	//set all objects except the point clouds invisible
+	std::vector<ccHObject*> hidden; //store objects we hide so we can turn them back on after!
+	ccHObject::Container objects;
+	m_app->dbRootObject()->filterChildren(objects, true, CC_TYPES::OBJECT, false); //get list of all children!
+	for (ccHObject* o : objects)
+	{
+		if (!o->isA(CC_TYPES::POINT_CLOUD))
+		{
+			if (o->isVisible())
+			{
+				hidden.push_back(o);
+				o->setVisible(false);
+			}
+		}
+	}
+
+	//render the scene
+	QImage img = m_app->getActiveGLWindow()->renderToImage(zoom);
+
+	//restore visibility
+	for (ccHObject* o : hidden)
+	{
+		o->setVisible(true);
+	}
+
+	//convert image to base64 (png format) to write in svg file
+	QByteArray ba;
+	QBuffer bu(&ba);
+	bu.open(QIODevice::WriteOnly);
+	img.save(&bu, "PNG");
+	bu.close();
+
+	//create .svg file
 	QFile svg_file(filename);
 
 	//open file & create text stream
@@ -1363,14 +1754,19 @@ void ccCompass::exportToSVG()
 	{
 		QTextStream svg_stream(&svg_file);
 
-		int width = m_app->getActiveGLWindow()->glWidth();
-		int height = m_app->getActiveGLWindow()->glHeight();
+		int width = abs(m_app->getActiveGLWindow()->glWidth()*zoom); //glWidth and glHeight are negative on some machines??
+		int height = abs(m_app->getActiveGLWindow()->glHeight()*zoom); 
 
 		//write svg header
 		svg_stream << QString::asprintf("<svg width=\"%d\" height=\"%d\">", width, height) << endl;
 
+		//write the image
+		svg_stream << QString::asprintf("<image height = \"%d\" width = \"%d\" xlink:href = \"data:image/png;base64,", height, width) << ba.toBase64() << "\"/>" << endl;
+
 		//recursively write traces
-		int count = writeTracesSVG(m_app->dbRootObject(), &svg_stream, height);
+		int count = writeTracesSVG(m_app->dbRootObject(), &svg_stream, height,zoom);
+
+		//TODO: write scale bar
 
 		//write end tag for svg file
 		svg_stream << "</svg>" << endl; 
@@ -1392,7 +1788,7 @@ void ccCompass::exportToSVG()
 	}
 }
 
-int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
+int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height, float zoom)
 {
 	int n = 0;
 
@@ -1416,7 +1812,7 @@ int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
 		if (params.perspective)
 		{
 			m_app->getActiveGLWindow()->setPerspectiveState(false, true);
-			m_app->getActiveGLWindow()->redraw(false, false); //not sure if this is needed or not?
+			//m_app->getActiveGLWindow()->redraw(false, false); //not sure if this is needed or not?
 			m_app->getActiveGLWindow()->getGLCameraParameters(params); //get updated params
 		}
 
@@ -1432,7 +1828,7 @@ int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
 			params.project(P, coords2D);
 			
 			//write point
-			*out << QString::asprintf("%.3f,%.3f ", coords2D.x, height - coords2D.y); //n.b. we need to flip y-axis
+			*out << QString::asprintf("%.3f,%.3f ", coords2D.x*zoom, height - (coords2D.y*zoom)); //n.b. we need to flip y-axis
 
 		}
 
@@ -1445,29 +1841,43 @@ int ccCompass::writeTracesSVG(ccHObject* object, QTextStream* out, int height)
 	//recurse on children
 	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
-		n += writeTracesSVG(object->getChild(i), out, height);
+		n += writeTracesSVG(object->getChild(i), out, height, zoom);
 	}
 
 	return n;
 }
 
-//export the selected layer to CSV file
+//export interpretations to csv or xml
 void ccCompass::onSave()
 {
 	//get output file path
-	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("CSV files (*.csv *.txt)"));
+	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("CSV files (*.csv *.txt);;XML (*.xml)"));
 	if (filename.isEmpty())
 	{
 		//process cancelled by the user
 		return;
 	}
+
+	//is this an xml file?
+	QFileInfo fi(filename);
+	if (fi.suffix() == "xml")
+	{
+		writeToXML(filename); //write xml file
+		return;
+	}
+
+	//otherwise write a whole bunch of .csv files
+
 	int planes = 0; //keep track of how many objects are being written (used to delete empty files)
 	int traces = 0;
 	int lineations = 0;
 	int thicknesses = 0;
 
+	/*
+	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("XML files (*.xml *.txt)"));
+	*/
 	//build filenames
-	QFileInfo fi(filename);
+
 	QString baseName = fi.absolutePath() + "/" + fi.completeBaseName();
 	QString ext = fi.suffix();
 	if (!ext.isEmpty())
@@ -1484,7 +1894,7 @@ void ccCompass::onSave()
 	QFile trace_file(trace_fn);
 	QFile lineation_file(lineation_fn);
 	QFile thickness_file(thickness_fn);
-	
+
 	//open files
 	if (plane_file.open(QIODevice::WriteOnly) && trace_file.open(QIODevice::WriteOnly) && lineation_file.open(QIODevice::WriteOnly) && thickness_file.open(QIODevice::WriteOnly))
 	{
@@ -1563,6 +1973,7 @@ void ccCompass::onSave()
 		m_app->dispToConsole("[ccCompass] Could not open output files... ensure CC has write access to this location.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	}
 }
+
 
 //write plane data
 int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentName)
@@ -1724,5 +2135,269 @@ int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString pare
 		ccHObject* o = object->getChild(i);
 		n += writeLineations(o, out, name, thicknesses);
 	}
+	return n;
+}
+
+
+int ccCompass::writeToXML(QString filename)
+{
+	int n = 0;
+
+	//open output stream
+	QFile file(filename);
+	if (file.open(QIODevice::WriteOnly)) //open the file
+	{
+		//QTextStream plane_stream(&plane_file);
+		QXmlStreamWriter xmlWriter(&file); //open xml stream;
+
+		xmlWriter.setAutoFormatting(true);
+		xmlWriter.writeStartDocument();
+
+		//find root node
+		ccHObject* root = m_app->dbRootObject();
+		if (root->getChildrenNumber() == 1)
+		{
+			root = root->getChild(0); //HACK - often the root only has one child (a .bin file); if so, move down a level
+		}
+
+		/*ccHObject::Container pointClouds;
+		m_app->dbRootObject()->filterChildren(&pointClouds, true, CC_TYPES::POINT_CLOUD, true);*/
+
+		//write data tree
+		n += writeObjectXML(root, &xmlWriter);
+
+		//write end of document
+		xmlWriter.writeEndDocument();
+
+		//close
+		file.flush();
+		file.close();
+
+		m_app->dispToConsole("[ccCompass] Successfully exported data-tree to xml.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	}
+	else
+	{
+		m_app->dispToConsole("[ccCompass] Could not open output files... ensure CC has write access to this location.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+	}
+
+	return n;
+}
+
+//recursively write the provided ccHObject and its children
+int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
+{
+	int n = 1;
+	//write object header based on type
+	if (ccGeoObject::isGeoObject(object))
+	{
+		//write GeoObject
+		out->writeStartElement("GEO_OBJECT");
+	}
+	else if (object->isA(CC_TYPES::PLANE))
+	{
+		//write fitPlane
+		out->writeStartElement("PLANE");
+	}
+	else if (ccTrace::isTrace(object))
+	{
+		//write trace
+		out->writeStartElement("TRACE");
+	}
+	else if (ccThickness::isThickness(object))
+	{
+		//write thickness
+		out->writeStartElement("THICKNESS");
+	}
+	else if (ccLineation::isLineation(object))
+	{
+		//write lineation
+		out->writeStartElement("LINEATION");
+	}
+	else if (object->isA(CC_TYPES::POLY_LINE))
+	{
+		//write polyline (note that this will ignore "trace" polylines as they have been grabbed earlier)
+		out->writeStartElement("POLYLINE");
+	}
+	else if (object->isA(CC_TYPES::HIERARCHY_OBJECT))
+	{
+		//write container
+		out->writeStartElement("CONTAINER"); //QString::asprintf("CONTAINER name = '%s' id = %d", object->getName(), object->getUniqueID())
+	}
+	else //we don't care about this object
+	{
+		return 0;
+	}
+
+	//write name and oid attributes
+	out->writeAttribute("name", object->getName());
+	out->writeAttribute("id", QString::asprintf("%d", object->getUniqueID()));
+
+	//write metadata tags (these contain the data)
+	for (QMap<QString, QVariant>::const_iterator it = object->metaData().begin(); it != object->metaData().end(); it++)
+	{
+		out->writeTextElement(it.key(), it.value().toString());
+	}
+
+	//special case - we can calculate all metadata from a plane
+	if (object->isA(CC_TYPES::PLANE) && !ccFitPlane::isFitPlane(object))
+	{
+		//build fitplane object
+		ccFitPlane* temp = new ccFitPlane(static_cast<ccPlane*> (object));
+
+		//write metadata
+		for (QMap<QString, QVariant>::const_iterator it = temp->metaData().begin(); it != temp->metaData().end(); it++)
+		{
+			out->writeTextElement(it.key(), it.value().toString());
+		}
+
+		//cleanup
+		delete temp;
+	}
+
+	//if object is a polyline object (or a trace) write trace points and normals
+	if (object->isA(CC_TYPES::POLY_LINE))
+	{
+		ccPolyline* poly = static_cast<ccPolyline*>(object);
+		ccTrace* trace = nullptr;
+		if (ccTrace::isTrace(object))
+		{
+			trace = static_cast<ccTrace*>(object);
+		}
+
+		QString x, y, z, nx, ny, nz, cost, wIDs,w_local_ids;
+
+
+		//loop through points
+		CCVector3 p1, p2; //position
+		CCVector3 n1, n2; //normal vector (if defined)
+
+		//becomes true if any valid normals are recieved
+		bool hasNormals = false;
+
+		if (poly->size() >= 2)
+		{
+			//loop through segments
+			for (unsigned i = 1; i < poly->size(); i++)
+			{
+				//get points
+				poly->getPoint(i - 1, p1); //segment start point
+				poly->getPoint(i, p2); //segment end point
+
+				//store data to buffers
+				x += QString::asprintf("%f,", p1.x);
+				y += QString::asprintf("%f,", p1.y);
+				z += QString::asprintf("%f,", p1.z);
+
+				//write data specific to traces
+				if (trace)
+				{
+					int c = trace->getSegmentCost(trace->getPointGlobalIndex(i - 1), trace->getPointGlobalIndex(i));
+					cost += QString::asprintf("%d,", c);
+
+					//write point normals (if this is a trace)
+					n2 = trace->getPointNormal(i);
+					nx += QString::asprintf("%f,", n1.x);
+					ny += QString::asprintf("%f,", n1.y);
+					nz += QString::asprintf("%f,", n1.z);
+					if (!hasNormals && !(n1.x == 0 && n1.y == 0 && n1.z == 0))
+					{
+						hasNormals = true; //this was a non-null normal estimate - we will write normals now
+					}
+				}
+
+			}
+
+			//store last point
+			x += QString::asprintf("%f", p2.x);
+			y += QString::asprintf("%f", p2.y);
+			z += QString::asprintf("%f", p2.z);
+			if (hasNormals) //normal
+			{
+				nx += QString::asprintf("%f", n2.x);
+				ny += QString::asprintf("%f", n2.y);
+				nz += QString::asprintf("%f", n2.z);
+			}
+			if (trace) //cost
+			{
+				cost += "0";
+			}
+
+			//if this is a trace also write the waypoints
+			if (trace)
+			{
+				//get ids (on the cloud) for waypoints
+				for (int w = 0; w < trace->waypoint_count(); w++)
+				{
+					wIDs += QString::asprintf("%d,", trace->getWaypoint(w));
+				}
+
+				//get ids (vertex # in polyline) for waypoints
+				for (int w = 0; w < trace->waypoint_count(); w++)
+				{
+					
+					//get id of waypoint in cloud
+					int globalID = trace->getWaypoint(w);
+
+					//find corresponding point in trace
+					int i = 0;
+					for (i; i < trace->size(); i++)
+					{
+						if (trace->getPointGlobalIndex(i) == globalID)
+						{
+							break; //found it!;
+						}
+					}
+
+					//write this points local index
+					w_local_ids += QString::asprintf("%d,",i);
+				}
+
+			}
+			//write points
+			out->writeStartElement("POINTS");
+			out->writeAttribute("count", QString::asprintf("%d", poly->size()));
+
+			if (hasNormals)
+			{
+				out->writeAttribute("normals", "True");
+			}
+			else
+			{
+				out->writeAttribute("normals", "False");
+			}
+
+			out->writeTextElement("x", x);
+			out->writeTextElement("y", y);
+			out->writeTextElement("z", z);
+
+			if (hasNormals)
+			{
+				out->writeTextElement("nx", nx);
+				out->writeTextElement("ny", ny);
+				out->writeTextElement("nz", nz);
+			}
+
+			if (trace)
+			{
+				//write waypoints
+				out->writeTextElement("cost", cost);
+				out->writeTextElement("control_point_cloud_ids", wIDs);
+				out->writeTextElement("control_point_local_ids", w_local_ids);
+			}
+
+			//fin!
+			out->writeEndElement();
+		}
+	}
+
+	//write children
+	for (int i = 0; i < object->getChildrenNumber(); i++)
+	{
+		n += writeObjectXML(object->getChild(i), out);
+	}
+
+	//close this object
+	out->writeEndElement();
+
 	return n;
 }

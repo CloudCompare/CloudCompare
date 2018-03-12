@@ -20,36 +20,65 @@
 #include "ccTopologyRelation.h"
 #include "ccPinchNode.h"
 
-ccGeoObject::ccGeoObject(QString name, ccMainAppInterface* app)
+ccGeoObject::ccGeoObject(QString name, ccMainAppInterface* app, bool singleSurface)
 	: ccHObject(name)
 {
-	init(name, app);
+	m_app = app;
 
 	//add "interior", "upper" and "lower" HObjects
-	generateInterior();
-	generateUpper();
-	generateLower();
+	if (!singleSurface)
+	{
+		generateInterior();
+		generateUpper();
+		generateLower();
+	}
+	//generate GID
+	assignGID();
+
+	init(singleSurface);
 }
 
 ccGeoObject::ccGeoObject(ccHObject* obj, ccMainAppInterface* app)
 	: ccHObject(obj->getName())
 {
-	init(obj->getName(), app);
-
-	//n.b. object should already have upper, inner and lower children
-
-}
-
-void ccGeoObject::init(QString name, ccMainAppInterface* app)
-{
-	setName(name);
-
-	//store reference to app so we can manipulate the database
 	m_app = app;
 
+	//n.b. object should already have upper, inner and lower children
+	//n.b.b sometimes it doesn't as children are stripped before the object is created!
+
+	//copy GID key
+	QVariant GID = obj->getMetaData("GID");
+	if (GID.isValid())
+	{
+		_gID = GID.toUInt();
+	}
+	else
+	{
+		assignGID(); //no GID defined, assign a new one
+	}
+
+	init(ccGeoObject::isSingleSurfaceGeoObject(obj));
+}
+
+void ccGeoObject::assignGID()
+{
+	//get uniquely descriptive hash
+	_gID = std::hash<std::string>{}(QString::asprintf("%s%d", getName().toLatin1().data(), getUniqueID()).toStdString());
+}
+
+void ccGeoObject::init(bool singleSurface)
+{
 	//add metadata tag defining the ccCompass class type
 	QVariantMap* map = new QVariantMap();
-	map->insert("ccCompassType", "GeoObject");
+	if (singleSurface)
+	{
+		map->insert("ccCompassType", "GeoObjectSS"); //single-surface GeoObject
+	}
+	else
+	{
+		map->insert("ccCompassType", "GeoObject");
+	}
+	map->insert("GID", getGID());
 	setMetaData(*map, true);
 }
 
@@ -60,13 +89,19 @@ ccPointCloud* ccGeoObject::getAssociatedCloud()
 
 ccHObject* ccGeoObject::getRegion(int mappingRegion)
 {
+	if (ccGeoObject::isSingleSurfaceGeoObject(this))
+	{
+		return this; //SingleSurface GeoObjects only have a single region; this is essentially a combined upper, lower and interior
+	}
+
+	//for normal GeoObjects, look for the specific region
 	switch (mappingRegion)
 	{
 	case ccGeoObject::INTERIOR:
 		//check region hasn't been deleted...
 		if (!m_app->dbRootObject()->find(m_interior_id))
 		{
-			//item has been deleted... make a new one
+			//not found - make or find a new one
 			generateInterior();
 		}
 		return m_interior;
@@ -74,7 +109,7 @@ ccHObject* ccGeoObject::getRegion(int mappingRegion)
 		//check region hasn't been deleted...
 		if (!m_app->dbRootObject()->find(m_upper_id))
 		{
-			//item has been deleted... make a new one
+			//not found - make or find a new one
 			generateUpper();
 		}
 		return m_upper;
@@ -82,7 +117,7 @@ ccHObject* ccGeoObject::getRegion(int mappingRegion)
 		//check region hasn't been deleted...
 		if (!m_app->dbRootObject()->find(m_lower_id))
 		{
-			//item has been deleted... make a new one
+			//item has been deleted... make or find a new one
 			generateLower();
 		}
 		return  m_lower;
@@ -200,7 +235,6 @@ ccTopologyRelation* ccGeoObject::addRelationTo(ccGeoObject* obj2, int type, ccMa
 	return t;
 }
 
-
 void ccGeoObject::setActive(bool active)
 {
 	for (ccHObject* c : m_children)
@@ -274,9 +308,10 @@ void ccGeoObject::recurseChildren(ccHObject* par, bool highlight)
 void ccGeoObject::generateInterior()
 {
 	//check interior doesn't already exist
-	for (ccHObject* c : m_children)
+	for (int i = 0; i < getChildrenNumber(); i++)
 	{
-		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoInterior"))
+		ccHObject* c = getChild(i);
+		if (ccGeoObject::isGeoObjectInterior(c))
 		{
 			m_interior = c;
 			m_interior_id = c->getUniqueID();
@@ -299,9 +334,10 @@ void ccGeoObject::generateInterior()
 void ccGeoObject::generateUpper()
 {
 	//check upper doesn't already exist
-	for (ccHObject* c : m_children)
+	for (int i = 0; i < getChildrenNumber(); i++)
 	{
-		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoUpperBoundary"))
+		ccHObject* c = getChild(i);
+		if (ccGeoObject::isGeoObjectUpper(c))
 		{
 			m_upper = c;
 			m_upper_id = c->getUniqueID();
@@ -321,10 +357,11 @@ void ccGeoObject::generateUpper()
 
 void ccGeoObject::generateLower()
 {
-	//check upper doesn't already exist
-	for (ccHObject* c : m_children)
+	//check lower doesn't already exist
+	for (int i = 0; i < getChildrenNumber(); i++)
 	{
-		if (c->hasMetaData("ccCompassType") & (c->getMetaData("ccCompassType").toString() == "GeoLowerBoundary"))
+		ccHObject* c = getChild(i);
+		if (ccGeoObject::isGeoObjectLower(c))
 		{
 			m_lower = c;
 			m_lower_id = c->getUniqueID();
@@ -374,6 +411,15 @@ bool ccGeoObject::isGeoObjectInterior(ccHObject* object)
 	if (object->hasMetaData("ccCompassType"))
 	{
 		return object->getMetaData("ccCompassType").toString().contains("GeoInterior");
+	}
+	return false;
+}
+
+bool ccGeoObject::isSingleSurfaceGeoObject(ccHObject* object)
+{
+	if (object->hasMetaData("ccCompassType"))
+	{
+		return object->getMetaData("ccCompassType").toString().contains("GeoObjectSS");
 	}
 	return false;
 }

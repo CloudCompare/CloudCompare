@@ -67,6 +67,21 @@ struct CommandM3C2 : public ccCommandLineInterface::Command
 			return cmd.error(errorMessage);
 		}
 
+		if (outputCloud)
+		{
+			CLCloudDesc cloudDesc(outputCloud, cmd.clouds()[0].basename + QObject::tr("_M3C2"), cmd.clouds()[0].path);
+			if (cmd.autoSaveMode())
+			{
+				QString errorStr = cmd.exportEntity(cloudDesc, QString(), 0, false, true);
+				if (!errorStr.isEmpty())
+				{
+					cmd.error(errorStr);
+				}
+			}
+			//add cloud to the current pool
+			cmd.clouds().push_back(cloudDesc);
+		}
+
 		return true;
 	}
 };

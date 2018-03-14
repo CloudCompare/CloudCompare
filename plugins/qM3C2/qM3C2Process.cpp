@@ -435,7 +435,7 @@ void ComputeM3C2DistForPoint(unsigned index)
 bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPointCloud*& outputCloud, bool allowDialogs, QWidget* parentWidget/*=nullptr*/, ccMainAppInterface* app/*=nullptr*/)
 {
 	errorMessage.clear();
-	outputCloud = 0;
+	outputCloud = nullptr;
 
 	//get the clouds in the right order
 	ccPointCloud* cloud1 = dlg.getCloud1();

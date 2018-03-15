@@ -14,33 +14,28 @@ include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/db_tree )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qxt )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qcustomplot )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
-file( GLOB header_list *.h db_tree/*.h ${QXT_HEADERS} )
-file( GLOB source_list *.cpp db_tree/*.cpp ${QXT_SOURCES} )
-
-# 3DX support (3dConnexion devices)
-if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	file( GLOB 3DX_header_list devices/3dConnexion/*.h )
-	file( GLOB 3DX_source_list devices/3dConnexion/*.cpp )
-	list( APPEND header_list ${3DX_header_list} )
-	list( APPEND source_list ${3DX_source_list} )
-endif()	
-
-# Gamepad support (requires Qt 5.7+)
-if ( ${OPTION_SUPPORT_GAMEPADS} )
-	file( GLOB gamepad_header_list devices/gamepad/*.h )
-	file( GLOB gamepad_source_list devices/gamepad/*.cpp )
-	list( APPEND header_list ${gamepad_header_list} )
-	list( APPEND source_list ${gamepad_source_list} )
-endif()	
+file( GLOB header_list *.h  )
+file( GLOB source_list *.cpp )
 
 file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list *.qrc )
 
 file( GLOB txt_list TODO.txt ${CloudCompareProjects_SOURCE_DIR}/CHANGELOG.md )
+
+add_subdirectory( db_tree )
+
+# 3DX support (3dConnexion devices)
+if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
+	add_subdirectory( devices/3dConnexion )
+endif()	
+
+# Gamepad support (requires Qt 5.7+)
+if ( ${OPTION_SUPPORT_GAMEPADS} )
+	add_subdirectory( devices/gamepad )
+endif()	
 
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )

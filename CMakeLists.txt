@@ -38,15 +38,15 @@ OPTION( OPTION_GL_QUAD_BUFFER_SUPPORT "Check to compile CloudCompare and ccViewe
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!
 if(WIN32 OR APPLE) 
-  set( CLOUDCOMPARE_DEST_FOLDER CloudCompare )
-  set( CCVIEWER_DEST_FOLDER ccViewer )
-  if (OPTION_GL_QUAD_BUFFER_SUPPORT)
-    set ( CLOUDCOMPARE_DEST_FOLDER ${CLOUDCOMPARE_DEST_FOLDER}Stereo )
-    set ( CCVIEWER_DEST_FOLDER ${CCVIEWER_DEST_FOLDER}Stereo )
-  endif()
+	set( CLOUDCOMPARE_DEST_FOLDER CloudCompare )
+	set( CCVIEWER_DEST_FOLDER ccViewer )
+	if (OPTION_GL_QUAD_BUFFER_SUPPORT)
+		set ( CLOUDCOMPARE_DEST_FOLDER ${CLOUDCOMPARE_DEST_FOLDER}Stereo )
+		set ( CCVIEWER_DEST_FOLDER ${CCVIEWER_DEST_FOLDER}Stereo )
+	endif()
 else()
-  set( CLOUDCOMPARE_DEST_FOLDER bin )
-  set( CCVIEWER_DEST_FOLDER bin )
+	set( CLOUDCOMPARE_DEST_FOLDER bin )
+	set( CCVIEWER_DEST_FOLDER bin )
 endif()
 
 if (APPLE)
@@ -74,7 +74,7 @@ elseif( APPLE )
         list( APPEND INSTALL_DESTINATIONS "${CCVIEWER_MAC_FRAMEWORK_DIR}" )
     endif()
 elseif( UNIX )
-  set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX}/bin )
+	set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX}/bin )
 endif()
 
 # Load advanced scripts
@@ -95,7 +95,7 @@ add_subdirectory( libs/qCC_io ) # must always be included after qCC_db (dependen
 add_subdirectory( libs/qCC_glWindow ) # must always be included after qCC_db (dependency)
 add_subdirectory( libs/qcustomplot )
 
-#load plugins (potentially used by qCC and ccViewer)
+# load plugins (potentially used by qCC and ccViewer)
 add_subdirectory( plugins )
 
 # qCC

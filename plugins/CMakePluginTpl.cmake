@@ -102,7 +102,10 @@ endif()
 
 #'GL filter' plugins specifics
 if( CC_SHADER_FOLDER )
-    #copy the shader files
+	# copy shader dirs into our shadow build directory
+	file( COPY shaders DESTINATION "${CMAKE_BINARY_DIR}" )
+
+	# install the shader files
     file( GLOB shaderFiles shaders/${CC_SHADER_FOLDER}/*.frag shaders/${CC_SHADER_FOLDER}/*.vert )
     foreach( filename ${shaderFiles} )
         if( APPLE )

@@ -721,18 +721,24 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 											bool withTexture,
 											CCLib::GenericProgressCallback* pDlg/*=0*/)
 {
+	if (samplingParameter <= 0)
+	{
+		assert(false);
+		return nullptr;
+	}
+
 	bool withFeatures = (withNormals || withRGB || withTexture);
 
-	GenericChunkedArray<1,unsigned>* triIndices = (withFeatures ? new GenericChunkedArray<1,unsigned> : 0);
+	GenericChunkedArray<1, unsigned>* triIndices = (withFeatures ? new GenericChunkedArray<1, unsigned> : 0);
 
 	CCLib::SimpleCloud* sampledCloud = 0;
 	if (densityBased)
 	{
-		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this,samplingParameter,pDlg,triIndices);
+		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this, samplingParameter, pDlg, triIndices);
 	}
 	else
 	{
-		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this,static_cast<unsigned>(samplingParameter),pDlg,triIndices);
+		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this, static_cast<unsigned>(samplingParameter), pDlg, triIndices);
 	}
 
 	//convert to real point cloud
@@ -752,7 +758,7 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 				ccLog::Warning("[ccGenericMesh::samplePoints] Not enough memory!");
 			}
 		}
-		
+
 		delete sampledCloud;
 		sampledCloud = 0;
 	}
@@ -775,13 +781,13 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 		{
 			if (cloud->reserveTheNormsTable())
 			{
-				for (unsigned i=0; i<cloud->size(); ++i)
+				for (unsigned i = 0; i < cloud->size(); ++i)
 				{
 					unsigned triIndex = triIndices->getValue(i);
 					const CCVector3* P = cloud->getPoint(i);
 
-					CCVector3 N(0,0,1);
-					interpolateNormals(triIndex,*P,N);
+					CCVector3 N(0, 0, 1);
+					interpolateNormals(triIndex, *P, N);
 					cloud->addNorm(N);
 				}
 
@@ -798,13 +804,13 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 		{
 			if (cloud->reserveTheRGBTable())
 			{
-				for (unsigned i=0; i<cloud->size(); ++i)
+				for (unsigned i = 0; i < cloud->size(); ++i)
 				{
 					unsigned triIndex = triIndices->getValue(i);
 					const CCVector3* P = cloud->getPoint(i);
 
 					ccColor::Rgb C;
-					getColorFromMaterial(triIndex,*P,C,withRGB);
+					getColorFromMaterial(triIndex, *P, C, withRGB);
 					cloud->addRGBColor(C.rgb);
 				}
 
@@ -819,13 +825,13 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 		{
 			if (cloud->reserveTheRGBTable())
 			{
-				for (unsigned i=0; i<cloud->size(); ++i)
+				for (unsigned i = 0; i < cloud->size(); ++i)
 				{
 					unsigned triIndex = triIndices->getValue(i);
 					const CCVector3* P = cloud->getPoint(i);
 
 					ccColor::Rgb C;
-					interpolateColors(triIndex,*P,C);
+					interpolateColors(triIndex, *P, C);
 					cloud->addRGBColor(C.rgb);
 				}
 
@@ -846,7 +852,7 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 	}
 
 	//we rename the resulting cloud
-	cloud->setName(getName()+QString(".sampled"));
+	cloud->setName(getName() + QString(".sampled"));
 	cloud->setDisplay(getDisplay());
 	cloud->prepareDisplayForRefresh();
 
@@ -858,7 +864,7 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 		cloud->setGlobalScale(vertices->getGlobalScale());
 	}
 	cloud->setGLTransformationHistory(getGLTransformationHistory());
-		
+
 	return cloud;
 }
 

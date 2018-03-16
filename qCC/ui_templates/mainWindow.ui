@@ -67,8 +67,6 @@
      <addaction name="actionDisplayMainTools"/>
      <addaction name="actionDisplayScalarFieldsTools"/>
      <addaction name="actionDisplayViewTools"/>
-     <addaction name="actionDisplayPluginTools"/>
-     <addaction name="actionDisplayGLFiltersTools"/>
     </widget>
     <widget class="QMenu" name="menuLights">
      <property name="title">
@@ -88,7 +86,6 @@
      <addaction name="actionLoadShader"/>
      <addaction name="actionDeleteShader"/>
      <addaction name="separator"/>
-     <addaction name="actionNoFilter"/>
     </widget>
     <widget class="QMenu" name="menuActiveScalarField">
      <property name="title">
@@ -361,14 +358,6 @@
     <addaction name="actionNext3DView"/>
     <addaction name="actionPrevious3DView"/>
    </widget>
-   <widget class="QMenu" name="menuPlugins">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="title">
-     <string>Plugins</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
      <string>Tools</string>
@@ -503,7 +492,6 @@
    <addaction name="menuEdit"/>
    <addaction name="menuTools"/>
    <addaction name="menuDisplay"/>
-   <addaction name="menuPlugins"/>
    <addaction name="menu3DViews"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -781,41 +769,6 @@ QTreeView::branch:open:has-children:has-siblings  {
      </item>
     </layout>
    </widget>
-  </widget>
-  <widget class="QToolBar" name="toolBarGLFilters">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="windowTitle">
-    <string>GL filters</string>
-   </property>
-   <property name="toolTip">
-    <string>GL filters</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>RightToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionNoFilter"/>
-  </widget>
-  <widget class="QToolBar" name="toolBarPluginTools">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="windowTitle">
-    <string>Plugins</string>
-   </property>
-   <property name="toolTip">
-    <string>Plugins</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>RightToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
   </widget>
   <action name="actionOpen">
    <property name="icon">
@@ -1905,18 +1858,6 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Load shader</string>
    </property>
   </action>
-  <action name="actionNoFilter">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/noFilter.png</normaloff>:/CC/images/noFilter.png</iconset>
-   </property>
-   <property name="text">
-    <string>Remove Filter</string>
-   </property>
-  </action>
   <action name="actionDeleteShader">
    <property name="enabled">
     <bool>false</bool>
@@ -1938,17 +1879,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>Point picking (point information, distance between 2 points, angles between 3 points, etc.)</string>
-   </property>
-  </action>
-  <action name="actionDisplayPluginTools">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Plugins</string>
    </property>
   </action>
   <action name="actionComputeBestFitBB">
@@ -2619,17 +2549,6 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Distance map to best-fit 3D quadric</string>
    </property>
   </action>
-  <action name="actionDisplayGLFiltersTools">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>GL filters</string>
-   </property>
-  </action>
   <action name="actionChangeColorLevels">
    <property name="text">
     <string>Levels</string>
@@ -3152,38 +3071,6 @@ QTreeView::branch:open:has-children:has-siblings  {
     <hint type="destinationlabel">
      <x>36</x>
      <y>95</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionDisplayPluginTools</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>toolBarPluginTools</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>963</x>
-     <y>57</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionDisplayGLFiltersTools</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>toolBarGLFilters</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>957</x>
-     <y>37</y>
     </hint>
    </hints>
   </connection>

@@ -51,7 +51,7 @@ class ccGraphicalSegmentationTool;
 class ccGraphicalTransformationTool;
 class ccHObject;
 class ccOverlayDialog;
-class ccPluginInterface;
+class ccPluginManager;
 class ccPointListPickingDlg;
 class ccPointPairRegistrationDlg;
 class ccPointPropertiesDlg;
@@ -166,8 +166,8 @@ public:
 	**/
 	void  addEditPlaneAction( QMenu &menu ) const;
 	
-	//! Dispatches the (loaded) plugins in the UI
-	void setupPluginDispatch(const tPluginInfoList& plugins, const QStringList& pluginPaths);
+	//! Sets up the UI (menus and toolbars) based on loaded plugins
+	void initPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths);
 
 	//! Updates the 'Properties' view
 	void updatePropertiesView();
@@ -184,8 +184,6 @@ private slots:
 
 	//! Displays 'help' dialog
 	void doActionShowHelpDialog();
-	//! Displays 'about plugins' dialog
-	void doActionShowAboutPluginsDialog();
 	//! Displays file open dialog
 	void doActionLoadFile();
 	//! Displays file save dialog
@@ -380,8 +378,6 @@ private slots:
 	//Shaders & plugins
 	void doActionLoadShader();
 	void doActionDeleteShader();
-	void doEnableGLFilter();
-	void doDisableGLFilter();
 
 	void doActionFindBiggestInnerRectangle();
 
@@ -602,11 +598,8 @@ private:
 	ccPrimitiveFactoryDlg* m_pfDlg;
 
 	/*** plugins ***/
-	QStringList m_pluginPaths;
-	tPluginInfoList m_pluginInfoList;
-	QList<ccStdPluginInterface*> m_stdPlugins;
-	QList<QToolBar*> m_stdPluginsToolbars;
-	QActionGroup m_glFilterActions;
+	//! Manages plugins - menus, toolbars, and the about dialog
+	ccPluginManager	*m_pluginManager;
 };
 
 #endif

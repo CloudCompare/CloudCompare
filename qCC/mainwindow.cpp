@@ -64,9 +64,6 @@
 #include "ccInnerRect2DFinder.h"
 #include "ccHistogramWindow.h"
 
-//shaders & Filters
-#include <ccShader.h>
-
 //dialogs
 #include "ccAboutDialog.h"
 #include "ccAdjustZoomDlg.h"
@@ -92,7 +89,6 @@
 #include "ccPickingHub.h"
 #include "ccPickOneElementDlg.h"
 #include "ccPlaneEditDlg.h"
-#include "ccPluginDlg.h"
 #include "ccPointListPickingDlg.h"
 #include "ccPointPairRegistrationDlg.h"
 #include "ccPointPropertiesDlg.h" //Aurelien BEY
@@ -119,6 +115,7 @@
 #include "ccRecentFiles.h"
 #include "ccRegistrationTools.h"
 #include "ccUtils.h"
+#include "pluginManager/ccPluginManager.h"
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
@@ -180,11 +177,12 @@ MainWindow::MainWindow()
 	, m_plpDlg(nullptr)
 	, m_pprDlg(nullptr)
 	, m_pfDlg(nullptr)
-	, m_glFilterActions(this)
 {
 	m_UI->setupUi( this );
 
-	m_glFilterActions.setExclusive( true );
+	setWindowTitle(QStringLiteral("CloudCompare v") + ccCommon::GetCCVersion(false));
+	
+	m_pluginManager = new ccPluginManager( this, this );
 	
 #ifdef Q_OS_MAC
 	m_UI->actionAbout->setMenuRole( QAction::AboutRole );
@@ -194,13 +192,12 @@ MainWindow::MainWindow()
 	m_UI->actionFullScreen->setShortcut( QKeySequence( Qt::CTRL + Qt::META + Qt::Key_F ) );
 #endif
 
+	// Set up dynamic menus
 	m_UI->menuFile->insertMenu(m_UI->actionSave, m_recentFiles->menu());
-
+	
 	//Console
 	ccConsole::Init(m_UI->consoleWidget, this, this);
 	m_UI->actionEnableQtWarnings->setChecked(ccConsole::QtMessagesEnabled());
-
-	setWindowTitle(QString("CloudCompare v") + ccCommon::GetCCVersion(false));
 
 	//advanced widgets not handled by QDesigner
 	{
@@ -327,207 +324,30 @@ MainWindow::~MainWindow()
 	ccConsole::ReleaseInstance();
 }
 
-void MainWindow::setupPluginDispatch(const tPluginInfoList& plugins, const QStringList& pluginPaths)
+void MainWindow::initPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths)
 {
-	m_UI->menuPlugins->setEnabled(false);
-	m_UI->menuShadersAndFilters->setEnabled(false);
-	m_UI->toolBarPluginTools->setVisible(false);
-	m_UI->toolBarGLFilters->setVisible(false);
-
-	m_pluginInfoList = plugins;
-	m_pluginPaths = pluginPaths;
-
-	for ( const tPluginInfo &plugin : plugins )
+	m_pluginManager->init( plugins, pluginPaths );
+	
+	// Set up dynamic tool bars
+	addToolBar( Qt::RightToolBarArea, m_pluginManager->glFiltersToolbar() );
+	addToolBar( Qt::RightToolBarArea, m_pluginManager->mainPluginToolbar() );
+	
+	for ( QToolBar *toolbar : m_pluginManager->additionalPluginToolbars() )
 	{
-		if (!plugin.object)
-		{
-			assert(false);
-			continue;
-		}
-
-		QString pluginName = plugin.object->getName();
-		if (pluginName.isEmpty())
-		{
-			ccLog::Warning(QString("[Plugin] Plugin '%1' has an invalid (empty) name!").arg(plugin.filename));
-			continue;
-		}
-
-		CC_PLUGIN_TYPE type = plugin.object->getType();
-		switch (type)
-		{
-
-		case CC_STD_PLUGIN: //standard plugin
-		{
-			plugin.qObject->setParent(this);
-			ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(plugin.object);
-			stdPlugin->setMainAppInterface(this);
-
-			QMenu* destMenu = nullptr;
-			QToolBar* destToolBar = nullptr;
-
-			QActionGroup actions(this);
-			stdPlugin->getActions(actions);
-			if (actions.actions().size() > 1) //more than one action? We create it's own menu and toolbar
-			{
-				destMenu = (m_UI->menuPlugins ? m_UI->menuPlugins->addMenu(pluginName) : 0);
-				if (destMenu)
-					destMenu->setIcon(stdPlugin->getIcon());
-				destToolBar = addToolBar(pluginName + QString(" toolbar"));
-
-				if (destToolBar)
-				{
-					m_stdPluginsToolbars.push_back(destToolBar);
-					//not sure why but it seems that we must specifically set the object name.
-					//if not the QSettings thing will complain about an unset name
-					//when saving settings of qCC mainwindow
-					destToolBar->setObjectName(pluginName);
-				}
-			}
-			else //default destination
-			{
-				destMenu = m_UI->menuPlugins;
-				destToolBar = m_UI->toolBarPluginTools;
-			}
-
-			//add actions
-			const QList<QAction *>	actionList = actions.actions();
-			
-			for (QAction* action : actionList)
-			{
-				//add to menu (if any)
-				if (destMenu)
-				{
-					destMenu->addAction(action);
-					destMenu->setEnabled(true);
-				}
-				//add to toolbar
-				if (destToolBar)
-				{
-					destToolBar->addAction(action);
-					destToolBar->setVisible(true);
-					destToolBar->setEnabled(true);
-				}
-			}
-
-			//add to std. plugins list
-			m_stdPlugins.push_back(stdPlugin);
-
-			//last but not least: update the current plugin state
-			stdPlugin->onNewSelection(m_selectedEntities);
-		}
-		break;
-
-		case CC_GL_FILTER_PLUGIN: //GL filter
-		{
-			//(auto)create action
-			plugin.qObject->setParent(this);
-			
-			QAction* action = new QAction(pluginName, plugin.qObject);
-			action->setToolTip(plugin.object->getDescription());
-			action->setIcon(plugin.object->getIcon());
-			action->setCheckable( true );
-			
-			connect(action, &QAction::triggered, this, &MainWindow::doEnableGLFilter);
-
-			m_UI->menuShadersAndFilters->addAction(action);
-			m_UI->menuShadersAndFilters->setEnabled(true);
-			m_UI->toolBarGLFilters->addAction(action);
-			m_UI->toolBarGLFilters->setVisible(true);
-			m_UI->toolBarGLFilters->setEnabled(true);
-
-			//add to GL filter (actions) list
-			m_glFilterActions.addAction(action);
-		}
-		break;
-
-		case CC_IO_FILTER_PLUGIN: //I/O filter
-		{
-			//not handled by the MainWindow instance
-		}
-		break;
-
-		default:
-			assert(false);
-			continue;
-		}
+		addToolBar( Qt::TopToolBarArea, toolbar );
 	}
+	
+	// Set up dynamic menus
+	m_UI->menubar->insertMenu( m_UI->menu3DViews->menuAction(), m_pluginManager->pluginMenu() );
+	m_UI->menuDisplay->insertMenu( m_UI->menuActiveScalarField->menuAction(), m_pluginManager->shaderAndFilterMenu() );
 
-	if (m_UI->menuPlugins)
-	{
-		m_UI->menuPlugins->setEnabled(!m_stdPlugins.empty());
-	}
-
-	if (m_UI->toolBarPluginTools->isEnabled())
-	{
-		m_UI->actionDisplayPluginTools->setEnabled(true);
-		m_UI->actionDisplayPluginTools->setChecked(true);
-	}
-	else
-	{
-		//DGM: doesn't work :(
-		//actionDisplayPluginTools->setChecked(false);
-	}
-
-	if (m_UI->toolBarGLFilters->isEnabled())
-	{
-		m_UI->actionDisplayGLFiltersTools->setEnabled(true);
-		m_UI->actionDisplayGLFiltersTools->setChecked(true);
-	}
-	else
-	{
-		//DGM: doesn't work :(
-		//actionDisplayGLFiltersTools->setChecked(false);
-	}
-}
-
-void MainWindow::doActionShowAboutPluginsDialog()
-{
-	ccPluginDlg ccpDlg(m_pluginPaths, m_pluginInfoList, this);
-	ccpDlg.exec();
+	m_UI->menuToolbars->addAction( m_pluginManager->actionShowMainPluginToolbar() );
+	m_UI->menuToolbars->addAction( m_pluginManager->actionShowGLFilterToolbar() );
 }
 
 void MainWindow::doEnableQtWarnings(bool state)
 {
 	ccConsole::EnableQtMessages(state);
-}
-
-void MainWindow::doEnableGLFilter()
-{
-	ccGLWindow* win = getActiveGLWindow();
-	if (!win)
-	{
-		ccLog::Warning("[GL filter] No active 3D view!");
-		return;
-	}
-
-	QAction *action = qobject_cast<QAction*>(sender());
-	ccPluginInterface* ccPlugin = ccPlugins::ToValidPlugin(action ? action->parent() : 0);
-	if (!ccPlugin)
-		return;
-
-	if (ccPlugin->getType() != CC_GL_FILTER_PLUGIN)
-		return;
-
-	if (win->areGLFiltersEnabled())
-	{
-		ccGlFilter* filter = static_cast<ccGLFilterPluginInterface*>(ccPlugin)->getFilter();
-		if (filter)
-		{
-			win->setGlFilter(filter);
-			
-			m_UI->actionNoFilter->setEnabled( true );
-			
-			ccConsole::Print("Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter");
-		}
-		else
-		{
-			ccConsole::Error("Can't load GL filter (an error occurred)!");
-		}
-	}
-	else
-	{
-		ccConsole::Error("GL filters not supported!");
-	}
 }
 
 void MainWindow::increasePointSize()
@@ -824,7 +644,6 @@ void MainWindow::connectActions()
 	//"Display > Shaders & filters" menu
 	connect(m_UI->actionLoadShader,					&QAction::triggered, this, &MainWindow::doActionLoadShader);
 	connect(m_UI->actionDeleteShader,				&QAction::triggered, this, &MainWindow::doActionDeleteShader);
-	connect(m_UI->actionNoFilter,					&QAction::triggered, this, &MainWindow::doDisableGLFilter);
 
 	//"Display > Active SF" menu
 	connect(m_UI->actionToggleActiveSFColorScale,	&QAction::triggered, this, &MainWindow::doActionToggleActiveSFColorScale);
@@ -848,7 +667,7 @@ void MainWindow::connectActions()
 
 	//"About" menu entry
 	connect(m_UI->actionHelp,						&QAction::triggered, this, &MainWindow::doActionShowHelpDialog);
-	connect(m_UI->actionAboutPlugins,				&QAction::triggered, this, &MainWindow::doActionShowAboutPluginsDialog);
+	connect(m_UI->actionAboutPlugins,				&QAction::triggered, m_pluginManager, &ccPluginManager::showAboutDialog);
 	connect(m_UI->actionEnableQtWarnings,			&QAction::toggled, this, &MainWindow::doEnableQtWarnings);
 
 	connect(m_UI->actionAbout,	&QAction::triggered, this, [this] () {
@@ -5998,16 +5817,13 @@ void MainWindow::freezeUI(bool state)
 	//freeze standard plugins
 	m_UI->toolBarMainTools->setDisabled(state);
 	m_UI->toolBarSFTools->setDisabled(state);
-	m_UI->toolBarPluginTools->setDisabled(state);
-	//toolBarGLFilters->setDisabled(state);
-	//toolBarView->setDisabled(state);
+	
+	m_pluginManager->mainPluginToolbar()->setDisabled(state);
 
 	//freeze plugin toolbars
+	for ( QToolBar *toolbar : m_pluginManager->additionalPluginToolbars() )
 	{
-		for ( QToolBar *toolbar : m_stdPluginsToolbars )
-		{
-			toolbar->setDisabled(state);
-		}
+		toolbar->setDisabled(state);
 	}
 
 	m_UI->DockableDBTree->setDisabled(state);
@@ -8998,20 +8814,6 @@ void MainWindow::doActionDeleteShader()
 		win->setShader(0);
 }
 
-void MainWindow::doDisableGLFilter()
-{
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-	{
-		win->setGlFilter(nullptr);
-		win->redraw(false);
-		
-		m_UI->actionNoFilter->setEnabled( false );
-		
-		m_glFilterActions.checkedAction()->setChecked( false );
-	}
-}
-
 void MainWindow::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
 {
 	if (!obj)
@@ -9792,11 +9594,7 @@ void MainWindow::updateMenus()
 	m_UI->actionToggleViewerBasedPerspective->setEnabled(hasMdiChild);
 
 	//plugins
-	const QList<QAction*> actionList = m_glFilterActions.actions();
-	for (QAction* action : actionList)
-	{
-		action->setEnabled(hasMdiChild);
-	}
+	m_pluginManager->updateMenus();
 }
 
 void MainWindow::update3DViewsMenu()
@@ -10098,10 +9896,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionMatchScales->setEnabled(atLeastTwoEntities);
 
 	//standard plugins
-	for (ccStdPluginInterface* plugin : m_stdPlugins)
-	{
-		plugin->onNewSelection(m_selectedEntities);
-	}
+	m_pluginManager->handleSelectionChanged();
 }
 
 void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)

@@ -23,17 +23,27 @@
 
 //Default constructor: should mainly be used to initialize
 //actions (pointers) and other members
-qDummyPlugin::qDummyPlugin(QObject* parent/*=0*/)
-	: QObject(parent)
-	, m_action(0)
+qDummyPlugin::qDummyPlugin( QObject* parent )
+	: QObject( parent )
+	, m_action( nullptr )
 {
+}
+
+QString qDummyPlugin::getName() const
+{
+	return QString( "Dummy Plugin" );
+}
+
+QString qDummyPlugin::getDescription() const
+{
+	return QString( "Dummy plugin (add description here)" );
 }
 
 //This method should enable or disable each plugin action
 //depending on the currently selected entities ('selectedEntities').
 //For example: if none of the selected entities is a cloud, and your
 //plugin deals only with clouds, call 'm_action->setEnabled(false)'
-void qDummyPlugin::onNewSelection(const ccHObject::Container& selectedEntities)
+void qDummyPlugin::onNewSelection( const ccHObject::Container& selectedEntities )
 {
 	//if (m_action)
 	//	m_action->setEnabled(!selectedEntities.empty());
@@ -41,21 +51,22 @@ void qDummyPlugin::onNewSelection(const ccHObject::Container& selectedEntities)
 
 //This method returns all 'actions' of your plugin.
 //It will be called only once, when plugin is loaded.
-void qDummyPlugin::getActions(QActionGroup& group)
+void qDummyPlugin::getActions( QActionGroup& group )
 {
 	//default action (if it has not been already created, it's the moment to do it)
-	if (!m_action)
+	if ( !m_action )
 	{
 		//here we use the default plugin name, description and icon,
 		//but each action can have its own!
-		m_action = new QAction(getName(),this);
-		m_action->setToolTip(getDescription());
-		m_action->setIcon(getIcon());
+		m_action = new QAction( getName(), this );
+		m_action->setToolTip( getDescription() );
+		m_action->setIcon( getIcon() );
+		
 		//connect appropriate signal
-		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
+		connect( m_action, &QAction::triggered, this, &qDummyPlugin::doAction );
 	}
 
-	group.addAction(m_action);
+	group.addAction( m_action );
 }
 
 //This is an example of an action's slot called when the corresponding action
@@ -67,9 +78,11 @@ void qDummyPlugin::doAction()
 {
 	//m_app should have already been initialized by CC when plugin is loaded!
 	//(--> pure internal check)
-	assert(m_app);
-	if (!m_app)
+	Q_ASSERT(m_app != nullptr);
+	if ( !m_app )
+	{
 		return;
+	}
 
 	/*** HERE STARTS THE ACTION ***/
 

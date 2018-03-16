@@ -26,6 +26,7 @@ file( GLOB qrc_list *.qrc )
 file( GLOB txt_list TODO.txt ${CloudCompareProjects_SOURCE_DIR}/CHANGELOG.md )
 
 add_subdirectory( db_tree )
+add_subdirectory( pluginManager )
 
 # 3DX support (3dConnexion devices)
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )

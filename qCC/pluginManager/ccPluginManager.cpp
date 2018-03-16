@@ -273,13 +273,13 @@ void ccPluginManager::setupMenus()
 
 void ccPluginManager::setupToolbars()
 {
-	m_mainPluginToolbar = new QToolBar( m_parentWidget );
+	m_mainPluginToolbar = new QToolBar( tr( "Plugins" ), m_parentWidget );
 	
 	m_mainPluginToolbar->setObjectName( QStringLiteral( "Main Plugin Toolbar" ) );
 	
 	connect( m_showPluginToolbar, &QAction::toggled, m_mainPluginToolbar, &QToolBar::setVisible );
 	
-	m_glFiltersToolbar = new QToolBar( m_parentWidget );
+	m_glFiltersToolbar = new QToolBar( tr( "GL Filters" ), m_parentWidget );
 	
 	m_glFiltersToolbar->setObjectName( QStringLiteral( "GL Plugin Toolbar" ) );
 	m_glFiltersToolbar->addAction( m_actionRemoveFilter );	

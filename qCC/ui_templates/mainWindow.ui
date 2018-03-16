@@ -2992,7 +2992,6 @@ QTreeView::branch:open:has-children:has-siblings  {
  </customwidgets>
  <resources>
   <include location="../icones.qrc"/>
-  <include location="../icones.qrc"/>
  </resources>
  <connections>
   <connection>

@@ -79,14 +79,14 @@ public:
 	}
 
 
-	void LASSaveDlg::clearEVLRs()
+	void clearEVLRs()
 	{
 		evlrListWidget->clear();
 		extraFieldGroupBox->setEnabled(false);
 		extraFieldGroupBox->setChecked(false);
 	}
 
-	void LASSaveDlg::addEVLR(QString description)
+	void addEVLR(QString description)
 	{
 		QListWidgetItem* item = new QListWidgetItem(description);
 		evlrListWidget->addItem(item);
@@ -97,7 +97,7 @@ public:
 		extraFieldGroupBox->setChecked(false);
 	}
 
-	bool LASSaveDlg::doSaveEVLR(size_t index) const
+	bool doSaveEVLR(size_t index) const
 	{
 		if (!extraFieldGroupBox->isChecked())
 			return false;

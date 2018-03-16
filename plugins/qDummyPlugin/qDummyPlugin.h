@@ -39,29 +39,28 @@ class qDummyPlugin : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	//replace qDummy by the plugin name (IID should be unique - let's hope your plugin name is unique ;)
+	
+	// replace qDummy by the plugin name (IID should be unique - let's hope your plugin name is unique ;)
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qDummy")
 
 public:
 
 	//! Default constructor
-	explicit qDummyPlugin(QObject* parent = 0);
+	explicit qDummyPlugin( QObject* parent = nullptr );
 
-	//inherited from ccPluginInterface
-	virtual QString getName() const override { return "qDummyPlugin"; }
-	virtual QString getDescription() const override { return "Dummy plugin (add description here)"; }
+	// inherited from ccPluginInterface
+	virtual QString getName() const override;
+	virtual QString getDescription() const override;
 	virtual QIcon getIcon() const override;
 
-	//inherited from ccStdPluginInterface
-	void onNewSelection(const ccHObject::Container& selectedEntities) override;
-	virtual void getActions(QActionGroup& group) override;
+	// inherited from ccStdPluginInterface
+	virtual void onNewSelection( const ccHObject::Container& selectedEntities ) override;
+	virtual void getActions( QActionGroup& group ) override;
 
-protected slots:
+private:
 
-	/*** ADD YOUR CUSTOM ACTIONS' SLOTS HERE ***/
+	/*** ADD YOUR CUSTOM ACTIONS HERE ***/
 	void doAction();
-
-protected:
 
 	//! Default action
 	/** You can add as many actions as you want in a plugin.

@@ -29,7 +29,7 @@ function( target_link_GDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = base 
 					file( GLOB GDAL_DLL_FILES ${GDAL_BIN_DIR}/*.dll )
 					file( GLOB GDAL_DLL_FILES2 ${GDAL_INCLUDE_DIR}/../bin/*.dll )
 					message( "GDAL DLLs" )
-					message( "Looked in: "${GDAL_BIN_DIR} )
+					message( "Looked in: " ${GDAL_BIN_DIR} )
 					message( ${GDAL_DLL_FILES} )
 					message( ${GDAL_DLL_FILES2} )
 					copy_files("${GDAL_DLL_FILES}" ${ARGV1} ) #mind the quotes!

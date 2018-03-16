@@ -38,10 +38,10 @@ after_success:
 services:
   - docker
 
-deploy:
-  on:
-    branch: master
-    condition: $CC = gcc
-  provider: script
-  script: scripts/linux/snap_deploy.sh $(pwd)
-  skip_cleanup: true
+# deploy:
+#   on:
+#     branch: master
+#     condition: $CC = gcc
+#   provider: script
+#   script: scripts/linux/snap_deploy.sh $(pwd)
+#   skip_cleanup: true

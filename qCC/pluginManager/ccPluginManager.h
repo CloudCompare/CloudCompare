@@ -57,7 +57,7 @@ public:
 	void	updateMenus();
 	void	handleSelectionChanged();
 
-	void	showAboutPluginsDialog() const;
+	void	showAboutDialog() const;
 	
 private:
 	void	setupActions();

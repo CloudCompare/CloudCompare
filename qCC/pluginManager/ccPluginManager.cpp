@@ -237,7 +237,7 @@ void ccPluginManager::handleSelectionChanged()
 	}
 }
 
-void ccPluginManager::showAboutPluginsDialog() const
+void ccPluginManager::showAboutDialog() const
 {
 	ccPluginDlg ccpDlg( m_pluginPaths, m_pluginInfoList );
 	

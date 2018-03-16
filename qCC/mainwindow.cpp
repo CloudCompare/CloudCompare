@@ -667,7 +667,7 @@ void MainWindow::connectActions()
 
 	//"About" menu entry
 	connect(m_UI->actionHelp,						&QAction::triggered, this, &MainWindow::doActionShowHelpDialog);
-	connect(m_UI->actionAboutPlugins,				&QAction::triggered, m_pluginManager, &ccPluginManager::showAboutPluginsDialog);
+	connect(m_UI->actionAboutPlugins,				&QAction::triggered, m_pluginManager, &ccPluginManager::showAboutDialog);
 	connect(m_UI->actionEnableQtWarnings,			&QAction::toggled, this, &MainWindow::doEnableQtWarnings);
 
 	connect(m_UI->actionAbout,	&QAction::triggered, this, [this] () {

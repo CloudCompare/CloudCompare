@@ -141,6 +141,11 @@ public:
 	//! Returns the number of segments
 	unsigned segmentCount() const;
 
+	//! Samples points on the polyline
+	ccPointCloud* samplePoints(	bool densityBased,
+								double samplingParameter,
+								bool withRGB);
+
 public: //meta-data keys
 	
 	//! Meta data key: vertical direction (for 2D polylines, contour plots, etc.)

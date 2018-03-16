@@ -4,6 +4,11 @@ CloudCompare version history
 v2.10.alpha - XX/XX/201X
 ----------------------
 
+- new features:
+
+	* Edit > Polyline > Sample points
+		- to regularly samples points on one or several polylines
+
 - enhancements:
 
 	* The 'Display > Lock vertical rotation' option has been renamed 'Display > Lock rotation about an axis' (Shortcut: L)

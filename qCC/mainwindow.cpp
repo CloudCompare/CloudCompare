@@ -496,7 +496,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionMeshTwoPolylines,			&QAction::triggered, this, &MainWindow::doMeshTwoPolylines);
 	connect(m_UI->actionMeshScanGrids,				&QAction::triggered, this, &MainWindow::doActionMeshScanGrids);
 	connect(m_UI->actionConvertTextureToColor,		&QAction::triggered, this, &MainWindow::doActionConvertTextureToColor);
-	connect(m_UI->actionSamplePoints,				&QAction::triggered, this, &MainWindow::doActionSamplePointsOnMesh);
+	connect(m_UI->actionSamplePointsOnMesh,			&QAction::triggered, this, &MainWindow::doActionSamplePointsOnMesh);
 	connect(m_UI->actionSmoothMeshLaplacian,		&QAction::triggered, this, &MainWindow::doActionSmoothMeshLaplacian);
 	connect(m_UI->actionSubdivideMesh,				&QAction::triggered, this, &MainWindow::doActionSubdivideMesh);
 	connect(m_UI->actionMeasureMeshSurface,			&QAction::triggered, this, &MainWindow::doActionMeasureMeshSurface);
@@ -505,6 +505,8 @@ void MainWindow::connectActions()
 	//"Edit > Mesh > Scalar Field" menu
 	connect(m_UI->actionSmoothMeshSF,				&QAction::triggered, this, &MainWindow::doActionSmoothMeshSF);
 	connect(m_UI->actionEnhanceMeshSF,				&QAction::triggered, this, &MainWindow::doActionEnhanceMeshSF);
+	//"Edit > Polyline" menu
+	connect(m_UI->actionSamplePointsOnPolyline,		&QAction::triggered, this, &MainWindow::doActionSamplePointsOnPolyline);
 	//"Edit > Plane" menu
 	connect(m_UI->actionCreatePlane,				&QAction::triggered, this, &MainWindow::doActionCreatePlane);
 	connect(m_UI->actionEditPlane,					&QAction::triggered, this, &MainWindow::doActionEditPlane);
@@ -2511,12 +2513,11 @@ void MainWindow::doActionSamplePointsOnMesh()
 	bool withNormals = dlg.generateNormals();
 	bool withRGB = dlg.interpolateRGB();
 	bool withTexture = dlg.interpolateTexture();
-	bool useDensity = dlg.useDensity();
+	s_useDensity = dlg.useDensity();
 	assert(dlg.getPointsNumber() >= 0);
 	s_ptsSamplingCount = static_cast<unsigned>(dlg.getPointsNumber());
 	s_ptsSamplingDensity = dlg.getDensityValue();
 	s_ptsSampleNormals = withNormals;
-	s_useDensity = useDensity;
 
 	bool errors = false;
 
@@ -2528,8 +2529,8 @@ void MainWindow::doActionSamplePointsOnMesh()
 		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 		assert(mesh);
 		
-		ccPointCloud* cloud = mesh->samplePoints(	useDensity,
-													useDensity ? s_ptsSamplingDensity : s_ptsSamplingCount,
+		ccPointCloud* cloud = mesh->samplePoints(	s_useDensity,
+													s_useDensity ? s_ptsSamplingDensity : s_ptsSamplingCount,
 													withNormals,
 													withRGB,
 													withTexture,
@@ -2547,6 +2548,58 @@ void MainWindow::doActionSamplePointsOnMesh()
 
 	if (errors)
 		ccLog::Error("[doActionSamplePointsOnMesh] Errors occurred during the process! Result may be incomplete!");
+
+	refreshAll();
+}
+
+void MainWindow::doActionSamplePointsOnPolyline()
+{
+	static unsigned s_ptsSamplingCount = 1000;
+	static double s_ptsSamplingDensity = 10.0;
+	static bool s_useDensity = false;
+
+	ccPtsSamplingDlg dlg(this);
+	//restore last parameters
+	dlg.setPointsNumber(s_ptsSamplingCount);
+	dlg.setDensityValue(s_ptsSamplingDensity);
+	dlg.setUseDensity(s_useDensity);
+	dlg.optionsFrame->setVisible(false);
+	if (!dlg.exec())
+		return;
+
+	assert(dlg.getPointsNumber() >= 0);
+	s_ptsSamplingCount = static_cast<unsigned>(dlg.getPointsNumber());
+	s_ptsSamplingDensity = dlg.getDensityValue();
+	s_useDensity = dlg.useDensity();
+
+	bool errors = false;
+
+	for (ccHObject *entity : getSelectedEntities())
+	{
+		if (!entity->isKindOf(CC_TYPES::POLY_LINE))
+			continue;
+
+		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
+		assert(poly);
+
+		ccPointCloud* cloud = poly->samplePoints(	s_useDensity,
+													s_useDensity ? s_ptsSamplingDensity : s_ptsSamplingCount,
+													true);
+
+		if (cloud)
+		{
+			addToDB(cloud);
+		}
+		else
+		{
+			errors = true;
+		}
+	}
+
+	if (errors)
+	{
+		ccLog::Error("[doActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!");
+	}
 
 	refreshAll();
 }
@@ -9803,7 +9856,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionSetSFAsCoord->setEnabled(atLeastOneSF && atLeastOneCloud);
 	m_UI->actionInterpolateSFs->setEnabled(atLeastOneCloud || atLeastOneMesh);
 
-	m_UI->actionSamplePoints->setEnabled(atLeastOneMesh);
+	m_UI->actionSamplePointsOnMesh->setEnabled(atLeastOneMesh);
 	m_UI->actionMeasureMeshSurface->setEnabled(atLeastOneMesh);
 	m_UI->actionMeasureMeshVolume->setEnabled(atLeastOneMesh);
 	m_UI->actionFlagMeshVertices->setEnabled(atLeastOneMesh);
@@ -9837,6 +9890,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	bool exactlyOneCameraSensor = (selInfo.cameraSensorCount == 1);
 
 	m_UI->actionConvertPolylinesToMesh->setEnabled(atLeastOnePolyline || exactlyOneGroup);
+	m_UI->actionSamplePointsOnPolyline->setEnabled(atLeastOnePolyline);
 	m_UI->actionMeshTwoPolylines->setEnabled(selInfo.selCount == 2 && selInfo.polylineCount == 2);
 	m_UI->actionCreateSurfaceBetweenTwoPolylines->setEnabled(m_UI->actionMeshTwoPolylines->isEnabled()); //clone of actionMeshTwoPolylines
 	m_UI->actionModifySensor->setEnabled(exactlyOneSensor);

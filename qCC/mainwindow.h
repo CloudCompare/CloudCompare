@@ -303,6 +303,7 @@ private slots:
 	void doActionSubsample(); //Aurelien BEY le 4/12/2008
 	void doActionStatisticalTest();
 	void doActionSamplePointsOnMesh();
+	void doActionSamplePointsOnPolyline();
 	void doActionConvertTextureToColor();
 	void doActionLabelConnectedComponents();
 	void doActionComputeStatParams();

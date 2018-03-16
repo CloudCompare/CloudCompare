@@ -227,7 +227,7 @@
      <addaction name="actionMeshScanGrids"/>
      <addaction name="separator"/>
      <addaction name="actionConvertTextureToColor"/>
-     <addaction name="actionSamplePoints"/>
+     <addaction name="actionSamplePointsOnMesh"/>
      <addaction name="actionSmoothMeshLaplacian"/>
      <addaction name="actionSubdivideMesh"/>
      <addaction name="separator"/>
@@ -314,11 +314,18 @@
      <addaction name="actionDeleteScanGrid"/>
      <addaction name="actionMeshScanGrids"/>
     </widget>
+    <widget class="QMenu" name="menuPolyline">
+     <property name="title">
+      <string>Polyline</string>
+     </property>
+     <addaction name="actionSamplePointsOnPolyline"/>
+    </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
     <addaction name="menuOctree"/>
     <addaction name="menuGrid"/>
     <addaction name="menuMesh"/>
+    <addaction name="menuPolyline"/>
     <addaction name="menuPlane"/>
     <addaction name="menuSensors"/>
     <addaction name="menuScalarFields"/>
@@ -681,7 +688,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionPointPairsAlign"/>
    <addaction name="actionRegister"/>
    <addaction name="actionSubsample"/>
-   <addaction name="actionSamplePoints"/>
+   <addaction name="actionSamplePointsOnMesh"/>
    <addaction name="actionCloudCloudDist"/>
    <addaction name="actionCloudMeshDist"/>
    <addaction name="actionLabelConnectedComponents"/>
@@ -1109,7 +1116,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Apply a local statistical test to separate noise from true differences</string>
    </property>
   </action>
-  <action name="actionSamplePoints">
+  <action name="actionSamplePointsOnMesh">
    <property name="icon">
     <iconset resource="../icones.qrc">
      <normaloff>:/CC/images/ccSamplePoints.png</normaloff>:/CC/images/ccSamplePoints.png</iconset>
@@ -2975,6 +2982,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionLock_rotation_about_arbitrary_axis">
    <property name="text">
     <string>Lock rotation about arbitrary axis</string>
+   </property>
+  </action>
+  <action name="actionSamplePointsOnPolyline">
+   <property name="text">
+    <string>Sample points</string>
    </property>
   </action>
  </widget>

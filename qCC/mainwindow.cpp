@@ -496,7 +496,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionMeshTwoPolylines,			&QAction::triggered, this, &MainWindow::doMeshTwoPolylines);
 	connect(m_UI->actionMeshScanGrids,				&QAction::triggered, this, &MainWindow::doActionMeshScanGrids);
 	connect(m_UI->actionConvertTextureToColor,		&QAction::triggered, this, &MainWindow::doActionConvertTextureToColor);
-	connect(m_UI->actionSamplePoints,				&QAction::triggered, this, &MainWindow::doActionSamplePoints);
+	connect(m_UI->actionSamplePoints,				&QAction::triggered, this, &MainWindow::doActionSamplePointsOnMesh);
 	connect(m_UI->actionSmoothMeshLaplacian,		&QAction::triggered, this, &MainWindow::doActionSmoothMeshLaplacian);
 	connect(m_UI->actionSubdivideMesh,				&QAction::triggered, this, &MainWindow::doActionSubdivideMesh);
 	connect(m_UI->actionMeasureMeshSurface,			&QAction::triggered, this, &MainWindow::doActionMeasureMeshSurface);
@@ -2489,7 +2489,7 @@ void MainWindow::doActionConvertTextureToColor()
 	updateUI();
 }
 
-void MainWindow::doActionSamplePoints()
+void MainWindow::doActionSamplePointsOnMesh()
 {
 	static unsigned s_ptsSamplingCount = 1000000;
 	static double s_ptsSamplingDensity = 10.0;
@@ -2546,7 +2546,7 @@ void MainWindow::doActionSamplePoints()
 	}
 
 	if (errors)
-		ccLog::Error("[doActionSamplePoints] Errors occurred during the process! Result may be incomplete!");
+		ccLog::Error("[doActionSamplePointsOnMesh] Errors occurred during the process! Result may be incomplete!");
 
 	refreshAll();
 }

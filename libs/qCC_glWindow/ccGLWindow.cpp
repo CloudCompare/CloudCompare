@@ -4292,9 +4292,16 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 			//picking?
 			if (m_timer.elapsed() < m_lastClickTime_ticks + CC_MAX_PICKING_CLICK_DURATION_MS) //in msec
 			{
-				m_lastMousePos = event->pos(); //just in case (it should be already at this position)
-				m_deferredPickingTimer.start();
-				//doPicking();
+				int x = m_lastMousePos.x();
+				int y = m_lastMousePos.y();
+
+				//first test if the user has clicked on a particular item on the screen
+				if (!processClickableItems(x, y))
+				{
+					m_lastMousePos = event->pos(); //just in case (it should be already at this position)
+					m_deferredPickingTimer.start();
+					//doPicking();
+				}
 			}
 		}
 
@@ -4315,12 +4322,6 @@ void ccGLWindow::doPicking()
 		return;
 	}
 
-	//first test if the user has clicked on a particular item on the screen
-	if (processClickableItems(x, y))
-	{
-		return;
-	}
-	
 	if (	(m_pickingMode != NO_PICKING)
 		||	(m_interactionFlags & INTERACT_2D_ITEMS))
 	{

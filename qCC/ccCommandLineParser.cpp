@@ -101,12 +101,12 @@ int ccCommandLineParser::Parse(int nargs, char** args, tPluginInfoList* plugins/
 	{
 		for (tPluginInfo &pluginInfo : *plugins)
 		{
-			if (!pluginInfo.object)
+			if (!pluginInfo.interface)
 			{
 				assert(false);
 				continue;
 			}
-			ccPluginInterface* plugin = static_cast<ccPluginInterface*>(pluginInfo.object);
+			ccPluginInterface* plugin = static_cast<ccPluginInterface*>(pluginInfo.interface);
 			plugin->registerCommands(parser.data());
 		}
 	}

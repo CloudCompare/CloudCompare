@@ -40,20 +40,18 @@
 
 class QObject;
 
-//! This type is used to communicate information between the main window and the plugin dialog
-//! It is a pair - first is path to the plugin, second is an object pointer to the plugin
+//! This struct is used to store plugin information including
+//! a pointer to its interface and a pointer to its QObject
 struct tPluginInfo
 {
-	tPluginInfo(QString f, ccPluginInterface* o, QObject* q)
-		: filename(f)
-		, object(o)
-		, qObject(q)
+	tPluginInfo(ccPluginInterface* o, QObject* q) :
+		interface( o )
+	  , qObject( q )
 	{}
 	
-	//! Path to the plugin
-	QString filename;
-	//! Pointer to the plugin
-	ccPluginInterface* object;
+	//! Pointer to the plugin interface
+	ccPluginInterface* interface;
+	
 	//! Pointer to the QObject
 	QObject* qObject;
 };
@@ -71,15 +69,16 @@ public:
 		//"static" plugins
 		const QObjectList	pluginInstances = QPluginLoader::staticInstances();
 		
-		for (QObject* plugin : pluginInstances)
+		for ( QObject* plugin : pluginInstances )
 		{
 			ccPluginInterface* ccPlugin = dynamic_cast<ccPluginInterface*>(plugin);
+			
 			if (ccPlugin == nullptr)
 			{
 				continue;
 			}
-			//generate a fake filename
-			plugins.push_back(tPluginInfo(QString(), ccPlugin, plugin)); //static plugins have no associated filename
+
+			plugins.push_back(tPluginInfo(ccPlugin, plugin)); 
 		}
 		
 		//"dynamic" plugins
@@ -88,17 +87,17 @@ public:
 		//now iterate over plugins and automatically register what we can
 		for ( tPluginInfo &plugin : plugins )
 		{
-			if (!plugin.object)
+			if (!plugin.interface)
 			{
 				Q_ASSERT(false);
 				continue;
 			}
 			
-			switch (plugin.object->getType())
+			switch (plugin.interface->getType())
 			{
 				case CC_STD_PLUGIN:
 				{
-					ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(plugin.object);
+					ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(plugin.interface);
 					
 					//see if this plugin provides an additional factory for objects
 					ccExternalFactory* factory = stdPlugin->getCustomObjectsFactory();
@@ -113,7 +112,7 @@ public:
 					
 				case CC_IO_FILTER_PLUGIN: //I/O filter
 				{
-					ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(plugin.object);
+					ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(plugin.interface);
 					FileIOFilter::Shared filter = ioPlugin->getFilter();
 					if (filter)
 					{
@@ -194,7 +193,7 @@ public:
 	{
 		const QStringList pluginPaths = GetPluginPaths();
 		
-		ccLog::Print( QStringLiteral( "[Plugins] Plugin lookup dirs: %1" ).arg( pluginPaths.join( ", " ) ) );
+		ccLog::Print( QStringLiteral( "[Plugin] Lookup paths: %1" ).arg( pluginPaths.join( ", " ) ) );
 		
 		const QStringList nameFilters{
 #if defined(Q_OS_MAC)
@@ -233,24 +232,35 @@ public:
 				QPluginLoader loader(pluginPath);
 				QObject* plugin = loader.instance();
 				
-				if (plugin == nullptr)
+				if ( plugin == nullptr )
 				{
-					ccLog::Warning(QString("[Plugin] File '%1' doesn't seem to be a valid plugin\t(%2)").arg(filename, loader.errorString()));
+					ccLog::Warning( QStringLiteral( "[Plugin] File '%1' doesn't seem to be a valid plugin\t(%2)" ).arg( filename, loader.errorString() ) );
 					continue;
 				}
 				
 				ccPluginInterface* ccPlugin = dynamic_cast<ccPluginInterface*>(plugin);
 				
-				if (ccPlugin == nullptr)
+				if ( ccPlugin == nullptr )
 				{
 					delete plugin;
-					ccLog::Warning(QString("[Plugin] File '%1' doesn't seem to be a valid plugin or it is not supported by this version").arg(filename));
+					ccLog::Warning( QStringLiteral( "[Plugin] File '%1' doesn't seem to be a valid plugin or it is not supported by this version" ).arg( filename ) );
 					continue;
 				}
 				
-				ccLog::Print( QStringLiteral( "Found plugin: %1 (%2)" ).arg( ccPlugin->getName(), filename ) );
+				if ( ccPlugin->getName().isEmpty() )
+				{
+					ccLog::Error( QStringLiteral( "[Plugin] Plugin '%1' has a blank name" ).arg( filename ) );
+
+					loader.unload();
+					
+					continue;
+				}
+				else
+				{
+					ccLog::Print( QStringLiteral( "[Plugin] Found: %1 (%2)" ).arg( ccPlugin->getName(), filename ) );
+				}
 				
-				plugins.push_back( tPluginInfo(pluginPath, ccPlugin, plugin) );
+				plugins.push_back( tPluginInfo(ccPlugin, plugin) );
 			}
 		}
 	}

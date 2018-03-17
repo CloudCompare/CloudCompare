@@ -275,13 +275,13 @@ int main(int argc, char **argv)
 					bool found = false;
 					for (const tPluginInfo &plugin : plugins)
 					{
-						if (plugin.object->getName().replace(' ', '_').toUpper() == pluginNameUpper)
+						if (plugin.interface->getName().replace(' ', '_').toUpper() == pluginNameUpper)
 						{
 							found = true;
-							bool success = plugin.object->start();
+							bool success = plugin.interface->start();
 							if (!success)
 							{
-								ccLog::Error(QString("Failed to start the plugin '%1'").arg(plugin.object->getName()));
+								ccLog::Error(QString("Failed to start the plugin '%1'").arg(plugin.interface->getName()));
 							}
 							break;
 						}
@@ -324,12 +324,12 @@ int main(int argc, char **argv)
 		//release the plugins
 		for (tPluginInfo &plugin : plugins)
 		{
-			plugin.object->stop(); //just in case
+			plugin.interface->stop(); //just in case
 			if (!plugin.qObject->parent())
 			{
-				delete plugin.object;
-				plugin.object = 0;
-				plugin.qObject = 0;
+				delete plugin.interface;
+				plugin.interface = nullptr;
+				plugin.qObject = nullptr;
 			}
 		}
 	}

@@ -60,21 +60,23 @@ void ccPluginManager::init( const tPluginInfoList &plugins )
 	
 	for ( const tPluginInfo &plugin : plugins )
 	{
-		if ( plugin.object == nullptr )
+		if ( plugin.interface == nullptr )
 		{
 			Q_ASSERT( false );
 			continue;
 		}
 		
-		QString pluginName = plugin.object->getName();
+		QString pluginName = plugin.interface->getName();
+		
+		Q_ASSERT( !pluginName.isEmpty() );
 		
 		if ( pluginName.isEmpty() )
 		{
-			ccLog::Warning( QStringLiteral( "[Plugin] Plugin '%1' has an invalid (empty) name!" ).arg( plugin.filename ) );
+			// should be unreachable - we have already checked for this in ccPlugins::Find()
 			continue;
 		}
 		
-		switch ( plugin.object->getType() )
+		switch ( plugin.interface->getType() )
 		{
 			case CC_STD_PLUGIN: //standard plugin
 			{
@@ -82,7 +84,7 @@ void ccPluginManager::init( const tPluginInfoList &plugins )
 				
 				plugin.qObject->setParent( this );
 				
-				ccStdPluginInterface *stdPlugin = static_cast<ccStdPluginInterface*>( plugin.object );
+				ccStdPluginInterface *stdPlugin = static_cast<ccStdPluginInterface*>( plugin.interface );
 				
 				stdPlugin->setMainAppInterface( m_appInterface );
 				
@@ -134,7 +136,7 @@ void ccPluginManager::init( const tPluginInfoList &plugins )
 				
 			case CC_GL_FILTER_PLUGIN: //GL filter
 			{
-				ccGLFilterPluginInterface *glPlugin = static_cast<ccGLFilterPluginInterface*>( plugin.object );
+				ccGLFilterPluginInterface *glPlugin = static_cast<ccGLFilterPluginInterface*>( plugin.interface );
 				
 				plugin.qObject->setParent( this );
 				
@@ -167,7 +169,7 @@ void ccPluginManager::init( const tPluginInfoList &plugins )
 				
 			case CC_IO_FILTER_PLUGIN:
 			{
-				ccIOFilterPluginInterface *ioPlugin = static_cast<ccIOFilterPluginInterface*>( plugin.object );
+				ccIOFilterPluginInterface *ioPlugin = static_cast<ccIOFilterPluginInterface*>( plugin.interface );
 
 				// there are no menus or toolbars for I/O plugins
 				

@@ -201,7 +201,7 @@ void ccViewer::loadPlugins()
 
 	for ( const tPluginInfo &plugin : plugins )
 	{
-		if (!plugin.object)
+		if (!plugin.interface)
 		{
 			assert(false);
 			continue;
@@ -211,9 +211,9 @@ void ccViewer::loadPlugins()
 		plugin.qObject->setParent(this);
 
 		//is this a GL plugin?
-		if (plugin.object->getType() == CC_GL_FILTER_PLUGIN)
+		if (plugin.interface->getType() == CC_GL_FILTER_PLUGIN)
 		{
-			QString pluginName = plugin.object->getName();
+			QString pluginName = plugin.interface->getName();
 			if (pluginName.isEmpty())
 			{
 				ccLog::Warning("Plugin has an invalid (empty) name!");
@@ -223,8 +223,8 @@ void ccViewer::loadPlugins()
 
 			//(auto)create action
 			QAction* action = new QAction(pluginName, plugin.qObject);
-			action->setToolTip(plugin.object->getDescription());
-			action->setIcon(plugin.object->getIcon());
+			action->setToolTip(plugin.interface->getDescription());
+			action->setIcon(plugin.interface->getIcon());
 			//connect default signal
 			connect(action, &QAction::triggered, this, &ccViewer::doEnableGLFilter);
 

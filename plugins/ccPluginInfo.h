@@ -31,11 +31,8 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QPluginLoader>
-#include <QString>
-
-#ifdef Q_OS_MAC
 #include <QStandardPaths>
-#endif
+#include <QString>
 
 //system
 #include <vector>

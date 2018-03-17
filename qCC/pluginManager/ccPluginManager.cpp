@@ -49,10 +49,8 @@ ccPluginManager::~ccPluginManager()
 {
 }
 
-void ccPluginManager::init( const tPluginInfoList &plugins, const QStringList &pluginPaths )
-{
-	m_pluginPaths = pluginPaths;	
-	
+void ccPluginManager::init( const tPluginInfoList &plugins )
+{	
 	m_pluginMenu->setEnabled( false );
 	m_glFilterMenu->setEnabled( false );
 	
@@ -263,7 +261,7 @@ void ccPluginManager::showAboutDialog() const
 {
 	ccPluginInfoDlg	about;
 	
-	about.setPluginPaths( m_pluginPaths );
+	about.setPluginPaths( ccPlugins::GetPluginPaths() );
 	about.setPluginList( m_plugins );
 	
 	about.exec();

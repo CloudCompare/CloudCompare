@@ -324,9 +324,9 @@ MainWindow::~MainWindow()
 	ccConsole::ReleaseInstance();
 }
 
-void MainWindow::initPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths)
+void MainWindow::initPlugins( const tPluginInfoList& plugins )
 {
-	m_pluginManager->init( plugins, pluginPaths );
+	m_pluginManager->init( plugins );
 	
 	// Set up dynamic tool bars
 	addToolBar( Qt::RightToolBarArea, m_pluginManager->glFiltersToolbar() );

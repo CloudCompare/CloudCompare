@@ -224,56 +224,7 @@ int main(int argc, char **argv)
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
 	//load the plugins
-	tPluginInfoList plugins;
-	QStringList pluginPaths;
-	{
-		QString appPath = QCoreApplication::applicationDirPath();
-
-#if defined(Q_OS_MAC)
-		// plugins are in the bundle
-		appPath = appPath.left( appPath.lastIndexOf( "MacOS" ) );
-
-		pluginPaths += (appPath + "PlugIns/ccPlugins");
-#if defined(CC_MAC_DEV_PATHS)
-		// used for development only - this is the path where the plugins are built
-		// this avoids having to install into the application bundle when developing
-		pluginPaths += (appPath + "../../../ccPlugins");
-#endif
-#elif defined(Q_OS_WIN)
-		//plugins are in bin/plugins
-		pluginPaths << (appPath + "/plugins");
-#elif defined(Q_OS_LINUX)
-		// Plugins are relative to the bin directory where the executable is found
-		QDir  binDir(appPath);
-
-		if (binDir.dirName() == "bin")
-		{
-			binDir.cdUp();
-
-			pluginPaths << (binDir.absolutePath() + "/lib/cloudcompare/plugins");
-		}
-		else
-		{
-			// Choose a reasonable default to look in
-			pluginPaths << "/usr/lib/cloudcompare/plugins";
-		}
-#else
-#error Need to specify the plugin path for this OS.
-#endif
-
-#ifdef Q_OS_MAC
-		// Add any app data paths
-		// Plugins in these directories take precendence over the included ones
-		QStringList appDataPaths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
-
-		for (const QString &appDataPath : appDataPaths)
-		{
-			pluginPaths << (appDataPath + "/plugins");
-		}
-#endif
-	}
-
-	ccPlugins::LoadPlugins(plugins, pluginPaths);
+	tPluginInfoList	plugins = ccPlugins::LoadPlugins();
 	
 	int result = 0;
 
@@ -292,7 +243,7 @@ int main(int argc, char **argv)
 			QMessageBox::critical(0, "Error", "Failed to initialize the main application window?!");
 			return EXIT_FAILURE;
 		}
-		mainWindow->initPlugins(plugins, pluginPaths);
+		mainWindow->initPlugins(plugins);
 		mainWindow->show();
 		QApplication::processEvents();
 

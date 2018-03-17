@@ -197,39 +197,7 @@ void ccViewer::loadPlugins()
 {
 	ui.menuPlugins->setEnabled(false);
 
-	QString	appPath = QCoreApplication::applicationDirPath();
-	
-#if defined(Q_OS_MAC)
-	// plugins are in the bundle
-	appPath = appPath.left( appPath.lastIndexOf( "MacOS" ) );
-	
-	appPath += "Plugins/ccPlugins";
-#elif defined(Q_OS_WIN)
-	//plugins are in bin/plugins
-	appPath += "/plugins";
-
-#elif defined(Q_OS_LINUX)	
-	// Plugins are relative to the bin directory where the executable is found
-	QDir  binDir( appPath );
-	
-	if ( binDir.dirName() == "bin" )
-	{
-		binDir.cdUp();
-		
-		appPath = (binDir.absolutePath() + "/lib/cloudcompare/plugins");
-	}
-	else
-	{
-		// Choose a reasonable default to look in
-		appPath = "/usr/lib/cloudcompare/plugins";
-	}
-	
-#else
-#error Need to specify the plugin path for this OS.
-#endif
-
-	tPluginInfoList	plugins;
-	ccPlugins::LoadPlugins(plugins, QStringList(appPath));
+	tPluginInfoList	plugins = ccPlugins::LoadPlugins();
 
 	for ( const tPluginInfo &plugin : plugins )
 	{
@@ -258,7 +226,7 @@ void ccViewer::loadPlugins()
 			action->setToolTip(plugin.object->getDescription());
 			action->setIcon(plugin.object->getIcon());
 			//connect default signal
-			connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
+			connect(action, &QAction::triggered, this, &ccViewer::doEnableGLFilter);
 
 			ui.menuPlugins->addAction(action);
 			ui.menuPlugins->setEnabled(true);

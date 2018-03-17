@@ -42,7 +42,7 @@ public:
 	ccPluginManager( ccMainAppInterface *appInterface, QWidget *parent );
 	~ccPluginManager();
 	
-	void	init( const tPluginInfoList &plugins, const QStringList &pluginPaths );
+	void	init( const tPluginInfoList &plugins );
 	
 	QMenu	*pluginMenu() const;
 	QMenu	*shaderAndFilterMenu() const;
@@ -70,9 +70,6 @@ private:
 	QWidget	*m_parentWidget;	// unfortunately we need this when creating new menus & toolbars
 	
 	ccMainAppInterface *m_appInterface;
-
-	// these are used to create our toolbars and menus as well as provide info for the about dialog
-	QStringList m_pluginPaths;
 	
 	QMenu	*m_pluginMenu;
 	QMenu	*m_glFilterMenu;

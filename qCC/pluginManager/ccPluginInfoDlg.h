@@ -1,3 +1,5 @@
+#ifndef CCPLUGININFODLG_H
+#define CCPLUGININFODLG_H
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -11,46 +13,42 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_PLUGIN_DIALOG_HEADER
-#define CC_PLUGIN_DIALOG_HEADER
-
 #include <QDialog>
-#include <QIcon>
+#include <QList>
 
-#include <ccPluginInfo.h>
+class QStandardItemModel;
 
-class QLabel;
-class QPushButton;
-class QStringList;
-class QTreeWidget;
-class QTreeWidgetItem;
+class ccPluginInterface;
 
-//! Dialog to display the loaded plugin list
-class ccPluginDlg : public QDialog
+namespace Ui {
+	class ccPluginInfoDlg;
+}
+
+class ccPluginInfoDlg : public QDialog
 {
 	Q_OBJECT
-
+	
 public:
-	ccPluginDlg(const QStringList &paths,
-				const tPluginInfoList &pluginInfoList,
-				QWidget *parent = 0);
-
-protected:
-	void addPluginInfo(const QStringList &paths, const tPluginInfoList &pluginInfoList);
-	void populateTreeWidget(QObject *plugin, const QString &name, const QString &path = QString());
-	void addItems(	QTreeWidgetItem *pluginItem,
-					const char *interfaceName,
-					const QStringList &features);
-
-	QLabel *label;
-	QTreeWidget *treeWidget;
-	QPushButton *okButton;
-	QIcon interfaceIcon;
-	QIcon featureIcon;
+	explicit ccPluginInfoDlg( QWidget *parent = nullptr );
+	~ccPluginInfoDlg();
+	
+	void	setPluginPaths( const QStringList &pluginPaths );
+	void	setPluginList( const QList<ccPluginInterface *> &pluginList );
+	
+private:
+	enum {
+		PLUGIN_PTR = Qt::UserRole + 1
+	};
+		
+	void	updatePluginInfo( const ccPluginInterface *plugin );
+	
+	Ui::ccPluginInfoDlg *m_UI;
+	
+	QStandardItemModel	*m_ItemModel;
 };
 
 #endif

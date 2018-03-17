@@ -22,9 +22,9 @@
 
 #include "ccConsole.h"
 #include "ccGLWindow.h"
-#include "ccPluginManager.h"
 #include "ccMainAppInterface.h"
-#include "ccPluginDlg.h"
+#include "ccPluginInfoDlg.h"
+#include "ccPluginManager.h"
 
 
 ccPluginManager::ccPluginManager( ccMainAppInterface *appInterface, QWidget *parent )
@@ -52,12 +52,13 @@ ccPluginManager::~ccPluginManager()
 void ccPluginManager::init( const tPluginInfoList &plugins, const QStringList &pluginPaths )
 {
 	m_pluginPaths = pluginPaths;	
-	m_pluginInfoList = plugins;
 	
 	m_pluginMenu->setEnabled( false );
 	m_glFilterMenu->setEnabled( false );
 	
 	m_mainPluginToolbar->setVisible( false );
+	
+	bool haveStdPlugin = false;
 	
 	for ( const tPluginInfo &plugin : plugins )
 	{
@@ -79,6 +80,8 @@ void ccPluginManager::init( const tPluginInfoList &plugins, const QStringList &p
 		{
 			case CC_STD_PLUGIN: //standard plugin
 			{
+				haveStdPlugin = true;
+				
 				plugin.qObject->setParent( this );
 				
 				ccStdPluginInterface *stdPlugin = static_cast<ccStdPluginInterface*>( plugin.object );
@@ -133,12 +136,13 @@ void ccPluginManager::init( const tPluginInfoList &plugins, const QStringList &p
 				
 			case CC_GL_FILTER_PLUGIN: //GL filter
 			{
-				//(auto)create action
+				ccGLFilterPluginInterface *glPlugin = static_cast<ccGLFilterPluginInterface*>( plugin.object );
+				
 				plugin.qObject->setParent( this );
 				
 				QAction* action = new QAction( pluginName, plugin.qObject );
-				action->setToolTip( plugin.object->getDescription() );
-				action->setIcon( plugin.object->getIcon() );
+				action->setToolTip( glPlugin->getDescription() );
+				action->setIcon( glPlugin->getIcon() );
 				action->setCheckable( true );
 				
 				connect( action, &QAction::triggered, this, &ccPluginManager::enableGLFilter );
@@ -150,19 +154,24 @@ void ccPluginManager::init( const tPluginInfoList &plugins, const QStringList &p
 				
 				m_glFiltersToolbar->addAction( action );				
 				m_glFiltersToolbar->setEnabled( true );				
+
+				m_plugins.push_back( glPlugin );
 				break;
 			}
 				
 			case CC_IO_FILTER_PLUGIN:
 			{
+				ccIOFilterPluginInterface *ioPlugin = static_cast<ccIOFilterPluginInterface*>( plugin.object );
+
 				// there are no menus or toolbars for I/O plugins
-				break;
-			}
 				
+				m_plugins.push_back( ioPlugin );
+				break;
+			}	
 		}
 	}
 	
-	m_pluginMenu->setEnabled( !m_plugins.empty() );
+	m_pluginMenu->setEnabled( haveStdPlugin );
 	
 	if ( m_mainPluginToolbar->isEnabled() )
 	{
@@ -231,17 +240,25 @@ void ccPluginManager::handleSelectionChanged()
 {
 	const ccHObject::Container &selectedEntities = m_appInterface->getSelectedEntities();
 	
-	for ( ccStdPluginInterface* plugin : m_plugins )
+	for ( ccPluginInterface *plugin : m_plugins )
 	{
-		plugin->onNewSelection( selectedEntities );
+		if ( plugin->getType() == CC_STD_PLUGIN )
+		{
+			ccStdPluginInterface	*stdPlugin = static_cast<ccStdPluginInterface *>(plugin);
+			
+			stdPlugin->onNewSelection( selectedEntities );
+		}
 	}
 }
 
 void ccPluginManager::showAboutDialog() const
 {
-	ccPluginDlg ccpDlg( m_pluginPaths, m_pluginInfoList );
+	ccPluginInfoDlg	about;
 	
-	ccpDlg.exec();
+	about.setPluginPaths( m_pluginPaths );
+	about.setPluginList( m_plugins );
+	
+	about.exec();
 }
 
 void ccPluginManager::setupActions()

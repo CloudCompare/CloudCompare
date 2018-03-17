@@ -198,28 +198,17 @@ void ccViewer::loadPlugins()
 	ui.menuPlugins->setEnabled(false);
 
 	QString	appPath = QCoreApplication::applicationDirPath();
-	QStringList	filters;
 	
 #if defined(Q_OS_MAC)
-
-	filters << "*.dylib";
-
 	// plugins are in the bundle
-	appPath.remove( "MacOS" );
+	appPath = appPath.left( appPath.lastIndexOf( "MacOS" ) );
 	
 	appPath += "Plugins/ccViewerPlugins";
-
 #elif defined(Q_OS_WIN)
-
-	filters << "*.dll";
-
 	//plugins are in bin/plugins
 	appPath += "/plugins";
 
 #elif defined(Q_OS_LINUX)	
-
-	filters << "*.so";
-
 	// Plugins are relative to the bin directory where the executable is found
 	QDir  binDir( appPath );
 	
@@ -236,11 +225,11 @@ void ccViewer::loadPlugins()
 	}
 	
 #else
-#warning Need to specify the plugin path for this OS.
+#error Need to specify the plugin path for this OS.
 #endif
 
 	tPluginInfoList	plugins;
-	ccPlugins::LoadPlugins(plugins, QStringList(appPath), filters);
+	ccPlugins::LoadPlugins(plugins, QStringList(appPath));
 
 	for ( const tPluginInfo &plugin : plugins )
 	{

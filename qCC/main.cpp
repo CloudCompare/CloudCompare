@@ -225,14 +225,11 @@ int main(int argc, char **argv)
 
 	//load the plugins
 	tPluginInfoList plugins;
-	QStringList dirFilters;
 	QStringList pluginPaths;
 	{
 		QString appPath = QCoreApplication::applicationDirPath();
 
 #if defined(Q_OS_MAC)
-		dirFilters << "*.dylib";
-
 		// plugins are in the bundle
 		appPath = appPath.left( appPath.lastIndexOf( "MacOS" ) );
 
@@ -243,13 +240,9 @@ int main(int argc, char **argv)
 		pluginPaths += (appPath + "../../../ccPlugins");
 #endif
 #elif defined(Q_OS_WIN)
-		dirFilters << "*.dll";
-
 		//plugins are in bin/plugins
 		pluginPaths << (appPath + "/plugins");
 #elif defined(Q_OS_LINUX)
-		dirFilters << "*.so";
-
 		// Plugins are relative to the bin directory where the executable is found
 		QDir  binDir(appPath);
 
@@ -265,7 +258,7 @@ int main(int argc, char **argv)
 			pluginPaths << "/usr/lib/cloudcompare/plugins";
 		}
 #else
-		#warning Need to specify the plugin path for this OS.
+#error Need to specify the plugin path for this OS.
 #endif
 
 #ifdef Q_OS_MAC
@@ -280,7 +273,7 @@ int main(int argc, char **argv)
 #endif
 	}
 
-	ccPlugins::LoadPlugins(plugins, pluginPaths, dirFilters);
+	ccPlugins::LoadPlugins(plugins, pluginPaths);
 	
 	int result = 0;
 

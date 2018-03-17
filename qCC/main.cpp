@@ -234,7 +234,7 @@ int main(int argc, char **argv)
 		dirFilters << "*.dylib";
 
 		// plugins are in the bundle
-		appPath.remove("MacOS");
+		appPath = appPath.left( appPath.lastIndexOf( "MacOS" ) );
 
 		pluginPaths += (appPath + "PlugIns/ccPlugins");
 #if defined(CC_MAC_DEV_PATHS)

@@ -31,7 +31,7 @@ class QToolBar;
 class QWidget;
 
 class ccMainAppInterface;
-class ccStdPluginInterface;
+class ccPluginInterface;
 
 //! Plugin manager
 class ccPluginManager : public QObject
@@ -73,7 +73,6 @@ private:
 
 	// these are used to create our toolbars and menus as well as provide info for the about dialog
 	QStringList m_pluginPaths;
-	tPluginInfoList m_pluginInfoList;
 	
 	QMenu	*m_pluginMenu;
 	QMenu	*m_glFilterMenu;
@@ -81,7 +80,7 @@ private:
 	QAction *m_actionRemoveFilter;	
 	QActionGroup m_glFilterActions;
 	
-	QList<ccStdPluginInterface *> m_plugins;	
+	QList<ccPluginInterface *> m_plugins;	
 	
 	QToolBar *m_mainPluginToolbar;	// if a plugin only has one action it goes here
 	QList<QToolBar *> m_additionalPluginToolbars;	// if a plugin has multiple actions it gets its own toolbar

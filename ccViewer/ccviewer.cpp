@@ -203,7 +203,7 @@ void ccViewer::loadPlugins()
 	// plugins are in the bundle
 	appPath = appPath.left( appPath.lastIndexOf( "MacOS" ) );
 	
-	appPath += "Plugins/ccViewerPlugins";
+	appPath += "Plugins/ccPlugins";
 #elif defined(Q_OS_WIN)
 	//plugins are in bin/plugins
 	appPath += "/plugins";

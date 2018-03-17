@@ -141,9 +141,17 @@ void ccPluginManager::init( const tPluginInfoList &plugins, const QStringList &p
 				plugin.qObject->setParent( this );
 				
 				QAction* action = new QAction( pluginName, plugin.qObject );
+				
 				action->setToolTip( glPlugin->getDescription() );
 				action->setIcon( glPlugin->getIcon() );
 				action->setCheckable( true );
+				
+				// store the plugin's pointer in the QAction data so we can access it in enableGLFilter()
+				QVariant v;
+		  
+				v.setValue( glPlugin );
+		  
+				action->setData( v );
 				
 				connect( action, &QAction::triggered, this, &ccPluginManager::enableGLFilter );
 
@@ -316,20 +324,22 @@ void ccPluginManager::enableGLFilter()
 	
 	QAction *action = qobject_cast<QAction*>(sender());
 	
-	ccPluginInterface *ccPlugin = ccPlugins::ToValidPlugin( action ? action->parent() : nullptr );
+	Q_ASSERT( action != nullptr );
 	
-	if ( (ccPlugin == nullptr) || (ccPlugin->getType() != CC_GL_FILTER_PLUGIN) )
+	ccGLFilterPluginInterface	*plugin = action->data().value<ccGLFilterPluginInterface *>();
+	
+	if ( plugin == nullptr )
 	{
 		return;
 	}
 	
 	if ( win->areGLFiltersEnabled() )
 	{
-		ccGlFilter *filter = static_cast<ccGLFilterPluginInterface*>(ccPlugin)->getFilter();
+		ccGlFilter *filter = plugin->getFilter();
 		
 		if ( filter != nullptr )
 		{
-			win->setGlFilter(filter);
+			win->setGlFilter( filter );
 			
 			m_actionRemoveFilter->setEnabled( true );
 			

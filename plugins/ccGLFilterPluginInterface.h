@@ -36,6 +36,8 @@ public:
 	virtual ccGlFilter* getFilter() = 0;
 };
 
+Q_DECLARE_METATYPE(ccGLFilterPluginInterface *);
+
 Q_DECLARE_INTERFACE(ccGLFilterPluginInterface,
                     "edf.rd.CloudCompare.ccGLFilterPluginInterface/1.1")
 

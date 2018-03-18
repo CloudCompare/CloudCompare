@@ -4,6 +4,7 @@
 #include "ccCommandLineCommands.h"
 #include "ccCommandCrossSection.h"
 #include "ccCommandRaster.h"
+#include "ccPluginInterface.h"
 
 //qCC_db
 #include <ccProgressDialog.h>

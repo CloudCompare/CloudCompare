@@ -111,6 +111,7 @@
 
 //other
 #include "ccCropTool.h"
+#include "ccGLFilterPluginInterface.h"
 #include "ccPersistentSettings.h"
 #include "ccRecentFiles.h"
 #include "ccRegistrationTools.h"
@@ -324,9 +325,9 @@ MainWindow::~MainWindow()
 	ccConsole::ReleaseInstance();
 }
 
-void MainWindow::initPlugins( const ccPluginInterfaceList& plugins )
+void MainWindow::initPlugins( )
 {
-	m_pluginUIManager->init( plugins );
+	m_pluginUIManager->init( ccPluginManager::pluginList() );
 	
 	// Set up dynamic tool bars
 	addToolBar( Qt::RightToolBarArea, m_pluginUIManager->glFiltersToolbar() );

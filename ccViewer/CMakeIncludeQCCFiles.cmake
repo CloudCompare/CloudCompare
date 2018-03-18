@@ -8,6 +8,7 @@ list( APPEND header_list
 	../qCC/ccPickingHub.h
 	../qCC/ccPickOneElementDlg.h
 	../qCC/ccStereoModeDlg.h
+	../qCC/pluginManager/ccPluginManager.h
 )
 
 list( APPEND source_list
@@ -18,6 +19,7 @@ list( APPEND source_list
 	../qCC/ccPickingHub.cpp
 	../qCC/ccPickOneElementDlg.cpp
 	../qCC/ccStereoModeDlg.cpp
+	../qCC/pluginManager/ccPluginManager.cpp
 )
 
 list( APPEND ui_list

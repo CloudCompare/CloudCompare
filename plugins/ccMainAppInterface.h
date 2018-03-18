@@ -23,6 +23,7 @@
 
 //qCC_db
 #include <ccHObject.h>
+#include <ccHObjectCaster.h>
 //qCC_gl
 #include <ccGLUtils.h>
 

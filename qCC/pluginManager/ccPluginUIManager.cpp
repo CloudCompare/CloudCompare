@@ -22,9 +22,12 @@
 
 #include "ccConsole.h"
 #include "ccGLWindow.h"
+#include "ccGLFilterPluginInterface.h"
+#include "ccIOFilterPluginInterface.h"
 #include "ccMainAppInterface.h"
 #include "ccPluginInfoDlg.h"
 #include "ccPluginUIManager.h"
+#include "ccStdPluginInterface.h"
 
 
 ccPluginUIManager::ccPluginUIManager( ccMainAppInterface *appInterface, QWidget *parent )
@@ -259,7 +262,7 @@ void ccPluginUIManager::showAboutDialog() const
 {
 	ccPluginInfoDlg	about;
 	
-	about.setPluginPaths( ccPlugins::GetPluginPaths() );
+	about.setPluginPaths( ccPluginManager::pluginPaths() );
 	about.setPluginList( m_plugins );
 	
 	about.exec();

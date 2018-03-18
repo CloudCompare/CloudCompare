@@ -51,7 +51,8 @@
 #include "ccPersistentSettings.h"
 
 //plugins
-#include <ccPluginInfo.h>
+#include "ccPluginInterface.h"
+#include "pluginManager/ccPluginManager.h"
 
 #ifdef USE_VLD
 //VLD
@@ -224,7 +225,7 @@ int main(int argc, char **argv)
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
 	//load the plugins
-	ccPluginInterfaceList	plugins = ccPlugins::LoadPlugins();
+	ccPluginManager::loadPlugins();
 	
 	int result = 0;
 
@@ -232,7 +233,7 @@ int main(int argc, char **argv)
 	if (commandLine)
 	{
 		//command line processing (no GUI)
-		result = ccCommandLineParser::Parse(argc, argv, plugins);
+		result = ccCommandLineParser::Parse(argc, argv, ccPluginManager::pluginList());
 	}
 	else
 	{
@@ -243,7 +244,7 @@ int main(int argc, char **argv)
 			QMessageBox::critical(0, "Error", "Failed to initialize the main application window?!");
 			return EXIT_FAILURE;
 		}
-		mainWindow->initPlugins(plugins);
+		mainWindow->initPlugins();
 		mainWindow->show();
 		QApplication::processEvents();
 
@@ -273,7 +274,7 @@ int main(int argc, char **argv)
 					QString pluginNameUpper = pluginName.toUpper();
 					//look for this plugin
 					bool found = false;
-					for ( ccPluginInterface *plugin : plugins )
+					for ( ccPluginInterface *plugin : ccPluginManager::pluginList() )
 					{
 						if (plugin->getName().replace(' ', '_').toUpper() == pluginNameUpper)
 						{
@@ -322,7 +323,7 @@ int main(int argc, char **argv)
 		}
 
 		//release the plugins
-		for ( ccPluginInterface *plugin : plugins )
+		for ( ccPluginInterface *plugin : ccPluginManager::pluginList() )
 		{
 			plugin->stop(); //just in case
 		}

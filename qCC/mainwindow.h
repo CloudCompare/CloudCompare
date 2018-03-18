@@ -23,10 +23,8 @@
 
 //Local
 #include "ccEntityAction.h"
+#include "ccMainAppInterface.h"
 #include "ccPickingListener.h"
-
-//qCC_plugins
-#include <ccPluginInfo.h>
 
 //CCLib
 #include <AutoSegmentationTools.h>
@@ -167,7 +165,7 @@ public:
 	void  addEditPlaneAction( QMenu &menu ) const;
 	
 	//! Sets up the UI (menus and toolbars) based on loaded plugins
-	void initPlugins(const ccPluginInterfaceList& plugins);
+	void initPlugins();
 
 	//! Updates the 'Properties' view
 	void updatePropertiesView();

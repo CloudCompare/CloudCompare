@@ -35,7 +35,9 @@
 #include <ccPointCloud.h>
 
 //plugins
-#include <ccPluginInfo.h>
+#include "ccGLFilterPluginInterface.h"
+#include "ccIOFilterPluginInterface.h"
+#include "pluginManager/ccPluginManager.h"
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
@@ -197,9 +199,9 @@ void ccViewer::loadPlugins()
 {
 	ui.menuPlugins->setEnabled(false);
 
-	ccPluginInterfaceList	plugins = ccPlugins::LoadPlugins();
+	ccPluginManager::loadPlugins();
 
-	for ( ccPluginInterface *plugin : plugins )
+	for ( ccPluginInterface *plugin : ccPluginManager::pluginList() )
 	{
 		if ( plugin == nullptr )
 		{

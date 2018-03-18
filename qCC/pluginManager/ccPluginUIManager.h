@@ -18,13 +18,13 @@
 //#                                                                        #
 //##########################################################################
 
+#include <QActionGroup>
 #include <QList>
 #include <QObject>
 
-#include "ccPluginInfo.h"
+#include "ccPluginManager.h"
 
 class QAction;
-class QActionGroup;
 class QMenu;
 class QString;
 class QToolBar;

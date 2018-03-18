@@ -5,7 +5,7 @@
 #include "../plugins/ccCommandLineInterface.h"
 
 //Local
-#include "ccPluginInfo.h"
+#include "pluginManager/ccPluginManager.h"
 
 class ccProgressDialog;
 class QDialog;

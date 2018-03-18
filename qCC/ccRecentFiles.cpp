@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include <QAction>
+#include <QDir>
 #include <QFile>
 #include <QMenu>
 #include <QSettings>

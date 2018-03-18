@@ -1,5 +1,5 @@
-#ifndef CCPLUGINMANAGER_H
-#define CCPLUGINMANAGER_H
+#ifndef CCPLUGINUIMANAGER_H
+#define CCPLUGINUIMANAGER_H
 
 //##########################################################################
 //#                                                                        #
@@ -33,14 +33,14 @@ class QWidget;
 class ccMainAppInterface;
 class ccPluginInterface;
 
-//! Plugin manager
-class ccPluginManager : public QObject
+//! Plugin UI manager
+class ccPluginUIManager : public QObject
 {
 	Q_OBJECT
 	
 public:
-	ccPluginManager( ccMainAppInterface *appInterface, QWidget *parent );
-	~ccPluginManager();
+	ccPluginUIManager( ccMainAppInterface *appInterface, QWidget *parent );
+	~ccPluginUIManager();
 	
 	void	init( const ccPluginInterfaceList &plugins );
 	

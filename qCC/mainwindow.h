@@ -51,7 +51,7 @@ class ccGraphicalSegmentationTool;
 class ccGraphicalTransformationTool;
 class ccHObject;
 class ccOverlayDialog;
-class ccPluginManager;
+class ccPluginUIManager;
 class ccPointListPickingDlg;
 class ccPointPairRegistrationDlg;
 class ccPointPropertiesDlg;
@@ -600,7 +600,7 @@ private:
 
 	/*** plugins ***/
 	//! Manages plugins - menus, toolbars, and the about dialog
-	ccPluginManager	*m_pluginManager;
+	ccPluginUIManager	*m_pluginUIManager;
 };
 
 #endif

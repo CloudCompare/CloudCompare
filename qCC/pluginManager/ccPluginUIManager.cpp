@@ -24,10 +24,10 @@
 #include "ccGLWindow.h"
 #include "ccMainAppInterface.h"
 #include "ccPluginInfoDlg.h"
-#include "ccPluginManager.h"
+#include "ccPluginUIManager.h"
 
 
-ccPluginManager::ccPluginManager( ccMainAppInterface *appInterface, QWidget *parent )
+ccPluginUIManager::ccPluginUIManager( ccMainAppInterface *appInterface, QWidget *parent )
 	: QObject( parent )
 	, m_parentWidget( parent )
 	, m_appInterface( appInterface )
@@ -45,11 +45,11 @@ ccPluginManager::ccPluginManager( ccMainAppInterface *appInterface, QWidget *par
 	setupToolbars();
 }
 
-ccPluginManager::~ccPluginManager()
+ccPluginUIManager::~ccPluginUIManager()
 {
 }
 
-void ccPluginManager::init( const ccPluginInterfaceList &plugins )
+void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 {	
 	m_pluginMenu->setEnabled( false );
 	m_glFilterMenu->setEnabled( false );
@@ -149,7 +149,7 @@ void ccPluginManager::init( const ccPluginInterfaceList &plugins )
 		  
 				action->setData( v );
 				
-				connect( action, &QAction::triggered, this, &ccPluginManager::enableGLFilter );
+				connect( action, &QAction::triggered, this, &ccPluginUIManager::enableGLFilter );
 
 				m_glFilterActions.addAction( action );
 				
@@ -192,42 +192,42 @@ void ccPluginManager::init( const ccPluginInterfaceList &plugins )
 	m_showGLFilterToolbar->setChecked( m_glFiltersToolbar->isEnabled() );
 }
 
-QMenu *ccPluginManager::pluginMenu() const
+QMenu *ccPluginUIManager::pluginMenu() const
 {
 	return m_pluginMenu;
 }
 
-QMenu *ccPluginManager::shaderAndFilterMenu() const
+QMenu *ccPluginUIManager::shaderAndFilterMenu() const
 {
 	return m_glFilterMenu;
 }
 
-QToolBar *ccPluginManager::mainPluginToolbar()
+QToolBar *ccPluginUIManager::mainPluginToolbar()
 {
 	return m_mainPluginToolbar;
 }
 
-QList<QToolBar *> &ccPluginManager::additionalPluginToolbars()
+QList<QToolBar *> &ccPluginUIManager::additionalPluginToolbars()
 {
 	return m_additionalPluginToolbars;
 }
 
-QAction *ccPluginManager::actionShowMainPluginToolbar()
+QAction *ccPluginUIManager::actionShowMainPluginToolbar()
 {
 	return m_showPluginToolbar;
 }
 
-QToolBar *ccPluginManager::glFiltersToolbar()
+QToolBar *ccPluginUIManager::glFiltersToolbar()
 {
 	return m_glFiltersToolbar;
 }
 
-QAction *ccPluginManager::actionShowGLFilterToolbar()
+QAction *ccPluginUIManager::actionShowGLFilterToolbar()
 {
 	return m_showGLFilterToolbar;
 }
 
-void ccPluginManager::updateMenus()
+void ccPluginUIManager::updateMenus()
 {
 	ccGLWindow *active3DView = m_appInterface->getActiveGLWindow();
 	const bool hasActiveView = (active3DView != nullptr);
@@ -240,7 +240,7 @@ void ccPluginManager::updateMenus()
 	}
 }
 
-void ccPluginManager::handleSelectionChanged()
+void ccPluginUIManager::handleSelectionChanged()
 {
 	const ccHObject::Container &selectedEntities = m_appInterface->getSelectedEntities();
 	
@@ -255,7 +255,7 @@ void ccPluginManager::handleSelectionChanged()
 	}
 }
 
-void ccPluginManager::showAboutDialog() const
+void ccPluginUIManager::showAboutDialog() const
 {
 	ccPluginInfoDlg	about;
 	
@@ -265,12 +265,12 @@ void ccPluginManager::showAboutDialog() const
 	about.exec();
 }
 
-void ccPluginManager::setupActions()
+void ccPluginUIManager::setupActions()
 {
 	m_actionRemoveFilter = new QAction( QIcon( ":/CC/images/noFilter.png" ), tr( "Remove Filter" ), this );
 	m_actionRemoveFilter->setEnabled( false );
 	
-	connect( m_actionRemoveFilter, &QAction::triggered, this, &ccPluginManager::disableGLFilter );
+	connect( m_actionRemoveFilter, &QAction::triggered, this, &ccPluginUIManager::disableGLFilter );
 	
 	m_showPluginToolbar = new QAction( tr( "Plugins" ), this );
 	m_showPluginToolbar->setCheckable( true );
@@ -281,7 +281,7 @@ void ccPluginManager::setupActions()
 	m_showGLFilterToolbar->setEnabled( false );
 }
 
-void ccPluginManager::setupMenus()
+void ccPluginUIManager::setupMenus()
 {	
 	m_pluginMenu = new QMenu( tr( "Plugins" ), m_parentWidget );
 	
@@ -292,7 +292,7 @@ void ccPluginManager::setupMenus()
 	m_glFilterActions.setExclusive( true );		
 }
 
-void ccPluginManager::setupToolbars()
+void ccPluginUIManager::setupToolbars()
 {
 	m_mainPluginToolbar = new QToolBar( tr( "Plugins" ), m_parentWidget );
 	
@@ -308,7 +308,7 @@ void ccPluginManager::setupToolbars()
 	connect( m_showGLFilterToolbar, &QAction::toggled, m_glFiltersToolbar, &QToolBar::setVisible );
 }
 
-void ccPluginManager::enableGLFilter()
+void ccPluginUIManager::enableGLFilter()
 {
 	ccGLWindow *win = m_appInterface->getActiveGLWindow();
 	
@@ -352,7 +352,7 @@ void ccPluginManager::enableGLFilter()
 	}
 }
 
-void ccPluginManager::disableGLFilter()
+void ccPluginUIManager::disableGLFilter()
 {
 	ccGLWindow *win = m_appInterface->getActiveGLWindow();
 	

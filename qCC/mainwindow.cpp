@@ -115,7 +115,7 @@
 #include "ccRecentFiles.h"
 #include "ccRegistrationTools.h"
 #include "ccUtils.h"
-#include "pluginManager/ccPluginManager.h"
+#include "pluginManager/ccPluginUIManager.h"
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
@@ -182,7 +182,7 @@ MainWindow::MainWindow()
 
 	setWindowTitle(QStringLiteral("CloudCompare v") + ccCommon::GetCCVersion(false));
 	
-	m_pluginManager = new ccPluginManager( this, this );
+	m_pluginUIManager = new ccPluginUIManager( this, this );
 	
 #ifdef Q_OS_MAC
 	m_UI->actionAbout->setMenuRole( QAction::AboutRole );
@@ -326,23 +326,23 @@ MainWindow::~MainWindow()
 
 void MainWindow::initPlugins( const ccPluginInterfaceList& plugins )
 {
-	m_pluginManager->init( plugins );
+	m_pluginUIManager->init( plugins );
 	
 	// Set up dynamic tool bars
-	addToolBar( Qt::RightToolBarArea, m_pluginManager->glFiltersToolbar() );
-	addToolBar( Qt::RightToolBarArea, m_pluginManager->mainPluginToolbar() );
+	addToolBar( Qt::RightToolBarArea, m_pluginUIManager->glFiltersToolbar() );
+	addToolBar( Qt::RightToolBarArea, m_pluginUIManager->mainPluginToolbar() );
 	
-	for ( QToolBar *toolbar : m_pluginManager->additionalPluginToolbars() )
+	for ( QToolBar *toolbar : m_pluginUIManager->additionalPluginToolbars() )
 	{
 		addToolBar( Qt::TopToolBarArea, toolbar );
 	}
 	
 	// Set up dynamic menus
-	m_UI->menubar->insertMenu( m_UI->menu3DViews->menuAction(), m_pluginManager->pluginMenu() );
-	m_UI->menuDisplay->insertMenu( m_UI->menuActiveScalarField->menuAction(), m_pluginManager->shaderAndFilterMenu() );
+	m_UI->menubar->insertMenu( m_UI->menu3DViews->menuAction(), m_pluginUIManager->pluginMenu() );
+	m_UI->menuDisplay->insertMenu( m_UI->menuActiveScalarField->menuAction(), m_pluginUIManager->shaderAndFilterMenu() );
 
-	m_UI->menuToolbars->addAction( m_pluginManager->actionShowMainPluginToolbar() );
-	m_UI->menuToolbars->addAction( m_pluginManager->actionShowGLFilterToolbar() );
+	m_UI->menuToolbars->addAction( m_pluginUIManager->actionShowMainPluginToolbar() );
+	m_UI->menuToolbars->addAction( m_pluginUIManager->actionShowGLFilterToolbar() );
 }
 
 void MainWindow::doEnableQtWarnings(bool state)
@@ -669,7 +669,7 @@ void MainWindow::connectActions()
 
 	//"About" menu entry
 	connect(m_UI->actionHelp,						&QAction::triggered, this, &MainWindow::doActionShowHelpDialog);
-	connect(m_UI->actionAboutPlugins,				&QAction::triggered, m_pluginManager, &ccPluginManager::showAboutDialog);
+	connect(m_UI->actionAboutPlugins,				&QAction::triggered, m_pluginUIManager, &ccPluginUIManager::showAboutDialog);
 	connect(m_UI->actionEnableQtWarnings,			&QAction::toggled, this, &MainWindow::doEnableQtWarnings);
 
 	connect(m_UI->actionAbout,	&QAction::triggered, this, [this] () {
@@ -5871,10 +5871,10 @@ void MainWindow::freezeUI(bool state)
 	m_UI->toolBarMainTools->setDisabled(state);
 	m_UI->toolBarSFTools->setDisabled(state);
 	
-	m_pluginManager->mainPluginToolbar()->setDisabled(state);
+	m_pluginUIManager->mainPluginToolbar()->setDisabled(state);
 
 	//freeze plugin toolbars
-	for ( QToolBar *toolbar : m_pluginManager->additionalPluginToolbars() )
+	for ( QToolBar *toolbar : m_pluginUIManager->additionalPluginToolbars() )
 	{
 		toolbar->setDisabled(state);
 	}
@@ -9647,7 +9647,7 @@ void MainWindow::updateMenus()
 	m_UI->actionToggleViewerBasedPerspective->setEnabled(hasMdiChild);
 
 	//plugins
-	m_pluginManager->updateMenus();
+	m_pluginUIManager->updateMenus();
 }
 
 void MainWindow::update3DViewsMenu()
@@ -9950,7 +9950,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionMatchScales->setEnabled(atLeastTwoEntities);
 
 	//standard plugins
-	m_pluginManager->handleSelectionChanged();
+	m_pluginUIManager->handleSelectionChanged();
 }
 
 void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)

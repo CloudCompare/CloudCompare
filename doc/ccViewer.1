@@ -1,0 +1,24 @@
+.TH CloudCompare 1 "February 23 2018"
+.SH NAME
+CloudCompare \- 3D point cloud and mesh processing software
+.SH SYNOPSIS
+.B CloudCompare
+.RI "files" ...
+.br
+.SH DESCRIPTION
+This manual page documents briefly the
+.B CloudCompare
+command.
+.PP
+\fBCloudCompare\fP is a 3D point cloud (and triangular mesh) processing software.
+It has been originally designed to perform comparison between two 3D points
+clouds (such as the ones obtained with a laser scanner) or between a point cloud
+and a triangular mesh.
+.br
+It relies on a specific octree structure that enables great performances in
+this particular function. It was also meant to deal with huge point clouds
+(typically more than 10 millions points, and up to 120 millions with 2 GB
+of memory)
+.SH SEE ALSO
+.BR ccViewer (1).
+.br

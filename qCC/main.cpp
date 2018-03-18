@@ -224,7 +224,7 @@ int main(int argc, char **argv)
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
 	//load the plugins
-	tPluginInfoList	plugins = ccPlugins::LoadPlugins();
+	ccPluginInterfaceList	plugins = ccPlugins::LoadPlugins();
 	
 	int result = 0;
 
@@ -232,7 +232,7 @@ int main(int argc, char **argv)
 	if (commandLine)
 	{
 		//command line processing (no GUI)
-		result = ccCommandLineParser::Parse(argc, argv, &plugins);
+		result = ccCommandLineParser::Parse(argc, argv, plugins);
 	}
 	else
 	{
@@ -273,15 +273,15 @@ int main(int argc, char **argv)
 					QString pluginNameUpper = pluginName.toUpper();
 					//look for this plugin
 					bool found = false;
-					for (const tPluginInfo &plugin : plugins)
+					for ( ccPluginInterface *plugin : plugins )
 					{
-						if (plugin.interface->getName().replace(' ', '_').toUpper() == pluginNameUpper)
+						if (plugin->getName().replace(' ', '_').toUpper() == pluginNameUpper)
 						{
 							found = true;
-							bool success = plugin.interface->start();
+							bool success = plugin->start();
 							if (!success)
 							{
-								ccLog::Error(QString("Failed to start the plugin '%1'").arg(plugin.interface->getName()));
+								ccLog::Error(QString("Failed to start the plugin '%1'").arg(plugin->getName()));
 							}
 							break;
 						}
@@ -322,15 +322,9 @@ int main(int argc, char **argv)
 		}
 
 		//release the plugins
-		for (tPluginInfo &plugin : plugins)
+		for ( ccPluginInterface *plugin : plugins )
 		{
-			plugin.interface->stop(); //just in case
-			if (!plugin.qObject->parent())
-			{
-				delete plugin.interface;
-				plugin.interface = nullptr;
-				plugin.qObject = nullptr;
-			}
+			plugin->stop(); //just in case
 		}
 	}
 

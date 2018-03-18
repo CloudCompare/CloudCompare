@@ -49,7 +49,7 @@ ccPluginManager::~ccPluginManager()
 {
 }
 
-void ccPluginManager::init( const tPluginInfoList &plugins )
+void ccPluginManager::init( const ccPluginInterfaceList &plugins )
 {	
 	m_pluginMenu->setEnabled( false );
 	m_glFilterMenu->setEnabled( false );
@@ -58,15 +58,15 @@ void ccPluginManager::init( const tPluginInfoList &plugins )
 	
 	bool haveStdPlugin = false;
 	
-	for ( const tPluginInfo &plugin : plugins )
+	for ( ccPluginInterface *plugin : plugins )
 	{
-		if ( plugin.interface == nullptr )
+		if ( plugin == nullptr )
 		{
 			Q_ASSERT( false );
 			continue;
 		}
 		
-		QString pluginName = plugin.interface->getName();
+		const QString pluginName = plugin->getName();
 		
 		Q_ASSERT( !pluginName.isEmpty() );
 		
@@ -76,15 +76,13 @@ void ccPluginManager::init( const tPluginInfoList &plugins )
 			continue;
 		}
 		
-		switch ( plugin.interface->getType() )
+		switch ( plugin->getType() )
 		{
 			case CC_STD_PLUGIN: //standard plugin
 			{
 				haveStdPlugin = true;
-				
-				plugin.qObject->setParent( this );
-				
-				ccStdPluginInterface *stdPlugin = static_cast<ccStdPluginInterface*>( plugin.interface );
+								
+				ccStdPluginInterface *stdPlugin = static_cast<ccStdPluginInterface*>( plugin );
 				
 				stdPlugin->setMainAppInterface( m_appInterface );
 				
@@ -136,17 +134,15 @@ void ccPluginManager::init( const tPluginInfoList &plugins )
 				
 			case CC_GL_FILTER_PLUGIN: //GL filter
 			{
-				ccGLFilterPluginInterface *glPlugin = static_cast<ccGLFilterPluginInterface*>( plugin.interface );
-				
-				plugin.qObject->setParent( this );
-				
-				QAction* action = new QAction( pluginName, plugin.qObject );
+				ccGLFilterPluginInterface *glPlugin = static_cast<ccGLFilterPluginInterface*>( plugin );
+								
+				QAction* action = new QAction( pluginName, this );
 				
 				action->setToolTip( glPlugin->getDescription() );
 				action->setIcon( glPlugin->getIcon() );
 				action->setCheckable( true );
 				
-				// store the plugin's pointer in the QAction data so we can access it in enableGLFilter()
+				// store the plugin's interface pointer in the QAction data so we can access it in enableGLFilter()
 				QVariant v;
 		  
 				v.setValue( glPlugin );
@@ -169,7 +165,7 @@ void ccPluginManager::init( const tPluginInfoList &plugins )
 				
 			case CC_IO_FILTER_PLUGIN:
 			{
-				ccIOFilterPluginInterface *ioPlugin = static_cast<ccIOFilterPluginInterface*>( plugin.interface );
+				ccIOFilterPluginInterface *ioPlugin = static_cast<ccIOFilterPluginInterface*>( plugin );
 
 				// there are no menus or toolbars for I/O plugins
 				

@@ -167,7 +167,7 @@ public:
 	void  addEditPlaneAction( QMenu &menu ) const;
 	
 	//! Sets up the UI (menus and toolbars) based on loaded plugins
-	void initPlugins(const tPluginInfoList& plugins);
+	void initPlugins(const ccPluginInterfaceList& plugins);
 
 	//! Updates the 'Properties' view
 	void updatePropertiesView();

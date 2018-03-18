@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include <QDebug>
+#include <QDir>
 #include <QStandardItemModel>
 
 #include "ccPluginInfoDlg.h"
@@ -100,7 +101,15 @@ ccPluginInfoDlg::~ccPluginInfoDlg()
 
 void ccPluginInfoDlg::setPluginPaths( const QStringList &pluginPaths )
 {
-	m_UI->mPluginPathTextEdit->setText( pluginPaths.join( "\n" ) );
+	QString	paths;
+	
+	for ( const QString &path : pluginPaths )
+	{
+		paths += QDir::toNativeSeparators( path );
+		paths += QStringLiteral( "\n" );
+	}
+	
+	m_UI->mPluginPathTextEdit->setText( paths );
 }
 
 void ccPluginInfoDlg::setPluginList( const QList<ccPluginInterface *> &pluginList )

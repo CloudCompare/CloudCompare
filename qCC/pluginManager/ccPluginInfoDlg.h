@@ -20,6 +20,7 @@
 #include <QDialog>
 #include <QList>
 
+class QModelIndex;
 class QStandardItemModel;
 
 class ccPluginInterface;
@@ -43,7 +44,8 @@ private:
 	enum {
 		PLUGIN_PTR = Qt::UserRole + 1
 	};
-		
+	
+	void	selectionChanged( const QModelIndex &current, const QModelIndex &previous );
 	void	updatePluginInfo( const ccPluginInterface *plugin );
 	
 	Ui::ccPluginInfoDlg *m_UI;

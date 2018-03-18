@@ -79,19 +79,8 @@ ccPluginInfoDlg::ccPluginInfoDlg( QWidget *parent ) :
 	
 	m_UI->mPluginListView->setModel( m_ItemModel );
 	
-	connect( m_UI->mPluginListView, &QAbstractItemView::clicked, this, [=] ( const QModelIndex &index ) {
-		QStandardItem *item = m_ItemModel->itemFromIndex( index );
-		
-		if ( item == nullptr )
-		{
-			qWarning() << "Could not find item in model";
-			return;
-		}
-		
-		const ccPluginInterface *plugin = item->data( PLUGIN_PTR ).value<const ccPluginInterface*>();
-		
-		updatePluginInfo( plugin );
-	} );
+	connect( m_UI->mPluginListView->selectionModel(), &QItemSelectionModel::currentChanged, 
+			 this, &ccPluginInfoDlg::selectionChanged );
 }
 
 ccPluginInfoDlg::~ccPluginInfoDlg()
@@ -154,19 +143,27 @@ void ccPluginInfoDlg::setPluginList( const QList<ccPluginInterface *> &pluginLis
 	
 	if ( !pluginList.empty() )
 	{
-		// initial selection and info display
 		QModelIndex	index = m_ItemModel->index( 0, 0 );
+		
 		m_UI->mPluginListView->setCurrentIndex( index );
-		
-		QStandardItem *item = m_ItemModel->itemFromIndex( index );
-		
-		if ( item != nullptr )
-		{
-			const ccPluginInterface *plugin = item->data( PLUGIN_PTR ).value<const ccPluginInterface*>();
-			
-			updatePluginInfo( plugin );
-		}
 	}
+}
+
+void ccPluginInfoDlg::selectionChanged( const QModelIndex &current, const QModelIndex &previous )
+{
+	Q_UNUSED( previous );
+	
+	QStandardItem *item = m_ItemModel->itemFromIndex( current );
+	
+	if ( item == nullptr )
+	{
+		qWarning() << "Could not find item in model";
+		return;
+	}
+	
+	const ccPluginInterface *plugin = item->data( PLUGIN_PTR ).value<const ccPluginInterface*>();
+	
+	updatePluginInfo( plugin );	
 }
 
 void ccPluginInfoDlg::updatePluginInfo( const ccPluginInterface *plugin )

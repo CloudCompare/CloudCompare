@@ -197,44 +197,49 @@ void ccViewer::loadPlugins()
 {
 	ui.menuPlugins->setEnabled(false);
 
-	tPluginInfoList	plugins = ccPlugins::LoadPlugins();
+	ccPluginInterfaceList	plugins = ccPlugins::LoadPlugins();
 
-	for ( const tPluginInfo &plugin : plugins )
+	for ( ccPluginInterface *plugin : plugins )
 	{
-		if (!plugin.interface)
+		if ( plugin == nullptr )
 		{
-			assert(false);
+			Q_ASSERT( false );
 			continue;
 		}
-		
-		assert(plugin.qObject);
-		plugin.qObject->setParent(this);
 
-		//is this a GL plugin?
-		if (plugin.interface->getType() == CC_GL_FILTER_PLUGIN)
+		// is this a GL plugin?
+		if ( plugin->getType() == CC_GL_FILTER_PLUGIN )
 		{
-			QString pluginName = plugin.interface->getName();
-			if (pluginName.isEmpty())
+			ccGLFilterPluginInterface *glPlugin = static_cast<ccGLFilterPluginInterface*>( plugin );
+			
+			const QString pluginName = glPlugin->getName();
+			
+			Q_ASSERT( !pluginName.isEmpty() );
+			
+			if ( pluginName.isEmpty() )
 			{
-				ccLog::Warning("Plugin has an invalid (empty) name!");
+				// should be unreachable - we have already checked for this in ccPlugins::Find()
 				continue;
 			}
-			ccLog::Print(QString("Plugin name: [%1] (GL filter)").arg(pluginName));
+			
+			ccLog::Print( QStringLiteral( "Plugin name: [%1] (GL filter)" ).arg( pluginName ) );
 
-			//(auto)create action
-			QAction* action = new QAction(pluginName, plugin.qObject);
-			action->setToolTip(plugin.interface->getDescription());
-			action->setIcon(plugin.interface->getIcon());
-			//connect default signal
+			QAction* action = new QAction( pluginName, this );
+			action->setToolTip( glPlugin->getDescription() );
+			action->setIcon( glPlugin->getIcon() );
+			
+			// store the plugin's interface pointer in the QAction data so we can access it in doEnableGLFilter()
+			QVariant v;
+	  
+			v.setValue( glPlugin );
+	  
+			action->setData( v );
+
 			connect(action, &QAction::triggered, this, &ccViewer::doEnableGLFilter);
 
-			ui.menuPlugins->addAction(action);
-			ui.menuPlugins->setEnabled(true);
-			ui.menuPlugins->setVisible(true);
-		}
-		else
-		{
-			//ignored
+			ui.menuPlugins->addAction( action );
+			ui.menuPlugins->setEnabled( true );
+			ui.menuPlugins->setVisible( true );
 		}
 	}
 }
@@ -257,28 +262,40 @@ void ccViewer::doEnableGLFilter()
 	}
 
 	QAction *action = qobject_cast<QAction*>(sender());
-	if (!action)
-		return;
-	ccGLFilterPluginInterface* ccPlugin = qobject_cast<ccGLFilterPluginInterface*>(action->parent());
-	if (!ccPlugin)
-		return;
 
-	assert(ccPlugin->getType() == CC_GL_FILTER_PLUGIN);
-
-	ccGlFilter* filter = ccPlugin->getFilter();
-	if (filter)
+	if ( action == nullptr )
 	{
-		if (m_glWindow->areGLFiltersEnabled())
+		Q_ASSERT( false );
+		return;
+	}
+	
+	ccGLFilterPluginInterface	*plugin = action->data().value<ccGLFilterPluginInterface *>();
+	
+	if ( plugin == nullptr )
+	{
+		return;
+	}
+
+	Q_ASSERT( plugin->getType() == CC_GL_FILTER_PLUGIN );
+
+	ccGlFilter* filter = plugin->getFilter();
+	
+	if ( filter != nullptr )
+	{
+		if ( m_glWindow->areGLFiltersEnabled() )
 		{
-			m_glWindow->setGlFilter(filter);
-			ccLog::Print("Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter");
+			m_glWindow->setGlFilter( filter );
+			
+			ccLog::Print( "Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter" );
 		}
 		else
-			ccLog::Error("GL filters not supported!");
+		{
+			ccLog::Error( "GL filters not supported" );
+		}
 	}
 	else
 	{
-		ccLog::Error("Can't load GL filter (an error occurred)!");
+		ccLog::Error( "Can't load GL filter (an error occurred)!" );
 	}
 }
 

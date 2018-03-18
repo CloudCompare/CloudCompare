@@ -16,7 +16,7 @@ class ccCommandLineParser : public ccCommandLineInterface
 public:
 
 	//! Parses the input command
-	static int Parse(int nargs, char** args, tPluginInfoList* plugins = 0);
+	static int Parse(int nargs, char** args, ccPluginInterfaceList& plugins);
 
 	//! Destructor
 	virtual ~ccCommandLineParser();

@@ -42,7 +42,7 @@ public:
 	ccPluginManager( ccMainAppInterface *appInterface, QWidget *parent );
 	~ccPluginManager();
 	
-	void	init( const tPluginInfoList &plugins );
+	void	init( const ccPluginInterfaceList &plugins );
 	
 	QMenu	*pluginMenu() const;
 	QMenu	*shaderAndFilterMenu() const;

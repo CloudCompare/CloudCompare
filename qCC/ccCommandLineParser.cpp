@@ -59,7 +59,7 @@ bool ccCommandLineParser::error(const QString& message) const
 	return false;
 }
 
-int ccCommandLineParser::Parse(int nargs, char** args, tPluginInfoList* plugins/*=0*/)
+int ccCommandLineParser::Parse(int nargs, char** args, ccPluginInterfaceList& plugins)
 {
 	if (!args || nargs < 2)
 	{
@@ -97,18 +97,15 @@ int ccCommandLineParser::Parse(int nargs, char** args, tPluginInfoList* plugins/
 	}
 
 	//load the plugins commands
-	if (plugins)
+	for ( ccPluginInterface *plugin : plugins )
 	{
-		for (tPluginInfo &pluginInfo : *plugins)
+		if (!plugin)
 		{
-			if (!pluginInfo.interface)
-			{
-				assert(false);
-				continue;
-			}
-			ccPluginInterface* plugin = static_cast<ccPluginInterface*>(pluginInfo.interface);
-			plugin->registerCommands(parser.data());
+			assert(false);
+			continue;
 		}
+
+		plugin->registerCommands(parser.data());
 	}
 
 	//parse input

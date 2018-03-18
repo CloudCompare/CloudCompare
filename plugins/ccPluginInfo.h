@@ -33,40 +33,22 @@
 #include <QPluginLoader>
 #include <QStandardPaths>
 #include <QString>
+#include <QVector>
 
 //system
-#include <vector>
 #include <set>
 
-class QObject;
-
-//! This struct is used to store plugin information including
-//! a pointer to its interface and a pointer to its QObject
-struct tPluginInfo
-{
-	tPluginInfo(ccPluginInterface* o, QObject* q) :
-		interface( o )
-	  , qObject( q )
-	{}
-	
-	//! Pointer to the plugin interface
-	ccPluginInterface* interface;
-	
-	//! Pointer to the QObject
-	QObject* qObject;
-};
-
-//! Simply a list of \see tPluginInfo
-typedef std::vector<tPluginInfo> tPluginInfoList;
+//! Simply a list of \see ccPluginInterface
+typedef QVector<ccPluginInterface *> ccPluginInterfaceList;
 
 class ccPlugins
 {
 public:
-	static tPluginInfoList LoadPlugins()
+	static ccPluginInterfaceList LoadPlugins()
 	{
-		tPluginInfoList	plugins;
+		ccPluginInterfaceList	plugins;
 		
-		//"static" plugins
+		// "static" plugins
 		const QObjectList	pluginInstances = QPluginLoader::staticInstances();
 		
 		for ( QObject* plugin : pluginInstances )
@@ -78,26 +60,26 @@ public:
 				continue;
 			}
 
-			plugins.push_back(tPluginInfo(ccPlugin, plugin)); 
+			plugins.push_back( ccPlugin ); 
 		}
 		
-		//"dynamic" plugins
+		// "dynamic" plugins
 		ccPlugins::Find( plugins );
 		
-		//now iterate over plugins and automatically register what we can
-		for ( tPluginInfo &plugin : plugins )
+		// now iterate over plugins and automatically register what we can
+		for ( ccPluginInterface *interface : plugins )
 		{
-			if (!plugin.interface)
+			if ( interface == nullptr )
 			{
 				Q_ASSERT(false);
 				continue;
 			}
 			
-			switch (plugin.interface->getType())
+			switch ( interface->getType() )
 			{
 				case CC_STD_PLUGIN:
 				{
-					ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(plugin.interface);
+					ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(interface);
 					
 					//see if this plugin provides an additional factory for objects
 					ccExternalFactory* factory = stdPlugin->getCustomObjectsFactory();
@@ -112,7 +94,7 @@ public:
 					
 				case CC_IO_FILTER_PLUGIN: //I/O filter
 				{
-					ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(plugin.interface);
+					ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(interface);
 					FileIOFilter::Shared filter = ioPlugin->getFilter();
 					if (filter)
 					{
@@ -189,7 +171,7 @@ public:
 		return pluginPaths;		
 	}
 	
-	static void Find( tPluginInfoList& plugins )
+	static void Find( ccPluginInterfaceList& plugins )
 	{
 		const QStringList pluginPaths = GetPluginPaths();
 		
@@ -211,7 +193,7 @@ public:
 		//	This allows us to create a unique list (overridden by path)
 		std::set<QString> alreadyLoadedFiles;
 		
-		for (const QString &path : pluginPaths)
+		for ( const QString &path : pluginPaths )
 		{
 			QDir pluginsDir( path );
 			
@@ -219,7 +201,7 @@ public:
 			
 			const QStringList	fileNames = pluginsDir.entryList();
 			
-			for (const QString &filename : fileNames)
+			for ( const QString &filename : fileNames )
 			{
 				const QString pluginPath = pluginsDir.absoluteFilePath(filename);
 				
@@ -260,7 +242,7 @@ public:
 					ccLog::Print( QStringLiteral( "[Plugin] Found: %1 (%2)" ).arg( ccPlugin->getName(), filename ) );
 				}
 				
-				plugins.push_back( tPluginInfo(ccPlugin, plugin) );
+				plugins.push_back( ccPlugin );
 			}
 		}
 	}

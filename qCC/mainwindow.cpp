@@ -324,7 +324,7 @@ MainWindow::~MainWindow()
 	ccConsole::ReleaseInstance();
 }
 
-void MainWindow::initPlugins( const tPluginInfoList& plugins )
+void MainWindow::initPlugins( const ccPluginInterfaceList& plugins )
 {
 	m_pluginManager->init( plugins );
 	

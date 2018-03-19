@@ -70,6 +70,10 @@ v2.10.alpha - XX/XX/201X
 	* LAS I/O:
 		- CloudCompare can now read and save extra dimensions (for any file version) - see https://github.com/CloudCompare/CloudCompare/pull/666
 
+	* Plugins:
+		- The "About Plugins" dialog was rewritten to provide more information about installed plugins and to include I/O and GL plugins.
+		- Added several fields to the plugin interface: authors, maintainers, and reference links.
+		
 - Bug fix:
 
 	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values
@@ -86,6 +90,7 @@ v2.10.alpha - XX/XX/201X
 		the stereo mode is automatically disabled)
 	* The global shift along vertical dimension (e.g. Z) was not applied when exporting a raster grid to a raster file (geotiff)
 	* The 2.5D Volume calculation tool was ignoring the strategy for filling the empty cells of the 'ceil' cloud (it was always using the 'ground' setting)
+	* [macOS] Fixed the squished text in the Matrix and Axis/Angle sections of the transformation history section of the properties
 
 v2.9.1 - 11/03/2017
 ----------------------

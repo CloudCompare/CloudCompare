@@ -19,6 +19,7 @@
 //##########################################################################
 
 #include <QObject>
+#include <QVector>
 
 class ccPluginInterface;
 

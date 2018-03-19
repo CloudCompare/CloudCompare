@@ -58,7 +58,8 @@ void ccPluginManager::loadPlugins()
 			continue;
 		}
 
-		m_pluginList.push_back( ccPlugin );
+		ccLog::Print(QStringLiteral("[Plugin] Found: %1 (STATIC)").arg(ccPlugin->getName()));
+		m_pluginList.push_back(ccPlugin);
 	}
 
 	// "dynamic" plugins
@@ -161,7 +162,11 @@ QStringList ccPluginManager::pluginPaths()
 
 	for ( const QString &appDataPath : appDataPaths )
 	{
-		pluginPaths << (appDataPath + "/plugins");
+		QString path = appDataPath + "/plugins";
+		if (!pluginPaths.contains(path)) //avoid duplicate entries (can happen, at least on Windows)
+		{
+			pluginPaths << path;
+		}
 	}
 
 	return pluginPaths;
@@ -214,7 +219,7 @@ void ccPluginManager::loadFromPathsAndAddToList()
 			const QString pluginPath = pluginsDir.absoluteFilePath(filename);
 
 			//if we have already encountered this file, we can skip it
-			if (alreadyLoadedFiles.find(pluginPath) != alreadyLoadedFiles.end())
+			if (alreadyLoadedFiles.contains(pluginPath))
 			{
 				continue;
 			}

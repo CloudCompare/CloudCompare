@@ -25,13 +25,34 @@
 
 //Qt
 #include <QtGui>
-#include <QApplication>
 #include <QMainWindow>
 
-qAnimation::qAnimation(QObject* parent/*=0*/)
+qAnimation::qAnimation(QObject* parent)
 	: QObject(parent)
-	, m_action(0)
+	, m_action(nullptr)
 {
+}
+
+QString qAnimation::getName() const
+{
+	return QStringLiteral( "Animation" );
+}
+
+QString qAnimation::getDescription() const
+{
+	return QStringLiteral( "Animation plugin, used to build a movie from a series of views." );
+}
+
+QIcon qAnimation::getIcon() const
+{
+	return QIcon(":/CC/plugin/qAnimation/animation.png");
+}
+
+ccPluginInterface::ContactList qAnimation::getAuthors() const
+{
+	return ccPluginInterface::ContactList{
+		Contact{ "Ryan Wicks, 2G Robotics Inc.", QString() },
+	};	
 }
 
 void qAnimation::onNewSelection(const ccHObject::Container& selectedEntities)
@@ -49,7 +70,7 @@ void qAnimation::getActions(QActionGroup& group)
 		m_action->setToolTip(getDescription());
 		m_action->setIcon(getIcon());
 
-		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
+		connect(m_action, &QAction::triggered, this, &qAnimation::doAction);
 	}
 
 	group.addAction(m_action);
@@ -105,9 +126,4 @@ void qAnimation::doAction()
 		return;
 	}
 	videoDlg.exec();
-}
-
-QIcon qAnimation::getIcon() const
-{
-	return QIcon(":/CC/plugin/qAnimation/animation.png");
 }

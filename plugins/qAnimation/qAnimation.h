@@ -19,7 +19,7 @@
 #define Q_ANIMATION_PLUGIN_HEADER
 
 //qCC
-#include "../ccStdPluginInterface.h"
+#include "ccStdPluginInterface.h"
 
 //Qt
 #include <QObject>
@@ -37,25 +37,24 @@ class qAnimation : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qAnimation(QObject* parent = 0);
+	qAnimation(QObject* parent = nullptr);
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const override { return "Animation"; }
-	virtual QString getDescription() const override { return "Animation plugin, used to build a movie from a series of views."; }
+	virtual QString getName() const override;
+	virtual QString getDescription() const override;
 	virtual QIcon getIcon() const override;
 
+	virtual ContactList getAuthors() const override;
+	
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	virtual void getActions(QActionGroup& group) override;
 
-protected slots:
+private:
 
 	void doAction();
 
-protected:
-
 	QAction* m_action;
-
 };
 
 #endif

@@ -1158,11 +1158,14 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 				//save the Spatial reference as meta-data
 				SpatialReference srs = lasHeader.srs();
-				if (!srs.empty())
+				if (srs.valid())
 				{
 					QString proj4 = QString::fromStdString(srs.getProj4());
 					ccLog::Print("[LAS] Spatial reference: " + proj4);
 					pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, proj4);
+				}
+				else {
+					ccLog::Print("[LAS] Spatial reference: None");
 				}
 
 				pointChunk.createFieldsToLoad(extraDimensionsIds, extraNamesToLoad);

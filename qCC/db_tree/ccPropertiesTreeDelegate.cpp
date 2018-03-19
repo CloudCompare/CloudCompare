@@ -157,7 +157,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_SENSOR_MATRIX_EDITOR:
 		case OBJECT_HISTORY_MATRIX_EDITOR:
 		case OBJECT_GLTRANS_MATRIX_EDITOR:
-			return QSize(250, 120);
+			return QSize(250, 140);
 		}
 	}
 

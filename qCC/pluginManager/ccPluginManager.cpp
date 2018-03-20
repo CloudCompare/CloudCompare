@@ -186,10 +186,6 @@ ccPluginInterfaceList &ccPluginManager::pluginList()
 
 void ccPluginManager::loadFromPathsAndAddToList()
 {
-	const QStringList paths = pluginPaths();
-
-	ccLog::Print( QStringLiteral( "[Plugin] Lookup paths: %1" ).arg( paths.join( ", " ) ) );
-
 	const QStringList nameFilters{
 #if defined(Q_OS_MAC)
 		"*.dylib"
@@ -201,61 +197,92 @@ void ccPluginManager::loadFromPathsAndAddToList()
 #error Need to specify the dynamic library extension for this OS.
 #endif
 	};
-
-	// maps plugin name (from inside the plugin) to its path & pointer
-	//	This allows us to create a unique list (overridden by path)
-	QSet<QString> alreadyLoadedFiles;
-
-	for ( const QString &path : paths )
+	
+	// Map the plugin file name to its loader so we can unload it if necessary.
+	//	This lets us override plugins by path.
+	QMap<QString, QPluginLoader *> fileNameToLoaderMap;
+	
+	for ( const QString &path : pluginPaths() )
 	{
+		ccLog::Print( tr( "[Plugin] Searching: %1" ).arg( path ) );
+		
 		QDir pluginsDir( path );
 
 		pluginsDir.setNameFilters( nameFilters );
 
 		const QStringList	fileNames = pluginsDir.entryList();
 
-		for ( const QString &filename : fileNames )
+		for ( const QString &fileName : fileNames )
 		{
-			const QString pluginPath = pluginsDir.absoluteFilePath(filename);
-
-			//if we have already encountered this file, we can skip it
-			if (alreadyLoadedFiles.contains(pluginPath))
-			{
-				continue;
-			}
-
-			QPluginLoader loader(pluginPath);
-			QObject* plugin = loader.instance();
+			const QString pluginPath = pluginsDir.absoluteFilePath( fileName );
+			
+			QPluginLoader *loader = new QPluginLoader( pluginPath );
+			
+			QObject *plugin = loader->instance();
 
 			if ( plugin == nullptr )
 			{
-				ccLog::Warning( QStringLiteral( "[Plugin] File '%1' doesn't seem to be a valid plugin\t(%2)" ).arg( filename, loader.errorString() ) );
+				ccLog::Warning( tr( "\t'%1' does not seem to be a valid plugin\t(%2)" ).arg( fileName, loader->errorString() ) );
+				
+				delete loader;
+				
 				continue;
 			}
-
-			ccPluginInterface* ccPlugin = dynamic_cast<ccPluginInterface*>(plugin);
+			
+			ccPluginInterface *ccPlugin = dynamic_cast<ccPluginInterface*>(plugin);
 
 			if ( ccPlugin == nullptr )
-			{
-				delete plugin;
-				ccLog::Warning( QStringLiteral( "[Plugin] File '%1' doesn't seem to be a valid plugin or it is not supported by this version" ).arg( filename ) );
+			{				
+				ccLog::Warning( tr( "\t'%1' does not seem to be a valid plugin or it is not supported by this version" ).arg( fileName ) );
+
+				loader->unload();
+				
+				delete loader;
+				
 				continue;
 			}
 
 			if ( ccPlugin->getName().isEmpty() )
 			{
-				ccLog::Error( QStringLiteral( "[Plugin] Plugin '%1' has a blank name" ).arg( filename ) );
+				ccLog::Error( tr( "\tPlugin '%1' has a blank name" ).arg( fileName ) );
 
-				loader.unload();
+				loader->unload();
+				
+				delete loader;
 
 				continue;
 			}
+			
+			QPluginLoader *previousLoader = fileNameToLoaderMap.value( fileName );
+			
+			// If we have already loaded a plugin with this file name, unload it and replace the interface in the plugin list
+			if ( previousLoader != nullptr )
+			{
+				ccPluginInterface *interface = dynamic_cast<ccPluginInterface *>( previousLoader->instance() );
+				
+				// maintain the order of the plugin list
+				const int index = m_pluginList.indexOf( interface );
+				m_pluginList.replace( index, ccPlugin );
+				
+				previousLoader->unload();
+				
+				delete previousLoader;
+								
+				ccLog::Warning( tr( "\t'%1' overridden" ).arg( fileName ) );
+			}
 			else
 			{
-				ccLog::Print( QStringLiteral( "[Plugin] Found: %1 (%2)" ).arg( ccPlugin->getName(), filename ) );
+				m_pluginList.push_back( ccPlugin );
 			}
 
-			m_pluginList.push_back( ccPlugin );
+			fileNameToLoaderMap[fileName] = loader;
+			
+			ccLog::Print( tr( "\tPlugin found: %1 (%2)" ).arg( ccPlugin->getName(), fileName ) );
 		}
+	}
+	
+	for ( QPluginLoader *loader : fileNameToLoaderMap.values() )
+	{
+		delete loader;
 	}
 }

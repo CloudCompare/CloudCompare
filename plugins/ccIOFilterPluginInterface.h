@@ -34,7 +34,7 @@ public:
 	//inherited from ccPluginInterface
 	virtual CC_PLUGIN_TYPE getType() const { return CC_IO_FILTER_PLUGIN; }
 
-	//! Returns a list of I/O filter instances
+	//! Returns an I/O filter instance
 	/** Either getFilter or getFilters should be reimplemented by the child class
 		(depending on the number of I/O filters managed by the plugin)
 	**/

@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! Calibrated images and cloud meta-file I/O filter
-class QCC_IO_LIB_API IcmFilter : public FileIOFilter
+class /*QCC_IO_LIB_API*/ IcmFilter : public FileIOFilter
 {
 public:
 

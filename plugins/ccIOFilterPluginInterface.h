@@ -35,7 +35,16 @@ public:
 	virtual CC_PLUGIN_TYPE getType() const { return CC_IO_FILTER_PLUGIN; }
 
 	//! Returns a list of I/O filter instances
-	virtual QVector<FileIOFilter::Shared> getFilters() = 0;
+	/** Either getFilter or getFilters should be reimplemented by the child class
+		(depending on the number of I/O filters managed by the plugin)
+	**/
+	virtual FileIOFilter::Shared getFilter() { return FileIOFilter::Shared(nullptr); }
+
+	//! Returns a list of I/O filter instances
+	/** Either getFilter or getFilters should be reimplemented by the child class
+		(depending on the number of I/O filters managed by the plugin)
+	**/
+	virtual QVector<FileIOFilter::Shared> getFilters() { return QVector<FileIOFilter::Shared>{ getFilter() }; }
 };
 
 Q_DECLARE_INTERFACE(ccIOFilterPluginInterface,

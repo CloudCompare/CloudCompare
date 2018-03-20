@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! Mensi Soisic point cloud file I/O filter
-class QCC_IO_LIB_API SoiFilter : public FileIOFilter
+class /*QCC_IO_LIB_API*/ SoiFilter : public FileIOFilter
 {
 public:
 

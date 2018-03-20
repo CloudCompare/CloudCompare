@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! Point+Scalar value binary point cloud file I/O filter
-class QCC_IO_LIB_API PVFilter : public FileIOFilter
+class /*QCC_IO_LIB_API*/ PVFilter : public FileIOFilter
 {
 public:
 

@@ -23,7 +23,7 @@
 //Qt
 #include <QtPlugin>
 
-QVector<FileIOFilter::Shared> qCSVMatrixIO::getFilters()
+FileIOFilter::Shared qCSVMatrixIO::getFilter()
 {
-	return QVector<FileIOFilter::Shared>{ FileIOFilter::Shared(new CSVMatrixFilter) };
+	return FileIOFilter::Shared(new CSVMatrixFilter);
 }

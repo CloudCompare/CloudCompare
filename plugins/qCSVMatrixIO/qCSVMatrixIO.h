@@ -30,11 +30,11 @@ class qCSVMatrixIO : public QObject, public ccIOFilterPluginInterface
 public:
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "CSV Matrix I/O filter"; }
-	virtual QString getDescription() const { return "2.5D CSV matrix I/O filter"; }
+	virtual QString getName() const override { return "CSV Matrix I/O filter"; }
+	virtual QString getDescription() const override { return "2.5D CSV matrix I/O filter"; }
 
 	//inherited from ccIOFilterPluginInterface
-	FileIOFilter::Shared getFilter();
+	QVector<FileIOFilter::Shared> getFilters() override;
 };
 
 #endif //Q_CSV_MATRIX_IO_PLUGIN_HEADER

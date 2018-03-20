@@ -18,13 +18,15 @@
 #ifndef CC_IO_FILTER_PLUGIN_INTERFACE_HEADER
 #define CC_IO_FILTER_PLUGIN_INTERFACE_HEADER
 
+#include <QVector>
+
 #include "ccPluginInterface.h"
 
 //qCC_io
 #include <FileIOFilter.h>
 
 //! I/O filter plugin interface
-/** Version 1.0
+/** Version 1.1
 **/
 class ccIOFilterPluginInterface : public ccPluginInterface
 {
@@ -32,11 +34,11 @@ public:
 	//inherited from ccPluginInterface
 	virtual CC_PLUGIN_TYPE getType() const { return CC_IO_FILTER_PLUGIN; }
 
-	//! Returns an I/O filter instance
-	virtual FileIOFilter::Shared getFilter() = 0;
+	//! Returns a list of I/O filter instances
+	virtual QVector<FileIOFilter::Shared> getFilters() = 0;
 };
 
 Q_DECLARE_INTERFACE(ccIOFilterPluginInterface,
-                    "edf.rd.CloudCompare.ccIOFilterPluginInterface/1.0")
+                    "edf.rd.CloudCompare.ccIOFilterPluginInterface/1.1")
 
 #endif //CC_IO_FILTER_PLUGIN_INTERFACE_HEADER

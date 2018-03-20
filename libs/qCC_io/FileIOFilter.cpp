@@ -21,12 +21,7 @@
 //CLOUDS
 #include "BinFilter.h"
 #include "SimpleBinFilter.h"
-#include "IcmFilter.h"
 #include "AsciiFilter.h"
-#include "SoiFilter.h"
-#include "PNFilter.h"
-#include "PVFilter.h"
-#include "PovFilter.h"
 #include "BundlerFilter.h"
 #include "VTKFilter.h"
 #include "STLFilter.h"
@@ -68,7 +63,7 @@
 /** Filters are uniquely recognized by their 'file filter' string.
 	We use a std::vector so as to keep the insertion ordering!
 **/
-FileIOFilter::FilterContainer s_ioFilters;
+static FileIOFilter::FilterContainer s_ioFilters;
 
 static unsigned s_sessionCounter = 0;
 
@@ -117,13 +112,7 @@ void FileIOFilter::InitInternalFilters()
 #endif
 	Register(Shared(new BundlerFilter()));
 	Register(Shared(new ImageFileFilter()));
-	//secondary formats (are they even used anymore?!)
-	Register(Shared(new PNFilter()));
-	Register(Shared(new PVFilter()));
-	Register(Shared(new SoiFilter()));
 	Register(Shared(new MAFilter()));
-	Register(Shared(new PovFilter()));
-	Register(Shared(new IcmFilter()));
 	Register(Shared(new DepthMapFileFilter()));
 	Register(Shared(new MascaretFilter()));
 	Register(Shared(new SinusxFilter()));

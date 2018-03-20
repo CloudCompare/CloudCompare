@@ -23,7 +23,7 @@
 //Qt
 #include <QtPlugin>
 
-FileIOFilter::Shared qPhotoscanIO::getFilter()
+QVector<FileIOFilter::Shared> qPhotoscanIO::getFilters()
 {
-	return FileIOFilter::Shared(new PhotoScanFilter);
+	return QVector<FileIOFilter::Shared>{ FileIOFilter::Shared(new PhotoScanFilter) };
 }

@@ -30,11 +30,11 @@ class qPhotoscanIO : public QObject, public ccIOFilterPluginInterface
 public:
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "Photoscan I/O filter"; }
-	virtual QString getDescription() const { return "Photoscan (PSZ) I/O filter"; }
+	virtual QString getName() const override { return "Photoscan I/O filter"; }
+	virtual QString getDescription() const override { return "Photoscan (PSZ) I/O filter"; }
 
 	//inherited from ccIOFilterPluginInterface
-	FileIOFilter::Shared getFilter();
+	QVector<FileIOFilter::Shared> getFilters() override;
 };
 
 #endif //Q_PHOTOSCAN_IO_PLUGIN_HEADER

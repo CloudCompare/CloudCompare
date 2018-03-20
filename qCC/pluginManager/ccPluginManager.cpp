@@ -94,11 +94,14 @@ void ccPluginManager::loadPlugins()
 			case CC_IO_FILTER_PLUGIN: //I/O filter
 			{
 				ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(plugin);
-				FileIOFilter::Shared filter = ioPlugin->getFilter();
-				if (filter)
+				
+				for ( FileIOFilter::Shared filter : ioPlugin->getFilters() )
 				{
-					FileIOFilter::Register(filter);
-					ccLog::Print(QString("[Plugin][%1] New file extension(s) registered: %2").arg(ioPlugin->getName(), filter->getDefaultExtension().toUpper()));
+					if (filter)
+					{
+						FileIOFilter::Register(filter);
+						ccLog::Print(QString("[Plugin][%1] New file extension(s) registered: %2").arg(ioPlugin->getName(), filter->getDefaultExtension().toUpper()));
+					}
 				}
 			}
 				break;

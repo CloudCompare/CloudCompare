@@ -73,6 +73,7 @@ v2.10.alpha - XX/XX/201X
 	* Plugins:
 		- The "About Plugins" dialog was rewritten to provide more information about installed plugins and to include I/O and GL plugins.
 		- Added several fields to the plugin interface: authors, maintainers, and reference links.
+		- I/O plugins now return a list of filters using getFilters() so they can handle multiple file extensions
 		
 - Bug fix:
 

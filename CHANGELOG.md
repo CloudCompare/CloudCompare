@@ -91,6 +91,7 @@ v2.10.alpha - XX/XX/201X
 	* The global shift along vertical dimension (e.g. Z) was not applied when exporting a raster grid to a raster file (geotiff)
 	* The 2.5D Volume calculation tool was ignoring the strategy for filling the empty cells of the 'ceil' cloud (it was always using the 'ground' setting)
 	* [macOS] Fixed the squished text in the Matrix and Axis/Angle sections of the transformation history section of the properties
+	* [macOS] Fixed squished menus in the properties editor
 
 v2.9.1 - 11/03/2017
 ----------------------

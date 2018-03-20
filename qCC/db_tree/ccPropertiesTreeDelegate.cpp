@@ -147,11 +147,11 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_OCTREE_TYPE:
 		case OBJECT_COLOR_RAMP_STEPS:
 		case OBJECT_CLOUD_POINT_SIZE:
-			return QSize(50, 18);
+			return QSize(50, 24);
 		case OBJECT_COLOR_SOURCE:
 		case OBJECT_POLYLINE_WIDTH:
 		case OBJECT_CURRENT_COLOR_RAMP:
-			return QSize(70, 22);
+			return QSize(70, 24);
 		case OBJECT_CLOUD_SF_EDITOR:
 			return QSize(250, 200);
 		case OBJECT_SENSOR_MATRIX_EDITOR:

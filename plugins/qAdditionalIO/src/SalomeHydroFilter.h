@@ -23,7 +23,7 @@
 //! SALOME hydro polylines I/O filter
 /** See http://chercheurs.edf.com/logiciels/salome-41218.html
 **/
-class QCC_IO_LIB_API SalomeHydroFilter : public FileIOFilter
+class SalomeHydroFilter : public FileIOFilter
 {
 public:
 

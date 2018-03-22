@@ -22,33 +22,32 @@
 #include "BinFilter.h"
 
 //qCC_db
-#include <ccLog.h>
-#include <ccImage.h>
+#include <ccCameraSensor.h>
 #include <ccGenericPointCloud.h>
-#include <ccPointCloud.h>
-#include <ccProgressDialog.h>
 #include <ccGLMatrix.h>
 #include <ccHObjectCaster.h>
-#include <ccCameraSensor.h>
+#include <ccImage.h>
+#include <ccLog.h>
+#include <ccPointCloud.h>
+#include <ccProgressDialog.h>
 
 //Qt
+#include <QDir>
+#include <QFile>
+#include <QFileDialog>
+#include <QFileInfo>
 #include <QInputDialog>
 #include <QString>
-#include <QFile>
 #include <QTextStream>
-#include <QFileInfo>
-#include <QDir>
-#include <QFileDialog>
-#include <QApplication>
 
 //CCLib (for DTM generation)
-#include <PointProjectionTools.h>
-#include <MeshSamplingTools.h>
-#include <SimpleCloud.h>
 #include <ccMesh.h>
+#include <MeshSamplingTools.h>
+#include <PointProjectionTools.h>
+#include <SimpleCloud.h>
 
 //System
-#include <string.h>
+#include <string>
 
 //! Bundler camera
 struct BundlerCamera

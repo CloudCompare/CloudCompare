@@ -15,29 +15,40 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_SINUSX_FILTER_HEADER
-#define CC_SINUSX_FILTER_HEADER
+#ifndef CC_BUNDLER_FILTER_HEADER
+#define CC_BUNDLER_FILTER_HEADER
 
 #include "FileIOFilter.h"
 
-//! Sinusx curve I/O filter
-class QCC_IO_LIB_API SinusxFilter : public FileIOFilter
+//! Noah Snavely's Bundler output file filter
+/** See http://phototour.cs.washington.edu/
+**/
+class BundlerFilter : public FileIOFilter
 {
 public:
 
 	//static accessors
-	static inline QString GetFileFilter() { return "Sinusx curve (*.sx)"; }
-	static inline QString GetDefaultExtension() { return QString("sx"); }
+	static inline QString GetFileFilter() { return "Snavely's Bundler output (*.out)"; }
+	static inline QString GetDefaultExtension() { return "out"; }
 
 	//inherited from FileIOFilter
-	virtual bool exportSupported() const override { return true; }
 	virtual bool importSupported() const override { return true; }
 	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters) override;
 	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
 	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
 	virtual bool canLoadExtension(QString upperCaseExt) const override;
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+
+	//! Specific load method
+	CC_FILE_ERROR loadFileExtended(	const QString& filename,
+									ccHObject& container,
+									LoadParameters& parameters,
+									const QString& altKeypointsFilename = QString(),
+									bool undistortImages = false,
+									bool generateColoredDTM = false,
+									unsigned coloredDTMVerticesCount = 1000000,
+									float scaleFactor = 1.0f);
+
 };
 
-#endif //CC_SINUSX_FILTER_HEADER
+#endif //CC_BUNDLER_FILTER_HEADER

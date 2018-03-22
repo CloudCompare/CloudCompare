@@ -22,7 +22,6 @@
 #include "BinFilter.h"
 #include "SimpleBinFilter.h"
 #include "AsciiFilter.h"
-#include "BundlerFilter.h"
 #include "VTKFilter.h"
 #include "STLFilter.h"
 #include "LASFilter.h"
@@ -43,8 +42,6 @@
 #include "DxfFilter.h"
 #include "ShpFilter.h"
 #include "MascaretFilter.h"
-#include "SinusxFilter.h"
-#include "SalomeHydroFilter.h"
 #include "HeightProfileFilter.h"
 
 //Qt
@@ -110,13 +107,10 @@ void FileIOFilter::InitInternalFilters()
 #ifdef CC_GDAL_SUPPORT
 	Register(Shared(new RasterGridFilter()));
 #endif
-	Register(Shared(new BundlerFilter()));
 	Register(Shared(new ImageFileFilter()));
 	Register(Shared(new MAFilter()));
 	Register(Shared(new DepthMapFileFilter()));
 	Register(Shared(new MascaretFilter()));
-	Register(Shared(new SinusxFilter()));
-	Register(Shared(new SalomeHydroFilter()));
 	Register(Shared(new HeightProfileFilter()));
 }
 

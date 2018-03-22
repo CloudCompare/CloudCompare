@@ -1,9 +1,9 @@
-#ifndef Q_ADDITIONAL_IO_PLUGIN_HEADER
-#define Q_ADDITIONAL_IO_PLUGIN_HEADER
+#ifndef BUNDLERCOMMAND_H
+#define BUNDLERCOMMAND_H
 
 //##########################################################################
 //#                                                                        #
-//#         CLOUDCOMPARE PLUGIN: qAdditionalIO                             #
+//#                      CLOUDCOMPARE PLUGIN                               #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -18,32 +18,15 @@
 //#                                                                        #
 //##########################################################################
 
-//qCC
-#include "ccIOFilterPluginInterface.h"
+#include "ccCommandLineInterface.h"
 
-//! Additional I/O Formats
-class qAdditionalIOPlugin : public QObject, public ccIOFilterPluginInterface
+class BundlerCommand : public ccCommandLineInterface::Command
 {
-	Q_OBJECT
-	Q_INTERFACES(ccIOFilterPluginInterface)
-	
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qAdditionalIOFormatsPlugin")
-
 public:
-	//! Default constructor
-	explicit qAdditionalIOPlugin( QObject* parent = nullptr );
+	BundlerCommand();
+	virtual ~BundlerCommand() {}
 
-	// inherited from ccPluginInterface
-	virtual QString getName() const override;
-	virtual QString getDescription() const override;
-
-	virtual ContactList getAuthors() const override;
-	virtual ContactList getMaintainers() const override;
-	
-	virtual void registerCommands(ccCommandLineInterface* cmd) override;
-	
-	//inherited from ccIOFilterPluginInterface
-	QVector<FileIOFilter::Shared> getFilters() override;
+	virtual bool process( ccCommandLineInterface &cmd ) override;
 };
 
 #endif

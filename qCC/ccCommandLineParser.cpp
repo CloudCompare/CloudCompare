@@ -164,7 +164,6 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandCrop2D));
 	registerCommand(Command::Shared(new CommandCoordToSF));
 	registerCommand(Command::Shared(new CommandColorBanding));
-	registerCommand(Command::Shared(new CommandBundler));
 	registerCommand(Command::Shared(new CommandC2MDist));
 	registerCommand(Command::Shared(new CommandC2CDist));
 	registerCommand(Command::Shared(new CommandStatTest));
@@ -194,9 +193,6 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandComputeMeshVolume));
 	registerCommand(Command::Shared(new CommandSFColorScale));
 	registerCommand(Command::Shared(new CommandSFConvertToRGB));
-	//registerCommand(Command::Shared(new XXX));
-	//registerCommand(Command::Shared(new XXX));
-	//registerCommand(Command::Shared(new XXX));
 }
 
 ccCommandLineParser::~ccCommandLineParser()

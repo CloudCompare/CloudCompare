@@ -116,6 +116,7 @@ enum Image2DType
 class CameraRepresentation
 {
 public:
+	virtual ~CameraRepresentation() {}
 	virtual Image2DProjection getType() { return E57_NO_PROJECTION; }
 };
 

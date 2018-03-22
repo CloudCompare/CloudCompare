@@ -235,7 +235,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	}
 
 	//Intensity
-	ccScalarField* intensitySF = 0;
+	ccScalarField* intensitySF = nullptr;
 	bool hasInvalidIntensities = false;
 	{
 		int intensitySFIndex = cloud->getScalarFieldIndexByName(CC_E57_INTENSITY_FIELD_NAME);
@@ -614,7 +614,7 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 
 	imageNode.set(cameraRepresentationStr.toStdString(), cameraRepresentation);
 	images2D.append(imageNode);
-	blob.write((uint8_t*)ba.data(), 0, (size_t)imageSize);
+	blob.write((uint8_t*)ba.data(), 0, static_cast<size_t>(imageSize));
 }
 
 CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
@@ -629,8 +629,12 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SavePar
 	else
 	{
 		for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
+		{
 			if (entity->getChild(i)->isA(CC_TYPES::POINT_CLOUD))
+			{
 				scans.push_back(static_cast<ccPointCloud*>(entity->getChild(i)));
+			}
+		}
 	}
 
 	if (scans.empty())
@@ -866,7 +870,6 @@ bool NodeStructureToTree(ccHObject* currentTreeNode, e57::Node currentE57Node)
 			obj->setName(infoStr);
 			return false;
 		}
-		break;
 	}
 
 	obj->setName(infoStr);
@@ -1077,17 +1080,23 @@ void DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 	header.pointFields.columnIndexMaximum = 0;
 
 	if ( proto.isDefined("rowIndex") )
-		header.pointFields.rowIndexMaximum = (uint32_t)e57::IntegerNode(proto.get("rowIndex")).maximum();
+	{
+		header.pointFields.rowIndexMaximum = static_cast<uint32_t>(e57::IntegerNode(proto.get("rowIndex")).maximum());
+	}
 
 	if ( proto.isDefined("columnIndex") )
-		header.pointFields.columnIndexMaximum = (uint32_t)e57::IntegerNode(proto.get("columnIndex")).maximum();
+	{
+		header.pointFields.columnIndexMaximum = static_cast<uint32_t>(e57::IntegerNode(proto.get("columnIndex")).maximum());
+	}
 
 	header.pointFields.returnIndexField = proto.isDefined("returnIndex");
 	header.pointFields.returnCountField = proto.isDefined("returnCount");
 	header.pointFields.returnMaximum = 0;
 
 	if ( proto.isDefined("returnIndex") )
-		header.pointFields.returnMaximum = (uint8_t)e57::IntegerNode(proto.get("returnIndex")).maximum();
+	{
+		header.pointFields.returnMaximum = static_cast<uint8_t>(e57::IntegerNode(proto.get("returnIndex")).maximum());
+	}
 
 	header.pointFields.normXField = proto.isDefined("nor:normalX");
 	header.pointFields.normYField = proto.isDefined("nor:normalY");
@@ -1340,9 +1349,9 @@ static ScalarType s_maxIntensity = 0;
 static ScalarType s_minIntensity = 0;
 
 //for coordinate shift handling
-FileIOFilter::LoadParameters s_loadParameters;
+static FileIOFilter::LoadParameters s_loadParameters;
 
-ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progressDlg = 0)
+ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progressDlg = nullptr)
 {
 	if (node.type() != e57::E57_STRUCTURE)
 	{
@@ -1520,7 +1529,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 		{
 			ccLog::Error("[E57] Not enough memory!");
 			delete cloud;
-			return 0;
+			return nullptr;
 		}
 		cloud->showNormals(true);
 		if (header.pointFields.normXField)
@@ -1554,7 +1563,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 			ccLog::Error("[E57] Not enough memory!");
 			intensitySF->release();
 			delete cloud;
-			return 0;
+			return nullptr;
 		}
 		cloud->addScalarField(intensitySF);
 
@@ -1587,7 +1596,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 		{
 			ccLog::Error("[E57] Not enough memory!");
 			delete cloud;
-			return 0;
+			return nullptr;
 		}
 		if (header.pointFields.colorRedField)
 		{
@@ -1629,7 +1638,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 			ccLog::Error("[E57] Not enough memory!");
 			delete cloud;
 			returnIndexSF->release();
-			return 0;
+			return nullptr;
 		}
 		cloud->addScalarField(returnIndexSF);
 		arrays.scanIndexData.resize(chunkSize);
@@ -1652,7 +1661,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 	CCVector3d Pshift(0,0,0);
 	unsigned size = 0;
 	boost::int64_t realCount = 0;
-	while (size = dataReader.read())
+	while ((size = dataReader.read()))
 	{
 		for (unsigned i = 0; i < size; i++)
 		{
@@ -1793,7 +1802,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 	}
 	else if (realCount < pointCount)
 	{
-		ccLog::Warning(QString("[E57] We read less points than expected for scan '%1'! (%2/%3)").arg(scanNode.elementName().c_str()).arg(realCount).arg(pointCount));
+		ccLog::Warning(QString("[E57] We read fewer points than expected for scan '%1' (%2/%3)").arg(scanNode.elementName().c_str()).arg(realCount).arg(pointCount));
 		cloud->resize(static_cast<unsigned>(realCount));
 	}
 
@@ -1837,7 +1846,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	if (node.type() != e57::E57_STRUCTURE)
 	{
 		ccLog::Warning("[E57Filter] Image nodes should be STRUCTURES!");
-		return 0;
+		return nullptr;
 	}
 	e57::StructureNode imageNode(node);
 
@@ -1861,7 +1870,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 
 	//camera information
 	e57::ustring cameraRepresentationStr("none");
-	CameraRepresentation* cameraRepresentation = 0;
+	CameraRepresentation* cameraRepresentation = nullptr;
 	if (imageNode.isDefined("visualReferenceRepresentation"))
 	{
 		cameraRepresentation = new VisualReferenceRepresentation;
@@ -1886,7 +1895,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	if (!cameraRepresentation)
 	{
 		ccLog::Warning(QString("[E57] Image %1 has no associated camera representation!").arg(name.c_str()));
-		return 0;
+		return nullptr;
 	}
 	Image2DProjection cameraType = cameraRepresentation->getType();
 
@@ -1912,27 +1921,27 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	else
 	{
 		ccLog::Warning("[E57] Image format not handled (only jpg and png for the moment)");
-		return 0;
+		return nullptr;
 	}
 
 	if (visualRefRepresentation->imageSize == 0)
 	{
 		ccLog::Warning("[E57] Invalid image size!");
-		return 0;
+		return nullptr;
 	}
 
 	uint8_t* imageBits = new uint8_t[visualRefRepresentation->imageSize];
 	if (!imageBits)
 	{
 		ccLog::Warning("[E57] Not enough memory to load image!");
-		return 0;
+		return nullptr;
 	}
 	
 	if (cameraRepresentationNode.isDefined("imageMask"))
 		visualRefRepresentation->imageMaskSize = e57::BlobNode(cameraRepresentationNode.get("imageMask")).byteCount();
 
-	visualRefRepresentation->imageHeight = (int32_t)e57::IntegerNode(cameraRepresentationNode.get("imageHeight")).value();
-	visualRefRepresentation->imageWidth = (int32_t)e57::IntegerNode(cameraRepresentationNode.get("imageWidth")).value();
+	visualRefRepresentation->imageHeight = static_cast<int32_t>(e57::IntegerNode(cameraRepresentationNode.get("imageHeight")).value());
+	visualRefRepresentation->imageWidth = static_cast<int32_t>(e57::IntegerNode(cameraRepresentationNode.get("imageWidth")).value());
 
 	//Pixel size
 	switch(cameraType)
@@ -1946,6 +1955,9 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 			spherical->pixelWidth = e57::FloatNode(cameraRepresentationNode.get("pixelWidth")).value();
 		}
 		break;
+	case E57_NO_PROJECTION:
+	case E57_VISUAL:
+			break;
 	}
 
 	if (cameraType == E57_PINHOLE)
@@ -1972,7 +1984,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 		{
 			assert(cameraRepresentationNode.isDefined("jpegImage"));
 			e57::BlobNode jpegImage(cameraRepresentationNode.get("jpegImage"));
-			jpegImage.read(imageBits, 0, (size_t)visualRefRepresentation->imageSize);
+			jpegImage.read(imageBits, 0, static_cast<size_t>(visualRefRepresentation->imageSize));
 //#ifdef QT_DEBUG
 //			FILE* fp = fopen("test_e57.jpg","wb");
 //			fwrite(imageBits,visualRefRepresentation->imageSize,1,fp);
@@ -1985,7 +1997,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 			strcpy(imageFormat, "png");
 			assert(cameraRepresentationNode.isDefined("pngImage"));
 			e57::BlobNode pngImage(cameraRepresentationNode.get("pngImage"));
-			pngImage.read((uint8_t*)imageBits, 0, (size_t)visualRefRepresentation->imageSize);
+			pngImage.read((uint8_t*)imageBits, 0, static_cast<size_t>(visualRefRepresentation->imageSize));
 			break;
 		}
 	default:
@@ -2010,7 +2022,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	if (!loadResult)
 	{
 		ccLog::Warning("[E57] Failed to load image from blob data!");
-		return 0;
+		return nullptr;
 	}
 
 	ccImage* imageObj = 0;
@@ -2075,9 +2087,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 		imageObj->setAspectRatio(static_cast<float>(spherical->pixelWidth / spherical->pixelHeight) * imageObj->getAspectRatio());
 	}
 
-	if (cameraRepresentation)
-		delete cameraRepresentation;
-	cameraRepresentation=0;
+	delete cameraRepresentation;
 
 	return imageObj;
 }

@@ -5,7 +5,10 @@ option( INSTALL_QADDITIONAL_IO_PLUGIN "Check to install qAdditionalIO plugin" OF
 if (INSTALL_QADDITIONAL_IO_PLUGIN)
     project( INSTALL_QADDITIONAL_IO_PLUGIN )
 
-	add_subdirectory( filters )
+	include_directories( src )
+	
+	add_subdirectory( src )
+	add_subdirectory( ui )
 	
     include( ../CMakePluginTpl.cmake )    
 endif()

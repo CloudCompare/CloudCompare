@@ -22,7 +22,6 @@
 
 //qCC_io
 #include <AsciiFilter.h>
-#include <BundlerFilter.h>
 #include <FBXFilter.h>
 #include <PlyFilter.h>
 
@@ -82,11 +81,6 @@ static const char COMMAND_CROP[]							= "CROP";
 static const char COMMAND_CROP_OUTSIDE[]					= "OUTSIDE";
 static const char COMMAND_CROP_2D[]							= "CROP2D";
 static const char COMMAND_COLOR_BANDING[]					= "CBANDING";
-static const char COMMAND_BUNDLER[]							= "BUNDLER_IMPORT"; //Import Bundler file + orthorectification
-static const char COMMAND_BUNDLER_ALT_KEYPOINTS[]			= "ALT_KEYPOINTS";
-static const char COMMAND_BUNDLER_SCALE_FACTOR[]			= "SCALE_FACTOR";
-static const char COMMAND_BUNDLER_UNDISTORT[]				= "UNDISTORT";
-static const char COMMAND_BUNDLER_COLOR_DTM[]				= "COLOR_DTM";
 static const char COMMAND_C2M_DIST[]						= "C2M_DIST";
 static const char COMMAND_C2M_DIST_FLIP_NORMALS[]			= "FLIP_NORMS";
 static const char COMMAND_C2C_DIST[]						= "C2C_DIST";
@@ -2679,92 +2673,6 @@ struct CommandColorBanding : public ccCommandLineInterface::Command
 				return false;
 		}
 
-		return true;
-	}
-};
-
-struct CommandBundler : public ccCommandLineInterface::Command
-{
-	CommandBundler() : ccCommandLineInterface::Command("Bundler", COMMAND_BUNDLER) {}
-
-	virtual bool process(ccCommandLineInterface& cmd) override
-	{
-		cmd.print("[BUNDLER]");
-		if (cmd.arguments().empty())
-			return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_BUNDLER));
-
-		//open specified file
-		QString bundlerFilename(cmd.arguments().takeFirst());
-		cmd.print(QObject::tr("Importing Bundler file: '%1'").arg(bundlerFilename));
-
-		QString altKeypointsFilename;
-		bool undistortImages = false;
-		bool generateColoredDTM = false;
-		unsigned coloredDTMVerticesCount = 0;
-		float scaleFactor = 1.0f;
-
-		//inner loop for Bundler import options
-		while (!cmd.arguments().empty())
-		{
-			QString argument = cmd.arguments().front();
-			if (ccCommandLineInterface::IsCommand(argument, COMMAND_BUNDLER_ALT_KEYPOINTS))
-			{
-				//local option confirmed, we can move on
-				cmd.arguments().pop_front();
-
-				if (cmd.arguments().empty())
-					return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_BUNDLER_ALT_KEYPOINTS));
-				altKeypointsFilename = cmd.arguments().takeFirst();
-			}
-			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_BUNDLER_SCALE_FACTOR))
-			{
-				//local option confirmed, we can move on
-				cmd.arguments().pop_front();
-
-				if (cmd.arguments().empty())
-					return cmd.error(QObject::tr("Missing parameter: value after \"-%1\"").arg(COMMAND_BUNDLER_SCALE_FACTOR));
-				bool conversionOk = false;
-				scaleFactor = cmd.arguments().takeFirst().toFloat(&conversionOk);
-				if (!conversionOk)
-					return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_BUNDLER_SCALE_FACTOR));
-			}
-			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_BUNDLER_UNDISTORT))
-			{
-				//local option confirmed, we can move on
-				cmd.arguments().pop_front();
-
-				undistortImages = true;
-			}
-			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_BUNDLER_COLOR_DTM))
-			{
-				//local option confirmed, we can move on
-				cmd.arguments().pop_front();
-
-				if (cmd.arguments().empty())
-					return cmd.error(QObject::tr("Missing parameter: vertices count after \"-%1\"").arg(COMMAND_BUNDLER_COLOR_DTM));
-				bool conversionOk = false;
-				coloredDTMVerticesCount = cmd.arguments().takeFirst().toUInt(&conversionOk);
-				if (!conversionOk)
-					return cmd.error(QObject::tr("Invalid parameter: vertices count after \"-%1\"").arg(COMMAND_BUNDLER_COLOR_DTM));
-				generateColoredDTM = true;
-			}
-			else
-			{
-				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
-			}
-		}
-
-		ccHObject tempContainer;
-		FileIOFilter::LoadParameters parameters;
-		parameters.alwaysDisplayLoadDialog = false;
-		BundlerFilter().loadFileExtended(	qPrintable(bundlerFilename),
-											tempContainer,
-											parameters,
-											altKeypointsFilename,
-											undistortImages,
-											generateColoredDTM,
-											coloredDTMVerticesCount,
-											scaleFactor);
 		return true;
 	}
 };

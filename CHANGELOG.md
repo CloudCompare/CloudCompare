@@ -73,7 +73,16 @@ v2.10.alpha - XX/XX/201X
 	* Plugins:
 		- The "About Plugins" dialog was rewritten to provide more information about installed plugins and to include I/O and GL plugins.
 		- Added several fields to the plugin interface: authors, maintainers, and reference links.
-		- I/O plugins now return a list of filters using getFilters() so they can handle multiple file extensions
+		- I/O plugins now have the option to return a list of filters using a new method *getFilters()* (so one plugin can handle multiple file extensions)
+		- Moved support for several less frequently used file formats to a new plugin called qAdditionalIO
+			- Snavely's Bundler output (*.out)
+			- Clouds + calibrated images [meta][ascii] (*.icm)
+			- Point + Normal cloud (*.pn)
+			- Clouds + sensor info. [meta][ascii] (*.pov)
+			- Point + Value cloud (*.pv)
+			- Salome Hydro polylines (*.poly)
+			- SinusX curve (*.sx)
+			- Mensi Soisic cloud (*.soi)
 		
 - Bug fix:
 

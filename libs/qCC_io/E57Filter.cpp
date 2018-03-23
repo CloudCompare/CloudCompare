@@ -77,7 +77,7 @@ struct TempArrays
 	std::vector<double> xData;
 	std::vector<double> yData;
 	std::vector<double> zData;
-	std::vector<boost::int8_t> isInvalidData;
+	std::vector<int8_t> isInvalidData;
 
 	//normals
 	std::vector<double> xNormData;
@@ -86,10 +86,10 @@ struct TempArrays
 
 	//scalar field
 	std::vector<double>	intData;
-	std::vector<boost::int8_t> isInvalidIntData;
+	std::vector<int8_t> isInvalidIntData;
 
 	//scan index field
-	std::vector<boost::int8_t> scanIndexData;
+	std::vector<int8_t> scanIndexData;
 
 	//color
 	std::vector<colorFieldType> redData;
@@ -502,7 +502,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 			if (returnIndexSF)
 			{
 				assert(!arrays.scanIndexData.empty());
-				arrays.scanIndexData[i] = static_cast<boost::int8_t>(returnIndexSF->getValue(index));
+				arrays.scanIndexData[i] = static_cast<int8_t>(returnIndexSF->getValue(index));
 			}
 			
 			if (!nprogress.oneStep())
@@ -809,66 +809,66 @@ bool NodeStructureToTree(ccHObject* currentTreeNode, e57::Node currentE57Node)
 	e57::ustring name = currentE57Node.elementName();
 	QString infoStr = QString(name.c_str() == 0 || name.c_str()[0]==0 ? "No name" : name.c_str());
 
-	switch(currentE57Node.type())
+	switch (currentE57Node.type())
 	{
 	case e57::E57_STRUCTURE:
-		{
-			infoStr += QString(" [STRUCTURE]");
-			e57::StructureNode s = static_cast<e57::StructureNode>(currentE57Node);
-			for (boost::int64_t i=0;i<s.childCount();++i)
-				NodeStructureToTree(obj,s.get(i));
-		}
-		break;
+	{
+		infoStr += QString(" [STRUCTURE]");
+		e57::StructureNode s = static_cast<e57::StructureNode>(currentE57Node);
+		for (int64_t i = 0; i < s.childCount(); ++i)
+			NodeStructureToTree(obj, s.get(i));
+	}
+	break;
 	case e57::E57_VECTOR:
-		{
-			infoStr += QString(" [VECTOR]");
-			e57::VectorNode v = static_cast<e57::VectorNode>(currentE57Node);
-			for (boost::int64_t i=0;i<v.childCount();++i)
-				NodeStructureToTree(obj,v.get(i));
-		}
-		break;
+	{
+		infoStr += QString(" [VECTOR]");
+		e57::VectorNode v = static_cast<e57::VectorNode>(currentE57Node);
+		for (int64_t i = 0; i < v.childCount(); ++i)
+			NodeStructureToTree(obj, v.get(i));
+	}
+	break;
 	case e57::E57_COMPRESSED_VECTOR:
-		{
-			e57::CompressedVectorNode cv = static_cast<e57::CompressedVectorNode>(currentE57Node);
-			infoStr += QString(" [COMPRESSED VECTOR (%1 elements)]").arg(cv.childCount());
-		}
-		break;
+	{
+		e57::CompressedVectorNode cv = static_cast<e57::CompressedVectorNode>(currentE57Node);
+		infoStr += QString(" [COMPRESSED VECTOR (%1 elements)]").arg(cv.childCount());
+	}
+	break;
 	case e57::E57_INTEGER:
-		{
-			e57::IntegerNode i = static_cast<e57::IntegerNode>(currentE57Node);
-			infoStr += QString(" [INTEGER: %1]").arg(i.value());
-		}
-		break;
+	{
+		e57::IntegerNode i = static_cast<e57::IntegerNode>(currentE57Node);
+		infoStr += QString(" [INTEGER: %1]").arg(i.value());
+	}
+	break;
 	case e57::E57_SCALED_INTEGER:
-		{
-			e57::ScaledIntegerNode si = static_cast<e57::ScaledIntegerNode>(currentE57Node);
-			infoStr += QString(" [SCALED INTEGER: %1]").arg(si.scaledValue());
-		}
-		break;
+	{
+		e57::ScaledIntegerNode si = static_cast<e57::ScaledIntegerNode>(currentE57Node);
+		infoStr += QString(" [SCALED INTEGER: %1]").arg(si.scaledValue());
+	}
+	break;
 	case e57::E57_FLOAT:
-		{
-			e57::FloatNode f = static_cast<e57::FloatNode>(currentE57Node);
-			infoStr += QString(" [FLOAT: %1]").arg(f.value());
-		}
-		break;
+	{
+		e57::FloatNode f = static_cast<e57::FloatNode>(currentE57Node);
+		infoStr += QString(" [FLOAT: %1]").arg(f.value());
+	}
+	break;
 	case e57::E57_STRING:
-		{
-			e57::StringNode s = static_cast<e57::StringNode>(currentE57Node);
-			infoStr += QString(" [STRING: %1]").arg(s.value().c_str());
-		}
-		break;
+	{
+		e57::StringNode s = static_cast<e57::StringNode>(currentE57Node);
+		infoStr += QString(" [STRING: %1]").arg(s.value().c_str());
+	}
+	break;
 	case e57::E57_BLOB:
-		{
-			e57::BlobNode b = static_cast<e57::BlobNode>(currentE57Node);
-			infoStr += QString(" [BLOB (%1 bytes)]").arg(b.byteCount());
-		}
-		break;
+	{
+		e57::BlobNode b = static_cast<e57::BlobNode>(currentE57Node);
+		infoStr += QString(" [BLOB (%1 bytes)]").arg(b.byteCount());
+	}
+	break;
 	default:
-		{
-			infoStr += QString( "[INVALID]");
-			obj->setName(infoStr);
-			return false;
-		}
+	{
+		infoStr += QString("[INVALID]");
+		obj->setName(infoStr);
+		return false;
+	}
 	}
 
 	obj->setName(infoStr);
@@ -1383,7 +1383,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 
 	//points
 	e57::CompressedVectorNode points(scanNode.get("points"));
-	boost::int64_t pointCount = points.childCount();
+	int64_t pointCount = points.childCount();
 	
 	//prototype for points
 	e57::StructureNode prototype(points.prototype());
@@ -1659,7 +1659,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 
 	CCVector3d Pshift(0,0,0);
 	unsigned size = 0;
-	boost::int64_t realCount = 0;
+	int64_t realCount = 0;
 	while ((size = dataReader.read()))
 	{
 		for (unsigned i = 0; i < size; i++)

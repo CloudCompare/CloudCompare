@@ -70,7 +70,12 @@ v2.10.alpha - XX/XX/201X
 	* LAS I/O:
 		- CloudCompare can now read and save extra dimensions (for any file version) - see https://github.com/CloudCompare/CloudCompare/pull/666
 
-	* Plugins:
+	* E57:
+		- the E57 plugin now uses [libE57Format](https://github.com/asmaloney/libE57Format) which is a fork of the old E57RefImpl 
+		- if you compile CloudCompare with the E57 plugin, you will need to use this new lib and change some CMake options to point at it - specifically **OPTION_USE_LIBE57FORMAT** and **LIBE57FORMAT_INSTALL_DIR**
+		- the E57 plugin is now available on macOS
+
+	* Plugins (General):
 		- The "About Plugins" dialog was rewritten to provide more information about installed plugins and to include I/O and GL plugins.
 		- Added several fields to the plugin interface: authors, maintainers, and reference links.
 		- I/O plugins now have the option to return a list of filters using a new method *getFilters()* (so one plugin can handle multiple file extensions)
@@ -83,8 +88,8 @@ v2.10.alpha - XX/XX/201X
 			- Salome Hydro polylines (*.poly)
 			- SinusX curve (*.sx)
 			- Mensi Soisic cloud (*.soi)
-		
-- Bug fix:
+
+- bug fixes:
 
 	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values
 	* Point picking was performed on each click, even when double-clicking. This could actually prevent the double-click from

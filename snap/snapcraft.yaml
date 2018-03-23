@@ -25,7 +25,7 @@ apps:
 
 parts:
   cloudcompare:
-    after: [desktop-qt5,eigen, e57]
+    after: [desktop-qt5, eigen, pdal]
     plugin: cmake
     source: https://github.com/CloudCompare/CloudCompare.git
     source-branch: master
@@ -38,12 +38,12 @@ parts:
       - libboost-program-options-dev
       - libcgal-dev
       - libcgal-qt5-dev
-      - liblas-c-dev
-      - liblas-dev
       - libswscale-dev
       - libvxl1-dev
       - libqt5opengl5-dev
       - qt5-default
+      - libgdal-dev
+      - libxerces-c-dev
     prepare: |
       sed -i '/CMAKE_INSTALL_RPATH/d' ../src/CMakeLists.txt 
     configflags:
@@ -58,7 +58,6 @@ parts:
       - -DOPTION_USE_GDAL=ON
       - -DOPTION_USE_DXF_LIB=ON
       - -DINSTALL_QSSAO_PLUGIN=ON
-      - -DOPTION_USE_LIBLAS=ON
       - -DINSTALL_QGMMREG_PLUGIN=ON
       - -DINSTALL_QANIMATION_PLUGIN=ON
       - -DINSTALL_QCSF_PLUGIN=ON
@@ -74,24 +73,54 @@ parts:
       - -DINSTALL_QHOUGH_NORMALS_PLUGIN=ON
       - -DINSTALL_QCOMPASS_PLUGIN=ON
       - -DEIGEN_ROOT_DIR=$SNAPCRAFT_STAGE/include/eigen3
-      - -DLIBLAS_INCLUDE_DIR="/usr/include"
-      - -DLIBLAS_RELEASE_LIBRARY_FILE="/usr/lib/liblas.so"
-      - -DOPTION_USE_LIBE57=ON
-      - -DLIBE57_INSTALL_DIR=$SNAPCRAFT_STAGE
+      - -DOPTION_PDAL_LAS=ON
+      - -DJSON_ROOT_DIR=/usr/include/jsoncpp
+      - -DOPTION_USE_LIBE57FORMAT=ON
+      - -DLIBE57FORMAT_INSTALL_DIR=$SNAPCRAFT_STAGE
       - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
+      - -OPTION_PDAL_LAS=ON
     install: 
       make install
-  e57:
+  pdal:
+    after: [laszip, eigen]
     plugin: cmake
-    prepare: |
-      sed -i '154 i\set_property(TARGET E57RefImpl PROPERTY POSITION_INDEPENDENT_CODE ON)' ../src/CMakeLists.txt
-    source: svn://svn.code.sf.net/p/e57-3d-imgfmt/code/trunk
+    source: https://github.com/PDAL/PDAL.git
+    source-tag: "1.6"
     build-packages:
-      - build-essential 
-    prime: [ -* ]
+      - build-essential
+      - libgdal-dev
+      - libgeotiff-dev
+      - libjsoncpp-dev
+    configflags:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
+      - -DWITH_TESTS=OFF
+      - -DWITH_LASZIP=ON
+      - -DBUILD_PLUGIN_PYTHON=OFF
+      - -DBUILD_PLUGIN_PGPOINTCLOUD=OFF
+    install: 
+      make install
+    stage: [ include/*, lib/* ]
+    prime: [ lib/* ]
+  laszip:
+    plugin: cmake
+    source: https://github.com/LASzip/LASzip.git
+    source-tag: "3.2.0"
+    build-packages:
+      - build-essential
+    configflags:
+      - -DCMAKE_BUILD_TYPE=Release
+    stage: [ include/*, lib/* ]
+    prime: [ lib/* ]
   eigen:
     plugin: cmake
+    configflags:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DEIGEN_DONT_VECTORIZE=ON
+#maybe the "don't vectorize" is a little too strong, but it's safer 
+      - -DBUILD_TESTING=OFF
     source: http://bitbucket.org/eigen/eigen/get/3.2.10.tar.bz2
+    stage: [ include/* ]
     prime: [ -* ]
   launcher:
     plugin: dump

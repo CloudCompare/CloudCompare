@@ -22,9 +22,8 @@
 //Local
 #include "E57Header.h"
 
-//libE57
-#include <e57/E57Foundation.h>
-//using namespace e57; //conflict between boost and stdint!
+//libE57Format
+#include <E57Foundation.h>
 
 //CCLib
 #include <ScalarField.h>

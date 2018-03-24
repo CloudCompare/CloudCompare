@@ -18,31 +18,22 @@
 //#                                                                        #
 //##########################################################################
 
-//qCC
 #include "ccIOFilterPluginInterface.h"
 
 //! Additional I/O Formats
-class qAdditionalIOPlugin : public QObject, public ccIOFilterPluginInterface
+class qAdditionalIO : public QObject, public ccIOFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccIOFilterPluginInterface)
 	
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qAdditionalIOFormatsPlugin")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qAdditionalIO" FILE "info.json")
 
 public:
-	//! Default constructor
-	explicit qAdditionalIOPlugin( QObject* parent = nullptr );
-
-	// inherited from ccPluginInterface
-	virtual QString getName() const override;
-	virtual QString getDescription() const override;
-
-	virtual ContactList getAuthors() const override;
-	virtual ContactList getMaintainers() const override;
+	explicit qAdditionalIO( QObject* parent = nullptr );
 	
 	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 	
-	//inherited from ccIOFilterPluginInterface
+	// inherited from ccIOFilterPluginInterface
 	QVector<FileIOFilter::Shared> getFilters() override;
 };
 

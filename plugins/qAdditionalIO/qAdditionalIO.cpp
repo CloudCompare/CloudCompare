@@ -29,52 +29,18 @@
 #include "SoiFilter.h"
 
 
-qAdditionalIOPlugin::qAdditionalIOPlugin( QObject* parent )
-	: QObject( parent )
+qAdditionalIO::qAdditionalIO( QObject* parent ) :
+	QObject( parent )
+  , ccIOFilterPluginInterface( ":/CC/plugin/qAdditionalIO/info.json" )
 {
 }
 
-QString qAdditionalIOPlugin::getName() const
-{
-	return QStringLiteral( "Additional I/O" );
-}
-
-QString qAdditionalIOPlugin::getDescription() const
-{
-	return QStringLiteral( "This plugin adds some less frequently used I/O formats to CloudCompare:"
-						   "<ul>"
-						   "<li>Snavely's Bundler output (*.out)</li>"
-						   "<li>Clouds + calibrated images [meta][ascii] (*.icm)</li>"
-						   "<li>Point + Normal cloud (*.pn)</li>"
-						   "<li>Clouds + sensor info. [meta][ascii] (*.pov)</li>"
-						   "<li>Point + Value cloud (*.pv)</li>"
-						   "<li>Salome Hydro polylines (*.poly)</li>"
-						   "<li>SinusX curve (*.sx)</li>"
-						   "<li>Mensi Soisic cloud (*.soi)</li>"
-						   "</ul>");
-}
-
-ccPluginInterface::ContactList qAdditionalIOPlugin::getAuthors() const
-{
-	return ccPluginInterface::ContactList{
-		Contact{ "Daniel Girardeau-Montaut", "daniel.girardeau@gmail.com" },
-	};
-}
-
-ccPluginInterface::ContactList qAdditionalIOPlugin::getMaintainers() const
-{
-	return ccPluginInterface::ContactList{
-		Contact{ "Daniel Girardeau-Montaut", "daniel.girardeau@gmail.com" },
-		Contact{ "Andy Maloney", "asmaloney@gmail.com" },
-	};
-}
-
-void qAdditionalIOPlugin::registerCommands( ccCommandLineInterface *cmd )
+void qAdditionalIO::registerCommands( ccCommandLineInterface *cmd )
 {
 	cmd->registerCommand( ccCommandLineInterface::Command::Shared( new BundlerCommand ) );	
 }
 
-QVector<FileIOFilter::Shared> qAdditionalIOPlugin::getFilters()
+QVector<FileIOFilter::Shared> qAdditionalIO::getFilters()
 {
 	return QVector<FileIOFilter::Shared>{
 		FileIOFilter::Shared( new BundlerFilter ),

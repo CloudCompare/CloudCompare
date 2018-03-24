@@ -1,0 +1,31 @@
+{
+	"type" : "I/O",
+	"name" : "Additional I/O",
+	"description": "This plugin adds some less frequently used I/O formats to CloudCompare:
+		<ul>
+		<li>Snavely's Bundler output (*.out)</li>
+		<li>Clouds + calibrated images [meta][ascii] (*.icm)</li>
+		<li>Point + Normal cloud (*.pn)</li>
+		<li>Clouds + sensor info. [meta][ascii] (*.pov)</li>
+		<li>Point + Value cloud (*.pv)</li>
+		<li>Salome Hydro polylines (*.poly)</li>
+		<li>SinusX curve (*.sx)</li>
+		<li>Mensi Soisic cloud (*.soi)</li>
+		</ul>",
+	"authors" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		},
+		{
+			"name" : "Andy Maloney",
+			"email" : "asmaloney@gmail.com"
+		}
+	]
+}

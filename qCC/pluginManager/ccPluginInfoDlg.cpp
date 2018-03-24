@@ -181,29 +181,50 @@ void ccPluginInfoDlg::updatePluginInfo( const ccPluginInterface *plugin )
 	
 	const QSize iconSize( 64, 64 );
 	
+	QPixmap	iconPixmap;
+	
+	if ( !plugin->getIcon().isNull() )
+	{
+		iconPixmap = plugin->getIcon().pixmap( iconSize );
+	}
+	
 	switch ( plugin->getType() )
 	{
 		case CC_STD_PLUGIN:
 		{
-			m_UI->mIcon->setPixmap( plugin->getIcon().pixmap( iconSize ) );
+			if ( iconPixmap.isNull() )
+			{
+				iconPixmap = QPixmap( ":/CC/pluginManager/images/std_plugin.png" ).scaled( iconSize );
+			}
+			
 			m_UI->mPluginTypeLabel->clear();
 			break;				
 		}
 			
 		case CC_GL_FILTER_PLUGIN:
 		{
-			m_UI->mIcon->setPixmap( plugin->getIcon().pixmap( iconSize ) );
+			if ( iconPixmap.isNull() )
+			{
+				iconPixmap = QPixmap( ":/CC/pluginManager/images/gl_plugin.png" ).scaled( iconSize );
+			}
+			
 			m_UI->mPluginTypeLabel->setText( tr( "GL Shader" ) );
 			break;
 		}
 			
 		case CC_IO_FILTER_PLUGIN:
 		{
-			m_UI->mIcon->setPixmap( QPixmap( ":/CC/pluginManager/images/io_plugin.png" ).scaled( iconSize ) );
+			if ( iconPixmap.isNull() )
+			{
+				iconPixmap = QPixmap( ":/CC/pluginManager/images/io_plugin.png" ).scaled( iconSize );
+			}
+			
 			m_UI->mPluginTypeLabel->setText( tr( "I/O" ) );
 			break;
 		}
 	}
+
+	m_UI->mIcon->setPixmap( iconPixmap );
 	
 	m_UI->mNameLabel->setText( plugin->getName() );
 	m_UI->mDescriptionTextEdit->setHtml( plugin->getDescription() );

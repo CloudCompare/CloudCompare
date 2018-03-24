@@ -2,11 +2,10 @@ cmake_minimum_required(VERSION 3.0)
 
 cmake_policy(PUSH)
 
-include ( CMakePolicies.cmake )
-
 project( CloudCompareProjects )
 
-include( CMakeSetCompilerOptions.cmake )
+include( cmake/CMakePolicies.cmake )
+include( cmake/CMakeSetCompilerOptions.cmake )
 
 # Default debug suffix for libraries.
 set( CMAKE_DEBUG_POSTFIX "d" )
@@ -78,12 +77,12 @@ elseif( UNIX )
 endif()
 
 # Load advanced scripts
-include( CMakeInclude.cmake )
+include( cmake/CMakeInclude.cmake )
 
 add_subdirectory( CC )
 
 # Add external libraries
-include( CMakeExternalLibs.cmake )
+include( cmake/CMakeExternalLibs.cmake )
 
 # Contrib. libraries (mainly for I/O)
 include( contrib/AllSupport.cmake )

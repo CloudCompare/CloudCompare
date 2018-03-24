@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
 cmake_policy(PUSH)
-include ( ../CMakePolicies.cmake )
 
 # Options
 option( COMPILE_CC_CORE_LIB_WITH_QT "Check to compile CC_CORE_LIB with Qt (to enable parallel processing)" ON )
@@ -11,8 +10,8 @@ option( COMPILE_CC_CORE_LIB_SHARED "Check to compile CC_CORE_LIB as a shared lib
 # to compile CCLib only! (CMake implicitly imposes to declare a project before anything...)
 project( CC_CORE_LIB VERSION 1.0 )
 
-# add this after the first call to 'project'
-include ( ../CMakeSetCompilerOptions.cmake )
+include ( ../cmake/CMakePolicies.cmake )
+include ( ../cmake/CMakeSetCompilerOptions.cmake )
 
 # CGAL takes precedence over triangle
 if (COMPILE_CC_CORE_LIB_WITH_CGAL)
@@ -21,7 +20,7 @@ endif()
 
 # Additional dependencies (only Qt in fact)
 if (COMPILE_CC_CORE_LIB_WITH_QT)
-	include( ../CMakeExternalLibs.cmake )
+	include( ../cmake/CMakeExternalLibs.cmake )
 endif()
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
@@ -51,7 +50,7 @@ if ( COMPILE_CC_CORE_LIB_WITH_QT )
 endif()
 
 # Load advanced scripts
-include( ../CMakeInclude.cmake )
+include( ../cmake/CMakeInclude.cmake )
 
 if ( COMPILE_CC_CORE_LIB_SHARED )
 	if (WIN32)

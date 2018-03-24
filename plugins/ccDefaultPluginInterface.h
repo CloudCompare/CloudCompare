@@ -11,41 +11,39 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GL_FILTER_PLUGIN_INTERFACE_HEADER
-#define CC_GL_FILTER_PLUGIN_INTERFACE_HEADER
+#ifndef CC_DEFAULT_PLUGIN_INTERFACE_HEADER
+#define CC_DEFAULT_PLUGIN_INTERFACE_HEADER
 
-//CC_FBO_LIB
-#include <ccGlFilter.h>
+#include <QString>
 
-#include "ccDefaultPluginInterface.h"
+#include "ccPluginInterface.h"
 
-//! GL Filter plugin interface
-/** Version 1.2
-**/
-class ccGLFilterPluginInterface : public ccDefaultPluginInterface
+
+class ccDefaultPluginData;
+
+
+class ccDefaultPluginInterface : public ccPluginInterface
 {
 public:
-	ccGLFilterPluginInterface( const QString &resourcePath = QString() ) :
-		ccDefaultPluginInterface( resourcePath )
-	{
-	}
+	ccDefaultPluginInterface( const QString &resourcePath = QString() );
+
+	virtual ~ccDefaultPluginInterface();
+
+	virtual QString getName() const override;
+	virtual QString getDescription() const override;
 	
-	virtual ~ccGLFilterPluginInterface() {}
-
-	//inherited from ccPluginInterface
-	virtual CC_PLUGIN_TYPE getType() const { return CC_GL_FILTER_PLUGIN; }
-
-	//! Returns a GL filter object
-	virtual ccGlFilter* getFilter() = 0;
+	virtual QIcon getIcon() const override;
+	
+	virtual ReferenceList getReferences() const override;
+	virtual ContactList getAuthors() const override;
+	virtual ContactList getMaintainers() const override;
+	
+private:
+	ccDefaultPluginData	*m_data;
 };
 
-Q_DECLARE_METATYPE(ccGLFilterPluginInterface *);
-
-Q_DECLARE_INTERFACE(ccGLFilterPluginInterface,
-                    "edf.rd.CloudCompare.ccGLFilterPluginInterface/1.2")
-
-#endif //CC_GL_FILTER_PLUGIN_INTERFACE_HEADER
+#endif

@@ -20,17 +20,24 @@
 
 #include <QVector>
 
-#include "ccPluginInterface.h"
-
 //qCC_io
 #include <FileIOFilter.h>
+
+#include "ccDefaultPluginInterface.h"
 
 //! I/O filter plugin interface
 /** Version 1.1
 **/
-class ccIOFilterPluginInterface : public ccPluginInterface
+class ccIOFilterPluginInterface : public ccDefaultPluginInterface
 {
 public:
+	ccIOFilterPluginInterface( const QString &resourcePath = QString() ) :
+		ccDefaultPluginInterface( resourcePath )
+	{
+	}
+	
+	virtual ~ccIOFilterPluginInterface() {}
+	
 	//inherited from ccPluginInterface
 	virtual CC_PLUGIN_TYPE getType() const { return CC_IO_FILTER_PLUGIN; }
 

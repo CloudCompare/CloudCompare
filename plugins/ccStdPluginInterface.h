@@ -26,7 +26,7 @@
 #include <ccHObject.h>
 
 //qCC
-#include "ccPluginInterface.h"
+#include "ccDefaultPluginInterface.h"
 #include "ccMainAppInterface.h"
 
 //UI Modification flags
@@ -40,12 +40,17 @@
 	and the associated ccMainAppInterface member should give it
 	access to everything it needs in the main application.
 **/
-class ccStdPluginInterface : public ccPluginInterface
-{
+class ccStdPluginInterface : public ccDefaultPluginInterface
+{	
 public:
 
 	//! Default constructor
-	ccStdPluginInterface() : ccPluginInterface(), m_app(0) {}
+	ccStdPluginInterface( const QString &resourcePath = QString() ) :
+		ccDefaultPluginInterface( resourcePath )
+	  , m_app(nullptr)
+	{
+	}
+	
 	//! Destructor
 	virtual ~ccStdPluginInterface() {}
 

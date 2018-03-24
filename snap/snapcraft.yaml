@@ -25,7 +25,7 @@ apps:
 
 parts:
   cloudcompare:
-    after: [desktop-qt5, eigen, pdal]
+    after: [desktop-qt5, eigen, pdal, e57]
     plugin: cmake
     source: https://github.com/CloudCompare/CloudCompare.git
     source-branch: master
@@ -112,14 +112,16 @@ parts:
       - -DCMAKE_BUILD_TYPE=Release
     stage: [ include/*, lib/* ]
     prime: [ lib/* ]
+    install: 
+      make install
   eigen:
     plugin: cmake
+    source: http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2
     configflags:
       - -DCMAKE_BUILD_TYPE=Release
-      - -DEIGEN_DONT_VECTORIZE=ON
-#maybe the "don't vectorize" is a little too strong, but it's safer 
-      - -DBUILD_TESTING=OFF
-    source: http://bitbucket.org/eigen/eigen/get/3.2.10.tar.bz2
+      - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
+    install:
+      make install
     stage: [ include/* ]
     prime: [ -* ]
   launcher:

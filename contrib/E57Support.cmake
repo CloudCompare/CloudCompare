@@ -14,26 +14,6 @@ if( ${OPTION_USE_LIBE57FORMAT} )
 	else()
 		include_directories( ${LIBE57FORMAT_INSTALL_DIR}/include/E57Format )
 	endif()
-
-	# Find Boost
-	# Boost (using static, multithreaded libraries)
-	if ( WIN32 )
-		if ( MSVC )
-			set(Boost_USE_STATIC_LIBS   ON)
-			set(Boost_USE_MULTITHREADED ON)
-		endif() 
-	elseif( APPLE )
-		set(Boost_USE_STATIC_LIBS   ON)
-		set(Boost_USE_MULTITHREADED ON)
-	endif()
-
-	find_package( Boost COMPONENTS system QUIET ) #DGM: not sure why, but "system" lib doesn't show up otherwise...
-	if( Boost_FOUND )
-		include_directories( ${Boost_INCLUDE_DIR} )
-	else()
-		set( BOOST_ROOT CACHE PATH "Location of the boost root directory" )
-		message( FATAL_ERROR "Unable to find boost library. Please set BOOST_ROOT to point to the boost distribution files." )
-	endif()
 	
 	# Find Xerces
 	if (WIN32)
@@ -93,9 +73,6 @@ function( target_link_LIBE57FORMAT ) # 1 argument: ARGV0 = project name
 					message( FATAL_ERROR "Unable to find Xerces library. Please set Xerces_LIBRARY_RELEASE to point to the (release) library file." )
 				endif()
 			endif()
-			
-			#Boost
-			target_link_libraries( ${ARGV0} ${Boost_LIBRARIES} )
 	
 			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_E57_SUPPORT XERCES_STATIC_LIBRARY )
 		else()

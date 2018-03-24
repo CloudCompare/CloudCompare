@@ -1,0 +1,15 @@
+{
+	"type" : "GL",
+	"name" : "Blur",
+	"description": "Bilateral smoothing (OpenGL shader)",
+	"authors" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		}
+	],
+	"maintainers" : [
+	],
+	"references" : [
+	]
+}

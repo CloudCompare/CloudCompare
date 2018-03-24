@@ -23,9 +23,10 @@
 
 #include "qBlur.h"
 
-QIcon qBlur::getIcon() const
+qBlur::qBlur(QObject *parent) :
+	QObject( parent )
+  , ccGLFilterPluginInterface( ":/CC/plugin/qBlur/info.json" )
 {
-    return QIcon();
 }
 
 ccGlFilter* qBlur::getFilter()
@@ -34,7 +35,7 @@ ccGlFilter* qBlur::getFilter()
 	double sigma = QInputDialog::getDouble(0, "Bilateral filter", "Sigma (pixel)", 1.0, 0.1, 8.0, 1, &ok);
 
 	if (!ok || sigma < 0)
-		return 0;
+		return nullptr;
 
 	unsigned halfFilterSize = static_cast<unsigned>(ceil(2.5*sigma));
 

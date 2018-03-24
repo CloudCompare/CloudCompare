@@ -18,21 +18,17 @@
 #ifndef Q_BLUR_PLUGIN_HEADER
 #define Q_BLUR_PLUGIN_HEADER
 
-#include "../ccGLFilterPluginInterface.h"
+#include "ccGLFilterPluginInterface.h"
 
 //! Blur shader
 class qBlur : public QObject, public ccGLFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccGLFilterPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qBlur")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qBlur" FILE "info.json")
 
 public:
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const override { return "Blur (shader)"; }
-	virtual QString getDescription() const override { return "Bilateral smoothing (OpenGL shader)"; }
-	virtual QIcon getIcon() const override;
+	qBlur( QObject *parent = nullptr );
 
 	//inherited from ccGLFilterPluginInterface
 	ccGlFilter* getFilter() override;

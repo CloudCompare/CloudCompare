@@ -206,7 +206,7 @@ void ccPluginInfoDlg::updatePluginInfo( const ccPluginInterface *plugin )
 	}
 	
 	m_UI->mNameLabel->setText( plugin->getName() );
-	m_UI->mDescriptionTextEdit->setText( plugin->getDescription() );
+	m_UI->mDescriptionTextEdit->setHtml( plugin->getDescription() );
 	
 	const QString referenceText = sFormatReferenceList( plugin->getReferences() );
 	

@@ -32,19 +32,12 @@ class qAnimation : public QObject, public ccStdPluginInterface
 	Q_OBJECT
 
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qAnimation")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qAnimation" FILE "info.json")
 
 public:
 
 	//! Default constructor
 	qAnimation(QObject* parent = nullptr);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const override;
-	virtual QString getDescription() const override;
-	virtual QIcon getIcon() const override;
-
-	virtual ContactList getAuthors() const override;
 	
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;

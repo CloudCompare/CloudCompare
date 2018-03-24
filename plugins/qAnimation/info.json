@@ -1,0 +1,15 @@
+{
+	"type" : "Standard",
+	"name" : "Animation",
+	"icon" : ":/CC/plugin/qAnimation/animation.png",
+	"description": "Creates a movie from a series of views.",
+	"authors" : [
+		{
+			"name" : "Ryan Wicks, 2G Robotics Inc."
+		}
+	],
+	"maintainers" : [
+	],
+	"references" : [
+	]
+}

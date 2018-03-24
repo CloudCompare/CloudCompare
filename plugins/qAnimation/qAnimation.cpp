@@ -44,32 +44,11 @@ static ViewPortList sGetSelectedViewPorts( const ccHObject::Container &selectedE
 	return viewports;
 }
 
-qAnimation::qAnimation(QObject* parent)
-	: QObject(parent)
-	, m_action(nullptr)
+qAnimation::qAnimation(QObject* parent) :
+	QObject( parent )
+  , ccStdPluginInterface( ":/CC/plugin/qAnimation/info.json" )
+  , m_action( nullptr )
 {
-}
-
-QString qAnimation::getName() const
-{
-	return QStringLiteral( "Animation" );
-}
-
-QString qAnimation::getDescription() const
-{
-	return QStringLiteral( "Animation plugin, used to build a movie from a series of views." );
-}
-
-QIcon qAnimation::getIcon() const
-{
-	return QIcon(":/CC/plugin/qAnimation/animation.png");
-}
-
-ccPluginInterface::ContactList qAnimation::getAuthors() const
-{
-	return ccPluginInterface::ContactList{
-		Contact{ "Ryan Wicks, 2G Robotics Inc.", QString() },
-	};	
 }
 
 void qAnimation::onNewSelection(const ccHObject::Container& selectedEntities)

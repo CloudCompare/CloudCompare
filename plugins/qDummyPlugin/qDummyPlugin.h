@@ -1,3 +1,6 @@
+#ifndef Q_DUMMY_PLUGIN_HEADER
+#define Q_DUMMY_PLUGIN_HEADER
+
 //##########################################################################
 //#                                                                        #
 //#                       CLOUDCOMPARE PLUGIN: qDummy                      #
@@ -15,21 +18,22 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_DUMMY_PLUGIN_HEADER
-#define Q_DUMMY_PLUGIN_HEADER
-
 //qCC
-#include "../ccStdPluginInterface.h"
+#include "ccStdPluginInterface.h"
 
 //! Dummy qCC plugin
-/** Replace the 'qDummyPlugin' string by your own plugin class name and then
-	check 'qDummyPlugin.cpp' for more directions (you must fill in the blank methods.
+/** Replace 'qDummyPlugin' by your own plugin class name throughout and then
+	check 'qDummyPlugin.cpp' for more directions.
 
-	The most important one is the 'getActions' method. This method should return all
-	actions (QAction objects). CloudCompare will automatically add them as an icon in
-	the plugin toolbar and to an entry in the plugin menu. If your plugin returns
-	several actions, CC will create a dedicated toolbar and sub-menu for your plugin. 
-	You are responsible for connecting these actions to custom slots of your plugin.
+	Each plugin requires an info.json file to provide information about itself -
+	the name, authors, maintainers, icon, etc..
+	
+	The one method you are required to implement is 'getActions'. This should
+	return all actions (QAction objects) for the plugin. CloudCompare will automatically
+	add these with their icons in the plugin toolbar and to the plugin menu. If
+	your plugin returns	several actions, CC will create a dedicated toolbar and a
+	sub-menu for your plugin. You are responsible for connecting these actions to
+	methods in your plugin.
 	
 	Use the ccStdPluginInterface::m_app variable for access to most of the CC
 	components (database, 3D views, console, etc.) - see the ccMainAppInterface
@@ -40,26 +44,19 @@ class qDummyPlugin : public QObject, public ccStdPluginInterface
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
 	
-	// replace qDummy by the plugin name (IID should be unique - let's hope your plugin name is unique ;)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qDummy")
+	// Replace "qDummy" by your plugin name (IID should be unique - let's hope your plugin name is unique ;)
+	// The info.json file provides information about the plugin to the loading system and
+	// it is displayed in the plugin information dialog.
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qDummy" FILE "info.json")
 
 public:
 
 	//! Default constructor
-	explicit qDummyPlugin( QObject* parent = nullptr );
-
-	// inherited from ccPluginInterface
-	virtual QString getName() const override;
-	virtual QString getDescription() const override;
-	virtual QIcon getIcon() const override;
-
-	virtual ReferenceList getReferences() const override;
-	virtual ContactList getAuthors() const override;
-	virtual ContactList getMaintainers() const override;
+	explicit qDummyPlugin( QObject *parent = nullptr );
 	
 	// inherited from ccStdPluginInterface
-	virtual void onNewSelection( const ccHObject::Container& selectedEntities ) override;
-	virtual void getActions( QActionGroup& group ) override;
+	virtual void onNewSelection( const ccHObject::Container &selectedEntities ) override;
+	virtual void getActions( QActionGroup &group ) override;
 
 private:
 

@@ -15,95 +15,59 @@
 //#                                                                        #
 //##########################################################################
 
-//First: replace all occurrences of 'qDummyPlugin' by your own plugin class name in this file!
-#include "qDummyPlugin.h"
+// First:
+//	Replace all occurrences of 'qDummyPlugin' by your own plugin class name in this file!
 
-//Qt
+// Second:
+//	Open qDummyPlugin.qrc, change the "prefix" and the icon filename for your plugin.
+//	Change the name of the file to <yourPluginName>.qrc
+
+// Third:
+//	Open the info.json file and fill in the information about the plugin.
+//	 "type" should be one of: "Standard", "GL", or "I/O" (required)
+//	 "name" is the name of the plugin (required)
+//	 "icon" is the Qt resource path to the plugin's icon (from the .qrc file)
+//	 "description" is used as a tootip if the plugin has actions and is displayed in the plugin dialog
+//	 "authors", "maintainers", and "references" show up in the plugin dialog as well
+
 #include <QtGui>
 
-// Default constructor: should mainly be used to initialize
-// actions (pointers) and other members
-qDummyPlugin::qDummyPlugin( QObject* parent )
-	: QObject( parent )
+#include "qDummyPlugin.h"
+
+// Default constructor:
+//	- pass the Qt resource path to the info.json file (from <yourPluginName>.qrc file) 
+//  - constructor should mainly be used to initialize actions and other members
+qDummyPlugin::qDummyPlugin( QObject *parent ) :
+	  QObject( parent )
+	, ccStdPluginInterface( ":/CC/plugin/qDummyPlugin/info.json" )
 	, m_action( nullptr )
 {
-}
-
-QString qDummyPlugin::getName() const
-{
-	return QString( "Dummy Plugin" );
-}
-
-QString qDummyPlugin::getDescription() const
-{
-	return QString( "This is a description of the marvelous Dummy plugin. It does nothing." );
-}
-
-// This method should return the plugin icon. It will be used mainly
-// if your plugin as several actions in which case CC will create a
-// dedicated sub-menu entry with this icon.
-QIcon qDummyPlugin::getIcon() const
-{
-	// Open qDummyPlugin.qrc (text file), update the "prefix" and the
-	// icon filenames. Then save it with the correct name (yourPlugin.qrc).
-	// Remove the original qDummyPlugin.qrc file.
-	return QIcon(":/CC/plugin/qDummyPlugin/icon.png");
-}
-
-// Return an optional list of references for the plugin.
-// This might be a journal article or a post online.
-// Note that the url is optional - if included it will add a clickable link for the reference.
-ccPluginInterface::ReferenceList qDummyPlugin::getReferences() const
-{
-	return ccPluginInterface::ReferenceList{
-		Reference{ "The unsuccessful self-treatment of a case of “writer's block”", "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1311997/" },
-		Reference{ "Sword swallowing and its side effects", "http://www.bmj.com/content/333/7582/1285" },
-		Reference{ "I thought of creating this wonderful plugin while I was hiking up Mont Blanc &#x26f0;", QString() },
-	};
-}
-
-// Return a list of the authors of the plugin.
-// Note that the email address is optional - if included, it will add a mailto
-// link for the email with a default subject of "CloudCompare <plugin name>".
-ccPluginInterface::ContactList qDummyPlugin::getAuthors() const
-{
-	return ccPluginInterface::ContactList{
-		Contact{ "Daniel Girardeau-Montaut", "daniel.girardeau@gmail.com" },
-	};
-}
-
-// Return a list of the maintainers of the plugin.
-// Note that the email address is optional - if included, it will add a mailto
-// link for the email with a default subject of "CloudCompare <plugin name>".
-ccPluginInterface::ContactList qDummyPlugin::getMaintainers() const
-{
-	return ccPluginInterface::ContactList{
-		Contact{ "Daniel Girardeau-Montaut", "daniel.girardeau@gmail.com" },
-		Contact{ "Andy Maloney", "asmaloney@gmail.com" },
-		Contact{ "Romain Janvier", "romain.janvier@hotmail.fr" },
-		Contact{ "Ihave Noemail", QString() },
-	};
 }
 
 // This method should enable or disable your plugin actions
 // depending on the currently selected entities ('selectedEntities').
 // For example: if none of the selected entities is a cloud, and your
 // plugin deals only with clouds, call 'm_action->setEnabled( false )'
-void qDummyPlugin::onNewSelection( const ccHObject::Container& selectedEntities )
+void qDummyPlugin::onNewSelection( const ccHObject::Container &selectedEntities )
 {
-	//if ( m_action )
-	//	m_action->setEnabled( !selectedEntities.empty() );
+	if ( m_action == nullptr )
+	{
+		return;
+	}
+	
+	// for example - only enable our action if something is selected
+	m_action->setEnabled( !selectedEntities.empty() );
 }
 
 // This method returns all the 'actions' your plugin can perform.
 // getActions() will be called only once, when plugin is loaded.
-void qDummyPlugin::getActions( QActionGroup& group )
+void qDummyPlugin::getActions( QActionGroup &group )
 {
 	// default action (if it has not been already created, this is the moment to do it)
 	if ( !m_action )
 	{
 		// Here we use the default plugin name, description, and icon,
-		// but each action can have its own.
+		// but each action should have its own.
 		m_action = new QAction( getName(), this );
 		m_action->setToolTip( getDescription() );
 		m_action->setIcon( getIcon() );
@@ -115,7 +79,7 @@ void qDummyPlugin::getActions( QActionGroup& group )
 	group.addAction( m_action );
 }
 
-// This is an example of an action's slot called when the corresponding action
+// This is an example of an action's method called when the corresponding action
 // is triggered (i.e. the corresponding icon or menu entry is clicked in CC's
 // main interface). You can access most of CC components (database,
 // 3D views, console, etc.) via the 'm_app' variable (see the ccMainAppInterface

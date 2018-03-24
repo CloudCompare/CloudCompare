@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC/plugin/qDummyPlugin" >
     <file>icon.png</file>
+    <file>info.json</file>
   </qresource>
 </RCC>

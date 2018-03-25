@@ -42,7 +42,7 @@ class ccCompass : public QObject, public ccStdPluginInterface, public ccPickingL
 {
 	Q_OBJECT
 		Q_INTERFACES(ccStdPluginInterface)
-		Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ccCompass")
+		Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ccCompass" FILE "info.json")
 
 public:
 	//! Default constructor
@@ -52,9 +52,6 @@ public:
 	~ccCompass();
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const override { return "Compass"; }
-	virtual QString getDescription() const override { return "A virtual 'compass' for measuring outcrop orientations"; }
-	virtual QIcon getIcon() const override;
 	virtual void stop() override { stopMeasuring(); m_dlg = nullptr; ccStdPluginInterface::stop(); } //called when the plugin is being stopped
 
 	//inherited from ccStdPluginInterface

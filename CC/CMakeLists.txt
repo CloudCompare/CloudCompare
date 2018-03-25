@@ -24,10 +24,6 @@ if (COMPILE_CC_CORE_LIB_WITH_QT)
 endif()
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
-if( MSVC )
-	include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include/msvc )
-endif()
-
 
 file( GLOB header_list include/*.h)
 file( GLOB source_list src/*.cpp src/*.h)

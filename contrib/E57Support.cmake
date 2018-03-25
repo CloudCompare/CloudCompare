@@ -5,7 +5,7 @@
 OPTION( OPTION_USE_LIBE57FORMAT "Build with libE57Format (ASTM E2807-11 E57 file format support)" OFF )
 
 if( ${OPTION_USE_LIBE57FORMAT} )
-
+        include()
 	# libE57Format
 	set( LIBE57FORMAT_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/contrib/libE57Format" CACHE PATH "libE57Format install directory (CMake INSTALL output)" )
 

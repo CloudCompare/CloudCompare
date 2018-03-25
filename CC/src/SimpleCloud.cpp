@@ -65,7 +65,7 @@ void SimpleCloud::addPoint(const PointCoordinateType P[])
 	m_validBB=false;
 }
 
-void SimpleCloud::forEach(genericPointAction& action)
+void SimpleCloud::forEach(genericPointAction action)
 {
 	unsigned n = m_points->currentSize();
 

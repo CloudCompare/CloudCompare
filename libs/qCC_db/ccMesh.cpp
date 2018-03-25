@@ -1482,7 +1482,7 @@ unsigned ccMesh::capacity() const
 	return m_triVertIndexes->capacity();
 }
 
-void ccMesh::forEach(genericTriangleAction& action)
+void ccMesh::forEach(genericTriangleAction action)
 {
 	if (!m_associatedCloud)
 		return;

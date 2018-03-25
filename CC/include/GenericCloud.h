@@ -19,6 +19,8 @@
 #ifndef GENERIC_CLOUD_HEADER
 #define GENERIC_CLOUD_HEADER
 
+#include <functional>
+
 //Local
 #include "CCGeom.h"
 #include "CCConst.h"
@@ -39,7 +41,7 @@ public:
 	virtual ~GenericCloud() {}
 
 	//! Generic function applied to a point (used by foreach)
-	typedef void genericPointAction(const CCVector3&, ScalarType&);
+	typedef std::function<void(const CCVector3&, ScalarType&)> genericPointAction;
 
 	//! Returns the number of points
 	/**	Virtual method to request the cloud size
@@ -51,7 +53,7 @@ public:
 	/**	Virtual method to apply a function to the whole cloud
 		\param action the function to apply (see GenericCloud::genericPointAction)
 	**/
-	virtual void forEach(genericPointAction& action) = 0;
+	virtual void forEach(genericPointAction action) = 0;
 
 	//! Returns the cloud bounding box
 	/**	Virtual method to request the cloud bounding box limits

@@ -76,7 +76,7 @@ void ccSubMesh::onUpdateOf(ccHObject* obj)
 		m_bBox.setValidity(false);
 }
 
-void ccSubMesh::forEach(genericTriangleAction& action)
+void ccSubMesh::forEach(genericTriangleAction action)
 {
 	if (!m_associatedMesh)
 		return;

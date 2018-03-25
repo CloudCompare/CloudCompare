@@ -323,7 +323,7 @@ bool Delaunay2dMesh::removeTrianglesWithEdgesLongerThan(PointCoordinateType maxE
 	return true;
 }
 
-void Delaunay2dMesh::forEach(genericTriangleAction& action)
+void Delaunay2dMesh::forEach(genericTriangleAction action)
 {
 	if (!m_associatedCloud)
 		return;

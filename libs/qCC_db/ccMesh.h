@@ -103,7 +103,7 @@ public:
 	virtual unsigned capacity() const override;
 
 	//inherited methods (GenericIndexedMesh)
-	virtual void forEach(genericTriangleAction& action) override;
+	virtual void forEach(genericTriangleAction action) override;
 	virtual void placeIteratorAtBegining() override;
 	virtual CCLib::GenericTriangle* _getNextTriangle() override; //temporary
 	virtual CCLib::GenericTriangle* _getTriangle(unsigned triangleIndex) override; //temporary

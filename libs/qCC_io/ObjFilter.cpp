@@ -233,7 +233,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			return CC_FERR_WRITING;
 
 		unsigned triNum = st->size();
-		st->placeIteratorAtBegining();
+		st->placeIteratorAtBeginning();
 
 		int lastMtlIndex = -1;
 		int t1 = -1, t2 = -1, t3 = -1;

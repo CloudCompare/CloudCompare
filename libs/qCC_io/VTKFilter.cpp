@@ -123,7 +123,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	if (mesh)
 	{
 		outFile << "POLYGONS " << triCount << " " << 4 * triCount << endl;
-		mesh->placeIteratorAtBegining();
+		mesh->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < triCount; ++i)
 		{
 			const CCLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!

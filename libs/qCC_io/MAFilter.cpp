@@ -249,7 +249,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 	int hard = 0; //Maya edges cab be "hard" or "soft" ...
 	{
 
-		theMesh->placeIteratorAtBegining();
+		theMesh->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < numberOfTriangles; ++i)
 		{
 			const CCLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
@@ -360,7 +360,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 		return CC_FERR_WRITING;
 	}
 
-	theMesh->placeIteratorAtBegining();
+	theMesh->placeIteratorAtBeginning();
 	{
 		for (unsigned i=0; i<numberOfTriangles; ++i)
 		{
@@ -440,7 +440,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 		//association of each vertex with the faces it belongs to
 		faceIndexes** theFacesIndexes = new faceIndexes*[numberOfVertexes];
 		memset(theFacesIndexes,0,sizeof(faceIndexes*)*numberOfVertexes);
-		theMesh->placeIteratorAtBegining();
+		theMesh->placeIteratorAtBeginning();
 		{
 			for (unsigned i=0; i<numberOfTriangles; ++i)
 			{

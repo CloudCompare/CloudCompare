@@ -710,7 +710,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 					unsigned triNum = dm->size();
 					MapCell* cells = &grid->at(0);
 					//now we are going to 'project' all triangles on the grid
-					dm->placeIteratorAtBegining();
+					dm->placeIteratorAtBeginning();
 					for (unsigned k = 0; k < triNum; ++k)
 					{
 						const CCLib::VerticesIndexes* tsi = dm->getNextTriangleVertIndexes();

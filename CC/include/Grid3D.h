@@ -149,7 +149,7 @@ public:
 		}
 
 		//for each triangle: look for intersecting cells
-		mesh->placeIteratorAtBegining();
+		mesh->placeIteratorAtBeginning();
 		for (unsigned n = 0; n<numberOfTriangles; ++n)
 		{
 			//get the positions (in the grid) of each vertex 

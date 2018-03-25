@@ -227,7 +227,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 		newMesh = new SimpleMesh(destCloud ? destCloud : pointIndexes->getAssociatedCloud());
 		unsigned count = 0;
 
-		theMesh->placeIteratorAtBegining();
+		theMesh->placeIteratorAtBeginning();
 		for (unsigned i=0; i<numberOfTriangles; ++i)
 		{
 			bool triangleIsOnTheRightSide = true;

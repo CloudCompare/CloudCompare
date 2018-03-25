@@ -340,7 +340,7 @@ void Delaunay2dMesh::forEach(genericTriangleAction action)
 	}
 }
 
-void Delaunay2dMesh::placeIteratorAtBegining()
+void Delaunay2dMesh::placeIteratorAtBeginning()
 {
 	m_globalIterator = m_triIndexes;
 }

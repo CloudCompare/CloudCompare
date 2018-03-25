@@ -368,7 +368,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 
 	//for each point in the cloud that is still 'marked', we look
 	//for its neighbors and remove their own marks
-	markers->placeIteratorAtBegining();
+	markers->placeIteratorAtBeginning();
 	bool error = false;
 	//default octree level
 	assert(!bestOctreeLevel.empty());

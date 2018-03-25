@@ -308,7 +308,7 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCLib::GenericCloud* cloud
 
 	//normalize
 	{
-		normalGrid->placeIteratorAtBegining();
+		normalGrid->placeIteratorAtBeginning();
 		for (unsigned i=0; i<m_depthBuffer.height*m_depthBuffer.width; ++i)
 		{
 			PointCoordinateType* newN = normalGrid->getCurrentValue();

@@ -1705,7 +1705,7 @@ bool ccPointCloud::colorize(float r, float g, float b)
 	if (hasColors())
 	{
 		assert(m_rgbColors);
-		m_rgbColors->placeIteratorAtBegining();
+		m_rgbColors->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < m_rgbColors->currentSize(); i++)
 		{
 			ColorCompType* p = m_rgbColors->getCurrentValue();
@@ -1888,7 +1888,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 					newNorms->addElement(newNormIndex);
 				}
 
-				m_normals->placeIteratorAtBegining();
+				m_normals->placeIteratorAtBeginning();
 				for (unsigned j=0; j<count; j++)
 				{
 					m_normals->setValue(j,newNorms->getValue(m_normals->getCurrentValue()));
@@ -1907,7 +1907,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 		if (!recoded)
 		{
 			//on recode direct chaque normale
-			m_normals->placeIteratorAtBegining();
+			m_normals->placeIteratorAtBeginning();
 			for (unsigned i=0; i<count; i++)
 			{
 				CompressedNormType* _theNormIndex = m_normals->getCurrentValuePtr();
@@ -2132,7 +2132,7 @@ void ccPointCloud::invertNormals()
 	if (!hasNormals())
 		return;
 
-	m_normals->placeIteratorAtBegining();
+	m_normals->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < m_normals->currentSize(); ++i)
 	{
 		ccNormalCompressor::InvertNormal(*m_normals->getCurrentValuePtr());
@@ -3462,7 +3462,7 @@ bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*
 	}
 	else
 	{
-		m_rgbColors->placeIteratorAtBegining();
+		m_rgbColors->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < count; i++)
 		{
 			const ColorCompType* col = getPointScalarValueColor(i);

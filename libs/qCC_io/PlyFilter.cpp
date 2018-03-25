@@ -414,7 +414,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	//and the mesh structure
 	if (mesh)
 	{
-		mesh->placeIteratorAtBegining();
+		mesh->placeIteratorAtBeginning();
 		for (unsigned i=0;i<triNum;++i)
 		{
 			const CCLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!

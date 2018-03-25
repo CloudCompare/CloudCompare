@@ -143,7 +143,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidg
 		ccLog::Warning("[STL] Global shift information can't be restored in STL Binary format! (too low precision)");
 	}
 
-	mesh->placeIteratorAtBegining();
+	mesh->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < faceCount; ++i)
 	{
 		CCLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
@@ -218,7 +218,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 	//vertices
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 
-	mesh->placeIteratorAtBegining();
+	mesh->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < faceCount; ++i)
 	{
 		CCLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();

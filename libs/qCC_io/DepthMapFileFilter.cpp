@@ -202,9 +202,9 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sens
 
 	const ScalarType* _zBuff = &(db.zBuff.front());
 	if (theNorms)
-		theNorms->placeIteratorAtBegining();
+		theNorms->placeIteratorAtBeginning();
 	if (theColors)
-		theColors->placeIteratorAtBegining();
+		theColors->placeIteratorAtBeginning();
 	for (unsigned k = 0; k < db.height; ++k)
 	{
 		for (unsigned j = 0; j < db.width; ++j, ++_zBuff)

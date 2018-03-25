@@ -86,7 +86,7 @@ ccMesh::ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertice
 	if (!reserve(triNum))
 		return;
 
-	giMesh->placeIteratorAtBegining();
+	giMesh->placeIteratorAtBeginning();
 	for (unsigned i=0; i<triNum; ++i)
 	{
 		const CCLib::VerticesIndexes* tsi = giMesh->getNextTriangleVertIndexes();
@@ -218,7 +218,7 @@ bool ccMesh::computePerVertexNormals()
 	}
 
 	//for each triangle
-	placeIteratorAtBegining();
+	placeIteratorAtBeginning();
 	{
 		for (unsigned i = 0; i < triCount; ++i)
 		{
@@ -361,7 +361,7 @@ bool ccMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 	//for each triangle
 	unsigned nTri = size();
 	{
-		placeIteratorAtBegining();
+		placeIteratorAtBeginning();
 		for (unsigned i = 0; i < nTri; ++i)
 		{
 			const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
@@ -509,7 +509,7 @@ void ccMesh::transformTriNormals(const ccGLMatrix& trans)
 				}
 
 				//recode
-                m_triNormals->placeIteratorAtBegining();
+                m_triNormals->placeIteratorAtBeginning();
 				{
 					for (unsigned i=0; i<numTriNormals; i++)
 					{
@@ -530,7 +530,7 @@ void ccMesh::transformTriNormals(const ccGLMatrix& trans)
         if (!recoded)
 #endif
         {
-            m_triNormals->placeIteratorAtBegining();
+            m_triNormals->placeIteratorAtBeginning();
             for (unsigned i=0; i<numTriNormals; i++)
             {
                 CompressedNormType* _theNormIndex = m_triNormals->getCurrentValuePtr();
@@ -578,7 +578,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 		return false;
 	}
 
-	placeIteratorAtBegining();
+	placeIteratorAtBeginning();
 	for(unsigned j=0; j<faceCount; j++)
 	{
 		const CCLib::VerticesIndexes* tri = getNextTriangleVertIndexes();
@@ -602,7 +602,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 		verticesDisplacement->fill(0);
 
 		//for each triangle
-		placeIteratorAtBegining();
+		placeIteratorAtBeginning();
 		for(unsigned j=0; j<faceCount; j++)
 		{
 			const CCLib::VerticesIndexes* tri = getNextTriangleVertIndexes();
@@ -630,7 +630,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 		}
 
 		//apply displacement
-		verticesDisplacement->placeIteratorAtBegining();
+		verticesDisplacement->placeIteratorAtBeginning();
 		for (unsigned i=0; i<vertCount; i++)
 		{
 			//this is a "persistent" pointer and we know what type of cloud is behind ;)
@@ -689,7 +689,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 
 		//flag used vertices
 		{
-			placeIteratorAtBegining();
+			placeIteratorAtBeginning();
 			for (unsigned i=0; i<triNum; ++i)
 			{
 				const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();
@@ -755,7 +755,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 	//let's create the new triangles
 	if (!usedVerts.empty()) //in case we have an equivalence table
 	{
-		placeIteratorAtBegining();
+		placeIteratorAtBeginning();
 		for (unsigned i=0; i<triNum; ++i)
 		{
 			const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();
@@ -765,7 +765,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 	}
 	else
 	{
-		placeIteratorAtBegining();
+		placeIteratorAtBeginning();
 		for (unsigned i=0; i<triNum; ++i)
 		{
 			const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();
@@ -1487,7 +1487,7 @@ void ccMesh::forEach(genericTriangleAction action)
 	if (!m_associatedCloud)
 		return;
 
-	m_triVertIndexes->placeIteratorAtBegining();
+	m_triVertIndexes->placeIteratorAtBeginning();
 	for (unsigned i=0; i<m_triVertIndexes->currentSize(); ++i)
 	{
 		const unsigned* tri = m_triVertIndexes->getCurrentValue();
@@ -1499,7 +1499,7 @@ void ccMesh::forEach(genericTriangleAction action)
 	}
 }
 
-void ccMesh::placeIteratorAtBegining()
+void ccMesh::placeIteratorAtBeginning()
 {
 	m_globalIterator = 0;
 }
@@ -1542,7 +1542,7 @@ void ccMesh::refreshBB()
 	m_bBox.clear();
 
 	unsigned count = m_triVertIndexes->currentSize();
-	m_triVertIndexes->placeIteratorAtBegining();
+	m_triVertIndexes->placeIteratorAtBeginning();
 	for (unsigned i=0; i<count; ++i)
 	{
 		const unsigned* tri = m_triVertIndexes->getCurrentValue();
@@ -2068,7 +2068,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			const float *Tx1 = 0, *Tx2 = 0, *Tx3 = 0;
 
 			//loop on all triangles
-			m_triVertIndexes->placeIteratorAtBegining();
+			m_triVertIndexes->placeIteratorAtBeginning();
 
 			int lasMtlIndex = -1;
 
@@ -2416,7 +2416,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				}
 
 				unsigned triNum = m_triVertIndexes->currentSize();
-				m_triVertIndexes->placeIteratorAtBegining();
+				m_triVertIndexes->placeIteratorAtBeginning();
 				for (unsigned i = 0; i < triNum; ++i)
 				{
 					const CCLib::VerticesIndexes* tsi = (CCLib::VerticesIndexes*)m_triVertIndexes->getCurrentValue();
@@ -2602,7 +2602,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				unsigned newVisibleIndex = 0;
 				unsigned newInvisibleIndex = 0;
 
-				m_triVertIndexes->placeIteratorAtBegining();
+				m_triVertIndexes->placeIteratorAtBeginning();
 				for (unsigned i=0; i<triNum; ++i)
 				{
 					const CCLib::VerticesIndexes* tsi = reinterpret_cast<CCLib::VerticesIndexes*>(m_triVertIndexes->getCurrentValue());
@@ -2650,7 +2650,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	{
 		//we remove all fully visible faces
 		unsigned lastTri = 0;
-		m_triVertIndexes->placeIteratorAtBegining();
+		m_triVertIndexes->placeIteratorAtBeginning();
 		for (unsigned i=0; i<triNum; ++i)
 		{
 			const CCLib::VerticesIndexes* tsi = reinterpret_cast<CCLib::VerticesIndexes*>(m_triVertIndexes->getCurrentValue());
@@ -2685,7 +2685,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 void ccMesh::shiftTriangleIndexes(unsigned shift)
 {
-	m_triVertIndexes->placeIteratorAtBegining();
+	m_triVertIndexes->placeIteratorAtBeginning();
 	for (unsigned i=0; i<m_triVertIndexes->currentSize(); ++i)
 	{
 		unsigned *ti = m_triVertIndexes->getCurrentValue();
@@ -3867,7 +3867,7 @@ bool ccMesh::convertMaterialsToVertexColors()
 	//now scan all faces and get the vertex color each time
 	unsigned faceCount = size();
 
-	placeIteratorAtBegining();
+	placeIteratorAtBeginning();
 	for (unsigned i = 0; i < faceCount; ++i)
 	{
 		const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();

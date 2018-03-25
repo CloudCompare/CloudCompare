@@ -41,7 +41,7 @@ double MeshSamplingTools::computeMeshArea(GenericMesh* mesh)
 	//total area
 	double Stotal = 0.0;
 
-	mesh->placeIteratorAtBegining();
+	mesh->placeIteratorAtBeginning();
 	for (unsigned n=0; n<mesh->size(); ++n)
 	{
 		GenericTriangle* tri = mesh->_getNextTriangle();
@@ -74,7 +74,7 @@ double MeshSamplingTools::computeMeshVolume(GenericMesh* mesh)
 	CCVector3 origin,upperCorner;
 	mesh->getBoundingBox(origin,upperCorner);
 
-	mesh->placeIteratorAtBegining();
+	mesh->placeIteratorAtBeginning();
 	for (unsigned n=0; n<mesh->size(); ++n)
 	{
 		GenericTriangle* tri = mesh->_getNextTriangle();
@@ -122,7 +122,7 @@ bool MeshSamplingTools::buildMeshEdgeUsageMap(GenericIndexedMesh* mesh, EdgeUsag
 
 	try
 	{
-		mesh->placeIteratorAtBegining();
+		mesh->placeIteratorAtBeginning();
 		//for all triangles
 		for (unsigned n=0; n<mesh->size(); ++n)
 		{
@@ -324,7 +324,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 	std::uniform_real_distribution<double> dist(0, 1);
 
 	//for each triangle
-	mesh->placeIteratorAtBegining();
+	mesh->placeIteratorAtBeginning();
 	for (unsigned n = 0; n < triCount; ++n)
 	{
 		const GenericTriangle* tri = mesh->_getNextTriangle();

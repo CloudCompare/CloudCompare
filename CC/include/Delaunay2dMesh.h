@@ -93,7 +93,7 @@ public:
 	virtual unsigned size() const { return m_numberOfTriangles; }
 	virtual void forEach(genericTriangleAction action);
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
-	virtual void placeIteratorAtBegining();
+	virtual void placeIteratorAtBeginning();
 	virtual GenericTriangle* _getNextTriangle();
 	virtual GenericTriangle* _getTriangle(unsigned triangleIndex);
 	virtual VerticesIndexes* getNextTriangleVertIndexes();

@@ -518,7 +518,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			{
 				unsigned triNum = delaunayMesh.size();
 				//now we are going to 'project' all triangles on the grid
-				delaunayMesh.placeIteratorAtBegining();
+				delaunayMesh.placeIteratorAtBeginning();
 				for (unsigned k = 0; k < triNum; ++k)
 				{
 					const CCLib::VerticesIndexes* tsi = delaunayMesh.getNextTriangleVertIndexes();

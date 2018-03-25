@@ -810,7 +810,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				assert(vertices);
 
 				unsigned triCount = mesh->size();
-				mesh->placeIteratorAtBegining();
+				mesh->placeIteratorAtBeginning();
 				for (unsigned f = 0; f < triCount; ++f)
 				{
 					const CCLib::GenericTriangle* tri = mesh->_getNextTriangle();

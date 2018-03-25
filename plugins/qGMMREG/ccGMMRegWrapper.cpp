@@ -63,7 +63,7 @@ static bool CloudToVNLMatrix(CCLib::GenericCloud* cloud, vnl_matrix<double>& mat
 		return false;
 	}
 
-	cloud->placeIteratorAtBegining();
+	cloud->placeIteratorAtBeginning();
 	for (unsigned i=0; i<pointCount; ++i)
 	{
 		CCVector3 P = *cloud->getNextPoint() - C;

@@ -49,7 +49,7 @@ public: //constructors
 public: //inherited methods
 
 	virtual void forEach(genericTriangleAction action);
-	virtual void placeIteratorAtBegining();
+	virtual void placeIteratorAtBeginning();
 	virtual GenericTriangle* _getNextTriangle(); //temporary
 	virtual GenericTriangle* _getTriangle(unsigned triangleIndex); //temporary
 	virtual VerticesIndexes* getNextTriangleVertIndexes();

@@ -81,7 +81,7 @@ void ccSubMesh::forEach(genericTriangleAction action)
 	if (!m_associatedMesh)
 		return;
 
-	m_triIndexes->placeIteratorAtBegining();
+	m_triIndexes->placeIteratorAtBeginning();
 	for (unsigned i=0; i<m_triIndexes->currentSize(); ++i)
 	{
 		CCLib::GenericTriangle* tri = m_associatedMesh->_getTriangle(m_triIndexes->getCurrentValue());

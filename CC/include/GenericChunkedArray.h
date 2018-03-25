@@ -146,7 +146,7 @@ public:
 		m_count = 0;
 		memset(m_minVal, 0, sizeof(ElementType)*N);
 		memset(m_maxVal, 0, sizeof(ElementType)*N);
-		placeIteratorAtBegining();
+		placeIteratorAtBeginning();
 	}
 
 	//! Fills the table with a particular value
@@ -405,14 +405,14 @@ public:
 	//***** data access *****//
 
 	//! Places global iterator at the beginning of the array
-	inline void placeIteratorAtBegining() { m_iterator = 0; }
+	inline void placeIteratorAtBeginning() { m_iterator = 0; }
 
 	//! Forwards global iterator (one position)
 	inline void forwardIterator() { ++m_iterator; }
 
 	//! Returns the value currently pointed by the global iterator
 	/** \warning The global iterator must have been previously initialized
-		(see GenericChunkedArray::placeIteratorAtBegining) and it shouldn't
+		(see GenericChunkedArray::placeIteratorAtBeginning) and it shouldn't
 		be out of bounds.
 		\return a pointer to the current element.
 	**/
@@ -818,7 +818,7 @@ public:
 
 		m_count = 0;
 		m_minVal = m_maxVal = 0;
-		placeIteratorAtBegining();
+		placeIteratorAtBeginning();
 	}
 
 	//! Fills the table with a particular value
@@ -1068,14 +1068,14 @@ public:
 	//***** data access *****//
 
 	//! Places global iterator at the beginning of the array
-	inline void placeIteratorAtBegining() { m_iterator = 0; }
+	inline void placeIteratorAtBeginning() { m_iterator = 0; }
 
 	//! Forwards global iterator (one position)
 	inline void forwardIterator() { ++m_iterator; }
 
 	//! Returns the value currently pointed by the global iterator
 	/** Warning: the global iterator must have been previously initizialized
-		(see GenericChunkedArray::placeIteratorAtBegining) and it shouldn't
+		(see GenericChunkedArray::placeIteratorAtBeginning) and it shouldn't
 		be out of bounds.
 		\return current element value as a reference.
 	**/
@@ -1083,7 +1083,7 @@ public:
 
 	//! Returns a pointer on the the value currently pointed by the global iterator
 	/** Warning: the global iterator must have been previously initizialized
-		(see GenericChunkedArray::placeIteratorAtBegining) and it shouldn't
+		(see GenericChunkedArray::placeIteratorAtBeginning) and it shouldn't
 		be out of bounds.
 		\return a pointer to the current element.
 	**/

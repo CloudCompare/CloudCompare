@@ -218,7 +218,7 @@ void PCVContext::drawEntity()
 	if (m_mesh)
 	{
 		unsigned nTri = m_mesh->size();
-		m_mesh->placeIteratorAtBegining();
+		m_mesh->placeIteratorAtBeginning();
 
 		glBegin(GL_TRIANGLES);
 		for (unsigned i = 0; i < nTri; ++i)

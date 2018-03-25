@@ -86,7 +86,7 @@ public:
 		ScalarType minDist2 = NAN_VALUE;
 		if (m_tri)
 		{
-			m_tri->placeIteratorAtBegining();
+			m_tri->placeIteratorAtBeginning();
 			unsigned numberOfTriangles = m_tri->size();
 			for (unsigned i=0; i<numberOfTriangles; ++i)
 			{

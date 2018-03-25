@@ -523,7 +523,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 
 	//we 'compress' each normal
 	theNormsCodes.fill(0);
-	theNorms->placeIteratorAtBegining();
+	theNorms->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < pointCount; i++)
 	{
 		const PointCoordinateType* N = theNorms->getCurrentValue();
@@ -639,7 +639,7 @@ bool ccNormalVectors::ComputeNormalWithTri(CCLib::GenericIndexedCloudPersist* po
 	unsigned triCount = theMesh->size();
 
 	//for all triangles
-	theMesh->placeIteratorAtBegining();
+	theMesh->placeIteratorAtBeginning();
 	for (unsigned j = 0; j < triCount; ++j)
 	{
 		//we can't use getNextTriangleVertIndexes (which is faster on mesh groups but not multi-thread compatible) but anyway we'll never get mesh groups here!

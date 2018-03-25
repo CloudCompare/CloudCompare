@@ -63,7 +63,7 @@ public:
 	//! Places the mesh iterator at the beginning
 	/**	Virtual method to handle the mesh global iterator
 	**/
-	virtual void placeIteratorAtBegining() = 0;
+	virtual void placeIteratorAtBeginning() = 0;
 
 	//! Returns the next triangle (relatively to the global iterator position)
 	/**	Virtual method to handle the mesh global iterator.

@@ -46,7 +46,7 @@ void ChunkedPointCloud::clear()
 {
 	m_points->clear();
 	deleteAllScalarFields();
-	placeIteratorAtBegining();
+	placeIteratorAtBeginning();
 	invalidateBoundingBox();
 }
 
@@ -84,7 +84,7 @@ void ChunkedPointCloud::invalidateBoundingBox()
 	m_validBB = false;
 }
 
-void ChunkedPointCloud::placeIteratorAtBegining()
+void ChunkedPointCloud::placeIteratorAtBeginning()
 {
 	m_currentPointIndex = 0;
 }

@@ -44,7 +44,7 @@ void SimpleCloud::clear()
 {
 	m_scalarField->clear();
 	m_points->clear();
-	placeIteratorAtBegining();
+	placeIteratorAtBeginning();
 	m_validBB=false;
 }
 
@@ -129,7 +129,7 @@ bool SimpleCloud::resize(unsigned n)
 	return true;
 }
 
-void SimpleCloud::placeIteratorAtBegining()
+void SimpleCloud::placeIteratorAtBeginning()
 {
 	globalIterator = 0;
 }

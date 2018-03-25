@@ -1041,7 +1041,7 @@ void ComparePointsAndTriangles(	ReferenceCloud& Yk,
 	//we can 'remove' all the eligible points at the current neighborhood radius
 	if (firstComparisonDone)
 	{
-		Yk.placeIteratorAtBegining();
+		Yk.placeIteratorAtBeginning();
 		for (unsigned j=0; j<remainingPoints; ++j)
 		{
 			//eligibility distance
@@ -1198,7 +1198,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 
 	//for each point, we pre-compute its distance to the nearest cell border
 	//(will be handy later)
-	Yk.placeIteratorAtBegining();
+	Yk.placeIteratorAtBeginning();
 	for (unsigned j = 0; j<remainingPoints; ++j)
 	{
 		//coordinates of the current point
@@ -2174,7 +2174,7 @@ ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(	GenericCloud
 	double dSumSq = 0.0;
 
 	//compute deviations
-	cloud->placeIteratorAtBegining();
+	cloud->placeIteratorAtBeginning();
 	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = cloud->getNextPoint();
@@ -2211,7 +2211,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* 
 	tail.resize(tailSize);
 
 	//compute deviations
-	cloud->placeIteratorAtBegining();
+	cloud->placeIteratorAtBeginning();
 	size_t pos = 0;
 	for (unsigned i=0; i<count; ++i)
 	{
@@ -2264,7 +2264,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneMaxDistance(	GenericCloud
 	//we search the max distance
 	PointCoordinateType maxDist = 0;
 	
-	cloud->placeIteratorAtBegining();
+	cloud->placeIteratorAtBeginning();
 	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = cloud->getNextPoint();

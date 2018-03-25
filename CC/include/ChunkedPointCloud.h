@@ -51,7 +51,7 @@ public:
 		inline virtual unsigned size() const { return m_points->currentSize(); }
 		virtual void forEach(genericPointAction action);
 		virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
-		virtual void placeIteratorAtBegining();
+		virtual void placeIteratorAtBeginning();
 		virtual const CCVector3* getNextPoint();
 		virtual bool enableScalarField();
 		virtual bool isScalarFieldEnabled() const;

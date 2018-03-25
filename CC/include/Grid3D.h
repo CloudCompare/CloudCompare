@@ -369,7 +369,7 @@ public:
 		}
 
 		//for each point: look for the intersecting cell
-		cloud->placeIteratorAtBegining();
+		cloud->placeIteratorAtBeginning();
 		for (unsigned n = 0; n<numberOfPoints; ++n)
 		{
 			CCVector3 P = *cloud->getNextPoint() - gridMinCorner;

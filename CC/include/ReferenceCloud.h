@@ -48,7 +48,7 @@ public:
 	virtual void forEach(genericPointAction action);
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
 	inline virtual unsigned char testVisibility(const CCVector3& P) const { assert(m_theAssociatedCloud); return m_theAssociatedCloud->testVisibility(P); }
-	inline virtual void placeIteratorAtBegining() { m_globalIterator = 0; }
+	inline virtual void placeIteratorAtBeginning() { m_globalIterator = 0; }
 	inline virtual const CCVector3* getNextPoint() { assert(m_theAssociatedCloud); return (m_globalIterator < size() ? m_theAssociatedCloud->getPoint(m_theIndexes->getValue(m_globalIterator++)) : 0); }
 	inline virtual bool enableScalarField() { assert(m_theAssociatedCloud); return m_theAssociatedCloud->enableScalarField(); }
 	inline virtual bool isScalarFieldEnabled() const { assert(m_theAssociatedCloud); return m_theAssociatedCloud->isScalarFieldEnabled(); }

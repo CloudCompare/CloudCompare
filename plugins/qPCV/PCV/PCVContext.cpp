@@ -233,7 +233,7 @@ void PCVContext::drawEntity()
 	else
 	{
 		unsigned nPts = m_vertices->size();
-		m_vertices->placeIteratorAtBegining();
+		m_vertices->placeIteratorAtBeginning();
 
 		glBegin(GL_POINTS);
 		for (unsigned i = 0; i < nPts; ++i)
@@ -312,7 +312,7 @@ int PCVContext::GLAccumPixel(std::vector<int>& visibilityCount)
 	int sx4 = (m_width << 2);
 
 	unsigned nVert = m_vertices->size();
-	m_vertices->placeIteratorAtBegining();
+	m_vertices->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < nVert; ++i)
 	{
 		const CCVector3* P = m_vertices->getNextPoint();

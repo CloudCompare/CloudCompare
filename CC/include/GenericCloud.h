@@ -77,7 +77,7 @@ public:
 	//! Sets the cloud iterator at the beginning
 	/**	Virtual method to handle the cloud global iterator
 	**/
-	virtual void placeIteratorAtBegining() = 0;
+	virtual void placeIteratorAtBeginning() = 0;
 
 	//! Returns the next point (relatively to the global iterator position)
 	/**	Virtual method to handle the cloud global iterator.

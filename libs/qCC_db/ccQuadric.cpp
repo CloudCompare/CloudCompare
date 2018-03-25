@@ -181,7 +181,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 		return 0;
 	}
 
-	cloud->placeIteratorAtBegining();
+	cloud->placeIteratorAtBeginning();
 	for (unsigned k=0; k<count; ++k)
 	{
 		//projection into local 2D plane ref.

@@ -175,7 +175,7 @@ bool FastMarchingForPropagation::extractPropagatedPoints(ReferenceCloud* points)
 	}
 	
 	//raz de la norme du gradient du point, pour qu'il ne soit plus pris en compte par la suite !
-	points->placeIteratorAtBegining();
+	points->placeIteratorAtBeginning();
 	for (unsigned k=0; k<points->size(); ++k)
 	{
 		points->setCurrentPointScalarValue(NAN_VALUE);
@@ -202,7 +202,7 @@ bool FastMarchingForPropagation::setPropagationTimingsAsDistances()
 			return false;
 		}
 
-		Yk.placeIteratorAtBegining();
+		Yk.placeIteratorAtBeginning();
 		for (unsigned k=0; k<Yk.size(); ++k)
 		{
 			Yk.setCurrentPointScalarValue(aCell->T);

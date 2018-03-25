@@ -635,7 +635,7 @@ CCVector3 GeometricalAnalysisTools::computeGravityCenter(GenericCloud* theCloud)
 
 	CCVector3d sum(0,0,0);
 
-	theCloud->placeIteratorAtBegining();
+	theCloud->placeIteratorAtBeginning();
 	const CCVector3 *P = 0;
 	while ((P = theCloud->getNextPoint()))
 	{
@@ -656,7 +656,7 @@ CCVector3 GeometricalAnalysisTools::computeWeightedGravityCenter(GenericCloud* t
 
 	CCVector3d sum(0, 0, 0);
 
-	theCloud->placeIteratorAtBegining();
+	theCloud->placeIteratorAtBeginning();
 	double wSum = 0;
 	for (unsigned i = 0; i < count; ++i)
 	{
@@ -695,7 +695,7 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeCovarianceMatrix(GenericCl
 	double mXZ = 0;
 	double mYZ = 0;
 
-	theCloud->placeIteratorAtBegining();
+	theCloud->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < n; ++i)
 	{
 		const CCVector3* Q = theCloud->getNextPoint();
@@ -733,8 +733,8 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeCrossCovarianceMatrix(Gene
 	double* l2 = covMat.row(1);
 	double* l3 = covMat.row(2);
 
-	P->placeIteratorAtBegining();
-	Q->placeIteratorAtBegining();
+	P->placeIteratorAtBeginning();
+	Q->placeIteratorAtBeginning();
 
 	//sums
 	unsigned count = P->size();
@@ -776,8 +776,8 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 	double* r2 = covMat.row(1);
 	double* r3 = covMat.row(2);
 
-	P->placeIteratorAtBegining();
-	Q->placeIteratorAtBegining();
+	P->placeIteratorAtBeginning();
+	Q->placeIteratorAtBeginning();
 
 	//sums
 	unsigned count = P->size();

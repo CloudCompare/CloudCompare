@@ -130,7 +130,7 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 
 	//compute bounding box in 2D plane
 	CCVector2 minXY(0, 0), maxXY(0, 0);
-	cloud->placeIteratorAtBegining();
+	cloud->placeIteratorAtBeginning();
 	for (unsigned k = 0; k < count; ++k)
 	{
 		//projection into local 2D plane ref.

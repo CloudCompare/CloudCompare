@@ -93,7 +93,7 @@ ccPointCloud* ccPointCloud::From(CCLib::GenericCloud* cloud, const ccGenericPoin
 		else
 		{
 			//import points
-			cloud->placeIteratorAtBegining();
+			cloud->placeIteratorAtBeginning();
 			for (unsigned i = 0; i < n; i++)
 			{
 				pc->addPoint(*cloud->getNextPoint());

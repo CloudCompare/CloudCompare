@@ -3162,7 +3162,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 			const int& label = equivalentLabels[cellIndexToLabel[i]];
 			assert(label > 0);
 			getPointsInCell(ccCells[i].theCode, level, &Y, true);
-			Y.placeIteratorAtBegining();
+			Y.placeIteratorAtBeginning();
 			ScalarType d = static_cast<ScalarType>(label);
 			for (unsigned j = 0; j < Y.size(); ++j)
 			{

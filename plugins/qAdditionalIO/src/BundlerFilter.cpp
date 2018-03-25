@@ -800,7 +800,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			else
 			{
 				//project alternative cloud in image!
-				_keypointsCloud->placeIteratorAtBegining();
+				_keypointsCloud->placeIteratorAtBeginning();
 				int half_w = (image->getW() >> 1);
 				int half_h = (image->getH() >> 1);
 				ccCameraSensor::KeyPoint kp;

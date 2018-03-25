@@ -74,7 +74,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 	}
 
 	const CCVector3* Q = 0;
-	cloud->placeIteratorAtBegining();
+	cloud->placeIteratorAtBeginning();
 	while ((Q = cloud->getNextPoint()))
 	{
 		CCVector3 P = *Q-*center;
@@ -118,7 +118,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsig
 	//float sin_alpha = sin(alpha*CC_DEG_TO_RAD);
 	float q = 1.0f/(1.0f+tan_alpha*tan_alpha);
 
-	cloud->placeIteratorAtBegining();
+	cloud->placeIteratorAtBeginning();
 
 	NormalizedProgress nprogress(progressCb, count);
 	if (progressCb)
@@ -202,7 +202,7 @@ SimpleCloud* PointProjectionTools::applyTransformation(GenericCloud* cloud, Tran
 		progressCb->start();
 	}
 
-	cloud->placeIteratorAtBegining();
+	cloud->placeIteratorAtBeginning();
 	const CCVector3* P;
 
 	if (trans.R.isValid())
@@ -285,7 +285,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 				break;
 			}
 
-			cloud->placeIteratorAtBegining();
+			cloud->placeIteratorAtBeginning();
 			for (unsigned i=0; i<count; ++i)
 			{
 				const CCVector3* P = cloud->getPoint(i);

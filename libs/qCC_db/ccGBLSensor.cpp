@@ -244,7 +244,7 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCLib::GenericCloud* cloud
 
 	//poject each point + normal
 	{
-		cloud->placeIteratorAtBegining();
+		cloud->placeIteratorAtBeginning();
 		unsigned pointCount = cloud->size();
 		for (unsigned i=0; i<pointCount; ++i)
 		{
@@ -363,7 +363,7 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCLib::GenericCloud* cloud,
 	//project colors
 	{
 		unsigned pointCount = cloud->size();
-		cloud->placeIteratorAtBegining();
+		cloud->placeIteratorAtBeginning();
 		{
 			for (unsigned i=0; i<pointCount; ++i)
 			{
@@ -508,7 +508,7 @@ bool ccGBLSensor::computeAutoParameters(CCLib::GenericCloud* theCloud)
 	PointCoordinateType maxDepth = 0;
 	{
 		//first project all points to compute the (yaw,ptich) ranges
-		theCloud->placeIteratorAtBegining();
+		theCloud->placeIteratorAtBeginning();
 		for (unsigned i=0; i<pointCount; ++i)
 		{
 			const CCVector3* P = theCloud->getNextPoint();
@@ -567,7 +567,7 @@ bool ccGBLSensor::computeAutoParameters(CCLib::GenericCloud* theCloud)
 	if (m_yawAnglesAreShifted || m_pitchAnglesAreShifted)
 	{
 		//we re-project all the points in order to update the boundaries!
-		theCloud->placeIteratorAtBegining();
+		theCloud->placeIteratorAtBeginning();
 		for (unsigned i = 0; i<pointCount; ++i)
 		{
 			const CCVector3 *P = theCloud->getNextPoint();
@@ -676,7 +676,7 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 			}
 		}
 
-		theCloud->placeIteratorAtBegining();
+		theCloud->placeIteratorAtBeginning();
 		{
 			//progress bar
 			ccProgressDialog pdlg(true);

@@ -833,8 +833,8 @@ double HornRegistrationTools::ComputeRMS(GenericCloud* lCloud,
 
 	double rms = 0.0;
 
-	rCloud->placeIteratorAtBegining();
-	lCloud->placeIteratorAtBegining();
+	rCloud->placeIteratorAtBeginning();
+	lCloud->placeIteratorAtBeginning();
 	unsigned count = rCloud->size();
 			
 	for (unsigned i=0; i<count; i++)
@@ -877,7 +877,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 	if (P->size() == 3)
 	{
 		//compute the first set normal
-		P->placeIteratorAtBegining();
+		P->placeIteratorAtBeginning();
 		const CCVector3* Ap = P->getNextPoint();
 		const CCVector3* Bp = P->getNextPoint();
 		const CCVector3* Cp = P->getNextPoint();
@@ -890,7 +890,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 			Np /= static_cast<PointCoordinateType>(norm);
 		}
 		//compute the second set normal
-		X->placeIteratorAtBegining();
+		X->placeIteratorAtBeginning();
 		const CCVector3* Ax = X->getNextPoint();
 		const CCVector3* Bx = X->getNextPoint();
 		const CCVector3* Cx = X->getNextPoint();
@@ -1085,8 +1085,8 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 			double acc_denom = 0.0;
 
 			//now deduce the scale (refer to "Point Set Registration with Integrated Scale Estimation", Zinsser et. al, PRIP 2005)
-			X->placeIteratorAtBegining();
-			P->placeIteratorAtBegining();
+			X->placeIteratorAtBeginning();
+			P->placeIteratorAtBeginning();
 
 			unsigned count = X->size();
 			assert(P->size() == count);

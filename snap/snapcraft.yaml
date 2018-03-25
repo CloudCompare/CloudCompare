@@ -22,10 +22,9 @@ apps:
   CloudCompare:
     command: launch CloudCompare
     plugs: [home, x11, mir, opengl, unity7, removable-media]
-
 parts:
   cloudcompare:
-    after: [desktop-qt5,eigen]
+    after: [desktop-qt5, eigen, pdal, e57]
     plugin: cmake
     source: https://github.com/CloudCompare/CloudCompare.git
     source-branch: master
@@ -38,59 +37,110 @@ parts:
       - libboost-program-options-dev
       - libcgal-dev
       - libcgal-qt5-dev
-      - liblas-c-dev
-      - liblas-dev
       - libswscale-dev
       - libvxl1-dev
       - libqt5opengl5-dev
       - qt5-default
+      - libgdal-dev
+      - libxerces-c-dev
+      - libpcl-dev
+      - libproj-dev
     prepare: |
       sed -i '/CMAKE_INSTALL_RPATH/d' ../src/CMakeLists.txt
-    build: |
-      export DEBARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
-      export NPROCS=$(grep -c ^processor /proc/cpuinfo)
-      mkdir build
-      cd build
-      cmake \
-        -DINSTALL_QBLUR_PLUGIN=ON \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCOMPILE_CC_CORE_LIB_WITH_CGAL=ON \
-        -DINSTALL_QHPR_PLUGIN=ON \
-        -DINSTALL_QPOISSON_RECON_PLUGIN=ON \
-        -DPOISSON_RECON_WITH_OPEN_MP=ON \
-        -DINSTALL_QEDL_PLUGIN=ON \
-        -DINSTALL_QSRA_PLUGIN=ON \
-        -DOPTION_USE_GDAL=ON \
-        -DOPTION_USE_DXF_LIB=ON \
-        -DINSTALL_QSSAO_PLUGIN=ON \
-        -DOPTION_USE_LIBLAS=ON \
-        -DINSTALL_QGMMREG_PLUGIN=ON \
-        -DINSTALL_QANIMATION_PLUGIN=ON \
-        -DINSTALL_QCSF_PLUGIN=ON \
-        -DINSTALL_QPHOTOSCAN_IO_PLUGIN=ON \
-        -DWITH_FFMPEG_SUPPORT=ON \
-        -DFFMPEG_INCLUDE_DIR="/usr/include/${DEBARCH}" \
-        -DFFMPEG_LIBRARY_DIR="/usr/lib/${DEBARCH}" \
-        -DINSTALL_QFACETS_PLUGIN=ON \
-        -DOPTION_USE_SHAPE_LIB=ON \
-        -DINSTALL_QPCV_PLUGIN=ON \
-        -DINSTALL_QM3C2_PLUGIN=ON \
-        -DINSTALL_QBROOM_PLUGIN=true \
-        -DINSTALL_QHOUGH_NORMALS_PLUGIN=true \
-        -DINSTALL_QCOMPASS_PLUGIN=ON \
-        -DEIGEN_ROOT_DIR=$SNAPCRAFT_STAGE/include/eigen3 \
-        -DLIBLAS_INCLUDE_DIR="/usr/include" \
-        -DLIBLAS_RELEASE_LIBRARY_FILE="/usr/lib/liblas.so" \
-        -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL \
-        ..
-      make -j${NPROCS}
-    install: |
-      cd build
+      ln -s /usr/lib/x86_64-linux-gnu/libvtkCommonCore-6.2.so /usr/lib/libvtkproj4.so
+#https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=819741
+    configflags:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DINSTALL_QBLUR_PLUGIN=ON
+      - -DCOMPILE_CC_CORE_LIB_WITH_CGAL=ON
+      - -DINSTALL_QHPR_PLUGIN=ON
+      - -DINSTALL_QPOISSON_RECON_PLUGIN=ON
+      - -DPOISSON_RECON_WITH_OPEN_MP=ON
+      - -DINSTALL_QEDL_PLUGIN=ON
+      - -DINSTALL_QSRA_PLUGIN=ON
+      - -DOPTION_USE_GDAL=ON
+      - -DOPTION_USE_DXF_LIB=ON
+      - -DINSTALL_QSSAO_PLUGIN=ON
+      - -DINSTALL_QGMMREG_PLUGIN=ON
+      - -DINSTALL_QANIMATION_PLUGIN=ON
+      - -DINSTALL_QCSF_PLUGIN=ON
+      - -DINSTALL_QPHOTOSCAN_IO_PLUGIN=ON
+      - -DWITH_FFMPEG_SUPPORT=ON
+      - -DFFMPEG_INCLUDE_DIR=/usr/include/x86_64-linux-gnu
+      - -DFFMPEG_LIBRARY_DIR=/usr/lib/x86_64-linux-gnu
+      - -DINSTALL_QFACETS_PLUGIN=ON
+      - -DOPTION_USE_SHAPE_LIB=ON
+      - -DINSTALL_QPCV_PLUGIN=ON
+      - -DINSTALL_QM3C2_PLUGIN=ON
+      - -DINSTALL_QBROOM_PLUGIN=ON
+      - -DINSTALL_QHOUGH_NORMALS_PLUGIN=ON
+      - -DINSTALL_QCOMPASS_PLUGIN=ON
+      - -DEIGEN_ROOT_DIR=$SNAPCRAFT_STAGE/include/eigen3
+      - -DOPTION_PDAL_LAS=ON
+      - -DJSON_ROOT_DIR=/usr/include/jsoncpp
+      - -DOPTION_USE_LIBE57FORMAT=ON
+      - -DLIBE57FORMAT_INSTALL_DIR=$SNAPCRAFT_STAGE
+      - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
+      - -DINSTALL_QPCL_PLUGIN=ON
+    install: 
+      make install
+  e57:
+    plugin: cmake
+    source: https://github.com/asmaloney/libE57Format.git
+    prepare: |
+      sed -i '123 i\set_property(TARGET E57Format PROPERTY POSITION_INDEPENDENT_CODE ON)' ../src/CMakeLists.txt
+    build-packages:
+      - build-essential
+    configflags:
+     - -DCMAKE_BUILD_TYPE=Release
+    install: 
+     make install
+    stage: [ include/*, lib/* ]
+    prime: [ -* ]
+  laszip:
+    plugin: cmake
+    source: https://github.com/LASzip/LASzip.git
+    source-tag: "3.2.0"
+    build-packages:
+      - build-essential
+    configflags:
+      - -DCMAKE_BUILD_TYPE=Release
+    stage: [ include/*, lib/* ]
+    prime: [ lib/* ]
+    install: 
       make install
   eigen:
     plugin: cmake
-    source: http://bitbucket.org/eigen/eigen/get/3.2.10.tar.bz2
+    source: http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2
+    configflags:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
+    install:
+      make install
+    stage: [ include/* ]
     prime: [ -* ]
+  pdal:
+    after: [laszip, eigen]
+    plugin: cmake
+    source: https://github.com/PDAL/PDAL.git
+    source-tag: "1.6"
+    build-packages:
+      - build-essential
+      - libgdal-dev
+      - libgeotiff-dev
+      - libjsoncpp-dev
+      - python-numpy
+    configflags:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
+      - -DWITH_TESTS=OFF
+      - -DWITH_LASZIP=ON
+      - -DBUILD_PLUGIN_PYTHON=OFF
+      - -DBUILD_PLUGIN_PGPOINTCLOUD=OFF
+    install: 
+      make install
+    stage: [ include/*, lib/* ]
+    prime: [ lib/* ]
   launcher:
     plugin: dump
     source: snap

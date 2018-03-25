@@ -50,7 +50,7 @@ unsigned SimpleMesh::size() const
     return m_triIndexes->currentSize();
 };
 
-void SimpleMesh::forEach(genericTriangleAction& action)
+void SimpleMesh::forEach(genericTriangleAction action)
 {
 	SimpleTriangle tri;
 	unsigned count = m_triIndexes->currentSize();

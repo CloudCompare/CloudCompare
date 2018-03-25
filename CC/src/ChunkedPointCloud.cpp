@@ -50,7 +50,7 @@ void ChunkedPointCloud::clear()
 	invalidateBoundingBox();
 }
 
-void ChunkedPointCloud::forEach(genericPointAction& action)
+void ChunkedPointCloud::forEach(genericPointAction action)
 {
 	//there's no point of calling forEach if there's no activated scalar field!
 	ScalarField* currentOutScalarFieldArray = getCurrentOutScalarField();

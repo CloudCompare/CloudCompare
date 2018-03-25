@@ -76,7 +76,7 @@ void DgmOctreeReferenceCloud::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 	bbMax = m_bbMax;
 }
 
-void DgmOctreeReferenceCloud::forEach(genericPointAction& action)
+void DgmOctreeReferenceCloud::forEach(genericPointAction action)
 {
 	unsigned count = size();
 	for (unsigned i=0; i<count; ++i)

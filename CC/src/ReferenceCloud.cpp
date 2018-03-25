@@ -174,7 +174,7 @@ void ReferenceCloud::setPointIndex(unsigned localIndex, unsigned globalIndex)
 	invalidateBoundingBox();
 }
 
-void ReferenceCloud::forEach(genericPointAction& action)
+void ReferenceCloud::forEach(genericPointAction action)
 {
 	assert(m_theAssociatedCloud);
 

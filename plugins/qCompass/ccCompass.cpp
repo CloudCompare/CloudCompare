@@ -43,9 +43,10 @@ int ccCompass::costMode = ccTrace::DARK;
 bool ccCompass::mapMode = false;
 int ccCompass::mapTo = ccGeoObject::LOWER_BOUNDARY;
 
-ccCompass::ccCompass(QObject* parent/*=0*/)
-	: QObject(parent)
-	, m_action(0)
+ccCompass::ccCompass(QObject* parent) :
+	QObject( parent )
+  , ccStdPluginInterface( ":/CC/plugin/qCompass/info.json" )
+  , m_action( nullptr )
 {
 	//initialize all tools
 	m_fitPlaneTool = new ccFitPlaneTool();
@@ -700,14 +701,6 @@ bool ccCompass::eventFilter(QObject* obj, QEvent* event)
 		}
 	}
 	return false;
-}
-
-QIcon ccCompass::getIcon() const
-{
-	//open ccCompass.qrc (text file), update the "prefix" and the
-	//icon(s) filename(s). Then save it with the right name (yourPlugin.qrc).
-	//(eventually, remove the original qDummyPlugin.qrc file!)
-	return QIcon(":/CC/plugin/qCompass/icon.png");
 }
 
 //exit this tool

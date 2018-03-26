@@ -29,8 +29,6 @@ script:
 after_success:
 - openssl aes-256-cbc -K $encrypted_d04fcf964026_key -iv $encrypted_d04fcf964026_iv
   -in .snapcraft/travis_snapcraft.cfg -out .snapcraft/snapcraft.cfg -d
-- openssl aes-256-cbc -K $encrypted_553dcb22e689_key -iv $encrypted_553dcb22e689_iv
-  -in .snapcraft/travis_snapcraft.cfg -out .snapcraft/snapcraft.cfg -d
 services:
 - docker
 deploy:

@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qBlur                       #
+//#            CLOUDCOMPARE PLUGIN: qExampleGLPlugin                       #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -15,23 +15,41 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_BLUR_PLUGIN_HEADER
-#define Q_BLUR_PLUGIN_HEADER
+#include <QInputDialog>
+#include <QtMath>
 
-#include "ccGLFilterPluginInterface.h"
+#include "ccBilateralFilter.h"
 
-//! Blur shader
-class qBlur : public QObject, public ccGLFilterPluginInterface
+#include "qExampleGLPlugin.h"
+
+
+qExampleGLPlugin::qExampleGLPlugin( QObject *parent ) :
+	QObject( parent )
+  , ccGLFilterPluginInterface( ":/CC/plugin/qExampleGLPlugin/info.json" )
 {
-	Q_OBJECT
-	Q_INTERFACES(ccGLFilterPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qBlur" FILE "info.json")
+}
 
-public:
-	qBlur( QObject *parent = nullptr );
+ccGlFilter *qExampleGLPlugin::getFilter()
+{
+	bool ok = false;
+	double sigma = QInputDialog::getDouble( 0,
+											"Bilateral filter",
+											"Sigma (pixel)",
+											1.0,
+											0.1, 8.0,
+											1,
+											&ok );
 
-	//inherited from ccGLFilterPluginInterface
-	ccGlFilter* getFilter() override;
-};
+	if (!ok || sigma < 0)
+	{
+		return nullptr;
+	}
 
-#endif
+	unsigned int halfFilterSize = static_cast<unsigned int>(qCeil( 2.5 * sigma ));
+
+	ccBilateralFilter* filter = new ccBilateralFilter;
+	
+	filter->setParams( halfFilterSize, static_cast<float>(sigma), 0.0f );
+
+	return filter;
+}

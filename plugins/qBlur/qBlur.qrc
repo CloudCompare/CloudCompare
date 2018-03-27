@@ -1,5 +1,0 @@
-<RCC>
-  <qresource prefix="/CC/plugin/qBlur" >
-    <file>info.json</file>
-  </qresource>
-</RCC>

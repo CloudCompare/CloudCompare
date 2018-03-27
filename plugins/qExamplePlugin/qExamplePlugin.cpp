@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qDummy                      #
+//#               CLOUDCOMPARE PLUGIN: qExamplePlugin                      #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -16,10 +16,10 @@
 //##########################################################################
 
 // First:
-//	Replace all occurrences of 'qDummyPlugin' by your own plugin class name in this file!
+//	Replace all occurrences of 'qExamplePlugin' by your own plugin class name in this file!
 
 // Second:
-//	Open qDummyPlugin.qrc, change the "prefix" and the icon filename for your plugin.
+//	Open qExamplePlugin.qrc, change the "prefix" and the icon filename for your plugin.
 //	Change the name of the file to <yourPluginName>.qrc
 
 // Third:
@@ -32,36 +32,45 @@
 
 #include <QtGui>
 
-#include "qDummyPlugin.h"
+#include "qExamplePlugin.h"
 
 // Default constructor:
 //	- pass the Qt resource path to the info.json file (from <yourPluginName>.qrc file) 
 //  - constructor should mainly be used to initialize actions and other members
-qDummyPlugin::qDummyPlugin( QObject *parent ) :
+qExamplePlugin::qExamplePlugin( QObject *parent ) :
 	  QObject( parent )
-	, ccStdPluginInterface( ":/CC/plugin/qDummyPlugin/info.json" )
+	, ccStdPluginInterface( ":/CC/plugin/qExamplePlugin/info.json" )
 	, m_action( nullptr )
 {
 }
 
 // This method should enable or disable your plugin actions
 // depending on the currently selected entities ('selectedEntities').
-// For example: if none of the selected entities is a cloud, and your
-// plugin deals only with clouds, call 'm_action->setEnabled( false )'
-void qDummyPlugin::onNewSelection( const ccHObject::Container &selectedEntities )
+void qExamplePlugin::onNewSelection( const ccHObject::Container &selectedEntities )
 {
 	if ( m_action == nullptr )
 	{
 		return;
 	}
 	
-	// for example - only enable our action if something is selected
+	// If you need to check for a specific type of object, you can use the methods
+	// in ccHObjectCaster.h or loop and check the objects' classIDs like this:
+	//
+	//	for ( ccHObject *object : selectedEntities )
+	//	{
+	//		if ( object->getClassID() == CC_TYPES::VIEWPORT_2D_OBJECT )
+	//		{
+	//			// ... do something with the viewports
+	//		}
+	//	}
+	
+	// For example - only enable our action if something is selected.
 	m_action->setEnabled( !selectedEntities.empty() );
 }
 
 // This method returns all the 'actions' your plugin can perform.
 // getActions() will be called only once, when plugin is loaded.
-void qDummyPlugin::getActions( QActionGroup &group )
+void qExamplePlugin::getActions( QActionGroup &group )
 {
 	// default action (if it has not been already created, this is the moment to do it)
 	if ( !m_action )
@@ -73,7 +82,7 @@ void qDummyPlugin::getActions( QActionGroup &group )
 		m_action->setIcon( getIcon() );
 		
 		// Connect appropriate signal
-		connect( m_action, &QAction::triggered, this, &qDummyPlugin::doAction );
+		connect( m_action, &QAction::triggered, this, &qExamplePlugin::doAction );
 	}
 
 	group.addAction( m_action );
@@ -84,14 +93,13 @@ void qDummyPlugin::getActions( QActionGroup &group )
 // main interface). You can access most of CC components (database,
 // 3D views, console, etc.) via the 'm_app' variable (see the ccMainAppInterface
 // class in ccMainAppInterface.h).
-void qDummyPlugin::doAction()
-{
-	// m_app should have already been initialized by CC when plugin is loaded
-	// (--> pure internal check)
-	Q_ASSERT(m_app != nullptr);
-	
-	if ( !m_app )
+void qExamplePlugin::doAction()
+{	
+	if ( m_app == nullptr )
 	{
+		// m_app should have already been initialized by CC when plugin is loaded
+		Q_ASSERT( false );
+		
 		return;
 	}
 
@@ -102,13 +110,13 @@ void qDummyPlugin::doAction()
 
 	// This is how you can output messages
 	// Display a standard message in the console
-	m_app->dispToConsole( "[qDummyPlugin] Hello world!", ccMainAppInterface::STD_CONSOLE_MESSAGE );
+	m_app->dispToConsole( "[qExamplePlugin] Hello world!", ccMainAppInterface::STD_CONSOLE_MESSAGE );
 	
 	// Display a warning message in the console
-	m_app->dispToConsole( "[qDummyPlugin] Warning: dummy plugin shouldn't be used as is!", ccMainAppInterface::WRN_CONSOLE_MESSAGE );
+	m_app->dispToConsole( "[qExamplePlugin] Warning: example plugin shouldn't be used as is", ccMainAppInterface::WRN_CONSOLE_MESSAGE );
 	
 	// Display an error message in the console AND pop-up an error box
-	m_app->dispToConsole( "Dummy plugin shouldn't be used as is!", ccMainAppInterface::ERR_CONSOLE_MESSAGE );
+	m_app->dispToConsole( "Example plugin shouldn't be used - it doesn't do anything!", ccMainAppInterface::ERR_CONSOLE_MESSAGE );
 
 	/*** HERE ENDS THE ACTION ***/
 }

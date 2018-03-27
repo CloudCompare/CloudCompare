@@ -1,8 +1,8 @@
 {
 	"type" : "Standard",
-	"name" : "Dummy Plugin",
-	"icon" : ":/CC/plugin/qDummyPlugin/icon.png",
-	"description": "This is a description of the marvelous Dummy plugin. It does nothing.",
+	"name" : "Example (Standard Plugin)",
+	"icon" : ":/CC/plugin/qExamplePlugin/images/icon.png",
+	"description": "This is a description of the marvelous Example plugin. It does nothing.",
 	"authors" : [
 		{
 			"name" : "Daniel Girardeau-Montaut",
@@ -11,19 +11,11 @@
 	],
 	"maintainers" : [
 		{
-			"name" : "Daniel Girardeau-Montaut",
-			"email" : "daniel.girardeau@gmail.com"
-		},
-		{
 			"name" : "Andy Maloney",
 			"email" : "asmaloney@gmail.com"
 		},
 		{
-			"name" : "Romain Janvier",
-			"email" : "romain.janvier@hotmail.fr"
-		},
-		{
-			"name" : "Ihave Noemail"
+			"name" : "Dontshow Myemail"
 		}
 	],
 	"references" : [
@@ -36,7 +28,7 @@
 			"url" : "http://www.bmj.com/content/333/7582/1285"
 		},
 		{
-			"text" : "I thought of creating this wonderful plugin while I was hiking up Mont Blanc &#x26f0;"
+			"text" : "I thought of creating this wonderful plugin while I was hiking up &#x26f0; Mont Blanc"
 		}
 	]
 }

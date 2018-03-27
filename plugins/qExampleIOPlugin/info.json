@@ -1,0 +1,23 @@
+{
+	"type" : "I/O",
+	"name" : "Example (I/O Plugin)",
+	"description": "This plugin is an example of how to add I/O for a new file format. It counts the number of occurenecs of the string 'foo' in a text file.",
+	"authors" : [
+		{
+			"name" : "Andy Maloney",
+			"email" : "asmaloney@gmail.com"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "Andy Maloney",
+			"email" : "asmaloney@gmail.com"
+		}
+	],
+	"references" : [
+		{
+			"text" : "FOO format",
+			"url" : "https://en.wikipedia.org/wiki/Foobar"
+		}
+	]
+}

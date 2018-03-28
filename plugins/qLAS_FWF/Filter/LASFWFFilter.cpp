@@ -61,7 +61,7 @@ public:
 //! Semi persistent save dialog
 QSharedPointer<LASSaveDlg> s_saveDlg(0);
 
-bool LASFWFFilter::canLoadExtension(QString upperCaseExt) const
+bool LASFWFFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (	upperCaseExt == "LAS"
 			||	upperCaseExt == "LAZ" );
@@ -79,7 +79,7 @@ bool LASFWFFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) 
 	return true;
 }
 
-CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 	{
@@ -617,7 +617,7 @@ bool PrepareLASField(ccScalarField*& field, LAS_FIELDS type, unsigned totalCount
 	return true;
 }
 
-CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	

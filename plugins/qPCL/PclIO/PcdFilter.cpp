@@ -40,7 +40,7 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/io/pcd_io.h>
 
-bool PcdFilter::canLoadExtension(QString upperCaseExt) const
+bool PcdFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "PCD");
 }
@@ -58,7 +58,7 @@ bool PcdFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	return false;
 }
 
-CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -126,7 +126,7 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR PcdFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	Eigen::Vector4f origin;
 	Eigen::Quaternionf orientation;

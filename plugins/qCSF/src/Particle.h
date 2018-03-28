@@ -66,26 +66,31 @@ public:
 	
 public:
 
-	Particle() {}
-
-	Particle(Vec3 pos, double time_step)
+	Particle()
 		: movable(true)
 		//, mass(1)
 		, acceleration(0, 0, 0)
 		//, accumulated_normal(0, 0, 0)
-		, time_step2(time_step)
+		, time_step2(0.0)
 		, isVisited(false)
 		//, neibor_count(0)
 		, pos_x(0)
 		, pos_y(0)
 		, c_pos(0)
-		, pos(pos)
-		, old_pos(pos)
+		//, pos()
+		//, old_pos(pos)
 		, nearestPointHeight(MIN_INF)
 		, tmpDist(MAX_INF)
-
 	{}
-
+	
+	Particle(Vec3 posVec, double time_step)
+		: Particle()
+	{
+		pos = posVec;
+		old_pos = posVec;
+		time_step2 = time_step;
+	}
+	
 	/* This is one of the important methods, where the time is progressed a single step size (TIME_STEPSIZE)
 	The method is called by Cloth.time_step()*/
 	void timeStep();

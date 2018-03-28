@@ -39,7 +39,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -79,14 +79,6 @@
      <addaction name="actionToggleSunLight"/>
      <addaction name="actionToggleCustomLight"/>
     </widget>
-    <widget class="QMenu" name="menuShadersAndFilters">
-     <property name="title">
-      <string>Shaders &amp;&amp; filters</string>
-     </property>
-     <addaction name="actionLoadShader"/>
-     <addaction name="actionDeleteShader"/>
-     <addaction name="separator"/>
-    </widget>
     <widget class="QMenu" name="menuActiveScalarField">
      <property name="title">
       <string>Active scalar field</string>
@@ -113,7 +105,6 @@
     <addaction name="actionTestFrameRate"/>
     <addaction name="separator"/>
     <addaction name="menuLights"/>
-    <addaction name="menuShadersAndFilters"/>
     <addaction name="menuActiveScalarField"/>
     <addaction name="separator"/>
     <addaction name="actionConsole"/>

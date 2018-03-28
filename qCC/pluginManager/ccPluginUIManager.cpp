@@ -288,7 +288,7 @@ void ccPluginUIManager::setupMenus()
 {	
 	m_pluginMenu = new QMenu( tr( "Plugins" ), m_parentWidget );
 	
-	m_glFilterMenu = new QMenu( tr( "Shaders && Filters NEW" ), m_parentWidget );
+	m_glFilterMenu = new QMenu( tr( "Shaders && Filters" ), m_parentWidget );
 	
 	m_glFilterMenu->addAction( m_actionRemoveFilter );
 	

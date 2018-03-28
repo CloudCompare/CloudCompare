@@ -1663,7 +1663,7 @@ struct CommandMergeMeshes : public ccCommandLineInterface::Command
 			ccMesh* mesh = dynamic_cast<ccMesh*>(meshDesc.mesh);
 			if (!mesh)
 			{
-				ccLog::Error(QObject::tr("Can't merge mesh '%1' (unhandled type)").arg(mesh->getName()));
+				ccLog::Error(QObject::tr("Can't merge mesh '%1' (unhandled type)").arg(meshDesc.basename));
 			}
 			
 			if (mergedMesh->merge(mesh, true)) //merge it

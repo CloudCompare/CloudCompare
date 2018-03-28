@@ -27,7 +27,14 @@ struct CLEntityDesc
 	QString path;
 	int indexInFile;
 
-	CLEntityDesc(QString filename, int _indexInFile = -1)
+	CLEntityDesc( const QString &name )
+		: basename( name )
+		, path( QDir::currentPath() )
+		, indexInFile( -1 )
+	{	
+	}
+	
+	CLEntityDesc(const QString &filename, int _indexInFile)
 		: indexInFile(_indexInFile)
 	{
 		if (filename.isNull())
@@ -43,7 +50,7 @@ struct CLEntityDesc
 		}
 	}
 	
-	CLEntityDesc(QString _basename, QString _path, int _indexInFile = -1)
+	CLEntityDesc(const QString &_basename, const QString &_path, int _indexInFile = -1)
 		: basename(_basename)
 		, path(_path)
 		, indexInFile(_indexInFile)

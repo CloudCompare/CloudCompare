@@ -1,0 +1,44 @@
+{
+	"type" : "Standard",
+	"name" : "CSF Filter",
+	"icon" : ":/CC/plugin/qCSF/images/icon.png",
+	"description": "A pointclouds filtering algorithm utilize cloth simulation process(Wuming Zhang; Jianbo Qi; Peng Wan,2015).",
+	"authors" : [
+		{
+			"name" : "Wuming Zhang"
+		},
+		{
+			"name" : "Jianbo Qi"
+		},
+		{
+			"name" : "Peng Wan"
+		},
+		{
+			"name" : "Hongtao Wang"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "Wuming Zhang"
+		},
+		{
+			"name" : "Jianbo Qi"
+		},
+		{
+			"name" : "Peng Wan"
+		},
+		{
+			"name" : "Hongtao Wang"
+		}
+	],
+	"references" : [
+		{
+			"text" : "An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth Simulation",
+			"url" : "http://www.mdpi.com/2072-4292/8/6/501"
+		},
+		{
+			"text" : "RAMM laboratory, School of Geography, Beijing Normal University",
+			"url" : "http://ramm.bnu.edu.cn/"
+		}
+	]
+}

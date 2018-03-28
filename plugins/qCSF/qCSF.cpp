@@ -63,9 +63,10 @@
 Q_EXPORT_PLUGIN2(qCSF,qCSF);
 #endif
 
-qCSF::qCSF(QObject* parent/*=0*/)
-	: QObject(parent)
-	, m_action(0)
+qCSF::qCSF(QObject* parent)
+	: QObject( parent )
+	, ccStdPluginInterface( ":/CC/plugin/qCSF/info.json" )
+	, m_action( nullptr )
 {
 }	
 
@@ -285,9 +286,4 @@ void qCSF::doAction()
 
 	m_app->addToDB(cloudContainer);
 	m_app->refreshAll();
-}
-
-QIcon qCSF::getIcon() const
-{
-	return QIcon(":/CC/plugin/qCSF/icon.png");
 }

@@ -32,24 +32,19 @@
 #ifndef Q_CSF_PLUGIN_HEADER
 #define Q_CSF_PLUGIN_HEADER
 
-#include "../ccStdPluginInterface.h"
+#include "ccStdPluginInterface.h"
 
 //! A point-clouds filtering algorithm utilize cloth simulation process. 
 class qCSF : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCSF")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCSF" FILE "info.json")
 
 public:
 
 	//! Default constructor
 	explicit qCSF(QObject* parent = 0);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "CSF Filter"; }
-	virtual QString getDescription() const { return "A pointclouds filtering algorithm utilize cloth simulation process(Wuming Zhang; Jianbo Qi; Peng Wan,2015)."; }
-	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);

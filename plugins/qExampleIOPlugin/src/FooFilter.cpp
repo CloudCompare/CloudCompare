@@ -30,7 +30,7 @@ bool FooFilter::exportSupported() const
 	return false;
 }
 
-CC_FILE_ERROR FooFilter::loadFile( QString fileName, ccHObject &container, LoadParameters &parameters )
+CC_FILE_ERROR FooFilter::loadFile( const QString &fileName, ccHObject &container, LoadParameters &parameters )
 {	
 	QFile file( fileName );
 	
@@ -82,7 +82,7 @@ QString FooFilter::getDefaultExtension() const
 	return QStringLiteral( "foo" );
 }
 
-bool FooFilter::canLoadExtension( QString upperCaseExt ) const
+bool FooFilter::canLoadExtension( const QString &upperCaseExt ) const
 {
 	const QStringList extensions{
 		"FOO",

@@ -166,7 +166,7 @@ void FileIOFilter::UnregisterAll()
 	s_ioFilters.clear();
 }
 
-FileIOFilter::Shared FileIOFilter::GetFilter(QString fileFilter, bool onImport)
+FileIOFilter::Shared FileIOFilter::GetFilter(const QString& fileFilter, bool onImport)
 {
 	if (!fileFilter.isEmpty())
 	{
@@ -186,13 +186,13 @@ const FileIOFilter::FilterContainer& FileIOFilter::GetFilters()
 	return s_ioFilters;
 }
 
-FileIOFilter::Shared FileIOFilter::FindBestFilterForExtension(QString ext)
+FileIOFilter::Shared FileIOFilter::FindBestFilterForExtension(const QString& ext)
 {
-	ext = ext.toUpper();
+	const QString upperExt = ext.toUpper();
 
 	for (FilterContainer::const_iterator it=s_ioFilters.begin(); it!=s_ioFilters.end(); ++it)
 	{
-		if ((*it)->canLoadExtension(ext))
+		if ((*it)->canLoadExtension(upperExt))
 			return *it;
 	}
 
@@ -326,7 +326,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 
 CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 										const QString& filename,
-										SaveParameters& parameters,
+										const SaveParameters& parameters,
 										Shared filter)
 {
 	if (!entities || filename.isEmpty() || !filter)
@@ -362,8 +362,8 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 
 CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 										const QString& filename,
-										SaveParameters& parameters,
-										QString fileFilter)
+										const SaveParameters& parameters,
+										const QString& fileFilter)
 {
 	if (fileFilter.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -450,7 +450,7 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
 		ccLog::Error(outputString);
 }
 
-bool FileIOFilter::CheckForSpecialChars(QString filename)
+bool FileIOFilter::CheckForSpecialChars(const QString& filename)
 {
 	return (filename.normalized(QString::NormalizationForm_D) != filename);
 }

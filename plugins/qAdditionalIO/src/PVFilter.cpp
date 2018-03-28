@@ -28,7 +28,7 @@
 //Qt
 #include <QFile>
 
-bool PVFilter::canLoadExtension(QString upperCaseExt) const
+bool PVFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "PV");
 }
@@ -44,7 +44,7 @@ bool PVFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) cons
 	return false;
 }
 
-CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -134,7 +134,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 	return result;
 }
 
-CC_FILE_ERROR PVFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	//opening file
 	QFile in(filename);

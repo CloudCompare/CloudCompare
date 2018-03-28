@@ -38,12 +38,12 @@ bool SalomeHydroFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclus
 	return false;
 }
 
-bool SalomeHydroFilter::canLoadExtension(QString upperCaseExt) const
+bool SalomeHydroFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "POLY");
 }
 
-CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -117,7 +117,7 @@ CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, QString filename,
 	return result;
 }
 
-CC_FILE_ERROR SalomeHydroFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	//we open the file (ASCII mode)
 	QFile file(filename);

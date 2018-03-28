@@ -127,7 +127,7 @@ public:
 	}
 };
 
-bool ShpFilter::canLoadExtension(QString upperCaseExt) const
+bool ShpFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "SHP");
 }
@@ -1017,7 +1017,7 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 }
 
 
-CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	std::vector<GenericDBFField*> fields;
 	return saveToFile(entity, fields, filename, parameters);
@@ -1027,7 +1027,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 static bool s_save3DPolysAs2D = false;
 static int  s_poly2DVertDim = 2;
 static bool s_save3DPolyHeightInDBF = false;
-CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity)
 		return CC_FERR_BAD_ENTITY_TYPE;
@@ -1426,7 +1426,7 @@ typedef QPair<int, QString> FieldIndexAndName;
 
 //semi-persistent settings
 static double s_dbfFielImportScale = 1.0;
-CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly))

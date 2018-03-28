@@ -34,7 +34,7 @@ static const size_t c_headerSize = 64;
 //header flag
 static const quint16 s_headerFlagSBF = (static_cast<quint16>(42) | static_cast<quint16>(42 << 8));
 
-bool SimpleBinFilter::canLoadExtension(QString upperCaseExt) const
+bool SimpleBinFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "SBF" || upperCaseExt == "DATA");
 }
@@ -46,7 +46,7 @@ bool SimpleBinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusiv
 	return (type == CC_TYPES::POINT_CLOUD);
 }
 
-CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filename, const SaveParameters& parameters)
 {
 	if (!root || filename.isNull() || !root->isA(CC_TYPES::POINT_CLOUD))
 	{
@@ -237,7 +237,7 @@ struct GlobalDescriptor
 	std::vector<SFDescriptor> SFs;
 };
 
-CC_FILE_ERROR SimpleBinFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	if (filename.isEmpty())
 	{

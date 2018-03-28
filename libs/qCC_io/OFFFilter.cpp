@@ -38,7 +38,7 @@
 //System
 #include <string.h>
 
-bool OFFFilter::canLoadExtension(QString upperCaseExt) const
+bool OFFFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "OFF");
 }
@@ -54,7 +54,7 @@ bool OFFFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	return false;
 }
 
-CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
@@ -134,7 +134,7 @@ static QString GetNextLine(QTextStream& stream)
 	return currentLine;
 }
 
-CC_FILE_ERROR OFFFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR OFFFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	//try to open file
 	QFile fp(filename);

@@ -68,7 +68,7 @@ struct MeshDesc
 	QString texture;
 };
 
-bool PhotoScanFilter::canLoadExtension(QString upperCaseExt) const
+bool PhotoScanFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "PSZ");
 }
@@ -388,7 +388,7 @@ static QString CreateTempFile(QuaZip& zip, QString zipFilename)
 }
 
 
-CC_FILE_ERROR PhotoScanFilter::loadFile(QString filename,
+CC_FILE_ERROR PhotoScanFilter::loadFile(const QString& filename,
 										ccHObject& container,
 										LoadParameters& parameters)
 {

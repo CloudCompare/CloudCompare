@@ -49,7 +49,7 @@ const char CC_SENSOR_ROTATION_ORDER_OLD_NAMES[][10] = {	"THETA_PHI",		//Rotation
 														"PHI_THETA"			//Rotation: mirror then body
 };
 
-bool PovFilter::canLoadExtension(QString upperCaseExt) const
+bool PovFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "POV");
 }
@@ -65,7 +65,7 @@ bool PovFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	return false;
 }
 
-CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -183,7 +183,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	assert(!filename.isEmpty());
 

@@ -37,7 +37,7 @@
 
 const char CC_PTX_INTENSITY_FIELD_NAME[] = "Intensity";
 
-bool PTXFilter::canLoadExtension(QString upperCaseExt) const
+bool PTXFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "PTX");
 }
@@ -88,7 +88,7 @@ void CleanMatrix(ccGLMatrixd& mat)
 	}
 }
 
-CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
+CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 									ccHObject& container,
 									LoadParameters& parameters)
 {

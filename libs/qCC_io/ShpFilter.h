@@ -44,18 +44,18 @@ public:
 	//inherited from FileIOFilter
 	virtual bool importSupported() const override { return true; }
 	virtual bool exportSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters) override;
+	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
 	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(QString upperCaseExt) const override;
+	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 
 	//! Default constructor
 	ShpFilter() : FileIOFilter(), m_closedPolylinesAsPolygons(false) {}
 
 	//! Special method to save multiple entities with attributes
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, QString filename, SaveParameters& parameters);
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters);
 
 	//! Sets whether to consider closed polylines as polygons or not
 	void treatClosedPolylinesAsPolygons(bool state) { m_closedPolylinesAsPolygons = state; }

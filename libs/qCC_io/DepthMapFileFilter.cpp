@@ -29,7 +29,7 @@
 //system
 #include <assert.h>
 
-bool DepthMapFileFilter::canLoadExtension(QString upperCaseExt) const
+bool DepthMapFileFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	//import not supported
 	return false;
@@ -46,7 +46,7 @@ bool DepthMapFileFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclu
 	return false;
 }
 
-CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -89,7 +89,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, QString filename
 	return result;
 }
 
-CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sensor)
+CC_FILE_ERROR DepthMapFileFilter::saveToFile(const QString& filename, ccGBLSensor* sensor)
 {
 	assert(sensor);
 	if (!sensor)

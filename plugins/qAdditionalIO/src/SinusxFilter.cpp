@@ -41,7 +41,7 @@ bool SinusxFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) 
 	return false;
 }
 
-bool SinusxFilter::canLoadExtension(QString upperCaseExt) const
+bool SinusxFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (	upperCaseExt == "SX"
 			||	upperCaseExt == "SINUSX" );
@@ -55,7 +55,7 @@ QString MakeSinusxName(QString name)
 	return name;
 }
 
-CC_FILE_ERROR SinusxFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR SinusxFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -154,7 +154,7 @@ CC_FILE_ERROR SinusxFilter::saveToFile(ccHObject* entity, QString filename, Save
 enum CurveType { INVALID = -1, CUREV_S = 0, CURVE_P = 1, CURVE_N = 2, CURVE_C = 3 };
 const QChar SHORTCUT[] = { 'S', 'P', 'N', 'C' };
 
-CC_FILE_ERROR SinusxFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	//open file
 	QFile file(filename);

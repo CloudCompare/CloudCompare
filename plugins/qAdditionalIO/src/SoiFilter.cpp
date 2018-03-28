@@ -26,7 +26,7 @@
 //TODO: use QFile instead!
 const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
 
-bool SoiFilter::canLoadExtension(QString upperCaseExt) const
+bool SoiFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "SOI");
 }
@@ -37,7 +37,7 @@ bool SoiFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	return false;
 }
 
-CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	//open the file
 	FILE *fp = fopen(qPrintable(filename), "rt");

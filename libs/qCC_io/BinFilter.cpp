@@ -52,7 +52,7 @@
 #include <unistd.h>
 #endif
 
-bool BinFilter::canLoadExtension(QString upperCaseExt) const
+bool BinFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "BIN");
 }
@@ -149,7 +149,7 @@ CC_FILE_ERROR _SaveFileV2()
 	return (s_file && s_container ? BinFilter::SaveFileV2(*s_file,s_container) : CC_FERR_BAD_ARGUMENT);
 }
 
-CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, const SaveParameters& parameters)
 {
 	if (!root || filename.isNull())
 		return CC_FERR_BAD_ARGUMENT;
@@ -325,7 +325,7 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 	return result;
 }
 
-CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR BinFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	ccLog::Print(QString("[BIN] Opening file '%1'...").arg(filename));
 

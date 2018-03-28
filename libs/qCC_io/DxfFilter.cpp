@@ -36,7 +36,7 @@
 //system
 #include <assert.h>
 
-bool DxfFilter::canLoadExtension(QString upperCaseExt) const
+bool DxfFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "DXF");
 }
@@ -487,7 +487,7 @@ private:
 
 #endif //CC_DXF_SUPPORT
 
-CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, const SaveParameters& parameters)
 {
 #ifndef CC_DXF_SUPPORT
 
@@ -868,7 +868,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 #endif
 }
 
-CC_FILE_ERROR DxfFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR DxfFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	CC_FILE_ERROR result = CC_FERR_NO_LOAD;
 

@@ -47,7 +47,7 @@
 
 using namespace CCLib;
 
-bool PlyFilter::canLoadExtension(QString upperCaseExt) const
+bool PlyFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "PLY");
 }
@@ -70,7 +70,7 @@ void PlyFilter::SetDefaultOutputFormat(e_ply_storage_mode format)
 	s_defaultOutputFormat = format;
 }
 
-CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	e_ply_storage_mode outputFormat = s_defaultOutputFormat;
 
@@ -833,12 +833,12 @@ static int texIndexes_cb(p_ply_argument argument)
 	return 1;
 }
 
-CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	return loadFile(filename, QString(), container, parameters);
 }
 
-CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputTextureFilename, ccHObject& container, LoadParameters& parameters)
 {
 	//reset statics!
 	s_triCount = 0;

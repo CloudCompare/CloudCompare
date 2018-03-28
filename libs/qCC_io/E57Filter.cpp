@@ -54,7 +54,7 @@ typedef double colorFieldType;
 const char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
 const char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
 
-bool E57Filter::canLoadExtension(QString upperCaseExt) const
+bool E57Filter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "E57");
 }
@@ -616,7 +616,7 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	blob.write((uint8_t*)ba.data(), 0, static_cast<size_t>(imageSize));
 }
 
-CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	//we assume the input entity is either a cloud or a group of clouds (=multiple scans)
 	std::vector<ccPointCloud*> scans;
@@ -2091,7 +2091,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	return imageObj;
 }
 
-CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	s_loadParameters = parameters;
 

@@ -61,7 +61,7 @@ AsciiOpenDlg* AsciiFilter::GetOpenDialog(QWidget* parentWidget/*=0*/)
 	return s_openDialog.ptr;
 }
 
-bool AsciiFilter::canLoadExtension(QString upperCaseExt) const
+bool AsciiFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (	upperCaseExt == "ASC"
 			||	upperCaseExt == "TXT"
@@ -84,7 +84,7 @@ bool AsciiFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) c
 	return false;
 }
 
-CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	assert(entity && !filename.isEmpty());
 
@@ -352,7 +352,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 	return result;
 }
 
-CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
+CC_FILE_ERROR AsciiFilter::loadFile(const QString& filename,
 									ccHObject& container,
 									LoadParameters& parameters)
 {

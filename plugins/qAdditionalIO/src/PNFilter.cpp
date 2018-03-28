@@ -28,7 +28,7 @@
 //default normal value
 static const CCVector3 s_defaultNorm(0,0,1);
 
-bool PNFilter::canLoadExtension(QString upperCaseExt) const
+bool PNFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "PN");
 }
@@ -44,7 +44,7 @@ bool PNFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) cons
 	return false;
 }
 
-CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -135,7 +135,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 	return result;
 }
 
-CC_FILE_ERROR PNFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	//opening file
 	QFile in(filename);

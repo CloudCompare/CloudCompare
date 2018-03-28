@@ -35,7 +35,7 @@
 //System
 #include <string.h> //for memset
 
-bool RasterGridFilter::canLoadExtension(QString upperCaseExt) const
+bool RasterGridFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (	upperCaseExt == "TIF"
 			||	upperCaseExt == "TIFF"
@@ -48,7 +48,7 @@ bool RasterGridFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusi
 	return false;
 }
 
-CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	GDALAllRegister();
 	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());

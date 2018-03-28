@@ -107,7 +107,7 @@ public:
 	}
 };
 
-bool LASFilter::canLoadExtension(QString upperCaseExt) const
+bool LASFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "LAS" ||
 			upperCaseExt == "LAZ");
@@ -203,7 +203,7 @@ pdal::Dimension::Id typeToId(LAS_FIELDS sfType)
 }
 
 
-CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -887,7 +887,7 @@ std::vector<ExtraDim> readExtraBytesVlr(LasHeader header)
 	return extraDims;
 }
 
-CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	Options las_opts;
 	las_opts.add("filename", filename.toLocal8Bit().toStdString());

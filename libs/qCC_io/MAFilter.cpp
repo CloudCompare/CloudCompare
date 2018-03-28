@@ -30,7 +30,7 @@
 #include <string.h>
 #include <assert.h>
 
-bool MAFilter::canLoadExtension(QString upperCaseExt) const
+bool MAFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	//import not supported
 	return false;
@@ -86,7 +86,7 @@ struct faceIndexes
 	faceIndexes* nextFace;
 };
 
-CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;

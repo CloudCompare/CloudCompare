@@ -61,7 +61,7 @@ ImageFileFilter::ImageFileFilter()
 	}
 }
 
-QString ImageFileFilter::GetSaveFilename(QString dialogTitle, QString baseName, QString imageSavePath, QWidget* parentWidget/*=0*/)
+QString ImageFileFilter::GetSaveFilename(const QString& dialogTitle, const QString& baseName, const QString& imageSavePath, QWidget* parentWidget/*=0*/)
 {
 	//add images output file filters
 	QString filters;
@@ -98,7 +98,7 @@ QString ImageFileFilter::GetSaveFilename(QString dialogTitle, QString baseName, 
 	return outputFilename;
 }
 
-QString ImageFileFilter::GetLoadFilename(QString dialogTitle, QString imageLoadPath, QWidget* parentWidget/*=0*/)
+QString ImageFileFilter::GetLoadFilename(const QString& dialogTitle, const QString& imageLoadPath, QWidget* parentWidget/*=0*/)
 {
 	//we grab the list of supported image file formats (for reading)
 	QList<QByteArray> formats = QImageReader::supportedImageFormats();
@@ -121,7 +121,7 @@ QStringList ImageFileFilter::getFileFilters(bool onImport) const
 	return onImport ? QStringList(m_inputFilter) : m_outputFilters;
 }
 
-bool ImageFileFilter::canLoadExtension(QString upperCaseExt) const
+bool ImageFileFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	//we grab the list of supported image file formats (for reading)
 	QList<QByteArray> formats = QImageReader::supportedImageFormats();
@@ -144,7 +144,7 @@ bool ImageFileFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusiv
 	return false;
 }
 
-CC_FILE_ERROR ImageFileFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR ImageFileFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
@@ -168,7 +168,7 @@ CC_FILE_ERROR ImageFileFilter::saveToFile(ccHObject* entity, QString filename, S
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR ImageFileFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR ImageFileFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	QImage qImage;
 	if (!qImage.load(filename))

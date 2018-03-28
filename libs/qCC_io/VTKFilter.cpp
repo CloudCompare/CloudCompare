@@ -30,7 +30,7 @@
 //System
 #include <string.h>
 
-bool VTKFilter::canLoadExtension(QString upperCaseExt) const
+bool VTKFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "VTK");
 }
@@ -47,7 +47,7 @@ bool VTKFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	return false;
 }
 
-CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -216,7 +216,7 @@ static bool GetNextNonEmptyLine(QTextStream& stream, QString& line)
 	return true;
 }
 
-CC_FILE_ERROR VTKFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	//open ASCII file for reading
 	QFile file(filename);

@@ -35,7 +35,7 @@ bool HeightProfileFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& excl
 	return false;
 }
 
-CC_FILE_ERROR HeightProfileFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR HeightProfileFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 	{

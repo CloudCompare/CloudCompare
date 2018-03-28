@@ -34,22 +34,22 @@ public:
 	//inherited from FileIOFilter
 	virtual bool importSupported() const override { return true; }
 	virtual bool exportSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters) override;
+	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 	virtual QStringList getFileFilters(bool onImport) const override;
 	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(QString upperCaseExt) const override;
+	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 
 	//! Helper: select an input image filename
-	static QString GetLoadFilename(	QString dialogTitle,
-									QString imageLoadPath,
+	static QString GetLoadFilename(	const QString& dialogTitle,
+									const QString& imageLoadPath,
 									QWidget* parentWidget = 0);
 
 	//! Helper: select an output image filename
-	static QString GetSaveFilename(	QString dialogTitle,
-									QString baseName,
-									QString imageSavePath,
+	static QString GetSaveFilename(	const QString& dialogTitle,
+									const QString& baseName,
+									const QString& imageSavePath,
 									QWidget* parentWidget = 0);
 
 protected:

@@ -37,7 +37,7 @@
 #include <string.h>
 #include <assert.h>
 
-bool CSVMatrixFilter::canLoadExtension(QString upperCaseExt) const
+bool CSVMatrixFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "CSV");
 }
@@ -49,7 +49,7 @@ static double s_ySpacing = 1.0;
 static bool s_inverseRows = false;
 static bool s_loadAsMesh = false;
 static bool s_useTexture = false;
-CC_FILE_ERROR CSVMatrixFilter::loadFile(QString filename,
+CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 									ccHObject& container,
 									LoadParameters& parameters)
 {

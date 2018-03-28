@@ -39,7 +39,7 @@
 //System
 #include <string.h>
 
-bool ObjFilter::canLoadExtension(QString upperCaseExt) const
+bool ObjFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "OBJ");
 }
@@ -55,7 +55,7 @@ bool ObjFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	return false;
 }
 
-CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
@@ -400,7 +400,7 @@ struct facetElement
 	}
 };
 
-CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	ccLog::Print(QString("[OBJ] ") + filename);
 

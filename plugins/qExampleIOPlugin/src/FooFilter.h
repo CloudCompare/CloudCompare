@@ -28,12 +28,12 @@ public:
 	virtual bool importSupported() const override;
 	virtual bool exportSupported() const override;
 	
-	virtual CC_FILE_ERROR loadFile( QString fileName, ccHObject &container, LoadParameters &parameters ) override;
+	virtual CC_FILE_ERROR loadFile( const QString &fileName, ccHObject &container, LoadParameters &parameters ) override;
 	
 	virtual QStringList getFileFilters( bool onImport ) const override;
 	virtual QString getDefaultExtension() const override;
 	
-	virtual bool canLoadExtension( QString upperCaseExt ) const override;
+	virtual bool canLoadExtension( const QString &upperCaseExt ) const override;
 	virtual bool canSave( CC_CLASS_ENUM type, bool &multiple, bool &exclusive ) const override;
 };
 

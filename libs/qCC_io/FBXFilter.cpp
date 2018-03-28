@@ -41,7 +41,7 @@
 
 static const char FBX_SCALE_METADATA_KEY[] = "FBX:ScaleToCM";
 
-bool FBXFilter::canLoadExtension(QString upperCaseExt) const
+bool FBXFilter::canLoadExtension(const QString& upperCaseExt) const
 {
 	return (upperCaseExt == "FBX");
 }
@@ -455,7 +455,7 @@ QString SanitizeFBXFormatString(QString format)
 	return format;
 }
 
-CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
@@ -1302,7 +1302,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 }
 
 
-CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR FBXFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 

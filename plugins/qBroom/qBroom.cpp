@@ -31,9 +31,10 @@
 //system
 #include <assert.h>
 
-qBroom::qBroom(QObject* parent/*=0*/)
-	: QObject(parent)
-	, m_action(0)
+qBroom::qBroom(QObject* parent)
+	: QObject( parent )
+	, ccStdPluginInterface( ":/CC/plugin/qBroom/info.json" )
+	, m_action( nullptr )
 {
 }
 
@@ -101,9 +102,4 @@ void qBroom::doAction()
 
 	//currently selected entities appearance may have changed!
 	m_app->refreshAll();
-}
-
-QIcon qBroom::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/CC/plugin/qBroom/qBroom.png"));
 }

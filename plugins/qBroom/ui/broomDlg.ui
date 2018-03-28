@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="qBroom.qrc">
-    <normaloff>:/CC/plugin/qBroom/qBroom.png</normaloff>:/CC/plugin/qBroom/qBroom.png</iconset>
+    <normaloff>:/CC/plugin/qBroom/images/qBroom.png</normaloff>:/CC/plugin/qBroom/images/qBroom.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">QDialog{ background-color:white }</string>
@@ -48,7 +48,7 @@
       <item>
        <widget class="QLabel" name="caeLogoLabel">
         <property name="pixmap">
-         <pixmap resource="qBroom.qrc">:/CC/plugin/qBroom/cea_logo_small.jpg</pixmap>
+         <pixmap resource="qBroom.qrc">:/CC/plugin/qBroom/images/cea_logo_small.jpg</pixmap>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -315,7 +315,7 @@
           <widget class="QToolButton" name="topViewToolButton">
            <property name="icon">
             <iconset resource="qBroom.qrc">
-             <normaloff>:/icons/icons/ccViewZpos.png</normaloff>:/icons/icons/ccViewZpos.png</iconset>
+             <normaloff>:/CC/plugin/qBroom/images/ccViewZpos.png</normaloff>:/CC/plugin/qBroom/images/ccViewZpos.png</iconset>
            </property>
            <property name="autoRaise">
             <bool>true</bool>
@@ -326,7 +326,7 @@
           <widget class="QToolButton" name="frontViewToolButton">
            <property name="icon">
             <iconset resource="qBroom.qrc">
-             <normaloff>:/icons/icons/ccViewYpos.png</normaloff>:/icons/icons/ccViewYpos.png</iconset>
+             <normaloff>:/CC/plugin/qBroom/images/ccViewYpos.png</normaloff>:/CC/plugin/qBroom/images/ccViewYpos.png</iconset>
            </property>
            <property name="autoRaise">
             <bool>true</bool>
@@ -337,7 +337,7 @@
           <widget class="QToolButton" name="leftViewToolButton">
            <property name="icon">
             <iconset resource="qBroom.qrc">
-             <normaloff>:/icons/icons/ccViewXpos.png</normaloff>:/icons/icons/ccViewXpos.png</iconset>
+             <normaloff>:/CC/plugin/qBroom/images/ccViewXpos.png</normaloff>:/CC/plugin/qBroom/images/ccViewXpos.png</iconset>
            </property>
            <property name="autoRaise">
             <bool>true</bool>
@@ -348,7 +348,7 @@
           <widget class="QToolButton" name="backViewToolButton">
            <property name="icon">
             <iconset resource="qBroom.qrc">
-             <normaloff>:/icons/icons/ccViewYneg.png</normaloff>:/icons/icons/ccViewYneg.png</iconset>
+             <normaloff>:/CC/plugin/qBroom/images/ccViewYneg.png</normaloff>:/CC/plugin/qBroom/images/ccViewYneg.png</iconset>
            </property>
            <property name="autoRaise">
             <bool>true</bool>
@@ -359,7 +359,7 @@
           <widget class="QToolButton" name="rightViewToolButton">
            <property name="icon">
             <iconset resource="qBroom.qrc">
-             <normaloff>:/icons/icons/ccViewXneg.png</normaloff>:/icons/icons/ccViewXneg.png</iconset>
+             <normaloff>:/CC/plugin/qBroom/images/ccViewXneg.png</normaloff>:/CC/plugin/qBroom/images/ccViewXneg.png</iconset>
            </property>
            <property name="autoRaise">
             <bool>true</bool>
@@ -370,7 +370,7 @@
           <widget class="QToolButton" name="bottomViewToolButton">
            <property name="icon">
             <iconset resource="qBroom.qrc">
-             <normaloff>:/icons/icons/ccViewZneg.png</normaloff>:/icons/icons/ccViewZneg.png</iconset>
+             <normaloff>:/CC/plugin/qBroom/images/ccViewZneg.png</normaloff>:/CC/plugin/qBroom/images/ccViewZneg.png</iconset>
            </property>
            <property name="autoRaise">
             <bool>true</bool>
@@ -408,7 +408,7 @@
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="qBroom.qrc">:/CC/plugin/qBroom/warning.png</pixmap>
+            <pixmap resource="qBroom.qrc">:/CC/plugin/qBroom/images/warning.png</pixmap>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -521,7 +521,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="qBroom.qrc"/>
+  <include location="../qBroom.qrc"/>
  </resources>
  <connections/>
 </ui>

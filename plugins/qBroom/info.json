@@ -1,0 +1,26 @@
+{
+	"type" : "Standard",
+	"name" : "CEA Virtual Broom",
+	"icon" : ":/CC/plugin/qBroom/images/qBroom.png",
+	"description": "Clean a point cloud with a virtual broom.",
+	"authors" : [
+		{
+			"name" : "Wesley Grimes (Collision Engineering Associates)"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "Wesley Grimes (Collision Engineering Associates)"
+		}
+	],
+	"references" : [
+		{
+			"text" : "Collision Engineering Associates",
+			"url" : "https://cea-az.com/"
+		},
+		{
+			"text" : "Contribute via PayPal",
+			"url" : "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=DZAYQVLL8MMNL"
+		}
+	]
+}

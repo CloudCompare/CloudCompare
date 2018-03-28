@@ -18,24 +18,19 @@
 #ifndef Q_BROOM_PLUGIN_HEADER
 #define Q_BROOM_PLUGIN_HEADER
 
-#include "../ccStdPluginInterface.h"
+#include "ccStdPluginInterface.h"
 
 //! CEA virtual broom plugin
 class qBroom : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qBroom")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qBroom" FILE "info.json")
 
 public:
 
 	//! Default constructor
 	explicit qBroom(QObject* parent = 0);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "CEA virtual broom"; }
-	virtual QString getDescription() const { return "Clean a point cloud with a virtual broom"; }
-	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);

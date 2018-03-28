@@ -1,17 +1,16 @@
 <RCC>
   <qresource prefix="/CC/plugin/qBroom">
-    <file>cea_logo_small.jpg</file>
-    <file>cea_logo.jpg</file>
-    <file>btn_donateCC_LG.gif</file>
-    <file>qBroom.png</file>
-    <file>warning.png</file>
-  </qresource>
-  <qresource prefix="icons">
-    <file>icons/ccViewXneg.png</file>
-    <file>icons/ccViewXpos.png</file>
-    <file>icons/ccViewYneg.png</file>
-    <file>icons/ccViewYpos.png</file>
-    <file>icons/ccViewZneg.png</file>
-    <file>icons/ccViewZpos.png</file>
+    <file>images/cea_logo_small.jpg</file>
+    <file>images/cea_logo.jpg</file>
+    <file>images/btn_donateCC_LG.gif</file>
+    <file>images/qBroom.png</file>
+    <file>images/warning.png</file>
+    <file>images/ccViewXneg.png</file>
+    <file>images/ccViewXpos.png</file>
+    <file>images/ccViewYneg.png</file>
+    <file>images/ccViewYpos.png</file>
+    <file>images/ccViewZneg.png</file>
+    <file>images/ccViewZpos.png</file>
+    <file>info.json</file>
   </qresource>
 </RCC>

@@ -14,8 +14,8 @@
    <string>qBroom (disclaimer)</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="qBroom.qrc">
-    <normaloff>:/CC/plugin/qBroom/qBroom.png</normaloff>:/CC/plugin/qBroom/qBroom.png</iconset>
+   <iconset resource="../qBroom.qrc">
+    <normaloff>:/CC/plugin/qBroom/images/qBroom.png</normaloff>:/CC/plugin/qBroom/images/qBroom.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: white</string>
@@ -24,7 +24,7 @@
    <item>
     <widget class="QLabel" name="logoLabel">
      <property name="pixmap">
-      <pixmap resource="qBroom.qrc">:/CC/plugin/qBroom/cea_logo.jpg</pixmap>
+      <pixmap resource="../qBroom.qrc">:/CC/plugin/qBroom/images/cea_logo.jpg</pixmap>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -46,7 +46,7 @@ This plugin is kindly provided by Wesley Grimes,
 &lt;br/&gt;
 Collision Engineering Associates, Inc.
 &lt;br/&gt;
-&lt;a href=&quot;http://cea-az.com/&quot;&gt;http://cea-az.com/&lt;/a&gt;
+&lt;a href=&quot;https://cea-az.com/&quot;&gt;https://cea-az.com/&lt;/a&gt;
 &lt;/p&gt;
 &lt;p align=&quot;center&quot;&gt;
 &lt;b&gt;Please donate if you find this tool useful&lt;/b&gt;
@@ -90,7 +90,7 @@ Collision Engineering Associates, Inc.
   </layout>
  </widget>
  <resources>
-  <include location="qBroom.qrc"/>
+  <include location="../qBroom.qrc"/>
  </resources>
  <connections>
   <connection>

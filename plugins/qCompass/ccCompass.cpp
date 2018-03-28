@@ -1033,9 +1033,11 @@ void ccCompass::fitPlaneToGeoObject()
 		if (ccTrace::isTrace(upper->getChild(i)))
 		{
 			ccTrace* t = dynamic_cast<ccTrace*> (upper->getChild(i));
-			points->reserve(points->size() + t->size()); //make space
-			if (t) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
+
+			if (t != nullptr) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
 			{
+				points->reserve(points->size() + t->size()); //make space
+
 				for (unsigned p = 0; p < t->size(); p++)
 				{
 					points->addPoint(*t->getPoint(p)); //add point to 

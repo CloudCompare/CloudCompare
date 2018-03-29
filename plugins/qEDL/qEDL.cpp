@@ -17,16 +17,14 @@
 
 #include "ccEDLFilter.h"
 
-//Qt
-#include <QtGui>
-
 #include "qEDL.h"
 
-QIcon qEDL::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/CC/plugin/qEDL/cc_edl.png"));
-}
 
+qEDL::qEDL( QObject *parent )
+	: QObject( parent )
+	, ccGLFilterPluginInterface( ":/CC/plugin/qEDL/info.json" )
+{
+}
 ccGlFilter* qEDL::getFilter()
 {
 	return new ccEDLFilter();

@@ -18,21 +18,17 @@
 #ifndef Q_EDL_PLUGIN_HEADER
 #define Q_EDL_PLUGIN_HEADER
 
-#include "../ccGLFilterPluginInterface.h"
+#include "ccGLFilterPluginInterface.h"
 
 //! EDL shader (Eye Dome Lighting)
 class qEDL : public QObject, public ccGLFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccGLFilterPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qEDL")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qEDL" FILE "info.json")
 
 public:
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "E.D.L. (shader)"; }
-	virtual QString getDescription() const { return "Eye-dome Lighting OpenGL shader"; }
-	virtual QIcon getIcon() const;
+	qEDL( QObject *parent = nullptr );
 
 	//inherited from ccGLFilterPluginInterface
 	ccGlFilter* getFilter();

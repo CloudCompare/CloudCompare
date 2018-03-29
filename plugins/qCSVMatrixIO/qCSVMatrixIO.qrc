@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/CC/plugin/qCSVMatrixIO">
+        <file>info.json</file>
+    </qresource>
+</RCC>

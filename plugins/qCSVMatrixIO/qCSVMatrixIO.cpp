@@ -20,8 +20,12 @@
 //local
 #include "CSVMatrixFilter.h"
 
-//Qt
-#include <QtPlugin>
+
+qCSVMatrixIO::qCSVMatrixIO(QObject *parent)
+	: QObject( parent )
+	, ccIOFilterPluginInterface( ":/CC/plugin/qCSVMatrixIO/info.json" )
+{
+}
 
 FileIOFilter::Shared qCSVMatrixIO::getFilter()
 {

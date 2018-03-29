@@ -1,0 +1,19 @@
+{
+	"type" : "I/O",
+	"name" : "CSV Matrix I/O",
+	"description": "2.5D CSV matrix I/O filter.",
+	"authors" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		}
+	],
+	"references" : [
+	]
+}

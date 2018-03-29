@@ -1,0 +1,29 @@
+{
+    "type" : "Standard",
+    "name" : "Hough Normals Computation",
+    "icon" : ":/CC/plugin/qHoughNormals/images/normal.png",
+    "description": "Uses the Hough transform to estimate normals in unstructured point clouds.",
+    "authors" : [
+        {
+            "name" : "Daniel Girardeau-Montaut",
+            "email" : "daniel.girardeau@gmail.com"
+        }
+    ],
+    "maintainers" : [
+        {
+            "name" : "Daniel Girardeau-Montaut",
+            "email" : "daniel.girardeau@gmail.com"
+        }
+    ],
+    "references" : [
+        {
+            "text": "\"Deep Learning for Robust Normal Estimation in Unstructured Point Clouds\"<br/>
+                Talk by Alexandre Boulch &amp; Renaud Marlet at the Symposium of Geometry Processing, 2016",
+            "url" : "http://imagine.enpc.fr/~marletr/publi/SGP-2016-Boulch-Marlet_slides.pdf"
+        },
+        {
+            "text": "normals_Hough library",
+            "url": "https://github.com/aboulch/normals_Hough"
+        }
+    ]
+}

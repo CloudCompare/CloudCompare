@@ -1,0 +1,73 @@
+This file contains information about the normal estimator for point clouds. 
+The implementation refers to the paper from Symposium of Geometry Processing 2012,
+"Fast and Robust Normal Estimation for Point Clouds with Sharp Features".
+The code is developped at the Center for Visual Computing of the LIGM 
+(Paris Est university - Ecole Nationale des Points et Chaussees).
+
+################################################################################
+EXAMPLE OF USE
+################################################################################
+example of .cpp file to estimate normals
+
+-----------------------------------------------------
+
+#define USE_OPENMP_FOR_NORMEST //you don't want to use OPENMP comment this line
+
+#include PCL_normEst.h
+
+int main(){
+
+  ...
+  pcl::PointCloud<pcl::PointXYZ>::Ptr points(new pcl::PointCloud<pcl::PointXYZ);
+  ... // filling the vector with the point cloud
+
+  pcl::PointCloud<pcl::Normal>::Ptr points(new pcl::PointCloud<pcl::Normal);
+
+  CGAL_Normal_Estimator NE(points,normals);
+  
+  //change values of the parameters
+  NE.number_of_planes() = 500;
+  NE.normal_selection_mode() = CGAL_NORMAL_ESTIMATOR::MEAN;
+
+  //estimate the normals
+  NE.estimate() // with default parameters
+  NE.estimate(CGAL_NORMAL_ESTIMATOR::CUBES, CGAL_NORMAL_ESTIMATOR::RADIUS, 0.1); //changing method
+
+  ...
+
+  return 0;
+}
+
+
+
+-----------------------------------------------------
+
+
+#################################################################################
+LICENSE INFORMATION
+#################################################################################
+
+ Copyright (C) 2013 Boulch Alexandre, Ecole Nationale des Ponts et Chaussees
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+ software and associated documentation files (the "Software"), to deal in the Software 
+ without restriction, including without limitation the rights to use, copy, modify, merge,
+ publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons 
+ to whom the Software is furnished to do so, subject to the following conditions:
+  
+ The above copyright notice and this permission notice shall be included in all copies or
+ substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+ INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+ PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE 
+ OR OTHER DEALINGS IN THE SOFTWARE.
+
+ Note that this library relies on external libraries subject to their own license.
+ To use this software, you are subject to the dependencies license, these licenses 
+ applies to the dependency ONLY  and NOT this code.
+ Please refer below to the web sites for license informations.
+
+ OPENMP (http://openmp.org/)
+ POINT CLOUD LIBRARIES (http://pointclouds.org/)

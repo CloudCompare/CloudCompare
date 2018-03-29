@@ -25,17 +25,16 @@
 #include <ccPointCloud.h>
 
 //Qt
-#include <QtGui>
 #include <QMainWindow>
 #include <QProgressDialog>
 
 //system
 #include <assert.h>
 
-qHoughNormals::qHoughNormals(QObject* parent/*=0*/)
+qHoughNormals::qHoughNormals(QObject* parent)
 	: QObject(parent)
-	, m_action(0)
-{
+	, ccStdPluginInterface( ":/CC/plugin/qHoughNormals/info.json" )
+	, m_action( nullptr ){
 }
 
 void qHoughNormals::onNewSelection(const ccHObject::Container& selectedEntities)
@@ -175,9 +174,4 @@ void qHoughNormals::doAction()
 	m_app->updateUI();
 	//currently selected entities appearance may have changed!
 	m_app->refreshAll();
-}
-
-QIcon qHoughNormals::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/CC/plugin/qHoughNormals/normal.png"));
 }

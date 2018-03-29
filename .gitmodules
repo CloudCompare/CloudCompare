@@ -1,9 +1,6 @@
 [submodule "plugins/qPoissonRecon/PoissonReconLib"]
 	path = plugins/qPoissonRecon/PoissonReconLib
 	url = https://github.com/cloudcompare/PoissonRecon
-[submodule "plugins/qHoughNormals/normals_Hough"]
-	path = plugins/qHoughNormals/normals_Hough
-	url = https://github.com/cloudcompare/normals_Hough
 [submodule "PoissonReconLib"]
 	path = PoissonReconLib
 	url = https://github.com/cloudcompare/PoissonRecon

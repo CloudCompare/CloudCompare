@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/CC/plugin/qHoughNormals" >
-        <file>normal.png</file>
+        <file>images/normal.png</file>
+        <file>info.json</file>
     </qresource>
 </RCC>

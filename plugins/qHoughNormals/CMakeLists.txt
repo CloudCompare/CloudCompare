@@ -10,18 +10,23 @@ if (INSTALL_QHOUGH_NORMALS_PLUGIN)
 		message( SEND_ERROR "No Eigen root directory specified (EIGEN_ROOT_DIR)" )
 	endif()
 
-	set( NANOFLANN_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/nanoflann" CACHE PATH "nanoflann root (contains the include directory)" )
+	set( NANOFLANN_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/nanoflann" CACHE PATH "nanoflann root (contains the include directory)" )
 	if ( NOT NANOFLANN_ROOT_DIR )
 		message( SEND_ERROR "No nanoflann root directory specified (NANOFLANN_ROOT_DIR)" )
 	endif()
 
 	project( QHOUGH_NORMALS_PLUGIN )
 
-	include( ../CMakePluginTpl.cmake )
-
-	include_directories( ${CURRENT_SOURCE_DIR}/normals_Hough )
-	include_directories( ${EIGEN_ROOT_DIR} )
+	include_directories( src )
+	include_directories( src/normals_Hough )
+	
 	include_directories( ${NANOFLANN_ROOT_DIR}/include )
+	include_directories( ${EIGEN_ROOT_DIR} )
+	
+	add_subdirectory( src )
+	add_subdirectory( ui )
+	
+	include( ../CMakePluginTpl.cmake )
 
 	target_link_libraries( ${PROJECT_NAME} )
 	target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES} )

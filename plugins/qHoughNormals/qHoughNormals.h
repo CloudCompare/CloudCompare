@@ -18,7 +18,7 @@
 #ifndef QHOUGH_NORMALS_PLUGIN_HEADER
 #define QHOUGH_NORMALS_PLUGIN_HEADER
 
-#include "../ccStdPluginInterface.h"
+#include "ccStdPluginInterface.h"
 
 //! Wrapper to the 'normals_Hough' library (https://github.com/aboulch/normals_Hough)
 /** "Deep Learning for Robust Normal Estimation in Unstructured Point Clouds"
@@ -28,17 +28,12 @@ class qHoughNormals : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qHoughNormals")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qHoughNormals" FILE "info.json")
 
 public:
 
 	//! Default constructor
-	explicit qHoughNormals(QObject* parent = 0);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "Hough Normals Computation"; }
-	virtual QString getDescription() const { return "Normal Estimation in Unstructured Point Clouds with Hough transform (A. Boulch and R. Marlet)"; }
-	virtual QIcon getIcon() const;
+	explicit qHoughNormals(QObject* parent = nullptr);
 
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities);

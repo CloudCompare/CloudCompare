@@ -33,6 +33,20 @@
 ccPluginInterfaceList ccPluginManager::m_pluginList;
 
 
+// Check for metadata and warn if it's not there
+// This indicates that a plugin hasn't been converted to the new JSON metadata.
+// It is going to be required.
+static void	sWarnIfNoMetaData( QPluginLoader *loader, const QString &fileName )
+{
+	QJsonObject	metaObject = loader->metaData();
+	
+	if ( metaObject.isEmpty() || metaObject["MetaData"].toObject().isEmpty() )
+	{
+		ccLog::Warning( QStringLiteral( "\t%1 does not supply meta data in the Q_PLUGIN_METADATA - it will need to be updated (see one of the example plugins)" ).arg( fileName ) );				
+	}
+}	
+
+
 ccPluginManager::ccPluginManager( QObject *parent ) :
     QObject( parent )
 {
@@ -221,11 +235,13 @@ void ccPluginManager::loadFromPathsAndAddToList()
 			
 			QPluginLoader *loader = new QPluginLoader( pluginPath );
 			
+			sWarnIfNoMetaData( loader, fileName );
+			
 			QObject *plugin = loader->instance();
 
 			if ( plugin == nullptr )
 			{
-				ccLog::Warning( tr( "\t'%1' does not seem to be a valid plugin\t(%2)" ).arg( fileName, loader->errorString() ) );
+				ccLog::Warning( tr( "\t%1 does not seem to be a valid plugin\t(%2)" ).arg( fileName, loader->errorString() ) );
 				
 				delete loader;
 				
@@ -236,7 +252,7 @@ void ccPluginManager::loadFromPathsAndAddToList()
 
 			if ( ccPlugin == nullptr )
 			{				
-				ccLog::Warning( tr( "\t'%1' does not seem to be a valid plugin or it is not supported by this version" ).arg( fileName ) );
+				ccLog::Warning( tr( "\t%1 does not seem to be a valid plugin or it is not supported by this version" ).arg( fileName ) );
 
 				loader->unload();
 				
@@ -247,7 +263,7 @@ void ccPluginManager::loadFromPathsAndAddToList()
 
 			if ( ccPlugin->getName().isEmpty() )
 			{
-				ccLog::Error( tr( "\tPlugin '%1' has a blank name" ).arg( fileName ) );
+				ccLog::Error( tr( "\tPlugin %1 has a blank name" ).arg( fileName ) );
 
 				loader->unload();
 				
@@ -271,7 +287,7 @@ void ccPluginManager::loadFromPathsAndAddToList()
 				
 				delete previousLoader;
 								
-				ccLog::Warning( tr( "\t'%1' overridden" ).arg( fileName ) );
+				ccLog::Warning( tr( "\t%1 overridden" ).arg( fileName ) );
 			}
 			else
 			{

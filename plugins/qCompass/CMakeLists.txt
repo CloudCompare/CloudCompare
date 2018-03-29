@@ -21,15 +21,11 @@ if (INSTALL_QCOMPASS_PLUGIN)
 	list( APPEND  CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/ccPickingListener.h )
 	list( APPEND  CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/ccPickingHub.h )	
 	list( APPEND  CC_PLUGIN_CUSTOM_SOURCE_LIST ${CloudCompare_SOURCE_DIR}/ccPickingHub.cpp )
-
-	#not sure this is the correcrt way of doing this but adding in 
-	#qCC build file so it knows where the ui_*.h files are
-
-	#list( APPEND CC_PLUGIN_CUSTOM_UI_LIST ${CMAKE_CURRENT_SOURCE_DIR}/mapDlg.ui )
-	#list( APPEND CC_PLUGIN_CUSTOM_UI_LIST ${CMAKE_CURRENT_SOURCE_DIR}/compassDlg.ui )
-
-	set( CC_PLUGIN_CUSTOM_UI_LIST ${CMAKE_CURRENT_SOURCE_DIR}/mapDlg.ui )
-	set( CC_PLUGIN_CUSTOM_UI_LIST ${CMAKE_CURRENT_SOURCE_DIR}/compassDlg.ui )
+	
+	include_directories( src )
+	
+	add_subdirectory( src )
+	add_subdirectory( ui )
 
 	include( ../CMakePluginTpl.cmake  )
 

@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/CC/plugin/qAnimation">
-        <file>animation.png</file>
+        <file>images/animation.png</file>
         <file>info.json</file>
     </qresource>
 </RCC>

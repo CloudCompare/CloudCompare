@@ -1,0 +1,22 @@
+
+set( CC_PLUGIN_CUSTOM_HEADER_LIST
+	${CC_PLUGIN_CUSTOM_HEADER_LIST} 
+	${CMAKE_CURRENT_SOURCE_DIR}/cellsFusionDlg.h
+	${CMAKE_CURRENT_SOURCE_DIR}/classificationParamsDlg.h
+	${CMAKE_CURRENT_SOURCE_DIR}/disclaimerDialog.h
+	${CMAKE_CURRENT_SOURCE_DIR}/facetsClassifier.h
+	${CMAKE_CURRENT_SOURCE_DIR}/facetsExportDlg.h
+	${CMAKE_CURRENT_SOURCE_DIR}/fastMarchingForFacetExtraction.h
+	${CMAKE_CURRENT_SOURCE_DIR}/kdTreeForFacetExtraction.h
+	${CMAKE_CURRENT_SOURCE_DIR}/stereogramDlg.h
+	PARENT_SCOPE
+)
+
+set( CC_PLUGIN_CUSTOM_SOURCE_LIST
+	${CC_PLUGIN_CUSTOM_SOURCE_LIST} 
+	${CMAKE_CURRENT_SOURCE_DIR}/facetsExportDlg.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/fastMarchingForFacetExtraction.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/kdTreeForFacetExtraction.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/stereogramDlg.cpp
+	PARENT_SCOPE
+)

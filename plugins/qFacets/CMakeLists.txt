@@ -19,7 +19,13 @@ if (INSTALL_QFACETS_PLUGIN)
 	file( GLOB CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/ccColorScale*.h )
 	file( GLOB CC_PLUGIN_CUSTOM_SOURCE_LIST ${CloudCompare_SOURCE_DIR}/ccColorScale*.cpp )
 	set( CC_PLUGIN_CUSTOM_UI_LIST ${CloudCompare_SOURCE_DIR}/ui_templates/colorScaleEditorDlg.ui )
+	
+	include_directories( src )
+	
+	add_subdirectory( src )
 
+	add_subdirectory( ui )
+	
 	include( ../CMakePluginTpl.cmake )
 
 	#add IO support

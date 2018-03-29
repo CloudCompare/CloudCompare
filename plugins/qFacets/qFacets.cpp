@@ -64,19 +64,20 @@ static double	s_classifMaxDist = 1.0;
 
 static double	s_stereogramAngleStep = 30.0;
 static double	s_stereogramResolution_deg = 5.0;
-static ccPointCloud* s_lastCloud = 0;
+static ccPointCloud* s_lastCloud = nullptr;
 
 //persistent dialog
-static StereogramDialog* s_fcDlg = 0;
+static StereogramDialog* s_fcDlg = nullptr;
 
-qFacets::qFacets(QObject* parent/*=0*/)
+qFacets::qFacets(QObject* parent)
 	: QObject(parent)
-	, m_doFuseKdTreeCells(0)
-	, m_fastMarchingExtraction(0)
-	, m_doExportFacetsInfo(0)
-	, m_doExportFacets(0)
-	, m_doClassifyFacetsByAngle(0)
-	, m_doShowStereogram(0)
+	, ccStdPluginInterface( ":/CC/plugin/qFacets/info.json" )
+	, m_doFuseKdTreeCells(nullptr)
+	, m_fastMarchingExtraction(nullptr)
+	, m_doExportFacets(nullptr)
+	, m_doExportFacetsInfo(nullptr)
+	, m_doClassifyFacetsByAngle(nullptr)
+	, m_doShowStereogram(nullptr)
 {
 }
 
@@ -85,7 +86,7 @@ qFacets::~qFacets()
 	if (s_fcDlg)
 	{
 		s_fcDlg->close();
-		s_fcDlg = 0;
+		s_fcDlg = nullptr;
 	}
 }
 
@@ -96,7 +97,7 @@ void qFacets::getActions(QActionGroup& group)
 	{
 		m_doFuseKdTreeCells = new QAction("Extract facets (Kd-tree)", this);
 		m_doFuseKdTreeCells->setToolTip("Detect planar facets by fusing Kd-tree cells");
-		m_doFuseKdTreeCells->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/extractKD.png")));
+		m_doFuseKdTreeCells->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/images/extractKD.png")));
 		//connect signal
 		connect(m_doFuseKdTreeCells, SIGNAL(triggered()), this, SLOT(fuseKdTreeCells()));
 	}
@@ -106,7 +107,7 @@ void qFacets::getActions(QActionGroup& group)
 	{
 		m_fastMarchingExtraction = new QAction("Extract facets (Fast Marching)", this);
 		m_fastMarchingExtraction->setToolTip("Detect planar facets with Fast Marching");
-		m_fastMarchingExtraction->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/extractFM.png")));
+		m_fastMarchingExtraction->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/images/extractFM.png")));
 		//connect signal
 		connect(m_fastMarchingExtraction, SIGNAL(triggered()), this, SLOT(extractFacetsWithFM()));
 	}
@@ -116,7 +117,7 @@ void qFacets::getActions(QActionGroup& group)
 	{
 		m_doExportFacets = new QAction("Export facets (SHP)", this);
 		m_doExportFacets->setToolTip("Exports one or several facets to a shapefile");
-		m_doExportFacets->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/shpFile.png")));
+		m_doExportFacets->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/images/shpFile.png")));
 		//connect signal
 		connect(m_doExportFacets, SIGNAL(triggered()), this, SLOT(exportFacets()));
 	}
@@ -126,7 +127,7 @@ void qFacets::getActions(QActionGroup& group)
 	{
 		m_doExportFacetsInfo = new QAction("Export facets info (CSV)", this);
 		m_doExportFacetsInfo->setToolTip("Exports various information on a set of facets (ASCII CSV file)");
-		m_doExportFacetsInfo->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/csvFile.png")));
+		m_doExportFacetsInfo->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/images/csvFile.png")));
 		//connect signal
 		connect(m_doExportFacetsInfo, SIGNAL(triggered()), this, SLOT(exportFacetsInfo()));
 	}
@@ -136,7 +137,7 @@ void qFacets::getActions(QActionGroup& group)
 	{
 		m_doClassifyFacetsByAngle = new QAction("Classify facets by orientation", this);
 		m_doClassifyFacetsByAngle->setToolTip("Classifies facets based on their orienation (dip & dip direction)");
-		m_doClassifyFacetsByAngle->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/classifIcon.png")));
+		m_doClassifyFacetsByAngle->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/images/classifIcon.png")));
 		//connect signal
 		connect(m_doClassifyFacetsByAngle, SIGNAL(triggered()), this, SLOT(classifyFacetsByAngle()));
 	}
@@ -146,7 +147,7 @@ void qFacets::getActions(QActionGroup& group)
 	{
 		m_doShowStereogram = new QAction("Show stereogram", this);
 		m_doShowStereogram->setToolTip("Computes and displays a stereogram (+ interactive filtering)");
-		m_doShowStereogram->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/stereogram.png")));
+		m_doShowStereogram->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qFacets/images/stereogram.png")));
 		//connect signal
 		connect(m_doShowStereogram, SIGNAL(triggered()), this, SLOT(showStereogram()));
 	}
@@ -510,9 +511,8 @@ ccHObject* qFacets::createFacets(ccPointCloud* cloud,
 				}
 			}
 
-			if (compIndexes)
-				delete compIndexes;
-			compIndexes = 0;
+			delete compIndexes;
+			compIndexes = nullptr;
 		}
 
 		pDlg.setValue(static_cast<int>(componentCount - components.size()));
@@ -522,7 +522,7 @@ ccHObject* qFacets::createFacets(ccPointCloud* cloud,
 	if (ccGroup->getChildrenNumber() == 0)
 	{
 		delete ccGroup;
-		ccGroup = 0;
+		ccGroup = nullptr;
 	}
 
 	return ccGroup;
@@ -1120,9 +1120,4 @@ void qFacets::exportFacetsInfo()
 	outFile.close();
 
 	m_app->dispToConsole(QString("[qFacets] File '%1' successfully saved").arg(filename), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-}
-
-QIcon qFacets::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/CC/plugin/qFacets/qFacets.png"));
 }

@@ -47,20 +47,15 @@ class qFacets : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qFacets")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qFacets" FILE "info.json")
 
 public:
 
 	//! Default constructor
-	qFacets(QObject* parent = 0);
+	qFacets(QObject* parent = nullptr);
 
 	//! Destructor
 	virtual ~qFacets();
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const override { return "Facet/fracture detection"; }
-	virtual QString getDescription() const override { return "BRGM Fracture detection plugin"; }
-	virtual QIcon getIcon() const override;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;

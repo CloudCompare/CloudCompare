@@ -306,7 +306,7 @@ Output facet normals may be randomly oriented
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="qFacets.qrc"/>
+  <include location="../qFacets.qrc"/>
  </resources>
  <connections>
   <connection>

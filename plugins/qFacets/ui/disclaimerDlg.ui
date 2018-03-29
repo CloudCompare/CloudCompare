@@ -30,7 +30,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="qFacets.qrc">:/CC/plugin/qFacets/logoBRGM.png</pixmap>
+          <pixmap resource="../qFacets.qrc">:/CC/plugin/qFacets/images/logoBRGM.png</pixmap>
          </property>
         </widget>
        </item>
@@ -85,7 +85,7 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
-  <include location="qFacets.qrc"/>
+  <include location="../qFacets.qrc"/>
  </resources>
  <connections>
   <connection>

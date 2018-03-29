@@ -562,7 +562,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="qFacets.qrc"/>
+  <include location="../qFacets.qrc"/>
  </resources>
  <connections/>
 </ui>

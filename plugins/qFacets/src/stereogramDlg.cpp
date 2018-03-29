@@ -589,7 +589,7 @@ StereogramDialog::StereogramDialog(ccMainAppInterface* app/*=0*/)
 	if (m_app)
 	{
 		ccColorScalesManager* csManager = m_app->getColorScalesManager();
-		m_colorScaleSelector = new ccColorScaleSelector(csManager, this, QString::fromUtf8(":/CC/plugin/qFacets/gearIcon.png"));
+		m_colorScaleSelector = new ccColorScaleSelector(csManager, this, QString::fromUtf8(":/CC/plugin/qFacets/images/gearIcon.png"));
 		m_colorScaleSelector->init();
 		ccColorScale::Shared scale = csManager->getDefaultScale(ccColorScalesManager::BGYR);
 		if (scale)

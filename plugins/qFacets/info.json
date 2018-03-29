@@ -1,0 +1,22 @@
+{
+	"type" : "Standard",
+	"name" : "Facet/fracture detection",
+	"icon" : ":/CC/plugin/qFacets/images/qFacets.png",
+	"description": "BRGM Fracture detection plugin",
+	"authors" : [
+		{
+			"name" : "Thomas Dewez"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "Thomas Dewez"
+		}
+	],
+	"references" : [
+		{
+			"text": "Bureau de Recherches Geologiques et Minieres",
+			"url": "http://www.brgm.fr/"
+		}
+	]
+}

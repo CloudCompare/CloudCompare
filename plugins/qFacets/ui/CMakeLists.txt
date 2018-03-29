@@ -1,0 +1,11 @@
+
+set( CC_PLUGIN_CUSTOM_UI_LIST
+	${CC_PLUGIN_CUSTOM_UI_LIST} 
+	${CMAKE_CURRENT_SOURCE_DIR}/cellsFusionDlg.ui
+	${CMAKE_CURRENT_SOURCE_DIR}/classificationParamsDlg.ui
+	${CMAKE_CURRENT_SOURCE_DIR}/disclaimerDlg.ui
+	${CMAKE_CURRENT_SOURCE_DIR}/facetsExportDlg.ui
+	${CMAKE_CURRENT_SOURCE_DIR}/stereogramDlg.ui
+	${CMAKE_CURRENT_SOURCE_DIR}/stereogramParamsDlg.ui
+	PARENT_SCOPE
+)

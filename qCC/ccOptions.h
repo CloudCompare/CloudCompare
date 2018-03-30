@@ -29,6 +29,9 @@ public: //parameters
 	//! Whether to display the normals by default or not
 	bool normalsDisplayedByDefault;
 
+	//! Use native load/save dialogs
+	bool useNativeDialogs;
+
 public: //methods
 
 	//! Default constructor

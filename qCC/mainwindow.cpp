@@ -155,6 +155,16 @@ static std::vector<cc2DLabel*> s_levelLabels;
 static ccPointCloud* s_levelMarkersCloud = nullptr;
 static ccHObject* s_levelEntity = nullptr;
 
+static QFileDialog::Options CCFileDialogOptions()
+{
+	//dialog options
+	QFileDialog::Options dialogOptions = QFileDialog::Options();
+	if (!ccOptions::Instance().useNativeDialogs)
+	{
+		dialogOptions |= QFileDialog::DontUseNativeDialog;
+	}
+	return dialogOptions;
+}
 
 MainWindow::MainWindow()
 	: m_UI( new Ui::MainWindow )
@@ -640,7 +650,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSaveViewportAsObject,			&QAction::triggered, this, &MainWindow::doActionSaveViewportAsCamera);
 
 	//"Display > Lights & Materials" menu
-	connect(m_UI->actionDisplayOptions,				&QAction::triggered, this, &MainWindow::setLightsAndMaterials);
+	connect(m_UI->actionDisplayOptions,				&QAction::triggered, this, &MainWindow::showDisplayOptions);
 	connect(m_UI->actionToggleSunLight,				&QAction::triggered, this, &MainWindow::toggleActiveWindowSunLight);
 	connect(m_UI->actionToggleCustomLight,			&QAction::triggered, this, &MainWindow::toggleActiveWindowCustomLight);
 	connect(m_UI->actionRenderToFile,				&QAction::triggered, this, &MainWindow::doActionRenderToFile);
@@ -2319,7 +2329,13 @@ void MainWindow::doActionExportDepthBuffer()
 	settings.beginGroup(ccPS::SaveFile());
 	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
-	QString filename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, DepthMapFileFilter::GetFileFilter());
+	QString filename = QFileDialog::getSaveFileName(this,
+													"Select output file",
+													currentPath,
+													DepthMapFileFilter::GetFileFilter(),
+													nullptr,
+													CCFileDialogOptions()
+	);
 	if (filename.isEmpty())
 	{
 		//process cancelled by user
@@ -2351,7 +2367,7 @@ void MainWindow::doActionExportDepthBuffer()
 	{
 		parameters.alwaysDisplaySaveDialog = true;
 	}
-	CC_FILE_ERROR result = DepthMapFileFilter().saveToFile(toSave,filename,parameters);
+	CC_FILE_ERROR result = DepthMapFileFilter().saveToFile(toSave, filename, parameters);
 
 	if (result != CC_FERR_NO_ERROR)
 	{
@@ -6677,16 +6693,14 @@ void MainWindow::testFrameRate()
 		win->startFrameRateTest();
 }
 
-void MainWindow::setLightsAndMaterials()
+void MainWindow::showDisplayOptions()
 {
-	ccDisplayOptionsDlg colorsDlg(this);
-	connect(&colorsDlg, &ccDisplayOptionsDlg::aspectHasChanged, this, [=] () {
-		redrawAll();
-	});
+	ccDisplayOptionsDlg displayOptionsDlg(this);
+	connect(&displayOptionsDlg, &ccDisplayOptionsDlg::aspectHasChanged, this, [=] () { redrawAll();	});
 			
-	colorsDlg.exec();
+	displayOptionsDlg.exec();
 
-	disconnect(&colorsDlg, 0, 0, 0);
+	disconnect(&displayOptionsDlg);
 }
 
 void MainWindow::doActionRenderToFile()
@@ -8192,7 +8206,13 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		settings.beginGroup(ccPS::SaveFile());
 		QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
-		QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
+		QString outputFilename = QFileDialog::getSaveFileName(	this,
+																"Select output file",
+																currentPath,
+																"*.csv",
+																nullptr,
+																CCFileDialogOptions());
+
 		if (outputFilename.isEmpty())
 			return;
 
@@ -8266,7 +8286,13 @@ void MainWindow::doActionExportPlaneInfo()
 	settings.beginGroup(ccPS::SaveFile());
 	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
-	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
+	QString outputFilename = QFileDialog::getSaveFileName(	this,
+															"Select output file",
+															currentPath,
+															"*.csv",
+															nullptr,
+															CCFileDialogOptions());
+
 	if (outputFilename.isEmpty())
 	{
 		//process cancelled by the user
@@ -8363,7 +8389,12 @@ void MainWindow::doActionExportCloudInfo()
 	settings.beginGroup(ccPS::SaveFile());
 	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
-	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
+	QString outputFilename = QFileDialog::getSaveFileName(	this,
+															"Select output file",
+															currentPath,
+															"*.csv",
+															nullptr,
+															CCFileDialogOptions());
 	if (outputFilename.isEmpty())
 	{
 		//process cancelled by the user
@@ -9161,13 +9192,8 @@ void MainWindow::doActionLoadFile()
 																"Open file(s)",
 																currentPath,
 																fileFilters.join(s_fileFilterSeparator),
-																&currentOpenDlgFilter
-#ifdef Q_OS_WIN
-//#ifdef QT_DEBUG
-																, QFileDialog::DontUseNativeDialog
-//#endif
-#endif
-															);
+																&currentOpenDlgFilter,
+																CCFileDialogOptions());
 	if (selectedFiles.isEmpty())
 		return;
 
@@ -9412,7 +9438,8 @@ void MainWindow::doActionSaveFile()
 															"Save file",
 															fullPathName,
 															fileFilters.join(s_fileFilterSeparator),
-															&selectedFilter);
+															&selectedFilter,
+															CCFileDialogOptions());
 
 	if (selectedFilename.isEmpty())
 	{

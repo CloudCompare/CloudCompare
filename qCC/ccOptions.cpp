@@ -55,6 +55,7 @@ ccOptions::ccOptions()
 void ccOptions::reset()
 {
 	normalsDisplayedByDefault = false;
+	useNativeDialogs = true;
 }
 
 void ccOptions::fromPersistentSettings()
@@ -63,6 +64,7 @@ void ccOptions::fromPersistentSettings()
 	settings.beginGroup("Options");
 	{
 		normalsDisplayedByDefault = settings.value("normalsDisplayedByDefault", false).toBool();
+		useNativeDialogs = settings.value("useNativeDialogs", true).toBool();
 	}
 	settings.endGroup();
 }
@@ -73,6 +75,7 @@ void ccOptions::toPersistentSettings() const
 	settings.beginGroup("Options");
 	{
 		settings.setValue("normalsDisplayedByDefault", normalsDisplayedByDefault);
+		settings.setValue("useNativeDialogs", useNativeDialogs);
 	}
 	settings.endGroup();
 }

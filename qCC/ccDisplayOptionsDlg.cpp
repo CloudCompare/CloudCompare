@@ -55,6 +55,7 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(decimateCloudBox,                &QCheckBox::toggled, this, [&](bool state) { parameters.decimateCloudOnMove = state; });
 	connect(drawRoundedPointsCheckBox,       &QCheckBox::toggled, this, [&](bool state) { parameters.drawRoundedPoints = state; });
 	connect(autoDisplayNormalsCheckBox,      &QCheckBox::toggled, this, [&](bool state) { options.normalsDisplayedByDefault = state; });
+	connect(useNativeDialogsCheckBox,        &QCheckBox::toggled, this, [&](bool state) { options.useNativeDialogs = state; });
 
 	connect(useVBOCheckBox,                  SIGNAL(clicked()),         this, SLOT(changeVBOUsage()));
 
@@ -158,9 +159,10 @@ void ccDisplayOptionsDlg::refresh()
 
 	zoomSpeedDoubleSpinBox->setValue(parameters.zoomSpeed);
 	
-	autoDisplayNormalsCheckBox->setChecked(options.normalsDisplayedByDefault);
-	
 	autoComputeOctreeComboBox->setCurrentIndex(parameters.autoComputeOctree);
+
+	autoDisplayNormalsCheckBox->setChecked(options.normalsDisplayedByDefault);
+	useNativeDialogsCheckBox->setChecked(options.useNativeDialogs);
 
 	update();
 }

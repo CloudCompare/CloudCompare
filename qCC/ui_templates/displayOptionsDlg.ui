@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>493</width>
-    <height>461</height>
+    <width>500</width>
+    <height>470</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -584,8 +584,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>475</width>
-        <height>304</height>
+        <width>482</width>
+        <height>313</height>
        </rect>
       </property>
       <attribute name="label">
@@ -873,6 +873,16 @@
         <widget class="QCheckBox" name="autoDisplayNormalsCheckBox">
          <property name="text">
           <string>Automatically display normals at loading time (when available)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="useNativeDialogsCheckBox">
+         <property name="text">
+          <string>Use native load / save dialogs</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

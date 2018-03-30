@@ -234,7 +234,7 @@ private slots:
 	void handleNewLabel(ccHObject*);
 
 	void setActiveSubWindow(QWidget* window);
-	void setLightsAndMaterials();
+	void showDisplayOptions();
 	void showSelectedEntitiesHistogram();
 	void testFrameRate();
 	void toggleFullScreen(bool state);

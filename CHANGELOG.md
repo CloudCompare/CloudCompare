@@ -58,8 +58,9 @@ v2.10.alpha - XX/XX/201X
 		- the cylindrical unrolling can be performed inside an arbitrary angular range (between -3600 and +3600 degrees)
 		- this means that the shape can be unrolled on more than 360 degrees, and from an arbitrary orientation
 
-	* New option:
+	* New option (Display > Display options):
 		- the user can now control whether normals should be enabled on loaded clouds by default or not (default state is now 'off')
+		- the user can now control whether load and save dialogs should be native ones or generic Qt dialogs
 
 	* New behavior:
 		- Some load dialogs 'Apply all' button will only apply to the set of selected files (ASCII, PLY and LAS)

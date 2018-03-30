@@ -127,8 +127,8 @@ public:
 	//  Custom types
 	/** Custom objects are typically defined by plugins. They can be inserted in an object
 		hierarchy or displayed in an OpenGL context like any other ccHObject.
-		To differentiate custom objects, use the meta-data mechanism (see ccOBject::getMetaData
-		and ccOBject::setMetaData). You can also define a custom icon (see ccHObject::getIcon).
+		To differentiate custom objects, use the meta-data mechanism (see ccObject::getMetaData
+		and ccObject::setMetaData). You can also define a custom icon (see ccHObject::getIcon).
 
 		It is highly advised to use the ccCustomHObject and ccCustomLeafObject interfaces to
 		define a custom types. Carefully read the ccCustomHObject::isDeserialized method's

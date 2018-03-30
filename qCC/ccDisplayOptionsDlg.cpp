@@ -424,6 +424,7 @@ void ccDisplayOptionsDlg::doAccept()
 	apply();
 
 	parameters.toPersistentSettings();
+	options.toPersistentSettings();
 
 	accept();
 }

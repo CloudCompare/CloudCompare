@@ -1,0 +1,21 @@
+{
+	"type" : "Standard",
+	"name" : "Hidden Point Removal",
+	"icon" : ":/CC/plugin/qHPR/images/cc_hpr.png",
+	"description": "Uses the Hidden Point Removal algorithm for approximating point visibility in an N dimensional point cloud, as seen from a given viewpoint.",
+	"authors" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		}
+	],
+	"maintainers" : [
+	],
+	"references" : [
+		{
+			"text" : "\"Direct Visibility of Point Sets\", Sagi Katz, Ayellet Tal, and Ronen Basri.<br/>
+				SIGGRAPH 2007",
+			"url" : "http://www.mathworks.com/matlabcentral/fileexchange/16581-hidden-point-removal"
+		}
+	]
+}

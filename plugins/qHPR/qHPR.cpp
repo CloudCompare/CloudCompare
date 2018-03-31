@@ -41,9 +41,10 @@ extern "C"
 #include <qhull_a.h>
 }
 
-qHPR::qHPR(QObject* parent/*=0*/)
+qHPR::qHPR(QObject* parent)
 	: QObject(parent)
-	, m_action(0)
+	, ccStdPluginInterface( ":/CC/plugin/qHPR/info.json" )
+	, m_action(nullptr)
 {
 }
 
@@ -390,9 +391,4 @@ void qHPR::doAction()
 
 	//currently selected entities appearance may have changed!
 	m_app->refreshAll();
-}
-
-QIcon qHPR::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/CC/plugin/qHPR/cc_hpr.png"));
 }

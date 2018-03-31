@@ -32,17 +32,12 @@ class qHPR : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qHPR")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qHPR" FILE "info.json")
 
 public:
 
 	//! Default constructor
-	explicit qHPR(QObject* parent = 0);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const override { return "Hidden Point Removal"; }
-	virtual QString getDescription() const override { return "Hidden Point Removal (Katz et al.)"; }
-	virtual QIcon getIcon() const override;
+	explicit qHPR(QObject* parent = nullptr);
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;

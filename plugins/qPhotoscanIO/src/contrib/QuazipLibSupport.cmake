@@ -6,12 +6,12 @@ cmake_minimum_required(VERSION 3.0)
 
 # Use system zlib on unix and Qt ZLIB on Windows
 IF(UNIX OR MINGW)
-	find_package(ZLIB REQUIRED)
+    find_package(ZLIB REQUIRED)
 ELSE()
 
-	set( ZLIB_INCLUDE_DIRS "" CACHE PATH "zlib include directory" )
-	set( ZLIB_LIBRARIES "" CACHE FILEPATH "zlib static library file" )
-	
+    set( ZLIB_INCLUDE_DIRS "" CACHE PATH "zlib include directory" )
+    set( ZLIB_LIBRARIES "" CACHE FILEPATH "zlib static library file" )
+
 	if ( NOT ZLIB_INCLUDE_DIRS )
 		message( SEND_ERROR "No zlib include dir specified (ZLIB_INCLUDE_DIRS)" )
 	endif()
@@ -23,7 +23,7 @@ ENDIF()
 
 project( quazip_static )
 
-set(LOCAL_PATH contrib/quazip-0.7.3/quazip)
+set(LOCAL_PATH src/contrib/quazip-0.7.3/quazip)
 set(GLOBAL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${LOCAL_PATH})
 
 # set all include directories for in and out of source builds
@@ -48,13 +48,13 @@ set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS QUAZIP_
 function( target_link_QUAZIP ) # 1 argument: ARGV0 = project name
 
 	if (ZLIB_INCLUDE_DIRS)
-	
+
 		include_directories( ${ZLIB_INCLUDE_DIRS} )
 
 		set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS QUAZIP_STATIC )
 		target_link_libraries( ${ARGV0} quazip_static )
 		#target_link_libraries( ${ARGV0} Qt5::Xml )
-		
+
 	endif()
 
 endfunction()

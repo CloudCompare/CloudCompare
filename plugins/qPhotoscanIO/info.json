@@ -1,0 +1,13 @@
+{
+    "type" : "I/O",
+    "name" : "Photoscan I/O",
+    "description": "Photoscan (PSZ) I/O filter",
+    "authors" : [
+        {
+            "name" : "Daniel Girardeau-Montaut",
+            "email" : "daniel.girardeau@gmail.com"
+        }
+    ],
+    "maintainers" : [
+    ]
+}

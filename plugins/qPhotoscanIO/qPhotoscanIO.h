@@ -18,20 +18,17 @@
 #ifndef Q_PHOTOSCAN_IO_PLUGIN_HEADER
 #define Q_PHOTOSCAN_IO_PLUGIN_HEADER
 
-#include "../ccIOFilterPluginInterface.h"
+#include "ccIOFilterPluginInterface.h"
 
 //! PhotoScan
 class qPhotoscanIO : public QObject, public ccIOFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccIOFilterPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPhotoscanIO")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPhotoscanIO" FILE "info.json")
 
 public:
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const override { return "Photoscan I/O filter"; }
-	virtual QString getDescription() const override { return "Photoscan (PSZ) I/O filter"; }
+	explicit qPhotoscanIO( QObject *parent = nullptr );
 
 	//inherited from ccIOFilterPluginInterface
 	FileIOFilter::Shared getFilter() override;

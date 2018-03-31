@@ -20,8 +20,12 @@
 //local
 #include "PhotoScanFilter.h"
 
-//Qt
-#include <QtPlugin>
+
+qPhotoscanIO::qPhotoscanIO( QObject* parent )
+	: QObject( parent )
+	, ccIOFilterPluginInterface( ":/CC/plugin/qPhotoscanIO/info.json" )
+{
+}
 
 FileIOFilter::Shared qPhotoscanIO::getFilter()
 {

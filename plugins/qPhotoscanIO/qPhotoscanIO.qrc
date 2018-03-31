@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/CC/plugin/qPhotoscanIO" >
+        <file>info.json</file>
+    </qresource>
+</RCC>

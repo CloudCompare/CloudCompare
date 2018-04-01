@@ -202,7 +202,7 @@ public: //features allocation/resize
 	/** Before adding normals to the cloud (with addNorm())
 		be sure to reserve the necessary amount of memory
 		with this method. This method reserves memory for as
-		many colors as the number of points in the cloud
+		many normals as the number of points in the cloud
 		(effictively stored or reserved).
 		\return true if ok, false if there's not enough memory
 	**/

@@ -234,9 +234,13 @@ void ccPluginInfoDlg::updatePluginInfo( const ccPluginInterface *plugin )
 	if ( !referenceText.isEmpty() )
 	{
 		m_UI->mReferencesTextBrowser->setHtml( referenceText );
+		m_UI->mReferencesLabel->show();
+		m_UI->mReferencesTextBrowser->show();
 	}
 	else
 	{
+		m_UI->mReferencesLabel->hide();
+		m_UI->mReferencesTextBrowser->hide();
 		m_UI->mReferencesTextBrowser->clear();
 	}
 	

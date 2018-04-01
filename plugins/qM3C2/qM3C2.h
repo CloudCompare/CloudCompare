@@ -19,13 +19,11 @@
 #define Q_M3C2_PLUGIN_HEADER
 
 //qCC
-#include "../ccStdPluginInterface.h"
+#include "ccStdPluginInterface.h"
 
 //qCC_db
 #include <ccHObject.h>
 
-//Qt
-#include <QObject>
 
 //! M3C2 plugin
 /** See "Accurate 3D comparison of complex topography with terrestrial laser scanner:
@@ -36,28 +34,21 @@ class qM3C2Plugin : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qM3C2")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qM3C2" FILE "info.json")
 
 public:
 
 	//! Default constructor
 	qM3C2Plugin(QObject* parent = nullptr);
 
-	//inherited from ccPluginInterface
-	virtual QString getName() const override { return "M3C2 distance"; }
-	virtual QString getDescription() const override { return "Multiscale Model to Model Cloud Comparison (M3C2)"; }
-	virtual QIcon getIcon() const override;
-
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	virtual void getActions(QActionGroup& group) override;
 	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 
-protected slots:
+private:
 
 	void doAction();
-
-protected:
 
 	//! Default action
 	QAction* m_action;

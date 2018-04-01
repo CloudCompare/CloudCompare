@@ -1,0 +1,19 @@
+{
+	"type" : "Standard",
+	"name" : "M3C2 Distance",
+	"icon" : ":/CC/plugin/qM3C2Plugin/images/iconM3C2.png",
+	"description": "Multiscale Model to Model Cloud Comparison (M3C2).",
+	"authors" : [
+		{
+			"name" : "Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique, and EEC Marie-Curie actions"
+		}
+	],
+	"references" : [
+		{
+			"text" : "\"Accurate 3D comparison of complex topography with terrestrial laser scanner:
+			application to the Rangitikei canyon (N-Z)\", Lague, D., Brodu, N. and Leroux, J.,
+			2013, ISPRS journal of Photogrammmetry and Remote Sensing",
+			"url" : "https://arxiv.org/pdf/1302.1183.pdf"
+		}
+	]
+}

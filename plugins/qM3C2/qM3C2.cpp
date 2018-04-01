@@ -27,14 +27,11 @@
 //qCC_db
 #include <ccPointCloud.h>
 
-//Qt
-//#include <QtGui>
-//#include <QtCore>
-//#include <QApplication>
 
-qM3C2Plugin::qM3C2Plugin(QObject* parent/*=0*/)
+qM3C2Plugin::qM3C2Plugin(QObject* parent)
 	: QObject(parent)
-	, m_action(0)
+	, ccStdPluginInterface( ":/CC/plugin/qM3C2Plugin/info.json" )
+	, m_action(nullptr)
 {
 }
 
@@ -57,7 +54,7 @@ void qM3C2Plugin::getActions(QActionGroup& group)
 		m_action = new QAction(getName(),this);
 		m_action->setToolTip(getDescription());
 		m_action->setIcon(getIcon());
-		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
+		connect(m_action, &QAction::triggered, this, &qM3C2Plugin::doAction);
 	}
 
 	group.addAction(m_action);
@@ -102,11 +99,6 @@ void qM3C2Plugin::doAction()
 
 	//'Compute' may change some parameters of the dialog
 	dlg.saveParamsToPersistentSettings();
-}
-
-QIcon qM3C2Plugin::getIcon() const
-{
-	return QIcon(":/CC/plugin/qM3C2Plugin/iconM3C2.png");
 }
 
 void qM3C2Plugin::registerCommands(ccCommandLineInterface* cmd)

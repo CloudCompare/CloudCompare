@@ -6,16 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>567</width>
-    <height>377</height>
+    <width>755</width>
+    <height>490</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>M3C2 distance</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>iconM3C2.png</normaloff>iconM3C2.png</iconset>
+   <iconset resource="../qM3C2.qrc">
+    <normaloff>:/CC/plugin/qM3C2Plugin/images/iconM3C2.png</normaloff>:/CC/plugin/qM3C2Plugin/images/iconM3C2.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_7">
    <item>
@@ -53,8 +53,8 @@
      <item>
       <widget class="QToolButton" name="swapCloudsToolButton">
        <property name="icon">
-        <iconset resource="qM3C2.qrc">
-         <normaloff>:/CC/plugin/qM3C2Plugin/iconSwap.png</normaloff>:/CC/plugin/qM3C2Plugin/iconSwap.png</iconset>
+        <iconset resource="../qM3C2.qrc">
+         <normaloff>:/CC/plugin/qM3C2Plugin/images/iconSwap.png</normaloff>:/CC/plugin/qM3C2Plugin/images/iconSwap.png</iconset>
        </property>
       </widget>
      </item>
@@ -309,7 +309,16 @@
        <item>
         <widget class="QFrame" name="normParamsFrame">
          <layout class="QVBoxLayout" name="verticalLayout_3">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
@@ -605,7 +614,16 @@
        <item>
         <widget class="QFrame" name="minPoints4StatsFrame">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
@@ -656,7 +674,16 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
@@ -721,9 +748,9 @@
           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;3D uncertainty-based topographic change detection with SfM photogrammetry: precision maps for ground control and directly georeferenced surveys&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Mike R. James, Stuart Robson and Mark W. Smith (&lt;/span&gt;&lt;a href=&quot;http://onlinelibrary.wiley.com/doi/10.1002/esp.4125/abstract&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;DOI: 10.1002/esp.4125&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:10pt; font-weight:600;&quot;&gt;3D uncertainty-based topographic change detection with SfM photogrammetry: precision maps for ground control and directly georeferenced surveys&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;Mike R. James, Stuart Robson and Mark W. Smith (&lt;/span&gt;&lt;a href=&quot;http://onlinelibrary.wiley.com/doi/10.1002/esp.4125/abstract&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;DOI: 10.1002/esp.4125&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="openExternalLinks">
           <bool>true</bool>
@@ -966,8 +993,8 @@ p, li { white-space: pre-wrap; }
         <string>Load parameters from file</string>
        </property>
        <property name="icon">
-        <iconset resource="qM3C2.qrc">
-         <normaloff>:/CC/plugin/qM3C2Plugin/iconLoad.png</normaloff>:/CC/plugin/qM3C2Plugin/iconLoad.png</iconset>
+        <iconset resource="../qM3C2.qrc">
+         <normaloff>:/CC/plugin/qM3C2Plugin/images/iconLoad.png</normaloff>:/CC/plugin/qM3C2Plugin/images/iconLoad.png</iconset>
        </property>
       </widget>
      </item>
@@ -977,8 +1004,8 @@ p, li { white-space: pre-wrap; }
         <string>Save parameters to file</string>
        </property>
        <property name="icon">
-        <iconset resource="qM3C2.qrc">
-         <normaloff>:/CC/plugin/qM3C2Plugin/iconSave.png</normaloff>:/CC/plugin/qM3C2Plugin/iconSave.png</iconset>
+        <iconset resource="../qM3C2.qrc">
+         <normaloff>:/CC/plugin/qM3C2Plugin/images/iconSave.png</normaloff>:/CC/plugin/qM3C2Plugin/images/iconSave.png</iconset>
        </property>
       </widget>
      </item>
@@ -1038,7 +1065,7 @@ p, li { white-space: pre-wrap; }
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources>
-  <include location="qM3C2.qrc"/>
+  <include location="../qM3C2.qrc"/>
  </resources>
  <connections>
   <connection>

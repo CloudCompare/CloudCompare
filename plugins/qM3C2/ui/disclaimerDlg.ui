@@ -14,8 +14,8 @@
    <string>qM3C2 (disclaimer)</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="qM3C2.qrc">
-    <normaloff>:/CC/plugin/qM3C2Plugin/iconM3C2.png</normaloff>:/CC/plugin/qM3C2Plugin/iconM3C2.png</iconset>
+   <iconset resource="../qM3C2.qrc">
+    <normaloff>:/CC/plugin/qM3C2Plugin/images/iconM3C2.png</normaloff>:/CC/plugin/qM3C2Plugin/images/iconM3C2.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -32,7 +32,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="qM3C2.qrc">:/CC/plugin/qM3C2Plugin/Logo_cnrs_eub_eec.png</pixmap>
+        <pixmap resource="../qM3C2.qrc">:/CC/plugin/qM3C2Plugin/images/Logo_cnrs_eub_eec.png</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -73,7 +73,7 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
-  <include location="qM3C2.qrc"/>
+  <include location="../qM3C2.qrc"/>
  </resources>
  <connections>
   <connection>

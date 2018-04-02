@@ -6,10 +6,22 @@
 	"authors" : [
 		{
 			"name" : "Ryan Wicks, 2G Robotics Inc."
+		},
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
 		}
 	],
 	"maintainers" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		}	
 	],
-	"references" : [
-	]
+  "references": [
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=Animation_(plugin)"
+    }
+  ]
 }

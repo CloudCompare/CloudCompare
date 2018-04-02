@@ -3,18 +3,25 @@
 	"name" : "EDL Shader",
 	"icon" : ":/CC/plugin/qEDL/images/cc_edl.png",
 	"description": "Eye-dome Lighting OpenGL shader.",
-	"authors" : [
-		{
-			"name" : "Daniel Girardeau-Montaut",
-			"email" : "daniel.girardeau@gmail.com"
-		}
-	],
+  "authors": [
+    {
+      "name": "Christian Boucheny, EDF R&D"
+    },
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
 	"maintainers" : [
 		{
 			"name" : "Daniel Girardeau-Montaut",
 			"email" : "daniel.girardeau@gmail.com"
 		}
 	],
-	"references" : [
-	]
+  "references": [
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=EDL_(shader)"
+    }
+  ]
 }

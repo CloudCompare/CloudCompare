@@ -19,12 +19,12 @@
 
 #include "qEDL.h"
 
-
 qEDL::qEDL( QObject *parent )
 	: QObject( parent )
 	, ccGLFilterPluginInterface( ":/CC/plugin/qEDL/info.json" )
 {
 }
+
 ccGlFilter* qEDL::getFilter()
 {
 	return new ccEDLFilter();

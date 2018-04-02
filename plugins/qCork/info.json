@@ -6,9 +6,17 @@
   "authors": [
     {
       "name": "Gilbert Bernstein, Stanford"
+    },
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
     }
   ],
   "maintainers": [
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
   ],
   "references": [
     {

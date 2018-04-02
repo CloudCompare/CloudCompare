@@ -21,9 +21,13 @@
                 Talk by Alexandre Boulch &amp; Renaud Marlet at the Symposium of Geometry Processing, 2016",
             "url" : "http://imagine.enpc.fr/~marletr/publi/SGP-2016-Boulch-Marlet_slides.pdf"
         },
-        {
-            "text": "normals_Hough library",
-            "url": "https://github.com/aboulch/normals_Hough"
-        }
+      {
+        "text": "normals_Hough library",
+        "url": "https://github.com/aboulch/normals_Hough"
+      },
+      {
+        "text": "Documentation",
+        "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=HoughNormals_(plugin)"
+      }
     ]
 }

@@ -143,6 +143,8 @@ void ccPluginInfoDlg::setPluginList( const QList<ccPluginInterface *> &pluginLis
 	
 	if ( !pluginList.empty() )
 	{
+		m_ItemModel->sort( 0 );
+		
 		QModelIndex	index = m_ItemModel->index( 0, 0 );
 		
 		m_UI->mPluginListView->setCurrentIndex( index );

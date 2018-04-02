@@ -28,17 +28,12 @@ class qSRA : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qSRA")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qSRA" FILE "info.json")
 
 public:
 
 	//! Default constructor
-	explicit qSRA(QObject* parent = 0);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "Surface of Revolution Analysis"; }
-	virtual QString getDescription() const { return "Generates a distance map between a point cloud and a surface of revolution"; }
-	virtual QIcon getIcon() const;
+	explicit qSRA(QObject* parent = nullptr);
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);

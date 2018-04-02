@@ -29,17 +29,12 @@ class qPCV : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPCV")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPCV" FILE "info.json")
 
 public:
 
 	//! Default constructor
 	explicit qPCV(QObject* parent = nullptr);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "P.C.V. (Ambient Occlusion)"; }
-	virtual QString getDescription() const { return "PCV (Ambient Occlusion inspired from ShadeVis, Tarini et al.)"; }
-	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities);

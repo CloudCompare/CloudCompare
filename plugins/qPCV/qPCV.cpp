@@ -319,8 +319,3 @@ void qPCV::doAction()
 	//currently selected entities appearance may have changed!
 	m_app->refreshAll();
 }
-
-QIcon qPCV::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/CC/plugin/qPCV/cc_ShadeVisIcon.png"));
-}

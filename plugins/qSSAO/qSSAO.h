@@ -25,17 +25,12 @@ class qSSAO : public QObject, public ccGLFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccGLFilterPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qSSAO")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qSSAO" FILE "info.json")
 
 public:
 
 	//! Default constructor
 	explicit qSSAO(QObject* parent = nullptr);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "S.S.A.O. (shader)"; }
-	virtual QString getDescription() const { return "Screen Space Ambient Occlusion OpenGL shader"; }
-	virtual QIcon getIcon() const;
 
 	//inherited from ccGLFilterPluginInterface
 	ccGlFilter* getFilter();

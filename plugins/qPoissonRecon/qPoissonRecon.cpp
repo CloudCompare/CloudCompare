@@ -564,8 +564,3 @@ void qPoissonRecon::doAction()
 	s_mesh = 0;
 	s_coloredMesh = 0;
 }
-
-QIcon qPoissonRecon::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/CC/plugin/qPoissonRecon/qPoissonRecon.png"));
-}

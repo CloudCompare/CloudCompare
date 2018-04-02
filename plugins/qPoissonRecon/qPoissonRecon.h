@@ -29,17 +29,12 @@ class qPoissonRecon : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPoissonRecon")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPoissonRecon" FILE "info.json")
 
 public:
 
 	//! Default constructor
-	explicit qPoissonRecon(QObject* parent = 0);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const override { return "Poisson Surface Reconstruction"; }
-	virtual QString getDescription() const override { return "Poisson Surface Reconstruction V9.0 (Kazhdan et al.)"; }
-	virtual QIcon getIcon() const override;
+	explicit qPoissonRecon(QObject* parent = nullptr);
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;

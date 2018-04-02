@@ -525,8 +525,3 @@ void qSRA::doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) 
 
 	dmgDlg.exec();
 }
-
-QIcon qSRA::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/CC/plugin/qSRA/qSRA.png"));
-}

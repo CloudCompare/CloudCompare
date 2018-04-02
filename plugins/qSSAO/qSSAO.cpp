@@ -28,11 +28,6 @@ qSSAO::qSSAO(QObject *parent)
 {
 }
 
-QIcon qSSAO::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/CC/plugin/qSSAO/cc_ssao.png"));
-}
-
 ccGlFilter* qSSAO::getFilter()
 {
 	return new ccSSAOFilter();

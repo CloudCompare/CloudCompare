@@ -1,0 +1,23 @@
+{
+  "type": "I/O",
+  "name": "LAS FWF file I/O",
+  "description": "Open LAS files (1.3 or later) with FWF data.",
+  "authors": [
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
+  "references": [
+    {
+      "text": "Relies on LASlib",
+      "url": "https://github.com/LAStools/LAStools/tree/master/LASlib"
+    }
+  ]
+}

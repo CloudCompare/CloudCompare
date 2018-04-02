@@ -24,6 +24,12 @@
 //Qt
 #include <QtPlugin>
 
+qLASFWFIO::qLASFWFIO(QObject *parent)
+	: QObject(parent)
+	, ccIOFilterPluginInterface(":/CC/plugin/qLASFWFIO/info.json")
+{
+}
+
 FileIOFilter::Shared qLASFWFIO::getFilter()
 {
 	return FileIOFilter::Shared(new LASFWFFilter);

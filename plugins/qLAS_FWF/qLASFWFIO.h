@@ -31,6 +31,9 @@ class qLASFWFIO : public QObject, public ccIOFilterPluginInterface
 
 public:
 
+	//! Default constructor
+	qLASFWFIO(QObject* parent = nullptr);
+
 	//inherited from ccPluginInterface
 	virtual QString getName() const override { return "LAS FWF I/O filter"; }
 	virtual QString getDescription() const override { return "LAS FWF I/O filter"; }

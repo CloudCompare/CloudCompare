@@ -29,6 +29,9 @@ class qSSAO : public QObject, public ccGLFilterPluginInterface
 
 public:
 
+	//! Default constructor
+	explicit qSSAO(QObject* parent = nullptr);
+
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "S.S.A.O. (shader)"; }
 	virtual QString getDescription() const { return "Screen Space Ambient Occlusion OpenGL shader"; }

@@ -1,0 +1,27 @@
+{
+	"type" : "GL",
+	"name" : "SSAO Shader",
+	"icon" : ":/CC/plugin/qSSAO/images/cc_ssao.png",
+	"description": "Screen Space Ambient Occlusion OpenGL shader.",
+	"authors" : [
+		{
+			"name" : "Christian Boucheny, EDF R&D"
+		},
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		}
+	],
+  "references": [
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=SSAO_(shader)"
+    }
+  ]
+}

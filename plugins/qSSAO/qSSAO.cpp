@@ -22,6 +22,12 @@
 
 #include "qSSAO.h"
 
+qSSAO::qSSAO(QObject *parent)
+	: QObject(parent)
+	, ccGLFilterPluginInterface(":/CC/plugin/qSSAO/info.json")
+{
+}
+
 QIcon qSSAO::getIcon() const
 {
 	return QIcon(QString::fromUtf8(":/CC/plugin/qSSAO/cc_ssao.png"));

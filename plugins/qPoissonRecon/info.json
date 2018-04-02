@@ -1,0 +1,31 @@
+{
+  "type": "Standard",
+  "name": "PoissonRecon",
+  "icon": ":/CC/plugin/qPoissonRecon/qPoissonRecon.png",
+  "description": "Poisson Surface Reconstruction.",
+  "authors": [
+    {
+      "name": "Misha Kazhdan, Johns Hopkins University"
+    },
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
+  "references": [
+    {
+      "text": "PoissonRecon library",
+      "url": "http://www.cs.jhu.edu/~misha/Code/PoissonRecon"
+    },
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=Poisson_Surface_Reconstruction_(plugin)"
+    }
+  ]
+}

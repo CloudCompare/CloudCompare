@@ -139,6 +139,7 @@ public:
 
 qPoissonRecon::qPoissonRecon(QObject* parent/*=0*/)
 	: QObject(parent)
+	, ccStdPluginInterface(":/CC/plugin/qPoissonRecon/info.json")
 	, m_action(0)
 {
 }

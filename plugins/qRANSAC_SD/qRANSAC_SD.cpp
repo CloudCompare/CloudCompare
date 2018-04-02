@@ -63,9 +63,10 @@
 #include <time.h>
 #endif
 
-qRansacSD::qRansacSD(QObject* parent/*=0*/)
+qRansacSD::qRansacSD(QObject* parent/*=nullptr*/)
 	: QObject(parent)
-	, m_action(0)
+	, ccStdPluginInterface(":/CC/plugin/qRANSAC_SD/info.json")
+	, m_action(nullptr)
 {
 }
 

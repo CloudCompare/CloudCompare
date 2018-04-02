@@ -1,0 +1,31 @@
+{
+  "type": "Standard",
+  "name": "RANSAC Shape Detection",
+  "icon": ":/CC/plugin/qRANSAC_SD/qRANSAC_SD.png",
+  "description": "Automatic RANSAC Shape Detection.",
+  "authors": [
+    {
+      "name": " Ruwen Schnabel et al., Bonn university"
+    },
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
+  "references": [
+    {
+      "text": "Efficient RANSAC for Point-Cloud Shape Detection",
+      "url": "http://cg.cs.uni-bonn.de/en/publications/paper-details/schnabel-2007-efficient/"
+    },
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=RANSAC_Shape_Detection_(plugin)"
+    }
+  ]
+}

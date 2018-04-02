@@ -11,11 +11,14 @@
 	],
 	"maintainers" : [
 	],
-	"references" : [
-		{
-			"text" : "\"Direct Visibility of Point Sets\", Sagi Katz, Ayellet Tal, and Ronen Basri.<br/>
-				SIGGRAPH 2007",
-			"url" : "http://www.mathworks.com/matlabcentral/fileexchange/16581-hidden-point-removal"
-		}
-	]
+  "references": [
+    {
+      "text": "\"Direct Visibility of Point Sets\", Sagi Katz, Ayellet Tal, and Ronen Basri.<br/>SIGGRAPH 2007",
+      "url": "http://www.mathworks.com/matlabcentral/fileexchange/16581-hidden-point-removal"
+    },
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=Hidden_Point_Removal_(plugin)"
+    }
+  ]
 }

@@ -44,7 +44,7 @@
 
 qCork::qCork(QObject* parent/*=0*/)
 	: QObject(parent)
-	, ccStdPluginInterface()
+	, ccStdPluginInterface(":/CC/plugin/qCork/info.json")
 	, m_action(0)
 {
 }

@@ -1,0 +1,23 @@
+{
+  "type": "Standard",
+  "name": "Cork",
+  "icon": ":/CC/plugin/qCork/cork_icon.png",
+  "description": "CSG operations on meshes.",
+  "authors": [
+    {
+      "name": "Gilbert Bernstein, Stanford"
+    }
+  ],
+  "maintainers": [
+  ],
+  "references": [
+    {
+      "text": "Cork Boolean Library",
+      "url": "https://github.com/gilbo/cork"
+    },
+    {
+      "text": "Gilbert Bernstein",
+      "url": "http://www.gilbertbernstein.com/"
+    }
+  ]
+}

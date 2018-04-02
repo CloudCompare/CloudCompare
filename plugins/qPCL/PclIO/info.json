@@ -1,0 +1,21 @@
+{
+  "type": "I/O",
+  "name": "PCD file I/O",
+  "description": "Open PCD files (PCL library).",
+  "authors": [
+    {
+      "name": "Luca Penasa"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Luca Penasa"
+    }
+  ],
+  "references": [
+    {
+      "text": "PCL library",
+      "url": "http://pointclouds.org/"
+    }
+  ]
+}

@@ -28,17 +28,11 @@ class qPclIO : public QObject, public ccIOFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccIOFilterPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPclIO")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPclIO" FILE "info.json")
 
 public:
 
-	qPclIO() {}
-	virtual ~qPclIO() {}
-
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "PCL I/O filter"; }
-	virtual QString getDescription() const { return "Interface to open PCL clouds (*.pcd)"; }
+	explicit qPclIO(QObject* parent = nullptr);
 
 	//inherited from ccIOFilterPluginInterface
 	FileIOFilter::Shared getFilter() override;

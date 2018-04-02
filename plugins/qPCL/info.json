@@ -1,0 +1,26 @@
+{
+  "type": "Standard",
+  "name": "PCL wrapper",
+  "icon": ":/toolbar/pcl.png",
+  "description": "Point Cloud Library wrapper.",
+  "authors": [
+    {
+      "name": "Lucas Penasa"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Lucas Penasa"
+    }
+  ],
+  "references": [
+    {
+      "text": "PCL library",
+      "url": "http://pointclouds.org/"
+    },
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=Point_Cloud_Library_Wrapper_(plugin)"
+    }
+  ]
+}

@@ -28,6 +28,12 @@
 #include <NormalEstimation.h>
 #include <MLSSmoothingUpsampling.h>
 
+qPCL::qPCL(QObject* parent/*=0*/)
+	: QObject(parent)
+	, ccStdPluginInterface(":/toolbar/info.json")
+{
+}
+
 qPCL::~qPCL()
 {
 	while (!m_filters.empty())

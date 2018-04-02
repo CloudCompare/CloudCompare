@@ -35,6 +35,8 @@ class qPCL : public QObject, public ccStdPluginInterface
 
 public:
 
+	//! Default constructor
+	qPCL(QObject* parent = nullptr);
 	//! Destructor
 	virtual ~qPCL();
 

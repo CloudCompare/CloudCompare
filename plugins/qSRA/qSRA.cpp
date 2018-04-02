@@ -48,6 +48,7 @@
 
 qSRA::qSRA(QObject* parent/*=0*/)
 	: QObject(parent)
+	, ccStdPluginInterface(":/CC/plugin/qSRA/info.json")
 	, m_doLoadProfile(0)
 	, m_doCompareCloudToProfile(0)
 	, m_doProjectCloudDists(0)

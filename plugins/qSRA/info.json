@@ -1,0 +1,23 @@
+{
+  "type": "Standard",
+  "name": "Surface of Revolution Analysis",
+  "icon": ":/CC/plugin/qSRA/qSRA.png",
+  "description": "Comparison between a point cloud and a surface of revolution.",
+  "authors": [
+    {
+      "name": "EDF R&D"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
+  "references": [
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=Surface_of_Revolution_Analysis_(plugin)"
+    }
+  ]
+}

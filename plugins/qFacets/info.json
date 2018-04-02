@@ -5,18 +5,22 @@
 	"description": "BRGM Fracture detection plugin",
 	"authors" : [
 		{
-			"name" : "Thomas Dewez"
+			"name" : "Thomas Dewez, BRGM"
 		}
 	],
 	"maintainers" : [
-		{
-			"name" : "Thomas Dewez"
-		}
+    {
+      "name": "Thomas Dewez, BRGM"
+    }
 	],
-	"references" : [
-		{
-			"text": "Bureau de Recherches Geologiques et Minieres",
-			"url": "http://www.brgm.fr/"
-		}
-	]
+  "references": [
+    {
+      "text": "Bureau de Recherches Geologiques et Minieres",
+      "url": "http://www.brgm.fr/"
+    },
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=Facets_(plugin)"
+    }
+  ]
 }

@@ -1,0 +1,24 @@
+{
+  "type": "Standard",
+  "name": "PCV / ShadeVis",
+  "icon": ":/CC/plugin/qPCV/cc_ShadeVisIcon.png",
+  "description": "Ambient Occlusion for mesh or point cloud.",
+  "authors": [
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
+  "references": [
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=ShadeVis_(plugin)"
+    }
+  ]
+}

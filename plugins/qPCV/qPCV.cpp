@@ -42,7 +42,8 @@
 
 qPCV::qPCV(QObject* parent/*=0*/)
 	: QObject(parent)
-	, m_action(0)
+	, ccStdPluginInterface(":/CC/plugin/qPCV/info.json")
+	, m_action(nullptr)
 {
 }
 

@@ -13,10 +13,14 @@
 			"name" : "Sam Thiele"
 		}
 	],
-	"references" : [
-		{
-			"text" : "Rapid, semi-automatic fracture and contact mapping for point clouds, images and geophysical data ",
-			"url" : "https://doi.org/10.5194/se-8-1241-2017"
-		}
-	]
+  "references": [
+    {
+      "text": "Rapid, semi-automatic fracture and contact mapping for point clouds, images and geophysical data",
+      "url": "https://doi.org/10.5194/se-8-1241-2017"
+    },
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=Compass_(plugin)"
+    }
+  ]
 }

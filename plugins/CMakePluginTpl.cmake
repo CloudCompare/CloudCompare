@@ -15,6 +15,7 @@ include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
 
 file( GLOB header_list *.h)
 file( GLOB source_list *.cpp)
+file( GLOB json_list *.json)
 # force the link with ccStdPluginInterface.cpp
 list( APPEND source_list ${CloudComparePlugins_SOURCE_DIR}/ccDefaultPluginInterface.cpp )
 list( APPEND source_list ${CloudComparePlugins_SOURCE_DIR}/ccStdPluginInterface.cpp )
@@ -38,7 +39,7 @@ endif()
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )
 
-add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list})
+add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${json_list} )
 
 # Add custom default preprocessor definitions
 if (OPTION_GL_QUAD_BUFFER_SUPPORT)

@@ -648,8 +648,3 @@ void qRansacSD::doAction()
 		}
 	}
 }
-
-QIcon qRansacSD::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/CC/plugin/qRANSAC_SD/qRANSAC_SD.png"));
-}

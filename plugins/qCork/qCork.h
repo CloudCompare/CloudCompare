@@ -33,17 +33,12 @@ class qCork : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCork")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCork" FILE "info.json")
 
 public:
 
 	//! Default constructor
 	explicit qCork(QObject* parent = 0);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "Mesh Boolean Operations"; }
-	virtual QString getDescription() const { return "Mesh Boolean Operations (CSG) based on Cork library"; }
-	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);

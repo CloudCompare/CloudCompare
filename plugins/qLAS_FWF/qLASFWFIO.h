@@ -27,7 +27,7 @@ class qLASFWFIO : public QObject, public ccIOFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccIOFilterPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qLAS_FWF_IO")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qLAS_FWF_IO" FILE "info.json")
 
 public:
 
@@ -35,8 +35,6 @@ public:
 	qLASFWFIO(QObject* parent = nullptr);
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const override { return "LAS FWF I/O filter"; }
-	virtual QString getDescription() const override { return "LAS FWF I/O filter"; }
 	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 
 	//inherited from ccIOFilterPluginInterface

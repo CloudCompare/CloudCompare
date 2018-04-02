@@ -107,8 +107,3 @@ void qPCL::onNewSelection(const ccHObject::Container& selectedEntities)
 	for (size_t i=0; i<m_filters.size(); ++i)
 		m_filters[i]->updateSelectedEntities(selectedEntities);
 }
-
-QIcon qPCL::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/toolbar/pcl.png"));
-}

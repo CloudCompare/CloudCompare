@@ -49,11 +49,6 @@ qCork::qCork(QObject* parent/*=0*/)
 {
 }
 
-QIcon qCork::getIcon() const
-{
-	return QIcon(QString::fromUtf8(":/CC/plugin/qCork/cork_icon.png"));
-}
-
 void qCork::getActions(QActionGroup& group)
 {
 	//default action

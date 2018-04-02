@@ -29,17 +29,12 @@ class qRansacSD : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qRansacSD")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qRansacSD" FILE "info.json")
 
 public:
 
 	//! Default constructor
 	explicit qRansacSD(QObject* parent = 0);
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "RANSAC Shape Detection"; }
-	virtual QString getDescription() const { return "Efficient RANSAC for Point-Cloud Shape Detection (Schnabel et al 2007)"; }
-	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);

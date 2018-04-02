@@ -31,7 +31,7 @@ class qPCL : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPCL")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPCL" FILE "info.json")
 
 public:
 
@@ -39,11 +39,6 @@ public:
 	qPCL(QObject* parent = nullptr);
 	//! Destructor
 	virtual ~qPCL();
-
-	//inherited from ccPluginInterface
-	virtual QString getName() const { return "PCL wrapper"; }
-	virtual QString getDescription() const { return "PCL (Point Cloud Library) wrapper"; }
-	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);

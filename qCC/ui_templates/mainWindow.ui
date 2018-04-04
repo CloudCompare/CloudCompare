@@ -1780,7 +1780,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionAboutPlugins">
    <property name="text">
-    <string>About Plugins ...</string>
+    <string>About Plugins...</string>
    </property>
   </action>
   <action name="actionConvertToRGB">

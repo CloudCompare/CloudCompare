@@ -78,6 +78,7 @@ v2.10.alpha - XX/XX/201X
 
 	* Plugins (General):
 		- The "About Plugins" dialog was rewritten to provide more information about installed plugins and to include I/O and GL plugins.
+		- [macOS] The "About Plugins..." menu item was moved from the Help menu to the Application menu.
 		- Added several fields to the plugin interface: authors, maintainers, and reference links.
 		- I/O plugins now have the option to return a list of filters using a new method *getFilters()* (so one plugin can handle multiple file extensions)
 		- Moved support for several less frequently used file formats to a new plugin called qAdditionalIO

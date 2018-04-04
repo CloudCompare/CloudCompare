@@ -197,7 +197,7 @@ MainWindow::MainWindow()
 	
 #ifdef Q_OS_MAC
 	m_UI->actionAbout->setMenuRole( QAction::AboutRole );
-	m_UI->actionAboutPlugins->setMenuRole( QAction::NoRole );
+	m_UI->actionAboutPlugins->setMenuRole( QAction::ApplicationSpecificRole );
 
 	m_UI->actionFullScreen->setText( tr( "Enter Full Screen" ) );
 	m_UI->actionFullScreen->setShortcut( QKeySequence( Qt::CTRL + Qt::META + Qt::Key_F ) );

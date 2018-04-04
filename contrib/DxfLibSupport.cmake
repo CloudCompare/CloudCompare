@@ -6,7 +6,6 @@ OPTION( OPTION_USE_DXF_LIB "Build with Ribbonsoft's DXF Lib (AutoCAD DXF files s
 if( ${OPTION_USE_DXF_LIB} )
 	# set( DXF_LIB_DIR )
 	set( DXF_LIB_DIR "contrib/dxflib-3.17.0"  CACHE PATH "DXF lib path" )
-	message( ${DXF_LIB_DIR} )
 	add_subdirectory( "${DXF_LIB_DIR}" )
 	include_directories( "${DXF_LIB_DIR}/src" )
 endif()

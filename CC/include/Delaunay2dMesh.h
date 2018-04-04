@@ -44,7 +44,7 @@ public:
 	virtual ~Delaunay2dMesh();
 
 	//! Returns whether 2D Delaunay triangulation is supported or not
-	/** 2D Delaunay triangulation requires Triangle library.
+	/** 2D Delaunay triangulation requires the CGAL library.
 	**/
 	static bool Available();
 
@@ -62,7 +62,7 @@ public:
 	//! Build the Delaunay mesh on top a set of 2D points
 	/** \param points2D a set of 2D points
 		\param pointCountToUse number of points to use from the input set (0 = all)
-		\param outputErrorStr error string as output by Triangle lib. (if any) [optional]
+		\param outputErrorStr error string as output by the CGAL lib. (if any) [optional]
 		\return success
 	**/
 	virtual bool buildMesh(	const std::vector<CCVector2>& points2D,
@@ -72,7 +72,7 @@ public:
 	//! Build the Delaunay mesh from a set of 2D polylines
 	/** \param points2D a set of 2D points
 		\param segments2D constraining segments (as 2 indexes per segment)
-		\param outputErrorStr error string as output by Triangle lib. (if any) [optional]
+		\param outputErrorStr error string as output by the CGAL lib. (if any) [optional]
 		\return success
 	**/
 	virtual bool buildMesh(	const std::vector<CCVector2>& points2D,

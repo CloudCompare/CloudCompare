@@ -38,7 +38,6 @@ parts:
       - libcgal-dev
       - libcgal-qt5-dev
       - libswscale-dev
-      - libvxl1-dev
       - libqt5opengl5-dev
       - qt5-default
       - libgdal-dev
@@ -87,8 +86,6 @@ parts:
   e57:
     plugin: cmake
     source: https://github.com/asmaloney/libE57Format.git
-    prepare: |
-      sed -i '125 i\set_property(TARGET E57Format PROPERTY POSITION_INDEPENDENT_CODE ON)' ../src/CMakeLists.txt
     build-packages:
       - build-essential
     configflags:

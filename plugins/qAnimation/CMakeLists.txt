@@ -9,8 +9,8 @@ if (INSTALL_QANIMATION_PLUGIN)
 	project( QANIMATION_PLUGIN )
 	
 	if (WITH_FFMPEG_SUPPORT)
-		include_directories( ${QTFFMPEG_LIB_SOURCE_DIR} )
 		add_subdirectory( src/QTFFmpegWrapper )
+		include_directories( ${QTFFMPEG_LIB_SOURCE_DIR} )
 	endif()
 
 	include_directories( src )

@@ -82,13 +82,14 @@ parts:
       - -DLIBE57FORMAT_INSTALL_DIR=$SNAPCRAFT_STAGE
       - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
       - -DINSTALL_QPCL_PLUGIN=ON
+      - -DINSTALL_QADDITIONAL_IO_PLUGIN=ON
     install: 
       make install
   e57:
     plugin: cmake
     source: https://github.com/asmaloney/libE57Format.git
     prepare: |
-      sed -i '123 i\set_property(TARGET E57Format PROPERTY POSITION_INDEPENDENT_CODE ON)' ../src/CMakeLists.txt
+      sed -i '125 i\set_property(TARGET E57Format PROPERTY POSITION_INDEPENDENT_CODE ON)' ../src/CMakeLists.txt
     build-packages:
       - build-essential
     configflags:

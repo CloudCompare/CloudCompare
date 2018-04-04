@@ -26,8 +26,6 @@
 #include <CCGeom.h>
 
 //Qt
-#include <QStringList>
-#include <QRegExp>
 #include <QTextStream>
 
 

@@ -66,10 +66,10 @@ public: //initialization
 		LoadParameters()
 			: shiftHandlingMode(ccGlobalShiftManager::DIALOG_IF_NECESSARY)
 			, alwaysDisplayLoadDialog(true)
-			, coordinatesShiftEnabled(0)
-			, coordinatesShift(0)
+			, coordinatesShiftEnabled(nullptr)
+			, coordinatesShift(nullptr)
 			, autoComputeNormals(false)
-			, parentWidget(0)
+			, parentWidget(nullptr)
 			, sessionStart(true)
 		{}
 
@@ -95,7 +95,7 @@ public: //initialization
 		//! Default constructor
 		SaveParameters()
 			: alwaysDisplaySaveDialog(true)
-			, parentWidget(0)
+			, parentWidget(nullptr)
 		{}
 
 		//! Wether to always display a dialog (if any), even if automatic guess is possible

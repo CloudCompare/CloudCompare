@@ -23,7 +23,7 @@
 
 //system
 #include <stdio.h>
-#include <string.h>
+#include <string>
 
 //Qt
 #include <QString>

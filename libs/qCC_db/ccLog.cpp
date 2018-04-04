@@ -21,7 +21,7 @@
 #include <CCPlatform.h>
 
 //System
-#include <assert.h>
+#include <cassert>
 #include <vector>
 
 #if !defined(CC_WINDOWS)
@@ -54,7 +54,7 @@ static bool s_backupEnabled;
 static std::vector<Message> s_backupMessages;
 
 //unique console instance
-static ccLog* s_instance = 0;
+static ccLog* s_instance = nullptr;
 
 ccLog* ccLog::TheInstance()
 {

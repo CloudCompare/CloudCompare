@@ -17,26 +17,15 @@
 
 #include "OFFFilter.h"
 
-//Qt
-#include <QApplication>
-#include <QFile>
-#include <QTextStream>
-
-#include <QFileInfo>
-#include <QStringList>
-#include <QString>
-#include <QMessageBox>
-#include <QPushButton>
-
 //qCC_db
 #include <ccLog.h>
 #include <ccMesh.h>
-#include <ccPointCloud.h>
 #include <ccNormalVectors.h>
 #include <ccOctree.h>
+#include <ccPointCloud.h>
 
 //System
-#include <string.h>
+#include <string>
 
 bool OFFFilter::canLoadExtension(const QString& upperCaseExt) const
 {

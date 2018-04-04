@@ -34,7 +34,7 @@
 #endif
 
 //system
-#include <assert.h>
+#include <cassert>
 
 bool DxfFilter::canLoadExtension(const QString& upperCaseExt) const
 {
@@ -63,10 +63,10 @@ public:
 	//! Default constructor
 	DxfImporter(ccHObject* root, FileIOFilter::LoadParameters& parameters)
 		: m_root(root)
-		, m_points(0)
-		, m_faces(0)
-		, m_poly(0)
-		, m_polyVertices(0)
+		, m_points(nullptr)
+		, m_faces(nullptr)
+		, m_poly(nullptr)
+		, m_polyVertices(nullptr)
 		, m_firstPoint(true)
 		, m_globalShift(0, 0, 0)
 		, m_loadParameters(parameters)
@@ -160,8 +160,8 @@ public:
 		{
 			ccLog::Error("[DxfImporter] Not enough memory!");
 			delete m_poly;
-			m_polyVertices = 0;
-			m_poly = 0;
+			m_polyVertices = nullptr;
+			m_poly = nullptr;
 			return;
 		}
 		m_polyVertices->setEnabled(false);
@@ -239,7 +239,7 @@ public:
 
 		//current face color
 		ccColor::Rgb col;
-		ccColor::Rgb* faceCol = 0;
+		ccColor::Rgb* faceCol = nullptr;
 		if (getCurrentColour(col))
 			faceCol = &col;
 
@@ -861,7 +861,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 	}
 
 	delete dw;
-	dw = 0;
+	dw = nullptr;
 
 	return result;
 

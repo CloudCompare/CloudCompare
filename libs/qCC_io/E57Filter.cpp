@@ -29,24 +29,24 @@
 #include <ScalarField.h>
 
 //qCC_db
+#include <ccCameraSensor.h>
+#include <ccColorScalesManager.h>
+#include <ccImage.h>
 #include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
-#include <ccImage.h>
-#include <ccColorScalesManager.h>
 #include <ccScalarField.h>
-#include <ccCameraSensor.h>
 
 //Qt
 #include <QApplication>
+#include <QBuffer>
 #include <QString>
 #include <QMap>
 #include <QUuid>
-#include <QBuffer>
 
 //system
-#include <string.h>
-#include <assert.h>
+#include <cassert>
+#include <string>
 
 typedef double colorFieldType;
 //typedef boost::uint16_t colorFieldType;
@@ -187,7 +187,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 
 	// No index bounds for unstructured clouds!
 	// But we can still have multiple return indexes
-	ccScalarField* returnIndexSF = 0;
+	ccScalarField* returnIndexSF = nullptr;
 	int minReturnIndex = 0;
 	int maxReturnIndex = 0;
 	{
@@ -699,7 +699,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		s_absoluteScanIndex = 0;
 
 		//progress dialog
-		QScopedPointer<ccProgressDialog> progressDlg(0);
+		QScopedPointer<ccProgressDialog> progressDlg(nullptr);
 		if (parameters.parentWidget)
 		{
 			progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -807,7 +807,7 @@ bool NodeStructureToTree(ccHObject* currentTreeNode, e57::Node currentE57Node)
 	currentTreeNode->addChild(obj);
 
 	e57::ustring name = currentE57Node.elementName();
-	QString infoStr = QString(name.c_str() == 0 || name.c_str()[0]==0 ? "No name" : name.c_str());
+	QString infoStr = QString(name.c_str() == nullptr || name.c_str()[0]==0 ? "No name" : name.c_str());
 
 	switch (currentE57Node.type())
 	{
@@ -1355,7 +1355,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 	if (node.type() != e57::E57_STRUCTURE)
 	{
 		ccLog::Warning("[E57Filter] Scan nodes should be STRUCTURES!");
-		return 0;
+		return nullptr;
 	}
 	e57::StructureNode scanNode(node);
 
@@ -1365,7 +1365,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 	if (!scanNode.isDefined("points"))
 	{
 		ccLog::Warning(QString("[E57Filter] No point in scan '%1'!").arg(scanNode.elementName().c_str()));
-		return 0;
+		return nullptr;
 	}
 
 	//unique GUID
@@ -1402,7 +1402,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 			!header.pointFields.sphericalElevationField)
 		{
 			ccLog::Warning(QString("[E57Filter] No readable point in scan '%1'! (only cartesian and spherical coordinates are supported right now)").arg(scanNode.elementName().c_str()));
-			return 0;
+			return nullptr;
 		}
 		sphericalMode = true;
 	}
@@ -1462,7 +1462,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 	{
 		ccLog::Error("[E57] Not enough memory!");
 		delete cloud;
-		return 0;
+		return nullptr;
 	}
 
 	if (sphericalMode)
@@ -1553,7 +1553,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 	//double intOffset = 0;
 	//ScalarType invalidSFValue = 0;
 
-	ccScalarField* intensitySF = 0;
+	ccScalarField* intensitySF = nullptr;
 	if (header.pointFields.intensityField)
 	{
 		intensitySF = new ccScalarField(CC_E57_INTENSITY_FIELD_NAME);
@@ -1627,7 +1627,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 	}
 
 	//return index (multiple shoots scanners)
-	ccScalarField* returnIndexSF = 0;
+	ccScalarField* returnIndexSF = nullptr;
 	if (header.pointFields.returnIndexField && header.pointFields.returnMaximum>0)
 	{
 		//we store the point return index as a scalar field
@@ -1797,7 +1797,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 	{
 		ccLog::Warning(QString("[E57] No valid point in scan '%1'!").arg(scanNode.elementName().c_str()));
 		delete cloud;
-		return 0;
+		return nullptr;
 	}
 	else if (realCount < pointCount)
 	{
@@ -2016,7 +2016,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	assert(imageBits);
 	bool loadResult = qImage.loadFromData(imageBits, static_cast<int>(visualRefRepresentation->imageSize), imageFormat);
 	delete[] imageBits;
-	imageBits=0;
+	imageBits = nullptr;
 
 	if (!loadResult)
 	{
@@ -2024,7 +2024,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 		return nullptr;
 	}
 
-	ccImage* imageObj = 0;
+	ccImage* imageObj = nullptr;
 	switch(cameraType)
 	{
 	case E57_CYLINDRICAL:
@@ -2159,7 +2159,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			unsigned scanCount = static_cast<unsigned>(data3D.childCount());
 
 			//global progress bar
-			QScopedPointer<ccProgressDialog> progressDlg(0);
+			QScopedPointer<ccProgressDialog> progressDlg(nullptr);
 			if (parameters.parentWidget)
 			{
 				progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -2192,7 +2192,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 					{
 						QString name("Scan ");
 						e57::ustring nodeName = scanNode.elementName();
-						if (nodeName.c_str() != 0 && nodeName.c_str()[0] != 0)
+						if (nodeName.c_str() != nullptr && nodeName.c_str()[0] != 0)
 							name += QString(nodeName.c_str());
 						else
 							name += QString::number(i);
@@ -2249,7 +2249,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			if (imageCount)
 			{
 				//progress bar
-				QScopedPointer<ccProgressDialog> progressDlg(0);
+				QScopedPointer<ccProgressDialog> progressDlg(nullptr);
 				if (parameters.parentWidget)
 				{
 					progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -2272,7 +2272,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 						{
 							QString name("Image");
 							e57::ustring nodeName = imageNode.elementName();
-							if (nodeName.c_str() != 0 && nodeName.c_str()[0]!=0)
+							if (nodeName.c_str() != nullptr && nodeName.c_str()[0]!=0)
 								name += QString(nodeName.c_str());
 							else
 								name += QString::number(i);
@@ -2281,7 +2281,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 						image->setEnabled(false); //not displayed by default
 
 						//existing link to a loaded scan?
-						ccHObject* parentScan = 0;
+						ccHObject* parentScan = nullptr;
 						if (!associatedData3DGuid.isEmpty())
 						{
 							if (scans.contains(associatedData3DGuid))

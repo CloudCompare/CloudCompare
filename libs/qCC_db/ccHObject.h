@@ -47,13 +47,13 @@ public: //construction
 		\param name object name (optional)
 		\return instantiated object (if type is valid) or 0
 	**/
-	static ccHObject* New(CC_CLASS_ENUM objectType, const char* name = 0);
+	static ccHObject* New(CC_CLASS_ENUM objectType, const char* name = nullptr);
 
 	//! Static factory (version to be used by external plugin factories)
 	/** Two strings are used as keys, one for the plugin name and one for the class name.
 		Those strings will typically be saved as metadata of a custom object
 	**/
-	static ccHObject* New(QString pluginId, QString classId, const char* name = 0);
+	static ccHObject* New(QString pluginId, QString classId, const char* name = nullptr);
 
 public: //base members access
 
@@ -159,7 +159,7 @@ public: //children management
 							bool recursive = false,
 							CC_CLASS_ENUM filter = CC_TYPES::OBJECT,
 							bool strict = false,
-							ccGenericGLDisplay* inDisplay = 0) const;
+							ccGenericGLDisplay* inDisplay = nullptr) const;
 
 	//! Detaches a specific child
 	/** This method does not delete the child.
@@ -196,9 +196,9 @@ public: //children management
 	void transferChildren(ccHObject& newParent, bool forceFatherDependent = false);
 
 	//! Shortcut: returns first child
-	ccHObject* getFirstChild() const { return (m_children.empty() ? 0 : m_children.front()); }
+	ccHObject* getFirstChild() const { return (m_children.empty() ? nullptr : m_children.front()); }
 	//! Shortcut: returns last child
-	ccHObject* getLastChild() const { return (m_children.empty() ? 0 : m_children.back()); }
+	ccHObject* getLastChild() const { return (m_children.empty() ? nullptr : m_children.back()); }
 
 	//! Returns true if the current object is an ancestor of the specified one
 	bool isAncestorOf(const ccHObject *anObject) const;
@@ -225,7 +225,7 @@ public: //bounding-box
 		\param display if not null, this method will return the bounding-box of this entity (and its children) in the specified 3D view (i.e. potentially not visible)
 		\return bounding-box
 	**/
-	virtual ccBBox getDisplayBB_recursive(bool relative, const ccGenericGLDisplay* display = 0);
+	virtual ccBBox getDisplayBB_recursive(bool relative, const ccGenericGLDisplay* display = nullptr);
 
 	//! Returns best-fit bounding-box (if available)
 	/** \warning Only suitable for leaf objects (i.e. without children)

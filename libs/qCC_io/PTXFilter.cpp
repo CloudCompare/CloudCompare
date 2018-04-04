@@ -27,13 +27,12 @@
 #include <ccGriddedTools.h>
 
 //Qt
-#include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
 
 //System
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <string>
 
 const char CC_PTX_INTENSITY_FIELD_NAME[] = "Intensity";
 
@@ -109,7 +108,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 	ScalarType maxIntensity = 0;
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -118,7 +117,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 	}
 
 	//progress dialog (for normals computation)
-	QScopedPointer<ccProgressDialog> normalsProgressDlg(0);
+	QScopedPointer<ccProgressDialog> normalsProgressDlg(nullptr);
 	if (parameters.parentWidget && parameters.autoComputeNormals)
 	{
 		normalsProgressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -158,7 +157,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 				if (tokens.size() != 3)
 					return CC_FERR_MALFORMED_FILE;
 
-				double* colDest = 0;
+				double* colDest = nullptr;
 				if (i == 0)
 				{
 					//Translation
@@ -233,7 +232,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 		{
 			result = CC_FERR_NOT_ENOUGH_MEMORY;
 			delete cloud;
-			cloud = 0;
+			cloud = nullptr;
 			break;
 		}
 
@@ -246,7 +245,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 		{
 			ccLog::Warning("[PTX] Not enough memory to load intensities!");
 			intensitySF->release();
-			intensitySF = 0;
+			intensitySF = nullptr;
 		}
 
 		//grid structure
@@ -417,7 +416,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 		if (cloud->size() == 0)
 		{
 			delete cloud;
-			cloud = 0;
+			cloud = nullptr;
 			if (intensitySF)
 				intensitySF->release();
 

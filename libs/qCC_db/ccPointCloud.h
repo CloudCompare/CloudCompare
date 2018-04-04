@@ -169,7 +169,7 @@ public: //features allocation/resize
 	//! Reserves memory to store the points coordinates
 	/** Before adding points to the cloud (with addPoint())
 		be sure to reserve the necessary amount of memory
-		with this method. It the number of new elements is
+		with this method. If the number of new elements is
 		smaller than the actual one, nothing will happen.
 		\param _numberOfPoints number of points to reserve the memory for
 		\return true if ok, false if there's not enough memory

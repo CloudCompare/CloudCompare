@@ -848,13 +848,13 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionDisplayOptions">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/ccSettings.png</normaloff>:/CC/images/ccSettings.png</iconset>
+     <normaloff>:/CC/images/monitor.svg</normaloff>:/CC/images/monitor.svg</iconset>
    </property>
    <property name="text">
-    <string>Display options</string>
+    <string>Display settings</string>
    </property>
    <property name="toolTip">
-    <string>Set various display options</string>
+    <string>Display settings</string>
    </property>
   </action>
   <action name="actionHelp">
@@ -1467,7 +1467,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionZoomAndCenter">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/ccZoom.png</normaloff>:/CC/images/ccZoom.png</iconset>
+     <normaloff>:/CC/images/search.svg</normaloff>:/CC/images/search.svg</iconset>
    </property>
    <property name="text">
     <string>Zoom &amp; Center</string>
@@ -1893,7 +1893,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionEditCamera">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/ccCamera.png</normaloff>:/CC/images/ccCamera.png</iconset>
+     <normaloff>:/CC/images/photo-camera.svg</normaloff>:/CC/images/photo-camera.svg</iconset>
    </property>
    <property name="text">
     <string>Camera settings</string>

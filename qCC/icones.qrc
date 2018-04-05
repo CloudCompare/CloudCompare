@@ -81,8 +81,6 @@
     <file>images/ccSfArithmetic.png</file>
     <file>images/ccAddConstSF.png</file>
     <file>images/ccPickCenter.png</file>
-    <file>images/ccCamera.png</file>
-    <file>images/ccSettings.png</file>
     <file>images/ccViewXneg.png</file>
     <file>images/ccViewXpos.png</file>
     <file>images/ccViewYneg.png</file>
@@ -108,7 +106,6 @@
     <file>images/ccSamplePoints.png</file>
     <file>images/ccSegment.png</file>
     <file>images/ccStatTest.png</file>
-    <file>images/ccZoom.png</file>
     <file>images/ccConsole.png</file>
     <file>images/ccOpen.png</file>
     <file>images/ccPointSize.png</file>
@@ -143,6 +140,9 @@
     <file>images/qCompass.png</file>
     <file>images/mapIcon.png</file>
     <file>images/noFilter.png</file>
+    <file>images/monitor.svg</file>
+    <file>images/photo-camera.svg</file>
+    <file>images/search.svg</file>
   </qresource>
   <qresource prefix="/CC/Icons">
     <file>images/icon/cc_viewer_icon_16.png</file>

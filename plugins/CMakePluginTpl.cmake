@@ -1,5 +1,8 @@
 ### DEFAULT CC "STANDARD" PLUGIN CMAKE SCRIPT ###
 
+set( CloudCompare_SOURCE_DIR ${CMAKE_SOURCE_DIR}/qCC)
+set( CloudComparePlugins_SOURCE_DIR "${CMAKE_SOURCE_DIR}/plugins" )
+
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
@@ -15,10 +18,12 @@ include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
 
 file( GLOB header_list *.h)
 file( GLOB source_list *.cpp)
-file( GLOB json_list *.json)
-# force the link with ccStdPluginInterface.cpp
+
+# force link with interface implementations
 list( APPEND source_list ${CloudComparePlugins_SOURCE_DIR}/ccDefaultPluginInterface.cpp )
 list( APPEND source_list ${CloudComparePlugins_SOURCE_DIR}/ccStdPluginInterface.cpp )
+
+file( GLOB json_list *.json)
 file( GLOB ui_list *.ui )
 file( GLOB qrc_list *.qrc )
 file( GLOB rc_list *.rc )
@@ -73,7 +78,7 @@ qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL Concurrent)
 
 if( APPLE )
     # put all the plugins we build into one directory
-    set( PLUGINS_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/../../ccPlugins" )
+    set( PLUGINS_OUTPUT_DIR "${CMAKE_BINARY_DIR}/ccPlugins" )
 
     file( MAKE_DIRECTORY "${PLUGINS_OUTPUT_DIR}" )
 

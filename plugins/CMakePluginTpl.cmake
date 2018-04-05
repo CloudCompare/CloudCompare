@@ -1,8 +1,5 @@
 ### DEFAULT CC "STANDARD" PLUGIN CMAKE SCRIPT ###
 
-set( CloudCompare_SOURCE_DIR ${CMAKE_SOURCE_DIR}/qCC)
-set( CloudComparePlugins_SOURCE_DIR "${CMAKE_SOURCE_DIR}/plugins" )
-
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )

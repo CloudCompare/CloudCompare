@@ -19,6 +19,7 @@ find_package(Qt5PrintSupport)
 find_package(Qt5Concurrent)
 find_package(Qt5OpenGL)
 find_package(Qt5OpenGLExtensions)
+find_package(Qt5Svg)
 
 # in the case no Qt5Config.cmake file could be found, cmake will explicitly ask the user for the QT5_DIR containing it!
 # thus no need to keep additional variables and checks

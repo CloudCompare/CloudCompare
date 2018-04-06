@@ -18,7 +18,7 @@ if( WIN32 )
 			set(QT_RELEASE_DLLS)
 			
 			#standard DLLs (Qt 5)
-			set( QT_RELEASE_DLLS_BASE_NAME Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets Qt5Concurrent Qt5PrintSupport )
+			set( QT_RELEASE_DLLS_BASE_NAME Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets Qt5Concurrent Qt5PrintSupport Qt5Svg )
 			if( ${ARGC} GREATER 1 )
 				if ( ${ARGV1} )
 					list( APPEND QT_RELEASE_DLLS_BASE_NAME Qt5Gamepad )
@@ -59,7 +59,7 @@ if( WIN32 )
 				set( QT_DEBUG_DLLS )
 				
 				#standard DLLs
-				set( QT_DEBUG_DLLS_BASE_NAME Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5Concurrentd Qt5PrintSupportd )
+				set( QT_DEBUG_DLLS_BASE_NAME Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5Concurrentd Qt5PrintSupportd Qt5Svgd )
 				if( ${ARGC} GREATER 1 )
 					if ( ${ARGV1} )
 						list( APPEND QT_DEBUG_DLLS_BASE_NAME Qt5Gamepadd )

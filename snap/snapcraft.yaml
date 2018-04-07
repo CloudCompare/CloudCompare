@@ -51,7 +51,6 @@ parts:
 #https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=819741
     configflags:
       - -DCMAKE_BUILD_TYPE=Release
-      - -DINSTALL_QBLUR_PLUGIN=ON
       - -DCOMPILE_CC_CORE_LIB_WITH_CGAL=ON
       - -DINSTALL_QHPR_PLUGIN=ON
       - -DINSTALL_QPOISSON_RECON_PLUGIN=ON
@@ -122,7 +121,7 @@ parts:
     after: [laszip, eigen]
     plugin: cmake
     source: https://github.com/PDAL/PDAL.git
-    source-tag: "1.6"
+    source-tag: "1.7.1"
     build-packages:
       - build-essential
       - libgdal-dev

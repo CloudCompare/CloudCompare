@@ -1,15 +1,18 @@
 cmake_minimum_required( VERSION 3.0 )
 
+# CloudCompare example for standard plugins
+
 # REPLACE ALL 'ExamplePlugin' OCCURENCES BY YOUR PLUGIN NAME
 # AND ADAPT THE CODE BELOW TO YOUR OWN NEEDS!
 
-option( INSTALL_QEXAMPLE_PLUGIN "Check to install qExamplePlugin" OFF )
+# Add an option to CMake to control whether we build this plugin or not
+option( INSTALL_EXAMPLE_PLUGIN "Check to install example plugin" OFF )
 
-# CloudCompare example for standard plugins
-if ( INSTALL_QEXAMPLE_PLUGIN )
-    project( QEXAMPLE_PLUGIN )
+if ( INSTALL_EXAMPLE_PLUGIN )
+	# Name the plugin
+    project( ExamplePlugin )
     
-    # load files in subdirectories (see qAdditionalIO for an example)
+    # load any subdirectories (see qAdditionalIO for an example)
     # add_subdirectory( LIB1 )
     
     include( ../../CMakePluginTpl.cmake )

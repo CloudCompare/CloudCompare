@@ -1,7 +1,7 @@
 {
 	"type" : "GL",
 	"name" : "Example (GL Plugin)",
-	"icon" : ":/CC/plugin/qExampleGLPlugin/images/icon.png",
+	"icon" : ":/CC/plugin/ExampleGLPlugin/images/icon.png",
 	"description": "Bilateral smoothing (OpenGL shader)",
 	"authors" : [
 		{

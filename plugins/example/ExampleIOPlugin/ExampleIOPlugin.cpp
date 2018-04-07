@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#         CLOUDCOMPARE PLUGIN: qExampleIOPlugin                          #
+//#          CLOUDCOMPARE PLUGIN: ExampleIOPlugin                          #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -15,18 +15,18 @@
 //#                                                                        #
 //##########################################################################
 
-#include "qExampleIOPlugin.h"
+#include "ExampleIOPlugin.h"
 
 #include "FooFilter.h"
 
 
-qExampleIOPlugin::qExampleIOPlugin( QObject* parent ) :
-	QObject( parent )
-  , ccIOFilterPluginInterface( ":/CC/plugin/qExampleIOPlugin/info.json" )
+ExampleIOPlugin::ExampleIOPlugin( QObject* parent )
+	: QObject( parent )
+	, ccIOFilterPluginInterface( ":/CC/plugin/ExampleIOPlugin/info.json" )
 {
 }
 
-void qExampleIOPlugin::registerCommands( ccCommandLineInterface *cmd )
+void ExampleIOPlugin::registerCommands( ccCommandLineInterface *cmd )
 {
 	// If you want to register this plugin for the command line, create a
 	// ccCommandLineInterface::Command and add it here. e.g.:
@@ -34,7 +34,7 @@ void qExampleIOPlugin::registerCommands( ccCommandLineInterface *cmd )
 	// cmd->registerCommand( ccCommandLineInterface::Command::Shared( new FooCommand ) );	
 }
 
-QVector<FileIOFilter::Shared> qExampleIOPlugin::getFilters()
+QVector<FileIOFilter::Shared> ExampleIOPlugin::getFilters()
 {
 	return QVector<FileIOFilter::Shared>{
 		FileIOFilter::Shared( new FooFilter ),

@@ -1,9 +1,9 @@
 cmake_minimum_required( VERSION 3.0 )
 
-option( INSTALL_QEXAMPLE_IO_PLUGIN "Check to install qExampleIOPlugin plugin" OFF )
+option( INSTALL_EXAMPLE_IO_PLUGIN "Check to install example I/O plugin" OFF )
 
-if (INSTALL_QEXAMPLE_IO_PLUGIN)
-	project( QEXAMPLE_IO_PLUGIN )
+if (INSTALL_EXAMPLE_IO_PLUGIN)
+	project( ExampleIOPlugin )
 	
 	# Set to include this I/O plugin in ccViewer
 	set( CC_IS_IO_PLUGIN 1 )

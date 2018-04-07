@@ -1,9 +1,9 @@
-#ifndef Q_EXAMPLE_IO_PLUGIN_HEADER
-#define Q_EXAMPLE_IO_PLUGIN_HEADER
+#ifndef EXAMPLE_IO_PLUGIN_HEADER
+#define EXAMPLE_IO_PLUGIN_HEADER
 
 //##########################################################################
 //#                                                                        #
-//#         CLOUDCOMPARE PLUGIN: qExampleIOPlugin                          #
+//#          CLOUDCOMPARE PLUGIN: ExampleIOPlugin                          #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -21,15 +21,15 @@
 #include "ccIOFilterPluginInterface.h"
 
 //! Example I/O Plugin
-class qExampleIOPlugin : public QObject, public ccIOFilterPluginInterface
+class ExampleIOPlugin : public QObject, public ccIOFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccIOFilterPluginInterface)
 	
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qExampleIOPlugin" FILE "info.json")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ExampleIO" FILE "info.json")
 
 public:
-	explicit qExampleIOPlugin( QObject *parent = nullptr );
+	explicit ExampleIOPlugin( QObject *parent = nullptr );
 	
 	virtual void registerCommands( ccCommandLineInterface *cmd ) override;
 	

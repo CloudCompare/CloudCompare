@@ -1,5 +1,5 @@
 <RCC>
-  <qresource prefix="/CC/plugin/qExampleIOPlugin" >
+  <qresource prefix="/CC/plugin/ExampleIOPlugin" >
     <file>info.json</file>
   </qresource>
 </RCC>

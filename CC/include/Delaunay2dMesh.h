@@ -98,7 +98,7 @@ public:
 	virtual GenericTriangle* _getTriangle(unsigned triangleIndex);
 	virtual VerticesIndexes* getNextTriangleVertIndexes();
 	virtual VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex);
-	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const;
 
 	//! Returns triangles indexes array (pointer to)
 	/** Handle with care!

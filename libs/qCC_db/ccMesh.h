@@ -109,7 +109,7 @@ public:
 	virtual CCLib::GenericTriangle* _getTriangle(unsigned triangleIndex) override; //temporary
 	virtual CCLib::VerticesIndexes* getNextTriangleVertIndexes() override;
 	virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
-	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) override;
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
 	virtual unsigned size() const override;
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
 

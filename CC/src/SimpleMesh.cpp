@@ -86,7 +86,7 @@ GenericTriangle* SimpleMesh::_getTriangle(unsigned triangleIndex)
 	return &dummyTriangle; //temporary!
 }
 
-void SimpleMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
+void SimpleMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const
 {
 	assert(triangleIndex<m_triIndexes->currentSize());
 

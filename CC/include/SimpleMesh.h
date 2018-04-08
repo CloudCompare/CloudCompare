@@ -56,7 +56,7 @@ public: //inherited methods
 	virtual VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex);
 	virtual unsigned size() const;
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
-	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const;
 
 public: //specific methods
 

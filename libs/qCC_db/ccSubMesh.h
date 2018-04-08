@@ -79,7 +79,7 @@ public:
 	virtual CCLib::GenericTriangle* _getTriangle(unsigned index) override; //temporary object
 	virtual CCLib::VerticesIndexes* getNextTriangleVertIndexes() override;
 	virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
-	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) override;
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
 
 	//! Returns global index (i.e. relative to the associated mesh) of a given element

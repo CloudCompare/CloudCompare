@@ -155,7 +155,7 @@ CCLib::GenericTriangle* ccSubMesh::_getTriangle(unsigned triIndex) //temporary o
 	return 0;
 }
 
-void ccSubMesh::getTriangleVertices(unsigned triIndex, CCVector3& A, CCVector3& B, CCVector3& C)
+void ccSubMesh::getTriangleVertices(unsigned triIndex, CCVector3& A, CCVector3& B, CCVector3& C) const
 {
 	if (m_associatedMesh && triIndex < size())
 	{

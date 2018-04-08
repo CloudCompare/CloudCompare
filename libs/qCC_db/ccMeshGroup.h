@@ -70,7 +70,7 @@ public:
 	virtual CCLib::GenericTriangle* _getTriangle(unsigned index) override { return 0; }
 	virtual CCLib::VerticesIndexes* getNextTriangleVertIndexes() override { return 0; }
 	virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override { return 0; }
-	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) override {}
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override {}
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override {}
 
 protected:

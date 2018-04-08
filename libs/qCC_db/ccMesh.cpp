@@ -1524,7 +1524,7 @@ CCLib::GenericTriangle* ccMesh::_getTriangle(unsigned triangleIndex) //temporary
 	return &m_currentTriangle;
 }
 
-void ccMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
+void ccMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const
 {
 	assert(triangleIndex < m_triVertIndexes->currentSize());
 
@@ -1658,7 +1658,7 @@ CCLib::VerticesIndexes* ccMesh::getNextTriangleVertIndexes()
 	if (m_globalIterator<m_triVertIndexes->currentSize())
 		return getTriangleVertIndexes(m_globalIterator++);
 
-	return NULL;
+	return nullptr;
 }
 
 unsigned ccMesh::getUniqueIDForDisplay() const

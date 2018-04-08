@@ -384,7 +384,7 @@ GenericTriangle* Delaunay2dMesh::_getTriangle(unsigned triangleIndex)
 	return (GenericTriangle*)&m_dumpTriangle;
 }
 
-void Delaunay2dMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
+void Delaunay2dMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const
 {
 	assert(m_associatedCloud && triangleIndex < m_numberOfTriangles);
 

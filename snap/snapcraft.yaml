@@ -47,8 +47,6 @@ parts:
       - libproj-dev
     prepare: |
       sed -i '/CMAKE_INSTALL_RPATH/d' ../src/CMakeLists.txt
-      ln -s /usr/lib/x86_64-linux-gnu/libvtkCommonCore-6.2.so /usr/lib/libvtkproj4.so
-#https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=819741
     configflags:
       - -DCMAKE_BUILD_TYPE=Release
       - -DCOMPILE_CC_CORE_LIB_WITH_CGAL=ON

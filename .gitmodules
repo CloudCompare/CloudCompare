@@ -1,11 +1,5 @@
-[submodule "plugins/qPoissonRecon/PoissonReconLib"]
-	path = plugins/qPoissonRecon/PoissonReconLib
-	url = https://github.com/cloudcompare/PoissonRecon
-[submodule "PoissonReconLib"]
-	path = PoissonReconLib
-	url = https://github.com/cloudcompare/PoissonRecon
-[submodule "plugins/qPoissonRecon/PoissonRecon"]
-	path = plugins/qPoissonRecon/PoissonRecon
+[submodule "plugins/core/qPoissonRecon/PoissonReconLib"]
+	path = plugins/core/qPoissonRecon/PoissonReconLib
 	url = https://github.com/cloudcompare/PoissonRecon
 [submodule "contrib/libE57Format"]
 	path = contrib/libE57Format

@@ -1,0 +1,27 @@
+{
+	"type" : "GL",
+	"name" : "Example (GL Plugin)",
+	"icon" : ":/CC/plugin/ExampleGLPlugin/images/icon.png",
+	"description": "Bilateral smoothing (OpenGL shader)",
+	"authors" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "Andy Maloney",
+			"email" : "asmaloney@gmail.com"
+		},
+		{
+			"name" : "Example NoEmail"
+		}
+	],
+	"references" : [
+		{
+			"text" : "Bilateral filter",
+			"url" : "https://en.wikipedia.org/wiki/Bilateral_filter"
+		}
+	]
+}

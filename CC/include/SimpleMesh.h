@@ -44,19 +44,19 @@ public: //constructors
 	SimpleMesh(GenericIndexedCloud* _theVertices, bool linkVerticesWithMesh = false);
 
 	//! SimpleMesh destructor
-	virtual ~SimpleMesh();
+	virtual ~SimpleMesh() override;
 
 public: //inherited methods
 
-	virtual void forEach(genericTriangleAction action);
-	virtual void placeIteratorAtBeginning();
-	virtual GenericTriangle* _getNextTriangle(); //temporary
-	virtual GenericTriangle* _getTriangle(unsigned triangleIndex); //temporary
-	virtual VerticesIndexes* getNextTriangleVertIndexes();
-	virtual VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex);
-	virtual unsigned size() const;
-	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
-	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const;
+	virtual void forEach(genericTriangleAction action) override;
+	virtual void placeIteratorAtBeginning() override;
+	virtual GenericTriangle* _getNextTriangle() override; //temporary
+	virtual GenericTriangle* _getTriangle(unsigned triangleIndex) override; //temporary
+	virtual VerticesIndexes* getNextTriangleVertIndexes() override;
+	virtual VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
+	virtual unsigned size() const override;
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
 
 public: //specific methods
 

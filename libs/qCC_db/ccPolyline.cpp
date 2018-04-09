@@ -684,13 +684,9 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 		}
 	}
 
-	//import parameters from the source vertices
-	ccGenericPointCloud* vertices = dynamic_cast<ccPointCloud*>(getAssociatedCloud());
-	if (vertices)
-	{
-		cloud->setGlobalShift(vertices->getGlobalShift());
-		cloud->setGlobalScale(vertices->getGlobalScale());
-	}
+	//import parameters from the source
+	cloud->setGlobalShift(getGlobalShift());
+	cloud->setGlobalScale(getGlobalScale());
 	cloud->setGLTransformationHistory(getGLTransformationHistory());
 
 	return cloud;

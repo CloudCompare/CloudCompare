@@ -478,6 +478,14 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 		m_poly3D->addChild(m_poly3DVertices);
 		m_poly3D->setWidth(widthSpinBox->value() < 2 ? 0 : widthSpinBox->value()); //'1' is equivalent to the default line size
 
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(pi.entity);
+		if (cloud)
+		{
+			//copy the first clicked entity's global shift & scale
+			m_poly3D->setGlobalShift(cloud->getGlobalShift());
+			m_poly3D->setGlobalScale(cloud->getGlobalScale());
+		}
+
 		m_segmentParams.clear(); //just in case
 
 		m_associatedWin->addToOwnDB(m_poly3D);

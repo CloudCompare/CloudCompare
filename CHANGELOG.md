@@ -91,6 +91,9 @@ v2.10.alpha - XX/XX/201X
 			- SinusX curve (*.sx)
 			- Mensi Soisic cloud (*.soi)
 
+	* Misc:
+		- The trace polyline tool will now use the Global Shift & Scale information of the first clicked entity
+
 - bug fixes:
 
 	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values

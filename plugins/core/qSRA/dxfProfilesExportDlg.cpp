@@ -33,9 +33,9 @@ DxfProfilesExportDlg::DxfProfilesExportDlg(QWidget* parent)
 {
 	setupUi(this);
 
-	connect(vertBrowseToolButton, SIGNAL(clicked()), this, SLOT(browseVertFile()));
-	connect(horizBrowseToolButton, SIGNAL(clicked()), this, SLOT(browseHorizFile()));
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(acceptAndSaveSettings()));
+	connect(vertBrowseToolButton, &QAbstractButton::clicked, this, &DxfProfilesExportDlg::browseVertFile);
+	connect(horizBrowseToolButton, &QAbstractButton::clicked, this, &DxfProfilesExportDlg::browseHorizFile);
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &DxfProfilesExportDlg::acceptAndSaveSettings);
 
 	initFromPersistentSettings();
 }

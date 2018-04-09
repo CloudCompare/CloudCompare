@@ -31,7 +31,7 @@ ccCompassInfo::ccCompassInfo(QWidget *parent)
 	QPushButton *okButton = new QPushButton(tr("Ok"));
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(Qt::Horizontal);
 	buttonBox->addButton(okButton, QDialogButtonBox::AcceptRole);
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept())); //done
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept); //done
 	QVBoxLayout *lt = new QVBoxLayout;
 	lt->addWidget(l);
 	lt->addWidget(buttonBox);

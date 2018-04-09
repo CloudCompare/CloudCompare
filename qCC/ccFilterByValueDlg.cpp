@@ -33,6 +33,6 @@ ccFilterByValueDlg::ccFilterByValueDlg(	double minRange,
 	minDoubleSpinBox->setValue(minRange);
 	maxDoubleSpinBox->setValue(maxRange);
 
-	connect(exportPushButton, SIGNAL(clicked()), this, SLOT(onExport()));
-	connect(splitPushButton, SIGNAL(clicked()), this, SLOT(onSplit()));
+	connect(exportPushButton, &QAbstractButton::clicked, this, &ccFilterByValueDlg::onExport);
+	connect(splitPushButton, &QAbstractButton::clicked, this, &ccFilterByValueDlg::onSplit);
 }

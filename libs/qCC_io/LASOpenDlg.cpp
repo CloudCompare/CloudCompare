@@ -35,9 +35,9 @@ LASOpenDlg::LASOpenDlg(QWidget* parent)
 
 	clearEVLRs();
 
-	connect(applyAllButton, SIGNAL(clicked()), this, SLOT(onApplyAll()));
-	connect(browseToolButton, SIGNAL(clicked()), this, SLOT(onBrowse()));
-	connect(tileGroupBox, SIGNAL(toggled(bool)), applyAllButton, SLOT(setDisabled(bool)));
+	connect(applyAllButton, &QAbstractButton::clicked, this, &LASOpenDlg::onApplyAll);
+	connect(browseToolButton, &QAbstractButton::clicked, this, &LASOpenDlg::onBrowse);
+	connect(tileGroupBox, &QGroupBox::toggled, applyAllButton, &QWidget::setDisabled);
 
 	//can't use the 'Apply all' button if tiling mode is enabled
 	applyAllButton->setEnabled(!tileGroupBox->isChecked());

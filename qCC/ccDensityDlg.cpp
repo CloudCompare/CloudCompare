@@ -23,7 +23,7 @@ ccDensityDlg::ccDensityDlg(QWidget* parent/*=0*/)
 {
 	setupUi(this);
 
-	connect(preciseRadioButton, SIGNAL(toggled(bool)), this, SLOT(onPreciseToggled(bool)));
+	connect(preciseRadioButton, &QAbstractButton::toggled, this, &ccDensityDlg::onPreciseToggled);
 }
 
 CCLib::GeometricalAnalysisTools::Density ccDensityDlg::getDensityType() const

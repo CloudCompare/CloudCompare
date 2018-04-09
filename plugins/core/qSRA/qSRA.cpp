@@ -64,7 +64,7 @@ void qSRA::getActions(QActionGroup& group)
 		m_doLoadProfile->setToolTip("Loads the 2D profile of a Surface of Revolution (from a dedicated ASCII file)");
 		m_doLoadProfile->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qSRA/loadProfileIcon.png")));
 		//connect signal
-		connect(m_doLoadProfile, SIGNAL(triggered()), this, SLOT(loadProfile()));
+		connect(m_doLoadProfile, &QAction::triggered, this, &qSRA::loadProfile);
 	}
 	group.addAction(m_doLoadProfile);
 
@@ -74,7 +74,7 @@ void qSRA::getActions(QActionGroup& group)
 		m_doCompareCloudToProfile->setToolTip("Computes the radial distances between a cloud and a Surface of Revolution (polyline/profile, cone or cylinder)");
 		m_doCompareCloudToProfile->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qSRA/distToProfileIcon.png")));
 		//connect signal
-		connect(m_doCompareCloudToProfile, SIGNAL(triggered()), this, SLOT(computeCloud2ProfileRadialDist()));
+		connect(m_doCompareCloudToProfile, &QAction::triggered, this, &qSRA::computeCloud2ProfileRadialDist);
 	}
 	group.addAction(m_doCompareCloudToProfile);
 
@@ -84,7 +84,7 @@ void qSRA::getActions(QActionGroup& group)
 		m_doProjectCloudDists->setToolTip("Creates the 2D deviation map (radial distances) from a Surface or Revolution (unroll)");
 		m_doProjectCloudDists->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qSRA/createMapIcon.png")));
 		//connect signal
-		connect(m_doProjectCloudDists, SIGNAL(triggered()), this, SLOT(projectCloudDistsInGrid()));
+		connect(m_doProjectCloudDists, &QAction::triggered, this, &qSRA::projectCloudDistsInGrid);
 	}
 	group.addAction(m_doProjectCloudDists);
 }

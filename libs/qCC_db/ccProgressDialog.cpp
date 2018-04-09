@@ -43,7 +43,7 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	}
 	setCancelButton(cancelButton);
 
-	connect(this, SIGNAL(scheduleRefresh()), this, SLOT(refresh()), Qt::QueuedConnection); //can't use DirectConnection here!
+	connect(this, &ccProgressDialog::scheduleRefresh, this, &ccProgressDialog::refresh, Qt::QueuedConnection); //can't use DirectConnection here!
 }
 
 void ccProgressDialog::refresh()

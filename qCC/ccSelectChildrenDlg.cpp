@@ -36,7 +36,7 @@ ccSelectChildrenDlg::ccSelectChildrenDlg(QWidget* parent/*=0*/)
 	nameLineEdit->setText(s_lastName);
 	checkBoxRegex->setChecked(s_lastUseRegex);
 
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(onAccept()));
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &ccSelectChildrenDlg::onAccept);
 }
 
 void ccSelectChildrenDlg::addType(QString typeName, CC_CLASS_ENUM type)

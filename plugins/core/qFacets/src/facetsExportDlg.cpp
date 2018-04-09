@@ -30,7 +30,7 @@ FacetsExportDlg::FacetsExportDlg(IOMode mode, QWidget* parent)
 {
 	setupUi(this);
 
-	connect(browseToolButton, SIGNAL(clicked()), this, SLOT(browseDestination()));
+	connect(browseToolButton, &QAbstractButton::clicked, this, &FacetsExportDlg::browseDestination);
 }
 
 void FacetsExportDlg::browseDestination()

@@ -64,8 +64,8 @@ void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 	if (glWindow)
 	{
 		//link this new window
-		connect(glWindow, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)), Qt::UniqueConnection);
-		connect(glWindow, SIGNAL(destroyed(QObject*)), this, SLOT(onActiveWindowDeleted(QObject*)));
+		connect(glWindow, &ccGLWindow::itemPicked, this, &ccPickingHub::processPickedItem, Qt::UniqueConnection);
+		connect(glWindow, &QObject::destroyed, this, &ccPickingHub::onActiveWindowDeleted);
 		m_activeGLWindow = glWindow;
 
 		if (m_autoEnableOnActivatedWindow && !m_listeners.empty())

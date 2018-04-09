@@ -30,7 +30,7 @@ CSVMatrixOpenDialog::CSVMatrixOpenDialog(QWidget* parent/*=0*/)
 {
 	setupUi(this);
 
-	connect(browseToolButton, SIGNAL(clicked()), this, SLOT(browseTextureFile()));
+	connect(browseToolButton, &QAbstractButton::clicked, this, &CSVMatrixOpenDialog::browseTextureFile);
 
 	//persistent settings
 	QSettings settings;

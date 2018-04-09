@@ -50,7 +50,7 @@ ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSiz
 		m_bbEditorDlg = new ccBoundingBoxEditorDlg(this);
 		m_bbEditorDlg->setBaseBBox(baseBBox,true);
 		m_bbEditorDlg->forceKeepSquare(true);
-		connect(customBBToolButton, SIGNAL(clicked()), m_bbEditorDlg, SLOT(exec()));
+		connect(customBBToolButton, &QAbstractButton::clicked, m_bbEditorDlg, &ccBoundingBoxEditorDlg::exec);
 	}
 	else
 	{

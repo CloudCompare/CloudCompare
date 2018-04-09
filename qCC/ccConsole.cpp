@@ -197,13 +197,13 @@ void ccConsole::setAutoRefresh(bool state)
 {
 	if (state)
 	{
-		QObject::connect(&m_timer, SIGNAL(timeout()), this, SLOT(refresh()));
+		connect(&m_timer, &QTimer::timeout, this, &ccConsole::refresh);
 		m_timer.start(1000);
 	}
 	else
 	{
 		m_timer.stop();
-		QObject::disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(refresh()));
+		disconnect(&m_timer, &QTimer::timeout, this, &ccConsole::refresh);
 	}
 }
 

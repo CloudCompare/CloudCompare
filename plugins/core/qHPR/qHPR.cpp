@@ -57,7 +57,7 @@ void qHPR::getActions(QActionGroup& group)
 		m_action->setToolTip(getDescription());
 		m_action->setIcon(getIcon());
 		//connect signal
-		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
+		connect(m_action, &QAction::triggered, this, &qHPR::doAction);
 	}
 
 	group.addAction(m_action);

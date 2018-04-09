@@ -418,7 +418,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	connect(this, &ccGLWindow::itemPickedFast, this, &ccGLWindow::onItemPickedFast, Qt::DirectConnection);
 	connect(&m_scheduleTimer, &QTimer::timeout, this, &ccGLWindow::checkScheduledRedraw);
 	connect(&m_autoRefreshTimer, &QTimer::timeout, this, [=] () { update();	});
-	connect(&m_deferredPickingTimer, SIGNAL(timeout()), SLOT(doPicking()));
+	connect(&m_deferredPickingTimer, &QTimer::timeout, this, &ccGLWindow::doPicking);
 
 #ifndef CC_GL_WINDOW_USE_QWINDOW
 	setAcceptDrops(true);

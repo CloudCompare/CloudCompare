@@ -92,7 +92,7 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 		TzCheckBox->setChecked(s_transCheckboxes[2]);
 	}
 
-	connect(swapButton, SIGNAL(clicked()), this, SLOT(swapModelAndData()));
+	connect(swapButton, &QAbstractButton::clicked, this, &ccRegistrationDlg::swapModelAndData);
 }
 
 ccRegistrationDlg::~ccRegistrationDlg()

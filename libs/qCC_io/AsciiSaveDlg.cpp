@@ -36,7 +36,7 @@ AsciiSaveDlg::AsciiSaveDlg(QWidget* parent)
 {
 	m_ui->setupUi(this);
 
-	connect(m_ui->buttonBox, SIGNAL(accepted()), this, SLOT(acceptAndSaveSettings()));
+	connect(m_ui->buttonBox, &QDialogButtonBox::accepted, this, &AsciiSaveDlg::acceptAndSaveSettings);
 
 	initFromPersistentSettings();
 }

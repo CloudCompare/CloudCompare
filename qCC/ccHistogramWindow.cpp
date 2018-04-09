@@ -904,8 +904,8 @@ ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent/*=0*/)
 	hboxLayout->setContentsMargins(0, 0, 0, 0);
 	m_gui->histoFrame->setLayout(hboxLayout);
 
-	connect(m_gui->exportCSVToolButton, SIGNAL(clicked()), this, SLOT(onExportToCSV()));
-	connect(m_gui->exportImageToolButton, SIGNAL(clicked()), this, SLOT(onExportToImage()));
+	connect(m_gui->exportCSVToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToCSV);
+	connect(m_gui->exportImageToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToImage);
 
 	resize(400, 275);
 }

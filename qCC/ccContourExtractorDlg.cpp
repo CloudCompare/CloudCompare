@@ -53,9 +53,9 @@ void ccContourExtractorDlg::init()
 		return;
 	}
 
-	connect(nextPushButton, SIGNAL(clicked()), &m_loop, SLOT(quit()));
+	connect(nextPushButton, &QAbstractButton::clicked, &m_loop, &QEventLoop::quit);
 	//connect(nextPushButton, SIGNAL(clicked()), this, SLOT(accept()));
-	connect(skipPushButton, SIGNAL(clicked()), this,    SLOT(onSkipButtonClicked()));
+	connect(skipPushButton, &QAbstractButton::clicked, this, &ccContourExtractorDlg::onSkipButtonClicked);
 	nextPushButton->setFocus();
 
 	//create 3D window

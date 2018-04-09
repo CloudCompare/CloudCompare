@@ -37,8 +37,8 @@ MatrixDisplayDlg::MatrixDisplayDlg(QWidget* parent/*=0*/)
 {
 	setupUi(this);
 
-	connect(exportToAsciiPushButton,		SIGNAL(clicked()), this, SLOT(exportToASCII()));
-	connect(exportToClipboardPushButton,	SIGNAL(clicked()), this, SLOT(exportToClipboard()));
+	connect(exportToAsciiPushButton, &QAbstractButton::clicked, this, &MatrixDisplayDlg::exportToASCII);
+	connect(exportToClipboardPushButton, &QAbstractButton::clicked, this, &MatrixDisplayDlg::exportToClipboard);
 
 	show();
 }

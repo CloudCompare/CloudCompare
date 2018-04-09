@@ -45,8 +45,8 @@ ccPrimitiveFactoryDlg::ccPrimitiveFactoryDlg(MainWindow* win)
 
 	setupUi(this);
 
-	connect(createPushButton, SIGNAL(clicked()), this, SLOT(createPrimitive()));
-	connect(closePushButton, SIGNAL(clicked()), this, SLOT(accept()));
+	connect(createPushButton, &QAbstractButton::clicked, this, &ccPrimitiveFactoryDlg::createPrimitive);
+	connect(closePushButton, &QAbstractButton::clicked, this, &QDialog::accept);
 	connect(spherePosFromClipboardButton, &QPushButton::clicked, this, &ccPrimitiveFactoryDlg::setSpherePositionFromClipboard);
 	connect(spherePosToOriginButton, &QPushButton::clicked, this, &ccPrimitiveFactoryDlg::setSpherePositionToOrigin);
 }

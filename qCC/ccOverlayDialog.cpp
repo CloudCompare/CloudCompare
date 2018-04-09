@@ -79,7 +79,7 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 		{
 			widget->installEventFilter(this);
 		}
-		connect(m_associatedWin, SIGNAL(destroyed(QObject*)), this, SLOT(onLinkedWindowDeletion(QObject*)));
+		connect(m_associatedWin, &QObject::destroyed, this, &ccOverlayDialog::onLinkedWindowDeletion);
 	}
 
 	return true;

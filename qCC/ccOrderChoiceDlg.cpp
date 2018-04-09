@@ -46,7 +46,7 @@ ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
 {
 	m_gui->setupUi(this);
 
-	connect(m_gui->swapButton, SIGNAL(clicked()), this, SLOT(swap()));
+	connect(m_gui->swapButton, &QAbstractButton::clicked, this, &ccOrderChoiceDlg::swap);
 
 	m_gui->firstlabel->setText(firstRole);
 	m_gui->secondlabel->setText(secondRole);

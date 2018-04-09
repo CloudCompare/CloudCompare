@@ -29,7 +29,7 @@ ProfileImportDlg::ProfileImportDlg(QWidget* parent)
 {
 	setupUi(this);
 
-	connect(browseToolButton, SIGNAL(clicked()), this, SLOT(browseFile()));
+	connect(browseToolButton, &QAbstractButton::clicked, this, &ProfileImportDlg::browseFile);
 }
 
 int ProfileImportDlg::getAxisDimension() const

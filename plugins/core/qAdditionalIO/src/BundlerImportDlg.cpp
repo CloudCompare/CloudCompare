@@ -42,9 +42,9 @@ BundlerImportDlg::BundlerImportDlg(QWidget* parent)
 
 	initFromPersistentSettings();
 
-	connect(buttonBox,							SIGNAL(accepted()),	this, SLOT(acceptAndSaveSettings()));
-	connect(browseImageListFileToolButton,		SIGNAL(clicked()),	this, SLOT(browseImageListFilename()));
-	connect(browseAltKeypointsFileToolButton,	SIGNAL(clicked()),	this, SLOT(browseAltKeypointsFilename()));
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &BundlerImportDlg::acceptAndSaveSettings);
+	connect(browseImageListFileToolButton, &QAbstractButton::clicked, this, &BundlerImportDlg::browseImageListFilename);
+	connect(browseAltKeypointsFileToolButton, &QAbstractButton::clicked, this, &BundlerImportDlg::browseAltKeypointsFilename);
 }
 
 BundlerImportDlg::~BundlerImportDlg()

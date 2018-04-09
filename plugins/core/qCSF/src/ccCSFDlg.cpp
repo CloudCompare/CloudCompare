@@ -37,7 +37,7 @@ ccCSFDlg::ccCSFDlg(QWidget* parent) : QDialog(parent), Ui::CSFDialog()
 {
 	setupUi(this);
 
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &ccCSFDlg::saveSettings);
 
 	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 

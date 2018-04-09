@@ -15,7 +15,7 @@ GamepadInput::GamepadInput(QObject* parent/*=0*/)
 	, m_hasRotation(false)
 	, m_zoom(0)
 {
-	connect(&m_timer, SIGNAL(timeout()), this, SLOT(updateInternalState()));
+	connect(&m_timer, &QTimer::timeout, this, &GamepadInput::updateInternalState);
 }
 
 GamepadInput::~GamepadInput()

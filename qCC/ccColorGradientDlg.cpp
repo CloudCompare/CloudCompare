@@ -38,8 +38,8 @@ ccColorGradientDlg::ccColorGradientDlg(QWidget* parent)
 {
 	setupUi(this);
 
-	connect(firstColorButton, SIGNAL(clicked()), this, SLOT(changeFirstColor()));
-	connect(secondColorButton, SIGNAL(clicked()), this, SLOT(changeSecondColor()));
+	connect(firstColorButton, &QAbstractButton::clicked, this, &ccColorGradientDlg::changeFirstColor);
+	connect(secondColorButton, &QAbstractButton::clicked, this, &ccColorGradientDlg::changeSecondColor);
 
 	//restore previous parameters
 	ccQtHelpers::SetButtonColor(secondColorButton, s_secondColor);

@@ -80,11 +80,11 @@ PlyOpenDlg::PlyOpenDlg(QWidget* parent)
 		//not enough memory?! What can we do...
 	}
 
-	connect(addSFToolButton,	SIGNAL(clicked()),			this,	SLOT(addSFComboBox()));
-	connect(applyButton,		SIGNAL(clicked()),			this,	SLOT(apply()));
-	connect(applyAllButton,		SIGNAL(clicked()),			this,	SLOT(applyAll()));
-	connect(cancelButton,		SIGNAL(clicked()),			this,	SLOT(reject()));
-	connect(this,				SIGNAL(fullyAccepted()),	this,	SLOT(accept()));
+	connect(addSFToolButton,	&QAbstractButton::clicked,	this,	&PlyOpenDlg::addSFComboBox);
+	connect(applyButton,		&QAbstractButton::clicked,	this,	&PlyOpenDlg::apply);
+	connect(applyAllButton,		&QAbstractButton::clicked,	this,	&PlyOpenDlg::applyAll);
+	connect(cancelButton,		&QAbstractButton::clicked,	this,	&QDialog::reject);
+	connect(this,				&PlyOpenDlg::fullyAccepted,	this,	&QDialog::accept);
 }
 
 void PlyOpenDlg::setDefaultComboItems(const QStringList& stdPropsText)

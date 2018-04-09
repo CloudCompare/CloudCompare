@@ -30,18 +30,18 @@ ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleContourMode/*=false*/,
 
 	if (!singleContourMode)
 	{
-		connect(xRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
-		connect(yRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
-		connect(zRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
+		connect(xRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimChecked);
+		connect(yRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimChecked);
+		connect(zRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimChecked);
 	}
 	else
 	{
 		//single contour extraction mode!
 		repeatDimGroupBox->setTitle("Flat dimension");
 
-		connect(xRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimXChecked(bool)));
-		connect(yRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimYChecked(bool)));
-		connect(zRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimZChecked(bool)));
+		connect(xRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimXChecked);
+		connect(yRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimYChecked);
+		connect(zRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimZChecked);
 		setFlatDim(0);
 
 		extractContoursGroupBox->setChecked(true);

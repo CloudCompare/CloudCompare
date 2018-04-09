@@ -25,7 +25,7 @@ using namespace CCLib;
 
 SimpleMesh::SimpleMesh(GenericIndexedCloud* _theVertices, bool linkVerticesWithMesh)
 	: GenericIndexedMesh()
-	, m_triIndexes(0)
+	, m_triIndexes(nullptr)
 	, globalIterator(0)
 	, theVertices(_theVertices)
 	, verticesLinked(linkVerticesWithMesh)

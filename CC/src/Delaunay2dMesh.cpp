@@ -35,10 +35,10 @@
 using namespace CCLib;
 
 Delaunay2dMesh::Delaunay2dMesh()
-	: m_associatedCloud(0)
-	, m_triIndexes(0)
-	, m_globalIterator(0)
-	, m_globalIteratorEnd(0)
+	: m_associatedCloud(nullptr)
+	, m_triIndexes(nullptr)
+	, m_globalIterator(nullptr)
+	, m_globalIteratorEnd(nullptr)
 	, m_numberOfTriangles(0)
 	, m_cloudIsOwnedByMesh(false)
 {
@@ -46,7 +46,7 @@ Delaunay2dMesh::Delaunay2dMesh()
 
 Delaunay2dMesh::~Delaunay2dMesh()
 {
-	linkMeshWith(0);
+	linkMeshWith(nullptr);
 
 	if (m_triIndexes)
 		delete[] m_triIndexes;
@@ -184,7 +184,7 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 	if (m_triIndexes)
 	{
 		delete[] m_triIndexes;
-		m_triIndexes = 0;
+		m_triIndexes = nullptr;
 	}
 
 	for(size_t i = 0; i < pointCount; ++i) {
@@ -268,7 +268,7 @@ bool Delaunay2dMesh::removeOuterTriangles(	const std::vector<CCVector2>& vertice
 	{
 		//no triangle left!
 		delete[] m_triIndexes;
-		m_triIndexes = 0;
+		m_triIndexes = nullptr;
 	}
 
 	//update iterators
@@ -314,7 +314,7 @@ bool Delaunay2dMesh::removeTrianglesWithEdgesLongerThan(PointCoordinateType maxE
 		else //no more triangles?!
 		{
 			delete m_triIndexes;
-			m_triIndexes = 0;
+			m_triIndexes = nullptr;
 		}
 		m_globalIterator = m_triIndexes;
 		m_globalIteratorEnd = m_triIndexes + 3*m_numberOfTriangles;
@@ -349,7 +349,7 @@ GenericTriangle* Delaunay2dMesh::_getNextTriangle()
 {
 	assert(m_associatedCloud);
 	if (m_globalIterator >= m_globalIteratorEnd)
-        return 0;
+        return nullptr;
 
 	m_associatedCloud->getPoint(*m_globalIterator++,m_dumpTriangle.A);
 	m_associatedCloud->getPoint(*m_globalIterator++,m_dumpTriangle.B);
@@ -361,7 +361,7 @@ GenericTriangle* Delaunay2dMesh::_getNextTriangle()
 VerticesIndexes* Delaunay2dMesh::getNextTriangleVertIndexes()
 {
 	if (m_globalIterator >= m_globalIteratorEnd)
-        return 0;
+        return nullptr;
 
 	m_dumpTriangleIndexes.i1 = m_globalIterator[0];
 	m_dumpTriangleIndexes.i2 = m_globalIterator[1];
@@ -381,7 +381,7 @@ GenericTriangle* Delaunay2dMesh::_getTriangle(unsigned triangleIndex)
 	m_associatedCloud->getPoint(*tri++,m_dumpTriangle.B);
 	m_associatedCloud->getPoint(*tri++,m_dumpTriangle.C);
 
-	return (GenericTriangle*)&m_dumpTriangle;
+	return static_cast<GenericTriangle*>(&m_dumpTriangle);
 }
 
 void Delaunay2dMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const

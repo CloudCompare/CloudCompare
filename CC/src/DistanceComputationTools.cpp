@@ -88,9 +88,9 @@ namespace CCLib
 
 		//! Default constructor
 		OctreeAndMeshIntersection()
-			: octree(0)
-			, mesh(0)
-			, distanceTransform(0)
+			: octree(nullptr)
+			, mesh(nullptr)
+			, distanceTransform(nullptr)
 			, minFillIndexes(0,0,0)
 			, maxFillIndexes(0,0,0)
 		{}
@@ -111,7 +111,7 @@ namespace CCLib
 			if (distanceTransform)
 			{
 				delete distanceTransform;
-				distanceTransform = 0;
+				distanceTransform = nullptr;
 			}
 		}
 	};
@@ -246,12 +246,12 @@ int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPer
 	if (comparedOctree && !compOctree)
 	{
 		delete comparedOctree;
-		comparedOctree = 0;
+		comparedOctree = nullptr;
 	}
 	if (referenceOctree && !refOctree)
 	{
 		delete referenceOctree;
-		referenceOctree = 0;
+		referenceOctree = nullptr;
 	}
 
 	return result;
@@ -342,7 +342,7 @@ DistanceComputationTools::SOReturnCode
 			if (octreeACreated)
 			{
 				delete comparedOctree;
-				comparedOctree = 0;
+				comparedOctree = nullptr;
 			}
 			return OUT_OF_MEMORY;
 		}
@@ -382,12 +382,12 @@ DistanceComputationTools::SOReturnCode
 			if (octreeACreated)
 			{
 				delete comparedOctree;
-				comparedOctree = 0;
+				comparedOctree = nullptr;
 			}
 			if (octreeBCreated)
 			{
 				delete referenceOctree;
-				referenceOctree = 0;
+				referenceOctree = nullptr;
 			}
 			return OUT_OF_MEMORY;
 		}
@@ -546,7 +546,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 				referenceCloud->getPoint(nNSS.theNearestPointIndex, nearestPoint);
 
 				//local model for the 'nearest point'
-				const LocalModel* lm = 0;
+				const LocalModel* lm = nullptr;
 
 				if (params->reuseExistingLocalModels)
 				{
@@ -660,7 +660,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 					{
 						//we don't need the local model anymore!
 						delete lm;
-						lm = 0;
+						lm = nullptr;
 					}
 
 					if (computeSplitDistances)
@@ -985,7 +985,7 @@ void ComparePointsAndTriangles(	ReferenceCloud& Yk,
 	bool firstComparisonDone = (trianglesToTestCount != 0);
 
 	CCVector3 nearestPoint;
-	CCVector3* _nearestPoint = params.CPSet ? &nearestPoint : 0;
+	CCVector3* _nearestPoint = params.CPSet ? &nearestPoint : nullptr;
 
 	//for each triangle
 	while (trianglesToTestCount != 0)
@@ -1084,9 +1084,9 @@ int ComputeMaxNeighborhoodLength(ScalarType maxSearchDist, PointCoordinateType c
 
 /*** MULTI THREADING WRAPPER ***/
 
-static DgmOctree* s_octree_MT = 0;
-static NormalizedProgress* s_normProgressCb_MT = 0;
-static OctreeAndMeshIntersection* s_intersection_MT = 0;
+static DgmOctree* s_octree_MT = nullptr;
+static NormalizedProgress* s_normProgressCb_MT = nullptr;
+static OctreeAndMeshIntersection* s_intersection_MT = nullptr;
 static bool s_cellFunc_MT_success = true;
 static CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams s_params_MT;
 
@@ -1177,7 +1177,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 	size_t trianglesToTestCapacity = 0;
 
 	//bit mask for efficient comparisons
-	QBitArray* bitArray = 0;
+	QBitArray* bitArray = nullptr;
 	if (s_useBitArrays_MT)
 	{
 		s_currentBitMaskMutex.lock();
@@ -1743,9 +1743,9 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);
 		QtConcurrent::blockingMap(cellsDescs, cloudMeshDistCellFunc_MT);
 
-		s_octree_MT = 0;
-		s_normProgressCb_MT = 0;
-		s_intersection_MT = 0;
+		s_octree_MT = nullptr;
+		s_normProgressCb_MT = nullptr;
+		s_intersection_MT = nullptr;
 
 		//clean acceleration structure
 		while (!s_bitArrayPool_MT.empty())
@@ -2335,7 +2335,7 @@ bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersi
 		result = fm.setPropagationTimingsAsDistances();
 
 	delete octree;
-	octree = 0;
+	octree = nullptr;
 
 	return result;
 }
@@ -2499,12 +2499,12 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 	if (!compOctree)
 	{
 		delete octreeA;
-		octreeA = 0;
+		octreeA = nullptr;
 	}
 	if (!refOctree)
 	{
 		delete octreeB;
-		octreeB = 0;
+		octreeB = nullptr;
 	}
 
 	return result;

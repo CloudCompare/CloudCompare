@@ -18,7 +18,7 @@
 #ifndef Q_PCL_IO_PLUGIN_HEADER
 #define Q_PCL_IO_PLUGIN_HEADER
 
-#include "../../ccIOFilterPluginInterface.h"
+#include "../../../ccIOFilterPluginInterface.h"
 
 //Qt
 #include <QObject>

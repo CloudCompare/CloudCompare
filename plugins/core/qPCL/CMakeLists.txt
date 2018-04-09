@@ -20,7 +20,6 @@ if (INSTALL_QPCL_PLUGIN)
     
     include_directories( ${QPCL_PLUGIN_UTILS_LIB_SOURCE_DIR}/filters )
     include_directories( ${QPCL_PLUGIN_UTILS_LIB_BINARY_DIR} )
-    include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../ ) #the plugin dir
     include_directories( ${PCL_INCLUDE_DIRS} )
     
     include( ../../CMakePluginTpl.cmake )

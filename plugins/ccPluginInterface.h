@@ -71,11 +71,14 @@ public:
 public:
 
 	//! Virtual destructor
-	virtual ~ccPluginInterface() {}
+	virtual ~ccPluginInterface() = default;
 
 	//! Returns plugin type (standard or OpenGL filter)
 	virtual CC_PLUGIN_TYPE getType() const = 0;
 
+	//! Is this plugin a core plugin?
+	virtual bool isCore() const = 0;
+	
 	//! Returns (short) name (for menu entry, etc.)
 	virtual QString getName() const = 0;
 
@@ -124,7 +127,7 @@ public:
 		objects stream in BIN files. Custom objects must inherit the
 		ccCustomHObject or ccCustomLeafObject interfaces.
 	**/
-	virtual ccExternalFactory* getCustomObjectsFactory() const { return 0; }
+	virtual ccExternalFactory* getCustomObjectsFactory() const { return nullptr; }
 
 	//! Optional: registers commands (for the command line mode)
 	/** Does nothing by default.

@@ -1,5 +1,6 @@
 {
 	"type" : "Standard",
+	"core" : true,
 	"name" : "M3C2 Distance",
 	"icon" : ":/CC/plugin/qM3C2Plugin/images/iconM3C2.png",
 	"description": "Multiscale Model to Model Cloud Comparison (M3C2).",

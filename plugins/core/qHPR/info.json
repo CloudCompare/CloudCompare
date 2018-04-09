@@ -1,5 +1,6 @@
 {
 	"type" : "Standard",
+	"core" : true,
 	"name" : "Hidden Point Removal",
 	"icon" : ":/CC/plugin/qHPR/images/cc_hpr.png",
 	"description": "Uses the Hidden Point Removal algorithm for approximating point visibility in an N dimensional point cloud, as seen from a given viewpoint.",

@@ -1,5 +1,6 @@
 {
 	"type" : "Standard",
+	"core" : true,
 	"name" : "Facet/fracture detection",
 	"icon" : ":/CC/plugin/qFacets/images/qFacets.png",
 	"description": "BRGM Fracture detection plugin",

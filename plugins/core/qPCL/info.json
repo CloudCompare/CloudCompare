@@ -1,5 +1,6 @@
 {
   "type": "Standard",
+  "core" : true,
   "name": "PCL wrapper",
   "icon": ":/toolbar/pcl.png",
   "description": "Point Cloud Library wrapper.",

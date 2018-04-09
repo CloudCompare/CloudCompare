@@ -1,5 +1,6 @@
 {
 	"type" : "I/O",
+	"core" : true,
 	"name" : "CSV Matrix I/O",
 	"description": "2.5D CSV matrix I/O filter.",
 	"authors" : [

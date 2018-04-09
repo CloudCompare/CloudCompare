@@ -1,5 +1,6 @@
 {
   "type": "Standard",
+  "core" : true,
   "name": "PoissonRecon",
   "icon": ":/CC/plugin/qPoissonRecon/qPoissonRecon.png",
   "description": "Poisson Surface Reconstruction.",

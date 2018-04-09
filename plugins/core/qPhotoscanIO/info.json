@@ -1,5 +1,6 @@
 {
     "type" : "I/O",
+	"core" : true,
     "name" : "Photoscan I/O",
     "description": "Photoscan (PSZ) I/O filter",
     "authors" : [

@@ -1,5 +1,6 @@
 {
 	"type" : "GL",
+	"core" : true,
 	"name" : "EDL Shader",
 	"icon" : ":/CC/plugin/qEDL/images/cc_edl.png",
 	"description": "Eye-dome Lighting OpenGL shader.",

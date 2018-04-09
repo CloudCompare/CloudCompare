@@ -1,5 +1,6 @@
 {
 	"type" : "Standard",
+	"core" : true,
 	"name" : "Animation",
 	"icon" : ":/CC/plugin/qAnimation/images/animation.png",
 	"description": "Creates a movie from a series of views.",

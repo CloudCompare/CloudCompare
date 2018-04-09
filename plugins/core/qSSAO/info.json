@@ -1,5 +1,6 @@
 {
 	"type" : "GL",
+	"core" : true,
 	"name" : "SSAO Shader",
 	"icon" : ":/CC/plugin/qSSAO/images/cc_ssao.png",
 	"description": "Screen Space Ambient Occlusion OpenGL shader.",

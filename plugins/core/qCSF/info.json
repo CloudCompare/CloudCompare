@@ -1,5 +1,6 @@
 {
 	"type" : "Standard",
+	"core" : true,
 	"name" : "CSF Filter",
 	"icon" : ":/CC/plugin/qCSF/images/icon.png",
 	"description": "A pointclouds filtering algorithm utilize cloth simulation process(Wuming Zhang; Jianbo Qi; Peng Wan,2015).",

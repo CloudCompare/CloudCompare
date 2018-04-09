@@ -1,5 +1,6 @@
 {
   "type": "I/O",
+  "core" : true,
   "name": "LAS FWF file I/O",
   "description": "Open LAS files (1.3 or later) with FWF data.",
   "authors": [

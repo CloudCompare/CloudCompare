@@ -32,6 +32,8 @@ public:
 	ccDefaultPluginInterface( const QString &resourcePath = QString() );
 
 	virtual ~ccDefaultPluginInterface();
+	
+	virtual bool isCore() const override;
 
 	virtual QString getName() const override;
 	virtual QString getDescription() const override;

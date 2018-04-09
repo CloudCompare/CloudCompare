@@ -1,5 +1,6 @@
 {
   "type": "Standard",
+  "core" : true,
   "name": "Cork",
   "icon": ":/CC/plugin/qCork/cork_icon.png",
   "description": "CSG operations on meshes.",

@@ -1,5 +1,6 @@
 {
     "type" : "Standard",
+	"core" : true,
     "name" : "Hough Normals Computation",
     "icon" : ":/CC/plugin/qHoughNormals/images/normal.png",
     "description": "Uses the Hough transform to estimate normals in unstructured point clouds.",

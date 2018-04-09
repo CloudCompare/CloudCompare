@@ -1,5 +1,6 @@
 {
 	"type" : "I/O",
+	"core" : true,
 	"name" : "Additional I/O",
 	"description": "This plugin adds some less frequently used I/O formats to CloudCompare:
 		<ul>

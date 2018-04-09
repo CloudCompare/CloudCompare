@@ -110,6 +110,11 @@ ccDefaultPluginInterface::~ccDefaultPluginInterface()
 	delete m_data;
 }
 
+bool ccDefaultPluginInterface::isCore() const
+{	
+	return m_data->doc.object().value( "core" ).toBool();
+}
+
 QString ccDefaultPluginInterface::getName() const
 {		
     return m_data->field( "name" );

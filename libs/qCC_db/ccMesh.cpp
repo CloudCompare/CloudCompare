@@ -49,15 +49,15 @@ static CCVector3 s_blankNorm(0, 0, 0);
 
 ccMesh::ccMesh(ccGenericPointCloud* vertices)
 	: ccGenericMesh("Mesh")
-	, m_associatedCloud(0)
-	, m_triNormals(0)
-	, m_texCoords(0)
-	, m_materials(0)
-	, m_triVertIndexes(0)
+	, m_associatedCloud(nullptr)
+	, m_triNormals(nullptr)
+	, m_texCoords(nullptr)
+	, m_materials(nullptr)
+	, m_triVertIndexes(nullptr)
 	, m_globalIterator(0)
-	, m_triMtlIndexes(0)
-	, m_texCoordIndexes(0)
-	, m_triNormalIndexes(0)
+	, m_triMtlIndexes(nullptr)
+	, m_texCoordIndexes(nullptr)
+	, m_triNormalIndexes(nullptr)
 {
 	setAssociatedCloud(vertices);
 
@@ -67,15 +67,15 @@ ccMesh::ccMesh(ccGenericPointCloud* vertices)
 
 ccMesh::ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertices)
 	: ccGenericMesh("Mesh")
-	, m_associatedCloud(0)
-	, m_triNormals(0)
-	, m_texCoords(0)
-	, m_materials(0)
-	, m_triVertIndexes(0)
+	, m_associatedCloud(nullptr)
+	, m_triNormals(nullptr)
+	, m_texCoords(nullptr)
+	, m_materials(nullptr)
+	, m_triVertIndexes(nullptr)
 	, m_globalIterator(0)
-	, m_triMtlIndexes(0)
-	, m_texCoordIndexes(0)
-	, m_triNormalIndexes(0)
+	, m_triMtlIndexes(nullptr)
+	, m_texCoordIndexes(nullptr)
+	, m_triNormalIndexes(nullptr)
 {
 	setAssociatedCloud(giVertices);
 
@@ -107,8 +107,8 @@ ccMesh::ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertice
 ccMesh::~ccMesh()
 {
 	clearTriNormals();
-	setMaterialSet(0);
-	setTexCoordinatesTable(0);
+	setMaterialSet(nullptr);
+	setTexCoordinatesTable(nullptr);
 
 	if (m_triVertIndexes)
 		m_triVertIndexes->release();
@@ -144,7 +144,7 @@ void ccMesh::onUpdateOf(ccHObject* obj)
 void ccMesh::onDeletionOf(const ccHObject* obj)
 {
 	if (obj == m_associatedCloud)
-		setAssociatedCloud(0);
+		setAssociatedCloud(nullptr);
 
 	ccGenericMesh::onDeletionOf(obj);
 }
@@ -272,7 +272,7 @@ bool ccMesh::computePerTriangleNormals()
 	//if some normal indexes already exists, we remove them (easier)
 	if (m_triNormalIndexes)
 		removePerTriangleNormalIndexes();
-	setTriNormsTable(0);
+	setTriNormsTable(nullptr);
 
 	NormsIndexesTableType* normIndexes = new NormsIndexesTableType();
 	if (!normIndexes->reserve(triCount))
@@ -420,7 +420,7 @@ void ccMesh::setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoRel
 	{
 		int childIndex = getChildIndex(m_triNormals);
 		m_triNormals->release();
-		m_triNormals = 0;
+		m_triNormals = nullptr;
 		if (childIndex >= 0)
 			removeChild(childIndex);
 	}
@@ -448,7 +448,7 @@ void ccMesh::setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseOldMater
 	{
 		int childIndex = getChildIndex(m_materials);
 		m_materials->release();
-		m_materials = 0;
+		m_materials = nullptr;
 		if (childIndex >= 0)
 			removeChild(childIndex);
 	}
@@ -599,7 +599,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 	//repeat Laplacian smoothing iterations
 	for (unsigned iter = 0; iter < nbIteration; iter++)
 	{
-		verticesDisplacement->fill(0);
+		verticesDisplacement->fill(nullptr);
 
 		//for each triangle
 		placeIteratorAtBeginning();
@@ -651,7 +651,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 
 	if (verticesDisplacement)
 		verticesDisplacement->release();
-	verticesDisplacement = 0;
+	verticesDisplacement = nullptr;
 
 	return true;
 }
@@ -684,7 +684,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 		catch (const std::bad_alloc&)
 		{
 			ccLog::Error("[ccMesh::clone] Not enough memory!");
-			return 0;
+			return nullptr;
 		}
 
 		//flag used vertices
@@ -709,7 +709,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 		//the associated cloud is already the exact vertices set --> nothing to change
 		if (realVertCount == vertNum)
 		{
-			newVertices = m_associatedCloud->clone(0,true);
+			newVertices = m_associatedCloud->clone(nullptr,true);
 		}
 		else
 		{
@@ -718,8 +718,10 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 			if (rc.reserve(realVertCount))
 			{
 				for (unsigned i=0; i<vertNum; ++i)
+				{
 					if (usedVerts[i] != vertNum)
 						rc.addPointIndex(i); //can't fail, see above
+				}
 
 				//and the associated vertices set
 				assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
@@ -728,7 +730,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 				{
 					//not enough memory!
 					delete newVertices;
-					newVertices = 0;
+					newVertices = nullptr;
 				}
 			}
 		}
@@ -738,7 +740,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 	if (!newVertices)
 	{
 		ccLog::Error("[ccMesh::clone] Not enough memory!");
-		return 0;
+		return nullptr;
 	}
 
 	//mesh clone
@@ -749,7 +751,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 			delete newVertices;
 		delete cloneMesh;
 		ccLog::Error("[ccMesh::clone] Not enough memory!");
-		return 0;
+		return nullptr;
 	}
 
 	//let's create the new triangles
@@ -899,7 +901,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 	if (!p1 || p1->size() == 0 || !p2 || p2->size() == 0)
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	ccPointCloud* vertices = new ccPointCloud("vertices");
@@ -907,7 +909,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 	{
 		ccLog::Warning("[ccMesh::TriangulateTwoPolylines] Not enough memory");
 		delete vertices;
-		return 0;
+		return nullptr;
 	}
 
 	//merge the two sets of vertices
@@ -937,7 +939,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 		{
 			ccLog::Warning("[ccMesh::TriangulateTwoPolylines] Failed to fit a plane through both polylines");
 			delete vertices;
-			return 0;
+			return nullptr;
 		}
 
 		X = *N.getLSPlaneX();
@@ -956,7 +958,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 		//not enough memory
 		ccLog::Warning("[ccMesh::TriangulateTwoPolylines] Not enough memory");
 		delete vertices;
-		return 0;
+		return nullptr;
 	}
 
 	//project the polylines on the best fitting plane
@@ -1000,7 +1002,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 		ccLog::Warning(QString("Third party library error: %1").arg(errorStr));
 		delete delaunayMesh;
 		delete vertices;
-		return 0;
+		return nullptr;
 	}
 
 	delaunayMesh->linkMeshWith(vertices, false);
@@ -1073,12 +1075,12 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 	{
 		//not enough memory (error will be issued later)
 		delete mesh;
-		mesh = 0;
+		mesh = nullptr;
 	}
 
 	//don't need this anymore
 	delete delaunayMesh;
-	delaunayMesh = 0;
+	delaunayMesh = nullptr;
 
 	if (mesh)
 	{
@@ -1096,7 +1098,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 	{
 		ccLog::Warning("[ccMesh::TriangulateTwoPolylines] Not enough memory");
 		delete vertices;
-		vertices = 0;
+		vertices = nullptr;
 	}
 
 	return mesh;
@@ -1111,12 +1113,12 @@ ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
 	if (!cloud || dim > 2)
 	{
 		ccLog::Warning("[ccMesh::Triangulate] Invalid input parameters!");
-		return 0;
+		return nullptr;
 	}
 	if (cloud->size() < 3)
 	{
 		ccLog::Warning("[ccMesh::Triangulate] Cloud has not enough points!");
-		return 0;
+		return nullptr;
 	}
 	
 	//compute raw mesh
@@ -1129,7 +1131,7 @@ ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
 	if (!dummyMesh)
 	{
 		ccLog::Warning(QString("[ccMesh::Triangulate] Failed to construct Delaunay mesh (Triangle lib error: %1)").arg(errorStr));
-		return 0;
+		return nullptr;
 	}
 
 	//convert raw mesh to ccMesh
@@ -1137,12 +1139,12 @@ ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
 
 	//don't need this anymore
 	delete dummyMesh;
-	dummyMesh = 0;
+	dummyMesh = nullptr;
 
 	if (!mesh)
 	{
 		ccLog::Warning("[ccMesh::Triangulate] An error occurred while computing mesh! (not enough memory?)");
-		return 0;
+		return nullptr;
 	}
 
 	mesh->setName(cloud->getName()+QString(".mesh"));
@@ -1509,7 +1511,7 @@ CCLib::GenericTriangle* ccMesh::_getNextTriangle()
 	if (m_globalIterator < m_triVertIndexes->currentSize())
 		return _getTriangle(m_globalIterator++);
 
-	return NULL;
+	return nullptr;
 }
 
 CCLib::GenericTriangle* ccMesh::_getTriangle(unsigned triangleIndex) //temporary
@@ -1736,10 +1738,10 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//in the case we need to display scalar field colors
-		ccScalarField* currentDisplayedScalarField = 0;
+		ccScalarField* currentDisplayedScalarField = nullptr;
 		bool greyForNanScalarValues = true;
 		//unsigned colorRampSteps = 0;
-		ccColorScale::Shared colorScale(0);
+		ccColorScale::Shared colorScale(nullptr);
 
 		if (glParams.showSF)
 		{
@@ -1776,7 +1778,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//in the case we need to display vertex colors
-		ColorsTableType* rgbColorsTable = 0;
+		ColorsTableType* rgbColorsTable = nullptr;
 		if (glParams.showColors)
 		{
 			if (isColorOverriden())
@@ -1803,8 +1805,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//in the case we need normals (i.e. lighting)
-		NormsIndexesTableType* normalsIndexesTable = 0;
-		ccNormalVectors* compressedNormals = 0;
+		NormsIndexesTableType* normalsIndexesTable = nullptr;
+		ccNormalVectors* compressedNormals = nullptr;
 		if (glParams.showNorms)
 		{
 			assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
@@ -2061,11 +2063,17 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		else
 		{
 			//current vertex color
-			const ColorCompType *col1 = 0, *col2 = 0, *col3 = 0;
+			const ColorCompType *col1 = nullptr;
+			const ColorCompType *col2 = nullptr;
+			const ColorCompType *col3 = nullptr;
 			//current vertex normal
-			const PointCoordinateType *N1 = 0, *N2 = 0, *N3 = 0;
+			const PointCoordinateType *N1 = nullptr;
+			const PointCoordinateType *N2 = nullptr;
+			const PointCoordinateType *N3 = nullptr;
 			//current vertex texture coordinates
-			const float *Tx1 = 0, *Tx2 = 0, *Tx3 = 0;
+			const float *Tx1 = nullptr;
+			const float *Tx2 = nullptr;
+			const float *Tx3 = nullptr;
 
 			//loop on all triangles
 			m_triVertIndexes->placeIteratorAtBeginning();
@@ -2268,14 +2276,14 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 {
 	if (!m_associatedCloud)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	ccGenericPointCloud::VisibilityTableType* verticesVisibility = m_associatedCloud->getTheVisibilityArray();
 	if (!verticesVisibility || !verticesVisibility->isAllocated())
 	{
 		ccLog::Error(QString("[Mesh %1] Internal error: vertex visibility table not instantiated!").arg(getName()));
-		return NULL;
+		return nullptr;
 	}
 
 	//create vertices for the new mesh
@@ -2283,12 +2291,12 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	if (!newVertices)
 	{
 		ccLog::Error(QString("[Mesh %1] Failed to create segmented mesh vertices! (not enough memory?)").arg(getName()));
-		return NULL;
+		return nullptr;
 	}
 	assert(newVertices);
 
 	//create a 'reference' cloud if none was provided
-	CCLib::ReferenceCloud* rc = 0;
+	CCLib::ReferenceCloud* rc = nullptr;
 	{
 		//we create a temporary entity with the visible vertices only
 		rc = new CCLib::ReferenceCloud(m_associatedCloud);
@@ -2299,7 +2307,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				{
 					ccLog::Error("Not enough memory!");
 					delete rc;
-					return 0;
+					return nullptr;
 				}
 	}
 
@@ -2307,7 +2315,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	if (rc->size() == 0 || (removeSelectedFaces && rc->size() == m_associatedCloud->size()))
 	{
 		delete rc;
-		return 0;
+		return nullptr;
 	}
 
 	//we create a new mesh with the current selection
@@ -2315,7 +2323,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 	//don't use this anymore
 	delete rc;
-	rc = 0;
+	rc = nullptr;
 
 	ccMesh* newMesh = nullptr;
 	if (result)
@@ -2324,7 +2332,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		if (!newMesh)
 		{
 			delete newVertices;
-			newVertices = NULL;
+			newVertices = nullptr;
 			ccLog::Error("An error occurred: not enough memory?");
 		}
 		else
@@ -2344,7 +2352,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 			{
 				//temporary structure for normal indexes mapping
 				std::vector<int> newNormIndexes;
-				NormsIndexesTableType* newTriNormals = 0;
+				NormsIndexesTableType* newTriNormals = nullptr;
 				if (m_triNormals && m_triNormalIndexes)
 				{
 					assert(m_triNormalIndexes->currentSize() == m_triVertIndexes->currentSize());
@@ -2360,13 +2368,13 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 						ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new normals subset! (not enough memory)");
 						newMesh->removePerTriangleNormalIndexes();
 						newTriNormals->release();
-						newTriNormals = 0;
+						newTriNormals = nullptr;
 					}
 				}
 
 				//temporary structure for texture indexes mapping
 				std::vector<int> newTexIndexes;
-				TextureCoordsContainer* newTriTexIndexes = 0;
+				TextureCoordsContainer* newTriTexIndexes = nullptr;
 				if (m_texCoords && m_texCoordIndexes)
 				{
 					assert(m_texCoordIndexes->currentSize() == m_triVertIndexes->currentSize());
@@ -2382,13 +2390,13 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 						ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new texture indexes subset! (not enough memory)");
 						newMesh->removePerTriangleTexCoordIndexes();
 						newTriTexIndexes->release();
-						newTriTexIndexes = 0;
+						newTriTexIndexes = nullptr;
 					}
 				}
 
 				//temporary structure for material indexes mapping
 				std::vector<int> newMatIndexes;
-				ccMaterialSet* newMaterials = 0;
+				ccMaterialSet* newMaterials = nullptr;
 				if (m_materials && m_triMtlIndexes)
 				{
 					assert(m_triMtlIndexes->currentSize() == m_triVertIndexes->currentSize());
@@ -2404,12 +2412,12 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 						ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new material subset! (not enough memory)");
 						newMesh->removePerTriangleMtlIndexes();
 						newMaterials->release();
-						newMaterials = 0;
+						newMaterials = nullptr;
 						if (newTriTexIndexes) //we can release texture coordinates as well (as they depend on materials!)
 						{
 							newMesh->removePerTriangleTexCoordIndexes();
 							newTriTexIndexes->release();
-							newTriTexIndexes = 0;
+							newTriTexIndexes = nullptr;
 							newTexIndexes.clear();
 						}
 					}
@@ -2447,7 +2455,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 										ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new normals subset! (not enough memory)");
 										newMesh->removePerTriangleNormalIndexes();
 										newTriNormals->release();
-										newTriNormals = 0;
+										newTriNormals = nullptr;
 										break;
 									}
 
@@ -2485,7 +2493,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 										ccLog::Error("Failed to create new texture coordinates subset! (not enough memory)");
 										newMesh->removePerTriangleTexCoordIndexes();
 										newTriTexIndexes->release();
-										newTriTexIndexes = 0;
+										newTriTexIndexes = nullptr;
 										break;
 									}
 									//import old texture coordinate to new subset (create new index)
@@ -2525,7 +2533,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 									ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new materials subset! (not enough memory)");
 									newMesh->removePerTriangleMtlIndexes();
 									newMaterials->release();
-									newMaterials = 0;
+									newMaterials = nullptr;
 								}
 							}
 
@@ -2543,21 +2551,21 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					newTriNormals->resize(newTriNormals->currentSize()); //smaller so it should always be ok!
 					newMesh->setTriNormsTable(newTriNormals);
 					newTriNormals->release();
-					newTriNormals = 0;
+					newTriNormals = nullptr;
 				}
 
 				if (newTriTexIndexes)
 				{
 					newMesh->setTexCoordinatesTable(newTriTexIndexes);
 					newTriTexIndexes->release();
-					newTriTexIndexes = 0;
+					newTriTexIndexes = nullptr;
 				}
 
 				if (newMaterials)
 				{
 					newMesh->setMaterialSet(newMaterials);
 					newMaterials->release();
-					newMaterials = 0;
+					newMaterials = nullptr;
 				}
 			}
 
@@ -2573,7 +2581,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		}
 
 		delete result;
-		result = 0;
+		result = nullptr;
 	}
 
 	unsigned triNum = m_triVertIndexes->currentSize();
@@ -2630,7 +2638,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				if (subMesh->size() == 0) //no more faces in current sub-mesh?
 				{
 					detachChild(subMesh); //FIXME: removeChild instead?
-					subMesh = 0;
+					subMesh = nullptr;
 				}
 
 				if (subMesh2 && newMesh)
@@ -2642,7 +2650,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		}
 
 		indexMap->release();
-		indexMap = 0;
+		indexMap = nullptr;
 	}
 
 	//shall we remove the selected faces from this mesh?
@@ -2709,7 +2717,7 @@ void ccMesh::removePerTriangleNormalIndexes()
 {
 	if (m_triNormalIndexes)
 		m_triNormalIndexes->release();
-	m_triNormalIndexes = 0;
+	m_triNormalIndexes = nullptr;
 }
 
 bool ccMesh::reservePerTriangleNormalIndexes()
@@ -2797,7 +2805,7 @@ void ccMesh::setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool
 	{
 		int childIndex = getChildIndex(m_texCoords);
 		m_texCoords->release();
-		m_texCoords = 0;
+		m_texCoords = nullptr;
 		if (childIndex >= 0)
 			removeChild(childIndex);
 	}
@@ -2848,7 +2856,7 @@ bool ccMesh::reservePerTriangleTexCoordIndexes()
 void ccMesh::removePerTriangleTexCoordIndexes()
 {
 	triangleTexCoordIndexesSet* texCoordIndexes = m_texCoordIndexes;
-	m_texCoordIndexes = 0;
+	m_texCoordIndexes = nullptr;
 
 	if (texCoordIndexes)
 		texCoordIndexes->release();
@@ -2900,7 +2908,7 @@ void ccMesh::setTriangleMtlIndexesTable(triangleMaterialIndexesSet* matIndexesTa
 	if (m_triMtlIndexes && autoReleaseOldTable)
 	{
 		m_triMtlIndexes->release();
-		m_triMtlIndexes = 0;
+		m_triMtlIndexes = nullptr;
 	}
 
 	m_triMtlIndexes = matIndexesTable;
@@ -2928,7 +2936,7 @@ void ccMesh::removePerTriangleMtlIndexes()
 {
 	if (m_triMtlIndexes)
 		m_triMtlIndexes->release();
-	m_triMtlIndexes = 0;
+	m_triMtlIndexes = nullptr;
 }
 
 void ccMesh::addTriangleMtlIndex(int mtlIndex)
@@ -3103,7 +3111,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		if (!ccSerializationHelper::GenericArrayFromFile(*m_triMtlIndexes, in, dataVersion))
 		{
 			m_triMtlIndexes->release();
-			m_triMtlIndexes = 0;
+			m_triMtlIndexes = nullptr;
 			return false;
 		}
 	}
@@ -3208,7 +3216,7 @@ bool ccMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3
 
 	const unsigned* tri = m_triVertIndexes->getValue(triIndex);
 
-	return interpolateNormals(tri[0], tri[1], tri[2], P, N, hasTriNormals() ? m_triNormalIndexes->getValue(triIndex) : 0);
+	return interpolateNormals(tri[0], tri[1], tri[2], P, N, hasTriNormals() ? m_triNormalIndexes->getValue(triIndex) : nullptr);
 }
 
 bool ccMesh::interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3& N, const int* triNormIndexes/*=0*/)
@@ -3630,7 +3638,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 	if (maxArea <= ZERO_TOLERANCE)
 	{
 		ccLog::Error("[ccMesh::subdivide] Invalid input argument!");
-		return 0;
+		return nullptr;
 	}
 	s_maxSubdivideArea = maxArea;
 
@@ -3640,14 +3648,14 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 	if (!vertices || vertCount*triCount == 0)
 	{
 		ccLog::Error("[ccMesh::subdivide] Invalid mesh: no face or no vertex!");
-		return 0;
+		return nullptr;
 	}
 
 	ccPointCloud* resultVertices = vertices->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(vertices)->cloneThis() : ccPointCloud::From(vertices,vertices);
 	if (!resultVertices)
 	{
 		ccLog::Error("[ccMesh::subdivide] Not enough memory!");
-		return 0;
+		return nullptr;
 	}
 
 	ccMesh* resultMesh = new ccMesh(resultVertices);
@@ -3657,7 +3665,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 	{
 		ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 		delete resultMesh;
-		return 0;
+		return nullptr;
 	}
 
 	s_alreadyCreatedVertices.clear();
@@ -3671,7 +3679,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 			{
 				ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 				delete resultMesh;
-				return 0;
+				return nullptr;
 			}
 		}
 	}
@@ -3679,7 +3687,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 	{
 		ccLog::Error("[ccMesh::subdivide] An error occurred!");
 		delete resultMesh;
-		return 0;
+		return nullptr;
 	}
 
 	//we must also 'fix' the triangles that share (at least) an edge with a subdivided triangle!
@@ -3746,7 +3754,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 				{
 					ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 					delete resultMesh;
-					return 0;
+					return nullptr;
 				}
 			}
 			else if (brokenEdges == 2)
@@ -3763,7 +3771,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 					{
 						ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 						delete resultMesh;
-						return 0;
+						return nullptr;
 					}
 				}
 				else if (indexG2 < 0) //broken edges: AB and CA
@@ -3778,7 +3786,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 					{
 						ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 						delete resultMesh;
-						return 0;
+						return nullptr;
 					}
 				}
 				else /*if (indexG3 < 0)*/ //broken edges: AB and BC
@@ -3793,7 +3801,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 					{
 						ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 						delete resultMesh;
-						return 0;
+						return nullptr;
 					}
 				}
 			}
@@ -3810,7 +3818,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 				{
 					ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 					delete resultMesh;
-					return 0;
+					return nullptr;
 				}
 			}
 		}
@@ -3819,7 +3827,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 	{
 		ccLog::Error("[ccMesh::subdivide] An error occurred!");
 		delete resultMesh;
-		return 0;
+		return nullptr;
 	}
 
 	s_alreadyCreatedVertices.clear();

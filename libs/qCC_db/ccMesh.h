@@ -62,10 +62,10 @@ public:
 		\param cloneTexCoords for internal use
 		\return a copy of this entity
 	**/
-	ccMesh* cloneMesh(	ccGenericPointCloud* vertices = 0,
-								ccMaterialSet* clonedMaterials = 0,
-								NormsIndexesTableType* clonedNormsTable = 0,
-								TextureCoordsContainer* cloneTexCoords = 0);
+	ccMesh* cloneMesh(	ccGenericPointCloud* vertices = nullptr,
+								ccMaterialSet* clonedMaterials = nullptr,
+								NormsIndexesTableType* clonedNormsTable = nullptr,
+								TextureCoordsContainer* cloneTexCoords = nullptr);
 
 	//! Creates a Delaunay 2.5D mesh from a point cloud
 	/** See CCLib::PointProjectionTools::computeTriangulation.
@@ -77,7 +77,7 @@ public:
 								unsigned char dim = 2);
 
 	//! Creates a Delaunay 2.5D mesh from two polylines
-	static ccMesh* TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector3* projectionDir = 0);
+	static ccMesh* TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector3* projectionDir = nullptr);
 
 	//! Merges another mesh into this one
 	/** \param mesh mesh to be merged in this one
@@ -170,7 +170,7 @@ public:
 	void setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoReleaseOldTable = true);
 
 	//! Removes per-triangle normals
-	void clearTriNormals() { setTriNormsTable(0); }
+	void clearTriNormals() { setTriNormsTable(nullptr); }
 
 	//! Returns whether per triangle normals are enabled
 	/** To enable per triangle normals, you should:
@@ -335,7 +335,7 @@ public:
 	**/
 	bool laplacianSmooth(	unsigned nbIteration = 100,
 							PointCoordinateType factor = static_cast<PointCoordinateType>(0.01),
-							ccProgressDialog* progressCb = 0);
+							ccProgressDialog* progressCb = nullptr);
 
 	//! Mesh scalar field processes
 	enum MESH_SCALAR_FIELD_PROCESS {	SMOOTH_MESH_SF,		/**< Smooth **/

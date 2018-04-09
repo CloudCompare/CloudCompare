@@ -27,9 +27,9 @@
 #include <assert.h>
 
 //persistent parameters
-QColor s_firstColor(Qt::black);
-QColor s_secondColor(Qt::white);
-ccColorGradientDlg::GradientType s_lastType(ccColorGradientDlg::Default);
+static QColor s_firstColor(Qt::black);
+static QColor s_secondColor(Qt::white);
+static ccColorGradientDlg::GradientType s_lastType(ccColorGradientDlg::Default);
 static double s_lastFreq = 5.0;
 
 ccColorGradientDlg::ccColorGradientDlg(QWidget* parent)

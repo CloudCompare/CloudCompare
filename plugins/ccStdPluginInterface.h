@@ -67,7 +67,7 @@ public:
 	**/
 	virtual ccMainAppInterface * getMainAppInterface() { return m_app; }
 
-	//! Returns action(s)
+	//! Puts our plugin's action(s) into an action group
 	virtual void getActions(QActionGroup& group) = 0;
 
 	//! This method is called by the main application whenever the entity selection changes
@@ -90,6 +90,8 @@ protected:
 	//! Main application interface
 	ccMainAppInterface* m_app;
 };
+
+Q_DECLARE_METATYPE(const ccStdPluginInterface *);
 
 Q_DECLARE_INTERFACE(ccStdPluginInterface,"edf.rd.CloudCompare.ccStdPluginInterface/1.4")
 

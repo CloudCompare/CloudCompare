@@ -32,6 +32,7 @@ class QWidget;
 
 class ccMainAppInterface;
 class ccPluginInterface;
+class ccStdPluginInterface;
 
 //! Plugin UI manager
 class ccPluginUIManager : public QObject
@@ -61,8 +62,12 @@ public:
 	
 private:
 	void	setupActions();
+	
 	void	setupMenus();
+	void	addActionsToMenu( ccStdPluginInterface *stdPlugin, QActionGroup &actionGroup );
+
 	void	setupToolbars();
+	void	addActionsToToolBar( ccStdPluginInterface *stdPlugin, QActionGroup &actionGroup );
 	
 	void	enableGLFilter();
 	void	disableGLFilter();

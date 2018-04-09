@@ -58,8 +58,12 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 	m_glFilterMenu->setEnabled( false );
 	
 	m_mainPluginToolbar->setVisible( false );
+		
+	QVector<ccStdPluginInterface *>	coreStdPlugins;
+	QVector<ccStdPluginInterface *>	thirdPartyStdPlugins;
 	
-	bool haveStdPlugin = false;
+	QVector<QAction *>	coreGLActions;
+	QVector<QAction *>	thirdPartyGLActions;
 	
 	for ( ccPluginInterface *plugin : plugins )
 	{
@@ -82,56 +86,22 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 		switch ( plugin->getType() )
 		{
 			case CC_STD_PLUGIN: //standard plugin
-			{
-				haveStdPlugin = true;
-								
+			{								
 				ccStdPluginInterface *stdPlugin = static_cast<ccStdPluginInterface*>( plugin );
 				
 				stdPlugin->setMainAppInterface( m_appInterface );
-				
-				QMenu *menu = m_pluginMenu;
-				QToolBar *toolBar = m_mainPluginToolbar;
-				
-				QActionGroup actions( this );
-				stdPlugin->getActions( actions );
-				
-				if ( actions.actions().size() > 1 ) //more than one action? We create it's own menu and toolbar
+								
+				if ( stdPlugin->isCore() )
 				{
-					menu = m_pluginMenu->addMenu( pluginName );
-					
-					if ( menu != nullptr )
-					{
-						menu->setIcon( stdPlugin->getIcon() );
-					}
-					
-					toolBar = new QToolBar( pluginName + QStringLiteral( " toolbar" ), m_parentWidget );
-					
-					if ( toolBar != nullptr )
-					{
-						m_additionalPluginToolbars.push_back( toolBar );
-
-						toolBar->setObjectName( pluginName );
-					}
+					coreStdPlugins.append( stdPlugin );
 				}
-				
-				Q_ASSERT( menu != nullptr );
-				
-				// add actions to menu and toolbar
-				const QList<QAction *>	actionList = actions.actions();
-				
-				for ( QAction* action : actionList )
+				else
 				{
-					menu->addAction( action );
-					menu->setEnabled( true );
-					
-					toolBar->addAction( action );
-					toolBar->setEnabled( true );
+					thirdPartyStdPlugins.append( stdPlugin );
 				}
 				
 				m_plugins.push_back( stdPlugin );
-				
-				stdPlugin->onNewSelection( m_appInterface->getSelectedEntities() );
-				
+								
 				break;
 			}
 				
@@ -156,11 +126,14 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 
 				m_glFilterActions.addAction( action );
 				
-				m_glFilterMenu->addAction( action );
-				m_glFilterMenu->setEnabled( true );
-				
-				m_glFiltersToolbar->addAction( action );				
-				m_glFiltersToolbar->setEnabled( true );				
+				if ( glPlugin->isCore() )
+				{
+					coreGLActions.append( action );
+				}
+				else
+				{
+					thirdPartyGLActions.append( action );
+				}	
 
 				m_plugins.push_back( glPlugin );
 				break;
@@ -178,12 +151,65 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 		}
 	}
 	
-	m_pluginMenu->setEnabled( haveStdPlugin );
+	// add core standard plugins to menu & tool bar
+	for ( ccStdPluginInterface *plugin : coreStdPlugins )
+	{
+		QActionGroup actionGroup( this );
+		
+		plugin->getActions( actionGroup );
+		
+		addActionsToMenu( plugin, actionGroup );
+		addActionsToToolBar( plugin, actionGroup );
+
+		plugin->onNewSelection( m_appInterface->getSelectedEntities() );
+	}
+	
+	// add 3rd standard party plugins to menu & tool bar (if any )
+	if ( !thirdPartyStdPlugins.isEmpty() )
+	{
+		QAction	*separator = m_pluginMenu->addSection( "3rd Party" );
+		
+		for ( ccStdPluginInterface *plugin : thirdPartyStdPlugins )
+		{
+			QActionGroup actionGroup( this );
+			
+			plugin->getActions( actionGroup );
+			
+			addActionsToMenu( plugin, actionGroup );
+			addActionsToToolBar( plugin, actionGroup );
+
+			plugin->onNewSelection( m_appInterface->getSelectedEntities() );
+		}
+	}
+	
+	// add core GL plugins to menu & tool bar
+	for ( QAction *action : coreGLActions )
+	{
+		m_glFilterMenu->addAction( action );
+		m_glFiltersToolbar->addAction( action );				
+	}
+	
+	// add 3rd GL party plugins to menu & tool bar (if any )
+	if ( !thirdPartyGLActions.isEmpty() )
+	{
+		m_glFilterMenu->addSection( "3rd Party" );
+		
+		for ( QAction *action : thirdPartyGLActions )
+		{
+			m_glFilterMenu->addAction( action );
+			m_glFiltersToolbar->addAction( action );				
+		}
+	}
+	
+	m_pluginMenu->setEnabled( !m_pluginMenu->isEmpty() );
 	
 	if ( m_mainPluginToolbar->isEnabled() )
 	{
 		m_showPluginToolbar->setEnabled( true );
 	}
+	
+	m_glFilterMenu->setEnabled( !m_glFilterMenu->isEmpty() );
+	m_glFiltersToolbar->setEnabled( !m_glFilterMenu->isEmpty() );	// [sic] we have toolbar actions if we have them in the menu
 	
 	m_showPluginToolbar->setChecked( m_mainPluginToolbar->isEnabled() );
 	
@@ -295,6 +321,33 @@ void ccPluginUIManager::setupMenus()
 	m_glFilterActions.setExclusive( true );		
 }
 
+void ccPluginUIManager::addActionsToMenu( ccStdPluginInterface *stdPlugin, QActionGroup &actionGroup )
+{
+	const QList<QAction *>	actionList = actionGroup.actions();
+	
+	// If the plugin has more than one action we create its own menu
+	if ( actionGroup.actions().size() > 1 )
+	{
+		QMenu	*menu = new QMenu( stdPlugin->getName() );
+		
+		menu->setIcon( stdPlugin->getIcon() );
+		menu->setEnabled( true );
+		
+		for ( QAction* action : actionList )
+		{
+			menu->addAction( action );
+		}
+		
+		m_pluginMenu->addMenu( menu );
+	}
+	else // otherwise we just add it to the main menu
+	{		
+		Q_ASSERT( actionList.count() == 1 );
+		
+		m_pluginMenu->addAction( actionList.at( 0 ) );
+	}
+}
+
 void ccPluginUIManager::setupToolbars()
 {
 	m_mainPluginToolbar = new QToolBar( tr( "Plugins" ), m_parentWidget );
@@ -309,6 +362,38 @@ void ccPluginUIManager::setupToolbars()
 	m_glFiltersToolbar->addAction( m_actionRemoveFilter );	
 
 	connect( m_showGLFilterToolbar, &QAction::toggled, m_glFiltersToolbar, &QToolBar::setVisible );
+}
+
+void ccPluginUIManager::addActionsToToolBar( ccStdPluginInterface *stdPlugin, QActionGroup &actionGroup )
+{
+	const QList<QAction *>	actionList = actionGroup.actions();
+	
+	const QString pluginName = stdPlugin->getName();
+	
+	// If the plugin has more than one action we create its own tool bar
+	if ( actionGroup.actions().size() > 1 )
+	{
+		QToolBar *toolBar = new QToolBar( pluginName + QStringLiteral( " toolbar" ), m_parentWidget );
+		
+		if ( toolBar != nullptr )
+		{
+			m_additionalPluginToolbars.push_back( toolBar );
+
+			toolBar->setObjectName( pluginName );
+			toolBar->setEnabled( true );
+			
+			for ( QAction* action : actionList )
+			{
+				toolBar->addAction( action );
+			}
+		}
+	}
+	else // otherwise we just add it to the main tool bar
+	{		
+		Q_ASSERT( actionList.count() == 1 );
+		
+		m_mainPluginToolbar->addAction( actionList.at( 0 ) );
+	}
 }
 
 void ccPluginUIManager::enableGLFilter()

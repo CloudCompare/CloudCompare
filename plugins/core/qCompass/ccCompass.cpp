@@ -465,7 +465,7 @@ bool ccCompass::startMeasuring()
 }
 
 //Exits measuring
-bool ccCompass::stopMeasuring()
+bool ccCompass::stopMeasuring(bool finalStop/*=false*/)
 {
 	//remove click listener
 	if (m_app->getActiveGLWindow())
@@ -474,7 +474,7 @@ bool ccCompass::stopMeasuring()
 	}
 
 	//reset gui
-	cleanupBeforeToolChange();
+	cleanupBeforeToolChange(!finalStop);
 
 	//stop picking
 	stopPicking();
@@ -741,7 +741,7 @@ void ccCompass::onUndo()
 }
 
 //called to cleanup pointers etc. before changing the active tool
-void ccCompass::cleanupBeforeToolChange()
+void ccCompass::cleanupBeforeToolChange(bool autoRestartPicking/*=true*/)
 {
 	//finish current tool
 	if (m_activeTool)
@@ -777,8 +777,11 @@ void ccCompass::cleanupBeforeToolChange()
 		m_dlg->acceptButton->setEnabled(false);
 	}
 
-	//check picking is engaged
-	startPicking();
+	if (autoRestartPicking)
+	{
+		//check picking is engaged
+		startPicking();
+	}
 }
 
 //activate lineation mode

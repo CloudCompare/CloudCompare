@@ -49,10 +49,10 @@ public:
 	explicit ccCompass(QObject* parent = nullptr);
 
 	//deconstructor
-	~ccCompass();
+	virtual ~ccCompass();
 
 	//inherited from ccPluginInterface
-	virtual void stop() override { stopMeasuring(); m_dlg = nullptr; ccStdPluginInterface::stop(); } //called when the plugin is being stopped
+	virtual void stop() override { stopMeasuring(true); m_dlg = nullptr; ccStdPluginInterface::stop(); } //called when the plugin is being stopped
 
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;
@@ -70,7 +70,7 @@ protected slots:
 	bool startMeasuring();
 
 	//stop picking mode
-	bool stopMeasuring();
+	bool stopMeasuring(bool finalStop = false);
 	
 	//inherited from ccPickingListener
 	virtual void onItemPicked(const ccPickingListener::PickedItem& pi) override;
@@ -141,7 +141,7 @@ protected:
 	ccHObject* getInsertPoint();
 
 	//cleans up pointers etc before changing tools
-	void cleanupBeforeToolChange();
+	void cleanupBeforeToolChange(bool autoRestartPicking = true);
 
 	//registers this plugin with the picking hub
 	bool startPicking();

@@ -321,12 +321,12 @@ void ccPluginUIManager::setupMenus()
 	m_glFilterActions.setExclusive( true );		
 }
 
-void ccPluginUIManager::addActionsToMenu( ccStdPluginInterface *stdPlugin, QActionGroup &actionGroup )
+void ccPluginUIManager::addActionsToMenu( ccStdPluginInterface *stdPlugin, const QActionGroup &actionGroup )
 {
 	const QList<QAction *>	actionList = actionGroup.actions();
 	
 	// If the plugin has more than one action we create its own menu
-	if ( actionGroup.actions().size() > 1 )
+	if (actionList.size() > 1 )
 	{
 		QMenu	*menu = new QMenu( stdPlugin->getName() );
 		
@@ -364,14 +364,14 @@ void ccPluginUIManager::setupToolbars()
 	connect( m_showGLFilterToolbar, &QAction::toggled, m_glFiltersToolbar, &QToolBar::setVisible );
 }
 
-void ccPluginUIManager::addActionsToToolBar( ccStdPluginInterface *stdPlugin, QActionGroup &actionGroup )
+void ccPluginUIManager::addActionsToToolBar( ccStdPluginInterface *stdPlugin, const QActionGroup &actionGroup )
 {
 	const QList<QAction *>	actionList = actionGroup.actions();
 	
 	const QString pluginName = stdPlugin->getName();
 	
 	// If the plugin has more than one action we create its own tool bar
-	if ( actionGroup.actions().size() > 1 )
+	if (actionList.size() > 1 )
 	{
 		QToolBar *toolBar = new QToolBar( pluginName + QStringLiteral( " toolbar" ), m_parentWidget );
 		

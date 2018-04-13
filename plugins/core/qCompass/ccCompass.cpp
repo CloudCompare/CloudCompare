@@ -166,7 +166,7 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 }
 
 //Submit the action to launch ccCompass to CC
-void ccCompass::getActions(QActionGroup& group)
+QList<QAction *> ccCompass::getActions()
 {
 	//default action (if it has not been already created, it's the moment to do it)
 	if (!m_action) //this is the action triggered by clicking the "Compass" button in the plugin menu
@@ -178,12 +178,10 @@ void ccCompass::getActions(QActionGroup& group)
 		m_action->setIcon(getIcon());
 
 		//connect appropriate signal
-		QObject::connect(m_action, SIGNAL(triggered()), this, SLOT(doAction())); //this binds the m_action to the ccCompass::doAction() function
+		connect(m_action, &QAction::triggered, this, &ccCompass::doAction); //this binds the m_action to the ccCompass::doAction() function
 	}
-	group.addAction(m_action);
 
-	m_app->dispToConsole("[ccCompass] ccCompass plugin initialized successfully.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
-
+	return QList<QAction *>{ m_action };
 }
 
 //Called by CC when the plugin should be activated - sets up the plugin and then calls startMeasuring()

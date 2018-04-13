@@ -72,7 +72,7 @@ void qAnimation::onNewSelection(const ccHObject::Container& selectedEntities)
 	}
 }
 
-void qAnimation::getActions(QActionGroup& group)
+QList<QAction *> qAnimation::getActions()
 {
 	//default action (if it has not been already created, it's the moment to do it)
 	if (!m_action)
@@ -84,7 +84,7 @@ void qAnimation::getActions(QActionGroup& group)
 		connect(m_action, &QAction::triggered, this, &qAnimation::doAction);
 	}
 
-	group.addAction(m_action);
+	return QList<QAction *>{ m_action };
 }
 
 //what to do when clicked.

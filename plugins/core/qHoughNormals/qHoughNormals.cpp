@@ -56,7 +56,7 @@ void qHoughNormals::onNewSelection(const ccHObject::Container& selectedEntities)
 	}
 }
 
-void qHoughNormals::getActions(QActionGroup& group)
+QList<QAction *> qHoughNormals::getActions()
 {
 	//default action
 	if (!m_action)
@@ -68,7 +68,7 @@ void qHoughNormals::getActions(QActionGroup& group)
 		connect(m_action, &QAction::triggered, this, &qHoughNormals::doAction);
 	}
 
-	group.addAction(m_action);
+	return QList<QAction *>{ m_action };
 }
 
 //persistent settings during a single session

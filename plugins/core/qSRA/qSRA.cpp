@@ -55,7 +55,7 @@ qSRA::qSRA(QObject* parent/*=0*/)
 {
 }
 
-void qSRA::getActions(QActionGroup& group)
+QList<QAction *> qSRA::getActions()
 {
 	//actions
 	if (!m_doLoadProfile)
@@ -66,7 +66,6 @@ void qSRA::getActions(QActionGroup& group)
 		//connect signal
 		connect(m_doLoadProfile, &QAction::triggered, this, &qSRA::loadProfile);
 	}
-	group.addAction(m_doLoadProfile);
 
 	if (!m_doCompareCloudToProfile)
 	{
@@ -76,7 +75,6 @@ void qSRA::getActions(QActionGroup& group)
 		//connect signal
 		connect(m_doCompareCloudToProfile, &QAction::triggered, this, &qSRA::computeCloud2ProfileRadialDist);
 	}
-	group.addAction(m_doCompareCloudToProfile);
 
 	if (!m_doProjectCloudDists)
 	{
@@ -86,7 +84,12 @@ void qSRA::getActions(QActionGroup& group)
 		//connect signal
 		connect(m_doProjectCloudDists, &QAction::triggered, this, &qSRA::projectCloudDistsInGrid);
 	}
-	group.addAction(m_doProjectCloudDists);
+
+	return QList<QAction *>{
+				m_doLoadProfile,
+				m_doCompareCloudToProfile,
+				m_doProjectCloudDists,
+	};
 }
 
 void qSRA::onNewSelection(const ccHObject::Container& selectedEntities)

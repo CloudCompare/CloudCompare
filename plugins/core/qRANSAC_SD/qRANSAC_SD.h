@@ -34,11 +34,11 @@ class qRansacSD : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	explicit qRansacSD(QObject* parent = 0);
+	explicit qRansacSD(QObject* parent = nullptr);
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	virtual QList<QAction *> getActions() override;
 
 protected slots:
 

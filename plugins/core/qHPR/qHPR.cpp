@@ -48,7 +48,7 @@ qHPR::qHPR(QObject* parent)
 {
 }
 
-void qHPR::getActions(QActionGroup& group)
+QList<QAction *> qHPR::getActions()
 {
 	//default action
 	if (!m_action)
@@ -60,7 +60,7 @@ void qHPR::getActions(QActionGroup& group)
 		connect(m_action, &QAction::triggered, this, &qHPR::doAction);
 	}
 
-	group.addAction(m_action);
+	return QList<QAction *>{ m_action };
 }
 
 void qHPR::onNewSelection(const ccHObject::Container& selectedEntities)
@@ -78,7 +78,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 
 	unsigned nbPoints = theCloud->size();
 	if (nbPoints == 0)
-		return 0;
+		return nullptr;
 
 	//less than 4 points? no need for calculation, we return the whole cloud
 	if (nbPoints < 4)

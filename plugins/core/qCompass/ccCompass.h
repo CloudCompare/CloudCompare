@@ -56,7 +56,7 @@ public:
 
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;
-	virtual void getActions(QActionGroup& group) override;
+	virtual QList<QAction *> getActions() override;
 
 protected slots:
 

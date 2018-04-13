@@ -64,9 +64,9 @@
 #endif
 
 qRansacSD::qRansacSD(QObject* parent/*=nullptr*/)
-	: QObject(parent)
-	, ccStdPluginInterface(":/CC/plugin/qRANSAC_SD/info.json")
-	, m_action(nullptr)
+    : QObject(parent)
+    , ccStdPluginInterface(":/CC/plugin/qRANSAC_SD/info.json")
+    , m_action(nullptr)
 {
 }
 
@@ -76,7 +76,7 @@ void qRansacSD::onNewSelection(const ccHObject::Container& selectedEntities)
 		m_action->setEnabled(selectedEntities.size()==1 && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD));
 }
 
-void qRansacSD::getActions(QActionGroup& group)
+QList<QAction *> qRansacSD::getActions()
 {
 	//default action
 	if (!m_action)
@@ -88,7 +88,7 @@ void qRansacSD::getActions(QActionGroup& group)
 		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
 	}
 
-	group.addAction(m_action);
+	return QList<QAction *>{ m_action };
 }
 
 static MiscLib::Vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > >* s_shapes; // stores the detected shapes

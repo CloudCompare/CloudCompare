@@ -43,13 +43,13 @@
 
 
 qCork::qCork(QObject* parent/*=0*/)
-	: QObject(parent)
-	, ccStdPluginInterface(":/CC/plugin/qCork/info.json")
-	, m_action(0)
+    : QObject(parent)
+    , ccStdPluginInterface(":/CC/plugin/qCork/info.json")
+    , m_action(nullptr)
 {
 }
 
-void qCork::getActions(QActionGroup& group)
+QList<QAction *> qCork::getActions()
 {
 	//default action
 	if (!m_action)
@@ -58,10 +58,10 @@ void qCork::getActions(QActionGroup& group)
 		m_action->setToolTip(getDescription());
 		m_action->setIcon(getIcon());
 		//connect signal
-		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
+		connect(m_action, &QAction::triggered, this, &qCork::doAction);
 	}
 
-	group.addAction(m_action);
+	return QList<QAction *>{ m_action };
 }
 
 void qCork::onNewSelection(const ccHObject::Container& selectedEntities)

@@ -150,7 +150,7 @@ void qPoissonRecon::onNewSelection(const ccHObject::Container& selectedEntities)
 		m_action->setEnabled(selectedEntities.size()==1 && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD));
 }
 
-void qPoissonRecon::getActions(QActionGroup& group)
+QList<QAction *> qPoissonRecon::getActions()
 {
 	//default action
 	if (!m_action)
@@ -162,7 +162,7 @@ void qPoissonRecon::getActions(QActionGroup& group)
 		connect(m_action, &QAction::triggered, this, &qPoissonRecon::doAction);
 	}
 
-	group.addAction(m_action);
+	return QList<QAction *>{ m_action };
 }
 
 typedef PlyValueVertex< PointCoordinateType > Vertex;

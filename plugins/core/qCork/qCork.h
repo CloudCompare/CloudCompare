@@ -38,11 +38,11 @@ class qCork : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	explicit qCork(QObject* parent = 0);
+	explicit qCork(QObject* parent = nullptr);
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	virtual QList<QAction *> getActions() override;
 
 protected slots:
 

@@ -70,7 +70,7 @@ void ExamplePlugin::onNewSelection( const ccHObject::Container &selectedEntities
 
 // This method returns all the 'actions' your plugin can perform.
 // getActions() will be called only once, when plugin is loaded.
-void ExamplePlugin::getActions( QActionGroup &group )
+QList<QAction *> ExamplePlugin::getActions()
 {
 	// default action (if it has not been already created, this is the moment to do it)
 	if ( !m_action )
@@ -85,7 +85,7 @@ void ExamplePlugin::getActions( QActionGroup &group )
 		connect( m_action, &QAction::triggered, this, &ExamplePlugin::doAction );
 	}
 
-	group.addAction( m_action );
+	return QList<QAction *>{ m_action };
 }
 
 // This is an example of an action's method called when the corresponding action

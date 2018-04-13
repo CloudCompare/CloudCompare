@@ -64,7 +64,7 @@ void qPCV::onNewSelection(const ccHObject::Container& selectedEntities)
 	}
 }
 
-void qPCV::getActions(QActionGroup& group)
+QList<QAction *> qPCV::getActions()
 {
 	//default action
 	if (!m_action)
@@ -76,7 +76,7 @@ void qPCV::getActions(QActionGroup& group)
 		connect(m_action, &QAction::triggered, this, &qPCV::doAction);
 	}
 
-	group.addAction(m_action);
+	return QList<QAction *>{ m_action };
 }
 
 //persistent settings during a single session

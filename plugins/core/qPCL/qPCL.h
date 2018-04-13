@@ -41,8 +41,8 @@ public:
 	virtual ~qPCL();
 
 	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual QList<QAction *> getActions() override;
 
 	//! Adds a filter
 	int addFilter(BaseFilter* filter);

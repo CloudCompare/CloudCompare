@@ -328,7 +328,7 @@ void ccPluginUIManager::addActionsToMenu( ccStdPluginInterface *stdPlugin, const
 	// If the plugin has more than one action we create its own menu
 	if (actionList.size() > 1 )
 	{
-		QMenu	*menu = new QMenu( stdPlugin->getName() );
+		QMenu	*menu = new QMenu( stdPlugin->getName(), m_parentWidget);
 		
 		menu->setIcon( stdPlugin->getIcon() );
 		menu->setEnabled( true );

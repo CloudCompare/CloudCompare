@@ -165,7 +165,7 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 	// add 3rd standard party plugins to menu & tool bar (if any )
 	if ( !thirdPartyStdPlugins.isEmpty() )
 	{
-		QAction	*separator = m_pluginMenu->addSection( "3rd Party" );
+		m_pluginMenu->addSection( "3rd Party" );
 		
 		for ( ccStdPluginInterface *plugin : thirdPartyStdPlugins )
 		{			

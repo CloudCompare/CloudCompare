@@ -40,6 +40,8 @@ public:
 
 	//! Default constructor
 	qM3C2Plugin(QObject* parent = nullptr);
+	
+	virtual ~qM3C2Plugin() = default;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;

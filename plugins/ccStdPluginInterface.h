@@ -52,7 +52,7 @@ public:
 	}
 	
 	//! Destructor
-	virtual ~ccStdPluginInterface() {}
+	virtual ~ccStdPluginInterface() = default;
 
 	//inherited from ccPluginInterface
 	virtual CC_PLUGIN_TYPE getType() const override { return CC_STD_PLUGIN; }

@@ -35,6 +35,8 @@ public:
 
 	//! Default constructor
 	explicit qPoissonRecon(QObject* parent = nullptr);
+	
+	virtual ~qPoissonRecon() = default;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;

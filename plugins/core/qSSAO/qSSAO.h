@@ -31,9 +31,11 @@ public:
 
 	//! Default constructor
 	explicit qSSAO(QObject* parent = nullptr);
+	
+	virtual ~qSSAO() = default;
 
 	//inherited from ccGLFilterPluginInterface
-	ccGlFilter* getFilter();
+	virtual ccGlFilter* getFilter() override;
 };
 
 #endif

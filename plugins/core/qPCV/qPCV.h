@@ -35,10 +35,12 @@ public:
 
 	//! Default constructor
 	explicit qPCV(QObject* parent = nullptr);
+	
+	virtual ~qPCV() = default;
 
 	//inherited from ccStdPluginInterface
-	void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual void getActions(QActionGroup& group) override;
 
 protected slots:
 

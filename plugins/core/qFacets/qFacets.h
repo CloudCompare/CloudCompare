@@ -53,7 +53,7 @@ public:
 
 	//! Default constructor
 	qFacets(QObject* parent = nullptr);
-
+	
 	//! Destructor
 	virtual ~qFacets();
 

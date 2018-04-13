@@ -39,6 +39,8 @@ public:
 	//! Default constructor
 	qAnimation(QObject* parent = nullptr);
 	
+	virtual ~qAnimation() = default;
+	
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	virtual void getActions(QActionGroup& group) override;

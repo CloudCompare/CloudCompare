@@ -29,6 +29,8 @@ class qCSVMatrixIO : public QObject, public ccIOFilterPluginInterface
 
 public:
 	qCSVMatrixIO(QObject* parent = nullptr);
+	
+	virtual ~qCSVMatrixIO() = default;
 
 	//inherited from ccIOFilterPluginInterface
 	FileIOFilter::Shared getFilter() override;

@@ -30,7 +30,9 @@ class qBroom : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	explicit qBroom(QObject* parent = 0);
+	explicit qBroom(QObject* parent = nullptr);
+
+	virtual ~qBroom() = default;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);

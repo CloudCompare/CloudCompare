@@ -38,6 +38,8 @@ public:
 
 	//! Default constructor
 	explicit qHPR(QObject* parent = nullptr);
+	
+	virtual ~qHPR() = default;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;

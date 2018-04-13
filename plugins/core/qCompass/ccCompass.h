@@ -58,9 +58,6 @@ public:
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	virtual void getActions(QActionGroup& group) override;
 
-	//sets the specified object to be the current trace - provided it is a ccTrace object. If not, ccTrace becomes null.
-	void pickupTrace(ccHObject* o);
-
 protected slots:
 
 	//initialise the plugin

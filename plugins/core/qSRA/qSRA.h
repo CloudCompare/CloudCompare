@@ -34,10 +34,12 @@ public:
 
 	//! Default constructor
 	explicit qSRA(QObject* parent = nullptr);
+	
+	virtual ~qSRA() = default;
 
 	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual void getActions(QActionGroup& group) override;
 
 protected slots:
 

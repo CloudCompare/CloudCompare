@@ -28,10 +28,11 @@ class ExampleGLPlugin : public QObject, public ccGLFilterPluginInterface
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ExampleGL" FILE "info.json")
 
 public:
-	ExampleGLPlugin( QObject *parent = nullptr );
+	explicit ExampleGLPlugin( QObject *parent = nullptr );
+	virtual ~ExampleGLPlugin() = default;
 
 	// inherited from ccGLFilterPluginInterface
-	ccGlFilter *getFilter() override;
+	virtual ccGlFilter *getFilter() override;
 };
 
 #endif

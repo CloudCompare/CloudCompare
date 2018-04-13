@@ -29,6 +29,8 @@ class qPhotoscanIO : public QObject, public ccIOFilterPluginInterface
 
 public:
 	explicit qPhotoscanIO( QObject *parent = nullptr );
+	
+	virtual ~qPhotoscanIO() = default;
 
 	//inherited from ccIOFilterPluginInterface
 	FileIOFilter::Shared getFilter() override;

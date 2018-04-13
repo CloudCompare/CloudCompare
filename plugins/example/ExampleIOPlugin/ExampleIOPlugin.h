@@ -30,11 +30,12 @@ class ExampleIOPlugin : public QObject, public ccIOFilterPluginInterface
 
 public:
 	explicit ExampleIOPlugin( QObject *parent = nullptr );
+	virtual ~ExampleIOPlugin() = default;
 	
 	virtual void registerCommands( ccCommandLineInterface *cmd ) override;
 	
 	// inherited from ccIOFilterPluginInterface
-	QVector<FileIOFilter::Shared> getFilters() override;
+	virtual QVector<FileIOFilter::Shared> getFilters() override;
 };
 
 #endif

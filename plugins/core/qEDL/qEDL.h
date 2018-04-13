@@ -29,9 +29,11 @@ class qEDL : public QObject, public ccGLFilterPluginInterface
 
 public:
 	qEDL( QObject *parent = nullptr );
+	
+	virtual ~qEDL() = default;
 
 	//inherited from ccGLFilterPluginInterface
-	ccGlFilter* getFilter();
+	virtual ccGlFilter* getFilter() override;
 };
 
 #endif

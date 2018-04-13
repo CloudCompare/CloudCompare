@@ -49,9 +49,9 @@ class ExamplePlugin : public QObject, public ccStdPluginInterface
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.Example" FILE "info.json")
 
 public:
-
 	explicit ExamplePlugin( QObject *parent = nullptr );
-
+	virtual ~ExamplePlugin() = default;
+	
 	// inherited from ccStdPluginInterface
 	virtual void onNewSelection( const ccHObject::Container &selectedEntities ) override;
 	virtual void getActions( QActionGroup &group ) override;

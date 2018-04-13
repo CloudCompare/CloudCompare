@@ -44,11 +44,13 @@ class qCSF : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	explicit qCSF(QObject* parent = 0);
+	explicit qCSF(QObject* parent = nullptr);
+	
+	virtual ~qCSF() = default;
 
 	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual void getActions(QActionGroup& group) override;
 
 protected slots:
 

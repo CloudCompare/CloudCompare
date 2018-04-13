@@ -76,7 +76,7 @@ void qCSF::onNewSelection(const ccHObject::Container& selectedEntities)
 		m_action->setEnabled(selectedEntities.size()==1 && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD));
 }
 
-void qCSF::getActions(QActionGroup& group)
+QList<QAction *> qCSF::getActions()
 {
 	if (!m_action)
 	{
@@ -87,7 +87,7 @@ void qCSF::getActions(QActionGroup& group)
 		connect(m_action, &QAction::triggered, this, &qCSF::doAction);
 	}
 
-	group.addAction(m_action);
+	return QList<QAction *>{ m_action };
 }
 
 void qCSF::doAction()

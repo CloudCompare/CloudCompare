@@ -38,7 +38,7 @@ qBroom::qBroom(QObject* parent)
 {
 }
 
-void qBroom::getActions(QActionGroup& group)
+QList<QAction *> qBroom::getActions()
 {
 	//default action
 	if (!m_action)
@@ -50,7 +50,7 @@ void qBroom::getActions(QActionGroup& group)
 		connect(m_action, &QAction::triggered, this, &qBroom::doAction);
 	}
 
-	group.addAction(m_action);
+	return QList<QAction *>{ m_action };
 }
 
 void qBroom::onNewSelection(const ccHObject::Container& selectedEntities)

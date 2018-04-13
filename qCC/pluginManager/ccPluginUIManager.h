@@ -64,10 +64,10 @@ private:
 	void	setupActions();
 	
 	void	setupMenus();
-	void	addActionsToMenu( ccStdPluginInterface *stdPlugin, const QActionGroup &actionGroup );
+	void	addActionsToMenu( ccStdPluginInterface *stdPlugin, const QList<QAction *> &actions );
 
 	void	setupToolbars();
-	void	addActionsToToolBar( ccStdPluginInterface *stdPlugin, const QActionGroup &actionGroup );
+	void	addActionsToToolBar( ccStdPluginInterface *stdPlugin, const QList<QAction *> &actions );
 	
 	void	enableGLFilter();
 	void	disableGLFilter();

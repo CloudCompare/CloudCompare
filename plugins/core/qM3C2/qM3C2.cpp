@@ -47,7 +47,7 @@ void qM3C2Plugin::onNewSelection(const ccHObject::Container& selectedEntities)
 	m_selectedEntities = selectedEntities;
 }
 
-void qM3C2Plugin::getActions(QActionGroup& group)
+QList<QAction *> qM3C2Plugin::getActions()
 {
 	if (!m_action)
 	{
@@ -57,7 +57,7 @@ void qM3C2Plugin::getActions(QActionGroup& group)
 		connect(m_action, &QAction::triggered, this, &qM3C2Plugin::doAction);
 	}
 
-	group.addAction(m_action);
+	return QList<QAction *>{ m_action };
 }
 
 void qM3C2Plugin::doAction()

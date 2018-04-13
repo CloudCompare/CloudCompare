@@ -90,8 +90,8 @@ qFacets::~qFacets()
 	}
 }
 
-void qFacets::getActions(QActionGroup& group)
-{
+QList<QAction *> qFacets::getActions()
+{	
 	//actions
 	if (!m_doFuseKdTreeCells)
 	{
@@ -101,7 +101,6 @@ void qFacets::getActions(QActionGroup& group)
 		//connect signal
 		connect(m_doFuseKdTreeCells, &QAction::triggered, this, &qFacets::fuseKdTreeCells);
 	}
-	group.addAction(m_doFuseKdTreeCells);
 
 	if (!m_fastMarchingExtraction)
 	{
@@ -111,7 +110,6 @@ void qFacets::getActions(QActionGroup& group)
 		//connect signal
 		connect(m_fastMarchingExtraction, &QAction::triggered, this, &qFacets::extractFacetsWithFM);
 	}
-	group.addAction(m_fastMarchingExtraction);
 
 	if (!m_doExportFacets)
 	{
@@ -121,7 +119,6 @@ void qFacets::getActions(QActionGroup& group)
 		//connect signal
 		connect(m_doExportFacets, &QAction::triggered, this, &qFacets::exportFacets);
 	}
-	group.addAction(m_doExportFacets);
 
 	if (!m_doExportFacetsInfo)
 	{
@@ -131,7 +128,6 @@ void qFacets::getActions(QActionGroup& group)
 		//connect signal
 		connect(m_doExportFacetsInfo, &QAction::triggered, this, &qFacets::exportFacetsInfo);
 	}
-	group.addAction(m_doExportFacetsInfo);
 
 	if (!m_doClassifyFacetsByAngle)
 	{
@@ -143,7 +139,6 @@ void qFacets::getActions(QActionGroup& group)
 			classifyFacetsByAngle();
 		} );
 	}
-	group.addAction(m_doClassifyFacetsByAngle);
 
 	if (!m_doShowStereogram)
 	{
@@ -153,8 +148,15 @@ void qFacets::getActions(QActionGroup& group)
 		//connect signal
 		connect(m_doShowStereogram, &QAction::triggered, this, &qFacets::showStereogram);
 	}
-	group.addAction(m_doShowStereogram);
 
+	return QList<QAction *>{
+				m_doFuseKdTreeCells,
+				m_fastMarchingExtraction,
+				m_doExportFacets,
+				m_doExportFacetsInfo,
+				m_doClassifyFacetsByAngle,
+				m_doShowStereogram,
+	};
 }
 
 void qFacets::onNewSelection(const ccHObject::Container& selectedEntities)

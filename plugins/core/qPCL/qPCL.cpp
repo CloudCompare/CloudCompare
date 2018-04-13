@@ -29,8 +29,8 @@
 #include <MLSSmoothingUpsampling.h>
 
 qPCL::qPCL(QObject* parent/*=0*/)
-	: QObject(parent)
-	, ccStdPluginInterface(":/toolbar/info.json")
+    : QObject(parent)
+    , ccStdPluginInterface(":/toolbar/info.json")
 {
 }
 
@@ -63,7 +63,7 @@ void qPCL::handleErrorMessage(QString message)
 		m_app->dispToConsole(message,ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 }
 
-void qPCL::getActions(QActionGroup& group)
+QList<QAction *> qPCL::getActions()
 {
 	if (m_filters.empty())
 	{
@@ -75,8 +75,14 @@ void qPCL::getActions(QActionGroup& group)
 		addFilter( new MLSSmoothingUpsampling() );
 	}
 
+	QList<QAction *> actions;
+
 	for (std::vector<BaseFilter*>::const_iterator it = m_filters.begin(); it != m_filters.end(); ++it)
-		group.addAction((*it)->getAction());
+	{
+		actions.append( (*it)->getAction() );
+	}
+
+	return actions;
 }
 
 int qPCL::addFilter(BaseFilter* filter)

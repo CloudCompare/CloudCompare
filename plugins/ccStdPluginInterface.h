@@ -67,8 +67,8 @@ public:
 	**/
 	virtual ccMainAppInterface * getMainAppInterface() { return m_app; }
 
-	//! Puts our plugin's action(s) into an action group
-	virtual void getActions(QActionGroup& group) = 0;
+	//! Get a list of actions for this plugin
+	virtual QList<QAction *> getActions() = 0;
 
 	//! This method is called by the main application whenever the entity selection changes
 	/** Does nothing by default. Should be re-implemented by the plugin if necessary.

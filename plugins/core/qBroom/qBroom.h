@@ -35,8 +35,8 @@ public:
 	virtual ~qBroom() = default;
 
 	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual QList<QAction *> getActions() override;
 
 protected slots:
 

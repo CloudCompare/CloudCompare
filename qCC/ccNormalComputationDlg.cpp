@@ -28,63 +28,45 @@
 //system
 #include <assert.h>
 
-ccNormalComputationDlg::ccNormalComputationDlg(SelectionMode selectionMode, QWidget* parent/*=0*/)
+ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSensor, QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::NormalComputationDlg()
-	, m_cloud(0)
-	, m_selectionMode(selectionMode)
+    , m_cloud(nullptr)
 {
 	setupUi(this);
 
 	//by default, the 'auto' button is hidden (as long as setCloud is not called)
 	autoRadiusToolButton->setVisible(false);
 
-	connect(localModelComboBox,			SIGNAL(currentIndexChanged(int)), this, SLOT(localModelChanged(int)));
-	connect(autoRadiusToolButton,		SIGNAL(clicked()),                this, SLOT(autoEstimateRadius()));
+    connect(localModelComboBox,			SIGNAL(currentIndexChanged(int)), this, SLOT(localModelChanged(int)));
+    connect(autoRadiusToolButton,		SIGNAL(clicked()),                this, SLOT(autoEstimateRadius()));
 
-	//selection mode
-	{
-		//warning label (for MIXED selection)
-		mixedSelectionLabel->setVisible(selectionMode == MIXED);
+        if(withScanGrid)
+        {
+            useScanGridCheckBox->setChecked(true);
+            scanGridsOrientCheckBox->setChecked(true);
+        }
+        else
+        {
+            //disable 'scan grid' options
+            useScanGridCheckBox->setChecked(false);
+            useScanGridCheckBox->setEnabled(false);
+            gridAngleFrame->setEnabled(false);
 
-		switch (selectionMode)
-		{
-		case WITH_SCAN_GRIDS:
-			{
-				useScanGridRadioButton->setChecked(true);
-				scanGridsOrientRadioButton->setChecked(true);
-			}
-			break;
+            scanGridsOrientCheckBox->setChecked(false);
+            scanGridsOrientCheckBox->setEnabled(false);
+        }
 
-		case MIXED:
-			{
-				//both computation methods can be chosen
-				useScanGridRadioButton->setAutoExclusive(false);
-				useOctreeRadioButton->setAutoExclusive(false);
-				useOctreeRadioButton->setChecked(true);
-				useOctreeRadioButton->setEnabled(true);
-				//and the orientation methods can also be mixed
-				scanGridsOrientRadioButton->setAutoExclusive(false);
-			}
-			break;
-
-		case WITHOUT_SCAN_GRIDS:
-			{
-				//disable 'scan grid' options
-				useScanGridRadioButton->setChecked(false);
-				useScanGridRadioButton->setEnabled(false);
-
-				scanGridsOrientRadioButton->setChecked(false);
-				scanGridsOrientRadioButton->setEnabled(false);
-
-			}
-			break;
-
-		default:
-			assert(false);
-			break;
-		}
-	}
+        if(withSensor)
+        {
+            sensorOrientCheckBox->setChecked(true);
+        }
+        else
+        {
+            //disable 'sensor' options
+            sensorOrientCheckBox->setChecked(false);
+            sensorOrientCheckBox->setEnabled(false);
+        }
 }
 
 void ccNormalComputationDlg::setLocalModel(CC_LOCAL_MODEL_TYPES  model)
@@ -163,7 +145,7 @@ void ccNormalComputationDlg::setPreferredOrientation(ccNormalVectors::Orientatio
 
 bool ccNormalComputationDlg::useScanGridsForComputation() const
 {
-	return useScanGridRadioButton->isChecked();
+	return useScanGridCheckBox->isChecked();
 }
 
 double ccNormalComputationDlg::getMinGridAngle_deg() const
@@ -183,7 +165,12 @@ bool ccNormalComputationDlg::orientNormals() const
 
 bool ccNormalComputationDlg::useScanGridsForOrientation() const
 {
-	return scanGridsOrientRadioButton->isChecked();
+	return scanGridsOrientCheckBox->isChecked();
+}
+
+bool ccNormalComputationDlg::useSensorsForOrientation() const
+{
+	return sensorOrientCheckBox->isChecked();
 }
 
 bool ccNormalComputationDlg::usePreferredOrientation() const

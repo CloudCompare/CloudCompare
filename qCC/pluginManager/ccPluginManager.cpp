@@ -35,14 +35,28 @@ ccPluginInterfaceList ccPluginManager::m_pluginList;
 
 // Check for metadata and warn if it's not there
 // This indicates that a plugin hasn't been converted to the new JSON metadata.
-// It is going to be required.
+// It is going to be required in a future verison of CloudCompare.
 static void	sWarnIfNoMetaData( QPluginLoader *loader, const QString &fileName )
 {
 	QJsonObject	metaObject = loader->metaData();
 	
 	if ( metaObject.isEmpty() || metaObject["MetaData"].toObject().isEmpty() )
 	{
-		ccLog::Warning( QStringLiteral( "\t%1 does not supply meta data in the Q_PLUGIN_METADATA - it will need to be updated (see one of the example plugins)" ).arg( fileName ) );				
+		ccLog::Warning( QStringLiteral( "\t%1 does not supply meta data in the Q_PLUGIN_METADATA (see one of the example plugins). This will be required in a future verison of CloudCompare." ).arg( fileName ) );				
+	}
+	else
+	{
+		QJsonObject	data = metaObject["MetaData"].toObject();
+		
+		// The plugin type is going to be required
+		const QStringList validTypes{ "GL", "I/O", "Standard" };
+		
+		const QString	pluginType = data["type"].toString();
+		
+		if ( !validTypes.contains( pluginType ) )
+		{
+			ccLog::Warning( QStringLiteral( "\t%1 does not supply a valid plugin type in its info.json. It must be one of: %2" ).arg( fileName, validTypes.join( ", " ) ) );
+		}
 	}
 }	
 

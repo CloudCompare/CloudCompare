@@ -31,42 +31,42 @@
 ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSensor, QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::NormalComputationDlg()
-    , m_cloud(nullptr)
+	, m_cloud(nullptr)
 {
 	setupUi(this);
 
 	//by default, the 'auto' button is hidden (as long as setCloud is not called)
 	autoRadiusToolButton->setVisible(false);
 
-    connect(localModelComboBox,			SIGNAL(currentIndexChanged(int)), this, SLOT(localModelChanged(int)));
-    connect(autoRadiusToolButton,		SIGNAL(clicked()),                this, SLOT(autoEstimateRadius()));
+	connect(localModelComboBox,			SIGNAL(currentIndexChanged(int)), this, SLOT(localModelChanged(int)));
+	connect(autoRadiusToolButton,		SIGNAL(clicked()),                this, SLOT(autoEstimateRadius()));
 
-        if(withScanGrid)
-        {
-            useScanGridCheckBox->setChecked(true);
-            scanGridsOrientCheckBox->setChecked(true);
-        }
-        else
-        {
-            //disable 'scan grid' options
-            useScanGridCheckBox->setChecked(false);
-            useScanGridCheckBox->setEnabled(false);
-            gridAngleFrame->setEnabled(false);
+	if(withScanGrid)
+	{
+		useScanGridCheckBox->setChecked(true);
+		scanGridsOrientCheckBox->setChecked(true);
+	}
+	else
+	{
+		//disable 'scan grid' options
+		useScanGridCheckBox->setChecked(false);
+		useScanGridCheckBox->setEnabled(false);
+		gridAngleFrame->setEnabled(false);
 
-            scanGridsOrientCheckBox->setChecked(false);
-            scanGridsOrientCheckBox->setEnabled(false);
-        }
+		scanGridsOrientCheckBox->setChecked(false);
+		scanGridsOrientCheckBox->setEnabled(false);
+	}
 
-        if(withSensor)
-        {
-            sensorOrientCheckBox->setChecked(true);
-        }
-        else
-        {
-            //disable 'sensor' options
-            sensorOrientCheckBox->setChecked(false);
-            sensorOrientCheckBox->setEnabled(false);
-        }
+	if(withSensor)
+	{
+		sensorOrientCheckBox->setChecked(true);
+	}
+	else
+	{
+		//disable 'sensor' options
+		sensorOrientCheckBox->setChecked(false);
+		sensorOrientCheckBox->setEnabled(false);
+	}
 }
 
 void ccNormalComputationDlg::setLocalModel(CC_LOCAL_MODEL_TYPES  model)

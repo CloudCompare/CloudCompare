@@ -5485,36 +5485,36 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=0*/)
 
 bool ccPointCloud::orientNormalsTowardViewPoint( CCVector3 & VP, ccProgressDialog* pDlg)
 {
-    int progressIndex = 0;
-    for (unsigned pointIndex = 0; pointIndex < m_points->capacity(); ++pointIndex)
-    {
-        const CCVector3* P = getPoint(pointIndex);
-        CCVector3 N = getPointNormal(pointIndex);
-        CCVector3 OP = *P - VP;
-        OP.normalize();
-        PointCoordinateType dotProd = OP.dot(N);
-        if (dotProd > 0)
-        {
-            N = -N;
-            setPointNormalIndex(pointIndex, ccNormalVectors::GetNormIndex(N));
-        }
+	int progressIndex = 0;
+	for (unsigned pointIndex = 0; pointIndex < m_points->capacity(); ++pointIndex)
+	{
+		const CCVector3* P = getPoint(pointIndex);
+		CCVector3 N = getPointNormal(pointIndex);
+		CCVector3 OP = *P - VP;
+		OP.normalize();
+		PointCoordinateType dotProd = OP.dot(N);
+		if (dotProd > 0)
+		{
+			N = -N;
+			setPointNormalIndex(pointIndex, ccNormalVectors::GetNormIndex(N));
+		}
 
-        if (pDlg)
-        {
-            //update progress dialog
-            if (pDlg->wasCanceled())
-            {
-                unallocateNorms();
-                ccLog::Warning("[orientNormalsWithSensors] Process cancelled by user");
-                return false;
-            }
-            else
-            {
-                pDlg->setValue(++progressIndex);
-            }
-        }
-    }
-    return true;
+		if (pDlg)
+		{
+			//update progress dialog
+			if (pDlg->wasCanceled())
+			{
+				unallocateNorms();
+				ccLog::Warning("[orientNormalsWithSensors] Process cancelled by user");
+				return false;
+			}
+			else
+			{
+				pDlg->setValue(++progressIndex);
+			}
+		}
+	}
+	return true;
 }
 
 bool ccPointCloud::computeNormalsWithOctree(CC_LOCAL_MODEL_TYPES model,
@@ -5598,7 +5598,7 @@ bool ccPointCloud::hasSensor() const
 	for (size_t i = 0; i < m_children.size(); ++i)
 	{
 		ccHObject* child = m_children[i];
-        if (child && child->isKindOf(CC_TYPES::SENSOR))
+		if (child && child->isKindOf(CC_TYPES::SENSOR))
 		{
 			return true;
 		}

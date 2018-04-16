@@ -34,8 +34,8 @@ class ccNormalComputationDlg : public QDialog, public Ui::NormalComputationDlg
 public:
 
 	//! Default constructor
-    /** \param withScanGrid whether the selection contains some structured point clouds
-     *  \param withSensor whether the selection contains some sensors associated to the point clouds
+	/** \param withScanGrid whether the selection contains some structured point clouds
+	 *  \param withSensor whether the selection contains some sensors associated to the point clouds
 		\param parent parent widget
 	**/
     explicit ccNormalComputationDlg(bool withScanGrid, bool withSensor, QWidget* parent = nullptr);

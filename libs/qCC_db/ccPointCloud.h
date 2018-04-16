@@ -355,27 +355,27 @@ public: //normals computation/orientation
 	/** Can also orient the normals in the same run.
 	**/
 	bool computeNormalsWithGrids(	double minTriangleAngle_deg = 1.0,
-                                    ccProgressDialog* pDlg = nullptr );
+									ccProgressDialog* pDlg = nullptr );
 
 	//! Orient the normals with the associated grid structure(s)
-    bool orientNormalsWithGrids(    ccProgressDialog* pDlg = nullptr );
+	bool orientNormalsWithGrids(    ccProgressDialog* pDlg = nullptr );
 
-    //! Normals are forced to point to O
-    bool orientNormalsTowardViewPoint( CCVector3 & VP, ccProgressDialog* pDlg = nullptr);
+	//! Normals are forced to point to O
+	bool orientNormalsTowardViewPoint( CCVector3 & VP, ccProgressDialog* pDlg = nullptr);
 
 	//! Compute the normals by approximating the local surface around each point
 	bool computeNormalsWithOctree(	CC_LOCAL_MODEL_TYPES model,
 									ccNormalVectors::Orientation preferredOrientation,
 									PointCoordinateType defaultRadius,
-                                    ccProgressDialog* pDlg = nullptr );
+									ccProgressDialog* pDlg = nullptr );
 
 	//! Orient the normals with a Minimum Spanning Tree
 	bool orientNormalsWithMST(		unsigned kNN = 6,
-                                    ccProgressDialog* pDlg = nullptr );
+									ccProgressDialog* pDlg = nullptr );
 
 	//! Orient normals with Fast Marching
 	bool orientNormalsWithFM(		unsigned char level,
-                                    ccProgressDialog* pDlg = nullptr);
+									ccProgressDialog* pDlg = nullptr);
 
 public: //waveform (e.g. from airborne scanners)
 

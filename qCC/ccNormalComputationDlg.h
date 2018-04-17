@@ -38,7 +38,7 @@ public:
 	 *  \param withSensor whether the selection contains some sensors associated to the point clouds
 		\param parent parent widget
 	**/
-    explicit ccNormalComputationDlg(bool withScanGrid, bool withSensor, QWidget* parent = nullptr);
+	explicit ccNormalComputationDlg(bool withScanGrid, bool withSensor, QWidget* parent = nullptr);
 
 	//! Returns the local model chosen for normal computation
 	CC_LOCAL_MODEL_TYPES getLocalModel() const;

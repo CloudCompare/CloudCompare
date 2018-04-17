@@ -57,7 +57,7 @@ ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSenso
 		scanGridsOrientCheckBox->setEnabled(false);
 	}
 
-	if(withSensor)
+	if (withSensor)
 	{
 		sensorOrientCheckBox->setChecked(true);
 	}

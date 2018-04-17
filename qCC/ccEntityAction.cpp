@@ -1402,13 +1402,13 @@ namespace ccEntityAction
 					ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
 					clouds.push_back(cloud);
 					
-					if(cloud->gridCount() > 0)
+					if (cloud->gridCount() > 0)
 					{
 						withScanGrid = true;
 					}
-					for(unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
+					for (unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
 					{
-						if(cloud->hasSensor()){
+						if (cloud->hasSensor()){
 							withSensor = true;
 						}
 					}
@@ -1558,7 +1558,7 @@ namespace ccEntityAction
 							if (child && child->isKindOf(CC_TYPES::SENSOR))
 							{
 								ccSensor* sensor = ccHObjectCaster::ToSensor(child);
-								if(sensor->getActiveAbsoluteCenter(sensorPosition))
+								if (sensor->getActiveAbsoluteCenter(sensorPosition))
 								{
 									result = cloud->orientNormalsTowardViewPoint(sensorPosition, &pDlg);
 									break;

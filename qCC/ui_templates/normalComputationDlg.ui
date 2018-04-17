@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>482</width>
-    <height>434</height>
+    <height>411</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -298,7 +298,7 @@
          <bool>true</bool>
         </property>
         <property name="toolTip">
-         <string>Use sensor position to orient normals (if both grid and sensor ar ticked, sensor has precedence over grid)</string>
+         <string>Use sensor position to orient normals (if both grid and sensor are selected, 'grid' has precedence over 'sensor')</string>
         </property>
         <property name="text">
          <string>Use sensor(s) whenever possible</string>

@@ -65,6 +65,10 @@ v2.10.alpha - XX/XX/201X
 	* New behavior:
 		- Some load dialogs 'Apply all' button will only apply to the set of selected files (ASCII, PLY and LAS)
 
+	* Normals:
+		- Ergonomics of 'Normals > compute' dialog have been (hopefully) enhanced
+		- Normals can now be oriented toward a sensor even if there's no grid associated with the point cloud.
+
 	* PCV:
 		- the PCV plugin can now be applied on several clouds (batch mode)
 

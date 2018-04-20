@@ -36,6 +36,7 @@
 #include "ccPointCloud.h"
 #include "ccPolyline.h"
 #include "ccPointCloudInterpolator.h"
+#include "ccSensor.h"
 
 //qCC_gl
 #include "ccGuiParameters.h"
@@ -1387,7 +1388,8 @@ namespace ccEntityAction
 		
 		//look for clouds and meshes
 		std::vector<ccPointCloud*> clouds;
-		size_t cloudsWithScanGrids = 0;
+		bool withScanGrid = false;
+		bool withSensor = false;
 		std::vector<ccMesh*> meshes;
 		PointCoordinateType defaultRadius = 0;
 		try
@@ -1400,9 +1402,17 @@ namespace ccEntityAction
 					ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
 					clouds.push_back(cloud);
 					
-					if (cloud->gridCount() != 0)
-						++cloudsWithScanGrids;
-					
+					if (cloud->gridCount() > 0)
+					{
+						withScanGrid = true;
+					}
+					for (unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
+					{
+						if (cloud->hasSensor()){
+							withSensor = true;
+						}
+					}
+
 					if (defaultRadius == 0)
 					{
 						//default radius
@@ -1433,27 +1443,13 @@ namespace ccEntityAction
 		//compute normals for each selected cloud
 		if (!clouds.empty())
 		{
-			ccNormalComputationDlg::SelectionMode selectionMode = ccNormalComputationDlg::WITHOUT_SCAN_GRIDS;
-			if (cloudsWithScanGrids)
-			{
-				if (clouds.size() == cloudsWithScanGrids)
-				{
-					//all clouds have an associated grid
-					selectionMode = ccNormalComputationDlg::WITH_SCAN_GRIDS;
-				}
-				else
-				{
-					//only a part of the clouds have an associated grid
-					selectionMode = ccNormalComputationDlg::MIXED;
-				}
-			}
-			
+
 			static CC_LOCAL_MODEL_TYPES s_lastModelType = LS;
 			static ccNormalVectors::Orientation s_lastNormalOrientation = ccNormalVectors::UNDEFINED;
 			static int s_lastMSTNeighborCount = 6;
 			static double s_lastMinGridAngle_deg = 1.0;
 			
-			ccNormalComputationDlg ncDlg(selectionMode, parent);
+			ccNormalComputationDlg ncDlg(withScanGrid, withSensor, parent);
 			ncDlg.setLocalModel(s_lastModelType);
 			ncDlg.setRadius(defaultRadius);
 			ncDlg.setPreferredOrientation(s_lastNormalOrientation);
@@ -1469,13 +1465,14 @@ namespace ccEntityAction
 			
 			//normals computation
 			CC_LOCAL_MODEL_TYPES model = s_lastModelType = ncDlg.getLocalModel();
-			bool useGridStructure = cloudsWithScanGrids && ncDlg.useScanGridsForComputation();
+			bool useGridStructure = withScanGrid && ncDlg.useScanGridsForComputation();
 			defaultRadius = ncDlg.getRadius();
 			double minGridAngle_deg = s_lastMinGridAngle_deg = ncDlg.getMinGridAngle_deg();
 			
 			//normals orientation
 			bool orientNormals = ncDlg.orientNormals();
-			bool orientNormalsWithGrids = cloudsWithScanGrids && ncDlg.useScanGridsForOrientation();
+			bool orientNormalsWithGrids = withScanGrid && ncDlg.useScanGridsForOrientation();
+			bool orientNormalsWithSensors = withSensor && ncDlg.useSensorsForOrientation();
 			ccNormalVectors::Orientation preferredOrientation = s_lastNormalOrientation = ncDlg.getPreferredOrientation();
 			bool orientNormalsMST = ncDlg.useMSTOrientation();
 			int mstNeighbors = s_lastMSTNeighborCount = ncDlg.getMSTNeighborCount();
@@ -1543,6 +1540,31 @@ namespace ccEntityAction
 					{
 						//we can still use the grid structure(s) to orient the normals!
 						result = cloud->orientNormalsWithGrids();
+					}
+					else if (cloud->hasSensor() && orientNormalsWithSensors)
+					{
+						result = false;
+
+						// RJ: TODO: the issue here is that a cloud can have multiple sensors.
+						// As the association to sensor is not explicit in CC, given a cloud
+						// some points can belong to one sensor and some others can belongs to others sensors.
+						// so it's why here grid orientation has precedence over sensor orientation because in this
+						// case association is more explicit.
+						// Here we take the first valid viewpoint for now even if it's not a really good...
+						CCVector3 sensorPosition;
+						for (size_t i = 0; i < cloud->getChildrenNumber(); ++i)
+						{
+							ccHObject* child = cloud->getChild(i);
+							if (child && child->isKindOf(CC_TYPES::SENSOR))
+							{
+								ccSensor* sensor = ccHObjectCaster::ToSensor(child);
+								if (sensor->getActiveAbsoluteCenter(sensorPosition))
+								{
+									result = cloud->orientNormalsTowardViewPoint(sensorPosition, &pDlg);
+									break;
+								}
+							}
+						}
 					}
 					else if (orientNormalsMST)
 					{

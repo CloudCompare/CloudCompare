@@ -33,14 +33,12 @@ class ccNormalComputationDlg : public QDialog, public Ui::NormalComputationDlg
 
 public:
 
-	//! Types of the clouds in the current selection (i.e. with or without scan grids)
-	enum SelectionMode { WITH_SCAN_GRIDS = 1, WITHOUT_SCAN_GRIDS = 2, MIXED = 3 };
-
 	//! Default constructor
-	/** \param selectionMode selection mode
+	/** \param withScanGrid whether the selection contains some structured point clouds
+	 *  \param withSensor whether the selection contains some sensors associated to the point clouds
 		\param parent parent widget
 	**/
-	explicit ccNormalComputationDlg(SelectionMode selectionMode, QWidget* parent = 0);
+	explicit ccNormalComputationDlg(bool withScanGrid, bool withSensor, QWidget* parent = nullptr);
 
 	//! Returns the local model chosen for normal computation
 	CC_LOCAL_MODEL_TYPES getLocalModel() const;
@@ -75,6 +73,9 @@ public:
 	//! Returns whether scan grids should be used for normals orientation
 	bool useScanGridsForOrientation() const;
 
+	//! Returns whether scan grids should be used for normals computation
+	bool useSensorsForOrientation() const;
+
 	//! Returns whether a preferred orientation should be used
 	bool usePreferredOrientation() const;
 
@@ -102,10 +103,6 @@ protected:
 
 	//! Selected cloud
 	ccPointCloud* m_cloud;
-
-	//! Current selection mode
-	SelectionMode m_selectionMode;
-
 };
 
 #endif // CC_NORMAL_COMPUTATION_DLG_HEADER

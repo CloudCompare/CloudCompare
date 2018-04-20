@@ -6,27 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>418</width>
-    <height>387</height>
+    <width>482</width>
+    <height>411</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Compute normals</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
-   <item>
-    <widget class="QLabel" name="mixedSelectionLabel">
-     <property name="styleSheet">
-      <string notr="true">color: red;</string>
-     </property>
-     <property name="text">
-      <string>Mixed selection: some clouds don't have scan grid(s)</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
    <item>
     <widget class="QGroupBox" name="surfaceGroupBox">
      <property name="title">
@@ -89,7 +76,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QRadioButton" name="useScanGridRadioButton">
+         <widget class="QCheckBox" name="useScanGridCheckBox">
           <property name="toolTip">
            <string>Using scan grid(s) instead of the octree</string>
           </property>
@@ -112,9 +99,9 @@
          </spacer>
         </item>
         <item>
-         <widget class="QFrame" name="gridKernelFrame">
+         <widget class="QFrame" name="gridAngleFrame">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout">
            <property name="leftMargin">
@@ -131,8 +118,11 @@
            </property>
            <item>
             <widget class="QLabel" name="label_3">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="toolTip">
-              <string>Each normal will be computed using the (2p+1)*(2p+1) neighbors in the grid</string>
+              <string>min triangulation angle</string>
              </property>
              <property name="text">
               <string>min angle</string>
@@ -141,6 +131,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="gridAngleDoubleSpinBox">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="toolTip">
               <string>Min angle of local triangles (in degrees)</string>
              </property>
@@ -190,15 +183,9 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_10">
         <item>
-         <widget class="QRadioButton" name="useOctreeRadioButton">
-          <property name="toolTip">
-           <string>The octree works for any cloud</string>
-          </property>
+         <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>use octree</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
+           <string>Octree</string>
           </property>
          </widget>
         </item>
@@ -296,12 +283,25 @@
        <number>30</number>
       </property>
       <item>
-       <widget class="QRadioButton" name="scanGridsOrientRadioButton">
+       <widget class="QCheckBox" name="scanGridsOrientCheckBox">
         <property name="toolTip">
-         <string>Using scan grid(s) is the most robust method</string>
+         <string>Use scan grid(s) (robust method)</string>
         </property>
         <property name="text">
-         <string>Use scan grid(s) whenever possible</string>
+         <string>Use scan grid(s)  whenever possible</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="sensorOrientCheckBox">
+        <property name="acceptDrops">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>Use sensor position to orient normals (if both grid and sensor are selected, 'grid' has precedence over 'sensor')</string>
+        </property>
+        <property name="text">
+         <string>Use sensor(s) whenever possible</string>
         </property>
        </widget>
       </item>
@@ -475,7 +475,6 @@
   </layout>
   <zorder>buttonBox</zorder>
   <zorder>normalsOrientGroupBox</zorder>
-  <zorder>mixedSelectionLabel</zorder>
   <zorder>surfaceGroupBox</zorder>
   <zorder>neighborsGroupBox</zorder>
  </widget>
@@ -488,8 +487,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>424</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -504,44 +503,12 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>424</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>useScanGridRadioButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>gridKernelFrame</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>136</x>
-     <y>120</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>414</x>
-     <y>120</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>useOctreeRadioButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>localRadiusFrame</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>77</x>
-     <y>154</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>364</x>
-     <y>154</y>
     </hint>
    </hints>
   </connection>
@@ -552,12 +519,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>145</x>
-     <y>238</y>
+     <x>188</x>
+     <y>316</y>
     </hint>
     <hint type="destinationlabel">
-     <x>359</x>
-     <y>238</y>
+     <x>456</x>
+     <y>317</y>
     </hint>
    </hints>
   </connection>
@@ -568,12 +535,28 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>118</x>
-     <y>266</y>
+     <x>161</x>
+     <y>349</y>
     </hint>
     <hint type="destinationlabel">
-     <x>332</x>
-     <y>266</y>
+     <x>456</x>
+     <y>351</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useScanGridCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>gridAngleFrame</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>128</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>388</x>
+     <y>129</y>
     </hint>
    </hints>
   </connection>

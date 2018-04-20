@@ -6,7 +6,7 @@ OPTION( OPTION_SUPPORT_GAMEPADS "Build with gamepad support (requires Qt 5.7+)" 
 if( ${OPTION_SUPPORT_GAMEPADS} )
 
 	#TODO: make sure that Qt version is at least 5.7 ;)
-	find_package(Qt5Gamepad)
+	find_package(Qt5Gamepad REQUIRED)
 	
 	include_directories( ${Qt5Gamepad_INCLUDE_DIRS} )
 

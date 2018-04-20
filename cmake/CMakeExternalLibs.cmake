@@ -12,14 +12,14 @@ endif()
 
 # find qt5 components
 # find_package(Qt5 COMPONENTS OpenGL Widgets Core Gui PrintSupport Concurrent REQUIRED)
-find_package(Qt5Widgets)
-find_package(Qt5Core)
-find_package(Qt5Gui)
-find_package(Qt5PrintSupport)
-find_package(Qt5Concurrent)
-find_package(Qt5OpenGL)
-find_package(Qt5OpenGLExtensions)
-find_package(Qt5Svg)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5PrintSupport REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
+find_package(Qt5OpenGLExtensions REQUIRED)
+find_package(Qt5Svg REQUIRED)
 
 # in the case no Qt5Config.cmake file could be found, cmake will explicitly ask the user for the QT5_DIR containing it!
 # thus no need to keep additional variables and checks

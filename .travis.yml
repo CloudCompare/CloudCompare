@@ -11,7 +11,7 @@ install:
 - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
 - sudo apt-get update -qq
 - sudo apt-get install -qy cmake qt55base libgdal1-dev libfreenect-dev
-  libeigen3-dev
+  libeigen3-dev libqt5svg5-dev 
 - git submodule init && git submodule update
 before_script:
 - mkdir build

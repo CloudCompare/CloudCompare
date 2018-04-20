@@ -41,7 +41,7 @@ ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSenso
 	connect(localModelComboBox,			SIGNAL(currentIndexChanged(int)), this, SLOT(localModelChanged(int)));
 	connect(autoRadiusToolButton,		SIGNAL(clicked()),                this, SLOT(autoEstimateRadius()));
 
-	if(withScanGrid)
+	if (withScanGrid)
 	{
 		useScanGridCheckBox->setChecked(true);
 		scanGridsOrientCheckBox->setChecked(true);

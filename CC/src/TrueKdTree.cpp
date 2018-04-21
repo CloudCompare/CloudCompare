@@ -23,12 +23,6 @@
 #include "Neighbourhood.h"
 #include "SortAlgo.h"
 
-
-//Qt
-#ifdef USE_QT
-#include <QCoreApplication>
-#endif
-
 using namespace CCLib;
 
 TrueKdTree::TrueKdTree(GenericIndexedCloudPersist* cloud)

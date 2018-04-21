@@ -46,7 +46,7 @@ void ccPickingHub::togglePickingMode(bool state)
 
 void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 {
-	ccGLWindow* glWindow = (mdiSubWindow ? GLWindowFromWidget(mdiSubWindow->widget()) : 0);
+	ccGLWindow* glWindow = (mdiSubWindow ? GLWindowFromWidget(mdiSubWindow->widget()) : nullptr);
 	if (m_activeGLWindow == glWindow)
 	{
 		//nothing to do
@@ -58,7 +58,7 @@ void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 		//take care of the previously linked window
 		togglePickingMode(false);
 		disconnect(m_activeGLWindow);
-		m_activeGLWindow = 0;
+		m_activeGLWindow = nullptr;
 	}
 
 	if (glWindow)
@@ -77,7 +77,7 @@ void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 
 void ccPickingHub::onActiveWindowDeleted(QObject*)
 {
-	m_activeGLWindow = 0;
+	m_activeGLWindow = nullptr;
 }
 
 void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int x, int y, const CCVector3& P3D)

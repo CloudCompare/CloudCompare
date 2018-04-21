@@ -44,7 +44,8 @@ class ccPickingHub : public QObject
 public:
 	
 	//! Default constructor
-	ccPickingHub(ccMainAppInterface* app, QObject* parent = 0);
+	ccPickingHub(ccMainAppInterface* app, QObject* parent = nullptr);
+	virtual ~ccPickingHub() = default;
 
 	//! Returns the number of currently registered listeners
 	inline size_t listenerCount() const { return m_listeners.size(); }

@@ -27,8 +27,8 @@
 #include <ChunkedPointCloud.h>
 
 //Local
-#include "ccNormalVectors.h"
 #include "ccColorScale.h"
+#include "ccNormalVectors.h"
 #include "ccWaveform.h"
 
 //Qt

@@ -19,19 +19,19 @@
 #include "RegistrationTools.h"
 
 //local
-#include "GenericProgressCallback.h"
-#include "ReferenceCloud.h"
-#include "DistanceComputationTools.h"
-#include "CloudSamplingTools.h"
-#include "ScalarFieldTools.h"
-#include "NormalDistribution.h"
-#include "ManualSegmentationTools.h"
-#include "GeometricalAnalysisTools.h"
-#include "KdTree.h"
-#include "SimpleCloud.h"
 #include "ChunkedPointCloud.h"
+#include "CloudSamplingTools.h"
+#include "DistanceComputationTools.h"
 #include "Garbage.h"
+#include "GenericProgressCallback.h"
+#include "GeometricalAnalysisTools.h"
 #include "Jacobi.h"
+#include "KdTree.h"
+#include "ManualSegmentationTools.h"
+#include "NormalDistribution.h"
+#include "ReferenceCloud.h"
+#include "ScalarFieldTools.h"
+#include "SimpleCloud.h"
 #include "SortAlgo.h"
 
 //system
@@ -129,7 +129,7 @@ void RegistrationTools::FilterTransformation(	const ScaledTransformation& inTran
 
 struct ModelCloud
 {
-	ModelCloud() : cloud(0), weights(0) {}
+	ModelCloud() : cloud(nullptr), weights(nullptr) {}
 	ModelCloud(const ModelCloud& m) : cloud(m.cloud), weights(m.weights) {}
 	GenericIndexedCloudPersist* cloud;
 	ScalarField* weights;
@@ -137,7 +137,7 @@ struct ModelCloud
 
 struct DataCloud
 {
-	DataCloud() : cloud(0), rotatedCloud(0), weights(0), CPSetRef(0), CPSetPlain(0) {}
+	DataCloud() : cloud(nullptr), rotatedCloud(nullptr), weights(nullptr), CPSetRef(nullptr), CPSetPlain(nullptr) {}
 	
 	ReferenceCloud* cloud;
 	SimpleCloud* rotatedCloud;
@@ -328,7 +328,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 	}
 
 	//per-point couple weights
-	ScalarField* coupleWeights = 0;
+	ScalarField* coupleWeights = nullptr;
 	if (model.weights || data.weights)
 	{
 		coupleWeights = new ScalarField("CoupleWeights");
@@ -367,7 +367,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 		assert(false);
 	}
 
-	FILE* fTraceFile = 0;
+	FILE* fTraceFile = nullptr;
 #ifdef QT_DEBUG
 	fTraceFile = fopen("registration_trace_log.csv","wt");
 	if (fTraceFile)
@@ -803,7 +803,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 	if (fTraceFile)
 	{
 		fclose(fTraceFile);
-		fTraceFile = 0;
+		fTraceFile = nullptr;
 	}
 
 	//end of progress notification
@@ -865,7 +865,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 	trans.T = CCVector3(0,0,0);
 	trans.s = PC_ONE;
 
-	if (P == 0 || X == 0 || P->size() != X->size() || P->size() < 3)
+	if (P == nullptr || X == nullptr || P->size() != X->size() || P->size() < 3)
 		return false;
 
 	//centers of mass
@@ -1137,7 +1137,7 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
 	//}
 
 	//Initialize random seed with current time
-	srand(static_cast<unsigned>(time(0)));
+	srand(static_cast<unsigned>(time(nullptr)));
 
 	unsigned bestScore = 0, score = 0;
 	transform.R.invalidate();
@@ -1593,7 +1593,7 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 		}
 	}
 
-	return (int)results.size();
+	return static_cast<int>(results.size());
 }
 
 
@@ -1767,4 +1767,3 @@ bool FPCSRegistrationTools::FilterCandidates(	GenericIndexedCloud *modelCloud,
 
 	return true;
 }
-

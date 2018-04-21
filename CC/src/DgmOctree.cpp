@@ -19,11 +19,11 @@
 #include "DgmOctree.h"
 
 //local
-#include "ReferenceCloud.h"
-#include "GenericProgressCallback.h"
 #include "CCMiscTools.h"
-#include "ScalarField.h"
+#include "GenericProgressCallback.h"
 #include "RayAndBox.h"
+#include "ReferenceCloud.h"
+#include "ScalarField.h"
 #include "SortAlgo.h"
 
 //system
@@ -3188,7 +3188,7 @@ DgmOctree::octreeCell::octreeCell(const DgmOctree* _parentOctree)
 	: parentOctree(_parentOctree)
 	, truncatedCode(0)
 	, index(0)
-	, points(0)
+	, points(nullptr)
 	, level(0)
 {
 	if (parentOctree && parentOctree->m_theAssociatedCloud)
@@ -3206,7 +3206,7 @@ DgmOctree::octreeCell::octreeCell(const octreeCell& cell)
 	, level(cell.level)
 	, truncatedCode(cell.truncatedCode)
 	, index(cell.index)
-	, points(0)
+	, points(nullptr)
 {
 	//copy constructor shouldn't be used (we can't properly share the 'points' reference)
 	assert(false);
@@ -3233,11 +3233,11 @@ struct octreeCellDesc
 	unsigned char level;
 };
 
-static DgmOctree* s_octree_MT = 0;
-static DgmOctree::octreeCellFunc s_func_MT = 0;
-static void** s_userParams_MT = 0;
-static GenericProgressCallback* s_progressCb_MT = 0;
-static NormalizedProgress* s_normProgressCb_MT = 0;
+static DgmOctree* s_octree_MT = nullptr;
+static DgmOctree::octreeCellFunc s_func_MT = nullptr;
+static void** s_userParams_MT = nullptr;
+static GenericProgressCallback* s_progressCb_MT = nullptr;
+static NormalizedProgress* s_normProgressCb_MT = nullptr;
 static bool s_cellFunc_MT_success = true;
 
 void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
@@ -3524,17 +3524,17 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	unsigned char level,
 		}
 #endif
 
-		s_octree_MT = 0;
-		s_func_MT = 0;
-		s_userParams_MT = 0;
+		s_octree_MT = nullptr;
+		s_func_MT = nullptr;
+		s_userParams_MT = nullptr;
 
 		if (progressCb)
 		{
 			progressCb->stop();
 			if (s_normProgressCb_MT)
 				delete s_normProgressCb_MT;
-			s_normProgressCb_MT = 0;
-			s_progressCb_MT = 0;
+			s_normProgressCb_MT = nullptr;
+			s_progressCb_MT = nullptr;
 		}
 
 		//if something went wrong, we clear everything and return 0!
@@ -3792,7 +3792,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 			result=false;
 			break;
 			}
-			//*/
+			*/
 			for (unsigned i = 0; i < elements; ++i)
 			{
 				cell.points->addPointIndex((startingElement++)->theIndex);
@@ -3803,7 +3803,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 #ifndef ENABLE_DOWN_TOP_TRAVERSAL
 				&nProgress
 #else
-				0
+				nullptr
 #endif
 				);
 
@@ -4074,16 +4074,16 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 		}
 #endif
 
-		s_octree_MT = 0;
-		s_func_MT = 0;
-		s_userParams_MT = 0;
+		s_octree_MT = nullptr;
+		s_func_MT = nullptr;
+		s_userParams_MT = nullptr;
 
 		if (progressCb)
 		{
 			progressCb->stop();
 			if (s_normProgressCb_MT)
 				delete s_normProgressCb_MT;
-			s_normProgressCb_MT = 0;
+			s_normProgressCb_MT = nullptr;
 		}
 
 		//if something went wrong, we clear everything and return 0!

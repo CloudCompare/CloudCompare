@@ -91,7 +91,7 @@ protected:
 										GenericCloud* X,
 										ScaledTransformation& trans,
 										bool adjustScale = false,
-										ScalarField* coupleWeights = 0,
+										ScalarField* coupleWeights = nullptr,
 										PointCoordinateType aPrioriScale = 1.0f);
 
 };
@@ -168,8 +168,8 @@ public:
 			, filterOutFarthestPoints(false)
 			, samplingLimit(50000)
 			, finalOverlapRatio(1.0)
-			, modelWeights(0)
-			, dataWeights(0)
+			, modelWeights(nullptr)
+			, dataWeights(nullptr)
 			, transformationFilters(SKIP_NONE)
 			, maxThreadCount(0)
 		{}
@@ -229,7 +229,7 @@ public:
 									ScaledTransformation& totalTrans,
 									double& finalRMS,
 									unsigned& finalPointCount,
-									GenericProgressCallback* progressCb = 0);
+									GenericProgressCallback* progressCb = nullptr);
 
 
 };
@@ -261,7 +261,7 @@ public:
                                 PointCoordinateType overlap,
                                 unsigned nbBases,
                                 unsigned nbTries,
-                                GenericProgressCallback* progressCb=0,
+                                GenericProgressCallback* progressCb = nullptr,
                                 unsigned nbMaxCandidates = 0);
 
 protected:

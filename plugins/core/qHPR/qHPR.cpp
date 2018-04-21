@@ -88,7 +88,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		{
 			//not enough memory!
 			delete visiblePoints;
-			visiblePoints = 0;
+			visiblePoints = nullptr;
 		}
 		return visiblePoints;
 	}
@@ -141,7 +141,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 	std::vector<bool> pointBelongsToCvxHull;
 
 	static char qHullCommand[] = "qhull QJ Qci";
-	if (!qh_new_qhull(3,nbPoints+1,pt_array,False,qHullCommand,0,stderr))
+	if (!qh_new_qhull(3,nbPoints+1,pt_array,False,qHullCommand,nullptr,stderr))
 	{
 		try
 		{
@@ -151,11 +151,12 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		{
 			//not enough memory!
 			delete[] pt_array;
-			return 0;
+			return nullptr;
 		}
 
-		vertexT *vertex = 0,**vertexp = 0;
-		facetT *facet = 0;
+		vertexT *vertex = nullptr;
+		vertexT **vertexp = nullptr;
+		facetT *facet = nullptr;
 
 		FORALLfacets
 		{
@@ -172,7 +173,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 	}
 
 	delete[] pt_array;
-	pt_array = 0;
+	pt_array = nullptr;
 
 	qh_freeqhull(!qh_ALL);
 	//free long memory
@@ -203,11 +204,11 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		else //not enough memory
 		{
 			delete visiblePoints;
-			visiblePoints = 0;
+			visiblePoints = nullptr;
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void qHPR::doAction()
@@ -278,7 +279,7 @@ void qHPR::doAction()
 	}
 
 	//HPR
-	CCLib::ReferenceCloud* visibleCells = 0;
+	CCLib::ReferenceCloud* visibleCells = nullptr;
 	{
 		QElapsedTimer eTimer;
 		eTimer.start();
@@ -302,7 +303,7 @@ void qHPR::doAction()
 		//normal cloud (as it's 'associated cloud' has been deleted).
 		//Only its indexes are valid! (they are corresponding to octree cells)
 		delete theCellCenters;
-		theCellCenters = 0;
+		theCellCenters = nullptr;
 	}
 
 	if (visibleCells)
@@ -317,7 +318,7 @@ void qHPR::doAction()
 		ccPointCloud::VisibilityTableType* pointsVisibility = cloud->getTheVisibilityArray();
 		assert(pointsVisibility);
 		pointsVisibility->fill(POINT_HIDDEN);
-		//*/
+		*/
 
 		CCLib::ReferenceCloud visiblePoints(theOctree->associatedCloud());
 
@@ -345,7 +346,7 @@ void qHPR::doAction()
 			for (unsigned j=0;j<count;++j)
 				pointsVisibility->setValue(Yk.getPointGlobalIndex(j),POINT_VISIBLE);
 			visiblePointCount += count;
-			//*/
+			*/
 			if (!visiblePoints.add(Yk))
 			{
 				m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -355,7 +356,7 @@ void qHPR::doAction()
 		}
 
 		delete visibleCells;
-		visibleCells = 0;
+		visibleCells = nullptr;
 
 		m_app->dispToConsole(QString("[HPR] Visible points: %1").arg(visiblePointCount));
 

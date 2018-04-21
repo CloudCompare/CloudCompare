@@ -5,6 +5,7 @@ cmake_policy(PUSH)
 # Options
 option( COMPILE_CC_CORE_LIB_WITH_QT "Check to compile CC_CORE_LIB with Qt (to enable parallel processing)" ON )
 option( COMPILE_CC_CORE_LIB_WITH_CGAL "Check to compile CC_CORE_LIB with CGAL lib. (to enable Delaunay 2.5D triangulation with a GPL compliant licence)" OFF )
+option( COMPILE_CC_CORE_LIB_WITH_TBB " Check to compile CC_CORE_LIB with Intel Threading Building Blocks lib (enables some parallel processing )" OFF )
 option( COMPILE_CC_CORE_LIB_SHARED "Check to compile CC_CORE_LIB as a shared library (DLL/so)" ON )
 
 # to compile CCLib only! (CMake implicitly imposes to declare a project before anything...)
@@ -15,7 +16,15 @@ include ( ../cmake/CMakeSetCompilerOptions.cmake )
 
 # CGAL takes precedence over triangle
 if (COMPILE_CC_CORE_LIB_WITH_CGAL)
-	include (CGALSupport.cmake)
+	include( cmake/CGALSupport.cmake )
+endif()
+
+if (COMPILE_CC_CORE_LIB_WITH_TBB)
+	include( cmake/FindTBB.cmake )
+else()
+	if (NOT WIN32)
+		message( WARNING "CCLib configured without parallel algorithm capabilities - see COMPILE_CC_CORE_LIB_WITH_TBB" )
+	endif()
 endif()
 
 # Additional dependencies (only Qt in fact)
@@ -37,6 +46,12 @@ endif()
 if (COMPILE_CC_CORE_LIB_WITH_CGAL)
 	target_link_libraries( ${PROJECT_NAME} ${CGAL_LIBRARIES} )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_CGAL_LIB )
+endif()
+
+if (COMPILE_CC_CORE_LIB_WITH_TBB)
+	include_directories( ${TBB_INCLUDE_DIRS} )
+	target_link_libraries( ${PROJECT_NAME} ${TBB_LIBRARIES} )
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_TBB )
 endif()
 
 if ( COMPILE_CC_CORE_LIB_WITH_QT )

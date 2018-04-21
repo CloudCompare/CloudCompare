@@ -29,10 +29,10 @@
 #include "KdTree.h"
 #include "ManualSegmentationTools.h"
 #include "NormalDistribution.h"
+#include "ParallelSort.h"
 #include "ReferenceCloud.h"
 #include "ScalarFieldTools.h"
 #include "SimpleCloud.h"
-#include "SortAlgo.h"
 
 //system
 #include <ctime>
@@ -479,7 +479,8 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 				overlapDistances[i] = data.cloud->getPointScalarValue(i);
 				assert(overlapDistances[i] == overlapDistances[i]);
 			}
-			SortAlgo(overlapDistances.begin(), overlapDistances.begin() + pointCount);
+			
+			ParallelSort(overlapDistances.begin(), overlapDistances.begin() + pointCount);
 
 			assert(maxOverlapCount != 0);
 			ScalarType maxOverlapDist = overlapDistances[maxOverlapCount-1];

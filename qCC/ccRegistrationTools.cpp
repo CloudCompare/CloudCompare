@@ -25,7 +25,7 @@
 #include <DistanceComputationTools.h>
 #include <CloudSamplingTools.h>
 #include <Garbage.h>
-#include <SortAlgo.h>
+#include <ParallelSort.h>
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -186,7 +186,9 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 			{
 				distances[i] = dataCloud->getPointScalarValue(i);
 			}
-			SortAlgo(distances.begin(), distances.end());
+			
+			ParallelSort(distances.begin(), distances.end());
+			
 			//now look for the max value at 'finalOverlapRatio+margin' percent
 			maxSearchDist = distances[static_cast<unsigned>(std::max(1.0,count*(finalOverlapRatio+s_overlapMarginRatio)))-1];
 		}

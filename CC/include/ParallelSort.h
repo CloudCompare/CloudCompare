@@ -15,24 +15,31 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef SORT_ALGO_HEADER
-#define SORT_ALGO_HEADER
+#ifndef PARALLEL_SORT_HEADER
+#define PARALLEL_SORT_HEADER
 
-#ifndef SortAlgo
+#ifdef ParallelSort
+#undef ParallelSort
+#pragma message "Replacing preprocessor symbol 'ParallelSort' with the one defined in Parallel.h"
+#endif
 
-	#if defined(_MSC_VER) && (_MSC_VER >= 1800)
+#if defined(_MSC_VER) && (_MSC_VER >= 1800)
 
-		//Parallel Patterns Library (for parallel sort)
-		#include <ppl.h>
-		#define SortAlgo Concurrency::parallel_sort
+	//Parallel Patterns Library (for parallel sort)
+	#include <ppl.h>
 
-	#else
+	#define ParallelSort Concurrency::parallel_sort
 
-		//TODO: find a portable parallel sort algorithm
-		#define SortAlgo std::sort
+#elif USE_TBB
 
-	#endif
+	#include <tbb/parallel_sort.h>
 
-#endif //#ifndef SortAlgo
+	#define ParallelSort tbb::parallel_sort
 
-#endif //SORT_ALGO_HEADER
+#else
+
+	#define ParallelSort std::sort
+
+#endif
+
+#endif

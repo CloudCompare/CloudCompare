@@ -90,7 +90,7 @@ public: //clone, copy, etc.
 		\param cloud a GenericIndexedCloud structure
 		\param sourceCloud cloud from which main parameters will be imported (optional)
 	**/
-	static ccPointCloud* From(const CCLib::GenericIndexedCloud* cloud, const ccGenericPointCloud* sourceCloud = 0);
+	static ccPointCloud* From(const CCLib::GenericIndexedCloud* cloud, const ccGenericPointCloud* sourceCloud = nullptr);
 
 	//! Creates a new point cloud object from a GenericCloud
 	/** "GenericCloud" is a very simple and light interface from CCLib. It is
@@ -102,7 +102,7 @@ public: //clone, copy, etc.
 		\param cloud a GenericCloud structure
 		\param sourceCloud cloud from which main parameters will be imported (optional)
 	**/
-	static ccPointCloud* From(CCLib::GenericCloud* cloud, const ccGenericPointCloud* sourceCloud = 0);
+	static ccPointCloud* From(CCLib::GenericCloud* cloud, const ccGenericPointCloud* sourceCloud = nullptr);
 
 	//! Warnings for the partialClone method (bit flags)
 	enum CLONE_WARNINGS {	WRN_OUT_OF_MEM_FOR_COLORS		= 1,
@@ -118,7 +118,7 @@ public: //clone, copy, etc.
 		\param selection a ReferenceCloud structure (pointing to source)
 		\param[out] warnings [optional] to determine if warnings (CTOR_ERRORS) occurred during the duplication process
 	**/
-	ccPointCloud* partialClone(const CCLib::ReferenceCloud* selection, int* warnings = 0) const;
+	ccPointCloud* partialClone(const CCLib::ReferenceCloud* selection, int* warnings = nullptr) const;
 
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree and
@@ -130,7 +130,7 @@ public: //clone, copy, etc.
 	ccPointCloud* cloneThis(ccPointCloud* destCloud = 0, bool ignoreChildren = false);
 
 	//inherited from ccGenericPointCloud
-	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = 0, bool ignoreChildren = false) override;
+	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = nullptr, bool ignoreChildren = false) override;
 
 	//! Fuses another 3D entity with this one
 	/** All the main features of the given entity are added, except from the octree and
@@ -419,7 +419,7 @@ public: //waveform (e.g. from airborne scanners)
 	bool compressFWFData();
 
 	//! Computes the maximum amplitude of all associated waveforms
-	bool computeFWFAmplitude(double& minVal, double& maxVal, ccProgressDialog* pDlg = 0) const;
+	bool computeFWFAmplitude(double& minVal, double& maxVal, ccProgressDialog* pDlg = nullptr) const;
 
 	//! Clears all associated FWF data
 	void clearFWFData();
@@ -458,7 +458,7 @@ public: //other methods
 	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
 	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
 	/** \warning if removeSelectedPoints is true, any attached octree will be deleted. **/
-	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = 0) override;
+	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr) override;
 	virtual void applyRigidTransformation(const ccGLMatrix& trans) override;
 	//virtual bool isScalarFieldEnabled() const;
 	inline virtual void refreshBB() override { invalidateBoundingBox(); }
@@ -476,12 +476,12 @@ public: //other methods
 		(with the indexes pointing on the closest point in the other cloud)
 	**/
 	QSharedPointer<CCLib::ReferenceCloud> computeCPSet(	ccGenericPointCloud& otherCloud,
-														CCLib::GenericProgressCallback* progressCb = NULL,
+														CCLib::GenericProgressCallback* progressCb = nullptr,
 														unsigned char octreeLevel = 0);
 
 	//! Interpolate colors from another cloud (nearest neighbor only)
 	bool interpolateColorsFrom(	ccGenericPointCloud* cloud,
-								CCLib::GenericProgressCallback* progressCb = NULL,
+								CCLib::GenericProgressCallback* progressCb = nullptr,
 								unsigned char octreeLevel = 0);
 
 	//! Sets a particular point color
@@ -642,11 +642,11 @@ public: //other methods
 		**/
 	ccPointCloud* unrollOnCylinder(	PointCoordinateType radius,
 									unsigned char coneAxisDim,
-									CCVector3* center = 0,
+									CCVector3* center = nullptr,
 									bool exportDeviationSF = false,
 									double startAngle_deg = 0.0,
 									double stopAngle_deg = 360.0,
-									CCLib::GenericProgressCallback* progressCb = NULL) const;
+									CCLib::GenericProgressCallback* progressCb = nullptr) const;
 
 	//! Unrolls the cloud (and its normals) on a cone
 	/** \param coneAngle_deg cone apex angle (between 0 and 180 degrees)
@@ -664,7 +664,7 @@ public: //other methods
 								bool developStraightenedCone,
 								PointCoordinateType baseRadius,
 								bool exportDeviationSF = false,
-								CCLib::GenericProgressCallback* progressCb = NULL) const;
+								CCLib::GenericProgressCallback* progressCb = nullptr) const;
 
 	//! Adds associated SF color ramp info to current GL context
 	void addColorRampInfo(CC_DRAW_CONTEXT& context);
@@ -759,7 +759,7 @@ protected: // VBO
 		//! Inits the VBO
 		/** \return the number of allocated bytes (or -1 if an error occurred)
 		**/
-		int init(int count, bool withColors, bool withNormals, bool* reallocated = 0);
+		int init(int count, bool withColors, bool withNormals, bool* reallocated = nullptr);
 
 		VBO()
 			: QGLBuffer(QGLBuffer::VertexBuffer)

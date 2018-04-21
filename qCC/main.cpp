@@ -85,7 +85,7 @@ protected:
 		case QEvent::FileOpen:
 			{
 				MainWindow* mainWindow = MainWindow::TheInstance();
-				if ( mainWindow == NULL )
+				if ( mainWindow == nullptr )
 					return false;
 
 				mainWindow->addToDB( QStringList(static_cast<QFileOpenEvent *>(inEvent)->file()) );
@@ -200,7 +200,7 @@ int main(int argc, char **argv)
 	}
 
 	//splash screen
-	QScopedPointer<QSplashScreen> splash(0);
+	QScopedPointer<QSplashScreen> splash(nullptr);
 	QTimer splashTimer;
 
 	//standard mode

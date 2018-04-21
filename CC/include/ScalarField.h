@@ -41,7 +41,7 @@ public:
 	/** [SHAREABLE] Call 'link' when associating this structure to an object.
 		\param name scalar field name
 	**/
-	explicit ScalarField(const char* name = 0);
+	explicit ScalarField(const char* name = nullptr);
 
 	//! Copy constructor
 	/** \param sf scalar field to copy
@@ -62,7 +62,7 @@ public:
 	/** \param mean a field to store the mean value
 		\param variance if not void, the variance will be computed and stored here
 	**/
-	void computeMeanAndVariance(ScalarType &mean, ScalarType* variance = 0) const;
+	void computeMeanAndVariance(ScalarType &mean, ScalarType* variance = nullptr) const;
 
 	//inherited from GenericChunkedArray
 	virtual void computeMinAndMax();

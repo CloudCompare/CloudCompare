@@ -24,11 +24,11 @@
 #include "CCGeom.h"
 
 //system
+#include <cfloat>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
 #include <vector>
-#include <float.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 namespace CCLib
 {

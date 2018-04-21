@@ -16,13 +16,13 @@
 //#                                                                        #
 //##########################################################################
 
-#include "../include/Neighbourhood.h"
+#include "Neighbourhood.h"
 
 //local
-#include "Delaunay2dMesh.h"
-#include "ConjugateGradient.h"
-#include "DistanceComputationTools.h"
 #include "ChunkedPointCloud.h"
+#include "ConjugateGradient.h"
+#include "Delaunay2dMesh.h"
+#include "DistanceComputationTools.h"
 #include "SimpleMesh.h"
 
 //Eigenvalues decomposition
@@ -73,7 +73,7 @@ const CCVector3* Neighbourhood::getGravityCenter()
 {
 	if (!(m_structuresValidity & FLAG_GRAVITY_CENTER))
 		computeGravityCenter();
-	return ((m_structuresValidity & FLAG_GRAVITY_CENTER) ? &m_gravityCenter : 0);
+	return ((m_structuresValidity & FLAG_GRAVITY_CENTER) ? &m_gravityCenter : nullptr);
 }
 
 void Neighbourhood::setGravityCenter(const CCVector3& G)
@@ -106,21 +106,21 @@ const CCVector3* Neighbourhood::getLSPlaneX()
 {
 	if (!(m_structuresValidity & FLAG_LS_PLANE))
 		computeLeastSquareBestFittingPlane();
-	return ((m_structuresValidity & FLAG_LS_PLANE) ? m_lsPlaneVectors : 0);
+	return ((m_structuresValidity & FLAG_LS_PLANE) ? m_lsPlaneVectors : nullptr);
 }
 
 const CCVector3* Neighbourhood::getLSPlaneY()
 {
 	if (!(m_structuresValidity & FLAG_LS_PLANE))
 		computeLeastSquareBestFittingPlane();
-	return ((m_structuresValidity & FLAG_LS_PLANE) ? m_lsPlaneVectors + 1 : 0);
+	return ((m_structuresValidity & FLAG_LS_PLANE) ? m_lsPlaneVectors + 1 : nullptr);
 }
 
 const CCVector3* Neighbourhood::getLSPlaneNormal()
 {
 	if (!(m_structuresValidity & FLAG_LS_PLANE))
 		computeLeastSquareBestFittingPlane();
-	return ((m_structuresValidity & FLAG_LS_PLANE) ? m_lsPlaneVectors + 2 : 0);
+	return ((m_structuresValidity & FLAG_LS_PLANE) ? m_lsPlaneVectors + 2 : nullptr);
 }
 
 const PointCoordinateType* Neighbourhood::getQuadric(Tuple3ub* dims/*=0*/)
@@ -135,7 +135,7 @@ const PointCoordinateType* Neighbourhood::getQuadric(Tuple3ub* dims/*=0*/)
 		*dims = m_quadricEquationDirections;
 	}
 
-	return ((m_structuresValidity & FLAG_QUADRIC) ? m_quadricEquation : 0);
+	return ((m_structuresValidity & FLAG_QUADRIC) ? m_quadricEquation : nullptr);
 }
 
 void Neighbourhood::computeGravityCenter()
@@ -687,17 +687,17 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(	bool duplicateVertices/*=
 		//can't compute LSF plane with less than 3 points!
 		if (errorStr)
 			strcpy(errorStr,"Not enough points");
-		return 0;
+		return nullptr;
 	}
 
 	//safety check: Triangle lib will crash if the points are all the same!
 	if (computeLargestRadius() < ZERO_TOLERANCE)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	//project the points on this plane
-	GenericIndexedMesh* mesh = 0;
+	GenericIndexedMesh* mesh = nullptr;
 	std::vector<CCVector2> points2D;
 
 	if (projectPointsOn2DPlane<CCVector2>(points2D))
@@ -708,7 +708,7 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(	bool duplicateVertices/*=
 		if (!dm->buildMesh(points2D,0,errorStr))
 		{
 			delete dm;
-			return 0;
+			return nullptr;
 		}
 
 		//change the default mesh's reference
@@ -722,7 +722,7 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(	bool duplicateVertices/*=
 					strcpy(errorStr,"Not enough memory");
 				delete dm;
 				delete cloud;
-				return 0;
+				return nullptr;
 			}
 			for (unsigned i=0; i<count; ++i)
 				cloud->addPoint(*m_associatedCloud->getPoint(i));
@@ -743,7 +743,7 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(	bool duplicateVertices/*=
 				if (errorStr)
 					strcpy(errorStr,"Not triangle left after pruning");
 				delete dm;
-				dm = 0;
+				dm = nullptr;
 			}
 		}
 		mesh = static_cast<GenericIndexedMesh*>(dm);
@@ -755,12 +755,12 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(	bool duplicateVertices/*=
 GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsigned nStepY)
 {
 	if (nStepX<2 || nStepY<2)
-		return 0;
+		return nullptr;
 
 	//qaudric fit
 	const PointCoordinateType* Q = getQuadric(); //Q: Z = a + b.X + c.Y + d.X^2 + e.X.Y + f.Y^2
 	if (!Q)
-		return 0;
+		return nullptr;
 
 	const PointCoordinateType& a = Q[0];
 	const PointCoordinateType& b = Q[1];
@@ -792,14 +792,14 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 	if (!vertices->reserve(nStepX*nStepY))
 	{
 		delete vertices;
-		return 0;
+		return nullptr;
 	}
 
 	SimpleMesh* quadMesh = new SimpleMesh(vertices,true);
 	if (!quadMesh->reserve((nStepX-1)*(nStepY-1)*2))
 	{
 		delete quadMesh;
-		return 0;
+		return nullptr;
 	}
 
 	for (unsigned x=0; x<nStepX; ++x)

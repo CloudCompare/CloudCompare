@@ -20,8 +20,8 @@
 
 //system
 #include <algorithm>
-#include <string.h>
-#include <assert.h>
+#include <cassert>
+#include <cstring>
 
 using namespace CCLib;
 
@@ -169,8 +169,8 @@ int ChamferDistanceTransform::propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, G
         return -1;
 	}
 
-	const signed char* fwNeighbours = 0;
-	const signed char* bwNeighbours = 0;
+	const signed char* fwNeighbours = nullptr;
+	const signed char* bwNeighbours = nullptr;
 	switch (type)
 	{
 	case CHAMFER_111:

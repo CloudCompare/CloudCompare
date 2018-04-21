@@ -19,12 +19,12 @@
 #include "PointProjectionTools.h"
 
 //local
-#include "SimpleCloud.h"
 #include "Delaunay2dMesh.h"
+#include "DistanceComputationTools.h"
 #include "GenericProgressCallback.h"
 #include "Neighbourhood.h"
+#include "SimpleCloud.h"
 #include "SimpleMesh.h"
-#include "DistanceComputationTools.h"
 
 //system
 #include <set>
@@ -38,7 +38,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 															GenericProgressCallback* progressCb)
 {
 	if (!cloud)
-		return 0;
+		return nullptr;
 
 	unsigned char dim1 = (dim > 0 ? dim-1 : 2);
 	unsigned char dim2 = (dim < 2 ? dim+1 : 0);
@@ -47,7 +47,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 
 	SimpleCloud* newList = new SimpleCloud();
 	if (!newList->reserve(count)) //not enough memory
-		return 0;
+		return nullptr;
 
 	//we compute cloud bounding box center if no center is specified
 	CCVector3 C;
@@ -73,7 +73,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 		progressCb->start();
 	}
 
-	const CCVector3* Q = 0;
+	const CCVector3* Q = nullptr;
 	cloud->placeIteratorAtBeginning();
 	while ((Q = cloud->getNextPoint()))
 	{
@@ -102,13 +102,13 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsigned char dim, PointCoordinateType baseRadius, float alpha, const CCVector3& center, GenericProgressCallback* progressCb)
 {
 	if (!cloud)
-		return 0;
+		return nullptr;
 
 	unsigned count = cloud->size();
 
 	SimpleCloud* outCloud = new SimpleCloud();
 	if (!outCloud->reserve(count)) //not enough memory
-		return 0;
+		return nullptr;
 
 	unsigned char dim1 = (dim>0 ? dim-1 : 2);
 	unsigned char dim2 = (dim<2 ? dim+1 : 0);
@@ -186,7 +186,7 @@ SimpleCloud* PointProjectionTools::applyTransformation(GenericCloud* cloud, Tran
 
 	SimpleCloud* transformedCloud = new SimpleCloud();
 	if (!transformedCloud->reserve(count))
-		return 0; //not enough memory
+		return nullptr; //not enough memory
 
 	NormalizedProgress nprogress(progressCb, count);
 	if (progressCb)
@@ -254,7 +254,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 	{
 		if (errorStr)
 			strcpy(errorStr, "Invalid input cloud");
-		return 0;
+		return nullptr;
 	}
 
 
@@ -266,7 +266,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 			{
 				if (errorStr)
 					strcpy(errorStr, "Invalid projection dimension");
-				return 0;
+				return nullptr;
 			}
 			const unsigned char Z = static_cast<unsigned char>(dim);
 			const unsigned char X = Z == 2 ? 0 : Z+1;
@@ -300,7 +300,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 				if (errorStr)
 					strcpy(errorStr, triLibErrorStr);
 				delete dm;
-				return 0;
+				return nullptr;
 			}
 			dm->linkMeshWith(cloud,false);
 
@@ -314,7 +314,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 					if (errorStr)
 						strcpy(errorStr, "No triangle left after pruning");
 					delete dm;
-					return 0;
+					return nullptr;
 				}
 			}
 
@@ -334,7 +334,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 		break;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 // Lexicographic sorting operator

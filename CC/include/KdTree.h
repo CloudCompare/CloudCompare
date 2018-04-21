@@ -44,7 +44,7 @@ public:
 		\param progressCb the client method can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return success
 	**/
-	bool buildFromCloud(GenericIndexedCloud *cloud, GenericProgressCallback *progressCb = 0);
+	bool buildFromCloud(GenericIndexedCloud *cloud, GenericProgressCallback *progressCb = nullptr);
 
 	//! Gets the point cloud from which the tree has been build
 	/** \return associated cloud
@@ -89,9 +89,9 @@ protected:
 		KdCell()
 			: cuttingDim(0)
 			, cuttingCoordinate(0)
-			, leSon(0)
-			, gSon(0)
-			, father(0)
+			, leSon(nullptr)
+			, gSon(nullptr)
+			, father(nullptr)
 			, startingPointIndex(0)
 			, nbPoints(0)
 			, boundsMask(0)
@@ -162,7 +162,7 @@ protected:
 		\param progressCb the client method can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return sub tree (cell)
 	**/
-	KdCell* buildSubTree(unsigned first, unsigned last, KdCell *father, unsigned &nbBuildCell, GenericProgressCallback *progressCb = 0);
+	KdCell* buildSubTree(unsigned first, unsigned last, KdCell *father, unsigned &nbBuildCell, GenericProgressCallback *progressCb = nullptr);
 
 	//! Deletes a sub tree
 	void deleteSubTree(KdCell *cell);

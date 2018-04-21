@@ -20,11 +20,11 @@
 #define TRUE_KD_TREE_HEADER
 
 //Local
-#include "ReferenceCloud.h"
 #include "DistanceComputationTools.h"
+#include "ReferenceCloud.h"
 
 //system
-#include <stdint.h> //for uint fixed-sized types
+#include <cstdint>
 
 namespace CCLib
 {
@@ -48,7 +48,7 @@ public:
 	class BaseNode
 	{
 	public:
-		explicit BaseNode(uint8_t nodeType) : parent(0), type(nodeType) {}
+		explicit BaseNode(uint8_t nodeType) : parent(nullptr), type(nodeType) {}
 		virtual ~BaseNode() {}
 
 		bool isNode() const { return type == NODE_TYPE; }
@@ -81,8 +81,8 @@ public:
 		Node()
 			: BaseNode(NODE_TYPE)
 			, splitValue(0)
-			, leftChild(0)
-			, rightChild(0)
+			, leftChild(nullptr)
+			, rightChild(nullptr)
 			, splitDim(X_DIM)
 		{}
 
@@ -148,7 +148,7 @@ public:
 				DistanceComputationTools::ERROR_MEASURES errorMeasure = DistanceComputationTools::RMS,
 				unsigned minPointCountPerCell = 3,
 				unsigned maxPointCountPerCell = 0,
-				GenericProgressCallback* progressCb = 0);
+				GenericProgressCallback* progressCb = nullptr);
 
 	//! Clears structure
 	void clear();

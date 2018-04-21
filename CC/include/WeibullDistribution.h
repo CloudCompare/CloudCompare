@@ -79,7 +79,7 @@ public:
 	virtual double computeP(ScalarType x) const;
 	virtual double computePfromZero(ScalarType x) const;
 	virtual double computeP(ScalarType x1, ScalarType x2) const;
-	virtual double computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, int* histo=0);
+	virtual double computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, int* histo = nullptr);
 	virtual const char* getName() const { return "Weibull"; }
 
 protected:
@@ -114,7 +114,7 @@ protected:
 	//! internal function for parameters evaluation from sample points
 	/** inverseVmax can be optionally specified for overflow-safe version
 	**/
-	ScalarType computeG(const GenericCloud* Yk, ScalarType a, ScalarType* inverseVmax = 0) const;
+	ScalarType computeG(const GenericCloud* Yk, ScalarType a, ScalarType* inverseVmax = nullptr) const;
 	//! internal function for parameters evaluation from sample points
 	ScalarType findGRoot(const GenericCloud* Yk, ScalarType inverseMaxValue) const;
 };

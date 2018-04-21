@@ -63,8 +63,7 @@ public:
 	~Garbage()
 	{
 		//dispose of left over
-		typedef typename std::unordered_set<C*>::iterator iterator;
-		for (iterator it = m_items.begin(); it != m_items.end(); ++it)
+		for (auto it = m_items.begin(); it != m_items.end(); ++it)
 			delete *it;
 		m_items.clear();
 	}

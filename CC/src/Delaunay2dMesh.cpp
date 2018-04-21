@@ -19,9 +19,9 @@
 #include "Delaunay2dMesh.h"
 
 //local
+#include "ChunkedPointCloud.h"
 #include "ManualSegmentationTools.h"
 #include "Polyline.h"
-#include "ChunkedPointCloud.h"
 
 #if defined(USE_CGAL_LIB)
 //CGAL Lib

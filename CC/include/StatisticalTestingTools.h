@@ -62,10 +62,10 @@ public:
 											unsigned numberOfClasses,
 											unsigned &finalNumberOfClasses,
 											bool noClassCompression = false,
-											ScalarType* histoMin = 0,
-											ScalarType* histoMax = 0,
-											unsigned* histoValues = 0,
-											double* npis = 0);
+											ScalarType* histoMin = nullptr,
+											ScalarType* histoMax = nullptr,
+											unsigned* histoValues = nullptr,
+											double* npis = nullptr);
 
 	//! Computes the Chi2 fractile
 	/** Returns the max Chi2 Distance for a given "confidence" probability and a given number of
@@ -110,8 +110,8 @@ public:
 												GenericIndexedCloudPersist* theCloud,
 												unsigned numberOfNeighbours,
 												double pTrust,
-												GenericProgressCallback* progressCb = 0,
-												DgmOctree* inputOctree = 0);
+												GenericProgressCallback* progressCb = nullptr,
+												DgmOctree* inputOctree = nullptr);
 
 protected:
 
@@ -128,7 +128,7 @@ protected:
 	**/
 	static bool computeLocalChi2DistAtLevel(const DgmOctree::octreeCell& cell,
 											void** additionalParameters,
-											NormalizedProgress* nProgress = 0);
+											NormalizedProgress* nProgress = nullptr);
 
 };
 

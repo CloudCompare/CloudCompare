@@ -84,8 +84,8 @@ public:
 											PointCoordinateType radius,
 											bool euclideanDistances,
 											bool sameInAndOutScalarField = false,
-											GenericProgressCallback* progressCb = 0, 
-											DgmOctree* theOctree = 0);
+											GenericProgressCallback* progressCb = nullptr, 
+											DgmOctree* theOctree = nullptr);
 
 	//! Computes a spatial gaussian filter on a scalar field associated to a point cloud
 	/** The "amplitutde" of the gaussian filter must be precised (sigma).
@@ -105,8 +105,8 @@ public:
 	static bool applyScalarFieldGaussianFilter(	PointCoordinateType sigma, 
 												GenericIndexedCloudPersist* theCloud, 
 												PointCoordinateType sigmaSF,
-												GenericProgressCallback* progressCb = 0, 
-												DgmOctree* theOctree = 0);
+												GenericProgressCallback* progressCb = nullptr, 
+												DgmOctree* theOctree = nullptr);
 
 	//! Multiplies two scalar fields of the same size
 	/** The first scalar field is updated (S1 = S1*S2).
@@ -116,7 +116,7 @@ public:
 	**/
 	static void multiplyScalarFields(	GenericIndexedCloud* firstCloud, 
 										GenericIndexedCloud* secondCloud, 
-										GenericProgressCallback* progressCb = 0);
+										GenericProgressCallback* progressCb = nullptr);
 
 	//! Computes an histogram of the scalar field with a given number of classes
 	/** The scalar values are projected in a given number of classes,
@@ -156,7 +156,7 @@ public:
 	static bool computeKmeans(	const GenericCloud* theCloud, 
 								unsigned char K, 
 								KMeanClass kmcc[], 
-								GenericProgressCallback* progressCb = 0);
+								GenericProgressCallback* progressCb = nullptr);
 
 	//! Sets the distance value associated to a point
 	/** Generic function that can be used with the GenericCloud::foreach() method.
@@ -189,7 +189,7 @@ protected:
 	**/
 	static bool computeMeanGradientOnPatch(	const DgmOctree::octreeCell& cell,
 											void** additionalParameters,
-											NormalizedProgress* nProgress = 0);
+											NormalizedProgress* nProgress = nullptr);
 
 	//! "Cellular" function to apply a gaussian filter on the scalar values of points inside an octree cell
 	/** This function is meant to be applied to all cells of the octree
@@ -206,7 +206,7 @@ protected:
 	**/
 	static bool computeCellGaussianFilter(	const DgmOctree::octreeCell& cell,
 											void** additionalParameters,
-											NormalizedProgress* nProgress = 0);
+											NormalizedProgress* nProgress = nullptr);
 
 };
 

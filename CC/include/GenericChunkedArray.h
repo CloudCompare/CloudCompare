@@ -41,9 +41,9 @@ static const unsigned ELEMENT_INDEX_BIT_MASK = MAX_NUMBER_OF_ELEMENTS_PER_CHUNK-
 #include "CCShareable.h"
 
 //system
-#include <stdlib.h>
-#include <string.h>
 #include <algorithm>
+#include <cstdlib>
+#include <cstring>
 #include <vector>
 
 //! A generic array structure split in several small chunks to avoid the 'biggest contigous memory chunk' limit

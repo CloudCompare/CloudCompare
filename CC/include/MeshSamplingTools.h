@@ -99,7 +99,7 @@ public:
 		\param[out] stats output statistics (optional)
 		\return false if an error occurred (invalid input or not enough memory)
 	**/
-	static bool flagMeshVerticesByType(GenericIndexedMesh* mesh, ScalarField* flags, EdgeConnectivityStats* stats = 0);
+	static bool flagMeshVerticesByType(GenericIndexedMesh* mesh, ScalarField* flags, EdgeConnectivityStats* stats = nullptr);
 
 	//! Samples points on a mesh
 	/** The points are sampled on each triangle randomly, by generating
@@ -121,8 +121,8 @@ public:
 	**/
 	static SimpleCloud* samplePointsOnMesh(	GenericMesh* mesh,
 											double samplingDensity,
-											GenericProgressCallback* progressCb = 0,
-											GenericChunkedArray<1,unsigned>* triIndices = 0);
+											GenericProgressCallback* progressCb = nullptr,
+											GenericChunkedArray<1,unsigned>* triIndices = nullptr);
 
 	//! Samples points on a mesh
 	/** See the other version of this method. Instead of specifying a
@@ -136,8 +136,8 @@ public:
 	**/
 	static SimpleCloud* samplePointsOnMesh(	GenericMesh* mesh,
 											unsigned numberOfPoints,
-											GenericProgressCallback* progressCb = 0,
-											GenericChunkedArray<1,unsigned>* triIndices = 0);
+											GenericProgressCallback* progressCb = nullptr,
+											GenericChunkedArray<1,unsigned>* triIndices = nullptr);
 
 protected:
 
@@ -153,8 +153,8 @@ protected:
 	static SimpleCloud* samplePointsOnMesh(	GenericMesh* mesh,
 											double samplingDensity,
 											unsigned theoreticNumberOfPoints,
-											GenericProgressCallback* progressCb = 0,
-											GenericChunkedArray<1,unsigned>* triIndices = 0);
+											GenericProgressCallback* progressCb = nullptr,
+											GenericChunkedArray<1,unsigned>* triIndices = nullptr);
 
 	//! Map used to count the number of triangles using each edge
 	/** Edges are represented by two 32 bits indexes merged as a 64 integer

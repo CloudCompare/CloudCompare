@@ -20,9 +20,9 @@
 #define DGM_OCTREE_REFERENCE_CLOUD_HEADER
 
 //Local
-#include "GenericIndexedCloudPersist.h"
-#include "GenericChunkedArray.h"
 #include "DgmOctree.h"
+#include "GenericChunkedArray.h"
+#include "GenericIndexedCloudPersist.h"
 
 
 namespace CCLib

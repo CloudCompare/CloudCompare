@@ -122,7 +122,7 @@ public:
 
 		//! Default constructor
 		PointDescriptor()
-			: point(0)
+			: point(nullptr)
 			, pointIndex(0)
 			, squareDistd(-1.0)
 		{
@@ -442,7 +442,7 @@ public:
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return the number of points projected in the octree
 	**/
-	int build(GenericProgressCallback* progressCb = 0);
+	int build(GenericProgressCallback* progressCb = nullptr);
 
 	//! Builds the structure with constraints
 	/** Octree spatial limits must be specified. Also, if specified, points falling outside
@@ -746,7 +746,7 @@ public: //extraction of points inside geometrical volumes (sphere, cylinder, box
 		//! Default constructor
 		BoxNeighbourhood()
 			: center(0,0,0)
-			, axes(0)
+			, axes(nullptr)
 			, dimensions(0,0,0)
 			, level(0)
 		{}
@@ -1028,7 +1028,7 @@ public:	/***** CELLS POSITION HANDLING *****/
 	int extractCCs(	const cellCodesContainer& cellCodes,
 					unsigned char level,
 					bool sixConnexity,
-					GenericProgressCallback* progressCb = 0) const;
+					GenericProgressCallback* progressCb = nullptr) const;
 
 	//! Computes the connected components (considering the octree cells only) for a given level of subdivision (complete)
 	/** The octree is seen as a regular 3D grid, and each cell of this grid is either set to 0
@@ -1046,7 +1046,7 @@ public:	/***** CELLS POSITION HANDLING *****/
 	**/
 	int extractCCs(	unsigned char level,
 					bool sixConnexity,
-					GenericProgressCallback* progressCb = 0) const;
+					GenericProgressCallback* progressCb = nullptr) const;
 
 	/**** OCTREE VISITOR ****/
 
@@ -1077,8 +1077,8 @@ public:	/***** CELLS POSITION HANDLING *****/
 														unsigned minNumberOfPointsPerCell,
 														unsigned maxNumberOfPointsPerCell,
 														bool multiThread = true,
-														GenericProgressCallback* progressCb = 0,
-														const char* functionTitle = 0,
+														GenericProgressCallback* progressCb = nullptr,
+														const char* functionTitle = nullptr,
 														int maxThreadCount = 0);
 
 	//! Method to apply automatically a specific function to each cell of the octree
@@ -1100,8 +1100,8 @@ public:	/***** CELLS POSITION HANDLING *****/
 												octreeCellFunc func,
 												void** additionalParameters,
 												bool multiThread = false,
-												GenericProgressCallback* progressCb = 0,
-												const char* functionTitle = 0,
+												GenericProgressCallback* progressCb = nullptr,
+												const char* functionTitle = nullptr,
 												int maxThreadCount = 0);
 
 	//! Ray casting processes
@@ -1195,7 +1195,7 @@ protected:
 	/** \param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return the number of points projected in the octree
 	**/
-	int genericBuild(GenericProgressCallback* progressCb = 0);
+	int genericBuild(GenericProgressCallback* progressCb = nullptr);
 
 	//! Updates the tables containing octree limits and boundaries
 	void updateMinAndMaxTables();

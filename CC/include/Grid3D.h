@@ -20,16 +20,16 @@
 #define GRID_3D_HEADER
 
 //Local
+#include "CCMiscTools.h"
 #include "GenericCloud.h"
 #include "GenericIndexedMesh.h"
 #include "GenericProgressCallback.h"
 #include "GenericTriangle.h"
-#include "CCMiscTools.h"
 
 //System
+#include <cassert>
+#include <cstdio>
 #include <vector>
-#include <assert.h>
-#include <stdio.h> //for sprintf
 
 namespace CCLib
 {
@@ -116,7 +116,7 @@ public:
 						PointCoordinateType cellLength,
 						const CCVector3& gridMinCorner,
 						GridElement intersectValue = 0,
-						GenericProgressCallback* progressCb = 0)
+						GenericProgressCallback* progressCb = nullptr)
 	{
 		if (!mesh || !isInitialized())
 		{
@@ -339,7 +339,7 @@ public:
 						PointCoordinateType cellLength,
 						const CCVector3& gridMinCorner,
 						GridElement intersectValue = 0,
-						GenericProgressCallback* progressCb = 0)
+						GenericProgressCallback* progressCb = nullptr)
 	{
 		if (!cloud || !isInitialized())
 		{

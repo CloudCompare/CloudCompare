@@ -48,7 +48,7 @@ public:
 	virtual double computeP(ScalarType x) const;
 	virtual double computePfromZero(ScalarType x) const;
 	virtual double computeP(ScalarType x1, ScalarType x2) const;
-	virtual double computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, int* histo=0);
+	virtual double computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, int* histo = nullptr);
 	virtual const char* getName() const { return "Gauss"; }
 
 	//! Returns the distribution parameters

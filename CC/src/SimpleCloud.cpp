@@ -23,8 +23,8 @@
 using namespace CCLib;
 
 SimpleCloud::SimpleCloud()
-	: m_points(0)
-	, m_scalarField(0)
+	: m_points(nullptr)
+	, m_scalarField(nullptr)
 	, globalIterator(0)
 	, m_validBB(false)
 {

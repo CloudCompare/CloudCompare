@@ -23,9 +23,9 @@
 #include "CCGeom.h"
 
 //system
-#include <assert.h>
-#include <string.h>
-#include <stdio.h>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
 #include <vector>
 
 namespace CCLib
@@ -417,7 +417,7 @@ namespace CCLib
 		//! Prints out matrix to console or file
 		/** \param fp ASCII FILE handle (or 0 to print to console)
 		**/
-		void print(FILE* fp = 0) const
+		void print(FILE* fp = nullptr) const
 		{
 			for (unsigned r=0; r<m_matrixSize; r++)
 			{

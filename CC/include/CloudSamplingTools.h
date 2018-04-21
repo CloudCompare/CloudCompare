@@ -61,8 +61,8 @@ public:
 	static SimpleCloud* resampleCloudWithOctreeAtLevel(	GenericIndexedCloudPersist* cloud,
 														unsigned char octreeLevel,
 														RESAMPLING_CELL_METHOD resamplingMethod,
-														GenericProgressCallback* progressCb = 0,
-														DgmOctree* inputOctree = 0);
+														GenericProgressCallback* progressCb = nullptr,
+														DgmOctree* inputOctree = nullptr);
 
 	//! Resamples a point cloud (process based on the octree)
 	/** Same as 'resampleCloudWithOctreeAtLevel' method, apart the fact that instead
@@ -79,8 +79,8 @@ public:
 	static GenericIndexedCloud* resampleCloudWithOctree(GenericIndexedCloudPersist* cloud,
 														int newNumberOfPoints,
 														RESAMPLING_CELL_METHOD resamplingMethod,
-														GenericProgressCallback* progressCb = 0,
-														DgmOctree* inputOctree = 0);
+														GenericProgressCallback* progressCb = nullptr,
+														DgmOctree* inputOctree = nullptr);
 
 	//! Subsamples a point cloud (process based on the octree)
 	/** A subsampling algorithm is applied inside each cell of the octree. The
@@ -97,8 +97,8 @@ public:
 	static ReferenceCloud* subsampleCloudWithOctreeAtLevel(GenericIndexedCloudPersist* cloud,
 															unsigned char octreeLevel,
 															SUBSAMPLING_CELL_METHOD subsamplingMethod,
-															GenericProgressCallback* progressCb = 0,
-															DgmOctree* inputOctree = 0);
+															GenericProgressCallback* progressCb = nullptr,
+															DgmOctree* inputOctree = nullptr);
 
 	//! Subsamples a point cloud (process based on the octree)
 	/** Same as 'subsampleCloudWithOctreeAtLevel' method, apart the fact that instead
@@ -115,8 +115,8 @@ public:
 	static ReferenceCloud* subsampleCloudWithOctree(GenericIndexedCloudPersist* cloud,
 													int newNumberOfPoints,
 													SUBSAMPLING_CELL_METHOD subsamplingMethod,
-													GenericProgressCallback* progressCb = 0,
-													DgmOctree* inputOctree = 0);
+													GenericProgressCallback* progressCb = nullptr,
+													DgmOctree* inputOctree = nullptr);
 
 	//! Subsamples a point cloud (process based on random selections)
 	/** A very simple subsampling algorithm that simply consists in selecting
@@ -128,7 +128,7 @@ public:
 	**/
 	static ReferenceCloud* subsampleCloudRandomly(	GenericIndexedCloudPersist* cloud,
 													unsigned newNumberOfPoints,
-													GenericProgressCallback* progressCb = 0);
+													GenericProgressCallback* progressCb = nullptr);
 
 	//! Parameters for the scalar-field based modulation of a parameter
 	struct SFModulationParams
@@ -157,8 +157,8 @@ public:
 	static ReferenceCloud* resampleCloudSpatially(	GenericIndexedCloudPersist* cloud,
 													PointCoordinateType minDistance,
 													const SFModulationParams& modParams,
-													DgmOctree* octree = 0,
-													GenericProgressCallback* progressCb = 0);
+													DgmOctree* octree = nullptr,
+													GenericProgressCallback* progressCb = nullptr);
 
 	//! Statistical Outliers Removal (SOR) filter
 	/** This filter removes points based on their mean distance to their distance (by comparing it to the average distance of all points to their neighbors).
@@ -173,8 +173,8 @@ public:
 	static ReferenceCloud* sorFilter(	GenericIndexedCloudPersist* cloud,
 										int knn = 6,
 										double nSigma = 1.0,
-										DgmOctree* octree = 0,
-										GenericProgressCallback* progressCb = 0);
+										DgmOctree* octree = nullptr,
+										GenericProgressCallback* progressCb = nullptr);
 
 	//! Noise filter based on the distance to the approximate local surface
 	/** This filter removes points based on their distance relatively to the best fit plane computed on their neighbors.
@@ -198,8 +198,8 @@ public:
 										int knn = 6,
 										bool useAbsoluteError = true,
 										double absoluteError = 0.0,
-										DgmOctree* octree = 0,
-										GenericProgressCallback* progressCb = 0);
+										DgmOctree* octree = nullptr,
+										GenericProgressCallback* progressCb = nullptr);
 
 protected:
 
@@ -216,7 +216,7 @@ protected:
 	**/
 	static bool resampleCellAtLevel(const DgmOctree::octreeCell& cell,
 									void** additionalParameters,
-									NormalizedProgress* nProgress = 0);
+									NormalizedProgress* nProgress = nullptr);
 
 	//! "Cellular" function to select a unique point inside an octree cell
 	/** This function is meant to be applied to all cells of the octree
@@ -231,7 +231,7 @@ protected:
 	**/
 	static bool subsampleCellAtLevel(	const DgmOctree::octreeCell& cell,
 										void** additionalParameters,
-										NormalizedProgress* nProgress = 0);
+										NormalizedProgress* nProgress = nullptr);
 
 	//! "Cellular" function to apply the noise filter inside an octree cell
 	/** This function is meant to be applied to all cells of the octree
@@ -242,7 +242,7 @@ protected:
 	**/
 	static bool applyNoiseFilterAtLevel(const DgmOctree::octreeCell& cell,
 										void** additionalParameters,
-										NormalizedProgress* nProgress = 0);
+										NormalizedProgress* nProgress = nullptr);
 
 	//! "Cellular" function to apply the SOR filter inside an octree cell
 	/** This function is meant to be applied to all cells of the octree
@@ -253,7 +253,7 @@ protected:
 	**/
 	static bool applySORFilterAtLevel(	const DgmOctree::octreeCell& cell,
 										void** additionalParameters,
-										NormalizedProgress* nProgress = 0);
+										NormalizedProgress* nProgress = nullptr);
 };
 
 }

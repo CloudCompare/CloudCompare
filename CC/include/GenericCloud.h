@@ -22,8 +22,8 @@
 #include <functional>
 
 //Local
-#include "CCGeom.h"
 #include "CCConst.h"
+#include "CCGeom.h"
 
 namespace CCLib
 {

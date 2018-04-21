@@ -17,6 +17,7 @@
 //##########################################################################
 
 #include "KdTree.h"
+
 #include "GenericIndexedCloud.h"
 #include "GenericProgressCallback.h"
 
@@ -26,8 +27,8 @@
 using namespace CCLib;
 
 KDTree::KDTree()
-	: m_root(0)
-	, m_associatedCloud(0)
+	: m_root(nullptr)
+	, m_associatedCloud(nullptr)
 	, m_cellCount(0)
 {
 }
@@ -43,8 +44,8 @@ bool KDTree::buildFromCloud(GenericIndexedCloud *cloud, GenericProgressCallback 
 
     m_indexes.clear();
     m_cellCount = 0;
-	m_associatedCloud = 0;
-	m_root = 0;
+	m_associatedCloud = nullptr;
+	m_root = nullptr;
 
     if (cloudsize == 0)
         return false;
@@ -73,7 +74,7 @@ bool KDTree::buildFromCloud(GenericIndexedCloud *cloud, GenericProgressCallback 
 		progressCb->start();
     }
 
-    m_root = buildSubTree(0, cloudsize-1, (KdCell*)0, m_cellCount, progressCb);
+    m_root = buildSubTree(0, cloudsize-1, nullptr, m_cellCount, progressCb);
 
     if (progressCb)
         progressCb->stop();
@@ -81,7 +82,7 @@ bool KDTree::buildFromCloud(GenericIndexedCloud *cloud, GenericProgressCallback 
     //if the tree building has failed (memory issues)
     if (!m_root)
     {
-        m_associatedCloud = 0;
+        m_associatedCloud = nullptr;
         m_cellCount = 0;
         return false;
     }
@@ -92,7 +93,7 @@ bool KDTree::buildFromCloud(GenericIndexedCloud *cloud, GenericProgressCallback 
 	}
 	catch (.../*const std::bad_alloc&*/) //out of memory
 	{
-        m_associatedCloud = 0;
+        m_associatedCloud = nullptr;
         m_cellCount = 0;
         return false;
     }
@@ -114,7 +115,7 @@ void KDTree::deleteSubTree(KdCell *cell)
 }
 
 /*** Comparison functions used by the sort function (Strict ordering must be used) ***/
-static CCLib::GenericIndexedCloud* s_comparisonCloud = 0;
+static CCLib::GenericIndexedCloud* s_comparisonCloud = nullptr;
 
 //! Compares X coordinates of two points designated by their index
 static bool ComparisonX(const unsigned &a, const unsigned &b)
@@ -138,10 +139,10 @@ KDTree::KdCell* KDTree::buildSubTree(unsigned first, unsigned last, KdCell* fath
 {
     KdCell* cell = new KdCell;
     if (!cell)
-        return 0;
+        return nullptr;
     m_cellCount++;
 
-    unsigned dim = (father == 0 ? 0 : ((father->cuttingDim+1) % 3));
+    unsigned dim = (father == nullptr ? 0 : ((father->cuttingDim+1) % 3));
 
     //Compute outside bounding box (have to be done before building the current cell sons)
     cell->father = father;
@@ -156,8 +157,8 @@ KDTree::KdCell* KDTree::buildSubTree(unsigned first, unsigned last, KdCell* fath
     if (first == last)
     {
         cell->cuttingDim = 0;
-        cell->leSon = 0;
-        cell->gSon = 0;
+        cell->leSon = nullptr;
+        cell->gSon = nullptr;
     }
     else
     {
@@ -175,20 +176,20 @@ KDTree::KdCell* KDTree::buildSubTree(unsigned first, unsigned last, KdCell* fath
         cell->cuttingCoordinate = P->u[dim];
         //recursively build the other two sub trees
         //trap the memory issues. At this point, none of the cell sons can be set to 0. Otherwise there has been memory allocation failure.
-        cell->leSon = cell->gSon = 0;
+        cell->leSon = cell->gSon = nullptr;
         cell->leSon = buildSubTree(first, split, cell, nbBuildCell, progressCb);
-        if (cell->leSon == 0)
+        if (cell->leSon == nullptr)
         {
             deleteSubTree(cell);
             //the tree beyond the current cell will be deleted when noticing that this cell is set to 0
-            return 0;
+            return nullptr;
         }
         cell->gSon = buildSubTree(split+1, last, cell, nbBuildCell, progressCb);
-        if (cell->gSon == 0)
+        if (cell->gSon == nullptr)
         {
             deleteSubTree(cell);
             //the tree beyond the current cell will be deleted when noticing that this cell is set to 0
-            return 0;
+            return nullptr;
         }
 
     }
@@ -203,14 +204,14 @@ bool KDTree::findNearestNeighbour(	const PointCoordinateType *queryPoint,
 									unsigned &nearestPointIndex,
 									ScalarType maxDist)
 {
-    if (m_root == 0)
+    if (m_root == nullptr)
         return false;
 
     maxDist *= maxDist;
 
     //Go down the tree to find which cell contains the query point (at most log2(N) tests where N is the total number of points in the cloud)
 	KdCell* cellPtr = m_root;
-    while (cellPtr->leSon != 0 || cellPtr->gSon != 0)
+    while (cellPtr->leSon != 0 || cellPtr->gSon != nullptr)
     {
         if (queryPoint[cellPtr->cuttingDim] <= cellPtr->cuttingCoordinate)
             cellPtr = cellPtr->leSon;
@@ -233,11 +234,11 @@ bool KDTree::findNearestNeighbour(	const PointCoordinateType *queryPoint,
     }
 
     //Go up in the tree to check that neighbours cells do not contain a nearer point than the one we found
-    while (cellPtr != 0)
+    while (cellPtr != nullptr)
     {
         KdCell* prevPtr = cellPtr;
         cellPtr = cellPtr->father;
-        if (cellPtr != 0)
+        if (cellPtr != nullptr)
         {
             ScalarType sqrdist = InsidePointToCellDistance(queryPoint, cellPtr);
             if (sqrdist >= 0 && sqrdist*sqrdist < maxDist)
@@ -252,7 +253,7 @@ bool KDTree::findNearestNeighbour(	const PointCoordinateType *queryPoint,
             }
             else
 			{
-                cellPtr = 0;
+                cellPtr = nullptr;
 			}
         }
     }
@@ -263,14 +264,14 @@ bool KDTree::findNearestNeighbour(	const PointCoordinateType *queryPoint,
 bool KDTree::findPointBelowDistance(const PointCoordinateType *queryPoint,
 									ScalarType maxDist)
 {
-    if (m_root == 0)
+    if (m_root == nullptr)
         return false;
 
     maxDist *= maxDist;
 
 	KdCell* cellPtr = m_root;
     //Go down the tree to find which cell contains the query point (at most log2(N) tests where N is the total number of points in the cloud)
-    while (!(cellPtr->leSon == 0 && cellPtr->gSon == 0))
+    while (!(cellPtr->leSon == nullptr && cellPtr->gSon == nullptr))
     {
         if (queryPoint[cellPtr->cuttingDim] <= cellPtr->cuttingCoordinate)
             cellPtr = cellPtr->leSon;
@@ -288,11 +289,11 @@ bool KDTree::findPointBelowDistance(const PointCoordinateType *queryPoint,
     }
 
     //Go up in the tree to check that neighbours cells do not contain a point
-    while (cellPtr != 0)
+    while (cellPtr != nullptr)
     {
         KdCell* prevPtr = cellPtr;
         cellPtr = cellPtr->father;
-        if (cellPtr != 0)
+        if (cellPtr != nullptr)
         {
             ScalarType sqrdist = InsidePointToCellDistance(queryPoint, cellPtr);
             if (sqrdist >= 0 && sqrdist*sqrdist < maxDist)
@@ -303,7 +304,7 @@ bool KDTree::findPointBelowDistance(const PointCoordinateType *queryPoint,
             }
             else
 			{
-                cellPtr = 0;
+                cellPtr = nullptr;
 			}
         }
     }
@@ -316,7 +317,7 @@ unsigned KDTree::findPointsLyingToDistance(const PointCoordinateType *queryPoint
 											ScalarType tolerance,
 											std::vector<unsigned> &points)
 {
-    if (m_root == 0)
+    if (m_root == nullptr)
         return 0;
 
     distanceScanTree(queryPoint, distance, tolerance, m_root, points);
@@ -327,7 +328,7 @@ unsigned KDTree::findPointsLyingToDistance(const PointCoordinateType *queryPoint
 
 void KDTree::updateInsideBoundingBox(KdCell* cell)
 {
-    if (cell->leSon != 0 && cell->gSon != 0)
+    if (cell->leSon != nullptr && cell->gSon != nullptr)
     {
         cell->inbbmax.x = std::max(cell->leSon->inbbmax.x, cell->gSon->inbbmax.x);
         cell->inbbmax.y = std::max(cell->leSon->inbbmax.y, cell->gSon->inbbmax.y);
@@ -356,7 +357,7 @@ void KDTree::updateInsideBoundingBox(KdCell* cell)
 
 void KDTree::updateOutsideBoundingBox(KdCell *cell)
 {
-    if (cell->father == 0)
+    if (cell->father == nullptr)
     {
         cell->boundsMask = 0;
     }
@@ -470,7 +471,7 @@ int KDTree::checkNearerPointInSubTree(	const PointCoordinateType *queryPoint,
     if (pointToCellSquareDistance(queryPoint, cell) >= maxSqrDist)
         return -1;
 
-    if (cell->leSon == 0 && cell->gSon == 0)
+    if (cell->leSon == nullptr && cell->gSon == nullptr)
     {
         int a = -1;
         for (unsigned i=0; i<cell->nbPoints; i++)
@@ -499,7 +500,7 @@ bool KDTree::checkDistantPointInSubTree(const PointCoordinateType *queryPoint, S
     if (pointToCellSquareDistance(queryPoint, cell)>=maxSqrDist)
         return false;
 
-    if (cell->leSon == 0 && cell->gSon == 0)
+    if (cell->leSon == nullptr && cell->gSon == nullptr)
     {
         for (unsigned i=0; i<cell->nbPoints; i++)
         {
@@ -532,7 +533,7 @@ void KDTree::distanceScanTree(
 
     if ((min<=distance+tolerance) && (max>=distance-tolerance))
     {
-        if ((cell->leSon!=0) && (cell->gSon!=0))
+        if ((cell->leSon!=nullptr) && (cell->gSon!=nullptr))
         {
             //This case shall always happen (the other case is for leaves that contain more than one point - bucket KDtree)
             if (cell->nbPoints == 1)

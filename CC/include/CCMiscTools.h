@@ -20,8 +20,8 @@
 #define CC_MISC_TOOLS_HEADER
 
 //Local
-#include "CCToolbox.h"
 #include "CCGeom.h"
+#include "CCToolbox.h"
 
 namespace CCLib
 {

@@ -68,8 +68,8 @@ public:
 	static int labelConnectedComponents(GenericIndexedCloudPersist* theCloud,
 										unsigned char level,
 										bool sixConnexity = false,
-										CCLib::GenericProgressCallback* progressCb = 0,
-										CCLib::DgmOctree* inputOctree = 0);
+										CCLib::GenericProgressCallback* progressCb = nullptr,
+										CCLib::DgmOctree* inputOctree = nullptr);
 
 	//! Extracts connected components from a point cloud
 	/** This method shloud only be called after the connected components have been
@@ -108,8 +108,8 @@ public:
 													PointCoordinateType radius,
 													unsigned char octreeLevel,
 													ReferenceCloudContainer& theSegmentedLists,
-													CCLib::GenericProgressCallback* progressCb = 0,
-													CCLib::DgmOctree* inputOctree = 0,
+													CCLib::GenericProgressCallback* progressCb = nullptr,
+													CCLib::DgmOctree* inputOctree = nullptr,
 													bool applyGaussianFilter = false,
 													float alpha = 2.0f);
 

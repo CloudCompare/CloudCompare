@@ -19,14 +19,14 @@
 #include "ManualSegmentationTools.h"
 
 //local
-#include "GenericProgressCallback.h"
-#include "SimpleMesh.h"
-#include "Polyline.h"
 #include "ChunkedPointCloud.h"
+#include "GenericProgressCallback.h"
+#include "Polyline.h"
+#include "SimpleMesh.h"
 
 //system
+#include <cstdint>
 #include <map>
-#include <stdint.h> //for uint fixed-sized types
 
 
 using namespace CCLib;
@@ -35,7 +35,7 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 {
 	assert(poly && aCloud);
 
-	CCLib::SquareMatrix* trans = (viewMat ? new CCLib::SquareMatrix(viewMat) : 0);
+	CCLib::SquareMatrix* trans = (viewMat ? new CCLib::SquareMatrix(viewMat) : nullptr);
 
 	ReferenceCloud* Y = new ReferenceCloud(aCloud);
 
@@ -59,7 +59,7 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 			{
 				//not engouh memory
 				delete Y;
-				Y = 0;
+				Y = nullptr;
 				break;
 			}
 		}
@@ -142,7 +142,7 @@ ReferenceCloud* ManualSegmentationTools::segment(	GenericIndexedCloudPersist* cl
 	if (!cloud)
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	ReferenceCloud* Y = new ReferenceCloud(cloud);
@@ -158,7 +158,7 @@ ReferenceCloud* ManualSegmentationTools::segment(	GenericIndexedCloudPersist* cl
 			{
 				//not engouh memory
 				delete Y;
-				Y=0;
+				Y = nullptr;
 				break;
 			}
 		}
@@ -170,7 +170,7 @@ ReferenceCloud* ManualSegmentationTools::segment(	GenericIndexedCloudPersist* cl
 GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* theMesh, ReferenceCloud* pointIndexes, bool pointsWillBeInside, GenericProgressCallback* progressCb, GenericIndexedCloud* destCloud, unsigned indexShift)
 {
 	if (!theMesh || !pointIndexes || !pointIndexes->getAssociatedCloud())
-		return 0;
+		return nullptr;
 
 	//by default we try a fast process (but with a higher memory consumption)
 	unsigned numberOfPoints = pointIndexes->getAssociatedCloud()->size();
@@ -186,7 +186,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 		}
 		catch (const std::bad_alloc&)
 		{
-			return 0; //not enough memory
+			return nullptr; //not enough memory
 		}
 
 		for (unsigned i = 0; i < numberOfIndexes; ++i)
@@ -205,7 +205,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 	}
 
 	//create resulting mesh
-	SimpleMesh* newMesh = 0;
+	SimpleMesh* newMesh = nullptr;
 	{
 		unsigned numberOfTriangles = theMesh->size();
 
@@ -256,7 +256,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 				{
 					//stop process
 					delete newMesh;
-					newMesh = 0;
+					newMesh = nullptr;
 					break;
 				}
 				++count;
@@ -278,7 +278,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 			if (newMesh->size() == 0)
 			{
 				delete newMesh;
-				newMesh = 0;
+				newMesh = nullptr;
 			}
 			else if (count < newMesh->size())
 			{
@@ -397,7 +397,7 @@ bool MergeOldTriangles(	GenericIndexedMesh* origMesh,
 						SimpleMesh* newMesh,
 						ChunkedPointCloud* newVertices,
 						const std::vector<unsigned>& preservedTriangleIndexes,
-						std::vector<unsigned>* origTriIndexesMap = 0)
+						std::vector<unsigned>* origTriIndexesMap = nullptr)
 {
 	assert(origMesh && origVertices && newMesh && newVertices);
 	
@@ -992,7 +992,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 			{
 				bool triangleIsOriginal = false;
 				unsigned souceTriIndex = 0;
-				const VerticesIndexes* tsi = 0;
+				const VerticesIndexes* tsi = nullptr;
 				if (i < sourceTriCount)
 				{
 					souceTriIndex = i;
@@ -1376,14 +1376,14 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 	if (insideMesh == insideMesh1)
 	{
 		delete insideMesh2;
-		insideMesh2 = 0;
-		insideVertices2 = 0;
+		insideMesh2 = nullptr;
+		insideVertices2 = nullptr;
 	}
 	else
 	{
 		delete insideMesh1;
-		insideMesh1 = 0;
-		insideVertices1 = 0;
+		insideMesh1 = nullptr;
+		insideVertices1 = nullptr;
 	}
 
 	if (error)

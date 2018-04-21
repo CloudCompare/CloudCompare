@@ -20,8 +20,8 @@
 #define GEOMETRICAL_ANALYSIS_TOOLS_HEADER
 
 //Local
-#include "Neighbourhood.h"
 #include "DgmOctree.h"
+#include "Neighbourhood.h"
 
 namespace CCLib
 {
@@ -47,8 +47,8 @@ public:
 	static int computeCurvature(GenericIndexedCloudPersist* theCloud,
 								Neighbourhood::CC_CURVATURE_TYPE cType,
 								PointCoordinateType kernelRadius,
-								GenericProgressCallback* progressCb = 0,
-								DgmOctree* inputOctree = 0);
+								GenericProgressCallback* progressCb = nullptr,
+								DgmOctree* inputOctree = nullptr);
 
 	enum Density {	DENSITY_KNN,	/**< The number of points inside the neighborhing sphere **/
 					DENSITY_2D,		/**< The number of points divided by the area of the circle that has the same radius as the neighborhing sphere (2D approximation) **/
@@ -67,8 +67,8 @@ public:
 	**/
 	static int computeLocalDensityApprox(	GenericIndexedCloudPersist* theCloud,
 											Density densityType,
-											GenericProgressCallback* progressCb = 0,
-											DgmOctree* inputOctree = 0);
+											GenericProgressCallback* progressCb = nullptr,
+											DgmOctree* inputOctree = nullptr);
 
 	//! Computes the local density (at a given scale)
 	/** Simply counts the number of points falling inside a sphere around each point
@@ -83,8 +83,8 @@ public:
 	static int computeLocalDensity(	GenericIndexedCloudPersist* theCloud,
 									Density densityType,
 									PointCoordinateType kernelRadius,
-									GenericProgressCallback* progressCb = 0,
-									DgmOctree* inputOctree = 0);
+									GenericProgressCallback* progressCb = nullptr,
+									DgmOctree* inputOctree = nullptr);
 
 	//! Computes the local roughness
 	/** Roughness is defined as the distance to the locally (least square) fitted plane.
@@ -98,8 +98,8 @@ public:
 	**/
 	static int computeRoughness(GenericIndexedCloudPersist* theCloud,
 								PointCoordinateType kernelRadius,
-								GenericProgressCallback* progressCb = 0,
-								DgmOctree* inputOctree = 0);
+								GenericProgressCallback* progressCb = nullptr,
+								DgmOctree* inputOctree = nullptr);
 
 	//! Computes the gravity center of a point cloud
 	/** \warning this method uses the cloud global iterator
@@ -146,7 +146,7 @@ public:
 																GenericCloud* Q,
 																const CCVector3& pGravityCenter,
 																const CCVector3& qGravityCenter,
-																ScalarField* coupleWeights = 0);
+																ScalarField* coupleWeights = nullptr);
 
 	//! Computes the covariance matrix of a clouds
 	/** \warning this method uses the cloud global iterator
@@ -155,7 +155,7 @@ public:
 		\return covariance matrix
 	**/
 	static CCLib::SquareMatrixd computeCovarianceMatrix(GenericCloud* theCloud,
-														const PointCoordinateType* _gravityCenter = 0);
+														const PointCoordinateType* _gravityCenter = nullptr);
 
 	//! Flag duplicate points
 	/** This method only requires an output scalar field. Duplicate points will be
@@ -168,8 +168,8 @@ public:
 	**/
 	static int flagDuplicatePoints(	GenericIndexedCloudPersist* theCloud,
 									double minDistanceBetweenPoints = 1.0e-12,
-									GenericProgressCallback* progressCb = 0,
-									DgmOctree* inputOctree = 0);
+									GenericProgressCallback* progressCb = nullptr,
+									DgmOctree* inputOctree = nullptr);
 
 	//! Tries to detect a sphere in a point cloud
 	/** Inspired from "Parameter Estimation Techniques: A Tutorial with Application
@@ -190,7 +190,7 @@ public:
 									CCVector3& center,
 									PointCoordinateType& radius,
 									double& rms,
-									GenericProgressCallback* progressCb = 0,
+									GenericProgressCallback* progressCb = nullptr,
 									double confidence = 0.99,
 									unsigned seed = 0);
 
@@ -219,7 +219,7 @@ protected:
 	**/
 	static bool computeCellCurvatureAtLevel(const DgmOctree::octreeCell& cell,
 											void** additionalParameters,
-											NormalizedProgress* nProgress = 0);
+											NormalizedProgress* nProgress = nullptr);
 
 	//! Computes approximate point density inside a cell
 	/**	\param cell structure describing the cell on which processing is applied
@@ -228,7 +228,7 @@ protected:
 	**/
 	static bool computeApproxPointsDensityInACellAtLevel(	const DgmOctree::octreeCell& cell,
 															void** additionalParameters,
-															NormalizedProgress* nProgress = 0);
+															NormalizedProgress* nProgress = nullptr);
 
 	//! Computes point density inside a cell
 	/**	\param cell structure describing the cell on which processing is applied
@@ -237,7 +237,7 @@ protected:
 	**/
 	static bool computePointsDensityInACellAtLevel(	const DgmOctree::octreeCell& cell,
 													void** additionalParameters,
-													NormalizedProgress* nProgress = 0);
+													NormalizedProgress* nProgress = nullptr);
 
 	//! Computes point roughness inside a cell
 	/**	\param cell structure describing the cell on which processing is applied
@@ -246,7 +246,7 @@ protected:
 	**/
 	static bool computePointsRoughnessInACellAtLevel(	const DgmOctree::octreeCell& cell,
 														void** additionalParameters,
-														NormalizedProgress* nProgress = 0);
+														NormalizedProgress* nProgress = nullptr);
 
 	//! Flags duplicate points inside a cell
 	/**	\param cell structure describing the cell on which processing is applied
@@ -255,7 +255,7 @@ protected:
 	**/
 	static bool flagDuplicatePointsInACellAtLevel(	const DgmOctree::octreeCell& cell,
 													void** additionalParameters,
-													NormalizedProgress* nProgress = 0);
+													NormalizedProgress* nProgress = nullptr);
 
 	//! Refines the estimation of a sphere by (iterative) least-squares
 	static bool refineSphereLS(	GenericIndexedCloudPersist* cloud,

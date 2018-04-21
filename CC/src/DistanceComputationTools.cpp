@@ -21,16 +21,16 @@
 //local
 #include "ChunkedPointCloud.h"
 #include "DgmOctreeReferenceCloud.h"
+#include "FastMarchingForPropagation.h"
+#include "LocalModel.h"
 #include "ReferenceCloud.h"
 #include "SaitoSquaredDistanceTransform.h"
-#include "FastMarchingForPropagation.h"
-#include "ScalarFieldTools.h"
-#include "LocalModel.h"
-#include "SimpleTriangle.h"
 #include "ScalarField.h"
+#include "ScalarFieldTools.h"
+#include "SimpleTriangle.h"
 
 //system
-#include <assert.h>
+#include <cassert>
 
 
 #ifdef USE_QT

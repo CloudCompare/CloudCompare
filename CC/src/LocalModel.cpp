@@ -19,10 +19,10 @@
 #include "LocalModel.h"
 
 //local
-#include "GenericTriangle.h"
-#include "GenericMesh.h"
-#include "GenericIndexedMesh.h"
 #include "DistanceComputationTools.h"
+#include "GenericIndexedMesh.h"
+#include "GenericMesh.h"
+#include "GenericTriangle.h"
 
 
 using namespace CCLib;
@@ -43,7 +43,7 @@ public:
 	virtual CC_LOCAL_MODEL_TYPES getType() const { return LS; }
 
 	//inherited from LocalModel
-	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* P, CCVector3* nearestPoint = 0) const
+	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* P, CCVector3* nearestPoint = nullptr) const
 	{
 		ScalarType dist = DistanceComputationTools::computePoint2PlaneDistance(P, m_eq);
 
@@ -81,7 +81,7 @@ public:
 	virtual CC_LOCAL_MODEL_TYPES getType() const { return TRI; }
 
 	//inherited from LocalModel
-	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* P, CCVector3* nearestPoint = 0) const
+	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* P, CCVector3* nearestPoint = nullptr) const
 	{
 		ScalarType minDist2 = NAN_VALUE;
 		if (m_tri)
@@ -140,7 +140,7 @@ public:
 	virtual CC_LOCAL_MODEL_TYPES getType() const { return QUADRIC; }
 
 	//inherited from LocalModel
-	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* _P, CCVector3* nearestPoint = 0) const
+	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* _P, CCVector3* nearestPoint = nullptr) const
 	{
 		CCVector3 P = *_P - m_gravityCenter;
 
@@ -227,5 +227,5 @@ LocalModel* LocalModel::New(CC_LOCAL_MODEL_TYPES type,
 	}
 
 	//invalid input type or computation failed!
-	return 0;
+	return nullptr;
 }

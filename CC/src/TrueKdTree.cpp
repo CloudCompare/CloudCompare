@@ -32,7 +32,7 @@
 using namespace CCLib;
 
 TrueKdTree::TrueKdTree(GenericIndexedCloudPersist* cloud)
-	: m_root(0)
+	: m_root(nullptr)
 	, m_associatedCloud(cloud)
 	, m_maxError(0.0)
 	, m_errorMeasure(DistanceComputationTools::RMS)
@@ -49,21 +49,20 @@ TrueKdTree::~TrueKdTree()
 
 void TrueKdTree::clear()
 {
-	if (m_root)
-		delete m_root;
-	m_root = 0;
+	delete m_root;
+	m_root = nullptr;
 }
 
 //shared structure used to sort the points along a single dimension (see TrueKdTree::split)
 static std::vector<PointCoordinateType> s_sortedCoordsForSplit;
-static GenericProgressCallback* s_progressCb = 0;
+static GenericProgressCallback* s_progressCb = nullptr;
 static unsigned s_lastProgressCount = 0;
 static unsigned s_totalProgressCount = 0;
 static unsigned s_lastProgress = 0;
 
 static void InitProgress(GenericProgressCallback* progressCb, unsigned totalCount)
 {
-	s_progressCb = totalCount ? progressCb : 0;
+	s_progressCb = totalCount ? progressCb : nullptr;
 	s_totalProgressCount = totalCount;
 	s_lastProgressCount = 0;
 	s_lastProgress = 0;
@@ -110,7 +109,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		//we return an invalid Leaf (so as the above level understands that it's not a memory issue)
 		delete subset;
 		PointCoordinateType fakePlaneEquation[4] = {0,0,0,0};
-		return new Leaf(0, fakePlaneEquation, static_cast<ScalarType>(-1));
+		return new Leaf(nullptr, fakePlaneEquation, static_cast<ScalarType>(-1));
 	}
 
 	//we always split sets larger than a given size
@@ -199,7 +198,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		delete leftSubset;
 		delete rightSubset;
 		delete subset;
-		return 0;
+		return nullptr;
 	}
 
 	//fill subsets
@@ -222,7 +221,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	{
 		delete subset;
 		delete rightSubset;
-		return 0;
+		return nullptr;
 	}
 
 	BaseNode* rightChild = split(rightSubset);
@@ -230,11 +229,11 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	{
 		delete subset;
 		delete leftChild;
-		return 0;
+		return nullptr;
 	}
 
-	if (	(leftChild->isLeaf() && static_cast<Leaf*>(leftChild)->points == 0)
-		||	(rightChild->isLeaf() && static_cast<Leaf*>(rightChild)->points == 0) )
+	if (	(leftChild->isLeaf() && static_cast<Leaf*>(leftChild)->points == nullptr)
+		||	(rightChild->isLeaf() && static_cast<Leaf*>(rightChild)->points == nullptr) )
 	{
 		//at least one of the subsets couldn't be fitted with a plane!
 		delete leftChild;
@@ -248,7 +247,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 
 	//we can now delete the subset
 	delete subset;
-	subset = 0;
+	subset = nullptr;
 
 	Node* node = new Node;
 	{
@@ -313,7 +312,7 @@ bool TrueKdTree::build(	double maxError,
 	//clear static structure
 	s_sortedCoordsForSplit.clear();
 
-	return (m_root != 0);
+	return (m_root != nullptr);
 }
 
 //! Recursive visitor for TrueKdTree::getLeaves

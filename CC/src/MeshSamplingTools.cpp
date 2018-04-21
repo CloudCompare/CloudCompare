@@ -19,8 +19,8 @@
 #include "MeshSamplingTools.h"
 
 //local
-#include "GenericProgressCallback.h"
 #include "GenericIndexedMesh.h"
+#include "GenericProgressCallback.h"
 #include "GenericTriangle.h"
 #include "ScalarField.h"
 #include "SimpleCloud.h"
@@ -240,13 +240,13 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 													GenericChunkedArray<1,unsigned>* triIndices/*=0*/)
 {
 	if (!mesh)
-        return 0;
+        return nullptr;
 
 	//total mesh surface
 	double Stotal = computeMeshArea(mesh);
 
 	if (Stotal < ZERO_TOLERANCE)
-        return 0;
+        return nullptr;
 
 	double samplingDensity = numberOfPoints / Stotal;
 
@@ -277,18 +277,18 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 													GenericChunkedArray<1,unsigned>* triIndices/*=0*/)
 {
 	if (theoreticNumberOfPoints < 1)
-        return 0;
+        return nullptr;
 
 	assert(mesh);
 	unsigned triCount = (mesh ? mesh->size() : 0);
 	if (triCount == 0)
-		return 0;
+		return nullptr;
 
 	SimpleCloud* sampledCloud = new SimpleCloud();
 	if (!sampledCloud->reserve(theoreticNumberOfPoints)) //not enough memory
 	{
 		delete sampledCloud;
-		return 0;
+		return nullptr;
 	}
 
 	if (triIndices)
@@ -300,7 +300,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 			//not enough memory? DGM TODO: we should warn the caller
 			delete sampledCloud;
 			triIndices->clear();
-			return 0;
+			return nullptr;
 		}
 	}
 
@@ -364,7 +364,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 					|| (triIndices && triIndices->capacity() < theoreticNumberOfPoints && !triIndices->reserve(theoreticNumberOfPoints))) //not enough memory
 				{
 					delete sampledCloud;
-					sampledCloud = 0;
+					sampledCloud = nullptr;
 					if (triIndices)
 					{
 						triIndices->clear();

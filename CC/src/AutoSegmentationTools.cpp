@@ -19,11 +19,11 @@
 #include "AutoSegmentationTools.h"
 
 //local
+#include "FastMarchingForPropagation.h"
 #include "GenericProgressCallback.h"
 #include "ReferenceCloud.h"
-#include "FastMarchingForPropagation.h"
-#include "ScalarFieldTools.h"
 #include "ScalarField.h"
+#include "ScalarFieldTools.h"
 
 using namespace CCLib;
 
@@ -287,7 +287,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 			{
 				//not enough memory?!
 				delete newCloud;
-				newCloud = 0;
+				newCloud = nullptr;
 			}
 
 			if (progressCb)
@@ -319,19 +319,19 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 	if (fm)
 	{
 		delete fm;
-		fm = 0;
+		fm = nullptr;
 	}
 
 	if (theDists)
 	{
 		theDists->release();
-		theDists = 0;
+		theDists = nullptr;
 	}
 	
 	if (theOctree && !inputOctree)
 	{
 		delete theOctree;
-		theOctree = 0;
+		theOctree = nullptr;
 	}
 
 	return true;

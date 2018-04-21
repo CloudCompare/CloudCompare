@@ -92,7 +92,7 @@ int FastMarchingForPropagation::step()
 	}
 
 	Cell* minTCell =  m_theGrid[minTCellIndex];
-	assert(minTCell != 0);
+	assert(minTCell != nullptr);
 
 	//last arrival time
 	float lastT = (m_activeCells.empty() ? 0 : m_theGrid[m_activeCells.back()]->T);

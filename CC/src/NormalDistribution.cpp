@@ -22,12 +22,12 @@
 #endif
 
 //local
-#include "NormalDistribution.h"
-#include "GenericCloud.h"
-#include "ErrorFunction.h"
 #include "DistanceComputationTools.h"
-#include "ScalarFieldTools.h"
+#include "ErrorFunction.h"
+#include "GenericCloud.h"
+#include "NormalDistribution.h"
 #include "ScalarField.h"
+#include "ScalarFieldTools.h"
 
 
 using namespace CCLib;
@@ -239,7 +239,7 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned n
 
 	if (_histo && !histo)
 		delete[] _histo;
-	_histo = 0;
+	_histo = nullptr;
 
 	return dk;
 }

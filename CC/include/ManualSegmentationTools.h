@@ -48,7 +48,7 @@ public:
 		\param viewMat the optional 4x4 visualization matrix (OpenGL style)
 		\return a cloud structure containing references to the extracted points (references to - no duplication)
 	**/
-	static ReferenceCloud* segment(GenericIndexedCloudPersist* aCloud, const Polyline* poly, bool keepInside, const float* viewMat=0);
+	static ReferenceCloud* segment(GenericIndexedCloudPersist* aCloud, const Polyline* poly, bool keepInside, const float* viewMat = nullptr);
 
 	//! Selects the points which associated scalar value fall inside or outside a specified interval
 	/** \warning: be sure to activate an OUTPUT scalar field on the input cloud
@@ -94,8 +94,8 @@ public:
 	static GenericIndexedMesh* segmentMesh(	GenericIndexedMesh* theMesh,
 											ReferenceCloud* pointsIndexes,
 											bool pointsWillBeInside,
-											GenericProgressCallback* progressCb = 0,
-											GenericIndexedCloud* destCloud = 0,
+											GenericProgressCallback* progressCb = nullptr,
+											GenericIndexedCloud* destCloud = nullptr,
 											unsigned indexShift = 0);
 
 	//! Input/output parameters for the segmentMeshWitAAPlane method
@@ -116,8 +116,8 @@ public:
 		std::vector<unsigned> origTriIndexesMapOutside;
 
 		MeshCutterParams()
-			: insideMesh(0)
-			, outsideMesh(0)
+			: insideMesh(nullptr)
+			, outsideMesh(nullptr)
 			, generateOutsideMesh(false)
 			, epsilon(ZERO_TOLERANCE)
 			, planeOrthoDim(0)
@@ -131,7 +131,7 @@ public:
 	static bool segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 		GenericIndexedCloudPersist* vertices,
 		MeshCutterParams& ioParams,
-		GenericProgressCallback* progressCb = 0);
+		GenericProgressCallback* progressCb = nullptr);
 
 	static bool segmentMeshWitAABox(GenericIndexedMesh* mesh,
 		GenericIndexedCloudPersist* vertices,

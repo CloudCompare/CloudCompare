@@ -15,14 +15,14 @@
 //#                                                                        #
 //##########################################################################
 
-#include "../include/SaitoSquaredDistanceTransform.h"
+#include "SaitoSquaredDistanceTransform.h"
 
 //Local
 #include "DistanceComputationTools.h"
 
 //system
 #include <algorithm>
-#include <stdint.h>
+#include <cstdint>
 
 using namespace CCLib;
 

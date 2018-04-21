@@ -79,8 +79,8 @@ public:
 	static SimpleCloud* developCloudOnCylinder(	GenericCloud* cloud,
 												PointCoordinateType radius,
 												unsigned char dim = 2,
-												CCVector3* center = 0,
-												GenericProgressCallback* progressCb = 0);
+												CCVector3* center = nullptr,
+												GenericProgressCallback* progressCb = nullptr);
 
 	//! Develops a cone-shaped point cloud around its main axis
 	/** Generates a "developpee" of a cone-shaped point cloud.
@@ -98,7 +98,7 @@ public:
 											PointCoordinateType baseRadius,
 											float alpha,
 											const CCVector3& center,
-											GenericProgressCallback* progressCb = 0);
+											GenericProgressCallback* progressCb = nullptr);
 
 	//! Applys a geometrical transformation to a point cloud
 	/** \param cloud the point cloud to be "transformed"
@@ -108,7 +108,7 @@ public:
 	**/
 	static SimpleCloud* applyTransformation(GenericCloud* cloud,
 											Transformation& trans,
-											GenericProgressCallback* progressCb = 0);
+											GenericProgressCallback* progressCb = nullptr);
 
 	//! Applys a geometrical transformation to a single point
 	/** \param P the point
@@ -134,7 +134,7 @@ public:
 													CC_TRIANGULATION_TYPES type = DELAUNAY_2D_AXIS_ALIGNED,
 													PointCoordinateType maxEdgeLength = 0,
 													unsigned char dim = 2,
-													char* errorStr = 0);
+													char* errorStr = nullptr);
 
 	//! Indexed 2D vector
 	/** Used for convex and concave hull computation

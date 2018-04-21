@@ -23,8 +23,8 @@
 
 //system
 #include <algorithm>
-#include <string.h>
-#include <assert.h>
+#include <cassert>
+#include <cstring>
 
 #ifdef USE_VLD
 //VLD

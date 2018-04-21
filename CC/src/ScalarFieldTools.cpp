@@ -19,12 +19,12 @@
 #include "ScalarFieldTools.h"
 
 //local
-#include "ReferenceCloud.h"
 #include "GenericProgressCallback.h"
+#include "ReferenceCloud.h"
 #include "ScalarField.h"
 
 //system
-#include <stdio.h>
+#include <cstdio>
 
 using namespace CCLib;
 
@@ -75,7 +75,7 @@ int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* th
 	}
 
 	ScalarField* theGradientNorms = new ScalarField("gradient norms");
-	ScalarField* _theGradientNorms = 0;
+	ScalarField* _theGradientNorms = nullptr;
 
 	//if the IN and OUT scalar fields are the same
 	if (sameInAndOutScalarField)
@@ -126,7 +126,7 @@ int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* th
 	}
 
 	theGradientNorms->release();
-	theGradientNorms = 0;
+	theGradientNorms = nullptr;
 
 	return result;
 }
@@ -254,7 +254,7 @@ bool ScalarFieldTools::applyScalarFieldGaussianFilter(PointCoordinateType sigma,
 	if (n==0)
         return false;
 
-	DgmOctree* theOctree = 0;
+	DgmOctree* theOctree = nullptr;
 	if (theCloudOctree)
         theOctree = theCloudOctree;
 	else

@@ -36,9 +36,9 @@ public:
 
 	//! Default constructor
 	SimpleRefTriangle()
-		: A(0)
-		, B(0)
-		, C(0)
+		: A(nullptr)
+		, B(nullptr)
+		, C(nullptr)
 	{}
 
 	//! Constructor from 3 vertices (references to)

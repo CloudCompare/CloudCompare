@@ -25,8 +25,8 @@
 
 //local
 #include "GenericCloud.h"
-#include "ScalarFieldTools.h"
 #include "ScalarField.h"
+#include "ScalarFieldTools.h"
 
 
 using namespace CCLib;
@@ -411,7 +411,7 @@ double WeibullDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned 
 
 	if (histo && !inputHisto)
 		delete[] histo;
-	histo = 0;
+	histo = nullptr;
 
 	return dk;
 }

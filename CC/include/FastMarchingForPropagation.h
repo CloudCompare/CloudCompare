@@ -20,8 +20,8 @@
 #define FAST_MARCHING_PROP_HEADER
 
 //local
-#include "FastMarching.h"
 #include "DgmOctree.h"
+#include "FastMarching.h"
 
 namespace CCLib
 {

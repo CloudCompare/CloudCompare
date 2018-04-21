@@ -24,7 +24,7 @@
 using namespace CCLib;
 
 ReferenceCloud::ReferenceCloud(GenericIndexedCloudPersist* associatedCloud)
-	: m_theIndexes(0)
+	: m_theIndexes(nullptr)
 	, m_globalIterator(0)
 	, m_validBB(false)
 	, m_theAssociatedCloud(associatedCloud)
@@ -34,7 +34,7 @@ ReferenceCloud::ReferenceCloud(GenericIndexedCloudPersist* associatedCloud)
 }
 
 ReferenceCloud::ReferenceCloud(const ReferenceCloud& refCloud)
-	: m_theIndexes(0)
+	: m_theIndexes(nullptr)
 	, m_globalIterator(0)
 	, m_bbMin(0,0,0)
 	, m_bbMax(0,0,0)

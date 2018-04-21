@@ -35,7 +35,7 @@
 #include "SortAlgo.h"
 
 //system
-#include <time.h>
+#include <ctime>
 
 using namespace CCLib;
 

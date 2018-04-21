@@ -20,8 +20,8 @@
 #define GENERIC_PROGRESS_CALLBACK_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "CCConst.h"
+#include "CCCoreLib.h"
 
 class AtomicCounter;
 

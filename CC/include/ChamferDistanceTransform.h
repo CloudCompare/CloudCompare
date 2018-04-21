@@ -48,17 +48,21 @@ public:
 		The grid must be explicitelty initialized prior to any action.
 		\return true if the initialization succeeded
 	**/
-	inline bool init(const Tuple3ui& gridSize) { return Grid3D<GridElement>::init(gridSize.x, gridSize.y, gridSize.z, 1, MAX_DIST); }
+	inline bool init(const Tuple3ui& gridSize)
+	{
+		return Grid3D<GridElement>::init(gridSize.x, gridSize.y, gridSize.z, 1, MAX_DIST);
+	}
 
 	//! Computes the Chamfer distance on the whole grid
 	/** Propagates the distances on the whole grid. The 'zeros' should
 		have already been initialized before calling this method (see
 		ChamferDistanceTransform::setZero).
 		\param type the Chamfer distance type
-		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
+		\param progressCb the client application can get some notification of the process
+			progress through this callback mechanism (see GenericProgressCallback)
 		\return max distance (or -1 if an error occurred)
 	**/
-	int propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, GenericProgressCallback* progressCb = 0);
+	int propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, GenericProgressCallback* progressCb = nullptr);
 
 };
 

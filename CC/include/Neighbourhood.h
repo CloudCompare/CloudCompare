@@ -20,9 +20,9 @@
 #define CC_NEIGHBOURHOOD_HEADER
 
 //Local
+#include "CCMiscTools.h"
 #include "GenericIndexedCloudPersist.h"
 #include "SquareMatrix.h"
-#include "CCMiscTools.h"
 
 
 namespace CCLib
@@ -72,7 +72,7 @@ class CC_CORE_LIB_API Neighbourhood
 		***/
 		GenericIndexedMesh* triangulateOnPlane(	bool duplicateVertices = false,
 												PointCoordinateType maxEdgeLength = 0,
-												char* errorStr = 0);
+												char* errorStr = nullptr);
 
 		//! Fit a quadric on point set (see getQuadric) then triangulates it inside bounding box
 		GenericIndexedMesh* triangulateFromQuadric(unsigned stepsX, unsigned stepsY);
@@ -88,10 +88,10 @@ class CC_CORE_LIB_API Neighbourhood
 			\return success
 		**/
 		template<class Vec2D> bool projectPointsOn2DPlane(	std::vector<Vec2D>& points2D,
-															const PointCoordinateType* planeEquation = 0,
-															CCVector3* O = 0,
-															CCVector3* X = 0,
-															CCVector3* Y = 0,
+															const PointCoordinateType* planeEquation = nullptr,
+															CCVector3* O = nullptr,
+															CCVector3* X = nullptr,
+															CCVector3* Y = nullptr,
 															bool useOXYasBase = false)
 		{
 			//need at least one point ;)
@@ -220,7 +220,7 @@ class CC_CORE_LIB_API Neighbourhood
 				dims = [index(X),index(Y),index(Z)] where: 0=x, 1=y, 2=z
 			\return 0 if computation failed
 		**/
-		const PointCoordinateType* getQuadric(Tuple3ub* dims = 0);
+		const PointCoordinateType* getQuadric(Tuple3ub* dims = nullptr);
 
 		//! Computes the best interpolating quadric (Least-square)
 		/** \param[out] quadricEquation an array of 10 coefficients [a,b,c,d,e,f,g,l,m,n] such as

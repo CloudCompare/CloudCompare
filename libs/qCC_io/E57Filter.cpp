@@ -639,15 +639,14 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 	if (scans.empty())
 		return CC_FERR_NO_SAVE;
 
-	//Write file to disk
-	e57::ImageFile imf(qPrintable(filename), "w"); //DGM: warning, toStdString doesn't preserve "local" characters
-	if (!imf.isOpen())
-		return CC_FERR_WRITING;
-
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
 	try
 	{
+		e57::ImageFile imf(qPrintable(filename), "w"); //DGM: warning, toStdString doesn't preserve "local" characters
+		if (!imf.isOpen())
+			return CC_FERR_WRITING;
+
 		//get root
 		e57::StructureNode root = imf.root();
 
@@ -788,12 +787,18 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 	catch(const e57::E57Exception& e)
 	{
-		ccLog::Warning(QString("[E57] LibE57 has thrown an exception: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
+		ccLog::Warning(QStringLiteral("[E57] Error: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
+		
+		if ( !e.context().empty() )
+		{
+			ccLog::Warning( QStringLiteral("    context: %1").arg( QString::fromStdString( e.context() ) ) );
+		}
+		
 		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 	catch(...)
 	{
-		ccLog::Warning("[E57] LibE57 has thrown an unknown exception!");
+		ccLog::Warning("[E57] Unknown error");
 		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 
@@ -2095,14 +2100,16 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 {
 	s_loadParameters = parameters;
 
-	//Read file from disk
-	e57::ImageFile imf(qPrintable(filename), "r"); //DGM: warning, toStdString doesn't preserve "local" characters
-	if (!imf.isOpen())
-		return CC_FERR_READING;
-
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
+		e57::ImageFile imf(qPrintable(filename), "r"); //DGM: warning, toStdString doesn't preserve "local" characters
+		
+		if (!imf.isOpen())
+		{
+			return CC_FERR_READING;
+		}
+
 		//for normals handling
 		static const e57::ustring normalsExtension("http://www.libe57.org/E57_NOR_surface_normals.txt");
 		e57::ustring _normalsExtension;
@@ -2111,36 +2118,27 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			imf.extensionsAdd("nor", normalsExtension);
 		}
 
-		//get root
 		e57::StructureNode root = imf.root();
 
 		//header info
 		e57::StructureNode rootStruct = e57::StructureNode(root);
-		//format name
+		
+		if (!ChildNodeToConsole(rootStruct,"formatName") ||
+				!ChildNodeToConsole(rootStruct,"guid") ||
+				!ChildNodeToConsole(rootStruct,"versionMajor") ||
+				!ChildNodeToConsole(rootStruct,"versionMinor"))
 		{
-			if (!ChildNodeToConsole(rootStruct,"formatName"))
-				return CC_FERR_MALFORMED_FILE;
+			imf.close();
+			return CC_FERR_MALFORMED_FILE;
 		}
-		//GUID
-		{
-			if (!ChildNodeToConsole(rootStruct,"guid"))
-				return CC_FERR_MALFORMED_FILE;
-		}
-		//versionMajor
-		{
-			if (!ChildNodeToConsole(rootStruct,"versionMajor"))
-				return CC_FERR_MALFORMED_FILE;
-		}
-		//versionMinor
-		{
-			if (!ChildNodeToConsole(rootStruct,"versionMinor"))
-				return CC_FERR_MALFORMED_FILE;
-		}
-
+		
 		//unroll structure in tree (it's a quick to check structure + informative for user)
 		ccHObject* fileStructureTree = new ccHObject("File structure");
 		if (!NodeStructureToTree(fileStructureTree, rootStruct))
-				return CC_FERR_MALFORMED_FILE;
+		{
+			imf.close();
+			return CC_FERR_MALFORMED_FILE;
+		}
 		container.addChild(fileStructureTree);
 
 		//we store (temporarily) the loaded scans associated with
@@ -2153,7 +2151,10 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 		{
 			e57::Node n = root.get("/data3D"); //E57 standard: "data3D is a vector for storing an arbitrary number of 3D data sets "
 			if (n.type() != e57::E57_VECTOR)
+			{
+				imf.close();
 				return CC_FERR_MALFORMED_FILE;
+			}
 			e57::VectorNode data3D(n);
 
 			unsigned scanCount = static_cast<unsigned>(data3D.childCount());
@@ -2242,7 +2243,11 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 		{
 			e57::Node n = root.get("/images2D"); //E57 standard: "images2D is a vector for storing two dimensional images"
 			if (n.type() != e57::E57_VECTOR)
+			{
+				imf.close();
 				return CC_FERR_MALFORMED_FILE;
+			}
+			
 			e57::VectorNode images2D(n);
 
 			unsigned imageCount = static_cast<unsigned>(images2D.childCount());
@@ -2302,21 +2307,27 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 				}
 			}
 		}
+		
+		imf.close();		
 	}
 	catch(const e57::E57Exception& e)
 	{
-		ccLog::Warning(QString("[E57] LibE57 has thrown an exception: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
+		ccLog::Warning(QString("[E57] Error: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
+		
+		if ( !e.context().empty() )
+		{
+			ccLog::Warning( QStringLiteral("    context: %1").arg( QString::fromStdString( e.context() ) ) );
+		}
+
 		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 	catch(...)
 	{
-		ccLog::Warning("[E57] LibE57 has thrown an unknown exception!");
+		ccLog::Warning("[E57] Unknown error");
 		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 
-	imf.close();
-
-	//special case: process has benn cancelled by user
+	//special case: process has been cancelled by user
 	if (result == CC_FERR_NO_ERROR && s_cancelRequestedByUser)
 	{
 		result = CC_FERR_CANCELED_BY_USER;

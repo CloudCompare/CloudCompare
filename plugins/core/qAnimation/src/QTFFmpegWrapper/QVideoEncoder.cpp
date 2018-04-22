@@ -179,7 +179,7 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 	//some formats want stream headers to be separate
 	if (m_ff->formatContext->oformat->flags & AVFMT_GLOBALHEADER)
 	{
-		m_ff->codecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
+		m_ff->codecContext->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 	}
 
 	// Add the video stream

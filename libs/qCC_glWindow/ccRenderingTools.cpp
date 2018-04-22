@@ -477,12 +477,12 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		vlabelSet drawnLabels;
 
 		//add first label
-		drawnLabels.push_back(vlabel(0, 0, strHeight, sortedKeyValues.front()));
+		drawnLabels.emplace_back(0, 0, strHeight, sortedKeyValues.front());
 
 		if (keyValues.size() > 1)
 		{
 			//add last label
-			drawnLabels.push_back(vlabel(scaleMaxHeight, scaleMaxHeight - strHeight, scaleMaxHeight, sortedKeyValues.back()));
+			drawnLabels.emplace_back(scaleMaxHeight, scaleMaxHeight - strHeight, scaleMaxHeight, sortedKeyValues.back());
 		}
 
 		//we try to display the other keyPoints (if any)

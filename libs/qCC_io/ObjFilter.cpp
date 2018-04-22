@@ -633,12 +633,12 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					groupName.append(QString(" ") + tokens[i]);
 				//push previous group descriptor (if none was pushed)
 				if (groups.empty() && totalFacesRead > 0)
-					groups.push_back(std::pair<unsigned, QString>(0, "default"));
+					groups.emplace_back(0, "default");
 				//push new group descriptor
 				if (!groups.empty() && groups.back().first == totalFacesRead)
 					groups.back().second = groupName; //simply replace the group name if the previous group was empty!
 				else
-					groups.push_back(std::pair<unsigned, QString>(totalFacesRead, groupName));
+					groups.emplace_back(totalFacesRead, groupName);
 				polyCount = 0; //restart polyline count at 0!
 			}
 			/*** new face ***/

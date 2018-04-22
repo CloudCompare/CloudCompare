@@ -1249,7 +1249,7 @@ void MainWindow::doActionApplyScale()
 			}
 
 			assert(cloud);
-			candidates.push_back(EntityCloudAssociation(entity, cloud));
+			candidates.emplace_back(entity, cloud);
 		}
 	}
 
@@ -1377,7 +1377,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 					uniqueScale = (std::abs(shifted->getGlobalScale() - scale) < ZERO_TOLERANCE);
 			}
 
-			shiftedEntities.push_back(std::pair<ccShiftedObject*, ccHObject*>(shifted, entity));
+			shiftedEntities.emplace_back(shifted, entity);
 		}
 
 		Pg = globalBBmin;
@@ -2734,8 +2734,8 @@ void MainWindow::doRemoveDuplicatePoints()
 
 void MainWindow::doActionFilterByValue()
 {
-	typedef std::pair<ccHObject*, ccPointCloud*> entityAndVerticesType;
-	std::vector<entityAndVerticesType> toFilter;
+	typedef std::pair<ccHObject*, ccPointCloud*> EntityAndVerticesType;
+	std::vector<EntityAndVerticesType> toFilter;
 	
 	for ( ccHObject *entity : getSelectedEntities() )
 	{
@@ -2747,7 +2747,7 @@ void MainWindow::doActionFilterByValue()
 			CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
 			if (sf)
 			{
-				toFilter.push_back(entityAndVerticesType(entity,pc));
+				toFilter.emplace_back(entity,pc);
 			}
 			else
 			{
@@ -3842,7 +3842,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 			unsigned compCount = static_cast<unsigned>(components.size());
 			for (unsigned i = 0; i < compCount; ++i)
 			{
-				sortedIndexes.push_back(ComponentIndexAndSize(i, components[i]->size()));
+				sortedIndexes.emplace_back(i, components[i]->size());
 			}
 
 			ParallelSort(sortedIndexes.begin(), sortedIndexes.end(), ComponentIndexAndSize::DescendingCompOperator);

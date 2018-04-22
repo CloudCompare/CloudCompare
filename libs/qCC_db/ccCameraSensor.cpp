@@ -2266,7 +2266,7 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 		{
 			double xShift = (minC[0]-minCorners[0])/pixelSize;
 			double yShift = (minC[1]-minCorners[1])/pixelSize;
-			relativePos->push_back(std::pair<double,double>(xShift,yShift));
+			relativePos->emplace_back(xShift, yShift);
 		}
 
 		if (outputDir)

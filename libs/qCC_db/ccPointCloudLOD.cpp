@@ -474,7 +474,7 @@ int32_t ccPointCloudLOD::newCell(unsigned char level)
 	Level& l = m_levels[level];
 
 	//assert(l.data.size() < l.data.capacity());
-	l.data.push_back(Node(level));
+	l.data.emplace_back(level);
 
 	return static_cast<int32_t>(l.data.size()) - 1;
 }

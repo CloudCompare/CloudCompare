@@ -967,7 +967,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &n
 						{
 							if (!getOnlyPointsWithValidScalar || ScalarField::ValidValue(m_theAssociatedCloud->getPointScalarValue(p->theIndex)))
 							{
-								nNSS.pointsInNeighbourhood.emplace_back(PointDescriptor (m_theAssociatedCloud->getPointPersistentPtr(p->theIndex),p->theIndex));
+								nNSS.pointsInNeighbourhood.emplace_back(m_theAssociatedCloud->getPointPersistentPtr(p->theIndex), p->theIndex);
 							}
 						}
 					}
@@ -997,7 +997,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &n
 						{
 							if (!getOnlyPointsWithValidScalar || ScalarField::ValidValue(m_theAssociatedCloud->getPointScalarValue(p->theIndex)))
 							{
-								nNSS.pointsInNeighbourhood.emplace_back(PointDescriptor (m_theAssociatedCloud->getPointPersistentPtr(p->theIndex),p->theIndex));
+								nNSS.pointsInNeighbourhood.emplace_back(m_theAssociatedCloud->getPointPersistentPtr(p->theIndex),p->theIndex);
 							}
 						}
 					}
@@ -1024,7 +1024,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &n
 						{
 							if (!getOnlyPointsWithValidScalar || ScalarField::ValidValue(m_theAssociatedCloud->getPointScalarValue(p->theIndex)))
 							{
-								nNSS.pointsInNeighbourhood.emplace_back(PointDescriptor (m_theAssociatedCloud->getPointPersistentPtr(p->theIndex),p->theIndex));
+								nNSS.pointsInNeighbourhood.emplace_back(m_theAssociatedCloud->getPointPersistentPtr(p->theIndex),p->theIndex);
 							}
 						}
 					}
@@ -1531,7 +1531,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(	NearestNeighboursSearc
 			{
 				if (!getOnlyPointsWithValidScalar || ScalarField::ValidValue(m_theAssociatedCloud->getPointScalarValue(p->theIndex)))
 				{
-					nNSS.pointsInNeighbourhood.emplace_back(PointDescriptor(m_theAssociatedCloud->getPointPersistentPtr(p->theIndex),p->theIndex));
+					nNSS.pointsInNeighbourhood.emplace_back(m_theAssociatedCloud->getPointPersistentPtr(p->theIndex),p->theIndex);
 					++p;
 				}
 			}
@@ -1737,7 +1737,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(	const CCVector3& sphereCenter,
 							//we keep the points falling inside the sphere
 							if (d2 <= squareRadius)
 							{
-								neighbours.emplace_back(PointDescriptor(P,p->theIndex,d2));
+								neighbours.emplace_back(P,p->theIndex,d2);
 							}
 						}
 					}
@@ -1918,7 +1918,7 @@ size_t DgmOctree::getPointsInBoxNeighbourhood(BoxNeighbourhood& params) const
 							&&	fabs(Q.y) <= boxHalfDimensions.y
 							&&	fabs(Q.z) <= boxHalfDimensions.z )
 						{
-							params.neighbours.emplace_back(PointDescriptor(P, p->theIndex, 0));
+							params.neighbours.emplace_back(P, p->theIndex, 0);
 						}
 					}
 				}
@@ -2030,7 +2030,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& 
 							d2 = (OP - params.dir * dot).norm2d();
 							if (d2 <= squareRadius && dot >= minHalfLength && dot <= params.maxHalfLength)
 							{
-								params.neighbours.emplace_back(PointDescriptor(P,p->theIndex,dot)); //we save the distance relatively to the center projected on the axis!
+								params.neighbours.emplace_back(P,p->theIndex,dot); //we save the distance relatively to the center projected on the axis!
 							}
 						}
 					}
@@ -2191,12 +2191,12 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCyli
 									//potential candidate?
 									if (dot >= currentHalfLengthMinus && dot <= params.currentHalfLength)
 									{
-										params.neighbours.emplace_back(PointDescriptor(P,p->theIndex,dot)); //we save the distance relatively to the center projected on the axis!
+										params.neighbours.emplace_back(P,p->theIndex,dot); //we save the distance relatively to the center projected on the axis!
 									}
 									else if (params.currentHalfLength < params.maxHalfLength)
 									{
 										//we still keep it in the 'potential candidates' list
-										params.potentialCandidates.emplace_back(PointDescriptor(P,p->theIndex,dot)); //we save the distance relatively to the center projected on the axis!
+										params.potentialCandidates.emplace_back(P,p->theIndex,dot); //we save the distance relatively to the center projected on the axis!
 									}
 								}
 							}
@@ -2516,7 +2516,7 @@ bool DgmOctree::getCellCodesAndIndexes(unsigned char level, cellsContainer& vec,
 			CellCode currentCode = (p->theCode >> bitDec);
 
 			if (predCode != currentCode)
-				vec.emplace_back(IndexAndCode(i,truncatedCodes ? currentCode : p->theCode));
+				vec.emplace_back(i,truncatedCodes ? currentCode : p->theCode);
 
 			predCode = currentCode;
 		}
@@ -4272,7 +4272,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 					case RC_CLOSE_POINTS:
 					 
 						//store all the points that are close enough to the ray
-						output.emplace_back(PointDescriptor(P, it->theIndex, radialSqDist));
+						output.emplace_back(P, it->theIndex, radialSqDist);
 						break;
 
 					default:

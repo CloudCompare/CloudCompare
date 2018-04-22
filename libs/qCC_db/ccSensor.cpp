@@ -53,7 +53,7 @@ bool ccSensor::addPosition(ccGLMatrix& trans, double index)
 	bool sort = (!m_posBuffer->empty() && m_posBuffer->back().getIndex() > index);
 	try
 	{
-		m_posBuffer->push_back(ccIndexedTransformation(trans,index));
+		m_posBuffer->emplace_back(trans,index);
 	}
 	catch (const std::bad_alloc&)
 	{

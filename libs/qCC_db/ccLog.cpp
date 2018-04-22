@@ -84,7 +84,7 @@ void ccLog::LogMessage(const QString& message, int level)
 	{
 		try
 		{
-			s_backupMessages.push_back(Message(message, level));
+			s_backupMessages.emplace_back(message, level);
 		}
 		catch (const std::bad_alloc&)
 		{

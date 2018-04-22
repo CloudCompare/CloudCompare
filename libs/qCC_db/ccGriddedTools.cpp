@@ -124,10 +124,10 @@ bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 
 					unsigned span = maxIndex-minIndex+1;
 					ScalarType angle_rad = static_cast<ScalarType>((maxPhiCurrentLine-minPhiCurrentLine) / span);
-					angles.push_back(AngleAndSpan(angle_rad,span));
+					angles.emplace_back(angle_rad, span);
 
 					ScalarType angleShifted_rad = static_cast<ScalarType>((maxPhiCurrentLineShifted-minPhiCurrentLineShifted) / span);
-					anglesShifted.push_back(AngleAndSpan(angleShifted_rad,span));
+					anglesShifted.emplace_back(angleShifted_rad, span);
 				}
 
 				_indexGrid += grid->w;
@@ -240,10 +240,10 @@ bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 
 					unsigned span = maxIndex-minIndex;
 					ScalarType angle_rad = static_cast<ScalarType>((maxThetaCurrentCol-minThetaCurrentCol) / span);
-					angles.push_back(AngleAndSpan(angle_rad,span));
+					angles.emplace_back(angle_rad,span);
 
 					ScalarType angleShifted_rad = static_cast<ScalarType>((maxThetaCurrentColShifted-minThetaCurrentColShifted) / span);
-					anglesShifted.push_back(AngleAndSpan(angleShifted_rad,span));
+					anglesShifted.emplace_back(angleShifted_rad,span);
 				}
 			}
 

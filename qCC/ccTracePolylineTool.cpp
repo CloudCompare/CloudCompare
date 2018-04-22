@@ -511,7 +511,7 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 
 	m_poly3DVertices->addPoint(pi.P3D);
 	m_poly3D->addPointIndex(m_poly3DVertices->size() - 1);
-	m_segmentParams.push_back(SegmentGLParams(m_associatedWin, pi.clickPoint.x(), pi.clickPoint.y()));
+	m_segmentParams.emplace_back(m_associatedWin, pi.clickPoint.x(), pi.clickPoint.y());
 
 	//we replace the first point of the tip by this new point
 	{

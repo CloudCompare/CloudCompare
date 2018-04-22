@@ -164,7 +164,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		{
 			try
 			{
-				classes.push_back(Chi2Class(1.0e-6,static_cast<int>(histoBefore)));
+				classes.emplace_back(1.0e-6,static_cast<int>(histoBefore));
 			}
 			catch (const std::bad_alloc&)
 			{
@@ -200,7 +200,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		{
 			try
 			{
-				classes.push_back(Chi2Class(1.0e-6,static_cast<int>(histoAfter)));
+				classes.emplace_back(1.0e-6,static_cast<int>(histoAfter));
 			}
 			catch (const std::bad_alloc&)
 			{

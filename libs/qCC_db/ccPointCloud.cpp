@@ -373,8 +373,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 					if (scanGrid->validCount != 0) //no need to copy empty grids!
 					{
 						//duplicate the grid
-						Grid::Shared newGrid(new Grid(*scanGrid));
-						newGrids.push_back(newGrid);
+						newGrids.push_back(Grid::Shared (new Grid(*scanGrid)));
 					}
 				}
 			}
@@ -647,7 +646,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 			//we associate imported points with empty waveform
 			for (unsigned i = 0; i < addedPoints; i++)
 			{
-				m_fwfWaveforms.push_back(ccWaveform(0));
+				m_fwfWaveforms.emplace_back(0);
 			}
 		}
 		else //otherwise
@@ -662,7 +661,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				{
 					for (unsigned i = 0; i < pointCountBefore; i++)
 					{
-						m_fwfWaveforms.push_back(ccWaveform(0));
+						m_fwfWaveforms.emplace_back(0);
 					}
 					//we will simply use the other cloud FWF data container
 					fwfData() = addedCloud->fwfData();
@@ -775,7 +774,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 						}
 						else //the waveform is associated to a descriptor that couldn't be imported :(
 						{
-							m_fwfWaveforms.push_back(ccWaveform(0));
+							m_fwfWaveforms.emplace_back(0);
 							++lostWaveformCount;
 						}
 					}

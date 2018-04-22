@@ -109,7 +109,7 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 	//We build the constraints
 	for(size_t i = 0; i < constrCount; ++i) {
 		const CCVector2 * pt = &points2D[segments2D[i]];
-		constraints.push_back(std::make_pair(cgalPoint(pt->x, pt->y), segments2D[i]));
+		constraints.emplace_back(cgalPoint(pt->x, pt->y), segments2D[i]);
 	}
 	//The CDT  is built according to the constraints
 	cdt.insert(constraints.begin(), constraints.end());
@@ -189,7 +189,7 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 
 	for(size_t i = 0; i < pointCount; ++i) {
 		const CCVector2 * pt = &points2D[i];
-		pts.push_back(std::make_pair(cgalPoint(pt->x, pt->y), i));
+		pts.emplace_back(cgalPoint(pt->x, pt->y), i);
 	}
 
 	//The delaunay triangulation is built according to the 2D point cloud

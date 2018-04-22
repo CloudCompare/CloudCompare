@@ -443,7 +443,7 @@ bool ccCommandLineParser::importFile(QString filename, FileIOFilter::Shared filt
 				{
 					verticesIDs.insert(vertices->getUniqueID());
 					print(QString("Found one mesh with %1 faces and %2 vertices: '%3'").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()).arg(mesh->getName()));
-					m_meshes.push_back(CLMeshDesc(mesh, filename, count == 1 ? -1 : static_cast<int>(i)));
+					m_meshes.emplace_back(mesh, filename, count == 1 ? -1 : static_cast<int>(i));
 				}
 				else
 				{
@@ -471,7 +471,7 @@ bool ccCommandLineParser::importFile(QString filename, FileIOFilter::Shared filt
 				{
 					verticesIDs.insert(vertices->getUniqueID());
 					print(QString("Found one kind of mesh with %1 faces and %2 vertices: '%3'").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()).arg(mesh->getName()));
-					m_meshes.push_back(CLMeshDesc(mesh, filename, count == 1 ? -1 : static_cast<int>(countBefore + i)));
+					m_meshes.emplace_back(mesh, filename, count == 1 ? -1 : static_cast<int>(countBefore + i));
 				}
 				else
 				{
@@ -503,7 +503,7 @@ bool ccCommandLineParser::importFile(QString filename, FileIOFilter::Shared filt
 				continue;
 			}
 			print(QString("Found one cloud with %1 points").arg(pc->size()));
-			m_clouds.push_back(CLCloudDesc(pc, filename, count == 1 ? -1 : static_cast<int>(i)));
+			m_clouds.emplace_back(pc, filename, count == 1 ? -1 : static_cast<int>(i));
 		}
 	}
 

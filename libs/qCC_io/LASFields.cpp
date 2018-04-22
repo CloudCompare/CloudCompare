@@ -41,20 +41,20 @@ bool LasField::GetLASFields(ccPointCloud* cloud, std::vector<LasField>& fieldsTo
 		std::vector<LasField> lasFields;
 		lasFields.reserve(14);
 		{
-			lasFields.push_back(LasField(LAS_CLASSIFICATION, 0, 0, 255)); //unsigned char: between 0 and 255
-			lasFields.push_back(LasField(LAS_CLASSIF_VALUE, 0, 0, 31)); //5 bits: between 0 and 31
-			lasFields.push_back(LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1)); //1 bit: 0 or 1
-			lasFields.push_back(LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1)); //1 bit: 0 or 1
-			lasFields.push_back(LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1)); //1 bit: 0 or 1
-			lasFields.push_back(LasField(LAS_INTENSITY, 0, 0, 65535)); //16 bits: between 0 and 65536
-			lasFields.push_back(LasField(LAS_TIME, 0, 0, -1.0)); //8 bytes (double)
-			lasFields.push_back(LasField(LAS_RETURN_NUMBER, 1, 1, 7)); //3 bits: between 1 and 7
-			lasFields.push_back(LasField(LAS_NUMBER_OF_RETURNS, 1, 1, 7)); //3 bits: between 1 and 7
-			lasFields.push_back(LasField(LAS_SCAN_DIRECTION, 0, 0, 1)); //1 bit: 0 or 1
-			lasFields.push_back(LasField(LAS_FLIGHT_LINE_EDGE, 0, 0, 1)); //1 bit: 0 or 1
-			lasFields.push_back(LasField(LAS_SCAN_ANGLE_RANK, 0, -90, 90)); //signed char: between -90 and +90
-			lasFields.push_back(LasField(LAS_USER_DATA, 0, 0, 255)); //unsigned char: between 0 and 255
-			lasFields.push_back(LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535)); //16 bits: between 0 and 65536
+			lasFields.emplace_back(LAS_CLASSIFICATION, 0, 0, 255); //unsigned char: between 0 and 255
+			lasFields.emplace_back(LAS_CLASSIF_VALUE, 0, 0, 31); //5 bits: between 0 and 31
+			lasFields.emplace_back(LAS_CLASSIF_SYNTHETIC, 0, 0, 1); //1 bit: 0 or 1
+			lasFields.emplace_back(LAS_CLASSIF_KEYPOINT, 0, 0, 1); //1 bit: 0 or 1
+			lasFields.emplace_back(LAS_CLASSIF_WITHHELD, 0, 0, 1); //1 bit: 0 or 1
+			lasFields.emplace_back(LAS_INTENSITY, 0, 0, 65535); //16 bits: between 0 and 65536
+			lasFields.emplace_back(LAS_TIME, 0, 0, -1.0); //8 bytes (double)
+			lasFields.emplace_back(LAS_RETURN_NUMBER, 1, 1, 7); //3 bits: between 1 and 7
+			lasFields.emplace_back(LAS_NUMBER_OF_RETURNS, 1, 1, 7); //3 bits: between 1 and 7
+			lasFields.emplace_back(LAS_SCAN_DIRECTION, 0, 0, 1); //1 bit: 0 or 1
+			lasFields.emplace_back(LAS_FLIGHT_LINE_EDGE, 0, 0, 1); //1 bit: 0 or 1
+			lasFields.emplace_back(LAS_SCAN_ANGLE_RANK, 0, -90, 90); //signed char: between -90 and +90
+			lasFields.emplace_back(LAS_USER_DATA, 0, 0, 255); //unsigned char: between 0 and 255
+			lasFields.emplace_back(LAS_POINT_SOURCE_ID, 0, 0, 65535); //16 bits: between 0 and 65536
 		}
 
 		//we are going to check now the existing cloud SFs

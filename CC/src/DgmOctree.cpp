@@ -21,10 +21,10 @@
 //local
 #include "CCMiscTools.h"
 #include "GenericProgressCallback.h"
+#include "ParallelSort.h"
 #include "RayAndBox.h"
 #include "ReferenceCloud.h"
 #include "ScalarField.h"
-#include "SortAlgo.h"
 
 //system
 #include <stdio.h>
@@ -375,7 +375,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 	}
 
 	//we sort the 'cells' by ascending code order
-	SortAlgo(m_thePointsAndTheirCellCodes.begin(), m_thePointsAndTheirCellCodes.end(), IndexAndCode::codeComp);
+	ParallelSort(m_thePointsAndTheirCellCodes.begin(), m_thePointsAndTheirCellCodes.end(), IndexAndCode::codeComp);
 
 	//update the pre-computed 'number of cells per level of subdivision' array
 	updateCellCountTable();
@@ -2856,7 +2856,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	Tuple3i gridSize = indexMax - indexMin + Tuple3i(1, 1, 1);
 
 	//we sort the cells
-	SortAlgo(ccCells.begin(), ccCells.end(), IndexAndCodeExt::indexComp); //ascending index code order
+	ParallelSort(ccCells.begin(), ccCells.end(), IndexAndCodeExt::indexComp); //ascending index code order
 
 	const int& di = gridSize.x;
 	const int& dj = gridSize.y;
@@ -3005,7 +3005,8 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 				else //more than 1 neighbor?
 				{
 					//we get the smallest label
-					SortAlgo(neighboursVal.begin(), neighboursVal.end());
+					ParallelSort(neighboursVal.begin(), neighboursVal.end());
+					
 					int smallestLabel = neighboursVal[0];
 
 					//if they are not the same
@@ -3039,7 +3040,8 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 						}
 
 						//get the smallest one
-						SortAlgo(neighboursMin.begin(), neighboursMin.end());
+						ParallelSort(neighboursMin.begin(), neighboursMin.end());
+						
 						smallestLabel = neighboursMin.front();
 
 						//update the equivalence table by the way

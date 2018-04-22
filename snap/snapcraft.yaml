@@ -39,6 +39,7 @@ parts:
       - libcgal-dev
       - libcgal-qt5-dev
       - libswscale-dev
+      - libtbb-dev
       - libqt5opengl5-dev
       - qt5-default
       - libgdal-dev
@@ -52,6 +53,7 @@ parts:
     configflags:
       - -DCMAKE_BUILD_TYPE=Release
       - -DCOMPILE_CC_CORE_LIB_WITH_CGAL=ON
+      - -DCOMPILE_CC_CORE_LIB_WITH_TBB=ON
       - -DINSTALL_QHPR_PLUGIN=ON
       - -DINSTALL_QPOISSON_RECON_PLUGIN=ON
       - -DPOISSON_RECON_WITH_OPEN_MP=ON

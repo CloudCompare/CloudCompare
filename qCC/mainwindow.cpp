@@ -23,9 +23,9 @@
 #include <Jacobi.h>
 #include <MeshSamplingTools.h>
 #include <NormalDistribution.h>
+#include <ParallelSort.h>
 #include <ScalarFieldTools.h>
 #include <SimpleCloud.h>
-#include <SortAlgo.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
 
@@ -3845,7 +3845,8 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 				sortedIndexes.push_back(ComponentIndexAndSize(i, components[i]->size()));
 			}
 
-			SortAlgo(sortedIndexes.begin(), sortedIndexes.end(), ComponentIndexAndSize::DescendingCompOperator);
+			ParallelSort(sortedIndexes.begin(), sortedIndexes.end(), ComponentIndexAndSize::DescendingCompOperator);
+			
 			_sortedIndexes = &sortedIndexes;
 		}
 	}

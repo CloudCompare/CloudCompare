@@ -23,6 +23,7 @@
 #include "DistanceComputationTools.h"
 #include "GenericProgressCallback.h"
 #include "Neighbourhood.h"
+#include "ParallelSort.h"
 #include "SimpleCloud.h"
 #include "SimpleMesh.h"
 
@@ -349,7 +350,7 @@ bool PointProjectionTools::extractConvexHull2D(	std::vector<IndexedCCVector2>& p
 	size_t n = points.size();
 
 	// Sort points lexicographically
-	std::sort(points.begin(), points.end(), LexicographicSort);
+	ParallelSort(points.begin(), points.end(), LexicographicSort);
 
 	// Build lower hull
 	{

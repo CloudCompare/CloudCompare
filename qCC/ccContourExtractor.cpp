@@ -33,6 +33,10 @@
 #include <Neighbourhood.h>
 #include <PointProjectionTools.h>
 
+#ifdef USE_TBB
+#include <tbb/parallel_for.h>
+#endif
+
 //System
 #include <assert.h>
 #include <cmath>
@@ -71,7 +75,7 @@ struct Edge
 //! Finds the nearest (available) point to an edge
 /** \return The nearest point distance (or -1 if no point was found!)
 **/
-PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
+static PointCoordinateType FindNearestCandidate(unsigned& minIndex,
 											const VertexIterator& itA,
 											const VertexIterator& itB,
 											const std::vector<Vertex2D>& points,
@@ -82,9 +86,65 @@ PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
 {
 	//look for the nearest point in the input set
 	PointCoordinateType minDist2 = -1;
-	CCVector2 AB = **itB-**itA;
-	PointCoordinateType squareLengthAB = AB.norm2();
-	unsigned pointCount = static_cast<unsigned>(points.size());
+	const CCVector2 AB = **itB-**itA;
+	const PointCoordinateType squareLengthAB = AB.norm2();
+	const unsigned pointCount = static_cast<unsigned>(points.size());
+
+#ifdef USE_TBB
+	tbb::parallel_for( static_cast<unsigned int>(0), pointCount, [&](unsigned int i) {
+		const Vertex2D& P = points[i];
+		if (pointFlags[P.index] != POINT_NOT_USED)
+			return;
+
+		//skip the edge vertices!
+		if (P.index == (*itA)->index || P.index == (*itB)->index)
+		{
+			return;
+		}
+
+		//we only consider 'inner' points
+		const CCVector2 AP = P-**itA;
+		if (AB.x * AP.y - AB.y * AP.x < 0)
+		{
+			return;
+		}
+
+		//check the angle
+		if (minCosAngle > -1.0)
+		{
+			const CCVector2 PB = **itB - P;
+			const PointCoordinateType dotProd = AP.x * PB.x + AP.y * PB.y;
+			const PointCoordinateType minDotProd = static_cast<PointCoordinateType>(minCosAngle * std::sqrt(AP.norm2() * PB.norm2()));
+			if (dotProd < minDotProd)
+			{
+				return;
+			}
+		}
+
+		const PointCoordinateType dot = AB.dot(AP); // = cos(PAB) * ||AP|| * ||AB||
+		if (dot >= 0 && dot <= squareLengthAB)
+		{
+			const CCVector2 HP = AP - AB * (dot / squareLengthAB);
+			const PointCoordinateType dist2 = HP.norm2();
+			if (minDist2 < 0 || dist2 < minDist2)
+			{
+				//the 'nearest' point must also be a valid candidate
+				//(i.e. at least one of the created edges is smaller than the original one
+				//and we don't create too small edges!)
+				const PointCoordinateType squareLengthAP = AP.norm2();
+				const PointCoordinateType squareLengthBP = (P-**itB).norm2();
+				if (	squareLengthAP >= minSquareEdgeLength
+					&&	squareLengthBP >= minSquareEdgeLength
+					&&	(allowLongerChunks || (squareLengthAP < squareLengthAB || squareLengthBP < squareLengthAB))
+					)
+				{
+					minDist2 = dist2;
+					minIndex = i;
+				}
+			}
+		}
+	} );
+#else
 	for (unsigned i=0; i<pointCount; ++i)
 	{
 		const Vertex2D& P = points[i];
@@ -139,6 +199,8 @@ PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
 			}
 		}
 	}
+#endif
+	
 	return (minDist2 < 0 ? minDist2 : minDist2/squareLengthAB);
 }
 

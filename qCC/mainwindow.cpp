@@ -128,6 +128,10 @@
 #include "devices/gamepad/ccGamepadManager.h"
 #endif
 
+#ifdef USE_TBB
+#include <tbb/tbb_stddef.h>
+#endif
+
 //Qt UI files
 #include <ui_distanceMapDlg.h>
 #include <ui_globalShiftSettingsDlg.h>
@@ -281,6 +285,12 @@ MainWindow::MainWindow()
 	updateUI();
 
 	QMainWindow::statusBar()->showMessage(QString("Ready"));
+	
+#ifdef USE_TBB
+	ccConsole::Print( QStringLiteral( "[TBB] Using Intel's Threading Building Blocks %1.%2" )
+					  .arg( QString::number( TBB_VERSION_MAJOR ), QString::number( TBB_VERSION_MINOR ) ) );
+#endif
+	
 	ccConsole::Print("CloudCompare started!");
 }
 

@@ -15,6 +15,10 @@
 //#                                                                        #
 //##########################################################################
 
+#ifdef USE_TBB
+#include <tbb/parallel_for.h>
+#endif
+
 #include "ccGenericPointCloud.h"
 
 //CCLib
@@ -470,10 +474,11 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 			}
 		}
 
-#if defined(_OPENMP)
-#pragma omp parallel for
-#endif
+#ifdef USE_TBB
+		tbb::parallel_for( 0, static_cast<int>(size()), [&](int i)
+#else
 		for (int i = 0; i < static_cast<int>(size()); ++i)
+#endif
 		{
 			//we shouldn't test points that are actually hidden!
 			if (	(!visTable || visTable->getValue(i) == POINT_VISIBLE)
@@ -497,16 +502,19 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 				if (	fabs(Q2D.x - clickPos.x) <= pickWidth
 					&&	fabs(Q2D.y - clickPos.y) <= pickHeight)
 				{
-					double squareDist = CCVector3d(X.x - P->x, X.y - P->y, X.z - P->z).norm2d();
+					const double squareDist = CCVector3d(X.x - P->x, X.y - P->y, X.z - P->z).norm2d();
 					if (nearestPointIndex < 0 || squareDist < nearestSquareDist)
 					{
 						nearestSquareDist = squareDist;
-						nearestPointIndex = static_cast<int>(i);
+						nearestPointIndex = i;
 					}
 				}
 			}
 		}
+#ifdef USE_TBB
+		);
+#endif
 	}
-
+	
 	return (nearestPointIndex >= 0);
 }

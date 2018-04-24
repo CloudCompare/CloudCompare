@@ -31,19 +31,26 @@ if test -n "$(find ${FRAMEWORK_DIR} -maxdepth 1 -name 'libavcodec.*.dylib*' -pri
   if [ ! -d "$FFMPEG_DIR" ]; then
     echo "  error: could not find FFMPEG directory: ${FFMPEG_DIR} - check versions in fix_libs.sh"
   else
-    echo "  fixing: ${FRAMEWORK_DIR}/libavcodec.57.dylib"
-    install_name_tool -change "${FFMPEG_DIR}/libavutil.55.dylib" "@executable_path/../Frameworks/libavutil.55.dylib" "${FRAMEWORK_DIR}/libavcodec.57.dylib"
-    install_name_tool -change "${FFMPEG_DIR}/libswresample.2.dylib" "@executable_path/../Frameworks/libswresample.2.dylib" "${FRAMEWORK_DIR}/libavcodec.57.dylib"
+    AV_CODEC="libavcodec.58.dylib"
+    AV_FORMAT="libavformat.58.dylib"
+    AV_UTIL="libavutil.56.dylib"
 
-    echo "  fixing: ${FRAMEWORK_DIR}/libavformat.57.dylib"
-    install_name_tool -change "${FFMPEG_DIR}/libavcodec.57.dylib" "@executable_path/../Frameworks/libavcodec.57.dylib" "${FRAMEWORK_DIR}/libavformat.57.dylib"
-    install_name_tool -change "${FFMPEG_DIR}/libavutil.55.dylib" "@executable_path/../Frameworks/libavutil.55.dylib" "${FRAMEWORK_DIR}/libavformat.57.dylib"
-    install_name_tool -change "${FFMPEG_DIR}/libswresample.2.dylib" "@executable_path/../Frameworks/libswresample.2.dylib" "${FRAMEWORK_DIR}/libavformat.57.dylib"
+    SW_RESAMPLE="libswresample.3.dylib"
+    SW_SCALE="libswscale.5.dylib"
 
-    echo "  fixing: ${FRAMEWORK_DIR}/libswresample.2.dylib"
-    install_name_tool -change "${FFMPEG_DIR}/libavutil.55.dylib" "@executable_path/../Frameworks/libavutil.55.dylib" "${FRAMEWORK_DIR}/libswresample.2.dylib"
+    echo "  fixing: ${FRAMEWORK_DIR}/${AV_CODEC}"
+    install_name_tool -change "${FFMPEG_DIR}/${AV_UTIL}" "@executable_path/../Frameworks/${AV_UTIL}" "${FRAMEWORK_DIR}/${AV_CODEC}"
+    install_name_tool -change "${FFMPEG_DIR}/${SW_RESAMPLE}" "@executable_path/../Frameworks/${SW_RESAMPLE}" "${FRAMEWORK_DIR}/${AV_CODEC}"
 
-    echo "  fixing: ${FRAMEWORK_DIR}/libswscale.4.dylib"
-    install_name_tool -change "${FFMPEG_DIR}/libavutil.55.dylib" "@executable_path/../Frameworks/libavutil.55.dylib" "${FRAMEWORK_DIR}/libswscale.4.dylib"
+    echo "  fixing: ${FRAMEWORK_DIR}/${AV_FORMAT}"
+    install_name_tool -change "${FFMPEG_DIR}/${AV_CODEC}" "@executable_path/../Frameworks/${AV_CODEC}" "${FRAMEWORK_DIR}/${AV_FORMAT}"
+    install_name_tool -change "${FFMPEG_DIR}/${AV_UTIL}" "@executable_path/../Frameworks/${AV_UTIL}" "${FRAMEWORK_DIR}/${AV_FORMAT}"
+    install_name_tool -change "${FFMPEG_DIR}/${SW_RESAMPLE}" "@executable_path/../Frameworks/${SW_RESAMPLE}" "${FRAMEWORK_DIR}/${AV_FORMAT}"
+
+    echo "  fixing: ${FRAMEWORK_DIR}/${SW_RESAMPLE}"
+    install_name_tool -change "${FFMPEG_DIR}/${AV_UTIL}" "@executable_path/../Frameworks/${AV_UTIL}" "${FRAMEWORK_DIR}/${SW_RESAMPLE}"
+
+    echo "  fixing: ${FRAMEWORK_DIR}/${SW_SCALE}"
+    install_name_tool -change "${FFMPEG_DIR}/${AV_UTIL}" "@executable_path/../Frameworks/${AV_UTIL}" "${FRAMEWORK_DIR}/${SW_SCALE}"
   fi
 fi

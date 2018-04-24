@@ -24,35 +24,31 @@
 #ifdef USE_QT
 
 //we use Qt for the atomic counter
-#include <QAtomicInt>
+#include <QAtomicInteger>
 
-//! Qt 4/5 compatible QAtomicInt
-class AtomicCounter : public QAtomicInt
+class AtomicCounter : public QAtomicInteger<unsigned int>
 {
-public:
-	AtomicCounter() : QAtomicInt(0) {}
-
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-	inline int load() { return *this; }
-	inline void store(int value) { *static_cast<QAtomicInt*>(this) = value; }
-#endif
 };
 
 #else
 
-//we use a fake QAtomicInt
-
-//! Fake QAtomicInt
+//! Fake QAtomicInteger<unsigned int>
 /** \warning Not thread safe!
 **/
 class AtomicCounter
 {
 public:
 	AtomicCounter() : m_value(0) {}
-	inline int load() { return m_value; }
-	inline void store(int value) { m_value = value; }
-	inline int fetchAndAddRelaxed(int add) { int original = m_value; m_value += add; return original; }
-	int m_value;
+	inline unsigned int load() { return m_value; }
+	inline void store(unsigned int value) { m_value = value; }
+	inline unsigned int fetchAndAddRelaxed(unsigned int add)
+	{
+		unsigned int original = m_value;
+		m_value += add;
+		return original;
+	}
+private:
+	unsigned int m_value;
 };
 
 #endif
@@ -132,7 +128,7 @@ bool NormalizedProgress::oneStep()
 		return true;
 	}
 
-	unsigned currentCount = static_cast<unsigned>(m_counter->fetchAndAddRelaxed(1)) + 1;
+	unsigned currentCount = m_counter->fetchAndAddRelaxed(1) + 1;
 	if ((currentCount % m_step) == 0)
 	{
 		m_percent += m_percentAdd;
@@ -149,7 +145,7 @@ bool NormalizedProgress::steps(unsigned n)
 		return true;
 	}
 
-	unsigned currentCount = static_cast<unsigned>(m_counter->fetchAndAddRelaxed(n)) + n;
+	unsigned currentCount = m_counter->fetchAndAddRelaxed(n) + n;
 	unsigned d1 = currentCount / m_step;
 	unsigned d2 = (currentCount + n) / m_step;
 

@@ -12,6 +12,7 @@ File I/O:
 - Generate PDF 3D
 - OpenCTM format (https://github.com/cloudcompare/trunk/issues/146)
 - Visual SFM format (http://www.cloudcompare.org/forum/viewtopic.php?t=550)
+- OpenVDB format (http://www.danielgm.net/cc/forum/viewtopic.php?t=3057)
 
 *** And from the forum topic or emails 'recent requests' ***
 

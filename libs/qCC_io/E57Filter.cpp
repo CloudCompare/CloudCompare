@@ -2110,7 +2110,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
-		e57::ImageFile imf(qPrintable(filename), "r"); //DGM: warning, toStdString doesn't preserve "local" characters
+		e57::ImageFile imf( qPrintable(filename), "r", e57::CHECKSUM_POLICY_SPARSE ); //DGM: warning, toStdString doesn't preserve "local" characters
 		
 		if (!imf.isOpen())
 		{

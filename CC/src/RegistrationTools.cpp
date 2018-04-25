@@ -29,7 +29,7 @@
 #include "KdTree.h"
 #include "ManualSegmentationTools.h"
 #include "NormalDistribution.h"
-#include "ParallelSort.h"
+#include "Parallel.h"
 #include "ReferenceCloud.h"
 #include "ScalarFieldTools.h"
 #include "SimpleCloud.h"
@@ -480,7 +480,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 				assert(overlapDistances[i] == overlapDistances[i]);
 			}
 			
-			ParallelSort(overlapDistances.begin(), overlapDistances.begin() + pointCount);
+			CCParallelSort(overlapDistances.begin(), overlapDistances.begin() + pointCount);
 
 			assert(maxOverlapCount != 0);
 			ScalarType maxOverlapDist = overlapDistances[maxOverlapCount-1];

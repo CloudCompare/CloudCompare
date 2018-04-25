@@ -21,7 +21,7 @@
 //local
 #include "GenericProgressCallback.h"
 #include "Neighbourhood.h"
-#include "ParallelSort.h"
+#include "Parallel.h"
 
 using namespace CCLib;
 
@@ -148,7 +148,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		s_sortedCoordsForSplit[i] = P->u[splitDim];
 	}
 	
-	ParallelSort(s_sortedCoordsForSplit.begin(), s_sortedCoordsForSplit.begin() + count);
+	CCParallelSort(s_sortedCoordsForSplit.begin(), s_sortedCoordsForSplit.begin() + count);
 
 	unsigned splitCount = count/2;
 	assert(splitCount >= 3); //count >= 6 (see above)

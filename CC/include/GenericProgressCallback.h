@@ -19,11 +19,13 @@
 #ifndef GENERIC_PROGRESS_CALLBACK_HEADER
 #define GENERIC_PROGRESS_CALLBACK_HEADER
 
+//system
+#include <atomic>
+
 //Local
 #include "CCConst.h"
 #include "CCCoreLib.h"
-
-class AtomicCounter;
+#include "Parallel.h"
 
 namespace CCLib
 {
@@ -122,9 +124,7 @@ protected:
 	float m_percentAdd;
 
 	//! Current number of calls to 'oneStep'
-	/** Thread safe if CC_CORE_LIB is compiled with Qt.
-	**/
-	AtomicCounter* m_counter;
+	std::atomic<unsigned>* m_counter;
 
 	//! associated GenericProgressCallback
 	GenericProgressCallback* progressCallback;

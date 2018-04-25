@@ -21,7 +21,7 @@
 //local
 #include "CCMiscTools.h"
 #include "GenericProgressCallback.h"
-#include "ParallelSort.h"
+#include "Parallel.h"
 #include "RayAndBox.h"
 #include "ReferenceCloud.h"
 #include "ScalarField.h"
@@ -34,7 +34,7 @@
 //#define COMPUTE_NN_SEARCH_STATISTICS
 //#define ADAPTATIVE_BINARY_SEARCH
 
-#ifdef USE_QT
+#ifdef USE_PARALLEL
 #ifndef _DEBUG
 //enables multi-threading handling
 #define ENABLE_MT_OCTREE
@@ -375,7 +375,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 	}
 
 	//we sort the 'cells' by ascending code order
-	ParallelSort(m_thePointsAndTheirCellCodes.begin(), m_thePointsAndTheirCellCodes.end(), IndexAndCode::codeComp);
+	CCParallelSort(m_thePointsAndTheirCellCodes.begin(), m_thePointsAndTheirCellCodes.end(), IndexAndCode::codeComp);
 
 	//update the pre-computed 'number of cells per level of subdivision' array
 	updateCellCountTable();
@@ -2852,7 +2852,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	Tuple3i gridSize = indexMax - indexMin + Tuple3i(1, 1, 1);
 
 	//we sort the cells
-	ParallelSort(ccCells.begin(), ccCells.end(), IndexAndCodeExt::indexComp); //ascending index code order
+	CCParallelSort(ccCells.begin(), ccCells.end(), IndexAndCodeExt::indexComp); //ascending index code order
 
 	const int& di = gridSize.x;
 	const int& dj = gridSize.y;
@@ -3001,7 +3001,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 				else //more than 1 neighbor?
 				{
 					//we get the smallest label
-					ParallelSort(neighboursVal.begin(), neighboursVal.end());
+					CCParallelSort(neighboursVal.begin(), neighboursVal.end());
 					
 					int smallestLabel = neighboursVal[0];
 
@@ -3036,7 +3036,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 						}
 
 						//get the smallest one
-						ParallelSort(neighboursMin.begin(), neighboursMin.end());
+						CCParallelSort(neighboursMin.begin(), neighboursMin.end());
 						
 						smallestLabel = neighboursMin.front();
 
@@ -3217,11 +3217,6 @@ DgmOctree::octreeCell::~octreeCell()
 }
 
 #ifdef ENABLE_MT_OCTREE
-
-#include <QtCore>
-#include <QApplication>
-#include <QtConcurrentMap>
-#include <QThreadPool>
 
 /*** FOR THE MULTI THREADING WRAPPER ***/
 struct octreeCellDesc
@@ -3499,14 +3494,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	unsigned char level,
 		s_jumps = 0.0;
 		s_binarySearchCount = 0.0;
 #endif
-
-		if (maxThreadCount == 0)
-		{
-			maxThreadCount = QThread::idealThreadCount();
-		}
-		QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);
-		QtConcurrent::blockingMap(cells, LaunchOctreeCellFunc_MT);
-
+		CCParallelForEach(cells.begin(), cells.end(), LaunchOctreeCellFunc_MT);
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 		FILE* fp = fopen("octree_log.txt", "at");
 		if (fp)
@@ -4049,13 +4037,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 		s_jumps = 0.0;
 		s_binarySearchCount = 0.0;
 #endif
-
-		if (maxThreadCount == 0)
-		{
-			maxThreadCount = QThread::idealThreadCount();
-		}
-		QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);
-		QtConcurrent::blockingMap(cells, LaunchOctreeCellFunc_MT);
+		CCParallelForEach(cells.begin(), cells.end(), LaunchOctreeCellFunc_MT);
 
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 		FILE* fp=fopen("octree_log.txt","at");

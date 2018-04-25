@@ -15,31 +15,33 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef PARALLEL_SORT_HEADER
-#define PARALLEL_SORT_HEADER
-
-#ifdef ParallelSort
-#undef ParallelSort
-#pragma message "Replacing preprocessor symbol 'ParallelSort' with the one defined in Parallel.h"
-#endif
+#ifndef CCCORE_PARALLEL_HEADER
+#define CCCORE_PARALLEL_HEADER
+#include <atomic>
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1800)
 
-	//Parallel Patterns Library (for parallel sort)
-	#include <ppl.h>
-
-	#define ParallelSort Concurrency::parallel_sort
+#define USE_PARALLEL
+//Parallel Patterns Library (for parallel sort)
+#include <ppl.h>
+#define CCParallelSort Concurrency::parallel_sort
+#define CCParallelFor Concurrency::parallel_for
+#define CCParallelForEach Concurrency::parallel_for_each
 
 #elif USE_TBB
 
-	#include <tbb/parallel_sort.h>
-
-	#define ParallelSort tbb::parallel_sort
+#define USE_PARALLEL
+#include <tbb/parallel_for.h>
+#include <tbb/parallel_for_each.h>
+#include <tbb/parallel_sort.h>
+#define CCParallelSort tbb::parallel_sort
+#define CCParallelFor tbb::parallel_for
+#define CCParallelForEach tbb::parallel_for_each
 
 #else
 
-	#define ParallelSort std::sort
+#define CCParallelSort std::sort
 
 #endif
 
-#endif
+#endif // CCCORE_PARALLEL_HEADER

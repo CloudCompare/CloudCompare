@@ -27,10 +27,6 @@ else()
 	endif()
 endif()
 
-# Additional dependencies (only Qt in fact)
-if (COMPILE_CC_CORE_LIB_WITH_QT)
-	include( ../cmake/CMakeExternalLibs.cmake )
-endif()
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
 
@@ -54,14 +50,15 @@ if (COMPILE_CC_CORE_LIB_WITH_TBB)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_TBB )
 endif()
 
-if ( COMPILE_CC_CORE_LIB_WITH_QT )
+if (COMPILE_CC_CORE_LIB_WITH_QT)
+	include( ../cmake/CMakeExternalLibs.cmake )
 	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS} )
 	qt5_use_modules(${PROJECT_NAME} Core Widgets Concurrent)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_QT )
 endif()
 
 # Load advanced scripts
-include( ../cmake/CMakeInclude.cmake )
+include( ../cmake/CMakeInclude.cmake)
 
 if ( COMPILE_CC_CORE_LIB_SHARED )
 	if (WIN32)

@@ -15,10 +15,6 @@
 //#                                                                        #
 //##########################################################################
 
-#ifdef USE_TBB
-#include <tbb/parallel_for.h>
-#endif
-
 #include "ccGenericPointCloud.h"
 
 //CCLib
@@ -26,6 +22,9 @@
 #include <GenericProgressCallback.h>
 #include <Neighbourhood.h>
 #include <ReferenceCloud.h>
+#ifdef USE_PARALLEL
+#include <Parallel.h>
+#endif
 
 //Local
 #include "ccOctreeProxy.h"
@@ -474,8 +473,8 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 			}
 		}
 
-#ifdef USE_TBB
-		tbb::parallel_for( 0, static_cast<int>(size()), [&](int i)
+#ifdef USE_PARALLEL
+		CCParallelFor( 0, static_cast<int>(size()), [&](int i)
 #else
 		for (int i = 0; i < static_cast<int>(size()); ++i)
 #endif
@@ -511,7 +510,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 				}
 			}
 		}
-#ifdef USE_TBB
+#ifdef  USE_PARALLEL
 		);
 #endif
 	}

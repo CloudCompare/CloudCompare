@@ -19,7 +19,7 @@
 
 //CCLib
 #include <GenericProgressCallback.h>
-#include <ParallelSort.h>
+#include <Parallel.h>
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -97,7 +97,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 	ccPointCloud* pc = static_cast<ccPointCloud*>(associatedGenericCloud);
 
 	//sort cells based on their population size (we start by the biggest ones)
-	ParallelSort(leaves.begin(), leaves.end(), DescendingLeafSizeComparison);
+	CCParallelSort(leaves.begin(), leaves.end(), DescendingLeafSizeComparison);
 
 	//set all 'userData' to -1 (i.e. unfused cells)
 	{

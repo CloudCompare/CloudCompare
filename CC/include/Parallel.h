@@ -17,7 +17,6 @@
 
 #ifndef CCCORE_PARALLEL_HEADER
 #define CCCORE_PARALLEL_HEADER
-#include <atomic>
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1800)
 

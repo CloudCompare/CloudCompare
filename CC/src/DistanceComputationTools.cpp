@@ -23,6 +23,7 @@
 #include "DgmOctreeReferenceCloud.h"
 #include "FastMarchingForPropagation.h"
 #include "LocalModel.h"
+#include "Parallel.h"
 #include "ReferenceCloud.h"
 #include "SaitoSquaredDistanceTransform.h"
 #include "ScalarField.h"
@@ -33,7 +34,7 @@
 #include <cassert>
 
 
-#ifdef USE_QT
+#ifdef USE_PARALLEL
 #ifndef QT_DEBUG
 //enables multi-threading handling
 #define ENABLE_CLOUD2MESH_DIST_MT
@@ -1078,10 +1079,6 @@ int ComputeMaxNeighborhoodLength(ScalarType maxSearchDist, PointCoordinateType c
 
 #ifdef ENABLE_CLOUD2MESH_DIST_MT
 
-#include <QtCore>
-#include <QApplication>
-#include <QtConcurrentMap>
-
 /*** MULTI THREADING WRAPPER ***/
 
 static DgmOctree* s_octree_MT = nullptr;
@@ -1094,7 +1091,7 @@ static CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams s_pa
 #include <QtCore/QBitArray>
 static std::vector<QBitArray*> s_bitArrayPool_MT;
 static bool s_useBitArrays_MT = true;
-static QMutex s_currentBitMaskMutex;
+static CCCriticalSection s_currentBitMaskMutex;
 
 void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 {
@@ -1735,13 +1732,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		//for (unsigned i=0; i<numberOfCells; ++i)
 		//	cloudMeshDistCellFunc_MT(cellsDescs[i]);
 
-		int maxThreadCount = params.maxThreadCount;
-		if (maxThreadCount == 0)
-		{
-			maxThreadCount = QThread::idealThreadCount();
-		}
-		QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);
-		QtConcurrent::blockingMap(cellsDescs, cloudMeshDistCellFunc_MT);
+		CCParallelForEach(cellsDescs.begin(), cellsDescs.end(), cloudMeshDistCellFunc_MT);
 
 		s_octree_MT = nullptr;
 		s_normProgressCb_MT = nullptr;

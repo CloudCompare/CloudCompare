@@ -27,6 +27,7 @@
 #define CCParallelFor Concurrency::parallel_for
 #define CCParallelForEach Concurrency::parallel_for_each
 #define CCCriticalSection Concurrency::critical_section
+//TODO: CCParallelWithLimitedThreads
 
 #elif USE_TBB
 
@@ -35,10 +36,19 @@
 #include <tbb/parallel_for_each.h>
 #include <tbb/parallel_sort.h>
 #include <tbb/critical_section.h>
+#include <tbb/task_arena.h>
+#include <tbb/task_group.h>
 #define CCParallelSort tbb::parallel_sort
 #define CCParallelFor tbb::parallel_for
 #define CCParallelForEach tbb::parallel_for_each
 #define CCCriticalSection tbb::critical_section
+//Limit the number of thread of a parallel template function (or task)
+#define CCParallelWithLimitedThreads(task, num_threads) { \
+	tbb::task_arena limited_arena(num_threads, 0); \
+	limited_arena.execute([&]{ \
+		task; \
+	}); \
+}
 
 #else
 

@@ -1732,7 +1732,16 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		//for (unsigned i=0; i<numberOfCells; ++i)
 		//	cloudMeshDistCellFunc_MT(cellsDescs[i]);
 
-		CCParallelForEach(cellsDescs.begin(), cellsDescs.end(), cloudMeshDistCellFunc_MT);
+		if(params.maxThreadCount > 0)
+		{
+			CCParallelWithLimitedThreads(
+						CCParallelForEach(cellsDescs.begin(), cellsDescs.end(), cloudMeshDistCellFunc_MT),
+						params.maxThreadCount);
+		}
+		else
+		{
+			CCParallelForEach(cellsDescs.begin(), cellsDescs.end(), cloudMeshDistCellFunc_MT);
+		}
 
 		s_octree_MT = nullptr;
 		s_normProgressCb_MT = nullptr;

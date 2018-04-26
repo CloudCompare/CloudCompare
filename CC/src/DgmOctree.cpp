@@ -3494,7 +3494,15 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	unsigned char level,
 		s_jumps = 0.0;
 		s_binarySearchCount = 0.0;
 #endif
-		CCParallelForEach(cells.begin(), cells.end(), LaunchOctreeCellFunc_MT);
+		if(maxThreadCount > 0)
+		{
+
+			CCParallelWithLimitedThreads(CCParallelForEach(cells.begin(), cells.end(), LaunchOctreeCellFunc_MT), maxThreadCount)
+		}
+		else
+		{
+			CCParallelForEach(cells.begin(), cells.end(), LaunchOctreeCellFunc_MT);
+		}
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 		FILE* fp = fopen("octree_log.txt", "at");
 		if (fp)
@@ -4037,8 +4045,14 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 		s_jumps = 0.0;
 		s_binarySearchCount = 0.0;
 #endif
-		CCParallelForEach(cells.begin(), cells.end(), LaunchOctreeCellFunc_MT);
-
+		if(maxThreadCount > 0)
+		{
+			CCParallelWithLimitedThreads(CCParallelForEach(cells.begin(), cells.end(), LaunchOctreeCellFunc_MT), maxThreadCount)
+		}
+		else
+		{
+			CCParallelForEach(cells.begin(), cells.end(), LaunchOctreeCellFunc_MT);
+		}
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 		FILE* fp=fopen("octree_log.txt","at");
 		if (fp)

@@ -1088,7 +1088,8 @@ static bool s_cellFunc_MT_success = true;
 static CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams s_params_MT;
 
 //'processTriangles' mechanism (based on bit mask)
-static std::vector<std::vector<bool>*> s_bitArrayPool_MT; //TODO: RJ:Do the std::vector<bool> really need to be heap allocated?
+#include <QtCore/QBitArray>
+static std::vector<QBitArray*> s_bitArrayPool_MT;
 static bool s_useBitArrays_MT = true;
 static CCCriticalSection s_currentBitMaskMutex;
 
@@ -1173,25 +1174,23 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 	size_t trianglesToTestCapacity = 0;
 
 	//bit mask for efficient comparisons
-	std::vector<bool>* bitArray = nullptr;
+	QBitArray* bitArray = nullptr;
 	if (s_useBitArrays_MT)
 	{
+		s_currentBitMaskMutex.lock();
 		if (s_bitArrayPool_MT.empty())
 		{
-			bitArray = new std::vector<bool>;
+			bitArray = new QBitArray();
 			bitArray->resize(s_intersection_MT->mesh->size());
-			//s_bitArrayPool_MT.push_back(bitArray); //TODO: RJ it's no used because it is added at the end of the process. but why?
-			//is it more efficient?
+			//s_bitArrayPool_MT.push_back(bitArray);
 		}
 		else
 		{
-			s_currentBitMaskMutex.lock(); //TODO: RJ: use a parallel_queue to avoid implicit lock
 			bitArray = s_bitArrayPool_MT.back();
 			s_bitArrayPool_MT.pop_back();
-			s_currentBitMaskMutex.unlock();
-
 		}
-		std::fill(std::begin(*bitArray), std::end(*bitArray), 0);
+		s_currentBitMaskMutex.unlock();
+		bitArray->fill(0);
 	}
 
 	//for each point, we pre-compute its distance to the nearest cell border
@@ -1252,10 +1251,10 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 								{
 									unsigned indexTri = triList->indexes[p];
 									//if the triangles has not been processed yet
-									if (!(*bitArray)[indexTri])
+									if (!bitArray->testBit(indexTri))
 									{
 										trianglesToTest[trianglesToTestCount++] = indexTri;
-										(*bitArray)[indexTri] = 1;
+										bitArray->setBit(indexTri);
 									}
 								}
 								else
@@ -1287,10 +1286,10 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 								{
 									const unsigned& indexTri = triList->indexes[p];
 									//if the triangles has not been processed yet
-									if (!(*bitArray)[indexTri])
+									if (!bitArray->testBit(indexTri))
 									{
 										trianglesToTest[trianglesToTestCount++] = indexTri;
-										(*bitArray)[indexTri] = 1;
+										bitArray->setBit(indexTri);
 									}
 								}
 								else
@@ -1320,10 +1319,10 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 								{
 									const unsigned& indexTri = triList->indexes[p];
 									//if the triangles has not been processed yet
-									if (!(*bitArray)[indexTri])
+									if (!bitArray->testBit(indexTri))
 									{
 										trianglesToTest[trianglesToTestCount++] = indexTri;
-										(*bitArray)[indexTri] = 1;
+										bitArray->setBit(indexTri);
 									}
 								}
 								else
@@ -1340,7 +1339,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 		ComparePointsAndTriangles(Yk, remainingPoints, s_intersection_MT->mesh, trianglesToTest, trianglesToTestCount, minDists, maxRadius, s_params_MT);
 	}
 
-	//release bit mask //TODO really? see comment about the //queue.
+	//release bit mask
 	if (bitArray)
 	{
 		s_currentBitMaskMutex.lock();

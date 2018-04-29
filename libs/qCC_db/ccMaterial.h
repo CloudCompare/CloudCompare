@@ -23,6 +23,7 @@
 #include "ccSerializableObject.h"
 
 //Qt
+#include <QtGui/qopengl.h>
 #include <QSharedPointer>
 
 class QImage;

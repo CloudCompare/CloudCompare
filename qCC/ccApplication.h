@@ -21,6 +21,9 @@
 #include <QApplication>
 
 
+//! Mimic Qt's qApp for easy access to the application instance
+#define ccApp (static_cast<ccApplication *>( QCoreApplication::instance() ))
+
 class ccApplication : public QApplication
 {
 public:
@@ -30,10 +33,16 @@ public:
 	
 	ccApplication( int &argc, char **argv );
 	
+	QString versionStr() const;
+	QString versionLongStr( bool includeOS ) const;
+	
 #ifdef Q_OS_MAC
 protected:
 	bool event( QEvent *inEvent );
 #endif
+	
+private:
+	static QString s_version;
 };
 
 #endif

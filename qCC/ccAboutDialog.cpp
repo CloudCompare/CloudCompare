@@ -15,9 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccCommon.h"
-
 #include "ccAboutDialog.h"
+#include "ccApplication.h"
 
 #include "ui_aboutDlg.h"
 
@@ -31,15 +30,15 @@ ccAboutDialog::ccAboutDialog(QWidget *parent)
 
 	QString compilationInfo;
 
-	compilationInfo = ccCommon::GetCCVersion();
-	compilationInfo += QString("<br><i>Compiled with");
+	compilationInfo = ccApp->versionLongStr(true);
+	compilationInfo += QStringLiteral("<br><i>Compiled with");
 
 #if defined(_MSC_VER)
-	compilationInfo += QString(" MSVC %1 and").arg(_MSC_VER);
+	compilationInfo += QStringLiteral(" MSVC %1 and").arg(_MSC_VER);
 #endif
 
-	compilationInfo += QString(" Qt %1").arg(QT_VERSION_STR);
-	compilationInfo += QString("</i>");
+	compilationInfo += QStringLiteral(" Qt %1").arg(QT_VERSION_STR);
+	compilationInfo += QStringLiteral("</i>");
 
 	QString htmlText = mUI->labelText->text();
 	QString enrichedHtmlText = htmlText.arg(compilationInfo);

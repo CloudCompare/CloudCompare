@@ -18,13 +18,19 @@
 #ifdef Q_OS_MAC
 #include <QFileOpenEvent>
 #endif
+#include <QString>
 #include <QSurfaceFormat>
+
+// CCLib
+#include "CCPlatform.h"
 
 // qCC_db
 #include "ccMaterial.h"
 
 #include "ccApplication.h"
 #include "mainwindow.h"
+
+QString	ccApplication::s_version( "2.10-alpha" );
 
 
 void ccApplication::init()
@@ -83,6 +89,52 @@ ccApplication::ccApplication(int &argc, char **argv)
 #endif
 	
 	connect( this, &ccApplication::aboutToQuit, [=](){ ccMaterial::ReleaseTextures(); } );
+}
+
+QString ccApplication::versionStr() const
+{
+	return s_version;
+}
+
+QString ccApplication::versionLongStr( bool includeOS ) const
+{
+	QString verStr = s_version;
+	
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	verStr += QStringLiteral( " Stereo" );
+#endif
+	
+#if defined(CC_ENV_64)
+	const QString arch( "64-bit" );
+#elif defined(CC_ENV_32)
+	const QString arch( "32-bit" );
+#else
+	const QString arch( "??-bit" );
+#endif
+	
+	if ( includeOS )
+	{
+#if defined(CC_WINDOWS)
+		const QString platform( "Windows" );
+#elif defined(CC_MAC_OS)
+		const QString platform( "macOS" );
+#elif defined(CC_LINUX)
+		const QString platform( "Linux" );
+#else
+		const QString platform( "Unknown OS" );
+#endif
+		verStr += QStringLiteral( " [%1 %2]" ).arg( platform, arch );
+	}
+	else
+	{
+		verStr += QStringLiteral( " [%1]" ).arg( arch );
+	}
+	
+#ifdef QT_DEBUG
+	verStr += QStringLiteral( " [DEBUG]" );
+#endif
+	
+	return verStr;
 }
 
 #ifdef Q_OS_MAC

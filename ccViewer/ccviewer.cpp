@@ -18,6 +18,7 @@
 //##########################################################################
 
 #include "ccviewer.h"
+#include "ccViewerApplication.h"
 
 //Qt
 #include <QMessageBox>
@@ -44,24 +45,6 @@
 #include <devices/3dConnexion/Mouse3DInput.h>
 #endif
 
-//! Current version
-struct VerInfo
-{
-	VerInfo()
-		: number(1.38)
-	{
-		title = QString::number(number, 'f', 2) + ".alpha";
-#ifdef CC_GL_WINDOW_USE_QWINDOW
-		title += " Stereo";
-#endif
-	}
-
-	double number;
-	QString title;
-
-};
-static const VerInfo CC_VIEWER_VERSION;
-
 //Camera parameters dialog
 static ccCameraParamEditDlg* s_cpeDlg = nullptr;
 
@@ -79,7 +62,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	setStyleSheet("QStatusBar{background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(200,200,200), stop:1 rgb(255,255,255));}");
 #endif
 	
-	setWindowTitle(QString("ccViewer V%1").arg(CC_VIEWER_VERSION.title));
+	setWindowTitle(QString("ccViewer v%1").arg(ccViewerApp->versionLongStr( false )));
 
 	//insert GL window in a vertical layout
 	{
@@ -1049,7 +1032,7 @@ void ccViewer::doActionAbout()
 
 	Ui::AboutDialog ui;
 	ui.setupUi(&aboutDialog);
-	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(CC_VIEWER_VERSION.title));
+	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(ccViewerApp->versionLongStr( true )));
 
 	aboutDialog.exec();
 }

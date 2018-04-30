@@ -18,12 +18,8 @@
 //##########################################################################
 
 //Qt
-#include <QApplication>
 #include <QDir>
 #include <QGLFormat>
-#ifdef Q_OS_MAC
-#include <QFileOpenEvent>
-#endif
 
 //Local
 #include "ccviewerlog.h"
@@ -43,96 +39,14 @@
 #endif
 
 #include "ccviewer.h"
+#include "ccViewerApplication.h"
 
-class ccApplication : public QApplication
-{
-	Q_OBJECT
-
-public:
-	ccApplication( int &argc, char **argv ) :
-		QApplication( argc, argv )
-	{
-		setOrganizationName("CCCorp");
-		setApplicationName("CloudCompareViewer");
-		setAttribute(Qt::AA_ShareOpenGLContexts);
-#ifdef Q_OS_MAC
-		mViewer = NULL;
-
-		// Mac OS X apps don't show icons in menus
-		setAttribute( Qt::AA_DontShowIconsInMenus );
-#endif
-		connect(this, &ccApplication::aboutToQuit, [=](){ ccMaterial::ReleaseTextures(); });
-	}
-
-#ifdef Q_OS_MAC
-	void  setViewer( ccViewer *inViewer ) { mViewer = inViewer; }
-
-protected:
-	bool  event( QEvent *inEvent )
-	{
-		switch ( inEvent->type() )
-		{
-		case QEvent::FileOpen:
-			{
-				if ( mViewer == NULL )
-					return false;
-
-				QStringList fileName( static_cast<QFileOpenEvent *>(inEvent)->file() );
-
-				mViewer->addToDB( fileName );
-				return true;
-			}
-
-		default:
-			return QApplication::event( inEvent );
-		}
-	}
-
-private:
-	ccViewer *mViewer;
-#endif
-};
 
 int main(int argc, char *argv[])
 {
-	//See http://doc.qt.io/qt-5/qopenglwidget.html#opengl-function-calls-headers-and-qopenglfunctions
-	/** Calling QSurfaceFormat::setDefaultFormat() before constructing the QApplication instance is mandatory
-	on some platforms (for example, OS X) when an OpenGL core profile context is requested. This is to
-	ensure that resource sharing between contexts stays functional as all internal contexts are created
-	using the correct version and profile.
-	**/
-	{
-		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-		format.setStencilBufferSize(0);
-#ifdef CC_GL_WINDOW_USE_QWINDOW
-		format.setStereo(true);
-#endif
-#ifdef Q_OS_MAC
-		format.setVersion( 2, 1 );	// must be 2.1 - see ccGLWindow::functions()
-		format.setProfile( QSurfaceFormat::CoreProfile );
-#endif
-#ifdef QT_DEBUG
-		format.setOption(QSurfaceFormat::DebugContext);
-#endif
-		QSurfaceFormat::setDefaultFormat(format);
-	}
-
-	ccApplication a(argc, argv);
+	ccViewerApplication::init();
 	
-	//Locale management
-	{
-		//Force 'english' locale so as to get a consistent behavior everywhere
-		QLocale locale = QLocale(QLocale::English);
-		locale.setNumberOptions(QLocale::c().numberOptions());
-		QLocale::setDefault(locale);
-
-#ifdef Q_OS_UNIX
-		//We reset the numeric locale for POSIX functions
-		//See http://qt-project.org/doc/qt-5/qcoreapplication.html#locale-settings
-		setlocale(LC_NUMERIC, "C");
-#endif
-	}
+	ccViewerApplication a(argc, argv);
 
 #ifdef USE_VLD
 	VLDEnable();
@@ -169,9 +83,8 @@ int main(int argc, char *argv[])
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
 	ccViewer w/*(0,Qt::Window|Qt::CustomizeWindowHint)*/;
-#ifdef Q_OS_MAC
+
 	a.setViewer( &w );
-#endif
 
 	//register minimal logger to display errors
 	ccViewerLog logger(&w);
@@ -247,5 +160,3 @@ int main(int argc, char *argv[])
 
 	return result;
 }
-
-#include "main.moc"

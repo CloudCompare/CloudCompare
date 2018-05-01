@@ -890,9 +890,13 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 						parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
 					}
 				}
-				if (HandleGlobalShift(P, Pshift, parameters, useLasShift))
+				bool preserveCoordinateShift = true;
+				if (HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters, useLasShift))
 				{
-					cloud->setGlobalShift(Pshift);
+					if (preserveCoordinateShift)
+					{
+						cloud->setGlobalShift(Pshift);
+					}
 					ccLog::Warning("[LAS] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 

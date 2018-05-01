@@ -411,7 +411,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	QTextStream stream(&file);
 
 	//current vertex shift
-	CCVector3d Pshift(0,0,0);
+	CCVector3d Pshift(0, 0, 0);
 
 	//vertices
 	ccPointCloud* vertices = new ccPointCloud("vertices");
@@ -532,9 +532,13 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				//first point: check for 'big' coordinates
 				if (pointsRead == 0)
 				{
-					if (HandleGlobalShift(Pd, Pshift, parameters))
+					bool preserveCoordinateShift = true;
+					if (HandleGlobalShift(Pd, Pshift, preserveCoordinateShift, parameters))
 					{
-						vertices->setGlobalShift(Pshift);
+						if (preserveCoordinateShift)
+						{
+							vertices->setGlobalShift(Pshift);
+						}
 						ccLog::Warning("[OBJ] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 					}
 				}

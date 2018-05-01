@@ -11,6 +11,10 @@ v2.10.alpha - XX/XX/201X
 
 - enhancements:
 
+	* Global Shift & Scale dialog
+		- new option "Preserve global shift on save" to directly control whether the global coordinates should be preserved
+			at export time or simply forgotten
+
 	* The 'Display > Lock vertical rotation' option has been renamed 'Display > Lock rotation about an axis' (Shortcut: L)
 		- CC will now ask for the rotation axis to be locked (default: Z)
 

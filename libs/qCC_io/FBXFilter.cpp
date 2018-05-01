@@ -1221,9 +1221,13 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 			//coordinate shift management
 			if (i == 0)
 			{
-				if (FileIOFilter::HandleGlobalShift(P, Pshift, parameters))
+				bool preserveCoordinateShift = true;
+				if (FileIOFilter::HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters))
 				{
-					vertices->setGlobalShift(Pshift);
+					if (preserveCoordinateShift)
+					{
+						vertices->setGlobalShift(Pshift);
+					}
 					ccLog::Warning("[FBX] Mesh has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}

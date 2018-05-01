@@ -114,7 +114,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(const QString& filename, ccGBLSenso
 
 	if (CheckForSpecialChars(filename))
 	{
-		ccLog::Warning(QString("[DXF] Output filename contains special characters. It might be scrambled or rejected by the I/O filter..."));
+		ccLog::Warning(QString("[DepthMap] Output filename contains special characters. It might be scrambled or rejected by the I/O filter..."));
 	}
 
 	//opening file

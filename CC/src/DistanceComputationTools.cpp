@@ -1083,7 +1083,6 @@ int ComputeMaxNeighborhoodLength(ScalarType maxSearchDist, PointCoordinateType c
 #include <QtConcurrentMap>
 
 /*** MULTI THREADING WRAPPER ***/
-
 static DgmOctree* s_octree_MT = nullptr;
 static NormalizedProgress* s_normProgressCb_MT = nullptr;
 static OctreeAndMeshIntersection* s_intersection_MT = nullptr;
@@ -1091,8 +1090,7 @@ static bool s_cellFunc_MT_success = true;
 static CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams s_params_MT;
 
 //'processTriangles' mechanism (based on bit mask)
-#include <QtCore/QBitArray>
-static std::vector<QBitArray*> s_bitArrayPool_MT;
+static std::vector<std::vector<bool>*> s_bitArrayPool_MT;
 static bool s_useBitArrays_MT = true;
 static QMutex s_currentBitMaskMutex;
 
@@ -1177,15 +1175,14 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 	size_t trianglesToTestCapacity = 0;
 
 	//bit mask for efficient comparisons
-	QBitArray* bitArray = nullptr;
+	std::vector<bool>* bitArray = nullptr;
 	if (s_useBitArrays_MT)
 	{
+		const unsigned numTri = s_intersection_MT->mesh->size();
 		s_currentBitMaskMutex.lock();
 		if (s_bitArrayPool_MT.empty())
 		{
-			bitArray = new QBitArray();
-			bitArray->resize(s_intersection_MT->mesh->size());
-			//s_bitArrayPool_MT.push_back(bitArray);
+			bitArray = new std::vector<bool>(numTri);
 		}
 		else
 		{
@@ -1193,7 +1190,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 			s_bitArrayPool_MT.pop_back();
 		}
 		s_currentBitMaskMutex.unlock();
-		bitArray->fill(0);
+		bitArray->assign(numTri, false);
 	}
 
 	//for each point, we pre-compute its distance to the nearest cell border
@@ -1252,12 +1249,12 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 							{
 								if (bitArray)
 								{
-									unsigned indexTri = triList->indexes[p];
+									const unsigned indexTri = triList->indexes[p];
 									//if the triangles has not been processed yet
-									if (!bitArray->testBit(indexTri))
+									if (!(*bitArray)[indexTri])
 									{
 										trianglesToTest[trianglesToTestCount++] = indexTri;
-										bitArray->setBit(indexTri);
+										(*bitArray)[indexTri] = true;
 									}
 								}
 								else
@@ -1289,10 +1286,10 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 								{
 									const unsigned& indexTri = triList->indexes[p];
 									//if the triangles has not been processed yet
-									if (!bitArray->testBit(indexTri))
+									if (!(*bitArray)[indexTri])
 									{
 										trianglesToTest[trianglesToTestCount++] = indexTri;
-										bitArray->setBit(indexTri);
+										(*bitArray)[indexTri] = true;
 									}
 								}
 								else
@@ -1322,10 +1319,10 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 								{
 									const unsigned& indexTri = triList->indexes[p];
 									//if the triangles has not been processed yet
-									if (!bitArray->testBit(indexTri))
+									if (!(*bitArray)[indexTri])
 									{
 										trianglesToTest[trianglesToTestCount++] = indexTri;
-										bitArray->setBit(indexTri);
+										(*bitArray)[indexTri] = true;
 									}
 								}
 								else
@@ -1342,7 +1339,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 		ComparePointsAndTriangles(Yk, remainingPoints, s_intersection_MT->mesh, trianglesToTest, trianglesToTestCount, minDists, maxRadius, s_params_MT);
 	}
 
-	//release bit mask
+	//Save the bit mask
 	if (bitArray)
 	{
 		s_currentBitMaskMutex.lock();

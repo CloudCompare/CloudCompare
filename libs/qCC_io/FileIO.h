@@ -23,12 +23,20 @@
 class FileIO
 {
     public:
-        static void setWriterInfo( const QString &info );
+        static void setWriterInfo( const QString &applicationName, const QString &version );
         static QString writerInfo();
 
+		static QString applicationName();
+		static QString version();
+		
+		static QString createdBy();
+		static QString createdDateTime();
+		
     private:
         FileIO() = delete;
 
-        static QString s_writerInfo;
+		static QString s_applicationName;
+		static QString s_version;
+		static QString s_writerInfo;
 };
 #endif

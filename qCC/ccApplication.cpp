@@ -91,7 +91,7 @@ ccApplication::ccApplication(int &argc, char **argv)
 	setlocale( LC_NUMERIC, "C" );
 #endif
 	
-	FileIO::setWriterInfo( QStringLiteral( "%1 v%2" ).arg( applicationName(), s_version ) );
+	FileIO::setWriterInfo( applicationName(), s_version );
 	
 	connect( this, &ccApplication::aboutToQuit, [=](){ ccMaterial::ReleaseTextures(); } );
 }

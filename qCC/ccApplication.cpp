@@ -27,6 +27,9 @@
 // qCC_db
 #include "ccMaterial.h"
 
+// qCC_io
+#include "FileIO.h"
+
 #include "ccApplication.h"
 #include "mainwindow.h"
 
@@ -87,6 +90,8 @@ ccApplication::ccApplication(int &argc, char **argv)
 	// See https://doc.qt.io/qt-5/qcoreapplication.html#locale-settings
 	setlocale( LC_NUMERIC, "C" );
 #endif
+	
+	FileIO::setWriterInfo( QStringLiteral( "%1 v%2" ).arg( applicationName(), s_version ) );
 	
 	connect( this, &ccApplication::aboutToQuit, [=](){ ccMaterial::ReleaseTextures(); } );
 }

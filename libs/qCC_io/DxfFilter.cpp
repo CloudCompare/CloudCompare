@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "DxfFilter.h"
+#include "FileIO.h"
 
 //CCLib
 #include <ScalarField.h>
@@ -613,6 +614,9 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 
 	try
 	{
+		dxf.writeComment(*dw, FileIO::createdBy().toStdString() );
+		dxf.writeComment(*dw, FileIO::createdDateTime().toStdString() );
+
 		//write header
 		dxf.writeHeader(*dw);
 

@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "MAFilter.h"
+#include "FileIO.h"
 
 //qCC_db
 #include <ccLog.h>
@@ -24,6 +25,7 @@
 #include <ccProgressDialog.h>
 
 //Qt
+#include <QDateTime>
 #include <QFileInfo>
 
 //System
@@ -143,18 +145,31 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	//we extract the (short) filename from the whole path
 	QString baseFilename = QFileInfo(filename).fileName();
 
+	// For details of the format, see:
+	//	http://download.autodesk.com/us/support/files/fileformats.pdf
+	
 	//header
 	if (fprintf(fp,"//Maya ASCII 7.0 scene\n") < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
-	if (fprintf(fp,"//Name: %s\n",qPrintable(baseFilename)) < 0)
+	if (fprintf(fp,"//Name: %s\n", qPrintable(baseFilename)) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
-	if (fprintf(fp,"//Last modified: Sat, Mai 10, 2008 00:00:00 PM\n") < 0)
+	if (fprintf(fp,"//Last modified: %s\n", qPrintable( QDateTime::currentDateTime().toString( Qt::SystemLocaleShortDate ) )) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 	if (fprintf(fp,"requires maya \"4.0\";\n") < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 	if (fprintf(fp,"currentUnit -l %s -a degree -t film;\n","centimeter") < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
+	
+	//fileInfo
+	if (fprintf(fp,"fileInfo \"application\" \"%s\"\n", qPrintable(FileIO::applicationName())) < 0)
+		{fclose(fp);return CC_FERR_WRITING;}
 
+	if (fprintf(fp,"fileInfo \"product\" \"%s\"\n", qPrintable(FileIO::writerInfo())) < 0)
+		{fclose(fp);return CC_FERR_WRITING;}
+	
+	if (fprintf(fp,"fileInfo \"version\" \"%s\"\n", qPrintable(FileIO::version())) < 0)
+		{fclose(fp);return CC_FERR_WRITING;}
+	
 	//for multiple meshes handling (does not work yet)
 	unsigned char currentMesh = 0;
 

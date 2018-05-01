@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "ImageFileFilter.h"
+#include "FileIO.h"
 
 //qCC_db
 #include <ccImage.h>
@@ -158,8 +159,12 @@ CC_FILE_ERROR ImageFileFilter::saveToFile(ccHObject* entity, const QString& file
 		ccLog::Warning(QString("[IMAGE] Image '%1' is empty!").arg(image->getName()));
 		return CC_FERR_NO_SAVE;
 	}
-
-	if (!image->data().save(filename))
+	
+	QImageWriter writer(filename);
+	
+	writer.setText("Author", FileIO::writerInfo());
+	
+	if (!writer.write(image->data()))
 	{
 		ccLog::Warning(QString("[IMAGE] Failed to save image in '%1").arg(filename));
 		return CC_FERR_CONSOLE_ERROR;

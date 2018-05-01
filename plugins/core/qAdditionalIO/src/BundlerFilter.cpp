@@ -340,8 +340,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				}
 			}
 
-			CCVector3d Pshift(0,0,0);
-			for (unsigned i=0; i<ptsCount; ++i)
+			CCVector3d Pshift(0, 0, 0);
+			for (unsigned i = 0; i < ptsCount; ++i)
 			{
 				//Point (X,Y,Z)
 				currentLine = stream.readLine();
@@ -377,21 +377,25 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				//first point: check for 'big' coordinates
 				if (i == 0)
 				{
-					if (HandleGlobalShift(Pd,Pshift,parameters))
+					bool preserveCoordinateShift = true;
+					if (HandleGlobalShift(Pd, Pshift, preserveCoordinateShift, parameters))
 					{
-						keypointsCloud->setGlobalShift(Pshift);
-						//we must apply the shift to the cameras as well!!!
-						for (size_t j=0; j<cameras.size(); ++j)
+						if (preserveCoordinateShift)
 						{
-							ccGLMatrixd& trans = cameras[j].trans;
-							trans.invert();
-							trans.setTranslation(trans.getTranslationAsVec3D() + Pshift);
-							trans.invert();
+							keypointsCloud->setGlobalShift(Pshift);
+							//we must apply the shift to the cameras as well!!!
+							for (size_t j = 0; j < cameras.size(); ++j)
+							{
+								ccGLMatrixd& trans = cameras[j].trans;
+								trans.invert();
+								trans.setTranslation(trans.getTranslationAsVec3D() + Pshift);
+								trans.invert();
+							}
 						}
-						ccLog::Warning("[Bundler] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)",Pshift.x,Pshift.y,Pshift.z);
+						ccLog::Warning("[Bundler] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 					}
 				}
-				keypointsCloud->addPoint(CCVector3::fromArray((Pd+Pshift).u));
+				keypointsCloud->addPoint(CCVector3::fromArray((Pd + Pshift).u));
 
 				//RGB
 				currentLine = stream.readLine();

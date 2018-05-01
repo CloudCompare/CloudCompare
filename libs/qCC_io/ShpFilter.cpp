@@ -283,12 +283,13 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 	}
 }
 
-CC_FILE_ERROR LoadPolyline(QFile& file,
-	ccHObject& container,
-	int32_t index,
-	ESRI_SHAPE_TYPE shapeTypeInt,
-	const CCVector3d& PShift,
-	bool load2DPolyAs3DPoly = true)
+CC_FILE_ERROR LoadPolyline(	QFile& file,
+							ccHObject& container,
+							int32_t index,
+							ESRI_SHAPE_TYPE shapeTypeInt,
+							const CCVector3d& Pshift,
+							bool preserveCoordinateShift,
+							bool load2DPolyAs3DPoly = true)
 {
 	char header[40];
 	file.read(header, 40);
@@ -352,8 +353,8 @@ CC_FILE_ERROR LoadPolyline(QFile& file,
 				return CC_FERR_READING;
 			double x = qFromLittleEndianD(*reinterpret_cast<double*>(header));
 			double y = qFromLittleEndianD(*reinterpret_cast<double*>(header + 8));
-			points[i].x = static_cast<PointCoordinateType>(x + PShift.x);
-			points[i].y = static_cast<PointCoordinateType>(y + PShift.y);
+			points[i].x = static_cast<PointCoordinateType>(x + Pshift.x);
+			points[i].y = static_cast<PointCoordinateType>(y + Pshift.y);
 			points[i].z = 0;
 		}
 	}
@@ -379,7 +380,7 @@ CC_FILE_ERROR LoadPolyline(QFile& file,
 				if (file.error() != QFile::NoError)
 					return CC_FERR_READING;
 				double z = qFromLittleEndianD(*reinterpret_cast<double*>(header));
-				points[i].z = static_cast<PointCoordinateType>(z + PShift.z);
+				points[i].z = static_cast<PointCoordinateType>(z + Pshift.z);
 			}
 		}
 	}
@@ -453,12 +454,18 @@ CC_FILE_ERROR LoadPolyline(QFile& file,
 			vertices->addPoint(points[firstIndex + j]);
 		}
 		vertices->setEnabled(false);
-		vertices->setGlobalShift(PShift);
+		if (preserveCoordinateShift)
+		{
+			vertices->setGlobalShift(Pshift);
+		}
 
 		//polyline
 		ccPolyline* poly = new ccPolyline(vertices);
 		poly->addChild(vertices);
-		poly->setGlobalShift(PShift); //shouldn't be necessary but who knows ;)
+		if (preserveCoordinateShift)
+		{
+			poly->setGlobalShift(Pshift); //shouldn't be necessary but who knows ;)
+		}
 
 		if (!poly->reserve(vertCount))
 		{
@@ -706,7 +713,12 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_SHAPE_TYPE shapeTypeInt, const CCVector3d& PShift)
+CC_FILE_ERROR LoadCloud(QFile& file,
+						ccHObject& container,
+						int32_t index,
+						ESRI_SHAPE_TYPE shapeTypeInt,
+						const CCVector3d& Pshift,
+						bool preserveCoordinateShift)
 {
 	char header[36];
 	file.read(header, 36);
@@ -730,7 +742,10 @@ CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_S
 		delete cloud;
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
-	cloud->setGlobalShift(PShift);
+	if (preserveCoordinateShift)
+	{
+		cloud->setGlobalShift(Pshift);
+	}
 
 	//Points (An array of length NumPoints)
 	{
@@ -739,9 +754,9 @@ CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_S
 			file.read(header, 16);
 			double x = qFromLittleEndianD(*reinterpret_cast<double*>(header));
 			double y = qFromLittleEndianD(*reinterpret_cast<double*>(header + 8));
-			CCVector3 P(static_cast<PointCoordinateType>(x + PShift.x),
-				static_cast<PointCoordinateType>(y + PShift.y),
-				0);
+			CCVector3 P(static_cast<PointCoordinateType>(x + Pshift.x),
+						static_cast<PointCoordinateType>(y + Pshift.y),
+						0);
 			cloud->addPoint(P);
 		}
 	}
@@ -764,7 +779,7 @@ CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_S
 				file.read(header, 8);
 				double z = qFromLittleEndianD(*reinterpret_cast<double*>(header));
 				const CCVector3* P = cloud->getPoint(i);
-				const_cast<CCVector3*>(P)->z = static_cast<PointCoordinateType>(z + PShift.z);
+				const_cast<CCVector3*>(P)->z = static_cast<PointCoordinateType>(z + Pshift.z);
 			}
 			cloud->invalidateBoundingBox();
 		}
@@ -942,16 +957,20 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHAPE_TYPE shapeTypeInt, const CCVector3d& PShift)
+CC_FILE_ERROR LoadSinglePoint(	QFile& file,
+								ccPointCloud* &singlePoints,
+								ESRI_SHAPE_TYPE shapeTypeInt,
+								const CCVector3d& Pshift,
+								bool preserveCoordinateShift)
 {
 	char buffer[16];
 	file.read(buffer, 16);
 
 	double x = qFromLittleEndianD(*reinterpret_cast<double*>(buffer));
 	double y = qFromLittleEndianD(*reinterpret_cast<double*>(buffer + 8));
-	CCVector3 P(static_cast<PointCoordinateType>(x + PShift.x),
-		static_cast<PointCoordinateType>(y + PShift.y),
-		0);
+	CCVector3 P(static_cast<PointCoordinateType>(x + Pshift.x),
+				static_cast<PointCoordinateType>(y + Pshift.y),
+				0);
 
 	//3D point
 	if (shapeTypeInt == SHP_POINT_Z)
@@ -960,14 +979,17 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 		{
 			file.read(buffer, 8);
 			double z = qFromLittleEndianD(*reinterpret_cast<double*>(buffer));
-			P.z = static_cast<PointCoordinateType>(z + PShift.z);
+			P.z = static_cast<PointCoordinateType>(z + Pshift.z);
 		}
 	}
 
 	if (!singlePoints)
 	{
 		singlePoints = new ccPointCloud("Points");
-		singlePoints->setGlobalShift(PShift);
+		if (preserveCoordinateShift)
+		{
+			singlePoints->setGlobalShift(Pshift);
+		}
 	}
 	if (!singlePoints->reserve(singlePoints->size() + 1))
 	{
@@ -980,8 +1002,8 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 	}
 
 	ScalarType s = NAN_VALUE;
-	if (shapeTypeInt == SHP_POINT_Z
-		|| shapeTypeInt == SHP_POINT_M)
+	if (	shapeTypeInt == SHP_POINT_Z
+		||	shapeTypeInt == SHP_POINT_M)
 	{
 		//Measure
 		{
@@ -1434,6 +1456,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 
 	//global shift
 	CCVector3d Pshift(0, 0, 0);
+	bool preserveCoordinateShift = true;
 
 	//read header (refer to ESRI Shapefile Technical Description)
 	if (file.size() < 100)
@@ -1504,7 +1527,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 		}
 
 		CCVector3d Pmin(xMin, yMin, zMin);
-		if (HandleGlobalShift(Pmin, Pshift, parameters))
+		if (HandleGlobalShift(Pmin, Pshift, preserveCoordinateShift, parameters))
 		{
 			ccLog::Warning("[SHP] Entities will be recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 		}
@@ -1597,7 +1620,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			case SHP_POLYGON:
 			{
 				unsigned childCountBefore = container.getChildrenNumber();
-				error = LoadPolyline(file, container, recordNumber, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift);
+				error = LoadPolyline(file, container, recordNumber, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift, preserveCoordinateShift);
 				if (error == CC_FERR_NO_ERROR && shapeTypeInt == SHP_POLYLINE)
 				{
 					unsigned childCountAfter = container.getChildrenNumber();
@@ -1617,13 +1640,13 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			case SHP_MULTI_POINT_M:
 				is3DShape = true;
 			case SHP_MULTI_POINT:
-				error = LoadCloud(file, container, recordNumber, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift);
+				error = LoadCloud(file, container, recordNumber, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift, preserveCoordinateShift);
 				break;
 			case SHP_POINT_Z:
 			case SHP_POINT_M:
 				is3DShape = true;
 			case SHP_POINT:
-				error = LoadSinglePoint(file, singlePoints, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift);
+				error = LoadSinglePoint(file, singlePoints, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift, preserveCoordinateShift);
 				if (error == CC_FERR_NO_ERROR && recordNumber > maxPointID)
 				{
 					maxPointID = recordNumber;

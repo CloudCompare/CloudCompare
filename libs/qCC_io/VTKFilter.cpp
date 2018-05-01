@@ -348,9 +348,13 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 						//first point: check for 'big' coordinates
 						if (iPt == 0)
 						{
-							if (HandleGlobalShift(Pd, Pshift, parameters))
+							bool preserveCoordinateShift = true;
+							if (HandleGlobalShift(Pd, Pshift, preserveCoordinateShift, parameters))
 							{
-								vertices->setGlobalShift(Pshift);
+								if (preserveCoordinateShift)
+								{
+									vertices->setGlobalShift(Pshift);
+								}
 								ccLog::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 							}
 						}

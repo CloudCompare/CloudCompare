@@ -169,7 +169,7 @@ CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& contain
 	CurveType curveType = INVALID;
 	unsigned cpIndex = 0;
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	CCVector3d Pshift(0,0,0);
+	CCVector3d Pshift(0, 0, 0);
 	bool firstVertex = true;
 
 	while (!currentLine.isEmpty() && file.error() == QFile::NoError)
@@ -407,17 +407,21 @@ CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& contain
 								if (firstVertex/*currentVertices->size() == 0*/)
 								{
 									firstVertex = false;
-									if (HandleGlobalShift(Pd,Pshift,parameters))
+									bool preserveCoordinateShift = true;
+									if (HandleGlobalShift(Pd, Pshift, preserveCoordinateShift, parameters))
 									{
-										if (currentPoly)
-											currentPoly->setGlobalShift(Pshift);
-										else
-											currentVertices->setGlobalShift(Pshift);
-										ccLog::Warning("[SinusX::loadFile] Polyline has been recentered! Translation: (%.2f ; %.2f ; %.2f)",Pshift.x,Pshift.y,Pshift.z);
+										if (preserveCoordinateShift)
+										{
+											if (currentPoly)
+												currentPoly->setGlobalShift(Pshift);
+											else
+												currentVertices->setGlobalShift(Pshift);
+										}
+										ccLog::Warning("[SinusX::loadFile] Polyline has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 									}
 								}
 
-								currentVertices->addPoint(CCVector3::fromArray((Pd+Pshift).u));
+								currentVertices->addPoint(CCVector3::fromArray((Pd + Pshift).u));
 							}
 						}
 					}

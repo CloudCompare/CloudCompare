@@ -72,11 +72,17 @@ public:
 
 	//! Whether to show or not the 'Keep global position' checkbox
 	void showKeepGlobalPosCheckbox(bool state);
-
 	//! Returns whether the global position should be preserved or not
 	bool keepGlobalPos() const;
 	//! Sets whether the global position should be preserved or not
 	void setKeepGlobalPos(bool state);
+	
+	//! Whether to show or not the 'Preserve shift on save' checkbox
+	void showPreserveShiftOnSave(bool state);
+	//! Returns whether the global shift should be preserved or not
+	bool preserveShiftOnSave() const;
+	//! Sets whether the global shift should be preserved or not
+	void setPreserveShiftOnSave(bool state);
 
 	//! Adds shift info to the combox
 	/** \param info shift info

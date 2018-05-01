@@ -801,6 +801,16 @@ coordinate system</string>
        <number>0</number>
       </property>
       <item>
+       <widget class="QCheckBox" name="preserveShiftOnSaveCheckBox">
+        <property name="text">
+         <string>Preserve global shift on save</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="keepGlobalPosCheckBox">
         <property name="toolTip">
          <string>The local coordinates will be changed so as to keep the global coordinates the same</string>
@@ -856,6 +866,22 @@ coordinate system</string>
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>preserveShiftOnSaveCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>infoLabel</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>90</x>
+     <y>367</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>321</x>
+     <y>91</y>
     </hint>
    </hints>
   </connection>

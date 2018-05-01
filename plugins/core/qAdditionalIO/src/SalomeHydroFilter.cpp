@@ -128,7 +128,8 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 	QTextStream stream(&file);
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	CCVector3d Pshift(0,0,0);
+	CCVector3d Pshift(0, 0, 0);
+	bool preserveCoordinateShift = true;
 	bool firstPoint = true;
 
 	ccPointCloud* currentVertices = nullptr;
@@ -181,8 +182,10 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 			if (!currentVertices)
 			{
 				currentVertices = new ccPointCloud("vertices");
-				if (!firstPoint)
+				if (!firstPoint && preserveCoordinateShift)
+				{
 					currentVertices->setGlobalShift(Pshift);
+				}
 			}
 
 			QStringList parts = currentLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
@@ -196,10 +199,13 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 				//first point: check for 'big' coordinates
 				if (firstPoint)
 				{
-					if (HandleGlobalShift(P,Pshift,parameters))
+					if (HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters))
 					{
-						currentVertices->setGlobalShift(Pshift);
-						ccLog::Warning("[Salome Hydro] Polylines will be recentered! Translation: (%.2f ; %.2f ; %.2f)",Pshift.x,Pshift.y,Pshift.z);
+						if (preserveCoordinateShift)
+						{
+							currentVertices->setGlobalShift(Pshift);
+						}
+						ccLog::Warning("[Salome Hydro] Polylines will be recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 					}
 					firstPoint = false;
 				}
@@ -215,7 +221,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 						break;
 					}
 				}
-				currentVertices->addPoint(CCVector3::fromArray((P+Pshift).u));
+				currentVertices->addPoint(CCVector3::fromArray((P + Pshift).u));
 			}
 			else
 			{

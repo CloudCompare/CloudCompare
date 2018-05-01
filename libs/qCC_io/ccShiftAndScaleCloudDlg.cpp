@@ -60,6 +60,7 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pg,
 
 	showWarning(false);
 	showKeepGlobalPosCheckbox(false);
+	showPreserveShiftOnSave(true);
 	showScaleItems(m_originalDiagonal > 0.0);
 	showCancelButton(false);
 }
@@ -85,6 +86,7 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(	const CCVector3d& Pl,
 	showWarning(false);
 	showTitle(false);
 	showKeepGlobalPosCheckbox(true);
+	showPreserveShiftOnSave(false);
 	showScaleItems(m_originalDiagonal > 0.0 && m_localDiagonal > 0.0);
 	showCancelButton(true);
 
@@ -346,6 +348,21 @@ void ccShiftAndScaleCloudDlg::showTitle(bool state)
 void ccShiftAndScaleCloudDlg::showKeepGlobalPosCheckbox(bool state)
 {
 	m_ui->keepGlobalPosCheckBox->setVisible(state);
+}
+
+void ccShiftAndScaleCloudDlg::showPreserveShiftOnSave(bool state)
+{
+	m_ui->preserveShiftOnSaveCheckBox->setVisible(state);
+}
+
+bool ccShiftAndScaleCloudDlg::preserveShiftOnSave() const
+{
+	return m_ui->preserveShiftOnSaveCheckBox->isChecked();
+}
+
+void ccShiftAndScaleCloudDlg::setPreserveShiftOnSave(bool state)
+{
+	m_ui->preserveShiftOnSaveCheckBox->setChecked(state);
 }
 
 bool ccShiftAndScaleCloudDlg::keepGlobalPos() const

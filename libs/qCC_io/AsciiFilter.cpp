@@ -758,6 +758,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 	CCVector3d Pshift(0, 0, 0);
 	CCVector3 N(0, 0, 0);
 	ccColor::Rgb col;
+	bool preserveCoordinateShift = true;
 
 	//other useful variables
 	unsigned linesRead = 0;
@@ -845,7 +846,10 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 					ccLog::Error("Not enough memory! Process stopped ...");
 					break;
 				}
-				cloudDesc.cloud->setGlobalShift(Pshift);
+				if (preserveCoordinateShift)
+				{
+					cloudDesc.cloud->setGlobalShift(Pshift);
+				}
 			}
 
 			//we update the progress info
@@ -906,9 +910,12 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 			//first point: check for 'big' coordinates
 			if (pointsRead == 0)
 			{
-				if (HandleGlobalShift(P, Pshift, parameters))
+				if (HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters))
 				{
-					cloudDesc.cloud->setGlobalShift(Pshift);
+					if (preserveCoordinateShift)
+					{
+						cloudDesc.cloud->setGlobalShift(Pshift);
+					}
 					ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}

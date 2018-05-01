@@ -1080,6 +1080,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							sasDlg.showTitle(true);
 							sasDlg.setKeepGlobalPos(true);
 							sasDlg.showKeepGlobalPosCheckbox(false); //we don't want the user to mess with this!
+							sasDlg.showPreserveShiftOnSave(true);
 
 							//add "original" entry
 							int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", globalShift, globalScale));
@@ -8953,9 +8954,10 @@ void MainWindow::addToDB(	ccHObject* obj,
 		CCVector3d P = CCVector3d::fromArray(center.u);
 		CCVector3d Pshift(0, 0, 0);
 		double scale = 1.0;
+		bool preserveCoordinateShift = true;
 		//here we must test that coordinates are not too big whatever the case because OpenGL
 		//really doesn't like big ones (even if we work with GLdoubles :( ).
-		if (ccGlobalShiftManager::Handle(P, diag, ccGlobalShiftManager::DIALOG_IF_NECESSARY, false, Pshift, &scale))
+		if (ccGlobalShiftManager::Handle(P, diag, ccGlobalShiftManager::DIALOG_IF_NECESSARY, false, Pshift, &preserveCoordinateShift, &scale))
 		{
 			bool needRescale = (scale != 1.0);
 			bool needShift = (Pshift.norm2() > 0);
@@ -8971,24 +8973,27 @@ void MainWindow::addToDB(	ccHObject* obj,
 			}
 
 			//update 'global shift' and 'global scale' for ALL clouds recursively
-			//FIXME: why don't we do that all the time by the way?!
-			ccHObject::Container children;
-			children.push_back(obj);
-			while (!children.empty())
+			if (preserveCoordinateShift)
 			{
-				ccHObject* child = children.back();
-				children.pop_back();
-
-				if (child->isKindOf(CC_TYPES::POINT_CLOUD))
+				//FIXME: why don't we do that all the time by the way?!
+				ccHObject::Container children;
+				children.push_back(obj);
+				while (!children.empty())
 				{
-					ccGenericPointCloud* pc = ccHObjectCaster::ToGenericPointCloud(child);
-					pc->setGlobalShift(pc->getGlobalShift() + Pshift);
-					pc->setGlobalScale(pc->getGlobalScale() * scale);
-				}
+					ccHObject* child = children.back();
+					children.pop_back();
 
-				for (unsigned i = 0; i < child->getChildrenNumber(); ++i)
-				{
-					children.push_back(child->getChild(i));
+					if (child->isKindOf(CC_TYPES::POINT_CLOUD))
+					{
+						ccGenericPointCloud* pc = ccHObjectCaster::ToGenericPointCloud(child);
+						pc->setGlobalShift(pc->getGlobalShift() + Pshift);
+						pc->setGlobalScale(pc->getGlobalScale() * scale);
+					}
+
+					for (unsigned i = 0; i < child->getChildrenNumber(); ++i)
+					{
+						children.push_back(child->getChild(i));
+					}
 				}
 			}
 		}

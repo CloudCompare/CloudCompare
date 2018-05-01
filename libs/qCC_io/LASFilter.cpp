@@ -1124,6 +1124,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		ccPointCloud* loadedCloud = nullptr;
 		std::vector< LasField::Shared > fieldsToLoad;
 		CCVector3d Pshift(0, 0, 0);
+		bool preserveCoordinateShift = true;
 
 		unsigned int fileChunkSize = 0;
 		unsigned int nbPointsRead = 0;
@@ -1157,7 +1158,10 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 					return false;
 				}
 
-				pointChunk.loadedCloud->setGlobalShift(Pshift);
+				if (preserveCoordinateShift)
+				{
+					pointChunk.loadedCloud->setGlobalShift(Pshift);
+				}
 
 				//save the Spatial reference as meta-data
 				SpatialReference srs = lasHeader.srs();
@@ -1201,9 +1205,12 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 						}
 				}
 
-				if (HandleGlobalShift(P, Pshift, parameters, useLasShift))
+				if (HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters, useLasShift))
 				{
-					loadedCloud->setGlobalShift(Pshift);
+					if (preserveCoordinateShift)
+					{
+						loadedCloud->setGlobalShift(Pshift);
+					}
 					ccLog::Warning("[LAS] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 

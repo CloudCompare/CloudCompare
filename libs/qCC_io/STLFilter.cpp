@@ -756,9 +756,13 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			//first point: check for 'big' coordinates
 			if (pointCount == 0)
 			{
-				if (HandleGlobalShift(Pd, Pshift, parameters))
+				bool preserveCoordinateShift = true;
+				if (HandleGlobalShift(Pd, Pshift, preserveCoordinateShift, parameters))
 				{
-					vertices->setGlobalShift(Pshift);
+					if (preserveCoordinateShift)
+					{
+						vertices->setGlobalShift(Pshift);
+					}
 					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
@@ -967,9 +971,13 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 			CCVector3d Pd(Pf[0], Pf[1], Pf[2]);
 			if (pointCount == 0)
 			{
-				if (HandleGlobalShift(Pd, Pshift, parameters))
+				bool preserveCoordinateShift = true;
+				if (HandleGlobalShift(Pd, Pshift, preserveCoordinateShift, parameters))
 				{
-					vertices->setGlobalShift(Pshift);
+					if (preserveCoordinateShift)
+					{
+						vertices->setGlobalShift(Pshift);
+					}
 					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}

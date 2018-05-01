@@ -9379,7 +9379,7 @@ void MainWindow::doActionSaveFile()
 					ccHObject* child = otherSerializable.getChild(j);
 					bool isExclusive = true;
 					bool multiple = false;
-					canExportSerializables &= (		filter->canSave(child->getUniqueID(), multiple, isExclusive)
+					canExportSerializables &= (		filter->canSave(child->getClassID(), multiple, isExclusive)
 												&&	(multiple || otherSerializable.getChildrenNumber() == 1) );
 					atLeastOneExclusive |= isExclusive;
 				}

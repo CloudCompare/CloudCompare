@@ -20,17 +20,19 @@
 
 #include <QString>
 
+#include "qCC_io.h"
+
 class FileIO
 {
     public:
-        static void setWriterInfo( const QString &applicationName, const QString &version );
-        static QString writerInfo();
+        QCC_IO_LIB_API static void setWriterInfo( const QString &applicationName, const QString &version );
+        QCC_IO_LIB_API static QString writerInfo();
 
-		static QString applicationName();
-		static QString version();
+		QCC_IO_LIB_API static QString applicationName();
+		QCC_IO_LIB_API static QString version();
 		
-		static QString createdBy();
-		static QString createdDateTime();
+		QCC_IO_LIB_API static QString createdBy();
+		QCC_IO_LIB_API static QString createdDateTime();
 		
     private:
         FileIO() = delete;

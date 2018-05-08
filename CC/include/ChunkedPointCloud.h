@@ -48,22 +48,22 @@ public:
 		virtual ~ChunkedPointCloud();
 
 		//**** inherited form GenericCloud ****//
-		inline virtual unsigned size() const { return m_points->currentSize(); }
-		virtual void forEach(genericPointAction action);
-		virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
-		virtual void placeIteratorAtBeginning();
-		virtual const CCVector3* getNextPoint();
-		virtual bool enableScalarField();
-		virtual bool isScalarFieldEnabled() const;
-		virtual void setPointScalarValue(unsigned pointIndex, ScalarType value);
-		virtual ScalarType getPointScalarValue(unsigned pointIndex) const;
+		inline virtual unsigned size() const override { return m_points->currentSize(); }
+		virtual void forEach(genericPointAction action) override;
+		virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
+		virtual void placeIteratorAtBeginning() override;
+		virtual const CCVector3* getNextPoint() override;
+		virtual bool enableScalarField() override;
+		virtual bool isScalarFieldEnabled() const override;
+		virtual void setPointScalarValue(unsigned pointIndex, ScalarType value) override;
+		virtual ScalarType getPointScalarValue(unsigned pointIndex) const override;
 
 		//**** inherited form GenericIndexedCloud ****//
-		inline virtual const CCVector3* getPoint(unsigned index)  { return point(index); }
-		inline virtual void getPoint(unsigned index, CCVector3& P) const { P = *point(index); }
+		inline virtual const CCVector3* getPoint(unsigned index) override { return point(index); }
+		inline virtual void getPoint(unsigned index, CCVector3& P) const override { P = *point(index); }
 
 		//**** inherited form GenericIndexedCloudPersist ****//
-		inline virtual const CCVector3* getPointPersistentPtr(unsigned index) { return point(index); }
+		inline virtual const CCVector3* getPointPersistentPtr(unsigned index) override { return point(index); }
 
 		//**** other methods ****//
 

@@ -45,22 +45,22 @@ public:
 	virtual ~SimpleCloud();
 
 	//**** inherited form GenericCloud ****//
-	virtual unsigned size() const;
-	virtual void forEach(genericPointAction action);
-	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
-	virtual void placeIteratorAtBeginning();
-	virtual const CCVector3* getNextPoint();
-	virtual bool enableScalarField();
-	virtual bool isScalarFieldEnabled() const;
-	virtual void setPointScalarValue(unsigned pointIndex, ScalarType value);
-	virtual ScalarType getPointScalarValue(unsigned pointIndex) const;
+	virtual unsigned size() const override;
+	virtual void forEach(genericPointAction action) override;
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
+	virtual void placeIteratorAtBeginning() override;
+	virtual const CCVector3* getNextPoint() override;
+	virtual bool enableScalarField() override;
+	virtual bool isScalarFieldEnabled() const override;
+	virtual void setPointScalarValue(unsigned pointIndex, ScalarType value) override;
+	virtual ScalarType getPointScalarValue(unsigned pointIndex) const override;
 
 	//**** inherited form GenericIndexedCloud ****//
-	inline virtual const CCVector3* getPoint(unsigned index) {return getPointPersistentPtr(index);}
-	virtual void getPoint(unsigned index, CCVector3& P) const;
+	inline virtual const CCVector3* getPoint(unsigned index) override {return getPointPersistentPtr(index);}
+	virtual void getPoint(unsigned index, CCVector3& P) const override;
 
 	//**** inherited form GenericIndexedCloudPersist ****//
-	virtual const CCVector3* getPointPersistentPtr(unsigned index);
+	virtual const CCVector3* getPointPersistentPtr(unsigned index) override;
 
 	//! Clears cloud
 	void clear();

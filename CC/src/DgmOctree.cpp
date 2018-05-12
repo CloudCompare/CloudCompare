@@ -35,7 +35,7 @@
 //#define ADAPTATIVE_BINARY_SEARCH
 
 #ifdef USE_PARALLEL
-#ifndef _DEBUG
+#ifndef CC_DEBUG
 //enables multi-threading handling
 #define ENABLE_MT_OCTREE
 #endif
@@ -4140,7 +4140,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 	//smallest FOV (i.e. nearest point)
 	double smallestOrderDist = -1.0;
 
-#ifdef QT_DEBUG
+#ifdef CC_DEBUG
 	m_theAssociatedCloud->enableScalarField();
 #endif
 
@@ -4208,7 +4208,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 			currentBitDec = GET_BIT_SHIFT(level);
 		}
 
-#ifdef QT_DEBUG
+#ifdef CC_DEBUG
 		m_theAssociatedCloud->setPointScalarValue(it->theIndex, level);
 #endif
 
@@ -4227,7 +4227,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 				double fov_rad = atan2(sqrt(radialSqDist), sqrt(sqDist));
 				isElligible = (fov_rad <= maxRadiusOrFov);
 				orderDist = fov_rad;
-#ifdef QT_DEBUG
+#ifdef CC_DEBUG
 				//m_theAssociatedCloud->setPointScalarValue(it->theIndex, fov_rad);
 				//m_theAssociatedCloud->setPointScalarValue(it->theIndex, sqrt(sqDist));
 #endif
@@ -4235,7 +4235,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 			else
 			{
 				isElligible = (radialSqDist <= maxSqRadius);
-#ifdef QT_DEBUG
+#ifdef CC_DEBUG
 				//m_theAssociatedCloud->setPointScalarValue(it->theIndex, sqrt(radialSqDist));
 #endif
 			}

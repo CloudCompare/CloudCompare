@@ -34,7 +34,7 @@
 
 
 #ifdef USE_QT
-#ifndef QT_DEBUG
+#ifndef CC_DEBUG
 //enables multi-threading handling
 #define ENABLE_CLOUD2MESH_DIST_MT
 #endif

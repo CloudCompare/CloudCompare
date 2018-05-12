@@ -1,3 +1,6 @@
+#ifndef CCAPPLICATION_H
+#define CCAPPLICATION_H
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,38 +18,31 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccAboutDialog.h"
-#include "ccApplication.h"
+#include <QApplication>
 
-#include "ui_aboutDlg.h"
 
-ccAboutDialog::ccAboutDialog(QWidget *parent)
-	: QDialog(parent)
-	, mUI(new Ui::AboutDialog)
+//! Mimic Qt's qApp for easy access to the application instance
+#define ccApp (static_cast<ccApplication *>( QCoreApplication::instance() ))
+
+class ccApplication : public QApplication
 {
-	setAttribute(Qt::WA_DeleteOnClose);
-
-	mUI->setupUi(this);
-
-	QString compilationInfo;
-
-	compilationInfo = ccApp->versionLongStr(true);
-	compilationInfo += QStringLiteral("<br><i>Compiled with");
-
-#if defined(_MSC_VER)
-	compilationInfo += QStringLiteral(" MSVC %1 and").arg(_MSC_VER);
+public:
+	//! This must be called before instantiating the application class so it
+	//! can setup OpenGL first.
+	static void	init();
+	
+	ccApplication( int &argc, char **argv );
+	
+	QString versionStr() const;
+	QString versionLongStr( bool includeOS ) const;
+	
+#ifdef Q_OS_MAC
+protected:
+	bool event( QEvent *inEvent );
 #endif
+	
+private:
+	static QString s_version;
+};
 
-	compilationInfo += QStringLiteral(" Qt %1").arg(QT_VERSION_STR);
-	compilationInfo += QStringLiteral("</i>");
-
-	QString htmlText = mUI->labelText->text();
-	QString enrichedHtmlText = htmlText.arg(compilationInfo);
-
-	mUI->labelText->setText(enrichedHtmlText);
-}
-
-ccAboutDialog::~ccAboutDialog()
-{
-	delete mUI;
-}
+#endif

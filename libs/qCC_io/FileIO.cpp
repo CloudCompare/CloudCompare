@@ -2,8 +2,6 @@
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
 //#                                                                        #
-//#  This project has been initiated under funding from ANR/CIFRE          #
-//#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
 //#  the Free Software Foundation; version 2 or later of the License.      #
@@ -13,56 +11,55 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#include "ccCommon.h"
+#include <QDateTime>
+#include <QDebug>
 
-//CCLib
-#include <CCPlatform.h>
+#include "FileIO.h"
 
-#define CC_VER_NUM "2"
-#define CC_SUB_VER "10.alpha" //201X-XX-XX
 
-//! Returns current version as a string
-QString ccCommon::GetCCVersion(bool full/*=true*/)
+QString FileIO::s_applicationName;
+QString FileIO::s_version;
+QString FileIO::s_writerInfo;
+
+void FileIO::setWriterInfo( const QString &applicationName, const QString &version )
 {
-	QString verStr = QString("%1.%2").arg(CC_VER_NUM, CC_SUB_VER);
-#ifdef CC_GL_WINDOW_USE_QWINDOW
-	verStr += " Stereo";
-#endif
+	s_applicationName = applicationName;
+	s_version = version;
+    s_writerInfo = QStringLiteral( "%1 v%2" ).arg( applicationName, version );
+}
 
-#if defined(CC_ENV_64)
-	QString arch = "64-bit";
-#elif defined(CC_ENV_32)
-	QString arch = "32-bit";
-#else
-	QString arch = "??-bit";
-#endif
-
-	if (full)
+QString FileIO::writerInfo()
+{
+	if ( s_writerInfo.isNull() )
 	{
-#if defined(CC_WINDOWS)
-		QString platform = "Windows";
-#elif defined(CC_MAC_OS)
-		QString platform = "macOS";
-#elif defined(CC_LINUX)
-		QString platform = "Linux";
-#else
-		QString platform = "Unknown OS";
-#endif
-
-		verStr += QString(" [%1 %2]").arg(platform, arch);
+		qWarning() << "FileIO::setWriterInfo has not been called";
+		
+		return QStringLiteral( "(writer info not set)" );
 	}
-	else
-	{
-		verStr += QString(" [%1]").arg(arch);
-	}
+	
+	return s_writerInfo;
+}
 
-#ifdef QT_DEBUG
-	verStr += QString(" [DEBUG]");
-#endif
+QString FileIO::applicationName()
+{
+	return s_applicationName;
+}
 
-	return verStr;
-};
+QString FileIO::version()
+{
+	return s_version;
+}
+
+QString FileIO::createdBy()
+{
+	return QStringLiteral( "Created by %1" ).arg( FileIO::writerInfo() );
+}
+
+QString FileIO::createdDateTime()
+{
+	return QStringLiteral( "Created %1" ).arg( QDateTime::currentDateTime().toString( Qt::SystemLocaleShortDate ) );
+}

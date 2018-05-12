@@ -1,4 +1,4 @@
-<!--- If you are reporting a security issue, please email security@cloucompare.org directly -->
+<!--- If you are reporting a security issue, please email security@cloudcompare.org directly -->
 
 ## Current Behavior
 <!--- If describing a bug, tell us what happens instead of the expected behavior -->

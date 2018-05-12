@@ -50,7 +50,7 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	if (!entity->isKindOf(CC_TYPES::MESH))
 	{
-		ccLog::Warning("[OBJ] This filter can only save one mesh at a time!");
+		ccLog::Warning("[OFF] This filter can only save one mesh at a time!");
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 

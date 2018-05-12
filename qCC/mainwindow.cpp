@@ -67,6 +67,7 @@
 //dialogs
 #include "ccAboutDialog.h"
 #include "ccAdjustZoomDlg.h"
+#include "ccApplication.h"
 #include "ccAlignDlg.h" //Aurelien BEY
 #include "ccApplyTransformationDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
@@ -195,7 +196,7 @@ MainWindow::MainWindow()
 {
 	m_UI->setupUi( this );
 
-	setWindowTitle(QStringLiteral("CloudCompare v") + ccCommon::GetCCVersion(false));
+	setWindowTitle(QStringLiteral("CloudCompare v") + ccApp->versionLongStr(false));
 	
 	m_pluginUIManager = new ccPluginUIManager( this, this );
 	
@@ -9378,7 +9379,7 @@ void MainWindow::doActionSaveFile()
 					ccHObject* child = otherSerializable.getChild(j);
 					bool isExclusive = true;
 					bool multiple = false;
-					canExportSerializables &= (		filter->canSave(child->getUniqueID(), multiple, isExclusive)
+					canExportSerializables &= (		filter->canSave(child->getClassID(), multiple, isExclusive)
 												&&	(multiple || otherSerializable.getChildrenNumber() == 1) );
 					atLeastOneExclusive |= isExclusive;
 				}

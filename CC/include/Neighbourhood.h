@@ -56,7 +56,7 @@ class CC_CORE_LIB_API Neighbourhood
 		explicit Neighbourhood(GenericIndexedCloudPersist* associatedCloud);
 
 		//! Default destructor
-		virtual ~Neighbourhood() {}
+		virtual ~Neighbourhood() = default;
 
 		//! Resets structure (depreactes all associated geometrical fetaures)
 		virtual void reset();
@@ -140,7 +140,7 @@ class CC_CORE_LIB_API Neighbourhood
 			for (unsigned i=0; i<count; ++i)
 			{
 				//we recenter current point
-				CCVector3 P = *m_associatedCloud->getPoint(i) - G;
+				const CCVector3 P = *m_associatedCloud->getPoint(i) - G;
 
 				//then we project it on plane (with scalar prods)
 				points2D[i] = Vec2D(P.dot(u),P.dot(v));

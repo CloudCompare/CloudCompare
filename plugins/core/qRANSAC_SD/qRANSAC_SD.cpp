@@ -233,7 +233,7 @@ void qRansacSD::doAction()
 	//import parameters from dialog
 	RansacShapeDetector::Options ransacOptions;
 	{
-		ransacOptions.m_epsilon			= static_cast<float>(rsdDlg.epsilonDoubleSpinBox->value() * 3.0); //internally this threshold is multiplied by 3!
+		ransacOptions.m_epsilon			= static_cast<float>(rsdDlg.epsilonDoubleSpinBox->value());
 		ransacOptions.m_bitmapEpsilon	= static_cast<float>(rsdDlg.bitmapEpsilonDoubleSpinBox->value());
 		ransacOptions.m_normalThresh	= static_cast<float>(cos(rsdDlg.maxNormDevAngleSpinBox->value() * CC_DEG_TO_RAD));
 		assert( ransacOptions.m_normalThresh >= 0 );

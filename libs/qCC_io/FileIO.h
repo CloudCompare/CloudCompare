@@ -1,3 +1,6 @@
+#ifndef FILEIO_H
+#define FILEIO_H
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,38 +18,27 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccAboutDialog.h"
-#include "ccApplication.h"
+#include <QString>
 
-#include "ui_aboutDlg.h"
+#include "qCC_io.h"
 
-ccAboutDialog::ccAboutDialog(QWidget *parent)
-	: QDialog(parent)
-	, mUI(new Ui::AboutDialog)
+class FileIO
 {
-	setAttribute(Qt::WA_DeleteOnClose);
+    public:
+        QCC_IO_LIB_API static void setWriterInfo( const QString &applicationName, const QString &version );
+        QCC_IO_LIB_API static QString writerInfo();
 
-	mUI->setupUi(this);
+		QCC_IO_LIB_API static QString applicationName();
+		QCC_IO_LIB_API static QString version();
+		
+		QCC_IO_LIB_API static QString createdBy();
+		QCC_IO_LIB_API static QString createdDateTime();
+		
+    private:
+        FileIO() = delete;
 
-	QString compilationInfo;
-
-	compilationInfo = ccApp->versionLongStr(true);
-	compilationInfo += QStringLiteral("<br><i>Compiled with");
-
-#if defined(_MSC_VER)
-	compilationInfo += QStringLiteral(" MSVC %1 and").arg(_MSC_VER);
+		static QString s_applicationName;
+		static QString s_version;
+		static QString s_writerInfo;
+};
 #endif
-
-	compilationInfo += QStringLiteral(" Qt %1").arg(QT_VERSION_STR);
-	compilationInfo += QStringLiteral("</i>");
-
-	QString htmlText = mUI->labelText->text();
-	QString enrichedHtmlText = htmlText.arg(compilationInfo);
-
-	mUI->labelText->setText(enrichedHtmlText);
-}
-
-ccAboutDialog::~ccAboutDialog()
-{
-	delete mUI;
-}

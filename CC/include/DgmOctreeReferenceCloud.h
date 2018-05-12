@@ -40,21 +40,21 @@ public:
 	DgmOctreeReferenceCloud(DgmOctree::NeighboursSet* associatedSet, unsigned count = 0);
 
 	//**** inherited form GenericCloud ****//
-	inline virtual unsigned size() const { return m_size; }
-	virtual void forEach(genericPointAction action);
-	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
+	inline virtual unsigned size() const override { return m_size; }
+	virtual void forEach(genericPointAction action) override;
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
 	//virtual unsigned char testVisibility(const CCVector3& P) const; //not supported
-	inline virtual void placeIteratorAtBeginning() { m_globalIterator = 0; }
-	inline virtual const CCVector3* getNextPoint() { return (m_globalIterator < size() ? m_set->at(m_globalIterator++).point : 0); }
-	inline virtual bool enableScalarField() { return true; } //use DgmOctree::PointDescriptor::squareDistd by default
-	inline virtual bool isScalarFieldEnabled() const { return true; } //use DgmOctree::PointDescriptor::squareDistd by default
-	inline virtual void setPointScalarValue(unsigned pointIndex, ScalarType value) { assert(pointIndex < size()); m_set->at(pointIndex).squareDistd = static_cast<double>(value); }
-	inline virtual ScalarType getPointScalarValue(unsigned pointIndex) const { assert(pointIndex < size()); return static_cast<ScalarType>(m_set->at(pointIndex).squareDistd); }
+	inline virtual void placeIteratorAtBeginning() override { m_globalIterator = 0; }
+	inline virtual const CCVector3* getNextPoint() override { return (m_globalIterator < size() ? m_set->at(m_globalIterator++).point : 0); }
+	inline virtual bool enableScalarField() override { return true; } //use DgmOctree::PointDescriptor::squareDistd by default
+	inline virtual bool isScalarFieldEnabled() const override { return true; } //use DgmOctree::PointDescriptor::squareDistd by default
+	inline virtual void setPointScalarValue(unsigned pointIndex, ScalarType value) override { assert(pointIndex < size()); m_set->at(pointIndex).squareDistd = static_cast<double>(value); }
+	inline virtual ScalarType getPointScalarValue(unsigned pointIndex) const override { assert(pointIndex < size()); return static_cast<ScalarType>(m_set->at(pointIndex).squareDistd); }
 	//**** inherited form GenericIndexedCloud ****//
-	inline virtual const CCVector3* getPoint(unsigned index) { assert(index < size()); return m_set->at(index).point; }
-	inline virtual void getPoint(unsigned index, CCVector3& P) const  { assert(index < size()); P = *m_set->at(index).point; }
+	inline virtual const CCVector3* getPoint(unsigned index) override { assert(index < size()); return m_set->at(index).point; }
+	inline virtual void getPoint(unsigned index, CCVector3& P) const override { assert(index < size()); P = *m_set->at(index).point; }
 	//**** inherited form GenericIndexedCloudPersist ****//
-	inline virtual const CCVector3* getPointPersistentPtr(unsigned index) { assert(index < size()); return m_set->at(index).point; }
+	inline virtual const CCVector3* getPointPersistentPtr(unsigned index) override { assert(index < size()); return m_set->at(index).point; }
 
 	//! Forwards global iterator
 	inline void forwardIterator() { ++m_globalIterator; }

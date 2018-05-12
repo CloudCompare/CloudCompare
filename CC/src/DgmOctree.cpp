@@ -2268,10 +2268,10 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 	const PointCoordinateType& cs = getCellSize(nNSS.level);
 
 	//we compute the minimal distance between the query point and all cell borders
-	PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(nNSS.queryPoint,cs,nNSS.cellCenter);
+	const PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(nNSS.queryPoint,cs,nNSS.cellCenter);
 
 	//we deduce the minimum cell neighbourhood size (integer) that includes the search sphere
-	int minNeighbourhoodSize = 1+(radius>minDistToBorder ? static_cast<int>(ceil((radius-minDistToBorder)/cs)) : 0);
+	const int minNeighbourhoodSize = 1+(radius>minDistToBorder ? static_cast<int>(ceil((radius-minDistToBorder)/cs)) : 0);
 
 	//if we don't have visited such a neighbourhood...
 	if (nNSS.alreadyVisitedNeighbourhoodSize<minNeighbourhoodSize)
@@ -2286,7 +2286,7 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 #endif
 
 	//squared distances comparison is faster!
-	double squareRadius = radius * radius;
+	const double squareRadius = radius * radius;
 	unsigned numberOfEligiblePoints = 0;
 
 #ifdef TEST_CELLS_FOR_SPHERICAL_NN
@@ -2351,23 +2351,29 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 #else //TEST_CELLS_FOR_SPHERICAL_NN
 
 	//point by point scan
-	NeighboursSet::iterator p = nNSS.pointsInNeighbourhood.begin();
-	size_t k = nNSS.pointsInNeighbourhood.size();
-	for (size_t i=0; i<k; ++i,++p)
+	size_t i = 0;
+	
+	for ( PointDescriptor &pDescr : nNSS.pointsInNeighbourhood )
 	{
-		p->squareDistd = (*p->point - nNSS.queryPoint).norm2d();
+		pDescr.squareDistd = (*pDescr.point - nNSS.queryPoint).norm2d();
+		
 		//if the distance is inferior to the sphere radius...
-		if (p->squareDistd <= squareRadius)
+		if (pDescr.squareDistd <= squareRadius)
 		{
-			//... we had it to the 'eligible points' part of the container
+			//... we add it to the 'eligible points' part of the container
 			if (i > numberOfEligiblePoints)
-				std::swap(nNSS.pointsInNeighbourhood[i],nNSS.pointsInNeighbourhood[numberOfEligiblePoints]);
+			{
+				std::swap(nNSS.pointsInNeighbourhood[i], nNSS.pointsInNeighbourhood[numberOfEligiblePoints]);
+			}
 
 			++numberOfEligiblePoints;
+			
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 			s_testedPoints += 1.0;
 #endif
 		}
+		
+		++i;
 	}
 
 #endif //!TEST_CELLS_FOR_SPHERICAL_NN

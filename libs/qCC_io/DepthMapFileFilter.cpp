@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "DepthMapFileFilter.h"
+#include "FileIO.h"
 
 //qCC_db
 #include <ccGBLSensor.h>
@@ -114,7 +115,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(const QString& filename, ccGBLSenso
 
 	if (CheckForSpecialChars(filename))
 	{
-		ccLog::Warning(QString("[DXF] Output filename contains special characters. It might be scrambled or rejected by the I/O filter..."));
+		ccLog::Warning(QString("[DepthMap] Output filename contains special characters. It might be scrambled or rejected by the I/O filter..."));
 	}
 
 	//opening file
@@ -126,6 +127,8 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(const QString& filename, ccGBLSenso
 	}
 
 	fprintf(fp, "// SENSOR DEPTH MAP\n");
+	fprintf(fp, "// %s\n", qPrintable(FileIO::createdBy()));
+	fprintf(fp, "// %s\n", qPrintable(FileIO::createdDateTime()));
 	fprintf(fp, "// Associated cloud: %s\n", qPrintable(cloud ? cloud->getName() : "none"));
 	fprintf(fp, "// Pitch  = %f [ %f : %f ]\n",
 		sensor->getPitchStep(),

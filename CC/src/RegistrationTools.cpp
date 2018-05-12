@@ -368,7 +368,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 	}
 
 	FILE* fTraceFile = nullptr;
-#ifdef QT_DEBUG
+#ifdef CC_DEBUG
 	fTraceFile = fopen("registration_trace_log.csv","wt");
 	if (fTraceFile)
 		fprintf(fTraceFile,"Iteration; RMS; Point count;\n");
@@ -597,7 +597,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 
 			double rms = sqrt(meanSquareError);
 
-#ifdef QT_DEBUG
+#ifdef CC_DEBUG
 			if (fTraceFile)
 				fprintf(fTraceFile, "%u; %f; %u;\n", iteration, rms, data.cloud->size());
 #endif
@@ -844,7 +844,7 @@ double HornRegistrationTools::ComputeRMS(GenericCloud* lCloud,
 		const CCVector3* Li = lCloud->getNextPoint();
 		CCVector3 Lit = (trans.R.isValid() ? trans.R * (*Li) : (*Li))*trans.s + trans.T;
 
-//#ifdef QT_DEBUG
+//#ifdef CC_DEBUG
 //		double dist = (*Ri-Lit).norm();
 //#endif
 

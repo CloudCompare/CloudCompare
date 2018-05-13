@@ -73,9 +73,9 @@ void LASOpenDlg::onBrowse()
 
 bool FieldIsPresent(const std::vector<std::string>& dimensions, LAS_FIELDS field)
 {
-	for (std::vector<std::string>::const_iterator it=dimensions.begin(); it!=dimensions.end(); ++it)
+	for (const std::string& dimension : dimensions)
 	{
-		if (QString(it->c_str()).toUpper() == QString(LAS_FIELD_NAMES[field]).toUpper())
+		if (QString(dimension.c_str()).toUpper() == QString(LAS_FIELD_NAMES[field]).toUpper())
 			return true;
 	}
 

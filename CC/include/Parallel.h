@@ -32,6 +32,11 @@
 #elif USE_TBB
 
 #define USE_PARALLEL
+/*
+ * TODO: Task arena was in preview state prior to TBB 4.3 release.
+ * It's very unlikely that end user will compile with 4.2 but
+ * this version is notably used by ubuntu 14.04 on Travis. */
+#define TBB_PREVIEW_TASK_ARENA 1
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
 #include <tbb/parallel_sort.h>

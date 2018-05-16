@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.0)
 cmake_policy(PUSH)
 
 # Options
-option( COMPILE_CC_CORE_LIB_WITH_QT "Check to compile CC_CORE_LIB with Qt (to enable parallel processing)" ON )
 option( COMPILE_CC_CORE_LIB_WITH_CGAL "Check to compile CC_CORE_LIB with CGAL lib. (to enable Delaunay 2.5D triangulation with a GPL compliant licence)" OFF )
 option( COMPILE_CC_CORE_LIB_WITH_TBB " Check to compile CC_CORE_LIB with Intel Threading Building Blocks lib (enables some parallel processing )" OFF )
 option( COMPILE_CC_CORE_LIB_SHARED "Check to compile CC_CORE_LIB as a shared library (DLL/so)" ON )
@@ -48,13 +47,6 @@ if (COMPILE_CC_CORE_LIB_WITH_TBB)
 	include_directories( ${TBB_INCLUDE_DIRS} )
 	target_link_libraries( ${PROJECT_NAME} ${TBB_LIBRARIES} )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_TBB )
-endif()
-
-if (COMPILE_CC_CORE_LIB_WITH_QT)
-	include( ../cmake/CMakeExternalLibs.cmake )
-	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS} )
-	qt5_use_modules(${PROJECT_NAME} Core Widgets Concurrent)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_QT )
 endif()
 
 # Load advanced scripts

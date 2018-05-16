@@ -1057,9 +1057,6 @@ public:	/***** CELLS POSITION HANDLING *****/
 		the number of points in a cell. Thanks to this, the function is applied on a limited
 		number of points, avoiding great loss of performances. The only limitation is when the
 		level of subdivision is deepest level. In this case no more splitting is possible.
-
-		Parallel processing is based on QtConcurrent::map system.
-
 		\param startingLevel the initial level of subdivision
 		\param func the function to apply
 		\param additionalParameters the function parameters
@@ -1084,9 +1081,6 @@ public:	/***** CELLS POSITION HANDLING *****/
 	//! Method to apply automatically a specific function to each cell of the octree
 	/** The function to apply should be of the form DgmOctree::octreeCellFunc. In this case
 		the octree cells are scanned one by one at the same level of subdivision.
-
-		Parallel processing is based on QtConcurrent::map system.
-
 		\param level the level of subdivision
 		\param func the function to apply
 		\param additionalParameters the function parameters

@@ -49,7 +49,7 @@
 #define CCCriticalSection tbb::critical_section
 //Limit the number of thread of a parallel template function (or task)
 #define CCParallelWithLimitedThreads(task, num_threads) { \
-	tbb::task_arena limited_arena(num_threads, 0); \
+	tbb::task_arena limited_arena(num_threads, 1); \
 	limited_arena.execute([&]{ \
 		task; \
 	}); \

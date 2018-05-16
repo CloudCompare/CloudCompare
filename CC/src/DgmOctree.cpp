@@ -3305,7 +3305,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	unsigned char level,
 
 #ifdef ENABLE_MT_OCTREE
 
-	//Those cells will be processed in parallel
+	//These cells will be processed in parallel
 	const unsigned cellsNumber = getCellNumber(level);
 	std::vector<octreeCellDesc> cells;
 
@@ -3567,7 +3567,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 
 #ifdef ENABLE_MT_OCTREE
 
-	//Those cells will be processed in parallel
+	//These cells will be processed in parallel
 	std::vector<octreeCellDesc> cells;
 	if (multiThread)
 	{

@@ -46,6 +46,7 @@ parts:
       - libxerces-c-dev
       - libpcl-dev
       - libproj-dev
+      - libqt5svg5-dev 
     prepare: |
       sed -i '/CMAKE_INSTALL_RPATH/d' ../src/CMakeLists.txt
       ln -s /usr/lib/x86_64-linux-gnu/libvtkCommonCore-6.2.so /usr/lib/libvtkproj4.so

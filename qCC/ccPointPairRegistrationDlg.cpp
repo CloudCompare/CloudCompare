@@ -838,7 +838,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 					scale = alignedCloud->getGlobalScale();
 					shiftEnabled = true;
 				}
-				if (ccGlobalShiftManager::Handle(Pin, 0, ccGlobalShiftManager::DIALOG_IF_NECESSARY, shiftEnabled, Pshift, &scale))
+				if (ccGlobalShiftManager::Handle(Pin, 0, ccGlobalShiftManager::DIALOG_IF_NECESSARY, shiftEnabled, Pshift,  nullptr, &scale))
 				{
 					m_refPoints.setGlobalShift(Pshift);
 					m_refPoints.setGlobalScale(scale);

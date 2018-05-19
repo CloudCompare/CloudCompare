@@ -67,11 +67,15 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 									Mode mode,
 									bool useInputCoordinatesShiftIfPossible,
 									CCVector3d& coordinatesShift,
+									bool* preserveCoordinateShift,
 									double* coordinatesScale,
 									bool* applyAll/*=0*/)
 {
 	assert(diagonal >= 0);
-
+	if (preserveCoordinateShift)
+	{
+		*preserveCoordinateShift = true;
+	}
 	if (applyAll)
 	{
 		*applyAll = false;
@@ -91,6 +95,10 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		{
 			*coordinatesScale = 1.0;
 		}
+		if (preserveCoordinateShift)
+		{
+			*preserveCoordinateShift = false;
+		}
 
 		if (needShift || needRescale)
 		{
@@ -106,12 +114,11 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		//shift information already provided? (typically from a previous entity)
 		if (useInputCoordinatesShiftIfPossible && mode != ALWAYS_DISPLAY_DIALOG)
 		{
-			//either we are in non interactive mode (which means that shift is 'forced' by caller)
-			if (mode == NO_DIALOG
-				//or we are in interactive mode and existing shift is pertinent
-				|| (!NeedShift(P*scale + coordinatesShift) && !NeedRescale(diagonal*scale)) )
+			if (	mode == NO_DIALOG																//either we are in non interactive mode (which means that shift is 'forced' by caller)
+				||	(!NeedShift(P*scale + coordinatesShift) && !NeedRescale(diagonal*scale))		//or we are in interactive mode and existing shift is pertinent
+				)
 			{
-				//do we have already stored shift info?
+				//have we already stored shift info?
 				if (mode == NO_DIALOG_AUTO_SHIFT && s_lastInfo.valid)
 				{
 					//in "auto shift" mode, we may want to use it (to synchronize multiple clouds!)
@@ -121,6 +128,10 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 						if (coordinatesScale)
 						{
 							*coordinatesScale = scale;
+						}
+						if (preserveCoordinateShift)
+						{
+							*preserveCoordinateShift = s_lastInfo.preserve;
 						}
 						return true;
 					}
@@ -146,15 +157,24 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 			if (needShift)
 			{
 				coordinatesShift = BestShift(P);
+				if (preserveCoordinateShift)
+				{
+					*preserveCoordinateShift = true;
+				}
 
 				//save info for next time
 				s_lastInfo.valid = true;
 				s_lastInfo.shift = coordinatesShift;
 				s_lastInfo.scale = 1.0;
+				s_lastInfo.preserve = true;
 			}
 			if (coordinatesScale && needRescale)
 			{
 				*coordinatesScale = BestScale(diagonal);
+				if (preserveCoordinateShift)
+				{
+					*preserveCoordinateShift = true;
+				}
 
 				//save info for next time
 				if (!s_lastInfo.valid)
@@ -163,6 +183,7 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 				}
 				s_lastInfo.valid = true;
 				s_lastInfo.scale = *coordinatesScale;
+				s_lastInfo.preserve = true;
 			}
 
 			return true;
@@ -214,7 +235,9 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		if (s_lastInfo.valid)
 		{
 			sasDlg.addShiftInfo(s_lastInfo);
+			sasDlg.setPreserveShiftOnSave(s_lastInfo.preserve);
 		}
+		sasDlg.showPreserveShiftOnSave(preserveCoordinateShift != nullptr);
 		//add entries from file (if any)
 		sasDlg.addFileInfo();
 		
@@ -243,11 +266,16 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 			s_lastInfo.valid = true;
 			s_lastInfo.shift = sasDlg.getShift();
 			s_lastInfo.scale = sasDlg.getScale();
-
+			s_lastInfo.preserve = sasDlg.preserveShiftOnSave();
+			
 			coordinatesShift = sasDlg.getShift();
 			if (coordinatesScale)
 			{
 				*coordinatesScale = sasDlg.getScale();
+			}
+			if (preserveCoordinateShift)
+			{
+				*preserveCoordinateShift = sasDlg.preserveShiftOnSave();
 			}
 			if (applyAll)
 			{
@@ -262,6 +290,10 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 	if (coordinatesScale)
 	{
 		*coordinatesScale = 1.0;
+	}
+	if (preserveCoordinateShift)
+	{
+		*preserveCoordinateShift = false;
 	}
 
 	return false;

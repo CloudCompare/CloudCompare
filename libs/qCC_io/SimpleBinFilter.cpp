@@ -523,7 +523,6 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 			ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
 			bool useGlobalShift = false;
 			CCVector3d Pshift(0, 0, 0);
-			//set the LAS shift as default shift (if none was provided)
 			if ((descriptor.globalShift.norm2() != 0 || descriptor.globalScale != 1.0) && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
 			{
 				if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
@@ -537,11 +536,15 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 				}
 			}
 
-			if (HandleGlobalShift(Pd, Pshift, parameters, true))
+			bool preserveCoordinateShift = true;
+			if (HandleGlobalShift(Pd, Pshift, preserveCoordinateShift, parameters, true))
 			{
 				//set global shift
 				descriptor.globalShift = Pshift;
-				cloud->setGlobalShift(descriptor.globalShift);
+				if (preserveCoordinateShift)
+				{
+					cloud->setGlobalShift(descriptor.globalShift);
+				}
 				ccLog::Warning("[SBF] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", descriptor.globalShift.x, descriptor.globalShift.y, descriptor.globalShift.z);
 			}
 

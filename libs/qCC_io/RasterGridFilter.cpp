@@ -131,9 +131,10 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 			CCVector3d Pshift(0, 0, 0);
 			//check for 'big' coordinates
 			{
-				if (HandleGlobalShift(origin, Pshift, parameters))
+				bool preserveCoordinateShift = true;
+				if (HandleGlobalShift(origin, Pshift, preserveCoordinateShift, parameters))
 				{
-					if (pc)
+					if (pc && preserveCoordinateShift)
 					{
 						pc->setGlobalShift(Pshift);
 					}

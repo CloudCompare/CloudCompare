@@ -455,12 +455,17 @@ bool FileIOFilter::CheckForSpecialChars(const QString& filename)
 	return (filename.normalized(QString::NormalizationForm_D) != filename);
 }
 
-bool FileIOFilter::HandleGlobalShift(const CCVector3d& P, CCVector3d& Pshift, LoadParameters& loadParameters, bool useInputCoordinatesShiftIfPossible/*=false*/)
+bool FileIOFilter::HandleGlobalShift(	const CCVector3d& P,
+										CCVector3d& Pshift,
+										bool& preserveCoordinateShift,
+										LoadParameters& loadParameters,
+										bool useInputCoordinatesShiftIfPossible/*=false*/)
 {
 	bool shiftAlreadyEnabled = (loadParameters.coordinatesShiftEnabled && *loadParameters.coordinatesShiftEnabled && loadParameters.coordinatesShift);
 	if (shiftAlreadyEnabled)
 	{
 		Pshift = *loadParameters.coordinatesShift;
+		preserveCoordinateShift = loadParameters.preserveShiftOnSave;
 	}
 	
 	bool applyAll = false;
@@ -470,6 +475,7 @@ bool FileIOFilter::HandleGlobalShift(const CCVector3d& P, CCVector3d& Pshift, Lo
 											loadParameters.shiftHandlingMode,
 											shiftAlreadyEnabled || useInputCoordinatesShiftIfPossible,
 											Pshift,
+											&preserveCoordinateShift,
 											nullptr,
 											&applyAll) )
 	{
@@ -478,6 +484,7 @@ bool FileIOFilter::HandleGlobalShift(const CCVector3d& P, CCVector3d& Pshift, Lo
 		{
 			*loadParameters.coordinatesShiftEnabled = true;
 			*loadParameters.coordinatesShift = Pshift;
+			loadParameters.preserveShiftOnSave = preserveCoordinateShift;
 		}
 
 		return true;

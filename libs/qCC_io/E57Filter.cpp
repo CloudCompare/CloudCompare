@@ -1454,9 +1454,13 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	{
 		const CCVector3d T = poseMat.getTranslationAsVec3D();
 		CCVector3d Tshift;
-		if (FileIOFilter::HandleGlobalShift(T, Tshift, s_loadParameters))
+		bool preserveCoordinateShift = true;
+		if (FileIOFilter::HandleGlobalShift(T, Tshift, preserveCoordinateShift, s_loadParameters))
 		{
-			cloud->setGlobalShift(Tshift);
+			if (preserveCoordinateShift)
+			{
+				cloud->setGlobalShift(Tshift);
+			}
 			poseMat.setTranslation((T + Tshift).u);
 			poseMatWasShifted = true;
 			ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(guidStr), Tshift.x, Tshift.y, Tshift.z);
@@ -1720,9 +1724,13 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			if (	realCount == 0
 				&& (!validPoseMat || !poseMatWasShifted) )
 			{
-				if (FileIOFilter::HandleGlobalShift(Pd, Pshift, s_loadParameters))
+				bool preserveCoordinateShift = true;
+				if (FileIOFilter::HandleGlobalShift(Pd, Pshift, preserveCoordinateShift, s_loadParameters))
 				{
-					cloud->setGlobalShift(Pshift);
+					if (preserveCoordinateShift)
+					{
+						cloud->setGlobalShift(Pshift);
+					}
 					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(guidStr), Pshift.x, Pshift.y, Pshift.z);
 				}
 			}

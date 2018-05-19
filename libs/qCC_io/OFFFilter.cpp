@@ -174,8 +174,8 @@ CC_FILE_ERROR OFFFilter::loadFile(const QString& filename, ccHObject& container,
 
 	//read vertices
 	{
-		CCVector3d Pshift(0,0,0);
-		for (unsigned i=0; i<vertCount; ++i)
+		CCVector3d Pshift(0, 0, 0);
+		for (unsigned i = 0; i < vertCount; ++i)
 		{
 			currentLine = GetNextLine(stream);
 			tokens = currentLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
@@ -186,7 +186,7 @@ CC_FILE_ERROR OFFFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 
 			//read vertex
-			CCVector3d Pd(0,0,0);
+			CCVector3d Pd(0, 0, 0);
 			{
 				bool vertexIsOk = false;
 				Pd.x = tokens[0].toDouble(&vertexIsOk);
@@ -206,10 +206,14 @@ CC_FILE_ERROR OFFFilter::loadFile(const QString& filename, ccHObject& container,
 			//first point: check for 'big' coordinates
 			if (i == 0)
 			{
-				if (HandleGlobalShift(Pd,Pshift,parameters))
+				bool preserveCoordinateShift = true;
+				if (HandleGlobalShift(Pd, Pshift, preserveCoordinateShift, parameters))
 				{
-					vertices->setGlobalShift(Pshift);
-					ccLog::Warning("[OFF] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)",Pshift.x,Pshift.y,Pshift.z);
+					if (preserveCoordinateShift)
+					{
+						vertices->setGlobalShift(Pshift);
+					}
+					ccLog::Warning("[OFF] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 

@@ -27,7 +27,15 @@
 #define CCParallelFor Concurrency::parallel_for
 #define CCParallelForEach Concurrency::parallel_for_each
 #define CCCriticalSection Concurrency::critical_section
-//TODO: CCParallelWithLimitedThreads
+//Limit the number of thread of a parallel template function (or task)
+#define CCParallelWithLimitedThreads(task, num_threads) { \
+	Concurrency::CurrentScheduler::Create( Concurrency::SchedulerPolicy( 2, Concurrency::MinConcurrency, num_threads, Concurrency::MaxConcurrency, num_threads ) ); \
+	Concurrency::structured_task_group tasks; \
+	auto taskLambda = Concurrency::make_task([&] { task; }); \
+	tasks.run(taskLambda); \
+	tasks.wait(); \
+	Concurrency::CurrentScheduler::Detach(); \
+	} \
 
 #elif USE_TBB
 

@@ -958,7 +958,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 		ccHObject* child = New(classID);
 
 		//specifc case of custom objects (defined by plugins)
-		if (classID == CC_TYPES::CUSTOM_H_OBJECT)
+		if ((classID & CC_TYPES::CUSTOM_H_OBJECT) == CC_TYPES::CUSTOM_H_OBJECT)
 		{
 			//store current position
 			size_t originalFilePos = in.pos();

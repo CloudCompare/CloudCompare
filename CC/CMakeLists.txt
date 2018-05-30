@@ -56,7 +56,7 @@ endif()
 
 if ( COMPILE_CC_CORE_LIB_WITH_QT )
 	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS} )
-	qt5_use_modules(${PROJECT_NAME} Core Widgets Concurrent)
+	target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Widgets Qt5::Concurrent)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_QT )
 endif()
 

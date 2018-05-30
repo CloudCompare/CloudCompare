@@ -24,7 +24,7 @@ target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_OCULUS_SDK( ${PROJECT_NAME} )
 
 # Qt
-qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL OpenGLExtensions)
+target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::OpenGLExtensions)
 
 # Add custom preprocessor definitions
 # set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS )

@@ -9,4 +9,4 @@ file( GLOB source_list src/*.cpp )
 
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 
-qt5_use_modules(${PROJECT_NAME} Core OpenGL OpenGLExtensions )
+target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::OpenGL Qt5::OpenGLExtensions )

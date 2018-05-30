@@ -18,7 +18,7 @@ function( target_link_GAMEPADS ) # 1 argument: ARGV0 = project name
 
 	if( ${OPTION_SUPPORT_GAMEPADS} )
 	
-		qt5_use_modules(${PROJECT_NAME} Gamepad)
+		target_link_libraries(${PROJECT_NAME} Qt5::Gamepad)
 		
 		if ( CMAKE_CONFIGURATION_TYPES )
 		

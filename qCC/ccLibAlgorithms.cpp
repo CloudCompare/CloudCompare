@@ -363,13 +363,20 @@ namespace ccLibAlgorithms
 					}
 				}
 				
-				ccProgressDialog pDlg(true, parent);
+				QScopedPointer<ccProgressDialog> pDlg;
+				if (parent)
+				{
+					pDlg.reset(new ccProgressDialog(true, parent));
+				}
 				
 				ccOctree::Shared octree = cloud->getOctree();
 				if (!octree)
 				{
-					pDlg.show();
-					octree = cloud->computeOctree(&pDlg);
+					if (pDlg)
+					{
+						pDlg->show();
+					}
+					octree = cloud->computeOctree(pDlg.data());
 					if (!octree)
 					{
 						ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
@@ -385,7 +392,7 @@ namespace ccLibAlgorithms
 					case CCLIB_ALGO_APPROX_DENSITY:
 						result = CCLib::GeometricalAnalysisTools::computeLocalDensityApprox(cloud,
 																							densityType,
-																							&pDlg,
+																							pDlg.data(),
 																							octree.data());
 						break;
 						
@@ -393,7 +400,7 @@ namespace ccLibAlgorithms
 						result = CCLib::GeometricalAnalysisTools::computeLocalDensity(	cloud,
 																						densityType,
 																						densityKernelSize,
-																						&pDlg,
+																						pDlg.data(),
 																						octree.data());
 						break;
 						
@@ -401,7 +408,7 @@ namespace ccLibAlgorithms
 						result = CCLib::GeometricalAnalysisTools::computeCurvature(	cloud,
 																					curvType,
 																					curvKernelSize,
-																					&pDlg,
+																					pDlg.data(),
 																					octree.data());
 						break;
 						
@@ -410,14 +417,14 @@ namespace ccLibAlgorithms
 																						0, //auto --> FIXME: should be properly set by the user!
 																						euclidean,
 																						false,
-																						&pDlg,
+																						pDlg.data(),
 																						octree.data());
 						break;
 						
 					case CCLIB_ALGO_ROUGHNESS:
 						result = CCLib::GeometricalAnalysisTools::computeRoughness(	cloud,
 																					roughnessKernelSize,
-																					&pDlg,
+																					pDlg.data(),
 																					octree.data());
 						break;
 						
@@ -427,7 +434,7 @@ namespace ccLibAlgorithms
 						unsigned count = cloud->size();
 						cloud->enableScalarField();
 						{
-							for (unsigned j=0; j<count; ++j)
+							for (unsigned j = 0; j < count; ++j)
 								cloud->setPointScalarValue(j, NAN_VALUE);
 						}
 

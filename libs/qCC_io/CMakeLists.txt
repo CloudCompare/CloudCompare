@@ -31,7 +31,7 @@ target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
 
 # Qt
-qt5_use_modules(${PROJECT_NAME} Core)	
+target_link_libraries(${PROJECT_NAME} Qt5::Core)	
 
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} )

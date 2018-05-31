@@ -14,7 +14,7 @@ target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 
 # Qt
-qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
+target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL)
 
 # Add custom preprocessor definitions
 if (WIN32)

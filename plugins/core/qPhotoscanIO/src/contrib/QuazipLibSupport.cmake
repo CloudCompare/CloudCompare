@@ -40,7 +40,7 @@ add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 # Zlib
 target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES})
 # Qt
-qt5_use_modules(${PROJECT_NAME} Core)
+target_link_libraries(${PROJECT_NAME} Qt5::Core)
 
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS QUAZIP_STATIC )
 

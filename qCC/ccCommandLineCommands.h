@@ -549,11 +549,14 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 			}
 			
 			cloud->setName(cloud->getName() + QObject::tr(".OctreeNormal"));
-			CLCloudDesc cloudDesc(cloud, thisCloudDesc.basename, thisCloudDesc.path, thisCloudDesc.indexInFile);
-			QString errorStr = cmd.exportEntity(cloudDesc, "OCTREE_NORMALS");
-			if (!errorStr.isEmpty())
+			if (cmd.autoSaveMode())
 			{
-				return cmd.error(errorStr);
+				CLCloudDesc cloudDesc(cloud, thisCloudDesc.basename, thisCloudDesc.path, thisCloudDesc.indexInFile);
+				QString errorStr = cmd.exportEntity(cloudDesc, "OCTREE_NORMALS");
+				if (!errorStr.isEmpty())
+				{
+					return cmd.error(errorStr);
+				}
 			}
 		}
 

@@ -1037,7 +1037,7 @@ bool AsciiOpenDlg::safeSequence() const
 		return false;
 
 	AsciiOpenDlg::Sequence seq = getOpenSequence();
-	QStringList headerParts = m_headerLine.split(m_separator,QString::SkipEmptyParts);
+	QStringList headerParts = m_headerLine.split(m_separator, QString::SkipEmptyParts);
 
 	//not enough column headers?
 	if (headerParts.size() < static_cast<int>(seq.size()))
@@ -1107,6 +1107,10 @@ bool AsciiOpenDlg::safeSequence() const
 		case ASCII_OPEN_DLG_RGB32f:
 			if (	!CouldBeRGBf(colHeader)
 				&&	!colHeader.contains("RGB"))
+				return false;
+			break;
+		case ASCII_OPEN_DLG_Label:
+			if (!CouldBeLabel(colHeader))
 				return false;
 			break;
 		default:

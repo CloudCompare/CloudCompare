@@ -8,9 +8,11 @@ if(OPTION_USE_FBX_SDK)
 	# FBX SDK
 	set( FBX_SDK_INCLUDE_DIR "" CACHE PATH "FBX SDK include directory" )
 	set( FBX_SDK_LIBRARY_FILE "" CACHE FILEPATH "FBX SDK static library file" )
+	set( FBX_XML2_LIBRARY_FILE "" CACHE FILEPATH "FBX XML2 static library file (for the 2019 SDK only)" )
 
 	if( CMAKE_CONFIGURATION_TYPES )
 		set( FBX_SDK_LIBRARY_FILE_DEBUG "" CACHE FILEPATH "FBX SDK static debug library file" )
+		set( FBX_XML2_LIBRARY_FILE_DEBUG "" CACHE FILEPATH "FBX XML2 static debug library file (for the 2019 SDK only)" )
 	endif()
 
 	if ( NOT FBX_SDK_INCLUDE_DIR )
@@ -45,6 +47,14 @@ if( ${OPTION_USE_FBX_SDK} )
 		message( SEND_ERROR "FBX SDK library not found: can't link" )
 	
 	endif()
+	
+	if ( FBX_XML2_LIBRARY_FILE )
+		if ( CMAKE_CONFIGURATION_TYPES )
+			target_link_libraries( ${ARGV0} optimized ${FBX_XML2_LIBRARY_FILE} )
+		else()
+			target_link_libraries( ${ARGV0} ${FBX_XML2_LIBRARY_FILE} )
+		endif()
+	endif()
 
 	#debug
 	if ( CMAKE_CONFIGURATION_TYPES )
@@ -60,6 +70,12 @@ if( ${OPTION_USE_FBX_SDK} )
 		
 		endif()
 	
+		if (FBX_XML2_LIBRARY_FILE_DEBUG)
+			
+			target_link_libraries( ${ARGV0} debug ${FBX_XML2_LIBRARY_FILE_DEBUG} )
+
+		endif()
+
 	endif()
 
 endif()

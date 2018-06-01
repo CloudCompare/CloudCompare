@@ -1,23 +1,18 @@
 sudo: required
-dist: trusty
-group: deprecated-2017Q2
+dist: xenial
 cache: ccache
 language: cpp
 compiler:
 - clang
 - gcc
 install:
-- sudo add-apt-repository --yes ppa:george-edison55/cmake-3.x
-- sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
 - sudo apt-get update -qq
-- sudo apt-get install -qy cmake qt55base libgdal1-dev libfreenect-dev
+- sudo apt-get install -qy qtbase5-dev cmake libgdal1-dev libfreenect-dev
   libeigen3-dev libqt5svg5-dev libtbb-dev
-- git submodule init && git submodule update
 before_script:
 - mkdir build
 - cd build
 - cmake -DCMAKE_BUILD_TYPE=Release
-  -DQT5_ROOT_PATH=/opt/qt55
   -DEIGEN_ROOT_DIR=/usr/include/eigen3
   -DCOMPILE_CC_CORE_LIB_WITH_TBB=ON
   -DOPTION_USE_DXF_LIB=ON

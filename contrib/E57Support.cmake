@@ -25,13 +25,13 @@ if( ${OPTION_USE_LIBE57FORMAT} )
 	set( LIBE57FORMAT_LIB_DIR "${LIBE57FORMAT_INSTALL_DIR}/lib" CACHE INTERNAL "" )
 	
 	find_library( LIBE57FORMAT_LIBRARY_RELEASE
-					NAMES E57Format.lib libE57Format.a
+					NAMES E57Format.lib libE57Format.a E57Format.so libE57Format.so
 					PATHS "${LIBE57FORMAT_LIB_DIR}"
 					NO_DEFAULT_PATH
     )
 
 	find_library( LIBE57FORMAT_LIBRARY_DEBUG
-					NAMES E57Format-d.lib libE57Format-d.a
+					NAMES E57Format-d.lib libE57Format-d.a E57Format-d.so libE57Format.so
 					PATHS "${LIBE57FORMAT_LIB_DIR}"
 					NO_DEFAULT_PATH
 	)
@@ -70,18 +70,11 @@ endif()
 function( target_link_LIBE57FORMAT ) # 1 argument: ARGV0 = project name
 	if( ${OPTION_USE_LIBE57FORMAT} )
 		if( LIBE57FORMAT_INSTALL_DIR )
-			if (WIN32 AND NOT MINGW)
-				set(LIBE57FORMAT_LIB_DEBUG "E57Format-d.lib")
-				set(LIBE57FORMAT_LIB_RELEASE "E57Format.lib")
-			else()
-				set(LIBE57FORMAT_LIB_DEBUG "libE57Format-d.a")
-				set(LIBE57FORMAT_LIB_RELEASE "libE57Format.a")
-			endif()
 			
 			if ( CMAKE_CONFIGURATION_TYPES )
-				target_link_libraries( ${ARGV0} debug ${LIBE57FORMAT_INSTALL_DIR}/lib/${LIBE57FORMAT_LIB_DEBUG} optimized ${LIBE57FORMAT_INSTALL_DIR}/lib/${LIBE57FORMAT_LIB_RELEASE} )
+				target_link_libraries( ${ARGV0} debug ${LIBE57FORMAT_LIBRARY_DEBUG} optimized ${LIBE57FORMAT_LIBRARY_RELEASE} )
 			else()
-				target_link_libraries( ${ARGV0} ${LIBE57FORMAT_INSTALL_DIR}/lib/${LIBE57FORMAT_LIB_RELEASE} )
+				target_link_libraries( ${ARGV0} ${LIBE57FORMAT_LIBRARY_RELEASE} )
 			endif()
 			
 			#Xerces

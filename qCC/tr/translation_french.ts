@@ -3893,7 +3893,7 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/mainWindow.ui" line="1528"/>
         <location filename="../ui_templates/mainWindow.ui" line="1531"/>
         <source>Zoom and center on selected entities (Z)</source>
-        <translation>Zomm et centre sur les entités sélectionnnées (Z)</translation>
+        <translation>Zoom et centre sur les entités sélectionnnées (Z)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1534"/>
@@ -3999,7 +3999,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1671"/>
         <source>Main</source>
-        <translation type="unfinished">Principale</translation>
+        <translation>Principale</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1674"/>
@@ -4071,7 +4071,7 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/mainWindow.ui" line="1772"/>
         <location filename="../ui_templates/mainWindow.ui" line="1775"/>
         <source>Toggle perspective view (centered on objects) in current window</source>
-        <translation>Active une vue en perspective centrée sur les objets</translation>
+        <translation>Active une vue en perspective (centrée sur les objets) dans la fenêtre d&apos;affichage actuelle</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1778"/>
@@ -4087,7 +4087,7 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/mainWindow.ui" line="1793"/>
         <location filename="../ui_templates/mainWindow.ui" line="1796"/>
         <source>Toggle perspective view (centered on viewer) in current window</source>
-        <translation type="unfinished"></translation>
+        <translation>Active une vue en perspective (centrée sur le spectateur) dans la fenêtre d&apos;affichage actuelle</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1799"/>
@@ -4265,13 +4265,13 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2930"/>
         <source>Camera link</source>
-        <translation type="unfinished"></translation>
+        <translation>Lier les caméras</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2933"/>
         <source>Link the cameras of all 3D views
 (so that they all move in the same way and at the same time)</source>
-        <translation type="unfinished"></translation>
+        <translation>Lie les caméras de toutes les vues 3D pourqu&apos;elles se déplacent toutes de la même façon en même temps</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2939"/>
@@ -4512,22 +4512,22 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2092"/>
         <source>Apply rotation and/or translation</source>
-        <translation type="unfinished"></translation>
+        <translation>Appliquer une rotation et/ou une translation</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2095"/>
         <source>Ctrl+T</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+T</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2100"/>
         <source>Smooth (Laplacian)</source>
-        <translation type="unfinished"></translation>
+        <translation>Lisser (Laplacien)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2105"/>
         <source>HSV colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Couleurs HSV</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2114"/>
@@ -4537,17 +4537,17 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2117"/>
         <source>Ctrl+V</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ctrl+V</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2129"/>
         <source>Pick rotation center</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélection du centre de rotation</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2132"/>
         <source>P</source>
-        <translation type="unfinished"></translation>
+        <translation>P</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2140"/>
@@ -4562,12 +4562,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2152"/>
         <source>Bilateral filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre bilatéral</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2155"/>
         <source>Compute bilateral filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule un filtre bilatéral</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2160"/>
@@ -4582,29 +4582,29 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2168"/>
         <source>Toggle color scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Activer l&apos;échelle de couleur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2171"/>
         <location filename="../ui_templates/mainWindow.ui" line="2174"/>
         <source>Toggle active scalar field color scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Active l&apos;échelle de couleur pour le champ scalaire actif</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2177"/>
         <source>Shift+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+C</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2185"/>
         <source>Show previous SF</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher le champ scalaire précédent</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2188"/>
         <location filename="../ui_templates/mainWindow.ui" line="2191"/>
         <source>Show previous scalar field for active entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche le champ scalaire précédent pour l&apos;objet actif</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2194"/>
@@ -4614,13 +4614,13 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2202"/>
         <source>Show next SF</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher le champ scalaire suivant</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2205"/>
         <location filename="../ui_templates/mainWindow.ui" line="2208"/>
         <source>Show next scalar field for active entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche le champ scalaire suivant pour l&apos;objet actif</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2211"/>
@@ -4630,48 +4630,48 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2220"/>
         <source>Align (point pairs picking)</source>
-        <translation type="unfinished"></translation>
+        <translation>Aligner (par paires de points)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2223"/>
         <location filename="../ui_templates/mainWindow.ui" line="2226"/>
         <source>Aligns two clouds by picking (at least 4) equivalent point pairs</source>
-        <translation type="unfinished"></translation>
+        <translation>Aligner deux nuages en sélectionnant des paires de points (au moins 4)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2235"/>
         <source>Add constant SF</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajouter un champ scalaire constant</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2240"/>
         <source>Export coordinate(s) to SF(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporter les coordonnées dans un champ scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2243"/>
         <source>Export X, Y and/or Z coordinates to scalar field(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporte les coordonnées dans un champ scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2248"/>
         <source>Subdivide</source>
-        <translation type="unfinished"></translation>
+        <translation>Subdivise</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2253"/>
         <source>3D name</source>
-        <translation type="unfinished"></translation>
+        <translation>nom 3D</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2256"/>
         <source>Toggle selected entities 3D name display (recursive)</source>
-        <translation type="unfinished"></translation>
+        <translation>Active l&apos;affichage en 3D du nom de l&apos;objet actif</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2259"/>
         <source>D</source>
-        <translation type="unfinished"></translation>
+        <translation>D</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2271"/>
@@ -4681,7 +4681,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2276"/>
         <source>Materials/textures</source>
-        <translation type="unfinished"></translation>
+        <translation>Matériaux/textures</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2279"/>
@@ -4696,141 +4696,141 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2294"/>
         <source>Orthographic projection</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue orthographique</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2297"/>
         <location filename="../ui_templates/mainWindow.ui" line="2300"/>
         <source>Set orthographic projection for current 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Définit une projection orthographique pour la vue 3D active</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2309"/>
         <source>Object-centered perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue en perspective centrée sur l&apos;objet</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2312"/>
         <location filename="../ui_templates/mainWindow.ui" line="2315"/>
         <source>Set object-centered perspective for current 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Définit une perspective entrée sur l&apos;objet pour la vue 3D active</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2324"/>
         <source>Viewer-based perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue en perspective depuis le spectateur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2327"/>
         <location filename="../ui_templates/mainWindow.ui" line="2330"/>
         <source>Set viewer-based perspective for current 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Définit une perspective depuis le point de vue du spectateur pour la vue 3D active</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2339"/>
         <source>Always visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Toujours visible</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2342"/>
         <location filename="../ui_templates/mainWindow.ui" line="2345"/>
         <source>Pivot always visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Pivot toujours visible</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2354"/>
         <source>Rotation only</source>
-        <translation type="unfinished"></translation>
+        <translation>Rotation uniquement</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2357"/>
         <location filename="../ui_templates/mainWindow.ui" line="2360"/>
         <source>Pivot visible when rotating</source>
-        <translation type="unfinished"></translation>
+        <translation>Pivot visible uniquement lors de la rotation</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2369"/>
         <source>Never visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Jamais visible</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2372"/>
         <location filename="../ui_templates/mainWindow.ui" line="2375"/>
         <source>Pivot never visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Le pivot n&apos;est jamais visible</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2384"/>
         <source>Iso 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Iso 1</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2387"/>
         <location filename="../ui_templates/mainWindow.ui" line="2390"/>
         <source>Set view to &apos;front&apos; isometric</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue isométrique de la face &quot;avant&quot;</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2393"/>
         <source>7</source>
-        <translation type="unfinished"></translation>
+        <translation>7</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2405"/>
         <source>Iso 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Iso 2</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2408"/>
         <location filename="../ui_templates/mainWindow.ui" line="2411"/>
         <source>Set view to &apos;back&apos; isometric</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue isométrique de la face &quot;arrière&quot;</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2414"/>
         <source>9</source>
-        <translation type="unfinished"></translation>
+        <translation>9</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2426"/>
         <source>Convert texture/material to RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir les textures/matériaux en RVB</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2435"/>
         <source>Color Scales Manager</source>
-        <translation type="unfinished"></translation>
+        <translation>Gestion des échelles de couleurs</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2438"/>
         <source>Open Color Scales Manager dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Ouvre la fenêtre du gestionnaire d&apos;échelles</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2450"/>
         <location filename="../ui_templates/mainWindow.ui" line="2453"/>
         <source>Cross Section</source>
-        <translation type="unfinished"></translation>
+        <translation>Coupe transversale</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2458"/>
         <source>Edit global shift and scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Editer le déplacement général et l&apos;échelle</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2463"/>
         <source>Convert to Scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir en champ scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2468"/>
         <source>Compute Kd-tree</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer un arbre Kd</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2473"/>
         <source>test</source>
-        <translation type="unfinished"></translation>
+        <translation>test</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2478"/>
@@ -4850,7 +4850,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2491"/>
         <source>Adjust zoom</source>
-        <translation type="unfinished">Ajustement du zoom</translation>
+        <translation>Ajustement du zoom</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2494"/>
@@ -4870,7 +4870,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2507"/>
         <source>Close all</source>
-        <translation type="unfinished"></translation>
+        <translation>Tout fermer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2510"/>
@@ -4880,29 +4880,29 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2515"/>
         <source>Edit global scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Editer l&apos;échelle générale</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2524"/>
         <source>View from sensor</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue depuis le capteur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2529"/>
         <source>Find biggest inner rectangle (2D)</source>
-        <translation type="unfinished"></translation>
+        <translation>Chercher le plus grand rectangle interne (2D)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2534"/>
         <location filename="../ui_templates/mainWindow.ui" line="2539"/>
         <location filename="../ui_templates/mainWindow.ui" line="2944"/>
         <source>Create</source>
-        <translation type="unfinished"></translation>
+        <translation>Créer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2544"/>
         <source>Compute points visibility (with octree)</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer les points de visibilité (avec l&apos;octree)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2549"/>
@@ -4938,22 +4938,22 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2580"/>
         <source>Density</source>
-        <translation type="unfinished"></translation>
+        <translation>Densité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2583"/>
         <source>Compute density</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcul la densité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2588"/>
         <source>Remove duplicate points</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer les points en double</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2593"/>
         <source>Crop</source>
-        <translation type="unfinished"></translation>
+        <translation>Réduire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2598"/>
@@ -4964,12 +4964,12 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/mainWindow.ui" line="2611"/>
         <location filename="../ui_templates/mainWindow.ui" line="3042"/>
         <source>Interpolate from another entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Interpoler depuis un autre objet</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2614"/>
         <source>Interpolate colors from another entity (cloud or mesh) - color is taken from the nearest neighbor</source>
-        <translation type="unfinished"></translation>
+        <translation>Interpole des couleurs depuis un autre objet (nuage ou maillage), la couleurest sélectionnée par le plus proche voisin.</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2619"/>
@@ -4979,22 +4979,22 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2635"/>
         <source>Levels</source>
-        <translation type="unfinished"></translation>
+        <translation>Niveaux</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2648"/>
         <source>Convert to random RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir aléatoirement en RVB</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2653"/>
         <source>Noise filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtrer le bruit</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2656"/>
         <source>Noise filter (remove the points far from the - approximate - local surface)</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre le bruit en supprimant les points éloignés de la surface locale (approximativement)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2665"/>
@@ -5004,17 +5004,17 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2676"/>
         <source>Measure volume</source>
-        <translation type="unfinished"></translation>
+        <translation>Mesurer un volume</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2681"/>
         <source>Flag vertices by type</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher les sommets par type</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2684"/>
         <source>Flag vertices by type: normal (0), border (1), non-manifold (2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche les sommets par type : normale (0), bordure (1), non-manifold (2)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2689"/>
@@ -5034,12 +5034,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2706"/>
         <source>Lock rotation about vert. axis</source>
-        <translation type="unfinished"></translation>
+        <translation>Verrouiler la rotation de l&apos;axe vertical</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2709"/>
         <source>Lock manual rotation about the vertical (screen) axis</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Verrouiller</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2712"/>
@@ -5074,32 +5074,32 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2753"/>
         <source>Contour plot (polylines) to mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Lignes de contours vers maillage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2756"/>
         <source>Contour plot (set of polylines) to a 2.5D mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Transforme les polygones de contours en un maillage 2.5D</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2765"/>
         <source>Level</source>
-        <translation type="unfinished"></translation>
+        <translation>Niveaux</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2768"/>
         <source>Pick three points to make a cloud or mesh &apos;level&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélectionner 3 points pourcréer un niveau pour un nuage ou un maillage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2773"/>
         <source>Sphere</source>
-        <translation type="unfinished"></translation>
+        <translation>Spo*hère</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2776"/>
         <source>Fits a sphere on the selected cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Place une sphère sur le nuage sélectionné</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2781"/>
@@ -5109,7 +5109,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2786"/>
         <source>Zoom in</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoomer en avant</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2789"/>
@@ -5119,12 +5119,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2792"/>
         <source>+</source>
-        <translation type="unfinished"></translation>
+        <translation>+</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2797"/>
         <source>Zoom out</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoomer en arrière</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2800"/>
@@ -5139,12 +5139,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2817"/>
         <source>SOR filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre SOR</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2820"/>
         <source>Statistical Outlier Filter (remove the points far from their neighbors)</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre des aberrations statistiques (Statistical Outlier Filter), supprime les points éloignés de leurs voisins.</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2832"/>

@@ -192,11 +192,11 @@ void qPCV::doAction()
 		unsigned count = pc->size();
 		try
 		{
-			m_app->dispToConsole("Not enough memory to generate the set of rays", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			rays.resize(count);
 		}
 		catch (std::bad_alloc)
 		{
+			m_app->dispToConsole("Not enough memory to generate the set of rays", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;
 		}
 		for (unsigned i = 0; i < count; ++i)

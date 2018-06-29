@@ -6,7 +6,7 @@
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="17"/>
         <source>About CloudCompare</source>
-        <translation type="unfinished">CloudCompare</translation>
+        <translation>A propos de CloudCompare</translation>
     </message>
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="38"/>
@@ -16,7 +16,7 @@
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="78"/>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>OK</translation>
     </message>
 </context>
 <context>
@@ -24,42 +24,42 @@
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="14"/>
         <source>Adjust zoom</source>
-        <translation type="unfinished">Ajustement du zoom</translation>
+        <translation>Ajustement du zoom</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="20"/>
         <source>Window</source>
-        <translation type="unfinished">Vue 3D</translation>
+        <translation>Vue 3D</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="29"/>
         <source>1 (800 x 600)</source>
-        <translation type="unfinished"></translation>
+        <translation>1 (800 x 600)</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="49"/>
         <source>zoom</source>
-        <translation type="unfinished"></translation>
+        <translation>zoom</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="77"/>
         <source>pixel size</source>
-        <translation type="unfinished"></translation>
+        <translation>taille de pixel</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="86"/>
         <source> units</source>
-        <translation type="unfinished">unité(s)</translation>
+        <translation> unité(s)</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="108"/>
         <source>/</source>
-        <translation type="unfinished"></translation>
+        <translation>/</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="115"/>
         <source> pixel(s)</source>
-        <translation type="unfinished"></translation>
+        <translation> pixel(s</translation>
     </message>
 </context>
 <context>
@@ -67,154 +67,158 @@
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="14"/>
         <source>Clouds alignment</source>
-        <translation type="unfinished">Alignement automatique de nuages</translation>
+        <translation>Alignement automatique de nuages</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="34"/>
         <source>Model and data</source>
-        <translation type="unfinished">Roles</translation>
+        <translation>Rôles</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="49"/>
         <source>Data:</source>
+        <translatorcomment>?</translatorcomment>
         <translation type="unfinished">Mobile</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="84"/>
         <source>the model cloud is the reference: it won&apos;t move (red cloud)</source>
-        <translation type="unfinished">Le nuage de référence (ne bougera pas)</translation>
+        <translation>Le nuage de référence (ne bougera pas)</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="77"/>
         <source>Model:</source>
+        <translatorcomment>?</translatorcomment>
         <translation type="unfinished">Immobile</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="56"/>
         <source>the data cloud is the entity to align with the model cloud: it will be displaced (green cloud)</source>
-        <translation type="unfinished">Le nuage recalé (bougera)</translation>
+        <translation>Le nuage recalé (bougera)</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="111"/>
         <location filename="../ui_templates/alignDlg.ui" line="114"/>
         <source>press once to exchange model and data clouds</source>
-        <translation type="unfinished">Appuyer pour intervertir les rôles</translation>
+        <translation>Appuyer pour intervertir les rôles</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="117"/>
         <source>swap</source>
-        <translation type="unfinished">Inervertir</translation>
+        <translation>Intervertir</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="144"/>
         <source>Alignment parameters</source>
-        <translation type="unfinished">Paramètres</translation>
+        <translation>Paramètres</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="152"/>
         <source>Number of trials:</source>
-        <translation type="unfinished">Nombre d&apos;essais</translation>
+        <translation>Nombre d&apos;essais :</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="159"/>
         <source>Number of 4 points bases tested to find the best rigid transform. Great values may lead to long computation time.</source>
-        <translation type="unfinished">Nombre de bases de 4 points testées pour trouver la meilleure transformation rigide.\nDes valeurs grandes peuvent ralonger le temps.</translation>
+        <translation type="unfinished">Nombre de bases de 4 points testées pour trouver la meilleure transformation rigide.\nDes valeurs élevées peuvent allonger le temps de traitement.</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="182"/>
         <source>Overlap:</source>
-        <translation type="unfinished">Recouvrement</translation>
+        <translation>Recouvrement :</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="189"/>
         <source>Rough estimation of the two clouds overlap rate (between 0 and 1)</source>
-        <translation type="unfinished">Estimation du recouvrement des deux nuages (entre 0 et 1)</translation>
+        <translation>Estimation approximative du recouvrement des deux nuages (entre 0 et 1)</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="215"/>
         <source>Delta:</source>
-        <translation type="unfinished"></translation>
+        <translation>Delta :</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="222"/>
         <source>Estimation of the distance wished between the two clouds after registration.</source>
-        <translation type="unfinished">Distance finale entre les deux nuages</translation>
+        <translation>Estimation de la distance souhaitée entre les deux nuages après traitement.</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="241"/>
         <location filename="../ui_templates/alignDlg.ui" line="244"/>
         <source>The computer will estimate the best delta parameter</source>
-        <translation type="unfinished">Estimation automatique du delta</translation>
+        <translation>Estimation automatique du delta</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="247"/>
         <source>Estimate</source>
-        <translation type="unfinished">Estimer</translation>
+        <translation>Estimer</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="258"/>
         <source>For each attempt (see above parameter), candidate bases are found. If there are too much candidates, the program may take a long time to finish. Check this box to bound the number of candidates.</source>
-        <translation type="unfinished">Pour chaque essai (voir ci-dessus) des bases candidates sont trouvées.\nS&apos;il y a trop de candidats, le processus peut mettre beaucoup de temps à terminer.</translation>
+        <translation>Pour chaque essai (voir ci-dessus) des bases candidates sont trouvées.\nS&apos;il y a trop de candidats, le processus peut mettre beaucoup de temps à terminer.</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="261"/>
         <source>Limit max. number of candidates</source>
-        <translation type="unfinished">Nombre maximal de candidats</translation>
+        <translation>Nombre maximal de candidats</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="268"/>
         <source>Maximal number of candidates allowed (check the left box to use this parameter)</source>
-        <translation type="unfinished">Nombre maximal de bases candidates</translation>
+        <translation>Nombre maximal de bases candidates</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="306"/>
         <source>Sampling</source>
-        <translation type="unfinished">Echantillonnage</translation>
+        <translation>Echantillonnage</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="314"/>
         <source>Method:</source>
-        <translation type="unfinished">Méthode</translation>
+        <translation>Méthode :</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="446"/>
         <source>Model</source>
+        <translatorcomment>?</translatorcomment>
         <translation type="unfinished">Immobile</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="346"/>
         <location filename="../ui_templates/alignDlg.ui" line="466"/>
         <source>None</source>
-        <translation type="unfinished">Aucun</translation>
+        <translation>Aucun</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="369"/>
         <location filename="../ui_templates/alignDlg.ui" line="489"/>
         <source>All</source>
-        <translation type="unfinished">Tous</translation>
+        <translation>Tous</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="501"/>
         <location filename="../ui_templates/alignDlg.ui" line="504"/>
         <source>Move to the left (none) to decrease the number of points  to keep in the model cloud.</source>
-        <translation type="unfinished"></translation>
+        <translation>Déplacez le curseur vers la gauche pour réduire le nombre de points à conserver dans le nuage.</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="434"/>
         <location filename="../ui_templates/alignDlg.ui" line="554"/>
         <source>remaining points</source>
-        <translation type="unfinished">points restants</translation>
+        <translation>points restants</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="326"/>
         <source>Data</source>
+        <translatorcomment>?</translatorcomment>
         <translation type="unfinished">Mobile</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="381"/>
         <location filename="../ui_templates/alignDlg.ui" line="384"/>
         <source>Move to the left (none) to decrease the number of points  to keep in the data cloud.</source>
-        <translation type="unfinished">Déplacer ves la gauche (Aucun) pour diminuer le nombre de points à utiliser</translation>
+        <translation>Déplacer ves la gauche (Aucun) pour diminuer le nombre de points à utiliser.</translation>
     </message>
 </context>
 <context>
@@ -222,37 +226,37 @@
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="14"/>
         <source>Apply transformation</source>
-        <translation type="unfinished"></translation>
+        <translation>Appliquer une transformation</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="24"/>
         <source>Matrix 4x4</source>
-        <translation type="unfinished"></translation>
+        <translation>Matrice 4x4</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="32"/>
         <source>Enter 4x4 matrix values:</source>
-        <translation type="unfinished"></translation>
+        <translation>Saisir les valeurs :</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="52"/>
         <source>Load matrix from ascii file</source>
-        <translation type="unfinished"></translation>
+        <translation>Charger une matrice depuis un fichier ASCII</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="55"/>
         <source>ASCII file</source>
-        <translation type="unfinished"></translation>
+        <translation>Fichier ASCII</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="62"/>
         <source>Paste clipboard contents</source>
-        <translation type="unfinished"></translation>
+        <translation>Coller le contenu du presse-papier</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="65"/>
         <source>clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Pressa-papier</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="72"/>
@@ -268,7 +272,7 @@
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="83"/>
         <source>help</source>
-        <translation type="unfinished"></translation>
+        <translation>Aide</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="147"/>
@@ -294,79 +298,79 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="176"/>
         <source>Axis, Angle</source>
-        <translation type="unfinished"></translation>
+        <translation>Axes, Angle</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="182"/>
         <source>Rotation axis</source>
-        <translation type="unfinished"></translation>
+        <translation>Axe de rotation</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="197"/>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="310"/>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="462"/>
         <source>X:</source>
-        <translation type="unfinished"></translation>
+        <translation>X : </translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="213"/>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="326"/>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="478"/>
         <source>Y:</source>
-        <translation type="unfinished"></translation>
+        <translation>Y : </translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="229"/>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="342"/>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="494"/>
         <source>Z:</source>
-        <translation type="unfinished"></translation>
+        <translation>Z : </translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="248"/>
         <source>Rotation angle (degrees)</source>
-        <translation type="unfinished"></translation>
+        <translation>Angle de rotation (degrés)</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="263"/>
         <source> deg.</source>
-        <translation type="unfinished"></translation>
+        <translation> deg.</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="295"/>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="447"/>
         <source>Translation</source>
-        <translation type="unfinished"></translation>
+        <translation>Translation</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="375"/>
         <source>Euler angles</source>
-        <translation type="unfinished"></translation>
+        <translation>Angles d&apos;Euler</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="381"/>
         <source>Angles</source>
-        <translation type="unfinished"></translation>
+        <translation>Angles</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="396"/>
         <source>Phi:</source>
-        <translation type="unfinished"></translation>
+        <translation>Phi : </translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="412"/>
         <source>Theta:</source>
-        <translation type="unfinished"></translation>
+        <translation>Theta : </translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="428"/>
         <source>Psi:</source>
-        <translation type="unfinished"></translation>
+        <translation>Psi : </translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="530"/>
         <source>Apply inverse transformation</source>
-        <translation type="unfinished"></translation>
+        <translation>Appliquer une transformation inverse</translation>
     </message>
 </context>
 <context>
@@ -374,12 +378,12 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/askOneDoubleValueDlg.ui" line="12"/>
         <source>Set Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir la valeur</translation>
     </message>
     <message>
         <location filename="../ui_templates/askOneDoubleValueDlg.ui" line="20"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur</translation>
     </message>
 </context>
 <context>
@@ -387,12 +391,12 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/askOneIntValueDlg.ui" line="12"/>
         <source>Set Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir la valeur</translation>
     </message>
     <message>
         <location filename="../ui_templates/askOneIntValueDlg.ui" line="20"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur</translation>
     </message>
 </context>
 <context>
@@ -400,12 +404,13 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/askOneStringDlg.ui" line="12"/>
         <source>Set Name</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Nom</translatorcomment>
+        <translation>Définir le nom</translation>
     </message>
     <message>
         <location filename="../ui_templates/askOneStringDlg.ui" line="20"/>
         <source>Label</source>
-        <translation type="unfinished"></translation>
+        <translation>Etiquette</translation>
     </message>
 </context>
 <context>
@@ -413,26 +418,27 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="20"/>
         <source>Set Three Values</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir les 3 valeurs</translation>
     </message>
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="28"/>
         <source>Value 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur 1</translation>
     </message>
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="54"/>
         <source>Value 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur 2</translation>
     </message>
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="80"/>
         <source>Value 3</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur 3</translation>
     </message>
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="94"/>
         <source>CheckBox</source>
+        <translatorcomment>une étiquette checkbox pour une checkbox?</translatorcomment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -441,17 +447,17 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/askTwoDoubleValuesDlg.ui" line="12"/>
         <source>Set Two Values</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir 2 valeurs</translation>
     </message>
     <message>
         <location filename="../ui_templates/askTwoDoubleValuesDlg.ui" line="20"/>
         <source>Value 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur 1</translation>
     </message>
     <message>
         <location filename="../ui_templates/askTwoDoubleValuesDlg.ui" line="46"/>
         <source>Value 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur 2</translation>
     </message>
 </context>
 <context>
@@ -459,95 +465,95 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="14"/>
         <source>Bounding Box Editor</source>
-        <translation type="unfinished"></translation>
+        <translation>Edtion de la boîte englobante</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="32"/>
         <source>Min corner</source>
-        <translation type="unfinished"></translation>
+        <translation>Coin minimal</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="37"/>
         <source>Center</source>
-        <translation type="unfinished"></translation>
+        <translation>Centre</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="42"/>
         <source>Max corner</source>
-        <translation type="unfinished"></translation>
+        <translation>Coin maximal</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="57"/>
         <source>Width</source>
-        <translation type="unfinished"></translation>
+        <translation>Largeur</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="65"/>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="520"/>
         <source>X</source>
-        <translation type="unfinished"></translation>
+        <translation>X</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="110"/>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="507"/>
         <source>Y</source>
-        <translation type="unfinished"></translation>
+        <translation>Y</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="155"/>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="491"/>
         <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Z</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="211"/>
         <source>Warning, this box doesn&apos;t include the cloud bounding-box!</source>
-        <translation type="unfinished"></translation>
+        <translation>Attention, cette boîte n&apos;inclut pas celle du nuage !</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="227"/>
         <source>Orientation</source>
-        <translation type="unfinished"></translation>
+        <translation>Orientation</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="488"/>
         <source>automatically compute Z if checked</source>
-        <translation type="unfinished"></translation>
+        <translation>calcul automatiquement le Z si cochée</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="504"/>
         <source>automatically compute Y if checked</source>
-        <translation type="unfinished"></translation>
+        <translation>calcul automatiquement le Y si cochée</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="517"/>
         <source>automatically compute X if checked</source>
-        <translation type="unfinished"></translation>
+        <translation>calcul automatiquement le X si cochée</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="548"/>
         <source>keep square</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">garder carré</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="568"/>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Par défaut</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="575"/>
         <source>Last</source>
-        <translation type="unfinished"></translation>
+        <translation>Dernier</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="582"/>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>Ok</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="589"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Annuler</translation>
     </message>
 </context>
 <context>
@@ -555,24 +561,24 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="14"/>
         <source>Sensor parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Paramètres du capteur</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="24"/>
         <source>Position + Orientation</source>
-        <translation type="unfinished"></translation>
+        <translation>Position + Orientation</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="127"/>
         <source>sensor front direction (yaw = 0)</source>
-        <translation type="unfinished"></translation>
+        <translation>Direction avant du capteur (lacet = 0)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="57"/>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="71"/>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="99"/>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation>1</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="30"/>
@@ -582,69 +588,70 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="85"/>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="92"/>
         <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation>0</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="130"/>
         <source>X (right)</source>
-        <translation type="unfinished"></translation>
+        <translation>X (droit)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="140"/>
         <source>sensor lateral direction</source>
-        <translation type="unfinished"></translation>
+        <translation>Direction bilatérale du capteur</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="153"/>
         <source>sensor vertical direction (pitch = 0)</source>
-        <translation type="unfinished"></translation>
+        <translation>Direction verticale du capteur (tangage = 0)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="166"/>
         <source>sensor center</source>
-        <translation type="unfinished"></translation>
+        <translation>Centre du capteur</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="106"/>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="113"/>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="120"/>
         <source>0.0</source>
-        <translation type="unfinished"></translation>
+        <translation>0.0</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="143"/>
         <source>Y (up)</source>
-        <translation type="unfinished"></translation>
+        <translation>Y (haut)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="156"/>
         <source>Z (inv. view dir.)</source>
+        <translatorcomment>? direction opposée de la vue ?</translatorcomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="169"/>
         <source>Center</source>
-        <translation type="unfinished"></translation>
+        <translation>Centre</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="180"/>
         <source>Intrinsic params</source>
-        <translation type="unfinished"></translation>
+        <translation>Paramètres intrinsèques</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="186"/>
         <source>vert. focal</source>
-        <translation type="unfinished"></translation>
+        <translation>Focale verticale</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="193"/>
         <source>vertical focal (in pixels)</source>
-        <translation type="unfinished"></translation>
+        <translation>Focale verticale (en pixel)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="196"/>
         <source> pix</source>
-        <translation type="unfinished"></translation>
+        <translation> px</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="212"/>
@@ -659,7 +666,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="222"/>
         <source> deg.</source>
-        <translation type="unfinished"></translation>
+        <translation> deg.</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="235"/>
@@ -677,14 +684,14 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="435"/>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="464"/>
         <source> pix.</source>
-        <translation type="unfinished"></translation>
+        <translation> px</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="263"/>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="332"/>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="454"/>
         <source>x</source>
-        <translation type="unfinished"></translation>
+        <translation>x</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="270"/>
@@ -694,12 +701,12 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="304"/>
         <source>Pixel size (metric units)</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille de pixel (unités métriques)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="307"/>
         <source>pixel size</source>
-        <translation type="unfinished"></translation>
+        <translation>taille de pixel</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="316"/>
@@ -734,12 +741,12 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="413"/>
         <source>skew</source>
-        <translation type="unfinished"></translation>
+        <translation>biais</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="420"/>
         <source>Skew parameter</source>
-        <translation type="unfinished"></translation>
+        <translation>Paramètre de biais</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="432"/>
@@ -759,7 +766,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="506"/>
         <source>Distortion / uncertainty</source>
-        <translation type="unfinished"></translation>
+        <translation>Distortion / incertitude</translation>
     </message>
 </context>
 <context>
@@ -767,17 +774,17 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/cameraParamDlg.ui" line="14"/>
         <source>Camera parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Paramètres de la caméra</translation>
     </message>
     <message>
         <location filename="../ui_templates/cameraParamDlg.ui" line="22"/>
         <source>Current mode:</source>
-        <translation type="unfinished"></translation>
+        <translation>Mode actuel :</translation>
     </message>
     <message>
         <location filename="../ui_templates/cameraParamDlg.ui" line="35"/>
         <source>parallel projection</source>
-        <translation type="unfinished"></translation>
+        <translation>projection parallèle</translation>
     </message>
     <message>
         <location filename="../ui_templates/cameraParamDlg.ui" line="56"/>
@@ -790,7 +797,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
         <location filename="../ui_templates/cameraParamDlg.ui" line="141"/>
         <location filename="../ui_templates/cameraParamDlg.ui" line="211"/>
         <source>°</source>
-        <translation type="unfinished"></translation>
+        <translation>°</translation>
     </message>
     <message>
         <location filename="../ui_templates/cameraParamDlg.ui" line="100"/>
@@ -800,7 +807,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/cameraParamDlg.ui" line="103"/>
         <source>X1</source>
-        <translation type="unfinished"></translation>
+        <translation>X1</translation>
     </message>
     <message>
         <location filename="../ui_templates/cameraParamDlg.ui" line="116"/>
@@ -816,7 +823,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/cameraParamDlg.ui" line="163"/>
         <source>Y2</source>
-        <translation type="unfinished"></translation>
+        <translation>Y2</translation>
     </message>
     <message>
         <location filename="../ui_templates/cameraParamDlg.ui" line="176"/>
@@ -832,7 +839,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/cameraParamDlg.ui" line="201"/>
         <source>Z3</source>
-        <translation type="unfinished"></translation>
+        <translation>Z3</translation>
     </message>
     <message>
         <location filename="../ui_templates/cameraParamDlg.ui" line="248"/>
@@ -3059,12 +3066,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="26"/>
         <source>CloudCompare</source>
-        <translation type="unfinished"></translation>
+        <translation>CloudCompare</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="47"/>
         <source>&amp;File</source>
-        <translation type="unfinished">&amp;Fichier</translation>
+        <translation>&amp;Fichier</translation>
     </message>
     <message>
         <source>3D mouse</source>
@@ -3073,123 +3080,123 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="61"/>
         <source>&amp;Display</source>
-        <translation type="unfinished">&amp;Affichage</translation>
+        <translation>&amp;Affichage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="65"/>
         <source>Toolbars</source>
-        <translation type="unfinished">Barres d&apos;outils</translation>
+        <translation>Barres d&apos;outils</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="75"/>
         <source>Lights</source>
-        <translation type="unfinished">Lumières</translation>
+        <translation>Lumières</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="86"/>
         <source>Shaders &amp;&amp; filters</source>
-        <translation type="unfinished">Shaders &amp;&amp; filtres</translation>
+        <translation>Shaders &amp;&amp; filtres</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="95"/>
         <source>Active scalar field</source>
-        <translation type="unfinished">Champ scalaire actif</translation>
+        <translation>Champ scalaire actif</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="128"/>
         <location filename="../ui_templates/mainWindow.ui" line="911"/>
         <source>&amp;Help</source>
-        <translation type="unfinished">A&amp;ide</translation>
+        <translation>A&amp;ide</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="138"/>
         <location filename="../ui_templates/mainWindow.ui" line="1859"/>
         <location filename="../ui_templates/mainWindow.ui" line="2952"/>
         <source>Edit</source>
-        <translation type="unfinished">Editer</translation>
+        <translation>Editer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="142"/>
         <location filename="../ui_templates/mainWindow.ui" line="1708"/>
         <source>Scalar fields</source>
-        <translation type="unfinished">Champs scalaires</translation>
+        <translation>Champs scalaires</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="170"/>
         <location filename="../ui_templates/mainWindow.ui" line="2061"/>
         <source>Colors</source>
-        <translation type="unfinished">Couleurs</translation>
+        <translation>Couleurs</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="185"/>
         <location filename="../ui_templates/mainWindow.ui" line="2047"/>
         <source>Normals</source>
-        <translation type="unfinished">Normales</translation>
+        <translation>Normales</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="189"/>
         <source>Orient normals</source>
-        <translation type="unfinished">Orienter</translation>
+        <translation>Orienter</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="196"/>
         <source>Convert to</source>
-        <translation type="unfinished">Convertir</translation>
+        <translation>Convertir</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="210"/>
         <source>Octree</source>
-        <translation type="unfinished"></translation>
+        <translation>CloudCompare</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="218"/>
         <source>Mesh</source>
-        <translation type="unfinished">Maillage</translation>
+        <translation>Maillage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="222"/>
         <source>Scalar Field</source>
-        <translation type="unfinished">Champ Scalaire</translation>
+        <translation>Champ Scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="245"/>
         <source>Sensors</source>
-        <translation type="unfinished">Capteurs</translation>
+        <translation>Capteurs</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="249"/>
         <source>Terrestrial Laser Sensor = Ground Based Lidar</source>
-        <translation type="unfinished">Capteur Laser Terrestre (TLS/GBL)</translation>
+        <translation>Capteur Laser Terrestre (TLS/GBL)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="252"/>
         <source>TLS/GBL</source>
-        <translation type="unfinished"></translation>
+        <translation>TLS/GBL</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="266"/>
         <source>Camera</source>
-        <translation type="unfinished">Caméra</translation>
+        <translation>Caméra</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="288"/>
         <source>Toggle (recursive)</source>
-        <translation type="unfinished">Basculer (récursif)</translation>
+        <translation>Basculer (récursif)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="300"/>
         <source>Waveform</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="315"/>
         <source>Grid</source>
-        <translation type="unfinished"></translation>
+        <translation>Grille</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="348"/>
         <source>3D &amp;Views</source>
-        <translation type="unfinished">&amp;Vues 3D</translation>
+        <translation>&amp;Vues 3D</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="369"/>
@@ -3197,73 +3204,73 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/mainWindow.ui" line="811"/>
         <location filename="../ui_templates/mainWindow.ui" line="1951"/>
         <source>Plugins</source>
-        <translation type="unfinished"></translation>
+        <translation>Extensions</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="374"/>
         <source>Tools</source>
-        <translation type="unfinished">Outils</translation>
+        <translation>Outils</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="378"/>
         <source>Segmentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Segmentation</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="389"/>
         <source>Projection</source>
-        <translation type="unfinished"></translation>
+        <translation>Projection</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="399"/>
         <source>Statistics</source>
-        <translation type="unfinished">Statistiques</translation>
+        <translation>Statistiques</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="406"/>
         <source>Distances</source>
-        <translation type="unfinished"></translation>
+        <translation>Distances</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="414"/>
         <source>Registration</source>
-        <translation type="unfinished">Recalage</translation>
+        <translation>Recalage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="423"/>
         <source>Other</source>
-        <translation type="unfinished">Autres</translation>
+        <translation>Autres</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="432"/>
         <source>Sand box (research)</source>
-        <translation type="unfinished">Bac à sable (recherche)</translation>
+        <translation>Bac à sable (recherche)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="456"/>
         <location filename="../ui_templates/mainWindow.ui" line="2970"/>
         <source>Fit</source>
-        <translation type="unfinished">Ajustement</translation>
+        <translation>Ajustement</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="465"/>
         <source>Clean</source>
-        <translation type="unfinished">Nettoyage</translation>
+        <translation>Nettoyage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="472"/>
         <source>Volume</source>
-        <translation type="unfinished"></translation>
+        <translation>Volume</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="478"/>
         <source>Batch export</source>
-        <translation type="unfinished"></translation>
+        <translation>Export par lot</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="524"/>
         <source>DB Tree</source>
-        <translation type="unfinished">Base de données</translation>
+        <translation>Base de données</translation>
     </message>
     <message>
         <source>Link all 3D views cameras</source>
@@ -3277,96 +3284,96 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/mainWindow.ui" line="578"/>
         <location filename="../ui_templates/mainWindow.ui" line="581"/>
         <source>Viewing tools</source>
-        <translation type="unfinished">Vues 3D</translation>
+        <translation>Vues 3D</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="632"/>
         <location filename="../ui_templates/mainWindow.ui" line="1010"/>
         <source>Console</source>
-        <translation type="unfinished"></translation>
+        <translation>Console</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="672"/>
         <location filename="../ui_templates/mainWindow.ui" line="675"/>
         <source>Main tools</source>
-        <translation type="unfinished">Outils principaux</translation>
+        <translation>Outils principaux</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="711"/>
         <location filename="../ui_templates/mainWindow.ui" line="714"/>
         <source>Scalar field tools</source>
-        <translation type="unfinished">Champs scalaires</translation>
+        <translation>Champs scalaires</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="744"/>
         <source>Properties</source>
-        <translation type="unfinished">Propriétés</translation>
+        <translation>Propriétés</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="790"/>
         <location filename="../ui_templates/mainWindow.ui" line="793"/>
         <location filename="../ui_templates/mainWindow.ui" line="2630"/>
         <source>GL filters</source>
-        <translation type="unfinished">Filtres OpenGL</translation>
+        <translation>Filtres OpenGL</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="826"/>
         <source>&amp;Open</source>
-        <translation type="unfinished">&amp;Ouvrir</translation>
+        <translation>&amp;Ouvrir</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="829"/>
         <location filename="../ui_templates/mainWindow.ui" line="832"/>
         <location filename="../ui_templates/mainWindow.ui" line="835"/>
         <source>Open</source>
-        <translation type="unfinished">Ouvrir</translation>
+        <translation>Ouvrir</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="838"/>
         <source>Ctrl+O</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+O</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="847"/>
         <source>&amp;Save</source>
-        <translation type="unfinished">&amp;Sauver</translation>
+        <translation>Enregi$strer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="850"/>
         <location filename="../ui_templates/mainWindow.ui" line="853"/>
         <source>Save current entity</source>
-        <translation type="unfinished">Sauver les entités sélectionnées</translation>
+        <translation>Sauver les entités sélectionnées</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="856"/>
         <source>Ctrl+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+S</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="864"/>
         <source>&amp;Quit</source>
-        <translation type="unfinished">&amp;Quitter</translation>
+        <translation>&amp;Quitter</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="867"/>
         <source>Quit</source>
-        <translation type="unfinished">Quitter</translation>
+        <translation>Quitter</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="879"/>
         <source>&amp;Full screen</source>
-        <translation type="unfinished">&amp;Plein écran</translation>
+        <translation>&amp;Plein écran</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="882"/>
         <location filename="../ui_templates/mainWindow.ui" line="885"/>
         <source>Switch to full screen</source>
-        <translation type="unfinished">Basculer en plein écran</translation>
+        <translation>Basculer en plein écran</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="891"/>
         <source>F9</source>
-        <translation type="unfinished"></translation>
+        <translation>F</translation>
     </message>
     <message>
         <source>Display settings</source>
@@ -3375,32 +3382,32 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="903"/>
         <source>Display options</source>
-        <translation type="unfinished"></translation>
+        <translation>Options d&apos;affichage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="906"/>
         <source>Set various display options</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir les paramètres d&apos;affichage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="914"/>
         <source>Help</source>
-        <translation type="unfinished"></translation>
+        <translation>Aide</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="917"/>
         <source>F1</source>
-        <translation type="unfinished"></translation>
+        <translation>F1</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="922"/>
         <source>&amp;About ...</source>
-        <translation type="unfinished"></translation>
+        <translation>$A propos...</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="925"/>
         <source>About</source>
-        <translation type="unfinished"></translation>
+        <translation>A propos</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="934"/>
@@ -3416,67 +3423,67 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="943"/>
         <source>Alt+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+C</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="948"/>
         <source>Height Ramp</source>
-        <translation type="unfinished"></translation>
+        <translation>Palette d&apos;élévation</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="951"/>
         <location filename="../ui_templates/mainWindow.ui" line="954"/>
         <source>Apply a color ramp along X, Y or Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Applique une palette de couleurs pour l&apos;axe X, Y ou Z</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="963"/>
         <location filename="../ui_templates/mainWindow.ui" line="989"/>
         <source>Compute</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="966"/>
         <location filename="../ui_templates/mainWindow.ui" line="969"/>
         <source>Compute unsigned normals (least squares approx.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer les normales non-signées (approximation aux moindres carrés)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="974"/>
         <source>Invert</source>
-        <translation type="unfinished"></translation>
+        <translation>Inverser</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="977"/>
         <location filename="../ui_templates/mainWindow.ui" line="980"/>
         <source>Invert normals</source>
-        <translation type="unfinished"></translation>
+        <translation>Inverser les normales</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="992"/>
         <location filename="../ui_templates/mainWindow.ui" line="995"/>
         <source>Compute octree</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer l&apos;octree</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1013"/>
         <source>F8</source>
-        <translation type="unfinished"></translation>
+        <translation>F</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1021"/>
         <source>Cl&amp;ose</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Fe$rmer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1024"/>
         <source>Ctrl+F4</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+F4</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1029"/>
         <source>Close &amp;All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Tout fe$rmer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1034"/>
@@ -3491,87 +3498,87 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1044"/>
         <source>Pre&amp;vious</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Précé$dent</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1049"/>
         <source>Ne&amp;xt</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sui$vant</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1054"/>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation>Nouveau</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1057"/>
         <source>Ctrl+F3</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ctrl+F3</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1066"/>
         <source>Clone</source>
-        <translation type="unfinished"></translation>
+        <translation>Dupliquer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1069"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clone the selected entities&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(yes Claire ... these are Nyan sheep!)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Duplique les entités sélectionnées&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1078"/>
         <source>Merge</source>
-        <translation type="unfinished"></translation>
+        <translation>Fusionner</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1081"/>
         <source>Merge multiple clouds</source>
-        <translation type="unfinished"></translation>
+        <translation>Fusionne plusieurs nuages</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1090"/>
         <location filename="../ui_templates/mainWindow.ui" line="1270"/>
         <location filename="../ui_templates/mainWindow.ui" line="1360"/>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1093"/>
         <source>Del</source>
-        <translation type="unfinished"></translation>
+        <translation>Suppr</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1105"/>
         <source>Fine registration (ICP)</source>
-        <translation type="unfinished"></translation>
+        <translation>Recalage précis (ICP)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1108"/>
         <location filename="../ui_templates/mainWindow.ui" line="1111"/>
         <source>Finely registers already (roughly) aligned entities (clouds or meshes)</source>
-        <translation type="unfinished"></translation>
+        <translation>Recale précisément des objets approximativement alignés (nuages ou maillages)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1120"/>
         <source>Cloud/Cloud Dist.</source>
-        <translation type="unfinished"></translation>
+        <translation>Distance Nuage/Nuage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1123"/>
         <location filename="../ui_templates/mainWindow.ui" line="1126"/>
         <source>Compute cloud/cloud distance</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule la distance de nuage à nuage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1135"/>
         <source>Cloud/Mesh Dist</source>
-        <translation type="unfinished"></translation>
+        <translation>Distance Nuage/Maillage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1138"/>
         <location filename="../ui_templates/mainWindow.ui" line="1141"/>
         <source>Compute cloud/mesh distance</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule la distance entre un nuage et un maillage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1150"/>
@@ -3614,12 +3621,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1207"/>
         <source>Translate/rotate</source>
-        <translation type="unfinished"></translation>
+        <translation>Translater/pivoter</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1216"/>
         <source>Show histogram</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Afficher l&apos;histogramme</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1225"/>
@@ -3637,40 +3644,40 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1240"/>
         <source>Filter By Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtrer par valeur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1243"/>
         <location filename="../ui_templates/mainWindow.ui" line="1246"/>
         <source>Filter points by value</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre les points par valeur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1255"/>
         <source>Gaussian filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre gaussien</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1258"/>
         <location filename="../ui_templates/mainWindow.ui" line="1261"/>
         <source>Compute gaussian filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule un filtre gaussien</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1273"/>
         <source>Delete Scalar Field</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer le champ scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1276"/>
         <location filename="../ui_templates/mainWindow.ui" line="1279"/>
         <source>Delete current scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprime le champ scalaire actif</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1288"/>
         <source>Arithmetic</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculatrice</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1291"/>
@@ -3681,147 +3688,147 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/mainWindow.ui" line="1294"/>
         <location filename="../ui_templates/mainWindow.ui" line="1297"/>
         <source>Add, subtract, multiply or divide two scalar fields</source>
-        <translation type="unfinished"></translation>
+        <translation>Additionne, soustrait, multiplie ou divise deux champs scalaires</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1302"/>
         <source>Colorize</source>
-        <translation type="unfinished"></translation>
+        <translation>Colorier</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1305"/>
         <location filename="../ui_templates/mainWindow.ui" line="1308"/>
         <source>Colorize entity (lightness values are unchanged)</source>
-        <translation type="unfinished"></translation>
+        <translation>Colorie l&apos;entité (les valeurs de luminosité ne sont pas changées)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1313"/>
         <source>Smooth</source>
-        <translation type="unfinished"></translation>
+        <translation>Lisser</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1316"/>
         <location filename="../ui_templates/mainWindow.ui" line="1319"/>
         <source>Smooth mesh scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Lisse le champ scalaire d&apos;un maillage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1324"/>
         <location filename="../ui_templates/mainWindow.ui" line="1327"/>
         <source>Enhance</source>
-        <translation type="unfinished"></translation>
+        <translation>Améliorer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1330"/>
         <location filename="../ui_templates/mainWindow.ui" line="1333"/>
         <source>Enhance Scalar Field</source>
-        <translation type="unfinished"></translation>
+        <translation>Améliore le champ scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1342"/>
         <location filename="../ui_templates/mainWindow.ui" line="1357"/>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Enlever</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1345"/>
         <location filename="../ui_templates/mainWindow.ui" line="1348"/>
         <source>Clear colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Enlève les couleurs</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1363"/>
         <location filename="../ui_templates/mainWindow.ui" line="1366"/>
         <source>Delete normals</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer les normales</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1371"/>
         <source>Resample</source>
-        <translation type="unfinished"></translation>
+        <translation>Ré-échantillonner</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1374"/>
         <location filename="../ui_templates/mainWindow.ui" line="1377"/>
         <source>Resample entity with octree</source>
-        <translation type="unfinished"></translation>
+        <translation>nRé-échantillonne l&apos;entité avec l&apos;octree</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1382"/>
         <source>Delaunay 2.5D (XY plane)</source>
-        <translation type="unfinished"></translation>
+        <translation>Delaunay 2.5D (surface XY)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1385"/>
         <location filename="../ui_templates/mainWindow.ui" line="1388"/>
         <source>Compute &quot;2D1/2&quot; mesh by projecting points on the XY plane</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule un maillage 2.5D en projetant les points sur la surface XY</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1393"/>
         <source>Delaunay 2.5D (best fitting plane)</source>
-        <translation type="unfinished"></translation>
+        <translation>Delaunay 2.5D (surface la plus adaptée)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1396"/>
         <location filename="../ui_templates/mainWindow.ui" line="1399"/>
         <source>Compute &quot;2D1/2&quot; mesh by projecting points on the (least squares) best fitting plane</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule un maillage 2.5D en projetant les points sur la surface la plus adaptée (approche par les moindres carrés)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1404"/>
         <source>Measure surface</source>
-        <translation type="unfinished"></translation>
+        <translation>Mesurer la surface</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1407"/>
         <location filename="../ui_templates/mainWindow.ui" line="1410"/>
         <source>Measure mesh surface</source>
-        <translation type="unfinished"></translation>
+        <translation>Mesure la surface du maillage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1415"/>
         <source>Closest Point Set</source>
-        <translation type="unfinished"></translation>
+        <translation>Point le plus proche</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1418"/>
         <location filename="../ui_templates/mainWindow.ui" line="1421"/>
         <source>Compute closest point set</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule le point le plus proche</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1426"/>
         <source>Delete all (!)</source>
-        <translation type="unfinished"></translation>
+        <translation>Tout supprimer (!)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1429"/>
         <location filename="../ui_templates/mainWindow.ui" line="1432"/>
         <source>Delete all scalar fields</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprime la totalité des champs scalaires</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1437"/>
         <source>Multiply</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplier</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1440"/>
         <location filename="../ui_templates/mainWindow.ui" line="1443"/>
         <source>Multiply scalar field by a constant</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplie le champ scalaire par une constante</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1451"/>
         <source>K-Means</source>
-        <translation type="unfinished"></translation>
+        <translation>K-Moyennes</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1454"/>
         <location filename="../ui_templates/mainWindow.ui" line="1457"/>
         <source>classify point (K-Means applied on a scalar field)</source>
-        <translation type="unfinished"></translation>
+        <translation>classifie les points en appliquant les K-Moyennes sur un champ scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1465"/>
@@ -3837,45 +3844,45 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1476"/>
         <source>Multiply/Scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplier/Mise à l&apos;échelle</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1479"/>
         <location filename="../ui_templates/mainWindow.ui" line="1482"/>
         <source>Multiply coordinates (separately)</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplie les coordonnées (séparément)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1487"/>
         <source>Match bounding-box centers</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Associer les centres de boîtes englobantes</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1490"/>
         <location filename="../ui_templates/mainWindow.ui" line="1493"/>
         <source>Synchronize selected entities bbox centers</source>
-        <translation type="unfinished"></translation>
+        <translation>Associe les centres des boites englobantes sélectionnées</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1498"/>
         <source>Unroll</source>
-        <translation type="unfinished"></translation>
+        <translation>Dérouler</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1501"/>
         <location filename="../ui_templates/mainWindow.ui" line="1504"/>
         <source>Unroll entity on a cylinder or a cone</source>
-        <translation type="unfinished"></translation>
+        <translation>Déroule l&apos;entité selon un cylindre ou un cône</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1513"/>
         <source>Gradient</source>
-        <translation type="unfinished"></translation>
+        <translation>Palette graduée</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1522"/>
         <source>Zoom &amp; Center</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoomer et centrer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1525"/>
@@ -3886,293 +3893,293 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/mainWindow.ui" line="1528"/>
         <location filename="../ui_templates/mainWindow.ui" line="1531"/>
         <source>Zoom and center on selected entities (Z)</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoom et centre sur les entités sélectionnnées (Z)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1534"/>
         <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Z</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1543"/>
         <source>Top View</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue de dessus</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1546"/>
         <location filename="../ui_templates/mainWindow.ui" line="1549"/>
         <source>Set top view</source>
-        <translation type="unfinished"></translation>
+        <translation>Place la vue au-dessus de l&apos;entité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1552"/>
         <source>8</source>
-        <translation type="unfinished"></translation>
+        <translation>8</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1564"/>
         <source>Front View</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue de face</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1567"/>
         <location filename="../ui_templates/mainWindow.ui" line="1570"/>
         <source>Set front view</source>
-        <translation type="unfinished"></translation>
+        <translation>Place la vue en face de l&apos;entité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1573"/>
         <source>5</source>
-        <translation type="unfinished"></translation>
+        <translation>5</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1585"/>
         <source>Back View</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue arrière</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1588"/>
         <location filename="../ui_templates/mainWindow.ui" line="1591"/>
         <source>Set back view</source>
-        <translation type="unfinished"></translation>
+        <translation>Place la vue à l&apos;arrière de l&apos;entité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1594"/>
         <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation>0</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1606"/>
         <source>Left Side View</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue de gauche</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1609"/>
         <location filename="../ui_templates/mainWindow.ui" line="1612"/>
         <source>Set left side view</source>
-        <translation type="unfinished"></translation>
+        <translation>Place la vue à gauche de l&apos;entité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1615"/>
         <source>4</source>
-        <translation type="unfinished"></translation>
+        <translation>4</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1627"/>
         <source>Right Side View</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue de droite</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1630"/>
         <location filename="../ui_templates/mainWindow.ui" line="1633"/>
         <source>Set right side view</source>
-        <translation type="unfinished"></translation>
+        <translation>Place la vue à droite de l&apos;entité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1636"/>
         <source>6</source>
-        <translation type="unfinished"></translation>
+        <translation>6</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1648"/>
         <source>Bottom View</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue de dessous</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1651"/>
         <location filename="../ui_templates/mainWindow.ui" line="1654"/>
         <source>Set bottom view</source>
-        <translation type="unfinished"></translation>
+        <translation>Place la vue en-dessous de l&apos;entité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1657"/>
         <source>2</source>
-        <translation type="unfinished"></translation>
+        <translation>2</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1671"/>
         <source>Main</source>
-        <translation type="unfinished"></translation>
+        <translation>Principale</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1674"/>
         <location filename="../ui_templates/mainWindow.ui" line="1677"/>
         <source>Show/hide main toolbar</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche/masque la barre principale</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1688"/>
         <source>View</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1691"/>
         <location filename="../ui_templates/mainWindow.ui" line="1694"/>
         <source>Show/hide view toolbar</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche/masque la barre de vue</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1711"/>
         <location filename="../ui_templates/mainWindow.ui" line="1714"/>
         <source>Show/hide scalar fields toolbar</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche/masque la barre de champ scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1719"/>
         <source>Toggle Sun Light</source>
-        <translation type="unfinished"></translation>
+        <translation>Activer l&apos;éclairage solaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1722"/>
         <location filename="../ui_templates/mainWindow.ui" line="1725"/>
         <source>Toggle sun light (active window)</source>
-        <translation type="unfinished"></translation>
+        <translation>Active l&apos;éclairage solaire dans la fenêtre principale</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1728"/>
         <source>F6</source>
-        <translation type="unfinished"></translation>
+        <translation>F6</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1736"/>
         <source>Toggle Custom Light</source>
-        <translation type="unfinished"></translation>
+        <translation>Activer l&apos;éclairage personnalisé</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1739"/>
         <location filename="../ui_templates/mainWindow.ui" line="1742"/>
         <source>Toggle custom light (active window)</source>
-        <translation type="unfinished"></translation>
+        <translation>Active l&apos;éclairage personnalisé dans la fenêtre principale</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1745"/>
         <source>F7</source>
-        <translation type="unfinished"></translation>
+        <translation>F7</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1757"/>
         <location filename="../ui_templates/mainWindow.ui" line="1760"/>
         <source>Global Zoom</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoom global</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1769"/>
         <source>Toggle Centered Perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Activer la vue en perspective centrée</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1772"/>
         <location filename="../ui_templates/mainWindow.ui" line="1775"/>
         <source>Toggle perspective view (centered on objects) in current window</source>
-        <translation type="unfinished"></translation>
+        <translation>Active une vue en perspective (centrée sur les objets) dans la fenêtre d&apos;affichage actuelle</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1778"/>
         <source>F3</source>
-        <translation type="unfinished"></translation>
+        <translation>F3</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1790"/>
         <source>Toggle Viewer Based Perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Activer la vue en perspective depuis le spectateur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1793"/>
         <location filename="../ui_templates/mainWindow.ui" line="1796"/>
         <source>Toggle perspective view (centered on viewer) in current window</source>
-        <translation type="unfinished"></translation>
+        <translation>Active une vue en perspective (centrée sur le spectateur) dans la fenêtre d&apos;affichage actuelle</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1799"/>
         <source>F4</source>
-        <translation type="unfinished"></translation>
+        <translation>F</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1811"/>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Actualiser</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1814"/>
         <source>F5</source>
-        <translation type="unfinished"></translation>
+        <translation>F5</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1822"/>
         <source>Test Frame Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Tester le taux de rafraîchissement</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1827"/>
         <source>Render to File</source>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer le rendu</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1832"/>
         <source>About Plugins ...</source>
-        <translation type="unfinished"></translation>
+        <translation>A propos des extensions...</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1841"/>
         <source>Convert to RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir en RVB</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1844"/>
         <source>Convert current scalar field to RGB colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertit le champ scalaire en couleurs RVB</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1849"/>
         <source>Create/show depth buffer</source>
-        <translation type="unfinished"></translation>
+        <translation>Créer/afficher le champ de profondeur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1854"/>
         <source>Export depth buffer</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporter le champ de profondeur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1868"/>
         <source>Rasterize (and contour plot)</source>
-        <translation type="unfinished"></translation>
+        <translation>Rastérisation (et lignes de contours)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1871"/>
         <source>Convert a cloud to 2D raster (and optionally generate the contour plot)</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertit un nuage en raster 2D et génère optionnellement les lignes de contours</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1876"/>
         <source>Auto align clouds</source>
-        <translation type="unfinished"></translation>
+        <translation>Aligner automatiquement les nuages</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1879"/>
         <location filename="../ui_templates/mainWindow.ui" line="1882"/>
         <source>Tries to automatically register (roughly) two points clouds</source>
-        <translation type="unfinished"></translation>
+        <translation>Essaye de recaler automatiquement deux nuages de points</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1891"/>
         <source>Subsample</source>
-        <translation type="unfinished"></translation>
+        <translation>Sous-échantillonner</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1894"/>
         <location filename="../ui_templates/mainWindow.ui" line="1897"/>
         <source>Subsample a point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Sous-échantillonne un nuage de points</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1905"/>
         <source>Load shader</source>
-        <translation type="unfinished"></translation>
+        <translation>Charger un shader</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1917"/>
         <source>Remove Filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer un filtre</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2007"/>
@@ -4183,118 +4190,119 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2603"/>
         <source>Export cloud info</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporter les informations du nuage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2606"/>
         <source>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporte les informations dans un fichier CSV (nom, taille, barycentre, etc.)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2640"/>
         <source>Reset all GUI element positions</source>
-        <translation type="unfinished"></translation>
+        <translation>Réinitialise la position de tous les éléments de l&apos;interface</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2643"/>
         <source>Reset all GUI element positions (after restart)</source>
-        <translation type="unfinished"></translation>
+        <translation>Réinitialise la position de tous les éléments de l&apos;interface (après redémarrage)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2745"/>
         <source>Extract sections / Unfold</source>
-        <translation type="unfinished"></translation>
+        <translation>Extraire des sections / Déplier</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2748"/>
         <source>Extract cloud sections along polylines or unfold a cloud along a polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Extrait des sections du nuages ou déplie un nuage le long de polylignes</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2808"/>
         <source>Distance map</source>
-        <translation type="unfinished"></translation>
+        <translation>Carte de distance</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2888"/>
         <source>Convert to grey scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir en niveau de gris</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2891"/>
         <source>Convert RGB colors to grey scale colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir des couleurs RVB vers des couleurs en niveaux de gris</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2900"/>
         <source>Trace Polyline</source>
-        <translation type="unfinished"></translation>
+        <translation>Dessiner une polyligne</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2903"/>
         <source>Trace a polyline by point picking</source>
-        <translation type="unfinished"></translation>
+        <translation>Dessine une polyligne en plaçant des points</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2906"/>
         <source>Ctrl+P</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+P</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2914"/>
         <source>Enable Qt warnings in Console</source>
-        <translation type="unfinished"></translation>
+        <translation>Activer les avertissements Qt dans la console</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2919"/>
         <source>Global Shift settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Paramètres du Déplacement Global</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2922"/>
         <source>Set Global Shift &amp; Scale mechanism parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Définit les paramètres du mécanismes de Déplacement Global et Mise à l&apos;échelle</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2930"/>
         <source>Camera link</source>
-        <translation type="unfinished"></translation>
+        <translation>Lier les caméras</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2933"/>
         <source>Link the cameras of all 3D views
 (so that they all move in the same way and at the same time)</source>
-        <translation type="unfinished"></translation>
+        <translation>Lie les caméras de toutes les vues 3D pourqu&apos;elles se déplacent toutes de la même façon en même temps</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2939"/>
         <source>2D Waveform viewer</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>je traduit en retour d&apos;ondes complètes ?</translatorcomment>
+        <translation type="unfinished">Affichage Waveform 2d</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2947"/>
         <source>Create a plane</source>
-        <translation type="unfinished"></translation>
+        <translation>Créer une surface</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2955"/>
         <source>Edit the plane parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Editer les paramètres de la surface</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2960"/>
         <source>Create surface between two polylines</source>
-        <translation type="unfinished"></translation>
+        <translation>Crée une surface entre 2 polylignes</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2965"/>
         <source>Surface between 2 polylines</source>
-        <translation type="unfinished"></translation>
+        <translation>Surface entre 2 polylignes</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2978"/>
         <source>Enhance with intensities</source>
-        <translation type="unfinished"></translation>
+        <translation>Améliorer avec l&apos;intensité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2983"/>
@@ -4309,27 +4317,27 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3001"/>
         <source>Auto-pick rotation center</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélectionner automatiquement le point de rotation</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3004"/>
         <source>Auto-pick rotation center (rotation is always placed at the middle of the screen if possible)</source>
-        <translation type="unfinished"></translation>
+        <translation>Choisit automatiquement le point de rotation qui sera toujours placé au milieu de l&apos;écran</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3007"/>
         <source>Shift+P</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+P</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3018"/>
         <source>Show cursor coordinates</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher les coordonnées du curseur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3021"/>
         <source>Show cursor coordinates (2D and 3D if possible)</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche les coordonnées à l&apos;emplacement du curseur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3026"/>
@@ -4344,7 +4352,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3034"/>
         <source>Compress FWF data</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Compresser des données FWF</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3037"/>
@@ -4359,28 +4367,28 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3050"/>
         <source>Export plane info</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporter les informations de la surface</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3053"/>
         <source>Export plane info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporte les informations dans un fichier CSV (nom, largeur, hauteur, centre, etc.)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1925"/>
         <source>Delete shader</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer le shader</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1934"/>
         <source>Point picking</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélection d&apos;un point</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1937"/>
         <location filename="../ui_templates/mainWindow.ui" line="1940"/>
         <source>Point picking (point information, distance between 2 points, angles between 3 points, etc.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélection d&apos;un point pour obtenir de l&apos;information, mesurer une distance avec 2, un angle avec 3, etc.</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1956"/>
@@ -4396,7 +4404,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1971"/>
         <source>Camera settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Paramètres de la caméra</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1980"/>
@@ -4412,23 +4420,23 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1991"/>
         <source>Curvature</source>
-        <translation type="unfinished"></translation>
+        <translation>Courbure</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1999"/>
         <source>Roughness</source>
-        <translation type="unfinished"></translation>
+        <translation>Rugosité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="307"/>
         <location filename="../ui_templates/mainWindow.ui" line="2004"/>
         <source>Plane</source>
-        <translation type="unfinished"></translation>
+        <translation>Surface</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2012"/>
         <source>Rename</source>
-        <translation type="unfinished"></translation>
+        <translation>Renommer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2017"/>
@@ -4449,7 +4457,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2033"/>
         <source>Visibility</source>
-        <translation type="unfinished"></translation>
+        <translation>Visibilité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2036"/>
@@ -4499,27 +4507,27 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2089"/>
         <source>Apply transformation</source>
-        <translation type="unfinished"></translation>
+        <translation>Appliquer la transformation</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2092"/>
         <source>Apply rotation and/or translation</source>
-        <translation type="unfinished"></translation>
+        <translation>Appliquer une rotation et/ou une translation</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2095"/>
         <source>Ctrl+T</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+T</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2100"/>
         <source>Smooth (Laplacian)</source>
-        <translation type="unfinished"></translation>
+        <translation>Lisser (Laplacien)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2105"/>
         <source>HSV colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Couleurs HSV</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2114"/>
@@ -4529,17 +4537,17 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2117"/>
         <source>Ctrl+V</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ctrl+V</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2129"/>
         <source>Pick rotation center</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélection du centre de rotation</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2132"/>
         <source>P</source>
-        <translation type="unfinished"></translation>
+        <translation>P</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2140"/>
@@ -4554,12 +4562,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2152"/>
         <source>Bilateral filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre bilatéral</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2155"/>
         <source>Compute bilateral filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule un filtre bilatéral</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2160"/>
@@ -4574,29 +4582,29 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2168"/>
         <source>Toggle color scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Activer l&apos;échelle de couleur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2171"/>
         <location filename="../ui_templates/mainWindow.ui" line="2174"/>
         <source>Toggle active scalar field color scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Active l&apos;échelle de couleur pour le champ scalaire actif</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2177"/>
         <source>Shift+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+C</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2185"/>
         <source>Show previous SF</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher le champ scalaire précédent</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2188"/>
         <location filename="../ui_templates/mainWindow.ui" line="2191"/>
         <source>Show previous scalar field for active entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche le champ scalaire précédent pour l&apos;objet actif</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2194"/>
@@ -4606,13 +4614,13 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2202"/>
         <source>Show next SF</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher le champ scalaire suivant</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2205"/>
         <location filename="../ui_templates/mainWindow.ui" line="2208"/>
         <source>Show next scalar field for active entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche le champ scalaire suivant pour l&apos;objet actif</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2211"/>
@@ -4622,48 +4630,48 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2220"/>
         <source>Align (point pairs picking)</source>
-        <translation type="unfinished"></translation>
+        <translation>Aligner (par paires de points)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2223"/>
         <location filename="../ui_templates/mainWindow.ui" line="2226"/>
         <source>Aligns two clouds by picking (at least 4) equivalent point pairs</source>
-        <translation type="unfinished"></translation>
+        <translation>Aligner deux nuages en sélectionnant des paires de points (au moins 4)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2235"/>
         <source>Add constant SF</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajouter un champ scalaire constant</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2240"/>
         <source>Export coordinate(s) to SF(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporter les coordonnées dans un champ scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2243"/>
         <source>Export X, Y and/or Z coordinates to scalar field(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporte les coordonnées dans un champ scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2248"/>
         <source>Subdivide</source>
-        <translation type="unfinished"></translation>
+        <translation>Subdivise</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2253"/>
         <source>3D name</source>
-        <translation type="unfinished"></translation>
+        <translation>nom 3D</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2256"/>
         <source>Toggle selected entities 3D name display (recursive)</source>
-        <translation type="unfinished"></translation>
+        <translation>Active l&apos;affichage en 3D du nom de l&apos;objet actif</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2259"/>
         <source>D</source>
-        <translation type="unfinished"></translation>
+        <translation>D</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2271"/>
@@ -4673,7 +4681,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2276"/>
         <source>Materials/textures</source>
-        <translation type="unfinished"></translation>
+        <translation>Matériaux/textures</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2279"/>
@@ -4688,141 +4696,141 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2294"/>
         <source>Orthographic projection</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue orthographique</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2297"/>
         <location filename="../ui_templates/mainWindow.ui" line="2300"/>
         <source>Set orthographic projection for current 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Définit une projection orthographique pour la vue 3D active</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2309"/>
         <source>Object-centered perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue en perspective centrée sur l&apos;objet</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2312"/>
         <location filename="../ui_templates/mainWindow.ui" line="2315"/>
         <source>Set object-centered perspective for current 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Définit une perspective entrée sur l&apos;objet pour la vue 3D active</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2324"/>
         <source>Viewer-based perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue en perspective depuis le spectateur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2327"/>
         <location filename="../ui_templates/mainWindow.ui" line="2330"/>
         <source>Set viewer-based perspective for current 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Définit une perspective depuis le point de vue du spectateur pour la vue 3D active</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2339"/>
         <source>Always visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Toujours visible</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2342"/>
         <location filename="../ui_templates/mainWindow.ui" line="2345"/>
         <source>Pivot always visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Pivot toujours visible</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2354"/>
         <source>Rotation only</source>
-        <translation type="unfinished"></translation>
+        <translation>Rotation uniquement</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2357"/>
         <location filename="../ui_templates/mainWindow.ui" line="2360"/>
         <source>Pivot visible when rotating</source>
-        <translation type="unfinished"></translation>
+        <translation>Pivot visible uniquement lors de la rotation</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2369"/>
         <source>Never visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Jamais visible</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2372"/>
         <location filename="../ui_templates/mainWindow.ui" line="2375"/>
         <source>Pivot never visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Le pivot n&apos;est jamais visible</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2384"/>
         <source>Iso 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Iso 1</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2387"/>
         <location filename="../ui_templates/mainWindow.ui" line="2390"/>
         <source>Set view to &apos;front&apos; isometric</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue isométrique de la face &quot;avant&quot;</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2393"/>
         <source>7</source>
-        <translation type="unfinished"></translation>
+        <translation>7</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2405"/>
         <source>Iso 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Iso 2</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2408"/>
         <location filename="../ui_templates/mainWindow.ui" line="2411"/>
         <source>Set view to &apos;back&apos; isometric</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue isométrique de la face &quot;arrière&quot;</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2414"/>
         <source>9</source>
-        <translation type="unfinished"></translation>
+        <translation>9</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2426"/>
         <source>Convert texture/material to RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir les textures/matériaux en RVB</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2435"/>
         <source>Color Scales Manager</source>
-        <translation type="unfinished"></translation>
+        <translation>Gestion des échelles de couleurs</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2438"/>
         <source>Open Color Scales Manager dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Ouvre la fenêtre du gestionnaire d&apos;échelles</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2450"/>
         <location filename="../ui_templates/mainWindow.ui" line="2453"/>
         <source>Cross Section</source>
-        <translation type="unfinished"></translation>
+        <translation>Coupe transversale</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2458"/>
         <source>Edit global shift and scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Editer le déplacement général et l&apos;échelle</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2463"/>
         <source>Convert to Scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir en champ scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2468"/>
         <source>Compute Kd-tree</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer un arbre Kd</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2473"/>
         <source>test</source>
-        <translation type="unfinished"></translation>
+        <translation>test</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2478"/>
@@ -4842,7 +4850,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2491"/>
         <source>Adjust zoom</source>
-        <translation type="unfinished">Ajustement du zoom</translation>
+        <translation>Ajustement du zoom</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2494"/>
@@ -4862,7 +4870,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2507"/>
         <source>Close all</source>
-        <translation type="unfinished"></translation>
+        <translation>Tout fermer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2510"/>
@@ -4872,29 +4880,29 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2515"/>
         <source>Edit global scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Editer l&apos;échelle générale</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2524"/>
         <source>View from sensor</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue depuis le capteur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2529"/>
         <source>Find biggest inner rectangle (2D)</source>
-        <translation type="unfinished"></translation>
+        <translation>Chercher le plus grand rectangle interne (2D)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2534"/>
         <location filename="../ui_templates/mainWindow.ui" line="2539"/>
         <location filename="../ui_templates/mainWindow.ui" line="2944"/>
         <source>Create</source>
-        <translation type="unfinished"></translation>
+        <translation>Créer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2544"/>
         <source>Compute points visibility (with octree)</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer les points de visibilité (avec l&apos;octree)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2549"/>
@@ -4930,22 +4938,22 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2580"/>
         <source>Density</source>
-        <translation type="unfinished"></translation>
+        <translation>Densité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2583"/>
         <source>Compute density</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcul la densité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2588"/>
         <source>Remove duplicate points</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer les points en double</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2593"/>
         <source>Crop</source>
-        <translation type="unfinished"></translation>
+        <translation>Réduire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2598"/>
@@ -4956,12 +4964,12 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/mainWindow.ui" line="2611"/>
         <location filename="../ui_templates/mainWindow.ui" line="3042"/>
         <source>Interpolate from another entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Interpoler depuis un autre objet</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2614"/>
         <source>Interpolate colors from another entity (cloud or mesh) - color is taken from the nearest neighbor</source>
-        <translation type="unfinished"></translation>
+        <translation>Interpole des couleurs depuis un autre objet (nuage ou maillage), la couleurest sélectionnée par le plus proche voisin.</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2619"/>
@@ -4971,22 +4979,22 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2635"/>
         <source>Levels</source>
-        <translation type="unfinished"></translation>
+        <translation>Niveaux</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2648"/>
         <source>Convert to random RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir aléatoirement en RVB</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2653"/>
         <source>Noise filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtrer le bruit</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2656"/>
         <source>Noise filter (remove the points far from the - approximate - local surface)</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre le bruit en supprimant les points éloignés de la surface locale (approximativement)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2665"/>
@@ -4996,17 +5004,17 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2676"/>
         <source>Measure volume</source>
-        <translation type="unfinished"></translation>
+        <translation>Mesurer un volume</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2681"/>
         <source>Flag vertices by type</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher les sommets par type</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2684"/>
         <source>Flag vertices by type: normal (0), border (1), non-manifold (2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche les sommets par type : normale (0), bordure (1), non-manifold (2)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2689"/>
@@ -5026,12 +5034,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2706"/>
         <source>Lock rotation about vert. axis</source>
-        <translation type="unfinished"></translation>
+        <translation>Verrouiler la rotation de l&apos;axe vertical</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2709"/>
         <source>Lock manual rotation about the vertical (screen) axis</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Verrouiller</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2712"/>
@@ -5066,32 +5074,32 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2753"/>
         <source>Contour plot (polylines) to mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Lignes de contours vers maillage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2756"/>
         <source>Contour plot (set of polylines) to a 2.5D mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Transforme les polygones de contours en un maillage 2.5D</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2765"/>
         <source>Level</source>
-        <translation type="unfinished"></translation>
+        <translation>Niveaux</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2768"/>
         <source>Pick three points to make a cloud or mesh &apos;level&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélectionner 3 points pourcréer un niveau pour un nuage ou un maillage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2773"/>
         <source>Sphere</source>
-        <translation type="unfinished"></translation>
+        <translation>Spo*hère</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2776"/>
         <source>Fits a sphere on the selected cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Place une sphère sur le nuage sélectionné</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2781"/>
@@ -5101,7 +5109,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2786"/>
         <source>Zoom in</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoomer en avant</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2789"/>
@@ -5111,12 +5119,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2792"/>
         <source>+</source>
-        <translation type="unfinished"></translation>
+        <translation>+</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2797"/>
         <source>Zoom out</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoomer en arrière</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2800"/>
@@ -5131,12 +5139,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2817"/>
         <source>SOR filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre SOR</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2820"/>
         <source>Statistical Outlier Filter (remove the points far from their neighbors)</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre des aberrations statistiques (Statistical Outlier Filter), supprime les points éloignés de leurs voisins.</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2832"/>

@@ -72,6 +72,14 @@ Filename: "{tmp}\vcredist_2013_x64.exe"; Parameters: "/q"
 Filename: "{tmp}\{#MyFaroRedistExe}"; Check: WithFaro
 
 [Code]
+function InitializeUninstall(): Boolean;
+  var ErrorCode: Integer;
+begin
+  ShellExec('open','taskkill.exe','/f /im {#MyAppExeName}','',SW_HIDE,ewNoWait,ErrorCode);
+  ShellExec('open','tskill.exe',' {#MyAppName}','',SW_HIDE,ewNoWait,ErrorCode);
+  result := True;
+end;
+
 var
   WithFaroSupport: Boolean;
 

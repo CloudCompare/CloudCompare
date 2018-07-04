@@ -961,6 +961,10 @@ struct CommandCurvature : public ccCommandLineInterface::Command
 		{
 			curvType = CCLib::Neighbourhood::GAUSSIAN_CURV;
 		}
+		else if (curvTypeStr == "NORMAL_CHANGE")
+		{
+		curvType = CCLib::Neighbourhood::NORMAL_CHANGE_RATE;
+		}
 		else
 		{
 			return cmd.error(QObject::tr("Invalid curvature type after \"-%1\". Got '%2' instead of MEAN or GAUSS.").arg(COMMAND_CURVATURE, curvTypeStr));

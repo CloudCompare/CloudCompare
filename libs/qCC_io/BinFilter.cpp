@@ -333,9 +333,9 @@ CC_FILE_ERROR BinFilter::loadFile(const QString& filename, ccHObject& container,
 		return CC_FERR_READING;
 
 	uint32_t firstBytes = 0;
-	if (in.read((char*)&firstBytes,4) < 0)
+	if (in.read((char*)&firstBytes, 4) < 0)
 		return CC_FERR_READING;
-	bool v1 = (strncmp((char*)&firstBytes,"CCB",3) != 0);
+	bool v1 = (strncmp((char*)&firstBytes, "CCB", 3) != 0);
 
 	if (v1)
 	{
@@ -388,11 +388,11 @@ CC_FILE_ERROR BinFilter::loadFile(const QString& filename, ccHObject& container,
 
 			while (!future.isFinished())
 			{
-	#if defined(CC_WINDOWS)
+#if defined(CC_WINDOWS)
 				::Sleep(500);
-	#else
+#else
 				usleep(500 * 1000);
-	#endif
+#endif
 				if (pDlg)
 				{
 					pDlg->setValue(pDlg->value() + 1);
@@ -968,8 +968,22 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		}
 
 		if (currentObject)
+		{
+			const ccShiftedObject* shifted = ccHObjectCaster::ToShifted(currentObject);
+			if (shifted)
+			{
+				//it may be interesting to re-use the Global Shift when loading other files
+				ccGlobalShiftManager::StoreShift(shifted->getGlobalShift(), shifted->getGlobalScale());
+
+				//TODO: we should also check that other entities with global shift not too far away
+				//have not already been loaded. In which case we should 'translate' the current entity?
+			}
+
 			for (unsigned i = 0; i < currentObject->getChildrenNumber(); ++i)
+			{
 				toCheck.push_back(currentObject->getChild(i));
+			}
+		}
 	}
 
 	//check for unique IDs duplicate (yes it happens :-( )

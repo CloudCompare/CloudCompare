@@ -90,6 +90,12 @@ public:
 	**/
 	int addShiftInfo(const ccGlobalShiftManager::ShiftInfo& info);
 
+	//! Adds shift info to the combox
+	/** \param info shift info
+		\return index in combo-box
+	**/
+	int addShiftInfo(const std::vector<ccGlobalShiftManager::ShiftInfo>& info);
+
 	//! Returns a given input info
 	bool getInfo(size_t index, ccGlobalShiftManager::ShiftInfo& info) const;
 

@@ -1094,10 +1094,10 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Suggested", suggestedShift, suggestedScale));
 							sasDlg.setCurrentProfile(index);
 							//add "last" entry (if available)
-							ccGlobalShiftManager::ShiftInfo lastInfo;
-							if (ccGlobalShiftManager::GetLast(lastInfo))
+							std::vector<ccGlobalShiftManager::ShiftInfo> lastInfos;
+							if (ccGlobalShiftManager::GetLast(lastInfos))
 							{
-								sasDlg.addShiftInfo(lastInfo);
+								sasDlg.addShiftInfo(lastInfos);
 							}
 							//add entries from file (if any)
 							sasDlg.addFileInfo();
@@ -1424,10 +1424,10 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", shift, scale));
 	sasDlg.setCurrentProfile(index);
 	//add "last" entry (if available)
-	ccGlobalShiftManager::ShiftInfo lastInfo;
-	if (ccGlobalShiftManager::GetLast(lastInfo))
+	std::vector<ccGlobalShiftManager::ShiftInfo> lastInfos;
+	if (ccGlobalShiftManager::GetLast(lastInfos))
 	{
-		sasDlg.addShiftInfo(lastInfo);
+		sasDlg.addShiftInfo(lastInfos);
 	}
 	//add entries from file (if any)
 	sasDlg.addFileInfo();

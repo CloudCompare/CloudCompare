@@ -160,7 +160,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 	}
 
 	FILE* fp = fopen(qPrintable(completeImageDescFilename), "rt");
-	if (fp == NULL)
+	if (fp == nullptr)
 	{
 		ccLog::Error(QString("[IcmFilter::loadCalibratedImages] Error opening file %1!").arg(completeImageDescFilename));
 		return -1;
@@ -174,7 +174,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 	int loadedImages = 0;
 
 	//IL FAUDRAIT ETRE PLUS SOUPLE QUE CA !!!
-	while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp) != NULL)
+	while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp) != nullptr)
 	{
 		if (line[0] == 'D' && line[1] == 'E' && line[2] == 'F')
 		{

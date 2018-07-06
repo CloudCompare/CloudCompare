@@ -697,7 +697,7 @@ public: //extraction of points inside geometrical volumes (sphere, cylinder, box
 		\param params input/output parameters structure
 		\return the number of extracted points
 	**/
-	size_t getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& params) const;
+	std::size_t getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& params) const;
 
 	//! Input/output parameters structure for getPointsInCylindricalNeighbourhoodProgressive
 	struct ProgressiveCylindricalNeighbourhood : CylindricalNeighbourhood
@@ -727,7 +727,7 @@ public: //extraction of points inside geometrical volumes (sphere, cylinder, box
 	/** Can be called multiple times (the 'currentHalfLength' parameter will increase
 		each time until 'maxHalfLength' is reached).
 	**/
-	size_t getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCylindricalNeighbourhood& params) const;
+	std::size_t getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCylindricalNeighbourhood& params) const;
 
 	//! Input/output parameters structure for getPointsInBoxNeighbourhood
 	struct BoxNeighbourhood
@@ -757,7 +757,7 @@ public: //extraction of points inside geometrical volumes (sphere, cylinder, box
 		structure is not used/set
 		\return the number of extracted points
 	**/
-	size_t getPointsInBoxNeighbourhood(BoxNeighbourhood& params) const;
+	std::size_t getPointsInBoxNeighbourhood(BoxNeighbourhood& params) const;
 
 
 public:	/***** CELLS POSITION HANDLING *****/

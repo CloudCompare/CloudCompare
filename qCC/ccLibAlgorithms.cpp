@@ -15,31 +15,33 @@
 //#                                                                        #
 //##########################################################################
 
-#include <QElapsedTimer>
-#include <QInputDialog>
-#include <QMessageBox>
+#include "ccLibAlgorithms.h"
 
-#include "ScalarField.h"
-#include "ScalarFieldTools.h"
+//CCLib
+#include <ScalarFieldTools.h>
 
+//qCC_db
+#include <ccOctree.h>
+#include <ccPointCloud.h>
+#include <ccScalarField.h>
+
+//Local
 #include "ccCommon.h"
 #include "ccConsole.h"
-
-#include "ccOctree.h"
-#include "ccPointCloud.h"
-
 #include "ccCurvatureDlg.h"
 #include "ccDensityDlg.h"
 #include "ccProgressDialog.h"
 #include "ccRegistrationTools.h"
-
-#include "ccLibAlgorithms.h"
 #include "ccUtils.h"
+
+//Qt
+#include <QElapsedTimer>
+#include <QInputDialog>
+#include <QMessageBox>
 
 // This is included only for temporarily removing an object from the tree.
 //	TODO figure out a cleaner way to do this without having to include all of mainwindow.h
 #include "mainwindow.h"
-
 
 namespace ccLibAlgorithms
 {

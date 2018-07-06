@@ -36,6 +36,7 @@
 #include <ccNormalVectors.h>
 #include <ccMaterialSet.h>
 #include <ccPolyline.h>
+#include <ccChunk.h>
 
 //System
 #include <string.h>
@@ -196,8 +197,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		{
 			for (unsigned i=0; i<texCoords->currentSize(); ++i)
 			{
-				const float* tc = texCoords->getValue(i);
-				stream << "vt " << tc[0] << " " << tc[1] << endl;
+				const TexCoords2D& tc = texCoords->getValue(i);
+				stream << "vt " << tc.tx << " " << tc.ty << endl;
 				if (file.error() != QFile::NoError)
 					return CC_FERR_WRITING;
 			}
@@ -514,7 +515,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				//reserve more memory if necessary
 				if (vertices->size() == vertices->capacity())
 				{
-					if (!vertices->reserve(vertices->capacity() + MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
+					if (!vertices->reserve(vertices->capacity() + ccChunk::SIZE))
 					{
 						objWarnings[NOT_ENOUGH_MEMORY] = true;
 						error = true;
@@ -562,7 +563,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 				if (texCoords->currentSize() == texCoords->capacity())
 				{
-					if (!texCoords->reserve(texCoords->capacity() + MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
+					if (!texCoords->reserveSafe(texCoords->capacity() + ccChunk::SIZE))
 					{
 						objWarnings[NOT_ENOUGH_MEMORY] = true;
 						error = true;
@@ -578,11 +579,11 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					break;
 				}
 
-				float T[2] = { T[0] = tokens[1].toFloat(), 0 };
+				TexCoords2D T(tokens[1].toFloat(), 0);
 
 				if (tokens.size() > 2) //OBJ specification allows for only one value!!!
 				{
-					T[1] = tokens[2].toFloat();
+					T.ty = tokens[2].toFloat();
 				}
 
 				texCoords->addElement(T);
@@ -599,7 +600,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 				if (normals->currentSize() == normals->capacity())
 				{
-					if (!normals->reserve(normals->capacity() + MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
+					if (!normals->reserveSafe(normals->capacity() + ccChunk::SIZE))
 					{
 						objWarnings[NOT_ENOUGH_MEMORY] = true;
 						error = true;
@@ -991,9 +992,9 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 		//do some cleaning
 		vertices->shrinkToFit();
 		if (normals)
-			normals->shrinkToFit();
+			normals->shrink_to_fit();
 		if (texCoords)
-			texCoords->shrinkToFit();
+			texCoords->shrink_to_fit();
 		if (baseMesh->size() == 0)
 		{
 			delete baseMesh;

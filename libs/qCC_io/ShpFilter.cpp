@@ -484,11 +484,11 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 		if (!scalarValues.empty())
 		{
 			ccScalarField* sf = new ccScalarField("Measures");
-			if (!sf->reserve(vertCount))
+			if (!sf->reserveSafe(vertCount))
 			{
 				ccLog::Warning(QString("[SHP] Polyline #%1.%2: not enough memory to load scalar values!").arg(index).arg(i + 1));
 				sf->release();
-				sf = 0;
+				sf = nullptr;
 			}
 			for (int32_t j = 0; j < vertCount; ++j)
 			{
@@ -799,11 +799,11 @@ CC_FILE_ERROR LoadCloud(QFile& file,
 			if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
 			{
 				sf = new ccScalarField("Measures");
-				if (!sf->reserve(numPoints))
+				if (!sf->reserveSafe(numPoints))
 				{
 					ccLog::Warning("[SHP] Not enough memory to load scalar values!");
 					sf->release();
-					sf = 0;
+					sf = nullptr;
 				}
 			}
 		}

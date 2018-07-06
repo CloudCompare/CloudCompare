@@ -234,7 +234,7 @@ bool Reference::execute(PdmsObjects::GenericItem* &item) const
 		return endCommand.execute(item);
 	}
 
-	GenericItem* result = NULL;
+	GenericItem* result = nullptr;
 	//Search for the referenced item depending on the reference type
 	if (isNameReference())
 	{
@@ -278,7 +278,7 @@ bool Reference::execute(PdmsObjects::GenericItem* &item) const
 	if (result)
 		item = result;
 
-	return (result != NULL);
+	return (result != nullptr);
 }
 
 
@@ -455,7 +455,7 @@ bool Position::execute(PdmsObjects::GenericItem* &item) const
 		return false;
 
 	//Resolve reference if needed
-	GenericItem* refpos = NULL;
+	GenericItem* refpos = nullptr;
 	if (ref.isValid())
 	{
 		refpos = item;
@@ -487,7 +487,7 @@ bool Orientation::handle(Token t)
 	{
 		if (!current || !current->isValid())
 			return false;
-		current = NULL;
+		current = nullptr;
 		return true;
 	}
 	//PDMS_IS activates last specified component
@@ -517,7 +517,7 @@ bool Orientation::handle(Token t)
 		if (++component >= 3)
 			return false;
 		orientation[component].command = t;
-		current = NULL;
+		current = nullptr;
 		return true;
 	}
 	return false;
@@ -641,7 +641,7 @@ bool Orientation::execute(PdmsObjects::GenericItem* &item) const
 	//Resolve reference if needed
 	for (unsigned i = 0; i < 3; i++)
 	{
-		GenericItem* refori = NULL;
+		GenericItem* refori = nullptr;
 		if (refs[i].isValid())
 		{
 			refori = item;
@@ -879,7 +879,7 @@ bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 
 bool ElementEnding::execute(PdmsObjects::GenericItem* &item) const
 {
-	GenericItem* result = NULL;
+	GenericItem* result = nullptr;
 	switch (command)
 	{
 	case PDMS_OWNER:
@@ -976,7 +976,7 @@ Command* Command::Create(Token t)
 {
 	try
 	{
-		Command *result = NULL;
+		Command *result = nullptr;
 		switch (t)
 		{
 		case PDMS_CREATE:
@@ -1049,13 +1049,13 @@ Command* Command::Create(Token t)
 ///////////////////////////////
 
 GenericItem::GenericItem()
-	: owner(NULL)
-	, creator(NULL)
+	: owner(nullptr)
+	, creator(nullptr)
 	, position(0, 0, 0)
 	, isCoordinateSystemUpToDate(false)
-	, positionReference(NULL)
+	, positionReference(nullptr)
 {
-	orientationReferences[0] = orientationReferences[1] = orientationReferences[2] = NULL;
+	orientationReferences[0] = orientationReferences[1] = orientationReferences[2] = nullptr;
 	orientation[0] = CCVector3(0, 0, 0); orientation[0][0] = 1;
 	orientation[1] = CCVector3(0, 0, 0); orientation[1][1] = 1;
 	orientation[2] = CCVector3(0, 0, 0); orientation[2][2] = 1;

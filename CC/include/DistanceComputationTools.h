@@ -32,7 +32,7 @@ class GenericIndexedMesh;
 class GenericCloud;
 class GenericIndexedCloudPersist;
 class ReferenceCloud;
-class ChunkedPointCloud;
+class PointCloud;
 class GenericProgressCallback;
 struct OctreeAndMeshIntersection;
 class ScalarField;
@@ -186,7 +186,7 @@ public: //distance to clouds or meshes
 		/** The cloud should be initialized but empty on input. It will have the same size as the compared cloud on output.
 			\warning Not compatible with maxSearchDist > 0.
 		**/
-		ChunkedPointCloud* CPSet;
+		PointCloud* CPSet;
 
 		//! Default constructor
 		Cloud2MeshDistanceComputationParams()

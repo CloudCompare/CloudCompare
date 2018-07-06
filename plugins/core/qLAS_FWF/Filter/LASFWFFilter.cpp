@@ -147,7 +147,7 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 				fwfFile.write(description, 32);
 
 				//eventually write the FWF data
-				fwfFile.write((const char*)(&data->front()), data->size());
+				fwfFile.write((const char*)data->data(), data->size());
 			}
 
 			if (fwfFile.error() != QFile::NoError)
@@ -512,11 +512,11 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 
 			if (hasColors)
 			{
-				const ColorCompType* rgb = cloud->getPointColor(i);
+				const ccColor::Rgb& rgb = cloud->getPointColor(i);
 				//DGM: LAS colors are stored on 16 bits!
-				laspoint.set_R(static_cast<U16>(rgb[0]) << 8);
-				laspoint.set_G(static_cast<U16>(rgb[1]) << 8);
-				laspoint.set_B(static_cast<U16>(rgb[2]) << 8);
+				laspoint.set_R(static_cast<U16>(rgb.r) << 8);
+				laspoint.set_G(static_cast<U16>(rgb.g) << 8);
+				laspoint.set_B(static_cast<U16>(rgb.b) << 8);
 			}
 
 			if (hasFWF)
@@ -598,7 +598,7 @@ bool PrepareLASField(ccScalarField*& field, LAS_FIELDS type, unsigned totalCount
 
 	//try to reserve the memory to store the field values
 	field = new ccScalarField(LAS_FIELD_NAMES[type]);
-	if (!field->reserve(totalCount))
+	if (!field->reserveSafe(totalCount))
 	{
 		ccLog::Warning(QString("[LAS] Not enough memory to load a field: '%1'").arg(LAS_FIELD_NAMES[type]));
 		field->release();
@@ -814,7 +814,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 					break;
 				}
 
-				fwfDataSource.read((char*)(&(container->front())), fwfDataCount);
+				fwfDataSource.read((char*)container->data(), fwfDataCount);
 				fwfDataSource.close();
 
 				cloud->fwfData() = ccPointCloud::SharedFWFDataContainer(container);
@@ -924,7 +924,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 							for (unsigned i = 0; i < cloud->size(); ++i)
 							{
 								//set all previous colors!
-								cloud->addRGBColor(ccColor::black.rgba);
+								cloud->addRGBColor(ccColor::black);
 							}
 						}
 					}
@@ -945,7 +945,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 							for (unsigned i = 0; i < cloud->size(); ++i)
 							{
 								//reset all previous colors!
-								cloud->setPointColor(i, ccColor::black.rgba);
+								cloud->setPointColor(i, ccColor::black);
 							}
 						}
 					}
@@ -954,7 +954,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 										static_cast<unsigned char>((point.rgb[1] >> colorBitDec) & 255),
 										static_cast<unsigned char>((point.rgb[2] >> colorBitDec) & 255));
 
-					cloud->addRGBColor(color.rgb);
+					cloud->addRGBColor(color);
 				}
 			}
 

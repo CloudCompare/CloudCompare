@@ -63,7 +63,7 @@ public: //base members access
 	inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::HIERARCHY_OBJECT; }
 
 	//! Returns parent object
-	/** \return parent object (NULL if no parent)
+	/** \return parent object (nullptr if no parent)
 	**/
 	inline ccHObject* getParent() const { return m_parent; }
 
@@ -128,13 +128,13 @@ public: //children management
 
 	//! Returns the ith child
 	/** \param childPos child position
-		\return child object (or NULL if wrong position)
+		\return child object (or nullptr if wrong position)
 	**/
 	inline ccHObject* getChild(unsigned childPos) const { return (childPos < getChildrenNumber() ? m_children[childPos] : 0); }
 
 	//! Finds an entity in this object hierarchy
 	/** \param uniqueID child unique ID
-		\return child (or NULL if not found)
+		\return child (or nullptr if not found)
 	**/
 	ccHObject* find(unsigned uniqueID);
 

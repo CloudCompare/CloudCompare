@@ -367,26 +367,23 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 	{
 		ccGenericPointCloud* inputCloud = ccHObjectCaster::ToGenericPointCloud(obj);
 
-		ccGenericPointCloud::VisibilityTableType* selectionTable = new ccGenericPointCloud::VisibilityTableType;
-		if (!selectionTable->resize(inputCloud->size()))
+		ccGenericPointCloud::VisibilityTableType selectionTable;
+		try
 		{
-			selectionTable->release();
-			selectionTable = 0;
-			
+			selectionTable.resize(inputCloud->size());
+		}
+		catch (const std::bad_alloc&)
+		{
 			if (!silent)
 			{
 				ccLog::Error("Not enough memory!");
 			}
 			return 0;
 		}
-		clipBox->flagPointsInside(inputCloud, selectionTable);
+		clipBox->flagPointsInside(inputCloud, &selectionTable);
 		
-		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, selectionTable);
+		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, &selectionTable);
 		
-		//we don't need the table anymore
-		selectionTable->release();
-		selectionTable = 0;
-
 		if (!sliceCloud && !silent)
 		{
 			ccLog::Error("Not enough memory!");

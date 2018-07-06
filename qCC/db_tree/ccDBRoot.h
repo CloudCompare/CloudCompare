@@ -126,7 +126,7 @@ public:
 	//! Returns selected entities in DB tree (optionally with a given type and additional information)
 	size_t getSelectedEntities(	ccHObject::Container& selectedEntities,
 								CC_CLASS_ENUM filter = CC_TYPES::OBJECT,
-								dbTreeSelectionInfo* info = NULL);
+								dbTreeSelectionInfo* info = nullptr);
 
 	//! Expands tree at a given node
 	void expandElement(ccHObject* object, bool state);

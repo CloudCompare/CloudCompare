@@ -25,6 +25,9 @@
 //qCC_db
 #include "ccAdvancedTypes.h"
 
+//system
+#include <vector>
+
 class ccGenericPointCloud;
 class ccPointCloud;
 class ccOctree;
@@ -64,7 +67,7 @@ public:
 	/** \return the number of resolved points
 	**/
 	unsigned updateResolvedTable(	ccGenericPointCloud* theCloud,
-									GenericChunkedArray<1,unsigned char> &resolved,
+									std::vector<unsigned char>& resolved,
 									NormsIndexesTableType* theNorms);
 
 	//inherited methods (see FastMarchingAlgorithm)

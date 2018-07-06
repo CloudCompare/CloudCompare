@@ -16,12 +16,12 @@
 //#                                                                        #
 //##########################################################################
 
-#include "Delaunay2dMesh.h"
+#include <Delaunay2dMesh.h>
 
 //local
-#include "ChunkedPointCloud.h"
-#include "ManualSegmentationTools.h"
-#include "Polyline.h"
+#include <PointCloud.h>
+#include <ManualSegmentationTools.h>
+#include <Polyline.h>
 
 #if defined(USE_CGAL_LIB)
 //CGAL Lib
@@ -82,16 +82,16 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 
 	//CGAL boilerplate
 	typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-	//We define a vertex_base with info. The "info" (size_t) allow us to keep track of the original point index.
-	typedef CGAL::Triangulation_vertex_base_with_info_2<size_t, K> Vb;
+	//We define a vertex_base with info. The "info" (std::size_t) allow us to keep track of the original point index.
+	typedef CGAL::Triangulation_vertex_base_with_info_2<std::size_t, K> Vb;
 	typedef CGAL::Constrained_triangulation_face_base_2<K> Fb;
 	typedef CGAL::No_intersection_tag  Itag; //This tag could ben changed if we decide to handle intersection
 	typedef CGAL::Triangulation_data_structure_2<Vb, Fb> Tds;
 	typedef CGAL::Constrained_Delaunay_triangulation_2<K, Tds, Itag> CDT;
 	typedef CDT::Point cgalPoint;
 
-	std::vector< std::pair<cgalPoint, size_t > > constraints;
-	size_t constrCount = segments2D.size();
+	std::vector< std::pair<cgalPoint, std::size_t > > constraints;
+	std::size_t constrCount = segments2D.size();
 
 	try
 	{
@@ -107,7 +107,7 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 	CDT cdt;
 
 	//We build the constraints
-	for(size_t i = 0; i < constrCount; ++i) {
+	for(std::size_t i = 0; i < constrCount; ++i) {
 		const CCVector2 * pt = &points2D[segments2D[i]];
 		constraints.emplace_back(cgalPoint(pt->x, pt->y), segments2D[i]);
 	}
@@ -141,21 +141,21 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 }
 
 bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
-								size_t pointCountToUse/*=0*/,
+								std::size_t pointCountToUse/*=0*/,
 								char* outputErrorStr/*=0*/)
 {
 #if defined(USE_CGAL_LIB)
 
 	//CGAL boilerplate
 	typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-	//We define a vertex_base with info. The "info" (size_t) allow us to keep track of the original point index.
-	typedef CGAL::Triangulation_vertex_base_with_info_2<size_t, K> Vb;
+	//We define a vertex_base with info. The "info" (std::size_t) allow us to keep track of the original point index.
+	typedef CGAL::Triangulation_vertex_base_with_info_2<std::size_t, K> Vb;
 	typedef CGAL::Triangulation_data_structure_2<Vb> Tds;
 	typedef CGAL::Delaunay_triangulation_2<K, Tds> DT;
 	typedef DT::Point cgalPoint;
 
-	std::vector< std::pair<cgalPoint, size_t > > pts;
-	size_t pointCount = points2D.size();
+	std::vector< std::pair<cgalPoint, std::size_t > > pts;
+	std::size_t pointCount = points2D.size();
 
 	//we will use at most 'pointCountToUse' points (if not 0)
 	if (pointCountToUse > 0 && pointCountToUse < pointCount)
@@ -187,7 +187,7 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 		m_triIndexes = nullptr;
 	}
 
-	for(size_t i = 0; i < pointCount; ++i) {
+	for(std::size_t i = 0; i < pointCount; ++i) {
 		const CCVector2 * pt = &points2D[i];
 		pts.emplace_back(cgalPoint(pt->x, pt->y), i);
 	}
@@ -229,7 +229,7 @@ bool Delaunay2dMesh::removeOuterTriangles(	const std::vector<CCVector2>& vertice
 		return false;
 
 	//we expect the same number of 2D points as the actual number of points in the associated mesh (if any)
-	if (m_associatedCloud && static_cast<size_t>(m_associatedCloud->size()) != vertices2D.size())
+	if (m_associatedCloud && static_cast<std::size_t>(m_associatedCloud->size()) != vertices2D.size())
 		return false;
 
 	unsigned lastValidIndex = 0;

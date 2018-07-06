@@ -205,11 +205,11 @@ void ccSSAOFilter::sampleSphere()
 {
 	// Initialize the sobol QRNG
 	rk_sobol_state s;
-	if (rk_sobol_init(3, &s, NULL, rk_sobol_Ldirections, NULL) != RK_SOBOL_OK)
+	if (rk_sobol_init(3, &s, nullptr, rk_sobol_Ldirections, NULL) != RK_SOBOL_OK)
 	{
 		return;
 	}
-	rk_sobol_randomshift(&s, NULL);
+	rk_sobol_randomshift(&s, nullptr);
 
 	//	draw in sphere
 	float* ssao_neighbours = m_ssao_neighbours;

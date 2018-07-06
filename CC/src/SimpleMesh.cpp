@@ -21,45 +21,37 @@
 //local
 #include "GenericIndexedCloud.h"
 
+//System
+#include <assert.h>
+
 using namespace CCLib;
 
 SimpleMesh::SimpleMesh(GenericIndexedCloud* _theVertices, bool linkVerticesWithMesh)
 	: GenericIndexedMesh()
-	, m_triIndexes(nullptr)
 	, globalIterator(0)
 	, theVertices(_theVertices)
 	, verticesLinked(linkVerticesWithMesh)
-	, bbMin(0,0,0)
-	, bbMax(0,0,0)
-	, bbIsValid(false)
 {
-	m_triIndexes = new TriangleIndexesContainer();
-	m_triIndexes->link();
 }
 
 SimpleMesh::~SimpleMesh()
 {
 	if (theVertices && verticesLinked)
-        delete theVertices;
-
-	m_triIndexes->release();
+	{
+		delete theVertices;
+		theVertices = nullptr;
+	}
 }
-
-unsigned SimpleMesh::size() const
-{
-    return m_triIndexes->currentSize();
-};
 
 void SimpleMesh::forEach(genericTriangleAction action)
 {
 	SimpleTriangle tri;
-	unsigned count = m_triIndexes->currentSize();
-	for (unsigned i=0; i<count; ++i)
+	std::size_t count = m_triIndexes.size();
+	for (VerticesIndexes& ti : m_triIndexes)
 	{
-		const unsigned *ti = m_triIndexes->getValue(i);
-		theVertices->getPoint(ti[0],tri.A);
-		theVertices->getPoint(ti[1],tri.B);
-		theVertices->getPoint(ti[2],tri.C);
+		theVertices->getPoint(ti.i1, tri.A);
+		theVertices->getPoint(ti.i2, tri.B);
+		theVertices->getPoint(ti.i3, tri.C);
 		action(tri);
 	}
 }
@@ -76,110 +68,82 @@ GenericTriangle* SimpleMesh::_getNextTriangle()
 
 GenericTriangle* SimpleMesh::_getTriangle(unsigned triangleIndex)
 {
-	assert(triangleIndex<m_triIndexes->currentSize());
+	assert(triangleIndex < m_triIndexes.size());
 
-	const unsigned *ti = m_triIndexes->getValue(triangleIndex);
-	theVertices->getPoint(ti[0],dummyTriangle.A);
-	theVertices->getPoint(ti[1],dummyTriangle.B);
-	theVertices->getPoint(ti[2],dummyTriangle.C);
+	const VerticesIndexes& ti = m_triIndexes[triangleIndex];
+	theVertices->getPoint(ti.i1, dummyTriangle.A);
+	theVertices->getPoint(ti.i2, dummyTriangle.B);
+	theVertices->getPoint(ti.i3, dummyTriangle.C);
 
 	return &dummyTriangle; //temporary!
 }
 
 void SimpleMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const
 {
-	assert(triangleIndex<m_triIndexes->currentSize());
+	assert(triangleIndex<m_triIndexes.size());
 
-	const unsigned *ti = m_triIndexes->getValue(triangleIndex);
-	theVertices->getPoint(ti[0],A);
-	theVertices->getPoint(ti[1],B);
-	theVertices->getPoint(ti[2],C);
-}
-
-void SimpleMesh::updateBBWithPoint(const CCVector3* P)
-{
-    if (bbIsValid)
-    {
-        if (bbMin.x>P->x)
-            bbMin.x = P->x;
-        else if (bbMax.x<P->x)
-            bbMax.x = P->x;
-
-        if (bbMin.y>P->y)
-            bbMin.y = P->y;
-        else if (bbMax.y<P->y)
-            bbMax.y = P->y;
-
-        if (bbMin.z>P->z)
-            bbMin.z = P->z;
-        else if (bbMax.z<P->z)
-            bbMax.z = P->z;
-    }
-	else
-    {
-        bbMin = bbMax = *P;
-        bbIsValid = true;
-    }
+	const VerticesIndexes& ti = m_triIndexes[triangleIndex];
+	theVertices->getPoint(ti.i1, A);
+	theVertices->getPoint(ti.i2, B);
+	theVertices->getPoint(ti.i3, C);
 }
 
 void SimpleMesh::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 {
-    /* TODO: how can we know if the vertices cloud changes?!
-    if (!bbIsValid)
-    {
-        unsigned i,n=m_triIndexes->size();
-        if (n>0)
-        {
-            m_triIndexes->placeIteratorAtBeginning();
-            for (i=0;i<n;++i)
-            {
-                const unsigned *ti = m_triIndexes->getCurrentValue();
-                updateBBWithPoint(theVertices->getPoint(ti[0]));
-                updateBBWithPoint(theVertices->getPoint(ti[1]));
-                updateBBWithPoint(theVertices->getPoint(ti[2]));
-                m_triIndexes->forwardIterator();
-            }
-        }
-        else
-        {
-            bbMin.x=bbMin.y=bbMin.z=0.0;
-            bbMax.x=bbMax.y=bbMax.z=0.0;
-            bbIsValid = true;
-        }
-    }
+	////TODO: how can we know if the vertices cloud changes?!
+	//if (!m_bbox.isValid())
+	//{
+	//	m_bbox.clear();
+	//	for (const VerticesIndexes& ti : m_triIndexes)
+	//	{
+	//		m_bbox.add(*theVertices->getPoint(ti.i1));
+	//		m_bbox.add(*theVertices->getPoint(ti.i2));
+	//		m_bbox.add(*theVertices->getPoint(ti.i3));
+	//	}
+	//}
 
-    memcpy(Mins,bbMin.u,3*sizeof(PointCoordinateType));
-    memcpy(Maxs,bbMax.u,3*sizeof(PointCoordinateType));
-    */
+	//bbMin = m_bbox.minCorner();
+	//bbMax = m_bbox.maxCorner();
 
-    return theVertices->getBoundingBox(bbMin,bbMax);
+	return theVertices->getBoundingBox(bbMin, bbMax);
 }
 
-//specific methods
 void SimpleMesh::addTriangle(unsigned i1, unsigned i2, unsigned i3)
 {
-	unsigned t[3] = {i1,i2,i3};
-	m_triIndexes->addElement(t);
+	m_triIndexes.push_back(VerticesIndexes(i1, i2, i3));
 
-	bbIsValid = false;
+	m_bbox.setValidity(false);
 }
 
 bool SimpleMesh::reserve(unsigned n)
 {
-	return m_triIndexes->reserve(n);
+	try
+	{
+		m_triIndexes.reserve(n);
+	}
+	catch (const std::bad_alloc&)
+	{
+		return false;
+	}
+	return true;
 }
 
 bool SimpleMesh::resize(unsigned n)
 {
-    if (n<m_triIndexes->currentSize())
-        bbIsValid = false;
-
-	return m_triIndexes->resize(n);
+	try
+	{
+		m_triIndexes.resize(n);
+	}
+	catch (const std::bad_alloc&)
+	{
+		return false;
+	}
+	return true;
 }
 
 VerticesIndexes* SimpleMesh::getTriangleVertIndexes(unsigned triangleIndex)
 {
-	return reinterpret_cast<VerticesIndexes*>(m_triIndexes->getValue(triangleIndex));
+	return &(m_triIndexes[triangleIndex]);
 }
 
 VerticesIndexes* SimpleMesh::getNextTriangleVertIndexes()

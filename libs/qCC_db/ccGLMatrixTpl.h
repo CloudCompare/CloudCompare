@@ -804,16 +804,16 @@ public:
 	//! Applies transformation to a 3D vector (in place) - double version
 	/** Input vector is directly modified after calling this method
 	**/
-	inline void apply(Vector3Tpl<double>& vec) const	{ vec = (*this)*vec; }
+	inline void apply(Vector3Tpl<double>& vec) const { vec = (*this)*vec; }
 
 	//! Applies transformation to a 4D vector (in place) - float version
 	/** Input vector is directly modified after calling this method
 	**/
-	inline void apply(Tuple4Tpl<float>& vec) const	{ vec = (*this)*vec; }
+	inline void apply(Tuple4Tpl<float>& vec) const { vec = (*this)*vec; }
 	//! Applies transformation to a 3D vector (in place) - double version
 	/** Input vector is directly modified after calling this method
 	**/
-	inline void apply(Tuple4Tpl<double>& vec) const	{ vec = (*this)*vec; }
+	inline void apply(Tuple4Tpl<double>& vec) const { vec = (*this)*vec; }
 
 	//! Get the resulting transformation along X dimension (float version)
 	inline float applyX(const Vector3Tpl<float>& vec) const

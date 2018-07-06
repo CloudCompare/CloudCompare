@@ -635,8 +635,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(*p);
 		assert(cloud);
 
-		ccGenericPointCloud::VisibilityTableType* visibilityArray = cloud->getTheVisibilityArray();
-		assert(visibilityArray);
+		ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
+		assert(!visibilityArray.empty());
 
 		unsigned cloudSize = cloud->size();
 
@@ -646,7 +646,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 #endif
 		for (int i = 0; i < static_cast<int>(cloudSize); ++i)
 		{
-			if (visibilityArray->getValue(i) == POINT_VISIBLE)
+			if (visibilityArray[i] == POINT_VISIBLE)
 			{
 				const CCVector3* P3D = cloud->getPoint(i);
 
@@ -658,7 +658,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 				
 				bool pointInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
 
-				visibilityArray->setValue(i, keepPointsInside != pointInside ? POINT_HIDDEN : POINT_VISIBLE );
+				visibilityArray[i] = (keepPointsInside != pointInside ? POINT_HIDDEN : POINT_VISIBLE);
 			}
 		}
 	}

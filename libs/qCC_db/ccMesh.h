@@ -143,7 +143,7 @@ public:
 	/** \param n the number of triangles to reserve
 		\return true if the method succeeds, false otherwise
 	**/
-	bool reserve(unsigned n);
+	bool reserve(size_t n);
 
 	//! Resizes the array of vertex indexes (3 per triangle)
 	/** If the new number of elements is smaller than the actual size,
@@ -151,7 +151,7 @@ public:
 		\param n the new number of triangles
 		\return true if the method succeeds, false otherwise
 	**/
-	bool resize(unsigned n);
+	bool resize(size_t n);
 
 	//! Removes unused capacity
 	inline void shrinkToFit() { if (size() < capacity()) resize(size()); }
@@ -252,7 +252,7 @@ public:
 	void addTriangleMtlIndex(int mtlIndex);
 
 	//! Container of per-triangle material descriptors
-	typedef GenericChunkedArray<1,int> triangleMaterialIndexesSet;
+	typedef ccArray<int, 1, int> triangleMaterialIndexesSet;
 
 	//! Sets per-triangle material indexes array
 	void setTriangleMtlIndexesTable(triangleMaterialIndexesSet* matIndexesTable, bool autoReleaseOldTable = true);
@@ -277,7 +277,7 @@ public:
 	//inherited from ccGenericMesh
 	virtual bool hasTextures() const override;
 	virtual TextureCoordsContainer* getTexCoordinatesTable() const override { return m_texCoords; }
-	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const override;
+	virtual void getTriangleTexCoordinates(unsigned triIndex, TexCoords2D* &tx1, TexCoords2D* &tx2, TexCoords2D* &tx3) const override;
 	virtual bool hasPerTriangleTexCoordIndexes() const override { return m_texCoordIndexes && m_texCoordIndexes->isAllocated(); }
 	virtual void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
 
@@ -389,11 +389,11 @@ protected:
 	virtual void onDeletionOf(const ccHObject* obj) override;
 
 	//! Same as other 'computeInterpolationWeights' method with a set of 3 vertices indexes
-	void computeInterpolationWeights(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3d& weights) const;
+	void computeInterpolationWeights(const CCLib::VerticesIndexes& vertIndexes, const CCVector3& P, CCVector3d& weights) const;
 	//! Same as other 'interpolateNormals' method with a set of 3 vertices indexes
-	bool interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3& N, const int* triNormIndexes = 0);
+	bool interpolateNormals(const CCLib::VerticesIndexes& vertIndexes, const CCVector3& P, CCVector3& N, const Tuple3i* triNormIndexes = 0);
 	//! Same as other 'interpolateColors' method with a set of 3 vertices indexes
-	bool interpolateColors(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, ccColor::Rgb& C);
+	bool interpolateColors(const CCLib::VerticesIndexes& vertIndexes, const CCVector3& P, ccColor::Rgb& C);
 
 	//! Used internally by 'subdivide'
 	bool pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC);
@@ -436,7 +436,7 @@ protected:
 	ccMaterialSet* m_materials;
 
 	//! Container of per-triangle vertices indexes (3)
-	typedef GenericChunkedArray<3,unsigned> triangleIndexesContainer;
+	typedef ccArray<CCLib::VerticesIndexes, 3, unsigned> triangleIndexesContainer;
 	//! Triangles' vertices indexes (3 per triangle)
 	triangleIndexesContainer* m_triVertIndexes;
 
@@ -452,12 +452,12 @@ protected:
 	triangleMaterialIndexesSet* m_triMtlIndexes;
 
 	//! Set of triplets of indexes referring to mesh texture coordinates
-	typedef GenericChunkedArray<3,int> triangleTexCoordIndexesSet;
+	typedef ccArray<Tuple3i, 3, int> triangleTexCoordIndexesSet;
 	//! Mesh tex coords indexes (per-triangle)
 	triangleTexCoordIndexesSet* m_texCoordIndexes;
 
 	//! Set of triplets of indexes referring to mesh normals
-	typedef GenericChunkedArray<3,int> triangleNormalsIndexesSet;
+	typedef ccArray<Tuple3i, 3, int> triangleNormalsIndexesSet;
 	//! Mesh normals indexes (per-triangle)
 	triangleNormalsIndexesSet* m_triNormalIndexes;
 };

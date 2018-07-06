@@ -172,15 +172,15 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 	unsigned pointsRead = 0;
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-	for (unsigned i=0; i<numberOfPoints; i++)
+	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
 		//if we reach the max. cloud size limit, we cerate a new chunk
-		if (pointsRead == fileChunkPos+fileChunkSize)
+		if (pointsRead == fileChunkPos + fileChunkSize)
 		{
 			if (loadedCloud)
 				container.addChild(loadedCloud);
 			fileChunkPos = pointsRead;
-			fileChunkSize = std::min<unsigned>(numberOfPoints-pointsRead,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
+			fileChunkSize = std::min<unsigned>(numberOfPoints - pointsRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 			loadedCloud = new ccPointCloud(QString("unnamed - Cloud #%1").arg(++chunkIndex));
 			if (!loadedCloud || !loadedCloud->reserveThePointsTable(fileChunkSize) || !loadedCloud->reserveTheNormsTable())
 			{
@@ -195,12 +195,10 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 
 		//we read the 3 coordinates of the point
 		float rBuff[3];
-		if (in.read((char*)rBuff,3*sizeof(float))>=0)
+		if (in.read((char*)rBuff, 3 * sizeof(float)) >= 0)
 		{
 			//conversion to CCVector3
-			CCVector3 P((PointCoordinateType)rBuff[0],
-						(PointCoordinateType)rBuff[1],
-						(PointCoordinateType)rBuff[2]);
+			CCVector3 P = CCVector3::fromArray(rBuff);
 			loadedCloud->addPoint(P);
 		}
 		else

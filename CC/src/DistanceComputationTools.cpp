@@ -16,22 +16,22 @@
 //#                                                                        #
 //##########################################################################
 
-#include "DistanceComputationTools.h"
+#include <DistanceComputationTools.h>
 
 //local
-#include "ChunkedPointCloud.h"
-#include "DgmOctreeReferenceCloud.h"
-#include "FastMarchingForPropagation.h"
-#include "LocalModel.h"
-#include "ReferenceCloud.h"
-#include "SaitoSquaredDistanceTransform.h"
-#include "ScalarField.h"
-#include "ScalarFieldTools.h"
-#include "SimpleTriangle.h"
+#include <PointCloud.h>
+#include <DgmOctreeReferenceCloud.h>
+#include <FastMarchingForPropagation.h>
+#include <LocalModel.h>
+#include <ReferenceCloud.h>
+#include <SaitoSquaredDistanceTransform.h>
+#include <ScalarField.h>
+#include <ScalarFieldTools.h>
+#include <SimpleTriangle.h>
 
 //system
-#include <cassert>
-
+#include <assert.h>
+#include <algorithm>
 
 #ifdef USE_QT
 #ifndef CC_DEBUG
@@ -101,7 +101,7 @@ namespace CCLib
 			if (perCellTriangleList.isInitialized())
 			{
 				TriangleList** data = perCellTriangleList.data();
-				for (size_t i=0; i<perCellTriangleList.totalCellCount(); ++i, ++data)
+				for (std::size_t i=0; i<perCellTriangleList.totalCellCount(); ++i, ++data)
 				{
 					if (*data)
 						delete (*data);
@@ -973,7 +973,7 @@ void ComparePointsAndTriangles(	ReferenceCloud& Yk,
 								unsigned& remainingPoints,
 								CCLib::GenericIndexedMesh* mesh,
 								std::vector<unsigned>& trianglesToTest,
-								size_t& trianglesToTestCount,
+								std::size_t& trianglesToTestCount,
 								std::vector<ScalarType>& minDists,
 								ScalarType maxRadius,
 								CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams& params)
@@ -1171,8 +1171,8 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 
 	//useful variables
 	std::vector<unsigned> trianglesToTest;
-	size_t trianglesToTestCount = 0;
-	size_t trianglesToTestCapacity = 0;
+	std::size_t trianglesToTestCount = 0;
+	std::size_t trianglesToTestCapacity = 0;
 
 	//bit mask for efficient comparisons
 	std::vector<bool>* bitArray = nullptr;
@@ -1458,8 +1458,8 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 
 		//variables
 		std::vector<unsigned> trianglesToTest;
-		size_t trianglesToTestCount = 0;
-		size_t trianglesToTestCapacity = 0;
+		std::size_t trianglesToTestCount = 0;
+		std::size_t trianglesToTestCapacity = 0;
 		unsigned numberOfTriangles = mesh->size();
 
 		//acceleration structure
@@ -1591,7 +1591,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 										trianglesToTest.resize(trianglesToTestCapacity);
 									}
 									//let's test all the triangles that intersect this cell
-									for (size_t p = 0; p < triList->indexes.size(); ++p)
+									for (std::size_t p = 0; p < triList->indexes.size(); ++p)
 									{
 										if (!processTriangles.empty())
 										{
@@ -1626,7 +1626,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 										trianglesToTest.resize(trianglesToTestCapacity);
 									}
 									//let's test all the triangles that intersect this cell
-									for (size_t p = 0; p < triList->indexes.size(); ++p)
+									for (std::size_t p = 0; p < triList->indexes.size(); ++p)
 									{
 										if (!processTriangles.empty())
 										{
@@ -1659,7 +1659,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 										trianglesToTest.resize(trianglesToTestCapacity);
 									}
 									//let's test all the triangles that intersect this cell
-									for (size_t p = 0; p < triList->indexes.size(); ++p)
+									for (std::size_t p = 0; p < triList->indexes.size(); ++p)
 									{
 										if (!processTriangles.empty())
 										{
@@ -2204,12 +2204,12 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* 
 
 	//we search the max @ 'percent'% (to avoid outliers)
 	std::vector<PointCoordinateType> tail;
-	size_t tailSize = static_cast<size_t>(ceil(static_cast<float>(count) * percent));
+	std::size_t tailSize = static_cast<std::size_t>(ceil(static_cast<float>(count) * percent));
 	tail.resize(tailSize);
 
 	//compute deviations
 	cloud->placeIteratorAtBeginning();
-	size_t pos = 0;
+	std::size_t pos = 0;
 	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = cloud->getNextPoint();
@@ -2225,11 +2225,11 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* 
 		}
 
 		//search the max element of the tail
-		size_t maxPos = pos-1;
+		std::size_t maxPos = pos-1;
 		if (maxPos != 0)
 		{
-			size_t maxIndex = maxPos;
-			for (size_t j=0; j<maxPos; ++j)
+			std::size_t maxIndex = maxPos;
+			for (std::size_t j=0; j<maxPos; ++j)
 				if (tail[j] < tail[maxIndex])
 					maxIndex = j;
 			//and put it to the back!

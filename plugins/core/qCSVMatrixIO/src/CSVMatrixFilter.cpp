@@ -201,18 +201,18 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 				if (mesh)
 				{
 					TextureCoordsContainer* texCoords = new TextureCoordsContainer();
-					if (	texCoords->reserve(cloud->size())
+					if (	texCoords->reserveSafe(cloud->size())
 						&&	mesh->reservePerTriangleTexCoordIndexes()
 						&&	mesh->reservePerTriangleMtlIndexes())
 					{
 						//generate texture coordinates
 						{
-							for (unsigned j=0; j<rowCount; ++j)
+							for (unsigned j = 0; j < rowCount; ++j)
 							{
-								float coord[2] = { 0, static_cast<float>(j)/(rowCount-1) };
-								for (unsigned i=0; i<colCount; ++i)
+								TexCoords2D coord(0, static_cast<float>(j) / (rowCount - 1));
+								for (unsigned i = 0; i < colCount; ++i)
 								{
-									coord[0] = static_cast<float>(i)/(colCount-1);
+									coord.tx = static_cast<float>(i) / (colCount - 1);
 									texCoords->addElement(coord);
 								}
 							}
@@ -227,10 +227,10 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 						mesh->setMaterialSet(matSet);
 
 						//assign texture coordinaetes and material to each triangle
-						for (unsigned i=0; i<mesh->size(); ++i)
+						for (unsigned i = 0; i < mesh->size(); ++i)
 						{
 							CCLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
-							mesh->addTriangleTexCoordIndexes(tsi->i1,tsi->i2,tsi->i3);
+							mesh->addTriangleTexCoordIndexes(tsi->i1, tsi->i2, tsi->i3);
 							mesh->addTriangleMtlIndex(0);
 						}
 
@@ -252,12 +252,12 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 					}
 					else if (cloud->reserveTheRGBTable())
 					{
-						for (unsigned j=0; j<rowCount; ++j)
+						for (unsigned j = 0; j < rowCount; ++j)
 						{
-							for (unsigned i=0; i<colCount; ++i)
+							for (unsigned i = 0; i < colCount; ++i)
 							{
-								QRgb col = texture.pixel(static_cast<int>(i),static_cast<int>(j));
-								cloud->addRGBColor(ccColor::FromQRgb(col).rgb);
+								QRgb col = texture.pixel(static_cast<int>(i), static_cast<int>(j));
+								cloud->addRGBColor(ccColor::FromQRgb(col));
 							}
 						}
 						cloud->showColors(true);

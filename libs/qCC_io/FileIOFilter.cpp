@@ -235,6 +235,16 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 									*container,
 									loadParameters);
 	}
+	catch (const std::exception& e)
+	{
+		ccLog::Warning(QString("[I/O] CC has caught an exception while loading file '%1'").arg(filename));
+		ccLog::Warning(QString("[I/O] Exception: %1").arg(e.what()));
+		if (container)
+		{
+			container->removeAllChildren();
+		}
+		result = CC_FERR_CONSOLE_ERROR;
+	}
 	catch (...)
 	{
 		ccLog::Warning(QString("[I/O] CC has caught an unhandled exception while loading file '%1'").arg(filename));

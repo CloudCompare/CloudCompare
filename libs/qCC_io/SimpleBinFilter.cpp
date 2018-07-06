@@ -490,7 +490,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 			sfDesc.name = QString("Scalar field #%1").arg(i + 1);
 		}
 		sfDesc.sf = new ccScalarField(qPrintable(sfDesc.name));
-		if (!sfDesc.sf->reserve(static_cast<unsigned>(descriptor.pointCount)))
+		if (!sfDesc.sf->reserveSafe(static_cast<unsigned>(descriptor.pointCount)))
 		{
 			sfDesc.sf->release();
 			sfDesc.sf = nullptr;

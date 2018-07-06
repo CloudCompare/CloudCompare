@@ -248,7 +248,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 												ccColor::Rgb col;
 												if (mesh->interpolateColors(origTriIndex, *Vcj, col))
 												{
-													croppedVertices->setPointColor(vertIndex,col.rgb);
+													croppedVertices->setPointColor(vertIndex, col);
 												}
 											}
 
@@ -377,16 +377,16 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 								{
 									TextureCoordsContainer* texCoords = new TextureCoordsContainer;
 									if (	croppedMesh->reservePerTriangleTexCoordIndexes()
-										&&	texCoords->reserve(croppedMesh->size()*3))
+										&&	texCoords->reserveSafe(croppedMesh->size()*3))
 									{
 										//for each new triangle
 										for (unsigned i = 0; i < croppedMesh->size(); ++i)
 										{
 											//get the origin triangle
 											unsigned origTriIndex = origTriIndexes[i];
-											float* tx1 = 0;
-											float* tx2 = 0;
-											float* tx3 = 0;
+											TexCoords2D* tx1 = 0;
+											TexCoords2D* tx2 = 0;
+											TexCoords2D* tx3 = 0;
 											mesh->getTriangleTexCoordinates(origTriIndex, tx1, tx2, tx3);
 
 											//get the new triangle
@@ -407,11 +407,11 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 													&&	(tx2 || w.u[1] < ZERO_TOLERANCE)
 													&&	(tx3 || w.u[2] < ZERO_TOLERANCE) )
 												{
-													float t[2] = {	static_cast<float>((tx1 ? tx1[0]*w.u[0] : 0.0) + (tx2 ? tx2[0]*w.u[1] : 0.0) + (tx3 ? tx3[0]*w.u[2] : 0.0)),
-																	static_cast<float>((tx1 ? tx1[1]*w.u[0] : 0.0) + (tx2 ? tx2[1]*w.u[1] : 0.0) + (tx3 ? tx3[1]*w.u[2] : 0.0)) };
+													TexCoords2D t(	static_cast<float>((tx1 ? tx1->tx*w.u[0] : 0.0) + (tx2 ? tx2->tx*w.u[1] : 0.0) + (tx3 ? tx3->tx*w.u[2] : 0.0)),
+																	static_cast<float>((tx1 ? tx1->ty*w.u[0] : 0.0) + (tx2 ? tx2->ty*w.u[1] : 0.0) + (tx3 ? tx3->ty*w.u[2] : 0.0)) );
 
 													texCoords->addElement(t);
-													texIndexes[j] = static_cast<int>(texCoords->currentSize())-1;
+													texIndexes[j] = static_cast<int>(texCoords->currentSize()) - 1;
 												}
 											}
 											

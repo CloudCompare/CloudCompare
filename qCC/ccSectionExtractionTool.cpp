@@ -49,12 +49,12 @@
 #include <cmath>
 
 //default parameters
-static const ccColor::Rgba& s_defaultPolylineColor = ccColor::magenta;
-static const ccColor::Rgba& s_defaultContourColor = ccColor::green;
-static const ccColor::Rgba& s_defaultEditedPolylineColor = ccColor::green;
-static const ccColor::Rgba& s_defaultSelectedPolylineColor = ccColor::red;
-static const int            s_defaultPolylineWidth = 1;
-static const int            s_defaultSelectedPolylineWidth = 3;
+static const ccColor::Rgb& s_defaultPolylineColor = ccColor::magenta;
+static const ccColor::Rgb& s_defaultContourColor = ccColor::green;
+static const ccColor::Rgb& s_defaultEditedPolylineColor = ccColor::green;
+static const ccColor::Rgb& s_defaultSelectedPolylineColor = ccColor::red;
+static const int           s_defaultPolylineWidth = 1;
+static const int           s_defaultSelectedPolylineWidth = 3;
 
 //default export groups
 static unsigned s_polyExportGroupID = 0;

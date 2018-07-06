@@ -56,7 +56,7 @@ static const int DEL_BUTTON_COL_INDEX	= 4;
 //minimum number of pairs to let the user click on the align button
 static const unsigned MIN_PAIRS_COUNT = 3;
 
-ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(ccPickingHub* pickingHub, QWidget* parent/*=0*/)
+ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(ccPickingHub* pickingHub, ccMainAppInterface* app, QWidget* parent/*=0*/)
 	: ccOverlayDialog(parent)
 	, m_aligned(0)
 	, m_alignedPoints("aligned points")
@@ -64,6 +64,7 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(ccPickingHub* pickingHub,
 	, m_refPoints("reference points")
 	, m_paused(false)
 	, m_pickingHub(pickingHub)
+	, m_app(app)
 {
 	assert(m_pickingHub);
 
@@ -1259,7 +1260,7 @@ void ccPointPairRegistrationDlg::reset()
 	m_aligned.entity->enableGLTransformation(false);
 	m_alignedPoints.enableGLTransformation(false);
 	//DGM: we have to reset the markers scale
-	for (unsigned i=0; i<m_alignedPoints.getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < m_alignedPoints.getChildrenNumber(); ++i)
 	{
 		ccHObject* child = m_alignedPoints.getChild(i);
 		if (child->isA(CC_TYPES::LABEL_2D))
@@ -1282,7 +1283,7 @@ void ccPointPairRegistrationDlg::apply()
 	CCLib::PointProjectionTools::Transformation trans;
 	double rms = -1.0;
 	
-	if (callHornRegistration(trans,rms,false))
+	if (callHornRegistration(trans, rms, false))
 	{
 		QStringList summary;
 		if (rms >= 0)
@@ -1300,8 +1301,15 @@ void ccPointPairRegistrationDlg::apply()
 		ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType,float>(trans.R,trans.T);
 		//...for real this time!
 		assert(m_aligned.entity);
+		//we temporarily detach entity, as it may undergo
+		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
+		ccMainAppInterface::ccHObjectContext objContext;
+		if (m_app)
+			objContext = m_app->removeObjectTemporarilyFromDBTree(m_aligned.entity);
 		m_aligned.entity->applyGLTransformation_recursive();
 		m_alignedPoints.setGLTransformation(transMat);
+		if (m_app)
+			m_app->putObjectBackIntoDBTree(m_aligned.entity, objContext);
 
 		summary << QString("Transformation matrix");
 		summary << transMat.toString(3,'\t'); //low precision, just for display
@@ -1313,7 +1321,7 @@ void ccPointPairRegistrationDlg::apply()
 		if (adjustScale)
 		{
 			QString scaleString = QString("Scale: %1 (already integrated in above matrix!)").arg(trans.s);
-			ccLog::Warning(QString("[PointPairRegistration] ")+scaleString);
+			ccLog::Warning(QString("[PointPairRegistration] ") + scaleString);
 			summary << scaleString;
 		}
 		else
@@ -1325,7 +1333,7 @@ void ccPointPairRegistrationDlg::apply()
 
 		//pop-up summary
 		summary << "Refer to Console (F8) for more details";
-		QMessageBox::information(this,"Align info",summary.join("\n"));
+		QMessageBox::information(this, "Align info", summary.join("\n"));
 
 		//don't forget global shift
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_aligned.entity);
@@ -1343,7 +1351,7 @@ void ccPointPairRegistrationDlg::apply()
 			{
 				if (QMessageBox::question(this, "Drop shift information?", "Aligned cloud is shifted but reference cloud is not: drop global shift information?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
 				{
-					cloud->setGlobalShift(0,0,0);
+					cloud->setGlobalShift(0, 0, 0);
 					cloud->setGlobalScale(1.0);
 					ccLog::Warning(QString("[PointPairRegistration] Aligned cloud global shift has been reset to match the reference!"));
 				}

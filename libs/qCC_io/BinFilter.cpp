@@ -23,9 +23,6 @@
 #include <QFileInfo>
 #include <QtConcurrentRun>
 
-//CCLib
-#include <ScalarField.h>
-
 //qCC_db
 #include <ccFlags.h>
 #include <ccGenericPointCloud.h>
@@ -40,6 +37,7 @@
 #include <ccSensor.h>
 #include <ccCameraSensor.h>
 #include <ccImage.h>
+#include <ccScalarField.h>
 
 //system
 #include <unordered_set>
@@ -70,7 +68,7 @@ bool BinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 
 	//these entities shouldn't be saved alone (but it's possible!)
 	case CC_TYPES::MATERIAL_SET:
-	case CC_TYPES::CHUNKED_ARRAY:
+	case CC_TYPES::ARRAY:
 	case CC_TYPES::NORMALS_ARRAY:
 	case CC_TYPES::NORMAL_INDEXES_ARRAY:
 	case CC_TYPES::RGB_COLOR_ARRAY:
@@ -820,7 +818,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 
 					ccLog::Warning(QString("[BIN] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
 
-					//positions are optional, so we can simply set them to NULL and go ahead, we do not need to return.
+					//positions are optional, so we can simply set them to nullptr and go ahead, we do not need to return.
 					//return CC_FERR_MALFORMED_FILE;
 				}
 			}
@@ -1177,7 +1175,9 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			if (lineRead == fileChunkPos + fileChunkSize)
 			{
 				if (header.scalarField)
+				{
 					loadedCloud->getCurrentInScalarField()->computeMinAndMax();
+				}
 
 				container.addChild(loadedCloud);
 				fileChunkPos = lineRead;
@@ -1212,8 +1212,8 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 			if (header.colors)
 			{
-				unsigned char C[3];
-				if (in.read((char*)C, sizeof(ColorCompType) * 3) < 0)
+				ccColor::Rgb C;
+				if (in.read((char*)C.rgb, sizeof(ColorCompType) * 3) < 0)
 				{
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity colors !\n",k);
 					return CC_FERR_READING;

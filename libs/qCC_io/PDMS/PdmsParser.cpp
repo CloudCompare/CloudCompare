@@ -233,8 +233,8 @@ PointCoordinateType PdmsLexer::valueFromBuffer()
 	//Read units
 	if (length > 0)
 	{
-		strcpy(nextBuffer, &(tokenBuffer[index]));
-		memset(&(tokenBuffer[index]), 0, length);
+		strcpy(nextBuffer, tokenBuffer + index);
+		memset(tokenBuffer + index, 0, length);
 	}
 
 	//Replace comma
@@ -420,11 +420,11 @@ void PdmsFileSession::skipComment()
 		currentToken = PDMS_ENTER_METAGROUP;
 		//The meta group name starts after the "entering in group:" statement, after the last slash
 		//But we still store the whole path
-		char* ptr2 = &(tokenBuffer[18]);
+		char* ptr2 = tokenBuffer + 18;
 		while ((*ptr2) == ' ') { ptr2++; }
 		//Copy the meta group name at the beginning of tokenbuffer
 		tokenBuffer[0] = '/';
-		char* ptr1 = &(tokenBuffer[1]);
+		char* ptr1 = tokenBuffer + 1;
 		while ((*ptr2) && (*ptr2) != ' ')
 		{
 			*ptr1 = *ptr2;

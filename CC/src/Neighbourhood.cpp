@@ -16,21 +16,24 @@
 //#                                                                        #
 //##########################################################################
 
-#include "Neighbourhood.h"
+#include <Neighbourhood.h>
 
 //local
-#include "ChunkedPointCloud.h"
-#include "ConjugateGradient.h"
-#include "Delaunay2dMesh.h"
-#include "DistanceComputationTools.h"
-#include "SimpleMesh.h"
+#include <PointCloud.h>
+#include <ConjugateGradient.h>
+#include <Delaunay2dMesh.h>
+#include <DistanceComputationTools.h>
+#include <SimpleMesh.h>
+
+//System
+#include <algorithm>
 
 //Eigenvalues decomposition
 //#define USE_EIGEN
 #ifdef USE_EIGEN
-#include "eigen/Eigen/Eigenvalues"
+#include <eigen/Eigen/Eigenvalues>
 #else
-#include "Jacobi.h"
+#include <Jacobi.h>
 #endif
 
 using namespace CCLib;
@@ -391,11 +394,10 @@ bool Neighbourhood::computeQuadric()
 	}
 
 	//compute the A matrix and b vector
-	std::vector<float> A;
-	std::vector<float> b;
+	std::vector<float> A, b;
 	try
 	{
-		A.resize(6*count,0);
+		A.resize(6 * count, 0);
 		b.resize(count, 0);
 	}
 	catch (const std::bad_alloc&)
@@ -408,9 +410,9 @@ bool Neighbourhood::computeQuadric()
 
     //for all points
 	{
-		float* _A = &(A[0]);
-		float* _b = &(b[0]);
-		for (unsigned i=0; i<count; ++i)
+		float* _A = A.data();
+		float* _b = b.data();
+		for (unsigned i = 0; i < count; ++i)
 		{
 			CCVector3 P = *m_associatedCloud->getPoint(i) - *G;
 
@@ -457,7 +459,7 @@ bool Neighbourhood::computeQuadric()
 				double tmp = 0;
 				float* _Ai = &(A[i]);
 				float* _Aj = &(A[j]);
-				for (unsigned k = 0; k<count; ++k, _Ai += 6, _Aj += 6)
+				for (unsigned k = 0; k < count; ++k, _Ai += 6, _Aj += 6)
 				{
 					//tmp += A[(6*k)+i] * A[(6*k)+j];
 					tmp += static_cast<double>(*_Ai) * static_cast<double>(*_Aj);
@@ -480,7 +482,7 @@ bool Neighbourhood::computeQuadric()
 
 #if 0
 		//trace tA.A and tA.b to a file
-		FILE* f = 0;
+		FILE* f = nullptr;
 		fopen_s(&f, "CG_trace.txt", "wt");
 		if (f)
 		{
@@ -608,8 +610,8 @@ bool Neighbourhood::compute3DQuadric(double quadricEquation[10])
 			return false;
 		}
 
-		PointCoordinateType* _M = &(M[0]);
-		for (unsigned i=0; i<count; ++i)
+		PointCoordinateType* _M = M.data();
+		for (unsigned i = 0; i < count; ++i)
 		{
 			const CCVector3 P = *m_associatedCloud->getPoint(i) - *G;
 
@@ -634,7 +636,7 @@ bool Neighbourhood::compute3DQuadric(double quadricEquation[10])
 		for (unsigned c = 0; c < 10; ++c)
 		{
 			double sum = 0;
-			const PointCoordinateType* _M = &(M[0]);
+			const PointCoordinateType* _M = M.data();
 			for (unsigned i = 0; i < count; ++i, _M += 10)
 				sum += static_cast<double>(_M[l] * _M[c]);
 
@@ -712,7 +714,7 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(	bool duplicateVertices/*=
 		//change the default mesh's reference
 		if (duplicateVertices)
 		{
-			ChunkedPointCloud* cloud = new ChunkedPointCloud();
+			PointCloud* cloud = new PointCloud();
 			const unsigned count = m_associatedCloud->size();
 			if (!cloud->reserve(count))
 			{
@@ -786,7 +788,7 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 	const PointCoordinateType stepX = spanX/(nStepX-1);
 	const PointCoordinateType stepY = spanY/(nStepY-1);
 
-	ChunkedPointCloud* vertices = new ChunkedPointCloud();
+	PointCloud* vertices = new PointCloud();
 	if (!vertices->reserve(nStepX*nStepY))
 	{
 		delete vertices;

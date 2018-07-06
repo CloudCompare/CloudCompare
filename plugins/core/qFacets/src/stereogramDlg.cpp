@@ -474,10 +474,10 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 				if (*d != 0)
 				{
 					double relPos = (*d)/ m_densityGrid->minMaxDensity[1];
-					const ColorCompType* col = m_densityColorScale->getColorByRelativePos(relPos, m_densityColorScaleSteps);
-					brush.setColor(QColor(	static_cast<int>(col[0]),
-											static_cast<int>(col[1]),
-											static_cast<int>(col[2]),
+					const ccColor::Rgb* col = m_densityColorScale->getColorByRelativePos(relPos, m_densityColorScaleSteps);
+					brush.setColor(QColor(	static_cast<int>(col->r),
+											static_cast<int>(col->g),
+											static_cast<int>(col->b),
 											255));
 					painter.setBrush(brush);
 
@@ -793,8 +793,8 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 				m_app->dispToConsole("Not enough memory!");
 				return;
 			}
-			ccPointCloud::VisibilityTableType* visTable = cloud->getTheVisibilityArray();
-			assert(visTable);
+			ccPointCloud::VisibilityTableType& visTable = cloud->getTheVisibilityArray();
+			assert(!visTable.empty());
 
 			for (unsigned i = 0; i < static_cast<unsigned>(count); ++i)
 			{
@@ -808,7 +808,7 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 				bool visible = (	(	dDip	<= halfDipSpan		|| dDip		>= 360.0 - halfDipSpan)
 								&&	(	dDipDir	<= halfDipDirSpan	|| dDipDir	>= 360.0 - halfDipDirSpan) );
 
-				visTable->setValue(i, visible ? POINT_VISIBLE : POINT_HIDDEN);
+				visTable[i] = (visible ? POINT_VISIBLE : POINT_HIDDEN);
 			}
 		}
 		else

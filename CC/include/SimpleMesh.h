@@ -21,8 +21,11 @@
 
 //Local
 #include "GenericIndexedMesh.h"
-#include "GenericChunkedArray.h"
 #include "SimpleTriangle.h"
+#include "BoundingBox.h"
+
+//System
+#include <vector>
 
 namespace CCLib
 {
@@ -33,7 +36,7 @@ class GenericIndexedCloud;
 /** Implements the GenericIndexedMesh interface. This mesh is always associated
 	to a (index based) point cloud that stores the mesh vertexes.
 **/
-class CC_CORE_LIB_API SimpleMesh : virtual public GenericIndexedMesh
+class CC_CORE_LIB_API SimpleMesh : public GenericIndexedMesh
 {
 public: //constructors
 
@@ -54,20 +57,20 @@ public: //inherited methods
 	virtual GenericTriangle* _getTriangle(unsigned triangleIndex) override; //temporary
 	virtual VerticesIndexes* getNextTriangleVertIndexes() override;
 	virtual VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
-	virtual unsigned size() const override;
+	virtual unsigned size() const override { return static_cast<unsigned>(m_triIndexes.size()); }
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
 	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
 
 public: //specific methods
 
 	//! Returns the mesh capacity
-	inline unsigned capacity() const { return m_triIndexes->capacity(); }
+	inline unsigned capacity() const { return static_cast<unsigned>(m_triIndexes.capacity()); }
 
 	//! Returns the vertices
 	inline const GenericIndexedCloud* vertices() const { return theVertices; }
 
 	//! Clears the mesh
-	inline void clear(bool releaseMemory) { m_triIndexes->clear(releaseMemory); }
+	inline void clear() { m_triIndexes.clear(); }
 
 	//! Adds a triangle to the mesh
 	/** Vertex indexes are expresesed relatively to the vertex cloud.
@@ -93,13 +96,10 @@ public: //specific methods
 
 protected:
 
-	//! Updates bounding-box with a 3D point
-	virtual void updateBBWithPoint(const CCVector3* P);
-
 	//! A triangle vertices indexes container
-	typedef GenericChunkedArray<3,unsigned> TriangleIndexesContainer;
+	typedef std::vector<VerticesIndexes> TriangleIndexesContainer;
 	//! The triangles indexes
-	TriangleIndexesContainer* m_triIndexes;
+	TriangleIndexesContainer m_triIndexes;
 
 	//! Iterator on the list of triangles
 	unsigned globalIterator;
@@ -111,12 +111,8 @@ protected:
 	//! Specifies if the associated cloud should be deleted when the mesh is deleted
 	bool verticesLinked;
 
-	//! Bounding-box min corner
-	CCVector3 bbMin;
-	//! Bounding-box min corner
-	CCVector3 bbMax;
-	//! Bounding-box validity
-	bool bbIsValid;
+	//! Bounding-box
+	BoundingBox m_bbox;
 };
 
 }

@@ -151,7 +151,7 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 		//(therefore we always render it dynamically)
 		
 		glFunc->glDisable(GL_LIGHTING);
-		ccGL::Color3v(glFunc, ccColor::green.rgba);
+		ccGL::Color3v(glFunc, ccColor::green.rgb);
 
 		void* additionalParameters[] = {	reinterpret_cast<void*>(m_frustumIntersector),
 											reinterpret_cast<void*>(glFunc)
@@ -181,7 +181,7 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 
 		if (!glParams.showColors)
 		{
-			ccGL::Color3v(glFunc, ccColor::white.rgba);
+			ccGL::Color3v(glFunc, ccColor::white.rgb);
 		}
 
 		//shall we recompile the GL list?
@@ -295,7 +295,7 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	// outside
 	if (vis == ccOctreeFrustumIntersector::CELL_OUTSIDE_FRUSTUM)
 	{
-		ccGL::Color3v(glFunc, ccColor::green.rgba);
+		ccGL::Color3v(glFunc, ccColor::green.rgb);
 	}
 	else
 	{
@@ -303,10 +303,10 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 		glFunc->glLineWidth(2.0f);
 		// inside
 		if (vis == ccOctreeFrustumIntersector::CELL_INSIDE_FRUSTUM)
-			ccGL::Color3v(glFunc, ccColor::magenta.rgba);
+			ccGL::Color3v(glFunc, ccColor::magenta.rgb);
 		// intersecting
 		else
-			ccGL::Color3v(glFunc, ccColor::blue.rgba);
+			ccGL::Color3v(glFunc, ccColor::blue.rgb);
 	}
 
 	glFunc->glBegin(GL_LINE_LOOP);
@@ -356,8 +356,8 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
 	if (glParams->showSF)
 	{
 		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
-		const ColorCompType* col = cloud->geScalarValueColor(dist);
-		glFunc->glColor3ubv(col ? col : ccColor::lightGrey.rgba);
+		const ccColor::Rgb* col = cloud->geScalarValueColor(dist);
+		glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGrey.rgb);
 	}
 	else if (glParams->showColors)
 	{
@@ -401,8 +401,9 @@ bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
 	if (glParams->showSF)
 	{
 		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
-		ccColor::Rgba rgb(cloud->geScalarValueColor(dist));
-		primitive->setColor(rgb);
+		const ccColor::Rgb* rgb = cloud->geScalarValueColor(dist);
+		if (rgb)
+			primitive->setColor(*rgb);
 	}
 	else if (glParams->showColors)
 	{
@@ -442,10 +443,10 @@ void ccOctree::ComputeAverageColor(CCLib::ReferenceCloud* subset, ccGenericPoint
 	unsigned n = subset->size();
 	for (unsigned i = 0; i < n; ++i)
 	{
-		const ColorCompType* _theColors = sourceCloud->getPointColor(subset->getPointGlobalIndex(i));
-		sum.x += static_cast<double>(*_theColors++);
-		sum.y += static_cast<double>(*_theColors++);
-		sum.z += static_cast<double>(*_theColors++);
+		const ccColor::Rgb& _theColor = sourceCloud->getPointColor(subset->getPointGlobalIndex(i));
+		sum.x += _theColor.r;
+		sum.y += _theColor.g;
+		sum.z += _theColor.b;
 	}
 
 	meanCol[0] = static_cast<ColorCompType>(sum.x / n);
@@ -604,7 +605,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	Ray<PointCoordinateType> rayLocal(rayAxis, rayOrigin - m_dimMin);
 
 	//visibility table (if any)
-	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->isVisibilityTableInstantiated() ? m_theAssociatedCloudAsGPC->getTheVisibilityArray() : 0;
+	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->isVisibilityTableInstantiated() ? &m_theAssociatedCloudAsGPC->getTheVisibilityArray() : 0;
 
 	//scalar field with hidden values (if any)
 	ccScalarField* activeSF = 0;
@@ -692,7 +693,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 		if (!skipThisCell)
 		{
 			//we shouldn't test points that are actually hidden!
-			if (	(!visTable || visTable->getValue(it->theIndex) == POINT_VISIBLE)
+			if (	(!visTable || visTable->at(it->theIndex) == POINT_VISIBLE)
 				&&	(!activeSF || activeSF->getColor(activeSF->getValue(it->theIndex)))
 				)
 			{

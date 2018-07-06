@@ -788,7 +788,7 @@ protected: //rendering
 	//(Sadly QOpenGLWidget::makeCurrentmakeCurrent is not virtual)
 	void makeCurrent();
 
-	//! Binds an FBO or releases the current one (if input is NULL)
+	//! Binds an FBO or releases the current one (if input is nullptr)
 	/** This method must be called instead of the FBO's own 'start' and 'stop' methods
 		so as to properly handle the interactions with QOpenGLWidget's own FBO.
 	**/

@@ -443,11 +443,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 	info.hasRGB = info.cloud->hasColors();
 	if (info.hasRGB)
 	{
-		const ColorCompType* C = info.cloud->getPointColor(info.pointIndex);
-		assert(C);
-		info.rgb[0] = C[0];
-		info.rgb[1] = C[1];
-		info.rgb[2] = C[2];
+		info.rgb = info.cloud->getPointColor(info.pointIndex);
 	}
 	//scalar field
 	info.hasSF = info.cloud->hasDisplayedScalarField();
@@ -562,7 +558,7 @@ QStringList cc2DLabel::getLabelContent(int precision) const
 		//color
 		if (info.hasRGB)
 		{
-			QString colorStr = QString("Color: (%1;%2;%3)").arg(info.rgb[0]).arg(info.rgb[1]).arg(info.rgb[2]);
+			QString colorStr = QString("Color: (%1;%2;%3)").arg(info.rgb.r).arg(info.rgb.g).arg(info.rgb.b);
 			body << colorStr;
 		}
 		//scalar field
@@ -836,7 +832,7 @@ static const int c_tabMarginY = 2;
 static const int c_arrowBaseSize = 3;
 //static const int c_buttonSize = 10;
 
-static const ccColor::Rgba c_darkGreen(0, 200, 0, 255);
+static const ccColor::Rgb c_darkGreen(0, 200, 0);
 
 //! Data table
 struct Tab
@@ -962,7 +958,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 				//we draw the segments
 				if (isSelected())
-					ccGL::Color3v(glFunc, ccColor::red.rgba);
+					ccGL::Color3v(glFunc, ccColor::red.rgb);
 				else
 					ccGL::Color3v(glFunc, context.labelDefaultMarkerCol.rgb/*ccColor::green.rgba*/);
 
@@ -999,7 +995,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						static_cast<int>(m_points[j].pos2D.y) + context.labelMarkerTextShift_pix,
 						ccGenericGLDisplay::ALIGN_DEFAULT,
 						context.labelOpacity / 100.0f,
-						ccColor::white.rgba,
+						ccColor::white.rgb,
 						&font);
 				}
 			}
@@ -1118,9 +1114,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						if (info.hasRGB)
 						{
 							int c = tab.add2x3Block();
-							tab.colContent[c] << "R"; tab.colContent[c + 1] << QString::number(info.rgb.x);
-							tab.colContent[c] << "G"; tab.colContent[c + 1] << QString::number(info.rgb.y);
-							tab.colContent[c] << "B"; tab.colContent[c + 1] << QString::number(info.rgb.z);
+							tab.colContent[c] << "R"; tab.colContent[c + 1] << QString::number(info.rgb.r);
+							tab.colContent[c] << "G"; tab.colContent[c + 1] << QString::number(info.rgb.g);
+							tab.colContent[c] << "B"; tab.colContent[c + 1] << QString::number(info.rgb.b);
 						}
 					}
 					else if (count == 2)
@@ -1242,7 +1238,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	unsigned char alpha = static_cast<unsigned char>((context.labelOpacity / 100.0) * 255);
 	ccColor::Rgbaub defaultBkgColor(context.labelDefaultBkgCol, alpha);
 	//default border color (mustn't be totally transparent!)
-	ccColor::Rgbaub defaultBorderColor(ccColor::red);
+	ccColor::Rgbaub defaultBorderColor(ccColor::red, 255);
 	if (!highlighted)
 	{
 		//apply only half of the transparency
@@ -1422,7 +1418,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				int actualRowCount = std::min(tab.rowCount, tab.colContent[c].size());
 
 				bool labelCol = ((c & 1) == 0);
-				const unsigned char* textColor = labelCol ? ccColor::white.rgba : defaultTextColor.rgb;
+				const unsigned char* textColor = labelCol ? ccColor::white.rgb : defaultTextColor.rgb;
 
 				for (int r = 0; r < actualRowCount; ++r)
 				{
@@ -1434,11 +1430,11 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						//draw background
 						int rgbIndex = (r % 3);
 						if (rgbIndex == 0)
-							glFunc->glColor3ubv(ccColor::red.rgba);
+							glFunc->glColor3ubv(ccColor::red.rgb);
 						else if (rgbIndex == 1)
-							glFunc->glColor3ubv(c_darkGreen.rgba);
+							glFunc->glColor3ubv(c_darkGreen.rgb);
 						else if (rgbIndex == 2)
-							glFunc->glColor3ubv(ccColor::blue.rgba);
+							glFunc->glColor3ubv(ccColor::blue.rgb);
 
 						glFunc->glBegin(GL_QUADS);
 						glFunc->glVertex2i(m_labelROI.left() + xCol, -m_labelROI.top() + yRow);

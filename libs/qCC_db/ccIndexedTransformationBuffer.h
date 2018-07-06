@@ -26,14 +26,14 @@
 #include <float.h>
 
 //! Indexed Transformation buffer
-class QCC_DB_LIB_API ccIndexedTransformationBuffer : public ccHObject, public std::vector< ccIndexedTransformation >
+class ccIndexedTransformationBuffer : public ccHObject, public std::vector< ccIndexedTransformation >
 {
 public:
 
 	//! Default constructor
-	ccIndexedTransformationBuffer(QString name = QString("Trans. buffer"));
+	QCC_DB_LIB_API ccIndexedTransformationBuffer(QString name = QString("Trans. buffer"));
 	//! Copy constructor
-	ccIndexedTransformationBuffer(const ccIndexedTransformationBuffer& buffer);
+	QCC_DB_LIB_API ccIndexedTransformationBuffer(const ccIndexedTransformationBuffer& buffer);
 
 	//inherited from ccHObject
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::TRANS_BUFFER; }
@@ -42,7 +42,7 @@ public:
 	//! Sorts transformations based on their index
 	/** Ascending sort.
 	**/
-	void sort();
+	QCC_DB_LIB_API void sort();
 
 	//! Returns the nearest indexed transformation(s) to a given index
 	/** This method returns the preceding and following transformations.
@@ -56,11 +56,11 @@ public:
 		\param trans2IndexInBuffer (optional) index of trans2 in buffer
 		\return success
 	**/
-	bool findNearest(	double index,
-						const ccIndexedTransformation* &trans1,
-						const ccIndexedTransformation* &trans2,
-						size_t* trans1IndexInBuffer = 0,
-						size_t* trans2IndexInBuffer = 0) const;
+	QCC_DB_LIB_API bool findNearest(double index,
+									const ccIndexedTransformation* &trans1,
+									const ccIndexedTransformation* &trans2,
+									size_t* trans1IndexInBuffer = 0,
+									size_t* trans2IndexInBuffer = 0) const;
 
 	//! Returns the indexed transformation at a given index (interpolates it if necessary)
 	/** \warning Binary search: buffer must be sorted! (see ccIndexedTransformationBuffer::sort)
@@ -70,9 +70,9 @@ public:
 		\param maxIndexDistForInterpolation max 'distance' between query index and existing indexes to actually interpolate/output a transformation
 		\return success
 	**/
-	bool getInterpolatedTransformation(	double index,
-										ccIndexedTransformation& trans,
-										double maxIndexDistForInterpolation = DBL_MAX) const;
+	QCC_DB_LIB_API bool getInterpolatedTransformation(	double index,
+														ccIndexedTransformation& trans,
+														double maxIndexDistForInterpolation = DBL_MAX) const;
 
 	//! [Display option] Returns whether trihedrons should be displayed or not (otherwise only points or a polyline)
 	bool triherdonsShown() { return m_showTrihedrons; }
@@ -92,17 +92,17 @@ public:
 	//! Invalidates the bounding box
 	/** Should be called whenever the content of this structure changes!
 	**/
-	void invalidateBoundingBox();
+	QCC_DB_LIB_API void invalidateBoundingBox();
 
 	//Inherited from ccHObject
-	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
+	QCC_DB_LIB_API virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
 
 protected:
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	QCC_DB_LIB_API virtual bool toFile_MeOnly(QFile& out) const override;
+	QCC_DB_LIB_API virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	QCC_DB_LIB_API virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Bounding box
 	ccBBox m_bBox;

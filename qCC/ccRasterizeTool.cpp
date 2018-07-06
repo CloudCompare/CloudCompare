@@ -1124,7 +1124,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 		return false;
 	}
 
-	char **papszOptions = NULL;
+	char **papszOptions = nullptr;
 	GDALDataset* poDstDS = poDriver->Create(qPrintable(outputFilename),
 											static_cast<int>(grid.width),
 											static_cast<int>(grid.height),
@@ -1153,7 +1153,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 	//OGRSpatialReference oSRS;
 	//oSRS.SetUTM( 11, TRUE );
 	//oSRS.SetWellKnownGeogCS( "NAD27" );
-	//char *pszSRS_WKT = NULL;
+	//char *pszSRS_WKT = nullptr;
 	//oSRS.exportToWkt( &pszSRS_WKT );
 	//poDstDS->SetProjection( pszSRS_WKT );
 	//CPLFree( pszSRS_WKT );
@@ -1328,7 +1328,7 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 			assert(!grid.scalarFields[k].empty());
 			if (exportBands.allSFs || (exportBands.visibleSF && visibleSfIndex == static_cast<int>(k)))
 			{
-				const double* sfGrid = &(grid.scalarFields[k].front());
+				const double* sfGrid = grid.scalarFields[k].data();
 				GDALRasterBand* poBand = poDstDS->GetRasterBand(++currentBand);
 
 				double sfNanValue = std::numeric_limits<ccRasterGrid::SF::value_type>::quiet_NaN();
@@ -1406,10 +1406,11 @@ void ccRasterizeTool::generateHillshade()
 	else
 	{
 		hillshadeLayer = new ccScalarField(HILLSHADE_FIELD_NAME);
-		if (!hillshadeLayer->reserve(m_rasterCloud->size()))
+		if (!hillshadeLayer->reserveSafe(m_rasterCloud->size()))
 		{
 			ccLog::Error("Not enough memory!");
 			hillshadeLayer->release();
+			hillshadeLayer = nullptr;
 			return;
 		}
 
@@ -1647,10 +1648,10 @@ void ccRasterizeTool::addNewContour(ccPolyline* poly, double height, unsigned su
 			ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
 			if (activeLayer)
 			{
-				const ColorCompType* col = activeLayer->getColor(height);
+				const ccColor::Rgb* col = activeLayer->getColor(height);
 				if (col)
 				{
-					poly->setColor(ccColor::Rgb(col));
+					poly->setColor(*col);
 				}
 			}
 		}
@@ -1879,7 +1880,7 @@ void ccRasterizeTool::generateContours()
 		Isolines<double> iso(static_cast<int>(xDim), static_cast<int>(yDim));
 		if (!ignoreBorders)
 		{
-			iso.createOnePixelBorder(&(grid.front()), activeLayer->getMin() - 1.0);
+			iso.createOnePixelBorder(grid.data(), activeLayer->getMin() - 1.0);
 		}
 		//bounding box
 		ccBBox box = getCustomBBox();
@@ -1907,7 +1908,7 @@ void ccRasterizeTool::generateContours()
 		{
 			//extract contour lines for the current level
 			iso.setThreshold(v);
-			int lineCount = iso.find(&(grid.front()));
+			int lineCount = iso.find(grid.data());
 
 			ccLog::PrintDebug(QString("[Rasterize][Isolines] value=%1 : %2 lines").arg(v).arg(lineCount));
 
@@ -2162,8 +2163,8 @@ void ccRasterizeTool::generateImage() const
 			unsigned steps = (addTransparentColor ? 255 : 256);
 			for (unsigned i = 0; i < steps; i++)
 			{
-				const ColorCompType* col = colorScale->getColorByRelativePos(i / static_cast<double>(steps - 1), steps, ccColor::lightGrey.rgba);
-				palette[i] = qRgba(col[0], col[1], col[2], 255);
+				const ccColor::Rgb* col = colorScale->getColorByRelativePos(i / static_cast<double>(steps - 1), steps, &ccColor::lightGrey);
+				palette[i] = qRgba(col->r, col->g, col->b, 255);
 			}
 		}
 		else

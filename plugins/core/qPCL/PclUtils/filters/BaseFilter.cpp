@@ -284,11 +284,11 @@ ccPointCloud* BaseFilter::getSelectedEntityAsCCPointCloud() const
 {
 	//does we have any selected entity?
 	if (m_selected.size() == 0)
-		return NULL;
+		return nullptr;
 
 	ccHObject* entity = m_selected.at(0);
 	if (!entity->isA(CC_TYPES::POINT_CLOUD))
-		return NULL;
+		return nullptr;
 
 	return ccHObjectCaster::ToPointCloud(entity);
 }
@@ -297,7 +297,7 @@ ccHObject *BaseFilter::getSelectedEntityAsCCHObject() const
 {
 	//does we have any selected entity?
 	if (m_selected.size() == 0)
-		return NULL;
+		return nullptr;
 
 	return m_selected.at(0);
 }

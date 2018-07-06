@@ -109,10 +109,10 @@ public:
 
 		//color
 		assert(m_cloud->hasColors());
-		const ColorCompType* rgb = m_cloud->getPointColor(m_index);
-		d[0] = static_cast<Real>(rgb[0]);
-		d[1] = static_cast<Real>(rgb[1]);
-		d[2] = static_cast<Real>(rgb[2]);
+		const ccColor::Rgb& rgb = m_cloud->getPointColor(m_index);
+		d[0] = static_cast<Real>(rgb.r);
+		d[1] = static_cast<Real>(rgb.g);
+		d[2] = static_cast<Real>(rgb.b);
 
 		//auto-forward
 		++m_index;
@@ -378,7 +378,7 @@ void qPoissonRecon::doAction()
 			if (s_params.density)
 			{
 				densitySF = new ccScalarField("Density");
-				if (!densitySF->reserve(nr_vertices))
+				if (!densitySF->reserveSafe(nr_vertices))
 				{
 					m_app->dispToConsole(QString("[PoissonRecon] Failed to allocate memory for storing density!"),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 					densitySF->release();
@@ -406,9 +406,9 @@ void qPoissonRecon::doAction()
 
 						if (importColors)
 						{
-							ColorCompType C[3] = {	static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[0], 0.0))),
-													static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[1], 0.0))),
-													static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[2], 0.0))) };
+							ccColor::Rgb C(	static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[0], 0.0))),
+											static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[1], 0.0))),
+											static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[2], 0.0))) );
 							newPC->addRGBColor(C);
 						}
 
@@ -433,9 +433,9 @@ void qPoissonRecon::doAction()
 
 						if (importColors)
 						{
-							ColorCompType C[3] = {	static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[0], 0.0))),
-													static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[1], 0.0))),
-													static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[2], 0.0))) };
+							ccColor::Rgb C(	static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[0], 0.0))),
+											static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[1], 0.0))),
+											static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[2], 0.0))) );
 							newPC->addRGBColor(C);
 						}
 

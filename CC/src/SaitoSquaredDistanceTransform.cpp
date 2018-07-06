@@ -26,14 +26,14 @@
 
 using namespace CCLib;
 
-bool SaitoSquaredDistanceTransform::EDT_1D(GridElement* slice, size_t r, size_t c)
+bool SaitoSquaredDistanceTransform::EDT_1D(GridElement* slice, std::size_t r, std::size_t c)
 {
 	GridElement *row = slice;
 	
-	for (size_t j = 0; j < r; j++, row += c)
+	for (std::size_t j = 0; j < r; j++, row += c)
 	{
 		GridElement b = 1;
-		for (size_t i = 1; i < c; i++)
+		for (std::size_t i = 1; i < c; i++)
 		{
 			GridElement limit = row[i - 1] + b;
 			if (row[i] > limit)
@@ -48,9 +48,9 @@ bool SaitoSquaredDistanceTransform::EDT_1D(GridElement* slice, size_t r, size_t 
 		}
 
 		b = 1;
-		for (size_t i = 1; i < c; i++)
+		for (std::size_t i = 1; i < c; i++)
 		{
-			size_t colIndex = c - i;
+			std::size_t colIndex = c - i;
 			GridElement limit = row[colIndex] + b;
 			if (row[colIndex - 1] > limit)
 			{
@@ -70,12 +70,12 @@ bool SaitoSquaredDistanceTransform::EDT_1D(GridElement* slice, size_t r, size_t 
 //:
 // Assumes given a Lookup table of integer squares.
 // Also assumes the image \a im already has infinity in all non-zero points.
-bool SaitoSquaredDistanceTransform::SDT_2D(Grid3D<GridElement>& grid, size_t sliceIndex, const std::vector<GridElement>& sq)
+bool SaitoSquaredDistanceTransform::SDT_2D(Grid3D<GridElement>& grid, std::size_t sliceIndex, const std::vector<GridElement>& sq)
 {
 	const Tuple3ui& gridSize = grid.size();
-	size_t r = gridSize.y;
-	size_t c = gridSize.x;
-	size_t voxelCount = r*c;
+	std::size_t r = gridSize.y;
+	std::size_t c = gridSize.x;
+	std::size_t voxelCount = r*c;
 
 	GridElement* sliceData = grid.data() + sliceIndex * voxelCount;
 
@@ -101,12 +101,12 @@ bool SaitoSquaredDistanceTransform::SDT_2D(Grid3D<GridElement>& grid, size_t sli
 		}
 
 		//for each column
-		for (size_t i = 0; i < c; ++i)
+		for (std::size_t i = 0; i < c; ++i)
 		{
 			//fill buffer with column values
 			{
 				GridElement* pt = sliceData + i;
-				for (size_t j = 0; j < r; ++j, pt += c)
+				for (std::size_t j = 0; j < r; ++j, pt += c)
 					colData[j] = *pt;
 			}
 
@@ -116,9 +116,9 @@ bool SaitoSquaredDistanceTransform::SDT_2D(Grid3D<GridElement>& grid, size_t sli
 				GridElement a = 0;
 				GridElement buffer = colData[0];
 
-				for (size_t j = 1; j < r; ++j, pt += c)
+				for (std::size_t j = 1; j < r; ++j, pt += c)
 				{
-					size_t rowIndex = j;
+					std::size_t rowIndex = j;
 					if (a != 0)
 						--a;
 					if (colData[rowIndex] > buffer + 1)
@@ -156,9 +156,9 @@ bool SaitoSquaredDistanceTransform::SDT_2D(Grid3D<GridElement>& grid, size_t sli
 				GridElement a = 0;
 				GridElement buffer = colData[r - 1];
 
-				for (size_t j = 1; j < r; ++j, pt -= c)
+				for (std::size_t j = 1; j < r; ++j, pt -= c)
 				{
-					size_t rowIndex = r - j - 1;
+					std::size_t rowIndex = r - j - 1;
 					if (a != 0)
 						--a;
 					if (colData[rowIndex] > buffer + 1)
@@ -198,13 +198,13 @@ bool SaitoSquaredDistanceTransform::SDT_2D(Grid3D<GridElement>& grid, size_t sli
 bool SaitoSquaredDistanceTransform::SDT_3D(Grid3D<GridElement>& grid, GenericProgressCallback* progressCb/*=0*/)
 {
 	const Tuple3ui& gridSize = grid.size();
-	size_t r = gridSize.y;
-	size_t c = gridSize.x;
-	size_t p = gridSize.z;
-	size_t voxelCount = r*c*p;
+	std::size_t r = gridSize.y;
+	std::size_t c = gridSize.x;
+	std::size_t p = gridSize.z;
+	std::size_t voxelCount = r*c*p;
 
-	size_t diag = static_cast<size_t>(ceil(sqrt(static_cast<double>(r*r + c*c + p*p))) - 1);
-	size_t nsqr = 2 * (diag + 1);
+	std::size_t diag = static_cast<std::size_t>(ceil(sqrt(static_cast<double>(r*r + c*c + p*p))) - 1);
+	std::size_t nsqr = 2 * (diag + 1);
 
 	std::vector<GridElement> sq;
 	try
@@ -217,7 +217,7 @@ bool SaitoSquaredDistanceTransform::SDT_3D(Grid3D<GridElement>& grid, GenericPro
 		return false;
 	}
 
-	for (size_t i = 0; i < nsqr; ++i)
+	for (std::size_t i = 0; i < nsqr; ++i)
 	{
 		sq[i] = static_cast<GridElement>(i*i);
 	}
@@ -240,7 +240,7 @@ bool SaitoSquaredDistanceTransform::SDT_3D(Grid3D<GridElement>& grid, GenericPro
 
 	GridElement* data = grid.data();
 	{
-		for (size_t i = 0; i < voxelCount; ++i)
+		for (std::size_t i = 0; i < voxelCount; ++i)
 		{
 			//DGM: warning we must invert the input image here!
 			if (data[i] == 0)
@@ -251,7 +251,7 @@ bool SaitoSquaredDistanceTransform::SDT_3D(Grid3D<GridElement>& grid, GenericPro
 	}
 
 	// 2D EDT for each slice
-	for (size_t k = 0; k < p; ++k)
+	for (std::size_t k = 0; k < p; ++k)
 	{
 		if (!SDT_2D(grid, k, sq))
 		{
@@ -266,7 +266,7 @@ bool SaitoSquaredDistanceTransform::SDT_3D(Grid3D<GridElement>& grid, GenericPro
 	}
 
 	// Now, for each pixel, compute final distance by searching along Z direction
-	size_t rc = r*c;
+	std::size_t rc = r*c;
 	std::vector<GridElement> colData;
 	try
 	{
@@ -278,20 +278,20 @@ bool SaitoSquaredDistanceTransform::SDT_3D(Grid3D<GridElement>& grid, GenericPro
 		return false;
 	}
 
-	for (size_t j = 0; j < r; ++j, data += c)
+	for (std::size_t j = 0; j < r; ++j, data += c)
 	{
-		for (size_t i = 0; i < c; ++i)
+		for (std::size_t i = 0; i < c; ++i)
 		{
 			GridElement* pt = data + i;
 
-			for (size_t k = 0; k < p; ++k, pt += rc)
+			for (std::size_t k = 0; k < p; ++k, pt += rc)
 				colData[k] = *pt;
 
 			pt = data + i + rc;
 			GridElement a = 0;
 			GridElement buffer = colData[0];
 
-			for (size_t k = 1; k < p; ++k, pt += rc)
+			for (std::size_t k = 1; k < p; ++k, pt += rc)
 			{
 				if (a != 0)
 					--a;
@@ -324,7 +324,7 @@ bool SaitoSquaredDistanceTransform::SDT_3D(Grid3D<GridElement>& grid, GenericPro
 			pt -= 2 * rc;
 			buffer = colData[p - 1];
 
-			for (size_t k = p - 2; k != static_cast<size_t>(-1); --k, pt -= rc)
+			for (std::size_t k = p - 2; k != static_cast<std::size_t>(-1); --k, pt -= rc)
 			{
 				if (a != 0)
 					--a;

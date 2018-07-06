@@ -146,7 +146,7 @@ protected:
 		bool hasNormal;
 		CCVector3 normal;
 		bool hasRGB;
-		Vector3Tpl<ColorCompType> rgb;
+		ccColor::Rgb rgb;
 		bool hasSF;
 		ScalarType sfValue;
 		double sfShiftedValue;

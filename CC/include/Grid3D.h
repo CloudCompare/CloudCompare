@@ -453,9 +453,9 @@ public:
 	}
 
 	//! Gives access to the internal grid data (with margin)
-	inline GridElement* data() { return &(m_grid[0]); }
+	inline GridElement* data() { return m_grid.data(); }
 	//! Gives access to the internal grid data (with margin) (const version)
-	inline const GridElement* data() const { return &(m_grid[0]); }
+	inline const GridElement* data() const { return m_grid.data(); }
 
 	//! Returns the number of cell count (whithout margin)
 	inline unsigned innerCellCount() const { return m_innerCellCount; }

@@ -105,7 +105,7 @@ if( WIN32 )
 	# Export Qt imageformats DLLs to specified destinations
 	function( install_Qt_ImageFormats )
 		set( QT_PLUGINS_DIR ${QT5_ROOT_PATH}/plugins )
-		set( QT_IMAGEFORMATS_PLUGINS qgif qico qjpeg )
+		set( QT_IMAGEFORMATS_PLUGINS qgif qico qjpeg qsvg )
 		foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
 			if( NOT CMAKE_CONFIGURATION_TYPES )
 				install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}${QT_VER_NUM}.dll DESTINATION ${ARGV0}/imageformats )

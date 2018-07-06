@@ -296,7 +296,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 	assert(!sf2 || valCount == sf2->currentSize());
 
 	//resize destination SF
-	if (!sfDest->resize(valCount))
+	if (!sfDest->resizeSafe(valCount))
 	{
 		ccLog::Warning("[ccScalarFieldArithmeticsDlg::apply] Not enough memory!");
 		cloud->deleteScalarField(sfIdx);
@@ -305,7 +305,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 	}
 	assert(valCount == sfDest->currentSize());
 
-	for (unsigned i=0; i<valCount; ++i)
+	for (unsigned i = 0; i < valCount; ++i)
 	{
 		ScalarType val = NAN_VALUE;
 

@@ -1050,7 +1050,7 @@ int ccDBRoot::countSelectedEntities(CC_CLASS_ENUM filter)
 
 size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 										CC_CLASS_ENUM filter/*=CC_TYPES::OBJECT*/,
-										dbTreeSelectionInfo* info/*=NULL*/ )
+										dbTreeSelectionInfo* info/*=nullptr*/ )
 {
 	selectedEntities.clear();
 
@@ -1093,7 +1093,7 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 			{
 				ccGenericPointCloud* genericCloud = ccHObjectCaster::ToGenericPointCloud(obj);
 				info->cloudCount++;
-				info->octreeCount += genericCloud->getOctree() != NULL ? 1 : 0;
+				info->octreeCount += genericCloud->getOctree() != nullptr ? 1 : 0;
 				ccPointCloud* qccCloud = ccHObjectCaster::ToPointCloud(obj);
 				info->gridCound += qccCloud->gridCount();
 			}
@@ -1338,7 +1338,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		}
 
 		//remove link with old parent (only CHILD/PARENT related flags!)
-		int itemDependencyFlags = item->getDependencyFlagsWith(oldParent); //works even with NULL
+		int itemDependencyFlags = item->getDependencyFlagsWith(oldParent); //works even with nullptr
 		int fatherDependencyFlags = oldParent ? oldParent->getDependencyFlagsWith(item) : 0;
 		if (oldParent)
 		{

@@ -293,7 +293,7 @@ bool qBroomDlg::CloudBackup::backupColors()
 	if (ref->hasColors())
 	{
 		colors = new ColorsTableType;
-		if (!colors->resize(ref->size()))
+		if (!colors->resizeSafe(ref->size()))
 		{
 			//not enough memory
 			colors->release();
@@ -1801,7 +1801,7 @@ bool qBroomDlg::selectPoint(unsigned index)
 		return false;
 	}
 
-	m_cloud.ref->setPointColor(index, ccColor::red.rgba);
+	m_cloud.ref->setPointColor(index, ccColor::red);
 
 	assert(!m_undoPositions.empty());
 	m_selectionTable[index] = static_cast<uint32_t>(m_undoPositions.size());

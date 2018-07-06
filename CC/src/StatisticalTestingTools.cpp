@@ -16,15 +16,15 @@
 //#                                                                        #
 //##########################################################################
 
-#include "StatisticalTestingTools.h"
+#include <StatisticalTestingTools.h>
 
 //local
 #include "Chi2Helper.h"
-#include "DgmOctreeReferenceCloud.h"
-#include "GenericProgressCallback.h"
-#include "NormalDistribution.h"
-#include "ReferenceCloud.h"
-#include "ScalarField.h"
+#include <DgmOctreeReferenceCloud.h>
+#include <GenericProgressCallback.h>
+#include <NormalDistribution.h>
+#include <ReferenceCloud.h>
+#include <ScalarField.h>
 
 //system
 #include <list>
@@ -54,7 +54,7 @@ typedef std::list<Chi2Class> Chi2ClassList;
 double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribution* distrib,
 															const GenericCloud* cloud,
 															unsigned numberOfClasses,
-															unsigned &finalNumberOfClasses,
+															unsigned& finalNumberOfClasses,
 															bool noClassCompression/*=false*/,
 															ScalarType* histoMin/*=0*/,
 															ScalarType* histoMax/*=0*/,
@@ -72,7 +72,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 	unsigned numberOfValidValues = 0;
 	{
 		bool firstValidValue = true;
-		for (unsigned i=0; i<n; ++i)
+		for (unsigned i = 0; i < n; ++i)
 		{
 			ScalarType V = cloud->getPointScalarValue(i);
 			if (ScalarField::ValidValue(V))
@@ -119,20 +119,20 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		//not enough memory
 		return -1.0;
 	}
-	memset(histo,0,sizeof(unsigned)*numberOfClasses);
+	memset(histo, 0, sizeof(unsigned)*numberOfClasses);
 
 	//accumulate histogram
-	ScalarType dV = maxV-minV;
+	ScalarType dV = maxV - minV;
 	unsigned histoBefore = 0;
 	unsigned histoAfter = 0;
 	if (dV > ZERO_TOLERANCE)
 	{
-		for (unsigned i=0;i<n;++i)
+		for (unsigned i = 0; i < n; ++i)
 		{
 			ScalarType V = cloud->getPointScalarValue(i);
 			if (ScalarField::ValidValue(V))
 			{
-				int bin = static_cast<int>(floor((V-minV)*(ScalarType)numberOfClasses/dV));
+				int bin = static_cast<int>(floor((V - minV)*(ScalarType)numberOfClasses / dV));
 				if (bin < 0)
 				{
 					histoBefore++;
@@ -142,7 +142,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 					if (V > maxV)
 						histoAfter++;
 					else
-						histo[numberOfClasses-1]++;
+						histo[numberOfClasses - 1]++;
 				}
 				else
 				{
@@ -164,7 +164,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		{
 			try
 			{
-				classes.emplace_back(1.0e-6,static_cast<int>(histoBefore));
+				classes.emplace_back(1.0e-6, static_cast<int>(histoBefore));
 			}
 			catch (const std::bad_alloc&)
 			{
@@ -173,16 +173,16 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 			}
 		}
 		double p1 = distrib->computePfromZero(minV);
-		for (unsigned k=1; k<=numberOfClasses; ++k)
+		for (unsigned k = 1; k <= numberOfClasses; ++k)
 		{
 			double p2 = distrib->computePfromZero(minV + (k * dV) / numberOfClasses);
 
 			//add the class to the chain
 			Chi2Class currentClass;
-			currentClass.n = histo[k-1];
-			currentClass.pi = p2-p1;
+			currentClass.n = histo[k - 1];
+			currentClass.pi = p2 - p1;
 			if (npis)
-				npis[k-1]= currentClass.pi * numberOfValidValues;
+				npis[k - 1] = currentClass.pi * numberOfValidValues;
 
 			try
 			{
@@ -200,7 +200,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		{
 			try
 			{
-				classes.emplace_back(1.0e-6,static_cast<int>(histoAfter));
+				classes.emplace_back(1.0e-6, static_cast<int>(histoAfter));
 			}
 			catch (const std::bad_alloc&)
 			{
@@ -214,7 +214,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 	if (!noClassCompression)
 	{
 		//lowest acceptable value: "K/n" (K=5 generally, but it could be 3 or 1 at the tail!)
-		double minPi = 5.0/numberOfValidValues;
+		double minPi = 5.0 / numberOfValidValues;
 
 		while (classes.size() > 2)
 		{
@@ -435,34 +435,34 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(	const DgmOctree::octr
 		return false;
 	}
 
-	for (unsigned i=0; i<n; ++i)
+	for (unsigned i = 0; i < n; ++i)
 	{
-		cell.points->getPoint(i,nNSS.queryPoint);
+		cell.points->getPoint(i, nNSS.queryPoint);
 		ScalarType D = cell.points->getPointScalarValue(i);
 
 		if (ScalarField::ValidValue(D))
 		{
 			//nNSS.theNearestPoints.clear();
 
-			unsigned k = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS,true);
+			unsigned k = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS, true);
 			if (k > numberOfNeighbours)
 				k = numberOfNeighbours;
 
-			neighboursCloud.clear(false);
-			for (unsigned j=0; j<k; ++j)
+			neighboursCloud.clear();
+			for (unsigned j = 0; j < k; ++j)
 				neighboursCloud.addPointIndex(nNSS.pointsInNeighbourhood[j].pointIndex);
 
-			unsigned finalNumberOfChi2Classes=0;
-			//VERSION "SYMPA" (test grossier)
-			double Chi2Dist = static_cast<ScalarType>(computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,true,histoMin,histoMax,histoValues));
-			//VERSION "SEVERE" (test ultra-precis)
-			//double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,false,histoMin,histoMax,histoValues);
+			unsigned finalNumberOfChi2Classes = 0;
+			//LAZY VERSION (approximate test)
+			double Chi2Dist = static_cast<ScalarType>(computeAdaptativeChi2Dist(statModel, &neighboursCloud, numberOfChi2Classes, finalNumberOfChi2Classes, true, histoMin, histoMax, histoValues));
+			//STRICT VERSION (ultra-precise test)
+			//double Chi2Dist = static_cast<ScalarType>(computeAdaptativeChi2Dist(statModel, &neighboursCloud, numberOfChi2Classes, finalNumberOfChi2Classes, false, histoMin, histoMax, histoValues));
 
 			D = (Chi2Dist >= 0.0 ? static_cast<ScalarType>(sqrt(Chi2Dist)) : NAN_VALUE);
 		}
 
 		//We assume that "IN" and "OUT" scalar fields are different!
-		cell.points->setPointScalarValue(i,D);
+		cell.points->setPointScalarValue(i, D);
 
 		if (nProgress && !nProgress->oneStep())
 			return false;

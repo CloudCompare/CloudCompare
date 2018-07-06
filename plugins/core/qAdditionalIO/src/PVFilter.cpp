@@ -17,12 +17,10 @@
 
 #include "PVFilter.h"
 
-//CCLib
-#include <ScalarField.h>
-
 //qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
+#include <ccScalarField.h>
 #include <ccProgressDialog.h>
 
 //Qt
@@ -189,14 +187,14 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 				container.addChild(loadedCloud);
 			}
 			fileChunkPos = pointsRead;
-			fileChunkSize = std::min<unsigned>(numberOfPoints-pointsRead,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
+			fileChunkSize = std::min<unsigned>(numberOfPoints - pointsRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 			loadedCloud = new ccPointCloud(QString("unnamed - Cloud #%1").arg(++chunkIndex));
 			if (!loadedCloud || !loadedCloud->reserveThePointsTable(fileChunkSize) || !loadedCloud->enableScalarField())
 			{
 				result = CC_FERR_NOT_ENOUGH_MEMORY;
 				if (loadedCloud)
 					delete loadedCloud;
-				loadedCloud=0;
+				loadedCloud = 0;
 				break;
 			}
 		}

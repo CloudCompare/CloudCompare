@@ -238,7 +238,7 @@ public:
 			//not enough memory
 			return false;
 		}
-		Scalar* d = &eigenValues.front();
+		Scalar* d = eigenValues.data();
 
 		//init
 		{

@@ -338,10 +338,10 @@ void ccHistogramWindow::refreshBars()
 			keyData[i] = m_minVal + normVal * (m_maxVal - m_minVal);
 			valueData[i] = m_histoValues[i];
 
-			const ColorCompType* col = m_associatedSF->getColor(static_cast<ScalarType>(keyData[i]));
+			const ccColor::Rgb* col = m_associatedSF->getColor(static_cast<ScalarType>(keyData[i]));
 			if (!col) //hidden values may have no associated color!
-				col = ccColor::lightGrey.rgba;
-			colors[i] = QColor(col[0], col[1], col[2]);
+				col = &ccColor::lightGrey;
+			colors[i] = QColor(col->r, col->g, col->b);
 		}
 
 		m_histogram->setData(keyData, valueData, colors);
@@ -469,7 +469,7 @@ void ccHistogramWindow::refresh()
 			//import color for the current bin
 			if (colorScheme != USE_SOLID_COLOR)
 			{
-				const ColorCompType* col = 0;
+				const ccColor::Rgb* col = 0;
 				if (colorScheme == USE_SF_SCALE)
 				{
 					//equivalent SF value
@@ -483,8 +483,8 @@ void ccHistogramWindow::refresh()
 					col = colorScale->getColorByRelativePos(normVal);
 				}
 				if (!col) //hidden values may have no associated color!
-					col = ccColor::lightGrey.rgba;
-				colors[i] = QColor(col[0], col[1], col[2]);
+					col = &ccColor::lightGrey;
+				colors[i] = QColor(col->r, col->g, col->b);
 			}
 		}
 
@@ -513,7 +513,7 @@ void ccHistogramWindow::refresh()
 		m_overlayCurve->setName("OverlayCurve");
 
 		//set pen color
-		const ccColor::Rgba& col = ccColor::darkGrey;
+		const ccColor::Rgb& col = ccColor::darkGrey;
 		QPen pen(QColor(col.r, col.g, col.b));
 		m_overlayCurve->setPen(pen);
 
@@ -543,9 +543,9 @@ void ccHistogramWindow::refresh()
 		m_arrowLeft->setCurrentVal(satRange.start());
 		if (colorScale)
 		{
-			const ColorCompType* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
+			const ccColor::Rgb* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
 			if (col)
-				m_arrowLeft->setColor(col[0], col[1], col[2]);
+				m_arrowLeft->setColor(col->r, col->g, col->b);
 		}
 		addPlottable(m_arrowLeft);
 
@@ -554,9 +554,9 @@ void ccHistogramWindow::refresh()
 		m_arrowRight->setCurrentVal(satRange.stop());
 		if (colorScale)
 		{
-			const ColorCompType* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());
+			const ccColor::Rgb* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());
 			if (col)
-				m_arrowRight->setColor(col[0], col[1], col[2]);
+				m_arrowRight->setColor(col->r, col->g, col->b);
 		}
 		addPlottable(m_arrowRight);
 	}

@@ -207,7 +207,7 @@ public:
 	inline double getRelativePosition(double value) const
 	{
 		assert(m_updated && !m_relative);
-		return (value - m_absoluteMinValue)/m_absoluteRange;
+		return (value - m_absoluteMinValue) / m_absoluteRange;
 	}
 
 	//! Returns color by value
@@ -216,7 +216,7 @@ public:
 		\param outOfRangeColor default color to return if relativePos if out of [0;1]
 		\return corresponding color
 	**/
-	inline const ColorCompType* getColorByValue(double value, const ColorCompType* outOfRangeColor = 0) const
+	inline const ccColor::Rgb* getColorByValue(double value, const ccColor::Rgb* outOfRangeColor = nullptr) const
 	{
 		assert(m_updated && !m_relative);
 		double relativePos = getRelativePosition(value);
@@ -228,11 +228,11 @@ public:
 		\param outOfRangeColor default color to return if relativePos if out of [0;1]
 		\return corresponding color
 	**/
-	inline const ColorCompType* getColorByRelativePos(double relativePos, const ColorCompType* outOfRangeColor = 0) const
+	inline const ccColor::Rgb* getColorByRelativePos(double relativePos, const ccColor::Rgb* outOfRangeColor = nullptr) const
 	{
 		assert(m_updated);
 		if (relativePos >= 0.0 && relativePos <= 1.0)
-			return getColorByIndex(static_cast<unsigned>(relativePos * (MAX_STEPS-1))).rgba;
+			return &getColorByIndex(static_cast<unsigned>(relativePos * (MAX_STEPS - 1)));
 		else
 			return outOfRangeColor;
 	}
@@ -243,14 +243,14 @@ public:
 		\param outOfRangeColor default color to return if relativePos if out of [0;1]
 		\return corresponding color
 	**/
-	inline const ColorCompType* getColorByRelativePos(double relativePos, unsigned steps, const ColorCompType* outOfRangeColor = 0) const
+	inline const ccColor::Rgb* getColorByRelativePos(double relativePos, unsigned steps, const ccColor::Rgb* outOfRangeColor = nullptr) const
 	{
 		assert(m_updated);
 		if (relativePos >= 0.0 && relativePos <= 1.0)
 		{
 			//quantized (16 bits) version --> much faster than floor!
-			unsigned index = (static_cast<unsigned>((relativePos*steps)*65535.0))>>16;
-			return getColorByIndex((index*(MAX_STEPS-1)) / steps).rgba;
+			unsigned index = (static_cast<unsigned>((relativePos*steps)*65535.0)) >> 16;
+			return &getColorByIndex((index*(MAX_STEPS - 1)) / steps);
 		}
 		else
 		{
@@ -262,7 +262,7 @@ public:
 	/** \param index color index in m_rgbaScale array (must be below MAX_STEPS)
 		\return corresponding color
 	**/
-	inline const ccColor::Rgba& getColorByIndex(unsigned index) const
+	inline const ccColor::Rgb& getColorByIndex(unsigned index) const
 	{
 		assert(m_updated && index < MAX_STEPS);
 		return m_rgbaScale[index];
@@ -292,8 +292,8 @@ protected:
 	//! Elements
 	QList<ccColorScaleElement> m_steps;
 
-	//! Internal representation (RGBA)
-	ccColor::Rgba m_rgbaScale[MAX_STEPS];
+	//! Internal representation (RGB)
+	ccColor::Rgb m_rgbaScale[MAX_STEPS];
 
 	//! Internal representation validity
 	bool m_updated;

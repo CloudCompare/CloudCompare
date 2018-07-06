@@ -275,12 +275,20 @@ void AsciiOpenDlg::updateTable()
 
 	//we skip first lines (if needed)
 	{
-		for (unsigned i = 0; i < m_skippedLines; ++i)
+		for (unsigned i = 0; i < m_skippedLines;)
 		{
 			QString currentLine = stream.readLine();
+			if (currentLine.isEmpty())
+			{
+				//empty lines are ignored
+				continue;
+			}
 			//we keep track of the first line
 			if (i == 0)
+			{
 				m_headerLine = currentLine;
+			}
+			++i;
 		}
 	}
 
@@ -304,9 +312,20 @@ void AsciiOpenDlg::updateTable()
 	std::vector<bool> valueIsBelow255;	//identifies columns with integer values between 0 and 255 only
 
 	QChar decimalPoint = QLocale().decimalPoint();
-	QString currentLine = stream.readLine();
-	while (lineCount < LINES_READ_FOR_STATS && !currentLine.isNull())
+	while (lineCount < LINES_READ_FOR_STATS)
 	{
+		QString currentLine = stream.readLine();
+		if (currentLine.isNull())
+		{
+			//end of file reached
+			break;
+		}
+		if (currentLine.isEmpty())
+		{
+			//empty lines are ignored
+			continue;
+		}
+
 		//we recognize "//" as the beginning of a comment
 		if (!currentLine.startsWith("//")/* || !currentLine.startsWith("#")*/)
 		{
@@ -398,9 +417,6 @@ void AsciiOpenDlg::updateTable()
 			}
 			++commentLines;
 		}
-
-		//read next line
-		currentLine = stream.readLine();
 	}
 
 	file.close();
@@ -709,6 +725,8 @@ void AsciiOpenDlg::updateTable()
 						m_columnType[i] = VALID;
 						labelColumnAssigned = true;
 					}
+
+					columnHeaderWidget->blockSignals(false);
 				}
 			}
 		} //if (validHeader)

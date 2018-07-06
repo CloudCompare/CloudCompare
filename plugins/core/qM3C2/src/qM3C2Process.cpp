@@ -788,7 +788,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 		//allocate distances SF
 		s_M3C2Params.m3c2DistSF = new ccScalarField(M3C2_DIST_SF_NAME);
 		s_M3C2Params.m3c2DistSF->link();
-		if (!s_M3C2Params.m3c2DistSF->resize(corePointCount, true, NAN_VALUE))
+		if (!s_M3C2Params.m3c2DistSF->resizeSafe(corePointCount, true, NAN_VALUE))
 		{
 			errorMessage = "Failed to allocate memory for distance values!";
 			error = true;
@@ -797,7 +797,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 		//allocate dist. uncertainty SF
 		s_M3C2Params.distUncertaintySF = new ccScalarField(DIST_UNCERTAINTY_SF_NAME);
 		s_M3C2Params.distUncertaintySF->link();
-		if (!s_M3C2Params.distUncertaintySF->resize(corePointCount, true, NAN_VALUE))
+		if (!s_M3C2Params.distUncertaintySF->resizeSafe(corePointCount, true, NAN_VALUE))
 		{
 			errorMessage = "Failed to allocate memory for dist. uncertainty values!";
 			error = true;
@@ -806,7 +806,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 		//allocate change significance SF
 		s_M3C2Params.sigChangeSF = new ccScalarField(SIG_CHANGE_SF_NAME);
 		s_M3C2Params.sigChangeSF->link();
-		if (!s_M3C2Params.sigChangeSF->resize(corePointCount, true, SCALAR_ZERO))
+		if (!s_M3C2Params.sigChangeSF->resizeSafe(corePointCount, true, SCALAR_ZERO))
 		{
 			if (app)
 				app->dispToConsole("Failed to allocate memory for change significance values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
@@ -832,7 +832,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 			QString stdDevSFName1 = QString(STD_DEV_CLOUD1_SF_NAME).arg(prefix);
 			s_M3C2Params.stdDevCloud1SF = new ccScalarField(qPrintable(stdDevSFName1));
 			s_M3C2Params.stdDevCloud1SF->link();
-			if (!s_M3C2Params.stdDevCloud1SF->resize(corePointCount, true, NAN_VALUE))
+			if (!s_M3C2Params.stdDevCloud1SF->resizeSafe(corePointCount, true, NAN_VALUE))
 			{
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #1 std. dev. values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
@@ -843,7 +843,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 			QString stdDevSFName2 = QString(STD_DEV_CLOUD2_SF_NAME).arg(prefix);
 			s_M3C2Params.stdDevCloud2SF = new ccScalarField(qPrintable(stdDevSFName2));
 			s_M3C2Params.stdDevCloud2SF->link();
-			if (!s_M3C2Params.stdDevCloud2SF->resize(corePointCount, true, NAN_VALUE))
+			if (!s_M3C2Params.stdDevCloud2SF->resizeSafe(corePointCount, true, NAN_VALUE))
 			{
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #2 std. dev. values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
@@ -856,7 +856,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 			//allocate cloud #1 density SF
 			s_M3C2Params.densityCloud1SF = new ccScalarField(DENSITY_CLOUD1_SF_NAME);
 			s_M3C2Params.densityCloud1SF->link();
-			if (!s_M3C2Params.densityCloud1SF->resize(corePointCount, true, NAN_VALUE))
+			if (!s_M3C2Params.densityCloud1SF->resizeSafe(corePointCount, true, NAN_VALUE))
 			{
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #1 density values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
@@ -866,7 +866,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 			//allocate cloud #2 density SF
 			s_M3C2Params.densityCloud2SF = new ccScalarField(DENSITY_CLOUD2_SF_NAME);
 			s_M3C2Params.densityCloud2SF->link();
-			if (!s_M3C2Params.densityCloud2SF->resize(corePointCount, true, NAN_VALUE))
+			if (!s_M3C2Params.densityCloud2SF->resizeSafe(corePointCount, true, NAN_VALUE))
 			{
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #2 density values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);

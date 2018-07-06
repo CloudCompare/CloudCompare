@@ -205,8 +205,8 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 				lUVDiffuseElement->GetDirectArray().SetCount(static_cast<int>(count));
 				for (unsigned i = 0; i < count; ++i)
 				{
-					const float* uv = texCoords->getValue(i);
-					lUVDiffuseElement->GetDirectArray().SetAt(i, FbxVector2(uv[0], uv[1]));
+					const TexCoords2D& uv = texCoords->getValue(i);
+					lUVDiffuseElement->GetDirectArray().SetAt(i, FbxVector2(uv.tx, uv.ty));
 				}
 			}
 
@@ -339,10 +339,10 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 		lGeometryElementVertexColor->GetDirectArray().SetCount(vertCount);
 		for (unsigned i = 0; i < vertCount; ++i)
 		{
-			const ColorCompType* C = cloud->getPointColor(i);
-			FbxColor col(static_cast<double>(C[0]) / ccColor::MAX,
-				static_cast<double>(C[1]) / ccColor::MAX,
-				static_cast<double>(C[2]) / ccColor::MAX);
+			const ccColor::Rgb& C = cloud->getPointColor(i);
+			FbxColor col(	static_cast<double>(C.r) / ccColor::MAX,
+							static_cast<double>(C.g) / ccColor::MAX,
+							static_cast<double>(C.b) / ccColor::MAX);
 			lGeometryElementVertexColor->GetDirectArray().SetAt(i, col);
 		}
 
@@ -909,7 +909,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 	if (perVertexNormals >= 0 || perPolygonNormals >= 0)
 	{
 		normsTable = new NormsIndexesTableType();
-		if (!normsTable->reserve(polyVertCount) || !mesh->reservePerTriangleNormalIndexes())
+		if (!normsTable->reserveSafe(polyVertCount) || !mesh->reservePerTriangleNormalIndexes())
 		{
 			ccLog::Warning(QString("[FBX] Not enough memory to load mesh '%1' normals!").arg(fbxMesh->GetName()));
 			normsTable->release();
@@ -1056,7 +1056,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 				vertTexUVTable = new TextureCoordsContainer();
 				int uvCount = leUV->GetDirectArray().GetCount();
 
-				if (!vertTexUVTable->reserve(uvCount) || !mesh->reservePerTriangleTexCoordIndexes())
+				if (!vertTexUVTable->reserveSafe(uvCount) || !mesh->reservePerTriangleTexCoordIndexes())
 				{
 					vertTexUVTable->release();
 					vertTexUVTable = 0;
@@ -1069,8 +1069,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 					{
 						FbxVector2 uv = leUV->GetDirectArray().GetAt(i);
 						//convert to CC-structure
-						float uvf[2] = { static_cast<float>(uv.Buffer()[0]),
-							static_cast<float>(uv.Buffer()[1]) };
+						TexCoords2D uvf( static_cast<float>(uv.Buffer()[0]), static_cast<float>(uv.Buffer()[1]) );
 						vertTexUVTable->addElement(uvf);
 					}
 

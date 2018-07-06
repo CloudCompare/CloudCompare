@@ -212,9 +212,9 @@ bool sm2ccConverter::addRGB(ccPointCloud * cloud)
 	//loop
 	for (size_t i = 0; i < pointCount; ++i)
 	{
-		ColorCompType C[3] = {	static_cast<ColorCompType>(pcl_cloud_rgb->points[i].r),
-								static_cast<ColorCompType>(pcl_cloud_rgb->points[i].g),
-								static_cast<ColorCompType>(pcl_cloud_rgb->points[i].b)};
+		ccColor::Rgb C(	static_cast<ColorCompType>(pcl_cloud_rgb->points[i].r),
+						static_cast<ColorCompType>(pcl_cloud_rgb->points[i].g),
+						static_cast<ColorCompType>(pcl_cloud_rgb->points[i].b) );
 		cloud->addRGBColor(C);
 	}
 
@@ -246,7 +246,7 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 
 	//create new scalar field
 	ccScalarField* cc_scalar_field = new ccScalarField(name.c_str());
-	if (!cc_scalar_field->reserve((unsigned)pointCount))
+	if (!cc_scalar_field->reserveSafe(static_cast<unsigned>(pointCount)))
 	{
 		cc_scalar_field->release();
 		return false;

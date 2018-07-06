@@ -122,18 +122,18 @@ namespace ccColor
 	typedef RgbaTpl<ColorCompType> Rgba;
 
 	// Predefined colors (default type)
-	QCC_DB_LIB_API extern const Rgba white;
-	QCC_DB_LIB_API extern const Rgba lightGrey;
-	QCC_DB_LIB_API extern const Rgba darkGrey;
-	QCC_DB_LIB_API extern const Rgba red;
-	QCC_DB_LIB_API extern const Rgba green;
-	QCC_DB_LIB_API extern const Rgba blue;
-	QCC_DB_LIB_API extern const Rgba darkBlue;
-	QCC_DB_LIB_API extern const Rgba magenta;
-	QCC_DB_LIB_API extern const Rgba cyan;
-	QCC_DB_LIB_API extern const Rgba orange;
-	QCC_DB_LIB_API extern const Rgba black;
-	QCC_DB_LIB_API extern const Rgba yellow;
+	QCC_DB_LIB_API extern const Rgb white;
+	QCC_DB_LIB_API extern const Rgb lightGrey;
+	QCC_DB_LIB_API extern const Rgb darkGrey;
+	QCC_DB_LIB_API extern const Rgb red;
+	QCC_DB_LIB_API extern const Rgb green;
+	QCC_DB_LIB_API extern const Rgb blue;
+	QCC_DB_LIB_API extern const Rgb darkBlue;
+	QCC_DB_LIB_API extern const Rgb magenta;
+	QCC_DB_LIB_API extern const Rgb cyan;
+	QCC_DB_LIB_API extern const Rgb orange;
+	QCC_DB_LIB_API extern const Rgb black;
+	QCC_DB_LIB_API extern const Rgb yellow;
 
 	// Predefined materials (float)
 	QCC_DB_LIB_API extern const Rgbaf bright;

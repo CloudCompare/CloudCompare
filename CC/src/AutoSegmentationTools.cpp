@@ -16,14 +16,17 @@
 //#                                                                        #
 //##########################################################################
 
-#include "AutoSegmentationTools.h"
+#include <AutoSegmentationTools.h>
 
 //local
-#include "FastMarchingForPropagation.h"
-#include "GenericProgressCallback.h"
-#include "ReferenceCloud.h"
-#include "ScalarField.h"
-#include "ScalarFieldTools.h"
+#include <FastMarchingForPropagation.h>
+#include <GenericProgressCallback.h>
+#include <ReferenceCloud.h>
+#include <ScalarField.h>
+#include <ScalarFieldTools.h>
+
+//System
+#include <algorithm>
 
 using namespace CCLib;
 
@@ -96,7 +99,7 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 			//(they will be "used" later)
 			try
 			{
-				while (static_cast<size_t>(ccLabel) >= cc.size())
+				while (static_cast<std::size_t>(ccLabel) >= cc.size())
 				{
 					cc.push_back(new ReferenceCloud(theCloud));
 				}
@@ -205,12 +208,12 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 	ScalarField* theDists = new ScalarField("distances");
 	{
 		ScalarType d = theCloud->getPointScalarValue(0);
-		if (!theDists->resize(numberOfPoints, true, d))
+		if (!theDists->resizeSafe(numberOfPoints, true, d))
 		{
 			if (!inputOctree)
 				delete theOctree;
+			theDists->release();
 			return false;
-
 		}
 	}
 
@@ -225,7 +228,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 		while (begin<numberOfPoints)
 		{
 			const CCVector3 *thePoint = theCloud->getPoint(begin);
-			const ScalarType& theDistance = theDists->getValue(begin);
+			const ScalarType& theDistance = theDists->at(begin);
 			++begin;
 
 			//FIXME DGM: what happens if SF is negative?!
@@ -248,9 +251,9 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 		for (unsigned i = begin; i<numberOfPoints; ++i)
 		{
 			const CCVector3 *thePoint = theCloud->getPoint(i);
-			const ScalarType& theDistance = theDists->getValue(i);
+			const ScalarType& theDistance = theDists->at(i);
 
-			if ((theCloud->getPointScalarValue(i)>=0.0)&&(theDistance > maxDist))
+			if ((theCloud->getPointScalarValue(i) >= 0.0) && (theDistance > maxDist))
 			{
 				maxDist = theDistance;
 				startPoint = *thePoint;
@@ -313,8 +316,11 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 
 	for (unsigned i = 0; i < numberOfPoints; ++i)
 	{
-		theCloud->setPointScalarValue(i, theDists->getValue(i));
+		theCloud->setPointScalarValue(i, theDists->at(i));
 	}
+
+	theDists->release();
+	theDists = nullptr;
 
 	if (fm)
 	{
@@ -322,12 +328,6 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 		fm = nullptr;
 	}
 
-	if (theDists)
-	{
-		theDists->release();
-		theDists = nullptr;
-	}
-	
 	if (theOctree && !inputOctree)
 	{
 		delete theOctree;

@@ -16,23 +16,23 @@
 //#                                                                        #
 //##########################################################################
 
-#include "PointProjectionTools.h"
+#include <PointProjectionTools.h>
 
 //local
-#include "Delaunay2dMesh.h"
-#include "DistanceComputationTools.h"
-#include "GenericProgressCallback.h"
-#include "Neighbourhood.h"
-#include "ParallelSort.h"
-#include "SimpleCloud.h"
-#include "SimpleMesh.h"
+#include <Delaunay2dMesh.h>
+#include <DistanceComputationTools.h>
+#include <GenericProgressCallback.h>
+#include <Neighbourhood.h>
+#include <ParallelSort.h>
+#include <PointCloud.h>
+#include <SimpleMesh.h>
 
 //system
 #include <set>
 
 using namespace CCLib;
 
-SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
+PointCloud* PointProjectionTools::developCloudOnCylinder(	GenericCloud* cloud,
 															PointCoordinateType radius,
 															unsigned char dim,
 															CCVector3* center,
@@ -46,8 +46,8 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 
 	unsigned count = cloud->size();
 
-	SimpleCloud* newList = new SimpleCloud();
-	if (!newList->reserve(count)) //not enough memory
+	PointCloud* newCloud = new PointCloud();
+	if (!newCloud->reserve(count)) //not enough memory
 		return nullptr;
 
 	//we compute cloud bounding box center if no center is specified
@@ -82,7 +82,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 		PointCoordinateType u = sqrt(P.u[dim1] * P.u[dim1] + P.u[dim2] * P.u[dim2]);
 		PointCoordinateType lon = atan2(P.u[dim1],P.u[dim2]);
 
-		newList->addPoint(CCVector3(lon*radius,P.u[dim],u-radius));
+		newCloud->addPoint(CCVector3(lon*radius,P.u[dim],u-radius));
 
 		if (progressCb && !nprogress.oneStep())
 		{
@@ -96,18 +96,18 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 		progressCb->stop();
 	}
 
-	return newList;
+	return newCloud;
 }
 
 //deroule la liste sur un cone dont le centre est "center" et d'angle alpha en degres
-SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsigned char dim, PointCoordinateType baseRadius, float alpha, const CCVector3& center, GenericProgressCallback* progressCb)
+PointCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsigned char dim, PointCoordinateType baseRadius, float alpha, const CCVector3& center, GenericProgressCallback* progressCb)
 {
 	if (!cloud)
 		return nullptr;
 
 	unsigned count = cloud->size();
 
-	SimpleCloud* outCloud = new SimpleCloud();
+	PointCloud* outCloud = new PointCloud();
 	if (!outCloud->reserve(count)) //not enough memory
 		return nullptr;
 
@@ -179,13 +179,13 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsig
 	return outCloud;
 }
 
-SimpleCloud* PointProjectionTools::applyTransformation(GenericCloud* cloud, Transformation& trans, GenericProgressCallback* progressCb)
+PointCloud* PointProjectionTools::applyTransformation(GenericCloud* cloud, Transformation& trans, GenericProgressCallback* progressCb)
 {
 	assert(cloud);
 
 	unsigned count = cloud->size();
 
-	SimpleCloud* transformedCloud = new SimpleCloud();
+	PointCloud* transformedCloud = new PointCloud();
 	if (!transformedCloud->reserve(count))
 		return nullptr; //not enough memory
 
@@ -347,14 +347,14 @@ inline bool LexicographicSort(const CCVector2& a, const CCVector2& b)
 bool PointProjectionTools::extractConvexHull2D(	std::vector<IndexedCCVector2>& points,
 												std::list<IndexedCCVector2*>& hullPoints)
 {
-	size_t n = points.size();
+	std::size_t n = points.size();
 
 	// Sort points lexicographically
 	ParallelSort(points.begin(), points.end(), LexicographicSort);
 
 	// Build lower hull
 	{
-		for (size_t i=0; i<n; i++)
+		for (std::size_t i=0; i<n; i++)
 		{
 			while (hullPoints.size() >= 2)
 			{
@@ -384,7 +384,7 @@ bool PointProjectionTools::extractConvexHull2D(	std::vector<IndexedCCVector2>& p
 
 	// Build upper hull
 	{
-		size_t t = hullPoints.size()+1;
+		std::size_t t = hullPoints.size()+1;
 		for (int i=static_cast<int>(n)-2; i>=0; i--)
 		{
 			while (hullPoints.size() >= t)
@@ -512,25 +512,24 @@ struct Edge
 	float nearestPointSquareDist;
 };
 
-
 //! Finds the nearest (available) point to an edge
 /** \return The nearest point distance (or -1 if no point was found!)
 **/
-PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
-											const VertexIterator& itA,
-											const VertexIterator& itB,
-											const std::vector<Vertex2D>& points,
-											const std::vector<HullPointFlags>& pointFlags,
-											PointCoordinateType minSquareEdgeLength,
-											PointCoordinateType maxSquareEdgeLength,
-											bool allowLongerChunks = false)
+static PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
+													const VertexIterator& itA,
+													const VertexIterator& itB,
+													const std::vector<Vertex2D>& points,
+													const std::vector<HullPointFlags>& pointFlags,
+													PointCoordinateType minSquareEdgeLength,
+													PointCoordinateType maxSquareEdgeLength,
+													bool allowLongerChunks = false)
 {
 	//look for the nearest point in the input set
 	PointCoordinateType minDist2 = -1;
-	CCVector2 AB = **itB-**itA;
+	CCVector2 AB = **itB - **itA;
 	PointCoordinateType squareLengthAB = AB.norm2();
 	unsigned pointCount = static_cast<unsigned>(points.size());
-	for (unsigned i=0; i<pointCount; ++i)
+	for (unsigned i = 0; i < pointCount; ++i)
 	{
 		const Vertex2D& P = points[i];
 		if (pointFlags[P.index] != POINT_NOT_USED)
@@ -541,7 +540,7 @@ PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
 			continue;
 
 		//we only consider 'inner' points
-		CCVector2 AP = P-**itA;
+		CCVector2 AP = P - **itA;
 		if (AB.x * AP.y - AB.y * AP.x < 0)
 		{
 			continue;
@@ -558,7 +557,7 @@ PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
 				//(i.e. at least one of the created edges is smaller than the original one
 				//and we don't create too small edges!)
 				PointCoordinateType squareLengthAP = AP.norm2();
-				PointCoordinateType squareLengthBP = (P-**itB).norm2();
+				PointCoordinateType squareLengthBP = (P - **itB).norm2();
 				if (	squareLengthAP >= minSquareEdgeLength
 					&&	squareLengthBP >= minSquareEdgeLength
 					&&	(allowLongerChunks || (squareLengthAP < squareLengthAB || squareLengthBP < squareLengthAB))
@@ -602,7 +601,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 	PointCoordinateType minSquareEdgeLength = 0;
 	{
 		CCVector2 minP,maxP;
-		for (size_t i = 0; i < pointCount; ++i)
+		for (std::size_t i = 0; i < pointCount; ++i)
 		{
 			const IndexedCCVector2& P = points[i];
 			if (i)
@@ -652,7 +651,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 			++step;
 
 			////reset point flags
-			//for (size_t i=0; i<pointCount; ++i)
+			//for (std::size_t i=0; i<pointCount; ++i)
 			//{
 			//	if (pointFlags[i] != POINT_FROZEN)
 			//		pointFlags[i] = POINT_NOT_USED;
@@ -780,7 +779,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 						}
 
 						//update the removed edges info and put them back in the main list
-						for (size_t i=0; i<removed.size(); ++i)
+						for (std::size_t i=0; i<removed.size(); ++i)
 						{
 							VertexIterator itC = removed[i];
 							VertexIterator itD = itC; ++itD;
@@ -854,4 +853,37 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 	}
 
 	return true;
+}
+
+void PointProjectionTools::Transformation::apply(GenericIndexedCloudPersist& cloud) const
+{
+	unsigned count = cloud.size();
+
+	//always apply the scale before everything (applying before or after rotation does not changes anything)
+	if (fabs(static_cast<double>(s) - 1.0) > ZERO_TOLERANCE)
+	{
+		for (unsigned i = 0; i< cloud.size(); ++i)
+		{
+			CCVector3* P = const_cast<CCVector3*>(cloud.getPoint(i));
+			*P *= s;
+		}
+	}
+
+	if (R.isValid())
+	{
+		for (unsigned i = 0; i< cloud.size(); ++i)
+		{
+			CCVector3* P = const_cast<CCVector3*>(cloud.getPoint(i));
+			(*P) = R * (*P);
+		}
+	}
+
+	if (T.norm() > ZERO_TOLERANCE) //T applied only if it makes sense
+	{
+		for (unsigned i = 0; i< cloud.size(); ++i)
+		{
+			CCVector3* P = const_cast<CCVector3*>(cloud.getPoint(i));
+			(*P) += T;
+		}
+	}
 }

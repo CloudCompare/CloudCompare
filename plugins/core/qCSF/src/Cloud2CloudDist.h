@@ -30,7 +30,7 @@
 #define _C2CDIST_H_
 
 #include "Cloth.h"
-#include "PointCloud.h"
+#include "wlPointCloud.h"
 
 //computing distance between clouds
 class Cloud2CloudDist

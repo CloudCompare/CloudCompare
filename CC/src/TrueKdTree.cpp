@@ -141,7 +141,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		splitDim = Z_DIM;
 
 	//find the median by sorting the points coordinates
-	assert(s_sortedCoordsForSplit.size() >= static_cast<size_t>(count));
+	assert(s_sortedCoordsForSplit.size() >= static_cast<std::size_t>(count));
 	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = subset->getPoint(i);

@@ -107,6 +107,7 @@ static const char COMMAND_ICP_RANDOM_SAMPLING_LIMIT[]		= "RANDOM_SAMPLING_LIMIT"
 static const char COMMAND_ICP_ENABLE_FARTHEST_REMOVAL[]		= "FARTHEST_REMOVAL";
 static const char COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT[]		= "MODEL_SF_AS_WEIGHTS";
 static const char COMMAND_ICP_USE_DATA_SF_AS_WEIGHT[]		= "DATA_SF_AS_WEIGHTS";
+static const char COMMAND_ICP_ROT[]				= "ROT";
 static const char COMMAND_FBX_EXPORT_FORMAT[]				= "FBX_EXPORT_FMT";
 static const char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 static const char COMMAND_COMPUTE_GRIDDED_NORMALS[]			= "COMPUTE_NORMALS";
@@ -3428,6 +3429,7 @@ struct CommandICP : public ccCommandLineInterface::Command
 		int modelSFAsWeights = -1;
 		int dataSFAsWeights = -1;
 		int maxThreadCount = 0;
+		int transformationFilters = 0;
 
 		while (!cmd.arguments().empty())
 		{
@@ -3555,6 +3557,32 @@ struct CommandICP : public ccCommandLineInterface::Command
 				maxThreadCount = cmd.arguments().takeFirst().toInt(&ok);
 				if (!ok || maxThreadCount < 0)
 					return cmd.error(QObject::tr("Invalid thread count! (after %1)").arg(COMMAND_MAX_THREAD_COUNT));
+			}
+			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_ROT))
+			{
+				//local option confirmed, we can move on
+				cmd.arguments().pop_front();
+
+				if (!cmd.arguments().empty())
+				{
+					QString rotation = cmd.arguments().takeFirst().toUpper();
+					if (rotation == "XYZ")
+						transformationFilters = 0;
+					else if (rotation == "X")
+						transformationFilters = 2;
+					else if (rotation == "Y")
+						transformationFilters = 4;
+					else if (rotation == "Z")
+						transformationFilters = 1;
+					else if (rotation == "NONE")
+						transformationFilters = 7;
+					else
+						return cmd.error(QObject::tr("Invalid parameter: unknown rotation filter \"%1\"").arg(rotation));
+				}
+				else
+				{
+					return cmd.error(QObject::tr("Missing parameter: rotation filter after \"-%1\" (XYZ/X/Y/Z/NONE)").arg(COMMAND_ICP_ROT));
+				}
 			}
 			else
 			{

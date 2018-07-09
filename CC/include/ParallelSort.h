@@ -38,6 +38,8 @@
 
 #else
 
+	#include <algorithm>
+
 	#define ParallelSort std::sort
 
 #endif

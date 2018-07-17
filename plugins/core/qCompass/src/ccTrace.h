@@ -166,6 +166,13 @@ public:
 	ccFitPlane* fitPlane(int surface_effect_tolerance = 10, float min_planarity = 0.75f);
 
 	/*
+	Assign a structure normal to points in this trace. These represent the (estimated) normal vector to the structure who's intersection
+	with the outcrop surface forms this trace. Structure normals are estimated and assigned in ccCompass::estimateStructureNormals(...).
+	
+	*/
+	void assignStructureNormal(int pointID, CCVector3f normal, double weight=1.0);
+
+	/*
 	Assigns the ID of this object to active scalar field (for each trace point).
 	*/
 	void bakePathToScalarField();
@@ -231,7 +238,8 @@ protected:
 	std::vector<std::deque<int>> m_trace; //contains an ordered list of indices which define this trace. Note that indices representing nodes MAY be inserted twice.
 	std::vector<int> m_waypoints; //list of waypoint indices
 	std::vector<int> m_previous; //for undoing waypoints
-
+	std::vector<CCVector3> m_SNE; //structure-normal estimates. Value at m_SNE[i] corresponds to the i'th vertex in this trace.
+	std::vector<float> m_SNE_weights; //the weights of the individual sne
 private:
 
 	//class for storing point index & path costs (from the path start) in sorted lists

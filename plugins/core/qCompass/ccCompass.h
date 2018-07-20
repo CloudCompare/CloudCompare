@@ -39,6 +39,7 @@ class ccThicknessTool;
 class ccTool;
 class ccTopologyTool;
 class ccTraceTool;
+class ccSNECloud;
 
 class ccCompass : public QObject, public ccStdPluginInterface, public ccPickingListener
 {
@@ -200,7 +201,7 @@ protected:
 	static double prior(double phi, double theta, double nx, double ny, double nz); //prior distribution for orientations (depends on outcrop orientation)
 	static double logWishSF(double X[3][3], int nobserved); //calculate log scale-factor for wishart dist. This only needs to be done once per X, so is pulled out of the wish function for performance
 	static double logWishart(double X[3][3], int nobserved, double phi, double theta, double alpha, double e1, double e2, double e3, double lsf); //calculate log wishart probability density for an observed covariance and proposed eigen system
-	static double wishartExp1D(double X[3][3], int nobserved, double phi, double theta, double e1, double e2, double e3, double lsf, int steps=500); //integrate over alpha
+	static double wishartExp1D(double X[3][3], int nobserved, double phi, double theta, double e1, double e2, double e3, double lsf, unsigned steps=500); //integrate over alpha
 	static double** sampleMCMC(double icov[3][3], int nobserved, CCVector3* normal, int nsamples = 1000, double proposalWidth = 0.075); //sample posterior with MCMC
 
 //static flags used to define simple behaviours

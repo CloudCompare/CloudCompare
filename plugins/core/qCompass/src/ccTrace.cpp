@@ -246,9 +246,6 @@ void ccTrace::finalizePath()
 	//clear existing points in background "polyline"
 	clear();
 
-	//clear any defined structure normals
-	m_SNE.clear();
-	m_SNE_weights.clear();
 	//push trace buffer to said polyline (for save/export etc.)
 	for (std::deque<int> seg : m_trace)
 	{
@@ -836,19 +833,6 @@ ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 	return p;
 }
 
-
-void ccTrace::assignStructureNormal(int pointID, CCVector3f normal,double weight)
-{
-	if (m_SNE.size() <= pointID) //check array is big enough...
-	{
-		m_SNE.resize(pointID+1); //increase size to fit pointID
-		m_SNE_weights.resize(pointID + 1);
-	}
-	m_SNE[pointID] = normal;
-	m_SNE_weights[pointID] = weight;
-}
-
-
 void ccTrace::bakePathToScalarField()
 {
 	//bake points
@@ -1045,42 +1029,6 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glFunc->glPopMatrix();
 				}
 			}
-		}
-
-		//draw normal vectors (if defined)
-		if ( (m_isHighlighted | m_isAlternate | m_isActive) && m_SNE.size() == size())
-		{
-			//setup
-			if (m_width != 0)
-			{
-				glFunc->glPushAttrib(GL_LINE_BIT);
-				glFunc->glLineWidth(static_cast<GLfloat>(m_width));
-			}
-			glFunc->glMatrixMode(GL_MODELVIEW);
-			glFunc->glPushMatrix();
-			glFunc->glEnable(GL_BLEND);
-
-			//draw normal vectors (if properly defined)
-			for (unsigned p = 0; p < m_SNE.size(); p++)
-			{
-				//calculate start and end points of normal vector
-				const CCVector3 start = *getPoint(p);
-				CCVector3 end = start + m_SNE[p];
-
-				//push line to opengl
-				glFunc->glBegin(GL_LINE_STRIP);
-				glFunc->glColor4f((1.0f-m_SNE_weights[p])*0.75f, m_SNE_weights[p], 0.0f,(m_SNE_weights[p]*0.7)+0.3); //green = good, red = bad
-				ccGL::Vertex3v(glFunc, start.u);
-				ccGL::Vertex3v(glFunc, end.u);
-				glFunc->glEnd();
-			}
-
-			//cleanup
-			if (m_width != 0)
-			{
-				glFunc->glPopAttrib();
-			}
-			glFunc->glPopMatrix();
 		}
 
 		//finish picking name

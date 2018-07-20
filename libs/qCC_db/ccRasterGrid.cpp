@@ -886,12 +886,12 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 	unsigned nonEmptyCellIndex = 0;
 
 	//we work with doubles as the grid step can be much smaller than the cloud coordinates!
-	double Py = box.minCorner().u[Y] + gridStep / 2;
+	double Py = box.minCorner().u[Y]/* + gridStep / 2*/;
 
 	for (unsigned j = 0; j < height; ++j)
 	{
 		const ccRasterCell* aCell = rows[j].data();
-		double Px = box.minCorner().u[X] + gridStep / 2;
+		double Px = box.minCorner().u[X]/* + gridStep / 2*/;
 		
 		for (unsigned i = 0; i < width; ++i, ++aCell)
 		{

@@ -15,11 +15,14 @@
 //#                                                                        #
 //##########################################################################
 
+#include <array>
+
 //Qt
 #include <QFileDialog>
 #include <QFileInfo>
 
 #include <ccPickingHub.h>
+#include <ccProgressDialog.h>
 
 #include "ccCompass.h"
 #include "ccCompassDlg.h"
@@ -333,7 +336,8 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 	if (dynamic_cast<ccFitPlane*>(obj)
 		|| dynamic_cast<ccTrace*>(obj)
 		|| dynamic_cast<ccPointPair*>(obj) //n.b. several classes inherit from PointPair, so this cast will still succede for them
-		|| dynamic_cast<ccGeoObject*>(obj))
+		|| dynamic_cast<ccGeoObject*>(obj)
+		|| dynamic_cast<ccSNECloud*>(obj))
 	{
 		return; //we need do nothing!
 	}
@@ -345,7 +349,7 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 	}
 
 	//store parent of this object
-	ccHObject* parent = obj->getParent();
+	//ccHObject* parent = obj->getParent();
 
 	//are we a geoObject
 	if (ccGeoObject::isGeoObject(obj))
@@ -356,7 +360,6 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 		originals->push_back(obj->getUniqueID());
 		replacements->push_back(geoObj);
 		return;
-
 	}
 
 	//are we a fit plane?
@@ -374,6 +377,15 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 			replacements->push_back(plane);
 			return;
 		}
+	}
+
+	//are we a SNE cloud?
+	if (ccSNECloud::isSNECloud(obj))
+	{
+		ccHObject* sneCloud = new ccSNECloud(static_cast<ccPointCloud*>(obj));
+		originals->push_back(obj->getUniqueID());
+		replacements->push_back(sneCloud);
+		return;
 	}
 
 	//is the HObject a polyline? (this will be the case for lineations & traces)
@@ -1183,6 +1195,103 @@ break;
 	}
 }
 
+
+//prior distribution for orientations (depends on outcrop orientation)
+inline double prior(double phi, double theta, double nx, double ny, double nz)
+{
+	//check normal points down
+	if (nz > 0)
+	{
+		nx *= -1; ny *= -1; nz *= -1;
+	}
+
+	//calculate angle between normal vector and the normal estimate(phi, theta)
+	double alpha = acos(nx * sin(phi)*cos(theta) + ny * cos(phi) * cos(theta) - nz * sin(theta));
+	return sin(alpha) / (2 * M_PI); //n.b. 2pi is normalising factor so that function integrates to one over all phi,theta
+}
+
+//calculate log scale-factor for wishart dist. This only needs to be done once per X, so is pulled out of the wish function for performance
+inline double logWishSF(double X[3][3], int nobserved)
+{
+	//calculate determinant of X
+	double detX = X[0][0] * ((X[1][1] * X[2][2]) - (X[2][1] * X[1][2])) -
+		X[0][1] * (X[1][0] * X[2][2] - X[2][0] * X[1][2]) +
+		X[0][2] * (X[1][0] * X[2][1] - X[2][0] * X[1][1]);
+
+	return (nobserved - 4.0)*0.5*log(detX) - (nobserved*3. / 2.)*log(2.0) -   //=parts of gamma function that do not depend on the scale matrix
+		((3.0 / 2.0)*log(M_PI) + lgamma(nobserved / 2.0) + lgamma((nobserved / 2.0) - 0.5) + lgamma((nobserved / 2.0) - 1.0)); //= log(gamma3(nobserved/2))
+}
+
+//calculate log wishart probability density
+inline double logWishart(double X[3][3], int nobserved, double phi, double theta, double alpha, double e1, double e2, double e3, double lsf)
+{
+	//--------------------------------------------------
+	//Derive scale matrix eigenvectors (basis matrix)
+	//--------------------------------------------------
+	double e[3][3];
+	double i[3][3];
+
+	//eigenvector 3 (normal to plane defined by theta->phi)
+	e[0][2] = sin(phi) * cos(theta);
+	e[1][2] = cos(phi) * cos(theta);
+	e[2][2] = -sin(theta);
+	//eigenvector 2 (normal of theta->phi projected into horizontal plane and rotated by angle alpha)
+	e[0][1] = sin(phi) * sin(theta) * sin(alpha) - cos(phi) * cos(alpha);
+	e[1][1] = sin(phi) * cos(alpha) + sin(theta) * cos(phi) * sin(alpha);
+	e[2][1] = sin(alpha) * cos(theta);
+	//eigenvector 1 (calculate using cross product)
+	e[0][0] = e[1][2] * e[2][1] - e[2][2] * e[1][1];
+	e[1][0] = e[2][2] * e[0][1] - e[0][2] * e[2][1];
+	e[2][0] = e[0][2] * e[1][1] - e[1][2] * e[0][1];
+
+	//calculate determinant of the scale matrix by multiplying it's eigens
+	double D = e1*e2*e3;
+
+	//calculate the inverse of the scale matrix (we don't actually need to compute the scale matrix)
+	e1 = 1.0 / e1; //N.B. Note that by inverting the eigenvalues we compute the inverse scale matrix
+	e2 = 1.0 / e2;
+	e3 = 1.0 / e3;
+
+	//calculate unique components of I from the eigenvectors and inverted eigenvalues
+	i[0][0] = e1*e[0][0] * e[0][0] + e2*e[0][1] * e[0][1] + e3*e[0][2] * e[0][2]; //diagonal component
+	i[1][1] = e1*e[1][0] * e[1][0] + e2*e[1][1] * e[1][1] + e3*e[1][2] * e[1][2];
+	i[2][2] = e1*e[2][0] * e[2][0] + e2*e[2][1] * e[2][1] + e3*e[2][2] * e[2][2];
+	i[0][1] = e1*e[0][0] * e[1][0] + e2*e[0][1] * e[1][1] + e3*e[0][2] * e[1][2]; //off-axis component
+	i[0][2] = e1*e[0][0] * e[2][0] + e2*e[0][1] * e[2][1] + e3*e[0][2] * e[2][2];
+	i[1][2] = e1*e[1][0] * e[2][0] + e2*e[1][1] * e[2][1] + e3*e[1][2] * e[2][2];
+
+	//compute the trace of I times X
+	double trIX = (i[0][0] * X[0][0] + i[0][1] * X[1][0] + i[0][2] * X[2][0]) +
+		(i[0][1] * X[0][1] + i[1][1] * X[1][1] + i[1][2] * X[2][1]) +
+		(i[0][2] * X[0][2] + i[1][2] * X[1][2] + i[2][2] * X[2][2]);
+
+	//return the log wishart probability density
+	return lsf - 0.5 * (trIX + nobserved*log(D));
+}
+
+//integrate over alpha
+inline double wishartExp1D(double X[3][3], int nobserved, double phi, double theta, double e1, double e2, double e3, double lsf, unsigned steps)
+{
+	//evaluate integral over alpha = 0 to pi
+	double pd0 = exp(logWishart(X, nobserved, phi, theta, 0.0, e1, e2, e3, lsf));
+	double pd1 = 0.0, sum = 0.0;
+	double dA = M_PI / steps;
+	for (unsigned i = 1; i <= steps; i++)
+	{
+		pd1 = exp(logWishart(X, nobserved, phi, theta, i*dA, e1, e2, e3, lsf));
+		sum += dA*pd0 + dA*(pd1 - pd0)*0.5;
+		pd0 = pd1;
+	}
+	return sum;
+}
+
+//sample posterior with MCMC
+inline double** sampleMCMC(double icov[3][3], int nobserved, CCVector3* normal, int nsamples, double proposalWidth)
+{
+	return nullptr; //todo
+}
+
+
 //Estimate the normal vector to the structure this trace represents at each point in this trace.
 void ccCompass::estimateStructureNormals()
 {
@@ -1200,65 +1309,123 @@ void ccCompass::estimateStructureNormals()
 	CCLib::SquareMatrixd eigVectors; std::vector<double> eigValues;
 	bool hasNormals = true, broken = false; //assume normals exist until check later on
 
-	//get selected GeoObjects
-	std::vector<ccGeoObject*> objs;
+	//setup progress dialog
+	ccProgressDialog prg(true, m_app->getMainWindow());
+	prg.setMethodTitle("Structure Normal Estimation");
+	prg.setInfo("Gathering data...");
+	prg.start();
+	prg.update(0.0);
+
+	//gather objects to process
+	std::vector<std::array<ccHObject*,2>> datasets; //upper/lower surfaces will be put into this array 
+	std::vector<ccPointCloud*> pinchClouds;
 	for (ccHObject* o : m_app->getSelectedEntities())
 	{
-
-		//******************************************
-		//GATHER OBJECTS TO SEARCH FOR TRACES IN
-		//******************************************
-		ccHObject* regions[2] = { o, nullptr }; //by default, search (for traces) in selected object. If GeoObject is found, split into two regions (lower and upper)
-		ccPointCloud* pinchNodes = new ccPointCloud(); //pinch nodes - will be gathered if geoobjects are found
-
-		//this is a geoObject, so populate with two regions rather than 1
-		if (ccGeoObject::isGeoObject(o))
+		//option 1 - selected object is a GeoObject or has GeoObject children
+		ccHObject::Container objs;
+		if (ccGeoObject::isGeoObject(o)) { //selected object is a geoObject
+			objs.push_back(o);
+		} else //otherwise search for all GeoObjects
 		{
-			//A GeoObject has been found!
-			ccGeoObject* g = dynamic_cast<ccGeoObject*> (o);
-			if (g) //could possibly be null if non-loaded geo-objects exist
-			{
-				//gather data from regions (upper, interior and lower)
-				regions[0] = g->getRegion(ccGeoObject::LOWER_BOUNDARY);
-				regions[1] = g->getRegion(ccGeoObject::UPPER_BOUNDARY);
+			o->filterChildren(objs, true, CC_TYPES::HIERARCHY_OBJECT); //n.b. geoObjects are simpy considered to be hierarchy objects by CC
+		}
 
-				//special case - single surface geoboject (upper and lower regions will be the same). Set upper to null
-				if (ccGeoObject::isSingleSurfaceGeoObject(g)) {
-					regions[1] = nullptr;
-				}
+		bool foundGeoObject = false;
+		for (ccHObject* o2 : objs) {
+			if (ccGeoObject::isGeoObject(o2)) {
+				ccGeoObject* g = dynamic_cast<ccGeoObject*> (o2);
+				if (g) {//could possibly be null if non-loaded geo-objects exist
+					foundGeoObject = true; //use to escape to next object later
 
-				//gather pinch-nodes
-				ccHObject::Container objs;
-				g->filterChildren(objs, true, CC_TYPES::POLY_LINE); //pinch nodes inherit the polyline clas
-				for (ccHObject* c : objs) {
-					if (ccPinchNode::isPinchNode(c)) {  //is it a pinch node?
-						ccPinchNode* p = dynamic_cast<ccPinchNode*>(c);
-						if (p != nullptr) //can in rare cases fail
-						{
-							pinchNodes->reserve(pinchNodes->size() + 1); //pinch nodes only have one point
-							pinchNodes->addPoint(*p->getPoint(0)); //get this point
+					//store upper and lower regions
+					std::array<ccHObject*, 2> data = { g->getRegion(ccGeoObject::LOWER_BOUNDARY),g->getRegion(ccGeoObject::UPPER_BOUNDARY) };			
+					if (ccGeoObject::isSingleSurfaceGeoObject(g)) { //special case - single surface geoboject (upper and lower regions will be the same). Set upper to null
+						data[1] = nullptr; }
+					datasets.push_back(data);
+
+					//build empty point cloud for pinch nodes to go in
+					ccPointCloud* cloud = new ccPointCloud(); //points will be written here if the object is a GeoObject and if it contains pinch nodes
+					pinchClouds.push_back(cloud); //store it
+
+					//gather pinch-nodes from GeoObject
+					ccHObject::Container objs;
+					g->filterChildren(objs, true, CC_TYPES::POLY_LINE); //pinch nodes inherit the polyline clas
+					for (ccHObject* c : objs) {
+						if (ccPinchNode::isPinchNode(c)) {  //is it a pinch node?
+							ccPinchNode* p = dynamic_cast<ccPinchNode*>(c);
+							if (p != nullptr) //can in rare cases fail
+							{
+								cloud->reserve(cloud->size() + 1); //pinch nodes only have one point
+								cloud->addPoint(*p->getPoint(0)); //get this point
+							}
 						}
 					}
 				}
 			}
 		}
+		if (foundGeoObject) {
+			continue; //skip to next object if we found one (or more!) GeoObjects
+		}
+
+		//option 2 - selected object is a trace or has children that are traces
+		objs.clear();
+		if (ccTrace::isTrace(o)) { //selected object is a trace
+			objs.push_back(o);
+		}
+		else {//otherwise search for all GeoObjects
+			o->filterChildren(objs, true, CC_TYPES::POLY_LINE); //n.b. geoObjects are simpy considered to be hierarchy objects by CC
+		}
+		for (ccHObject* o2 : objs) {
+			if (ccTrace::isTrace(o2)) {//is it a trace?
+				ccTrace* t = dynamic_cast<ccTrace*> (o2);
+				if (t != nullptr) {//can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
+					std::array<ccHObject*, 2> data = { t, nullptr };
+					datasets.push_back(data); //store data for processing
+					pinchClouds.push_back(new ccPointCloud()); //push empty cloud (no pinch nodes).
+				}
+			}
+		}
+	}
+
+	if (datasets.size() == 0) { //no data found
+		m_app->dispToConsole("[ccCompass] No GeoObjects or Traces could be found to estimate structure normals for. Please select some!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+	}
+
+	//process datasets std::array<ccHObject*, 2> regions : datasets
+	for (int _d = 0; _d < datasets.size(); _d++)
+	{
+		//update progress dialog
+		prg.setInfo(QString::asprintf("Processing %d of %d datasets: Calculating fit planes...", _d+1, datasets.size()));
+		prg.update(0.0f);
+		if (prg.isCancelRequested()) {
+			break;
+		}
+
+		//get regions and pinchNodes to work on this step
+		std::array<ccHObject*, 2> regions = datasets[_d];
+		ccPointCloud* pinchNodes = pinchClouds[_d];
 
 		//************************************************
-		//LOAD POINT DATA FROM TRACES AND PINCH-NODES
+		//LOAD POINT DATA FROM TRACESS IN REGIONS
 		//************************************************
-		//load points from traces
 		ccPointCloud* points[] = { new ccSNECloud(),  //Lower Boundary Points 
-									new ccSNECloud() }; //Upper Boundary Points (will remain empty for everything execept multi-surface GeoObjects)
+			new ccSNECloud() }; //Upper Boundary Points (will remain empty for everything execept multi-surface GeoObjects)
 
-		for (unsigned r = 0; r < 2; r++) //for lower,upper in the case of a GeoObject, otherwise regions[1] will be null and will be ignored
+		//for lower,upper in the case of a GeoObject, otherwise regions[1] will be null and will be ignored
+		for (unsigned r = 0; r < 2; r++) 
 		{
 			if (regions[r] == nullptr) {
+				delete points[r];
 				continue; //skip null regions
 			}
 
-			//search for traces and pinch nodes
+			//search for traces in this region
 			ccHObject::Container objs;
-			regions[r]->filterChildren(objs, true, CC_TYPES::POLY_LINE);
+			if (ccTrace::isTrace(regions[r])) { //given object is a trace
+				objs.push_back(regions[r]);
+			} else { //otherwise search for child traces (this is a GeoObject region so traces need to be joined together)
+				regions[r]->filterChildren(objs, true, CC_TYPES::POLY_LINE);
+			}
 			for (ccHObject* c : objs)
 			{
 				if (ccTrace::isTrace(c)) //is it a trace?
@@ -1275,7 +1442,16 @@ void ccCompass::estimateStructureNormals()
 							points[r]->addNorm(t->getPointNormal(p)); //add point normal
 						}
 					}
-				} 
+				}
+			}
+
+			//skip if there are not enough points!
+			if (points[r]->size() < minsize) {
+				m_app->dispToConsole(QString::asprintf("[ccCompass] Warning: Region %d contains less than minsize points. Region ignored.", regions[r]->getUniqueID()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				delete points[r];
+				points[r] = nullptr;
+				regions[r] = nullptr;
+				continue;
 			}
 
 			//*********************************************************
@@ -1285,7 +1461,7 @@ void ccCompass::estimateStructureNormals()
 			const CCVector3* longAxis = Z.getLSPlaneX(); //n.b. this is a normal vector
 			if (longAxis == nullptr) {
 				//fail friendly if eigens could not be computed
-				m_app->dispToConsole(QString::asprintf("[ccCompass] Warning: Could not compute eigensystem for region %s. Region ignored.", regions[0]->getName()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				m_app->dispToConsole(QString::asprintf("[ccCompass] Warning: Could not compute eigensystem for region %s. Region ignored.", regions[r]->getName()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				continue; //skip to next region
 			}
 
@@ -1302,11 +1478,12 @@ void ccCompass::estimateStructureNormals()
 				d = points[r]->getPoint(p)->dot(*longAxis);
 
 				//quick-check to see if point can just be pushed to end of the list
-				if (dist[dist.size()-1] <= d) {
+				if (dist[dist.size() - 1] <= d) {
 					pid.push_back(p); dist.push_back(d);
 					px.push_back(points[r]->getPoint(p)->x); py.push_back(points[r]->getPoint(p)->y); pz.push_back(points[r]->getPoint(p)->z);
 					nx.push_back(points[r]->getPointNormal(p).x); ny.push_back(points[r]->getPointNormal(p).y); nz.push_back(points[r]->getPointNormal(p).z);
-				} else {
+				}
+				else {
 					//find insert point
 					for (int n = 0; n < dist.size(); n++)
 					{
@@ -1355,24 +1532,16 @@ void ccCompass::estimateStructureNormals()
 			//***********************************************************************************************
 			//declare variables used in nested loops below
 			int n;
-			double mnx, mny, mnz, map, lsf, phi, theta, alpha, len;
-
-			//CCLib::SquareMatrixd MAP(px.size());
-			//CCLib::SquareMatrixd phiMatrix(px.size());
-			//CCLib::SquareMatrixd thetaMatrix(px.size());
-			//CCLib::SquareMatrixd alphaMatrix(px.size());
-			//CCLib::SquareMatrixd priorMatrix(px.size());
-			//CCLib::SquareMatrixd wishMatrix(px.size());
-			//CCLib::SquareMatrixd wishSFMatrix(px.size());
-			
-			std::vector<double> bestMAP(px.size(), -9999999999999999999999999.0); //best map observed for each point (initialize all to very negative number)
+			double mnx, mny, mnz, pd, lsf, phi, theta, alpha, len;
+			bool hasValidSNE = false; //becomes true once a valid plane is found
+			std::vector<double> bestPd(px.size(), 0.0); //best map observed for each point (initialize all to very negative number)
 			std::vector<CCVector3> sne(px.size()); //list of the best surface normal estimates found for each point (corresponds with the MAP above)
-			std::vector<int> start(px.size()); //index of start point for best planes
-			std::vector<int> end(px.size()); //index of end point for best planes
-			std::vector<int> segmentID(px.size()); //unique id for each point segment.
+			std::vector<int> start(px.size(),0); //index of start point for best planes
+			std::vector<int> end(px.size(),0); //index of end point for best planes
+			std::vector<int> segmentID(px.size(),-1); //unique id for each point segment.
 
 			//check if valid normals have been retrieved
-			if (hasNormals){
+			if (hasNormals) {
 				if (abs(nx[0]) <= 0.000001 && abs(ny[0]) <= 0.0000001 && abs(nz[0]) <= 0.00000001) { //zero normal vector means normals not computed
 
 					m_app->dispToConsole("[ccCompass] Warning: Cannot compensate for outcrop-surface bias as point cloud has no normals. Structure normal estimates may be misleading or incorrect.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
@@ -1380,9 +1549,26 @@ void ccCompass::estimateStructureNormals()
 				}
 			}
 
+
 			//loop through all possible continuous subsets of the combined trace with minsize < length < maxsize.
 			for (unsigned _min = 0; _min < px.size() - minsize; _min++)
 			{
+				//update progress bar
+				if (r == 0) {
+					prg.update(50 * _min / (float)(px.size() - minsize)); //first half
+				} else {
+					prg.update(50 + 50 * _min / (float)(px.size() - minsize)); //second half
+				}
+				if (prg.isCancelRequested()) {
+
+					//cleanup
+					delete points[r];
+					for (int i = 0; i < pinchClouds.size(); i++) {
+						delete pinchClouds[i];
+					}
+					return; }
+
+				//do inner loop
 				for (unsigned _max = _min + minsize; _max < std::min((unsigned)px.size(), _min + maxsize); _max++)
 				{
 					//size of the current subset
@@ -1415,6 +1601,8 @@ void ccCompass::estimateStructureNormals()
 						len = sqrt(mnx*mnx + mny*mny + mnz*mnz); //normalise
 						mnx /= len; mny /= len; mnz /= len;
 					}
+
+					hasValidSNE = true; //we have now found at least one valid plane
 
 					//-----------------------------------------------------------------------------
 					//compute the scatter and covariance matrices of this section of the trace
@@ -1454,11 +1642,11 @@ void ccCompass::estimateStructureNormals()
 					//but it doesn't matter that much....
 					//----------------------------------------------------------------------------------------------------
 
-					//calculate trend and plunge of 3rd eigenvector (this represents the "best-fit-plane").
+																					  //calculate trend and plunge of 3rd eigenvector (this represents the "best-fit-plane").
 					phi = atan2(eigVectors.m_values[0][2], eigVectors.m_values[1][2]); //trend of the third eigenvector
 					theta = -asin(eigVectors.m_values[2][2]); //plunge of the principal eigenvector
 
-					//ensure phi and theta are in the correct domain
+															  //ensure phi and theta are in the correct domain
 					if (theta < 0) //ensure dip angle is positive
 					{
 						phi = phi + (M_PI);
@@ -1483,42 +1671,26 @@ void ccCompass::estimateStructureNormals()
 						alpha -= M_PI;
 					}
 
-					//phiMatrix.m_values[_min][_max] = phi;
-					//thetaMatrix.m_values[_min][_max] = theta;
-					//alphaMatrix.m_values[_min][_max] = alpha;
-
-					//--------------------------------------------
-					//compute maximum a-postiori for this segment
-					//--------------------------------------------
-					//TODO - write hill-climbing algorithm for cases where prior changes MAP
-					//for now.. just use the maximum likelihood estimate (this is almost always the MAP anyway)
-
-					//compute log-likelihood
+					//compute log-likelihood of this plane estimate
 					n = maxsize - minsize - 1; //degrees of freedom
-					lsf = ccCompass::logWishSF(X, n);
-					//map = ccCompass::logWishart(X, n, phi, theta, alpha, eigValues[0], eigValues[1], eigValues[2], lsf);
-					map = exp(ccCompass::logWishart(X, n, phi, theta, alpha, eigValues[0], eigValues[1], eigValues[2], lsf));//ccCompass::wishartExp1D(X, n, phi, theta, eigValues[0], eigValues[1], eigValues[2], lsf, 500);
-
-					//wishSFMatrix.m_values[_min][_max] = lsf;
-					//wishMatrix.m_values[_min][_max] = map;
-
+					lsf = logWishSF(X, n);
+					pd = exp(logWishart(X, n, phi, theta, alpha, eigValues[0], eigValues[1], eigValues[2], lsf));//ccCompass::wishartExp1D(X, n, phi, theta, eigValues[0], eigValues[1], eigValues[2], lsf, 500);
+																															
 					//multiply by prior 
 					if (hasNormals)
 					{
 						//priorMatrix.m_values[_min][_max] = prior(phi, theta, mnx, mny, mnz);
-						map *= prior(phi, theta, mnx, mny, mnz);
+						pd *= prior(phi, theta, mnx, mny, mnz);
 					}
 
-					//MAP.m_values[_min][_max] = map;
-
 					//----------------------------------------------------------------------------
-					//Check if this is the best observed MAP for any of the points in this segment
+					//Check if this is the best observed posterior probability
 					//----------------------------------------------------------------------------
 					for (unsigned p = _min; p < _max; p++)
 					{
-						if (map > bestMAP[p]) //this is a better MAP
+						if (pd > bestPd[p]) //this is a better Pd
 						{
-							bestMAP[p] = map;
+							bestPd[p] = pd;
 							sne[p] = CCVector3(eigVectors.m_values[0][2], eigVectors.m_values[1][2], eigVectors.m_values[2][2]);
 							start[p] = _min;
 							end[p] = _max;
@@ -1528,15 +1700,23 @@ void ccCompass::estimateStructureNormals()
 				}
 			}
 
+			if (!hasValidSNE) { //if segments between pinch nodes are too small, then we will not get any valid fit-planes
+				m_app->dispToConsole(QString::asprintf("[ccCompass] Warning: Region %d contains no valid points (PinchNodes break the trace into small segments?). Region ignored.", regions[r]->getUniqueID()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				delete points[r];
+				points[r] = nullptr;
+				regions[r] = nullptr;
+				continue;
+			}
+
 			//###########################################################################
 			//STORE SNE ESTIMATES ON CLOUD
 			//###########################################################################
 			//setup point cloud (build relevant scalar fields to store data on etc.)
 			points[r]->setName("SNE");
-			CCLib::ScalarField* weightSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Weight")));
 			CCLib::ScalarField* startSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("StartPoint")));
 			CCLib::ScalarField* endSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("EndPoint")));
 			CCLib::ScalarField* idSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("SegmentID")));
+			CCLib::ScalarField* weightSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Weight")));
 
 			weightSF->reserve(px.size());
 			startSF->reserve(px.size());
@@ -1544,9 +1724,9 @@ void ccCompass::estimateStructureNormals()
 			idSF->reserve(px.size());
 
 			//assign point normals.
-			for (unsigned p = 0; p < px.size(); p++) {
+			for (unsigned p = 0; p < points[r]->size(); p++) {
 				points[r]->setPointNormal(pid[p], sne[p]);
-				weightSF->setValue(pid[p], bestMAP[p]);
+				weightSF->setValue(pid[p], bestPd[p]);
 				startSF->setValue(pid[p], start[p]);
 				endSF->setValue(pid[p], end[p]);
 				idSF->setValue(pid[p], segmentID[p]);
@@ -1557,7 +1737,7 @@ void ccCompass::estimateStructureNormals()
 			startSF->computeMinAndMax();
 			endSF->computeMinAndMax();
 			idSF->computeMinAndMax();
-			
+
 			//set weight to visible
 			points[r]->setCurrentDisplayedScalarField(0);
 			points[r]->showSF(true);
@@ -1568,301 +1748,93 @@ void ccCompass::estimateStructureNormals()
 		}
 
 		//compute thicknesses if upper + lower surfaces are defined
-		if (points[0]->size() > 0 && points[1]->size() > 0) {
-			
-			CCLib::ReferenceCloud* nCloudUpper = new  CCLib::ReferenceCloud(points[1]);
-
-			for (int r = 0; r < 2; r++)
-			{
-				//make scalar field
-				CCLib::ScalarField* thickSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Thickness")));
-				thickSF->reserve(points[r]->size());
-
-				//figure out id of the compared surface (opposite to the current one)
-				int compID = 0;
-				if (r == 0) {
-					compID = 1;
-				}
-
-				//get octree for the picking and build picking data structures
-				ccOctree::Shared oct = points[compID]->getOctree();
-				CCLib::ReferenceCloud* nCloud = new  CCLib::ReferenceCloud(points[compID]);
-				unsigned char level = oct->findBestLevelForAGivenPopulationPerCell(2);
-				CCLib::DgmOctree::NeighboursSet neighbours;
-				d = -1.0;
-				//loop through points in this surface
-				for (int p = 0; p < points[r]->size(); p++)
+		if (regions[0] != nullptr && regions[1] != nullptr) //have both surfaces been defined?
+		{
+			if (points[0]->size() > 0 && points[1]->size() > 0) { //do both surfaces have points in them?
+				prg.setInfo(QString::asprintf("Processing %d of %d datasets: Estimating thickness...", _d + 1, datasets.size()));
+				for (int r = 0; r < 2; r++)
 				{
-					//pick nearest point in opposite surface closest to this one
-					nCloud->clear();
-					oct->findPointNeighbourhood(points[r]->getPoint(p), nCloud, 10, level, d);
+					//make scalar field
+					CCLib::ScalarField* thickSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Thickness")));
+					thickSF->reserve(points[r]->size());
 
-					if (d > tcDistance) {
-						thickSF->setValue(p, 1.0);
-						continue; //skip points that are a long way from their opposite neighbours
+					//set thickness to visible scalar field
+					points[r]->setCurrentDisplayedScalarField(points[r]->getScalarFieldIndexByName("Thickness"));
+					points[r]->showSF(true);
+					//figure out id of the compared surface (opposite to the current one)
+					int compID = 0;
+					if (r == 0) {
+						compID = 1;
 					}
 
-					//calculate vector between this point and the corresponding point
-					//CCVector3 AB = *nCloud->getPoint(0) - *points[r]->getPoint(p);
+					//get octree for the picking and build picking data structures
+					ccOctree::Shared oct = points[compID]->getOctree();
+					CCLib::ReferenceCloud* nCloud = new  CCLib::ReferenceCloud(points[compID]);
+					unsigned char level = oct->findBestLevelForAGivenPopulationPerCell(2);
+					CCLib::DgmOctree::NeighboursSet neighbours;
+					d = -1.0;
+					//loop through points in this surface
+					for (int p = 0; p < points[r]->size(); p++)
+					{
 
-					//build equation of the plane
-					PointCoordinateType pEq[4];
-					pEq[0] = points[r]->getPointNormal(p).x;
-					pEq[1] = points[r]->getPointNormal(p).y;
-					pEq[2] = points[r]->getPointNormal(p).z;
-					pEq[3] = points[r]->getPoint(p)->dot(points[r]->getPointNormal(p));
+						//keep progress bar up to date
+						if (r == 0) {
+							prg.update(50 * p / (float) points[r]->size()); //first 50% from lower surface
+						} else {
+							prg.update(50 + 50 * p / (float) points[r]->size()); //second 50% from upper surface
+						}
+						if (prg.isCancelRequested()) {
+							//cleanup
+							delete nCloud;
+							for (int i = 0; i < pinchClouds.size(); i++) {
+								delete pinchClouds[i];
+							}
+							return;
+						}
 
-					//calculate point to plane distance
-					d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
+						//pick nearest point in opposite surface closest to this one
+						nCloud->clear();
+						oct->findPointNeighbourhood(points[r]->getPoint(p), nCloud, 10, level, d);
 
-					m_app->dispToConsole(QString::asprintf("[ccCompass] Thickness = %f",d), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+						if (d > tcDistance) {
+							thickSF->setValue(p, 1.0);
+							continue; //skip points that are a long way from their opposite neighbours
+						}
 
-					//write thickness scalar field
-					thickSF->setValue(p, abs(d));
+						//build equation of the plane
+						PointCoordinateType pEq[4];
+						pEq[0] = points[r]->getPointNormal(p).x;
+						pEq[1] = points[r]->getPointNormal(p).y;
+						pEq[2] = points[r]->getPointNormal(p).z;
+						pEq[3] = points[r]->getPoint(p)->dot(points[r]->getPointNormal(p));
 
-					//flip normals so that it points in the correct direction
-					points[r]->setPointNormal(p, points[r]->getPointNormal(p) * (d / abs(d)));
+						//calculate point to plane distance
+						d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
+
+						//write thickness scalar field
+						thickSF->setValue(p, abs(d));
+
+						//flip normals so that it points in the correct direction
+						points[r]->setPointNormal(p, points[r]->getPointNormal(p) * (d / abs(d)));
+					}
+					thickSF->computeMinAndMax();
+					delete nCloud;
 				}
-				thickSF->computeMinAndMax();
 			}
-			
-
 		}
-
-		//delete pinch-points cloud
-		delete pinchNodes;
-
 	}
-/*
-								//export MAP to file
-								QString filename = QString::asprintf("G:/My Drive/Software/CloudCompare_bin/%d_matrix.csv", t->getUniqueID());
-								QFile file(filename);
-								if (file.open(QIODevice::WriteOnly | QIODevice::Text))
-								{
-									QTextStream stream(&file);
-									for (unsigned i = 0; i < px.size(); i++)
-									{
-										for (unsigned j = 0; j < px.size(); j++)
-										{
-											stream << QString::asprintf("%f,", MAP.m_values[i][j]);
-										}
-										stream << "\n";
-									}
-									file.close();
-								}
-								
-								//export MAP to file
-								filename = QString::asprintf("G:/My Drive/Software/CloudCompare_bin/%d_theta_matrix.csv", t->getUniqueID());
-								QFile file2(filename);
-								if (file2.open(QIODevice::WriteOnly | QIODevice::Text))
-								{
-									QTextStream stream(&file2);
-									for (unsigned i = 0; i < px.size(); i++)
-									{
-										for (unsigned j = 0; j < px.size(); j++)
-										{
-											stream << QString::asprintf("%f,", thetaMatrix.m_values[i][j]);
-										}
-										stream << "\n";
-									}
-									file2.close();
-								}
 
-								//export MAP to file
-								filename = QString::asprintf("G:/My Drive/Software/CloudCompare_bin/%d_phi_matrix.csv", t->getUniqueID());
-								QFile file3(filename);
-								if (file3.open(QIODevice::WriteOnly | QIODevice::Text))
-								{
-									QTextStream stream(&file3);
-									for (unsigned i = 0; i < px.size(); i++)
-									{
-										for (unsigned j = 0; j < px.size(); j++)
-										{
-											stream << QString::asprintf("%f,", phiMatrix.m_values[i][j]);
-										}
-										stream << "\n";
-									}
-									file3.close();
-								}
-
-								filename = QString::asprintf("G:/My Drive/Software/CloudCompare_bin/%d_prior_matrix.csv", t->getUniqueID());
-								QFile file4(filename);
-								if (file4.open(QIODevice::WriteOnly | QIODevice::Text))
-								{
-									QTextStream stream(&file4);
-									for (unsigned i = 0; i < px.size(); i++)
-									{
-										for (unsigned j = 0; j < px.size(); j++)
-										{
-											stream << QString::asprintf("%f,", priorMatrix.m_values[i][j]);
-										}
-										stream << "\n";
-									}
-									file4.close();
-								}
-
-								filename = QString::asprintf("G:/My Drive/Software/CloudCompare_bin/%d_wish_matrix.csv", t->getUniqueID());
-								QFile file5(filename);
-								if (file5.open(QIODevice::WriteOnly | QIODevice::Text))
-								{
-									QTextStream stream(&file5);
-									for (unsigned i = 0; i < px.size(); i++)
-									{
-										for (unsigned j = 0; j < px.size(); j++)
-										{
-											stream << QString::asprintf("%f,", wishMatrix.m_values[i][j]);
-										}
-										stream << "\n";
-									}
-									file5.close();
-								}
-
-								filename = QString::asprintf("G:/My Drive/Software/CloudCompare_bin/%d_wishlsf_matrix.csv", t->getUniqueID());
-								QFile file6(filename);
-								if (file6.open(QIODevice::WriteOnly | QIODevice::Text))
-								{
-									QTextStream stream(&file6);
-									for (unsigned i = 0; i < px.size(); i++)
-									{
-										for (unsigned j = 0; j < px.size(); j++)
-										{
-											stream << QString::asprintf("%f,", wishSFMatrix.m_values[i][j]);
-										}
-										stream << "\n";
-									}
-									file6.close();
-								}
-
-								//export MAP to file
-								filename = QString::asprintf("G:/My Drive/Software/CloudCompare_bin/%d_alpha_matrix.csv", t->getUniqueID());
-								QFile file7(filename);
-								if (file7.open(QIODevice::WriteOnly | QIODevice::Text))
-								{
-									QTextStream stream(&file7);
-									for (unsigned i = 0; i < px.size(); i++)
-									{
-										for (unsigned j = 0; j < px.size(); j++)
-										{
-											stream << QString::asprintf("%f,", alphaMatrix.m_values[i][j]);
-										}
-										stream << "\n";
-									}
-									file7.close();
-								}
-
-								*/
-				//			}
-				//		}
-				//	}
-				//}
-			//}
-		//}
-	//}
+	//cleanup
+	for (int i = 0; i < pinchClouds.size(); i++) {
+		delete pinchClouds[i];
+	}
 
 	//notify finish
+	prg.stop();
 	m_app->dispToConsole("[ccCompass] Structure normal estimation complete.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 	//redraw
 	m_app->redrawAll();
-}
-
-
-//convert a vector to trend and plunge angles
-//static void vec2TrendPlunge(double vec[3], double &trend, double &plunge);
-
-//prior distribution for orientations (depends on outcrop orientation)
-double ccCompass::prior(double phi, double theta, double nx, double ny, double nz)
-{
-	//check normal points down
-	if (nz > 0)
-	{
-		nx *= -1; ny *= -1; nz *= -1;
-	}
-
-	//calculate angle between normal vector and the normal estimate(phi, theta)
-	double alpha = acos(nx * sin(phi)*cos(theta) + ny * cos(phi) * cos(theta) - nz * sin(theta));
-	return sin(alpha) / (2*M_PI); //n.b. 2pi is normalising factor so that function integrates to one over all phi,theta
-}
-
-//calculate log scale-factor for wishart dist. This only needs to be done once per X, so is pulled out of the wish function for performance
-double ccCompass::logWishSF(double X[3][3], int nobserved)
-{
-	//calculate determinant of X
-	double detX = X[0][0] * ((X[1][1]*X[2][2])-(X[2][1]*X[1][2])) -
-									X[0][1]*(X[1][0]*X[2][2]-X[2][0]*X[1][2]) + 
-									X[0][2]*(X[1][0]*X[2][1]-X[2][0]*X[1][1]);
-
-	return (nobserved-4.0)*0.5*log(detX) - (nobserved*3./2.)*log(2.0) -   //=parts of gamma function that do not depend on the scale matrix
-		((3.0/2.0)*log(M_PI) + lgamma(nobserved/2.0)+lgamma((nobserved/2.0)-0.5) + lgamma((nobserved/2.0)-1.0)); //= log(gamma3(nobserved/2))
-}
-
-//calculate log wishart probability density
-double ccCompass::logWishart(double X[3][3], int nobserved, double phi, double theta, double alpha, double e1, double e2, double e3, double lsf)
-{
-	//--------------------------------------------------
-	//Derive scale matrix eigenvectors (basis matrix)
-	//--------------------------------------------------
-	double e[3][3];
-	double i[3][3];
-
-	//eigenvector 3 (normal to plane defined by theta->phi)
-	e[0][2] = sin(phi) * cos(theta);
-	e[1][2] = cos(phi) * cos(theta);
-	e[2][2] = -sin(theta);
-	//eigenvector 2 (normal of theta->phi projected into horizontal plane and rotated by angle alpha)
-	e[0][1] = sin(phi) * sin(theta) * sin(alpha) - cos(phi) * cos(alpha);
-	e[1][1] = sin(phi) * cos(alpha) + sin(theta) * cos(phi) * sin(alpha);
-	e[2][1] = sin(alpha) * cos(theta);
-	//eigenvector 1 (calculate using cross product)
-	e[0][0] = e[1][2]*e[2][1] - e[2][2] * e[1][1];
-	e[1][0] = e[2][2]*e[0][1] - e[0][2] * e[2][1];
-	e[2][0] = e[0][2]*e[1][1] - e[1][2] * e[0][1];
-
-	//calculate determinant of the scale matrix by multiplying it's eigens
-	double D = e1*e2*e3;
-
-	//calculate the inverse of the scale matrix (we don't actually need to compute the scale matrix)
-	e1 = 1.0 / e1; //N.B. Note that by inverting the eigenvalues we compute the inverse scale matrix
-	e2 = 1.0 / e2; 
-	e3 = 1.0 / e3; 
-
-	//calculate unique components of I from the eigenvectors and inverted eigenvalues
-	i[0][0] = e1*e[0][0]*e[0][0] + e2*e[0][1]*e[0][1] + e3*e[0][2]*e[0][2]; //diagonal component
-	i[1][1] = e1*e[1][0]*e[1][0] + e2*e[1][1]*e[1][1] + e3*e[1][2]*e[1][2];
-	i[2][2] = e1*e[2][0]*e[2][0] + e2*e[2][1]*e[2][1] + e3*e[2][2]*e[2][2];
-	i[0][1] = e1*e[0][0]*e[1][0] + e2*e[0][1]*e[1][1] + e3*e[0][2]*e[1][2]; //off-axis component
-	i[0][2] = e1*e[0][0]*e[2][0] + e2*e[0][1]*e[2][1] + e3*e[0][2]*e[2][2];
-	i[1][2] = e1*e[1][0]*e[2][0] + e2*e[1][1]*e[2][1] + e3*e[1][2]*e[2][2];
-	
-	//compute the trace of I times X
-	double trIX = (i[0][0] * X[0][0] + i[0][1] * X[1][0] + i[0][2] * X[2][0]) +
-				  (i[0][1] * X[0][1] + i[1][1] * X[1][1] + i[1][2] * X[2][1]) +
-				  (i[0][2] * X[0][2] + i[1][2] * X[1][2] + i[2][2] * X[2][2]);
-
-	//return the log wishart probability density
-	return lsf - 0.5 * (trIX + nobserved*log(D));
-}
-
-//integrate over alpha
-double  ccCompass::wishartExp1D(double X[3][3], int nobserved, double phi, double theta, double e1, double e2, double e3, double lsf,unsigned steps)
-{
-	//evaluate integral over alpha = 0 to pi
-	double pd0 = exp(ccCompass::logWishart(X, nobserved, phi, theta, 0.0, e1, e2, e3, lsf));
-	double pd1=0.0, sum=0.0;
-	double dA = M_PI / steps;
-	for (unsigned i = 1; i <= steps; i++)
-	{
-		pd1 = exp(ccCompass::logWishart(X, nobserved, phi, theta, i*dA, e1, e2, e3, lsf));
-		sum += dA*pd0 + dA*(pd1 - pd0)*0.5;
-		pd0 = pd1;
-	}
-	return sum;
-}
-
-//sample posterior with MCMC
-double** ccCompass::sampleMCMC(double icov[3][3], int nobserved, CCVector3* normal, int nsamples, double proposalWidth)
-{
-	return nullptr; //todo
 }
 
 //converts selected traces or geoObjects to point clouds
@@ -2082,7 +2054,6 @@ void ccCompass::distributeSelection()
 	m_app->updateUI();
 	m_app->redrawAll();
 }
-
 
 //recompute entirely each selected trace (useful if the cost function has changed)
 void ccCompass::recalculateSelectedTraces()
@@ -2601,7 +2572,6 @@ void ccCompass::onSave()
 		m_app->dispToConsole("[ccCompass] Could not open output files... ensure CC has write access to this location.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	}
 }
-
 
 //write plane data
 int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentName)

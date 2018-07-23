@@ -16,7 +16,8 @@
 //##########################################################################
 
 #include "ccSNECloud.h"
-
+#include <ccScalarField.h>
+#include <ccColorRampShader.h>
 //pass ctors straight to ccPointCloud
 ccSNECloud::ccSNECloud()
 	: ccPointCloud()
@@ -83,7 +84,7 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
 		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
-
+		
 		//get point size for drawing
 		float pSize;
 		glFunc->glGetFloatv(GL_POINT_SIZE, &pSize);
@@ -102,22 +103,30 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glPushMatrix();
 			glFunc->glEnable(GL_BLEND);
 
-			//draw normal vectors (if properly defined)
-			float weight;
-			float maxWeight = getScalarField(0)->getMax();
+			//get normal vector properties
 			int thickID = getScalarFieldIndexByName("Thickness");
+			int weightID = getScalarFieldIndexByName("Weight");
+			float weight;
+			float maxWeight = getScalarField( weightID )->getMax();
+
+			//draw normals
 			glFunc->glBegin(GL_LINES);
 			for (unsigned p = 0; p < size(); p++)
 			{
 				//get weight
-				weight = getScalarField(0)->getValue(p);
-				if (weight < 0) {
-					continue; //weight not assigned - ignore this point
-				}
+				weight = getScalarField(weightID)->getValue(p);
 				weight /= maxWeight;
-				
+
+				//push colour
+				const ccColor::Rgb* col = m_currentDisplayedScalarField->getColor(m_currentDisplayedScalarField->getValue(p));
+				const ccColor::Rgba col4(col->r, col->g, col->b,(int)(255*(weight*0.5f+0.5f)));
+
+				//glFunc->glColor4f(col->r, col->g, col->b, (weight * 0.5) + 0.5); //use scalar field colours, but make poor estimates semi-transparent
+				//glFunc->glColor4b(col->r, col->g, col->b,(unsigned char)((weight*128)+127));
+				//glFunc->glColor3ubv(col->rgb);
+				glFunc->glColor4ubv(col4.rgba);
 				//define colour based on weight
-				glFunc->glColor4f((1.0f - weight)*0.75f, weight, 0.0f, (weight * 0.7) + 0.3); //green = good, red = bad
+				//glFunc->glColor4f((1.0f - weight)*0.75f, weight, 0.0f, (weight * 0.7) + 0.3); //green = good, red = bad
 
 				//get length from thickness (if defined)
 				float length = 1.0;
@@ -136,12 +145,11 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				ccGL::Vertex3v(glFunc, end.u);
 			}
 			glFunc->glEnd();
-
+			
 			//cleanup
 			if (pSize != 0) {
 				glFunc->glPopAttrib();
 			}
 			glFunc->glPopMatrix();
-		//}
 	}
 }

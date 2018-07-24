@@ -107,7 +107,8 @@ static const char COMMAND_ICP_RANDOM_SAMPLING_LIMIT[]		= "RANDOM_SAMPLING_LIMIT"
 static const char COMMAND_ICP_ENABLE_FARTHEST_REMOVAL[]		= "FARTHEST_REMOVAL";
 static const char COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT[]		= "MODEL_SF_AS_WEIGHTS";
 static const char COMMAND_ICP_USE_DATA_SF_AS_WEIGHT[]		= "DATA_SF_AS_WEIGHTS";
-static const char COMMAND_ICP_ROT[]				= "ROT";
+static const char COMMAND_ICP_ROT[]							= "ROT";
+static const char COMMAND_ICP_TRANS[]						= "TRANS";
 static const char COMMAND_FBX_EXPORT_FORMAT[]				= "FBX_EXPORT_FMT";
 static const char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 static const char COMMAND_COMPUTE_GRIDDED_NORMALS[]			= "COMPUTE_NORMALS";
@@ -3429,7 +3430,8 @@ struct CommandICP : public ccCommandLineInterface::Command
 		int modelSFAsWeights = -1;
 		int dataSFAsWeights = -1;
 		int maxThreadCount = 0;
-		int transformationFilters = 0;
+		int rotFilter = 0;
+		int transFilter = 0;
 
 		while (!cmd.arguments().empty())
 		{
@@ -3567,21 +3569,51 @@ struct CommandICP : public ccCommandLineInterface::Command
 				{
 					QString rotation = cmd.arguments().takeFirst().toUpper();
 					if (rotation == "XYZ")
-						transformationFilters = 0;
+						rotFilter = SKIP_NONE;
 					else if (rotation == "X")
-						transformationFilters = 2;
+						rotFilter = SKIP_RYZ;
 					else if (rotation == "Y")
-						transformationFilters = 4;
+						rotFilter = SKIP_RXZ;
 					else if (rotation == "Z")
-						transformationFilters = 1;
+						rotFilter = SKIP_RXY;
 					else if (rotation == "NONE")
-						transformationFilters = 7;
+						rotFilter = SKIP_ROTATION;
 					else
 						return cmd.error(QObject::tr("Invalid parameter: unknown rotation filter \"%1\"").arg(rotation));
 				}
 				else
 				{
 					return cmd.error(QObject::tr("Missing parameter: rotation filter after \"-%1\" (XYZ/X/Y/Z/NONE)").arg(COMMAND_ICP_ROT));
+				}
+			}
+			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_TRANS))
+			{
+				//local option confirmed, we can move on
+				cmd.arguments().pop_front();
+
+				if (!cmd.arguments().empty())
+				{
+					QString translation = cmd.arguments().takeFirst().toUpper();
+					if (translation == "XYZ")
+						transFilter = SKIP_NONE;
+					else if (translation == "X")
+						transFilter = SKIP_TX;
+					else if (translation == "Y")
+						transFilter = SKIP_TY;
+					else if (translation == "Z")
+						transFilter = SKIP_TZ;
+					else if (translation == "XY")
+						transFilter = SKIP_TX+SKIP_TY;
+					else if (translation == "XZ")
+						transFilter = SKIP_TX+SKIP_TZ;
+					else if (translation == "YZ")
+						transFilter = SKIP_TY+SKIP_TZ;
+					else
+						return cmd.error(QObject::tr("Invalid parameter: unknown translation filter \"%1\"").arg(translation));
+				}
+				else
+				{
+					return cmd.error(QObject::tr("Missing parameter: translation filter after \"-%1\" (XYZ/X/Y/Z/NONE)").arg(COMMAND_ICP_TRANS));
 				}
 			}
 			else
@@ -3654,6 +3686,7 @@ struct CommandICP : public ccCommandLineInterface::Command
 		double finalError = 0.0;
 		double finalScale = 1.0;
 		unsigned finalPointCount = 0;
+		int transformationFilters = rotFilter + transFilter;
 		if (ccRegistrationTools::ICP(	dataAndModel[0]->getEntity(),
 										dataAndModel[1]->getEntity(),
 										transMat,

@@ -3704,7 +3704,7 @@ struct CommandICP : public ccCommandLineInterface::Command
 										overlap / 100.0,
 										dataSFAsWeights >= 0,
 										modelSFAsWeights >= 0,
-										CCLib::ICPRegistrationTools::SKIP_NONE,
+										transformationFilters,
 										maxThreadCount,
 										cmd.widgetParent()))
 		{

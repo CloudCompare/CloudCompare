@@ -11,7 +11,6 @@
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
 #include <MeshSamplingTools.h>
-#include <RegistrationTools.h>
 
 //qCC_db
 #include <ccNormalVectors.h>
@@ -3570,15 +3569,15 @@ struct CommandICP : public ccCommandLineInterface::Command
 				{
 					QString rotation = cmd.arguments().takeFirst().toUpper();
 					if (rotation == "XYZ")
-						rotFilter = SKIP_NONE;
+						rotFilter = 0;
 					else if (rotation == "X")
-						rotFilter = SKIP_RYZ;
+						rotFilter = 2;
 					else if (rotation == "Y")
-						rotFilter = SKIP_RXZ;
+						rotFilter = 4;
 					else if (rotation == "Z")
-						rotFilter = SKIP_RXY;
+						rotFilter = 1;
 					else if (rotation == "NONE")
-						rotFilter = SKIP_ROTATION;
+						rotFilter = 7;
 					else
 						return cmd.error(QObject::tr("Invalid parameter: unknown rotation filter \"%1\"").arg(rotation));
 				}
@@ -3596,25 +3595,27 @@ struct CommandICP : public ccCommandLineInterface::Command
 				{
 					QString translation = cmd.arguments().takeFirst().toUpper();
 					if (translation == "XYZ")
-						transFilter = SKIP_NONE;
+						transFilter = 0;
 					else if (translation == "X")
-						transFilter = SKIP_TX;
+						transFilter = 8;
 					else if (translation == "Y")
-						transFilter = SKIP_TY;
+						transFilter = 16;
 					else if (translation == "Z")
-						transFilter = SKIP_TZ;
+						transFilter = 32;
 					else if (translation == "XY")
-						transFilter = SKIP_TX+SKIP_TY;
+						transFilter = 24;
 					else if (translation == "XZ")
-						transFilter = SKIP_TX+SKIP_TZ;
+						transFilter = 40;
 					else if (translation == "YZ")
-						transFilter = SKIP_TY+SKIP_TZ;
+						transFilter = 48;
+					else if (translation == "NONE")
+						transFilter = 56;
 					else
 						return cmd.error(QObject::tr("Invalid parameter: unknown translation filter \"%1\"").arg(translation));
 				}
 				else
 				{
-					return cmd.error(QObject::tr("Missing parameter: translation filter after \"-%1\" (XYZ/X/Y/Z/NONE)").arg(COMMAND_ICP_TRANS));
+					return cmd.error(QObject::tr("Missing parameter: translation filter after \"-%1\" (XYZ/X/Y/Z/XY/XZ/YZ/NONE)").arg(COMMAND_ICP_TRANS));
 				}
 			}
 			else

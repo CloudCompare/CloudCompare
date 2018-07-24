@@ -21,6 +21,7 @@
 #include "ccGenericMesh.h"
 
 //local
+#include "ccChunk.h"
 #include "ccHObjectCaster.h"
 #include "ccGenericPointCloud.h"
 #include "ccPointCloud.h"
@@ -35,7 +36,7 @@
 #include <GenericTriangle.h>
 #include <MeshSamplingTools.h>
 #include <ReferenceCloud.h>
-#include <SimpleCloud.h>
+#include <PointCloud.h>
 
 //system
 #include <assert.h>
@@ -115,28 +116,28 @@ void ccGenericMesh::EnableGLStippleMask(const QOpenGLContext* context, bool stat
 }
 
 //Vertex buffer
-PointCoordinateType* ccGenericMesh::GetVertexBuffer()
+CCVector3* ccGenericMesh::GetVertexBuffer()
 {
-	static PointCoordinateType s_xyzBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
+	static CCVector3 s_xyzBuffer[ccChunk::SIZE * 3];
 	return s_xyzBuffer;
 }
 
 //Normals buffer
-PointCoordinateType* ccGenericMesh::GetNormalsBuffer()
+CCVector3* ccGenericMesh::GetNormalsBuffer()
 {
-	static PointCoordinateType s_normBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
+	static CCVector3 s_normBuffer[ccChunk::SIZE * 3];
 	return s_normBuffer;
 }
 
 //Colors buffer
-ColorCompType* ccGenericMesh::GetColorsBuffer()
+ccColor::Rgb* ccGenericMesh::GetColorsBuffer()
 {
-	static ColorCompType s_rgbBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
+	static ccColor::Rgb s_rgbBuffer[ccChunk::SIZE * 3];
 	return s_rgbBuffer;
 }
 
 //Vertex indexes buffer (for wired display)
-static unsigned s_vertWireIndexes[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*6];
+static unsigned s_vertWireIndexes[ccChunk::SIZE * 6];
 static bool s_vertIndexesInitialized = false;
 unsigned* ccGenericMesh::GetWireVertexIndexes()
 {
@@ -144,10 +145,10 @@ unsigned* ccGenericMesh::GetWireVertexIndexes()
 	if (!s_vertIndexesInitialized)
 	{
 		unsigned* _vertWireIndexes = s_vertWireIndexes;
-		for (unsigned i=0; i<MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3; ++i)
+		for (unsigned i = 0; i < ccChunk::SIZE * 3; ++i)
 		{
 			*_vertWireIndexes++ = i;
-			*_vertWireIndexes++ = ( ((i+1) % 3) == 0 ? i-2 : i+1);
+			*_vertWireIndexes++ = (((i + 1) % 3) == 0 ? i - 2 : i + 1);
 		}
 		s_vertIndexesInitialized = true;
 	}
@@ -221,8 +222,8 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glParams.showNorms &= bool(MACRO_LightIsEnabled(context));
 
 		//vertices visibility
-		const ccGenericPointCloud::VisibilityTableType* verticesVisibility = vertices->getTheVisibilityArray();
-		bool visFiltering = (verticesVisibility && verticesVisibility->isAllocated());
+		const ccGenericPointCloud::VisibilityTableType& verticesVisibility = vertices->getTheVisibilityArray();
+		bool visFiltering = (verticesVisibility.size() == vertices->size());
 
 		//wireframe ? (not compatible with LOD)
 		bool showWired = isShownAsWire() && !lodEnabled;
@@ -254,10 +255,10 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//in the case we need to display scalar field colors
-		ccScalarField* currentDisplayedScalarField = 0;
+		ccScalarField* currentDisplayedScalarField = nullptr;
 		bool greyForNanScalarValues = true;
 		//unsigned colorRampSteps = 0;
-		ccColorScale::Shared colorScale(0);
+		ccColorScale::Shared colorScale(nullptr);
 
 		if (glParams.showSF)
 		{
@@ -294,7 +295,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//in the case we need to display vertex colors
-		ColorsTableType* rgbColorsTable = 0;
+		ColorsTableType* rgbColorsTable = nullptr;
 		if (glParams.showColors)
 		{
 			if (isColorOverriden())
@@ -321,8 +322,8 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//in the case we need normals (i.e. lighting)
-		NormsIndexesTableType* normalsIndexesTable = 0;
-		ccNormalVectors* compressedNormals = 0;
+		NormsIndexesTableType* normalsIndexesTable = nullptr;
+		ccNormalVectors* compressedNormals = nullptr;
 		if (glParams.showNorms)
 		{
 			assert(vertices->isA(CC_TYPES::POINT_CLOUD));
@@ -357,103 +358,84 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			//we can scan and process each chunk separately in an optimized way
 			//we mimic the way ccMesh beahves by using virtual chunks!
-			unsigned chunks = static_cast<unsigned>(ceil(static_cast<double>(displayedTriNum) / MAX_NUMBER_OF_ELEMENTS_PER_CHUNK));
-			unsigned chunkStart = 0;
-			const ColorCompType* col = 0;
-			for (unsigned k=0; k<chunks; ++k, chunkStart += MAX_NUMBER_OF_ELEMENTS_PER_CHUNK)
+			size_t chunkCount = ccChunk::Count(displayedTriNum);
+			size_t chunkStart = 0;
+			for (size_t k = 0; k < chunkCount; ++k, chunkStart += ccChunk::SIZE)
 			{
 				//virtual chunk size
-				const unsigned chunkSize = k+1 < chunks ? MAX_NUMBER_OF_ELEMENTS_PER_CHUNK : (displayedTriNum % MAX_NUMBER_OF_ELEMENTS_PER_CHUNK);
+				const size_t chunkSize = ccChunk::Size(k, displayedTriNum);
 
 				//vertices
-				PointCoordinateType* _vertices = GetVertexBuffer();
-				for (unsigned n=0; n<chunkSize; n+=decimStep)
+				CCVector3* _vertices = GetVertexBuffer();
+				for (size_t n = 0; n < chunkSize; n += decimStep)
 				{
-					const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(chunkStart + n);
-					memcpy(_vertices, vertices->getPoint(ti->i1)->u, sizeof(PointCoordinateType) * 3);
-					_vertices += 3;
-					memcpy(_vertices, vertices->getPoint(ti->i2)->u, sizeof(PointCoordinateType) * 3);
-					_vertices += 3;
-					memcpy(_vertices, vertices->getPoint(ti->i3)->u, sizeof(PointCoordinateType) * 3);
-					_vertices += 3;
+					const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+					*_vertices++ = *vertices->getPoint(ti->i1);
+					*_vertices++ = *vertices->getPoint(ti->i2);
+					*_vertices++ = *vertices->getPoint(ti->i3);
 				}
 
 				//scalar field
 				if (glParams.showSF)
 				{
-					ColorCompType* _rgbColors = GetColorsBuffer();
+					ccColor::Rgb* _rgbColors = GetColorsBuffer();
 					assert(colorScale);
-					for (unsigned n=0; n<chunkSize; n+=decimStep)
+					for (unsigned n = 0; n < chunkSize; n += decimStep)
 					{
-						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(chunkStart + n);
-						col = currentDisplayedScalarField->getValueColor(ti->i1);
-						memcpy(_rgbColors, col, sizeof(ColorCompType) * 3);
-						_rgbColors += 3;
-						col = currentDisplayedScalarField->getValueColor(ti->i2);
-						memcpy(_rgbColors, col, sizeof(ColorCompType) * 3);
-						_rgbColors += 3;
-						col = currentDisplayedScalarField->getValueColor(ti->i3);
-						memcpy(_rgbColors, col, sizeof(ColorCompType) * 3);
-						_rgbColors += 3;
+						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(ti->i1);
+						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(ti->i2);
+						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(ti->i3);
 					}
 				}
 				//colors
 				else if (glParams.showColors)
 				{
-					ColorCompType* _rgbColors = GetColorsBuffer();
+					ccColor::Rgb* _rgbColors = GetColorsBuffer();
 
-					for (unsigned n=0; n<chunkSize; n+=decimStep)
+					for (unsigned n = 0; n < chunkSize; n += decimStep)
 					{
-						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(chunkStart + n);
-						memcpy(_rgbColors, rgbColorsTable->getValue(ti->i1), sizeof(ColorCompType) * 3);
-						_rgbColors += 3;
-						memcpy(_rgbColors, rgbColorsTable->getValue(ti->i2), sizeof(ColorCompType) * 3);
-						_rgbColors += 3;
-						memcpy(_rgbColors, rgbColorsTable->getValue(ti->i3), sizeof(ColorCompType) * 3);
-						_rgbColors += 3;
+						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+						*_rgbColors++ = rgbColorsTable->at(ti->i1);
+						*_rgbColors++ = rgbColorsTable->at(ti->i2);
+						*_rgbColors++ = rgbColorsTable->at(ti->i3);
 					}
 				}
 
 				//normals
 				if (glParams.showNorms)
 				{
-					PointCoordinateType* _normals = GetNormalsBuffer();
+					CCVector3* _normals = GetNormalsBuffer();
 					if (showTriNormals)
 					{
-						for (unsigned n=0; n<chunkSize; n+=decimStep)
+						for (unsigned n = 0; n < chunkSize; n += decimStep)
 						{
 							CCVector3 Na, Nb, Nc;
-							getTriangleNormals(chunkStart + n, Na, Nb, Nc);
-							memcpy(_normals, Na.u, sizeof(PointCoordinateType) * 3);
-							_normals += 3;
-							memcpy(_normals, Nb.u, sizeof(PointCoordinateType) * 3);
-							_normals += 3;
-							memcpy(_normals, Nc.u, sizeof(PointCoordinateType) * 3);
-							_normals += 3;
+							getTriangleNormals(static_cast<unsigned>(chunkStart + n), Na, Nb, Nc);
+							*_normals++ = Na;
+							*_normals++ = Nb;
+							*_normals++ = Nc;
 						}
 					}
 					else
 					{
-						for (unsigned n=0; n<chunkSize; n+=decimStep)
+						for (unsigned n = 0; n < chunkSize; n += decimStep)
 						{
-							const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(chunkStart + n);
-							memcpy(_normals, vertices->getPointNormal(ti->i1).u, sizeof(PointCoordinateType) * 3);
-							_normals += 3;
-							memcpy(_normals, vertices->getPointNormal(ti->i2).u, sizeof(PointCoordinateType) * 3);
-							_normals += 3;
-							memcpy(_normals, vertices->getPointNormal(ti->i3).u, sizeof(PointCoordinateType) * 3);
-							_normals += 3;
+							const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+							*_normals++ = vertices->getPointNormal(ti->i1);
+							*_normals++ = vertices->getPointNormal(ti->i2);
+							*_normals++ = vertices->getPointNormal(ti->i3);
 						}
 					}
 				}
 
 				if (!showWired)
 				{
-					glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, (chunkSize / decimStep) * 3);
+					glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, (static_cast<int>(chunkSize) / decimStep) * 3);
 				}
 				else
 				{
-					glFunc->glDrawElements(GL_LINES, (chunkSize / decimStep) * 6, GL_UNSIGNED_INT, GetWireVertexIndexes());
+					glFunc->glDrawElements(GL_LINES, (static_cast<int>(chunkSize) / decimStep) * 6, GL_UNSIGNED_INT, GetWireVertexIndexes());
 				}
 			}
 
@@ -467,11 +449,11 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		else
 		{
 			//current vertex color
-			const ColorCompType *col1 = 0, *col2 = 0, *col3 = 0;
+			const ccColor::Rgb *col1 = nullptr, *col2 = nullptr, *col3 = nullptr;
 			//current vertex normal
-			const PointCoordinateType *N1 = 0, *N2 = 0, *N3 = 0;
+			const PointCoordinateType *N1 = nullptr, *N2 = nullptr, *N3 = nullptr;
 			//current vertex texture coordinates
-			float *Tx1 = 0, *Tx2 = 0, *Tx3 = 0;
+			TexCoords2D *Tx1 = nullptr, *Tx2 = nullptr, *Tx3 = nullptr;
 
 			//loop on all triangles
 			int lasMtlIndex = -1;
@@ -504,9 +486,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (visFiltering)
 				{
 					//we skip the triangle if at least one vertex is hidden
-					if ((verticesVisibility->getValue(tsi->i1) != POINT_VISIBLE) ||
-						(verticesVisibility->getValue(tsi->i2) != POINT_VISIBLE) ||
-						(verticesVisibility->getValue(tsi->i3) != POINT_VISIBLE))
+					if ((verticesVisibility[tsi->i1] != POINT_VISIBLE) ||
+						(verticesVisibility[tsi->i2] != POINT_VISIBLE) ||
+						(verticesVisibility[tsi->i3] != POINT_VISIBLE))
 						continue;
 				}
 
@@ -525,9 +507,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 				else if (glParams.showColors)
 				{
-					col1 = rgbColorsTable->getValue(tsi->i1);
-					col2 = rgbColorsTable->getValue(tsi->i2);
-					col3 = rgbColorsTable->getValue(tsi->i3);
+					col1 = &rgbColorsTable->at(tsi->i1);
+					col2 = &rgbColorsTable->at(tsi->i2);
+					col3 = &rgbColorsTable->at(tsi->i3);
 				}
 
 				if (glParams.showNorms)
@@ -537,16 +519,16 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						assert(triNormals);
 						int n1, n2, n3;
 						getTriangleNormalIndexes(n, n1, n2, n3);
-						N1 = (n1 >= 0 ? ccNormalVectors::GetNormal(triNormals->getValue(n1)).u : 0);
-						N2 = (n1 == n2 ? N1 : n1 >= 0 ? ccNormalVectors::GetNormal(triNormals->getValue(n2)).u : 0);
-						N3 = (n1 == n3 ? N1 : n3 >= 0 ? ccNormalVectors::GetNormal(triNormals->getValue(n3)).u : 0);
+						N1 = (n1 >= 0 ?                 ccNormalVectors::GetNormal(triNormals->at(n1)).u : 0);
+						N2 = (n1 == n2 ? N1 : n1 >= 0 ? ccNormalVectors::GetNormal(triNormals->at(n2)).u : 0);
+						N3 = (n1 == n3 ? N1 : n3 >= 0 ? ccNormalVectors::GetNormal(triNormals->at(n3)).u : 0);
 
 					}
 					else
 					{
-						N1 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i1)).u;
-						N2 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i2)).u;
-						N3 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i3)).u;
+						N1 = compressedNormals->getNormal(normalsIndexesTable->at(tsi->i1)).u;
+						N2 = compressedNormals->getNormal(normalsIndexesTable->at(tsi->i2)).u;
+						N3 = compressedNormals->getNormal(normalsIndexesTable->at(tsi->i3)).u;
 					}
 				}
 
@@ -603,27 +585,27 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (N1)
 					ccGL::Normal3v(glFunc, N1);
 				if (col1)
-					glFunc->glColor3ubv(col1);
+					glFunc->glColor3ubv(col1->rgb);
 				if (Tx1)
-					glFunc->glTexCoord2fv(Tx1);
+					glFunc->glTexCoord2fv(Tx1->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i1)->u);
 
 				//vertex 2
 				if (N2)
 					ccGL::Normal3v(glFunc, N2);
 				if (col2)
-					glFunc->glColor3ubv(col2);
+					glFunc->glColor3ubv(col2->rgb);
 				if (Tx2)
-					glFunc->glTexCoord2fv(Tx2);
+					glFunc->glTexCoord2fv(Tx2->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i2)->u);
 
 				//vertex 3
 				if (N3)
 					ccGL::Normal3v(glFunc, N3);
 				if (col3)
-					glFunc->glColor3ubv(col3);
+					glFunc->glColor3ubv(col3->rgb);
 				if (Tx3)
-					glFunc->glTexCoord2fv(Tx3);
+					glFunc->glTexCoord2fv(Tx3->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i3)->u);
 			}
 
@@ -669,19 +651,19 @@ bool ccGenericMesh::toFile_MeOnly(QFile& out) const
 		return false;
 
 	//'show wired' state (dataVersion>=20)
-	if (out.write((const char*)&m_showWired,sizeof(bool)) < 0)
+	if (out.write((const char*)&m_showWired, sizeof(bool)) < 0)
 		return WriteError();
 
 	//'per-triangle normals shown' state (dataVersion>=29))
-	if (out.write((const char*)&m_triNormsShown,sizeof(bool)) < 0)
+	if (out.write((const char*)&m_triNormsShown, sizeof(bool)) < 0)
 		return WriteError();
 
 	//'materials shown' state (dataVersion>=29))
-	if (out.write((const char*)&m_materialsShown,sizeof(bool)) < 0)
+	if (out.write((const char*)&m_materialsShown, sizeof(bool)) < 0)
 		return WriteError();
 
 	//'polygon stippling' state (dataVersion>=29))
-	if (out.write((const char*)&m_stippling,sizeof(bool)) < 0)
+	if (out.write((const char*)&m_stippling, sizeof(bool)) < 0)
 		return WriteError();
 
 	return true;
@@ -693,21 +675,21 @@ bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		return false;
 
 	//'show wired' state (dataVersion>=20)
-	if (in.read((char*)&m_showWired,sizeof(bool)) < 0)
+	if (in.read((char*)&m_showWired, sizeof(bool)) < 0)
 		return ReadError();
 
 	//'per-triangle normals shown' state (dataVersion>=29))
 	if (dataVersion >= 29)
 	{
-		if (in.read((char*)&m_triNormsShown,sizeof(bool)) < 0)
+		if (in.read((char*)&m_triNormsShown, sizeof(bool)) < 0)
 			return ReadError();
 
 		//'materials shown' state (dataVersion>=29))
-		if (in.read((char*)&m_materialsShown,sizeof(bool)) < 0)
+		if (in.read((char*)&m_materialsShown, sizeof(bool)) < 0)
 			return ReadError();
 
 		//'polygon stippling' state (dataVersion>=29))
-		if (in.read((char*)&m_stippling,sizeof(bool)) < 0)
+		if (in.read((char*)&m_stippling, sizeof(bool)) < 0)
 			return ReadError();
 	}
 
@@ -719,7 +701,7 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 											bool withNormals,
 											bool withRGB,
 											bool withTexture,
-											CCLib::GenericProgressCallback* pDlg/*=0*/)
+											CCLib::GenericProgressCallback* pDlg/*=nullptr*/)
 {
 	if (samplingParameter <= 0)
 	{
@@ -729,20 +711,24 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 
 	bool withFeatures = (withNormals || withRGB || withTexture);
 
-	GenericChunkedArray<1, unsigned>* triIndices = (withFeatures ? new GenericChunkedArray<1, unsigned> : 0);
+	QScopedPointer< std::vector<unsigned> > triIndices;
+	if (withFeatures)
+	{
+		triIndices.reset(new std::vector<unsigned>);
+	}
 
-	CCLib::SimpleCloud* sampledCloud = 0;
+	CCLib::PointCloud* sampledCloud = nullptr;
 	if (densityBased)
 	{
-		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this, samplingParameter, pDlg, triIndices);
+		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this, samplingParameter, pDlg, triIndices.data());
 	}
 	else
 	{
-		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this, static_cast<unsigned>(samplingParameter), pDlg, triIndices);
+		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this, static_cast<unsigned>(samplingParameter), pDlg, triIndices.data());
 	}
 
 	//convert to real point cloud
-	ccPointCloud* cloud = 0;
+	ccPointCloud* cloud = nullptr;
 
 	if (sampledCloud)
 	{
@@ -760,7 +746,7 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 		}
 
 		delete sampledCloud;
-		sampledCloud = 0;
+		sampledCloud = nullptr;
 	}
 	else
 	{
@@ -769,12 +755,10 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 
 	if (!cloud)
 	{
-		if (triIndices)
-			triIndices->release();
-		return 0;
+		return nullptr;
 	}
 
-	if (withFeatures && triIndices && triIndices->currentSize() >= cloud->size())
+	if (withFeatures && triIndices && triIndices->size() >= cloud->size())
 	{
 		//generate normals
 		if (withNormals && hasNormals())
@@ -783,7 +767,7 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 			{
 				for (unsigned i = 0; i < cloud->size(); ++i)
 				{
-					unsigned triIndex = triIndices->getValue(i);
+					unsigned triIndex = triIndices->at(i);
 					const CCVector3* P = cloud->getPoint(i);
 
 					CCVector3 N(0, 0, 1);
@@ -806,12 +790,12 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 			{
 				for (unsigned i = 0; i < cloud->size(); ++i)
 				{
-					unsigned triIndex = triIndices->getValue(i);
+					unsigned triIndex = triIndices->at(i);
 					const CCVector3* P = cloud->getPoint(i);
 
 					ccColor::Rgb C;
 					getColorFromMaterial(triIndex, *P, C, withRGB);
-					cloud->addRGBColor(C.rgb);
+					cloud->addRGBColor(C);
 				}
 
 				cloud->showColors(true);
@@ -827,12 +811,12 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 			{
 				for (unsigned i = 0; i < cloud->size(); ++i)
 				{
-					unsigned triIndex = triIndices->getValue(i);
+					unsigned triIndex = triIndices->at(i);
 					const CCVector3* P = cloud->getPoint(i);
 
 					ccColor::Rgb C;
 					interpolateColors(triIndex, *P, C);
-					cloud->addRGBColor(C.rgb);
+					cloud->addRGBColor(C);
 				}
 
 				cloud->showColors(true);
@@ -842,13 +826,6 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 				ccLog::Warning("[ccGenericMesh::samplePoints] Failed to interpolate colors (not enough memory?)");
 			}
 		}
-	}
-
-	//release memory
-	if (triIndices)
-	{
-		triIndices->release();
-		triIndices = 0;
 	}
 
 	//we rename the resulting cloud

@@ -21,13 +21,12 @@
 #pragma warning( disable: 4996 )
 #endif
 
-#include "WeibullDistribution.h"
+#include <WeibullDistribution.h>
 
 //local
-#include "GenericCloud.h"
-#include "ScalarField.h"
-#include "ScalarFieldTools.h"
-
+#include <GenericCloud.h>
+#include <ScalarField.h>
+#include <ScalarFieldTools.h>
 
 using namespace CCLib;
 
@@ -252,10 +251,10 @@ ScalarType WeibullDistribution::computeG(const GenericCloud* cloud, ScalarType r
 	if (r <= 0 || n == 0)
 		return static_cast<ScalarType>(1.0); //a positive value means that computeG failed
 
-	double p=0, q=0, s=0;
-	unsigned counter=0, zeroValues=0;
+	double p = 0, q = 0, s = 0;
+	unsigned counter = 0, zeroValues = 0;
 
-	for (unsigned i=0; i<n; ++i)
+	for (unsigned i = 0; i < n; ++i)
 	{
 		ScalarType v = cloud->getPointScalarValue(i);
 		if (ScalarField::ValidValue(v)) //we ignore NaN values
@@ -379,17 +378,17 @@ double WeibullDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned 
 		if (!histo)
 			return -1.0; //not enough memory
 	}
-	memset(histo,0,numberOfClasses*sizeof(int));
+	memset(histo, 0, numberOfClasses * sizeof(int));
 
 	//compute the histogram
 	unsigned n = cloud->size();
-	for (unsigned i=0; i<n; ++i)
+	for (unsigned i = 0; i < n; ++i)
 	{
 		ScalarType V = cloud->getPointScalarValue(i);
 		if (ScalarField::ValidValue(V))
 		{
 			unsigned j = 0;
-			for (;j<numberOfClasses-1;++j)
+			for (; j < numberOfClasses - 1; ++j)
 				if (V < chi2ClassesPositions[j])
 					break;
 

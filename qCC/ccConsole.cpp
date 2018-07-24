@@ -60,9 +60,9 @@ ccConsole* ccConsole::TheInstance(bool autoInit/*=true*/)
 	return s_console.instance;
 }
 
-void ccConsole::ReleaseInstance()
+void ccConsole::ReleaseInstance(bool flush/*=true*/)
 {
-	if (s_console.instance)
+	if (flush && s_console.instance)
 	{
 		//DGM: just in case some messages are still in the queue
 		s_console.instance->refresh();

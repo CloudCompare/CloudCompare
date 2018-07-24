@@ -57,7 +57,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 	{
 		GDALDataset* poDataset = static_cast<GDALDataset*>(GDALOpen( qPrintable(filename), GA_ReadOnly ));
 
-		if( poDataset != NULL )
+		if( poDataset != nullptr )
 		{
 			ccLog::Print(QString("Raster file: '%1'").arg(filename));
 			ccLog::Print( "Driver: %s/%s",
@@ -69,7 +69,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 			int rasterY = poDataset->GetRasterYSize();
 			ccLog::Print( "Size is %dx%dx%d", rasterX, rasterY, rasterCount );
 
-			if( poDataset->GetProjectionRef() != NULL )
+			if( poDataset->GetProjectionRef() != nullptr )
 				ccLog::Print( "Projection is `%s'", poDataset->GetProjectionRef() );
 
 			double adfGeoTransform[6] = {	 0, //top left x
@@ -241,7 +241,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 				ccLog::Print( "[GDAL] Min=%.3fd, Max=%.3f", adfMinMax[0], adfMinMax[1] );
 
 				GDALColorTable* colTable = poBand->GetColorTable();
-				if( colTable != NULL )
+				if( colTable != nullptr )
 					printf( "[GDAL] Band has a color table with %d entries", colTable->GetColorEntryCount() );
 
 				if( poBand->GetOverviewCount() > 0 )
@@ -389,8 +389,8 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 											}
 											else
 											{
-												const ColorCompType* origColor = pc->getPointColor(pointIndex);
-												C = ccColor::Rgba(origColor[0], origColor[1], origColor[2], ccColor::MAX);
+												const ccColor::Rgb& origColor = pc->getPointColor(pointIndex);
+												C = ccColor::Rgba(origColor, ccColor::MAX);
 											}
 
 											switch (colorInterp)
@@ -431,7 +431,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 											}
 											else
 											{
-												pc->setPointColor(pointIndex, C.rgba);
+												pc->setPointColor(pointIndex, C);
 											}
 										}
 									}
@@ -447,11 +447,11 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					{
 						QString sfName = QString("band #%1 (%2)").arg(i).arg(GDALGetColorInterpretationName(colorInterp)); //SF names really need to be unique!
 						ccScalarField* sf = new ccScalarField(qPrintable(sfName));
-						if (!sf->resize(pc->size(), true, NAN_VALUE))
+						if (!sf->resizeSafe(pc->size(), true, NAN_VALUE))
 						{
 							ccLog::Warning(QString("Failed to instantiate memory for storing '%1' as a scalar field!").arg(sf->getName()));
 							sf->release();
-							sf = 0;
+							sf = nullptr;
 						}
 						else
 						{

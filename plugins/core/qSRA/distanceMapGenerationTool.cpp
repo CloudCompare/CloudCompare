@@ -889,7 +889,7 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 	{
 		//texture coordinates
 		TextureCoordsContainer* texCoords = new TextureCoordsContainer();
-		if (!texCoords->reserve(meshVertCount))
+		if (!texCoords->reserveSafe(meshVertCount))
 		{
 			//not enough memory to finish the job!
 			delete texCoords;
@@ -899,10 +899,10 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 		//create default texture coordinates
 		for (unsigned j = 0; j < map->xSteps; ++j)
 		{
-			float T[2] = { static_cast<float>(j) / (map->xSteps - 1), 0.0f };
+			TexCoords2D T(static_cast<float>(j) / (map->xSteps - 1), 0.0f);
 			for (unsigned i = 0; i < map->ySteps; ++i)
 			{
-				T[1] = static_cast<float>(i) / (map->ySteps - 1);
+				T.ty = static_cast<float>(i) / (map->ySteps - 1);
 				texCoords->addElement(T);
 			}
 		}
@@ -1416,7 +1416,7 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 		//texture coordinates
 		TextureCoordsContainer* texCoords = new TextureCoordsContainer();
 		mesh->addChild(texCoords);
-		if (!texCoords->reserve(meshVertCount+profVertCount)) //we add a column for correct wrapping!
+		if (!texCoords->reserveSafe(meshVertCount+profVertCount)) //we add a column for correct wrapping!
 		{
 			//not enough memory to finish the job!
 			return mesh;
@@ -1425,12 +1425,12 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 		//create default texture coordinates
 		for (unsigned j = 0; j <= angularSteps; ++j)
 		{
-			float T[2] = { static_cast<float>(j) / angularSteps, 0.0f };
+			TexCoords2D T(static_cast<float>(j) / angularSteps, 0.0f);
 			for (unsigned i = 0; i < profVertCount; ++i)
 			{
-				T[1] = (profileVertices->getPoint(i)->y - h0) / dH;
+				T.ty = (profileVertices->getPoint(i)->y - h0) / dH;
 				if (invertedHeight)
-					T[1] = 1.0f - T[1];
+					T.ty = 1.0f - T.ty;
 				texCoords->addElement(T);
 			}
 		}
@@ -1512,7 +1512,7 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 
 	ccPointCloud* cloud = new ccPointCloud("map");
 	ccScalarField* sf = new ccScalarField("values");
-	if (!cloud->reserve(count) || !sf->reserve(count))
+	if (!cloud->reserve(count) || !sf->reserveSafe(count))
 	{
 		//not enough memory
 		delete cloud;
@@ -1619,7 +1619,7 @@ QImage DistanceMapGenerationTool::ConvertMapToImage(const QSharedPointer<Map>& m
 			//for each column
 			for (unsigned i = 0; i < map->xSteps; ++i, ++cell)
 			{
-				const ColorCompType* rgb = ccColor::lightGrey.rgba;
+				const ccColor::Rgb* rgb = &ccColor::lightGrey;
 
 				if (cell->count != 0)
 				{
@@ -1628,13 +1628,13 @@ QImage DistanceMapGenerationTool::ConvertMapToImage(const QSharedPointer<Map>& m
 						relativePos = 0.0;
 					else if (relativePos > 1.0)
 						relativePos = 1.0;
-					rgb = colorScale->getColorByRelativePos(relativePos, colorScaleSteps, ccColor::lightGrey.rgba);
+					rgb = colorScale->getColorByRelativePos(relativePos, colorScaleSteps, &ccColor::lightGrey);
 				}
 
 				//DGM FIXME: QImage::sePixel is quite slow!
 				image.setPixel(	static_cast<int>(i),
 								static_cast<int>(j),
-								qRgb(rgb[0], rgb[1], rgb[2]));
+								qRgb(rgb->r, rgb->g, rgb->b));
 			}
 		}
 	}

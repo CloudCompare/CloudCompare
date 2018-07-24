@@ -1752,8 +1752,8 @@ void ccCompass::exportToSVG()
 	{
 		QTextStream svg_stream(&svg_file);
 
-		int width = abs(m_app->getActiveGLWindow()->glWidth()*zoom); //glWidth and glHeight are negative on some machines??
-		int height = abs(m_app->getActiveGLWindow()->glHeight()*zoom); 
+		int width  = std::abs(static_cast<int>(m_app->getActiveGLWindow()->glWidth()  * zoom)); //glWidth and glHeight are negative on some machines??
+		int height = std::abs(static_cast<int>(m_app->getActiveGLWindow()->glHeight() * zoom));
 
 		//write svg header
 		svg_stream << QString::asprintf("<svg width=\"%d\" height=\"%d\">", width, height) << endl;

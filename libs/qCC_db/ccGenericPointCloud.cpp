@@ -65,72 +65,44 @@ void ccGenericPointCloud::clear()
 
 bool ccGenericPointCloud::resetVisibilityArray()
 {
-	if (!m_pointsVisibility)
+	try
 	{
-		m_pointsVisibility = new VisibilityTableType();
-		m_pointsVisibility->link();
+		m_pointsVisibility.resize(size());
 	}
-
-	if (!m_pointsVisibility->resize(size()))
+	catch (const std::bad_alloc&)
 	{
 		unallocateVisibilityArray();
 		return false;
 	}
 
-	m_pointsVisibility->fill(POINT_VISIBLE); //by default, all points are visible
+	std::fill(m_pointsVisibility.begin(), m_pointsVisibility.end(), POINT_VISIBLE); //by default, all points are visible
 
 	return true;
 }
 
 void ccGenericPointCloud::invertVisibilityArray()
 {
-	if (!m_pointsVisibility || m_pointsVisibility->currentSize() == 0)
+	if (m_pointsVisibility.empty())
 	{
 		assert(false);
 		return;
 	}
 
-	unsigned count = m_pointsVisibility->currentSize();
-	for (unsigned i = 0; i < count; ++i)
+	size_t count = m_pointsVisibility.size();
+	for (size_t i = 0; i < count; ++i)
 	{
-		m_pointsVisibility->setValue(i, m_pointsVisibility->getValue(i) == POINT_HIDDEN ? POINT_VISIBLE : POINT_HIDDEN);
+		m_pointsVisibility[i] = (m_pointsVisibility[i] == POINT_HIDDEN ? POINT_VISIBLE : POINT_HIDDEN);
 	}
 }
 
 void ccGenericPointCloud::unallocateVisibilityArray()
 {
-	if (m_pointsVisibility)
-	{
-		m_pointsVisibility->release();
-		m_pointsVisibility = 0;
-	}
+	m_pointsVisibility.clear();
 }
 
 bool ccGenericPointCloud::isVisibilityTableInstantiated() const
 {
-	return m_pointsVisibility && m_pointsVisibility->isAllocated();
-}
-
-unsigned char ccGenericPointCloud::testVisibility(const CCVector3& P) const
-{
-	unsigned char bestVisibility = 255; //impossible value
-
-	for (ccHObject::Container::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
-	{
-		if ((*it)->isKindOf(CC_TYPES::SENSOR))
-		{
-			unsigned char visibility = static_cast<ccSensor*>(*it)->checkVisibility(P);
-
-			if (visibility == POINT_VISIBLE)
-			{
-				return POINT_VISIBLE; //shortcut
-			}
-
-			bestVisibility = std::min<unsigned char>(visibility,bestVisibility);
-		}
-	}
-
-	return (bestVisibility == 255 ? POINT_VISIBLE : bestVisibility);
+	return 	!m_pointsVisibility.empty();
 }
 
 void ccGenericPointCloud::deleteOctree()
@@ -203,53 +175,6 @@ ccOctree::Shared ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallba
 	return octree;
 }
 
-CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(VisibilityTableType* visTable/*=0*/) const
-{
-	if (!visTable)
-	{
-		visTable = m_pointsVisibility;
-	}
-
-	unsigned count = size();
-	if (!visTable || visTable->currentSize() != count)
-	{
-		assert(false);
-		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No visibility table instantiated!");
-		return 0;
-	}
-
-	//count the number of points to copy
-	unsigned pointCount = 0;
-	{
-		for (unsigned i=0; i<count; ++i)
-			if (visTable->getValue(i) == POINT_VISIBLE)
-				++pointCount;
-	}
-
-	if (pointCount == 0)
-	{
-		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No point in selection");
-		return 0;
-	}
-
-	//we create an entity with the 'visible' vertices only
-	CCLib::ReferenceCloud* rc = new CCLib::ReferenceCloud(const_cast<ccGenericPointCloud*>(this));
-	if (rc->reserve(pointCount))
-	{
-		for (unsigned i=0; i<count; ++i)
-			if (visTable->getValue(i) == POINT_VISIBLE)
-				rc->addPointIndex(i); //can't fail (see above)
-	}
-	else
-	{
-		delete rc;
-		rc = 0;
-		ccLog::Error("[ccGenericPointCloud::getTheVisiblePoints] Not enough memory!");
-	}
-
-	return rc;
-}
-
 ccBBox ccGenericPointCloud::getOwnBB(bool withGLFeatures/*=false*/)
 {
 	ccBBox box;
@@ -277,8 +202,7 @@ bool ccGenericPointCloud::toFile_MeOnly(QFile& out) const
 		return WriteError();
 	if (hasVisibilityArray)
 	{
-		assert(m_pointsVisibility);
-		if (!ccSerializationHelper::GenericArrayToFile(*m_pointsVisibility,out))
+		if (!ccSerializationHelper::GenericArrayToFile<unsigned char, 1, unsigned char>(m_pointsVisibility, out))
 			return false;
 	}
 
@@ -318,12 +242,7 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 		return ReadError();
 	if (hasVisibilityArray)
 	{
-		if (!m_pointsVisibility)
-		{
-			m_pointsVisibility = new VisibilityTableType();
-			m_pointsVisibility->link();
-		}
-		if (!ccSerializationHelper::GenericArrayFromFile(*m_pointsVisibility,in,dataVersion))
+		if (!ccSerializationHelper::GenericArrayFromFile<unsigned char, 1, unsigned char>(m_pointsVisibility, in, dataVersion))
 		{
 			unallocateVisibilityArray();
 			return false;
@@ -456,7 +375,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		bool noGLTrans = !getAbsoluteGLTransformation(trans);
 
 		//visibility table (if any)
-		const ccGenericPointCloud::VisibilityTableType* visTable = isVisibilityTableInstantiated() ? getTheVisibilityArray() : 0;
+		const ccGenericPointCloud::VisibilityTableType* visTable = isVisibilityTableInstantiated() ? &getTheVisibilityArray() : nullptr;
 
 		//scalar field with hidden values (if any)
 		ccScalarField* activeSF = 0;
@@ -481,7 +400,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 #endif
 		{
 			//we shouldn't test points that are actually hidden!
-			if (	(!visTable || visTable->getValue(i) == POINT_VISIBLE)
+			if (	(!visTable || visTable->at(i) == POINT_VISIBLE)
 				&&	(!activeSF || activeSF->getColor(activeSF->getValue(i)))
 				)
 			{
@@ -518,3 +437,51 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 	
 	return (nearestPointIndex >= 0);
 }
+
+CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable/*=nullptr*/) const
+{
+	if (!visTable)
+	{
+		visTable = &m_pointsVisibility;
+	}
+
+	unsigned count = size();
+	if (!visTable || visTable->size() != count)
+	{
+		assert(false);
+		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No visibility table instantiated!");
+		return 0;
+	}
+
+	//count the number of points to copy
+	unsigned pointCount = 0;
+	{
+		for (unsigned i = 0; i < count; ++i)
+			if (visTable->at(i) == POINT_VISIBLE)
+				++pointCount;
+	}
+
+	if (pointCount == 0)
+	{
+		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No point in selection");
+		return 0;
+	}
+
+	//we create an entity with the 'visible' vertices only
+	CCLib::ReferenceCloud* rc = new CCLib::ReferenceCloud(const_cast<ccGenericPointCloud*>(this));
+	if (rc->reserve(pointCount))
+	{
+		for (unsigned i = 0; i < count; ++i)
+			if (visTable->at(i) == POINT_VISIBLE)
+				rc->addPointIndex(i); //can't fail (see above)
+	}
+	else
+	{
+		delete rc;
+		rc = 0;
+		ccLog::Error("[ccGenericPointCloud::getTheVisiblePoints] Not enough memory!");
+	}
+
+	return rc;
+}
+

@@ -30,22 +30,18 @@ class ccMeasurement
 {
 public:
 
-	ccMeasurement()
-	{
-	}
+	ccMeasurement() {}
 
-	~ccMeasurement()
-	{
-	}
+	virtual ~ccMeasurement() {}
 
 	//drawing stuff
-	void setDefaultColor(ccColor::Rgba col) { m_normal_colour = col; }
-	void setHighlightColor(ccColor::Rgba col) { m_highlight_colour = col; }
-	void setActiveColor(ccColor::Rgba col) { m_active_colour = col; }
-	void setAlternateColor(ccColor::Rgba col) { m_alternate_colour = col; }
+	void setDefaultColor  (const ccColor::Rgb& col) { m_normal_colour    = col; }
+	void setHighlightColor(const ccColor::Rgb& col) { m_highlight_colour = col; }
+	void setActiveColor   (const ccColor::Rgb& col) { m_active_colour    = col; }
+	void setAlternateColor(const ccColor::Rgb& col) { m_alternate_colour = col; }
 
 	//returns the colour of this measurment object given the active/highlighted state
-	ccColor::Rgba getMeasurementColour()
+	ccColor::Rgb getMeasurementColour() const
 	{
 		if (m_isActive)
 		{
@@ -63,9 +59,9 @@ public:
 	}
 
 	//set draw state of this measurment
-	void setActive(bool isActive) { m_isActive = isActive; }
+	void setActive   (bool isActive) { m_isActive      = isActive; }
 	void setHighlight(bool isActive) { m_isHighlighted = isActive; }
-	void setAlternate(bool isActive) { m_isAlternate = isActive;  }
+	void setAlternate(bool isActive) { m_isAlternate   = isActive;  }
 	void setNormal() { m_isActive = false; m_isHighlighted = false; m_isAlternate = false; }
 
 protected:
@@ -73,10 +69,10 @@ protected:
 	bool m_isActive = false;
 	bool m_isHighlighted = false;
 	bool m_isAlternate = false;
-	ccColor::Rgba m_active_colour = ccColor::yellow;
-	ccColor::Rgba m_highlight_colour = ccColor::green;
-	ccColor::Rgba m_alternate_colour = ccColor::cyan;
-	ccColor::Rgba m_normal_colour = ccColor::blue;
+	ccColor::Rgb m_active_colour = ccColor::yellow;
+	ccColor::Rgb m_highlight_colour = ccColor::green;
+	ccColor::Rgb m_alternate_colour = ccColor::cyan;
+	ccColor::Rgb m_normal_colour = ccColor::blue;
 };
 
 #endif

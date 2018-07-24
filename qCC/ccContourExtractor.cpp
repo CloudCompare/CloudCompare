@@ -76,13 +76,13 @@ struct Edge
 /** \return The nearest point distance (or -1 if no point was found!)
 **/
 static PointCoordinateType FindNearestCandidate(unsigned& minIndex,
-											const VertexIterator& itA,
-											const VertexIterator& itB,
-											const std::vector<Vertex2D>& points,
-											const std::vector<HullPointFlags>& pointFlags,
-											PointCoordinateType minSquareEdgeLength,
-											bool allowLongerChunks = false,
-											double minCosAngle = -1.0)
+												const VertexIterator& itA,
+												const VertexIterator& itB,
+												const std::vector<Vertex2D>& points,
+												const std::vector<HullPointFlags>& pointFlags,
+												PointCoordinateType minSquareEdgeLength,
+												bool allowLongerChunks = false,
+												double minCosAngle = -1.0)
 {
 	//look for the nearest point in the input set
 	PointCoordinateType minDist2 = -1;
@@ -145,7 +145,7 @@ static PointCoordinateType FindNearestCandidate(unsigned& minIndex,
 		}
 	} );
 #else
-	for (unsigned i=0; i<pointCount; ++i)
+	for (unsigned i = 0; i < pointCount; ++i)
 	{
 		const Vertex2D& P = points[i];
 		if (pointFlags[P.index] != POINT_NOT_USED)
@@ -158,7 +158,7 @@ static PointCoordinateType FindNearestCandidate(unsigned& minIndex,
 		}
 
 		//we only consider 'inner' points
-		CCVector2 AP = P-**itA;
+		CCVector2 AP = P - **itA;
 		if (AB.x * AP.y - AB.y * AP.x < 0)
 		{
 			continue;
@@ -187,7 +187,7 @@ static PointCoordinateType FindNearestCandidate(unsigned& minIndex,
 				//(i.e. at least one of the created edges is smaller than the original one
 				//and we don't create too small edges!)
 				PointCoordinateType squareLengthAP = AP.norm2();
-				PointCoordinateType squareLengthBP = (P-**itB).norm2();
+				PointCoordinateType squareLengthBP = (P - **itB).norm2();
 				if (	squareLengthAP >= minSquareEdgeLength
 					&&	squareLengthBP >= minSquareEdgeLength
 					&&	(allowLongerChunks || (squareLengthAP < squareLengthAB || squareLengthBP < squareLengthAB))

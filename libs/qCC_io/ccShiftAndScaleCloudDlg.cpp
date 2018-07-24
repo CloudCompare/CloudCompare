@@ -434,5 +434,16 @@ int ccShiftAndScaleCloudDlg::addShiftInfo(const ccGlobalShiftManager::ShiftInfo&
 	m_ui->loadComboBox->addItem(m_defaultInfos.back().name);
 	m_ui->loadComboBox->setEnabled(m_defaultInfos.size() >= 2);
 
-	return static_cast<int>(m_defaultInfos.size())-1;
+	return static_cast<int>(m_defaultInfos.size()) - 1;
+}
+
+int ccShiftAndScaleCloudDlg::addShiftInfo(const std::vector<ccGlobalShiftManager::ShiftInfo>& infos)
+{
+	for (const ccGlobalShiftManager::ShiftInfo& info : infos)
+	{
+		if (addShiftInfo(info) < 0)
+			break;
+	}
+
+	return static_cast<int>(m_defaultInfos.size()) - 1;
 }

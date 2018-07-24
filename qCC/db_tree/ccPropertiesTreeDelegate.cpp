@@ -254,19 +254,19 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	}
 	else if (m_currentObject->isA(CC_TYPES::NORMAL_INDEXES_ARRAY))
 	{
-		fillWithChunkedArray(static_cast<NormsIndexesTableType*>(m_currentObject));
+		fillWithCCArray(static_cast<NormsIndexesTableType*>(m_currentObject));
 	}
 	else if (m_currentObject->isA(CC_TYPES::TEX_COORDS_ARRAY))
 	{
-		fillWithChunkedArray(static_cast<TextureCoordsContainer*>(m_currentObject));
+		fillWithCCArray(static_cast<TextureCoordsContainer*>(m_currentObject));
 	}
 	else if (m_currentObject->isA(CC_TYPES::NORMALS_ARRAY))
 	{
-		fillWithChunkedArray(static_cast<NormsTableType*>(m_currentObject));
+		fillWithCCArray(static_cast<NormsTableType*>(m_currentObject));
 	}
 	else if (m_currentObject->isA(CC_TYPES::RGB_COLOR_ARRAY))
 	{
-		fillWithChunkedArray(static_cast<ColorsTableType*>(m_currentObject));
+		fillWithCCArray(static_cast<ColorsTableType*>(m_currentObject));
 	}
 	else if (m_currentObject->isA(CC_TYPES::TRANS_BUFFER))
 	{
@@ -955,7 +955,7 @@ void ccPropertiesTreeDelegate::fillWithShareable(CCShareable* _obj)
 	appendRow(ITEM("Shared"), ITEM(linkCount < 3 ? QString("No") : QString("Yes (%1)").arg(linkCount - 1)));
 }
 
-template<int N, class ElementType> void ccPropertiesTreeDelegate::fillWithChunkedArray(ccChunkedArray<N, ElementType>* _obj)
+template<class Type, int N, class ComponentType> void ccPropertiesTreeDelegate::fillWithCCArray(ccArray<Type, N, ComponentType>* _obj)
 {
 	assert(_obj && m_model);
 
@@ -965,15 +965,15 @@ template<int N, class ElementType> void ccPropertiesTreeDelegate::fillWithChunke
 	appendRow(ITEM("Name"), ITEM(_obj->getName().isEmpty() ? "undefined" : _obj->getName()));
 
 	//Count
-	appendRow(ITEM("Elements"), ITEM(QLocale(QLocale::English).toString(_obj->currentSize())));
+	appendRow(ITEM("Elements"), ITEM(QLocale(QLocale::English).toString(static_cast<qulonglong>(_obj->size()))));
 
 	//Capacity
-	appendRow(ITEM("Capacity"), ITEM(QLocale(QLocale::English).toString(_obj->capacity())));
+	appendRow(ITEM("Capacity"), ITEM(QLocale(QLocale::English).toString(static_cast<qulonglong>(_obj->capacity()))));
 
 	//Memory
-	appendRow(ITEM("Memory"), ITEM(QString("%1 Mb").arg((double)_obj->memory() / 1048576.0, 0, 'f', 2)));
+	appendRow(ITEM("Memory"), ITEM(QString("%1 Mb").arg((_obj->capacity() * sizeof(Type)) / 1048576.0, 0, 'f', 2)));
 
-	//ccChunkedArray objects are 'shareable'
+	//ccArray objects are 'Shareable'
 	fillWithShareable(_obj);
 }
 
@@ -999,18 +999,18 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	const QModelIndex &index) const
 {
 	if (!m_model || !m_currentObject)
-		return NULL;
+		return nullptr;
 
 	QStandardItem* item = m_model->itemFromIndex(index);
 
 	if (!item || !item->data().isValid())
-		return NULL;
+		return nullptr;
 
 	int itemData = item->data().toInt();
 	if (item->column() == 0 && !isWideEditor(itemData))
 	{
 		//on the first column, only editors spanning on 2 columns are allowed
-		return NULL;
+		return nullptr;
 	}
 
 	QWidget* outputWidget = nullptr;

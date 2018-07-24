@@ -325,7 +325,7 @@ bool ccScalarField::toFile(QFile& out) const
 		return WriteError();
 
 	//data (dataVersion>=20)
-	if (!ccSerializationHelper::GenericArrayToFile(*this, out))
+	if (!ccSerializationHelper::GenericArrayToFile<ScalarType, 1, ScalarType>(*this, out))
 		return WriteError();
 
 	//displayed values & saturation boundaries (dataVersion>=20)
@@ -412,19 +412,21 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 		bool fileScalarIsFloat = (flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS);
 		if (fileScalarIsFloat && sizeof(ScalarType) == 8) //file is 'float' and current type is 'double'
 		{
-			result = ccSerializationHelper::GenericArrayFromTypedFile<1, ScalarType, float>(*this, in, dataVersion);
+			result = ccSerializationHelper::GenericArrayFromTypedFile<ScalarType, 1, ScalarType, float>(*this, in, dataVersion);
 		}
 		else if (!fileScalarIsFloat && sizeof(ScalarType) == 4) //file is 'double' and current type is 'float'
 		{
-			result = ccSerializationHelper::GenericArrayFromTypedFile<1, ScalarType, double>(*this, in, dataVersion);
+			result = ccSerializationHelper::GenericArrayFromTypedFile<ScalarType, 1, ScalarType, double>(*this, in, dataVersion);
 		}
 		else
 		{
-			result = ccSerializationHelper::GenericArrayFromFile(*this, in, dataVersion);
+			result = ccSerializationHelper::GenericArrayFromFile<ScalarType, 1, ScalarType>(*this, in, dataVersion);
 		}
 	}
 	if (!result)
+	{
 		return false;
+	}
 
 	//convert former 'hidden/NaN' values for non strictly positive SFs (dataVersion < 26)
 	if (dataVersion < 26)
@@ -436,9 +438,13 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 			ScalarType val = getValue(i);
 			//convert former 'HIDDEN_VALUE' and 'BIG_VALUE' to 'NAN_VALUE'
 			if ((onlyPositiveValues && val < 0) || (!onlyPositiveValues && val >= FORMER_BIG_VALUE))
+			{
 				val = NAN_VALUE;
+			}
 		}
 	}
+
+	computeMinAndMax();
 
 	//displayed values & saturation boundaries (dataVersion>=20)
 	double minDisplayed = 0;
@@ -472,14 +478,18 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 
 	//'logarithmic scale' state (dataVersion>=20)
 	if (in.read((char*)&m_logScale, sizeof(bool)) < 0)
+	{
 		return ReadError();
+	}
 
 	if (dataVersion < 27)
 	{
 		bool autoBoundaries = false;
 		//'automatic boundaries update' state (dataVersion>=20)
 		if (in.read((char*)&autoBoundaries, sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 		//warn the user that this option is deprecated
 		if (!autoBoundaries)
 		{

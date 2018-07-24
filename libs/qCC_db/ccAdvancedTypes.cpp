@@ -24,39 +24,43 @@ bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int fl
 		//in previous versions (< 41) the normals were compressed on 15 bytes (2*6+3) as unsigned short
 		static const unsigned OLD_QUANTIZE_LEVEL = 6;
 
-		ccChunkedArray<1, unsigned short>* oldNormals = new ccChunkedArray<1, unsigned short>();
-		if (!ccSerializationHelper::GenericArrayFromFile(*oldNormals, in, dataVersion))
+		ccArray<unsigned short, 1, unsigned short>* oldNormals = new ccArray<unsigned short, 1, unsigned short>();
+		if (!ccSerializationHelper::GenericArrayFromFile<unsigned short, 1, unsigned short>(*oldNormals, in, dataVersion))
 		{
 			oldNormals->release();
 			return false;
 		}
 
 		bool success = false;
-		if (resize(oldNormals->currentSize()))
+		try
 		{
-			//convert old normals to new ones
-			for (unsigned i = 0; i < oldNormals->currentSize(); ++i)
-			{
-				CCVector3 N;
-				//decompress (with the old parameters)
-				{
-					unsigned short n = oldNormals->getValue(i);
-					ccNormalCompressor::Decompress(n, N.u, OLD_QUANTIZE_LEVEL);
-				}
-				//and recompress
-				CompressedNormType index = static_cast<CompressedNormType>(ccNormalCompressor::Compress(N.u));
-				setValue(i, index);
-			}
+			resize(oldNormals->size());
+		}
+		catch (const std::bad_alloc&)
+		{
+			oldNormals->release();
+			return false;
+		}
 
-			success = true;
+		//convert old normals to new ones
+		for (size_t i = 0; i < oldNormals->size(); ++i)
+		{
+			CCVector3 N;
+			//decompress (with the old parameters)
+			{
+				unsigned short n = oldNormals->at(i);
+				ccNormalCompressor::Decompress(n, N.u, OLD_QUANTIZE_LEVEL);
+			}
+			//and recompress
+			CompressedNormType index = static_cast<CompressedNormType>(ccNormalCompressor::Compress(N.u));
+			at(i) = index;
 		}
 
 		oldNormals->release();
-
-		return success;
+		return true;
 	}
 	else
 	{
-		return ccSerializationHelper::GenericArrayFromFile(*this, in, dataVersion);
+		return ccSerializationHelper::GenericArrayFromFile<CompressedNormType, 1, CompressedNormType>(*this, in, dataVersion);
 	}
 }

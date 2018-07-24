@@ -183,7 +183,7 @@ namespace PdmsTools
 			virtual bool setValue(Token t, PointCoordinateType value) { return false; }
 
 			//other
-			virtual GenericItem* scan(const char* str) { return strcmp(name, str) == 0 ? this : NULL; }
+			virtual GenericItem* scan(const char* str) { return strcmp(name, str) == 0 ? this : nullptr; }
 			virtual bool scan(Token t, std::vector<GenericItem*> &array);
 			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const = 0;
 
@@ -216,7 +216,7 @@ namespace PdmsTools
 			virtual bool push(GenericItem *i);
 			virtual void remove(GenericItem *i);
 
-			//virtual Shape* toShape() {return NULL;}
+			//virtual Shape* toShape() {return nullptr;}
 			virtual PointCoordinateType surface() const { return 0; }
 		};
 
@@ -438,9 +438,9 @@ namespace PdmsTools
 			virtual ~Extrusion() { if (loop) { GenericItem* i = loop; Stack::Destroy(i); } }
 
 			//reimplemented from GenericItem
-			virtual void remove(Loop *l) { if (l == loop) loop = NULL; }
+			virtual void remove(Loop *l) { if (l == loop) loop = nullptr; }
 			virtual bool push(GenericItem *l);
-			virtual void remove(GenericItem *i) { if (loop == i) loop = NULL; }
+			virtual void remove(GenericItem *i) { if (loop == i) loop = nullptr; }
 			virtual bool setValue(Token t, PointCoordinateType value) { if (t == PDMS_HEIGHT) { height = value; return true; } return false; }
 			virtual Token getType() const { return negative ? PDMS_NEXTRU : PDMS_EXTRU; }
 			virtual std::pair<int, int> write(std::ostream &output, int nbtabs = 0) const;
@@ -540,7 +540,7 @@ namespace PdmsTools
 			Reference ref;
 			Command *current;
 
-			Position() : Command(PDMS_POSITION) { current = NULL; }
+			Position() : Command(PDMS_POSITION) { current = nullptr; }
 			virtual bool handle(Token t);
 			virtual bool handle(PointCoordinateType numvalue);
 			virtual bool handle(const char* str);
@@ -556,7 +556,7 @@ namespace PdmsTools
 			Command *current;
 			int component;
 
-			Orientation() : Command(PDMS_ORIENTATION) { current = NULL; component = -1; }
+			Orientation() : Command(PDMS_ORIENTATION) { current = nullptr; component = -1; }
 			virtual bool handle(Token t);
 			virtual bool handle(PointCoordinateType numvalue);
 			virtual bool handle(const char* str);

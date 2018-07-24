@@ -27,6 +27,9 @@
 //Qt
 #include <QString>
 
+//STL
+#include <vector>
+
 class ccHObject;
 
 //! Helper class to handle big coordinates shift/scale (typically while loading entities)
@@ -69,6 +72,9 @@ public:
 	//! Sets the max bounding-box diagonal
 	static void SetMaxBoundgBoxDiagonal(double value) { MAX_DIAGONAL_LENGTH = value; }
 
+	//! Adds a new shift / scale couple
+	static void StoreShift(const CCVector3d& shift, double scale, bool preserve = true);
+
 public: //Shift and scale info
 
 	//! Shift and scale info
@@ -86,6 +92,7 @@ public: //Shift and scale info
 	};
 
 	static bool GetLast(ShiftInfo& info);
+	static bool GetLast(std::vector<ShiftInfo>& infos);
 
 protected:
 	

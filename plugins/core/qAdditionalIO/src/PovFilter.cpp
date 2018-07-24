@@ -20,9 +20,6 @@
 //Local
 #include "BinFilter.h"
 
-//CCLib
-#include <SimpleCloud.h>
-
 //qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
@@ -254,16 +251,16 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 
 	while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 	{
-		if ((line[0]=='#')&&(line[1]=='P'))
+		if ((line[0] == '#') && (line[1] == 'P'))
 		{
 			ccLog::Print(QString(line).trimmed());
-			if (fscanf(fp,"F %s\n",subFileName) < 0)
+			if (fscanf(fp, "F %s\n", subFileName) < 0)
 			{
 				ccLog::PrintDebug("[PovFilter::loadFile] Read error (F) !");
 				fclose(fp);
 				return CC_FERR_READING;
 			}
-			if (fscanf(fp,"T %s\n",subFileType) < 0)
+			if (fscanf(fp, "T %s\n", subFileType) < 0)
 			{
 				ccLog::PrintDebug("[PovFilter::loadFile] Read error (T) !");
 				fclose(fp);
@@ -274,44 +271,44 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 			FileIOFilter::Shared filter = FileIOFilter::FindBestFilterForExtension(subFileType);
 			if (!filter)
 			{
-				ccLog::Warning(QString("[POV] No I/O filter found for loading file '%1' (type = '%2')").arg(subFileName,subFileType));
+				ccLog::Warning(QString("[POV] No I/O filter found for loading file '%1' (type = '%2')").arg(subFileName, subFileType));
 				fclose(fp);
 				return CC_FERR_UNKNOWN_FILE;
 			}
 
 			CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-			ccHObject* entities = FileIOFilter::LoadFromFile(QString("%1/%2").arg(path,subFileName), parameters, filter, result);
+			ccHObject* entities = FileIOFilter::LoadFromFile(QString("%1/%2").arg(path, subFileName), parameters, filter, result);
 			if (entities)
 			{
 				ccGLMatrix rot;
 				rot.toIdentity();
-				CCVector3 sensorCenter(0,0,0);
+				CCVector3 sensorCenter(0, 0, 0);
 				float dPhi = 1.0f, dTheta = 1.0f;
 
 				while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 				{
-					if (line[0]=='#')
+					if (line[0] == '#')
 						break;
-					else if (line[0]=='C')
+					else if (line[0] == 'C')
 					{
 						float C[3];
-						sscanf(line,"C %f %f %f\n",C,C+1,C+2);
+						sscanf(line, "C %f %f %f\n", C, C + 1, C + 2);
 						sensorCenter = CCVector3::fromArray(C);
 					}
-					else if (line[0]=='X' || line[0]=='Y' || line[0]=='Z')
+					else if (line[0] == 'X' || line[0] == 'Y' || line[0] == 'Z')
 					{
 						float V[3];
-						sscanf(line+2,"%f %f %f\n",V,V+1,V+2);
+						sscanf(line + 2, "%f %f %f\n", V, V + 1, V + 2);
 
-						unsigned char col = static_cast<unsigned char>(line[0])-88;
+						unsigned char col = static_cast<unsigned char>(line[0]) - 88;
 						float* mat = rot.data();
-						mat[col+0] = V[0];
-						mat[col+4] = V[1];
-						mat[col+8] = V[2];
+						mat[col + 0] = V[0];
+						mat[col + 4] = V[1];
+						mat[col + 8] = V[2];
 					}
-					else if (line[0]=='A')
+					else if (line[0] == 'A')
 					{
-						sscanf(line,"A %f %f\n",&dTheta,&dPhi);
+						sscanf(line, "A %f %f\n", &dTheta, &dPhi);
 					}
 				}
 
@@ -322,13 +319,13 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 				else
 				{
-					entities->filterChildren(clouds,true,CC_TYPES::POINT_CLOUD);
+					entities->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
 					entities->detatchAllChildren();
 					delete entities;
 				}
 				entities = 0;
 
-				for (size_t i=0; i<clouds.size(); ++i)
+				for (size_t i = 0; i < clouds.size(); ++i)
 				{
 					ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(clouds[i]);
 

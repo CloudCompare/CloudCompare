@@ -24,7 +24,7 @@
 #include <GeometricalAnalysisTools.h>
 #include <DgmOctree.h>
 #include <ReferenceCloud.h>
-#include <ChunkedPointCloud.h>
+#include <PointCloud.h>
 
 //qCC_db
 #include <ccGenericPointCloud.h>
@@ -128,7 +128,7 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 			sampledCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	modelObject,
 																						static_cast<unsigned char>(modelSamplingRate->value()),
 																						CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
-																						NULL,
+																						nullptr,
 																						modelObject->getOctree().data());
 		}
 		else
@@ -176,7 +176,7 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledData()
 			sampledCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	dataObject,
 																						static_cast<unsigned char>(dataSamplingRate->value()),
 																						CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
-																						NULL,
+																						nullptr,
 																						dataObject->getOctree().data());
 		}
 		else
@@ -352,21 +352,21 @@ void ccAlignDlg::estimateDelta()
 	CCLib::ReferenceCloud *sampledData = getSampledData();
 
 	//we have to work on a copy of the cloud in order to prevent the algorithms from modifying the original cloud.
-	CCLib::ChunkedPointCloud* cloud = new CCLib::ChunkedPointCloud();
+	CCLib::PointCloud cloud;
 	{
-		cloud->reserve(sampledData->size());
-		for (unsigned i=0; i<sampledData->size(); i++)
-			cloud->addPoint(*sampledData->getPoint(i));
-		cloud->enableScalarField();
+		cloud.reserve(sampledData->size());
+		for (unsigned i = 0; i < sampledData->size(); i++)
+			cloud.addPoint(*sampledData->getPoint(i));
+		cloud.enableScalarField();
 	}
 
-	CCLib::GeometricalAnalysisTools::computeLocalDensityApprox(cloud, CCLib::GeometricalAnalysisTools::DENSITY_KNN, &pDlg);
+	CCLib::GeometricalAnalysisTools::computeLocalDensityApprox(&cloud, CCLib::GeometricalAnalysisTools::DENSITY_KNN, &pDlg);
 	unsigned count = 0;
 	double meanDensity = 0;
 	double meanSqrDensity = 0;
-	for (unsigned i=0; i<cloud->size(); i++)
+	for (unsigned i = 0; i < cloud.size(); i++)
 	{
-		ScalarType value = cloud->getPointScalarValue(i);
+		ScalarType value = cloud.getPointScalarValue(i);
 		if (value == value)
 		{
 			meanDensity += value;
@@ -374,7 +374,7 @@ void ccAlignDlg::estimateDelta()
 			count++;
 		}
 	}
-	
+
 	if (count)
 	{
 		meanDensity /= count;
@@ -382,9 +382,8 @@ void ccAlignDlg::estimateDelta()
 	}
 	double dev = meanSqrDensity - (meanDensity*meanDensity);
 
-	delta->setValue(meanDensity+dev);
+	delta->setValue(meanDensity + dev);
 	delete sampledData;
-	delete cloud;
 }
 
 void ccAlignDlg::changeSamplingMethod(int index)

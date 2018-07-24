@@ -24,7 +24,6 @@
 #include <Delaunay2dMesh.h>
 #include <DistanceComputationTools.h>
 #include <MeshSamplingTools.h>
-#include <SimpleCloud.h>
 
 static const char DEFAULT_POLYGON_MESH_NAME[] = "2D polygon";
 static const char DEFAULT_CONTOUR_NAME[] = "Contour";

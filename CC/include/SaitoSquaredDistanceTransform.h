@@ -88,9 +88,9 @@ namespace CCLib
 	protected:
 
 		//! 1D Euclidean Distance Transform
-		static bool EDT_1D(GridElement* slice, size_t r, size_t c);
+		static bool EDT_1D(GridElement* slice, std::size_t r, std::size_t c);
 		//! 2D Exact Squared Distance Transform
-		static bool SDT_2D(Grid3D<GridElement>& image, size_t sliceIndex, const std::vector<GridElement>& sq);
+		static bool SDT_2D(Grid3D<GridElement>& image, std::size_t sliceIndex, const std::vector<GridElement>& sq);
 		//! 3D Exact Squared Distance Transform
 		static bool SDT_3D(Grid3D<GridElement>& image, GenericProgressCallback* progressCb = nullptr);
 	};

@@ -24,11 +24,9 @@
 //PCL
 #include <pcl/common/io.h>
 
-//CCLib
-#include <ScalarField.h>
-
 //qCC_db
 #include <ccPointCloud.h>
+#include <ccScalarField.h>
 
 //system
 #include <assert.h>
@@ -271,10 +269,10 @@ PCLCloud::Ptr cc2smReader::getColors() const
 
 		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			const ColorCompType* rgb = m_cc_cloud->getPointColor(i);
-			pcl_cloud->at(i).r = static_cast<uint8_t>(rgb[0]);
-			pcl_cloud->at(i).g = static_cast<uint8_t>(rgb[1]);
-			pcl_cloud->at(i).b = static_cast<uint8_t>(rgb[2]);
+			const ccColor::Rgb& rgb = m_cc_cloud->getPointColor(i);
+			pcl_cloud->at(i).r = static_cast<uint8_t>(rgb.r);
+			pcl_cloud->at(i).g = static_cast<uint8_t>(rgb.g);
+			pcl_cloud->at(i).b = static_cast<uint8_t>(rgb.b);
 		}
 
 		TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
@@ -426,7 +424,7 @@ PCLCloud::Ptr cc2smReader::getAsSM() const
 			fields.push_back("normal_xyz");
 		if (m_cc_cloud->hasColors())
 			fields.push_back("rgb");
-		for (unsigned i=0; i<m_cc_cloud->getNumberOfScalarFields(); ++i)
+		for (unsigned i = 0; i < m_cc_cloud->getNumberOfScalarFields(); ++i)
 			fields.push_back(m_cc_cloud->getScalarField(static_cast<int>(i))->getName());
 	}
 	catch (const std::bad_alloc&)

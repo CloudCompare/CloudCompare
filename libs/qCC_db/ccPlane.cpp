@@ -231,7 +231,7 @@ bool ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilena
 	if (!texCoords)
 	{
 		texCoords = new TextureCoordsContainer();
-		if (!texCoords->reserve(4))
+		if (!texCoords->reserveSafe(4))
 		{
 			//not enough memory
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
@@ -240,14 +240,14 @@ bool ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilena
 		}
 
 		//create default texture coordinates
-		float TA[2] = { 0.0f, 0.0f };
-		float TB[2] = { 0.0f, 1.0f };
-		float TC[2] = { 1.0f, 1.0f };
-		float TD[2] = { 1.0f, 0.0f };
-		texCoords->addElement(TA);
-		texCoords->addElement(TB);
-		texCoords->addElement(TC);
-		texCoords->addElement(TD);
+		TexCoords2D TA (0.0f, 0.0f);
+		TexCoords2D TB (0.0f, 1.0f);
+		TexCoords2D TC (1.0f, 1.0f);
+		TexCoords2D TD (1.0f, 0.0f);
+		texCoords->emplace_back(TA);
+		texCoords->emplace_back(TB);
+		texCoords->emplace_back(TC);
+		texCoords->emplace_back(TD);
 
 		quadMesh->setTexCoordinatesTable(texCoords);
 	}

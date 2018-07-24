@@ -112,12 +112,12 @@ public:
 	std::vector<std::string> getSelectedAvailableScalarFields();
 
 	//! Returns the first selected entity as a ccPointCloud
-	/** \return NULL if no cloud is selected or if is not a ccPointCloud
+	/** \return nullptr if no cloud is selected or if is not a ccPointCloud
 	**/
 	ccPointCloud * getSelectedEntityAsCCPointCloud() const;
 
 	//! Returns the first selected entity as a ccHObject
-	/** \return NULL if no object is selected
+	/** \return nullptr if no object is selected
 	**/
 	ccHObject * getSelectedEntityAsCCHObject() const;
 

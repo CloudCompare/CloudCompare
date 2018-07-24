@@ -102,7 +102,7 @@ public:
 	static ccConsole* TheInstance(bool autoInit = true);
 
 	//! Releases unique instance
-	static void ReleaseInstance();
+	static void ReleaseInstance(bool flush = true);
 
 	//! Sets auto-refresh state
 	void setAutoRefresh(bool state);

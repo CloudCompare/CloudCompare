@@ -132,7 +132,7 @@ public:
 			if (m_points->hasColors())
 			{
 				//simply add the new color
-				m_points->addRGBColor(col.rgb);
+				m_points->addRGBColor(col);
 			}
 			else
 			{
@@ -143,13 +143,13 @@ public:
 					return;
 				}
 				m_points->showColors(true);
-				m_points->setPointColor(m_points->size() - 1, ccColor::white.rgba); //replace the last color
+				m_points->setPointColor(m_points->size() - 1, ccColor::white); //replace the last color
 			}
 		}
 		else if (m_points->hasColors())
 		{
 			//add default color if none is defined!
-			m_points->addRGBColor(ccColor::white.rgba);
+			m_points->addRGBColor(ccColor::white);
 		}
 	}
 
@@ -268,9 +268,9 @@ public:
 						//We must also check that the color is the same (if any)
 						if (faceCol || vertices->hasColors())
 						{
-							const ColorCompType* _faceCol = faceCol ? faceCol->rgb : ccColor::white.rgba;
-							const ColorCompType* _vertCol = vertices->hasColors() ? vertices->getPointColor(j) : ccColor::white.rgba;
-							useCurrentVertex = (_faceCol[0] == _vertCol[0] && _faceCol[1] == _vertCol[1] && _faceCol[2] == _vertCol[2]);
+							const ccColor::Rgb* _faceCol = faceCol ? faceCol : &ccColor::white;
+							const ccColor::Rgb* _vertCol = vertices->hasColors() ? &vertices->getPointColor(j) : &ccColor::white;
+							useCurrentVertex = (_faceCol->r == _vertCol->r && _faceCol->g == _vertCol->g && _faceCol->b == _vertCol->b);
 						}
 
 						if (useCurrentVertex)
@@ -337,7 +337,7 @@ public:
 
 			//add 1 or 2 new entries
 			unsigned triNormCount = triNormsTable->currentSize();
-			if (!triNormsTable->reserve(triNormsTable->currentSize() + addTriCount))
+			if (!triNormsTable->reserveSafe(triNormsTable->currentSize() + addTriCount))
 			{
 				ccLog::Error("[DxfImporter] Not enough memory!");
 				return;
@@ -379,14 +379,14 @@ public:
 			if (vertices->hasColors())
 			{
 				for (unsigned i = 0; i < createdVertCount; ++i)
-					vertices->addRGBColor(faceCol->rgb);
+					vertices->addRGBColor(*faceCol);
 			}
 			//otherwise, reserve memory and set all previous points to white by default
 			else if (vertices->setRGBColor(ccColor::white))
 			{
 				//then replace the last color(s) by the current one
 				for (unsigned i = 0; i < createdVertCount; ++i)
-					vertices->setPointColor(vertCount - 1 - i, faceCol->rgb);
+					vertices->setPointColor(vertCount - 1 - i, *faceCol);
 				m_faces->showColors(true);
 			}
 		}
@@ -394,7 +394,7 @@ public:
 		{
 			//add default color if none is defined!
 			for (unsigned i = 0; i < createdVertCount; ++i)
-				vertices->addRGBColor(ccColor::white.rgba);
+				vertices->addRGBColor(ccColor::white);
 		}
 	}
 

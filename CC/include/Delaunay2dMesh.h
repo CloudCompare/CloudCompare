@@ -66,7 +66,7 @@ public:
 		\return success
 	**/
 	virtual bool buildMesh(	const std::vector<CCVector2>& points2D,
-								size_t pointCountToUse = 0,
+								std::size_t pointCountToUse = 0,
 								char* outputErrorStr = nullptr);
 
 	//! Build the Delaunay mesh from a set of 2D polylines

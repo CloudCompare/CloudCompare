@@ -29,7 +29,7 @@
 #ifndef _CSF_H_
 #define _CSF_H_
 
-#include "PointCloud.h"
+#include "wlPointCloud.h"
 #include "Cloth.h"
 
 //system

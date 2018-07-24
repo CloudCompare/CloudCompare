@@ -23,7 +23,6 @@
 
 //qCC_db
 #include <ccCameraSensor.h>
-#include <ccGenericPointCloud.h>
 #include <ccGLMatrix.h>
 #include <ccHObjectCaster.h>
 #include <ccImage.h>
@@ -44,7 +43,6 @@
 #include <ccMesh.h>
 #include <MeshSamplingTools.h>
 #include <PointProjectionTools.h>
-#include <SimpleCloud.h>
 
 //System
 #include <string>
@@ -418,9 +416,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						int R = tokens[0].toInt();
 						int G = tokens[1].toInt();
 						int B = tokens[2].toInt();
-						keypointsCloud->addRGBColor(static_cast<ColorCompType>(std::min<int>(R,ccColor::MAX)),
-													static_cast<ColorCompType>(std::min<int>(G,ccColor::MAX)),
-													static_cast<ColorCompType>(std::min<int>(B,ccColor::MAX)));
+						keypointsCloud->addRGBColor(static_cast<ColorCompType>(std::min<int>(R, ccColor::MAX)),
+													static_cast<ColorCompType>(std::min<int>(G, ccColor::MAX)),
+													static_cast<ColorCompType>(std::min<int>(B, ccColor::MAX)));
 					}
 
 					currentLine = stream.readLine();
@@ -635,8 +633,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	/*** pre-processing steps (colored MNT computation, etc.) ***/
 
 	//for colored DTM generation
-	int* mntColors = 0;
-	CCLib::SimpleCloud* mntSamples = 0;
+	int* mntColors = nullptr;
+	CCLib::PointCloud* mntSamples = nullptr;
 	if (generateColoredDTM)
 	{
 		QScopedPointer<ccProgressDialog> toDlg(0);
@@ -1162,9 +1160,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					if (col[3] > 0) //accum
 					{
 						const CCVector3* X = mntSamples->getPointPersistentPtr(i);
-						ColorCompType avgCol[3]= {	static_cast<ColorCompType>(col[0]/col[3]),
-												static_cast<ColorCompType>(col[1]/col[3]),
-												static_cast<ColorCompType>(col[2]/col[3]) };
+						ccColor::Rgb avgCol(static_cast<ColorCompType>(col[0] / col[3]),
+											static_cast<ColorCompType>(col[1] / col[3]),
+											static_cast<ColorCompType>(col[2] / col[3]) );
 						mntCloud->addPoint(*X);
 						mntCloud->addRGBColor(avgCol);
 						++realCount;

@@ -132,13 +132,13 @@ void ccColorLevelsDlg::updateHistogram()
 		{
 			for (unsigned i=0; i<pointCount; ++i)
 			{
-				const ColorCompType* rgb = m_cloud->getPointColor(i);
+				const ccColor::Rgb& rgb = m_cloud->getPointColor(i);
 				if (histoValuesR)
-					histoValuesR->at(rgb[0])++;
+					histoValuesR->at(rgb.r)++;
 				if (histoValuesG)
-					histoValuesG->at(rgb[1])++;
+					histoValuesG->at(rgb.g)++;
 				if (histoValuesB)
-					histoValuesB->at(rgb[2])++;
+					histoValuesB->at(rgb.b)++;
 			}
 		}
 
@@ -188,35 +188,35 @@ void ccColorLevelsDlg::onApply()
 		int pOut = s_outputLevels[1] - s_outputLevels[0];
 		for (unsigned i=0; i<pointCount; ++i)
 		{
-			const ColorCompType* rgb = m_cloud->getPointColor(i);
-			ColorCompType newRgb[3];
-			for (unsigned c=0; c<3; ++c)
+			const ccColor::Rgb& rgb = m_cloud->getPointColor(i);
+			ccColor::Rgb newRgb;
+			for (unsigned c = 0; c < 3; ++c)
 			{
 				if (applyRGB[c])
 				{
 					double newC = s_outputLevels[0];
 					if (qIn)
 					{
-						double u = (static_cast<double>(rgb[c]) - s_inputLevels[0]) / qIn;
+						double u = (static_cast<double>(rgb.rgb[c]) - s_inputLevels[0]) / qIn;
 						newC = s_outputLevels[0] + u * pOut; 
 					}
-					newRgb[c] = static_cast<ColorCompType>(std::max<double>(std::min<double>(newC,ccColor::MAX),0.0));
+					newRgb.rgb[c] = static_cast<ColorCompType>(std::max<double>(std::min<double>(newC, ccColor::MAX), 0.0));
 				}
 				else
 				{
-					newRgb[c] = rgb[c];
+					newRgb.rgb[c] = rgb.rgb[c];
 				}
 			}
 
 			//set the new color
 			if (pc)
 			{
-				pc->setPointColor(i,newRgb);
+				pc->setPointColor(i, newRgb);
 			}
 			else
 			{
 				//DGM FIXME: dirty!
-				memcpy(const_cast<ColorCompType*>(rgb),newRgb,sizeof(ColorCompType)*3);
+				const_cast<ccColor::Rgb&>(rgb) = newRgb;
 			}
 		}
 

@@ -30,21 +30,59 @@ double ccGlobalShiftManager::MAX_COORDINATE_ABS_VALUE = 1.0e4;
 double ccGlobalShiftManager::MAX_DIAGONAL_LENGTH = 1.0e6;
 
 //semi-persistent settings
-struct LastShiftInfo : ccGlobalShiftManager::ShiftInfo
-{
-	bool valid;
+static std::vector<ccGlobalShiftManager::ShiftInfo> s_lastInfoBuffer;
 
-	LastShiftInfo()
-		: ccGlobalShiftManager::ShiftInfo("Last input")
-		, valid(false)
-	{}
-};
-static LastShiftInfo s_lastInfo;
+void ccGlobalShiftManager::StoreShift(const CCVector3d& shift, double scale, bool preserve/*=true*/)
+{
+	if (scale == 1.0 && shift.norm2d() == 0)
+	{
+		//default shift and scale are ignored
+		return;
+	}
+
+	for (const ccGlobalShiftManager::ShiftInfo& shiftInfo : s_lastInfoBuffer)
+	{
+		if (shiftInfo.scale == scale && (shiftInfo.shift - shift).norm2d() == 0)
+		{
+			//we already know this one
+			return;
+		}
+	}
+
+	ccGlobalShiftManager::ShiftInfo info("Last input");
+	info.scale = scale;
+	info.shift = shift;
+	info.preserve = preserve;
+	if (!s_lastInfoBuffer.empty())
+	{
+		info.name += QString(" (%1)").arg(s_lastInfoBuffer.size());
+	}
+	s_lastInfoBuffer.emplace_back(info);
+}
 
 bool ccGlobalShiftManager::GetLast(ShiftInfo& info)
 {
-	info = s_lastInfo;
-	return s_lastInfo.valid;
+	if (s_lastInfoBuffer.empty())
+	{
+		return false;
+	}
+	info = s_lastInfoBuffer.back();
+	return true;
+}
+
+bool ccGlobalShiftManager::GetLast(std::vector<ShiftInfo>& infos)
+{
+	try
+	{
+		infos = s_lastInfoBuffer;
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("[ccGlobalShiftManager::GetLast] Not enough memory");
+		return false;
+	}
+
+	return true;
 }
 
 bool ccGlobalShiftManager::NeedShift(const CCVector3d& P)
@@ -119,30 +157,31 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 				)
 			{
 				//have we already stored shift info?
-				if (mode == NO_DIALOG_AUTO_SHIFT && s_lastInfo.valid)
+				if (mode == NO_DIALOG_AUTO_SHIFT && !s_lastInfoBuffer.empty())
 				{
 					//in "auto shift" mode, we may want to use it (to synchronize multiple clouds!)
-					if (!NeedShift(P*s_lastInfo.scale + s_lastInfo.shift) && !NeedRescale(diagonal*s_lastInfo.scale))
+					for (const ccGlobalShiftManager::ShiftInfo& shiftInfo : s_lastInfoBuffer)
 					{
-						coordinatesShift = s_lastInfo.shift;
-						if (coordinatesScale)
+						if (!NeedShift(P*shiftInfo.scale + shiftInfo.shift) && !NeedRescale(diagonal*shiftInfo.scale))
 						{
-							*coordinatesScale = scale;
+							coordinatesShift = shiftInfo.shift;
+							if (coordinatesScale)
+							{
+								*coordinatesScale = shiftInfo.scale;
+							}
+							if (preserveCoordinateShift)
+							{
+								*preserveCoordinateShift = shiftInfo.preserve;
+							}
+							return true;
 						}
-						if (preserveCoordinateShift)
-						{
-							*preserveCoordinateShift = s_lastInfo.preserve;
-						}
-						return true;
 					}
 				}
 				
 				//save info for next time
 				if (coordinatesShift.norm2() != 0 || scale != 1.0)
 				{
-					s_lastInfo.valid = true;
-					s_lastInfo.shift = coordinatesShift;
-					s_lastInfo.scale = scale;
+					StoreShift(coordinatesShift, scale);
 				}
 				//user should use the provided shift information
 				return true;
@@ -154,6 +193,8 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		if (mode == NO_DIALOG_AUTO_SHIFT)
 		{
 			//guess best shift & scale info from input point/diagonal
+			coordinatesShift = CCVector3d(0, 0, 0);
+			scale = 1.0;
 			if (needShift)
 			{
 				coordinatesShift = BestShift(P);
@@ -162,11 +203,6 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 					*preserveCoordinateShift = true;
 				}
 
-				//save info for next time
-				s_lastInfo.valid = true;
-				s_lastInfo.shift = coordinatesShift;
-				s_lastInfo.scale = 1.0;
-				s_lastInfo.preserve = true;
 			}
 			if (coordinatesScale && needRescale)
 			{
@@ -177,15 +213,11 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 				}
 
 				//save info for next time
-				if (!s_lastInfo.valid)
-				{
-					s_lastInfo.shift = CCVector3d(0, 0, 0);
-				}
-				s_lastInfo.valid = true;
-				s_lastInfo.scale = *coordinatesScale;
-				s_lastInfo.preserve = true;
+				scale = *coordinatesScale;
 			}
 
+			//save info for next time
+			StoreShift(coordinatesShift, 1.0, true);
 			return true;
 		}
 
@@ -232,10 +264,12 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		int index = sasDlg.addShiftInfo(ShiftInfo("Suggested", shift, scale));
 		sasDlg.setCurrentProfile(index);
 		//add "last" entry (if available)
-		if (s_lastInfo.valid)
+		if (!s_lastInfoBuffer.empty())
 		{
-			sasDlg.addShiftInfo(s_lastInfo);
-			sasDlg.setPreserveShiftOnSave(s_lastInfo.preserve);
+			sasDlg.addShiftInfo(s_lastInfoBuffer);
+
+			//use the very last one for preserve or not preserve
+ 			sasDlg.setPreserveShiftOnSave(s_lastInfoBuffer.back().preserve);
 		}
 		sasDlg.showPreserveShiftOnSave(preserveCoordinateShift != nullptr);
 		//add entries from file (if any)
@@ -263,10 +297,7 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		if (sasDlg.exec())
 		{
 			//save info for next time
-			s_lastInfo.valid = true;
-			s_lastInfo.shift = sasDlg.getShift();
-			s_lastInfo.scale = sasDlg.getScale();
-			s_lastInfo.preserve = sasDlg.preserveShiftOnSave();
+			StoreShift(sasDlg.getShift(), sasDlg.getScale(), sasDlg.preserveShiftOnSave());
 			
 			coordinatesShift = sasDlg.getShift();
 			if (coordinatesScale)

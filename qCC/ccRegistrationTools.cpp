@@ -20,7 +20,7 @@
 //CCLib
 #include <MeshSamplingTools.h>
 #include <GenericIndexedCloudPersist.h>
-#include <SimpleCloud.h>
+#include <PointCloud.h>
 #include <RegistrationTools.h>
 #include <DistanceComputationTools.h>
 #include <CloudSamplingTools.h>

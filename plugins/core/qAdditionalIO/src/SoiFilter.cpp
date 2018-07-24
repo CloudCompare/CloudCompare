@@ -54,25 +54,25 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 	char* pEnd;
 
 	//header
-	while ((strcmp((char*)line.substr(0,4).c_str(),"#CC#") != 0)&&(eof != NULL))
+	while ((strcmp((char*)line.substr(0, 4).c_str(), "#CC#") != 0) && (eof != nullptr))
 	{
-		if (strcmp(line.substr(0,4).c_str(),"#NP#")==0)
+		if (strcmp(line.substr(0, 4).c_str(), "#NP#") == 0)
 		{
-			std::string numPoints (line,4,line.size()-4);
-			nbPointsTotal=strtol(numPoints.c_str(),&pEnd,0);
+			std::string numPoints(line, 4, line.size() - 4);
+			nbPointsTotal = strtol(numPoints.c_str(), &pEnd, 0);
 			//ccLog::Print("[SoiFilter::loadFile] Total number of points: %i",nbPointsTotal);
 		}
-		else if (strcmp(line.substr(0,4).c_str(),"#NS#")==0)
+		else if (strcmp(line.substr(0, 4).c_str(), "#NS#") == 0)
 		{
-			std::string numScans (line,4,line.size()-4);
-			nbScansTotal=strtol(numScans.c_str(),&pEnd,0);
+			std::string numScans(line, 4, line.size() - 4);
+			nbScansTotal = strtol(numScans.c_str(), &pEnd, 0);
 			//ccLog::Print("[SoiFilter::loadFile] Total number of scans: %i",nbScansTotal);
 		}
 
-		eof = fgets ((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH , fp);
+		eof = fgets((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH, fp);
 	}
 
-	if ((nbScansTotal == 0)||(nbPointsTotal == 0))
+	if ((nbScansTotal == 0) || (nbPointsTotal == 0))
 	{
 		ccLog::Warning("[SoiFilter::loadFile] No points or scans defined in this file!");
 		fclose(fp);
@@ -93,18 +93,18 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 	//Scan by scan
 	for (unsigned k = 0; k < nbScansTotal; k++)
 	{
-		char* eof = fgets ((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH , fp);
+		char* eof = fgets((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH, fp);
 
 		//we only look for points (we ignore the rest)
-		while ((strcmp(line.substr(0,4).c_str(),"#pt#")!=0)&&(eof != NULL))
-			eof = fgets ((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH , fp);
+		while ((strcmp(line.substr(0, 4).c_str(), "#pt#") != 0) && (eof != nullptr))
+			eof = fgets((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH, fp);
 
 		unsigned nbOfPoints = 0;
 
-		if (strcmp(line.substr(0,4).c_str(),"#pt#")==0)
+		if (strcmp(line.substr(0, 4).c_str(), "#pt#") == 0)
 		{
-			std::string numPoints(line,4,line.size()-4);
-			nbOfPoints = strtol(numPoints.c_str(),&pEnd,0);
+			std::string numPoints(line, 4, line.size() - 4);
+			nbOfPoints = strtol(numPoints.c_str(), &pEnd, 0);
 			//ccLog::Print("[SoiFilter::loadFile] Scan %i - points: %i",k+1,nbOfPoints);
 		}
 		else
@@ -113,10 +113,10 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 			fclose(fp);
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
-		
+
 		if (nbOfPoints == 0)
 		{
-			ccLog::Warning("[SoiFilter::loadFile] Scan #%i is empty!",k);
+			ccLog::Warning("[SoiFilter::loadFile] Scan #%i is empty!", k);
 			continue;
 		}
 
@@ -124,7 +124,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 		QString name = QString("unnamed - Scan #%1").arg(k);
 
 		ccPointCloud* loadedCloud = new ccPointCloud(name);
-		if ( !loadedCloud->reserveThePointsTable(nbOfPoints) || !loadedCloud->reserveTheRGBTable() )
+		if (!loadedCloud->reserveThePointsTable(nbOfPoints) || !loadedCloud->reserveTheRGBTable())
 		{
 			fclose(fp);
 			delete loadedCloud;
@@ -145,7 +145,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 
 			loadedCloud->addPoint(CCVector3::fromArray(P));
-			loadedCloud->addGreyColor(static_cast<ColorCompType>(c<<3)); //<<2 ? <<3 ? we lack some info. here ...
+			loadedCloud->addGreyColor(static_cast<ColorCompType>(c << 3)); //<<2 ? <<3 ? we lack some info. here ...
 
 			if (pDlg)
 			{

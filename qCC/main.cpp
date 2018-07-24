@@ -232,6 +232,10 @@ int main(int argc, char **argv)
 		{
 			result = app.exec();
 		}
+		catch (const std::exception& e)
+		{
+			QMessageBox::warning(0, "CC crashed!", QString("Hum, it seems that CC has crashed... Sorry about that :)\n") + e.what());
+		}
 		catch (...)
 		{
 			QMessageBox::warning(0, "CC crashed!", "Hum, it seems that CC has crashed... Sorry about that :)");

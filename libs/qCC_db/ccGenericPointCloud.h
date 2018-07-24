@@ -23,6 +23,9 @@
 #include "ccAdvancedTypes.h"
 #include "ccOctree.h"
 
+//System
+#include <vector>
+
 namespace CCLib
 {
 	class GenericProgressCallback;
@@ -49,7 +52,7 @@ class ccOctreeProxy;
 	- an octree strucutre
 	- visibility information per point (to hide/display subsets of points)
 **/
-class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject,  virtual public CCLib::GenericIndexedCloudPersist
+class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject,  public CCLib::GenericIndexedCloudPersist
 {
 	friend class ccMesh;
 
@@ -124,14 +127,14 @@ public:
 		It may even be 0 if the value shouldn't be displayed.
 		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
-	virtual const ColorCompType* geScalarValueColor(ScalarType d) const = 0;
+	virtual const ccColor::Rgb* geScalarValueColor(ScalarType d) const = 0;
 
 	//! Returns color corresponding to a given point associated scalar value
 	/** The returned value depends on the current scalar field display parameters.
 		It may even be 0 if the value shouldn't be displayed.
 		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
-	virtual const ColorCompType* getPointScalarValueColor(unsigned pointIndex) const = 0;
+	virtual const ccColor::Rgb* getPointScalarValueColor(unsigned pointIndex) const = 0;
 
 	//! Returns scalar value associated to a given point
 	/** The returned value is taken from the current displayed scalar field
@@ -142,7 +145,7 @@ public:
 	//! Returns color corresponding to a given point
 	/** WARNING: color array must be enabled! (see ccDrawableObject::hasColors)
 	**/
-	virtual const ColorCompType* getPointColor(unsigned pointIndex) const = 0;
+	virtual const ccColor::Rgb& getPointColor(unsigned pointIndex) const = 0;
 
 	//! Returns compressed normal corresponding to a given point
 	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasNormals)
@@ -162,16 +165,16 @@ public:
 	//! Array of "visibility" information for each point
 	/** See <CCConst.h>
 	**/
-	typedef GenericChunkedArray<1,unsigned char> VisibilityTableType;
+	typedef std::vector<unsigned char> VisibilityTableType;
 
 	//! Returns associated visiblity array
-	virtual inline VisibilityTableType* getTheVisibilityArray() { return m_pointsVisibility; }
+	virtual inline VisibilityTableType& getTheVisibilityArray() { return m_pointsVisibility; }
 
 	//! Returns a ReferenceCloud equivalent to the visiblity array
 	/** \param visTable visibility table (optional, otherwise the cloud's default one will be used)
 		\return the visible points as a ReferenceCloud
 	**/
-	virtual CCLib::ReferenceCloud* getTheVisiblePoints(VisibilityTableType* visTable = 0) const;
+	virtual CCLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = 0) const;
 
 	//! Returns whether the visiblity array is allocated or not
 	virtual bool isVisibilityTableInstantiated() const;
@@ -191,9 +194,6 @@ public:
 	/***************************************************
 					Other methods
 	***************************************************/
-
-	//Inherited from GenericCloud
-	virtual unsigned char testVisibility(const CCVector3& P) const override;
 
 	//Inherited from ccHObject
 	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
@@ -269,7 +269,7 @@ protected:
 	/** If this table is allocated, only values set to POINT_VISIBLE
 		will be considered as visible/selected.
 	**/
-	VisibilityTableType* m_pointsVisibility;
+	VisibilityTableType m_pointsVisibility;
 
 	//! Point size (won't be applied if 0)
 	unsigned char m_pointSize;

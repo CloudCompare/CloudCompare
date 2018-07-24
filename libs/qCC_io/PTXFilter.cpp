@@ -246,7 +246,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 
 		//intensities
 		ccScalarField* intensitySF = new ccScalarField(CC_PTX_INTENSITY_FIELD_NAME);
-		if (!intensitySF->reserve(static_cast<unsigned>(gridSize)))
+		if (!intensitySF->reserveSafe(static_cast<unsigned>(gridSize)))
 		{
 			ccLog::Warning("[PTX] Not enough memory to load intensities!");
 			intensitySF->release();
@@ -402,7 +402,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 
 						if (pointIsValid)
 						{
-							cloud->addRGBColor(color.rgb);
+							cloud->addRGBColor(color);
 						}
 						if (loadGridColors)
 						{
@@ -426,7 +426,10 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 			delete cloud;
 			cloud = nullptr;
 			if (intensitySF)
+			{
 				intensitySF->release();
+				intensitySF = nullptr;
+			}
 
 			ccLog::Warning(QString("[PTX] Scan #%1 is empty?!").arg(cloudIndex+1));
 		}

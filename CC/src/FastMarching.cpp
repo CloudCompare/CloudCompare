@@ -186,7 +186,7 @@ bool FastMarching::setSeedCell(const Tuple3i& pos)
 
 void FastMarching::initTrialCells()
 {
-	for (size_t j = 0; j < m_activeCells.size(); ++j)
+	for (std::size_t j = 0; j < m_activeCells.size(); ++j)
 	{
 		const unsigned& index = m_activeCells[j];
 		Cell* aCell = m_theGrid[index];
@@ -235,12 +235,12 @@ unsigned FastMarching::getNearestTrialCell()
 		return 0; //0 = error
 
 	//we look for the "TRIAL" cell with the minimum time (T)
-	size_t minTCellIndexPos = 0;
+	std::size_t minTCellIndexPos = 0;
 	unsigned minTCellIndex = m_trialCells[minTCellIndexPos];
 	CCLib::FastMarching::Cell* minTCell = m_theGrid[minTCellIndex];
 	assert(minTCell != nullptr);
 
-	for (size_t i=1; i<m_trialCells.size(); ++i)
+	for (std::size_t i=1; i<m_trialCells.size(); ++i)
 	{
 		unsigned cellIndex = m_trialCells[i];
 		CCLib::FastMarching::Cell* cell = m_theGrid[cellIndex];

@@ -32,7 +32,7 @@ class GenericIndexedCloudPersist;
 class GenericIndexedMesh;
 class ReferenceCloud;
 class ReferenceCloudPersist;
-class SimpleCloud;
+class PointCloud;
 
 //! Several point cloud resampling algorithms (octree-based, random, etc.)
 class CC_CORE_LIB_API CloudSamplingTools : public CCToolbox
@@ -58,7 +58,7 @@ public:
 		\param inputOctree if the octree has been already computed, it can be used by the process (avoid recomputation)
 		\return the resampled cloud (new cloud)
 	**/
-	static SimpleCloud* resampleCloudWithOctreeAtLevel(	GenericIndexedCloudPersist* cloud,
+	static PointCloud* resampleCloudWithOctreeAtLevel(	GenericIndexedCloudPersist* cloud,
 														unsigned char octreeLevel,
 														RESAMPLING_CELL_METHOD resamplingMethod,
 														GenericProgressCallback* progressCb = nullptr,
@@ -208,7 +208,7 @@ protected:
 		(it is of the form DgmOctree::localFunctionPtr). It replaces all
 		points in a cell by a unique one, according to different rules.
 		Method parameters (defined in "additionalParameters") are :
-		- (SimpleCloud*) point cloud to store new points
+		- (PointCloud*) point cloud to store new points
 		- (RESAMPLING_CELL_METHOD*) resampling method
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description

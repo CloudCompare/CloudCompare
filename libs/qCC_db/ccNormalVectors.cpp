@@ -55,15 +55,12 @@ void ccNormalVectors::ReleaseUniqueInstance()
 }
 
 ccNormalVectors::ccNormalVectors()
-	: m_theNormalHSVColors(0)
 {
 	init();
 }
 
 ccNormalVectors::~ccNormalVectors()
 {
-	if (m_theNormalHSVColors)
-		delete[] m_theNormalHSVColors;
 }
 
 CompressedNormType ccNormalVectors::GetNormIndex(const PointCoordinateType N[])
@@ -75,8 +72,10 @@ CompressedNormType ccNormalVectors::GetNormIndex(const PointCoordinateType N[])
 
 bool ccNormalVectors::enableNormalHSVColorsArray()
 {
-	if (m_theNormalHSVColors)
+	if (!m_theNormalHSVColors.empty())
+	{
 		return true;
+	}
 
 	if (m_theNormalVectors.empty())
 	{
@@ -84,36 +83,28 @@ bool ccNormalVectors::enableNormalHSVColorsArray()
 		return false;
 	}
 
-	m_theNormalHSVColors = new ColorCompType[m_theNormalVectors.size() * 3];
-	if (!m_theNormalHSVColors)
+	try
+	{
+		m_theNormalHSVColors.resize(m_theNormalVectors.size());
+	}
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
 	}
 
-	ColorCompType* rgb = m_theNormalHSVColors;
-	for (size_t i = 0; i < m_theNormalVectors.size(); ++i, rgb += 3)
+	for (size_t i = 0; i < m_theNormalVectors.size(); ++i)
 	{
-		ccColor::Rgb col = ccNormalVectors::ConvertNormalToRGB(m_theNormalVectors[i]);
-		rgb[0] = col.r;
-		rgb[1] = col.g;
-		rgb[2] = col.b;
+		m_theNormalHSVColors[i] = ccNormalVectors::ConvertNormalToRGB(m_theNormalVectors[i]);
 	}
 
-	return (m_theNormalHSVColors != 0);
+	return true;
 }
 
-const ColorCompType* ccNormalVectors::getNormalHSVColor(unsigned index) const
+const ccColor::Rgb& ccNormalVectors::getNormalHSVColor(unsigned index) const
 {
-	assert(m_theNormalHSVColors);
 	assert(index < m_theNormalVectors.size());
-	return m_theNormalHSVColors+3*index;
-}
-
-const ColorCompType* ccNormalVectors::getNormalHSVColorArray() const
-{
-	assert(m_theNormalHSVColors);
-	return m_theNormalHSVColors;
+	return m_theNormalHSVColors[index];
 }
 
 bool ccNormalVectors::init()
@@ -449,7 +440,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	//reserve some memory to store the (compressed) normals
 	if (!theNormsCodes.isAllocated() || theNormsCodes.currentSize() < pointCount)
 	{
-		if (!theNormsCodes.resize(pointCount))
+		if (!theNormsCodes.resizeSafe(pointCount))
 		{
 			if (theOctree && !inputOctree)
 				delete theOctree;
@@ -459,8 +450,8 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 
 	//we instantiate 3D normal vectors
 	NormsTableType* theNorms = new NormsTableType;
-	CCVector3 blankN(0, 0, 0);
-	if (!theNorms->resize(pointCount, true, blankN.u))
+	static const CCVector3 blankN(0, 0, 0);
+	if (!theNorms->resizeSafe(pointCount, true, &blankN))
 	{
 		theNormsCodes.clear();
 		if (theOctree && !inputOctree)
@@ -522,14 +513,12 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	}
 
 	//we 'compress' each normal
-	theNormsCodes.fill(0);
-	theNorms->placeIteratorAtBeginning();
+	std::fill(theNormsCodes.begin(), theNormsCodes.end(), 0);
 	for (unsigned i = 0; i < pointCount; i++)
 	{
-		const PointCoordinateType* N = theNorms->getCurrentValue();
+		const CCVector3& N = theNorms->at(i);
 		CompressedNormType nCode = GetNormIndex(N);
 		theNormsCodes.setValue(i, nCode);
-		theNorms->forwardIterator();
 	}
 
 	theNorms->release();
@@ -711,7 +700,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCLib::DgmOctree::oc
 			CCVector3 N;
 			if (ComputeNormalWithQuadric(&neighbours, nNSS.queryPoint, N))
 			{
-				theNorms->setValue(cell.points->getPointGlobalIndex(i), N.u);
+				theNorms->setValue(cell.points->getPointGlobalIndex(i), N);
 			}
 		}
 
@@ -768,7 +757,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 			CCVector3 N;
 			if (ComputeNormalWithLS(&neighbours, N))
 			{
-				theNorms->setValue(cell.points->getPointGlobalIndex(i), N.u);
+				theNorms->setValue(cell.points->getPointGlobalIndex(i), N);
 			}
 		}
 
@@ -821,7 +810,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octree
 			CCVector3 N;
 			if (ComputeNormalWithTri(&neighbours, N))
 			{
-				theNorms->setValue(cell.points->getPointGlobalIndex(i), N.u);
+				theNorms->setValue(cell.points->getPointGlobalIndex(i), N);
 			}
 		}
 

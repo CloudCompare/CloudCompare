@@ -23,9 +23,6 @@
 #include <QFileInfo>
 #include <QtConcurrentRun>
 
-//CCLib
-#include <ScalarField.h>
-
 //qCC_db
 #include <ccFlags.h>
 #include <ccGenericPointCloud.h>
@@ -40,6 +37,7 @@
 #include <ccSensor.h>
 #include <ccCameraSensor.h>
 #include <ccImage.h>
+#include <ccScalarField.h>
 
 //system
 #include <unordered_set>
@@ -70,7 +68,7 @@ bool BinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 
 	//these entities shouldn't be saved alone (but it's possible!)
 	case CC_TYPES::MATERIAL_SET:
-	case CC_TYPES::CHUNKED_ARRAY:
+	case CC_TYPES::ARRAY:
 	case CC_TYPES::NORMALS_ARRAY:
 	case CC_TYPES::NORMAL_INDEXES_ARRAY:
 	case CC_TYPES::RGB_COLOR_ARRAY:
@@ -335,9 +333,9 @@ CC_FILE_ERROR BinFilter::loadFile(const QString& filename, ccHObject& container,
 		return CC_FERR_READING;
 
 	uint32_t firstBytes = 0;
-	if (in.read((char*)&firstBytes,4) < 0)
+	if (in.read((char*)&firstBytes, 4) < 0)
 		return CC_FERR_READING;
-	bool v1 = (strncmp((char*)&firstBytes,"CCB",3) != 0);
+	bool v1 = (strncmp((char*)&firstBytes, "CCB", 3) != 0);
 
 	if (v1)
 	{
@@ -390,11 +388,11 @@ CC_FILE_ERROR BinFilter::loadFile(const QString& filename, ccHObject& container,
 
 			while (!future.isFinished())
 			{
-	#if defined(CC_WINDOWS)
+#if defined(CC_WINDOWS)
 				::Sleep(500);
-	#else
+#else
 				usleep(500 * 1000);
-	#endif
+#endif
 				if (pDlg)
 				{
 					pDlg->setValue(pDlg->value() + 1);
@@ -820,7 +818,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 
 					ccLog::Warning(QString("[BIN] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
 
-					//positions are optional, so we can simply set them to NULL and go ahead, we do not need to return.
+					//positions are optional, so we can simply set them to nullptr and go ahead, we do not need to return.
 					//return CC_FERR_MALFORMED_FILE;
 				}
 			}
@@ -970,8 +968,22 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		}
 
 		if (currentObject)
+		{
+			const ccShiftedObject* shifted = ccHObjectCaster::ToShifted(currentObject);
+			if (shifted)
+			{
+				//it may be interesting to re-use the Global Shift when loading other files
+				ccGlobalShiftManager::StoreShift(shifted->getGlobalShift(), shifted->getGlobalScale());
+
+				//TODO: we should also check that other entities with global shift not too far away
+				//have not already been loaded. In which case we should 'translate' the current entity?
+			}
+
 			for (unsigned i = 0; i < currentObject->getChildrenNumber(); ++i)
+			{
 				toCheck.push_back(currentObject->getChild(i));
+			}
+		}
 	}
 
 	//check for unique IDs duplicate (yes it happens :-( )
@@ -1177,7 +1189,9 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			if (lineRead == fileChunkPos + fileChunkSize)
 			{
 				if (header.scalarField)
+				{
 					loadedCloud->getCurrentInScalarField()->computeMinAndMax();
+				}
 
 				container.addChild(loadedCloud);
 				fileChunkPos = lineRead;
@@ -1212,8 +1226,8 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 			if (header.colors)
 			{
-				unsigned char C[3];
-				if (in.read((char*)C, sizeof(ColorCompType) * 3) < 0)
+				ccColor::Rgb C;
+				if (in.read((char*)C.rgb, sizeof(ColorCompType) * 3) < 0)
 				{
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity colors !\n",k);
 					return CC_FERR_READING;

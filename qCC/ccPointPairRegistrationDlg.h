@@ -21,6 +21,10 @@
 //Local
 #include "ccOverlayDialog.h"
 #include "ccPickingListener.h"
+#include "ccMainAppInterface.h"
+
+//CCLib
+#include <PointProjectionTools.h>
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -43,7 +47,7 @@ class ccPointPairRegistrationDlg : public ccOverlayDialog, public ccPickingListe
 public:
 
 	//! Default constructor
-	explicit ccPointPairRegistrationDlg(ccPickingHub* pickingHub, QWidget* parent = 0);
+	explicit ccPointPairRegistrationDlg(ccPickingHub* pickingHub, ccMainAppInterface* app, QWidget* parent = 0);
 
 	//inherited from ccOverlayDialog
 	virtual bool linkWith(ccGLWindow* win);
@@ -163,6 +167,9 @@ protected:
 
 	//! Picking hub
 	ccPickingHub* m_pickingHub;
+
+	//! Main application interface
+	ccMainAppInterface* m_app;
 };
 
 #endif //POINT_PAIR_REGISTRATION_DIALOG_HEADER

@@ -24,7 +24,7 @@
 #endif
 
 //CCLib
-#include <ChunkedPointCloud.h>
+#include <PointCloudTpl.h>
 
 //Local
 #include "ccColorScale.h"
@@ -61,9 +61,12 @@ const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = 2000000000; //we must keep it
 	- per-point visibility information (to hide/display subsets of points)
 	- other children objects (meshes, calibrated pictures, etc.)
 **/
-class QCC_DB_LIB_API ccPointCloud : public CCLib::ChunkedPointCloud, public ccGenericPointCloud
+class QCC_DB_LIB_API ccPointCloud : public CCLib::PointCloudTpl<ccGenericPointCloud>
 {
 public:
+
+	//! Base class (shortcut)
+	typedef CCLib::PointCloudTpl<ccGenericPointCloud> BaseClass;
 
 	//! Default constructor
 	/** Creates an empty cloud without any feature. Each of them shoud be
@@ -143,7 +146,7 @@ public: //features deletion/clearing
 	//! Clears the entity from all its points and features
 	/** Display parameters are also reseted to their default values.
 	**/
-	virtual void clear() override;
+	virtual void clear();
 
 	//! Erases the cloud points
 	/** Prefer ccPointCloud::clear by default.
@@ -223,7 +226,7 @@ public: //features allocation/resize
 		population. Only the already allocated features will be re-reserved.
 		\return true if ok, false if there's not enough memory
 	**/
-	virtual bool reserve(unsigned numberOfPoints) override;
+	virtual bool reserve(unsigned numberOfPoints);
 
 	//! Resizes all the active features arrays
 	/** This method is meant to be called after having increased the cloud
@@ -231,7 +234,7 @@ public: //features allocation/resize
 		reserved size). Otherwise, it fills all new elements with blank values.
 		\return true if ok, false if there's not enough memory
 	**/
-	virtual bool resize(unsigned numberOfPoints) override;
+	virtual bool resize(unsigned numberOfPoints);
 
 	//! Removes unused capacity
 	inline void shrinkToFit() { if (size() < capacity()) resize(size()); }
@@ -247,10 +250,10 @@ public: //scalar-fields management
 	**/
 	void setCurrentDisplayedScalarField(int index);
 
-	//inherited from ChunkedPointCloud
-	virtual void deleteScalarField(int index) override;
-	virtual void deleteAllScalarFields() override;
-	virtual int addScalarField(const char* uniqueName) override;
+	//inherited from base class
+	virtual void deleteScalarField(int index);
+	virtual void deleteAllScalarFields();
+	virtual int addScalarField(const char* uniqueName);
 
 	//! Returns whether color scale should be displayed or not
 	bool sfColorScaleShown() const;
@@ -431,8 +434,8 @@ public: //other methods
 	**/
 	CCVector3 computeGravityCenter();
 
-	//inherited from ChunkedPointCloud
-	virtual void invalidateBoundingBox() override;
+	//inherited from base class
+	virtual void invalidateBoundingBox();
 
 	//inherited from ccHObject
 	virtual void getDrawingParameters(glDrawParams& params) const override;
@@ -449,10 +452,10 @@ public: //other methods
 	virtual unsigned char testVisibility(const CCVector3& P) const override;
 
 	//inherited from ccGenericPointCloud
-	virtual const ColorCompType* getPointScalarValueColor(unsigned pointIndex) const override;
-	virtual const ColorCompType* geScalarValueColor(ScalarType d) const override;
+	virtual const ccColor::Rgb* geScalarValueColor(ScalarType d) const override;
+	virtual const ccColor::Rgb* getPointScalarValueColor(unsigned pointIndex) const override;
 	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const override;
-	virtual const ColorCompType* getPointColor(unsigned pointIndex) const override;
+	virtual const ccColor::Rgb& getPointColor(unsigned pointIndex) const override;
 	virtual const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const override;
 	virtual const CCVector3& getPointNormal(unsigned pointIndex) const override;
 	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
@@ -462,6 +465,7 @@ public: //other methods
 	virtual void applyRigidTransformation(const ccGLMatrix& trans) override;
 	//virtual bool isScalarFieldEnabled() const;
 	inline virtual void refreshBB() override { invalidateBoundingBox(); }
+
 
 	//! Sets whether visibility check is enabled or not (e.g. during distances computation)
 	/** See ccPointCloud::testVisibility.
@@ -487,7 +491,7 @@ public: //other methods
 	//! Sets a particular point color
 	/** WARNING: colors must be enabled.
 	**/
-	void setPointColor(unsigned pointIndex, const ColorCompType* col);
+	void setPointColor(unsigned pointIndex, const ccColor::Rgb& col);
 
 	//! Sets a particular point compressed normal
 	/** WARNING: normals must be enabled.
@@ -535,22 +539,22 @@ public: //other methods
 	bool convertNormalToDipDirSFs(ccScalarField* dipSF, ccScalarField* dipDirSF);
 
 	//! Pushes an RGB color on stack
+	/** \param C RGB color
+	**/
+	void addRGBColor(const ccColor::Rgb& C);
+
+	//! Pushes an RGB color on stack (shortcut)
 	/** \param r red component
 		\param g green component
 		\param b blue component
 	**/
-	void addRGBColor(ColorCompType r, ColorCompType g, ColorCompType b);
+	inline void addRGBColor(ColorCompType r, ColorCompType g, ColorCompType b) { addRGBColor(ccColor::Rgb(r, g, b)); }
 
-	//! Pushes an RGB color on stack
-	/** \param C RGB color (size: 3)
-	**/
-	void addRGBColor(const ColorCompType* C);
-
-	//! Pushes a grey color on stack
-	/** Shortcut: color is converted to RGB=(g,g,g).
+	//! Pushes a grey color on stack (shortcut)
+	/** Shortcut: color is converted to RGB(g, g, g)
 		\param g grey component
 	**/
-	void addGreyColor(ColorCompType g);
+	inline void addGreyColor(ColorCompType g) { addRGBColor(ccColor::Rgb(g, g, g)); }
 
 	//! Converts RGB to grey scale colors
 	/** \return success
@@ -597,7 +601,7 @@ public: //other methods
 		\param b blue component
 		\return success
 	**/
-	bool setRGBColor(ColorCompType r, ColorCompType g, ColorCompType b);
+	inline bool setRGBColor(ColorCompType r, ColorCompType g, ColorCompType b) { return setRGBColor(ccColor::Rgb(r, g, b)); }
 
 	//! Set a unique color for the whole cloud
 	/** Color array is automatically allocated if necessary.
@@ -715,10 +719,10 @@ protected:
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 	virtual void notifyGeometryUpdate() override;
 
-	//inherited from ChunkedPointCloud
+	//inherited from PointCloud
 	/** \warning Doesn't handle scan grids!
 	**/
-	virtual void swapPoints(unsigned firstIndex, unsigned secondIndex) override;
+	virtual void swapPoints(unsigned firstIndex, unsigned secondIndex);
 
 	//! Colors
 	ColorsTableType* m_rgbColors;
@@ -808,10 +812,10 @@ protected: // VBO
 	vboSet m_vboManager;
 
 	//per-block data transfer to the GPU (VBO or standard mode)
-	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkColorPointer (const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkSFPointer    (const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkNormalPointer(const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkColorPointer (const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkSFPointer    (const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
 
 public: //Level of Detail (LOD)
 

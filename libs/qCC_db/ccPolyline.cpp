@@ -156,7 +156,7 @@ void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
 
 	//invalidate the bounding-box
 	//(and we hope the vertices will be updated as well!)
-	m_validBB = false;
+	invalidateBoundingBox();
 }
 
 //unit arrow

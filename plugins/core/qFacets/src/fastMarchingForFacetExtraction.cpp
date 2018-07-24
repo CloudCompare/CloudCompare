@@ -340,7 +340,7 @@ int FastMarchingForFacetExtraction::propagate()
 }
 
 unsigned FastMarchingForFacetExtraction::updateFlagsTable(	ccGenericPointCloud* theCloud,
-															GenericChunkedArray<1, unsigned char>& flags,
+															std::vector<unsigned char>& flags,
 															unsigned facetIndex)
 {
 	if (!m_initialized || !m_currentFacetPoints)
@@ -350,7 +350,7 @@ unsigned FastMarchingForFacetExtraction::updateFlagsTable(	ccGenericPointCloud* 
 	for (unsigned k = 0; k < pointCount; ++k)
 	{
 		unsigned index = m_currentFacetPoints->getPointGlobalIndex(k);
-		flags.setValue(index, 1);
+		flags[index] = 1;
 
 		theCloud->setPointScalarValue(index, static_cast<ScalarType>(facetIndex));
 	}
@@ -380,7 +380,7 @@ unsigned FastMarchingForFacetExtraction::updateFlagsTable(	ccGenericPointCloud* 
 		for (unsigned k = 0; k < Yk.size(); ++k)
 		{
 			unsigned index = Yk.getPointGlobalIndex(k);
-			assert(flags.getValue(index) == 1);
+			assert(flags[index] == 1);
 			//flags.setValue(index,1);			
 			//++pointCount;
 		}
@@ -456,7 +456,7 @@ void FastMarchingForFacetExtraction::initTrialCells()
 		unsigned index = m_activeCells.front();
 		PlanarCell* seedCell = static_cast<PlanarCell*>(m_theGrid[index]);
 
-		assert(seedCell != NULL);
+		assert(seedCell != nullptr);
 		assert(seedCell->T == 0);
 
 		//add all its neighbour cells to the TRIAL set
@@ -539,11 +539,14 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 	}
 
 	//flags indicating if each point has been processed or not
-	GenericChunkedArray<1, unsigned char>* flags = new GenericChunkedArray<1, unsigned char>();
-	if (!flags->resize(numberOfPoints, true, 0)) //defaultFlagValue = 0
+	std::vector<unsigned char> flags;
+	try
+	{
+		flags.resize(numberOfPoints, 0); //defaultFlagValue = 0
+	}
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[FastMarchingForFacetExtraction] Not enough memory!");
-		flags->release();
 		return -5;
 	}
 
@@ -560,7 +563,6 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 	if (result < 0)
 	{
 		ccLog::Error("[FastMarchingForFacetExtraction] Something went wrong during initialization...");
-		flags->release();
 		return -6;
 	}
 
@@ -595,7 +597,7 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 		{
 			++lastProcessedPoint;
 		}
-		while (lastProcessedPoint < static_cast<int>(numberOfPoints) && flags->getValue(lastProcessedPoint) != 0);
+		while (lastProcessedPoint < static_cast<int>(numberOfPoints) && flags[lastProcessedPoint] != 0);
 
 		//all points have been processed? Then we can stop.
 		if (lastProcessedPoint == static_cast<int>(numberOfPoints))
@@ -633,7 +635,7 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 		}
 
 		//compute the number of points processed during this pass
-		unsigned count = fm.updateFlagsTable(theCloud, *flags, ++facetIndex);
+		unsigned count = fm.updateFlagsTable(theCloud, flags, ++facetIndex);
 
 		if (count != 0)
 		{
@@ -655,10 +657,9 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 	fm.setPropagateCallback(nullptr);
 
 	if (progressCb)
+	{
 		progressCb->stop();
-
-	flags->release();
-	flags = 0;
+	}
 
 	return result;
 }

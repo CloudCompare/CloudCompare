@@ -59,7 +59,7 @@ public:
 		\param[out] nearestPoint returns the nearest point (optional)
 		\return the (unsigned) distance (or NAN_VALUE if the computation failed)
 	**/
-	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* P, CCVector3* nearestPoint = 0) const = 0;
+	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* P, CCVector3* nearestPoint = nullptr) const = 0;
 
 protected:
 

@@ -21,13 +21,14 @@
 #pragma warning( disable: 4996 )
 #endif
 
+#include <NormalDistribution.h>
+
 //local
-#include "DistanceComputationTools.h"
-#include "ErrorFunction.h"
-#include "GenericCloud.h"
-#include "NormalDistribution.h"
-#include "ScalarField.h"
-#include "ScalarFieldTools.h"
+#include <DistanceComputationTools.h>
+#include <ErrorFunction.h>
+#include <GenericCloud.h>
+#include <ScalarField.h>
+#include <ScalarFieldTools.h>
 
 
 using namespace CCLib;

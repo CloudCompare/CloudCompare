@@ -20,18 +20,18 @@
 namespace ccColor
 {
 	// Predefined colors (default type)
-	QCC_DB_LIB_API const Rgba white						(MAX, MAX, MAX, MAX);
-	QCC_DB_LIB_API const Rgba lightGrey					(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), MAX);
-	QCC_DB_LIB_API const Rgba darkGrey					(MAX / 2, MAX / 2, MAX / 2, MAX);
-	QCC_DB_LIB_API const Rgba red						(MAX, 0, 0, MAX);
-	QCC_DB_LIB_API const Rgba green						(0, MAX, 0, MAX);
-	QCC_DB_LIB_API const Rgba blue						(0, 0, MAX, MAX);
-	QCC_DB_LIB_API const Rgba darkBlue					(0, 0, MAX / 2, MAX);
-	QCC_DB_LIB_API const Rgba magenta					(MAX, 0, MAX, MAX);
-	QCC_DB_LIB_API const Rgba cyan						(0, MAX, MAX, MAX);
-	QCC_DB_LIB_API const Rgba orange					(MAX, MAX / 2, 0, MAX);
-	QCC_DB_LIB_API const Rgba black						(0, 0, 0, MAX);
-	QCC_DB_LIB_API const Rgba yellow					(MAX, MAX, 0, MAX);
+	QCC_DB_LIB_API const Rgb white						(MAX, MAX, MAX);
+	QCC_DB_LIB_API const Rgb lightGrey					(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8));
+	QCC_DB_LIB_API const Rgb darkGrey					(MAX / 2, MAX / 2, MAX / 2);
+	QCC_DB_LIB_API const Rgb red						(MAX, 0, 0);
+	QCC_DB_LIB_API const Rgb green						(0, MAX, 0);
+	QCC_DB_LIB_API const Rgb blue						(0, 0, MAX);
+	QCC_DB_LIB_API const Rgb darkBlue					(0, 0, MAX / 2);
+	QCC_DB_LIB_API const Rgb magenta					(MAX, 0, MAX);
+	QCC_DB_LIB_API const Rgb cyan						(0, MAX, MAX);
+	QCC_DB_LIB_API const Rgb orange						(MAX, MAX / 2, 0);
+	QCC_DB_LIB_API const Rgb black						(0, 0, 0);
+	QCC_DB_LIB_API const Rgb yellow						(MAX, MAX, 0);
 
 	// Predefined materials (float)
 	QCC_DB_LIB_API const Rgbaf bright					(1.00f, 1.00f, 1.00f, 1.00f);

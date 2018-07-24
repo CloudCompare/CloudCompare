@@ -273,7 +273,7 @@ static bool TagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 									void** additionalParameters,
 									CCLib::NormalizedProgress* nProgress/*=0*/)
 {
-	GenericChunkedArray<1, int>* equivalentIndexes = static_cast<GenericChunkedArray<1, int>*>(additionalParameters[0]);
+	std::vector<int>* equivalentIndexes = static_cast<std::vector<int>*>(additionalParameters[0]);
 
 	//we look for points very near to the others (only if not yet tagged!)
 
@@ -312,7 +312,7 @@ static bool TagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 	for (unsigned i = 0; i < n; ++i)
 	{
 		int thisIndex = static_cast<int>(cell.points->getPointGlobalIndex(i));
-		if (equivalentIndexes->getValue(thisIndex) < 0) //has no equivalent yet 
+		if (equivalentIndexes->at(thisIndex) < 0) //has no equivalent yet 
 		{
 			cell.points->getPoint(i, nNSS.queryPoint);
 
@@ -328,12 +328,12 @@ static bool TagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 					//all the other points are equivalent to the query point
 					const unsigned& otherIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
 					if (static_cast<int>(otherIndex) != thisIndex)
-						equivalentIndexes->setValue(otherIndex, thisIndex);
+						equivalentIndexes->at(otherIndex) = thisIndex;
 				}
 			}
 
 			//and the query point is always root
-			equivalentIndexes->setValue(thisIndex, thisIndex);
+			equivalentIndexes->at(thisIndex) = thisIndex;
 		}
 
 		if (nProgress && !nProgress->oneStep())
@@ -423,16 +423,20 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 		mesh->shrinkToFit();
 		NormsIndexesTableType* normals = mesh->getTriNormsTable();
 		if (normals)
-			normals->shrinkToFit();
+		{
+			normals->shrink_to_fit();
+		}
 	}
 
 	//remove duplicated vertices
 	//if (false)
 	{
-		GenericChunkedArray<1, int>* equivalentIndexes = new GenericChunkedArray < 1, int > ;
-		const int razValue = -1;
-		if (equivalentIndexes && equivalentIndexes->resize(vertCount, true, razValue))
+		try
 		{
+			std::vector<int> equivalentIndexes;
+			const int razValue = -1;
+			equivalentIndexes.resize(vertCount, razValue);
+			
 			QScopedPointer<ccProgressDialog> pDlg(0);
 			if (parameters.parentWidget)
 			{
@@ -445,7 +449,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 			if (octree)
 			{
-				void* additionalParameters[] = { static_cast<void*>(equivalentIndexes) };
+				void* additionalParameters[] = { static_cast<void*>(&equivalentIndexes) };
 				unsigned result = octree->executeFunctionForAllCellsAtLevel(10,
 																			TagDuplicatedVertices,
 																			additionalParameters,
@@ -460,12 +464,12 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 					unsigned remainingCount = 0;
 					for (unsigned i = 0; i < vertCount; ++i)
 					{
-						int eqIndex = equivalentIndexes->getValue(i);
+						int eqIndex = equivalentIndexes[i];
 						assert(eqIndex >= 0);
 						if (eqIndex == static_cast<int>(i)) //root point
 						{
 							int newIndex = static_cast<int>(vertCount + remainingCount); //We replace the root index by its 'new' index (+ vertCount, to differentiate it later)
-							equivalentIndexes->setValue(i, newIndex);
+							equivalentIndexes[i] = newIndex;
 							++remainingCount;
 						}
 					}
@@ -477,11 +481,11 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 						{
 							for (unsigned i = 0; i < vertCount; ++i)
 							{
-								int eqIndex = equivalentIndexes->getValue(i);
+								int eqIndex = equivalentIndexes[i];
 								if (eqIndex >= static_cast<int>(vertCount)) //root point
 									newVertices->addPoint(*vertices->getPoint(i));
 								else
-									equivalentIndexes->setValue(i, equivalentIndexes->getValue(eqIndex)); //and update the other indexes
+									equivalentIndexes[i] = equivalentIndexes[eqIndex]; //and update the other indexes
 							}
 						}
 
@@ -491,9 +495,9 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 							for (unsigned i = 0; i < faceCount; ++i)
 							{
 								CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
-								tri->i1 = static_cast<unsigned>(equivalentIndexes->getValue(tri->i1)) - vertCount;
-								tri->i2 = static_cast<unsigned>(equivalentIndexes->getValue(tri->i2)) - vertCount;
-								tri->i3 = static_cast<unsigned>(equivalentIndexes->getValue(tri->i3)) - vertCount;
+								tri->i1 = static_cast<unsigned>(equivalentIndexes[tri->i1]) - vertCount;
+								tri->i2 = static_cast<unsigned>(equivalentIndexes[tri->i2]) - vertCount;
+								tri->i3 = static_cast<unsigned>(equivalentIndexes[tri->i3]) - vertCount;
 
 								//very small triangles (or flat ones) may be implicitly removed by vertex fusion!
 								if (tri->i1 != tri->i2 && tri->i1 != tri->i3 && tri->i2 != tri->i3)
@@ -541,14 +545,10 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 				ccLog::Warning("[STL] Not enough memory: couldn't removed duplicated vertices!");
 			}
 		}
-		else
+		catch (const std::bad_alloc&)
 		{
 			ccLog::Warning("[STL] Not enough memory: couldn't removed duplicated vertices!");
 		}
-
-		if (equivalentIndexes)
-			equivalentIndexes->release();
-		equivalentIndexes = 0;
 	}
 
 	NormsIndexesTableType* normals = mesh->getTriNormsTable();
@@ -820,16 +820,19 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 
 				if (normals)
 				{
-					bool success = normals->reserve(mesh->capacity());
+					bool success = normals->reserveSafe(mesh->capacity());
 					if (success && faceCount == 0) //specific case: allocate per triangle normal indexes the first time!
+					{
 						success = mesh->reservePerTriangleNormalIndexes();
+					}
 
 					if (!success)
 					{
 						ccLog::Warning("[STL] Not enough memory: can't store normals!");
 						mesh->removePerTriangleNormalIndexes();
 						mesh->setTriNormsTable(0);
-						normals = 0;
+						normals->release();
+						normals = nullptr;
 					}
 				}
 			}
@@ -927,7 +930,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	if (!mesh->reserve(faceCount))
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	NormsIndexesTableType* normals = mesh->getTriNormsTable();
-	if (normals && (!normals->reserve(faceCount) || !mesh->reservePerTriangleNormalIndexes()))
+	if (normals && (!normals->reserveSafe(faceCount) || !mesh->reservePerTriangleNormalIndexes()))
 	{
 		ccLog::Warning("[STL] Not enough memory: can't store normals!");
 		mesh->removePerTriangleNormalIndexes();

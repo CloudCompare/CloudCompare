@@ -145,9 +145,9 @@ public:
 	virtual void destroyGLWindow(ccGLWindow*) const override;
 	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator() override;
 	virtual ccColorScalesManager* getColorScalesManager() override;
-	virtual void spawnHistogramDialog(const std::vector<unsigned>& histoValues,
-												 double minVal, double maxVal,
-												 QString title, QString xAxisLabel) override;
+	virtual void spawnHistogramDialog(	const std::vector<unsigned>& histoValues,
+										double minVal, double maxVal,
+										QString title, QString xAxisLabel) override;
 	virtual ccPickingHub* pickingHub() override { return m_pickingHub; }
 	virtual ccHObjectContext removeObjectTemporarilyFromDBTree(ccHObject* obj) override;
 	virtual void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context) override;

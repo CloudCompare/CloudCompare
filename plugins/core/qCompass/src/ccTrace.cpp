@@ -78,7 +78,7 @@ ccTrace::ccTrace(ccPolyline* obj)
 		optimizePath(); //[slooooow...!]
 	}
 
-	computeBB(); //update bounding box (for picking)
+	invalidateBoundingBox(); //update bounding box (for picking)
 }
 
 void ccTrace::init(ccPointCloud* associatedCloud)
@@ -272,15 +272,15 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 	//retrieve and store start & end rgb
 	if (m_cloud->hasColors())
 	{
-		const ColorCompType* s = m_cloud->getPointColor(start);
-		const ColorCompType* e = m_cloud->getPointColor(end);
-		m_start_rgb[0] = s[0]; m_start_rgb[1] = s[1]; m_start_rgb[2] = s[2];
-		m_end_rgb[0] = e[0]; m_end_rgb[1] = e[1]; m_end_rgb[2] = e[2];
+		const ccColor::Rgb& s = m_cloud->getPointColor(start);
+		const ccColor::Rgb& e = m_cloud->getPointColor(end);
+		m_start_rgb[0] = s.r; m_start_rgb[1] = s.g; m_start_rgb[2] = s.b;
+		m_end_rgb[0]   = e.r; m_end_rgb[1]   = e.g; m_end_rgb[2]   = e.b;
 	}
 	else
 	{	//no colour... set to 0 just in case something tries to use these vars
 		m_start_rgb[0] = 0; m_start_rgb[1] = 0; m_start_rgb[2] = 0;
-		m_end_rgb[0] = 0; m_end_rgb[1] = 0; m_end_rgb[2] = 0;
+		m_end_rgb[0]   = 0; m_end_rgb[1]   = 0; m_end_rgb[2]   = 0;
 	}
 
 	//get location of target node - used to optimise algorithm to stop searching paths leading away from the target
@@ -469,42 +469,42 @@ int ccTrace::getSegmentCost(int p1, int p2)
 int ccTrace::getSegmentCostRGB(int p1, int p2)
 {
 	//get colors
-	const ColorCompType* p1_rgb = m_cloud->getPointColor(p1);
-	const ColorCompType* p2_rgb = m_cloud->getPointColor(p2);
+	const ccColor::Rgb& p1_rgb = m_cloud->getPointColor(p1);
+	const ccColor::Rgb& p2_rgb = m_cloud->getPointColor(p2);
 
 	//cost function: cost = |c1-c2| + 0.25 ( |c1-start| + |c1-end| + |c2-start| + |c2-end| )
 	//IDEA: can we somehow optimize all the square roots here (for speed)? 
 	return sqrt(
 		//|c1-c2|
-		(p1_rgb[0] - p2_rgb[0]) * (p1_rgb[0] - p2_rgb[0]) +
-		(p1_rgb[1] - p2_rgb[1]) * (p1_rgb[1] - p2_rgb[1]) +
-		(p1_rgb[2] - p2_rgb[2]) * (p1_rgb[2] - p2_rgb[2])) + 0.25 * (
+		(p1_rgb.r - p2_rgb.r) * (p1_rgb.r - p2_rgb.r) +
+		(p1_rgb.g - p2_rgb.g) * (p1_rgb.g - p2_rgb.g) +
+		(p1_rgb.b - p2_rgb.b) * (p1_rgb.b - p2_rgb.b)) + 0.25 * (
 		//|c1-start|
-		sqrt((p1_rgb[0] - m_start_rgb[0]) * (p1_rgb[0] - m_start_rgb[0]) +
-		(p1_rgb[1] - m_start_rgb[1]) * (p1_rgb[1] - m_start_rgb[1]) +
-		(p1_rgb[2] - m_start_rgb[2]) * (p1_rgb[2] - m_start_rgb[2])) +
+		sqrt((p1_rgb.r - m_start_rgb[0]) * (p1_rgb.r - m_start_rgb[0]) +
+		(p1_rgb.g - m_start_rgb[1]) * (p1_rgb.g - m_start_rgb[1]) +
+		(p1_rgb.b - m_start_rgb[2]) * (p1_rgb.b - m_start_rgb[2])) +
 		//|c1-end|
-		sqrt((p1_rgb[0] - m_end_rgb[0]) * (p1_rgb[0] - m_end_rgb[0]) +
-		(p1_rgb[1] - m_end_rgb[1]) * (p1_rgb[1] - m_end_rgb[1]) +
-		(p1_rgb[2] - m_end_rgb[2]) * (p1_rgb[2] - m_end_rgb[2])) +
+		sqrt((p1_rgb.r - m_end_rgb[0]) * (p1_rgb.r - m_end_rgb[0]) +
+		(p1_rgb.g - m_end_rgb[1]) * (p1_rgb.g - m_end_rgb[1]) +
+		(p1_rgb.b - m_end_rgb[2]) * (p1_rgb.b - m_end_rgb[2])) +
 		//|c2-start|
-		sqrt((p2_rgb[0] - m_start_rgb[0]) * (p2_rgb[0] - m_start_rgb[0]) +
-		(p2_rgb[1] - m_start_rgb[1]) * (p2_rgb[1] - m_start_rgb[1]) +
-		(p2_rgb[2] - m_start_rgb[2]) * (p2_rgb[2] - m_start_rgb[2])) +
+		sqrt((p2_rgb.r - m_start_rgb[0]) * (p2_rgb.r - m_start_rgb[0]) +
+		(p2_rgb.g - m_start_rgb[1]) * (p2_rgb.g - m_start_rgb[1]) +
+		(p2_rgb.b - m_start_rgb[2]) * (p2_rgb.b - m_start_rgb[2])) +
 		//|c2-end|
-		sqrt((p2_rgb[0] - m_end_rgb[0]) * (p2_rgb[0] - m_end_rgb[0]) +
-		(p2_rgb[1] - m_end_rgb[1]) * (p2_rgb[1] - m_end_rgb[1]) +
-		(p2_rgb[2] - m_end_rgb[2]) * (p2_rgb[2] - m_end_rgb[2]))) / 3.5; //N.B. the divide by 3.5 scales this cost function to range between 0 & 255
+		sqrt((p2_rgb.r - m_end_rgb[0]) * (p2_rgb.r - m_end_rgb[0]) +
+		(p2_rgb.g - m_end_rgb[1]) * (p2_rgb.g - m_end_rgb[1]) +
+		(p2_rgb.b - m_end_rgb[2]) * (p2_rgb.b - m_end_rgb[2]))) / 3.5; //N.B. the divide by 3.5 scales this cost function to range between 0 & 255
 }
 
 int ccTrace::getSegmentCostDark(int p1, int p2)
 {
 	//return magnitude of the point p2
 	//const ColorCompType* p1_rgb = m_cloud->getPointColor(p1);
-	const ColorCompType* p2_rgb = m_cloud->getPointColor(p2);
+	const ccColor::Rgb& p2_rgb = m_cloud->getPointColor(p2);
 
 	//return "taxi-cab" length
-	return (p2_rgb[0] + p2_rgb[1] + p2_rgb[2]); //note: this will naturally give a maximum of 765 (=255 + 255 + 255)
+	return (p2_rgb.r + p2_rgb.g + p2_rgb.b); //note: this will naturally give a maximum of 765 (=255 + 255 + 255)
 }
 
 int ccTrace::getSegmentCostLight(int p1, int p2)
@@ -569,47 +569,47 @@ int ccTrace::getSegmentCostGrad(int p1, int p2, float search_r)
 	{
 
 		CCVector3 p = *m_cloud->getPoint(p2);
-		const ColorCompType* p2_rgb = m_cloud->getPointColor(p2);
-		int p_value = p2_rgb[0] + p2_rgb[1] + p2_rgb[2];
+		const ccColor::Rgb p2_rgb = m_cloud->getPointColor(p2);
+		int p_value = p2_rgb.r + p2_rgb.g + p2_rgb.b;
 
 		if (m_neighbours.size() > 2) //need at least 2 points to calculate gradient....
 		{
-		//N.B. The following code is mostly stolen from the computeGradient function in CloudCompare
-		CCVector3d sum(0, 0, 0);
-		CCLib::DgmOctree::PointDescriptor n;
-		for (int i = 0; i < m_neighbours.size(); i++)
-		{
-		n = m_neighbours[i];
+			//N.B. The following code is mostly stolen from the computeGradient function in CloudCompare
+			CCVector3d sum(0, 0, 0);
+			CCLib::DgmOctree::PointDescriptor n;
+			for (int i = 0; i < m_neighbours.size(); i++)
+			{
+				n = m_neighbours[i];
 
-		//vector from p1 to m_p
-		CCVector3 deltaPos = *n.point - p;
-		double norm2 = deltaPos.norm2d();
+				//vector from p1 to m_p
+				CCVector3 deltaPos = *n.point - p;
+				double norm2 = deltaPos.norm2d();
 
-		//colour
-		const ColorCompType* c = m_cloud->getPointColor(n.pointIndex);
-		int c_value = c[0] + c[1] + c[2];
+				//colour
+				const ccColor::Rgb& c = m_cloud->getPointColor(n.pointIndex);
+				int c_value = (static_cast<int>(c.r) + c.g) + c.b;
 
-		//calculate gradient weighted by distance to the point (i.e. divide by distance^2)
-		if (norm2 > ZERO_TOLERANCE)
-		{
-		//color magnitude difference
-		int deltaValue = p_value - c_value;
-		//divide by norm^2 to get distance-weighted gradient
-		deltaValue /= norm2; //we divide by 'norm' to get the normalized direction, and by 'norm' again to get the gradient (hence we use the squared norm)
-		//sum stuff
-		sum.x += deltaPos.x * deltaValue; //warning: here 'deltaValue'= deltaValue / squaredNorm(deltaPos) ;)
-		sum.y += deltaPos.y * deltaValue;
-		sum.z += deltaPos.z * deltaValue;
-		}
-		}
+				//calculate gradient weighted by distance to the point (i.e. divide by distance^2)
+				if (norm2 > ZERO_TOLERANCE)
+				{
+					//color magnitude difference
+					int deltaValue = p_value - c_value;
+					//divide by norm^2 to get distance-weighted gradient
+					deltaValue /= norm2; //we divide by 'norm' to get the normalized direction, and by 'norm' again to get the gradient (hence we use the squared norm)
+					//sum stuff
+					sum.x += deltaPos.x * deltaValue; //warning: here 'deltaValue'= deltaValue / squaredNorm(deltaPos) ;)
+					sum.y += deltaPos.y * deltaValue;
+					sum.z += deltaPos.z * deltaValue;
+				}
+			}
 
-		float gradient = sum.norm() / m_neighbours.size();
+			float gradient = sum.norm() / m_neighbours.size();
 
-		//ensure gradient is lass than a case-specific maximum gradient (colour change from white to black across a distance or search_r,
-		//                                                                                  giving a gradient of (255+255+255) / search_r)
-		gradient = std::min(gradient, 765 / search_r);
-		gradient *= search_r; //scale between 0 and 765
-		return 765 - gradient; //return inverse gradient (high gradient = low cost)
+			//ensure gradient is lass than a case-specific maximum gradient (colour change from white to black across a distance or search_r,
+			//                                                                                  giving a gradient of (255+255+255) / search_r)
+			gradient = std::min(gradient, 765 / search_r);
+			gradient *= search_r; //scale between 0 and 765
+			return 765 - gradient; //return inverse gradient (high gradient = low cost)
 		}
 		return 765; //no gradient = high cost
 	}
@@ -648,7 +648,8 @@ void ccTrace::buildGradientCost(QWidget* parent)
 	//make colours greyscale and push to SF (otherwise copy active SF)
 	for (unsigned i = 0; i < m_cloud->size(); i++)
 	{
-		m_cloud->setPointScalarValue(i, static_cast<ScalarType>(m_cloud->getPointColor(i)[0] + m_cloud->getPointColor(i)[1] + m_cloud->getPointColor(i)[2]));
+		const ccColor::Rgb& col = m_cloud->getPointColor(i);
+		m_cloud->setPointScalarValue(i, static_cast<ScalarType>((static_cast<int>(col.r) + col.g) + col.b));
 	}
 	//compute min/max
 	m_cloud->getScalarField(idx)->computeMinAndMax();
@@ -941,7 +942,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//set draw colour
-		ccColor::Rgba color = getMeasurementColour();
+		ccColor::Rgb color = getMeasurementColour();
 		c_unitPointMarker->setTempColor(color);
 
 		//get point size for drawing

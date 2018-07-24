@@ -76,7 +76,7 @@ public:
 	/** \return the number of newly flagged points
 	**/
 	unsigned updateFlagsTable(	ccGenericPointCloud* theCloud,
-								GenericChunkedArray<1,unsigned char>& flags,
+								std::vector<unsigned char>& flags,
 								unsigned facetIndex);
 
 	//! Sets the propagation progress callback

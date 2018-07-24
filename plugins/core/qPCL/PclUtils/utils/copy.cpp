@@ -57,7 +57,7 @@ void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::
 			new_field = new ccScalarField(name);
 
 			//resize the scalar field to the outcloud size
-			if (!new_field->resize(n_out))
+			if (!new_field->resizeSafe(n_out))
 			{
 				//not enough memory!
 				new_field->release();

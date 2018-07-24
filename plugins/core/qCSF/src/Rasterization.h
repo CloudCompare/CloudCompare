@@ -30,7 +30,7 @@
 #define _RASTERIZATION_H_
 
 #include "Cloth.h"
-#include "PointCloud.h"
+#include "wlPointCloud.h"
 
 #define SQUARE_DIST(x1,y1,x2,y2) (((x1)-(x2))*((x1)-(x2))+((y1)-(y2))*((y1)-(y2)))
 

@@ -221,14 +221,14 @@ bool ccKdTree::convertCellIndexToRandomColor()
 		return false;
 
 	//for each cell
-	for (size_t i=0; i<leaves.size(); ++i)
+	for (size_t i = 0; i < leaves.size(); ++i)
 	{
 		ccColor::Rgb col = ccColor::Generator::Random();
 		CCLib::ReferenceCloud* subset = leaves[i]->points;
 		if (subset)
 		{
-			for (unsigned j=0; j<subset->size(); ++j)
-				pc->setPointColor(subset->getPointGlobalIndex(j),col.rgb);
+			for (unsigned j = 0; j < subset->size(); ++j)
+				pc->setPointColor(subset->getPointGlobalIndex(j), col);
 		}
 	}
 

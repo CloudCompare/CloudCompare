@@ -16,12 +16,12 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ScalarFieldTools.h"
+#include <ScalarFieldTools.h>
 
 //local
-#include "GenericProgressCallback.h"
-#include "ReferenceCloud.h"
-#include "ScalarField.h"
+#include <GenericProgressCallback.h>
+#include <ReferenceCloud.h>
+#include <ScalarField.h>
 
 //system
 #include <cstdio>
@@ -80,7 +80,7 @@ int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* th
 	//if the IN and OUT scalar fields are the same
 	if (sameInAndOutScalarField)
 	{
-		if (!theGradientNorms->reserve(theCloud->size())) //not enough memory
+		if (!theGradientNorms->reserveSafe(theCloud->size())) //not enough memory
 		{
 			if (!theCloudOctree)
 				delete theOctree;
@@ -124,9 +124,7 @@ int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* th
 	{
 		delete theOctree;
 	}
-
 	theGradientNorms->release();
-	theGradientNorms = nullptr;
 
 	return result;
 }
@@ -435,15 +433,15 @@ void ScalarFieldTools::multiplyScalarFields(GenericIndexedCloud* firstCloud, Gen
 		return;
 
 	unsigned n1 = firstCloud->size();
-	if (n1 != secondCloud->size() || n1==0)
+	if (n1 != secondCloud->size() || n1 == 0)
 		return;
 
-	for (unsigned i=0;i<n1;++i)
+	for (unsigned i = 0; i < n1; ++i)
 	{
 		ScalarType V1 = firstCloud->getPointScalarValue(i);
 		ScalarType V2 = secondCloud->getPointScalarValue(i);
 
-		firstCloud->setPointScalarValue(i,ScalarField::ValidValue(V1) && ScalarField::ValidValue(V2) ? V1*V2 : NAN_VALUE);
+		firstCloud->setPointScalarValue(i, ScalarField::ValidValue(V1) && ScalarField::ValidValue(V2) ? V1*V2 : NAN_VALUE);
 	}
 }
 
@@ -459,7 +457,7 @@ void ScalarFieldTools::computeScalarFieldExtremas(const GenericCloud* theCloud, 
 
 	bool firstValidValue = true;
 
-	for (unsigned i=0;i<numberOfPoints;++i)
+	for (unsigned i = 0; i < numberOfPoints; ++i)
 	{
 		ScalarType V = theCloud->getPointScalarValue(i);
 		if (ScalarField::ValidValue(V))
@@ -489,7 +487,7 @@ unsigned ScalarFieldTools::countScalarFieldValidValues(const GenericCloud* theCl
 	if (theCloud)
 	{
 		unsigned n = theCloud->size();
-		for (unsigned i=0; i<n; ++i)
+		for (unsigned i = 0; i < n; ++i)
 		{
 			ScalarType V = theCloud->getPointScalarValue(i);
 			if (ScalarField::ValidValue(V))
@@ -533,7 +531,7 @@ void ScalarFieldTools::computeScalarFieldHistogram(const GenericCloud* theCloud,
 	//compute the min and max sf values
 	ScalarType minV,maxV;
 	{
-		computeScalarFieldExtremas(theCloud,minV,maxV);
+		computeScalarFieldExtremas(theCloud, minV, maxV);
 
 		if (!ScalarField::ValidValue(minV))
 		{
@@ -543,17 +541,17 @@ void ScalarFieldTools::computeScalarFieldHistogram(const GenericCloud* theCloud,
 	}
 
 	//historgram step
-	ScalarType invStep = (maxV > minV ? numberOfClasses / (maxV-minV) : 0);
+	ScalarType invStep = (maxV > minV ? numberOfClasses / (maxV - minV) : 0);
 
 	//histogram computation
 	{
 		int iNumberOfClasses = static_cast<int>(numberOfClasses);
-		for (unsigned i=0; i<pointCount; ++i)
+		for (unsigned i = 0; i < pointCount; ++i)
 		{
 			ScalarType V = theCloud->getPointScalarValue(i);
 			if (ScalarField::ValidValue(V))
 			{
-				int aimClass = static_cast<int>((V-minV) * invStep);
+				int aimClass = static_cast<int>((V - minV) * invStep);
 				if (aimClass == iNumberOfClasses)
 					--aimClass; //sepcific case: V == maxV
 
@@ -660,10 +658,10 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 
 		//compute the clusters centers
 		theOldKNums = theKNums;
-		std::fill(theKSums.begin(),theKSums.end(),static_cast<ScalarType>(0));
-		std::fill(theKNums.begin(),theKNums.end(),static_cast<unsigned>(0));
+		std::fill(theKSums.begin(), theKSums.end(), static_cast<ScalarType>(0));
+		std::fill(theKNums.begin(), theKNums.end(), static_cast<unsigned>(0));
 		{
-			for (unsigned i=0; i<n; ++i)
+			for (unsigned i = 0; i < n; ++i)
 			{
 				if (minDistsToMean[i] >= 0) //must be a valid value!
 				{
@@ -675,9 +673,9 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 
 		double classMovingDist = 0.0;
 		{
-			for (unsigned char j=0; j<K; ++j)
+			for (unsigned char j = 0; j < K; ++j)
 			{
-				ScalarType newMean = (theKNums[j] > 0 ? theKSums[j]/theKNums[j] : theKMeans[j]);
+				ScalarType newMean = (theKNums[j] > 0 ? theKSums[j] / theKNums[j] : theKMeans[j]);
 
 				if (theOldKNums[j] != theKNums[j])
 					meansHaveMoved = true;
@@ -705,18 +703,17 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 			}
 			else
 			{
-				progressCb->update(static_cast<float>((1.0 - classMovingDist/initialCMD) * 100.0));
+				progressCb->update(static_cast<float>((1.0 - classMovingDist / initialCMD) * 100.0));
 			}
 		}
-	}
-	while (meansHaveMoved);
+	} while (meansHaveMoved);
 
 	//update distances
-	std::vector<ScalarType> mins,maxs;
+	std::vector<ScalarType> mins, maxs;
 	try
 	{
-		mins.resize(K,maxV);
-		maxs.resize(K,minV);
+		mins.resize(K, maxV);
+		maxs.resize(K, minV);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -726,7 +723,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 
 	//look for min and max values for each cluster
 	{
-		for (unsigned i=0; i<n; ++i)
+		for (unsigned i = 0; i < n; ++i)
 		{
 			ScalarType V = theCloud->getPointScalarValue(i);
 			if (ScalarField::ValidValue(V))
@@ -741,14 +738,14 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 
 	//last check
 	{
-		for (unsigned char j=0; j<K; ++j)
+		for (unsigned char j = 0; j < K; ++j)
 			if (theKNums[j] == 0)
 				mins[j] = maxs[j] = -1.0;
 	}
 
 	//output
 	{
-		for (unsigned char j=0; j<K; ++j)
+		for (unsigned char j = 0; j < K; ++j)
 		{
 			kmcc[j].mean = theKMeans[j];
 			kmcc[j].minValue = mins[j];

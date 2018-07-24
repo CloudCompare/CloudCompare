@@ -130,7 +130,7 @@ template <class QOpenGLFunctions> void drawSymbolAt(QOpenGLFunctions* glFunc, do
 
 void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	if (!m_points->isAllocated())
+	if (m_points.empty())
 		return;
 
 	//nothing to do?!
@@ -174,10 +174,10 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//glFunc->glOrtho(-halfW, halfW, -halfH, halfH, -maxS, maxS);
 
 		//default color
-		const unsigned char* color = context.pointsDefaultCol.rgb;
+		const ccColor::Rgb* color = &context.pointsDefaultCol;
 		if (isColorOverriden())
 		{
-			color = m_tempColor.rgb;
+			color = &m_tempColor;
 			glParams.showColors = false;
 		}
 		
@@ -222,10 +222,10 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//apply point color (if any)
 				if (glParams.showColors)
 				{
-					color = getPointColor(i);
+					color = &getPointColor(i);
 				}
 				//we must reset the color each time as the call to displayText may change the active color!
-				glFunc->glColor3ubv(color);
+				glFunc->glColor3ubv(color->rgb);
 
 				//draw associated symbol
 				if (m_showSymbols && m_symbolSize > 0.0)
@@ -242,7 +242,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 													static_cast<int>(Q2D.y + ypShift),
 													m_labelAlignFlags,
 													0,
-													color,
+													color->rgb,
 													&font);
 				}
 

@@ -32,7 +32,7 @@ struct VerticesIndexes
 	{
 		struct
 		{
-			unsigned i1,i2,i3;
+			unsigned i1, i2, i3;
 		};
 		unsigned i[3];
 	};

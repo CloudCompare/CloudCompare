@@ -165,18 +165,18 @@ bool FastMarchingForPropagation::extractPropagatedPoints(ReferenceCloud* points)
 	if (!m_initialized || !m_octree || m_gridLevel > DgmOctree::MAX_OCTREE_LEVEL || !points)
 		return false;
 
-	points->clear(false);
+	points->clear();
 
-	for (unsigned i=0; i<m_activeCells.size(); ++i)
+	for (unsigned i = 0; i < m_activeCells.size(); ++i)
 	{
 		PropagationCell* aCell = static_cast<PropagationCell*>(m_theGrid[m_activeCells[i]]);
-		if (!m_octree->getPointsInCell(aCell->cellCode,m_gridLevel,points,true,false))
+		if (!m_octree->getPointsInCell(aCell->cellCode, m_gridLevel, points, true, false))
 			return false;
 	}
-	
+
 	//raz de la norme du gradient du point, pour qu'il ne soit plus pris en compte par la suite !
 	points->placeIteratorAtBeginning();
-	for (unsigned k=0; k<points->size(); ++k)
+	for (unsigned k = 0; k < points->size(); ++k)
 	{
 		points->setCurrentPointScalarValue(NAN_VALUE);
 		points->forwardIterator();

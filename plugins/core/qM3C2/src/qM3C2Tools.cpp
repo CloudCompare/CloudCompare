@@ -209,7 +209,7 @@ bool qM3C2Normals::ComputeCorePointsNormals(CCLib::GenericIndexedCloud* corePoin
 
 	if (normalScale)
 	{
-		if (normalScale->currentSize() != corePtsCount && !normalScale->resize(corePtsCount))
+		if (normalScale->currentSize() != corePtsCount && !normalScale->resizeSafe(corePtsCount))
 		{
 			//not enough memory
 			return false;
@@ -242,7 +242,7 @@ bool qM3C2Normals::ComputeCorePointsNormals(CCLib::GenericIndexedCloud* corePoin
 	//reserve memory for normals (codes) storage
 	if (!corePointsNormals->isAllocated() || corePointsNormals->currentSize() < corePtsCount)
 	{
-		if (!corePointsNormals->resize(corePtsCount))
+		if (!corePointsNormals->resizeSafe(corePtsCount))
 		{
 			if (!inputOctree)
 				delete theOctree;

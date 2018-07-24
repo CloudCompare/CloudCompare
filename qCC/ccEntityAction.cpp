@@ -938,17 +938,17 @@ namespace ccEntityAction
 		Q_ASSERT(s_randomColorsNumber > 1);
 		
 		ColorsTableType* randomColors = new ColorsTableType;
-		if (!randomColors->reserve(static_cast<unsigned>(s_randomColorsNumber)))
+		if (!randomColors->reserveSafe(static_cast<unsigned>(s_randomColorsNumber)))
 		{
 			ccConsole::Error("Not enough memory!");
 			return false;
 		}
 		
 		//generate random colors
-		for (int i=0; i<s_randomColorsNumber; ++i)
+		for (int i = 0; i < s_randomColorsNumber; ++i)
 		{
 			ccColor::Rgb col = ccColor::Generator::Random();
-			randomColors->addElement(col.rgb);
+			randomColors->addElement(col);
 		}
 		
 		//apply random colors
@@ -1267,7 +1267,7 @@ namespace ccEntityAction
 			unsigned count = cloud->size();
 			for (ccScalarField*& sf : fields)
 			{
-				if (sf && !sf->reserve(count))
+				if (sf && !sf->reserveSafe(count))
 				{
 					ccLog::Warning(QString("[sfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(sf->getName(), cloud->getName()));
 					sf->release();
@@ -1278,16 +1278,16 @@ namespace ccEntityAction
 			//export points
 			for (unsigned j = 0; j < cloud->size(); ++j)
 			{
-				const ColorCompType* rgb = cloud->getPointColor(j);
+				const ccColor::Rgb& rgb = cloud->getPointColor(j);
 				
 				if (fields[0])
-					fields[0]->addElement(rgb[0]);
+					fields[0]->addElement(rgb.r);
 				if (fields[1])
-					fields[1]->addElement(rgb[1]);
+					fields[1]->addElement(rgb.g);
 				if (fields[2])
-					fields[2]->addElement(rgb[2]);
+					fields[2]->addElement(rgb.b);
 				if (fields[3])
-					fields[3]->addElement(static_cast<ScalarType>(rgb[0] + rgb[1] + rgb[2])/3);
+					fields[3]->addElement(static_cast<ScalarType>(rgb.r + rgb.g + rgb.b) / 3);
 			}
 			
 			QString fieldsStr;
@@ -1503,7 +1503,7 @@ namespace ccEntityAction
 						}
 						ccGLMatrixd toSensor = scanGrid->sensorPosition.inverse();
 						
-						const int* _indexGrid = &(scanGrid->indexes[0]);
+						const int* _indexGrid = scanGrid->indexes.data();
 						for (int j = 0; j < static_cast<int>(scanGrid->h); ++j)
 						{
 							for (int i = 0; i < static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
@@ -1554,7 +1554,7 @@ namespace ccEntityAction
 						CCVector3 sensorPosition;
 						for (size_t i = 0; i < cloud->getChildrenNumber(); ++i)
 						{
-							ccHObject* child = cloud->getChild(i);
+							ccHObject* child = cloud->getChild(static_cast<unsigned>(i));
 							if (child && child->isKindOf(CC_TYPES::SENSOR))
 							{
 								ccSensor* sensor = ccHObjectCaster::ToSensor(child);
@@ -2256,7 +2256,7 @@ namespace ccEntityAction
 				continue;
 			}
 			
-			Q_ASSERT(inSF->isAllocated());
+			Q_ASSERT(inSF->capacity() != 0);
 			
 			//force SF as 'OUT' field (in case of)
 			const int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
@@ -2363,7 +2363,7 @@ namespace ccEntityAction
 				continue;
 			}
 			
-			Q_ASSERT(sf->isAllocated());
+			Q_ASSERT(sf->capacity() != 0);
 			
 			//force SF as 'OUT' field (in case of)
 			const int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
@@ -2418,7 +2418,7 @@ namespace ccEntityAction
 				//compute the Chi2 distance
 				{
 					unsigned finalNumberOfClasses = 0;
-					const double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib, pc, 0, finalNumberOfClasses, false, 0, 0, &(histo[0]), &(npis[0]));
+					const double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib, pc, 0, finalNumberOfClasses, false, 0, 0, histo.data(), npis.data());
 
 					if (chi2dist >= 0.0)
 					{

@@ -25,7 +25,7 @@
 #include <NormalDistribution.h>
 #include <ParallelSort.h>
 #include <ScalarFieldTools.h>
-#include <SimpleCloud.h>
+#include <PointCloud.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
 
@@ -338,12 +338,15 @@ MainWindow::~MainWindow()
 	m_mdiArea->closeAllSubWindows();
 
 	if (ccRoot)
+	{
 		delete ccRoot;
+		ccRoot = nullptr;
+	}
 
 	delete m_UI;
 	m_UI = nullptr;
 	
-	ccConsole::ReleaseInstance();
+	ccConsole::ReleaseInstance(false); //if we flush the console, it will try to display the console window while we are destroying everything!
 }
 
 void MainWindow::initPlugins( )
@@ -1091,10 +1094,10 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Suggested", suggestedShift, suggestedScale));
 							sasDlg.setCurrentProfile(index);
 							//add "last" entry (if available)
-							ccGlobalShiftManager::ShiftInfo lastInfo;
-							if (ccGlobalShiftManager::GetLast(lastInfo))
+							std::vector<ccGlobalShiftManager::ShiftInfo> lastInfos;
+							if (ccGlobalShiftManager::GetLast(lastInfos))
 							{
-								sasDlg.addShiftInfo(lastInfo);
+								sasDlg.addShiftInfo(lastInfos);
 							}
 							//add entries from file (if any)
 							sasDlg.addFileInfo();
@@ -1343,6 +1346,10 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 		{
 			bool lockedVertices;
 			ccShiftedObject* shifted = ccHObjectCaster::ToShifted(entity, &lockedVertices);
+			if (!shifted)
+			{
+				continue;
+			}
 			//for (unlocked) entities only
 			if (lockedVertices)
 			{
@@ -1405,7 +1412,9 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	}
 
 	if (shiftedEntities.empty())
+	{
 		return;
+	}
 
 	ccShiftAndScaleCloudDlg sasDlg(Pl, Dl, Pg, Dg, this);
 	sasDlg.showApplyAllButton(shiftedEntities.size() > 1);
@@ -1415,10 +1424,10 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", shift, scale));
 	sasDlg.setCurrentProfile(index);
 	//add "last" entry (if available)
-	ccGlobalShiftManager::ShiftInfo lastInfo;
-	if (ccGlobalShiftManager::GetLast(lastInfo))
+	std::vector<ccGlobalShiftManager::ShiftInfo> lastInfos;
+	if (ccGlobalShiftManager::GetLast(lastInfos))
 	{
-		sasDlg.addShiftInfo(lastInfo);
+		sasDlg.addShiftInfo(lastInfos);
 	}
 	//add entries from file (if any)
 	sasDlg.addFileInfo();
@@ -2314,7 +2323,7 @@ void MainWindow::doActionShowDepthBuffer()
 				{
 					//force depth buffer computation
 					int errorCode;
-					if (!sensor->computeDepthBuffer(cloud,errorCode))
+					if (!sensor->computeDepthBuffer(cloud, errorCode))
 					{
 						ccConsole::Error(ccGBLSensor::GetErrorString(errorCode));
 					}
@@ -2326,7 +2335,7 @@ void MainWindow::doActionShowDepthBuffer()
 				}
 			}
 
-			ccRenderingTools::ShowDepthBuffer(sensor,this);
+			ccRenderingTools::ShowDepthBuffer(sensor, this);
 		}
 	}
 }
@@ -2434,9 +2443,9 @@ void MainWindow::doActionComputePointsVisibility()
 			}
 
 			int errorCode;
-			if (sensor->computeDepthBuffer(static_cast<ccPointCloud*>(defaultCloud),errorCode))
+			if (sensor->computeDepthBuffer(static_cast<ccPointCloud*>(defaultCloud), errorCode))
 			{
-				ccRenderingTools::ShowDepthBuffer(sensor,this);
+				ccRenderingTools::ShowDepthBuffer(sensor, this);
 			}
 			else
 			{
@@ -3644,19 +3653,20 @@ void MainWindow::doAction4pcsRegister()
 	{
 		//output resulting transformation matrix
 		{
-			ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType,float>(transform.R,transform.T);
+			ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType, float>(transform.R, transform.T);
 			forceConsoleDisplay();
 			ccConsole::Print("[Align] Resulting matrix:");
-			ccConsole::Print(transMat.toString(12,' ')); //full precision
+			ccConsole::Print(transMat.toString(12, ' ')); //full precision
 			ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 		}
 
-		ccPointCloud *newDataCloud = data->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(data)->cloneThis() : ccPointCloud::From(data,data);
+		ccPointCloud *newDataCloud = data->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(data)->cloneThis() : ccPointCloud::From(data, data);
 
 		if (data->getParent())
 			data->getParent()->addChild(newDataCloud);
-		newDataCloud->setName(data->getName()+QString(".registered"));
-		newDataCloud->applyTransformation(transform);
+		newDataCloud->setName(data->getName() + QString(".registered"));
+		transform.apply(*newDataCloud);
+		newDataCloud->invalidateBoundingBox(); //invalidate bb
 		newDataCloud->setDisplay(data->getDisplay());
 		newDataCloud->prepareDisplayForRefresh();
 		zoomOn(newDataCloud);
@@ -4756,7 +4766,7 @@ void MainWindow::doActionComputeDistanceMap()
 			}
 
 			ccScalarField* sf = new ccScalarField("DT values");
-			if (!sf->reserve(pointCount))
+			if (!sf->reserveSafe(pointCount))
 			{
 				ccLog::Error("Not enough memory!");
 				delete gridCloud;
@@ -5079,7 +5089,7 @@ void MainWindow::doActionMatchBBCenters()
 		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 		entity->applyGLTransformation_recursive(&glTrans);
-		putObjectBackIntoDBTree(entity,objContext);
+		putObjectBackIntoDBTree(entity, objContext);
 
 		entity->prepareDisplayForRefresh_recursive();
 	}
@@ -5962,7 +5972,7 @@ void MainWindow::activateRegisterPointPairTool()
 
 	if (!m_pprDlg)
 	{
-		m_pprDlg = new ccPointPairRegistrationDlg(m_pickingHub, this);
+		m_pprDlg = new ccPointPairRegistrationDlg(m_pickingHub, this, this);
 		connect(m_pprDlg, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateRegisterPointPairTool);
 		registerOverlayDialog(m_pprDlg, Qt::TopRightCorner);
 	}
@@ -7305,13 +7315,14 @@ void MainWindow::setView( CC_VIEW_ORIENTATION view )
 void MainWindow::spawnHistogramDialog(const std::vector<unsigned>& histoValues, double minVal, double maxVal, QString title, QString xAxisLabel)
 {
 	ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
+	hDlg->setAttribute(Qt::WA_DeleteOnClose, true);
 	hDlg->setWindowTitle("Histogram");
 
 	ccHistogramWindow* histogram = hDlg->window();
 	{
 		histogram->setTitle(title);
-		histogram->fromBinArray(histoValues,minVal,maxVal);
-		histogram->setAxisLabels(xAxisLabel,"Count");
+		histogram->fromBinArray(histoValues, minVal, maxVal);
+		histogram->setAxisLabels(xAxisLabel, "Count");
 		histogram->refresh();
 	}
 
@@ -7331,6 +7342,7 @@ void MainWindow::showSelectedEntitiesHistogram()
 			if (sf)
 			{
 				ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
+				hDlg->setAttribute(Qt::WA_DeleteOnClose, true);
 				hDlg->setWindowTitle(QString("Histogram [%1]").arg(cloud->getName()));
 
 				ccHistogramWindow* histogram = hDlg->window();
@@ -7339,13 +7351,13 @@ void MainWindow::showSelectedEntitiesHistogram()
 					unsigned numberOfClasses = static_cast<unsigned>(sqrt(static_cast<double>(numberOfPoints)));
 					//we take the 'nearest' multiple of 4
 					numberOfClasses &= (~3);
-					numberOfClasses = std::max<unsigned>(4,numberOfClasses);
-					numberOfClasses = std::min<unsigned>(256,numberOfClasses);
+					numberOfClasses = std::max<unsigned>(4, numberOfClasses);
+					numberOfClasses = std::min<unsigned>(256, numberOfClasses);
 
 					histogram->setTitle(QString("%1 (%2 values) ").arg(sf->getName()).arg(numberOfPoints));
 					bool showNaNValuesInGrey = sf->areNaNValuesShownInGrey();
-					histogram->fromSF(sf,numberOfClasses,true,showNaNValuesInGrey);
-					histogram->setAxisLabels(sf->getName(),"Count");
+					histogram->fromSF(sf, numberOfClasses, true, showNaNValuesInGrey);
+					histogram->setAxisLabels(sf->getName(), "Count");
 					histogram->refresh();
 				}
 				hDlg->show();

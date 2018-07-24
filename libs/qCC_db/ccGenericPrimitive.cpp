@@ -88,7 +88,7 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 			unsigned primTriNormCount = primNorms->currentSize();
 
 			NormsIndexesTableType* normsTable = (m_triNormals ? m_triNormals : new NormsIndexesTableType());
-			if (!normsTable || !normsTable->reserve(triFacesNormCount + primTriNormCount))
+			if (!normsTable || !normsTable->reserveSafe(triFacesNormCount + primTriNormCount))
 			{
 				ccLog::Error("[ccGenericPrimitive::operator +] Not enough memory!");
 				return *this;
@@ -114,9 +114,8 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 			addTriangle(vertCount + tsi->i1, vertCount + tsi->i2, vertCount + tsi->i3);
 			if (primHasFaceNorms)
 			{
-				const int* normIndexes = prim.m_triNormalIndexes->getValue(i);
-				assert(normIndexes);
-				addTriangleNormalIndexes(triFacesNormCount + normIndexes[0], triFacesNormCount + normIndexes[1], triFacesNormCount + normIndexes[2]);
+				const Tuple3i& normIndexes = prim.m_triNormalIndexes->at(i);
+				addTriangleNormalIndexes(triFacesNormCount + normIndexes.u[0], triFacesNormCount + normIndexes.u[1], triFacesNormCount + normIndexes.u[2]);
 			}
 		}
 	}
@@ -271,7 +270,7 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 	if (faceNormCounts)
 	{
 		NormsIndexesTableType* normsTable = (m_triNormals ? m_triNormals : new NormsIndexesTableType());
-		if (!normsTable || !normsTable->reserve(faceNormCounts) || !reservePerTriangleNormalIndexes())
+		if (!normsTable || !normsTable->reserveSafe(faceNormCounts) || !reservePerTriangleNormalIndexes())
 		{
 			verts->clear();
 			m_triVertIndexes->clear();

@@ -106,7 +106,7 @@ const signed char BackwardNeighbours111[14*4] = {
 //{
 //	assert(!m_grid.empty());
 //
-//	GridElement* _grid = &(m_grid[pos2index(iStart,jStart,kStart)]);
+//	GridElement* _grid = &(m_grid[pos2index(iStart, jStart, kStart)]);
 //
 //	//accelerating structure
 //	int neighborShift[14];
@@ -209,7 +209,7 @@ int ChamferDistanceTransform::propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, G
 
 	//1st pass: forward scan
 	{
-		GridElement* _grid = &(m_grid[pos2index(0,0,0)]);
+		GridElement* _grid = &(m_grid[pos2index(0, 0, 0)]);
 
 		//accelerating structure
 		int neighborShift[14];
@@ -267,19 +267,19 @@ int ChamferDistanceTransform::propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, G
 			}
 		}
 
-		GridElement* _grid = &(m_grid[pos2index(static_cast<int>(m_innerSize.x)-1, static_cast<int>(m_innerSize.y)-1, static_cast<int>(m_innerSize.z)-1)]);
+		GridElement* _grid = &(m_grid[pos2index(static_cast<int>(m_innerSize.x) - 1, static_cast<int>(m_innerSize.y) - 1, static_cast<int>(m_innerSize.z) - 1)]);
 
-		for (unsigned k=0; k<m_innerSize.z; ++k)
+		for (unsigned k = 0; k < m_innerSize.z; ++k)
 		{
-			for (unsigned j=0; j<m_innerSize.y; ++j)
+			for (unsigned j = 0; j < m_innerSize.y; ++j)
 			{
-				for (unsigned i=0; i<m_innerSize.x; ++i)
+				for (unsigned i = 0; i < m_innerSize.x; ++i)
 				{
 					GridElement minVal = _grid[neighborShift[0]] + static_cast<GridElement>(bwNeighbours[3]);
 
-					for (unsigned char v=1; v<14; ++v)
+					for (unsigned char v = 1; v < 14; ++v)
 					{
-						const signed char* bwNeighbour = bwNeighbours + 4*v;
+						const signed char* bwNeighbour = bwNeighbours + 4 * v;
 						GridElement neighborVal = _grid[neighborShift[v]] + static_cast<GridElement>(bwNeighbour[3]);
 						minVal = std::min(minVal, neighborVal);
 					}
@@ -300,7 +300,7 @@ int ChamferDistanceTransform::propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, G
 				}
 			}
 
-			_grid -= 2*m_rowSize; //next slice
+			_grid -= 2 * m_rowSize; //next slice
 		}
 	}
 

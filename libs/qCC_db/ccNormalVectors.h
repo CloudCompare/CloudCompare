@@ -24,6 +24,9 @@
 //Local
 #include "ccGenericPointCloud.h"
 
+//System
+#include <vector>
+
 //! Compressed normal vectors handler
 class QCC_DB_LIB_API ccNormalVectors
 {
@@ -179,10 +182,10 @@ public:
 	bool enableNormalHSVColorsArray();
 
 	//! Returns the HSV color equivalent to a given compressed normal index
-	const ColorCompType* getNormalHSVColor(unsigned index) const;
+	const ccColor::Rgb& getNormalHSVColor(unsigned index) const;
 
 	//! Returns the HSV color array
-	const ColorCompType* getNormalHSVColorArray() const;
+	inline const std::vector<ccColor::Rgb>& getNormalHSVColorArray() const { return m_theNormalHSVColors; }
 
 	//! Helper: computes the normal (with best LS fit)
 	static bool ComputeNormalWithLS(CCLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N);
@@ -213,7 +216,7 @@ protected:
 	//! 'HSV' colors corresponding to each compressed normal index
 	/** In fact, HSV color has already been converted to RGB here for faster display.
 	**/
-	ColorCompType* m_theNormalHSVColors;
+	std::vector<ccColor::Rgb> m_theNormalHSVColors;
 
 	//! Cellular method for octree-based normal computation
 	static bool ComputeNormsAtLevelWithQuadric(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);

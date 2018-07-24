@@ -18,9 +18,6 @@
 #ifndef CC_POINT_CLOUD_LOD
 #define CC_POINT_CLOUD_LOD
 
-//CCLib
-#include <GenericChunkedArray.h>
-
 //qCC_db
 #include <ccOctree.h>
 #include <ccFrustum.h>
@@ -50,7 +47,7 @@ struct LODLevelDesc
 };
 
 //! L.O.D. indexes set
-typedef GenericChunkedArray<1, unsigned> LODIndexSet;
+typedef std::vector<unsigned> LODIndexSet;
 
 //! L.O.D. (Level of Detail) structure
 class ccPointCloudLOD
@@ -158,10 +155,10 @@ public:
 	uint32_t flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes = 0);
 
 	//! Builds an index map with the remaining visible points
-	LODIndexSet* getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel);
+	LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel);
 
 	//! Returns the last index map
-	inline LODIndexSet* getLasIndexMap() const { return m_lastIndexMap; }
+	inline const LODIndexSet& getLasIndexMap() const { return m_lastIndexMap; }
 
 	//! Returns whether all points have been displayed or not
 	inline bool allDisplayed() const { return m_currentState.displayedPoints >= m_currentState.visiblePoints; }
@@ -243,10 +240,10 @@ protected: //members
 	RenderParams m_currentState;
 
 	//! Index map
-	LODIndexSet* m_indexMap;
+	LODIndexSet m_indexMap;
 
 	//! Last index map (pointer on)
-	LODIndexSet* m_lastIndexMap;
+	LODIndexSet m_lastIndexMap;
 
 	//! Associated octree
 	ccOctree::Shared m_octree;

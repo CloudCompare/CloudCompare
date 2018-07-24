@@ -19,8 +19,8 @@
 
 
 ViewInterpolate::ViewInterpolate()
-    : m_view1 ( NULL )
-    , m_view2 ( NULL )
+    : m_view1 (nullptr)
+    , m_view2 (nullptr)
     , m_totalSteps ( 0 )
     , m_currentStep ( 0 )
 {
@@ -43,8 +43,8 @@ template <class T> T InterpolateNumber( T start, T end, double interpolationFrac
 bool ViewInterpolate::nextView ( cc2DViewportObject& outViewport )
 {
     if (	m_currentStep >= m_totalSteps
-		||	m_view1 == NULL
-		||	m_view2 == NULL )
+		||	m_view1 == nullptr
+		||	m_view2 == nullptr)
     {
         return false;
     }

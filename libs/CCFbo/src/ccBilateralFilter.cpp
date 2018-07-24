@@ -168,7 +168,7 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParamete
 	m_shader.setUniformValue("SX", static_cast<float>(m_width));
 	m_shader.setUniformValue("SY", static_cast<float>(m_height));
 	m_shader.setUniformValue("NHalf", m_halfSpatialSize);
-	m_shader.setUniformValueArray("DistCoefs", &(m_dampingPixelDist.front()), 64, 1);
+	m_shader.setUniformValueArray("DistCoefs", m_dampingPixelDist.data(), 64, 1);
 	m_shader.setUniformValue("SigmaDepth", m_depthSigma);
 
 	//Texture 1 --> 2D

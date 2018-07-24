@@ -80,7 +80,7 @@ public:
 	virtual TextureCoordsContainer* getTexCoordinatesTable() const = 0;
 
 	//! Returns per-triangle texture coordinates (pointer to)
-	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const = 0;
+	virtual void getTriangleTexCoordinates(unsigned triIndex, TexCoords2D* &tx1, TexCoords2D* &tx2, TexCoords2D* &tx3) const = 0;
 
 	//! Returns whether this mesh as per-triangle triplets of tex coords indexes
 	virtual bool hasPerTriangleTexCoordIndexes() const = 0;
@@ -200,9 +200,9 @@ protected:
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//Static arrays for OpenGL drawing
-	static PointCoordinateType* GetVertexBuffer();
-	static PointCoordinateType* GetNormalsBuffer();
-	static ColorCompType* GetColorsBuffer();
+	static CCVector3* GetVertexBuffer();
+	static CCVector3* GetNormalsBuffer();
+	static ccColor::Rgb* GetColorsBuffer();
 
 	//! Returns a pre-initialized array of vertex indexes for wired display
 	/** Array size is MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*6 by default

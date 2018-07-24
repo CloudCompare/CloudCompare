@@ -20,7 +20,7 @@
 //Qt
 #include <QFileDialog>
 #include <QFileInfo>
-
+#include <qcheckbox.h>
 #include <ccPickingHub.h>
 #include <ccProgressDialog.h>
 
@@ -1295,10 +1295,59 @@ inline double** sampleMCMC(double icov[3][3], int nobserved, CCVector3* normal, 
 //Estimate the normal vector to the structure this trace represents at each point in this trace.
 void ccCompass::estimateStructureNormals()
 {
-	//TODO: get min-size and max-size for MAP plane selection
-	unsigned int minsize = 250;
-	unsigned int maxsize = 1000;
-	double tcDistance = 100; //the square of the maximum distance to compute thicknesses for
+	//******************************************
+	//build dialog to get input properties
+	//******************************************
+	QDialog dlg(m_app->getMainWindow());
+	QVBoxLayout* vbox = new QVBoxLayout();
+	QLabel labelA("Minimum trace size (points):");
+	QLineEdit lineEditA("100"); lineEditA.setValidator(new QIntValidator(5, 9999999999999999));
+	QLabel labelB("Maximum trace size (points):");
+	QLineEdit lineEditB("1000"); lineEditB.setValidator(new QIntValidator(50, 9999999999999999));
+	QLabel labelC("Distance cutoff (m):");
+	QLineEdit lineEditC("10.0"); lineEditC.setValidator(new QDoubleValidator(0, 999999999999999.9, 6));
+	QLabel labelD("Calculate thickness:");
+	QCheckBox checkTC("Calculate thickness"); checkTC.setChecked(true);
+	
+	//tooltips
+	lineEditA.setToolTip("The minimum size of the normal-estimation window.");
+	lineEditB.setToolTip("The maximum size of the normal-estimation window.");
+	lineEditB.setToolTip("The furthest distance to search for points on the opposite surface of a GeoObject during thickness calculations.");
+
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+
+	vbox->addWidget(&labelA);
+	vbox->addWidget(&lineEditA);
+	vbox->addWidget(&labelB);
+	vbox->addWidget(&lineEditB);
+	vbox->addWidget(&checkTC);
+	vbox->addWidget(&labelC);
+	vbox->addWidget(&lineEditC);
+	vbox->addWidget(&buttonBox);
+
+	dlg.setLayout(vbox);
+
+	//execute dialog and get results
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return; //bail!
+	}
+
+	//get values
+	unsigned int minsize = lineEditA.text().toInt(); //these are the defaults
+	unsigned int maxsize = lineEditB.text().toInt();
+	double tcDistance = lineEditC.text().toDouble(); //the square of the maximum distance to compute thicknesses for
+	bool calcThickness = checkTC.isChecked();
+	delete vbox;
+
+	//someone is an idiot
+	if (maxsize < minsize) {
+		m_app->dispToConsole("[ccCompass] Error - provided maxsize is less than minsize? Get your shit together...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
 	m_app->dispToConsole("[ccCompass] Estimating structure normals. This may take a while...", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
@@ -1311,7 +1360,7 @@ void ccCompass::estimateStructureNormals()
 
 	//setup progress dialog
 	ccProgressDialog prg(true, m_app->getMainWindow());
-	prg.setMethodTitle("Structure Normal Estimation");
+	prg.setMethodTitle("Estimating Structure Normals");
 	prg.setInfo("Gathering data...");
 	prg.start();
 	prg.update(0.0);
@@ -1534,7 +1583,7 @@ void ccCompass::estimateStructureNormals()
 			int n;
 			double mnx, mny, mnz, pd, lsf, phi, theta, alpha, len;
 			bool hasValidSNE = false; //becomes true once a valid plane is found
-			std::vector<double> bestPd(px.size(), 0.0); //best map observed for each point (initialize all to very negative number)
+			std::vector<double> bestPd(px.size(), 0.0); //best map observed for each point
 			std::vector<CCVector3> sne(px.size()); //list of the best surface normal estimates found for each point (corresponds with the MAP above)
 			std::vector<int> start(px.size(),0); //index of start point for best planes
 			std::vector<int> end(px.size(),0); //index of end point for best planes
@@ -1674,8 +1723,8 @@ void ccCompass::estimateStructureNormals()
 					//compute log-likelihood of this plane estimate
 					n = maxsize - minsize - 1; //degrees of freedom
 					lsf = logWishSF(X, n);
-					pd = exp(logWishart(X, n, phi, theta, alpha, eigValues[0], eigValues[1], eigValues[2], lsf));//ccCompass::wishartExp1D(X, n, phi, theta, eigValues[0], eigValues[1], eigValues[2], lsf, 500);
-																															
+					pd = exp(logWishart(X, n, phi, theta, alpha, eigValues[0], eigValues[1], eigValues[2], lsf));
+					//pd  = wishartExp1D(X, n, phi, theta, eigValues[0], eigValues[1], eigValues[2], lsf, 500);																										
 					//multiply by prior 
 					if (hasNormals)
 					{
@@ -1726,7 +1775,7 @@ void ccCompass::estimateStructureNormals()
 			//assign point normals.
 			for (unsigned p = 0; p < points[r]->size(); p++) {
 				points[r]->setPointNormal(pid[p], sne[p]);
-				weightSF->setValue(pid[p], bestPd[p]);
+				weightSF->setValue(pid[p], log(bestPd[p]));
 				startSF->setValue(pid[p], start[p]);
 				endSF->setValue(pid[p], end[p]);
 				idSF->setValue(pid[p], segmentID[p]);
@@ -1748,7 +1797,7 @@ void ccCompass::estimateStructureNormals()
 		}
 
 		//compute thicknesses if upper + lower surfaces are defined
-		if (regions[0] != nullptr && regions[1] != nullptr) //have both surfaces been defined?
+		if (regions[0] != nullptr && regions[1] != nullptr && calcThickness) //have both surfaces been defined?
 		{
 			if (points[0]->size() > 0 && points[1]->size() > 0) { //do both surfaces have points in them?
 				prg.setInfo(QString::asprintf("Processing %d of %d datasets: Estimating thickness...", _d + 1, datasets.size()));

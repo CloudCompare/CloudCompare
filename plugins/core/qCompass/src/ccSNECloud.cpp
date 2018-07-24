@@ -105,28 +105,22 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			//get normal vector properties
 			int thickID = getScalarFieldIndexByName("Thickness");
-			int weightID = getScalarFieldIndexByName("Weight");
-			float weight;
-			float maxWeight = getScalarField( weightID )->getMax();
+			//int weightID = getScalarFieldIndexByName("Weight");
+			//float weight;
+			//float maxWeight = getScalarField( weightID )->getMax();
 
 			//draw normals
 			glFunc->glBegin(GL_LINES);
 			for (unsigned p = 0; p < size(); p++)
 			{
 				//get weight
-				weight = getScalarField(weightID)->getValue(p);
-				weight /= maxWeight;
+				//weight = getScalarField(weightID)->getValue(p);
+				//weight /= maxWeight;
 
 				//push colour
 				const ccColor::Rgb* col = m_currentDisplayedScalarField->getColor(m_currentDisplayedScalarField->getValue(p));
-				const ccColor::Rgba col4(col->r, col->g, col->b,(int)(255*(weight*0.5f+0.5f)));
-
-				//glFunc->glColor4f(col->r, col->g, col->b, (weight * 0.5) + 0.5); //use scalar field colours, but make poor estimates semi-transparent
-				//glFunc->glColor4b(col->r, col->g, col->b,(unsigned char)((weight*128)+127));
-				//glFunc->glColor3ubv(col->rgb);
+				const ccColor::Rgba col4(col->r, col->g, col->b,200);
 				glFunc->glColor4ubv(col4.rgba);
-				//define colour based on weight
-				//glFunc->glColor4f((1.0f - weight)*0.75f, weight, 0.0f, (weight * 0.7) + 0.3); //green = good, red = bad
 
 				//get length from thickness (if defined)
 				float length = 1.0;

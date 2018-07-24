@@ -48,11 +48,17 @@ void RegistrationTools::FilterTransformation(	const ScaledTransformation& inTran
 	if (filters & SKIP_TRANSLATION)
 	{
 		if (filters & SKIP_TX)
+		{
 			outTrans.T.x = 0;
+		}
 		if (filters & SKIP_TY)
+		{
 			outTrans.T.y = 0;
+		}
 		if (filters & SKIP_TZ)
+		{
 			outTrans.T.z = 0;
+		}
 	}
 
 	//filter rotation
@@ -81,7 +87,7 @@ void RegistrationTools::FilterTransformation(	const ScaledTransformation& inTran
 				//simpler/faster to ignore this (very) specific case!
 			}
 		}
-		else if (filters & SKIP_RXZ) //keep only the rotation component around Y
+		if (filters & SKIP_RXZ) //keep only the rotation component around Y
 		{
 			//we use a specific Euler angles convention here
 			if (R.getValue(2,1) < 1.0)
@@ -102,7 +108,7 @@ void RegistrationTools::FilterTransformation(	const ScaledTransformation& inTran
 				//simpler/faster to ignore this (very) specific case!
 			}
 		}
-		else if (filters & SKIP_RXY) //keep only the rotation component around Z
+		if (filters & SKIP_RXY) //keep only the rotation component around Z
 		{
 			//we use a specific Euler angles convention here
 			if (R.getValue(2,0) < 1.0)
@@ -122,6 +128,10 @@ void RegistrationTools::FilterTransformation(	const ScaledTransformation& inTran
 			{
 				//simpler/faster to ignore this (very) specific case!
 			}
+		}
+		if ((filters & SKIP_RYZ)>0 & (filters & SKIP_RXZ)>0 & (filters & SKIP_RXY)>0) //no rotation
+		{
+			outTrans.R.toIdentity();
 		}
 	}
 }

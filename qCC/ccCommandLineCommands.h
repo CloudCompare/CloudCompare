@@ -11,6 +11,7 @@
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
 #include <MeshSamplingTools.h>
+#include <RegistrationTools.h>
 
 //qCC_db
 #include <ccNormalVectors.h>

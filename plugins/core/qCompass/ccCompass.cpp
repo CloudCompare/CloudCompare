@@ -1511,7 +1511,7 @@ void ccCompass::estimateStructureNormals()
 			const CCVector3* longAxis = Z.getLSPlaneX(); //n.b. this is a normal vector
 			if (longAxis == nullptr) {
 				//fail friendly if eigens could not be computed
-				m_app->dispToConsole(QString::asprintf("[ccCompass] Warning: Could not compute eigensystem for region %s. Region ignored.", regions[r]->getName()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				m_app->dispToConsole(QString::asprintf("[ccCompass] Warning: Could not compute eigensystem for region %s. Region ignored.", regions[r]->getUniqueID()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				continue; //skip to next region
 			}
 

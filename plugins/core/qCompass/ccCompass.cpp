@@ -1340,6 +1340,7 @@ void ccCompass::estimateStructureNormals()
 	unsigned int minsize = lineEditA.text().toInt(); //these are the defaults
 	unsigned int maxsize = lineEditB.text().toInt();
 	double tcDistance = lineEditC.text().toDouble(); //the square of the maximum distance to compute thicknesses for
+	tcDistance *= tcDistance; //convert to distance squared (as this is used for the distance comp)
 	bool calcThickness = checkTC.isChecked();
 	delete vbox;
 

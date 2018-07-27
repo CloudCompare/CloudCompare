@@ -124,7 +124,6 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_equivalent = new QAction("Assign \"Equivalent\" Relationship", this); m_equivalent->setEnabled(false);
 	m_fitPlaneToGeoObject = new QAction("Fit plane to GeoObject", this);
 	m_mergeSelected = new QAction("Merge selected GeoObjects", this);
-
 	m_pinchTool->setToolTip("Add Pinch Node objects to record features such as dyke tips or sedimentary units that pinch-out.");
 	m_toSVG->setToolTip("Export the currently visible trace to a SVG vector graphic using an orthographic projection of the current view.");
 	m_noteTool->setToolTip("Add short notes to a point in a point cloud for future reference.");
@@ -135,7 +134,6 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_equivalent->setToolTip("Select two GeoObjects to assign an \"equivalent\" (i.e. coeval) relationship.");
 	m_fitPlaneToGeoObject->setToolTip("Calculates best fit planes for the entire upper/lower surfaces of the GeoObject.");
 	m_mergeSelected->setToolTip("Merge all selected GeoObjects into a single GeoObject.");
-
 
 	m_pairpicking_menu->addAction(m_pinchTool);
 	m_pairpicking_menu->addAction(m_measure_thickness);
@@ -157,16 +155,17 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_recalculateFitPlanes = new QAction("Recalculate Fit-Planes", this);
 	m_toPointCloud = new QAction("Convert to point cloud", this);
 	m_distributeSelection = new QAction("Distribute to GeoObjects", this);
+	m_estimateNormals = new QAction("Estimate Structure Normals", this);
 
 	m_recalculateFitPlanes->setToolTip("Recalculates all fit-planes deriving from traces and GeoObjects (but not those calculated with the Plane Tool).");
 	m_toPointCloud->setToolTip("Converts the selected GeoObject(s) or individual traces to a point cloud (typically for proximity analysis).");
 	m_distributeSelection->setToolTip("Distributes the selected objects into GeoObjects that have matching names.");
+	m_estimateNormals->setToolTip("Estimate trace structure normals with maximum a-postiori plane fitting algorithm.");
 
 	m_research_menu->addAction(m_recalculateFitPlanes);
+	m_research_menu->addAction(m_estimateNormals);
 	m_research_menu->addAction(m_distributeSelection);
 	m_research_menu->addAction(m_toPointCloud);
-
-
 
 	extraModeButton->setPopupMode(QToolButton::InstantPopup);
 	extraModeButton->setMenu(m_pairpicking_menu);

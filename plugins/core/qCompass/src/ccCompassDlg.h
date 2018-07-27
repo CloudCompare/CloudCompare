@@ -73,6 +73,7 @@ public:
 	//--
 	QAction *m_fitPlaneToGeoObject; //fits a plane to the upper/lower surfaces of all points in a GeoObject
 	QAction *m_recalculateFitPlanes;
+	QAction *m_estimateNormals; //estimate structure normals
 	QAction *m_mergeSelected; //merges the selected geoObjects
 	QAction *m_toPointCloud; //converts geoObject data to point cloud
 	QAction *m_distributeSelection; //tool for distributing imported data (meshes etc.) into GeoObjects based on shared names.

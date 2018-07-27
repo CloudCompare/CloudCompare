@@ -78,6 +78,8 @@ ccTrace::ccTrace(ccPolyline* obj)
 		optimizePath(); //[slooooow...!]
 	}
 
+	//load SNE data from metadata (TODO)
+
 	invalidateBoundingBox(); //update bounding box (for picking)
 }
 
@@ -97,6 +99,9 @@ void ccTrace::updateMetadata()
 	map->insert("ccCompassType", "Trace");
 	map->insert("search_r", m_search_r);
 	map->insert("cost_function", ccTrace::COST_MODE);
+
+	//TODO - write metadata for structure normal estimates
+
 	setMetaData(*map, true);
 }
 
@@ -908,7 +913,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (!c_unitPointMarker)
 		{
 			c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, 0, "PointMarker", 6));
-			
+
 			c_unitPointMarker->showColors(true);
 			c_unitPointMarker->setVisible(true);
 			c_unitPointMarker->setEnabled(true);
@@ -930,7 +935,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
 		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
-    
+
 		//push name for picking
 		bool pushName = MACRO_DrawEntityNames(context);
 		if (pushName)
@@ -949,7 +954,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		float pSize;
 		glFunc->glGetFloatv(GL_POINT_SIZE, &pSize);
 
-		//draw key-points
+		//draw key-points and structure normals (if assigned)
 		if (m_isActive)
 		{
 			for (size_t i = 0; i < m_waypoints.size(); i++)
@@ -959,7 +964,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				const CCVector3* P = m_cloud->getPoint(m_waypoints[i]);
 				ccGL::Translate(glFunc, P->x, P->y, P->z);
-				float scale = context.labelMarkerSize * m_relMarkerScale * 0.3 * fmin(pSize,4);
+				float scale = context.labelMarkerSize * m_relMarkerScale * 0.3 * fmin(pSize, 4);
 				if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 				{
 					//in perspective view, the actual scale depends on the distance to the camera!
@@ -1025,6 +1030,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 		}
+
 		//finish picking name
 		if (pushName)
 			glFunc->glPopName();

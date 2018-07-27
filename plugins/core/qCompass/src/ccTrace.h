@@ -231,7 +231,6 @@ protected:
 	std::vector<std::deque<int>> m_trace; //contains an ordered list of indices which define this trace. Note that indices representing nodes MAY be inserted twice.
 	std::vector<int> m_waypoints; //list of waypoint indices
 	std::vector<int> m_previous; //for undoing waypoints
-
 private:
 
 	//class for storing point index & path costs (from the path start) in sorted lists

@@ -1301,11 +1301,11 @@ void ccCompass::estimateStructureNormals()
 	QDialog dlg(m_app->getMainWindow());
 	QVBoxLayout* vbox = new QVBoxLayout();
 	QLabel labelA("Minimum trace size (points):");
-	QLineEdit lineEditA("100"); lineEditA.setValidator(new QIntValidator(5, 9999999999999999));
+	QLineEdit lineEditA("100"); lineEditA.setValidator(new QIntValidator(5, std::numeric_limits<int>::max()));
 	QLabel labelB("Maximum trace size (points):");
-	QLineEdit lineEditB("1000"); lineEditB.setValidator(new QIntValidator(50, 9999999999999999));
+	QLineEdit lineEditB("1000"); lineEditB.setValidator(new QIntValidator(50, std::numeric_limits<int>::max()));
 	QLabel labelC("Distance cutoff (m):");
-	QLineEdit lineEditC("10.0"); lineEditC.setValidator(new QDoubleValidator(0, 999999999999999.9, 6));
+	QLineEdit lineEditC("10.0"); lineEditC.setValidator(new QDoubleValidator(0, std::numeric_limits<double>::max(), 6));
 	QLabel labelD("Calculate thickness:");
 	QCheckBox checkTC("Calculate thickness"); checkTC.setChecked(true);
 	
@@ -1824,19 +1824,23 @@ void ccCompass::estimateStructureNormals()
 					CCLib::DgmOctree::NeighboursSet neighbours;
 					d = -1.0;
 					//loop through points in this surface
-					for (int p = 0; p < points[r]->size(); p++)
+					for (unsigned p = 0; p < points[r]->size(); p++)
 					{
 
 						//keep progress bar up to date
-						if (r == 0) {
-							prg.update(50 * p / (float) points[r]->size()); //first 50% from lower surface
-						} else {
-							prg.update(50 + 50 * p / (float) points[r]->size()); //second 50% from upper surface
+						if (r == 0)
+						{
+							prg.update((50.0f * p) / points[r]->size()); //first 50% from lower surface
+						} else
+						{
+							prg.update(50.0f + (50.0f * p) / points[r]->size()); //second 50% from upper surface
 						}
-						if (prg.isCancelRequested()) {
+						if (prg.isCancelRequested())
+						{
 							//cleanup
 							delete nCloud;
-							for (int i = 0; i < pinchClouds.size(); i++) {
+							for (int i = 0; i < pinchClouds.size(); i++)
+							{
 								delete pinchClouds[i];
 							}
 							return;
@@ -1846,7 +1850,8 @@ void ccCompass::estimateStructureNormals()
 						nCloud->clear();
 						oct->findPointNeighbourhood(points[r]->getPoint(p), nCloud, 10, level, d);
 
-						if (d > tcDistance) {
+						if (d > tcDistance)
+						{
 							thickSF->setValue(p, 1.0);
 							continue; //skip points that are a long way from their opposite neighbours
 						}
@@ -1875,7 +1880,8 @@ void ccCompass::estimateStructureNormals()
 	}
 
 	//cleanup
-	for (int i = 0; i < pinchClouds.size(); i++) {
+	for (int i = 0; i < pinchClouds.size(); i++)
+	{
 		delete pinchClouds[i];
 	}
 

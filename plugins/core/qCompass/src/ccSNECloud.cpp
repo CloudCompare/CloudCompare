@@ -74,9 +74,6 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			return;
 		}
 
-		//glDrawParams glParams;
-		//getDrawingParameters(glParams);
-
 		//get camera info
 		ccGLCameraParameters camera;
 		glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
@@ -113,6 +110,23 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glBegin(GL_LINES);
 			for (unsigned p = 0; p < size(); p++)
 			{
+
+				//skip out-of-range points
+				if (!m_currentDisplayedScalarField->areNaNValuesShownInGrey()) {
+					if (!m_currentDisplayedScalarField->displayRange().isInRange(m_currentDisplayedScalarField->getValue(p))) {
+						continue;
+					}
+				}
+
+				//skip hidden points
+				if (isVisibilityTableInstantiated())
+				{
+					if (m_pointsVisibility[p] != POINT_VISIBLE && !m_pointsVisibility.empty())
+					{
+						continue; //skip this point
+					}
+				}
+
 				//get weight
 				//weight = getScalarField(weightID)->getValue(p);
 				//weight /= maxWeight;

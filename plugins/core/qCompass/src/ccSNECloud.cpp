@@ -126,7 +126,6 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						continue; //skip this point
 					}
 				}
-
 				//get weight
 				//weight = getScalarField(weightID)->getValue(p);
 				//weight /= maxWeight;

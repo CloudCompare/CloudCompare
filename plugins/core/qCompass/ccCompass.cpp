@@ -1340,7 +1340,7 @@ void ccCompass::estimateStructureNormals()
 	unsigned int minsize = lineEditA.text().toInt(); //these are the defaults
 	unsigned int maxsize = lineEditB.text().toInt();
 	double tcDistance = lineEditC.text().toDouble(); //the square of the maximum distance to compute thicknesses for
-	tcDistance *= tcDistance; //convert to distance squared (as this is used for the distance comp)
+	//tcDistance *= tcDistance; //convert to distance squared (as this is used for the distance comp)
 	bool calcThickness = checkTC.isChecked();
 	delete vbox;
 
@@ -1820,7 +1820,8 @@ void ccCompass::estimateStructureNormals()
 					//get octree for the picking and build picking data structures
 					ccOctree::Shared oct = points[compID]->getOctree();
 					CCLib::ReferenceCloud* nCloud = new  CCLib::ReferenceCloud(points[compID]);
-					unsigned char level = oct->findBestLevelForAGivenPopulationPerCell(2);
+					unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(tcDistance/2);
+					
 					CCLib::DgmOctree::NeighboursSet neighbours;
 					d = -1.0;
 					//loop through points in this surface
@@ -1850,7 +1851,7 @@ void ccCompass::estimateStructureNormals()
 						nCloud->clear();
 						oct->findPointNeighbourhood(points[r]->getPoint(p), nCloud, 10, level, d);
 
-						if (d > tcDistance)
+						if (d > tcDistance*tcDistance)
 						{
 							thickSF->setValue(p, 1.0);
 							continue; //skip points that are a long way from their opposite neighbours

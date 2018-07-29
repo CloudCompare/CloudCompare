@@ -20,6 +20,7 @@
 //Qt
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QIntValidator>
 #include <qcheckbox.h>
 #include <ccPickingHub.h>
 #include <ccProgressDialog.h>

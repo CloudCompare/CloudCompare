@@ -27,6 +27,7 @@
 #include "ccSphere.h"
 
 //Qt
+#include <QFontMetrics>
 #include <QSharedPointer>
 
 //System

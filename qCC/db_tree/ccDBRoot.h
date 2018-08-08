@@ -190,7 +190,8 @@ protected:
 							TG_SF,
 							TG_NORMAL,
 							TG_MATERIAL,
-							TG_3D_NAME };
+							TG_3D_NAME,
+							TG_NORMAL_WHISKERS};
 
 	//! Toggles a given property (enable state, visibility, normal, color, SF, etc.) on selected entities
 	void toggleSelectedEntitiesProperty(TOGGLE_PROPERTY prop);
@@ -206,13 +207,14 @@ protected slots:
 	void sortChildrenType();
 	void selectByTypeAndName();
 
-	inline void toggleSelectedEntities()			{ toggleSelectedEntitiesProperty(TG_ENABLE); }
-	inline void toggleSelectedEntitiesVisibility()	{ toggleSelectedEntitiesProperty(TG_VISIBLE); }
-	inline void toggleSelectedEntitiesColor()		{ toggleSelectedEntitiesProperty(TG_COLOR); }
-	inline void toggleSelectedEntitiesNormals()		{ toggleSelectedEntitiesProperty(TG_NORMAL); }
-	inline void toggleSelectedEntitiesSF()			{ toggleSelectedEntitiesProperty(TG_SF); }
-	inline void toggleSelectedEntitiesMat()         { toggleSelectedEntitiesProperty(TG_MATERIAL); }
-	inline void toggleSelectedEntities3DName()      { toggleSelectedEntitiesProperty(TG_3D_NAME); }
+	inline void toggleSelectedEntities()				{ toggleSelectedEntitiesProperty(TG_ENABLE); }
+	inline void toggleSelectedEntitiesVisibility()		{ toggleSelectedEntitiesProperty(TG_VISIBLE); }
+	inline void toggleSelectedEntitiesColor()			{ toggleSelectedEntitiesProperty(TG_COLOR); }
+	inline void toggleSelectedEntitiesNormals()			{ toggleSelectedEntitiesProperty(TG_NORMAL); }
+	inline void toggleSelectedEntitiesSF()				{ toggleSelectedEntitiesProperty(TG_SF); }
+	inline void toggleSelectedEntitiesMat()				{ toggleSelectedEntitiesProperty(TG_MATERIAL); }
+	inline void toggleSelectedEntities3DName()			{ toggleSelectedEntitiesProperty(TG_3D_NAME); }
+	inline void toggleSelectedEntitiesNormalWhiskers()	{ toggleSelectedEntitiesProperty(TG_NORMAL_WHISKERS); }
 
 	void addEmptyGroup();
 	void alignCameraWithEntityDirect() { alignCameraWithEntity(false); }
@@ -293,7 +295,9 @@ protected:
 	//! Context menu action: hide/show selected entities SF
 	QAction* m_toggleSelectedEntitiesSF;
 	//! Context menu action: hide/show selected entities 3D name
-	QAction* m_toggleSelectedEntities3DName;	
+	QAction* m_toggleSelectedEntities3DName;
+	//! Context menu action: hide/show normal whiskers
+	QAction* m_toggleSelectedEntitiesNormalWhiskers;
 	//! Context menu action: add empty group
 	QAction* m_addEmptyGroup;
 	//! Context menu action: use 3-points labels or planes to orient camera

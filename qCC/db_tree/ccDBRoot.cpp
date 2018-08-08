@@ -124,6 +124,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_toggleSelectedEntitiesMat = new QAction("Toggle materials/textures", this);
 	m_toggleSelectedEntitiesSF = new QAction("Toggle SF", this);
 	m_toggleSelectedEntities3DName = new QAction("Toggle 3D name", this);
+	m_toggleSelectedEntitiesNormalWhiskers = new QAction("Toggle normal whiskers", this);
 	m_addEmptyGroup = new QAction("Add empty group", this);
 	m_alignCameraWithEntity = new QAction("Align camera", this);
 	m_alignCameraWithEntityReverse = new QAction("Align camera (reverse)", this);
@@ -133,27 +134,28 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_contextMenuPos = QPoint(-1,-1);
 
 	//connect custom context menu actions
-	connect(m_dbTreeWidget,						SIGNAL(customContextMenuRequested(const QPoint&)),	this, SLOT(showContextMenu(const QPoint&)));
-	connect(m_expandBranch,						SIGNAL(triggered()),								this, SLOT(expandBranch()));
-	connect(m_collapseBranch,					SIGNAL(triggered()),								this, SLOT(collapseBranch()));
-	connect(m_gatherInformation,				SIGNAL(triggered()),								this, SLOT(gatherRecursiveInformation()));
-	connect(m_sortChildrenAZ,					SIGNAL(triggered()),								this, SLOT(sortChildrenAZ()));
-	connect(m_sortChildrenZA,					SIGNAL(triggered()),								this, SLOT(sortChildrenZA()));
-	connect(m_sortChildrenType,					SIGNAL(triggered()),								this, SLOT(sortChildrenType()));
-	connect(m_selectByTypeAndName,              SIGNAL(triggered()),								this, SLOT(selectByTypeAndName()));
-	connect(m_deleteSelectedEntities,			SIGNAL(triggered()),								this, SLOT(deleteSelectedEntities()));
-	connect(m_toggleSelectedEntities,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities()));
-	connect(m_toggleSelectedEntitiesVisibility,	SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesVisibility()));
-	connect(m_toggleSelectedEntitiesColor,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesColor()));
-	connect(m_toggleSelectedEntitiesNormals,	SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesNormals()));
-	connect(m_toggleSelectedEntitiesMat,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesMat()));
-	connect(m_toggleSelectedEntitiesSF,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesSF()));
-	connect(m_toggleSelectedEntities3DName,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities3DName()));
-	connect(m_addEmptyGroup,					SIGNAL(triggered()),								this, SLOT(addEmptyGroup()));
-	connect(m_alignCameraWithEntity,			SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityDirect()));
-	connect(m_alignCameraWithEntityReverse,		SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityIndirect()));
-	connect(m_enableBubbleViewMode,				SIGNAL(triggered()),								this, SLOT(enableBubbleViewMode()));
-	connect(m_editLabelScalarValue,				SIGNAL(triggered()),								this, SLOT(editLabelScalarValue()));
+	connect(m_dbTreeWidget,								SIGNAL(customContextMenuRequested(const QPoint&)),	this, SLOT(showContextMenu(const QPoint&)));
+	connect(m_expandBranch,								SIGNAL(triggered()),								this, SLOT(expandBranch()));
+	connect(m_collapseBranch,							SIGNAL(triggered()),								this, SLOT(collapseBranch()));
+	connect(m_gatherInformation,						SIGNAL(triggered()),								this, SLOT(gatherRecursiveInformation()));
+	connect(m_sortChildrenAZ,							SIGNAL(triggered()),								this, SLOT(sortChildrenAZ()));
+	connect(m_sortChildrenZA,							SIGNAL(triggered()),								this, SLOT(sortChildrenZA()));
+	connect(m_sortChildrenType,							SIGNAL(triggered()),								this, SLOT(sortChildrenType()));
+	connect(m_selectByTypeAndName,						SIGNAL(triggered()),								this, SLOT(selectByTypeAndName()));
+	connect(m_deleteSelectedEntities,					SIGNAL(triggered()),								this, SLOT(deleteSelectedEntities()));
+	connect(m_toggleSelectedEntities,					SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities()));
+	connect(m_toggleSelectedEntitiesVisibility,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesVisibility()));
+	connect(m_toggleSelectedEntitiesColor,				SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesColor()));
+	connect(m_toggleSelectedEntitiesNormals,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesNormals()));
+	connect(m_toggleSelectedEntitiesMat,				SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesMat()));
+	connect(m_toggleSelectedEntitiesSF,					SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesSF()));
+	connect(m_toggleSelectedEntities3DName,				SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities3DName()));
+	connect(m_toggleSelectedEntitiesNormalWhiskers,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesNormalWhiskers()));
+	connect(m_addEmptyGroup,							SIGNAL(triggered()),								this, SLOT(addEmptyGroup()));
+	connect(m_alignCameraWithEntity,					SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityDirect()));
+	connect(m_alignCameraWithEntityReverse,				SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityIndirect()));
+	connect(m_enableBubbleViewMode,						SIGNAL(triggered()),								this, SLOT(enableBubbleViewMode()));
+	connect(m_editLabelScalarValue,						SIGNAL(triggered()),								this, SLOT(editLabelScalarValue()));
 
 	//other DB tree signals/slots connection
 	connect(m_dbTreeWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(changeSelection(const QItemSelection&, const QItemSelection&)));
@@ -1936,6 +1938,9 @@ void ccDBRoot::toggleSelectedEntitiesProperty(TOGGLE_PROPERTY prop)
 		case TG_3D_NAME: //3D name
 			item->toggleShowName();
 			break;
+		case TG_NORMAL_WHISKERS: //Normal whiskers
+			item->toggleNormalWhiskers();
+			break;
 		}
 		item->prepareDisplayForRefresh();
 	}
@@ -2153,6 +2158,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				menu.addAction(m_toggleSelectedEntitiesColor);
 				menu.addAction(m_toggleSelectedEntitiesNormals);
 				menu.addAction(m_toggleSelectedEntitiesSF);
+				menu.addAction(m_toggleSelectedEntitiesNormalWhiskers);
 			}
 			if (toggleMaterials)
 			{

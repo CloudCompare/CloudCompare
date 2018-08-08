@@ -28,6 +28,7 @@ ccDrawableObject::ccDrawableObject()
 	lockVisibility(false);
 	showColors(false);
 	showNormals(false);
+	showNormalWhiksers(false);
 	showSF(false);
 	enableTempColor(false);
 	setTempColor(ccColor::white,false);
@@ -41,6 +42,7 @@ ccDrawableObject::ccDrawableObject(const ccDrawableObject& object)
 	, m_lockedVisibility(object.m_lockedVisibility)
 	, m_colorsDisplayed(object.m_colorsDisplayed)
 	, m_normalsDisplayed(object.m_normalsDisplayed)
+	, m_normalWhiskersDisplayed(object.m_normalWhiskersDisplayed)
 	, m_sfDisplayed(object.m_sfDisplayed)
 	, m_tempColor(object.m_tempColor)
 	, m_colorIsOverriden(object.m_colorIsOverriden)
@@ -153,6 +155,7 @@ void ccDrawableObject::getDrawingParameters(glDrawParams& params) const
 		//colors are not displayed if scalar field is displayed
 		params.showColors = !params.showSF && hasColors() && colorsShown();
 	}
+	params.showNormWhiskers = false;
 }
 
 bool ccDrawableObject::addClipPlanes(const ccClipPlane& plane)

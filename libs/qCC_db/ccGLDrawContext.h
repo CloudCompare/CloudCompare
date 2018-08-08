@@ -37,6 +37,8 @@ struct glDrawParams
 	bool showColors;
 	//! Display normals
 	bool showNorms;
+	//! Display normal whiskers
+	bool showNormWhiskers;
 };
 
 // Drawing flags (type: short)

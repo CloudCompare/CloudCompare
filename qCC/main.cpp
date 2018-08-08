@@ -19,6 +19,7 @@
 
 //Qt
 #include <QDir>
+#include <QGLFormat>
 #include <QSplashScreen>
 #include <QPixmap>
 #include <QMessageBox>

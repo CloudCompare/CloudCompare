@@ -17,6 +17,9 @@
 
 #include "ccSphere.h"
 
+//Qt
+#include <QFontMetrics>
+
 //Local
 #include "ccPointCloud.h"
 

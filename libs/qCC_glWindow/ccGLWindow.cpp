@@ -40,6 +40,7 @@
 #include <QMimeData>
 #include <QOpenGLDebugLogger>
 #include <QOpenGLTexture>
+#include <QPainter>
 #include <QPushButton>
 #include <QSettings>
 #include <QTouchEvent>

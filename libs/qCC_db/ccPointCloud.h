@@ -30,6 +30,7 @@
 #include "ccColorScale.h"
 #include "ccNormalVectors.h"
 #include "ccWaveform.h"
+#include "ccPointCloudLOD.h"
 
 //Qt
 #include <QOpenGLBuffer>
@@ -748,8 +749,46 @@ protected:
 
 protected: // VBO
 
+		   //description of the (sub)set of points to display
+	struct DisplayDesc : LODLevelDesc
+	{
+		//! Default constructor
+		DisplayDesc()
+			: LODLevelDesc()
+			, endIndex(0)
+			, decimStep(1)
+			, indexMap(nullptr)
+		{}
+
+		//! Constructor from a start index and a count value
+		DisplayDesc(unsigned startIndex, unsigned count)
+			: LODLevelDesc(startIndex, count)
+			, endIndex(startIndex + count)
+			, decimStep(1)
+			, indexMap(nullptr)
+		{}
+
+		//! Set operator
+		DisplayDesc& operator = (const LODLevelDesc& desc)
+		{
+			startIndex = desc.startIndex;
+			count = desc.count;
+			endIndex = startIndex + count;
+			return *this;
+		}
+
+		//! Last index (excluded)
+		unsigned endIndex;
+
+		//! Decimation step (for non-octree based LoD)
+		unsigned decimStep;
+
+		//! Map of indexes (to invert the natural order)
+		LODIndexSet* indexMap;
+	};
+
 	//! Init/updates VBOs
-	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams);
+	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, const DisplayDesc& toDisplay);
 
 	//! Release VBOs
 	void releaseVBOs();
@@ -762,6 +801,7 @@ protected: // VBO
 
 		//! Update flags
 		enum UPDATE_FLAGS {
+			UPDATE_NONE = 0,
 			UPDATE_POINTS = 1,
 			UPDATE_COLORS = 2,
 			UPDATE_NORMALS = 4,

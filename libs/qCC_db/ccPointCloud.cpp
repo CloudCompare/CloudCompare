@@ -45,7 +45,6 @@
 #include "ccFastMarchingForNormsDirection.h"
 #include "ccMinimumSpanningTreeForNormsDirection.h"
 #include "ccFrustum.h"
-#include "ccPointCloudLOD.h"
 #include "ccChunk.h"
 
 //Qt
@@ -2172,45 +2171,6 @@ static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 16); //~ 64K
 static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 19); //~ 512K
 #endif
 
-
-//description of the (sub)set of points to display
-struct DisplayDesc : LODLevelDesc
-{
-	//! Default constructor
-	DisplayDesc()
-		: LODLevelDesc()
-		, endIndex(0)
-		, decimStep(1)
-		, indexMap(nullptr)
-	{}
-
-	//! Constructor from a start index and a count value
-	DisplayDesc(unsigned startIndex, unsigned count)
-		: LODLevelDesc(startIndex, count)
-		, endIndex(startIndex+count)
-		, decimStep(1)
-		, indexMap(nullptr)
-	{}
-
-	//! Set operator
-	DisplayDesc& operator = (const LODLevelDesc& desc)
-	{
-		startIndex = desc.startIndex;
-		count = desc.count;
-		endIndex = startIndex + count;
-		return *this;
-	}
-	
-	//! Last index (excluded)
-	unsigned endIndex;
-	
-	//! Decimation step (for non-octree based LoD)
-	unsigned decimStep;
-
-	//! Map of indexes (to invert the natural order)
-	LODIndexSet* indexMap;
-};
-
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (m_points.size() == 0)
@@ -2236,6 +2196,99 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//can't display a SF without... a SF... and an active color scale!
 		assert(!glParams.showSF || hasDisplayedScalarField());
+
+		// L.O.D. display
+		DisplayDesc toDisplay(0, size());
+		if (context.decimateCloudOnMove && toDisplay.count > context.minLODPointCount && MACRO_LODActivated(context))
+		{
+			bool skipLoD = false;
+
+			//is there a LoD structure associated yet?
+			if (!m_lod || !m_lod->isBroken())
+			{
+				if (!m_lod || m_lod->isNull())
+				{
+					//auto-init LoD structure
+					//DGM: can't spawn a progress dialog here as the process will be async
+					//ccProgressDialog pDlg(false, context.display ? context.display->asWidget() : 0);
+					initLOD(/*&pDlg*/);
+				}
+				else
+				{
+					assert(m_lod);
+
+					unsigned char maxLevel = m_lod->maxLevel();
+					bool underConstruction = m_lod->isUnderConstruction();
+
+					//if the cloud has less LOD levels than the minimum to display
+					if (underConstruction || maxLevel == 0)
+					{
+						//not yet ready
+						context.moreLODPointsAvailable = underConstruction;
+						context.higherLODLevelsAvailable = false;
+					}
+					else if (context.stereoPassIndex == 0)
+					{
+						if (context.currentLODLevel == 0)
+						{
+							//get the current viewport and OpenGL matrices
+							ccGLCameraParameters camera;
+							context.display->getGLCameraParameters(camera);
+							//relpace the viewport and matrices by the real ones
+							glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
+							glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
+							glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
+							//camera frustum
+							Frustum frustum(camera.modelViewMat, camera.projectionMat);
+
+							//first time: we flag the cells visibility and count the number of visible points
+							m_lod->flagVisibility(frustum, m_clipPlanes.empty() ? 0 : &m_clipPlanes);
+						}
+
+						unsigned remainingPointsAtThisLevel = 0;
+						toDisplay.startIndex = 0;
+						toDisplay.count = MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
+						toDisplay.indexMap = &m_lod->getIndexMap(context.currentLODLevel, toDisplay.count, remainingPointsAtThisLevel);
+						if (toDisplay.count == 0)
+						{
+							//nothing to draw at this level
+							toDisplay.indexMap = nullptr;
+						}
+						else
+						{
+							assert(toDisplay.count == toDisplay.indexMap->size());
+							toDisplay.endIndex = toDisplay.startIndex + toDisplay.count;
+						}
+
+						//could we draw more points at the next level?
+						context.moreLODPointsAvailable = (remainingPointsAtThisLevel != 0);
+						context.higherLODLevelsAvailable = (!m_lod->allDisplayed() && context.currentLODLevel + 1 <= maxLevel);
+					}
+				}
+			}
+
+			if (!toDisplay.indexMap && !skipLoD)
+			{
+				//if we don't have a LoD map, we can only display points at level 0!
+				if (context.currentLODLevel != 0)
+				{
+					return;
+				}
+
+				//we wait for the LOD to be ready
+				//meanwhile we will display less points
+				if (context.minLODPointCount && toDisplay.count > context.minLODPointCount)
+				{
+					GLint maxStride = 2048;
+#ifdef GL_MAX_VERTEX_ATTRIB_STRIDE
+					glFunc->glGetIntegerv(GL_MAX_VERTEX_ATTRIB_STRIDE, &maxStride);
+#endif
+					//maxStride == decimStep * 3 * sizeof(PointCoordinateType)
+					toDisplay.decimStep = static_cast<int>(ceil(static_cast<float>(toDisplay.count) / context.minLODPointCount));
+					toDisplay.decimStep = std::min<unsigned>(toDisplay.decimStep, maxStride / (3 * sizeof(PointCoordinateType)));
+				}
+			}
+		}
 
 		bool colorMaterialEnabled = false;
 
@@ -2294,10 +2347,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//main display procedure
-		const bool useVBOs = updateVBOs(context, glParams);
+		const bool useVBOs = updateVBOs(context, glParams, toDisplay);
 
 		if (useVBOs)
 		{
+			GLsizei numPoints = (toDisplay.endIndex - toDisplay.startIndex) / toDisplay.decimStep;
+
 			glFunc->glEnableClientState(GL_VERTEX_ARRAY);
 			if (glParams.showNorms)
 				glFunc->glEnableClientState(GL_NORMAL_ARRAY);
@@ -2317,7 +2372,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				m_vboManager.colors.bind();
 				glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, nullptr);
 			}
-			glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(m_points.size()));
+			glFunc->glDrawArrays(GL_POINTS, 0, numPoints);
 
 			// Draw normal whiskers
 			if (glParams.showNormWhiskers && m_vboManager.hasNormalWhiskers)
@@ -2328,7 +2383,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				m_vboManager.normalWhiskers.bind();
 				glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, nullptr);
 
-				glFunc->glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_points.size() * 2));
+				glFunc->glDrawArrays(GL_LINES, 0, numPoints * 2);
 			}
 
 			glFunc->glDisableClientState(GL_VERTEX_ARRAY);
@@ -3927,8 +3982,9 @@ static bool CatchGLErrors(GLenum err, const char* context)
 	return true;
 }
 
-bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
+bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, const DisplayDesc& toDisplay)
 {
+
 	if (m_vboManager.state == vboSet::FAILED)
 	{
 		//ccLog::Warning(QString("[ccPointCloud::updateVBOs] VBOs are in a 'failed' state... we won't try to update them! (cloud '%1')").arg(getName()));
@@ -3970,7 +4026,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		}
 
 		//nothing to do?
-		if (m_vboManager.updateFlags == 0)
+		if (m_vboManager.updateFlags == vboSet::UPDATE_NONE)
 		{
 			return true;
 		}
@@ -3991,167 +4047,117 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 	m_vboManager.hasNormals = glParams.showNorms;
 	m_vboManager.hasNormalWhiskers = glParams.showNormWhiskers;
 
+	auto initBuffer = [](const int numBytes, QOpenGLBuffer& buffer)
+	{
+		if (!buffer.isCreated())
+		{
+			if (!buffer.create())
+			{
+				ccLog::Warning("[VBO] Cannot create buffer");
+				return false;
+			}
+			buffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+		}
+		if (!buffer.bind())
+		{
+			ccLog::Warning("[VBO] Cannot bind buffer");
+			return false;
+		}
+		if (buffer.size() < numBytes)
+		{
+			buffer.allocate(numBytes);
+		}
+		return true;
+	};
+
+	PointCoordinateType *pBuff = nullptr, *nBuff = nullptr, *wBuff = nullptr;
+	ColorCompType *cBuff = nullptr;
 	if (m_vboManager.updateFlags & vboSet::UPDATE_POINTS)
 	{
-		const int numBytes = m_points.size() * sizeof(m_points.front());
-		if (!m_vboManager.points.isCreated())
-		{
-			if (!m_vboManager.points.create())
-			{
-				ccLog::Warning("[VBO] Cannot create points buffer");
-				return false;
-			}
-			m_vboManager.points.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-		}
-		if (!m_vboManager.points.bind())
-		{
-			ccLog::Warning("[VBO] Cannot bind points buffer");
-			return false;
-		}
-		if (m_vboManager.points.size() < numBytes)
-		{
-			m_vboManager.points.allocate(m_points.data(), numBytes);
-		}
-		else
-		{
-			m_vboManager.points.write(0, m_points.data(), numBytes);
-		}
+		const int numBytes = static_cast<int>(m_points.size() * sizeof(m_points.front()));
+		if (initBuffer(numBytes, m_vboManager.points))
+			pBuff = static_cast<PointCoordinateType*>(m_vboManager.points.map(QOpenGLBuffer::WriteOnly));
 	}
-
 	if (m_vboManager.updateFlags & vboSet::UPDATE_NORMALS)
 	{
-		const auto& normals = *m_normals;
-		const int numBytes = normals.size() * sizeof(PointCoordinateType) * 3;
-		if (!m_vboManager.normals.isCreated())
-		{
-			if (!m_vboManager.normals.create())
-			{
-				ccLog::Warning("[VBO] Cannot create normals buffer");
-				return false;
-			}
-			m_vboManager.normals.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-		}
-		if (!m_vboManager.normals.bind())
-		{
-			ccLog::Warning("[VBO] Cannot bind normals buffer");
-			return false;
-		}
-		if (m_vboManager.normals.size() < numBytes)
-		{
-			m_vboManager.normals.allocate(numBytes);
-		}
-		auto buff = static_cast<PointCoordinateType*>(m_vboManager.normals.map(QOpenGLBuffer::WriteOnly));
-		if (buff != nullptr)
-		{
-			for (size_t i = 0; i < normals.size(); i++)
-			{
-				const CCVector3& N = ccNormalVectors::GetNormal(normals[i]);
-				*(buff)++ = N.x;
-				*(buff)++ = N.y;
-				*(buff)++ = N.z;
-			}
-			m_vboManager.normals.unmap();
-		}
-		else
-		{
-			ccLog::Warning("[VBO] Cannot map normal buffer");
-			return false;
-		}
+		const int numBytes = static_cast<int>(m_normals->size() * sizeof(PointCoordinateType) * 3);
+		if (initBuffer(numBytes, m_vboManager.normals))
+			nBuff = static_cast<PointCoordinateType*>(m_vboManager.normals.map(QOpenGLBuffer::WriteOnly));
 	}
-
 	if (m_vboManager.updateFlags & vboSet::UPDATE_NORMAL_WHISKERS)
 	{
-		const auto& normals = *m_normals;
-		const int numBytes = m_points.size() * sizeof(m_points.front()) * 2;
-		if (!m_vboManager.normalWhiskers.isCreated())
+		const int numBytes = static_cast<int>(m_points.size() * sizeof(m_points.front()) * 2);
+		if (initBuffer(numBytes, m_vboManager.normalWhiskers))
+			wBuff = static_cast<PointCoordinateType*>(m_vboManager.normalWhiskers.map(QOpenGLBuffer::WriteOnly));
+	}
+	if (m_vboManager.updateFlags & vboSet::UPDATE_COLORS)
+	{
+		const int numBytes = static_cast<int>(m_points.size() * sizeof(ColorCompType) * 3);
+		if (initBuffer(numBytes, m_vboManager.colors))
+			cBuff = static_cast<ColorCompType*>(m_vboManager.colors.map(QOpenGLBuffer::WriteOnly));
+	}
+
+	const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
+
+	for (unsigned i = toDisplay.startIndex; i < toDisplay.endIndex; i += toDisplay.decimStep)
+	{
+		unsigned pointIndex = toDisplay.indexMap ? toDisplay.indexMap->at(i) : i;
+
+		if (pBuff)
 		{
-			if (!m_vboManager.normalWhiskers.create())
-			{
-				ccLog::Warning("[VBO] Cannot create normal whiskers buffer");
-				return false;
-			}
-			m_vboManager.normalWhiskers.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+			const CCVector3& p = m_points[pointIndex];
+			*(pBuff)++ = p.x;
+			*(pBuff)++ = p.y;
+			*(pBuff)++ = p.z;
 		}
-		if (!m_vboManager.normalWhiskers.bind())
+		if (nBuff)
 		{
-			ccLog::Warning("[VBO] Cannot bind normal whiskers buffer");
-			return false;
+			const CCVector3& n = compressedNormals->getNormal(m_normals->getValue(pointIndex));
+			*(nBuff)++ = n.x;
+			*(nBuff)++ = n.y;
+			*(nBuff)++ = n.z;
 		}
-		if (m_vboManager.normalWhiskers.size() < numBytes)
+		if (wBuff)
 		{
-			m_vboManager.normalWhiskers.allocate(numBytes);
+			const CCVector3& p = m_points[pointIndex];
+			const CCVector3& n = p + compressedNormals->getNormal(m_normals->getValue(pointIndex)) * 0.05f;
+			*(wBuff)++ = p.x;
+			*(wBuff)++ = p.y;
+			*(wBuff)++ = p.z;
+			*(wBuff)++ = n.x;
+			*(wBuff)++ = n.y;
+			*(wBuff)++ = n.z;
 		}
-		auto buff = static_cast<PointCoordinateType*>(m_vboManager.normalWhiskers.map(QOpenGLBuffer::WriteOnly));
-		if (buff != nullptr)
+		if (cBuff)
 		{
-			for (size_t i = 0; i < m_points.size(); i++)
-			{
-				const CCVector3& P = m_points[i];
-				const CCVector3& N = P + ccNormalVectors::GetNormal(normals[i]) * 0.05;
-				*(buff)++ = P.x;
-				*(buff)++ = P.y;
-				*(buff)++ = P.z;
-				*(buff)++ = N.x;
-				*(buff)++ = N.y;
-				*(buff)++ = N.z;
-			}
-			m_vboManager.normalWhiskers.unmap();
-		}
-		else
-		{
-			ccLog::Warning("[VBO] Cannot map normal whiskers buffer");
-			return false;
+			const auto& col = glParams.showColors ? m_rgbColors->data()[pointIndex]
+				: glParams.showSF ? *m_vboManager.sourceSF->getValueColor(static_cast<unsigned>(pointIndex))
+				: ccColor::lightGrey;
+			*(cBuff)++ = col.r;
+			*(cBuff)++ = col.g;
+			*(cBuff)++ = col.b;
 		}
 	}
 
-	if (m_vboManager.updateFlags & vboSet::UPDATE_COLORS)
+	if (pBuff)
 	{
-		const int numBytes = m_points.size() * sizeof(ColorCompType) * 3;
-		if (!m_vboManager.colors.isCreated())
-		{
-			if (!m_vboManager.colors.create())
-			{
-				ccLog::Warning("[VBO] Cannot create color buffer");
-				return false;
-			}
-			m_vboManager.colors.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-		}
-		if (!m_vboManager.colors.bind())
-		{
-			ccLog::Warning("[VBO] Cannot bind color buffer");
-			return false;
-		}
-		if (m_vboManager.colors.size() < numBytes)
-		{
-			m_vboManager.colors.allocate(numBytes);
-		}
-		if (glParams.showColors)
-		{
-			m_vboManager.colors.write(0, m_rgbColors->data(), numBytes);
-		}
-		else if (glParams.showSF)
-		{
-			auto buff = static_cast<ColorCompType*>(m_vboManager.colors.map(QOpenGLBuffer::WriteOnly));
-			if (buff != nullptr)
-			{
-				for (size_t i = 0; i < m_points.size(); i++)
-				{
-					auto col = m_vboManager.sourceSF->getValueColor(i);
-					if (!col)
-						col = &ccColor::lightGrey;
-					*(buff)++ = col->r;
-					*(buff)++ = col->g;
-					*(buff)++ = col->b;
-				}
-				m_vboManager.colors.unmap();
-			}
-			else
-			{
-				ccLog::Warning("[VBO] Cannot map color buffer");
-				return false;
-			}
-			m_vboManager.sourceSF->setModificationFlag(false);
-		}
+		m_vboManager.points.bind();
+		m_vboManager.points.unmap();
+	}
+	if (nBuff)
+	{
+		m_vboManager.normals.bind();
+		m_vboManager.normals.unmap();
+	}
+	if (wBuff)
+	{
+		m_vboManager.normalWhiskers.bind();
+		m_vboManager.normalWhiskers.unmap();
+	}
+	if (cBuff)
+	{
+		m_vboManager.colors.bind();
+		m_vboManager.colors.unmap();
 	}
 
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -4162,7 +4168,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 	}
 
 	m_vboManager.state = vboSet::INITIALIZED;
-	m_vboManager.updateFlags = 0;
+	m_vboManager.updateFlags = vboSet::UPDATE_NONE;
 
 	return true;
 }

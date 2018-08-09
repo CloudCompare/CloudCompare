@@ -36,7 +36,6 @@
 #include "ccImage.h"
 #include "cc2DLabel.h"
 #include "ccMaterial.h"
-#include "ccColorRampShader.h"
 #include "ccPolyline.h"
 #include "ccScalarField.h"
 #include "ccGenericGLDisplay.h"

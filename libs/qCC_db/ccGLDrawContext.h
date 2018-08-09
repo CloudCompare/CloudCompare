@@ -25,7 +25,6 @@
 
 class ccGenericGLDisplay;
 class ccScalarField;
-class ccColorRampShader;
 class ccShader;
 
 //! Display parameters of a 3D entity
@@ -128,9 +127,7 @@ struct ccGLDrawContext
 
 	//! Currently displayed color scale (the corresponding scalar field in fact)
 	ccScalarField* sfColorScaleToDisplay;
-	
-	//! Shader for fast dynamic color ramp lookup
-	ccColorRampShader* colorRampShader;
+
 	//! Custom rendering shader (OpenGL 3.3+)
 	ccShader* customRenderingShader;
 	//! Use VBOs for faster display
@@ -183,7 +180,6 @@ struct ccGLDrawContext
 		, decimateMeshOnMove(true)
 		, minLODTriangleCount(2500000)
 		, sfColorScaleToDisplay(0)
-		, colorRampShader(0)
 		, customRenderingShader(0)
 		, useVBOs(true)
 		, labelMarkerSize(5)

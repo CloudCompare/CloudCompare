@@ -4209,7 +4209,9 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	}
 	
 	bool mouseHasMoved = m_mouseMoved;
-	//setLODEnabled(false, false); //DGM: why?
+	// Enabling LOD on mouse move event doesn't auto reset
+	// Even if it did, LOD doesn't disable itself sometimes
+	setLODEnabled(false, false);
 
 	//reset to default state
 	m_mouseButtonPressed = false;

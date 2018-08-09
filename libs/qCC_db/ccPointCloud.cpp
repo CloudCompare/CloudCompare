@@ -2198,13 +2198,14 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		assert(!glParams.showSF || hasDisplayedScalarField());
 
 		// L.O.D. display
-		DisplayDesc toDisplay(0, size());
+		LODLevelDesc toDisplay(0, size());
 		if (context.decimateCloudOnMove && toDisplay.count > context.minLODPointCount && MACRO_LODActivated(context))
 		{
 			bool skipLoD = false;
 
 			//is there a LoD structure associated yet?
-			if (!m_lod || !m_lod->isBroken())
+			//if (!m_lod || !m_lod->isBroken())
+			if(false)
 			{
 				if (!m_lod || m_lod->isNull())
 				{
@@ -3982,7 +3983,7 @@ static bool CatchGLErrors(GLenum err, const char* context)
 	return true;
 }
 
-bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, const DisplayDesc& toDisplay)
+bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, const LODLevelDesc& toDisplay)
 {
 
 	if (m_vboManager.state == vboSet::FAILED)
@@ -4001,12 +4002,20 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 	if (m_vboManager.state == vboSet::INITIALIZED)
 	{
 		//let's check if something has changed
-		if (glParams.showColors && (!m_vboManager.hasColors || m_vboManager.colorIsSF))
+
+		if (m_currentLodDesc != toDisplay)
+		{
+			m_vboManager.updateFlags |= vboSet::UPDATE_POINTS;
+		}
+
+		if (m_vboManager.updateFlags & vboSet::UPDATE_POINTS && m_vboManager.hasColors
+			|| glParams.showColors && (!m_vboManager.hasColors || m_vboManager.colorIsSF))
 		{
 			m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
 		}
 
-		if (glParams.showSF
+		if (m_vboManager.updateFlags & vboSet::UPDATE_POINTS && m_vboManager.hasColors
+			|| glParams.showSF
 			&& (!m_vboManager.hasColors
 				|| !m_vboManager.colorIsSF
 				|| m_vboManager.sourceSF != m_currentDisplayedScalarField
@@ -4015,12 +4024,14 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
 		}
 
-		if (glParams.showNorms && !m_vboManager.hasNormals)
+		if (m_vboManager.updateFlags & vboSet::UPDATE_POINTS && m_vboManager.hasNormals
+			|| glParams.showNorms && !m_vboManager.hasNormals)
 		{
 			m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS;
 		}
 
-		if (hasNormals() && glParams.showNormWhiskers && !m_vboManager.hasNormalWhiskers)
+		if (m_vboManager.updateFlags & vboSet::UPDATE_POINTS && m_vboManager.hasNormalWhiskers
+			|| hasNormals() && glParams.showNormWhiskers && !m_vboManager.hasNormalWhiskers)
 		{
 			m_vboManager.updateFlags |= vboSet::UPDATE_NORMAL_WHISKERS;
 		}
@@ -4169,6 +4180,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 
 	m_vboManager.state = vboSet::INITIALIZED;
 	m_vboManager.updateFlags = vboSet::UPDATE_NONE;
+	m_currentLodDesc = toDisplay;
 
 	return true;
 }
@@ -4181,7 +4193,6 @@ void ccPointCloud::releaseVBOs()
 	m_vboManager.points.destroy();
 	m_vboManager.normals.destroy();
 	m_vboManager.colors.destroy();
-	m_vboManager.hidden.destroy();
 
 	m_vboManager.state = vboSet::NEW;
 }

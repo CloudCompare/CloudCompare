@@ -749,46 +749,8 @@ protected:
 
 protected: // VBO
 
-		   //description of the (sub)set of points to display
-	struct DisplayDesc : LODLevelDesc
-	{
-		//! Default constructor
-		DisplayDesc()
-			: LODLevelDesc()
-			, endIndex(0)
-			, decimStep(1)
-			, indexMap(nullptr)
-		{}
-
-		//! Constructor from a start index and a count value
-		DisplayDesc(unsigned startIndex, unsigned count)
-			: LODLevelDesc(startIndex, count)
-			, endIndex(startIndex + count)
-			, decimStep(1)
-			, indexMap(nullptr)
-		{}
-
-		//! Set operator
-		DisplayDesc& operator = (const LODLevelDesc& desc)
-		{
-			startIndex = desc.startIndex;
-			count = desc.count;
-			endIndex = startIndex + count;
-			return *this;
-		}
-
-		//! Last index (excluded)
-		unsigned endIndex;
-
-		//! Decimation step (for non-octree based LoD)
-		unsigned decimStep;
-
-		//! Map of indexes (to invert the natural order)
-		LODIndexSet* indexMap;
-	};
-
 	//! Init/updates VBOs
-	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, const DisplayDesc& toDisplay);
+	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, const LODLevelDesc& toDisplay);
 
 	//! Release VBOs
 	void releaseVBOs();
@@ -825,7 +787,6 @@ protected: // VBO
 		QOpenGLBuffer normals;
 		QOpenGLBuffer normalWhiskers;
 		QOpenGLBuffer colors;
-		QOpenGLBuffer hidden;
 		bool hasColors;
 		bool hasNormals;
 		bool hasNormalWhiskers;
@@ -855,6 +816,7 @@ protected: //Level of Detail (LOD)
 
 	//! L.O.D. structure
 	ccPointCloudLOD* m_lod;
+	LODLevelDesc m_currentLodDesc;
 
 protected: //waveform (e.g. from airborne scanners)
 

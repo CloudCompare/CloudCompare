@@ -110,6 +110,7 @@ protected slots:
 	void fitPlaneToGeoObject(); //calculates best-fit plane for the upper and lower surfaces of the selected GeoObject
 	void recalculateFitPlanes(); //recalcs fit planes for traces and GeoObjects
 	void estimateStructureNormals(); //Estimate the normal vector to the structure this trace represents at each point in this trace.
+	void estimateSpacing(); //Calculate the spacing between objects with defined structure normals
 	void convertToPointCloud(); //converts selected traces or geoObjects to point clouds
 	void distributeSelection(); //distributes selected objects into GeoObjects with the same name
 	void exportToSVG(); //exports current view to SVG

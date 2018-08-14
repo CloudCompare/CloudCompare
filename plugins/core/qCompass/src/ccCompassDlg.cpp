@@ -156,17 +156,20 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_toPointCloud = new QAction("Convert to point cloud", this);
 	m_distributeSelection = new QAction("Distribute to GeoObjects", this);
 	m_estimateNormals = new QAction("Estimate Structure Normals", this);
+	m_estimateSpacing = new QAction("Estimate true spacing", this);
 
 	m_recalculateFitPlanes->setToolTip("Recalculates all fit-planes deriving from traces and GeoObjects (but not those calculated with the Plane Tool).");
 	m_toPointCloud->setToolTip("Converts the selected GeoObject(s) or individual traces to a point cloud (typically for proximity analysis).");
 	m_distributeSelection->setToolTip("Distributes the selected objects into GeoObjects that have matching names.");
 	m_estimateNormals->setToolTip("Estimate trace structure normals with maximum a-postiori plane fitting algorithm.");
+	m_estimateSpacing->setToolTip("Uses structure normals to estimate the spacing of selected structures perpendicular to their orientation");
 
 	m_research_menu->addAction(m_recalculateFitPlanes);
 	m_research_menu->addAction(m_estimateNormals);
+	m_research_menu->addAction(m_estimateSpacing);
 	m_research_menu->addAction(m_distributeSelection);
 	m_research_menu->addAction(m_toPointCloud);
-
+	
 	extraModeButton->setPopupMode(QToolButton::InstantPopup);
 	extraModeButton->setMenu(m_pairpicking_menu);
 

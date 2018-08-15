@@ -633,7 +633,7 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		return;
 
 	//we display it in the 2D layer in fact!
-	ccBBox bBox = getOwnBB();
+	ccBBox bBox = getBB_recursive();
 	if (!bBox.isValid())
 		return;
 	
@@ -717,11 +717,13 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 			{
 				toggleClipPlanes(context, false);
 			}
-
-			//draw name in 3D (we display it in the 2D foreground layer in fact!)
-			if (m_showNameIn3D && MACRO_Draw2D(context) && MACRO_Foreground(context) && !MACRO_DrawEntityNames(context))
-				drawNameIn3D(context);
 		}
+	}
+
+	//draw name - container objects are not visible but can still show a name
+	if (m_currentDisplay == context.display && m_showNameIn3D && MACRO_Draw2D(context) && MACRO_Foreground(context) && !MACRO_DrawEntityNames(context))
+	{
+		drawNameIn3D(context);
 	}
 
 	//draw entity's children

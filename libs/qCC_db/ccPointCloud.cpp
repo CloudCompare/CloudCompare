@@ -2203,8 +2203,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			bool skipLoD = false;
 
 			//is there a LoD structure associated yet?
-			//if (!m_lod || !m_lod->isBroken())
-			if(false)
+			if (!m_lod || !m_lod->isBroken())
 			{
 				if (!m_lod || m_lod->isNull())
 				{

@@ -33,21 +33,52 @@
 class ccPointCloud;
 class ccPointCloudLODThread;
 
+//! L.O.D. indexes set
+typedef std::vector<unsigned> LODIndexSet;
+
 //! Level descriptor
 struct LODLevelDesc
 {
 	//! Default constructor
-	LODLevelDesc() : startIndex(0), count(0) {}
+	LODLevelDesc() : startIndex(0), endIndex(0), count(0), decimStep(1), indexMap(nullptr) {}
 	//! Constructor from a start index and a count value
-	LODLevelDesc(unsigned _startIndex, unsigned _count) : startIndex(_startIndex), count(_count) {}
+	LODLevelDesc(unsigned _startIndex, unsigned _count) : startIndex(_startIndex), endIndex(_startIndex + _count), count(_count), decimStep(1), indexMap(nullptr) {}
+
+	LODLevelDesc& operator = (const LODLevelDesc& desc)
+	{
+		startIndex = desc.startIndex;
+		endIndex = desc.endIndex;
+		count = desc.count;
+		decimStep = desc.decimStep;
+		indexMap = desc.indexMap;
+		return *this;
+	}
+
+	bool operator == (const LODLevelDesc& desc)
+	{
+		return startIndex == desc.startIndex
+			&& endIndex == desc.endIndex
+			&& decimStep == desc.decimStep
+			&& count == desc.count
+			&& indexMap == desc.indexMap;
+	}
+
+	bool operator != (const LODLevelDesc& desc)
+	{
+		return !(*this == desc);
+	}
+
 	//! Start index (refers to the 'indexes' table)
 	unsigned startIndex;
+	//! Last index (excluded)
+	unsigned endIndex;
 	//! Index count for this level
 	unsigned count;
+	//! Decimation step (for non-octree based LoD)
+	unsigned decimStep;
+	//! Map of indexes (to invert the natural order)
+	LODIndexSet* indexMap;
 };
-
-//! L.O.D. indexes set
-typedef std::vector<unsigned> LODIndexSet;
 
 //! L.O.D. (Level of Detail) structure
 class ccPointCloudLOD

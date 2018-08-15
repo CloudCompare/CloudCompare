@@ -45,7 +45,6 @@
 class QOpenGLDebugMessage;
 
 class ccBBox;
-class ccColorRampShader;
 class ccFrameBufferObject;
 class ccGlFilter;
 class ccHObject;
@@ -457,9 +456,6 @@ public:
 
 	//! Returns the zoom value equivalent to the current camera position (perspective only)
 	float computePerspectiveZoom() const;
-
-	//! Returns whether the ColorRamp shader is supported or not
-	bool hasColorRampShader() const { return m_colorRampShader != nullptr; }
 
 	//! Returns whether rectangular picking is allowed or not
 	bool isRectangularPickingAllowed() const { return m_allowRectangularEntityPicking; }
@@ -1264,8 +1260,6 @@ protected: //members
 	//! Whether FBO should be updated (or simply displayed as a texture = faster!)
 	bool m_updateFBO;
 
-	// Color ramp shader
-	ccColorRampShader* m_colorRampShader;
 	// Custom rendering shader (OpenGL 3.3+)
 	ccShader* m_customRenderingShader;
 

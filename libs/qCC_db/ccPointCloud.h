@@ -30,14 +30,15 @@
 #include "ccColorScale.h"
 #include "ccNormalVectors.h"
 #include "ccWaveform.h"
+#include "ccPointCloudLOD.h"
 
 //Qt
-#include <QGLBuffer>
+#include <QOpenGLBuffer>
+#include <qimage.h>
 
 class ccScalarField;
 class ccPolyline;
 class ccMesh;
-class QGLBuffer;
 class ccProgressDialog;
 class ccPointCloudLOD;
 
@@ -749,28 +750,10 @@ protected:
 protected: // VBO
 
 	//! Init/updates VBOs
-	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams);
+	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, const LODLevelDesc& toDisplay);
 
 	//! Release VBOs
 	void releaseVBOs();
-
-	class VBO : public QGLBuffer
-	{
-	public:
-		int rgbShift;
-		int normalShift;
-
-		//! Inits the VBO
-		/** \return the number of allocated bytes (or -1 if an error occurred)
-		**/
-		int init(int count, bool withColors, bool withNormals, bool* reallocated = nullptr);
-
-		VBO()
-			: QGLBuffer(QGLBuffer::VertexBuffer)
-			, rgbShift(0)
-			, normalShift(0)
-		{}
-	};
 
 	//! VBO set
 	struct vboSet
@@ -780,29 +763,37 @@ protected: // VBO
 
 		//! Update flags
 		enum UPDATE_FLAGS {
+			UPDATE_NONE = 0,
 			UPDATE_POINTS = 1,
 			UPDATE_COLORS = 2,
 			UPDATE_NORMALS = 4,
-			UPDATE_ALL = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS
+			UPDATE_HIDDEN = 8,
+			UPDATE_NORMAL_WHISKERS = 16,
+			UPDATE_ALL = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS | UPDATE_HIDDEN | UPDATE_NORMAL_WHISKERS
 		};
 
 		vboSet()
 			: hasColors(false)
 			, colorIsSF(false)
-			, sourceSF(nullptr)
 			, hasNormals(false)
-			, totalMemSizeBytes(0)
+			, hasNormalWhiskers(false)
+			, sourceSF(nullptr)
 			, updateFlags(0)
+			, pointSize(0)
 			, state(NEW)
 		{}
 
-		std::vector<VBO*> vbos;
+		QOpenGLBuffer points;
+		QOpenGLBuffer normals;
+		QOpenGLBuffer normalWhiskers;
+		QOpenGLBuffer colors;
 		bool hasColors;
+		bool hasNormals;
+		bool hasNormalWhiskers;
 		bool colorIsSF;
 		ccScalarField* sourceSF;
-		bool hasNormals;
-		int totalMemSizeBytes;
 		int updateFlags;
+		unsigned char pointSize;
 
 		//! Current state
 		STATES state;
@@ -810,12 +801,6 @@ protected: // VBO
 
 	//! Set of VBOs attached to this cloud
 	vboSet m_vboManager;
-
-	//per-block data transfer to the GPU (VBO or standard mode)
-	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkColorPointer (const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkSFPointer    (const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
 
 public: //Level of Detail (LOD)
 
@@ -831,6 +816,7 @@ protected: //Level of Detail (LOD)
 
 	//! L.O.D. structure
 	ccPointCloudLOD* m_lod;
+	LODLevelDesc m_currentLodDesc;
 
 protected: //waveform (e.g. from airborne scanners)
 

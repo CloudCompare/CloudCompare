@@ -22,7 +22,7 @@
 //qCC_db
 #include <cc2DLabel.h>
 #include <ccClipBox.h>
-#include <ccColorRampShader.h>
+#include <ccShader.h>
 #include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
 #include <ccPolyline.h>
@@ -40,6 +40,7 @@
 #include <QMimeData>
 #include <QOpenGLDebugLogger>
 #include <QOpenGLTexture>
+#include <QPainter>
 #include <QPushButton>
 #include <QSettings>
 #include <QTouchEvent>
@@ -273,7 +274,6 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_fbo2(nullptr)
 	, m_alwaysUseFBO(false)
 	, m_updateFBO(true)
-	, m_colorRampShader(nullptr)
 	, m_customRenderingShader(nullptr)
 	, m_activeGLFilter(nullptr)
 	, m_glFiltersEnabled(false)
@@ -450,9 +450,6 @@ ccGLWindow::~ccGLWindow()
 
 	delete m_activeGLFilter;
 	m_activeGLFilter = nullptr;
-
-	delete m_colorRampShader;
-	m_colorRampShader = nullptr;
 
 	delete m_customRenderingShader;
 	m_customRenderingShader = nullptr;
@@ -782,58 +779,6 @@ bool ccGLWindow::initialize()
 			else if (!m_silentInitialization)
 			{
 				ccLog::Warning("[3D View %i] GL filters unavailable (FBO not supported)", m_uniqueID);
-			}
-
-			//color ramp shader
-			if (!m_colorRampShader)
-			{
-				//we will update global parameters
-				params.colorScaleShaderSupported = false;
-
-				GLint maxBytes = 0;
-				glFunc->glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &maxBytes);
-
-				const GLint minRequiredBytes = ccColorRampShader::MinRequiredBytes();
-				if (maxBytes < minRequiredBytes)
-				{
-					if (!m_silentInitialization)
-						ccLog::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader! (max=%i/%i bytes)", m_uniqueID, maxBytes, minRequiredBytes);
-				}
-				else
-				{
-					ccColorRampShader* colorRampShader = new ccColorRampShader();
-					QString shadersPath = ccGLWindow::getShadersPath();
-					QString error;
-					if (!colorRampShader->loadProgram(QString(), shadersPath + QString("/ColorRamp/color_ramp.frag"), error))
-					{
-						if (!m_silentInitialization)
-							ccLog::Warning(QString("[3D View %1] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
-						delete colorRampShader;
-						colorRampShader = nullptr;
-					}
-					else
-					{
-						if (!m_silentInitialization)
-							ccLog::Print("[3D View %i] Color ramp shader loaded successfully", m_uniqueID);
-						m_colorRampShader = colorRampShader;
-						params.colorScaleShaderSupported = true;
-
-						//if global parameter is not yet defined
-						if (!getDisplayParameters().isInPersistentSettings("colorScaleUseShader"))
-						{
-							bool shouldUseShader = true;
-							if (!vendorName || vendorNameStr.startsWith("ATI") || vendorNameStr.startsWith("VMWARE"))
-							{
-								if (!m_silentInitialization)
-								{
-									ccLog::Warning("[3D View %i] Color ramp shader will remain disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)", m_uniqueID, vendorName);
-								}
-								shouldUseShader = false;
-							}
-							params.colorScaleUseShader = shouldUseShader;
-						}
-					}
-				}
 			}
 
 			//stereo mode
@@ -2168,12 +2113,6 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 		m_activeShader->bind();
 	}
 
-	//color ramp shader for fast dynamic color ramp lookup-up
-	if (m_colorRampShader && getDisplayParameters().colorScaleUseShader)
-	{
-		CONTEXT.colorRampShader = m_colorRampShader;
-	}
-
 	//custom rendering shader (OpenGL 3.3+)
 	{
 		//FIXME: work in progress
@@ -2364,7 +2303,6 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	}
 
 	//reset context
-	CONTEXT.colorRampShader = nullptr;
 	CONTEXT.customRenderingShader = nullptr;
 
 	//we disable shader (if any)
@@ -4208,7 +4146,9 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	}
 	
 	bool mouseHasMoved = m_mouseMoved;
-	//setLODEnabled(false, false); //DGM: why?
+	// Enabling LOD on mouse move event doesn't auto reset
+	// Even if it did, LOD doesn't disable itself sometimes
+	setLODEnabled(false, false);
 
 	//reset to default state
 	m_mouseButtonPressed = false;

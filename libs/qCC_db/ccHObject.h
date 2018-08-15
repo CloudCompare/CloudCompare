@@ -310,6 +310,7 @@ public: //display
 	ccHObject_recursive_call0(toggleSF, toggleSF_recursive)
 	ccHObject_recursive_call0(toggleShowName, toggleShowName_recursive)
 	ccHObject_recursive_call0(toggleMaterials, toggleMaterials_recursive)
+	ccHObject_recursive_call0(toggleNormalWhiskers, toggleNormalWhiskers_recursive)
 
 	//! Transfers the entity from one display to the other
 	inline virtual void transferDisplay(ccGenericGLDisplay* oldDisplay, ccGenericGLDisplay* newDisplay)

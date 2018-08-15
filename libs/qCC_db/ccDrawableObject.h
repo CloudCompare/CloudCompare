@@ -96,6 +96,13 @@ public:  //drawing and drawing options
 	//! Toggles normals display state
 	inline virtual void toggleNormals() { showNormals(!normalsShown()); }
 
+	//! Returns whether normals are shown or not
+	inline virtual bool normalWhiskersShown() const { return m_normalWhiskersDisplayed; }
+	//! Sets normals visibility
+	inline virtual void showNormalWhiksers(bool state) { m_normalWhiskersDisplayed = state; }
+	//! Toggles normal whiskers display state
+	inline virtual void toggleNormalWhiskers() { showNormalWhiksers(!normalWhiskersShown()); }
+
 public: //scalar fields
 
 	//! Returns whether an active scalar field is available or not
@@ -259,6 +266,8 @@ protected: //members
 	bool m_normalsDisplayed;
 	//! Specifies whether scalar field should be displayed
 	bool m_sfDisplayed;
+	//! Specifies whether normal whiskers should be displayed
+	bool m_normalWhiskersDisplayed;
 
 	//! Temporary (unique) color
 	ccColor::Rgb m_tempColor;

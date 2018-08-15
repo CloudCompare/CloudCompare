@@ -1857,6 +1857,11 @@ void ccPropertiesTreeDelegate::updateDisplay()
 				objectIsDisplayed = true;
 			}
 		}
+		// Allows show name toggle on normally non-visible objects to update the screen
+		else if (object->isKindOf(CC_TYPES::HIERARCHY_OBJECT))
+		{
+			objectIsDisplayed = true;
+		}
 	}
 
 	if (objectIsDisplayed)

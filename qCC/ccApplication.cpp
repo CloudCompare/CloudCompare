@@ -15,6 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
+#include <QtGlobal>
+
 #ifdef Q_OS_MAC
 #include <QFileOpenEvent>
 #endif

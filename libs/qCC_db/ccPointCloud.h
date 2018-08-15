@@ -131,7 +131,7 @@ public: //clone, copy, etc.
 		\param ignoreChildren [optional] whether to ignore the cloud's children or not (in which case they will be cloned as well)
 		\return a copy of this entity
 	**/
-	ccPointCloud* cloneThis(ccPointCloud* destCloud = 0, bool ignoreChildren = false);
+	ccPointCloud* cloneThis(ccPointCloud* destCloud = nullptr, bool ignoreChildren = false);
 
 	//inherited from ccGenericPointCloud
 	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = nullptr, bool ignoreChildren = false) override;
@@ -147,7 +147,7 @@ public: //features deletion/clearing
 	//! Clears the entity from all its points and features
 	/** Display parameters are also reseted to their default values.
 	**/
-	virtual void clear();
+	void clear() override;
 
 	//! Erases the cloud points
 	/** Prefer ccPointCloud::clear by default.
@@ -227,7 +227,7 @@ public: //features allocation/resize
 		population. Only the already allocated features will be re-reserved.
 		\return true if ok, false if there's not enough memory
 	**/
-	virtual bool reserve(unsigned numberOfPoints);
+	bool reserve(unsigned numberOfPoints) override;
 
 	//! Resizes all the active features arrays
 	/** This method is meant to be called after having increased the cloud
@@ -235,7 +235,7 @@ public: //features allocation/resize
 		reserved size). Otherwise, it fills all new elements with blank values.
 		\return true if ok, false if there's not enough memory
 	**/
-	virtual bool resize(unsigned numberOfPoints);
+	bool resize(unsigned numberOfPoints) override;
 
 	//! Removes unused capacity
 	inline void shrinkToFit() { if (size() < capacity()) resize(size()); }
@@ -252,9 +252,9 @@ public: //scalar-fields management
 	void setCurrentDisplayedScalarField(int index);
 
 	//inherited from base class
-	virtual void deleteScalarField(int index);
-	virtual void deleteAllScalarFields();
-	virtual int addScalarField(const char* uniqueName);
+	void deleteScalarField(int index) override;
+	void deleteAllScalarFields() override;
+	int addScalarField(const char* uniqueName) override;
 
 	//! Returns whether color scale should be displayed or not
 	bool sfColorScaleShown() const;
@@ -436,7 +436,7 @@ public: //other methods
 	CCVector3 computeGravityCenter();
 
 	//inherited from base class
-	virtual void invalidateBoundingBox();
+	void invalidateBoundingBox() override;
 
 	//inherited from ccHObject
 	virtual void getDrawingParameters(glDrawParams& params) const override;
@@ -723,7 +723,7 @@ protected:
 	//inherited from PointCloud
 	/** \warning Doesn't handle scan grids!
 	**/
-	virtual void swapPoints(unsigned firstIndex, unsigned secondIndex);
+	void swapPoints(unsigned firstIndex, unsigned secondIndex) override;
 
 	//! Colors
 	ColorsTableType* m_rgbColors;

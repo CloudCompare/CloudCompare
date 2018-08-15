@@ -189,7 +189,7 @@ public: //general
 	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//inherited from ccSensor
-	virtual bool applyViewport(ccGenericGLDisplay* win = 0) override;
+	virtual bool applyViewport(ccGenericGLDisplay* win = nullptr) override;
 
 public: //getters and setters
 
@@ -353,9 +353,9 @@ public: //orthorectification tools
 									CCLib::GenericIndexedCloud* keypoints3D,
 									std::vector<KeyPoint>& keypointsImage,
 									double& pixelSize,
-									double* minCorner = 0,
-									double* maxCorner = 0,
-									double* realCorners = 0) const;
+									double* minCorner = nullptr,
+									double* maxCorner = nullptr,
+									double* realCorners = nullptr) const;
 
 	//! Direct ortho-rectification of an image (as image)
 	/** No keypoint is required. The user must specify however the
@@ -373,9 +373,9 @@ public: //orthorectification tools
 										PointCoordinateType altitude,
 										double& pixelSize,
 										bool undistortImages = true,
-										double* minCorner = 0,
-										double* maxCorner = 0,
-										double* realCorners = 0) const;
+										double* minCorner = nullptr,
+										double* maxCorner = nullptr,
+										double* realCorners = nullptr) const;
 
 	//! Projective ortho-rectification of multiple images (as image files)
 	/** \param images set of N calibrated images (i.e. images with their associated sensor)
@@ -391,9 +391,9 @@ public: //orthorectification tools
 	static bool OrthoRectifyAsImages(std::vector<ccImage*> images,
 									double a[], double b[], double c[],
 									unsigned maxSize,
-									QDir* outputDir = 0,
-									std::vector<ccImage*>* orthoRectifiedImages = 0,
-									std::vector<std::pair<double,double> >* relativePos = 0);
+									QDir* outputDir = nullptr,
+									std::vector<ccImage*>* orthoRectifiedImages = nullptr,
+									std::vector<std::pair<double,double> >* relativePos = nullptr);
 
 	//! Computes ortho-rectification parameters for a given image
 	/** Requires at least 4 key points!
@@ -532,7 +532,7 @@ public:
 
 	//! Default constructor
 	ccOctreeFrustumIntersector()
-		: m_associatedOctree(0)
+		: m_associatedOctree(nullptr)
 	{
 	}
 

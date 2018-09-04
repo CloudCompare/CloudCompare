@@ -81,6 +81,8 @@ public:
 
 	//--
 	QAction *m_noteTool; //activates note tool
+	QAction *m_loadFoliations; //load field data from a file
+	QAction *m_loadLineations; //load field data from a file
 	QAction *m_toSVG; //export to svg
 	
 

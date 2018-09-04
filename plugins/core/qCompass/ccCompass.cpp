@@ -23,6 +23,7 @@
 #include <qcheckbox.h>
 #include <ccPickingHub.h>
 #include <ccProgressDialog.h>
+#include <qcombobox.h>
 
 #include "ccCompass.h"
 #include "ccCompassDlg.h"
@@ -251,7 +252,8 @@ void ccCompass::doAction()
 		ccCompassDlg::connect(m_dlg->m_estimateNormals, SIGNAL(triggered()), this, SLOT(estimateStructureNormals()));
 		ccCompassDlg::connect(m_dlg->m_estimateSpacing, SIGNAL(triggered()), this, SLOT(estimateSpacing()));
 		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNote()));
-
+		ccCompassDlg::connect(m_dlg->m_loadFoliations, SIGNAL(triggered()), this, SLOT(importFoliations()));
+		ccCompassDlg::connect(m_dlg->m_loadLineations, SIGNAL(triggered()), this, SLOT(importLineations()));
 		ccCompassDlg::connect(m_dlg->m_toSVG, SIGNAL(triggered()), this, SLOT(exportToSVG()));
 
 		//settings menu
@@ -1279,7 +1281,7 @@ void ccCompass::estimateStructureNormals()
 	QDialog dlg(m_app->getMainWindow());
 	QVBoxLayout* vbox = new QVBoxLayout();
 	QLabel minSizeLabel("Minimum trace size (points):");
-	QLineEdit minSizeText("100"); minSizeText.setValidator(new QIntValidator(5, std::numeric_limits<int>::max()));
+	QLineEdit minSizeText("500"); minSizeText.setValidator(new QIntValidator(5, std::numeric_limits<int>::max()));
 	QLabel maxSizeLabel("Maximum trace size (points):");
 	QLineEdit maxSizeText("1000"); maxSizeText.setValidator(new QIntValidator(50, std::numeric_limits<int>::max()));
 	QLabel likPowerLabel("Likelihood power:");
@@ -1289,7 +1291,7 @@ void ccCompass::estimateStructureNormals()
 	QLabel distanceLabel("Distance cutoff (m):");
 	QLineEdit distanceText("10.0"); distanceText.setValidator(new QDoubleValidator(0, std::numeric_limits<double>::max(), 6));
 	QLabel sampleLabel("MCMC Samples:");
-	QLineEdit sampleText("0"); sampleText.setValidator(new QIntValidator(0, std::numeric_limits<int>::max()));
+	QLineEdit sampleText("0"); sampleText.setValidator(new QIntValidator(0, 10000)); //>10000 samples per point will break even the best computer!
 	QLabel strideLabel("MCMC Stride (radians):");
 	QLineEdit strideText("0.025"); strideText.setValidator(new QDoubleValidator(0.0000001, 0.5, 6));
 
@@ -1580,7 +1582,7 @@ void ccCompass::estimateStructureNormals()
 			//***********************************************************************************************
 			//declare variables used in nested loops below
 			int n;
-			int dof = maxsize - minsize - 1; //degrees of freedom
+			int dof = 10; //maxsize - minsize - 1; //degrees of freedom
 			double mnx, mny, mnz, lpd, lsf, phi, theta, alpha, len;
 			bool hasValidSNE = false; //becomes true once a valid plane is found
 			std::vector<double> bestPd(px.size(), std::numeric_limits<double>::lowest()); //best (log) probability density observed for each point
@@ -1673,6 +1675,10 @@ void ccCompass::estimateStructureNormals()
 					CCLib::SquareMatrixd cov(3); //convert to covariance matrix
 					cov.m_values[0][0] = X.m_values[0][0] / n; cov.m_values[1][1] = X.m_values[1][1] / n; cov.m_values[2][2] = X.m_values[2][2] / n;
 					cov.m_values[0][1] = X.m_values[0][1] / n; cov.m_values[0][2] = X.m_values[0][2] / n; cov.m_values[1][2] = X.m_values[1][2] / n;
+
+					//update X to reflect the dof (rather than the true number of samples, as these are not truly independent due to spatial covariance)
+					X.m_values[0][0] = cov.m_values[0][0] * dof; X.m_values[1][1] = cov.m_values[1][1] * dof; X.m_values[2][2] = cov.m_values[2][2] * dof;
+					X.m_values[0][1] = cov.m_values[0][1] * dof; X.m_values[0][2] = cov.m_values[0][2] * dof; X.m_values[1][2] = cov.m_values[1][2] * dof;
 
 					//fill symmetric parts
 					X.m_values[1][0] = X.m_values[0][1]; cov.m_values[1][0] = cov.m_values[0][1];
@@ -2583,6 +2589,149 @@ void ccCompass::writeToLower() //new digitiziation will be added to the GeoObjec
 	m_mapDlg->setInteriorButton->setChecked(false);
 	m_mapDlg->setUpperButton->setChecked(false);
 	m_mapDlg->setLowerButton->setChecked(true);
+}
+
+//convert a point cloud containing field points (x,y,z) and dip+dip-direction scalar fields to planes for visualisation.
+void ccCompass::importFoliations()
+{
+	//get selected point cloud
+	std::vector<ccHObject*> sel = m_app->getSelectedEntities();
+	if (sel.size() == 0)
+	{
+		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	if (!sel[0]->isA(CC_TYPES::POINT_CLOUD))
+	{
+		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	//get point cloud object
+	ccPointCloud* cld = static_cast<ccPointCloud*>(sel[0]);
+
+	//get user to select scalar field for dip & dip-directon
+	QDialog dlg(m_app->getMainWindow());
+	QVBoxLayout* vbox = new QVBoxLayout();
+	QLabel dipLabel("Dip Field:");
+	QLabel dipDirLabel("Dip-Direction Field:");
+	QLabel sizeLabel("Plane Size");
+	QComboBox dipDirCombo(m_app->getMainWindow());
+	QComboBox dipCombo(m_app->getMainWindow());
+	QLineEdit planeSize("2.0"); planeSize.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
+
+	//fill combo boxes with field names
+	//std::vector<QString> fields;
+	//std::vector<int> idx;
+	for (int i = 0; i < cld->getNumberOfScalarFields(); i++)
+	{
+		dipDirCombo.addItem(cld->getScalarFieldName(i));
+		dipCombo.addItem(cld->getScalarFieldName(i));
+		//fields.push_back(cld->getScalarFieldName(i));
+		//idx.push_back(i);
+	}
+
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+
+	vbox->addWidget(&dipLabel);
+	vbox->addWidget(&dipCombo);
+	vbox->addWidget(&dipDirLabel);
+	vbox->addWidget(&dipDirCombo);
+	vbox->addWidget(&buttonBox);
+	vbox->addWidget(&sizeLabel);
+	vbox->addWidget(&planeSize);
+	dlg.setLayout(vbox);
+
+	//execute dialog and get results
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return; //bail!
+	}
+
+
+	//get values
+	int dipSF = cld->getScalarFieldIndexByName(dipCombo.currentText().toStdString().c_str());
+	int dipDirSF = cld->getScalarFieldIndexByName(dipDirCombo.currentText().toStdString().c_str());
+	double size = planeSize.text().toDouble();
+	if (dipSF == dipDirSF)
+	{
+		m_app->dispToConsole("Error: Dip and Dip-Direction scalar fields must be different!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	//loop through points
+	float dip, dipdir;
+	for (int p = 0; p < cld->size(); p++)
+	{
+		dip = cld->getScalarField(dipSF)->at(p);
+		dipdir = cld->getScalarField(dipSF)->at(p);
+		CCVector3 Cd = *cld->getPoint(p);
+
+		//build plane and get its orientation 
+		ccPlane* plane = new ccPlane(QString("%1/%2").arg((int)dip, 2, 10, QChar('0')).arg((int)dipdir, 3, 10, QChar('0')));
+		plane->showNameIn3D(true);
+		cld->addChild(plane);
+		m_app->addToDB(plane, false, true, false, false);
+		CCVector3 N = plane->getNormal();
+		CCVector3 C = plane->getCenter();
+
+		//figure out transform (blatantly stolen from ccPlaneEditDlg::updatePlane())
+		CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(dip, dipdir); //why do I need to subtract 180 to get a sensible result??!
+		ccGLMatrix trans;
+		bool needToApplyTrans = false;
+		bool needToApplyRot = false;
+
+		needToApplyRot = (fabs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
+		needToApplyTrans = needToApplyRot || ((C - Cd).norm2d() != 0);
+
+		if (needToApplyTrans)
+		{
+			trans.setTranslation(-C);
+			needToApplyTrans = true;
+		}
+		if (needToApplyRot)
+		{
+			ccGLMatrix rotation;
+			//special case: plane parallel to XY
+			if (fabs(N.z) > PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
+			{
+				ccGLMatrix rotX; rotX.initFromParameters(dip * CC_DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
+				ccGLMatrix rotZ; rotZ.initFromParameters(dipdir * CC_DEG_TO_RAD, CCVector3(0, 0, -1), CCVector3(0, 0, 0));
+				rotation = rotZ * rotX;
+			}
+			else //general case
+			{
+				rotation = ccGLMatrix::FromToRotation(N, Nd);
+			}
+			trans = rotation * trans;
+		}
+		if (needToApplyTrans)
+		{
+			trans.setTranslation(trans.getTranslationAsVec3D() + Cd);
+		}
+		if (needToApplyRot || needToApplyTrans)
+		{
+			plane->applyGLTransformation_recursive(&trans);
+
+			//ccLog::Print("[Plane edit] Applied transformation matrix:");
+			//ccLog::Print(trans.toString(12, ' ')); //full precision
+		}
+
+		plane->setXWidth(size, false);
+		plane->setYWidth(size, true);
+
+	}
+
+
+}
+
+void ccCompass::importLineations()
+{
+	//TODO
+	m_app->dispToConsole("Lineations");
 }
 
 //save the current view to an SVG file

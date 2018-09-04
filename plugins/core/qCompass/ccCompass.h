@@ -113,6 +113,8 @@ protected slots:
 	void estimateSpacing(); //Calculate the spacing between objects with defined structure normals
 	void convertToPointCloud(); //converts selected traces or geoObjects to point clouds
 	void distributeSelection(); //distributes selected objects into GeoObjects with the same name
+	void importFoliations(); //import foliation data
+	void importLineations(); //import lineation data
 	void exportToSVG(); //exports current view to SVG
 
 	//map mode dialog

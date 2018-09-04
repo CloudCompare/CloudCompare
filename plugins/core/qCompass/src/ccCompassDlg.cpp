@@ -114,7 +114,9 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_research_menu = new QMenu(this);
 	m_research_menu->setTitle("Research");
 
-	m_toSVG = new QAction("Export SVG", this);
+	m_loadFoliations = new QAction("Import Foliations...", this);
+	m_loadLineations = new QAction("Import Lineations...", this);
+	m_toSVG = new QAction("Export SVG...", this);
 	m_noteTool = new QAction("Add note", this);
 	m_pinchTool = new QAction("Add pinch nodes", this);
 	m_measure_thickness = new QAction("Measure One-Point Thickness", this);
@@ -125,6 +127,8 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_fitPlaneToGeoObject = new QAction("Fit plane to GeoObject", this);
 	m_mergeSelected = new QAction("Merge selected GeoObjects", this);
 	m_pinchTool->setToolTip("Add Pinch Node objects to record features such as dyke tips or sedimentary units that pinch-out.");
+	m_loadFoliations->setToolTip("Converts a point cloud containing points (measurement location) and dip/dip-direction scalar fields to planes.");
+	m_loadLineations->setToolTip("Convert a point cloud containing measurement points and trend->plunge scalar fields into foliation objects.");
 	m_toSVG->setToolTip("Export the currently visible trace to a SVG vector graphic using an orthographic projection of the current view.");
 	m_noteTool->setToolTip("Add short notes to a point in a point cloud for future reference.");
 	m_measure_thickness->setToolTip("Select a plane and then a point to measure plane-perpendicular thickness.");
@@ -148,6 +152,8 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_pairpicking_menu->addAction(m_mergeSelected);
 	m_pairpicking_menu->addMenu(m_research_menu);
 	m_pairpicking_menu->addSeparator();
+	m_pairpicking_menu->addAction(m_loadFoliations);
+	m_pairpicking_menu->addAction(m_loadLineations);
 	m_pairpicking_menu->addAction(m_toSVG);
 	
 	
@@ -162,7 +168,8 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_toPointCloud->setToolTip("Converts the selected GeoObject(s) or individual traces to a point cloud (typically for proximity analysis).");
 	m_distributeSelection->setToolTip("Distributes the selected objects into GeoObjects that have matching names.");
 	m_estimateNormals->setToolTip("Estimate trace structure normals with maximum a-postiori plane fitting algorithm.");
-	m_estimateSpacing->setToolTip("Uses structure normals to estimate the spacing of selected structures perpendicular to their orientation");
+	m_estimateSpacing->setToolTip("Uses structure normals to estimate the spacing of selected structures perpendicular to their orientation.");
+	
 
 	m_research_menu->addAction(m_recalculateFitPlanes);
 	m_research_menu->addAction(m_estimateNormals);

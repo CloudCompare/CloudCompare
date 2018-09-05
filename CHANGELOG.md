@@ -84,6 +84,9 @@ v2.10.alpha - XX/XX/201X
 		- if you compile CloudCompare with the E57 plugin, you will need to use this new lib and change some CMake options to point at it - specifically **OPTION_USE_LIBE57FORMAT** and **LIBE57FORMAT_INSTALL_DIR**
 		- the E57 plugin is now available on macOS
 
+	* RDS (Rielg)
+		- the reflectance scalar field read from RDS file should now have correct values (in dB)
+
 	* Plugins (General):
 		- The "About Plugins" dialog was rewritten to provide more information about installed plugins and to include I/O and GL plugins.
 		- [macOS] The "About Plugins..." menu item was moved from the Help menu to the Application menu.

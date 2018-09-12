@@ -104,6 +104,8 @@ v2.10.alpha - XX/XX/201X
 
 	* Misc:
 		- The trace polyline tool will now use the Global Shift & Scale information of the first clicked entity
+		- When calling the 'Edit > Edit Shift & Scale' dialog, the precision of the fields of the shift vector is now 6 digits
+			(so as to let the user manually "geo-reference" a cloud)
 
 - bug fixes:
 

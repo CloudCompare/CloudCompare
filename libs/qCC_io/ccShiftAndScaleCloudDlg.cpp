@@ -103,6 +103,13 @@ ccShiftAndScaleCloudDlg::~ccShiftAndScaleCloudDlg()
 	}
 }
 
+void ccShiftAndScaleCloudDlg::setShiftFieldsPrecision(int precision)
+{
+	m_ui->shiftX->setDecimals(precision);
+	m_ui->shiftY->setDecimals(precision);
+	m_ui->shiftZ->setDecimals(precision);
+}
+
 void ccShiftAndScaleCloudDlg::init()
 {
 	//should be called once and only once!
@@ -217,8 +224,10 @@ bool ccShiftAndScaleCloudDlg::loadInfoFromFile(QString filename)
 	}
 	
 	//now add the new entries in the combo-box
-	for (size_t i=originalSize; i<m_defaultInfos.size(); ++i)
+	for (size_t i = originalSize; i < m_defaultInfos.size(); ++i)
+	{
 		m_ui->loadComboBox->addItem(m_defaultInfos[i].name);
+	}
 	m_ui->loadComboBox->setEnabled(m_defaultInfos.size() >= 2);
 
 	return true;
@@ -248,15 +257,15 @@ void ccShiftAndScaleCloudDlg::updateGlobalSystem()
 		diag = m_localDiagonal / getScale();
 	}
 
-	m_ui->xOriginLabel->setText(QString("x = %1").arg(P.x,0,'f'));
-	m_ui->xOriginLabel->setStyleSheet(AlmostEq(P.x,m_originalPoint.x) ? QString() : QString("color: purple;"));
-	m_ui->yOriginLabel->setText(QString("y = %1").arg(P.y,0,'f'));
-	m_ui->yOriginLabel->setStyleSheet(AlmostEq(P.y,m_originalPoint.y) ? QString() : QString("color: purple;"));
-	m_ui->zOriginLabel->setText(QString("z = %1").arg(P.z,0,'f'));
-	m_ui->zOriginLabel->setStyleSheet(AlmostEq(P.z,m_originalPoint.z) ? QString() : QString("color: purple;"));
+	m_ui->xOriginLabel->setText(QString("x = %1").arg(P.x, 0, 'f'));
+	m_ui->xOriginLabel->setStyleSheet(AlmostEq(P.x, m_originalPoint.x) ? QString() : QString("color: purple;"));
+	m_ui->yOriginLabel->setText(QString("y = %1").arg(P.y, 0, 'f'));
+	m_ui->yOriginLabel->setStyleSheet(AlmostEq(P.y, m_originalPoint.y) ? QString() : QString("color: purple;"));
+	m_ui->zOriginLabel->setText(QString("z = %1").arg(P.z, 0, 'f'));
+	m_ui->zOriginLabel->setStyleSheet(AlmostEq(P.z, m_originalPoint.z) ? QString() : QString("color: purple;"));
 
-	m_ui->diagOriginLabel->setText(QString("diagonal = %1").arg(diag,0,'f'));
-	m_ui->diagOriginLabel->setStyleSheet(AlmostEq(diag,m_originalDiagonal) ? QString() : QString("color: purple;"));
+	m_ui->diagOriginLabel->setText(QString("diagonal = %1").arg(diag, 0, 'f'));
+	m_ui->diagOriginLabel->setStyleSheet(AlmostEq(diag, m_originalDiagonal) ? QString() : QString("color: purple;"));
 }
 
 void ccShiftAndScaleCloudDlg::updateLocalSystem()
@@ -270,20 +279,20 @@ void ccShiftAndScaleCloudDlg::updateLocalSystem()
 	}
 
 	//adaptive precision
-	double maxCoord = std::max(fabs(localPoint.x),fabs(localPoint.y));
-	maxCoord = std::max(fabs(localPoint.z),maxCoord);
-	int digitsBeforeDec = static_cast<int>(floor(log10(maxCoord)))+1;
-	int prec = std::max(0,8-digitsBeforeDec);
+	double maxCoord = std::max(fabs(localPoint.x), fabs(localPoint.y));
+	maxCoord = std::max(fabs(localPoint.z), maxCoord);
+	int digitsBeforeDec = static_cast<int>(floor(log10(maxCoord))) + 1;
+	int prec = std::max(0, 8 - digitsBeforeDec);
 
-	m_ui->xDestLabel->setText(QString("x = %1").arg(localPoint.x,0,'f',prec));
-	m_ui->xDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.x) ? QString("color: red;") : QString() );
-	m_ui->yDestLabel->setText(QString("y = %1").arg(localPoint.y,0,'f',prec));
-	m_ui->yDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.y) ? QString("color: red;") : QString() );
-	m_ui->zDestLabel->setText(QString("z = %1").arg(localPoint.z,0,'f',prec));
-	m_ui->zDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.z) ? QString("color: red;") : QString() );
+	m_ui->xDestLabel->setText(QString("x = %1").arg(localPoint.x, 0, 'f', prec));
+	m_ui->xDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.x) ? QString("color: red;") : QString());
+	m_ui->yDestLabel->setText(QString("y = %1").arg(localPoint.y, 0, 'f', prec));
+	m_ui->yDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.y) ? QString("color: red;") : QString());
+	m_ui->zDestLabel->setText(QString("z = %1").arg(localPoint.z, 0, 'f', prec));
+	m_ui->zDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.z) ? QString("color: red;") : QString());
 
-	m_ui->diagDestLabel->setText(QString("diagonal = %1").arg(localDiagonal,0,'f',prec));
-	m_ui->diagDestLabel->setStyleSheet(ccGlobalShiftManager::NeedRescale(localDiagonal) ? QString("color: red;") : QString() );
+	m_ui->diagDestLabel->setText(QString("diagonal = %1").arg(localDiagonal, 0, 'f', prec));
+	m_ui->diagDestLabel->setStyleSheet(ccGlobalShiftManager::NeedRescale(localDiagonal) ? QString("color: red;") : QString());
 }
 
 void ccShiftAndScaleCloudDlg::setShift(const CCVector3d& shift)
@@ -378,7 +387,7 @@ void ccShiftAndScaleCloudDlg::setKeepGlobalPos(bool state)
 void ccShiftAndScaleCloudDlg::onGlobalPosCheckBoxToggled(bool state)
 {
 	//set the thickest border to the point that will be modified
-	m_ui->smallCubeFrame->setLineWidth(state  ? 2 : 1);
+	m_ui->smallCubeFrame->setLineWidth(state ? 2 : 1);
 	m_ui->bigCubeFrame->setLineWidth(state ? 1 : 2);
 
 	updateGlobalSystem();
@@ -388,7 +397,7 @@ void ccShiftAndScaleCloudDlg::onGlobalPosCheckBoxToggled(bool state)
 void ccShiftAndScaleCloudDlg::onClick(QAbstractButton* button)
 {
 	m_applyAll = (button == m_ui->buttonBox->button(QDialogButtonBox::YesToAll));
-	m_cancel   = (button == m_ui->buttonBox->button(QDialogButtonBox::Cancel  ));
+	m_cancel = (button == m_ui->buttonBox->button(QDialogButtonBox::Cancel));
 }
 
 void ccShiftAndScaleCloudDlg::onLoadIndexChanged(int index)

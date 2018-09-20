@@ -60,6 +60,9 @@ if ( COMPILE_CC_CORE_LIB_WITH_QT )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_QT )
 endif()
 
+# Some archs have char unsigned
+set_source_files_properties(src/ChamferDistanceTransform.cpp PROPERTIES COMPILE_FLAGS -fsigned-char)
+
 # Load advanced scripts
 include( ../cmake/CMakeInclude.cmake )
 

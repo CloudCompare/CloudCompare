@@ -1,7 +1,7 @@
 #ifndef CC_E57_HEADER_HEADER
 #define CC_E57_HEADER_HEADER
 
-#include <E57Foundation.h>
+#include <cstdint>
 
 //! Point prototype (structure use to interrogate if standardized fields are available)
 /** Taken from "E57 Simple API" by Stan Coleby
@@ -116,7 +116,7 @@ enum Image2DType
 class CameraRepresentation
 {
 public:
-	virtual ~CameraRepresentation() {}
+	virtual ~CameraRepresentation() = default;
 	virtual Image2DProjection getType() { return E57_NO_PROJECTION; }
 };
 
@@ -126,7 +126,7 @@ public:
 class VisualReferenceRepresentation : public CameraRepresentation
 {
 public:
-	virtual Image2DProjection getType() { return E57_VISUAL; }
+	Image2DProjection getType() override { return E57_VISUAL; }
 
 	Image2DType	imageType;		//!< image type.
 	int64_t		imageSize;		//!< size of image data in BlobNode.
@@ -141,7 +141,7 @@ public:
 class SphericalRepresentation : public VisualReferenceRepresentation
 {
 public:
-	virtual Image2DProjection getType() { return E57_SPHERICAL; }
+	Image2DProjection getType() override { return E57_SPHERICAL; }
 
 	double			pixelWidth;		//!< The width of a pixel in the image (in radians). Shall be positive
 	double			pixelHeight;	//!< The height of a pixel in the image (in radians). Shall be positive.
@@ -153,7 +153,7 @@ public:
 class PinholeRepresentation : public SphericalRepresentation
 {
 public:
-	virtual Image2DProjection getType() { return E57_PINHOLE; }
+	Image2DProjection getType() override { return E57_PINHOLE; }
 
 	double			focalLength;	//!< The camera's focal length (in meters). Shall be positive
 	double			principalPointX;//!< The X coordinate in the image of the principal point, (in pixels). The principal point is the intersection of the z axis of the camera coordinate frame with the image plane.
@@ -166,7 +166,7 @@ public:
 class CylindricalRepresentation : public SphericalRepresentation
 {
 public:
-	virtual Image2DProjection getType() { return E57_CYLINDRICAL; }
+	Image2DProjection getType() override { return E57_CYLINDRICAL; }
 
 	double			radius;			//!< The closest distance from the cylindrical image surface to the center of projection (that is, the radius of the cylinder) (in meters). Shall be non-negative
 	double			principalPointY;//!< The Y coordinate in the image of the principal point (in pixels). This is the intersection of the z = 0 plane with the image

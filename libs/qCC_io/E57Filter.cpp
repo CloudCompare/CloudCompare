@@ -24,7 +24,7 @@
 #include "E57Header.h"
 
 //libE57Format
-#include <E57Foundation.h>
+#include <E57Format.h>
 
 //CCLib
 #include <ScalarField.h>

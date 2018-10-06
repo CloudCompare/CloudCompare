@@ -49,10 +49,9 @@ namespace CCLib
 			deleteAllScalarFields();
 		}
 
-		//**** inherited form GenericCloud ****//
-		inline virtual unsigned size() const override { return static_cast<unsigned>(m_points.size()); }
+		inline unsigned size() const { return static_cast<unsigned>(m_points.size()); }
 
-		virtual void forEach(GenericCloud::genericPointAction action) override
+		void forEach(GenericCloud::genericPointAction action)
 		{
 			//there's no point of calling forEach if there's no activated scalar field!
 			ScalarField* currentOutScalarFieldArray = getCurrentOutScalarField();
@@ -69,7 +68,7 @@ namespace CCLib
 			}
 		}
 
-		virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override
+		void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 		{
 			if (!m_bbox.isValid())
 			{
@@ -84,11 +83,11 @@ namespace CCLib
 			bbMax = m_bbox.maxCorner();
 		}
 
-		virtual void placeIteratorAtBeginning() override { m_currentPointIndex = 0; }
+		void placeIteratorAtBeginning() { m_currentPointIndex = 0; }
 		
-		virtual const CCVector3* getNextPoint() override { return (m_currentPointIndex < m_points.size() ? point(m_currentPointIndex++) : 0); }
+		const CCVector3* getNextPoint() { return (m_currentPointIndex < m_points.size() ? point(m_currentPointIndex++) : 0); }
 		
-		virtual bool enableScalarField() override
+		bool enableScalarField()
 		{
 			ScalarField* currentInScalarField = getCurrentInScalarField();
 
@@ -123,7 +122,7 @@ namespace CCLib
 			return currentInScalarField->resizeSafe(m_points.capacity());
 		}
 		
-		virtual bool isScalarFieldEnabled() const override
+		bool isScalarFieldEnabled() const
 		{
 			ScalarField* currentInScalarFieldArray = getCurrentInScalarField();
 			if (!currentInScalarFieldArray)
@@ -135,7 +134,7 @@ namespace CCLib
 			return (sfValuesCount != 0 && sfValuesCount >= m_points.size());
 		}
 
-		virtual void setPointScalarValue(unsigned pointIndex, ScalarType value) override
+		void setPointScalarValue(unsigned pointIndex, ScalarType value)
 		{
 			assert(m_currentInScalarFieldIndex >= 0 && m_currentInScalarFieldIndex<(int)m_scalarFields.size());
 			//slow version
@@ -147,32 +146,19 @@ namespace CCLib
 			m_scalarFields[m_currentInScalarFieldIndex]->setValue(pointIndex, value);
 		}
 		
-		virtual ScalarType getPointScalarValue(unsigned pointIndex) const override
+		ScalarType getPointScalarValue(unsigned pointIndex) const
 		{
 			assert(m_currentOutScalarFieldIndex >= 0 && m_currentOutScalarFieldIndex < static_cast<int>(m_scalarFields.size()));
 
 			return m_scalarFields[m_currentOutScalarFieldIndex]->getValue(pointIndex);
 		}
 
-		//**** inherited form GenericIndexedCloud ****//
-		inline virtual const CCVector3* getPoint(unsigned index) override { return point(index); }
-		inline virtual void getPoint(unsigned index, CCVector3& P) const override { P = *point(index); }
+		inline const CCVector3* getPoint(unsigned index) { return point(index); }
+		inline const CCVector3* getPoint(unsigned index) const { return point(index); }
+		inline void getPoint(unsigned index, CCVector3& P) const { P = *point(index); }
 
-		//**** inherited form GenericIndexedCloudPersist ****//
-		inline virtual const CCVector3* getPointPersistentPtr(unsigned index) override { return point(index); }
-
-		//**** other methods ****//
-
-		//! Const version of getPoint
-		inline virtual const CCVector3* getPoint(unsigned index) const { return point(index); }
-		//! Const version of getPointPersistentPtr
-		inline virtual const CCVector3* getPointPersistentPtr(unsigned index) const { return point(index); }
-
-		//! Applies a rigid transformation to the cloud, for the scaled scale
-		/** WARNING: THIS METHOD IS NOT COMPATIBLE WITH PARALLEL STRATEGIES
-			\param trans transformation (scale * rotation matrix + translation vector)
-		**/
-		//virtual void applyTransformation(PointProjectionTools::Transformation& trans);
+		inline const CCVector3* getPointPersistentPtr(unsigned index) { return point(index); }
+		inline const CCVector3* getPointPersistentPtr(unsigned index) const { return point(index); }
 
 		//! Resizes the point database
 		/** The cloud database is resized with the specified size. If the new size
@@ -251,7 +237,7 @@ namespace CCLib
 		//! Clears the cloud database
 		/** Equivalent to resize(0).
 		**/
-		virtual void clear()
+		void clear()
 		{
 			m_points.clear();
 			deleteAllScalarFields();
@@ -265,7 +251,7 @@ namespace CCLib
 			happens.
 			\param P a 3D point
 		**/
-		virtual void addPoint(const CCVector3 &P)
+		void addPoint(const CCVector3 &P)
 		{
 			//NaN coordinates check
 			if (	P.x != P.x
@@ -294,13 +280,13 @@ namespace CCLib
 		//! Returns the number of associated (and active) scalar fields
 		/** \return the number of active scalar fields
 		**/
-		inline virtual unsigned getNumberOfScalarFields() const { return (unsigned)m_scalarFields.size(); }
+		inline unsigned getNumberOfScalarFields() const { return (unsigned)m_scalarFields.size(); }
 
 		//! Returns a pointer to a specific scalar field
 		/** \param index a scalar field index
 			\return a pointer to a ScalarField structure, or 0 if the index is invalid.
 		**/
-		virtual ScalarField* getScalarField(int index) const
+		ScalarField* getScalarField(int index) const
 		{
 			return (index >= 0 && index < static_cast<int>(m_scalarFields.size()) ? m_scalarFields[index] : 0);
 		}
@@ -309,7 +295,7 @@ namespace CCLib
 		/** \param index a scalar field index
 			\return a pointer to a string structure (null-terminated array of characters), or 0 if the index is invalid.
 		**/
-		virtual const char* getScalarFieldName(int index) const
+		const char* getScalarFieldName(int index) const
 		{
 			return (index >= 0 && index < static_cast<int>(m_scalarFields.size()) ? m_scalarFields[index]->getName() : 0);
 		}
@@ -318,7 +304,7 @@ namespace CCLib
 		/** \param name a scalar field name
 			\return an index (-1 if the scalar field couldn't be found)
 		**/
-		virtual int getScalarFieldIndexByName(const char* name) const
+		int getScalarFieldIndexByName(const char* name) const
 		{
 			std::size_t sfCount = m_scalarFields.size();
 			for (std::size_t i = 0; i < sfCount; ++i)
@@ -335,38 +321,38 @@ namespace CCLib
 		/** See PointCloud::setPointScalarValue.
 			\return a pointer to the currently defined INPUT scalar field (or 0 if none)
 		**/
-		inline virtual ScalarField* getCurrentInScalarField() const { return getScalarField(m_currentInScalarFieldIndex); }
+		inline ScalarField* getCurrentInScalarField() const { return getScalarField(m_currentInScalarFieldIndex); }
 
 		//! Returns the scalar field currently associated to the cloud output
 		/** See PointCloud::getPointScalarValue.
 			\return a pointer to the currently defined OUTPUT scalar field (or 0 if none)
 		**/
-		inline virtual ScalarField* getCurrentOutScalarField() const { return getScalarField(m_currentOutScalarFieldIndex); }
+		inline ScalarField* getCurrentOutScalarField() const { return getScalarField(m_currentOutScalarFieldIndex); }
 
 		//! Sets the INPUT scalar field
 		/** This scalar field will be used by the PointCloud::setPointScalarValue method.
 			\param index a scalar field index (or -1 if none)
 		**/
-		inline virtual void setCurrentInScalarField(int index) { m_currentInScalarFieldIndex = index; }
+		inline void setCurrentInScalarField(int index) { m_currentInScalarFieldIndex = index; }
 
 		//! Returns current INPUT scalar field index (or -1 if none)
-		inline virtual int getCurrentInScalarFieldIndex() { return m_currentInScalarFieldIndex; }
+		inline int getCurrentInScalarFieldIndex() { return m_currentInScalarFieldIndex; }
 
 		//! Sets the OUTPUT scalar field
 		/** This scalar field will be used by the PointCloud::getPointScalarValue method.
 			\param index a scalar field index (or -1 if none)
 		**/
-		inline virtual void setCurrentOutScalarField(int index) { m_currentOutScalarFieldIndex = index; }
+		inline void setCurrentOutScalarField(int index) { m_currentOutScalarFieldIndex = index; }
 
 		//! Returns current OUTPUT scalar field index (or -1 if none)
-		inline virtual int getCurrentOutScalarFieldIndex() { return m_currentOutScalarFieldIndex; }
+		inline int getCurrentOutScalarFieldIndex() { return m_currentOutScalarFieldIndex; }
 
 		//! Sets both the INPUT & OUTPUT scalar field
 		/** This scalar field will be used by both PointCloud::getPointScalarValue
 			and PointCloud::setPointScalarValue methods.
 			\param index a scalar field index
 		**/
-		inline virtual void setCurrentScalarField(int index) { setCurrentInScalarField(index); setCurrentOutScalarField(index); }
+		inline void setCurrentScalarField(int index) { setCurrentInScalarField(index); setCurrentOutScalarField(index); }
 
 		//! Creates a new scalar field and registers it
 		/** Warnings:
@@ -413,7 +399,7 @@ namespace CCLib
 			\param newName new name
 			\return success
 		**/
-		virtual bool renameScalarField(int index, const char* newName)
+		bool renameScalarField(int index, const char* newName)
 		{
 			if (getScalarFieldIndexByName(newName) < 0)
 			{
@@ -476,7 +462,7 @@ namespace CCLib
 		}
 
 		//! Returns cloud capacity (i.e. reserved size)
-		inline virtual unsigned capacity() const { return static_cast<unsigned>(m_points.capacity()); }
+		inline unsigned capacity() const { return static_cast<unsigned>(m_points.capacity()); }
 
 	protected:
 
@@ -503,14 +489,14 @@ namespace CCLib
 			\param index point index
 			\return pointer on point stored data
 		**/
-		inline virtual CCVector3* point(unsigned index) { assert(index < size()); return &(m_points[index]); }
+		inline CCVector3* point(unsigned index) { assert(index < size()); return &(m_points[index]); }
 
 		//! Returns const access to a given point
 		/** WARNING: index must be valid
 			\param index point index
 			\return pointer on point stored data
 		**/
-		inline virtual const CCVector3* point(unsigned index) const { assert(index < size()); return &(m_points[index]); }
+		inline const CCVector3* point(unsigned index) const { assert(index < size()); return &(m_points[index]); }
 
 		//! 3D Points database
 		std::vector<CCVector3> m_points;

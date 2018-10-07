@@ -332,7 +332,7 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCLib::GenericCloud* cloud,
 
 	unsigned gridSize = m_depthBuffer.height*m_depthBuffer.width;
 	if (gridSize == 0)
-		return 0; //depth buffer empty or not initialized!
+		return nullptr; //depth buffer empty or not initialized!
 
 	//number of points per cell of the depth map
 	std::vector<size_t> pointPerDMCell;
@@ -362,7 +362,7 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCLib::GenericCloud* cloud,
 	}
 	
 	//final array
-	ColorsTableType* colorGrid = new ColorsTableType;
+	ColorGrid* colorGrid = new ColorGrid;
 	try
 	{
 		colorGrid->resize(gridSize, ccColor::black);

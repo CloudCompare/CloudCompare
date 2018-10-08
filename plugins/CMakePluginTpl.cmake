@@ -18,7 +18,6 @@ file( GLOB source_list *.cpp)
 
 # force link with interface implementations
 list( APPEND source_list ${CloudComparePlugins_SOURCE_DIR}/ccDefaultPluginInterface.cpp )
-list( APPEND source_list ${CloudComparePlugins_SOURCE_DIR}/ccStdPluginInterface.cpp )
 
 file( GLOB json_list *.json)
 file( GLOB ui_list *.ui )

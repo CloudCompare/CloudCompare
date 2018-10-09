@@ -31,6 +31,9 @@ ccSNECloud::ccSNECloud(ccPointCloud* obj)
 	//copy points, normals and scalar fields from obj.
 	*this += obj;
 
+	//set name
+	setName(obj->getName());
+
 	//update metadata
 	updateMetadata();
 }

@@ -61,17 +61,17 @@ public:
 		\param obj ccHObject to dynamically cast to a ccPointCloud object
 		\param isLockedVertices the caller can be warned if the returned cloud corresponds to locked vertices
 	**/
-	static ccPointCloud* ToPointCloud(ccHObject* obj, bool* isLockedVertices = 0);
+	static ccPointCloud* ToPointCloud(ccHObject* obj, bool* isLockedVertices = nullptr);
 
 	//! Converts current object to 'equivalent' ccGenericPointCloud
 	/** Warning: if a mesh is passed, this method returns its vertices.
 	**/
-	static ccGenericPointCloud* ToGenericPointCloud(ccHObject* obj, bool* isLockedVertices = 0);
+	static ccGenericPointCloud* ToGenericPointCloud(ccHObject* obj, bool* isLockedVertices = nullptr);
 
 	//! Converts current object to 'equivalent' ccShiftedObject
 	/** Warning: if a mesh is passed, this method returns its vertices.
 	**/
-	static ccShiftedObject* ToShifted(ccHObject* obj, bool* isLockedVertices = 0);
+	static ccShiftedObject* ToShifted(ccHObject* obj, bool* isLockedVertices = nullptr);
 
 	//! Converts current object to ccGenericMesh (if possible)
 	static ccGenericMesh* ToGenericMesh(ccHObject* obj);

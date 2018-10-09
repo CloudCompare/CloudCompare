@@ -744,7 +744,7 @@ QModelIndex ccDBRoot::parent(const QModelIndex &index) const
 
 int ccDBRoot::rowCount(const QModelIndex &parent) const
 {
-	ccHObject *parentItem = 0;
+	ccHObject *parentItem = nullptr;
 	if (!parent.isValid())
 		parentItem = m_treeRoot;
 	else

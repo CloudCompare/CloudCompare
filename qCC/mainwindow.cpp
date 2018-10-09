@@ -10251,7 +10251,7 @@ void MainWindow::addEditPlaneAction( QMenu &menu ) const
 
 ccHObject* MainWindow::dbRootObject()
 {
-	return (m_ccRoot ? m_ccRoot->getRootEntity() : 0);
+	return (m_ccRoot ? m_ccRoot->getRootEntity() : nullptr);
 }
 
 ccUniqueIDGenerator::Shared MainWindow::getUniqueIDGenerator()

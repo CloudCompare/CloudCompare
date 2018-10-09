@@ -333,7 +333,7 @@ public: //display
 		a pre-transformation.
 		\param trans a ccGLMatrix structure (reference to)
 	**/
-	void applyGLTransformation_recursive(const ccGLMatrix* trans = 0);
+	void applyGLTransformation_recursive(const ccGLMatrix* trans = nullptr);
 
 	//! Notifies all dependent entities that the geometry of this entity has changed
 	virtual void notifyGeometryUpdate();

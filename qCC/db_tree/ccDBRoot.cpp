@@ -21,28 +21,29 @@
 #include "ccGLWindow.h"
 
 //Qt
-#include <QTreeView>
-#include <QStandardItemModel>
+#include <QApplication>
 #include <QHeaderView>
-#include <QMenu>
-#include <QMimeData>
-#include <QMessageBox>
-#include <QRegExp>
 #include <QInputDialog>
+#include <QMenu>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QRegExp>
+#include <QStandardItemModel>
+#include <QTreeView>
 
 //qCC_db
-#include <ccLog.h>
-#include <ccHObject.h>
-#include <ccGenericPointCloud.h>
-#include <ccPointCloud.h>
-#include <ccMesh.h>
-#include <ccMaterialSet.h>
 #include <cc2DLabel.h>
-#include <ccGenericPrimitive.h>
-#include <ccPlane.h>
-#include <ccPolyline.h>
 #include <ccFacet.h>
 #include <ccGBLSensor.h>
+#include <ccGenericPointCloud.h>
+#include <ccGenericPrimitive.h>
+#include <ccHObject.h>
+#include <ccLog.h>
+#include <ccMaterialSet.h>
+#include <ccMesh.h>
+#include <ccPlane.h>
+#include <ccPointCloud.h>
+#include <ccPolyline.h>
 #include <ccScalarField.h>
 
 //CClib
@@ -55,9 +56,9 @@
 #include "../ccSelectChildrenDlg.h"
 
 //system
-#include <assert.h>
 #include <algorithm>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 //Minimum width of the left column of the properties tree view
 static const int c_propViewLeftColumnWidth = 115;

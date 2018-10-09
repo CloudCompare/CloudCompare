@@ -258,7 +258,7 @@ void ccCompass::doAction()
 		ccCompassDlg::connect(m_dlg->m_toPointCloud, SIGNAL(triggered()), this, SLOT(convertToPointCloud()));
 		ccCompassDlg::connect(m_dlg->m_distributeSelection, SIGNAL(triggered()), this, SLOT(distributeSelection()));
 		ccCompassDlg::connect(m_dlg->m_estimateNormals, SIGNAL(triggered()), this, SLOT(estimateStructureNormals()));
-		ccCompassDlg::connect(m_dlg->m_estimateSpacing, SIGNAL(triggered()), this, SLOT(estimateSpacing()));
+		ccCompassDlg::connect(m_dlg->m_estimateP21, SIGNAL(triggered()), this, SLOT(estimateP21()));
 		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNote()));
 		ccCompassDlg::connect(m_dlg->m_loadFoliations, SIGNAL(triggered()), this, SLOT(importFoliations()));
 		ccCompassDlg::connect(m_dlg->m_loadLineations, SIGNAL(triggered()), this, SLOT(importLineations()));
@@ -1216,7 +1216,6 @@ void ccCompass::recalculateFitPlanes()
 	}
 }
 
-
 //prior distribution for orientations (depends on outcrop orientation)
 inline double prior(double phi, double theta, double nx, double ny, double nz)
 {
@@ -2134,8 +2133,10 @@ void ccCompass::estimateStructureNormals()
 }
 
 //Calculate the spacing between objects with defined structure normals
-void ccCompass::estimateSpacing()
+void ccCompass::estimateP21()
 {
+	//Todo 
+
 	//gather selected SNE clouds into one cloud (and give points from each structure a unique id)
 
 
@@ -2737,19 +2738,104 @@ void ccCompass::importFoliations()
 			//ccLog::Print("[Plane edit] Applied transformation matrix:");
 			//ccLog::Print(trans.toString(12, ' ')); //full precision
 		}
-
 		plane->setXWidth(size, false);
 		plane->setYWidth(size, true);
-
 	}
-
-
 }
 
 void ccCompass::importLineations()
 {
-	//TODO
-	m_app->dispToConsole("Lineations");
+	//get selected point cloud
+	std::vector<ccHObject*> sel = m_app->getSelectedEntities();
+	if (sel.size() == 0)
+	{
+		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	if (!sel[0]->isA(CC_TYPES::POINT_CLOUD))
+	{
+		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	//get point cloud object
+	ccPointCloud* cld = static_cast<ccPointCloud*>(sel[0]);
+
+	//get user to select scalar field for dip & dip-directon
+	QDialog dlg(m_app->getMainWindow());
+	QVBoxLayout* vbox = new QVBoxLayout();
+	QLabel dipLabel("Trend Field:");
+	QLabel dipDirLabel("Plunge Field:");
+	QLabel sizeLabel("Display Length");
+	QComboBox dipDirCombo(m_app->getMainWindow());
+	QComboBox dipCombo(m_app->getMainWindow());
+	QLineEdit planeSize("2.0"); planeSize.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
+
+	//fill combo boxes with field names
+	for (int i = 0; i < cld->getNumberOfScalarFields(); i++)
+	{
+		dipDirCombo.addItem(cld->getScalarFieldName(i));
+		dipCombo.addItem(cld->getScalarFieldName(i));
+	}
+
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+
+	vbox->addWidget(&dipLabel);
+	vbox->addWidget(&dipCombo);
+	vbox->addWidget(&dipDirLabel);
+	vbox->addWidget(&dipDirCombo);
+	vbox->addWidget(&buttonBox);
+	vbox->addWidget(&sizeLabel);
+	vbox->addWidget(&planeSize);
+	dlg.setLayout(vbox);
+
+	//execute dialog and get results
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return; //bail!
+	}
+
+	//get values
+	int dipSF = cld->getScalarFieldIndexByName(dipCombo.currentText().toStdString().c_str());
+	int dipDirSF = cld->getScalarFieldIndexByName(dipDirCombo.currentText().toStdString().c_str());
+	double size = planeSize.text().toDouble();
+	if (dipSF == dipDirSF)
+	{
+		m_app->dispToConsole("Error: Trend and plunge scalar fields must be different!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	//loop through points
+	float trend, plunge;
+	for (int p = 0; p < cld->size(); p++)
+	{
+		trend = cld->getScalarField(dipSF)->at(p);
+		plunge = cld->getScalarField(dipDirSF)->at(p);
+		CCVector3 Cd = *cld->getPoint(p);
+		
+		//build lineation vector
+		CCVector3 l(sin(trend * CC_DEG_TO_RAD) * cos(plunge * CC_DEG_TO_RAD),cos(trend * CC_DEG_TO_RAD)*cos(plunge * CC_DEG_TO_RAD),-sin(plunge * CC_DEG_TO_RAD));
+
+		//create new point cloud to associate with lineation graphic
+		ccPointCloud* points = new ccPointCloud();
+		points->reserve(2);
+		points->addPoint(Cd);
+		points->addPoint(Cd + l*size);
+		points->setName("verts");
+
+		//create lineation graphic
+		ccLineation* lineation = new ccLineation(points);
+		lineation->addChild(points);
+		lineation->addPointIndex(0);
+		lineation->addPointIndex(1);
+		lineation->updateMetadata();
+		lineation->setName(QString::asprintf("%d->%d", (int) plunge, (int) trend));
+		cld->addChild(lineation);
+		m_app->addToDB(lineation, false, true, false, false);
+	}
 }
 
 //save the current view to an SVG file

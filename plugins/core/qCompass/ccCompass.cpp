@@ -91,6 +91,14 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 		return; //not initialized yet - ignore callback
 	}
 
+	if (m_active) //this will be true if Compass is being used. Avoids weird bugs when other tools change the selection a lot
+	{
+		tryLoading();
+	}
+
+	//check for new ccCompass objects that are not represented by our custom classes 
+	//tryLoading();
+
 	if (m_activeTool)
 	{
 		m_activeTool->onNewSelection(selectedEntities); //pass on to the active tool
@@ -277,6 +285,22 @@ void ccCompass::doAction()
 	m_dlg->linkWith(m_app->getActiveGLWindow());
 	m_mapDlg->linkWith(m_app->getActiveGLWindow());
 
+	//start in measure mode
+	enableMeasureMode();
+	
+	//begin measuring
+	startMeasuring();
+
+	//trigger selection changed
+	onNewSelection(m_app->getSelectedEntities());
+}
+
+//loop through DB tree looking for ccCompass objects that
+//are not represented by our custom class. If any are found,
+//replace them. Assuming not too many objects are found, this should be
+//quite fast; hence we call it every time the selection changes.
+void ccCompass::tryLoading()
+{
 	//loop through DB_Tree and find any ccCompass objects
 	std::vector<int> originals; //ids of original objects
 	std::vector<ccHObject*> replacements; //pointers to objects that will replace the originals
@@ -304,7 +328,7 @@ void ccCompass::doAction()
 		}
 
 		//remove them from the orignal parent
-		original->detatchAllChildren(); 
+		original->detatchAllChildren();
 
 		//add new parent to scene graph
 		original->getParent()->addChild(replacement);
@@ -322,19 +346,16 @@ void ccCompass::doAction()
 			g->setActive(false);
 		}
 	}
-
-	//start in measure mode
-	enableMeasureMode();
-
-	//trigger selection changed
-	onNewSelection(m_app->getSelectedEntities());
-
-	//begin measuring
-	startMeasuring();
 }
 
 void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vector<ccHObject*>* replacements)
 {
+	//recurse on children
+	for (unsigned i = 0; i < obj->getChildrenNumber(); i++)
+	{
+		tryLoading(obj->getChild(i), originals, replacements);
+	}
+
 	//is object already represented by a ccCompass class?
 	if (dynamic_cast<ccFitPlane*>(obj)
 		|| dynamic_cast<ccTrace*>(obj)
@@ -343,12 +364,6 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 		|| dynamic_cast<ccSNECloud*>(obj))
 	{
 		return; //we need do nothing!
-	}
-
-	//recurse on children
-	for (unsigned i = 0; i < obj->getChildrenNumber(); i++)
-	{
-		tryLoading(obj->getChild(i), originals, replacements);
 	}
 
 	//store parent of this object
@@ -475,6 +490,7 @@ bool ccCompass::startMeasuring()
 		m_activeTool->toolActivated();
 	}
 	
+	m_active = true;
 	return true;
 }
 
@@ -521,6 +537,8 @@ bool ccCompass::stopMeasuring(bool finalStop/*=false*/)
 	{
 		m_app->getActiveGLWindow()->redraw(true, false);
 	}
+
+	m_active = false;
 
 	return true;
 }
@@ -2667,7 +2685,7 @@ void ccCompass::importFoliations()
 	for (int p = 0; p < cld->size(); p++)
 	{
 		dip = cld->getScalarField(dipSF)->at(p);
-		dipdir = cld->getScalarField(dipSF)->at(p);
+		dipdir = cld->getScalarField(dipDirSF)->at(p);
 		CCVector3 Cd = *cld->getPoint(p);
 
 		//build plane and get its orientation 
@@ -2679,7 +2697,7 @@ void ccCompass::importFoliations()
 		CCVector3 C = plane->getCenter();
 
 		//figure out transform (blatantly stolen from ccPlaneEditDlg::updatePlane())
-		CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(dip, dipdir); //why do I need to subtract 180 to get a sensible result??!
+		CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(dip, dipdir,true);
 		ccGLMatrix trans;
 		bool needToApplyTrans = false;
 		bool needToApplyRot = false;
@@ -2698,7 +2716,7 @@ void ccCompass::importFoliations()
 			//special case: plane parallel to XY
 			if (fabs(N.z) > PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
 			{
-				ccGLMatrix rotX; rotX.initFromParameters(dip * CC_DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
+				ccGLMatrix rotX; rotX.initFromParameters(-dip * CC_DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
 				ccGLMatrix rotZ; rotZ.initFromParameters(dipdir * CC_DEG_TO_RAD, CCVector3(0, 0, -1), CCVector3(0, 0, 0));
 				rotation = rotZ * rotX;
 			}

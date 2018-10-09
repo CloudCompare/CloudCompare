@@ -154,6 +154,7 @@ protected:
 	void stopPicking();
 
 	//checks if the passed object, or any of it's children, represent unloaded ccCompass objects (e.g. traces, fitplanes etc).
+	void tryLoading();
 	void tryLoading(ccHObject* obj, std::vector<int>* originals, std::vector<ccHObject*>* replacements);
 
 	//Action to start ccCompass
@@ -164,6 +165,7 @@ protected:
 
 	//picking or not?
 	bool m_picking = false;
+	bool m_active = false;
 
 	//ccCompass toolbar gui
 	ccCompassDlg* m_dlg = nullptr;

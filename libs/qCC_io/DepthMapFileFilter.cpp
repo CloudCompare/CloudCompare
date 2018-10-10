@@ -28,7 +28,7 @@
 #include <QString>
 
 //system
-#include <assert.h>
+#include <cassert>
 
 bool DepthMapFileFilter::canLoadExtension(const QString& upperCaseExt) const
 {
@@ -232,17 +232,17 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(const QString& filename, ccGBLSenso
 	}
 
 	fclose(fp);
-	fp = 0;
+	fp = nullptr;
 
 	if (theNorms)
 	{
 		delete theNorms;
-		theNorms = 0;
+		theNorms = nullptr;
 	}
 	if (theColors)
 	{
 		delete theColors;
-		theColors = 0;
+		theColors = nullptr;
 	}
 
 	return CC_FERR_NO_ERROR;

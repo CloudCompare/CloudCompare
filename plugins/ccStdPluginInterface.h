@@ -72,7 +72,7 @@ public:
 		}
 	}
 
-	//! A callback poiner to the main app interface for being used by plugins
+	//! A callback pointer to the main app interface for use by plugins
 	/**  Any plugin (and its tools) may need to access methods of this interface
 	**/
 	virtual ccMainAppInterface * getMainAppInterface() { return m_app; }

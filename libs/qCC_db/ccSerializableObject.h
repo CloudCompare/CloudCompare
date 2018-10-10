@@ -26,8 +26,8 @@
 #include <CCPlatform.h>
 
 //System
-#include <stdint.h>
-#include <assert.h>
+#include <cassert>
+#include <cstdint>
 
 //Qt
 #include <QFile>

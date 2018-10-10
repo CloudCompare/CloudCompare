@@ -21,35 +21,35 @@
 //Local
 #include "qCC_db.h"
 
-class ccHObject;
-class ccGenericPointCloud;
-class ccPointCloud;
-class ccGenericMesh;
-class ccMesh;
-class ccSubMesh;
-class ccGenericPrimitive;
-class ccOctree;
-class ccOctreeProxy;
-class ccKdTree;
-class ccSensor;
-class ccGBLSensor;
-class ccCameraSensor;
-class ccImage;
 class cc2DLabel;
-class cc2DViewportObject;
 class cc2DViewportLabel;
-class ccFacet;
-class ccPolyline;
-class ccIndexedTransformationBuffer;
-class ccSphere;
-class ccCylinder;
+class cc2DViewportObject;
+class ccCameraSensor;
 class ccCone;
-class ccPlane;
+class ccCylinder;
 class ccDish;
 class ccExtru;
-class ccTorus;
-class ccShiftedObject;
+class ccFacet;
+class ccGBLSensor;
+class ccGenericMesh;
+class ccGenericPointCloud;
+class ccGenericPrimitive;
+class ccHObject;
+class ccImage;
+class ccIndexedTransformationBuffer;
+class ccKdTree;
+class ccMesh;
+class ccOctree;
+class ccOctreeProxy;
 class ccPlanarEntityInterface;
+class ccPlane;
+class ccPointCloud;
+class ccPolyline;
+class ccSensor;
+class ccShiftedObject;
+class ccSphere;
+class ccSubMesh;
+class ccTorus;
 
 //! Useful class to (try to) statically cast a basic ccHObject to a given type
 class QCC_DB_LIB_API ccHObjectCaster

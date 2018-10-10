@@ -531,10 +531,16 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 		switch (item->getClassID())
 		{
 		case CC_TYPES::HIERARCHY_OBJECT:
-			if (locked)
-				return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbolLocked.png"));
-			else
-				return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbol.png"));
+			if ( item->getChildrenNumber() )
+			{
+				if (locked)
+					return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbolLocked.png"));
+				else
+					return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbol.png"));
+			}
+				
+			return QIcon();
+				
 		case CC_TYPES::POINT_CLOUD:
 			if (locked)
 				return QIcon(QStringLiteral(":/CC/images/dbCloudSymbolLocked.png"));

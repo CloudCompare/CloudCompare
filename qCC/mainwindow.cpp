@@ -8922,7 +8922,9 @@ void MainWindow::doActionDeleteShader()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
-		win->setShader(0);
+	{
+		win->setShader(nullptr);
+	}
 }
 
 void MainWindow::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
@@ -9447,8 +9449,10 @@ void MainWindow::doActionSaveFile()
 		if (m_selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
 			QStringList parts = defaultFileName.split(' ',QString::SkipEmptyParts);
-			if (parts.size() > 0)
+			if (!parts.empty())
+			{
 				defaultFileName = parts[0];
+			}
 		}
 
 		//we remove the extension
@@ -9557,7 +9561,7 @@ void MainWindow::doActionSaveFile()
 
 void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 {
-	ccGLWindow* win = mdiWin ? GLWindowFromWidget(mdiWin->widget()) : 0;
+	ccGLWindow* win = mdiWin ? GLWindowFromWidget(mdiWin->widget()) : nullptr;
 	if (win)
 	{
 		updateViewModePopUpMenu(win);
@@ -10186,9 +10190,8 @@ MainWindow* MainWindow::TheInstance()
 
 void MainWindow::DestroyInstance()
 {
-	if (s_instance)
-		delete s_instance;
-	s_instance=0;
+	delete s_instance;
+	s_instance=nullptr;
 }
 
 void MainWindow::GetGLWindows(std::vector<ccGLWindow*>& glWindows)

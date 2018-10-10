@@ -389,7 +389,7 @@ void ccDBRoot::deleteSelectedEntities()
 {
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
-	if (selectedIndexes.size() < 1)
+	if (selectedIndexes.empty())
 	{
 		return;
 	}
@@ -1141,7 +1141,7 @@ Qt::DropActions ccDBRoot::supportedDropActions() const
 Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
-		return 0;
+		return Qt::NoItemFlags;
 
 	Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
 

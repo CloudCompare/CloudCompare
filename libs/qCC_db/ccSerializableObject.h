@@ -39,7 +39,7 @@ class ccSerializableObject
 public:
 
 	//! Desctructor
-	virtual ~ccSerializableObject() {}
+	virtual ~ccSerializableObject() = default;
 
 	//! Returns whether object is serializable of not
 	virtual bool isSerializable() const { return false; }

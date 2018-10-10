@@ -46,8 +46,8 @@ public:
 	explicit ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertices);
 
 	//! Default destructor
-	virtual ~ccMesh();
-
+	~ccMesh() override;
+	
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MESH; }
 

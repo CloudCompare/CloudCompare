@@ -439,3 +439,24 @@ ccGeoObject* ccGeoObject::getGeoObjectParent(ccHObject* object)
 
 	return nullptr;
 }
+
+int ccGeoObject::getGeoObjectRegion(ccHObject* object)
+{
+	ccGeoObject* geoObject = ccGeoObject::getGeoObjectParent(object);
+	if (geoObject == nullptr)
+	{
+		return -1; 
+	}
+	else if (ccGeoObject::isGeoObjectInterior(geoObject))
+	{
+		return ccGeoObject::INTERIOR;
+	} 
+	else if (ccGeoObject::isGeoObjectUpper(geoObject))
+	{
+		return ccGeoObject::UPPER_BOUNDARY;
+	}
+	else if (ccGeoObject::isGeoObjectLower(geoObject))
+	{
+		return ccGeoObject::LOWER_BOUNDARY;
+	}
+}

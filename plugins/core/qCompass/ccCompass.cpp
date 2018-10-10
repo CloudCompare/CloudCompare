@@ -1289,6 +1289,15 @@ inline double logWishart(CCLib::SquareMatrixd X, int nobserved, double phi, doub
 	return lsf - 0.5 * (trIX + nobserved*log(D));
 }
 
+//declare variables for the dlg used by the below function as statics, so they are remembered between uses (for convenience)
+static unsigned int minsize = 500; //these are the defaults
+static unsigned int maxsize = 1000;
+static double tcDistance = 10.0; //the square of the maximum distance to compute thicknesses for
+static unsigned int oversample = 0;
+static double likPower = 1.0;
+static bool calcThickness = true;
+static double stride = 0.025;
+
 //Estimate the normal vector to the structure this trace represents at each point in this trace.
 void ccCompass::estimateStructureNormals()
 {
@@ -1298,19 +1307,19 @@ void ccCompass::estimateStructureNormals()
 	QDialog dlg(m_app->getMainWindow());
 	QVBoxLayout* vbox = new QVBoxLayout();
 	QLabel minSizeLabel("Minimum trace size (points):");
-	QLineEdit minSizeText("500"); minSizeText.setValidator(new QIntValidator(5, std::numeric_limits<int>::max()));
+	QLineEdit minSizeText(QString::number(minsize)); minSizeText.setValidator(new QIntValidator(5, std::numeric_limits<int>::max()));
 	QLabel maxSizeLabel("Maximum trace size (points):");
-	QLineEdit maxSizeText("1000"); maxSizeText.setValidator(new QIntValidator(50, std::numeric_limits<int>::max()));
+	QLineEdit maxSizeText(QString::number(maxsize)); maxSizeText.setValidator(new QIntValidator(50, std::numeric_limits<int>::max()));
 	QLabel likPowerLabel("Likelihood power:");
-	QLineEdit likPowerText("1.0"); likPowerText.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
+	QLineEdit likPowerText(QString::number(likPower)); likPowerText.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
 	QLabel calcThickLabel("Calculate thickness:");
-	QCheckBox calcThickChk("Calculate thickness"); calcThickChk.setChecked(true);
+	QCheckBox calcThickChk("Calculate thickness"); calcThickChk.setChecked(calcThickness);
 	QLabel distanceLabel("Distance cutoff (m):");
-	QLineEdit distanceText("10.0"); distanceText.setValidator(new QDoubleValidator(0, std::numeric_limits<double>::max(), 6));
+	QLineEdit distanceText(QString::number(tcDistance)); distanceText.setValidator(new QDoubleValidator(0, std::numeric_limits<double>::max(), 6));
 	QLabel sampleLabel("MCMC Samples:");
-	QLineEdit sampleText("0"); sampleText.setValidator(new QIntValidator(0, 10000)); //>10000 samples per point will break even the best computer!
+	QLineEdit sampleText(QString::number(oversample)); sampleText.setValidator(new QIntValidator(0, 10000)); //>10000 samples per point will break even the best computer!
 	QLabel strideLabel("MCMC Stride (radians):");
-	QLineEdit strideText("0.025"); strideText.setValidator(new QDoubleValidator(0.0000001, 0.5, 6));
+	QLineEdit strideText(QString::number(stride)); strideText.setValidator(new QDoubleValidator(0.0000001, 0.5, 6));
 
 	//tooltips
 	minSizeText.setToolTip("The minimum size of the normal-estimation window.");
@@ -1349,13 +1358,13 @@ void ccCompass::estimateStructureNormals()
 	}
 
 	//get values
-	unsigned int minsize = minSizeText.text().toInt(); //these are the defaults
-	unsigned int maxsize = maxSizeText.text().toInt();
-	double tcDistance = distanceText.text().toDouble(); //the square of the maximum distance to compute thicknesses for
-	unsigned int oversample = sampleText.text().toInt();
-	double likPower = likPowerText.text().toDouble();
-	bool calcThickness = calcThickChk.isChecked();
-	double stride = strideText.text().toDouble();
+	minsize = minSizeText.text().toInt(); //these are the defaults
+	maxsize = maxSizeText.text().toInt();
+	tcDistance = distanceText.text().toDouble(); //the square of the maximum distance to compute thicknesses for
+	oversample = sampleText.text().toInt();
+	likPower = likPowerText.text().toDouble();
+	calcThickness = calcThickChk.isChecked();
+	stride = strideText.text().toDouble();
 
 	//cleanup
 	dlg.close();
@@ -2133,24 +2142,233 @@ void ccCompass::estimateStructureNormals()
 }
 
 //Calculate the spacing between objects with defined structure normals
+static double binSize = 25;
 void ccCompass::estimateP21()
 {
-	//Todo 
+	//setup point cloud to store data in
+	ccPointCloud* cloud = new ccPointCloud();
+	ccScalarField* surf = new ccScalarField("surface");
+	cloud->addScalarField(surf); //1 = upper surface, 0 = unassigned (middle or stand-alone), -1 = lower surface
+	
+	////traverses up the DbTree, starting at object, until a ccHObject is found. If none is found this will return null.
+	//static ccGeoObject* getGeoObjectParent(ccHObject* object);
 
-	//gather selected SNE clouds into one cloud (and give points from each structure a unique id)
+	//******************************
+	//gather polylines and SNEs
+	//******************************
+	std::vector<ccPolyline*> lines;
+	std::vector<ccSNECloud*> sne;
+	for (ccHObject* o : m_app->getSelectedEntities())
+	{
+		//Is selected object a polyline/trace?
+		if (o->isKindOf(CC_TYPES::POLY_LINE)) { //selected object is a geoObject
+			if (ccNote::isNote(o) | ccLineation::isLineation(o) | ccPinchNode::isPinchNode(o)) //ignore some types of polyline...
+			{
+				continue;
+			}
 
+			lines.push_back(static_cast<ccPolyline*>(o));
+			continue;
+		}
+		//What about an SNE cloud?
+		else if (ccSNECloud::isSNECloud(o))
+		{
+			ccSNECloud* s = dynamic_cast<ccSNECloud*>(o);
+			if (s != nullptr)
+			{
+				sne.push_back(s);
+			}
+			continue;
+		}
 
-	//loop through points
-	  
-	    //pick neighbours within search distance
+		//Clearly not... what about it's children?
+		ccHObject::Container objs;
+		o->filterChildren(objs, true, CC_TYPES::POINT_CLOUD); //look for SNE
+		for (ccHObject* c : objs)
+		{
+			if (ccSNECloud::isSNECloud(c))
+			{
+				ccSNECloud* s = dynamic_cast<ccSNECloud*>(c);
+				if (s != nullptr)
+				{
+					sne.push_back(s);
+				}
+			}
+		}
 
-	    //find closest below the structure surface (negative distance)
+		objs.clear();
+		o->filterChildren(objs, true, CC_TYPES::POLY_LINE); //look for SNE
+		for (ccHObject* c : objs)
+		{
+			if (ccNote::isNote(c) | ccLineation::isLineation(c) | ccPinchNode::isPinchNode(c)) //ignore some types of polyline...
+			{
+				continue;
+			}
 
-		//find closest above the structure surface (positive distance)
+			lines.push_back(static_cast<ccPolyline*>(c));
+		}
+	}
 
-	//store data
+	//calculate bounding box of all polylines
+	float minx = std::numeric_limits<float>::max(), maxx = std::numeric_limits<float>::lowest();
+	float miny = std::numeric_limits<float>::max(), maxy = std::numeric_limits<float>::lowest();
+	float minz = std::numeric_limits<float>::max(), maxz = std::numeric_limits<float>::lowest();
 
+	if (lines.size() == 0)
+	{
+		m_app->dispToConsole("[ccCompass] Error - no polylines or traces found to compute P21.",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
+	m_app->dispToConsole(QString::asprintf("MinB = (%f,%f,%f), MaxB = (%f,%f,%f)", minx, miny, minz, maxx, maxy, maxz));
+
+	//check bounds
+	for (ccPolyline* poly : lines)
+	{
+		CCVector3 bbMin, bbMax;
+		if (poly->size() > 0) //avoid (0,0,0),(0,0,0) bounding boxes...
+		{
+			poly->getBoundingBox(bbMin, bbMax);
+			minx = std::min(bbMin.x, minx); maxx = std::max(bbMax.x, maxx);
+			miny = std::min(bbMin.y, miny); maxy = std::max(bbMax.y, maxy);
+			minz = std::min(bbMin.z, minz); maxz = std::max(bbMax.z, maxz);
+		}
+	}
+
+	//******************************
+	//get bin-size from user
+	//******************************
+	QDialog dlg(m_app->getMainWindow());
+	QVBoxLayout* vbox = new QVBoxLayout();
+	QLabel boxSizeLabel("Voxel Size:");
+	QLineEdit boxSizeText(QString::number(binSize)); boxSizeText.setValidator(new QDoubleValidator(0.00001, std::numeric_limits<double>::max(), 6));
+	boxSizeText.setToolTip("The voxel size for computing P21.");
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+	vbox->addWidget(&boxSizeLabel);
+	vbox->addWidget(&boxSizeText);
+	vbox->addWidget(&buttonBox);
+	dlg.setLayout(vbox);
+
+	//execute dialog and get results
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return; //bail!
+	}
+
+	//get values
+	binSize = boxSizeText.text().toDouble();
+
+	//cleanup
+	dlg.close();
+	delete vbox;
+
+	//***************************************
+	//build grid for accumulating lengths in
+	//***************************************
+	//pad out by half a bin size on each side to avoid gaps due to rounding
+	minx -= binSize / 2;
+	miny -= binSize / 2;
+	minz -= binSize / 2;
+	maxx += binSize / 2;
+	maxy += binSize / 2;
+	maxz += binSize / 2;
+
+	int nx = (maxx - minx) / binSize;
+	int ny = (maxy - miny) / binSize;
+	int nz = (maxz - minz) / binSize;
+/*
+	if (nx == 0) 
+	{
+		nx = 1;
+	}
+	if (ny == 0)
+	{
+		ny = 1;
+	}
+	if (ny == 0)
+	{
+		ny = 1;
+	}
+*/
+//	m_app->dispToConsole(QString::asprintf("Voxet size = (%f,%f,%f)", (maxx - minx) / binSize, (maxy - miny) / binSize, (maxz - minz) / binSize));
+
+	std::vector<double> upperGrid(nx*ny*nz,0.0);
+	std::vector<double> lowerGrid(nx*ny*nz, 0.0);
+
+	//*********************************************
+	//Accumulate lengths in bins
+	//*********************************************
+	for (ccPolyline* poly : lines)
+	{
+		int region = ccGeoObject::getGeoObjectRegion(poly);
+
+		for (int i = 1; i < poly->size(); i++)
+		{
+			CCVector3 V1 = *poly->getPoint(i-1);
+			CCVector3 V2 = *poly->getPoint(i);
+			CCVector3 S = V2 - V1;
+
+			//compute voxel that last vertex of this segment falls in
+			int x = (V1.x - minx) / binSize;
+			int y = (V1.y - miny) / binSize;
+			int z = (V1.z - minz) / binSize;
+			int idx = x + nx * (y + ny * z);
+
+			//accumulate length
+			switch (region)
+			{
+			case ccGeoObject::UPPER_BOUNDARY:
+				upperGrid[idx] += S.norm();
+				break;
+			case ccGeoObject::LOWER_BOUNDARY:
+				lowerGrid[idx] += S.norm();
+				break;
+			default:
+				lowerGrid[idx] += S.norm();
+				upperGrid[idx] += S.norm();
+			}
+
+			//N.B.
+			//This accumulation will introduce slight errors where the segment crosses a voxel boundary,
+			//however as segments tend to be short these will be small and will generally cancel out. 
+		}
+	}
+
+	//convert grid to mesh and compute/store P21 based on area of grid-cells projected onto plane perpendicular to avg structure orientation. 
+	ccPointCloud* points = new ccPointCloud("Mesh");
+	ccScalarField* p21 = new ccScalarField("P21");
+	points->addScalarField(p21);
+	p21->reserve(nx*ny*nz);
+	points->reserve(nx*ny*nz);
+	for (int x = 0; x < nx; x++)
+	{
+		for (int y = 0; y < ny; y++)
+		{
+			for (int z = 0; z < nz; z++)
+			{
+				//calculate density
+				int idx = x + nx * (y + ny * z);
+				double p = std::max(upperGrid[idx], lowerGrid[idx]); //use maximum from both sets of surface. TODO - divide by projected voxel area....
+
+				//build point
+				if (p > 0)
+				{
+					points->addPoint(CCVector3(minx + ((x + 0.5) * binSize), miny + ((y + 0.5) * binSize), minz + ((z + 0.5) * binSize)));
+					p21->addElement(p);
+				}
+			}
+		}
+	}
+	
+	//store & display mesh
+	p21->computeMinAndMax();
+	m_app->dbRootObject()->addChild(points);
+	m_app->addToDB(points);
+	points->setPointSize(10);
+	points->setCurrentDisplayedScalarField(0);
+	points->showSF(true);
 }
 
 //converts selected traces or geoObjects to point clouds
@@ -2194,7 +2412,6 @@ void ccCompass::convertToPointCloud()
 					lines.push_back(static_cast<ccPolyline*>(c));
 				}
 			}
-
 		}
 	}
 
@@ -2743,6 +2960,7 @@ void ccCompass::importFoliations()
 	}
 }
 
+//convert a point cloud containing field points (x,y,z) and trend + plunge scalar fields to lineation vectors for visualisation.
 void ccCompass::importLineations()
 {
 	//get selected point cloud

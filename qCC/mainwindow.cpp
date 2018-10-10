@@ -24,8 +24,8 @@
 #include <MeshSamplingTools.h>
 #include <NormalDistribution.h>
 #include <ParallelSort.h>
-#include <ScalarFieldTools.h>
 #include <PointCloud.h>
+#include <ScalarFieldTools.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
 
@@ -67,8 +67,8 @@
 //dialogs
 #include "ccAboutDialog.h"
 #include "ccAdjustZoomDlg.h"
-#include "ccApplication.h"
 #include "ccAlignDlg.h" //Aurelien BEY
+#include "ccApplication.h"
 #include "ccApplyTransformationDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
 #include "ccBoundingBoxEditorDlg.h"

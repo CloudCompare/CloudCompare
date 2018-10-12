@@ -60,9 +60,19 @@ public:
 	//! Sets application entry point
 	/** Called just after plugin creation by qCC
 	**/
-	virtual void setMainAppInterface(ccMainAppInterface* app);
+	virtual void setMainAppInterface(ccMainAppInterface* app)
+	{
+		m_app = app;
+		
+		if (m_app)
+		{
+			//we use the same 'unique ID' generator in plugins as in the main
+			//application (otherwise we'll have issues with 'unique IDs'!)
+			ccObject::SetUniqueIDGenerator(m_app->getUniqueIDGenerator());
+		}
+	}
 
-	//! A callback poiner to the main app interface for being used by plugins
+	//! A callback pointer to the main app interface for use by plugins
 	/**  Any plugin (and its tools) may need to access methods of this interface
 	**/
 	virtual ccMainAppInterface * getMainAppInterface() { return m_app; }

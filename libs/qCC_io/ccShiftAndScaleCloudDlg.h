@@ -37,6 +37,9 @@ public:
 	**/
 	ccShiftAndScaleCloudDlg(const CCVector3d& Pl, double Dl, const CCVector3d& Pg, double Dg, QWidget* parent = 0);
 
+	//! Sets the Shift fields (X, Y and Z) precision (default should be 2)
+	void setShiftFieldsPrecision(int precision);
+
 	//! Destructor
 	virtual ~ccShiftAndScaleCloudDlg();
 

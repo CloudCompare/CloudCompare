@@ -20,19 +20,29 @@
 
 #include "ccGLFilterPluginInterface.h"
 
+/** Replace 'ExampleGLPlugin' by your own plugin class name throughout and then
+	check 'ExampleGLPlugin.cpp' for more directions.
+	
+	Each plugin requires an info.json file to provide information about itself -
+	the name, authors, maintainers, icon, etc..
+	
+	The one method you are required to implement is getFilter(). This method
+	registers your GL filter with CloudCompare.
+**/
+
 //! Example GL Plugin
 class ExampleGLPlugin : public QObject, public ccGLFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccGLFilterPluginInterface)
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ExampleGL" FILE "info.json")
-
+	
 public:
 	explicit ExampleGLPlugin( QObject *parent = nullptr );
-	virtual ~ExampleGLPlugin() = default;
-
+	~ExampleGLPlugin() override = default;
+	
 	// inherited from ccGLFilterPluginInterface
-	virtual ccGlFilter *getFilter() override;
+	ccGlFilter *getFilter() override;
 };
 
 #endif

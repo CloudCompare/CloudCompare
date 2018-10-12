@@ -1350,7 +1350,7 @@ bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 				assert(m_triMtlIndexes->capacity() >= triNumBefore + triAdded);
 				//fill the indexes table with default values
 				{
-					for (unsigned i = 0; i < mesh->m_triMtlIndexes->size(); ++i)
+					for (unsigned i = 0; i < mesh->size(); ++i)
 						m_triMtlIndexes->emplace_back(-1);
 				}
 			}

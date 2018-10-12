@@ -37,7 +37,7 @@ public: //construction
 	ccHObject(const ccHObject& object);
 
 	//! Default destructor
-	virtual ~ccHObject();
+	 ~ccHObject() override;
 
 	//! Static factory
 	/** Warning: objects depending on other structures (such as meshes 
@@ -319,9 +319,9 @@ public: //display
 			setDisplay(newDisplay);
 		}
 	
-		for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
+		for (auto child : m_children)
 		{
-			(*it)->transferDisplay(oldDisplay, newDisplay);
+			child->transferDisplay(oldDisplay, newDisplay);
 		}
 	} 
 
@@ -333,7 +333,7 @@ public: //display
 		a pre-transformation.
 		\param trans a ccGLMatrix structure (reference to)
 	**/
-	void applyGLTransformation_recursive(const ccGLMatrix* trans = 0);
+	void applyGLTransformation_recursive(const ccGLMatrix* trans = nullptr);
 
 	//! Notifies all dependent entities that the geometry of this entity has changed
 	virtual void notifyGeometryUpdate();

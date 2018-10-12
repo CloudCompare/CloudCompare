@@ -73,7 +73,7 @@ QStringList FooFilter::getFileFilters( bool onImport ) const
 	else
 	{
 		// export
-		return QStringList{};
+		return {};
 	}
 }
 

@@ -16,7 +16,8 @@
 //##########################################################################
 
 // First:
-//	Replace all occurrences of 'ExamplePlugin' by your own plugin class name in this file!
+//	Replace all occurrences of 'ExamplePlugin' by your own plugin class name in this file.
+//	This includes the resource path to info.json in the constructor.
 
 // Second:
 //	Open ExamplePlugin.qrc, change the "prefix" and the icon filename for your plugin.
@@ -85,12 +86,12 @@ QList<QAction *> ExamplePlugin::getActions()
 		connect( m_action, &QAction::triggered, this, &ExamplePlugin::doAction );
 	}
 
-	return QList<QAction *>{ m_action };
+	return { m_action };
 }
 
 // This is an example of an action's method called when the corresponding action
 // is triggered (i.e. the corresponding icon or menu entry is clicked in CC's
-// main interface). You can access most of CC components (database,
+// main interface). You can access most of CC's components (database,
 // 3D views, console, etc.) via the 'm_app' variable (see the ccMainAppInterface
 // class in ccMainAppInterface.h).
 void ExamplePlugin::doAction()

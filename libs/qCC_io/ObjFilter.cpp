@@ -918,6 +918,15 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					//DGM: in case there's space characters in the filename, we must read it again from the original line buffer
 					//QString mtlFilename = tokens[1];
 					QString mtlFilename = currentLine.mid(7).trimmed();
+					//remove any quotes around the filename (Photoscan 1.4 bug)
+					if (mtlFilename.startsWith("\""))
+					{
+						mtlFilename = mtlFilename.right(mtlFilename.size() - 1);
+					}
+					if (mtlFilename.endsWith("\""))
+					{
+						mtlFilename = mtlFilename.left(mtlFilename.size() - 1);
+					}
 					ccLog::Print(QString("[OBJ] Material file: ") + mtlFilename);
 					QString mtlPath = QFileInfo(filename).canonicalPath();
 					//we try to load it

@@ -15,6 +15,22 @@
 //#                                                                        #
 //##########################################################################
 
+// First:
+//	Replace all occurrences of 'ExampleIOPlugin' by your own plugin class name in this file.
+//	This includes the resource path to info.json in the constructor.
+
+// Second:
+//	Open ExampleIOPlugin.qrc, change the "prefix" and the icon filename for your plugin.
+//	Change the name of the file to <yourPluginName>.qrc
+
+// Third:
+//	Open the info.json file and fill in the information about the plugin.
+//	 "type" should be: "I/O"
+//	 "name" is the name of the plugin (required)
+//	 "icon" is the Qt resource path to the plugin's icon (from the .qrc file)
+//	 "description" is used as a tootip if the plugin has actions and is displayed in the plugin dialog
+//	 "authors", "maintainers", and "references" show up in the plugin dialog as well
+
 #include "ExampleIOPlugin.h"
 
 #include "FooFilter.h"
@@ -36,7 +52,7 @@ void ExampleIOPlugin::registerCommands( ccCommandLineInterface *cmd )
 
 QVector<FileIOFilter::Shared> ExampleIOPlugin::getFilters()
 {
-	return QVector<FileIOFilter::Shared>{
+	return {
 		FileIOFilter::Shared( new FooFilter ),
 	};
 }

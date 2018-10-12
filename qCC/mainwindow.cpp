@@ -24,8 +24,8 @@
 #include <MeshSamplingTools.h>
 #include <NormalDistribution.h>
 #include <ParallelSort.h>
-#include <ScalarFieldTools.h>
 #include <PointCloud.h>
+#include <ScalarFieldTools.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
 
@@ -67,8 +67,8 @@
 //dialogs
 #include "ccAboutDialog.h"
 #include "ccAdjustZoomDlg.h"
-#include "ccApplication.h"
 #include "ccAlignDlg.h" //Aurelien BEY
+#include "ccApplication.h"
 #include "ccApplyTransformationDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
@@ -1420,6 +1420,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	sasDlg.showApplyAllButton(shiftedEntities.size() > 1);
 	sasDlg.showApplyButton(shiftedEntities.size() == 1);
 	sasDlg.showNoButton(false);
+	sasDlg.setShiftFieldsPrecision(6);
 	//add "original" entry
 	int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", shift, scale));
 	sasDlg.setCurrentProfile(index);
@@ -8921,7 +8922,9 @@ void MainWindow::doActionDeleteShader()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
-		win->setShader(0);
+	{
+		win->setShader(nullptr);
+	}
 }
 
 void MainWindow::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
@@ -9446,8 +9449,10 @@ void MainWindow::doActionSaveFile()
 		if (m_selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
 			QStringList parts = defaultFileName.split(' ',QString::SkipEmptyParts);
-			if (parts.size() > 0)
+			if (!parts.empty())
+			{
 				defaultFileName = parts[0];
+			}
 		}
 
 		//we remove the extension
@@ -9556,7 +9561,7 @@ void MainWindow::doActionSaveFile()
 
 void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 {
-	ccGLWindow* win = mdiWin ? GLWindowFromWidget(mdiWin->widget()) : 0;
+	ccGLWindow* win = mdiWin ? GLWindowFromWidget(mdiWin->widget()) : nullptr;
 	if (win)
 	{
 		updateViewModePopUpMenu(win);
@@ -10185,9 +10190,8 @@ MainWindow* MainWindow::TheInstance()
 
 void MainWindow::DestroyInstance()
 {
-	if (s_instance)
-		delete s_instance;
-	s_instance=0;
+	delete s_instance;
+	s_instance=nullptr;
 }
 
 void MainWindow::GetGLWindows(std::vector<ccGLWindow*>& glWindows)
@@ -10250,7 +10254,7 @@ void MainWindow::addEditPlaneAction( QMenu &menu ) const
 
 ccHObject* MainWindow::dbRootObject()
 {
-	return (m_ccRoot ? m_ccRoot->getRootEntity() : 0);
+	return (m_ccRoot ? m_ccRoot->getRootEntity() : nullptr);
 }
 
 ccUniqueIDGenerator::Shared MainWindow::getUniqueIDGenerator()

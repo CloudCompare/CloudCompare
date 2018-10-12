@@ -21,28 +21,29 @@
 #include "ccGLWindow.h"
 
 //Qt
-#include <QTreeView>
-#include <QStandardItemModel>
+#include <QApplication>
 #include <QHeaderView>
-#include <QMenu>
-#include <QMimeData>
-#include <QMessageBox>
-#include <QRegExp>
 #include <QInputDialog>
+#include <QMenu>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QRegExp>
+#include <QStandardItemModel>
+#include <QTreeView>
 
 //qCC_db
-#include <ccLog.h>
-#include <ccHObject.h>
-#include <ccGenericPointCloud.h>
-#include <ccPointCloud.h>
-#include <ccMesh.h>
-#include <ccMaterialSet.h>
 #include <cc2DLabel.h>
-#include <ccGenericPrimitive.h>
-#include <ccPlane.h>
-#include <ccPolyline.h>
 #include <ccFacet.h>
 #include <ccGBLSensor.h>
+#include <ccGenericPointCloud.h>
+#include <ccGenericPrimitive.h>
+#include <ccHObject.h>
+#include <ccLog.h>
+#include <ccMaterialSet.h>
+#include <ccMesh.h>
+#include <ccPlane.h>
+#include <ccPointCloud.h>
+#include <ccPolyline.h>
 #include <ccScalarField.h>
 
 //CClib
@@ -55,9 +56,9 @@
 #include "../ccSelectChildrenDlg.h"
 
 //system
-#include <assert.h>
 #include <algorithm>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 //Minimum width of the left column of the properties tree view
 static const int c_propViewLeftColumnWidth = 115;
@@ -388,7 +389,7 @@ void ccDBRoot::deleteSelectedEntities()
 {
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
-	if (selectedIndexes.size() < 1)
+	if (selectedIndexes.empty())
 	{
 		return;
 	}
@@ -530,10 +531,16 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 		switch (item->getClassID())
 		{
 		case CC_TYPES::HIERARCHY_OBJECT:
-			if (locked)
-				return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbolLocked.png"));
-			else
-				return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbol.png"));
+			if ( item->getChildrenNumber() )
+			{
+				if (locked)
+					return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbolLocked.png"));
+				else
+					return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbol.png"));
+			}
+				
+			return QIcon();
+				
 		case CC_TYPES::POINT_CLOUD:
 			if (locked)
 				return QIcon(QStringLiteral(":/CC/images/dbCloudSymbolLocked.png"));
@@ -744,7 +751,7 @@ QModelIndex ccDBRoot::parent(const QModelIndex &index) const
 
 int ccDBRoot::rowCount(const QModelIndex &parent) const
 {
-	ccHObject *parentItem = 0;
+	ccHObject *parentItem = nullptr;
 	if (!parent.isValid())
 		parentItem = m_treeRoot;
 	else
@@ -1134,7 +1141,7 @@ Qt::DropActions ccDBRoot::supportedDropActions() const
 Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
-		return 0;
+		return Qt::NoItemFlags;
 
 	Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
 

@@ -539,6 +539,11 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 					return cmd.error(QString("Invalid vert. direction! (after %1)").arg(COMMAND_GRID_VERT_DIR));
 				}
 			}
+			else
+			{
+				//unrecognized argument (probably another command?)
+				break;
+			}
 		}
 
 		if (gridStep == 0)

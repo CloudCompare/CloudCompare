@@ -720,8 +720,8 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 					outputDesc = &cmd.clouds().back();
 				}
 
-				//save result as a PLY file
-				if (outputDesc)
+				//save result
+				if (outputDesc && cmd.autoSaveMode())
 				{
 					QString outputFilename;
 					QString errorStr = cmd.exportEntity(*outputDesc, "HEIGHT_DIFFERENCE", &outputFilename);

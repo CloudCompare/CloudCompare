@@ -1317,7 +1317,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				{
 					assert(sourceMesh == insideMesh2 || sourceMesh == origMesh);
 					insideMesh2->clear();
-					insideVertices2->clear();
+					insideVertices2->reset();
 					sourceMesh = insideMesh1;
 					sourceVertices = insideVertices1;
 					insideMesh = insideMesh2;
@@ -1330,7 +1330,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				{
 					assert(sourceMesh == insideMesh1 || sourceMesh == origMesh);
 					insideMesh1->clear();
-					insideVertices1->clear();
+					insideVertices1->reset();
 					sourceMesh = insideMesh2;
 					sourceVertices = insideVertices2;
 					insideMesh = insideMesh1;

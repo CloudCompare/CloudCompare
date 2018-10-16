@@ -455,7 +455,7 @@ void ccPointCloud::unalloactePoints()
 {
 	clearLOD();	// we have to clear the LOD structure before clearing the colors / SFs, so we can't leave it to notifyGeometryUpdate()
 	showSFColorsScale(false); //SFs will be destroyed
-	BaseClass::clear();
+	BaseClass::reset();
 	ccGenericPointCloud::clear();
 
 	notifyGeometryUpdate(); //calls releaseVBOs()

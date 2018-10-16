@@ -1707,7 +1707,7 @@ bool FPCSRegistrationTools::FilterCandidates(	GenericIndexedCloud *modelCloud,
 	{
 		for (unsigned i=0; i<table.size(); i++)
 		{
-			dataBaseCloud.clear();
+			dataBaseCloud.reset();
 			if (!dataBaseCloud.reserve(4)) //we never know ;)
 				return false;
 			for (unsigned j=0; j<4; j++)

@@ -34,7 +34,6 @@ namespace CCLib
 	template<class T> class PointCloudTpl : public T
 	{
 	public:
-
 		//! Default constructor
 		PointCloudTpl()
 			: T()
@@ -237,7 +236,7 @@ namespace CCLib
 		//! Clears the cloud database
 		/** Equivalent to resize(0).
 		**/
-		void clear()
+		void reset()
 		{
 			m_points.clear();
 			deleteAllScalarFields();
@@ -465,7 +464,6 @@ namespace CCLib
 		inline unsigned capacity() const { return static_cast<unsigned>(m_points.capacity()); }
 
 	protected:
-
 		//! Swaps two points (and their associated scalar values!)
 		virtual void swapPoints(unsigned firstIndex, unsigned secondIndex)
 		{

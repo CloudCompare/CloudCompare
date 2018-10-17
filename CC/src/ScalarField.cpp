@@ -30,6 +30,7 @@ ScalarField::ScalarField(const char* name/*=0*/)
 }
 
 ScalarField::ScalarField(const ScalarField& sf)
+	: std::vector<ScalarType>(sf)
 {
 	setName(sf.m_name);
 }

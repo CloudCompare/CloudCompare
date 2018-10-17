@@ -20,8 +20,8 @@
 #define CC_LIB_POINT_CLOUD_TPL_HEADER
 
 //Local
-#include "GenericIndexedCloudPersist.h"
 #include "BoundingBox.h"
+#include "GenericIndexedCloudPersist.h"
 #include "ScalarField.h"
 
 //STL
@@ -284,7 +284,7 @@ namespace CCLib
 		//! Returns the number of associated (and active) scalar fields
 		/** \return the number of active scalar fields
 		**/
-		inline unsigned getNumberOfScalarFields() const { return (unsigned)m_scalarFields.size(); }
+		inline unsigned getNumberOfScalarFields() const { return static_cast<unsigned>(m_scalarFields.size()); }
 
 		//! Returns a pointer to a specific scalar field
 		/** \param index a scalar field index

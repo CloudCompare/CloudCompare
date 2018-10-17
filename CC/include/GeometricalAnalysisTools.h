@@ -173,7 +173,7 @@ public:
 
 	//! Tries to detect a sphere in a point cloud
 	/** Inspired from "Parameter Estimation Techniques: A Tutorial with Application
-		to Conic Fitting" by Zhengyou Zhang (Inria Technical Report n°2676).
+		to Conic Fitting" by Zhengyou Zhang (Inria Technical Report 2676).
 		More specifically the section 9.5 about Least Median of Squares.
 		\param[in]  cloud input cloud
 		\param[in]  outliersRatio proportion of outliers (between 0 and 1)

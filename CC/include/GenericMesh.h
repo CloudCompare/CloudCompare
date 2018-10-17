@@ -35,10 +35,10 @@ class CC_CORE_LIB_API GenericMesh
 public:
 
 	//! Default destructor
-	virtual ~GenericMesh() {}
+	virtual ~GenericMesh() = default;
 
 	//! Generic function to apply to a triangle (used by foreach)
-	typedef std::function<void(GenericTriangle&)> genericTriangleAction;
+	using genericTriangleAction = std::function<void (GenericTriangle &)>;
 
 	//! Returns the number of triangles
 	/**	Virtual method to request the mesh size

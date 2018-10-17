@@ -19,10 +19,10 @@
 #include <Neighbourhood.h>
 
 //local
-#include <PointCloud.h>
 #include <ConjugateGradient.h>
 #include <Delaunay2dMesh.h>
 #include <DistanceComputationTools.h>
+#include <PointCloud.h>
 #include <SimpleMesh.h>
 
 //System

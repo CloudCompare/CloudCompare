@@ -32,9 +32,8 @@ class CC_CORE_LIB_API GenericIndexedCloud : virtual public GenericCloud
 {
 
 public:
-
 	//! Default destructor
-	virtual ~GenericIndexedCloud() {}
+	~GenericIndexedCloud() override = default;
 
 	//! Returns the ith point
 	/**	Virtual method to request a point with a specific index.

@@ -136,7 +136,7 @@ public:
 	static bool segmentMeshWitAABox(GenericIndexedMesh* mesh,
 		GenericIndexedCloudPersist* vertices,
 		MeshCutterParams& ioParams,
-		GenericProgressCallback* progressCb = 0);
+		GenericProgressCallback* progressCb = nullptr);
 };
 
 }

@@ -19,10 +19,10 @@
 #include <DistanceComputationTools.h>
 
 //local
-#include <PointCloud.h>
 #include <DgmOctreeReferenceCloud.h>
 #include <FastMarchingForPropagation.h>
 #include <LocalModel.h>
+#include <PointCloud.h>
 #include <ReferenceCloud.h>
 #include <SaitoSquaredDistanceTransform.h>
 #include <ScalarField.h>
@@ -30,8 +30,8 @@
 #include <SimpleTriangle.h>
 
 //system
-#include <assert.h>
 #include <algorithm>
+#include <cassert>
 
 #ifdef USE_QT
 #ifndef CC_DEBUG
@@ -641,7 +641,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 				if (lm)
 				{
 					CCVector3 nearestModelPoint;
-					ScalarType distToModel = lm->computeDistanceFromModelToPoint(&nNSS.queryPoint, computeSplitDistances ? &nearestModelPoint : 0);
+					ScalarType distToModel = lm->computeDistanceFromModelToPoint(&nNSS.queryPoint, computeSplitDistances ? &nearestModelPoint : nullptr);
 
 					//we take the best estimation between the nearest neighbor and the model!
 					//this way we only reduce any potential noise (that would be due to sampling)

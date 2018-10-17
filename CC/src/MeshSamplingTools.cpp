@@ -22,8 +22,8 @@
 #include <GenericIndexedMesh.h>
 #include <GenericProgressCallback.h>
 #include <GenericTriangle.h>
-#include <ScalarField.h>
 #include <PointCloud.h>
+#include <ScalarField.h>
 
 //system
 #include <random>
@@ -260,7 +260,7 @@ PointCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 													std::vector<unsigned>* triIndices/*=0*/)
 {
 	if (!mesh)
-        return 0;
+        return nullptr;
 
 	//we must compute the total area to deduce the number of points
 	double Stotal = computeMeshArea(mesh);

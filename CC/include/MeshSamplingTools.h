@@ -159,7 +159,7 @@ protected:
 	//! Map used to count the number of triangles using each edge
 	/** Edges are represented by two 32 bits indexes merged as a 64 integer
 	**/
-	typedef std::map<unsigned long long, unsigned> EdgeUsageMap;
+	using EdgeUsageMap = std::map<unsigned long long, unsigned>;
 
 	//! Computes the unique key corresponding to an edge
 	static unsigned long long ComputeEdgeKey(unsigned i1, unsigned i2);

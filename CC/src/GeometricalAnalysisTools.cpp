@@ -27,8 +27,8 @@
 #include <ScalarFieldTools.h>
 
 //system
-#include <random>
 #include <algorithm>
+#include <random>
 
 using namespace CCLib;
 

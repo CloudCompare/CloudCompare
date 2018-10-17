@@ -20,9 +20,9 @@
 #define CC_TYPES_HEADER
 
 //! Type of the coordinates of a (N-D) point
-typedef float PointCoordinateType;
+using PointCoordinateType = float;
 
 //! Type of a single scalar field value
-typedef float ScalarType;
+using ScalarType = float;
 
 #endif //CC_TYPES_HEADER

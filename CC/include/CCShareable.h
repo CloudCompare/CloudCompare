@@ -23,7 +23,7 @@
 #include "CCCoreLib.h"
 
 //system
-#include <assert.h>
+#include <cassert>
 
 //Activate shared objects tracking (for debug purposes)
 #ifdef CC_DEBUG

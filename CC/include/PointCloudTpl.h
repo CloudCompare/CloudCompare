@@ -140,7 +140,7 @@ namespace CCLib
 
 		void setPointScalarValue(unsigned pointIndex, ScalarType value) override
 		{
-			assert(m_currentInScalarFieldIndex >= 0 && m_currentInScalarFieldIndex<(int)m_scalarFields.size());
+			assert(m_currentInScalarFieldIndex >= 0 && m_currentInScalarFieldIndex < static_cast<int>(m_scalarFields.size()));
 			//slow version
 			//ScalarField* currentInScalarFieldArray = getCurrentInScalarField();
 			//if (currentInScalarFieldArray)

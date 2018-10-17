@@ -22,7 +22,7 @@
 #include "GenericIndexedCloud.h"
 
 //System
-#include <assert.h>
+#include <cassert>
 
 using namespace CCLib;
 

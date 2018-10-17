@@ -39,7 +39,7 @@ class CC_CORE_LIB_API RegistrationTools : public CCToolbox
 public:
 
 	//! Shortcut to PointProjectionTools::ScaledTransformation
-	typedef PointProjectionTools::Transformation ScaledTransformation;
+	using ScaledTransformation = PointProjectionTools::Transformation;
 
 	//! Transformation constraints
 	enum TRANSFORMATION_FILTERS

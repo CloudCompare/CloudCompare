@@ -75,12 +75,12 @@ public:
 	inline ScalarType getValueShift() const { return valueShift; }
 
 	//inherited methods (see GenericDistribution)
-	virtual bool computeParameters(const GenericCloud* Yk);
-	virtual double computeP(ScalarType x) const;
-	virtual double computePfromZero(ScalarType x) const;
-	virtual double computeP(ScalarType x1, ScalarType x2) const;
-	virtual double computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, int* histo = nullptr);
-	virtual const char* getName() const { return "Weibull"; }
+	bool computeParameters(const GenericCloud* Yk) override;
+	double computeP(ScalarType x) const override;
+	double computePfromZero(ScalarType x) const override;
+	double computeP(ScalarType x1, ScalarType x2) const override;
+	double computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, int* histo = nullptr) override;
+	const char* getName() const override { return "Weibull"; }
 
 protected:
 

@@ -49,7 +49,7 @@ public:
 	{
 	public:
 		explicit BaseNode(uint8_t nodeType) : parent(nullptr), type(nodeType) {}
-		virtual ~BaseNode() {}
+		virtual ~BaseNode() = default;
 
 		bool isNode() const { return type == NODE_TYPE; }
 		bool isLeaf() const { return type == LEAF_TYPE; }
@@ -86,10 +86,10 @@ public:
 			, splitDim(X_DIM)
 		{}
 
-		virtual ~Node()
+		~Node() override
 		{
-			if (leftChild) delete leftChild;
-			if (rightChild) delete rightChild;
+			delete leftChild;
+			delete rightChild;
 		}
 	};
 
@@ -118,15 +118,14 @@ public:
 			memcpy(planeEq, planeEquation, sizeof(PointCoordinateType) * 4);
 		}
 
-		virtual ~Leaf()
+		~Leaf() override
 		{
-			if (points)
-				delete points;
+			delete points;
 		}
 	};
 
 	//! A vector of leaves
-	typedef std::vector<Leaf*> LeafVector;
+	using LeafVector = std::vector<Leaf *>;
 
 	//! Default constructor
 	explicit TrueKdTree(GenericIndexedCloudPersist* cloud);

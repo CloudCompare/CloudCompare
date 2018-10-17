@@ -38,7 +38,7 @@ namespace CCLib
 	public:
 
 		//! Default constructor
-		SaitoSquaredDistanceTransform() : Grid3D<GridElement>() {}
+		SaitoSquaredDistanceTransform() = default;
 
 		//! Initializes the grid
 		/** The memory for the grid must be explicitelty reserved prior to any action.

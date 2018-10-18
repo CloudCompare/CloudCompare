@@ -376,6 +376,18 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 	return true;
 }
 
+unsigned int ccHObject::getChildCountRecursive() const
+{
+	unsigned int	count = static_cast<unsigned>(m_children.size());
+	
+	for ( auto child : m_children )
+	{
+		count += child->getChildCountRecursive();
+	}
+	
+	return count;
+}
+
 ccHObject* ccHObject::find(unsigned uniqueID)
 {
 	//found the right item?

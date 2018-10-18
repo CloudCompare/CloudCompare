@@ -1015,7 +1015,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 			}
 			else
 			{
-				ccLog::Warning(QString("[ccHObject::fromFile] Couldn't found any plugin able to deserialize custom object '%1' (class_ID = %2 / plugin_ID = %3").arg(childName).arg(classID).arg(pluginId));
+				ccLog::Warning(QString("[ccHObject::fromFile] Couldn't find a plugin able to deserialize custom object '%1' (class_ID = %2 / plugin_ID = %3)").arg(childName).arg(classID).arg(pluginId));
 				return false; // FIXME: for now simply return false. We may want to skip it but I'm not sure if there is a simple way of doing that
 			}
 		}

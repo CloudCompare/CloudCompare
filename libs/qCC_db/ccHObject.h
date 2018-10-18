@@ -125,6 +125,11 @@ public: //children management
 	/** \return children number
 	**/
 	inline unsigned getChildrenNumber() const { return static_cast<unsigned>(m_children.size()); }
+	
+	//! Returns the total number of children under this object recursively
+	/** \return Number of children
+	**/
+	unsigned int getChildCountRecursive() const;
 
 	//! Returns the ith child
 	/** \param childPos child position

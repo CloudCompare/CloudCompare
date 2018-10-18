@@ -60,7 +60,7 @@ public: //base members access
 	//! Returns class ID
 	/** \return class unique ID
 	**/
-	inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::HIERARCHY_OBJECT; }
+	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::HIERARCHY_OBJECT; }
 
 	//! Returns parent object
 	/** \return parent object (nullptr if no parent)
@@ -130,7 +130,7 @@ public: //children management
 	/** \param childPos child position
 		\return child object (or nullptr if wrong position)
 	**/
-	inline ccHObject* getChild(unsigned childPos) const { return (childPos < getChildrenNumber() ? m_children[childPos] : 0); }
+	inline ccHObject* getChild(unsigned childPos) const { return (childPos < getChildrenNumber() ? m_children[childPos] : nullptr); }
 
 	//! Finds an entity in this object hierarchy
 	/** \param uniqueID child unique ID
@@ -139,13 +139,13 @@ public: //children management
 	ccHObject* find(unsigned uniqueID);
 
 	//! Standard instances container (for children, etc.)
-	typedef std::vector<ccHObject*> Container;
+	using Container = std::vector<ccHObject *>;
 
 	//! Shared pointer
-	typedef QSharedPointer<ccHObject> Shared;
+	using Shared = QSharedPointer<ccHObject>;
 
 	//! Shared instances container (for children, etc.)
-	typedef std::vector<Shared> SharedContainer;
+	using SharedContainer = std::vector<Shared>;
 
 	//! Collects the children corresponding to a certain pattern
 	/** \param filteredChildren result container
@@ -259,7 +259,7 @@ public: //bounding-box
 public: //display
 
 	//Inherited from ccDrawableObject
-	virtual void draw(CC_DRAW_CONTEXT& context) override;
+	void draw(CC_DRAW_CONTEXT& context) override;
 
 	//! Returns the absolute transformation (i.e. the actual displayed GL transforamtion) of an entity
 	/** \param[out] trans absolute transformation
@@ -339,9 +339,9 @@ public: //display
 	virtual void notifyGeometryUpdate();
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const override;
-	virtual bool toFile(QFile& out) const override;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool isSerializable() const override;
+	bool toFile(QFile& out) const override;
+	bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	//! Custom version of ccSerializableObject::fromFile
 	/** This is used to load only the object's part of a stream (and not its children)

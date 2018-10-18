@@ -616,6 +616,24 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 
 	case Qt::CheckStateRole:
 	{
+		// Don't include checkboxes for hierarchy objects if they have no children or only contain hierarchy objects (recursively)
+		if ( item->getClassID() == CC_TYPES::HIERARCHY_OBJECT )
+		{
+			if ( item->getChildrenNumber() == 0 )
+			{
+				return {};
+			}
+			
+			ccHObject::Container	drawableObjects;
+			
+			unsigned int	count = item->filterChildren( drawableObjects, true, CC_TYPES::HIERARCHY_OBJECT, true );
+			
+			if ( item->getChildCountRecursive() == count )
+			{
+				return {};
+			}
+		}
+		
 		if (item->isEnabled())
 			return Qt::Checked;
 		else

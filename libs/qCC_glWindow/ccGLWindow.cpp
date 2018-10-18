@@ -45,7 +45,7 @@
 #include <QTouchEvent>
 #include <QWheelEvent>
 
-#ifdef Q_OS_LINUX
+#if defined( Q_OS_MAC ) || defined( Q_OS_LINUX )
 #include <QDir>
 #endif
 
@@ -6319,14 +6319,20 @@ void ccGLWindow::displayText(	QString text,
 
 QString ccGLWindow::getShadersPath()
 {
-	QString  appPath = QCoreApplication::applicationDirPath();
+	QString appPath = QCoreApplication::applicationDirPath();
 	QString	shaderPath;
 	
 #if defined(Q_OS_MAC)
-	appPath.remove( "MacOS" );
+	QDir  workingDir( appPath );
 	
+	if ( workingDir.dirName() == "MacOS" )
+	{
+		workingDir.cdUp();
+	}
+	
+	appPath = workingDir.absolutePath();
 #if defined(CC_MAC_DEV_PATHS)
-	shaderPath = appPath + "../../../shaders";
+	shaderPath = appPath + "/../../../shaders";
 #else
 	shaderPath = appPath + "/Shaders";
 #endif

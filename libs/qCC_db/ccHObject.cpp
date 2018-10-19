@@ -987,8 +987,17 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 		if (classID == CC_TYPES::OBJECT)
 			return false;
 
-		//create corresponding child object
-		ccHObject* child = New(classID);
+		if (dataVersion >= 35 && dataVersion <= 47 && ((classID & CC_CUSTOM_BIT) != 0))
+		{
+			//bug fix: for a long time the CC_CAMERA_BIT and CC_QUADRIC_BIT were wrongly defined
+			//with two bits instead of one! The additional and wrongly defined bit was the CC_CUSTOM_BIT :(
+			if (	static_cast<int>(classID) & CC_TYPES::CAMERA_SENSOR == CC_TYPES::CAMERA_SENSOR
+				||	static_cast<int>(classID) & CC_TYPES::QUADRIC == CC_TYPES::QUADRIC
+				)
+			{
+				classID &= (~CC_CUSTOM_BIT);
+			}
+		}
 
 		//specifc case of custom objects (defined by plugins)
 		if ((classID & CC_TYPES::CUSTOM_H_OBJECT) == CC_TYPES::CUSTOM_H_OBJECT)

@@ -65,16 +65,16 @@ enum CC_OBJECT_FLAG {	//CC_UNUSED			= 1, //DGM: not used anymore (former CC_FATH
 #define CC_NORMAL_BIT					0x00000020000000	//Normal (Nx,Ny,Nz)
 #define CC_COMPRESSED_NORMAL_BIT		0x00000040000000	//Compressed normal (index)
 #define CC_TEX_COORDS_BIT				0x00000080000000	//Texture coordinates (u,v)
-#define CC_CAMERA_BIT					0x00000100000080	//For camera sensors (projective sensors)
-#define CC_QUADRIC_BIT					0x00000200000080	//Quadric (primitive)
-//#define CC_FREE_BIT					0x00000400000080
-//#define CC_FREE_BIT					0x00000800000080
-//#define CC_FREE_BIT					0x00000400000080
-//#define CC_FREE_BIT					0x00001000000080
-//#define CC_FREE_BIT					0x00002000000080
-//#define CC_FREE_BIT					0x00004000000080
-//#define CC_FREE_BIT					0x00008000000080
-//#define CC_FREE_BIT					0x00004000000080
+#define CC_CAMERA_BIT					0x00000100000000	//For camera sensors (projective sensors)
+#define CC_QUADRIC_BIT					0x00000200000000	//Quadric (primitive)
+//#define CC_FREE_BIT					0x00000400000000
+//#define CC_FREE_BIT					0x00000800000000
+//#define CC_FREE_BIT					0x00000400000000
+//#define CC_FREE_BIT					0x00001000000000
+//#define CC_FREE_BIT					0x00002000000000
+//#define CC_FREE_BIT					0x00004000000000
+//#define CC_FREE_BIT					0x00008000000000
+//#define CC_FREE_BIT					0x00004000000000
 //#define CC_FREE_BIT					...
 
 //! Type of object type flags (64 bits)

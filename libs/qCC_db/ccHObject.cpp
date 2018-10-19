@@ -999,6 +999,9 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 			}
 		}
 
+		//create corresponding child object
+		ccHObject* child = New(classID);
+
 		//specifc case of custom objects (defined by plugins)
 		if ((classID & CC_TYPES::CUSTOM_H_OBJECT) == CC_TYPES::CUSTOM_H_OBJECT)
 		{

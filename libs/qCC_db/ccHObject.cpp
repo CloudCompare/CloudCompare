@@ -991,8 +991,8 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 		{
 			//bug fix: for a long time the CC_CAMERA_BIT and CC_QUADRIC_BIT were wrongly defined
 			//with two bits instead of one! The additional and wrongly defined bit was the CC_CUSTOM_BIT :(
-			if (	(static_cast<int>(classID) & CC_TYPES::CAMERA_SENSOR) == CC_TYPES::CAMERA_SENSOR
-				||	(static_cast<int>(classID) & CC_TYPES::QUADRIC) == CC_TYPES::QUADRIC
+			if (	(static_cast<uint64_t>(classID) & CC_TYPES::CAMERA_SENSOR) == CC_TYPES::CAMERA_SENSOR
+				||	(static_cast<uint64_t>(classID) & CC_TYPES::QUADRIC) == CC_TYPES::QUADRIC
 				)
 			{
 				classID &= (~CC_CUSTOM_BIT);

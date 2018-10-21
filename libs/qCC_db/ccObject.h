@@ -150,7 +150,7 @@ class QCC_DB_LIB_API ccUniqueIDGenerator
 public:
 
 	//! Shared type
-	typedef QSharedPointer<ccUniqueIDGenerator> Shared;
+	using Shared = QSharedPointer<ccUniqueIDGenerator>;
 
 	//! Default constructor
 	ccUniqueIDGenerator() : m_lastUniqueID(0) {}
@@ -302,14 +302,14 @@ protected:
 	virtual void setFlagState(CC_OBJECT_FLAG flag, bool state);
 
 	//inherited from ccSerializableObject
-	virtual bool toFile(QFile& out) const override;
+	bool toFile(QFile& out) const override;
 
 	//! Reimplemented from ccSerializableObject::fromFile
 	/** Be sure to call ccObject::ReadClassIDFromFile (once)
 		before calling this method, as the classID is voluntarily
 		skipped (in order to let the user instantiate the object first)
 	**/
-	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	//! Object name
 	QString m_name;

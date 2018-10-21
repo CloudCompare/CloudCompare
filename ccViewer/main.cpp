@@ -68,12 +68,12 @@ int main(int argc, char *argv[])
 	
 	if (!QGLFormat::hasOpenGL())
 	{
-		QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
+		QMessageBox::critical(nullptr, "Error", "This application needs OpenGL to run!");
 		return EXIT_FAILURE;
 	}
 	if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
 	{
-		QMessageBox::critical(0, "Error", "This application needs OpenGL 2.1 at least to run!");
+		QMessageBox::critical(nullptr, "Error", "This application needs OpenGL 2.1 at least to run!");
 		return EXIT_FAILURE;
 	}
 

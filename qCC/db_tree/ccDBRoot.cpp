@@ -50,10 +50,10 @@
 #include <CCMiscTools.h>
 
 //local
+#include "ccPickOneElementDlg.h"
 #include "ccPropertiesTreeDelegate.h"
-#include "../mainwindow.h"
-#include "../ccPickOneElementDlg.h"
-#include "../ccSelectChildrenDlg.h"
+#include "ccSelectChildrenDlg.h"
+#include "mainwindow.h"
 
 //system
 #include <algorithm>
@@ -325,14 +325,9 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 
 ccDBRoot::~ccDBRoot()
 {
-	if (m_ccPropDelegate)
-		delete m_ccPropDelegate;
-
-	if (m_propertiesModel)
-		delete m_propertiesModel;
-
-	if (m_treeRoot)
-		delete m_treeRoot;
+	delete m_ccPropDelegate;
+	delete m_propertiesModel;
+	delete m_treeRoot;
 }
 
 void ccDBRoot::unloadAll()
@@ -634,7 +629,7 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	const ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
+	const ccHObject *item = static_cast<const ccHObject*>(index.internalPointer());
 	assert(item);
 	if (!item)
 	{
@@ -654,12 +649,12 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 		else if (item->isA(CC_TYPES::VIEWPORT_2D_LABEL))
 			baseName = QStringLiteral("2D area label: ")+baseName;
 
-		return QVariant(baseName);
+		return baseName;
 	}
 	
 	case Qt::EditRole:
 	{
-		return QVariant(item->getName());
+		return item->getName();
 	}
 
 	case Qt::DecorationRole:
@@ -859,10 +854,6 @@ int ccDBRoot::rowCount(const QModelIndex &parent) const
 int ccDBRoot::columnCount(const QModelIndex &parent) const
 {
 	return 1;
-	//if (parent.isValid())
-	//	return static_cast<ccHObject*>(parent.internalPointer())->columnCount();
-	//else
-	//	return m_treeRoot->columnCount();
 }
 
 void ccDBRoot::changeSelection(const QItemSelection & selected, const QItemSelection & deselected)
@@ -1244,7 +1235,7 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 	defaultFlags |= (Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
 
 	//class type based filtering
-	const ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
+	const ccHObject *item = static_cast<const ccHObject*>(index.internalPointer());
 	assert(item);
 	if (item && !item->isLocked()) //locked items cannot be drag-dropped
 	{
@@ -1286,7 +1277,7 @@ QMap<int,QVariant> ccDBRoot::itemData(const QModelIndex& index) const
 
 	if (index.isValid())
 	{
-		ccHObject* object = static_cast<ccHObject*>(index.internalPointer());
+		const ccHObject* object = static_cast<const ccHObject*>(index.internalPointer());
 		if (object)
 			map.insert(Qt::UserRole,QVariant(object->getUniqueID()));
 	}

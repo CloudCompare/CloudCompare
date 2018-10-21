@@ -1999,7 +1999,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
 			logGLError("ccGLWindow::fullRenderingPass (FBO stop)");
-			bindFBO(0);
+			bindFBO(nullptr);
 			m_updateFBO = false;
 		}
 
@@ -3451,7 +3451,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	CONTEXT.currentLODLevel = 0;
 
 	//scalar field color-bar
-	CONTEXT.sfColorScaleToDisplay = 0;
+	CONTEXT.sfColorScaleToDisplay = nullptr;
 
 	//point picking
 	CONTEXT.labelMarkerSize = static_cast<float>(guiParams.labelMarkerSize * computeActualPixelSize());
@@ -6012,7 +6012,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 
 	//disable the FBO
 	logGLError("ccGLWindow::renderToFile/FBO stop");
-	bindFBO(0);
+	bindFBO(nullptr);
 
 	setLODEnabled(wasLODEnabled);
 
@@ -6090,7 +6090,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	glFunc->glReadBuffer(GL_NONE);
 
 	//restore the default FBO
-	bindFBO(0);
+	bindFBO(nullptr);
 
 	glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
 

@@ -22,8 +22,8 @@
 #include <GenericIndexedMesh.h>
 
 //Local
-#include "ccGenericGLDisplay.h"
 #include "ccAdvancedTypes.h"
+#include "ccGenericGLDisplay.h"
 
 namespace CCLib
 {
@@ -47,13 +47,13 @@ public:
 	ccGenericMesh(QString name = QString());
 
 	//! Destructor
-	virtual ~ccGenericMesh() {}
+	~ccGenericMesh() override = default;
 
 	//inherited methods (ccDrawableObject)
-	virtual void showNormals(bool state) override;
+	void showNormals(bool state) override;
 
 	//inherited methods (ccHObject)
-	virtual bool isSerializable() const override { return true; }
+	bool isSerializable() const override { return true; }
 
 	//! Returns the vertices cloud
 	virtual ccGenericPointCloud* getAssociatedCloud() const = 0;
@@ -179,7 +179,7 @@ public:
 								bool withNormals,
 								bool withRGB,
 								bool withTexture,
-								CCLib::GenericProgressCallback* pDlg = 0);
+								CCLib::GenericProgressCallback* pDlg = nullptr);
 
 	//! Imports the parameters from another mesh
 	/** Only the specific parameters are imported.
@@ -196,8 +196,8 @@ public:
 protected:
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//Static arrays for OpenGL drawing
 	static CCVector3* GetVertexBuffer();
@@ -213,7 +213,7 @@ protected:
 	static void EnableGLStippleMask(const QOpenGLContext* context, bool state);
 
 	//inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Handles the color ramp display
 	void handleColorRamp(CC_DRAW_CONTEXT& context);

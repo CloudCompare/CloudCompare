@@ -73,7 +73,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 
 		bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
 
-		QWidget* glWidget = 0;
+		QWidget* glWidget = nullptr;
 		CreateGLWindow(m_glWindow, glWidget, stereoMode);
 		assert(m_glWindow && glWidget);
 
@@ -163,13 +163,13 @@ ccViewer::~ccViewer()
 	if (s_cpeDlg)
 	{
 		delete s_cpeDlg;
-		s_cpeDlg = 0;
+		s_cpeDlg = nullptr;
 	}
 
 	ccHObject* currentRoot = m_glWindow->getSceneDB();
 	if (currentRoot)
 	{
-		m_glWindow->setSceneDB(0);
+		m_glWindow->setSceneDB(nullptr);
 		//m_glWindow->redraw();
 		delete currentRoot;
 	}
@@ -233,7 +233,7 @@ void ccViewer::doDisableGLFilter()
 {
 	if (m_glWindow)
 	{
-		m_glWindow->setGlFilter(0);
+		m_glWindow->setGlFilter(nullptr);
 		m_glWindow->redraw();
 	}
 }
@@ -457,11 +457,11 @@ void ccViewer::addToDB(QStringList filenames)
 	ccHObject* currentRoot = m_glWindow->getSceneDB();
 	if (currentRoot)
 	{
-		m_selectedObject = 0;
-		m_glWindow->setSceneDB(0);
+		m_selectedObject = nullptr;
+		m_glWindow->setSceneDB(nullptr);
 		m_glWindow->redraw();
 		delete currentRoot;
-		currentRoot=0;
+		currentRoot = nullptr;
 	}
 
 	bool scaleAlreadyDisplayed = false;
@@ -582,7 +582,7 @@ void ccViewer::doActionEditCamera()
 {
 	if (!s_cpeDlg)
 	{
-		s_cpeDlg = new ccCameraParamEditDlg(this, 0);
+		s_cpeDlg = new ccCameraParamEditDlg(this, nullptr);
 		s_cpeDlg->linkWith(m_glWindow);
 	}
 	s_cpeDlg->show();

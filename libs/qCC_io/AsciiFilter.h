@@ -26,9 +26,9 @@
 
 template <class T> struct AutoDeletePtr
 {
-	AutoDeletePtr(T* _ptr = 0) : ptr(_ptr) {}
+	AutoDeletePtr(T* _ptr = nullptr) : ptr(_ptr) {}
 	~AutoDeletePtr() { release(); }
-	inline void release() { if (ptr) { delete ptr; ptr = 0; } }
+	inline void release() { delete ptr; ptr = nullptr; }
 	T* ptr;
 };
 
@@ -42,14 +42,14 @@ public:
 	static inline QString GetDefaultExtension() { return "asc"; }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual bool exportSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	bool importSupported() const override { return true; }
+	bool exportSupported() const override { return true; }
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
+	QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
+	QString getDefaultExtension() const override { return GetDefaultExtension(); }
+	bool canLoadExtension(const QString& upperCaseExt) const override;
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 
 	//! Loads an ASCII file with a predefined format
 	CC_FILE_ERROR loadCloudFromFormatedAsciiFile(	const QString& filename,
@@ -64,9 +64,9 @@ public:
 													bool showLabelsIn2D = false);
 
 	//! Returns associated dialog (creates it if necessary)
-	static AsciiOpenDlg* GetOpenDialog(QWidget* parentWidget = 0);
+	static AsciiOpenDlg* GetOpenDialog(QWidget* parentWidget = nullptr);
 	//! Returns associated dialog (creates it if necessary)
-	static AsciiSaveDlg* GetSaveDialog(QWidget* parentWidget = 0);
+	static AsciiSaveDlg* GetSaveDialog(QWidget* parentWidget = nullptr);
 
 protected:
 

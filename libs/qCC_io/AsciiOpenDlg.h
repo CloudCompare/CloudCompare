@@ -22,8 +22,8 @@
 #include "qCC_io.h"
 
 //Qt
-#include <QString>
 #include <QDialog>
+#include <QString>
 
 //system
 #include <vector>
@@ -108,15 +108,15 @@ public:
 	//! Default constructor
 	/** \param parent parent widget
 	**/
-	explicit AsciiOpenDlg(QWidget* parent = 0);
+	explicit AsciiOpenDlg(QWidget* parent = nullptr);
 
 	//! Default destructor
-	virtual ~AsciiOpenDlg();
+	~AsciiOpenDlg() override;
 
 	//! Sets filename
 	/** \param filename filename
 	**/
-	void setFilename(QString filename);
+	void setFilename(const QString &filename);
 
 	//! Restores the previous context ('Apply all' button)
 	/** \return whether a context was saved or not
@@ -143,7 +143,7 @@ public:
 	};
 
 	//! ASCII open sequence
-	typedef std::vector<SequenceItem> Sequence;
+	using Sequence = std::vector<SequenceItem>;
 
 	//! Returns the whole "opening" sequence as set by the user
 	Sequence getOpenSequence() const;

@@ -20,26 +20,26 @@
 //Qt
 #include <QFile>
 #include <QFileInfo>
-#include <QTextStream>
 #include <QSharedPointer>
+#include <QTextStream>
 
 //CClib
 #include <ScalarField.h>
 
 //qCC_db
+#include <cc2DLabel.h>
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
-#include <ccLog.h>
 #include <ccScalarField.h>
-#include <cc2DLabel.h>
 
 //System
-#include <string.h>
-#include <assert.h>
+#include <cassert>
+#include <cstring>
 
 //declaration of static members
-AutoDeletePtr<AsciiSaveDlg> AsciiFilter::s_saveDialog(0);
-AutoDeletePtr<AsciiOpenDlg> AsciiFilter::s_openDialog(0);
+AutoDeletePtr<AsciiSaveDlg> AsciiFilter::s_saveDialog(nullptr);
+AutoDeletePtr<AsciiOpenDlg> AsciiFilter::s_openDialog(nullptr);
 
 AsciiSaveDlg* AsciiFilter::GetSaveDialog(QWidget* parentWidget/*=0*/)
 {
@@ -187,10 +187,10 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		for (unsigned i = 0; i < ccCloud->getNumberOfScalarFields(); ++i)
 			theScalarFields.push_back(static_cast<ccScalarField*>(ccCloud->getScalarField(i)));
 	}
-	bool writeSF = (theScalarFields.size() != 0);
+	bool writeSF = (!theScalarFields.empty());
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -470,7 +470,7 @@ struct cloudAttributesDescriptor
 
 	void reset()
 	{
-		cloud = 0;
+		cloud = nullptr;
 		for (unsigned i = 0; i < c_attribCount; ++i)
 		{
 			indexes[i] = -1;
@@ -498,9 +498,8 @@ struct cloudAttributesDescriptor
 
 void clearStructure(cloudAttributesDescriptor &cloudDesc)
 {
-	if (cloudDesc.cloud)
-		delete cloudDesc.cloud;
-	cloudDesc.cloud = 0;
+	delete cloudDesc.cloud;
+	cloudDesc.cloud = nullptr;
 	cloudDesc.reset();
 }
 
@@ -513,8 +512,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 	ccPointCloud* cloud = new ccPointCloud();
 	if (!cloud || !cloud->reserveThePointsTable(numberOfPoints))
 	{
-		if (cloud)
-			delete cloud;
+		delete cloud;
 		return cloudAttributesDescriptor();
 	}
 
@@ -748,7 +746,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 	}
 
 	//progress indicator
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -953,7 +951,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 				else if (cloudDesc.fRgbaIndex >= 0)
 				{
 					const float rgbf = parts[cloudDesc.fRgbaIndex].toFloat();
-					const uint32_t rgb = (uint32_t)(*((uint32_t*)&rgbf));
+					const uint32_t rgb = *(reinterpret_cast<const uint32_t *>(&rgbf));
 					col.r = ((rgb >> 16) & 0x0000ff);
 					col.g = ((rgb >>  8) & 0x0000ff);
 					col.b = ((rgb      ) & 0x0000ff);

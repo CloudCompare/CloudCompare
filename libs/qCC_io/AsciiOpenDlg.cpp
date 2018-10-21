@@ -26,22 +26,22 @@
 #include <ccPointCloud.h>
 
 //Qt
-#include <QMessageBox>
-#include <QTableWidget>
-#include <QTableWidgetItem>
-#include <QLineEdit>
-#include <QSpinBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
-#include <QToolButton>
-#include <QPushButton>
 #include <QFile>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QTableWidget>
+#include <QTableWidgetItem>
 #include <QTextStream>
+#include <QToolButton>
 
 //system
-#include <string.h>
-#include <stdio.h>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
 
 //Semi-persistent value for max. cloud size
 static double s_maxCloudSizeDoubleSpinBoxValue = (CC_MAX_NUMBER_OF_POINTS_PER_CLOUD / 1.0e6);
@@ -95,12 +95,10 @@ static AsciiOpenContext s_asciiOpenContext;
 
 AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	: QDialog(parent)
-	//, Ui::AsciiOpenDialog()
 	, m_ui(new Ui_AsciiOpenDialog)
 	, m_skippedLines(0)
 	, m_separator(' ')
 	, m_averageLineSize(-1.0)
-	//, m_filename()
 	, m_columnsCount(0)
 {
 	m_ui->setupUi(this);
@@ -126,11 +124,11 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 
 AsciiOpenDlg::~AsciiOpenDlg()
 {
-	if (m_ui)
-		delete m_ui;
+	delete m_ui;
+	m_ui = nullptr;
 }
 
-void AsciiOpenDlg::setFilename(QString filename)
+void AsciiOpenDlg::setFilename(const QString &filename)
 {
 	m_filename = filename;
 	m_ui->lineEditFileName->setText(m_filename);
@@ -156,8 +154,12 @@ void AsciiOpenDlg::autoFindBestSeparator()
 		//...until we find one that gives us at least 3 valid colums
 		size_t validColumnCount = 0;
 		for (ColumnType type : m_columnType)
+		{
 			if (type != TEXT)
+			{
 				++validColumnCount;
+			}
+		}
 
 		if (validColumnCount > 2)
 		{
@@ -232,7 +234,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 	if (separator.length() < 1)
 	{
 		m_ui->asciiCodeLabel->setText("Enter a valid character!");
-		m_ui->buttonFrame->setEnabled(false);
+		m_ui->buttonWidget->setEnabled(false);
 		m_ui->tableWidget->clear();
 		m_columnType.clear();
 		return;
@@ -330,6 +332,7 @@ void AsciiOpenDlg::updateTable()
 		if (!currentLine.startsWith("//")/* || !currentLine.startsWith("#")*/)
 		{
 			QStringList parts = currentLine.trimmed().split(m_separator, QString::SkipEmptyParts);
+			
 			if (lineCount < DISPLAYED_LINES)
 			{
 				unsigned partsCount = std::min(MAX_COLUMNS, static_cast<unsigned>(parts.size()));
@@ -360,7 +363,7 @@ void AsciiOpenDlg::updateTable()
 						//remove the unnecessary cells!
 						for (int i = static_cast<int>(partsCount); i < m_ui->tableWidget->columnCount(); ++i)
 						{
-							m_ui->tableWidget->setItem(lineCount + 1, i, 0);
+							m_ui->tableWidget->setItem(lineCount + 1, i, nullptr);
 						}
 					}
 					columnsCount = partsCount;
@@ -873,7 +876,7 @@ void AsciiOpenDlg::updateTable()
 	m_columnsCount = columnsCount;
 
 	m_ui->tableWidget->setEnabled(true);
-	m_ui->buttonFrame->setEnabled(true);
+	m_ui->buttonWidget->setEnabled(true);
 
 	//check for invalid columns
 	checkSelectedColumnsValidity(); //will eventually enable of disable the "OK" button
@@ -1221,7 +1224,7 @@ void AsciiOpenDlg::columnsTypeHasChanged(int index)
 			if (combo->currentIndex() == index)
 			{
 				combo->blockSignals(true);
-				combo->setCurrentIndex((int)ASCII_OPEN_DLG_None);
+				combo->setCurrentIndex(ASCII_OPEN_DLG_None);
 				combo->blockSignals(false);
 			}
 		}

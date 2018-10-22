@@ -58,5 +58,5 @@ bool ccApplication::event(QEvent *inEvent)
 	}
 #endif
 	
-	return QApplication::event( inEvent );
+	return ccApplicationBase::event( inEvent );
 }

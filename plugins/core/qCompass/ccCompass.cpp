@@ -18,10 +18,11 @@
 #include <array>
 
 //Qt
+#include <QCheckBox>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QIntValidator>
-#include <qcheckbox.h>
+
 #include <ccPickingHub.h>
 #include <ccProgressDialog.h>
 
@@ -34,10 +35,10 @@
 #include "ccMapDlg.h"
 #include "ccNoteTool.h"
 #include "ccPinchNodeTool.h"
+#include "ccSNECloud.h"
 #include "ccThicknessTool.h"
 #include "ccTopologyTool.h"
 #include "ccTraceTool.h"
-#include "ccSNECloud.h"
 
 //initialize default static pars
 bool ccCompass::drawName = false;
@@ -51,7 +52,6 @@ int ccCompass::mapTo = ccGeoObject::LOWER_BOUNDARY;
 ccCompass::ccCompass(QObject* parent) :
 	QObject( parent )
   , ccStdPluginInterface( ":/CC/plugin/qCompass/info.json" )
-  , m_action( nullptr )
 {
 	//initialize all tools
 	m_fitPlaneTool = new ccFitPlaneTool();
@@ -75,10 +75,8 @@ ccCompass::~ccCompass()
 	delete m_noteTool;
 	delete m_pinchNodeTool;
 
-	if (m_dlg)
-		delete m_dlg;
-	if (m_mapDlg)
-		delete m_mapDlg;
+	delete m_dlg;
+	delete m_mapDlg;
 }
 
 void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
@@ -1438,7 +1436,7 @@ void ccCompass::estimateStructureNormals()
 		}
 	}
 
-	if (datasets.size() == 0) { //no data found
+	if (datasets.empty()) { //no data found
 		m_app->dispToConsole("[ccCompass] No GeoObjects or Traces could be found to estimate structure normals for. Please select some!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	}
 
@@ -1606,9 +1604,9 @@ void ccCompass::estimateStructureNormals()
 			{
 				//update progress bar
 				if (r == 0) {
-					prg.update(50 * _min / (float)(px.size() - minsize)); //first half
+					prg.update(50 * _min / static_cast<float>(px.size() - minsize)); //first half
 				} else {
-					prg.update(50 + 50 * _min / (float)(px.size() - minsize)); //second half
+					prg.update(50 + 50 * _min / static_cast<float>(px.size() - minsize)); //second half
 				}
 				if (prg.isCancelRequested()) {
 
@@ -1620,7 +1618,7 @@ void ccCompass::estimateStructureNormals()
 					return; }
 
 				//do inner loop
-				for (unsigned _max = _min + minsize; _max < std::min((unsigned)px.size(), _min + maxsize); _max++)
+				for (unsigned _max = _min + minsize; _max < std::min(static_cast<unsigned>(px.size()), _min + maxsize); _max++)
 				{
 					//size of the current subset
 					n = _max - _min;
@@ -2631,7 +2629,7 @@ void ccCompass::onSave()
 }
 
 //write plane data
-int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentName)
+int ccCompass::writePlanes(ccHObject* object, QTextStream* out, const QString &parentName)
 {
 	//get object name
 	QString name;
@@ -2692,7 +2690,7 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentNa
 }
 
 //write trace data
-int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentName)
+int ccCompass::writeTraces(ccHObject* object, QTextStream* out, const QString &parentName)
 {
 	//get object name
 	QString name;
@@ -2758,7 +2756,7 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 }
 
 //write lineation data
-int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString parentName, bool thicknesses)
+int ccCompass::writeLineations(ccHObject* object, QTextStream* out, const QString &parentName, bool thicknesses)
 {
 	//get object name
 	QString name;
@@ -2794,7 +2792,7 @@ int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString pare
 }
 
 
-int ccCompass::writeToXML(QString filename)
+int ccCompass::writeToXML(const QString &filename)
 {
 	int n = 0;
 

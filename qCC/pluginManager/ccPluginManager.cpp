@@ -66,10 +66,6 @@ ccPluginManager::ccPluginManager( QObject *parent ) :
 {
 }
 
-ccPluginManager::~ccPluginManager()
-{
-}
-
 void ccPluginManager::loadPlugins()
 {
 	m_pluginList.clear();
@@ -123,7 +119,7 @@ void ccPluginManager::loadPlugins()
 			{
 				ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(plugin);
 				
-				for ( FileIOFilter::Shared filter : ioPlugin->getFilters() )
+				for ( auto &filter : ioPlugin->getFilters() )
 				{
 					if (filter)
 					{

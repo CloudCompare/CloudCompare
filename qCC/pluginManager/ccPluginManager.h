@@ -24,7 +24,7 @@
 class ccPluginInterface;
 
 //! Simply a list of \see ccPluginInterface
-typedef QVector<ccPluginInterface *> ccPluginInterfaceList;
+using ccPluginInterfaceList = QVector<ccPluginInterface *>;
 
 
 class ccPluginManager : public QObject
@@ -33,7 +33,7 @@ class ccPluginManager : public QObject
 	
 public:
 	explicit ccPluginManager( QObject *parent = nullptr );
-	~ccPluginManager();
+	~ccPluginManager() override = default;
 	
 	static void loadPlugins();
 

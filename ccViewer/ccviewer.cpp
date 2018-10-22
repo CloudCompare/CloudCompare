@@ -62,7 +62,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	setStyleSheet("QStatusBar{background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(200,200,200), stop:1 rgb(255,255,255));}");
 #endif
 	
-	setWindowTitle(QString("ccViewer v%1").arg(ccViewerApp->versionLongStr( false )));
+	setWindowTitle(QString("ccViewer v%1").arg(ccApp->versionLongStr( false )));
 
 	//insert GL window in a vertical layout
 	{
@@ -1032,7 +1032,7 @@ void ccViewer::doActionAbout()
 
 	Ui::AboutDialog ui;
 	ui.setupUi(&aboutDialog);
-	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(ccViewerApp->versionLongStr( true )));
+	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(ccApp->versionLongStr( true )));
 
 	aboutDialog.exec();
 }

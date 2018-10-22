@@ -675,7 +675,7 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 						reportInfo.addedVolume += cell.h;
 					}
 					reportInfo.surface += 1.0;
-					++grid.nonEmptyCellCount; //= matching count
+					++grid.nonEmptyCellCount; // matching count
 					++cellCount;
 				}
 				else

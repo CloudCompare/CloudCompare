@@ -74,7 +74,7 @@ protected:
 	};
 
 	//inherited from ccPointPickingGenericInterface
-	void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y);
+	void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y) override;
 
 	//! Current picking mode
 	Mode m_pickingMode;

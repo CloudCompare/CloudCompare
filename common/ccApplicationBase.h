@@ -18,8 +18,8 @@
 //#                                                                        #
 //##########################################################################
 
+//Qt
 #include <QApplication>
-
 
 //! Mimic Qt's qApp for easy access to the application instance
 #define ccApp (static_cast<ccApplicationBase *>( QCoreApplication::instance() ))

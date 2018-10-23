@@ -19,9 +19,11 @@
 
 //local
 #include "ccColorScaleEditorWidget.h"
-#include "ccQtHelpers.h"
 #include "ccPersistentSettings.h"
+
+//common
 #include <ccMainAppInterface.h>
+#include <ccQtHelpers.h>
 
 //qCC_db
 #include <ccColorScalesManager.h>

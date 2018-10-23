@@ -50,9 +50,9 @@ public:
 	explicit ccPointPairRegistrationDlg(ccPickingHub* pickingHub, ccMainAppInterface* app, QWidget* parent = 0);
 
 	//inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindow* win);
-	virtual bool start();
-	virtual void stop(bool state);
+	virtual bool linkWith(ccGLWindow* win) override;
+	virtual bool start() override;
+	virtual void stop(bool state) override;
 
 	//! Inits dialog
 	bool init(	ccGLWindow* win,

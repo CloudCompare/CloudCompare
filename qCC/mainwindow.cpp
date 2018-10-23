@@ -64,6 +64,14 @@
 #include "ccInnerRect2DFinder.h"
 #include "ccHistogramWindow.h"
 
+//common
+#include <ccPickingHub.h>
+//common dialogs
+#include <ccCameraParamEditDlg.h>
+#include <ccDisplayOptionsDlg.h>
+#include <ccPickOneElementDlg.h>
+#include <ccStereoModeDlg.h>
+
 //dialogs
 #include "ccAboutDialog.h"
 #include "ccAdjustZoomDlg.h"
@@ -72,12 +80,10 @@
 #include "ccApplyTransformationDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
-#include "ccCameraParamEditDlg.h"
 #include "ccCamSensorProjectionDlg.h"
 #include "ccClippingBoxTool.h"
 #include "ccColorScaleEditorDlg.h"
 #include "ccComparisonDlg.h"
-#include "ccDisplayOptionsDlg.h"
 #include "ccFilterByValueDlg.h"
 #include "ccGBLSensorProjectionDlg.h"
 #include "ccGraphicalSegmentationTool.h"
@@ -87,8 +93,6 @@
 #include "ccMatchScalesDlg.h"
 #include "ccNoiseFilterDlg.h"
 #include "ccOrderChoiceDlg.h"
-#include "ccPickingHub.h"
-#include "ccPickOneElementDlg.h"
 #include "ccPlaneEditDlg.h"
 #include "ccPointListPickingDlg.h"
 #include "ccPointPairRegistrationDlg.h"
@@ -103,7 +107,6 @@
 #include "ccSensorComputeDistancesDlg.h"
 #include "ccSensorComputeScatteringAnglesDlg.h"
 #include "ccSORFilterDlg.h"
-#include "ccStereoModeDlg.h"
 #include "ccSubsamplingDlg.h" //Aurelien BEY
 #include "ccTracePolylineTool.h"
 #include "ccUnrollDlg.h"

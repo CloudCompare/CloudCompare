@@ -48,9 +48,9 @@ public:
 	virtual ~ccPointPickingGenericInterface() {}
 
 	//inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindow* win);
-	virtual bool start();
-	virtual void stop(bool state);
+	virtual bool linkWith(ccGLWindow* win) override;
+	virtual bool start() override;
+	virtual void stop(bool state) override;
 
 	//! Inherited from ccPickingListener
 	virtual void onItemPicked(const PickedItem& pi);

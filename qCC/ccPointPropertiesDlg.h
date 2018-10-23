@@ -40,9 +40,9 @@ public:
 	virtual ~ccPointPropertiesDlg();
 
 	//inherited from ccPointPickingGenericInterface
-	virtual bool start();
-	virtual void stop(bool state);
-	virtual bool linkWith(ccGLWindow* win);
+	virtual bool start() override;
+	virtual void stop(bool state) override;
+	virtual bool linkWith(ccGLWindow* win) override;
 
 protected slots:
 

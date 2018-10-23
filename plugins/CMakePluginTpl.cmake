@@ -3,6 +3,7 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
+include_directories( ${CloudCompare_SOURCE_DIR}/../common )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_IO_LIB_SOURCE_DIR} )

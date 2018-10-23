@@ -49,8 +49,10 @@
 //CClib
 #include <CCMiscTools.h>
 
+//common
+#include <ccPickOneElementDlg.h>
+
 //local
-#include "ccPickOneElementDlg.h"
 #include "ccPropertiesTreeDelegate.h"
 #include "ccSelectChildrenDlg.h"
 #include "mainwindow.h"

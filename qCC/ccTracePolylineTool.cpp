@@ -19,7 +19,9 @@
 
 //Local
 #include "mainwindow.h"
-#include "ccPickingHub.h"
+
+//common
+#include <ccPickingHub.h>
 
 //CCLib
 #include <ManualSegmentationTools.h>

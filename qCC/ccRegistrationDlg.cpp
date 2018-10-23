@@ -18,8 +18,10 @@
 #include "ccRegistrationDlg.h"
 
 //Local
-#include "ccQtHelpers.h"
 #include "mainwindow.h"
+
+//common
+#include <ccQtHelpers.h>
 
 //CCLib
 #include <DgmOctree.h>

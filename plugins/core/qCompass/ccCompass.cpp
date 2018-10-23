@@ -23,7 +23,10 @@
 #include <QFileInfo>
 #include <QIntValidator>
 
+//common
 #include <ccPickingHub.h>
+
+//qCC_db
 #include <ccProgressDialog.h>
 
 #include "ccCompass.h"

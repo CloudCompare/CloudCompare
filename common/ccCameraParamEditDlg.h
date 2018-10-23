@@ -56,8 +56,8 @@ public:
 	ccGLMatrixd getMatrix();
 
 	//inherited from ccOverlayDialog
-	virtual bool start();
-	virtual bool linkWith(ccGLWindow* win);
+	virtual bool start() override;
+	virtual bool linkWith(ccGLWindow* win) override;
 
 	//inherited from ccPickingListener
 	virtual void onItemPicked(const PickedItem& pi);

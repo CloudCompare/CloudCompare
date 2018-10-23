@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
+//Qt
 #include <QtGlobal>
-
 #include <QDir>
 #include <QString>
 #include <QSurfaceFormat>
@@ -27,9 +27,8 @@
 // qCC_db
 #include "ccMaterial.h"
 
+//Common
 #include "ccApplicationBase.h"
-#include "mainwindow.h"
-
 
 void ccApplicationBase::init()
 {

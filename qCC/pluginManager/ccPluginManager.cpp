@@ -15,20 +15,24 @@
 //#                                                                        #
 //##########################################################################
 
+#include "ccPluginManager.h"
+
+//qCC_db
+#include <ccExternalFactory.h>
+#include <ccLog.h>
+
+//plugins
+#include "ccGLFilterPluginInterface.h"
+#include "ccIOFilterPluginInterface.h"
+#include "ccStdPluginInterface.h"
+
+//Qt
 #include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
 #include <QPluginLoader>
 #include <QSet>
 #include <QStandardPaths>
-
-#include "ccExternalFactory.h"
-#include "ccGLFilterPluginInterface.h"
-#include "ccIOFilterPluginInterface.h"
-#include "ccLog.h"
-#include "ccPluginManager.h"
-#include "ccStdPluginInterface.h"
-
 
 ccPluginInterfaceList ccPluginManager::m_pluginList;
 

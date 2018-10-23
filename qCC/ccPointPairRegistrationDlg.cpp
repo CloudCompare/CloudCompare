@@ -20,7 +20,9 @@
 //Local
 #include "mainwindow.h"
 #include "ccAskThreeDoubleValuesDlg.h"
-#include "ccPickingHub.h"
+
+//common
+#include <ccPickingHub.h>
 
 //qCC_gl
 #include <ccGLWindow.h>

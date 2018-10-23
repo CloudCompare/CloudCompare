@@ -18,10 +18,10 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccApplicationBase.h"
+//Common
+#include <ccApplicationBase.h>
 
 class ccViewer;
-
 
 class ccViewerApplication : public ccApplicationBase
 {

@@ -26,7 +26,7 @@
 //qCC_glWindow
 #include <ccGLWidget.h>
 
-//dialogs
+//common dialogs
 #include <ccCameraParamEditDlg.h>
 #include <ccDisplayOptionsDlg.h>
 #include <ccStereoModeDlg.h>

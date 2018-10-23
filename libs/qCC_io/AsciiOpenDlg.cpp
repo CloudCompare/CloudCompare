@@ -206,7 +206,7 @@ static bool CouldBeRGBf(const QString& colHeader) { return colHeader == AsciiHea
 static bool CouldBeScal(const QString& colHeader) { return colHeader.contains("SCALAR"); }
 static bool CouldBeLabel(const QString& colHeader) { return colHeader.contains("LABEL") || colHeader.contains("NAME"); }
 
-static const unsigned MAX_COLUMNS = 512;				//maximum number of columns that can be handled
+static const unsigned MAX_COLUMNS = 256;				//maximum number of columns that can be handled
 static const unsigned LINES_READ_FOR_STATS = 200;		//number of lines read for stats
 static const unsigned DISPLAYED_LINES = 20;				//number of displayed lines
 

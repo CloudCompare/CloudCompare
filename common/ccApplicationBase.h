@@ -1,3 +1,6 @@
+#ifndef CCAPPLICATIONBASE_H
+#define CCAPPLICATIONBASE_H
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,47 +18,26 @@
 //#                                                                        #
 //##########################################################################
 
-#include <QtGlobal>
+#include <QApplication>
 
-#ifdef Q_OS_MAC
-#include <QFileOpenEvent>
+
+//! Mimic Qt's qApp for easy access to the application instance
+#define ccApp (static_cast<ccApplicationBase *>( QCoreApplication::instance() ))
+
+class ccApplicationBase : public QApplication
+{
+public:
+	//! This must be called before instantiating the application class so it
+	//! can setup OpenGL first.
+	static void	init();
+
+	ccApplicationBase( int &argc, char **argv, const QString &version );
+
+	QString versionStr() const;
+	QString versionLongStr( bool includeOS ) const;
+
+private:
+	const QString c_VersionStr;
+};
+
 #endif
-
-#include "ccviewer.h"
-#include "ccViewerApplication.h"
-
-
-ccViewerApplication::ccViewerApplication(int &argc, char **argv)
-	: ccApplicationBase( argc, argv, QStringLiteral( "1.38-alpha" ) )
-{
-	setApplicationName( "CloudCompareViewer" );
-}
-
-void ccViewerApplication::setViewer(ccViewer *inViewer)
-{
-	mViewer = inViewer;
-}
-
-bool ccViewerApplication::event(QEvent *inEvent)
-{
-#ifdef Q_OS_MAC
-	switch ( inEvent->type() )
-	{
-		case QEvent::FileOpen:
-		{			
-			if ( mViewer == nullptr )
-			{
-				return false;
-			}
-			
-			mViewer->addToDB( { static_cast<QFileOpenEvent *>(inEvent)->file() } );
-			return true;
-		}
-			
-		default:
-			break;
-	}
-#endif
-
-	return ccApplicationBase::event( inEvent );
-}

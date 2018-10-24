@@ -200,9 +200,6 @@ protected:
 	//! Tries to guess the best separator automagically
 	void autoFindBestSeparator();
 
-	// Resizes dialog width to fit all displayed table columns
-	void resizeWidthToFitTableColumns();
-
 	//associated UI
 	Ui_AsciiOpenDialog* m_ui;
 

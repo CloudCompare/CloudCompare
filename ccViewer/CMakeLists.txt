@@ -19,10 +19,6 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 file( GLOB header_list *.h )
 file( GLOB source_list *.cpp )
 
-#add the plugin manager
-list( APPEND header_list ../qCC/pluginManager/ccPluginManager.h)
-list( APPEND source_list ../qCC/pluginManager/ccPluginManager.cpp)
-
 file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list ../qCC/*.qrc )
 file( GLOB rc_list ../qCC/*.rc )

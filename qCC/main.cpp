@@ -45,7 +45,7 @@
 
 //plugins
 #include "ccPluginInterface.h"
-#include "pluginManager/ccPluginManager.h"
+#include "ccPluginManager.h"
 
 #ifdef USE_VLD
 //VLD

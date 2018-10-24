@@ -34,6 +34,8 @@
 #include <QSet>
 #include <QStandardPaths>
 
+
+QStringList ccPluginManager::m_PluginPaths;
 ccPluginInterfaceList ccPluginManager::m_pluginList;
 
 
@@ -70,9 +72,24 @@ ccPluginManager::ccPluginManager( QObject *parent ) :
 {
 }
 
+void ccPluginManager::setPaths( const QStringList &paths )
+{
+	m_PluginPaths = paths;
+}
+
+QStringList ccPluginManager::pluginPaths()
+{
+	return m_PluginPaths;
+}
+
 void ccPluginManager::loadPlugins()
 {
 	m_pluginList.clear();
+	
+	if ( m_PluginPaths.empty() )
+	{
+		qWarning() << "There are no plugin paths set. Maybe missing a call to ccPluginManager::setPaths()?";
+	}
 
 	// "static" plugins
 	const QObjectList	pluginInstances = QPluginLoader::staticInstances();
@@ -139,68 +156,6 @@ void ccPluginManager::loadPlugins()
 				break;
 		}
 	}
-}
-
-QStringList ccPluginManager::pluginPaths()
-{
-	QString appPath = QCoreApplication::applicationDirPath();
-
-	QStringList pluginPaths;
-
-#if defined(Q_OS_MAC)
-	// plugins are in the bundle
-	QDir  dir( appPath );
-
-	if ( dir.dirName() == "MacOS" )
-	{
-		dir.cdUp();
-
-		pluginPaths << (dir.absolutePath() + "/PlugIns/ccPlugins");
-#if defined(CC_MAC_DEV_PATHS)
-		// used for development only - this is the path where the plugins are built
-		// this avoids having to install into the application bundle when developing
-		dir.cdUp();
-		dir.cdUp();
-		dir.cdUp();
-		pluginPaths << (dir.absolutePath() + "/ccPlugins");
-#endif
-	}
-#elif defined(Q_OS_WIN)
-	pluginPaths << (appPath + "/plugins");
-#elif defined(Q_OS_LINUX)
-	// Plugins are relative to the bin directory where the executable is found
-	QDir  binDir(appPath);
-
-	if (binDir.dirName() == "bin")
-	{
-		binDir.cdUp();
-
-		pluginPaths << (binDir.absolutePath() + "/lib/cloudcompare/plugins");
-	}
-	else
-	{
-		// Choose a reasonable default to look in
-		pluginPaths << "/usr/lib/cloudcompare/plugins";
-	}
-#else
-#error Need to specify the plugin path for this OS.
-#endif
-
-	// Add any app data paths
-	// Plugins in these directories take precendence over the included ones
-	// This allows users to put plugins outside of the install directories.
-	QStringList appDataPaths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
-
-	for ( const QString &appDataPath : appDataPaths )
-	{
-		QString path = appDataPath + "/plugins";
-		if (!pluginPaths.contains(path)) //avoid duplicate entries (can happen, at least on Windows)
-		{
-			pluginPaths << path;
-		}
-	}
-
-	return pluginPaths;
 }
 
 ccPluginInterfaceList &ccPluginManager::pluginList()

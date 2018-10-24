@@ -35,15 +35,17 @@ public:
 	explicit ccPluginManager( QObject *parent = nullptr );
 	~ccPluginManager() override = default;
 	
-	static void loadPlugins();
-
+	static void setPaths( const QStringList &paths );
 	static QStringList pluginPaths();
+	
+	static void loadPlugins();
 	
 	static ccPluginInterfaceList &pluginList();
 	
 private:	
 	static void loadFromPathsAndAddToList();	
 	
+	static QStringList m_PluginPaths;
 	static ccPluginInterfaceList m_pluginList;
 };
 

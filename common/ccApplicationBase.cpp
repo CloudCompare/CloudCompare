@@ -16,10 +16,11 @@
 //##########################################################################
 
 //Qt
-#include <QtGlobal>
 #include <QDir>
+#include <QStandardPaths>
 #include <QString>
 #include <QSurfaceFormat>
+#include <QtGlobal>
 
 // CCLib
 #include "CCPlatform.h"
@@ -27,8 +28,13 @@
 // qCC_db
 #include "ccMaterial.h"
 
+// qCC_glWindow
+#include "ccGLWindow.h"
+
 //Common
 #include "ccApplicationBase.h"
+#include "ccPluginManager.h"
+
 
 void ccApplicationBase::init()
 {
@@ -71,6 +77,8 @@ ccApplicationBase::ccApplicationBase(int &argc, char **argv, const QString &vers
 {
 	setOrganizationName( "CCCorp" );
 
+	setupPaths();
+	
 #ifdef Q_OS_MAC
 	// Mac OS X apps don't show icons in menus
 	setAttribute( Qt::AA_DontShowIconsInMenus );
@@ -85,6 +93,9 @@ ccApplicationBase::ccApplicationBase(int &argc, char **argv, const QString &vers
 	setlocale( LC_NUMERIC, "C" );
 #endif
 
+	ccGLWindow::setShaderPath( m_ShaderPath );
+	ccPluginManager::setPaths( m_PluginPaths );
+	
 	connect( this, &ccApplicationBase::aboutToQuit, [=](){ ccMaterial::ReleaseTextures(); } );
 }
 
@@ -132,4 +143,72 @@ QString ccApplicationBase::versionLongStr( bool includeOS ) const
 #endif
 
 	return verStr;
+}
+
+void ccApplicationBase::setupPaths()
+{
+	QDir  appDir = QCoreApplication::applicationDirPath();
+
+	// Set up our shader and plugin paths
+#if defined(Q_OS_MAC)
+	QDir  bundleDir = appDir;
+
+	if ( bundleDir.dirName() == "MacOS" )
+	{
+		bundleDir.cdUp();
+	}
+
+	m_PluginPaths << (bundleDir.absolutePath() + "/PlugIns/ccPlugins");
+
+#if defined(CC_MAC_DEV_PATHS)
+	// Used for development only - this is the path where the plugins are built
+	// and the shaders are located.
+	// This avoids having to install into the application bundle when developing.
+	bundleDir.cdUp();
+	bundleDir.cdUp();
+	bundleDir.cdUp();
+
+	m_PluginPaths << (bundleDir.absolutePath() + "/ccPlugins");
+	m_ShaderPath = (bundleDir.absolutePath() + "/shaders");
+#else
+	m_ShaderPath = (bundleDir.absolutePath() + "/Shaders");
+#endif
+#elif defined(Q_OS_WIN)
+	m_PluginPaths << (appDir.absolutePath() + "/plugins");
+	m_ShaderPath = (appDir.absolutePath() + "/shaders");
+#elif defined(Q_OS_LINUX)
+	// Shaders & plugins are relative to the bin directory where the executable is found
+	QDir  theDir = appDir;
+
+	if ( theDir.dirName() == "bin" )
+	{
+		theDir.cdUp();
+
+		m_PluginPaths << (theDir.absolutePath() + "/lib/cloudcompare/plugins");
+		m_ShaderPath = (theDir.absolutePath() + "/share/cloudcompare/shaders");
+	}
+	else
+	{
+		// Choose a reasonable default to look in
+		m_PluginPaths << "/usr/lib/cloudcompare/plugins";
+		m_ShaderPath = "/usr/share/cloudcompare/shaders";
+	}
+#else
+#warning Need to specify the shader path for this OS.
+#endif
+
+	// Add any app data paths to plugin paths
+	// Plugins in these directories take precendence over the included ones
+	// This allows users to put plugins outside of the install directories.
+	const QStringList appDataPaths = QStandardPaths::standardLocations( QStandardPaths::AppDataLocation );
+
+	for ( const QString &appDataPath : appDataPaths )
+	{
+		QString path = appDataPath + "/plugins";
+
+		if (!m_PluginPaths.contains(path)) //avoid duplicate entries (can happen, at least on Windows)
+		{
+			m_PluginPaths << path;
+		}
+	}
 }

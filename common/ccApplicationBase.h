@@ -37,7 +37,12 @@ public:
 	QString versionLongStr( bool includeOS ) const;
 
 private:
+	void setupPaths();
+	
 	const QString c_VersionStr;
+	
+	QString	m_ShaderPath;
+	QStringList m_PluginPaths;
 };
 
 #endif

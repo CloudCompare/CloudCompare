@@ -104,6 +104,9 @@ static const char c_ps_stereoGlassType[] = "stereoGlassType";
 //Unique GL window ID
 static int s_GlWindowNumber = 0;
 
+// Shader path
+QString	ccGLWindow::s_shaderPath;
+
 //On some versions of Qt, QGLWidget::renderText seems to need glColorf instead of glColorub!
 // See https://bugreports.qt-project.org/browse/QTBUG-6217
 template<class QOpenGLFunctions> inline static void glColor3ubv_safe(QOpenGLFunctions* glFunc, const unsigned char* rgb)
@@ -802,9 +805,8 @@ bool ccGLWindow::initialize()
 				else
 				{
 					ccColorRampShader* colorRampShader = new ccColorRampShader();
-					QString shadersPath = ccGLWindow::getShadersPath();
 					QString error;
-					if (!colorRampShader->loadProgram(QString(), shadersPath + QString("/ColorRamp/color_ramp.frag"), error))
+					if (!colorRampShader->loadProgram(QString(), s_shaderPath + QString("/ColorRamp/color_ramp.frag"), error))
 					{
 						if (!m_silentInitialization)
 							ccLog::Warning(QString("[3D View %1] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
@@ -5838,6 +5840,11 @@ bool ccGLWindow::renderToFile(	QString filename,
 	return success;
 }
 
+void ccGLWindow::setShaderPath( const QString &path )
+{
+	s_shaderPath = path;
+}
+
 QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 									bool dontScaleFeatures/*=false*/,
 									bool renderOverlayItems/*=false*/,
@@ -5963,7 +5970,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 		if (m_activeGLFilter)
 		{
 			QString error;
-			if (!m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), ccGLWindow::getShadersPath(), error))
+			if (!m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), s_shaderPath, error))
 			{
 				if (!silent)
 				{
@@ -6110,7 +6117,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	if (glFilter && zoomFactor != 1.0f)
 	{
 		QString error;
-		m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), ccGLWindow::getShadersPath(), error);
+		m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), s_shaderPath, error);
 	}
 
 	//we restore viewport parameters
@@ -6199,10 +6206,8 @@ bool ccGLWindow::initGLFilter(int w, int h, bool silent/*=false*/)
 	ccGlFilter* _filter = nullptr;
 	std::swap(_filter, m_activeGLFilter);
 
-	QString shadersPath = ccGLWindow::getShadersPath();
-
 	QString error;
-	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), shadersPath, error))
+	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), s_shaderPath, error))
 	{
 		if (!silent)
 		{
@@ -6315,49 +6320,6 @@ void ccGLWindow::displayText(	QString text,
 
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, col);
 	renderText(x2, y2, text, textFont);
-}
-
-QString ccGLWindow::getShadersPath()
-{
-	QString appPath = QCoreApplication::applicationDirPath();
-	QString	shaderPath;
-	
-#if defined(Q_OS_MAC)
-	QDir  workingDir( appPath );
-	
-	if ( workingDir.dirName() == "MacOS" )
-	{
-		workingDir.cdUp();
-	}
-	
-	appPath = workingDir.absolutePath();
-#if defined(CC_MAC_DEV_PATHS)
-	shaderPath = appPath + "/../../../shaders";
-#else
-	shaderPath = appPath + "/Shaders";
-#endif
-#elif defined(Q_OS_WIN)
-	shaderPath = appPath + "/shaders";
-#elif defined(Q_OS_LINUX)
-	// Shaders are relative to the bin directory where the executable is found
-	QDir  theDir( appPath );
-	
-	if ( theDir.dirName() == "bin" )
-	{
-		theDir.cdUp();
-		
-		shaderPath = (theDir.absolutePath() + "/share/cloudcompare/shaders");
-	}
-	else
-	{
-		// Choose a reasonable default to look in
-		shaderPath = "/usr/share/cloudcompare/shaders";
-	}
-#else
-#warning Need to specify the shader path for this OS.	
-#endif
-	
-	return shaderPath;
 }
 
 CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,

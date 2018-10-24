@@ -37,6 +37,7 @@
 #include <QTableWidgetItem>
 #include <QTextStream>
 #include <QToolButton>
+#include <QDesktopWidget>
 
 //system
 #include <cassert>
@@ -118,8 +119,11 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	connect(m_ui->toolButtonShortcutComma,		SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
 	connect(m_ui->toolButtonShortcutDotcomma,	SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
 
-	m_ui->maxCloudSizeDoubleSpinBox->setMaximum(static_cast<double>(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD)/1.0e6);
+	m_ui->maxCloudSizeDoubleSpinBox->setMaximum(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD / 1.0e6);
 	m_ui->maxCloudSizeDoubleSpinBox->setValue(s_maxCloudSizeDoubleSpinBoxValue);
+
+	QSize screenSize = QApplication::desktop()->screenGeometry().size();
+	setMaximumSize(screenSize);
 }
 
 AsciiOpenDlg::~AsciiOpenDlg()
@@ -138,7 +142,7 @@ void AsciiOpenDlg::setFilename(const QString &filename)
 
 void AsciiOpenDlg::autoFindBestSeparator()
 {
-	const QList<QChar> separators{ QChar(' '),
+	const QList<QChar> separators{	QChar(' '),
 									QChar('\t'),
 									QChar(','),
 									QChar(';'),
@@ -443,7 +447,13 @@ void AsciiOpenDlg::updateTable()
 		{
 			m_headerLine.remove(0, n);
 		}
-		m_ui->headerLabel->setText(QString("Header: ") + m_headerLine);
+
+		QString displayHeader = m_headerLine;
+		if (m_headerLine.length() > 256)
+		{
+			displayHeader = m_headerLine.left(256) + "...";
+		}
+		m_ui->headerLabel->setText(QString("Header: ") + displayHeader);
 		m_ui->headerLabel->setVisible(true);
 	}
 	else

@@ -2,20 +2,11 @@ set_directory_properties( PROPERTIES CLEAN_NO_CUSTOM 1 )
 
 find_package( Qt5LinguistTools REQUIRED )
 
-# Find our main Qt directory by removing directories (I don't see another way to get this)
-get_filename_component( QT_PATH ${Qt5LinguistTools_DIR} PATH )
-get_filename_component( QT_PATH ${QT_PATH} PATH )
-get_filename_component( QT_PATH ${QT_PATH} PATH )
+# Note that _qt5_linguisttools_install_prefix is from Qt5LinguistToolsConfig.cmake
+#	and probably a private variable...
+set( QT_PATH ${_qt5_linguisttools_install_prefix} )
 
-# find lconvert
-find_program( QT_LCONVERT_EXE NAMES lconvert-qt5 lconvert PATHS
-	${QT_PATH}/bin
-	NO_DEFAULT_PATH
-	)
-
-if( NOT QT_LCONVERT_EXE )
-	message(FATAL_ERROR "Could NOT find lconvert")
-endif()
+set( QT_LCONVERT_EXE Qt5::lconvert )
 
 # Now handle out own .ts files
 file( GLOB TRANSLATION_FILES ${CMAKE_CURRENT_LIST_DIR}/*.ts )
@@ -35,11 +26,11 @@ foreach( TRANSLATION_FILE ${TRANSLATION_FILES} )
 	unset( QT_LANG_FILES )
 	unset( TRANSLATION_FILES_QT_EXIST )
 	
-	# These are the Qt files we want to add if they exist	
+	# These are the Qt files we want to add if they exist
 	set( QT_LANG_FILES 
 		${QT_PATH}/translations/qtbase_${LANG_CODE}.qm
 		)
-		
+	
 	# Now check that they exist	
 	foreach ( QT_LANG_FILE IN ITEMS ${QT_LANG_FILES} )
 		if ( EXISTS ${QT_LANG_FILE} )
@@ -47,20 +38,22 @@ foreach( TRANSLATION_FILE ${TRANSLATION_FILES} )
 		endif()
 	endforeach()
 	
-	# Finally, add a command to generate the qt language file for this language	
-	add_custom_command(
-		OUTPUT
+	if ( TRANSLATION_FILES_QT_EXIST )
+		# Finally, add a command to generate the qt language file for this language	
+		add_custom_command(
+			OUTPUT
 			qt_${LANG_CODE}.qm
-		DEPENDS
+			DEPENDS
 			${TRANSLATION_FILES_QT_EXIST}
-		COMMAND
-			${QT_LCONVERT_EXE} -o qt_${LANG_CODE}.qm ${TRANSLATION_FILES_QT_EXIST}
-		COMMENT
+			COMMAND
+			"${QT_LCONVERT_EXE}" -o qt_${LANG_CODE}.qm ${TRANSLATION_FILES_QT_EXIST}
+			COMMENT
 			"Generating Qt language file for ${LANG_CODE}"
-		VERBATIM
-		)
-	
-	add_custom_target( translations_${LANG_CODE} ALL DEPENDS qt_${LANG_CODE}.qm )
+			VERBATIM
+			)
+		
+		add_custom_target( translations_${LANG_CODE} ALL DEPENDS qt_${LANG_CODE}.qm )
+	endif()
 endforeach()
 
 if( APPLE )

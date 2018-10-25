@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
-    <height>320</height>
+    <width>329</width>
+    <height>392</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
       <item row="0" column="1">
        <widget class="QLabel" name="activeSectionsLabel">
         <property name="text">
-         <string>0</string>
+         <string notr="true">0</string>
         </property>
        </widget>
       </item>
@@ -103,7 +103,16 @@
          </size>
         </property>
         <layout class="QFormLayout" name="formLayout">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item row="0" column="0">

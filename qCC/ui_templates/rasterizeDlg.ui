@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>905</height>
+    <height>1019</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,16 @@
       </size>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -62,7 +71,7 @@
          <item row="1" column="1">
           <widget class="QLabel" name="pointCountLabel">
            <property name="text">
-            <string>0</string>
+            <string notr="true">0</string>
            </property>
           </widget>
          </item>
@@ -102,7 +111,7 @@
          <item row="2" column="1">
           <widget class="QLabel" name="gridWidthLabel">
            <property name="text">
-            <string>640 x 480</string>
+            <string notr="true">640 x 480</string>
            </property>
           </widget>
          </item>
@@ -187,21 +196,21 @@
            <item>
             <widget class="QComboBox" name="dimensionComboBox">
              <property name="currentIndex">
-              <number>2</number>
+              <number>0</number>
              </property>
              <item>
               <property name="text">
-               <string>X</string>
+               <string notr="true">X</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Y</string>
+               <string notr="true">Y</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Z</string>
+               <string notr="true">Z</string>
               </property>
              </item>
             </widget>
@@ -250,7 +259,16 @@
          <item>
           <widget class="QFrame" name="interpolateSFFrame">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <property name="margin">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
              <number>0</number>
             </property>
             <item>
@@ -461,7 +479,16 @@ replaced by the cell's average height!</string>
              <enum>QFrame::Raised</enum>
             </property>
             <layout class="QFormLayout" name="formLayout_4">
-             <property name="margin">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
               <number>0</number>
              </property>
              <item row="0" column="0">
@@ -883,7 +910,7 @@ replaced by the cell's average height!</string>
           <item row="0" column="1">
            <widget class="QLabel" name="volumeLabel">
             <property name="text">
-             <string>0</string>
+             <string notr="true">0</string>
             </property>
            </widget>
           </item>
@@ -897,7 +924,7 @@ replaced by the cell's average height!</string>
           <item row="1" column="1">
            <widget class="QLabel" name="filledCellsPercentageLabel">
             <property name="text">
-             <string>0%</string>
+             <string notr="true">0%</string>
             </property>
            </widget>
           </item>

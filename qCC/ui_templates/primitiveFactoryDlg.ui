@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>615</width>
-    <height>300</height>
+    <width>689</width>
+    <height>353</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label">
            <property name="text">
-            <string>dx</string>
+            <string notr="true">dx</string>
            </property>
           </widget>
          </item>
@@ -56,7 +56,7 @@
          <item row="1" column="0">
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>dy</string>
+            <string notr="true">dy</string>
            </property>
           </widget>
          </item>
@@ -120,7 +120,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label_3">
            <property name="text">
-            <string>dx</string>
+            <string notr="true">dx</string>
            </property>
           </widget>
          </item>
@@ -143,7 +143,7 @@
          <item row="1" column="0">
           <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>dy</string>
+            <string notr="true">dy</string>
            </property>
           </widget>
          </item>
@@ -166,7 +166,7 @@
          <item row="2" column="0">
           <widget class="QLabel" name="label_5">
            <property name="text">
-            <string>dz</string>
+            <string notr="true">dz</string>
            </property>
           </widget>
          </item>
@@ -287,7 +287,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="label_21">
             <property name="text">
-             <string>y</string>
+             <string notr="true">y</string>
             </property>
            </widget>
           </item>
@@ -333,14 +333,14 @@
           <item row="3" column="0">
            <widget class="QLabel" name="label_22">
             <property name="text">
-             <string>z</string>
+             <string notr="true">z</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_20">
             <property name="text">
-             <string>x</string>
+             <string notr="true">x</string>
             </property>
            </widget>
           </item>

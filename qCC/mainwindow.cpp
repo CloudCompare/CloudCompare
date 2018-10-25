@@ -61,8 +61,8 @@
 //local includes
 #include "ccConsole.h"
 #include "ccEntityAction.h"
-#include "ccInnerRect2DFinder.h"
 #include "ccHistogramWindow.h"
+#include "ccInnerRect2DFinder.h"
 
 //common
 #include <ccPickingHub.h>
@@ -109,6 +109,7 @@
 #include "ccSORFilterDlg.h"
 #include "ccSubsamplingDlg.h" //Aurelien BEY
 #include "ccTracePolylineTool.h"
+#include "ccTranslationManager.h"
 #include "ccUnrollDlg.h"
 #include "ccVolumeCalcTool.h"
 #include "ccWaveformDialog.h"
@@ -196,12 +197,15 @@ MainWindow::MainWindow()
 	, m_plpDlg(nullptr)
 	, m_pprDlg(nullptr)
 	, m_pfDlg(nullptr)
+	, m_TranslationManager( new ccTranslationManager( this ) )
 {
 	m_UI->setupUi( this );
 
 	setWindowTitle(QStringLiteral("CloudCompare v") + ccApp->versionLongStr(false));
 	
 	m_pluginUIManager = new ccPluginUIManager( this, this );
+	
+	m_TranslationManager->populateMenu( m_UI->menuLanguage );
 	
 #ifdef Q_OS_MAC
 	m_UI->actionAbout->setMenuRole( QAction::AboutRole );

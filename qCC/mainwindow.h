@@ -58,6 +58,7 @@ class ccRecentFiles;
 class ccSectionExtractionTool;
 class ccStdPluginInterface;
 class ccTracePolylineTool;
+class ccTranslationManager;
 
 namespace Ui {
 	class MainWindow;
@@ -596,6 +597,8 @@ private:
 	/*** plugins ***/
 	//! Manages plugins - menus, toolbars, and the about dialog
 	ccPluginUIManager	*m_pluginUIManager;
+	
+	ccTranslationManager	*m_TranslationManager;
 };
 
 #endif

@@ -87,6 +87,11 @@
      <addaction name="actionShowActiveSFPrevious"/>
      <addaction name="actionShowActiveSFNext"/>
     </widget>
+    <widget class="QMenu" name="menuLanguage">
+     <property name="title">
+      <string>Language Translation</string>
+     </property>
+    </widget>
     <addaction name="actionFullScreen"/>
     <addaction name="actionExclusiveFullScreen"/>
     <addaction name="actionRefresh"/>
@@ -109,6 +114,7 @@
     <addaction name="separator"/>
     <addaction name="actionConsole"/>
     <addaction name="menuToolbars"/>
+    <addaction name="menuLanguage"/>
     <addaction name="actionResetGUIElementsPos"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -2947,6 +2953,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionSamplePointsOnPolyline">
    <property name="text">
     <string>Sample points</string>
+   </property>
+  </action>
+  <action name="actionNoTranslation">
+   <property name="text">
+    <string>None (English)</string>
    </property>
   </action>
  </widget>

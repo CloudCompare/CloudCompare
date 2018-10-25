@@ -5762,7 +5762,7 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 	m_mdiDialogs.push_back(ccMDIDialogs(dlg, pos));
 
 	//automatically update the dialog placement when its shown
-	connect(dlg, &ccOverlayDialog::shown, this, [&]()
+	connect(dlg, &ccOverlayDialog::shown, this, [=]()
 	{
 		//check for existence
 		for (ccMDIDialogs& mdi : m_mdiDialogs)

@@ -11,6 +11,7 @@ set(header_list
    ${CMAKE_CURRENT_SOURCE_DIR}/ccPluginManager.h
    ${CMAKE_CURRENT_SOURCE_DIR}/ccStereoModeDlg.h
    ${CMAKE_CURRENT_SOURCE_DIR}/ccQtHelpers.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccTranslationManager.h
    PARENT_SCOPE
 )
 
@@ -25,6 +26,7 @@ set(source_list
    ${CMAKE_CURRENT_SOURCE_DIR}/ccPickOneElementDlg.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/ccPluginManager.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/ccStereoModeDlg.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccTranslationManager.cpp
    PARENT_SCOPE
 )
 

@@ -41,6 +41,8 @@ public:
 private:
 	void setupPaths();
 	
+	void loadTranslations();
+	
 	const QString c_VersionStr;
 	
 	QString	m_ShaderPath;

@@ -20,6 +20,7 @@
 #include <QStandardPaths>
 #include <QString>
 #include <QSurfaceFormat>
+#include <QTranslator>
 #include <QtGlobal>
 
 // CCLib
@@ -34,6 +35,7 @@
 //Common
 #include "ccApplicationBase.h"
 #include "ccPluginManager.h"
+#include "ccTranslationManager.h"
 
 
 void ccApplicationBase::init()
@@ -78,7 +80,7 @@ ccApplicationBase::ccApplicationBase(int &argc, char **argv, const QString &vers
 	setOrganizationName( "CCCorp" );
 
 	setupPaths();
-	
+		
 #ifdef Q_OS_MAC
 	// Mac OS X apps don't show icons in menus
 	setAttribute( Qt::AA_DontShowIconsInMenus );
@@ -95,6 +97,8 @@ ccApplicationBase::ccApplicationBase(int &argc, char **argv, const QString &vers
 
 	ccGLWindow::setShaderPath( m_ShaderPath );
 	ccPluginManager::setPaths( m_PluginPaths );
+
+	loadTranslations();
 	
 	connect( this, &ccApplicationBase::aboutToQuit, [=](){ ccMaterial::ReleaseTextures(); } );
 }
@@ -220,5 +224,28 @@ void ccApplicationBase::setupPaths()
 		{
 			m_PluginPaths << path;
 		}
+	}
+}
+
+void ccApplicationBase::loadTranslations()
+{	
+	const QString  &cLangFromPrefs = ccTranslationManager::languagePref();
+ 
+	auto qtTranslator = new QTranslator( this );
+ 
+	bool  loaded = qtTranslator->load( QLocale( cLangFromPrefs ), QStringLiteral( "qt" ), QStringLiteral( "_" ), m_TranslationPath );
+ 
+	if ( loaded )
+	{ 
+	   installTranslator( qtTranslator );
+	}
+ 
+	auto  appTranslator = new QTranslator( this );
+ 
+	loaded = appTranslator->load( QLocale( cLangFromPrefs ), QStringLiteral( "CloudCompare" ), QStringLiteral( "_" ), m_TranslationPath );
+ 
+	if ( loaded )
+	{ 
+	   installTranslator( appTranslator );
 	}
 }

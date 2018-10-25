@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>516</width>
-    <height>370</height>
+    <width>687</width>
+    <height>415</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -162,7 +162,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <enum>QPlainTextEdit::NoWrap</enum>
          </property>
          <property name="plainText">
-          <string>1.000000	0.000000	0.000000	0.000000
+          <string notr="true">1.000000	0.000000	0.000000	0.000000
 0.000000	1.000000	0.000000	0.000000
 0.000000	0.000000	1.000000	0.000000
 0.000000	0.000000	0.000000	1.000000</string>
@@ -194,7 +194,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="rxAxisDoubleSpinBox">
             <property name="prefix">
-             <string>X:</string>
+             <string notr="true">X: </string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -210,7 +210,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="ryAxisDoubleSpinBox">
             <property name="prefix">
-             <string>Y:</string>
+             <string notr="true">Y: </string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -226,7 +226,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="rzAxisDoubleSpinBox">
             <property name="prefix">
-             <string>Z:</string>
+             <string notr="true">Z: </string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -307,7 +307,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="txAxisDoubleSpinBox">
             <property name="prefix">
-             <string>X:</string>
+             <string notr="true">X: </string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -323,7 +323,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="tyAxisDoubleSpinBox">
             <property name="prefix">
-             <string>Y:</string>
+             <string notr="true">Y: </string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -339,7 +339,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="tzAxisDoubleSpinBox">
             <property name="prefix">
-             <string>Z:</string>
+             <string notr="true">Z: </string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -393,7 +393,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="ePhiDoubleSpinBox">
             <property name="prefix">
-             <string>Phi:</string>
+             <string notr="true">Phi: </string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -409,7 +409,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="eThetaDoubleSpinBox">
             <property name="prefix">
-             <string>Theta:</string>
+             <string notr="true">Theta: </string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -425,7 +425,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="ePsiDoubleSpinBox">
             <property name="prefix">
-             <string>Psi:</string>
+             <string notr="true">Psi: </string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -459,7 +459,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="etxAxisDoubleSpinBox">
             <property name="prefix">
-             <string>X:</string>
+             <string notr="true">X: </string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -475,7 +475,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="etyAxisDoubleSpinBox">
             <property name="prefix">
-             <string>Y:</string>
+             <string notr="true">Y: </string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -491,7 +491,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="etzAxisDoubleSpinBox">
             <property name="prefix">
-             <string>Z:</string>
+             <string notr="true">Z: </string>
             </property>
             <property name="decimals">
              <number>8</number>

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>101</height>
+    <height>130</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,21 +33,21 @@
       <item>
        <widget class="QCheckBox" name="xCheckBox">
         <property name="text">
-         <string>X</string>
+         <string notr="true">X</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="yCheckBox">
         <property name="text">
-         <string>Y</string>
+         <string notr="true">Y</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="zCheckBox">
         <property name="text">
-         <string>Z</string>
+         <string notr="true">Z</string>
         </property>
         <property name="checked">
          <bool>true</bool>

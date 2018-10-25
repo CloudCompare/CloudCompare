@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>136</width>
-    <height>90</height>
+    <width>146</width>
+    <height>109</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,7 +20,16 @@
    <string>Graphical Transformation</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>6</number>
+   </property>
+   <property name="topMargin">
+    <number>6</number>
+   </property>
+   <property name="rightMargin">
+    <number>6</number>
+   </property>
+   <property name="bottomMargin">
     <number>6</number>
    </property>
    <item>
@@ -32,7 +41,16 @@
       </sizepolicy>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -89,7 +107,7 @@
          </size>
         </property>
         <property name="text">
-         <string>...</string>
+         <string notr="true">...</string>
         </property>
         <property name="icon">
          <iconset resource="../icones.qrc">
@@ -106,7 +124,7 @@
          </size>
         </property>
         <property name="text">
-         <string>...</string>
+         <string notr="true">...</string>
         </property>
         <property name="icon">
          <iconset resource="../icones.qrc">
@@ -123,7 +141,7 @@
          </size>
         </property>
         <property name="text">
-         <string>...</string>
+         <string notr="true">...</string>
         </property>
         <property name="icon">
          <iconset resource="../icones.qrc">
@@ -165,22 +183,22 @@
        </property>
        <item>
         <property name="text">
-         <string>XYZ</string>
+         <string notr="true">XYZ</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>X</string>
+         <string notr="true">X</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Y</string>
+         <string notr="true">Y</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Z</string>
+         <string notr="true">Z</string>
         </property>
        </item>
       </widget>
@@ -201,7 +219,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Tx</string>
+        <string notr="true">Tx</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -217,7 +235,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Ty</string>
+        <string notr="true">Ty</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -233,7 +251,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Tz</string>
+        <string notr="true">Tz</string>
        </property>
        <property name="checked">
         <bool>true</bool>

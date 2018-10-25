@@ -420,7 +420,6 @@
      </property>
      <addaction name="actionComputeKdTree"/>
      <addaction name="separator"/>
-     <addaction name="separator"/>
      <addaction name="actionComputeBestFitBB"/>
      <addaction name="actionDistanceToBestFitQuadric3D"/>
      <addaction name="actionDistanceMap"/>
@@ -776,12 +775,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="text">
     <string>&amp;Open</string>
    </property>
-   <property name="iconText">
-    <string>Open</string>
-   </property>
-   <property name="toolTip">
-    <string>Open</string>
-   </property>
    <property name="statusTip">
     <string>Open</string>
    </property>
@@ -796,9 +789,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="text">
     <string>&amp;Save</string>
-   </property>
-   <property name="toolTip">
-    <string>Save current entity</string>
    </property>
    <property name="statusTip">
     <string>Save current entity</string>
@@ -835,9 +825,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="statusTip">
     <string>Switch to full screen</string>
    </property>
-   <property name="whatsThis">
-    <string/>
-   </property>
    <property name="shortcut">
     <string>F9</string>
    </property>
@@ -851,9 +838,6 @@ QTreeView::branch:open:has-children:has-siblings  {
      <normaloff>:/CC/images/monitor.svg</normaloff>:/CC/images/monitor.svg</iconset>
    </property>
    <property name="text">
-    <string>Display settings</string>
-   </property>
-   <property name="toolTip">
     <string>Display settings</string>
    </property>
   </action>
@@ -1155,7 +1139,7 @@ QTreeView::branch:open:has-children:has-siblings  {
      <normaloff>:/CC/images/ccInteractiveTransformation.png</normaloff>:/CC/images/ccInteractiveTransformation.png</iconset>
    </property>
    <property name="text">
-    <string>Translate/rotate</string>
+    <string>Translate/Rotate</string>
    </property>
   </action>
   <action name="actionShowHistogram">
@@ -1274,9 +1258,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="text">
     <string>Enhance</string>
    </property>
-   <property name="iconText">
-    <string>Enhance</string>
-   </property>
    <property name="toolTip">
     <string>Enhance Scalar Field</string>
    </property>
@@ -1306,9 +1287,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="text">
     <string>Clear</string>
-   </property>
-   <property name="iconText">
-    <string>Delete</string>
    </property>
    <property name="toolTip">
     <string>Delete normals</string>
@@ -1500,7 +1478,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Set top view</string>
    </property>
    <property name="shortcut">
-    <string>8</string>
+    <string notr="true">8</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -1521,7 +1499,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Set front view</string>
    </property>
    <property name="shortcut">
-    <string>5</string>
+    <string notr="true">5</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -1542,7 +1520,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Set back view</string>
    </property>
    <property name="shortcut">
-    <string>0</string>
+    <string notr="true">0</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -1563,7 +1541,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Set left side view</string>
    </property>
    <property name="shortcut">
-    <string>4</string>
+    <string notr="true">4</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -1584,7 +1562,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Set right side view</string>
    </property>
    <property name="shortcut">
-    <string>6</string>
+    <string notr="true">6</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -1605,7 +1583,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Set bottom view</string>
    </property>
    <property name="shortcut">
-    <string>2</string>
+    <string notr="true">2</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -1643,9 +1621,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>Show/hide view toolbar</string>
-   </property>
-   <property name="whatsThis">
-    <string/>
    </property>
   </action>
   <action name="actionDisplayScalarFieldsTools">
@@ -1705,9 +1680,6 @@ QTreeView::branch:open:has-children:has-siblings  {
      <normaloff>:/CC/images/ccGlobalZoom.png</normaloff>:/CC/images/ccGlobalZoom.png</iconset>
    </property>
    <property name="text">
-    <string>Global Zoom</string>
-   </property>
-   <property name="statusTip">
     <string>Global Zoom</string>
    </property>
   </action>
@@ -1908,9 +1880,6 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Point list picking</string>
    </property>
    <property name="statusTip">
-    <string>Pick several points (and export them to ASCII file, a new cloud, etc.)</string>
-   </property>
-   <property name="whatsThis">
     <string>Pick several points (and export them to ASCII file, a new cloud, etc.)</string>
    </property>
   </action>
@@ -2318,7 +2287,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Set view to 'front' isometric</string>
    </property>
    <property name="shortcut">
-    <string>7</string>
+    <string notr="true">7</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -2339,7 +2308,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Set view to 'back' isometric</string>
    </property>
    <property name="shortcut">
-    <string>9</string>
+    <string notr="true">9</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -2706,7 +2675,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Zoom in (current 3D view)</string>
    </property>
    <property name="shortcut">
-    <string>+</string>
+    <string extracomment="Zoom in shortcut">+</string>
    </property>
   </action>
   <action name="actionZoomOut">
@@ -2717,7 +2686,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Zoom out (current 3D view)</string>
    </property>
    <property name="shortcut">
-    <string>=</string>
+    <string extracomment="Zoom in shortcut">=</string>
    </property>
   </action>
   <action name="actionDistanceMap">

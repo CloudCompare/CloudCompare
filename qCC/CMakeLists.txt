@@ -124,25 +124,19 @@ if( WIN32 )
 	list( APPEND auxFiles ${batch_list} )
 endif()
 
-# Translation file(s)
-file( GLOB trFiles tr/*.qm )
-
 # Install auxiliary files
 if( WIN32 OR APPLE )
 	foreach( filename ${auxFiles} )
 		install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} )
 	endforeach()
-	foreach( filename ${trFiles} )
-		install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} /tr )
-	endforeach()
 else( UNIX )
 	foreach( filename ${auxFiles} )
 		install_ext( FILES ${filename} share/cloudcompare )
 	endforeach()
-	foreach( filename ${trFiles} )
-		install_ext( FILES ${filename} share/cloudcompare /tr )
-	endforeach()
 endif()
+
+# Translation
+add_subdirectory( translations )
 
 # in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
 if( APPLE )

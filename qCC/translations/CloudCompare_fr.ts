@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="zh_CN" sourcelanguage="en">
+<TS version="2.1" language="fr_FR" sourcelanguage="en">
 <context>
     <name>AboutDialog</name>
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="17"/>
         <source>About CloudCompare</source>
-        <translation type="unfinished"></translation>
+        <translation>A propos de CloudCompare</translation>
     </message>
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="38"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/CC/Icons/images/icon/cc_icon_64.png&quot;/&gt;&lt;br/&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;CloudCompare &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;???&lt;/span&gt;&lt;br/&gt;Version: %1&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org/donate&quot;&gt;&lt;img src=&quot;:/CC/images/donate.png&quot; width=&quot;200&quot;/&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;www.cloudcompare.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;License: GNU GPL (General Public Licence)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/CC/Icons/images/icon/cc_icon_64.png&quot;/&gt;&lt;br/&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;CloudCompare &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;&lt;/span&gt;&lt;br/&gt;Version: %1&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org/donate&quot;&gt;&lt;img src=&quot;:/CC/images/donate.png&quot; width=&quot;200&quot;/&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;www.cloudcompare.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;License: GNU GPL (General Public Licence)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="78"/>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>OK</translation>
     </message>
 </context>
 <context>
@@ -24,42 +24,32 @@
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="14"/>
         <source>Adjust zoom</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajustement du zoom</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="20"/>
         <source>Window</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/adjustZoomDlg.ui" line="29"/>
-        <source>1 (800 x 600)</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue 3D</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="49"/>
         <source>zoom</source>
-        <translation type="unfinished"></translation>
+        <translation>zoom</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="77"/>
         <source>pixel size</source>
-        <translation type="unfinished"></translation>
+        <translation>taille de pixel</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="86"/>
         <source> units</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/adjustZoomDlg.ui" line="108"/>
-        <source>/</source>
-        <translation type="unfinished"></translation>
+        <translation> unité(s)</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="115"/>
         <source> pixel(s)</source>
-        <translation type="unfinished"></translation>
+        <translation> pixel(s</translation>
     </message>
 </context>
 <context>
@@ -67,154 +57,158 @@
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="14"/>
         <source>Clouds alignment</source>
-        <translation type="unfinished"></translation>
+        <translation>Alignement automatique de nuages</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="34"/>
         <source>Model and data</source>
-        <translation type="unfinished"></translation>
+        <translation>Rôles</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="49"/>
         <source>Data:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>?</translatorcomment>
+        <translation type="unfinished">Mobile</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="84"/>
         <source>the model cloud is the reference: it won&apos;t move (red cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>Le nuage de référence (ne bougera pas)</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="77"/>
         <source>Model:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>?</translatorcomment>
+        <translation type="unfinished">Immobile</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="56"/>
         <source>the data cloud is the entity to align with the model cloud: it will be displaced (green cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>Le nuage recalé (bougera)</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="111"/>
         <location filename="../ui_templates/alignDlg.ui" line="114"/>
         <source>press once to exchange model and data clouds</source>
-        <translation type="unfinished"></translation>
+        <translation>Appuyer pour intervertir les rôles</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="117"/>
         <source>swap</source>
-        <translation type="unfinished"></translation>
+        <translation>Intervertir</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="144"/>
         <source>Alignment parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Paramètres</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="152"/>
         <source>Number of trials:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nombre d&apos;essais :</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="159"/>
         <source>Number of 4 points bases tested to find the best rigid transform. Great values may lead to long computation time.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Nombre de bases de 4 points testées pour trouver la meilleure transformation rigide.\nDes valeurs élevées peuvent allonger le temps de traitement.</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="182"/>
         <source>Overlap:</source>
-        <translation type="unfinished"></translation>
+        <translation>Recouvrement :</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="189"/>
         <source>Rough estimation of the two clouds overlap rate (between 0 and 1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Estimation approximative du recouvrement des deux nuages (entre 0 et 1)</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="215"/>
         <source>Delta:</source>
-        <translation type="unfinished"></translation>
+        <translation>Delta :</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="222"/>
         <source>Estimation of the distance wished between the two clouds after registration.</source>
-        <translation type="unfinished"></translation>
+        <translation>Estimation de la distance souhaitée entre les deux nuages après traitement.</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="241"/>
         <location filename="../ui_templates/alignDlg.ui" line="244"/>
         <source>The computer will estimate the best delta parameter</source>
-        <translation type="unfinished"></translation>
+        <translation>Estimation automatique du delta</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="247"/>
         <source>Estimate</source>
-        <translation type="unfinished"></translation>
+        <translation>Estimer</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="258"/>
         <source>For each attempt (see above parameter), candidate bases are found. If there are too much candidates, the program may take a long time to finish. Check this box to bound the number of candidates.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pour chaque essai (voir ci-dessus) des bases candidates sont trouvées.\nS&apos;il y a trop de candidats, le processus peut mettre beaucoup de temps à terminer.</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="261"/>
         <source>Limit max. number of candidates</source>
-        <translation type="unfinished"></translation>
+        <translation>Nombre maximal de candidats</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="268"/>
         <source>Maximal number of candidates allowed (check the left box to use this parameter)</source>
-        <translation type="unfinished"></translation>
+        <translation>Nombre maximal de bases candidates</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="306"/>
         <source>Sampling</source>
-        <translation type="unfinished"></translation>
+        <translation>Echantillonnage</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="314"/>
         <source>Method:</source>
-        <translation type="unfinished"></translation>
+        <translation>Méthode :</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="446"/>
         <source>Model</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>?</translatorcomment>
+        <translation type="unfinished">Immobile</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="346"/>
         <location filename="../ui_templates/alignDlg.ui" line="466"/>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>Aucun</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="369"/>
         <location filename="../ui_templates/alignDlg.ui" line="489"/>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Tous</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="501"/>
         <location filename="../ui_templates/alignDlg.ui" line="504"/>
         <source>Move to the left (none) to decrease the number of points  to keep in the model cloud.</source>
-        <translation type="unfinished"></translation>
+        <translation>Déplacez le curseur vers la gauche pour réduire le nombre de points à conserver dans le nuage.</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="434"/>
         <location filename="../ui_templates/alignDlg.ui" line="554"/>
         <source>remaining points</source>
-        <translation type="unfinished"></translation>
+        <translation>points restants</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="326"/>
         <source>Data</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>?</translatorcomment>
+        <translation type="unfinished">Mobile</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="381"/>
         <location filename="../ui_templates/alignDlg.ui" line="384"/>
         <source>Move to the left (none) to decrease the number of points  to keep in the data cloud.</source>
-        <translation type="unfinished"></translation>
+        <translation>Déplacer ves la gauche (Aucun) pour diminuer le nombre de points à utiliser.</translation>
     </message>
 </context>
 <context>
@@ -222,37 +216,37 @@
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="14"/>
         <source>Apply transformation</source>
-        <translation type="unfinished"></translation>
+        <translation>Appliquer une transformation</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="24"/>
         <source>Matrix 4x4</source>
-        <translation type="unfinished"></translation>
+        <translation>Matrice 4x4</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="32"/>
         <source>Enter 4x4 matrix values:</source>
-        <translation type="unfinished"></translation>
+        <translation>Saisir les valeurs :</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="52"/>
         <source>Load matrix from ascii file</source>
-        <translation type="unfinished"></translation>
+        <translation>Charger une matrice depuis un fichier ASCII</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="55"/>
         <source>ASCII file</source>
-        <translation type="unfinished"></translation>
+        <translation>Fichier ASCII</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="62"/>
         <source>Paste clipboard contents</source>
-        <translation type="unfinished"></translation>
+        <translation>Coller le contenu du presse-papier</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="65"/>
         <source>clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Pressa-papier</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="72"/>
@@ -268,7 +262,7 @@
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="83"/>
         <source>help</source>
-        <translation type="unfinished"></translation>
+        <translation>Aide</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="147"/>
@@ -284,89 +278,45 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="165"/>
-        <source>1.000000	0.000000	0.000000	0.000000
-0.000000	1.000000	0.000000	0.000000
-0.000000	0.000000	1.000000	0.000000
-0.000000	0.000000	0.000000	1.000000</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="176"/>
         <source>Axis, Angle</source>
-        <translation type="unfinished"></translation>
+        <translation>Axes, Angle</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="182"/>
         <source>Rotation axis</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="197"/>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="310"/>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="462"/>
-        <source>X:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="213"/>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="326"/>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="478"/>
-        <source>Y:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="229"/>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="342"/>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="494"/>
-        <source>Z:</source>
-        <translation type="unfinished"></translation>
+        <translation>Axe de rotation</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="248"/>
         <source>Rotation angle (degrees)</source>
-        <translation type="unfinished"></translation>
+        <translation>Angle de rotation (degrés)</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="263"/>
         <source> deg.</source>
-        <translation type="unfinished"></translation>
+        <translation> deg.</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="295"/>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="447"/>
         <source>Translation</source>
-        <translation type="unfinished"></translation>
+        <translation>Translation</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="375"/>
         <source>Euler angles</source>
-        <translation type="unfinished"></translation>
+        <translation>Angles d&apos;Euler</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="381"/>
         <source>Angles</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="396"/>
-        <source>Phi:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="412"/>
-        <source>Theta:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/applyTransformationDlg.ui" line="428"/>
-        <source>Psi:</source>
-        <translation type="unfinished"></translation>
+        <translation>Angles</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="530"/>
         <source>Apply inverse transformation</source>
-        <translation type="unfinished"></translation>
+        <translation>Appliquer une transformation inverse</translation>
     </message>
 </context>
 <context>
@@ -374,12 +324,12 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/askOneDoubleValueDlg.ui" line="12"/>
         <source>Set Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir la valeur</translation>
     </message>
     <message>
         <location filename="../ui_templates/askOneDoubleValueDlg.ui" line="20"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur</translation>
     </message>
 </context>
 <context>
@@ -387,12 +337,12 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/askOneIntValueDlg.ui" line="12"/>
         <source>Set Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir la valeur</translation>
     </message>
     <message>
         <location filename="../ui_templates/askOneIntValueDlg.ui" line="20"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur</translation>
     </message>
 </context>
 <context>
@@ -400,12 +350,13 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/askOneStringDlg.ui" line="12"/>
         <source>Set Name</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Nom</translatorcomment>
+        <translation>Définir le nom</translation>
     </message>
     <message>
         <location filename="../ui_templates/askOneStringDlg.ui" line="20"/>
         <source>Label</source>
-        <translation type="unfinished"></translation>
+        <translation>Etiquette</translation>
     </message>
 </context>
 <context>
@@ -413,27 +364,22 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="20"/>
         <source>Set Three Values</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir les 3 valeurs</translation>
     </message>
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="28"/>
         <source>Value 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur 1</translation>
     </message>
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="54"/>
         <source>Value 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur 2</translation>
     </message>
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="80"/>
         <source>Value 3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="94"/>
-        <source>CheckBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur 3</translation>
     </message>
 </context>
 <context>
@@ -441,17 +387,17 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/askTwoDoubleValuesDlg.ui" line="12"/>
         <source>Set Two Values</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir 2 valeurs</translation>
     </message>
     <message>
         <location filename="../ui_templates/askTwoDoubleValuesDlg.ui" line="20"/>
         <source>Value 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur 1</translation>
     </message>
     <message>
         <location filename="../ui_templates/askTwoDoubleValuesDlg.ui" line="46"/>
         <source>Value 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur 2</translation>
     </message>
 </context>
 <context>
@@ -459,95 +405,77 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="14"/>
         <source>Bounding Box Editor</source>
-        <translation type="unfinished"></translation>
+        <translation>Edtion de la boîte englobante</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="32"/>
         <source>Min corner</source>
-        <translation type="unfinished"></translation>
+        <translation>Coin minimal</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="37"/>
         <source>Center</source>
-        <translation type="unfinished"></translation>
+        <translation>Centre</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="42"/>
         <source>Max corner</source>
-        <translation type="unfinished"></translation>
+        <translation>Coin maximal</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="57"/>
         <source>Width</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="65"/>
-        <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="520"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="110"/>
-        <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="507"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="155"/>
-        <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="491"/>
-        <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Largeur</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="211"/>
         <source>Warning, this box doesn&apos;t include the cloud bounding-box!</source>
-        <translation type="unfinished"></translation>
+        <translation>Attention, cette boîte n&apos;inclut pas celle du nuage !</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="227"/>
         <source>Orientation</source>
-        <translation type="unfinished"></translation>
+        <translation>Orientation</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="488"/>
         <source>automatically compute Z if checked</source>
-        <translation type="unfinished"></translation>
+        <translation>calcul automatiquement le Z si cochée</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="504"/>
         <source>automatically compute Y if checked</source>
-        <translation type="unfinished"></translation>
+        <translation>calcul automatiquement le Y si cochée</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="517"/>
         <source>automatically compute X if checked</source>
-        <translation type="unfinished"></translation>
+        <translation>calcul automatiquement le X si cochée</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="548"/>
         <source>keep square</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">garder carré</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="568"/>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Par défaut</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="575"/>
         <source>Last</source>
-        <translation type="unfinished"></translation>
+        <translation>Dernier</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="582"/>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>Ok</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="589"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Annuler</translation>
     </message>
 </context>
 <context>
@@ -555,96 +483,73 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="14"/>
         <source>Sensor parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Paramètres du capteur</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="24"/>
         <source>Position + Orientation</source>
-        <translation type="unfinished"></translation>
+        <translation>Position + Orientation</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="127"/>
         <source>sensor front direction (yaw = 0)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="57"/>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="71"/>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="99"/>
-        <source>1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="30"/>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="50"/>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="64"/>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="78"/>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="85"/>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="92"/>
-        <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation>Direction avant du capteur (lacet = 0)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="130"/>
         <source>X (right)</source>
-        <translation type="unfinished"></translation>
+        <translation>X (droit)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="140"/>
         <source>sensor lateral direction</source>
-        <translation type="unfinished"></translation>
+        <translation>Direction bilatérale du capteur</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="153"/>
         <source>sensor vertical direction (pitch = 0)</source>
-        <translation type="unfinished"></translation>
+        <translation>Direction verticale du capteur (tangage = 0)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="166"/>
         <source>sensor center</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="106"/>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="113"/>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="120"/>
-        <source>0.0</source>
-        <translation type="unfinished"></translation>
+        <translation>Centre du capteur</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="143"/>
         <source>Y (up)</source>
-        <translation type="unfinished"></translation>
+        <translation>Y (haut)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="156"/>
         <source>Z (inv. view dir.)</source>
+        <translatorcomment>? direction opposée de la vue ?</translatorcomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="169"/>
         <source>Center</source>
-        <translation type="unfinished"></translation>
+        <translation>Centre</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="180"/>
         <source>Intrinsic params</source>
-        <translation type="unfinished"></translation>
+        <translation>Paramètres intrinsèques</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="186"/>
         <source>vert. focal</source>
-        <translation type="unfinished"></translation>
+        <translation>Focale verticale</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="193"/>
         <source>vertical focal (in pixels)</source>
-        <translation type="unfinished"></translation>
+        <translation>Focale verticale (en pixel)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="196"/>
         <source> pix</source>
-        <translation type="unfinished"></translation>
+        <translation> px</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="212"/>
@@ -659,7 +564,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="222"/>
         <source> deg.</source>
-        <translation type="unfinished"></translation>
+        <translation> deg.</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="235"/>
@@ -677,14 +582,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="435"/>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="464"/>
         <source> pix.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="263"/>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="332"/>
-        <location filename="../ui_templates/camSensorProjectDlg.ui" line="454"/>
-        <source>x</source>
-        <translation type="unfinished"></translation>
+        <translation> px</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="270"/>
@@ -694,12 +592,12 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="304"/>
         <source>Pixel size (metric units)</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille de pixel (unités métriques)</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="307"/>
         <source>pixel size</source>
-        <translation type="unfinished"></translation>
+        <translation>taille de pixel</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="316"/>
@@ -734,12 +632,12 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="413"/>
         <source>skew</source>
-        <translation type="unfinished"></translation>
+        <translation>biais</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="420"/>
         <source>Skew parameter</source>
-        <translation type="unfinished"></translation>
+        <translation>Paramètre de biais</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="432"/>
@@ -759,180 +657,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="506"/>
         <source>Distortion / uncertainty</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>CameraParamDlg</name>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="14"/>
-        <source>Camera parameters</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="22"/>
-        <source>Current mode:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="35"/>
-        <source>parallel projection</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="56"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="78"/>
-        <source>First rotation: around X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="81"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="141"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="211"/>
-        <source>°</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="100"/>
-        <source>Third rotation: around the camera X axis (horizontal if phi = 0 and theta = 0)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="103"/>
-        <source>X1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="116"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="138"/>
-        <source>Second rotation: around Y2 (i.e. after the rotation around X)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="160"/>
-        <source>Second rotation: around the camera Y axis (vertical if phi = 0)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="163"/>
-        <source>Y2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="176"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="208"/>
-        <source>Third rotation: around Z3 (i.e. after the rotation around X1 and Y2)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="198"/>
-        <source>First rotation: around the camera Z axis (normal to the screen)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="201"/>
-        <source>Z3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="248"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="251"/>
-        <source>Push current camera orientation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="274"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="277"/>
-        <source>Revert to previously stored camera orientation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="288"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="291"/>
-        <source>Set &apos;up&apos; view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="302"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="305"/>
-        <source>Set &apos;down&apos; view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="316"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="319"/>
-        <source>Set &apos;left&apos; view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="330"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="333"/>
-        <source>Set &apos;right&apos; view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="344"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="347"/>
-        <source>Set &apos;front&apos; view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="358"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="361"/>
-        <source>Set &apos;back&apos; view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="372"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="375"/>
-        <source>Set &apos;front&apos; isometric view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="386"/>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="389"/>
-        <source>Set &apos;back&apos; isometric view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="447"/>
-        <source>Rotation Center</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="457"/>
-        <source>Pick a 3D point as rotation center</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="563"/>
-        <source>Camera/eye center</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="646"/>
-        <source>f.o.v. (perspective mode only)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="649"/>
-        <source>Field of view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="669"/>
-        <source> deg.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="689"/>
-        <source>Relative position (zNear)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/cameraParamDlg.ui" line="692"/>
-        <source>Near clipping plane</source>
-        <translation type="unfinished"></translation>
+        <translation>Distortion / incertitude</translation>
     </message>
 </context>
 <context>
@@ -972,21 +697,6 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="143"/>
         <source>Box thickness</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="149"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="166"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="183"/>
-        <source>Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1075,45 +785,15 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="559"/>
-        <source>-X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="581"/>
-        <source>+X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="600"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="622"/>
         <source>Shift box along its Y dimension</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="603"/>
-        <source>-Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="625"/>
-        <source>+Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="644"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="666"/>
         <source>Shift box along its Z dimension</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="647"/>
-        <source>-Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="669"/>
-        <source>+Z</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1132,21 +812,6 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="23"/>
         <source>Repeat dimensions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="33"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="44"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="55"/>
-        <source>Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1250,7 +915,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="26"/>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Par défaut</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="36"/>
@@ -1260,12 +925,6 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="61"/>
         <source>First color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/colorGradientDlg.ui" line="68"/>
-        <location filename="../ui_templates/colorGradientDlg.ui" line="95"/>
-        <source>...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1286,21 +945,6 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="180"/>
         <source>direction</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/colorGradientDlg.ui" line="191"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/colorGradientDlg.ui" line="196"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/colorGradientDlg.ui" line="201"/>
-        <source>Z</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1387,7 +1031,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/colorScaleEditorDlg.ui" line="169"/>
         <source>Rename</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Renommer</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorScaleEditorDlg.ui" line="176"/>
@@ -1397,7 +1041,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/colorScaleEditorDlg.ui" line="183"/>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Supprimer</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorScaleEditorDlg.ui" line="193"/>
@@ -1407,7 +1051,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/colorScaleEditorDlg.ui" line="200"/>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Nouveau</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorScaleEditorDlg.ui" line="225"/>
@@ -1427,12 +1071,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     <message>
         <location filename="../ui_templates/colorScaleEditorDlg.ui" line="303"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/colorScaleEditorDlg.ui" line="326"/>
-        <source>(32%)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Valeur</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorScaleEditorDlg.ui" line="349"/>
@@ -1558,11 +1197,6 @@ that could not have been seen (hidden/out of range/out of field of view).</sourc
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/comparisonDlg.ui" line="226"/>
-        <source> / 8</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="252"/>
         <source>Local modeling</source>
         <translation type="unfinished"></translation>
@@ -1604,14 +1238,9 @@ to help you set the general parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/comparisonDlg.ui" line="441"/>
-        <source>...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="479"/>
         <source>Compute</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Calculer</translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="509"/>
@@ -1621,7 +1250,7 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="516"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Annuler</translation>
     </message>
 </context>
 <context>
@@ -1644,7 +1273,7 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="33"/>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Par défaut</translation>
     </message>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="43"/>
@@ -1659,7 +1288,7 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="73"/>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Editer</translation>
     </message>
 </context>
 <context>
@@ -1701,7 +1330,7 @@ to help you set the general parameters</source>
         <location filename="../ui_templates/curvatureDlg.ui" line="14"/>
         <location filename="../ui_templates/curvatureDlg.ui" line="22"/>
         <source>Curvature</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Courbure</translation>
     </message>
     <message>
         <location filename="../ui_templates/curvatureDlg.ui" line="33"/>
@@ -1818,7 +1447,7 @@ to help you set the general parameters</source>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="29"/>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="49"/>
         <source> deg.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"> deg.</translation>
     </message>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="42"/>
@@ -1828,331 +1457,6 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="64"/>
         <source>rotate about selection center</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DisplayOptionsDlg</name>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="20"/>
-        <source>Display options</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="42"/>
-        <source>Colors and Materials</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="63"/>
-        <source>Light</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="71"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="89"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="107"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="160"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="178"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="196"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="214"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="241"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="262"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="283"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="526"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="560"/>
-        <source>...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="78"/>
-        <source>Ambient</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="96"/>
-        <source>Specular</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="114"/>
-        <source>Diffuse</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="123"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether to use a double-sided light model or not&lt;/p&gt;&lt;p&gt;(if disabled, triangles will appear black when looked from behind)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="126"/>
-        <source>double-sided</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="152"/>
-        <source>Default Materials</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="167"/>
-        <source>Mesh Front</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="185"/>
-        <source>Mesh Back</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="203"/>
-        <source>Mesh specular</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="221"/>
-        <source>Points</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="233"/>
-        <source>Colors</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="251"/>
-        <source>Background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="272"/>
-        <source>Bounding-box</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="290"/>
-        <source>Text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="333"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="336"/>
-        <source>Gradient goes from &apos;background&apos; color to inverse of &apos;Points&apos; color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="339"/>
-        <source>display gradient background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="373"/>
-        <source>Color scale (scalar field)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="379"/>
-        <source>Show histogram next to color ramp</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="389"/>
-        <source>Enable shader for faster display (ATI cards: use at your own risk ;)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="398"/>
-        <source>Ramp width</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="405"/>
-        <source> pixels</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="458"/>
-        <source>Labels</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="476"/>
-        <source>Label opacity</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="483"/>
-        <source>%</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="496"/>
-        <source>Label font size</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="516"/>
-        <source>background color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="533"/>
-        <source>Labels marker size</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="550"/>
-        <source>marker color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="592"/>
-        <source>Other options</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="875"/>
-        <source>Automatically display normals at loading time (when available)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="884"/>
-        <source>Auto-compute octree for picking</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="891"/>
-        <source>Octree computation can be long but the picking is then much faster</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="898"/>
-        <source>Always</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="903"/>
-        <source>Ask each time</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="908"/>
-        <source>Never</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="600"/>
-        <source>Default font size</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="637"/>
-        <source>Displayed numbers precision</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="668"/>
-        <source>Perspective zooming speed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="675"/>
-        <source>Zoom/walk speed in perspective mode (default = 1.0)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="711"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="714"/>
-        <source>Automatically decimate big point clouds when moved</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="717"/>
-        <source>Decimate clouds over</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="727"/>
-        <source>Minimum number of points to activate decimation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="730"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="795"/>
-        <source>&gt; </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="733"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="798"/>
-        <source> M.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="752"/>
-        <source>points when moved</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="776"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="779"/>
-        <source>Automatically decimate big meshes when moved</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="782"/>
-        <source>Decimate meshes over</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="792"/>
-        <source>Minimum number of triangles to activate decimation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="820"/>
-        <source>triangles when moved</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="842"/>
-        <source>Draw rounded points (slower)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="849"/>
-        <source>Try to load clouds on GPU for faster display</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="859"/>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="862"/>
-        <source>A cross is displayed in the middle of the screen</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="865"/>
-        <source>Show middle screen cross</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="963"/>
-        <source>Ok</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="970"/>
-        <source>Apply</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="977"/>
-        <source>Reset</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/displayOptionsDlg.ui" line="984"/>
-        <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2195,11 +1499,6 @@ The bigger the more accurate the map will be
         <source>Range</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <location filename="../ui_templates/distanceMapDlg.ui" line="131"/>
-        <source>-</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>ExportCoordToSFDlg</name>
@@ -2211,21 +1510,6 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="29"/>
         <source>Export</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/exportCoordToSFDlg.ui" line="36"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/exportCoordToSFDlg.ui" line="43"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/exportCoordToSFDlg.ui" line="50"/>
-        <source>Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2249,11 +1533,6 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="29"/>
         <source>Min range value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/filterByValueDlg.ui" line="51"/>
-        <source>-</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2285,7 +1564,7 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="102"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Annuler</translation>
     </message>
 </context>
 <context>
@@ -2293,7 +1572,7 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="14"/>
         <source>Sensor parameters</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Paramètres du capteur</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="35"/>
@@ -2319,71 +1598,27 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="90"/>
         <source>Position + Orientation</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Position + Orientation</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="96"/>
         <source>sensor front direction (yaw = 0)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="99"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="106"/>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="144"/>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="182"/>
-        <source>1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="113"/>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="120"/>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="137"/>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="151"/>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="168"/>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="175"/>
-        <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Direction avant du capteur (lacet = 0)</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="127"/>
         <source>sensor lateral direction</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="130"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Direction bilatérale du capteur</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="158"/>
         <source>sensor vertical direction (pitch = 0)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="161"/>
-        <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Direction verticale du capteur (tangage = 0)</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="202"/>
         <source>sensor center</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="205"/>
-        <source>C</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="212"/>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="219"/>
-        <location filename="../ui_templates/gblSensorProjectDlg.ui" line="226"/>
-        <source>0.0</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Centre du capteur</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="234"/>
@@ -2413,7 +1648,7 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="314"/>
         <source>Other</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Autres</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="322"/>
@@ -2441,7 +1676,7 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="14"/>
         <source>Global Shift settings</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Paramètres du Déplacement Global</translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="26"/>
@@ -2470,12 +1705,6 @@ Note: the diagonal is not tested at loading time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="64"/>
-        <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="93"/>
-        <source>10^</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="80"/>
         <source>Max entity diagonal</source>
         <translation type="unfinished"></translation>
@@ -2491,7 +1720,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="20"/>
         <source>Segmentation</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Segmentation</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="41"/>
@@ -2590,7 +1819,7 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="183"/>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="189"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Annuler</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="186"/>
@@ -2646,65 +1875,23 @@ Note: the diagonal is not tested at loading time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="63"/>
+        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="81"/>
         <source>Pause segmentation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="66"/>
+        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="84"/>
         <source>Pause transformation (allow rotation/panning of 3D view)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="69"/>
+        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="87"/>
         <source>pause</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="92"/>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="109"/>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="126"/>
-        <source>...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="148"/>
+        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="166"/>
         <source>Rotation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="168"/>
-        <source>XYZ</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="173"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="178"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="183"/>
-        <source>Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="204"/>
-        <source>Tx</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="220"/>
-        <source>Ty</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/graphicalTransformationDlg.ui" line="236"/>
-        <source>Tz</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2718,7 +1905,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="26"/>
         <source>Grid</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Grille</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="32"/>
@@ -2738,7 +1925,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="71"/>
         <source>Projection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Projection</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="79"/>
@@ -2747,25 +1934,25 @@ Note: the diagonal is not tested at loading time.</source>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="86"/>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="162"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="174"/>
         <source>choose the height (z coordinate) projected : maximum = highest point in the cell or average)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="93"/>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="215"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="227"/>
         <source>minimum height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="98"/>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="220"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="232"/>
         <source>average height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="103"/>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="225"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="237"/>
         <source>maximum height</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2775,117 +1962,102 @@ Note: the diagonal is not tested at loading time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="126"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="131"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="136"/>
-        <source>Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="152"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="164"/>
         <source>interpolate scalar field(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="169"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="181"/>
         <source>minimum value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="174"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="186"/>
         <source>average value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="179"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="191"/>
         <source>maximum value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="193"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="205"/>
         <source>Empty cells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="199"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="211"/>
         <source>Fill with</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="206"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="218"/>
         <source>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="210"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="222"/>
         <source>leave empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="230"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="242"/>
         <source>user specified value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="266"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="278"/>
         <source>Generate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="272"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="284"/>
         <source>Grid as a point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="281"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="293"/>
         <source>Adds a scalar field with the grid density (= number of points falling in each cell)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="284"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="296"/>
         <source>save per-cell count as SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="291"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="303"/>
         <source>Keeps the nearest point in each cell instead of the cell center</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="294"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="306"/>
         <source>resample original cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="307"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="319"/>
         <source>Grid as a raster (geotiff)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="314"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="326"/>
         <source>image is automatically generated in the application directory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="317"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="329"/>
         <source>Grid as an image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="324"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="336"/>
         <source>file is automatically generated in the application directory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="327"/>
+        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="339"/>
         <source>Grid as a matrix (text file)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3059,2169 +2231,2120 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="26"/>
         <source>CloudCompare</source>
-        <translation type="unfinished"></translation>
+        <translation>CloudCompare</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="47"/>
         <source>&amp;File</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Fichier</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="61"/>
         <source>&amp;Display</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Affichage</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="65"/>
         <source>Toolbars</source>
-        <translation type="unfinished"></translation>
+        <translation>Barres d&apos;outils</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="75"/>
+        <location filename="../ui_templates/mainWindow.ui" line="73"/>
         <source>Lights</source>
-        <translation type="unfinished"></translation>
+        <translation>Lumières</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="86"/>
-        <source>Shaders &amp;&amp; filters</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="95"/>
+        <location filename="../ui_templates/mainWindow.ui" line="84"/>
         <source>Active scalar field</source>
+        <translation>Champ scalaire actif</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="92"/>
+        <source>Language Translation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="128"/>
-        <location filename="../ui_templates/mainWindow.ui" line="911"/>
+        <location filename="../ui_templates/mainWindow.ui" line="122"/>
+        <location filename="../ui_templates/mainWindow.ui" line="852"/>
         <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
+        <translation>A&amp;ide</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="138"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1859"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2952"/>
+        <location filename="../ui_templates/mainWindow.ui" line="132"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1788"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2844"/>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>Editer</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="142"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1708"/>
+        <location filename="../ui_templates/mainWindow.ui" line="136"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1640"/>
         <source>Scalar fields</source>
-        <translation type="unfinished"></translation>
+        <translation>Champs scalaires</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="170"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2061"/>
+        <location filename="../ui_templates/mainWindow.ui" line="164"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1964"/>
         <source>Colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Couleurs</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="185"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2047"/>
+        <location filename="../ui_templates/mainWindow.ui" line="179"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1950"/>
         <source>Normals</source>
-        <translation type="unfinished"></translation>
+        <translation>Normales</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="189"/>
+        <location filename="../ui_templates/mainWindow.ui" line="183"/>
         <source>Orient normals</source>
-        <translation type="unfinished"></translation>
+        <translation>Orienter</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="196"/>
+        <location filename="../ui_templates/mainWindow.ui" line="190"/>
         <source>Convert to</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="210"/>
+        <location filename="../ui_templates/mainWindow.ui" line="204"/>
         <source>Octree</source>
-        <translation type="unfinished"></translation>
+        <translation>CloudCompare</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="218"/>
+        <location filename="../ui_templates/mainWindow.ui" line="212"/>
         <source>Mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Maillage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="222"/>
+        <location filename="../ui_templates/mainWindow.ui" line="216"/>
         <source>Scalar Field</source>
-        <translation type="unfinished"></translation>
+        <translation>Champ Scalaire</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="245"/>
+        <location filename="../ui_templates/mainWindow.ui" line="239"/>
         <source>Sensors</source>
-        <translation type="unfinished"></translation>
+        <translation>Capteurs</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="249"/>
+        <location filename="../ui_templates/mainWindow.ui" line="243"/>
         <source>Terrestrial Laser Sensor = Ground Based Lidar</source>
-        <translation type="unfinished"></translation>
+        <translation>Capteur Laser Terrestre (TLS/GBL)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="252"/>
+        <location filename="../ui_templates/mainWindow.ui" line="246"/>
         <source>TLS/GBL</source>
-        <translation type="unfinished"></translation>
+        <translation>TLS/GBL</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="266"/>
+        <location filename="../ui_templates/mainWindow.ui" line="260"/>
         <source>Camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Caméra</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="288"/>
+        <location filename="../ui_templates/mainWindow.ui" line="282"/>
         <source>Toggle (recursive)</source>
-        <translation type="unfinished"></translation>
+        <translation>Basculer (récursif)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="300"/>
+        <location filename="../ui_templates/mainWindow.ui" line="294"/>
         <source>Waveform</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="315"/>
+        <location filename="../ui_templates/mainWindow.ui" line="309"/>
         <source>Grid</source>
-        <translation type="unfinished"></translation>
+        <translation>Grille</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="348"/>
+        <location filename="../ui_templates/mainWindow.ui" line="349"/>
         <source>3D &amp;Views</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Vues 3D</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="369"/>
-        <location filename="../ui_templates/mainWindow.ui" line="808"/>
-        <location filename="../ui_templates/mainWindow.ui" line="811"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1951"/>
-        <source>Plugins</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="374"/>
+        <location filename="../ui_templates/mainWindow.ui" line="367"/>
         <source>Tools</source>
-        <translation type="unfinished"></translation>
+        <translation>Outils</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="378"/>
+        <location filename="../ui_templates/mainWindow.ui" line="371"/>
         <source>Segmentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Segmentation</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="389"/>
+        <location filename="../ui_templates/mainWindow.ui" line="382"/>
         <source>Projection</source>
-        <translation type="unfinished"></translation>
+        <translation>Projection</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="392"/>
+        <source>Statistics</source>
+        <translation>Statistiques</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="399"/>
-        <source>Statistics</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="406"/>
         <source>Distances</source>
-        <translation type="unfinished"></translation>
+        <translation>Distances</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="414"/>
+        <location filename="../ui_templates/mainWindow.ui" line="407"/>
         <source>Registration</source>
-        <translation type="unfinished"></translation>
+        <translation>Recalage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="423"/>
+        <location filename="../ui_templates/mainWindow.ui" line="416"/>
         <source>Other</source>
-        <translation type="unfinished"></translation>
+        <translation>Autres</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="432"/>
+        <location filename="../ui_templates/mainWindow.ui" line="425"/>
         <source>Sand box (research)</source>
-        <translation type="unfinished"></translation>
+        <translation>Bac à sable (recherche)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="456"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2970"/>
+        <location filename="../ui_templates/mainWindow.ui" line="448"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2862"/>
         <source>Fit</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajustement</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="465"/>
+        <location filename="../ui_templates/mainWindow.ui" line="457"/>
         <source>Clean</source>
-        <translation type="unfinished"></translation>
+        <translation>Nettoyage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="472"/>
+        <location filename="../ui_templates/mainWindow.ui" line="464"/>
         <source>Volume</source>
-        <translation type="unfinished"></translation>
+        <translation>Volume</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="478"/>
+        <location filename="../ui_templates/mainWindow.ui" line="470"/>
         <source>Batch export</source>
-        <translation type="unfinished"></translation>
+        <translation>Export par lot</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="524"/>
+        <location filename="../ui_templates/mainWindow.ui" line="515"/>
         <source>DB Tree</source>
-        <translation type="unfinished"></translation>
+        <translation>Base de données</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="578"/>
-        <location filename="../ui_templates/mainWindow.ui" line="581"/>
+        <location filename="../ui_templates/mainWindow.ui" line="569"/>
+        <location filename="../ui_templates/mainWindow.ui" line="572"/>
         <source>Viewing tools</source>
-        <translation type="unfinished"></translation>
+        <translation>Vues 3D</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="632"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1010"/>
+        <location filename="../ui_templates/mainWindow.ui" line="623"/>
+        <location filename="../ui_templates/mainWindow.ui" line="951"/>
         <source>Console</source>
-        <translation type="unfinished"></translation>
+        <translation>Console</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="672"/>
-        <location filename="../ui_templates/mainWindow.ui" line="675"/>
+        <location filename="../ui_templates/mainWindow.ui" line="663"/>
+        <location filename="../ui_templates/mainWindow.ui" line="666"/>
         <source>Main tools</source>
-        <translation type="unfinished"></translation>
+        <translation>Outils principaux</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="711"/>
-        <location filename="../ui_templates/mainWindow.ui" line="714"/>
+        <location filename="../ui_templates/mainWindow.ui" line="702"/>
+        <location filename="../ui_templates/mainWindow.ui" line="705"/>
         <source>Scalar field tools</source>
-        <translation type="unfinished"></translation>
+        <translation>Champs scalaires</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="744"/>
+        <location filename="../ui_templates/mainWindow.ui" line="735"/>
         <source>Properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Propriétés</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="790"/>
-        <location filename="../ui_templates/mainWindow.ui" line="793"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2630"/>
-        <source>GL filters</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui_templates/mainWindow.ui" line="782"/>
+        <source>&amp;Open</source>
+        <translation>&amp;Ouvrir</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="785"/>
+        <source>Open</source>
+        <translation>Ouvrir</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="788"/>
+        <source>Ctrl+O</source>
+        <translation>Ctrl+O</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="797"/>
+        <source>&amp;Save</source>
+        <translation>Enregi$strer</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="800"/>
+        <source>Save current entity</source>
+        <translation>Sauver les entités sélectionnées</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="803"/>
+        <source>Ctrl+S</source>
+        <translation>Ctrl+S</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="811"/>
+        <source>&amp;Quit</source>
+        <translation>&amp;Quitter</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="814"/>
+        <source>Quit</source>
+        <translation>Quitter</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="826"/>
-        <source>&amp;Open</source>
-        <translation type="unfinished"></translation>
+        <source>&amp;Full screen</source>
+        <translation>&amp;Plein écran</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="829"/>
         <location filename="../ui_templates/mainWindow.ui" line="832"/>
-        <location filename="../ui_templates/mainWindow.ui" line="835"/>
-        <source>Open</source>
-        <translation type="unfinished"></translation>
+        <source>Switch to full screen</source>
+        <translation>Basculer en plein écran</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="838"/>
-        <source>Ctrl+O</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui_templates/mainWindow.ui" line="835"/>
+        <source>F9</source>
+        <translation>F</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="847"/>
-        <source>&amp;Save</source>
-        <translation type="unfinished"></translation>
+        <source>Display settings</source>
+        <translation type="unfinished">Paramètres d&apos;affichage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="850"/>
-        <location filename="../ui_templates/mainWindow.ui" line="853"/>
-        <source>Save current entity</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="856"/>
-        <source>Ctrl+S</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="864"/>
-        <source>&amp;Quit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="867"/>
-        <source>Quit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="879"/>
-        <source>&amp;Full screen</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="882"/>
-        <location filename="../ui_templates/mainWindow.ui" line="885"/>
-        <source>Switch to full screen</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="891"/>
-        <source>F9</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="903"/>
-        <source>Display options</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="906"/>
-        <source>Set various display options</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="914"/>
+        <location filename="../ui_templates/mainWindow.ui" line="855"/>
         <source>Help</source>
-        <translation type="unfinished"></translation>
+        <translation>Aide</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="917"/>
+        <location filename="../ui_templates/mainWindow.ui" line="858"/>
         <source>F1</source>
-        <translation type="unfinished"></translation>
+        <translation>F1</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="922"/>
+        <location filename="../ui_templates/mainWindow.ui" line="863"/>
         <source>&amp;About ...</source>
-        <translation type="unfinished"></translation>
+        <translation>$A propos...</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="925"/>
+        <location filename="../ui_templates/mainWindow.ui" line="866"/>
         <source>About</source>
-        <translation type="unfinished"></translation>
+        <translation>A propos</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="934"/>
+        <location filename="../ui_templates/mainWindow.ui" line="875"/>
         <source>Set unique</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="937"/>
-        <location filename="../ui_templates/mainWindow.ui" line="940"/>
+        <location filename="../ui_templates/mainWindow.ui" line="878"/>
+        <location filename="../ui_templates/mainWindow.ui" line="881"/>
         <source>Set a unique color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="943"/>
+        <location filename="../ui_templates/mainWindow.ui" line="884"/>
         <source>Alt+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+C</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="948"/>
+        <location filename="../ui_templates/mainWindow.ui" line="889"/>
         <source>Height Ramp</source>
-        <translation type="unfinished"></translation>
+        <translation>Palette d&apos;élévation</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="951"/>
-        <location filename="../ui_templates/mainWindow.ui" line="954"/>
+        <location filename="../ui_templates/mainWindow.ui" line="892"/>
+        <location filename="../ui_templates/mainWindow.ui" line="895"/>
         <source>Apply a color ramp along X, Y or Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Applique une palette de couleurs pour l&apos;axe X, Y ou Z</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="963"/>
-        <location filename="../ui_templates/mainWindow.ui" line="989"/>
+        <location filename="../ui_templates/mainWindow.ui" line="904"/>
+        <location filename="../ui_templates/mainWindow.ui" line="930"/>
         <source>Compute</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="966"/>
-        <location filename="../ui_templates/mainWindow.ui" line="969"/>
+        <location filename="../ui_templates/mainWindow.ui" line="907"/>
+        <location filename="../ui_templates/mainWindow.ui" line="910"/>
         <source>Compute unsigned normals (least squares approx.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer les normales non-signées (approximation aux moindres carrés)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="974"/>
+        <location filename="../ui_templates/mainWindow.ui" line="915"/>
         <source>Invert</source>
-        <translation type="unfinished"></translation>
+        <translation>Inverser</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="977"/>
-        <location filename="../ui_templates/mainWindow.ui" line="980"/>
+        <location filename="../ui_templates/mainWindow.ui" line="918"/>
+        <location filename="../ui_templates/mainWindow.ui" line="921"/>
         <source>Invert normals</source>
-        <translation type="unfinished"></translation>
+        <translation>Inverser les normales</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="992"/>
-        <location filename="../ui_templates/mainWindow.ui" line="995"/>
+        <location filename="../ui_templates/mainWindow.ui" line="933"/>
+        <location filename="../ui_templates/mainWindow.ui" line="936"/>
         <source>Compute octree</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer l&apos;octree</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1013"/>
+        <location filename="../ui_templates/mainWindow.ui" line="954"/>
         <source>F8</source>
-        <translation type="unfinished"></translation>
+        <translation>F</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1021"/>
+        <location filename="../ui_templates/mainWindow.ui" line="962"/>
         <source>Cl&amp;ose</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Fermer</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1024"/>
+        <location filename="../ui_templates/mainWindow.ui" line="965"/>
         <source>Ctrl+F4</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+F4</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1029"/>
+        <location filename="../ui_templates/mainWindow.ui" line="970"/>
         <source>Close &amp;All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Tout fermer</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1034"/>
+        <location filename="../ui_templates/mainWindow.ui" line="975"/>
         <source>&amp;Tile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1039"/>
+        <location filename="../ui_templates/mainWindow.ui" line="980"/>
         <source>&amp;Cascade</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1044"/>
+        <location filename="../ui_templates/mainWindow.ui" line="985"/>
         <source>Pre&amp;vious</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Précédent</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="990"/>
+        <source>Ne&amp;xt</source>
+        <translation type="unfinished">Suivant</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="995"/>
+        <source>New</source>
+        <translation>Nouveau</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="998"/>
+        <source>Ctrl+F3</source>
+        <translation type="unfinished">Ctrl+F3</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1007"/>
+        <source>Clone</source>
+        <translation>Dupliquer</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1010"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clone the selected entities&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(yes Claire ... these are Nyan sheep!)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Duplique les entités sélectionnées&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1019"/>
+        <source>Merge</source>
+        <translation>Fusionner</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1022"/>
+        <source>Merge multiple clouds</source>
+        <translation>Fusionne plusieurs nuages</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1031"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1211"/>
+        <source>Delete</source>
+        <translation>Supprimer</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1034"/>
+        <source>Del</source>
+        <translation>Suppr</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1046"/>
+        <source>Fine registration (ICP)</source>
+        <translation>Recalage précis (ICP)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1049"/>
-        <source>Ne&amp;xt</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1054"/>
-        <source>New</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1057"/>
-        <source>Ctrl+F3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1066"/>
-        <source>Clone</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1069"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clone the selected entities&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(yes Claire ... these are Nyan sheep!)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1078"/>
-        <source>Merge</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1081"/>
-        <source>Merge multiple clouds</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1090"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1270"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1360"/>
-        <source>Delete</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1093"/>
-        <source>Del</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1105"/>
-        <source>Fine registration (ICP)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1108"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1111"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1052"/>
         <source>Finely registers already (roughly) aligned entities (clouds or meshes)</source>
-        <translation type="unfinished"></translation>
+        <translation>Recale précisément des objets approximativement alignés (nuages ou maillages)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1120"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1061"/>
         <source>Cloud/Cloud Dist.</source>
-        <translation type="unfinished"></translation>
+        <translation>Distance Nuage/Nuage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1123"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1126"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1064"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1067"/>
         <source>Compute cloud/cloud distance</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule la distance de nuage à nuage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1135"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1076"/>
         <source>Cloud/Mesh Dist</source>
-        <translation type="unfinished"></translation>
+        <translation>Distance Nuage/Maillage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1138"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1141"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1079"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1082"/>
         <source>Compute cloud/mesh distance</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule la distance entre un nuage et un maillage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1150"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1091"/>
         <source>Local Statistical test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1153"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1156"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1094"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1097"/>
         <source>Apply a local statistical test to separate noise from true differences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1165"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1106"/>
         <source>Sample Points</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1168"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1171"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1109"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1112"/>
         <source>Sample points on a mesh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1180"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1121"/>
         <source>Label Connected Comp.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1183"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1186"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1124"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1127"/>
         <source>Label connected components</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1195"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1136"/>
         <source>Segment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1207"/>
-        <source>Translate/rotate</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1216"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1157"/>
         <source>Show histogram</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Afficher l&apos;histogramme</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1225"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1166"/>
         <source>Compute stat. params</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1228"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1231"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2668"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2671"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1169"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1172"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2560"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2563"/>
         <source>Fits a statistical model on the active scalar field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1240"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1181"/>
         <source>Filter By Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtrer par valeur</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1243"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1246"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1184"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1187"/>
         <source>Filter points by value</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre les points par valeur</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1255"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1196"/>
         <source>Gaussian filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre gaussien</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1258"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1261"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1199"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1202"/>
         <source>Compute gaussian filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule un filtre gaussien</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1273"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1214"/>
         <source>Delete Scalar Field</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer le champ scalaire</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1276"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1279"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1217"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1220"/>
         <source>Delete current scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprime le champ scalaire actif</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1288"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1229"/>
         <source>Arithmetic</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculatrice</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1291"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1232"/>
         <source>SF arithmetic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1294"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1297"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1235"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1238"/>
         <source>Add, subtract, multiply or divide two scalar fields</source>
-        <translation type="unfinished"></translation>
+        <translation>Additionne, soustrait, multiplie ou divise deux champs scalaires</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1302"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1243"/>
         <source>Colorize</source>
-        <translation type="unfinished"></translation>
+        <translation>Colorier</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1305"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1308"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1246"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1249"/>
         <source>Colorize entity (lightness values are unchanged)</source>
-        <translation type="unfinished"></translation>
+        <translation>Colorie l&apos;entité (les valeurs de luminosité ne sont pas changées)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1313"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1254"/>
         <source>Smooth</source>
-        <translation type="unfinished"></translation>
+        <translation>Lisser</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1316"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1319"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1257"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1260"/>
         <source>Smooth mesh scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Lisse le champ scalaire d&apos;un maillage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1324"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1327"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1265"/>
         <source>Enhance</source>
-        <translation type="unfinished"></translation>
+        <translation>Améliorer</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1330"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1333"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1268"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1271"/>
         <source>Enhance Scalar Field</source>
-        <translation type="unfinished"></translation>
+        <translation>Améliore le champ scalaire</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1280"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1295"/>
+        <source>Clear</source>
+        <translation>Enlever</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1283"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1286"/>
+        <source>Clear colors</source>
+        <translation>Enlève les couleurs</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1298"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1301"/>
+        <source>Delete normals</source>
+        <translation>Supprimer les normales</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1306"/>
+        <source>Resample</source>
+        <translation>Ré-échantillonner</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1309"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1312"/>
+        <source>Resample entity with octree</source>
+        <translation>nRé-échantillonne l&apos;entité avec l&apos;octree</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1317"/>
+        <source>Delaunay 2.5D (XY plane)</source>
+        <translation>Delaunay 2.5D (surface XY)</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1320"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1323"/>
+        <source>Compute &quot;2D1/2&quot; mesh by projecting points on the XY plane</source>
+        <translation>Calcule un maillage 2.5D en projetant les points sur la surface XY</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1328"/>
+        <source>Delaunay 2.5D (best fitting plane)</source>
+        <translation>Delaunay 2.5D (surface la plus adaptée)</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1331"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1334"/>
+        <source>Compute &quot;2D1/2&quot; mesh by projecting points on the (least squares) best fitting plane</source>
+        <translation>Calcule un maillage 2.5D en projetant les points sur la surface la plus adaptée (approche par les moindres carrés)</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1339"/>
+        <source>Measure surface</source>
+        <translation>Mesurer la surface</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1342"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1357"/>
-        <source>Clear</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/mainWindow.ui" line="1345"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1348"/>
-        <source>Clear colors</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1363"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1366"/>
-        <source>Delete normals</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1371"/>
-        <source>Resample</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1374"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1377"/>
-        <source>Resample entity with octree</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1382"/>
-        <source>Delaunay 2.5D (XY plane)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1385"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1388"/>
-        <source>Compute &quot;2D1/2&quot; mesh by projecting points on the XY plane</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1393"/>
-        <source>Delaunay 2.5D (best fitting plane)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1396"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1399"/>
-        <source>Compute &quot;2D1/2&quot; mesh by projecting points on the (least squares) best fitting plane</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1404"/>
-        <source>Measure surface</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1407"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1410"/>
         <source>Measure mesh surface</source>
-        <translation type="unfinished"></translation>
+        <translation>Mesure la surface du maillage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1415"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1350"/>
         <source>Closest Point Set</source>
-        <translation type="unfinished"></translation>
+        <translation>Point le plus proche</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1418"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1421"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1353"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1356"/>
         <source>Compute closest point set</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule le point le plus proche</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1426"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1361"/>
         <source>Delete all (!)</source>
-        <translation type="unfinished"></translation>
+        <translation>Tout supprimer (!)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1429"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1432"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1364"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1367"/>
         <source>Delete all scalar fields</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprime la totalité des champs scalaires</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1437"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1372"/>
         <source>Multiply</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplier</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1440"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1443"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1375"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1378"/>
         <source>Multiply scalar field by a constant</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplie le champ scalaire par une constante</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1451"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1386"/>
         <source>K-Means</source>
-        <translation type="unfinished"></translation>
+        <translation>K-Moyennes</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1454"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1457"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1389"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1392"/>
         <source>classify point (K-Means applied on a scalar field)</source>
-        <translation type="unfinished"></translation>
+        <translation>classifie les points en appliquant les K-Moyennes sur un champ scalaire</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1465"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1400"/>
         <source>Front propagation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1468"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1471"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1403"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1406"/>
         <source>Classify points by propagating a front on a scalar field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1476"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1411"/>
         <source>Multiply/Scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplier/Mise à l&apos;échelle</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1479"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1482"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1414"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1417"/>
         <source>Multiply coordinates (separately)</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplie les coordonnées (séparément)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1487"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1422"/>
         <source>Match bounding-box centers</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Associer les centres de boîtes englobantes</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1490"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1493"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1425"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1428"/>
         <source>Synchronize selected entities bbox centers</source>
-        <translation type="unfinished"></translation>
+        <translation>Associe les centres des boites englobantes sélectionnées</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1498"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1433"/>
         <source>Unroll</source>
-        <translation type="unfinished"></translation>
+        <translation>Dérouler</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1501"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1504"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1436"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1439"/>
         <source>Unroll entity on a cylinder or a cone</source>
-        <translation type="unfinished"></translation>
+        <translation>Déroule l&apos;entité selon un cylindre ou un cône</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1513"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1448"/>
         <source>Gradient</source>
-        <translation type="unfinished"></translation>
+        <translation>Palette graduée</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1522"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1457"/>
         <source>Zoom &amp; Center</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoomer et centrer</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1525"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1460"/>
         <source>ZoomCenter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1528"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1531"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1463"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1466"/>
         <source>Zoom and center on selected entities (Z)</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoom et centre sur les entités sélectionnnées (Z)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1534"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1469"/>
         <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Z</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1543"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1478"/>
         <source>Top View</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue de dessus</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1546"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1549"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1481"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1484"/>
         <source>Set top view</source>
-        <translation type="unfinished"></translation>
+        <translation>Place la vue au-dessus de l&apos;entité</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1552"/>
-        <source>8</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1564"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1499"/>
         <source>Front View</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue de face</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1567"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1570"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1502"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1505"/>
         <source>Set front view</source>
-        <translation type="unfinished"></translation>
+        <translation>Place la vue en face de l&apos;entité</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1573"/>
-        <source>5</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1585"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1520"/>
         <source>Back View</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue arrière</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1588"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1591"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1523"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1526"/>
         <source>Set back view</source>
-        <translation type="unfinished"></translation>
+        <translation>Place la vue à l&apos;arrière de l&apos;entité</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1594"/>
-        <source>0</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui_templates/mainWindow.ui" line="1541"/>
+        <source>Left Side View</source>
+        <translation>Vue de gauche</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1544"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1547"/>
+        <source>Set left side view</source>
+        <translation>Place la vue à gauche de l&apos;entité</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1562"/>
+        <source>Right Side View</source>
+        <translation>Vue de droite</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1565"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1568"/>
+        <source>Set right side view</source>
+        <translation>Place la vue à droite de l&apos;entité</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1583"/>
+        <source>Bottom View</source>
+        <translation>Vue de dessous</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1586"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1589"/>
+        <source>Set bottom view</source>
+        <translation>Place la vue en-dessous de l&apos;entité</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1606"/>
-        <source>Left Side View</source>
-        <translation type="unfinished"></translation>
+        <source>Main</source>
+        <translation>Principale</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1609"/>
         <location filename="../ui_templates/mainWindow.ui" line="1612"/>
-        <source>Set left side view</source>
-        <translation type="unfinished"></translation>
+        <source>Show/hide main toolbar</source>
+        <translation>Affiche/masque la barre principale</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1615"/>
-        <source>4</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui_templates/mainWindow.ui" line="1623"/>
+        <source>View</source>
+        <translation>Vue</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1627"/>
-        <source>Right Side View</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui_templates/mainWindow.ui" line="1626"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1629"/>
+        <source>Show/hide view toolbar</source>
+        <translation>Affiche/masque la barre de vue</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1630"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1633"/>
-        <source>Set right side view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1636"/>
-        <source>6</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1648"/>
-        <source>Bottom View</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui_templates/mainWindow.ui" line="1643"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1646"/>
+        <source>Show/hide scalar fields toolbar</source>
+        <translation>Affiche/masque la barre de champ scalaire</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1651"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1654"/>
-        <source>Set bottom view</source>
-        <translation type="unfinished"></translation>
+        <source>Toggle Sun Light</source>
+        <translation>Activer l&apos;éclairage solaire</translation>
     </message>
     <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1654"/>
         <location filename="../ui_templates/mainWindow.ui" line="1657"/>
-        <source>2</source>
-        <translation type="unfinished"></translation>
+        <source>Toggle sun light (active window)</source>
+        <translation>Active l&apos;éclairage solaire dans la fenêtre principale</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1660"/>
+        <source>F6</source>
+        <translation>F6</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1668"/>
+        <source>Toggle Custom Light</source>
+        <translation>Activer l&apos;éclairage personnalisé</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1671"/>
-        <source>Main</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/mainWindow.ui" line="1674"/>
+        <source>Toggle custom light (active window)</source>
+        <translation>Active l&apos;éclairage personnalisé dans la fenêtre principale</translation>
+    </message>
+    <message>
         <location filename="../ui_templates/mainWindow.ui" line="1677"/>
-        <source>Show/hide main toolbar</source>
-        <translation type="unfinished"></translation>
+        <source>F7</source>
+        <translation>F7</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1688"/>
-        <source>View</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui_templates/mainWindow.ui" line="1689"/>
+        <source>Global Zoom</source>
+        <translation>Zoom global</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1691"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1694"/>
-        <source>Show/hide view toolbar</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui_templates/mainWindow.ui" line="1698"/>
+        <source>Toggle Centered Perspective</source>
+        <translation>Activer la vue en perspective centrée</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1711"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1714"/>
-        <source>Show/hide scalar fields toolbar</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui_templates/mainWindow.ui" line="1701"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1704"/>
+        <source>Toggle perspective view (centered on objects) in current window</source>
+        <translation>Active une vue en perspective (centrée sur les objets) dans la fenêtre d&apos;affichage actuelle</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1707"/>
+        <source>F3</source>
+        <translation>F3</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1719"/>
-        <source>Toggle Sun Light</source>
-        <translation type="unfinished"></translation>
+        <source>Toggle Viewer Based Perspective</source>
+        <translation>Activer la vue en perspective depuis le spectateur</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1722"/>
         <location filename="../ui_templates/mainWindow.ui" line="1725"/>
-        <source>Toggle sun light (active window)</source>
-        <translation type="unfinished"></translation>
+        <source>Toggle perspective view (centered on viewer) in current window</source>
+        <translation>Active une vue en perspective (centrée sur le spectateur) dans la fenêtre d&apos;affichage actuelle</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1728"/>
-        <source>F6</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1736"/>
-        <source>Toggle Custom Light</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1739"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1742"/>
-        <source>Toggle custom light (active window)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1745"/>
-        <source>F7</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1757"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1760"/>
-        <source>Global Zoom</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1769"/>
-        <source>Toggle Centered Perspective</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1772"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1775"/>
-        <source>Toggle perspective view (centered on objects) in current window</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1778"/>
-        <source>F3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1790"/>
-        <source>Toggle Viewer Based Perspective</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1793"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1796"/>
-        <source>Toggle perspective view (centered on viewer) in current window</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1799"/>
         <source>F4</source>
-        <translation type="unfinished"></translation>
+        <translation>F</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1811"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1740"/>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Actualiser</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1814"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1743"/>
         <source>F5</source>
-        <translation type="unfinished"></translation>
+        <translation>F5</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1822"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1751"/>
         <source>Test Frame Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Tester le taux de rafraîchissement</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1827"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1756"/>
         <source>Render to File</source>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer le rendu</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1832"/>
-        <source>About Plugins ...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1841"/>
-        <source>Convert to RGB</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1844"/>
-        <source>Convert current scalar field to RGB colors</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1849"/>
-        <source>Create/show depth buffer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1854"/>
-        <source>Export depth buffer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1868"/>
-        <source>Rasterize (and contour plot)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1871"/>
-        <source>Convert a cloud to 2D raster (and optionally generate the contour plot)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1876"/>
-        <source>Auto align clouds</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1879"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1882"/>
-        <source>Tries to automatically register (roughly) two points clouds</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1891"/>
-        <source>Subsample</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1894"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1897"/>
-        <source>Subsample a point cloud</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1905"/>
-        <source>Load shader</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1917"/>
-        <source>Remove Filter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2007"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2973"/>
-        <source>Fit a plane on a set of point</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2603"/>
-        <source>Export cloud info</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2606"/>
-        <source>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2640"/>
-        <source>Reset all GUI element positions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2643"/>
-        <source>Reset all GUI element positions (after restart)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2745"/>
-        <source>Extract sections / Unfold</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2748"/>
-        <source>Extract cloud sections along polylines or unfold a cloud along a polyline</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2808"/>
-        <source>Distance map</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2888"/>
-        <source>Convert to grey scale</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2891"/>
-        <source>Convert RGB colors to grey scale colors</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2900"/>
-        <source>Trace Polyline</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2903"/>
-        <source>Trace a polyline by point picking</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2906"/>
-        <source>Ctrl+P</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2914"/>
-        <source>Enable Qt warnings in Console</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2919"/>
-        <source>Global Shift settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2922"/>
-        <source>Set Global Shift &amp; Scale mechanism parameters</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2930"/>
-        <source>Camera link</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2933"/>
-        <source>Link the cameras of all 3D views
-(so that they all move in the same way and at the same time)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2939"/>
-        <source>2D Waveform viewer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2947"/>
-        <source>Create a plane</source>
+        <location filename="../ui_templates/mainWindow.ui" line="2950"/>
+        <source>Lock rotation about arbitrary axis</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2955"/>
-        <source>Edit the plane parameters</source>
+        <source>Sample points</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2960"/>
+        <source>None (English)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1770"/>
+        <source>Convert to RGB</source>
+        <translation>Convertir en RVB</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1773"/>
+        <source>Convert current scalar field to RGB colors</source>
+        <translation>Convertit le champ scalaire en couleurs RVB</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1778"/>
+        <source>Create/show depth buffer</source>
+        <translation>Créer/afficher le champ de profondeur</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1783"/>
+        <source>Export depth buffer</source>
+        <translation>Exporter le champ de profondeur</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1797"/>
+        <source>Rasterize (and contour plot)</source>
+        <translation>Rastérisation (et lignes de contours)</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1800"/>
+        <source>Convert a cloud to 2D raster (and optionally generate the contour plot)</source>
+        <translation>Convertit un nuage en raster 2D et génère optionnellement les lignes de contours</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1805"/>
+        <source>Auto align clouds</source>
+        <translation>Aligner automatiquement les nuages</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1808"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1811"/>
+        <source>Tries to automatically register (roughly) two points clouds</source>
+        <translation>Essaye de recaler automatiquement deux nuages de points</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1820"/>
+        <source>Subsample</source>
+        <translation>Sous-échantillonner</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1823"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1826"/>
+        <source>Subsample a point cloud</source>
+        <translation>Sous-échantillonne un nuage de points</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1834"/>
+        <source>Load shader</source>
+        <translation>Charger un shader</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1910"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2865"/>
+        <source>Fit a plane on a set of point</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2506"/>
+        <source>Export cloud info</source>
+        <translation>Exporter les informations du nuage</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2509"/>
+        <source>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</source>
+        <translation>Exporte les informations dans un fichier CSV (nom, taille, barycentre, etc.)</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2532"/>
+        <source>Reset all GUI element positions</source>
+        <translation>Réinitialise la position de tous les éléments de l&apos;interface</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2535"/>
+        <source>Reset all GUI element positions (after restart)</source>
+        <translation>Réinitialise la position de tous les éléments de l&apos;interface (après redémarrage)</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2598"/>
+        <source>Lock rotation about an axis</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2601"/>
+        <source>Lock 3D camera rotation about an axis</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2637"/>
+        <source>Extract sections / Unfold</source>
+        <translation>Extraire des sections / Déplier</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2640"/>
+        <source>Extract cloud sections along polylines or unfold a cloud along a polyline</source>
+        <translation>Extrait des sections du nuages ou déplie un nuage le long de polylignes</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2700"/>
+        <source>Distance map</source>
+        <translation>Carte de distance</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2780"/>
+        <source>Convert to grey scale</source>
+        <translation>Convertir en niveau de gris</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2783"/>
+        <source>Convert RGB colors to grey scale colors</source>
+        <translation>Convertir des couleurs RVB vers des couleurs en niveaux de gris</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2792"/>
+        <source>Trace Polyline</source>
+        <translation>Dessiner une polyligne</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2795"/>
+        <source>Trace a polyline by point picking</source>
+        <translation>Dessine une polyligne en plaçant des points</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2798"/>
+        <source>Ctrl+P</source>
+        <translation>Ctrl+P</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2806"/>
+        <source>Enable Qt warnings in Console</source>
+        <translation>Activer les avertissements Qt dans la console</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2811"/>
+        <source>Global Shift settings</source>
+        <translation>Paramètres du Déplacement Global</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2814"/>
+        <source>Set Global Shift &amp; Scale mechanism parameters</source>
+        <translation>Définit les paramètres du mécanismes de Déplacement Global et Mise à l&apos;échelle</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2822"/>
+        <source>Camera link</source>
+        <translation>Lier les caméras</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2825"/>
+        <source>Link the cameras of all 3D views
+(so that they all move in the same way and at the same time)</source>
+        <translation>Lie les caméras de toutes les vues 3D pourqu&apos;elles se déplacent toutes de la même façon en même temps</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2831"/>
+        <source>2D Waveform viewer</source>
+        <translatorcomment>je traduit en retour d&apos;ondes complètes ?</translatorcomment>
+        <translation type="unfinished">Affichage Waveform 2d</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2839"/>
+        <source>Create a plane</source>
+        <translation>Créer une surface</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2847"/>
+        <source>Edit the plane parameters</source>
+        <translation>Editer les paramètres de la surface</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2852"/>
         <source>Create surface between two polylines</source>
-        <translation type="unfinished"></translation>
+        <translation>Crée une surface entre 2 polylignes</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2965"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2857"/>
         <source>Surface between 2 polylines</source>
-        <translation type="unfinished"></translation>
+        <translation>Surface entre 2 polylignes</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2978"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2870"/>
         <source>Enhance with intensities</source>
-        <translation type="unfinished"></translation>
+        <translation>Améliorer avec l&apos;intensité</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2983"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2875"/>
         <source>Mesh scan grids</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2986"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2878"/>
         <source>Mesh scan grids (structured point clouds)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3001"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2893"/>
         <source>Auto-pick rotation center</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélectionner automatiquement le point de rotation</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3004"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2896"/>
         <source>Auto-pick rotation center (rotation is always placed at the middle of the screen if possible)</source>
-        <translation type="unfinished"></translation>
+        <translation>Choisit automatiquement le point de rotation qui sera toujours placé au milieu de l&apos;écran</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3007"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2899"/>
         <source>Shift+P</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+P</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3018"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2910"/>
         <source>Show cursor coordinates</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher les coordonnées du curseur</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3021"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2913"/>
         <source>Show cursor coordinates (2D and 3D if possible)</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche les coordonnées à l&apos;emplacement du curseur</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3026"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2918"/>
         <source>Delete scan grids</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3029"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2921"/>
         <source>Delete the underlying scan grids</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3034"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2926"/>
         <source>Compress FWF data</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Compresser des données FWF</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3037"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2929"/>
         <source>Compress the associated FWF data (maybe interesting after interactive segmentation for instance)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3045"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2937"/>
         <source>Interpolate scalar-field(s) from another cloud or mesh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3050"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2942"/>
         <source>Export plane info</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporter les informations de la surface</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3053"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2945"/>
         <source>Export plane info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporte les informations dans un fichier CSV (nom, largeur, hauteur, centre, etc.)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1925"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1842"/>
         <source>Delete shader</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer le shader</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1934"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1851"/>
         <source>Point picking</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélection d&apos;un point</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1937"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1940"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1854"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1857"/>
         <source>Point picking (point information, distance between 2 points, angles between 3 points, etc.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélection d&apos;un point pour obtenir de l&apos;information, mesurer une distance avec 2, un angle avec 3, etc.</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1956"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1862"/>
         <source>Bounding box P.C.A. fit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1959"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1962"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1865"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1868"/>
         <source>Makes BB fit principal components (rotates entity!)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1971"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1877"/>
         <source>Camera settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Paramètres de la caméra</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1980"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1886"/>
         <source>Point list picking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1983"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1986"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1889"/>
         <source>Pick several points (and export them to ASCII file, a new cloud, etc.)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1991"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1894"/>
         <source>Curvature</source>
-        <translation type="unfinished"></translation>
+        <translation>Courbure</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1999"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1902"/>
         <source>Roughness</source>
-        <translation type="unfinished"></translation>
+        <translation>Rugosité</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="307"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2004"/>
+        <location filename="../ui_templates/mainWindow.ui" line="301"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1907"/>
         <source>Plane</source>
+        <translation>Surface</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="316"/>
+        <source>Polyline</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2012"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1148"/>
+        <source>Translate/Rotate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1761"/>
+        <source>About Plugins...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1915"/>
         <source>Rename</source>
-        <translation type="unfinished"></translation>
+        <translation>Renommer</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2017"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1920"/>
         <source>2.5D quadric</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2022"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1925"/>
         <source>SNE test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2025"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2028"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1928"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1931"/>
         <source>Spherical Neighbourhood Extraction test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2033"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1936"/>
         <source>Visibility</source>
-        <translation type="unfinished"></translation>
+        <translation>Visibilité</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2036"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1939"/>
         <source>Toggle selected entities visibility (recursive)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2039"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1942"/>
         <source>V</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2050"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1953"/>
         <source>Toggle selected entities normals (recursive)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2053"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1956"/>
         <source>N</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2064"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1967"/>
         <source>Toggle selected entities colors (recursive)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2067"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1970"/>
         <source>C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2075"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1978"/>
         <source>SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2078"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1981"/>
         <source>Toggle selected entities SF (recursive)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2081"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1984"/>
         <source>S</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2089"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1992"/>
         <source>Apply transformation</source>
-        <translation type="unfinished"></translation>
+        <translation>Appliquer la transformation</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2092"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1995"/>
         <source>Apply rotation and/or translation</source>
-        <translation type="unfinished"></translation>
+        <translation>Appliquer une rotation et/ou une translation</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2095"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1998"/>
         <source>Ctrl+T</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+T</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2100"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2003"/>
         <source>Smooth (Laplacian)</source>
-        <translation type="unfinished"></translation>
+        <translation>Lisser (Laplacien)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2105"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2008"/>
         <source>HSV colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Couleurs HSV</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2114"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2017"/>
         <source>Save viewport as object</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2117"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2020"/>
         <source>Ctrl+V</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2129"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2032"/>
         <source>Pick rotation center</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélection du centre de rotation</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2132"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2035"/>
         <source>P</source>
-        <translation type="unfinished"></translation>
+        <translation>P</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2140"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2043"/>
         <source>Compute Ranges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2143"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2046"/>
         <source>Compute ranges from sensor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2152"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2055"/>
         <source>Bilateral filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre bilatéral</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2155"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2058"/>
         <source>Compute bilateral filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcule un filtre bilatéral</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2160"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2063"/>
         <source>Compute Scattering Angles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2163"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2066"/>
         <source>Compute laser beam scattering angle for a cloud with normals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2168"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2071"/>
         <source>Toggle color scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Activer l&apos;échelle de couleur</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2171"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2174"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2074"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2077"/>
         <source>Toggle active scalar field color scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Active l&apos;échelle de couleur pour le champ scalaire actif</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2177"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2080"/>
         <source>Shift+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+C</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2185"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2088"/>
         <source>Show previous SF</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher le champ scalaire précédent</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2188"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2191"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2091"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2094"/>
         <source>Show previous scalar field for active entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche le champ scalaire précédent pour l&apos;objet actif</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2194"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2097"/>
         <source>Shift+Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2202"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2105"/>
         <source>Show next SF</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher le champ scalaire suivant</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2205"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2208"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2108"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2111"/>
         <source>Show next scalar field for active entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche le champ scalaire suivant pour l&apos;objet actif</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2211"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2114"/>
         <source>Shift+Down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2220"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2123"/>
         <source>Align (point pairs picking)</source>
-        <translation type="unfinished"></translation>
+        <translation>Aligner (par paires de points)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2223"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2226"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2126"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2129"/>
         <source>Aligns two clouds by picking (at least 4) equivalent point pairs</source>
-        <translation type="unfinished"></translation>
+        <translation>Aligner deux nuages en sélectionnant des paires de points (au moins 4)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2235"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2138"/>
         <source>Add constant SF</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajouter un champ scalaire constant</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2240"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2143"/>
         <source>Export coordinate(s) to SF(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporter les coordonnées dans un champ scalaire</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2243"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2146"/>
         <source>Export X, Y and/or Z coordinates to scalar field(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporte les coordonnées dans un champ scalaire</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2248"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2151"/>
         <source>Subdivide</source>
-        <translation type="unfinished"></translation>
+        <translation>Subdivise</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2253"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2156"/>
         <source>3D name</source>
-        <translation type="unfinished"></translation>
+        <translation>nom 3D</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2256"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2159"/>
         <source>Toggle selected entities 3D name display (recursive)</source>
-        <translation type="unfinished"></translation>
+        <translation>Active l&apos;affichage en 3D du nom de l&apos;objet actif</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2259"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2162"/>
         <source>D</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2271"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2174"/>
         <source>Primitive factory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2276"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2179"/>
         <source>Materials/textures</source>
-        <translation type="unfinished"></translation>
+        <translation>Matériaux/textures</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2279"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2182"/>
         <source>Toggle selected entities materials/textures (recursive)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2282"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2185"/>
         <source>M</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2294"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2197"/>
         <source>Orthographic projection</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue orthographique</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2297"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2300"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2200"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2203"/>
         <source>Set orthographic projection for current 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Définit une projection orthographique pour la vue 3D active</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2309"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2212"/>
         <source>Object-centered perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue en perspective centrée sur l&apos;objet</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2312"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2315"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2215"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2218"/>
         <source>Set object-centered perspective for current 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Définit une perspective entrée sur l&apos;objet pour la vue 3D active</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2324"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2227"/>
         <source>Viewer-based perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue en perspective depuis le spectateur</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2327"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2330"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2230"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2233"/>
         <source>Set viewer-based perspective for current 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Définit une perspective depuis le point de vue du spectateur pour la vue 3D active</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2339"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2242"/>
         <source>Always visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Toujours visible</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2342"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2345"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2245"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2248"/>
         <source>Pivot always visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Pivot toujours visible</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2354"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2257"/>
         <source>Rotation only</source>
-        <translation type="unfinished"></translation>
+        <translation>Rotation uniquement</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2357"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2360"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2260"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2263"/>
         <source>Pivot visible when rotating</source>
-        <translation type="unfinished"></translation>
+        <translation>Pivot visible uniquement lors de la rotation</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2369"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2272"/>
         <source>Never visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Jamais visible</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2372"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2375"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2275"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2278"/>
         <source>Pivot never visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Le pivot n&apos;est jamais visible</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2384"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2287"/>
         <source>Iso 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Iso 1</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2387"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2390"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2290"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2293"/>
         <source>Set view to &apos;front&apos; isometric</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue isométrique de la face &quot;avant&quot;</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2393"/>
-        <source>7</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2405"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2308"/>
         <source>Iso 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Iso 2</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2408"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2411"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2311"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2314"/>
         <source>Set view to &apos;back&apos; isometric</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue isométrique de la face &quot;arrière&quot;</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2414"/>
-        <source>9</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2426"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2329"/>
         <source>Convert texture/material to RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir les textures/matériaux en RVB</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2435"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2338"/>
         <source>Color Scales Manager</source>
-        <translation type="unfinished"></translation>
+        <translation>Gestion des échelles de couleurs</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2438"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2341"/>
         <source>Open Color Scales Manager dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Ouvre la fenêtre du gestionnaire d&apos;échelles</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2450"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2453"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2353"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2356"/>
         <source>Cross Section</source>
-        <translation type="unfinished"></translation>
+        <translation>Coupe transversale</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2458"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2361"/>
         <source>Edit global shift and scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Editer le déplacement général et l&apos;échelle</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2463"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2366"/>
         <source>Convert to Scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir en champ scalaire</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2468"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2371"/>
         <source>Compute Kd-tree</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer un arbre Kd</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2473"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2376"/>
         <source>test</source>
-        <translation type="unfinished"></translation>
+        <translation>test</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2478"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2381"/>
         <source>Add point indexes as SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2481"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2384"/>
         <source>Adds a scalar field with ordered integers for each point in the cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2486"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2389"/>
         <source>2D polygon (facet)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2491"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2394"/>
         <source>Adjust zoom</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajustement du zoom</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2494"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2397"/>
         <source>Adjusts zoom with a given pixel/unit ratio (orthographic projection only)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2499"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2402"/>
         <source>Set SF as coordinate(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2502"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2405"/>
         <source>Set SF as coordinate(s) (X, Y or Z)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2507"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2410"/>
         <source>Close all</source>
-        <translation type="unfinished"></translation>
+        <translation>Tout fermer</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2510"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2413"/>
         <source>Remove all entities currently loaded in the DB tree</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2515"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2418"/>
         <source>Edit global scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Editer l&apos;échelle générale</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2524"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2427"/>
         <source>View from sensor</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue depuis le capteur</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2529"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2432"/>
         <source>Find biggest inner rectangle (2D)</source>
-        <translation type="unfinished"></translation>
+        <translation>Chercher le plus grand rectangle interne (2D)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2534"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2539"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2944"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2437"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2442"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2836"/>
         <source>Create</source>
-        <translation type="unfinished"></translation>
+        <translation>Créer</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2544"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2447"/>
         <source>Compute points visibility (with octree)</source>
-        <translation type="unfinished"></translation>
+        <translation>Calculer les points de visibilité (avec l&apos;octree)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2549"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2452"/>
         <source>Project Uncertainty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2554"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2457"/>
         <source>With Minimum Spanning Tree</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2559"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2462"/>
         <source>With Fast Marching</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2564"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2467"/>
         <source>CNE test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2567"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2570"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2470"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2473"/>
         <source>Cylindrical Neighbourhood Extraction test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2575"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2478"/>
         <source>Approximate (dist. to nearest neighbor)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2580"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2483"/>
         <source>Density</source>
-        <translation type="unfinished"></translation>
+        <translation>Densité</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2583"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2486"/>
         <source>Compute density</source>
-        <translation type="unfinished"></translation>
+        <translation>Calcul la densité</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2588"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2491"/>
         <source>Remove duplicate points</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer les points en double</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2593"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2496"/>
         <source>Crop</source>
-        <translation type="unfinished"></translation>
+        <translation>Réduire</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2598"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2501"/>
         <source>Dip/Dip direction SFs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2611"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3042"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2514"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2934"/>
         <source>Interpolate from another entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Interpoler depuis un autre objet</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2614"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2517"/>
         <source>Interpolate colors from another entity (cloud or mesh) - color is taken from the nearest neighbor</source>
-        <translation type="unfinished"></translation>
+        <translation>Interpole des couleurs depuis un autre objet (nuage ou maillage), la couleurest sélectionnée par le plus proche voisin.</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2619"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2522"/>
         <source>Distance map to best-fit 3D quadric</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2635"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2527"/>
         <source>Levels</source>
-        <translation type="unfinished"></translation>
+        <translation>Niveaux</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2648"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2540"/>
         <source>Convert to random RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir aléatoirement en RVB</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2653"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2545"/>
         <source>Noise filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtrer le bruit</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2656"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2548"/>
         <source>Noise filter (remove the points far from the - approximate - local surface)</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre le bruit en supprimant les points éloignés de la surface locale (approximativement)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2665"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2557"/>
         <source>Compute stat. params (active SF)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2676"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2568"/>
         <source>Measure volume</source>
-        <translation type="unfinished"></translation>
+        <translation>Mesurer un volume</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2681"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2573"/>
         <source>Flag vertices by type</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher les sommets par type</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2684"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2576"/>
         <source>Flag vertices by type: normal (0), border (1), non-manifold (2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Affiche les sommets par type : normale (0), bordure (1), non-manifold (2)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2689"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2581"/>
         <source>Activation (not recursive)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2692"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2584"/>
         <source>Enable/disable selected entities (not recursive)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2695"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2587"/>
         <source>A</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2706"/>
-        <source>Lock rotation about vert. axis</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2709"/>
-        <source>Lock manual rotation about the vertical (screen) axis</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2712"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2604"/>
         <source>L</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2720"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2612"/>
         <source>Create cloud from selected entities centers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2725"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2617"/>
         <source>Compute best registration RMS matrix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2728"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2620"/>
         <source>Computes the best registration between all couples among multiple entities and save the resulting RMS in a matrix (CSV) file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2733"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2625"/>
         <source>Enter bubble-view mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2736"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2628"/>
         <source>B</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2753"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2645"/>
         <source>Contour plot (polylines) to mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Lignes de contours vers maillage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2756"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2648"/>
         <source>Contour plot (set of polylines) to a 2.5D mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Transforme les polygones de contours en un maillage 2.5D</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2765"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2657"/>
         <source>Level</source>
-        <translation type="unfinished"></translation>
+        <translation>Niveaux</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2768"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2660"/>
         <source>Pick three points to make a cloud or mesh &apos;level&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélectionner 3 points pourcréer un niveau pour un nuage ou un maillage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2773"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2665"/>
         <source>Sphere</source>
-        <translation type="unfinished"></translation>
+        <translation>Spo*hère</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2776"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2668"/>
         <source>Fits a sphere on the selected cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Place une sphère sur le nuage sélectionné</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2781"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2673"/>
         <source>Match scales</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2786"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2678"/>
         <source>Zoom in</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoomer en avant</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2789"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2681"/>
         <source>Zoom in (current 3D view)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2792"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2684"/>
         <source>+</source>
-        <translation type="unfinished"></translation>
+        <extracomment>Zoom in shortcut</extracomment>
+        <translation>+</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2797"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2689"/>
         <source>Zoom out</source>
-        <translation type="unfinished"></translation>
+        <translation>Zoomer en arrière</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2800"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2692"/>
         <source>Zoom out (current 3D view)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2803"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2695"/>
         <source>=</source>
+        <extracomment>Zoom in shortcut</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2817"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2709"/>
         <source>SOR filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre SOR</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2820"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2712"/>
         <source>Statistical Outlier Filter (remove the points far from their neighbors)</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtre des aberrations statistiques (Statistical Outlier Filter), supprime les points éloignés de leurs voisins.</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2832"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2724"/>
         <source>actionEnableStereo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2835"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2727"/>
         <source>Enable stereo mode (with red-blue or red-cyan glasses)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2838"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2730"/>
         <source>F10</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">F10</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2846"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2738"/>
         <source>Compute points visibility (with depth buffer)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2851"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2743"/>
         <source>Compute 2.5D volume</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2863"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2755"/>
         <source>Full screen (3D view)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2866"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2758"/>
         <source>Exclusive full screen (3D view)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2869"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2761"/>
         <source>F11</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">F11</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2877"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2769"/>
         <source>Enable Visual Debug Traces</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2880"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2772"/>
         <source>Enables visual debug traces (active 3D view)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2883"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2775"/>
         <source>Ctrl+D</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="193"/>
-        <location filename="../mainwindow.cpp" line="5775"/>
-        <location filename="../mainwindow.cpp" line="5977"/>
+        <location filename="../mainwindow.cpp" line="214"/>
+        <location filename="../mainwindow.cpp" line="5695"/>
+        <location filename="../mainwindow.cpp" line="5897"/>
         <source>Enter Full Screen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2624"/>
+        <location filename="../mainwindow.cpp" line="2491"/>
         <source>Compute visibility</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2625"/>
+        <location filename="../mainwindow.cpp" line="2492"/>
         <source>Points: %L1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3833"/>
+        <location filename="../mainwindow.cpp" line="3752"/>
         <source>Subsampling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4649"/>
+        <location filename="../mainwindow.cpp" line="4569"/>
         <source>Triangulation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4650"/>
+        <location filename="../mainwindow.cpp" line="4570"/>
         <source>Triangulation in progress...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5771"/>
-        <location filename="../mainwindow.cpp" line="5973"/>
+        <location filename="../mainwindow.cpp" line="5691"/>
+        <location filename="../mainwindow.cpp" line="5893"/>
         <source>Exit Full Screen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8195"/>
+        <location filename="../mainwindow.cpp" line="8112"/>
         <source>Testing all possible positions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8196"/>
+        <location filename="../mainwindow.cpp" line="8113"/>
         <source>%1 clouds and %2 positions</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5310,19 +4433,9 @@ Should be used after one of the previous methods!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/matchScalesDlg.ui" line="119"/>
-        <source>1.0e-5</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="129"/>
         <location filename="../ui_templates/matchScalesDlg.ui" line="154"/>
         <source>Rough estimation of the final overlap ratio of the data cloud (the smaller, the better the initial registration should be!)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/matchScalesDlg.ui" line="135"/>
-        <source>%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5334,13 +4447,13 @@ Should be used after one of the previous methods!</source>
 <context>
     <name>MatrixDisplayDlg</name>
     <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="17"/>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="39"/>
+        <location filename="../ui_templates/matrixDisplayDlg.ui" line="23"/>
+        <location filename="../ui_templates/matrixDisplayDlg.ui" line="45"/>
         <source>Matrix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="57"/>
+        <location filename="../ui_templates/matrixDisplayDlg.ui" line="69"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -5353,52 +4466,37 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="73"/>
+        <location filename="../ui_templates/matrixDisplayDlg.ui" line="85"/>
         <source>Axis/Angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="79"/>
+        <location filename="../ui_templates/matrixDisplayDlg.ui" line="100"/>
         <source>Axis</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="86"/>
+        <location filename="../ui_templates/matrixDisplayDlg.ui" line="120"/>
         <source>Angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="93"/>
+        <location filename="../ui_templates/matrixDisplayDlg.ui" line="140"/>
         <source>Center</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Centre</translation>
     </message>
     <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="100"/>
-        <source>0 ; 0 ; 1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="110"/>
-        <source>15.65 deg.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="120"/>
+        <location filename="../ui_templates/matrixDisplayDlg.ui" line="150"/>
         <source>0 ; 0;  0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="131"/>
+        <location filename="../ui_templates/matrixDisplayDlg.ui" line="161"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="137"/>
-        <source>ASCII</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/matrixDisplayDlg.ui" line="144"/>
+        <location filename="../ui_templates/matrixDisplayDlg.ui" line="177"/>
         <source>Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5454,109 +4552,114 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="23"/>
-        <source>Mixed selection: some clouds don&apos;t have scan grid(s)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="33"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="20"/>
         <source>Surface approximation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="42"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="29"/>
         <source>Local surface model</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="49"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="36"/>
         <source>Local surface estimation model</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="56"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="43"/>
         <source>Plane</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Surface</translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="61"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="48"/>
         <source>Quadric</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="66"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="53"/>
         <source>Triangulation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="83"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="70"/>
         <source>Neighbors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="94"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="81"/>
         <source>Using scan grid(s) instead of the octree</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="97"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="84"/>
         <source>use scan grid(s) whenever possible</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="135"/>
-        <source>Each normal will be computed using the (2p+1)*(2p+1) neighbors in the grid</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="138"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="128"/>
         <source>min angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="145"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="138"/>
         <source>Min angle of local triangles (in degrees)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="195"/>
-        <source>The octree works for any cloud</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="198"/>
-        <source>use octree</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="236"/>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="246"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="223"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="233"/>
         <source>Radius of the sphere in which the neighbors will be extracted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="239"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="226"/>
         <source>radius</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="268"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="255"/>
         <source>Auto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="289"/>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="276"/>
         <source>Orientation</source>
+        <translation type="unfinished">Orientation</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="376"/>
+        <source>+ Barycenter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="125"/>
+        <source>min triangulation angle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="188"/>
+        <source>Octree</source>
+        <translation type="unfinished">CloudCompare</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="288"/>
+        <source>Use scan grid(s) (robust method)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="291"/>
+        <source>Use scan grid(s)  whenever possible</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="301"/>
-        <source>Using scan grid(s) is the most robust method</source>
+        <source>Use sensor position to orient normals (if both grid and sensor are selected, &apos;grid&apos; has precedence over &apos;sensor&apos;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="304"/>
-        <source>Use scan grid(s) whenever possible</source>
+        <source>Use sensor(s) whenever possible</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5570,53 +4673,8 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="346"/>
-        <source>+X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="351"/>
-        <source>-X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="356"/>
-        <source>+Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="361"/>
-        <source>-Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="366"/>
-        <source>+Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="371"/>
-        <source>-Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="376"/>
-        <source>+Barycenter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="381"/>
         <source>- Barycenter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="386"/>
-        <source>+ (0,0,0)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="391"/>
-        <source>- (0,0,0)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5637,11 +4695,6 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="437"/>
         <source>Number of neighbors used to build the tree</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="440"/>
-        <source>knn = </source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5704,19 +4757,6 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
-    <name>PickOneElementDialog</name>
-    <message>
-        <location filename="../ui_templates/pickOneElementDlg.ui" line="25"/>
-        <source>Choose parameter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pickOneElementDlg.ui" line="33"/>
-        <source>Elements</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>PlaneEditDlg</name>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="14"/>
@@ -5731,12 +4771,6 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="30"/>
         <source>dip</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/planeEditDlg.ui" line="37"/>
-        <location filename="../ui_templates/planeEditDlg.ui" line="60"/>
-        <source> deg.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5757,21 +4791,6 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="90"/>
         <source>Normal</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/planeEditDlg.ui" line="96"/>
-        <source>Nx = </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/planeEditDlg.ui" line="112"/>
-        <source>Ny = </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/planeEditDlg.ui" line="128"/>
-        <source>Nz = </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5802,26 +4821,11 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="212"/>
         <source>Center</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/planeEditDlg.ui" line="221"/>
-        <source>X:</source>
-        <translation type="unfinished"></translation>
+        <translation>Centre</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="237"/>
         <source>Pick the plane center (click again to cancel)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/planeEditDlg.ui" line="251"/>
-        <source>Y:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/planeEditDlg.ui" line="267"/>
-        <source>Z:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5877,28 +4881,8 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/pointListPickingDlg.ui" line="134"/>
-        <source>0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="168"/>
         <source>Index</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointListPickingDlg.ui" line="173"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointListPickingDlg.ui" line="178"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointListPickingDlg.ui" line="183"/>
-        <source>Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5940,9 +4924,6 @@ p, li { white-space: pre-wrap; }
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="29"/>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="49"/>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="66"/>
-        <location filename="../ui_templates/pointPropertiesDlg.ui" line="100"/>
-        <location filename="../ui_templates/pointPropertiesDlg.ui" line="111"/>
-        <location filename="../ui_templates/pointPropertiesDlg.ui" line="122"/>
         <source>...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6004,25 +4985,25 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="48"/>
         <source>Density</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Densité</translation>
     </message>
     <message>
-        <location filename="../ui_templates/ptsSamplingDlg.ui" line="99"/>
+        <location filename="../ui_templates/ptsSamplingDlg.ui" line="111"/>
         <source>generate normals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/ptsSamplingDlg.ui" line="111"/>
+        <location filename="../ui_templates/ptsSamplingDlg.ui" line="123"/>
         <source>get colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/ptsSamplingDlg.ui" line="118"/>
+        <location filename="../ui_templates/ptsSamplingDlg.ui" line="130"/>
         <source>from RGB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/ptsSamplingDlg.ui" line="128"/>
+        <location filename="../ui_templates/ptsSamplingDlg.ui" line="140"/>
         <source>or from material/texture if available</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6037,19 +5018,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="28"/>
         <source>Plane</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="36"/>
-        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="123"/>
-        <source>dx</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="59"/>
-        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="146"/>
-        <source>dy</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Surface</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="115"/>
@@ -6057,14 +5026,9 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="169"/>
-        <source>dz</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="225"/>
         <source>Sphere</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Spo*hère</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="233"/>
@@ -6076,21 +5040,6 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="284"/>
         <source>Position</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="290"/>
-        <source>y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="336"/>
-        <source>z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="343"/>
-        <source>x</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6111,7 +5060,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="371"/>
         <source>clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pressa-papier</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="388"/>
@@ -6216,7 +5165,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="980"/>
         <source>Create</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Créer</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="987"/>
@@ -6227,12 +5176,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../main.cpp" line="194"/>
+        <location filename="../main.cpp" line="98"/>
         <source>Translation</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Translation</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="194"/>
+        <location filename="../main.cpp" line="98"/>
         <source>Failed to load language file &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6242,48 +5191,1234 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="674"/>
+        <location filename="../ccClippingBoxTool.cpp" line="671"/>
         <source>Section extraction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="675"/>
+        <location filename="../ccClippingBoxTool.cpp" line="672"/>
         <source>Section(s): %L1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="798"/>
+        <location filename="../ccClippingBoxTool.cpp" line="795"/>
         <source>Up to (%1 x %2 x %3) = %4 section(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="880"/>
+        <location filename="../ccClippingBoxTool.cpp" line="877"/>
         <source>Contour(s): %L1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccLibAlgorithms.cpp" line="530"/>
+        <location filename="../ccLibAlgorithms.cpp" line="539"/>
         <source>Computing entities scales</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccLibAlgorithms.cpp" line="531"/>
+        <location filename="../ccLibAlgorithms.cpp" line="540"/>
         <source>Entities: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccLibAlgorithms.cpp" line="659"/>
+        <location filename="../ccLibAlgorithms.cpp" line="668"/>
         <source>Rescaling entities</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccVolumeCalcTool.cpp" line="626"/>
+        <location filename="../ccVolumeCalcTool.cpp" line="627"/>
         <source>Volume computation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccVolumeCalcTool.cpp" line="627"/>
+        <location filename="../ccVolumeCalcTool.cpp" line="628"/>
         <source>Cells: %1 x %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="167"/>
+        <source>Unhandled format specifier (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="191"/>
+        <source>Output export format (clouds) set to: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="216"/>
+        <location filename="../ccCommandLineCommands.h" line="341"/>
+        <source>Missing parameter: extension after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="219"/>
+        <source>New output extension for clouds: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="227"/>
+        <source>Missing parameter: precision value after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="231"/>
+        <source>Invalid value for precision! (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="234"/>
+        <location filename="../ccCommandLineCommands.h" line="253"/>
+        <location filename="../ccCommandLineCommands.h" line="282"/>
+        <location filename="../ccCommandLineCommands.h" line="297"/>
+        <source>Argument &apos;%1&apos; is only applicable to ASCII format!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="250"/>
+        <source>Missing parameter: separator character after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="267"/>
+        <source>Invalid separator! (&apos;%1&apos;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="328"/>
+        <source>Output export format (meshes) set to: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="344"/>
+        <source>New output extension for meshes: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="364"/>
+        <source>Missing parameter: filename after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="378"/>
+        <source>Missing parameter: number of lines after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="385"/>
+        <source>Invalid parameter: number of lines after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="388"/>
+        <source>Will skip %1 lines</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="397"/>
+        <source>Missing parameter: global shift vector or %1 after &apos;%2&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="414"/>
+        <source>Missing parameter: global shift vector after &apos;%1&apos; (3 values expected)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="422"/>
+        <source>Invalid parameter: X coordinate of the global shift vector after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="425"/>
+        <source>Invalid parameter: Y coordinate of the global shift vector after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="428"/>
+        <source>Invalid parameter: Z coordinate of the global shift vector after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="465"/>
+        <source>No entity loaded (be sure to open at least one file with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="517"/>
+        <source>No point cloud to normal calculation (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="522"/>
+        <source>Missing parameter: radius after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="529"/>
+        <source>Invalid radius</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="532"/>
+        <source>	Radius: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="545"/>
+        <source>cloud-&gt;hasNormals: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="552"/>
+        <source>.OctreeNormal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="577"/>
+        <source>No point cloud to resample (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="582"/>
+        <source>Missing parameter: resampling method after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="586"/>
+        <source>	Method: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="591"/>
+        <source>Missing parameter: number of points after &quot;-%1 RANDOM&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="600"/>
+        <source>	Output points: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="605"/>
+        <location filename="../ccCommandLineCommands.h" line="662"/>
+        <location filename="../ccCommandLineCommands.h" line="728"/>
+        <location filename="../ccCommandLineCommands.h" line="837"/>
+        <location filename="../ccCommandLineCommands.h" line="3170"/>
+        <source>	Processing cloud #%1 (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="612"/>
+        <location filename="../ccCommandLineCommands.h" line="670"/>
+        <location filename="../ccCommandLineCommands.h" line="738"/>
+        <source>	Result: %1 points</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="621"/>
+        <location filename="../ccCommandLineCommands.h" line="679"/>
+        <location filename="../ccCommandLineCommands.h" line="747"/>
+        <source>.subsampled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="635"/>
+        <location filename="../ccCommandLineCommands.h" line="693"/>
+        <location filename="../ccCommandLineCommands.h" line="761"/>
+        <source>_SUBSAMPLED</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="649"/>
+        <source>Missing parameter: spatial step after &quot;-%1 SPATIAL&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="657"/>
+        <source>	Spatial step: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="707"/>
+        <source>Missing parameter: octree level after &quot;-%1 OCTREE&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="716"/>
+        <location filename="../ccCommandLineCommands.h" line="809"/>
+        <source>	Octree level: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="751"/>
+        <source>OCTREE_LEVEL_%1_SUBSAMPLED</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="795"/>
+        <source>No point cloud loaded (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="801"/>
+        <source>Missing parameter: octree level after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="814"/>
+        <source>Missing parameter: minimum number of points per component after &quot;-%1 [octree level]&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="821"/>
+        <source>	Min number of points per component: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="894"/>
+        <source>_COMPONENT_%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="908"/>
+        <source>Failed to create component #%1! (not enough memory)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="924"/>
+        <source>%1 component(s) were created</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="953"/>
+        <source>Missing parameter: curvature type after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="971"/>
+        <source>Invalid curvature type after &quot;-%1&quot;. Got &apos;%2&apos; instead of MEAN or GAUSS.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="981"/>
+        <source>Failed to read a numerical parameter: kernel size (after curvature type). Got &apos;%1&apos; instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="982"/>
+        <location filename="../ccCommandLineCommands.h" line="1210"/>
+        <source>	Kernel size: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="985"/>
+        <source>No point cloud on which to compute curvature! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="997"/>
+        <source>%1_CURVATURE_KERNEL_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1007"/>
+        <location filename="../ccCommandLineCommands.h" line="1057"/>
+        <location filename="../ccCommandLineCommands.h" line="1104"/>
+        <source>Missing parameter: density type after &quot;-%1&quot; (KNN/SURFACE/VOLUME)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1025"/>
+        <source>Invalid parameter: density type is expected after &quot;-%1&quot; (KNN/SURFACE/VOLUME)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1039"/>
+        <source>No point cloud on which to compute approx. density! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1085"/>
+        <source>Missing parameter: sphere radius after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1091"/>
+        <source>Failed to read a numerical parameter: sphere radius (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1092"/>
+        <source>	Sphere radius: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1112"/>
+        <source>No point cloud on which to compute density! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1141"/>
+        <source>Missing parameter: boolean (whether SF is euclidean or not) after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1151"/>
+        <location filename="../ccCommandLineCommands.h" line="1369"/>
+        <source>Invalid boolean value after &quot;-%1&quot;. Got &apos;%2&apos; instead of TRUE or FALSE.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1155"/>
+        <source>No point cloud on which to compute SF gradient! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1166"/>
+        <location filename="../ccCommandLineCommands.h" line="1383"/>
+        <source>cmd.warning: cloud &apos;%1&apos; has no scalar field (it will be ignored)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1171"/>
+        <source>cmd.warning: cloud &apos;%1&apos; has several scalar fields (the active one will be used by default, or the first one if none is active)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1203"/>
+        <source>Missing parameter: kernel size after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1209"/>
+        <source>Failed to read a numerical parameter: kernel size (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1213"/>
+        <source>No point cloud on which to compute roughness! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1225"/>
+        <source>ROUGHNESS_KERNEL_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1242"/>
+        <source>Missing parameter: transformation file after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1247"/>
+        <source>Failed to read transformation matrix file &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1249"/>
+        <source>Transformation:
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1252"/>
+        <source>No entity on which to apply the transformation! (be sure to open one with &quot;-%1 [filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1291"/>
+        <source>No loaded entity! (be sure to open one with &quot;-%1 [filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1322"/>
+        <source>Missing parameter: color scale file after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1329"/>
+        <source>Failed to read color scale file &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1332"/>
+        <source>No point cloud on which to change the SF color scale! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1359"/>
+        <source>Missing parameter: boolean (whether to mix with existing colors or not) after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1373"/>
+        <source>No point cloud on which to convert SF to RGB! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1387"/>
+        <source>cmd.warning: cloud &apos;%1&apos; has no active scalar field (it will be ignored)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1401"/>
+        <source>cmd.warning: cloud &apos;%1&apos; failed to convert SF to RGB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1440"/>
+        <source>Missing parameter: min value after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1460"/>
+        <source>Failed to read a numerical parameter: min value (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1469"/>
+        <source>Missing parameter: max value after &quot;-%1&quot; {min}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1489"/>
+        <source>Failed to read a numerical parameter: max value (after min value). Got &apos;%1&apos; instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1493"/>
+        <source>	Interval: [%1 - %2]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1496"/>
+        <source>No point cloud on which to filter SF! (be sure to open one or generate one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1545"/>
+        <source>		Cloud &apos;%1&apos; --&gt; %2/%3 points remaining</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1551"/>
+        <source>_FILTERED_[%1_%2]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1601"/>
+        <source>Missing argument: filename after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1623"/>
+        <source>Mesh &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1626"/>
+        <source> (#%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1629"/>
+        <source>V = %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1674"/>
+        <source>Can&apos;t merge mesh &apos;%1&apos; (unhandled type)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1704"/>
+        <location filename="../ccCommandLineCommands.h" line="1757"/>
+        <source>_MERGED</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1775"/>
+        <source>Missing parameter: scalar field index after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1781"/>
+        <source>Failed to read a numerical parameter: S.F. index (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1782"/>
+        <source>Set active S.F. index: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1785"/>
+        <source>No point cloud loaded! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1794"/>
+        <source>Cloud &apos;%1&apos; has less scalar fields than the index to select!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1903"/>
+        <source>Entity &apos;%1&apos; has been translated: (%2,%3,%4)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1952"/>
+        <location filename="../ccCommandLineCommands.h" line="2065"/>
+        <location filename="../ccCommandLineCommands.h" line="2136"/>
+        <location filename="../ccCommandLineCommands.h" line="3036"/>
+        <source>No cloud available. Be sure to open one first!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1963"/>
+        <source>Plane successfully fitted: rms = %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1980"/>
+        <source>%1/%2_BEST_FIT_PLANE_INFO</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1982"/>
+        <location filename="../ccCommandLineCommands.h" line="3686"/>
+        <source>_%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1983"/>
+        <location filename="../ccCommandLineCommands.h" line="3687"/>
+        <source>.txt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1988"/>
+        <source>Filename: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1989"/>
+        <source>Fitting RMS: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="1996"/>
+        <source>Normal: (%1,%2,%3)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2027"/>
+        <source>Cloud &apos;%1&apos; has been transformed with the above matrix</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2028"/>
+        <source>_HORIZ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2039"/>
+        <source>Failed to compute best fit plane for cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2056"/>
+        <source>Missing parameter: number of neighbors after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2062"/>
+        <location filename="../ccCommandLineCommands.h" line="2126"/>
+        <source>Invalid parameter: number of neighbors (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2087"/>
+        <source>_NORMS_REORIENTED</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2097"/>
+        <source>Failed to orient the normals of cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2120"/>
+        <source>Missing parameter: number of neighbors mode after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2129"/>
+        <source>Missing parameter: sigma multiplier after number of neighbors (SOR)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2133"/>
+        <source>Invalid parameter: sigma multiplier (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2162"/>
+        <source>.clean</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2176"/>
+        <source>_SOR</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2182"/>
+        <source>Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2191"/>
+        <source>Failed to apply SOR filter on cloud &apos;%1&apos;! (not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2215"/>
+        <location filename="../ccCommandLineCommands.h" line="2279"/>
+        <location filename="../ccCommandLineCommands.h" line="2711"/>
+        <source>No mesh available. Be sure to open one first!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2230"/>
+        <source>.vertices</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2258"/>
+        <source>Missing parameter: sampling mode after &quot;-%1&quot; (POINTS/DENSITY)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2269"/>
+        <source>Invalid parameter: unknown sampling mode &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2272"/>
+        <source>Missing parameter: value after sampling mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2276"/>
+        <source>Invalid parameter: value after sampling mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2294"/>
+        <source>Cloud sampling failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2298"/>
+        <source>Sampled cloud created: %1 points</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2299"/>
+        <source>_SAMPLED_POINTS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2329"/>
+        <source>Missing parameter: box extents after &quot;-%1&quot; (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2331"/>
+        <source>No point cloud or mesh available. Be sure to open or generate one first!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2339"/>
+        <source>Invalid parameter: box extents (expected format is &apos;Xmin:Ymin:Zmin:Xmax:Ymax:Zmax&apos;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2348"/>
+        <source>Invalid parameter: box extents (component #%1 is not a valid number)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2428"/>
+        <source>Missing parameter after &quot;-%1&quot; (DIMENSION)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2430"/>
+        <location filename="../ccCommandLineCommands.h" line="2481"/>
+        <location filename="../ccCommandLineCommands.h" line="2701"/>
+        <source>No point cloud available. Be sure to open or generate one first!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2443"/>
+        <location filename="../ccCommandLineCommands.h" line="2632"/>
+        <source>Invalid parameter: dimension after &quot;-%1&quot; (expected: X, Y or Z)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2452"/>
+        <source>_%1_TO_SF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2462"/>
+        <source>Failed to export coord. %1 to SF on cloud &apos;%2&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2479"/>
+        <source>Missing parameter(s) after &quot;-%1&quot; (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2498"/>
+        <source>Invalid parameter: orthogonal dimension after &quot;-%1&quot; (expected: X, Y or Z)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2508"/>
+        <source>Invalid parameter: number of vertices for the 2D polyline after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2523"/>
+        <source>Missing parameter(s): vertex #%1 data and following</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2531"/>
+        <source>Invalid parameter: X-coordinate of vertex #%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2535"/>
+        <source>Invalid parameter: Y-coordinate of vertex #%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2576"/>
+        <source>.cropped</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2587"/>
+        <source>Not enough memory to crop cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2594"/>
+        <source>No point of cloud &apos;%1&apos; falls inside the input box!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2599"/>
+        <source>Crop process failed! (not enough memory)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2616"/>
+        <source>Missing parameter(s) after &quot;-%1&quot; (DIM FREQUENCY)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2618"/>
+        <source>No entity available. Be sure to open or generate one first!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2642"/>
+        <source>Invalid parameter: frequency after &quot;-%1 DIM&quot; (in Hz, integer value)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2656"/>
+        <location filename="../ccCommandLineCommands.h" line="2680"/>
+        <source>COLOR_BANDING_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2675"/>
+        <source>Vertices of mesh &apos;%1&apos; are locked (they may be shared by multiple entities for instance). Can&apos;t apply the current command on them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2719"/>
+        <source>Only one point cloud available. Be sure to open or generate a second one before performing C2C distance!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2755"/>
+        <location filename="../ccCommandLineCommands.h" line="2767"/>
+        <source>Missing parameter: value after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2759"/>
+        <location filename="../ccCommandLineCommands.h" line="2771"/>
+        <source>Invalid parameter: value after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2798"/>
+        <source>Invalid parameter: unknown model type &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2802"/>
+        <source>Missing parameter: model type after &quot;-%1&quot; (LS/TRI/HF)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2813"/>
+        <source>Invalid parameter: unknown neighborhood type &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2817"/>
+        <source>Missing parameter: expected neighborhood type after model type (KNN/SPHERE)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2826"/>
+        <source>Invalid parameter: neighborhood size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2830"/>
+        <source>Missing parameter: expected neighborhood size after neighborhood type (neighbor count/sphere radius)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2839"/>
+        <location filename="../ccCommandLineCommands.h" line="3554"/>
+        <source>Missing parameter: max thread count after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2844"/>
+        <location filename="../ccCommandLineCommands.h" line="3559"/>
+        <source>Invalid thread count! (after %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2916"/>
+        <source>_MAX_DIST_%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2955"/>
+        <source>Missing parameter: distribution type after &quot;-%1&quot; (GAUSS/WEIBULL)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2962"/>
+        <source>Missing parameter: mean value after &quot;GAUSS&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2966"/>
+        <source>Invalid parameter: mean value after &quot;GAUSS&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2969"/>
+        <source>Missing parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2973"/>
+        <source>Invalid parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2983"/>
+        <source>Missing parameter: a value after &quot;WEIBULL&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2987"/>
+        <source>Invalid parameter: a value after &quot;WEIBULL&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2990"/>
+        <source>Missing parameter: b value after &quot;WEIBULL&quot; {a}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2994"/>
+        <source>Invalid parameter: b value after &quot;WEIBULL&quot; {a}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="2997"/>
+        <source>Missing parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3001"/>
+        <source>Invalid parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3009"/>
+        <source>Invalid parameter: unknown distribution &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3017"/>
+        <source>Missing parameter: p-value after distribution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3021"/>
+        <source>Invalid parameter: p-value after distribution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3028"/>
+        <source>Missing parameter: neighbors after p-value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3032"/>
+        <source>Invalid parameter: neighbors after p-value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3076"/>
+        <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3083"/>
+        <source>[Chi2 Test] %1 test result = %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3099"/>
+        <source>_STAT_TEST_%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3151"/>
+        <source>Missing parameter: max edge length value after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3155"/>
+        <source>Invalid value for max edge length! (after %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3156"/>
+        <source>Max edge length: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3164"/>
+        <source>Axis aligned: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3181"/>
+        <source>	Resulting mesh: #%1 faces, %2 vertices</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3225"/>
+        <source>Missing parameter(s): SF index and/or operation after &apos;%1&apos; (2 values expected)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3238"/>
+        <location filename="../ccCommandLineCommands.h" line="3329"/>
+        <location filename="../ccCommandLineCommands.h" line="3525"/>
+        <location filename="../ccCommandLineCommands.h" line="3545"/>
+        <source>Invalid SF index! (after %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3248"/>
+        <location filename="../ccCommandLineCommands.h" line="3340"/>
+        <source>Unknown operation! (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3252"/>
+        <location filename="../ccCommandLineCommands.h" line="3344"/>
+        <source>Operation %1 can&apos;t be applied with %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3264"/>
+        <location filename="../ccCommandLineCommands.h" line="3373"/>
+        <source>Failed top apply operation on cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3287"/>
+        <location filename="../ccCommandLineCommands.h" line="3396"/>
+        <source>Failed top apply operation on mesh &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3314"/>
+        <source>Missing parameter(s): SF index and/or operation and/or scalar value after &apos;%1&apos; (3 values expected)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3355"/>
+        <source>Invalid scalar value! (after %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3464"/>
+        <source>Missing parameter: min error difference after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3468"/>
+        <source>Invalid value for min. error difference! (after %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3476"/>
+        <source>Missing parameter: number of iterations after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3481"/>
+        <source>Invalid number of iterations! (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3489"/>
+        <source>Missing parameter: overlap percentage after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3494"/>
+        <source>Invalid overlap value! (%1 --&gt; should be between 10 and 100)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3502"/>
+        <source>Missing parameter: random sampling limit value after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3506"/>
+        <source>Invalid random sampling limit! (after %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3514"/>
+        <location filename="../ccCommandLineCommands.h" line="3534"/>
+        <source>Missing parameter: SF index after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3580"/>
+        <source>Invalid parameter: unknown rotation filter &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3584"/>
+        <source>Missing parameter: rotation filter after &quot;-%1&quot; (XYZ/X/Y/Z/NONE)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3626"/>
+        <source>Invalid SF index for data entity! (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3632"/>
+        <source>[ICP] SF #%1 (data entity) will be used as weights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3642"/>
+        <source>Invalid SF index for model entity! (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3648"/>
+        <source>[ICP] SF #%1 (model entity) will be used as weights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3678"/>
+        <source>Entity &apos;%1&apos; has been registered</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3679"/>
+        <source>RMS: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3680"/>
+        <source>Number of points used for final step: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3684"/>
+        <source>%1/%2_REGISTRATION_MATRIX</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3695"/>
+        <source>_REGISTERED</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3719"/>
+        <source>Missing parameter: FBX format (string) after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3722"/>
+        <source>FBX format: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3739"/>
+        <source>Missing parameter: format (ASCII, BINARY_LE, or BINARY_BE) after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3754"/>
+        <source>Invalid PLY format! (&apos;%1&apos;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3956"/>
+        <source>Missing parameter: option after &apos;%1&apos; (%2/%3)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3971"/>
+        <source>Unrecognized option after &apos;%1&apos; (%2 or %3 expected)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.h" line="3985"/>
+        <source>Missing parameter: filename after &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -6297,11 +6432,6 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="35"/>
         <source>Raster dimensions:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="42"/>
-        <source>0 x 0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6338,114 +6468,88 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="38"/>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="426"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="47"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="444"/>
         <source>Cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="44"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="53"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="51"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="60"/>
         <source>Unknown</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="58"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="67"/>
         <source>Points</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="65"/>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="886"/>
-        <source>0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="78"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="87"/>
         <source>Update grid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="85"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="94"/>
         <source>Grid</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Grille</translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="91"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="100"/>
         <source>size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="98"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="107"/>
         <source>step</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="105"/>
-        <source>640 x 480</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="114"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="123"/>
         <source>size of step of the grid generated (in the same units as the coordinates of the point cloud)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="136"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="145"/>
         <source>Edit grid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="145"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="154"/>
         <source>Active layer (or &apos;scalar field&apos;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="148"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="157"/>
         <source>active layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="158"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="167"/>
         <source>range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="175"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="184"/>
         <source>Projection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Projection</translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="183"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="192"/>
         <source>direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="194"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="199"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="204"/>
-        <source>Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="216"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="225"/>
         <source>cell height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="223"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="232"/>
         <source>Per-cell height computation method:
  - minimum = lowest point in the cell
  - average = mean height of all points inside the cell
@@ -6453,337 +6557,332 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="233"/>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="352"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="242"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="370"/>
         <source>minimum height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="238"/>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="357"/>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="493"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="247"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="375"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="520"/>
         <source>average height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="243"/>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="362"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="252"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="380"/>
         <source>maximum height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="259"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="277"/>
         <source>Interpolate scalar field(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="262"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="280"/>
         <source>interpolate SF(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="272"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="290"/>
         <source>SF interpolation method</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="279"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="297"/>
         <source>minimum value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="284"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="302"/>
         <source>average value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="289"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="307"/>
         <source>maximum value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="300"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="318"/>
         <source>Use the nearest point of the input cloud in each cell instead of the cell center</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="303"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="321"/>
         <source>resample input cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="316"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="334"/>
         <source>Warning: the original point&apos;s height will be
 replaced by the cell&apos;s average height!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="588"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="615"/>
         <source>Contour plot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="602"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="629"/>
         <source>The contour plot is computed on the active layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="775"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="802"/>
         <source>Hillshade</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="789"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="816"/>
         <source>Hillshade is computed on the height layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="798"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="825"/>
         <source>Sun zenith</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="805"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="832"/>
         <source>Zenith angle (in degrees) = 90 - altitude angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="808"/>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="834"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="835"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="861"/>
         <source> deg.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"> deg.</translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="824"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="851"/>
         <source>Sun azimuth</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="831"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="858"/>
         <source>Azimuth angle (in degrees)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="873"/>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="879"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="900"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="906"/>
         <source>Volume</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Volume</translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="893"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="920"/>
         <source>Non empty cells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="900"/>
-        <source>0%</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="330"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="348"/>
         <source>Empty cells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="336"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="354"/>
         <source>Fill with</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="343"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="361"/>
         <source>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="347"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="365"/>
         <source>leave empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="367"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="385"/>
         <source>user specified value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="372"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="390"/>
         <source>interpolate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="389"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="407"/>
         <source>Custom value for empty cells</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="415"/>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="758"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="433"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="785"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="423"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="441"/>
         <source>Export grid as a point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="433"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="451"/>
         <source>Export grid as a mesh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="436"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="454"/>
         <source>Mesh</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Maillage</translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="445"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="463"/>
         <source>Export per-cell statistics as SF(s):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="470"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="497"/>
         <source>Adds a scalar field with the grid density (= number of points inside each cell)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="473"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="500"/>
         <source>population</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="480"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="507"/>
         <source>Adds a scalar field with the min. height of the points inside the cell</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="483"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="510"/>
         <source>min height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="490"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="517"/>
         <source>Adds a scalar field with the average height of the points inside the cell</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="500"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="527"/>
         <source>Adds a scalar field with the max. height of the points inside the cell</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="503"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="530"/>
         <source>max height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="510"/>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="520"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="537"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="547"/>
         <source>Adds a scalar field with the standard deviation of the heights of the points inside the cell</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="513"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="540"/>
         <source>height std. dev.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="523"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="550"/>
         <source>height range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="542"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="569"/>
         <source>Export grid as a raster (geotiff)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="545"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="572"/>
         <source>Raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="552"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="579"/>
         <source>Export grid as an image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="555"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="582"/>
         <source>Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="562"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="589"/>
         <source>Export grid as a matrix (text file)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="565"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="592"/>
         <source>Matrix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="611"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="638"/>
         <source>Start value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="631"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="658"/>
         <source>Step</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="651"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="678"/>
         <source>Min. vertex count</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="658"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="685"/>
         <source>Min vertex count per iso-line (to ignore the smallest ones)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="671"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="698"/>
         <source>Line width</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="678"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="705"/>
         <source>Default contour lines width</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="695"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="722"/>
         <source>colorize</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="702"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="729"/>
         <source>ignore borders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="730"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="757"/>
         <source>project contours on the altitude layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="742"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="769"/>
         <source>Remove all contour lines</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="745"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="772"/>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Enlever</translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="755"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="782"/>
         <source>Export contour lines to the DB tree</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="765"/>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="865"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="792"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="892"/>
         <source>Generate</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6806,76 +6905,66 @@ replaced by the cell&apos;s average height!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="88"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="82"/>
         <source>the model cloud is the reference : it won&apos;t move (yellow cloud)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="98"/>
-        <location filename="../ui_templates/registrationDlg.ui" line="101"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="92"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="95"/>
         <source>press once to exchange model and data clouds</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Appuyer pour intervertir les rôles</translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="104"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="98"/>
         <source>swap</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Inervertir</translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="121"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="115"/>
         <source>Parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="129"/>
-        <location filename="../ui_templates/registrationDlg.ui" line="132"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="123"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="126"/>
         <source>By choosing this criterion, you can control the computation time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="135"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="129"/>
         <source>Number of iterations</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="145"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="139"/>
         <source>Set the maximal number of step for the algorithm regsitration computation .</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="164"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="158"/>
         <source>By choosing this criterion, you can control the quality of the result.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="167"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="161"/>
         <source>RMS difference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="183"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="177"/>
         <source>Set the minimum RMS improvement between 2 consecutive iterations (below which the registration process will stop).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="189"/>
-        <source>1.0e-5</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="199"/>
-        <location filename="../ui_templates/registrationDlg.ui" line="212"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="193"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="206"/>
         <source>Rough estimation of the final overlap ratio of the data cloud (the smaller, the better the initial registration should be!)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="205"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="199"/>
         <source>Final overlap</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="221"/>
-        <source>%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6894,130 +6983,90 @@ replaced by the cell&apos;s average height!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="75"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="69"/>
         <source>&apos;model&apos; entity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="78"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="72"/>
         <source>reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="85"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="79"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;reference entity (won&apos;t move)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="255"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="249"/>
         <source>Whether to adjust the scale of the &apos;data&apos; entity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="258"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="252"/>
         <source>adjust scale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="288"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="282"/>
         <source>max thread count</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="295"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="289"/>
         <source>Maximum number of threads/cores to be used
 (CC or your computer might not respond for a while if you use all available cores)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="299"/>
-        <source> / 8</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="325"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="319"/>
         <source>Research</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="333"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="327"/>
         <source>Random sampling limit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="340"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="334"/>
         <source>Above this limit, clouds are randomly resampled at each iteration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="365"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="359"/>
         <source>Rotation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="385"/>
-        <source>XYZ</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="390"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="395"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="400"/>
-        <source>Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="414"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="408"/>
         <source>Translation</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Translation</translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="445"/>
-        <source>Tx</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="461"/>
-        <source>Ty</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="477"/>
-        <source>Tz</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="491"/>
-        <location filename="../ui_templates/registrationDlg.ui" line="494"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="485"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="488"/>
         <source>Chose this option to remove points that are likely to disturb the registration during the computation.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="497"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="491"/>
         <source>Enable farthest points removal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="504"/>
-        <location filename="../ui_templates/registrationDlg.ui" line="514"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="498"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="508"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the displayed scalar field as weights (the bigger its associated scalar value/weight is, the more influence the point will have).&lt;/p&gt;&lt;p&gt;Note that only absolute distances are considered (i.e. minimal weight is 0).&lt;/p&gt;&lt;p&gt;Weights are automatically normalized.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="507"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="501"/>
         <source>Data: use displayed S.F. as weights</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/registrationDlg.ui" line="517"/>
+        <location filename="../ui_templates/registrationDlg.ui" line="511"/>
         <source>Model: use displayed S.F. as weights (only for clouds)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7031,12 +7080,7 @@ replaced by the cell&apos;s average height!</source>
     </message>
     <message>
         <location filename="../ui_templates/renderToFileDialog.ui" line="22"/>
-        <source>Filename</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/renderToFileDialog.ui" line="32"/>
-        <source>...</source>
+        <source>File Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7047,11 +7091,6 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/renderToFileDialog.ui" line="60"/>
         <source>Result:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/renderToFileDialog.ui" line="67"/>
-        <source>(? x ?)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7321,75 +7360,70 @@ replaced by the cell&apos;s average height!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="23"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="32"/>
         <source>Create polyline by clicking on the screen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="43"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="61"/>
         <source>Import one or several polylines from DB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="57"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="75"/>
         <source>Generate orthogonal sections along a path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="71"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="89"/>
         <source>Extract points along active sections</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="85"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="103"/>
         <source>Unfold the points along the selected polyline</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="99"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="117"/>
         <source>Export manually defined sections to DB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="113"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="131"/>
         <source>Undo last polyline(s) addition</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="116"/>
-        <source>raz</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="135"/>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="138"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="150"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="153"/>
         <source>Close the tool</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="141"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="156"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="152"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="167"/>
         <source>Vert.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="163"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="178"/>
         <source>X</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">X</translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="168"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="183"/>
         <source>Y</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Y</translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionDlg.ui" line="173"/>
+        <location filename="../ui_templates/sectionExtractionDlg.ui" line="188"/>
         <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Z</translation>
     </message>
 </context>
 <context>
@@ -7402,11 +7436,6 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="23"/>
         <source>Active section(s)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="30"/>
-        <source>0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7445,69 +7474,69 @@ replaced by the cell&apos;s average height!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="112"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="121"/>
         <source>type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="119"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="128"/>
         <source>Section type (lower or upper part, or both)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="123"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="132"/>
         <source>Lower</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="128"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="137"/>
         <source>Upper</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="133"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="142"/>
         <source>Both</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="141"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="150"/>
         <source>max edge length</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="148"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="157"/>
         <source>Max output polyline edge length (the smaller, the closer to the points the contour will be).
 Warning: if 0, generates the convex hull.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="165"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="174"/>
         <source>Multi-pass process where longer edges may be temporarily created to obtain a better fit... or a worst one ;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="168"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="177"/>
         <source>multi-pass</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="175"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="184"/>
         <source>split the generated profile(s) in smaller parts to avoid creating too long edges (10 times the specified max edge length).
 Warning: may not be compatible with Mascaret export.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="179"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="188"/>
         <source>split profile on longer edges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="186"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="195"/>
         <source>Display a dialog with step-by-step execution of the algorithm (debug mode - very slow)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="189"/>
+        <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="198"/>
         <source>visual debug mode</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7624,94 +7653,6 @@ multiplier threshold (nSigma)</source>
     </message>
 </context>
 <context>
-    <name>StereoModeDialog</name>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="14"/>
-        <source>Stereo mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="22"/>
-        <source>Glasses</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="30"/>
-        <source>Red-Blue</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="39"/>
-        <source>Blue-Red</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="48"/>
-        <source>Red-Cyan</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="57"/>
-        <source>Cyan-Red</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="66"/>
-        <source>NVidia Vision</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="75"/>
-        <source>Oculus</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="106"/>
-        <source>Parameters</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="159"/>
-        <source>Focal distance</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="172"/>
-        <source>auto</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="152"/>
-        <source>Eyes separation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="133"/>
-        <source>%</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="212"/>
-        <source>Note: the focus will depend on the distance to the rotation center</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/stereoModeDlg.ui" line="89"/>
-        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;To make this mode work properly make sure that:&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- the NVidia Vision IR emitter is plugged and enabled (dim green light)&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- 3D stereo mode is activated in the NVidia Control Pannel&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- the screen frequency is set to 120Hz&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- the glasses are switched on&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Note: the current 3D view will be automatically displayed in exclusive full screen mode - press F11 to quit this mode&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>SubsamplingDialog</name>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="14"/>
@@ -7774,18 +7715,8 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/subsamplingDlg.ui" line="211"/>
-        <source>0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="234"/>
         <source>max</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/subsamplingDlg.ui" line="247"/>
-        <source>100</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7794,58 +7725,59 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="20"/>
         <source>Segmentation</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Segmentation</translation>
     </message>
     <message>
-        <location filename="../ui_templates/tracePolylineDlg.ui" line="32"/>
+        <location filename="../ui_templates/tracePolylineDlg.ui" line="41"/>
         <source>Width</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Largeur</translation>
     </message>
     <message>
-        <location filename="../ui_templates/tracePolylineDlg.ui" line="71"/>
+        <location filename="../ui_templates/tracePolylineDlg.ui" line="80"/>
         <source>Snap size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/tracePolylineDlg.ui" line="101"/>
+        <location filename="../ui_templates/tracePolylineDlg.ui" line="110"/>
         <source>Oversample</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/tracePolylineDlg.ui" line="134"/>
+        <location filename="../ui_templates/tracePolylineDlg.ui" line="143"/>
         <source>Export current polyline to the main DB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/tracePolylineDlg.ui" line="148"/>
+        <location filename="../ui_templates/tracePolylineDlg.ui" line="157"/>
         <source>Reset current polyline</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/tracePolylineDlg.ui" line="162"/>
+        <location filename="../ui_templates/tracePolylineDlg.ui" line="171"/>
         <source>Continue the current polyline edition</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/tracePolylineDlg.ui" line="169"/>
+        <location filename="../ui_templates/tracePolylineDlg.ui" line="178"/>
         <source>C</source>
+        <extracomment>Shortcut for continue</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/tracePolylineDlg.ui" line="185"/>
+        <location filename="../ui_templates/tracePolylineDlg.ui" line="194"/>
         <source>Confirm polyline creation and exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/tracePolylineDlg.ui" line="188"/>
+        <location filename="../ui_templates/tracePolylineDlg.ui" line="197"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/tracePolylineDlg.ui" line="205"/>
-        <location filename="../ui_templates/tracePolylineDlg.ui" line="208"/>
+        <location filename="../ui_templates/tracePolylineDlg.ui" line="214"/>
+        <location filename="../ui_templates/tracePolylineDlg.ui" line="217"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Annuler</translation>
     </message>
 </context>
 <context>
@@ -7853,7 +7785,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="14"/>
         <source>Unroll</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Dérouler</translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="22"/>
@@ -7886,89 +7818,71 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="98"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="244"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="103"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="286"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="108"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="328"/>
-        <source>Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="141"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="151"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="150"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="160"/>
         <source>Cone angle (0-180°)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="144"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="153"/>
         <source>Half angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="157"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="414"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="456"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="166"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="450"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="492"/>
         <source> deg</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="395"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="431"/>
         <source>Unroll range (can do multiple turns)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="398"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="434"/>
         <source>Unroll range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="404"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="440"/>
         <source>Start angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="411"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="447"/>
         <source>Starting angle (can be negative)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="446"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="482"/>
         <source>Stop angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="453"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="489"/>
         <source>Stop angle (can be negative)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="195"/>
-        <location filename="../ui_templates/unrollDlg.ui" line="208"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="213"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="226"/>
         <source>Cylinder (or cone base) radius</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="198"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="216"/>
         <source>Radius</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="232"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="250"/>
         <source>Axis position</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/unrollDlg.ui" line="366"/>
+        <location filename="../ui_templates/unrollDlg.ui" line="402"/>
         <source>Auto (gravity center)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8066,7 +7980,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="171"/>
         <source>swap</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Inervertir</translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="191"/>
@@ -8076,7 +7990,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="282"/>
         <source>Grid</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Grille</translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="303"/>
@@ -8104,11 +8018,6 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="356"/>
-        <source>640 x 480</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="363"/>
         <source>projection dir.</source>
         <translation type="unfinished"></translation>
@@ -8116,21 +8025,6 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="370"/>
         <source>Projection direction (X, Y or Z)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="377"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="382"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="387"/>
-        <source>Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -8238,17 +8132,17 @@ You should fill the empty cells...</source>
 <context>
     <name>ccClippingBoxTool</name>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="604"/>
+        <location filename="../ccClippingBoxTool.cpp" line="601"/>
         <source>Preparing extraction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="618"/>
+        <location filename="../ccClippingBoxTool.cpp" line="615"/>
         <source>Cloud &apos;%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="619"/>
+        <location filename="../ccClippingBoxTool.cpp" line="616"/>
         <source>Points: %L1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8299,14 +8193,120 @@ You should fill the empty cells...</source>
     </message>
 </context>
 <context>
+    <name>ccPluginInfoDlg</name>
+    <message>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="14"/>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="96"/>
+        <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="109"/>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="182"/>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="256"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;.SF NS Text&apos;; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="119"/>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="263"/>
+        <source>(none listed)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="136"/>
+        <source>Plugins</source>
+        <translation type="unfinished">Extensions</translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="149"/>
+        <source>Maintainers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="189"/>
+        <source>(CloudCompare Team)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="230"/>
+        <source>Authors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="246"/>
+        <source>References</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="278"/>
+        <source>CloudCompare looks for plugins in the following directories:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="78"/>
+        <source>About Plugins</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="176"/>
+        <source>(No plugin selected)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="213"/>
+        <source>GL Shader</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="224"/>
+        <source>I/O</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ccPluginUIManager</name>
+    <message>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="295"/>
+        <source>Remove Filter</source>
+        <translation type="unfinished">Supprimer un filtre</translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="300"/>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="311"/>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="347"/>
+        <source>Plugins</source>
+        <translation type="unfinished">Extensions</translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="304"/>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="353"/>
+        <source>GL Filters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="313"/>
+        <source>Shaders &amp;&amp; Filters</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ccRasterizeTool</name>
     <message>
-        <location filename="../ccRasterizeTool.cpp" line="1891"/>
+        <location filename="../ccRasterizeTool.cpp" line="1896"/>
         <source>Contour plot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccRasterizeTool.cpp" line="1892"/>
+        <location filename="../ccRasterizeTool.cpp" line="1897"/>
         <source>Levels: %1
 Cells: %2 x %3</source>
         <translation type="unfinished"></translation>
@@ -8315,12 +8315,12 @@ Cells: %2 x %3</source>
 <context>
     <name>ccRecentFiles</name>
     <message>
-        <location filename="../ccRecentFiles.cpp" line="35"/>
+        <location filename="../ccRecentFiles.cpp" line="36"/>
         <source>Open Recent...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccRecentFiles.cpp" line="37"/>
+        <location filename="../ccRecentFiles.cpp" line="38"/>
         <source>Clear Menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8389,68 +8389,8 @@ Number of points: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="84"/>
-        <source>r = </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="106"/>
         <source>Max RMS (as a percentage of the radius)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="109"/>
-        <source>%</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="112"/>
-        <source>RMS &lt; </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="149"/>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="259"/>
-        <source>1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="154"/>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="264"/>
-        <source>2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="159"/>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="269"/>
-        <source>3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="164"/>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="274"/>
-        <source>4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="169"/>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="279"/>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="363"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="174"/>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="284"/>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="368"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="179"/>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="289"/>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="373"/>
-        <source>Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -8480,30 +8420,10 @@ Number of points: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="358"/>
-        <source>XYZ</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="403"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="422"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="441"/>
         <source>Constrains the translation along particular axes (warning: experimental)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="406"/>
-        <source>Tx</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="425"/>
-        <source>Ty</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="444"/>
-        <source>Tz</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

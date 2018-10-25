@@ -145,6 +145,11 @@ QString ccApplicationBase::versionLongStr( bool includeOS ) const
 	return verStr;
 }
 
+const QString &ccApplicationBase::translationPath() const
+{
+	return m_TranslationPath;
+}
+
 void ccApplicationBase::setupPaths()
 {
 	QDir  appDir = QCoreApplication::applicationDirPath();
@@ -170,12 +175,15 @@ void ccApplicationBase::setupPaths()
 
 	m_PluginPaths << (bundleDir.absolutePath() + "/ccPlugins");
 	m_ShaderPath = (bundleDir.absolutePath() + "/shaders");
+	m_TranslationPath = (bundleDir.absolutePath() + "/qCC/translations");
 #else
 	m_ShaderPath = (bundleDir.absolutePath() + "/Shaders");
+	m_TranslationPath = (bundleDir.absolutePath() + "/translations");
 #endif
 #elif defined(Q_OS_WIN)
 	m_PluginPaths << (appDir.absolutePath() + "/plugins");
 	m_ShaderPath = (appDir.absolutePath() + "/shaders");
+	m_TranslationPath = (appDir.absolutePath() + "/translations");
 #elif defined(Q_OS_LINUX)
 	// Shaders & plugins are relative to the bin directory where the executable is found
 	QDir  theDir = appDir;
@@ -186,12 +194,14 @@ void ccApplicationBase::setupPaths()
 
 		m_PluginPaths << (theDir.absolutePath() + "/lib/cloudcompare/plugins");
 		m_ShaderPath = (theDir.absolutePath() + "/share/cloudcompare/shaders");
+		m_TranslationPath = (theDir.absolutePath() + "/share/cloudcompare/translations");
 	}
 	else
 	{
 		// Choose a reasonable default to look in
 		m_PluginPaths << "/usr/lib/cloudcompare/plugins";
 		m_ShaderPath = "/usr/share/cloudcompare/shaders";
+		m_TranslationPath = "/usr/share/cloudcompare/translations";
 	}
 #else
 #warning Need to specify the shader path for this OS.

@@ -30,18 +30,21 @@ public:
 	//! This must be called before instantiating the application class so it
 	//! can setup OpenGL first.
 	static void	init();
-
+	
 	ccApplicationBase( int &argc, char **argv, const QString &version );
-
+	
 	QString versionStr() const;
 	QString versionLongStr( bool includeOS ) const;
-
+	
+	const QString &translationPath() const;
+	
 private:
 	void setupPaths();
 	
 	const QString c_VersionStr;
 	
 	QString	m_ShaderPath;
+	QString	m_TranslationPath;
 	QStringList m_PluginPaths;
 };
 

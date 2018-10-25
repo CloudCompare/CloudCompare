@@ -10,7 +10,8 @@ install:
 - sudo add-apt-repository --yes ppa:george-edison55/cmake-3.x
 - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
 - sudo apt-get update -qq
-- sudo apt-get install -qy cmake qt55base libgdal1-dev libfreenect-dev
+- sudo apt-get install -qy cmake qt55base qttools5-dev
+  libgdal1-dev libfreenect-dev
   libeigen3-dev libqt5svg5-dev libtbb-dev
 - git submodule init && git submodule update
 before_script:

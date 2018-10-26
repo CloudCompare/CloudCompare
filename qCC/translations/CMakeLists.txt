@@ -11,7 +11,7 @@ endif()
 
 set( QT_LCONVERT_EXE Qt5::lconvert )
 
-# Now handle out own .ts files
+# Now handle our own .ts files
 file( GLOB TRANSLATION_FILES ${CMAKE_CURRENT_LIST_DIR}/*.ts )
 
 qt5_add_translation( TRANSLATION_QM ${TRANSLATION_FILES} )
@@ -42,16 +42,19 @@ foreach( TRANSLATION_FILE ${TRANSLATION_FILES} )
 	endforeach()
 
 	if ( TRANSLATION_FILES_QT_EXIST )
-		# Finally, add a command to generate the qt language file for this language	
+		# Finally, add a command to generate the qt language file for this language
+		set( QT_LANG_FILE qt_${LANG_CODE}.qm )
+		set( TRANSLATION_QM ${TRANSLATION_QM} ${CMAKE_CURRENT_BINARY_DIR}/${QT_LANG_FILE} )
+		
 		add_custom_command(
 			OUTPUT
-			qt_${LANG_CODE}.qm
+				${QT_LANG_FILE}
 			DEPENDS
-			${TRANSLATION_FILES_QT_EXIST}
+				${TRANSLATION_FILES_QT_EXIST}
 			COMMAND
-			"${QT_LCONVERT_EXE}" -o qt_${LANG_CODE}.qm ${TRANSLATION_FILES_QT_EXIST}
+				"${QT_LCONVERT_EXE}" -o ${QT_LANG_FILE} ${TRANSLATION_FILES_QT_EXIST}
 			COMMENT
-			"Generating Qt language file for ${LANG_CODE}"
+				"Generating Qt language file for ${LANG_CODE}"
 			VERBATIM
 			)
 		
@@ -60,7 +63,7 @@ foreach( TRANSLATION_FILE ${TRANSLATION_FILES} )
 endforeach()
 
 if( APPLE )
-	install( FILES ${TRANSLATION_QM} DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Resources/translations )
+	install( FILES ${TRANSLATION_QM} DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/translations )
 elseif( UNIX )
 	install( FILES ${TRANSLATION_QM} DESTINATION share/cloudcompare/translations )
 else( WIN32 )

@@ -5,6 +5,9 @@ find_package( Qt5LinguistTools REQUIRED )
 # Note that _qt5_linguisttools_install_prefix is from Qt5LinguistToolsConfig.cmake
 #	and probably a private variable...
 set( QT_PATH ${_qt5_linguisttools_install_prefix} )
+if( UNIX AND NOT APPLE )
+	set( QT_PATH "${QT_PATH}/share/qt5" )
+endif()
 
 set( QT_LCONVERT_EXE Qt5::lconvert )
 
@@ -37,7 +40,7 @@ foreach( TRANSLATION_FILE ${TRANSLATION_FILES} )
 			list( APPEND TRANSLATION_FILES_QT_EXIST ${QT_LANG_FILE} )
 		endif()
 	endforeach()
-	
+
 	if ( TRANSLATION_FILES_QT_EXIST )
 		# Finally, add a command to generate the qt language file for this language	
 		add_custom_command(

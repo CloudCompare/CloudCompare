@@ -59,19 +59,19 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 
 	connect(useVBOCheckBox,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeVBOUsage);
 
-	connect(colorRampWidthSpinBox,	QOverload<int>::of(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeColorScaleRampWidth);
+	connect(colorRampWidthSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeColorScaleRampWidth);
 
-	connect(defaultFontSizeSpinBox,	QOverload<int>::of(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeDefaultFontSize);
-	connect(labelFontSizeSpinBox,	QOverload<int>::of(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelFontSize);
-	connect(numberPrecisionSpinBox,	QOverload<int>::of(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeNumberPrecision);
-	connect(labelOpacitySpinBox,	QOverload<int>::of(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelOpacity);
-	connect(labelMarkerSizeSpinBox,	QOverload<int>::of(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelMarkerSize);
+	connect(defaultFontSizeSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeDefaultFontSize);
+	connect(labelFontSizeSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelFontSize);
+	connect(numberPrecisionSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeNumberPrecision);
+	connect(labelOpacitySpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelOpacity);
+	connect(labelMarkerSizeSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelMarkerSize);
 
-	connect(zoomSpeedDoubleSpinBox,		QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeZoomSpeed);
-	connect(maxCloudSizeDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeMaxCloudSize);
-	connect(maxMeshSizeDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeMaxMeshSize);
+	connect(zoomSpeedDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeZoomSpeed);
+	connect(maxCloudSizeDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeMaxCloudSize);
+	connect(maxMeshSizeDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeMaxMeshSize);
 
-	connect(autoComputeOctreeComboBox,	QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ccDisplayOptionsDlg::changeAutoComputeOctreeOption);
+	connect(autoComputeOctreeComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccDisplayOptionsDlg::changeAutoComputeOctreeOption);
 
 	connect(okButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::doAccept);
 	connect(applyButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::apply);

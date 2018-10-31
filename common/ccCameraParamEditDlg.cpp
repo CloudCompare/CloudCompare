@@ -50,21 +50,21 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickin
 	connect(thetaSlider,	&QAbstractSlider::valueChanged,	this,	&ccCameraParamEditDlg::iThetaValueChanged);
 	connect(psiSlider,		&QAbstractSlider::valueChanged,	this,	&ccCameraParamEditDlg::iPsiValueChanged);
 	
-	connect(phiSpinBox,		QOverload<double>::of(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::dPhiValueChanged);
-	connect(thetaSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::dThetaValueChanged);
-	connect(psiSpinBox,		QOverload<double>::of(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::dPsiValueChanged);
+	connect(phiSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::dPhiValueChanged);
+	connect(thetaSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::dThetaValueChanged);
+	connect(psiSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::dPsiValueChanged);
 
 	//rotation center
-	connect(rcxDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::pivotChanged);
-	connect(rcyDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::pivotChanged);
-	connect(rczDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::pivotChanged);
+	connect(rcxDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::pivotChanged);
+	connect(rcyDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::pivotChanged);
+	connect(rczDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::pivotChanged);
 
 	//camera center
-	connect(exDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
-	connect(eyDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
-	connect(ezDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
+	connect(exDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
+	connect(eyDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
+	connect(ezDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
 
-	connect(fovDoubleSpinBox,		QOverload<double>::of(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::fovChanged);
+	connect(fovDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::fovChanged);
 	connect(zNearHorizontalSlider,	&QAbstractSlider::sliderMoved,	this,	&ccCameraParamEditDlg::zNearSliderMoved);
 
 	connect(viewUpToolButton,		&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setTopView);

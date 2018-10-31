@@ -20,8 +20,8 @@
 //UI file
 #include <ui_pickOneElementDlg.h>
 
-ccPickOneElementDlg::ccPickOneElementDlg(	QString label,
-											QString windowTitle/*=QString()*/,
+ccPickOneElementDlg::ccPickOneElementDlg(	const QString &label,
+											const QString &windowTitle/*=QString()*/,
 											QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::Tool)
 	, m_ui(new Ui_PickOneElementDialog)
@@ -45,7 +45,7 @@ ccPickOneElementDlg::~ccPickOneElementDlg()
 	}
 }
 
-void ccPickOneElementDlg::addElement(QString elementName)
+void ccPickOneElementDlg::addElement(const QString &elementName)
 {
 	m_ui->comboBox->addItem(elementName);
 }

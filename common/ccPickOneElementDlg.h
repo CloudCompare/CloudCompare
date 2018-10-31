@@ -36,7 +36,7 @@ public:
 						QWidget* parent = 0);
 
 	//! Destructor
-	~ccPickOneElementDlg();
+	~ccPickOneElementDlg() override;
 
 	//! Add an element to the combo box
 	void addElement(QString elementName);

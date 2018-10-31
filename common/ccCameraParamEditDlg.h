@@ -47,7 +47,7 @@ public:
 	explicit ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickingHub);
 
 	//! Destructor
-	~ccCameraParamEditDlg() override;
+	~ccCameraParamEditDlg() override = default;
 
 	//! Makes this dialog frameless
 	void makeFrameless();

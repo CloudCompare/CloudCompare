@@ -29,7 +29,7 @@
 #include <QApplication>
 
 //system
-#include <assert.h>
+#include <cassert>
 
 ccOverlayDialog::ccOverlayDialog(QWidget* parent/*=0*/, Qt::WindowFlags flags/*=Qt::FramelessWindowHint | Qt::Tool*/)
 	: QDialog(parent, flags)

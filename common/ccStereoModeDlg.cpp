@@ -18,7 +18,7 @@
 #include "ccStereoModeDlg.h"
 
 //system
-#include <assert.h>
+#include <cassert>
 
 //combo-box items order
 const int COMBO_INDEX_RED_BLUE  = 0;

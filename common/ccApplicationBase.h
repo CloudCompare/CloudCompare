@@ -1,5 +1,5 @@
-#ifndef CCPLUGINMANAGER_H
-#define CCPLUGINMANAGER_H
+#ifndef CCAPPLICATIONBASE_H
+#define CCAPPLICATIONBASE_H
 
 //##########################################################################
 //#                                                                        #
@@ -18,33 +18,36 @@
 //#                                                                        #
 //##########################################################################
 
-#include <QObject>
-#include <QVector>
+//Qt
+#include <QApplication>
 
-class ccPluginInterface;
+//! Mimic Qt's qApp for easy access to the application instance
+#define ccApp (static_cast<ccApplicationBase *>( QCoreApplication::instance() ))
 
-//! Simply a list of \see ccPluginInterface
-typedef QVector<ccPluginInterface *> ccPluginInterfaceList;
-
-
-class ccPluginManager : public QObject
+class ccApplicationBase : public QApplication
 {
-	Q_OBJECT
-	
 public:
-	explicit ccPluginManager( QObject *parent = nullptr );
-	~ccPluginManager();
+	//! This must be called before instantiating the application class so it
+	//! can setup OpenGL first.
+	static void	init();
 	
-	static void loadPlugins();
-
-	static QStringList pluginPaths();
+	ccApplicationBase( int &argc, char **argv, const QString &version );
 	
-	static ccPluginInterfaceList &pluginList();
+	QString versionStr() const;
+	QString versionLongStr( bool includeOS ) const;
 	
-private:	
-	static void loadFromPathsAndAddToList();	
+	const QString &translationPath() const;
 	
-	static ccPluginInterfaceList m_pluginList;
+private:
+	void setupPaths();
+	
+	void loadTranslations();
+	
+	const QString c_VersionStr;
+	
+	QString	m_ShaderPath;
+	QString	m_TranslationPath;
+	QStringList m_PluginPaths;
 };
 
 #endif

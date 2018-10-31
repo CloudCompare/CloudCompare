@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>77</height>
+    <width>432</width>
+    <height>99</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,7 +48,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>-</string>
+        <string notr="true">-</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

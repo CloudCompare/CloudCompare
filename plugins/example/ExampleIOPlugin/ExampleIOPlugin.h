@@ -20,6 +20,16 @@
 
 #include "ccIOFilterPluginInterface.h"
 
+/** Replace 'ExampleIOPlugin' by your own plugin class name throughout and then
+	check 'ExampleIOPlugin.cpp' for more directions.
+	
+	Each plugin requires an info.json file to provide information about itself -
+	the name, authors, maintainers, icon, etc..
+	
+	The one method you are required to implement is getFilters(). This method
+	registers your file I/O methods with CloudCompare.
+**/
+
 //! Example I/O Plugin
 class ExampleIOPlugin : public QObject, public ccIOFilterPluginInterface
 {
@@ -27,15 +37,15 @@ class ExampleIOPlugin : public QObject, public ccIOFilterPluginInterface
 	Q_INTERFACES(ccIOFilterPluginInterface)
 	
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ExampleIO" FILE "info.json")
-
+	
 public:
 	explicit ExampleIOPlugin( QObject *parent = nullptr );
-	virtual ~ExampleIOPlugin() = default;
+	~ExampleIOPlugin() override = default;
 	
-	virtual void registerCommands( ccCommandLineInterface *cmd ) override;
+	void registerCommands( ccCommandLineInterface *cmd ) override;
 	
 	// inherited from ccIOFilterPluginInterface
-	virtual QVector<FileIOFilter::Shared> getFilters() override;
+	QVector<FileIOFilter::Shared> getFilters() override;
 };
 
 #endif

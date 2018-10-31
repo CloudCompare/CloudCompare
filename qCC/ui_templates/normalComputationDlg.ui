@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>482</width>
-    <height>411</height>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -343,37 +343,37 @@
           </property>
           <item>
            <property name="text">
-            <string>+X</string>
+            <string notr="true">+X</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>-X</string>
+            <string notr="true">-X</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>+Y</string>
+            <string notr="true">+Y</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>-Y</string>
+            <string notr="true">-Y</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>+Z</string>
+            <string notr="true">+Z</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>-Z</string>
+            <string notr="true">-Z</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>+Barycenter</string>
+            <string>+ Barycenter</string>
            </property>
           </item>
           <item>
@@ -383,12 +383,12 @@
           </item>
           <item>
            <property name="text">
-            <string>+ (0,0,0)</string>
+            <string notr="true">+ (0,0,0)</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>- (0,0,0)</string>
+            <string notr="true">- (0,0,0)</string>
            </property>
           </item>
           <item>
@@ -437,7 +437,7 @@
            <string>Number of neighbors used to build the tree</string>
           </property>
           <property name="prefix">
-           <string>knn = </string>
+           <string notr="true">knn = </string>
           </property>
           <property name="minimum">
            <number>1</number>

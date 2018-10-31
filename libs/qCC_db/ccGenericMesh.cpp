@@ -22,24 +22,24 @@
 
 //local
 #include "ccChunk.h"
-#include "ccHObjectCaster.h"
-#include "ccGenericPointCloud.h"
-#include "ccPointCloud.h"
-#include "ccNormalVectors.h"
-#include "ccMaterialSet.h"
-#include "ccScalarField.h"
 #include "ccColorScalesManager.h"
 #include "ccGenericGLDisplay.h"
+#include "ccGenericPointCloud.h"
+#include "ccHObjectCaster.h"
+#include "ccMaterialSet.h"
+#include "ccNormalVectors.h"
+#include "ccPointCloud.h"
+#include "ccScalarField.h"
 
 //CCLib
 #include <GenericProgressCallback.h>
 #include <GenericTriangle.h>
 #include <MeshSamplingTools.h>
-#include <ReferenceCloud.h>
 #include <PointCloud.h>
+#include <ReferenceCloud.h>
 
 //system
-#include <assert.h>
+#include <cassert>
 
 ccGenericMesh::ccGenericMesh(QString name/*=QString()*/)
 	: GenericIndexedMesh()
@@ -651,19 +651,19 @@ bool ccGenericMesh::toFile_MeOnly(QFile& out) const
 		return false;
 
 	//'show wired' state (dataVersion>=20)
-	if (out.write((const char*)&m_showWired, sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_showWired), sizeof(bool)) < 0)
 		return WriteError();
 
 	//'per-triangle normals shown' state (dataVersion>=29))
-	if (out.write((const char*)&m_triNormsShown, sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_triNormsShown), sizeof(bool)) < 0)
 		return WriteError();
 
 	//'materials shown' state (dataVersion>=29))
-	if (out.write((const char*)&m_materialsShown, sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_materialsShown), sizeof(bool)) < 0)
 		return WriteError();
 
 	//'polygon stippling' state (dataVersion>=29))
-	if (out.write((const char*)&m_stippling, sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_stippling), sizeof(bool)) < 0)
 		return WriteError();
 
 	return true;
@@ -675,21 +675,21 @@ bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		return false;
 
 	//'show wired' state (dataVersion>=20)
-	if (in.read((char*)&m_showWired, sizeof(bool)) < 0)
+	if (in.read(reinterpret_cast<char*>(&m_showWired), sizeof(bool)) < 0)
 		return ReadError();
 
 	//'per-triangle normals shown' state (dataVersion>=29))
 	if (dataVersion >= 29)
 	{
-		if (in.read((char*)&m_triNormsShown, sizeof(bool)) < 0)
+		if (in.read(reinterpret_cast<char*>(&m_triNormsShown), sizeof(bool)) < 0)
 			return ReadError();
 
 		//'materials shown' state (dataVersion>=29))
-		if (in.read((char*)&m_materialsShown, sizeof(bool)) < 0)
+		if (in.read(reinterpret_cast<char*>(&m_materialsShown), sizeof(bool)) < 0)
 			return ReadError();
 
 		//'polygon stippling' state (dataVersion>=29))
-		if (in.read((char*)&m_stippling, sizeof(bool)) < 0)
+		if (in.read(reinterpret_cast<char*>(&m_stippling), sizeof(bool)) < 0)
 			return ReadError();
 	}
 

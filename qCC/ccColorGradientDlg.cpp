@@ -17,8 +17,8 @@
 
 #include "ccColorGradientDlg.h"
 
-//Local
-#include "ccQtHelpers.h"
+//common
+#include <ccQtHelpers.h>
 
 //Qt
 #include <QColorDialog>

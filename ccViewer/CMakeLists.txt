@@ -10,9 +10,9 @@ if( MSVC )
 endif()
 include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
-
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../common )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../qCC )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
@@ -23,17 +23,17 @@ file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list ../qCC/*.qrc )
 file( GLOB rc_list ../qCC/*.rc )
 
-include( CMakeIncludeQCCFiles.cmake )
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../common ${CMAKE_CURRENT_BINARY_DIR}/common)
 
 # 3DX support (3dConnexion devices)
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	add_subdirectory( ../qCC/devices/3dConnexion devices/3dConnexion )
-endif()	
+endif()
 
 # Gamepad support (requires Qt 5.7+)
 if ( ${OPTION_SUPPORT_GAMEPADS} )
 	add_subdirectory( ../qCC/devices/gamepad devices/gamepad )
-endif()	
+endif()
 
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )

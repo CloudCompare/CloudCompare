@@ -21,40 +21,39 @@
 #include "ccPointCloud.h"
 
 //CCLib
-#include <ManualSegmentationTools.h>
 #include <GeometricalAnalysisTools.h>
-#include <ReferenceCloud.h>
 #include <ManualSegmentationTools.h>
+#include <ReferenceCloud.h>
 
 //local
-#include "ccNormalVectors.h"
-#include "ccColorScalesManager.h"
-#include "ccOctree.h"
-#include "ccKdTree.h"
-#include "ccGenericMesh.h"
-#include "ccMesh.h"
-#include "ccImage.h"
 #include "cc2DLabel.h"
-#include "ccMaterial.h"
-#include "ccColorRampShader.h"
-#include "ccPolyline.h"
-#include "ccScalarField.h"
-#include "ccGenericGLDisplay.h"
-#include "ccGBLSensor.h"
-#include "ccProgressDialog.h"
-#include "ccFastMarchingForNormsDirection.h"
-#include "ccMinimumSpanningTreeForNormsDirection.h"
-#include "ccFrustum.h"
-#include "ccPointCloudLOD.h"
 #include "ccChunk.h"
+#include "ccColorRampShader.h"
+#include "ccColorScalesManager.h"
+#include "ccFastMarchingForNormsDirection.h"
+#include "ccFrustum.h"
+#include "ccGBLSensor.h"
+#include "ccGenericGLDisplay.h"
+#include "ccGenericMesh.h"
+#include "ccImage.h"
+#include "ccKdTree.h"
+#include "ccMaterial.h"
+#include "ccMesh.h"
+#include "ccMinimumSpanningTreeForNormsDirection.h"
+#include "ccNormalVectors.h"
+#include "ccOctree.h"
+#include "ccPointCloudLOD.h"
+#include "ccPolyline.h"
+#include "ccProgressDialog.h"
+#include "ccScalarField.h"
 
 //Qt
+#include <QCoreApplication>
 #include <QElapsedTimer>
 #include <QSharedPointer>
-#include <QCoreApplication>
 
 //system
-#include <assert.h>
+#include <cassert>
 #include <queue>
 
 static const char s_deviationSFName[] = "Deviation";
@@ -455,7 +454,7 @@ void ccPointCloud::unalloactePoints()
 {
 	clearLOD();	// we have to clear the LOD structure before clearing the colors / SFs, so we can't leave it to notifyGeometryUpdate()
 	showSFColorsScale(false); //SFs will be destroyed
-	BaseClass::clear();
+	BaseClass::reset();
 	ccGenericPointCloud::clear();
 
 	notifyGeometryUpdate(); //calls releaseVBOs()
@@ -3458,7 +3457,7 @@ QSharedPointer<CCLib::ReferenceCloud> ccPointCloud::computeCPSet(	ccGenericPoint
 	if (sfIdx < 0)
 	{
 		ccLog::Warning("[ccPointCloud::ComputeCPSet] Not enough memory!");
-		return QSharedPointer<CCLib::ReferenceCloud>(0);
+		return QSharedPointer<CCLib::ReferenceCloud>(nullptr);
 	}
 
 	int currentInSFIndex = m_currentInScalarFieldIndex;

@@ -49,7 +49,7 @@ struct Chi2Class
 };
 
 //! An ordered list of Chi2 classes
-typedef std::list<Chi2Class> Chi2ClassList;
+using Chi2ClassList = std::list<Chi2Class>;
 
 double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribution* distrib,
 															const GenericCloud* cloud,
@@ -132,7 +132,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 			ScalarType V = cloud->getPointScalarValue(i);
 			if (ScalarField::ValidValue(V))
 			{
-				int bin = static_cast<int>(floor((V - minV)*(ScalarType)numberOfClasses / dV));
+				int bin = static_cast<int>(floor((V - minV) * static_cast<ScalarType>(numberOfClasses) / dV));
 				if (bin < 0)
 				{
 					histoBefore++;

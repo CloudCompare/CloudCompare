@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>143</height>
+    <width>425</width>
+    <height>165</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Filename</string>
+        <string>File Name</string>
        </property>
       </widget>
      </item>
@@ -29,7 +29,7 @@
      <item>
       <widget class="QToolButton" name="chooseFileButton">
        <property name="text">
-        <string>...</string>
+        <string notr="true">...</string>
        </property>
       </widget>
      </item>
@@ -64,7 +64,7 @@
      <item>
       <widget class="QLabel" name="finalSizeLabel">
        <property name="text">
-        <string>(? x ?)</string>
+        <string notr="true">(? x ?)</string>
        </property>
       </widget>
      </item>

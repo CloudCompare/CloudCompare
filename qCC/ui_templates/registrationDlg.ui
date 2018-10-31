@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>386</width>
-    <height>427</height>
+    <width>411</width>
+    <height>458</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,18 +54,12 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
-        <property name="text">
-         <string/>
-        </property>
        </widget>
       </item>
       <item row="0" column="0">
        <widget class="QToolButton" name="dataColorButton">
         <property name="enabled">
          <bool>false</bool>
-        </property>
-        <property name="text">
-         <string/>
         </property>
        </widget>
       </item>
@@ -186,7 +180,7 @@
             <enum>Qt::RightToLeft</enum>
            </property>
            <property name="text">
-            <string>1.0e-5</string>
+            <string notr="true">1.0e-5</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -218,7 +212,7 @@
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="suffix">
-            <string>%</string>
+            <string notr="true">%</string>
            </property>
            <property name="minimum">
             <number>1</number>
@@ -296,7 +290,7 @@
 (CC or your computer might not respond for a while if you use all available cores)</string>
               </property>
               <property name="suffix">
-               <string> / 8</string>
+               <string notr="true"> / 8</string>
               </property>
              </widget>
             </item>
@@ -382,22 +376,22 @@
            </property>
            <item>
             <property name="text">
-             <string>XYZ</string>
+             <string notr="true">XYZ</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>X</string>
+             <string notr="true">X</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Y</string>
+             <string notr="true">Y</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Z</string>
+             <string notr="true">Z</string>
             </property>
            </item>
           </widget>
@@ -442,7 +436,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Tx</string>
+              <string notr="true">Tx</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -458,7 +452,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Ty</string>
+              <string notr="true">Ty</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -474,7 +468,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Tz</string>
+              <string notr="true">Tz</string>
              </property>
              <property name="checked">
               <bool>true</bool>

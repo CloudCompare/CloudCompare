@@ -18,13 +18,13 @@
 #include "ccCameraParamEditDlg.h"
 
 //Local
-#include "ccPointCloud.h"
 #include "ccPickingHub.h"
 
 //qCC_db
 #include <ccGLUtils.h>
 #include <ccHObjectCaster.h>
 #include <ccGenericMesh.h>
+#include <ccPointCloud.h>
 
 //qCC_gl
 #include <ccGLWidget.h>

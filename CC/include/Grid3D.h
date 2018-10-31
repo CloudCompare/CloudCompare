@@ -43,7 +43,7 @@ template< class Type > class Grid3D
 public:
 
 	//! Cell type
-	typedef Type GridElement;
+	using GridElement = Type;
 
 	//! Default constructor
 	Grid3D()

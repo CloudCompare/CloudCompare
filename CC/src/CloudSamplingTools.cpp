@@ -19,19 +19,19 @@
 #include <CloudSamplingTools.h>
 
 //local
-#include <DgmOctreeReferenceCloud.h>
 #include <DistanceComputationTools.h>
+#include <DgmOctreeReferenceCloud.h>
 #include <GenericProgressCallback.h>
 #include <Neighbourhood.h>
+#include <PointCloud.h>
 #include <ReferenceCloud.h>
 #include <ScalarField.h>
 #include <ScalarFieldTools.h>
-#include <PointCloud.h>
 #include <SimpleMesh.h>
 
 //system
-#include <random>
 #include <algorithm>
+#include <random>
 
 using namespace CCLib;
 

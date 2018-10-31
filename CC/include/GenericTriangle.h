@@ -33,7 +33,7 @@ class CC_CORE_LIB_API GenericTriangle
 public:
 
 	//! Default destructor
-	virtual ~GenericTriangle() {}
+	virtual ~GenericTriangle() = default;
 
 	//! Returns the first vertex (A)
 	virtual const CCVector3* _getA() const = 0;

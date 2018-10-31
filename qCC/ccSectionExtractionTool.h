@@ -55,9 +55,9 @@ public:
 	void removeAllEntities();
 	
 	//inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindow* win);
-	virtual bool start();
-	virtual void stop(bool accepted);
+	virtual bool linkWith(ccGLWindow* win) override;
+	virtual bool start() override;
+	virtual void stop(bool accepted) override;
 
 protected slots:
 

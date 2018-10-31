@@ -50,8 +50,7 @@ public:
 	}
 
 	//! Default destructor
-	virtual ~ConjugateGradient()
-	{}
+	virtual ~ConjugateGradient() = default;
 
 	//! Returns A matrix
 	inline CCLib::SquareMatrixTpl<Scalar>& A() { return cg_A; }

@@ -51,9 +51,9 @@ public:
 	virtual ~ccClippingBoxTool();
 
 	//inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindow* win);
-	virtual bool start();
-	virtual void stop(bool state);
+	virtual bool linkWith(ccGLWindow* win) override;
+	virtual bool start() override;
+	virtual void stop(bool state) override;
 
 	//! Returns box
 	const ccClipBox* box() const { return m_clipBox; }

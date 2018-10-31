@@ -1,3 +1,6 @@
+#ifndef CCTRANSLATIONMANAGER_H
+#define CCTRANSLATIONMANAGER_H
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -11,23 +14,34 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#include "ccStdPluginInterface.h"
+#include <QMenu>
+#include <QPair>
+#include <QVector>
 
-//qCC_db
-#include <ccObject.h>
 
-void ccStdPluginInterface::setMainAppInterface(ccMainAppInterface* app)
+class ccTranslationManager : public QObject
 {
-	m_app = app;
+	Q_OBJECT
+	
+public:
+	ccTranslationManager( QObject *parent );
+	~ccTranslationManager() override = default;
+	
+	void populateMenu( QMenu *menu );
+	
+	static const QString languagePref();
+	
+private:
+	using TranslationInfo = QPair<QString, QString>;
+	using LanguageList = QVector<TranslationInfo>;
+	
+	LanguageList availableLanguages( const QString &appName );
+	
+	void setLanguagePref( const QString &languageCode );
+};
 
-	if (m_app)
-	{
-		//we use the same 'unique ID' generator in plugins as in the main
-		//application (otherwise we'll have issues with 'unique IDs'!)
-		ccObject::SetUniqueIDGenerator(m_app->getUniqueIDGenerator());
-	}
-}
+#endif //CCTRANSLATIONMANAGER_H

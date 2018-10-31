@@ -61,7 +61,7 @@ Note: the diagonal is not tested at loading time.</string>
         <string/>
        </property>
        <property name="prefix">
-        <string>10^</string>
+        <string notr="true">10^</string>
        </property>
        <property name="minimum">
         <number>2</number>
@@ -90,7 +90,7 @@ Note: the diagonal is not tested at loading time.</string>
         <string/>
        </property>
        <property name="prefix">
-        <string>10^</string>
+        <string notr="true">10^</string>
        </property>
        <property name="minimum">
         <number>2</number>

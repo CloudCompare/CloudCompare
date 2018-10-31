@@ -12,6 +12,7 @@ include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../common )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/db_tree )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qcustomplot )
@@ -25,6 +26,7 @@ file( GLOB qrc_list *.qrc )
 
 file( GLOB txt_list TODO.txt ${CloudCompareProjects_SOURCE_DIR}/CHANGELOG.md )
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../common ${CMAKE_CURRENT_BINARY_DIR}/common)
 add_subdirectory( db_tree )
 add_subdirectory( pluginManager )
 
@@ -122,25 +124,19 @@ if( WIN32 )
 	list( APPEND auxFiles ${batch_list} )
 endif()
 
-# Translation file(s)
-file( GLOB trFiles tr/*.qm )
-
 # Install auxiliary files
 if( WIN32 OR APPLE )
 	foreach( filename ${auxFiles} )
 		install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} )
 	endforeach()
-	foreach( filename ${trFiles} )
-		install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} /tr )
-	endforeach()
 else( UNIX )
 	foreach( filename ${auxFiles} )
 		install_ext( FILES ${filename} share/cloudcompare )
 	endforeach()
-	foreach( filename ${trFiles} )
-		install_ext( FILES ${filename} share/cloudcompare /tr )
-	endforeach()
 endif()
+
+# Translation
+add_subdirectory( translations )
 
 # in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
 if( APPLE )

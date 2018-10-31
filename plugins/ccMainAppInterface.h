@@ -38,6 +38,7 @@ class ccPickingHub;
 class ccMainAppInterface
 {
 public:
+	virtual ~ccMainAppInterface() = default;
 
 	//! Returns main window
 	virtual QMainWindow* getMainWindow() = 0;
@@ -103,10 +104,9 @@ public:
 	**/
 	struct ccHObjectContext
 	{
-		ccHObjectContext() : parent(0), childFlags(0), parentFlags(0) {}
-		ccHObject* parent;
-		int childFlags;
-		int parentFlags;
+		ccHObject* parent = nullptr;
+		int childFlags = 0;
+		int parentFlags = 0;
 	};
 
 	//! Removes object temporarily from DB tree

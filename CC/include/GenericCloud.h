@@ -35,13 +35,13 @@ class CC_CORE_LIB_API GenericCloud
 public:
 
 	//! Default constructor
-	GenericCloud() {}
+	GenericCloud() = default;
 
 	//! Default destructor
-	virtual ~GenericCloud() {}
+	virtual ~GenericCloud() = default;
 
 	//! Generic function applied to a point (used by foreach)
-	typedef std::function<void(const CCVector3&, ScalarType&)> genericPointAction;
+	using genericPointAction = std::function<void (const CCVector3 &, ScalarType &)>;
 
 	//! Returns the number of points
 	/**	Virtual method to request the cloud size

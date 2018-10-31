@@ -19,9 +19,9 @@
 #define CC_GENERIC_POINT_CLOUD_HEADER
 
 //Local
-#include "ccShiftedObject.h"
 #include "ccAdvancedTypes.h"
 #include "ccOctree.h"
+#include "ccShiftedObject.h"
 
 //System
 #include <vector>
@@ -65,9 +65,9 @@ public:
 	ccGenericPointCloud(const ccGenericPointCloud& cloud);
 
 	//! Default destructor
-	virtual ~ccGenericPointCloud();
-
-
+	~ccGenericPointCloud() override;
+	
+	
 	/***************************************************
 						Clone/Copy
 	***************************************************/
@@ -79,9 +79,9 @@ public:
 		\param ignoreChildren [optional] whether to ignore the cloud's children or not (in which case they will be cloned as well)
 		\return a copy of this entity
 	**/
-	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = 0, bool ignoreChildren = false) = 0;
-
-
+	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = nullptr, bool ignoreChildren = false) = 0;
+	
+	
 	/***************************************************
 				Features deletion/clearing
 	***************************************************/
@@ -105,8 +105,8 @@ public:
 		\param autoAddChild whether to automatically add the computed octree as child of this cloud or not
 		\return the computed octree
 	**/
-	virtual ccOctree::Shared computeOctree(CCLib::GenericProgressCallback* progressCb = 0, bool autoAddChild = true);
-
+	virtual ccOctree::Shared computeOctree(CCLib::GenericProgressCallback* progressCb = nullptr, bool autoAddChild = true);
+	
 	//! Returns the associated octree (if any)
 	virtual ccOctree::Shared getOctree() const;
 	//! Sets the associated octree
@@ -165,8 +165,8 @@ public:
 	//! Array of "visibility" information for each point
 	/** See <CCConst.h>
 	**/
-	typedef std::vector<unsigned char> VisibilityTableType;
-
+	using VisibilityTableType = std::vector<unsigned char>;
+	
 	//! Returns associated visiblity array
 	virtual inline VisibilityTableType& getTheVisibilityArray() { return m_pointsVisibility; }
 
@@ -174,8 +174,8 @@ public:
 	/** \param visTable visibility table (optional, otherwise the cloud's default one will be used)
 		\return the visible points as a ReferenceCloud
 	**/
-	virtual CCLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = 0) const;
-
+	virtual CCLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = nullptr) const;
+	
 	//! Returns whether the visiblity array is allocated or not
 	virtual bool isVisibilityTableInstantiated() const;
 
@@ -196,8 +196,8 @@ public:
 	***************************************************/
 
 	//Inherited from ccHObject
-	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
-
+	ccBBox getOwnBB(bool withGLFeatures = false) override;
+	
 	//! Forces bounding-box update
 	virtual void refreshBB() = 0;
 
@@ -206,8 +206,8 @@ public:
 		\param visTable visibility table (optional, otherwise the cloud's default one will be used)
 		\return new point cloud with selected points
 	**/
-	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = 0) = 0;
-
+	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr) = 0;
+	
 	//! Applies a rigid transformation (rotation + translation)
 	virtual void applyRigidTransformation(const ccGLMatrix& trans) = 0;
 
@@ -229,8 +229,8 @@ public:
 	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0, 0, 0)) = 0;
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const override { return true; }
-
+	bool isSerializable() const override { return true; }
+	
 	//! Sets point size
 	/** Overrides default value one if superior than 0
 		(see glPointSize).
@@ -260,11 +260,10 @@ public:
 						bool autoComputeOctree = false);
 
 protected:
-
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
-
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	
 	//! Per-point visibility table
 	/** If this table is allocated, only values set to POINT_VISIBLE
 		will be considered as visible/selected.

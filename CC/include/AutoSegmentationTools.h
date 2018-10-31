@@ -37,7 +37,7 @@ class ReferenceCloud;
 /** Several algorithms of the AutoSegmentationTools toolbox return a collection of subsets of points
 	corresponding to each segmented part. Such a collection is generally stored in this type of container.
 **/
-typedef std::vector<ReferenceCloud*> ReferenceCloudContainer;
+using ReferenceCloudContainer = std::vector<ReferenceCloud *>;
 
 //! Several point cloud auto-segmentation algorithms (Connected Components, Front propagation, etc.)
 class CC_CORE_LIB_API AutoSegmentationTools : public CCToolbox

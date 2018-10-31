@@ -26,7 +26,7 @@
 //qCC_glWindow
 #include <ccGLWidget.h>
 
-//dialogs
+//common dialogs
 #include <ccCameraParamEditDlg.h>
 #include <ccDisplayOptionsDlg.h>
 #include <ccStereoModeDlg.h>
@@ -38,7 +38,7 @@
 //plugins
 #include "ccGLFilterPluginInterface.h"
 #include "ccIOFilterPluginInterface.h"
-#include "pluginManager/ccPluginManager.h"
+#include "ccPluginManager.h"
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
@@ -62,7 +62,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	setStyleSheet("QStatusBar{background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(200,200,200), stop:1 rgb(255,255,255));}");
 #endif
 	
-	setWindowTitle(QString("ccViewer v%1").arg(ccViewerApp->versionLongStr( false )));
+	setWindowTitle(QString("ccViewer v%1").arg(ccApp->versionLongStr( false )));
 
 	//insert GL window in a vertical layout
 	{
@@ -73,7 +73,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 
 		bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
 
-		QWidget* glWidget = 0;
+		QWidget* glWidget = nullptr;
 		CreateGLWindow(m_glWindow, glWidget, stereoMode);
 		assert(m_glWindow && glWidget);
 
@@ -163,13 +163,13 @@ ccViewer::~ccViewer()
 	if (s_cpeDlg)
 	{
 		delete s_cpeDlg;
-		s_cpeDlg = 0;
+		s_cpeDlg = nullptr;
 	}
 
 	ccHObject* currentRoot = m_glWindow->getSceneDB();
 	if (currentRoot)
 	{
-		m_glWindow->setSceneDB(0);
+		m_glWindow->setSceneDB(nullptr);
 		//m_glWindow->redraw();
 		delete currentRoot;
 	}
@@ -233,7 +233,7 @@ void ccViewer::doDisableGLFilter()
 {
 	if (m_glWindow)
 	{
-		m_glWindow->setGlFilter(0);
+		m_glWindow->setGlFilter(nullptr);
 		m_glWindow->redraw();
 	}
 }
@@ -457,11 +457,11 @@ void ccViewer::addToDB(QStringList filenames)
 	ccHObject* currentRoot = m_glWindow->getSceneDB();
 	if (currentRoot)
 	{
-		m_selectedObject = 0;
-		m_glWindow->setSceneDB(0);
+		m_selectedObject = nullptr;
+		m_glWindow->setSceneDB(nullptr);
 		m_glWindow->redraw();
 		delete currentRoot;
-		currentRoot=0;
+		currentRoot = nullptr;
 	}
 
 	bool scaleAlreadyDisplayed = false;
@@ -582,7 +582,7 @@ void ccViewer::doActionEditCamera()
 {
 	if (!s_cpeDlg)
 	{
-		s_cpeDlg = new ccCameraParamEditDlg(this, 0);
+		s_cpeDlg = new ccCameraParamEditDlg(this, nullptr);
 		s_cpeDlg->linkWith(m_glWindow);
 	}
 	s_cpeDlg->show();
@@ -1032,7 +1032,7 @@ void ccViewer::doActionAbout()
 
 	Ui::AboutDialog ui;
 	ui.setupUi(&aboutDialog);
-	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(ccViewerApp->versionLongStr( true )));
+	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(ccApp->versionLongStr( true )));
 
 	aboutDialog.exec();
 }

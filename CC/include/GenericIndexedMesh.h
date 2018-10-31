@@ -60,7 +60,7 @@ class CC_CORE_LIB_API GenericIndexedMesh : public GenericMesh
 public:
 
 	//! Default destructor
-	virtual ~GenericIndexedMesh() {}
+	~GenericIndexedMesh() override = default;
 
 	//! Returns the ith triangle
 	/**	Virtual method to request a triangle with a specific index.
@@ -88,8 +88,6 @@ public:
 	/**	\return the triangle indexes (or 0 if the global iterator is out of bounds)
 	**/
 	virtual VerticesIndexes* getNextTriangleVertIndexes() = 0;
-
-protected:
 };
 
 }

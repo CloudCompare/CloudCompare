@@ -41,6 +41,9 @@
 //qCC_gl
 #include "ccGuiParameters.h"
 
+//common
+#include <ccPickOneElementDlg.h>
+
 //Local
 #include "ccAskTwoDoubleValuesDlg.h"
 #include "ccColorGradientDlg.h"
@@ -48,7 +51,6 @@
 #include "ccComputeOctreeDlg.h"
 #include "ccExportCoordToSFDlg.h"
 #include "ccNormalComputationDlg.h"
-#include "ccPickOneElementDlg.h"
 #include "ccProgressDialog.h"
 #include "ccScalarFieldArithmeticsDlg.h"
 #include "ccScalarFieldFromColorDlg.h"

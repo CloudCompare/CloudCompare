@@ -20,8 +20,8 @@
 
 //Local
 #include "ccArray.h"
-#include "ccNormalCompressor.h"
 #include "ccColorTypes.h"
+#include "ccNormalCompressor.h"
 
 /***************************************************
 	  Advanced cloudCompare types (containers)
@@ -33,26 +33,27 @@ class NormsIndexesTableType : public ccArray<CompressedNormType, 1, CompressedNo
 public:
 	//! Default constructor
 	NormsIndexesTableType() : ccArray<CompressedNormType, 1, CompressedNormType>("Compressed normals") {}
-
+	virtual ~NormsIndexesTableType() = default;
+	
 	//inherited from ccArray/ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::NORMAL_INDEXES_ARRAY; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::NORMAL_INDEXES_ARRAY; }
 
 	//! Duplicates array (overloaded from ccArray::clone)
-	virtual NormsIndexesTableType* clone() override
+	NormsIndexesTableType* clone() override
 	{
 		NormsIndexesTableType* cloneArray = new NormsIndexesTableType();
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[NormsIndexesTableType::clone] Failed to clone array (not enough memory)");
 			cloneArray->release();
-			return 0;
+			return nullptr;
 		}
 		cloneArray->setName(getName());
 		return cloneArray;
 	}
 
 	//inherited from ccHObject/ccArray
-	QCC_DB_LIB_API virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	QCC_DB_LIB_API bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 };
 
 //! Array of (uncompressed) 3D normals (Nx,Ny,Nz)
@@ -61,19 +62,20 @@ class NormsTableType : public ccArray<CCVector3, 3,PointCoordinateType>
 public:
 	//! Default constructor
 	NormsTableType() : ccArray<CCVector3, 3, PointCoordinateType>("Normals") {}
+	virtual ~NormsTableType() = default;
 
 	//inherited from ccArray/ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::NORMALS_ARRAY; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::NORMALS_ARRAY; }
 
 	//! Duplicates array (overloaded from ccArray::clone)
-	virtual NormsTableType* clone() override
+	NormsTableType* clone() override
 	{
 		NormsTableType* cloneArray = new NormsTableType();
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[NormsTableType::clone] Failed to clone array (not enough memory)");
 			cloneArray->release();
-			return 0;
+			return nullptr;
 		}
 		cloneArray->setName(getName());
 		return cloneArray;
@@ -86,19 +88,20 @@ class ColorsTableType : public ccArray<ccColor::Rgb, 3, ColorCompType>
 public:
 	//! Default constructor
 	ColorsTableType() : ccArray<ccColor::Rgb, 3, ColorCompType>("RGB colors") {}
+	virtual ~ColorsTableType() = default;
 
 	//inherited from ccArray/ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::RGB_COLOR_ARRAY; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::RGB_COLOR_ARRAY; }
 
 	//! Duplicates array (overloaded from ccArray::clone)
-	virtual ColorsTableType* clone() override
+	ColorsTableType* clone() override
 	{
 		ColorsTableType* cloneArray = new ColorsTableType();
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[ColorsTableType::clone] Failed to clone array (not enough memory)");
 			cloneArray->release();
-			return 0;
+			return nullptr;
 		}
 		cloneArray->setName(getName());
 		return cloneArray;
@@ -127,19 +130,20 @@ class TextureCoordsContainer : public ccArray<TexCoords2D, 2, float>
 public:
 	//! Default constructor
 	TextureCoordsContainer() : ccArray<TexCoords2D, 2, float>("Texture coordinates") {}
+	virtual ~TextureCoordsContainer() = default;
 
 	//inherited from ccArray/ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::TEX_COORDS_ARRAY; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::TEX_COORDS_ARRAY; }
 
 	//! Duplicates array (overloaded from ccArray::clone)
-	virtual TextureCoordsContainer* clone() override
+	TextureCoordsContainer* clone() override
 	{
 		TextureCoordsContainer* cloneArray = new TextureCoordsContainer();
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[TextureCoordsContainer::clone] Failed to clone array (not enough memory)");
 			cloneArray->release();
-			return 0;
+			return nullptr;
 		}
 		cloneArray->setName(getName());
 		return cloneArray;

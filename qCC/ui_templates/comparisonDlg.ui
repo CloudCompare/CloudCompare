@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>420</width>
-    <height>380</height>
+    <height>458</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -223,7 +223,7 @@ that could not have been seen (hidden/out of range/out of field of view).</strin
 (CC or your computer might not respond for a while if you use all available cores)</string>
                  </property>
                  <property name="suffix">
-                  <string> / 8</string>
+                  <string notr="true"> / 8</string>
                  </property>
                 </widget>
                </item>
@@ -438,7 +438,7 @@ to help you set the general parameters</string>
                <item>
                 <widget class="QToolButton" name="histoButton">
                  <property name="text">
-                  <string>...</string>
+                  <string notr="true">...</string>
                  </property>
                  <property name="icon">
                   <iconset resource="../icones.qrc">

@@ -36,10 +36,6 @@ ReferenceCloud::ReferenceCloud(const ReferenceCloud& refCloud)
 {
 }
 
-ReferenceCloud::~ReferenceCloud()
-{
-}
-
 void ReferenceCloud::clear(bool releaseMemory/*=false*/)
 {
 	if (releaseMemory)

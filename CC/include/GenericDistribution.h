@@ -43,7 +43,7 @@ public:
 	GenericDistribution() : m_isValid(false) {}
 
 	//! Default destructor
-	virtual ~GenericDistribution() {}
+	virtual ~GenericDistribution() = default;
 
 	//! Returns distribution name
 	virtual const char* getName() const = 0; 

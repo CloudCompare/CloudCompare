@@ -21,43 +21,46 @@
 #include "ccGLWindow.h"
 
 //Qt
-#include <QTreeView>
-#include <QStandardItemModel>
+#include <QApplication>
 #include <QHeaderView>
-#include <QMenu>
-#include <QMimeData>
-#include <QMessageBox>
-#include <QRegExp>
 #include <QInputDialog>
+#include <QMenu>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QRegExp>
+#include <QStandardItemModel>
+#include <QTreeView>
 
 //qCC_db
-#include <ccLog.h>
-#include <ccHObject.h>
-#include <ccGenericPointCloud.h>
-#include <ccPointCloud.h>
-#include <ccMesh.h>
-#include <ccMaterialSet.h>
 #include <cc2DLabel.h>
-#include <ccGenericPrimitive.h>
-#include <ccPlane.h>
-#include <ccPolyline.h>
 #include <ccFacet.h>
 #include <ccGBLSensor.h>
+#include <ccGenericPointCloud.h>
+#include <ccGenericPrimitive.h>
+#include <ccHObject.h>
+#include <ccLog.h>
+#include <ccMaterialSet.h>
+#include <ccMesh.h>
+#include <ccPlane.h>
+#include <ccPointCloud.h>
+#include <ccPolyline.h>
 #include <ccScalarField.h>
 
 //CClib
 #include <CCMiscTools.h>
 
+//common
+#include <ccPickOneElementDlg.h>
+
 //local
 #include "ccPropertiesTreeDelegate.h"
-#include "../mainwindow.h"
-#include "../ccPickOneElementDlg.h"
-#include "../ccSelectChildrenDlg.h"
+#include "ccSelectChildrenDlg.h"
+#include "mainwindow.h"
 
 //system
-#include <assert.h>
 #include <algorithm>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 //Minimum width of the left column of the properties tree view
 static const int c_propViewLeftColumnWidth = 115;
@@ -84,6 +87,150 @@ static bool CanDetachCloud(const ccHObject* obj)
 
 	return !blocked;
 }
+
+class DBRootIcons
+{
+public:
+	const QIcon &icon( CC_CLASS_ENUM id, bool locked )
+	{
+		if ( mIconMap.isEmpty() )
+		{
+			init();
+		}
+		
+		if ( !mIconMap.contains( id ) )
+		{
+			return (locked ? mDefaultIcons.second : mDefaultIcons.first);
+		}
+		
+		const int		index = mIconMap[id];
+		const IconPair	&icons = mIconList[index];
+		
+		if ( !locked )
+		{
+			return icons.first;
+		}
+		
+		// If we don't have a locked icon for this class, return the unlocked one
+		return (icons.second.isNull() ? icons.first : icons.second);
+	}
+	
+private:
+	using IconPair = QPair<QIcon, QIcon>;	// unlocked icon, locked icon (if any)
+	using IconPairList = QVector<IconPair>;
+	using IconMap = QMap<CC_CLASS_ENUM, int>;
+	
+	void	init()
+	{
+		// Special case for default - no icon in general, but a lock if locked
+		mDefaultIcons = { {}, QIcon(QStringLiteral(":/CC/images/dbLockSymbol.png")) };
+		
+		const int	hObjectIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbHObjectSymbol.png")),
+							QIcon(QStringLiteral(":/CC/images/dbHObjectSymbolLocked.png")) } );
+		
+		const int	cloudIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbCloudSymbol.png")),
+							QIcon(QStringLiteral(":/CC/images/dbCloudSymbolLocked.png")) } );
+		
+		const int	geomIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbMiscGeomSymbol.png")),
+							QIcon(QStringLiteral(":/CC/images/dbMiscGeomSymbolLocked.png")) } );
+		
+		const int	meshIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbMeshSymbol.png")),
+							QIcon(QStringLiteral(":/CC/images/dbMeshSymbolLocked.png")) } );
+		
+		const int	subMeshIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbSubMeshSymbol.png")),
+							QIcon(QStringLiteral(":/CC/images/dbSubMeshSymbolLocked.png")) } );
+		
+		const int	polyLineIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbPolylineSymbol.png")),
+							{} } );
+		
+		const int	octreeIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbOctreeSymbol.png")),
+							QIcon(QStringLiteral(":/CC/images/dbOctreeSymbolLocked.png")) } );
+		
+		const int	calibratedImageIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbCalibratedImageSymbol.png")),
+							{} } );
+		
+		const int	imageIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbImageSymbol.png")),
+							{} } );
+		
+		const int	sensorIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbGBLSensorSymbol.png")),
+							{} } );
+		
+		const int	cameraSensorIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbCamSensorSymbol.png")),
+							{} } );
+		
+		const int	materialSetIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbMaterialSymbol.png")),
+							{} } );
+		
+		const int	containerIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbContainerSymbol.png")),
+							QIcon(QStringLiteral(":/CC/images/dbContainerSymbolLocked.png")) } );
+		
+		const int	labelIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbLabelSymbol.png")),
+							{} } );
+		
+		const int	viewportObjIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbViewportSymbol.png")),
+							{} } );
+		
+		const int	viewportLabelIndex = mIconList.count();
+		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbAreaLabelSymbol.png")),
+							{} } );
+		
+		mIconMap = {
+			{ CC_TYPES::HIERARCHY_OBJECT, hObjectIndex },
+			{ CC_TYPES::POINT_CLOUD, cloudIndex },
+			{ CC_TYPES::PLANE, geomIndex },
+			{ CC_TYPES::SPHERE, geomIndex },
+			{ CC_TYPES::TORUS, geomIndex },
+			{ CC_TYPES::CYLINDER, geomIndex },
+			{ CC_TYPES::CONE, geomIndex },
+			{ CC_TYPES::BOX, geomIndex },
+			{ CC_TYPES::DISH, geomIndex },
+			{ CC_TYPES::EXTRU, geomIndex },
+			{ CC_TYPES::FACET, geomIndex },
+			{ CC_TYPES::QUADRIC, geomIndex },
+			{ CC_TYPES::MESH, meshIndex },
+			{ CC_TYPES::MESH_GROUP, subMeshIndex },
+			{ CC_TYPES::SUB_MESH, subMeshIndex },
+			{ CC_TYPES::POLY_LINE, polyLineIndex },
+			{ CC_TYPES::POINT_OCTREE, octreeIndex },
+			{ CC_TYPES::CALIBRATED_IMAGE, calibratedImageIndex },
+			{ CC_TYPES::IMAGE, imageIndex },
+			{ CC_TYPES::SENSOR, sensorIndex },
+			{ CC_TYPES::GBL_SENSOR, sensorIndex },
+			{ CC_TYPES::CAMERA_SENSOR, cameraSensorIndex },
+			{ CC_TYPES::MATERIAL_SET, materialSetIndex },
+			{ CC_TYPES::NORMALS_ARRAY, containerIndex },
+			{ CC_TYPES::NORMAL_INDEXES_ARRAY, containerIndex },
+			{ CC_TYPES::RGB_COLOR_ARRAY, containerIndex },
+			{ CC_TYPES::TEX_COORDS_ARRAY, containerIndex },
+			{ CC_TYPES::TRANS_BUFFER, containerIndex },
+			{ CC_TYPES::LABEL_2D, labelIndex },
+			{ CC_TYPES::VIEWPORT_2D_OBJECT, viewportObjIndex },
+			{ CC_TYPES::VIEWPORT_2D_LABEL, viewportLabelIndex },
+		};
+	}
+	
+	IconPair		mDefaultIcons;
+	IconPairList	mIconList;
+	IconMap			mIconMap;
+};
+
+Q_GLOBAL_STATIC( DBRootIcons, gDBRootIcons )
+
 
 ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWidget, QObject* parent) : QAbstractItemModel(parent)
 {
@@ -180,14 +327,9 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 
 ccDBRoot::~ccDBRoot()
 {
-	if (m_ccPropDelegate)
-		delete m_ccPropDelegate;
-
-	if (m_propertiesModel)
-		delete m_propertiesModel;
-
-	if (m_treeRoot)
-		delete m_treeRoot;
+	delete m_ccPropDelegate;
+	delete m_propertiesModel;
+	delete m_treeRoot;
 }
 
 void ccDBRoot::unloadAll()
@@ -388,7 +530,7 @@ void ccDBRoot::deleteSelectedEntities()
 {
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
-	if (selectedIndexes.size() < 1)
+	if (selectedIndexes.empty())
 	{
 		return;
 	}
@@ -489,7 +631,7 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	const ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
+	const ccHObject *item = static_cast<const ccHObject*>(index.internalPointer());
 	assert(item);
 	if (!item)
 	{
@@ -509,12 +651,12 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 		else if (item->isA(CC_TYPES::VIEWPORT_2D_LABEL))
 			baseName = QStringLiteral("2D area label: ")+baseName;
 
-		return QVariant(baseName);
+		return baseName;
 	}
 	
 	case Qt::EditRole:
 	{
-		return QVariant(item->getName());
+		return item->getName();
 	}
 
 	case Qt::DecorationRole:
@@ -526,89 +668,46 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 			return icon;
 		}
 
-		bool locked = item->isLocked();
+		const bool locked = item->isLocked();
+		
 		switch (item->getClassID())
 		{
-		case CC_TYPES::HIERARCHY_OBJECT:
-			if (locked)
-				return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbolLocked.png"));
-			else
-				return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbol.png"));
-		case CC_TYPES::POINT_CLOUD:
-			if (locked)
-				return QIcon(QStringLiteral(":/CC/images/dbCloudSymbolLocked.png"));
-			else
-				return QIcon(QStringLiteral(":/CC/images/dbCloudSymbol.png"));
-			//all primitives
-		case CC_TYPES::PLANE:
-		case CC_TYPES::SPHERE:
-		case CC_TYPES::TORUS:
-		case CC_TYPES::CYLINDER:
-		case CC_TYPES::CONE:
-		case CC_TYPES::BOX:
-		case CC_TYPES::DISH:
-		case CC_TYPES::EXTRU:
-		case CC_TYPES::FACET:
-		case CC_TYPES::QUADRIC:
-			if (locked)
-				return QIcon(QStringLiteral(":/CC/images/dbMiscGeomSymbolLocked.png"));
-			else
-				return QIcon(QStringLiteral(":/CC/images/dbMiscGeomSymbol.png"));
-		case CC_TYPES::MESH:
-			if (locked)
-				return QIcon(QStringLiteral(":/CC/images/dbMeshSymbolLocked.png"));
-			else
-				return QIcon(QStringLiteral(":/CC/images/dbMeshSymbol.png"));
-		case CC_TYPES::MESH_GROUP:
-		case CC_TYPES::SUB_MESH:
-			if (locked)
-				return QIcon(QStringLiteral(":/CC/images/dbSubMeshSymbolLocked.png"));
-			else
-				return QIcon(QStringLiteral(":/CC/images/dbSubMeshSymbol.png"));
-		case CC_TYPES::POLY_LINE:
-			return QIcon(QStringLiteral(":/CC/images/dbPolylineSymbol.png"));
-		case CC_TYPES::POINT_OCTREE:
-			if (locked)
-				return QIcon(QStringLiteral(":/CC/images/dbOctreeSymbolLocked.png"));
-			else
-				return QIcon(QStringLiteral(":/CC/images/dbOctreeSymbol.png"));
-		case CC_TYPES::CALIBRATED_IMAGE:
-			return QIcon(QStringLiteral(":/CC/images/dbCalibratedImageSymbol.png"));
-		case CC_TYPES::IMAGE:
-			return QIcon(QStringLiteral(":/CC/images/dbImageSymbol.png"));
-		case CC_TYPES::SENSOR:
-		case CC_TYPES::GBL_SENSOR:
-			return QIcon(QStringLiteral(":/CC/images/dbGBLSensorSymbol.png"));
-		case CC_TYPES::CAMERA_SENSOR:
-			return QIcon(QStringLiteral(":/CC/images/dbCamSensorSymbol.png"));
-		case CC_TYPES::MATERIAL_SET:
-			return QIcon(QStringLiteral(":/CC/images/dbMaterialSymbol.png"));
-		case CC_TYPES::NORMALS_ARRAY:
-		case CC_TYPES::NORMAL_INDEXES_ARRAY:
-		case CC_TYPES::RGB_COLOR_ARRAY:
-		case CC_TYPES::TEX_COORDS_ARRAY:
-		case CC_TYPES::TRANS_BUFFER:
-			if (locked)
-				return QIcon(QStringLiteral(":/CC/images/dbContainerSymbolLocked.png"));
-			else
-				return QIcon(QStringLiteral(":/CC/images/dbContainerSymbol.png"));
-		case CC_TYPES::LABEL_2D:
-			return QIcon(QStringLiteral(":/CC/images/dbLabelSymbol.png"));
-		case CC_TYPES::VIEWPORT_2D_OBJECT:
-			return QIcon(QStringLiteral(":/CC/images/dbViewportSymbol.png"));
-		case CC_TYPES::VIEWPORT_2D_LABEL:
-			return QIcon(QStringLiteral(":/CC/images/dbAreaLabelSymbol.png"));
-		default:
-			if (locked)
-				return QIcon(QStringLiteral(":/CC/images/dbLockSymbol.png"));
-			else
-				return QVariant();
+			case CC_TYPES::HIERARCHY_OBJECT:
+				if ( item->getChildrenNumber() )
+				{
+					return gDBRootIcons->icon( item->getClassID(), locked );
+				}
+				
+				return {};
+				
+			default:
+			{
+				return gDBRootIcons->icon( item->getClassID(), locked );
+			}
 		}
 		break;
 	}
 
 	case Qt::CheckStateRole:
 	{
+		// Don't include checkboxes for hierarchy objects if they have no children or only contain hierarchy objects (recursively)
+		if ( item->getClassID() == CC_TYPES::HIERARCHY_OBJECT )
+		{
+			if ( item->getChildrenNumber() == 0 )
+			{
+				return {};
+			}
+			
+			ccHObject::Container	drawableObjects;
+			
+			unsigned int	count = item->filterChildren( drawableObjects, true, CC_TYPES::HIERARCHY_OBJECT, true );
+			
+			if ( item->getChildCountRecursive() == count )
+			{
+				return {};
+			}
+		}
+		
 		if (item->isEnabled())
 			return Qt::Checked;
 		else
@@ -744,7 +843,7 @@ QModelIndex ccDBRoot::parent(const QModelIndex &index) const
 
 int ccDBRoot::rowCount(const QModelIndex &parent) const
 {
-	ccHObject *parentItem = 0;
+	ccHObject *parentItem = nullptr;
 	if (!parent.isValid())
 		parentItem = m_treeRoot;
 	else
@@ -757,10 +856,6 @@ int ccDBRoot::rowCount(const QModelIndex &parent) const
 int ccDBRoot::columnCount(const QModelIndex &parent) const
 {
 	return 1;
-	//if (parent.isValid())
-	//	return static_cast<ccHObject*>(parent.internalPointer())->columnCount();
-	//else
-	//	return m_treeRoot->columnCount();
 }
 
 void ccDBRoot::changeSelection(const QItemSelection & selected, const QItemSelection & deselected)
@@ -1134,7 +1229,7 @@ Qt::DropActions ccDBRoot::supportedDropActions() const
 Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
-		return 0;
+		return Qt::NoItemFlags;
 
 	Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
 
@@ -1142,7 +1237,7 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 	defaultFlags |= (Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
 
 	//class type based filtering
-	const ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
+	const ccHObject *item = static_cast<const ccHObject*>(index.internalPointer());
 	assert(item);
 	if (item && !item->isLocked()) //locked items cannot be drag-dropped
 	{
@@ -1184,7 +1279,7 @@ QMap<int,QVariant> ccDBRoot::itemData(const QModelIndex& index) const
 
 	if (index.isValid())
 	{
-		ccHObject* object = static_cast<ccHObject*>(index.internalPointer());
+		const ccHObject* object = static_cast<const ccHObject*>(index.internalPointer());
 		if (object)
 			map.insert(Qt::UserRole,QVariant(object->getUniqueID()));
 	}

@@ -1,0 +1,40 @@
+set(header_list
+   ${header_list}
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccApplicationBase.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccCameraParamEditDlg.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccDisplayOptionsDlg.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccOptions.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccOverlayDialog.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccPickingListener.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccPickingHub.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccPickOneElementDlg.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccPluginManager.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccStereoModeDlg.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccQtHelpers.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccTranslationManager.h
+   PARENT_SCOPE
+)
+
+set(source_list
+   ${source_list}
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccApplicationBase.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccCameraParamEditDlg.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccDisplayOptionsDlg.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccOptions.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccOverlayDialog.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccPickingHub.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccPickOneElementDlg.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccPluginManager.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccStereoModeDlg.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ccTranslationManager.cpp
+   PARENT_SCOPE
+)
+
+set(ui_list
+   ${ui_list}
+   ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates/cameraParamDlg.ui
+   ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates/displayOptionsDlg.ui
+   ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates/pickOneElementDlg.ui
+   ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates/stereoModeDlg.ui
+   PARENT_SCOPE
+)

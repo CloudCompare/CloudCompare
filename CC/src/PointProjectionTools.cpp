@@ -490,9 +490,9 @@ enum HullPointFlags {	POINT_NOT_USED	= 0,
 						POINT_FROZEN	= 3,
 };
 
-typedef CCLib::PointProjectionTools::IndexedCCVector2 Vertex2D;
-typedef std::list<Vertex2D*>::iterator VertexIterator;
-typedef std::list<Vertex2D*>::const_iterator ConstVertexIterator;
+using Vertex2D = CCLib::PointProjectionTools::IndexedCCVector2;
+using VertexIterator = std::list<Vertex2D *>::iterator;
+using ConstVertexIterator = std::list<Vertex2D *>::const_iterator;
 
 struct Edge
 {
@@ -857,8 +857,6 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 
 void PointProjectionTools::Transformation::apply(GenericIndexedCloudPersist& cloud) const
 {
-	unsigned count = cloud.size();
-
 	//always apply the scale before everything (applying before or after rotation does not changes anything)
 	if (fabs(static_cast<double>(s) - 1.0) > ZERO_TOLERANCE)
 	{

@@ -19,8 +19,8 @@
 #include <ManualSegmentationTools.h>
 
 //local
-#include <PointCloud.h>
 #include <GenericProgressCallback.h>
+#include <PointCloud.h>
 #include <Polyline.h>
 #include <SimpleMesh.h>
 
@@ -65,8 +65,7 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 		}
 	}
 
-	if (trans)
-		delete trans;
+	delete trans;
 
 	return Y;
 }
@@ -664,7 +663,7 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 								CCVector3d::fromArray(vertices->getPoint(tsi->i2)->u),
 								CCVector3d::fromArray(vertices->getPoint(tsi->i3)->u) };
 
-			unsigned origVertIndexes[3] = {
+			const unsigned origVertIndexes[3] = {
 				tsi->i1 | c_origIndexFlag,
 				tsi->i2 | c_origIndexFlag,
 				tsi->i3 | c_origIndexFlag };
@@ -1317,7 +1316,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				{
 					assert(sourceMesh == insideMesh2 || sourceMesh == origMesh);
 					insideMesh2->clear();
-					insideVertices2->clear();
+					insideVertices2->reset();
 					sourceMesh = insideMesh1;
 					sourceVertices = insideVertices1;
 					insideMesh = insideMesh2;
@@ -1330,7 +1329,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				{
 					assert(sourceMesh == insideMesh1 || sourceMesh == origMesh);
 					insideMesh1->clear();
-					insideVertices1->clear();
+					insideVertices1->reset();
 					sourceMesh = insideMesh2;
 					sourceVertices = insideVertices2;
 					insideMesh = insideMesh1;
@@ -1389,8 +1388,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 	if (error)
 	{
 		delete insideMesh;
-		if (outsideMesh)
-			delete outsideMesh;
+		delete outsideMesh;
 		return false;
 	}
 

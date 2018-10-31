@@ -28,12 +28,13 @@
 #include <ReferenceCloud.h>
 
 //Local
-#include "ccOctreeProxy.h"
-#include "ccSensor.h"
 #include "ccGenericGLDisplay.h"
-#include "ccProgressDialog.h"
+#include "ccOctreeProxy.h"
 #include "ccPointCloud.h"
+#include "ccProgressDialog.h"
 #include "ccScalarField.h"
+#include "ccSensor.h"
+
 
 ccGenericPointCloud::ccGenericPointCloud(QString name)
 	: ccShiftedObject(name)
@@ -119,7 +120,9 @@ ccOctreeProxy* ccGenericPointCloud::getOctreeProxy() const
 	for (size_t i = 0; i < m_children.size(); ++i)
 	{
 		if (m_children[i]->isA(CC_TYPES::POINT_OCTREE))
+		{
 			return static_cast<ccOctreeProxy*>(m_children[i]);
+		}
 	}
 
 	return nullptr;
@@ -134,7 +137,7 @@ ccOctree::Shared ccGenericPointCloud::getOctree() const
 	}
 	else
 	{
-		return ccOctree::Shared(0);
+		return ccOctree::Shared(nullptr);
 	}
 }
 
@@ -310,7 +313,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		{
 			//we can now use the octree to do faster point picking
 #ifdef QT_DEBUG
-			CCLib::ScalarField* sf = 0;
+			CCLib::ScalarField* sf = nullptr;
 			if (getClassID() == CC_TYPES::POINT_CLOUD)
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(this);
@@ -378,7 +381,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		const ccGenericPointCloud::VisibilityTableType* visTable = isVisibilityTableInstantiated() ? &getTheVisibilityArray() : nullptr;
 
 		//scalar field with hidden values (if any)
-		ccScalarField* activeSF = 0;
+		ccScalarField* activeSF = nullptr;
 		if (	sfShown()
 			&&	isA(CC_TYPES::POINT_CLOUD)
 			&&	!visTable //if the visibility table is instantiated, we always display ALL points
@@ -450,21 +453,25 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibility
 	{
 		assert(false);
 		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No visibility table instantiated!");
-		return 0;
+		return nullptr;
 	}
 
 	//count the number of points to copy
 	unsigned pointCount = 0;
 	{
 		for (unsigned i = 0; i < count; ++i)
+		{
 			if (visTable->at(i) == POINT_VISIBLE)
+			{
 				++pointCount;
+			}
+		}
 	}
 
 	if (pointCount == 0)
 	{
 		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No point in selection");
-		return 0;
+		return nullptr;
 	}
 
 	//we create an entity with the 'visible' vertices only
@@ -472,16 +479,19 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibility
 	if (rc->reserve(pointCount))
 	{
 		for (unsigned i = 0; i < count; ++i)
+		{
 			if (visTable->at(i) == POINT_VISIBLE)
+			{
 				rc->addPointIndex(i); //can't fail (see above)
+			}
+		}
 	}
 	else
 	{
 		delete rc;
-		rc = 0;
+		rc = nullptr;
 		ccLog::Error("[ccGenericPointCloud::getTheVisiblePoints] Not enough memory!");
 	}
 
 	return rc;
 }
-

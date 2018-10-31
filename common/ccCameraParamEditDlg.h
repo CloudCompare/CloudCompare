@@ -47,7 +47,7 @@ public:
 	explicit ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickingHub);
 
 	//! Destructor
-	virtual ~ccCameraParamEditDlg();
+	~ccCameraParamEditDlg() override;
 
 	//! Makes this dialog frameless
 	void makeFrameless();
@@ -56,11 +56,11 @@ public:
 	ccGLMatrixd getMatrix();
 
 	//inherited from ccOverlayDialog
-	virtual bool start();
-	virtual bool linkWith(ccGLWindow* win);
+	bool start() override;
+	bool linkWith(ccGLWindow* win) override;
 
 	//inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi);
+	void onItemPicked(const PickedItem& pi) override;
 
 public slots:
 
@@ -126,9 +126,9 @@ protected:
 	void initWith(ccGLWindow* win);
 
 	//! Type of the pushed matrices map structure
-	typedef std::map<ccGLWindow*,ccGLMatrixd> PushedMatricesMapType;
+	using PushedMatricesMapType = std::map<ccGLWindow*,ccGLMatrixd>;
 	//! Type of an element of the pushed matrices map structure
-	typedef std::pair<ccGLWindow*,ccGLMatrixd> PushedMatricesMapElement;
+	using PushedMatricesMapElement = std::pair<ccGLWindow*,ccGLMatrixd>;
 
 	//! Pushed camera matrices (per window)
 	PushedMatricesMapType pushedMatrices;

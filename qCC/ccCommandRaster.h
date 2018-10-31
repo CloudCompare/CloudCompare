@@ -539,6 +539,11 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 					return cmd.error(QString("Invalid vert. direction! (after %1)").arg(COMMAND_GRID_VERT_DIR));
 				}
 			}
+			else
+			{
+				//unrecognized argument (probably another command?)
+				break;
+			}
 		}
 
 		if (gridStep == 0)
@@ -715,8 +720,8 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 					outputDesc = &cmd.clouds().back();
 				}
 
-				//save result as a PLY file
-				if (outputDesc)
+				//save result
+				if (outputDesc && cmd.autoSaveMode())
 				{
 					QString outputFilename;
 					QString errorStr = cmd.exportEntity(*outputDesc, "HEIGHT_DIFFERENCE", &outputFilename);

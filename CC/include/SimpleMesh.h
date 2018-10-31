@@ -20,9 +20,9 @@
 #define SIMPLE_MESH_HEADER
 
 //Local
+#include "BoundingBox.h"
 #include "GenericIndexedMesh.h"
 #include "SimpleTriangle.h"
-#include "BoundingBox.h"
 
 //System
 #include <vector>
@@ -47,19 +47,19 @@ public: //constructors
 	SimpleMesh(GenericIndexedCloud* _theVertices, bool linkVerticesWithMesh = false);
 
 	//! SimpleMesh destructor
-	virtual ~SimpleMesh() override;
+	~SimpleMesh() override;
 
 public: //inherited methods
 
-	virtual void forEach(genericTriangleAction action) override;
-	virtual void placeIteratorAtBeginning() override;
-	virtual GenericTriangle* _getNextTriangle() override; //temporary
-	virtual GenericTriangle* _getTriangle(unsigned triangleIndex) override; //temporary
-	virtual VerticesIndexes* getNextTriangleVertIndexes() override;
-	virtual VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
-	virtual unsigned size() const override { return static_cast<unsigned>(m_triIndexes.size()); }
-	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
-	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
+	void forEach(genericTriangleAction action) override;
+	void placeIteratorAtBeginning() override;
+	GenericTriangle* _getNextTriangle() override; //temporary
+	GenericTriangle* _getTriangle(unsigned triangleIndex) override; //temporary
+	VerticesIndexes* getNextTriangleVertIndexes() override;
+	VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
+	unsigned size() const override { return static_cast<unsigned>(m_triIndexes.size()); }
+	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
+	void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
 
 public: //specific methods
 
@@ -97,7 +97,7 @@ public: //specific methods
 protected:
 
 	//! A triangle vertices indexes container
-	typedef std::vector<VerticesIndexes> TriangleIndexesContainer;
+	using TriangleIndexesContainer = std::vector<VerticesIndexes>;
 	//! The triangles indexes
 	TriangleIndexesContainer m_triIndexes;
 

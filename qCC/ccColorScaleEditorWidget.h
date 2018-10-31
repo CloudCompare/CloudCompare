@@ -34,7 +34,7 @@ class ColorScaleElementSlider : public QWidget, public ccColorScaleElement
 public:
 
 	//! Default constructor
-	ColorScaleElementSlider(double relativePos = 0.0, QColor color = Qt::black, QWidget* parent = 0, Qt::Orientation orientation = Qt::Horizontal);
+	ColorScaleElementSlider(double relativePos = 0.0, QColor color = Qt::black, QWidget* parent = nullptr, Qt::Orientation orientation = Qt::Horizontal);
 
 	//! Sets selection state
 	void setSelected(bool state) { m_selected = state; }
@@ -51,7 +51,7 @@ public:
 protected:
 
 	//inherited from QWidget
-	virtual void paintEvent(QPaintEvent* e);
+	void paintEvent(QPaintEvent* e) override;
 
 	//! Selection state
 	bool m_selected;
@@ -87,7 +87,7 @@ public:
 };
 
 //! Shared set of color scale elements (widgets)
-typedef QSharedPointer<ColorScaleElementSliders> SharedColorScaleElementSliders;
+using SharedColorScaleElementSliders = QSharedPointer<ColorScaleElementSliders>;
 
 //! Base color scale editor (sub)Widget
 /** A widget with a margin (along a preferred orientation)
@@ -102,7 +102,7 @@ public:
 	ColorScaleEditorBaseWidget(SharedColorScaleElementSliders sliders, 
 		Qt::Orientation orientation,
 		int margin,
-		QWidget* parent = 0)
+		QWidget* parent = nullptr)
 		: QWidget(parent)
 		, m_sliders(sliders)
 		, m_orientation(orientation)
@@ -140,7 +140,7 @@ class ColorBarWidget : public ColorScaleEditorBaseWidget
 public:
 
 	//! Default constructor
-	ColorBarWidget(SharedColorScaleElementSliders sliders, QWidget* parent = 0, Qt::Orientation orientation = Qt::Horizontal);
+	ColorBarWidget(SharedColorScaleElementSliders sliders, QWidget* parent = nullptr, Qt::Orientation orientation = Qt::Horizontal);
 
 signals:
 
@@ -152,8 +152,8 @@ signals:
 protected:
 
 	//inherited from QWidget
-	virtual void paintEvent(QPaintEvent* e);
-	virtual void mousePressEvent(QMouseEvent* e);
+	void paintEvent(QPaintEvent* e) override;
+	void mousePressEvent(QMouseEvent* e) override;
 };
 
 //! All sliders widget
@@ -164,7 +164,7 @@ class SlidersWidget : public ColorScaleEditorBaseWidget
 public:
 
 	//! Default constructor
-	SlidersWidget(SharedColorScaleElementSliders sliders, QWidget* parent = 0, Qt::Orientation orientation = Qt::Horizontal);
+	SlidersWidget(SharedColorScaleElementSliders sliders, QWidget* parent = nullptr, Qt::Orientation orientation = Qt::Horizontal);
 
 	//! Manually selects a slider
 	void select(int index, bool silent=false);
@@ -193,11 +193,11 @@ signals:
 protected:
 
 	//inherited from QWidget
-	virtual void mousePressEvent(QMouseEvent* e);
-	virtual void mouseMoveEvent(QMouseEvent* e);
+	void mousePressEvent(QMouseEvent* e) override;
+	void mouseMoveEvent(QMouseEvent* e) override;
 	//virtual void mouseReleaseEvent(QMouseEvent* e);
-	virtual void mouseDoubleClickEvent(QMouseEvent* e);
-	virtual void resizeEvent(QResizeEvent* e);
+	void mouseDoubleClickEvent(QMouseEvent* e) override;
+	void resizeEvent(QResizeEvent* e) override;
 
 };
 
@@ -209,7 +209,7 @@ class SliderLabelWidget : public ColorScaleEditorBaseWidget
 public:
 
 	//! Default constructor
-	SliderLabelWidget(SharedColorScaleElementSliders sliders, QWidget* parent = 0, Qt::Orientation orientation = Qt::Horizontal);
+	SliderLabelWidget(SharedColorScaleElementSliders sliders, QWidget* parent = nullptr, Qt::Orientation orientation = Qt::Horizontal);
 
 	//! Sets text color
 	inline void setTextColor(QColor color) { m_textColor = color; }
@@ -220,7 +220,7 @@ public:
 protected:
 
 	//inherited from QWidget
-	void paintEvent(QPaintEvent* e);
+	void paintEvent(QPaintEvent* e) override;
 
 	//! Text color
 	QColor m_textColor;
@@ -237,16 +237,16 @@ class ccColorScaleEditorWidget : public ColorScaleEditorBaseWidget
 public:
 
 	//! Default constructor
-	ccColorScaleEditorWidget(QWidget* parent = 0, Qt::Orientation orientation = Qt::Horizontal);
+	ccColorScaleEditorWidget(QWidget* parent = nullptr, Qt::Orientation orientation = Qt::Horizontal);
 
 	//! Destructor
-	virtual ~ccColorScaleEditorWidget();
+	~ccColorScaleEditorWidget() override = default;
 
 	//! Returns the current number of color scale steps
 	inline int getStepCount() const { return (m_sliders ? m_sliders->size() : 0); }
 
 	//! Returns a given slider (pointer on)
-	inline const ColorScaleElementSlider* getStep(int index) { return m_sliders ? m_sliders->at(index) : 0; }
+	inline const ColorScaleElementSlider* getStep(int index) { return m_sliders ? m_sliders->at(index) : nullptr; }
 
 	//! Sets a given slider color
 	void setStepColor(int index, QColor color);
@@ -281,7 +281,7 @@ public:
 	void setLabelPrecision(int precision);
 
 	//inherited from ColorScaleEditorBaseWidget
-	virtual void setSliders(SharedColorScaleElementSliders sliders);
+	void setSliders(SharedColorScaleElementSliders sliders) override;
 
 signals:
 

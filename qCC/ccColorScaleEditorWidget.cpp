@@ -21,13 +21,13 @@
 
 //Qt
 #include <QColorDialog>
-#include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QPainter>
 #include <QMouseEvent>
+#include <QPainter>
+#include <QVBoxLayout>
 
 //System
-#include <assert.h>
+#include <cassert>
 
 static const int DEFAULT_SLIDER_SYMBOL_SIZE = 8;
 static const int DEFAULT_MARGIN = DEFAULT_SLIDER_SYMBOL_SIZE/2+1;
@@ -98,7 +98,7 @@ void ColorScaleElementSliders::clear()
 {
 	while (!isEmpty())
 	{
-		back()->setParent(0);
+		back()->setParent(nullptr);
 		delete back();
 		pop_back();
 	}
@@ -115,9 +115,9 @@ void ColorScaleElementSliders::removeAt(int i)
 	ColorScaleElementSlider* slider = at(i);
 	if (slider)
 	{
-		slider->setParent(0);
+		slider->setParent(nullptr);
 		delete slider;
-		slider = 0;
+		slider = nullptr;
 	}
 	
 	QList<ColorScaleElementSlider*>::removeAt(i);
@@ -229,13 +229,13 @@ void ColorBarWidget::paintEvent(QPaintEvent* e)
 				double relativePos = m_sliders->at(i)->getRelativePos();
 				if (m_orientation == Qt::Horizontal)
 				{
-					int pos = contentRect.left() + (int)(relativePos * (double)contentRect.width());
+					int pos = contentRect.left() + static_cast<int>(relativePos * contentRect.width());
 					A.setX(pos);
 					B.setX(pos);
 				}
 				else
 				{
-					int pos = contentRect.top() + (int)(relativePos * (double)contentRect.height());
+					int pos = contentRect.top() + static_cast<int>(relativePos * contentRect.height());
 					A.setY(pos);
 					B.setY(pos);
 				}
@@ -298,7 +298,7 @@ ColorScaleElementSlider* SlidersWidget::addNewSlider(double relativePos, QColor 
 
 	m_sliders->addSlider(slider);
 	
-	int pos = (int)((double)length() * relativePos);
+	int pos = static_cast<int>(length() * relativePos);
 
 	if (m_orientation == Qt::Horizontal)
 	{
@@ -330,7 +330,7 @@ void SlidersWidget::updateAllSlidersPos()
 	for (ColorScaleElementSliders::iterator it = m_sliders->begin(); it != m_sliders->end(); ++it)
 	{
 		ColorScaleElementSlider* slider = *it;
-		int pos = (int)(slider->getRelativePos() * (double)rectLength);
+		int pos = static_cast<int>(slider->getRelativePos() * rectLength);
 
 		if (m_orientation == Qt::Horizontal)
 		{
@@ -352,7 +352,7 @@ void SlidersWidget::updateSliderPos(int index)
 
 	ColorScaleElementSlider* slider = m_sliders->at(index);
 
-	int pos = static_cast<int>(slider->getRelativePos() * (double)length());
+	int pos = static_cast<int>(slider->getRelativePos() * length());
 
 	if (m_orientation == Qt::Horizontal)
 	{
@@ -392,7 +392,7 @@ void SlidersWidget::mouseMoveEvent(QMouseEvent* e)
 		return;
 
 	int pos = (m_orientation == Qt::Horizontal ? e->pos().x() : e->pos().y());
-	double relativePos = (double)(pos-DEFAULT_MARGIN)/(double)length();
+	double relativePos = static_cast<double>(pos-DEFAULT_MARGIN)/static_cast<double>(length());
 
 	if (relativePos > 0.0 && relativePos < 1.0)
 	{
@@ -583,11 +583,6 @@ ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=0*/, Qt::Or
 		layout()->addWidget(m_labelsWidget);
 		m_labelsWidget->setVisible(false); //hidden by default
 	}
-}
-
-ccColorScaleEditorWidget::~ccColorScaleEditorWidget()
-{
-	//Qt will take care of its sibliings!
 }
 
 void ccColorScaleEditorWidget::onPointClicked(double relativePos)
@@ -791,4 +786,3 @@ void ccColorScaleEditorWidget::setStepRelativePosition(int index, double relativ
 
 	onSliderModified(index);
 }
-

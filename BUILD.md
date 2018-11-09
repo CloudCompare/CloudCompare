@@ -37,10 +37,10 @@
   - `OPTION_SUPPORT_MAC_PDMS_FORMAT`: to add support for PDMS .mac scripts (*CAD format*)
   - `OPTION_USE_DXFLIB`: to add support for DXF files in CloudCompare/ccViewer with **dxflib** - see [below](#optional-setup-for-dxflib-support)
   - `OPTION_USE_FBX_SDK`: to add support for FBX files in CloudCompare/ccViewer with the official **FBX SDK** - see [below](#optional-setup-for-fbx-sdk-support)
-  - `OPTION_USE_GDAL`: to add support for a lot of raster files in CloudCompare/ccViewer with **GDAL** libray - see [below](#gdal_setup)
-  - `OPTION_USE_LIBE57`: to add support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#libE57_setup)
+  - `OPTION_USE_GDAL`: to add support for a lot of raster files in CloudCompare/ccViewer with **GDAL** libray - see [below](#optional-setup-for-gdal-support)
+  - `OPTION_USE_LIBE57`: to add support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#optional-setup-for-libe57-support)
   - `OPTION_USE_SHAPE_LIB`: to add support for SHP files in CloudCompare/ccViewer
-  - `OPTION_PDAL_LAS`: to add support for LAS files in CloudCompare/ccViewer with **PDAL** - see [below](#pdal_las)
+  - `OPTION_PDAL_LAS`: to add support for LAS files in CloudCompare/ccViewer with **PDAL** - see [below](#optional-setup-for-las-using-pdal)
 
   The following are Windows-only options:
   - `OPTION_MP_BUILD`: for Visual Studio only *(multi-process build --> much faster but uses a lot of CPU power)*
@@ -107,11 +107,11 @@ If you want to use or debug plugins in DEBUG mode while using a single configura
 1. The version of the Poisson Surface Reconstruction library (M. Kazhdan et al.) used by the  is https://github.com/cloudcompare/PoissonRecon. It is declared as a submodule of CC's repository. You have to explicitly synchronize it (see https://git-scm.com/docs/git-submodule).
 2. Then simply check the INSTALL_QPOISSON_RECON_PLUGIN option in CMake
 
-### [Optional] Setup for PDAL support <a name="pdal_las"></a>
+### [Optional] Setup for LAS using PDAL
 
 If you want to compile CloudCompare (and ccViewer) with LAS/LAZ files support, you'll need:
 
-1. Get [PDAL](https://pdal.io/)
+1. [PDAL](https://pdal.io/)
 2. Set `OPTION_PDAL_LAS=TRUE`
 
 If your PDAL installation is not correctly picked up by CMake, 

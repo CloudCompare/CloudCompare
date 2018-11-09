@@ -365,7 +365,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		pdalId = id(dimName);
 		table.layout()->registerDim(pdalId);
 	}
-	
+
 	std::vector<ExtraLasField::Shared> extraFieldsToSave;
 
 	for (unsigned int i = 0; i < extraFields.size(); ++i)
@@ -489,9 +489,27 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	writerOptions.add("filename", filename.toLocal8Bit().toStdString());
 	writerOptions.add("extra_dims", "all");
-	//make a dialog for this ?
-	//writerOptions.add("minor_version", )
-	//writerOptions.add("dataformat_id", );
+
+	const QVariant minor_version_meta_data = theCloud->getMetaData(LAS_VERSION_MINOR_META_DATA);
+	if (!minor_version_meta_data.isNull())
+    {
+		bool ok = false;
+		int minor_version = minor_version_meta_data.toInt(&ok);
+		if (ok)
+			writerOptions.add("minor_version", minor_version);
+		else
+			ccLog::Warning(QString("Could not convert minor_version to int"));
+	}
+	const QVariant point_format_meta_data = theCloud->getMetaData(LAS_POINT_FORMAT_META_DATA);
+	if (!point_format_meta_data.isNull())
+	{
+	 	bool ok = false;
+	 	int point_format = point_format_meta_data.toInt(&ok);
+	 		if (ok)
+	 			writerOptions.add("dataformat_id", point_format);
+	 		else
+				ccLog::Warning(QString("Could not convert point_format to int"));
+	}
 
 	StreamCallbackFilter f;
 	f.setCallback(convertOne);
@@ -1078,7 +1096,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 				pDlg->exec();
 			}
 			reader.waitForFinished();
-		
+
 			PointViewSet viewSet = reader.result();
 			PointViewPtr pointView = *viewSet.begin();
 
@@ -1417,6 +1435,9 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 					loadedCloud->setMetaData(LAS_SCALE_X_META_DATA, QVariant(lasScale.x));
 					loadedCloud->setMetaData(LAS_SCALE_Y_META_DATA, QVariant(lasScale.y));
 					loadedCloud->setMetaData(LAS_SCALE_Z_META_DATA, QVariant(lasScale.z));
+					loadedCloud->setMetaData(LAS_VERSION_MAJOR_META_DATA, QVariant(lasHeader.versionMajor()));
+					loadedCloud->setMetaData(LAS_VERSION_MINOR_META_DATA, QVariant(lasHeader.versionMinor()));
+					loadedCloud->setMetaData(LAS_POINT_FORMAT_META_DATA, QVariant(lasHeader.pointFormat()));
 
 					container.addChild(loadedCloud);
 					loadedCloud = nullptr;

@@ -1,3 +1,5 @@
+#include <memory>
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -86,7 +88,7 @@ public:
 		extraFieldGroupBox->setChecked(false);
 	}
 
-	void addEVLR(QString description)
+	void addEVLR(const QString &description)
 	{
 		QListWidgetItem* item = new QListWidgetItem(description);
 		evlrListWidget->addItem(item);
@@ -138,8 +140,7 @@ struct ExtraLasField : LasField
 
 	typedef QSharedPointer<ExtraLasField> Shared;
 
-	//reimplemented from LasField
-	virtual inline QString getName() const { return fieldName; }
+	inline QString getName() const override { return fieldName; }
 
 	QString fieldName;
 	Id pdalId;
@@ -148,7 +149,7 @@ struct ExtraLasField : LasField
 };
 
 //! Semi persistent save dialog
-QSharedPointer<LASSaveDlg> s_saveDlg(0);
+QSharedPointer<LASSaveDlg> s_saveDlg(nullptr);
 pdal::Dimension::Id typeToId(LAS_FIELDS sfType)
 {
 	switch (sfType) {
@@ -249,9 +250,8 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			//find an equivalent in official LAS fields
 			QString sfName = QString(sf->getName()).toUpper();
 			bool matched = false;
-			for (size_t j = 0; j < fieldsToSave.size(); ++j)
-			{
-				if (sfName == fieldsToSave[j].getName().toUpper())
+			for (auto &j : fieldsToSave) {
+				if (sfName == j.getName().toUpper())
 				{
 					matched = true;
 					break;
@@ -260,14 +260,14 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			if (!matched)
 			{
 				ExtraLasField *extraField = new ExtraLasField(QString(sf->getName()), Id::Unknown);
-				extraFields.push_back(ExtraLasField::Shared(extraField));
+				extraFields.emplace_back(extraField);
 				extraFields.back()->sf = sf;
 			}
 		}
 	}
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
@@ -327,7 +327,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		s_saveDlg->clearEVLRs();
 
-		for (ExtraLasField::Shared extraField : extraFields)
+		for (const ExtraLasField::Shared &extraField : extraFields)
 		{
 			s_saveDlg->addEVLR(QString("%1").arg(extraField->getName()));
 		}
@@ -555,7 +555,7 @@ public:
 	bool init(unsigned int width,
 		unsigned int height,
 		unsigned int Zdim,
-		QString absoluteBaseFilename,
+		const QString &absoluteBaseFilename,
 		const CCVector3d& bbMin,
 		const CCVector3d& bbMax,
 		const PointTableRef table,
@@ -598,14 +598,14 @@ public:
 				QString filename = absoluteBaseFilename + QString("_%1_%2.%3").arg(QString::number(i), QString::number(j), ext);
 
 				fileNames[ii] = filename;
-				tilePointViews[ii] = PointViewPtr(new PointView(table));
+				tilePointViews[ii] = std::make_shared<PointView>(table);
 			}
 		}
 
 		return true;
 	}
 
-	void addPoint(const PointViewPtr buffer, unsigned int pointIndex)
+	void addPoint(const PointViewPtr &buffer, unsigned int pointIndex)
 	{
 		//determine the right tile
 		CCVector3d Prel = CCVector3d(	buffer->getFieldAs<double>(Id::X, pointIndex),
@@ -719,7 +719,7 @@ struct LasCloudChunk
 		{
 			QString name = QString::fromStdString(extraNamesToLoad[i]);
 			ExtraLasField *eField = new ExtraLasField(name, extraFieldsToLoad[i]);
-			lasFields.push_back(LasField::Shared(eField));
+			lasFields.emplace_back(eField);
 		}
 	}
 
@@ -867,7 +867,7 @@ std::vector<ExtraDim> ExtraBytesIf::toExtraDims()
 	return eds;
 }
 
-std::vector<ExtraDim> readExtraBytesVlr(LasHeader header)
+std::vector<ExtraDim> readExtraBytesVlr(const LasHeader &header)
 {
 	std::vector<ExtraDim> extraDims;
 
@@ -948,7 +948,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 	CCVector3d lasScale = CCVector3d(lasHeader.scaleX(), lasHeader.scaleY(), lasHeader.scaleZ());
 	CCVector3d lasShift = -CCVector3d(lasHeader.offsetX(), lasHeader.offsetY(), lasHeader.offsetZ());
 
-	unsigned int nbOfPoints = lasHeader.pointCount();
+	unsigned int nbOfPoints = static_cast<unsigned int>(lasHeader.pointCount());
 	if (nbOfPoints == 0)
 	{
 		//strange file ;)
@@ -1011,7 +1011,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 
 	try
 	{
-		if (extraNamesToLoad.size())
+		if (!extraNamesToLoad.empty())
 		{
 			// If extra fields are requested, reload the file with the new extra_dims parameters
 			Options las_opts2;
@@ -1167,7 +1167,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 			if (pointChunk.getLoadedCloud() == nullptr)
 			{
 				// create a new cloud
-				unsigned int pointsToRead = static_cast<unsigned int>(nbOfPoints) - nbPointsRead;
+				unsigned int pointsToRead = nbOfPoints - nbPointsRead;
 				fileChunkSize = std::min(pointsToRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 				if (!pointChunk.reserveSize(fileChunkSize))
 				{

@@ -39,8 +39,8 @@
   - `OPTION_USE_FBX_SDK`: to add support for FBX files in CloudCompare/ccViewer with the official **FBX SDK** - see [below](#optional-setup-for-fbx-sdk-support)
   - `OPTION_USE_GDAL`: to add support for a lot of raster files in CloudCompare/ccViewer with **GDAL** libray - see [below](#gdal_setup)
   - `OPTION_USE_LIBE57`: to add support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#libE57_setup)
-  - `OPTION_USE_LIBLAS`: to add support for LAS files in CloudCompare/ccViewer with **libLAS** - see [below](#optional-setup-for-gdal-supportt)
   - `OPTION_USE_SHAPE_LIB`: to add support for SHP files in CloudCompare/ccViewer
+  - `OPTION_PDAL_LAS`: to add support for LAS files in CloudCompare/ccViewer with **PDAL** - see [below](#pdal_las)
 
   The following are Windows-only options:
   - `OPTION_MP_BUILD`: for Visual Studio only *(multi-process build --> much faster but uses a lot of CPU power)*
@@ -107,7 +107,7 @@ If you want to use or debug plugins in DEBUG mode while using a single configura
 1. The version of the Poisson Surface Reconstruction library (M. Kazhdan et al.) used by the  is https://github.com/cloudcompare/PoissonRecon. It is declared as a submodule of CC's repository. You have to explicitly synchronize it (see https://git-scm.com/docs/git-submodule).
 2. Then simply check the INSTALL_QPOISSON_RECON_PLUGIN option in CMake
 
-### [Optional] Setup for PDAL support
+### [Optional] Setup for PDAL support <a name="pdal_las"></a>
 
 If you want to compile CloudCompare (and ccViewer) with LAS/LAZ files support, you'll need:
 
@@ -121,7 +121,7 @@ set the `PDAL_DIR` to the path containing `PDALConfig.cmake`.
 
 If you want to compile CloudCompare (and ccViewer) with LibE57 files support, you'll need:
 
-1. [Boost](http://www.boost.org/) multi-thread static libraries (same as [libLAS](#liblas_setup))
+1. [Boost](http://www.boost.org/) multi-thread static libraries
 2. [Xerces-C++](http://xerces.apache.org/xerces-c) multi-thread **static** libraries
     - On Visual C++ (Windows):
         1. select the `Static Debug` or `Static Release` configurations

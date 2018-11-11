@@ -37,7 +37,7 @@
   - `OPTION_SUPPORT_MAC_PDMS_FORMAT`: to add support for PDMS .mac scripts (*CAD format*)
   - `OPTION_USE_DXFLIB`: to add support for DXF files in CloudCompare/ccViewer with **dxflib** - see [below](#optional-setup-for-dxflib-support)
   - `OPTION_USE_FBX_SDK`: to add support for FBX files in CloudCompare/ccViewer with the official **FBX SDK** - see [below](#optional-setup-for-fbx-sdk-support)
-  - `OPTION_USE_GDAL`: to add support for a lot of raster files in CloudCompare/ccViewer with **GDAL** libray - see [below](#optional-setup-for-gdal-support)
+  - `OPTION_USE_GDAL`: to add support for a lot of raster files in CloudCompare/ccViewer with **GDAL** library - see [below](#optional-setup-for-gdal-support)
   - `OPTION_USE_LIBE57`: to add support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#optional-setup-for-libe57-support)
   - `OPTION_USE_SHAPE_LIB`: to add support for SHP files in CloudCompare/ccViewer
   - `OPTION_PDAL_LAS`: to add support for LAS files in CloudCompare/ccViewer with **PDAL** - see [below](#optional-setup-for-las-using-pdal)

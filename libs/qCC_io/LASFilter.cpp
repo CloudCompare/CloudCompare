@@ -228,15 +228,6 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	//standard las fields (as scalar fields)
 	std::vector<LasField> fieldsToSave;
-
-	if (theCloud->isA(CC_TYPES::POINT_CLOUD))
-	{
-		ccPointCloud* pc = static_cast<ccPointCloud*>(theCloud);
-
-		//match cloud SFs with official LASfields
-		LasField::GetLASFields(pc, fieldsToSave);
-	}
-
 	//extra las fields (as scalar fields)
 	std::vector<ExtraLasField::Shared> extraFields;
 
@@ -244,22 +235,19 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	{
 		ccPointCloud* pc = static_cast<ccPointCloud*>(theCloud);
 
+		LasField::GetLASFields(pc, fieldsToSave);
+
 		for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
 		{
 			ccScalarField* sf = static_cast<ccScalarField*>(pc->getScalarField(i));
 			//find an equivalent in official LAS fields
 			QString sfName = QString(sf->getName()).toUpper();
-			bool matched = false;
-			for (auto &j : fieldsToSave) {
-				if (sfName == j.getName().toUpper())
-				{
-					matched = true;
-					break;
-				}
-			}
-			if (!matched)
+
+			auto name_matches = [&sfName](const LasField &field) { return sfName == field.getName().toUpper(); };
+			auto pos = std::find_if(fieldsToSave.begin(), fieldsToSave.end(), name_matches);
+			if (pos == fieldsToSave.end())
 			{
-				ExtraLasField *extraField = new ExtraLasField(QString(sf->getName()), Id::Unknown);
+				auto *extraField = new ExtraLasField(QString(sf->getName()), Id::Unknown);
 				extraFields.emplace_back(extraField);
 				extraFields.back()->sf = sf;
 			}

@@ -31,8 +31,10 @@
 #include <ccColorScalesManager.h>
 #include <ccColorScaleEditorDlg.h>
 #include <ccCommon.h>
-#include <ccQtHelpers.h>
 #include <ccRenderToFileDlg.h>
+
+//common
+#include <ccQtHelpers.h>
 
 //qCC_db
 #include <ccFileUtils.h>

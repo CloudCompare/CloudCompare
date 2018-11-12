@@ -24,9 +24,9 @@
 #include "CCPlatform.h"
 
 //system
+#include <cassert>
+#include <cstring>
 #include <vector>
-#include <assert.h>
-#include <string.h>
 
 #ifdef CC_ENV_64
 //enables 64 bits code octree (can go up to level 21, but take 50% more memory)
@@ -86,9 +86,9 @@ public:
 		\warning Never pass a 'constant initializer' by reference
 	**/
 #ifdef OCTREE_CODES_64_BITS
-	typedef unsigned long long CellCode; //max 21 levels (but twice more memory!)
+	using CellCode = unsigned long long; //max 21 levels (but twice more memory!)
 #else
-	typedef unsigned CellCode; //max 10 levels
+	using CellCode = unsigned; //max 10 levels
 #endif
 
 	//! Max octree length at last level of subdivision (number of cells)
@@ -102,10 +102,10 @@ public:
 	static const CellCode INVALID_CELL_CODE = (~static_cast<CellCode>(0));
 
 	//! Octree cell codes container
-	typedef std::vector<CellCode> cellCodesContainer;
+	using cellCodesContainer = std::vector<CellCode>;
 
 	//! Octree cell indexes container
-	typedef std::vector<unsigned> cellIndexesContainer;
+	using cellIndexesContainer = std::vector<unsigned int>;
 
 	//! Structure used during nearest neighbour search
 	/** Association between a point, its index and its square distance to the query point.
@@ -156,7 +156,7 @@ public:
 	};
 
 	//! A set of neighbours
-	typedef std::vector<PointDescriptor> NeighboursSet;
+	using NeighboursSet = std::vector<PointDescriptor>;
 
 	//! Structure used during nearest neighbour search
 	struct CellDescriptor
@@ -167,7 +167,7 @@ public:
 		unsigned index;
 
 		//! Default empty constructor
-		CellDescriptor() {}
+		CellDescriptor() = default;
 
 		//! Constructor from a point and an index
 		CellDescriptor(const CCVector3& C, unsigned i)
@@ -177,7 +177,7 @@ public:
 	};
 
 	//! A set of neighbour cells descriptors
-	typedef std::vector<CellDescriptor> NeighbourCellsSet;
+	using NeighbourCellsSet = std::vector<CellDescriptor>;
 
 	//! Container of in/out parameters for nearest neighbour(s) search
 	/** This structure is generic and can be used in multiple cases.
@@ -379,7 +379,7 @@ public:
 	};
 
 	//! Container of 'IndexAndCode' structures
-	typedef std::vector<IndexAndCode> cellsContainer;
+	using cellsContainer = std::vector<IndexAndCode>;
 
 	//! Octree cell descriptor
 	struct octreeCell
@@ -420,7 +420,7 @@ public:
 		- (NormalizedProgress*) optional (normalized) progress callback
 		- return success
 	**/
-	typedef bool (*octreeCellFunc)(const octreeCell& cell, void**, NormalizedProgress*);
+	using octreeCellFunc = bool (*)(const octreeCell &, void **, NormalizedProgress *);
 
 	/******************************/
 	/**          METHODS         **/
@@ -432,7 +432,7 @@ public:
 	explicit DgmOctree(GenericIndexedCloudPersist* cloud);
 
 	//! DgmOctree destructor
-	virtual ~DgmOctree();
+	~DgmOctree() override = default;
 
 	//! Clears the octree
 	virtual void clear();
@@ -457,9 +457,9 @@ public:
 	**/
 	int build(	const CCVector3& octreeMin,
 				const CCVector3& octreeMax,
-				const CCVector3* pointsMinFilter = 0,
-				const CCVector3* pointsMaxFilter = 0,
-				GenericProgressCallback* progressCb = 0);
+				const CCVector3* pointsMinFilter = nullptr,
+				const CCVector3* pointsMaxFilter = nullptr,
+				GenericProgressCallback* progressCb = nullptr);
 
 	/**** GETTERS ****/
 

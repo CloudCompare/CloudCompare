@@ -2,22 +2,22 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompareStereo"
-#define MyAppVersion "2.9.1"
+#define MyAppVersion "2.10.alpha"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.cloudcompare.org/"
 #define MyAppExeName "CloudCompare.exe"
 #define MyVCRedistPath "E:\These\C++\CloudCompare\vc_redist"
 #define MyFaroRedistPath "E:\These\C++\Faro\redist"
-#define MyFaroRedistExe "FARO LS 5.5.3.16 x64 Setup.exe"
-#define MyCCPath "E:\These\C++\CloudCompare\bin_x64_msvc_2013\CloudCompareStereo"
-#define MyOutputDir "E:\These\C++\CloudCompare\bin_x64_msvc_2013"
+#define MyFaroRedistExe "E1800_FARO_LS_SDK_7.1.1.81_x64_Setup"
+#define MyCCPath "E:\These\C++\CloudCompare\bin_x64_msvc_2017\CloudCompareStereo"
+#define MyOutputDir "E:\These\C++\CloudCompare\bin_x64_msvc_2017"
 #define MyCreationDate GetDateTimeString('mm_dd_yyyy', '', '')
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppID={{4DE0A2C8-03F9-4B3F-BAFC-1D5F2141464B}
+AppID={E36D8881-C2B4-473E-A794-44437C1C7745}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}

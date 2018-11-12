@@ -11,42 +11,44 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                    COPYRIGHT: CloudCompare project                     #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_PICKING_LISTENER_HEADER
-#define CC_PICKING_LISTENER_HEADER
-
-//CCLib
-#include <CCGeom.h>
+#ifndef CC_PICK_ONE_ELEMENT_DLG_HEADER
+#define CC_PICK_ONE_ELEMENT_DLG_HEADER
 
 //Qt
-#include <QPoint>
+#include <QDialog>
 
-class ccHObject;
+class Ui_PickOneElementDialog;
 
-//! Point/triangle picking listener interface
-class ccPickingListener
+//! Minimal dialog to pick one element in a list (combox box)
+class ccPickOneElementDlg : public QDialog
 {
+	Q_OBJECT
+
 public:
-	
-	//! Picked item
-	struct PickedItem
-	{
-		PickedItem()
-			: entity(nullptr)
-			, itemIndex(0)
-		{}
 
-		QPoint clickPoint; //position of the user click
-		ccHObject* entity; //picked entity (if any)
-		unsigned itemIndex; //e.g. point or triangle index
-		CCVector3 P3D; //picked point in 3D (if any)
-	};
+	//! Default constructor
+	ccPickOneElementDlg(const QString &label,
+						const QString &windowTitle = QString(),
+						QWidget* parent = nullptr);
 
-	//! Method called whenever an item is picked
-	virtual void onItemPicked(const PickedItem& pi) = 0;
+	//! Destructor
+	~ccPickOneElementDlg() override;
+
+	//! Add an element to the combo box
+	void addElement(const QString &elementName);
+	//! Sets the combo box default index
+	void setDefaultIndex(int index);
+	//! Returns the combo box current index (after completion)
+	int getSelectedIndex();
+
+protected:
+
+	//! Associated UI
+	Ui_PickOneElementDialog* m_ui;
 };
 
-#endif //CC_PICKING_LISTENER_HEADER
+#endif //CC_PICK_ONE_ELEMENT_DLG_HEADER

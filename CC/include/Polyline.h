@@ -44,7 +44,7 @@ class CC_CORE_LIB_API Polyline : public ReferenceCloud
 		inline void setClosed(bool state) { m_isClosed = state; }
 
 		//inherited from ReferenceCloud
-		virtual void clear(bool unusedParam = true);
+		void clear(bool unusedParam = true) override;
 
 	protected:
 

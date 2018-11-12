@@ -27,9 +27,9 @@ namespace CCLib
 {
 
 class GenericCloud;
+class GenericDistribution;
 class GenericIndexedCloud;
 class GenericIndexedCloudPersist;
-class GenericDistribution;
 class GenericProgressCallback;
 
 //! Statistical testing algorithms (Chi2 distance computation, statistic filtering, etc.)

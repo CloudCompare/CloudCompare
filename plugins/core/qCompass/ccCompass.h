@@ -191,13 +191,13 @@ protected:
 	QString m_lastGeoObjectName = "GeoObject"; 
 
 	//used while exporting data
-	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());
-	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = QString());
-	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString(), bool thickness=false); //if thickness is true this will write "thickness lineations" rather than orientation lineations
+	int writePlanes(ccHObject* object, QTextStream* out, const QString &parentName = QString());
+	int writeTraces(ccHObject* object, QTextStream* out, const QString &parentName = QString());
+	int writeLineations(ccHObject* object, QTextStream* out, const QString &parentName = QString(), bool thickness=false); //if thickness is true this will write "thickness lineations" rather than orientation lineations
 	
 	int writeTracesSVG(ccHObject* object, QTextStream* out, int height, float zoom);
 
-	int writeToXML(QString filename); //exports Compass interpretation tree to xml
+	int writeToXML(const QString &filename); //exports Compass interpretation tree to xml
 	int writeObjectXML(ccHObject* object, QXmlStreamWriter* out); //writes the provided object (recursive)
 
 	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)

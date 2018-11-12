@@ -261,6 +261,16 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 				//DGM: in case there's hidden or space characters at the beginning of the line...
 				int shift = currentLine.indexOf("map_K",0);
 				QString textureFilename = (shift + 7 < currentLine.size() ? currentLine.mid(shift+7).trimmed() : QString());
+				//remove any quotes around the filename (Photoscan 1.4 bug)
+				if (textureFilename.startsWith("\""))
+				{
+					textureFilename = textureFilename.right(textureFilename.size() - 1);
+				}
+				if (textureFilename.endsWith("\""))
+				{
+					textureFilename = textureFilename.left(textureFilename.size() - 1);
+				}
+
 				QString fullTexName = path + QString('/') + textureFilename;
 				if (!currentMaterial->loadAndSetTexture(fullTexName))
 				{

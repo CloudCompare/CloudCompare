@@ -1,6 +1,3 @@
-#ifndef CCPLUGINMANAGER_H
-#define CCPLUGINMANAGER_H
-
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,37 +11,43 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#                    COPYRIGHT: CloudCompare project                     #
 //#                                                                        #
 //##########################################################################
 
-#include <QObject>
-#include <QVector>
+#ifndef CC_PICKING_LISTENER_HEADER
+#define CC_PICKING_LISTENER_HEADER
 
-class ccPluginInterface;
+//CCLib
+#include <CCGeom.h>
 
-//! Simply a list of \see ccPluginInterface
-typedef QVector<ccPluginInterface *> ccPluginInterfaceList;
+//Qt
+#include <QPoint>
 
+class ccHObject;
 
-class ccPluginManager : public QObject
+//! Point/triangle picking listener interface
+class ccPickingListener
 {
-	Q_OBJECT
-	
 public:
-	explicit ccPluginManager( QObject *parent = nullptr );
-	~ccPluginManager();
+	virtual ~ccPickingListener() = default;
 	
-	static void loadPlugins();
+	//! Picked item
+	struct PickedItem
+	{
+		PickedItem()
+			: entity(nullptr)
+			, itemIndex(0)
+		{}
 
-	static QStringList pluginPaths();
-	
-	static ccPluginInterfaceList &pluginList();
-	
-private:	
-	static void loadFromPathsAndAddToList();	
-	
-	static ccPluginInterfaceList m_pluginList;
+		QPoint clickPoint; //position of the user click
+		ccHObject* entity; //picked entity (if any)
+		unsigned itemIndex; //e.g. point or triangle index
+		CCVector3 P3D; //picked point in 3D (if any)
+	};
+
+	//! Method called whenever an item is picked
+	virtual void onItemPicked(const PickedItem& pi) = 0;
 };
 
-#endif
+#endif //CC_PICKING_LISTENER_HEADER

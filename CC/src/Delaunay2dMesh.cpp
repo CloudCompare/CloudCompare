@@ -19,8 +19,8 @@
 #include <Delaunay2dMesh.h>
 
 //local
-#include <PointCloud.h>
 #include <ManualSegmentationTools.h>
+#include <PointCloud.h>
 #include <Polyline.h>
 
 #if defined(USE_CGAL_LIB)

@@ -64,9 +64,8 @@ const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = 2000000000; //we must keep it
 class QCC_DB_LIB_API ccPointCloud : public CCLib::PointCloudTpl<ccGenericPointCloud>
 {
 public:
-
 	//! Base class (shortcut)
-	typedef CCLib::PointCloudTpl<ccGenericPointCloud> BaseClass;
+	using BaseClass = CCLib::PointCloudTpl<ccGenericPointCloud>;
 
 	//! Default constructor
 	/** Creates an empty cloud without any feature. Each of them shoud be
@@ -80,7 +79,7 @@ public:
 	virtual ~ccPointCloud();
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POINT_CLOUD; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POINT_CLOUD; }
 
 public: //clone, copy, etc.
 
@@ -130,10 +129,10 @@ public: //clone, copy, etc.
 		\param ignoreChildren [optional] whether to ignore the cloud's children or not (in which case they will be cloned as well)
 		\return a copy of this entity
 	**/
-	ccPointCloud* cloneThis(ccPointCloud* destCloud = 0, bool ignoreChildren = false);
+	ccPointCloud* cloneThis(ccPointCloud* destCloud = nullptr, bool ignoreChildren = false);
 
 	//inherited from ccGenericPointCloud
-	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = nullptr, bool ignoreChildren = false) override;
+	ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = nullptr, bool ignoreChildren = false) override;
 
 	//! Fuses another 3D entity with this one
 	/** All the main features of the given entity are added, except from the octree and
@@ -146,7 +145,7 @@ public: //features deletion/clearing
 	//! Clears the entity from all its points and features
 	/** Display parameters are also reseted to their default values.
 	**/
-	virtual void clear();
+	void clear() override;
 
 	//! Erases the cloud points
 	/** Prefer ccPointCloud::clear by default.
@@ -226,7 +225,7 @@ public: //features allocation/resize
 		population. Only the already allocated features will be re-reserved.
 		\return true if ok, false if there's not enough memory
 	**/
-	virtual bool reserve(unsigned numberOfPoints);
+	bool reserve(unsigned numberOfPoints) override;
 
 	//! Resizes all the active features arrays
 	/** This method is meant to be called after having increased the cloud
@@ -234,7 +233,7 @@ public: //features allocation/resize
 		reserved size). Otherwise, it fills all new elements with blank values.
 		\return true if ok, false if there's not enough memory
 	**/
-	virtual bool resize(unsigned numberOfPoints);
+	bool resize(unsigned numberOfPoints) override;
 
 	//! Removes unused capacity
 	inline void shrinkToFit() { if (size() < capacity()) resize(size()); }
@@ -251,9 +250,9 @@ public: //scalar-fields management
 	void setCurrentDisplayedScalarField(int index);
 
 	//inherited from base class
-	virtual void deleteScalarField(int index);
-	virtual void deleteAllScalarFields();
-	virtual int addScalarField(const char* uniqueName);
+	void deleteScalarField(int index) override;
+	void deleteAllScalarFields() override;
+	int addScalarField(const char* uniqueName) override;
 
 	//! Returns whether color scale should be displayed or not
 	bool sfColorScaleShown() const;
@@ -266,7 +265,7 @@ public: //associated (scan) grid structure
 	struct Grid
 	{
 		//! Shared type
-		typedef QSharedPointer<Grid> Shared;
+		using Shared = QSharedPointer<Grid>;
 
 		//! Default constructor
 		Grid()
@@ -389,11 +388,11 @@ public: //waveform (e.g. from airborne scanners)
 	ccWaveformProxy waveformProxy(unsigned index) const;
 
 	//! Waveform descriptors set
-	typedef QMap<uint8_t, WaveformDescriptor> FWFDescriptorSet;
+	using FWFDescriptorSet = QMap<uint8_t, WaveformDescriptor>;
 
 	//! Waveform data container
-	typedef std::vector<uint8_t> FWFDataContainer;
-	typedef QSharedPointer<const FWFDataContainer> SharedFWFDataContainer;
+	using FWFDataContainer = std::vector<uint8_t>;
+	using SharedFWFDataContainer = QSharedPointer<const FWFDataContainer>;
 
 	//! Gives access to the FWF descriptors
 	FWFDescriptorSet& fwfDescriptors() { return m_fwfDescriptors; }
@@ -435,36 +434,35 @@ public: //other methods
 	CCVector3 computeGravityCenter();
 
 	//inherited from base class
-	virtual void invalidateBoundingBox();
+	void invalidateBoundingBox() override;
 
 	//inherited from ccHObject
-	virtual void getDrawingParameters(glDrawParams& params) const override;
-	virtual unsigned getUniqueIDForDisplay() const override;
+	void getDrawingParameters(glDrawParams& params) const override;
+	unsigned getUniqueIDForDisplay() const override;
 
 	//inherited from ccDrawableObject
-	virtual bool hasColors() const override;
-	virtual bool hasNormals() const override;
-	virtual bool hasScalarFields() const override;
-	virtual bool hasDisplayedScalarField() const override;
-	virtual void removeFromDisplay(const ccGenericGLDisplay* win) override; //for proper VBO release
+	bool hasColors() const override;
+	bool hasNormals() const override;
+	bool hasScalarFields() const override;
+	bool hasDisplayedScalarField() const override;
+	void removeFromDisplay(const ccGenericGLDisplay* win) override; //for proper VBO release
 
 	//inherited from CCLib::GenericCloud
-	virtual unsigned char testVisibility(const CCVector3& P) const override;
+	unsigned char testVisibility(const CCVector3& P) const override;
 
 	//inherited from ccGenericPointCloud
-	virtual const ccColor::Rgb* geScalarValueColor(ScalarType d) const override;
-	virtual const ccColor::Rgb* getPointScalarValueColor(unsigned pointIndex) const override;
-	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const override;
-	virtual const ccColor::Rgb& getPointColor(unsigned pointIndex) const override;
-	virtual const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const override;
-	virtual const CCVector3& getPointNormal(unsigned pointIndex) const override;
+	const ccColor::Rgb* geScalarValueColor(ScalarType d) const override;
+	const ccColor::Rgb* getPointScalarValueColor(unsigned pointIndex) const override;
+	ScalarType getPointDisplayedDistance(unsigned pointIndex) const override;
+	const ccColor::Rgb& getPointColor(unsigned pointIndex) const override;
+	const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const override;
+	const CCVector3& getPointNormal(unsigned pointIndex) const override;
 	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
-	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
+	void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
 	/** \warning if removeSelectedPoints is true, any attached octree will be deleted. **/
-	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr) override;
-	virtual void applyRigidTransformation(const ccGLMatrix& trans) override;
-	//virtual bool isScalarFieldEnabled() const;
-	inline virtual void refreshBB() override { invalidateBoundingBox(); }
+	ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr) override;
+	void applyRigidTransformation(const ccGLMatrix& trans) override;
+	inline void refreshBB() override { invalidateBoundingBox(); }
 
 
 	//! Sets whether visibility check is enabled or not (e.g. during distances computation)
@@ -713,16 +711,16 @@ public: //other methods
 protected:
 
 	//inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
-	virtual void applyGLTransformation(const ccGLMatrix& trans) override;
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
-	virtual void notifyGeometryUpdate() override;
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	void applyGLTransformation(const ccGLMatrix& trans) override;
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	void notifyGeometryUpdate() override;
 
 	//inherited from PointCloud
 	/** \warning Doesn't handle scan grids!
 	**/
-	virtual void swapPoints(unsigned firstIndex, unsigned secondIndex);
+	void swapPoints(unsigned firstIndex, unsigned secondIndex) override;
 
 	//! Colors
 	ColorsTableType* m_rgbColors;

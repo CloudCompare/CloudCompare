@@ -24,8 +24,8 @@
 #include "BoundingBox.h"
 
 //System
+#include <cassert>
 #include <vector>
-#include <assert.h>
 
 namespace CCLib
 {
@@ -45,26 +45,26 @@ public:
 	ReferenceCloud(const ReferenceCloud& refCloud);
 
 	//! Destructor
-	virtual ~ReferenceCloud();
+	~ReferenceCloud() override = default;
 
 	//**** inherited form GenericCloud ****//
-	inline virtual unsigned size() const override { return static_cast<unsigned>(m_theIndexes.size()); }
-	virtual void forEach(genericPointAction action) override;
-	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
-	inline virtual unsigned char testVisibility(const CCVector3& P) const override { assert(m_theAssociatedCloud); return m_theAssociatedCloud->testVisibility(P); }
-	inline virtual void placeIteratorAtBeginning() override { m_globalIterator = 0; }
-	inline virtual const CCVector3* getNextPoint() override { assert(m_theAssociatedCloud); return (m_globalIterator < size() ? m_theAssociatedCloud->getPoint(m_theIndexes[m_globalIterator++]) : nullptr); }
-	inline virtual bool enableScalarField() override { assert(m_theAssociatedCloud); return m_theAssociatedCloud->enableScalarField(); }
-	inline virtual bool isScalarFieldEnabled() const override { assert(m_theAssociatedCloud); return m_theAssociatedCloud->isScalarFieldEnabled(); }
-	inline virtual void setPointScalarValue(unsigned pointIndex, ScalarType value) override { assert(m_theAssociatedCloud && pointIndex < size()); m_theAssociatedCloud->setPointScalarValue(m_theIndexes[pointIndex], value); }
-	inline virtual ScalarType getPointScalarValue(unsigned pointIndex) const override { assert(m_theAssociatedCloud && pointIndex < size()); return m_theAssociatedCloud->getPointScalarValue(m_theIndexes[pointIndex]); }
+	inline unsigned size() const override { return static_cast<unsigned>(m_theIndexes.size()); }
+	void forEach(genericPointAction action) override;
+	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
+	inline unsigned char testVisibility(const CCVector3& P) const override { assert(m_theAssociatedCloud); return m_theAssociatedCloud->testVisibility(P); }
+	inline void placeIteratorAtBeginning() override { m_globalIterator = 0; }
+	inline const CCVector3* getNextPoint() override { assert(m_theAssociatedCloud); return (m_globalIterator < size() ? m_theAssociatedCloud->getPoint(m_theIndexes[m_globalIterator++]) : nullptr); }
+	inline bool enableScalarField() override { assert(m_theAssociatedCloud); return m_theAssociatedCloud->enableScalarField(); }
+	inline bool isScalarFieldEnabled() const override { assert(m_theAssociatedCloud); return m_theAssociatedCloud->isScalarFieldEnabled(); }
+	inline void setPointScalarValue(unsigned pointIndex, ScalarType value) override { assert(m_theAssociatedCloud && pointIndex < size()); m_theAssociatedCloud->setPointScalarValue(m_theIndexes[pointIndex], value); }
+	inline ScalarType getPointScalarValue(unsigned pointIndex) const override { assert(m_theAssociatedCloud && pointIndex < size()); return m_theAssociatedCloud->getPointScalarValue(m_theIndexes[pointIndex]); }
 
 	//**** inherited form GenericIndexedCloud ****//
-	inline virtual const CCVector3* getPoint(unsigned index) override { assert(m_theAssociatedCloud && index < size()); return m_theAssociatedCloud->getPoint(m_theIndexes[index]); }
-	inline virtual void getPoint(unsigned index, CCVector3& P) const override { assert(m_theAssociatedCloud && index < size()); m_theAssociatedCloud->getPoint(m_theIndexes[index], P); }
+	inline const CCVector3* getPoint(unsigned index) override { assert(m_theAssociatedCloud && index < size()); return m_theAssociatedCloud->getPoint(m_theIndexes[index]); }
+	inline void getPoint(unsigned index, CCVector3& P) const override { assert(m_theAssociatedCloud && index < size()); m_theAssociatedCloud->getPoint(m_theIndexes[index], P); }
 
 	//**** inherited form GenericIndexedCloudPersist ****//
-	inline virtual const CCVector3* getPointPersistentPtr(unsigned index) override { assert(m_theAssociatedCloud && index < size()); return m_theAssociatedCloud->getPointPersistentPtr(m_theIndexes[index]); }
+	inline const CCVector3* getPointPersistentPtr(unsigned index) override { assert(m_theAssociatedCloud && index < size()); return m_theAssociatedCloud->getPointPersistentPtr(m_theIndexes[index]); }
 
 	//! Returns global index (i.e. relative to the associated cloud) of a given element
 	/** \param localIndex local index (i.e. relative to the internal index container)
@@ -163,7 +163,7 @@ public:
 protected:
 
 	//! Container of 3D point indexes
-	typedef std::vector<unsigned> ReferencesContainer;
+	using ReferencesContainer = std::vector<unsigned int>;
 
 	//! Indexes of (some of) the associated cloud points
 	ReferencesContainer m_theIndexes;

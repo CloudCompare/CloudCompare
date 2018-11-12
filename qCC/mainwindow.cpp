@@ -24,8 +24,8 @@
 #include <MeshSamplingTools.h>
 #include <NormalDistribution.h>
 #include <ParallelSort.h>
-#include <ScalarFieldTools.h>
 #include <PointCloud.h>
+#include <ScalarFieldTools.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
 
@@ -61,23 +61,29 @@
 //local includes
 #include "ccConsole.h"
 #include "ccEntityAction.h"
-#include "ccInnerRect2DFinder.h"
 #include "ccHistogramWindow.h"
+#include "ccInnerRect2DFinder.h"
+
+//common
+#include <ccPickingHub.h>
+//common dialogs
+#include <ccCameraParamEditDlg.h>
+#include <ccDisplayOptionsDlg.h>
+#include <ccPickOneElementDlg.h>
+#include <ccStereoModeDlg.h>
 
 //dialogs
 #include "ccAboutDialog.h"
 #include "ccAdjustZoomDlg.h"
-#include "ccApplication.h"
 #include "ccAlignDlg.h" //Aurelien BEY
+#include "ccApplication.h"
 #include "ccApplyTransformationDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
-#include "ccCameraParamEditDlg.h"
 #include "ccCamSensorProjectionDlg.h"
 #include "ccClippingBoxTool.h"
 #include "ccColorScaleEditorDlg.h"
 #include "ccComparisonDlg.h"
-#include "ccDisplayOptionsDlg.h"
 #include "ccFilterByValueDlg.h"
 #include "ccGBLSensorProjectionDlg.h"
 #include "ccGraphicalSegmentationTool.h"
@@ -87,8 +93,6 @@
 #include "ccMatchScalesDlg.h"
 #include "ccNoiseFilterDlg.h"
 #include "ccOrderChoiceDlg.h"
-#include "ccPickingHub.h"
-#include "ccPickOneElementDlg.h"
 #include "ccPlaneEditDlg.h"
 #include "ccPointListPickingDlg.h"
 #include "ccPointPairRegistrationDlg.h"
@@ -103,9 +107,9 @@
 #include "ccSensorComputeDistancesDlg.h"
 #include "ccSensorComputeScatteringAnglesDlg.h"
 #include "ccSORFilterDlg.h"
-#include "ccStereoModeDlg.h"
 #include "ccSubsamplingDlg.h" //Aurelien BEY
 #include "ccTracePolylineTool.h"
+#include "ccTranslationManager.h"
 #include "ccUnrollDlg.h"
 #include "ccVolumeCalcTool.h"
 #include "ccWaveformDialog.h"
@@ -193,12 +197,15 @@ MainWindow::MainWindow()
 	, m_plpDlg(nullptr)
 	, m_pprDlg(nullptr)
 	, m_pfDlg(nullptr)
+	, m_TranslationManager( new ccTranslationManager( this ) )
 {
 	m_UI->setupUi( this );
 
 	setWindowTitle(QStringLiteral("CloudCompare v") + ccApp->versionLongStr(false));
 	
 	m_pluginUIManager = new ccPluginUIManager( this, this );
+	
+	m_TranslationManager->populateMenu( m_UI->menuLanguage );
 	
 #ifdef Q_OS_MAC
 	m_UI->actionAbout->setMenuRole( QAction::AboutRole );
@@ -1420,6 +1427,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	sasDlg.showApplyAllButton(shiftedEntities.size() > 1);
 	sasDlg.showApplyButton(shiftedEntities.size() == 1);
 	sasDlg.showNoButton(false);
+	sasDlg.setShiftFieldsPrecision(6);
 	//add "original" entry
 	int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", shift, scale));
 	sasDlg.setCurrentProfile(index);
@@ -5758,7 +5766,7 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 	m_mdiDialogs.push_back(ccMDIDialogs(dlg, pos));
 
 	//automatically update the dialog placement when its shown
-	connect(dlg, &ccOverlayDialog::shown, this, [&]()
+	connect(dlg, &ccOverlayDialog::shown, this, [=]()
 	{
 		//check for existence
 		for (ccMDIDialogs& mdi : m_mdiDialogs)
@@ -8921,7 +8929,9 @@ void MainWindow::doActionDeleteShader()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
-		win->setShader(0);
+	{
+		win->setShader(nullptr);
+	}
 }
 
 void MainWindow::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
@@ -9446,8 +9456,10 @@ void MainWindow::doActionSaveFile()
 		if (m_selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
 			QStringList parts = defaultFileName.split(' ',QString::SkipEmptyParts);
-			if (parts.size() > 0)
+			if (!parts.empty())
+			{
 				defaultFileName = parts[0];
+			}
 		}
 
 		//we remove the extension
@@ -9556,7 +9568,7 @@ void MainWindow::doActionSaveFile()
 
 void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 {
-	ccGLWindow* win = mdiWin ? GLWindowFromWidget(mdiWin->widget()) : 0;
+	ccGLWindow* win = mdiWin ? GLWindowFromWidget(mdiWin->widget()) : nullptr;
 	if (win)
 	{
 		updateViewModePopUpMenu(win);
@@ -10185,9 +10197,8 @@ MainWindow* MainWindow::TheInstance()
 
 void MainWindow::DestroyInstance()
 {
-	if (s_instance)
-		delete s_instance;
-	s_instance=0;
+	delete s_instance;
+	s_instance=nullptr;
 }
 
 void MainWindow::GetGLWindows(std::vector<ccGLWindow*>& glWindows)
@@ -10250,7 +10261,7 @@ void MainWindow::addEditPlaneAction( QMenu &menu ) const
 
 ccHObject* MainWindow::dbRootObject()
 {
-	return (m_ccRoot ? m_ccRoot->getRootEntity() : 0);
+	return (m_ccRoot ? m_ccRoot->getRootEntity() : nullptr);
 }
 
 ccUniqueIDGenerator::Shared MainWindow::getUniqueIDGenerator()

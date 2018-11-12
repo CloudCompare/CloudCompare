@@ -17,8 +17,8 @@
 
 #include "ccOverlayDialog.h"
 
-//Local
-#include "ccGLWindow.h"
+//qCC_glWindow
+#include <ccGLWindow.h>
 
 //qCC_db
 #include <ccLog.h>
@@ -29,11 +29,11 @@
 #include <QApplication>
 
 //system
-#include <assert.h>
+#include <cassert>
 
 ccOverlayDialog::ccOverlayDialog(QWidget* parent/*=0*/, Qt::WindowFlags flags/*=Qt::FramelessWindowHint | Qt::Tool*/)
 	: QDialog(parent, flags)
-	, m_associatedWin(0)
+	, m_associatedWin(nullptr)
 	, m_processing(false)
 {
 }

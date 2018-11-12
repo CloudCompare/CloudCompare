@@ -26,22 +26,23 @@
 #include <ccPointCloud.h>
 
 //Qt
-#include <QMessageBox>
-#include <QTableWidget>
-#include <QTableWidgetItem>
-#include <QLineEdit>
-#include <QSpinBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
-#include <QToolButton>
-#include <QPushButton>
 #include <QFile>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QTableWidget>
+#include <QTableWidgetItem>
 #include <QTextStream>
+#include <QToolButton>
+#include <QDesktopWidget>
 
 //system
-#include <string.h>
-#include <stdio.h>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
 
 //Semi-persistent value for max. cloud size
 static double s_maxCloudSizeDoubleSpinBoxValue = (CC_MAX_NUMBER_OF_POINTS_PER_CLOUD / 1.0e6);
@@ -95,12 +96,10 @@ static AsciiOpenContext s_asciiOpenContext;
 
 AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	: QDialog(parent)
-	//, Ui::AsciiOpenDialog()
 	, m_ui(new Ui_AsciiOpenDialog)
 	, m_skippedLines(0)
 	, m_separator(' ')
 	, m_averageLineSize(-1.0)
-	//, m_filename()
 	, m_columnsCount(0)
 {
 	m_ui->setupUi(this);
@@ -120,17 +119,20 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	connect(m_ui->toolButtonShortcutComma,		SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
 	connect(m_ui->toolButtonShortcutDotcomma,	SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
 
-	m_ui->maxCloudSizeDoubleSpinBox->setMaximum(static_cast<double>(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD)/1.0e6);
+	m_ui->maxCloudSizeDoubleSpinBox->setMaximum(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD / 1.0e6);
 	m_ui->maxCloudSizeDoubleSpinBox->setValue(s_maxCloudSizeDoubleSpinBoxValue);
+
+	QSize screenSize = QApplication::desktop()->screenGeometry().size();
+	setMaximumSize(screenSize);
 }
 
 AsciiOpenDlg::~AsciiOpenDlg()
 {
-	if (m_ui)
-		delete m_ui;
+	delete m_ui;
+	m_ui = nullptr;
 }
 
-void AsciiOpenDlg::setFilename(QString filename)
+void AsciiOpenDlg::setFilename(const QString &filename)
 {
 	m_filename = filename;
 	m_ui->lineEditFileName->setText(m_filename);
@@ -140,7 +142,7 @@ void AsciiOpenDlg::setFilename(QString filename)
 
 void AsciiOpenDlg::autoFindBestSeparator()
 {
-	const QList<QChar> separators{ QChar(' '),
+	const QList<QChar> separators{	QChar(' '),
 									QChar('\t'),
 									QChar(','),
 									QChar(';'),
@@ -156,8 +158,12 @@ void AsciiOpenDlg::autoFindBestSeparator()
 		//...until we find one that gives us at least 3 valid colums
 		size_t validColumnCount = 0;
 		for (ColumnType type : m_columnType)
+		{
 			if (type != TEXT)
+			{
 				++validColumnCount;
+			}
+		}
 
 		if (validColumnCount > 2)
 		{
@@ -204,7 +210,7 @@ static bool CouldBeRGBf(const QString& colHeader) { return colHeader == AsciiHea
 static bool CouldBeScal(const QString& colHeader) { return colHeader.contains("SCALAR"); }
 static bool CouldBeLabel(const QString& colHeader) { return colHeader.contains("LABEL") || colHeader.contains("NAME"); }
 
-static const unsigned MAX_COLUMNS = 256;				//maximum number of columns that can be handled
+static const unsigned MAX_COLUMNS = 512;				//maximum number of columns that can be handled
 static const unsigned LINES_READ_FOR_STATS = 200;		//number of lines read for stats
 static const unsigned DISPLAYED_LINES = 20;				//number of displayed lines
 
@@ -232,7 +238,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 	if (separator.length() < 1)
 	{
 		m_ui->asciiCodeLabel->setText("Enter a valid character!");
-		m_ui->buttonFrame->setEnabled(false);
+		m_ui->buttonWidget->setEnabled(false);
 		m_ui->tableWidget->clear();
 		m_columnType.clear();
 		return;
@@ -330,6 +336,7 @@ void AsciiOpenDlg::updateTable()
 		if (!currentLine.startsWith("//")/* || !currentLine.startsWith("#")*/)
 		{
 			QStringList parts = currentLine.trimmed().split(m_separator, QString::SkipEmptyParts);
+			
 			if (lineCount < DISPLAYED_LINES)
 			{
 				unsigned partsCount = std::min(MAX_COLUMNS, static_cast<unsigned>(parts.size()));
@@ -360,7 +367,7 @@ void AsciiOpenDlg::updateTable()
 						//remove the unnecessary cells!
 						for (int i = static_cast<int>(partsCount); i < m_ui->tableWidget->columnCount(); ++i)
 						{
-							m_ui->tableWidget->setItem(lineCount + 1, i, 0);
+							m_ui->tableWidget->setItem(lineCount + 1, i, nullptr);
 						}
 					}
 					columnsCount = partsCount;
@@ -440,7 +447,13 @@ void AsciiOpenDlg::updateTable()
 		{
 			m_headerLine.remove(0, n);
 		}
-		m_ui->headerLabel->setText(QString("Header: ") + m_headerLine);
+
+		QString displayHeader = m_headerLine;
+		if (m_headerLine.length() > 256)
+		{
+			displayHeader = m_headerLine.left(256) + "...";
+		}
+		m_ui->headerLabel->setText(QString("Header: ") + displayHeader);
 		m_ui->headerLabel->setVisible(true);
 	}
 	else
@@ -873,12 +886,12 @@ void AsciiOpenDlg::updateTable()
 	m_columnsCount = columnsCount;
 
 	m_ui->tableWidget->setEnabled(true);
-	m_ui->buttonFrame->setEnabled(true);
+	m_ui->buttonWidget->setEnabled(true);
 
 	//check for invalid columns
 	checkSelectedColumnsValidity(); //will eventually enable of disable the "OK" button
-	//expand dialog width to display all table columns
-	resizeWidthToFitTableColumns();
+	
+	m_ui->tableWidget->resizeColumnsToContents();
 }
 
 void AsciiOpenDlg::checkSelectedColumnsValidity()
@@ -1221,7 +1234,7 @@ void AsciiOpenDlg::columnsTypeHasChanged(int index)
 			if (combo->currentIndex() == index)
 			{
 				combo->blockSignals(true);
-				combo->setCurrentIndex((int)ASCII_OPEN_DLG_None);
+				combo->setCurrentIndex(ASCII_OPEN_DLG_None);
 				combo->blockSignals(false);
 			}
 		}
@@ -1265,38 +1278,4 @@ unsigned AsciiOpenDlg::getMaxCloudSize() const
 bool AsciiOpenDlg::showLabelsIn2D() const
 {
 	return m_ui->show2DLabelsCheckBox->isEnabled() && m_ui->show2DLabelsCheckBox->isChecked();
-}
-
-void AsciiOpenDlg::resizeWidthToFitTableColumns()
-{
-/*!
- * Increases dialog width if table widget contains many columns.
- * Increases table column widths to fill dialog if only a few
- * columns are present.
-*/
-    // First make sure all columns are wide enought to fit data
-    // Then get combined width of all columns.
-    m_ui->tableWidget->resizeColumnsToContents();
-    int totalColumnsWidth = m_ui->tableWidget->horizontalHeader()->length();
-
-    // To display whole table widget without h. scrollbars, need to add
-    // table and layout margin pixel values to get a total required dialog width
-    int leftTable, rightTable, leftLayout, rightLayout, top, bottom;
-    m_ui->tableWidget->getContentsMargins(&leftTable, &top, &rightTable, &bottom);
-    m_ui->verticalLayout->getContentsMargins(&leftLayout, &top, &rightLayout, &bottom);
-    int totalMarginsWidth = leftTable + rightTable + leftLayout + rightLayout;
-    int minDialogWidth = totalColumnsWidth + totalMarginsWidth;
-
-    // If table requires more space, resize dialog
-    if (minDialogWidth > this->width())
-        this->resize(minDialogWidth, this->height());
-
-    // Make columns stretchy and auto-resize
-    // This is done differently in Qt5 vs. Qt4
-#if QT_VERSION >= 0x050000
-    m_ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#else
-    m_ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-#endif
-
 }

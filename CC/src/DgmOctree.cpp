@@ -27,7 +27,7 @@
 #include <ScalarField.h>
 
 //system
-#include <stdio.h>
+#include <cstdio>
 #include <set>
 
 //DGM: tests in progress
@@ -190,10 +190,6 @@ DgmOctree::DgmOctree(GenericIndexedCloudPersist* cloud)
 	clear();
 
 	assert(m_theAssociatedCloud);
-}
-
-DgmOctree::~DgmOctree()
-{
 }
 
 void DgmOctree::clear()
@@ -2770,9 +2766,9 @@ int DgmOctree::extractCCs(unsigned char level, bool sixConnexity, GenericProgres
 struct IndexAndCodeExt
 {
 #ifdef OCTREE_CODES_64_BITS
-	typedef unsigned long long IndexType;
+	using IndexType = unsigned long long;
 #else
-	typedef unsigned IndexType;
+	using IndexType = unsigned;
 #endif
 	
 	//! index

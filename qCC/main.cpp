@@ -19,33 +19,33 @@
 
 //Qt
 #include <QDir>
-#include <QSplashScreen>
-#include <QPixmap>
 #include <QMessageBox>
+#include <QPixmap>
+#include <QSettings>
+#include <QSplashScreen>
 #include <QTime>
 #include <QTimer>
 #include <QTranslator>
-#include <QSettings>
 
 //qCC_db
+#include <ccColorScalesManager.h>
 #include <ccLog.h>
 #include <ccNormalVectors.h>
-#include <ccColorScalesManager.h>
 
 //qCC_io
 #include <FileIOFilter.h>
 #include <ccGlobalShiftManager.h>
 
 //local
-#include "mainwindow.h"
 #include "ccApplication.h"
-#include "ccGuiParameters.h"
 #include "ccCommandLineParser.h"
+#include "ccGuiParameters.h"
 #include "ccPersistentSettings.h"
+#include "mainwindow.h"
 
 //plugins
 #include "ccPluginInterface.h"
-#include "pluginManager/ccPluginManager.h"
+#include "ccPluginManager.h"
 
 #ifdef USE_VLD
 //VLD

@@ -58,6 +58,7 @@ class ccRecentFiles;
 class ccSectionExtractionTool;
 class ccStdPluginInterface;
 class ccTracePolylineTool;
+class ccTranslationManager;
 
 namespace Ui {
 	class MainWindow;
@@ -69,15 +70,13 @@ class MainWindow : public QMainWindow, public ccMainAppInterface, public ccPicki
 	Q_OBJECT
 
 protected:
-
 	//! Default constructor
 	MainWindow();
 
 	//! Default desctructor
-	virtual ~MainWindow();
-
+	~MainWindow() override;
+	
 public:
-
 	//! Returns the unique instance of this object
 	static MainWindow* TheInstance();
 
@@ -104,7 +103,7 @@ public:
 	static void DestroyInstance();
 
 	//! Returns active GL sub-window (if any)
-	virtual ccGLWindow* getActiveGLWindow() override;
+	ccGLWindow* getActiveGLWindow() override;
 	
 	//! Returns MDI area subwindow corresponding to a given 3D view
 	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
@@ -120,41 +119,41 @@ public:
 		\param fileFilter selected file filter (i.e. type)
 		\param destWin destination window (0 = active one)
 	**/
-	virtual void addToDB(	const QStringList& filenames,
-							QString fileFilter = QString(),
-							ccGLWindow* destWin = nullptr);
-
+	virtual void addToDB( const QStringList& filenames,
+						  QString fileFilter = QString(),
+						  ccGLWindow* destWin = nullptr );
+	
 	//inherited from ccMainAppInterface
-	virtual void addToDB(	ccHObject* obj,
-							bool updateZoom = false,
-							bool autoExpandDBTree = true,
-							bool checkDimensions = false,
-							bool autoRedraw = true) override;
-
-	virtual void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
-	virtual void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
-	virtual void updateOverlayDialogsPlacement() override;
-	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
-	virtual void setSelectedInDB(ccHObject* obj, bool selected) override;
-	virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
-	virtual void forceConsoleDisplay() override;
-	virtual ccHObject* dbRootObject() override;
-	inline virtual QMainWindow* getMainWindow() override { return this; }
-	inline virtual const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
-	virtual void createGLWindow(ccGLWindow*& window, QWidget*& widget) const override;
-	virtual void destroyGLWindow(ccGLWindow*) const override;
-	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator() override;
-	virtual ccColorScalesManager* getColorScalesManager() override;
-	virtual void spawnHistogramDialog(	const std::vector<unsigned>& histoValues,
-										double minVal, double maxVal,
-										QString title, QString xAxisLabel) override;
-	virtual ccPickingHub* pickingHub() override { return m_pickingHub; }
-	virtual ccHObjectContext removeObjectTemporarilyFromDBTree(ccHObject* obj) override;
-	virtual void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context) override;
-
+	void addToDB( ccHObject* obj,
+				  bool updateZoom = false,
+				  bool autoExpandDBTree = true,
+				  bool checkDimensions = false,
+				  bool autoRedraw = true ) override;
+	
+	void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
+	void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
+	void updateOverlayDialogsPlacement() override;
+	void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
+	void setSelectedInDB(ccHObject* obj, bool selected) override;
+	void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
+	void forceConsoleDisplay() override;
+	ccHObject* dbRootObject() override;
+	inline  QMainWindow* getMainWindow() override { return this; }
+	inline  const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
+	void createGLWindow(ccGLWindow*& window, QWidget*& widget) const override;
+	void destroyGLWindow(ccGLWindow*) const override;
+	ccUniqueIDGenerator::Shared getUniqueIDGenerator() override;
+	ccColorScalesManager* getColorScalesManager() override;
+	void spawnHistogramDialog(	const std::vector<unsigned>& histoValues,
+								double minVal, double maxVal,
+								QString title, QString xAxisLabel) override;
+	ccPickingHub* pickingHub() override { return m_pickingHub; }
+	ccHObjectContext removeObjectTemporarilyFromDBTree(ccHObject* obj) override;
+	void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context) override;
+	
 	//! Inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi) override;
-
+	void onItemPicked(const PickedItem& pi) override;
+	
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
 
@@ -171,7 +170,6 @@ public:
 	void updatePropertiesView();
 	
 private slots:
-
 	//! Creates a new 3D GL sub-window
 	ccGLWindow* new3DView();
 
@@ -203,25 +201,25 @@ private slots:
 	void onExclusiveFullScreenToggled(bool);
 
 	//inherited from ccMainAppInterface
-	virtual void freezeUI(bool state) override;
-	virtual void redrawAll(bool only2D = false) override;
-	virtual void refreshAll(bool only2D = false) override;
-	virtual void enableAll() override;
-	virtual void disableAll() override;
-	virtual void disableAllBut(ccGLWindow* win) override;
-	virtual void updateUI() override;
+	void freezeUI(bool state) override;
+	void redrawAll(bool only2D = false) override;
+	void refreshAll(bool only2D = false) override;
+	void enableAll() override;
+	void disableAll() override;
+	void disableAllBut(ccGLWindow* win) override;
+	void updateUI() override;
 	
 	virtual void toggleActiveWindowStereoVision(bool);
-	virtual void toggleActiveWindowCenteredPerspective() override;
-	virtual void toggleActiveWindowCustomLight() override;
-	virtual void toggleActiveWindowSunLight() override;
-	virtual void toggleActiveWindowViewerBasedPerspective() override;
-	virtual void zoomOnSelectedEntities() override;
-	virtual void setGlobalZoom() override;
+	void toggleActiveWindowCenteredPerspective() override;
+	void toggleActiveWindowCustomLight() override;
+	void toggleActiveWindowSunLight() override;
+	void toggleActiveWindowViewerBasedPerspective() override;
+	void zoomOnSelectedEntities() override;
+	void setGlobalZoom() override;
 	
-	virtual void increasePointSize() override;
-	virtual void decreasePointSize() override;
-
+	void increasePointSize() override;
+	void decreasePointSize() override;
+	
 	void toggleLockRotationAxis();
 	void doActionEnableBubbleViewMode();
 	void setPivotAlwaysOn();
@@ -447,7 +445,7 @@ private:
 	void	toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY property );
 	void	clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY property );
 	
-	virtual void setView( CC_VIEW_ORIENTATION view ) override;
+	void setView( CC_VIEW_ORIENTATION view ) override;
 	
 	//! Apply transformation to the selected entities
 	void applyTransformation(const ccGLMatrixd& transMat);
@@ -466,14 +464,14 @@ private:
 	void setOrthoView(ccGLWindow* win);
 	void setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw = true);
 	void setViewerPerspectiveView(ccGLWindow* win);
-
-	virtual void showEvent(QShowEvent* event) override;
-	virtual void closeEvent(QCloseEvent* event) override;
-	virtual void moveEvent(QMoveEvent* event) override;
-	virtual void resizeEvent(QResizeEvent* event) override;
-	virtual bool eventFilter(QObject *obj, QEvent *event) override;
-	virtual void keyPressEvent(QKeyEvent *event) override;
-
+	
+	void showEvent(QShowEvent* event) override;
+	void closeEvent(QCloseEvent* event) override;
+	void moveEvent(QMoveEvent* event) override;
+	void resizeEvent(QResizeEvent* event) override;
+	bool eventFilter(QObject *obj, QEvent *event) override;
+	void keyPressEvent(QKeyEvent *event) override;
+	
 	//! Makes the window including an entity zoom on it (helper)
 	void zoomOn(ccHObject* object);
 
@@ -599,6 +597,8 @@ private:
 	/*** plugins ***/
 	//! Manages plugins - menus, toolbars, and the about dialog
 	ccPluginUIManager	*m_pluginUIManager;
+	
+	ccTranslationManager	*m_TranslationManager;
 };
 
 #endif

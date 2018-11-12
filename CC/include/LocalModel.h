@@ -43,7 +43,7 @@ public:
 							PointCoordinateType squaredRadius);
 
 	//! Destructor
-	virtual ~LocalModel() {}
+	virtual ~LocalModel() = default;
 
 	//! Returns the model type
 	virtual CC_LOCAL_MODEL_TYPES getType() const = 0;

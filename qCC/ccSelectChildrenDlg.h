@@ -18,23 +18,26 @@
 #ifndef CC_SELECT_CHILDREN_DLG_HEADER
 #define CC_SELECT_CHILDREN_DLG_HEADER
 
-#include <ui_selectChildrenDlg.h>
-
 //Qt
 #include <QDialog>
 
 //qCC_db
 #include <ccObject.h>
 
+namespace Ui {
+    class SelectChildrenDialog;
+}
+
+
 //! Minimal dialog to pick one element in a list (combo box)
-class ccSelectChildrenDlg : public QDialog, public Ui::SelectChildrenDialog
+class ccSelectChildrenDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
-
 	//! Default constructor
-	explicit ccSelectChildrenDlg(QWidget* parent = 0);
+	explicit ccSelectChildrenDlg(QWidget* parent = nullptr);
+	~ccSelectChildrenDlg() override;
 
 	//! Add an element to the 'type' combo box
 	void addType(QString typeName, CC_CLASS_ENUM type);
@@ -57,10 +60,11 @@ public:
 	bool getNameMatchIsUsed() const;
 
 protected slots:
-
 	//! Called when the dialog is accepted
 	void onAccept();
-
+	
+private:
+	Ui::SelectChildrenDialog	*mUI;
 };
 
 #endif //CC_SELECT_CHILDREN_DLG_HEADER

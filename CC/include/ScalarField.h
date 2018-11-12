@@ -101,7 +101,7 @@ protected: //methods
 	//! Default destructor
 	/** Call release instead.
 	**/
-	virtual ~ScalarField() {}
+	~ScalarField() override = default;
 
 protected: //members
 

@@ -49,8 +49,12 @@ FastMarching::~FastMarching()
 	if (m_theGrid)
 	{
 		for (unsigned i=0; i<m_gridSize; ++i)
+		{
 			if (m_theGrid[i])
+			{
 				delete m_theGrid[i];
+			}
+		}
 
 		delete[] m_theGrid;
 	}

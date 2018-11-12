@@ -1350,7 +1350,7 @@ bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 				assert(m_triMtlIndexes->capacity() >= triNumBefore + triAdded);
 				//fill the indexes table with default values
 				{
-					for (unsigned i = 0; i < mesh->m_triMtlIndexes->size(); ++i)
+					for (unsigned i = 0; i < mesh->size(); ++i)
 						m_triMtlIndexes->emplace_back(-1);
 				}
 			}
@@ -2175,17 +2175,16 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	assert(newVertices);
 
 	//create a 'reference' cloud if none was provided
-	CCLib::ReferenceCloud* rc = nullptr;
+	QSharedPointer<CCLib::ReferenceCloud> rc;
 	{
 		//we create a temporary entity with the visible vertices only
-		rc = new CCLib::ReferenceCloud(m_associatedCloud);
+		rc.reset(new CCLib::ReferenceCloud(m_associatedCloud));
 
 		for (unsigned i = 0; i < m_associatedCloud->size(); ++i)
 			if (verticesVisibility[i] == POINT_VISIBLE)
 				if (!rc->addPointIndex(i))
 				{
 					ccLog::Error("Not enough memory!");
-					delete rc;
 					return nullptr;
 				}
 	}
@@ -2193,16 +2192,14 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	//nothing to do
 	if (rc->size() == 0 || (removeSelectedFaces && rc->size() == m_associatedCloud->size()))
 	{
-		delete rc;
 		return nullptr;
 	}
 
 	//we create a new mesh with the current selection
-	CCLib::GenericIndexedMesh* result = CCLib::ManualSegmentationTools::segmentMesh(this, rc, true, nullptr, newVertices);
+	CCLib::GenericIndexedMesh* result = CCLib::ManualSegmentationTools::segmentMesh(this, rc.data(), true, nullptr, newVertices);
 
 	//don't use this anymore
-	delete rc;
-	rc = nullptr;
+	rc.clear();
 
 	ccMesh* newMesh = nullptr;
 	if (result)
@@ -2327,7 +2324,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 								if (triNormIndexes.u[j] >= 0 && newNormIndexes[triNormIndexes.u[j]] < 0)
 								{
 									if (newTriNormals->size() == newTriNormals->capacity() 
-										&& !newTriNormals->reserveSafe(newTriNormals->size() + 1000)) //auto expand
+										&& !newTriNormals->reserveSafe(newTriNormals->size() + 4096)) //auto expand
 									{
 										ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new normals subset! (not enough memory)");
 										newMesh->removePerTriangleNormalIndexes();
@@ -2365,7 +2362,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 								if (triTexIndexes.u[j] >= 0 && newTexIndexes[triTexIndexes.u[j]] < 0)
 								{
 									if (newTriTexIndexes->size() == newTriTexIndexes->capacity() 
-										&& !newTriTexIndexes->reserveSafe(newTriTexIndexes->size() + 500)) //auto expand
+										&& !newTriTexIndexes->reserveSafe(newTriTexIndexes->size() + 4096)) //auto expand
 									{
 										ccLog::Error("Failed to create new texture coordinates subset! (not enough memory)");
 										newMesh->removePerTriangleTexCoordIndexes();
@@ -2467,6 +2464,8 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	ccHObject::Container subMeshes;
 	if (filterChildren(subMeshes, false, CC_TYPES::SUB_MESH) != 0)
 	{
+		ccLog::Warning("Has sub-meshes!");
+
 		//create index map
 		ccSubMesh::IndexMap indexMap;
 		try
@@ -2532,6 +2531,8 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	//shall we remove the selected faces from this mesh?
 	if (removeSelectedFaces)
 	{
+		ccLog::Warning("Remove faces!");
+
 		//we remove all fully visible faces
 		size_t lastTri = 0;
 		for (size_t i = 0; i < triNum; ++i)

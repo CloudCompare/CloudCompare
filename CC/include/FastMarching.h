@@ -25,9 +25,9 @@
 
 //system
 #include <cfloat>
-#include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
 
 namespace CCLib
@@ -147,7 +147,7 @@ protected:
 		{}
 
 		//! Virtual destructor
-		virtual ~Cell() {}
+		virtual ~Cell() = default;
 
 		//! Cell state
 		STATE state;
@@ -215,7 +215,7 @@ protected:
 			return false;
 		memset(grid,0,size*sizeof(T*));
 
-		m_theGrid = (Cell**)grid;
+		m_theGrid = reinterpret_cast<Cell **>(grid);
 
 		return true;
 	}

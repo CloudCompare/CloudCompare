@@ -15,19 +15,47 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccStdPluginInterface.h"
+#include "ccPickOneElementDlg.h"
 
-//qCC_db
-#include <ccObject.h>
+//UI file
+#include <ui_pickOneElementDlg.h>
 
-void ccStdPluginInterface::setMainAppInterface(ccMainAppInterface* app)
+ccPickOneElementDlg::ccPickOneElementDlg(	const QString &label,
+											const QString &windowTitle/*=QString()*/,
+											QWidget* parent/*=0*/)
+	: QDialog(parent, Qt::Tool)
+	, m_ui(new Ui_PickOneElementDialog)
 {
-	m_app = app;
+	m_ui->setupUi(this);
 
-	if (m_app)
+	if (!windowTitle.isNull())
 	{
-		//we use the same 'unique ID' generator in plugins as in the main
-		//application (otherwise we'll have issues with 'unique IDs'!)
-		ccObject::SetUniqueIDGenerator(m_app->getUniqueIDGenerator());
+		setWindowTitle(windowTitle);
 	}
+
+	m_ui->comboLabel->setText(label);
+}
+
+ccPickOneElementDlg::~ccPickOneElementDlg()
+{
+	if (m_ui)
+	{
+		delete m_ui;
+		m_ui = nullptr;
+	}
+}
+
+void ccPickOneElementDlg::addElement(const QString &elementName)
+{
+	m_ui->comboBox->addItem(elementName);
+}
+
+void ccPickOneElementDlg::setDefaultIndex(int index)
+{
+	m_ui->comboBox->setCurrentIndex(index);
+}
+
+int ccPickOneElementDlg::getSelectedIndex()
+{
+	return m_ui->comboBox->currentIndex();
 }

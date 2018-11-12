@@ -95,8 +95,8 @@ void ccMaterial::applyGL(const QOpenGLContext* context, bool lightEnabled, bool 
 		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   m_ambient.rgba);
 		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_specular.rgba);
 		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,  m_emission.rgba);
-		glFunc->glMaterialf (GL_FRONT,          GL_SHININESS, m_shininessFront);
-		glFunc->glMaterialf (GL_BACK,           GL_SHININESS, m_shininessBack);
+		glFunc->glMaterialf (GL_FRONT,          GL_SHININESS, std::max(0.0f, std::min(m_shininessFront, 128.0f)));
+		glFunc->glMaterialf (GL_BACK,           GL_SHININESS, std::max(0.0f, std::min(m_shininessBack, 128.0f)));
 	}
 	else
 	{

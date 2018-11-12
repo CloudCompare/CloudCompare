@@ -21,8 +21,10 @@
 #include "ccQCustomPlot.h"
 #include "ccPersistentSettings.h"
 #include "ccGuiParameters.h"
-#include "ccPickingHub.h"
 #include "ccFileUtils.h"
+
+//common
+#include <ccPickingHub.h>
 
 //qCC_db
 #include <ccPointCloud.h>

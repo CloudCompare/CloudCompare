@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>450</width>
-    <height>340</height>
+    <width>517</width>
+    <height>359</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
        <item row="3" column="2">
         <widget class="QLineEdit" name="z1rot">
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
         </widget>
        </item>
@@ -47,77 +47,77 @@
        <item row="2" column="4">
         <widget class="QLineEdit" name="y3rot">
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
         </widget>
        </item>
        <item row="3" column="4">
         <widget class="QLineEdit" name="z3rot">
          <property name="text">
-          <string>1</string>
+          <string notr="true">1</string>
          </property>
         </widget>
        </item>
        <item row="1" column="4">
         <widget class="QLineEdit" name="x3rot">
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
         </widget>
        </item>
        <item row="1" column="2">
         <widget class="QLineEdit" name="x1rot">
          <property name="text">
-          <string>1</string>
+          <string notr="true">1</string>
          </property>
         </widget>
        </item>
        <item row="2" column="2">
         <widget class="QLineEdit" name="y1rot">
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
         </widget>
        </item>
        <item row="1" column="3">
         <widget class="QLineEdit" name="x2rot">
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
         </widget>
        </item>
        <item row="3" column="3">
         <widget class="QLineEdit" name="z2rot">
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
         </widget>
        </item>
        <item row="2" column="3">
         <widget class="QLineEdit" name="y2rot">
          <property name="text">
-          <string>1</string>
+          <string notr="true">1</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
         <widget class="QLineEdit" name="posXEdit">
          <property name="text">
-          <string>0.0</string>
+          <string notr="true">0.0</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
         <widget class="QLineEdit" name="posYEdit">
          <property name="text">
-          <string>0.0</string>
+          <string notr="true">0.0</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
         <widget class="QLineEdit" name="posZEdit">
          <property name="text">
-          <string>0.0</string>
+          <string notr="true">0.0</string>
          </property>
         </widget>
        </item>
@@ -260,7 +260,7 @@
          <item>
           <widget class="QLabel" name="label_14">
            <property name="text">
-            <string>x</string>
+            <string notr="true">x</string>
            </property>
           </widget>
          </item>
@@ -329,7 +329,7 @@
          <item>
           <widget class="QLabel" name="label_15">
            <property name="text">
-            <string>x</string>
+            <string notr="true">x</string>
            </property>
           </widget>
          </item>
@@ -451,7 +451,7 @@
          <item>
           <widget class="QLabel" name="label_16">
            <property name="text">
-            <string>x</string>
+            <string notr="true">x</string>
            </property>
           </widget>
          </item>

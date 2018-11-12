@@ -32,9 +32,8 @@ class CC_CORE_LIB_API GenericIndexedCloudPersist : virtual public GenericIndexed
 {
 
 public:
-
 	//! Default destructor
-	virtual ~GenericIndexedCloudPersist() {}
+	 ~GenericIndexedCloudPersist() override = default;
 
 	//! Returns the ith point as a persistent pointer
 	/**	Virtual method to request a point with a specific index.

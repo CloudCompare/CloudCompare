@@ -41,7 +41,7 @@ public:
 	Delaunay2dMesh();
 
 	//! Delaunay2dMesh destructor
-	virtual ~Delaunay2dMesh() override;
+	~Delaunay2dMesh() override;
 
 	//! Returns whether 2D Delaunay triangulation is supported or not
 	/** 2D Delaunay triangulation requires the CGAL library.
@@ -90,15 +90,15 @@ public:
 										bool removeOutside = true);
 
 	//inherited methods (see GenericMesh)
-	virtual unsigned size() const override { return m_numberOfTriangles; }
-	virtual void forEach(genericTriangleAction action) override;
-	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
-	virtual void placeIteratorAtBeginning() override;
-	virtual GenericTriangle* _getNextTriangle() override;
-	virtual GenericTriangle* _getTriangle(unsigned triangleIndex) override;
-	virtual VerticesIndexes* getNextTriangleVertIndexes() override;
-	virtual VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
-	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
+	unsigned size() const override { return m_numberOfTriangles; }
+	void forEach(genericTriangleAction action) override;
+	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
+	void placeIteratorAtBeginning() override;
+	GenericTriangle* _getNextTriangle() override;
+	GenericTriangle* _getTriangle(unsigned triangleIndex) override;
+	VerticesIndexes* getNextTriangleVertIndexes() override;
+	VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
+	void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
 
 	//! Returns triangles indexes array (pointer to)
 	/** Handle with care!

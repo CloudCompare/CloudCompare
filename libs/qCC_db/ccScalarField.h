@@ -34,7 +34,7 @@ public:
 	//! Default constructor
 	/** \param name scalar field name
 	**/
-	QCC_DB_LIB_API explicit ccScalarField(const char* name = 0);
+	QCC_DB_LIB_API explicit ccScalarField(const char* name = nullptr);
 
 	//! Copy constructor
 	/** \param sf scalar field to copy

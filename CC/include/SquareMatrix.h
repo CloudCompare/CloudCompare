@@ -737,13 +737,13 @@ namespace CCLib
 	};
 
 	//! Default CC square matrix type (PointCoordinateType)
-	typedef SquareMatrixTpl<PointCoordinateType> SquareMatrix;
+	using SquareMatrix = SquareMatrixTpl<PointCoordinateType>;
 
 	//! Float square matrix type
-	typedef SquareMatrixTpl<float> SquareMatrixf;
+	using SquareMatrixf = SquareMatrixTpl<float>;
 
 	//! Double square matrix type
-	typedef SquareMatrixTpl<double> SquareMatrixd;
+	using SquareMatrixd = SquareMatrixTpl<double>;
 
 } //namespace CCLib
 

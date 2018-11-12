@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>433</width>
-    <height>26</height>
+    <width>495</width>
+    <height>30</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,7 +23,16 @@
    <property name="spacing">
     <number>2</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
     <number>2</number>
    </property>
    <item>
@@ -166,7 +175,7 @@
        <normaloff>:/CC/images/ccAddConstSF.png</normaloff>:/CC/images/ccAddConstSF.png</iconset>
      </property>
      <property name="shortcut">
-      <string>C</string>
+      <string extracomment="Shortcut for continue">C</string>
      </property>
     </widget>
    </item>

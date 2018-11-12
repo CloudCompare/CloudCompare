@@ -40,10 +40,10 @@ public:
 	}
 
 	//inherited from LocalModel
-	virtual CC_LOCAL_MODEL_TYPES getType() const { return LS; }
+	CC_LOCAL_MODEL_TYPES getType() const override { return LS; }
 
 	//inherited from LocalModel
-	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* P, CCVector3* nearestPoint = nullptr) const
+	ScalarType computeDistanceFromModelToPoint(const CCVector3* P, CCVector3* nearestPoint = nullptr) const override
 	{
 		ScalarType dist = DistanceComputationTools::computePoint2PlaneDistance(P, m_eq);
 
@@ -75,13 +75,13 @@ public:
 	}
 
 	//! Destructor
-	virtual ~DelaunayLocalModel() { if (m_tri) delete m_tri; }
+	~DelaunayLocalModel() override {  delete m_tri; }
 
 	//inherited from LocalModel
-	virtual CC_LOCAL_MODEL_TYPES getType() const { return TRI; }
+	CC_LOCAL_MODEL_TYPES getType() const override { return TRI; }
 
 	//inherited from LocalModel
-	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* P, CCVector3* nearestPoint = nullptr) const
+	ScalarType computeDistanceFromModelToPoint(const CCVector3* P, CCVector3* nearestPoint = nullptr) const override
 	{
 		ScalarType minDist2 = NAN_VALUE;
 		if (m_tri)
@@ -137,10 +137,10 @@ public:
 	}
 
 	//inherited from LocalModel
-	virtual CC_LOCAL_MODEL_TYPES getType() const { return QUADRIC; }
+	CC_LOCAL_MODEL_TYPES getType() const override { return QUADRIC; }
 
 	//inherited from LocalModel
-	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* _P, CCVector3* nearestPoint = nullptr) const
+	ScalarType computeDistanceFromModelToPoint(const CCVector3* _P, CCVector3* nearestPoint = nullptr) const override
 	{
 		CCVector3 P = *_P - m_gravityCenter;
 

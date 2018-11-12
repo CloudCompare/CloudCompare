@@ -26,8 +26,8 @@
 #include <CCPlatform.h>
 
 //System
-#include <stdint.h>
-#include <assert.h>
+#include <cassert>
+#include <cstdint>
 
 //Qt
 #include <QFile>
@@ -39,7 +39,7 @@ class ccSerializableObject
 public:
 
 	//! Desctructor
-	virtual ~ccSerializableObject() {}
+	virtual ~ccSerializableObject() = default;
 
 	//! Returns whether object is serializable of not
 	virtual bool isSerializable() const { return false; }

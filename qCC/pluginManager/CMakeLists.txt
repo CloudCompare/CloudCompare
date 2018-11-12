@@ -1,7 +1,6 @@
 set(header_list
    ${header_list}
    ${CMAKE_CURRENT_SOURCE_DIR}/ccPluginInfoDlg.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/ccPluginManager.h
    ${CMAKE_CURRENT_SOURCE_DIR}/ccPluginUIManager.h
    PARENT_SCOPE
 )
@@ -9,7 +8,6 @@ set(header_list
 set(source_list
    ${source_list}
    ${CMAKE_CURRENT_SOURCE_DIR}/ccPluginInfoDlg.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/ccPluginManager.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/ccPluginUIManager.cpp
    PARENT_SCOPE
 )

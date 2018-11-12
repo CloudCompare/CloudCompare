@@ -116,7 +116,7 @@ Should be used after one of the previous methods!</string>
          <enum>Qt::RightToLeft</enum>
         </property>
         <property name="text">
-         <string>1.0e-5</string>
+         <string notr="true">1.0e-5</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -132,7 +132,7 @@ Should be used after one of the previous methods!</string>
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
         <property name="suffix">
-         <string>%</string>
+         <string notr="true">%</string>
         </property>
         <property name="minimum">
          <number>1</number>

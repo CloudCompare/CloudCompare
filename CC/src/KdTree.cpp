@@ -211,7 +211,7 @@ bool KDTree::findNearestNeighbour(	const PointCoordinateType *queryPoint,
 
     //Go down the tree to find which cell contains the query point (at most log2(N) tests where N is the total number of points in the cloud)
 	KdCell* cellPtr = m_root;
-    while (cellPtr->leSon != 0 || cellPtr->gSon != nullptr)
+    while (cellPtr->leSon != nullptr || cellPtr->gSon != nullptr)
     {
         if (queryPoint[cellPtr->cuttingDim] <= cellPtr->cuttingCoordinate)
             cellPtr = cellPtr->leSon;

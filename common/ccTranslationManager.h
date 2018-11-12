@@ -1,3 +1,6 @@
+#ifndef CCTRANSLATIONMANAGER_H
+#define CCTRANSLATIONMANAGER_H
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -11,51 +14,34 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#include "ccPickOneElementDlg.h"
+#include <QMenu>
+#include <QPair>
+#include <QVector>
 
-//UI file
-#include <ui_pickOneElementDlg.h>
 
-ccPickOneElementDlg::ccPickOneElementDlg(	QString label,
-											QString windowTitle/*=QString()*/,
-											QWidget* parent/*=0*/)
-	: QDialog(parent, Qt::Tool)
-	, m_ui(new Ui_PickOneElementDialog)
+class ccTranslationManager : public QObject
 {
-	m_ui->setupUi(this);
+	Q_OBJECT
+	
+public:
+	ccTranslationManager( QObject *parent );
+	~ccTranslationManager() override = default;
+	
+	void populateMenu( QMenu *menu );
+	
+	static const QString languagePref();
+	
+private:
+	using TranslationInfo = QPair<QString, QString>;
+	using LanguageList = QVector<TranslationInfo>;
+	
+	LanguageList availableLanguages( const QString &appName );
+	
+	void setLanguagePref( const QString &languageCode );
+};
 
-	if (!windowTitle.isNull())
-	{
-		setWindowTitle(windowTitle);
-	}
-
-	m_ui->comboLabel->setText(label);
-}
-
-ccPickOneElementDlg::~ccPickOneElementDlg()
-{
-	if (m_ui)
-	{
-		delete m_ui;
-		m_ui = 0;
-	}
-}
-
-void ccPickOneElementDlg::addElement(QString elementName)
-{
-	m_ui->comboBox->addItem(elementName);
-}
-
-void ccPickOneElementDlg::setDefaultIndex(int index)
-{
-	m_ui->comboBox->setCurrentIndex(index);
-}
-
-int ccPickOneElementDlg::getSelectedIndex()
-{
-	return m_ui->comboBox->currentIndex();
-}
+#endif //CCTRANSLATIONMANAGER_H

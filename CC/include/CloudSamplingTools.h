@@ -26,13 +26,13 @@
 namespace CCLib
 {
 
-class GenericProgressCallback;
 class GenericIndexedCloud;
 class GenericIndexedCloudPersist;
 class GenericIndexedMesh;
+class GenericProgressCallback;
+class PointCloud;
 class ReferenceCloud;
 class ReferenceCloudPersist;
-class PointCloud;
 
 //! Several point cloud resampling algorithms (octree-based, random, etc.)
 class CC_CORE_LIB_API CloudSamplingTools : public CCToolbox

@@ -19,7 +19,7 @@
 
 //STL
 #include <algorithm>
-#include <stdint.h>
+#include <cstdint>
 
 using namespace CCLib;
 

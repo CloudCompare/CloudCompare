@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>487</height>
+    <width>366</width>
+    <height>604</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -118,22 +118,25 @@
         </item>
         <item>
          <widget class="QComboBox" name="dimensionComboBox">
+          <property name="currentText">
+           <string notr="true">Z</string>
+          </property>
           <property name="currentIndex">
            <number>2</number>
           </property>
           <item>
            <property name="text">
-            <string>X</string>
+            <string notr="true">X</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Y</string>
+            <string notr="true">Y</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Z</string>
+            <string notr="true">Z</string>
            </property>
           </item>
          </widget>
@@ -143,7 +146,16 @@
       <item>
        <widget class="QFrame" name="interpolateSFFrame">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>

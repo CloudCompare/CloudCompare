@@ -19,7 +19,6 @@
 #include <RegistrationTools.h>
 
 //local
-#include <PointCloud.h>
 #include <CloudSamplingTools.h>
 #include <DistanceComputationTools.h>
 #include <Garbage.h>
@@ -30,6 +29,7 @@
 #include <ManualSegmentationTools.h>
 #include <NormalDistribution.h>
 #include <ParallelSort.h>
+#include <PointCloud.h>
 #include <ReferenceCloud.h>
 #include <ScalarFieldTools.h>
 
@@ -1417,7 +1417,7 @@ bool FPCSRegistrationTools::FindBase(	GenericIndexedCloud* cloud,
 }
 
 //pair of indexes
-typedef std::pair<unsigned,unsigned> IndexPair;
+using IndexPair = std::pair<unsigned,unsigned>;
 
 int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 												ScalarType delta,
@@ -1707,7 +1707,7 @@ bool FPCSRegistrationTools::FilterCandidates(	GenericIndexedCloud *modelCloud,
 	{
 		for (unsigned i=0; i<table.size(); i++)
 		{
-			dataBaseCloud.clear();
+			dataBaseCloud.reset();
 			if (!dataBaseCloud.reserve(4)) //we never know ;)
 				return false;
 			for (unsigned j=0; j<4; j++)

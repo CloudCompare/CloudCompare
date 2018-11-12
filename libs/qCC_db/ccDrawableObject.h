@@ -32,7 +32,7 @@ struct ccClipPlane
 {
 	Tuple4Tpl<double> equation;
 };
-typedef std::vector<ccClipPlane> ccClipPlaneSet;
+using ccClipPlaneSet = std::vector<ccClipPlane>;
 
 //! Generic interface for (3D) drawable entities
 class QCC_DB_LIB_API ccDrawableObject
@@ -44,7 +44,7 @@ public:
 	//! Copy constructor
 	ccDrawableObject(const ccDrawableObject& object);
 	
-	virtual ~ccDrawableObject() {}
+	virtual ~ccDrawableObject() = default;
 
 public:  //drawing and drawing options
 

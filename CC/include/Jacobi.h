@@ -28,8 +28,8 @@ template <typename Scalar> class Jacobi
 {
 public:
 
-	typedef CCLib::SquareMatrixTpl<Scalar> SquareMatrix;
-	typedef std::vector<Scalar> EigenValues;
+	using SquareMatrix = CCLib::SquareMatrixTpl<Scalar>;
+	using EigenValues = std::vector<Scalar>;
 
 	//! Computes the eigenvalues and eigenvectors of a given square matrix
 	/** It uses Rutishauser's modfications of the classical Jacobi rotation method with threshold pivoting.

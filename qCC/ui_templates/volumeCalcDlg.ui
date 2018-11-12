@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>869</height>
+    <height>887</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -353,7 +353,7 @@
                <string>Grid size corresponding to the current step / boundaries</string>
               </property>
               <property name="text">
-               <string>640 x 480</string>
+               <string notr="true">640 x 480</string>
               </property>
              </widget>
             </item>
@@ -374,17 +374,17 @@
               </property>
               <item>
                <property name="text">
-                <string>X</string>
+                <string notr="true">X</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>Y</string>
+                <string notr="true">Y</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>Z</string>
+                <string notr="true">Z</string>
                </property>
               </item>
              </widget>

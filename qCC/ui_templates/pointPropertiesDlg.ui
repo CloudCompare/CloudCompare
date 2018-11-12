@@ -97,7 +97,7 @@
       <string>Save current label (added to cloud children)</string>
      </property>
      <property name="text">
-      <string>...</string>
+      <string notr="true">...</string>
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
@@ -108,7 +108,7 @@
    <item>
     <widget class="QToolButton" name="razButton">
      <property name="text">
-      <string>...</string>
+      <string notr="true">...</string>
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
@@ -119,7 +119,7 @@
    <item>
     <widget class="QToolButton" name="closeButton">
      <property name="text">
-      <string>...</string>
+      <string notr="true">...</string>
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
@@ -130,6 +130,7 @@
   </layout>
  </widget>
  <resources>
+  <include location="../icones.qrc"/>
   <include location="../icones.qrc"/>
  </resources>
  <connections/>

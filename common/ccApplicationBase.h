@@ -1,3 +1,6 @@
+#ifndef CCAPPLICATIONBASE_H
+#define CCAPPLICATIONBASE_H
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -11,44 +14,40 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_PICK_ONE_ELEMENT_DLG_HEADER
-#define CC_PICK_ONE_ELEMENT_DLG_HEADER
-
 //Qt
-#include <QDialog>
+#include <QApplication>
 
-class Ui_PickOneElementDialog;
+//! Mimic Qt's qApp for easy access to the application instance
+#define ccApp (static_cast<ccApplicationBase *>( QCoreApplication::instance() ))
 
-//! Minimal dialog to pick one element in a list (combox box)
-class ccPickOneElementDlg : public QDialog
+class ccApplicationBase : public QApplication
 {
-	Q_OBJECT
-
 public:
-
-	//! Default constructor
-	ccPickOneElementDlg(QString label,
-						QString windowTitle = QString(),
-						QWidget* parent = 0);
-
-	//! Destructor
-	~ccPickOneElementDlg();
-
-	//! Add an element to the combo box
-	void addElement(QString elementName);
-	//! Sets the combo box default index
-	void setDefaultIndex(int index);
-	//! Returns the combo box current index (after completion)
-	int getSelectedIndex();
-
-protected:
-
-	//! Associated UI
-	Ui_PickOneElementDialog* m_ui;
+	//! This must be called before instantiating the application class so it
+	//! can setup OpenGL first.
+	static void	init();
+	
+	ccApplicationBase( int &argc, char **argv, const QString &version );
+	
+	QString versionStr() const;
+	QString versionLongStr( bool includeOS ) const;
+	
+	const QString &translationPath() const;
+	
+private:
+	void setupPaths();
+	
+	void loadTranslations();
+	
+	const QString c_VersionStr;
+	
+	QString	m_ShaderPath;
+	QString	m_TranslationPath;
+	QStringList m_PluginPaths;
 };
 
-#endif //CC_PICK_ONE_ELEMENT_DLG_HEADER
+#endif

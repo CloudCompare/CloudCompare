@@ -17,7 +17,9 @@
 
 #include "ccAlignDlg.h"
 #include "mainwindow.h"
-#include "ccQtHelpers.h"
+
+//common
+#include <ccQtHelpers.h>
 
 //CCLib
 #include <CloudSamplingTools.h>

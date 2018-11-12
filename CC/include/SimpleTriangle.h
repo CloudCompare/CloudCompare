@@ -53,9 +53,9 @@ public:
 	{}
 
 	//inherited methods (see GenericDistribution)
-	inline virtual const CCVector3* _getA() const { return A; }
-	inline virtual const CCVector3* _getB() const { return B; }
-	inline virtual const CCVector3* _getC() const { return C; }
+	inline const CCVector3* _getA() const override { return A; }
+	inline const CCVector3* _getB() const override { return B; }
+	inline const CCVector3* _getC() const override { return C; }
 
 	//! A vertex (ref)
 	const CCVector3 *A;
@@ -92,9 +92,9 @@ public:
 	{}
 
 	//inherited methods (see GenericDistribution)
-	inline virtual const CCVector3* _getA() const { return &A; }
-	inline virtual const CCVector3* _getB() const { return &B; }
-	inline virtual const CCVector3* _getC() const { return &C; }
+	inline const CCVector3* _getA() const override { return &A; }
+	inline const CCVector3* _getB() const override { return &B; }
+	inline const CCVector3* _getC() const override { return &C; }
 
 	//! A vertex
 	CCVector3 A;

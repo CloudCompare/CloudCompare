@@ -123,13 +123,13 @@ public:
 };
 
 //! Tuple of 3 unsigned bytes
-typedef Tuple3Tpl<unsigned char> Tuple3ub;
+using Tuple3ub = Tuple3Tpl<unsigned char>;
 //! Tuple of 3 short values
-typedef Tuple3Tpl<short> Tuple3s;
+using Tuple3s = Tuple3Tpl<short>;
 //! Tuple of 3 int values
-typedef Tuple3Tpl<int> Tuple3i;
+using Tuple3i = Tuple3Tpl<int>;
 //! Tuple of 3 unsigned int values
-typedef Tuple3Tpl<unsigned int> Tuple3ui;
+using Tuple3ui = Tuple3Tpl<unsigned int>;
 
 //! 3D Vector (templated version)
 template <typename Type> class Vector3Tpl : public Tuple3Tpl<Type>
@@ -317,20 +317,20 @@ public:
 };
 
 //! Default 3D Vector
-typedef Vector3Tpl<PointCoordinateType> CCVector3;
+using CCVector3 = Vector3Tpl<PointCoordinateType>;
 
 //! Double 3D Vector
-typedef Vector3Tpl<float> CCVector3f;
+using CCVector3f = Vector3Tpl<float>;
 //! Double 3D Vector
-typedef Vector3Tpl<double> CCVector3d;
+using CCVector3d = Vector3Tpl<double>;
 
 //! Default 2D Vector
-typedef Vector2Tpl<PointCoordinateType> CCVector2;
+using CCVector2 = Vector2Tpl<PointCoordinateType>;
 
 //! Double 2D Vector
-typedef Vector2Tpl<double> CCVector2d;
+using CCVector2d = Vector2Tpl<double>;
 
 //! Int 2D Vector
-typedef Vector2Tpl<int> CCVector2i;
+using CCVector2i = Vector2Tpl<int>;
 
 #endif //CC_GEOM_HEADER

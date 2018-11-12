@@ -443,6 +443,8 @@ public:
 								bool dontScaleFeatures = false,
 								bool renderOverlayItems = false);
 
+	static void setShaderPath( const QString &path );
+	
 	virtual void setShader(ccShader* shader);
 	virtual void setGlFilter(ccGlFilter* filter);
 	ccGlFilter* getGlFilter() { return m_activeGLFilter; }
@@ -1391,9 +1393,7 @@ protected: //members
 	CCVector3d m_lockedRotationAxis;
 
 private:
-
-	//! Returns shaders path
-	static QString getShadersPath();
+	static QString	s_shaderPath;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

@@ -21,27 +21,27 @@
 #include "ccIncludeGL.h"
 
 //Objects handled by factory
-#include "ccSubMesh.h"
-#include "ccMeshGroup.h"
-#include "ccFacet.h"
-#include "ccMaterialSet.h"
-#include "ccImage.h"
-#include "ccGBLSensor.h"
-#include "ccCameraSensor.h"
 #include "cc2DLabel.h"
 #include "cc2DViewportLabel.h"
-#include "ccPlane.h"
-#include "ccSphere.h"
-#include "ccTorus.h"
-#include "ccCylinder.h"
 #include "ccBox.h"
-#include "ccDish.h"
-#include "ccExtru.h"
-#include "ccQuadric.h"
+#include "ccCameraSensor.h"
 #include "ccCustomObject.h"
+#include "ccCylinder.h"
+#include "ccDish.h"
 #include "ccExternalFactory.h"
+#include "ccExtru.h"
+#include "ccFacet.h"
+#include "ccGBLSensor.h"
+#include "ccImage.h"
+#include "ccMaterialSet.h"
+#include "ccMeshGroup.h"
+#include "ccPlane.h"
 #include "ccPointCloud.h"
 #include "ccPolyline.h"
+#include "ccQuadric.h"
+#include "ccSphere.h"
+#include "ccSubMesh.h"
+#include "ccTorus.h"
 
 //Qt
 #include <QIcon>
@@ -49,7 +49,7 @@
 ccHObject::ccHObject(QString name/*=QString()*/)
 	: ccObject(name)
 	, ccDrawableObject()
-	, m_parent(0)
+	, m_parent(nullptr)
 	, m_selectionBehavior(SELECTION_AA_BBOX)
 	, m_isDeleting(false)
 {
@@ -62,7 +62,7 @@ ccHObject::ccHObject(QString name/*=QString()*/)
 ccHObject::ccHObject(const ccHObject& object)
 	: ccObject(object)
 	, ccDrawableObject(object)
-	, m_parent(0)
+	, m_parent(nullptr)
 	, m_selectionBehavior(object.m_selectionBehavior)
 	, m_isDeleting(false)
 {
@@ -130,10 +130,10 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 		return new ccPointCloud(name);
 	case CC_TYPES::MESH:
 		//warning: no associated vertices --> retrieved later
-		return new ccMesh(0);
+		return new ccMesh(nullptr);
 	case CC_TYPES::SUB_MESH:
 		//warning: no associated mesh --> retrieved later
-		return new ccSubMesh(0);
+		return new ccSubMesh(nullptr);
 	case CC_TYPES::MESH_GROUP:
 		//warning: deprecated
 		ccLog::Warning("[ccHObject::New] Mesh groups are deprecated!");
@@ -141,7 +141,7 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 		return new ccMeshGroup();
 	case CC_TYPES::POLY_LINE:
 		//warning: no associated vertices --> retrieved later
-		return new ccPolyline(0);
+		return new ccPolyline(nullptr);
 	case CC_TYPES::FACET:
 		return new ccFacet();
 	case CC_TYPES::MATERIAL_SET:
@@ -205,26 +205,35 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 		break;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 ccHObject* ccHObject::New(QString pluginId, QString classId, const char* name)
 {
 	ccExternalFactory::Container::Shared externalFactories = ccExternalFactory::Container::GetUniqueInstance();
 	if (!externalFactories)
-		return 0;
-
+	{
+		return nullptr;
+	}
+	
 	ccExternalFactory* factory = externalFactories->getFactoryByName(pluginId);
 	if (!factory)
-		return 0;
-
+	{
+		return nullptr;
+	}
+	
 	ccHObject* obj = factory->buildObject(classId);
 
 	if (!obj)
-		return 0;
-
+	{
+		return nullptr;
+	}
+	
 	if (name)
+	{
 		obj->setName(name);
+	}
+	
 	return obj;
 }
 
@@ -367,21 +376,37 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 	return true;
 }
 
+unsigned int ccHObject::getChildCountRecursive() const
+{
+	unsigned int	count = static_cast<unsigned>(m_children.size());
+	
+	for ( auto child : m_children )
+	{
+		count += child->getChildCountRecursive();
+	}
+	
+	return count;
+}
+
 ccHObject* ccHObject::find(unsigned uniqueID)
 {
 	//found the right item?
 	if (getUniqueID() == uniqueID)
+	{
 		return this;
-
+	}
+	
 	//otherwise we are going to test all children recursively
 	for (unsigned i=0; i<getChildrenNumber(); ++i)
 	{
 		ccHObject* match = getChild(i)->find(uniqueID);
 		if (match)
+		{
 			return match;
+		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 unsigned ccHObject::filterChildren(	Container& filteredChildren,
@@ -437,7 +462,7 @@ void ccHObject::transferChild(ccHObject* child, ccHObject& newParent)
 	child->addDependency(&newParent,childDependencyFlags);
 
 	//after a successful transfer, either the parent is 'newParent' or a null pointer
-	assert(child->getParent() == &newParent || child->getParent() == 0);
+	assert(child->getParent() == &newParent || child->getParent() == nullptr);
 }
 
 void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent/*=false*/)
@@ -457,7 +482,7 @@ void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent
 		child->addDependency(&newParent,childDependencyFlags);
 
 		//after a successful transfer, either the parent is 'newParent' or a null pointer
-		assert(child->getParent() == &newParent || child->getParent() == 0);
+		assert(child->getParent() == &newParent || child->getParent() == nullptr);
 	}
 	m_children.clear();
 }
@@ -633,7 +658,7 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		return;
 
 	//we display it in the 2D layer in fact!
-	ccBBox bBox = getOwnBB();
+	ccBBox bBox = getBB_recursive();
 	if (!bBox.isValid())
 		return;
 	
@@ -717,11 +742,13 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 			{
 				toggleClipPlanes(context, false);
 			}
-
-			//draw name in 3D (we display it in the 2D foreground layer in fact!)
-			if (m_showNameIn3D && MACRO_Draw2D(context) && MACRO_Foreground(context) && !MACRO_DrawEntityNames(context))
-				drawNameIn3D(context);
 		}
+	}
+
+	//draw name - container objects are not visible but can still show a name
+	if (m_currentDisplay == context.display && m_showNameIn3D && MACRO_Draw2D(context) && MACRO_Foreground(context) && !MACRO_DrawEntityNames(context))
+	{
+		drawNameIn3D(context);
 	}
 
 	//draw entity's children
@@ -803,8 +830,10 @@ void ccHObject::detachChild(ccHObject* child)
 	child->removeDependencyWith(this);
 
 	if (child->getParent() == this)
-		child->setParent(0);
-
+	{
+		child->setParent(nullptr);
+	}
+	
 	int pos = getChildIndex(child);
 	if (pos >= 0)
 	{
@@ -824,7 +853,9 @@ void ccHObject::detatchAllChildren()
 		child->removeDependencyWith(this);
 
 		if (child->getParent() == this)
-			child->setParent(0);
+		{
+			child->setParent(nullptr);
+		}
 	}
 	m_children.clear();
 }
@@ -833,7 +864,9 @@ void ccHObject::removeChild(ccHObject* child)
 {
 	int pos = getChildIndex(child);
 	if (pos >= 0)
+	{
 		removeChild(pos);
+	}
 }
 
 void ccHObject::removeChild(int pos)
@@ -868,7 +901,7 @@ void ccHObject::removeChild(int pos)
 	}
 	else if (child->getParent() == this)
 	{
-		child->setParent(0);
+		child->setParent(nullptr);
 	}
 }
 
@@ -913,7 +946,7 @@ bool ccHObject::toFile(QFile& out) const
 	for (unsigned i = 0; i < m_children.size(); ++i)
 		if (m_children[i]->isSerializable())
 			++serializableCount;
-	if (out.write((const char*)&serializableCount, sizeof(uint32_t)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&serializableCount), sizeof(uint32_t)) < 0)
 		return WriteError();
 
 	//write serializable children (if any)
@@ -927,7 +960,7 @@ bool ccHObject::toFile(QFile& out) const
 	}
 
 	//write current selection behavior (dataVersion >= 23)
-	if (out.write((const char*)&m_selectionBehavior, sizeof(SelectionBehavior)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_selectionBehavior), sizeof(SelectionBehavior)) < 0)
 		return WriteError();
 
 	//write transformation history (dataVersion >= 45)
@@ -943,7 +976,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 
 	//(serializable) child count (dataVersion>=20)
 	uint32_t serializableCount = 0;
-	if (in.read((char*)&serializableCount,4) < 0)
+	if (in.read(reinterpret_cast<char*>(&serializableCount), 4) < 0)
 		return ReadError();
 
 	//read serializable children (if any)
@@ -953,6 +986,18 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 		CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
 		if (classID == CC_TYPES::OBJECT)
 			return false;
+
+		if (dataVersion >= 35 && dataVersion <= 47 && ((classID & CC_CUSTOM_BIT) != 0))
+		{
+			//bug fix: for a long time the CC_CAMERA_BIT and CC_QUADRIC_BIT were wrongly defined
+			//with two bits instead of one! The additional and wrongly defined bit was the CC_CUSTOM_BIT :(
+			if (	(classID & CC_TYPES::CAMERA_SENSOR) == CC_TYPES::CAMERA_SENSOR
+				||	(classID & CC_TYPES::QUADRIC) == CC_TYPES::QUADRIC
+				)
+			{
+				classID &= (~CC_CUSTOM_BIT);
+			}
+		}
 
 		//create corresponding child object
 		ccHObject* child = New(classID);
@@ -972,7 +1017,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 			QString pluginId = child->getMetaData(ccCustomHObject::DefautMetaDataPluginName()).toString();
 			//dont' need this instance anymore
 			delete child;
-			child = 0;
+			child = nullptr;
 
 			// try to get a new object from external factories
 			ccHObject* newChild = ccHObject::New(pluginId, classId);
@@ -982,7 +1027,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 			}
 			else
 			{
-				ccLog::Warning(QString("[ccHObject::fromFile] Couldn't found any plugin able to deserialize custom object '%1' (class_ID = %2 / plugin_ID = %3").arg(childName).arg(classID).arg(pluginId));
+				ccLog::Warning(QString("[ccHObject::fromFile] Couldn't find a plugin able to deserialize custom object '%1' (class_ID = %2 / plugin_ID = %3)").arg(childName).arg(classID).arg(pluginId));
 				return false; // FIXME: for now simply return false. We may want to skip it but I'm not sure if there is a simple way of doing that
 			}
 		}
@@ -1011,8 +1056,10 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 	//read the selection behavior (dataVersion>=23)
 	if (dataVersion >= 23)
 	{
-		if (in.read((char*)&m_selectionBehavior,sizeof(SelectionBehavior)) < 0)
+		if (in.read(reinterpret_cast<char*>(&m_selectionBehavior), sizeof(SelectionBehavior)) < 0)
+		{
 			return ReadError();
+		}
 	}
 	else
 	{
@@ -1050,38 +1097,44 @@ bool ccHObject::toFile_MeOnly(QFile& out) const
 	/*** ccHObject takes in charge the ccDrawableObject properties (which is not a ccSerializableObject) ***/
 
 	//'visible' state (dataVersion>=20)
-	if (out.write((const char*)&m_visible,sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_visible), sizeof(bool)) < 0)
 		return WriteError();
 	//'lockedVisibility' state (dataVersion>=20)
-	if (out.write((const char*)&m_lockedVisibility,sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_lockedVisibility), sizeof(bool)) < 0)
 		return WriteError();
 	//'colorsDisplayed' state (dataVersion>=20)
-	if (out.write((const char*)&m_colorsDisplayed,sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_colorsDisplayed), sizeof(bool)) < 0)
 		return WriteError();
 	//'normalsDisplayed' state (dataVersion>=20)
-	if (out.write((const char*)&m_normalsDisplayed,sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_normalsDisplayed), sizeof(bool)) < 0)
 		return WriteError();
 	//'sfDisplayed' state (dataVersion>=20)
-	if (out.write((const char*)&m_sfDisplayed,sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_sfDisplayed), sizeof(bool)) < 0)
 		return WriteError();
 	//'colorIsOverriden' state (dataVersion>=20)
-	if (out.write((const char*)&m_colorIsOverriden,sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_colorIsOverriden), sizeof(bool)) < 0)
 		return WriteError();
 	if (m_colorIsOverriden)
 	{
 		//'tempColor' (dataVersion>=20)
-		if (out.write((const char*)m_tempColor.rgb,sizeof(ColorCompType)*3) < 0)
+		if (out.write(reinterpret_cast<const char*>(m_tempColor.rgb), sizeof(ColorCompType)*3) < 0)
+		{
 			return WriteError();
+		}
 	}
 	//'glTransEnabled' state (dataVersion>=20)
-	if (out.write((const char*)&m_glTransEnabled,sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_glTransEnabled), sizeof(bool)) < 0)
 		return WriteError();
 	if (m_glTransEnabled)
+	{
 		if (!m_glTrans.toFile(out))
+		{
 			return false;
+		}
+	}
 
 	//'showNameIn3D' state (dataVersion>=24)
-	if (out.write((const char*)&m_showNameIn3D,sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_showNameIn3D), sizeof(bool)) < 0)
 		return WriteError();
 
 	return true;
@@ -1094,41 +1147,47 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	/*** ccHObject takes in charge the ccDrawableObject properties (which is not a ccSerializableObject) ***/
 
 	//'visible' state (dataVersion>=20)
-	if (in.read((char*)&m_visible,sizeof(bool)) < 0)
+	if (in.read(reinterpret_cast<char*>(&m_visible), sizeof(bool)) < 0)
 		return ReadError();
 	//'lockedVisibility' state (dataVersion>=20)
-	if (in.read((char*)&m_lockedVisibility,sizeof(bool)) < 0)
+	if (in.read(reinterpret_cast<char*>(&m_lockedVisibility), sizeof(bool)) < 0)
 		return ReadError();
 	//'colorsDisplayed' state (dataVersion>=20)
-	if (in.read((char*)&m_colorsDisplayed,sizeof(bool)) < 0)
+	if (in.read(reinterpret_cast<char*>(&m_colorsDisplayed), sizeof(bool)) < 0)
 		return ReadError();
 	//'normalsDisplayed' state (dataVersion>=20)
-	if (in.read((char*)&m_normalsDisplayed,sizeof(bool)) < 0)
+	if (in.read(reinterpret_cast<char*>(&m_normalsDisplayed), sizeof(bool)) < 0)
 		return ReadError();
 	//'sfDisplayed' state (dataVersion>=20)
-	if (in.read((char*)&m_sfDisplayed,sizeof(bool)) < 0)
+	if (in.read(reinterpret_cast<char*>(&m_sfDisplayed), sizeof(bool)) < 0)
 		return ReadError();
 	//'colorIsOverriden' state (dataVersion>=20)
-	if (in.read((char*)&m_colorIsOverriden,sizeof(bool)) < 0)
+	if (in.read(reinterpret_cast<char*>(&m_colorIsOverriden), sizeof(bool)) < 0)
 		return ReadError();
 	if (m_colorIsOverriden)
 	{
 		//'tempColor' (dataVersion>=20)
-		if (in.read((char*)m_tempColor.rgb,sizeof(ColorCompType)*3) < 0)
+		if (in.read(reinterpret_cast<char*>(m_tempColor.rgb), sizeof(ColorCompType)*3) < 0)
 			return ReadError();
 	}
 	//'glTransEnabled' state (dataVersion>=20)
-	if (in.read((char*)&m_glTransEnabled,sizeof(bool)) < 0)
+	if (in.read(reinterpret_cast<char*>(&m_glTransEnabled), sizeof(bool)) < 0)
 		return ReadError();
 	if (m_glTransEnabled)
+	{
 		if (!m_glTrans.fromFile(in, dataVersion, flags))
+		{
 			return false;
+		}
+	}
 
 	//'showNameIn3D' state (dataVersion>=24)
 	if (dataVersion >= 24)
 	{
-		if (in.read((char*)&m_showNameIn3D,sizeof(bool)) < 0)
+		if (in.read(reinterpret_cast<char*>(&m_showNameIn3D), sizeof(bool)) < 0)
+		{
 			return WriteError();
+		}
 	}
 	else
 	{

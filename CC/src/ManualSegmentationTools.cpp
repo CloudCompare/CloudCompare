@@ -19,8 +19,8 @@
 #include <ManualSegmentationTools.h>
 
 //local
-#include <PointCloud.h>
 #include <GenericProgressCallback.h>
+#include <PointCloud.h>
 #include <Polyline.h>
 #include <SimpleMesh.h>
 
@@ -65,8 +65,7 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 		}
 	}
 
-	if (trans)
-		delete trans;
+	delete trans;
 
 	return Y;
 }
@@ -228,7 +227,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 		unsigned count = 0;
 
 		theMesh->placeIteratorAtBeginning();
-		for (unsigned i=0; i<numberOfTriangles; ++i)
+		for (unsigned i = 0; i < numberOfTriangles; ++i)
 		{
 			bool triangleIsOnTheRightSide = true;
 
@@ -252,18 +251,18 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 			//if we keep the triangle
 			if (triangleIsOnTheRightSide)
 			{
-				if (count == newMesh->size() && !newMesh->reserve(newMesh->size() + 1000)) //auto expand mesh size
+				if (count == newMesh->capacity() && !newMesh->reserve(newMesh->size() + 4096)) //auto expand mesh size
 				{
 					//stop process
 					delete newMesh;
 					newMesh = nullptr;
 					break;
 				}
-				++count;
 
 				newMesh->addTriangle(	indexShift + newVertexIndexes[0],
 										indexShift + newVertexIndexes[1],
 										indexShift + newVertexIndexes[2] );
+				++count;
 			}
 
 			if (progressCb && !nprogress.oneStep())
@@ -293,7 +292,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 const unsigned c_origIndexFlag = 0x80000000; //original index flag (bit 31)
 const unsigned c_srcIndexFlag  = 0x40000000; //source index flag (bit 30)
 const unsigned c_realIndexMask = 0x3FFFFFFF; //original index mask (bit 0 to 29) --> max allowed index = 1073741823 ;)
-const unsigned c_defaultArrayGrowth = 100;
+const unsigned c_defaultArrayGrowth = 1024;
 
 struct InsideOutsideIndexes
 {
@@ -664,7 +663,7 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 								CCVector3d::fromArray(vertices->getPoint(tsi->i2)->u),
 								CCVector3d::fromArray(vertices->getPoint(tsi->i3)->u) };
 
-			unsigned origVertIndexes[3] = {
+			const unsigned origVertIndexes[3] = {
 				tsi->i1 | c_origIndexFlag,
 				tsi->i2 | c_origIndexFlag,
 				tsi->i3 | c_origIndexFlag };
@@ -1317,7 +1316,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				{
 					assert(sourceMesh == insideMesh2 || sourceMesh == origMesh);
 					insideMesh2->clear();
-					insideVertices2->clear();
+					insideVertices2->reset();
 					sourceMesh = insideMesh1;
 					sourceVertices = insideVertices1;
 					insideMesh = insideMesh2;
@@ -1330,7 +1329,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				{
 					assert(sourceMesh == insideMesh1 || sourceMesh == origMesh);
 					insideMesh1->clear();
-					insideVertices1->clear();
+					insideVertices1->reset();
 					sourceMesh = insideMesh2;
 					sourceVertices = insideVertices2;
 					insideMesh = insideMesh1;
@@ -1389,8 +1388,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 	if (error)
 	{
 		delete insideMesh;
-		if (outsideMesh)
-			delete outsideMesh;
+		delete outsideMesh;
 		return false;
 	}
 

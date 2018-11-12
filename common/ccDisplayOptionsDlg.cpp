@@ -33,18 +33,18 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 {
 	setupUi(this);
 
-	connect(ambientColorButton,              SIGNAL(clicked()),         this, SLOT(changeLightAmbientColor()));
-	connect(diffuseColorButton,              SIGNAL(clicked()),         this, SLOT(changeLightDiffuseColor()));
-	connect(specularColorButton,             SIGNAL(clicked()),         this, SLOT(changeLightSpecularColor()));
-	connect(meshBackColorButton,             SIGNAL(clicked()),         this, SLOT(changeMeshBackDiffuseColor()));
-	connect(meshSpecularColorButton,         SIGNAL(clicked()),         this, SLOT(changeMeshSpecularColor()));
-	connect(meshFrontColorButton,            SIGNAL(clicked()),         this, SLOT(changeMeshFrontDiffuseColor()));
-	connect(bbColorButton,                   SIGNAL(clicked()),         this, SLOT(changeBBColor()));
-	connect(bkgColorButton,                  SIGNAL(clicked()),         this, SLOT(changeBackgroundColor()));
-	connect(labelBkgColorButton,             SIGNAL(clicked()),         this, SLOT(changeLabelBackgroundColor()));
-	connect(labelMarkerColorButton,          SIGNAL(clicked()),         this, SLOT(changeLabelMarkerColor()));
-	connect(pointsColorButton,               SIGNAL(clicked()),         this, SLOT(changePointsColor()));
-	connect(textColorButton,                 SIGNAL(clicked()),         this, SLOT(changeTextColor()));
+	connect(ambientColorButton,         &QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeLightAmbientColor);
+	connect(diffuseColorButton,         &QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeLightDiffuseColor);
+	connect(specularColorButton,        &QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeLightSpecularColor);
+	connect(meshBackColorButton,        &QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeMeshBackDiffuseColor);
+	connect(meshSpecularColorButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeMeshSpecularColor);
+	connect(meshFrontColorButton,       &QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeMeshFrontDiffuseColor);
+	connect(bbColorButton,              &QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeBBColor);
+	connect(bkgColorButton,             &QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeBackgroundColor);
+	connect(labelBkgColorButton,        &QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeLabelBackgroundColor);
+	connect(labelMarkerColorButton,     &QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeLabelMarkerColor);
+	connect(pointsColorButton,          &QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changePointsColor);
+	connect(textColorButton,            &QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeTextColor);
 
 	connect(doubleSidedCheckBox,             &QCheckBox::toggled, this, [&](bool state) { parameters.lightDoubleSided = state; });
 	connect(enableGradientCheckBox,          &QCheckBox::toggled, this, [&](bool state) { parameters.drawBackgroundGradient = state; });
@@ -57,26 +57,26 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(autoDisplayNormalsCheckBox,      &QCheckBox::toggled, this, [&](bool state) { options.normalsDisplayedByDefault = state; });
 	connect(useNativeDialogsCheckBox,        &QCheckBox::toggled, this, [&](bool state) { options.useNativeDialogs = state; });
 
-	connect(useVBOCheckBox,                  SIGNAL(clicked()),         this, SLOT(changeVBOUsage()));
+	connect(useVBOCheckBox,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeVBOUsage);
 
-	connect(colorRampWidthSpinBox,           SIGNAL(valueChanged(int)), this, SLOT(changeColorScaleRampWidth(int)));
+	connect(colorRampWidthSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeColorScaleRampWidth);
 
-	connect(defaultFontSizeSpinBox,          SIGNAL(valueChanged(int)), this, SLOT(changeDefaultFontSize(int)));
-	connect(labelFontSizeSpinBox,            SIGNAL(valueChanged(int)), this, SLOT(changeLabelFontSize(int)));
-	connect(numberPrecisionSpinBox,          SIGNAL(valueChanged(int)), this, SLOT(changeNumberPrecision(int)));
-	connect(labelOpacitySpinBox,             SIGNAL(valueChanged(int)), this, SLOT(changeLabelOpacity(int)));
-	connect(labelMarkerSizeSpinBox,          SIGNAL(valueChanged(int)), this, SLOT(changeLabelMarkerSize(int)));
+	connect(defaultFontSizeSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeDefaultFontSize);
+	connect(labelFontSizeSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelFontSize);
+	connect(numberPrecisionSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeNumberPrecision);
+	connect(labelOpacitySpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelOpacity);
+	connect(labelMarkerSizeSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelMarkerSize);
 
-	connect(zoomSpeedDoubleSpinBox,          SIGNAL(valueChanged(double)), this, SLOT(changeZoomSpeed(double)));
-	connect(maxCloudSizeDoubleSpinBox,       SIGNAL(valueChanged(double)), this, SLOT(changeMaxCloudSize(double)));
-	connect(maxMeshSizeDoubleSpinBox,        SIGNAL(valueChanged(double)), this, SLOT(changeMaxMeshSize(double)));
+	connect(zoomSpeedDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeZoomSpeed);
+	connect(maxCloudSizeDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeMaxCloudSize);
+	connect(maxMeshSizeDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeMaxMeshSize);
 
-	connect(autoComputeOctreeComboBox,       SIGNAL(currentIndexChanged(int)), this, SLOT(changeAutoComputeOctreeOption(int)));
+	connect(autoComputeOctreeComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccDisplayOptionsDlg::changeAutoComputeOctreeOption);
 
-	connect(okButton,                        SIGNAL(clicked()),         this, SLOT(doAccept()));
-	connect(applyButton,                     SIGNAL(clicked()),         this, SLOT(apply()));
-	connect(resetButton,                     SIGNAL(clicked()),         this, SLOT(reset()));
-	connect(cancelButton,                    SIGNAL(clicked()),         this, SLOT(doReject()));
+	connect(okButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::doAccept);
+	connect(applyButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::apply);
+	connect(resetButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::reset);
+	connect(cancelButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::doReject);
 
 	oldParameters = parameters = ccGui::Parameters();
 	oldOptions = options = ccOptions::Instance();

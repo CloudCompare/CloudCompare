@@ -1326,8 +1326,8 @@ void ccCompass::estimateStructureNormals()
 	QCheckBox calcThickChk("Calculate thickness"); calcThickChk.setChecked(calcThickness);
 	QLabel distanceLabel("Distance cutoff (m):");
 	QLineEdit distanceText(QString::number(tcDistance)); distanceText.setValidator(new QDoubleValidator(0, std::numeric_limits<double>::max(), 6));
-	QLabel sampleLabel("MCMC Samples:");
-	QLineEdit sampleText(QString::number(oversample)); sampleText.setValidator(new QIntValidator(0, 10000)); //>10000 samples per point will break even the best computer!
+	QLabel sampleLabel("Samples:");
+	QLineEdit sampleText(QString::number(oversample)); sampleText.setValidator(new QIntValidator(1, 10000)); //>10000 samples per point will break even the best computer!
 	QLabel strideLabel("MCMC Stride (radians):");
 	QLineEdit strideText(QString::number(stride)); strideText.setValidator(new QDoubleValidator(0.0000001, 0.5, 6));
 
@@ -1522,6 +1522,8 @@ void ccCompass::estimateStructureNormals()
 						//copy points from this trace across into the relevant point cloud for future access
 						points[r]->reserve(points[r]->size() + t->size()); //make space
 						points[r]->reserveTheNormsTable(); //make space for normals
+						points[r]->setGlobalScale(t->getGlobalScale()); //copy global shift & scale onto new point cloud
+						points[r]->setGlobalShift(t->getGlobalShift());
 						for (unsigned p = 0; p < t->size(); p++)
 						{
 							points[r]->addPoint(*t->getPoint(p)); //add point to relevant surface
@@ -1649,6 +1651,16 @@ void ccCompass::estimateStructureNormals()
 			{
 				//update progress bar
 				prg.update(100 * _min / (float)(px.size() - minsize));
+				//keep progress bar up to date
+				if (r == 0)
+				{
+					prg.update((50.0f * _min) / (px.size()-minsize)); //first 50% from lower surface
+				}
+				else
+				{
+					prg.update(50.0f + (50.0f * _min) / (px.size() - minsize)); //second 50% from upper surface
+				}
+
 				if (prg.isCancelRequested()) {
 
 					//cleanup
@@ -1866,6 +1878,8 @@ void ccCompass::estimateStructureNormals()
 				//build point cloud to store MCMC samples in and associated scalar fields
 				samples[r] = new ccSNECloud();
 				samples[r]->setName("SNE_Samples");
+				samples[r]->setGlobalScale(points[r]->getGlobalScale()); //copy global shift & scale onto new point cloud
+				samples[r]->setGlobalShift(points[r]->getGlobalShift());
 				samples[r]->reserve(px.size()*oversample);
 				samples[r]->reserveTheNormsTable();
 				CCLib::ScalarField* startSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("StartPoint")));
@@ -2027,8 +2041,8 @@ void ccCompass::estimateStructureNormals()
 					points[r]->showSF(true);
 
 					//create scalar field in samples point cloud
-					CCLib::ScalarField* thickSF_sample;
-					CCLib::ScalarField* idSF_sample;
+					CCLib::ScalarField* thickSF_sample = nullptr;
+					CCLib::ScalarField* idSF_sample = nullptr;
 					if (samples[r] != nullptr)
 					{
 						thickSF_sample = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Thickness")));
@@ -2067,7 +2081,6 @@ void ccCompass::estimateStructureNormals()
 						if (prg.isCancelRequested())
 						{
 							//cleanup
-							delete nCloud;
 							for (int i = 0; i < pinchClouds.size(); i++)
 							{
 								delete pinchClouds[i];
@@ -2142,9 +2155,6 @@ void ccCompass::estimateStructureNormals()
 					{
 						thickSF_sample->computeMinAndMax();
 					}
-
-					//cleanup
-					delete nCloud;
 				}
 			}
 		}
@@ -2513,6 +2523,9 @@ void ccCompass::estimateStrain()
 	//store strain tensors on point cloud and build graphics
 	//**************************************************************
 	ccPointCloud* points = new ccPointCloud("Strain");
+	points->setGlobalScale(lines[0]->getGlobalScale()); //copy global shift & scale from one of the polylines (N.B. we assume here that all features have the same shift/scale)
+	points->setGlobalShift(lines[0]->getGlobalShift());
+
 	points->reserve(validCells);
 	ccScalarField* nValidSF = new ccScalarField("nValid");
 	ccScalarField* nIgnoredSF = new ccScalarField("nIgnored");
@@ -2784,7 +2797,10 @@ void ccCompass::estimateP21()
 	{
 		outputCloud->addPoint(*outcrop->getPoint(p));
 	}
-
+	//copy global shift
+	outputCloud->setGlobalScale(outcrop->getGlobalScale()); //copy global scale
+	outputCloud->setGlobalShift(outcrop->getGlobalShift()); //copy global shift
+	
 	//setup scalar fields etc
 	ccScalarField* P21 = new ccScalarField("P21");
 	outputCloud->addScalarField(P21);
@@ -2951,6 +2967,8 @@ void ccCompass::convertToPointCloud()
 			for (ccHObject::Container::const_iterator it = poly.begin(); it != poly.end(); it++)
 			{
 				ccPolyline* t = static_cast<ccPolyline*>(*it);
+				points->setGlobalScale(t->getGlobalScale()); //copy global scale
+				points->setGlobalShift(t->getGlobalShift()); //copy global shift
 				points->reserve(points->size() + t->size()); //make space
 				sf->reserve(points->size() + t->size());
 				for (unsigned int p = 0; p < t->size(); p++)
@@ -3545,6 +3563,8 @@ void ccCompass::importLineations()
 
 		//create new point cloud to associate with lineation graphic
 		ccPointCloud* points = new ccPointCloud();
+		points->setGlobalScale(cld->getGlobalScale()); //copy global shift & scale onto new point cloud
+		points->setGlobalShift(cld->getGlobalShift());
 		points->reserve(2);
 		points->addPoint(Cd);
 		points->addPoint(Cd + l*size);
@@ -3864,7 +3884,7 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, const QString &p
 	{
 		std::vector<ccHObject*> clouds;
 		m_app->dbRootObject()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, false);
-		unsigned npoints = 0;
+		unsigned int npoints = 0;
 		for (ccHObject* o : clouds)
 		{
 			ccPointCloud* p = static_cast<ccPointCloud*>(o);
@@ -3893,7 +3913,7 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, const QString &p
 			ccPlane* P = static_cast<ccPlane*>(object);
 			CCVector3 L = P->getTransformation().getTranslationAsVec3D();
 			CCVector3d G = ss->toGlobal3d(L);
-			*out << G.x << "," << G.y << "," << G.z << ss->getName() << endl;
+			*out << G.x << "," << G.y << "," << G.z << endl;
 		}
 		else
 		{

@@ -1651,15 +1651,6 @@ void ccCompass::estimateStructureNormals()
 			{
 				//update progress bar
 				prg.update(100 * _min / (float)(px.size() - minsize));
-				//keep progress bar up to date
-				if (r == 0)
-				{
-					prg.update((50.0f * _min) / (px.size()-minsize)); //first 50% from lower surface
-				}
-				else
-				{
-					prg.update(50.0f + (50.0f * _min) / (px.size() - minsize)); //second 50% from upper surface
-				}
 
 				if (prg.isCancelRequested()) {
 
@@ -2352,7 +2343,7 @@ void ccCompass::estimateStrain()
 
 	//init strain tensors
 	CCLib::SquareMatrixd I(3); I.toIdentity();
-	std::vector<CCLib::SquareMatrixd> E(nx*ny*nz, CCLib::SquareMatrixd(I));
+	std::vector<CCLib::SquareMatrixd> F(nx*ny*nz, CCLib::SquareMatrixd(I)); //deformation gradient tensors
 
 	int validCells = 0;
 	prg.setInfo("Calculating strain tensors...");
@@ -2497,11 +2488,12 @@ void ccCompass::estimateStrain()
 					//compute transform matrix that apply's a scaling/stretching equal to the dyke thickness and in the direction of its normal
 					CCLib::SquareMatrixd e(3); e.toIdentity();
 					e.setValue(0, 0, (binSize + average_thickness) / binSize); //stretch matrix in local coordinates
-					CCLib::SquareMatrixd E_increment = B*(e*B.transposed());// transform to global coords
+					CCLib::SquareMatrixd F_increment = B*(e*B.transposed());// transform to global coords
 					
 					//apply this (multiply with) the deformation gradient tensor
-					//N.B. The order here is important!? Check the order things are fed in...
-					E[idx] = E_increment*E[idx];
+					//N.B. The order here is important, but we don't know the timing!
+					//Hence we need to somehow bootstrap this to try  all possibilites. 
+					F[idx] = F_increment*F[idx];
 
 					//build blocks for visualisation?
 					if (buildGraphics)
@@ -2529,10 +2521,13 @@ void ccCompass::estimateStrain()
 	points->reserve(validCells);
 	ccScalarField* nValidSF = new ccScalarField("nValid");
 	ccScalarField* nIgnoredSF = new ccScalarField("nIgnored");
+	ccScalarField* JSF = new ccScalarField("J");
 	points->addScalarField(nValidSF);
 	points->addScalarField(nIgnoredSF);
+	points->addScalarField(JSF);
 	nValidSF->reserve(validCells);
 	nIgnoredSF->reserve(validCells);
+	JSF->reserve(validCells);
 	ccScalarField* eSF[3][3];
 	for (int i = 0; i < 3; i++)
 	{
@@ -2571,26 +2566,41 @@ void ccCompass::estimateStrain()
 					nValidSF->addElement(nStructures[idx]);
 					nIgnoredSF->addElement(nIgnored[idx]);
 
+
+					//decompose into the rotation and right-stretch 
+					CCLib::SquareMatrixd eigVectors; std::vector<double> eigValues;
+					CCLib::SquareMatrixd B = F[idx] * F[idx].transposed();
+					Jacobi<double>::ComputeEigenValuesAndVectors(B, eigVectors, eigValues, true); //get eigens
+
+					CCLib::SquareMatrixd U_local(3); U_local.toIdentity();  //calculate stretch matrix in local (un-rotated coordinates)
+					U_local.setValue(0, 0, sqrt(eigValues[0])); U_local.setValue(1, 1, sqrt(eigValues[1])); U_local.setValue(2, 2, sqrt(eigValues[2]));
+					CCLib::SquareMatrixd U = eigVectors.transposed() * (U_local * eigVectors); //transform back into global coordinates
+
+					//compute jacobian (volumetric strain)
+					double J = eigValues[0] * eigValues[1] * eigValues[2]; //F[idx].computeDet();
+					JSF->addElement(J);
+
+					//store strain tensor
 					for (int i = 0; i < 3; i++)
 					{
 						for (int j = 0; j < 3; j++)
 						{
-							eSF[i][j]->addElement(E[idx].getValue(i, j));
+							eSF[i][j]->addElement(U.getValue(i, j));
 						}
 					}
-					
-					//compute and sort eigens of the deformation tensor
-					CCLib::SquareMatrixd eigVectors; std::vector<double> eigValues;
-					Jacobi<double>::ComputeEigenValuesAndVectors(E[idx], eigVectors, eigValues, true); //get eigens
-					Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues); //sort into decreasing order
 
 					if (buildGraphics)
 					{
+						//compute eigens of F
+						eigVectors.clear(); eigValues.clear();
+						Jacobi<double>::ComputeEigenValuesAndVectors(F[idx], eigVectors, eigValues, true); //get eigens
+						Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues);
+						
 						//apply exaggeration to eigenvalues (exaggerate shape of the strain ellipse)
 						CCLib::SquareMatrixd transMat(3);
-						transMat.setValue(0, 0, pow(eigValues[0] / eigValues[0], exag));
-						transMat.setValue(1, 1, pow(eigValues[1] / eigValues[0], exag));
-						transMat.setValue(2, 2, pow(eigValues[2] / eigValues[0], exag));
+						transMat.setValue(0, 0, pow(eigValues[0] / eigValues[1], exag));
+						transMat.setValue(1, 1, pow(eigValues[1] / eigValues[1], exag));
+						transMat.setValue(2, 2, pow(eigValues[2] / eigValues[1], exag));
 
 						//transform back into global coords
 						transMat = eigVectors * (transMat * eigVectors.transposed());
@@ -2602,11 +2612,11 @@ void ccCompass::estimateStrain()
 						ellipses->addChild(ellipse);
 
 						//store strain tensor on the graphic for reference
-						//TODO - remove the rotational component!
 						QVariantMap* map = new QVariantMap();
-						map->insert("Exx", E[idx].getValue(0, 0) - 1.0); map->insert("Exy", E[idx].getValue(0, 1)); map->insert("Exz", E[idx].getValue(0, 2));
-						map->insert("Eyx", E[idx].getValue(1, 0)); map->insert("Eyy", E[idx].getValue(1, 1) - 1.0); map->insert("Eyz", E[idx].getValue(1, 2));
-						map->insert("Ezx", E[idx].getValue(2, 0)); map->insert("Ezy", E[idx].getValue(2, 1)); map->insert("Ezz", E[idx].getValue(2, 2) - 1.0);
+						map->insert("Exx", U.getValue(0, 0) - 1.0); map->insert("Exy", U.getValue(0, 1)); map->insert("Exz", U.getValue(0, 2));
+						map->insert("Eyx", U.getValue(1, 0)); map->insert("Eyy", U.getValue(1, 1) - 1.0); map->insert("Eyz", U.getValue(1, 2));
+						map->insert("Ezx", U.getValue(2, 0)); map->insert("Ezy", U.getValue(2, 1)); map->insert("Ezz", U.getValue(2, 2) - 1.0);
+						map->insert("J", J);
 						ellipse->setMetaData(*map, true);
 
 						//create cubes to highlight gridding
@@ -2631,6 +2641,7 @@ void ccCompass::estimateStrain()
 	//finalize scalar fields
 	nValidSF->computeMinAndMax();
 	nIgnoredSF->computeMinAndMax();
+	JSF->computeMinAndMax();
 	for (int i = 0; i < 3; i++)
 	{
 		for (int j = 0; j < 3; j++)

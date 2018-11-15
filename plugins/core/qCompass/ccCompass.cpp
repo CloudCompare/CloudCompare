@@ -1906,7 +1906,14 @@ void ccCompass::estimateStructureNormals()
 						for (int i = 0; i < pinchClouds.size(); i++)
 						{
 							delete pinchClouds[i];
-							delete samples;
+							if (samples[0] != nullptr)
+							{
+								delete samples[0];
+							}
+							if (samples[1] != nullptr)
+							{
+								delete samples[1];
+							}
 						}
 						return;
 					}

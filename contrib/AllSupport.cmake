@@ -1,7 +1,5 @@
 # ALL 'contrib' supported libraries 
 
-# liblas support
-#include( contrib/LiblasSupport.cmake )
 # PDAL support
 include( contrib/PDALSupport.cmake )
 # E57 support
@@ -27,8 +25,6 @@ function( target_link_contrib ) # 2 arguments: ARGV0 = project name / ARGV1 = sh
 
 	#libraries with dynamic linkage can automatically 'install' their DLLs
 
-	#liblas support
-	#target_link_liblas( ${ARGV0} ${ARGV1} )
 	#PDAL support
 	target_link_PDAL( ${ARGV0} ${ARGV1} )
 	#GDAL support

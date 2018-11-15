@@ -1305,7 +1305,7 @@ inline double logWishart(CCLib::SquareMatrixd X, int nobserved, double phi, doub
 static unsigned int minsize = 500; //these are the defaults
 static unsigned int maxsize = 1000;
 static double tcDistance = 10.0; //the square of the maximum distance to compute thicknesses for
-static unsigned int oversample = 0;
+static unsigned int oversample = 30;
 static double likPower = 1.0;
 static bool calcThickness = true;
 static double stride = 0.025;
@@ -4152,10 +4152,18 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 		//write thickness
 		out->writeStartElement("THICKNESS");
 	}
+	else if (ccSNECloud::isSNECloud(object))
+	{
+		out->writeStartElement("SNE");
+	}
 	else if (ccLineation::isLineation(object))
 	{
 		//write lineation
 		out->writeStartElement("LINEATION");
+	}
+	else if (object->isA(CC_TYPES::POINT_CLOUD))
+	{
+		out->writeStartElement("CLOUD");
 	}
 	else if (object->isA(CC_TYPES::POLY_LINE))
 	{
@@ -4330,6 +4338,59 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 			}
 
 			//fin!
+			out->writeEndElement();
+		}
+	}
+
+	//if object is a point cloud write global shift and scale
+	if (object->isA(CC_TYPES::POINT_CLOUD))
+	{
+		ccPointCloud* cloud = static_cast<ccPointCloud*>(object);
+		out->writeTextElement("GLOBAL_SCALE", QString::asprintf("%f", cloud->getGlobalScale()));
+		out->writeTextElement("GLOBAL_X", QString::asprintf("%f", cloud->getGlobalShift().x));
+		out->writeTextElement("GLOBAL_Y", QString::asprintf("%f", cloud->getGlobalShift().y));
+		out->writeTextElement("GLOBAL_Z", QString::asprintf("%f", cloud->getGlobalShift().z));
+
+		//for SNE clouds write all points, point normals and scalar fields
+		if (ccSNECloud::isSNECloud(object))
+		{
+			//write header for point data
+			out->writeStartElement("POINTS");
+			out->writeAttribute("count", QString::asprintf("%d", cloud->size()));
+
+			//gather data strings
+			QString x, y, z, nx, ny, nz, thickness, weight, trend, plunge;
+			CCLib::ScalarField* tSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Thickness"));
+			CCLib::ScalarField* wSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Weight"));
+			CCLib::ScalarField* trendSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Trend"));
+			CCLib::ScalarField* plungeSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Plunge"));
+			for (unsigned p = 0; p < cloud->size(); p++)
+			{
+				x += QString::asprintf("%f,", cloud->getPoint(p)->x);
+				y += QString::asprintf("%f,", cloud->getPoint(p)->y);
+				z += QString::asprintf("%f,", cloud->getPoint(p)->z);
+				nx += QString::asprintf("%f,", cloud->getPointNormal(p).x);
+				ny += QString::asprintf("%f,", cloud->getPointNormal(p).y);
+				nz += QString::asprintf("%f,", cloud->getPointNormal(p).z);
+				thickness += QString::asprintf("%f,", tSF->getValue(p));
+				weight += QString::asprintf("%f,", wSF->getValue(p));
+				trend += QString::asprintf("%f,", trendSF->getValue(p));
+				plunge += QString::asprintf("%f,", plungeSF->getValue(p));
+			}
+
+			//write
+			out->writeTextElement("x", x);
+			out->writeTextElement("y", y);
+			out->writeTextElement("z", z);
+			out->writeTextElement("nx", nx);
+			out->writeTextElement("ny", ny);
+			out->writeTextElement("nz", nz);
+			out->writeTextElement("thickness", thickness);
+			out->writeTextElement("weight", weight);
+			out->writeTextElement("trend", trend);
+			out->writeTextElement("plunge", plunge);
+
+			//fin
 			out->writeEndElement();
 		}
 	}

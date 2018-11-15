@@ -2607,7 +2607,8 @@ void ccCompass::estimateStrain()
 						transMat = eigVectors * (transMat * eigVectors.transposed());
 						double gl16[16]; transMat.toGlMatrix(gl16);
 						gl16[12] = p.x; gl16[13] = p.y; gl16[14] = p.z; gl16[15] = 1.0; //add translation to GL matrix
-						ccGenericPrimitive* ellipse = new ccSphere(binSize / 3, &ccGLMatrix(gl16), "StrainEllipse");
+						ccGLMatrix gl(gl16);
+						ccGenericPrimitive* ellipse = new ccSphere(binSize / 3, &gl, "StrainEllipse");
 						ellipse->setColor(ccColor::blue);
 						ellipse->showColors(true);
 						ellipses->addChild(ellipse);

@@ -2500,7 +2500,8 @@ void ccCompass::estimateStrain()
 					{
 						double gl16[16]; B.toGlMatrix(gl16);
 						gl16[12] = minx + (x+0.5) * binSize; gl16[13] = miny + (y+0.5) * binSize; gl16[14] = minz + (z+0.5)*binSize; gl16[15] = 1.0;
-						ccGenericPrimitive* box = new ccBox(CCVector3(average_thickness, binSize/2, binSize/2), &ccGLMatrix(gl16), "BlockStrain");
+						ccGLMatrix gl(gl16);
+						ccGenericPrimitive* box = new ccBox(CCVector3(average_thickness, binSize/2, binSize/2), &gl, "BlockStrain");
 						dataInCell[idx]->addChild(box);
 					}
 				}

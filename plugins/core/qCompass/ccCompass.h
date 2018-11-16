@@ -110,8 +110,12 @@ protected slots:
 	void fitPlaneToGeoObject(); //calculates best-fit plane for the upper and lower surfaces of the selected GeoObject
 	void recalculateFitPlanes(); //recalcs fit planes for traces and GeoObjects
 	void estimateStructureNormals(); //Estimate the normal vector to the structure this trace represents at each point in this trace.
+	void estimateP21(); //Calculate the intensity of selected structures 
+	void estimateStrain(); //Estimate strain from Mode-I dykes and veins
 	void convertToPointCloud(); //converts selected traces or geoObjects to point clouds
 	void distributeSelection(); //distributes selected objects into GeoObjects with the same name
+	void importFoliations(); //import foliation data
+	void importLineations(); //import lineation data
 	void exportToSVG(); //exports current view to SVG
 
 	//map mode dialog
@@ -151,6 +155,7 @@ protected:
 	void stopPicking();
 
 	//checks if the passed object, or any of it's children, represent unloaded ccCompass objects (e.g. traces, fitplanes etc).
+	void tryLoading();
 	void tryLoading(ccHObject* obj, std::vector<int>* originals, std::vector<ccHObject*>* replacements);
 
 	//Action to start ccCompass
@@ -161,6 +166,7 @@ protected:
 
 	//picking or not?
 	bool m_picking = false;
+	bool m_active = false;
 
 	//ccCompass toolbar gui
 	ccCompassDlg* m_dlg = nullptr;

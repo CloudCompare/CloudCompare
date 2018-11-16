@@ -117,8 +117,12 @@ public:
 	//returns true if object is a single-surface GeoObject rather than a generic GeoObject
 	static bool isSingleSurfaceGeoObject(ccHObject* object);
 
-	//traverses up the DbTree, starting at object, until a ccHObject is found. If none is found this will return null.
+	//traverses up the DbTree, starting at object, until a ccGeoObject is found. If none is found this will return null.
 	static ccGeoObject* getGeoObjectParent(ccHObject* object);
+
+	//traverses up the DbTree, starting at object, until a ccGeoObject representing the interior, upper or lower surface. 
+	//returns -1 if no ccGeoObject is found, otherwise ccGeoObject::INTERIOR, ccGeoObject::UPPER_BOUNDARY or ccGeoObject::LOWER_BOUNDARY
+	static int getGeoObjectRegion(ccHObject* object);
 };
 
 #endif

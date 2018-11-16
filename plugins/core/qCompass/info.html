@@ -94,6 +94,11 @@ in which the note can be added. As always, short notes are best.</p>
 trace, the <i>Fit Plane to GeoObject</i> tool will calculate a fit plane for all traces defining the upper and lower surfaces of a GeoObject. Use with care, as this can often 
 produce spurious results.</p>
 
+<h3>Estimate Structure Normals</h3>
+<p>This tool uses a combines a bayesian plane fitting algorithm with a moving window search algorithm to (1) identify the best constrained fit plane for each point in a structural trace and (2) generate 
+orientation estimates using an MCMC sampler. These provide estimates of a structures orientation at each point along a trace, and associated uncertainty. Please refer to the documentation on the CloudCompare wiki page for further details regarding
+this tool.</p>
+
 <h3>Merge selected GeoObjects</h3>
 <p>Merges all of the GeoObjects selected in the DB Tree into the currently active (most recently selected) GeoObject.</p>
 

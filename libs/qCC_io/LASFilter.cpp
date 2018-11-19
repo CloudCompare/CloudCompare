@@ -415,9 +415,8 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		for (const LasField &lasField: fieldsToSave)
 		{
 			std::bitset<8> classFlags;
-			Id pdalId;
-			assert(lasField->sf);
-			pdalId = typeToId(lasField.type);
+			assert(lasField.sf);
+			Id pdalId = typeToId(lasField.type);
 			switch (lasField.type)
 			{
 			case LAS_X:
@@ -851,12 +850,12 @@ std::vector<ExtraDim> ExtraBytesIf::toExtraDims()
 	return eds;
 }
 
-std::vector<ExtraDim> readExtraBytesVlr(const LasHeader &header)
+std::vector<ExtraDim> readExtraBytesVlr(LasHeader &header)
 {
 	std::vector<ExtraDim> extraDims;
 
-	const LasVLR *vlr = header.findVlr(SPEC_USER_ID,
-		EXTRA_BYTES_RECORD_ID);
+	const LasVLR *vlr = header.findVlr(SPEC_USER_ID, EXTRA_BYTES_RECORD_ID);
+	
 	if (!vlr)
 	{
 		return extraDims;

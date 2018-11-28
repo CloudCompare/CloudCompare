@@ -80,9 +80,6 @@ ccCompass::~ccCompass()
 	delete m_topologyTool;
 	delete m_noteTool;
 	delete m_pinchNodeTool;
-
-	delete m_dlg;
-	delete m_mapDlg;
 }
 
 void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)

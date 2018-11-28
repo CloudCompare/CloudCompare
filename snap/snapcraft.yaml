@@ -38,10 +38,13 @@ parts:
       - libboost-program-options-dev
       - libcgal-dev
       - libcgal-qt5-dev
+      - libdlib-dev
       - libswscale-dev
       - libtbb-dev
       - libqt5opengl5-dev
       - qt5-default
+      - qttools5-dev 
+      - qttools5-dev-tools
       - libgdal-dev
       - libxerces-c-dev
       - libpcl-dev
@@ -76,6 +79,8 @@ parts:
       - -DINSTALL_QBROOM_PLUGIN=ON
       - -DINSTALL_QHOUGH_NORMALS_PLUGIN=ON
       - -DINSTALL_QCOMPASS_PLUGIN=ON
+      - -DINSTALL_QCANUPO_PLUGIN=ON
+      - -DDLIB_ROOT=/usr/include
       - -DEIGEN_ROOT_DIR=$SNAPCRAFT_STAGE/include/eigen3
       - -DOPTION_PDAL_LAS=ON
       - -DJSON_ROOT_DIR=/usr/include/jsoncpp
@@ -94,6 +99,7 @@ parts:
       - build-essential
     configflags:
      - -DCMAKE_BUILD_TYPE=Release
+     - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
     install: 
      make install
     stage: [ include/*, lib/* ]

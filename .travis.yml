@@ -8,10 +8,16 @@ compiler:
 - gcc
 install:
 - sudo apt-get update -qq
-- sudo apt-get install -qy cmake qt55base qttools5-dev qttools5-dev-tools
-  libgdal1-dev libfreenect-dev
+- sudo apt-get install -qy cmake
+  libgdal-dev libfreenect-dev
   libeigen3-dev libqt5svg5-dev libtbb-dev
+  libavcodec-dev libavformat-dev libavutil-dev libboost-thread-dev
+  libboost-program-options-dev libcgal-dev libcgal-qt5-dev
+  libdlib-dev libswscale-dev libtbb-dev
+  libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools 
+  libproj-dev libdlib-dev
 - git submodule init && git submodule update
+
 before_script:
 - mkdir build
 - cd build
@@ -28,6 +34,8 @@ before_script:
   -DINSTALL_QANIMATION_PLUGIN=ON
   -DINSTALL_QBROOM_PLUGIN=ON
   -DINSTALL_QCOMPASS_PLUGIN=ON
+  -DINSTALL_QCANUPO_PLUGIN=ON
+  -DDLIB_ROOT=/usr/include
   -DINSTALL_QCSF_PLUGIN=ON
   -DINSTALL_QEDL_PLUGIN=ON
   -DINSTALL_QFACETS_PLUGIN=ON

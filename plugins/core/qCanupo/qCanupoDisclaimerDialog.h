@@ -25,7 +25,7 @@
 #include <ccMainAppInterface.h>
 
 //Qt
-#include <QMainwindow>
+#include <QMainWindow>
 
 //! Dialog for displaying the CANUPO/UEB disclaimer
 class TrainDisclaimerDialog : public QDialog, public Ui::TrainDisclaimerDialog

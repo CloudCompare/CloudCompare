@@ -37,10 +37,10 @@
   - `OPTION_SUPPORT_MAC_PDMS_FORMAT`: to add support for PDMS .mac scripts (*CAD format*)
   - `OPTION_USE_DXFLIB`: to add support for DXF files in CloudCompare/ccViewer with **dxflib** - see [below](#optional-setup-for-dxflib-support)
   - `OPTION_USE_FBX_SDK`: to add support for FBX files in CloudCompare/ccViewer with the official **FBX SDK** - see [below](#optional-setup-for-fbx-sdk-support)
-  - `OPTION_USE_GDAL`: to add support for a lot of raster files in CloudCompare/ccViewer with **GDAL** libray - see [below](#gdal_setup)
-  - `OPTION_USE_LIBE57`: to add support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#libE57_setup)
-  - `OPTION_USE_LIBLAS`: to add support for LAS files in CloudCompare/ccViewer with **libLAS** - see [below](#optional-setup-for-gdal-supportt)
+  - `OPTION_USE_GDAL`: to add support for a lot of raster files in CloudCompare/ccViewer with **GDAL** library - see [below](#optional-setup-for-gdal-support)
+  - `OPTION_USE_LIBE57`: to add support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#optional-setup-for-libe57-support)
   - `OPTION_USE_SHAPE_LIB`: to add support for SHP files in CloudCompare/ccViewer
+  - `OPTION_PDAL_LAS`: to add support for LAS files in CloudCompare/ccViewer with **PDAL** - see [below](#optional-setup-for-las-using-pdal)
 
   The following are Windows-only options:
   - `OPTION_MP_BUILD`: for Visual Studio only *(multi-process build --> much faster but uses a lot of CPU power)*
@@ -107,29 +107,21 @@ If you want to use or debug plugins in DEBUG mode while using a single configura
 1. The version of the Poisson Surface Reconstruction library (M. Kazhdan et al.) used by the  is https://github.com/cloudcompare/PoissonRecon. It is declared as a submodule of CC's repository. You have to explicitly synchronize it (see https://git-scm.com/docs/git-submodule).
 2. Then simply check the INSTALL_QPOISSON_RECON_PLUGIN option in CMake
 
-### [Optional] Setup for LibLAS support
+### [Optional] Setup for LAS using PDAL
 
 If you want to compile CloudCompare (and ccViewer) with LAS/LAZ files support, you'll need:
 
-1.  [LibLAS](http://liblas.org) (*last tested version: 1.8 on Windows*)
-2.  and optionally [laszip](http://www.laszip.org/) for LAZ files support (*last tested version: 2.2.0 on Windows*) --> prefer the static version (`BUILD_STATIC` in LASzip CMake configuration) and mind the `WITH_STATIC_LASZIP` option in libLAS CMake configuration! (*only appears in 'Advanced' mode*)
-3. [Boost](http://www.boost.org/) multi-thread static libraries
-  - make the `BOOST_ROOT` environment variable point to your Boost installation before launching CMake in order for the automatic `find_package` script to work properly
-  - otherwise refer to LibLAS [documentation](http://liblas.org/compilation.html) for more directions
+1. [PDAL](https://pdal.io/)
+2. Set `OPTION_PDAL_LAS=TRUE`
 
-Then, the CloudCompare CMake project will request that you set the 3 following variables:
-
-1. `LIBLAS_INCLUDE_DIR`: LibLAS include directory (pretty straightforward ;))
-2. `LIBLAS_RELEASE_LIBRARY_FILE`: main LibLAS release library (the .lib or .a file itself!)
-3. [Windows] `LIBLAS_SHARED_LIBRARY_FILE`: full path to the `liblas.dll` file
-
-*For the moment, only the release version of CloudCompare supports LibLAS files*
+If your PDAL installation is not correctly picked up by CMake, 
+set the `PDAL_DIR` to the path containing `PDALConfig.cmake`.
 
 ### [Optional] Setup for LibE57 support
 
 If you want to compile CloudCompare (and ccViewer) with LibE57 files support, you'll need:
 
-1. [Boost](http://www.boost.org/) multi-thread static libraries (same as [libLAS](#liblas_setup))
+1. [Boost](http://www.boost.org/) multi-thread static libraries
 2. [Xerces-C++](http://xerces.apache.org/xerces-c) multi-thread **static** libraries
     - On Visual C++ (Windows):
         1. select the `Static Debug` or `Static Release` configurations

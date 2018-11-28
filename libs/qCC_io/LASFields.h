@@ -33,6 +33,9 @@ class ccPointCloud;
 static const char LAS_SCALE_X_META_DATA[] = "LAS.scale.x";
 static const char LAS_SCALE_Y_META_DATA[] = "LAS.scale.y";
 static const char LAS_SCALE_Z_META_DATA[] = "LAS.scale.z";
+static const char LAS_VERSION_MAJOR_META_DATA[] = "LAS.version.major";
+static const char LAS_VERSION_MINOR_META_DATA[] = "LAS.version.minor";
+static const char LAS_POINT_FORMAT_META_DATA[] = "LAS.point_format";
 
 enum LAS_FIELDS {
 	LAS_X = 0,

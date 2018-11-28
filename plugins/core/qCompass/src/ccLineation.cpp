@@ -76,13 +76,14 @@ void ccLineation::updateMetadata()
 		}
 
 		//store trend and plunge info
-		CCVector3 s = *getPoint(0); //start point
-		CCVector3 e = *getPoint(1); //end point
+		//CCVector3d Pg = cloud->toGlobal3d(*P);
+		CCVector3d s = toGlobal3d(*getPoint(0)); //start point
+		CCVector3d e = toGlobal3d(*getPoint(1)); //end point
 		float length = (s - e).norm();
-
+		
 		map->insert("Sx", s.x); map->insert("Sy", s.y); map->insert("Sz", s.z);
 		map->insert("Ex", e.x); map->insert("Ey", e.y); map->insert("Ez", e.z);
-		map->insert("Trend", trend); map->insert("Plunge", plunge); map->insert("Length", length);
+		map->insert("Trend", trend); map->insert("Plunge", plunge); map->insert("Length", length*getGlobalScale());
 
 		//store metadata
 		setMetaData(*map, true);

@@ -2,6 +2,7 @@
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/qAdditionalIO )
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/qAnimation )
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/qBroom )
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/qCanupo )
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/qCompass )
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/qCork )
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/qCSF )

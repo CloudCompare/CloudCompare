@@ -20,8 +20,8 @@
 
 //Qt
 #include <QDialog>
-#include <QWidget>
 #include <QList>
+#include <QWidget>
 
 class ccGLWindow;
 
@@ -33,10 +33,10 @@ class ccOverlayDialog : public QDialog
 public:
 
 	//! Default constructor
-	explicit ccOverlayDialog(QWidget* parent = 0, Qt::WindowFlags flags = Qt::FramelessWindowHint | Qt::Tool);
+	explicit ccOverlayDialog(QWidget* parent = nullptr, Qt::WindowFlags flags = Qt::FramelessWindowHint | Qt::Tool);
 
 	//! Destructor
-	virtual ~ccOverlayDialog();
+	~ccOverlayDialog() override;
 
 	//! Links the overlay dialog with a MDI window
 	/** Warning: link can't be modified while dialog is displayed/process is running!
@@ -56,7 +56,7 @@ public:
 	virtual void stop(bool accepted);
 
 	//reimplemented from QDialog
-	virtual void reject();
+	void reject() override;
 
 	//! Adds a keyboard shortcut (single key) that will be overridden from the associated window
 	/** When an overridden key is pressed, the shortcutTriggered(int) signal is emitted.
@@ -84,12 +84,12 @@ signals:
 protected slots:
 
 	//! Slot called when the linked window is deleted (calls 'onClose')
-	virtual void onLinkedWindowDeletion(QObject* object = 0);
+	virtual void onLinkedWindowDeletion(QObject* object = nullptr);
 
 protected:
 
 	//inherited from QObject
-	bool eventFilter(QObject *obj, QEvent *e);
+	bool eventFilter(QObject *obj, QEvent *e) override;
 
 	//! Associated (MDI) window
 	ccGLWindow* m_associatedWin;

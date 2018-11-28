@@ -31,15 +31,15 @@ class ccPickOneElementDlg : public QDialog
 public:
 
 	//! Default constructor
-	ccPickOneElementDlg(QString label,
-						QString windowTitle = QString(),
-						QWidget* parent = 0);
+	ccPickOneElementDlg(const QString &label,
+						const QString &windowTitle = QString(),
+						QWidget* parent = nullptr);
 
 	//! Destructor
-	~ccPickOneElementDlg();
+	~ccPickOneElementDlg() override;
 
 	//! Add an element to the combo box
-	void addElement(QString elementName);
+	void addElement(const QString &elementName);
 	//! Sets the combo box default index
 	void setDefaultIndex(int index);
 	//! Returns the combo box current index (after completion)

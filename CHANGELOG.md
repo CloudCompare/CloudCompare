@@ -72,6 +72,7 @@ v2.10.alpha - XX/XX/201X
 	* Normals:
 		- Ergonomics of 'Normals > compute' dialog have been (hopefully) enhanced
 		- Normals can now be oriented toward a sensor even if there's no grid associated with the point cloud.
+		- The Normal Orientation algorithm based on the Minimum Spanning Tree now uses much less memory (~1/10)
 
 	* PCV:
 		- the PCV plugin can now be applied on several clouds (batch mode)

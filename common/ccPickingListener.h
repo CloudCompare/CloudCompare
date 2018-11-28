@@ -30,6 +30,7 @@ class ccHObject;
 class ccPickingListener
 {
 public:
+	virtual ~ccPickingListener() = default;
 	
 	//! Picked item
 	struct PickedItem

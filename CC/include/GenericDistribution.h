@@ -56,14 +56,14 @@ public:
 	**/
 	virtual bool isValid() const { return m_isValid; }
 
-	//! Computes the distribution parameters from a group of sample points
-	/**	Virtual method to determine the distribution parameters from the
-		scalar values.
-		Warning: be sure to activate an OUTPUT scalar field on the input cloud
-		\param cloud a point cloud with associated scalar values
+	//! Scalar values container
+	using ScalarContainer = std::vector<ScalarType>;
+
+	//! Computes the distribution parameters from a set of values
+	/**	\param values a set of scalar values
 		\return true (if the computation succeeded) or false (if not)
 	**/
-	virtual bool computeParameters(const GenericCloud* cloud) = 0;
+	virtual bool computeParameters(const ScalarContainer& values) = 0;
 
 	//! Computes the probability of x
 	/** \param x the variable

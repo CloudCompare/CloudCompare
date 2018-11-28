@@ -439,3 +439,34 @@ ccGeoObject* ccGeoObject::getGeoObjectParent(ccHObject* object)
 
 	return nullptr;
 }
+
+int ccGeoObject::getGeoObjectRegion(ccHObject* object)
+{
+	//recurse up until we find a georegion
+	ccHObject* parent = object->getParent();
+	while (parent != nullptr && !(isGeoObjectUpper(parent) | isGeoObjectLower(parent) | isGeoObjectInterior(parent) | isSingleSurfaceGeoObject(parent)))
+	{
+		parent = parent->getParent();
+	}
+
+	if (parent == nullptr)
+	{
+		return -1; 
+	}
+	else if (ccGeoObject::isGeoObjectInterior(parent) | isSingleSurfaceGeoObject(parent))
+	{
+		return ccGeoObject::INTERIOR;
+	} 
+	else if (ccGeoObject::isGeoObjectUpper(parent))
+	{
+		return ccGeoObject::UPPER_BOUNDARY;
+	}
+	else if (ccGeoObject::isGeoObjectLower(parent))
+	{
+		return ccGeoObject::LOWER_BOUNDARY;
+	}
+	else
+	{
+		return -2; //unknown ...should never happen?
+	}
+}

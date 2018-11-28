@@ -16,7 +16,6 @@
 //##########################################################################
 
 #include <QFile>
-#include <QPushButton>
 #include <QTextEdit>
 #include <QTextStream>
 #include <QVBoxLayout>
@@ -26,18 +25,16 @@
 ccCompassInfo::ccCompassInfo(QWidget *parent)
 	: QDialog(parent)
 {
-	setFixedWidth(800);
-	setFixedHeight(600);
+	setFixedSize(800, 600);
 
 	//setup GUI components
-	QTextEdit* l = new QTextEdit(this);
+	QTextEdit* l = new QTextEdit;
 	l->acceptRichText();
 	l->setReadOnly(true);
 
-	QPushButton *okButton = new QPushButton(tr("Ok"));
-	QDialogButtonBox *buttonBox = new QDialogButtonBox(Qt::Horizontal);
-	buttonBox->addButton(okButton, QDialogButtonBox::AcceptRole);
-	connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept); //done
+	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal);
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+	
 	QVBoxLayout *lt = new QVBoxLayout;
 	lt->addWidget(l);
 	lt->addWidget(buttonBox);
@@ -50,10 +47,9 @@ ccCompassInfo::ccCompassInfo(QWidget *parent)
 		QTextStream in(&file);
 		QString html = in.readAll();
 		l->setText(html);
-		file.close();
 	}
 	else
 	{
-		l->setText("Error loading documentation file....");
+		l->setText("Error loading documentation file...");
 	}
 }

@@ -15,6 +15,12 @@
 //#                                                                        #
 //##########################################################################
 
+#include <QFile>
+#include <QPushButton>
+#include <QTextEdit>
+#include <QTextStream>
+#include <QVBoxLayout>
+
 #include "ccCompassInfo.h"
 
 ccCompassInfo::ccCompassInfo(QWidget *parent)

@@ -19,13 +19,7 @@
 #define CC_COMPASS_INFO_HEADER
 
 #include <QDialog>
-#include <QLabel>
-#include <QPushButton>
 #include <QDialogButtonBox>
-#include <QBoxLayout>
-#include <QTextEdit>
-#include <QFile>
-#include <QTextStream>
 
 /*
 Simple class for displaying the help dialog.
@@ -35,7 +29,7 @@ class ccCompassInfo : public QDialog
 	Q_OBJECT
 	
 public:
-	explicit ccCompassInfo(QWidget *parent = 0);
+	explicit ccCompassInfo(QWidget *parent = nullptr);
 };
 
 #endif

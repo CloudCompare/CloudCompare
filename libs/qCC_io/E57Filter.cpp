@@ -41,15 +41,15 @@
 //Qt
 #include <QApplication>
 #include <QBuffer>
-#include <QString>
 #include <QMap>
+#include <QString>
 #include <QUuid>
 
 //system
 #include <cassert>
 #include <string>
 
-typedef double colorFieldType;
+using colorFieldType = double;
 //typedef boost::uint16_t colorFieldType;
 
 const char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";

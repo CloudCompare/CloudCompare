@@ -71,8 +71,10 @@ function( target_link_LIBE57FORMAT ) # 1 argument: ARGV0 = project name
 	if( ${OPTION_USE_LIBE57FORMAT} )
 		if( LIBE57FORMAT_INSTALL_DIR )
 			
-			target_link_libraries( ${ARGV0} debug ${LIBE57FORMAT_LIBRARY_DEBUG} optimized ${LIBE57FORMAT_LIBRARY_RELEASE} )
-			
+			target_link_libraries( ${ARGV0} optimized ${LIBE57FORMAT_LIBRARY_RELEASE})
+			if(LIBE57FORMAT_LIBRARY_DEBUG)			
+				target_link_libraries( ${ARGV0} debug ${LIBE57FORMAT_LIBRARY_DEBUG})
+			endif()
 			#Xerces
 			if ( CMAKE_CONFIGURATION_TYPES )
 				if (Xerces_LIBRARY_DEBUG AND Xerces_LIBRARY_RELEASE)

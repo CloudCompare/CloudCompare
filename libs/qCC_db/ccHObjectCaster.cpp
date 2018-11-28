@@ -109,7 +109,7 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 
 ccShiftedObject* ccHObjectCaster::ToShifted(ccHObject* obj, bool* lockedVertices /*= 0*/)
 {
-	ccGenericPointCloud* cloud = ToGenericPointCloud(obj, lockedVertices /*= 0*/);
+	ccGenericPointCloud* cloud = ToGenericPointCloud(obj, lockedVertices);
 	if (cloud)
 		return cloud;
 

@@ -1249,8 +1249,8 @@ inline double logWishSF(CCLib::SquareMatrixd X, int nobserved)
 		X.m_values[0][1] * (X.m_values[1][0] * X.m_values[2][2] - X.m_values[2][0] * X.m_values[1][2]) +
 		X.m_values[0][2] * (X.m_values[1][0] * X.m_values[2][1] - X.m_values[2][0] * X.m_values[1][1]);
 
-	return (nobserved - 4.0)*0.5*log(detX) - (nobserved*3. / 2.)*log(2.0) -   //=parts of gamma function that do not depend on the scale matrix
-		((3.0 / 2.0)*log(M_PI) + lgamma(nobserved / 2.0) + lgamma((nobserved / 2.0) - 0.5) + lgamma((nobserved / 2.0) - 1.0)); //= log(gamma3(nobserved/2))
+	return (nobserved - 4.0)*0.5*log(detX) - (nobserved*3. / 2.)*log(2.0) -   // parts of gamma function that do not depend on the scale matrix
+		((3.0 / 2.0)*log(M_PI) + lgamma(nobserved / 2.0) + lgamma((nobserved / 2.0) - 0.5) + lgamma((nobserved / 2.0) - 1.0)); // log(gamma3(nobserved/2))
 }
 
 //calculate log wishart probability density

@@ -32,7 +32,8 @@ Simple class for displaying the help dialog.
 */
 class ccCompassInfo : public QDialog
 {
-
+	Q_OBJECT
+	
 public:
 	explicit ccCompassInfo(QWidget *parent = 0);
 };

@@ -260,7 +260,7 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 	}
 	else
 	{
-		m_pointSize = 0; //= follows default setting
+		m_pointSize = 0; // follows default setting
 	}
 
 	return true;

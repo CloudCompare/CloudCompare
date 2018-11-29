@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>643</width>
-    <height>389</height>
+    <width>734</width>
+    <height>456</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -86,7 +86,7 @@
             <string>More information about this issue</string>
            </property>
            <property name="text">
-            <string>?</string>
+            <string notr="true">?</string>
            </property>
           </widget>
          </item>
@@ -266,7 +266,7 @@ coordinate system (on disk)</string>
               <item>
                <widget class="QLabel" name="xOriginLabel">
                 <property name="text">
-                 <string>x = 3213132123.3215</string>
+                 <string notr="true">x = 3213132123.3215</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -276,7 +276,7 @@ coordinate system (on disk)</string>
               <item>
                <widget class="QLabel" name="yOriginLabel">
                 <property name="text">
-                 <string>y = 3213213143.34</string>
+                 <string notr="true">y = 3213213143.34</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -286,7 +286,7 @@ coordinate system (on disk)</string>
               <item>
                <widget class="QLabel" name="zOriginLabel">
                 <property name="text">
-                 <string>z = 3.87</string>
+                 <string notr="true">z = 3.87</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -385,7 +385,7 @@ coordinate system (on disk)</string>
                 </font>
                </property>
                <property name="text">
-                <string>x</string>
+                <string notr="true">x</string>
                </property>
               </widget>
              </item>
@@ -434,7 +434,7 @@ coordinate system (on disk)</string>
                 </font>
                </property>
                <property name="text">
-                <string>+</string>
+                <string notr="true">+</string>
                </property>
               </widget>
              </item>
@@ -588,19 +588,6 @@ coordinate system (on disk)</string>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>25</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
            <widget class="QFrame" name="smallCubeFrame">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -611,13 +598,7 @@ coordinate system (on disk)</string>
             <property name="minimumSize">
              <size>
               <width>150</width>
-              <height>150</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>150</width>
-              <height>150</height>
+              <height>180</height>
              </size>
             </property>
             <property name="toolTip">
@@ -677,7 +658,7 @@ coordinate system</string>
                 <item>
                  <widget class="QLabel" name="xDestLabel">
                   <property name="text">
-                   <string>x = 123.3215</string>
+                   <string notr="true">x = 123.3215</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignCenter</set>
@@ -687,7 +668,7 @@ coordinate system</string>
                 <item>
                  <widget class="QLabel" name="yDestLabel">
                   <property name="text">
-                   <string>y = 143.34</string>
+                   <string notr="true">y = 143.34</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignCenter</set>
@@ -697,7 +678,7 @@ coordinate system</string>
                 <item>
                  <widget class="QLabel" name="zDestLabel">
                   <property name="text">
-                   <string>z = 3.87</string>
+                   <string notr="true">z = 3.87</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignCenter</set>
@@ -732,19 +713,6 @@ coordinate system</string>
              </item>
             </layout>
            </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_5">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>25</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </item>

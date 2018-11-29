@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>578</width>
-    <height>407</height>
+    <width>731</width>
+    <height>530</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -358,7 +358,7 @@
          <item>
           <widget class="QSpinBox" name="maxThreadCountSpinBox">
            <property name="suffix">
-            <string> / 8</string>
+            <string notr="true"> / 8</string>
            </property>
           </widget>
          </item>

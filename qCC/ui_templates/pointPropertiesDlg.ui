@@ -6,15 +6,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>201</width>
-    <height>26</height>
+    <width>234</width>
+    <height>30</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Points Properties</string>
   </property>
   <layout class="QHBoxLayout">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
     <number>2</number>
    </property>
    <item>
@@ -26,7 +35,7 @@
       <string comment="Display selected point properties">Select one point and display its information</string>
      </property>
      <property name="text">
-      <string>...</string>
+      <string notr="true">...</string>
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
@@ -46,7 +55,7 @@
       <string/>
      </property>
      <property name="text">
-      <string>...</string>
+      <string notr="true">...</string>
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
@@ -63,7 +72,7 @@
       <string>Select 3 points and display corresponding triangle information</string>
      </property>
      <property name="text">
-      <string>...</string>
+      <string notr="true">...</string>
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">

@@ -168,14 +168,14 @@
        <item>
         <widget class="QToolButton" name="toolButtonShortcutComma">
          <property name="text">
-          <string>,</string>
+          <string notr="true">,</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QToolButton" name="toolButtonShortcutDotcomma">
          <property name="text">
-          <string>;</string>
+          <string notr="true">;</string>
          </property>
         </widget>
        </item>

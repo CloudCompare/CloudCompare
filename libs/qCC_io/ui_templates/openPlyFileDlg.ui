@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>335</width>
-    <height>530</height>
+    <height>694</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,7 +53,7 @@
         </size>
        </property>
        <property name="text">
-        <string>0</string>
+        <string notr="true">0</string>
        </property>
        <property name="maxLength">
         <number>3</number>
@@ -79,7 +79,7 @@
         </size>
        </property>
        <property name="text">
-        <string>0</string>
+        <string notr="true">0</string>
        </property>
        <property name="maxLength">
         <number>3</number>
@@ -105,7 +105,7 @@
         </size>
        </property>
        <property name="text">
-        <string>0</string>
+        <string notr="true">0</string>
        </property>
        <property name="maxLength">
         <number>3</number>
@@ -198,7 +198,7 @@
      <item row="8" column="0">
       <widget class="QLabel" name="label_12">
        <property name="text">
-        <string>Nx</string>
+        <string notr="true">Nx</string>
        </property>
       </widget>
      </item>
@@ -208,7 +208,7 @@
      <item row="9" column="0">
       <widget class="QLabel" name="label_13">
        <property name="text">
-        <string>Ny</string>
+        <string notr="true">Ny</string>
        </property>
       </widget>
      </item>
@@ -218,7 +218,7 @@
      <item row="10" column="0">
       <widget class="QLabel" name="label_14">
        <property name="text">
-        <string>Nz</string>
+        <string notr="true">Nz</string>
        </property>
       </widget>
      </item>

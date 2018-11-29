@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>550</height>
+    <height>607</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -168,7 +168,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QToolButton" name="mscBrowseToolButton">
            <property name="text">
-            <string>...</string>
+            <string notr="true">...</string>
            </property>
           </widget>
          </item>
@@ -303,7 +303,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QSpinBox" name="maxThreadCountSpinBox">
            <property name="suffix">
-            <string> / 8</string>
+            <string notr="true"> / 8</string>
            </property>
           </widget>
          </item>

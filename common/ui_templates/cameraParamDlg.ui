@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>321</width>
-    <height>382</height>
+    <width>419</width>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,7 +41,16 @@
    <item>
     <widget class="QFrame" name="anglesFrame">
      <layout class="QGridLayout" name="gridLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item row="0" column="1">
@@ -78,7 +87,7 @@
          <string>First rotation: around X</string>
         </property>
         <property name="suffix">
-         <string>°</string>
+         <string notr="true">°</string>
         </property>
         <property name="decimals">
          <number>1</number>
@@ -100,7 +109,7 @@
          <string>Third rotation: around the camera X axis (horizontal if phi = 0 and theta = 0)</string>
         </property>
         <property name="text">
-         <string>X1</string>
+         <string notr="true">X1</string>
         </property>
        </widget>
       </item>
@@ -138,7 +147,7 @@
          <string>Second rotation: around Y2 (i.e. after the rotation around X)</string>
         </property>
         <property name="suffix">
-         <string>°</string>
+         <string notr="true">°</string>
         </property>
         <property name="decimals">
          <number>1</number>
@@ -160,7 +169,7 @@
          <string>Second rotation: around the camera Y axis (vertical if phi = 0)</string>
         </property>
         <property name="text">
-         <string>Y2</string>
+         <string notr="true">Y2</string>
         </property>
        </widget>
       </item>
@@ -198,7 +207,7 @@
          <string>First rotation: around the camera Z axis (normal to the screen)</string>
         </property>
         <property name="text">
-         <string>Z3</string>
+         <string notr="true">Z3</string>
         </property>
        </widget>
       </item>
@@ -208,7 +217,7 @@
          <string>Third rotation: around Z3 (i.e. after the rotation around X1 and Y2)</string>
         </property>
         <property name="suffix">
-         <string>°</string>
+         <string notr="true">°</string>
         </property>
         <property name="decimals">
          <number>1</number>
@@ -251,7 +260,7 @@
         <string>Push current camera orientation</string>
        </property>
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../../qCC/icones.qrc">
          <normaloff>:/CC/images/smallBasket.png</normaloff>:/CC/images/smallBasket.png</iconset>
        </property>
       </widget>
@@ -265,7 +274,16 @@
         <enum>QFrame::NoFrame</enum>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_8">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>
@@ -277,7 +295,7 @@
            <string>Revert to previously stored camera orientation</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../../qCC/icones.qrc">
             <normaloff>:/CC/images/smallRevert.png</normaloff>:/CC/images/smallRevert.png</iconset>
           </property>
          </widget>
@@ -291,7 +309,7 @@
            <string>Set 'up' view</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../../qCC/icones.qrc">
             <normaloff>:/CC/images/ccViewZpos.png</normaloff>:/CC/images/ccViewZpos.png</iconset>
           </property>
          </widget>
@@ -305,7 +323,7 @@
            <string>Set 'down' view</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../../qCC/icones.qrc">
             <normaloff>:/CC/images/ccViewZneg.png</normaloff>:/CC/images/ccViewZneg.png</iconset>
           </property>
          </widget>
@@ -319,7 +337,7 @@
            <string>Set 'left' view</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../../qCC/icones.qrc">
             <normaloff>:/CC/images/ccViewXpos.png</normaloff>:/CC/images/ccViewXpos.png</iconset>
           </property>
          </widget>
@@ -333,7 +351,7 @@
            <string>Set 'right' view</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../../qCC/icones.qrc">
             <normaloff>:/CC/images/ccViewXneg.png</normaloff>:/CC/images/ccViewXneg.png</iconset>
           </property>
          </widget>
@@ -347,7 +365,7 @@
            <string>Set 'front' view</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../../qCC/icones.qrc">
             <normaloff>:/CC/images/ccViewYpos.png</normaloff>:/CC/images/ccViewYpos.png</iconset>
           </property>
          </widget>
@@ -361,7 +379,7 @@
            <string>Set 'back' view</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../../qCC/icones.qrc">
             <normaloff>:/CC/images/ccViewYneg.png</normaloff>:/CC/images/ccViewYneg.png</iconset>
           </property>
          </widget>
@@ -375,7 +393,7 @@
            <string>Set 'front' isometric view</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../../qCC/icones.qrc">
             <normaloff>:/CC/images/ccViewIso1.png</normaloff>:/CC/images/ccViewIso1.png</iconset>
           </property>
          </widget>
@@ -389,7 +407,7 @@
            <string>Set 'back' isometric view</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../../qCC/icones.qrc">
             <normaloff>:/CC/images/ccViewIso2.png</normaloff>:/CC/images/ccViewIso2.png</iconset>
           </property>
          </widget>
@@ -460,7 +478,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../icones.qrc">
+            <iconset resource="../../qCC/icones.qrc">
              <normaloff>:/CC/images/ccPointPicking.png</normaloff>:/CC/images/ccPointPicking.png</iconset>
            </property>
            <property name="checkable">
@@ -666,7 +684,7 @@
      <item>
       <widget class="QDoubleSpinBox" name="fovDoubleSpinBox">
        <property name="suffix">
-        <string> deg.</string>
+        <string notr="true">°</string>
        </property>
        <property name="minimum">
         <double>0.010000000000000</double>
@@ -737,7 +755,8 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../../qCC/icones.qrc"/>
+  <include location="../../qCC/icones.qrc"/>
  </resources>
  <connections>
   <connection>

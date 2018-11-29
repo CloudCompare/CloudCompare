@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>470</height>
+    <width>514</width>
+    <height>566</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -34,8 +34,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>475</width>
-        <height>304</height>
+        <width>493</width>
+        <height>349</height>
        </rect>
       </property>
       <attribute name="label">
@@ -54,7 +54,16 @@
           <enum>QFrame::NoFrame</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
@@ -68,7 +77,7 @@
                <item>
                 <widget class="QToolButton" name="ambientColorButton">
                  <property name="text">
-                  <string>...</string>
+                  <string notr="true">...</string>
                  </property>
                 </widget>
                </item>
@@ -86,7 +95,7 @@
                <item>
                 <widget class="QToolButton" name="specularColorButton">
                  <property name="text">
-                  <string>...</string>
+                  <string notr="true">...</string>
                  </property>
                 </widget>
                </item>
@@ -104,7 +113,7 @@
                <item>
                 <widget class="QToolButton" name="diffuseColorButton">
                  <property name="text">
-                  <string>...</string>
+                  <string notr="true">...</string>
                  </property>
                 </widget>
                </item>
@@ -157,7 +166,7 @@
                <item>
                 <widget class="QToolButton" name="meshFrontColorButton">
                  <property name="text">
-                  <string>...</string>
+                  <string notr="true">...</string>
                  </property>
                 </widget>
                </item>
@@ -175,7 +184,7 @@
                <item>
                 <widget class="QToolButton" name="meshBackColorButton">
                  <property name="text">
-                  <string>...</string>
+                  <string notr="true">...</string>
                  </property>
                 </widget>
                </item>
@@ -193,7 +202,7 @@
                <item>
                 <widget class="QToolButton" name="meshSpecularColorButton">
                  <property name="text">
-                  <string>...</string>
+                  <string notr="true">...</string>
                  </property>
                 </widget>
                </item>
@@ -211,7 +220,7 @@
                <item>
                 <widget class="QToolButton" name="pointsColorButton">
                  <property name="text">
-                  <string>...</string>
+                  <string notr="true">...</string>
                  </property>
                 </widget>
                </item>
@@ -238,7 +247,7 @@
                <item>
                 <widget class="QToolButton" name="bkgColorButton">
                  <property name="text">
-                  <string>...</string>
+                  <string notr="true">...</string>
                  </property>
                  <property name="toolButtonStyle">
                   <enum>Qt::ToolButtonIconOnly</enum>
@@ -259,7 +268,7 @@
                <item>
                 <widget class="QToolButton" name="bbColorButton">
                  <property name="text">
-                  <string>...</string>
+                  <string notr="true">...</string>
                  </property>
                  <property name="toolButtonStyle">
                   <enum>Qt::ToolButtonIconOnly</enum>
@@ -280,7 +289,7 @@
                <item>
                 <widget class="QToolButton" name="textColorButton">
                  <property name="text">
-                  <string>...</string>
+                  <string notr="true">...</string>
                  </property>
                 </widget>
                </item>
@@ -365,8 +374,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>475</width>
-        <height>304</height>
+        <width>490</width>
+        <height>364</height>
        </rect>
       </property>
       <attribute name="label">
@@ -450,8 +459,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>475</width>
-        <height>304</height>
+        <width>490</width>
+        <height>364</height>
        </rect>
       </property>
       <attribute name="label">
@@ -467,7 +476,16 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item row="0" column="0">
@@ -480,7 +498,7 @@
           <item row="0" column="1">
            <widget class="QSpinBox" name="labelOpacitySpinBox">
             <property name="suffix">
-             <string>%</string>
+             <string notr="true">%</string>
             </property>
             <property name="maximum">
              <number>100</number>
@@ -523,7 +541,7 @@
           <item row="1" column="3">
            <widget class="QToolButton" name="labelBkgColorButton">
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
           </item>
@@ -557,7 +575,7 @@
           <item row="2" column="3">
            <widget class="QToolButton" name="labelMarkerColorButton">
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
           </item>
@@ -584,8 +602,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>482</width>
-        <height>313</height>
+        <width>490</width>
+        <height>364</height>
        </rect>
       </property>
       <attribute name="label">
@@ -727,10 +745,10 @@
             <string>Minimum number of points to activate decimation</string>
            </property>
            <property name="prefix">
-            <string>&gt; </string>
+            <string notr="true">&gt; </string>
            </property>
            <property name="suffix">
-            <string> M.</string>
+            <string notr="true"> M.</string>
            </property>
            <property name="decimals">
             <number>1</number>
@@ -792,10 +810,10 @@
             <string>Minimum number of triangles to activate decimation</string>
            </property>
            <property name="prefix">
-            <string>&gt; </string>
+            <string notr="true">&gt; </string>
            </property>
            <property name="suffix">
-            <string> M.</string>
+            <string notr="true"> M.</string>
            </property>
            <property name="decimals">
             <number>1</number>
@@ -999,10 +1017,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../icones.qrc"/>
-  <include location="../icones.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>decimateCloudBox</sender>

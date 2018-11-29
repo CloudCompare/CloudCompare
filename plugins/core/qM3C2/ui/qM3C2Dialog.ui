@@ -488,32 +488,32 @@
                </property>
                <item>
                 <property name="text">
-                 <string>+X</string>
+                 <string notr="true">+X</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>-X</string>
+                 <string notr="true">-X</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>+Y</string>
+                 <string notr="true">+Y</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>-Y</string>
+                 <string notr="true">-Y</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>+Z</string>
+                 <string notr="true">+Z</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>-Z</string>
+                 <string notr="true">-Z</string>
                 </property>
                </item>
                <item>
@@ -528,12 +528,12 @@
                </item>
                <item>
                 <property name="text">
-                 <string>+ (0,0,0)</string>
+                 <string notr="true">+ (0,0,0)</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>- (0,0,0)</string>
+                 <string notr="true">- (0,0,0)</string>
                 </property>
                </item>
               </widget>
@@ -696,7 +696,7 @@
           <item>
            <widget class="QSpinBox" name="maxThreadCountSpinBox">
             <property name="suffix">
-             <string> / 8</string>
+             <string notr="true"> / 8</string>
             </property>
            </widget>
           </item>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>380</width>
-    <height>270</height>
+    <width>395</width>
+    <height>452</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,7 +50,7 @@
      <item>
       <widget class="QLabel" name="bestAccuracyLabel">
        <property name="text">
-        <string>(0,0,0)</string>
+        <string notr="true">(0,0,0)</string>
        </property>
       </widget>
      </item>
@@ -219,28 +219,28 @@
      </property>
     </widget>
    </item>
-    <item>
-      <widget class="QGroupBox" name="extraFieldGroupBox">
-        <property name="title">
-          <string>Save additional field(s)</string>
+   <item>
+    <widget class="QGroupBox" name="extraFieldGroupBox">
+     <property name="title">
+      <string>Save additional field(s)</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QListWidget" name="evlrListWidget">
+        <property name="selectionMode">
+         <enum>QAbstractItemView::MultiSelection</enum>
         </property>
-        <property name="checkable">
-          <bool>true</bool>
-        </property>
-        <property name="checked">
-          <bool>false</bool>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-            <widget class="QListWidget" name="evlrListWidget">
-              <property name="selectionMode">
-                <enum>QAbstractItemView::MultiSelection</enum>
-              </property>
-            </widget>
-          </item>
-        </layout>
-      </widget>
-    </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item>
     <spacer name="verticalSpacer">
      <property name="orientation">

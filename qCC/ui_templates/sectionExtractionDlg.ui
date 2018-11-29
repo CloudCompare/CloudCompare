@@ -175,17 +175,17 @@
         </property>
         <item>
          <property name="text">
-          <string>X</string>
+          <string notr="true">X</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Y</string>
+          <string notr="true">Y</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Z</string>
+          <string notr="true">Z</string>
          </property>
         </item>
        </widget>

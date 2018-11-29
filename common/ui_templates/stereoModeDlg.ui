@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>383</width>
-    <height>325</height>
+    <width>455</width>
+    <height>332</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,7 +30,7 @@
          <string>Red-Blue</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../../qCC/icones.qrc">
           <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
         </property>
        </item>
@@ -39,7 +39,7 @@
          <string>Blue-Red</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../../qCC/icones.qrc">
           <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
         </property>
        </item>
@@ -48,7 +48,7 @@
          <string>Red-Cyan</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../../qCC/icones.qrc">
           <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
         </property>
        </item>
@@ -57,7 +57,7 @@
          <string>Cyan-Red</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../../qCC/icones.qrc">
           <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
         </property>
        </item>
@@ -66,7 +66,7 @@
          <string>NVidia Vision</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../../qCC/icones.qrc">
           <normaloff>:/CC/images/nvidia.png</normaloff>:/CC/images/nvidia.png</iconset>
         </property>
        </item>
@@ -75,7 +75,7 @@
          <string>Oculus</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../../qCC/icones.qrc">
           <normaloff>:/CC/images/oculus.png</normaloff>:/CC/images/oculus.png</iconset>
         </property>
        </item>
@@ -130,7 +130,7 @@ p, li { white-space: pre-wrap; }
          <item row="0" column="1">
           <widget class="QDoubleSpinBox" name="eyeSepDoubleSpinBox">
            <property name="suffix">
-            <string>%</string>
+            <string notr="true">%</string>
            </property>
            <property name="decimals">
             <number>1</number>
@@ -242,7 +242,7 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../../qCC/icones.qrc"/>
  </resources>
  <connections>
   <connection>

@@ -306,7 +306,7 @@ public:
 		if (neighbors.size() >= 6)
 		{
 			CCLib::Neighbourhood Z(&neighbors);
-			params[0] = Z.computeCurvature(0,CCLib::Neighbourhood::GAUSSIAN_CURV);
+			params[0] = Z.computeCurvature(*neighbors.getPoint(0), CCLib::Neighbourhood::GAUSSIAN_CURV);
 
 			//save parameters for next scale
 			m_defaultParams[0] = params[0];

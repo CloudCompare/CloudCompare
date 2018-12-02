@@ -161,9 +161,9 @@ class CC_CORE_LIB_API Neighbourhood
 		}
 
 		//! Computes the curvature of a set of point (by fitting a 2.5D quadric)
-		/** \return curvature value (warning: unsigned value!) or NAN_VALUE if computation failed.
+		/** \return curvature value at a given position P (warning: unsigned value!) or NAN_VALUE if computation failed.
 		**/
-		ScalarType computeCurvature(unsigned neighbourIndex, CC_CURVATURE_TYPE cType);
+		ScalarType computeCurvature(const CCVector3& P, CC_CURVATURE_TYPE cType);
 
 		/**** GETTERS ****/
 

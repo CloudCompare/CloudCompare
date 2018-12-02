@@ -9196,7 +9196,7 @@ void MainWindow::doActionLoadFile()
 	QSettings settings;
 	settings.beginGroup(ccPS::LoadFile());
 	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
-	QString currentOpenDlgFilter = settings.value(ccPS::SelectedInputFilter(),BinFilter::GetFileFilter()).toString();
+	QString currentOpenDlgFilter = settings.value(ccPS::SelectedInputFilter(), BinFilter::GetFileFilter()).toString();
 
 	// Add all available file I/O filters (with import capabilities)
 	QStringList fileFilters;

@@ -534,25 +534,25 @@ int ccTrace::getSegmentCostCurve(int p1, int p2)
 		//put neighbourhood in a CCLib::Neighbourhood structure
 		if (m_neighbours.size() > 4) //need at least 4 points to calculate curvature....
 		{
-		m_neighbours.push_back(m_p); //add center point onto end of neighbourhood
+			m_neighbours.push_back(m_p); //add center point onto end of neighbourhood
 
-		//compute curvature
-		CCLib::DgmOctreeReferenceCloud nCloud(&m_neighbours, static_cast<unsigned>(m_neighbours.size()));
-		CCLib::Neighbourhood Z(&nCloud);
-		float c = Z.computeCurvature(0, CCLib::Neighbourhood::CC_CURVATURE_TYPE::MEAN_CURV);
+			//compute curvature
+			CCLib::DgmOctreeReferenceCloud nCloud(&m_neighbours, static_cast<unsigned>(m_neighbours.size()));
+			CCLib::Neighbourhood Z(&nCloud);
+			float c = Z.computeCurvature(*nCloud.getPoint(0), CCLib::Neighbourhood::CC_CURVATURE_TYPE::MEAN_CURV);
 
-		m_neighbours.erase(m_neighbours.end()-1); //remove center point from neighbourhood (so as not to screw up loops)
+			m_neighbours.erase(m_neighbours.end() - 1); //remove center point from neighbourhood (so as not to screw up loops)
 
-		//curvature tends to range between 0 (high cost) and 10 (low cost), though it can be greater than 10 in extreme cases
-		//hence we need to map to domain 0 - 10 and then transform that to the (integer) domain 0 - 884 to meet the cost function spec
-		if (c > 10)
-		c = 10;
+			//curvature tends to range between 0 (high cost) and 10 (low cost), though it can be greater than 10 in extreme cases
+			//hence we need to map to domain 0 - 10 and then transform that to the (integer) domain 0 - 884 to meet the cost function spec
+			if (c > 10)
+				c = 10;
 
-		//scale curvature to range 0, 765
-		c *= 76.5;
+			//scale curvature to range 0, 765
+			c *= 76.5;
 
-		//note that high curvature = low cost, hence subtract curvature from 765
-		return 765 - c;
+			//note that high curvature = low cost, hence subtract curvature from 765
+			return 765 - c;
 
 		}
 		return 765; //unknown curvature - this point is high cost.

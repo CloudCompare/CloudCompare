@@ -130,36 +130,19 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 	//for each point in the cell
 	for (unsigned i = 0; i < n; ++i)
 	{
-		ScalarType curv = NAN_VALUE;
-
 		cell.points->getPoint(i, nNSS.queryPoint);
 
 		//look for neighbors in a sphere
 		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (neighborCount)!
 		unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, false);
-		//neighborCount = std::min(neighborCount,16);
 
+		ScalarType curv = NAN_VALUE;
 		if (neighborCount > 5)
 		{
-			//current point index
-			unsigned index = cell.points->getPointGlobalIndex(i);
-			//current point index in neighbourhood (to compute curvature at the right position!)
-			unsigned indexInNeighbourhood = 0;
-
-			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,neighborCount);
+			//neighborCount = std::min(neighborCount, 16);
+			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood, neighborCount);
 			Neighbourhood Z(&neighboursCloud);
-
-			//look for local index
-			for (unsigned j = 0; j < neighborCount; ++j)
-			{
-				if (nNSS.pointsInNeighbourhood[j].pointIndex == index)
-				{
-					indexInNeighbourhood = j;
-					break;
-				}
-			}
-
-			curv = Z.computeCurvature(indexInNeighbourhood,cType);
+			curv = Z.computeCurvature(nNSS.queryPoint, cType);
 		}
 
 		cell.points->setPointScalarValue(i, curv);

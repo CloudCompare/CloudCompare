@@ -835,7 +835,7 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 	return quadMesh;
 }
 
-ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE_TYPE cType)
+ScalarType Neighbourhood::computeCurvature(const CCVector3& P, CC_CURVATURE_TYPE cType)
 {
 	switch (cType)
 	{
@@ -851,7 +851,7 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 			const CCVector3* G = getGravityCenter();
 
 			//we compute curvature at the input neighbour position + we recenter it by the way
-			const CCVector3 Q( *m_associatedCloud->getPoint(neighbourIndex) - *G );
+			const CCVector3 Q(P - *G);
 
 			const unsigned char X = m_quadricEquationDirections.x;
 			const unsigned char Y = m_quadricEquationDirections.y;

@@ -674,7 +674,7 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 			for (unsigned char j = 0; j < 3; ++j)
 			{
 				const CCVector3d& v = V[j];
-				if (fabs(v.u[Z] - planeZ) < epsilon)
+				if (std::abs(v.u[Z] - planeZ) < epsilon)
 				{
 					//relativePos[j] = 0;
 				}
@@ -1048,7 +1048,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				for (unsigned char j = 0; j < 3; ++j)
 				{
 					const CCVector3d& v = V[j];
-					if (fabs(v.u[Z] - planeCoord) < epsilon)
+					if (std::abs(v.u[Z] - planeCoord) < epsilon)
 					{
 						//relativePos[j] = 0;
 					}

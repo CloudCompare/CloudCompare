@@ -11,44 +11,54 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                   COPYRIGHT: Daniel Girardeau-Montaut                  #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_DENSITY_DIALOG_HEADER
-#define CC_DENSITY_DIALOG_HEADER
+#ifndef CC_GEOM_FEATURES_DIALOG_HEADER
+#define CC_GEOM_FEATURES_DIALOG_HEADER
+
+//Local
+#include "ccLibAlgorithms.h"
 
 //Qt
 #include <QDialog>
 
-//CCLib
-#include <GeometricalAnalysisTools.h>
-
-#include <ui_densityDlg.h>
+#include <ui_geomFeaturesDlg.h>
 
 //! Dialog for computing the density of a point clouds
-class ccDensityDlg: public QDialog, public Ui::DensityDialog
+class ccGeomFeaturesDlg: public QDialog, public Ui::GeomFeaturesDialog
 {
-	Q_OBJECT
-
 public:
 
 	//! Default constructor
-	explicit ccDensityDlg(QWidget* parent = 0);
+	explicit ccGeomFeaturesDlg(QWidget* parent = nullptr);
 
-	//! Returns output type
-	CCLib::GeometricalAnalysisTools::Density getDensityType() const;
-	//! Returns	whether the computation should be 'precise' or not
-	bool isPrecise() const;
-
+	//! Sets selected features
+	void setSelectedFeatures(const ccLibAlgorithms::GeomCharacteristicSet& features);
+	//! Returns selected features
+	bool getSelectedFeatures(ccLibAlgorithms::GeomCharacteristicSet& features) const;
 	//! Sets the default kernel radius (for 'precise' mode only)
 	void setRadius(double r);
 	//! Returns	the kernel radius (for 'precise' mode only)
 	double getRadius() const;
 
-protected slots:
-	void onPreciseToggled(bool);
+	//! Reset the whole dialog
+	void reset();
 
+protected:
+
+	struct Option : ccLibAlgorithms::GeomCharacteristic
+	{
+		Option(QCheckBox* cb, CCLib::GeometricalAnalysisTools::GeomCharacteristic c, int option = 0)
+			: ccLibAlgorithms::GeomCharacteristic(c, option)
+			, checkBox(cb)
+		{}
+
+		QCheckBox* checkBox = nullptr;
+	};
+	
+	std::vector<Option> m_options;
 };
 
-#endif // CC_DENSITY_DIALOG_HEADER
+#endif // CC_GEOM_FEATURES_DIALOG_HEADER

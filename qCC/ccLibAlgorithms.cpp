@@ -28,8 +28,6 @@
 //Local
 #include "ccCommon.h"
 #include "ccConsole.h"
-#include "ccCurvatureDlg.h"
-#include "ccDensityDlg.h"
 #include "ccProgressDialog.h"
 #include "ccRegistrationTools.h"
 #include "ccUtils.h"
@@ -75,7 +73,6 @@ namespace ccLibAlgorithms
 		return sfName;
 	}
 	
-	
 	PointCoordinateType GetDefaultCloudKernelSize(ccGenericPointCloud* cloud, unsigned knn/*=12*/)
 	{
 		assert(cloud);
@@ -105,7 +102,7 @@ namespace ccLibAlgorithms
 		
 		size_t selNum = entities.size();
 		//computation of a first sigma guess
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(entities[i]);
 			PointCoordinateType sigmaCloud = GetDefaultCloudKernelSize(pc);
@@ -117,7 +114,282 @@ namespace ccLibAlgorithms
 		
 		return sigma;
 	}
-	
+
+	bool ComputeGeomCharacteristics(const GeomCharacteristicSet& characteristics,
+									PointCoordinateType radius,
+									ccHObject::Container& entities,
+									QWidget* parent/*=nullptr*/)
+	{
+		//no feature case
+		if (characteristics.empty())
+		{
+			//nothing to do
+			assert(false);
+			return true;
+		}
+		
+		//single features case
+		if (characteristics.size() == 1)
+		{
+			return ComputeGeomCharacteristic(	characteristics.front().charac,
+												characteristics.front().subOption,
+												radius,
+												entities,
+												parent);
+		}
+
+		//multiple features case
+		QScopedPointer<ccProgressDialog> pDlg;
+		if (parent)
+		{
+			pDlg.reset(new ccProgressDialog(true, parent));
+			pDlg->setAutoClose(false);
+		}
+		
+		for (const GeomCharacteristic& g : characteristics)
+		{
+			if (!ComputeGeomCharacteristic(	g.charac,
+											g.subOption,
+											radius,
+											entities,
+											parent,
+											pDlg.data()))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
+	bool ComputeGeomCharacteristic(	CCLib::GeometricalAnalysisTools::GeomCharacteristic c,
+									int subOption,
+									PointCoordinateType radius,
+									ccHObject::Container& entities,
+									QWidget* parent/*= nullptr*/,
+									ccProgressDialog* progressDialog/*=nullptr*/)
+	{
+		size_t selNum = entities.size();
+		if (selNum < 1)
+			return false;
+
+		//generate the right SF name
+		QString sfName;
+
+		switch (c)
+		{
+		case CCLib::GeometricalAnalysisTools::Feature:
+		{
+			switch (subOption)
+			{
+			case CCLib::Neighbourhood::EigenValuesSum:
+				sfName = "Eigenvalues sum";
+				break;
+			case CCLib::Neighbourhood::Omnivariance:
+				sfName = "Omnivariance";
+				break;
+			case CCLib::Neighbourhood::EigenEntropy:
+				sfName = "Eigenentropy";
+				break;
+			case CCLib::Neighbourhood::Anisotropy:
+				sfName = "Anisotropy";
+				break;
+			case CCLib::Neighbourhood::Planarity:
+				sfName = "Planarity";
+				break;
+			case CCLib::Neighbourhood::Linearity:
+				sfName = "Linearity";
+				break;
+			case CCLib::Neighbourhood::PCA1:
+				sfName = "PCA1";
+				break;
+			case CCLib::Neighbourhood::PCA2:
+				sfName = "PCA2";
+				break;
+			case CCLib::Neighbourhood::SurfaceVariation:
+				sfName = "Surface variation";
+				break;
+			case CCLib::Neighbourhood::Sphericity:
+				sfName = "Sphericity";
+				break;
+			case CCLib::Neighbourhood::Verticality:
+				sfName = "Verticality";
+				break;
+			default:
+				assert(false);
+				ccLog::Error("Internal error: invalid sub option for Feature computation");
+				return false;
+			}
+
+			sfName += QString(" (%1)").arg(radius);
+		}
+		break;
+
+		case CCLib::GeometricalAnalysisTools::Curvature:
+		{
+			switch (subOption)
+			{
+			case CCLib::Neighbourhood::GAUSSIAN_CURV:
+				sfName = CC_CURVATURE_GAUSSIAN_FIELD_NAME;
+				break;
+			case CCLib::Neighbourhood::MEAN_CURV:
+				sfName = CC_CURVATURE_MEAN_FIELD_NAME;
+				break;
+			case CCLib::Neighbourhood::NORMAL_CHANGE_RATE:
+				sfName = CC_CURVATURE_NORM_CHANGE_RATE_FIELD_NAME;
+				break;
+			default:
+				assert(false);
+				ccLog::Error("Internal error: invalid sub option for Curvature computation");
+				return false;
+			}
+			sfName += QString(" (%1)").arg(radius);
+		}
+		break;
+
+		case CCLib::GeometricalAnalysisTools::LocalDensity:
+			sfName = GetDensitySFName(static_cast<CCLib::GeometricalAnalysisTools::Density>(subOption), false, radius);
+			break;
+
+		case CCLib::GeometricalAnalysisTools::ApproxLocalDensity:
+			sfName = GetDensitySFName(static_cast<CCLib::GeometricalAnalysisTools::Density>(subOption), true);
+			break;
+
+		case CCLib::GeometricalAnalysisTools::Roughness:
+			sfName = CC_ROUGHNESS_FIELD_NAME + QString(" (%1)").arg(radius);
+			break;
+
+		case CCLib::GeometricalAnalysisTools::MomentOrder1:
+			sfName = CC_MOMENT_ORDER1_FIELD_NAME + QString(" (%1)").arg(radius);
+			break;
+
+		default:
+			assert(false);
+			return false;
+		}
+
+		ccProgressDialog* pDlg = progressDialog;
+		if (!pDlg && parent)
+		{
+			pDlg = new ccProgressDialog(true, parent);
+			pDlg->setAutoClose(false);
+		}
+
+		for (size_t i = 0; i < selNum; ++i)
+		{
+			//is the ith selected data is eligible for processing?
+			if (entities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
+			{
+				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entities[i]);
+
+				ccPointCloud* pc = 0;
+				int sfIdx = -1;
+				if (cloud->isA(CC_TYPES::POINT_CLOUD))
+				{
+					pc = static_cast<ccPointCloud*>(cloud);
+
+					sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
+					if (sfIdx < 0)
+						sfIdx = pc->addScalarField(qPrintable(sfName));
+					if (sfIdx >= 0)
+						pc->setCurrentInScalarField(sfIdx);
+					else
+					{
+						ccConsole::Error(QString("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(pc->getName()));
+						continue;
+					}
+				}
+
+				ccOctree::Shared octree = cloud->getOctree();
+				if (!octree)
+				{
+					if (pDlg)
+					{
+						pDlg->show();
+					}
+					octree = cloud->computeOctree(pDlg);
+					if (!octree)
+					{
+						ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
+						break;
+					}
+				}
+
+				CCLib::GeometricalAnalysisTools::ErrorCode result = CCLib::GeometricalAnalysisTools::ComputeCharactersitic(c, subOption, cloud, radius, pDlg, octree.data());
+
+				if (result == CCLib::GeometricalAnalysisTools::NoError)
+				{
+					if (pc && sfIdx >= 0)
+					{
+						pc->setCurrentDisplayedScalarField(sfIdx);
+						pc->showSF(sfIdx >= 0);
+						pc->getCurrentInScalarField()->computeMinAndMax();
+					}
+					cloud->prepareDisplayForRefresh();
+				}
+				else
+				{
+					QString errorMessage;
+					switch (result)
+					{
+					case CCLib::GeometricalAnalysisTools::InvalidInput:
+						errorMessage = "Internal error (invalid input)";
+						break;
+					case CCLib::GeometricalAnalysisTools::NotEnoughPoints:
+						errorMessage = "Not enough points";
+						break;
+					case CCLib::GeometricalAnalysisTools::OctreeComputationFailed:
+						errorMessage = "Failed to compute octree (not enough memory?)";
+						break;
+					case CCLib::GeometricalAnalysisTools::ProcessFailed:
+						errorMessage = "Process failed";
+						break;
+					case CCLib::GeometricalAnalysisTools::UnhandledCharacteristic:
+						errorMessage = "Internal error (unhandled characteristic)";
+						break;
+					case CCLib::GeometricalAnalysisTools::NotEnoughMemory:
+						errorMessage = "Not enough memory";
+						break;
+					case CCLib::GeometricalAnalysisTools::ProcessCancelledByUser:
+						errorMessage = "Process cancelled by user";
+						break;
+					default:
+						assert(false);
+						errorMessage = "Unknown error";
+						break;
+					}
+					
+					ccConsole::Warning(QString("Failed to apply processing to cloud '%1'").arg(cloud->getName()));
+					ccConsole::Warning(errorMessage);
+					
+					if (pc && sfIdx >= 0)
+					{
+						pc->deleteScalarField(sfIdx);
+						sfIdx = -1;
+					}
+
+					if (pDlg != progressDialog)
+					{
+						delete pDlg;
+						pDlg = nullptr;
+					}
+
+					return false;
+				}
+			}
+		}
+
+		if (pDlg != progressDialog)
+		{
+			delete pDlg;
+			pDlg = nullptr;
+		}
+
+		return true;
+	}
+
+
 	bool ApplyCCLibAlgorithm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget* parent/*=0*/, void** additionalParameters/*=0*/)
 	{
 		size_t selNum = entities.size();
@@ -126,127 +398,12 @@ namespace ccLibAlgorithms
 		
 		//generic parameters
 		QString sfName;
-		
-		//computeDensity parameters
-		PointCoordinateType densityKernelSize = PC_ONE;
-		CCLib::GeometricalAnalysisTools::Density densityType = CCLib::GeometricalAnalysisTools::DENSITY_3D;
-		
-		//curvature parameters
-		PointCoordinateType curvKernelSize = -PC_ONE;
-		CCLib::Neighbourhood::CC_CURVATURE_TYPE curvType = CCLib::Neighbourhood::GAUSSIAN_CURV;
-		
+
 		//computeScalarFieldGradient parameters
 		bool euclidean = false;
 		
-		//computeRoughness parameters
-		PointCoordinateType roughnessKernelSize = PC_ONE;
-		
 		switch (algo)
 		{
-			case CCLIB_ALGO_APPROX_DENSITY:
-			{
-				//parameters already provided?
-				if (additionalParameters)
-				{
-					densityType = *static_cast<CCLib::GeometricalAnalysisTools::Density*>(additionalParameters[0]);
-				}
-				else
-				{
-					//shouldn't happen
-					assert(false);
-				}
-				sfName = GetDensitySFName(densityType,true);
-			}
-			break;
-				
-			case CCLIB_ALGO_ACCURATE_DENSITY:
-			{
-				//parameters already provided?
-				if (additionalParameters)
-				{
-					densityKernelSize = *static_cast<PointCoordinateType*>(additionalParameters[0]);
-					densityType = *static_cast<CCLib::GeometricalAnalysisTools::Density*>(additionalParameters[1]);
-				}
-				else //ask the user!
-				{
-					densityKernelSize = GetDefaultCloudKernelSize(entities);
-					if (densityKernelSize < 0)
-					{
-						ccConsole::Error("Invalid kernel size!");
-						return false;
-					}
-					
-					ccDensityDlg dDlg(parent);
-					dDlg.setRadius(densityKernelSize);
-					
-					//process cancelled by user
-					if (!dDlg.exec())
-						return false;
-					
-					if (!dDlg.isPrecise())
-					{
-						//Switch to approx density if necessary
-						algo = CCLIB_ALGO_APPROX_DENSITY;
-					}
-					else
-					{
-						//otherwise read kernel size
-						densityKernelSize = static_cast<PointCoordinateType>(dDlg.getRadius());
-					}
-					//and in both cases we need the density type
-					densityType = dDlg.getDensityType();
-				}
-				
-				sfName = GetDensitySFName(densityType,algo == CCLIB_ALGO_APPROX_DENSITY,densityKernelSize);
-			}
-			break;
-				
-			case CCLIB_ALGO_CURVATURE:
-			{
-				//parameters already provided?
-				if (additionalParameters)
-				{
-					curvType = *static_cast<CCLib::Neighbourhood::CC_CURVATURE_TYPE*>(additionalParameters[0]);
-					curvKernelSize = *static_cast<PointCoordinateType*>(additionalParameters[1]);
-				}
-				else //ask the user!
-				{
-					curvKernelSize = GetDefaultCloudKernelSize(entities);
-					if (curvKernelSize < 0)
-					{
-						ccConsole::Error("Invalid kernel size!");
-						return false;
-					}
-					ccCurvatureDlg curvDlg(0);
-					if (selNum == 1)
-						curvDlg.setKernelSize(curvKernelSize);
-					if (!curvDlg.exec())
-						return false;
-					
-					curvType = curvDlg.getCurvatureType();
-					curvKernelSize = static_cast<PointCoordinateType>(curvDlg.getKernelSize());
-				}
-				
-				QString fieldName;
-				switch (curvType)
-				{
-					case CCLib::Neighbourhood::GAUSSIAN_CURV:
-						fieldName = CC_CURVATURE_GAUSSIAN_FIELD_NAME;
-						break;
-					case CCLib::Neighbourhood::MEAN_CURV:
-						fieldName = CC_CURVATURE_MEAN_FIELD_NAME;
-						break;
-					case CCLib::Neighbourhood::NORMAL_CHANGE_RATE:
-						fieldName = CC_CURVATURE_NORM_CHANGE_RATE_FIELD_NAME;
-						break;
-					default:
-						assert(false);
-						break;
-				}
-				sfName = QString("%1 (%2)").arg(fieldName).arg(curvKernelSize);
-			}
-			break;
-				
 			case CCLIB_ALGO_SF_GRADIENT:
 			{
 				sfName = CC_GRADIENT_NORMS_FIELD_NAME;
@@ -266,33 +423,6 @@ namespace ccLibAlgorithms
 			}
 			break;
 				
-			case CCLIB_ALGO_ROUGHNESS:
-			case CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST: //for tests: we'll use the roughness kernel for SNE
-			{
-				//parameters already provided?
-				if (additionalParameters)
-				{
-					roughnessKernelSize = *static_cast<PointCoordinateType*>(additionalParameters[0]);
-				}
-				else //ask the user!
-				{
-					roughnessKernelSize = GetDefaultCloudKernelSize(entities);
-					if (roughnessKernelSize < 0)
-					{
-						ccConsole::Error("Invalid kernel size!");
-						return false;
-					}
-					bool ok;
-					double val = QInputDialog::getDouble(parent, "Roughness", "Kernel size:", static_cast<double>(roughnessKernelSize), DBL_MIN, 1.0e9, 8, &ok);
-					if (!ok)
-						return false;
-					roughnessKernelSize = static_cast<PointCoordinateType>(val);
-				}
-				
-				sfName = QString(CC_ROUGHNESS_FIELD_NAME) + QString("(%1)").arg(roughnessKernelSize);
-			}
-			break;
-				
 			default:
 				assert(false);
 				return false;
@@ -302,7 +432,7 @@ namespace ccLibAlgorithms
 		{
 			//is the ith selected data is eligible for processing?
 			ccGenericPointCloud* cloud = 0;
-			switch(algo)
+			switch (algo)
 			{
 				case CCLIB_ALGO_SF_GRADIENT:
 					//for scalar field gradient, we can apply it directly on meshes
@@ -338,7 +468,7 @@ namespace ccLibAlgorithms
 					}
 					break;
 					
-					//by default, we apply processings on clouds only
+				//by default, we apply processings on clouds only
 				default:
 					if (entities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
 						cloud = ccHObjectCaster::ToGenericPointCloud(entities[i]);
@@ -391,83 +521,18 @@ namespace ccLibAlgorithms
 				eTimer.start();
 				switch(algo)
 				{
-					case CCLIB_ALGO_APPROX_DENSITY:
-						result = CCLib::GeometricalAnalysisTools::computeLocalDensityApprox(cloud,
-																							densityType,
-																							pDlg.data(),
-																							octree.data());
-						break;
-						
-					case CCLIB_ALGO_ACCURATE_DENSITY:
-						result = CCLib::GeometricalAnalysisTools::computeLocalDensity(	cloud,
-																						densityType,
-																						densityKernelSize,
-																						pDlg.data(),
-																						octree.data());
-						break;
-						
-					case CCLIB_ALGO_CURVATURE:
-						result = CCLib::GeometricalAnalysisTools::computeCurvature(	cloud,
-																					curvType,
-																					curvKernelSize,
-																					pDlg.data(),
-																					octree.data());
-						break;
-						
-					case CCLIB_ALGO_SF_GRADIENT:
-						result = CCLib::ScalarFieldTools::computeScalarFieldGradient(	cloud,
-																						0, //auto --> FIXME: should be properly set by the user!
-																						euclidean,
-																						false,
-																						pDlg.data(),
-																						octree.data());
-						break;
-						
-					case CCLIB_ALGO_ROUGHNESS:
-						result = CCLib::GeometricalAnalysisTools::computeRoughness(	cloud,
-																					roughnessKernelSize,
-																					pDlg.data(),
-																					octree.data());
-						break;
-						
-						//TEST
-					case CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST:
-					{
-						unsigned count = cloud->size();
-						cloud->enableScalarField();
-						{
-							for (unsigned j = 0; j < count; ++j)
-								cloud->setPointScalarValue(j, NAN_VALUE);
-						}
+				case CCLIB_ALGO_SF_GRADIENT:
+					result = CCLib::ScalarFieldTools::computeScalarFieldGradient(cloud,
+						0, //auto --> FIXME: should be properly set by the user!
+						euclidean,
+						false,
+						pDlg.data(),
+						octree.data());
+					break;
 
-						QElapsedTimer subTimer;
-						subTimer.start();
-						unsigned long long extractedPoints = 0;
-						unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(roughnessKernelSize);;
-						const unsigned samples = 1000;
-						std::random_device rd;   // non-deterministic generator
-						std::mt19937 gen(rd());  // to seed mersenne twister.
-						std::uniform_int_distribution<unsigned> dist(0, count - 1);
-
-						for (unsigned j = 0; j < samples; ++j)
-						{
-							unsigned randIndex = dist(gen);
-							CCLib::DgmOctree::NeighboursSet neighbours;
-							octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex), roughnessKernelSize, neighbours, level);
-							size_t neihgboursCount = neighbours.size();
-							extractedPoints += static_cast<unsigned long long>(neihgboursCount);
-							for (size_t k = 0; k < neihgboursCount; ++k)
-								cloud->setPointScalarValue(neighbours[k].pointIndex, static_cast<ScalarType>(sqrt(neighbours[k].squareDistd)));
-						}
-						ccConsole::Print("[SNE_TEST] Mean extraction time = %i ms (radius = %f, mean(neighbours) = %3.1f)", subTimer.elapsed(), roughnessKernelSize, static_cast<double>(extractedPoints) / static_cast<double>(samples));
-
-						result = 0;
-					}
-						break;
-						
-					default:
-						//missed something?
-						assert(false);
+				default:
+					//missed something?
+					assert(false);
 				}
 				qint64 elapsedTime_ms = eTimer.elapsed();
 				
@@ -496,8 +561,8 @@ namespace ccLibAlgorithms
 		
 		return true;
 	}
-	
-	
+
+
 	bool ApplyScaleMatchingAlgorithm(	ScaleMatchingAlgorithm algo,
 										ccHObject::Container& entities,
 										double icpRmsDiff,

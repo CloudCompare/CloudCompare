@@ -583,7 +583,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 						ScalarType w = coupleWeights->getValue(i);
 						if (!ScalarField::ValidValue(w))
 							continue;
-						wi = fabs(w);
+						wi = std::abs(w);
 					}
 					double Vd = wi * V;
 					wiSum += wi * wi;
@@ -871,8 +871,8 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		return false;
 
 	//centers of mass
-	CCVector3 Gp = coupleWeights ? GeometricalAnalysisTools::computeWeightedGravityCenter(P, coupleWeights) : GeometricalAnalysisTools::computeGravityCenter(P);
-	CCVector3 Gx = coupleWeights ? GeometricalAnalysisTools::computeWeightedGravityCenter(X, coupleWeights) : GeometricalAnalysisTools::computeGravityCenter(X);
+	CCVector3 Gp = coupleWeights ? GeometricalAnalysisTools::ComputeWeightedGravityCenter(P, coupleWeights) : GeometricalAnalysisTools::ComputeGravityCenter(P);
+	CCVector3 Gx = coupleWeights ? GeometricalAnalysisTools::ComputeWeightedGravityCenter(X, coupleWeights) : GeometricalAnalysisTools::ComputeGravityCenter(X);
 
 	//specific case: 3 points only
 	//See section 5.A in Horn's paper
@@ -1016,15 +1016,15 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		//it's the case when the two clouds are very far away from
 		//each other in the ICP process) we try to get the two clouds closer
 		CCVector3 diag = bbMax-bbMin;
-		if (fabs(diag.x) + fabs(diag.y) + fabs(diag.z) < ZERO_TOLERANCE)
+		if (std::abs(diag.x) + std::abs(diag.y) + std::abs(diag.z) < ZERO_TOLERANCE)
 		{
 			trans.T = Gx - Gp*aPrioriScale;
 			return true;
 		}
 
 		//Cross covariance matrix, eq #24 in Besl92 (but with weights, if any)
-		SquareMatrixd Sigma_px = (coupleWeights ? GeometricalAnalysisTools::computeWeightedCrossCovarianceMatrix(P, X, Gp, Gx, coupleWeights)
-												: GeometricalAnalysisTools::computeCrossCovarianceMatrix(P,X,Gp,Gx) );
+		SquareMatrixd Sigma_px = (coupleWeights ? GeometricalAnalysisTools::ComputeWeightedCrossCovarianceMatrix(P, X, Gp, Gx, coupleWeights)
+												: GeometricalAnalysisTools::ComputeCrossCovarianceMatrix(P,X,Gp,Gx) );
 		if (!Sigma_px.isValid())
 			return false;
 
@@ -1105,7 +1105,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 
 			//DGM: acc_2 can't be 0 because we already have checked that the bbox is not a single point!
 			assert(acc_denom > 0.0);
-			trans.s = static_cast<PointCoordinateType>(fabs(acc_num / acc_denom));
+			trans.s = static_cast<PointCoordinateType>(std::abs(acc_num / acc_denom));
 		}
 
 		//and we deduce the translation
@@ -1306,10 +1306,10 @@ bool FPCSRegistrationTools::FindBase(	GenericIndexedCloud* cloud,
 	size = cloud->size();
 	best = 0.;
 	b = c = 0;
-	a = rand()%size;
+	a = rand() % size;
 	p0 = cloud->getPoint(a);
 	//Randomly pick 3 points as sparsed as possible
-	for(i=0; i<nbTries; i++)
+	for (i = 0; i < nbTries; i++)
 	{
 		unsigned t1 = (rand() % size);
 		unsigned t2 = (rand() % size);
@@ -1319,19 +1319,19 @@ bool FPCSRegistrationTools::FindBase(	GenericIndexedCloud* cloud,
 		p1 = cloud->getPoint(t1);
 		p2 = cloud->getPoint(t2);
 		//Checked that the selected points are not more than overlap-distant from p0
-		u = *p1-*p0;
+		u = *p1 - *p0;
 		if (u.norm2() > overlap)
 			continue;
-		u = *p2-*p0;
+		u = *p2 - *p0;
 		if (u.norm2() > overlap)
 			continue;
 
 		//compute [p0, p1, p2] area thanks to cross product
-		x = ((p1->y-p0->y)*(p2->z-p0->z))-((p1->z-p0->z)*(p2->y-p0->y));
-		y = ((p1->z-p0->z)*(p2->x-p0->x))-((p1->x-p0->x)*(p2->z-p0->z));
-		z = ((p1->x-p0->x)*(p2->y-p0->y))-((p1->y-p0->y)*(p2->x-p0->x));
+		x = ((p1->y - p0->y)*(p2->z - p0->z)) - ((p1->z - p0->z)*(p2->y - p0->y));
+		y = ((p1->z - p0->z)*(p2->x - p0->x)) - ((p1->x - p0->x)*(p2->z - p0->z));
+		z = ((p1->x - p0->x)*(p2->y - p0->y)) - ((p1->y - p0->y)*(p2->x - p0->x));
 		//don't need to compute the true area : f=(area²)*2 is sufficient for comparison
-		f = x*x + y*y + z*z;
+		f = x * x + y * y + z * z;
 		if (f > best)
 		{
 			b = t1;
@@ -1350,12 +1350,12 @@ bool FPCSRegistrationTools::FindBase(	GenericIndexedCloud* cloud,
 	f = normal.norm();
 	if (f <= 0)
 		return false;
-	normal *= 1.0f/f;
+	normal *= 1.0f / f;
 	//plane equation : p lies in the plane if x*p[0] + y*p[1] + z*p[2] + w = 0
 	x = normal.x;
 	y = normal.y;
 	z = normal.z;
-	w = -(x*p0->x)-(y*p0->y)-(z*p0->z);
+	w = -(x*p0->x) - (y*p0->y) - (z*p0->z);
 	d = a;
 	best = -1.;
 	p1 = cloud->getPoint(b);
@@ -1370,12 +1370,12 @@ bool FPCSRegistrationTools::FindBase(	GenericIndexedCloud* cloud,
 		d0 = (*p3 - *p0).norm2();
 		d1 = (*p3 - *p1).norm2();
 		d2 = (*p3 - *p2).norm2();
-		if ((d0>=overlap && d1>=overlap) || (d0>=overlap && d2>=overlap) || (d1>=overlap && d2>=overlap))
+		if ((d0 >= overlap && d1 >= overlap) || (d0 >= overlap && d2 >= overlap) || (d1 >= overlap && d2 >= overlap))
 			continue;
 		//Compute distance to the plane (cloud[a], cloud[b], cloud[c])
-		f = fabs((x*p3->x)+(y*p3->y)+(z*p3->z)+w);
+		f = std::abs((x*p3->x) + (y*p3->y) + (z*p3->z) + w);
 		//keep the point which is the closest to the plane, while being as far as possible from the other three points
-		f=(f+1.0f)/(sqrt(d0)+sqrt(d1)+sqrt(d2));
+		f = (f + 1.0f) / (sqrt(d0) + sqrt(d1) + sqrt(d2));
 		if ((best < 0.) || (f < best))
 		{
 			d = t1;
@@ -1619,23 +1619,23 @@ bool FPCSRegistrationTools::LinesIntersections(	const CCVector3 &p0,
 	p10 = p1-p0;
 	num = (p02.dot(p32) * p32.dot(p10)) - (p02.dot(p10) * p32.dot(p32));
 	denom = (p10.dot(p10) * p32.dot(p32)) - (p32.dot(p10) * p32.dot(p10));
-	if (fabs(denom) < 0.00001)
+	if (std::abs(denom) < 0.00001)
 		return false;
 	lambda = num / denom;
 	num = p02.dot(p32) + (lambda*p32.dot(p10));
 	denom = p32.dot(p32);
-	if (fabs(denom) < 0.00001)
+	if (std::abs(denom) < 0.00001)
 		return false;
 	mu = num / denom;
-	A.x = p0.x+(lambda*p10.x);
-	A.y = p0.y+(lambda*p10.y);
-	A.z = p0.z+(lambda*p10.z);
-	B.x = p2.x+(mu*p32.x);
-	B.y = p2.y+(mu*p32.y);
-	B.z = p2.z+(mu*p32.z);
-	inter.x = (A.x+B.x)/2.0f;
-	inter.y = (A.y+B.y)/2.0f;
-	inter.z = (A.z+B.z)/2.0f;
+	A.x = p0.x + (lambda*p10.x);
+	A.y = p0.y + (lambda*p10.y);
+	A.z = p0.z + (lambda*p10.z);
+	B.x = p2.x + (mu*p32.x);
+	B.y = p2.y + (mu*p32.y);
+	B.z = p2.z + (mu*p32.z);
+	inter.x = (A.x + B.x) / 2.0f;
+	inter.y = (A.y + B.y) / 2.0f;
+	inter.z = (A.z + B.z) / 2.0f;
 
 	return true;
 }

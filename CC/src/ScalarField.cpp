@@ -66,7 +66,7 @@ void ScalarField::computeMeanAndVariance(ScalarType &mean, ScalarType* variance)
 
 		if (variance)
 		{
-			_std2 = fabs(_std2 / count - _mean*_mean);
+			_std2 = std::abs(_std2 / count - _mean*_mean);
 			*variance = static_cast<ScalarType>(_std2);
 		}
 	}

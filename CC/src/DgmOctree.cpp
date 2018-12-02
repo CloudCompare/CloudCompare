@@ -1874,9 +1874,9 @@ std::size_t DgmOctree::getPointsInBoxNeighbourhood(BoxNeighbourhood& params) con
 									params.axes[2].dot(Q) );
 
 					//rough inclusion test
-					if (	fabs(Q.x) > maxHalfDist.x
-						||	fabs(Q.y) > maxHalfDist.y
-						||	fabs(Q.z) > maxHalfDist.z )
+					if (	std::abs(Q.x) > maxHalfDist.x
+						||	std::abs(Q.y) > maxHalfDist.y
+						||	std::abs(Q.z) > maxHalfDist.z )
 					{
 						//skip this cell
 						continue;
@@ -1910,9 +1910,9 @@ std::size_t DgmOctree::getPointsInBoxNeighbourhood(BoxNeighbourhood& params) con
 						}
 
 						//we keep the points that fall inside the box
-						if (	fabs(Q.x) <= boxHalfDimensions.x
-							&&	fabs(Q.y) <= boxHalfDimensions.y
-							&&	fabs(Q.z) <= boxHalfDimensions.z )
+						if (	std::abs(Q.x) <= boxHalfDimensions.x
+							&&	std::abs(Q.y) <= boxHalfDimensions.y
+							&&	std::abs(Q.z) <= boxHalfDimensions.z )
 						{
 							params.neighbours.emplace_back(P, p->theIndex, 0);
 						}

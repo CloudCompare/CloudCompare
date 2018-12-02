@@ -539,7 +539,7 @@ int ccTrace::getSegmentCostCurve(int p1, int p2)
 			//compute curvature
 			CCLib::DgmOctreeReferenceCloud nCloud(&m_neighbours, static_cast<unsigned>(m_neighbours.size()));
 			CCLib::Neighbourhood Z(&nCloud);
-			float c = Z.computeCurvature(*nCloud.getPoint(0), CCLib::Neighbourhood::CC_CURVATURE_TYPE::MEAN_CURV);
+			float c = Z.computeCurvature(*nCloud.getPoint(0), CCLib::Neighbourhood::CurvatureType::MEAN_CURV);
 
 			m_neighbours.erase(m_neighbours.end() - 1); //remove center point from neighbourhood (so as not to screw up loops)
 
@@ -728,8 +728,10 @@ void ccTrace::buildCurvatureCost(QWidget* parent)
 	}
 
 	//calculate curvature
-	int result = CCLib::GeometricalAnalysisTools::computeCurvature(m_cloud,
-		CCLib::Neighbourhood::CC_CURVATURE_TYPE::MEAN_CURV,
+	int result = CCLib::GeometricalAnalysisTools::ComputeCharactersitic(
+		CCLib::GeometricalAnalysisTools::Curvature,
+		CCLib::Neighbourhood::CurvatureType::MEAN_CURV,
+		m_cloud,
 		m_search_r,
 		pDlg,
 		octree.data());

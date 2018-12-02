@@ -273,10 +273,8 @@ private slots:
 	void doActionSetSFAsCoord();
 	void doActionInterpolateScalarFields();
 
-	void doComputeDensity();
-	void doComputeCurvature();
+	void doComputeGeometricFeature();
 	void doActionSFGradient();
-	void doComputeRoughness();
 	void doRemoveDuplicatePoints();
 	void doSphericalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
 	void doCylindricalNeighbourhoodExtractionTest(); //DGM TODO: remove after test

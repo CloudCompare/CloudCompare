@@ -86,17 +86,17 @@ double MeshSamplingTools::computeMeshVolume(GenericMesh* mesh)
 
 		//see "EFFICIENT FEATURE EXTRACTION FOR 2D/3D OBJECTS IN MESH REPRESENTATION" by Cha Zhang and Tsuhan Chen (2001)
 		//We compute the (signed) volume of the tetrahedron defined by each triangle and the origin
-		double signedVol = (-static_cast<double>(C.x*B.y*A.z)
-							+static_cast<double>(B.x*C.y*A.z)
-							+static_cast<double>(C.x*A.y*B.z)
-							-static_cast<double>(A.x*C.y*B.z)
-							-static_cast<double>(B.x*A.y*C.z)
-							+static_cast<double>(A.x*B.y*C.z))/6.0;
+		double signedVol = (- static_cast<double>(C.x*B.y*A.z)
+							+ static_cast<double>(B.x*C.y*A.z)
+							+ static_cast<double>(C.x*A.y*B.z)
+							- static_cast<double>(A.x*C.y*B.z)
+							- static_cast<double>(B.x*A.y*C.z)
+							+ static_cast<double>(A.x*B.y*C.z)) / 6;
 
 		Vtotal += signedVol;
 	}
 
-	return fabs(Vtotal); //in case the triangles are in the wrong order!
+	return std::abs(Vtotal); //in case the triangles are in the wrong order!
 }
 
 unsigned long long MeshSamplingTools::ComputeEdgeKey(unsigned i1, unsigned i2)

@@ -86,6 +86,7 @@
 #include "ccComparisonDlg.h"
 #include "ccFilterByValueDlg.h"
 #include "ccGBLSensorProjectionDlg.h"
+#include "ccGeomFeaturesDlg.h"
 #include "ccGraphicalSegmentationTool.h"
 #include "ccGraphicalTransformationTool.h"
 #include "ccItemSelectionDlg.h"
@@ -635,9 +636,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionExportCloudInfo,			&QAction::triggered, this, &MainWindow::doActionExportCloudInfo);
 	connect(m_UI->actionExportPlaneInfo,			&QAction::triggered, this, &MainWindow::doActionExportPlaneInfo);
 	//"Tools > Other" menu
-	connect(m_UI->actionComputeDensity,				&QAction::triggered, this, &MainWindow::doComputeDensity);
-	connect(m_UI->actionCurvature,					&QAction::triggered, this, &MainWindow::doComputeCurvature);
-	connect(m_UI->actionRoughness,					&QAction::triggered, this, &MainWindow::doComputeRoughness);
+	connect(m_UI->actionComputeGeometricFeature,	&QAction::triggered, this, &MainWindow::doComputeGeometricFeature);
 	connect(m_UI->actionRemoveDuplicatePoints,		&QAction::triggered, this, &MainWindow::doRemoveDuplicatePoints);
 	//"Tools"
 	connect(m_UI->actionLevel,						&QAction::triggered, this, &MainWindow::doLevel);
@@ -2696,7 +2695,7 @@ void MainWindow::doRemoveDuplicatePoints()
 
 			ccOctree::Shared octree = cloud->getOctree();
 
-			int result = CCLib::GeometricalAnalysisTools::flagDuplicatePoints(	cloud,
+			int result = CCLib::GeometricalAnalysisTools::FlagDuplicatePoints(	cloud,
 																				minDistanceBetweenPoints,
 																				&pDlg,
 																				octree.data());
@@ -7640,7 +7639,7 @@ void MainWindow::doActionFitSphere()
 		CCVector3 center;
 		PointCoordinateType radius;
 		double rms;
-		if (!CCLib::GeometricalAnalysisTools::detectSphereRobust(cloud,
+		if (!CCLib::GeometricalAnalysisTools::DetectSphereRobust(cloud,
 			outliersRatio,
 			center,
 			radius,
@@ -7828,19 +7827,27 @@ void MainWindow::doShowPrimitiveFactory()
 	m_pfDlg->show();
 }
 
-void MainWindow::doComputeDensity()
+void MainWindow::doComputeGeometricFeature()
 {
-	//we use CCLIB_ALGO_ACCURATE_DENSITY by default (will be modified if necessary)
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ACCURATE_DENSITY,m_selectedEntities,this))
-		return;
-	refreshAll();
-	updateUI();
-}
+	static ccLibAlgorithms::GeomCharacteristicSet s_selectedCharacteristics;
 
-void MainWindow::doComputeCurvature()
-{
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_CURVATURE, m_selectedEntities, this))
+	ccGeomFeaturesDlg gfDlg(this);
+	double radius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
+	gfDlg.setRadius(radius);
+	gfDlg.setSelectedFeatures(s_selectedCharacteristics);
+	
+	if (!gfDlg.exec())
 		return;
+
+	radius = gfDlg.getRadius();
+	if (!gfDlg.getSelectedFeatures(s_selectedCharacteristics))
+	{
+		ccLog::Error("Not enough memory");
+		return;
+	}
+
+	ccLibAlgorithms::ComputeGeomCharacteristics(s_selectedCharacteristics, static_cast<PointCoordinateType>(radius), m_selectedEntities, this);
+
 	refreshAll();
 	updateUI();
 }
@@ -7853,18 +7860,93 @@ void MainWindow::doActionSFGradient()
 	updateUI();
 }
 
-void MainWindow::doComputeRoughness()
-{
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ROUGHNESS, m_selectedEntities, this))
-		return;
-	refreshAll();
-	updateUI();
-}
-
 void MainWindow::doSphericalNeighbourhoodExtractionTest()
 {
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST,m_selectedEntities,this))
+	size_t selNum = m_selectedEntities.size();
+	if (selNum < 1)
 		return;
+
+	//spherical neighborhood extraction radius
+	PointCoordinateType sphereRadius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
+	if (sphereRadius < 0)
+	{
+		ccConsole::Error("Invalid kernel size!");
+		return;
+	}
+
+	bool ok;
+	double val = QInputDialog::getDouble(this, "SNE test", "Radius:", static_cast<double>(sphereRadius), DBL_MIN, 1.0e9, 8, &ok);
+	if (!ok)
+		return;
+	sphereRadius = static_cast<PointCoordinateType>(val);
+
+	QString sfName = QString("Spherical extraction test") + QString(" (%1)").arg(sphereRadius);
+
+	ccProgressDialog pDlg(true, this);
+	pDlg.setAutoClose(false);
+
+	for (size_t i = 0; i < selNum; ++i)
+	{
+		//we only process clouds
+		if (!m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
+		{
+			continue;
+		}
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
+
+		int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+		if (sfIdx < 0)
+			sfIdx = cloud->addScalarField(qPrintable(sfName));
+		if (sfIdx < 0)
+		{
+			ccConsole::Error(QString("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(cloud->getName()));
+			return;
+		}
+			
+		ccOctree::Shared octree = cloud->getOctree();
+		if (!octree)
+		{
+			pDlg.reset();
+			pDlg.show();
+			octree = cloud->computeOctree(&pDlg);
+			if (!octree)
+			{
+				ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
+				return;
+			}
+		}
+
+		CCLib::ScalarField* sf = cloud->getScalarField(sfIdx);
+		sf->fill(NAN_VALUE);
+
+		QElapsedTimer eTimer;
+		eTimer.start();
+
+		size_t extractedPoints = 0;
+		unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(sphereRadius);
+		std::random_device rd;   // non-deterministic generator
+		std::mt19937 gen(rd());  // to seed mersenne twister.
+		std::uniform_int_distribution<unsigned> dist(0, cloud->size() - 1);
+
+		const unsigned samples = 1000;
+		for (unsigned j = 0; j < samples; ++j)
+		{
+			unsigned randIndex = dist(gen);
+			CCLib::DgmOctree::NeighboursSet neighbours;
+			octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex), sphereRadius, neighbours, level);
+			size_t neihgboursCount = neighbours.size();
+			extractedPoints += neihgboursCount;
+			for (size_t k = 0; k < neihgboursCount; ++k)
+				cloud->setPointScalarValue(neighbours[k].pointIndex, static_cast<ScalarType>(sqrt(neighbours[k].squareDistd)));
+		}
+		ccConsole::Print("[SNE_TEST] Mean extraction time = %i ms (radius = %f, mean(neighbours) = %3.1f)", eTimer.elapsed(), sphereRadius, extractedPoints / static_cast<double>(samples));
+
+		sf->computeMinAndMax();
+		cloud->setCurrentDisplayedScalarField(sfIdx);
+		cloud->showSF(true);
+		cloud->prepareDisplayForRefresh();
+	}
+
 	refreshAll();
 	updateUI();
 }
@@ -7872,11 +7954,11 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 {
 	bool ok;
-	double radius = QInputDialog::getDouble(this,"CNE Test","radius",0.02,1.0e-6,1.0e6,6,&ok);
+	double radius = QInputDialog::getDouble(this, "CNE Test", "radius", 0.02, 1.0e-6, 1.0e6, 6, &ok);
 	if (!ok)
 		return;
 
-	double height = QInputDialog::getDouble(this,"CNE Test","height",0.05,1.0e-6,1.0e6,6,&ok);
+	double height = QInputDialog::getDouble(this, "CNE Test", "height", 0.05, 1.0e-6, 1.0e6, 6, &ok);
 	if (!ok)
 		return;
 
@@ -7898,8 +7980,8 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 		for (unsigned i = 0; i < ptsCount; ++i)
 		{
 			CCVector3 P(dist(gen),
-						dist(gen),
-						dist(gen) );
+				dist(gen),
+				dist(gen));
 
 			cloud->addPoint(P);
 		}
@@ -7938,13 +8020,13 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 		for (unsigned j = 0; j < samples; ++j)
 		{
 			//generate random normal vector
-			CCVector3 dir(0,0,1);
+			CCVector3 dir(0, 0, 1);
 			{
 				ccGLMatrix rot;
-				rot.initFromParameters(	distAngle(gen),
-										distAngle(gen),
-										distAngle(gen),
-										CCVector3(0,0,0) );
+				rot.initFromParameters(distAngle(gen),
+					distAngle(gen),
+					distAngle(gen),
+					CCVector3(0, 0, 0));
 				rot.applyRotation(dir);
 			}
 			unsigned randIndex = distIndex(gen);
@@ -7954,7 +8036,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 			cn.dir = dir;
 			cn.level = level;
 			cn.radius = static_cast<PointCoordinateType>(radius);
-			cn.maxHalfLength = static_cast<PointCoordinateType>(height/2);
+			cn.maxHalfLength = static_cast<PointCoordinateType>(height / 2);
 
 			octree->getPointsInCylindricalNeighbourhood(cn);
 			//octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),radius,neighbours,level);
@@ -9893,9 +9975,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionMeshScanGrids->setEnabled(atLeastOneGrid);
 	//actionComputeQuadric3D->setEnabled(atLeastOneCloud);
 	m_UI->actionComputeBestFitBB->setEnabled(atLeastOneEntity);
-	m_UI->actionComputeDensity->setEnabled(atLeastOneCloud);
-	m_UI->actionCurvature->setEnabled(atLeastOneCloud);
-	m_UI->actionRoughness->setEnabled(atLeastOneCloud);
+	m_UI->actionComputeGeometricFeature->setEnabled(atLeastOneCloud);
 	m_UI->actionRemoveDuplicatePoints->setEnabled(atLeastOneCloud);
 	m_UI->actionFitPlane->setEnabled(atLeastOneEntity);
 	m_UI->actionFitSphere->setEnabled(atLeastOneCloud);

@@ -362,7 +362,7 @@ void ccAlignDlg::estimateDelta()
 		cloud.enableScalarField();
 	}
 
-	CCLib::GeometricalAnalysisTools::computeLocalDensityApprox(&cloud, CCLib::GeometricalAnalysisTools::DENSITY_KNN, &pDlg);
+	CCLib::GeometricalAnalysisTools::ComputeLocalDensityApprox(&cloud, CCLib::GeometricalAnalysisTools::DENSITY_KNN, &pDlg);
 	unsigned count = 0;
 	double meanDensity = 0;
 	double meanSqrDensity = 0;

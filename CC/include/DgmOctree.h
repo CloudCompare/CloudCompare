@@ -999,12 +999,12 @@ public:	/***** CELLS POSITION HANDLING *****/
 	**/
 	static inline PointCoordinateType ComputeMinDistanceToCellBorder(const CCVector3& queryPoint, PointCoordinateType cs, const CCVector3& cellCenter)
 	{
-		PointCoordinateType d1 = fabs(cellCenter.x - queryPoint.x);
-		PointCoordinateType d2 = fabs(cellCenter.y - queryPoint.y);
+		PointCoordinateType d1 = std::abs(cellCenter.x - queryPoint.x);
+		PointCoordinateType d2 = std::abs(cellCenter.y - queryPoint.y);
 		if (d2 > d1)
 			d1 = d2;
 		
-		d2 = fabs(cellCenter.z - queryPoint.z);
+		d2 = std::abs(cellCenter.z - queryPoint.z);
 		return cs/2 - (d2 > d1 ? d2 : d1);
 	}
 

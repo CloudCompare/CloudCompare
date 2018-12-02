@@ -33,6 +33,7 @@
 #define CC_LOCAL_SURF_DENSITY_FIELD_NAME "Surface density"
 #define CC_LOCAL_VOL_DENSITY_FIELD_NAME "Volume density"
 #define CC_ROUGHNESS_FIELD_NAME "Roughness"
+#define CC_MOMENT_ORDER1_FIELD_NAME "1st order moment"
 #define CC_CURVATURE_GAUSSIAN_FIELD_NAME "Gaussian curvature"
 #define CC_CURVATURE_MEAN_FIELD_NAME "Mean curvature"
 #define CC_CURVATURE_NORM_CHANGE_RATE_FIELD_NAME "Normal change rate"

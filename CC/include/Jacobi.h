@@ -108,32 +108,32 @@ public:
 			{
 				for (unsigned q = p + 1; q < n; ++q)
 				{
-					Scalar gapq = 10 * fabs(a.m_values[p][q]);
-					Scalar termp = gapq + fabs(eigenValues[p]);
-					Scalar termq = gapq + fabs(eigenValues[q]);
+					Scalar gapq = 10 * std::abs(a.m_values[p][q]);
+					Scalar termp = gapq + std::abs(eigenValues[p]);
+					Scalar termq = gapq + std::abs(eigenValues[q]);
 
 					//Annihilate tiny offdiagonal elements
 					if (it > 4
-						&& termp == fabs(eigenValues[p])
-						&& termq == fabs(eigenValues[q]))
+						&& termp == std::abs(eigenValues[p])
+						&& termq == std::abs(eigenValues[q]))
 					{
 						a.m_values[p][q] = 0;
 					}
 					//Otherwise, apply a rotation
-					else if (thresh <= fabs(a.m_values[p][q]))
+					else if (thresh <= std::abs(a.m_values[p][q]))
 					{
 						Scalar h = eigenValues[q] - eigenValues[p];
-						Scalar term = fabs(h) + gapq;
+						Scalar term = std::abs(h) + gapq;
 
 						Scalar t = 0;
-						if (term == fabs(h))
+						if (term == std::abs(h))
 						{
 							t = a.m_values[p][q] / h;
 						}
 						else
 						{
 							Scalar theta = h / (2 * a.m_values[p][q]);
-							t = 1 / (fabs(theta) + sqrt(1 + theta*theta));
+							t = 1 / (std::abs(theta) + sqrt(1 + theta*theta));
 							if (theta < 0)
 							{
 								t = -t;
@@ -257,7 +257,7 @@ public:
 				for (unsigned ip = 0; ip < n - 1; ip++)
 				{
 					for (unsigned iq = ip + 1; iq < n; iq++)
-						sm += fabs(matrix.m_values[ip][iq]);
+						sm += std::abs(matrix.m_values[ip][iq]);
 				}
 			}
 
@@ -267,7 +267,7 @@ public:
 				{
 					//we only need the absolute values of eigenvalues
 					for (unsigned ip = 0; ip < n; ip++)
-						d[ip] = fabs(d[ip]);
+						d[ip] = std::abs(d[ip]);
 				}
 
 				return true;
@@ -283,26 +283,26 @@ public:
 			{
 				for (unsigned iq = ip + 1; iq < n; iq++)
 				{
-					Scalar g = fabs(matrix.m_values[ip][iq]) * 100;
+					Scalar g = std::abs(matrix.m_values[ip][iq]) * 100;
 					//After four sweeps, skip the rotation if the off-diagonal element is small.
 					if (i > 4
-						&& static_cast<float>(fabs(d[ip]) + g) == static_cast<float>(fabs(d[ip]))
-						&& static_cast<float>(fabs(d[iq]) + g) == static_cast<float>(fabs(d[iq])))
+						&& static_cast<float>(std::abs(d[ip]) + g) == static_cast<float>(std::abs(d[ip]))
+						&& static_cast<float>(std::abs(d[iq]) + g) == static_cast<float>(std::abs(d[iq])))
 					{
 						matrix.m_values[ip][iq] = 0;
 					}
-					else if (fabs(matrix.m_values[ip][iq]) > tresh)
+					else if (std::abs(matrix.m_values[ip][iq]) > tresh)
 					{
 						Scalar h = d[iq] - d[ip];
 						Scalar t = 0;
-						if (static_cast<float>(fabs(h) + g) == static_cast<float>(fabs(h)))
+						if (static_cast<float>(std::abs(h) + g) == static_cast<float>(std::abs(h)))
 						{
 							t = matrix.m_values[ip][iq] / h;
 						}
 						else
 						{
 							Scalar theta = h / (2 * matrix.m_values[ip][iq]); //Equation (11.1.10).
-							t = 1 / (fabs(theta) + sqrt(1 + theta*theta));
+							t = 1 / (std::abs(theta) + sqrt(1 + theta*theta));
 							if (theta < 0)
 								t = -t;
 						}

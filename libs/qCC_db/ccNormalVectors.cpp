@@ -160,7 +160,7 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 	case PLUS_BARYCENTER:
 	case MINUS_BARYCENTER:
 		{
-			barycenter = CCLib::GeometricalAnalysisTools::computeGravityCenter(theCloud);
+			barycenter = CCLib::GeometricalAnalysisTools::ComputeGravityCenter(theCloud);
 			ccLog::Print(QString("[UpdateNormalOrientations] Barycenter: (%1,%2,%3)").arg(barycenter.x).arg(barycenter.y).arg(barycenter.z));
 			useBarycenter = true;
 			positiveSign = (preferredOrientation == 6);

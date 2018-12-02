@@ -953,7 +953,7 @@ struct CommandCurvature : public ccCommandLineInterface::Command
 			return cmd.error(QObject::tr("Missing parameter: curvature type after \"-%1\"").arg(COMMAND_CURVATURE));
 
 		QString curvTypeStr = cmd.arguments().takeFirst().toUpper();
-		CCLib::Neighbourhood::CC_CURVATURE_TYPE curvType = CCLib::Neighbourhood::MEAN_CURV;
+		CCLib::Neighbourhood::CurvatureType curvType = CCLib::Neighbourhood::MEAN_CURV;
 		if (curvTypeStr == "MEAN")
 		{
 			//curvType = CCLib::Neighbourhood::MEAN_CURV;
@@ -985,13 +985,12 @@ struct CommandCurvature : public ccCommandLineInterface::Command
 			return cmd.error(QObject::tr("No point cloud on which to compute curvature! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CURVATURE));
 
 		//Call MainWindow generic method
-		void* additionalParameters[2] = { &curvType, &kernelSize };
 		ccHObject::Container entities;
 		entities.resize(cmd.clouds().size());
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 			entities[i] = cmd.clouds()[i].pc;
 
-		if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_CURVATURE, entities, cmd.widgetParent(), additionalParameters))
+		if (ccLibAlgorithms::ComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::Curvature, curvType, kernelSize, entities, cmd.widgetParent()))
 		{
 			//save output
 			if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize)))
@@ -1060,9 +1059,8 @@ struct CommandApproxDensity : public ccCommandLineInterface::Command
 					return false;
 			}
 		}
-		void* additionalParameters[] = { &densityType };
 
-		if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_APPROX_DENSITY, entities, cmd.widgetParent(), additionalParameters))
+		if (ccLibAlgorithms::ComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::ApproxLocalDensity, densityType, 0, entities, cmd.widgetParent()))
 		{
 			//save output
 			if (cmd.autoSaveMode() && !cmd.saveClouds("APPROX_DENSITY"))
@@ -1112,13 +1110,12 @@ struct CommandDensity : public ccCommandLineInterface::Command
 			return cmd.error(QObject::tr("No point cloud on which to compute density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DENSITY));
 
 		//Call MainWindow generic method
-		void* additionalParameters[] = { &kernelSize, &densityType };
 		ccHObject::Container entities;
 		entities.resize(cmd.clouds().size());
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 			entities[i] = cmd.clouds()[i].pc;
 
-		if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ACCURATE_DENSITY, entities, cmd.widgetParent(), additionalParameters))
+		if (ccLibAlgorithms::ComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::LocalDensity, densityType, kernelSize, entities, cmd.widgetParent()))
 		{
 			//save output
 			if (cmd.autoSaveMode() && !cmd.saveClouds("DENSITY"))
@@ -1213,13 +1210,12 @@ struct CommandRoughness : public ccCommandLineInterface::Command
 			return cmd.error(QObject::tr("No point cloud on which to compute roughness! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_ROUGHNESS));
 
 		//Call MainWindow generic method
-		void* additionalParameters[1] = { &kernelSize };
 		ccHObject::Container entities;
 		entities.resize(cmd.clouds().size());
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 			entities[i] = cmd.clouds()[i].pc;
 
-		if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ROUGHNESS, entities, cmd.widgetParent(), additionalParameters))
+		if (ccLibAlgorithms::ComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::Roughness, 0, kernelSize, entities, cmd.widgetParent()))
 		{
 			//save output
 			if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("ROUGHNESS_KERNEL_%2").arg(kernelSize)))

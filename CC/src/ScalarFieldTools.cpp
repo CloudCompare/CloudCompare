@@ -637,12 +637,12 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 				ScalarType V = theCloud->getPointScalarValue(i);
 				if (ScalarField::ValidValue(V))
 				{
-					minDistsToMean[i] = fabs(theKMeans[minK]-V);
+					minDistsToMean[i] = std::abs(theKMeans[minK]-V);
 
 					//we look for the nearest cluster center
-					for (unsigned char j=1; j<K; ++j)
+					for (unsigned char j = 1; j < K; ++j)
 					{
-						ScalarType distToMean = fabs(theKMeans[j]-V);
+						ScalarType distToMean = std::abs(theKMeans[j] - V);
 						if (distToMean<minDistsToMean[i])
 						{
 							minDistsToMean[i] = distToMean;
@@ -680,7 +680,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 				if (theOldKNums[j] != theKNums[j])
 					meansHaveMoved = true;
 
-				classMovingDist += fabs(theKMeans[j] - newMean);
+				classMovingDist += std::abs(theKMeans[j] - newMean);
 
 				theKMeans[j] = newMean;
 			}

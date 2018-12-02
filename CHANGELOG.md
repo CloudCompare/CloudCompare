@@ -9,7 +9,26 @@ v2.10.alpha - XX/XX/201X
 	* Edit > Polyline > Sample points
 		- to regularly samples points on one or several polylines
 
+	* New set of geometrical features to compute on clouds:
+		- Tools > Other > Compute geometric features
+		- features are all based on locally computed eigen values:
+			* sum of eigen values
+			* omnivariance
+			* eigenentropy
+			* anisotropy
+			* planarity
+			* linearity
+			* PCA1
+			* PCA2
+			* surface variation
+			* sphericity
+			* verticality
+		- most of the features are defined in "Contour detection in unstructured 3D point clouds", Hackel et al, 2016
+
 - enhancements:
+
+	* Roughness, Density and Curvature can now all be computed via the new 'Tools > Other > Compute geometric features' menu
+		(Approx density can't be computed anymore)
 
 	* Global Shift & Scale dialog
 		- new option "Preserve global shift on save" to directly control whether the global coordinates should be preserved

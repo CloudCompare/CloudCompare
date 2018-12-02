@@ -80,7 +80,7 @@ static inline void UpdateProgress(unsigned increment)
 	{
 		assert(s_totalProgressCount != 0);
 		s_lastProgressCount += increment;
-		float fPercent = static_cast<float>(s_lastProgressCount) / static_cast<float>(s_totalProgressCount) * 100.0f;
+		float fPercent = static_cast<float>(s_lastProgressCount) / s_totalProgressCount * 100.0f;
 		unsigned uiPercent = static_cast<unsigned>(fPercent);
 		if (uiPercent > s_lastProgress)
 		{
@@ -102,7 +102,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		//an error occurred during LS plane computation?! (maybe the (3) points are aligned) 
 		//we return an invalid Leaf (so as the above level understands that it's not a memory issue)
 		delete subset;
-		PointCoordinateType fakePlaneEquation[4] = {0,0,0,0};
+		PointCoordinateType fakePlaneEquation[4] = { 0,0,0,0 };
 		return new Leaf(nullptr, fakePlaneEquation, static_cast<ScalarType>(-1));
 	}
 
@@ -110,7 +110,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	ScalarType error = -1;
 	if (count < m_maxPointCountPerCell || count < 2 * m_minPointCountPerCell)
 	{
-		assert(fabs(CCVector3(planeEquation).norm2() - 1.0) < 1.0e-6);
+		assert(std::abs(CCVector3(planeEquation).norm2() - 1.0) < 1.0e-6);
 		error = (count > 3 ? DistanceComputationTools::ComputeCloud2PlaneDistance(subset, planeEquation, m_errorMeasure) : 0);
 	
 		//we can't split cells with less than twice the minimum number of points per cell! (and min >= 3 so as to fit a plane)
@@ -119,7 +119,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		{
 			UpdateProgress(count);
 			//the Leaf class takes ownership of the subset!
-			return new Leaf(subset,planeEquation,error);
+			return new Leaf(subset, planeEquation, error);
 		}
 	}
 
@@ -142,7 +142,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 
 	//find the median by sorting the points coordinates
 	assert(s_sortedCoordsForSplit.size() >= static_cast<std::size_t>(count));
-	for (unsigned i=0; i<count; ++i)
+	for (unsigned i = 0; i < count; ++i)
 	{
 		const CCVector3* P = subset->getPoint(i);
 		s_sortedCoordsForSplit[i] = P->u[splitDim];
@@ -150,11 +150,11 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	
 	ParallelSort(s_sortedCoordsForSplit.begin(), s_sortedCoordsForSplit.begin() + count);
 
-	unsigned splitCount = count/2;
+	unsigned splitCount = count / 2;
 	assert(splitCount >= 3); //count >= 6 (see above)
 	
 	//we must check that the split value is the 'first one'
-	if (s_sortedCoordsForSplit[splitCount-1] == s_sortedCoordsForSplit[splitCount])
+	if (s_sortedCoordsForSplit[splitCount - 1] == s_sortedCoordsForSplit[splitCount])
 	{
 		if (s_sortedCoordsForSplit[2] != s_sortedCoordsForSplit[splitCount]) //can we go backward?
 		{
@@ -164,14 +164,14 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 				--splitCount;
 			}
 		}
-		else if (s_sortedCoordsForSplit[count-3] != s_sortedCoordsForSplit[splitCount]) //can we go forward?
+		else if (s_sortedCoordsForSplit[count - 3] != s_sortedCoordsForSplit[splitCount]) //can we go forward?
 		{
 			do
 			{
 				++splitCount;
-				assert(splitCount < count-3);
+				assert(splitCount < count - 3);
 			}
-			while (/*splitCount+1<count &&*/ s_sortedCoordsForSplit[splitCount] == s_sortedCoordsForSplit[splitCount-1]);
+			while (/*splitCount+1<count &&*/ s_sortedCoordsForSplit[splitCount] == s_sortedCoordsForSplit[splitCount - 1]);
 		}
 		else //in fact we can't split this cell!
 		{
@@ -197,7 +197,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	}
 
 	//fill subsets
-	for (unsigned i=0; i<count; ++i)
+	for (unsigned i = 0; i < count; ++i)
 	{
 		const CCVector3* P = subset->getPoint(i);
 		if (P->u[splitDim] < splitCoord)
@@ -288,7 +288,7 @@ bool TrueKdTree::build(	double maxError,
 
 	//initial 'subset' to start recursion
 	ReferenceCloud* subset = new ReferenceCloud(m_associatedCloud);
-	if (!subset->addPointIndex(0,count))
+	if (!subset->addPointIndex(0, count))
 	{
 		//not enough memory
 		delete subset;
@@ -299,8 +299,8 @@ bool TrueKdTree::build(	double maxError,
 
 	//launch recursive process
 	m_maxError = maxError;
-	m_minPointCountPerCell = std::max<unsigned>(3,minPointCountPerCell);
-	m_maxPointCountPerCell = std::max<unsigned>(2*minPointCountPerCell,maxPointCountPerCell); //the max number of point per cell can't be < 2*min
+	m_minPointCountPerCell = std::max<unsigned>(3, minPointCountPerCell);
+	m_maxPointCountPerCell = std::max<unsigned>(2 * minPointCountPerCell, maxPointCountPerCell); //the max number of point per cell can't be < 2*min
 	m_errorMeasure = errorMeasure;
 	m_root = split(subset);
 

@@ -122,7 +122,7 @@ bool NormalDistribution::computeParameters(const GenericCloud* cloud)
 	}
 
 	mean /= counter;
-	stddev2 = fabs(stddev2 / counter - mean*mean);
+	stddev2 = std::abs(stddev2 / counter - mean*mean);
 
 	return setParameters(static_cast<ScalarType>(mean), static_cast<ScalarType>(stddev2));
 }
@@ -151,7 +151,7 @@ bool NormalDistribution::computeParameters(const ScalarContainer& values)
 	}
 
 	mean /= counter;
-	stddev2 = fabs(stddev2 / counter - mean*mean);
+	stddev2 = std::abs(stddev2 / counter - mean*mean);
 
 	return setParameters(static_cast<ScalarType>(mean), static_cast<ScalarType>(stddev2));
 }
@@ -169,7 +169,7 @@ bool NormalDistribution::computeRobustParameters(const ScalarContainer& values, 
 
 	for (ScalarType v : values)
 	{
-		if (static_cast<double>(fabs(v - m_mu)) < maxStddev)
+		if (static_cast<double>(std::abs(v - m_mu)) < maxStddev)
 		{
 			mean += v;
 			stddev2 += static_cast<double>(v) * v;
@@ -183,7 +183,7 @@ bool NormalDistribution::computeRobustParameters(const ScalarContainer& values, 
 	}
 
 	mean /= counter;
-	stddev2 = fabs(stddev2 / counter - mean*mean);
+	stddev2 = std::abs(stddev2 / counter - mean*mean);
 
 	return setParameters(static_cast<ScalarType>(mean), static_cast<ScalarType>(stddev2));
 }

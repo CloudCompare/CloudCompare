@@ -394,17 +394,17 @@ ScalarType KDTree::pointToCellSquareDistance(const PointCoordinateType *queryPoi
     if (cell->inbbmin.x <= queryPoint[0] && queryPoint[0] <= cell->inbbmax.x)
         dx = 0;
     else
-        dx = std::min(fabs(queryPoint[0]-cell->inbbmin.x), fabs(queryPoint[0]-cell->inbbmax.x));
+        dx = std::min(std::abs(queryPoint[0]-cell->inbbmin.x), std::abs(queryPoint[0]-cell->inbbmax.x));
     
 	if (cell->inbbmin.y <= queryPoint[1] && queryPoint[1] <= cell->inbbmax.y)
         dy = 0;
     else
-        dy = std::min(fabs(queryPoint[1]-cell->inbbmin.y), fabs(queryPoint[1]-cell->inbbmax.y));
+        dy = std::min(std::abs(queryPoint[1]-cell->inbbmin.y), std::abs(queryPoint[1]-cell->inbbmax.y));
     
 	if (cell->inbbmin.z <= queryPoint[2] && queryPoint[2] <= cell->inbbmax.z)
         dz = 0;
     else
-        dz = std::min(fabs(queryPoint[2]-cell->inbbmin.z), fabs(queryPoint[2]-cell->inbbmax.z));
+        dz = std::min(std::abs(queryPoint[2]-cell->inbbmin.z), std::abs(queryPoint[2]-cell->inbbmax.z));
 
     return static_cast<ScalarType>(dx*dx + dy*dy + dz*dz);
 }
@@ -417,9 +417,9 @@ void KDTree::pointToCellDistances(	const PointCoordinateType *queryPoint,
     PointCoordinateType dx, dy, dz;
 
     min = sqrt(pointToCellSquareDistance(queryPoint, cell));
-    dx = std::max(fabs(queryPoint[0]-cell->inbbmin.x), fabs(queryPoint[0]-cell->inbbmax.x));
-    dy = std::max(fabs(queryPoint[1]-cell->inbbmin.y), fabs(queryPoint[1]-cell->inbbmax.y));
-    dz = std::max(fabs(queryPoint[2]-cell->inbbmin.z), fabs(queryPoint[2]-cell->inbbmax.z));
+    dx = std::max(std::abs(queryPoint[0]-cell->inbbmin.x), std::abs(queryPoint[0]-cell->inbbmax.x));
+    dy = std::max(std::abs(queryPoint[1]-cell->inbbmin.y), std::abs(queryPoint[1]-cell->inbbmax.y));
+    dz = std::max(std::abs(queryPoint[2]-cell->inbbmin.z), std::abs(queryPoint[2]-cell->inbbmax.z));
     max = static_cast<ScalarType>( sqrt(dx*dx + dy*dy + dz*dz) );
 }
 
@@ -430,25 +430,25 @@ ScalarType KDTree::InsidePointToCellDistance(const PointCoordinateType *queryPoi
     dx = dy = dz = -1;
 
     if ((cell->boundsMask&1) && (cell->boundsMask&8))
-        dx = std::min(fabs(queryPoint[0]-cell->outbbmin.x), fabs(queryPoint[0]-cell->outbbmax.x));
+        dx = std::min(std::abs(queryPoint[0]-cell->outbbmin.x), std::abs(queryPoint[0]-cell->outbbmax.x));
     else if (cell->boundsMask&1)
-        dx = fabs(queryPoint[0]-cell->outbbmin.x);
+        dx = std::abs(queryPoint[0]-cell->outbbmin.x);
     else if (cell->boundsMask&8)
-        dx = fabs(queryPoint[0]-cell->outbbmax.x);
+        dx = std::abs(queryPoint[0]-cell->outbbmax.x);
 
     if ((cell->boundsMask&2) && (cell->boundsMask&16))
-        dy = std::min(fabs(queryPoint[1]-cell->outbbmin.y), fabs(queryPoint[1]-cell->outbbmax.y));
+        dy = std::min(std::abs(queryPoint[1]-cell->outbbmin.y), std::abs(queryPoint[1]-cell->outbbmax.y));
     else if (cell->boundsMask&2)
-        dy = fabs(queryPoint[1]-cell->outbbmin.y);
+        dy = std::abs(queryPoint[1]-cell->outbbmin.y);
     else if (cell->boundsMask&16)
-        dy = fabs(queryPoint[1]-cell->outbbmax.y);
+        dy = std::abs(queryPoint[1]-cell->outbbmax.y);
 
     if ((cell->boundsMask&4) && (cell->boundsMask&32))
-        dz = std::min(fabs(queryPoint[2]-cell->outbbmin.z), fabs(queryPoint[2]-cell->outbbmax.z));
+        dz = std::min(std::abs(queryPoint[2]-cell->outbbmin.z), std::abs(queryPoint[2]-cell->outbbmax.z));
     else if (cell->boundsMask&4)
-        dz = fabs(queryPoint[2]-cell->outbbmin.z);
+        dz = std::abs(queryPoint[2]-cell->outbbmin.z);
     else if (cell->boundsMask&32)
-        dz = fabs(queryPoint[2]-cell->outbbmax.z);
+        dz = std::abs(queryPoint[2]-cell->outbbmax.z);
 
     if (dx < 0 && dy < 0 && dz < 0)
         return -1;

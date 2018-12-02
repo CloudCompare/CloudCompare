@@ -1826,7 +1826,7 @@ bool ccPointCloud::setRGBColor(const ccColor::Rgb& col)
 
 CCVector3 ccPointCloud::computeGravityCenter()
 {
-	return CCLib::GeometricalAnalysisTools::computeGravityCenter(this);
+	return CCLib::GeometricalAnalysisTools::ComputeGravityCenter(this);
 }
 
 void ccPointCloud::applyGLTransformation(const ccGLMatrix& trans)
@@ -1840,7 +1840,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 	ccGenericPointCloud::applyGLTransformation(trans);
 
 	unsigned count = size();
-	for (unsigned i=0; i<count; i++)
+	for (unsigned i = 0; i < count; i++)
 	{
 		trans.apply(*point(i));
 	}

@@ -452,7 +452,7 @@ bool PointProjectionTools::segmentIntersect(const CCVector2& A, const CCVector2&
 	}
 
 	PointCoordinateType cross_AB_CD = AB.cross(CD);
-	if (fabs(cross_AB_CD) != 0) //AB and CD are not parallel
+	if (std::abs(cross_AB_CD) != 0) //AB and CD are not parallel
 	{
 		//where do they intersect?
 		//PointCoordinateType v = cross_AB_AC/cross_AB_CD;
@@ -858,7 +858,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 void PointProjectionTools::Transformation::apply(GenericIndexedCloudPersist& cloud) const
 {
 	//always apply the scale before everything (applying before or after rotation does not changes anything)
-	if (fabs(static_cast<double>(s) - 1.0) > ZERO_TOLERANCE)
+	if (std::abs(s - 1.0) > ZERO_TOLERANCE)
 	{
 		for (unsigned i = 0; i< cloud.size(); ++i)
 		{

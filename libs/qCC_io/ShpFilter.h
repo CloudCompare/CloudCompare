@@ -29,7 +29,46 @@
 //system
 #include <vector>
 
+
 class GenericDBFField;
+//! ESRI Shapefile's shape types
+enum class ESRI_SHAPE_TYPE : int32_t {
+	NULL_SHAPE = 0,
+	//below this point are 2D types
+	SHP_POINT = 1,
+	POLYLINE = 3,
+	POLYGON = 5,
+	MULTI_POINT = 8,
+	//below this point are 3D types
+	POINT_Z = 11,
+	POLYLINE_Z = 13,
+	POLYGON_Z = 15,
+
+	MULTI_POINT_Z = 18,
+	POINT_M = 21,
+	POLYLINE_M = 23,
+	POLYGON_M = 25,
+	MULTI_POINT_M = 28,
+	MULTI_PATCH = 31
+};
+
+enum class ESRI_PART_TYPE : uint8_t {
+	TRIANGLE_STRIP = 0,
+	TRIANGLE_FAN = 1,
+	OUTER_RING = 2,
+	INNER_RING = 3,
+	FIRST_RING = 4,
+	RING = 5
+};
+
+struct ShapeFileHeader {
+	int32_t fileLength = 100;
+	int32_t version = 1000;
+	int32_t shapeTypeInt = static_cast<int32_t >(ESRI_SHAPE_TYPE::NULL_SHAPE);
+	CCVector3d pointMin;
+	CCVector3d pointMax;
+	CCVector2d mRange;
+};
 
 //! ESRI Shapefile file filter (output only)
 /** See http://www.esri.com/library/whitepapers/pdfs/shapefile.pdf
@@ -63,9 +102,18 @@ public:
 	bool areClosedPolylinesAsPolygons() const { return m_closedPolylinesAsPolygons; }
 
 protected:
-
+	CC_FILE_ERROR readHeaderInto(QDataStream& stream, ShapeFileHeader &hdr);
 	//! Whether to consider closed polylines as polygons or not
 	bool m_closedPolylinesAsPolygons;
+
+	CC_FILE_ERROR
+	writeDBF(const std::vector<GenericDBFField *> &fields, const ccHObject::Container &toSave, bool save3DPolyHeightInDBF,
+			 unsigned char Z, const QString &dbfFilename) const;
+
+
+	void
+	loadDBF(const QString &filename, ccPointCloud *singlePoints, QMap<ccPolyline *, int32_t> &polyIDs, int32_t maxPolyID,
+			bool hasPolylines, bool hasPoints) const;
 };
 
 #endif //CC_SHP_SUPPORT

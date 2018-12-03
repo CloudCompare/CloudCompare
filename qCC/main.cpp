@@ -54,7 +54,9 @@
 
 int main(int argc, char **argv)
 {
-	ccApplication::init();
+	bool commandLine = (argc > 1 && argv[1][0] == '-');
+
+	ccApplication::init(commandLine);
 	
 	ccApplication app(argc, argv);
 
@@ -75,9 +77,6 @@ int main(int argc, char **argv)
 		ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);
 	}
 
-	//Command line mode?
-	bool commandLine = (argc > 1 && argv[1][0] == '-');
-	
 	//specific commands
 	int lastArgumentIndex = 1;
 	QTranslator translator;

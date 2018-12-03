@@ -29,7 +29,7 @@ class ccApplicationBase : public QApplication
 public:
 	//! This must be called before instantiating the application class so it
 	//! can setup OpenGL first.
-	static void	init();
+	static void	init(bool noOpenGLSupport);
 	
 	ccApplicationBase( int &argc, char **argv, const QString &version );
 	

@@ -44,7 +44,7 @@
 
 int main(int argc, char *argv[])
 {
-	ccViewerApplication::init();
+	ccViewerApplication::init(false);
 	
 	ccViewerApplication a(argc, argv);
 

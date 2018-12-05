@@ -45,7 +45,9 @@ void ccTranslationManager::loadTranslations()
 {
 	const QLocale	locale( languagePref() );
 	
-	for ( const auto &fileInfo : qAsConst( mTranslatorFileInfo ) )
+	const auto	&info = mTranslatorFileInfo;
+	
+	for ( const auto &fileInfo : info )
 	{
 		auto translator = new QTranslator( ccApp );
 	 

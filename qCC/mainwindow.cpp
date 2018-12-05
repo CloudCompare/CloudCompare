@@ -198,7 +198,6 @@ MainWindow::MainWindow()
 	, m_plpDlg(nullptr)
 	, m_pprDlg(nullptr)
 	, m_pfDlg(nullptr)
-	, m_TranslationManager( new ccTranslationManager( this ) )
 {
 	m_UI->setupUi( this );
 
@@ -206,7 +205,7 @@ MainWindow::MainWindow()
 	
 	m_pluginUIManager = new ccPluginUIManager( this, this );
 	
-	m_TranslationManager->populateMenu( m_UI->menuLanguage );
+	ccTranslationManager::get().populateMenu( m_UI->menuLanguage, ccApp->translationPath() );
 	
 #ifdef Q_OS_MAC
 	m_UI->actionAbout->setMenuRole( QAction::AboutRole );

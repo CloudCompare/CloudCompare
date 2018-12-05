@@ -97,11 +97,13 @@ ccApplicationBase::ccApplicationBase(int &argc, char **argv, const QString &vers
 	// See https://doc.qt.io/qt-5/qcoreapplication.html#locale-settings
 	setlocale( LC_NUMERIC, "C" );
 #endif
-
+	
 	ccGLWindow::setShaderPath( m_ShaderPath );
 	ccPluginManager::setPaths( m_PluginPaths );
-
-	loadTranslations();
+	
+	ccTranslationManager::get().registerTranslatorFile( QStringLiteral( "qt" ), m_TranslationPath );
+	ccTranslationManager::get().registerTranslatorFile( QStringLiteral( "CloudCompare" ), m_TranslationPath );
+	ccTranslationManager::get().loadTranslations();
 	
 	connect( this, &ccApplicationBase::aboutToQuit, [=](){ ccMaterial::ReleaseTextures(); } );
 }
@@ -227,28 +229,5 @@ void ccApplicationBase::setupPaths()
 		{
 			m_PluginPaths << path;
 		}
-	}
-}
-
-void ccApplicationBase::loadTranslations()
-{	
-	const QString  &cLangFromPrefs = ccTranslationManager::languagePref();
- 
-	auto qtTranslator = new QTranslator( this );
- 
-	bool  loaded = qtTranslator->load( QLocale( cLangFromPrefs ), QStringLiteral( "qt" ), QStringLiteral( "_" ), m_TranslationPath );
- 
-	if ( loaded )
-	{ 
-	   installTranslator( qtTranslator );
-	}
- 
-	auto  appTranslator = new QTranslator( this );
- 
-	loaded = appTranslator->load( QLocale( cLangFromPrefs ), QStringLiteral( "CloudCompare" ), QStringLiteral( "_" ), m_TranslationPath );
- 
-	if ( loaded )
-	{ 
-	   installTranslator( appTranslator );
 	}
 }

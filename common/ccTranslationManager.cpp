@@ -17,22 +17,54 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QGlobalStatic>
 #include <QMessageBox>
 #include <QRegularExpression>
 #include <QSettings>
+#include <QTranslator>
 
 #include "ccApplicationBase.h"
 #include "ccTranslationManager.h"
 
 
-ccTranslationManager::ccTranslationManager( QObject *parent )
-	: QObject( parent )
+class _ccTranslationManager : public ccTranslationManager {};	// trick for Q_GLOBAL_STATIC to access constructor
+Q_GLOBAL_STATIC( _ccTranslationManager, sTranslationmanager )
+
+
+ccTranslationManager &ccTranslationManager::get()
 {
+	return *sTranslationmanager;
 }
 
-void ccTranslationManager::populateMenu( QMenu *menu )
+void ccTranslationManager::registerTranslatorFile( const QString &prefix, const QString &path )
 {
-	const LanguageList	cList = availableLanguages( QStringLiteral( "CloudCompare") );
+	mTranslatorFileInfo.append( { prefix, path } );
+}
+
+void ccTranslationManager::loadTranslations()
+{
+	const QLocale	locale( languagePref() );
+	
+	for ( const auto &fileInfo : qAsConst( mTranslatorFileInfo ) )
+	{
+		auto translator = new QTranslator( ccApp );
+	 
+		bool loaded = translator->load( locale, fileInfo.prefix, QStringLiteral( "_" ), fileInfo.path );
+	 
+		if ( loaded )
+		{ 
+		   ccApp->installTranslator( translator );
+		}
+		else
+		{
+			delete translator;
+		}
+	}
+}
+
+void ccTranslationManager::populateMenu( QMenu *menu, const QString &pathToTranslationFiles )
+{
+	const LanguageList	cList = availableLanguages( QStringLiteral( "CloudCompare" ), pathToTranslationFiles );
 	
 	QActionGroup	*group = new QActionGroup( menu );
 	
@@ -86,11 +118,11 @@ const QString ccTranslationManager::languagePref()
 	return langCode;
 }
 
-ccTranslationManager::LanguageList ccTranslationManager::availableLanguages( const QString &appName )
+ccTranslationManager::LanguageList ccTranslationManager::availableLanguages( const QString &appName, const QString &pathToTranslationFiles )
 {
 	LanguageList theList;
 
-	QDir dir( ccApp->translationPath() );
+	QDir dir( pathToTranslationFiles );
 
 	const QString     cFilter = QStringLiteral( "%1_*.qm" ).arg( appName );
 	const QStringList cFileNames = dir.entryList( { cFilter } );
@@ -143,5 +175,5 @@ void ccTranslationManager::setLanguagePref( const QString &languageCode )
 	
 	QMessageBox::information( nullptr, 
 							  tr( "Language Change" ),
-							  tr( "Language change will take effect when CloudCompare is restarted") );
+							  tr( "Language change will take effect when CloudCompare is restarted" ) );
 }

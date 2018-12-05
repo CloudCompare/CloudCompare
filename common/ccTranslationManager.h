@@ -28,20 +28,46 @@ class ccTranslationManager : public QObject
 	Q_OBJECT
 	
 public:
-	ccTranslationManager( QObject *parent );
+	static ccTranslationManager &get();
+	
 	~ccTranslationManager() override = default;
 	
-	void populateMenu( QMenu *menu );
+	/** Register a file prefix for translation files.
+	 * The files should be named <prefix>_<lang>.ts where <lang> is the 2-letter ISO 639 
+	 * language code in lowercase.
+	 *  e.g. CloudCompare_fr.ts
+	 * @param prefix The prefix of the file to register
+	 * @param path The path to look for the files in
+	 */
+	void registerTranslatorFile( const QString &prefix, const QString &path );
 	
-	static const QString languagePref();
+	//! Using the translation file prefixes that were registered, load the actual translations
+	void loadTranslations();
 	
+	//! Populate the menu with a list of languages found using files in 'pathToTranslationFiles'
+	void populateMenu( QMenu *menu, const QString &pathToTranslationFiles );
+	
+protected:
+	explicit ccTranslationManager() = default;
+
 private:
+	struct TranslatorFile {
+		QString	prefix;
+		QString path;
+	};
+	using TranslatorFileList = QVector<TranslatorFile>;
+	
 	using TranslationInfo = QPair<QString, QString>;
 	using LanguageList = QVector<TranslationInfo>;
 	
-	LanguageList availableLanguages( const QString &appName );
+	const QString languagePref();
+	
+	//! Generate a list of available languages based on the files in the "translation" directory.
+	LanguageList availableLanguages( const QString &appName, const QString &pathToTranslationFiles );
 	
 	void setLanguagePref( const QString &languageCode );
+	
+	TranslatorFileList	mTranslatorFileInfo;
 };
 
 #endif //CCTRANSLATIONMANAGER_H

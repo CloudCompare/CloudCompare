@@ -304,7 +304,6 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 			//Colors?
 			if (hasColors)
 			{
-				lasheader.point_data_format += 1;
 				if (lasheader.point_data_format == 6)
 				{
 					//6 --> 7

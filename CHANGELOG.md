@@ -155,6 +155,7 @@ v2.10.alpha - XX/XX/201X
 	* In some cases, merging a mesh with materials with a mesh without could make CC crash
 	* Command line mode: the VOLUME command parser would loop indefinitely if other commands were appended after its own options + it was ignoring the AUTO_SAVE state.
 	* Bug fix: some files saved with version 2.6 to 2.9 and containing quadric primitives or projective camera sensors could not be loaded properly since the version 2.10.alpha of May 2018
+	* For a mysterious reason, the FWF_SAVE_CLOUDS command was not accessible anymore...
 
 v2.9.1 - 11/03/2017
 ----------------------

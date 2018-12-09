@@ -52,10 +52,18 @@
 #include <vld.h>
 #endif
 
+#ifdef Q_OS_MAC
+#include <unistd.h>
+#endif
+
 int main(int argc, char **argv)
 {
-	bool commandLine = (argc > 1 && argv[1][0] == '-');
-
+#ifdef Q_OS_MAC
+	bool commandLine = isatty( fileno( stdin ) );
+#else
+	bool commandLine = (argc > 1) && (argv[1][0] == '-');
+#endif
+   
 	ccApplication::init(commandLine);
 	
 	ccApplication app(argc, argv);
@@ -77,6 +85,11 @@ int main(int argc, char **argv)
 		ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);
 	}
 
+   QMessageBox::warning( nullptr, QString(),
+                         QString( "commandLine: %1" ) 
+                                
+                         .arg( commandLine ) );
+    
 	//specific commands
 	int lastArgumentIndex = 1;
 	QTranslator translator;

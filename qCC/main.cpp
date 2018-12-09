@@ -85,11 +85,6 @@ int main(int argc, char **argv)
 		ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);
 	}
 
-   QMessageBox::warning( nullptr, QString(),
-                         QString( "commandLine: %1" ) 
-                                
-                         .arg( commandLine ) );
-    
 	//specific commands
 	int lastArgumentIndex = 1;
 	QTranslator translator;

@@ -26,7 +26,7 @@
 
 
 ccViewerApplication::ccViewerApplication(int &argc, char **argv)
-	: ccApplicationBase( argc, argv, QStringLiteral( "1.38-alpha" ) )
+	: ccApplicationBase( argc, argv, QStringLiteral( "1.38-beta" ) )
 {
 	setApplicationName( "CloudCompareViewer" );
 }

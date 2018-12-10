@@ -30,6 +30,8 @@
 	<string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.12</string>
 	<key>LSRequiresCarbon</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>

@@ -1163,6 +1163,9 @@ protected:
 
 	//! Number of points projected in the octree
 	unsigned m_numberOfProjectedPoints;
+	
+	//! Nearest power of 2 less than the number of points (used for binary search)
+	unsigned m_nearestPow2;
 
 	//! Min coordinates of the octree bounding-box
 	CCVector3 m_dimMin;

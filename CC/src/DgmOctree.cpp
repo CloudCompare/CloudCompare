@@ -186,6 +186,7 @@ bool DgmOctree::MultiThreadSupport()
 DgmOctree::DgmOctree(GenericIndexedCloudPersist* cloud)
 	: m_theAssociatedCloud(cloud)
 	, m_numberOfProjectedPoints(0)
+	, m_nearestPow2(0)
 {
 	clear();
 
@@ -198,6 +199,7 @@ void DgmOctree::clear()
 	m_dimMin = m_pointsMin = m_dimMax = m_pointsMax = CCVector3(0,0,0);
 
 	m_numberOfProjectedPoints = 0;
+	m_nearestPow2 = 0;
 	m_thePointsAndTheirCellCodes.clear();
 
 	memset(m_fillIndexes, 0, sizeof(int)*(MAX_OCTREE_LEVEL + 1) * 6);
@@ -252,7 +254,9 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 	{
 		return -1;
 	}
+	
 	m_numberOfProjectedPoints = 0;
+	m_nearestPow2 = 0;
 
 	//update the pre-computed 'cell size per level of subdivision' array
 	updateCellSizeTable();
@@ -401,6 +405,8 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 		progressCb->stop();
 	}
 
+	m_nearestPow2 = (1 << static_cast<int>( log(static_cast<double>(m_numberOfProjectedPoints-1)) / LOG_NAT_2 ));
+   
 	return static_cast<int>(m_numberOfProjectedPoints);
 }
 
@@ -585,7 +591,8 @@ unsigned DgmOctree::getCellIndex(CellCode truncatedCellCode, unsigned char bitDe
 	//inspired from the algorithm proposed by MATT PULVER (see http://eigenjoy.com/2011/01/21/worlds-fastest-binary-search/)
 	//DGM:	it's not faster, but the code is simpler ;)
 	unsigned i = 0;
-	unsigned b = (1 << static_cast<int>( log(static_cast<double>(m_numberOfProjectedPoints-1)) / LOG_NAT_2 ));
+	unsigned b = m_nearestPow2;
+   
 	for ( ; b ; b >>= 1 )
 	{
 		unsigned j = i | b;
@@ -605,7 +612,7 @@ unsigned DgmOctree::getCellIndex(CellCode truncatedCellCode, unsigned char bitDe
 					//what we are looking for is right here
 					return j;
 				}
-				//otheriwse what we are looking for is on the left!
+				//otherwise what we are looking for is on the left!
 			}
 		}
 	}

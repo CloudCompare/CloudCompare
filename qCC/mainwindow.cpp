@@ -7917,6 +7917,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 
 		CCLib::ScalarField* sf = cloud->getScalarField(sfIdx);
 		sf->fill(NAN_VALUE);
+		cloud->setCurrentScalarField(sfIdx);
 
 		QElapsedTimer eTimer;
 		eTimer.start();

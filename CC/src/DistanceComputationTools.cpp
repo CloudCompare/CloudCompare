@@ -91,8 +91,8 @@ namespace CCLib
 			: octree(nullptr)
 			, mesh(nullptr)
 			, distanceTransform(nullptr)
-			, minFillIndexes(0,0,0)
-			, maxFillIndexes(0,0,0)
+			, minFillIndexes(0, 0, 0)
+			, maxFillIndexes(0, 0, 0)
 		{}
 
 		//! Destructor
@@ -101,7 +101,7 @@ namespace CCLib
 			if (perCellTriangleList.isInitialized())
 			{
 				TriangleList** data = perCellTriangleList.data();
-				for (std::size_t i=0; i<perCellTriangleList.totalCellCount(); ++i, ++data)
+				for (std::size_t i = 0; i < perCellTriangleList.totalCellCount(); ++i, ++data)
 				{
 					if (*data)
 						delete (*data);
@@ -429,7 +429,7 @@ bool DistanceComputationTools::computeCellHausdorffDistance(const DgmOctree::oct
 
 	//for each point of the current cell (compared octree) we look for its nearest neighbour in the reference cloud
 	unsigned pointCount = cell.points->size();
-	for (unsigned i=0; i<pointCount; i++)
+	for (unsigned i = 0; i < pointCount; i++)
 	{
 		cell.points->getPoint(i, nNSS.queryPoint);
 
@@ -526,7 +526,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 
 	//for each point of the current cell (compared octree) we look for its nearest neighbour in the reference cloud
 	unsigned pointCount = cell.points->size();
-	for (unsigned i=0; i<pointCount; ++i)
+	for (unsigned i = 0; i < pointCount; ++i)
 	{
 		//distance of the current point
 		ScalarType distPt = NAN_VALUE;
@@ -551,7 +551,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 				if (params->reuseExistingLocalModels)
 				{
 					//we look if the nearest point is close to existing models
-					for (std::vector<const LocalModel*>::const_iterator it = models.begin(); it!=models.end(); ++it)
+					for (std::vector<const LocalModel*>::const_iterator it = models.begin(); it != models.end(); ++it)
 					{
 						//we take the first model that 'includes' the nearest point
 						if ( ((*it)->getCenter() - nearestPoint).norm2() <= (*it)->getSquareSize())
@@ -611,7 +611,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 						//Neighbours are sorted, so the farthest is at the end. It also gives us
 						//an approximation of the model 'size'
 						const double& maxSquareDist = nNSS_Model.pointsInNeighbourhood[kNN-1].squareDistd;
-						if (maxSquareDist > 0) //DGM: it happens with duplicate points :(
+						if (maxSquareDist > 0) //DGM: with duplicate points, all neighbors can be at the same place :(
 						{
 							lm = LocalModel::New(params->localModel, Z, nearestPoint, static_cast<PointCoordinateType>(maxSquareDist));
 							if (lm && params->reuseExistingLocalModels)
@@ -1928,18 +1928,18 @@ ScalarType DistanceComputationTools::computePoint2TriangleDistance(const CCVecto
 
 	//we do all computations with double precision, otherwise
 	//some triangles with sharp angles will give very poor results.
-	CCVector3d AP(P->x-A->x, P->y-A->y, P->z-A->z);
-	CCVector3d AB(B->x-A->x, B->y-A->y, B->z-A->z);
-	CCVector3d AC(C->x-A->x, C->y-A->y, C->z-A->z);
+	CCVector3d AP(P->x - A->x, P->y - A->y, P->z - A->z);
+	CCVector3d AB(B->x - A->x, B->y - A->y, B->z - A->z);
+	CCVector3d AC(C->x - A->x, C->y - A->y, C->z - A->z);
 
-    double a00 = AB.dot(AB);
-    double a01 = AB.dot(AC);
-    double a11 = AC.dot(AC);
-    double b0 = -AP.dot(AB);
-    double b1 = -AP.dot(AC);
+    double a00 =  AB.dot(AB);
+    double a01 =  AB.dot(AC);
+    double a11 =  AC.dot(AC);
+    double b0  = -AP.dot(AB);
+    double b1  = -AP.dot(AC);
     double det = a00 * a11 - a01 * a01;
-    double t0 = a01 * b1 - a11 * b0;
-    double t1 = a01 * b0 - a00 * b1;
+    double t0  = a01 * b1 - a11 * b0;
+    double t1  = a01 * b0 - a00 * b1;
 
     if (t0 + t1 <= det)
     {

@@ -88,14 +88,17 @@ public:
 		{
 			m_tri->placeIteratorAtBeginning();
 			unsigned numberOfTriangles = m_tri->size();
-			for (unsigned i=0; i<numberOfTriangles; ++i)
+			CCVector3 triNearestPoint;
+			for (unsigned i = 0; i < numberOfTriangles; ++i)
 			{
 				GenericTriangle* tri = m_tri->_getNextTriangle();
-				ScalarType dist2 = DistanceComputationTools::computePoint2TriangleDistance(P, tri, false, nearestPoint);
+				ScalarType dist2 = DistanceComputationTools::computePoint2TriangleDistance(P, tri, false, nearestPoint ? &triNearestPoint : nullptr);
 				if (dist2 < minDist2 || i == 0)
 				{
 					//keep track of the smallest distance
 					minDist2 = dist2;
+					if (nearestPoint)
+						*nearestPoint = triNearestPoint;
 				}
 			}
 		}

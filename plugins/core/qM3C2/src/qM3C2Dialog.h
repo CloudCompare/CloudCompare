@@ -92,11 +92,14 @@ protected slots:
 	void swapClouds();
 	void setCloud1Visibility(bool);
 	void setCloud2Visibility(bool);
-	void ifUseOtherCloudForCorePoints(bool);
 	void saveParamsToFile();
 	void loadParamsFromFile();
-	void guessParamsSlow() { guessParams(false); }
+	inline void guessParamsSlow() { guessParams(false); }
 	void projDestIndexChanged(int);
+	void onUpdateNormalComboBoxChanged(int);
+
+	//! Updates the normalSourceComboBox
+	void updateNormalComboBox();
 
 protected: //methods
 

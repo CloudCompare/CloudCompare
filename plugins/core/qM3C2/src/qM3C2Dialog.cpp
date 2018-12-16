@@ -96,7 +96,6 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 
 	connect(showCloud1CheckBox,			SIGNAL(toggled(bool)),	this, SLOT(setCloud1Visibility(bool)));
 	connect(showCloud2CheckBox,			SIGNAL(toggled(bool)),	this, SLOT(setCloud2Visibility(bool)));
-	connect(cpUseOtherCloudRadioButton,	SIGNAL(toggled(bool)),	this, SLOT(ifUseOtherCloudForCorePoints(bool)));
 
 	connect(loadParamsToolButton,		SIGNAL(clicked()),		this, SLOT(loadParamsFromFile()));
 	connect(saveParamsToolButton,		SIGNAL(clicked()),		this, SLOT(saveParamsToFile()));
@@ -104,6 +103,12 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 	connect(guessParamsPushButton,		SIGNAL(clicked()),		this, SLOT(guessParamsSlow()));
 
 	connect(projDestComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(projDestIndexChanged(int)));
+
+	connect(cpOtherCloudComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateNormalComboBox()));
+	connect(normalSourceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onUpdateNormalComboBoxChanged(int)));
+	connect(cpUseCloud1RadioButton, SIGNAL(toggled(bool)), this, SLOT(updateNormalComboBox()));
+	connect(cpSubsampleRadioButton, SIGNAL(toggled(bool)), this, SLOT(updateNormalComboBox()));
+	connect(cpUseOtherCloudRadioButton, SIGNAL(toggled(bool)), this, SLOT(updateNormalComboBox()));
 
 	loadParamsFromPersistentSettings();
 
@@ -204,6 +209,7 @@ void qM3C2Dialog::setupPrecisionMapsTab()
 void qM3C2Dialog::swapClouds()
 {
 	setClouds(m_cloud2, m_cloud1);
+	updateNormalComboBox();
 }
 
 void qM3C2Dialog::setClouds(ccPointCloud* cloud1, ccPointCloud* cloud2)
@@ -222,9 +228,6 @@ void qM3C2Dialog::setClouds(ccPointCloud* cloud1, ccPointCloud* cloud2)
 	showCloud1CheckBox->blockSignals(true);
 	showCloud1CheckBox->setChecked(cloud1->isVisible());
 	showCloud1CheckBox->blockSignals(false);
-	if (!cloud1->hasNormals())
-		useCloud1NormalsCheckBox->setChecked(false);
-	ifUseOtherCloudForCorePoints(cpUseOtherCloudRadioButton->isChecked()); //enables or disables 'useCloud1NormalsCheckBox'
 
 	//cloud #2
 	cloud2LineEdit->setText(GetEntityName(cloud2));
@@ -242,10 +245,61 @@ void qM3C2Dialog::setClouds(ccPointCloud* cloud1, ccPointCloud* cloud2)
 	setupPrecisionMapsTab();
 }
 
-void qM3C2Dialog::ifUseOtherCloudForCorePoints(bool state)
+void qM3C2Dialog::onUpdateNormalComboBoxChanged(int)
 {
-	useCloud1NormalsCheckBox->setEnabled(m_cloud1 && m_cloud1->hasNormals() && !state);
-	normParamsFrame->setEnabled(!useCloud1NormalsCheckBox->isEnabled() || !useCloud1NormalsCheckBox->isChecked());
+	int selectedItem = normalSourceComboBox->currentIndex() >= 0 ? normalSourceComboBox->currentData().toInt() : -1;
+	switch (selectedItem)
+	{
+	case qM3C2Normals::USE_CLOUD1_NORMALS:
+	case qM3C2Normals::USE_CORE_POINTS_NORMALS:
+		normParamsFrame->setEnabled(false);
+		normalScaleDoubleSpinBox->setEnabled(false);
+		break;
+	default:
+		normParamsFrame->setEnabled(true);
+		normalScaleDoubleSpinBox->setEnabled(true);
+		break;
+	}
+}
+
+void qM3C2Dialog::updateNormalComboBox()
+{
+	int previouslySelectedItem = normalSourceComboBox->currentIndex() >= 0 ? normalSourceComboBox->currentData().toInt() : -1;
+	int lastIndex = -1;
+	normalSourceComboBox->clear();
+	normalSourceComboBox->addItem("Compute normals (on core points)", QVariant(qM3C2Normals::DEFAULT_MODE));
+	++lastIndex;
+	//if (previouslySelectedItem == qM3C2Normals::DEFAULT_MODE)
+	{
+		normalSourceComboBox->setCurrentIndex(lastIndex); //default mode
+	}
+	
+	if (m_cloud1 && m_cloud1->hasNormals())
+	{
+		normalSourceComboBox->addItem("Use cloud #1 normals", QVariant(qM3C2Normals::USE_CLOUD1_NORMALS));
+		++lastIndex;
+		if (previouslySelectedItem == qM3C2Normals::USE_CLOUD1_NORMALS || previouslySelectedItem < 0)
+		{
+			normalSourceComboBox->setCurrentIndex(lastIndex);
+			previouslySelectedItem = qM3C2Normals::USE_CLOUD1_NORMALS;
+		}
+	}
+	
+	if (cpUseOtherCloudRadioButton->isChecked())
+	{
+		//return the cloud currently selected in the combox box
+		ccPointCloud* otherCloud = GetCloudFromCombo(cpOtherCloudComboBox, m_app->dbRootObject());
+		if (otherCloud && otherCloud->hasNormals())
+		{
+			normalSourceComboBox->addItem("Use core points normals", QVariant(qM3C2Normals::USE_CORE_POINTS_NORMALS));
+			++lastIndex;
+			if (previouslySelectedItem == qM3C2Normals::USE_CORE_POINTS_NORMALS || previouslySelectedItem < 0)
+			{
+				normalSourceComboBox->setCurrentIndex(lastIndex);
+				previouslySelectedItem = qM3C2Normals::USE_CORE_POINTS_NORMALS;
+			}
+		}
+	}
 }
 
 ccPointCloud* qM3C2Dialog::getCorePointsCloud() const
@@ -313,19 +367,37 @@ void qM3C2Dialog::setCloud2Visibility(bool state)
 qM3C2Normals::ComputationMode qM3C2Dialog::getNormalsComputationMode() const
 {
 	//special case
-	if (useCloud1NormalsCheckBox->isEnabled() && useCloud1NormalsCheckBox->isChecked())
+	if (normalSourceComboBox->currentIndex() >= 0)
 	{
-		assert(m_cloud1 && m_cloud1->hasNormals());
-		return qM3C2Normals::USE_CLOUD1_NORMALS;
+		int selectedItem = normalSourceComboBox->currentData().toInt();
+		if (selectedItem == qM3C2Normals::USE_CLOUD1_NORMALS)
+		{
+			assert(m_cloud1 && m_cloud1->hasNormals());
+			return qM3C2Normals::USE_CLOUD1_NORMALS;
+		}
+		else if (selectedItem == qM3C2Normals::USE_CORE_POINTS_NORMALS)
+		{
+			return qM3C2Normals::USE_CORE_POINTS_NORMALS;
+		}
 	}
-	else if (normMultiScaleRadioButton->isChecked())
+
+	//otherwise we are in the default mode
+	if (normMultiScaleRadioButton->isChecked())
+	{
 		return qM3C2Normals::MULTI_SCALE_MODE;
+	}
 	else if (normVertRadioButton->isChecked())
+	{
 		return qM3C2Normals::VERT_MODE;
+	}
 	else if (normHorizRadioButton->isChecked())
+	{
 		return qM3C2Normals::HORIZ_MODE;
+	}
 	else /*if (normDefaultRadioButton->isChecked())*/
+	{
 		return qM3C2Normals::DEFAULT_MODE;
+	}
 }
 
 qM3C2Dialog::ExportOptions qM3C2Dialog::getExportOption() const
@@ -416,19 +488,41 @@ void qM3C2Dialog::loadParamsFrom(const QSettings& settings)
 	switch(normModeInt)
 	{
 	case qM3C2Normals::USE_CLOUD1_NORMALS:
-		useCloud1NormalsCheckBox->setChecked(m_cloud1 && m_cloud1->hasNormals());
+	case qM3C2Normals::USE_CORE_POINTS_NORMALS:
+	{
+		bool found = false;
+		for (int i = 0; i < normalSourceComboBox->count(); ++i)
+		{
+			if (normalSourceComboBox->itemData(i) == normModeInt)
+			{
+				normalSourceComboBox->setCurrentIndex(i);
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			ccLog::Warning("Can't restore the previous normal computation method (cloud #1 or core points has no normals)");
+		}
+	}
+	break;
+	
 	case qM3C2Normals::DEFAULT_MODE:
 		normDefaultRadioButton->setChecked(true);
 		break;
+	
 	case qM3C2Normals::MULTI_SCALE_MODE:
 		normMultiScaleRadioButton->setChecked(true);
 		break;
+	
 	case qM3C2Normals::VERT_MODE:
 		normVertRadioButton->setChecked(true);
 		break;
+	
 	case qM3C2Normals::HORIZ_MODE:
 		normHorizRadioButton->setChecked(true);
 		break;
+	
 	default:
 		//nothing to do
 		break;

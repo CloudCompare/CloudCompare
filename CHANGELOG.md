@@ -44,6 +44,7 @@ v2.10.alpha - XX/XX/201X
 		- optionally load a 3rd cloud that will be used as core points
 		- and eventually call the -M3C2 option with the parameter file as argument:
 			CloudCompare -O cloud1 -O cloud2 (-O core_points) -M3C2 parameters_file
+		- new option to use the core points cloud normals (if any)
 
 	* The "Classify" option of the Canupo plugin can now be called from the command line:
 		- you'll need a trained classifier (.prm file)

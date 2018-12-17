@@ -101,10 +101,23 @@ public:
 	//! Returns whether closed polylines are considered as polygons or not
 	bool areClosedPolylinesAsPolygons() const { return m_closedPolylinesAsPolygons; }
 
+	void save3DPolyAs2D(bool state) { m_save3DPolyAs2D = state; }
+	bool are3DPolySavedAs2D() const { return m_save3DPolyAs2D; }
+
+	int verticalDim() const { return m_verticalDim; }
+	void setVerticalDim(int dim) { m_verticalDim = dim; }; // FIXME proper check ?
+
+	void save3DPolyHeightInDBF(bool state) { m_save3DPolyHeightInDBF = state; };
+	bool shouldSave3DPolyHeightInDBF() const { return m_save3DPolyHeightInDBF; }
+
+
 protected:
 	CC_FILE_ERROR readHeaderInto(QDataStream& stream, ShapeFileHeader &hdr);
 	//! Whether to consider closed polylines as polygons or not
-	bool m_closedPolylinesAsPolygons;
+	bool m_closedPolylinesAsPolygons = true;
+	bool m_save3DPolyAs2D = false;
+	bool m_save3DPolyHeightInDBF = false;
+	int m_verticalDim = 2; // Z
 
 	CC_FILE_ERROR
 	writeDBF(const std::vector<GenericDBFField *> &fields, const ccHObject::Container &toSave, bool save3DPolyHeightInDBF,
@@ -115,6 +128,9 @@ protected:
 	loadDBF(const QString &filename, ccPointCloud *singlePoints, QMap<ccPolyline *, int32_t> &polyIDs, int32_t maxPolyID,
 			bool hasPolylines, bool hasPoints) const;
 };
+
+bool QCC_IO_LIB_API haveSameCCType(const ccHObject::Container& container);
+ESRI_SHAPE_TYPE QCC_IO_LIB_API esriTypeOfccHobject(ccHObject *entity, bool closedPolylineAsPolygon = true, bool save3DPolyAs2D = false);
 
 #endif //CC_SHP_SUPPORT
 

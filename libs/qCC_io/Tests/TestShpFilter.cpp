@@ -13,7 +13,8 @@
 #include "ccPointCloud.h"
 
 
-void TestShpFilter::doesNotHaveSameType() const {
+void TestShpFilter::doesNotHaveSameType() const
+{
 	auto *vertices = new ccPointCloud("vertices");
 
 	ccHObject::Container objs;
@@ -21,19 +22,22 @@ void TestShpFilter::doesNotHaveSameType() const {
 	objs.push_back(new ccMesh(vertices));
 
 	bool haveSameType = haveSameCCType(objs);
-	for (const auto *item : objs) {
+	for (const auto *item : objs)
+	{
 		delete item;
 	}
 	delete vertices;
 	QVERIFY(!haveSameType);
 }
 
-void TestShpFilter::haveSameTypeOnEmpty() const {
+void TestShpFilter::haveSameTypeOnEmpty() const
+{
 	ccHObject::Container objs;
 	QVERIFY(!haveSameCCType(objs));
 }
 
-void TestShpFilter::haveSameTypeOnManyMeshes() const {
+void TestShpFilter::haveSameTypeOnManyMeshes() const
+{
 	ccHObject::Container objs;
 	auto *vertices = new ccPointCloud("vertices");
 	objs.push_back(new ccMesh(vertices));
@@ -41,26 +45,30 @@ void TestShpFilter::haveSameTypeOnManyMeshes() const {
 	objs.push_back(new ccMesh(vertices));
 
 	bool haveSameType = haveSameCCType(objs);
-	for (const auto *item : objs) {
+	for (const auto *item : objs)
+	{
 		delete item;
 	}
 	delete vertices;
 	QVERIFY(haveSameType);
 }
 
-void TestShpFilter::haveSameTypeOnManyClouds() const {
+void TestShpFilter::haveSameTypeOnManyClouds() const
+{
 	ccHObject::Container objs;
 	objs.push_back(new ccPointCloud("Cloud - 1"));
 	objs.push_back(new ccPointCloud("Cloud - 2"));
 
 	bool haveSameType = haveSameCCType(objs);
-	for (const auto *item : objs) {
+	for (const auto *item : objs)
+	{
 		delete item;
 	}
 	QVERIFY(haveSameType);
 }
 
-void TestShpFilter::esriTypeOf3DPolyLineDefaults() const {
+void TestShpFilter::esriTypeOf3DPolyLineDefaults() const
+{
 	auto *vertices = new ccPointCloud("vertices");
 	auto *poly = new ccPolyline(vertices);
 	poly->setClosed(false);
@@ -69,7 +77,8 @@ void TestShpFilter::esriTypeOf3DPolyLineDefaults() const {
 	QVERIFY(type == ESRI_SHAPE_TYPE::POLYLINE_Z);
 }
 
-void TestShpFilter::esriTypeOf3DPolyLineSave2D() const {
+void TestShpFilter::esriTypeOf3DPolyLineSave2D() const
+{
 	auto *vertices = new ccPointCloud("vertices");
 	auto *poly = new ccPolyline(vertices);
 	poly->setClosed(false);
@@ -80,7 +89,8 @@ void TestShpFilter::esriTypeOf3DPolyLineSave2D() const {
 	QVERIFY(type == ESRI_SHAPE_TYPE::POLYLINE);
 }
 
-void TestShpFilter::esriTypeOf3DClosedPolyLineDefaults() const {
+void TestShpFilter::esriTypeOf3DClosedPolyLineDefaults() const
+{
 	auto *vertices = new ccPointCloud("vertices");
 	auto *poly = new ccPolyline(vertices);
 	poly->setClosed(true);
@@ -89,7 +99,8 @@ void TestShpFilter::esriTypeOf3DClosedPolyLineDefaults() const {
 	QVERIFY(type == ESRI_SHAPE_TYPE::POLYGON_Z);
 }
 
-void TestShpFilter::esriTypeOf3DClosedPolyLineSave2D() const {
+void TestShpFilter::esriTypeOf3DClosedPolyLineSave2D() const
+{
 	auto *vertices = new ccPointCloud("vertices");
 	auto *poly = new ccPolyline(vertices);
 	poly->setClosed(true);
@@ -100,7 +111,8 @@ void TestShpFilter::esriTypeOf3DClosedPolyLineSave2D() const {
 	QVERIFY(type == ESRI_SHAPE_TYPE::POLYGON);
 }
 
-void TestShpFilter::esriTypeOf3DClosedPolylineSaveAsPolyline() const {
+void TestShpFilter::esriTypeOf3DClosedPolylineSaveAsPolyline() const
+{
 	auto *vertices = new ccPointCloud("vertices");
 	auto *poly = new ccPolyline(vertices);
 	poly->setClosed(true);
@@ -111,7 +123,8 @@ void TestShpFilter::esriTypeOf3DClosedPolylineSaveAsPolyline() const {
 	QVERIFY(type == ESRI_SHAPE_TYPE::POLYLINE_Z);
 }
 
-void TestShpFilter::esriTypeOf3DClosedPolylineSaveAs2DPolyline() const {
+void TestShpFilter::esriTypeOf3DClosedPolylineSaveAs2DPolyline() const
+{
 	auto *vertices = new ccPointCloud("vertices");
 	auto *poly = new ccPolyline(vertices);
 	poly->setClosed(true);
@@ -123,7 +136,8 @@ void TestShpFilter::esriTypeOf3DClosedPolylineSaveAs2DPolyline() const {
 }
 
 
-void TestShpFilter::readPolylineFile(const QString &filePath) const {
+void TestShpFilter::readPolylineFile(const QString &filePath) const
+{
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
 	ShpFilter filter;
@@ -132,7 +146,8 @@ void TestShpFilter::readPolylineFile(const QString &filePath) const {
 
 	QVERIFY(container.getChildrenNumber() == 2);
 
-	for (unsigned i(0); i < container.getChildrenNumber(); ++i) {
+	for (unsigned i(0); i < container.getChildrenNumber(); ++i)
+	{
 		ccHObject *child = container.getChild(i);
 		QVERIFY(child->getClassID() == CC_TYPES::POLY_LINE);
 	}
@@ -146,8 +161,9 @@ void TestShpFilter::readPolylineFile(const QString &filePath) const {
 
 	ScalarType expectedXs[5] = {1.0, 5.0, 5.0, 3.0, 1.0};
 	ScalarType expectedYs[5] = {5.0, 5.0, 1.0, 3.0, 1.0};
-	for (unsigned i = 0; i < 5; ++i){
-		const CCVector3  *point = vertices->getPoint(i);
+	for (unsigned i = 0; i < 5; ++i)
+	{
+		const CCVector3 *point = vertices->getPoint(i);
 		QCOMPARE(point->x, expectedXs[i]);
 		QCOMPARE(point->y, expectedYs[i]);
 		QCOMPARE(point->z, 0.0);
@@ -162,15 +178,17 @@ void TestShpFilter::readPolylineFile(const QString &filePath) const {
 
 	ScalarType expectedXs2[2] = {3.0, 2.0};
 	ScalarType expectedYs2[2] = {2.0, 6.0};
-	for (unsigned i = 0; i < 2; ++i){
-		const CCVector3  *point = vertices->getPoint(i);
+	for (unsigned i = 0; i < 2; ++i)
+	{
+		const CCVector3 *point = vertices->getPoint(i);
 		QCOMPARE(point->x, expectedXs2[i]);
 		QCOMPARE(point->y, expectedYs2[i]);
 		QCOMPARE(point->z, 0.0);
 	}
 }
 
-void TestShpFilter::readPolylineMFile(const QString &filePath) const {
+void TestShpFilter::readPolylineMFile(const QString &filePath) const
+{
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
 	ShpFilter filter;
@@ -179,7 +197,8 @@ void TestShpFilter::readPolylineMFile(const QString &filePath) const {
 
 	QVERIFY(container.getChildrenNumber() == 2);
 
-	for (unsigned i(0); i < container.getChildrenNumber(); ++i) {
+	for (unsigned i(0); i < container.getChildrenNumber(); ++i)
+	{
 		ccHObject *child = container.getChild(i);
 		QVERIFY(child->getClassID() == CC_TYPES::POLY_LINE);
 	}
@@ -193,8 +212,9 @@ void TestShpFilter::readPolylineMFile(const QString &filePath) const {
 
 	ScalarType expectedXs[5] = {1.0, 5.0, 5.0, 3.0, 1.0};
 	ScalarType expectedYs[5] = {5.0, 5.0, 1.0, 3.0, 1.0};
-	for (unsigned i = 0; i < 5; ++i){
-		const CCVector3  *point = vertices->getPoint(i);
+	for (unsigned i = 0; i < 5; ++i)
+	{
+		const CCVector3 *point = vertices->getPoint(i);
 		QCOMPARE(point->x, expectedXs[i]);
 		QCOMPARE(point->y, expectedYs[i]);
 		QCOMPARE(point->z, 0.0);
@@ -215,8 +235,9 @@ void TestShpFilter::readPolylineMFile(const QString &filePath) const {
 
 	ScalarType expectedXs2[2] = {3.0, 2.0};
 	ScalarType expectedYs2[2] = {2.0, 6.0};
-	for (unsigned i = 0; i < 2; ++i){
-		const CCVector3  *point = vertices->getPoint(i);
+	for (unsigned i = 0; i < 2; ++i)
+	{
+		const CCVector3 *point = vertices->getPoint(i);
 		QCOMPARE(point->x, expectedXs2[i]);
 		QCOMPARE(point->y, expectedYs2[i]);
 		QCOMPARE(point->z, 0.0);
@@ -224,7 +245,8 @@ void TestShpFilter::readPolylineMFile(const QString &filePath) const {
 	}
 }
 
-void TestShpFilter::readPolylineZFile(const QString &filePath) const {
+void TestShpFilter::readPolylineZFile(const QString &filePath) const
+{
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
 	ShpFilter filter;
@@ -232,7 +254,8 @@ void TestShpFilter::readPolylineZFile(const QString &filePath) const {
 	QVERIFY(error == CC_FERR_NO_ERROR);
 
 	QVERIFY(container.getChildrenNumber() == 3);
-	for (unsigned i(0); i < container.getChildrenNumber(); ++i) {
+	for (unsigned i(0); i < container.getChildrenNumber(); ++i)
+	{
 		ccHObject *child = container.getChild(i);
 		QVERIFY(child->getClassID() == CC_TYPES::POLY_LINE);
 	}
@@ -277,7 +300,8 @@ void TestShpFilter::readPolylineZFile(const QString &filePath) const {
 }
 
 
-void TestShpFilter::readMultiPointFile(const QString &filePath) const {
+void TestShpFilter::readMultiPointFile(const QString &filePath) const
+{
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
 	params.alwaysDisplayLoadDialog = false;
@@ -304,7 +328,8 @@ void TestShpFilter::readMultiPointFile(const QString &filePath) const {
 	QCOMPARE(point->z, 0.0);
 }
 
-void TestShpFilter::readMultiPointZFile(const QString &filePath) const {
+void TestShpFilter::readMultiPointZFile(const QString &filePath) const
+{
 	CCVector3d bbMin(1422671.7232666016, 4188903.4295959473, 71.99445343017578);
 	CCVector3d shift = ccGlobalShiftManager::BestShift(bbMin);
 	bool shiftEnabled = true;
@@ -357,7 +382,8 @@ void TestShpFilter::readMultiPointZFile(const QString &filePath) const {
 	QCOMPARE(pg.z, 71.99445343017578);
 }
 
-void TestShpFilter::readMultipatchFile(const QString &filePath) const {
+void TestShpFilter::readMultipatchFile(const QString &filePath) const
+{
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
 	params.alwaysDisplayLoadDialog = false;
@@ -368,7 +394,8 @@ void TestShpFilter::readMultipatchFile(const QString &filePath) const {
 
 	QVERIFY(container.getChildrenNumber() == 2);
 
-	for (unsigned i(0); i < container.getChildrenNumber(); ++i) {
+	for (unsigned i(0); i < container.getChildrenNumber(); ++i)
+	{
 		QVERIFY(container.getChild(i)->getClassID() == CC_TYPES::MESH);
 	}
 
@@ -379,7 +406,8 @@ void TestShpFilter::readMultipatchFile(const QString &filePath) const {
 	ScalarType expectedXs[expectedNumPoints] = {0.0, 0.0, 5.0, 5.0, 5.0, 5.0, 0.0, 0.0, 0.0, 0.0};
 	ScalarType expectedYs[expectedNumPoints] = {0.0, 0.0, 0.0, 0.0, 5.0, 5.0, 5.0, 5.0, 0.0, 0.0};
 	ScalarType expectedZs[expectedNumPoints] = {0.0, 3.0, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0};
-	for (unsigned i = 0; i < expectedNumPoints; ++i){
+	for (unsigned i = 0; i < expectedNumPoints; ++i)
+	{
 		const CCVector3 *point = vertices->getPoint(i);
 		QCOMPARE(point->x, expectedXs[i]);
 		QCOMPARE(point->y, expectedYs[i]);
@@ -393,7 +421,8 @@ void TestShpFilter::readMultipatchFile(const QString &filePath) const {
 	ScalarType expectedXs2[expectedNumPoints2] = {2.5, 0.0, 5.0, 5.0, 0.0, 0.0};
 	ScalarType expectedYs2[expectedNumPoints2] = {2.5, 0.0, 0.0, 5.0, 5.0, 0.0};
 	ScalarType expectedZs2[expectedNumPoints2] = {5.0, 3.0, 3.0, 3.0, 3.0, 3.0};
-	for (unsigned i = 0; i < expectedNumPoints2; ++i){
+	for (unsigned i = 0; i < expectedNumPoints2; ++i)
+	{
 		const CCVector3 *point = vertices->getPoint(i);
 		QCOMPARE(point->x, expectedXs2[i]);
 		QCOMPARE(point->y, expectedYs2[i]);
@@ -401,7 +430,8 @@ void TestShpFilter::readMultipatchFile(const QString &filePath) const {
 	}
 }
 
-void TestShpFilter::testWritePolyline() const {
+void TestShpFilter::testWritePolyline() const
+{
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
 	ShpFilter filter;
@@ -421,7 +451,8 @@ void TestShpFilter::testWritePolyline() const {
 	readPolylineFile(tmpLineM);
 }
 
-void TestShpFilter::testWritePolylineM() const {
+void TestShpFilter::testWritePolylineM() const
+{
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
 	ShpFilter filter;
@@ -439,7 +470,8 @@ void TestShpFilter::testWritePolylineM() const {
 	readPolylineMFile(tmpLineM);
 }
 
-void TestShpFilter::testWritePolylineZ() const {
+void TestShpFilter::testWritePolylineZ() const
+{
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
 	ShpFilter filter;
@@ -457,7 +489,8 @@ void TestShpFilter::testWritePolylineZ() const {
 	readPolylineZFile(tmpLineM);
 }
 
-void TestShpFilter::testWriteMultpatchFile() const {
+void TestShpFilter::testWriteMultpatchFile() const
+{
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
 	ShpFilter filter;
@@ -475,7 +508,8 @@ void TestShpFilter::testWriteMultpatchFile() const {
 	readMultipatchFile(tmpMultipatch);
 }
 
-void TestShpFilter::testWriteMultiPointFile() const {
+void TestShpFilter::testWriteMultiPointFile() const
+{
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
 	ShpFilter filter;
@@ -493,7 +527,8 @@ void TestShpFilter::testWriteMultiPointFile() const {
 	readMultiPointFile(tmpMultipatch);
 }
 
-void TestShpFilter::testWriteMultiPointZFile() const {
+void TestShpFilter::testWriteMultiPointZFile() const
+{
 	CCVector3d bbMin(1422671.7232666016, 4188903.4295959473, 71.99445343017578);
 	CCVector3d shift = ccGlobalShiftManager::BestShift(bbMin);
 	bool shiftEnabled = true;
@@ -520,7 +555,8 @@ void TestShpFilter::testWriteMultiPointZFile() const {
 	readMultiPointZFile(tmpMultipatch);
 }
 
-void TestShpFilter::readPolygonFile(const QString &filePath) const {
+void TestShpFilter::readPolygonFile(const QString &filePath) const
+{
 	const unsigned expectedNumPoints = 14; // File has 15 points but as its a polygon, CC will keep the 14 first pts
 	CCVector3d bbMin(-626146.0444521683, 5219675.646154184, 0);
 	CCVector3d shift = ccGlobalShiftManager::BestShift(bbMin);
@@ -560,7 +596,8 @@ void TestShpFilter::readPolygonFile(const QString &filePath) const {
 									  5391094.921049644, 5271679.246403368, 5352573.735679878, 5219675.646154184,
 									  5348721.617142901, 5789789.189626727};
 
-	for (unsigned i(0); i < expectedNumPoints; ++i) {
+	for (unsigned i(0); i < expectedNumPoints; ++i)
+	{
 		const CCVector3 *p = vertices->getPoint(i);
 		QCOMPARE(p->x, static_cast<ScalarType >(expectedXs[i] + shift.x));
 		QCOMPARE(p->y, static_cast<ScalarType >(expectedYs[i] + shift.y));
@@ -568,7 +605,8 @@ void TestShpFilter::readPolygonFile(const QString &filePath) const {
 	}
 }
 
-void TestShpFilter::readPolygonZFile(const QString &filePath) const {
+void TestShpFilter::readPolygonZFile(const QString &filePath) const
+{
 	CCVector3d bbMin(1422671.7232666016, 4188903.4295959473, 71.99445343017578);
 	CCVector3d shift = ccGlobalShiftManager::BestShift(bbMin);
 	bool shiftEnabled = true;
@@ -588,15 +626,15 @@ void TestShpFilter::readPolygonZFile(const QString &filePath) const {
 	QVERIFY(container.getChildrenNumber() == 1);
 	QVERIFY(container.getFirstChild()->getClassID() == CC_TYPES::POLY_LINE);
 
-	auto *polygon = static_cast<ccPolyline*>(container.getFirstChild());
+	auto *polygon = static_cast<ccPolyline *>(container.getFirstChild());
 	QVERIFY(polygon->size() == 72); //File has 73 points, but cc reads 72 as its a polygon
 	QVERIFY(!polygon->is2DMode());
 	QVERIFY(polygon->isClosed());
 }
 
 
-
-void TestShpFilter::testWritePolygonFile() const {
+void TestShpFilter::testWritePolygonFile() const
+{
 	CCVector3d bbMin(-626146.0444521683, 5219675.646154184, 0);
 	CCVector3d shift = ccGlobalShiftManager::BestShift(bbMin);
 	bool shiftEnabled = true;
@@ -626,7 +664,8 @@ void TestShpFilter::testWritePolygonFile() const {
 	readPolygonFile(tmpMultipatch);
 }
 
-void TestShpFilter::testWritePolygonZFile() const {
+void TestShpFilter::testWritePolygonZFile() const
+{
 	CCVector3d bbMin(1422671.7232666016, 4188903.4295959473, 71.99445343017578);
 	CCVector3d shift = ccGlobalShiftManager::BestShift(bbMin);
 	bool shiftEnabled = true;
@@ -655,7 +694,8 @@ void TestShpFilter::testWritePolygonZFile() const {
 	readPolygonZFile(tmpMultipatch);
 }
 
-void TestShpFilter::readSinglePointZFile(const QString filePath) const {
+void TestShpFilter::readSinglePointZFile(const QString filePath) const
+{
 	CCVector3d bbMin(1422459.0908050265, 4188942.211755641, 0.0);
 	CCVector3d shift = ccGlobalShiftManager::BestShift(bbMin);
 	bool shiftEnabled = true;
@@ -676,14 +716,15 @@ void TestShpFilter::readSinglePointZFile(const QString filePath) const {
 	QVERIFY(container.getFirstChild()->getClassID() == CC_TYPES::POINT_CLOUD);
 
 	unsigned expectedNumPoints = 2;
-	auto *cloud = static_cast<ccPointCloud*>(container.getFirstChild());
+	auto *cloud = static_cast<ccPointCloud *>(container.getFirstChild());
 	QVERIFY(cloud->size() == expectedNumPoints);
 	QVERIFY(!cloud->isScalarFieldEnabled());
 
 	std::array<double, 2> expectedXs{1422464.3681007193, 1422459.0908050265};
 	std::array<double, 2> expectedYs{4188962.3364355816, 4188942.211755641};
 	std::array<double, 2> expectedZs{72.40956470558095, 72.58286959604922};
-	for (unsigned i(0); i < expectedNumPoints; ++i) {
+	for (unsigned i(0); i < expectedNumPoints; ++i)
+	{
 		const CCVector3 *p = cloud->getPoint(i);
 		QCOMPARE(p->x, static_cast<ScalarType>(expectedXs[i] + shift.x));
 		QCOMPARE(p->y, static_cast<ScalarType>(expectedYs[i] + shift.y));

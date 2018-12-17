@@ -69,25 +69,31 @@ static double s_dbfFieldImportScale = 1.0;
 //! represent a "no data" value."
 //! \param m
 //! \return
-bool isESRINoData(double m) {
+bool isESRINoData(double m)
+{
 	return m <= ESRI_NO_DATA;
 }
+
 //! Shape File Save dialog
-class SaveSHPFileDialog : public QDialog, public Ui::SaveSHPFileDlg {
+class SaveSHPFileDialog : public QDialog, public Ui::SaveSHPFileDlg
+{
 public:
 	//! Default constructor
 	explicit SaveSHPFileDialog(QWidget *parent = nullptr)
-			: QDialog(parent), Ui::SaveSHPFileDlg() {
+			: QDialog(parent), Ui::SaveSHPFileDlg()
+	{
 		setupUi(this);
 	}
 };
 
 //! Shape File Load dialog (to choose an 'altitude' field)
-class ImportDBFFieldDialog : public QDialog, public Ui::ImportDBFFieldDlg {
+class ImportDBFFieldDialog : public QDialog, public Ui::ImportDBFFieldDlg
+{
 public:
 	//! Default constructor
 	explicit ImportDBFFieldDialog(QWidget *parent = nullptr)
-			: QDialog(parent), Ui::ImportDBFFieldDlg() {
+			: QDialog(parent), Ui::ImportDBFFieldDlg()
+	{
 		setupUi(this);
 	}
 };
@@ -168,23 +174,28 @@ bool hasMeasurements(ESRI_SHAPE_TYPE shapeType)
  */
 bool bbMinMaxOfHierarchy(const ccHObject *entity, CCVector3d &bbMinCorner, CCVector3d &bbMaxCorner)
 {
-	if (!entity->isA(CC_TYPES::HIERARCHY_OBJECT)) {
+	if (!entity->isA(CC_TYPES::HIERARCHY_OBJECT))
+	{
 		return false;
 	}
 
 	bool isValid = false;
-	for (unsigned i = 0; i < entity->getChildrenNumber(); ++i) {
+	for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
+	{
 		ccHObject *child = entity->getChild(i);
 		CCVector3d minC, maxC;
-		if (child->getGlobalBB(minC, maxC)) {
-			if (isValid) {
+		if (child->getGlobalBB(minC, maxC))
+		{
+			if (isValid)
+			{
 				bbMinCorner.x = std::min(bbMinCorner.x, minC.x);
 				bbMinCorner.y = std::min(bbMinCorner.y, minC.y);
 				bbMinCorner.z = std::min(bbMinCorner.z, minC.z);
 				bbMaxCorner.x = std::max(bbMaxCorner.x, maxC.x);
 				bbMaxCorner.y = std::max(bbMaxCorner.y, maxC.y);
 				bbMaxCorner.z = std::max(bbMaxCorner.z, maxC.z);
-			} else {
+			} else
+			{
 				bbMinCorner = minC;
 				bbMaxCorner = maxC;
 				isValid = true;
@@ -200,11 +211,12 @@ bool bbMinMaxOfHierarchy(const ccHObject *entity, CCVector3d &bbMinCorner, CCVec
  * @param objects containter of objects to compute the range on
  * @return 2D vector, x is the min, y in the max
  */
-CCVector2d mRangeOfContainer(ccHObject::Container& objects)
+CCVector2d mRangeOfContainer(ccHObject::Container &objects)
 {
 	CCVector2d range(std::numeric_limits<double>::max(), std::numeric_limits<double>::min());
 
-	auto updateRange = [&range](const CCLib::GenericIndexedCloudPersist *cloud){
+	auto updateRange = [&range](const CCLib::GenericIndexedCloudPersist *cloud)
+	{
 		if (!cloud->isScalarFieldEnabled())
 			return;
 		unsigned numPoints = cloud->size();
@@ -219,26 +231,26 @@ CCVector2d mRangeOfContainer(ccHObject::Container& objects)
 		}
 	};
 
-	for (ccHObject* obj : objects)
+	for (ccHObject *obj : objects)
 	{
 		switch (obj->getClassID())
 		{
 			case CC_TYPES::POINT_CLOUD:
 			{
-				auto *cloud = static_cast<ccPointCloud*>(obj);
+				auto *cloud = static_cast<ccPointCloud *>(obj);
 				updateRange(cloud);
 				break;
 			}
 			case CC_TYPES::POLY_LINE:
 			{
-				auto *poly = static_cast<ccPolyline*>(obj);
+				auto *poly = static_cast<ccPolyline *>(obj);
 				const CCLib::GenericIndexedCloudPersist *vertices = poly->getAssociatedCloud();
 				updateRange(vertices);
 				break;
 			}
 			case CC_TYPES::MESH:
 			{
-				auto *mesh = static_cast<ccMesh*>(obj);
+				auto *mesh = static_cast<ccMesh *>(obj);
 				const ccGenericPointCloud *vertices = mesh->getAssociatedCloud();
 				updateRange(vertices);
 				break;
@@ -248,8 +260,8 @@ CCVector2d mRangeOfContainer(ccHObject::Container& objects)
 		}
 	}
 
-	if(range.x == std::numeric_limits<double>::max() &&
-	   range.y == std::numeric_limits<double>::min())
+	if (range.x == std::numeric_limits<double>::max() &&
+		range.y == std::numeric_limits<double>::min())
 	{
 		range.x = range.y = ESRI_NO_DATA;
 	}
@@ -271,7 +283,8 @@ bool arePolygonVerticesCounterClockwise(
 
 	//or http://en.wikipedia.org/wiki/Shoelace_formula
 	double sum = 0.0;
-	for (unsigned i = 0; i + 1 < numPoints; ++i) {
+	for (unsigned i = 0; i + 1 < numPoints; ++i)
+	{
 		const CCVector3 *P1 = vertices->getPoint(i);
 		const CCVector3 *P2 = vertices->getPoint((i + 1) % realNumPoints);
 		sum += (P2->u[dim1] - P2->u[dim1]) * (P2->u[dim2] + P1->u[dim2]);
@@ -281,24 +294,28 @@ bool arePolygonVerticesCounterClockwise(
 	return sum < 0.0;
 }
 
-void guessFlatDimension(const CCVector3d &diag, unsigned char &dim1, unsigned char &dim2) {
+void guessFlatDimension(const CCVector3d &diag, unsigned char &dim1, unsigned char &dim2)
+{
 	auto minDim = static_cast<unsigned char>(diag.u[1] < diag.u[0] ? 1 : 0);
 	if (diag.u[2] < diag.u[minDim])
-			minDim = 2;
+		minDim = 2;
 	dim1 = static_cast<unsigned char>(minDim == 2 ? 0 : minDim + 1);
 	dim2 = static_cast<unsigned char>(dim1 == 2 ? 0 : dim1 + 1);
 }
 
 
-bool ShpFilter::canLoadExtension(const QString &upperCaseExt) const {
+bool ShpFilter::canLoadExtension(const QString &upperCaseExt) const
+{
 	return (upperCaseExt == "SHP");
 }
 
-bool ShpFilter::canSave(CC_CLASS_ENUM type, bool &multiple, bool &exclusive) const {
+bool ShpFilter::canSave(CC_CLASS_ENUM type, bool &multiple, bool &exclusive) const
+{
 	if (type == CC_TYPES::POLY_LINE
 		|| type == CC_TYPES::POINT_CLOUD
 		|| type == CC_TYPES::HIERARCHY_OBJECT
-		|| type == CC_TYPES::MESH) {
+		|| type == CC_TYPES::MESH)
+	{
 		multiple = true;
 		exclusive = true;
 		return true;
@@ -306,8 +323,10 @@ bool ShpFilter::canSave(CC_CLASS_ENUM type, bool &multiple, bool &exclusive) con
 	return false;
 }
 
-QString toString(ESRI_SHAPE_TYPE type) {
-	switch (type) {
+QString toString(ESRI_SHAPE_TYPE type)
+{
+	switch (type)
+	{
 		case ESRI_SHAPE_TYPE::NULL_SHAPE:
 			return "Null";
 		case ESRI_SHAPE_TYPE::SHP_POINT:
@@ -343,7 +362,8 @@ QString toString(ESRI_SHAPE_TYPE type) {
 	return QString("Unknown");
 }
 
-QString toString(ESRI_PART_TYPE type) {
+QString toString(ESRI_PART_TYPE type)
+{
 	switch (type)
 	{
 		case ESRI_PART_TYPE::TRIANGLE_FAN:
@@ -364,8 +384,10 @@ QString toString(ESRI_PART_TYPE type) {
 //! Returns the corresponding ESRI Shape type for the given entity
 //! If the entity has no valid corresponding shape type, returns
 //! the ESRI NUll_SHAPE type
-ESRI_SHAPE_TYPE esriTypeOfccHobject(ccHObject *entity, bool closedPolylineAsPolygon, bool save3DPolyAs2D) {
-	if (!entity) {
+ESRI_SHAPE_TYPE esriTypeOfccHobject(ccHObject *entity, bool closedPolylineAsPolygon, bool save3DPolyAs2D)
+{
+	if (!entity)
+	{
 		return ESRI_SHAPE_TYPE::NULL_SHAPE;
 	}
 
@@ -378,12 +400,11 @@ ESRI_SHAPE_TYPE esriTypeOfccHobject(ccHObject *entity, bool closedPolylineAsPoly
 			auto *poly = static_cast<ccPolyline *>(entity);
 			if (closedPolylineAsPolygon && poly->isClosed())
 			{
-			    if (!poly->is2DMode() && save3DPolyAs2D)
-			    	return ESRI_SHAPE_TYPE::POLYGON;
-			    else
+				if (!poly->is2DMode() && save3DPolyAs2D)
+					return ESRI_SHAPE_TYPE::POLYGON;
+				else
 					return ESRI_SHAPE_TYPE::POLYGON_Z;
-			}
-			else
+			} else
 			{
 				if (!poly->is2DMode() && save3DPolyAs2D)
 					return ESRI_SHAPE_TYPE::POLYLINE;
@@ -399,11 +420,14 @@ ESRI_SHAPE_TYPE esriTypeOfccHobject(ccHObject *entity, bool closedPolylineAsPoly
 }
 
 //! Returns true il all the elements in the container have the same corresponding ESRI shape type
-bool haveSameCorrespondingEsriType(const ccHObject::Container& container, bool closedPolylineAsPolygon = true, bool save3DPolyAs2D = false) {
+bool haveSameCorrespondingEsriType(const ccHObject::Container &container, bool closedPolylineAsPolygon = true,
+								   bool save3DPolyAs2D = false)
+{
 	if (container.empty())
 		return false;
 	ESRI_SHAPE_TYPE firstType = esriTypeOfccHobject(container.front(), closedPolylineAsPolygon, save3DPolyAs2D);
-	auto haveSameTypeAsFirst = [firstType, closedPolylineAsPolygon, save3DPolyAs2D](ccHObject *obj) {
+	auto haveSameTypeAsFirst = [firstType, closedPolylineAsPolygon, save3DPolyAs2D](ccHObject *obj)
+	{
 		return esriTypeOfccHobject(obj, closedPolylineAsPolygon, save3DPolyAs2D) == firstType;
 	};
 	return std::all_of(container.begin(), container.end(), haveSameTypeAsFirst);
@@ -411,11 +435,13 @@ bool haveSameCorrespondingEsriType(const ccHObject::Container& container, bool c
 
 //! Returns true of all the objects in the container ave the same
 //! Cloud Compare Type
-bool haveSameCCType(const ccHObject::Container& container) {
+bool haveSameCCType(const ccHObject::Container &container)
+{
 	if (container.empty())
 		return false;
 	CC_CLASS_ENUM firstType = container.front()->getClassID();
-	auto haveSameTypeAsFirst = [firstType](ccHObject *obj) {
+	auto haveSameTypeAsFirst = [firstType](ccHObject *obj)
+	{
 		return obj->getClassID() == firstType;
 	};
 	return std::all_of(container.begin(), container.end(), haveSameTypeAsFirst);
@@ -427,26 +453,28 @@ void getSupportedShapes(ccHObject *baseEntity, ccHObject::Container &shapes)
 {
 	if (baseEntity->getClassID() == CC_TYPES::HIERARCHY_OBJECT)
 	{
-		for (unsigned i(0); i < baseEntity->getChildrenNumber(); ++i){
+		for (unsigned i(0); i < baseEntity->getChildrenNumber(); ++i)
+		{
 			getSupportedShapes(baseEntity->getChild(i), shapes);
 		}
-	}
-	else if (esriTypeOfccHobject(baseEntity) != ESRI_SHAPE_TYPE::NULL_SHAPE) {
+	} else if (esriTypeOfccHobject(baseEntity) != ESRI_SHAPE_TYPE::NULL_SHAPE)
+	{
 		shapes.push_back(baseEntity);
 	}
 }
 
 
-
-
 //! Saves the polyline to the stream as specified in the Shapefile specification
 CC_FILE_ERROR savePolyline(ccPolyline *poly, QDataStream &stream, int32_t recordNumber, ESRI_SHAPE_TYPE outputShapeType,
-						   int vertDim = 2) {
-	if (!poly) {
+						   int vertDim = 2)
+{
+	if (!poly)
+	{
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	if (vertDim < 0 || vertDim >= 3) {
+	if (vertDim < 0 || vertDim >= 3)
+	{
 		throw std::invalid_argument("vertical dim must be >= 0 & <3");
 	}
 
@@ -463,12 +491,12 @@ CC_FILE_ERROR savePolyline(ccPolyline *poly, QDataStream &stream, int32_t record
 
 	CCVector3d bbMing, bbMaxg;
 	poly->getGlobalBB(bbMing, bbMaxg);
-	int32_t numPoints = isClosed ? (realNumPoints + 1 ) : realNumPoints;
+	int32_t numPoints = isClosed ? (realNumPoints + 1) : realNumPoints;
 	int32_t numParts = 1;
 
 	int32_t recordSize(0);
 	recordSize += sizeof(int32_t); // ShapeType
-	recordSize += (4* sizeof(double)); // MBR
+	recordSize += (4 * sizeof(double)); // MBR
 	recordSize += sizeof(int32_t); // nbParts
 	recordSize += sizeof(int32_t); // nbPoints
 	recordSize += (numParts * sizeof(int32_t)); // Parts
@@ -513,7 +541,7 @@ CC_FILE_ERROR savePolyline(ccPolyline *poly, QDataStream &stream, int32_t record
 		CCVector3d diag = bbMaxg - bbMing;
 		if (outputShapeType == ESRI_SHAPE_TYPE::POLYGON_Z)
 			guessFlatDimension(diag, X, Y);
-		inverseOrder = arePolygonVerticesCounterClockwise(vertices, diag, X,Y);
+		inverseOrder = arePolygonVerticesCounterClockwise(vertices, diag, X, Y);
 	}
 
 	//Points (An array of length NumPoints)
@@ -527,7 +555,8 @@ CC_FILE_ERROR savePolyline(ccPolyline *poly, QDataStream &stream, int32_t record
 	}
 
 	//3D polylines
-	if (isESRIShape3D(outputShapeType)) {
+	if (isESRIShape3D(outputShapeType))
+	{
 		stream << bbMing.u[Z] << bbMaxg.u[Z];
 		//Z coordinates (for each part - just one here)
 		for (int32_t i = 0; i < numPoints; ++i)
@@ -539,14 +568,17 @@ CC_FILE_ERROR savePolyline(ccPolyline *poly, QDataStream &stream, int32_t record
 		}
 	}
 
-	if (hasMeasurements(outputShapeType)) {
+	if (hasMeasurements(outputShapeType))
+	{
 		bool hasSF = vertices->isScalarFieldEnabled();
 		double mMin = ESRI_NO_DATA;
 		double mMax = ESRI_NO_DATA;
-		if (hasSF) {
+		if (hasSF)
+		{
 			mMin = std::numeric_limits<double>::max();
 			mMax = std::numeric_limits<double>::min();
-			for (int32_t i = 0; i < numPoints; ++i) {
+			for (int32_t i = 0; i < numPoints; ++i)
+			{
 				auto scalar = static_cast<double >(vertices->getPointScalarValue(i % realNumPoints));
 				mMin = std::min(mMin, scalar);
 				mMax = std::max(mMax, scalar);
@@ -556,8 +588,10 @@ CC_FILE_ERROR savePolyline(ccPolyline *poly, QDataStream &stream, int32_t record
 
 		//M values (for each part - just one here)
 		double scalar = ESRI_NO_DATA;
-		for (int32_t i = 0; i < numPoints; ++i) {
-			if (hasSF) {
+		for (int32_t i = 0; i < numPoints; ++i)
+		{
+			if (hasSF)
+			{
 				//warning: handle loop if polyline is closed
 				scalar = static_cast<double>(vertices->getPointScalarValue(i % realNumPoints));
 			}
@@ -566,7 +600,8 @@ CC_FILE_ERROR savePolyline(ccPolyline *poly, QDataStream &stream, int32_t record
 	}
 	qint64 newPos = stream.device()->pos();
 
-	if (newPos - oldPos != recordSize * 2){
+	if (newPos - oldPos != recordSize * 2)
+	{
 		return CC_FERR_WRITING;
 	}
 	return CC_FERR_NO_ERROR;
@@ -582,10 +617,11 @@ CC_FILE_ERROR savePolyline(ccPolyline *poly, QDataStream &stream, int32_t record
  */
 void save3DCloud(QDataStream &stream, ccGenericPointCloud *cloud, const CCVector3d &bbMing, const CCVector3d &bbMaxg)
 {
-    unsigned numPoints = cloud->size();
+	unsigned numPoints = cloud->size();
 
 	// Points (x ,y)
-	for (unsigned i = 0; i < numPoints; ++i) {
+	for (unsigned i = 0; i < numPoints; ++i)
+	{
 		const CCVector3 *P = cloud->getPoint(i);
 		CCVector3d Pg = cloud->toGlobal3d(*P);
 		stream << Pg.x << Pg.y;
@@ -593,7 +629,8 @@ void save3DCloud(QDataStream &stream, ccGenericPointCloud *cloud, const CCVector
 
 	// Z Coordinates
 	stream << bbMing.z << bbMaxg.z;
-	for (unsigned i = 0; i < numPoints; ++i) {
+	for (unsigned i = 0; i < numPoints; ++i)
+	{
 		const CCVector3 *P = cloud->getPoint(i);
 		CCVector3d Pg = cloud->toGlobal3d(*P);
 		stream << Pg.z;
@@ -603,10 +640,12 @@ void save3DCloud(QDataStream &stream, ccGenericPointCloud *cloud, const CCVector
 	bool hasSF = cloud->isScalarFieldEnabled();
 	double mMin = ESRI_NO_DATA;
 	double mMax = ESRI_NO_DATA;
-	if (hasSF) {
+	if (hasSF)
+	{
 		mMin = std::numeric_limits<double>::max();
 		mMax = std::numeric_limits<double>::min();
-		for (unsigned i = 0; i < numPoints; ++i) {
+		for (unsigned i = 0; i < numPoints; ++i)
+		{
 			auto scalar = static_cast<double >(cloud->getPointScalarValue(i));
 			mMin = std::min(mMin, scalar);
 			mMax = std::max(mMax, scalar);
@@ -615,8 +654,10 @@ void save3DCloud(QDataStream &stream, ccGenericPointCloud *cloud, const CCVector
 	stream << mMin << mMax;
 
 	auto scalar = ESRI_NO_DATA;
-	for (unsigned i = 0; i < numPoints; ++i) {
-		if (hasSF) {
+	for (unsigned i = 0; i < numPoints; ++i)
+	{
+		if (hasSF)
+		{
 			scalar = static_cast<double>(cloud->getPointScalarValue(i));
 		}
 		stream << scalar;
@@ -631,8 +672,10 @@ void save3DCloud(QDataStream &stream, ccGenericPointCloud *cloud, const CCVector
  * @param recordNumber
  * @return
  */
-CC_FILE_ERROR saveAsCloud(ccGenericPointCloud *cloud, QDataStream &stream, int32_t recordNumber) {
-	if (!cloud) {
+CC_FILE_ERROR saveAsCloud(ccGenericPointCloud *cloud, QDataStream &stream, int32_t recordNumber)
+{
+	if (!cloud)
+	{
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
@@ -664,7 +707,8 @@ CC_FILE_ERROR saveAsCloud(ccGenericPointCloud *cloud, QDataStream &stream, int32
 
 	qint64 recordEnd = stream.device()->pos();
 	qint64 bytesWritten = recordEnd - recordStart;
-	if (bytesWritten != 2 * recordLength) {
+	if (bytesWritten != 2 * recordLength)
+	{
 		ccLog::Error(QString("wrote %1 bytes, expected to write %2").arg(bytesWritten).arg(recordLength * 2));
 		return CC_FERR_WRITING;
 	}
@@ -672,7 +716,8 @@ CC_FILE_ERROR saveAsCloud(ccGenericPointCloud *cloud, QDataStream &stream, int32
 }
 
 
-void writeHeaderTo(const ShapeFileHeader &hdr, QDataStream &stream) {
+void writeHeaderTo(const ShapeFileHeader &hdr, QDataStream &stream)
+{
 	uint32_t skip = 0;
 
 	stream.setByteOrder(QDataStream::BigEndian);
@@ -725,8 +770,7 @@ CC_FILE_ERROR findTriangleOrganisation(ccMesh *mesh, ESRI_PART_TYPE &type)
 		type = ESRI_PART_TYPE::TRIANGLE_STRIP;
 		return CC_FERR_NO_ERROR;
 
-	}
-	else if (isTriangleFan(secondVert))
+	} else if (isTriangleFan(secondVert))
 	{
 		for (unsigned i(2); i < mesh->size(); ++i)
 		{
@@ -737,8 +781,7 @@ CC_FILE_ERROR findTriangleOrganisation(ccMesh *mesh, ESRI_PART_TYPE &type)
 		type = ESRI_PART_TYPE::TRIANGLE_FAN;
 		return CC_FERR_NO_ERROR;
 
-	}
-	else
+	} else
 	{
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
@@ -746,28 +789,28 @@ CC_FILE_ERROR findTriangleOrganisation(ccMesh *mesh, ESRI_PART_TYPE &type)
 
 CC_FILE_ERROR saveMesh(QDataStream &stream, ccMesh *mesh, int32_t recordNumber)
 {
-    ESRI_PART_TYPE triangleType;
-    if (findTriangleOrganisation(mesh, triangleType) == CC_FERR_BAD_ENTITY_TYPE)
+	ESRI_PART_TYPE triangleType;
+	if (findTriangleOrganisation(mesh, triangleType) == CC_FERR_BAD_ENTITY_TYPE)
 		return CC_FERR_BAD_ENTITY_TYPE;
 
-    ccLog::Print(QString("[SHP] Triangle type: %1").arg(toString(triangleType)));
+	ccLog::Print(QString("[SHP] Triangle type: %1").arg(toString(triangleType)));
 
-    ccGenericPointCloud *vertices = mesh->getAssociatedCloud();
-    int32_t numParts = 1;
-    unsigned numPoints = vertices->size();
+	ccGenericPointCloud *vertices = mesh->getAssociatedCloud();
+	int32_t numParts = 1;
+	unsigned numPoints = vertices->size();
 
 	int32_t recordSize(0);
 	recordSize += sizeof(int32_t); // ShapeType
-	recordSize += (4* sizeof(double)); // MBR
+	recordSize += (4 * sizeof(double)); // MBR
 	recordSize += sizeof(int32_t); // nbParts
 	recordSize += sizeof(int32_t); // nbPoints
 	recordSize += (numParts * sizeof(int32_t)); // Parts
 	recordSize += (numParts * sizeof(int32_t)); // Parts Type
 	recordSize += (numPoints * 2 * sizeof(double)); //Points
-    recordSize += (2 * sizeof(double)); // zRange
-    recordSize += (numPoints) * sizeof(double); // Zs
-    recordSize += (2 * sizeof(double)); // mRange
-    recordSize += (numPoints) * sizeof(double); // Measures
+	recordSize += (2 * sizeof(double)); // zRange
+	recordSize += (numPoints) * sizeof(double); // Zs
+	recordSize += (2 * sizeof(double)); // mRange
+	recordSize += (numPoints) * sizeof(double); // Measures
 	recordSize /= 2; // 16bit words
 
 	// Record Header
@@ -790,7 +833,8 @@ CC_FILE_ERROR saveMesh(QDataStream &stream, ccMesh *mesh, int32_t recordNumber)
 
 	qint64 recordEnd = stream.device()->pos();
 	qint64 bytesWritten = recordEnd - recordStart;
-	if (bytesWritten != 2 * recordSize) {
+	if (bytesWritten != 2 * recordSize)
+	{
 		ccLog::Error(QString("wrote %1 bytes, expected to write %2").arg(bytesWritten).arg(recordSize * 2));
 		return CC_FERR_WRITING;
 	}
@@ -813,9 +857,10 @@ void updateFileSize(QDataStream &stream, int32_t fileSize16bit)
 	stream.device()->seek(oldPos);
 }
 
-CC_FILE_ERROR ShpFilter::saveToFile(ccHObject *entity, const QString &filename, const SaveParameters &parameters) {
-    std::vector<GenericDBFField *> fields;
-    return saveToFile(entity, fields, filename, parameters);
+CC_FILE_ERROR ShpFilter::saveToFile(ccHObject *entity, const QString &filename, const SaveParameters &parameters)
+{
+	std::vector<GenericDBFField *> fields;
+	return saveToFile(entity, fields, filename, parameters);
 }
 
 //! Saves the entity(ies) to a Shapefile
@@ -830,19 +875,22 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject *entity, const QString &filename, 
 //! \return
 CC_FILE_ERROR
 ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &fields, const QString &filename,
-					  const SaveParameters &parameters) {
+					  const SaveParameters &parameters)
+{
 	if (!entity)
 		return CC_FERR_BAD_ENTITY_TYPE;
 
 	ccHObject::Container toSave;
 	getSupportedShapes(entity, toSave);
 
-	if (toSave.empty()) {
+	if (toSave.empty())
+	{
 		ccLog::Warning("[SHP] No valid entity to save");
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	if (!haveSameCCType(toSave)) {
+	if (!haveSameCCType(toSave))
+	{
 		ccLog::Error("[SHP] All entities in a Shapefile must have the same type");
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
@@ -850,7 +898,7 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 	int poly2DVertDim = 2;
 	if (toSave.front()->getClassID() == CC_TYPES::POLY_LINE)
 	{
-	    if (parameters.alwaysDisplaySaveDialog)
+		if (parameters.alwaysDisplaySaveDialog)
 		{
 			//display SHP save dialog
 			SaveSHPFileDialog ssfDlg(nullptr);
@@ -869,35 +917,42 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 				throw std::runtime_error("Invalid vertical dimension");
 		}
 
-		if (!haveSameCorrespondingEsriType(toSave, m_closedPolylinesAsPolygons, are3DPolySavedAs2D())) {
+		if (!haveSameCorrespondingEsriType(toSave, m_closedPolylinesAsPolygons, are3DPolySavedAs2D()))
+		{
 			ccLog::Error("[SHP] All entities in a Shapefile must have the same type");
 			return CC_FERR_BAD_ENTITY_TYPE;
 		}
 
 	}
-	ESRI_SHAPE_TYPE outputShapeType = esriTypeOfccHobject(toSave.front(), m_closedPolylinesAsPolygons, are3DPolySavedAs2D());
+	ESRI_SHAPE_TYPE outputShapeType = esriTypeOfccHobject(toSave.front(), m_closedPolylinesAsPolygons,
+														  are3DPolySavedAs2D());
 	ccLog::Print("[SHP] Output type: " + toString(outputShapeType));
 
-	if (outputShapeType == ESRI_SHAPE_TYPE::POLYGON ||outputShapeType == ESRI_SHAPE_TYPE::POLYLINE)
+	if (outputShapeType == ESRI_SHAPE_TYPE::POLYGON || outputShapeType == ESRI_SHAPE_TYPE::POLYLINE)
 	{
-		auto hasMeasures = [](const ccHObject *obj) {
-			return static_cast<const ccPolyline*>(obj)->getAssociatedCloud()->isScalarFieldEnabled();
+		auto hasMeasures = [](const ccHObject *obj)
+		{
+			return static_cast<const ccPolyline *>(obj)->getAssociatedCloud()->isScalarFieldEnabled();
 		};
 		if (std::any_of(toSave.begin(), toSave.end(), hasMeasures))
 		{
-			outputShapeType = (outputShapeType == ESRI_SHAPE_TYPE::POLYLINE) ? ESRI_SHAPE_TYPE::POLYLINE_M : ESRI_SHAPE_TYPE::POLYGON_M;
+			outputShapeType = (outputShapeType == ESRI_SHAPE_TYPE::POLYLINE) ? ESRI_SHAPE_TYPE::POLYLINE_M
+																			 : ESRI_SHAPE_TYPE::POLYGON_M;
 		}
 	}
 
 	CCVector3d bbMinCorner, bbMaxCorner;
 	bool isValid;
-	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT)) {
+	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
+	{
 		isValid = bbMinMaxOfHierarchy(entity, bbMinCorner, bbMaxCorner);
-	} else {
+	} else
+	{
 		isValid = entity->getGlobalBB(bbMinCorner, bbMaxCorner);
 	}
 
-	if (!isValid) {
+	if (!isValid)
+	{
 		ccLog::Error("Entity(ies) has(ve) an invalid bounding box?!");
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
@@ -921,7 +976,8 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 	if (!indexFile.open(QIODevice::WriteOnly))
 		return CC_FERR_WRITING;
 
-	if (!isESRIShape3D(outputShapeType)) {
+	if (!isESRIShape3D(outputShapeType))
+	{
 		bbMinCorner.z = 0.0;
 		bbMaxCorner.z = 0.0;
 	}
@@ -939,10 +995,13 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 	writeHeaderTo(hdr, indexStream);
 
 	unsigned shapeIndex = 0;
-	for (auto child : toSave) {
+	for (auto child : toSave)
+	{
 		//check entity eligibility
-		if (child->isA(CC_TYPES::POLY_LINE)) {
-			if (static_cast<ccPolyline *>(child)->size() < 2) {
+		if (child->isA(CC_TYPES::POLY_LINE))
+		{
+			if (static_cast<ccPolyline *>(child)->size() < 2)
+			{
 				ccLog::Warning(QString("Polyline '%1' is too small! It won't be saved...").arg(child->getName()));
 				continue;
 			}
@@ -952,7 +1011,8 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 
 		CC_FILE_ERROR error = CC_FERR_NO_ERROR;
 		int32_t recordNumber = ++shapeIndex;
-		switch (outputShapeType) {
+		switch (outputShapeType)
+		{
 			case ESRI_SHAPE_TYPE::POLYLINE:
 			case ESRI_SHAPE_TYPE::POLYGON:
 			case ESRI_SHAPE_TYPE::POLYLINE_M:
@@ -960,7 +1020,7 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 			case ESRI_SHAPE_TYPE::POLYGON_Z:
 			case ESRI_SHAPE_TYPE::POLYLINE_Z:
 			{
-				auto *polyLine = static_cast<ccPolyline*>(child);
+				auto *polyLine = static_cast<ccPolyline *>(child);
 				error = savePolyline(polyLine, shpStream, recordNumber, outputShapeType, poly2DVertDim);
 				break;
 			}
@@ -971,13 +1031,14 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 			}
 			case ESRI_SHAPE_TYPE::MULTI_PATCH:
 			{
-                auto *mesh = dynamic_cast<ccMesh*>(child);
-                if (!mesh){
-                	ccLog::Warning("Not a mesh");
+				auto *mesh = dynamic_cast<ccMesh *>(child);
+				if (!mesh)
+				{
+					ccLog::Warning("Not a mesh");
 					return CC_FERR_BAD_ENTITY_TYPE;
-                }
-                error = saveMesh(shpStream, mesh, recordNumber);
-                break;
+				}
+				error = saveMesh(shpStream, mesh, recordNumber);
+				break;
 			}
 			default:
 			{
@@ -1010,13 +1071,13 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 }
 
 
-
 CC_FILE_ERROR ShpFilter::writeDBF(
 		const std::vector<GenericDBFField *> &fields,
 		const ccHObject::Container &toSave,
 		bool save3DPolyHeightInDBF,
 		const unsigned char Z,
-		const QString &dbfFilename) const {
+		const QString &dbfFilename) const
+{
 	DBFHandle dbfHandle = DBFCreate(qPrintable(dbfFilename));
 	if (!dbfHandle)
 	{
@@ -1026,36 +1087,44 @@ CC_FILE_ERROR ShpFilter::writeDBF(
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	//always write an 'index' table
 	int fieldIdx = DBFAddField(dbfHandle, "local_idx", FTInteger, 6, 0);
-	if (fieldIdx >= 0) {
+	if (fieldIdx >= 0)
+	{
 		for (size_t i = 0; i < toSave.size(); ++i)
 			DBFWriteIntegerAttribute(dbfHandle, static_cast<int>(i), fieldIdx, static_cast<int>(i) + 1);
-	} else {
+	} else
+	{
 		ccLog::Warning(QString("[SHP] Failed to save field 'index' (default)"));
 		return CC_FERR_WRITING;
 	}
 
 	//write the '3D polylines height' field if request
-	if (save3DPolyHeightInDBF) {
+	if (save3DPolyHeightInDBF)
+	{
 		fieldIdx = DBFAddField(dbfHandle, "height", FTDouble, 8, 8);
-		if (fieldIdx >= 0) {
-			for (size_t i = 0; i < toSave.size(); ++i) {
+		if (fieldIdx >= 0)
+		{
+			for (size_t i = 0; i < toSave.size(); ++i)
+			{
 				auto *poly = static_cast<ccPolyline *>(toSave[i]);
 				double height = 0.0;
-				if (poly && poly->size() != 0) {
+				if (poly && poly->size() != 0)
+				{
 					const CCVector3 *P0 = poly->getPoint(0);
 					CCVector3d Pg0 = poly->toGlobal3d(*P0);
 					height = Pg0.u[Z];
 				}
 				DBFWriteDoubleAttribute(dbfHandle, static_cast<int>(i), fieldIdx, height);
 			}
-		} else {
+		} else
+		{
 			ccLog::Warning(QString("[SHP] Failed to save field 'height' (3D polylines height)"));
 			return CC_FERR_WRITING;
 		}
 	}
 
 	//and write the other tables (specified by the user)
-	for (auto it : fields) {
+	for (auto it : fields)
+	{
 		const GenericDBFField *field = it;
 		if (field->is3D()) //3D case
 		{
@@ -1065,25 +1134,29 @@ CC_FILE_ERROR ShpFilter::writeDBF(
 										field->width(), field->decimal());
 			int zFieldIdx = DBFAddField(dbfHandle, qPrintable(field->name() + QString("_z")), field->type(),
 										field->width(), field->decimal());
-			if (xFieldIdx >= 0 && yFieldIdx >= 0 && zFieldIdx >= 0) {
+			if (xFieldIdx >= 0 && yFieldIdx >= 0 && zFieldIdx >= 0)
+			{
 				if (!it->save(dbfHandle, xFieldIdx, yFieldIdx, zFieldIdx))
 					xFieldIdx = -1;
 			}
 
-			if (xFieldIdx < 0) {
+			if (xFieldIdx < 0)
+			{
 				ccLog::Warning(QString("[SHP] Failed to save field '%1'").arg(field->name()));
 				return CC_FERR_WRITING;
 			}
 		} else //1D case
 		{
 			fieldIdx = DBFAddField(dbfHandle, qPrintable(field->name()), field->type(), field->width(),
-									   field->decimal());
-			if (fieldIdx >= 0) {
+								   field->decimal());
+			if (fieldIdx >= 0)
+			{
 				if (!it->save(dbfHandle, fieldIdx))
 					fieldIdx = -1;
 			}
 
-			if (fieldIdx < 0) {
+			if (fieldIdx < 0)
+			{
 				ccLog::Warning(QString("[SHP] Failed to save field '%1'").arg(field->name()));
 				return CC_FERR_WRITING;
 			}
@@ -1096,12 +1169,14 @@ CC_FILE_ERROR ShpFilter::writeDBF(
 }
 
 
-CC_FILE_ERROR ShpFilter::readHeaderInto(QDataStream &stream, ShapeFileHeader &hdr) {
+CC_FILE_ERROR ShpFilter::readHeaderInto(QDataStream &stream, ShapeFileHeader &hdr)
+{
 	stream.setByteOrder(QDataStream::BigEndian);
 
 	int32_t fileCode;
 	stream >> fileCode;
-	if (fileCode != SHP_FILE_CODE) {
+	if (fileCode != SHP_FILE_CODE)
+	{
 		ccLog::Warning("Wrong file code, is it a Shapefile ?");
 		return CC_FERR_MALFORMED_FILE;
 	}
@@ -1130,7 +1205,8 @@ CC_FILE_ERROR ShpFilter::readHeaderInto(QDataStream &stream, ShapeFileHeader &hd
 	stream >> zMin >> zMax;
 	stream >> mMin >> mMax;
 
-	if (std::isnan(zMin)) {
+	if (std::isnan(zMin))
+	{
 		//for 2D entities, the zMin value might be NaN!!!
 		zMin = 0;
 	}
@@ -1142,8 +1218,8 @@ CC_FILE_ERROR ShpFilter::readHeaderInto(QDataStream &stream, ShapeFileHeader &hd
 	return CC_FERR_NO_ERROR;
 }
 
-template <typename T>
-CC_FILE_ERROR readElements(QDataStream& stream, std::vector<T>& vector, size_t numElements)
+template<typename T>
+CC_FILE_ERROR readElements(QDataStream &stream, std::vector<T> &vector, size_t numElements)
 {
 	try
 	{
@@ -1162,7 +1238,7 @@ CC_FILE_ERROR readElements(QDataStream& stream, std::vector<T>& vector, size_t n
 	return CC_FERR_NO_ERROR;
 }
 
-void readZCoordinates(QDataStream& stream, int32_t numPoints, std::vector<CCVector3>& points, const CCVector3d& Pshift)
+void readZCoordinates(QDataStream &stream, int32_t numPoints, std::vector<CCVector3> &points, const CCVector3d &Pshift)
 {
 	double zMin, zMax, z;
 	stream >> zMin >> zMax;
@@ -1173,9 +1249,11 @@ void readZCoordinates(QDataStream& stream, int32_t numPoints, std::vector<CCVect
 	}
 }
 
-CC_FILE_ERROR readPoints(QDataStream& stream, int32_t numPoints, std::vector<CCVector3>& points, const CCVector3d& Pshift)
+CC_FILE_ERROR
+readPoints(QDataStream &stream, int32_t numPoints, std::vector<CCVector3> &points, const CCVector3d &Pshift)
 {
-	try {
+	try
+	{
 		points.resize(numPoints);
 	}
 	catch (const std::bad_alloc &)
@@ -1195,28 +1273,32 @@ CC_FILE_ERROR readPoints(QDataStream& stream, int32_t numPoints, std::vector<CCV
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR readMeasures(QDataStream& stream, int32_t numPoints, std::vector<ScalarType>& scalarValues)
+CC_FILE_ERROR readMeasures(QDataStream &stream, int32_t numPoints, std::vector<ScalarType> &scalarValues)
 {
 	double mMin, mMax, m;
 	stream >> mMin >> mMax;
 
 	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
-	if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA) {
-		try {
+	if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
+	{
+		try
+		{
 			scalarValues.reserve(numPoints);
 		}
-		catch (const std::bad_alloc &) {
+		catch (const std::bad_alloc &)
+		{
 			error = CC_FERR_NOT_ENOUGH_MEMORY;
 		}
 	}
 
-	if (error == CC_FERR_NO_ERROR) {
-		for (int32_t i = 0; i < numPoints; ++i) {
+	if (error == CC_FERR_NO_ERROR)
+	{
+		for (int32_t i = 0; i < numPoints; ++i)
+		{
 			stream >> m;
 			scalarValues.push_back(isESRINoData(m) ? NAN_VALUE : static_cast<ScalarType>(m));
 		}
-	}
-	else
+	} else
 	{
 		stream.skipRawData(numPoints * sizeof(m));
 	}
@@ -1225,9 +1307,9 @@ CC_FILE_ERROR readMeasures(QDataStream& stream, int32_t numPoints, std::vector<S
 
 CC_FILE_ERROR buildPolylinesInto(
 		ccHObject &container,
-		const std::vector<int32_t>& startIndexes,
-		const std::vector<CCVector3>& points,
-		const std::vector<ScalarType>& scalarValues,
+		const std::vector<int32_t> &startIndexes,
+		const std::vector<CCVector3> &points,
+		const std::vector<ScalarType> &scalarValues,
 		bool preserveCoordinateShift,
 		CCVector3d Pshift,
 		int index)
@@ -1235,45 +1317,52 @@ CC_FILE_ERROR buildPolylinesInto(
 	size_t numParts = startIndexes.size();
 	size_t numPoints = points.size();
 	//and of course the polyline(s)
-	for (int32_t i = 0; i < numParts; ++i) {
+	for (int32_t i = 0; i < numParts; ++i)
+	{
 		const int32_t &firstIndex = startIndexes[i];
-		const int32_t &lastIndex = static_cast<const int32_t &>((i + 1 < numParts ? startIndexes[i + 1] : numPoints) - 1);
-		int32_t vertCount = lastIndex - firstIndex + 1;
+		const int32_t &lastIndex = static_cast<const int32_t &>((i + 1 < numParts ? startIndexes[i + 1] : numPoints) -
+																1);
+		auto vertCount = static_cast<unsigned int>(lastIndex - firstIndex + 1);
 
 		//test if the polyline is closed
 		bool isClosed = false;
-		if (vertCount > 2 && (points[firstIndex] - points[lastIndex]).norm() < ZERO_TOLERANCE) {
+		if (vertCount > 2 && (points[firstIndex] - points[lastIndex]).norm() < ZERO_TOLERANCE)
+		{
 			vertCount--;
 			isClosed = true;
 		}
 
 		//vertices
 		ccPointCloud *vertices = new ccPointCloud("vertices");
-		if (!vertices->reserve(vertCount)) {
+		if (!vertices->reserve(vertCount))
+		{
 			delete vertices;
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
-		for (int32_t j = 0; j < vertCount; ++j) {
+		for (int32_t j = 0; j < vertCount; ++j)
+		{
 			vertices->addPoint(points[firstIndex + j]);
-			auto p = points[firstIndex + j];
 		}
 		vertices->setEnabled(false);
-		if (preserveCoordinateShift) {
+		if (preserveCoordinateShift)
+		{
 			vertices->setGlobalShift(Pshift);
 		}
 
 		//polyline
 		auto *poly = new ccPolyline(vertices);
 		poly->addChild(vertices);
-		if (preserveCoordinateShift) {
+		if (preserveCoordinateShift)
+		{
 			poly->setGlobalShift(Pshift); //shouldn't be necessary but who knows ;)
 		}
 
-		if (!poly->reserve(vertCount)) {
+		if (!poly->reserve(vertCount))
+		{
 			delete poly;
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
-		poly->addPointIndex(0, static_cast<unsigned>(vertCount));
+		poly->addPointIndex(0, vertCount);
 		QString name = QString("Polyline #%1").arg(index);
 		if (numParts != 1)
 			name += QString(".%1").arg(i + 1);
@@ -1281,17 +1370,19 @@ CC_FILE_ERROR buildPolylinesInto(
 		poly->setClosed(isClosed);
 		poly->set2DMode(false); // Always load Polylines in 3D
 
-		if (!scalarValues.empty()) {
+		if (!scalarValues.empty())
+		{
 			auto *sf = new ccScalarField("Measures");
-			if (!sf->reserveSafe(vertCount)) {
+			if (!sf->reserveSafe(vertCount))
+			{
 				ccLog::Warning(
 						QString("[SHP] Polyline #%1.%2: not enough memory to load scalar values!").arg(index).arg(
 								i + 1));
 				sf->release();
-			}
-			else
+			} else
 			{
-				for (int32_t j = 0; j < vertCount; ++j) {
+				for (int32_t j = 0; j < vertCount; ++j)
+				{
 					sf->addElement(scalarValues[j + firstIndex]);
 				}
 				sf->computeMinAndMax();
@@ -1317,15 +1408,13 @@ CC_FILE_ERROR buildPolylinesInto(
 //! \param shapeType of the record
 //! \param pShift Coordinate shift to apply
 //! \param preserveCoordinateShift
-//! \param load2DPolyAs3DPoly
 //! \return any errors that could happen
 CC_FILE_ERROR loadPolyline(QDataStream &stream,
 						   ccHObject &container,
 						   int32_t index,
 						   ESRI_SHAPE_TYPE shapeType,
 						   const CCVector3d &pShift,
-						   bool preserveCoordinateShift,
-						   bool load2DPolyAs3DPoly = false)
+						   bool preserveCoordinateShift)
 {
 	CC_FILE_ERROR error;
 	stream.setByteOrder(QDataStream::LittleEndian);
@@ -1368,13 +1457,13 @@ CC_FILE_ERROR loadPolyline(QDataStream &stream,
 	}
 
 	error = buildPolylinesInto(
-		container,
-		startIndexes,
-		points,
-		scalarValues,
-		preserveCoordinateShift,
-		pShift,
-		index
+			container,
+			startIndexes,
+			points,
+			scalarValues,
+			preserveCoordinateShift,
+			pShift,
+			index
 	);
 
 	return error;
@@ -1382,12 +1471,14 @@ CC_FILE_ERROR loadPolyline(QDataStream &stream,
 
 //! Reads numPoints z coordinates from the stream, applies the given shift
 //! and modify the point cloud points's z
-void readZCoordinates(QDataStream &stream, int32_t numPoints, ccPointCloud *cloud, double zShift) {
+void readZCoordinates(QDataStream &stream, int32_t numPoints, ccPointCloud *cloud, double zShift)
+{
 	double zMin, zMax;
 	stream >> zMin >> zMax;
 
 	double z;
-	for (int32_t i = 0; i < numPoints; ++i) {
+	for (int32_t i = 0; i < numPoints; ++i)
+	{
 		stream >> z;
 		const CCVector3 *P = cloud->getPoint(static_cast<unsigned int>(i));
 		const_cast<CCVector3 *>(P)->z = static_cast<PointCoordinateType>(z + zShift);
@@ -1397,19 +1488,24 @@ void readZCoordinates(QDataStream &stream, int32_t numPoints, ccPointCloud *clou
 
 //! Reads numPoints measures from the stream.
 //! add them to the cloud if the range is not null
-void readMeasures(QDataStream &stream, int32_t numPoints, ccPointCloud *cloud) {
+void readMeasures(QDataStream &stream, int32_t numPoints, ccPointCloud *cloud)
+{
 	ccScalarField *sf = nullptr;
 	double mMin, mMax;
 	stream >> mMin >> mMax;
 
-	if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA) {
+	if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
+	{
 		sf = new ccScalarField("Measures");
-		if (!sf->reserveSafe(static_cast<size_t>(numPoints))) {
+		if (!sf->reserveSafe(static_cast<size_t>(numPoints)))
+		{
 			ccLog::Warning("[SHP] Not enough memory to load scalar values!");
 			sf->release();
-		} else {
+		} else
+		{
 			double m;
-			for (int32_t i = 0; i < numPoints; ++i) {
+			for (int32_t i = 0; i < numPoints; ++i)
+			{
 				stream >> m;
 				ScalarType s = isESRINoData(m) ? NAN_VALUE : static_cast<ScalarType>(m);
 				sf->addElement(s);
@@ -1419,7 +1515,8 @@ void readMeasures(QDataStream &stream, int32_t numPoints, ccPointCloud *cloud) {
 			cloud->setCurrentDisplayedScalarField(sfIdx);
 			cloud->showSF(true);
 		}
-	} else {
+	} else
+	{
 		stream.skipRawData(sizeof(double) * numPoints);
 	}
 }
@@ -1437,7 +1534,8 @@ CC_FILE_ERROR loadCloud(QDataStream &stream,
 						int32_t index,
 						ESRI_SHAPE_TYPE shapeType,
 						const CCVector3d &pShift,
-						bool preserveCoordinateShift) {
+						bool preserveCoordinateShift)
+{
 	double xMin, yMin, xMax, yMax;
 	stream >> xMin >> yMin >> xMax >> yMax;
 
@@ -1488,10 +1586,12 @@ CC_FILE_ERROR loadCloud(QDataStream &stream,
 //! different than ESRI_NO_DATA
 //! \param stream Input stream of the Shapefile
 //! \param cloud where the measure will be stored
-void readSingleMeasure(QDataStream &stream, ccPointCloud *cloud) {
+void readSingleMeasure(QDataStream &stream, ccPointCloud *cloud)
+{
 	double m;
 	stream >> m;
-	if (m != ESRI_NO_DATA) {
+	if (m != ESRI_NO_DATA)
+	{
 		if (!cloud->hasScalarFields())
 		{
 			int sfIdx = cloud->addScalarField("Measures");
@@ -1516,7 +1616,8 @@ void readSingleMeasure(QDataStream &stream, ccPointCloud *cloud) {
 //! \param stream Input stream of the Shapefile
 //! \param shapeType POINT or POINT_M or PONT_Z
 //! \param cloud where the point read will be appended
-void readSinglePoint(QDataStream &stream, ESRI_SHAPE_TYPE shapeType, ccPointCloud *cloud) {
+void readSinglePoint(QDataStream &stream, ESRI_SHAPE_TYPE shapeType, ccPointCloud *cloud)
+{
 	stream.setByteOrder(QDataStream::LittleEndian);
 
 	double x, y, z = 0.0;
@@ -1526,7 +1627,8 @@ void readSinglePoint(QDataStream &stream, ESRI_SHAPE_TYPE shapeType, ccPointClou
 	x += pShift.x;
 	y += pShift.y;
 
-	if (isESRIShape3D(shapeType)) {
+	if (isESRIShape3D(shapeType))
+	{
 		stream >> z;
 		z += pShift.z;
 	}
@@ -1537,23 +1639,26 @@ void readSinglePoint(QDataStream &stream, ESRI_SHAPE_TYPE shapeType, ccPointClou
 			static_cast<PointCoordinateType >(z));
 	cloud->addPoint(point);
 
-	if (hasMeasurements(shapeType)) {
+	if (hasMeasurements(shapeType))
+	{
 		readSingleMeasure(stream, cloud);
 	}
 }
 
 //! Builds the ccPointCloud of vertices
 //! Returns nullptr if out of memory
-ccPointCloud* buildVertices(const std::vector<CCVector3 >& points, int32_t firstIndex, int32_t lastIndex)
+ccPointCloud *buildVertices(const std::vector<CCVector3> &points, int32_t firstIndex, int32_t lastIndex)
 {
 	int32_t vertCount = lastIndex - firstIndex + 1;
 
 	auto *vertices = new ccPointCloud("vertices");
-	if (!vertices->reserve(vertCount)) {
+	if (!vertices->reserve(vertCount))
+	{
 		delete vertices;
 		return nullptr;
 	}
-	for (int32_t j = 0; j < vertCount; ++j) {
+	for (int32_t j = 0; j < vertCount; ++j)
+	{
 		vertices->addPoint(points[firstIndex + j]);
 	}
 	vertices->setEnabled(false);
@@ -1562,14 +1667,15 @@ ccPointCloud* buildVertices(const std::vector<CCVector3 >& points, int32_t first
 
 //! Creates the ccMesh
 ccMesh *createMesh(
-		const std::vector<CCVector3>& points,
-		const std::vector<ScalarType>& scalarValues,
+		const std::vector<CCVector3> &points,
+		const std::vector<ScalarType> &scalarValues,
 		int32_t firstIndex,
 		int32_t lastIndex
-		)
+)
 {
 	int32_t vertCount = lastIndex - firstIndex + 1;
-	if (vertCount < 3) {
+	if (vertCount < 3)
+	{
 		return nullptr;
 	}
 
@@ -1582,14 +1688,15 @@ ccMesh *createMesh(
 	if (!scalarValues.empty())
 	{
 		auto *sf = new ccScalarField("Measures");
-		if (!sf->reserveSafe(vertCount)) {
+		if (!sf->reserveSafe(vertCount))
+		{
 			ccLog::Warning(
 					QString("[SHP] Mesh: not enough memory to load scalar values!"));
 			sf->release();
-		}
-		else
+		} else
 		{
-			for (int32_t j = 0; j < vertCount; ++j) {
+			for (int32_t j = 0; j < vertCount; ++j)
+			{
 				sf->addElement(scalarValues[j + firstIndex]);
 			}
 			sf->computeMinAndMax();
@@ -1608,21 +1715,23 @@ ccMesh *createMesh(
 //! The only supported Patches/Part types are Triangle_Fan & Triangle_Strip
 CC_FILE_ERROR buildPatches(
 		ccHObject &container,
-		const std::vector<int32_t>& startIndexes,
-		const std::vector<int32_t>& partTypes,
-		const std::vector<CCVector3>& points,
-		const std::vector<ScalarType>& scalarValues
-		)
+		const std::vector<int32_t> &startIndexes,
+		const std::vector<int32_t> &partTypes,
+		const std::vector<CCVector3> &points,
+		const std::vector<ScalarType> &scalarValues
+)
 {
 	size_t numParts = startIndexes.size();
 	size_t numPoints = points.size();
 
 
-	for (int32_t i = 0; i < numParts; ++i) {
+	for (int32_t i = 0; i < numParts; ++i)
+	{
 		auto type = static_cast<ESRI_PART_TYPE>(partTypes[i]);
 
 		const int32_t &firstIndex = startIndexes[i];
-		const int32_t &lastIndex = static_cast<const int32_t &>((i + 1 < numParts ? startIndexes[i + 1] : numPoints) - 1);
+		const int32_t &lastIndex = static_cast<const int32_t &>((i + 1 < numParts ? startIndexes[i + 1] : numPoints) -
+																1);
 		const int32_t vertCount = lastIndex - firstIndex + 1;
 
 		switch (type)
@@ -1630,7 +1739,8 @@ CC_FILE_ERROR buildPatches(
 			case ESRI_PART_TYPE::TRIANGLE_STRIP:
 			{
 				ccMesh *mesh = createMesh(points, scalarValues, firstIndex, lastIndex);
-				for (int32_t j(2); j < vertCount; ++j) {
+				for (int32_t j(2); j < vertCount; ++j)
+				{
 					mesh->addTriangle(j - 2, j - 1, j);
 				}
 				container.addChild(mesh);
@@ -1639,7 +1749,8 @@ CC_FILE_ERROR buildPatches(
 			case ESRI_PART_TYPE::TRIANGLE_FAN:
 			{
 				ccMesh *mesh = createMesh(points, scalarValues, firstIndex, lastIndex);
-				for (int32_t j(2); j < vertCount; ++j) {
+				for (int32_t j(2); j < vertCount; ++j)
+				{
 					mesh->addTriangle(0, j - 1, j);
 				}
 				container.addChild(mesh);
@@ -1647,7 +1758,7 @@ CC_FILE_ERROR buildPatches(
 			}
 			default:
 				ccLog::Print(QString("[SHP] Cannot handle Patch of type: %1").arg(toString(type)));
-            	return CC_FERR_BAD_ENTITY_TYPE;
+				return CC_FERR_BAD_ENTITY_TYPE;
 		}
 	}
 	return CC_FERR_NO_ERROR;
@@ -1675,13 +1786,13 @@ CC_FILE_ERROR readMultiPatch(QDataStream &stream, ccHObject &container, CCVector
 	}
 
 	std::vector<int32_t> partTypes;
-	error = readElements(stream, partTypes, numParts);
+	error = readElements(stream, partTypes, static_cast<size_t>(numParts));
 	if (error != CC_FERR_NO_ERROR)
 	{
 		return error;
 	}
 
-	std::vector<CCVector3 > points;
+	std::vector<CCVector3> points;
 	error = readPoints(stream, numPoints, points, Pshift);
 	if (error != CC_FERR_NO_ERROR)
 	{
@@ -1703,61 +1814,77 @@ CC_FILE_ERROR readMultiPatch(QDataStream &stream, ccHObject &container, CCVector
 }
 
 void ShpFilter::loadDBF(const QString &filename, ccPointCloud *singlePoints, QMap<ccPolyline *, int32_t> &polyIDs,
-						int32_t maxPolyID, bool hasPolylines, bool hasPoints) const {
+						int32_t maxPolyID, bool hasPolylines, bool hasPoints) const
+{
 	QFileInfo fi(filename);
 	QString baseFileName = fi.path() + QString("/") + fi.completeBaseName();
 	//try to load the DB file (suffix should be ".dbf")
 	QString dbfFilename = baseFileName + QString(".dbf");
 	DBFHandle dbfHandle = DBFOpen(qPrintable(dbfFilename), "rb");
-	if (dbfHandle) {
+	if (dbfHandle)
+	{
 		int fieldCount = DBFGetFieldCount(dbfHandle);
 		int recordCount = DBFGetRecordCount(dbfHandle);
-		if (fieldCount == 0) {
+		if (fieldCount == 0)
+		{
 			ccLog::Warning("[SHP] No field in the associated DBF file!");
-		} else if (hasPolylines && recordCount < static_cast<int>(maxPolyID)) {
+		} else if (hasPolylines && recordCount < static_cast<int>(maxPolyID))
+		{
 			ccLog::Warning("[SHP] No enough records in the associated DBF file!");
-		} else if (hasPoints && recordCount < static_cast<int>(singlePoints->size())) {
+		} else if (hasPoints && recordCount < static_cast<int>(singlePoints->size()))
+		{
 			ccLog::Warning("[SHP] No enough records in the associated DBF file!");
-		} else {
+		} else
+		{
 			QList<FieldIndexAndName> candidateFields;
-			for (int i = 0; i < fieldCount; ++i) {
+			for (int i = 0; i < fieldCount; ++i)
+			{
 				char fieldName[256];
 				DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle, i, fieldName, nullptr, nullptr);
-				if (fieldType == FTDouble || fieldType == FTInteger) {
+				if (fieldType == FTDouble || fieldType == FTInteger)
+				{
 					candidateFields.push_back(FieldIndexAndName(i, QString(fieldName)));
 				}
 			}
 
-			if (!candidateFields.empty()) {
+			if (!candidateFields.empty())
+			{
 				//create a list of available fields
 				ImportDBFFieldDialog lsfDlg(nullptr);
-				for (auto it = candidateFields.begin(); it != candidateFields.end(); ++it) {
-					lsfDlg.listWidget->addItem(it->second);
+				for (auto &candidateField : candidateFields)
+				{
+					lsfDlg.listWidget->addItem(candidateField.second);
 				}
 				lsfDlg.scaleDoubleSpinBox->setValue(s_dbfFieldImportScale);
 				lsfDlg.okPushButton->setVisible(false);
 
 
-				if (lsfDlg.exec()) {
+				if (lsfDlg.exec())
+				{
 					s_dbfFieldImportScale = lsfDlg.scaleDoubleSpinBox->value();
 
 					//look for the selected index
 					int index = -1;
-					for (int i = 0; i < candidateFields.size(); ++i) {
-						if (lsfDlg.listWidget->isItemSelected(lsfDlg.listWidget->item(i))) {
+					for (int i = 0; i < candidateFields.size(); ++i)
+					{
+						if (lsfDlg.listWidget->isItemSelected(lsfDlg.listWidget->item(i)))
+						{
 							index = candidateFields[i].first;
 							break;
 						}
 					}
 
-					if (index >= 0) {
+					if (index >= 0)
+					{
 						double scale = s_dbfFieldImportScale;
 						//read values
 						DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle, index, nullptr, nullptr, nullptr);
 
-						if (hasPolylines) {
+						if (hasPolylines)
+						{
 							//for each poyline
-							for (auto it = polyIDs.begin(); it != polyIDs.end(); ++it) {
+							for (auto it = polyIDs.begin(); it != polyIDs.end(); ++it)
+							{
 								//get the height
 								double z;
 								if (fieldType == FTDouble)
@@ -1772,7 +1899,8 @@ void ShpFilter::loadDBF(const QString &filename, ccPointCloud *singlePoints, QMa
 								ccGLMatrix trans;
 								trans.setTranslation(T);
 								ccPolyline *poly = it.key();
-								if (poly) {
+								if (poly)
+								{
 									poly->applyGLTransformation_recursive(&trans);
 									//this transformation is of no interest for the user
 									poly->resetGLTransformationHistory_recursive();
@@ -1780,9 +1908,11 @@ void ShpFilter::loadDBF(const QString &filename, ccPointCloud *singlePoints, QMa
 									poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(z));
 								}
 							}
-						} else if (hasPoints) {
+						} else if (hasPoints)
+						{
 							//for each point
-							for (unsigned i = 0; i < singlePoints->size(); ++i) {
+							for (unsigned i = 0; i < singlePoints->size(); ++i)
+							{
 								//get the height
 								double z;
 								if (fieldType == FTDouble)
@@ -1797,23 +1927,25 @@ void ShpFilter::loadDBF(const QString &filename, ccPointCloud *singlePoints, QMa
 										i))->z = static_cast<PointCoordinateType >(z);
 							}
 							singlePoints->invalidateBoundingBox();
-						} else {
+						} else
+						{
 							assert(false);
 						}
 					}
 				}
-			} else {
+			} else
+			{
 				ccLog::Warning("[SHP] No numerical field in the associated DBF file!");
 			}
 		}
-	}
-	else
+	} else
 	{
 		ccLog::Warning(QString("[SHP] Failed to load associated DBF file ('%1')").arg(dbfFilename));
 	}
 }
 
-CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container, LoadParameters &parameters) {
+CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container, LoadParameters &parameters)
+{
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly))
 		return CC_FERR_READING;
@@ -1825,20 +1957,23 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 	ShapeFileHeader hdr;
 
 	CC_FILE_ERROR err = readHeaderInto(stream, hdr);
-	if (err != CC_FERR_NO_ERROR) {
+	if (err != CC_FERR_NO_ERROR)
+	{
 		return err;
 	}
 
 	CCVector3d pShift(0, 0, 0);
 	bool preserveCoordinateShift = true;
-	if (HandleGlobalShift(hdr.pointMin, pShift, preserveCoordinateShift, parameters)) {
+	if (HandleGlobalShift(hdr.pointMin, pShift, preserveCoordinateShift, parameters))
+	{
 		ccLog::Warning("[SHP] Entities will be recentered! Translation: (%.2f ; %.2f ; %.2f)", pShift.x, pShift.y,
 					   pShift.z);
 	}
 
 	//progress bar
 	QScopedPointer<ccProgressDialog> pDlg(nullptr);
-	if (parameters.parentWidget) {
+	if (parameters.parentWidget)
+	{
 		qint64 fileSize = file.size();
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
 		pDlg->setMaximum(static_cast<int>(fileSize));
@@ -1854,8 +1989,10 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 	QMap<ccPolyline *, int32_t> polyIDs;
 	int32_t maxPolyID = 0;
 	int32_t maxPointID = 0;
-	while (hdr.fileLength - stream.device()->pos() > 0) {
-		if (stream.status() != QDataStream::Status::Ok) {
+	while (hdr.fileLength - stream.device()->pos() > 0)
+	{
+		if (stream.status() != QDataStream::Status::Ok)
+		{
 			error = CC_FERR_MALFORMED_FILE;
 			break;
 		}
@@ -1870,14 +2007,16 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 
 		if (!isValidESRIShapeCode(shapeTypeInt))
 		{
-			ccLog::Warning(QString("[SHP] Shape %1 does not have a valid type (%2)").arg(recordNumber).arg(shapeTypeInt));
+			ccLog::Warning(
+					QString("[SHP] Shape %1 does not have a valid type (%2)").arg(recordNumber).arg(shapeTypeInt));
 			stream.skipRawData((recordSize) - sizeof(shapeTypeInt));
 			continue;
 		}
 		auto shapeType = static_cast<ESRI_SHAPE_TYPE >(shapeTypeInt);
 		ccLog::Print(QString("[SHP] Record #%1 - type: %2").arg(recordNumber).arg(toString(shapeType)));
 
-		switch (shapeType) {
+		switch (shapeType)
+		{
 			case ESRI_SHAPE_TYPE::POLYGON_M:
 			case ESRI_SHAPE_TYPE::POLYGON_Z:
 			case ESRI_SHAPE_TYPE::POLYGON:
@@ -1891,10 +2030,12 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 			{
 				unsigned childCountBefore = container.getChildrenNumber();
 				error = loadPolyline(stream, container, recordNumber, shapeType, pShift, preserveCoordinateShift);
-				if (error == CC_FERR_NO_ERROR) {
+				if (error == CC_FERR_NO_ERROR)
+				{
 					unsigned childCountAfter = container.getChildrenNumber();
 					//warning: we can load mutliple polylines for a single record!
-					for (unsigned i = childCountBefore; i < childCountAfter; ++i) {
+					for (unsigned i = childCountBefore; i < childCountAfter; ++i)
+					{
 						ccHObject *child = container.getChild(i);
 						polyIDs[static_cast<ccPolyline *>(child)] = recordNumber;
 						maxPolyID = std::max(recordNumber, maxPolyID);
@@ -1913,9 +2054,11 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 			case ESRI_SHAPE_TYPE::POINT_M:
 			case ESRI_SHAPE_TYPE::SHP_POINT:
 			{
-				if (!singlePoints) {
+				if (!singlePoints)
+				{
 					singlePoints = new ccPointCloud("Points");
-					if (preserveCoordinateShift) {
+					if (preserveCoordinateShift)
+					{
 						singlePoints->setGlobalShift(pShift);
 					}
 				}
@@ -1935,13 +2078,16 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 		}
 
 
-		if (error != CC_FERR_NO_ERROR) {
+		if (error != CC_FERR_NO_ERROR)
+		{
 			return error;
 		}
 
-		if (pDlg) {
+		if (pDlg)
+		{
 			pDlg->setValue(static_cast<int>(stream.device()->pos()));
-			if (pDlg->wasCanceled()) {
+			if (pDlg->wasCanceled())
+			{
 				error = CC_FERR_CANCELED_BY_USER;
 				break;
 			}
@@ -1950,7 +2096,8 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 		qint64 newPos = stream.device()->pos();
 		if (recordSize != newPos - recordStart)
 		{
-			ccLog::Error(QString("Expected to read: %1 bytes, actually read: %2 bytes").arg(recordSize).arg(newPos - recordStart));
+			ccLog::Error(QString("Expected to read: %1 bytes, actually read: %2 bytes").arg(recordSize).arg(
+					newPos - recordStart));
 			return CC_FERR_READING;
 		}
 	}
@@ -1965,12 +2112,16 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 		loadDBF(filename, singlePoints, polyIDs, maxPolyID, hasPolylines, hasPoints);
 	}
 
-	if (singlePoints) {
-		if (singlePoints->size() == 0) {
+	if (singlePoints)
+	{
+		if (singlePoints->size() == 0)
+		{
 			delete singlePoints;
-		} else {
+		} else
+		{
 			CCLib::ScalarField *sf = singlePoints->getScalarField(0);
-			if (sf) {
+			if (sf)
+			{
 				sf->computeMinAndMax();
 				singlePoints->showSF(true);
 			}
@@ -1980,7 +2131,6 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 
 	return error;
 }
-
 
 
 #endif //CC_SHP_SUPPORT

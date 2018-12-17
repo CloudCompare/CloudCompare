@@ -105,7 +105,11 @@ public:
 	bool are3DPolySavedAs2D() const { return m_save3DPolyAs2D; }
 
 	int verticalDim() const { return m_verticalDim; }
-	void setVerticalDim(int dim) { m_verticalDim = dim; }; // FIXME proper check ?
+	void setVerticalDim(int dim) {
+		if (dim < 0 || dim > 2)
+			throw std::invalid_argument("Vertival dim index must be in range [0,2]");
+		m_verticalDim = dim;
+	};
 
 	void save3DPolyHeightInDBF(bool state) { m_save3DPolyHeightInDBF = state; };
 	bool shouldSave3DPolyHeightInDBF() const { return m_save3DPolyHeightInDBF; }

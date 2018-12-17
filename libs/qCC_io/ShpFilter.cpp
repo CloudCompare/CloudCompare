@@ -895,7 +895,6 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	int poly2DVertDim = 2;
 	if (toSave.front()->getClassID() == CC_TYPES::POLY_LINE)
 	{
 		if (parameters.alwaysDisplaySaveDialog)
@@ -912,9 +911,6 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 			save3DPolyAs2D(ssfDlg.save3DPolyAs2DCheckBox->isChecked());
 			setVerticalDim(ssfDlg.dimComboBox->currentIndex());
 			save3DPolyHeightInDBF(ssfDlg.save3DPolyHeightInDBFCheckBox->isChecked());
-
-			if (poly2DVertDim >= 3 || poly2DVertDim < 0)
-				throw std::runtime_error("Invalid vertical dimension");
 		}
 
 		if (!haveSameCorrespondingEsriType(toSave, m_closedPolylinesAsPolygons, are3DPolySavedAs2D()))
@@ -956,8 +952,6 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 		ccLog::Error("Entity(ies) has(ve) an invalid bounding box?!");
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
-
-	const auto Z = static_cast<unsigned char>(poly2DVertDim);
 
 	ccLog::Print("[SHP] Output type: " + toString(outputShapeType));
 
@@ -1021,7 +1015,7 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 			case ESRI_SHAPE_TYPE::POLYLINE_Z:
 			{
 				auto *polyLine = static_cast<ccPolyline *>(child);
-				error = savePolyline(polyLine, shpStream, recordNumber, outputShapeType, poly2DVertDim);
+				error = savePolyline(polyLine, shpStream, recordNumber, outputShapeType, verticalDim());
 				break;
 			}
 			case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
@@ -1065,7 +1059,12 @@ ShpFilter::saveToFile(ccHObject *entity, const std::vector<GenericDBFField *> &f
 
 	//eventually, we create the DB file (suffix should be ".dbf")
 	QString dbfFilename = baseFileName + QString(".dbf");
-	CC_FILE_ERROR result = writeDBF(fields, toSave, shouldSave3DPolyHeightInDBF(), Z, dbfFilename);
+	CC_FILE_ERROR result = writeDBF(
+			fields,
+			toSave,
+			shouldSave3DPolyHeightInDBF(),
+			static_cast<unsigned char>(verticalDim()),
+			dbfFilename);
 
 	return result;
 }

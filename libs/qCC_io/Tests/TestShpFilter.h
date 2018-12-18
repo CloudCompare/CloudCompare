@@ -15,41 +15,58 @@
 #define POLYGONZ_FILE ":/TestFiles/Data/shp/polygon_z.shp"
 #define POINTZ_FILE ":/TestFiles/Data/shp/point_z.shp"
 
-class TestShpFilter: public QObject
+class TestShpFilter : public QObject
 {
-    Q_OBJECT
+Q_OBJECT
 private slots:
+
 	/*
 	 * Tests were we check the functions that tells us if the
 	 * CC Object in a container have the same type (as ShapeFiles do not
 	 * allow mixing shape types)
-	 */
-    void doesNotHaveSameType() const;
-    void haveSameTypeOnEmpty() const;
-    void haveSameTypeOnManyMeshes() const;
-    void haveSameTypeOnManyClouds() const;
-
-    /*
-     * Tests were we check that the mapping from CC Type to ESRI Shape Type
-     * is as expected
      */
-    void esriTypeOf3DPolyLineDefaults() const;
-    void esriTypeOf3DPolyLineSave2D() const;
-    void esriTypeOf3DClosedPolyLineDefaults() const;
-    void esriTypeOf3DClosedPolyLineSave2D() const;
-    void esriTypeOf3DClosedPolylineSaveAsPolyline() const;
-    void esriTypeOf3DClosedPolylineSaveAs2DPolyline() const;
+	void doesNotHaveSameType() const;
 
-    /* Reading tests */
-    void readPolylineFile(const QString& filePath = LINE_FILE) const;
-	void readPolylineMFile(const QString& filePath = LINEM_FILE) const;
-	void readPolylineZFile(const QString& filePath = LINEZ_FILE) const;
-	void readMultiPointFile(const QString& filePath = MULTIPOINT_FILE) const;
-	void readMultiPointZFile(const QString& filePath = MULTIPOINT_Z) const;
-	void readMultipatchFile(const QString& filePath = MULTIPATCH_FILE) const;
-	void readPolygonFile(const QString& filePath = POLYGON_FILE) const;
-	void readPolygonZFile(const QString& filePath = POLYGONZ_FILE) const;
-	void readSinglePointZFile(const QString filePath = POINTZ_FILE) const;
+	void haveSameTypeOnEmpty() const;
+
+	void haveSameTypeOnManyMeshes() const;
+
+	void haveSameTypeOnManyClouds() const;
+
+	/*
+	 * Tests were we check that the mapping from CC Type to ESRI Shape Type
+	 * is as expected
+	 */
+	void esriTypeOf3DPolyLineDefaults() const;
+
+	void esriTypeOf3DPolyLineSave2D() const;
+
+	void esriTypeOf3DClosedPolyLineDefaults() const;
+
+	void esriTypeOf3DClosedPolyLineSave2D() const;
+
+	void esriTypeOf3DClosedPolylineSaveAsPolyline() const;
+
+	void esriTypeOf3DClosedPolylineSaveAs2DPolyline() const;
+
+	/* Reading tests */
+	void readPolylineFile(const QString &filePath = LINE_FILE) const;
+
+	void readPolylineMFile(const QString &filePath = LINEM_FILE) const;
+
+	void readPolylineZFile(const QString &filePath = LINEZ_FILE) const;
+
+	void readMultiPointFile(const QString &filePath = MULTIPOINT_FILE) const;
+
+	void readMultiPointZFile(const QString &filePath = MULTIPOINT_Z) const;
+
+	void readMultipatchFile(const QString &filePath = MULTIPATCH_FILE) const;
+
+	void readPolygonFile(const QString &filePath = POLYGON_FILE) const;
+
+	void readPolygonZFile(const QString &filePath = POLYGONZ_FILE) const;
+
+	void readSinglePointZFile(const QString &filePath = POINTZ_FILE) const;
 
 	/*
 	 * Writing Tests, these tests do a cycle:
@@ -58,12 +75,19 @@ private slots:
 	 * 3) use its corresponding read test (functions above) to check the result of the writer
 	 */
 	void testWritePolyline() const;
+
 	void testWritePolylineM() const;
+
 	void testWritePolylineZ() const;
+
 	void testWriteMultiPointFile() const;
+
 	void testWriteMultiPointZFile() const;
+
 	void testWriteMultpatchFile() const;
+
 	void testWritePolygonFile() const;
+
 	void testWritePolygonZFile() const;
 };
 

@@ -1,13 +1,22 @@
 find_package(Qt5Test REQUIRED)
 
 
-QT5_ADD_RESOURCES( TestDataResources_SRCS TestData.qrc )
+QT5_ADD_RESOURCES(TestDataResources_SRCS TestData.qrc)
 
-SET(CMAKE_WIN32_EXECUTABLE False)
-set(TEST_LIBRARIES Qt5::Test Qt5::Core Qt5::WinMain CC_CORE_LIB QCC_DB_LIB QCC_IO_LIB)
+set(TEST_LIBRARIES Qt5::Test Qt5::Core CC_CORE_LIB QCC_DB_LIB QCC_IO_LIB)
 
-SET(TestShpFilter_SRC TestShpFilter.cpp)
-ADD_EXECUTABLE(TestShpFilter ${TestShpFilter_SRC} ${TestDataResources_SRCS})
-TARGET_LINK_LIBRARIES(TestShpFilter ${TEST_LIBRARIES})
-ADD_TEST(NAME TestShpFilter COMMAND TestShpFilter)
+if (WIN_32)
+    SET(CMAKE_WIN32_EXECUTABLE False)
+    set(TEST_LIBRARIES ${TEST_LIBRARIES} Qt5::WinMain)
+endif ()
+
+if (OPTION_USE_SHAPE_LIB)
+    message("Use hapefils")
+    SET(TestShpFilter_SRC TestShpFilter.cpp)
+    ADD_EXECUTABLE(TestShpFilter ${TestShpFilter_SRC} ${TestDataResources_SRCS})
+    TARGET_LINK_LIBRARIES(TestShpFilter ${TEST_LIBRARIES})
+    ADD_TEST(NAME TestShpFilter COMMAND TestShpFilter)
+endif ()
+
+
 

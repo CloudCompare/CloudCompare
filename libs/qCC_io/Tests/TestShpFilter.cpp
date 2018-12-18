@@ -498,7 +498,7 @@ void TestShpFilter::testWriteMultpatchFile() const
 
 	error = filter.saveToFile(&container, tmpMultipatch, saveParams);
 	QVERIFY(error == CC_FERR_NO_ERROR);
-	//readMultipatchFile(tmpMultipatch);
+	readMultipatchFile(tmpMultipatch);
 }
 
 void TestShpFilter::testWriteMultiPointFile() const

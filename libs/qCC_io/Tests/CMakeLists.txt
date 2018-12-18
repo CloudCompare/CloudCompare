@@ -11,7 +11,6 @@ if (WIN_32)
 endif ()
 
 if (OPTION_USE_SHAPE_LIB)
-    message("Use hapefils")
     SET(TestShpFilter_SRC TestShpFilter.cpp)
     ADD_EXECUTABLE(TestShpFilter ${TestShpFilter_SRC} ${TestDataResources_SRCS})
     TARGET_LINK_LIBRARIES(TestShpFilter ${TEST_LIBRARIES})

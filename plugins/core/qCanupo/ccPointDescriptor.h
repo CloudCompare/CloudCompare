@@ -61,7 +61,8 @@ public:
 	static ScaleParamsComputer* GetByIndex(unsigned index);
 
 public:
-
+	virtual ~ScaleParamsComputer() = default;
+	
 	//! Returns the associated descriptor ID
 	virtual unsigned getID() const = 0;
 

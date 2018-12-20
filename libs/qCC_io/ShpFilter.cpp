@@ -177,7 +177,7 @@ class SaveSHPFileDialog : public QDialog, public Ui::SaveSHPFileDlg
 {
 public:
 	//! Default constructor
-	explicit SaveSHPFileDialog(QWidget* parent = 0)
+	explicit SaveSHPFileDialog(QWidget* parent = nullptr)
 		: QDialog(parent)
 		, Ui::SaveSHPFileDlg()
 	{
@@ -190,7 +190,7 @@ class ImportDBFFieldDialog : public QDialog, public Ui::ImportDBFFieldDlg
 {
 public:
 	//! Default constructor
-	explicit ImportDBFFieldDialog(QWidget* parent = 0)
+	explicit ImportDBFFieldDialog(QWidget* parent = nullptr)
 		: QDialog(parent)
 		, Ui::ImportDBFFieldDlg()
 	{
@@ -859,7 +859,7 @@ CC_FILE_ERROR LoadCloud(QFile& file,
 	if (hasMeasurements(shapeType))
 	{
 		//M boundaries
-		ccScalarField* sf = 0;
+		ccScalarField* sf = nullptr;
 		{
 			file.read(header, 16);
 			double mMin = qFromLittleEndianD(*reinterpret_cast<double*>(header));
@@ -1065,7 +1065,7 @@ CC_FILE_ERROR LoadSinglePoint(	QFile& file,
 		if (singlePoints->size() == 0)
 		{
 			delete singlePoints;
-			singlePoints = 0;
+			singlePoints = nullptr;
 		}
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
@@ -1180,7 +1180,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	if (parameters.alwaysDisplaySaveDialog && inputShapeType == ESRI_SHAPE_TYPE::POLYLINE_Z)
 	{
 		//display SHP save dialog
-		SaveSHPFileDialog ssfDlg(0);
+		SaveSHPFileDialog ssfDlg(nullptr);
 		ssfDlg.save3DPolyAs2DCheckBox->setChecked(s_save3DPolysAs2D);
 		ssfDlg.save3DPolyHeightInDBFCheckBox->setChecked(s_save3DPolyHeightInDBF);
 		ssfDlg.dimComboBox->setCurrentIndex(s_poly2DVertDim);
@@ -1627,7 +1627,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	//progress bar
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	qint64 fileSize = file.size();
 	if (parameters.parentWidget)
 	{
@@ -1641,7 +1641,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 
 	//load shapes
 	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
-	ccPointCloud* singlePoints = 0;
+	ccPointCloud* singlePoints = nullptr;
 	qint64 pos = file.pos();
 	//we also keep track of the polylines 'record number' (if any)
 	QMap<ccPolyline*, int32_t> polyIDs;
@@ -1794,7 +1794,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 				for (int i = 0; i < fieldCount; ++i)
 				{
 					char fieldName[256];
-					DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle, i, fieldName, 0, 0);
+					DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle, i, fieldName, nullptr, nullptr);
 					if (fieldType == FTDouble || fieldType == FTInteger)
 					{
 						candidateFields.push_back(FieldIndexAndName(i, QString(fieldName)));
@@ -1804,7 +1804,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 				if (!candidateFields.empty())
 				{
 					//create a list of available fields
-					ImportDBFFieldDialog lsfDlg(0);
+					ImportDBFFieldDialog lsfDlg(nullptr);
 					for (QList<FieldIndexAndName>::const_iterator it = candidateFields.begin(); it != candidateFields.end(); ++it)
 					{
 						lsfDlg.listWidget->addItem(it->second);
@@ -1832,7 +1832,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 						{
 							double scale = s_dbfFielImportScale;
 							//read values
-							DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle, index, 0, 0, 0);
+							DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle, index, nullptr, nullptr, nullptr);
 
 							if (hasPolylines)
 							{
@@ -1904,7 +1904,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 		if (singlePoints->size() == 0)
 		{
 			delete singlePoints;
-			singlePoints = 0;
+			singlePoints = nullptr;
 		}
 		else
 		{

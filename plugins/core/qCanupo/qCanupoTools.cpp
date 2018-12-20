@@ -21,26 +21,25 @@
 #include "trainer.h"
 
 //CCLib
-#include <Neighbourhood.h>
 #include <DistanceComputationTools.h>
+#include <Neighbourhood.h>
 #include <ParallelSort.h>
 
 //qCC_db
 #include <ccGenericPointCloud.h>
-#include <ccPointCloud.h>
-#include <ccScalarField.h>
-#include <ccProgressDialog.h>
 #include <ccOctree.h>
+#include <ccPointCloud.h>
+#include <ccProgressDialog.h>
+#include <ccScalarField.h>
 
 //qCC_plugins
 #include "../../ccMainAppInterface.h"
 
 //Qt
-#include <QtCore>
-#include <QComboBox>
 #include <QApplication>
-#include <QProgressDialog>
+#include <QComboBox>
 #include <QMainWindow>
+#include <QProgressDialog>
 #include <QtConcurrentMap>
 
 //ComputeCorePointsDescriptors parameters
@@ -121,7 +120,7 @@ void ComputeCorePointDescriptor(unsigned index)
 			{
 				//trim the points that don't fall in the current neighborhood
 				double squareRadius = radius*radius;
-				CCLib::DgmOctree::PointDescriptor fakeDesc(0,0,squareRadius);
+				CCLib::DgmOctree::PointDescriptor fakeDesc(nullptr,0,squareRadius);
 				CCLib::DgmOctree::NeighboursSet::iterator up = std::upper_bound(neighbours.begin(),neighbours.end(),fakeDesc,CCLib::DgmOctree::PointDescriptor::distComp);
 				if (up != neighbours.end())
 				{
@@ -306,7 +305,7 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCLib::GenericIndexedCloud* core
 	s_computeCorePointsDescParams.sourceCloud = sourceCloud;
 	s_computeCorePointsDescParams.octree = theOctree;
 	s_computeCorePointsDescParams.octreeLevel = octreeLevel;
-	s_computeCorePointsDescParams.nProgress = progressCb ? &nProgress : 0;
+	s_computeCorePointsDescParams.nProgress = progressCb ? &nProgress : nullptr;
 	s_computeCorePointsDescParams.processCanceled = false;
 	s_computeCorePointsDescParams.errorOccurred = false;
 	s_computeCorePointsDescParams.invalidDescriptors = false;
@@ -366,16 +365,16 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCLib::GenericIndexedCloud* core
 	invalidDescriptors = s_computeCorePointsDescParams.invalidDescriptors;
 
 	//reset static parameters (just to be clean ;)
-	s_computeCorePointsDescParams.corePoints = 0;
-	s_computeCorePointsDescParams.descriptors = 0;
-	s_computeCorePointsDescParams.sourceCloud = 0;
-	s_computeCorePointsDescParams.octree = 0;
+	s_computeCorePointsDescParams.corePoints = nullptr;
+	s_computeCorePointsDescParams.descriptors = nullptr;
+	s_computeCorePointsDescParams.sourceCloud = nullptr;
+	s_computeCorePointsDescParams.octree = nullptr;
 	s_computeCorePointsDescParams.octreeLevel = 0;
-	s_computeCorePointsDescParams.nProgress = 0;
+	s_computeCorePointsDescParams.nProgress = nullptr;
 	s_computeCorePointsDescParams.processCanceled = false;
 	s_computeCorePointsDescParams.errorOccurred = false;
 	s_computeCorePointsDescParams.invalidDescriptors = false;
-	s_computeCorePointsDescParams.computer = 0;
+	s_computeCorePointsDescParams.computer = nullptr;
 
 	if (progressCb)
 	{
@@ -439,7 +438,7 @@ ccPointCloud* qCanupoTools::GetCloudFromCombo(QComboBox* comboBox, ccHObject* db
 	if (!comboBox || !dbRoot)
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	//return the cloud currently selected in the combox box
@@ -447,14 +446,14 @@ ccPointCloud* qCanupoTools::GetCloudFromCombo(QComboBox* comboBox, ccHObject* db
 	if (index < 0)
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 	unsigned uniqueID = comboBox->itemData(index).toUInt();
 	ccHObject* item = dbRoot->find(uniqueID);
 	if (!item || !item->isA(CC_TYPES::POINT_CLOUD))
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 	return static_cast<ccPointCloud*>(item);
 }
@@ -607,7 +606,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 	}
 
 	//Computing the two best projection directions
-	QMainWindow* parentWindow = (app ? app->getMainWindow() : 0);
+	QMainWindow* parentWindow = (app ? app->getMainWindow() : nullptr);
 	LDATrainer trainer;
 	{
 		QProgressDialog tempProgressDlg("LDA (step #1) in progress... please wait...",QString(),0,0,parentWindow);
@@ -832,7 +831,6 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 		{
 			if (app)
 				app->dispToConsole("Not enough memory to display colors!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			bool hasColors = false;
 		}
 		else
 		{
@@ -845,7 +843,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 			LDATrainer::sample_type sample;
 			sample.set_size(fdim);
 
-			const CorePointDesc* desc = 0;
+			const CorePointDesc* desc = nullptr;
 			const ccColor::Rgb* col = &ccColor::lightGrey;
 
 			if (i < nsamples1)

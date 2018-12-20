@@ -77,6 +77,23 @@ v2.10.alpha - XX/XX/201X
 		- Remove all scan grids
 			* '-REMOVE_SCAN_GRIDS'
 		- New sub-option of 'SAVE_CLOUDS' to set the output filename(s) (e.g. -SAVE_CLOUDS FILE "cloud1.bin cloud2.bin ..."
+		- New options for the 'OCTREE_NORMALS' (thanks to Michael Barnes):
+			* '-ORIENT' to specify a default orientation hint:
+				- PLUS_ZERO
+				- MINUS_ZERO
+				- PLUS_BARYCENTER
+				- MINUS_BARYCENTER
+				- PLUS_X
+				- MINUS_X
+				- PLUS_Y
+				- MINUS_Y
+				- PLUS_Z
+				- MINUS_Z
+				- PREVIOUS
+			* '-MODEL' to specify the local model;
+				- LS
+				- TRI
+				- QUADRIC
 
 	* Unroll tool:
 		- the cylindrical unrolling can be performed inside an arbitrary angular range (between -3600 and +3600 degrees)

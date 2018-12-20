@@ -51,8 +51,19 @@
 #include <string.h>
 #include <array>
 
+
+using FieldIndexAndName = QPair<int, QString>;
+
 //Specific value for NaN
 static const double ESRI_NO_DATA = -1.0e38;
+
+//semi-persistent settings
+static double s_dbfFielImportScale = 1.0;
+
+//semi-persistent parameters
+static bool s_save3DPolysAs2D = false;
+static int  s_poly2DVertDim = 2;
+static bool s_save3DPolyHeightInDBF = false;
 
 //! ESRI Shapefile's shape types
 enum class ESRI_SHAPE_TYPE : int32_t {
@@ -1113,10 +1124,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	return saveToFile(entity, fields, filename, parameters);
 }
 
-//semi-persistent parameters
-static bool s_save3DPolysAs2D = false;
-static int  s_poly2DVertDim = 2;
-static bool s_save3DPolyHeightInDBF = false;
+
 CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity)
@@ -1311,10 +1319,8 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 	//save shapes
 	unsigned shapeIndex = 0;
-	for (unsigned i = 0; i < toSave.size(); ++i)
+	for (ccHObject *child : toSave)
 	{
-		ccHObject* child = toSave[i];
-
 		//check entity eligibility
 		if (child->isA(CC_TYPES::POLY_LINE))
 		{
@@ -1460,9 +1466,9 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 			}
 
 			//and write the other tables (specified by the user)
-			for (std::vector<GenericDBFField*>::const_iterator it = fields.begin(); it != fields.end(); ++it)
+			for (GenericDBFField* field: fields)
 			{
-				const GenericDBFField* field = *it;
+				//const GenericDBFField* field = *it;
 				if (field->is3D()) //3D case
 				{
 					int xFieldIdx = DBFAddField(dbfHandle, qPrintable(field->name() + QString("_x")), field->type(), field->width(), field->decimal());
@@ -1470,7 +1476,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 					int zFieldIdx = DBFAddField(dbfHandle, qPrintable(field->name() + QString("_z")), field->type(), field->width(), field->decimal());
 					if (xFieldIdx >= 0 && yFieldIdx >= 0 && zFieldIdx >= 0)
 					{
-						if (!(*it)->save(dbfHandle, xFieldIdx, yFieldIdx, zFieldIdx))
+						if (!field->save(dbfHandle, xFieldIdx, yFieldIdx, zFieldIdx))
 							xFieldIdx = -1;
 					}
 
@@ -1486,7 +1492,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 					int fieldIdx = DBFAddField(dbfHandle, qPrintable(field->name()), field->type(), field->width(), field->decimal());
 					if (fieldIdx >= 0)
 					{
-						if (!(*it)->save(dbfHandle, fieldIdx))
+						if (!field->save(dbfHandle, fieldIdx))
 							fieldIdx = -1;
 					}
 
@@ -1512,10 +1518,6 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	return result;
 }
 
-typedef QPair<int, QString> FieldIndexAndName;
-
-//semi-persistent settings
-static double s_dbfFielImportScale = 1.0;
 CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	QFile file(filename);

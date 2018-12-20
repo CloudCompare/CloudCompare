@@ -74,6 +74,76 @@ enum class ESRI_SHAPE_TYPE : int32_t {
 	MULTI_PATCH		= 31
 };
 
+//! Returns true if the code corresponds to a valid ESRI Shape Type
+/**
+ * \param code The code to check (typically read from a file)
+**/
+bool isValidESRIShapeCode(int32_t code)
+{
+	if (code < static_cast<int32_t >(ESRI_SHAPE_TYPE::NULL_SHAPE))
+		return false;
+	if (code > static_cast<int32_t >(ESRI_SHAPE_TYPE::MULTI_PATCH))
+		return false;
+
+	switch (static_cast<ESRI_SHAPE_TYPE >(code))
+	{
+		case ESRI_SHAPE_TYPE::NULL_SHAPE:
+		case ESRI_SHAPE_TYPE::POINT:
+		case ESRI_SHAPE_TYPE::POLYLINE:
+		case ESRI_SHAPE_TYPE::POLYGON:
+		case ESRI_SHAPE_TYPE::MULTI_POINT:
+		case ESRI_SHAPE_TYPE::POINT_Z:
+		case ESRI_SHAPE_TYPE::POLYLINE_Z:
+		case ESRI_SHAPE_TYPE::POLYGON_Z:
+		case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
+		case ESRI_SHAPE_TYPE::POINT_M:
+		case ESRI_SHAPE_TYPE::POLYLINE_M:
+		case ESRI_SHAPE_TYPE::POLYGON_M:
+		case ESRI_SHAPE_TYPE::MULTI_POINT_M:
+		case ESRI_SHAPE_TYPE::MULTI_PATCH:
+			return true;
+		default:
+			return false;
+	}
+
+}
+
+
+//! Returns whether the shape type contains the 3rd dimensions Z
+bool isESRIShape3D(ESRI_SHAPE_TYPE shapeType)
+{
+	switch (shapeType)
+	{
+		case ESRI_SHAPE_TYPE::POINT_Z:
+		case ESRI_SHAPE_TYPE::POLYLINE_Z:
+		case ESRI_SHAPE_TYPE::POLYGON_Z:
+		case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
+			return true;
+		default:
+			return false;
+	}
+}
+
+
+//! Returns whether the shape type contains the additional measures dimension
+bool hasMeasurements(ESRI_SHAPE_TYPE shapeType)
+{
+	switch (shapeType)
+	{
+		case ESRI_SHAPE_TYPE::POINT_Z:
+		case ESRI_SHAPE_TYPE::POLYLINE_Z:
+		case ESRI_SHAPE_TYPE::POLYGON_Z:
+		case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
+		case ESRI_SHAPE_TYPE::POINT_M:
+		case ESRI_SHAPE_TYPE::POLYLINE_M:
+		case ESRI_SHAPE_TYPE::POLYGON_M:
+		case ESRI_SHAPE_TYPE::MULTI_POINT_M:
+			return true;
+		default:
+			return false;
+	}
+}
+
 //DGM: by default qToLittleEndian and qFromLittleEndian only works for integer types!
 double swapD(double in)
 {
@@ -286,7 +356,7 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 CC_FILE_ERROR LoadPolyline(	QFile& file,
 							ccHObject& container,
 							int32_t index,
-							ESRI_SHAPE_TYPE shapeTypeInt,
+							ESRI_SHAPE_TYPE shapeType,
 							const CCVector3d& Pshift,
 							bool preserveCoordinateShift,
 							bool load2DPolyAs3DPoly = true)
@@ -360,7 +430,7 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 	}
 
 	//3D polylines
-	bool is3D = (shapeTypeInt > SHP_POINT_Z && shapeTypeInt < SHP_POINT_M);
+	bool is3D = isESRIShape3D(shapeType);
 	if (is3D)
 	{
 		//Z boundaries
@@ -387,7 +457,7 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 
 	//3D polylines or 2D polylines + measurement
 	std::vector<ScalarType> scalarValues;
-	if (shapeType > ESRI_SHAPE_TYPE::POINT_Z)
+	if (hasMeasurements(shapeType))
 	{
 		//M boundaries
 		{
@@ -716,7 +786,7 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 CC_FILE_ERROR LoadCloud(QFile& file,
 						ccHObject& container,
 						int32_t index,
-						ESRI_SHAPE_TYPE shapeTypeInt,
+						ESRI_SHAPE_TYPE shapeType,
 						const CCVector3d& Pshift,
 						bool preserveCoordinateShift)
 {
@@ -762,7 +832,7 @@ CC_FILE_ERROR LoadCloud(QFile& file,
 	}
 
 	//3D clouds
-	if (shapeTypeInt == ESRI_SHAPE_TYPE::MULTI_POINT_Z)
+	if (isESRIShape3D(shapeType))
 	{
 		//Z boundaries
 		{
@@ -786,8 +856,7 @@ CC_FILE_ERROR LoadCloud(QFile& file,
 	}
 
 	//3D clouds or 2D clouds + measurement
-	if (shapeTypeInt == ESRI_SHAPE_TYPE::MULTI_POINT_Z
-		|| shapeTypeInt == ESRI_SHAPE_TYPE::MULTI_POINT_M)
+	if (hasMeasurements(shapeType))
 	{
 		//M boundaries
 		ccScalarField* sf = 0;
@@ -959,7 +1028,7 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 
 CC_FILE_ERROR LoadSinglePoint(	QFile& file,
 								ccPointCloud* &singlePoints,
-								ESRI_SHAPE_TYPE shapeTypeInt,
+								ESRI_SHAPE_TYPE shapeType,
 								const CCVector3d& Pshift,
 								bool preserveCoordinateShift)
 {
@@ -973,7 +1042,7 @@ CC_FILE_ERROR LoadSinglePoint(	QFile& file,
 				0);
 
 	//3D point
-	if (shapeTypeInt == ESRI_SHAPE_TYPE::POINT_Z)
+	if (isESRIShape3D(shapeType))
 	{
 		//Z coordinate
 		{
@@ -1002,8 +1071,7 @@ CC_FILE_ERROR LoadSinglePoint(	QFile& file,
 	}
 
 	ScalarType s = NAN_VALUE;
-	if (	shapeTypeInt == ESRI_SHAPE_TYPE::POINT_Z
-		||	shapeTypeInt == ESRI_SHAPE_TYPE::POINT_M)
+	if (hasMeasurements(shapeType))
 	{
 		//Measure
 		{
@@ -1214,8 +1282,8 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 		//Z bounaries
 		//Unused, with value 0.0, if not Measured or Z type
-		double zMin = outputShapeType < ESRI_SHAPE_TYPE::POINT_Z ? 0.0 : qToLittleEndianD(bbMinCorner.u[Z]);
-		double zMax = outputShapeType < ESRI_SHAPE_TYPE::POINT_Z ? 0.0 : qToLittleEndianD(bbMaxCorner.u[Z]);
+		double zMin = isESRIShape3D(outputShapeType) ? 0.0 : qToLittleEndianD(bbMinCorner.u[Z]);
+		double zMax = isESRIShape3D(outputShapeType) ? 0.0 : qToLittleEndianD(bbMaxCorner.u[Z]);
 		//Byte 68: box Z min
 		memcpy(_header, (const char*)&zMin, 8);
 		_header += 8;
@@ -1495,6 +1563,11 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 		int32_t shapeTypeInt = qFromLittleEndian<int32_t>(*reinterpret_cast<const int32_t*>(_header));
 		_header += 4;
 
+		if (!isValidESRIShapeCode(shapeTypeInt))
+		{
+			ccLog::Warning("[SHP] Invalid shape type code: %d", shapeTypeInt);
+			return CC_FERR_MALFORMED_FILE;
+		}
 		ccLog::Print(QString("[SHP] Version: %1 - type: %2").arg(version).arg(ToString(static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt))));
 
 		//X and Y bounaries
@@ -1610,7 +1683,12 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			recordSize -= 4;
 			int32_t shapeTypeInt = qToLittleEndian<int32_t>(*reinterpret_cast<const int32_t*>(header));
 			ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt))).arg(recordSize));
-			auto shapeType = static_cast<ESRI_SHAPE_TYPE >(shapeTypeInt); //TODO CHECK
+			if (!isValidESRIShapeCode(shapeTypeInt))
+			{
+				ccLog::Warning("[SHP] Invalid shape type code: %d", shapeTypeInt);
+				return CC_FERR_MALFORMED_FILE;
+			}
+			auto shapeType = static_cast<ESRI_SHAPE_TYPE >(shapeTypeInt);
 			switch (shapeType)
 			{
 			case ESRI_SHAPE_TYPE::POLYLINE_Z:

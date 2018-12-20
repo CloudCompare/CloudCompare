@@ -55,22 +55,23 @@
 static const double ESRI_NO_DATA = -1.0e38;
 
 //! ESRI Shapefile's shape types
-enum ESRI_SHAPE_TYPE {	SHP_NULL_SHAPE		= 0 ,
-						//below this point are 2D types
-						SHP_POINT			= 1	,
-						SHP_POLYLINE		= 3 ,
-						SHP_POLYGON			= 5 ,
-						SHP_MULTI_POINT		= 8 ,
-						//below this point are 3D types
-						SHP_POINT_Z			= 11,
-						SHP_POLYLINE_Z		= 13,
-						SHP_POLYGON_Z		= 15,
-						SHP_MULTI_POINT_Z	= 18,
-						SHP_POINT_M			= 21,
-						SHP_POLYLINE_M		= 23,
-						SHP_POLYGON_M		= 25,
-						SHP_MULTI_POINT_M	= 28,
-						SHP_MULTI_PATCH		= 31
+enum class ESRI_SHAPE_TYPE : int32_t {
+	NULL_SHAPE		= 0,
+	//below this point are 2D types
+	POINT			= 1,
+	POLYLINE		= 3,
+	POLYGON			= 5,
+	MULTI_POINT		= 8,
+	//below this point are 3D types
+	POINT_Z			= 11,
+	POLYLINE_Z		= 13,
+	POLYGON_Z		= 15,
+	MULTI_POINT_Z	= 18,
+	POINT_M			= 21,
+	POLYLINE_M		= 23,
+	POLYGON_M		= 25,
+	MULTI_POINT_M	= 28,
+	MULTI_PATCH		= 31
 };
 
 //DGM: by default qToLittleEndian and qFromLittleEndian only works for integer types!
@@ -150,37 +151,36 @@ QString ToString(ESRI_SHAPE_TYPE type)
 {
 	switch (type)
 	{
-	case SHP_NULL_SHAPE:
+	case ESRI_SHAPE_TYPE::NULL_SHAPE:
 		return "Unhandled";
-	case SHP_POINT:
+	case ESRI_SHAPE_TYPE::POINT:
 		return "2D point";
-	case SHP_POLYLINE:
+	case ESRI_SHAPE_TYPE::POLYLINE:
 		return "2D polyline";
-	case SHP_POLYGON:
+	case ESRI_SHAPE_TYPE::POLYGON:
 		return "2D polygon";
-	case SHP_MULTI_POINT:
+	case ESRI_SHAPE_TYPE::MULTI_POINT:
 		return "2D point cloud";
-	case SHP_POINT_Z:
+	case ESRI_SHAPE_TYPE::POINT_Z:
 		return "3D point";
-	case SHP_POLYLINE_Z:
+	case ESRI_SHAPE_TYPE::POLYLINE_Z:
 		return "3D polyline";
-	case SHP_POLYGON_Z:
+	case ESRI_SHAPE_TYPE::POLYGON_Z:
 		return "3D polygon";
-	case SHP_MULTI_POINT_Z:
+	case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
 		return "3D point cloud";
-	case SHP_POINT_M:
+	case ESRI_SHAPE_TYPE::POINT_M:
 		return "2D point (+measure)";
-	case SHP_POLYLINE_M:
+	case ESRI_SHAPE_TYPE::POLYLINE_M:
 		return "2D polyline (+measure)";
-	case SHP_POLYGON_M:
+	case ESRI_SHAPE_TYPE::POLYGON_M:
 		return "2D polygon (+measure)";
-	case SHP_MULTI_POINT_M:
+	case ESRI_SHAPE_TYPE::MULTI_POINT_M:
 		return "2D point cloud (+measure)";
-	case SHP_MULTI_PATCH:
+	case ESRI_SHAPE_TYPE::MULTI_PATCH:
 		return "Multi patch";
 	default:
-		assert(false);
-		break;
+		return "Unknown";
 	}
 
 	return QString("Unknown");
@@ -188,7 +188,7 @@ QString ToString(ESRI_SHAPE_TYPE type)
 
 void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESRI_SHAPE_TYPE& shapeType)
 {
-	shapeType = SHP_NULL_SHAPE;
+	shapeType = ESRI_SHAPE_TYPE::NULL_SHAPE;
 	if (!baseEntity)
 	{
 		assert(false);
@@ -203,7 +203,7 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 		unsigned count = ccHObjectCaster::ToGenericPointCloud(baseEntity)->size();
 		if (count != 0)
 		{
-			shapeType = SHP_MULTI_POINT_Z;
+			shapeType = ESRI_SHAPE_TYPE::MULTI_POINT_Z;
 			shapes.push_back(baseEntity);
 		}
 	}
@@ -215,7 +215,7 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 	//		unsigned count = ccHObjectCaster::ToGenericMesh(baseEntity)->size();
 	//		if (count != 0)
 	//		{
-	//			shapeType = SHP_MULTI_PATCH;
+	//			shapeType = MULTI_PATCH;
 	//			shapes.push_back(baseEntity);
 	//		}
 	//	}
@@ -223,7 +223,7 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 	case CC_TYPES::POLY_LINE:
 	{
 		ccPolyline* poly = static_cast<ccPolyline*>(baseEntity);
-		shapeType = poly->is2DMode() ? SHP_POLYLINE : SHP_POLYLINE_Z;
+		shapeType = poly->is2DMode() ? ESRI_SHAPE_TYPE::POLYLINE : ESRI_SHAPE_TYPE::POLYLINE_Z;
 		shapes.push_back(baseEntity);
 		break;
 	}
@@ -250,14 +250,14 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 
 			//call the same method on the first child so as to get its type
 			GetSupportedShapes(child, shapes, shapeType/*,closedPolylinesAsPolygons*/);
-			if (shapeType == SHP_NULL_SHAPE)
+			if (shapeType == ESRI_SHAPE_TYPE::NULL_SHAPE)
 				return;
 
 			//then add the remaining children
 			{
 				for (unsigned i = 1; i < baseEntity->getChildrenNumber(); ++i)
 				{
-					ESRI_SHAPE_TYPE otherShapeType = SHP_NULL_SHAPE;
+					ESRI_SHAPE_TYPE otherShapeType = ESRI_SHAPE_TYPE::NULL_SHAPE;
 					ccHObject* child = baseEntity->getChild(i);
 					if (child)
 						GetSupportedShapes(child, shapes, otherShapeType);
@@ -387,7 +387,7 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 
 	//3D polylines or 2D polylines + measurement
 	std::vector<ScalarType> scalarValues;
-	if (shapeTypeInt > SHP_POINT_Z)
+	if (shapeType > ESRI_SHAPE_TYPE::POINT_Z)
 	{
 		//M boundaries
 		{
@@ -538,7 +538,7 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	//Shape Type
 	{
 		//Byte 0: Shape Type
-		int32_t shapeTypeInt = qToLittleEndian<int32_t>(outputShapeType);
+		int32_t shapeTypeInt = qToLittleEndian<int32_t>(static_cast<int32_t >(outputShapeType));
 		file.write((const char*)&shapeTypeInt, 4);
 		bytesWritten += 4;
 	}
@@ -587,14 +587,14 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	//the ring in vertex order is the inside of the polygon"
 	//== clockwise order
 	bool inverseOrder = false;
-	if (outputShapeType == SHP_POLYGON || outputShapeType == SHP_POLYGON_Z)
+	if (outputShapeType == ESRI_SHAPE_TYPE::POLYGON || outputShapeType == ESRI_SHAPE_TYPE::POLYGON_Z)
 	{
 		assert(isClosed);
 		assert(numPoints > 2);
 
 		unsigned char dim1 = X;
 		unsigned char dim2 = Y;
-		if (outputShapeType == SHP_POLYGON_Z)
+		if (outputShapeType == ESRI_SHAPE_TYPE::POLYGON_Z)
 		{
 			CCVector3d diag = bbMaxg - bbMing;
 
@@ -762,7 +762,7 @@ CC_FILE_ERROR LoadCloud(QFile& file,
 	}
 
 	//3D clouds
-	if (shapeTypeInt == SHP_MULTI_POINT_Z)
+	if (shapeTypeInt == ESRI_SHAPE_TYPE::MULTI_POINT_Z)
 	{
 		//Z boundaries
 		{
@@ -786,8 +786,8 @@ CC_FILE_ERROR LoadCloud(QFile& file,
 	}
 
 	//3D clouds or 2D clouds + measurement
-	if (shapeTypeInt == SHP_MULTI_POINT_Z
-		|| shapeTypeInt == SHP_MULTI_POINT_M)
+	if (shapeTypeInt == ESRI_SHAPE_TYPE::MULTI_POINT_Z
+		|| shapeTypeInt == ESRI_SHAPE_TYPE::MULTI_POINT_M)
 	{
 		//M boundaries
 		ccScalarField* sf = 0;
@@ -846,7 +846,7 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 	//Shape Type
 	{
 		//Byte 0: Shape Type
-		int32_t shapeTypeInt = qToLittleEndian<int32_t>(SHP_MULTI_POINT_Z);
+		int32_t shapeTypeInt = qToLittleEndian<int32_t>(static_cast<int32_t >(ESRI_SHAPE_TYPE::MULTI_POINT_Z));
 		file.write((const char*)&shapeTypeInt, 4);
 		bytesWritten += 4;
 	}
@@ -973,7 +973,7 @@ CC_FILE_ERROR LoadSinglePoint(	QFile& file,
 				0);
 
 	//3D point
-	if (shapeTypeInt == SHP_POINT_Z)
+	if (shapeTypeInt == ESRI_SHAPE_TYPE::POINT_Z)
 	{
 		//Z coordinate
 		{
@@ -1002,8 +1002,8 @@ CC_FILE_ERROR LoadSinglePoint(	QFile& file,
 	}
 
 	ScalarType s = NAN_VALUE;
-	if (	shapeTypeInt == SHP_POINT_Z
-		||	shapeTypeInt == SHP_POINT_M)
+	if (	shapeTypeInt == ESRI_SHAPE_TYPE::POINT_Z
+		||	shapeTypeInt == ESRI_SHAPE_TYPE::POINT_M)
 	{
 		//Measure
 		{
@@ -1055,11 +1055,11 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		return CC_FERR_BAD_ENTITY_TYPE;
 
 	//this filter only supports point clouds, meshes and polylines!
-	ESRI_SHAPE_TYPE inputShapeType = SHP_NULL_SHAPE;
+	ESRI_SHAPE_TYPE inputShapeType = ESRI_SHAPE_TYPE::NULL_SHAPE;
 	ccHObject::Container toSave;
 	GetSupportedShapes(entity, toSave, inputShapeType/*,m_closedPolylinesAsPolygons*/);
 
-	if (inputShapeType == SHP_NULL_SHAPE || toSave.empty())
+	if (inputShapeType == ESRI_SHAPE_TYPE::NULL_SHAPE || toSave.empty())
 	{
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
@@ -1109,7 +1109,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	bool save3DPolysAs2D = false;
 	int poly2DVertDim = 2;
 	bool save3DPolyHeightInDBF = false;
-	if (parameters.alwaysDisplaySaveDialog && inputShapeType == SHP_POLYLINE_Z)
+	if (parameters.alwaysDisplaySaveDialog && inputShapeType == ESRI_SHAPE_TYPE::POLYLINE_Z)
 	{
 		//display SHP save dialog
 		SaveSHPFileDialog ssfDlg(0);
@@ -1130,7 +1130,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 
 	ESRI_SHAPE_TYPE outputShapeType = inputShapeType;
-	if (m_closedPolylinesAsPolygons && (inputShapeType == SHP_POLYLINE || inputShapeType == SHP_POLYLINE_Z))
+	if (m_closedPolylinesAsPolygons && (inputShapeType == ESRI_SHAPE_TYPE::POLYLINE || inputShapeType == ESRI_SHAPE_TYPE::POLYLINE_Z))
 	{
 		//check if all the polylines are closed!
 		bool allAreClosed = true;
@@ -1143,7 +1143,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		if (allAreClosed)
 		{
 			//promote 'polylines' to 'polygon'
-			outputShapeType = SHP_POLYLINE ? SHP_POLYGON : SHP_POLYGON_Z;
+			outputShapeType = (outputShapeType == ESRI_SHAPE_TYPE::POLYLINE) ? ESRI_SHAPE_TYPE::POLYGON : ESRI_SHAPE_TYPE::POLYGON_Z;
 		}
 	}
 
@@ -1190,7 +1190,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		_header += 4;
 
 		//Byte 32: shape type
-		int32_t shapeTypeInt = qToLittleEndian<int32_t>(outputShapeType);
+		int32_t shapeTypeInt = qToLittleEndian<int32_t>(static_cast<int32_t>(outputShapeType));
 		memcpy(_header, (const char*)&shapeTypeInt, 4);
 		_header += 4;
 
@@ -1214,8 +1214,8 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 		//Z bounaries
 		//Unused, with value 0.0, if not Measured or Z type
-		double zMin = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndianD(bbMinCorner.u[Z]);
-		double zMax = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndianD(bbMaxCorner.u[Z]);
+		double zMin = outputShapeType < ESRI_SHAPE_TYPE::POINT_Z ? 0.0 : qToLittleEndianD(bbMinCorner.u[Z]);
+		double zMax = outputShapeType < ESRI_SHAPE_TYPE::POINT_Z ? 0.0 : qToLittleEndianD(bbMaxCorner.u[Z]);
 		//Byte 68: box Z min
 		memcpy(_header, (const char*)&zMin, 8);
 		_header += 8;
@@ -1272,16 +1272,16 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		CC_FILE_ERROR error = CC_FERR_NO_ERROR;
 		switch (inputShapeType)
 		{
-		case SHP_POLYLINE:
-		case SHP_POLYLINE_Z:
+		case ESRI_SHAPE_TYPE::POLYLINE:
+		case ESRI_SHAPE_TYPE::POLYLINE_Z:
 			assert(child->isKindOf(CC_TYPES::POLY_LINE));
-			error = SavePolyline(static_cast<ccPolyline*>(child), file, recordSize, save3DPolysAs2D ? SHP_POLYLINE : outputShapeType, poly2DVertDim);
+			error = SavePolyline(static_cast<ccPolyline*>(child), file, recordSize, save3DPolysAs2D ? ESRI_SHAPE_TYPE::POLYLINE : outputShapeType, poly2DVertDim);
 			break;
-		case SHP_MULTI_POINT_Z:
+		case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
 			assert(child->isKindOf(CC_TYPES::POINT_CLOUD));
 			error = SaveAsCloud(ccHObjectCaster::ToGenericPointCloud(child), file, recordSize);
 			break;
-			//case SHP_MULTI_PATCH:
+			//case MULTI_PATCH:
 			//	assert(child->isKindOf(CC_TYPES::MESH));
 			//	error = SaveAsMesh(ccHObjectCaster::ToMesh(child),file,recordSize);
 			//	break;
@@ -1610,18 +1610,18 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			recordSize -= 4;
 			int32_t shapeTypeInt = qToLittleEndian<int32_t>(*reinterpret_cast<const int32_t*>(header));
 			ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt))).arg(recordSize));
-
-			switch (shapeTypeInt)
+			auto shapeType = static_cast<ESRI_SHAPE_TYPE >(shapeTypeInt); //TODO CHECK
+			switch (shapeType)
 			{
-			case SHP_POLYLINE_Z:
-			case SHP_POLYGON_Z:
+			case ESRI_SHAPE_TYPE::POLYLINE_Z:
+			case ESRI_SHAPE_TYPE::POLYGON_Z:
 				is3DShape = true;
-			case SHP_POLYLINE:
-			case SHP_POLYGON:
+			case ESRI_SHAPE_TYPE::POLYLINE:
+			case ESRI_SHAPE_TYPE::POLYGON:
 			{
 				unsigned childCountBefore = container.getChildrenNumber();
 				error = LoadPolyline(file, container, recordNumber, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift, preserveCoordinateShift);
-				if (error == CC_FERR_NO_ERROR && shapeTypeInt == SHP_POLYLINE)
+				if (error == CC_FERR_NO_ERROR && shapeType == ESRI_SHAPE_TYPE::POLYLINE)
 				{
 					unsigned childCountAfter = container.getChildrenNumber();
 					//warning: we can load mutliple polylines for a single record!
@@ -1636,26 +1636,26 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 			}
 			break;
-			case SHP_MULTI_POINT_Z:
-			case SHP_MULTI_POINT_M:
+			case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
+			case ESRI_SHAPE_TYPE::MULTI_POINT_M:
 				is3DShape = true;
-			case SHP_MULTI_POINT:
+			case ESRI_SHAPE_TYPE::MULTI_POINT:
 				error = LoadCloud(file, container, recordNumber, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift, preserveCoordinateShift);
 				break;
-			case SHP_POINT_Z:
-			case SHP_POINT_M:
+			case ESRI_SHAPE_TYPE::POINT_Z:
+			case ESRI_SHAPE_TYPE::POINT_M:
 				is3DShape = true;
-			case SHP_POINT:
+			case ESRI_SHAPE_TYPE::POINT:
 				error = LoadSinglePoint(file, singlePoints, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift, preserveCoordinateShift);
 				if (error == CC_FERR_NO_ERROR && recordNumber > maxPointID)
 				{
 					maxPointID = recordNumber;
 				}
 				break;
-				//case SHP_MULTI_PATCH:
+				//case MULTI_PATCH:
 				//error = LoadMesh(file, recordSize);
 				//break;
-			case SHP_NULL_SHAPE:
+			case ESRI_SHAPE_TYPE::NULL_SHAPE:
 				//ignored
 				break;
 			default:

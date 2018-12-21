@@ -28,21 +28,21 @@
 #include <ReferenceCloud.h>
 
 //qCC_db
+#include <ccOctree.h>
+#include <ccOctreeProxy.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
-#include <ccOctree.h>
-#include <ccOctreeProxy.h>
 
 //Qt
-#include <QtGui>
-#include <QtCore>
 #include <QApplication>
 #include <QMessageBox>
 #include <QStringList>
 
 // Default SF names
+#ifdef COMPILE_PRIVATE_CANUPO
 static const char CANUPO_PER_LEVEL_ROUGHNESS_SF_NAME[] = "CANUPO.roughness";
+#endif
 static const char CANUPO_PER_LEVEL_ADDITIONAL_SF_NAME[] = "CANUPO.(x-y)";
 
 //Reserved name for CANUPO 'MSC' meta-data
@@ -410,8 +410,8 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 					}
 
 					if (computer->needSF()
-						&& ((realCorePoints		&& realCorePoints->getCurrentDisplayedScalarField() == 0)
-						||  (!realCorePoints	&&          cloud->getCurrentDisplayedScalarField() == 0) //if realCorePoints == 0, it means that the subsampled cloud couldn't be converted to a real cloud!
+						&& ((realCorePoints		&& realCorePoints->getCurrentDisplayedScalarField() == nullptr)
+						||  (!realCorePoints	&&          cloud->getCurrentDisplayedScalarField() == nullptr) //if realCorePoints == 0, it means that the subsampled cloud couldn't be converted to a real cloud!
 						)
 						)
 					{
@@ -474,10 +474,10 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 			//main classification process
 			{
 				//advanced options
-				assert(!params.useActiveSFForConfidence || cloud->getCurrentDisplayedScalarField() != 0);
+				assert(!params.useActiveSFForConfidence || cloud->getCurrentDisplayedScalarField() != nullptr);
 
 				// core points octree
-				CCLib::DgmOctree* corePointsOctree = 0;
+				CCLib::DgmOctree* corePointsOctree = nullptr;
 				if (corePoints == cloud)
 				{
 					corePointsOctree = octree.data();
@@ -490,7 +490,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						if (app)
 							app->dispToConsole("Failed to compute core points octree! (not enough memory?)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 						delete corePointsOctree;
-						corePointsOctree = 0;
+						corePointsOctree = nullptr;
 						break;
 					}
 				}
@@ -679,18 +679,18 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 								// search for max vote
 								std::vector<int> bestClasses;
 								int maxVoteCount = -1;
-								for (std::map<int, int>::iterator it = votes.begin(); it != votes.end(); ++it)
+								for (auto &vote : votes)
 								{
-									int voteCount = it->second;
+									int voteCount = vote.second;
 									if (maxVoteCount < voteCount)
 									{
 										bestClasses.clear();
-										bestClasses.push_back(/*class=*/it->first);
+										bestClasses.push_back(vote.first);
 										maxVoteCount = voteCount;
 									}
 									else if (maxVoteCount == voteCount)
 									{
-										bestClasses.push_back(/*class=*/it->first);
+										bestClasses.push_back(vote.first);
 									}
 								}
 
@@ -743,7 +743,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 				// eventually label the points
 				{
 					// instantiate the scalar fields
-					CCLib::ScalarField* classLabelSF = 0;
+					CCLib::ScalarField* classLabelSF = nullptr;
 					int classLabelSFIdx = -1;
 					{
 						classLabelSFIdx = cloud->getScalarFieldIndexByName("CANUPO.class");
@@ -762,7 +762,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						}
 					}
 
-					CCLib::ScalarField* confidenceSF = 0;
+					CCLib::ScalarField* confidenceSF = nullptr;
 					int confidenceSFIdx = -1;
 					{
 						confidenceSFIdx = cloud->getScalarFieldIndexByName("CANUPO.confidence");
@@ -806,7 +806,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						}
 
 						size_t scaleCount = scales.size();
-						scaleSFs.resize(scaleCount, 0);
+						scaleSFs.resize(scaleCount, nullptr);
 						//for each scale
 						for (size_t s = 0; s < scaleCount; ++s)
 						{
@@ -1009,11 +1009,11 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 
 						if (generateAdditionalSF)
 						{
-							for (size_t s = 0; s < scaleSFs.size(); ++s)
+							for (auto &scaleSF : scaleSFs)
 							{
-								scaleSFs[s]->computeMinAndMax();
-								scaleSFs[s]->setSymmetricalScale(true);
-								cloud->addScalarField(scaleSFs[s]);
+								scaleSF->computeMinAndMax();
+								scaleSF->setSymmetricalScale(true);
+								cloud->addScalarField(scaleSF);
 							}
 						}
 
@@ -1028,14 +1028,14 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						}
 #endif
 					}
-					cloud->showSF(cloud->getCurrentDisplayedScalarField() != 0);
+					cloud->showSF(cloud->getCurrentDisplayedScalarField() != nullptr);
 				}
 
 				//dispose of octree
 				if (corePointsOctree != octree)
 				{
 					delete corePointsOctree;
-					corePointsOctree = 0;
+					corePointsOctree = nullptr;
 				}
 
 				//save MSC data as meta-data on the core point cloud

@@ -1731,7 +1731,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 
 		if (pDlg)
 		{
-			pDlg->setValue(fileSize - (pos + fileLength));
+			pDlg->setValue(pos);
 			if (pDlg->wasCanceled())
 			{
 				error = CC_FERR_CANCELED_BY_USER;

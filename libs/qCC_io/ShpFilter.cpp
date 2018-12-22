@@ -1058,15 +1058,6 @@ CC_FILE_ERROR LoadSinglePoint(	QFile& file,
 			singlePoints->setGlobalShift(Pshift);
 		}
 	}
-	if (!singlePoints->reserve(singlePoints->size() + 1))
-	{
-		if (singlePoints->size() == 0)
-		{
-			delete singlePoints;
-			singlePoints = nullptr;
-		}
-		return CC_FERR_NOT_ENOUGH_MEMORY;
-	}
 
 	ScalarType s = NAN_VALUE;
 	if (hasMeasurements(shapeType))
@@ -1075,7 +1066,7 @@ CC_FILE_ERROR LoadSinglePoint(	QFile& file,
 		{
 			file.read(buffer, 8);
 			double m = qFromLittleEndianD(*reinterpret_cast<double*>(buffer));
-			if (m != ESRI_NO_DATA)
+			if (m > ESRI_NO_DATA)
 			{
 				s = static_cast<ScalarType>(m);
 				//add a SF to the cloud if not done already
@@ -1096,10 +1087,19 @@ CC_FILE_ERROR LoadSinglePoint(	QFile& file,
 		}
 	}
 
+	//make sure to reserve the point cloud memory AFTER declaring the scalar field
+	//(otherwise the SF won't be reserved...)
+	if (singlePoints->size() == singlePoints->capacity() && !singlePoints->reserve(singlePoints->size() + 256)) //256 each time because it appears some SHP files have many isolated points...
+	{
+		delete singlePoints;
+		singlePoints = nullptr;
+		return CC_FERR_NOT_ENOUGH_MEMORY;
+	}
+
 	singlePoints->addPoint(P);
 
-	if (singlePoints->hasScalarFields())
-		singlePoints->setPointScalarValue(singlePoints->size() - 1, s);
+	if (singlePoints->getCurrentOutScalarField())
+		singlePoints->getCurrentOutScalarField()->addElement(s);
 
 	return CC_FERR_NO_ERROR;
 }
@@ -1895,6 +1895,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 				sf->computeMinAndMax();
 				singlePoints->showSF(true);
 			}
+			singlePoints->shrinkToFit();
 			container.addChild(singlePoints);
 		}
 	}

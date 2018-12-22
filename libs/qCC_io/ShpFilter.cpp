@@ -157,6 +157,11 @@ static inline bool hasMeasurements(ESRI_SHAPE_TYPE shapeType)
 	}
 }
 
+static inline bool isESRINoData(double m)
+{
+	return m  <= ESRI_NO_DATA;
+}
+
 struct ShapeFileHeader {
 	int32_t fileLength = ESRI_HEADER_SIZE;
 	int32_t version = 1000;
@@ -1082,32 +1087,12 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR LoadSinglePoint(	QFile& file,
+CC_FILE_ERROR LoadSinglePoint(	QDataStream& shpStream,
 								ccPointCloud* &singlePoints,
 								ESRI_SHAPE_TYPE shapeType,
 								const CCVector3d& Pshift,
 								bool preserveCoordinateShift)
 {
-	char buffer[16];
-	file.read(buffer, 16);
-
-	double x = qFromLittleEndianD(*reinterpret_cast<double*>(buffer));
-	double y = qFromLittleEndianD(*reinterpret_cast<double*>(buffer + 8));
-	CCVector3 P(static_cast<PointCoordinateType>(x + Pshift.x),
-				static_cast<PointCoordinateType>(y + Pshift.y),
-				0);
-
-	//3D point
-	if (isESRIShape3D(shapeType))
-	{
-		//Z coordinate
-		{
-			file.read(buffer, 8);
-			double z = qFromLittleEndianD(*reinterpret_cast<double*>(buffer));
-			P.z = static_cast<PointCoordinateType>(z + Pshift.z);
-		}
-	}
-
 	if (!singlePoints)
 	{
 		singlePoints = new ccPointCloud("Points");
@@ -1117,28 +1102,39 @@ CC_FILE_ERROR LoadSinglePoint(	QFile& file,
 		}
 	}
 
+	double x , y;
+	shpStream >> x >> y;
+	CCVector3 P(static_cast<PointCoordinateType>(x + Pshift.x),
+				static_cast<PointCoordinateType>(y + Pshift.y),
+				0);
+
+	if (isESRIShape3D(shapeType))
+	{
+		double z;
+		shpStream >> z;
+		P.z = static_cast<PointCoordinateType>(z + Pshift.z);
+	}
+	singlePoints->addPoint(P);
+
 	ScalarType s = NAN_VALUE;
 	if (hasMeasurements(shapeType))
 	{
-		//Measure
+		double m;
+		shpStream >> m;
+		if (m > ESRI_NO_DATA)
 		{
-			file.read(buffer, 8);
-			double m = qFromLittleEndianD(*reinterpret_cast<double*>(buffer));
-			if (m > ESRI_NO_DATA)
+			s = static_cast<ScalarType>(m);
+			//add a SF to the cloud if not done already
+			if (!singlePoints->hasScalarFields())
 			{
-				s = static_cast<ScalarType>(m);
-				//add a SF to the cloud if not done already
-				if (!singlePoints->hasScalarFields())
+				int sfIdx = singlePoints->addScalarField("Measures");
+				if (sfIdx >= 0)
 				{
-					int sfIdx = singlePoints->addScalarField("Measures");
-					if (sfIdx >= 0)
+					//set the SF value for the previous points
+					singlePoints->setCurrentScalarField(sfIdx);
+					for (unsigned i = 0; i < singlePoints->size(); ++i)
 					{
-						//set the SF value for the previous points
-						singlePoints->setCurrentScalarField(sfIdx);
-						for (unsigned i = 0; i < singlePoints->size(); ++i)
-						{
-							singlePoints->setPointScalarValue(i, NAN_VALUE);
-						}
+						singlePoints->setPointScalarValue(i, NAN_VALUE);
 					}
 				}
 			}
@@ -1630,28 +1626,22 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			shpStream >> shapeTypeInt;
 			qint64 recordStart = shpStream.device()->pos();
 
-			shpStream.setByteOrder(QDataStream::LittleEndian);
 			if (!isValidESRIShapeCode(shapeTypeInt))
 			{
 				ccLog::Warning("[SHP] Shape %d has an invalid shape code (%d)", recordNumber, shapeTypeInt);
-				shpStream.skipRawData(recordSize - sizeof(shapeTypeInt));
-				continue;
+				//shpStream.skipRawData(recordSize - sizeof(shapeTypeInt));
+				return CC_FERR_READING;
 			}
 
-			pos += recordSize;
+			pos += (recordSize + sizeof(recordNumber) + sizeof(recordSize));
 
 
 			if (recordNumber < 64)
 				ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt))).arg(recordSize));
 			else if (recordNumber == 64)
 				ccLog::Print("[SHP] Records won't be displayed in the Console anymore to avoid flooding it...");
-			if (!isValidESRIShapeCode(shapeTypeInt))
-			{
-				ccLog::Warning("[SHP] Invalid shape type code: %d", shapeTypeInt);
-				return CC_FERR_MALFORMED_FILE;
-			}
+
 			auto shapeType = static_cast<ESRI_SHAPE_TYPE >(shapeTypeInt);
-			ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(shapeType)).arg(recordSize));
 
 			switch (shapeType)
 			{
@@ -1688,7 +1678,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			case ESRI_SHAPE_TYPE::POINT_M:
 				is3DShape = true;
 			case ESRI_SHAPE_TYPE::POINT:
-				error = LoadSinglePoint(file, singlePoints, shapeType, Pshift, preserveCoordinateShift);
+				error = LoadSinglePoint(shpStream, singlePoints, shapeType, Pshift, preserveCoordinateShift);
 				if (error == CC_FERR_NO_ERROR && recordNumber > maxPointID)
 				{
 					maxPointID = recordNumber;

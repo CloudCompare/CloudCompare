@@ -116,7 +116,6 @@ bool isValidESRIShapeCode(int32_t code)
 		default:
 			return false;
 	}
-
 }
 
 
@@ -287,20 +286,8 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 			shapeType = ESRI_SHAPE_TYPE::MULTI_POINT_Z;
 			shapes.push_back(baseEntity);
 		}
+		break;
 	}
-	break;
-	//DGM: TODO
-	//case CC_MESH:
-	//case CC_SUB_MESH:
-	//	{
-	//		unsigned count = ccHObjectCaster::ToGenericMesh(baseEntity)->size();
-	//		if (count != 0)
-	//		{
-	//			shapeType = MULTI_PATCH;
-	//			shapes.push_back(baseEntity);
-	//		}
-	//	}
-	//	break;
 	case CC_TYPES::POLY_LINE:
 	{
 		ccPolyline* poly = static_cast<ccPolyline*>(baseEntity);
@@ -1355,10 +1342,6 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 			assert(child->isKindOf(CC_TYPES::POINT_CLOUD));
 			error = SaveAsCloud(ccHObjectCaster::ToGenericPointCloud(child), file, recordSize);
 			break;
-			//case MULTI_PATCH:
-			//	assert(child->isKindOf(CC_TYPES::MESH));
-			//	error = SaveAsMesh(ccHObjectCaster::ToMesh(child),file,recordSize);
-			//	break;
 		default:
 			assert(false);
 			break;
@@ -1468,7 +1451,6 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 			//and write the other tables (specified by the user)
 			for (GenericDBFField* field: fields)
 			{
-				//const GenericDBFField* field = *it;
 				if (field->is3D()) //3D case
 				{
 					int xFieldIdx = DBFAddField(dbfHandle, qPrintable(field->name() + QString("_x")), field->type(), field->width(), field->decimal());
@@ -1732,9 +1714,6 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 					maxPointID = recordNumber;
 				}
 				break;
-				//case MULTI_PATCH:
-				//error = LoadMesh(file, recordSize);
-				//break;
 			case ESRI_SHAPE_TYPE::NULL_SHAPE:
 				//ignored
 				break;

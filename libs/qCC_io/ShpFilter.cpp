@@ -844,28 +844,18 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR LoadCloud(QFile& file,
+CC_FILE_ERROR LoadCloud(QDataStream& shpStream,
 						ccHObject& container,
 						int32_t index,
 						ESRI_SHAPE_TYPE shapeType,
 						const CCVector3d& Pshift,
 						bool preserveCoordinateShift)
 {
-	char header[36];
-	file.read(header, 36);
+	// Skip record bbox
+	shpStream.skipRawData(4 * sizeof(double));
 
-	//Byte 0: Box
-	{
-		//The Bounding Box for the Cloud stored in the order Xmin, Ymin, Xmax, Ymax
-		//DGM: ignored
-		//double xMin = qFromLittleEndianD(*reinterpret_cast<double*>(header   ));
-		//double xMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+ 8));
-		//double yMin = qFromLittleEndianD(*reinterpret_cast<double*>(header+16));
-		//double yMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+24));
-	}
-
-	//Byte 32: NumPoints (The total number of points)
-	int32_t numPoints = qFromLittleEndian<int32_t>(*reinterpret_cast<int32_t*>(header + 32));
+	int32_t numPoints;
+	shpStream >> numPoints;
 
 	ccPointCloud* cloud = new ccPointCloud(QString("Cloud #%1").arg(index));
 	if (!cloud->reserve(numPoints))
@@ -879,41 +869,31 @@ CC_FILE_ERROR LoadCloud(QFile& file,
 	}
 
 	//Points (An array of length NumPoints)
+	for (int32_t i = 0; i < numPoints; ++i)
 	{
-		for (int32_t i = 0; i < numPoints; ++i)
-		{
-			file.read(header, 16);
-			double x = qFromLittleEndianD(*reinterpret_cast<double*>(header));
-			double y = qFromLittleEndianD(*reinterpret_cast<double*>(header + 8));
-			CCVector3 P(static_cast<PointCoordinateType>(x + Pshift.x),
-						static_cast<PointCoordinateType>(y + Pshift.y),
-						0);
-			cloud->addPoint(P);
-		}
+		double  x, y;
+		shpStream >> x >> y;
+		CCVector3 P(static_cast<PointCoordinateType>(x + Pshift.x),
+					static_cast<PointCoordinateType>(y + Pshift.y),
+					0);
+		cloud->addPoint(P);
 	}
 
 	//3D clouds
 	if (isESRIShape3D(shapeType))
 	{
 		//Z boundaries
-		{
-			file.read(header, 16);
-			//DGM: ignored
-			//double zMin = qFromLittleEndianD(*reinterpret_cast<double*>(header  ));
-			//double zMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+8));
-		}
+		shpStream.skipRawData(2 * sizeof(double));
 
 		//Z coordinates (an array of length NumPoints)
+		for (int32_t i = 0; i < numPoints; ++i)
 		{
-			for (int32_t i = 0; i < numPoints; ++i)
-			{
-				file.read(header, 8);
-				double z = qFromLittleEndianD(*reinterpret_cast<double*>(header));
-				const CCVector3* P = cloud->getPoint(i);
-				const_cast<CCVector3*>(P)->z = static_cast<PointCoordinateType>(z + Pshift.z);
-			}
-			cloud->invalidateBoundingBox();
+			double z;
+			shpStream >> z;
+			const CCVector3* P = cloud->getPoint(i);
+			const_cast<CCVector3*>(P)->z = static_cast<PointCoordinateType>(z + Pshift.z);
 		}
+		cloud->invalidateBoundingBox();
 	}
 
 	//3D clouds or 2D clouds + measurement
@@ -921,20 +901,17 @@ CC_FILE_ERROR LoadCloud(QFile& file,
 	{
 		//M boundaries
 		ccScalarField* sf = nullptr;
-		{
-			file.read(header, 16);
-			double mMin = qFromLittleEndianD(*reinterpret_cast<double*>(header));
-			double mMax = qFromLittleEndianD(*reinterpret_cast<double*>(header + 8));
+		double mMin, mMax;
+		shpStream >> mMin >> mMax;
 
-			if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
+		if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
+		{
+			sf = new ccScalarField("Measures");
+			if (!sf->reserveSafe(numPoints))
 			{
-				sf = new ccScalarField("Measures");
-				if (!sf->reserveSafe(numPoints))
-				{
-					ccLog::Warning("[SHP] Not enough memory to load scalar values!");
-					sf->release();
-					sf = nullptr;
-				}
+				ccLog::Warning("[SHP] Not enough memory to load scalar values!");
+				sf->release();
+				sf = nullptr;
 			}
 		}
 
@@ -943,8 +920,8 @@ CC_FILE_ERROR LoadCloud(QFile& file,
 		{
 			for (int32_t i = 0; i < numPoints; ++i)
 			{
-				file.read(header, 8);
-				double m = qFromLittleEndianD(*reinterpret_cast<double*>(header));
+				double m;
+				shpStream >> m;
 				ScalarType s = m == ESRI_NO_DATA ? NAN_VALUE : static_cast<ScalarType>(m);
 				sf->addElement(s);
 			}
@@ -953,10 +930,12 @@ CC_FILE_ERROR LoadCloud(QFile& file,
 			cloud->setCurrentDisplayedScalarField(sfIdx);
 			cloud->showSF(true);
 		}
+		else
+		{
+			shpStream.skipRawData(numPoints * sizeof(double));
+		}
 	}
-
 	container.addChild(cloud);
-
 	return CC_FERR_NO_ERROR;
 }
 
@@ -1672,7 +1651,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			case ESRI_SHAPE_TYPE::MULTI_POINT_M:
 				is3DShape = true;
 			case ESRI_SHAPE_TYPE::MULTI_POINT:
-				error = LoadCloud(file, container, recordNumber, shapeType, Pshift, preserveCoordinateShift);
+				error = LoadCloud(shpStream, container, recordNumber, shapeType, Pshift, preserveCoordinateShift);
 				break;
 			case ESRI_SHAPE_TYPE::POINT_Z:
 			case ESRI_SHAPE_TYPE::POINT_M:

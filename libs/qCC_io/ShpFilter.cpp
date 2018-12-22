@@ -56,6 +56,8 @@ using FieldIndexAndName = QPair<int, QString>;
 
 //Specific value for NaN
 static const double ESRI_NO_DATA = -1.0e38;
+static int32_t ESRI_SHAPE_FILE_CODE = 9994;
+const size_t ESRI_HEADER_SIZE = 100;
 
 //semi-persistent settings
 static double s_dbfFielImportScale = 1.0;
@@ -64,6 +66,7 @@ static double s_dbfFielImportScale = 1.0;
 static bool s_save3DPolysAs2D = false;
 static int  s_poly2DVertDim = 2;
 static bool s_save3DPolyHeightInDBF = false;
+
 
 //! ESRI Shapefile's shape types
 enum class ESRI_SHAPE_TYPE : int32_t {
@@ -152,6 +155,61 @@ static inline bool hasMeasurements(ESRI_SHAPE_TYPE shapeType)
 		default:
 			return false;
 	}
+}
+
+struct ShapeFileHeader {
+	int32_t fileLength = ESRI_HEADER_SIZE;
+	int32_t version = 1000;
+	int32_t shapeTypeInt = static_cast<int32_t >(ESRI_SHAPE_TYPE::NULL_SHAPE);
+	CCVector3d pointMin;
+	CCVector3d pointMax;
+	CCVector2d mRange; // x is the min, y is the max
+
+	CC_FILE_ERROR readFrom(QDataStream& sin);
+};
+
+CC_FILE_ERROR ShapeFileHeader::readFrom(QDataStream &sin)
+{
+	sin.setByteOrder(QDataStream::BigEndian);
+
+	int32_t fileCode;
+	sin >> fileCode;
+	if (fileCode != ESRI_SHAPE_FILE_CODE)
+	{
+		ccLog::Warning("[SHP] wrong file code (%d), is this a shape file?", fileCode);
+		return CC_FERR_MALFORMED_FILE;
+	}
+
+	sin.skipRawData(5 * sizeof(int32_t));
+
+	sin >> fileLength;
+	fileLength *= 2;  //fileLength is measured in 16-bit words
+
+	sin.setByteOrder(QDataStream::LittleEndian);
+
+	sin >> version >> shapeTypeInt;
+
+	if (!isValidESRIShapeCode(shapeTypeInt))
+	{
+		ccLog::Warning("[SHP] invalid shape type code in header (%d)", shapeTypeInt);
+		return CC_FERR_MALFORMED_FILE;
+	}
+
+	sin >> pointMin.x >> pointMin.y >> pointMax.x >> pointMax.y;
+	sin >> pointMin.z >> pointMax.z;
+
+	pointMin.z = std::isnan(pointMin.z) ? 0 : pointMin.z;
+	pointMax.z = std::isnan(pointMin.z) ? 0 : pointMax.z;
+
+	sin >> mRange.x >> mRange.y;
+
+	if (sin.status() != QDataStream::Ok)
+	{
+		ccLog::Warning("[SHP] Something went wrong reading the shp header");
+		return CC_FERR_READING;
+	}
+
+	return CC_FERR_NO_ERROR;
 }
 
 //DGM: by default qToLittleEndian and qFromLittleEndian only works for integer types!
@@ -1500,114 +1558,35 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	return result;
 }
 
+
+
+
 CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly))
 		return CC_FERR_READING;
 
+	if (file.size() < ESRI_HEADER_SIZE)
+	{
+		ccLog::Warning("[SHP] File is too small to be valid");
+		return CC_FERR_MALFORMED_FILE;
+	}
+
+	QDataStream shpStream(&file);
+
+	ShapeFileHeader hdr;
+	CC_FILE_ERROR error = hdr.readFrom(shpStream);
+	if (error != CC_FERR_NO_ERROR)
+		return error;
+
 	//global shift
 	CCVector3d Pshift(0, 0, 0);
 	bool preserveCoordinateShift = true;
-
-	//read header (refer to ESRI Shapefile Technical Description)
-	if (file.size() < 100)
-		return CC_FERR_MALFORMED_FILE;
-	char header[100];
-	file.read(header, 100);
-	int32_t fileLength = 0;
+	CCVector3d Pmin = hdr.pointMin;
+	if (HandleGlobalShift(Pmin, Pshift, preserveCoordinateShift, parameters))
 	{
-		/*** WARNING: the beginning of the header is written with big endianness! ***/
-		const char* _header = header;
-
-		//Byte 0: SHP code
-		const int32_t code = qFromBigEndian<int32_t>(*reinterpret_cast<const int32_t*>(_header));
-		if (code != 9994)
-		{
-			return CC_FERR_MALFORMED_FILE;
-		}
-		_header += 4;
-
-		//Byte 4: unused (20 bytes)
-		_header += 20;
-
-		//Byte 24: file length (will be written... later ;)
-		fileLength = qFromBigEndian<int32_t>(*reinterpret_cast<const int32_t*>(_header));
-		fileLength *= 2; //fileLength is measured in 16-bit words
-
-		_header += 4;
-
-		/*** WARNING: from now on, we only read data with little endianness! ***/
-
-		//Byte 28: file verion
-		const int32_t version = qFromLittleEndian<int32_t>(*reinterpret_cast<const int32_t*>(_header));
-		_header += 4;
-
-		//Byte 32: shape type
-		int32_t shapeTypeInt = qFromLittleEndian<int32_t>(*reinterpret_cast<const int32_t*>(_header));
-		_header += 4;
-
-		if (!isValidESRIShapeCode(shapeTypeInt))
-		{
-			ccLog::Warning("[SHP] Invalid shape type code: %d", shapeTypeInt);
-			return CC_FERR_MALFORMED_FILE;
-		}
-		ccLog::Print(QString("[SHP] Version: %1 - type: %2").arg(version).arg(ToString(static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt))));
-
-		//X and Y bounaries
-		//Byte 36: box X min
-		double xMin = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
-		_header += 8;
-		//Byte 44: box Y min
-		double yMin = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
-		_header += 8;
-		//Byte 52: box X max
-		//double xMax = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
-		_header += 8;
-		//Byte 60: box Y max
-		//double yMax = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
-		_header += 8;
-
-		//Z bounaries
-		//Unused, with value 0.0, if not Measured or Z type
-		//Byte 68: box Z min
-		double zMin = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
-		_header += 8;
-		//Byte 76: box Z max
-		//double zMax = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
-		_header += 8;
-
-		if (std::isnan(zMin))
-		{
-			//for 2D entities, the zMin value might be NaN!!!
-			zMin = 0;
-		}
-
-		CCVector3d Pmin(xMin, yMin, zMin);
-		if (HandleGlobalShift(Pmin, Pshift, preserveCoordinateShift, parameters))
-		{
-			ccLog::Warning("[SHP] Entities will be recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
-		}
-
-		//M bounaries (M = measures)
-		//Byte 84: M min
-		//double mMin = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
-		_header += 8;
-		//Byte 92: M max
-		//double mMax = qFromLittleEndianD(*reinterpret_cast<const double*>(_header));
-		_header += 8;
-	}
-	assert(fileLength >= 100);
-	if (fileLength < 100)
-	{
-		assert(false);
-		return CC_FERR_MALFORMED_FILE;
-	}
-	fileLength -= 100;
-
-	if (fileLength == 0)
-	{
-		return CC_FERR_NO_LOAD;
+		ccLog::Warning("[SHP] Entities will be recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 	}
 
 	//progress bar
@@ -1624,7 +1603,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	//load shapes
-	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
+	error = CC_FERR_NO_ERROR;
 	ccPointCloud* singlePoints = nullptr;
 	qint64 pos = file.pos();
 	//we also keep track of the polylines 'record number' (if any)
@@ -1632,51 +1611,48 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 	int32_t maxPolyID = 0;
 	int32_t maxPointID = 0;
 	bool is3DShape = false;
-	while (fileLength >= 12)
+	while (hdr.fileLength - shpStream.device()->pos() > 0)
 	{
+		if (shpStream.status() != QDataStream::Ok )
+		{
+			ccLog::Warning("[SHP] Something went wrong reading the file");
+			return CC_FERR_READING;
+		}
 		file.seek(pos);
 		assert(pos + fileLength == fileSize);
 		//load shape record in main SHP file
 		{
-			file.read(header, 8);
-			//Byte 0: Record Number
-			int32_t recordNumber = qFromBigEndian<int32_t>(*reinterpret_cast<const int32_t*>(header)); //Record numbers begin at 1
-			//Byte 4: Content Length
-			int32_t recordSize = qFromBigEndian<int32_t>(*reinterpret_cast<const int32_t*>(header + 4)); //Record numbers begin at 1
+			int32_t recordNumber, recordSize, shapeTypeInt;
+			shpStream.setByteOrder(QDataStream::BigEndian);
+			shpStream >> recordNumber >> recordSize;
 			recordSize *= 2; //recordSize is measured in 16-bit words
-			fileLength -= 8;
-			pos += 8;
+			shpStream.setByteOrder(QDataStream::LittleEndian);
+			shpStream >> shapeTypeInt;
+			qint64 recordStart = shpStream.device()->pos();
 
-			if (fileLength < recordSize)
+			shpStream.setByteOrder(QDataStream::LittleEndian);
+			if (!isValidESRIShapeCode(shapeTypeInt))
 			{
-				assert(false);
-				error = CC_FERR_MALFORMED_FILE;
-				break;
+				ccLog::Warning("[SHP] Shape %d has an invalid shape code (%d)", recordNumber, shapeTypeInt);
+				shpStream.skipRawData(recordSize - sizeof(shapeTypeInt));
+				continue;
 			}
-			fileLength -= recordSize;
+
 			pos += recordSize;
 
-			//Record start (byte 0): Shape Type
-			if (recordSize < 4)
-			{
-				assert(false);
-				error = CC_FERR_MALFORMED_FILE;
-				break;
-			}
-			file.read(header, 4);
-			recordSize -= 4;
-			int32_t shapeTypeInt = qToLittleEndian<int32_t>(*reinterpret_cast<const int32_t*>(header));
+
 			if (recordNumber < 64)
 				ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt))).arg(recordSize));
 			else if (recordNumber == 64)
 				ccLog::Print("[SHP] Records won't be displayed in the Console anymore to avoid flooding it...");
-
 			if (!isValidESRIShapeCode(shapeTypeInt))
 			{
 				ccLog::Warning("[SHP] Invalid shape type code: %d", shapeTypeInt);
 				return CC_FERR_MALFORMED_FILE;
 			}
 			auto shapeType = static_cast<ESRI_SHAPE_TYPE >(shapeTypeInt);
+			ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(shapeType)).arg(recordSize));
+
 			switch (shapeType)
 			{
 			case ESRI_SHAPE_TYPE::POLYLINE_Z:
@@ -1686,7 +1662,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			case ESRI_SHAPE_TYPE::POLYGON:
 			{
 				unsigned childCountBefore = container.getChildrenNumber();
-				error = LoadPolyline(file, container, recordNumber, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift, preserveCoordinateShift);
+				error = LoadPolyline(file, container, recordNumber, shapeType, Pshift, preserveCoordinateShift);
 				if (error == CC_FERR_NO_ERROR && shapeType == ESRI_SHAPE_TYPE::POLYLINE)
 				{
 					unsigned childCountAfter = container.getChildrenNumber();
@@ -1706,13 +1682,13 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			case ESRI_SHAPE_TYPE::MULTI_POINT_M:
 				is3DShape = true;
 			case ESRI_SHAPE_TYPE::MULTI_POINT:
-				error = LoadCloud(file, container, recordNumber, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift, preserveCoordinateShift);
+				error = LoadCloud(file, container, recordNumber, shapeType, Pshift, preserveCoordinateShift);
 				break;
 			case ESRI_SHAPE_TYPE::POINT_Z:
 			case ESRI_SHAPE_TYPE::POINT_M:
 				is3DShape = true;
 			case ESRI_SHAPE_TYPE::POINT:
-				error = LoadSinglePoint(file, singlePoints, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift, preserveCoordinateShift);
+				error = LoadSinglePoint(file, singlePoints, shapeType, Pshift, preserveCoordinateShift);
 				if (error == CC_FERR_NO_ERROR && recordNumber > maxPointID)
 				{
 					maxPointID = recordNumber;
@@ -1735,7 +1711,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 
 		if (pDlg)
 		{
-			pDlg->setValue(pos);
+			pDlg->setValue(static_cast<int>(shpStream.device()->pos()));
 			if (pDlg->wasCanceled())
 			{
 				error = CC_FERR_CANCELED_BY_USER;

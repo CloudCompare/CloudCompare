@@ -1666,7 +1666,11 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			file.read(header, 4);
 			recordSize -= 4;
 			int32_t shapeTypeInt = qToLittleEndian<int32_t>(*reinterpret_cast<const int32_t*>(header));
-			ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt))).arg(recordSize));
+			if (recordNumber < 64)
+				ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt))).arg(recordSize));
+			else if (recordNumber == 64)
+				ccLog::Print("[SHP] Records won't be displayed in the Console anymore to avoid flooding it...");
+
 			if (!isValidESRIShapeCode(shapeTypeInt))
 			{
 				ccLog::Warning("[SHP] Invalid shape type code: %d", shapeTypeInt);

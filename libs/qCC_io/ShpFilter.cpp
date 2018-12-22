@@ -89,7 +89,7 @@ enum class ESRI_SHAPE_TYPE : int32_t {
 /**
  * \param code The code to check (typically read from a file)
 **/
-bool isValidESRIShapeCode(int32_t code)
+static inline bool isValidESRIShapeCode(int32_t code)
 {
 	if (code < static_cast<int32_t >(ESRI_SHAPE_TYPE::NULL_SHAPE))
 		return false;
@@ -120,7 +120,7 @@ bool isValidESRIShapeCode(int32_t code)
 
 
 //! Returns whether the shape type contains the 3rd dimensions Z
-bool isESRIShape3D(ESRI_SHAPE_TYPE shapeType)
+static inline bool isESRIShape3D(ESRI_SHAPE_TYPE shapeType)
 {
 	switch (shapeType)
 	{
@@ -136,7 +136,7 @@ bool isESRIShape3D(ESRI_SHAPE_TYPE shapeType)
 
 
 //! Returns whether the shape type contains the additional measures dimension
-bool hasMeasurements(ESRI_SHAPE_TYPE shapeType)
+static inline bool hasMeasurements(ESRI_SHAPE_TYPE shapeType)
 {
 	switch (shapeType)
 	{

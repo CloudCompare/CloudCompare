@@ -56,8 +56,8 @@ using FieldIndexAndName = QPair<int, QString>;
 
 //Specific value for NaN
 static const double ESRI_NO_DATA = -1.0e38;
-static int32_t ESRI_SHAPE_FILE_CODE = 9994;
-const size_t ESRI_HEADER_SIZE = 100;
+static const int32_t ESRI_SHAPE_FILE_CODE = 9994;
+static const size_t ESRI_HEADER_SIZE = 100;
 
 //semi-persistent settings
 static double s_dbfFielImportScale = 1.0;
@@ -204,7 +204,7 @@ CC_FILE_ERROR ShapeFileHeader::readFrom(QDataStream &sin)
 	sin >> pointMin.z >> pointMax.z;
 
 	pointMin.z = std::isnan(pointMin.z) ? 0 : pointMin.z;
-	pointMax.z = std::isnan(pointMin.z) ? 0 : pointMax.z;
+	pointMax.z = std::isnan(pointMax.z) ? 0 : pointMax.z;
 
 	sin >> mRange.x >> mRange.y;
 
@@ -290,7 +290,7 @@ bool ShpFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	return false;
 }
 
-QString ToString(ESRI_SHAPE_TYPE type)
+static QString ToString(ESRI_SHAPE_TYPE type)
 {
 	switch (type)
 	{
@@ -414,13 +414,13 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 	}
 }
 
-CC_FILE_ERROR LoadPolyline(	QDataStream& shpStream,
-							ccHObject& container,
-							int32_t index,
-							ESRI_SHAPE_TYPE shapeType,
-							const CCVector3d& Pshift,
-							bool preserveCoordinateShift,
-							bool load2DPolyAs3DPoly = true)
+static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
+                                  ccHObject &container,
+                                  int32_t index,
+                                  ESRI_SHAPE_TYPE shapeType,
+                                  const CCVector3d &Pshift,
+                                  bool preserveCoordinateShift,
+                                  bool load2DPolyAs3DPoly = true)
 {
 	// skip record bbox
 	shpStream.skipRawData(4 * sizeof(double));
@@ -811,12 +811,12 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR LoadCloud(QDataStream& shpStream,
-						ccHObject& container,
-						int32_t index,
-						ESRI_SHAPE_TYPE shapeType,
-						const CCVector3d& Pshift,
-						bool preserveCoordinateShift)
+static CC_FILE_ERROR LoadCloud(QDataStream &shpStream,
+                               ccHObject &container,
+                               int32_t index,
+                               ESRI_SHAPE_TYPE shapeType,
+                               const CCVector3d &Pshift,
+                               bool preserveCoordinateShift)
 {
 	// Skip record bbox
 	shpStream.skipRawData(4 * sizeof(double));
@@ -1033,11 +1033,11 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR LoadSinglePoint(	QDataStream& shpStream,
-								ccPointCloud* &singlePoints,
-								ESRI_SHAPE_TYPE shapeType,
-								const CCVector3d& Pshift,
-								bool preserveCoordinateShift)
+static CC_FILE_ERROR LoadSinglePoint(QDataStream &shpStream,
+                                     ccPointCloud *&singlePoints,
+                                     ESRI_SHAPE_TYPE shapeType,
+                                     const CCVector3d &Pshift,
+                                     bool preserveCoordinateShift)
 {
 	if (!singlePoints)
 	{
@@ -1051,8 +1051,8 @@ CC_FILE_ERROR LoadSinglePoint(	QDataStream& shpStream,
 	double x , y;
 	shpStream >> x >> y;
 	CCVector3 P(static_cast<PointCoordinateType>(x + Pshift.x),
-				static_cast<PointCoordinateType>(y + Pshift.y),
-				0);
+	            static_cast<PointCoordinateType>(y + Pshift.y),
+	            0);
 
 	if (isESRIShape3D(shapeType))
 	{
@@ -1547,7 +1547,6 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 	//load shapes
 	error = CC_FERR_NO_ERROR;
 	ccPointCloud* singlePoints = nullptr;
-	qint64 pos = file.pos();
 	//we also keep track of the polylines 'record number' (if any)
 	QMap<ccPolyline*, int32_t> polyIDs;
 	int32_t maxPolyID = 0;
@@ -1560,37 +1559,27 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			ccLog::Warning("[SHP] Something went wrong reading the file");
 			return CC_FERR_READING;
 		}
-		file.seek(pos);
-		assert(pos + fileLength == fileSize);
-		//load shape record in main SHP file
+		int32_t recordNumber, recordSize, shapeTypeInt;
+		shpStream.setByteOrder(QDataStream::BigEndian);
+		shpStream >> recordNumber >> recordSize;
+		recordSize *= 2; //recordSize is measured in 16-bit words
+		shpStream.setByteOrder(QDataStream::LittleEndian);
+		shpStream >> shapeTypeInt;
+
+		if (!isValidESRIShapeCode(shapeTypeInt))
 		{
-			int32_t recordNumber, recordSize, shapeTypeInt;
-			shpStream.setByteOrder(QDataStream::BigEndian);
-			shpStream >> recordNumber >> recordSize;
-			recordSize *= 2; //recordSize is measured in 16-bit words
-			shpStream.setByteOrder(QDataStream::LittleEndian);
-			shpStream >> shapeTypeInt;
-			qint64 recordStart = shpStream.device()->pos();
+			ccLog::Warning("[SHP] Shape %d has an invalid shape code (%d)", recordNumber, shapeTypeInt);
+			return CC_FERR_READING;
+		}
+		auto shapeType = static_cast<ESRI_SHAPE_TYPE >(shapeTypeInt);
 
-			if (!isValidESRIShapeCode(shapeTypeInt))
-			{
-				ccLog::Warning("[SHP] Shape %d has an invalid shape code (%d)", recordNumber, shapeTypeInt);
-				//shpStream.skipRawData(recordSize - sizeof(shapeTypeInt));
-				return CC_FERR_READING;
-			}
+		if (recordNumber < 64)
+			ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(shapeType)).arg(recordSize));
+		else if (recordNumber == 64)
+			ccLog::Print("[SHP] Records won't be displayed in the Console anymore to avoid flooding it...");
 
-			pos += (recordSize + sizeof(recordNumber) + sizeof(recordSize));
-
-
-			if (recordNumber < 64)
-				ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt))).arg(recordSize));
-			else if (recordNumber == 64)
-				ccLog::Print("[SHP] Records won't be displayed in the Console anymore to avoid flooding it...");
-
-			auto shapeType = static_cast<ESRI_SHAPE_TYPE >(shapeTypeInt);
-
-			switch (shapeType)
-			{
+		switch (shapeType)
+		{
 			case ESRI_SHAPE_TYPE::POLYLINE_Z:
 			case ESRI_SHAPE_TYPE::POLYGON_Z:
 				is3DShape = true;
@@ -1637,9 +1626,9 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 				break;
 			default:
 				//unhandled entity
+				shpStream.skipRawData(recordSize - sizeof(shapeTypeInt));
 				ccLog::Warning("[SHP] Unhandled type!");
 				break;
-			}
 		}
 
 		if (error != CC_FERR_NO_ERROR)

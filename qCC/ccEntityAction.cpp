@@ -34,8 +34,8 @@
 #include "ccGenericPrimitive.h"
 #include "ccOctreeProxy.h"
 #include "ccPointCloud.h"
-#include "ccPolyline.h"
 #include "ccPointCloudInterpolator.h"
+#include "ccPolyline.h"
 #include "ccSensor.h"
 
 //qCC_gl
@@ -50,14 +50,14 @@
 #include "ccColorLevelsDlg.h"
 #include "ccComputeOctreeDlg.h"
 #include "ccExportCoordToSFDlg.h"
+#include "ccInterpolationDlg.h"
+#include "ccItemSelectionDlg.h"
 #include "ccNormalComputationDlg.h"
+#include "ccOrderChoiceDlg.h"
 #include "ccProgressDialog.h"
 #include "ccScalarFieldArithmeticsDlg.h"
 #include "ccScalarFieldFromColorDlg.h"
 #include "ccStatisticalTestDlg.h"
-#include "ccOrderChoiceDlg.h"
-#include "ccItemSelectionDlg.h"
-#include "ccInterpolationDlg.h"
 
 #include "ccCommon.h"
 #include "ccConsole.h"
@@ -114,7 +114,7 @@ namespace ccEntityAction
 			}
 			else if (ent->isA(CC_TYPES::POINT_CLOUD) || ent->isA(CC_TYPES::MESH))
 			{
-				ccPointCloud* cloud = 0;
+				ccPointCloud* cloud = nullptr;
 				if (ent->isA(CC_TYPES::POINT_CLOUD))
 				{
 					cloud = static_cast<ccPointCloud*>(ent);
@@ -157,7 +157,6 @@ namespace ccEntityAction
 					cloud->getParent()->showColors(true);
 					cloud->getParent()->showSF(false); //just in case
 				}
-
 			}
 			else if (ent->isKindOf(CC_TYPES::PRIMITIVE))
 			{
@@ -232,7 +231,7 @@ namespace ccEntityAction
 		unsigned char dim = dlg.getDimension();
 		ccColorGradientDlg::GradientType ramp = dlg.getType();
 		
-		ccColorScale::Shared colorScale(0);
+		ccColorScale::Shared colorScale(nullptr);
 		if (ramp == ccColorGradientDlg::Default)
 		{
 			colorScale = ccColorScalesManager::GetDefaultScale();
@@ -847,7 +846,7 @@ namespace ccEntityAction
 					}
 				}
 				
-				Q_ASSERT(octree != 0);
+				Q_ASSERT(octree != nullptr);
 				{
 					QElapsedTimer eTimer;
 					eTimer.start();
@@ -1255,15 +1254,13 @@ namespace ccEntityAction
 		const bool exportB = dialog.getBStatus();
 		const bool exportC = dialog.getCompositeStatus();
 		
-		for (std::unordered_set<ccPointCloud*>::const_iterator it = clouds.begin(); it != clouds.end(); ++it)
+		for (const auto cloud : clouds)
 		{
-			ccPointCloud* cloud = *it;
-			
 			std::vector<ccScalarField*> fields(4);
-			fields[0] = (exportR ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"R"))) : 0);
-			fields[1] = (exportG ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"G"))) : 0);
-			fields[2] = (exportB ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"B"))) : 0);
-			fields[3] = (exportC ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"Composite"))) : 0);
+			fields[0] = (exportR ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"R"))) : nullptr);
+			fields[1] = (exportG ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"G"))) : nullptr);
+			fields[2] = (exportB ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"B"))) : nullptr);
+			fields[3] = (exportC ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"Composite"))) : nullptr);
 			
 			//try to instantiate memory for each field
 			unsigned count = cloud->size();
@@ -1394,11 +1391,11 @@ namespace ccEntityAction
 		bool withSensor = false;
 		std::vector<ccMesh*> meshes;
 		PointCoordinateType defaultRadius = 0;
+		
 		try
 		{
-			for (size_t i = 0; i < selectedEntities.size(); ++i)
+			for (const auto entity : selectedEntities)
 			{
-				ccHObject	*entity = selectedEntities[i];
 				if (entity->isA(CC_TYPES::POINT_CLOUD))
 				{
 					ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
@@ -1410,7 +1407,8 @@ namespace ccEntityAction
 					}
 					for (unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
 					{
-						if (cloud->hasSensor()){
+						if (cloud->hasSensor())
+						{
 							withSensor = true;
 						}
 					}
@@ -1445,7 +1443,6 @@ namespace ccEntityAction
 		//compute normals for each selected cloud
 		if (!clouds.empty())
 		{
-
 			static CC_LOCAL_MODEL_TYPES s_lastModelType = LS;
 			static ccNormalVectors::Orientation s_lastNormalOrientation = ccNormalVectors::UNDEFINED;
 			static int s_lastMSTNeighborCount = 6;
@@ -1483,13 +1480,14 @@ namespace ccEntityAction
 			pDlg.setAutoClose(false);
 
 			size_t errors = 0;
-			for (size_t i = 0; i < clouds.size(); i++)
+			
+			for (auto cloud : clouds)
 			{
-				ccPointCloud* cloud = clouds[i];
 				Q_ASSERT(cloud != nullptr);
 				
 				bool result = false;
 				bool normalsAlreadyOriented = false;
+				
 				if (useGridStructure && cloud->gridCount())
 				{
 #if 0
@@ -1608,9 +1606,8 @@ namespace ccEntityAction
 			
 			bool computePerVertexNormals = (question.clickedButton() == perVertexButton);
 			
-			for (size_t i = 0; i < meshes.size(); i++)
+			for (auto mesh : meshes)
 			{
-				ccMesh* mesh = meshes[i];
 				Q_ASSERT(mesh != nullptr);
 				
 				//we remove temporarily the mesh as its normals may be removed (and they can be a child object)
@@ -1960,10 +1957,8 @@ namespace ccEntityAction
 		if (coDlg.getMode() == ccComputeOctreeDlg::CUSTOM_BBOX)
 			bbox = coDlg.getCustomBBox();
 
-		for (std::unordered_set<ccGenericPointCloud*>::iterator it = clouds.begin(); it != clouds.end(); ++it)
+		for (const auto cloud : clouds)
 		{
-			ccGenericPointCloud* cloud = *it;
-
 			//we temporarily detach entity, as it may undergo
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
 			MainWindow* instance = dynamic_cast<MainWindow*>(parent);
@@ -1974,7 +1969,7 @@ namespace ccEntityAction
 			//computation
 			QElapsedTimer eTimer;
 			eTimer.start();
-			ccOctree::Shared octree(0);
+			ccOctree::Shared octree(nullptr);
 			switch (coDlg.getMode())
 			{
 			case ccComputeOctreeDlg::DEFAULT:
@@ -1994,7 +1989,7 @@ namespace ccEntityAction
 				}
 				cloud->deleteOctree();
 				octree = ccOctree::Shared(new ccOctree(cloud));
-				if (octree->build(bbox.minCorner(), bbox.maxCorner(), 0, 0, &pDlg) > 0)
+				if (octree->build(bbox.minCorner(), bbox.maxCorner(), nullptr, nullptr, &pDlg) > 0)
 				{
 					ccOctreeProxy* proxy = new ccOctreeProxy(octree);
 					proxy->setDisplay(cloud->getDisplay());
@@ -2096,34 +2091,38 @@ namespace ccEntityAction
 			
 			if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
 			{
+				auto pointCloud = static_cast<ccPointCloud*>(cloud);
+				
 				switch (property)
 				{
-					case CLEAR_PROPERTY::COLORS: //colors
+					case CLEAR_PROPERTY::COLORS:
 						if (cloud->hasColors())
 						{
-							static_cast<ccPointCloud*>(cloud)->unallocateColors();
+							pointCloud->unallocateColors();
 							ent->prepareDisplayForRefresh();
 						}
 						break;
-					case CLEAR_PROPERTY::NORMALS: //normals
+						
+					case CLEAR_PROPERTY::NORMALS:
 						if (cloud->hasNormals())
 						{
-							static_cast<ccPointCloud*>(cloud)->unallocateNorms();
+							pointCloud->unallocateNorms();
 							ent->prepareDisplayForRefresh();
 						}
 						break;
-					case CLEAR_PROPERTY::CURRENT_SCALAR_FIELD: //current sf
+						
+					case CLEAR_PROPERTY::CURRENT_SCALAR_FIELD:
 						if (cloud->hasDisplayedScalarField())
 						{
-							ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-							pc->deleteScalarField(pc->getCurrentDisplayedScalarFieldIndex());
+							pointCloud->deleteScalarField( pointCloud->getCurrentDisplayedScalarFieldIndex() );
 							ent->prepareDisplayForRefresh();
 						}
 						break;
-					case CLEAR_PROPERTY::ALL_SCALAR_FIELDS: //all sf
+						
+					case CLEAR_PROPERTY::ALL_SCALAR_FIELDS:
 						if (cloud->hasScalarFields())
 						{
-							static_cast<ccPointCloud*>(cloud)->deleteAllScalarFields();
+							pointCloud->deleteAllScalarFields();
 							ent->prepareDisplayForRefresh();
 						}
 						break;
@@ -2365,7 +2364,7 @@ namespace ccEntityAction
 				continue;
 			}
 			
-			Q_ASSERT(sf->size() != 0);
+			Q_ASSERT(!sf->empty());
 			
 			if (sf && distrib->computeParameters(*sf))
 			{
@@ -2416,7 +2415,7 @@ namespace ccEntityAction
 				//compute the Chi2 distance
 				{
 					unsigned finalNumberOfClasses = 0;
-					const double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib, pc, 0, finalNumberOfClasses, false, 0, 0, histo.data(), npis.data());
+					const double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib, pc, 0, finalNumberOfClasses, false, nullptr, nullptr, histo.data(), npis.data());
 
 					if (chi2dist >= 0.0)
 					{

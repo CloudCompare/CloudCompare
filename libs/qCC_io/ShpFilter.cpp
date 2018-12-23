@@ -414,7 +414,7 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 	}
 }
 
-CC_FILE_ERROR LoadPolyline(	QFile& file,
+CC_FILE_ERROR LoadPolyline(	QDataStream& shpStream,
 							ccHObject& container,
 							int32_t index,
 							ESRI_SHAPE_TYPE shapeType,
@@ -422,47 +422,28 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 							bool preserveCoordinateShift,
 							bool load2DPolyAs3DPoly = true)
 {
-	char header[40];
-	file.read(header, 40);
-	//check for errors
-	if (file.error() != QFile::NoError)
-		return CC_FERR_READING;
+	// skip record bbox
+	shpStream.skipRawData(4 * sizeof(double));
 
-	//Byte 0: Box
-	{
-		//The Bounding Box for the PolyLine stored in the order Xmin, Ymin, Xmax, Ymax
-		//DGM: ignored
-		//double xMin = qFromLittleEndianD(*reinterpret_cast<double*>(header   ));
-		//double xMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+ 8));
-		//double yMin = qFromLittleEndianD(*reinterpret_cast<double*>(header+16));
-		//double yMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+24));
-	}
+	int32_t numParts, numPoints;
+	shpStream >> numParts >> numPoints;
 
-	//Byte 32: NumParts (The number of parts in the PolyLine)
-	int32_t numParts = qFromLittleEndian<int32_t>(*reinterpret_cast<int32_t*>(header + 32));
 
-	//Byte 36: NumPoints (The total number of points for all parts)
-	int32_t numPoints = qFromLittleEndian<int32_t>(*reinterpret_cast<int32_t*>(header + 36));
-
-	//Byte 40: Parts (An array of length NumParts)
 	//for each part, the index of its first point in the points array
 	std::vector<int32_t> startIndexes;
+	try
 	{
-		try
-		{
-			startIndexes.resize(numParts, 0);
-		}
-		catch (const std::bad_alloc&)
-		{
-			return CC_FERR_NOT_ENOUGH_MEMORY;
-		}
-		for (int32_t i = 0; i != numParts; ++i)
-		{
-			file.read(header, 4);
-			startIndexes[i] = qFromLittleEndian<int32_t>(*reinterpret_cast<int32_t*>(header));
-		}
-		//FIXME: we should use this information and create as many polylines as necessary!
+		startIndexes.resize(numParts, 0);
 	}
+	catch (const std::bad_alloc&)
+	{
+		return CC_FERR_NOT_ENOUGH_MEMORY;
+	}
+	for (int32_t i = 0; i != numParts; ++i)
+	{
+		shpStream >> startIndexes[i];
+	}
+	//FIXME: we should use this information and create as many polylines as necessary!
 
 	//Points (An array of length NumPoints)
 	std::vector<CCVector3> points;
@@ -475,19 +456,14 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 		//not enough memory
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
+
+	for (int32_t i = 0; i < numPoints; ++i)
 	{
-		for (int32_t i = 0; i < numPoints; ++i)
-		{
-			file.read(header, 16);
-			//check for errors
-			if (file.error() != QFile::NoError)
-				return CC_FERR_READING;
-			double x = qFromLittleEndianD(*reinterpret_cast<double*>(header));
-			double y = qFromLittleEndianD(*reinterpret_cast<double*>(header + 8));
-			points[i].x = static_cast<PointCoordinateType>(x + Pshift.x);
-			points[i].y = static_cast<PointCoordinateType>(y + Pshift.y);
-			points[i].z = 0;
-		}
+		double x, y;
+		shpStream >> x >> y;
+		points[i].x = static_cast<PointCoordinateType>(x + Pshift.x);
+		points[i].y = static_cast<PointCoordinateType>(y + Pshift.y);
+		points[i].z = 0;
 	}
 
 	//3D polylines
@@ -495,24 +471,14 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 	if (is3D)
 	{
 		//Z boundaries
-		{
-			file.read(header, 16);
-			//DGM: ignored
-			//double zMin = qFromLittleEndianD(*reinterpret_cast<double*>(header  ));
-			//double zMax = qFromLittleEndianD(*reinterpret_cast<double*>(header+8));
-		}
+		shpStream.skipRawData(2 * sizeof(double));
 
 		//Z coordinates (an array of length NumPoints)
+		for (int32_t i = 0; i < numPoints; ++i)
 		{
-			for (int32_t i = 0; i < numPoints; ++i)
-			{
-				file.read(header, 8);
-				//check for errors
-				if (file.error() != QFile::NoError)
-					return CC_FERR_READING;
-				double z = qFromLittleEndianD(*reinterpret_cast<double*>(header));
-				points[i].z = static_cast<PointCoordinateType>(z + Pshift.z);
-			}
+			double z;
+			shpStream >> z;
+			points[i].z = static_cast<PointCoordinateType>(z + Pshift.z);
 		}
 	}
 
@@ -521,25 +487,19 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 	if (hasMeasurements(shapeType))
 	{
 		//M boundaries
-		{
-			file.read(header, 16);
-			//check for errors
-			if (file.error() != QFile::NoError)
-				return CC_FERR_READING;
-			double mMin = qFromLittleEndianD(*reinterpret_cast<double*>(header));
-			double mMax = qFromLittleEndianD(*reinterpret_cast<double*>(header + 8));
+		double mMin, mMax;
+		shpStream >> mMin >> mMax;
 
-			if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
+		if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
+		{
+			try
 			{
-				try
-				{
-					scalarValues.resize(numPoints);
-				}
-				catch (const std::bad_alloc&)
-				{
-					//not enough memory to load scalar values!
-					ccLog::Warning(QString("[SHP] Polyline #%1: not enough memory to load scalar values!").arg(index));
-				}
+				scalarValues.resize(numPoints);
+			}
+			catch (const std::bad_alloc&)
+			{
+				//not enough memory to load scalar values!
+				ccLog::Warning(QString("[SHP] Polyline #%1: not enough memory to load scalar values!").arg(index));
 			}
 		}
 
@@ -548,13 +508,14 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 		{
 			for (int32_t i = 0; i < numPoints; ++i)
 			{
-				file.read(header, 8);
-				//check for errors
-				if (file.error() != QFile::NoError)
-					return CC_FERR_READING;
-				double m = qFromLittleEndianD(*reinterpret_cast<double*>(header));
-				scalarValues[i] = (m == ESRI_NO_DATA ? NAN_VALUE : static_cast<ScalarType>(m));
+				double m;
+				shpStream >> m;
+				scalarValues[i] = (isESRINoData(m)  ? NAN_VALUE : static_cast<ScalarType>(m));
 			}
+		}
+		else
+		{
+			shpStream.skipRawData(numPoints * sizeof(double));
 		}
 	}
 
@@ -614,26 +575,32 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 
 		if (!scalarValues.empty())
 		{
-			ccScalarField* sf = new ccScalarField("Measures");
-			if (!sf->reserveSafe(vertCount))
+			bool allNans = std::all_of(
+					scalarValues.begin() + firstIndex,
+					scalarValues.begin() + lastIndex,
+					[](ScalarType v) {return std::isnan(v);}
+			);
+			if (!allNans)
 			{
-				ccLog::Warning(QString("[SHP] Polyline #%1.%2: not enough memory to load scalar values!").arg(index).arg(i + 1));
-				sf->release();
-				sf = nullptr;
+				ccScalarField* sf = new ccScalarField("Measures");
+				if (!sf->reserveSafe(vertCount))
+				{
+					ccLog::Warning(QString("[SHP] Polyline #%1.%2: not enough memory to load scalar values!").arg(index).arg(i + 1));
+					sf->release();
+					sf = nullptr;
+				}
+				for (int32_t j = 0; j < vertCount; ++j)
+				{
+					sf->addElement(scalarValues[j + firstIndex]);
+				}
+				sf->computeMinAndMax();
+				int sfIdx = vertices->addScalarField(sf);
+				vertices->setCurrentDisplayedScalarField(sfIdx);
+				vertices->showSF(true);
 			}
-			for (int32_t j = 0; j < vertCount; ++j)
-			{
-				sf->addElement(scalarValues[j + firstIndex]);
-			}
-			sf->computeMinAndMax();
-			int sfIdx = vertices->addScalarField(sf);
-			vertices->setCurrentDisplayedScalarField(sfIdx);
-			vertices->showSF(true);
 		}
-
 		container.addChild(poly);
 	}
-
 	return CC_FERR_NO_ERROR;
 }
 
@@ -922,7 +889,7 @@ CC_FILE_ERROR LoadCloud(QDataStream& shpStream,
 			{
 				double m;
 				shpStream >> m;
-				ScalarType s = m == ESRI_NO_DATA ? NAN_VALUE : static_cast<ScalarType>(m);
+				ScalarType s = isESRINoData(m) ? NAN_VALUE : static_cast<ScalarType>(m);
 				sf->addElement(s);
 			}
 			sf->computeMinAndMax();
@@ -1100,7 +1067,7 @@ CC_FILE_ERROR LoadSinglePoint(	QDataStream& shpStream,
 	{
 		double m;
 		shpStream >> m;
-		if (m > ESRI_NO_DATA)
+		if (!isESRINoData(m))
 		{
 			s = static_cast<ScalarType>(m);
 			//add a SF to the cloud if not done already
@@ -1629,9 +1596,11 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 				is3DShape = true;
 			case ESRI_SHAPE_TYPE::POLYLINE:
 			case ESRI_SHAPE_TYPE::POLYGON:
+			case ESRI_SHAPE_TYPE::POLYLINE_M:
+			case ESRI_SHAPE_TYPE::POLYGON_M:
 			{
 				unsigned childCountBefore = container.getChildrenNumber();
-				error = LoadPolyline(file, container, recordNumber, shapeType, Pshift, preserveCoordinateShift);
+				error = LoadPolyline(shpStream, container, recordNumber, shapeType, Pshift, preserveCoordinateShift);
 				if (error == CC_FERR_NO_ERROR && shapeType == ESRI_SHAPE_TYPE::POLYLINE)
 				{
 					unsigned childCountAfter = container.getChildrenNumber();

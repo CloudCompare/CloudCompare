@@ -56,6 +56,7 @@ using FieldIndexAndName = QPair<int, QString>;
 
 //Specific value for NaN
 static const double ESRI_NO_DATA = -1.0e38;
+
 static const int32_t ESRI_SHAPE_FILE_CODE = 9994;
 static const size_t ESRI_HEADER_SIZE = 100;
 
@@ -69,7 +70,8 @@ static bool s_save3DPolyHeightInDBF = false;
 
 
 //! ESRI Shapefile's shape types
-enum class ESRI_SHAPE_TYPE : int32_t {
+enum class ESRI_SHAPE_TYPE : int32_t
+{
 	NULL_SHAPE		= 0,
 	//below this point are 2D types
 	POINT			= 1,
@@ -162,7 +164,8 @@ static inline bool isESRINoData(double m)
 	return m  <= ESRI_NO_DATA;
 }
 
-struct ShapeFileHeader {
+struct ShapeFileHeader
+{
 	int32_t fileLength = ESRI_HEADER_SIZE;
 	int32_t version = 1000;
 	int32_t shapeTypeInt = static_cast<int32_t >(ESRI_SHAPE_TYPE::NULL_SHAPE);
@@ -459,7 +462,8 @@ static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
 
 	for (int32_t i = 0; i < numPoints; ++i)
 	{
-		double x, y;
+		double x;
+		double y;
 		shpStream >> x >> y;
 		points[i].x = static_cast<PointCoordinateType>(x + Pshift.x);
 		points[i].y = static_cast<PointCoordinateType>(y + Pshift.y);
@@ -487,10 +491,11 @@ static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
 	if (hasMeasurements(shapeType))
 	{
 		//M boundaries
-		double mMin, mMax;
+		double mMin;
+		double mMax;
 		shpStream >> mMin >> mMax;
 
-		if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
+		if (!isESRINoData(mMin) && !isESRINoData(mMax))
 		{
 			try
 			{
@@ -582,7 +587,7 @@ static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
 			);
 			if (!allNans)
 			{
-				ccScalarField* sf = new ccScalarField("Measures");
+				auto* sf = new ccScalarField("Measures");
 				if (!sf->reserveSafe(vertCount))
 				{
 					ccLog::Warning(QString("[SHP] Polyline #%1.%2: not enough memory to load scalar values!").arg(index).arg(i + 1));
@@ -824,7 +829,7 @@ static CC_FILE_ERROR LoadCloud(QDataStream &shpStream,
 	int32_t numPoints;
 	shpStream >> numPoints;
 
-	ccPointCloud* cloud = new ccPointCloud(QString("Cloud #%1").arg(index));
+	auto* cloud = new ccPointCloud(QString("Cloud #%1").arg(index));
 	if (!cloud->reserve(numPoints))
 	{
 		delete cloud;
@@ -868,7 +873,8 @@ static CC_FILE_ERROR LoadCloud(QDataStream &shpStream,
 	{
 		//M boundaries
 		ccScalarField* sf = nullptr;
-		double mMin, mMax;
+		double mMin;
+		double mMax;
 		shpStream >> mMin >> mMax;
 
 		if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
@@ -1048,7 +1054,8 @@ static CC_FILE_ERROR LoadSinglePoint(QDataStream &shpStream,
 		}
 	}
 
-	double x , y;
+	double x;
+	double y;
 	shpStream >> x >> y;
 	CCVector3 P(static_cast<PointCoordinateType>(x + Pshift.x),
 	            static_cast<PointCoordinateType>(y + Pshift.y),
@@ -1501,9 +1508,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 }
 
 
-
-
-CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
+CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container, LoadParameters &parameters)
 {
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly))
@@ -1559,7 +1564,9 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 			ccLog::Warning("[SHP] Something went wrong reading the file");
 			return CC_FERR_READING;
 		}
-		int32_t recordNumber, recordSize, shapeTypeInt;
+		int32_t recordNumber;
+		int32_t recordSize;
+		int32_t shapeTypeInt;
 		shpStream.setByteOrder(QDataStream::BigEndian);
 		shpStream >> recordNumber >> recordSize;
 		recordSize *= 2; //recordSize is measured in 16-bit words

@@ -57,9 +57,9 @@ struct HotZone;
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 class QOpenGLPaintDevice;
-typedef QWindow ccGLWindowParent;
+using ccGLWindowParent = QWindow;
 #else
-typedef QOpenGLWidget ccGLWindowParent;
+using ccGLWindowParent = QOpenGLWidget;
 #endif
 
 
@@ -141,7 +141,7 @@ public:
 	ccGLWindow(QSurfaceFormat* format = nullptr, ccGLWindowParent* parent = nullptr, bool silentInitialization = false);
 
 	//! Destructor
-	virtual ~ccGLWindow();
+	~ccGLWindow() override;
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	//! Returns the parent widget
@@ -169,25 +169,25 @@ public:
 	void renderText(double x, double y, double z, const QString & str, const QFont & font = QFont());
 
 	//inherited from ccGenericGLDisplay
-	virtual void toBeRefreshed() override;
-	virtual void refresh(bool only2D = false) override;
-	virtual void invalidateViewport() override;
-	virtual void deprecate3DLayer() override;
-	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = nullptr, const QFont& font = QFont()) override;
-	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0.0f, const unsigned char* rgbColor = nullptr, const QFont* font = nullptr) override;
-	virtual QFont getTextDisplayFont() const override; //takes rendering zoom into account!
-	virtual QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
-	virtual const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
-	virtual QPointF toCenteredGLCoordinates(int x, int y) const override;
-	virtual QPointF toCornerGLCoordinates(int x, int y) const override;
-	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
+	void toBeRefreshed() override;
+	void refresh(bool only2D = false) override;
+	void invalidateViewport() override;
+	void deprecate3DLayer() override;
+	void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = nullptr, const QFont& font = QFont()) override;
+	void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0.0f, const unsigned char* rgbColor = nullptr, const QFont* font = nullptr) override;
+	QFont getTextDisplayFont() const override; //takes rendering zoom into account!
+	QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
+	const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
+	QPointF toCenteredGLCoordinates(int x, int y) const override;
+	QPointF toCornerGLCoordinates(int x, int y) const override;
+	void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
 #ifdef CC_GL_WINDOW_USE_QWINDOW
-	inline virtual QWidget* asWidget() override { return m_parentWidget; }
+	inline QWidget* asWidget() override { return m_parentWidget; }
 #else
-	inline virtual QWidget* asWidget() override { return this; }
+	inline QWidget* asWidget() override { return this; }
 #endif
-	inline virtual QSize getScreenSize() const override { return size(); }
-	virtual void getGLCameraParameters(ccGLCameraParameters& params) override;
+	inline QSize getScreenSize() const override { return size(); }
+	void getGLCameraParameters(ccGLCameraParameters& params) override;
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -622,7 +622,7 @@ public slots:
 	void zoomGlobal();
 
 	//inherited from ccGenericGLDisplay
-	virtual void redraw(bool only2D = false, bool resetLOD = true) override;
+	void redraw(bool only2D = false, bool resetLOD = true) override;
 
 	//called when receiving mouse wheel is rotated
 	void onWheelEvent(float wheelDelta_deg);
@@ -774,10 +774,10 @@ signals:
 protected: //rendering
 
 	//Default OpenGL functions set
-	typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
+	using ccQOpenGLFunctions = QOpenGLFunctions_2_1;
 
 	//! Returns the set of OpenGL functions
-	inline ccQOpenGLFunctions* functions() const { return context() ? context()->versionFunctions<ccQOpenGLFunctions>() : 0; }
+	inline ccQOpenGLFunctions* functions() const { return context() ? context()->versionFunctions<ccQOpenGLFunctions>() : nullptr; }
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	//! Returns the context (if any)
@@ -914,8 +914,8 @@ protected: //other methods
 	void initializeGL() override { initialize(); }
 	void resizeGL(int w, int h) override;
 	void paintGL() override;
-	virtual void dragEnterEvent(QDragEnterEvent* event) override;
-	virtual void dropEvent(QDropEvent* event) override;
+	void dragEnterEvent(QDragEnterEvent* event) override;
+	void dropEvent(QDropEvent* event) override;
 #endif
 
 	//Graphical features controls

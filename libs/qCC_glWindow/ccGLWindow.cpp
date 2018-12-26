@@ -105,7 +105,7 @@ static const char c_ps_stereoGlassType[] = "stereoGlassType";
 static int s_GlWindowNumber = 0;
 
 // Shader path
-QString	ccGLWindow::s_shaderPath;
+Q_GLOBAL_STATIC( QString, s_shaderPath );
 
 //On some versions of Qt, QGLWidget::renderText seems to need glColorf instead of glColorub!
 // See https://bugreports.qt-project.org/browse/QTBUG-6217
@@ -806,7 +806,9 @@ bool ccGLWindow::initialize()
 				{
 					ccColorRampShader* colorRampShader = new ccColorRampShader();
 					QString error;
-					if (!colorRampShader->loadProgram(QString(), s_shaderPath + QString("/ColorRamp/color_ramp.frag"), error))
+					const QString shaderPath = QStringLiteral( "%1/ColorRamp/color_ramp.frag" ).arg( *s_shaderPath );
+					
+					if (!colorRampShader->loadProgram(QString(), shaderPath, error))
 					{
 						if (!m_silentInitialization)
 							ccLog::Warning(QString("[3D View %1] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
@@ -5842,7 +5844,7 @@ bool ccGLWindow::renderToFile(	QString filename,
 
 void ccGLWindow::setShaderPath( const QString &path )
 {
-	s_shaderPath = path;
+	(*s_shaderPath) = path;
 }
 
 QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
@@ -5970,7 +5972,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 		if (m_activeGLFilter)
 		{
 			QString error;
-			if (!m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), s_shaderPath, error))
+			if (!m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), *s_shaderPath, error))
 			{
 				if (!silent)
 				{
@@ -6117,7 +6119,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	if (glFilter && zoomFactor != 1.0f)
 	{
 		QString error;
-		m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), s_shaderPath, error);
+		m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), *s_shaderPath, error);
 	}
 
 	//we restore viewport parameters
@@ -6207,7 +6209,7 @@ bool ccGLWindow::initGLFilter(int w, int h, bool silent/*=false*/)
 	std::swap(_filter, m_activeGLFilter);
 
 	QString error;
-	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), s_shaderPath, error))
+	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), *s_shaderPath, error))
 	{
 		if (!silent)
 		{

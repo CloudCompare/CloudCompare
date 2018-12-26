@@ -843,7 +843,8 @@ static CC_FILE_ERROR LoadCloud(QDataStream &shpStream,
 	//Points (An array of length NumPoints)
 	for (int32_t i = 0; i < numPoints; ++i)
 	{
-		double  x, y;
+		double x;
+		double y;
 		shpStream >> x >> y;
 		CCVector3 P(static_cast<PointCoordinateType>(x + Pshift.x),
 					static_cast<PointCoordinateType>(y + Pshift.y),

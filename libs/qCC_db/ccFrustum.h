@@ -33,8 +33,7 @@ public:
 		, constCoef(0)
 	{}
 
-	virtual ~Plane()
-	{}
+	virtual ~Plane() = default;
 
 	void setCoefficients(float a, float b, float c, float d)
 	{
@@ -110,9 +109,7 @@ public:
 	{
 	}
 
-	virtual ~AACube()
-	{
-	}
+	virtual ~AACube() = default;
 
 	CCVector3f getVertexP(const CCVector3f& normal) const
 	{
@@ -144,9 +141,7 @@ class Frustum
 {
 public:
 
-	Frustum()
-	{
-	}
+	Frustum() = default;
 
 	Frustum(const ccGLMatrixd& modelViewMat, const ccGLMatrixd& projMat)
 	{
@@ -154,9 +149,7 @@ public:
 		initfromMPMatrix(MP);
 	}
 
-	virtual ~Frustum()
-	{
-	}
+	virtual ~Frustum() = default;
 
 	enum Intersection
 	{

@@ -1122,8 +1122,8 @@ public:
 	}
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const { return true; }
-	virtual bool toFile(QFile& out) const
+	bool isSerializable() const override { return true; }
+	bool toFile(QFile& out) const override
 	{
 		assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
@@ -1134,7 +1134,7 @@ public:
 		return true;
 	}
 
-	virtual bool fromFile(QFile& in, short dataVersion, int flags)
+	bool fromFile(QFile& in, short dataVersion, int flags) override
 	{
 		assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 

@@ -37,10 +37,10 @@ public:
 	{}
 
 	//inherited from ccHObject
-	virtual bool isSerializable() const override { return true; }
+	bool isSerializable() const override { return true; }
 
 	// inherited from ccObject
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CUSTOM_H_OBJECT; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CUSTOM_H_OBJECT; }
 
 	//! Returns the default key for the "class name" metadata
 	/** See ccHObject::New.
@@ -66,7 +66,7 @@ public:
 	ccCustomLeafObject(QString name = QString()) : ccCustomHObject(name) {}
 
 	// inherited from ccCustomHObject
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CUSTOM_LEAF_OBJECT; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CUSTOM_LEAF_OBJECT; }
 };
 
 #endif //CC_CUSTOM_OBJECT_HEADER

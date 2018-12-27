@@ -19,7 +19,7 @@
 #define CC_FLAGS_HEADER
 
 //System
-#include <string.h>
+#include <cstring>
 
 //! Flags
 class ccFlags

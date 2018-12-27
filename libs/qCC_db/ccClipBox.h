@@ -20,8 +20,8 @@
 
 //Local
 #include "ccBBox.h"
-#include "ccHObject.h"
 #include "ccGenericPointCloud.h"
+#include "ccHObject.h"
 #include "ccInteractor.h"
 
 //Qt

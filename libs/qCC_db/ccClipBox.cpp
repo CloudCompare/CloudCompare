@@ -21,20 +21,20 @@
 #include "ccClipBox.h"
 
 //Local
-#include "ccCylinder.h"
 #include "ccCone.h"
+#include "ccCylinder.h"
+#include "ccHObjectCaster.h"
 #include "ccSphere.h"
 #include "ccTorus.h"
-#include "ccHObjectCaster.h"
 
 //system
-#include <assert.h>
+#include <cassert>
 
 //Components geometry
-static QSharedPointer<ccCylinder> c_arrowShaft(0);
-static QSharedPointer<ccCone> c_arrowHead(0);
-static QSharedPointer<ccSphere> c_centralSphere(0);
-static QSharedPointer<ccTorus> c_torus(0);
+static QSharedPointer<ccCylinder> c_arrowShaft(nullptr);
+static QSharedPointer<ccCone> c_arrowHead(nullptr);
+static QSharedPointer<ccSphere> c_centralSphere(nullptr);
+static QSharedPointer<ccTorus> c_torus(nullptr);
 
 void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
@@ -78,9 +78,9 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 	}
 
 	if (!c_arrowShaft)
-		c_arrowShaft = QSharedPointer<ccCylinder>(new ccCylinder(0.15f,0.6f,0,"ArrowShaft",12));
+		c_arrowShaft = QSharedPointer<ccCylinder>(new ccCylinder(0.15f,0.6f,nullptr,"ArrowShaft",12));
 	if (!c_arrowHead)
-		c_arrowHead = QSharedPointer<ccCone>(new ccCone(0.3f,0,0.4f,0,0,0,"ArrowHead",24));
+		c_arrowHead = QSharedPointer<ccCone>(new ccCone(0.3f,0,0.4f,0,0,nullptr,"ArrowHead",24));
 
 	glFunc->glTranslatef(0,0,0.3f);
 	c_arrowShaft->setTempColor(col);
@@ -132,7 +132,7 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 	}
 
 	if (!c_torus)
-		c_torus = QSharedPointer<ccTorus>(new ccTorus(0.2f, 0.4f, 2.0*M_PI, false, 0, 0, "Torus", 12));
+		c_torus = QSharedPointer<ccTorus>(new ccTorus(0.2f, 0.4f, 2.0*M_PI, false, 0, nullptr, "Torus", 12));
 
 	glFunc->glTranslatef(0,0,0.3f);
 	c_torus->setTempColor(col);
@@ -721,7 +721,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//custom arrow 'context'
 		CC_DRAW_CONTEXT componentContext = context;
 		componentContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the arows don't push their own!
-		componentContext.display = 0;
+		componentContext.display = nullptr;
 
 		if (pushName) //2nd level = sub-item
 		{

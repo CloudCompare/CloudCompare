@@ -19,8 +19,8 @@
 #define CC_FAST_MARCHING_DIRECTION_HEADER
 
 //CCLib
-#include <FastMarching.h>
 #include <DgmOctree.h>
+#include <FastMarching.h>
 
 //qCC_db
 #include "ccAdvancedTypes.h"
@@ -44,7 +44,7 @@ public:
 	//! Static entry point (helper)
 	static int OrientNormals(	ccPointCloud* theCloud,
 								unsigned char octreeLevel,
-								ccProgressDialog* progressCb = 0);
+								ccProgressDialog* progressCb = nullptr);
 	//! Default constructor
 	ccFastMarchingForNormsDirection();
 

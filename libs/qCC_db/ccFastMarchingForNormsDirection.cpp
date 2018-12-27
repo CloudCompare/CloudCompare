@@ -18,18 +18,18 @@
 #include "ccFastMarchingForNormsDirection.h"
 
 //Local
-#include "ccNormalVectors.h"
 #include "ccGenericPointCloud.h"
-#include "ccPointCloud.h"
-#include "ccOctree.h"
 #include "ccLog.h"
+#include "ccNormalVectors.h"
+#include "ccOctree.h"
+#include "ccPointCloud.h"
 #include "ccProgressDialog.h"
 #ifdef QT_DEBUG
 #include "ccScalarField.h"
 #endif
 
 //system
-#include <assert.h>
+#include <cassert>
 
 ccFastMarchingForNormsDirection::ccFastMarchingForNormsDirection()
 	: CCLib::FastMarching()

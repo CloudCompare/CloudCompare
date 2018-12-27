@@ -24,9 +24,9 @@
 #include <ccLog.h>
 
 //Qt
+#include <QApplication>
 #include <QEvent>
 #include <QKeyEvent>
-#include <QApplication>
 
 //system
 #include <cassert>
@@ -90,7 +90,7 @@ void ccOverlayDialog::onLinkedWindowDeletion(QObject* object/*=0*/)
 	if (m_processing)
 		stop(false);
 
-	linkWith(0);
+	linkWith(nullptr);
 }
 
 bool ccOverlayDialog::start()
@@ -113,7 +113,7 @@ void ccOverlayDialog::stop(bool accepted)
 	//auto-hide
 	hide();
 
-	linkWith(0);
+	linkWith(nullptr);
 
 	emit processFinished(accepted);
 }

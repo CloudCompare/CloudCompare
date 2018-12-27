@@ -175,7 +175,7 @@ bool ccWaveform::decodeSamples(std::vector<double>& values, const WaveformDescri
 	return true;
 }
 
-bool ccWaveform::toASCII(QString filename, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const
+bool ccWaveform::toASCII(const QString& filename, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const
 {
 	if (descriptor.numberOfSamples == 0)
 	{
@@ -193,7 +193,7 @@ bool ccWaveform::toASCII(QString filename, const WaveformDescriptor& descriptor,
 	return ToASCII(filename, values, descriptor.samplingRate_ps);
 }
 
-bool ccWaveform::ToASCII(QString filename, std::vector<double>& values, uint32_t samplingRate_ps)
+bool ccWaveform::ToASCII(const QString& filename, std::vector<double>& values, uint32_t samplingRate_ps)
 {
 	QFile file(filename);
 	if (!file.open(QFile::Text | QFile::WriteOnly))

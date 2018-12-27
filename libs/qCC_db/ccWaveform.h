@@ -76,10 +76,10 @@ public:
 	bool decodeSamples(std::vector<double>& values, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const;
 
 	//! Exports (real) samples to an ASCII file
-	bool toASCII(QString filename, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const;
+	bool toASCII(const QString& filename, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const;
 
 	//! Helper: exports a series of values as an ASCII file
-	static bool ToASCII(QString filename, std::vector<double>& values, uint32_t samplingRate_ps);
+	static bool ToASCII(const QString& filename, std::vector<double>& values, uint32_t samplingRate_ps);
 
 	//! Returns the sample position in 3D
 	CCVector3 getSamplePos(float i, const CCVector3& P0, const WaveformDescriptor& descriptor) const;
@@ -189,7 +189,7 @@ public:
 	inline bool decodeSamples(std::vector<double>& values) const { return m_w.decodeSamples(values, m_d, m_storage); }
 
 	//! Exports (real) samples to an ASCII file
-	inline bool toASCII(QString filename) const { return m_w.toASCII(filename, m_d, m_storage); }
+	inline bool toASCII(const QString& filename) const { return m_w.toASCII(filename, m_d, m_storage); }
 
 	//! Returns the sample position in 3D
 	inline CCVector3 getSamplePos(float i, const CCVector3& P0) const { return m_w.getSamplePos(i, P0, m_d); }

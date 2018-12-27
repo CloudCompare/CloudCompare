@@ -291,7 +291,7 @@ public:
 	/** \param[in] matText matrix text
 		\param[out] success whether input matrix text is valid or not
 	**/
-	static ccGLMatrixTpl<T> FromString(QString matText, bool& success)
+	static ccGLMatrixTpl<T> FromString(const QString &matText, bool& success)
 	{
 		QStringList valuesStr = matText.split(QRegExp("\\s+"),QString::SkipEmptyParts);
 		if (valuesStr.size() != OPENGL_MATRIX_SIZE)

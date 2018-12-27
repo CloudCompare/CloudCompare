@@ -22,11 +22,11 @@
 template<class T> struct ccSingleton
 {
 	//! Default constructor
-	ccSingleton() : instance(0) {}
+	ccSingleton() : instance(nullptr) {}
 	//! Destructor
 	~ccSingleton() { release(); }
 	//! Releases the current instance
-	inline void release() { if (instance) { delete instance; instance = 0; } }
+	inline void release() { if (instance) { delete instance; instance = nullptr; } }
 	
 	//! Current instance
 	T* instance;

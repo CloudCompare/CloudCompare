@@ -22,16 +22,16 @@
 #include "ccLog.h"
 
 //CCLib
-#include <CCTypes.h>
 #include <CCPlatform.h>
+#include <CCTypes.h>
 
 //System
 #include <cassert>
 #include <cstdint>
 
 //Qt
-#include <QFile>
 #include <QDataStream>
+#include <QFile>
 
 //! Serializable object interface
 class ccSerializableObject

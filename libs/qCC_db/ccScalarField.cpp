@@ -435,7 +435,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 
 		for (unsigned i = 0; i < currentSize(); ++i)
 		{
-			ScalarType val = getValue(i);
+			ScalarType &val = getValue(i);
 			//convert former 'HIDDEN_VALUE' and 'BIG_VALUE' to 'NAN_VALUE'
 			if ((onlyPositiveValues && val < 0) || (!onlyPositiveValues && val >= FORMER_BIG_VALUE))
 			{

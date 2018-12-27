@@ -1092,7 +1092,7 @@ public:
 	//! Scales the whole matrix
 	/** \param coef scaling coef.
 	**/
-	inline void scale(T coef) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] *= coef; }
+	inline void scale(T coef) { for (auto &cell : m_mat) cell *= coef; }
 
 	//! Scales one line of the matrix
 	/** \param lineIndex (0-3)

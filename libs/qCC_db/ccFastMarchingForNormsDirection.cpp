@@ -293,9 +293,9 @@ unsigned ccFastMarchingForNormsDirection::updateResolvedTable(	ccGenericPointClo
 	CCLib::ReferenceCloud Yk(m_octree->associatedCloud());
 
 	unsigned count = 0;
-	for (size_t i = 0; i < m_activeCells.size(); ++i)
+	for (unsigned int cell : m_activeCells)
 	{
-		DirectionCell* aCell = static_cast<DirectionCell*>(m_theGrid[m_activeCells[i]]);
+		DirectionCell* aCell = static_cast<DirectionCell*>(m_theGrid[cell]);
 		if (!m_octree->getPointsInCell(aCell->cellCode, m_gridLevel, &Yk, true))
 		{
 			//not enough memory

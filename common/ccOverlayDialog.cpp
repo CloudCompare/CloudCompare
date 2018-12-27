@@ -143,7 +143,7 @@ bool ccOverlayDialog::eventFilter(QObject *obj, QEvent *e)
 		}
 		else
 		{
-			return QObject::eventFilter(obj, e);
+			return QDialog::eventFilter(obj, e);
 		}
 	}
 	else
@@ -154,6 +154,6 @@ bool ccOverlayDialog::eventFilter(QObject *obj, QEvent *e)
 		}
 		
 		// standard event processing
-		return QObject::eventFilter(obj, e);
+		return QDialog::eventFilter(obj, e);
 	}
 }

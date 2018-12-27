@@ -19,20 +19,19 @@
 
 //CCLib
 #include <Delaunay2dMesh.h>
-//#include <PointProjectionTools.h>
 
 //qCC_db
 #include "ccGenericPointCloud.h"
 #include "ccPointCloud.h"
-#include "ccScalarField.h"
 #include "ccProgressDialog.h"
+#include "ccScalarField.h"
 
 //Qt
 #include <QCoreApplication>
 #include <QMap>
 
 //System
-#include <assert.h>
+#include <cassert>
 
 //default field names
 struct DefaultFieldNames : public QMap<ccRasterGrid::ExportableFields, QString>

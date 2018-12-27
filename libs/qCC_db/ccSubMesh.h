@@ -19,8 +19,8 @@
 #define CC_SUB_MESH_HEADER
 
 //Local
-#include "ccGenericMesh.h"
 #include "ccBBox.h"
+#include "ccGenericMesh.h"
 
 class ccMesh;
 

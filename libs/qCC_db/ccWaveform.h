@@ -10,8 +10,8 @@
 #include <CCGeom.h>
 
 //system
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 
 //! Waveform descriptor
 class QCC_DB_LIB_API WaveformDescriptor : public ccSerializableObject

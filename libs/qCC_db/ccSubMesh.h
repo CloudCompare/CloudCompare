@@ -151,7 +151,7 @@ public:
 		\param removeSelectedFaces specifies if the faces composed only of 'selected' vertices should be removed or not
 		\param indexMap if an index map is provided, it will be used to 'translate' global indexes
 	**/
-	ccSubMesh* createNewSubMeshFromSelection(bool removeSelectedFaces, IndexMap* indexMap = 0);
+	ccSubMesh* createNewSubMeshFromSelection(bool removeSelectedFaces, IndexMap* indexMap = nullptr);
 
 protected:
 

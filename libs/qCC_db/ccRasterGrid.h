@@ -131,7 +131,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 					ProjectionType projectionType,
 					bool interpolateEmptyCells,
 					ProjectionType sfInterpolation = INVALID_PROJECTION_TYPE,
-					ccProgressDialog* progressDialog = 0);
+					ccProgressDialog* progressDialog = nullptr);
 
 	//! Option for handling empty cells
 	enum EmptyCellFillOption {	LEAVE_EMPTY				= 0,

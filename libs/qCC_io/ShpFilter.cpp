@@ -231,13 +231,6 @@ double swapD(double in)
 	return in;
 }
 
-double qFromLittleEndianD(double in)
-{
-#if Q_BYTE_ORDER == Q_BIG_ENDIAN
-	return swapD(in);
-#endif
-	return in;
-}
 
 double qToLittleEndianD(double in)
 {
@@ -428,7 +421,8 @@ static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
 	// skip record bbox
 	shpStream.skipRawData(4 * sizeof(double));
 
-	int32_t numParts, numPoints;
+	int32_t numParts;
+	int32_t numPoints;
 	shpStream >> numParts >> numPoints;
 
 

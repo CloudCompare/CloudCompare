@@ -1559,7 +1559,11 @@ void ccGLWindow::paintGL()
 
 	m_shouldBeRefreshed = false;
 
-	if (!m_stereoModeEnabled && m_autoPickPivotAtCenter && !m_mouseMoved && m_autoPivotCandidate.norm2d() != 0.0)
+	if (	!m_stereoModeEnabled
+		&&	m_autoPickPivotAtCenter
+		&&	!m_mouseMoved
+		&&	m_autoPivotCandidate.norm2d() != 0.0
+		&&	!renderingParams.nextLODState.inProgress)
 	{
 		setPivotPoint(m_autoPivotCandidate, true, false);
 	}
@@ -1606,7 +1610,7 @@ void ccGLWindow::paintGL()
 			{
 				qint64 displayTime_ms = m_timer.elapsed() - startTime_ms;
 				//we try to refresh LOD levels at a regular pace
-				qint64 baseLODRefreshTime_ms = 50;
+				static const qint64 baseLODRefreshTime_ms = 50;
 
 				m_LODPendingRefresh = true;
 				m_LODPendingIgnore = false;
@@ -1629,7 +1633,7 @@ void ccGLWindow::renderNextLODLevel()
 	m_LODPendingRefresh = false;
 	if (m_currentLODState.inProgress && m_currentLODState.level != 0 && !m_LODPendingIgnore)
 	{
-		ccLog::PrintDebug(QString("[renderNextLODLevel] Confirmed"));
+		ccLog::PrintDebug(QString("[renderNextLODLevel] Level %1 - index %2 confirmed").arg(m_currentLODState.level).arg(m_currentLODState.startIndex));
 		QApplication::processEvents();
 		requestUpdate();
 	}

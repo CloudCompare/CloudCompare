@@ -25,7 +25,7 @@ namespace ccFileUtils
 	inline QString	defaultDocPath()
 	{
 		// note that according to the docs the QStandardPaths::DocumentsLocation path is never empty
-		return QStandardPaths::standardLocations( QStandardPaths::DocumentsLocation ).first();
+		return QStandardPaths::standardLocations( QStandardPaths::DocumentsLocation ).constFirst();
 	}
 }
 #endif

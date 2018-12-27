@@ -44,10 +44,6 @@ ccSubMesh::ccSubMesh(ccMesh* parentMesh)
 	showSF(parentMesh ? parentMesh->sfShown() : true);
 }
 
-ccSubMesh::~ccSubMesh()
-{
-}
-
 void ccSubMesh::setAssociatedMesh(ccMesh* mesh, bool unlinkPreviousOne/*=true*/)
 {
 	if (m_associatedMesh == mesh)

@@ -160,23 +160,23 @@ struct QCC_DB_LIB_API ccRasterGrid
 		int i = static_cast<int>((relativePos.u[X] / gridStep + 0.5));
 		int j = static_cast<int>((relativePos.u[Y] / gridStep + 0.5));
 
-		return std::pair<int, int>(i, j);
+		return {i, j};
 	}
 
 	//! Computes the position of the center of a given cell
 	CCVector2d computeCellCenter(int i, int j, unsigned char X, unsigned char Y) const
 	{
-		return CCVector2d(minCorner.u[X] + (i + 0.5) * gridStep, minCorner.u[Y] + (j + 0.5) * gridStep);
+		return {minCorner.u[X] + (i + 0.5) * gridStep, minCorner.u[Y] + (j + 0.5) * gridStep};
 	}
 
 	//! Row
-	typedef std::vector<ccRasterCell> Row;
+	using Row = std::vector<ccRasterCell>;
 
 	//! All cells
 	std::vector<Row> rows;
 
 	//! Scalar field
-	typedef std::vector<double> SF;
+	using SF = std::vector<double>;
 
 	//! Associated scalar fields
 	std::vector<SF> scalarFields;

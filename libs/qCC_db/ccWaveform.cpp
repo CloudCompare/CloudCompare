@@ -62,10 +62,6 @@ ccWaveform::ccWaveform(uint8_t descriptorID/*=0*/)
 	, m_returnIndex(1)
 {
 }
-	
-ccWaveform::~ccWaveform()
-{
-}
 
 void ccWaveform::setDataDescription(uint64_t dataOffset, uint32_t byteCount)
 {

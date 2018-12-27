@@ -28,9 +28,9 @@ public:
 	bool operator == (const WaveformDescriptor& d) const { return	!(*this != d); }
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const override { return true; }
-	virtual bool toFile(QFile& out) const override;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool isSerializable() const override { return true; }
+	bool toFile(QFile& out) const override;
+	bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	uint32_t numberOfSamples;	//!< Number of samples
 	uint32_t samplingRate_ps;	//!< Sampling rate in pico seconds
@@ -50,7 +50,7 @@ public:
 	ccWaveform(uint8_t descriptorID = 0);
 	
 	//! Destructor
-	virtual ~ccWaveform();
+	~ccWaveform() override = default;
 
 	//! Returns the associated descriptor (ID)
 	/** \warning A value of zero indicates that there is no associated waveform data.
@@ -117,11 +117,9 @@ public:
 	void setReturnIndex(uint8_t index) { m_returnIndex = index; }
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const override { return true; }
-	virtual bool toFile(QFile& out) const override;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
-
-protected: //methods
+	bool isSerializable() const override { return true; }
+	bool toFile(QFile& out) const override;
+	bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 protected: //members
 
@@ -168,13 +166,6 @@ public:
 		: m_w(w)
 		, m_d(d)
 		, m_storage(storage)
-	{}
-
-	//! Copy constructor
-	ccWaveformProxy(const ccWaveformProxy& p)
-		: m_w(p.m_w)
-		, m_d(p.m_d)
-		, m_storage(p.m_storage)
 	{}
 
 	//! Returns whether the waveform (proxy) is valid or not

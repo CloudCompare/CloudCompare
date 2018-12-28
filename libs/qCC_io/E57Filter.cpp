@@ -805,7 +805,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 	return result;
 }
 
-static bool NodeStructureToTree(ccHObject* currentTreeNode, const e57::Node currentE57Node)
+static bool NodeStructureToTree(ccHObject* currentTreeNode, const e57::Node &currentE57Node)
 {
 	assert(currentTreeNode);
 	ccHObject* obj = new ccHObject(currentE57Node.elementName().c_str());

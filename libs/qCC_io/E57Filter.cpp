@@ -710,9 +710,8 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		//Extension for normals
 		bool hasNormals = false;
 
-		for (size_t i = 0; i < scans.size(); ++i)
+		for (auto cloud : scans)
 		{
-			ccPointCloud* cloud = scans[i];
 			QString scanGUID = GetNewGuid();
 
 			//we should only add the "normals" extension once
@@ -2051,6 +2050,7 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 	case E57_CYLINDRICAL:
 	case E57_SPHERICAL:
 		ccLog::Warning("[E57] Unhandled camera type (image will be loaded as is)");
+		Q_FALLTHROUGH();
 	case E57_VISUAL:
 		imageObj = new ccImage();
 		break;

@@ -52,7 +52,7 @@ public:
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 
 	//! Default constructor
-	ShpFilter() : FileIOFilter(), m_closedPolylinesAsPolygons(false) {}
+	ShpFilter() : FileIOFilter(), m_closedPolylinesAsPolygons(true) {}
 
 	//! Special method to save multiple entities with attributes
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters);

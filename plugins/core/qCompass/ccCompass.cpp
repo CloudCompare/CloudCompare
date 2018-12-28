@@ -2064,7 +2064,7 @@ void ccCompass::estimateStructureNormals()
 					
 					CCLib::DgmOctree::NeighboursSet neighbours;
 					d = -1.0;
-					unsigned pointIDIdx = points[r]->getScalarFieldIndexByName("PointID");
+
 					//loop through points in this surface
 					for (unsigned p = 0; p < points[r]->size(); p++)
 					{
@@ -2852,8 +2852,6 @@ void ccCompass::estimateP21()
 	prg.update(0.0);
 
 	//loop through points in the output cloud
-	float approxArea = M_PI * searchR * searchR;
-	int n_trace;
 	for (unsigned p = 0; p < outputCloud->size(); p++)
 	{
 		//keep progress bar up to date
@@ -2867,7 +2865,7 @@ void ccCompass::estimateP21()
 
 		//get number of structure points in this neighbourhood
 		region.clear();
-		n_trace = trace_oct->getPointsInSphericalNeighbourhood(*outputCloud->getPoint(p), searchR, region, trace_level);
+		trace_oct->getPointsInSphericalNeighbourhood(*outputCloud->getPoint(p), searchR, region, trace_level);
 
 		//calculate total weight (think length) of structure points by summing weights
 		float sum = 0;
@@ -2883,8 +2881,7 @@ void ccCompass::estimateP21()
 	//loop through points in output cloud again, but this time calculate surface area in regions where n_trace wasn't zero
 	prg.setInfo("Calculating patch areas...");
 	ccOctree::Shared outcrop_oct = outputCloud->computeOctree();
-	unsigned char outcrop_level = outcrop_oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(searchR);
-	int n_outcrop;
+	int n_outcrop = 0;
 	for (unsigned p = 0; p < outputCloud->size(); p++)
 	{
 		float sum = P21->getValue(p);
@@ -3602,7 +3599,7 @@ void ccCompass::importLineations()
 		lineation->addPointIndex(0);
 		lineation->addPointIndex(1);
 		lineation->updateMetadata();
-		lineation->setName(QString::asprintf("%d->%d", (int) plunge, (int) trend));
+		lineation->setName(QStringLiteral("%1->%2").arg( qRound( plunge ) ).arg( qRound( trend ) ));
 		cld->addChild(lineation);
 		m_app->addToDB(lineation, false, true, false, false);
 	}

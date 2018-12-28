@@ -410,24 +410,24 @@ unsigned ccHObject::filterChildren(	Container& filteredChildren,
 									bool strict/*=false*/,
 									ccGenericGLDisplay* inDisplay/*=0*/) const
 {
-	for (Container::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
+	for (auto child : m_children)
 	{
-		if (	(!strict && (*it)->isKindOf(filter))
-			||	( strict && (*it)->isA(filter)))
+		if (	(!strict && child->isKindOf(filter))
+			||	( strict && child->isA(filter)))
 		{
-			if (!inDisplay || (*it)->getDisplay() == inDisplay)
+			if (!inDisplay || child->getDisplay() == inDisplay)
 			{
 				//warning: we have to handle unicity as a sibling may be in the same container as its parent!
-				if (std::find(filteredChildren.begin(), filteredChildren.end(), *it) == filteredChildren.end()) //not yet in output vector?
+				if (std::find(filteredChildren.begin(), filteredChildren.end(), child) == filteredChildren.end()) //not yet in output vector?
 				{
-					filteredChildren.push_back(*it);
+					filteredChildren.push_back(child);
 				}
 			}
 		}
 
 		if (recursive)
 		{
-			(*it)->filterChildren(filteredChildren, true, filter, strict, inDisplay);
+			child->filterChildren(filteredChildren, true, filter, strict, inDisplay);
 		}
 	}
 
@@ -462,9 +462,8 @@ void ccHObject::transferChild(ccHObject* child, ccHObject& newParent)
 
 void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent/*=false*/)
 {
-	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
+	for (auto child : m_children)
 	{
-		ccHObject* child = *it;
 		//remove link from old parent
 		int childDependencyFlags = child->getDependencyFlagsWith(this);
 		int fatherDependencyFlags = getDependencyFlagsWith(child);
@@ -537,10 +536,12 @@ ccBBox ccHObject::getBB_recursive(bool withGLFeatures/*=false*/, bool onlyEnable
 {
 	ccBBox box = getOwnBB(withGLFeatures);
 
-	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
+	for (auto child : m_children)
 	{
-		if (!onlyEnabledChildren || (*it)->isEnabled())
-			box += (*it)->getBB_recursive(withGLFeatures,onlyEnabledChildren);
+		if (!onlyEnabledChildren || child->isEnabled())
+		{
+			box += child->getBB_recursive(withGLFeatures,onlyEnabledChildren);
+		}
 	}
 
 	return box;
@@ -553,14 +554,14 @@ ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay
 	if (!display || display == m_currentDisplay)
 		box = getOwnBB(true);
 
-	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
+	for (auto child : m_children)
 	{
-		if ((*it)->isEnabled())
+		if (child->isEnabled())
 		{
-			ccBBox childBox = (*it)->getDisplayBB_recursive(true, display);
-			if ((*it)->isGLTransEnabled())
+			ccBBox childBox = child->getDisplayBB_recursive(true, display);
+			if (child->isGLTransEnabled())
 			{
-				childBox = childBox * (*it)->getGLTransformation();
+				childBox = childBox * child->getGLTransformation();
 			}
 			box += childBox;
 		}
@@ -747,9 +748,11 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	//draw entity's children
-	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
-		(*it)->draw(context);
-
+	for (auto child : m_children)
+	{
+		child->draw(context);
+	}
+	
 	//if the entity is currently selected, we draw its bounding-box
 	if (m_selected && draw3D && drawInThisContext && !MACRO_DrawEntityNames(context) && context.currentLODLevel == 0)
 	{
@@ -791,8 +794,8 @@ void ccHObject::applyGLTransformation_recursive(const ccGLMatrix* transInput/*=n
 		notifyGeometryUpdate();
 	}
 
-	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-		(*it)->applyGLTransformation_recursive(transToApply);
+	for (auto child : m_children)
+		child->applyGLTransformation_recursive(transToApply);
 
 	if (m_glTransEnabled)
 		resetGLTransformation();
@@ -802,11 +805,13 @@ unsigned ccHObject::findMaxUniqueID_recursive() const
 {
 	unsigned id = getUniqueID();
 
-	for (Container::const_iterator it = m_children.begin(); it!=m_children.end(); ++it)
+	for (auto child : m_children)
 	{
-		unsigned childMaxID = (*it)->findMaxUniqueID_recursive();
+		unsigned childMaxID = child->findMaxUniqueID_recursive();
 		if (id < childMaxID)
+		{
 			id = childMaxID;
+		}
 	}
 
 	return id;
@@ -839,10 +844,8 @@ void ccHObject::detachChild(ccHObject* child)
 
 void ccHObject::detatchAllChildren()
 {
-	for (Container::iterator it=m_children.begin(); it!=m_children.end(); ++it)
+	for (auto child : m_children)
 	{
-		ccHObject* child = *it;
-
 		//remove any dependency (bilateral)
 		removeDependencyWith(child);
 		child->removeDependencyWith(this);
@@ -938,18 +941,23 @@ bool ccHObject::toFile(QFile& out) const
 
 	//(serializable) child count (dataVersion >= 20)
 	uint32_t serializableCount = 0;
-	for (unsigned i = 0; i < m_children.size(); ++i)
-		if (m_children[i]->isSerializable())
+	for (auto child : m_children)
+	{
+		if (child->isSerializable())
+		{
 			++serializableCount;
+		}
+	}
+	
 	if (out.write(reinterpret_cast<const char*>(&serializableCount), sizeof(uint32_t)) < 0)
 		return WriteError();
 
 	//write serializable children (if any)
-	for (unsigned i = 0; i < m_children.size(); ++i)
+	for (auto child : m_children)
 	{
-		if (m_children[i]->isSerializable())
+		if (child->isSerializable())
 		{
-			if (!m_children[i]->toFile(out))
+			if (!child->toFile(out))
 				return false;
 		}
 	}

@@ -2370,6 +2370,7 @@ void ccCompass::estimateStrain()
 				prg.update(100.0 * idx / float(nx*ny*nz));
 				if (prg.isCancelRequested())
 				{
+					delete blocks;
 					return;
 				}
 

@@ -22,7 +22,7 @@
 #include "ccLog.h"
 
 //! Association of an angle and the corresponding number of rows/columns
-typedef std::pair<PointCoordinateType,unsigned> AngleAndSpan;
+using AngleAndSpan = std::pair<PointCoordinateType,unsigned>;
 
 bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 										const ccPointCloud::Grid::Shared grid,
@@ -298,7 +298,7 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud
 	GridParameters parameters;
 	if (!DetectParameters(cloud, grid, parameters, true, cloudToSensorTrans))
 	{
-		return 0;
+		return nullptr;
 	}
 
 	ccGBLSensor* sensor = new ccGBLSensor(ccGBLSensor::YAW_THEN_PITCH);

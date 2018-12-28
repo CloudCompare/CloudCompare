@@ -584,7 +584,7 @@ ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay
 
 bool ccHObject::isDisplayed() const
 {
-	return (getDisplay() != 0) && isVisible() && isBranchEnabled();
+	return (getDisplay() != nullptr) && isVisible() && isBranchEnabled();
 }
 
 bool ccHObject::isDisplayedIn(ccGenericGLDisplay* display) const
@@ -678,7 +678,7 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 									static_cast<int>(Q2D.y),
 									ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
 									0.75f,
-									0,
+									nullptr,
 									&font);
 }
 

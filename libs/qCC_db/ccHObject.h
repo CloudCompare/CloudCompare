@@ -37,7 +37,7 @@ public: //construction
 	ccHObject(const ccHObject& object);
 
 	//! Default destructor
-	 ~ccHObject() override;
+	~ccHObject() override;
 
 	//! Static factory
 	/** Warning: objects depending on other structures (such as meshes 

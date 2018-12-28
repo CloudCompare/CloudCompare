@@ -22,8 +22,8 @@
 
 //Local
 #include "ccPointCloud.h"
-#include "ccSphere.h"
 #include "ccProgressDialog.h"
+#include "ccSphere.h"
 
 //Qt
 #include <QCoreApplication>

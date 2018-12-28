@@ -1477,7 +1477,7 @@ void ccCompass::estimateStructureNormals()
 	for (int _d = 0; _d < datasets.size(); _d++)
 	{
 		//update progress dialog
-		prg.setInfo(QString::asprintf("Processing %d of %d datasets: Calculating fit planes...", _d+1, datasets.size()));
+		prg.setInfo(QStringLiteral("Processing %1 of %2 datasets: Calculating fit planes...").arg( _d+1 ).arg( datasets.size() ));
 		prg.update(0.0f);
 		if (prg.isCancelRequested()) {
 			break;
@@ -1895,7 +1895,7 @@ void ccCompass::estimateStructureNormals()
 				for (unsigned p = 0; p < px.size(); p++) 
 				{
 					//update progress dialog
-					prg.setInfo(QString::asprintf("Processing %d of %d datasets: Sampling points...", _d + 1, datasets.size()));
+					prg.setInfo(QStringLiteral("Processing %1 of %2 datasets: Sampling points...").arg( _d + 1 ).arg( datasets.size() ));
 					prg.update(100.0f * p / (float)px.size());
 					if (prg.isCancelRequested()) {
 						//cleanup
@@ -2024,7 +2024,7 @@ void ccCompass::estimateStructureNormals()
 		if (regions[0] != nullptr && regions[1] != nullptr && calcThickness) //have both surfaces been defined?
 		{
 			if (points[0]->size() > 0 && points[1]->size() > 0) { //do both surfaces have points in them?
-				prg.setInfo(QString::asprintf("Processing %d of %d datasets: Estimating thickness...", _d + 1, datasets.size()));
+				prg.setInfo(QStringLiteral("Processing %1 of %2 datasets: Estimating thickness...").arg( _d + 1 ).arg( datasets.size() ));
 				for (int r = 0; r < 2; r++)
 				{
 					//make scalar field
@@ -2324,7 +2324,12 @@ void ccCompass::estimateStrain()
 				else
 				{
 					//n.b. this *should* never happen!
-					m_app->dispToConsole(QString::asprintf("[ccCompass] Error: cell %d is outside of mesh bounds (with total size = %d [%d,%d,%d]).", idx, geoObjectBins.size(), nx, ny, nz),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+					const QString message = QStringLiteral( "[ccCompass] Error: cell %1 is outside of mesh bounds (with total size = %2 [%3,%4,%5])." )
+											.arg( idx )
+											.arg( geoObjectBins.size() )
+											.arg( nx ).arg( ny ).arg( nz );
+					
+					m_app->dispToConsole( message, ccMainAppInterface::ERR_CONSOLE_MESSAGE );
 					return;
 				}
 			}

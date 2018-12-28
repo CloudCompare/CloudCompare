@@ -53,7 +53,7 @@ public: //construction
 	/** Two strings are used as keys, one for the plugin name and one for the class name.
 		Those strings will typically be saved as metadata of a custom object
 	**/
-	static ccHObject* New(QString pluginId, QString classId, const char* name = nullptr);
+	static ccHObject* New(const QString& pluginId, const QString& classId, const char* name = nullptr);
 
 public: //base members access
 

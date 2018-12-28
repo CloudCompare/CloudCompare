@@ -208,7 +208,7 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 	return nullptr;
 }
 
-ccHObject* ccHObject::New(QString pluginId, QString classId, const char* name)
+ccHObject* ccHObject::New(const QString& pluginId, const QString& classId, const char* name)
 {
 	ccExternalFactory::Container::Shared externalFactories = ccExternalFactory::Container::GetUniqueInstance();
 	if (!externalFactories)
@@ -224,12 +224,7 @@ ccHObject* ccHObject::New(QString pluginId, QString classId, const char* name)
 	
 	ccHObject* obj = factory->buildObject(classId);
 
-	if (!obj)
-	{
-		return nullptr;
-	}
-	
-	if (name)
+	if (name && obj)
 	{
 		obj->setName(name);
 	}

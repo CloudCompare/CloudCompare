@@ -67,7 +67,7 @@ ccPointCloud::ccPointCloud(QString name) throw()
 	, m_currentDisplayedScalarFieldIndex(-1)
 	, m_visibilityCheckEnabled(false)
 	, m_lod(nullptr)
-	, m_fwfData(0)
+	, m_fwfData(nullptr)
 {
 	setName(name); //sadly we cannot use the ccGenericPointCloud constructor argument
 	showSF(false);
@@ -419,7 +419,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 
 	if (importScanners)
 	{
-	//on insere les objets "capteur" (pas de copie ici, la même instance peut-être partagee par plusieurs listes)
+	//on insere les objets "capteur" (pas de copie ici, la meme instance peut-etre partagee par plusieurs listes)
 	for (i=1;i<=source->getNumberOfSensors();++i)
 	setSensor(source->_getSensor(i),i);
 	}
@@ -991,7 +991,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				//ccGenericMesh* addedTri = mesh;
 
 				//or clone?
-				ccMesh* cloneMesh = mesh->cloneMesh(mesh->getAssociatedCloud() == addedCloud ? this : 0);
+				ccMesh* cloneMesh = mesh->cloneMesh(mesh->getAssociatedCloud() == addedCloud ? this : nullptr);
 				if (cloneMesh)
 				{
 					//change mesh vertices
@@ -1134,7 +1134,7 @@ bool ccPointCloud::reserveTheRGBTable()
 
 bool ccPointCloud::resizeTheRGBTable(bool fillWithWhite/*=false*/)
 {
-	if (m_points.size() == 0)
+	if (m_points.empty())
 	{
 		ccLog::Warning("[ccPointCloud::resizeTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
 		return false;
@@ -1192,7 +1192,7 @@ bool ccPointCloud::reserveTheNormsTable()
 
 bool ccPointCloud::resizeTheNormsTable()
 {
-	if (m_points.size() == 0)
+	if (m_points.empty())
 	{
 		ccLog::Warning("[ccPointCloud::resizeTheNormsTable] Internal error: properties (re)allocation before points allocation is forbidden!");
 		return false;
@@ -1222,7 +1222,7 @@ bool ccPointCloud::resizeTheNormsTable()
 
 bool ccPointCloud::compressFWFData()
 {
-	if (!m_fwfData || m_fwfData->size() == 0)
+	if (!m_fwfData || m_fwfData->empty())
 	{
 		return false;
 	}
@@ -1323,7 +1323,7 @@ bool ccPointCloud::hasFWF() const
 {
 	return		m_fwfData
 			&&	!m_fwfData->empty()
-			&&	m_fwfWaveforms.size();
+			&&	!m_fwfWaveforms.empty();
 }
 
 ccWaveformProxy ccPointCloud::waveformProxy(unsigned index) const
@@ -2227,7 +2227,7 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 		{
 			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
 			int normalDataShift = m_vboManager.vbos[chunkIndex]->normalShift;
-			glFunc->glNormalPointer(GL_COORD_TYPE, decimStep * 3 * sizeof(PointCoordinateType), (const GLvoid*)(start + normalDataShift));
+			glFunc->glNormalPointer(GL_COORD_TYPE, decimStep * 3 * sizeof(PointCoordinateType), static_cast<const GLvoid*>(start + normalDataShift));
 			m_vboManager.vbos[chunkIndex]->release();
 		}
 		else
@@ -2284,7 +2284,7 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 		{
 			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
 			int colorDataShift = m_vboManager.vbos[chunkIndex]->rgbShift;
-			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, decimStep * 3 * sizeof(ColorCompType), (const GLvoid*)(start + colorDataShift));
+			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, decimStep * 3 * sizeof(ColorCompType), static_cast<const GLvoid*>(start + colorDataShift));
 			m_vboManager.vbos[chunkIndex]->release();
 		}
 		else
@@ -2328,7 +2328,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 		{
 			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
 			int colorDataShift = m_vboManager.vbos[chunkIndex]->rgbShift;
-			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, decimStep * 3 * sizeof(ColorCompType), (const GLvoid*)(start + colorDataShift));
+			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, decimStep * 3 * sizeof(ColorCompType), static_cast<const GLvoid*>(start + colorDataShift));
 			m_vboManager.vbos[chunkIndex]->release();
 		}
 		else
@@ -2497,7 +2497,7 @@ struct DisplayDesc : LODLevelDesc
 
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	if (m_points.size() == 0)
+	if (m_points.empty())
 		return;
 
 	//get the set of OpenGL functions (version 2.1)
@@ -2591,7 +2591,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								Frustum frustum(camera.modelViewMat, camera.projectionMat);
 
 								//first time: we flag the cells visibility and count the number of visible points
-								m_lod->flagVisibility(frustum, m_clipPlanes.empty() ? 0 : &m_clipPlanes);
+								m_lod->flagVisibility(frustum, m_clipPlanes.empty() ? nullptr : &m_clipPlanes);
 							}
 
 							unsigned remainingPointsAtThisLevel = 0;
@@ -4809,14 +4809,14 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			{
 				m_vboManager.vbos[i]->destroy();
 				delete m_vboManager.vbos[i];
-				m_vboManager.vbos[i] = 0;
+				m_vboManager.vbos[i] = nullptr;
 			}
 		}
 
 		//resize the container
 		try
 		{
-			m_vboManager.vbos.resize(chunksCount, 0);
+			m_vboManager.vbos.resize(chunksCount, nullptr);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -4953,7 +4953,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			{
 				m_vboManager.vbos[i]->destroy();
 				delete m_vboManager.vbos[i];
-				m_vboManager.vbos[i] = 0;
+				m_vboManager.vbos[i] = nullptr;
 
 				//we can stop here
 				if (i == 0)
@@ -5065,7 +5065,7 @@ void ccPointCloud::releaseVBOs()
 			{
 				m_vboManager.vbos[i]->destroy();
 				delete m_vboManager.vbos[i];
-				m_vboManager.vbos[i] = 0;
+				m_vboManager.vbos[i] = nullptr;
 			}
 		}
 	}
@@ -5078,7 +5078,7 @@ void ccPointCloud::releaseVBOs()
 	m_vboManager.hasColors = false;
 	m_vboManager.hasNormals = false;
 	m_vboManager.colorIsSF = false;
-	m_vboManager.sourceSF = 0;
+	m_vboManager.sourceSF = nullptr;
 	m_vboManager.totalMemSizeBytes = 0;
 	m_vboManager.state = vboSet::NEW;
 }

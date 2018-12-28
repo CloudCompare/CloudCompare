@@ -76,7 +76,7 @@ public:
 	ccPointCloud(QString name = QString()) throw();
 
 	//! Default destructor
-	virtual ~ccPointCloud();
+	~ccPointCloud() override;
 
 	//! Returns class ID
 	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POINT_CLOUD; }

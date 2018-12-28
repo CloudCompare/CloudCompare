@@ -274,8 +274,7 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 		{
 			verts->clear();
 			m_triVertIndexes->clear();
-			if (normsTable)
-				delete normsTable;
+			delete normsTable;
 			return false;
 		}
 

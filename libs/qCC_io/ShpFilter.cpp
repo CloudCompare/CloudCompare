@@ -28,27 +28,17 @@
 #include <ccPolyline.h>
 #include <ccGenericPointCloud.h>
 #include <ccGenericMesh.h>
-#include <ccHObjectCaster.h>
-#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 #include <ccProgressDialog.h>
 
 //Qt
-#include <QString>
-#include <QFile>
 #include <QFileInfo>
-#include <QApplication>
-#include <QtEndian>
-#include <QDialog>
-#include <QMap>
 
 //CCLib
-#include <Neighbourhood.h>
 #include <MeshSamplingTools.h>
 
 //System
-#include <string.h>
 #include <array>
 
 
@@ -265,7 +255,8 @@ static bool bBoxOfHObjectContainer(const ccHObject::Container& objects, CCVector
 	bool isValid = false;
 	for (ccHObject *obj : objects)
 	{
-		CCVector3d minC, maxC;
+		CCVector3d minC;
+		CCVector3d maxC;
 		if (obj->getGlobalBB(minC, maxC))
 		{
 			if (isValid)
@@ -871,7 +862,8 @@ static CC_FILE_ERROR SavePolyline(ccPolyline *poly,
 	out.setByteOrder(QDataStream::LittleEndian);
 	out << static_cast<int32_t>(outputShapeType);
 
-	CCVector3d bbMing, bbMaxg;
+	CCVector3d bbMing;
+	CCVector3d bbMaxg;
 	poly->getGlobalBB(bbMing, bbMaxg);
 	out << bbMing.u[X] << bbMing.u[Y] << bbMaxg.u[X] << bbMaxg.u[Y];
 
@@ -1084,7 +1076,8 @@ static CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QDataStream& out, i
 	out.setByteOrder(QDataStream::BigEndian);
 	out << recordNumber << recordSize;
 
-	CCVector3d bbMing, bbMaxg;
+	CCVector3d bbMing;
+	CCVector3d bbMaxg;
 	cloud->getGlobalBB(bbMing, bbMaxg);
 
 	int64_t recordStart = out.device()->pos();

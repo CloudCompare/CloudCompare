@@ -34,7 +34,7 @@ public:
 		\param name name
 		\param transMat optional 3D transformation applied to the primitive vertices (can be set afterwards with ccDrawableObject::setGLTransformation + ccDrawableObject::applyGLTransformation_recursive)
 	**/
-	ccGenericPrimitive(QString name = QString(), const ccGLMatrix* transMat = 0);
+	ccGenericPrimitive(QString name = QString(), const ccGLMatrix* transMat = nullptr);
 
 	//! Returns type name (sphere, cylinder, etc.)
 	virtual QString getTypeName() const = 0;
@@ -43,7 +43,7 @@ public:
 	virtual ccGenericPrimitive* clone() const = 0;
 
 	//! Returns class ID
-	virtual inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::PRIMITIVE; }
+	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::PRIMITIVE; }
 
 	//! Sets primitive color (shortcut)
 	/** \param col rgb color
@@ -83,16 +83,16 @@ public:
 	virtual inline const ccGLMatrix& getTransformation() const { return m_transformation; }
 
 	//inherited methods (ccHObject)
-	virtual const ccGLMatrix& getGLTransformationHistory() const override;
+	const ccGLMatrix& getGLTransformationHistory() const override;
 
 protected:
 
 	//! Inherited from ccGenericMesh
-	virtual void applyGLTransformation(const ccGLMatrix& trans) override;
+	void applyGLTransformation(const ccGLMatrix& trans) override;
 
 	//inherited from ccMesh
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//! Builds primitive
 	/** Transformation will be applied afterwards!

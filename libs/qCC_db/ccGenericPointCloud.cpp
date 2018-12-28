@@ -305,7 +305,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		ccOctree::Shared octree = getOctree();
 		if (!octree && autoComputeOctree)
 		{
-			ccProgressDialog pDlg(false, getDisplay() ? getDisplay()->asWidget() : 0);
+			ccProgressDialog pDlg(false, getDisplay() ? getDisplay()->asWidget() : nullptr);
 			octree = computeOctree(&pDlg);
 		}
 

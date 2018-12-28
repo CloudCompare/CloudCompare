@@ -152,12 +152,13 @@ struct vlabel
 };
 
 //! A set of 'vlabel' structures
-typedef std::list<vlabel> vlabelSet;
+using vlabelSet = std::list<vlabel>;
 
 //helper: returns the neighbouring labels at a given position
 //(first: above label, second: below label)
 //Warning: set must be already sorted!
-typedef std::pair<vlabelSet::iterator,vlabelSet::iterator> vlabelPair;
+using vlabelPair = std::pair<vlabelSet::iterator,vlabelSet::iterator>;
+
 static vlabelPair GetVLabelsAround(int y, vlabelSet& set)
 {
 	if (set.empty())
@@ -556,7 +557,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 			if (logScale)
 				sfTitle += QString("[Log scale]");
 			//we leave some (vertical) space for the top-most label!
-			win->displayText(sfTitle, glW-xShift, glH-yShift+strHeight, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VTOP, 0, 0, &font);
+			win->displayText(sfTitle, glW-xShift, glH-yShift+strHeight, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VTOP, 0, nullptr, &font);
 		}
 
 		//precision (same as color scale)
@@ -589,7 +590,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 			if (logScale)
 				value = exp(value*c_log10);
 
-			win->displayText(QString::number(value,format,precision), x, y+it->yPos, align, 0, 0, &font);
+			win->displayText(QString::number(value,format,precision), x, y+it->yPos, align, 0, nullptr, &font);
 			glFunc->glBegin(GL_LINES);
 			glFunc->glVertex2i(xTick,yTick+it->yPos);
 			glFunc->glVertex2i(xTick+tickSize,yTick+it->yPos);

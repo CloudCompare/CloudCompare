@@ -519,9 +519,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						assert(triNormals);
 						int n1, n2, n3;
 						getTriangleNormalIndexes(n, n1, n2, n3);
-						N1 = (n1 >= 0 ?                 ccNormalVectors::GetNormal(triNormals->at(n1)).u : 0);
-						N2 = (n1 == n2 ? N1 : n1 >= 0 ? ccNormalVectors::GetNormal(triNormals->at(n2)).u : 0);
-						N3 = (n1 == n3 ? N1 : n3 >= 0 ? ccNormalVectors::GetNormal(triNormals->at(n3)).u : 0);
+						N1 = (n1 >= 0 ?                 ccNormalVectors::GetNormal(triNormals->at(n1)).u : nullptr);
+						N2 = (n1 == n2 ? N1 : n1 >= 0 ? ccNormalVectors::GetNormal(triNormals->at(n2)).u : nullptr);
+						N3 = (n1 == n3 ? N1 : n3 >= 0 ? ccNormalVectors::GetNormal(triNormals->at(n3)).u : nullptr);
 
 					}
 					else

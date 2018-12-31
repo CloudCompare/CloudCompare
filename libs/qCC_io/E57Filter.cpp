@@ -787,7 +787,11 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 	catch(const e57::E57Exception& e)
 	{
-		ccLog::Warning(QStringLiteral("[E57] Error: %1").arg(e57::Utilities::errorCodeToString(e.errorCode()).c_str()));
+		ccLog::Warning( QStringLiteral("[E57] Error: %1 (%2 line %3)")
+						.arg( e57::Utilities::errorCodeToString( e.errorCode() ).c_str() )
+						.arg( e.sourceFileName() )
+						.arg( e.sourceLineNumber() )
+						);
 		
 		if ( !e.context().empty() )
 		{

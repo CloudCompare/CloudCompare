@@ -18,24 +18,24 @@
 #include "ccConsole.h"
 
 //Local
-#include "mainwindow.h"
 #include "ccPersistentSettings.h"
+#include "mainwindow.h"
 
 //qCC_db
 #include <ccSingleton.h>
 
 //Qt
-#include <QListWidget>
-#include <QMessageBox>
 #include <QApplication>
+#include <QClipboard>
 #include <QColor>
-#include <QTime>
-#include <QThread>
-#include <QTextStream>
+#include <QMessageBox>
 #include <QSettings>
+#include <QTextStream>
+#include <QThread>
+#include <QTime>
 
 //system
-#include <assert.h>
+#include <cassert>
 #ifdef QT_DEBUG
 #include <iostream>
 #endif
@@ -49,6 +49,36 @@ static ccSingleton<ccConsole> s_console;
 
 bool ccConsole::s_showQtMessagesInConsole = false;
 
+// ccCustomQListWidget
+ccCustomQListWidget::ccCustomQListWidget(QWidget *parent)
+	: QListWidget(parent)
+{
+}
+
+void ccCustomQListWidget::keyPressEvent(QKeyEvent *event)
+{
+	if (event->matches(QKeySequence::Copy))
+	{
+		int itemsCount = count();
+		QStringList strings;
+		for (int i = 0; i < itemsCount; ++i)
+		{
+			if (item(i)->isSelected())
+			{
+				strings << item(i)->text();
+			}
+		}
+		
+		QApplication::clipboard()->setText(strings.join("\n"));
+	}
+	else
+	{
+		QListWidget::keyPressEvent(event);
+	}
+}
+
+
+// ccConsole
 ccConsole* ccConsole::TheInstance(bool autoInit/*=true*/)
 {
 	if (!s_console.instance && autoInit)
@@ -67,15 +97,15 @@ void ccConsole::ReleaseInstance(bool flush/*=true*/)
 		//DGM: just in case some messages are still in the queue
 		s_console.instance->refresh();
 	}
-	ccLog::RegisterInstance(0);
+	ccLog::RegisterInstance(nullptr);
 	s_console.release();
 }
 
 ccConsole::ccConsole()
-	: m_textDisplay(0)
-	, m_parentWidget(0)
-	, m_parentWindow(0)
-	, m_logStream(0)
+	: m_textDisplay(nullptr)
+	, m_parentWidget(nullptr)
+	, m_parentWindow(nullptr)
+	, m_logStream(nullptr)
 {
 }
 
@@ -332,14 +362,14 @@ void ccConsole::logMessage(const QString& message, int level)
 	}
 }
 
-bool ccConsole::setLogFile(QString filename)
+bool ccConsole::setLogFile(const QString& filename)
 {
 	//close previous stream (if any)
 	if (m_logStream)
 	{
 		m_mutex.lock();
 		delete m_logStream;
-		m_logStream = 0;
+		m_logStream = nullptr;
 		m_mutex.unlock();
 
 		if (m_logFile.isOpen())
@@ -361,7 +391,6 @@ bool ccConsole::setLogFile(QString filename)
 		m_mutex.unlock();
 		setAutoRefresh(true);
 	}
-
 
 	return true;
 }

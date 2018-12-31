@@ -33,6 +33,7 @@
 #include "ccUtils.h"
 
 //Qt
+#include <QApplication>
 #include <QElapsedTimer>
 #include <QInputDialog>
 #include <QMessageBox>

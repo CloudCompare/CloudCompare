@@ -22,20 +22,10 @@
 #include <ccLog.h>
 
 //Qt
-#include <QObject>
-#include <QMutex>
-#include <QStringList>
-#include <QTimer>
-#include <QVector>
-#include <QPair>
 #include <QFile>
-
 #include <QListWidget>
-#include <QClipboard>
-#include <QKeyEvent>
-#include <QApplication>
+#include <QTimer>
 
-class QWidget;
 class MainWindow;
 class QTextStream;
 
@@ -45,32 +35,10 @@ class ccCustomQListWidget : public QListWidget
 	Q_OBJECT
 	
 public:
-
-	ccCustomQListWidget(QWidget* parent = 0) : QListWidget(parent) {}
+	ccCustomQListWidget(QWidget* parent = nullptr);
 
 protected:
-	
-	virtual void keyPressEvent(QKeyEvent *event) override
-	{
-		if (event->matches(QKeySequence::Copy))
-		{
-			int itemsCount = count();
-			QStringList strings;
-			for (int i = 0; i < itemsCount; ++i)
-			{
-				if (item(i)->isSelected())
-				{
-					strings << item(i)->text();
-				}
-			}
-
-			QApplication::clipboard()->setText(strings.join("\n"));
-		}
-		else
-		{
-			QListWidget::keyPressEvent(event);
-		}
-	}
+	void keyPressEvent(QKeyEvent *event) override;
 };
 
 //! Console
@@ -81,7 +49,7 @@ class ccConsole : public QObject, public ccLog
 public:
 
 	//! Destructor
-	virtual ~ccConsole();
+	~ccConsole() override;
 
 	//! Inits console (and optionaly associates it with a text output widget)
 	/** WARNING: in release mode, no message will be output if no 'textDisplay'
@@ -92,9 +60,9 @@ public:
 		\param parentWidget parent widget (optional)
 		\param parentWindow parent window (if any - optional)
 	**/
-	static void Init(	QListWidget* textDisplay = 0,
-						QWidget* parentWidget = 0,
-						MainWindow* parentWindow = 0);
+	static void Init(	QListWidget* textDisplay = nullptr,
+						QWidget* parentWidget = nullptr,
+						MainWindow* parentWindow = nullptr);
 
 	//! Returns the (unique) static instance
 	/** \param autoInit automatically initialize the console instance (with no widget!) if not done already
@@ -108,7 +76,7 @@ public:
 	void setAutoRefresh(bool state);
 
 	//! Sets log file
-	bool setLogFile(QString filename);
+	bool setLogFile(const QString& filename);
 
 	//! Whether to show Qt messages (qDebug / qWarning / etc.) in Console
 	static void EnableQtMessages(bool state);
@@ -132,7 +100,7 @@ protected:
 	ccConsole();
 
 	//inherited from ccLog
-	virtual void logMessage(const QString& message, int level);
+	void logMessage(const QString& message, int level) override;
 
 	//! Associated text display widget
 	QListWidget* m_textDisplay;
@@ -147,7 +115,7 @@ protected:
 	QMutex m_mutex;
 
 	//! Queue element type (message + color)
-	typedef QPair<QString,int> ConsoleItemType;
+	using ConsoleItemType = QPair<QString,int>;
 
 	//! Queue for incoming messages
 	QVector<ConsoleItemType> m_queue;

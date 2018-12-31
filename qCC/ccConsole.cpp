@@ -28,6 +28,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QColor>
+#include <QKeyEvent>
 #include <QMessageBox>
 #include <QSettings>
 #include <QTextStream>

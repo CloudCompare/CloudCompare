@@ -24,6 +24,7 @@
 //Qt
 #include <QFile>
 #include <QListWidget>
+#include <QMutex>
 #include <QTimer>
 
 class MainWindow;

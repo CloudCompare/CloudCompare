@@ -2050,7 +2050,9 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 	case E57_CYLINDRICAL:
 	case E57_SPHERICAL:
 		ccLog::Warning("[E57] Unhandled camera type (image will be loaded as is)");
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
 		Q_FALLTHROUGH();
+#endif
 	case E57_VISUAL:
 		imageObj = new ccImage();
 		break;

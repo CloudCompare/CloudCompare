@@ -26,11 +26,6 @@
 //Qt
 #include <QOpenGLFunctions_2_1>
 
-//temporary test for QOpenGLWidget integration
-#if (QT_VERSION < QT_VERSION_CHECK(5, 4, 0))
-#error	Error: CloudCompare does not support versions of Qt prior to 5.4 anymore!
-#endif
-
 //! Shortcuts to OpenGL commands independent on the input type
 class ccGL
 {

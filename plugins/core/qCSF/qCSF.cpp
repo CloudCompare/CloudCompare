@@ -58,11 +58,6 @@
 //CSF
 #include <CSF.h>
 
-#ifndef CC_QT5
-//Don't forget to replace 'qMyPlugin' by your own plugin class name here also!
-Q_EXPORT_PLUGIN2(qCSF,qCSF);
-#endif
-
 qCSF::qCSF(QObject* parent)
 	: QObject( parent )
 	, ccStdPluginInterface( ":/CC/plugin/qCSF/info.json" )

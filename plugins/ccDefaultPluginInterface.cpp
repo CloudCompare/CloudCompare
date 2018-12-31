@@ -21,6 +21,7 @@
 #include <QJsonObject>
 
 #include "ccDefaultPluginInterface.h"
+#include "ccLog.h"
 
 
 // This class keeps JSON from being included in the header

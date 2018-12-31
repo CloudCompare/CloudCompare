@@ -38,6 +38,11 @@
 #include "ccTranslationManager.h"
 
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
+#error CloudCompare does not support versions of Qt prior to 5.5
+#endif
+
+
 void ccApplicationBase::init(bool noOpenGLSupport)
 {
 	if (!noOpenGLSupport)

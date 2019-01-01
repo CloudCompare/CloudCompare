@@ -80,8 +80,8 @@ parts:
       - -DINSTALL_QBROOM_PLUGIN=ON
       - -DINSTALL_QHOUGH_NORMALS_PLUGIN=ON
       - -DINSTALL_QCOMPASS_PLUGIN=ON
-#      - -DINSTALL_QCANUPO_PLUGIN=ON
-#      - -DDLIB_ROOT=/usr/include
+      - -DINSTALL_QCANUPO_PLUGIN=ON
+      - -DDLIB_ROOT=/usr/include
       - -DEIGEN_ROOT_DIR=$SNAPCRAFT_STAGE/include/eigen3
       - -DOPTION_PDAL_LAS=ON
       - -DJSON_ROOT_DIR=/usr/include/jsoncpp

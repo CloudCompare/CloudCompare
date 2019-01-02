@@ -164,7 +164,6 @@ enum class ESRI_PART_TYPE: int32_t {
 
 static bool isValidEsriPartType(int32_t code)
 {
-
 	if (code < static_cast<int32_t >(ESRI_PART_TYPE::TRIANGLE_STRIP))
 		return false;
 	if (code > static_cast<int32_t >(ESRI_PART_TYPE::RING))
@@ -783,8 +782,7 @@ ccMesh *createMesh(
 		const std::vector<CCVector3> &points,
 		const std::vector<ScalarType> &scalarValues,
 		int32_t firstIndex,
-		int32_t lastIndex
-)
+		int32_t lastIndex)
 {
 	int32_t vertCount = lastIndex - firstIndex + 1;
 	if (vertCount < 3)
@@ -813,8 +811,7 @@ ccMesh *createMesh(
 			auto *sf = new ccScalarField("Measures");
 			if (!sf->reserveSafe(vertCount))
 			{
-				ccLog::Warning(
-						QString("[SHP] Mesh: not enough memory to load scalar values!"));
+				ccLog::Warning(QString("[SHP] Mesh: not enough memory to load scalar values!"));
 				sf->release();
 			} else
 			{
@@ -842,12 +839,10 @@ CC_FILE_ERROR buildPatches(
 		const std::vector<int32_t> &startIndexes,
 		const std::vector<int32_t> &partTypes,
 		const std::vector<CCVector3> &points,
-		const std::vector<ScalarType> &scalarValues
-)
+		const std::vector<ScalarType> &scalarValues)
 {
 	size_t numParts = startIndexes.size();
 	size_t numPoints = points.size();
-
 
 	for (int32_t i = 0; i < numParts; ++i)
 	{
@@ -859,8 +854,7 @@ CC_FILE_ERROR buildPatches(
 		auto type = static_cast<ESRI_PART_TYPE>(partTypes[i]);
 
 		const int32_t &firstIndex = startIndexes[i];
-		const int32_t &lastIndex = static_cast<const int32_t &>((i + 1 < numParts ? startIndexes[i + 1] : numPoints) -
-		                                                        1);
+		const int32_t &lastIndex = static_cast<const int32_t &>((i + 1 < numParts ? startIndexes[i + 1] : numPoints) -1);
 		const int32_t vertCount = lastIndex - firstIndex + 1;
 
 		switch (type)
@@ -868,7 +862,7 @@ CC_FILE_ERROR buildPatches(
 			case ESRI_PART_TYPE::TRIANGLE_STRIP:
 			{
 				ccMesh *mesh = createMesh(points, scalarValues, firstIndex, lastIndex);
-				for (int32_t j(2); j < vertCount; ++j)
+				for (int32_t j = 2; j < vertCount; ++j)
 				{
 					mesh->addTriangle(j - 2, j - 1, j);
 				}
@@ -878,7 +872,7 @@ CC_FILE_ERROR buildPatches(
 			case ESRI_PART_TYPE::TRIANGLE_FAN:
 			{
 				ccMesh *mesh = createMesh(points, scalarValues, firstIndex, lastIndex);
-				for (int32_t j(2); j < vertCount; ++j)
+				for (int32_t j = 2; j < vertCount; ++j)
 				{
 					mesh->addTriangle(0, j - 1, j);
 				}
@@ -917,7 +911,6 @@ static CC_FILE_ERROR LoadMultiPatch(QDataStream &shpStream,
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
 
-
 	std::vector<CCVector3> points = readPoints(shpStream, numPoints, Pshift);
 	if (points.empty())
 	{
@@ -947,15 +940,16 @@ static CC_FILE_ERROR LoadMultiPatch(QDataStream &shpStream,
  * @param bbMing Min point of the cloud
  * @param bbMaxg Mxx point of the cloud
  */
-static void save3DCloud(QDataStream &stream, ccGenericPointCloud *cloud, const CCVector3d &bbMing, const CCVector3d &bbMaxg)
+static void save3DCloud(QDataStream &stream, const ccGenericPointCloud *cloud, const CCVector3d &bbMing, const CCVector3d &bbMaxg)
 {
-	unsigned numPoints = cloud->size();
+	const unsigned numPoints = cloud->size();
+	CCVector3 P;
 
 	// Points (x ,y)
 	for (unsigned i = 0; i < numPoints; ++i)
 	{
-		const CCVector3 *P = cloud->getPoint(i);
-		CCVector3d Pg = cloud->toGlobal3d(*P);
+		cloud->getPoint(i, P);
+		CCVector3d Pg = cloud->toGlobal3d(P);
 		stream << Pg.x << Pg.y;
 	}
 
@@ -963,8 +957,8 @@ static void save3DCloud(QDataStream &stream, ccGenericPointCloud *cloud, const C
 	stream << bbMing.z << bbMaxg.z;
 	for (unsigned i = 0; i < numPoints; ++i)
 	{
-		const CCVector3 *P = cloud->getPoint(i);
-		CCVector3d Pg = cloud->toGlobal3d(*P);
+		cloud->getPoint(i, P);
+		CCVector3d Pg = cloud->toGlobal3d(P);
 		stream << Pg.z;
 	}
 
@@ -1014,16 +1008,14 @@ static inline bool isTriangleFan(const CCLib::VerticesIndexes *idx)
  */
 CC_FILE_ERROR findTriangleOrganisation(ccMesh *mesh, ESRI_PART_TYPE &type)
 {
-
-	CCLib::VerticesIndexes *firstVert = mesh->getNextTriangleVertIndexes();
+	const CCLib::VerticesIndexes *firstVert = mesh->getNextTriangleVertIndexes();
 	if (!isTriangleFan(firstVert) && !isTriangleStrip(firstVert))
 		return CC_FERR_BAD_ENTITY_TYPE;
 
-
-	CCLib::VerticesIndexes *secondVert = mesh->getNextTriangleVertIndexes();
+	const CCLib::VerticesIndexes *secondVert = mesh->getNextTriangleVertIndexes();
 	if (isTriangleStrip(secondVert))
 	{
-		for (unsigned i(2); i < mesh->size(); ++i)
+		for (unsigned i = 2; i < mesh->size(); ++i)
 		{
 			CCLib::VerticesIndexes *idx = mesh->getNextTriangleVertIndexes();
 			if (!isTriangleStrip(idx))
@@ -1032,9 +1024,10 @@ CC_FILE_ERROR findTriangleOrganisation(ccMesh *mesh, ESRI_PART_TYPE &type)
 		type = ESRI_PART_TYPE::TRIANGLE_STRIP;
 		return CC_FERR_NO_ERROR;
 
-	} else if (isTriangleFan(secondVert))
+	}
+	else if (isTriangleFan(secondVert))
 	{
-		for (unsigned i(2); i < mesh->size(); ++i)
+		for (unsigned i = 2; i < mesh->size(); ++i)
 		{
 			CCLib::VerticesIndexes *idx = mesh->getNextTriangleVertIndexes();
 			if (!isTriangleFan(idx))
@@ -1042,8 +1035,8 @@ CC_FILE_ERROR findTriangleOrganisation(ccMesh *mesh, ESRI_PART_TYPE &type)
 		}
 		type = ESRI_PART_TYPE::TRIANGLE_FAN;
 		return CC_FERR_NO_ERROR;
-
-	} else
+	}
+	else
 	{
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
@@ -1084,7 +1077,6 @@ CC_FILE_ERROR SaveMesh(ccMesh *mesh, QDataStream &stream, int32_t recordNumber, 
 	qint64 bytesWritten = recordEnd - recordStart;
 	assert(bytesWritten == 2 * recordSize);
 	return CC_FERR_NO_ERROR;
-
 }
 
 static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
@@ -1101,7 +1093,6 @@ static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
 	int32_t numParts;
 	int32_t numPoints;
 	shpStream >> numParts >> numPoints;
-
 
 	std::vector<int32_t> startIndexes = readParts(shpStream, numParts);
 	if (startIndexes.empty())
@@ -1506,7 +1497,7 @@ static CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QDataStream& out, i
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	if (cloud->size() > std::numeric_limits<int32_t>::max())
+	if (cloud->size() > static_cast<unsigned >(std::numeric_limits<int32_t>::max()))
 	{
 		ccLog::Print("[SHP] Cloud is to big to be saved");
 		return CC_FERR_BAD_ENTITY_TYPE;

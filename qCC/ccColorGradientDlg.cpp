@@ -31,6 +31,7 @@ static QColor s_firstColor(Qt::black);
 static QColor s_secondColor(Qt::white);
 static ccColorGradientDlg::GradientType s_lastType(ccColorGradientDlg::Default);
 static double s_lastFreq = 5.0;
+static int s_lastDimIndex = 2;
 
 ccColorGradientDlg::ccColorGradientDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
@@ -46,11 +47,13 @@ ccColorGradientDlg::ccColorGradientDlg(QWidget* parent)
 	ccQtHelpers::SetButtonColor(firstColorButton, s_firstColor);
 	setType(s_lastType);
 	bandingFreqSpinBox->setValue(s_lastFreq);
+	directionComboBox->setCurrentIndex(s_lastDimIndex);
 }
 
 unsigned char ccColorGradientDlg::getDimension() const
 {
-	return static_cast<unsigned char>(directionComboBox->currentIndex());
+	s_lastDimIndex = directionComboBox->currentIndex();
+	return static_cast<unsigned char>(s_lastDimIndex);
 }
 
 void ccColorGradientDlg::setType(ccColorGradientDlg::GradientType type)

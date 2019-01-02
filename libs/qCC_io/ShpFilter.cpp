@@ -383,7 +383,8 @@ CCVector2d mRangeOfContainer(ccHObject::Container &objects)
 
 	if (range.x == std::numeric_limits<double>::max())
 	{
-		range.x = range.y = ESRI_NO_DATA;
+		range.x = 0.0;
+		range.y = 0.0;
 	}
 	return range;
 }
@@ -1710,11 +1711,23 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	QDataStream shpStream(&file);
 	QDataStream idxStream(&indexFile);
 
+	CCVector2d mRange(0.0, 0.0);
+	if (hasMeasurements(outputShapeType))
+	{
+		mRange = mRangeOfContainer(toSave);
+	}
+
+	if (!isESRIShape3D(outputShapeType))
+	{
+		bbMinCorner.u[Z] = 0.0;
+		bbMaxCorner.u[Z] = 0.0;
+	}
+
 	ShapeFileHeader hdr;
 	hdr.pointMin = CCVector3d(bbMinCorner.u[X], bbMinCorner.u[Y], bbMinCorner.u[Z]);
 	hdr.pointMax = CCVector3d(bbMaxCorner.u[X], bbMaxCorner.u[Y], bbMaxCorner.u[Z]);
 	hdr.shapeTypeInt = static_cast<int32_t>(outputShapeType);
-	hdr.mRange = mRangeOfContainer(toSave);
+	hdr.mRange = mRange;
 
 	hdr.writeTo(shpStream);
 	hdr.writeTo(idxStream);

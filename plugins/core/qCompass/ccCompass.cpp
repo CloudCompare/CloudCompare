@@ -3820,7 +3820,7 @@ void ccCompass::onSave()
 		QTextStream thickness_stream(&thickness_file);
 
 		//write headers
-		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS,Gx,Gy,Gz" << endl;
+		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS,Gx,Gy,Gz,Length" << endl;
 		trace_stream << "Name,Trace_id,Point_id,Start_x,Start_y,Start_z,End_x,End_y,End_z,Cost,Cost_Mode" << endl;
 		lineation_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Length" << endl;
 		thickness_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Thickness" << endl;
@@ -3929,26 +3929,26 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, const QString &p
 	int n = 0;
 	if (ccFitPlane::isFitPlane(object))
 	{
-		//Write object as Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Radius,RMS
+		//write global position
+		ccPlane* P = static_cast<ccPlane*>(object);
+
+		//Write object as Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Radius,RMS,Gx,Gy,Gz,Length
 		*out << name << ",";
 		*out << object->getMetaData("Strike").toString() << "," << object->getMetaData("Dip").toString() << "," << object->getMetaData("DipDir").toString() << ",";
 		*out << object->getMetaData("Cx").toString() << "," << object->getMetaData("Cy").toString() << "," << object->getMetaData("Cz").toString() << ",";
 		*out << object->getMetaData("Nx").toString() << "," << object->getMetaData("Ny").toString() << "," << object->getMetaData("Nz").toString() << ",";
 		*out << object->getMetaData("Radius").toString() << "," << object->getMetaData("RMS").toString() << ",";
-		
+
 		if (ss != nullptr)
 		{
-			//write global position
-			ccPlane* P = static_cast<ccPlane*>(object);
 			CCVector3 L = P->getTransformation().getTranslationAsVec3D();
 			CCVector3d G = ss->toGlobal3d(L);
-			*out << G.x << "," << G.y << "," << G.z << endl;
-		}
-		else
-		{
-			*out << endl;
+
+			*out << G.x << "," << G.y << "," << G.z << ",";
 		}
 
+		//write length of trace associated with this plane
+		*out << std::max(P->getXWidth(), P->getYWidth()) << endl;
 		n++;
 	}
 	else if (object->isKindOf(CC_TYPES::PLANE)) //not one of our planes, but a plane anyway (so we'll export it)
@@ -4209,19 +4209,28 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 	}
 
 	//special case - we can calculate all metadata from a plane
-	if (object->isA(CC_TYPES::PLANE) && !ccFitPlane::isFitPlane(object))
+	if (object->isA(CC_TYPES::PLANE))
 	{
-		//build fitplane object
-		ccFitPlane* temp = new ccFitPlane(static_cast<ccPlane*> (object));
+		ccPlane* P = static_cast<ccPlane*> (object);
 
-		//write metadata
-		for (QMap<QString, QVariant>::const_iterator it = temp->metaData().begin(); it != temp->metaData().end(); it++)
+		//write length
+		out->writeTextElement("Length", QString::asprintf("%f", std::max(P->getXWidth(), P->getYWidth())));
+
+		//if this is just an ordinary plane, make a corresponding fitplane object and then steal metadata
+		if (!ccFitPlane::isFitPlane(P))
 		{
-			out->writeTextElement(it.key(), it.value().toString());
-		}
+			//build fitplane object
+			ccFitPlane* temp = new ccFitPlane(P);
 
-		//cleanup
-		delete temp;
+			//write metadata
+			for (QMap<QString, QVariant>::const_iterator it = temp->metaData().begin(); it != temp->metaData().end(); it++)
+			{
+				out->writeTextElement(it.key(), it.value().toString());
+			}
+
+			//cleanup
+			delete temp;
+		}
 	}
 
 	//if object is a polyline object (or a trace) write trace points and normals

@@ -109,3 +109,6 @@ if( ${OPTION_BUILD_CCVIEWER} )
 endif()
 
 cmake_policy(POP)
+
+option(BUILD_TESTING "" OFF)
+include(CTest)

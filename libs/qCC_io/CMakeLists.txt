@@ -9,8 +9,6 @@ if( MSVC )
 endif()
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
-include(CTest)
-
 project( QCC_IO_LIB )
 
 file( GLOB header_list *.h)

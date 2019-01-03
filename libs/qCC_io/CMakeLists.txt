@@ -9,6 +9,8 @@ if( MSVC )
 endif()
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
+include(CTest)
+
 project( QCC_IO_LIB )
 
 file( GLOB header_list *.h)
@@ -51,4 +53,8 @@ if( WIN32 OR APPLE )
 	endforeach()
 else()
 	install_shared( ${PROJECT_NAME} ${CMAKE_INSTALL_LIBDIR}/cloudcompare 0 ) #default destination: /usr/lib
+endif()
+
+if(BUILD_TESTING)
+	add_subdirectory(Tests)
 endif()

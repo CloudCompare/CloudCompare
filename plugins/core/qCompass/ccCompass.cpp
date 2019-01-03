@@ -1305,6 +1305,7 @@ static unsigned int oversample = 30;
 static double likPower = 1.0;
 static bool calcThickness = true;
 static double stride = 0.025;
+static int dof = 10;
 void ccCompass::estimateStructureNormals()
 {
 	//******************************************
@@ -1316,6 +1317,8 @@ void ccCompass::estimateStructureNormals()
 	QLineEdit minSizeText(QString::number(minsize)); minSizeText.setValidator(new QIntValidator(5, std::numeric_limits<int>::max()));
 	QLabel maxSizeLabel("Maximum trace size (points):");
 	QLineEdit maxSizeText(QString::number(maxsize)); maxSizeText.setValidator(new QIntValidator(50, std::numeric_limits<int>::max()));
+	QLabel dofLabel("Wishart Degrees of Freedom:");
+	QLineEdit dofText(QString::number(dof)); dofText.setValidator(new QIntValidator(3, std::numeric_limits<int>::max()));
 	QLabel likPowerLabel("Likelihood power:");
 	QLineEdit likPowerText(QString::number(likPower)); likPowerText.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
 	QLabel calcThickLabel("Calculate thickness:");
@@ -1330,6 +1333,7 @@ void ccCompass::estimateStructureNormals()
 	//tooltips
 	minSizeText.setToolTip("The minimum size of the normal-estimation window.");
 	maxSizeText.setToolTip("The maximum size of the normal-estimation window.");
+	dofText.setToolTip("Sets the degrees of freedom parameter for the Wishart distribution. Due to non-independent data/errors in traces, this should be low (~10). Higher give more confident results - use with care!");
 	distanceText.setToolTip("The furthest distance to search for points on the opposite surface of a GeoObject during thickness calculations.");
 	sampleText.setToolTip("Sample n orientation estimates at each point in each trace to quantify uncertainty.");
 	likPowerText.setToolTip("Fudge factor to change the balance between the prior and likelihood functions. Advanced use only - see docs for details.");
@@ -1343,6 +1347,8 @@ void ccCompass::estimateStructureNormals()
 	vbox->addWidget(&minSizeText);
 	vbox->addWidget(&maxSizeLabel);
 	vbox->addWidget(&maxSizeText);
+	vbox->addWidget(&dofLabel);
+	vbox->addWidget(&dofText);
 	vbox->addWidget(&likPowerLabel);
 	vbox->addWidget(&likPowerText);
 	vbox->addWidget(&sampleLabel);
@@ -1366,6 +1372,7 @@ void ccCompass::estimateStructureNormals()
 	//get values
 	minsize = minSizeText.text().toInt(); //these are the defaults
 	maxsize = maxSizeText.text().toInt();
+	dof = dofText.text().toInt();
 	tcDistance = distanceText.text().toDouble(); //the square of the maximum distance to compute thicknesses for
 	oversample = sampleText.text().toInt();
 	likPower = likPowerText.text().toDouble();
@@ -1621,7 +1628,6 @@ void ccCompass::estimateStructureNormals()
 			//***********************************************************************************************
 			//declare variables used in nested loops below
 			int n;
-			int dof = 10; //maxsize - minsize - 1; //degrees of freedom
 			double mnx, mny, mnz, lpd, lsf, phi, theta, alpha, len;
 			bool hasValidSNE = false; //becomes true once a valid plane is found
 			std::vector<double> bestPd(px.size(), std::numeric_limits<double>::lowest()); //best (log) probability density observed for each point
@@ -3814,7 +3820,7 @@ void ccCompass::onSave()
 		QTextStream thickness_stream(&thickness_file);
 
 		//write headers
-		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS,Gx,Gy,Gz" << endl;
+		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS,Gx,Gy,Gz,Length" << endl;
 		trace_stream << "Name,Trace_id,Point_id,Start_x,Start_y,Start_z,End_x,End_y,End_z,Cost,Cost_Mode" << endl;
 		lineation_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Length" << endl;
 		thickness_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Thickness" << endl;
@@ -3923,26 +3929,26 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, const QString &p
 	int n = 0;
 	if (ccFitPlane::isFitPlane(object))
 	{
-		//Write object as Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Radius,RMS
+		//write global position
+		ccPlane* P = static_cast<ccPlane*>(object);
+
+		//Write object as Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Radius,RMS,Gx,Gy,Gz,Length
 		*out << name << ",";
 		*out << object->getMetaData("Strike").toString() << "," << object->getMetaData("Dip").toString() << "," << object->getMetaData("DipDir").toString() << ",";
 		*out << object->getMetaData("Cx").toString() << "," << object->getMetaData("Cy").toString() << "," << object->getMetaData("Cz").toString() << ",";
 		*out << object->getMetaData("Nx").toString() << "," << object->getMetaData("Ny").toString() << "," << object->getMetaData("Nz").toString() << ",";
 		*out << object->getMetaData("Radius").toString() << "," << object->getMetaData("RMS").toString() << ",";
-		
+
 		if (ss != nullptr)
 		{
-			//write global position
-			ccPlane* P = static_cast<ccPlane*>(object);
 			CCVector3 L = P->getTransformation().getTranslationAsVec3D();
 			CCVector3d G = ss->toGlobal3d(L);
-			*out << G.x << "," << G.y << "," << G.z << endl;
-		}
-		else
-		{
-			*out << endl;
+
+			*out << G.x << "," << G.y << "," << G.z << ",";
 		}
 
+		//write length of trace associated with this plane
+		*out << std::max(P->getXWidth(), P->getYWidth()) << endl;
 		n++;
 	}
 	else if (object->isKindOf(CC_TYPES::PLANE)) //not one of our planes, but a plane anyway (so we'll export it)
@@ -4203,19 +4209,28 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 	}
 
 	//special case - we can calculate all metadata from a plane
-	if (object->isA(CC_TYPES::PLANE) && !ccFitPlane::isFitPlane(object))
+	if (object->isA(CC_TYPES::PLANE))
 	{
-		//build fitplane object
-		ccFitPlane* temp = new ccFitPlane(static_cast<ccPlane*> (object));
+		ccPlane* P = static_cast<ccPlane*> (object);
 
-		//write metadata
-		for (QMap<QString, QVariant>::const_iterator it = temp->metaData().begin(); it != temp->metaData().end(); it++)
+		//write length
+		out->writeTextElement("Length", QString::asprintf("%f", std::max(P->getXWidth(), P->getYWidth())));
+
+		//if this is just an ordinary plane, make a corresponding fitplane object and then steal metadata
+		if (!ccFitPlane::isFitPlane(P))
 		{
-			out->writeTextElement(it.key(), it.value().toString());
-		}
+			//build fitplane object
+			ccFitPlane* temp = new ccFitPlane(P);
 
-		//cleanup
-		delete temp;
+			//write metadata
+			for (QMap<QString, QVariant>::const_iterator it = temp->metaData().begin(); it != temp->metaData().end(); it++)
+			{
+				out->writeTextElement(it.key(), it.value().toString());
+			}
+
+			//cleanup
+			delete temp;
+		}
 	}
 
 	//if object is a polyline object (or a trace) write trace points and normals
@@ -4372,10 +4387,11 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 
 			//gather data strings
 			QString x, y, z, nx, ny, nz, thickness, weight, trend, plunge;
-			CCLib::ScalarField* tSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Thickness"));
 			CCLib::ScalarField* wSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Weight"));
 			CCLib::ScalarField* trendSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Trend"));
 			CCLib::ScalarField* plungeSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Plunge"));
+
+			CCLib::ScalarField* tSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Thickness"));
 			for (unsigned p = 0; p < cloud->size(); p++)
 			{
 				x += QString::asprintf("%f,", cloud->getPoint(p)->x);
@@ -4384,10 +4400,15 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 				nx += QString::asprintf("%f,", cloud->getPointNormal(p).x);
 				ny += QString::asprintf("%f,", cloud->getPointNormal(p).y);
 				nz += QString::asprintf("%f,", cloud->getPointNormal(p).z);
-				thickness += QString::asprintf("%f,", tSF->getValue(p));
 				weight += QString::asprintf("%f,", wSF->getValue(p));
 				trend += QString::asprintf("%f,", trendSF->getValue(p));
 				plunge += QString::asprintf("%f,", plungeSF->getValue(p));
+
+
+				if (tSF != nullptr) //can be null if no thickness was estimated!
+				{
+					thickness += QString::asprintf("%f,", tSF->getValue(p));
+				}
 			}
 
 			//write
@@ -4397,10 +4418,13 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 			out->writeTextElement("nx", nx);
 			out->writeTextElement("ny", ny);
 			out->writeTextElement("nz", nz);
-			out->writeTextElement("thickness", thickness);
 			out->writeTextElement("weight", weight);
 			out->writeTextElement("trend", trend);
 			out->writeTextElement("plunge", plunge);
+			if (tSF != nullptr)
+			{
+				out->writeTextElement("thickness", thickness);
+			}
 
 			//fin
 			out->writeEndElement();

@@ -4372,10 +4372,11 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 
 			//gather data strings
 			QString x, y, z, nx, ny, nz, thickness, weight, trend, plunge;
-			CCLib::ScalarField* tSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Thickness"));
 			CCLib::ScalarField* wSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Weight"));
 			CCLib::ScalarField* trendSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Trend"));
 			CCLib::ScalarField* plungeSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Plunge"));
+
+			CCLib::ScalarField* tSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Thickness"));
 			for (unsigned p = 0; p < cloud->size(); p++)
 			{
 				x += QString::asprintf("%f,", cloud->getPoint(p)->x);
@@ -4384,10 +4385,15 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 				nx += QString::asprintf("%f,", cloud->getPointNormal(p).x);
 				ny += QString::asprintf("%f,", cloud->getPointNormal(p).y);
 				nz += QString::asprintf("%f,", cloud->getPointNormal(p).z);
-				thickness += QString::asprintf("%f,", tSF->getValue(p));
 				weight += QString::asprintf("%f,", wSF->getValue(p));
 				trend += QString::asprintf("%f,", trendSF->getValue(p));
 				plunge += QString::asprintf("%f,", plungeSF->getValue(p));
+
+
+				if (tSF != nullptr) //can be null if no thickness was estimated!
+				{
+					thickness += QString::asprintf("%f,", tSF->getValue(p));
+				}
 			}
 
 			//write
@@ -4397,10 +4403,13 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 			out->writeTextElement("nx", nx);
 			out->writeTextElement("ny", ny);
 			out->writeTextElement("nz", nz);
-			out->writeTextElement("thickness", thickness);
 			out->writeTextElement("weight", weight);
 			out->writeTextElement("trend", trend);
 			out->writeTextElement("plunge", plunge);
+			if (tSF != nullptr)
+			{
+				out->writeTextElement("thickness", thickness);
+			}
 
 			//fin
 			out->writeEndElement();

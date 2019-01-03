@@ -1543,7 +1543,6 @@ static CC_FILE_ERROR LoadSinglePoint(QDataStream &shpStream,
 		shpStream >> z;
 		P.z = static_cast<PointCoordinateType>(z + Pshift.z);
 	}
-	singlePoints->addPoint(P);
 
 	ScalarType s = NAN_VALUE;
 	if (hasMeasurements(shapeType))

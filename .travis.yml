@@ -45,7 +45,7 @@ before_script:
   -DINSTALL_QPOISSON_RECON_PLUGIN=ON
   -DINSTALL_QSRA_PLUGIN=ON
   -DINSTALL_QSSAO_PLUGIN=ON
-  -BUILD_TESTING=ON
+  -DBUILD_TESTING=ON
   ..
 script:
 - if [[ $TRAVIS_BRANCH != "beta_builds" ]]; then make -j2; fi

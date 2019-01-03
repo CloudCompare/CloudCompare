@@ -1305,6 +1305,7 @@ static unsigned int oversample = 30;
 static double likPower = 1.0;
 static bool calcThickness = true;
 static double stride = 0.025;
+static int dof = 10;
 void ccCompass::estimateStructureNormals()
 {
 	//******************************************
@@ -1316,6 +1317,8 @@ void ccCompass::estimateStructureNormals()
 	QLineEdit minSizeText(QString::number(minsize)); minSizeText.setValidator(new QIntValidator(5, std::numeric_limits<int>::max()));
 	QLabel maxSizeLabel("Maximum trace size (points):");
 	QLineEdit maxSizeText(QString::number(maxsize)); maxSizeText.setValidator(new QIntValidator(50, std::numeric_limits<int>::max()));
+	QLabel dofLabel("Wishart Degrees of Freedom:");
+	QLineEdit dofText(QString::number(dof)); dofText.setValidator(new QIntValidator(3, std::numeric_limits<int>::max()));
 	QLabel likPowerLabel("Likelihood power:");
 	QLineEdit likPowerText(QString::number(likPower)); likPowerText.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
 	QLabel calcThickLabel("Calculate thickness:");
@@ -1330,6 +1333,7 @@ void ccCompass::estimateStructureNormals()
 	//tooltips
 	minSizeText.setToolTip("The minimum size of the normal-estimation window.");
 	maxSizeText.setToolTip("The maximum size of the normal-estimation window.");
+	dofText.setToolTip("Sets the degrees of freedom parameter for the Wishart distribution. Due to non-independent data/errors in traces, this should be low (~10). Higher give more confident results - use with care!");
 	distanceText.setToolTip("The furthest distance to search for points on the opposite surface of a GeoObject during thickness calculations.");
 	sampleText.setToolTip("Sample n orientation estimates at each point in each trace to quantify uncertainty.");
 	likPowerText.setToolTip("Fudge factor to change the balance between the prior and likelihood functions. Advanced use only - see docs for details.");
@@ -1343,6 +1347,8 @@ void ccCompass::estimateStructureNormals()
 	vbox->addWidget(&minSizeText);
 	vbox->addWidget(&maxSizeLabel);
 	vbox->addWidget(&maxSizeText);
+	vbox->addWidget(&dofLabel);
+	vbox->addWidget(&dofText);
 	vbox->addWidget(&likPowerLabel);
 	vbox->addWidget(&likPowerText);
 	vbox->addWidget(&sampleLabel);
@@ -1366,6 +1372,7 @@ void ccCompass::estimateStructureNormals()
 	//get values
 	minsize = minSizeText.text().toInt(); //these are the defaults
 	maxsize = maxSizeText.text().toInt();
+	dof = dofText.text().toInt();
 	tcDistance = distanceText.text().toDouble(); //the square of the maximum distance to compute thicknesses for
 	oversample = sampleText.text().toInt();
 	likPower = likPowerText.text().toDouble();
@@ -1621,7 +1628,6 @@ void ccCompass::estimateStructureNormals()
 			//***********************************************************************************************
 			//declare variables used in nested loops below
 			int n;
-			int dof = 10; //maxsize - minsize - 1; //degrees of freedom
 			double mnx, mny, mnz, lpd, lsf, phi, theta, alpha, len;
 			bool hasValidSNE = false; //becomes true once a valid plane is found
 			std::vector<double> bestPd(px.size(), std::numeric_limits<double>::lowest()); //best (log) probability density observed for each point

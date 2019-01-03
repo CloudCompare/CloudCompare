@@ -31,7 +31,7 @@
 
 class GenericDBFField;
 
-//! ESRI Shapefile file filter (output only)
+//! ESRI Shapefile file filter
 /** See http://www.esri.com/library/whitepapers/pdfs/shapefile.pdf
 **/
 class QCC_IO_LIB_API ShpFilter : public FileIOFilter

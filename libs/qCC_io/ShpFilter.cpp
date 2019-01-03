@@ -145,7 +145,8 @@ static inline bool hasMeasurements(ESRI_SHAPE_TYPE shapeType)
 	}
 }
 
-enum class ESRI_PART_TYPE: int32_t {
+enum class ESRI_PART_TYPE : int32_t
+{
 	TRIANGLE_STRIP = 0,
 	TRIANGLE_FAN = 1,
 	OUTER_RING = 2,
@@ -177,7 +178,7 @@ static bool isValidEsriPartType(int32_t code)
 
 static inline bool isESRINoData(double m)
 {
-	return m  <= ESRI_NO_DATA;
+	return m <= ESRI_NO_DATA;
 }
 
 static int32_t sizeofMultiPointZ(size_t numPoints) noexcept
@@ -546,36 +547,36 @@ static QString ToString(ESRI_SHAPE_TYPE type)
 {
 	switch (type)
 	{
-	case ESRI_SHAPE_TYPE::NULL_SHAPE:
-		return "Unhandled";
-	case ESRI_SHAPE_TYPE::POINT:
-		return "2D point";
-	case ESRI_SHAPE_TYPE::POLYLINE:
-		return "2D polyline";
-	case ESRI_SHAPE_TYPE::POLYGON:
-		return "2D polygon";
-	case ESRI_SHAPE_TYPE::MULTI_POINT:
-		return "2D point cloud";
-	case ESRI_SHAPE_TYPE::POINT_Z:
-		return "3D point";
-	case ESRI_SHAPE_TYPE::POLYLINE_Z:
-		return "3D polyline";
-	case ESRI_SHAPE_TYPE::POLYGON_Z:
-		return "3D polygon";
-	case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
-		return "3D point cloud";
-	case ESRI_SHAPE_TYPE::POINT_M:
-		return "2D point (+measure)";
-	case ESRI_SHAPE_TYPE::POLYLINE_M:
-		return "2D polyline (+measure)";
-	case ESRI_SHAPE_TYPE::POLYGON_M:
-		return "2D polygon (+measure)";
-	case ESRI_SHAPE_TYPE::MULTI_POINT_M:
-		return "2D point cloud (+measure)";
-	case ESRI_SHAPE_TYPE::MULTI_PATCH:
-		return "Multi patch";
-	default:
-		return "Unknown";
+		case ESRI_SHAPE_TYPE::NULL_SHAPE:
+			return "Unhandled";
+		case ESRI_SHAPE_TYPE::POINT:
+			return "2D point";
+		case ESRI_SHAPE_TYPE::POLYLINE:
+			return "2D polyline";
+		case ESRI_SHAPE_TYPE::POLYGON:
+			return "2D polygon";
+		case ESRI_SHAPE_TYPE::MULTI_POINT:
+			return "2D point cloud";
+		case ESRI_SHAPE_TYPE::POINT_Z:
+			return "3D point";
+		case ESRI_SHAPE_TYPE::POLYLINE_Z:
+			return "3D polyline";
+		case ESRI_SHAPE_TYPE::POLYGON_Z:
+			return "3D polygon";
+		case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
+			return "3D point cloud";
+		case ESRI_SHAPE_TYPE::POINT_M:
+			return "2D point (+measure)";
+		case ESRI_SHAPE_TYPE::POLYLINE_M:
+			return "2D polyline (+measure)";
+		case ESRI_SHAPE_TYPE::POLYGON_M:
+			return "2D polygon (+measure)";
+		case ESRI_SHAPE_TYPE::MULTI_POINT_M:
+			return "2D point cloud (+measure)";
+		case ESRI_SHAPE_TYPE::MULTI_PATCH:
+			return "Multi patch";
+		default:
+			return "Unknown";
 	}
 
 	return QString("Unknown");
@@ -1734,25 +1735,26 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 		switch (outputShapeType)
 		{
-		case ESRI_SHAPE_TYPE::POLYLINE:
-		case ESRI_SHAPE_TYPE::POLYLINE_Z:
-		case ESRI_SHAPE_TYPE::POLYLINE_M:
-		case ESRI_SHAPE_TYPE::POLYGON:
-		case ESRI_SHAPE_TYPE::POLYGON_Z:
-		case ESRI_SHAPE_TYPE::POLYGON_M:
-			assert(child->isKindOf(CC_TYPES::POLY_LINE));
-			error = SavePolyline(static_cast<ccPolyline*>(child), shpStream, recordSize, shapeIndex, outputShapeType, poly2DVertDim);
-			break;
-		case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
-			assert(child->isKindOf(CC_TYPES::POINT_CLOUD));
-			error = SaveAsCloud(ccHObjectCaster::ToGenericPointCloud(child), shpStream, shapeIndex, recordSize);
-			break;
-		case ESRI_SHAPE_TYPE::MULTI_PATCH:
-			error = SaveMesh(ccHObjectCaster::ToMesh(child), shpStream, shapeIndex, recordSize);
-			break;
-		default:
-			assert(false);
-			break;
+			case ESRI_SHAPE_TYPE::POLYLINE:
+			case ESRI_SHAPE_TYPE::POLYLINE_Z:
+			case ESRI_SHAPE_TYPE::POLYLINE_M:
+			case ESRI_SHAPE_TYPE::POLYGON:
+			case ESRI_SHAPE_TYPE::POLYGON_Z:
+			case ESRI_SHAPE_TYPE::POLYGON_M:
+				assert(child->isKindOf(CC_TYPES::POLY_LINE));
+				error = SavePolyline(static_cast<ccPolyline *>(child), shpStream, recordSize, shapeIndex,
+				                     outputShapeType, poly2DVertDim);
+				break;
+			case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
+				assert(child->isKindOf(CC_TYPES::POINT_CLOUD));
+				error = SaveAsCloud(ccHObjectCaster::ToGenericPointCloud(child), shpStream, shapeIndex, recordSize);
+				break;
+			case ESRI_SHAPE_TYPE::MULTI_PATCH:
+				error = SaveMesh(ccHObjectCaster::ToMesh(child), shpStream, shapeIndex, recordSize);
+				break;
+			default:
+				assert(false);
+				break;
 		}
 
 		if (error != CC_FERR_NO_ERROR)
@@ -2031,11 +2033,9 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 
 	//try to load the DBF to see if there's a 'height' field or something similar for polylines
 	bool hasPolylines = (!polyIDs.empty());
-	bool hasPoints = (singlePoints && singlePoints->size() != 0 && maxPointID == static_cast<int32_t>(singlePoints->size()));
-	if (!is3DShape
-		&&	error == CC_FERR_NO_ERROR
-		&& (hasPolylines || hasPoints)
-		)
+	bool hasPoints = (singlePoints && singlePoints->size() != 0 &&
+	                  maxPointID == static_cast<int32_t>(singlePoints->size()));
+	if (!is3DShape && error == CC_FERR_NO_ERROR && (hasPolylines || hasPoints))
 	{
 		QFileInfo fi(filename);
 		QString baseFileName = fi.path() + QString("/") + fi.completeBaseName();

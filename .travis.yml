@@ -15,6 +15,7 @@ install:
   libdlib-dev libswscale-dev libtbb-dev
   libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools 
   libproj-dev libdlib-dev
+- sudo apt-get install -qy xvfb
 - git submodule init && git submodule update
 
 before_script:
@@ -49,7 +50,7 @@ before_script:
   ..
 script:
 - if [[ $TRAVIS_BRANCH != "beta_builds" ]]; then make -j2; fi
-- ctest
+- xvfb-run ctest
 - cd ..
 after_success:
 - openssl aes-256-cbc -K $encrypted_d04fcf964026_key -iv $encrypted_d04fcf964026_iv

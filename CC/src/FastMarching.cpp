@@ -37,7 +37,7 @@ FastMarching::FastMarching()
 	, m_octree(nullptr)
 	, m_gridLevel(0)
 	, m_cellSize(1.0f)
-	, m_minFillIndexes(0,0,0)
+	, m_minFillIndexes(0, 0, 0)
 	, m_numberOfNeighbours(6)
 {
 	memset(m_neighboursIndexShift, 0, sizeof(int)   * CC_FM_MAX_NUMBER_OF_NEIGHBOURS);
@@ -48,7 +48,7 @@ FastMarching::~FastMarching()
 {
 	if (m_theGrid)
 	{
-		for (unsigned i=0; i<m_gridSize; ++i)
+		for (unsigned i = 0; i < m_gridSize; ++i)
 		{
 			if (m_theGrid[i])
 			{
@@ -57,6 +57,7 @@ FastMarching::~FastMarching()
 		}
 
 		delete[] m_theGrid;
+		m_theGrid = nullptr;
 	}
 }
 
@@ -70,9 +71,9 @@ float FastMarching::getTime(Tuple3i& pos, bool absoluteCoordinates) const
 	}
 	else
 	{
-		index =	  static_cast<unsigned>(pos.x+1)
-				+ static_cast<unsigned>(pos.y+1) * m_rowSize
-				+ static_cast<unsigned>(pos.z+1) * m_sliceSize;
+		index =	static_cast<unsigned>(pos.x + 1)
+			+	static_cast<unsigned>(pos.y + 1) * m_rowSize
+			+	static_cast<unsigned>(pos.z + 1) * m_sliceSize;
 	}
 
 	assert(m_theGrid[index]);
@@ -85,7 +86,7 @@ int FastMarching::initGrid(float step, unsigned dim[3])
 	m_octree = nullptr;
 	m_gridLevel = 0;
 	m_cellSize = step;
-	m_minFillIndexes = Tuple3i(0,0,0);
+	m_minFillIndexes = Tuple3i(0, 0, 0);
 
 	m_dx = dim[0];
 	m_dy = dim[1];
@@ -118,10 +119,10 @@ int FastMarching::initGridWithOctree(DgmOctree* octree, unsigned char gridLevel)
 
 int FastMarching::initOther()
 {
-	m_rowSize = m_dx+2;
-	m_sliceSize = m_rowSize*(m_dy+2);
-	m_gridSize = m_sliceSize*(m_dz+2);
-	m_indexShift = 1+m_rowSize+m_sliceSize;
+	m_rowSize = m_dx + 2;
+	m_sliceSize = m_rowSize * (m_dy + 2);
+	m_gridSize = m_sliceSize * (m_dz + 2);
+	m_indexShift = 1 + m_rowSize + m_sliceSize;
 
 	for (unsigned i=0; i<CC_FM_MAX_NUMBER_OF_NEIGHBOURS; ++i)
 	{
@@ -135,9 +136,9 @@ int FastMarching::initOther()
 									* m_cellSize;
 	}
 
-	m_activeCells.clear();
-	m_trialCells.clear();
-	m_ignoredCells.clear();
+	m_activeCells.resize(0);
+	m_trialCells.resize(0);
+	m_ignoredCells.resize(0);
 
 	if (!instantiateGrid(m_gridSize))
         return -3;

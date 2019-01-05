@@ -196,11 +196,11 @@ DgmOctree::DgmOctree(GenericIndexedCloudPersist* cloud)
 void DgmOctree::clear()
 {
 	//reset internal tables
-	m_dimMin = m_pointsMin = m_dimMax = m_pointsMax = CCVector3(0,0,0);
+	m_dimMin = m_pointsMin = m_dimMax = m_pointsMax = CCVector3(0, 0, 0);
 
 	m_numberOfProjectedPoints = 0;
 	m_nearestPow2 = 0;
-	m_thePointsAndTheirCellCodes.clear();
+	m_thePointsAndTheirCellCodes.resize(0);
 
 	memset(m_fillIndexes, 0, sizeof(int)*(MAX_OCTREE_LEVEL + 1) * 6);
 	memset(m_cellSize, 0, sizeof(PointCoordinateType)*(MAX_OCTREE_LEVEL + 2));
@@ -344,7 +344,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 
 		if (!nprogress.oneStep())
 		{
-			m_thePointsAndTheirCellCodes.clear();
+			m_thePointsAndTheirCellCodes.resize(0);
 			m_numberOfProjectedPoints = 0;
 			if (progressCb)
 			{
@@ -3094,8 +3094,8 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	}
 
 	//release some memory
-	slice.clear();
-	oldSlice.clear();
+	slice.resize(0);
+	oldSlice.resize(0);
 
 	if (progressCb)
 	{
@@ -4104,7 +4104,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 
 		//if something went wrong, we clear everything and return 0!
 		if (!s_cellFunc_MT_success)
-			cells.clear();
+			cells.resize(0);
 
 		return static_cast<unsigned>(cells.size());
 	}
@@ -4138,7 +4138,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 	if (!AABB<PointCoordinateType>(m_dimMin - margin, m_dimMax + margin).intersects(ray))
 	{
 		//no intersection
-		output.clear();
+		output.resize(0);
 		return true;
 	}
 

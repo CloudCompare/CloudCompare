@@ -975,7 +975,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 			if (ioParams.trackOrigIndexes)
 			{
 				origTriIndexesMapInsideBackup = ioParams.origTriIndexesMapInside;
-				ioParams.origTriIndexesMapInside.clear();
+				ioParams.origTriIndexesMapInside.resize(0);
 			}
 
 			//look for original triangles
@@ -1321,7 +1321,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 					sourceVertices = insideVertices1;
 					insideMesh = insideMesh2;
 					insideVertices = insideVertices2;
-					preservedTrianglesInside2.clear();
+					preservedTrianglesInside2.resize(0);
 					preservedTrianglesInside = &preservedTrianglesInside2;
 					formerPreservedTriangles = &preservedTrianglesInside1;
 				}
@@ -1334,7 +1334,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 					sourceVertices = insideVertices2;
 					insideMesh = insideMesh1;
 					insideVertices = insideVertices1;
-					preservedTrianglesInside1.clear();
+					preservedTrianglesInside1.resize(0);
 					preservedTrianglesInside = &preservedTrianglesInside1;
 					formerPreservedTriangles = &preservedTrianglesInside2;
 				}
@@ -1352,7 +1352,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 
 	//free some memory
 	s_edgePoint.clear();
-	formerPreservedTriangles->clear();
+	formerPreservedTriangles->resize(0);
 
 	if (!error)
 	{

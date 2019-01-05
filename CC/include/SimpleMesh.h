@@ -70,7 +70,7 @@ public: //specific methods
 	inline const GenericIndexedCloud* vertices() const { return theVertices; }
 
 	//! Clears the mesh
-	inline void clear() { m_triIndexes.clear(); }
+	inline void clear() { m_triIndexes.resize(0); }
 
 	//! Adds a triangle to the mesh
 	/** Vertex indexes are expresesed relatively to the vertex cloud.

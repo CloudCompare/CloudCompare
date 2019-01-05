@@ -113,8 +113,8 @@ void ccRasterGrid::clear()
 	//reset
 	width = height = 0;
 
-	rows.clear();
-	scalarFields.clear();
+	rows.resize(0);
+	scalarFields.resize(0);
 
 	minHeight = maxHeight = meanHeight = 0;
 	nonEmptyCellCount = validCellCount = 0;
@@ -142,7 +142,7 @@ bool ccRasterGrid::init(unsigned w,
 	catch (const std::bad_alloc&)
 	{
 		//not enough memory
-		rows.clear();
+		rows.resize(0);
 		return false;
 	}
 
@@ -199,7 +199,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			catch (const std::bad_alloc&)
 			{
 				//not enough memory
-				scalarFields.clear();
+				scalarFields.resize(0);
 				ccLog::Warning("[Rasterize] Failed to allocate memory for scalar fields!");
 			}
 		}

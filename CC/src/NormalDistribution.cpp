@@ -61,8 +61,8 @@ bool NormalDistribution::setParameters(ScalarType mu, ScalarType sigma2)
 	m_sigma2 = sigma2;
 
 	//update Chi2 data
-	m_chi2ClassesPositions.clear();
-	m_Pi.clear();
+	m_chi2ClassesPositions.resize(0);
+	m_Pi.resize(0);
 
 	if (m_sigma2 >= 0)
 	{
@@ -253,8 +253,8 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned n
 
 bool NormalDistribution::setChi2ClassesPositions(unsigned numberOfClasses)
 {
-	m_chi2ClassesPositions.clear();
-	m_Pi.clear();
+	m_chi2ClassesPositions.resize(0);
+	m_Pi.resize(0);
 
 	if (!isValid() || numberOfClasses < 2)
 		return false;

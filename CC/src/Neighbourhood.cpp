@@ -645,7 +645,7 @@ bool Neighbourhood::compute3DQuadric(double quadricEquation[10])
 	}
 
 	//we don't need M anymore
-	M.clear();
+	M.resize(0);
 
 	//now we compute eigen values and vectors of D
 #ifdef USE_EIGEN

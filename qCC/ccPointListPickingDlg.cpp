@@ -192,8 +192,8 @@ void ccPointListPickingDlg::cancelAndExit()
 		}
 	}
 
-	m_toBeDeleted.clear();
-	m_toBeAdded.clear();
+	m_toBeDeleted.resize(0);
+	m_toBeAdded.resize(0);
 	m_associatedCloud = 0;
 	m_orderedLabelsContainer = 0;
 
@@ -295,8 +295,8 @@ void ccPointListPickingDlg::applyAndExit()
 		m_associatedCloud = 0;
 	}
 
-	m_toBeDeleted.clear();
-	m_toBeAdded.clear();
+	m_toBeDeleted.resize(0);
+	m_toBeAdded.resize(0);
 	m_orderedLabelsContainer = 0;
 
 	updateList();

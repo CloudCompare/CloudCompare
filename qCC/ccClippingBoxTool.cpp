@@ -238,7 +238,7 @@ bool ccClippingBoxTool::addAssociatedEntity(ccHObject* entity)
 	}
 
 	s_maxEdgeLength = -1.0;
-	s_lastContourUniqueIDs.clear();
+	s_lastContourUniqueIDs.resize(0);
 	removeLastContourToolButton->setEnabled(false);
 
 	return true;
@@ -350,7 +350,7 @@ void ccClippingBoxTool::removeLastContour()
 		}
 	}
 
-	s_lastContourUniqueIDs.clear();
+	s_lastContourUniqueIDs.resize(0);
 	removeLastContourToolButton->setEnabled(false);
 }
 
@@ -964,7 +964,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 			{
 				delete slice;
 			}
-			outputSlices.clear();
+			outputSlices.resize(0);
 		}
 
 		if (error)

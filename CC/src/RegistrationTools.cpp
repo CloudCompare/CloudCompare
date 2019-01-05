@@ -1457,7 +1457,7 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 			return -1;
 		}
 
-		for (unsigned i=0; i<count; i++)
+		for (unsigned i = 0; i < count; i++)
 		{
 			const CCVector3 *q0 = cloud->getPoint(i);
 			IndexPair idxPair;
@@ -1466,10 +1466,10 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 			pointsIndexes.clear();
 			tree->findPointsLyingToDistance(q0->u, static_cast<ScalarType>(d1), delta, pointsIndexes);
 			{
-				for(std::size_t j=0; j<pointsIndexes.size(); j++)
+				for (std::size_t j = 0; j < pointsIndexes.size(); j++)
 				{
 					//As ||pi-pj|| = ||pj-pi||, we only take care of pairs that verify i<j
-					if (pointsIndexes[j]>i)
+					if (pointsIndexes[j] > i)
 					{
 						idxPair.second = pointsIndexes[j];
 						pairs1.push_back(idxPair);
@@ -1480,9 +1480,9 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 			pointsIndexes.clear();
 			tree->findPointsLyingToDistance(q0->u, static_cast<ScalarType>(d2), delta, pointsIndexes);
 			{
-				for(std::size_t j=0; j<pointsIndexes.size(); j++)
+				for (std::size_t j = 0; j < pointsIndexes.size(); j++)
 				{
-					if (pointsIndexes[j]>i)
+					if (pointsIndexes[j] > i)
 					{
 						idxPair.second = pointsIndexes[j];
 						pairs2.push_back(idxPair);
@@ -1557,14 +1557,20 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 
 	//Find bases from matching intermediate points indexes
 	{
-		results.clear();
+		results.resize(0);
 		std::size_t count = match.size();
-		if (count>0)
+		if (count > 0)
 		{
-			results.reserve(count);
-			if (results.capacity() < count)		//not enough memory
+			try
+			{
+				results.reserve(count);
+			}
+			catch (const std::bad_alloc&)
+			{
+				//not enough memory
 				return -6;
-			for(std::size_t i=0; i<count; i++)
+			}
+			for (std::size_t i = 0; i < count; i++)
 			{
 				Base quad;
 				unsigned b = match[i].second / 2;
@@ -1737,8 +1743,7 @@ bool FPCSRegistrationTools::FilterCandidates(	GenericIndexedCloud *modelCloud,
 
 	if (filter)
 	{
-		transforms.clear();
-		candidates.clear();
+		transforms.resize(0);
 		try
 		{
 			candidates.resize(nbMaxCandidates);
@@ -1750,9 +1755,9 @@ bool FPCSRegistrationTools::FilterCandidates(	GenericIndexedCloud *modelCloud,
 
 		//Sort the scores in ascending order and only keep the nbMaxCandidates smallest scores
 		sort(sortedscores.begin(), sortedscores.end());
-		float score = sortedscores[nbMaxCandidates-1];
+		float score = sortedscores[nbMaxCandidates - 1];
 		unsigned j = 0;
-		for (unsigned i=0; i<scores.size(); i++)
+		for (unsigned i = 0; i < scores.size(); i++)
 		{
 			if (scores[i] <= score && j < nbMaxCandidates)
 			{

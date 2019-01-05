@@ -88,7 +88,7 @@ void ccWaveWidget::clear()
 
 void ccWaveWidget::clearInternal()
 {
-	m_curveValues.clear();
+	m_curveValues.resize(0);
 	m_dt = 0;
 	m_minA = m_maxA = 0;
 }

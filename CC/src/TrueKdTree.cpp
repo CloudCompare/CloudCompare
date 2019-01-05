@@ -43,8 +43,11 @@ TrueKdTree::~TrueKdTree()
 
 void TrueKdTree::clear()
 {
-	delete m_root;
-	m_root = nullptr;
+	if (m_root)
+	{
+		delete m_root;
+		m_root = nullptr;
+	}
 }
 
 //shared structure used to sort the points along a single dimension (see TrueKdTree::split)

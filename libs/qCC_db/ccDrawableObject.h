@@ -228,7 +228,7 @@ public: //Transformation matrix management (for display only)
 public: //clipping planes
 
 	//! Removes all clipping planes (if any)
-	virtual void removeAllClipPlanes() { m_clipPlanes.clear(); }
+	virtual void removeAllClipPlanes() { m_clipPlanes.resize(0); }
 
 	//! Registers a new clipping plane
 	/** \return false if the planes couldn't be added (not enough memory)

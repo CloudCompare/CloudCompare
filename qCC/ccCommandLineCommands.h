@@ -895,7 +895,7 @@ struct CommandExtractCCs : public ccCommandLineInterface::Command
 			}
 
 			std::vector< CLCloudDesc > inputClouds = cmd.clouds();
-			cmd.clouds().clear();
+			cmd.clouds().resize(0);
 			for (size_t i = 0; i < inputClouds.size(); ++i)
 			{
 				ccPointCloud* cloud = inputClouds[i].pc;
@@ -3267,7 +3267,7 @@ struct CommandDelaunayTri : public ccCommandLineInterface::Command
 			}
 		}
 		//mehses have taken ownership of the clouds!
-		cmd.clouds().clear();
+		cmd.clouds().resize(0);
 
 		return true;
 	}

@@ -235,13 +235,13 @@ void qBroomDlg::AutomationArea::clear()
 		polyline = 0;
 	}
 
-	clickedPoints.clear();
+	clickedPoints.resize(0);
 }
 
 void qBroomDlg::Picking::clear()
 {
 	//remove the 'labels' (if any)
-	for (size_t i=0; i<labels.size(); ++i)
+	for (size_t i = 0; i < labels.size(); ++i)
 	{
 		cc2DLabel* label = labels[i];
 		if (label)
@@ -256,7 +256,7 @@ void qBroomDlg::Picking::clear()
 		}
 	}
 
-	labels.clear();
+	labels.resize(0);
 }
 
 void qBroomDlg::freezeUI(bool state)
@@ -420,7 +420,7 @@ bool qBroomDlg::setCloud(ccPointCloud* cloud, bool ownCloud/*=false*/, bool auto
 		{
 			m_selectionTable.clear();
 			m_selectionTable.resize(pointCount, 0);
-			m_undoPositions.clear();
+			m_undoPositions.resize(0);
 			m_undoPositions.reserve(1);
 		}
 		catch (const std::bad_alloc&)

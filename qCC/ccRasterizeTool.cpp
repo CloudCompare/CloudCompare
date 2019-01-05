@@ -1821,7 +1821,7 @@ void ccRasterizeTool::generateContours()
 				addNewContour(poly, height, poly->getMetaData("SubIndex").toUInt());
 			}
 
-			params.contourLines.clear(); //just in case
+			params.contourLines.resize(0); //just in case
 		}
 	}
 
@@ -2077,7 +2077,7 @@ void ccRasterizeTool::exportContourLines()
 		if (m_glWindow)
 			m_glWindow->removeFromOwnDB(poly);
 	}
-	m_contourLines.clear();
+	m_contourLines.resize(0);
 	exportContoursPushButton->setEnabled(false);
 
 	group->setDisplay_recursive(m_cloud->getDisplay());

@@ -344,7 +344,7 @@ public: //associated (scan) grid structure
 	//! Adds an associated grid
 	inline bool addGrid(Grid::Shared grid) { try{ m_grids.push_back(grid); } catch (const std::bad_alloc&) { return false; } return true; }
 	//! Remove all associated grids
-	inline void removeGrids() { m_grids.clear(); }
+	inline void removeGrids() { m_grids.resize(0); }
 
 	//! Meshes a scan grid
 	/** \warning The mesh vertices will be this cloud instance!

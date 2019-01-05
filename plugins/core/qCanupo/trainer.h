@@ -44,7 +44,7 @@ public:
 		size_t nsamples = samplesvec.size();
 
 		long ndata_class1 = 0, ndata_class2 = 0;
-		for (size_t i=0; i<nsamples; ++i)
+		for (size_t i = 0; i < nsamples; ++i)
 		{
 			if (labels[i] > 0)
 				++ndata_class1;
@@ -52,19 +52,19 @@ public:
 				++ndata_class2;
 		}
 
-		dlib::matrix<sample_type,0,1> samples1, samples2;
+		dlib::matrix<sample_type, 0, 1> samples1, samples2;
 		samples1.set_size(ndata_class1);
 		samples2.set_size(ndata_class2);
 		sample_type mu1; mu1.set_size(fdim);
 		sample_type mu2; mu2.set_size(fdim);
-		for (size_t i=0; i<fdim; ++i)
+		for (size_t i = 0; i < fdim; ++i)
 		{
 			mu1(i) = 0;
 			mu2(i) = 0;
 		}
 
 		ndata_class1 = 0; ndata_class2 = 0;
-		for (size_t i=0; i<nsamples; ++i)
+		for (size_t i = 0; i < nsamples; ++i)
 		{
 			if (labels[i] > 0)
 			{
@@ -81,7 +81,7 @@ public:
 		}
 		mu1 /= ndata_class1;
 		mu2 /= ndata_class2;
-		
+
 		// if you get a compilation error coming from here (with templates
 		// and a 'visual_studio_sucks_cov_helper' structure involved) then
 		// you may have to patch the dlib's file 'matrix_utilities.h":
@@ -94,20 +94,20 @@ public:
 		dlib::matrix<float> sigma1 = covariance(samples1);
 		dlib::matrix<float> sigma2 = covariance(samples2);
 
-		sample_type w_vect = pinv(sigma1+sigma2) * (mu2 - mu1);
+		sample_type w_vect = pinv(sigma1 + sigma2) * (mu2 - mu1);
 
 		trained_function_type ret;
 		//ret.alpha.set_size(fdim);
 		//for (int i=0; i<fdim; ++i) ret.alpha(i) = w_vect(i);
 		ret.alpha = w_vect;
-		ret.b = dot(w_vect,(mu1+mu2)*0.5);
+		ret.b = dot(w_vect, (mu1 + mu2)*0.5);
 		// linear kernel idiocy
 		ret.basis_vectors.set_size(fdim);
-		for (size_t i=0; i<fdim; ++i)
+		for (size_t i = 0; i < fdim; ++i)
 		{
 			ret.basis_vectors(i).set_size(fdim);
-			for (size_t j=0; j<fdim; ++j)
-				ret.basis_vectors(i)(j)=0;
+			for (size_t j = 0; j < fdim; ++j)
+				ret.basis_vectors(i)(j) = 0;
 			ret.basis_vectors(i)(i) = 1;
 		}
 		return ret;
@@ -202,22 +202,22 @@ public:
 		int dim = samples.back().size();
 		// see comments in linearSVM.hpp
 		m_weights.clear();
-		m_weights.resize(dim+1, 0);
-		dlib::matrix<float> w(dim,1);
+		m_weights.resize(dim + 1, 0);
+		dlib::matrix<float> w(dim, 1);
 		w = 0;
-		for (int i=0; i<decfun.alpha.nr(); ++i)
+		for (int i = 0; i < decfun.alpha.nr(); ++i)
 		{
 			w += decfun.alpha(i) * decfun.basis_vectors(i);
 		}
-		for (int i=0; i<dim; ++i)
+		for (int i = 0; i < dim; ++i)
 			m_weights[i] = w(i);
 		m_weights[dim] = -decfun.b;
-		for (int i=0; i<=dim; ++i)
+		for (int i = 0; i <= dim; ++i)
 			m_weights[i] *= pdecfun.alpha;
 		m_weights[dim] += pdecfun.beta;
 
 		// TODO: check if necessary here
-		for (int i=0; i<=dim; ++i)
+		for (int i = 0; i <= dim; ++i)
 			m_weights[i] = -m_weights[i];
 	}
 
@@ -225,7 +225,7 @@ public:
 	{
 		assert(!m_weights.empty());
 		double ret = m_weights.back();
-		for (size_t d=0; d<m_weights.size()-1; ++d)
+		for (size_t d = 0; d < m_weights.size() - 1; ++d)
 			ret += static_cast<double>(m_weights[d]) * data(d);
 		return ret;
 	}

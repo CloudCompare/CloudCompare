@@ -151,12 +151,12 @@ void ccPointPairRegistrationDlg::clear()
 		refPointsTableWidget->removeRow(refPointsTableWidget->rowCount() - 1);
 
 	m_alignedPoints.removeAllChildren();
-	m_alignedPoints.clear();
+	m_alignedPoints.resize(0);
 	m_alignedPoints.setGlobalShift(0, 0, 0);
 	m_alignedPoints.setGlobalScale(1.0);
 	m_aligned.entity = 0;
 	m_refPoints.removeAllChildren();
-	m_refPoints.clear();
+	m_refPoints.resize(0);
 	m_refPoints.setGlobalShift(0, 0, 0);
 	m_refPoints.setGlobalScale(1.0);
 	m_reference.entity = 0;

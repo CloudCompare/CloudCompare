@@ -488,7 +488,7 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 			m_poly3D->setGlobalScale(cloud->getGlobalScale());
 		}
 
-		m_segmentParams.clear(); //just in case
+		m_segmentParams.resize(0); //just in case
 
 		m_associatedWin->addToOwnDB(m_poly3D);
 	}
@@ -587,7 +587,7 @@ void ccTracePolylineTool::restart(bool reset)
 			}
 
 			delete m_poly3D;
-			m_segmentParams.clear();
+			m_segmentParams.resize(0);
 			//delete m_poly3DVertices;
 			m_poly3D = 0;
 			m_poly3DVertices = 0;
@@ -639,7 +639,7 @@ void ccTracePolylineTool::exportLine()
 		if (poly)
 		{
 			delete m_poly3D;
-			m_segmentParams.clear();
+			m_segmentParams.resize(0);
 			m_poly3DVertices = 0;
 			m_poly3D = poly;
 		}
@@ -657,7 +657,7 @@ void ccTracePolylineTool::exportLine()
 	}
 
 	m_poly3D = 0;
-	m_segmentParams.clear();
+	m_segmentParams.resize(0);
 	m_poly3DVertices = 0;
 
 	resetLine(); //to update the GUI

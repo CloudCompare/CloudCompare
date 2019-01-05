@@ -181,7 +181,7 @@ void cc2DLabel::clear(bool ignoreDependencies)
 {
 	if (ignoreDependencies)
 	{
-		m_points.clear();
+		m_points.resize(0);
 	}
 	else
 	{

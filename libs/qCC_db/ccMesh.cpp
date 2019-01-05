@@ -753,7 +753,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 			const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();
 			cloneMesh->addTriangle(usedVerts[tsi->i1], usedVerts[tsi->i2], usedVerts[tsi->i3]);
 		}
-		usedVerts.clear();
+		usedVerts.resize(0);
 	}
 	else
 	{
@@ -2294,7 +2294,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 							newMesh->removePerTriangleTexCoordIndexes();
 							newTriTexIndexes->release();
 							newTriTexIndexes = nullptr;
-							newTexIndexes.clear();
+							newTexIndexes.resize(0);
 						}
 					}
 				}

@@ -369,7 +369,7 @@ PointCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 					sampledCloud = nullptr;
 					if (triIndices)
 					{
-						triIndices->clear();
+						triIndices->resize(0);
 					}
 					break;
 				}
@@ -386,7 +386,7 @@ PointCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 						sampledCloud = nullptr;
 						if (triIndices)
 						{
-							triIndices->clear();
+							triIndices->resize(0);
 						}
 						break;
 					}
@@ -431,7 +431,7 @@ PointCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 		else
 		{
 			if (triIndices)
-				triIndices->clear();
+				triIndices->resize(0);
 		}
 	}
 

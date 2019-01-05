@@ -42,7 +42,7 @@ bool KDTree::buildFromCloud(GenericIndexedCloud *cloud, GenericProgressCallback 
 {
     unsigned cloudsize = cloud->size();
 
-    m_indexes.clear();
+    m_indexes.resize(0);
     m_cellCount = 0;
 	m_associatedCloud = nullptr;
 	m_root = nullptr;

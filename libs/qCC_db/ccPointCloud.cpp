@@ -934,7 +934,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				catch (const std::bad_alloc&)
 				{
 					//not enough memory
-					m_grids.clear();
+					m_grids.resize(0);
 					ccLog::Warning(QString("[ccPointCloud::fusion] Not enough memory: failed to copy the grid structure(s) from '%1'").arg(addedCloud->getName()));
 					break;
 				}
@@ -948,7 +948,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	else if (gridCount() != 0) //otherwise we'll have to drop the former grid structures!
 	{
 		ccLog::Warning(QString("[ccPointCloud::fusion] Grid structure(s) will be dropped as the merged cloud is unstructured"));
-		m_grids.clear();
+		m_grids.resize(0);
 	}
 
 	//has the cloud been recentered/rescaled?
@@ -1083,7 +1083,7 @@ void ccPointCloud::unallocateColors()
 	{
 		if (m_grids[i])
 		{
-			m_grids[i]->colors.clear();
+			m_grids[i]->colors.resize(0);
 		}
 	}
 
@@ -1312,7 +1312,7 @@ bool ccPointCloud::reserveTheFWFTable()
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("[ccPointCloud::reserveTheFWFTable] Not enough memory!");
-		m_fwfWaveforms.clear();
+		m_fwfWaveforms.resize(0);
 	}
 
 	//double check
@@ -1369,7 +1369,7 @@ bool ccPointCloud::resizeTheFWFTable()
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("[ccPointCloud::resizeTheFWFTable] Not enough memory!");
-		m_fwfWaveforms.clear();
+		m_fwfWaveforms.resize(0);
 	}
 
 	//double check
@@ -2015,7 +2015,7 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 				removeChild(kdtrees[kdtrees.size() - 1 - i]); //faster to remove the last objects
 			}
 		}
-		kdtrees.clear();
+		kdtrees.resize(0);
 	}
 
 	//new we have to compute a proper transformation matrix
@@ -3317,7 +3317,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 			{
 				if (grid->validCount == 0)
 				{
-					grid->indexes.clear();
+					grid->indexes.resize(0);
 				}
 			}
 		}
@@ -4962,7 +4962,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				{
 					ccLog::Warning(QString("[ccPointCloud::updateVBOs] Failed to initialize VBOs (not enough memory?) (cloud '%1')").arg(getName()));
 					m_vboManager.state = vboSet::FAILED;
-					m_vboManager.vbos.clear();
+					m_vboManager.vbos.resize(0);
 					return false;
 				}
 				else
@@ -5076,7 +5076,7 @@ void ccPointCloud::releaseVBOs()
 		assert(m_vboManager.vbos.empty());
 	}
 
-	m_vboManager.vbos.clear();
+	m_vboManager.vbos.resize(0);
 	m_vboManager.hasColors = false;
 	m_vboManager.hasNormals = false;
 	m_vboManager.colorIsSF = false;
@@ -5596,7 +5596,7 @@ void ccPointCloud::clearLOD()
 
 void ccPointCloud::clearFWFData()
 {
-	m_fwfWaveforms.clear();
+	m_fwfWaveforms.resize(0);
 	m_fwfDescriptors.clear();
 }
 

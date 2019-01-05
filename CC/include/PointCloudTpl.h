@@ -243,7 +243,7 @@ namespace CCLib
 		**/
 		void reset()
 		{
-			m_points.clear();
+			m_points.resize(0);
 			deleteAllScalarFields();
 			placeIteratorAtBeginning();
 			invalidateBoundingBox();

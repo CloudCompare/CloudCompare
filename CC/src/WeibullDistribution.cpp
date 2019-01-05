@@ -145,7 +145,7 @@ bool WeibullDistribution::setParameters(ScalarType a, ScalarType b, ScalarType v
 	m_b = b;
 
 	//for the Chi2 test
-	chi2ClassesPositions.clear();
+	chi2ClassesPositions.resize(0);
 
 	if (m_a > 0.0 && m_b >= 0.0)
 	{
@@ -436,7 +436,7 @@ double WeibullDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned 
 
 bool WeibullDistribution::setChi2ClassesPositions(unsigned numberOfClasses)
 {
-	chi2ClassesPositions.clear();
+	chi2ClassesPositions.resize(0);
 
 	if (!isValid() || numberOfClasses < 2)
 		return false;

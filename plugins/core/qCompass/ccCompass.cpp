@@ -304,10 +304,10 @@ void ccCompass::tryLoading()
 	//loop through DB_Tree and find any ccCompass objects
 	std::vector<int> originals; //ids of original objects
 	std::vector<ccHObject*> replacements; //pointers to objects that will replace the originals
-	int nChildren = m_app->dbRootObject()->getChildrenNumber();
+	unsigned nChildren = m_app->dbRootObject()->getChildrenNumber();
 	for (unsigned i = 0; i < nChildren; i++)
 	{
-		prg.setValue( (50 * i) / nChildren);
+		prg.setValue(static_cast<int>((50 * i) / nChildren));
 		ccHObject* c = m_app->dbRootObject()->getChild(i);
 		tryLoading(c, &originals, &replacements);
 	}
@@ -1946,8 +1946,8 @@ void ccCompass::estimateStructureNormals()
 					double _phi, _theta, _alpha; //propsals
 
 					//generate chain
-					int count = 0;
-					int iter = 0;
+					unsigned count = 0;
+					unsigned iter = 0;
 					while (count < oversample)
 					{
 						//generate proposed sample
@@ -1991,7 +1991,7 @@ void ccCompass::estimateStructureNormals()
 							count++;
 						}
 
-						if (iter > 1000000*oversample)
+						if (iter > 1000000 * oversample)
 						{
 							m_app->dispToConsole("[ccCompass] Warning - MCMC sampler failed so sampling will be incomplete.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 							break;
@@ -2366,14 +2366,14 @@ void ccCompass::estimateStrain()
 
 	int validCells = 0;
 	prg.setInfo("Calculating strain tensors...");
-	for (unsigned x = 0; x < nx; x++)
+	for (int x = 0; x < nx; x++)
 	{
-		for (unsigned y = 0; y < ny; y++)
+		for (int y = 0; y < ny; y++)
 		{
-			for (unsigned z = 0; z < nz; z++)
+			for (int z = 0; z < nz; z++)
 			{
 				int idx = x + nx * (y + ny * z);
-				prg.update(100.0 * idx / float(nx*ny*nz));
+				prg.update((100.0f * idx) / (nx*ny*nz));
 				if (prg.isCancelRequested())
 				{
 					delete blocks;
@@ -2410,7 +2410,7 @@ void ccCompass::estimateStrain()
 								{
 									s->setCurrentOutScalarField(thickSF);
 									int region = ccGeoObject::getGeoObjectRegion(s);
-									if (!(region == ccGeoObject::LOWER_BOUNDARY | region == ccGeoObject::UPPER_BOUNDARY))
+									if (!(region == ccGeoObject::LOWER_BOUNDARY || region == ccGeoObject::UPPER_BOUNDARY))
 									{
 										continue;
 									}
@@ -2681,7 +2681,7 @@ void ccCompass::estimateStrain()
 
 //Estimate P21 intensity of selected structures
 static double searchR = 10;
-static int subsample = 25;
+static unsigned subsample = 25;
 void ccCompass::estimateP21()
 {
 	//setup point cloud to store data in
@@ -2772,7 +2772,7 @@ void ccCompass::estimateP21()
 
 		cloud->reserve(p->size());
 		weight->reserve(p->size());
-		for (int i = 0; i < p->size(); i++)
+		for (unsigned i = 0; i < p->size(); i++)
 		{
 			cloud->addPoint(*p->getPoint(i));
 			weight->addElement(w);
@@ -2813,7 +2813,7 @@ void ccCompass::estimateP21()
 
 	//get values
 	searchR = boxSizeText.text().toDouble();
-	subsample = subsampleText.text().toInt();
+	subsample = subsampleText.text().toUInt();
 	m_app->dispToConsole(QString::asprintf("[ccCompass] Estimating P21 Intensity using a search radius of of %f.",searchR), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 	//cleanup
@@ -2826,7 +2826,7 @@ void ccCompass::estimateP21()
 	//subsample outcrop cloud
 	ccPointCloud* outputCloud = new ccPointCloud("P21 Intensity");
 	outputCloud->reserve(outcrop->size() / subsample);
-	for (int p = 0; p < outcrop->size(); p+= subsample)
+	for (unsigned p = 0; p < outcrop->size(); p+= subsample)
 	{
 		outputCloud->addPoint(*outcrop->getPoint(p));
 	}
@@ -3413,7 +3413,7 @@ void ccCompass::importFoliations()
 	//fill combo boxes with field names
 	//std::vector<QString> fields;
 	//std::vector<int> idx;
-	for (int i = 0; i < cld->getNumberOfScalarFields(); i++)
+	for (unsigned i = 0; i < cld->getNumberOfScalarFields(); i++)
 	{
 		dipDirCombo.addItem(cld->getScalarFieldName(i));
 		dipCombo.addItem(cld->getScalarFieldName(i));
@@ -3452,15 +3452,14 @@ void ccCompass::importFoliations()
 	}
 
 	//loop through points
-	float dip, dipdir;
-	for (int p = 0; p < cld->size(); p++)
+	for (unsigned p = 0; p < cld->size(); p++)
 	{
-		dip = cld->getScalarField(dipSF)->at(p);
-		dipdir = cld->getScalarField(dipDirSF)->at(p);
+		float dip = cld->getScalarField(dipSF)->at(p);
+		float dipdir = cld->getScalarField(dipDirSF)->at(p);
 		CCVector3 Cd = *cld->getPoint(p);
 
 		//build plane and get its orientation 
-		ccPlane* plane = new ccPlane(QString("%1/%2").arg((int)dip, 2, 10, QChar('0')).arg((int)dipdir, 3, 10, QChar('0')));
+		ccPlane* plane = new ccPlane(QString("%1/%2").arg(static_cast<int>(dip), 2, 10, QChar('0')).arg(static_cast<int>(dipdir), 3, 10, QChar('0')));
 		plane->showNameIn3D(true);
 		cld->addChild(plane);
 		m_app->addToDB(plane, false, true, false, false);
@@ -3468,7 +3467,7 @@ void ccCompass::importFoliations()
 		CCVector3 C = plane->getCenter();
 
 		//figure out transform (blatantly stolen from ccPlaneEditDlg::updatePlane())
-		CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(dip, dipdir,true);
+		CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(dip, dipdir, true);
 		ccGLMatrix trans;
 		bool needToApplyTrans = false;
 		bool needToApplyRot = false;
@@ -3544,7 +3543,7 @@ void ccCompass::importLineations()
 	QLineEdit planeSize("2.0"); planeSize.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
 
 	//fill combo boxes with field names
-	for (int i = 0; i < cld->getNumberOfScalarFields(); i++)
+	for (unsigned i = 0; i < cld->getNumberOfScalarFields(); i++)
 	{
 		dipDirCombo.addItem(cld->getScalarFieldName(i));
 		dipCombo.addItem(cld->getScalarFieldName(i));
@@ -3580,15 +3579,14 @@ void ccCompass::importLineations()
 	}
 
 	//loop through points
-	float trend, plunge;
-	for (int p = 0; p < cld->size(); p++)
+	for (unsigned p = 0; p < cld->size(); p++)
 	{
-		trend = cld->getScalarField(dipSF)->at(p);
-		plunge = cld->getScalarField(dipDirSF)->at(p);
+		float trend = cld->getScalarField(dipSF)->at(p);
+		float plunge = cld->getScalarField(dipDirSF)->at(p);
 		CCVector3 Cd = *cld->getPoint(p);
 		
 		//build lineation vector
-		CCVector3 l(sin(trend * CC_DEG_TO_RAD) * cos(plunge * CC_DEG_TO_RAD),cos(trend * CC_DEG_TO_RAD)*cos(plunge * CC_DEG_TO_RAD),-sin(plunge * CC_DEG_TO_RAD));
+		CCVector3 l(sin(trend * CC_DEG_TO_RAD) * cos(plunge * CC_DEG_TO_RAD), cos(trend * CC_DEG_TO_RAD)*cos(plunge * CC_DEG_TO_RAD), -sin(plunge * CC_DEG_TO_RAD));
 
 		//create new point cloud to associate with lineation graphic
 		ccPointCloud* points = new ccPointCloud();

@@ -3336,6 +3336,8 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 			}
 		}
 
+		unallocateVisibilityArray();
+
 		//TODO: handle associated meshes
 
 		resize(lastPoint);

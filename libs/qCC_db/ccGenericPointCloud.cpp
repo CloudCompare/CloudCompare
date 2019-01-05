@@ -38,7 +38,6 @@
 
 ccGenericPointCloud::ccGenericPointCloud(QString name)
 	: ccShiftedObject(name)
-	, m_pointsVisibility(0)
 	, m_pointSize(0)
 {
 	setVisible(true);
@@ -89,21 +88,20 @@ void ccGenericPointCloud::invertVisibilityArray()
 		return;
 	}
 
-	size_t count = m_pointsVisibility.size();
-	for (size_t i = 0; i < count; ++i)
+	for (unsigned char& vis : m_pointsVisibility)
 	{
-		m_pointsVisibility[i] = (m_pointsVisibility[i] == POINT_HIDDEN ? POINT_VISIBLE : POINT_HIDDEN);
+		vis = (vis == POINT_HIDDEN ? POINT_VISIBLE : POINT_HIDDEN);
 	}
 }
 
 void ccGenericPointCloud::unallocateVisibilityArray()
 {
-	m_pointsVisibility.clear();
+	m_pointsVisibility.resize(0);
 }
 
 bool ccGenericPointCloud::isVisibilityTableInstantiated() const
 {
-	return 	!m_pointsVisibility.empty();
+	return !m_pointsVisibility.empty();
 }
 
 void ccGenericPointCloud::deleteOctree()

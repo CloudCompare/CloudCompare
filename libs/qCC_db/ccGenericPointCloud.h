@@ -170,6 +170,9 @@ public:
 	//! Returns associated visiblity array
 	virtual inline VisibilityTableType& getTheVisibilityArray() { return m_pointsVisibility; }
 
+	//! Returns associated visiblity array (const version)
+	virtual inline const VisibilityTableType& getTheVisibilityArray() const { return m_pointsVisibility; }
+
 	//! Returns a ReferenceCloud equivalent to the visiblity array
 	/** \param visTable visibility table (optional, otherwise the cloud's default one will be used)
 		\return the visible points as a ReferenceCloud

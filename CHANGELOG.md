@@ -141,6 +141,10 @@ v2.10.beta - 01/XX/2019
 	* SHP:
 		- improved support thanks to T. Montaigu (saving and loading Multipatch entities, code refactoring, unit tests, etc.)
 
+	* Cross section tool:
+		- can now be started with a group of entities (no need to select the entities inside anymore)
+		- produces less warnings
+
 	* Plugins (General):
 		- The "About Plugins" dialog was rewritten to provide more information about installed plugins and to include I/O and GL plugins.
 		- [macOS] The "About Plugins..." menu item was moved from the Help menu to the Application menu.

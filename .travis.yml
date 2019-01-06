@@ -50,6 +50,7 @@ before_script:
   ..
 script:
 - if [[ $TRAVIS_BRANCH != "beta_builds" ]]; then make -j2; fi
+- if [[ $CXX == "clang++" ]]; then export LD_LIBRARY_PATH=/usr/local/clang/lib:$LD_LIBRARY_PATH; fi
 - xvfb-run ctest
 - cd ..
 after_success:

@@ -27,7 +27,7 @@ v2.10 (Zephyrus) - 01/06/2019
 
 	* Localization support
 		- Display > Language translation
-		- Currently supported languages:
+		- currently supported languages:
 			* English (default)
 			* Brazilian portuguese (partial)
 			* French (very partial)
@@ -81,16 +81,16 @@ v2.10 (Zephyrus) - 01/06/2019
 			if the corresponding meshes are exported as FBX again
 
 	* Command line mode:
-		- Scalar field convert to RGB:
+		- scalar field convert to RGB:
 			* '-SF_CONVERT_TO_RGB {mixWithExistingColors bool}'
-		- Scalar field set color scale:
+		- scalar field set color scale:
 			* '-SF_COLOR_SCALE {filename}'
-		- Extract all loaded mesh vertices as standalone 'clouds' (the mesh is discarded)
+		- extract all loaded mesh vertices as standalone 'clouds' (the mesh is discarded)
 			* '-EXTRACT_VERTICES'
-		- Remove all scan grids
+		- remove all scan grids
 			* '-REMOVE_SCAN_GRIDS'
-		- New sub-option of 'SAVE_CLOUDS' to set the output filename(s) (e.g. -SAVE_CLOUDS FILE "cloud1.bin cloud2.bin ..."
-		- New options for the 'OCTREE_NORMALS' (thanks to Michael Barnes):
+		- new sub-option of 'SAVE_CLOUDS' to set the output filename(s) (e.g. -SAVE_CLOUDS FILE "cloud1.bin cloud2.bin ..."
+		- new options for the 'OCTREE_NORMALS' (thanks to Michael Barnes):
 			* '-ORIENT' to specify a default orientation hint:
 				- PLUS_ZERO
 				- MINUS_ZERO
@@ -103,7 +103,7 @@ v2.10 (Zephyrus) - 01/06/2019
 				- PLUS_Z
 				- MINUS_Z
 				- PREVIOUS
-			* '-MODEL' to specify the local model;
+			* '-MODEL' to specify the local model:
 				- LS
 				- TRI
 				- QUADRIC
@@ -112,17 +112,14 @@ v2.10 (Zephyrus) - 01/06/2019
 		- the cylindrical unrolling can be performed inside an arbitrary angular range (between -3600 and +3600 degrees)
 		- this means that the shape can be unrolled on more than 360 degrees, and from an arbitrary starting orientation
 
-	* New option (Display > Display options):
+	* New options (Display > Display options):
 		- the user can now control whether normals should be enabled on loaded clouds by default or not (default state is now 'off')
 		- the user can now control whether load and save dialogs should be native ones or generic Qt dialogs
 
-	* New behavior:
-		- Some loading dialogs 'Apply all' button will only apply to the set of selected files (ASCII, PLY and LAS)
-
 	* Normals:
-		- Ergonomics of 'Normals > compute' dialog have been (hopefully) enhanced
-		- Normals can now be oriented toward a sensor even if there's no grid associated to the point cloud.
-		- The Normal Orientation algorithm based on the Minimum Spanning Tree now uses much less memory (~1/10)
+		- ergonomics of 'Normals > compute' dialog have been (hopefully) enhanced
+		- normals can now be oriented toward a sensor even if there's no grid associated to the point cloud.
+		- the Normal Orientation algorithm based on the Minimum Spanning Tree now uses much less memory (~1/10)
 
 	* PCV:
 		- the PCV plugin can now be applied on several clouds (batch mode)
@@ -146,11 +143,11 @@ v2.10 (Zephyrus) - 01/06/2019
 		- produces less warnings
 
 	* Plugins (General):
-		- The "About Plugins" dialog was rewritten to provide more information about installed plugins and to include I/O and GL plugins.
-		- [macOS] The "About Plugins..." menu item was moved from the Help menu to the Application menu.
-		- Added several fields to the plugin interface: authors, maintainers, and reference links.
+		- the "About Plugins" dialog was rewritten to provide more information about installed plugins and to include I/O and GL plugins.
+		- [macOS] the "About Plugins..." menu item was moved from the Help menu to the Application menu.
+		- added several fields to the plugin interface: authors, maintainers, and reference links.
 		- I/O plugins now have the option to return a list of filters using a new method *getFilters()* (so one plugin can handle multiple file extensions)
-		- Moved support for several less frequently used file formats to a new plugin called qAdditionalIO
+		- moved support for several less frequently used file formats to a new plugin called qAdditionalIO
 			- Snavely's Bundler output (*.out)
 			- Clouds + calibrated images [meta][ascii] (*.icm)
 			- Point + Normal cloud (*.pn)
@@ -161,39 +158,40 @@ v2.10 (Zephyrus) - 01/06/2019
 			- Mensi Soisic cloud (*.soi)
 
 	* Misc:
-		- The trace polyline tool will now use the Global Shift & Scale information of the first clicked entity
-		- When calling the 'Edit > Edit Shift & Scale' dialog, the precision of the fields of the shift vector is now 6 digits
+		- some loading dialogs 'Apply all' button will only apply to the set of selected files (ASCII, PLY and LAS)
+		- the trace polyline tool will now use the Global Shift & Scale information of the first clicked entity
+		- when calling the 'Edit > Edit Shift & Scale' dialog, the precision of the fields of the shift vector is now 6 digits
 			(so as to let the user manually "geo-reference" a cloud)
 		- the ASCII loading dialog can now load up to 512 columns (i.e. almost as many scalar fields ;). And it shouldn't become huge if
 			there are too many columns or characters in the header line!
 
 - bug fixes:
 
-	* Subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values
-	* Point picking was performed on each click, even when double-clicking. This could actually prevent the double-click from
+	* subsampling with a radius dependent on the active scalar field could make CC stall when dealing with negative values
+	* point picking was performed on each click, even when double-clicking. This could actually prevent the double-click from
 		being recognized as such (as the picking could be too slow!)
-	* Command line mode: when loading at least two LAS files with the 'GLOBAL_SHIFT AUTO' option, if the LAS files had different AND small LAS Shift
-	* Point picking on a mesh (i.e. mainly in the point-pair based registration tool) could select the wrong point on the triangle, or even a wrong triangle
-	* Raster I/O: when importing a raster file, the corresponding point cloud was shifted of half a pixel
-	* The RASTERIZE command line could make CC crash at the end of the process
-	* Hitting the 'Apply all' button of the ASCII open dialog would not restore the previous load configuration correctly in all cases
+	* command line mode: when loading at least two LAS files with the 'GLOBAL_SHIFT AUTO' option, if the LAS files had different AND small LAS Shift
+	* point picking on a mesh (i.e. mainly in the point-pair based registration tool) could select the wrong point on the triangle, or even a wrong triangle
+	* raster I/O: when importing a raster file, the corresponding point cloud was shifted of half a pixel
+	* the RASTERIZE command line could make CC crash at the end of the process
+	* hitting the 'Apply all' button of the ASCII open dialog would not restore the previous load configuration correctly in all cases
 		(the header line may not be extracted the second time, etc.)
-	* Align tool: large coordinates of manually input points were rounded off (only when displayed)
-	* When applying an orthographic viewport while the 'stereo' mode is enabled, the stereo mode was broken (now a warning message is disabled and
+	* align tool: large coordinates of manually input points were rounded off (only when displayed)
+	* when applying an orthographic viewport while the 'stereo' mode is enabled, the stereo mode was broken (now a warning message is displayed and
 		the stereo mode is automatically disabled)
-	* The global shift along vertical dimension (e.g. Z) was not applied when exporting a raster grid to a raster file (geotiff)
-	* The 2.5D Volume calculation tool was ignoring the strategy for filling the empty cells of the 'ceil' cloud (it was always using the 'ground' setting)
-	* [macOS] Fixed the squished text in the Matrix and Axis/Angle sections of the transformation history section of the properties
-	* [macOS] Fixed squished menus in the properties editor
-	* The application options (i.e. only whether the normals should be displayed or not at loading time) were not saved!
-	* DXF files generated by the qSRA plugin were borken (same bug as the DXF filter in version 2.9)
-	* The OCTREE_NORMALS command was saving a file whatever the state of the AUTO_SAVE option
-	* The Align tools could make CC crash when applying the alignment matrix (if the octree below the aligned entity was visible in the DB tree)
-	* The clouds and contour lines generated by the Rasterize tool were shifted of half a cell
-	* In some cases, merging a mesh with materials with a mesh without could make CC crash
-	* Command line mode: the VOLUME command parser would loop indefinitely if other commands were appended after its own options + it was ignoring the AUTO_SAVE state.
-	* Bug fix: some files saved with version 2.6 to 2.9 and containing quadric primitives or projective camera sensors could not be loaded properly since the version 2.10.alpha of May 2018
-	* For a mysterious reason, the FWF_SAVE_CLOUDS command was not accessible anymore...
+	* the global shift along vertical dimension (e.g. Z) was not applied when exporting a raster grid to a raster file (geotiff)
+	* the 2.5D Volume calculation tool was ignoring the strategy for filling the empty cells of the 'ceil' cloud (it was always using the 'ground' setting)
+	* [macOS] fixed the squished text in the Matrix and Axis/Angle sections of the transformation history section of the properties
+	* [macOS] fixed squished menus in the properties editor
+	* the application options (i.e. only whether the normals should be displayed or not at loading time) were not saved!
+	* DXF files generated by the qSRA plugin were broken (same bug as the DXF filter in version 2.9)
+	* the OCTREE_NORMALS command was saving a file whatever the state of the AUTO_SAVE option
+	* the Align tools could make CC crash when applying the alignment matrix (if the octree below the aligned entity was visible in the DB tree)
+	* the clouds and contour lines generated by the Rasterize tool were shifted of half a cell
+	* in some cases, merging a mesh with materials with a mesh without could make CC crash
+	* command line mode: the VOLUME command parser would loop indefinitely if other commands were appended after its own options + it was ignoring the AUTO_SAVE state.
+	* some files saved with version 2.6 to 2.9 and containing quadric primitives or projective camera sensors could not be loaded properly since the version 2.10.alpha of May 2018
+	* for a mysterious reason, the FWF_SAVE_CLOUDS command was not accessible anymore...
 	* when computing C2C distances, and using both a 2.5D Triangulation local model and the 'split distances along X, Y and Z' option, the split distances could be wrong in some times
 
 v2.9.1 (Omnia) - 11/03/2017

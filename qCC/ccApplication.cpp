@@ -28,7 +28,7 @@
 #include "mainwindow.h"
 
 ccApplication::ccApplication(int &argc, char **argv)
-	: ccApplicationBase( argc, argv, QStringLiteral( "2.10-beta" ) )
+	: ccApplicationBase( argc, argv, QStringLiteral( "2.10 (Zephyrus)" ) )
 {
 	setApplicationName( "CloudCompare" );
 	

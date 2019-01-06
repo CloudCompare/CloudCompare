@@ -1,7 +1,7 @@
 CloudCompare version history
 ============================
 
-v2.10.beta - 01/XX/2019
+v2.10 (Zephyrus) - 01/06/2019
 ----------------------
 
 - new features:
@@ -196,7 +196,7 @@ v2.10.beta - 01/XX/2019
 	* For a mysterious reason, the FWF_SAVE_CLOUDS command was not accessible anymore...
 	* when computing C2C distances, and using both a 2.5D Triangulation local model and the 'split distances along X, Y and Z' option, the split distances could be wrong in some times
 
-v2.9.1 - 11/03/2017
+v2.9.1 (Omnia) - 11/03/2017
 ----------------------
 
 - enhancements:
@@ -209,7 +209,7 @@ v2.9.1 - 11/03/2017
 	* DXF export was broken (styles table was not properly declared)
 	* PLY files with texture indexes were not correctly read
 
-v2.9 - 10/22/2017
+v2.9 (Omnia) - 10/22/2017
 ----------------------
 
 - New features:
@@ -417,7 +417,7 @@ v2.9 - 10/22/2017
 		- the 'Cube' mode was not functional
 		- the 'Point' mode with normals was not functional
 
-v2.8.1 - 16/02/2017
+v2.8.1 (Hogfather) - 16/02/2017
 ----------------------
 
 - Bug fixes:
@@ -432,7 +432,7 @@ v2.8.1 - 16/02/2017
 	* the polyline width was not correctly set in the properties dialog (always set to 'Default')
 	* the clipping box arrows were not displayed correctly when the lights were turned off
 
-v2.8 - 12/18/2016
+v2.8 (Hogfather) - 12/18/2016
 ----------------------
 
 - New features:

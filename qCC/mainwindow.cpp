@@ -2694,12 +2694,12 @@ void MainWindow::doRemoveDuplicatePoints()
 
 			ccOctree::Shared octree = cloud->getOctree();
 
-			int result = CCLib::GeometricalAnalysisTools::FlagDuplicatePoints(	cloud,
-																				minDistanceBetweenPoints,
-																				&pDlg,
-																				octree.data());
+			CCLib::GeometricalAnalysisTools::ErrorCode result = CCLib::GeometricalAnalysisTools::FlagDuplicatePoints(	cloud,
+																														minDistanceBetweenPoints,
+																														&pDlg,
+																														octree.data());
 
-			if (result >= 0)
+			if (result == CCLib::GeometricalAnalysisTools::NoError)
 			{
 				//count the number of duplicate points!
 				CCLib::ScalarField* flagSF = cloud->getScalarField(sfIdx);
@@ -7647,13 +7647,13 @@ void MainWindow::doActionFitSphere()
 		CCVector3 center;
 		PointCoordinateType radius;
 		double rms;
-		if (!CCLib::GeometricalAnalysisTools::DetectSphereRobust(cloud,
+		if (CCLib::GeometricalAnalysisTools::DetectSphereRobust(cloud,
 			outliersRatio,
 			center,
 			radius,
 			rms,
 			&pDlg,
-			confidence))
+			confidence) != CCLib::GeometricalAnalysisTools::NoError)
 		{
 			ccLog::Warning(QString("[Fit sphere] Failed to fit a sphere on cloud '%1'").arg(cloud->getName()));
 			continue;
@@ -7669,11 +7669,11 @@ void MainWindow::doActionFitSphere()
 
 		ccGLMatrix trans;
 		trans.setTranslation(center);
-		ccSphere* sphere = new ccSphere(radius,&trans,QString("Sphere r=%1 [rms %2]").arg(radius).arg(rms));
+		ccSphere* sphere = new ccSphere(radius, &trans, QString("Sphere r=%1 [rms %2]").arg(radius).arg(rms));
 		cloud->addChild(sphere);
 		//sphere->setDisplay(cloud->getDisplay());
 		sphere->prepareDisplayForRefresh();
-		addToDB(sphere,false,false,false);
+		addToDB(sphere, false, false, false);
 	}
 
 	refreshAll();

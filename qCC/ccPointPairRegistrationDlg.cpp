@@ -443,7 +443,7 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 		double rms;
 		ccProgressDialog pDlg(true, this);
 		//first roughly search for the sphere
-		if (CCLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.9))
+		if (CCLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.9) == CCLib::GeometricalAnalysisTools::NoError)
 		{
 			if (radius / searchRadius < 0.5 || radius / searchRadius > 2.0)
 			{
@@ -457,7 +457,7 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 					box.clear();
 					box.add(C - CCVector3(1, 1, 1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
 					box.add(C + CCVector3(1, 1, 1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
-					part = cloud->crop(box,true);
+					part = cloud->crop(box, true);
 					if (part && part->size() > 16)
 						CCLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.99);
 				}

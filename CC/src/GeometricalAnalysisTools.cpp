@@ -894,7 +894,7 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 		++attempts;
 		CCVector3 thisCenter;
 		PointCoordinateType thisRadius;
-		if (!ComputeSphereFrom4(*A, *B, *C, *D, thisCenter, thisRadius))
+		if (ComputeSphereFrom4(*A, *B, *C, *D, thisCenter, thisRadius) != NoError)
 			continue;
 
 		//compute residuals

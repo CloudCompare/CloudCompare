@@ -1,7 +1,7 @@
 CloudCompare version history
 ============================
 
-v2.10.alpha - XX/XX/201X
+v2.10.beta - 01/XX/2019
 ----------------------
 
 - new features:
@@ -25,6 +25,15 @@ v2.10.alpha - XX/XX/201X
 			* verticality
 		- most of the features are defined in "Contour detection in unstructured 3D point clouds", Hackel et al, 2016
 
+	* Localization support
+		- Display > Language translation
+		- Currently supported languages:
+			* English (default)
+			* Brazilian portuguese (partial)
+			* French (very partial)
+			* Russian (partial)
+		- volunteers are welcome: https://www.cloudcompare.org/forum/viewtopic.php?t=1444
+
 - enhancements:
 
 	* Roughness, Density and Curvature can now all be computed via the new 'Tools > Other > Compute geometric features' menu
@@ -45,6 +54,10 @@ v2.10.alpha - XX/XX/201X
 		- and eventually call the -M3C2 option with the parameter file as argument:
 			CloudCompare -O cloud1 -O cloud2 (-O core_points) -M3C2 parameters_file
 		- new option to use the core points cloud normals (if any)
+
+	* The Canupo plugin is now open-source!
+		- Thanks (once again) to Dimitri Lague for this great contribution
+		- the code is here: https://github.com/CloudCompare/CloudCompare/tree/master/plugins/core/qCanupo
 
 	* The "Classify" option of the Canupo plugin can now be called from the command line:
 		- you'll need a trained classifier (.prm file)
@@ -97,18 +110,18 @@ v2.10.alpha - XX/XX/201X
 
 	* Unroll tool:
 		- the cylindrical unrolling can be performed inside an arbitrary angular range (between -3600 and +3600 degrees)
-		- this means that the shape can be unrolled on more than 360 degrees, and from an arbitrary orientation
+		- this means that the shape can be unrolled on more than 360 degrees, and from an arbitrary starting orientation
 
 	* New option (Display > Display options):
 		- the user can now control whether normals should be enabled on loaded clouds by default or not (default state is now 'off')
 		- the user can now control whether load and save dialogs should be native ones or generic Qt dialogs
 
 	* New behavior:
-		- Some load dialogs 'Apply all' button will only apply to the set of selected files (ASCII, PLY and LAS)
+		- Some loading dialogs 'Apply all' button will only apply to the set of selected files (ASCII, PLY and LAS)
 
 	* Normals:
 		- Ergonomics of 'Normals > compute' dialog have been (hopefully) enhanced
-		- Normals can now be oriented toward a sensor even if there's no grid associated with the point cloud.
+		- Normals can now be oriented toward a sensor even if there's no grid associated to the point cloud.
 		- The Normal Orientation algorithm based on the Minimum Spanning Tree now uses much less memory (~1/10)
 
 	* PCV:
@@ -118,12 +131,15 @@ v2.10.alpha - XX/XX/201X
 		- CloudCompare can now read and save extra dimensions (for any file version) - see https://github.com/CloudCompare/CloudCompare/pull/666
 
 	* E57:
-		- the E57 plugin now uses [libE57Format](https://github.com/asmaloney/libE57Format) which is a fork of the old E57RefImpl 
+		- the E57 plugin now uses [libE57Format] (https://github.com/asmaloney/libE57Format) which is a fork of the old E57RefImpl 
 		- if you compile CloudCompare with the E57 plugin, you will need to use this new lib and change some CMake options to point at it - specifically **OPTION_USE_LIBE57FORMAT** and **LIBE57FORMAT_INSTALL_DIR**
 		- the E57 plugin is now available on macOS
 
-	* RDS (Rielg)
+	* RDS (Riegl)
 		- the reflectance scalar field read from RDS file should now have correct values (in dB)
+
+	* SHP:
+		- improved support thanks to T. Montaigu (saving and loading Multipatch entities, code refactoring, unit tests, etc.)
 
 	* Plugins (General):
 		- The "About Plugins" dialog was rewritten to provide more information about installed plugins and to include I/O and GL plugins.

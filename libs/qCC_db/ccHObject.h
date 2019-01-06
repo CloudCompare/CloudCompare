@@ -37,7 +37,7 @@ public: //construction
 	ccHObject(const ccHObject& object);
 
 	//! Default destructor
-	~ccHObject() override;
+	virtual ~ccHObject() override;
 
 	//! Static factory
 	/** Warning: objects depending on other structures (such as meshes 
@@ -61,6 +61,9 @@ public: //base members access
 	/** \return class unique ID
 	**/
 	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::HIERARCHY_OBJECT; }
+
+	//! Returns whether the instance is a group
+	inline bool isGroup() const { return getClassID() == CC_TYPES::HIERARCHY_OBJECT; }
 
 	//! Returns parent object
 	/** \return parent object (nullptr if no parent)

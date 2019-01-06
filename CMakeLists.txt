@@ -4,6 +4,9 @@ cmake_policy(PUSH)
 
 project( CloudCompareProjects )
 
+option(BUILD_TESTING "" OFF)
+include(CTest)
+
 include( cmake/CMakePolicies.cmake )
 include( cmake/CMakeSetCompilerOptions.cmake )
 
@@ -109,3 +112,4 @@ if( ${OPTION_BUILD_CCVIEWER} )
 endif()
 
 cmake_policy(POP)
+

@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/TestFiles">
+        <file>Data/shp/line.shp</file>
+        <file>Data/shp/linem.shp</file>
+        <file>Data/shp/linez.shp</file>
+        <file>Data/shp/polygon.shp</file>
+        <file>Data/shp/polygon_z.shp</file>
+        <file>Data/shp/multipoint.shp</file>
+        <file>Data/shp/multi_pointz.shp</file>
+        <file>Data/shp/point_z.shp</file>
+        <file>Data/shp/multipatch.shp</file>
+    </qresource>
+</RCC>

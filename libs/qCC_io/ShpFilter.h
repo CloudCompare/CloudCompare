@@ -31,7 +31,7 @@
 
 class GenericDBFField;
 
-//! ESRI Shapefile file filter (output only)
+//! ESRI Shapefile file filter
 /** See http://www.esri.com/library/whitepapers/pdfs/shapefile.pdf
 **/
 class QCC_IO_LIB_API ShpFilter : public FileIOFilter
@@ -52,7 +52,7 @@ public:
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 
 	//! Default constructor
-	ShpFilter() : FileIOFilter(), m_closedPolylinesAsPolygons(true) {}
+	ShpFilter() : FileIOFilter() {}
 
 	//! Special method to save multiple entities with attributes
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters);
@@ -62,10 +62,26 @@ public:
 	//! Returns whether closed polylines are considered as polygons or not
 	bool areClosedPolylinesAsPolygons() const { return m_closedPolylinesAsPolygons; }
 
-protected:
+	//! Sets whether to save polyline as 2D
+	void save3DPolyAs2D(bool state) { m_save3DPolyAs2D = state; }
 
+	//! Sets whether to save polyline's height in .dbf
+	void save3DPolyHeightInDBF(bool state) { m_save3DPolyHeightInDBF = state; }
+
+protected:
 	//! Whether to consider closed polylines as polygons or not
-	bool m_closedPolylinesAsPolygons;
+	bool m_closedPolylinesAsPolygons = true;
+
+	//! Whether to save 3D poly as 2D
+	//! Note that all Polylines from shapefiles are loaded as 3D
+	bool m_save3DPolyAs2D = false;
+
+	//! Whether to save the 3D height in .dbf file
+	bool m_save3DPolyHeightInDBF = false;
+
+	int m_poly2DVertDim = 2;
+
+	double m_dbfFieldImportScale = 1.0;
 };
 
 #endif //CC_SHP_SUPPORT

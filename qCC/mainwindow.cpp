@@ -6233,7 +6233,16 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
 					ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(entity);
-					segmentationResult = genCloud->createNewCloudFromVisibilitySelection(!deleteHiddenParts);
+					ccGenericPointCloud* segmentedCloud = genCloud->createNewCloudFromVisibilitySelection(!deleteHiddenParts);
+					if (segmentedCloud && segmentedCloud->size() == 0)
+					{
+						delete segmentationResult;
+						segmentationResult = nullptr;
+					}
+					else
+					{
+						segmentationResult = segmentedCloud;
+					}
 
 					deleteOriginalEntity |= (genCloud->size() == 0);
 				}
@@ -10070,7 +10079,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
 
 	m_UI->menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount > 0);
-	m_UI->actionCrossSection->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	m_UI->actionCrossSection->setEnabled(atLeastOneCloud || atLeastOneMesh || (selInfo.groupCount != 0));
 	m_UI->actionExtractSections->setEnabled(atLeastOneCloud);
 	m_UI->actionRasterize->setEnabled(exactlyOneCloud);
 	m_UI->actionCompute2HalfDimVolume->setEnabled(selInfo.cloudCount == selInfo.selCount && selInfo.cloudCount >= 1 && selInfo.cloudCount <= 2); //one or two clouds!

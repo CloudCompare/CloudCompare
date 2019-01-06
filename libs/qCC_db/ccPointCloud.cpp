@@ -190,244 +190,241 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 		return nullptr;
 	}
 
-	unsigned n = selection->size();
-	if (n == 0)
-	{
-		ccLog::Warning("[ccPointCloud::partialClone] Selection is empty");
-		return nullptr;
-	}
-
 	ccPointCloud* result = new ccPointCloud(getName() + QString(".extract"));
-
-	if (!result->reserveThePointsTable(n))
-	{
-		ccLog::Error("[ccPointCloud::partialClone] Not enough memory to duplicate cloud!");
-		delete result;
-		return nullptr;
-	}
-
-	//import points
-	{
-		for (unsigned i = 0; i < n; i++)
-		{
-			result->addPoint(*getPointPersistentPtr(selection->getPointGlobalIndex(i)));
-		}
-	}
 
 	//visibility
 	result->setVisible(isVisible());
 	result->setDisplay(getDisplay());
 	result->setEnabled(isEnabled());
 
-	//RGB colors
-	if (hasColors())
+	//other parameters
+	result->importParametersFrom(this);
+
+	//from now on we will need some points to proceed ;)
+	unsigned n = selection->size();
+	if (n)
 	{
-		if (result->reserveTheRGBTable())
+		if (!result->reserveThePointsTable(n))
+		{
+			ccLog::Error("[ccPointCloud::partialClone] Not enough memory to duplicate cloud!");
+			delete result;
+			return nullptr;
+		}
+
+		//import points
 		{
 			for (unsigned i = 0; i < n; i++)
 			{
-				result->addRGBColor(getPointColor(selection->getPointGlobalIndex(i)));
+				result->addPoint(*getPointPersistentPtr(selection->getPointGlobalIndex(i)));
 			}
-			result->showColors(colorsShown());
 		}
-		else
-		{
-			ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy RGB colors!");
-			if (warnings)
-				*warnings |= WRN_OUT_OF_MEM_FOR_COLORS;
-		}
-	}
 
-	//normals
-	if (hasNormals())
-	{
-		if (result->reserveTheNormsTable())
+		//RGB colors
+		if (hasColors())
 		{
-			for (unsigned i = 0; i < n; i++)
-			{
-				result->addNormIndex(getPointNormalIndex(selection->getPointGlobalIndex(i)));
-			}
-			result->showNormals(normalsShown());
-		}
-		else
-		{
-			ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy normals!");
-			if (warnings)
-				*warnings |= WRN_OUT_OF_MEM_FOR_NORMALS;
-		}
-	}
-
-	//waveform
-	if (hasFWF())
-	{
-		if (result->reserveTheFWFTable())
-		{
-			try
+			if (result->reserveTheRGBTable())
 			{
 				for (unsigned i = 0; i < n; i++)
 				{
-					const ccWaveform& w = m_fwfWaveforms[selection->getPointGlobalIndex(i)];
-					if (!result->fwfDescriptors().contains(w.descriptorID()))
-					{
-						//copy only the necessary descriptors
-						result->fwfDescriptors().insert(w.descriptorID(), m_fwfDescriptors[w.descriptorID()]);
-					}
-					result->waveforms().push_back(w);
+					result->addRGBColor(getPointColor(selection->getPointGlobalIndex(i)));
 				}
-				//we will use the same FWF data container
-				result->fwfData() = fwfData();
+				result->showColors(colorsShown());
 			}
-			catch (const std::bad_alloc&)
+			else
+			{
+				ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy RGB colors!");
+				if (warnings)
+					*warnings |= WRN_OUT_OF_MEM_FOR_COLORS;
+			}
+		}
+
+		//normals
+		if (hasNormals())
+		{
+			if (result->reserveTheNormsTable())
+			{
+				for (unsigned i = 0; i < n; i++)
+				{
+					result->addNormIndex(getPointNormalIndex(selection->getPointGlobalIndex(i)));
+				}
+				result->showNormals(normalsShown());
+			}
+			else
+			{
+				ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy normals!");
+				if (warnings)
+					*warnings |= WRN_OUT_OF_MEM_FOR_NORMALS;
+			}
+		}
+
+		//waveform
+		if (hasFWF())
+		{
+			if (result->reserveTheFWFTable())
+			{
+				try
+				{
+					for (unsigned i = 0; i < n; i++)
+					{
+						const ccWaveform& w = m_fwfWaveforms[selection->getPointGlobalIndex(i)];
+						if (!result->fwfDescriptors().contains(w.descriptorID()))
+						{
+							//copy only the necessary descriptors
+							result->fwfDescriptors().insert(w.descriptorID(), m_fwfDescriptors[w.descriptorID()]);
+						}
+						result->waveforms().push_back(w);
+					}
+					//we will use the same FWF data container
+					result->fwfData() = fwfData();
+				}
+				catch (const std::bad_alloc&)
+				{
+					ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy waveform signals!");
+					result->clearFWFData();
+					if (warnings)
+						*warnings |= WRN_OUT_OF_MEM_FOR_FWF;
+				}
+			}
+			else
 			{
 				ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy waveform signals!");
-				result->clearFWFData();
 				if (warnings)
 					*warnings |= WRN_OUT_OF_MEM_FOR_FWF;
 			}
 		}
-		else
-		{
-			ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy waveform signals!");
-			if (warnings)
-				*warnings |= WRN_OUT_OF_MEM_FOR_FWF;
-		}
-	}
 
-	//scalar fields
-	unsigned sfCount = getNumberOfScalarFields();
-	if (sfCount != 0)
-	{
-		for (unsigned k = 0; k < sfCount; ++k)
+		//scalar fields
+		unsigned sfCount = getNumberOfScalarFields();
+		if (sfCount != 0)
 		{
-			const ccScalarField* sf = static_cast<ccScalarField*>(getScalarField(k));
-			assert(sf);
-			if (sf)
+			for (unsigned k = 0; k < sfCount; ++k)
 			{
-				//we create a new scalar field with same name
-				int sfIdx = result->addScalarField(sf->getName());
-				if (sfIdx >= 0) //success
+				const ccScalarField* sf = static_cast<ccScalarField*>(getScalarField(k));
+				assert(sf);
+				if (sf)
 				{
-					ccScalarField* currentScalarField = static_cast<ccScalarField*>(result->getScalarField(sfIdx));
-					assert(currentScalarField);
-					if (currentScalarField->resizeSafe(n))
+					//we create a new scalar field with same name
+					int sfIdx = result->addScalarField(sf->getName());
+					if (sfIdx >= 0) //success
 					{
-						currentScalarField->setGlobalShift(sf->getGlobalShift());
+						ccScalarField* currentScalarField = static_cast<ccScalarField*>(result->getScalarField(sfIdx));
+						assert(currentScalarField);
+						if (currentScalarField->resizeSafe(n))
+						{
+							currentScalarField->setGlobalShift(sf->getGlobalShift());
 
-						//we copy data to new SF
-						for (unsigned i = 0; i < n; i++)
-							currentScalarField->setValue(i, sf->getValue(selection->getPointGlobalIndex(i)));
+							//we copy data to new SF
+							for (unsigned i = 0; i < n; i++)
+								currentScalarField->setValue(i, sf->getValue(selection->getPointGlobalIndex(i)));
 
-						currentScalarField->computeMinAndMax();
-						//copy display parameters
-						currentScalarField->importParametersFrom(sf);
+							currentScalarField->computeMinAndMax();
+							//copy display parameters
+							currentScalarField->importParametersFrom(sf);
+						}
+						else
+						{
+							//if we don't have enough memory, we cancel SF creation
+							result->deleteScalarField(sfIdx);
+							ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy scalar field '%1'!").arg(sf->getName()));
+							if (warnings)
+								*warnings |= WRN_OUT_OF_MEM_FOR_SFS;
+						}
 					}
+				}
+			}
+
+			unsigned copiedSFCount = getNumberOfScalarFields();
+			if (copiedSFCount)
+			{
+				//we display the same scalar field as the source (if we managed to copy it!)
+				if (getCurrentDisplayedScalarField())
+				{
+					int sfIdx = result->getScalarFieldIndexByName(getCurrentDisplayedScalarField()->getName());
+					if (sfIdx >= 0)
+						result->setCurrentDisplayedScalarField(sfIdx);
 					else
+						result->setCurrentDisplayedScalarField(static_cast<int>(copiedSFCount) - 1);
+				}
+				//copy visibility
+				result->showSF(sfShown());
+			}
+		}
+
+		//scan grids
+		if (gridCount() != 0)
+		{
+			try
+			{
+				//we need a map between old and new indexes
+				std::vector<int> newIndexMap(size(), -1);
+				{
+					for (unsigned i = 0; i < n; i++)
 					{
-						//if we don't have enough memory, we cancel SF creation
-						result->deleteScalarField(sfIdx);
-						ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy scalar field '%1'!").arg(sf->getName()));
-						if (warnings)
-							*warnings |= WRN_OUT_OF_MEM_FOR_SFS;
+						newIndexMap[selection->getPointGlobalIndex(i)] = i;
+					}
+				}
+
+				//duplicate the grid structure(s)
+				std::vector<Grid::Shared> newGrids;
+				{
+					for (size_t i = 0; i < gridCount(); ++i)
+					{
+						const Grid::Shared& scanGrid = grid(i);
+						if (scanGrid->validCount != 0) //no need to copy empty grids!
+						{
+							//duplicate the grid
+							newGrids.push_back(Grid::Shared(new Grid(*scanGrid)));
+						}
+					}
+				}
+
+				//then update the indexes
+				UpdateGridIndexes(newIndexMap, newGrids);
+
+				//and keep the valid (non empty) ones
+				for (Grid::Shared& scanGrid : newGrids)
+				{
+					if (scanGrid->validCount)
+					{
+						result->addGrid(scanGrid);
 					}
 				}
 			}
+			catch (const std::bad_alloc&)
+			{
+				//not enough memory
+				ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy the grid structure(s)"));
+			}
 		}
 
-		unsigned copiedSFCount = getNumberOfScalarFields();
-		if (copiedSFCount)
+		//Meshes //TODO
+		/*Lib::GenericIndexedMesh* theMesh = source->_getMesh();
+		if (theMesh)
 		{
-			//we display the same scalar field as the source (if we managed to copy it!)
-			if (getCurrentDisplayedScalarField())
-			{
-				int sfIdx = result->getScalarFieldIndexByName(getCurrentDisplayedScalarField()->getName());
-				if (sfIdx >= 0)
-					result->setCurrentDisplayedScalarField(sfIdx);
-				else
-					result->setCurrentDisplayedScalarField(static_cast<int>(copiedSFCount)-1);
-			}
-			//copy visibility
-			result->showSF(sfShown());
+		//REVOIR --> on pourrait le faire pour chaque sous-mesh non ?
+		CCLib::GenericIndexedMesh* newTri = CCLib::ManualSegmentationTools::segmentMesh(theMesh,selection,true,nullptr,this);
+		setMesh(newTri);
+		if (source->areMeshesDisplayed()) showTri();
 		}
-	}
 
-	//scan grids
-	if (gridCount() != 0)
-	{
-		try
+		//PoV & Scanners
+		bool importScanners = true;
+		if (source->isMultipleScansModeActivated())
+		if (activateMultipleScansMode())
 		{
-			//we need a map between old and new indexes
-			std::vector<int> newIndexMap(size(), -1);
-			{
-				for (unsigned i = 0; i < n; i++)
-				{
-					newIndexMap[selection->getPointGlobalIndex(i)] = i;
-				}
-			}
-
-			//duplicate the grid structure(s)
-			std::vector<Grid::Shared> newGrids;
-			{
-				for (size_t i = 0; i < gridCount(); ++i)
-				{
-					const Grid::Shared& scanGrid = grid(i);
-					if (scanGrid->validCount != 0) //no need to copy empty grids!
-					{
-						//duplicate the grid
-						newGrids.push_back(Grid::Shared (new Grid(*scanGrid)));
-					}
-				}
-			}
-
-			//then update the indexes
-			UpdateGridIndexes(newIndexMap, newGrids);
-
-			//and keep the valid (non empty) ones
-			for (Grid::Shared& scanGrid : newGrids)
-			{
-				if (scanGrid->validCount)
-				{
-					result->addGrid(scanGrid);
-				}
-			}
+		scanIndexesTableType* _theScans = source->getTheScansIndexesArray();
+		for (i=0; i<n; ++i) cubeVertexesIndexes.setValue(i,_theScans->getValue(i));
 		}
-		catch (const std::bad_alloc&)
+		else importScanners=false;
+
+		if (importScanners)
 		{
-			//not enough memory
-			ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy the grid structure(s)"));
+		//on insere les objets "capteur" (pas de copie ici, la meme instance peut-etre partagee par plusieurs listes)
+		for (i=1;i<=source->getNumberOfSensors();++i)
+		setSensor(source->_getSensor(i),i);
 		}
+		*/
 	}
-
-	//Meshes //TODO
-	/*Lib::GenericIndexedMesh* theMesh = source->_getMesh();
-	if (theMesh)
-	{
-	//REVOIR --> on pourrait le faire pour chaque sous-mesh non ?
-	CCLib::GenericIndexedMesh* newTri = CCLib::ManualSegmentationTools::segmentMesh(theMesh,selection,true,nullptr,this);
-	setMesh(newTri);
-	if (source->areMeshesDisplayed()) showTri();
-	}
-
-	//PoV & Scanners
-	bool importScanners = true;
-	if (source->isMultipleScansModeActivated())
-	if (activateMultipleScansMode())
-	{
-	scanIndexesTableType* _theScans = source->getTheScansIndexesArray();
-	for (i=0; i<n; ++i) cubeVertexesIndexes.setValue(i,_theScans->getValue(i));
-	}
-	else importScanners=false;
-
-	if (importScanners)
-	{
-	//on insere les objets "capteur" (pas de copie ici, la meme instance peut-etre partagee par plusieurs listes)
-	for (i=1;i<=source->getNumberOfSensors();++i)
-	setSensor(source->_getSensor(i),i);
-	}
-	*/
-
-	//other parameters
-	result->importParametersFrom(this);
-
 	return result;
 }
 
@@ -3235,7 +3232,7 @@ void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 	}
 }
 
-ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool removeSelectedPoints/*=false*/, VisibilityTableType* visTable/*=0*/)
+ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool removeSelectedPoints/*=false*/, VisibilityTableType* visTable/*=nullptr*/, bool silent/*=false*/)
 {
 	if (!visTable)
 	{
@@ -3259,14 +3256,13 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 	ccPointCloud* result = nullptr;
 	{
 		//we create a temporary entity with the visible points only
-		CCLib::ReferenceCloud* rc = getTheVisiblePoints(visTable);
+		CCLib::ReferenceCloud* rc = getTheVisiblePoints(visTable, silent);
 		if (!rc)
 		{
 			//a warning message has already been issued by getTheVisiblePoints!
 			//ccLog::Warning("[ccPointCloud] An error occurred during points selection!");
 			return nullptr;
 		}
-		assert(rc->size() != 0);
 
 		//convert selection to cloud
 		result = partialClone(rc);

@@ -460,7 +460,7 @@ public: //other methods
 	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
 	void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
 	/** \warning if removeSelectedPoints is true, any attached octree will be deleted. **/
-	ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr) override;
+	ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, bool silent = false) override;
 	void applyRigidTransformation(const ccGLMatrix& trans) override;
 	inline void refreshBB() override { invalidateBoundingBox(); }
 

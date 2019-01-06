@@ -175,9 +175,10 @@ public:
 
 	//! Returns a ReferenceCloud equivalent to the visiblity array
 	/** \param visTable visibility table (optional, otherwise the cloud's default one will be used)
+		\param silent don't issue warnings if no visible point is present
 		\return the visible points as a ReferenceCloud
 	**/
-	virtual CCLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = nullptr) const;
+	virtual CCLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = nullptr, bool silent = false) const;
 	
 	//! Returns whether the visiblity array is allocated or not
 	virtual bool isVisibilityTableInstantiated() const;
@@ -207,9 +208,10 @@ public:
 	//! Creates a new point cloud with only the 'visible' points (as defined by the visibility array)
 	/** \param removeSelectedPoints if true, exported point are also removed from the current point cloud
 		\param visTable visibility table (optional, otherwise the cloud's default one will be used)
+		\param silent don't issue a warning message if there's no point to keep
 		\return new point cloud with selected points
 	**/
-	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr) = 0;
+	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, bool silent = false) = 0;
 	
 	//! Applies a rigid transformation (rotation + translation)
 	virtual void applyRigidTransformation(const ccGLMatrix& trans) = 0;

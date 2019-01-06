@@ -439,7 +439,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 	return (nearestPointIndex >= 0);
 }
 
-CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable/*=nullptr*/) const
+CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable/*=nullptr*/, bool silent/*=false*/) const
 {
 	if (!visTable)
 	{
@@ -466,29 +466,31 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibility
 		}
 	}
 
-	if (pointCount == 0)
-	{
-		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No point in selection");
-		return nullptr;
-	}
-
 	//we create an entity with the 'visible' vertices only
 	CCLib::ReferenceCloud* rc = new CCLib::ReferenceCloud(const_cast<ccGenericPointCloud*>(this));
-	if (rc->reserve(pointCount))
+
+	if (pointCount)
 	{
-		for (unsigned i = 0; i < count; ++i)
+		if (rc->reserve(pointCount))
 		{
-			if (visTable->at(i) == POINT_VISIBLE)
+			for (unsigned i = 0; i < count; ++i)
 			{
-				rc->addPointIndex(i); //can't fail (see above)
+				if (visTable->at(i) == POINT_VISIBLE)
+				{
+					rc->addPointIndex(i); //can't fail (see above)
+				}
 			}
 		}
+		else
+		{
+			ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] Not enough memory!");
+			delete rc;
+			rc = nullptr;
+		}
 	}
-	else
+	else if (!silent)
 	{
-		delete rc;
-		rc = nullptr;
-		ccLog::Error("[ccGenericPointCloud::getTheVisiblePoints] Not enough memory!");
+		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No point in selection");
 	}
 
 	return rc;

@@ -668,13 +668,18 @@ void ccTrace::buildGradientCost(QWidget* parent)
 	m_cloud->setCurrentInScalarField(gIdx); //set in scalar field - gradient is written here
 
 	//get/build octree
-	ccProgressDialog* pDlg = new ccProgressDialog(true , parent);
-	pDlg->show();
+	ccProgressDialog pDlg(true, parent);
+	pDlg.show();
 
 	ccOctree::Shared octree = m_cloud->getOctree();
 	if (!octree)
 	{
-		octree = m_cloud->computeOctree(pDlg);
+		octree = m_cloud->computeOctree(&pDlg);
+		if (!octree)
+		{
+			ccLog::Error("Failed to compute octree");
+			return;
+		}
 	}
 
 	//calculate gradient
@@ -682,11 +687,17 @@ void ccTrace::buildGradientCost(QWidget* parent)
 		m_search_r, //auto --> FIXME: should be properly set by the user!
 		false,
 		false,
-		pDlg,
+		&pDlg,
 		octree.data());
 
-	pDlg->close();
-	delete pDlg;
+	pDlg.close();
+
+	if (result != 0)
+	{
+		m_cloud->deleteScalarField(gIdx);
+		ccLog::Warning("Failed to compute the scalar field gradient");
+		return;
+	}
 
 	//calculate bounds
 	m_cloud->getScalarField(gIdx)->computeMinAndMax();
@@ -718,26 +729,32 @@ void ccTrace::buildCurvatureCost(QWidget* parent)
 	m_cloud->setCurrentScalarField(idx);
 
 	//get/build octree
-	ccProgressDialog* pDlg = new ccProgressDialog(true, parent);
-	pDlg->show();
+	ccProgressDialog pDlg(true, parent);
+	pDlg.show();
 
 	ccOctree::Shared octree = m_cloud->getOctree();
 	if (!octree)
 	{
-		octree = m_cloud->computeOctree(pDlg);
+		octree = m_cloud->computeOctree(&pDlg);
 	}
 
 	//calculate curvature
-	int result = CCLib::GeometricalAnalysisTools::ComputeCharactersitic(
+	CCLib::GeometricalAnalysisTools::ErrorCode result = CCLib::GeometricalAnalysisTools::ComputeCharactersitic(
 		CCLib::GeometricalAnalysisTools::Curvature,
 		CCLib::Neighbourhood::CurvatureType::MEAN_CURV,
 		m_cloud,
 		m_search_r,
-		pDlg,
+		&pDlg,
 		octree.data());
 
-	pDlg->close();
-	delete pDlg;
+	pDlg.close();
+
+	if (result != CCLib::GeometricalAnalysisTools::NoError)
+	{
+		m_cloud->deleteScalarField(idx);
+		ccLog::Warning("Failed to compute the curvature");
+		return;
+	}
 
 	//calculate minmax
 	m_cloud->getScalarField(idx)->computeMinAndMax();

@@ -18,10 +18,9 @@
 #include "ccWaveformDialog.h"
 
 //Local
-#include "ccQCustomPlot.h"
-#include "ccPersistentSettings.h"
-#include "ccGuiParameters.h"
 #include "ccFileUtils.h"
+#include "ccPersistentSettings.h"
+#include "ccQCustomPlot.h"
 
 //common
 #include <ccPickingHub.h>
@@ -35,7 +34,7 @@
 #include <QSettings>
 
 //System
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 
 //Gui
@@ -184,7 +183,7 @@ void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale,
 
 	m_dt = w.descriptor().samplingRate_ps;
 	m_echoPos = w.echoTime_ps();
-};
+}
 
 void ccWaveWidget::refresh()
 {
@@ -204,7 +203,7 @@ void ccWaveWidget::refresh()
 		{
 			//remove previous title
 			plotLayout()->remove(m_titlePlot);
-			m_titlePlot = 0;
+			m_titlePlot = nullptr;
 		}
 		m_titlePlot = new QCPPlotTitle(this, m_titleStr);
 		
@@ -215,9 +214,9 @@ void ccWaveWidget::refresh()
 	}
 
 	//clear previous display
-	m_vertBar = 0;
-	m_curve = 0;
-	m_peakBar = 0;
+	m_vertBar = nullptr;
+	m_curve = nullptr;
+	m_peakBar = nullptr;
 	this->clearGraphs();
 	this->clearPlottables();
 
@@ -357,11 +356,6 @@ void ccWaveWidget::mouseMoveEvent(QMouseEvent *event)
 	}
 }
 
-//void ccWaveWidget::wheelEvent(QWheelEvent* e)
-//{
-//	e->ignore();
-//}
-
 ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 							ccPickingHub* pickingHub,
 							QWidget* parent/*=0*/)
@@ -411,10 +405,8 @@ ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 
 ccWaveDialog::~ccWaveDialog()
 {
-	if (m_gui)
-	{
-		delete m_gui;
-	}
+
+	delete m_gui;
 }
 
 void ccWaveDialog::onPointIndexChanged(int index)

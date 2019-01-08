@@ -16,6 +16,9 @@
 //#                                                                        #
 //##########################################################################
 
+#ifndef CC_CORE_LIB_HEADER
+#define CC_CORE_LIB_HEADER
+
 #ifdef _MSC_VER
 //To get rid of the really annoying warnings about template class exportation
 #pragma warning( disable: 4251 )
@@ -41,3 +44,5 @@
 #define CC_CORE_LIB_API
 
 #endif //CC_USE_AS_DLL
+
+#endif //CC_CORE_LIB_HEADER

@@ -18,15 +18,16 @@
 #ifndef CC_COMPASS_HEADER
 #define CC_COMPASS_HEADER
 
-#include <QObject>
-#include <QXmlStreamWriter>
 #include <cmath>
-#include <random>
+
+#include <QBuffer>
+#include <QObject>
 
 //qCC
 #include "ccStdPluginInterface.h"
 #include <ccPickingListener.h>
-#include <qbuffer.h>
+
+class QXmlStreamWriter;
 
 class ccCompassDlg;
 class ccFitPlaneTool;
@@ -52,14 +53,14 @@ public:
 	explicit ccCompass(QObject* parent = nullptr);
 
 	//deconstructor
-	virtual ~ccCompass();
+	~ccCompass() override;
 
 	//inherited from ccPluginInterface
-	virtual void stop() override { stopMeasuring(true); m_dlg = nullptr; ccStdPluginInterface::stop(); } //called when the plugin is being stopped
+	void stop() override { stopMeasuring(true); m_dlg = nullptr; ccStdPluginInterface::stop(); } //called when the plugin is being stopped
 
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;
-	virtual QList<QAction *> getActions() override;
+	QList<QAction *> getActions() override;
 
 protected slots:
 
@@ -73,7 +74,7 @@ protected slots:
 	bool stopMeasuring(bool finalStop = false);
 	
 	//inherited from ccPickingListener
-	virtual void onItemPicked(const ccPickingListener::PickedItem& pi) override;
+	void onItemPicked(const ccPickingListener::PickedItem& pi) override;
 
 	//picked point callback (called by the above function)
 	void pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3& P);
@@ -140,7 +141,7 @@ protected slots:
 protected:
 
 	//event to get mouse-move updates & trigger repaint of overlay circle
-	virtual bool eventFilter(QObject* obj, QEvent* event) override;
+	bool eventFilter(QObject* obj, QEvent* event) override;
 	
 	//used to get the place/object that new measurements or interpretation should be stored
 	ccHObject* getInsertPoint();

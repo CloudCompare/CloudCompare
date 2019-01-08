@@ -16,19 +16,21 @@
 //##########################################################################
 
 #include <array>
+#include <random>
 
 //Qt
 #include <QCheckBox>
+#include <QComboBox>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QIntValidator>
+#include <QXmlStreamWriter>
 
 //common
 #include <ccPickingHub.h>
 
 //qCC_db
 #include <ccProgressDialog.h>
-#include <qcombobox.h>
 
 #include "ccBox.h"
 #include "ccCompass.h"
@@ -1160,13 +1162,13 @@ void ccCompass::recalculateFitPlanes()
 	m_app->dbRootObject()->filterChildren(planes, true, CC_TYPES::PLANE, true);
 
 	std::vector<ccHObject*> garbage; //planes that need to be deleted
-	for (ccHObject::Container::iterator it = planes.begin(); it != planes.end(); it++)
+	for (auto & plane : planes)
 	{
-		if (!ccFitPlane::isFitPlane((*it)))
+		if (!ccFitPlane::isFitPlane(plane))
 			continue; //only deal with FitPlane objects
 
 		//is parent of the plane a trace object?
-		ccHObject* parent = (*it)->getParent();
+		ccHObject* parent = plane->getParent();
 
 		if (ccTrace::isTrace(parent)) //add to recalculate list
 		{
@@ -1180,15 +1182,15 @@ void ccCompass::recalculateFitPlanes()
 			}
 
 			//add the old plane to the garbage list (to be deleted later)
-			garbage.push_back((*it));
+			garbage.push_back(plane);
 
 			continue; //next
 		}
 
 		//otherwise - does the plane have a child that is a trace object (i.e. it was created in Compass mode)
-		for (unsigned c = 0; c < (*it)->getChildrenNumber(); c++)
+		for (unsigned c = 0; c < plane->getChildrenNumber(); c++)
 		{
-			ccHObject* child = (*it)->getChild(c);
+			ccHObject* child = plane->getChild(c);
 			if (ccTrace::isTrace(child)) //add to recalculate list
 			{
 				//recalculate the fit plane
@@ -1202,13 +1204,13 @@ void ccCompass::recalculateFitPlanes()
 					m_app->addToDB(p, false, false, false, false);
 
 					//remove the trace from the original fit-plane
-					(*it)->detachChild(t);
+					plane->detachChild(t);
 
 					//add it to the new one
 					p->addChild(t);
 
 					//add the old plane to the garbage list (to be deleted later)
-					garbage.push_back((*it));
+					garbage.push_back(plane);
 
 					break;
 				}
@@ -1646,7 +1648,7 @@ void ccCompass::estimateStructureNormals()
 
 			//check if valid normals have been retrieved
 			if (hasNormals) {
-				if (abs(nx[0]) <= 0.000001 && abs(ny[0]) <= 0.0000001 && abs(nz[0]) <= 0.00000001) //zero normal vector means normals not computed
+				if (std::abs(nx[0]) <= 0.000001 && std::abs(ny[0]) <= 0.0000001 && std::abs(nz[0]) <= 0.00000001) //zero normal vector means normals not computed
 				{ 
 					m_app->dispToConsole("[ccCompass] Warning: Cannot compensate for outcrop-surface bias as point cloud has no normals. Structure normal estimates may be misleading or incorrect.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 					hasNormals = false; //don't bother checking again - if normals are computed they will exist for all points
@@ -2128,10 +2130,10 @@ void ccCompass::estimateStructureNormals()
 						d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
 
 						//write thickness scalar field
-						thickSF->setValue(p, abs(d));
+						thickSF->setValue(p, std::abs(d));
 
 						//flip normals so that it points in the correct direction
-						points[r]->setPointNormal(p, points[r]->getPointNormal(p) * (d / abs(d)));
+						points[r]->setPointNormal(p, points[r]->getPointNormal(p) * (d / std::abs(d)));
 
 						//if samples have been generated, also calculate thicknesses for matching sets of points
 						if (samples[r] != nullptr)
@@ -2147,8 +2149,8 @@ void ccCompass::estimateStructureNormals()
 									pEq[2] = samples[r]->getPointNormal(s).z;
 									pEq[3] = samples[r]->getPoint(s)->dot(samples[r]->getPointNormal(s));
 									d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
-									thickSF_sample->setValue(s, abs(d));
-									samples[r]->setPointNormal(s, samples[r]->getPointNormal(s) * (d / abs(d)));
+									thickSF_sample->setValue(s, std::abs(d));
+									samples[r]->setPointNormal(s, samples[r]->getPointNormal(s) * (d / std::abs(d)));
 								}
 							}
 						}
@@ -3472,7 +3474,7 @@ void ccCompass::importFoliations()
 		bool needToApplyTrans = false;
 		bool needToApplyRot = false;
 
-		needToApplyRot = (fabs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
+		needToApplyRot = (std::abs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
 		needToApplyTrans = needToApplyRot || ((C - Cd).norm2d() != 0);
 
 		if (needToApplyTrans)
@@ -3484,7 +3486,7 @@ void ccCompass::importFoliations()
 		{
 			ccGLMatrix rotation;
 			//special case: plane parallel to XY
-			if (fabs(N.z) > PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
+			if (std::abs(N.z) > PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
 			{
 				ccGLMatrix rotX; rotX.initFromParameters(-dip * CC_DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
 				ccGLMatrix rotZ; rotZ.initFromParameters(dipdir * CC_DEG_TO_RAD, CCVector3(0, 0, -1), CCVector3(0, 0, 0));

@@ -15,39 +15,72 @@
 //#                                                                        #
 //##########################################################################
 
+#include <cmath>
+#include <random>
+
 #include "ccColorTypes.h"
+
 
 namespace ccColor
 {
-	// Predefined colors (default type)
-	QCC_DB_LIB_API const Rgb white						(MAX, MAX, MAX);
-	QCC_DB_LIB_API const Rgb lightGrey					(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8));
-	QCC_DB_LIB_API const Rgb darkGrey					(MAX / 2, MAX / 2, MAX / 2);
-	QCC_DB_LIB_API const Rgb red						(MAX, 0, 0);
-	QCC_DB_LIB_API const Rgb green						(0, MAX, 0);
-	QCC_DB_LIB_API const Rgb blue						(0, 0, MAX);
-	QCC_DB_LIB_API const Rgb darkBlue					(0, 0, MAX / 2);
-	QCC_DB_LIB_API const Rgb magenta					(MAX, 0, MAX);
-	QCC_DB_LIB_API const Rgb cyan						(0, MAX, MAX);
-	QCC_DB_LIB_API const Rgb orange						(MAX, MAX / 2, 0);
-	QCC_DB_LIB_API const Rgb black						(0, 0, 0);
-	QCC_DB_LIB_API const Rgb yellow						(MAX, MAX, 0);
+	
+	Rgb Generator::Random(bool lightOnly)
+	{
+		std::random_device rd;   // non-deterministic generator
+		std::mt19937 gen(rd());  // to seed mersenne twister.
+		std::uniform_int_distribution<unsigned char> dist(0, MAX);
+		
+		Rgb col;
+		col.r = dist(gen);
+		col.g = dist(gen);
+		if (lightOnly)
+		{
+			col.b = MAX - static_cast<ColorCompType>((static_cast<double>(col.r) + static_cast<double>(col.g)) / 2); //cast to double to avoid overflow (whatever the type of ColorCompType!!!)
+		}
+		else
+		{
+			col.b = dist(gen);
+		}
+		
+		return col;
+	}
+	
+	Rgb Convert::hsv2rgb(float H, float S, float V)
+	{
+		float hi = 0;
+		float f = std::modf(H / 60.0f, &hi);
+		
+		float l = V*(1.0f - S);
+		float m = V*(1.0f - f*S);
+		float n = V*(1.0f - (1.0f - f)*S);
+		
+		Rgbf rgb(0, 0, 0);
+		
+		switch (static_cast<int>(hi) % 6)
+		{
+			case 0:
+				rgb.r = V; rgb.g = n; rgb.b = l;
+				break;
+			case 1:
+				rgb.r = m; rgb.g = V; rgb.b = l;
+				break;
+			case 2:
+				rgb.r = l; rgb.g = V; rgb.b = n;
+				break;
+			case 3:
+				rgb.r = l; rgb.g = m; rgb.b = V;
+				break;
+			case 4:
+				rgb.r = n; rgb.g = l; rgb.b = V;
+				break;
+			case 5:
+				rgb.r = V; rgb.g = l; rgb.b = m;
+				break;
+		}
+		
+		return Rgb (static_cast<ColorCompType>(rgb.r * ccColor::MAX),
+					static_cast<ColorCompType>(rgb.g * ccColor::MAX),
+					static_cast<ColorCompType>(rgb.b * ccColor::MAX));
+	}
 
-	// Predefined materials (float)
-	QCC_DB_LIB_API const Rgbaf bright					(1.00f, 1.00f, 1.00f, 1.00f);
-	QCC_DB_LIB_API const Rgbaf lighter					(0.83f, 0.83f, 0.83f, 1.00f);
-	QCC_DB_LIB_API const Rgbaf light					(0.66f, 0.66f, 0.66f, 1.00f);
-	QCC_DB_LIB_API const Rgbaf middle					(0.50f, 0.50f, 0.50f, 1.00f);
-	QCC_DB_LIB_API const Rgbaf dark						(0.34f, 0.34f, 0.34f, 1.00f);
-	QCC_DB_LIB_API const Rgbaf darker					(0.17f, 0.17f, 0.17f, 1.00f);
-	QCC_DB_LIB_API const Rgbaf darkest					(0.08f, 0.08f, 0.08f, 1.00f);
-	QCC_DB_LIB_API const Rgbaf night					(0.00f, 0.00f, 0.00f, 1.00F);
-	QCC_DB_LIB_API const Rgbaf defaultMeshFrontDiff		(0.00f, 0.90f, 0.27f, 1.00f);
-	QCC_DB_LIB_API const Rgbaf defaultMeshBackDiff		(0.27f, 0.90f, 0.90f, 1.00f);
-
-	// Default foreground color (unsigned byte)
-	QCC_DB_LIB_API const Rgbub defaultColor				(255, 255, 255); //white
-	QCC_DB_LIB_API const Rgbub defaultBkgColor			( 10, 102, 151); //dark blue
-	QCC_DB_LIB_API const Rgbub defaultLabelBkgColor		(255, 255, 255); //white
-	QCC_DB_LIB_API const Rgbub defaultLabelMarkerColor	(255,   0, 255); //magenta
 };

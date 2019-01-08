@@ -20,6 +20,13 @@
 //Qt
 #include <QMdiSubWindow>
 
+//qCC_gl
+#include <ccGLWidget.h>
+
+//Plugins
+#include <ccMainAppInterface.h>
+
+
 ccPickingHub::ccPickingHub(ccMainAppInterface* app, QObject* parent/*=0*/)
 	: QObject(parent)
 	, m_app(app)

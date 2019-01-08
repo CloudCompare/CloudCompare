@@ -28,11 +28,12 @@
 
 //System
 #include <cassert>
+#include <cmath>
 
-static const int DEFAULT_SLIDER_SYMBOL_SIZE = 8;
-static const int DEFAULT_MARGIN = DEFAULT_SLIDER_SYMBOL_SIZE/2+1;
-static const int DEFAULT_TEXT_MARGIN = 2;
-static const int DEFAULT_LABEL_HEIGHT = 12;
+constexpr int DEFAULT_SLIDER_SYMBOL_SIZE = 8;
+constexpr int DEFAULT_MARGIN = DEFAULT_SLIDER_SYMBOL_SIZE/2+1;
+constexpr int DEFAULT_TEXT_MARGIN = 2;
+constexpr int DEFAULT_LABEL_HEIGHT = 12;
 
 /*******************************/
 /*** ColorScaleElementSlider ***/

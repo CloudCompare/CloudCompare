@@ -15,6 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
+#include <clocale>
+
 //Qt
 #include <QDir>
 #include <QStandardPaths>

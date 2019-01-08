@@ -25,10 +25,10 @@
 
 #if defined(USE_CGAL_LIB)
 //CGAL Lib
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
-#include <CGAL/Triangulation_vertex_base_with_info_2.h>
 #include <CGAL/Delaunay_triangulation_2.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Triangulation_vertex_base_with_info_2.h>
 #endif
 
 
@@ -48,8 +48,7 @@ Delaunay2dMesh::~Delaunay2dMesh()
 {
 	linkMeshWith(nullptr);
 
-	if (m_triIndexes)
-		delete[] m_triIndexes;
+	delete[] m_triIndexes;
 }
 
 bool Delaunay2dMesh::Available()
@@ -81,14 +80,14 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 #if defined(USE_CGAL_LIB)
 
 	//CGAL boilerplate
-	typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+	using K = CGAL::Exact_predicates_inexact_constructions_kernel;
 	//We define a vertex_base with info. The "info" (std::size_t) allow us to keep track of the original point index.
-	typedef CGAL::Triangulation_vertex_base_with_info_2<std::size_t, K> Vb;
-	typedef CGAL::Constrained_triangulation_face_base_2<K> Fb;
-	typedef CGAL::No_intersection_tag  Itag; //This tag could ben changed if we decide to handle intersection
-	typedef CGAL::Triangulation_data_structure_2<Vb, Fb> Tds;
-	typedef CGAL::Constrained_Delaunay_triangulation_2<K, Tds, Itag> CDT;
-	typedef CDT::Point cgalPoint;
+	using Vb = CGAL::Triangulation_vertex_base_with_info_2<std::size_t, K>;
+	using Fb = CGAL::Constrained_triangulation_face_base_2<K>;
+	using Itag = CGAL::No_intersection_tag; //This tag could ben changed if we decide to handle intersection
+	using Tds = CGAL::Triangulation_data_structure_2<Vb, Fb>;
+	using CDT = CGAL::Constrained_Delaunay_triangulation_2<K, Tds, Itag>;
+	using cgalPoint = CDT::Point;
 
 	std::vector< std::pair<cgalPoint, std::size_t > > constraints;
 	std::size_t constrCount = segments2D.size();
@@ -147,12 +146,12 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 #if defined(USE_CGAL_LIB)
 
 	//CGAL boilerplate
-	typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+	using K = CGAL::Exact_predicates_inexact_constructions_kernel;
 	//We define a vertex_base with info. The "info" (std::size_t) allow us to keep track of the original point index.
-	typedef CGAL::Triangulation_vertex_base_with_info_2<std::size_t, K> Vb;
-	typedef CGAL::Triangulation_data_structure_2<Vb> Tds;
-	typedef CGAL::Delaunay_triangulation_2<K, Tds> DT;
-	typedef DT::Point cgalPoint;
+	using Vb = CGAL::Triangulation_vertex_base_with_info_2<std::size_t, K>;
+	using Tds = CGAL::Triangulation_data_structure_2<Vb>;
+	using DT = CGAL::Delaunay_triangulation_2<K, Tds>;
+	using cgalPoint = DT::Point;
 
 	std::vector< std::pair<cgalPoint, std::size_t > > pts;
 	std::size_t pointCount = points2D.size();

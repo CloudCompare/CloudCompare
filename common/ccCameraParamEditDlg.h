@@ -21,7 +21,6 @@
 //Local
 #include "ccOverlayDialog.h"
 #include "ccPickingListener.h"
-#include <ui_cameraParamDlg.h>
 
 //qCC_db
 #include <ccGLMatrix.h>
@@ -36,8 +35,13 @@ class ccGLWindow;
 class ccHObject;
 class ccPickingHub;
 
+namespace Ui
+{
+	class CameraParamDlg;
+}
+
 //! Dialog to interactively edit the camera pose parameters
-class ccCameraParamEditDlg : public ccOverlayDialog, public Ui::CameraParamDlg, public ccPickingListener
+class ccCameraParamEditDlg : public ccOverlayDialog, public ccPickingListener
 {
 	Q_OBJECT
 
@@ -47,7 +51,7 @@ public:
 	explicit ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickingHub);
 
 	//! Destructor
-	~ccCameraParamEditDlg() override = default;
+	~ccCameraParamEditDlg() override;
 
 	//! Makes this dialog frameless
 	void makeFrameless();
@@ -135,6 +139,9 @@ protected:
 
 	//! Picking hub
 	ccPickingHub* m_pickingHub;
+	
+private:
+	Ui::CameraParamDlg* m_ui;
 };
 
 #endif //CC_CAMERA_PARAM_EDIT_DLG_HEADER

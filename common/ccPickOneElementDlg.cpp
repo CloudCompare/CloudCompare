@@ -38,11 +38,8 @@ ccPickOneElementDlg::ccPickOneElementDlg(	const QString &label,
 
 ccPickOneElementDlg::~ccPickOneElementDlg()
 {
-	if (m_ui)
-	{
-		delete m_ui;
-		m_ui = nullptr;
-	}
+	delete m_ui;
+	m_ui = nullptr;
 }
 
 void ccPickOneElementDlg::addElement(const QString &elementName)

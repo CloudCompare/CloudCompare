@@ -24,6 +24,8 @@
 //Qt
 #include <QColorDialog>
 
+#include <cassert>
+
 //Default 'min cloud size' for LoD  when VBOs are activated
 constexpr double s_defaultMaxVBOCloudSizeM = 50.0;
 

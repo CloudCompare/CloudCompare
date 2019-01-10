@@ -62,29 +62,31 @@ static OculusHMD s_oculus;
 #include <vld.h>
 #endif
 
-const float ccGLWindow::MIN_POINT_SIZE_F = 1.0f;
-const float ccGLWindow::MAX_POINT_SIZE_F = 16.0f;
-const float ccGLWindow::MIN_LINE_WIDTH_F = 1.0f;
-const float ccGLWindow::MAX_LINE_WIDTH_F = 16.0f;
+// These extra definitions are required in C++11.
+// In C++17, class-level "static constexpr" is implicitly inline, so these are not required.
+constexpr float ccGLWindow::MIN_POINT_SIZE_F;
+constexpr float ccGLWindow::MAX_POINT_SIZE_F;
+constexpr float ccGLWindow::MIN_LINE_WIDTH_F;
+constexpr float ccGLWindow::MAX_LINE_WIDTH_F;
 
 //Min and max zoom ratio (relative)
-static const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
-static const float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
+constexpr float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
+constexpr float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
 
 //Vaious overlay elements dimensions
-static const double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8; //percentage of the smallest screen dimension
-static const double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0;
-static const float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
-static const float  CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
+constexpr double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8; //percentage of the smallest screen dimension
+constexpr double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0;
+constexpr float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
+constexpr float  CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
 
 //Max click duration for enabling picking mode (in ms)
-static const int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
+constexpr int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
 
 //invalid GL list index
-static const GLuint GL_INVALID_LIST_ID = (~0);
+constexpr GLuint GL_INVALID_LIST_ID = (~0);
 
 //GL filter banner margin (height = 2*margin + current font height)
-static const int CC_GL_FILTER_BANNER_MARGIN = 5;
+constexpr int CC_GL_FILTER_BANNER_MARGIN = 5;
 
 //default interaction flags
 ccGLWindow::INTERACTION_FLAGS ccGLWindow::PAN_ONLY()           { ccGLWindow::INTERACTION_FLAGS flags = INTERACT_PAN | INTERACT_ZOOM_CAMERA | INTERACT_2D_ITEMS | INTERACT_CLICKABLE_ITEMS; return flags; }
@@ -93,13 +95,13 @@ ccGLWindow::INTERACTION_FLAGS ccGLWindow::TRANSFORM_ENTITIES() { ccGLWindow::INT
 
 /*** Persistent settings ***/
 
-static const char c_ps_groupName[] = "ccGLWindow";
-static const char c_ps_perspectiveView[] = "perspectiveView";
-static const char c_ps_objectMode[] = "objectCenteredView";
-static const char c_ps_sunLight[] = "sunLightEnabled";
-static const char c_ps_customLight[] = "customLightEnabled";
-static const char c_ps_pivotVisibility[] = "pivotVisibility";
-static const char c_ps_stereoGlassType[] = "stereoGlassType";
+constexpr char c_ps_groupName[] = "ccGLWindow";
+constexpr char c_ps_perspectiveView[] = "perspectiveView";
+constexpr char c_ps_objectMode[] = "objectCenteredView";
+constexpr char c_ps_sunLight[] = "sunLightEnabled";
+constexpr char c_ps_customLight[] = "customLightEnabled";
+constexpr char c_ps_pivotVisibility[] = "pivotVisibility";
+constexpr char c_ps_stereoGlassType[] = "stereoGlassType";
 
 //Unique GL window ID
 static int s_GlWindowNumber = 0;
@@ -237,6 +239,69 @@ struct HotZone
 		return areaRect;
 	}
 };
+
+//! Rendering params
+struct ccGLWindow::RenderingParams
+{
+	// Next LOD state
+	LODState nextLODState;
+
+	// Pass info
+	unsigned char passIndex = 0;
+	unsigned char passCount = 1;
+
+	// 2D background
+	bool drawBackground = true;
+	bool clearDepthLayer = true;
+	bool clearColorLayer = true;
+
+	// 3D central layer
+	bool draw3DPass = true;
+	bool useFBO = false;
+	bool draw3DCross = false;
+
+	// 2D foreground
+	bool drawForeground = true;
+};
+
+//! Optional output metrics (from computeProjectionMatrix)
+struct ccGLWindow::ProjectionMetrics
+{
+	double zNear = 0.0;
+	double zFar = 0.0;
+	double cameraToBBCenterDist = 0.0;
+	double bbHalfDiag = 0.0;
+};
+
+//! Picking parameters
+struct ccGLWindow::PickingParameters
+{
+	//! Default constructor
+	PickingParameters(	PICKING_MODE _mode = NO_PICKING,
+						int _centerX = 0,
+						int _centerY = 0,
+						int _pickWidth = 5,
+						int _pickHeight = 5,
+						bool _pickInSceneDB = true,
+						bool _pickInLocalDB = true)
+		: mode(_mode)
+		, centerX(_centerX)
+		, centerY(_centerY)
+		, pickWidth(_pickWidth)
+		, pickHeight(_pickHeight)
+		, pickInSceneDB(_pickInSceneDB)
+		, pickInLocalDB(_pickInLocalDB)
+	{}
+
+	PICKING_MODE mode;
+	int centerX;
+	int centerY;
+	int pickWidth;
+	int pickHeight;
+	bool pickInSceneDB;
+	bool pickInLocalDB;
+};
+
 
 ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 						ccGLWindowParent* parent/*=0*/,

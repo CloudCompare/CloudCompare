@@ -49,9 +49,8 @@ before_script:
   -DBUILD_TESTING=ON
   ..
 script:
-- if [[ $TRAVIS_BRANCH != "beta_builds" ]]; then make -j2; fi
 - if [[ $CXX == "clang++" ]]; then export LD_LIBRARY_PATH=/usr/local/clang/lib:$LD_LIBRARY_PATH; fi
-- xvfb-run ctest
+- if [[ $TRAVIS_BRANCH != "beta_builds" ]]; then make -j2 && xvfb-run ctest; fi
 - cd ..
 after_success:
 - openssl aes-256-cbc -K $encrypted_d04fcf964026_key -iv $encrypted_d04fcf964026_iv

@@ -33,6 +33,7 @@
 
 //qCC_db
 #include <ccGenericMesh.h>
+#include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
 
 //plugins

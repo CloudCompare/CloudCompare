@@ -18,10 +18,11 @@
 #include "PVFilter.h"
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccPointCloud.h>
-#include <ccScalarField.h>
 #include <ccProgressDialog.h>
+#include <ccScalarField.h>
 
 //Qt
 #include <QFile>

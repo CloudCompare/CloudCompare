@@ -21,15 +21,16 @@
 #include "BinFilter.h"
 
 //qCC_db
+#include <ccGBLSensor.h>
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccPointCloud.h>
-#include <ccGBLSensor.h>
 
 //Qt
 #include <QFileInfo>
 
 //System
-#include <assert.h>
+#include <cassert>
 
 //Max number of characters per line in an ASCII file
 //TODO: use QFile instead!

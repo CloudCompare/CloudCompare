@@ -22,6 +22,7 @@
 #include <QApplication>
 #include <QFile>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include <QString>
 #include <QStringList>
 #include <QTextStream>
@@ -485,6 +486,11 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 		unsigned lineCount = 0;
 		unsigned polyCount = 0;
 		QString currentLine = stream.readLine();
+		
+		QRegularExpression	spacesRegExp( "\\s+" );
+		
+		spacesRegExp.optimize();
+		
 		while (!currentLine.isNull())
 		{
 			++lineCount;
@@ -500,7 +506,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				QApplication::processEvents();
 			}
 
-			QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
+			const QStringList tokens = currentLine.split( spacesRegExp, QString::SkipEmptyParts );
 
 			//skip comments & empty lines
 			if (tokens.empty() || tokens.front().startsWith('/', Qt::CaseInsensitive) || tokens.front().startsWith('#', Qt::CaseInsensitive))

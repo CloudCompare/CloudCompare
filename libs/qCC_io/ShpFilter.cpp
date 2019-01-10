@@ -20,18 +20,19 @@
 #include "ShpFilter.h"
 
 //Local
-#include "ui_saveSHPFileDlg.h"
-#include "ui_importDBFFieldDlg.h"
 #include "ShpDBFFields.h"
+#include "ui_importDBFFieldDlg.h"
+#include "ui_saveSHPFileDlg.h"
 
 //qCC_db
-#include <ccPolyline.h>
-#include <ccGenericPointCloud.h>
 #include <ccGenericMesh.h>
-#include <ccPointCloud.h>
-#include <ccScalarField.h>
-#include <ccProgressDialog.h>
+#include <ccGenericPointCloud.h>
+#include <ccHObjectCaster.h>
 #include <ccMesh.h>
+#include <ccPointCloud.h>
+#include <ccPolyline.h>
+#include <ccProgressDialog.h>
+#include <ccScalarField.h>
 
 //Qt
 #include <QFileInfo>

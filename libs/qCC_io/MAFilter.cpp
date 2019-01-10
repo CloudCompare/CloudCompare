@@ -19,9 +19,10 @@
 #include "FileIO.h"
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
-#include <ccPointCloud.h>
 #include <ccMesh.h>
+#include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
 //Qt
@@ -29,8 +30,8 @@
 #include <QFileInfo>
 
 //System
-#include <string.h>
-#include <assert.h>
+#include <cassert>
+#include <cstring>
 
 bool MAFilter::canLoadExtension(const QString& upperCaseExt) const
 {

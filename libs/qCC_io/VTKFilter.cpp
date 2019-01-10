@@ -18,9 +18,10 @@
 #include "VTKFilter.h"
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
-#include <ccPointCloud.h>
 #include <ccMesh.h>
+#include <ccPointCloud.h>
 #include <ccScalarField.h>
 
 //Qt
@@ -28,7 +29,7 @@
 #include <QTextStream>
 
 //System
-#include <string.h>
+#include <cstring>
 
 bool VTKFilter::canLoadExtension(const QString& upperCaseExt) const
 {

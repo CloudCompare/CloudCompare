@@ -19,17 +19,18 @@
 #include "FileIO.h"
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccImage.h>
 
 //Qt
-#include <QImageReader>
-#include <QImageWriter>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QImage>
-#include <QFileDialog>
+#include <QImageReader>
+#include <QImageWriter>
 
 //System
-#include <assert.h>
+#include <cassert>
 
 ImageFileFilter::ImageFileFilter()
 	: FileIOFilter()

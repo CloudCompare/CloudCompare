@@ -20,7 +20,6 @@
 
 //qCC_db
 #include <ccHObject.h>
-#include <ccHObjectCaster.h>
 
 //Local
 #include "ccGlobalShiftManager.h"

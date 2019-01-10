@@ -22,27 +22,28 @@
 #include "PlyOpenDlg.h"
 
 //Qt
-#include <QImage>
 #include <QFileInfo>
+#include <QImage>
 #include <QMessageBox>
 #include <QPushButton>
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
-#include <ccMesh.h>
-#include <ccPointCloud.h>
 #include <ccMaterial.h>
 #include <ccMaterialSet.h>
+#include <ccMesh.h>
+#include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
 //System
-#include <string.h>
-#include <assert.h>
+#include <cassert>
+#include <cstring>
 #if defined(CC_WINDOWS)
 #include <windows.h>
 #else
-#include <time.h>
+#include <ctime>
 #include <unistd.h>
 #endif
 

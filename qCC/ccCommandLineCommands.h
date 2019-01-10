@@ -7,12 +7,13 @@
 #include <AutoSegmentationTools.h>
 #include <CCConst.h>
 #include <CloudSamplingTools.h>
+#include <MeshSamplingTools.h>
 #include <NormalDistribution.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
-#include <MeshSamplingTools.h>
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccNormalVectors.h>
 #include <ccPlane.h>
 #include <ccPolyline.h>

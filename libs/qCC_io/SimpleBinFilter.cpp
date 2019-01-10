@@ -22,12 +22,13 @@
 #include <QSettings>
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
 //system
-#include <assert.h>
+#include <cassert>
 
 //header: 32 first bytes
 static const size_t c_headerSize = 64;

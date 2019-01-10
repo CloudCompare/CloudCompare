@@ -19,30 +19,30 @@
 
 //file wrappers
 //CLOUDS
-#include "BinFilter.h"
-#include "SimpleBinFilter.h"
 #include "AsciiFilter.h"
-#include "VTKFilter.h"
-#include "STLFilter.h"
-#include "LASFilter.h"
+#include "BinFilter.h"
 #include "E57Filter.h"
+#include "LASFilter.h"
 #include "PTXFilter.h"
+#include "SimpleBinFilter.h"
+#include "STLFilter.h"
+#include "VTKFilter.h"
 //MESHES
-#include "ObjFilter.h"
-#include "PlyFilter.h"
-#include "MAFilter.h"
 #include "FBXFilter.h"
+#include "MAFilter.h"
+#include "ObjFilter.h"
 #include "OFFFilter.h"
+#include "PlyFilter.h"
 //CAD
 #include "PDMS/PDMSFilter.h"
 //OTHERS
 #include "DepthMapFileFilter.h"
-#include "RasterGridFilter.h"
-#include "ImageFileFilter.h"
 #include "DxfFilter.h"
-#include "ShpFilter.h"
-#include "MascaretFilter.h"
 #include "HeightProfileFilter.h"
+#include "ImageFileFilter.h"
+#include "MascaretFilter.h"
+#include "RasterGridFilter.h"
+#include "ShpFilter.h"
 
 //Qt
 #include <QFileInfo>

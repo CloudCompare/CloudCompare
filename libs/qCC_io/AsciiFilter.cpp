@@ -28,6 +28,7 @@
 
 //qCC_db
 #include <cc2DLabel.h>
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>

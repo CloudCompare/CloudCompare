@@ -29,6 +29,7 @@
 
 //qCC_db
 #include <ccChunk.h>
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccMaterial.h>
 #include <ccMaterialSet.h>

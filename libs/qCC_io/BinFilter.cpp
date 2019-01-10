@@ -18,37 +18,40 @@
 #include "BinFilter.h"
 
 //Qt
-#include <QMessageBox>
 #include <QApplication>
 #include <QFileInfo>
+#include <QMessageBox>
 #include <QtConcurrentRun>
 
 //qCC_db
+#include <cc2DLabel.h>
+#include <ccCameraSensor.h>
+#include <ccFacet.h>
 #include <ccFlags.h>
 #include <ccGenericPointCloud.h>
-#include <ccPointCloud.h>
-#include <ccProgressDialog.h>
-#include <ccMesh.h>
-#include <ccSubMesh.h>
-#include <ccPolyline.h>
-#include <ccMaterialSet.h>
-#include <cc2DLabel.h>
-#include <ccFacet.h>
-#include <ccSensor.h>
-#include <ccCameraSensor.h>
+#include <ccHObjectCaster.h>
 #include <ccImage.h>
+#include <ccMaterialSet.h>
+#include <ccMesh.h>
+#include <ccPointCloud.h>
+#include <ccPolyline.h>
+#include <ccProgressDialog.h>
 #include <ccScalarField.h>
+#include <ccSensor.h>
+#include <ccSubMesh.h>
 
 //system
+#include <cassert>
+#include <cstring>
 #include <unordered_set>
-#include <assert.h>
-#include <string.h>
+
 #if defined(CC_WINDOWS)
 #include <windows.h>
 #else
-#include <time.h>
+#include <ctime>
 #include <unistd.h>
 #endif
+
 
 bool BinFilter::canLoadExtension(const QString& upperCaseExt) const
 {

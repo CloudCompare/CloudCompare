@@ -373,9 +373,9 @@ public:
 	virtual void getContext(CC_DRAW_CONTEXT& context);
 
 	//! Minimum point size
-	static const float MIN_POINT_SIZE_F;
+	static constexpr float MIN_POINT_SIZE_F = 1.0f;
 	//! Maximum point size
-	static const float MAX_POINT_SIZE_F;
+	static constexpr float MAX_POINT_SIZE_F = 16.0f;
 
 	//! Sets point size
 	/** \param size point size (between MIN_POINT_SIZE_F and MAX_POINT_SIZE_F)
@@ -383,9 +383,9 @@ public:
 	virtual void setPointSize(float size, bool silent = false);
 	
 	//! Minimum line width
-	static const float MIN_LINE_WIDTH_F;
+	static constexpr float MIN_LINE_WIDTH_F = 1.0f;
 	//! Maximum line width
-	static const float MAX_LINE_WIDTH_F;
+	static constexpr float MAX_LINE_WIDTH_F = 16.0f;
 
 	//! Sets line width
 	/** \param width lines width (between MIN_LINE_WIDTH_F and MAX_LINE_WIDTH_F)
@@ -817,38 +817,7 @@ protected: //rendering
 	};
 
 	//! Rendering params
-	struct RenderingParams
-	{
-		RenderingParams()
-			: passIndex(0)
-			, passCount(1)
-			, drawBackground(true)
-			, clearDepthLayer(true)
-			, clearColorLayer(true)
-			, draw3DPass(true)
-			, useFBO(false)
-			, draw3DCross(false)
-			, drawForeground(true)
-		{}
-
-		unsigned char passIndex;
-		unsigned char passCount;
-
-		//2D background
-		bool drawBackground;
-		bool clearDepthLayer;
-		bool clearColorLayer;
-
-		//3D central layer
-		bool draw3DPass;
-		bool useFBO;
-		bool draw3DCross;
-		//! Next LOD state
-		LODState nextLODState;
-
-		//2D foreground
-		bool drawForeground;
-	};
+	struct RenderingParams;
 
 	//! Full rendering pass (drawBackground + draw3D + drawForeground)
 	void fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& params);
@@ -927,20 +896,7 @@ protected: //other methods
 	ccGLMatrixd computeModelViewMatrix(const CCVector3d& cameraCenter) const;
 
 	//! Optional output metrics (from computeProjectionMatrix)
-	struct ProjectionMetrics
-	{
-		ProjectionMetrics()
-			: zNear(0.0)
-			, zFar(0.0)
-			, cameraToBBCenterDist(0.0)
-			, bbHalfDiag(0.0)
-		{}
-		
-		double zNear;
-		double zFar;
-		double cameraToBBCenterDist;
-		double bbHalfDiag;
-	};
+	struct ProjectionMetrics;
 
 	//! Computes the projection matrix
 	ccGLMatrixd computeProjectionMatrix(	const CCVector3d& cameraCenter,
@@ -963,33 +919,7 @@ protected: //other methods
 	void drawPivot();
 
 	//! Picking parameters
-	struct PickingParameters
-	{
-		//! Default constructor
-		PickingParameters(	PICKING_MODE _mode = NO_PICKING,
-							int _centerX = 0,
-							int _centerY = 0,
-							int _pickWidth = 5,
-							int _pickHeight = 5,
-							bool _pickInSceneDB = true,
-							bool _pickInLocalDB = true)
-			: mode(_mode)
-			, centerX(_centerX)
-			, centerY(_centerY)
-			, pickWidth(_pickWidth)
-			, pickHeight(_pickHeight)
-			, pickInSceneDB(_pickInSceneDB)
-			, pickInLocalDB(_pickInLocalDB)
-		{}
-
-		PICKING_MODE mode;
-		int centerX;
-		int centerY;
-		int pickWidth;
-		int pickHeight;
-		bool pickInSceneDB;
-		bool pickInLocalDB;
-	};
+	struct PickingParameters;
 
 	//! Starts picking process
 	/** \param params picking parameters

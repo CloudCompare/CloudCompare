@@ -4992,10 +4992,10 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 							{
 								autoComputeOctree = (clickedButton == always);
 								//update the global application parameters
-								ccGui::ParamStruct params = ccGui::Parameters();
-								params.autoComputeOctree = autoComputeOctree ? ccGui::ParamStruct::ALWAYS : ccGui::ParamStruct::NEVER;
-								ccGui::Set(params);
-								params.toPersistentSettings();
+								ccGui::ParamStruct globalParams = ccGui::Parameters();
+								globalParams.autoComputeOctree = autoComputeOctree ? ccGui::ParamStruct::ALWAYS : ccGui::ParamStruct::NEVER;
+								ccGui::Set(globalParams);
+								globalParams.toPersistentSettings();
 							}
 						}
 						break;

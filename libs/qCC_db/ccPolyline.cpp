@@ -21,8 +21,8 @@
 #include "ccPolyline.h"
 
 //Local
-#include "ccPointCloud.h"
 #include "ccCone.h"
+#include "ccPointCloud.h"
 
 ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 	: Polyline(associatedCloud)
@@ -47,10 +47,10 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 }
 
 ccPolyline::ccPolyline(const ccPolyline& poly)
-	: Polyline(0)
+	: Polyline(nullptr)
 	, ccShiftedObject(poly)
 {
-	ccPointCloud* clone = 0;
+	ccPointCloud* clone = nullptr;
 	initWith(clone, poly);
 }
 
@@ -160,7 +160,7 @@ void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
 }
 
 //unit arrow
-static QSharedPointer<ccCone> c_unitArrow(0);
+static QSharedPointer<ccCone> c_unitArrow(nullptr);
 
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
@@ -261,7 +261,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//build-up unit arrow own 'context'
 			CC_DRAW_CONTEXT markerContext = context;
 			markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-			markerContext.display = 0;
+			markerContext.display = nullptr;
 
 			glFunc->glMatrixMode(GL_MODELVIEW);
 			glFunc->glPushMatrix();
@@ -284,7 +284,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (m_showVertices)
 	{
 		glFunc->glPushAttrib(GL_POINT_BIT);
-		glFunc->glPointSize((GLfloat)m_vertMarkWidth);
+		glFunc->glPointSize(static_cast<GLfloat>(m_vertMarkWidth));
 
 		glFunc->glBegin(GL_POINTS);
 		for (unsigned i = 0; i < vertCount; ++i)

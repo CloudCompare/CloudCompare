@@ -2610,9 +2610,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							context.moreLODPointsAvailable = (remainingPointsAtThisLevel != 0);
 							context.higherLODLevelsAvailable = (!m_lod->allDisplayed() && context.currentLODLevel + 1 <= maxLevel);
 						}
-						else
-						{
-						}
 					}
 				}
 

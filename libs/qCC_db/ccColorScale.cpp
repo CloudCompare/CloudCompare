@@ -19,6 +19,8 @@
 
 //Qt
 #include <QUuid>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
 //CCLib
 #include <CCGeom.h>
@@ -26,12 +28,25 @@
 //Local
 #include "ccLog.h"
 
-ccColorScale::Shared ccColorScale::Create(QString name)
+
+static const QString s_xmlCloudCompare( "CloudCompare" );
+static const QString s_xmlColorScaleTitle( "ColorScale" );
+static const QString s_xmlColorScaleProperties( "Properties" );
+static const QString s_xmlColorScaleData( "Data" );
+constexpr int s_xmlColorScaleVer = 1;
+
+// These extra definitions are required in C++11.
+// In C++17, "static constexpr" is implicitly inline, so these are not required.
+constexpr unsigned ccColorScale::MIN_STEPS;
+constexpr unsigned ccColorScale::DEFAULT_STEPS;
+constexpr unsigned ccColorScale::MAX_STEPS;
+
+ccColorScale::Shared ccColorScale::Create(const QString& name)
 {
 	return ccColorScale::Shared(new ccColorScale(name));
 }
 
-ccColorScale::ccColorScale(QString name, QString uuid/*=QString()*/)
+ccColorScale::ccColorScale(const QString& name, const QString& uuid/*=QString()*/)
 	: m_name(name)
 	, m_uuid(uuid)
 	, m_updated(false)
@@ -47,10 +62,6 @@ ccColorScale::ccColorScale(QString name, QString uuid/*=QString()*/)
 void ccColorScale::generateNewUuid()
 {
 	m_uuid = QUuid::createUuid().toString();
-}
-
-ccColorScale::~ccColorScale()
-{
 }
 
 void ccColorScale::insert(const ccColorScaleElement& step, bool autoUpdate/*=true*/)
@@ -320,16 +331,7 @@ void ccColorScale::getAbsoluteBoundaries(double& minVal, double& maxVal) const
 	maxVal = m_absoluteMinValue + m_absoluteRange;
 }
 
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-
-static QString s_xmlCloudCompare         = "CloudCompare";
-static QString s_xmlColorScaleTitle      = "ColorScale";
-static QString s_xmlColorScaleProperties = "Properties";
-static QString s_xmlColorScaleData       = "Data";
-static int s_xmlColorScaleVer = 1;
-
-bool ccColorScale::saveAsXML(QString filename) const
+bool ccColorScale::saveAsXML(const QString& filename) const
 {
 	QFile file(filename);
 	if (!file.open(QFile::WriteOnly | QFile::Text))
@@ -410,16 +412,16 @@ bool ccColorScale::saveAsXML(QString filename) const
 	return true;
 }
 
-ccColorScale::Shared ccColorScale::LoadFromXML(QString filename)
+ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 {
 	QFile file(filename);
 	if (!file.open(QFile::ReadOnly | QFile::Text))
 	{
 		ccLog::Error(QString("Failed to open file '%1' for reading!").arg(filename));
-		return Shared(0);
+		return Shared(nullptr);
 	}
 	
-	Shared scale(0);
+	Shared scale(nullptr);
 
 	//read content
 	QXmlStreamReader stream(&file);

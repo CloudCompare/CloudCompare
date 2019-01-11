@@ -15,6 +15,9 @@
 //#                                                                        #
 //##########################################################################
 
+#ifndef CC_COLOR_SCALE_SELECTOR_HEADER
+#define CC_COLOR_SCALE_SELECTOR_HEADER
+
 //Qt
 #include <QFrame>
 
@@ -68,3 +71,5 @@ protected:
 	//! Spawn color scale editor button
 	QToolButton* m_button;
 };
+
+#endif //CC_COLOR_SCALE_SELECTOR_HEADER

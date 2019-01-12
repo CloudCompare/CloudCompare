@@ -27,6 +27,7 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
+#include <ccHObjectCaster.h>
 #include "ccColorScalesManager.h"
 
 //CCLib

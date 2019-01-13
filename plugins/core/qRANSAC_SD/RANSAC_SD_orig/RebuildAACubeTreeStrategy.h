@@ -82,7 +82,7 @@ struct RebuildAACubeTreeStrategy
 		size_t Rebuild(CellType &parent, size_t childIdx, const PointType &min,
 			const PointType &max, typename BaseType::HandleType *cur)
 		{
-			CellType &cell = parent[childIdx];
+			CellType &cell = parent[static_cast<unsigned>(childIdx)];
 			if(this->IsLeaf(cell))
 			{
 				typename BaseType::HandleType h = *cur;

@@ -59,11 +59,11 @@ class DLL_LINKAGE RansacShapeDetector
 			MiscLib::Vector< size_t >::const_iterator end,
 			std::pair< size_t, float > *score) const;
 		float CandidateFailureProbability(float candidateSize,
-			float numberOfPoints, float drawnCandidates, float levels) const
+			size_t numberOfPoints, size_t drawnCandidates, size_t levels) const
 		{
 			return std::min(std::pow(1.f - candidateSize
-				/ (numberOfPoints * levels * (1 << (m_reqSamples - 1))),
-				drawnCandidates), 1.f);
+				/ (numberOfPoints * levels * (static_cast<size_t>(1) << (m_reqSamples - 1))),
+				static_cast<float>(drawnCandidates)), 1.f);
 		}
 		float UpdateAcceptedFailureProbability(
 			float currentFailureProbability, size_t numTries) const
@@ -89,7 +89,7 @@ class DLL_LINKAGE RansacShapeDetector
 			const MiscLib::Vector< ImmediateOctreeType * > &octrees,
 			const PointCloud &pc, ScoreVisitorT &scoreVisitor,
 			size_t currentSize, size_t drawnCandidates,
-			size_t numInvalid, size_t minSize, float numLevels,
+			size_t numInvalid, size_t minSize, size_t numLevels,
 			float *maxForgottenCandidate, float *candidateFailProb) const;
 		size_t StatBucket(float score) const;
 		void UpdateLevelWeights(float factor,

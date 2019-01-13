@@ -342,8 +342,8 @@ void ConePrimitiveShape::BitmapExtent(float epsilon,
 	MiscLib::Vector< std::pair< float, float > > *params,
 	size_t *uextent, size_t *vextent)
 {
-	*uextent = std::ceil((bbox->Max()[0] - bbox->Min()[0]) / epsilon); // no wrappig along u direction
-	*vextent = std::ceil((bbox->Max()[1] - bbox->Min()[1]) / epsilon) + 1; // add one for wrapping
+	*uextent = static_cast<size_t>(std::ceil((bbox->Max()[0] - bbox->Min()[0]) / epsilon)); // no wrappig along u direction
+	*vextent = static_cast<size_t>(std::ceil((bbox->Max()[1] - bbox->Min()[1]) / epsilon)) + 1; // add one for wrapping
 	if((*vextent) * (*uextent) > 1e6 && m_cone.Angle() < float(M_PI / 4))
 	{
 		// try to reparameterize
@@ -386,7 +386,7 @@ void ConePrimitiveShape::BitmapExtent(float epsilon,
 			if((*params)[i].second > bbox->Max()[1])
 				bbox->Max()[1] = (*params)[i].second;
 		}
-		*vextent = std::floor((bbox->Max()[1] - bbox->Min()[1]) / epsilon) + 1;
+		*vextent = static_cast<size_t>(std::floor((bbox->Max()[1] - bbox->Min()[1]) / epsilon)) + 1;
 	}
 }
 
@@ -395,8 +395,8 @@ void ConePrimitiveShape::InBitmap(const std::pair< float, float > &param,
 	size_t uextent, size_t vextent, std::pair< int, int > *inBmp) const
 {
 	// convert u = length and v = arc length into bitmap coordinates
-	inBmp->first = std::floor((param.first - bbox.Min()[0]) / epsilon);
-	inBmp->second = std::floor((param.second - bbox.Min()[1]) / epsilon);
+	inBmp->first  = static_cast<int>(std::floor((param.first  - bbox.Min()[0]) / epsilon));
+	inBmp->second = static_cast<int>(std::floor((param.second - bbox.Min()[1]) / epsilon));
 }
 
 void ConePrimitiveShape::PreWrapBitmap(

@@ -821,11 +821,11 @@ namespace GfxTL
 			// find the child containing the point
 			//typename BaseType::CellCenterType center;
 			//CellCenter(cell, ti, &center);
-			size_t childIdx = 0;
-			for(size_t i = 0; i < static_cast<size_t>(DimT); ++i)
+			unsigned childIdx = 0;
+			for(unsigned i = 0; i < DimT; ++i)
 			{
 				if(point[i] > cell.Center()[i])//center[i])
-					childIdx |= 1 << (DimT - i - 1);
+					childIdx |= (1u << (DimT - i - 1));
 			}
 			if(this->ExistChild(cell, childIdx)
 				&& cell[childIdx].Size() >= minSize)

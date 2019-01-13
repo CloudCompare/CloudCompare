@@ -145,7 +145,7 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 	subsets = 1;
 #endif
 	MiscLib::Vector< unsigned int > subsetSizes(subsets);
-	for(unsigned int i = subsetSizes.size(); i;)
+	for(size_t i = subsetSizes.size(); i;)
 	{
 		--i;
 		subsetSizes[i] = totalSize;
@@ -159,7 +159,7 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 	// get current error
 	ScalarType chi = 0, newChi = 0;
 	ScalarType rho = 1;
-	unsigned int outerIter = 0,
+	size_t outerIter = 0,
 #ifndef PRECISIONLEVMAR
 		maxOuterIter = 200 / subsetSizes.size(),
 #else

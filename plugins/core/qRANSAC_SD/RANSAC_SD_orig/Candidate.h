@@ -202,7 +202,7 @@ bool Candidate::ImproveBounds(const MiscLib::Vector< ImmediateOctreeType * > &oc
 		if(m_subset >= octrees.size())
 		{
 			GetScore( pc, bitmapEpsilon, true);
-			m_upperBound = m_lowerBound = m_score;
+			m_upperBound = m_lowerBound = static_cast<float>(m_score);
 			return true;
 		}
 		GetScore( pc, (2 << ((octrees.size() - m_subset) / 2)) * bitmapEpsilon, false);

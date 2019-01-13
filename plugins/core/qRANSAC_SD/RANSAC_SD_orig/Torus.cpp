@@ -105,10 +105,10 @@ bool Torus::Init(const MiscLib::Vector< Vec3f > &samples)
 		return false;
 	if(rt < 0)
 		rt = 0;
-	double t1 = -p + std::sqrt(rt);
-	double t2 = -p - std::sqrt(rt);
-	double s1 = c * t1 + d;
-	double s2 = c * t2 + d;
+	float t1 = static_cast<float>(-p + std::sqrt(rt));
+	float t2 = static_cast<float>(-p - std::sqrt(rt));
+	float s1 = static_cast<float>(c * t1 + d);
+	float s2 = static_cast<float>(c * t2 + d);
 
 	Vec3f pos1 = samples[0] + s1 * samples[k];
 	Vec3f normal1 = pos1 - (samples[1] + t1 * samples[k + 1]);
@@ -228,10 +228,10 @@ bool Torus::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 						continue;
 					if(rt < 0)
 						rt = 0;
-					double t1 = -p + std::sqrt(rt);
-					double t2 = -p - std::sqrt(rt);
-					double s1 = c * t1 + d;
-					double s2 = c * t2 + d;
+					float t1 = static_cast<float>(-p + std::sqrt(rt));
+					float t2 = static_cast<float>(-p - std::sqrt(rt));
+					float s1 = static_cast<float>(c * t1 + d);
+					float s2 = static_cast<float>(c * t2 + d);
 					pos1 = samples[w] + s1 * samples[k + w];
 					normal1 = pos1 - (samples[x] + t1 * samples[k + x]);
 					normal1.normalize();
@@ -592,6 +592,6 @@ void Torus::ComputeAppleParams()
 		m_appleHeight = 0;
 		return;
 	}
-	m_cutOffAngle = std::acos((2 * m_rmajor - m_rminor) / m_rminor) + M_PI / 2.f;
+	m_cutOffAngle = static_cast<float>(std::acos((2 * m_rmajor - m_rminor) / m_rminor) + M_PI / 2);
 	m_appleHeight = std::sin(m_cutOffAngle) * m_rminor;
 }

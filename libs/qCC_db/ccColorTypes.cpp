@@ -28,18 +28,18 @@ namespace ccColor
 	{
 		std::random_device rd;   // non-deterministic generator
 		std::mt19937 gen(rd());  // to seed mersenne twister.
-		std::uniform_int_distribution<unsigned char> dist(0, MAX);
+		std::uniform_int_distribution<uint16_t> dist(0, MAX); //1-byte types are not allowed
 		
 		Rgb col;
-		col.r = dist(gen);
-		col.g = dist(gen);
+		col.r = static_cast<unsigned char>(dist(gen));
+		col.g = static_cast<unsigned char>(dist(gen));
 		if (lightOnly)
 		{
 			col.b = MAX - static_cast<ColorCompType>((static_cast<double>(col.r) + static_cast<double>(col.g)) / 2); //cast to double to avoid overflow (whatever the type of ColorCompType!!!)
 		}
 		else
 		{
-			col.b = dist(gen);
+			col.b = static_cast<unsigned char>(dist(gen));
 		}
 		
 		return col;

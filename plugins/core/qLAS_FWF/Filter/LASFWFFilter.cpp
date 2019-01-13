@@ -24,6 +24,7 @@
 #include <ccScalarField.h>
 #include <ccWaveform.h>
 #include <ccColorScalesManager.h>
+#include <ccHObjectCaster.h>
 
 //qCC_io
 #include <LASFields.h>

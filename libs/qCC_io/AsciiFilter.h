@@ -24,14 +24,6 @@
 #include "AsciiOpenDlg.h"
 #include "AsciiSaveDlg.h"
 
-template <class T> struct AutoDeletePtr
-{
-	AutoDeletePtr(T* _ptr = nullptr) : ptr(_ptr) {}
-	~AutoDeletePtr() { release(); }
-	inline void release() { delete ptr; ptr = nullptr; }
-	T* ptr;
-};
-
 //! ASCII point cloud I/O filter
 class QCC_IO_LIB_API AsciiFilter : public FileIOFilter
 {
@@ -72,11 +64,6 @@ protected:
 
 	//! Internal use only
 	CC_FILE_ERROR saveFile(ccHObject* entity, FILE *theFile);
-
-	//! Associated (export) dialog
-	static AutoDeletePtr<AsciiSaveDlg> s_saveDialog;
-	//! Associated (import) dialog
-	static AutoDeletePtr<AsciiOpenDlg> s_openDialog;
 };
 
 #endif //CC_ASCII_FILTER_HEADER

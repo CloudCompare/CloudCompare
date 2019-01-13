@@ -27,6 +27,7 @@
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 #include <ccProgressDialog.h>
+#include <ccColorTypes.h>
 
 //qCC_gl
 #include <ccGLWidget.h>

@@ -25,6 +25,7 @@
 
 //CClib
 #include <ScalarField.h>
+#include <Garbage.h>
 
 //qCC_db
 #include <cc2DLabel.h>
@@ -37,28 +38,35 @@
 #include <cassert>
 #include <cstring>
 
-//declaration of static members
-AutoDeletePtr<AsciiSaveDlg> AsciiFilter::s_saveDialog(nullptr);
-AutoDeletePtr<AsciiOpenDlg> AsciiFilter::s_openDialog(nullptr);
+//Qt
+#include <QScopedPointer>
+
+Garbage<QDialog> s_dialogGarbage;
+AsciiSaveDlg* s_saveDialog(nullptr);
+AsciiOpenDlg* s_openDialog(nullptr);
 
 AsciiSaveDlg* AsciiFilter::GetSaveDialog(QWidget* parentWidget/*=0*/)
 {
-	if (!s_saveDialog.ptr)
+	if (!s_saveDialog)
 	{
-		s_saveDialog.ptr = new AsciiSaveDlg(parentWidget);
+		s_saveDialog = new AsciiSaveDlg(parentWidget);
+		if (!parentWidget)
+			s_dialogGarbage.add(s_saveDialog);
 	}
 
-	return s_saveDialog.ptr;
+	return s_saveDialog;
 }
 
 AsciiOpenDlg* AsciiFilter::GetOpenDialog(QWidget* parentWidget/*=0*/)
 {
-	if (!s_openDialog.ptr)
+	if (!s_openDialog)
 	{
-		s_openDialog.ptr = new AsciiOpenDlg(parentWidget);
+		s_openDialog = new AsciiOpenDlg(parentWidget);
+		if (!parentWidget)
+			s_dialogGarbage.add(s_openDialog);
 	}
 
-	return s_openDialog.ptr;
+	return s_openDialog;
 }
 
 bool AsciiFilter::canLoadExtension(const QString& upperCaseExt) const
@@ -404,7 +412,10 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString& filename,
 		//show the dialog
 		if (!openDialog->exec())
 		{
-			s_openDialog.release(); //release the 'source' dialog (so as to be sure to reset it next time)
+			//release the 'source' dialog (so as to be sure to reset it next time)
+			assert(openDialog == s_openDialog);
+			s_dialogGarbage.destroy(s_openDialog);
+			openDialog = s_openDialog = nullptr;
 
 			//process was cancelled
 			return CC_FERR_CANCELED_BY_USER;
@@ -421,7 +432,10 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString& filename,
 	unsigned skipLineCount = openDialog->getSkippedLinesCount();
 	bool showLabelsIn2D = openDialog->showLabelsIn2D();
 
-	s_openDialog.release(); //release the 'source' dialog (so as to be sure to reset it next time)
+	//release the 'source' dialog (so as to be sure to reset it next time)
+	assert(openDialog == s_openDialog);
+	s_dialogGarbage.destroy(s_openDialog);
+	openDialog = s_openDialog = nullptr;
 
 	return loadCloudFromFormatedAsciiFile(	filename,
 											container,

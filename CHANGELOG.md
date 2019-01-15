@@ -1,5 +1,8 @@
-CloudCompare version history
+CloudCompare Version History
 ============================
+
+v2.10.1 (Zephyrus) - 01/15/2019
+----------------------
 
 v2.10 (Zephyrus) - 01/06/2019
 ----------------------

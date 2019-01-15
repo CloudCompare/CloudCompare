@@ -1,8 +1,12 @@
 CloudCompare Version History
 ============================
 
-v2.10.1 (Zephyrus) - 01/15/2019
+v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------
+
+- Bug fixes:
+
+  - Writing E57 files was broken.
 
 v2.10 (Zephyrus) - 01/06/2019
 ----------------------

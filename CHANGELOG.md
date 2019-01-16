@@ -1,5 +1,13 @@
-CloudCompare version history
+CloudCompare Version History
 ============================
+
+v2.10.1 (Zephyrus) - 01/16/2019
+----------------------
+
+- Bug fixes:
+
+  - writing E57 files was broken
+  - an exception was being thrown when you close CC after saving an ASCII file (#834)
 
 v2.10 (Zephyrus) - 01/06/2019
 ----------------------

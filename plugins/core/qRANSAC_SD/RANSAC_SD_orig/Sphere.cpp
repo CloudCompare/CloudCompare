@@ -182,7 +182,7 @@ bool Sphere::Init(const MiscLib::Vector< Vec3f > &samples)
 		}
 	if(!midCount)
 		return false;
-	m_center /= midCount;
+	m_center /= static_cast<float>(midCount);
 	m_radius = 0;
 	for(size_t i = 0; i < c; ++i)
 	{

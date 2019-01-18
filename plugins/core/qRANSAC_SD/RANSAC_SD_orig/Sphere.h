@@ -84,7 +84,7 @@ private:
 			ScalarType *values, ScalarType *temp) const
 		{
 			ScalarType chi = 0;
-			int size = end - begin;
+			size_t size = end - begin;
 #ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static) reduction(+:chi)
 #endif

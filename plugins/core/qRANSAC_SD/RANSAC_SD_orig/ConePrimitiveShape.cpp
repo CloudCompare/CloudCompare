@@ -411,7 +411,7 @@ void ConePrimitiveShape::PreWrapBitmap(
 		// determine the coordinates of the last pixel in the column
 		// get the radius of the column
 		float r = m_cone.RadiusAtLength(u * epsilon + bbox.Min()[0]);
-		size_t v = std::floor((2 * float(M_PI) * r - bbox.Min()[1]) / epsilon) + 1;
+		size_t v = static_cast<size_t>(std::floor((2 * M_PI * r - bbox.Min()[1]) / epsilon)) + 1;
 		if(v >= vextent)
 			continue;
 		if((*bmp)[u])
@@ -442,7 +442,7 @@ void ConePrimitiveShape::WrapComponents(
 		// determine the coordinates of the last pixel in the column
 		// get the radius of the column
 		float r = m_cone.RadiusAtLength(u * epsilon + bbox.Min()[0]);
-		size_t v = std::floor((2 * float(M_PI) * r  - bbox.Min()[1]) / epsilon) + 1;
+		size_t v = static_cast<size_t>(std::floor((2 * M_PI * r  - bbox.Min()[1]) / epsilon)) + 1;
 		if(v >= vextent)
 			continue;
 		if((*componentImg)[u])
@@ -453,7 +453,7 @@ void ConePrimitiveShape::WrapComponents(
 	for(size_t u = 0; u < uextent; ++u)
 	{
 		float r = m_cone.RadiusAtLength(u * epsilon + bbox.Min()[0]);
-		size_t v = std::floor((2 * float(M_PI) * r  - bbox.Min()[1]) / epsilon) + 1;
+		size_t v = static_cast<size_t>(std::floor((2 * M_PI * r  - bbox.Min()[1]) / epsilon)) + 1;
 		if(v >= vextent)
 			continue;
 		if(!(*componentImg)[v * uextent + u])
@@ -491,7 +491,7 @@ void ConePrimitiveShape::WrapComponents(
 				AssociateLabel(l, n[j], &tempLabels);
 	}
 	// condense labels
-	for(size_t i = tempLabels.size() - 1; i > 0; --i)
+	for(int i = static_cast<int>(tempLabels.size()) - 1; i > 0; --i)
 		tempLabels[i].first = ReduceLabel(i, tempLabels);
 	MiscLib::Vector< int > condensed(tempLabels.size());
 	labels->clear();

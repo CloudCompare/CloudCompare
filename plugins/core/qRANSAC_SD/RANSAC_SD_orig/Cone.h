@@ -101,7 +101,7 @@ private:
 			ScalarType chi = 0;
 			ScalarType cosPhi = std::cos(params[6]);
 			ScalarType sinPhi = std::sin(params[6]);
-			int size = end - begin;
+			size_t size = end - begin;
 #ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static) reduction(+:chi)
 #endif
@@ -129,7 +129,7 @@ private:
 		{
 			ScalarType sinPhi = -std::sin(params[6]);
 			ScalarType cosPhi = std::cos(params[6]);
-			int size = end - begin;
+			size_t size = end - begin;
 #ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static)
 #endif

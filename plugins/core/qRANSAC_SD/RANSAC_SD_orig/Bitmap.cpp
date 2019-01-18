@@ -574,7 +574,7 @@ void PreWrappedComponents(const MiscLib::Vector< char > &bitmap, size_t uextent,
 	tempLabels.reserve(bitmap.size() / 2 + 1); // this is the maximum of possible tempLabels
 	if(!tempLabels.size())
 		tempLabels.push_back(std::make_pair(0, size_t(0)));
-	int curLabel = tempLabels.size() - 1;
+	int curLabel = static_cast<int>(tempLabels.size()) - 1;
 	size_t prevRow, row = 0, nextRow = uextent;
 	for(size_t j = 1; j < vextent - 1; ++j)
 	{
@@ -605,7 +605,7 @@ void PreWrappedComponents(const MiscLib::Vector< char > &bitmap, size_t uextent,
 	}
 
 	// reduce the tempLabels
-	for(size_t i = tempLabels.size() - 1; i > 0; --i)
+	for(int i = static_cast<int>(tempLabels.size()) - 1; i > 0; --i)
 		tempLabels[i].first = ReduceLabel(i, tempLabels);
 	MiscLib::Vector< int > condensed(tempLabels.size());
 	labels->clear();
@@ -811,7 +811,7 @@ void Components(const MiscLib::Vector< char > &bitmap,
 		}
 	}
 	// reduce the tempLabels
-	for(size_t i = tempLabels.size() - 1; i > 0; --i)
+	for(int i = static_cast<int>(tempLabels.size()) - 1; i > 0; --i)
 		tempLabels[i].first = ReduceLabel(i, tempLabels);
 	MiscLib::Vector< int > condensed(tempLabels.size());
 	labels->clear();
@@ -966,7 +966,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 	// the corners of our pixels will be the vertices of our polygons
 	// (x, y) is the upper left corner of the pixel y * uextent + x
 	HashGrid< bool, 4 > edges;
-	unsigned int edgesExtent[] = { uextent + 1, vextent + 1, 3, 3 };
+	size_t edgesExtent[] = { uextent + 1, vextent + 1, 3, 3 };
 	edges.Extent(edgesExtent);
 	bool prevPixelWasWhite = true;
 	do
@@ -979,8 +979,8 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 			if(prevPixelWasWhite && componentImg[firsti] == label)
 			{
 				prevPixelWasWhite = false;
-				x = firsti % uextent;
-				y = firsti / uextent;
+				x = static_cast<int>(firsti % uextent);
+				y = static_cast<int>(firsti / uextent);
 				break;
 			}
 			prevPixelWasWhite = componentImg[firsti] != label;
@@ -999,7 +999,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 			if(componentImg[(vextent - 1) * uextent] == label)
 			{
 				x = 0;
-				y = vextent - 1;
+				y = static_cast<int>(vextent) - 1;
 			}
 		}
 		MiscLib::Vector< Vec2 > poly;
@@ -1011,7 +1011,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 		{
 			// on the left of pixel
 			// check if edge was visited already
-			unsigned int edgeIndex[] = { x, y, 1, 2 };
+			unsigned int edgeIndex[] = { static_cast<unsigned>(x), static_cast<unsigned>(y), 1u, 2u };
 			if(edges.find(edgeIndex))
 				continue;
 			prevx = 0;
@@ -1024,7 +1024,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 				x, y, 1, 0, &dx, &dy))
 				continue;
 			// check if edge was visited already
-			unsigned int edgeIndex[] = { x + 1, y, 0, 1 };
+			unsigned int edgeIndex[] = { static_cast<unsigned>(x + 1), static_cast<unsigned>(y), 0, 1 };
 			if(edges.find(edgeIndex))
 				continue;
 			// on top of pixel
@@ -1040,7 +1040,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 				continue;
 			// on bottom of pixel
 			// check if edge was visited already
-			unsigned int edgeIndex[] = { x + 1, y + 1, 0, 1 };
+			unsigned int edgeIndex[] = { static_cast<unsigned>(x + 1), static_cast<unsigned>(y + 1), 0, 1 };
 			if(edges.find(edgeIndex))
 				continue;
 			prevx = -1;
@@ -1056,7 +1056,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 				continue;
 			// on bottom of pixel
 			// check if edge was visited already
-			unsigned int edgeIndex[] = { x + 1, y + 1, 1, 0 };
+			unsigned int edgeIndex[] = { static_cast<unsigned>(x + 1), static_cast<unsigned>(y + 1), 1, 0 };
 			if(edges.find(edgeIndex))
 				continue;
 			prevx = 0;
@@ -1085,8 +1085,8 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 			}
 			if(checkEdge > 3)
 				return;
-			x = nextx;
-			y = nexty;
+			x = static_cast<int>(nextx);
+			y = static_cast<int>(nexty);
 			prevx = -prevx;
 			prevy = -prevy;
 			edges[x][y][prevx + 1][prevy + 1] = true;

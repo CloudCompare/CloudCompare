@@ -27,15 +27,11 @@ function( target_link_FBX_SDK ) # 2 arguments: ARGV0 = project name
 
 if( ${OPTION_USE_FBX_SDK} )
 	
-	#Anytime we use COMPILE_DEFINITIONS_XXX we must define this policy!
-	#(and setting it outside of the function/file doesn't seem to work...)
-	cmake_policy(SET CMP0043 OLD)
-
 	#release/general
 	if( FBX_SDK_LIBRARY_FILE )
 
 		if ( CMAKE_CONFIGURATION_TYPES )
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE CC_FBX_SUPPORT )
+			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Release>:CC_FBX_SUPPORT> )
 			target_link_libraries( ${ARGV0} optimized ${FBX_SDK_LIBRARY_FILE} )
 		else()
 			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_FBX_SUPPORT )
@@ -61,7 +57,7 @@ if( ${OPTION_USE_FBX_SDK} )
 	
 		if (FBX_SDK_LIBRARY_FILE_DEBUG)
 			
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG CC_FBX_SUPPORT )
+			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:CC_FBX_SUPPORT> )
 			target_link_libraries( ${ARGV0} debug ${FBX_SDK_LIBRARY_FILE_DEBUG} )
 
 		else()

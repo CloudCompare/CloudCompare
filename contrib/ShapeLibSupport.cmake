@@ -4,7 +4,7 @@
 
 OPTION( OPTION_USE_SHAPE_LIB "Build with ShapeLib (SHP files support)" OFF )
 if( ${OPTION_USE_SHAPE_LIB} )
-	add_subdirectory(contrib/shapelib-1.3.0)
+	add_subdirectory(contrib/shapelib)
 	include_directories( ${SHAPELIB_SOURCE_DIR} )
 endif()
 

@@ -1,3 +1,81 @@
+2017-09-10  Even Rouault  <even.rouault at spatialys.com>
+
+	* shpopen.c: resync with GDAL copy. Make sure to zero terminate all
+	error messages. And fix regression regarding re-writing the last shape
+	of a file (https://trac.osgeo.org/gdal/ticket/7031)
+
+2017-07-10  Even Rouault  <even.rouault at spatialys.com>
+
+	* contrib/shpgeo.c: fix compilation on _MSC_VER < 1800 regarding lack
+	of NAN macro.
+
+2016-12-09  Even Rouault  <even.rouault at spatialys.com>
+
+	* Makefile.am: add web/maptools.css to EXTRA_DIST
+
+	* Shapelib 1.4.0 released
+
+2016-12-06  Even Rouault  <even.rouault at spatialys.com>
+
+	* configure.ac: change soname to 2:1:0 to be in sync with Debian soname.
+	http://bugzilla.maptools.org/show_bug.cgi?id=2628
+	Patch by Bas Couwenberg 
+
+	* contrib/doc/Shape_PointInPoly_README.txt, contrib/shpgeo.c: typo fixes.
+	http://bugzilla.maptools.org/show_bug.cgi?id=2629
+	Patch by Bas Couwenberg
+
+	* web/*: use a local .css file to avoid a privacy breach issue reported
+	by the lintian QA tool. 
+	http://bugzilla.maptools.org/show_bug.cgi?id=2630
+	Patch by Bas Couwenberg
+
+2016-12-06  Even Rouault  <even.rouault at spatialys.com>
+
+	* web/release.html, HOWTO-RELEASE, configure.ac, CMakeLists.txt: prepare
+	for 1.4.0 release.
+
+2016-12-05  Even Rouault  <even.rouault at spatialys.com>
+
+	* dbfopen.c, shapefil.h: write DBF end-of-file character 0x1A by default.
+	This behaviour can be controlled with the DBFSetWriteEndOfFileChar()
+	function.
+
+2016-12-05  Even Rouault  <even.rouault at spatialys.com>
+
+	* Major overhaul of Makefile build system to use autoconf/automake.
+	Contributed by Sandro Mani: https://github.com/manisandro/shapelib/tree/autotools
+
+	* Warning fixes in contrib/
+
+2016-12-04  Even Rouault  <even.rouault at spatialys.com>
+
+	* shpopen.c, dbfopen.c, shptree.c, shapefil.h: resync with
+	GDAL Shapefile driver. Mostly cleanups. SHPObject and DBFInfo
+	structures extended with new members. New functions:
+	DBFSetLastModifiedDate, SHPOpenLLEx, SHPRestoreSHX,
+	SHPSetFastModeReadObject
+
+	* sbnsearch.c: new file to implement original ESRI .sbn spatial
+	index reading. (no write support). New functions:
+	SBNOpenDiskTree, SBNCloseDiskTree, SBNSearchDiskTree,
+	SBNSearchDiskTreeInteger, SBNSearchFreeIds
+
+	* Makefile, makefile.vc, CMakeLists.txt, shapelib.def: updates
+	with new file and symbols.
+
+	* commit: helper script to cvs commit
+
+2013-11-26  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* CMakeLists.txt: CMake support from Alan W. Irwin.
+
+	* dbfdump.c: untested reporting for deleted records.
+
+2012-04-10  Frank Warmerdam  <warmerdam@google.com>
+
+	* Shapelib 1.3.0 released.
+
 2012-01-27  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* shptree.c: optimize quadtree generation (gdal #4472)

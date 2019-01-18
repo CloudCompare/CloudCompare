@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: shptree.c,v 1.17 2012-01-27 21:09:26 fwarmerdam Exp $
+ * $Id: shptree.c,v 1.19 2016-12-05 12:44:06 erouault Exp $
  *
  * Project:  Shapelib
  * Purpose:  Implementation of quadtree building and searching functions.
@@ -7,13 +7,14 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
+ * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
  *
  * This software is available under the following "MIT Style" license,
- * or at the option of the licensee under the LGPL (see LICENSE.LGPL).  This
+ * or at the option of the licensee under the LGPL (see COPYING).  This
  * option is discussed in more detail in shapelib.html.
  *
  * --
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -34,6 +35,28 @@
  ******************************************************************************
  *
  * $Log: shptree.c,v $
+ * Revision 1.19  2016-12-05 12:44:06  erouault
+ * * Major overhaul of Makefile build system to use autoconf/automake.
+ *
+ * * Warning fixes in contrib/
+ *
+ * Revision 1.18  2016-12-04 15:30:15  erouault
+ * * shpopen.c, dbfopen.c, shptree.c, shapefil.h: resync with
+ * GDAL Shapefile driver. Mostly cleanups. SHPObject and DBFInfo
+ * structures extended with new members. New functions:
+ * DBFSetLastModifiedDate, SHPOpenLLEx, SHPRestoreSHX,
+ * SHPSetFastModeReadObject
+ *
+ * * sbnsearch.c: new file to implement original ESRI .sbn spatial
+ * index reading. (no write support). New functions:
+ * SBNOpenDiskTree, SBNCloseDiskTree, SBNSearchDiskTree,
+ * SBNSearchDiskTreeInteger, SBNSearchFreeIds
+ *
+ * * Makefile, makefile.vc, CMakeLists.txt, shapelib.def: updates
+ * with new file and symbols.
+ *
+ * * commit: helper script to cvs commit
+ *
  * Revision 1.17  2012-01-27 21:09:26  fwarmerdam
  * optimize .qix output (gdal #4472)
  *
@@ -93,12 +116,13 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #ifdef USE_CPL
 #include "cpl_error.h"
 #endif
 
-SHP_CVSID("$Id: shptree.c,v 1.17 2012-01-27 21:09:26 fwarmerdam Exp $")
+SHP_CVSID("$Id: shptree.c,v 1.19 2016-12-05 12:44:06 erouault Exp $")
 
 #ifndef TRUE
 #  define TRUE 1
@@ -238,6 +262,7 @@ SHPTree SHPAPI_CALL1(*)
     psTree->psRoot = SHPTreeNodeCreate( padfBoundsMin, padfBoundsMax );
     if( NULL == psTree->psRoot )
     {
+        free( psTree );
         return NULL;
     }
 
@@ -246,13 +271,10 @@ SHPTree SHPAPI_CALL1(*)
 /*      use the bounds of the provided file otherwise the create        */
 /*      function will have already set the bounds.                      */
 /* -------------------------------------------------------------------- */
-    assert( NULL != psTree );
-    assert( NULL != psTree->psRoot );
-	
     if( padfBoundsMin == NULL )
     {
         SHPGetInfo( hSHP, NULL, NULL,
-                    psTree->psRoot->adfBoundsMin, 
+                    psTree->psRoot->adfBoundsMin,
                     psTree->psRoot->adfBoundsMax );
     }
 
@@ -262,13 +284,13 @@ SHPTree SHPAPI_CALL1(*)
     if( hSHP != NULL )
     {
         int	iShape, nShapeCount;
-        
+
         SHPGetInfo( hSHP, &nShapeCount, NULL, NULL, NULL );
 
         for( iShape = 0; iShape < nShapeCount; iShape++ )
         {
             SHPObject	*psShape;
-            
+
             psShape = SHPReadObject( hSHP, iShape );
             if( psShape != NULL )
             {
@@ -276,7 +298,7 @@ SHPTree SHPAPI_CALL1(*)
                 SHPDestroyObject( psShape );
             }
         }
-    }        
+    }
 
     return psTree;
 }
@@ -289,7 +311,7 @@ static void SHPDestroyTreeNode( SHPTreeNode * psTreeNode )
 
 {
     int		i;
-    
+
 	assert( NULL != psTreeNode );
 
     for( i = 0; i < psTreeNode->nSubNodes; i++ )
@@ -297,7 +319,7 @@ static void SHPDestroyTreeNode( SHPTreeNode * psTreeNode )
         if( psTreeNode->apsSubNode[i] != NULL )
             SHPDestroyTreeNode( psTreeNode->apsSubNode[i] );
     }
-    
+
     if( psTreeNode->panShapeIds != NULL )
         free( psTreeNode->panShapeIds );
 
@@ -345,7 +367,7 @@ SHPCheckBoundsOverlap( double * padfBox1Min, double * padfBox1Max,
     {
         if( padfBox2Max[iDim] < padfBox1Min[iDim] )
             return FALSE;
-        
+
         if( padfBox1Max[iDim] < padfBox2Min[iDim] )
             return FALSE;
     }
@@ -366,18 +388,18 @@ static int SHPCheckObjectContained( SHPObject * psObject, int nDimension,
     if( psObject->dfXMin < padfBoundsMin[0]
         || psObject->dfXMax > padfBoundsMax[0] )
         return FALSE;
-    
+
     if( psObject->dfYMin < padfBoundsMin[1]
         || psObject->dfYMax > padfBoundsMax[1] )
         return FALSE;
 
     if( nDimension == 2 )
         return TRUE;
-    
+
     if( psObject->dfZMin < padfBoundsMin[2]
         || psObject->dfZMax > padfBoundsMax[2] )
         return FALSE;
-        
+
     if( nDimension == 3 )
         return TRUE;
 
@@ -395,7 +417,7 @@ static int SHPCheckObjectContained( SHPObject * psObject, int nDimension,
 /*      longest dimension.                                              */
 /************************************************************************/
 
-void SHPAPI_CALL
+static void
 SHPTreeSplitBounds( double *padfBoundsMinIn, double *padfBoundsMaxIn,
                     double *padfBoundsMin1, double * padfBoundsMax1,
                     double *padfBoundsMin2, double * padfBoundsMax2 )
@@ -409,7 +431,7 @@ SHPTreeSplitBounds( double *padfBoundsMinIn, double *padfBoundsMaxIn,
     memcpy( padfBoundsMax1, padfBoundsMaxIn, sizeof(double) * 4 );
     memcpy( padfBoundsMin2, padfBoundsMinIn, sizeof(double) * 4 );
     memcpy( padfBoundsMax2, padfBoundsMaxIn, sizeof(double) * 4 );
-    
+
 /* -------------------------------------------------------------------- */
 /*      Split in X direction.                                           */
 /* -------------------------------------------------------------------- */
@@ -444,9 +466,9 @@ SHPTreeNodeAddShapeId( SHPTreeNode * psTreeNode, SHPObject * psObject,
 
 {
     int		i;
-    
+
 /* -------------------------------------------------------------------- */
-/*      If there are subnodes, then consider wiether this object        */
+/*      If there are subnodes, then consider whether this object        */
 /*      will fit in them.                                               */
 /* -------------------------------------------------------------------- */
     if( nMaxDepth > 1 && psTreeNode->nSubNodes > 0 )
@@ -563,7 +585,7 @@ SHPTreeNodeAddShapeId( SHPTreeNode * psTreeNode, SHPObject * psObject,
 /* -------------------------------------------------------------------- */
     psTreeNode->nShapeCount++;
 
-    psTreeNode->panShapeIds = (int *) 
+    psTreeNode->panShapeIds = (int *)
         SfRealloc( psTreeNode->panShapeIds,
                    sizeof(int) * psTreeNode->nShapeCount );
     psTreeNode->panShapeIds[psTreeNode->nShapeCount-1] = psObject->nShapeId;
@@ -603,7 +625,7 @@ SHPTreeAddShapeId( SHPTree * psTree, SHPObject * psObject )
 /*      tree node by tree node basis.                                   */
 /************************************************************************/
 
-void SHPAPI_CALL
+static void
 SHPTreeCollectShapeIds( SHPTree *hTree, SHPTreeNode * psTreeNode,
                         double * padfBoundsMin, double * padfBoundsMax,
                         int * pnShapeCount, int * pnMaxShapes,
@@ -611,7 +633,7 @@ SHPTreeCollectShapeIds( SHPTree *hTree, SHPTreeNode * psTreeNode,
 
 {
     int		i;
-    
+
 /* -------------------------------------------------------------------- */
 /*      Does this node overlap the area of interest at all?  If not,    */
 /*      return without adding to the list at all.                       */
@@ -640,7 +662,7 @@ SHPTreeCollectShapeIds( SHPTree *hTree, SHPTreeNode * psTreeNode,
     {
         (*ppanShapeList)[(*pnShapeCount)++] = psTreeNode->panShapeIds[i];
     }
-    
+
 /* -------------------------------------------------------------------- */
 /*      Recurse to subnodes if they exist.                              */
 /* -------------------------------------------------------------------- */
@@ -693,7 +715,8 @@ SHPTreeFindLikelyShapes( SHPTree * hTree,
 /*      Sort the id array                                               */
 /* -------------------------------------------------------------------- */
 
-    qsort(panShapeList, *pnShapeCount, sizeof(int), compare_ints);
+    if( panShapeList != NULL )
+        qsort(panShapeList, *pnShapeCount, sizeof(int), compare_ints);
 
     return panShapeList;
 }
@@ -701,7 +724,7 @@ SHPTreeFindLikelyShapes( SHPTree * hTree,
 /************************************************************************/
 /*                          SHPTreeNodeTrim()                           */
 /*                                                                      */
-/*      This is the recurve version of SHPTreeTrimExtraNodes() that     */
+/*      This is the recursive version of SHPTreeTrimExtraNodes() that   */
 /*      walks the tree cleaning it up.                                  */
 /************************************************************************/
 
@@ -843,23 +866,24 @@ void SHPCloseDiskTree( SHPTreeDiskHandle hDiskTree )
 
 static int
 SHPSearchDiskTreeNode( SHPTreeDiskHandle hDiskTree, double *padfBoundsMin, double *padfBoundsMax,
-                       int **ppanResultBuffer, int *pnBufferMax, 
-                       int *pnResultCount, int bNeedSwap )
+                       int **ppanResultBuffer, int *pnBufferMax,
+                       int *pnResultCount, int bNeedSwap, int nRecLevel )
 
 {
-    int i;
-    int offset;
-    int numshapes, numsubnodes;
+    unsigned int i;
+    unsigned int offset;
+    unsigned int numshapes, numsubnodes;
     double adfNodeBoundsMin[2], adfNodeBoundsMax[2];
+    int nFReadAcc;
 
 /* -------------------------------------------------------------------- */
 /*      Read and unswap first part of node info.                        */
 /* -------------------------------------------------------------------- */
-    hDiskTree->sHooks.FRead( &offset, 4, 1, hDiskTree->fpQIX );
+    nFReadAcc = (int)hDiskTree->sHooks.FRead( &offset, 4, 1, hDiskTree->fpQIX );
     if ( bNeedSwap ) SwapWord ( 4, &offset );
 
-    hDiskTree->sHooks.FRead( adfNodeBoundsMin, sizeof(double), 2, hDiskTree->fpQIX );
-    hDiskTree->sHooks.FRead( adfNodeBoundsMax, sizeof(double), 2, hDiskTree->fpQIX );
+    nFReadAcc += (int)hDiskTree->sHooks.FRead( adfNodeBoundsMin, sizeof(double), 2, hDiskTree->fpQIX );
+    nFReadAcc += (int)hDiskTree->sHooks.FRead( adfNodeBoundsMax, sizeof(double), 2, hDiskTree->fpQIX );
     if ( bNeedSwap )
     {
         SwapWord( 8, adfNodeBoundsMin + 0 );
@@ -867,15 +891,36 @@ SHPSearchDiskTreeNode( SHPTreeDiskHandle hDiskTree, double *padfBoundsMin, doubl
         SwapWord( 8, adfNodeBoundsMax + 0 );
         SwapWord( 8, adfNodeBoundsMax + 1 );
     }
-      
-    hDiskTree->sHooks.FRead( &numshapes, 4, 1, hDiskTree->fpQIX );
+
+    nFReadAcc += (int)hDiskTree->sHooks.FRead( &numshapes, 4, 1, hDiskTree->fpQIX );
     if ( bNeedSwap ) SwapWord ( 4, &numshapes );
+
+    /* Check that we could read all previous values */
+    if( nFReadAcc != 1 + 2 + 2 + 1 )
+    {
+        hDiskTree->sHooks.Error("I/O error");
+        return FALSE;
+    }
+
+    /* Sanity checks to avoid int overflows in later computation */
+    if( offset > INT_MAX - sizeof(int) )
+    {
+        hDiskTree->sHooks.Error("Invalid value for offset");
+        return FALSE;
+    }
+
+    if( numshapes > (INT_MAX - offset - sizeof(int)) / sizeof(int) ||
+        numshapes > INT_MAX / sizeof(int) - *pnResultCount )
+    {
+        hDiskTree->sHooks.Error("Invalid value for numshapes");
+        return FALSE;
+    }
 
 /* -------------------------------------------------------------------- */
 /*      If we don't overlap this node at all, we can just fseek()       */
 /*      pass this node info and all subnodes.                           */
 /* -------------------------------------------------------------------- */
-    if( !SHPCheckBoundsOverlap( adfNodeBoundsMin, adfNodeBoundsMax, 
+    if( !SHPCheckBoundsOverlap( adfNodeBoundsMin, adfNodeBoundsMax,
                                 padfBoundsMin, padfBoundsMax, 2 ) )
     {
         offset += numshapes*sizeof(int) + sizeof(int);
@@ -886,17 +931,35 @@ SHPSearchDiskTreeNode( SHPTreeDiskHandle hDiskTree, double *padfBoundsMin, doubl
 /* -------------------------------------------------------------------- */
 /*      Add all the shapeids at this node to our list.                  */
 /* -------------------------------------------------------------------- */
-    if(numshapes > 0) 
+    if(numshapes > 0)
     {
-        if( *pnResultCount + numshapes > *pnBufferMax )
+        if( *pnResultCount + numshapes > (unsigned int)*pnBufferMax )
         {
-            *pnBufferMax = (int) ((*pnResultCount + numshapes + 100) * 1.25);
-            *ppanResultBuffer = (int *) 
+            int* pNewBuffer;
+
+            *pnBufferMax = (*pnResultCount + numshapes + 100) * 5 / 4;
+
+            if( (size_t)*pnBufferMax > INT_MAX / sizeof(int) )
+                *pnBufferMax = *pnResultCount + numshapes;
+
+            pNewBuffer = (int *)
                 SfRealloc( *ppanResultBuffer, *pnBufferMax * sizeof(int) );
+
+            if( pNewBuffer == NULL )
+            {
+                hDiskTree->sHooks.Error("Out of memory error");
+                return FALSE;
+            }
+
+            *ppanResultBuffer = pNewBuffer;
         }
 
-        hDiskTree->sHooks.FRead( *ppanResultBuffer + *pnResultCount, 
-               sizeof(int), numshapes, hDiskTree->fpQIX );
+        if( hDiskTree->sHooks.FRead( *ppanResultBuffer + *pnResultCount,
+                    sizeof(int), numshapes, hDiskTree->fpQIX ) != numshapes )
+        {
+            hDiskTree->sHooks.Error("I/O error");
+            return FALSE;
+        }
 
         if (bNeedSwap )
         {
@@ -904,20 +967,29 @@ SHPSearchDiskTreeNode( SHPTreeDiskHandle hDiskTree, double *padfBoundsMin, doubl
                 SwapWord( 4, *ppanResultBuffer + *pnResultCount + i );
         }
 
-        *pnResultCount += numshapes; 
-    } 
+        *pnResultCount += numshapes;
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Process the subnodes.                                           */
 /* -------------------------------------------------------------------- */
-    hDiskTree->sHooks.FRead( &numsubnodes, 4, 1, hDiskTree->fpQIX );
+    if( hDiskTree->sHooks.FRead( &numsubnodes, 4, 1, hDiskTree->fpQIX ) != 1 )
+    {
+        hDiskTree->sHooks.Error("I/O error");
+        return FALSE;
+    }
     if ( bNeedSwap  ) SwapWord ( 4, &numsubnodes );
+    if( numsubnodes > 0 && nRecLevel == 32 )
+    {
+        hDiskTree->sHooks.Error("Shape tree is too deep");
+        return FALSE;
+    }
 
     for(i=0; i<numsubnodes; i++)
     {
-        if( !SHPSearchDiskTreeNode( hDiskTree, padfBoundsMin, padfBoundsMax, 
-                                    ppanResultBuffer, pnBufferMax, 
-                                    pnResultCount, bNeedSwap ) )
+        if( !SHPSearchDiskTreeNode( hDiskTree, padfBoundsMin, padfBoundsMax,
+                                    ppanResultBuffer, pnBufferMax,
+                                    pnResultCount, bNeedSwap, nRecLevel + 1 ) )
             return FALSE;
     }
 
@@ -951,8 +1023,8 @@ SAOffset SHPTreeSeekLibc( SAFile file, SAOffset offset, int whence )
 /*                         SHPSearchDiskTree()                          */
 /************************************************************************/
 
-int SHPAPI_CALL1(*) 
-SHPSearchDiskTree( FILE *fp, 
+int SHPAPI_CALL1(*)
+SHPSearchDiskTree( FILE *fp,
                    double *padfBoundsMin, double *padfBoundsMax,
                    int *pnShapeCount )
 {
@@ -974,9 +1046,9 @@ SHPSearchDiskTree( FILE *fp,
 /*                       SHPSearchDiskTreeEx()                         */
 /************************************************************************/
 
-int* SHPSearchDiskTreeEx( SHPTreeDiskHandle hDiskTree, 
-                     double *padfBoundsMin, double *padfBoundsMax,
-                     int *pnShapeCount )
+int* SHPSearchDiskTreeEx( SHPTreeDiskHandle hDiskTree,
+                          double *padfBoundsMin, double *padfBoundsMax,
+                          int *pnShapeCount )
 
 {
     int i, bNeedSwap, nBufferMax = 0;
@@ -1010,11 +1082,11 @@ int* SHPSearchDiskTreeEx( SHPTreeDiskHandle hDiskTree,
         bNeedSwap = TRUE;
 
 /* -------------------------------------------------------------------- */
-/*      Search through root node and it's decendents.                   */
+/*      Search through root node and it's descendants.                  */
 /* -------------------------------------------------------------------- */
-    if( !SHPSearchDiskTreeNode( hDiskTree, padfBoundsMin, padfBoundsMax, 
-                                &panResultBuffer, &nBufferMax, 
-                                pnShapeCount, bNeedSwap ) )
+    if( !SHPSearchDiskTreeNode( hDiskTree, padfBoundsMin, padfBoundsMax,
+                                &panResultBuffer, &nBufferMax,
+                                pnShapeCount, bNeedSwap, 0 ) )
     {
         if( panResultBuffer != NULL )
             free( panResultBuffer );
@@ -1024,8 +1096,14 @@ int* SHPSearchDiskTreeEx( SHPTreeDiskHandle hDiskTree,
 /* -------------------------------------------------------------------- */
 /*      Sort the id array                                               */
 /* -------------------------------------------------------------------- */
-    qsort(panResultBuffer, *pnShapeCount, sizeof(int), compare_ints);
-    
+
+    /* To distinguish between empty intersection from error case */
+    if( panResultBuffer == NULL )
+        panResultBuffer = (int*) calloc(1, sizeof(int));
+    else
+        qsort(panResultBuffer, *pnShapeCount, sizeof(int), compare_ints);
+
+
     return panResultBuffer;
 }
 
@@ -1037,16 +1115,16 @@ int* SHPSearchDiskTreeEx( SHPTreeDiskHandle hDiskTree,
 /*      seek past them all efficiently.                                 */
 /************************************************************************/
 
-static int SHPGetSubNodeOffset( SHPTreeNode *node) 
+static int SHPGetSubNodeOffset( SHPTreeNode *node)
 {
     int i;
-    long offset=0;
+    int offset=0;
 
-    for(i=0; i<node->nSubNodes; i++ ) 
+    for(i=0; i<node->nSubNodes; i++ )
     {
-        if(node->apsSubNode[i]) 
+        if(node->apsSubNode[i])
         {
-            offset += 4*sizeof(double) 
+            offset += 4*sizeof(double)
                 + (node->apsSubNode[i]->nShapeCount+3)*sizeof(int);
             offset += SHPGetSubNodeOffset(node->apsSubNode[i]);
         }
@@ -1059,7 +1137,7 @@ static int SHPGetSubNodeOffset( SHPTreeNode *node)
 /*                          SHPWriteTreeNode()                          */
 /************************************************************************/
 
-static void SHPWriteTreeNode( SAFile fp, SHPTreeNode *node, SAHooks* psHooks) 
+static void SHPWriteTreeNode( SAFile fp, SHPTreeNode *node, SAHooks* psHooks)
 {
     int i,j;
     int offset;
@@ -1067,8 +1145,8 @@ static void SHPWriteTreeNode( SAFile fp, SHPTreeNode *node, SAHooks* psHooks)
     assert( NULL != node );
 
     offset = SHPGetSubNodeOffset(node);
-  
-    pabyRec = (unsigned char *) 
+
+    pabyRec = (unsigned char *)
         malloc(sizeof(double) * 4
                + (3 * sizeof(int)) + (node->nShapeCount * sizeof(int)) );
     if( NULL == pabyRec )
@@ -1090,13 +1168,14 @@ static void SHPWriteTreeNode( SAFile fp, SHPTreeNode *node, SAHooks* psHooks)
 
     memcpy( pabyRec+36, &node->nShapeCount, 4);
     j = node->nShapeCount * sizeof(int);
-    memcpy( pabyRec+40, node->panShapeIds, j);
+    if( j )
+        memcpy( pabyRec+40, node->panShapeIds, j);
     memcpy( pabyRec+j+40, &node->nSubNodes, 4);
 
     psHooks->FWrite( pabyRec, 44+j, 1, fp );
     free (pabyRec);
-  
-    for(i=0; i<node->nSubNodes; i++ ) 
+
+    for(i=0; i<node->nSubNodes; i++ )
     {
         if(node->apsSubNode[i])
             SHPWriteTreeNode( fp, node->apsSubNode[i], psHooks);
@@ -1133,12 +1212,12 @@ int SHPWriteTreeLL(SHPTree *tree, const char *filename, SAHooks* psHooks )
         SASetupDefaultHooks( &sHooks );
         psHooks = &sHooks;
     }
-  
+
 /* -------------------------------------------------------------------- */
 /*      Open the output file.                                           */
 /* -------------------------------------------------------------------- */
     fp = psHooks->FOpen(filename, "wb");
-    if( fp == NULL ) 
+    if( fp == NULL )
     {
         return FALSE;
     }
@@ -1151,12 +1230,12 @@ int SHPWriteTreeLL(SHPTree *tree, const char *filename, SAHooks* psHooks )
         bBigEndian = FALSE;
     else
         bBigEndian = TRUE;
-  
+
 /* -------------------------------------------------------------------- */
 /*      Write the header.                                               */
 /* -------------------------------------------------------------------- */
     memcpy( abyBuf+0, signature, 3 );
-    
+
     if( bBigEndian )
         abyBuf[3] = 2; /* New MSB */
     else
@@ -1179,8 +1258,8 @@ int SHPWriteTreeLL(SHPTree *tree, const char *filename, SAHooks* psHooks )
 /*      Write all the nodes "in order".                                 */
 /* -------------------------------------------------------------------- */
 
-    SHPWriteTreeNode( fp, tree->psRoot, psHooks );  
-    
+    SHPWriteTreeNode( fp, tree->psRoot, psHooks );
+
     psHooks->FClose( fp );
 
     return TRUE;

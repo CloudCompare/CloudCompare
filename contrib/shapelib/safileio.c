@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: safileio.c,v 1.4 2008-01-16 20:05:14 bram Exp $
+ * $Id: safileio.c,v 1.5 2016-12-05 12:44:05 erouault Exp $
  *
  * Project:  Shapelib
  * Purpose:  Default implementation of file io based on stdio.
@@ -9,7 +9,7 @@
  * Copyright (c) 2007, Frank Warmerdam
  *
  * This software is available under the following "MIT Style" license,
- * or at the option of the licensee under the LGPL (see LICENSE.LGPL).  This
+ * or at the option of the licensee under the LGPL (see COPYING).  This
  * option is discussed in more detail in shapelib.html.
  *
  * --
@@ -34,6 +34,11 @@
  ******************************************************************************
  *
  * $Log: safileio.c,v $
+ * Revision 1.5  2016-12-05 12:44:05  erouault
+ * * Major overhaul of Makefile build system to use autoconf/automake.
+ *
+ * * Warning fixes in contrib/
+ *
  * Revision 1.4  2008-01-16 20:05:14  bram
  * Add file hooks that accept UTF-8 encoded filenames on some platforms.  Use SASetupUtf8Hooks
  *  tosetup the hooks and check SHPAPI_UTF8_HOOKS for its availability.  Currently, this
@@ -65,7 +70,7 @@
 #include <string.h>
 #include <stdio.h>
 
-SHP_CVSID("$Id: safileio.c,v 1.4 2008-01-16 20:05:14 bram Exp $");
+SHP_CVSID("$Id: safileio.c,v 1.5 2016-12-05 12:44:05 erouault Exp $");
 
 #ifdef SHPAPI_UTF8_HOOKS
 #   ifdef SHPAPI_WINDOWS

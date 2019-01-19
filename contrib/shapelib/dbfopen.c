@@ -817,7 +817,7 @@ DBFCreateLL( const char * pszFilename, const char * pszCodePage, SAHooks *psHook
         if( ldid < 0 )
         {
             SAFile fpCPG = psHooks->FOpen( pszFullname, "w" );
-            psHooks->FWrite( (char*) pszCodePage, strlen(pszCodePage), 1, fpCPG );
+            psHooks->FWrite( (char*) pszCodePage, (SAOffset)strlen(pszCodePage), 1, fpCPG );
             psHooks->FClose( fpCPG );
         }
     }

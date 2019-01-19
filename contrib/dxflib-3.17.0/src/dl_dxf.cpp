@@ -298,7 +298,7 @@ bool DL_Dxf::getStrippedLine(std::string &s, unsigned int size,
  */
 bool DL_Dxf::stripWhiteSpace(char** s, bool stripSpace) {
     // last non-NULL char:
-    int lastChar = strlen(*s) - 1;
+    int lastChar = static_cast<int>(strlen(*s)) - 1;
 
     // Is last character CR or LF?
     while ( (lastChar >= 0) &&
@@ -1969,7 +1969,7 @@ void DL_Dxf::addHatch(DL_CreationInterface* creationInterface) {
     creationInterface->addHatch(hd);
 
     for (unsigned int i=0; i<hatchEdges.size(); i++) {
-        creationInterface->addHatchLoop(DL_HatchLoopData(hatchEdges[i].size()));
+        creationInterface->addHatchLoop(DL_HatchLoopData(static_cast<int>(hatchEdges[i].size())));
         for (unsigned int k=0; k<hatchEdges[i].size(); k++) {
             creationInterface->addHatchEdge(DL_HatchEdgeData(hatchEdges[i][k]));
         }
@@ -2855,7 +2855,7 @@ void DL_Dxf::writeMText(DL_WriterA& dw,
     dw.dxfInt(72, data.drawingDirection);
 
     // Creare text chunks of 250 characters each:
-    int length = data.text.length();
+    int length = static_cast<int>(data.text.length());
     char chunk[251];
     int i;
     for (i=250; i<length; i+=250) {
@@ -3533,7 +3533,7 @@ void DL_Dxf::writeHatch2(DL_WriterA& dw,
         dw.dxfString(1001, "ACAD");
         dw.dxfReal(1010, data.originX);
         dw.dxfReal(1020, data.originY);
-        dw.dxfInt(1030, 0.0);
+        dw.dxfInt(1030, 0);
     }
 }
 
@@ -5224,7 +5224,7 @@ int DL_Dxf::getLibVersion(const std::string& str) {
     }
 
     if (idx>=2) {
-        d[3] = str.length();
+        d[3] = static_cast<int>(str.length());
 
         v[0] = str.substr(0, d[0]);
         v[1] = str.substr(d[0]+1, d[1]-d[0]-1);

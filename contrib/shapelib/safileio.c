@@ -207,7 +207,7 @@ const wchar_t* Utf8ToWideChar( const char *pszFilename )
     int nMulti, nWide;
     wchar_t *pwszFileName;
     
-    nMulti = strlen(pszFilename) + 1;
+    nMulti = (int)strlen(pszFilename) + 1;
     nWide = MultiByteToWideChar( CP_UTF8, 0, pszFilename, nMulti, 0, 0);
     if( nWide == 0 )
     {

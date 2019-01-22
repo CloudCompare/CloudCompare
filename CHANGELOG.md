@@ -1,6 +1,12 @@
 CloudCompare Version History
 ============================
 
+v2.10.X (Zephyrus) - ??/??/2019
+----------------------
+
+Bug fix:
+	- the 'EXTRACT_VERTICES' command line option was not accessible
+
 v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------
 

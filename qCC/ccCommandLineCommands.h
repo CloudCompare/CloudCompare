@@ -2758,21 +2758,46 @@ struct CommandDist : public ccCommandLineInterface::Command
 		cmd.print("[DISTANCE COMPUTATION]");
 
 		//compared cloud
+		CLEntityDesc* compEntity = nullptr;
+		ccHObject* compCloud = nullptr;
+		size_t nextMeshIndex = 0;
 		if (cmd.clouds().empty())
-			return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
-		else if (m_cloud2meshDist && cmd.clouds().size() != 1)
-			cmd.warning("Multiple point clouds loaded! We take the first one by default");
-		CLCloudDesc& compCloud = cmd.clouds().front();
+		{
+			//no cloud loaded
+			if (!m_cloud2meshDist || cmd.meshes().size() < 2)
+			{
+				//we would need at least two meshes
+				return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
+			}
+			else
+			{
+				cmd.warning(QObject::tr("No point cloud available. Will use the first mesh vertices as compared cloud."));
+				compEntity = &(cmd.meshes().front());
+				compCloud = dynamic_cast<ccPointCloud*>(cmd.meshes()[nextMeshIndex++].mesh->getAssociatedCloud());
+				if (!compCloud)
+				{
+					return cmd.error(QObject::tr("Unhandled mesh vertices type"));
+				}
+			}
+		}
+		else //at least two clouds
+		{
+			if (m_cloud2meshDist && cmd.clouds().size() != 1)
+				cmd.warning("[C2M] Multiple point clouds loaded! Will take the first one by default.");
+			compEntity = &(cmd.clouds().front());
+			compCloud = cmd.clouds().front().pc;
+		}
+		assert(compEntity && compCloud);
 
 		//reference entity
 		ccHObject* refEntity = 0;
 		if (m_cloud2meshDist)
 		{
-			if (cmd.meshes().empty())
+			if (cmd.meshes().size() <= nextMeshIndex)
 				return cmd.error(QObject::tr("No mesh available. Be sure to open one first!"));
-			else if (cmd.meshes().size() != 1)
-				cmd.warning("Multiple meshes loaded! We take the first one by default");
-			refEntity = cmd.meshes().front().mesh;
+			else if (cmd.meshes().size() != nextMeshIndex + 1)
+				cmd.warning(QString("Multiple meshes loaded! We take the %1 one by default").arg(nextMeshIndex == 0 ? "first" : "second"));
+			refEntity = cmd.meshes()[nextMeshIndex].mesh;
 		}
 		else
 		{
@@ -2911,7 +2936,7 @@ struct CommandDist : public ccCommandLineInterface::Command
 		}
 
 		//spawn dialog (virtually) so as to prepare the comparison process
-		ccComparisonDlg compDlg(compCloud.pc,
+		ccComparisonDlg compDlg(compCloud,
 								refEntity,
 								m_cloud2meshDist ? ccComparisonDlg::CLOUDMESH_DIST : ccComparisonDlg::CLOUDCLOUD_DIST,
 								cmd.widgetParent(),
@@ -2976,11 +3001,11 @@ struct CommandDist : public ccCommandLineInterface::Command
 		if (maxDist > 0)
 			suffix += QObject::tr("_MAX_DIST_%1").arg(maxDist);
 
-		compCloud.basename += suffix;
+		compEntity->basename += suffix;
 
 		if (cmd.autoSaveMode())
 		{
-			QString errorStr = cmd.exportEntity(compCloud);
+			QString errorStr = cmd.exportEntity(*compEntity);
 			if (!errorStr.isEmpty())
 				return cmd.error(errorStr);
 		}

@@ -159,6 +159,7 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandOrientNormalsMST));
 	registerCommand(Command::Shared(new CommandSORFilter));
 	registerCommand(Command::Shared(new CommandSampleMesh));
+	registerCommand(Command::Shared(new CommandExtractVertices));
 	registerCommand(Command::Shared(new CommandCrossSection));
 	registerCommand(Command::Shared(new CommandCrop));
 	registerCommand(Command::Shared(new CommandCrop2D));

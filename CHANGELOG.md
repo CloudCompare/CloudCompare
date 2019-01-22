@@ -1,8 +1,14 @@
 CloudCompare Version History
 ============================
 
-v2.10.X (Zephyrus) - ??/??/2019
+v2.10.2 (Zephyrus) - ??/??/2019
 ----------------------
+
+Improvements
+
+	- Command line tool:
+		* The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
+			In this case the first mesh vertices are used as compared cloud.
 
 Bug fix:
 	- the 'EXTRACT_VERTICES' command line option was not accessible

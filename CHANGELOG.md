@@ -12,6 +12,7 @@ Improvements
 
 Bug fix:
 	- the 'EXTRACT_VERTICES' command line option was not accessible
+	- Rasterize tool: interpolating empty cells with the 'resample input cloud' option enabled would make CC crash
 
 v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------

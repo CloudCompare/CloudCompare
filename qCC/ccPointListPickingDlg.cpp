@@ -472,7 +472,9 @@ void ccPointListPickingDlg::updateList()
 {
 	//get all labels
 	std::vector<cc2DLabel*> labels;
-	unsigned count = getPickedPoints(labels);
+	const int count = static_cast<int>( getPickedPoints(labels) );
+
+	const int oldRowCount = tableWidget->rowCount();
 
 	revertToolButton->setEnabled(count);
 	validToolButton->setEnabled(count);
@@ -480,34 +482,56 @@ void ccPointListPickingDlg::updateList()
 	countLineEdit->setText(QString::number(count));
 	tableWidget->setRowCount(count);
 
-	if (!count)
+	if ( count == 0 )
+	{
 		return;
+	}
+
+	// If we have any new rows, create QTableWidgetItems for them
+	if ( (count - oldRowCount) > 0 )
+	{
+		for ( int i = oldRowCount; i < count; ++i )
+		{
+			tableWidget->setVerticalHeaderItem( i, new QTableWidgetItem );
+
+			for ( int j = 0; j < 4; ++j )
+			{
+				tableWidget->setItem( i, j, new QTableWidgetItem );
+			}
+		}
+	}
 
 	//starting index
-	int startIndex = startIndexSpinBox->value();
-	int precision = m_associatedWin ? m_associatedWin->getDisplayParameters().displayedNumPrecision : 6;
+	const int startIndex = startIndexSpinBox->value();
+	const int precision = m_associatedWin ? static_cast<int>(m_associatedWin->getDisplayParameters().displayedNumPrecision) : 6;
 
-	bool showAbsolute = showGlobalCoordsCheckBox->isEnabled() && showGlobalCoordsCheckBox->isChecked();
+	const bool showAbsolute = showGlobalCoordsCheckBox->isEnabled() && showGlobalCoordsCheckBox->isChecked();
 
-	for (unsigned i = 0; i < count; ++i)
+	for ( int i = 0; i < count; ++i )
 	{
-		const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
+		cc2DLabel* label = labels[static_cast<unsigned int>( i )];
+
+		const cc2DLabel::PickedPoint& PP = label->getPoint(0);
 		const CCVector3* P = PP.cloud->getPoint(PP.index);
 		CCVector3d Pd = (showAbsolute ? PP.cloud->toGlobal3d(*P) : CCVector3d::fromArray(P->u));
 
 		//point index in list
-		tableWidget->setVerticalHeaderItem(i, new QTableWidgetItem(QString("%1").arg(i + startIndex)));
-		//update name as well
-		if (	labels[i]->getUniqueID() > m_lastPreviousID
-			||	labels[i]->getName().startsWith(s_defaultLabelBaseName) ) //DGM: we don't change the name of old labels that have a non-default name
-		{
-			labels[i]->setName(s_defaultLabelBaseName + QString::number(i+startIndex));
-		}
-		//point absolute index (in cloud)
-		tableWidget->setItem(i, 0, new QTableWidgetItem(QString("%1").arg(PP.index)));
+		tableWidget->verticalHeaderItem( i )->setText( QStringLiteral( "%1" ).arg( i + startIndex ) );
 
-		for (unsigned j = 0; j < 3; ++j)
-			tableWidget->setItem(i, j + 1, new QTableWidgetItem(QString("%1").arg(Pd.u[j], 0, 'f', precision)));
+		//update name as well
+		if (	label->getUniqueID() > m_lastPreviousID
+		    ||	label->getName().startsWith(s_defaultLabelBaseName) ) //DGM: we don't change the name of old labels that have a non-default name
+		{
+			label->setName(s_defaultLabelBaseName + QString::number(i+startIndex));
+		}
+
+		//point absolute index (in cloud)
+		tableWidget->item( i, 0 )->setText( QStringLiteral( "%1" ).arg( PP.index ) );
+
+		for ( int j = 0; j < 3; ++j )
+		{
+			tableWidget->item( i, j + 1 )->setText( QStringLiteral( "%1" ).arg( Pd.u[j], 0, 'f', precision ) );
+		}
 	}
 
 	tableWidget->scrollToBottom();

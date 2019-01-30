@@ -63,7 +63,7 @@ public: //base members access
 	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::HIERARCHY_OBJECT; }
 
 	//! Returns whether the instance is a group
-	inline bool isGroup() const { return getClassID() == (CC_CLASS_ENUM)CC_TYPES::HIERARCHY_OBJECT; }
+	inline bool isGroup() const { return getClassID() == static_cast<CC_CLASS_ENUM>(CC_TYPES::HIERARCHY_OBJECT); }
 
 	//! Returns parent object
 	/** \return parent object (nullptr if no parent)

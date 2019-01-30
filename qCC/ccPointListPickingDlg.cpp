@@ -18,20 +18,20 @@
 #include "ccPointListPickingDlg.h"
 
 //Qt
-#include <QSettings>
+#include <QApplication>
+#include <QClipboard>
 #include <QFileDialog>
 #include <QMenu>
-#include <QClipboard>
-#include <QApplication>
 #include <QMessageBox>
+#include <QSettings>
 
 //CCLib
 #include <CCConst.h>
 
 //qCC_db
+#include <cc2DLabel.h>
 #include <ccLog.h>
 #include <ccPointCloud.h>
-#include <cc2DLabel.h>
 #include <ccPolyline.h>
 
 //qCC_io
@@ -40,25 +40,26 @@
 //local
 #include "ccGLWindow.h"
 #include "mainwindow.h"
+
 #include "db_tree/ccDBRoot.h"
 
 //system
-#include <assert.h>
+#include <cassert>
 
 //semi persistent settings
-static unsigned s_pickedPointsStartIndex = 0;
+static int s_pickedPointsStartIndex = 0;
 static bool s_showGlobalCoordsCheckBoxChecked = false;
 static const char s_pickedPointContainerName[] = "Picked points list";
 static const char s_defaultLabelBaseName[] = "Point #";
 
 ccPointListPickingDlg::ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* parent)
-	: ccPointPickingGenericInterface(pickingHub, parent)
-	, Ui::PointListPickingDlg()
-	, m_associatedCloud(0)
-	, m_lastPreviousID(0)
-	, m_orderedLabelsContainer(0)
+    : ccPointPickingGenericInterface(pickingHub, parent)
+    , Ui::PointListPickingDlg()
+    , m_associatedCloud(nullptr)
+    , m_lastPreviousID(0)
+    , m_orderedLabelsContainer(nullptr)
 {
-	setupUi(this);
+    setupUi(this);
 
 	exportToolButton->setPopupMode(QToolButton::MenuButtonPopup);
 	QMenu* menu = new QMenu(exportToolButton);
@@ -131,14 +132,14 @@ void ccPointListPickingDlg::linkWithCloud(ccPointCloud* cloud)
 {
 	m_associatedCloud = cloud;
 	m_lastPreviousID = 0;
-	
+
 	if (m_associatedCloud)
 	{
 		//find default container
-		m_orderedLabelsContainer = 0;
+		m_orderedLabelsContainer = nullptr;
 		ccHObject::Container groups;
 		m_associatedCloud->filterChildren(groups,true,CC_TYPES::HIERARCHY_OBJECT);
-		
+
 		for (ccHObject::Container::const_iterator it = groups.begin(); it != groups.end(); ++it)
 		{
 			if ((*it)->getName() == s_pickedPointContainerName)
@@ -178,24 +179,24 @@ void ccPointListPickingDlg::cancelAndExit()
 			dbRoot->removeElements(m_toBeAdded);
 		}
 
-		for (size_t j = 0; j < m_toBeDeleted.size(); ++j)
+		for (auto & object : m_toBeDeleted)
 		{
-			m_toBeDeleted[j]->prepareDisplayForRefresh();
-			m_toBeDeleted[j]->setEnabled(true);
+			object->prepareDisplayForRefresh();
+			object->setEnabled(true);
 		}
-		
+
 		if (m_orderedLabelsContainer->getChildrenNumber() == 0)
 		{
 			dbRoot->removeElement(m_orderedLabelsContainer);
 			//m_associatedCloud->removeChild(m_orderedLabelsContainer);
-			m_orderedLabelsContainer = 0;
+			m_orderedLabelsContainer = nullptr;
 		}
 	}
 
 	m_toBeDeleted.resize(0);
 	m_toBeAdded.resize(0);
-	m_associatedCloud = 0;
-	m_orderedLabelsContainer = 0;
+	m_associatedCloud = nullptr;
+	m_orderedLabelsContainer = nullptr;
 
 	MainWindow::RefreshAllGLWindow();
 
@@ -234,7 +235,7 @@ void ccPointListPickingDlg::exportToNewCloud()
 		{
 			ccLog::Error("Can't export picked points as point cloud: not enough memory!");
 			delete cloud;
-			cloud = 0;
+			cloud = nullptr;
 		}
 	}
 	else
@@ -292,12 +293,12 @@ void ccPointListPickingDlg::applyAndExit()
 	{
 		//apply modifications
 		MainWindow::TheInstance()->db()->removeElements(m_toBeDeleted); //no need to redraw as they should already be invisible
-		m_associatedCloud = 0;
+		m_associatedCloud = nullptr;
 	}
 
 	m_toBeDeleted.resize(0);
 	m_toBeAdded.resize(0);
-	m_orderedLabelsContainer = 0;
+	m_orderedLabelsContainer = nullptr;
 
 	updateList();
 
@@ -352,15 +353,15 @@ void ccPointListPickingDlg::removeLastEntry()
 
 void ccPointListPickingDlg::startIndexChanged(int value)
 {
-	unsigned int uValue = static_cast<unsigned int>(value);
-
-	if (uValue != s_pickedPointsStartIndex)
+	if (value != s_pickedPointsStartIndex)
 	{
-		s_pickedPointsStartIndex = uValue;
+		s_pickedPointsStartIndex = value;
 
 		updateList();
 		if (m_associatedWin)
+		{
 			m_associatedWin->redraw();
+		}
 	}
 }
 
@@ -397,9 +398,9 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	settings.endGroup();
 
 	filename = QFileDialog::getSaveFileName(this,
-											"Export to ASCII",
-											filename,
-											AsciiFilter::GetFileFilter());
+	                                        "Export to ASCII",
+	                                        filename,
+	                                        AsciiFilter::GetFileFilter());
 
 	if (filename.isEmpty())
 		return;
@@ -422,10 +423,10 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	if (shift.norm2() != 0 || scale != 1.0)
 	{
 		if (QMessageBox::warning(	this,
-									"Apply global shift",
-									"Do you want to apply global shift/scale to exported points?",
-									QMessageBox::Yes | QMessageBox::No,
-									QMessageBox::Yes ) == QMessageBox::No)
+		                            "Apply global shift",
+		                            "Do you want to apply global shift/scale to exported points?",
+		                            QMessageBox::Yes | QMessageBox::No,
+		                            QMessageBox::Yes ) == QMessageBox::No)
 		{
 			//reset shift
 			shift = CCVector3d(0,0,0);
@@ -459,8 +460,8 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 		}
 
 		fprintf(fp, "%.12f,%.12f,%.12f\n",	static_cast<double>(P->x) / scale - shift.x,
-											static_cast<double>(P->y) / scale - shift.y,
-											static_cast<double>(P->z) / scale - shift.z);
+		                                    static_cast<double>(P->y) / scale - shift.y,
+		                                    static_cast<double>(P->z) / scale - shift.z);
 	}
 
 	fclose(fp);
@@ -554,7 +555,7 @@ void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned poi
 		newLabel->setDisplay(display);
 		QSize size = display->getScreenSize();
 		newLabel->setPosition(	static_cast<float>(x + 20) / size.width(),
-								static_cast<float>(y + 20) / size.height() );
+		                        static_cast<float>(y + 20) / size.height() );
 	}
 
 	//add default container if necessary

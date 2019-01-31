@@ -76,19 +76,21 @@ ccPointListPickingDlg::ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* 
 	startIndexSpinBox->setValue(s_pickedPointsStartIndex);
 	showGlobalCoordsCheckBox->setChecked(s_showGlobalCoordsCheckBoxChecked);
 
-	connect(cancelToolButton,			SIGNAL(clicked()),			this,				SLOT(cancelAndExit()));
-	connect(revertToolButton,			SIGNAL(clicked()),			this,				SLOT(removeLastEntry()));
-	connect(validToolButton,			SIGNAL(clicked()),			this,				SLOT(applyAndExit()));
-	connect(exportToolButton,			SIGNAL(clicked()),			exportToolButton,	SLOT(showMenu()));
-	connect(exportASCII_xyz,			SIGNAL(triggered()),		this,				SLOT(exportToASCII_xyz()));
-	connect(exportASCII_ixyz,			SIGNAL(triggered()),		this,				SLOT(exportToASCII_ixyz()));
-	connect(exportASCII_gxyz,			SIGNAL(triggered()),		this,				SLOT(exportToASCII_gxyz()));
-	connect(exportASCII_lxyz,			SIGNAL(triggered()),		this,				SLOT(exportToASCII_lxyz()));
-	connect(exportToNewCloud,			SIGNAL(triggered()),		this,				SLOT(exportToNewCloud()));
-	connect(exportToNewPolyline,		SIGNAL(triggered()),		this,				SLOT(exportToNewPolyline()));
-	connect(markerSizeSpinBox,			SIGNAL(valueChanged(int)),	this,				SLOT(markerSizeChanged(int)));
-	connect(startIndexSpinBox,			SIGNAL(valueChanged(int)),	this,				SLOT(startIndexChanged(int)));
-	connect(showGlobalCoordsCheckBox,	SIGNAL(clicked()),			this,				SLOT(updateList()));
+	connect(cancelToolButton,		&QAbstractButton::clicked,	this,				&ccPointListPickingDlg::cancelAndExit);
+	connect(revertToolButton,		&QAbstractButton::clicked,	this,				&ccPointListPickingDlg::removeLastEntry);
+	connect(validToolButton,		&QAbstractButton::clicked,	this,				&ccPointListPickingDlg::applyAndExit);
+	connect(exportToolButton,		&QAbstractButton::clicked,	exportToolButton,	&QToolButton::showMenu);
+	connect(exportASCII_xyz,		&QAction::triggered,		this,				&ccPointListPickingDlg::exportToASCII_xyz);
+	connect(exportASCII_ixyz,		&QAction::triggered,		this,				&ccPointListPickingDlg::exportToASCII_ixyz);
+	connect(exportASCII_gxyz,		&QAction::triggered,		this,				&ccPointListPickingDlg::exportToASCII_gxyz);
+	connect(exportASCII_lxyz,		&QAction::triggered,		this,				&ccPointListPickingDlg::exportToASCII_lxyz);
+	connect(exportToNewCloud,		&QAction::triggered,		this,				&ccPointListPickingDlg::exportToNewCloud);
+	connect(exportToNewPolyline,	&QAction::triggered,		this,				&ccPointListPickingDlg::exportToNewPolyline);
+	
+	connect(markerSizeSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),	this,	&ccPointListPickingDlg::markerSizeChanged);
+	connect(startIndexSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),	this,	&ccPointListPickingDlg::startIndexChanged);
+	
+	connect(showGlobalCoordsCheckBox, &QAbstractButton::clicked, this, &ccPointListPickingDlg::updateList);
 
 	updateList();
 }

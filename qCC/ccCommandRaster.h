@@ -220,6 +220,10 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 
 				resample = true;
 			}
+			else
+			{
+				break;
+			}
 		}
 
 		if (gridStep == 0)

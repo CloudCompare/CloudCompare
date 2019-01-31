@@ -10,9 +10,10 @@ Improvements
 		* The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
 			In this case the first mesh vertices are used as compared cloud.
 
-Bug fix:
+Bug fixes:
 	- the 'EXTRACT_VERTICES' command line option was not accessible
 	- Rasterize tool: interpolating empty cells with the 'resample input cloud' option enabled would make CC crash
+	- Command line: calling the -RASTERIZE option would cause an infinite loop
 
 v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------

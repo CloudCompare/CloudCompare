@@ -357,6 +357,9 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 					rasterCloud->showSF(!cloudDesc.pc->hasColors());
 					rasterCloud->setCurrentDisplayedScalarField(0);
 				}
+				//don't forget the original shift
+				rasterCloud->setGlobalShift(cloudDesc.pc->getGlobalShift());
+				rasterCloud->setGlobalScale(cloudDesc.pc->getGlobalScale());
 
 				if (outputCloud)
 				{

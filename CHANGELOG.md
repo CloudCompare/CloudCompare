@@ -14,6 +14,7 @@ Bug fixes:
 	- the 'EXTRACT_VERTICES' command line option was not accessible
 	- Rasterize tool: interpolating empty cells with the 'resample input cloud' option enabled would make CC crash
 	- Command line: calling the -RASTERIZE option would cause an infinite loop
+	- Command line: the Global Shift & Scale information of the input cloud was not transferred to the output cloud of the -RASTERIZE tool
 
 v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------

@@ -276,6 +276,8 @@ protected: //members
 
 	//! Whether name is displayed in 3D or not
 	bool m_showNameIn3D;
+	//! Last 2D position of the '3D' name
+	CCVector3d m_nameIn3DPos;
 
 	//! Currently associated GL display
 	ccGenericGLDisplay* m_currentDisplay;

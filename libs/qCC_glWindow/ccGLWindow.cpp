@@ -1074,6 +1074,7 @@ void ccGLWindow::setGLViewport(const QRect& rect)
 	//correction for HD screens
 	const int retinaScale = devicePixelRatio();
 	m_glViewport = QRect(rect.left() * retinaScale, rect.top() * retinaScale, rect.width() * retinaScale, rect.height() * retinaScale);
+	invalidateViewport();
 
 	if (context() && context()->isValid())
 	{
@@ -1088,7 +1089,6 @@ void ccGLWindow::resizeGL(int w, int h)
 	//update OpenGL viewport
 	setGLViewport(0, 0, w, h);
 
-	invalidateViewport();
 	invalidateVisualization();
 	deprecate3DLayer();
 

@@ -16,6 +16,7 @@ Bug fixes:
 	- Command line: calling the -RASTERIZE option would cause an infinite loop
 	- Command line: the Global Shift & Scale information of the input cloud was not transferred to the output cloud of the -RASTERIZE tool
 	- glitch fix: the 3D window was not properly updated after rendering the screen as a file with a zoom > 1
+	- glitch fix: the name of the entity was not displayed at the right place when rendering the screen as a file with a zoom > 1
 
 v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------

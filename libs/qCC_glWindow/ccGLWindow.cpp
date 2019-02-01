@@ -6198,6 +6198,10 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	m_captureMode.zoomFactor = 1.0f;
 	setFontPointSize(getFontPointSize());
 
+	invalidateViewport();
+	invalidateVisualization();
+	redraw(true);
+
 	return outputImage;
 }
 

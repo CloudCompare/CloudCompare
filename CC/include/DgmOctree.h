@@ -913,8 +913,8 @@ public:	/***** CELLS POSITION HANDLING *****/
 	**/
 	unsigned char findBestLevelForComparisonWithOctree(const DgmOctree* theOtherOctree) const;
 
-	//! Determines the best subdivision level of the octree to assure a mean number of points per cell
-	/** \param indicativeNumberOfPointsPerCell 'desired' number of points per cell
+	//! Determines the best subdivision level of the octree that gives the average population per cell closest to the input value
+	/** \param indicativeNumberOfPointsPerCell 'desired' average number of points per cell
 		\return the 'best' level
 	**/
 	unsigned char findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const;

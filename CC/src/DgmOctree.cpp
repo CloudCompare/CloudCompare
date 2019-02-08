@@ -766,6 +766,12 @@ unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
 	if (maxNumberOfNeighbors == 1)
 	{
 		maxSquareDist = findTheNearestNeighborStartingFromCell(nNSS);
+
+		if (finalNeighbourhoodSize)
+		{
+			*finalNeighbourhoodSize = nNSS.alreadyVisitedNeighbourhoodSize;
+		}
+
 		if (maxSquareDist >= 0)
 		{
 			Yk->addPointIndex(nNSS.theNearestPointIndex);
@@ -2457,35 +2463,23 @@ unsigned char DgmOctree::findBestLevelForComparisonWithOctree(const DgmOctree* t
 
 unsigned char DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const
 {
-	double density = 0, prevDensity = 0;
-
-	unsigned char level = MAX_OCTREE_LEVEL;
-	for (level = MAX_OCTREE_LEVEL; level > 0; --level)
+	for (unsigned char level = MAX_OCTREE_LEVEL; level > 0; --level)
 	{
-		prevDensity = density;
-		density = static_cast<double>(m_numberOfProjectedPoints) / getCellNumber(level);
-		if (density >= indicativeNumberOfPointsPerCell)
+		if (m_averageCellPopulation[level] > indicativeNumberOfPointsPerCell) //density can only increase. If it's above the target, no need to look further
 		{
-			break;
+			//we take the closest match between this level and the previous one
+			if (level == MAX_OCTREE_LEVEL || (m_averageCellPopulation[level] - indicativeNumberOfPointsPerCell <= indicativeNumberOfPointsPerCell - m_averageCellPopulation[level + 1])) //by definition "m_averageCellPopulation[level + 1] <= indicativeNumberOfPointsPerCell"
+			{
+				return level;
+			}
+			else
+			{
+				return level + 1;
+			}
 		}
 	}
 
-	if (level < MAX_OCTREE_LEVEL)
-	{
-		if (level == 0)
-		{
-			prevDensity = density;
-			density = static_cast<double>(m_numberOfProjectedPoints);
-		}
-
-		//we take the closest match
-		if (density - indicativeNumberOfPointsPerCell > indicativeNumberOfPointsPerCell - prevDensity)
-		{
-			++level;
-		}
-	}
-
-	return level;
+	return 1;
 }
 
 unsigned char DgmOctree::findBestLevelForAGivenCellNumber(unsigned indicativeNumberOfCells) const

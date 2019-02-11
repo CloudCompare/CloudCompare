@@ -31,7 +31,7 @@ class CC_CORE_LIB_API GenericOctree
 public:
 
 	//! Default destructor
-    virtual ~GenericOctree() {}
+    virtual ~GenericOctree() = default;
 };
 
 }

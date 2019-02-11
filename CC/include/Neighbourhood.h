@@ -40,13 +40,13 @@ class CC_CORE_LIB_API Neighbourhood
 	public:
 
 		//! Geometric properties/elements that can be computed from the set of points (see Neighbourhood::getGeometricalElement)
-		enum CC_GEOM_ELEMENT {	FLAG_DEPRECATED			= 0,
+		enum GeomElement {		FLAG_DEPRECATED			= 0,
 								FLAG_GRAVITY_CENTER		= 1,
 								FLAG_LS_PLANE			= 2,
 								FLAG_QUADRIC			= 4 };
 
 		//! Curvature type
-		enum CC_CURVATURE_TYPE {GAUSSIAN_CURV,
+		enum CurvatureType {	GAUSSIAN_CURV = 1,
 								MEAN_CURV,
 								NORMAL_CHANGE_RATE};
 
@@ -119,7 +119,7 @@ class CC_CORE_LIB_API Neighbourhood
 			}
 
 			//we construct the plane local base
-			CCVector3 G(0,0,0), u(1,0,0), v(0,1,0);
+			CCVector3 G(0, 0, 0), u(1, 0, 0), v(0, 1, 0);
 			if (useOXYasBase && O && X && Y)
 			{
 				G = *O;
@@ -129,7 +129,7 @@ class CC_CORE_LIB_API Neighbourhood
 			else
 			{
 				CCVector3 N(planeEquation);
-				CCMiscTools::ComputeBaseVectors(N,u,v);
+				CCMiscTools::ComputeBaseVectors(N, u, v);
 				//get the barycenter
 				const CCVector3* _G = getGravityCenter();
 				assert(_G);
@@ -137,13 +137,13 @@ class CC_CORE_LIB_API Neighbourhood
 			}
 
 			//project the points
-			for (unsigned i=0; i<count; ++i)
+			for (unsigned i = 0; i < count; ++i)
 			{
 				//we recenter current point
 				const CCVector3 P = *m_associatedCloud->getPoint(i) - G;
 
 				//then we project it on plane (with scalar prods)
-				points2D[i] = Vec2D(P.dot(u),P.dot(v));
+				points2D[i] = Vec2D(P.dot(u), P.dot(v));
 			}
 
 			//output the local base if necessary
@@ -160,10 +160,46 @@ class CC_CORE_LIB_API Neighbourhood
 			return true;
 		}
 
-		//! Computes the curvature of a set of point (by fitting a 2.5D quadric)
-		/** \return curvature value (warning: unsigned value!) or NAN_VALUE if computation failed.
+		//! Geometric feature computed from eigen values/vectors
+		/** Most of them are defined in "Contour detection in unstructured 3D point clouds", Hackel et al, 2016
+			PCA1 and PCA2 are defined in "3D terrestrial lidar data classification of complex natural scenes using a multi-scale dimensionality criterion: Applications in geomorphology", Brodu and Lague, 2012
 		**/
-		ScalarType computeCurvature(unsigned neighbourIndex, CC_CURVATURE_TYPE cType);
+		enum GeomFeature
+		{
+			EigenValuesSum = 1,
+			Omnivariance,
+			EigenEntropy,
+			Anisotropy,
+			Planarity,
+			Linearity,
+			PCA1,
+			PCA2,
+			SurfaceVariation,
+			Sphericity,
+			Verticality
+		};
+
+		//! Computes the given feature on a set of point
+		/** \return feature value
+		**/
+		double computeFeature(GeomFeature feature);
+
+		//! Computes the 1st order moment of a set of point (based on the eigenvalues)
+		/** \return 1st order moment at a given position P (between 0 and 1)
+		**/
+		ScalarType computeMomentOrder1(const CCVector3& P);
+
+		//! Computes the roughness of a set of point (by fitting a 2D plane)
+		/** \return roughness value at a given position P
+			\warning The point P shouldn't be in the set of points
+		**/
+		ScalarType computeRoughness(const CCVector3& P);
+
+		//! Computes the curvature of a set of point (by fitting a 2.5D quadric)
+		/** \return curvature value at a given position P or NAN_VALUE if the computation failed
+			\warning The curvature value is always unsigned
+		**/
+		ScalarType computeCurvature(const CCVector3& P, CurvatureType cType);
 
 		/**** GETTERS ****/
 

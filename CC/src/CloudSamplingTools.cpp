@@ -19,19 +19,19 @@
 #include <CloudSamplingTools.h>
 
 //local
-#include <DgmOctreeReferenceCloud.h>
 #include <DistanceComputationTools.h>
+#include <DgmOctreeReferenceCloud.h>
 #include <GenericProgressCallback.h>
 #include <Neighbourhood.h>
+#include <PointCloud.h>
 #include <ReferenceCloud.h>
 #include <ScalarField.h>
 #include <ScalarFieldTools.h>
-#include <PointCloud.h>
 #include <SimpleMesh.h>
 
 //system
-#include <random>
 #include <algorithm>
+#include <random>
 
 using namespace CCLib;
 
@@ -540,7 +540,7 @@ ReferenceCloud* CloudSamplingTools::sorFilter(	GenericIndexedCloudPersist* input
 				sumSquareDist += meanDistances[i] * meanDistances[i];
 			}
 			avgDist = sumDist / pointCount;
-			stdDev = sqrt(fabs(sumSquareDist / pointCount - avgDist*avgDist));
+			stdDev = sqrt(std::abs(sumSquareDist / pointCount - avgDist*avgDist));
 		}
 
 		//2nd step: remove the farthest points 
@@ -811,12 +811,12 @@ bool CloudSamplingTools::applyNoiseFilterAtLevel(	const DgmOctree::octreeCell& c
 						sum_d2 += d*d;
 					}
 
-					double stddev = sqrt(fabs(sum_d2*realNeighborCount - sum_d*sum_d)) / realNeighborCount;
+					double stddev = sqrt(std::abs(sum_d2*realNeighborCount - sum_d*sum_d)) / realNeighborCount;
 					maxD = stddev * nSigma;
 				}
 
 				//distance from the query point to the plane
-				double d = fabs(CCLib::DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint, lsPlane));
+				double d = std::abs(CCLib::DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint, lsPlane));
 
 				if (d <= maxD)
 					cloud->addPointIndex(globalIndex);

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>225</height>
+    <width>489</width>
+    <height>274</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -98,7 +98,7 @@
            <string>Maximum distance of samples to the ideal shape</string>
           </property>
           <property name="prefix">
-           <string>e = </string>
+           <string notr="true">e = </string>
           </property>
           <property name="decimals">
            <number>3</number>
@@ -131,7 +131,7 @@
            <string>Should correspond to the distance between neighboring points in the data</string>
           </property>
           <property name="prefix">
-           <string>b = </string>
+           <string notr="true">b = </string>
           </property>
           <property name="decimals">
            <number>3</number>
@@ -164,10 +164,10 @@
            <string>Maximum deviation from the ideal shape normal vector (in degrees)</string>
           </property>
           <property name="prefix">
-           <string>a = </string>
+           <string notr="true">a = </string>
           </property>
           <property name="suffix">
-           <string> deg.</string>
+           <string notr="true">°</string>
           </property>
           <property name="maximum">
            <double>90.000000000000000</double>

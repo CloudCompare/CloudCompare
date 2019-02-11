@@ -41,7 +41,7 @@ public:
 	{
 		if((*m_shapeIndex)[i] != -1)
 			return;
-		if(m_pointComp(shape, oct, i))
+		if(m_pointComp(shape, oct, static_cast<unsigned>(i)))
 			m_indices->push_back(i);
 	}
 	float Epsilon() const { return m_pointComp.DistanceThresh(); }

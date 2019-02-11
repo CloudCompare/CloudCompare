@@ -753,7 +753,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 			const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();
 			cloneMesh->addTriangle(usedVerts[tsi->i1], usedVerts[tsi->i2], usedVerts[tsi->i3]);
 		}
-		usedVerts.clear();
+		usedVerts.resize(0);
 	}
 	else
 	{
@@ -2166,10 +2166,16 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	}
 
 	//create vertices for the new mesh
-	ccGenericPointCloud* newVertices = m_associatedCloud->createNewCloudFromVisibilitySelection(false);
+	ccGenericPointCloud* newVertices = m_associatedCloud->createNewCloudFromVisibilitySelection(false, nullptr, true);
 	if (!newVertices)
 	{
-		ccLog::Error(QString("[Mesh %1] Failed to create segmented mesh vertices! (not enough memory?)").arg(getName()));
+		ccLog::Error(QString("[Mesh %1] Failed to create segmented mesh vertices! (not enough memory)").arg(getName()));
+		return nullptr;
+	}
+	else if (newVertices->size() == 0)
+	{
+		ccLog::Error(QString("[Mesh %1] Failed to create segmented mesh vertices! (no visible point in selection)").arg(getName()));
+		delete newVertices;
 		return nullptr;
 	}
 	assert(newVertices);
@@ -2294,7 +2300,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 							newMesh->removePerTriangleTexCoordIndexes();
 							newTriTexIndexes->release();
 							newTriTexIndexes = nullptr;
-							newTexIndexes.clear();
+							newTexIndexes.resize(0);
 						}
 					}
 				}

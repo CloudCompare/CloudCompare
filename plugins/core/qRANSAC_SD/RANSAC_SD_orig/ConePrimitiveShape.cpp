@@ -342,8 +342,8 @@ void ConePrimitiveShape::BitmapExtent(float epsilon,
 	MiscLib::Vector< std::pair< float, float > > *params,
 	size_t *uextent, size_t *vextent)
 {
-	*uextent = std::ceil((bbox->Max()[0] - bbox->Min()[0]) / epsilon); // no wrappig along u direction
-	*vextent = std::ceil((bbox->Max()[1] - bbox->Min()[1]) / epsilon) + 1; // add one for wrapping
+	*uextent = static_cast<size_t>(std::ceil((bbox->Max()[0] - bbox->Min()[0]) / epsilon)); // no wrappig along u direction
+	*vextent = static_cast<size_t>(std::ceil((bbox->Max()[1] - bbox->Min()[1]) / epsilon)) + 1; // add one for wrapping
 	if((*vextent) * (*uextent) > 1e6 && m_cone.Angle() < float(M_PI / 4))
 	{
 		// try to reparameterize
@@ -386,7 +386,7 @@ void ConePrimitiveShape::BitmapExtent(float epsilon,
 			if((*params)[i].second > bbox->Max()[1])
 				bbox->Max()[1] = (*params)[i].second;
 		}
-		*vextent = std::floor((bbox->Max()[1] - bbox->Min()[1]) / epsilon) + 1;
+		*vextent = static_cast<size_t>(std::floor((bbox->Max()[1] - bbox->Min()[1]) / epsilon)) + 1;
 	}
 }
 
@@ -395,8 +395,8 @@ void ConePrimitiveShape::InBitmap(const std::pair< float, float > &param,
 	size_t uextent, size_t vextent, std::pair< int, int > *inBmp) const
 {
 	// convert u = length and v = arc length into bitmap coordinates
-	inBmp->first = std::floor((param.first - bbox.Min()[0]) / epsilon);
-	inBmp->second = std::floor((param.second - bbox.Min()[1]) / epsilon);
+	inBmp->first  = static_cast<int>(std::floor((param.first  - bbox.Min()[0]) / epsilon));
+	inBmp->second = static_cast<int>(std::floor((param.second - bbox.Min()[1]) / epsilon));
 }
 
 void ConePrimitiveShape::PreWrapBitmap(
@@ -411,7 +411,7 @@ void ConePrimitiveShape::PreWrapBitmap(
 		// determine the coordinates of the last pixel in the column
 		// get the radius of the column
 		float r = m_cone.RadiusAtLength(u * epsilon + bbox.Min()[0]);
-		size_t v = std::floor((2 * float(M_PI) * r - bbox.Min()[1]) / epsilon) + 1;
+		size_t v = static_cast<size_t>(std::floor((2 * M_PI * r - bbox.Min()[1]) / epsilon)) + 1;
 		if(v >= vextent)
 			continue;
 		if((*bmp)[u])
@@ -442,7 +442,7 @@ void ConePrimitiveShape::WrapComponents(
 		// determine the coordinates of the last pixel in the column
 		// get the radius of the column
 		float r = m_cone.RadiusAtLength(u * epsilon + bbox.Min()[0]);
-		size_t v = std::floor((2 * float(M_PI) * r  - bbox.Min()[1]) / epsilon) + 1;
+		size_t v = static_cast<size_t>(std::floor((2 * M_PI * r  - bbox.Min()[1]) / epsilon)) + 1;
 		if(v >= vextent)
 			continue;
 		if((*componentImg)[u])
@@ -453,7 +453,7 @@ void ConePrimitiveShape::WrapComponents(
 	for(size_t u = 0; u < uextent; ++u)
 	{
 		float r = m_cone.RadiusAtLength(u * epsilon + bbox.Min()[0]);
-		size_t v = std::floor((2 * float(M_PI) * r  - bbox.Min()[1]) / epsilon) + 1;
+		size_t v = static_cast<size_t>(std::floor((2 * M_PI * r  - bbox.Min()[1]) / epsilon)) + 1;
 		if(v >= vextent)
 			continue;
 		if(!(*componentImg)[v * uextent + u])
@@ -491,7 +491,7 @@ void ConePrimitiveShape::WrapComponents(
 				AssociateLabel(l, n[j], &tempLabels);
 	}
 	// condense labels
-	for(size_t i = tempLabels.size() - 1; i > 0; --i)
+	for(int i = static_cast<int>(tempLabels.size()) - 1; i > 0; --i)
 		tempLabels[i].first = ReduceLabel(i, tempLabels);
 	MiscLib::Vector< int > condensed(tempLabels.size());
 	labels->clear();

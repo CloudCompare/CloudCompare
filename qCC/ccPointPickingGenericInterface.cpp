@@ -21,7 +21,9 @@
 #include "ccGLWindow.h"
 #include "mainwindow.h"
 #include "db_tree/ccDBRoot.h"
-#include "ccPickingHub.h"
+
+//common
+#include <ccPickingHub.h>
 
 //qCC_db
 #include <ccLog.h>

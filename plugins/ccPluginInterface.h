@@ -18,9 +18,6 @@
 #ifndef CC_PLUGIN_INTERFACE_HEADER
 #define CC_PLUGIN_INTERFACE_HEADER
 
-//qCC_db
-#include <ccObject.h> //for CC_QT5 def
-
 //Qt
 #include <QIcon>
 #include <QList>
@@ -30,11 +27,6 @@
 
 //Qt version
 #include <qglobal.h>
-#ifndef CC_QT5
-	#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-		#define CC_QT5
-	#endif
-#endif
 
 class ccExternalFactory;
 class ccCommandLineInterface;

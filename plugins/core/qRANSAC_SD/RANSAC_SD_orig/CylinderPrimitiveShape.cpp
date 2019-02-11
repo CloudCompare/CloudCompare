@@ -340,7 +340,7 @@ void CylinderPrimitiveShape::BitmapExtent(float epsilon,
 			{
 				(*params)[i].second -= newCut;
 				if((*params)[i].second < 0)
-					(*params)[i].second = 2 * M_PI * m_cylinder.Radius() + (*params)[i].second;
+					(*params)[i].second = static_cast<float>(2 * M_PI * m_cylinder.Radius() + (*params)[i].second);
 				if((*params)[i].second < bbox->Min()[1])
 					bbox->Min()[1] = (*params)[i].second;
 				if((*params)[i].second > bbox->Max()[1])
@@ -356,8 +356,8 @@ void CylinderPrimitiveShape::InBitmap(const std::pair< float, float > &param,
 	size_t uextent, size_t vextent, std::pair< int, int > *inBmp) const
 {
 	// convert the parameters to bitmap coordinates
-	inBmp->first = std::floor((param.first - bbox.Min()[0]) / epsilon);
-	inBmp->second = std::floor((param.second - bbox.Min()[1]) / epsilon);
+	inBmp->first  = static_cast<int>(std::floor((param.first  - bbox.Min()[0]) / epsilon));
+	inBmp->second = static_cast<int>(std::floor((param.second - bbox.Min()[1]) / epsilon));
 }
 void CylinderPrimitiveShape::WrapBitmap(
 	const GfxTL::AABox< GfxTL::Vector2Df > &bbox, float epsilon, bool *uwrap,

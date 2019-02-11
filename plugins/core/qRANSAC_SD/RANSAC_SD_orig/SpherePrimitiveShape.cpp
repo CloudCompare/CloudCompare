@@ -449,8 +449,8 @@ void SpherePrimitiveShape::BitmapExtent(float epsilon,
 	MiscLib::Vector< std::pair< float, float > > *params,
 	size_t *uextent, size_t *vextent)
 {
-	*uextent = std::ceil((bbox->Max()[0] - bbox->Min()[0]) / epsilon);
-	*vextent = std::ceil((bbox->Max()[1] - bbox->Min()[1]) / epsilon);
+	*uextent = static_cast<size_t>(std::ceil((bbox->Max()[0] - bbox->Min()[0]) / epsilon));
+	*vextent = static_cast<size_t>(std::ceil((bbox->Max()[1] - bbox->Min()[1]) / epsilon));
 }
 
 void SpherePrimitiveShape::InBitmap(const std::pair< float, float > &param,
@@ -458,8 +458,8 @@ void SpherePrimitiveShape::InBitmap(const std::pair< float, float > &param,
 	size_t uextent, size_t vextent,
 	std::pair< int, int > *inBmp) const
 {
-	inBmp->first = std::floor((param.first - bbox.Min()[0]) / epsilon);
-	inBmp->second = std::floor((param.second - bbox.Min()[1]) / epsilon);
+	inBmp->first  = static_cast<int>(std::floor((param.first  - bbox.Min()[0]) / epsilon));
+	inBmp->second = static_cast<int>(std::floor((param.second - bbox.Min()[1]) / epsilon));
 }
 
 void SpherePrimitiveShape::WrapBitmap(

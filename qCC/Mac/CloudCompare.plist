@@ -30,6 +30,8 @@
 	<string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.12</string>
 	<key>LSRequiresCarbon</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
@@ -178,6 +180,18 @@
 			</array>
 			<key>CFBundleTypeName</key>
 			<string>Wavefront mesh file</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>e57</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>E57 data file</string>
 			<key>LSHandlerRank</key>
 			<string>Default</string>
 		</dict>

@@ -56,16 +56,16 @@ public:
 	ccGBLSensor(const ccGBLSensor& sensor);
 
 	//! Destructor
-	virtual ~ccGBLSensor() {}
+	~ccGBLSensor() override = default;
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::GBL_SENSOR; }
-	virtual bool isSerializable() const override { return true; }
-	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
-	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::GBL_SENSOR; }
+	bool isSerializable() const override { return true; }
+	ccBBox getOwnBB(bool withGLFeatures = false) override;
+	ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//inherited from ccSensor
-	virtual bool applyViewport(ccGenericGLDisplay* win = nullptr) override;
+	bool applyViewport(ccGenericGLDisplay* win = nullptr) override;
 
 	//! Determines a 3D point "visibility" relatively to the sensor field of view
 	/** Relies on the sensor associated depth map (see ccGBLSensor::computeDepthBuffer).
@@ -77,7 +77,7 @@ public:
 		\param P the point to test
 		\return the point's visibility (POINT_VISIBLE, POINT_HIDDEN, POINT_OUT_OF_RANGE or POINT_OUT_OF_FOV)
 	**/
-	virtual unsigned char checkVisibility(const CCVector3& P) const override;
+	unsigned char checkVisibility(const CCVector3& P) const override;
 
 	//! Computes angular parameters automatically (all but the angular steps!)
 	/** WARNING: this method uses the cloud global iterator.
@@ -176,7 +176,7 @@ public: //projection tools
 						double posIndex = 0 ) const;
 
 	//! 2D grid of normals
-	typedef std::vector<CCVector3> NormalGrid;
+	using NormalGrid = std::vector<CCVector3>;
 
 	//! Projects a set of point cloud normals in the sensor world
 	/** WARNING: this method uses the cloud global iterator
@@ -190,7 +190,7 @@ public: //projection tools
 								double posIndex = 0 ) const;
 
 	//! 2D grid of colors
-	typedef std::vector<ccColor::Rgb> ColorGrid;
+	using ColorGrid = std::vector<ccColor::Rgb>;
 
 	//! Projects a set of point cloud colors in the sensor frame defined by this instance
 	/** WARNING: this method uses the cloud global iterator
@@ -223,9 +223,9 @@ public: //depth buffer management
 protected:
 
 	//Inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Converts 2D angular coordinates (yaw,pitch) in integer depth buffer coordinates
 	bool convertToDepthMapCoords(PointCoordinateType yaw, PointCoordinateType pitch, unsigned& i, unsigned& j) const;

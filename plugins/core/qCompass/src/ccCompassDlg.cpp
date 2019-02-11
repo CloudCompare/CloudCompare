@@ -44,14 +44,14 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_cost_algorithm_menu->setTitle("Algorithm");
 	m_dark = new QAction("Darkness", this); m_dark->setCheckable(true); m_dark->setChecked(true);
 	m_light = new QAction("Lightness", this); m_light->setCheckable(true);
-	m_rgb = new QAction("RGB Similarity", this); m_rgb->setCheckable(true);
-	m_grad = new QAction("RGB Gradient", this); m_grad->setCheckable(true); //m_grad->setEnabled(true);
+	m_rgb = new QAction("RGB similarity", this); m_rgb->setCheckable(true);
+	m_grad = new QAction("RGB gradient", this); m_grad->setCheckable(true); //m_grad->setEnabled(true);
 	m_curve = new QAction("Curvature", this); m_curve->setCheckable(true); //m_curve->setEnabled(false);
 	m_dist = new QAction("Distance", this); m_dist->setCheckable(true);
-	m_scalar = new QAction("Scalar Field", this); m_scalar->setCheckable(true);
-	m_scalar_inv = new QAction("Inverse Scalar Field", this); m_scalar_inv->setCheckable(true);
-	m_recalculate = new QAction("Recalculate Selection", this); //used to recalculate selected traces with new cost function
-	m_plane_fit = new QAction("Fit Planes", this); m_plane_fit->setCheckable(true); m_plane_fit->setChecked(true);
+	m_scalar = new QAction("Scalar field", this); m_scalar->setCheckable(true);
+	m_scalar_inv = new QAction("Inverse scalar field", this); m_scalar_inv->setCheckable(true);
+	m_recalculate = new QAction("Recalculate selection", this); //used to recalculate selected traces with new cost function
+	m_plane_fit = new QAction("Fit planes", this); m_plane_fit->setCheckable(true); m_plane_fit->setChecked(true);
 
 	//setup tool-tips
 	m_dark->setToolTip("Traces follow 'dark' points. Good for shadowed fracture traces.");
@@ -88,10 +88,10 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 
 	//setup settings menu
 	m_settings_menu = new QMenu(this);
-	m_plane_fit = new QAction("Fit Planes", this); m_plane_fit->setCheckable(true); m_plane_fit->setChecked(false);
-	m_showStippled = new QAction("Show Stippled", this); m_showStippled->setCheckable(true); m_showStippled->setChecked(true);
-	m_showNormals = new QAction("Show Normals", this); m_showNormals->setCheckable(true); m_showNormals->setChecked(true);
-	m_showNames = new QAction("Show Names", this); m_showNames->setCheckable(true); m_showNames->setChecked(false);
+	m_plane_fit = new QAction("Fit planes", this); m_plane_fit->setCheckable(true); m_plane_fit->setChecked(false);
+	m_showStippled = new QAction("Show stippled", this); m_showStippled->setCheckable(true); m_showStippled->setChecked(true);
+	m_showNormals = new QAction("Show normals", this); m_showNormals->setCheckable(true); m_showNormals->setChecked(true);
+	m_showNames = new QAction("Show names", this); m_showNames->setCheckable(true); m_showNames->setChecked(false);
 
 	m_plane_fit->setToolTip("If checked, a plane will automatically be fitted to traces matching the criteria defined in the ccCompass description.");
 	m_showStippled->setToolTip("If checked, planes will be drawn partially transparent (stippled).");
@@ -114,17 +114,23 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_research_menu = new QMenu(this);
 	m_research_menu->setTitle("Research");
 
-	m_toSVG = new QAction("Export SVG", this);
+	m_loadFoliations = new QAction("Import foliations...", this);
+	m_loadLineations = new QAction("Import lineations...", this);
+	m_toSVG = new QAction("Export SVG...", this);
 	m_noteTool = new QAction("Add note", this);
 	m_pinchTool = new QAction("Add pinch nodes", this);
-	m_measure_thickness = new QAction("Measure One-Point Thickness", this);
-	m_measure_thickness_twoPoint = new QAction("Measure Two-Point Thickness", this);
-	m_youngerThan = new QAction("Assign \"Younger-Than\" Relationship", this); m_youngerThan->setEnabled(false); //todo
-	m_follows = new QAction("Assign \"Follows\" Relationship", this); m_follows->setEnabled(false);
-	m_equivalent = new QAction("Assign \"Equivalent\" Relationship", this); m_equivalent->setEnabled(false);
+	m_measure_thickness = new QAction("Measure one-point thickness", this);
+	m_measure_thickness_twoPoint = new QAction("Measure two-point thickness", this);
+	m_youngerThan = new QAction("Assign \"Younger-Than\" relationship", this); m_youngerThan->setEnabled(false); //todo
+	m_follows = new QAction("Assign \"Follows\" relationship", this); m_follows->setEnabled(false);
+	m_equivalent = new QAction("Assign \"Equivalent\" relationship", this); m_equivalent->setEnabled(false);
 	m_fitPlaneToGeoObject = new QAction("Fit plane to GeoObject", this);
 	m_mergeSelected = new QAction("Merge selected GeoObjects", this);
+	m_estimateNormals = new QAction("Estimate structure normals", this);
+
 	m_pinchTool->setToolTip("Add Pinch Node objects to record features such as dyke tips or sedimentary units that pinch-out.");
+	m_loadFoliations->setToolTip("Converts a point cloud containing points (measurement location) and dip/dip-direction scalar fields to planes.");
+	m_loadLineations->setToolTip("Convert a point cloud containing measurement points and trend->plunge scalar fields into foliation objects.");
 	m_toSVG->setToolTip("Export the currently visible trace to a SVG vector graphic using an orthographic projection of the current view.");
 	m_noteTool->setToolTip("Add short notes to a point in a point cloud for future reference.");
 	m_measure_thickness->setToolTip("Select a plane and then a point to measure plane-perpendicular thickness.");
@@ -134,39 +140,48 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_equivalent->setToolTip("Select two GeoObjects to assign an \"equivalent\" (i.e. coeval) relationship.");
 	m_fitPlaneToGeoObject->setToolTip("Calculates best fit planes for the entire upper/lower surfaces of the GeoObject.");
 	m_mergeSelected->setToolTip("Merge all selected GeoObjects into a single GeoObject.");
+	m_estimateNormals->setToolTip("Estimate trace structure normals with maximum a-postiori plane fitting algorithm.");
+	
 
 	m_pairpicking_menu->addAction(m_pinchTool);
 	m_pairpicking_menu->addAction(m_measure_thickness);
 	m_pairpicking_menu->addAction(m_measure_thickness_twoPoint);
 	m_pairpicking_menu->addAction(m_noteTool);
 	m_pairpicking_menu->addSeparator();
-	m_pairpicking_menu->addAction(m_youngerThan);
-	m_pairpicking_menu->addAction(m_follows);
-	m_pairpicking_menu->addAction(m_equivalent);
-	m_pairpicking_menu->addSeparator();
+	//m_pairpicking_menu->addAction(m_youngerThan); //TODO - reenable these once topology code has been fixed
+	//m_pairpicking_menu->addAction(m_follows);
+	//m_pairpicking_menu->addAction(m_equivalent);
+	//m_pairpicking_menu->addSeparator();
 	m_pairpicking_menu->addAction(m_fitPlaneToGeoObject);
 	m_pairpicking_menu->addAction(m_mergeSelected);
-	m_pairpicking_menu->addMenu(m_research_menu);
+	m_pairpicking_menu->addAction(m_estimateNormals);
 	m_pairpicking_menu->addSeparator();
+	m_pairpicking_menu->addAction(m_loadFoliations);
+	m_pairpicking_menu->addAction(m_loadLineations);
 	m_pairpicking_menu->addAction(m_toSVG);
+	m_pairpicking_menu->addSeparator();
+	m_pairpicking_menu->addMenu(m_research_menu);
 	
 	
 	//Add tools to research menu
-	m_recalculateFitPlanes = new QAction("Recalculate Fit-Planes", this);
+	m_recalculateFitPlanes = new QAction("Recalculate fit-planes", this);
 	m_toPointCloud = new QAction("Convert to point cloud", this);
 	m_distributeSelection = new QAction("Distribute to GeoObjects", this);
-	m_estimateNormals = new QAction("Estimate Structure Normals", this);
+	m_estimateP21 = new QAction("Estimate P21 intensity", this);
+	m_estimateStrain = new QAction("Estimate strain", this);
 
 	m_recalculateFitPlanes->setToolTip("Recalculates all fit-planes deriving from traces and GeoObjects (but not those calculated with the Plane Tool).");
 	m_toPointCloud->setToolTip("Converts the selected GeoObject(s) or individual traces to a point cloud (typically for proximity analysis).");
 	m_distributeSelection->setToolTip("Distributes the selected objects into GeoObjects that have matching names.");
-	m_estimateNormals->setToolTip("Estimate trace structure normals with maximum a-postiori plane fitting algorithm.");
+	m_estimateP21->setToolTip("Uses structure traces and the mesh octree to measure fracture intensity.");
+	m_estimateStrain->setToolTip("Estimate bulk strain tensor from Mode-I dykes and veins with structure normal estimates.");
 
 	m_research_menu->addAction(m_recalculateFitPlanes);
-	m_research_menu->addAction(m_estimateNormals);
+	m_research_menu->addAction(m_estimateP21);
+	m_research_menu->addAction(m_estimateStrain);
 	m_research_menu->addAction(m_distributeSelection);
 	m_research_menu->addAction(m_toPointCloud);
-
+	
 	extraModeButton->setPopupMode(QToolButton::InstantPopup);
 	extraModeButton->setMenu(m_pairpicking_menu);
 

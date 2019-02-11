@@ -19,8 +19,8 @@
 #define CC_SUB_MESH_HEADER
 
 //Local
-#include "ccGenericMesh.h"
 #include "ccBBox.h"
+#include "ccGenericMesh.h"
 
 class ccMesh;
 
@@ -34,53 +34,53 @@ public:
 	//! Default constructor
 	explicit ccSubMesh(ccMesh* parentMesh);
 	//! Destructor
-	virtual ~ccSubMesh();
+	~ccSubMesh() override = default;
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SUB_MESH; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SUB_MESH; }
 
 	//inherited methods (ccHObject)
-	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
-	virtual bool isSerializable() const override { return true; }
+	ccBBox getOwnBB(bool withGLFeatures = false) override;
+	bool isSerializable() const override { return true; }
 
 	//inherited methods (ccGenericMesh)
-	virtual ccGenericPointCloud* getAssociatedCloud() const override;
-	virtual void refreshBB() override;
-	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override;
-	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb) override;
-	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb, bool interpolateColorIfNoTexture) override;
-	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& rgb, bool returnColorIfNoTexture) override;
-	virtual bool hasMaterials() const override;
-	virtual const ccMaterialSet* getMaterialSet() const override;
-	virtual int getTriangleMtlIndex(unsigned triangleIndex) const override;
-	virtual bool hasTextures() const override;
-	virtual TextureCoordsContainer* getTexCoordinatesTable() const override;
-	virtual void getTriangleTexCoordinates(unsigned triIndex, TexCoords2D* &tx1, TexCoords2D* &tx2, TexCoords2D* &tx3) const override;
-	virtual bool hasPerTriangleTexCoordIndexes() const override;
-	virtual void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
-	virtual bool hasTriNormals() const override;
-	virtual void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
-	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override;
-	virtual NormsIndexesTableType* getTriNormsTable() const override;
-	virtual unsigned capacity() const override;
+	ccGenericPointCloud* getAssociatedCloud() const override;
+	void refreshBB() override;
+	bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override;
+	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb) override;
+	bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb, bool interpolateColorIfNoTexture) override;
+	bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& rgb, bool returnColorIfNoTexture) override;
+	bool hasMaterials() const override;
+	const ccMaterialSet* getMaterialSet() const override;
+	int getTriangleMtlIndex(unsigned triangleIndex) const override;
+	bool hasTextures() const override;
+	TextureCoordsContainer* getTexCoordinatesTable() const override;
+	void getTriangleTexCoordinates(unsigned triIndex, TexCoords2D* &tx1, TexCoords2D* &tx2, TexCoords2D* &tx3) const override;
+	bool hasPerTriangleTexCoordIndexes() const override;
+	void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
+	bool hasTriNormals() const override;
+	void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
+	bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override;
+	NormsIndexesTableType* getTriNormsTable() const override;
+	unsigned capacity() const override;
 
 	//inherited methods (ccDrawableObject)
-	virtual bool hasColors() const override;
-	virtual bool hasNormals() const override;
-	virtual bool hasScalarFields() const override;
-	virtual bool hasDisplayedScalarField() const override;
-	virtual bool normalsShown() const override;
+	bool hasColors() const override;
+	bool hasNormals() const override;
+	bool hasScalarFields() const override;
+	bool hasDisplayedScalarField() const override;
+	bool normalsShown() const override;
 
 	//inherited methods (GenericIndexedMesh)
-	inline virtual unsigned size() const override { return static_cast<unsigned>(m_triIndexes.size()); }
-	virtual void forEach(genericTriangleAction action) override;
-	inline virtual void placeIteratorAtBeginning() override { m_globalIterator = 0; }
-	virtual CCLib::GenericTriangle* _getNextTriangle() override; //temporary object
-	virtual CCLib::GenericTriangle* _getTriangle(unsigned index) override; //temporary object
-	virtual CCLib::VerticesIndexes* getNextTriangleVertIndexes() override;
-	virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
-	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
-	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
+	inline unsigned size() const override { return static_cast<unsigned>(m_triIndexes.size()); }
+	void forEach(genericTriangleAction action) override;
+	inline void placeIteratorAtBeginning() override { m_globalIterator = 0; }
+	CCLib::GenericTriangle* _getNextTriangle() override; //temporary object
+	CCLib::GenericTriangle* _getTriangle(unsigned index) override; //temporary object
+	CCLib::VerticesIndexes* getNextTriangleVertIndexes() override;
+	CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
+	void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
+	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
 
 	//! Returns global index (i.e. relative to the associated mesh) of a given element
 	/** \param localIndex local index (i.e. relative to the internal index container)
@@ -138,7 +138,7 @@ public:
 	void setAssociatedMesh(ccMesh* mesh, bool unlinkPreviousOne = true);
 
 	//! Indexes map for createNewSubMeshFromSelection
-	typedef std::vector<unsigned> IndexMap;
+	using IndexMap = std::vector<unsigned int>;
 
 	//! Creates a new sub mesh with the selected vertices only
 	/** This method is called after a graphical segmentation
@@ -151,20 +151,20 @@ public:
 		\param removeSelectedFaces specifies if the faces composed only of 'selected' vertices should be removed or not
 		\param indexMap if an index map is provided, it will be used to 'translate' global indexes
 	**/
-	ccSubMesh* createNewSubMeshFromSelection(bool removeSelectedFaces, IndexMap* indexMap = 0);
+	ccSubMesh* createNewSubMeshFromSelection(bool removeSelectedFaces, IndexMap* indexMap = nullptr);
 
 protected:
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
-	virtual void onUpdateOf(ccHObject* obj) override;
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	void onUpdateOf(ccHObject* obj) override;
 
 	//! Associated mesh
 	ccMesh* m_associatedMesh;
 
 	//! Container of 3D triangles indexes
-	typedef std::vector<unsigned> ReferencesContainer;
+	using ReferencesContainer = std::vector<unsigned int>;
 
 	//! Indexes of (some of) the associated mesh triangles
 	ReferencesContainer m_triIndexes;

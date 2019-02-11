@@ -34,7 +34,6 @@ class cc2DLabel;
 **/
 class ccPointListPickingDlg : public ccPointPickingGenericInterface, public Ui::PointListPickingDlg
 {
-
 	Q_OBJECT
 
 public:
@@ -76,7 +75,7 @@ protected slots:
 protected:
 
 	//inherited from ccPointPickingGenericInterface
-	void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y);
+	void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y) override;
 
 	//! Gets current (visible) picked points from the associated cloud
 	unsigned getPickedPoints(std::vector<cc2DLabel*>& pickedPoints);

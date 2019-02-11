@@ -126,9 +126,9 @@ bool Cone::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 	a[2 + 3 * 3] = d3;
 	if(dmat_solve(3, 1, a))
 		return false;
-	m_center[0] = a[0 + 3 * 3];
-	m_center[1] = a[1 + 3 * 3];
-	m_center[2] = a[2 + 3 * 3];
+	m_center[0] = static_cast<float>(a[0 + 3 * 3]);
+	m_center[1] = static_cast<float>(a[1 + 3 * 3]);
+	m_center[2] = static_cast<float>(a[2 + 3 * 3]);
 
 	LevMarPlaneDistance planeDistance;
 	LevMar(planes.begin(), planes.end(), planeDistance,
@@ -237,9 +237,9 @@ bool Cone::Init(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3,
 	a[2 + 3 * 3] = d3;
 	if(dmat_solve(3, 1, a))
 		return false;
-	m_center[0] = a[0 + 3 * 3];
-	m_center[1] = a[1 + 3 * 3];
-	m_center[2] = a[2 + 3 * 3];
+	m_center[0] = static_cast<float>(a[0 + 3 * 3]);
+	m_center[1] = static_cast<float>(a[1 + 3 * 3]);
+	m_center[2] = static_cast<float>(a[2 + 3 * 3]);
 
 	// compute axisDir
 	Vec3f s1 = p1 - m_center;

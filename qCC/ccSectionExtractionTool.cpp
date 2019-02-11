@@ -333,7 +333,7 @@ void ccSectionExtractionTool::deleteSelectedPolyline()
 
 	//remove the section from the list
 	m_sections.removeOne(*selectedPoly);
-	m_undoCount.clear();
+	m_undoCount.resize(0);
 	undoToolButton->setEnabled(false);
 
 	if (m_associatedWin)
@@ -477,7 +477,7 @@ bool ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 			releasePolyline(&section);
 		}
 		m_sections.clear();
-		m_undoCount.clear();
+		m_undoCount.resize(0);
 		undoToolButton->setEnabled(false);
 		exportSectionsToolButton->setEnabled(false);
 		extractPointsToolButton->setEnabled(false);

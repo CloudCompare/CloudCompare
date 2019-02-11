@@ -18,31 +18,18 @@
 //#                                                                        #
 //##########################################################################
 
-#include <QApplication>
+//Common
+#include <ccApplicationBase.h>
 
-
-//! Mimic Qt's qApp for easy access to the application instance
-#define ccApp (static_cast<ccApplication *>( QCoreApplication::instance() ))
-
-class ccApplication : public QApplication
+class ccApplication : public ccApplicationBase
 {
+	Q_OBJECT
+
 public:
-	//! This must be called before instantiating the application class so it
-	//! can setup OpenGL first.
-	static void	init();
-	
 	ccApplication( int &argc, char **argv );
 	
-	QString versionStr() const;
-	QString versionLongStr( bool includeOS ) const;
-	
-#ifdef Q_OS_MAC
 protected:
-	bool event( QEvent *inEvent );
-#endif
-	
-private:
-	static QString s_version;
+	bool event( QEvent *inEvent ) override;
 };
 
 #endif

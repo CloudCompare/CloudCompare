@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>240</width>
-    <height>236</height>
+    <width>303</width>
+    <height>278</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -65,7 +65,7 @@
          <item>
           <widget class="QToolButton" name="firstColorButton">
            <property name="text">
-            <string>...</string>
+            <string notr="true">...</string>
            </property>
           </widget>
          </item>
@@ -92,7 +92,7 @@
          <item>
           <widget class="QToolButton" name="secondColorButton">
            <property name="text">
-            <string>...</string>
+            <string notr="true">...</string>
            </property>
           </widget>
          </item>
@@ -184,21 +184,21 @@
      <item>
       <widget class="QComboBox" name="directionComboBox">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <item>
         <property name="text">
-         <string>X</string>
+         <string notr="true">X</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Y</string>
+         <string notr="true">Y</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Z</string>
+         <string notr="true">Z</string>
         </property>
        </item>
       </widget>

@@ -16,6 +16,9 @@
 //#                                                                        #
 //##########################################################################
 
+#ifndef CC_DB_HEADER
+#define CC_DB_HEADER
+
 #ifdef QCC_DB_USE_AS_DLL
 
 // The following ifdef block is the standard way of creating macros which make exporting
@@ -36,3 +39,5 @@
 #define QCC_DB_LIB_API
 
 #endif //NOT QCC_DB_USE_AS_DLL
+
+#endif //CC_DB_HEADER

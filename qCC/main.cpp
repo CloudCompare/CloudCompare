@@ -19,42 +19,52 @@
 
 //Qt
 #include <QDir>
-#include <QSplashScreen>
-#include <QPixmap>
 #include <QMessageBox>
+#include <QPixmap>
+#include <QSettings>
+#include <QSplashScreen>
 #include <QTime>
 #include <QTimer>
 #include <QTranslator>
-#include <QSettings>
 
 //qCC_db
+#include <ccColorScalesManager.h>
 #include <ccLog.h>
 #include <ccNormalVectors.h>
-#include <ccColorScalesManager.h>
 
 //qCC_io
 #include <FileIOFilter.h>
 #include <ccGlobalShiftManager.h>
 
 //local
-#include "mainwindow.h"
 #include "ccApplication.h"
-#include "ccGuiParameters.h"
 #include "ccCommandLineParser.h"
+#include "ccGuiParameters.h"
 #include "ccPersistentSettings.h"
+#include "mainwindow.h"
 
 //plugins
 #include "ccPluginInterface.h"
-#include "pluginManager/ccPluginManager.h"
+#include "ccPluginManager.h"
 
 #ifdef USE_VLD
 //VLD
 #include <vld.h>
 #endif
 
+#ifdef Q_OS_MAC
+#include <unistd.h>
+#endif
+
 int main(int argc, char **argv)
 {
-	ccApplication::init();
+#ifdef Q_OS_MAC
+	bool commandLine = isatty( fileno( stdin ) );
+#else
+	bool commandLine = (argc > 1) && (argv[1][0] == '-');
+#endif
+   
+	ccApplication::init(commandLine);
 	
 	ccApplication app(argc, argv);
 
@@ -75,9 +85,6 @@ int main(int argc, char **argv)
 		ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);
 	}
 
-	//Command line mode?
-	bool commandLine = (argc > 1 && argv[1][0] == '-');
-	
 	//specific commands
 	int lastArgumentIndex = 1;
 	QTranslator translator;

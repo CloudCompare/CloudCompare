@@ -19,10 +19,10 @@
 #include <Neighbourhood.h>
 
 //local
-#include <PointCloud.h>
 #include <ConjugateGradient.h>
 #include <Delaunay2dMesh.h>
 #include <DistanceComputationTools.h>
+#include <PointCloud.h>
 #include <SimpleMesh.h>
 
 //System
@@ -254,7 +254,7 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 		return false;
 	}
 
-	CCVector3 G(0,0,0);
+	CCVector3 G(0, 0, 0);
 	if (pointCount > 3)
 	{
 		CCLib::SquareMatrixd covMat = computeCovarianceMatrix();
@@ -283,7 +283,7 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 
 		//get normal
 		{
-			CCVector3d vec(0,0,1);
+			CCVector3d vec(0, 0, 1);
 			double minEigValue = 0;
 			//the smallest eigen vector corresponds to the "least square best fitting plane" normal
 			Jacobi<double>::GetMinEigenValueAndVector(eigVectors, eigValues, minEigValue, vec.u);
@@ -309,8 +309,8 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 		const CCVector3* C = m_associatedCloud->getPoint(2);
 
 		//get X (AB by default) and Y (AC - will be updated later) and deduce N = X ^ Y
-		m_lsPlaneVectors[0] = (*B-*A);
-		m_lsPlaneVectors[1] = (*C-*A);
+		m_lsPlaneVectors[0] = (*B - *A);
+		m_lsPlaneVectors[1] = (*C - *A);
 		m_lsPlaneVectors[2] = m_lsPlaneVectors[0].cross(m_lsPlaneVectors[1]);
 
 		//the plane passes through any of the 3 points
@@ -645,7 +645,7 @@ bool Neighbourhood::compute3DQuadric(double quadricEquation[10])
 	}
 
 	//we don't need M anymore
-	M.clear();
+	M.resize(0);
 
 	//now we compute eigen values and vectors of D
 #ifdef USE_EIGEN
@@ -779,14 +779,14 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 
 	//bounding box
 	CCVector3 bbMin, bbMax;
-	m_associatedCloud->getBoundingBox(bbMin,bbMax);
+	m_associatedCloud->getBoundingBox(bbMin, bbMax);
 	CCVector3 bboxDiag = bbMax - bbMin;
 
 	//Sample points on Quadric and triangulate them!
 	const PointCoordinateType spanX = bboxDiag.u[X];
 	const PointCoordinateType spanY = bboxDiag.u[Y];
-	const PointCoordinateType stepX = spanX/(nStepX-1);
-	const PointCoordinateType stepY = spanY/(nStepY-1);
+	const PointCoordinateType stepX = spanX / (nStepX - 1);
+	const PointCoordinateType stepY = spanY / (nStepY - 1);
 
 	PointCloud* vertices = new PointCloud();
 	if (!vertices->reserve(nStepX*nStepY))
@@ -795,21 +795,21 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 		return nullptr;
 	}
 
-	SimpleMesh* quadMesh = new SimpleMesh(vertices,true);
-	if (!quadMesh->reserve((nStepX-1)*(nStepY-1)*2))
+	SimpleMesh* quadMesh = new SimpleMesh(vertices, true);
+	if (!quadMesh->reserve((nStepX - 1)*(nStepY - 1) * 2))
 	{
 		delete quadMesh;
 		return nullptr;
 	}
 
-	for (unsigned x=0; x<nStepX; ++x)
+	for (unsigned x = 0; x < nStepX; ++x)
 	{
 		CCVector3 P;
 		P.x = bbMin[X] + stepX * x - G->u[X];
-		for (unsigned y=0; y<nStepY; ++y)
+		for (unsigned y = 0; y < nStepY; ++y)
 		{
 			P.y = bbMin[Y] + stepY * y - G->u[Y];
-			P.z = a+b*P.x+c*P.y+d*P.x*P.x+e*P.x*P.y+f*P.y*P.y;
+			P.z = a + b * P.x + c * P.y + d * P.x*P.x + e * P.x*P.y + f * P.y*P.y;
 
 			CCVector3 Pc;
 			Pc.u[X] = P.x;
@@ -821,10 +821,10 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 
 			if (x>0 && y>0)
 			{
-				const unsigned iA = (x-1) * nStepY + y-1;
-				const unsigned iB = iA+1;
-				const unsigned iC = iA+nStepY;
-				const unsigned iD = iB+nStepY;
+				const unsigned iA = (x - 1) * nStepY + y - 1;
+				const unsigned iB = iA + 1;
+				const unsigned iC = iA + nStepY;
+				const unsigned iD = iB + nStepY;
 
 				quadMesh->addTriangle(iA,iC,iB);
 				quadMesh->addTriangle(iB,iC,iD);
@@ -835,7 +835,143 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 	return quadMesh;
 }
 
-ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE_TYPE cType)
+ScalarType Neighbourhood::computeMomentOrder1(const CCVector3& P)
+{
+	if (!m_associatedCloud || m_associatedCloud->size() < 3)
+	{
+		//not enough points
+		return NAN_VALUE;
+	}
+
+	SquareMatrixd eigVectors;
+	std::vector<double> eigValues;
+	if (!Jacobi<double>::ComputeEigenValuesAndVectors(computeCovarianceMatrix(), eigVectors, eigValues, true))
+	{
+		//failed to compute the eigen values
+		return NAN_VALUE;
+	}
+
+	Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues); //sort the eigenvectors in decreasing order of their associated eigenvalues
+
+	double m1 = 0.0, m2 = 0.0;
+	CCVector3d e2;
+	Jacobi<double>::GetEigenVector(eigVectors, 1, e2.u);
+
+	for (unsigned i = 0; i < m_associatedCloud->size(); ++i)
+	{
+		double dotProd = CCVector3d::fromArray((*m_associatedCloud->getPoint(i) - P).u).dot(e2);
+		m1 += dotProd;
+		m2 += dotProd * dotProd;
+	}
+
+	//see "Contour detection in unstructured 3D point clouds", Hackel et al 2016
+	return (m2 < std::numeric_limits<double>::epsilon() ? NAN_VALUE : static_cast<ScalarType>((m1 * m1) / m2));
+}
+
+double Neighbourhood::computeFeature(GeomFeature feature)
+{
+	if (!m_associatedCloud || m_associatedCloud->size() < 3)
+	{
+		//not enough points
+		return std::numeric_limits<double>::quiet_NaN();
+	}
+	
+	SquareMatrixd eigVectors;
+	std::vector<double> eigValues;
+	if (!Jacobi<double>::ComputeEigenValuesAndVectors(computeCovarianceMatrix(), eigVectors, eigValues, true))
+	{
+		//failed to compute the eigen values
+		return std::numeric_limits<double>::quiet_NaN();
+	}
+
+	Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues); //sort the eigenvectors in decreasing order of their associated eigenvalues
+
+	//shortcuts
+	const double& l1 = eigValues[0];
+	const double& l2 = eigValues[1];
+	const double& l3 = eigValues[2];
+
+	double value = std::numeric_limits<double>::quiet_NaN();
+
+	switch (feature)
+	{
+	case EigenValuesSum:
+		value = l1 + l2 + l3;
+		break;
+	case Omnivariance:
+		value = pow(l1 * l2 * l3, 1.0/3.0);
+		break;
+	case EigenEntropy:
+		value = -(l1 * log(l1) + l2 * log(l2) + l3 * log(l3));
+		break;
+	case Anisotropy:
+		if (std::abs(l1) > std::numeric_limits<double>::epsilon())
+			value = (l1 - l3) / l1;
+		break;
+	case Planarity:
+		if (std::abs(l1) > std::numeric_limits<double>::epsilon())
+			value = (l2 - l3) / l1;
+		break;
+	case Linearity:
+		if (std::abs(l1) > std::numeric_limits<double>::epsilon())
+			value = (l1 - l2) / l1;
+		break;
+	case PCA1:
+		{
+			double sum = l1 + l2 + l3;
+			if (std::abs(sum) > std::numeric_limits<double>::epsilon())
+				value = l1 / sum;
+		}
+		break;
+	case PCA2:
+		{
+			double sum = l1 + l2 + l3;
+			if (std::abs(sum) > std::numeric_limits<double>::epsilon())
+				value = l2 / sum;
+		}
+		break;
+	case SurfaceVariation:
+		{
+			double sum = l1 + l2 + l3;
+			if (std::abs(sum) > std::numeric_limits<double>::epsilon())
+				value = l3 / sum;
+		}
+		break;
+	case Sphericity:
+		if (std::abs(l1) > std::numeric_limits<double>::epsilon())
+			value = l3 / l1;
+		break;
+	case Verticality:
+		{
+			CCVector3d Z(0, 0, 1);
+			CCVector3d e3(Z);
+			Jacobi<double>::GetEigenVector(eigVectors, 2, e3.u);
+
+			value = 1.0 - std::abs(Z.dot(e3));
+		}
+		break;
+	default:
+		assert(false);
+		break;
+	}
+
+	return value;
+}
+
+ScalarType Neighbourhood::computeRoughness(const CCVector3& P)
+{
+	const PointCoordinateType* lsPlane = getLSPlane();
+	if (lsPlane)
+	{
+		return std::abs(DistanceComputationTools::computePoint2PlaneDistance(&P, lsPlane));
+	}
+	else
+	{
+		return NAN_VALUE;
+	}
+}
+
+ScalarType Neighbourhood::computeCurvature(const CCVector3& P, CurvatureType cType)
 {
 	switch (cType)
 	{
@@ -851,7 +987,7 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 			const CCVector3* G = getGravityCenter();
 
 			//we compute curvature at the input neighbour position + we recenter it by the way
-			const CCVector3 Q( *m_associatedCloud->getPoint(neighbourIndex) - *G );
+			const CCVector3 Q(P - *G);
 
 			const unsigned char X = m_quadricEquationDirections.x;
 			const unsigned char Y = m_quadricEquationDirections.y;
@@ -880,14 +1016,14 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 			case GAUSSIAN_CURV:
 				{
 					//to sign the curvature, we need a normal!
-					const PointCoordinateType K = fabs( fxx*fyy - fxy*fxy ) / (q*q);
+					const PointCoordinateType K = std::abs(fxx*fyy - fxy * fxy) / (q*q);
 					return static_cast<ScalarType>(K);
 				}
 
 			case MEAN_CURV:
 				{
 					//to sign the curvature, we need a normal!
-					const PointCoordinateType H2 = fabs( ((1+fx2)*fyy - 2*fx*fy*fxy + (1+fy2)*fxx) ) / (2*sqrt(q)*q);
+					const PointCoordinateType H2 = std::abs(((1 + fx2)*fyy - 2 * fx*fy*fxy + (1 + fy2)*fxx)) / (2 * sqrt(q)*q);
 					return static_cast<ScalarType>(H2);
 				}
 

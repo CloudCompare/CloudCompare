@@ -19,9 +19,9 @@
 #define POINT_PAIR_REGISTRATION_DIALOG_HEADER
 
 //Local
+#include "ccMainAppInterface.h"
 #include "ccOverlayDialog.h"
 #include "ccPickingListener.h"
-#include "ccMainAppInterface.h"
 
 //CCLib
 #include <PointProjectionTools.h>
@@ -47,17 +47,17 @@ class ccPointPairRegistrationDlg : public ccOverlayDialog, public ccPickingListe
 public:
 
 	//! Default constructor
-	explicit ccPointPairRegistrationDlg(ccPickingHub* pickingHub, ccMainAppInterface* app, QWidget* parent = 0);
+	explicit ccPointPairRegistrationDlg(ccPickingHub* pickingHub, ccMainAppInterface* app, QWidget* parent = nullptr);
 
 	//inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindow* win);
-	virtual bool start();
-	virtual void stop(bool state);
+	bool linkWith(ccGLWindow* win) override;
+	bool start() override;
+	void stop(bool state) override;
 
 	//! Inits dialog
 	bool init(	ccGLWindow* win,
 				ccHObject* aligned,
-				ccHObject* reference = 0);
+				ccHObject* reference = nullptr);
 
 	//! Clears dialog
 	void clear();
@@ -66,9 +66,9 @@ public:
 	void pause(bool state);
 
 	//! Adds a point to the 'align' set
-	bool addAlignedPoint(CCVector3d& P, ccHObject* entity = 0, bool shifted = true);
+	bool addAlignedPoint(CCVector3d& P, ccHObject* entity = nullptr, bool shifted = true);
 	//! Adds a point to the 'reference' set
-	bool addReferencePoint(CCVector3d& P, ccHObject* entity = 0, bool shifted = true);
+	bool addReferencePoint(CCVector3d& P, ccHObject* entity = nullptr, bool shifted = true);
 
 	//! Removes a point from the 'align' set
 	void removeAlignedPoint(int index, bool autoRemoveDualPoint = true);
@@ -76,7 +76,7 @@ public:
 	void removeRefPoint(int index, bool autoRemoveDualPoint = true);
 
 	//! Inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi);
+	void onItemPicked(const PickedItem& pi) override;
 
 protected slots:
 

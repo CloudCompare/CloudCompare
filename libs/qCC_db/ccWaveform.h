@@ -10,8 +10,8 @@
 #include <CCGeom.h>
 
 //system
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 
 //! Waveform descriptor
 class QCC_DB_LIB_API WaveformDescriptor : public ccSerializableObject
@@ -28,9 +28,9 @@ public:
 	bool operator == (const WaveformDescriptor& d) const { return	!(*this != d); }
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const override { return true; }
-	virtual bool toFile(QFile& out) const override;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool isSerializable() const override { return true; }
+	bool toFile(QFile& out) const override;
+	bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	uint32_t numberOfSamples;	//!< Number of samples
 	uint32_t samplingRate_ps;	//!< Sampling rate in pico seconds
@@ -50,7 +50,7 @@ public:
 	ccWaveform(uint8_t descriptorID = 0);
 	
 	//! Destructor
-	virtual ~ccWaveform();
+	~ccWaveform() override = default;
 
 	//! Returns the associated descriptor (ID)
 	/** \warning A value of zero indicates that there is no associated waveform data.
@@ -76,10 +76,10 @@ public:
 	bool decodeSamples(std::vector<double>& values, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const;
 
 	//! Exports (real) samples to an ASCII file
-	bool toASCII(QString filename, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const;
+	bool toASCII(const QString& filename, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const;
 
 	//! Helper: exports a series of values as an ASCII file
-	static bool ToASCII(QString filename, std::vector<double>& values, uint32_t samplingRate_ps);
+	static bool ToASCII(const QString& filename, std::vector<double>& values, uint32_t samplingRate_ps);
 
 	//! Returns the sample position in 3D
 	CCVector3 getSamplePos(float i, const CCVector3& P0, const WaveformDescriptor& descriptor) const;
@@ -117,11 +117,9 @@ public:
 	void setReturnIndex(uint8_t index) { m_returnIndex = index; }
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const override { return true; }
-	virtual bool toFile(QFile& out) const override;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
-
-protected: //methods
+	bool isSerializable() const override { return true; }
+	bool toFile(QFile& out) const override;
+	bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 protected: //members
 
@@ -170,13 +168,6 @@ public:
 		, m_storage(storage)
 	{}
 
-	//! Copy constructor
-	ccWaveformProxy(const ccWaveformProxy& p)
-		: m_w(p.m_w)
-		, m_d(p.m_d)
-		, m_storage(p.m_storage)
-	{}
-
 	//! Returns whether the waveform (proxy) is valid or not
 	inline bool isValid() const { return m_storage && m_w.descriptorID() != 0 && m_d.numberOfSamples != 0; }
 
@@ -198,7 +189,7 @@ public:
 	inline bool decodeSamples(std::vector<double>& values) const { return m_w.decodeSamples(values, m_d, m_storage); }
 
 	//! Exports (real) samples to an ASCII file
-	inline bool toASCII(QString filename) const { return m_w.toASCII(filename, m_d, m_storage); }
+	inline bool toASCII(const QString& filename) const { return m_w.toASCII(filename, m_d, m_storage); }
 
 	//! Returns the sample position in 3D
 	inline CCVector3 getSamplePos(float i, const CCVector3& P0) const { return m_w.getSamplePos(i, P0, m_d); }

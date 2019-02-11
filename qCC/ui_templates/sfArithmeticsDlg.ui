@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>180</height>
+    <height>218</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -97,47 +97,47 @@
        </item>
        <item>
         <property name="text">
-         <string>exp</string>
+         <string notr="true">exp</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>log</string>
+         <string notr="true">log</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>log10</string>
+         <string notr="true">log10</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>cos</string>
+         <string notr="true">cos</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>sin</string>
+         <string notr="true">sin</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>tan</string>
+         <string notr="true">tan</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>acos</string>
+         <string notr="true">acos</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>asin</string>
+         <string notr="true">asin</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>atan</string>
+         <string notr="true">atan</string>
         </property>
        </item>
        <item>

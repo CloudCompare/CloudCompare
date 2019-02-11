@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>380</width>
-    <height>420</height>
+    <width>387</width>
+    <height>461</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,7 +42,7 @@
           <item>
            <widget class="QCheckBox" name="redCheckBox">
             <property name="text">
-             <string>R</string>
+             <string notr="true">R</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -52,7 +52,7 @@
           <item>
            <widget class="QCheckBox" name="greenCheckBox">
             <property name="text">
-             <string>G</string>
+             <string notr="true">G</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -62,7 +62,7 @@
           <item>
            <widget class="QCheckBox" name="blueCheckBox">
             <property name="text">
-             <string>B</string>
+             <string notr="true">B</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -311,17 +311,17 @@
               </property>
               <item>
                <property name="text">
-                <string>XY</string>
+                <string notr="true">XY</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>XZ</string>
+                <string notr="true">XZ</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>YZ</string>
+                <string notr="true">YZ</string>
                </property>
               </item>
              </widget>

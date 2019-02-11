@@ -131,7 +131,7 @@
         </size>
        </property>
        <property name="text">
-        <string>0</string>
+        <string notr="true">0</string>
        </property>
        <property name="maxLength">
         <number>255</number>
@@ -170,17 +170,17 @@
      </column>
      <column>
       <property name="text">
-       <string>X</string>
+       <string notr="true">X</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Y</string>
+       <string notr="true">Y</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Z</string>
+       <string notr="true">Z</string>
       </property>
      </column>
     </widget>

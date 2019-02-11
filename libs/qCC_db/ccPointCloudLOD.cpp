@@ -701,7 +701,7 @@ uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum, ccClipPlaneSet*
 
 uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 {
-	if (m_indexMap.empty())
+	if (m_indexMap.capacity() == 0)
 	{
 		assert(false);
 		return 0;

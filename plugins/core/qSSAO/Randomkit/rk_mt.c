@@ -294,7 +294,7 @@ rk_error rk_devfill(void *buffer, size_t size, int strong)
   if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
     CRYPT_VERIFYCONTEXT) || !hCryptProv)
     return RK_ENODEV;
-  done = CryptGenRandom(hCryptProv, size, (unsigned char *)buffer);
+  done = CryptGenRandom(hCryptProv, (DWORD)size, (unsigned char *)buffer);
   CryptReleaseContext(hCryptProv, 0);
   if (done)
     return RK_NOERR;

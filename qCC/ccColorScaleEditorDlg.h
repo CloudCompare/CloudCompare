@@ -40,11 +40,11 @@ public:
 	//! Default constructor
 	ccColorScaleEditorDialog(	ccColorScalesManager* manager,
 								ccMainAppInterface* mainApp,
-								ccColorScale::Shared currentScale = ccColorScale::Shared(0),
-								QWidget* parent = 0);
+								ccColorScale::Shared currentScale = ccColorScale::Shared(nullptr),
+								QWidget* parent = nullptr);
 
 	//! Destructor
-	virtual ~ccColorScaleEditorDialog();
+	~ccColorScaleEditorDialog() override = default;
 
 	//! Sets associated scalar field (optional)
 	void setAssociatedScalarField(ccScalarField* sf);

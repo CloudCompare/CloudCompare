@@ -61,8 +61,16 @@
 //local includes
 #include "ccConsole.h"
 #include "ccEntityAction.h"
-#include "ccInnerRect2DFinder.h"
 #include "ccHistogramWindow.h"
+#include "ccInnerRect2DFinder.h"
+
+//common
+#include <ccPickingHub.h>
+//common dialogs
+#include <ccCameraParamEditDlg.h>
+#include <ccDisplayOptionsDlg.h>
+#include <ccPickOneElementDlg.h>
+#include <ccStereoModeDlg.h>
 
 //dialogs
 #include "ccAboutDialog.h"
@@ -72,14 +80,13 @@
 #include "ccApplyTransformationDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
-#include "ccCameraParamEditDlg.h"
 #include "ccCamSensorProjectionDlg.h"
 #include "ccClippingBoxTool.h"
 #include "ccColorScaleEditorDlg.h"
 #include "ccComparisonDlg.h"
-#include "ccDisplayOptionsDlg.h"
 #include "ccFilterByValueDlg.h"
 #include "ccGBLSensorProjectionDlg.h"
+#include "ccGeomFeaturesDlg.h"
 #include "ccGraphicalSegmentationTool.h"
 #include "ccGraphicalTransformationTool.h"
 #include "ccItemSelectionDlg.h"
@@ -87,8 +94,6 @@
 #include "ccMatchScalesDlg.h"
 #include "ccNoiseFilterDlg.h"
 #include "ccOrderChoiceDlg.h"
-#include "ccPickingHub.h"
-#include "ccPickOneElementDlg.h"
 #include "ccPlaneEditDlg.h"
 #include "ccPointListPickingDlg.h"
 #include "ccPointPairRegistrationDlg.h"
@@ -103,9 +108,9 @@
 #include "ccSensorComputeDistancesDlg.h"
 #include "ccSensorComputeScatteringAnglesDlg.h"
 #include "ccSORFilterDlg.h"
-#include "ccStereoModeDlg.h"
 #include "ccSubsamplingDlg.h" //Aurelien BEY
 #include "ccTracePolylineTool.h"
+#include "ccTranslationManager.h"
 #include "ccUnrollDlg.h"
 #include "ccVolumeCalcTool.h"
 #include "ccWaveformDialog.h"
@@ -199,6 +204,8 @@ MainWindow::MainWindow()
 	setWindowTitle(QStringLiteral("CloudCompare v") + ccApp->versionLongStr(false));
 	
 	m_pluginUIManager = new ccPluginUIManager( this, this );
+	
+	ccTranslationManager::get().populateMenu( m_UI->menuLanguage, ccApp->translationPath() );
 	
 #ifdef Q_OS_MAC
 	m_UI->actionAbout->setMenuRole( QAction::AboutRole );
@@ -628,9 +635,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionExportCloudInfo,			&QAction::triggered, this, &MainWindow::doActionExportCloudInfo);
 	connect(m_UI->actionExportPlaneInfo,			&QAction::triggered, this, &MainWindow::doActionExportPlaneInfo);
 	//"Tools > Other" menu
-	connect(m_UI->actionComputeDensity,				&QAction::triggered, this, &MainWindow::doComputeDensity);
-	connect(m_UI->actionCurvature,					&QAction::triggered, this, &MainWindow::doComputeCurvature);
-	connect(m_UI->actionRoughness,					&QAction::triggered, this, &MainWindow::doComputeRoughness);
+	connect(m_UI->actionComputeGeometricFeature,	&QAction::triggered, this, &MainWindow::doComputeGeometricFeature);
 	connect(m_UI->actionRemoveDuplicatePoints,		&QAction::triggered, this, &MainWindow::doRemoveDuplicatePoints);
 	//"Tools"
 	connect(m_UI->actionLevel,						&QAction::triggered, this, &MainWindow::doLevel);
@@ -2689,12 +2694,12 @@ void MainWindow::doRemoveDuplicatePoints()
 
 			ccOctree::Shared octree = cloud->getOctree();
 
-			int result = CCLib::GeometricalAnalysisTools::flagDuplicatePoints(	cloud,
-																				minDistanceBetweenPoints,
-																				&pDlg,
-																				octree.data());
+			CCLib::GeometricalAnalysisTools::ErrorCode result = CCLib::GeometricalAnalysisTools::FlagDuplicatePoints(	cloud,
+																														minDistanceBetweenPoints,
+																														&pDlg,
+																														octree.data());
 
-			if (result >= 0)
+			if (result == CCLib::GeometricalAnalysisTools::NoError)
 			{
 				//count the number of duplicate points!
 				CCLib::ScalarField* flagSF = cloud->getScalarField(sfIdx);
@@ -5759,7 +5764,7 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 	m_mdiDialogs.push_back(ccMDIDialogs(dlg, pos));
 
 	//automatically update the dialog placement when its shown
-	connect(dlg, &ccOverlayDialog::shown, this, [&]()
+	connect(dlg, &ccOverlayDialog::shown, this, [=]()
 	{
 		//check for existence
 		for (ccMDIDialogs& mdi : m_mdiDialogs)
@@ -6228,7 +6233,16 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
 					ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(entity);
-					segmentationResult = genCloud->createNewCloudFromVisibilitySelection(!deleteHiddenParts);
+					ccGenericPointCloud* segmentedCloud = genCloud->createNewCloudFromVisibilitySelection(!deleteHiddenParts);
+					if (segmentedCloud && segmentedCloud->size() == 0)
+					{
+						delete segmentationResult;
+						segmentationResult = nullptr;
+					}
+					else
+					{
+						segmentationResult = segmentedCloud;
+					}
 
 					deleteOriginalEntity |= (genCloud->size() == 0);
 				}
@@ -7633,13 +7647,13 @@ void MainWindow::doActionFitSphere()
 		CCVector3 center;
 		PointCoordinateType radius;
 		double rms;
-		if (!CCLib::GeometricalAnalysisTools::detectSphereRobust(cloud,
+		if (CCLib::GeometricalAnalysisTools::DetectSphereRobust(cloud,
 			outliersRatio,
 			center,
 			radius,
 			rms,
 			&pDlg,
-			confidence))
+			confidence) != CCLib::GeometricalAnalysisTools::NoError)
 		{
 			ccLog::Warning(QString("[Fit sphere] Failed to fit a sphere on cloud '%1'").arg(cloud->getName()));
 			continue;
@@ -7655,11 +7669,11 @@ void MainWindow::doActionFitSphere()
 
 		ccGLMatrix trans;
 		trans.setTranslation(center);
-		ccSphere* sphere = new ccSphere(radius,&trans,QString("Sphere r=%1 [rms %2]").arg(radius).arg(rms));
+		ccSphere* sphere = new ccSphere(radius, &trans, QString("Sphere r=%1 [rms %2]").arg(radius).arg(rms));
 		cloud->addChild(sphere);
 		//sphere->setDisplay(cloud->getDisplay());
 		sphere->prepareDisplayForRefresh();
-		addToDB(sphere,false,false,false);
+		addToDB(sphere, false, false, false);
 	}
 
 	refreshAll();
@@ -7821,19 +7835,27 @@ void MainWindow::doShowPrimitiveFactory()
 	m_pfDlg->show();
 }
 
-void MainWindow::doComputeDensity()
+void MainWindow::doComputeGeometricFeature()
 {
-	//we use CCLIB_ALGO_ACCURATE_DENSITY by default (will be modified if necessary)
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ACCURATE_DENSITY,m_selectedEntities,this))
-		return;
-	refreshAll();
-	updateUI();
-}
+	static ccLibAlgorithms::GeomCharacteristicSet s_selectedCharacteristics;
 
-void MainWindow::doComputeCurvature()
-{
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_CURVATURE, m_selectedEntities, this))
+	ccGeomFeaturesDlg gfDlg(this);
+	double radius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
+	gfDlg.setRadius(radius);
+	gfDlg.setSelectedFeatures(s_selectedCharacteristics);
+	
+	if (!gfDlg.exec())
 		return;
+
+	radius = gfDlg.getRadius();
+	if (!gfDlg.getSelectedFeatures(s_selectedCharacteristics))
+	{
+		ccLog::Error("Not enough memory");
+		return;
+	}
+
+	ccLibAlgorithms::ComputeGeomCharacteristics(s_selectedCharacteristics, static_cast<PointCoordinateType>(radius), m_selectedEntities, this);
+
 	refreshAll();
 	updateUI();
 }
@@ -7846,18 +7868,94 @@ void MainWindow::doActionSFGradient()
 	updateUI();
 }
 
-void MainWindow::doComputeRoughness()
-{
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ROUGHNESS, m_selectedEntities, this))
-		return;
-	refreshAll();
-	updateUI();
-}
-
 void MainWindow::doSphericalNeighbourhoodExtractionTest()
 {
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST,m_selectedEntities,this))
+	size_t selNum = m_selectedEntities.size();
+	if (selNum < 1)
 		return;
+
+	//spherical neighborhood extraction radius
+	PointCoordinateType sphereRadius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
+	if (sphereRadius < 0)
+	{
+		ccConsole::Error("Invalid kernel size!");
+		return;
+	}
+
+	bool ok;
+	double val = QInputDialog::getDouble(this, "SNE test", "Radius:", static_cast<double>(sphereRadius), DBL_MIN, 1.0e9, 8, &ok);
+	if (!ok)
+		return;
+	sphereRadius = static_cast<PointCoordinateType>(val);
+
+	QString sfName = QString("Spherical extraction test") + QString(" (%1)").arg(sphereRadius);
+
+	ccProgressDialog pDlg(true, this);
+	pDlg.setAutoClose(false);
+
+	for (size_t i = 0; i < selNum; ++i)
+	{
+		//we only process clouds
+		if (!m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
+		{
+			continue;
+		}
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
+
+		int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+		if (sfIdx < 0)
+			sfIdx = cloud->addScalarField(qPrintable(sfName));
+		if (sfIdx < 0)
+		{
+			ccConsole::Error(QString("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(cloud->getName()));
+			return;
+		}
+			
+		ccOctree::Shared octree = cloud->getOctree();
+		if (!octree)
+		{
+			pDlg.reset();
+			pDlg.show();
+			octree = cloud->computeOctree(&pDlg);
+			if (!octree)
+			{
+				ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
+				return;
+			}
+		}
+
+		CCLib::ScalarField* sf = cloud->getScalarField(sfIdx);
+		sf->fill(NAN_VALUE);
+		cloud->setCurrentScalarField(sfIdx);
+
+		QElapsedTimer eTimer;
+		eTimer.start();
+
+		size_t extractedPoints = 0;
+		unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(sphereRadius);
+		std::random_device rd;   // non-deterministic generator
+		std::mt19937 gen(rd());  // to seed mersenne twister.
+		std::uniform_int_distribution<unsigned> dist(0, cloud->size() - 1);
+
+		const unsigned samples = 1000;
+		for (unsigned j = 0; j < samples; ++j)
+		{
+			unsigned randIndex = dist(gen);
+			CCLib::DgmOctree::NeighboursSet neighbours;
+			octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex), sphereRadius, neighbours, level);
+			size_t neihgboursCount = neighbours.size();
+			extractedPoints += neihgboursCount;
+			for (size_t k = 0; k < neihgboursCount; ++k)
+				cloud->setPointScalarValue(neighbours[k].pointIndex, static_cast<ScalarType>(sqrt(neighbours[k].squareDistd)));
+		}
+		ccConsole::Print("[SNE_TEST] Mean extraction time = %i ms (radius = %f, mean(neighbours) = %3.1f)", eTimer.elapsed(), sphereRadius, extractedPoints / static_cast<double>(samples));
+
+		sf->computeMinAndMax();
+		cloud->setCurrentDisplayedScalarField(sfIdx);
+		cloud->showSF(true);
+		cloud->prepareDisplayForRefresh();
+	}
+
 	refreshAll();
 	updateUI();
 }
@@ -7865,11 +7963,11 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 {
 	bool ok;
-	double radius = QInputDialog::getDouble(this,"CNE Test","radius",0.02,1.0e-6,1.0e6,6,&ok);
+	double radius = QInputDialog::getDouble(this, "CNE Test", "radius", 0.02, 1.0e-6, 1.0e6, 6, &ok);
 	if (!ok)
 		return;
 
-	double height = QInputDialog::getDouble(this,"CNE Test","height",0.05,1.0e-6,1.0e6,6,&ok);
+	double height = QInputDialog::getDouble(this, "CNE Test", "height", 0.05, 1.0e-6, 1.0e6, 6, &ok);
 	if (!ok)
 		return;
 
@@ -7891,8 +7989,8 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 		for (unsigned i = 0; i < ptsCount; ++i)
 		{
 			CCVector3 P(dist(gen),
-						dist(gen),
-						dist(gen) );
+				dist(gen),
+				dist(gen));
 
 			cloud->addPoint(P);
 		}
@@ -7931,13 +8029,13 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 		for (unsigned j = 0; j < samples; ++j)
 		{
 			//generate random normal vector
-			CCVector3 dir(0,0,1);
+			CCVector3 dir(0, 0, 1);
 			{
 				ccGLMatrix rot;
-				rot.initFromParameters(	distAngle(gen),
-										distAngle(gen),
-										distAngle(gen),
-										CCVector3(0,0,0) );
+				rot.initFromParameters(distAngle(gen),
+					distAngle(gen),
+					distAngle(gen),
+					CCVector3(0, 0, 0));
 				rot.applyRotation(dir);
 			}
 			unsigned randIndex = distIndex(gen);
@@ -7947,7 +8045,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 			cn.dir = dir;
 			cn.level = level;
 			cn.radius = static_cast<PointCoordinateType>(radius);
-			cn.maxHalfLength = static_cast<PointCoordinateType>(height/2);
+			cn.maxHalfLength = static_cast<PointCoordinateType>(height / 2);
 
 			octree->getPointsInCylindricalNeighbourhood(cn);
 			//octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),radius,neighbours,level);
@@ -9189,7 +9287,7 @@ void MainWindow::doActionLoadFile()
 	QSettings settings;
 	settings.beginGroup(ccPS::LoadFile());
 	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
-	QString currentOpenDlgFilter = settings.value(ccPS::SelectedInputFilter(),BinFilter::GetFileFilter()).toString();
+	QString currentOpenDlgFilter = settings.value(ccPS::SelectedInputFilter(), BinFilter::GetFileFilter()).toString();
 
 	// Add all available file I/O filters (with import capabilities)
 	QStringList fileFilters;
@@ -9886,9 +9984,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionMeshScanGrids->setEnabled(atLeastOneGrid);
 	//actionComputeQuadric3D->setEnabled(atLeastOneCloud);
 	m_UI->actionComputeBestFitBB->setEnabled(atLeastOneEntity);
-	m_UI->actionComputeDensity->setEnabled(atLeastOneCloud);
-	m_UI->actionCurvature->setEnabled(atLeastOneCloud);
-	m_UI->actionRoughness->setEnabled(atLeastOneCloud);
+	m_UI->actionComputeGeometricFeature->setEnabled(atLeastOneCloud);
 	m_UI->actionRemoveDuplicatePoints->setEnabled(atLeastOneCloud);
 	m_UI->actionFitPlane->setEnabled(atLeastOneEntity);
 	m_UI->actionFitSphere->setEnabled(atLeastOneCloud);
@@ -9983,7 +10079,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
 
 	m_UI->menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount > 0);
-	m_UI->actionCrossSection->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	m_UI->actionCrossSection->setEnabled(atLeastOneCloud || atLeastOneMesh || (selInfo.groupCount != 0));
 	m_UI->actionExtractSections->setEnabled(atLeastOneCloud);
 	m_UI->actionRasterize->setEnabled(exactlyOneCloud);
 	m_UI->actionCompute2HalfDimVolume->setEnabled(selInfo.cloudCount == selInfo.selCount && selInfo.cloudCount >= 1 && selInfo.cloudCount <= 2); //one or two clouds!

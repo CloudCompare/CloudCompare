@@ -20,8 +20,8 @@
 
 //Local
 #include "ccBBox.h"
-#include "ccHObject.h"
 #include "ccGenericPointCloud.h"
+#include "ccHObject.h"
 #include "ccInteractor.h"
 
 //Qt
@@ -38,7 +38,7 @@ public:
 	ccClipBox(QString name = QString("Clipping box"));
 
 	//! Destructor
-	virtual ~ccClipBox();
+	~ccClipBox() override;
 
 	//! Adds an associated entity
 	/** Warning: resets the current clipping box
@@ -51,11 +51,11 @@ public:
 	void releaseAssociatedEntities();
 
 	//inherited from ccHObject
-	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
+	ccBBox getOwnBB(bool withGLFeatures = false) override;
 
 	//inherited from ccInteractor
-	virtual bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight) override;
-	virtual bool move3D(const CCVector3d& u) override;
+	bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight) override;
+	bool move3D(const CCVector3d& u) override;
 
 	//! Sets last clicked point (on screen)
 	void setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrixd& viewMatrix);
@@ -84,7 +84,7 @@ public:
 	void setActiveComponent(int id);
 
 	//inherited from ccHObject
-	inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CLIPPING_BOX; }
+	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CLIPPING_BOX; }
 
 	//! Returns the box extents
 	inline const ccBBox& getBox() const { return m_box; }
@@ -130,7 +130,7 @@ protected: //methods
 	void update();
 
 	//inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Computes arrows display scale
 	PointCoordinateType computeArrowsScale();

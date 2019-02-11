@@ -33,8 +33,7 @@ public:
 		, constCoef(0)
 	{}
 
-	virtual ~Plane()
-	{}
+	virtual ~Plane() = default;
 
 	void setCoefficients(float a, float b, float c, float d)
 	{
@@ -77,21 +76,19 @@ public:
 
 	CCVector3f getVertexP(const CCVector3f& normal) const
 	{
-		return CCVector3f
-		(
+		return {
 			corners[normal.x > 0 ? 1 : 0].x,
 			corners[normal.y > 0 ? 1 : 0].y,
 			corners[normal.z > 0 ? 1 : 0].z
-		);
+		};
 	}
 	CCVector3f getVertexN(const CCVector3f& normal) const
 	{
-		return CCVector3f
-		(
+		return {
 			corners[normal.x < 0 ? 1 : 0].x,
 			corners[normal.y < 0 ? 1 : 0].y,
 			corners[normal.z < 0 ? 1 : 0].z
-		);
+		};
 	}
 };
 
@@ -110,28 +107,24 @@ public:
 	{
 	}
 
-	virtual ~AACube()
-	{
-	}
+	virtual ~AACube() = default;
 
 	CCVector3f getVertexP(const CCVector3f& normal) const
 	{
-		return CCVector3f
-			(
+		return {
 			normal.x > 0 ? O.x + d : O.x,
 			normal.y > 0 ? O.y + d : O.y,
 			normal.z > 0 ? O.z + d : O.z
-			);
+		};
 	}
 	
 	CCVector3f getVertexN(const CCVector3f& normal) const
 	{
-		return CCVector3f
-			(
+		return {
 			normal.x < 0 ? O.x + d : O.x,
 			normal.y < 0 ? O.y + d : O.y,
 			normal.z < 0 ? O.z + d : O.z
-			);
+		};
 	}
 
 public: //members
@@ -144,9 +137,7 @@ class Frustum
 {
 public:
 
-	Frustum()
-	{
-	}
+	Frustum() = default;
 
 	Frustum(const ccGLMatrixd& modelViewMat, const ccGLMatrixd& projMat)
 	{
@@ -154,9 +145,7 @@ public:
 		initfromMPMatrix(MP);
 	}
 
-	virtual ~Frustum()
-	{
-	}
+	virtual ~Frustum() = default;
 
 	enum Intersection
 	{
@@ -169,9 +158,9 @@ public: //Intersection tests
 
 	Intersection pointInFrustum(const CCVector3f& p) const
 	{
-		for (int i = 0; i < 6; i++)
+		for (const auto &plane : pl)
 		{
-			if (pl[i].distance(p) < 0)
+			if (plane.distance(p) < 0)
 			{
 				return OUTSIDE;
 			}
@@ -184,9 +173,9 @@ public: //Intersection tests
 	{
 		Intersection result = INSIDE;
 
-		for (int i = 0; i < 6; i++)
+		for (const auto &plane : pl)
 		{
-			float distance = pl[i].distance(c);
+			float distance = plane.distance(c);
 
 			if (distance < -r)
 				return OUTSIDE;
@@ -200,11 +189,12 @@ public: //Intersection tests
 	Intersection boxInFrustum(const AABox& box) const
 	{
 		Intersection result = INSIDE;
-		for (int i = 0; i < 6; i++)
+		
+		for (const auto &plane : pl)
 		{
-			if (pl[i].distance(box.getVertexP(pl[i].normal)) < 0)
+			if (plane.distance(box.getVertexP(plane.normal)) < 0)
 				return OUTSIDE;
-			else if (pl[i].distance(box.getVertexN(pl[i].normal)) < 0)
+			else if (plane.distance(box.getVertexN(plane.normal)) < 0)
 				result = INTERSECT;
 		}
 
@@ -214,11 +204,12 @@ public: //Intersection tests
 	Intersection boxInFrustum(const AACube& cube) const
 	{
 		Intersection result = INSIDE;
-		for (int i = 0; i < 6; i++)
+		
+		for (const auto &plane : pl)
 		{
-			if (pl[i].distance(cube.getVertexP(pl[i].normal)) < 0)
+			if (plane.distance(cube.getVertexP(plane.normal)) < 0)
 				return OUTSIDE;
-			else if (pl[i].distance(cube.getVertexN(pl[i].normal)) < 0)
+			else if (plane.distance(cube.getVertexN(plane.normal)) < 0)
 				result = INTERSECT;
 		}
 

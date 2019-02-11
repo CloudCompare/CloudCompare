@@ -542,6 +542,8 @@ void qPoissonRecon::doAction()
 
 			//output mesh
 			m_app->addToDB(newMesh);
+			m_app->setSelectedInDB(ent, false);
+			m_app->setSelectedInDB(newMesh, true);
 		}
 		else
 		{

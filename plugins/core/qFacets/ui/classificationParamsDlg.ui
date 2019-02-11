@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>250</width>
-    <height>101</height>
+    <height>128</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@
      <item row="0" column="1">
       <widget class="QDoubleSpinBox" name="angleStepDoubleSpinBox">
        <property name="suffix">
-        <string> deg.</string>
+        <string notr="true">°</string>
        </property>
        <property name="minimum">
         <double>1.000000000000000</double>

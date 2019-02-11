@@ -21,40 +21,39 @@
 #include "ccPointCloud.h"
 
 //CCLib
-#include <ManualSegmentationTools.h>
 #include <GeometricalAnalysisTools.h>
-#include <ReferenceCloud.h>
 #include <ManualSegmentationTools.h>
+#include <ReferenceCloud.h>
 
 //local
-#include "ccNormalVectors.h"
-#include "ccColorScalesManager.h"
-#include "ccOctree.h"
-#include "ccKdTree.h"
-#include "ccGenericMesh.h"
-#include "ccMesh.h"
-#include "ccImage.h"
 #include "cc2DLabel.h"
-#include "ccMaterial.h"
-#include "ccColorRampShader.h"
-#include "ccPolyline.h"
-#include "ccScalarField.h"
-#include "ccGenericGLDisplay.h"
-#include "ccGBLSensor.h"
-#include "ccProgressDialog.h"
-#include "ccFastMarchingForNormsDirection.h"
-#include "ccMinimumSpanningTreeForNormsDirection.h"
-#include "ccFrustum.h"
-#include "ccPointCloudLOD.h"
 #include "ccChunk.h"
+#include "ccColorRampShader.h"
+#include "ccColorScalesManager.h"
+#include "ccFastMarchingForNormsDirection.h"
+#include "ccFrustum.h"
+#include "ccGBLSensor.h"
+#include "ccGenericGLDisplay.h"
+#include "ccGenericMesh.h"
+#include "ccImage.h"
+#include "ccKdTree.h"
+#include "ccMaterial.h"
+#include "ccMesh.h"
+#include "ccMinimumSpanningTreeForNormsDirection.h"
+#include "ccNormalVectors.h"
+#include "ccOctree.h"
+#include "ccPointCloudLOD.h"
+#include "ccPolyline.h"
+#include "ccProgressDialog.h"
+#include "ccScalarField.h"
 
 //Qt
+#include <QCoreApplication>
 #include <QElapsedTimer>
 #include <QSharedPointer>
-#include <QCoreApplication>
 
 //system
-#include <assert.h>
+#include <cassert>
 #include <queue>
 
 static const char s_deviationSFName[] = "Deviation";
@@ -68,7 +67,7 @@ ccPointCloud::ccPointCloud(QString name) throw()
 	, m_currentDisplayedScalarFieldIndex(-1)
 	, m_visibilityCheckEnabled(false)
 	, m_lod(nullptr)
-	, m_fwfData(0)
+	, m_fwfData(nullptr)
 {
 	setName(name); //sadly we cannot use the ccGenericPointCloud constructor argument
 	showSF(false);
@@ -191,244 +190,241 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 		return nullptr;
 	}
 
-	unsigned n = selection->size();
-	if (n == 0)
-	{
-		ccLog::Warning("[ccPointCloud::partialClone] Selection is empty");
-		return nullptr;
-	}
-
 	ccPointCloud* result = new ccPointCloud(getName() + QString(".extract"));
-
-	if (!result->reserveThePointsTable(n))
-	{
-		ccLog::Error("[ccPointCloud::partialClone] Not enough memory to duplicate cloud!");
-		delete result;
-		return nullptr;
-	}
-
-	//import points
-	{
-		for (unsigned i = 0; i < n; i++)
-		{
-			result->addPoint(*getPointPersistentPtr(selection->getPointGlobalIndex(i)));
-		}
-	}
 
 	//visibility
 	result->setVisible(isVisible());
 	result->setDisplay(getDisplay());
 	result->setEnabled(isEnabled());
 
-	//RGB colors
-	if (hasColors())
+	//other parameters
+	result->importParametersFrom(this);
+
+	//from now on we will need some points to proceed ;)
+	unsigned n = selection->size();
+	if (n)
 	{
-		if (result->reserveTheRGBTable())
+		if (!result->reserveThePointsTable(n))
+		{
+			ccLog::Error("[ccPointCloud::partialClone] Not enough memory to duplicate cloud!");
+			delete result;
+			return nullptr;
+		}
+
+		//import points
 		{
 			for (unsigned i = 0; i < n; i++)
 			{
-				result->addRGBColor(getPointColor(selection->getPointGlobalIndex(i)));
+				result->addPoint(*getPointPersistentPtr(selection->getPointGlobalIndex(i)));
 			}
-			result->showColors(colorsShown());
 		}
-		else
-		{
-			ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy RGB colors!");
-			if (warnings)
-				*warnings |= WRN_OUT_OF_MEM_FOR_COLORS;
-		}
-	}
 
-	//normals
-	if (hasNormals())
-	{
-		if (result->reserveTheNormsTable())
+		//RGB colors
+		if (hasColors())
 		{
-			for (unsigned i = 0; i < n; i++)
-			{
-				result->addNormIndex(getPointNormalIndex(selection->getPointGlobalIndex(i)));
-			}
-			result->showNormals(normalsShown());
-		}
-		else
-		{
-			ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy normals!");
-			if (warnings)
-				*warnings |= WRN_OUT_OF_MEM_FOR_NORMALS;
-		}
-	}
-
-	//waveform
-	if (hasFWF())
-	{
-		if (result->reserveTheFWFTable())
-		{
-			try
+			if (result->reserveTheRGBTable())
 			{
 				for (unsigned i = 0; i < n; i++)
 				{
-					const ccWaveform& w = m_fwfWaveforms[selection->getPointGlobalIndex(i)];
-					if (!result->fwfDescriptors().contains(w.descriptorID()))
-					{
-						//copy only the necessary descriptors
-						result->fwfDescriptors().insert(w.descriptorID(), m_fwfDescriptors[w.descriptorID()]);
-					}
-					result->waveforms().push_back(w);
+					result->addRGBColor(getPointColor(selection->getPointGlobalIndex(i)));
 				}
-				//we will use the same FWF data container
-				result->fwfData() = fwfData();
+				result->showColors(colorsShown());
 			}
-			catch (const std::bad_alloc&)
+			else
+			{
+				ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy RGB colors!");
+				if (warnings)
+					*warnings |= WRN_OUT_OF_MEM_FOR_COLORS;
+			}
+		}
+
+		//normals
+		if (hasNormals())
+		{
+			if (result->reserveTheNormsTable())
+			{
+				for (unsigned i = 0; i < n; i++)
+				{
+					result->addNormIndex(getPointNormalIndex(selection->getPointGlobalIndex(i)));
+				}
+				result->showNormals(normalsShown());
+			}
+			else
+			{
+				ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy normals!");
+				if (warnings)
+					*warnings |= WRN_OUT_OF_MEM_FOR_NORMALS;
+			}
+		}
+
+		//waveform
+		if (hasFWF())
+		{
+			if (result->reserveTheFWFTable())
+			{
+				try
+				{
+					for (unsigned i = 0; i < n; i++)
+					{
+						const ccWaveform& w = m_fwfWaveforms[selection->getPointGlobalIndex(i)];
+						if (!result->fwfDescriptors().contains(w.descriptorID()))
+						{
+							//copy only the necessary descriptors
+							result->fwfDescriptors().insert(w.descriptorID(), m_fwfDescriptors[w.descriptorID()]);
+						}
+						result->waveforms().push_back(w);
+					}
+					//we will use the same FWF data container
+					result->fwfData() = fwfData();
+				}
+				catch (const std::bad_alloc&)
+				{
+					ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy waveform signals!");
+					result->clearFWFData();
+					if (warnings)
+						*warnings |= WRN_OUT_OF_MEM_FOR_FWF;
+				}
+			}
+			else
 			{
 				ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy waveform signals!");
-				result->clearFWFData();
 				if (warnings)
 					*warnings |= WRN_OUT_OF_MEM_FOR_FWF;
 			}
 		}
-		else
-		{
-			ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy waveform signals!");
-			if (warnings)
-				*warnings |= WRN_OUT_OF_MEM_FOR_FWF;
-		}
-	}
 
-	//scalar fields
-	unsigned sfCount = getNumberOfScalarFields();
-	if (sfCount != 0)
-	{
-		for (unsigned k = 0; k < sfCount; ++k)
+		//scalar fields
+		unsigned sfCount = getNumberOfScalarFields();
+		if (sfCount != 0)
 		{
-			const ccScalarField* sf = static_cast<ccScalarField*>(getScalarField(k));
-			assert(sf);
-			if (sf)
+			for (unsigned k = 0; k < sfCount; ++k)
 			{
-				//we create a new scalar field with same name
-				int sfIdx = result->addScalarField(sf->getName());
-				if (sfIdx >= 0) //success
+				const ccScalarField* sf = static_cast<ccScalarField*>(getScalarField(k));
+				assert(sf);
+				if (sf)
 				{
-					ccScalarField* currentScalarField = static_cast<ccScalarField*>(result->getScalarField(sfIdx));
-					assert(currentScalarField);
-					if (currentScalarField->resizeSafe(n))
+					//we create a new scalar field with same name
+					int sfIdx = result->addScalarField(sf->getName());
+					if (sfIdx >= 0) //success
 					{
-						currentScalarField->setGlobalShift(sf->getGlobalShift());
+						ccScalarField* currentScalarField = static_cast<ccScalarField*>(result->getScalarField(sfIdx));
+						assert(currentScalarField);
+						if (currentScalarField->resizeSafe(n))
+						{
+							currentScalarField->setGlobalShift(sf->getGlobalShift());
 
-						//we copy data to new SF
-						for (unsigned i = 0; i < n; i++)
-							currentScalarField->setValue(i, sf->getValue(selection->getPointGlobalIndex(i)));
+							//we copy data to new SF
+							for (unsigned i = 0; i < n; i++)
+								currentScalarField->setValue(i, sf->getValue(selection->getPointGlobalIndex(i)));
 
-						currentScalarField->computeMinAndMax();
-						//copy display parameters
-						currentScalarField->importParametersFrom(sf);
+							currentScalarField->computeMinAndMax();
+							//copy display parameters
+							currentScalarField->importParametersFrom(sf);
+						}
+						else
+						{
+							//if we don't have enough memory, we cancel SF creation
+							result->deleteScalarField(sfIdx);
+							ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy scalar field '%1'!").arg(sf->getName()));
+							if (warnings)
+								*warnings |= WRN_OUT_OF_MEM_FOR_SFS;
+						}
 					}
+				}
+			}
+
+			unsigned copiedSFCount = getNumberOfScalarFields();
+			if (copiedSFCount)
+			{
+				//we display the same scalar field as the source (if we managed to copy it!)
+				if (getCurrentDisplayedScalarField())
+				{
+					int sfIdx = result->getScalarFieldIndexByName(getCurrentDisplayedScalarField()->getName());
+					if (sfIdx >= 0)
+						result->setCurrentDisplayedScalarField(sfIdx);
 					else
+						result->setCurrentDisplayedScalarField(static_cast<int>(copiedSFCount) - 1);
+				}
+				//copy visibility
+				result->showSF(sfShown());
+			}
+		}
+
+		//scan grids
+		if (gridCount() != 0)
+		{
+			try
+			{
+				//we need a map between old and new indexes
+				std::vector<int> newIndexMap(size(), -1);
+				{
+					for (unsigned i = 0; i < n; i++)
 					{
-						//if we don't have enough memory, we cancel SF creation
-						result->deleteScalarField(sfIdx);
-						ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy scalar field '%1'!").arg(sf->getName()));
-						if (warnings)
-							*warnings |= WRN_OUT_OF_MEM_FOR_SFS;
+						newIndexMap[selection->getPointGlobalIndex(i)] = i;
+					}
+				}
+
+				//duplicate the grid structure(s)
+				std::vector<Grid::Shared> newGrids;
+				{
+					for (size_t i = 0; i < gridCount(); ++i)
+					{
+						const Grid::Shared& scanGrid = grid(i);
+						if (scanGrid->validCount != 0) //no need to copy empty grids!
+						{
+							//duplicate the grid
+							newGrids.push_back(Grid::Shared(new Grid(*scanGrid)));
+						}
+					}
+				}
+
+				//then update the indexes
+				UpdateGridIndexes(newIndexMap, newGrids);
+
+				//and keep the valid (non empty) ones
+				for (Grid::Shared& scanGrid : newGrids)
+				{
+					if (scanGrid->validCount)
+					{
+						result->addGrid(scanGrid);
 					}
 				}
 			}
+			catch (const std::bad_alloc&)
+			{
+				//not enough memory
+				ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy the grid structure(s)"));
+			}
 		}
 
-		unsigned copiedSFCount = getNumberOfScalarFields();
-		if (copiedSFCount)
+		//Meshes //TODO
+		/*Lib::GenericIndexedMesh* theMesh = source->_getMesh();
+		if (theMesh)
 		{
-			//we display the same scalar field as the source (if we managed to copy it!)
-			if (getCurrentDisplayedScalarField())
-			{
-				int sfIdx = result->getScalarFieldIndexByName(getCurrentDisplayedScalarField()->getName());
-				if (sfIdx >= 0)
-					result->setCurrentDisplayedScalarField(sfIdx);
-				else
-					result->setCurrentDisplayedScalarField(static_cast<int>(copiedSFCount)-1);
-			}
-			//copy visibility
-			result->showSF(sfShown());
+		//REVOIR --> on pourrait le faire pour chaque sous-mesh non ?
+		CCLib::GenericIndexedMesh* newTri = CCLib::ManualSegmentationTools::segmentMesh(theMesh,selection,true,nullptr,this);
+		setMesh(newTri);
+		if (source->areMeshesDisplayed()) showTri();
 		}
-	}
 
-	//scan grids
-	if (gridCount() != 0)
-	{
-		try
+		//PoV & Scanners
+		bool importScanners = true;
+		if (source->isMultipleScansModeActivated())
+		if (activateMultipleScansMode())
 		{
-			//we need a map between old and new indexes
-			std::vector<int> newIndexMap(size(), -1);
-			{
-				for (unsigned i = 0; i < n; i++)
-				{
-					newIndexMap[selection->getPointGlobalIndex(i)] = i;
-				}
-			}
-
-			//duplicate the grid structure(s)
-			std::vector<Grid::Shared> newGrids;
-			{
-				for (size_t i = 0; i < gridCount(); ++i)
-				{
-					const Grid::Shared& scanGrid = grid(i);
-					if (scanGrid->validCount != 0) //no need to copy empty grids!
-					{
-						//duplicate the grid
-						newGrids.push_back(Grid::Shared (new Grid(*scanGrid)));
-					}
-				}
-			}
-
-			//then update the indexes
-			UpdateGridIndexes(newIndexMap, newGrids);
-
-			//and keep the valid (non empty) ones
-			for (Grid::Shared& scanGrid : newGrids)
-			{
-				if (scanGrid->validCount)
-				{
-					result->addGrid(scanGrid);
-				}
-			}
+		scanIndexesTableType* _theScans = source->getTheScansIndexesArray();
+		for (i=0; i<n; ++i) cubeVertexesIndexes.setValue(i,_theScans->getValue(i));
 		}
-		catch (const std::bad_alloc&)
+		else importScanners=false;
+
+		if (importScanners)
 		{
-			//not enough memory
-			ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy the grid structure(s)"));
+		//on insere les objets "capteur" (pas de copie ici, la meme instance peut-etre partagee par plusieurs listes)
+		for (i=1;i<=source->getNumberOfSensors();++i)
+		setSensor(source->_getSensor(i),i);
 		}
+		*/
 	}
-
-	//Meshes //TODO
-	/*Lib::GenericIndexedMesh* theMesh = source->_getMesh();
-	if (theMesh)
-	{
-	//REVOIR --> on pourrait le faire pour chaque sous-mesh non ?
-	CCLib::GenericIndexedMesh* newTri = CCLib::ManualSegmentationTools::segmentMesh(theMesh,selection,true,nullptr,this);
-	setMesh(newTri);
-	if (source->areMeshesDisplayed()) showTri();
-	}
-
-	//PoV & Scanners
-	bool importScanners = true;
-	if (source->isMultipleScansModeActivated())
-	if (activateMultipleScansMode())
-	{
-	scanIndexesTableType* _theScans = source->getTheScansIndexesArray();
-	for (i=0; i<n; ++i) cubeVertexesIndexes.setValue(i,_theScans->getValue(i));
-	}
-	else importScanners=false;
-
-	if (importScanners)
-	{
-	//on insere les objets "capteur" (pas de copie ici, la même instance peut-être partagee par plusieurs listes)
-	for (i=1;i<=source->getNumberOfSensors();++i)
-	setSensor(source->_getSensor(i),i);
-	}
-	*/
-
-	//other parameters
-	result->importParametersFrom(this);
-
 	return result;
 }
 
@@ -455,7 +451,7 @@ void ccPointCloud::unalloactePoints()
 {
 	clearLOD();	// we have to clear the LOD structure before clearing the colors / SFs, so we can't leave it to notifyGeometryUpdate()
 	showSFColorsScale(false); //SFs will be destroyed
-	BaseClass::clear();
+	BaseClass::reset();
 	ccGenericPointCloud::clear();
 
 	notifyGeometryUpdate(); //calls releaseVBOs()
@@ -935,7 +931,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				catch (const std::bad_alloc&)
 				{
 					//not enough memory
-					m_grids.clear();
+					m_grids.resize(0);
 					ccLog::Warning(QString("[ccPointCloud::fusion] Not enough memory: failed to copy the grid structure(s) from '%1'").arg(addedCloud->getName()));
 					break;
 				}
@@ -949,7 +945,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	else if (gridCount() != 0) //otherwise we'll have to drop the former grid structures!
 	{
 		ccLog::Warning(QString("[ccPointCloud::fusion] Grid structure(s) will be dropped as the merged cloud is unstructured"));
-		m_grids.clear();
+		m_grids.resize(0);
 	}
 
 	//has the cloud been recentered/rescaled?
@@ -992,7 +988,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				//ccGenericMesh* addedTri = mesh;
 
 				//or clone?
-				ccMesh* cloneMesh = mesh->cloneMesh(mesh->getAssociatedCloud() == addedCloud ? this : 0);
+				ccMesh* cloneMesh = mesh->cloneMesh(mesh->getAssociatedCloud() == addedCloud ? this : nullptr);
 				if (cloneMesh)
 				{
 					//change mesh vertices
@@ -1084,7 +1080,7 @@ void ccPointCloud::unallocateColors()
 	{
 		if (m_grids[i])
 		{
-			m_grids[i]->colors.clear();
+			m_grids[i]->colors.resize(0);
 		}
 	}
 
@@ -1135,7 +1131,7 @@ bool ccPointCloud::reserveTheRGBTable()
 
 bool ccPointCloud::resizeTheRGBTable(bool fillWithWhite/*=false*/)
 {
-	if (m_points.size() == 0)
+	if (m_points.empty())
 	{
 		ccLog::Warning("[ccPointCloud::resizeTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
 		return false;
@@ -1193,7 +1189,7 @@ bool ccPointCloud::reserveTheNormsTable()
 
 bool ccPointCloud::resizeTheNormsTable()
 {
-	if (m_points.size() == 0)
+	if (m_points.empty())
 	{
 		ccLog::Warning("[ccPointCloud::resizeTheNormsTable] Internal error: properties (re)allocation before points allocation is forbidden!");
 		return false;
@@ -1223,7 +1219,7 @@ bool ccPointCloud::resizeTheNormsTable()
 
 bool ccPointCloud::compressFWFData()
 {
-	if (!m_fwfData || m_fwfData->size() == 0)
+	if (!m_fwfData || m_fwfData->empty())
 	{
 		return false;
 	}
@@ -1313,7 +1309,7 @@ bool ccPointCloud::reserveTheFWFTable()
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("[ccPointCloud::reserveTheFWFTable] Not enough memory!");
-		m_fwfWaveforms.clear();
+		m_fwfWaveforms.resize(0);
 	}
 
 	//double check
@@ -1324,7 +1320,7 @@ bool ccPointCloud::hasFWF() const
 {
 	return		m_fwfData
 			&&	!m_fwfData->empty()
-			&&	m_fwfWaveforms.size();
+			&&	!m_fwfWaveforms.empty();
 }
 
 ccWaveformProxy ccPointCloud::waveformProxy(unsigned index) const
@@ -1370,7 +1366,7 @@ bool ccPointCloud::resizeTheFWFTable()
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("[ccPointCloud::resizeTheFWFTable] Not enough memory!");
-		m_fwfWaveforms.clear();
+		m_fwfWaveforms.resize(0);
 	}
 
 	//double check
@@ -1827,7 +1823,7 @@ bool ccPointCloud::setRGBColor(const ccColor::Rgb& col)
 
 CCVector3 ccPointCloud::computeGravityCenter()
 {
-	return CCLib::GeometricalAnalysisTools::computeGravityCenter(this);
+	return CCLib::GeometricalAnalysisTools::ComputeGravityCenter(this);
 }
 
 void ccPointCloud::applyGLTransformation(const ccGLMatrix& trans)
@@ -1841,7 +1837,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 	ccGenericPointCloud::applyGLTransformation(trans);
 
 	unsigned count = size();
-	for (unsigned i=0; i<count; i++)
+	for (unsigned i = 0; i < count; i++)
 	{
 		trans.apply(*point(i));
 	}
@@ -2016,7 +2012,7 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 				removeChild(kdtrees[kdtrees.size() - 1 - i]); //faster to remove the last objects
 			}
 		}
-		kdtrees.clear();
+		kdtrees.resize(0);
 	}
 
 	//new we have to compute a proper transformation matrix
@@ -2228,7 +2224,7 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 		{
 			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
 			int normalDataShift = m_vboManager.vbos[chunkIndex]->normalShift;
-			glFunc->glNormalPointer(GL_COORD_TYPE, decimStep * 3 * sizeof(PointCoordinateType), (const GLvoid*)(start + normalDataShift));
+			glFunc->glNormalPointer(GL_COORD_TYPE, decimStep * 3 * sizeof(PointCoordinateType), static_cast<const GLvoid*>(start + normalDataShift));
 			m_vboManager.vbos[chunkIndex]->release();
 		}
 		else
@@ -2285,7 +2281,7 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 		{
 			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
 			int colorDataShift = m_vboManager.vbos[chunkIndex]->rgbShift;
-			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, decimStep * 3 * sizeof(ColorCompType), (const GLvoid*)(start + colorDataShift));
+			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, decimStep * 3 * sizeof(ColorCompType), static_cast<const GLvoid*>(start + colorDataShift));
 			m_vboManager.vbos[chunkIndex]->release();
 		}
 		else
@@ -2329,7 +2325,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 		{
 			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
 			int colorDataShift = m_vboManager.vbos[chunkIndex]->rgbShift;
-			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, decimStep * 3 * sizeof(ColorCompType), (const GLvoid*)(start + colorDataShift));
+			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, decimStep * 3 * sizeof(ColorCompType), static_cast<const GLvoid*>(start + colorDataShift));
 			m_vboManager.vbos[chunkIndex]->release();
 		}
 		else
@@ -2498,7 +2494,7 @@ struct DisplayDesc : LODLevelDesc
 
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	if (m_points.size() == 0)
+	if (m_points.empty())
 		return;
 
 	//get the set of OpenGL functions (version 2.1)
@@ -2592,7 +2588,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								Frustum frustum(camera.modelViewMat, camera.projectionMat);
 
 								//first time: we flag the cells visibility and count the number of visible points
-								m_lod->flagVisibility(frustum, m_clipPlanes.empty() ? 0 : &m_clipPlanes);
+								m_lod->flagVisibility(frustum, m_clipPlanes.empty() ? nullptr : &m_clipPlanes);
 							}
 
 							unsigned remainingPointsAtThisLevel = 0;
@@ -2613,9 +2609,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							//could we draw more points at the next level?
 							context.moreLODPointsAvailable = (remainingPointsAtThisLevel != 0);
 							context.higherLODLevelsAvailable = (!m_lod->allDisplayed() && context.currentLODLevel + 1 <= maxLevel);
-						}
-						else
-						{
 						}
 					}
 				}
@@ -3236,7 +3229,7 @@ void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 	}
 }
 
-ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool removeSelectedPoints/*=false*/, VisibilityTableType* visTable/*=0*/)
+ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool removeSelectedPoints/*=false*/, VisibilityTableType* visTable/*=nullptr*/, bool silent/*=false*/)
 {
 	if (!visTable)
 	{
@@ -3260,14 +3253,13 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 	ccPointCloud* result = nullptr;
 	{
 		//we create a temporary entity with the visible points only
-		CCLib::ReferenceCloud* rc = getTheVisiblePoints(visTable);
+		CCLib::ReferenceCloud* rc = getTheVisiblePoints(visTable, silent);
 		if (!rc)
 		{
 			//a warning message has already been issued by getTheVisiblePoints!
 			//ccLog::Warning("[ccPointCloud] An error occurred during points selection!");
 			return nullptr;
 		}
-		assert(rc->size() != 0);
 
 		//convert selection to cloud
 		result = partialClone(rc);
@@ -3318,7 +3310,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 			{
 				if (grid->validCount == 0)
 				{
-					grid->indexes.clear();
+					grid->indexes.resize(0);
 				}
 			}
 		}
@@ -3336,6 +3328,8 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 				++lastPoint;
 			}
 		}
+
+		unallocateVisibilityArray();
 
 		//TODO: handle associated meshes
 
@@ -3458,7 +3452,7 @@ QSharedPointer<CCLib::ReferenceCloud> ccPointCloud::computeCPSet(	ccGenericPoint
 	if (sfIdx < 0)
 	{
 		ccLog::Warning("[ccPointCloud::ComputeCPSet] Not enough memory!");
-		return QSharedPointer<CCLib::ReferenceCloud>(0);
+		return QSharedPointer<CCLib::ReferenceCloud>(nullptr);
 	}
 
 	int currentInSFIndex = m_currentInScalarFieldIndex;
@@ -4810,14 +4804,14 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			{
 				m_vboManager.vbos[i]->destroy();
 				delete m_vboManager.vbos[i];
-				m_vboManager.vbos[i] = 0;
+				m_vboManager.vbos[i] = nullptr;
 			}
 		}
 
 		//resize the container
 		try
 		{
-			m_vboManager.vbos.resize(chunksCount, 0);
+			m_vboManager.vbos.resize(chunksCount, nullptr);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -4954,14 +4948,14 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			{
 				m_vboManager.vbos[i]->destroy();
 				delete m_vboManager.vbos[i];
-				m_vboManager.vbos[i] = 0;
+				m_vboManager.vbos[i] = nullptr;
 
 				//we can stop here
 				if (i == 0)
 				{
 					ccLog::Warning(QString("[ccPointCloud::updateVBOs] Failed to initialize VBOs (not enough memory?) (cloud '%1')").arg(getName()));
 					m_vboManager.state = vboSet::FAILED;
-					m_vboManager.vbos.clear();
+					m_vboManager.vbos.resize(0);
 					return false;
 				}
 				else
@@ -4982,11 +4976,13 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 	//			.arg(m_vboManager.vbos[i] ? m_vboManager.vbos[i]->bufferId() : -1));
 	//}
 
+#ifdef _DEBUG
 	if (m_vboManager.totalMemSizeBytes != totalSizeBytesBefore)
 		ccLog::Print(QString("[VBO] VBO(s) (re)initialized for cloud '%1' (%2 Mb = %3% of points could be loaded)")
 			.arg(getName())
 			.arg(static_cast<double>(m_vboManager.totalMemSizeBytes) / (1 << 20), 0, 'f', 2)
 			.arg(static_cast<double>(pointsInVBOs) / size() * 100.0, 0, 'f', 2));
+#endif
 
 	m_vboManager.state = vboSet::INITIALIZED;
 	m_vboManager.updateFlags = 0;
@@ -5066,7 +5062,7 @@ void ccPointCloud::releaseVBOs()
 			{
 				m_vboManager.vbos[i]->destroy();
 				delete m_vboManager.vbos[i];
-				m_vboManager.vbos[i] = 0;
+				m_vboManager.vbos[i] = nullptr;
 			}
 		}
 	}
@@ -5075,11 +5071,11 @@ void ccPointCloud::releaseVBOs()
 		assert(m_vboManager.vbos.empty());
 	}
 
-	m_vboManager.vbos.clear();
+	m_vboManager.vbos.resize(0);
 	m_vboManager.hasColors = false;
 	m_vboManager.hasNormals = false;
 	m_vboManager.colorIsSF = false;
-	m_vboManager.sourceSF = 0;
+	m_vboManager.sourceSF = nullptr;
 	m_vboManager.totalMemSizeBytes = 0;
 	m_vboManager.state = vboSet::NEW;
 }
@@ -5595,7 +5591,7 @@ void ccPointCloud::clearLOD()
 
 void ccPointCloud::clearFWFData()
 {
-	m_fwfWaveforms.clear();
+	m_fwfWaveforms.resize(0);
 	m_fwfDescriptors.clear();
 }
 

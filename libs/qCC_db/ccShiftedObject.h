@@ -90,7 +90,7 @@ public:
 	}
 
 	//inherited from ccHObject
-	virtual bool getGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner) override;
+	bool getGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner) override;
 
 protected:
 

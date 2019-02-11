@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1100</width>
-    <height>650</height>
+    <width>1093</width>
+    <height>766</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>CEA Broom Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="qBroom.qrc">
+   <iconset resource="../qBroom.qrc">
     <normaloff>:/CC/plugin/qBroom/images/qBroom.png</normaloff>:/CC/plugin/qBroom/images/qBroom.png</iconset>
   </property>
   <property name="styleSheet">
@@ -42,13 +42,22 @@
       </size>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
        <widget class="QLabel" name="caeLogoLabel">
         <property name="pixmap">
-         <pixmap resource="qBroom.qrc">:/CC/plugin/qBroom/images/cea_logo_small.jpg</pixmap>
+         <pixmap resource="../qBroom.qrc">:/CC/plugin/qBroom/images/cea_logo_small.jpg</pixmap>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -152,7 +161,7 @@
          <item row="1" column="1">
           <widget class="QDoubleSpinBox" name="broomWidthDoubleSpinBox">
            <property name="suffix">
-            <string>%</string>
+            <string notr="true">%</string>
            </property>
            <property name="decimals">
             <number>1</number>
@@ -178,7 +187,7 @@
          <item row="2" column="1">
           <widget class="QDoubleSpinBox" name="broomThicknessDoubleSpinBox">
            <property name="suffix">
-            <string>%</string>
+            <string notr="true">%</string>
            </property>
            <property name="decimals">
             <number>1</number>
@@ -314,7 +323,7 @@
          <item>
           <widget class="QToolButton" name="topViewToolButton">
            <property name="icon">
-            <iconset resource="qBroom.qrc">
+            <iconset resource="../qBroom.qrc">
              <normaloff>:/CC/plugin/qBroom/images/ccViewZpos.png</normaloff>:/CC/plugin/qBroom/images/ccViewZpos.png</iconset>
            </property>
            <property name="autoRaise">
@@ -325,7 +334,7 @@
          <item>
           <widget class="QToolButton" name="frontViewToolButton">
            <property name="icon">
-            <iconset resource="qBroom.qrc">
+            <iconset resource="../qBroom.qrc">
              <normaloff>:/CC/plugin/qBroom/images/ccViewYpos.png</normaloff>:/CC/plugin/qBroom/images/ccViewYpos.png</iconset>
            </property>
            <property name="autoRaise">
@@ -336,7 +345,7 @@
          <item>
           <widget class="QToolButton" name="leftViewToolButton">
            <property name="icon">
-            <iconset resource="qBroom.qrc">
+            <iconset resource="../qBroom.qrc">
              <normaloff>:/CC/plugin/qBroom/images/ccViewXpos.png</normaloff>:/CC/plugin/qBroom/images/ccViewXpos.png</iconset>
            </property>
            <property name="autoRaise">
@@ -347,7 +356,7 @@
          <item>
           <widget class="QToolButton" name="backViewToolButton">
            <property name="icon">
-            <iconset resource="qBroom.qrc">
+            <iconset resource="../qBroom.qrc">
              <normaloff>:/CC/plugin/qBroom/images/ccViewYneg.png</normaloff>:/CC/plugin/qBroom/images/ccViewYneg.png</iconset>
            </property>
            <property name="autoRaise">
@@ -358,7 +367,7 @@
          <item>
           <widget class="QToolButton" name="rightViewToolButton">
            <property name="icon">
-            <iconset resource="qBroom.qrc">
+            <iconset resource="../qBroom.qrc">
              <normaloff>:/CC/plugin/qBroom/images/ccViewXneg.png</normaloff>:/CC/plugin/qBroom/images/ccViewXneg.png</iconset>
            </property>
            <property name="autoRaise">
@@ -369,7 +378,7 @@
          <item>
           <widget class="QToolButton" name="bottomViewToolButton">
            <property name="icon">
-            <iconset resource="qBroom.qrc">
+            <iconset resource="../qBroom.qrc">
              <normaloff>:/CC/plugin/qBroom/images/ccViewZneg.png</normaloff>:/CC/plugin/qBroom/images/ccViewZneg.png</iconset>
            </property>
            <property name="autoRaise">
@@ -408,7 +417,7 @@
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="qBroom.qrc">:/CC/plugin/qBroom/images/warning.png</pixmap>
+            <pixmap resource="../qBroom.qrc">:/CC/plugin/qBroom/images/warning.png</pixmap>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>

@@ -20,7 +20,6 @@
 #define CC_BOUNDING_BOX_HEADER
 
 //Local
-#include "CCGeom.h"
 #include "SquareMatrix.h"
 
 namespace CCLib

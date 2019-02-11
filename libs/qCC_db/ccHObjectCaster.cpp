@@ -18,31 +18,31 @@
 #include "ccHObjectCaster.h"
 
 //types
-#include "ccHObject.h"
-#include "ccShiftedObject.h"
-#include "ccGenericPointCloud.h"
-#include "ccPointCloud.h"
-#include "ccGenericMesh.h"
-#include "ccMesh.h"
-#include "ccSubMesh.h"
-#include "ccFacet.h"
-#include "ccPolyline.h"
-#include "ccOctree.h"
-#include "ccOctreeProxy.h"
-#include "ccKdTree.h"
-#include "ccImage.h"
-#include "ccGBLSensor.h"
-#include "ccCameraSensor.h"
 #include "cc2DLabel.h"
 #include "cc2DViewportLabel.h"
 #include "cc2DViewportObject.h"
-#include "ccGenericPrimitive.h"
-#include "ccSphere.h"
-#include "ccCylinder.h"
+#include "ccCameraSensor.h"
 #include "ccCone.h"
-#include "ccPlane.h"
+#include "ccCylinder.h"
 #include "ccDish.h"
 #include "ccExtru.h"
+#include "ccFacet.h"
+#include "ccGBLSensor.h"
+#include "ccGenericMesh.h"
+#include "ccGenericPointCloud.h"
+#include "ccGenericPrimitive.h"
+#include "ccHObject.h"
+#include "ccImage.h"
+#include "ccKdTree.h"
+#include "ccMesh.h"
+#include "ccOctree.h"
+#include "ccOctreeProxy.h"
+#include "ccPlane.h"
+#include "ccPointCloud.h"
+#include "ccPolyline.h"
+#include "ccShiftedObject.h"
+#include "ccSphere.h"
+#include "ccSubMesh.h"
 #include "ccTorus.h"
 
 /*** helpers ***/
@@ -74,7 +74,7 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* lockedVertices /*= 0*/)
@@ -104,12 +104,12 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 ccShiftedObject* ccHObjectCaster::ToShifted(ccHObject* obj, bool* lockedVertices /*= 0*/)
 {
-	ccGenericPointCloud* cloud = ToGenericPointCloud(obj, lockedVertices /*= 0*/);
+	ccGenericPointCloud* cloud = ToGenericPointCloud(obj, lockedVertices);
 	if (cloud)
 		return cloud;
 
@@ -122,7 +122,7 @@ ccShiftedObject* ccHObjectCaster::ToShifted(ccHObject* obj, bool* lockedVertices
 		return static_cast<ccPolyline*>(obj);
 	}
 
-	return 0;
+	return nullptr;
 }
 
 ccGenericMesh* ccHObjectCaster::ToGenericMesh(ccHObject* obj)
@@ -163,101 +163,101 @@ ccPlanarEntityInterface* ccHObjectCaster::ToPlanarEntity(ccHObject* obj)
 			return static_cast<ccPlane*>(obj);
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 ccGenericPrimitive* ccHObjectCaster::ToPrimitive(ccHObject* obj)
 {
-	return obj && obj->isKindOf(CC_TYPES::PRIMITIVE) ? static_cast<ccGenericPrimitive*>(obj) : 0;
+	return obj && obj->isKindOf(CC_TYPES::PRIMITIVE) ? static_cast<ccGenericPrimitive*>(obj) : nullptr;
 }
 
 ccSphere*	ccHObjectCaster::ToSphere(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::SPHERE) ? static_cast<ccSphere*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::SPHERE) ? static_cast<ccSphere*>(obj) : nullptr;
 }
 
 ccCylinder*	ccHObjectCaster::ToCylinder(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::CYLINDER) ? static_cast<ccCylinder*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::CYLINDER) ? static_cast<ccCylinder*>(obj) : nullptr;
 }
 
 ccCone*		ccHObjectCaster::ToCone(ccHObject* obj)
 {
-	return obj && obj->isKindOf(CC_TYPES::CONE) ? static_cast<ccCone*>(obj) : 0;
+	return obj && obj->isKindOf(CC_TYPES::CONE) ? static_cast<ccCone*>(obj) : nullptr;
 }
 
 ccPlane*	ccHObjectCaster::ToPlane(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::PLANE) ? static_cast<ccPlane*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::PLANE) ? static_cast<ccPlane*>(obj) : nullptr;
 }
 
 ccDish*		ccHObjectCaster::ToDish(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::DISH) ? static_cast<ccDish*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::DISH) ? static_cast<ccDish*>(obj) : nullptr;
 }
 
 ccExtru*	ccHObjectCaster::ToExtru(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::EXTRU) ? static_cast<ccExtru*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::EXTRU) ? static_cast<ccExtru*>(obj) : nullptr;
 }
 
 ccTorus*	ccHObjectCaster::ToTorus(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::TORUS) ? static_cast<ccTorus*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::TORUS) ? static_cast<ccTorus*>(obj) : nullptr;
 }
 
 ccOctreeProxy* ccHObjectCaster::ToOctreeProxy(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::POINT_OCTREE) ? static_cast<ccOctreeProxy*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::POINT_OCTREE) ? static_cast<ccOctreeProxy*>(obj) : nullptr;
 }
 
 ccOctree* ccHObjectCaster::ToOctree(ccHObject* obj)
 {
 	ccOctreeProxy* proxy = ToOctreeProxy(obj);
-	return proxy ? proxy->getOctree().data() : 0;
+	return proxy ? proxy->getOctree().data() : nullptr;
 }
 
 ccKdTree* ccHObjectCaster::ToKdTree(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::POINT_KDTREE) ? static_cast<ccKdTree*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::POINT_KDTREE) ? static_cast<ccKdTree*>(obj) : nullptr;
 }
 
 ccSensor* ccHObjectCaster::ToSensor(ccHObject* obj)
 {
-	return obj && obj->isKindOf(CC_TYPES::SENSOR) ? static_cast<ccSensor*>(obj) : 0;
+	return obj && obj->isKindOf(CC_TYPES::SENSOR) ? static_cast<ccSensor*>(obj) : nullptr;
 }
 
 ccGBLSensor* ccHObjectCaster::ToGBLSensor(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::GBL_SENSOR) ? static_cast<ccGBLSensor*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::GBL_SENSOR) ? static_cast<ccGBLSensor*>(obj) : nullptr;
 }
 
 ccCameraSensor* ccHObjectCaster::ToCameraSensor(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::CAMERA_SENSOR) ? static_cast<ccCameraSensor*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::CAMERA_SENSOR) ? static_cast<ccCameraSensor*>(obj) : nullptr;
 }
 
 ccImage* ccHObjectCaster::ToImage(ccHObject* obj)
 {
-	return obj && obj->isKindOf(CC_TYPES::IMAGE) ? static_cast<ccImage*>(obj) : 0;
+	return obj && obj->isKindOf(CC_TYPES::IMAGE) ? static_cast<ccImage*>(obj) : nullptr;
 }
 
 cc2DLabel* ccHObjectCaster::To2DLabel(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::LABEL_2D) ? static_cast<cc2DLabel*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::LABEL_2D) ? static_cast<cc2DLabel*>(obj) : nullptr;
 }
 
 cc2DViewportLabel* ccHObjectCaster::To2DViewportLabel(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::VIEWPORT_2D_LABEL) ? static_cast<cc2DViewportLabel*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::VIEWPORT_2D_LABEL) ? static_cast<cc2DViewportLabel*>(obj) : nullptr;
 }
 
 cc2DViewportObject* ccHObjectCaster::To2DViewportObject(ccHObject* obj)
 {
-	return obj && obj->isKindOf(CC_TYPES::VIEWPORT_2D_OBJECT) ? static_cast<cc2DViewportObject*>(obj) : 0;
+	return obj && obj->isKindOf(CC_TYPES::VIEWPORT_2D_OBJECT) ? static_cast<cc2DViewportObject*>(obj) : nullptr;
 }
 
 ccIndexedTransformationBuffer* ccHObjectCaster::ToTransBuffer(ccHObject* obj)
 {
-	return obj && obj->isKindOf(CC_TYPES::TRANS_BUFFER) ? static_cast<ccIndexedTransformationBuffer*>(obj) : 0;
+	return obj && obj->isKindOf(CC_TYPES::TRANS_BUFFER) ? static_cast<ccIndexedTransformationBuffer*>(obj) : nullptr;
 }

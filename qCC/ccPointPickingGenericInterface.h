@@ -43,17 +43,17 @@ class ccPointPickingGenericInterface : public ccOverlayDialog, public ccPickingL
 public:
 
 	//! Default constructor
-	explicit ccPointPickingGenericInterface(ccPickingHub* pickingHub, QWidget* parent = 0);
+	explicit ccPointPickingGenericInterface(ccPickingHub* pickingHub, QWidget* parent = nullptr);
 	//! Destructor
-	virtual ~ccPointPickingGenericInterface() {}
+	~ccPointPickingGenericInterface() override = default;
 
 	//inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindow* win);
-	virtual bool start();
-	virtual void stop(bool state);
+	bool linkWith(ccGLWindow* win) override;
+	bool start() override;
+	void stop(bool state) override;
 
 	//! Inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi);
+	void onItemPicked(const PickedItem& pi) override;
 
 protected:
 

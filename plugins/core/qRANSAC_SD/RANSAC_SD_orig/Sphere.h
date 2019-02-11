@@ -84,7 +84,7 @@ private:
 			ScalarType *values, ScalarType *temp) const
 		{
 			ScalarType chi = 0;
-			int size = end - begin;
+			size_t size = end - begin;
 #ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static) reduction(+:chi)
 #endif
@@ -107,7 +107,7 @@ private:
 		void Derivatives(const ScalarType *params, IteratorT begin, IteratorT end,
 			const ScalarType *values, const ScalarType *temp, ScalarType *matrix) const
 		{
-			int size = end - begin;
+			int size = static_cast<int>(end - begin);
 #ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static)
 #endif

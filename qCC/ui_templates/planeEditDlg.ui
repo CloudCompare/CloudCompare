@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>380</height>
+    <height>458</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
        <item row="0" column="1">
         <widget class="QDoubleSpinBox" name="dipDoubleSpinBox">
          <property name="suffix">
-          <string> deg.</string>
+          <string notr="true">°</string>
          </property>
          <property name="decimals">
           <number>3</number>
@@ -57,7 +57,7 @@
        <item row="1" column="1">
         <widget class="QDoubleSpinBox" name="dipDirDoubleSpinBox">
          <property name="suffix">
-          <string> deg.</string>
+          <string notr="true">°</string>
          </property>
          <property name="decimals">
           <number>4</number>
@@ -93,7 +93,7 @@
        <item>
         <widget class="QDoubleSpinBox" name="nxDoubleSpinBox">
          <property name="prefix">
-          <string>Nx = </string>
+          <string notr="true">Nx = </string>
          </property>
          <property name="decimals">
           <number>6</number>
@@ -109,7 +109,7 @@
        <item>
         <widget class="QDoubleSpinBox" name="nyDoubleSpinBox">
          <property name="prefix">
-          <string>Ny = </string>
+          <string notr="true">Ny = </string>
          </property>
          <property name="decimals">
           <number>6</number>
@@ -125,7 +125,7 @@
        <item>
         <widget class="QDoubleSpinBox" name="nzDoubleSpinBox">
          <property name="prefix">
-          <string>Nz = </string>
+          <string notr="true">Nz = </string>
          </property>
          <property name="decimals">
           <number>6</number>
@@ -218,7 +218,7 @@
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="cxAxisDoubleSpinBox">
         <property name="prefix">
-         <string>X:</string>
+         <string notr="true">X: </string>
         </property>
         <property name="decimals">
          <number>8</number>
@@ -248,7 +248,7 @@
       <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="cyAxisDoubleSpinBox">
         <property name="prefix">
-         <string>Y:</string>
+         <string notr="true">Y: </string>
         </property>
         <property name="decimals">
          <number>8</number>
@@ -264,7 +264,7 @@
       <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="czAxisDoubleSpinBox">
         <property name="prefix">
-         <string>Z:</string>
+         <string notr="true">Z: </string>
         </property>
         <property name="decimals">
          <number>8</number>

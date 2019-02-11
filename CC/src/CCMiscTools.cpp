@@ -115,37 +115,37 @@ bool CCMiscTools::TriBoxOverlap(const CCVector3& boxcenter, const CCVector3& box
 
 	/*  test the 9 tests first (this was faster) */
 	PointCoordinateType rad,fex,fey,fez;		// -NJMP- "d" local variable removed
-	//fex = fabs(e0[0]);
-	fey = fabs(e0[1]);
-	fez = fabs(e0[2]);
+	//fex = std::abs(e0[0]);
+	fey = std::abs(e0[1]);
+	fez = std::abs(e0[2]);
 
 	PointCoordinateType minV,maxV;
 	AXISTEST_X01(e0[2], e0[1], fez, fey);
-	fex = fabs(e0[0]); //DGM: not necessary before!
+	fex = std::abs(e0[0]); //DGM: not necessary before!
 	AXISTEST_Y02(e0[2], e0[0], fez, fex);
 	AXISTEST_Z12(e0[1], e0[0], fey, fex);
 
 	PointCoordinateType e1[3];
 	CCVector3::vsubstract(v2,v1,e1);      /* compute triangle edge 1 */
 
-	//fex = fabs(e1[0]);
-	fey = fabs(e1[1]);
-	fez = fabs(e1[2]);
+	//fex = std::abs(e1[0]);
+	fey = std::abs(e1[1]);
+	fez = std::abs(e1[2]);
 
 	AXISTEST_X01(e1[2], e1[1], fez, fey);
-	fex = fabs(e1[0]); //DGM: not necessary before!
+	fex = std::abs(e1[0]); //DGM: not necessary before!
 	AXISTEST_Y02(e1[2], e1[0], fez, fex);
 	AXISTEST_Z0(e1[1], e1[0], fey, fex);
 
 	PointCoordinateType e2[3];
 	CCVector3::vsubstract(v0,v2,e2);      /* compute triangle edge 2 */
 
-	//fex = fabs(e2[0]);
-	fey = fabs(e2[1]);
-	fez = fabs(e2[2]);
+	//fex = std::abs(e2[0]);
+	fey = std::abs(e2[1]);
+	fez = std::abs(e2[2]);
 
 	AXISTEST_X2(e2[2], e2[1], fez, fey);
-	fex = fabs(e2[0]); //DGM: not necessary before!
+	fex = std::abs(e2[0]); //DGM: not necessary before!
 	AXISTEST_Y1(e2[2], e2[0], fez, fex);
 	AXISTEST_Z12(e2[1], e2[0], fey, fex);
 
@@ -243,37 +243,37 @@ bool CCMiscTools::TriBoxOverlapd(const CCVector3d& boxcenter, const CCVector3d& 
 
 	/*  test the 9 tests first (this was faster) */
 	double rad, fex, fey, fez;		// -NJMP- "d" local variable removed
-	//fex = fabs(e0[0]);
-	fey = fabs(e0[1]);
-	fez = fabs(e0[2]);
+	//fex = std::abs(e0[0]);
+	fey = std::abs(e0[1]);
+	fez = std::abs(e0[2]);
 
 	double minV, maxV;
 	AXISTEST_X01(e0[2], e0[1], fez, fey);
-	fex = fabs(e0[0]); //DGM: not necessary before!
+	fex = std::abs(e0[0]); //DGM: not necessary before!
 	AXISTEST_Y02(e0[2], e0[0], fez, fex);
 	AXISTEST_Z12(e0[1], e0[0], fey, fex);
 
 	double e1[3];
 	CCVector3d::vsubstract(v2, v1, e1);      /* compute triangle edge 1 */
 
-	//fex = fabs(e1[0]);
-	fey = fabs(e1[1]);
-	fez = fabs(e1[2]);
+	//fex = std::abs(e1[0]);
+	fey = std::abs(e1[1]);
+	fez = std::abs(e1[2]);
 
 	AXISTEST_X01(e1[2], e1[1], fez, fey);
-	fex = fabs(e1[0]); //DGM: not necessary before!
+	fex = std::abs(e1[0]); //DGM: not necessary before!
 	AXISTEST_Y02(e1[2], e1[0], fez, fex);
 	AXISTEST_Z0(e1[1], e1[0], fey, fex);
 
 	double e2[3];
 	CCVector3d::vsubstract(v0, v2, e2);      /* compute triangle edge 2 */
 
-	//fex = fabs(e2[0]);
-	fey = fabs(e2[1]);
-	fez = fabs(e2[2]);
+	//fex = std::abs(e2[0]);
+	fey = std::abs(e2[1]);
+	fez = std::abs(e2[2]);
 
 	AXISTEST_X2(e2[2], e2[1], fez, fey);
-	fex = fabs(e2[0]); //DGM: not necessary before!
+	fex = std::abs(e2[0]); //DGM: not necessary before!
 	AXISTEST_Y1(e2[2], e2[0], fez, fex);
 	AXISTEST_Z12(e2[1], e2[0], fey, fex);
 

@@ -7,12 +7,13 @@
 #include <AutoSegmentationTools.h>
 #include <CCConst.h>
 #include <CloudSamplingTools.h>
+#include <MeshSamplingTools.h>
 #include <NormalDistribution.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
-#include <MeshSamplingTools.h>
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccNormalVectors.h>
 #include <ccPlane.h>
 #include <ccPolyline.h>
@@ -534,11 +535,76 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 		CC_LOCAL_MODEL_TYPES model = QUADRIC;
 		ccNormalVectors::Orientation  orientation = ccNormalVectors::Orientation::UNDEFINED;
 
+		while (!cmd.arguments().isEmpty())
+		{
+			auto arg = cmd.arguments().front().toUpper();
+			if (arg.left(6) == "ORIENT")
+			{
+				cmd.arguments().takeFirst();
+				if (!cmd.arguments().isEmpty())
+				{
+					QString orient_argument = cmd.arguments().takeFirst().toUpper();
+					if (orient_argument == "PLUS_ZERO")
+						orientation = ccNormalVectors::Orientation::PLUS_ZERO;
+					else if (orient_argument == "MINUS_ZERO")
+						orientation = ccNormalVectors::Orientation::MINUS_ZERO;
+					else if (orient_argument == "PLUS_BARYCENTER")
+						orientation = ccNormalVectors::Orientation::PLUS_BARYCENTER;
+					else if (orient_argument == "MINUS_BARYCENTER")
+						orientation = ccNormalVectors::Orientation::MINUS_BARYCENTER;
+					else if (orient_argument == "PLUS_X")
+						orientation = ccNormalVectors::Orientation::PLUS_X;
+					else if (orient_argument == "MINUS_X")
+						orientation = ccNormalVectors::Orientation::MINUS_X;
+					else if (orient_argument == "PLUS_Y")
+						orientation = ccNormalVectors::Orientation::PLUS_Y;
+					else if (orient_argument == "MINUS_Y")
+						orientation = ccNormalVectors::Orientation::MINUS_Y;
+					else if (orient_argument == "PLUS_Z")
+						orientation = ccNormalVectors::Orientation::PLUS_Z;
+					else if (orient_argument == "MINUS_Z")
+						orientation = ccNormalVectors::Orientation::MINUS_Z;
+					else if (orient_argument == "PREVIOUS")
+						orientation = ccNormalVectors::Orientation::PREVIOUS;
+					else
+						return cmd.error(QObject::tr("Invalid parameter: unknown orientation '%1'").arg(orient_argument));
+				}
+				else
+				{
+					return cmd.error(QObject::tr("Missing orientation"));
+				}
+			}
+			else if (arg == "MODEL")
+			{
+				cmd.arguments().takeFirst();
+				if (!cmd.arguments().isEmpty())
+				{
+					QString model_arg = cmd.arguments().takeFirst().toUpper();
+					if (model_arg == "LS")
+						model = CC_LOCAL_MODEL_TYPES::LS;
+					else if (model_arg == "TRI")
+						model = CC_LOCAL_MODEL_TYPES::TRI;
+					else if (model_arg == "QUADRIC")
+						model = CC_LOCAL_MODEL_TYPES::QUADRIC;
+					else
+						return cmd.error(QObject::tr("Invalid parameter: unknown model '%1'").arg(model_arg));
+				}
+				else
+				{
+					return cmd.error(QObject::tr("Missing model"));
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
+
 		for (const CLCloudDesc& thisCloudDesc : cmd.clouds())
 		{
 			ccPointCloud* cloud = thisCloudDesc.pc;
 			cmd.print("computeNormalsWithOctree started...\n");
-			bool success = cloud->computeNormalsWithOctree(QUADRIC, orientation, radius, nullptr);
+			bool success = cloud->computeNormalsWithOctree(model, orientation, radius, nullptr);
 			if(success)
 			{
 				cmd.print("computeNormalsWithOctree success");
@@ -830,7 +896,7 @@ struct CommandExtractCCs : public ccCommandLineInterface::Command
 			}
 
 			std::vector< CLCloudDesc > inputClouds = cmd.clouds();
-			cmd.clouds().clear();
+			cmd.clouds().resize(0);
 			for (size_t i = 0; i < inputClouds.size(); ++i)
 			{
 				ccPointCloud* cloud = inputClouds[i].pc;
@@ -953,7 +1019,7 @@ struct CommandCurvature : public ccCommandLineInterface::Command
 			return cmd.error(QObject::tr("Missing parameter: curvature type after \"-%1\"").arg(COMMAND_CURVATURE));
 
 		QString curvTypeStr = cmd.arguments().takeFirst().toUpper();
-		CCLib::Neighbourhood::CC_CURVATURE_TYPE curvType = CCLib::Neighbourhood::MEAN_CURV;
+		CCLib::Neighbourhood::CurvatureType curvType = CCLib::Neighbourhood::MEAN_CURV;
 		if (curvTypeStr == "MEAN")
 		{
 			//curvType = CCLib::Neighbourhood::MEAN_CURV;
@@ -985,13 +1051,12 @@ struct CommandCurvature : public ccCommandLineInterface::Command
 			return cmd.error(QObject::tr("No point cloud on which to compute curvature! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CURVATURE));
 
 		//Call MainWindow generic method
-		void* additionalParameters[2] = { &curvType, &kernelSize };
 		ccHObject::Container entities;
 		entities.resize(cmd.clouds().size());
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 			entities[i] = cmd.clouds()[i].pc;
 
-		if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_CURVATURE, entities, cmd.widgetParent(), additionalParameters))
+		if (ccLibAlgorithms::ComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::Curvature, curvType, kernelSize, entities, cmd.widgetParent()))
 		{
 			//save output
 			if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize)))
@@ -1060,9 +1125,8 @@ struct CommandApproxDensity : public ccCommandLineInterface::Command
 					return false;
 			}
 		}
-		void* additionalParameters[] = { &densityType };
 
-		if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_APPROX_DENSITY, entities, cmd.widgetParent(), additionalParameters))
+		if (ccLibAlgorithms::ComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::ApproxLocalDensity, densityType, 0, entities, cmd.widgetParent()))
 		{
 			//save output
 			if (cmd.autoSaveMode() && !cmd.saveClouds("APPROX_DENSITY"))
@@ -1112,13 +1176,12 @@ struct CommandDensity : public ccCommandLineInterface::Command
 			return cmd.error(QObject::tr("No point cloud on which to compute density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DENSITY));
 
 		//Call MainWindow generic method
-		void* additionalParameters[] = { &kernelSize, &densityType };
 		ccHObject::Container entities;
 		entities.resize(cmd.clouds().size());
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 			entities[i] = cmd.clouds()[i].pc;
 
-		if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ACCURATE_DENSITY, entities, cmd.widgetParent(), additionalParameters))
+		if (ccLibAlgorithms::ComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::LocalDensity, densityType, kernelSize, entities, cmd.widgetParent()))
 		{
 			//save output
 			if (cmd.autoSaveMode() && !cmd.saveClouds("DENSITY"))
@@ -1213,13 +1276,12 @@ struct CommandRoughness : public ccCommandLineInterface::Command
 			return cmd.error(QObject::tr("No point cloud on which to compute roughness! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_ROUGHNESS));
 
 		//Call MainWindow generic method
-		void* additionalParameters[1] = { &kernelSize };
 		ccHObject::Container entities;
 		entities.resize(cmd.clouds().size());
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 			entities[i] = cmd.clouds()[i].pc;
 
-		if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ROUGHNESS, entities, cmd.widgetParent(), additionalParameters))
+		if (ccLibAlgorithms::ComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::Roughness, 0, kernelSize, entities, cmd.widgetParent()))
 		{
 			//save output
 			if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("ROUGHNESS_KERNEL_%2").arg(kernelSize)))
@@ -2697,21 +2759,46 @@ struct CommandDist : public ccCommandLineInterface::Command
 		cmd.print("[DISTANCE COMPUTATION]");
 
 		//compared cloud
+		CLEntityDesc* compEntity = nullptr;
+		ccHObject* compCloud = nullptr;
+		size_t nextMeshIndex = 0;
 		if (cmd.clouds().empty())
-			return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
-		else if (m_cloud2meshDist && cmd.clouds().size() != 1)
-			cmd.warning("Multiple point clouds loaded! We take the first one by default");
-		CLCloudDesc& compCloud = cmd.clouds().front();
+		{
+			//no cloud loaded
+			if (!m_cloud2meshDist || cmd.meshes().size() < 2)
+			{
+				//we would need at least two meshes
+				return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
+			}
+			else
+			{
+				cmd.warning(QObject::tr("No point cloud available. Will use the first mesh vertices as compared cloud."));
+				compEntity = &(cmd.meshes().front());
+				compCloud = dynamic_cast<ccPointCloud*>(cmd.meshes()[nextMeshIndex++].mesh->getAssociatedCloud());
+				if (!compCloud)
+				{
+					return cmd.error(QObject::tr("Unhandled mesh vertices type"));
+				}
+			}
+		}
+		else //at least two clouds
+		{
+			if (m_cloud2meshDist && cmd.clouds().size() != 1)
+				cmd.warning("[C2M] Multiple point clouds loaded! Will take the first one by default.");
+			compEntity = &(cmd.clouds().front());
+			compCloud = cmd.clouds().front().pc;
+		}
+		assert(compEntity && compCloud);
 
 		//reference entity
 		ccHObject* refEntity = 0;
 		if (m_cloud2meshDist)
 		{
-			if (cmd.meshes().empty())
+			if (cmd.meshes().size() <= nextMeshIndex)
 				return cmd.error(QObject::tr("No mesh available. Be sure to open one first!"));
-			else if (cmd.meshes().size() != 1)
-				cmd.warning("Multiple meshes loaded! We take the first one by default");
-			refEntity = cmd.meshes().front().mesh;
+			else if (cmd.meshes().size() != nextMeshIndex + 1)
+				cmd.warning(QString("Multiple meshes loaded! We take the %1 one by default").arg(nextMeshIndex == 0 ? "first" : "second"));
+			refEntity = cmd.meshes()[nextMeshIndex].mesh;
 		}
 		else
 		{
@@ -2850,7 +2937,7 @@ struct CommandDist : public ccCommandLineInterface::Command
 		}
 
 		//spawn dialog (virtually) so as to prepare the comparison process
-		ccComparisonDlg compDlg(compCloud.pc,
+		ccComparisonDlg compDlg(compCloud,
 								refEntity,
 								m_cloud2meshDist ? ccComparisonDlg::CLOUDMESH_DIST : ccComparisonDlg::CLOUDCLOUD_DIST,
 								cmd.widgetParent(),
@@ -2915,11 +3002,11 @@ struct CommandDist : public ccCommandLineInterface::Command
 		if (maxDist > 0)
 			suffix += QObject::tr("_MAX_DIST_%1").arg(maxDist);
 
-		compCloud.basename += suffix;
+		compEntity->basename += suffix;
 
 		if (cmd.autoSaveMode())
 		{
-			QString errorStr = cmd.exportEntity(compCloud);
+			QString errorStr = cmd.exportEntity(*compEntity);
 			if (!errorStr.isEmpty())
 				return cmd.error(errorStr);
 		}
@@ -3206,7 +3293,7 @@ struct CommandDelaunayTri : public ccCommandLineInterface::Command
 			}
 		}
 		//mehses have taken ownership of the clouds!
-		cmd.clouds().clear();
+		cmd.clouds().resize(0);
 
 		return true;
 	}

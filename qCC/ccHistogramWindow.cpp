@@ -105,10 +105,10 @@ void ccHistogramWindow::clearInternal()
 		m_associatedSF = 0;
 	}
 
-	m_histoValues.clear();
+	m_histoValues.resize(0);
 	m_maxHistoVal = 0;
 
-	m_curveValues.clear();
+	m_curveValues.resize(0);
 
 	m_selectedItem = NONE;
 }
@@ -210,7 +210,7 @@ void ccHistogramWindow::setCurveValues(const std::vector<double>& curveValues)
 bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
 {
 	//clear any existing histogram
-	m_histoValues.clear();
+	m_histoValues.resize(0);
 
 	if (!m_associatedSF)
 	{

@@ -19,20 +19,19 @@
 
 //CCLib
 #include <Delaunay2dMesh.h>
-//#include <PointProjectionTools.h>
 
 //qCC_db
 #include "ccGenericPointCloud.h"
 #include "ccPointCloud.h"
-#include "ccScalarField.h"
 #include "ccProgressDialog.h"
+#include "ccScalarField.h"
 
 //Qt
 #include <QCoreApplication>
 #include <QMap>
 
 //System
-#include <assert.h>
+#include <cassert>
 
 //default field names
 struct DefaultFieldNames : public QMap<ccRasterGrid::ExportableFields, QString>
@@ -114,8 +113,8 @@ void ccRasterGrid::clear()
 	//reset
 	width = height = 0;
 
-	rows.clear();
-	scalarFields.clear();
+	rows.resize(0);
+	scalarFields.resize(0);
 
 	minHeight = maxHeight = meanHeight = 0;
 	nonEmptyCellCount = validCellCount = 0;
@@ -143,7 +142,7 @@ bool ccRasterGrid::init(unsigned w,
 	catch (const std::bad_alloc&)
 	{
 		//not enough memory
-		rows.clear();
+		rows.resize(0);
 		return false;
 	}
 
@@ -200,7 +199,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			catch (const std::bad_alloc&)
 			{
 				//not enough memory
-				scalarFields.clear();
+				scalarFields.resize(0);
 				ccLog::Warning("[Rasterize] Failed to allocate memory for scalar fields!");
 			}
 		}
@@ -346,7 +345,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				assert(!scalarFields[k].empty());
 
 				CCLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
-				assert(sf && pos < static_cast<int>(sf->currentSize()));
+				assert(sf && pos < scalarFields[k].size());
 
 				ScalarType sfValue = sf->getValue(n);
 
@@ -396,11 +395,11 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	//update SF grids for 'average' cases
 	if (sfInterpolation == PROJ_AVERAGE_VALUE)
 	{
-		for (size_t k = 0; k < scalarFields.size(); ++k)
+		for (auto &scalarField : scalarFields)
 		{
-			assert(!scalarFields[k].empty());
+			assert(!scalarField.empty());
 
-			double* _gridSF = scalarFields[k].data();
+			double* _gridSF = scalarField.data();
 			for (unsigned j = 0; j < height; ++j)
 			{
 				Row& row = rows[j];
@@ -544,7 +543,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						const double& valB = rows[ P[1][1] ][ P[1][0] ].h;
 						const double& valC = rows[ P[2][1] ][ P[2][0] ].h;
 
-						int det = (P[1][1] - P[2][1])*(P[0][0] - P[2][0]) + (P[2][0] - P[1][0])*(P[0][1] - P[2][1]);
+						double det = static_cast<double>((P[1][1] - P[2][1])*(P[0][0] - P[2][0]) + (P[2][0] - P[1][0])*(P[0][1] - P[2][1]));
 
 						for (int j = yMin; j <= yMax; ++j)
 						{
@@ -574,9 +573,9 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 									//can we interpolate?
 									if (inside)
 									{
-										double l1 = static_cast<double>((P[1][1] - P[2][1])*(i - P[2][0]) + (P[2][0] - P[1][0])*(j - P[2][1])) / det;
-										double l2 = static_cast<double>((P[2][1] - P[0][1])*(i - P[2][0]) + (P[0][0] - P[2][0])*(j - P[2][1])) / det;
-										double l3 = 1.0-l1-l2;
+										double l1 = ((P[1][1] - P[2][1])*(i - P[2][0]) + (P[2][0] - P[1][0])*(j - P[2][1])) / det;
+										double l2 = ((P[2][1] - P[0][1])*(i - P[2][0]) + (P[0][0] - P[2][0])*(j - P[2][1])) / det;
+										double l3 = 1.0 - l1 - l2;
 
 										row[i].h = l1 * valA + l2 * valB + l3 * valC;
 										assert(std::isfinite(row[i].h));
@@ -591,15 +590,15 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 										}
 
 										//interpolate the SFs as well!
-										for (size_t sfIndex = 0; sfIndex < scalarFields.size(); ++sfIndex)
+										for (auto &gridSF : scalarFields)
 										{
-											assert(!scalarFields[sfIndex].empty());
+											assert(!gridSF.empty());
 
-											SF& gridSF = scalarFields[sfIndex];
 											const double& sfValA = gridSF[P[0][0] + P[0][1] * width];
 											const double& sfValB = gridSF[P[1][0] + P[1][1] * width];
 											const double& sfValC = gridSF[P[2][0] + P[2][1] * width];
-											gridSF[i + j*width] = l1 * sfValA + l2 * sfValB + l3 * sfValC;
+											assert(i + j * width < gridSF.size());
+											gridSF[i + j * width] = l1 * sfValA + l2 * sfValB + l3 * sfValC;
 										}
 									}
 								}
@@ -717,32 +716,38 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 	{
 		//invalid input parameters
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	if (!isValid())
 	{
-		return 0;
+		return nullptr;
 	}
 
 	unsigned pointsCount = (fillEmptyCells ? width * height : validCellCount);
 	if (pointsCount == 0)
 	{
 		ccLog::Warning("[Rasterize] Empty grid!");
-		return 0;
+		return nullptr;
 	}
 
-	ccPointCloud* cloudGrid = 0;
+	ccPointCloud* cloudGrid = nullptr;
 	
 	//if we 'resample' the input cloud, we actually resample it (one point in each cell)
 	//and we may have to change some things aftewards (height, scalar fields, etc.)
 	if (resampleInputCloudXY)
 	{
+		if (!inputCloud)
+		{
+			ccLog::Warning("[Rasterize] Internal error: no input clouds specified (for resampling)");
+			assert(false);
+			return nullptr;
+		}
 		CCLib::ReferenceCloud refCloud(inputCloud);
 		if (!refCloud.reserve(nonEmptyCellCount))
 		{
 			ccLog::Warning("[Rasterize] Not enough memory!");
-			return 0;
+			return nullptr;
 		}
 
 		for (unsigned j = 0; j < height; ++j)
@@ -762,7 +767,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 		if (!cloudGrid)
 		{
 			ccLog::Error("[Rasterize] Not enough memory");
-			return 0;
+			return nullptr;
 		}
 		cloudGrid->setPointSize(0); //0 = default size (to avoid display issues)
 
@@ -801,7 +806,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 	std::vector<CCLib::ScalarField*> exportedSFs;
 	if (!exportedFields.empty())
 	{
-		exportedSFs.resize(exportedFields.size(), 0);
+		exportedSFs.resize(exportedFields.size(), nullptr);
 		for (size_t i = 0; i < exportedFields.size(); ++i)
 		{
 			int sfIndex = -1;
@@ -862,7 +867,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 		{
 			ccLog::Warning("[Rasterize] Not enough memory!");
 			delete cloudGrid;
-			return 0;
+			return nullptr;
 		}
 
 		if (interpolateColors && !cloudGrid->reserveTheRGBTable())
@@ -906,6 +911,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 					Pf.u[outY] = static_cast<PointCoordinateType>(Py);
 					Pf.u[outZ] = static_cast<PointCoordinateType>(aCell->h);
 
+					assert(cloudGrid->size() < cloudGrid->capacity());
 					cloudGrid->addPoint(Pf);
 
 					if (interpolateColors)
@@ -919,18 +925,19 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 				}
 
 				//fill the associated SFs
+				assert(!resampleInputCloudXY || inputCloud);
+				assert(!resampleInputCloudXY || nonEmptyCellIndex < inputCloud->size()); //we can't be here if we have a fully resampled cloud! (resampleInputCloudXY implies that inputCloud is defined)
 				assert(exportedSFs.size() == exportedFields.size());
-				assert(!inputCloud || nonEmptyCellIndex < inputCloud->size()); //we can't be here if we have a fully resampled cloud!
-				for (size_t i = 0; i < exportedSFs.size(); ++i)
+				for (size_t k = 0; k < exportedSFs.size(); ++k)
 				{
-					CCLib::ScalarField* sf = exportedSFs[i];
+					CCLib::ScalarField* sf = exportedSFs[k];
 					if (!sf)
 					{
 						continue;
 					}
 
 					ScalarType sVal = NAN_VALUE;
-					switch (exportedFields[i])
+					switch (exportedFields[k])
 					{
 					case PER_CELL_HEIGHT:
 						sVal = static_cast<ScalarType>(aCell->h);
@@ -960,14 +967,32 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 					
 					if (resampleInputCloudXY)
 					{
-						sf->setValue(nonEmptyCellIndex, sVal);
+						if (aCell->nbPoints != 0)
+						{
+							//previously existing point
+							assert(nonEmptyCellIndex < inputCloud->size());
+							assert(nonEmptyCellIndex < sf->size());
+							sf->setValue(nonEmptyCellIndex, sVal);
+						}
+						else
+						{
+							//new point
+							assert(sf->size() < sf->capacity());
+							sf->addElement(sVal);
+						}
 					}
 					else
 					{
+						//new point
+						assert(sf->size() < sf->capacity());
 						sf->addElement(sVal);
 					}
 				}
-				++nonEmptyCellIndex;
+
+				if (aCell->nbPoints != 0)
+				{
+					++nonEmptyCellIndex;
+				}
 			}
 			else if (fillEmptyCells) //empty cell
 			{
@@ -979,6 +1004,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 					Pf.u[outY] = static_cast<PointCoordinateType>(Py);
 					Pf.u[outZ] = static_cast<PointCoordinateType>(emptyCellsHeight);
 					
+					assert(cloudGrid->size() < cloudGrid->capacity());
 					cloudGrid->addPoint(Pf);
 
 					if (interpolateColors)
@@ -988,22 +1014,25 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 				}
 
 				assert(exportedSFs.size() == exportedFields.size());
-				for (size_t i = 0; i < exportedSFs.size(); ++i)
+				for (size_t k = 0; k < exportedSFs.size(); ++k)
 				{
-					if (!exportedSFs[i])
+					CCLib::ScalarField* sf = exportedSFs[k];
+					if (!sf)
 					{
 						continue;
 					}
-					
-					if (exportedFields[i] == PER_CELL_HEIGHT)
+
+					if (exportedFields[k] == PER_CELL_HEIGHT)
 					{
 						//we set the point height to the default height
 						ScalarType s = static_cast<ScalarType>(emptyCellsHeight);
-						exportedSFs[i]->addElement(s);
+						assert(sf->size() < sf->capacity());
+						sf->addElement(s);
 					}
 					else
 					{
-						exportedSFs[i]->addElement(NAN_VALUE);
+						assert(sf->size() < sf->capacity());
+						sf->addElement(NAN_VALUE);
 					}
 				}
 			}
@@ -1015,9 +1044,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 	}
 
 	//finish the SFs initialization (if any)
-	for (size_t i = 0; i < exportedSFs.size(); ++i)
+	for (auto sf : exportedSFs)
 	{
-		CCLib::ScalarField* sf = exportedSFs[i];
 		if (sf)
 		{
 			sf->computeMinAndMax();

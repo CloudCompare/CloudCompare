@@ -44,4 +44,5 @@ void qLASFWFIO::registerCommands(ccCommandLineInterface* cmd)
 	}
 
 	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandLoadLASFWF));
+	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandSaveLASFWF));
 }

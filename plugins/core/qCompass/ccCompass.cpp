@@ -16,15 +16,23 @@
 //##########################################################################
 
 #include <array>
+#include <random>
 
 //Qt
+#include <QCheckBox>
+#include <QComboBox>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QIntValidator>
-#include <qcheckbox.h>
+#include <QXmlStreamWriter>
+
+//common
 #include <ccPickingHub.h>
+
+//qCC_db
 #include <ccProgressDialog.h>
 
+#include "ccBox.h"
 #include "ccCompass.h"
 #include "ccCompassDlg.h"
 #include "ccCompassInfo.h"
@@ -34,10 +42,10 @@
 #include "ccMapDlg.h"
 #include "ccNoteTool.h"
 #include "ccPinchNodeTool.h"
+#include "ccSNECloud.h"
 #include "ccThicknessTool.h"
 #include "ccTopologyTool.h"
 #include "ccTraceTool.h"
-#include "ccSNECloud.h"
 
 //initialize default static pars
 bool ccCompass::drawName = false;
@@ -51,7 +59,6 @@ int ccCompass::mapTo = ccGeoObject::LOWER_BOUNDARY;
 ccCompass::ccCompass(QObject* parent) :
 	QObject( parent )
   , ccStdPluginInterface( ":/CC/plugin/qCompass/info.json" )
-  , m_action( nullptr )
 {
 	//initialize all tools
 	m_fitPlaneTool = new ccFitPlaneTool();
@@ -74,11 +81,6 @@ ccCompass::~ccCompass()
 	delete m_topologyTool;
 	delete m_noteTool;
 	delete m_pinchNodeTool;
-
-	if (m_dlg)
-		delete m_dlg;
-	if (m_mapDlg)
-		delete m_mapDlg;
 }
 
 void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
@@ -250,8 +252,11 @@ void ccCompass::doAction()
 		ccCompassDlg::connect(m_dlg->m_toPointCloud, SIGNAL(triggered()), this, SLOT(convertToPointCloud()));
 		ccCompassDlg::connect(m_dlg->m_distributeSelection, SIGNAL(triggered()), this, SLOT(distributeSelection()));
 		ccCompassDlg::connect(m_dlg->m_estimateNormals, SIGNAL(triggered()), this, SLOT(estimateStructureNormals()));
+		ccCompassDlg::connect(m_dlg->m_estimateP21, SIGNAL(triggered()), this, SLOT(estimateP21()));
+		ccCompassDlg::connect(m_dlg->m_estimateStrain, SIGNAL(triggered()), this, SLOT(estimateStrain()));
 		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNote()));
-
+		ccCompassDlg::connect(m_dlg->m_loadFoliations, SIGNAL(triggered()), this, SLOT(importFoliations()));
+		ccCompassDlg::connect(m_dlg->m_loadLineations, SIGNAL(triggered()), this, SLOT(importLineations()));
 		ccCompassDlg::connect(m_dlg->m_toSVG, SIGNAL(triggered()), this, SLOT(exportToSVG()));
 
 		//settings menu
@@ -275,11 +280,36 @@ void ccCompass::doAction()
 	m_dlg->linkWith(m_app->getActiveGLWindow());
 	m_mapDlg->linkWith(m_app->getActiveGLWindow());
 
+	//load ccCompass objects
+	tryLoading();
+
+	//start in measure mode
+	enableMeasureMode();
+	
+	//begin measuring
+	startMeasuring();
+}
+
+//loop through DB tree looking for ccCompass objects that
+//are not represented by our custom class. If any are found,
+//replace them. Assuming not too many objects are found, this should be
+//quite fast; hence we call it every time the selection changes.
+void ccCompass::tryLoading()
+{
+	//setup progress window
+	ccProgressDialog prg(true, m_app->getMainWindow());
+	prg.setMethodTitle("Compass");
+	prg.setInfo("Converting Compass types...");
+	prg.start();
+
+
 	//loop through DB_Tree and find any ccCompass objects
 	std::vector<int> originals; //ids of original objects
 	std::vector<ccHObject*> replacements; //pointers to objects that will replace the originals
-	for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
+	unsigned nChildren = m_app->dbRootObject()->getChildrenNumber();
+	for (unsigned i = 0; i < nChildren; i++)
 	{
+		prg.setValue(static_cast<int>((50 * i) / nChildren));
 		ccHObject* c = m_app->dbRootObject()->getChild(i);
 		tryLoading(c, &originals, &replacements);
 	}
@@ -287,8 +317,13 @@ void ccCompass::doAction()
 	//replace all "originals" with their corresponding "duplicates"
 	for (size_t i = 0; i < originals.size(); i++)
 	{
+		prg.setValue(50 + (50 * i) / originals.size());
+
 		ccHObject* original = m_app->dbRootObject()->find(originals[i]);
 		ccHObject* replacement = replacements[i];
+
+		replacement->setVisible(original->isVisible());
+		replacement->setEnabled(original->isEnabled());
 
 		if (!original) //can't find for some reason?
 			continue;
@@ -302,7 +337,7 @@ void ccCompass::doAction()
 		}
 
 		//remove them from the orignal parent
-		original->detatchAllChildren(); 
+		original->detatchAllChildren();
 
 		//add new parent to scene graph
 		original->getParent()->addChild(replacement);
@@ -321,18 +356,17 @@ void ccCompass::doAction()
 		}
 	}
 
-	//start in measure mode
-	enableMeasureMode();
-
-	//trigger selection changed
-	onNewSelection(m_app->getSelectedEntities());
-
-	//begin measuring
-	startMeasuring();
+	prg.close();
 }
 
 void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vector<ccHObject*>* replacements)
 {
+	//recurse on children
+	for (unsigned i = 0; i < obj->getChildrenNumber(); i++)
+	{
+		tryLoading(obj->getChild(i), originals, replacements);
+	}
+
 	//is object already represented by a ccCompass class?
 	if (dynamic_cast<ccFitPlane*>(obj)
 		|| dynamic_cast<ccTrace*>(obj)
@@ -343,15 +377,6 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 		return; //we need do nothing!
 	}
 
-	//recurse on children
-	for (unsigned i = 0; i < obj->getChildrenNumber(); i++)
-	{
-		tryLoading(obj->getChild(i), originals, replacements);
-	}
-
-	//store parent of this object
-	//ccHObject* parent = obj->getParent();
-
 	//are we a geoObject
 	if (ccGeoObject::isGeoObject(obj))
 	{
@@ -360,6 +385,7 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 		//add to originals/duplicates list [these are used later to overwrite the originals]
 		originals->push_back(obj->getUniqueID());
 		replacements->push_back(geoObj);
+
 		return;
 	}
 
@@ -473,6 +499,7 @@ bool ccCompass::startMeasuring()
 		m_activeTool->toolActivated();
 	}
 	
+	m_active = true;
 	return true;
 }
 
@@ -519,6 +546,8 @@ bool ccCompass::stopMeasuring(bool finalStop/*=false*/)
 	{
 		m_app->getActiveGLWindow()->redraw(true, false);
 	}
+
+	m_active = false;
 
 	return true;
 }
@@ -1133,13 +1162,13 @@ void ccCompass::recalculateFitPlanes()
 	m_app->dbRootObject()->filterChildren(planes, true, CC_TYPES::PLANE, true);
 
 	std::vector<ccHObject*> garbage; //planes that need to be deleted
-	for (ccHObject::Container::iterator it = planes.begin(); it != planes.end(); it++)
+	for (auto & plane : planes)
 	{
-		if (!ccFitPlane::isFitPlane((*it)))
+		if (!ccFitPlane::isFitPlane(plane))
 			continue; //only deal with FitPlane objects
 
 		//is parent of the plane a trace object?
-		ccHObject* parent = (*it)->getParent();
+		ccHObject* parent = plane->getParent();
 
 		if (ccTrace::isTrace(parent)) //add to recalculate list
 		{
@@ -1153,15 +1182,15 @@ void ccCompass::recalculateFitPlanes()
 			}
 
 			//add the old plane to the garbage list (to be deleted later)
-			garbage.push_back((*it));
+			garbage.push_back(plane);
 
 			continue; //next
 		}
 
 		//otherwise - does the plane have a child that is a trace object (i.e. it was created in Compass mode)
-		for (unsigned c = 0; c < (*it)->getChildrenNumber(); c++)
+		for (unsigned c = 0; c < plane->getChildrenNumber(); c++)
 		{
-			ccHObject* child = (*it)->getChild(c);
+			ccHObject* child = plane->getChild(c);
 			if (ccTrace::isTrace(child)) //add to recalculate list
 			{
 				//recalculate the fit plane
@@ -1175,15 +1204,15 @@ void ccCompass::recalculateFitPlanes()
 					m_app->addToDB(p, false, false, false, false);
 
 					//remove the trace from the original fit-plane
-					(*it)->detachChild(t);
+					plane->detachChild(t);
 
 					//add it to the new one
 					p->addChild(t);
 
-//add the old plane to the garbage list (to be deleted later)
-garbage.push_back((*it));
+					//add the old plane to the garbage list (to be deleted later)
+					garbage.push_back(plane);
 
-break;
+					break;
 				}
 			}
 		}
@@ -1195,7 +1224,6 @@ break;
 		garbage[i]->getParent()->removeChild(garbage[i]);
 	}
 }
-
 
 //prior distribution for orientations (depends on outcrop orientation)
 inline double prior(double phi, double theta, double nx, double ny, double nz)
@@ -1212,19 +1240,19 @@ inline double prior(double phi, double theta, double nx, double ny, double nz)
 }
 
 //calculate log scale-factor for wishart dist. This only needs to be done once per X, so is pulled out of the wish function for performance
-inline double logWishSF(double X[3][3], int nobserved)
+inline double logWishSF(CCLib::SquareMatrixd X, int nobserved)
 {
 	//calculate determinant of X
-	double detX = X[0][0] * ((X[1][1] * X[2][2]) - (X[2][1] * X[1][2])) -
-		X[0][1] * (X[1][0] * X[2][2] - X[2][0] * X[1][2]) +
-		X[0][2] * (X[1][0] * X[2][1] - X[2][0] * X[1][1]);
+	double detX = X.m_values[0][0] * ((X.m_values[1][1] * X.m_values[2][2]) - (X.m_values[2][1] * X.m_values[1][2])) -
+		X.m_values[0][1] * (X.m_values[1][0] * X.m_values[2][2] - X.m_values[2][0] * X.m_values[1][2]) +
+		X.m_values[0][2] * (X.m_values[1][0] * X.m_values[2][1] - X.m_values[2][0] * X.m_values[1][1]);
 
-	return (nobserved - 4.0)*0.5*log(detX) - (nobserved*3. / 2.)*log(2.0) -   //=parts of gamma function that do not depend on the scale matrix
-		((3.0 / 2.0)*log(M_PI) + lgamma(nobserved / 2.0) + lgamma((nobserved / 2.0) - 0.5) + lgamma((nobserved / 2.0) - 1.0)); //= log(gamma3(nobserved/2))
+	return (nobserved - 4.0)*0.5*log(detX) - (nobserved*3. / 2.)*log(2.0) -   // parts of gamma function that do not depend on the scale matrix
+		((3.0 / 2.0)*log(M_PI) + lgamma(nobserved / 2.0) + lgamma((nobserved / 2.0) - 0.5) + lgamma((nobserved / 2.0) - 1.0)); // log(gamma3(nobserved/2))
 }
 
 //calculate log wishart probability density
-inline double logWishart(double X[3][3], int nobserved, double phi, double theta, double alpha, double e1, double e2, double e3, double lsf)
+inline double logWishart(CCLib::SquareMatrixd X, int nobserved, double phi, double theta, double alpha, double e1, double e2, double e3, double lsf)
 {
 	//--------------------------------------------------
 	//Derive scale matrix eigenvectors (basis matrix)
@@ -1262,38 +1290,24 @@ inline double logWishart(double X[3][3], int nobserved, double phi, double theta
 	i[1][2] = e1*e[1][0] * e[2][0] + e2*e[1][1] * e[2][1] + e3*e[1][2] * e[2][2];
 
 	//compute the trace of I times X
-	double trIX = (i[0][0] * X[0][0] + i[0][1] * X[1][0] + i[0][2] * X[2][0]) +
-		(i[0][1] * X[0][1] + i[1][1] * X[1][1] + i[1][2] * X[2][1]) +
-		(i[0][2] * X[0][2] + i[1][2] * X[1][2] + i[2][2] * X[2][2]);
+	double trIX = (i[0][0] * X.m_values[0][0] + i[0][1] * X.m_values[1][0] + i[0][2] * X.m_values[2][0]) +
+		(i[0][1] * X.m_values[0][1] + i[1][1] * X.m_values[1][1] + i[1][2] * X.m_values[2][1]) +
+		(i[0][2] * X.m_values[0][2] + i[1][2] * X.m_values[1][2] + i[2][2] * X.m_values[2][2]);
 
 	//return the log wishart probability density
 	return lsf - 0.5 * (trIX + nobserved*log(D));
 }
 
-//integrate over alpha
-inline double wishartExp1D(double X[3][3], int nobserved, double phi, double theta, double e1, double e2, double e3, double lsf, unsigned steps)
-{
-	//evaluate integral over alpha = 0 to pi
-	double pd0 = exp(logWishart(X, nobserved, phi, theta, 0.0, e1, e2, e3, lsf));
-	double pd1 = 0.0, sum = 0.0;
-	double dA = M_PI / steps;
-	for (unsigned i = 1; i <= steps; i++)
-	{
-		pd1 = exp(logWishart(X, nobserved, phi, theta, i*dA, e1, e2, e3, lsf));
-		sum += dA*pd0 + dA*(pd1 - pd0)*0.5;
-		pd0 = pd1;
-	}
-	return sum;
-}
-
-//sample posterior with MCMC
-inline double** sampleMCMC(double icov[3][3], int nobserved, CCVector3* normal, int nsamples, double proposalWidth)
-{
-	return nullptr; //todo
-}
-
-
 //Estimate the normal vector to the structure this trace represents at each point in this trace.
+//declare variables for the dlg used by the below function as statics, so they are remembered between uses (for convenience)
+static unsigned int minsize = 500; //these are the defaults
+static unsigned int maxsize = 1000;
+static double tcDistance = 10.0; //the square of the maximum distance to compute thicknesses for
+static unsigned int oversample = 30;
+static double likPower = 1.0;
+static bool calcThickness = true;
+static double stride = 0.025;
+static int dof = 10;
 void ccCompass::estimateStructureNormals()
 {
 	//******************************************
@@ -1301,32 +1315,52 @@ void ccCompass::estimateStructureNormals()
 	//******************************************
 	QDialog dlg(m_app->getMainWindow());
 	QVBoxLayout* vbox = new QVBoxLayout();
-	QLabel labelA("Minimum trace size (points):");
-	QLineEdit lineEditA("100"); lineEditA.setValidator(new QIntValidator(5, std::numeric_limits<int>::max()));
-	QLabel labelB("Maximum trace size (points):");
-	QLineEdit lineEditB("1000"); lineEditB.setValidator(new QIntValidator(50, std::numeric_limits<int>::max()));
-	QLabel labelC("Distance cutoff (m):");
-	QLineEdit lineEditC("10.0"); lineEditC.setValidator(new QDoubleValidator(0, std::numeric_limits<double>::max(), 6));
-	QLabel labelD("Calculate thickness:");
-	QCheckBox checkTC("Calculate thickness"); checkTC.setChecked(true);
-	
+	QLabel minSizeLabel("Minimum trace size (points):");
+	QLineEdit minSizeText(QString::number(minsize)); minSizeText.setValidator(new QIntValidator(5, std::numeric_limits<int>::max()));
+	QLabel maxSizeLabel("Maximum trace size (points):");
+	QLineEdit maxSizeText(QString::number(maxsize)); maxSizeText.setValidator(new QIntValidator(50, std::numeric_limits<int>::max()));
+	QLabel dofLabel("Wishart Degrees of Freedom:");
+	QLineEdit dofText(QString::number(dof)); dofText.setValidator(new QIntValidator(3, std::numeric_limits<int>::max()));
+	QLabel likPowerLabel("Likelihood power:");
+	QLineEdit likPowerText(QString::number(likPower)); likPowerText.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
+	QLabel calcThickLabel("Calculate thickness:");
+	QCheckBox calcThickChk("Calculate thickness"); calcThickChk.setChecked(calcThickness);
+	QLabel distanceLabel("Distance cutoff (m):");
+	QLineEdit distanceText(QString::number(tcDistance)); distanceText.setValidator(new QDoubleValidator(0, std::numeric_limits<double>::max(), 6));
+	QLabel sampleLabel("Samples:");
+	QLineEdit sampleText(QString::number(oversample)); sampleText.setValidator(new QIntValidator(1, 10000)); //>10000 samples per point will break even the best computer!
+	QLabel strideLabel("MCMC Stride (radians):");
+	QLineEdit strideText(QString::number(stride)); strideText.setValidator(new QDoubleValidator(0.0000001, 0.5, 6));
+
 	//tooltips
-	lineEditA.setToolTip("The minimum size of the normal-estimation window.");
-	lineEditB.setToolTip("The maximum size of the normal-estimation window.");
-	lineEditB.setToolTip("The furthest distance to search for points on the opposite surface of a GeoObject during thickness calculations.");
-
+	minSizeText.setToolTip("The minimum size of the normal-estimation window.");
+	maxSizeText.setToolTip("The maximum size of the normal-estimation window.");
+	dofText.setToolTip("Sets the degrees of freedom parameter for the Wishart distribution. Due to non-independent data/errors in traces, this should be low (~10). Higher give more confident results - use with care!");
+	distanceText.setToolTip("The furthest distance to search for points on the opposite surface of a GeoObject during thickness calculations.");
+	sampleText.setToolTip("Sample n orientation estimates at each point in each trace to quantify uncertainty.");
+	likPowerText.setToolTip("Fudge factor to change the balance between the prior and likelihood functions. Advanced use only - see docs for details.");
+	strideText.setToolTip("Standard deviation of the normal distribution used to calculate monte-carlo jumps during sampling. Larger numbers sample more widely but are slower to run.");
+	
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
 	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
 
-	vbox->addWidget(&labelA);
-	vbox->addWidget(&lineEditA);
-	vbox->addWidget(&labelB);
-	vbox->addWidget(&lineEditB);
-	vbox->addWidget(&checkTC);
-	vbox->addWidget(&labelC);
-	vbox->addWidget(&lineEditC);
+	vbox->addWidget(&minSizeLabel);
+	vbox->addWidget(&minSizeText);
+	vbox->addWidget(&maxSizeLabel);
+	vbox->addWidget(&maxSizeText);
+	vbox->addWidget(&dofLabel);
+	vbox->addWidget(&dofText);
+	vbox->addWidget(&likPowerLabel);
+	vbox->addWidget(&likPowerText);
+	vbox->addWidget(&sampleLabel);
+	vbox->addWidget(&sampleText);
+	vbox->addWidget(&strideLabel);
+	vbox->addWidget(&strideText);
+	vbox->addWidget(&calcThickLabel);
+	vbox->addWidget(&calcThickChk);
+	vbox->addWidget(&distanceLabel);
+	vbox->addWidget(&distanceText);
 	vbox->addWidget(&buttonBox);
 
 	dlg.setLayout(vbox);
@@ -1338,13 +1372,19 @@ void ccCompass::estimateStructureNormals()
 	}
 
 	//get values
-	unsigned int minsize = lineEditA.text().toInt(); //these are the defaults
-	unsigned int maxsize = lineEditB.text().toInt();
-	double tcDistance = lineEditC.text().toDouble(); //the square of the maximum distance to compute thicknesses for
-	tcDistance *= tcDistance; //convert to distance squared (as this is used for the distance comp)
-	bool calcThickness = checkTC.isChecked();
-	delete vbox;
+	minsize = minSizeText.text().toInt(); //these are the defaults
+	maxsize = maxSizeText.text().toInt();
+	dof = dofText.text().toInt();
+	tcDistance = distanceText.text().toDouble(); //the square of the maximum distance to compute thicknesses for
+	oversample = sampleText.text().toInt();
+	likPower = likPowerText.text().toDouble();
+	calcThickness = calcThickChk.isChecked();
+	stride = strideText.text().toDouble();
 
+	//cleanup
+	dlg.close();
+	delete vbox;
+	
 	//someone is an idiot
 	if (maxsize < minsize) {
 		m_app->dispToConsole("[ccCompass] Error - provided maxsize is less than minsize? Get your shit together...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -1354,11 +1394,15 @@ void ccCompass::estimateStructureNormals()
 	m_app->dispToConsole("[ccCompass] Estimating structure normals. This may take a while...", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 	//declare some variables used in the loops
-	double X[3][3], d, cx, cy, cz;
-	int iid;
-	CCLib::SquareMatrixd cov(3);
-	CCLib::SquareMatrixd eigVectors; std::vector<double> eigValues;
-	bool hasNormals = true, broken = false; //assume normals exist until check later on
+	double d = 0.0;
+	double cx = 0.0;
+	double cy = 0.0;
+	double cz = 0.0;
+	int iid = 0;
+	CCLib::SquareMatrixd eigVectors;
+	std::vector<double> eigValues;
+	bool hasNormals = true;
+	bool broken = false; //assume normals exist until check later on
 
 	//setup progress dialog
 	ccProgressDialog prg(true, m_app->getMainWindow());
@@ -1375,7 +1419,7 @@ void ccCompass::estimateStructureNormals()
 		//option 1 - selected object is a GeoObject or has GeoObject children
 		ccHObject::Container objs;
 		if (ccGeoObject::isGeoObject(o)) { //selected object is a geoObject
-			objs.push_back(o);
+				objs.push_back(o);
 		} else //otherwise search for all GeoObjects
 		{
 			o->filterChildren(objs, true, CC_TYPES::HIERARCHY_OBJECT); //n.b. geoObjects are simpy considered to be hierarchy objects by CC
@@ -1427,7 +1471,7 @@ void ccCompass::estimateStructureNormals()
 			o->filterChildren(objs, true, CC_TYPES::POLY_LINE); //n.b. geoObjects are simpy considered to be hierarchy objects by CC
 		}
 		for (ccHObject* o2 : objs) {
-			if (ccTrace::isTrace(o2)) {//is it a trace?
+			if (ccTrace::isTrace(o2) && o2->isEnabled()) {//is it a trace?
 				ccTrace* t = dynamic_cast<ccTrace*> (o2);
 				if (t != nullptr) {//can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
 					std::array<ccHObject*, 2> data = { t, nullptr };
@@ -1438,7 +1482,7 @@ void ccCompass::estimateStructureNormals()
 		}
 	}
 
-	if (datasets.size() == 0) { //no data found
+	if (datasets.empty()) { //no data found
 		m_app->dispToConsole("[ccCompass] No GeoObjects or Traces could be found to estimate structure normals for. Please select some!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	}
 
@@ -1446,7 +1490,7 @@ void ccCompass::estimateStructureNormals()
 	for (int _d = 0; _d < datasets.size(); _d++)
 	{
 		//update progress dialog
-		prg.setInfo(QString::asprintf("Processing %d of %d datasets: Calculating fit planes...", _d+1, datasets.size()));
+		prg.setInfo(QStringLiteral("Processing %1 of %2 datasets: Calculating fit planes...").arg( _d+1 ).arg( datasets.size() ));
 		prg.update(0.0f);
 		if (prg.isCancelRequested()) {
 			break;
@@ -1461,6 +1505,7 @@ void ccCompass::estimateStructureNormals()
 		//************************************************
 		ccPointCloud* points[] = { new ccSNECloud(),  //Lower Boundary Points 
 			new ccSNECloud() }; //Upper Boundary Points (will remain empty for everything execept multi-surface GeoObjects)
+		ccPointCloud* samples[] = { nullptr, nullptr }; //lower and upper boundary samples (will be populated later if samples are generated).
 
 		//for lower,upper in the case of a GeoObject, otherwise regions[1] will be null and will be ignored
 		for (unsigned r = 0; r < 2; r++) 
@@ -1479,7 +1524,7 @@ void ccCompass::estimateStructureNormals()
 			}
 			for (ccHObject* c : objs)
 			{
-				if (ccTrace::isTrace(c)) //is it a trace?
+				if (ccTrace::isTrace(c) && c->isEnabled()) //is it a trace?
 				{
 					ccTrace* t = dynamic_cast<ccTrace*> (c);
 					if (t != nullptr) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
@@ -1487,6 +1532,8 @@ void ccCompass::estimateStructureNormals()
 						//copy points from this trace across into the relevant point cloud for future access
 						points[r]->reserve(points[r]->size() + t->size()); //make space
 						points[r]->reserveTheNormsTable(); //make space for normals
+						points[r]->setGlobalScale(t->getGlobalScale()); //copy global shift & scale onto new point cloud
+						points[r]->setGlobalShift(t->getGlobalShift());
 						for (unsigned p = 0; p < t->size(); p++)
 						{
 							points[r]->addPoint(*t->getPoint(p)); //add point to relevant surface
@@ -1519,6 +1566,7 @@ void ccCompass::estimateStructureNormals()
 			//now sort points along this vector
 			std::vector<unsigned> pid; //store link to point id in original cloud (for later data storage)
 			std::vector<double> dist, px, py, pz, nx, ny, nz;
+			
 			//add first point
 			pid.push_back(0); dist.push_back(points[r]->getPoint(0)->dot(*longAxis));
 			px.push_back(points[r]->getPoint(0)->x); py.push_back(points[r]->getPoint(0)->y); pz.push_back(points[r]->getPoint(0)->z);
@@ -1558,7 +1606,6 @@ void ccCompass::estimateStructureNormals()
 				}
 			}
 
-
 			//**************************************************************************************************
 			//CREATE BREAKS AT PINCH NODES (these prevent planes including points from two sides of a pinch node
 			//**************************************************************************************************
@@ -1583,33 +1630,37 @@ void ccCompass::estimateStructureNormals()
 			//***********************************************************************************************
 			//declare variables used in nested loops below
 			int n;
-			double mnx, mny, mnz, pd, lsf, phi, theta, alpha, len;
+			double mnx, mny, mnz, lpd, lsf, phi, theta, alpha, len;
 			bool hasValidSNE = false; //becomes true once a valid plane is found
-			std::vector<double> bestPd(px.size(), 0.0); //best map observed for each point
+			std::vector<double> bestPd(px.size(), std::numeric_limits<double>::lowest()); //best (log) probability density observed for each point
+			std::vector<double> bestPhi(px.size(), 0);
+			std::vector<double> bestTheta(px.size(), 0);
+			std::vector<double> bestAlpha(px.size(), 0);
+			std::vector<double> bestE1(px.size(), 0);
+			std::vector<double> bestE2(px.size(), 0);
+			std::vector<double> bestE3(px.size(), 0);
+			std::vector<CCLib::SquareMatrixd> bestX(px.size()); //keep track of best COV matrix for each trace (for oversampling later)
 			std::vector<CCVector3> sne(px.size()); //list of the best surface normal estimates found for each point (corresponds with the MAP above)
 			std::vector<int> start(px.size(),0); //index of start point for best planes
 			std::vector<int> end(px.size(),0); //index of end point for best planes
 			std::vector<int> segmentID(px.size(),-1); //unique id for each point segment.
+			std::vector<CCVector3> normal(px.size()); //list of the surface normals (as opposed to structure normals stored in SNE).
 
 			//check if valid normals have been retrieved
 			if (hasNormals) {
-				if (abs(nx[0]) <= 0.000001 && abs(ny[0]) <= 0.0000001 && abs(nz[0]) <= 0.00000001) { //zero normal vector means normals not computed
-
+				if (std::abs(nx[0]) <= 0.000001 && std::abs(ny[0]) <= 0.0000001 && std::abs(nz[0]) <= 0.00000001) //zero normal vector means normals not computed
+				{ 
 					m_app->dispToConsole("[ccCompass] Warning: Cannot compensate for outcrop-surface bias as point cloud has no normals. Structure normal estimates may be misleading or incorrect.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 					hasNormals = false; //don't bother checking again - if normals are computed they will exist for all points
 				}
 			}
 
-
 			//loop through all possible continuous subsets of the combined trace with minsize < length < maxsize.
 			for (unsigned _min = 0; _min < px.size() - minsize; _min++)
 			{
 				//update progress bar
-				if (r == 0) {
-					prg.update(50 * _min / (float)(px.size() - minsize)); //first half
-				} else {
-					prg.update(50 + 50 * _min / (float)(px.size() - minsize)); //second half
-				}
+				prg.update(100 * _min / static_cast<float>(px.size() - minsize));
+
 				if (prg.isCancelRequested()) {
 
 					//cleanup
@@ -1620,10 +1671,10 @@ void ccCompass::estimateStructureNormals()
 					return; }
 
 				//do inner loop
-				for (unsigned _max = _min + minsize; _max < std::min((unsigned)px.size(), _min + maxsize); _max++)
+				for (unsigned _max = _min + minsize; _max < std::min(static_cast<unsigned>(px.size()), _min + maxsize); _max++)
 				{
 					//size of the current subset
-					n = _max - _min;
+					n = _max - _min + 1;
 
 					//-------------------------------------------------------------------------------------------------------------------------------------
 					//compute centroid of points between min and max (and the average normal). Also check if break-point exists (if so skip this subset)
@@ -1631,7 +1682,7 @@ void ccCompass::estimateStructureNormals()
 					cx = 0.0; cy = 0.0; cz = 0.0;
 					mnx = 0.0; mny = 0.0; mnz = 0.0;
 					broken = false;
-					for (unsigned p = _min; p < _max; p++) {
+					for (unsigned p = _min; p <= _max; p++) {
 						cx += px[p]; cy += py[p]; cz += pz[p]; //average point positions
 						if (hasNormals) {
 							mnx += nx[p]; mny += ny[p]; mnz += nz[p]; //average point normals
@@ -1658,29 +1709,29 @@ void ccCompass::estimateStructureNormals()
 					//-----------------------------------------------------------------------------
 					//compute the scatter and covariance matrices of this section of the trace
 					//-----------------------------------------------------------------------------
-					//zero scatter matrix
-					for (unsigned i = 0; i < 3; i++)
-						for (unsigned j = 0; j < 3; j++)
-						{
-							X[i][j] = 0;
-						}
-					//calculate scatter matrix
-					for (unsigned p = _min; p < _max; p++)
+					CCLib::SquareMatrixd X(3); //scale matrix
+					for (unsigned p = _min; p <= _max; p++)
 					{
-						X[0][0] += (px[p] - cx) * (px[p] - cx); //mXX
-						X[1][1] += (py[p] - cy) * (py[p] - cy); //mYY
-						X[2][2] += (pz[p] - cz) * (pz[p] - cz); //mZZ
-						X[0][1] += (px[p] - cx) * (py[p] - cy); //mXY
-						X[0][2] += (px[p] - cx) * (pz[p] - cz); //mXZ
-						X[1][2] += (py[p] - cy) * (pz[p] - cz); //mYZ
+						X.m_values[0][0] += (px[p] - cx) * (px[p] - cx); //mXX
+						X.m_values[1][1] += (py[p] - cy) * (py[p] - cy); //mYY
+						X.m_values[2][2] += (pz[p] - cz) * (pz[p] - cz); //mZZ
+						X.m_values[0][1] += (px[p] - cx) * (py[p] - cy); //mXY
+						X.m_values[0][2] += (px[p] - cx) * (pz[p] - cz); //mXZ
+						X.m_values[1][2] += (py[p] - cy) * (pz[p] - cz); //mYZ
 					}
-					cov.m_values[0][0] = X[0][0] / n; cov.m_values[1][1] = X[1][1] / n; cov.m_values[2][2] = X[2][2] / n;
-					cov.m_values[0][1] = X[0][1] / n; cov.m_values[0][2] = X[0][2] / n; cov.m_values[1][2] = X[1][2] / n;
+					
+					CCLib::SquareMatrixd cov(3); //convert to covariance matrix
+					cov.m_values[0][0] = X.m_values[0][0] / n; cov.m_values[1][1] = X.m_values[1][1] / n; cov.m_values[2][2] = X.m_values[2][2] / n;
+					cov.m_values[0][1] = X.m_values[0][1] / n; cov.m_values[0][2] = X.m_values[0][2] / n; cov.m_values[1][2] = X.m_values[1][2] / n;
+
+					//update X to reflect the dof (rather than the true number of samples, as these are not truly independent due to spatial covariance)
+					X.m_values[0][0] = cov.m_values[0][0] * dof; X.m_values[1][1] = cov.m_values[1][1] * dof; X.m_values[2][2] = cov.m_values[2][2] * dof;
+					X.m_values[0][1] = cov.m_values[0][1] * dof; X.m_values[0][2] = cov.m_values[0][2] * dof; X.m_values[1][2] = cov.m_values[1][2] * dof;
 
 					//fill symmetric parts
-					X[1][0] = X[0][1]; cov.m_values[1][0] = cov.m_values[0][1];
-					X[2][0] = X[0][2]; cov.m_values[2][0] = cov.m_values[0][2];
-					X[2][1] = X[1][2]; cov.m_values[2][1] = cov.m_values[1][2];
+					X.m_values[1][0] = X.m_values[0][1]; cov.m_values[1][0] = cov.m_values[0][1];
+					X.m_values[2][0] = X.m_values[0][2]; cov.m_values[2][0] = cov.m_values[0][2];
+					X.m_values[2][1] = X.m_values[1][2]; cov.m_values[2][1] = cov.m_values[1][2];
 
 					//compute and sort eigens
 					Jacobi<double>::ComputeEigenValuesAndVectors(cov, eigVectors, eigValues, true); //get eigens
@@ -1693,11 +1744,11 @@ void ccCompass::estimateStructureNormals()
 					//but it doesn't matter that much....
 					//----------------------------------------------------------------------------------------------------
 
-																					  //calculate trend and plunge of 3rd eigenvector (this represents the "best-fit-plane").
+					//calculate trend and plunge of 3rd eigenvector (this represents the "best-fit-plane").
 					phi = atan2(eigVectors.m_values[0][2], eigVectors.m_values[1][2]); //trend of the third eigenvector
 					theta = -asin(eigVectors.m_values[2][2]); //plunge of the principal eigenvector
 
-															  //ensure phi and theta are in the correct domain
+					//ensure phi and theta are in the correct domain
 					if (theta < 0) //ensure dip angle is positive
 					{
 						phi = phi + (M_PI);
@@ -1714,7 +1765,7 @@ void ccCompass::estimateStructureNormals()
 					//calculate third angle (alpha) defining the orientation of the eigensystem
 					alpha = asin(eigVectors.m_values[2][1] / cos(theta)); //alpha = arcsin(eigVector2.z / cos(theta))
 
-																		  //map alpha to correct domain (0 to 180 degrees)
+					//map alpha to correct domain (0 to 180 degrees)
 					while (alpha < 0) {
 						alpha += M_PI;
 					}
@@ -1723,29 +1774,36 @@ void ccCompass::estimateStructureNormals()
 					}
 
 					//compute log-likelihood of this plane estimate
-					n = maxsize - minsize - 1; //degrees of freedom
-					lsf = logWishSF(X, n);
-					pd = exp(logWishart(X, n, phi, theta, alpha, eigValues[0], eigValues[1], eigValues[2], lsf));
-					//pd  = wishartExp1D(X, n, phi, theta, eigValues[0], eigValues[1], eigValues[2], lsf, 500);																										
+					//dof = _max - _min - 1;
+					lsf = logWishSF(X, dof);
+					lpd = likPower*logWishart(X, dof, phi, theta, alpha, eigValues[0], eigValues[1], eigValues[2], lsf);
+
 					//multiply by prior 
 					if (hasNormals)
 					{
-						//priorMatrix.m_values[_min][_max] = prior(phi, theta, mnx, mny, mnz);
-						pd *= prior(phi, theta, mnx, mny, mnz);
+						lpd += log(prior(phi, theta, mnx, mny, mnz));
 					}
 
 					//----------------------------------------------------------------------------
 					//Check if this is the best observed posterior probability
 					//----------------------------------------------------------------------------
-					for (unsigned p = _min; p < _max; p++)
+					for (unsigned p = _min; p <= _max; p++)
 					{
-						if (pd > bestPd[p]) //this is a better Pd
+						if (lpd > bestPd[p]) //this is a better Pd
 						{
-							bestPd[p] = pd;
+							bestPd[p] = lpd;
+							bestPhi[p] = phi;
+							bestTheta[p] = theta;
+							bestAlpha[p] = alpha;
+							bestE1[p] = eigValues[0];
+							bestE2[p] = eigValues[1];
+							bestE3[p] = eigValues[2];
 							sne[p] = CCVector3(eigVectors.m_values[0][2], eigVectors.m_values[1][2], eigVectors.m_values[2][2]);
 							start[p] = _min;
 							end[p] = _max;
 							segmentID[p] = _max * px.size() + _min;
+							bestX[p] = X;
+							normal[p] = CCVector3(mnx, mny, mnz);
 						}
 					}
 				}
@@ -1759,35 +1817,49 @@ void ccCompass::estimateStructureNormals()
 				continue;
 			}
 
-			//###########################################################################
+			//#################################################################################################################
 			//STORE SNE ESTIMATES ON CLOUD
-			//###########################################################################
-			//setup point cloud (build relevant scalar fields to store data on etc.)
+			//##################################################################################################################
 			points[r]->setName("SNE");
+
+			//build scalar fields
 			CCLib::ScalarField* startSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("StartPoint")));
 			CCLib::ScalarField* endSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("EndPoint")));
 			CCLib::ScalarField* idSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("SegmentID")));
 			CCLib::ScalarField* weightSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Weight")));
+			CCLib::ScalarField* trend = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Trend")));
+			CCLib::ScalarField* plunge = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Plunge")));
+			CCLib::ScalarField* pointID = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("PointID"))); //used for linking samples representing the same point
 
 			weightSF->reserve(px.size());
 			startSF->reserve(px.size());
 			endSF->reserve(px.size());
 			idSF->reserve(px.size());
+			trend->reserve(px.size());
+			plunge->reserve(px.size());
+			pointID->reserve(px.size());
 
-			//assign point normals.
-			for (unsigned p = 0; p < points[r]->size(); p++) {
+			//store best-guess (maximum a-postiori) surface normal estimates
+			for (unsigned p = 0; p < px.size(); p++)
+			{
 				points[r]->setPointNormal(pid[p], sne[p]);
-				weightSF->setValue(pid[p], log(bestPd[p]));
+				weightSF->setValue(pid[p], bestPd[p]);
 				startSF->setValue(pid[p], start[p]);
 				endSF->setValue(pid[p], end[p]);
 				idSF->setValue(pid[p], segmentID[p]);
+				trend->setValue(pid[p], bestPhi[p] * 180.0 / M_PI);
+				plunge->setValue(pid[p], bestTheta[p] * 180.0 / M_PI);
+				pointID->setValue(pid[p], pid[p]);
 			}
-
+			
 			//compute range
 			weightSF->computeMinAndMax();
 			startSF->computeMinAndMax();
 			endSF->computeMinAndMax();
 			idSF->computeMinAndMax();
+			trend->computeMinAndMax();
+			plunge->computeMinAndMax();
+			pointID->computeMinAndMax();
 
 			//set weight to visible
 			points[r]->setCurrentDisplayedScalarField(0);
@@ -1796,22 +1868,197 @@ void ccCompass::estimateStructureNormals()
 			//add cloud to object
 			regions[r]->addChild(points[r]);
 			m_app->addToDB(points[r], false, false, false, false);
+
+
+			//*************************************************************************************
+			//SAMPLE ORIENTATIONS FROM POSTERIORS FOR EACH POINTS SNE TO PROPAGATE UNCERTAINTY
+			//*************************************************************************************
+			if (oversample > 1)
+			{
+				//build point cloud to store MCMC samples in and associated scalar fields
+				samples[r] = new ccSNECloud();
+				samples[r]->setName("SNE_Samples");
+				samples[r]->setGlobalScale(points[r]->getGlobalScale()); //copy global shift & scale onto new point cloud
+				samples[r]->setGlobalShift(points[r]->getGlobalShift());
+				samples[r]->reserve(px.size()*oversample);
+				samples[r]->reserveTheNormsTable();
+				CCLib::ScalarField* startSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("StartPoint")));
+				CCLib::ScalarField* endSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("EndPoint")));
+				CCLib::ScalarField* idSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("SegmentID")));
+				CCLib::ScalarField* weightSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Weight")));
+				CCLib::ScalarField* trend = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Trend")));
+				CCLib::ScalarField* plunge = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Plunge")));
+				CCLib::ScalarField* pointID = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("PointID")));
+				weightSF->reserve(px.size()*oversample);
+				startSF->reserve(px.size()*oversample);
+				endSF->reserve(px.size()*oversample);
+				idSF->reserve(px.size()*oversample);
+				trend->reserve(px.size()*oversample);
+				plunge->reserve(px.size()*oversample);
+				pointID->reserve(px.size()*oversample);
+
+				//init random number generators 
+				std::random_device rd;
+				std::default_random_engine generator(rd());
+				std::normal_distribution<double> N(0.0, stride); //construct random samplers
+				std::uniform_real_distribution<double> U(0.0, 1.0);
+
+				//loop through points
+				for (unsigned p = 0; p < px.size(); p++) 
+				{
+					//update progress dialog
+					prg.setInfo(QStringLiteral("Processing %1 of %2 datasets: Sampling points...").arg( _d + 1 ).arg( datasets.size() ));
+					prg.update(100.0f * p / static_cast<float>(px.size()));
+					if (prg.isCancelRequested()) {
+						//cleanup
+						delete points[r];
+						for (int i = 0; i < pinchClouds.size(); i++)
+						{
+							delete pinchClouds[i];
+							if (samples[0] != nullptr)
+							{
+								delete samples[0];
+							}
+							if (samples[1] != nullptr)
+							{
+								delete samples[1];
+							}
+						}
+						return;
+					}
+
+					//skip stand-alone points (with no co-variance matrix)
+					if (bestX[p].m_values == nullptr)
+					{
+						continue; 
+					}
+
+					//calculate log scale factor for wish distribution
+					lsf = logWishSF(bestX[p], dof);
+
+					//initialise MCMC sampler at likelihood maxima (to avoid need for burn-in period)
+					double lpdProposed;
+					double lpdCurrent = bestPd[p];
+					double phi = bestPhi[p];
+					double theta = bestTheta[p];
+					double alpha = bestAlpha[p];
+					double e1 = bestE1[p];
+					double e2 = bestE2[p];
+					double e3 = bestE3[p];
+					double _phi, _theta, _alpha; //propsals
+
+					//generate chain
+					unsigned count = 0;
+					unsigned iter = 0;
+					while (count < oversample)
+					{
+						//generate proposed sample
+						_phi = phi + N(generator);
+						_theta = theta + N(generator);
+						_alpha = alpha + N(generator);
+
+						//evaluate log-likelihood of proposal
+						lpdProposed = likPower*logWishart(bestX[p], dof, _phi, _theta, _alpha, e1, e2, e3, lsf);
+
+						//apply prior?
+						if (hasNormals)
+						{
+							lpdProposed += log(prior(_phi, _theta, normal[p].x, normal[p].y, normal[p].z));
+						}
+
+						//accept or reject
+						if (log(U(generator)) <= lpdProposed - lpdCurrent)
+						{
+							//accept - update chain
+							phi = _phi;
+							theta = _theta;
+							alpha = _alpha;
+
+							//calculate normal vector
+							CCVector3 norm(sin(phi)*cos(theta), cos(phi)*cos(theta), -sin(theta));
+
+							//store sample in point cloud
+							samples[r]->addPoint(CCVector3(px[p], py[p], pz[p]));
+							samples[r]->addNorm(norm);
+							weightSF->addElement(lpdProposed);
+							startSF->addElement(start[p]);
+							endSF->addElement(end[p]);
+							idSF->addElement(segmentID[p]);
+							trend->addElement(phi * 180.0 / M_PI);
+							plunge->addElement(theta * 180.0 / M_PI);
+							pointID->addElement(pid[p]);
+
+							//move to next point
+							lpdCurrent = lpdProposed;
+							count++;
+						}
+
+						if (iter > 1000000 * oversample)
+						{
+							m_app->dispToConsole("[ccCompass] Warning - MCMC sampler failed so sampling will be incomplete.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+							break;
+						}
+						iter++;
+					}
+				}
+
+				//get rid of excess space in arrays (if samples were not generated in sections)
+				samples[r]->shrinkToFit();
+				samples[r]->normalsHaveChanged();
+				weightSF->shrink_to_fit();
+				startSF->shrink_to_fit();
+				idSF->shrink_to_fit();
+				trend->shrink_to_fit();
+				plunge->shrink_to_fit();
+				pointID->shrink_to_fit();
+
+				//compute range
+				weightSF->computeMinAndMax();
+				startSF->computeMinAndMax();
+				endSF->computeMinAndMax();
+				idSF->computeMinAndMax();
+				trend->computeMinAndMax();
+				plunge->computeMinAndMax();
+				pointID->computeMinAndMax();
+
+				//set weight to visible
+				samples[r]->setCurrentDisplayedScalarField(0);
+				samples[r]->showSF(true);
+
+				//add cloud to object
+				regions[r]->addChild(samples[r]);
+				m_app->addToDB(samples[r], false, false, false, false);
+				//samples[r]->setEnabled(false); //disable by default
+			}
 		}
 
 		//compute thicknesses if upper + lower surfaces are defined
 		if (regions[0] != nullptr && regions[1] != nullptr && calcThickness) //have both surfaces been defined?
 		{
 			if (points[0]->size() > 0 && points[1]->size() > 0) { //do both surfaces have points in them?
-				prg.setInfo(QString::asprintf("Processing %d of %d datasets: Estimating thickness...", _d + 1, datasets.size()));
+				prg.setInfo(QStringLiteral("Processing %1 of %2 datasets: Estimating thickness...").arg( _d + 1 ).arg( datasets.size() ));
 				for (int r = 0; r < 2; r++)
 				{
 					//make scalar field
 					CCLib::ScalarField* thickSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Thickness")));
 					thickSF->reserve(points[r]->size());
-
+					
 					//set thickness to visible scalar field
 					points[r]->setCurrentDisplayedScalarField(points[r]->getScalarFieldIndexByName("Thickness"));
 					points[r]->showSF(true);
+
+					//create scalar field in samples point cloud
+					CCLib::ScalarField* thickSF_sample = nullptr;
+					CCLib::ScalarField* idSF_sample = nullptr;
+					if (samples[r] != nullptr)
+					{
+						thickSF_sample = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Thickness")));
+						thickSF_sample->reserve(samples[r]->size());
+						idSF_sample = samples[r]->getScalarField(samples[r]->getScalarFieldIndexByName("PointID"));
+						samples[r]->setCurrentDisplayedScalarField(samples[r]->getScalarFieldIndexByName("Thickness"));
+						samples[r]->showSF(true);
+					}
+
 					//figure out id of the compared surface (opposite to the current one)
 					int compID = 0;
 					if (r == 0) {
@@ -1821,9 +2068,11 @@ void ccCompass::estimateStructureNormals()
 					//get octree for the picking and build picking data structures
 					ccOctree::Shared oct = points[compID]->getOctree();
 					CCLib::ReferenceCloud* nCloud = new  CCLib::ReferenceCloud(points[compID]);
-					unsigned char level = oct->findBestLevelForAGivenPopulationPerCell(2);
+					unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(tcDistance/2);
+					
 					CCLib::DgmOctree::NeighboursSet neighbours;
 					d = -1.0;
+
 					//loop through points in this surface
 					for (unsigned p = 0; p < points[r]->size(); p++)
 					{
@@ -1839,7 +2088,6 @@ void ccCompass::estimateStructureNormals()
 						if (prg.isCancelRequested())
 						{
 							//cleanup
-							delete nCloud;
 							for (int i = 0; i < pinchClouds.size(); i++)
 							{
 								delete pinchClouds[i];
@@ -1849,14 +2097,28 @@ void ccCompass::estimateStructureNormals()
 
 						//pick nearest point in opposite surface closest to this one
 						nCloud->clear();
-						oct->findPointNeighbourhood(points[r]->getPoint(p), nCloud, 10, level, d);
+						oct->findPointNeighbourhood(points[r]->getPoint(p), nCloud, 1, level, d);
 
-						if (d > tcDistance)
+						//skip points that are a long way from their opposite neighbours
+						if (d > tcDistance*tcDistance)
 						{
-							thickSF->setValue(p, 1.0);
-							continue; //skip points that are a long way from their opposite neighbours
+							thickSF->setValue(p, -1.0);
+
+							if (samples[r] != nullptr)
+							{
+								for (unsigned s = 0; s < samples[r]->size(); s++)
+								{
+									if (idSF_sample->getValue(s) == p) //find samples matching this point
+									{
+										thickSF_sample->setValue(s, -1.0);
+									}
+								}
+							}
+
+							continue; 
 						}
 
+						//calculate thickness for this point pair in sne cloud
 						//build equation of the plane
 						PointCoordinateType pEq[4];
 						pEq[0] = points[r]->getPointNormal(p).x;
@@ -1868,13 +2130,38 @@ void ccCompass::estimateStructureNormals()
 						d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
 
 						//write thickness scalar field
-						thickSF->setValue(p, abs(d));
+						thickSF->setValue(p, std::abs(d));
 
 						//flip normals so that it points in the correct direction
-						points[r]->setPointNormal(p, points[r]->getPointNormal(p) * (d / abs(d)));
+						points[r]->setPointNormal(p, points[r]->getPointNormal(p) * (d / std::abs(d)));
+
+						//if samples have been generated, also calculate thicknesses for matching sets of points
+						if (samples[r] != nullptr)
+						{
+							for (unsigned s = 0; s < samples[r]->size(); s++)
+							{
+								if (idSF_sample->getValue(s) == p) //find samples matching this point
+								{
+									//calculate and store thickness
+									PointCoordinateType pEq[4];
+									pEq[0] = samples[r]->getPointNormal(s).x;
+									pEq[1] = samples[r]->getPointNormal(s).y;
+									pEq[2] = samples[r]->getPointNormal(s).z;
+									pEq[3] = samples[r]->getPoint(s)->dot(samples[r]->getPointNormal(s));
+									d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
+									thickSF_sample->setValue(s, std::abs(d));
+									samples[r]->setPointNormal(s, samples[r]->getPointNormal(s) * (d / std::abs(d)));
+								}
+							}
+						}
 					}
+
+					//compute min and max of thickness scalar fields
 					thickSF->computeMinAndMax();
-					delete nCloud;
+					if (thickSF_sample != nullptr)
+					{
+						thickSF_sample->computeMinAndMax();
+					}
 				}
 			}
 		}
@@ -1892,6 +2179,749 @@ void ccCompass::estimateStructureNormals()
 
 	//redraw
 	m_app->redrawAll();
+}
+
+//Estimate strain from Mode-I dykes and veins
+static double binSize = 50;
+static bool useExternalSNE = true;
+static bool buildGraphics = true;
+static double exag = 2.0f;
+void ccCompass::estimateStrain()
+{
+	//******************************
+	//gather structure traces
+	//******************************
+	std::vector<ccPolyline*> lines;
+	for (ccHObject* o : m_app->getSelectedEntities())
+	{
+		//Is selected object a trace?
+		if (ccTrace::isTrace(o) && o->isEnabled()) {
+			lines.push_back(static_cast<ccPolyline*>(o));
+			continue;
+		}
+
+		//Clearly not... what about it's children?
+		ccHObject::Container objs;
+		o->filterChildren(objs, true, CC_TYPES::POLY_LINE); //look for SNE
+		for (ccHObject* c : objs)
+		{
+			if (ccTrace::isTrace(c) && c->isEnabled())
+			{
+				lines.push_back(static_cast<ccPolyline*>(c));
+			}
+		}
+	}
+
+	//calculate bounding box of all traces
+	float minx = std::numeric_limits<float>::max(), maxx = std::numeric_limits<float>::lowest();
+	float miny = std::numeric_limits<float>::max(), maxy = std::numeric_limits<float>::lowest();
+	float minz = std::numeric_limits<float>::max(), maxz = std::numeric_limits<float>::lowest();
+
+	if (lines.empty())
+	{
+		m_app->dispToConsole("[ccCompass] Error - no traces or SNEs found to compute estimate strain with.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	//check bounds
+	for (ccPolyline* poly : lines)
+	{
+		CCVector3 bbMin, bbMax;
+		if (poly->size() > 0) //avoid (0,0,0),(0,0,0) bounding boxes...
+		{
+			poly->getBoundingBox(bbMin, bbMax);
+			minx = std::min(bbMin.x, minx); maxx = std::max(bbMax.x, maxx);
+			miny = std::min(bbMin.y, miny); maxy = std::max(bbMax.y, maxy);
+			minz = std::min(bbMin.z, minz); maxz = std::max(bbMax.z, maxz);
+		}
+	}
+
+	//******************************
+	//get bin-size from user
+	//******************************
+	QDialog dlg(m_app->getMainWindow());
+	QVBoxLayout* vbox = new QVBoxLayout();
+	QLabel boxSizeLabel("Voxel Size:");
+	QLineEdit boxSizeText(QString::number(binSize)); boxSizeText.setValidator(new QDoubleValidator(0.00001, std::numeric_limits<double>::max(), 6));
+	QCheckBox externalSNEChk("Use external SNE:"); externalSNEChk.setChecked(useExternalSNE);
+	QCheckBox buildBlocksChk("Build graphics:"); buildBlocksChk.setChecked(buildGraphics);
+	QLabel exagLabel("Shape exaggeration factor:");
+	QLineEdit exagText(QString::number(exag)); boxSizeText.setValidator(new QDoubleValidator(0.00001, std::numeric_limits<double>::max(), 6));
+
+
+	boxSizeText.setToolTip("The voxel size for computing strain. This should be large enough that most boxes contain SNEs.");
+	externalSNEChk.setToolTip("Use SNE orientation estimates for outside the current cell if none are avaliable within it.");
+	buildBlocksChk.setToolTip("Build graphic strain ellipses and grid domains. Useful for validation.");
+	exagText.setToolTip("Exaggerate the shape of strain ellipses for easier visualisation.");
+
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+	vbox->addWidget(&boxSizeLabel);
+	vbox->addWidget(&boxSizeText);
+	vbox->addWidget(&buildBlocksChk);
+	vbox->addWidget(&exagLabel);
+	vbox->addWidget(&exagText);
+	vbox->addWidget(&externalSNEChk);
+	vbox->addWidget(&buttonBox);
+	dlg.setLayout(vbox);
+
+	//execute dialog and get results
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return; //bail!
+	}
+
+	//get values
+	binSize = boxSizeText.text().toDouble();
+	useExternalSNE = externalSNEChk.isChecked();
+	buildGraphics = buildBlocksChk.isChecked();
+	exag = exagText.text().toDouble();
+
+	//cleanup
+	dlg.close();
+	delete vbox;
+
+	//setup progress window
+	ccProgressDialog prg(true, m_app->getMainWindow());
+	prg.setMethodTitle("Computing strain estimates");
+	prg.start();
+	
+	//***************************************
+	//build grid for evaluating strain within
+	//***************************************
+	//pad out by a bin size on each side to avoid gaps due to rounding
+	minx -= binSize;
+	miny -= binSize;
+	minz -= binSize;
+	maxx += binSize;
+	maxy += binSize;
+	maxz += binSize;
+
+	int nx = (maxx - minx) / binSize;
+	int ny = (maxy - miny) / binSize;
+	int nz = (maxz - minz) / binSize;
+
+	//*********************************************
+	//Map geo-objects onto cells
+	//*********************************************
+	prg.setInfo("Gathering GeoObjects...");
+	std::vector< std::unordered_set<ccGeoObject*> > geoObjectBins(nx*ny*nz, std::unordered_set<ccGeoObject*>());
+	for (int i = 0; i < lines.size(); i++)
+	{
+		prg.update(100.0 * i / float(lines.size()));
+		if (prg.isCancelRequested())
+		{
+			return;
+		}
+
+		ccGeoObject* g = ccGeoObject::getGeoObjectParent(lines[i]);
+		if (g != nullptr)
+		{
+			for (unsigned p = 0; p < lines[i]->size(); p++)
+			{
+				CCVector3 V = *lines[i]->getPoint(p);
+
+				//compute cell this point falls in
+				int x = (V.x - minx) / binSize;
+				int y = (V.y - miny) / binSize;
+				int z = (V.z - minz) / binSize;
+				int idx = x + nx * (y + ny * z);
+
+				//store reference to this geoobject
+				if (idx < geoObjectBins.size())
+				{
+					geoObjectBins[idx].insert(g);
+				}
+				else
+				{
+					//n.b. this *should* never happen!
+					const QString message = QStringLiteral( "[ccCompass] Error: cell %1 is outside of mesh bounds (with total size = %2 [%3,%4,%5])." )
+											.arg( idx )
+											.arg( geoObjectBins.size() )
+											.arg( nx ).arg( ny ).arg( nz );
+					
+					m_app->dispToConsole( message, ccMainAppInterface::ERR_CONSOLE_MESSAGE );
+					return;
+				}
+			}
+		}
+	}
+
+	//*********************************************
+	//Loop through cells and compute strain tensor
+	//*********************************************
+	std::vector<int> nStructures(nx*ny*nz, 0); //number of structures used to compute the strain tensor per cell
+	std::vector<int> nIgnored(nx*ny*nz, 0); //number of structured ignored during the above calculation (as they did not have orientation/thickness estimates)
+	std::vector<ccPointCloud*> dataInCell(nx*ny*nz, nullptr);
+	
+	//init object to store blocks in
+	ccHObject* blocks = nullptr;
+	if (buildGraphics)
+	{
+		blocks = new ccHObject("Blocks");
+	}
+
+	//init strain tensors
+	CCLib::SquareMatrixd I(3); I.toIdentity();
+	std::vector<CCLib::SquareMatrixd> F(nx*ny*nz, CCLib::SquareMatrixd(I)); //deformation gradient tensors
+
+	int validCells = 0;
+	prg.setInfo("Calculating strain tensors...");
+	for (int x = 0; x < nx; x++)
+	{
+		for (int y = 0; y < ny; y++)
+		{
+			for (int z = 0; z < nz; z++)
+			{
+				int idx = x + nx * (y + ny * z);
+				prg.update((100.0f * idx) / (nx*ny*nz));
+				if (prg.isCancelRequested())
+				{
+					delete blocks;
+					return;
+				}
+
+				//build graphics objects. These are deleted later if no graphics were built.
+				dataInCell[idx] = new ccSNECloud();
+				dataInCell[idx]->setName("DataInCell");
+				ccScalarField* thickness = new ccScalarField("Thickness");
+				dataInCell[idx]->addScalarField(thickness);
+
+				for (ccGeoObject* g : geoObjectBins[idx])
+				{
+					//calculate average dilation vector for this structure (based on the SNEs within this cell)
+					CCVector3 average_direction; //dilation direction 
+					double average_thickness = 0.0; //amount of dilation
+
+					//TODO - write code that also tracks error/variability in orientation/length of dilation vectors?
+
+					int n_lower = 0, n_upper = 0;
+					ccHObject::Container objs;
+					g->filterChildren(objs, true, CC_TYPES::POINT_CLOUD,true); //look for SNE
+					for (ccHObject* c : objs)
+					{
+						if (ccSNECloud::isSNECloud(c))
+						{
+							ccSNECloud* s = dynamic_cast<ccSNECloud*>(c);
+							if (s != nullptr)
+							{
+								//check that a thickness scalar field exists
+								int thickSF = s->getScalarFieldIndexByName("Thickness");
+								if (thickSF != -1)
+								{
+									s->setCurrentOutScalarField(thickSF);
+									int region = ccGeoObject::getGeoObjectRegion(s);
+									if (!(region == ccGeoObject::LOWER_BOUNDARY || region == ccGeoObject::UPPER_BOUNDARY))
+									{
+										continue;
+									}
+
+									//loop through points and only pick those that fall in this bin
+									for (unsigned p = 0; p < s->size(); p++)
+									{
+										CCVector3 V = *s->getPoint(p);
+
+										//compute voxel that last vertex of this segment falls in
+										int _x = (V.x - minx) / binSize;
+										int _y = (V.y - miny) / binSize;
+										int _z = (V.z - minz) / binSize;
+										int _idx = _x + nx * (_y + ny * _z);
+
+										if (_idx == idx)
+										{										
+											//compute averages
+											CCVector3 normal = s->getPointNormal(p);
+											if (average_direction.norm2() == 0.0)
+											{
+												average_direction = normal;
+											}else if (normal.dot(average_direction) < 0)
+											{
+												//avoid vectors pointing in opposite directions (as opposite normal directions are equivalent)
+												average_direction += -1 * normal; 
+											} else
+											{
+												average_direction += normal;
+											}
+											average_thickness += s->getPointScalarValue(p);
+
+											//increment counters
+											if (region == ccGeoObject::UPPER_BOUNDARY)
+											{
+												n_upper++;
+											}
+											else
+											{
+												n_lower++;
+											}
+
+											//write to point cloud
+											if (buildGraphics)
+											{
+												dataInCell[idx]->reserve(1);
+												thickness->reserve(1);
+												thickness->addElement(s->getPointScalarValue(p));
+												dataInCell[idx]->addPoint(V);
+												dataInCell[idx]->reserveTheNormsTable();
+												dataInCell[idx]->addNorm(s->getPointNormal(p));
+											}
+
+										}
+									}
+
+									if (buildGraphics)
+									{
+										thickness->computeMinAndMax();
+										dataInCell[idx]->setCurrentDisplayedScalarField(0);
+										dataInCell[idx]->showSF(true);
+									}
+								}
+							}
+						}
+					}
+
+					//check that an upper SNE has been observed, otherwise we ignore this structure
+					if (n_upper == 0 && n_lower == 0)
+					{
+						nIgnored[idx]++;
+						continue; //skip this structure
+					}
+
+					//compute average dilation vector
+					average_direction.normalize();
+					average_thickness /= (n_lower + n_upper);
+
+					//increment number of structures that have contributed to the strain in this cell and number of valid cells for which
+					//strain can be estimated
+					validCells++; 
+					nStructures[idx]++;
+
+					//build local coordinate system relative to the dyke opening vector (opening vector N, strike vector S, dip vector D)
+					CCVector3 N = average_direction;
+					CCVector3 S = N.cross(CCVector3(0.0f, 0.0f, 1.0f));
+					CCVector3 D = N.cross(S);
+
+					//define basis matrix
+					CCLib::SquareMatrixd B(3);
+					B.setValue(0, 0, N.x); B.setValue(1, 0, N.y); B.setValue(2, 0, N.z);
+					B.setValue(0, 1, S.x); B.setValue(1, 1, S.y); B.setValue(2, 1, S.z);
+					B.setValue(0, 2, D.x); B.setValue(1, 2, D.y); B.setValue(2, 2, D.z);
+
+					//compute transform matrix that apply's a scaling/stretching equal to the dyke thickness and in the direction of its normal
+					CCLib::SquareMatrixd e(3); e.toIdentity();
+					e.setValue(0, 0, (binSize + average_thickness) / binSize); //stretch matrix in local coordinates
+					CCLib::SquareMatrixd F_increment = B*(e*B.transposed());// transform to global coords
+					
+					//apply this (multiply with) the deformation gradient tensor
+					//N.B. The order here is important, but we don't know the timing!
+					//Hence we need to somehow bootstrap this to try  all possibilites. 
+					F[idx] = F_increment*F[idx];
+
+					//build blocks for visualisation?
+					if (buildGraphics)
+					{
+						double gl16[16]; B.toGlMatrix(gl16);
+						gl16[12] = minx + (x+0.5) * binSize; gl16[13] = miny + (y+0.5) * binSize; gl16[14] = minz + (z+0.5)*binSize; gl16[15] = 1.0;
+						ccGLMatrix gl(gl16);
+						ccGenericPrimitive* box = new ccBox(CCVector3(average_thickness, binSize/2, binSize/2), &gl, "BlockStrain");
+						dataInCell[idx]->addChild(box);
+					}
+				}
+			}
+		}
+	}
+
+	//remove progress bar
+	prg.close();
+
+	//**************************************************************
+	//store strain tensors on point cloud and build graphics
+	//**************************************************************
+	ccPointCloud* points = new ccPointCloud("Strain");
+	points->setGlobalScale(lines[0]->getGlobalScale()); //copy global shift & scale from one of the polylines (N.B. we assume here that all features have the same shift/scale)
+	points->setGlobalShift(lines[0]->getGlobalShift());
+
+	points->reserve(validCells);
+	ccScalarField* nValidSF = new ccScalarField("nValid");
+	ccScalarField* nIgnoredSF = new ccScalarField("nIgnored");
+	ccScalarField* JSF = new ccScalarField("J");
+	points->addScalarField(nValidSF);
+	points->addScalarField(nIgnoredSF);
+	points->addScalarField(JSF);
+	nValidSF->reserve(validCells);
+	nIgnoredSF->reserve(validCells);
+	JSF->reserve(validCells);
+	ccScalarField* eSF[3][3];
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			eSF[i][j] = new ccScalarField(QString::asprintf("E%d%d", i + 1, j + 1).toStdString().c_str());
+			eSF[i][j]->reserve(validCells);
+			points->addScalarField(eSF[i][j]);
+		}
+	}
+
+	ccHObject* ellipses = nullptr;
+	ccHObject* grid = nullptr;
+	if (buildGraphics)
+	{
+		ellipses = new ccHObject("Ellipses");
+		grid = new ccHObject("Grid");
+		points->addChild(ellipses);
+		points->addChild(grid);
+		points->addChild(blocks);
+	}
+
+	//loop through bins and build points/graphics where strain has been estimated
+	for (int x = 0; x < nx; x++)
+	{
+		for (int y = 0; y < ny; y++)
+		{
+			for (int z = 0; z < nz; z++)
+			{
+				int idx = x + nx * (y + ny * z);
+				if (nStructures[idx] > 0)
+				{
+					//build point
+					CCVector3 p(minx + ((x + 0.5) * binSize), miny + ((y + 0.5) * binSize), minz + ((z + 0.5) * binSize));
+					points->addPoint(p);
+					nValidSF->addElement(nStructures[idx]);
+					nIgnoredSF->addElement(nIgnored[idx]);
+
+
+					//decompose into the rotation and right-stretch 
+					CCLib::SquareMatrixd eigVectors; std::vector<double> eigValues;
+					CCLib::SquareMatrixd B = F[idx] * F[idx].transposed();
+					Jacobi<double>::ComputeEigenValuesAndVectors(B, eigVectors, eigValues, true); //get eigens
+
+					CCLib::SquareMatrixd U_local(3); U_local.toIdentity();  //calculate stretch matrix in local (un-rotated coordinates)
+					U_local.setValue(0, 0, sqrt(eigValues[0])); U_local.setValue(1, 1, sqrt(eigValues[1])); U_local.setValue(2, 2, sqrt(eigValues[2]));
+					CCLib::SquareMatrixd U = eigVectors.transposed() * (U_local * eigVectors); //transform back into global coordinates
+
+					//compute jacobian (volumetric strain)
+					double J = eigValues[0] * eigValues[1] * eigValues[2]; //F[idx].computeDet();
+					JSF->addElement(J);
+
+					//store strain tensor
+					for (int i = 0; i < 3; i++)
+					{
+						for (int j = 0; j < 3; j++)
+						{
+							eSF[i][j]->addElement(U.getValue(i, j));
+						}
+					}
+
+					if (buildGraphics)
+					{
+						//compute eigens of F
+						eigVectors.clear(); eigValues.clear();
+						Jacobi<double>::ComputeEigenValuesAndVectors(F[idx], eigVectors, eigValues, true); //get eigens
+						Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues);
+						
+						//apply exaggeration to eigenvalues (exaggerate shape of the strain ellipse)
+						CCLib::SquareMatrixd transMat(3);
+						transMat.setValue(0, 0, pow(eigValues[0] / eigValues[1], exag));
+						transMat.setValue(1, 1, pow(eigValues[1] / eigValues[1], exag));
+						transMat.setValue(2, 2, pow(eigValues[2] / eigValues[1], exag));
+
+						//transform back into global coords
+						transMat = eigVectors * (transMat * eigVectors.transposed());
+						double gl16[16]; transMat.toGlMatrix(gl16);
+						gl16[12] = p.x; gl16[13] = p.y; gl16[14] = p.z; gl16[15] = 1.0; //add translation to GL matrix
+						ccGLMatrix gl(gl16);
+						ccGenericPrimitive* ellipse = new ccSphere(binSize / 3, &gl, "StrainEllipse");
+						ellipse->setColor(ccColor::blue);
+						ellipse->showColors(true);
+						ellipses->addChild(ellipse);
+
+						//store strain tensor on the graphic for reference
+						QVariantMap* map = new QVariantMap();
+						map->insert("Exx", U.getValue(0, 0) - 1.0); map->insert("Exy", U.getValue(0, 1)); map->insert("Exz", U.getValue(0, 2));
+						map->insert("Eyx", U.getValue(1, 0)); map->insert("Eyy", U.getValue(1, 1) - 1.0); map->insert("Eyz", U.getValue(1, 2));
+						map->insert("Ezx", U.getValue(2, 0)); map->insert("Ezy", U.getValue(2, 1)); map->insert("Ezz", U.getValue(2, 2) - 1.0);
+						map->insert("J", J);
+						ellipse->setMetaData(*map, true);
+
+						//create cubes to highlight gridding
+						ccGLMatrix T;
+						T.setTranslation(p);
+						ccGenericPrimitive* box = new ccBox(CCVector3(binSize, binSize, binSize), &T, "GridCell");
+						grid->addChild(box);
+						box->showWired(true);
+
+						//add points to this grid cell
+						box->addChild(dataInCell[idx]);
+					}
+				}
+				else //no strain estimate here - cleanup
+				{
+					delete dataInCell[idx];
+				}
+			}
+		}
+	}
+
+	//finalize scalar fields
+	nValidSF->computeMinAndMax();
+	nIgnoredSF->computeMinAndMax();
+	JSF->computeMinAndMax();
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			eSF[i][j]->computeMinAndMax();
+		}
+	}
+
+	//store & display mesh
+	m_app->dbRootObject()->addChild(points);
+	m_app->addToDB(points);
+	points->setCurrentDisplayedScalarField(0);
+	points->showSF(true);
+}
+
+//Estimate P21 intensity of selected structures
+static double searchR = 10;
+static unsigned subsample = 25;
+void ccCompass::estimateP21()
+{
+	//setup point cloud to store data in
+	ccPointCloud* cloud = new ccPointCloud();
+	ccScalarField* weight = new ccScalarField("weight");
+	cloud->addScalarField(weight);
+	cloud->setCurrentScalarField(0);
+
+	//******************************
+	//gather polylines and SNEs
+	//******************************
+	std::vector<ccPolyline*> lines;
+	std::vector<ccSNECloud*> sne;
+	for (ccHObject* o : m_app->getSelectedEntities())
+	{
+		//Is selected object a trace?
+		if (ccTrace::isTrace(o))
+		{ 
+			lines.push_back(static_cast<ccPolyline*>(o));
+			continue;
+		}
+		//What about an SNE cloud?
+		else if (ccSNECloud::isSNECloud(o))
+		{
+			ccSNECloud* s = dynamic_cast<ccSNECloud*>(o);
+			if (s != nullptr)
+			{
+				sne.push_back(s);
+			}
+			continue;
+		}
+
+		//Clearly not... what about it's children?
+		ccHObject::Container objs;
+		o->filterChildren(objs, true, CC_TYPES::POINT_CLOUD); //look for SNE
+		for (ccHObject* c : objs)
+		{
+			if (ccSNECloud::isSNECloud(c))
+			{
+				ccSNECloud* s = dynamic_cast<ccSNECloud*>(c);
+				if (s != nullptr)
+				{
+					sne.push_back(s);
+				}
+			}
+		}
+
+		objs.clear();
+		o->filterChildren(objs, true, CC_TYPES::POLY_LINE); //look for SNE
+		for (ccHObject* c : objs)
+		{
+			if (ccTrace::isTrace(c))
+			{
+				lines.push_back(static_cast<ccPolyline*>(c));
+			}
+		}
+	}
+
+	if (lines.empty())
+	{
+		m_app->dispToConsole("[ccCompass] Error - no polylines or traces found to compute P21.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	//get points from polylines
+	ccPointCloud* outcrop = nullptr;
+	for (ccPolyline* p : lines)
+	{
+		//if unknown, find the point cloud features have been digitised on
+		if (outcrop == nullptr)
+		{
+			outcrop = dynamic_cast<ccPointCloud*> (p->getAssociatedCloud());
+		}
+
+		//check that all features have been digitised on the same feature...
+		if (outcrop != p->getAssociatedCloud())
+		{
+			m_app->dispToConsole("[ccCompass] Error - cannot calculate P21 intensity for structures digitised from different point clouds.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
+
+		int sID = ccGeoObject::getGeoObjectRegion(p); //get the region of any associated geo-object this polyline relates too.
+		double w = 1.0;
+		if (sID == ccGeoObject::UPPER_BOUNDARY || ccGeoObject::LOWER_BOUNDARY)
+		{
+			w = 0.5; //upper/lower boundaries only count for 0.5 as they should be represented/counted twice.
+		}
+
+		cloud->reserve(p->size());
+		weight->reserve(p->size());
+		for (unsigned i = 0; i < p->size(); i++)
+		{
+			cloud->addPoint(*p->getPoint(i));
+			weight->addElement(w);
+		}
+	}
+
+	//compute octree for this cloud (for future picking)
+	cloud->computeOctree();
+
+	//******************************
+	//get search radius from user
+	//******************************
+	QDialog dlg(m_app->getMainWindow());
+	QVBoxLayout* vbox = new QVBoxLayout();
+	QLabel boxSizeLabel("Search Radius:");
+	QLineEdit boxSizeText(QString::number(searchR)); boxSizeText.setValidator(new QDoubleValidator(0.00001, std::numeric_limits<double>::max(), 6));
+	QLabel subsampleLabel("Subsample:");
+	QLineEdit subsampleText(QString::number(subsample)); boxSizeText.setValidator(new QIntValidator(1, std::numeric_limits<int>::max()));
+
+	boxSizeText.setToolTip("The search radius used to define the region to compute P21 within.");
+	subsampleText.setToolTip("Only sample P21 on the each n'th point in the original outcrop model (decreases calculation time).");
+
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+	vbox->addWidget(&boxSizeLabel);
+	vbox->addWidget(&boxSizeText);
+	vbox->addWidget(&subsampleLabel);
+	vbox->addWidget(&subsampleText);
+	vbox->addWidget(&buttonBox);
+	dlg.setLayout(vbox);
+
+	//execute dialog and get results
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return; //bail!
+	}
+
+	//get values
+	searchR = boxSizeText.text().toDouble();
+	subsample = subsampleText.text().toUInt();
+	m_app->dispToConsole(QString::asprintf("[ccCompass] Estimating P21 Intensity using a search radius of of %f.",searchR), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
+	//cleanup
+	dlg.close();
+	delete vbox;
+
+	//***************************************************************************
+	//Setup output cloud
+	//***************************************************************************
+	//subsample outcrop cloud
+	ccPointCloud* outputCloud = new ccPointCloud("P21 Intensity");
+	outputCloud->reserve(outcrop->size() / subsample);
+	for (unsigned p = 0; p < outcrop->size(); p+= subsample)
+	{
+		outputCloud->addPoint(*outcrop->getPoint(p));
+	}
+	//copy global shift
+	outputCloud->setGlobalScale(outcrop->getGlobalScale()); //copy global scale
+	outputCloud->setGlobalShift(outcrop->getGlobalShift()); //copy global shift
+	
+	//setup scalar fields etc
+	ccScalarField* P21 = new ccScalarField("P21");
+	outputCloud->addScalarField(P21);
+	P21->reserve(outputCloud->size());
+
+	//*****************************************************************************
+	//Loop through points on outcrop and calculate trace points / outcrop points
+	//*****************************************************************************
+
+	//get octree for the picking and build picking data structures
+	ccOctree::Shared trace_oct = cloud->computeOctree();
+	unsigned char trace_level = trace_oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(searchR);
+
+	//structure for nearest neighbors search
+	CCLib::DgmOctree::NeighboursSet region;
+
+	//setup progress dialog
+	ccProgressDialog prg(true, m_app->getMainWindow());
+	prg.setMethodTitle("Estimating P21 Intensity");
+	prg.setInfo("Sampling structures...");
+	prg.start();
+	prg.update(0.0);
+
+	//loop through points in the output cloud
+	for (unsigned p = 0; p < outputCloud->size(); p++)
+	{
+		//keep progress bar up to date
+		prg.update(100.0 * p / static_cast<float>(outputCloud->size()));
+		if (prg.isCancelRequested())
+		{
+			//cleanup
+			delete cloud;
+			return;
+		}
+
+		//get number of structure points in this neighbourhood
+		region.clear();
+		trace_oct->getPointsInSphericalNeighbourhood(*outputCloud->getPoint(p), searchR, region, trace_level);
+
+		//calculate total weight (think length) of structure points by summing weights
+		float sum = 0;
+		for (int i = 0; i < region.size(); i++)
+		{
+			sum += weight->getValue(region[i].pointIndex);
+		}
+
+		//calculate and store number of trace points within this domain
+		P21->setValue(p, sum);
+	}
+
+	//loop through points in output cloud again, but this time calculate surface area in regions where n_trace wasn't zero
+	prg.setInfo("Calculating patch areas...");
+	ccOctree::Shared outcrop_oct = outputCloud->computeOctree();
+	int n_outcrop = 0;
+	for (unsigned p = 0; p < outputCloud->size(); p++)
+	{
+		float sum = P21->getValue(p);
+		if (sum > 0) //this domain has at least some structures, so is worth computing patch area
+		{
+
+			//keep progress bar up to date
+			prg.update(100.0 * p / static_cast<float>(outputCloud->size()));
+			if (prg.isCancelRequested())
+			{
+				//cleanup
+				delete cloud;
+				return;
+			}
+
+			//get number of structure points in this neighbourhood
+			region.clear();
+			n_outcrop = outcrop_oct->getPointsInSphericalNeighbourhood(*outputCloud->getPoint(p), searchR, region, trace_level);
+
+			//update scalar field
+			P21->setValue(p, sum / (n_outcrop*subsample));
+		}
+	}
+
+	delete cloud;
+
+	//finish
+	P21->computeMinAndMax();
+	outputCloud->setCurrentDisplayedScalarField(0);
+	outputCloud->showSF(true);
+	m_app->dbRootObject()->addChild(outputCloud);
+	m_app->addToDB(outputCloud);
 }
 
 //converts selected traces or geoObjects to point clouds
@@ -1935,7 +2965,6 @@ void ccCompass::convertToPointCloud()
 					lines.push_back(static_cast<ccPolyline*>(c));
 				}
 			}
-
 		}
 	}
 
@@ -1969,6 +2998,8 @@ void ccCompass::convertToPointCloud()
 			for (ccHObject::Container::const_iterator it = poly.begin(); it != poly.end(); it++)
 			{
 				ccPolyline* t = static_cast<ccPolyline*>(*it);
+				points->setGlobalScale(t->getGlobalScale()); //copy global scale
+				points->setGlobalShift(t->getGlobalShift()); //copy global shift
 				points->reserve(points->size() + t->size()); //make space
 				sf->reserve(points->size() + t->size());
 				for (unsigned int p = 0; p < t->size(); p++)
@@ -2038,7 +3069,7 @@ void ccCompass::distributeSelection()
 
 	//get selection
 	ccHObject::Container selection = m_app->getSelectedEntities();
-	if (selection.size() == 0)
+	if (selection.empty())
 	{
 		m_app->dispToConsole("[Compass] No objects selected.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 	}
@@ -2351,10 +3382,239 @@ void ccCompass::writeToLower() //new digitiziation will be added to the GeoObjec
 	m_mapDlg->setLowerButton->setChecked(true);
 }
 
+//convert a point cloud containing field points (x,y,z) and dip+dip-direction scalar fields to planes for visualisation.
+void ccCompass::importFoliations()
+{
+	//get selected point cloud
+	std::vector<ccHObject*> sel = m_app->getSelectedEntities();
+	if (sel.empty())
+	{
+		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	if (!sel[0]->isA(CC_TYPES::POINT_CLOUD))
+	{
+		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	//get point cloud object
+	ccPointCloud* cld = static_cast<ccPointCloud*>(sel[0]);
+
+	//get user to select scalar field for dip & dip-directon
+	QDialog dlg(m_app->getMainWindow());
+	QVBoxLayout* vbox = new QVBoxLayout();
+	QLabel dipLabel("Dip Field:");
+	QLabel dipDirLabel("Dip-Direction Field:");
+	QLabel sizeLabel("Plane Size");
+	QComboBox dipDirCombo(m_app->getMainWindow());
+	QComboBox dipCombo(m_app->getMainWindow());
+	QLineEdit planeSize("2.0"); planeSize.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
+
+	//fill combo boxes with field names
+	//std::vector<QString> fields;
+	//std::vector<int> idx;
+	for (unsigned i = 0; i < cld->getNumberOfScalarFields(); i++)
+	{
+		dipDirCombo.addItem(cld->getScalarFieldName(i));
+		dipCombo.addItem(cld->getScalarFieldName(i));
+		//fields.push_back(cld->getScalarFieldName(i));
+		//idx.push_back(i);
+	}
+
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+
+	vbox->addWidget(&dipLabel);
+	vbox->addWidget(&dipCombo);
+	vbox->addWidget(&dipDirLabel);
+	vbox->addWidget(&dipDirCombo);
+	vbox->addWidget(&buttonBox);
+	vbox->addWidget(&sizeLabel);
+	vbox->addWidget(&planeSize);
+	dlg.setLayout(vbox);
+
+	//execute dialog and get results
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return; //bail!
+	}
+
+
+	//get values
+	int dipSF = cld->getScalarFieldIndexByName(dipCombo.currentText().toStdString().c_str());
+	int dipDirSF = cld->getScalarFieldIndexByName(dipDirCombo.currentText().toStdString().c_str());
+	double size = planeSize.text().toDouble();
+	if (dipSF == dipDirSF)
+	{
+		m_app->dispToConsole("Error: Dip and Dip-Direction scalar fields must be different!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	//loop through points
+	for (unsigned p = 0; p < cld->size(); p++)
+	{
+		float dip = cld->getScalarField(dipSF)->at(p);
+		float dipdir = cld->getScalarField(dipDirSF)->at(p);
+		CCVector3 Cd = *cld->getPoint(p);
+
+		//build plane and get its orientation 
+		ccPlane* plane = new ccPlane(QString("%1/%2").arg(static_cast<int>(dip), 2, 10, QChar('0')).arg(static_cast<int>(dipdir), 3, 10, QChar('0')));
+		plane->showNameIn3D(true);
+		cld->addChild(plane);
+		m_app->addToDB(plane, false, true, false, false);
+		CCVector3 N = plane->getNormal();
+		CCVector3 C = plane->getCenter();
+
+		//figure out transform (blatantly stolen from ccPlaneEditDlg::updatePlane())
+		CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(dip, dipdir, true);
+		ccGLMatrix trans;
+		bool needToApplyTrans = false;
+		bool needToApplyRot = false;
+
+		needToApplyRot = (std::abs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
+		needToApplyTrans = needToApplyRot || ((C - Cd).norm2d() != 0);
+
+		if (needToApplyTrans)
+		{
+			trans.setTranslation(-C);
+			needToApplyTrans = true;
+		}
+		if (needToApplyRot)
+		{
+			ccGLMatrix rotation;
+			//special case: plane parallel to XY
+			if (std::abs(N.z) > PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
+			{
+				ccGLMatrix rotX; rotX.initFromParameters(-dip * CC_DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
+				ccGLMatrix rotZ; rotZ.initFromParameters(dipdir * CC_DEG_TO_RAD, CCVector3(0, 0, -1), CCVector3(0, 0, 0));
+				rotation = rotZ * rotX;
+			}
+			else //general case
+			{
+				rotation = ccGLMatrix::FromToRotation(N, Nd);
+			}
+			trans = rotation * trans;
+		}
+		if (needToApplyTrans)
+		{
+			trans.setTranslation(trans.getTranslationAsVec3D() + Cd);
+		}
+		if (needToApplyRot || needToApplyTrans)
+		{
+			plane->applyGLTransformation_recursive(&trans);
+
+			//ccLog::Print("[Plane edit] Applied transformation matrix:");
+			//ccLog::Print(trans.toString(12, ' ')); //full precision
+		}
+		plane->setXWidth(size, false);
+		plane->setYWidth(size, true);
+	}
+}
+
+//convert a point cloud containing field points (x,y,z) and trend + plunge scalar fields to lineation vectors for visualisation.
+void ccCompass::importLineations()
+{
+	//get selected point cloud
+	std::vector<ccHObject*> sel = m_app->getSelectedEntities();
+	if (sel.empty())
+	{
+		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	if (!sel[0]->isA(CC_TYPES::POINT_CLOUD))
+	{
+		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	//get point cloud object
+	ccPointCloud* cld = static_cast<ccPointCloud*>(sel[0]);
+
+	//get user to select scalar field for dip & dip-directon
+	QDialog dlg(m_app->getMainWindow());
+	QVBoxLayout* vbox = new QVBoxLayout();
+	QLabel dipLabel("Trend Field:");
+	QLabel dipDirLabel("Plunge Field:");
+	QLabel sizeLabel("Display Length");
+	QComboBox dipDirCombo(m_app->getMainWindow());
+	QComboBox dipCombo(m_app->getMainWindow());
+	QLineEdit planeSize("2.0"); planeSize.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
+
+	//fill combo boxes with field names
+	for (unsigned i = 0; i < cld->getNumberOfScalarFields(); i++)
+	{
+		dipDirCombo.addItem(cld->getScalarFieldName(i));
+		dipCombo.addItem(cld->getScalarFieldName(i));
+	}
+
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+
+	vbox->addWidget(&dipLabel);
+	vbox->addWidget(&dipCombo);
+	vbox->addWidget(&dipDirLabel);
+	vbox->addWidget(&dipDirCombo);
+	vbox->addWidget(&buttonBox);
+	vbox->addWidget(&sizeLabel);
+	vbox->addWidget(&planeSize);
+	dlg.setLayout(vbox);
+
+	//execute dialog and get results
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return; //bail!
+	}
+
+	//get values
+	int dipSF = cld->getScalarFieldIndexByName(dipCombo.currentText().toStdString().c_str());
+	int dipDirSF = cld->getScalarFieldIndexByName(dipDirCombo.currentText().toStdString().c_str());
+	double size = planeSize.text().toDouble();
+	if (dipSF == dipDirSF)
+	{
+		m_app->dispToConsole("Error: Trend and plunge scalar fields must be different!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	//loop through points
+	for (unsigned p = 0; p < cld->size(); p++)
+	{
+		float trend = cld->getScalarField(dipSF)->at(p);
+		float plunge = cld->getScalarField(dipDirSF)->at(p);
+		CCVector3 Cd = *cld->getPoint(p);
+		
+		//build lineation vector
+		CCVector3 l(sin(trend * CC_DEG_TO_RAD) * cos(plunge * CC_DEG_TO_RAD), cos(trend * CC_DEG_TO_RAD)*cos(plunge * CC_DEG_TO_RAD), -sin(plunge * CC_DEG_TO_RAD));
+
+		//create new point cloud to associate with lineation graphic
+		ccPointCloud* points = new ccPointCloud();
+		points->setGlobalScale(cld->getGlobalScale()); //copy global shift & scale onto new point cloud
+		points->setGlobalShift(cld->getGlobalShift());
+		points->reserve(2);
+		points->addPoint(Cd);
+		points->addPoint(Cd + l*size);
+		points->setName("verts");
+
+		//create lineation graphic
+		ccLineation* lineation = new ccLineation(points);
+		lineation->addChild(points);
+		lineation->addPointIndex(0);
+		lineation->addPointIndex(1);
+		lineation->updateMetadata();
+		lineation->setName(QStringLiteral("%1->%2").arg( qRound( plunge ) ).arg( qRound( trend ) ));
+		cld->addChild(lineation);
+		m_app->addToDB(lineation, false, true, false, false);
+	}
+}
+
 //save the current view to an SVG file
 void ccCompass::exportToSVG()
 {
-	float zoom = 2.0; //TODO: create popup box
+	float zoom = 2.0f; //TODO: create popup box
 
 	//get filename for the svg file
 	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("SVG Output file"), "", tr("SVG files (*.svg)"));
@@ -2404,7 +3664,6 @@ void ccCompass::exportToSVG()
 
 	//create .svg file
 	QFile svg_file(filename);
-
 	//open file & create text stream
 	if (svg_file.open(QIODevice::WriteOnly))
 	{
@@ -2561,7 +3820,7 @@ void ccCompass::onSave()
 		QTextStream thickness_stream(&thickness_file);
 
 		//write headers
-		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS" << endl;
+		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS,Gx,Gy,Gz,Length" << endl;
 		trace_stream << "Name,Trace_id,Point_id,Start_x,Start_y,Start_z,End_x,End_y,End_z,Cost,Cost_Mode" << endl;
 		lineation_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Length" << endl;
 		thickness_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Thickness" << endl;
@@ -2631,7 +3890,7 @@ void ccCompass::onSave()
 }
 
 //write plane data
-int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentName)
+int ccCompass::writePlanes(ccHObject* object, QTextStream* out, const QString &parentName)
 {
 	//get object name
 	QString name;
@@ -2644,16 +3903,52 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentNa
 		name = QString("%1.%2").arg(parentName, object->getName());
 	}
 
+	//find point cloud (biggest in project) to pull global shift & scale from
+	//n.b. ccPlanes do not store a global shift/scale like point clouds do, hence this hack.
+	//Will only cause issues if CC is being used with multiple point clouds that have different underlying
+	//coordinate systems (and hence shift and scales) - which I can't see happening too often.
+	//(in any case, 99% of the time the biggest point cloud in the project will be the model being interpreted)
+	ccPointCloud* ss = nullptr; 
+	if (object->isKindOf(CC_TYPES::PLANE) | ccFitPlane::isFitPlane(object))
+	{
+		std::vector<ccHObject*> clouds;
+		m_app->dbRootObject()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, false);
+		unsigned int npoints = 0;
+		for (ccHObject* o : clouds)
+		{
+			ccPointCloud* p = static_cast<ccPointCloud*>(o);
+			if (npoints <= p->size())
+			{
+				npoints = p->size();
+				ss = p;
+			}
+		}
+	}
+
 	//is object a plane made by ccCompass?
 	int n = 0;
 	if (ccFitPlane::isFitPlane(object))
 	{
-		//Write object as Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Radius,RMS
+		//write global position
+		ccPlane* P = static_cast<ccPlane*>(object);
+
+		//Write object as Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Radius,RMS,Gx,Gy,Gz,Length
 		*out << name << ",";
 		*out << object->getMetaData("Strike").toString() << "," << object->getMetaData("Dip").toString() << "," << object->getMetaData("DipDir").toString() << ",";
 		*out << object->getMetaData("Cx").toString() << "," << object->getMetaData("Cy").toString() << "," << object->getMetaData("Cz").toString() << ",";
 		*out << object->getMetaData("Nx").toString() << "," << object->getMetaData("Ny").toString() << "," << object->getMetaData("Nz").toString() << ",";
-		*out << object->getMetaData("Radius").toString() << "," << object->getMetaData("RMS").toString() << endl;
+		*out << object->getMetaData("Radius").toString() << "," << object->getMetaData("RMS").toString() << ",";
+
+		if (ss != nullptr)
+		{
+			CCVector3 L = P->getTransformation().getTranslationAsVec3D();
+			CCVector3d G = ss->toGlobal3d(L);
+
+			*out << G.x << "," << G.y << "," << G.z << ",";
+		}
+
+		//write length of trace associated with this plane
+		*out << std::max(P->getXWidth(), P->getYWidth()) << endl;
 		n++;
 	}
 	else if (object->isKindOf(CC_TYPES::PLANE)) //not one of our planes, but a plane anyway (so we'll export it)
@@ -2678,7 +3973,19 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentNa
 		*out << strike << "," << dip << "," << dipdir << ","; //write orientation
 		*out << L.x << "," << L.y << "," << L.z << ","; //write location
 		*out << N.x << "," << N.y << "," << N.z << ","; //write normal
-		*out << "NA" << "," << "UNK" << endl; //the "radius" and "RMS" are unknown
+		*out << "NA" << "," << "UNK" << ","; //the "radius" and "RMS" are unknown
+
+	    //write global position
+		if (ss != nullptr)
+		{
+			CCVector3d G = ss->toGlobal3d(L);
+			*out << G.x << "," << G.y << "," << G.z << endl;
+		}
+		else
+		{
+			*out << endl;
+		}
+
 		n++;
 	}
 
@@ -2692,7 +3999,7 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentNa
 }
 
 //write trace data
-int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentName)
+int ccCompass::writeTraces(ccHObject* object, QTextStream* out, const QString &parentName)
 {
 	//get object name
 	QString name;
@@ -2726,7 +4033,7 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 				//get points
 				p->getPoint(i - 1, start);
 				p->getPoint(i, end);
-				
+
 				//calculate segment cost
 				cost = p->getSegmentCost(p->getPointGlobalIndex(i - 1), p->getPointGlobalIndex(i));
 				
@@ -2735,12 +4042,12 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 				*out << name << ","; //name
 				*out << tID << ",";
 				*out << i - 1 << ",";
-				*out << start.x << ",";
-				*out << start.y << ",";
-				*out << start.z << ",";
-				*out << end.x << ",";
-				*out << end.y << ",";
-				*out << end.z << ",";
+				*out << p->toGlobal3d(start).x << ",";
+				*out << p->toGlobal3d(start).y << ",";
+				*out << p->toGlobal3d(start).z << ",";
+				*out << p->toGlobal3d(end).x << ",";
+				*out << p->toGlobal3d(end).y << ",";
+				*out << p->toGlobal3d(end).z << ",";
 				*out << cost << ",";
 				*out << ccTrace::COST_MODE << endl;
 			}
@@ -2758,7 +4065,7 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 }
 
 //write lineation data
-int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString parentName, bool thicknesses)
+int ccCompass::writeLineations(ccHObject* object, QTextStream* out, const QString &parentName, bool thicknesses)
 {
 	//get object name
 	QString name;
@@ -2794,7 +4101,7 @@ int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString pare
 }
 
 
-int ccCompass::writeToXML(QString filename)
+int ccCompass::writeToXML(const QString &filename)
 {
 	int n = 0;
 
@@ -2863,10 +4170,18 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 		//write thickness
 		out->writeStartElement("THICKNESS");
 	}
+	else if (ccSNECloud::isSNECloud(object))
+	{
+		out->writeStartElement("SNE");
+	}
 	else if (ccLineation::isLineation(object))
 	{
 		//write lineation
 		out->writeStartElement("LINEATION");
+	}
+	else if (object->isA(CC_TYPES::POINT_CLOUD))
+	{
+		out->writeStartElement("CLOUD");
 	}
 	else if (object->isA(CC_TYPES::POLY_LINE))
 	{
@@ -2894,19 +4209,28 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 	}
 
 	//special case - we can calculate all metadata from a plane
-	if (object->isA(CC_TYPES::PLANE) && !ccFitPlane::isFitPlane(object))
+	if (object->isA(CC_TYPES::PLANE))
 	{
-		//build fitplane object
-		ccFitPlane* temp = new ccFitPlane(static_cast<ccPlane*> (object));
+		ccPlane* P = static_cast<ccPlane*> (object);
 
-		//write metadata
-		for (QMap<QString, QVariant>::const_iterator it = temp->metaData().begin(); it != temp->metaData().end(); it++)
+		//write length
+		out->writeTextElement("Length", QString::asprintf("%f", std::max(P->getXWidth(), P->getYWidth())));
+
+		//if this is just an ordinary plane, make a corresponding fitplane object and then steal metadata
+		if (!ccFitPlane::isFitPlane(P))
 		{
-			out->writeTextElement(it.key(), it.value().toString());
-		}
+			//build fitplane object
+			ccFitPlane* temp = new ccFitPlane(P);
 
-		//cleanup
-		delete temp;
+			//write metadata
+			for (QMap<QString, QVariant>::const_iterator it = temp->metaData().begin(); it != temp->metaData().end(); it++)
+			{
+				out->writeTextElement(it.key(), it.value().toString());
+			}
+
+			//cleanup
+			delete temp;
+		}
 	}
 
 	//if object is a polyline object (or a trace) write trace points and normals
@@ -3041,6 +4365,68 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 			}
 
 			//fin!
+			out->writeEndElement();
+		}
+	}
+
+	//if object is a point cloud write global shift and scale
+	if (object->isA(CC_TYPES::POINT_CLOUD))
+	{
+		ccPointCloud* cloud = static_cast<ccPointCloud*>(object);
+		out->writeTextElement("GLOBAL_SCALE", QString::asprintf("%f", cloud->getGlobalScale()));
+		out->writeTextElement("GLOBAL_X", QString::asprintf("%f", cloud->getGlobalShift().x));
+		out->writeTextElement("GLOBAL_Y", QString::asprintf("%f", cloud->getGlobalShift().y));
+		out->writeTextElement("GLOBAL_Z", QString::asprintf("%f", cloud->getGlobalShift().z));
+
+		//for SNE clouds write all points, point normals and scalar fields
+		if (ccSNECloud::isSNECloud(object))
+		{
+			//write header for point data
+			out->writeStartElement("POINTS");
+			out->writeAttribute("count", QString::asprintf("%d", cloud->size()));
+
+			//gather data strings
+			QString x, y, z, nx, ny, nz, thickness, weight, trend, plunge;
+			CCLib::ScalarField* wSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Weight"));
+			CCLib::ScalarField* trendSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Trend"));
+			CCLib::ScalarField* plungeSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Plunge"));
+
+			CCLib::ScalarField* tSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Thickness"));
+			for (unsigned p = 0; p < cloud->size(); p++)
+			{
+				x += QString::asprintf("%f,", cloud->getPoint(p)->x);
+				y += QString::asprintf("%f,", cloud->getPoint(p)->y);
+				z += QString::asprintf("%f,", cloud->getPoint(p)->z);
+				nx += QString::asprintf("%f,", cloud->getPointNormal(p).x);
+				ny += QString::asprintf("%f,", cloud->getPointNormal(p).y);
+				nz += QString::asprintf("%f,", cloud->getPointNormal(p).z);
+				weight += QString::asprintf("%f,", wSF->getValue(p));
+				trend += QString::asprintf("%f,", trendSF->getValue(p));
+				plunge += QString::asprintf("%f,", plungeSF->getValue(p));
+
+
+				if (tSF != nullptr) //can be null if no thickness was estimated!
+				{
+					thickness += QString::asprintf("%f,", tSF->getValue(p));
+				}
+			}
+
+			//write
+			out->writeTextElement("x", x);
+			out->writeTextElement("y", y);
+			out->writeTextElement("z", z);
+			out->writeTextElement("nx", nx);
+			out->writeTextElement("ny", ny);
+			out->writeTextElement("nz", nz);
+			out->writeTextElement("weight", weight);
+			out->writeTextElement("trend", trend);
+			out->writeTextElement("plunge", plunge);
+			if (tSF != nullptr)
+			{
+				out->writeTextElement("thickness", thickness);
+			}
+
+			//fin
 			out->writeEndElement();
 		}
 	}

@@ -54,7 +54,7 @@ public:
 					bool useModelSFAsWeights = false,
 					int transformationFilters = CCLib::ICPRegistrationTools::SKIP_NONE,
 					int maxThreadCount = 0,
-					QWidget* parent = 0);
+					QWidget* parent = nullptr);
 
 };
 

@@ -291,7 +291,7 @@ public:
 	/** \param[in] matText matrix text
 		\param[out] success whether input matrix text is valid or not
 	**/
-	static ccGLMatrixTpl<T> FromString(QString matText, bool& success)
+	static ccGLMatrixTpl<T> FromString(const QString &matText, bool& success)
 	{
 		QStringList valuesStr = matText.split(QRegExp("\\s+"),QString::SkipEmptyParts);
 		if (valuesStr.size() != OPENGL_MATRIX_SIZE)
@@ -1092,7 +1092,7 @@ public:
 	//! Scales the whole matrix
 	/** \param coef scaling coef.
 	**/
-	inline void scale(T coef) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] *= coef; }
+	inline void scale(T coef) { for (auto &cell : m_mat) cell *= coef; }
 
 	//! Scales one line of the matrix
 	/** \param lineIndex (0-3)
@@ -1122,8 +1122,8 @@ public:
 	}
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const { return true; }
-	virtual bool toFile(QFile& out) const
+	bool isSerializable() const override { return true; }
+	bool toFile(QFile& out) const override
 	{
 		assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
@@ -1134,7 +1134,7 @@ public:
 		return true;
 	}
 
-	virtual bool fromFile(QFile& in, short dataVersion, int flags)
+	bool fromFile(QFile& in, short dataVersion, int flags) override
 	{
 		assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 

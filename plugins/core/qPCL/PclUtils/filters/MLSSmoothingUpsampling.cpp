@@ -63,8 +63,6 @@ int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 	smoother.setSearchMethod(tree);	
 	smoother.setSearchRadius(params.search_radius_);
 	smoother.setComputeNormals(params.compute_normals_);
-	smoother.setPolynomialFit(params.polynomial_fit_);
-
 	if (params.polynomial_fit_)
 	{
 		smoother.setPolynomialOrder(params.order_);

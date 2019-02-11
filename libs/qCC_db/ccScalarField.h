@@ -51,8 +51,6 @@ public:
 
 		//! Default constructor
 		Range() : m_min(0), m_start(0), m_stop(0), m_max(0), m_range(1) {}
-		//! Copy constructor
-		Range(const Range& range) : m_min(range.m_min), m_start(range.m_start), m_stop(range.m_stop), m_max(range.m_max), m_range(range.m_range) {}
 
 		//getters
 		inline ScalarType min()			const { return m_min;		}
@@ -93,7 +91,7 @@ public:
 	protected:
 
 		//! Updates actual range
-		inline void updateRange() { m_range = std::max(m_stop - m_start, (ScalarType)ZERO_TOLERANCE); }
+		inline void updateRange() { m_range = std::max(m_stop - m_start, static_cast<ScalarType>(ZERO_TOLERANCE)); }
 
 		ScalarType m_min;		/**< Minimum value **/
 		ScalarType m_start;		/**< Current start value (in [min,max]) **/
@@ -170,7 +168,7 @@ public:
 	inline bool logScale() const { return m_logScale; }
 
 	//inherited
-	QCC_DB_LIB_API virtual void computeMinAndMax() override;
+	QCC_DB_LIB_API void computeMinAndMax() override;
 
 	//! Returns associated color scale
 	inline const ccColorScale::Shared& getColorScale() const { return m_colorScale; }
@@ -188,13 +186,7 @@ public:
 	struct Histogram : std::vector<unsigned>
 	{
 		//! Max histogram value
-		unsigned maxValue;
-
-		//! Default constructor
-		Histogram() : maxValue(0) {}
-
-		//! Copy constructor
-		Histogram(const Histogram& h) : std::vector<unsigned>(h), maxValue(h.maxValue) {}
+		unsigned maxValue = 0;
 	};
 
 	//! Returns associated histogram values (for display)
@@ -215,9 +207,9 @@ public:
 	QCC_DB_LIB_API void importParametersFrom(const ccScalarField* sf);
 
 	//inherited from ccSerializableObject
-	inline virtual bool isSerializable() const override { return true; }
-	QCC_DB_LIB_API virtual bool toFile(QFile& out) const override;
-	QCC_DB_LIB_API virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
+	inline bool isSerializable() const override { return true; }
+	QCC_DB_LIB_API bool toFile(QFile& out) const override;
+	QCC_DB_LIB_API bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	//! Returns the global shift (if any)
 	inline double getGlobalShift() const { return m_globalShift; }
@@ -229,7 +221,7 @@ protected: //methods
 	//! Default destructor
 	/** Call release instead
 	**/
-	virtual ~ccScalarField() {}
+	~ccScalarField() override = default;
 
 	//! Updates saturation values
 	QCC_DB_LIB_API void updateSaturationBounds();

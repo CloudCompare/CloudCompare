@@ -20,8 +20,9 @@
 
 //qCC_db
 #include <ccGBLSensor.h>
-#include <ccPointCloud.h>
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
+#include <ccPointCloud.h>
 
 //Qt
 #include <QFileInfo>

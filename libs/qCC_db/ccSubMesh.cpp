@@ -18,8 +18,8 @@
 #include "ccSubMesh.h"
 
 //Local
-#include "ccMaterialSet.h"
 #include "ccGenericPointCloud.h"
+#include "ccMaterialSet.h"
 #include "ccMesh.h"
 
 //Qt
@@ -29,12 +29,12 @@
 #include <ManualSegmentationTools.h>
 
 //system
-#include <string.h>
-#include <assert.h>
+#include <cassert>
+#include <cstring>
 
 ccSubMesh::ccSubMesh(ccMesh* parentMesh)
 	: ccGenericMesh("Sub-mesh")
-	, m_associatedMesh(0)
+	, m_associatedMesh(nullptr)
 	, m_globalIterator(0)
 {
 	setAssociatedMesh(parentMesh); //must be called so as to set the right dependency!
@@ -42,10 +42,6 @@ ccSubMesh::ccSubMesh(ccMesh* parentMesh)
 	showColors(parentMesh ? parentMesh->colorsShown() : true);
 	showNormals(parentMesh ? parentMesh->normalsShown() : true);
 	showSF(parentMesh ? parentMesh->sfShown() : true);
-}
-
-ccSubMesh::~ccSubMesh()
-{
 }
 
 void ccSubMesh::setAssociatedMesh(ccMesh* mesh, bool unlinkPreviousOne/*=true*/)
@@ -73,26 +69,26 @@ void ccSubMesh::forEach(genericTriangleAction action)
 	if (!m_associatedMesh)
 		return;
 
-	for (size_t i = 0; i < m_triIndexes.size(); ++i)
+	for (unsigned int index : m_triIndexes)
 	{
-		CCLib::GenericTriangle* tri = m_associatedMesh->_getTriangle(m_triIndexes[i]);
+		CCLib::GenericTriangle* tri = m_associatedMesh->_getTriangle(index);
 		action(*tri);
 	}
 }
 
 ccGenericPointCloud* ccSubMesh::getAssociatedCloud() const
 {
-	return m_associatedMesh ? m_associatedMesh->getAssociatedCloud() : 0;
+	return m_associatedMesh ? m_associatedMesh->getAssociatedCloud() : nullptr;
 }
 
 CCLib::GenericTriangle* ccSubMesh::_getNextTriangle() //temporary object
 {
-	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->_getTriangle(m_triIndexes[m_globalIterator++]) : 0;
+	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->_getTriangle(m_triIndexes[m_globalIterator++]) : nullptr;
 }
 
 CCLib::VerticesIndexes* ccSubMesh::getNextTriangleVertIndexes()
 {
-	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->getTriangleVertIndexes(m_triIndexes[m_globalIterator++]) : 0;
+	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->getTriangleVertIndexes(m_triIndexes[m_globalIterator++]) : nullptr;
 }
 
 bool ccSubMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N)
@@ -295,7 +291,7 @@ CC_SUB_MESH_TRANSIENT_CONST_TEST(hasTriNormals);
 
 const ccMaterialSet* ccSubMesh::getMaterialSet() const
 {
-	return m_associatedMesh ? m_associatedMesh->getMaterialSet() : 0;
+	return m_associatedMesh ? m_associatedMesh->getMaterialSet() : nullptr;
 }
 
 int ccSubMesh::getTriangleMtlIndex(unsigned triIndex) const
@@ -305,7 +301,7 @@ int ccSubMesh::getTriangleMtlIndex(unsigned triIndex) const
 
 TextureCoordsContainer* ccSubMesh::getTexCoordinatesTable() const
 {
-	return m_associatedMesh ? m_associatedMesh->getTexCoordinatesTable() : 0;
+	return m_associatedMesh ? m_associatedMesh->getTexCoordinatesTable() : nullptr;
 }
 
 void ccSubMesh::getTriangleTexCoordinates(unsigned triIndex, TexCoords2D* &tx1, TexCoords2D* &tx2, TexCoords2D* &tx3) const
@@ -358,7 +354,7 @@ bool ccSubMesh::getTriangleNormals(unsigned triIndex, CCVector3& Na, CCVector3& 
 
 NormsIndexesTableType* ccSubMesh::getTriNormsTable() const
 {
-	return m_associatedMesh ? m_associatedMesh->getTriNormsTable() : 0;
+	return m_associatedMesh ? m_associatedMesh->getTriNormsTable() : nullptr;
 }
 
 void ccSubMesh::clear(bool releaseMemory)

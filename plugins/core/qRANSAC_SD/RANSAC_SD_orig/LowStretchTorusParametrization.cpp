@@ -109,7 +109,7 @@ void LowStretchTorusParametrization::WrapComponents(
 	}
 
 	// condense labels
-	for(size_t i = tempLabels.size() - 1; i > 0; --i)
+	for (int i = static_cast<int>(tempLabels.size()) - 1; i > 0; --i)
 		tempLabels[i].first = ReduceLabel(i, tempLabels);
 	MiscLib::Vector< int > condensed(tempLabels.size());
 	labels->clear();

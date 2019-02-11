@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>234</height>
+    <height>284</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,7 +44,7 @@
            </size>
           </property>
           <property name="text">
-           <string>,</string>
+           <string notr="true">,</string>
           </property>
           <property name="maxLength">
            <number>1</number>
@@ -112,14 +112,14 @@
    <item>
     <widget class="QCheckBox" name="inverseRowCheckBox">
      <property name="text">
-      <string>inverse row order</string>
+      <string>Invert row order</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QCheckBox" name="loadAsMeshCheckBox">
      <property name="text">
-      <string>load as mesh</string>
+      <string>Load as mesh</string>
      </property>
     </widget>
    </item>
@@ -128,7 +128,7 @@
      <item>
       <widget class="QCheckBox" name="useTextureCheckBox">
        <property name="text">
-        <string>use texture file</string>
+        <string>Use texture file</string>
        </property>
       </widget>
      </item>
@@ -156,7 +156,7 @@
         <item>
          <widget class="QToolButton" name="browseToolButton">
           <property name="text">
-           <string>...</string>
+           <string notr="true">...</string>
           </property>
          </widget>
         </item>

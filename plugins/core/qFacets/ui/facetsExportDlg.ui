@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>208</height>
+    <height>268</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,7 +26,7 @@
       <item>
        <widget class="QToolButton" name="browseToolButton">
         <property name="text">
-         <string>...</string>
+         <string notr="true">...</string>
         </property>
        </widget>
       </item>
@@ -79,42 +79,42 @@
          <item>
           <widget class="QLabel" name="label">
            <property name="text">
-            <string>Nx</string>
+            <string notr="true">Nx</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QLineEdit" name="nXLineEdit">
            <property name="text">
-            <string>0</string>
+            <string notr="true">0</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Ny</string>
+            <string notr="true">Ny</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QLineEdit" name="nYLineEdit">
            <property name="text">
-            <string>0</string>
+            <string notr="true">0</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QLabel" name="label_3">
            <property name="text">
-            <string>Nz</string>
+            <string notr="true">Nz</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QLineEdit" name="nZLineEdit">
            <property name="text">
-            <string>1</string>
+            <string notr="true">1</string>
            </property>
           </widget>
          </item>
@@ -149,9 +149,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../qFacets.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

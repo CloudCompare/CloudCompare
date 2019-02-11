@@ -122,8 +122,8 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 	typedef typename FuncT::ScalarType ScalarType;
 	enum { paramDim = FuncT::NumParams };
 	bool retVal = true;
-	unsigned int totalSize = end - begin;
-	if(!totalSize)
+	size_t totalSize = end - begin;
+	if (!totalSize)
 		return false;
 	ScalarType lambda = ScalarType(0.0001);
 	ScalarType *F0 = new ScalarType[totalSize * paramDim];
@@ -145,10 +145,10 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 	subsets = 1;
 #endif
 	MiscLib::Vector< unsigned int > subsetSizes(subsets);
-	for(unsigned int i = subsetSizes.size(); i;)
+	for(size_t i = subsetSizes.size(); i;)
 	{
 		--i;
-		subsetSizes[i] = totalSize;
+		subsetSizes[i] = static_cast<unsigned>(totalSize);
 		if(i)
 			subsetSizes[i] = subsetSizes[i] >> 1;
 		totalSize -= subsetSizes[i];
@@ -159,7 +159,7 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 	// get current error
 	ScalarType chi = 0, newChi = 0;
 	ScalarType rho = 1;
-	unsigned int outerIter = 0,
+	size_t outerIter = 0,
 #ifndef PRECISIONLEVMAR
 		maxOuterIter = 200 / subsetSizes.size(),
 #else

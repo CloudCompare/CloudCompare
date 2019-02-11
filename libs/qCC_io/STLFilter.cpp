@@ -21,22 +21,23 @@
 #include <QApplication>
 #include <QFile>
 #include <QFileInfo>
-#include <QTextStream>
-#include <QStringList>
-#include <QString>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QString>
+#include <QStringList>
+#include <QTextStream>
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccMesh.h>
-#include <ccPointCloud.h>
-#include <ccProgressDialog.h>
 #include <ccNormalVectors.h>
 #include <ccOctree.h>
+#include <ccPointCloud.h>
+#include <ccProgressDialog.h>
 
 //System
-#include <string.h>
+#include <cstring>
 
 bool STLFilter::canLoadExtension(const QString& upperCaseExt) const
 {

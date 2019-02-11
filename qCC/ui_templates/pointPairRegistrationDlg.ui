@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>493</width>
+    <width>508</width>
     <height>380</height>
    </rect>
   </property>
@@ -81,7 +81,7 @@
         <string>search radius (or the spheres radius if you know it)</string>
        </property>
        <property name="prefix">
-        <string>r = </string>
+        <string notr="true">r = </string>
        </property>
        <property name="decimals">
         <number>3</number>
@@ -106,10 +106,10 @@
         <string>Max RMS (as a percentage of the radius)</string>
        </property>
        <property name="suffix">
-        <string>%</string>
+        <string notr="true">%</string>
        </property>
        <property name="prefix">
-        <string>RMS &lt; </string>
+        <string notr="true">RMS &lt; </string>
        </property>
        <property name="minimum">
         <number>1</number>
@@ -146,37 +146,37 @@
      </attribute>
      <row>
       <property name="text">
-       <string>1</string>
+       <string notr="true">1</string>
       </property>
      </row>
      <row>
       <property name="text">
-       <string>2</string>
+       <string notr="true">2</string>
       </property>
      </row>
      <row>
       <property name="text">
-       <string>3</string>
+       <string notr="true">3</string>
       </property>
      </row>
      <row>
       <property name="text">
-       <string>4</string>
+       <string notr="true">4</string>
       </property>
      </row>
      <column>
       <property name="text">
-       <string>X</string>
+       <string notr="true">X</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Y</string>
+       <string notr="true">Y</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Z</string>
+       <string notr="true">Z</string>
       </property>
      </column>
      <column>
@@ -256,37 +256,37 @@
      </attribute>
      <row>
       <property name="text">
-       <string>1</string>
+       <string notr="true">1</string>
       </property>
      </row>
      <row>
       <property name="text">
-       <string>2</string>
+       <string notr="true">2</string>
       </property>
      </row>
      <row>
       <property name="text">
-       <string>3</string>
+       <string notr="true">3</string>
       </property>
      </row>
      <row>
       <property name="text">
-       <string>4</string>
+       <string notr="true">4</string>
       </property>
      </row>
      <column>
       <property name="text">
-       <string>X</string>
+       <string notr="true">X</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Y</string>
+       <string notr="true">Y</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Z</string>
+       <string notr="true">Z</string>
       </property>
      </column>
      <column>
@@ -355,22 +355,22 @@
        </property>
        <item>
         <property name="text">
-         <string>XYZ</string>
+         <string notr="true">XYZ</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>X</string>
+         <string notr="true">X</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Y</string>
+         <string notr="true">Y</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Z</string>
+         <string notr="true">Z</string>
         </property>
        </item>
       </widget>
@@ -403,7 +403,7 @@
         <string>Constrains the translation along particular axes (warning: experimental)</string>
        </property>
        <property name="text">
-        <string>Tx</string>
+        <string notr="true">Tx</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -422,7 +422,7 @@
         <string>Constrains the translation along particular axes (warning: experimental)</string>
        </property>
        <property name="text">
-        <string>Ty</string>
+        <string notr="true">Ty</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -441,7 +441,7 @@
         <string>Constrains the translation along particular axes (warning: experimental)</string>
        </property>
        <property name="text">
-        <string>Tz</string>
+        <string notr="true">Tz</string>
        </property>
        <property name="checked">
         <bool>true</bool>

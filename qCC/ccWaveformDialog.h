@@ -44,10 +44,10 @@ class ccWaveWidget : public QCustomPlot
 public:
 
 	//! Default constructor
-	explicit ccWaveWidget(QWidget *parent = 0);
+	explicit ccWaveWidget(QWidget *parent = nullptr);
 
 	//! Destructor
-	virtual ~ccWaveWidget();
+	~ccWaveWidget() override;
 
 	//! Sets title
 	void setTitle(const QString& str);
@@ -65,10 +65,9 @@ public:
 protected: //methods
 
 	//mouse events handling
-	void mousePressEvent(QMouseEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	//void wheelEvent(QWheelEvent* event);
-	void resizeEvent(QResizeEvent * event);
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
+	void resizeEvent(QResizeEvent * event) override;
 	
 	//! Clears internal structures
 	void clearInternal();
@@ -111,15 +110,15 @@ class ccWaveDialog : public QDialog, public ccPickingListener
 
 public:
 	//! Default constructor
-	explicit ccWaveDialog(ccPointCloud* cloud, ccPickingHub* pickingHub, QWidget* parent = 0);
+	explicit ccWaveDialog(ccPointCloud* cloud, ccPickingHub* pickingHub, QWidget* parent = nullptr);
 	//! Destructor
-	virtual ~ccWaveDialog();
+	~ccWaveDialog() override;
 
 	//! Returns the encapsulated widget
 	inline ccWaveWidget* waveWidget() { return m_widget; }
 
 	//inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi);
+	virtual void onItemPicked(const PickedItem& pi) override;
 
 protected slots:
 
@@ -144,7 +143,6 @@ protected: //members
 
 	//! Maximum wave amplitude (for all points)
 	double m_waveMax;
-
 };
 
 #endif //CC_WAVEFORM_DIALOG_HEADER

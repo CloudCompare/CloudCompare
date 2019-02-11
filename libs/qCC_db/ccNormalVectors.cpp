@@ -160,7 +160,7 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 	case PLUS_BARYCENTER:
 	case MINUS_BARYCENTER:
 		{
-			barycenter = CCLib::GeometricalAnalysisTools::computeGravityCenter(theCloud);
+			barycenter = CCLib::GeometricalAnalysisTools::ComputeGravityCenter(theCloud);
 			ccLog::Print(QString("[UpdateNormalOrientations] Barycenter: (%1,%2,%3)").arg(barycenter.x).arg(barycenter.y).arg(barycenter.z));
 			useBarycenter = true;
 			positiveSign = (preferredOrientation == 6);
@@ -453,7 +453,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	static const CCVector3 blankN(0, 0, 0);
 	if (!theNorms->resizeSafe(pointCount, true, &blankN))
 	{
-		theNormsCodes.clear();
+		theNormsCodes.resize(0);
 		if (theOctree && !inputOctree)
 			delete theOctree;
 		return false;
@@ -508,7 +508,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	//error or canceled by user?
 	if (processedCells == 0 || (progressCb && progressCb->isCancelRequested()))
 	{
-		theNormsCodes.clear();
+		theNormsCodes.resize(0);
 		return false;
 	}
 

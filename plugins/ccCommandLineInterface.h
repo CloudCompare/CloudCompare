@@ -9,10 +9,10 @@
 #include <FileIOFilter.h>
 
 //Qt
+#include <QDir>
+#include <QSharedPointer>
 #include <QString>
 #include <QStringList>
-#include <QSharedPointer>
-#include <QDir>
 
 //System
 #include <vector>
@@ -57,6 +57,8 @@ struct CLEntityDesc
 	{
 	}
 	
+	virtual ~CLEntityDesc() = default;
+	
 	virtual ccHObject* getEntity() = 0;
 	virtual const ccHObject* getEntity() const = 0;
 };
@@ -67,14 +69,16 @@ struct CLGroupDesc : CLEntityDesc
 	ccHObject* groupEntity;
 
 	CLGroupDesc(ccHObject* group,
-				QString basename,
-				QString path = QString())
+				const QString& basename,
+				const QString& path = QString())
 		: CLEntityDesc(basename, path)
 		, groupEntity(group)
 	{}
 
-	virtual ccHObject* getEntity() override { return groupEntity; }
-	virtual const ccHObject* getEntity() const override { return groupEntity; }
+	~CLGroupDesc() override = default;
+	
+	ccHObject* getEntity() override { return groupEntity; }
+	const ccHObject* getEntity() const override { return groupEntity; }
 };
 
 //! Loaded cloud description
@@ -88,22 +92,24 @@ struct CLCloudDesc : CLEntityDesc
 	{}
 
 	CLCloudDesc(ccPointCloud* cloud,
-				QString filename = QString(),
+				const QString& filename = QString(),
 				int index = -1)
 		: CLEntityDesc(filename, index)
 		, pc(cloud)
 	{}
 
 	CLCloudDesc(ccPointCloud* cloud,
-				QString basename,
-				QString path,
+				const QString& basename,
+				const QString& path,
 				int index = -1)
 		: CLEntityDesc(basename, path, index)
 		, pc(cloud)
 	{}
 
-	virtual ccHObject* getEntity() override { return static_cast<ccHObject*>(pc); }
-	virtual const ccHObject* getEntity() const override { return static_cast<ccHObject*>(pc); }
+	~CLCloudDesc() override = default;
+
+	ccHObject* getEntity() override { return static_cast<ccHObject*>(pc); }
+	const ccHObject* getEntity() const override { return static_cast<ccHObject*>(pc); }
 };
 
 //! Loaded mesh description
@@ -117,22 +123,24 @@ struct CLMeshDesc : CLEntityDesc
 	{}
 
 	CLMeshDesc(	ccGenericMesh* _mesh,
-				QString filename = QString(),
+				const QString& filename = QString(),
 				int index = -1)
 		: CLEntityDesc(filename, index)
 		, mesh(_mesh)
 	{}
 
 	CLMeshDesc(	ccGenericMesh* _mesh,
-				QString basename,
-				QString path,
+				const QString& basename,
+				const QString& path,
 				int index = -1)
 		: CLEntityDesc(basename, path, index)
 		, mesh(_mesh)
 	{}
 
-	virtual ccHObject* getEntity() override { return static_cast<ccHObject*>(mesh); }
-	virtual const ccHObject* getEntity() const override { return static_cast<ccHObject*>(mesh); }
+	~CLMeshDesc() override = default;
+	
+	ccHObject* getEntity() override { return static_cast<ccHObject*>(mesh); }
+	const ccHObject* getEntity() const override { return static_cast<ccHObject*>(mesh); }
 };
 
 //! Command line interface
@@ -147,6 +155,8 @@ public: //constructor
 		, m_addTimestamp(true)
 		, m_precision(12)
 	{}
+	
+	virtual ~ccCommandLineInterface() = default;
 
 public: //commands
 
@@ -154,14 +164,16 @@ public: //commands
 	struct Command
 	{
 		//! Shared type
-		typedef QSharedPointer<Command> Shared;
+		using Shared = QSharedPointer<Command>;
 
 		//! Default constructor
-		Command(QString name, QString keyword)
+		Command(const QString& name, const QString& keyword)
 			: m_name(name)
 			, m_keyword(keyword)
 		{}
 
+		virtual ~Command() = default;
+		
 		//! Main process
 		virtual bool process(ccCommandLineInterface& cmd) = 0;
 
@@ -188,7 +200,7 @@ public: //virtual methods
 	virtual QString getExportFilename(	const CLEntityDesc& entityDesc,
 										QString extension = QString(),
 										QString suffix = QString(),
-										QString* baseOutputFilename = 0,
+										QString* baseOutputFilename = nullptr,
 										bool forceNoTimestamp = false) const = 0;
 
 	//! Exports a cloud or a mesh
@@ -196,7 +208,7 @@ public: //virtual methods
 	**/
 	virtual QString exportEntity(	CLEntityDesc& entityDesc,
 									QString suffix = QString(),
-									QString* outputFilename = 0,
+									QString* outputFilename = nullptr,
 									bool forceIsCloud = false,
 									bool forceNoTimestamp = false) = 0;
 
@@ -205,14 +217,14 @@ public: //virtual methods
 		\param allAtOnce whether to save all clouds in the same file or one cloud per file
 		\return success
 	**/
-	virtual bool saveClouds(QString suffix = QString(), bool allAtOnce = false, const QString* allAtOnceFileName = 0) = 0;
+	virtual bool saveClouds(QString suffix = QString(), bool allAtOnce = false, const QString* allAtOnceFileName = nullptr) = 0;
 
 	//! Saves all meshes
 	/** \param suffix optional suffix
 		\param allAtOnce whether to save all meshes in the same file or one mesh per file
 		\return success
 	**/
-	virtual bool saveMeshes(QString suffix = QString(), bool allAtOnce = false, const QString* allAtOnceFileName = 0) = 0;
+	virtual bool saveMeshes(QString suffix = QString(), bool allAtOnce = false, const QString* allAtOnceFileName = nullptr) = 0;
 
 	//! Removes all clouds (or only the last one ;)
 	virtual void removeClouds(bool onlyLast = false) = 0;
@@ -226,9 +238,9 @@ public: //virtual methods
 	virtual const QStringList& arguments() const = 0;
 
 	//! Returns a (shared) progress dialog (if any is available)
-	virtual ccProgressDialog* progressDialog() { return 0; }
+	virtual ccProgressDialog* progressDialog() { return nullptr; }
 	//! Returns a (widget) parent (if any is available)
-	virtual QDialog* widgetParent() { return 0; }
+	virtual QDialog* widgetParent() { return nullptr; }
 
 public: //file I/O
 
@@ -257,7 +269,7 @@ public: //file I/O
 	//! Loads a file with a specific filter
 	/** Automatically dispatches the entities between the clouds and meshes sets.
 	**/
-	virtual bool importFile(QString filename, FileIOFilter::Shared filter = FileIOFilter::Shared(0)) = 0;
+	virtual bool importFile(QString filename, FileIOFilter::Shared filter = FileIOFilter::Shared(nullptr)) = 0;
 
 	//! Returns the current cloud(s) export format
 	virtual QString cloudExportFormat() const = 0;
@@ -336,7 +348,6 @@ protected: //members
 
 	//! File loading parameters
 	CLLoadParameters m_loadingParameters;
-
 };
 
 #endif //CC_COMMAND_LINE_INTERFACE_HEADER

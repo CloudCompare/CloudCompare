@@ -44,12 +44,12 @@ public:
 	NormalDistribution(ScalarType _mu, ScalarType _sigma2);
 
 	//inherited methods (see GenericDistribution)
-	virtual bool computeParameters(const GenericCloud* cloud);
-	virtual double computeP(ScalarType x) const;
-	virtual double computePfromZero(ScalarType x) const;
-	virtual double computeP(ScalarType x1, ScalarType x2) const;
-	virtual double computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, int* histo = nullptr);
-	virtual const char* getName() const { return "Gauss"; }
+	bool computeParameters(const ScalarContainer& values) override;
+	double computeP(ScalarType x) const override;
+	double computePfromZero(ScalarType x) const override;
+	double computeP(ScalarType x1, ScalarType x2) const override;
+	double computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, int* histo = nullptr) override;
+	const char* getName() const override { return "Gauss"; }
 
 	//! Returns the distribution parameters
 	/** \param _mu a field to transmit the distribution mean
@@ -71,16 +71,8 @@ public:
 	//! Returns the distribution variance
 	inline ScalarType getSigma2() const { return m_sigma2; }
 
-	//! Scalar values container
-	typedef std::vector<ScalarType> ScalarContainer;
-
-	//! Computes the distribution parameters from an array of scalar values
-	/** Specific method to compute the parameters directly from an array
-		(vector) of scalar values, without associated points.
-		\param values the scalar values
-		\return the validity of the computed parameters
-	**/
-	bool computeParameters(const ScalarContainer& values);
+	//! Computes the distribution parameters from a point cloud (with scalar values)
+	bool computeParameters(const GenericCloud* cloud);
 
 	//! Computes robust parameters for the distribution from an array of scalar values
 	/** Specific method to compute the parameters directly from an array

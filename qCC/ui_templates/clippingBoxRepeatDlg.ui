@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>314</width>
-    <height>340</height>
+    <width>395</width>
+    <height>389</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,7 +30,7 @@
 color: white;</string>
         </property>
         <property name="text">
-         <string>X</string>
+         <string notr="true">X</string>
         </property>
        </widget>
       </item>
@@ -41,7 +41,7 @@ color: white;</string>
 color: white;</string>
         </property>
         <property name="text">
-         <string>Y</string>
+         <string notr="true">Y</string>
         </property>
        </widget>
       </item>
@@ -52,7 +52,7 @@ color: white;</string>
 color: white;</string>
         </property>
         <property name="text">
-         <string>Z</string>
+         <string notr="true">Z</string>
         </property>
         <property name="checked">
          <bool>true</bool>

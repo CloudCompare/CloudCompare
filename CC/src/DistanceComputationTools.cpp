@@ -19,10 +19,10 @@
 #include <DistanceComputationTools.h>
 
 //local
-#include <PointCloud.h>
 #include <DgmOctreeReferenceCloud.h>
 #include <FastMarchingForPropagation.h>
 #include <LocalModel.h>
+#include <PointCloud.h>
 #include <ReferenceCloud.h>
 #include <SaitoSquaredDistanceTransform.h>
 #include <ScalarField.h>
@@ -30,8 +30,8 @@
 #include <SimpleTriangle.h>
 
 //system
-#include <assert.h>
 #include <algorithm>
+#include <cassert>
 
 #ifdef USE_QT
 #ifndef CC_DEBUG
@@ -91,8 +91,8 @@ namespace CCLib
 			: octree(nullptr)
 			, mesh(nullptr)
 			, distanceTransform(nullptr)
-			, minFillIndexes(0,0,0)
-			, maxFillIndexes(0,0,0)
+			, minFillIndexes(0, 0, 0)
+			, maxFillIndexes(0, 0, 0)
 		{}
 
 		//! Destructor
@@ -101,7 +101,7 @@ namespace CCLib
 			if (perCellTriangleList.isInitialized())
 			{
 				TriangleList** data = perCellTriangleList.data();
-				for (std::size_t i=0; i<perCellTriangleList.totalCellCount(); ++i, ++data)
+				for (std::size_t i = 0; i < perCellTriangleList.totalCellCount(); ++i, ++data)
 				{
 					if (*data)
 						delete (*data);
@@ -429,7 +429,7 @@ bool DistanceComputationTools::computeCellHausdorffDistance(const DgmOctree::oct
 
 	//for each point of the current cell (compared octree) we look for its nearest neighbour in the reference cloud
 	unsigned pointCount = cell.points->size();
-	for (unsigned i=0; i<pointCount; i++)
+	for (unsigned i = 0; i < pointCount; i++)
 	{
 		cell.points->getPoint(i, nNSS.queryPoint);
 
@@ -526,7 +526,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 
 	//for each point of the current cell (compared octree) we look for its nearest neighbour in the reference cloud
 	unsigned pointCount = cell.points->size();
-	for (unsigned i=0; i<pointCount; ++i)
+	for (unsigned i = 0; i < pointCount; ++i)
 	{
 		//distance of the current point
 		ScalarType distPt = NAN_VALUE;
@@ -551,7 +551,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 				if (params->reuseExistingLocalModels)
 				{
 					//we look if the nearest point is close to existing models
-					for (std::vector<const LocalModel*>::const_iterator it = models.begin(); it!=models.end(); ++it)
+					for (std::vector<const LocalModel*>::const_iterator it = models.begin(); it != models.end(); ++it)
 					{
 						//we take the first model that 'includes' the nearest point
 						if ( ((*it)->getCenter() - nearestPoint).norm2() <= (*it)->getSquareSize())
@@ -611,7 +611,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 						//Neighbours are sorted, so the farthest is at the end. It also gives us
 						//an approximation of the model 'size'
 						const double& maxSquareDist = nNSS_Model.pointsInNeighbourhood[kNN-1].squareDistd;
-						if (maxSquareDist > 0) //DGM: it happens with duplicate points :(
+						if (maxSquareDist > 0) //DGM: with duplicate points, all neighbors can be at the same place :(
 						{
 							lm = LocalModel::New(params->localModel, Z, nearestPoint, static_cast<PointCoordinateType>(maxSquareDist));
 							if (lm && params->reuseExistingLocalModels)
@@ -641,7 +641,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 				if (lm)
 				{
 					CCVector3 nearestModelPoint;
-					ScalarType distToModel = lm->computeDistanceFromModelToPoint(&nNSS.queryPoint, computeSplitDistances ? &nearestModelPoint : 0);
+					ScalarType distToModel = lm->computeDistanceFromModelToPoint(&nNSS.queryPoint, computeSplitDistances ? &nearestModelPoint : nullptr);
 
 					//we take the best estimation between the nearest neighbor and the model!
 					//this way we only reduce any potential noise (that would be due to sampling)
@@ -1928,18 +1928,18 @@ ScalarType DistanceComputationTools::computePoint2TriangleDistance(const CCVecto
 
 	//we do all computations with double precision, otherwise
 	//some triangles with sharp angles will give very poor results.
-	CCVector3d AP(P->x-A->x, P->y-A->y, P->z-A->z);
-	CCVector3d AB(B->x-A->x, B->y-A->y, B->z-A->z);
-	CCVector3d AC(C->x-A->x, C->y-A->y, C->z-A->z);
+	CCVector3d AP(P->x - A->x, P->y - A->y, P->z - A->z);
+	CCVector3d AB(B->x - A->x, B->y - A->y, B->z - A->z);
+	CCVector3d AC(C->x - A->x, C->y - A->y, C->z - A->z);
 
-    double a00 = AB.dot(AB);
-    double a01 = AB.dot(AC);
-    double a11 = AC.dot(AC);
-    double b0 = -AP.dot(AB);
-    double b1 = -AP.dot(AC);
+    double a00 =  AB.dot(AB);
+    double a01 =  AB.dot(AC);
+    double a11 =  AC.dot(AC);
+    double b0  = -AP.dot(AB);
+    double b1  = -AP.dot(AC);
     double det = a00 * a11 - a01 * a01;
-    double t0 = a01 * b1 - a11 * b0;
-    double t1 = a01 * b0 - a00 * b1;
+    double t0  = a01 * b1 - a11 * b0;
+    double t1  = a01 * b0 - a00 * b1;
 
     if (t0 + t1 <= det)
     {
@@ -2146,7 +2146,7 @@ ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3*
 																const PointCoordinateType* planeEquation)
 {
 	//point to plane distance: d = (a0*x+a1*y+a2*z - a3) / sqrt(a0^2+a1^2+a2^2)
-	assert(fabs(CCVector3::vnorm(planeEquation) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
+	assert(std::abs(CCVector3::vnorm(planeEquation) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 
 	return static_cast<ScalarType>((CCVector3::vdot(P->u, planeEquation) - planeEquation[3])/*/CCVector3::vnorm(planeEquation)*/); //norm == 1.0!
 }
@@ -2161,12 +2161,12 @@ ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(	GenericCloud
 	if (count == 0)
 		return 0;
 
-	//point to plane distance: d = fabs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
+	//point to plane distance: d = std::abs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
 	//but the norm should always be equal to 1.0!
 	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
 	if (norm2 < ZERO_TOLERANCE)
         return NAN_VALUE;
-	assert(fabs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
+	assert(std::abs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 
 	double dSumSq = 0.0;
 
@@ -2195,12 +2195,12 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* 
 	if (count == 0)
 		return 0;
 
-	//point to plane distance: d = fabs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
+	//point to plane distance: d = std::abs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
 	//but the norm should always be equal to 1.0!
 	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
 	if (norm2 < ZERO_TOLERANCE)
         return NAN_VALUE;
-	assert(fabs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
+	assert(std::abs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 
 	//we search the max @ 'percent'% (to avoid outliers)
 	std::vector<PointCoordinateType> tail;
@@ -2213,7 +2213,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* 
 	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = cloud->getNextPoint();
-		PointCoordinateType d = fabs(CCVector3::vdot(P->u,planeEquation) - planeEquation[3])/*/norm*/; //norm == 1.0
+		PointCoordinateType d = std::abs(CCVector3::vdot(P->u,planeEquation) - planeEquation[3])/*/norm*/; //norm == 1.0
 
 		if (pos < tailSize)
 		{
@@ -2251,12 +2251,12 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneMaxDistance(	GenericCloud
 	if (count == 0)
 		return 0;
 
-	//point to plane distance: d = fabs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
+	//point to plane distance: d = std::abs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
 	//but the norm should always be equal to 1.0!
 	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
 	if (norm2 < ZERO_TOLERANCE)
 		return NAN_VALUE;
-	assert(fabs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
+	assert(std::abs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 
 	//we search the max distance
 	PointCoordinateType maxDist = 0;
@@ -2265,7 +2265,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneMaxDistance(	GenericCloud
 	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = cloud->getNextPoint();
-		PointCoordinateType d = fabs(CCVector3::vdot(P->u,planeEquation) - planeEquation[3])/*/norm*/; //norm == 1.0
+		PointCoordinateType d = std::abs(CCVector3::vdot(P->u,planeEquation) - planeEquation[3])/*/norm*/; //norm == 1.0
 		maxDist = std::max(d,maxDist);
 	}
 

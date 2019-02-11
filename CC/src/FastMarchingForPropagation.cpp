@@ -221,7 +221,7 @@ bool FastMarchingForPropagation::setPropagationTimingsAsDistances()
 // Compute exp(x) - 1 without loss of precision for small values of x.
 template <typename T> T expm1(T x)
 {
-	if (fabs(x) < 1e-5)
+	if (std::abs(x) < 1e-5)
 		return x + (x*x)/2;
 	else
 		return exp(x) - 1;

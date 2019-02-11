@@ -202,7 +202,7 @@ template< class ScoreVisitorT >
 bool RansacShapeDetector::FindBestCandidate(CandidatesType &candidates,
 	const MiscLib::Vector< ImmediateOctreeType * > &octrees, const PointCloud &pc,
 	ScoreVisitorT &scoreVisitor, size_t currentSize,
-	size_t drawnCandidates, size_t numInvalid, size_t minSize, float numLevels,
+	size_t drawnCandidates, size_t numInvalid, size_t minSize, size_t numLevels,
 	float *maxForgottenCandidate, float *candidateFailProb) const
 {
 	if(!candidates.size())
@@ -576,7 +576,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 		while(CandidateFailureProbability(bestExpectedValue,
 				currentSize - numInvalid, drawnCandidates,
 				globalOctTreeMaxNodeDepth) > m_options.m_probability
-			&& CandidateFailureProbability(m_options.m_minSupport,
+			&& CandidateFailureProbability(static_cast<float>(m_options.m_minSupport),
 				currentSize - numInvalid, drawnCandidates,
 				globalOctTreeMaxNodeDepth) > m_options.m_probability);
 		// find the best candidate:
@@ -586,7 +586,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 		size_t firstCandidateSize = 0;
 		while(FindBestCandidate(candidates, octrees, pc, subsetScoreVisitor,
 			currentSize, drawnCandidates, numInvalid,
-			std::max((size_t)m_options.m_minSupport, (size_t)(0.8f * firstCandidateSize)),
+			std::max(static_cast<size_t>(m_options.m_minSupport), static_cast<size_t>(0.8f * firstCandidateSize)),
 			globalOctTreeMaxNodeDepth, &maxForgottenCandidate,
 			&bestCandidateFailureProbability))
 		{
@@ -666,12 +666,12 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 			shapes->push_back(std::make_pair(RefCountPtr< PrimitiveShape >(candidates.back().Shape()),
 				candidates.back().Indices()->size()));
 			for(size_t i = 0; i < candidates.back().Indices()->size(); ++i)
-				shapeIndex[(*(candidates.back().Indices()))[i]] = numShapes;
+				shapeIndex[(*(candidates.back().Indices()))[i]] = static_cast<int>(numShapes);
 			++numShapes;
 			// update drawn candidates to reflect removal of points
 			// get the percentage of candidates that are invalid
-			drawnCandidates = std::pow(1.f - (candidates.back().Indices()->size() /
-				float(currentSize - numInvalid)), 3.f) * drawnCandidates;
+			drawnCandidates = static_cast<size_t>(std::pow(1.f - (candidates.back().Indices()->size() /
+				static_cast<float>(currentSize - numInvalid)), 3.f) * drawnCandidates);
 			numInvalid += candidates.back().Indices()->size();
 			candidates.pop_back();
 			if(numInvalid > currentSize / 4) // more than half of the points assigned?
@@ -684,7 +684,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 				
 				// these hold the address ranges for the lately detected shapes
 				MiscLib::Vector< size_t > shapeIterators(numShapes);
-				int shapeIt = shapes->size() - numShapes;
+				size_t shapeIt = shapes->size() - numShapes;
 				for(size_t i = 0; i < numShapes; ++i, ++shapeIt)
 					shapeIterators[i] = end -= ((*shapes)[shapeIt]).second;
 
@@ -695,11 +695,11 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 						if(i >= octrees[j]->end() - pc.begin() + beginIdx
 							&& j < octrees.size() - 1)
 							++j;
-						shapeIndex[i] = begin++;
+						shapeIndex[i] = static_cast<int>(begin++);
 						++subsetSizes[j];
 					}
 					else
-						shapeIndex[i] = shapeIterators[shapeIndex[i]]++;
+						shapeIndex[i] = static_cast<int>(shapeIterators[shapeIndex[i]]++);
 
 				// check if small subsets should be merged
 				size_t mergedSubsets = 0;
@@ -732,7 +732,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 				#pragma omp parallel for schedule(static)
 #endif
 				for(int i = 0; i < static_cast<int>(candidates.size()); ++i)
-					candidates[i].Reindex(shapeIndex, minInvalidIndex, mergedSubsets,
+					candidates[i].Reindex(shapeIndex, static_cast<int>(minInvalidIndex), mergedSubsets,
 						subsetSizes, pc, currentSize - numInvalid, m_options.m_epsilon,
 						m_options.m_normalThresh, m_options.m_bitmapEpsilon);
 
@@ -740,7 +740,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 				for(size_t i = beginIdx; i < beginIdx + currentSize; ++i)
 					while(i != shapeIndex[i])
 					{
-						pc.swapPoints(i, shapeIndex[i]);
+						pc.swapPoints(static_cast<unsigned>(i), static_cast<unsigned>(shapeIndex[i]));
 						std::swap(shapeIndex[i], shapeIndex[shapeIndex[i]]);
 					}
 					
@@ -853,7 +853,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 			numTries++;
 		}
 	}
-	while(CandidateFailureProbability(m_options.m_minSupport, currentSize - numInvalid,
+	while(CandidateFailureProbability(static_cast<float>(m_options.m_minSupport), currentSize - numInvalid,
 		drawnCandidates, globalOctTreeMaxNodeDepth) > m_options.m_probability
 		&& (currentSize - numInvalid) >= m_options.m_minSupport);
 
@@ -866,21 +866,21 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 		size_t begin = beginIdx, end = beginIdx + currentSize;
 		// these hold the address ranges for the lately detected shapes
 		MiscLib::Vector< size_t > shapeIterators(numShapes);
-		int shapeIt = shapes->size() - numShapes;
+		int shapeIt = static_cast<int>(shapes->size() - numShapes);
 		for(size_t i = 0; i < numShapes; ++i, ++shapeIt)
 			shapeIterators[i] = end -= ((*shapes)[shapeIt]).second;
 
 		for(size_t i = beginIdx; i < beginIdx + currentSize; ++i)
 			if(shapeIndex[i] < 0)
-				shapeIndex[i] = begin++;
+				shapeIndex[i] = static_cast<int>(begin++);
 			else
-				shapeIndex[i] = shapeIterators[shapeIndex[i]]++;
+				shapeIndex[i] = static_cast<int>(shapeIterators[shapeIndex[i]]++);
 
 		//regarding swapping it is best to swap both the addresses and the data
 		for(size_t i = beginIdx; i < beginIdx + currentSize; ++i)
 			while(i != shapeIndex[i])
 			{
-				pc.swapPoints(i, shapeIndex[i]);
+				pc.swapPoints(static_cast<unsigned>(i), static_cast<unsigned>(shapeIndex[i]));
 				std::swap(shapeIndex[i], shapeIndex[shapeIndex[i]]);
 			}
 	}

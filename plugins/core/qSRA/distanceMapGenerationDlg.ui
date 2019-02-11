@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1165</width>
-    <height>620</height>
+    <height>774</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -264,7 +264,7 @@
              <item row="3" column="1">
               <widget class="QLabel" name="gridSizeLabel">
                <property name="text">
-                <string>0</string>
+                <string notr="true">0</string>
                </property>
               </widget>
              </item>
@@ -1180,21 +1180,21 @@
              <string>Generatrix direction (in the 3D world)</string>
             </property>
             <property name="currentIndex">
-             <number>2</number>
+             <number>0</number>
             </property>
             <item>
              <property name="text">
-              <string>X</string>
+              <string notr="true">X</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Y</string>
+              <string notr="true">Y</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Z</string>
+              <string notr="true">Z</string>
              </property>
             </item>
            </widget>
@@ -1209,7 +1209,7 @@
           <item row="1" column="1">
            <widget class="QDoubleSpinBox" name="xOriginDoubleSpinBox">
             <property name="prefix">
-             <string>X = </string>
+             <string notr="true">X = </string>
             </property>
             <property name="decimals">
              <number>6</number>
@@ -1225,7 +1225,7 @@
           <item row="2" column="1">
            <widget class="QDoubleSpinBox" name="yOriginDoubleSpinBox">
             <property name="prefix">
-             <string>Y = </string>
+             <string notr="true">Y = </string>
             </property>
             <property name="decimals">
              <number>6</number>
@@ -1241,7 +1241,7 @@
           <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="zOriginDoubleSpinBox">
             <property name="prefix">
-             <string>Z = </string>
+             <string notr="true">Z = </string>
             </property>
             <property name="decimals">
              <number>6</number>

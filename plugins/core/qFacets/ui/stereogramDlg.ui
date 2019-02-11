@@ -26,7 +26,16 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -81,7 +90,7 @@
           <item>
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>270°</string>
+             <string notr="true">270°</string>
             </property>
            </widget>
           </item>
@@ -128,7 +137,7 @@
           <item>
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>90°</string>
+             <string notr="true">90°</string>
             </property>
            </widget>
           </item>
@@ -174,7 +183,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>180°</string>
+         <string notr="true">180°</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -219,7 +228,16 @@
        <property name="spacing">
         <number>0</number>
        </property>
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
@@ -321,7 +339,7 @@
                 <item>
                  <widget class="QSpinBox" name="ticksFreqSpinBox">
                   <property name="prefix">
-                   <string>1/</string>
+                   <string notr="true">1/</string>
                   </property>
                   <property name="minimum">
                    <number>1</number>
@@ -561,8 +579,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../qFacets.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

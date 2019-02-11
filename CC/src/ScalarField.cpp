@@ -19,8 +19,8 @@
 #include <ScalarField.h>
 
 //System
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 using namespace CCLib;
 
@@ -30,6 +30,7 @@ ScalarField::ScalarField(const char* name/*=0*/)
 }
 
 ScalarField::ScalarField(const ScalarField& sf)
+	: std::vector<ScalarType>(sf)
 {
 	setName(sf.m_name);
 }
@@ -65,7 +66,7 @@ void ScalarField::computeMeanAndVariance(ScalarType &mean, ScalarType* variance)
 
 		if (variance)
 		{
-			_std2 = fabs(_std2 / count - _mean*_mean);
+			_std2 = std::abs(_std2 / count - _mean*_mean);
 			*variance = static_cast<ScalarType>(_std2);
 		}
 	}

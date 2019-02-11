@@ -57,9 +57,9 @@ struct HotZone;
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 class QOpenGLPaintDevice;
-typedef QWindow ccGLWindowParent;
+using ccGLWindowParent = QWindow;
 #else
-typedef QOpenGLWidget ccGLWindowParent;
+using ccGLWindowParent = QOpenGLWidget;
 #endif
 
 
@@ -141,7 +141,7 @@ public:
 	ccGLWindow(QSurfaceFormat* format = nullptr, ccGLWindowParent* parent = nullptr, bool silentInitialization = false);
 
 	//! Destructor
-	virtual ~ccGLWindow();
+	~ccGLWindow() override;
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	//! Returns the parent widget
@@ -169,25 +169,25 @@ public:
 	void renderText(double x, double y, double z, const QString & str, const QFont & font = QFont());
 
 	//inherited from ccGenericGLDisplay
-	virtual void toBeRefreshed() override;
-	virtual void refresh(bool only2D = false) override;
-	virtual void invalidateViewport() override;
-	virtual void deprecate3DLayer() override;
-	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = nullptr, const QFont& font = QFont()) override;
-	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0.0f, const unsigned char* rgbColor = nullptr, const QFont* font = nullptr) override;
-	virtual QFont getTextDisplayFont() const override; //takes rendering zoom into account!
-	virtual QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
-	virtual const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
-	virtual QPointF toCenteredGLCoordinates(int x, int y) const override;
-	virtual QPointF toCornerGLCoordinates(int x, int y) const override;
-	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
+	void toBeRefreshed() override;
+	void refresh(bool only2D = false) override;
+	void invalidateViewport() override;
+	void deprecate3DLayer() override;
+	void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = nullptr, const QFont& font = QFont()) override;
+	void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0.0f, const unsigned char* rgbColor = nullptr, const QFont* font = nullptr) override;
+	QFont getTextDisplayFont() const override; //takes rendering zoom into account!
+	QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
+	const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
+	QPointF toCenteredGLCoordinates(int x, int y) const override;
+	QPointF toCornerGLCoordinates(int x, int y) const override;
+	void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
 #ifdef CC_GL_WINDOW_USE_QWINDOW
-	inline virtual QWidget* asWidget() override { return m_parentWidget; }
+	inline QWidget* asWidget() override { return m_parentWidget; }
 #else
-	inline virtual QWidget* asWidget() override { return this; }
+	inline QWidget* asWidget() override { return this; }
 #endif
-	inline virtual QSize getScreenSize() const override { return size(); }
-	virtual void getGLCameraParameters(ccGLCameraParameters& params) override;
+	inline QSize getScreenSize() const override { return size(); }
+	void getGLCameraParameters(ccGLCameraParameters& params) override;
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -373,9 +373,9 @@ public:
 	virtual void getContext(CC_DRAW_CONTEXT& context);
 
 	//! Minimum point size
-	static const float MIN_POINT_SIZE_F;
+	static constexpr float MIN_POINT_SIZE_F = 1.0f;
 	//! Maximum point size
-	static const float MAX_POINT_SIZE_F;
+	static constexpr float MAX_POINT_SIZE_F = 16.0f;
 
 	//! Sets point size
 	/** \param size point size (between MIN_POINT_SIZE_F and MAX_POINT_SIZE_F)
@@ -383,9 +383,9 @@ public:
 	virtual void setPointSize(float size, bool silent = false);
 	
 	//! Minimum line width
-	static const float MIN_LINE_WIDTH_F;
+	static constexpr float MIN_LINE_WIDTH_F = 1.0f;
 	//! Maximum line width
-	static const float MAX_LINE_WIDTH_F;
+	static constexpr float MAX_LINE_WIDTH_F = 16.0f;
 
 	//! Sets line width
 	/** \param width lines width (between MIN_LINE_WIDTH_F and MAX_LINE_WIDTH_F)
@@ -443,6 +443,8 @@ public:
 								bool dontScaleFeatures = false,
 								bool renderOverlayItems = false);
 
+	static void setShaderPath( const QString &path );
+	
 	virtual void setShader(ccShader* shader);
 	virtual void setGlFilter(ccGlFilter* filter);
 	ccGlFilter* getGlFilter() { return m_activeGLFilter; }
@@ -620,7 +622,7 @@ public slots:
 	void zoomGlobal();
 
 	//inherited from ccGenericGLDisplay
-	virtual void redraw(bool only2D = false, bool resetLOD = true) override;
+	void redraw(bool only2D = false, bool resetLOD = true) override;
 
 	//called when receiving mouse wheel is rotated
 	void onWheelEvent(float wheelDelta_deg);
@@ -772,10 +774,10 @@ signals:
 protected: //rendering
 
 	//Default OpenGL functions set
-	typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
+	using ccQOpenGLFunctions = QOpenGLFunctions_2_1;
 
 	//! Returns the set of OpenGL functions
-	inline ccQOpenGLFunctions* functions() const { return context() ? context()->versionFunctions<ccQOpenGLFunctions>() : 0; }
+	inline ccQOpenGLFunctions* functions() const { return context() ? context()->versionFunctions<ccQOpenGLFunctions>() : nullptr; }
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	//! Returns the context (if any)
@@ -815,38 +817,7 @@ protected: //rendering
 	};
 
 	//! Rendering params
-	struct RenderingParams
-	{
-		RenderingParams()
-			: passIndex(0)
-			, passCount(1)
-			, drawBackground(true)
-			, clearDepthLayer(true)
-			, clearColorLayer(true)
-			, draw3DPass(true)
-			, useFBO(false)
-			, draw3DCross(false)
-			, drawForeground(true)
-		{}
-
-		unsigned char passIndex;
-		unsigned char passCount;
-
-		//2D background
-		bool drawBackground;
-		bool clearDepthLayer;
-		bool clearColorLayer;
-
-		//3D central layer
-		bool draw3DPass;
-		bool useFBO;
-		bool draw3DCross;
-		//! Next LOD state
-		LODState nextLODState;
-
-		//2D foreground
-		bool drawForeground;
-	};
+	struct RenderingParams;
 
 	//! Full rendering pass (drawBackground + draw3D + drawForeground)
 	void fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& params);
@@ -912,8 +883,8 @@ protected: //other methods
 	void initializeGL() override { initialize(); }
 	void resizeGL(int w, int h) override;
 	void paintGL() override;
-	virtual void dragEnterEvent(QDragEnterEvent* event) override;
-	virtual void dropEvent(QDropEvent* event) override;
+	void dragEnterEvent(QDragEnterEvent* event) override;
+	void dropEvent(QDropEvent* event) override;
 #endif
 
 	//Graphical features controls
@@ -925,20 +896,7 @@ protected: //other methods
 	ccGLMatrixd computeModelViewMatrix(const CCVector3d& cameraCenter) const;
 
 	//! Optional output metrics (from computeProjectionMatrix)
-	struct ProjectionMetrics
-	{
-		ProjectionMetrics()
-			: zNear(0.0)
-			, zFar(0.0)
-			, cameraToBBCenterDist(0.0)
-			, bbHalfDiag(0.0)
-		{}
-		
-		double zNear;
-		double zFar;
-		double cameraToBBCenterDist;
-		double bbHalfDiag;
-	};
+	struct ProjectionMetrics;
 
 	//! Computes the projection matrix
 	ccGLMatrixd computeProjectionMatrix(	const CCVector3d& cameraCenter,
@@ -961,33 +919,7 @@ protected: //other methods
 	void drawPivot();
 
 	//! Picking parameters
-	struct PickingParameters
-	{
-		//! Default constructor
-		PickingParameters(	PICKING_MODE _mode = NO_PICKING,
-							int _centerX = 0,
-							int _centerY = 0,
-							int _pickWidth = 5,
-							int _pickHeight = 5,
-							bool _pickInSceneDB = true,
-							bool _pickInLocalDB = true)
-			: mode(_mode)
-			, centerX(_centerX)
-			, centerY(_centerY)
-			, pickWidth(_pickWidth)
-			, pickHeight(_pickHeight)
-			, pickInSceneDB(_pickInSceneDB)
-			, pickInLocalDB(_pickInLocalDB)
-		{}
-
-		PICKING_MODE mode;
-		int centerX;
-		int centerY;
-		int pickWidth;
-		int pickHeight;
-		bool pickInSceneDB;
-		bool pickInLocalDB;
-	};
+	struct PickingParameters;
 
 	//! Starts picking process
 	/** \param params picking parameters
@@ -1389,11 +1321,6 @@ protected: //members
 	bool m_rotationAxisLocked;
 	//! Locked rotation axis
 	CCVector3d m_lockedRotationAxis;
-
-private:
-
-	//! Returns shaders path
-	static QString getShadersPath();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

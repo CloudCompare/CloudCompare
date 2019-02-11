@@ -18,16 +18,12 @@
 #ifndef CC_BASIC_TYPES_HEADER
 #define CC_BASIC_TYPES_HEADER
 
-//local
-#include "ccColorTypes.h"
-
 //CCLib
-#include <CCGeom.h>
-
+#include <CCTypes.h>
 
 //! Compressed normals type
 /** Should be set accordingly to ccNormalCompressor::QUANTIZE_LEVEL
 **/
-typedef unsigned CompressedNormType;
+using CompressedNormType = unsigned int;
 
 #endif //CC_BASIC_TYPES_HEADER

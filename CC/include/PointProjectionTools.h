@@ -22,8 +22,8 @@
 //Local
 #include "CCConst.h"
 #include "CCToolbox.h"
-#include "SquareMatrix.h"
 #include "PointCloud.h"
+#include "SquareMatrix.h"
 
 //System
 #include <list>

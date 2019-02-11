@@ -3,6 +3,7 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
+include_directories( ${CloudCompare_SOURCE_DIR}/../common )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
@@ -52,15 +53,7 @@ endif()
 
 # Plugins need the QT_NO_DEBUG preprocessor in release!
 if( WIN32 )
-	if( NOT CMAKE_CONFIGURATION_TYPES )
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS QT_NO_DEBUG )
-	else()
-		#Anytime we use COMPILE_DEFINITIONS_XXX we must define this policy!
-		#(and setting it outside of the function/file doesn't seem to work...)
-		cmake_policy(SET CMP0043 OLD)
-	
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE QT_NO_DEBUG)
-	endif()
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Release>:QT_NO_DEBUG>)
 endif()
 
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )

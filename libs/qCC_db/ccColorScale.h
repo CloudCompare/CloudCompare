@@ -38,7 +38,7 @@ public:
 	ccColorScaleElement() : m_relativePos(0.0), m_color(Qt::black) {}
 
 	//! Constructor from a (relative) position and a color
-	ccColorScaleElement(double relativePos, QColor color) : m_relativePos(relativePos), m_color(color) {}
+	ccColorScaleElement(double relativePos, const QColor& color) : m_relativePos(relativePos), m_color(color) {}
 
 	//! Sets associated value (relative to scale boundaries)
 	/** \param pos relative position (always between 0.0 and 1.0!)
@@ -50,7 +50,7 @@ public:
 	inline double getRelativePos() const { return m_relativePos; }
 
 	//! Sets color
-	inline void setColor(QColor color) { m_color = color; }
+	inline void setColor(const QColor& color) { m_color = color; }
 	//! Returns color
 	inline const QColor& getColor() const { return m_color; }
 
@@ -72,13 +72,13 @@ protected:
 
 //! Color scale
 /** A color scale is defined by several 'steps' corresponding to given colors.
-	The color between each step is linearly interpolated. A vald color scale
+	The color between each step is linearly interpolated. A valid color scale
 	must have at least 2 steps, one at relative position 0.0 (scale start) and
 	one at relative position 1.0 (scale end). Steps can't be defined outside
-	this intervale.
+	this interval.
 
-	For faster access, a array of interpolated colors is maintained internally.
-	Be sure that the 'refresh' method has been called after any modification(s)
+	For faster access, an array of interpolated colors is maintained internally.
+	Be sure that the 'refresh' method has been called after any modification
 	of the scale steps (position or color).
 **/
 class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
@@ -86,12 +86,12 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 public:
 
 	//! Shared pointer type
-	typedef QSharedPointer<ccColorScale> Shared;
+	using Shared = QSharedPointer<ccColorScale>;
 
 	//! Creates a new color scale (with auto-generated unique id)
 	/** Warning: color scale is relative by default.
 	**/
-	static ccColorScale::Shared Create(QString name); 
+	static ccColorScale::Shared Create(const QString& name); 
 
 	//! Default constructor
 	/** \param name scale name
@@ -100,25 +100,19 @@ public:
 		On construction they already have the two extreme steps defined (at position
 		0.0 and 1.0).
 	**/
-	ccColorScale(QString name, QString uuid = QString());
+	ccColorScale(const QString& name, const QString& uuid = QString());
 
 	//! Destructor
-	virtual ~ccColorScale();
+	~ccColorScale() override = default;
 
 	//! Minimum number of steps
-	/** \warning Never pass a 'constant initializer' by reference
-	**/
-	static const unsigned MIN_STEPS = 2;
+	static constexpr unsigned MIN_STEPS = 2;
 
 	//! Default number of steps for display
-	/** \warning Never pass a 'constant initializer' by reference
-	**/
-	static const unsigned DEFAULT_STEPS = 256;
+	static constexpr unsigned DEFAULT_STEPS = 256;
 
 	//! Maximum number of steps (internal representation)
-	/** \warning Never pass a 'constant initializer' by reference
-	**/
-	static const unsigned MAX_STEPS = 1024;
+	static constexpr unsigned MAX_STEPS = 1024;
 
 	//! Returns name
 	inline const QString& getName() const { return m_name; }
@@ -126,9 +120,9 @@ public:
 	void setName(const QString& name) { m_name = name; }
 
 	//! Returns unique ID
-	QString getUuid() const { return m_uuid; }
+	const QString &getUuid() const { return m_uuid; }
 	//! Sets unique ID
-	void setUuid(QString uuid) { m_uuid = uuid; }
+	void setUuid(const QString& uuid) { m_uuid = uuid; }
 	//! Generates a new unique ID
 	void generateNewUuid();
 
@@ -155,7 +149,7 @@ public:
 	inline void setLocked(bool state) { m_locked = state; }
 
 	//! Type of a list of custom labels
-	typedef std::set<double> LabelSet;
+	using LabelSet = std::set<double>;
 
 	//! Returns the list of custom labels (if any)
 	inline LabelSet& customLabels() { return m_customLabels; }
@@ -269,14 +263,14 @@ public:
 	}
 
 	//! Saves this color scale as an XML file
-	bool saveAsXML(QString filename) const;
+	bool saveAsXML(const QString& filename) const;
 	//! Loads a color scale from an XML file
-	static Shared LoadFromXML(QString filename);
+	static Shared LoadFromXML(const QString& filename);
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const { return true; }
-	virtual bool toFile(QFile& out) const;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags);
+	bool isSerializable() const override { return true; }
+	bool toFile(QFile& out) const override;
+	bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 protected:
 

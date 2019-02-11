@@ -45,7 +45,7 @@
 #include <QTouchEvent>
 #include <QWheelEvent>
 
-#ifdef Q_OS_LINUX
+#if defined( Q_OS_MAC ) || defined( Q_OS_LINUX )
 #include <QDir>
 #endif
 
@@ -62,29 +62,31 @@ static OculusHMD s_oculus;
 #include <vld.h>
 #endif
 
-const float ccGLWindow::MIN_POINT_SIZE_F = 1.0f;
-const float ccGLWindow::MAX_POINT_SIZE_F = 16.0f;
-const float ccGLWindow::MIN_LINE_WIDTH_F = 1.0f;
-const float ccGLWindow::MAX_LINE_WIDTH_F = 16.0f;
+// These extra definitions are required in C++11.
+// In C++17, class-level "static constexpr" is implicitly inline, so these are not required.
+constexpr float ccGLWindow::MIN_POINT_SIZE_F;
+constexpr float ccGLWindow::MAX_POINT_SIZE_F;
+constexpr float ccGLWindow::MIN_LINE_WIDTH_F;
+constexpr float ccGLWindow::MAX_LINE_WIDTH_F;
 
 //Min and max zoom ratio (relative)
-static const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
-static const float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
+constexpr float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
+constexpr float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
 
 //Vaious overlay elements dimensions
-static const double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8; //percentage of the smallest screen dimension
-static const double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0;
-static const float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
-static const float  CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
+constexpr double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8; //percentage of the smallest screen dimension
+constexpr double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0;
+constexpr float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
+constexpr float  CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
 
 //Max click duration for enabling picking mode (in ms)
-static const int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
+constexpr int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
 
 //invalid GL list index
-static const GLuint GL_INVALID_LIST_ID = (~0);
+constexpr GLuint GL_INVALID_LIST_ID = (~0);
 
 //GL filter banner margin (height = 2*margin + current font height)
-static const int CC_GL_FILTER_BANNER_MARGIN = 5;
+constexpr int CC_GL_FILTER_BANNER_MARGIN = 5;
 
 //default interaction flags
 ccGLWindow::INTERACTION_FLAGS ccGLWindow::PAN_ONLY()           { ccGLWindow::INTERACTION_FLAGS flags = INTERACT_PAN | INTERACT_ZOOM_CAMERA | INTERACT_2D_ITEMS | INTERACT_CLICKABLE_ITEMS; return flags; }
@@ -93,16 +95,19 @@ ccGLWindow::INTERACTION_FLAGS ccGLWindow::TRANSFORM_ENTITIES() { ccGLWindow::INT
 
 /*** Persistent settings ***/
 
-static const char c_ps_groupName[] = "ccGLWindow";
-static const char c_ps_perspectiveView[] = "perspectiveView";
-static const char c_ps_objectMode[] = "objectCenteredView";
-static const char c_ps_sunLight[] = "sunLightEnabled";
-static const char c_ps_customLight[] = "customLightEnabled";
-static const char c_ps_pivotVisibility[] = "pivotVisibility";
-static const char c_ps_stereoGlassType[] = "stereoGlassType";
+constexpr char c_ps_groupName[] = "ccGLWindow";
+constexpr char c_ps_perspectiveView[] = "perspectiveView";
+constexpr char c_ps_objectMode[] = "objectCenteredView";
+constexpr char c_ps_sunLight[] = "sunLightEnabled";
+constexpr char c_ps_customLight[] = "customLightEnabled";
+constexpr char c_ps_pivotVisibility[] = "pivotVisibility";
+constexpr char c_ps_stereoGlassType[] = "stereoGlassType";
 
 //Unique GL window ID
 static int s_GlWindowNumber = 0;
+
+// Shader path
+Q_GLOBAL_STATIC( QString, s_shaderPath );
 
 //On some versions of Qt, QGLWidget::renderText seems to need glColorf instead of glColorub!
 // See https://bugreports.qt-project.org/browse/QTBUG-6217
@@ -234,6 +239,69 @@ struct HotZone
 		return areaRect;
 	}
 };
+
+//! Rendering params
+struct ccGLWindow::RenderingParams
+{
+	// Next LOD state
+	LODState nextLODState;
+
+	// Pass info
+	unsigned char passIndex = 0;
+	unsigned char passCount = 1;
+
+	// 2D background
+	bool drawBackground = true;
+	bool clearDepthLayer = true;
+	bool clearColorLayer = true;
+
+	// 3D central layer
+	bool draw3DPass = true;
+	bool useFBO = false;
+	bool draw3DCross = false;
+
+	// 2D foreground
+	bool drawForeground = true;
+};
+
+//! Optional output metrics (from computeProjectionMatrix)
+struct ccGLWindow::ProjectionMetrics
+{
+	double zNear = 0.0;
+	double zFar = 0.0;
+	double cameraToBBCenterDist = 0.0;
+	double bbHalfDiag = 0.0;
+};
+
+//! Picking parameters
+struct ccGLWindow::PickingParameters
+{
+	//! Default constructor
+	PickingParameters(	PICKING_MODE _mode = NO_PICKING,
+						int _centerX = 0,
+						int _centerY = 0,
+						int _pickWidth = 5,
+						int _pickHeight = 5,
+						bool _pickInSceneDB = true,
+						bool _pickInLocalDB = true)
+		: mode(_mode)
+		, centerX(_centerX)
+		, centerY(_centerY)
+		, pickWidth(_pickWidth)
+		, pickHeight(_pickHeight)
+		, pickInSceneDB(_pickInSceneDB)
+		, pickInLocalDB(_pickInLocalDB)
+	{}
+
+	PICKING_MODE mode;
+	int centerX;
+	int centerY;
+	int pickWidth;
+	int pickHeight;
+	bool pickInSceneDB;
+	bool pickInLocalDB;
+};
+
 
 ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 						ccGLWindowParent* parent/*=0*/,
@@ -802,9 +870,10 @@ bool ccGLWindow::initialize()
 				else
 				{
 					ccColorRampShader* colorRampShader = new ccColorRampShader();
-					QString shadersPath = ccGLWindow::getShadersPath();
 					QString error;
-					if (!colorRampShader->loadProgram(QString(), shadersPath + QString("/ColorRamp/color_ramp.frag"), error))
+					const QString shaderPath = QStringLiteral( "%1/ColorRamp/color_ramp.frag" ).arg( *s_shaderPath );
+					
+					if (!colorRampShader->loadProgram(QString(), shaderPath, error))
 					{
 						if (!m_silentInitialization)
 							ccLog::Warning(QString("[3D View %1] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
@@ -1070,6 +1139,7 @@ void ccGLWindow::setGLViewport(const QRect& rect)
 	//correction for HD screens
 	const int retinaScale = devicePixelRatio();
 	m_glViewport = QRect(rect.left() * retinaScale, rect.top() * retinaScale, rect.width() * retinaScale, rect.height() * retinaScale);
+	invalidateViewport();
 
 	if (context() && context()->isValid())
 	{
@@ -1084,7 +1154,6 @@ void ccGLWindow::resizeGL(int w, int h)
 	//update OpenGL viewport
 	setGLViewport(0, 0, w, h);
 
-	invalidateViewport();
 	invalidateVisualization();
 	deprecate3DLayer();
 
@@ -1557,7 +1626,11 @@ void ccGLWindow::paintGL()
 
 	m_shouldBeRefreshed = false;
 
-	if (!m_stereoModeEnabled && m_autoPickPivotAtCenter && !m_mouseMoved && m_autoPivotCandidate.norm2d() != 0.0)
+	if (	!m_stereoModeEnabled
+		&&	m_autoPickPivotAtCenter
+		&&	!m_mouseMoved
+		&&	m_autoPivotCandidate.norm2d() != 0.0
+		&&	!renderingParams.nextLODState.inProgress)
 	{
 		setPivotPoint(m_autoPivotCandidate, true, false);
 	}
@@ -1604,7 +1677,7 @@ void ccGLWindow::paintGL()
 			{
 				qint64 displayTime_ms = m_timer.elapsed() - startTime_ms;
 				//we try to refresh LOD levels at a regular pace
-				qint64 baseLODRefreshTime_ms = 50;
+				static const qint64 baseLODRefreshTime_ms = 50;
 
 				m_LODPendingRefresh = true;
 				m_LODPendingIgnore = false;
@@ -1627,7 +1700,7 @@ void ccGLWindow::renderNextLODLevel()
 	m_LODPendingRefresh = false;
 	if (m_currentLODState.inProgress && m_currentLODState.level != 0 && !m_LODPendingIgnore)
 	{
-		ccLog::PrintDebug(QString("[renderNextLODLevel] Confirmed"));
+		ccLog::PrintDebug(QString("[renderNextLODLevel] Level %1 - index %2 confirmed").arg(m_currentLODState.level).arg(m_currentLODState.startIndex));
 		QApplication::processEvents();
 		requestUpdate();
 	}
@@ -1999,7 +2072,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
 			logGLError("ccGLWindow::fullRenderingPass (FBO stop)");
-			bindFBO(0);
+			bindFBO(nullptr);
 			m_updateFBO = false;
 		}
 
@@ -2486,20 +2559,20 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				int ll_currentHeight = m_glViewport.height() - 10; //lower left
 				int uc_currentHeight = 10; //upper center
 
-				for (std::list<MessageToDisplay>::iterator it = m_messagesToDisplay.begin(); it != m_messagesToDisplay.end(); ++it)
+				for (const auto &message : m_messagesToDisplay)
 				{
-					switch (it->position)
+					switch (message.position)
 					{
 					case LOWER_LEFT_MESSAGE:
 					{
-						renderText(10, ll_currentHeight, it->message, m_font);
+						renderText(10, ll_currentHeight, message.message, m_font);
 						int messageHeight = QFontMetrics(m_font).height();
 						ll_currentHeight -= (messageHeight * 5) / 4; //add a 25% margin
 					}
 					break;
 					case UPPER_CENTER_MESSAGE:
 					{
-						QRect rect = QFontMetrics(m_font).boundingRect(it->message);
+						QRect rect = QFontMetrics(m_font).boundingRect(message.message);
 						//take the GL filter banner into account!
 						int x = (m_glViewport.width() - rect.width()) / 2;
 						int y = uc_currentHeight + rect.height();
@@ -2507,7 +2580,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 						{
 							y += getGlFilterBannerHeight();
 						}
-						renderText(x, y, it->message, m_font);
+						renderText(x, y, message.message, m_font);
 						uc_currentHeight += (rect.height() * 5) / 4; //add a 25% margin
 					}
 					break;
@@ -2515,9 +2588,9 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 					{
 						QFont newFont(m_font); //no need to take zoom into account!
 						newFont.setPointSize(12 * devicePixelRatio());
-						QRect rect = QFontMetrics(newFont).boundingRect(it->message);
+						QRect rect = QFontMetrics(newFont).boundingRect(message.message);
 						//only one message supported in the screen center (for the moment ;)
-						renderText((m_glViewport.width() - rect.width()) / 2, (m_glViewport.height() - rect.height()) / 2, it->message, newFont);
+						renderText((m_glViewport.width() - rect.width()) / 2, (m_glViewport.height() - rect.height()) / 2, message.message, newFont);
 					}
 					break;
 					}
@@ -3451,7 +3524,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	CONTEXT.currentLODLevel = 0;
 
 	//scalar field color-bar
-	CONTEXT.sfColorScaleToDisplay = 0;
+	CONTEXT.sfColorScaleToDisplay = nullptr;
 
 	//point picking
 	CONTEXT.labelMarkerSize = static_cast<float>(guiParams.labelMarkerSize * computeActualPixelSize());
@@ -3623,11 +3696,11 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 				if (m_winDBRoot)
 					m_winDBRoot->filterChildren(labels, true, CC_TYPES::LABEL_2D);
 
-				for (ccHObject::Container::iterator it = labels.begin(); it != labels.end(); ++it)
+				for (auto & label : labels)
 				{
-					if ((*it)->isA(CC_TYPES::LABEL_2D) && (*it)->isVisible()) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
+					if (label->isA(CC_TYPES::LABEL_2D) && label->isVisible()) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
 					{
-						cc2DLabel* l = static_cast<cc2DLabel*>(*it);
+						cc2DLabel* l = static_cast<cc2DLabel*>(label);
 						if (l != label && l->isSelected())
 						{
 							m_activeItems.push_back(l);
@@ -3867,13 +3940,13 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			const int retinaScale = devicePixelRatio();
 			u *= retinaScale;
 
-			for (std::list<ccInteractor*>::iterator it = m_activeItems.begin(); it != m_activeItems.end(); ++it)
+			for (auto &activeItem : m_activeItems)
 			{
-				if ((*it)->move2D(x * retinaScale, y * retinaScale, dx * retinaScale, dy * retinaScale, glWidth(), glHeight()))
+				if (activeItem->move2D(x * retinaScale, y * retinaScale, dx * retinaScale, dy * retinaScale, glWidth(), glHeight()))
 				{
 					invalidateViewport();
 				}
-				else if ((*it)->move3D(u))
+				else if (activeItem->move3D(u))
 				{
 					invalidateViewport();
 					deprecate3DLayer();
@@ -4496,7 +4569,7 @@ void ccGLWindow::startPicking(PickingParameters& params)
 	if (!m_globalDBRoot && !m_winDBRoot)
 	{
 		//we must always emit a signal!
-		processPickingResult(params, 0, -1);
+		processPickingResult(params, nullptr, -1);
 		return;
 	}
 
@@ -4622,7 +4695,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		//unhandled mode?!
 		assert(false);
 		//we must always emit a signal!
-		processPickingResult(params, 0, -1);
+		processPickingResult(params, nullptr, -1);
 		return;
 	}
 
@@ -4744,7 +4817,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	{
 		ccLog::Warning("[Picking] Too many items inside the picking area! Try to zoom in...");
 		//we must always emit a signal!
-		processPickingResult(params, 0, -1);
+		processPickingResult(params, nullptr, -1);
 	}
 
 	//process hits
@@ -4919,10 +4992,10 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 							{
 								autoComputeOctree = (clickedButton == always);
 								//update the global application parameters
-								ccGui::ParamStruct params = ccGui::Parameters();
-								params.autoComputeOctree = autoComputeOctree ? ccGui::ParamStruct::ALWAYS : ccGui::ParamStruct::NEVER;
-								ccGui::Set(params);
-								params.toPersistentSettings();
+								ccGui::ParamStruct globalParams = ccGui::Parameters();
+								globalParams.autoComputeOctree = autoComputeOctree ? ccGui::ParamStruct::ALWAYS : ccGui::ParamStruct::NEVER;
+								ccGui::Set(globalParams);
+								globalParams.toPersistentSettings();
 							}
 						}
 						break;
@@ -5838,6 +5911,11 @@ bool ccGLWindow::renderToFile(	QString filename,
 	return success;
 }
 
+void ccGLWindow::setShaderPath( const QString &path )
+{
+	(*s_shaderPath) = path;
+}
+
 QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 									bool dontScaleFeatures/*=false*/,
 									bool renderOverlayItems/*=false*/,
@@ -5963,7 +6041,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 		if (m_activeGLFilter)
 		{
 			QString error;
-			if (!m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), ccGLWindow::getShadersPath(), error))
+			if (!m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), *s_shaderPath, error))
 			{
 				if (!silent)
 				{
@@ -6012,7 +6090,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 
 	//disable the FBO
 	logGLError("ccGLWindow::renderToFile/FBO stop");
-	bindFBO(0);
+	bindFBO(nullptr);
 
 	setLODEnabled(wasLODEnabled);
 
@@ -6090,7 +6168,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	glFunc->glReadBuffer(GL_NONE);
 
 	//restore the default FBO
-	bindFBO(0);
+	bindFBO(nullptr);
 
 	glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
 
@@ -6110,7 +6188,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	if (glFilter && zoomFactor != 1.0f)
 	{
 		QString error;
-		m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), ccGLWindow::getShadersPath(), error);
+		m_activeGLFilter->init(m_glViewport.width(), m_glViewport.height(), *s_shaderPath, error);
 	}
 
 	//we restore viewport parameters
@@ -6119,6 +6197,10 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	m_captureMode.enabled = false;
 	m_captureMode.zoomFactor = 1.0f;
 	setFontPointSize(getFontPointSize());
+
+	invalidateViewport();
+	invalidateVisualization();
+	redraw(true);
 
 	return outputImage;
 }
@@ -6199,10 +6281,8 @@ bool ccGLWindow::initGLFilter(int w, int h, bool silent/*=false*/)
 	ccGlFilter* _filter = nullptr;
 	std::swap(_filter, m_activeGLFilter);
 
-	QString shadersPath = ccGLWindow::getShadersPath();
-
 	QString error;
-	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), shadersPath, error))
+	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), *s_shaderPath, error))
 	{
 		if (!silent)
 		{
@@ -6315,43 +6395,6 @@ void ccGLWindow::displayText(	QString text,
 
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, col);
 	renderText(x2, y2, text, textFont);
-}
-
-QString ccGLWindow::getShadersPath()
-{
-	QString  appPath = QCoreApplication::applicationDirPath();
-	QString	shaderPath;
-	
-#if defined(Q_OS_MAC)
-	appPath.remove( "MacOS" );
-	
-#if defined(CC_MAC_DEV_PATHS)
-	shaderPath = appPath + "../../../shaders";
-#else
-	shaderPath = appPath + "/Shaders";
-#endif
-#elif defined(Q_OS_WIN)
-	shaderPath = appPath + "/shaders";
-#elif defined(Q_OS_LINUX)
-	// Shaders are relative to the bin directory where the executable is found
-	QDir  theDir( appPath );
-	
-	if ( theDir.dirName() == "bin" )
-	{
-		theDir.cdUp();
-		
-		shaderPath = (theDir.absolutePath() + "/share/cloudcompare/shaders");
-	}
-	else
-	{
-		// Choose a reasonable default to look in
-		shaderPath = "/usr/share/cloudcompare/shaders";
-	}
-#else
-#warning Need to specify the shader path for this OS.	
-#endif
-	
-	return shaderPath;
 }
 
 CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,

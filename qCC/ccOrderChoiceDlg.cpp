@@ -17,8 +17,8 @@
 
 #include "ccOrderChoiceDlg.h"
 
-//local
-#include "ccQtHelpers.h"
+//common
+#include <ccQtHelpers.h>
 
 //qCC_plugins
 #include <ccMainAppInterface.h>

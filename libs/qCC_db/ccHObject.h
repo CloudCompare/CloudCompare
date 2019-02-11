@@ -37,7 +37,7 @@ public: //construction
 	ccHObject(const ccHObject& object);
 
 	//! Default destructor
-	 ~ccHObject() override;
+	virtual ~ccHObject() override;
 
 	//! Static factory
 	/** Warning: objects depending on other structures (such as meshes 
@@ -53,14 +53,17 @@ public: //construction
 	/** Two strings are used as keys, one for the plugin name and one for the class name.
 		Those strings will typically be saved as metadata of a custom object
 	**/
-	static ccHObject* New(QString pluginId, QString classId, const char* name = nullptr);
+	static ccHObject* New(const QString& pluginId, const QString& classId, const char* name = nullptr);
 
 public: //base members access
 
 	//! Returns class ID
 	/** \return class unique ID
 	**/
-	inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::HIERARCHY_OBJECT; }
+	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::HIERARCHY_OBJECT; }
+
+	//! Returns whether the instance is a group
+	inline bool isGroup() const { return getClassID() == CC_TYPES::HIERARCHY_OBJECT; }
 
 	//! Returns parent object
 	/** \return parent object (nullptr if no parent)
@@ -125,12 +128,17 @@ public: //children management
 	/** \return children number
 	**/
 	inline unsigned getChildrenNumber() const { return static_cast<unsigned>(m_children.size()); }
+	
+	//! Returns the total number of children under this object recursively
+	/** \return Number of children
+	**/
+	unsigned int getChildCountRecursive() const;
 
 	//! Returns the ith child
 	/** \param childPos child position
 		\return child object (or nullptr if wrong position)
 	**/
-	inline ccHObject* getChild(unsigned childPos) const { return (childPos < getChildrenNumber() ? m_children[childPos] : 0); }
+	inline ccHObject* getChild(unsigned childPos) const { return (childPos < getChildrenNumber() ? m_children[childPos] : nullptr); }
 
 	//! Finds an entity in this object hierarchy
 	/** \param uniqueID child unique ID
@@ -139,13 +147,13 @@ public: //children management
 	ccHObject* find(unsigned uniqueID);
 
 	//! Standard instances container (for children, etc.)
-	typedef std::vector<ccHObject*> Container;
+	using Container = std::vector<ccHObject *>;
 
 	//! Shared pointer
-	typedef QSharedPointer<ccHObject> Shared;
+	using Shared = QSharedPointer<ccHObject>;
 
 	//! Shared instances container (for children, etc.)
-	typedef std::vector<Shared> SharedContainer;
+	using SharedContainer = std::vector<Shared>;
 
 	//! Collects the children corresponding to a certain pattern
 	/** \param filteredChildren result container
@@ -259,7 +267,7 @@ public: //bounding-box
 public: //display
 
 	//Inherited from ccDrawableObject
-	virtual void draw(CC_DRAW_CONTEXT& context) override;
+	void draw(CC_DRAW_CONTEXT& context) override;
 
 	//! Returns the absolute transformation (i.e. the actual displayed GL transforamtion) of an entity
 	/** \param[out] trans absolute transformation
@@ -339,9 +347,9 @@ public: //display
 	virtual void notifyGeometryUpdate();
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const override;
-	virtual bool toFile(QFile& out) const override;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool isSerializable() const override;
+	bool toFile(QFile& out) const override;
+	bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	//! Custom version of ccSerializableObject::fromFile
 	/** This is used to load only the object's part of a stream (and not its children)

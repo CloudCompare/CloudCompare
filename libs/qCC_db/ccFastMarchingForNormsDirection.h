@@ -19,8 +19,8 @@
 #define CC_FAST_MARCHING_DIRECTION_HEADER
 
 //CCLib
-#include <FastMarching.h>
 #include <DgmOctree.h>
+#include <FastMarching.h>
 
 //qCC_db
 #include "ccAdvancedTypes.h"
@@ -44,7 +44,7 @@ public:
 	//! Static entry point (helper)
 	static int OrientNormals(	ccPointCloud* theCloud,
 								unsigned char octreeLevel,
-								ccProgressDialog* progressCb = 0);
+								ccProgressDialog* progressCb = nullptr);
 	//! Default constructor
 	ccFastMarchingForNormsDirection();
 
@@ -71,7 +71,7 @@ public:
 									NormsIndexesTableType* theNorms);
 
 	//inherited methods (see FastMarchingAlgorithm)
-	int propagate();
+	int propagate() override;
 
 protected:
 
@@ -92,7 +92,7 @@ protected:
 		{}
 
 		///! Destructor
-		virtual ~DirectionCell() {}
+		~DirectionCell() override = default;
 
 		//! The local cell normal
 		CCVector3 N;
@@ -109,10 +109,10 @@ protected:
 	};
 
 	//inherited methods (see FastMarchingAlgorithm)
-	virtual float computeTCoefApprox(CCLib::FastMarching::Cell* currentCell, CCLib::FastMarching::Cell* neighbourCell) const;
-	virtual int step();
-	virtual void initTrialCells();
-	virtual bool instantiateGrid(unsigned size) { return instantiateGridTpl<DirectionCell*>(size); }
+	float computeTCoefApprox(CCLib::FastMarching::Cell* currentCell, CCLib::FastMarching::Cell* neighbourCell) const override;
+	int step() override;
+	void initTrialCells() override;
+	bool instantiateGrid(unsigned size) override { return instantiateGridTpl<DirectionCell*>(size); }
 
 	//! Computes relative 'confidence' between two cells (orientations)
 	/** \return confidence between 0 and 1

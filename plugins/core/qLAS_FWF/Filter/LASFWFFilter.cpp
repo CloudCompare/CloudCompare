@@ -24,6 +24,7 @@
 #include <ccScalarField.h>
 #include <ccWaveform.h>
 #include <ccColorScalesManager.h>
+#include <ccHObjectCaster.h>
 
 //qCC_io
 #include <LASFields.h>
@@ -304,7 +305,6 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 			//Colors?
 			if (hasColors)
 			{
-				lasheader.point_data_format += 1;
 				if (lasheader.point_data_format == 6)
 				{
 					//6 --> 7

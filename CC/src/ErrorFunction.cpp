@@ -36,29 +36,29 @@ double ErrorFunction::erf(double x)
 // = 2/sqrt(pi)*[x - x^3/3 + x^5/5*2! - x^7/7*3! + ...]
 // = 1-erfc(x)
 {
-	static const double two_sqrtpi= 1.128379167095512574; // 2/sqrt(pi)
+	static const double two_sqrtpi = 1.128379167095512574; // 2/sqrt(pi)
 
-	if (fabs(x) > 2.2)
-		return 1.0 - erfc(x); //use continued fraction when fabs(x) > 2.2
+	if (std::abs(x) > 2.2)
+		return 1.0 - erfc(x); //use continued fraction when std::abs(x) > 2.2
 
-	double sum= x, term= x, xsqr= x*x;
-	int j= 1;
+	double sum = x, term = x, xsqr = x * x;
+	int j = 1;
 
 	do
 	{
-		term*= xsqr/j;
-		sum-= term/(2*j+1);
+		term *= xsqr / j;
+		sum -= term / (2 * j + 1);
 		++j;
-		term*= xsqr/j;
-		sum+= term/(2*j+1);
+		term *= xsqr / j;
+		sum += term / (2 * j + 1);
 		++j;
 	}
-	while (fabs(term/sum) > c_erfRelativeError);
+	while (std::abs(term/sum) > c_erfRelativeError);
 
-	return two_sqrtpi*sum;
+	return two_sqrtpi * sum;
 }
 
-static const double one_sqrtpi = 1.0/sqrt(M_PI);
+static const double one_sqrtpi = 1.0 / sqrt(M_PI);
 
 double ErrorFunction::erfc(double x)
 //erfc(x) = 2/sqrt(pi)*integral(exp(-t^2),t,x,inf)
@@ -66,30 +66,30 @@ double ErrorFunction::erfc(double x)
 // = 1-erf(x)
 //expression inside [] is a continued fraction so '+' means add to denominator only
 {
-	if (fabs(x) < 2.2)
-		return erfc(x); //use series when fabs(x) < 2.2
+	if (std::abs(x) < 2.2)
+		return erfc(x); //use series when std::abs(x) < 2.2
 
 	if (x < 1.0e-12) //continued fraction only valid for x>0
 		return 2.0 - erfc(-x);
 
-	double a=1, b=x; //last two convergent numerators
-	double c=x, d=x*x+0.5; //last two convergent denominators
-	double q1, q2= b/d; //last two convergents (a/c and b/d)
-	double n= 1.0;
+	double a = 1, b = x; //last two convergent numerators
+	double c = x, d = x * x + 0.5; //last two convergent denominators
+	double q1, q2 = b / d; //last two convergents (a/c and b/d)
+	double n = 1.0;
 
 	do
 	{
-		double t = a*n+b*x;
+		double t = a * n + b * x;
 		a = b;
 		b = t;
-		t = c*n+d*x;
+		t = c * n + d * x;
 		c = d;
 		d = t;
 		n += 0.5;
 		q1 = q2;
-		q2 = b/d;
+		q2 = b / d;
 	}
-	while (fabs(q1-q2)/q2 > c_erfRelativeError);
+	while (std::abs(q1 - q2) / q2 > c_erfRelativeError);
 
-	return one_sqrtpi*exp(-x*x)*q2;
+	return one_sqrtpi * exp(-x * x)*q2;
 }

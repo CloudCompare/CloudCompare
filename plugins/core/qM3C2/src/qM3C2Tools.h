@@ -39,11 +39,12 @@ public:
 	**/
 	enum ComputationMode
 	{
-		DEFAULT_MODE		= 0,
-		USE_CLOUD1_NORMALS	= 1,
-		MULTI_SCALE_MODE	= 2,
-		VERT_MODE			= 3,
-		HORIZ_MODE			= 4,
+		DEFAULT_MODE			= 0, //compute normals on core points
+		USE_CLOUD1_NORMALS		= 1,
+		MULTI_SCALE_MODE		= 2,
+		VERT_MODE				= 3,
+		HORIZ_MODE				= 4,
+		USE_CORE_POINTS_NORMALS	= 5,
 	};
 
 	//! Computes normals on core points only

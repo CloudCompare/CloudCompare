@@ -18,15 +18,16 @@
 #ifndef CC_COMPASS_HEADER
 #define CC_COMPASS_HEADER
 
-#include <QObject>
-#include <QXmlStreamWriter>
 #include <cmath>
-#include <random>
+
+#include <QBuffer>
+#include <QObject>
 
 //qCC
 #include "ccStdPluginInterface.h"
 #include <ccPickingListener.h>
-#include <qbuffer.h>
+
+class QXmlStreamWriter;
 
 class ccCompassDlg;
 class ccFitPlaneTool;
@@ -52,14 +53,14 @@ public:
 	explicit ccCompass(QObject* parent = nullptr);
 
 	//deconstructor
-	virtual ~ccCompass();
+	~ccCompass() override;
 
 	//inherited from ccPluginInterface
-	virtual void stop() override { stopMeasuring(true); m_dlg = nullptr; ccStdPluginInterface::stop(); } //called when the plugin is being stopped
+	void stop() override { stopMeasuring(true); m_dlg = nullptr; ccStdPluginInterface::stop(); } //called when the plugin is being stopped
 
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;
-	virtual QList<QAction *> getActions() override;
+	QList<QAction *> getActions() override;
 
 protected slots:
 
@@ -73,7 +74,7 @@ protected slots:
 	bool stopMeasuring(bool finalStop = false);
 	
 	//inherited from ccPickingListener
-	virtual void onItemPicked(const ccPickingListener::PickedItem& pi) override;
+	void onItemPicked(const ccPickingListener::PickedItem& pi) override;
 
 	//picked point callback (called by the above function)
 	void pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3& P);
@@ -110,8 +111,12 @@ protected slots:
 	void fitPlaneToGeoObject(); //calculates best-fit plane for the upper and lower surfaces of the selected GeoObject
 	void recalculateFitPlanes(); //recalcs fit planes for traces and GeoObjects
 	void estimateStructureNormals(); //Estimate the normal vector to the structure this trace represents at each point in this trace.
+	void estimateP21(); //Calculate the intensity of selected structures 
+	void estimateStrain(); //Estimate strain from Mode-I dykes and veins
 	void convertToPointCloud(); //converts selected traces or geoObjects to point clouds
 	void distributeSelection(); //distributes selected objects into GeoObjects with the same name
+	void importFoliations(); //import foliation data
+	void importLineations(); //import lineation data
 	void exportToSVG(); //exports current view to SVG
 
 	//map mode dialog
@@ -136,7 +141,7 @@ protected slots:
 protected:
 
 	//event to get mouse-move updates & trigger repaint of overlay circle
-	virtual bool eventFilter(QObject* obj, QEvent* event) override;
+	bool eventFilter(QObject* obj, QEvent* event) override;
 	
 	//used to get the place/object that new measurements or interpretation should be stored
 	ccHObject* getInsertPoint();
@@ -151,6 +156,7 @@ protected:
 	void stopPicking();
 
 	//checks if the passed object, or any of it's children, represent unloaded ccCompass objects (e.g. traces, fitplanes etc).
+	void tryLoading();
 	void tryLoading(ccHObject* obj, std::vector<int>* originals, std::vector<ccHObject*>* replacements);
 
 	//Action to start ccCompass
@@ -161,6 +167,7 @@ protected:
 
 	//picking or not?
 	bool m_picking = false;
+	bool m_active = false;
 
 	//ccCompass toolbar gui
 	ccCompassDlg* m_dlg = nullptr;
@@ -185,13 +192,13 @@ protected:
 	QString m_lastGeoObjectName = "GeoObject"; 
 
 	//used while exporting data
-	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());
-	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = QString());
-	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString(), bool thickness=false); //if thickness is true this will write "thickness lineations" rather than orientation lineations
+	int writePlanes(ccHObject* object, QTextStream* out, const QString &parentName = QString());
+	int writeTraces(ccHObject* object, QTextStream* out, const QString &parentName = QString());
+	int writeLineations(ccHObject* object, QTextStream* out, const QString &parentName = QString(), bool thickness=false); //if thickness is true this will write "thickness lineations" rather than orientation lineations
 	
 	int writeTracesSVG(ccHObject* object, QTextStream* out, int height, float zoom);
 
-	int writeToXML(QString filename); //exports Compass interpretation tree to xml
+	int writeToXML(const QString &filename); //exports Compass interpretation tree to xml
 	int writeObjectXML(ccHObject* object, QXmlStreamWriter* out); //writes the provided object (recursive)
 
 	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)

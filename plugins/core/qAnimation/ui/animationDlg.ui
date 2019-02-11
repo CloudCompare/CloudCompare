@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
+    <width>610</width>
     <height>450</height>
    </rect>
   </property>
@@ -14,7 +14,7 @@
    <string>Animation</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="qAnimation.qrc">
+   <iconset>
     <normaloff>:/CC/plugin/qAnimation/animation.png</normaloff>:/CC/plugin/qAnimation/animation.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -57,7 +57,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_8">
             <property name="text">
-             <string>total duration</string>
+             <string>Total duration</string>
             </property>
            </widget>
           </item>
@@ -99,14 +99,14 @@
           <item row="0" column="1">
            <widget class="QLabel" name="stepIndexLabel">
             <property name="text">
-             <string>0</string>
+             <string notr="true">0</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>duration</string>
+             <string>Duration</string>
             </property>
            </widget>
           </item>
@@ -170,13 +170,22 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
           <widget class="QLabel" name="label">
            <property name="text">
-            <string>Frame Rate</string>
+            <string>Frame rate</string>
            </property>
           </widget>
          </item>
@@ -327,7 +336,7 @@ larger). You may have to increase the points size beforehand.</string>
         <item>
          <widget class="QToolButton" name="browseButton">
           <property name="text">
-           <string>...</string>
+           <string notr="true">...</string>
           </property>
          </widget>
         </item>
@@ -392,9 +401,7 @@ larger). You may have to increase the points size beforehand.</string>
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="qAnimation.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

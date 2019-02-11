@@ -17,7 +17,9 @@
 
 #include "ccAlignDlg.h"
 #include "mainwindow.h"
-#include "ccQtHelpers.h"
+
+//common
+#include <ccQtHelpers.h>
 
 //CCLib
 #include <CloudSamplingTools.h>
@@ -360,7 +362,11 @@ void ccAlignDlg::estimateDelta()
 		cloud.enableScalarField();
 	}
 
-	CCLib::GeometricalAnalysisTools::computeLocalDensityApprox(&cloud, CCLib::GeometricalAnalysisTools::DENSITY_KNN, &pDlg);
+	if (CCLib::GeometricalAnalysisTools::ComputeLocalDensityApprox(&cloud, CCLib::GeometricalAnalysisTools::DENSITY_KNN, &pDlg) != CCLib::GeometricalAnalysisTools::NoError)
+	{
+		ccLog::Error("Failed to compute approx. density");
+		return;
+	}
 	unsigned count = 0;
 	double meanDensity = 0;
 	double meanSqrDensity = 0;

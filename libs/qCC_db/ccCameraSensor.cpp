@@ -2391,7 +2391,7 @@ bool ccOctreeFrustumIntersector::build(CCLib::DgmOctree* octree)
 	if (!octree)
 		return false;
 
-	for (int i=0; i<CCLib::DgmOctree::MAX_OCTREE_LEVEL+1 ; i++)
+	for (int i = 0; i < CCLib::DgmOctree::MAX_OCTREE_LEVEL + 1; i++)
 		m_cellsBuilt[i].clear();
 
 	const CCLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree->pointsAndTheirCellCodes();

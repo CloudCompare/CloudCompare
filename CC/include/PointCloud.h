@@ -30,12 +30,11 @@ namespace CCLib
 	class CC_CORE_LIB_API PointCloud : public PointCloudTpl<GenericIndexedCloudPersist>
 	{
 	public:
-
 		//! Default constructor
-		PointCloud() : PointCloudTpl<GenericIndexedCloudPersist>() {}
+		PointCloud() = default;
 
 		//! Default destructor
-		virtual ~PointCloud() {}
+		virtual ~PointCloud() = default;
 	};
 
 }

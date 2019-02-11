@@ -731,6 +731,17 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 		}
 		break;
 
+		case qM3C2Normals::USE_CORE_POINTS_NORMALS:
+		{
+			normalsAreOk = s_M3C2Params.corePoints && s_M3C2Params.corePoints->hasNormals();
+			if (normalsAreOk)
+			{
+				s_M3C2Params.coreNormals = s_M3C2Params.corePoints->normals();
+				s_M3C2Params.coreNormals->link(); //will be released anyway at the end of the process
+			}
+		}
+		break;
+
 		case qM3C2Normals::VERT_MODE:
 		{
 			outputName += QString(" scale=%1").arg(normalScale);

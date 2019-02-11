@@ -139,8 +139,8 @@ bool Cylinder::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 		}
 	if(!pointCount)
 		return false;
-	m_axisPos /= pointCount;
-	m_radius /= pointCount * 2;
+	m_axisPos /= static_cast<float>(pointCount);
+	m_radius /= (pointCount * 2);
 	if(m_radius > 1e6)
 		return false;
 

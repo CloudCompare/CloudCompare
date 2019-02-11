@@ -23,8 +23,10 @@ Big ones:
 	- being able to work on portions of very big clouds while other portions are visible but in 'read-only' mode (http://www.cloudcompare.org/forum/viewtopic.php?t=1699)
 [*] Undo mechanism
 [*] Command line mode could be extended
+	- call the PCV plugin (https://github.com/CloudCompare/CloudCompare/issues/837)
+	- compute the closest point set (CPS) (https://www.cloudcompare.org/forum/viewtopic.php?t=3445)
+	- add the options to constrain ICP (rotation and/or translation) (http://www.cloudcompare.org/forum/viewtopic.php?t=2920)
 	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
-	- use plugins through the command line (M3C2, etc. - see https://github.com/cloudcompare/trunk/issues/403)
 	- extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
 	- save the plane orientation as a text file after best plane fitting
 	- option to apply the inverse transformation
@@ -32,7 +34,6 @@ Big ones:
 	- clean filter
 	- let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
-	- set the output file name (http://www.danielgm.net/cc/forum/viewtopic.php?t=1089)
 	- export the history transformation (or the barycenter translation - see http://www.danielgm.net/cc/forum/viewtopic.php?t=1242)
 	- choose the format of STL output (acsii / binary - see http://www.danielgm.net/cc/forum/viewtopic.php?f=13)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
@@ -52,7 +53,6 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
-[*] Add the options to constrain ICP (rotation and/or translation) via the command line (http://www.cloudcompare.org/forum/viewtopic.php?t=2920)
 [*] Ability to change the mouse buttons mapping (http://www.cloudcompare.org/forum/viewtopic.php?t=2676)
 [*] Ability to define custom shortcuts for some methods (http://www.cloudcompare.org/forum/viewtopic.php?t=2676)
 [*] Set the Cross Section box using a plane entity (http://www.danielgm.net/cc/forum/viewtopic.php?t=2485)
@@ -60,7 +60,6 @@ Various:
 [*] Add a shortcut to take a 'snapshot' of the current view (automatic filename and export dir?)
 [*] Drop the old (deprecated) OpenGL based picking for entities and lablels (http://www.danielgm.net/cc/forum/viewtopic.php?t=2009)
 [*] Add support for Gocad pointset files (= ASCII file with a specific header and decoration)
-[*] LAS files: export non standard (scalar) fields as extended fields
 [*] Read PTS files as multiple clouds (http://www.cloudcompare.org/forum/viewtopic.php?t=2004)
 [*] Generate side-by-side OpenGL views for Sony or Epson AR glasses (http://www.cloudcompare.org/forum/viewtopic.php?t=2011)
 [*] Add GeoJSON format support for vector data... and a lot of other ideas (http://www.danielgm.net/cc/forum/viewtopic.php?t=1845)
@@ -70,7 +69,6 @@ Various:
 [*] Spherical projection of 360 degrees images to color a point cloud (http://www.danielgm.net/cc/forum/viewtopic.php?t=1268&p=4709#p4709)
 [*] Load georeferenced images (ecw+ers, jpg+jgw) (http://www.cloudcompare.org/forum/viewtopic.php?t=1244)
 [*] Add a check box to turn on and off gradient colors in the Color Scale Editor
-[*] Interpolate SFs over two clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1725)
 [*] Smooth zoom (clik and drag the mouse while holding a key - https://github.com/cloudcompare/trunk/issues/382)
 [*] Add the distance 'units' as a parameter for the color ramp
 [*] Select points by color (https://github.com/cloudcompare/trunk/issues/363)
@@ -79,13 +77,12 @@ Various:
 [*] Median Calculation in Rasterize (http://www.cloudcompare.org/forum/viewtopic.php?t=1610)
 [*] Add key bindings to pan the active 3D view (so as to be able to pan even in segmentation / polyline tracing mode - http://www.cloudcompare.org/forum/viewtopic.php?t=1714)
 [*] Choose the columns to export for ASCII files (http://www.cloudcompare.org/forum/viewtopic.php?t=1449)
-[*] Export 3D shapefiles (http://www.cloudcompare.org/forum/viewtopic.php?t=1400)
 [*] Handle arc-polylines (Autocad - http://www.cloudcompare.org/forum/viewtopic.php?t=1413)
 [*] fly-through mode (http://www.cloudcompare.org/forum/viewtopic.php?t=179)
 [*] Use the LEAP device to interact with point clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1090)
-[*] Volume calculation tool: make the resulting grid values available as a scalar field (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
 [*] Compute vertical distances (http://www.cloudcompare.org/forum/viewtopic.php?t=1245)
-[*] Clipping box tool and Segmentation tool improvements (https://github.com/cloudcompare/trunk/issues/215)
+[*] Use a temporary clipping box in the Interactive Segmentation tool (https://github.com/cloudcompare/trunk/issues/215)
+[*] Option to segment a point cloud via the clipping box instead of creating a new cloud (section) (https://github.com/cloudcompare/trunk/issues/215)
 [*] Import sensors from E57 files (http://www.cloudcompare.org/forum/viewtopic.php?t=1168)
 [*] Save polylines color and thickness in DXF files (http://www.danielgm.net/cc/forum/viewtopic.php?t=1086)
 [*] Add a filter to the DB tree (http://www.danielgm.net/cc/forum/viewtopic.php?t=1055)

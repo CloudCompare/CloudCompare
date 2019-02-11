@@ -181,7 +181,7 @@ void cc2DLabel::clear(bool ignoreDependencies)
 {
 	if (ignoreDependencies)
 	{
-		m_points.clear();
+		m_points.resize(0);
 	}
 	else
 	{
@@ -1038,9 +1038,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 #endif
 
 	//render zoom
-	int margin = static_cast<int>(c_margin        * context.renderZoom);
-	int tabMarginX = static_cast<int>(c_tabMarginX    * context.renderZoom);
-	int tabMarginY = static_cast<int>(c_tabMarginY    * context.renderZoom);
+	int margin        = static_cast<int>(c_margin        * context.renderZoom);
+	int tabMarginX    = static_cast<int>(c_tabMarginX    * context.renderZoom);
+	int tabMarginY    = static_cast<int>(c_tabMarginY    * context.renderZoom);
 	int arrowBaseSize = static_cast<int>(c_arrowBaseSize * context.renderZoom);
 
 	int titleHeight = 0;

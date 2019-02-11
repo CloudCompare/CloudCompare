@@ -28,7 +28,7 @@
         <item>
          <widget class="QToolButton" name="browseToolButton">
           <property name="text">
-           <string>...</string>
+           <string notr="true">...</string>
           </property>
          </widget>
         </item>
@@ -79,17 +79,17 @@ p, li { white-space: pre-wrap; }
        </property>
        <item>
         <property name="text">
-         <string>X</string>
+         <string notr="true">X</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Y</string>
+         <string notr="true">Y</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Z</string>
+         <string notr="true">Z</string>
         </property>
        </item>
       </widget>

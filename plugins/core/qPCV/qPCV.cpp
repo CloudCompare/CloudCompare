@@ -277,7 +277,7 @@ void qPCV::doAction()
 		if (!success)
 		{
 			cloud->deleteScalarField(sfIdx);
-			m_app->dispToConsole(tr("En error occurred during entity '%1' illumination!").arg(objName), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole(tr("An error occurred during entity '%1' illumination!").arg(objName), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		}
 		else
 		{

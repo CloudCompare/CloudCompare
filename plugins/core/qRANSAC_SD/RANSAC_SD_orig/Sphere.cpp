@@ -182,7 +182,7 @@ bool Sphere::Init(const MiscLib::Vector< Vec3f > &samples)
 		}
 	if(!midCount)
 		return false;
-	m_center /= midCount;
+	m_center /= static_cast<float>(midCount);
 	m_radius = 0;
 	for(size_t i = 0; i < c; ++i)
 	{
@@ -210,10 +210,10 @@ bool Sphere::Init(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3,
 	tetrahedron_circumsphere_3d(tetra, &r, pc);
 	if(r < 0)
 		return false;
-	m_radius = r;
-	m_center[0] = pc[0];
-	m_center[1] = pc[1];
-	m_center[2] = pc[2];
+	m_radius = static_cast<float>(r);
+	m_center[0] = static_cast<float>(pc[0]);
+	m_center[1] = static_cast<float>(pc[1]);
+	m_center[2] = static_cast<float>(pc[2]);
 	return true;
 }
 

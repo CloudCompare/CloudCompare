@@ -18,6 +18,7 @@
 #include "OFFFilter.h"
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccMesh.h>
 #include <ccNormalVectors.h>

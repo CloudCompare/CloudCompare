@@ -18,6 +18,7 @@
 #include "PNFilter.h"
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>

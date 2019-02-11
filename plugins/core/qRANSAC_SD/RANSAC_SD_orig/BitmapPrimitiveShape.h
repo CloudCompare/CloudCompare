@@ -104,7 +104,7 @@ void BitmapPrimitiveShape::BuildBitmap(const PointCloud &pc, float *epsilon,
 	GfxTL::AABox< GfxTL::Vector2Df > *bbox, MiscLib::Vector< char > *bitmap,
 	size_t *uextent, size_t *vextent, MiscLib::Vector< size_t > *bmpIdx) const
 {
-	int size = end - begin;
+	size_t size = end - begin;
 	params->resize(size);
 	// compute parameters and extent
 	Parameters(GfxTL::IndexIterate(begin, pc.begin()),
@@ -112,7 +112,7 @@ void BitmapPrimitiveShape::BuildBitmap(const PointCloud &pc, float *epsilon,
 	bbox->Min() = GfxTL::Vector2Df(std::numeric_limits< float >::infinity(),
 		std::numeric_limits< float >::infinity());
 	bbox->Max() = -bbox->Min();
-	for(size_t i = 0; i < (size_t)size; ++i)
+	for(size_t i = 0; i < size; ++i)
 	{
 		if((*params)[i].first < bbox->Min()[0])
 			bbox->Min()[0] = (*params)[i].first;
@@ -143,8 +143,8 @@ void BitmapPrimitiveShape::BuildBitmap(const PointCloud &pc, float *epsilon,
 		std::pair< int, int > bmpParam;
 		InBitmap((*params)[i], *epsilon, *bbox, *uextent, *vextent, &bmpParam);
 		// clamp bitmap coords
-		bmpParam.first = GfxTL::Math< int >::Clamp(bmpParam.first, 0, *uextent - 1);
-		bmpParam.second = GfxTL::Math< int >::Clamp(bmpParam.second, 0, *vextent - 1);
+		bmpParam.first = GfxTL::Math< int >::Clamp(bmpParam.first, 0, static_cast<int>(*uextent) - 1);
+		bmpParam.second = GfxTL::Math< int >::Clamp(bmpParam.second, 0, static_cast<int>(*vextent) - 1);
 		(*bitmap)[(*bmpIdx)[i] = bmpParam.first	+ bmpParam.second * (*uextent)] = true;
 	}
 }

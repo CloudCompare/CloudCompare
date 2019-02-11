@@ -19,6 +19,7 @@
 #define CC_NORMAL_COMPRESSOR_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccBasicTypes.h"
 
 //! Normal compressor

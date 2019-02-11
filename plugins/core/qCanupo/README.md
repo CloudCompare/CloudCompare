@@ -1,0 +1,2 @@
+# qCanupo
+CANUPO plugin

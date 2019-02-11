@@ -162,7 +162,7 @@ struct ccGLDrawContext
 		, glW(0)
 		, glH(0)
 		, devicePixelRatio(1.0f)
-		, display(0)
+		, display(nullptr)
 		, qGLContext(nullptr)
 		, renderZoom(1.0f)
 		, defaultMat(new ccMaterial("default"))
@@ -180,9 +180,9 @@ struct ccGLDrawContext
 		, higherLODLevelsAvailable(false)
 		, decimateMeshOnMove(true)
 		, minLODTriangleCount(2500000)
-		, sfColorScaleToDisplay(0)
-		, colorRampShader(0)
-		, customRenderingShader(0)
+		, sfColorScaleToDisplay(nullptr)
+		, colorRampShader(nullptr)
+		, customRenderingShader(nullptr)
 		, useVBOs(true)
 		, labelMarkerSize(5)
 		, labelMarkerTextShift_pix(5)
@@ -200,6 +200,7 @@ struct ccGLDrawContext
 		return qGLContext ? qGLContext->versionFunctions<TYPE>() : 0;
 	}   
 };
-typedef ccGLDrawContext CC_DRAW_CONTEXT;
+
+using CC_DRAW_CONTEXT = ccGLDrawContext;
 
 #endif //CC_GL_DRAW_CONTEXT_HEADER

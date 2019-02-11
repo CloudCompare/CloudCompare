@@ -41,15 +41,15 @@
 //Qt
 #include <QApplication>
 #include <QBuffer>
-#include <QString>
 #include <QMap>
+#include <QString>
 #include <QUuid>
 
 //system
 #include <cassert>
 #include <string>
 
-typedef double colorFieldType;
+using colorFieldType = double;
 //typedef boost::uint16_t colorFieldType;
 
 const char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
@@ -710,9 +710,8 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		//Extension for normals
 		bool hasNormals = false;
 
-		for (size_t i = 0; i < scans.size(); ++i)
+		for (auto cloud : scans)
 		{
-			ccPointCloud* cloud = scans[i];
 			QString scanGUID = GetNewGuid();
 
 			//we should only add the "normals" extension once
@@ -788,7 +787,11 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 	catch(const e57::E57Exception& e)
 	{
-		ccLog::Warning(QStringLiteral("[E57] Error: %1").arg(e57::Utilities::errorCodeToString(e.errorCode()).c_str()));
+		ccLog::Warning( QStringLiteral("[E57] Error: %1 (%2 line %3)")
+						.arg( e57::Utilities::errorCodeToString( e.errorCode() ).c_str() )
+						.arg( e.sourceFileName() )
+						.arg( e.sourceLineNumber() )
+						);
 		
 		if ( !e.context().empty() )
 		{
@@ -806,7 +809,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 	return result;
 }
 
-static bool NodeStructureToTree(ccHObject* currentTreeNode, const e57::Node currentE57Node)
+static bool NodeStructureToTree(ccHObject* currentTreeNode, const e57::Node &currentE57Node)
 {
 	assert(currentTreeNode);
 	ccHObject* obj = new ccHObject(currentE57Node.elementName().c_str());
@@ -2051,6 +2054,9 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 	case E57_CYLINDRICAL:
 	case E57_SPHERICAL:
 		ccLog::Warning("[E57] Unhandled camera type (image will be loaded as is)");
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+		Q_FALLTHROUGH();
+#endif
 	case E57_VISUAL:
 		imageObj = new ccImage();
 		break;

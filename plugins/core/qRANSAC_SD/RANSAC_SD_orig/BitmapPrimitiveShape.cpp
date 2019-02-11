@@ -202,10 +202,10 @@ size_t BitmapPrimitiveShape::ConnectedComponent(
 	{
 		int borderPixels = 0;
 		int maxLabel = labels[maxComp].first;
-		int row = bitmapInfo.uextent;
-		int pos = 0;
+		size_t row = bitmapInfo.uextent;
+		size_t pos = 0;
 		char numNeighbours = 0;
-		int ccSize = 0;
+		size_t ccSize = 0;
 
 		// test neightbourhood for all bitmappixels that are not marginal
 		for( size_t v = 1; v < bitmapInfo.vextent-1; ++v )
@@ -216,13 +216,13 @@ size_t BitmapPrimitiveShape::ConnectedComponent(
 
 				if( componentsImg[pos] == maxLabel )
 				{
-					ccSize++;
+					++ccSize;
 					numNeighbours = bitmapInfo.bitmap[pos-1] + bitmapInfo.bitmap[pos+1] + 
 								bitmapInfo.bitmap[pos-bitmapInfo.uextent-1] + bitmapInfo.bitmap[pos-bitmapInfo.uextent+1] +
 								bitmapInfo.bitmap[pos+bitmapInfo.uextent-1] + bitmapInfo.bitmap[pos+bitmapInfo.uextent+1] +
 								bitmapInfo.bitmap[pos-bitmapInfo.uextent] + bitmapInfo.bitmap[pos+bitmapInfo.uextent];
 
-					if( (int)numNeighbours != 8 )
+					if( numNeighbours != 8 )
 						++borderPixels;
 				}
 			}

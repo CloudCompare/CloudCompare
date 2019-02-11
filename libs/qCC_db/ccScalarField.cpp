@@ -37,7 +37,7 @@ ccScalarField::ccScalarField(const char* name/*=0*/)
 	, m_symmetricalScale(false)
 	, m_logScale(false)
 	, m_alwaysShowZero(false)
-	, m_colorScale(0)
+	, m_colorScale(nullptr)
 	, m_colorRampSteps(0)
 	, m_modified(true)
 	, m_globalShift(0)
@@ -366,7 +366,7 @@ bool ccScalarField::toFile(QFile& out) const
 
 	//color scale (dataVersion>=27)
 	{
-		bool hasColorScale = (m_colorScale != 0);
+		bool hasColorScale = (m_colorScale != nullptr);
 		if (out.write((const char*)&hasColorScale, sizeof(bool)) < 0)
 			return WriteError();
 
@@ -435,7 +435,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 
 		for (unsigned i = 0; i < currentSize(); ++i)
 		{
-			ScalarType val = getValue(i);
+			ScalarType &val = getValue(i);
 			//convert former 'HIDDEN_VALUE' and 'BIG_VALUE' to 'NAN_VALUE'
 			if ((onlyPositiveValues && val < 0) || (!onlyPositiveValues && val >= FORMER_BIG_VALUE))
 			{

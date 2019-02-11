@@ -1,23 +1,27 @@
 sudo: required
-dist: trusty
-group: deprecated-2017Q2
+dist: xenial
 cache: ccache
 language: cpp
 compiler:
 - clang
 - gcc
 install:
-- sudo add-apt-repository --yes ppa:george-edison55/cmake-3.x
-- sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
 - sudo apt-get update -qq
-- sudo apt-get install -qy cmake qt55base libgdal1-dev libfreenect-dev
+- sudo apt-get install -qy cmake
+  libgdal-dev libfreenect-dev
   libeigen3-dev libqt5svg5-dev libtbb-dev
+  libavcodec-dev libavformat-dev libavutil-dev libboost-thread-dev
+  libboost-program-options-dev libcgal-dev libcgal-qt5-dev
+  libdlib-dev libswscale-dev libtbb-dev
+  libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools 
+  libproj-dev libdlib-dev
+- sudo apt-get install -qy xvfb
 - git submodule init && git submodule update
+
 before_script:
 - mkdir build
 - cd build
 - cmake -DCMAKE_BUILD_TYPE=Release
-  -DQT5_ROOT_PATH=/opt/qt55
   -DEIGEN_ROOT_DIR=/usr/include/eigen3
   -DCOMPILE_CC_CORE_LIB_WITH_TBB=ON
   -DOPTION_USE_DXF_LIB=ON
@@ -29,6 +33,8 @@ before_script:
   -DINSTALL_QANIMATION_PLUGIN=ON
   -DINSTALL_QBROOM_PLUGIN=ON
   -DINSTALL_QCOMPASS_PLUGIN=ON
+  -DINSTALL_QCANUPO_PLUGIN=ON
+  -DDLIB_ROOT=/usr/include
   -DINSTALL_QCSF_PLUGIN=ON
   -DINSTALL_QEDL_PLUGIN=ON
   -DINSTALL_QFACETS_PLUGIN=ON
@@ -40,9 +46,11 @@ before_script:
   -DINSTALL_QPOISSON_RECON_PLUGIN=ON
   -DINSTALL_QSRA_PLUGIN=ON
   -DINSTALL_QSSAO_PLUGIN=ON
+  -DBUILD_TESTING=ON
   ..
 script:
-- if [[ $TRAVIS_BRANCH != "beta_builds" ]]; then make -j2; fi
+- if [[ $CXX == "clang++" ]]; then export LD_LIBRARY_PATH=/usr/local/clang/lib:$LD_LIBRARY_PATH; fi
+- if [[ $TRAVIS_BRANCH != "beta_builds" ]]; then make -j2 && xvfb-run ctest; fi
 - cd ..
 after_success:
 - openssl aes-256-cbc -K $encrypted_d04fcf964026_key -iv $encrypted_d04fcf964026_iv

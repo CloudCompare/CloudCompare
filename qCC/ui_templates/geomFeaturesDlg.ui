@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GeomFeaturesDialog</class>
+ <widget class="QDialog" name="GeomFeaturesDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>420</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Geometric features</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_7">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Local neighborhood radius</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>101</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>radius</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="radiusDoubleSpinBox">
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="minimum">
+         <double>0.000001000000000</double>
+        </property>
+        <property name="maximum">
+         <double>1000000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>101</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QGroupBox" name="roughnessGroupBox">
+         <property name="title">
+          <string>Roughness</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QCheckBox" name="roughnessCheckBox">
+            <property name="text">
+             <string>Roughness</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="curvatureGroupBox">
+         <property name="title">
+          <string>Curvature</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QCheckBox" name="curvMeanCheckBox">
+            <property name="toolTip">
+             <string>Mean curvature (unsigned)</string>
+            </property>
+            <property name="text">
+             <string>Mean</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="curvGaussCheckBox">
+            <property name="toolTip">
+             <string>Gaussian curvature (unsigned)</string>
+            </property>
+            <property name="text">
+             <string>Gaussian</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="curvNCRCheckBox">
+            <property name="toolTip">
+             <string>'Speed' of orientation change</string>
+            </property>
+            <property name="text">
+             <string>Normal change rate</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="desnityGroupBox">
+         <property name="title">
+          <string>Density</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QCheckBox" name="densityKnnCheckBox">
+            <property name="toolTip">
+             <string>Number of neighbors</string>
+            </property>
+            <property name="text">
+             <string>Number of neighbors</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="densitySurfCheckBox">
+            <property name="toolTip">
+             <string>Number of neighbors / neighborhood area</string>
+            </property>
+            <property name="text">
+             <string>Surface density</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="densityVolCheckBox">
+            <property name="toolTip">
+             <string>Number of neighbors / neighborhood volume</string>
+            </property>
+            <property name="text">
+             <string>Volume density</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QGroupBox" name="featureGroupBox">
+         <property name="toolTip">
+          <string>Geometric features (based on local eigenvalues: (L1, L2, L3))</string>
+         </property>
+         <property name="title">
+          <string>Feature</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QCheckBox" name="eigSumCheckBox">
+            <property name="toolTip">
+             <string>L1 + L2 + L3</string>
+            </property>
+            <property name="text">
+             <string>Sum of eigenvalues</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigOmnivarianceCheckBox">
+            <property name="toolTip">
+             <string>(L1 * L2 * L3)^(1/3)</string>
+            </property>
+            <property name="text">
+             <string>Ominvariance</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigenentropyCheckBox">
+            <property name="toolTip">
+             <string>-( L1*ln(L1) + L2*ln(L2) + L3*ln(L3) )</string>
+            </property>
+            <property name="text">
+             <string>Eigenentropy</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigAnisotropyCheckBox">
+            <property name="toolTip">
+             <string>(L1 - L3)/L1</string>
+            </property>
+            <property name="text">
+             <string>Anisotropy</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigPlanarityBox">
+            <property name="toolTip">
+             <string>(L2 - L3)/L1</string>
+            </property>
+            <property name="text">
+             <string>Planarity</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigLinearityCheckBox">
+            <property name="toolTip">
+             <string>(L1 - L2)/L1</string>
+            </property>
+            <property name="text">
+             <string>Linearity</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigPCA1CheckBox">
+            <property name="toolTip">
+             <string>L1 / (L1 + L2 + L3)</string>
+            </property>
+            <property name="text">
+             <string>PCA1</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigPCA2CheckBox">
+            <property name="toolTip">
+             <string>L2 / (L1 + L2 + L3)</string>
+            </property>
+            <property name="text">
+             <string>PCA2</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigSurfaceVarCheckBox">
+            <property name="toolTip">
+             <string>L3 / (L1 + L2 + L3)</string>
+            </property>
+            <property name="text">
+             <string>Surface variation</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigSphericityCheckBox">
+            <property name="toolTip">
+             <string>L3 / L1</string>
+            </property>
+            <property name="text">
+             <string>Sphericity</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigVerticalityCheckBox">
+            <property name="toolTip">
+             <string>1 - |Z.N|</string>
+            </property>
+            <property name="text">
+             <string>Verticality</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>6</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::Reset</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>GeomFeaturesDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>GeomFeaturesDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -20,26 +20,28 @@
 
 //Qt
 #include <QApplication>
-#include <QFileInfo>
-#include <QStringList>
-#include <QString>
 #include <QFile>
+#include <QFileInfo>
+#include <QRegularExpression>
+#include <QString>
+#include <QStringList>
 #include <QTextStream>
 
 //qCC_db
-#include <ccLog.h>
-#include <ccMesh.h>
-#include <ccSubMesh.h>
-#include <ccMaterial.h>
-#include <ccPointCloud.h>
-#include <ccProgressDialog.h>
-#include <ccNormalVectors.h>
-#include <ccMaterialSet.h>
-#include <ccPolyline.h>
 #include <ccChunk.h>
+#include <ccHObjectCaster.h>
+#include <ccLog.h>
+#include <ccMaterial.h>
+#include <ccMaterialSet.h>
+#include <ccMesh.h>
+#include <ccNormalVectors.h>
+#include <ccPointCloud.h>
+#include <ccPolyline.h>
+#include <ccProgressDialog.h>
+#include <ccSubMesh.h>
 
 //System
-#include <string.h>
+#include <cstring>
 
 bool ObjFilter::canLoadExtension(const QString& upperCaseExt) const
 {
@@ -93,7 +95,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	unsigned numberOfTriangles = mesh->size();
 
 	//progress
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -177,7 +179,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 		else
 		{
-			materials = 0;
+			materials = nullptr;
 			withMaterials = false;
 		}
 
@@ -440,26 +442,26 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	std::vector<std::pair<unsigned,QString> > groups;
 
 	//materials
-	ccMaterialSet* materials = 0;
+	ccMaterialSet* materials = nullptr;
 	bool hasMaterial = false;
 	int currentMaterial = -1;
 	bool currentMaterialDefined = false;
 	bool materialsLoadFailed = true;
 
 	//texture coordinates
-	TextureCoordsContainer* texCoords = 0;
+	TextureCoordsContainer* texCoords = nullptr;
 	bool hasTexCoords = false;
 	int texCoordsRead = 0;
 	int maxTexCoordIndex = -1;
 
 	//normals
-	NormsIndexesTableType* normals = 0;
+	NormsIndexesTableType* normals = nullptr;
 	int normsRead = 0;
 	bool normalsPerFacet = false;
 	int maxTriNormIndex = -1;
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -485,6 +487,11 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 		unsigned lineCount = 0;
 		unsigned polyCount = 0;
 		QString currentLine = stream.readLine();
+		
+		QRegularExpression	spacesRegExp( "\\s+" );
+		
+		spacesRegExp.optimize();
+		
 		while (!currentLine.isNull())
 		{
 			++lineCount;
@@ -500,7 +507,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				QApplication::processEvents();
 			}
 
-			QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
+			const QStringList tokens = currentLine.split( spacesRegExp, QString::SkipEmptyParts );
 
 			//skip comments & empty lines
 			if (tokens.empty() || tokens.front().startsWith('/', Qt::CaseInsensitive) || tokens.front().startsWith('#', Qt::CaseInsensitive))
@@ -669,7 +676,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					for (int i = 1; i < tokens.size(); ++i)
 					{
 						QStringList vertexTokens = tokens[i].split('/');
-						if (vertexTokens.size() == 0 || vertexTokens[0].isEmpty())
+						if (vertexTokens.empty() || vertexTokens[0].isEmpty())
 						{
 							objWarnings[INVALID_LINE] = true;
 							error = true;
@@ -850,7 +857,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					//not enough memory
 					objWarnings[NOT_ENOUGH_MEMORY] = true;
 					delete polyline;
-					polyline = 0;
+					polyline = nullptr;
 					currentLine = stream.readLine();
 					continue;
 				}
@@ -859,7 +866,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				{
 					//get next polyline's vertex index
 					QStringList vertexTokens = tokens[i].split('/');
-					if (vertexTokens.size() == 0 || vertexTokens[0].isEmpty())
+					if (vertexTokens.empty() || vertexTokens[0].isEmpty())
 					{
 						objWarnings[INVALID_LINE] = true;
 						error = true;
@@ -882,7 +889,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				if (error)
 				{
 					delete polyline;
-					polyline = 0;
+					polyline = nullptr;
 					break;
 				}
 
@@ -957,7 +964,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					if (materials->empty())
 					{
 						materials->release();
-						materials = 0;
+						materials = nullptr;
 						materialsLoadFailed = true;
 					}
 				}
@@ -1006,7 +1013,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 		if (baseMesh->size() == 0)
 		{
 			delete baseMesh;
-			baseMesh = 0;
+			baseMesh = nullptr;
 		}
 		else
 		{
@@ -1029,14 +1036,14 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				if (maxTexCoordIndex >= texCoordsRead)
 				{
 					texCoords->release();
-					texCoords = 0;
+					texCoords = nullptr;
 					materials->release();
-					materials = 0;
+					materials = nullptr;
 				}
 				if (maxTriNormIndex >= normsRead)
 				{
 					normals->release();
-					normals = 0;
+					normals = nullptr;
 				}
 			}
 		}
@@ -1065,21 +1072,10 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 			}
 
-			//normals: if the obj file doesn't provide any, should we compute them?
+			//normals: if the obj file doesn't provide any, let the user know
 			if (!normals)
 			{
-				//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
-				//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
-				//if (!materials && !baseMesh->hasColors()) //yes if no material is available!
-				//{
-				//	ccLog::Print("[OBJ] Mesh has no normal! We will compute them automatically");
-				//	baseMesh->computeNormals();
-				//	baseMesh->showNormals(true);
-				//}
-				//else
-				{
-					ccLog::Warning("[OBJ] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
-				}
+				ccLog::Warning("[OBJ] Mesh has no normals! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 			}
 
 			//create sub-meshes if necessary
@@ -1112,7 +1108,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					else
 					{
 						delete subTri;
-						subTri = 0;
+						subTri = nullptr;
 						objWarnings[NOT_ENOUGH_MEMORY] = true;
 					}
 				}
@@ -1159,27 +1155,25 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 
 	if (error)
 	{
-		if (baseMesh)
-			delete baseMesh;
-		if (vertices)
-			delete vertices;
+		delete baseMesh;
+		delete vertices;
 	}
 
 	//release shared structures
 	if (normals)
 	{
 		normals->release();
-		normals = 0;
+		normals = nullptr;
 	}
 	if (texCoords)
 	{
 		texCoords->release();
-		texCoords = 0;
+		texCoords = nullptr;
 	}
 	if (materials)
 	{
 		materials->release();
-		materials = 0;
+		materials = nullptr;
 	}
 
 	if (pDlg)

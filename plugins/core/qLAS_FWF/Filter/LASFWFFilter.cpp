@@ -36,9 +36,9 @@
 #include <QFileInfo>
 
 //LASLib
-#include <lasreader.hpp>
-#include <laswriter.hpp>
-#include <laspoint.hpp>
+#include <LASlib/lasreader.hpp>
+#include <LASlib/laswriter.hpp>
+#include <LASlib/laspoint.hpp>
 
 //Qt gui
 #include <ui_saveLASFileDlg.h>

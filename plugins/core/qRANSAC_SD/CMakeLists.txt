@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
+cmake_policy(SET CMP0071 NEW)
 
 option( INSTALL_QRANSAC_SD_PLUGIN "Check to install qRansac_SD (Shape Detection) plugin" OFF )
 

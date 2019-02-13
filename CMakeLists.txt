@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 cmake_policy(PUSH)
 
 project( CloudCompareProjects )
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(BUILD_TESTING "" OFF)
 include(CTest)

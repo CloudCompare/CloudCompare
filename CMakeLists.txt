@@ -5,6 +5,17 @@ cmake_policy(PUSH)
 project( CloudCompareProjects )
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+if(CMAKE_CL_64)  
+    set(PLATFORM "x64")      
+else(CMAKE_CL_64)  
+    set(PLATFORM "WIN32")
+endif(CMAKE_CL_64)
+
+# set output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${PLATFORM})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${PLATFORM})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${PLATFORM})
+
 option(BUILD_TESTING "" OFF)
 include(CTest)
 

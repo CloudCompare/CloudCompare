@@ -816,7 +816,6 @@ void MainWindow::doActionEnhanceRGBWithIntensities()
 	refreshAll();
 }
 
-
 void MainWindow::doActionInvertNormals()
 {
 	if ( !ccEntityAction::invertNormals(m_selectedEntities) )
@@ -8130,10 +8129,7 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 	}
 }
 
-void MainWindow::doActionBDImageLines()
-{
 
-}
 
 void MainWindow::doActionComputeBestICPRmsMatrix()
 {
@@ -10533,4 +10529,11 @@ void MainWindow::doActionEditPlane()
 	ccPlaneEditDlg* peDlg = new ccPlaneEditDlg(m_pickingHub, this);
 	peDlg->initWithPlane(plane);
 	peDlg->show();
+}
+
+//////////////////////////////////////////////////////////////////////////
+/// Building Reconstruction
+void MainWindow::doActionBDImageLines()
+{
+
 }

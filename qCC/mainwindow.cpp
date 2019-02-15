@@ -746,7 +746,7 @@ void MainWindow::connectActions()
 	//Building Reconstruction
 	//! Create Image Lines
 	connect(m_UI->actionBDImage_Lines,				&QAction::triggered, this, &MainWindow::doActionBDImageLines);
-
+	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);
 }
 
 void MainWindow::doActionColorize()
@@ -815,6 +815,7 @@ void MainWindow::doActionEnhanceRGBWithIntensities()
 
 	refreshAll();
 }
+
 
 void MainWindow::doActionInvertNormals()
 {
@@ -8129,8 +8130,6 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 	}
 }
 
-
-
 void MainWindow::doActionComputeBestICPRmsMatrix()
 {
 	//look for clouds
@@ -10120,6 +10119,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	//////////////////////////////////////////////////////////////////////////
 	// Building Reconstruction
 	m_UI->actionBDImage_Lines->setEnabled(atLeastOneEntity);
+	m_UI->actionBDPlane_Deduction->setEnabled(atLeastOneEntity);
 }
 
 void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
@@ -10534,6 +10534,11 @@ void MainWindow::doActionEditPlane()
 //////////////////////////////////////////////////////////////////////////
 /// Building Reconstruction
 void MainWindow::doActionBDImageLines()
+{
+
+}
+
+void MainWindow::doActionBDPlaneDeduction()
 {
 
 }

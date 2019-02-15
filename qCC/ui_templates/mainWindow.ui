@@ -494,6 +494,7 @@
      <string>BDRecon</string>
     </property>
     <addaction name="actionBDImage_Lines"/>
+    <addaction name="actionBDPlane_Deduction"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -2976,6 +2977,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDImage_Lines">
    <property name="text">
     <string>Image Lines</string>
+   </property>
+  </action>
+  <action name="actionBDPlane_Deduction">
+   <property name="text">
+    <string>Plane Deduction</string>
    </property>
   </action>
  </widget>

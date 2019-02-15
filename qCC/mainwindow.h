@@ -435,6 +435,8 @@ private slots:
 	//! Building Reconstruction
 	//! Create Image Lines
 	void doActionBDImageLines();
+	//! Plane Deduction
+	void doActionBDPlaneDeduction();
 
 private:
 	//! Shortcut: asks the user to select one cloud

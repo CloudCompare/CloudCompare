@@ -18,6 +18,7 @@ Bug fixes:
 	- glitch fix: the 3D window was not properly updated after rendering the screen as a file with a zoom > 1
 	- glitch fix: the name of the entity was not displayed at the right place when rendering the screen as a file with a zoom > 1
 	- the Surface and Volume Density features were potentially outputing wrong values (the wrong source scalar field was used when applying the dimensional scale!)
+	- the chosen octree level could be sub-optimal in some very particular cases
 
 v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------
@@ -229,7 +230,7 @@ v2.9.1 (Omnia) - 11/03/2017
 		- sphere center can now be set before its creation (either manually, or via the clipboard if the string is 'x y z')
 
 - Bug fixes:
-	
+
 	* DXF export was broken (styles table was not properly declared)
 	* PLY files with texture indexes were not correctly read
 
@@ -247,7 +248,7 @@ v2.9 (Omnia) - 10/22/2017
 			(now the default behavior, can be toggled thanks to the dedicated icon in the 'Viewing tools' toolbar or the 'Shift + P' shortcut)
 		- double clicking on the 3D view will also reposition the pivot point on the point under the cursor
 		- the state of this option is automatically saved and restored when CC starts
-		
+
 	* New tool to import scalar fields from one cloud to another: 'Edit > SFs > Interpolate from another entity'
 		- 3 neighbor extraction methods are supported (nearest neighbor, inside a sphere or with a given number of neighbors)
 		- 3 algorithms are available: average, median and weighted average
@@ -262,7 +263,7 @@ v2.9 (Omnia) - 10/22/2017
 			* Name, width, height, center, normal, dip and dip direction
 
 	* New interactor to change the default line width (via the 'hot zone' in the upper-left corner of 3D views)
-	
+
 	* New option: 'Display > Show cursor coordinates'
 		- if activated, the position of the mouse cursor relatively to the 3D view is constantly displayed
 		- the 2D position (in pixels) is always displayed

@@ -252,7 +252,7 @@ void qRansacSD::doAction()
 
 		if (pc->reserveTheNormsTable())
 		{
-			for (unsigned i=0; i<count; ++i)
+			for (unsigned i = 0; i < count; ++i)
 			{
 				Vec3f& Nvi = cloud[i].normal;
 				CCVector3 Ni = CCVector3::fromArray(Nvi);
@@ -319,7 +319,7 @@ void qRansacSD::doAction()
 #else
 			usleep(500 * 1000);
 #endif
-			pDlg.setValue(pDlg.value()+1);
+			pDlg.setValue(pDlg.value() + 1);
 			QApplication::processEvents();
 		}
 
@@ -366,7 +366,7 @@ void qRansacSD::doAction()
 
 	if (remaining == count)
 	{
-		m_app->dispToConsole("Segmentation failed...",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Segmentation failed...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
@@ -392,7 +392,7 @@ void qRansacSD::doAction()
 			ccPointCloud* pcShape = new ccPointCloud(desc.c_str());
 
 			//we fill cloud with sub-part points
-			if (!pcShape->reserve((unsigned)shapePointsCount))
+			if (!pcShape->reserve(static_cast<unsigned>(shapePointsCount)))
 			{
 				m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 				delete pcShape;
@@ -400,11 +400,11 @@ void qRansacSD::doAction()
 			}			
 			bool saveNormals = pcShape->reserveTheNormsTable();
 
-			for (unsigned j=0; j<shapePointsCount; ++j)
+			for (unsigned j = 0; j < shapePointsCount; ++j)
 			{
-				pcShape->addPoint(CCVector3::fromArray(cloud[count-1-j].pos));
+				pcShape->addPoint(CCVector3::fromArray(cloud[count - 1 - j].pos));
 				if (saveNormals)
-					pcShape->addNorm(CCVector3::fromArray(cloud[count-1-j].normal));
+					pcShape->addNorm(CCVector3::fromArray(cloud[count - 1 - j].normal));
 			}
 
 			//random color

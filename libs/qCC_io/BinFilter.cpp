@@ -277,7 +277,7 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 		else if (currentObject->isA(CC_TYPES::LABEL_2D))
 		{
 			cc2DLabel* label = static_cast<cc2DLabel*>(currentObject);
-			for (unsigned i=0;i<label->size();++i)
+			for (unsigned i = 0; i < label->size(); ++i)
 			{
 				const cc2DLabel::PickedPoint& pp = label->getPoint(i);
 				dependencies.insert(pp.cloud);
@@ -541,6 +541,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 	{
 		//DGM: can't delete it, too dangerous (bad pointers ;)
 		//delete root;
+		ccLog::Error(QString("Failed to read file (file position: %1 / %2").arg(in.pos()).arg(in.size()));
 		return CC_FERR_CONSOLE_ERROR;
 	}
 
@@ -548,7 +549,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 
 	//re-link objects (and check errors)
 	bool checkErrors = true;
-	ccHObject* orphans = new ccHObject("Orphans (CORRUPTED FILE)");;
+	ccHObject* orphans = new ccHObject("Orphans (CORRUPTED FILE)");
 	ccHObject::Container toCheck;
 	toCheck.push_back(root);
 	while (!toCheck.empty())

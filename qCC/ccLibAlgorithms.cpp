@@ -65,8 +65,7 @@ namespace ccLibAlgorithms
 				break;
 		}
 		
-		if (densityType != CCLib::GeometricalAnalysisTools::DENSITY_KNN)
-			sfName += QString(" (r=%2)").arg(densityKernelSize);
+		sfName += QString(" (r=%2)").arg(densityKernelSize);
 		
 		if (approx)
 			sfName += " [approx]";
@@ -294,7 +293,7 @@ namespace ccLibAlgorithms
 					if (sfIdx < 0)
 						sfIdx = pc->addScalarField(qPrintable(sfName));
 					if (sfIdx >= 0)
-						pc->setCurrentInScalarField(sfIdx);
+						pc->setCurrentScalarField(sfIdx);
 					else
 					{
 						ccConsole::Error(QString("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(pc->getName()));

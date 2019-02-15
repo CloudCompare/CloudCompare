@@ -17,6 +17,7 @@ Bug fixes:
 	- Command line: the Global Shift & Scale information of the input cloud was not transferred to the output cloud of the -RASTERIZE tool
 	- glitch fix: the 3D window was not properly updated after rendering the screen as a file with a zoom > 1
 	- glitch fix: the name of the entity was not displayed at the right place when rendering the screen as a file with a zoom > 1
+	- the Surface and Volume Density features were potentially outputing wrong values (the wrong source scalar field was used when applying the dimensional scale!)
 
 v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------

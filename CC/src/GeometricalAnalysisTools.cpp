@@ -147,18 +147,18 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::ComputeCharactersi
 		)
 	{
 		//compute the right dimensional coef based on the expected output
-		double dimensionalCoef = 1.0;
+		ScalarType dimensionalCoef = 1.0f;
 		switch (static_cast<Density>(subOption))
 		{
 		case DENSITY_KNN:
 			assert(false);
-			dimensionalCoef = 1.0;
+			dimensionalCoef = 1.0f;
 			break;
 		case DENSITY_2D:
-			dimensionalCoef = M_PI * pow(kernelRadius, 2.0);
+			dimensionalCoef = static_cast<ScalarType>(M_PI * pow(kernelRadius, 2.0));
 			break;
 		case DENSITY_3D:
-			dimensionalCoef = s_UnitSphereVolume * pow(kernelRadius, 3.0);
+			dimensionalCoef = static_cast<ScalarType>(s_UnitSphereVolume * pow(kernelRadius, 3.0));
 			break;
 		default:
 			assert(false);
@@ -169,7 +169,7 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::ComputeCharactersi
 		for (unsigned i = 0; i < numberOfPoints; ++i)
 		{
 			ScalarType s = cloud->getPointScalarValue(i);
-			s = static_cast<ScalarType>(dimensionalCoef * s);
+			s /= dimensionalCoef;
 			cloud->setPointScalarValue(i, s);
 		}
 	}

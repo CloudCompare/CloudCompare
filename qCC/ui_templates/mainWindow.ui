@@ -489,12 +489,19 @@
     <addaction name="menuSandBox"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuBDRecon">
+    <property name="title">
+     <string>BDRecon</string>
+    </property>
+    <addaction name="actionBDImage_Lines"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTools"/>
    <addaction name="menuDisplay"/>
    <addaction name="menu3DViews"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuBDRecon"/>
   </widget>
   <widget class="QDockWidget" name="DockableDBTree">
    <property name="minimumSize">
@@ -2964,6 +2971,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Compute geometric features (density, curvature, roughness, etc.)</string>
+   </property>
+  </action>
+  <action name="actionBDImage_Lines">
+   <property name="text">
+    <string>Image Lines</string>
    </property>
   </action>
  </widget>

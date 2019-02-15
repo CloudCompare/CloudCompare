@@ -431,6 +431,11 @@ private slots:
 	//! Creates a cloud with the (bounding-box) centers of all selected entities
 	void doActionCreateCloudFromEntCenters();
 
+	//////////////////////////////////////////////////////////////////////////
+	//! Building Reconstruction
+	//! Create Image Lines
+	void doActionBDImageLines();
+
 private:
 	//! Shortcut: asks the user to select one cloud
 	/** \param defaultCloudEntity a cloud to select by default (optional)

@@ -741,6 +741,12 @@ void MainWindow::connectActions()
 	
 	//hidden
 	connect(m_UI->actionEnableVisualDebugTraces,	&QAction::triggered, this, &MainWindow::toggleVisualDebugTraces);
+
+	//////////////////////////////////////////////////////////////////////////
+	//Building Reconstruction
+	//! Create Image Lines
+	connect(m_UI->actionBDImage_Lines,				&QAction::triggered, this, &MainWindow::doActionBDImageLines);
+
 }
 
 void MainWindow::doActionColorize()
@@ -8124,6 +8130,11 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 	}
 }
 
+void MainWindow::doActionBDImageLines()
+{
+
+}
+
 void MainWindow::doActionComputeBestICPRmsMatrix()
 {
 	//look for clouds
@@ -10109,6 +10120,10 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	//standard plugins
 	m_pluginUIManager->handleSelectionChanged();
+
+	//////////////////////////////////////////////////////////////////////////
+	// Building Reconstruction
+	m_UI->actionBDImage_Lines->setEnabled(atLeastOneEntity);
 }
 
 void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)

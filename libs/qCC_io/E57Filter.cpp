@@ -2070,7 +2070,7 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 			
 			ccCameraSensor::IntrinsicParameters params;
 			params.vertFocal_pix      = ccCameraSensor::ConvertFocalMMToPix(focal_mm, pixelHeight_mm);
-			params.arrayWidth         = pinhole->imageSize;
+			params.arrayWidth         = pinhole->imageWidth;
 			params.arrayHeight        = pinhole->imageHeight;
 			params.principal_point[0] = pinhole->principalPointX;
 			params.principal_point[1] = pinhole->principalPointY;

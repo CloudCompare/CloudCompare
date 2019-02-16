@@ -19,6 +19,7 @@ Bug fixes:
 	- glitch fix: the name of the entity was not displayed at the right place when rendering the screen as a file with a zoom > 1
 	- the Surface and Volume Density features were potentially outputing wrong values (the wrong source scalar field was used when applying the dimensional scale!)
 	- the chosen octree level could be sub-optimal in some very particular cases
+	- fix sensor array information when reading pinhole images from E57 files (it was displaying total image size for the width of the image)
 
 v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------

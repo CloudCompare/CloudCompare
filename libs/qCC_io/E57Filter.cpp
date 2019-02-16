@@ -1679,6 +1679,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	CCVector3d Pshift(0,0,0);
 	unsigned size = 0;
 	int64_t realCount = 0;
+	int64_t invalidCount = 0;
 	while ((size = dataReader.read()))
 	{
 		for (unsigned i = 0; i < size; ++i)
@@ -1686,6 +1687,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			//we skip invalid points!
 			if (!arrays.isInvalidData.empty() && arrays.isInvalidData[i] != 0)
 			{
+				++invalidCount;
 				continue;
 			}
 
@@ -1824,7 +1826,11 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 	else if (realCount < pointCount)
 	{
-		ccLog::Warning(QString("[E57] We read fewer points than expected for scan '%1' (%2/%3)").arg(scanNode.elementName().c_str()).arg(realCount).arg(pointCount));
+		if ( (realCount + invalidCount) < pointCount )
+		{
+			ccLog::Warning(QString("[E57] We read fewer points than expected for scan '%1' (%2/%3)").arg(scanNode.elementName().c_str()).arg(realCount).arg(pointCount));
+		}
+		
 		cloud->resize(static_cast<unsigned>(realCount));
 	}
 

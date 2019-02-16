@@ -10,6 +10,9 @@ Improvements
 		* The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
 			In this case the first mesh vertices are used as compared cloud.
 
+	- Raster import:
+		- new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
+
 Bug fixes:
 	- the 'EXTRACT_VERTICES' command line option was not accessible
 	- Rasterize tool: interpolating empty cells with the 'resample input cloud' option enabled would make CC crash

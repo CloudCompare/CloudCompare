@@ -25,9 +25,10 @@
 //system
 #include <unordered_set>
 
-class ccPointCloud;
-class ccMesh;
 class ccImage;
+class ccMesh;
+class ccPointCloud;
+
 class QDir;
 
 //! Camera (projective) sensor
@@ -75,10 +76,10 @@ public: //general
 	struct LensDistortionParameters
 	{
 		//! Shared pointer type
-		typedef QSharedPointer<LensDistortionParameters> Shared;
+		using Shared = QSharedPointer<LensDistortionParameters>;
 
 		//! Virtual destructor
-		virtual ~LensDistortionParameters() {}
+		virtual ~LensDistortionParameters() = default;
 
 		//! Returns distortion model type
 		virtual DistortionModel getModel() const = 0;
@@ -88,13 +89,13 @@ public: //general
 	struct QCC_DB_LIB_API RadialDistortionParameters : LensDistortionParameters
 	{
 		//! Shared pointer type
-		typedef QSharedPointer<RadialDistortionParameters> Shared;
+		using Shared = QSharedPointer<RadialDistortionParameters>;
 
 		//! Default initializer
 		RadialDistortionParameters() : k1(0), k2(0) {}
 
 		//inherited from LensDistortionParameters
-		inline virtual DistortionModel getModel() const override { return SIMPLE_RADIAL_DISTORTION; }
+		inline DistortionModel getModel() const override { return SIMPLE_RADIAL_DISTORTION; }
 
 		//! 1st radial distortion coefficient
 		float k1;
@@ -106,13 +107,13 @@ public: //general
 	struct QCC_DB_LIB_API ExtendedRadialDistortionParameters : RadialDistortionParameters
 	{
 		//! Shared pointer type
-		typedef QSharedPointer<RadialDistortionParameters> Shared;
+		using Shared = QSharedPointer<RadialDistortionParameters>;
 
 		//! Default initializer
 		ExtendedRadialDistortionParameters() : RadialDistortionParameters(), k3(0) {}
 
 		//inherited from LensDistortionParameters
-		inline virtual DistortionModel getModel() const override { return EXTENDED_RADIAL_DISTORTION; }
+		inline DistortionModel getModel() const override { return EXTENDED_RADIAL_DISTORTION; }
 
 		//! 3rd radial distortion coefficient
 		float k3;
@@ -127,13 +128,13 @@ public: //general
 	struct QCC_DB_LIB_API BrownDistortionParameters : LensDistortionParameters
 	{
 		//! Shared pointer type
-		typedef QSharedPointer<BrownDistortionParameters> Shared;
+		using Shared = QSharedPointer<BrownDistortionParameters>;
 
 		//! Default initializer
 		BrownDistortionParameters();
 
 		//inherited from LensDistortionParameters
-		inline virtual DistortionModel getModel() const override { return BROWN_DISTORTION; }
+		inline DistortionModel getModel() const override { return BROWN_DISTORTION; }
 
 		//! Helper: initializes a IntrinsicParameters structure with the default Kinect parameters
 		static void GetKinectDefaults(BrownDistortionParameters& params);
@@ -180,16 +181,16 @@ public: //general
 	ccCameraSensor(const IntrinsicParameters& iParams);
 
 	//! Destructor
-	virtual ~ccCameraSensor();
+	~ccCameraSensor() override = default;
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CAMERA_SENSOR; }
-	virtual bool isSerializable() const override { return true; }
-	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
-	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CAMERA_SENSOR; }
+	bool isSerializable() const override { return true; }
+	ccBBox getOwnBB(bool withGLFeatures = false) override;
+	ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//inherited from ccSensor
-	virtual bool applyViewport(ccGenericGLDisplay* win = nullptr) override;
+	bool applyViewport(ccGenericGLDisplay* win = nullptr) override;
 
 public: //getters and setters
 
@@ -494,9 +495,9 @@ protected:
 	bool computeFrustumCorners();
 
 	//Inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Camera intrinsic parameters
 	IntrinsicParameters m_intrinsicParams;

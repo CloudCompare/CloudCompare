@@ -22,6 +22,7 @@
 #include "cc2.5DimEditor.h"
 
 //Qt
+#include <QDialog>
 #include <QString>
 
 class ccGenericPointCloud;

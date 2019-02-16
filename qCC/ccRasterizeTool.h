@@ -58,7 +58,7 @@ public: //raster export
 	};
 
 	//! Exports a raster grid as a geotiff file
-	static bool ExportGeoTiff(	QString outputFilename,
+	static bool ExportGeoTiff(	const QString& outputFilename,
 								const ExportBands& exportBands,
 								ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy,
 								const ccRasterGrid& grid,
@@ -68,7 +68,7 @@ public: //raster export
 								ccGenericPointCloud* originCloud = nullptr,
 								int visibleSfIndex = -1);
 
-protected slots:
+private:
 
 	//! Exports the grid as a cloud
 	ccPointCloud* generateCloud(bool autoExport = true) const;
@@ -135,7 +135,7 @@ protected slots:
 	//! Exports the grid as an ASCII matrix
 	virtual void generateASCIIMatrix() const;
 
-protected: //standard methods
+private: //standard methods
 
 	//Inherited from cc2Point5DimEditor
 	double getGridStep() const override;
@@ -181,7 +181,7 @@ protected: //raster grid related stuff
 										bool interpolateSF,
 										bool interpolateColors,
 										bool copyHillshadeSF,
-										QString activeSFName,
+										const QString& activeSFName,
 										bool exportToOriginalCS) const;
 
 private: //members

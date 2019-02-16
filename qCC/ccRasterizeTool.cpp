@@ -83,34 +83,41 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	//force update
 	resampleOptionToggled(m_UI->resampleCloudCheckBox->isChecked());
 
-	connect(m_UI->buttonBox,					SIGNAL(accepted()),					this,	SLOT(testAndAccept()));
-	connect(m_UI->buttonBox,					SIGNAL(rejected()),					this,	SLOT(testAndReject()));
-	connect(m_UI->gridStepDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(updateGridInfo()));
-	connect(m_UI->gridStepDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(gridOptionChanged()));
-	connect(m_UI->emptyValueDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(gridOptionChanged()));
-	connect(m_UI->resampleCloudCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(resampleOptionToggled(bool)));
-	connect(m_UI->dimensionComboBox,			SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionDirChanged(int)));
-	connect(m_UI->heightProjectionComboBox,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionTypeChanged(int)));
-	connect(m_UI->scalarFieldProjection,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(sfProjectionTypeChanged(int)));
-	connect(m_UI->fillEmptyCellsComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(fillEmptyCellStrategyChanged(int)));
-	connect(m_UI->updateGridPushButton,		SIGNAL(clicked()),					this,	SLOT(updateGridAndDisplay()));
-	connect(m_UI->generateCloudPushButton,	SIGNAL(clicked()),					this,	SLOT(generateCloud()));
-	connect(m_UI->generateImagePushButton,	SIGNAL(clicked()),					this,	SLOT(generateImage()));
-	connect(m_UI->generateRasterPushButton,	SIGNAL(clicked()),					this,	SLOT(generateRaster()));
-	connect(m_UI->generateASCIIPushButton,	SIGNAL(clicked()),					this,	SLOT(generateASCIIMatrix()));
-	connect(m_UI->generateMeshPushButton,		SIGNAL(clicked()),					this,	SLOT(generateMesh()));
-	connect(m_UI->generateContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(generateContours()));
-	connect(m_UI->exportContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(exportContourLines()));
-	connect(m_UI->clearContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(removeContourLines()));
-	connect(m_UI->activeLayerComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(activeLayerChanged(int)));
-	connect(m_UI->generateHillshadePushButton,SIGNAL(clicked()),					this,	SLOT(generateHillshade()));
+	connect(m_UI->buttonBox,	&QDialogButtonBox::accepted,	this,	&ccRasterizeTool::testAndAccept);
+	connect(m_UI->buttonBox,	&QDialogButtonBox::rejected,	this,	&ccRasterizeTool::testAndReject);
+	
+	connect(m_UI->gridStepDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::updateGridInfo);
+	connect(m_UI->gridStepDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
+	connect(m_UI->emptyValueDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
+	connect(m_UI->dimensionComboBox,		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccRasterizeTool::projectionDirChanged);
+	connect(m_UI->heightProjectionComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccRasterizeTool::projectionTypeChanged);
+	connect(m_UI->scalarFieldProjection,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccRasterizeTool::sfProjectionTypeChanged);
+	connect(m_UI->fillEmptyCellsComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccRasterizeTool::fillEmptyCellStrategyChanged);
+	
+	connect(m_UI->resampleCloudCheckBox,		&QAbstractButton::toggled,	this,	&ccRasterizeTool::resampleOptionToggled);
+	connect(m_UI->updateGridPushButton,			&QAbstractButton::clicked,	this,	&ccRasterizeTool::updateGridAndDisplay);
+	connect(m_UI->generateCloudPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::generateCloud);
+	connect(m_UI->generateImagePushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::generateImage);
+	connect(m_UI->generateRasterPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::generateRaster);
+	connect(m_UI->generateASCIIPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::generateASCIIMatrix);
+	connect(m_UI->generateMeshPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::generateMesh);
+	connect(m_UI->generateContoursPushButton,	&QAbstractButton::clicked,	this,	&ccRasterizeTool::generateContours);
+	connect(m_UI->exportContoursPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::exportContourLines);
+	connect(m_UI->clearContoursPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::removeContourLines);
+	
+	connect(m_UI->generateHillshadePushButton, &QAbstractButton::clicked,	this,	&ccRasterizeTool::generateHillshade);
+
+	connect(m_UI->activeLayerComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, [this] (int index)
+	{
+		activeLayerChanged( index );
+	});
 
 	//custom bbox editor
 	ccBBox gridBBox = m_cloud ? m_cloud->getOwnBB() : ccBBox(); 
 	if (gridBBox.isValid())
 	{
 		createBoundingBoxEditor(gridBBox, this);
-		connect(m_UI->editGridToolButton, SIGNAL(clicked()), this, SLOT(showGridBoxEditor()));
+		connect(m_UI->editGridToolButton, &QAbstractButton::clicked, this, &ccRasterizeTool::showGridBoxEditor);
 	}
 	else
 	{
@@ -512,7 +519,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 													bool interpolateSF,
 													bool interpolateColors,
 													bool copyHillshadeSF,
-													QString activeSFName,
+													const QString& activeSFName,
 													bool exportToOriginalCS) const
 {
 	if (!m_cloud || !m_grid.isValid())
@@ -1012,7 +1019,7 @@ void ccRasterizeTool::generateRaster() const
 #endif
 }
 		
-bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
+bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 									const ExportBands& exportBands,
 									ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy,
 									const ccRasterGrid& grid,
@@ -1088,9 +1095,9 @@ bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
 	
 	if (exportBands.allSFs)
 	{
-		for (size_t i = 0; i < grid.scalarFields.size(); ++i)
+		for (const auto & scalarField : grid.scalarFields)
 		{
-			if (!grid.scalarFields[i].empty())
+			if (!scalarField.empty())
 			{
 				++totalBands;
 				onlyRGBA = false;
@@ -2053,10 +2060,8 @@ void ccRasterizeTool::exportContourLines()
 	const unsigned char Y = (X == 2 ? 0 : X + 1);
 
 	ccHObject* group = new ccHObject(QString("Contour plot(%1) [step=%2]").arg(m_cloud->getName()).arg(m_UI->contourStepDoubleSpinBox->value()));
-	for (size_t i = 0; i < m_contourLines.size(); ++i)
+	for (auto poly : m_contourLines)
 	{
-		ccPolyline* poly = m_contourLines[i];
-
 		//now is the time to map the polyline coordinates to the right dimensions!
 		ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(poly->getAssociatedCloud());
 		assert(vertices);

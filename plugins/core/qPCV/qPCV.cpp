@@ -17,7 +17,6 @@
 
 #include "qPCV.h"
 #include "ccPcvDlg.h"
-#include "PCVCommand.h"
 
 //CCLib
 #include <ScalarField.h>
@@ -46,21 +45,6 @@ qPCV::qPCV(QObject* parent/*=0*/)
 	, ccStdPluginInterface(":/CC/plugin/qPCV/info.json")
 	, m_action(nullptr)
 {
-}
-
-static const char COMMAND_PCV[] = "PCV";
-
-PCVCommand::PCVCommand() :
-	ccCommandLineInterface::Command("PCV", COMMAND_PCV ){
-}
-
-bool PCVCommand::process(ccCommandLineInterface &cmd) {
-	cmd.print("[PCV]");
-	return true;
-}
-
-void qPCV::registerCommands(ccCommandLineInterface *cmd) {
-		cmd->registerCommand(ccCommandLineInterface::Command::Shared(new PCVCommand));
 }
 
 void qPCV::onNewSelection(const ccHObject::Container& selectedEntities)

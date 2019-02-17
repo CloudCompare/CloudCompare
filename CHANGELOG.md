@@ -1,17 +1,23 @@
 CloudCompare Version History
 ============================
 
-v2.10.2 (Zephyrus) - 01/22/2019
+v2.11
 ----------------------
 
-Improvements
+- Improvements
+  - Raster dialog:
+    - change layout so it works better on lower-resolution monitors
+  - Raster import:
+    - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
 
+v2.10.2 (Zephyrus) - XX/XX/2019
+----------------------
+
+- Improvements
 	- Command line tool:
-		* The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
+		- The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
 			In this case the first mesh vertices are used as compared cloud.
 
-	- Raster import:
-		- new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
 
 Bug fixes:
 	- the 'EXTRACT_VERTICES' command line option was not accessible

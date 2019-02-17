@@ -109,8 +109,12 @@ void cc2Point5DimEditor::create2DView(QFrame* parentFrame)
 		//add window to the input frame (if any)
 		if (parentFrame)
 		{
-			parentFrame->setLayout(new QHBoxLayout());
-			parentFrame->layout()->addWidget(glWidget);
+			auto	layout = new QHBoxLayout;
+			
+			layout->setContentsMargins( 0, 0, 0, 0 );
+			layout->addWidget( glWidget) ;
+
+			parentFrame->setLayout( layout );
 		}
 	}
 }

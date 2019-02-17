@@ -11,6 +11,8 @@
 #include <ccScalarField.h>
 #include <ccColorScalesManager.h>
 
+#include <QProgressBar>
+
 static const char COMMAND_PCV[] = "PCV";
 
 PCVCommand::PCVCommand() :
@@ -19,11 +21,13 @@ PCVCommand::PCVCommand() :
 
 bool PCVCommand::process(ccCommandLineInterface &cmd) {
 	static int n_rays = 256;
+	static bool meshIsClosed = true;
 	static bool mode360 = true;
+	static unsigned resolution = 1024;
 
 	cmd.print("[PCV]");
 	if (cmd.meshes().empty()) {
-		return cmd.error(QObject::tr("No point cloud or mesh available. Be sure to open or generate one first!"));
+		return cmd.error(QObject::tr("No mesh is available. The CLI PCV impementation currently only supports a single mesh."));
 	}
 
 	ccPointCloud* pc = ccHObjectCaster::ToPointCloud(cmd.meshes()[0].mesh->getAssociatedCloud());
@@ -33,7 +37,11 @@ bool PCVCommand::process(ccCommandLineInterface &cmd) {
 
 	cmd.print(QObject::tr("Size is %1").arg(point_count));
 
-	PCV::Launch(n_rays, pc, mesh, mode360);
+	ccProgressDialog pcvProgressCb(true);
+	pcvProgressCb.setAutoClose(false);
+
+	PCV::Launch(n_rays, pc, mesh, meshIsClosed, mode360, resolution, resolution,
+		&pcvProgressCb, QString(mesh->getName()));
 
 	cmd.meshes()[0].basename += QObject::tr("_PCV");
 

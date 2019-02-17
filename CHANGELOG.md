@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.11
+v2.11 - (in development)
 ----------------------
 
 - Improvements
@@ -11,7 +11,7 @@ v2.11
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
 
-v2.10.2 (Zephyrus) - XX/XX/2019
+v2.10.2 (Zephyrus) - (in development)
 ----------------------
 
 - Bug fixes:

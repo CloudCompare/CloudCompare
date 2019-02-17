@@ -30,6 +30,9 @@ v2.10.2 (Zephyrus) - (in development)
     - fix pixel width & height
 
 
+- macOS note:
+  - I (Andy) had to update ffmpeg, which is used by the animation plugin, for this patch release. Normally I would wait for 2.11, but homebrew changed their policies and started including everything in their build, so I can no longer use it. The good news is that compiling ffmpeg myself and statically linking shaves about 30 MB off the size of CloudCompare.app...
+
 v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------
 

@@ -18,8 +18,6 @@
 #ifndef CC_2_5D_EDITOR_HEADER
 #define CC_2_5D_EDITOR_HEADER
 
-#include <ui_rasterizeDlg.h>
-
 //qCC_db
 #include <ccRasterGrid.h>
 

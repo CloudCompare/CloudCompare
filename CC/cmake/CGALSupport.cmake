@@ -12,9 +12,10 @@ if (CGAL_FOUND)
 		message(SEND_ERROR "CC Lib requires at least CGAL 4.3")
 	endif()
 
-  	# We need to get rid of CGAL CXX flags
-  	set(CGAL_DONT_OVERRIDE_CMAKE_FLAGS ON CACHE INTERNAL "override CGAL flags" FORCE)
-
+	# We need to get rid of CGAL CXX flags
+	set(CGAL_DONT_OVERRIDE_CMAKE_FLAGS ON CACHE INTERNAL "override CGAL flags" FORCE)
+	set(CGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE TRUE CACHE INTERNAL "turn off warning")
+	
 	include( ${CGAL_USE_FILE} )
 	include_directories(${CGAL_INCLUDE_DIR})
 

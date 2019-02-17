@@ -18,29 +18,33 @@
 #ifndef CC_RASTERIZE_TOOL_HEADER
 #define CC_RASTERIZE_TOOL_HEADER
 
-#include <ui_rasterizeDlg.h>
-
 //Local
 #include "cc2.5DimEditor.h"
 
 //Qt
+#include <QDialog>
 #include <QString>
 
 class ccGenericPointCloud;
 class ccPointCloud;
 class ccPolyline;
 
+namespace Ui
+{
+    class RasterizeToolDialog;
+}
+
 //! Rasterize tool (dialog)
-class ccRasterizeTool : public QDialog, public cc2Point5DimEditor, public Ui::RasterizeToolDialog
+class ccRasterizeTool : public QDialog, public cc2Point5DimEditor
 {
 	Q_OBJECT
 
 public:
 	//! Default constructor
-	ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent = 0);
+	ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent = nullptr);
 
 	//! Destructor
-	~ccRasterizeTool();
+	~ccRasterizeTool() override;
 
 public: //raster export
 
@@ -55,17 +59,17 @@ public: //raster export
 	};
 
 	//! Exports a raster grid as a geotiff file
-	static bool ExportGeoTiff(	QString outputFilename,
+	static bool ExportGeoTiff(	const QString& outputFilename,
 								const ExportBands& exportBands,
 								ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy,
 								const ccRasterGrid& grid,
 								const ccBBox& gridBBox,
 								unsigned char Z,
 								double customHeightForEmptyCells = std::numeric_limits<double>::quiet_NaN(),
-								ccGenericPointCloud* originCloud = 0,
+								ccGenericPointCloud* originCloud = nullptr,
 								int visibleSfIndex = -1);
 
-protected slots:
+private:
 
 	//! Exports the grid as a cloud
 	ccPointCloud* generateCloud(bool autoExport = true) const;
@@ -112,7 +116,7 @@ protected slots:
 	void sfProjectionTypeChanged(int);
 
 	//Inherited from cc2Point5DimEditor
-	virtual bool showGridBoxEditor() override;
+	bool showGridBoxEditor() override;
 
 	//! Called when the empty cell filling strategy changes
 	void fillEmptyCellStrategyChanged(int);
@@ -132,12 +136,12 @@ protected slots:
 	//! Exports the grid as an ASCII matrix
 	virtual void generateASCIIMatrix() const;
 
-protected: //standard methods
+private: //standard methods
 
 	//Inherited from cc2Point5DimEditor
-	virtual double getGridStep() const override;
-	virtual unsigned char getProjectionDimension() const override;
-	virtual ccRasterGrid::ProjectionType getTypeOfProjection() const override;
+	double getGridStep() const override;
+	unsigned char getProjectionDimension() const override;
+	ccRasterGrid::ProjectionType getTypeOfProjection() const override;
 
 	//! Returns user defined height for empty cells
 	double getCustomHeightForEmptyCells() const;
@@ -157,7 +161,7 @@ protected: //standard methods
 	ccRasterGrid::ProjectionType getTypeOfSFInterpolation() const;
 
 	//Inherited from cc2Point5DimEditor
-	virtual void gridIsUpToDate(bool state) override;
+	void gridIsUpToDate(bool state) override;
 
 	//! Load persistent settings
 	void loadSettings();
@@ -178,10 +182,10 @@ protected: //raster grid related stuff
 										bool interpolateSF,
 										bool interpolateColors,
 										bool copyHillshadeSF,
-										QString activeSFName,
+										const QString& activeSFName,
 										bool exportToOriginalCS) const;
 
-protected: //members
+private: //members
 
 	//! Layer types
 	enum LayerType {	LAYER_HEIGHT = 0,
@@ -189,6 +193,8 @@ protected: //members
 						LAYER_SF = 2
 	};
 
+	Ui::RasterizeToolDialog* m_UI;
+	
 	//! Associated cloud
 	ccGenericPointCloud* m_cloud;
 

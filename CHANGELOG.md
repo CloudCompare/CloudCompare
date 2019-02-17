@@ -1,23 +1,34 @@
 CloudCompare Version History
 ============================
 
-v2.10.2 (Zephyrus) - 01/22/2019
+v2.11 - (in development)
 ----------------------
 
-Improvements
+- Improvements
+  - Command line tool:
+    - The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
+      In this case the first mesh vertices are used as compared cloud.
+  - Raster import:
+    - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
 
-	- Command line tool:
-		* The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
-			In this case the first mesh vertices are used as compared cloud.
+v2.10.2 (Zephyrus) - (in development)
+----------------------
 
-Bug fixes:
-	- the 'EXTRACT_VERTICES' command line option was not accessible
-	- Rasterize tool: interpolating empty cells with the 'resample input cloud' option enabled would make CC crash
-	- Command line: calling the -RASTERIZE option would cause an infinite loop
-	- Command line: the Global Shift & Scale information of the input cloud was not transferred to the output cloud of the -RASTERIZE tool
-	- glitch fix: the 3D window was not properly updated after rendering the screen as a file with a zoom > 1
-	- glitch fix: the name of the entity was not displayed at the right place when rendering the screen as a file with a zoom > 1
-	- the Surface and Volume Density features were potentially outputing wrong values (the wrong source scalar field was used when applying the dimensional scale!)
+- Bug fixes:
+  - the 'EXTRACT_VERTICES' command line option was not accessible
+  - Rasterize tool:
+    - interpolating empty cells with the 'resample input cloud' option enabled would make CC crash
+    - change layout so it works better on lower-resolution monitors
+  - Command line: calling the -RASTERIZE option would cause an infinite loop
+  - Command line: the Global Shift & Scale information of the input cloud was not transferred to the output cloud of the -RASTERIZE tool
+  - glitch fix: the 3D window was not properly updated after rendering the screen as a file with a zoom > 1
+  - glitch fix: the name of the entity was not displayed at the right place when rendering the screen as a file with a zoom > 1
+  - the Surface and Volume Density features were potentially outputing wrong values (the wrong source scalar field was used when applying the dimensional scale!)
+  - the chosen octree level could be sub-optimal in some very particular cases
+  - E57 pinhole images:
+    - fix sensor array information (it was displaying total image size for the width of the image)
+    - fix pixel width & height
+
 
 v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------
@@ -154,7 +165,7 @@ v2.10 (Zephyrus) - 01/06/2019
 		- CloudCompare can now read and save extra dimensions (for any file version) - see https://github.com/CloudCompare/CloudCompare/pull/666
 
 	* E57:
-		- the E57 plugin now uses [libE57Format] (https://github.com/asmaloney/libE57Format) which is a fork of the old E57RefImpl 
+		- the E57 plugin now uses [libE57Format] (https://github.com/asmaloney/libE57Format) which is a fork of the old E57RefImpl
 		- if you compile CloudCompare with the E57 plugin, you will need to use this new lib and change some CMake options to point at it - specifically **OPTION_USE_LIBE57FORMAT** and **LIBE57FORMAT_INSTALL_DIR**
 		- the E57 plugin is now available on macOS
 
@@ -229,7 +240,7 @@ v2.9.1 (Omnia) - 11/03/2017
 		- sphere center can now be set before its creation (either manually, or via the clipboard if the string is 'x y z')
 
 - Bug fixes:
-	
+
 	* DXF export was broken (styles table was not properly declared)
 	* PLY files with texture indexes were not correctly read
 
@@ -247,7 +258,7 @@ v2.9 (Omnia) - 10/22/2017
 			(now the default behavior, can be toggled thanks to the dedicated icon in the 'Viewing tools' toolbar or the 'Shift + P' shortcut)
 		- double clicking on the 3D view will also reposition the pivot point on the point under the cursor
 		- the state of this option is automatically saved and restored when CC starts
-		
+
 	* New tool to import scalar fields from one cloud to another: 'Edit > SFs > Interpolate from another entity'
 		- 3 neighbor extraction methods are supported (nearest neighbor, inside a sphere or with a given number of neighbors)
 		- 3 algorithms are available: average, median and weighted average
@@ -262,7 +273,7 @@ v2.9 (Omnia) - 10/22/2017
 			* Name, width, height, center, normal, dip and dip direction
 
 	* New interactor to change the default line width (via the 'hot zone' in the upper-left corner of 3D views)
-	
+
 	* New option: 'Display > Show cursor coordinates'
 		- if activated, the position of the mouse cursor relatively to the 3D view is constantly displayed
 		- the 2D position (in pixels) is always displayed

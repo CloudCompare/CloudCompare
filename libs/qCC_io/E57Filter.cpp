@@ -1679,6 +1679,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	CCVector3d Pshift(0,0,0);
 	unsigned size = 0;
 	int64_t realCount = 0;
+	int64_t invalidCount = 0;
 	while ((size = dataReader.read()))
 	{
 		for (unsigned i = 0; i < size; ++i)
@@ -1686,6 +1687,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			//we skip invalid points!
 			if (!arrays.isInvalidData.empty() && arrays.isInvalidData[i] != 0)
 			{
+				++invalidCount;
 				continue;
 			}
 
@@ -1824,7 +1826,11 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 	else if (realCount < pointCount)
 	{
-		ccLog::Warning(QString("[E57] We read fewer points than expected for scan '%1' (%2/%3)").arg(scanNode.elementName().c_str()).arg(realCount).arg(pointCount));
+		if ( (realCount + invalidCount) != pointCount )
+		{
+			ccLog::Warning(QString("[E57] We read fewer points than expected for scan '%1' (%2/%3)").arg(scanNode.elementName().c_str()).arg(realCount).arg(pointCount));
+		}
+		
 		cloud->resize(static_cast<unsigned>(realCount));
 	}
 
@@ -2063,20 +2069,20 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 	case E57_PINHOLE:
 		{
 			PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation);
-			float focal_mm        = static_cast<float>(pinhole->focalLength);
-			float pixelWidth_mm   = static_cast<float>(pinhole->pixelWidth);    //FIXME: pixelWidth is in radians?!
-			float pixelHeight_mm  = static_cast<float>(pinhole->pixelHeight);   //FIXME: pixelHeight is in radians?!
+			float focal_mm        = static_cast<float>(pinhole->focalLength * 1000.0);
+			float pixelWidth_mm   = static_cast<float>(pinhole->pixelWidth * 1000.0);
+			float pixelHeight_mm  = static_cast<float>(pinhole->pixelHeight * 1000.0);
 			float ccdHeight_mm    = static_cast<float>(pinhole->imageHeight * pixelHeight_mm);
 			
 			ccCameraSensor::IntrinsicParameters params;
 			params.vertFocal_pix      = ccCameraSensor::ConvertFocalMMToPix(focal_mm, pixelHeight_mm);
-			params.arrayWidth         = pinhole->imageSize;
+			params.arrayWidth         = pinhole->imageWidth;
 			params.arrayHeight        = pinhole->imageHeight;
-			params.principal_point[0] = pinhole->principalPointX;
-			params.principal_point[1] = pinhole->principalPointY;
+			params.principal_point[0] = static_cast<float>(pinhole->principalPointX);
+			params.principal_point[1] = static_cast<float>(pinhole->principalPointY);
 			params.pixelSize_mm[0]    = pixelWidth_mm;
 			params.pixelSize_mm[1]    = pixelHeight_mm;
-			params.vFOV_rad           = ccCameraSensor::ComputeFovRadFromFocalMm(pinhole->focalLength, ccdHeight_mm);
+			params.vFOV_rad           = ccCameraSensor::ComputeFovRadFromFocalMm(focal_mm, ccdHeight_mm);
 			
 			ccCameraSensor* sensor = new ccCameraSensor(params);
 			if (validPoseMat)

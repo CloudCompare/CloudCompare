@@ -459,22 +459,22 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 							//double* scanline = new double[nXSize];
 							memset(colValues, 0, sizeof(double)*nXSize);
 
-							for (int j=0; j<nYSize; ++j)
+							for (int j = 0; j < nYSize; ++j)
 							{
-								if (poBand->RasterIO( GF_Read, /*xOffset=*/0, /*yOffset=*/j, /*xSize=*/nXSize, /*ySize=*/1, /*buffer=*/colValues, /*bufferSizeX=*/nXSize, /*bufferSizeY=*/1, /*bufferType=*/GDT_Float64, /*x_offset=*/0, /*y_offset=*/0 ) != CE_None)
+								if (poBand->RasterIO(GF_Read, /*xOffset=*/0, /*yOffset=*/j, /*xSize=*/nXSize, /*ySize=*/1, /*buffer=*/colValues, /*bufferSizeX=*/nXSize, /*bufferSizeY=*/1, /*bufferType=*/GDT_Float64, /*x_offset=*/0, /*y_offset=*/0) != CE_None)
 								{
 									CPLFree(colValues);
 									delete pc;
 									return CC_FERR_READING;
 								}
 
-								for (int k=0; k<nXSize; ++k)
+								for (int k = 0; k < nXSize; ++k)
 								{
 									unsigned pointIndex = static_cast<unsigned>(k + j * rasterX);
 									if (pointIndex <= pc->size())
 									{
 										ScalarType s = static_cast<ScalarType>(colValues[k]);
-										sf->setValue(pointIndex,s);
+										sf->setValue(pointIndex, s);
 									}
 								}
 							}
@@ -508,14 +508,19 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 				else if (zInvalid != 0 && zInvalid < pc->size())
 				{
 					//shall we remove the points with invalid heights?
-					if (QMessageBox::question(0, "Remove NaN points?", "This raster has pixels with invalid heights. Shall we remove them?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+					static bool s_alwaysRemoveInvalidHeights = false;
+					int result = (s_alwaysRemoveInvalidHeights ? QMessageBox::Yes : QMessageBox::question(0, "Remove NaN points?", "This raster has pixels with invalid heights. Shall we remove them?", QMessageBox::Yes, QMessageBox::YesToAll, QMessageBox::No));
+					if (result != QMessageBox::No)
 					{
+						if (result == QMessageBox::YesToAll)
+							s_alwaysRemoveInvalidHeights = true;
+
 						CCLib::ReferenceCloud validPoints(pc);
 						unsigned count = pc->size();
 						bool error = true;
-						if (validPoints.reserve(count-zInvalid))
+						if (validPoints.reserve(count - zInvalid))
 						{
-							for (unsigned i=0; i<count; ++i)
+							for (unsigned i = 0; i < count; ++i)
 							{
 								if (pc->getPoint(i)->z >= zMinMax[0])
 									validPoints.addPointIndex(i);

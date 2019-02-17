@@ -107,8 +107,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 
 	if (m_cloud)
 	{
-		cloudNameLabel->setText(m_cloud->getName());
-		pointCountLabel->setText(QString::number(m_cloud->size()));
+		cloudNameLabel->setText( QStringLiteral( "<b>%1</b> (%2 points)").arg( m_cloud->getName(), QLocale::system().toString( m_cloud->size() ) ) );
 		interpolateSFFrame->setEnabled(cloud->hasScalarFields());
 
 		//populate layer box

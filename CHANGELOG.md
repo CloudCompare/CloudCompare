@@ -6,7 +6,9 @@ v2.10.2 (Zephyrus) - 01/22/2019
 
 - Bug fixes:
   - the 'EXTRACT_VERTICES' command line option was not accessible
-  - Rasterize tool: interpolating empty cells with the 'resample input cloud' option enabled would make CC crash
+  - Rasterize tool:
+    - interpolating empty cells with the 'resample input cloud' option enabled would make CC crash
+    - change layout so it works better on lower-resolution monitors
   - Command line: calling the -RASTERIZE option would cause an infinite loop
   - Command line: the Global Shift & Scale information of the input cloud was not transferred to the output cloud of the -RASTERIZE tool
   - glitch fix: the 3D window was not properly updated after rendering the screen as a file with a zoom > 1

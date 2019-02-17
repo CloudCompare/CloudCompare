@@ -24,9 +24,12 @@ class PCVCommand : public ccCommandLineInterface::Command
 {
 public:
 	PCVCommand();
-	virtual ~PCVCommand() {}
 
-	virtual bool process(ccCommandLineInterface &cmd) override;
+	~PCVCommand()
+	{
+	}
+
+	bool process(ccCommandLineInterface& cmd) override;
 };
 
 #endif

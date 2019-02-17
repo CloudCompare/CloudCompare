@@ -19,7 +19,6 @@ PCVCommand::PCVCommand() :
 
 bool PCVCommand::process(ccCommandLineInterface &cmd) {
 	static int n_rays = 256;
-	static int s_resSpinBoxValue = 1024;
 	static bool mode360 = true;
 
 	cmd.print("[PCV]");
@@ -27,15 +26,16 @@ bool PCVCommand::process(ccCommandLineInterface &cmd) {
 		return cmd.error(QObject::tr("No point cloud or mesh available. Be sure to open or generate one first!"));
 	}
 
-	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(cmd.meshes()[0].mesh);
+	ccPointCloud* pc = ccHObjectCaster::ToPointCloud(cmd.meshes()[0].mesh->getAssociatedCloud());
+	ccGenericMesh* mesh = cmd.meshes()[0].mesh;
 
-	ccGenericPointCloud* pc = mesh->getAssociatedCloud();
+	int point_count = pc->size();
 
-	unsigned point_count = pc->size();
+	cmd.print(QObject::tr("Size is %1").arg(point_count));
 
-	PCV::Launch(n_rays, pc);
+	PCV::Launch(n_rays, pc, mesh, mode360);
 
-	cmd.exportEntity(pc, "PCV");
+	cmd.meshes()[0].basename += QObject::tr("_PCV");
 
 	return true;
 }

@@ -19,6 +19,7 @@
 #define Q_PCV_PLUGIN_HEADER
 
 #include "ccStdPluginInterface.h"
+#include "PCVCommand.h"
 
 //! Wrapper to the ShadeVis algorithm for computing Ambient Occlusion on meshes and point clouds
 /** "Visibility based methods and assessment for detail-recovery", M. Tarini, P. Cignoni, R. Scopigno
@@ -41,6 +42,7 @@ public:
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	virtual QList<QAction *> getActions() override;
+	void registerCommands(ccCommandLineInterface *cmd) override;
 
 protected slots:
 

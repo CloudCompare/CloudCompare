@@ -10540,5 +10540,21 @@ void MainWindow::doActionBDImageLines()
 
 void MainWindow::doActionBDPlaneDeduction()
 {
-
+	if (!haveSelection()) {
+		assert(false);
+		return;
+	}
+	ccHObject* ent = m_selectedEntities.front();
+	if (!ent->isGroup()) {
+		return;
+	}
+	size_t children_number = ent->getChildrenNumber();
+	for (size_t i = 0; i < children_number; ++i) {
+		ccPlane* plane = ccHObjectCaster::ToPlane(ent->getChild(i)->getChild(0));
+		if (!plane) {
+			continue;
+		}
+		CCVector3 N; float constVal;
+		plane->getEquation(N, constVal);
+	}
 }

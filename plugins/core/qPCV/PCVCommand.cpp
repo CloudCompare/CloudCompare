@@ -77,7 +77,8 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 			qPCV::tr("No mesh is available. The CLI PCV implementation currently only supports a single mesh."));
 	}
 
-	ccPointCloud* pc = ccHObjectCaster::ToPointCloud(cmd.meshes()[0].mesh->getAssociatedCloud());
+	ccGenericPointCloud* meshCloud = cmd.meshes()[0].mesh->getAssociatedCloud();
+	ccPointCloud* pc = ccHObjectCaster::ToPointCloud(meshCloud);
 	ccGenericMesh* mesh = cmd.meshes()[0].mesh;
 
 	int point_count = pc->size();

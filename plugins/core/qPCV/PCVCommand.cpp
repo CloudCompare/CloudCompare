@@ -8,11 +8,11 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
-static const char COMMAND_PCV[] = "PCV";
-static const char COMMAND_PCV_N_RAYS[] = "N_RAYS";
-static const char COMMAND_PCV_IS_CLOSED[] = "IS_CLOSED";
-static const char COMMAND_PCV_180[] = "180";
-static const char COMMAND_PCV_RESOLUTION[] = "RESOLUTION";
+constexpr char COMMAND_PCV[] = "PCV";
+constexpr char COMMAND_PCV_N_RAYS[] = "N_RAYS";
+constexpr char COMMAND_PCV_IS_CLOSED[] = "IS_CLOSED";
+constexpr char COMMAND_PCV_180[] = "180";
+constexpr char COMMAND_PCV_RESOLUTION[] = "RESOLUTION";
 
 PCVCommand::PCVCommand() :
 	Command("PCV", COMMAND_PCV)

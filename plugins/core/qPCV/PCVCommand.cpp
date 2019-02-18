@@ -52,7 +52,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 			nRays = cmd.arguments().takeFirst().toFloat(&conversionOk);
 			if (!conversionOk)
 			{
-				return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_PCV_N_RAYS));
+				return cmd.error(qPCV::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_PCV_N_RAYS));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(arg, COMMAND_PCV_RESOLUTION))
@@ -62,7 +62,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 			resolution = cmd.arguments().takeFirst().toFloat(&conversionOk);
 			if (!conversionOk)
 			{
-				return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_PCV_RESOLUTION));
+				return cmd.error(qPCV::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_PCV_RESOLUTION));
 			}
 		}
 		else
@@ -74,7 +74,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 	if (cmd.meshes().empty())
 	{
 		return cmd.error(
-			QObject::tr("No mesh is available. The CLI PCV implementation currently only supports a single mesh."));
+			qPCV::tr("No mesh is available. The CLI PCV implementation currently only supports a single mesh."));
 	}
 
 	ccPointCloud* pc = ccHObjectCaster::ToPointCloud(cmd.meshes()[0].mesh->getAssociatedCloud());
@@ -82,7 +82,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 
 	int point_count = pc->size();
 
-	cmd.print(QString("Size is %1").arg(point_count));
+	cmd.print(qPCV::tr("Size is %1").arg(point_count));
 
 	ccProgressDialog pcvProgressCb(true);
 	pcvProgressCb.setAutoClose(false);

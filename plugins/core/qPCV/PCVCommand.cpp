@@ -31,7 +31,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 
 	while (!cmd.arguments().empty())
 	{
-		QString arg = cmd.arguments().front();
+		const QString arg = cmd.arguments().front();
 		if (ccCommandLineInterface::IsCommand(arg, COMMAND_PCV_IS_CLOSED))
 		{
 			cmd.arguments().pop_front();

@@ -25,9 +25,7 @@ class PCVCommand : public ccCommandLineInterface::Command
 public:
 	PCVCommand();
 
-	~PCVCommand()
-	{
-	}
+	~PCVCommand() override = default;
 
 	bool process(ccCommandLineInterface& cmd) override;
 };

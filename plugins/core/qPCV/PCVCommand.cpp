@@ -52,7 +52,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 			nRays = cmd.arguments().takeFirst().toFloat(&conversionOk);
 			if (!conversionOk)
 			{
-				return cmd.error(qPCV::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_PCV_N_RAYS));
+				return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_PCV_N_RAYS));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(arg, COMMAND_PCV_RESOLUTION))
@@ -62,7 +62,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 			resolution = cmd.arguments().takeFirst().toFloat(&conversionOk);
 			if (!conversionOk)
 			{
-				return cmd.error(qPCV::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_PCV_RESOLUTION));
+				return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_PCV_RESOLUTION));
 			}
 		}
 		else
@@ -80,10 +80,6 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 	ccGenericPointCloud* meshCloud = cmd.meshes()[0].mesh->getAssociatedCloud();
 	ccPointCloud* pc = ccHObjectCaster::ToPointCloud(meshCloud);
 	ccGenericMesh* mesh = cmd.meshes()[0].mesh;
-
-	int point_count = pc->size();
-
-	cmd.print(qPCV::tr("Size is %1").arg(point_count));
 
 	ccProgressDialog pcvProgressCb(true);
 	pcvProgressCb.setAutoClose(false);

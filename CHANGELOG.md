@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.11 - (in development)
+v2.11 (Anoia) - (in development)
 ----------------------
 
 - Improvements

@@ -10692,11 +10692,17 @@ void MainWindow::doActionBD3D4EM()
 			cloud->placeIteratorAtBeginning();
 			for (unsigned i = 0; i < n; i++)
 			{
-				CCVector3 pt = *(cloud->getNextPoint());
-				
+				CCVector3 pt = *cloud->getNextPoint();
+				point_cloud.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
 			}
 
 		}
 		stocker::BuildingRecon_3D4EM(point_cloud, output_path.c_str(), ini_path.c_str());
 	}
+	if (!QFile::exists(QString(output_path.c_str()))) {
+		return;
+	}
+
+	QStringList files_add_to_db{ QString(output_path.c_str()) };
+	addToDB(files_add_to_db);
 }

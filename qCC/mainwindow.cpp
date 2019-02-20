@@ -198,6 +198,10 @@ MainWindow::MainWindow()
 	, m_plpDlg(nullptr)
 	, m_pprDlg(nullptr)
 	, m_pfDlg(nullptr)
+	, m_pbdrl3dDlg(nullptr)
+	, m_pbdrddtDlg(nullptr)
+	, m_pbdrpfDlg(nullptr)
+	, m_pbdr3d4emDlg(nullptr)
 {
 	m_UI->setupUi( this );
 
@@ -329,6 +333,11 @@ MainWindow::~MainWindow()
 	m_plpDlg = nullptr;
 	m_pprDlg = nullptr;
 	m_pfDlg = nullptr;
+
+	m_pbdrl3dDlg = nullptr;
+	m_pbdrddtDlg = nullptr;
+	m_pbdrpfDlg = nullptr;
+	m_pbdr3d4emDlg = nullptr;
 
 	//release all 'overlay' dialogs
 	while (!m_mdiDialogs.empty())
@@ -744,9 +753,10 @@ void MainWindow::connectActions()
 
 	//////////////////////////////////////////////////////////////////////////
 	//Building Reconstruction
-	//! Create Image Lines
 	connect(m_UI->actionBDImage_Lines,				&QAction::triggered, this, &MainWindow::doActionBDImageLines);
 	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);
+	connect(m_UI->actionBDPolyFit,					&QAction::triggered, this, &MainWindow::doActionBDPolyFit);
+	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBD3D4EM);
 }
 
 void MainWindow::doActionColorize()
@@ -10118,8 +10128,9 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	//////////////////////////////////////////////////////////////////////////
 	// Building Reconstruction
-	m_UI->actionBDImage_Lines->setEnabled(atLeastOneEntity);
+//	m_UI->actionBDImage_Lines->setEnabled(atLeastOneEntity);
 	m_UI->actionBDPlane_Deduction->setEnabled(atLeastOneEntity);
+	m_UI->actionBDPolyFit->setEnabled(atLeastOneEntity);
 }
 
 void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
@@ -10533,9 +10544,42 @@ void MainWindow::doActionEditPlane()
 
 //////////////////////////////////////////////////////////////////////////
 /// Building Reconstruction
+#include "bdrLine3DppDlg.h"
+#include "bdrDeductionDlg.h"
+#include "bdrPolyFitDlg.h"
+#include "bdr3D4EMDlg.h"
+#include <QtConcurrentRun>
+#ifdef USE_STOCKER
+#include "builderlod3/builderlod3.h"
+#include "builder3d4em/builder3d4em.h"
+#include "ioctrl/StFileOperator.hpp"
+#endif // USE_STOCKER
+
 void MainWindow::doActionBDImageLines()
 {
+	// Dialog
+	bdrLine3DppDlg line3dDlg(this);
+	if (!line3dDlg.exec()) {
+		return;
+	}
+	std::string bundle_out;
+	std::string image_list;
+	std::string building_list;
+	std::string output_dir;
+	std::string output_name;
 
+	// TODO : thread
+	stocker::GenerateLine3DPP(
+		bundle_out.c_str(),
+		image_list.c_str(),
+		building_list.c_str(),
+		output_dir.c_str(),
+		output_name.c_str());
+
+	QStringList files;
+	QString file_path = QString(output_dir.c_str()) + QString(output_name.c_str());
+	files.append(file_path);
+	addToDB(files);
 }
 
 void MainWindow::doActionBDPlaneDeduction()
@@ -10544,17 +10588,115 @@ void MainWindow::doActionBDPlaneDeduction()
 		assert(false);
 		return;
 	}
-	ccHObject* ent = m_selectedEntities.front();
-	if (!ent->isGroup()) {
-		return;
-	}
-	size_t children_number = ent->getChildrenNumber();
-	for (size_t i = 0; i < children_number; ++i) {
-		ccPlane* plane = ccHObjectCaster::ToPlane(ent->getChild(i)->getChild(0));
-		if (!plane) {
+	for (auto & ent : m_selectedEntities) {
+		if (!ent->isGroup()) {
 			continue;
 		}
-		CCVector3 N; float constVal;
-		plane->getEquation(N, constVal);
+		/// get lines
+		if (ent->getName().indexOf(QString("Line"), 0, Qt::CaseInsensitive) >= 0) {
+
+		}
+		/// get Planes
+		else if (ent->getName().indexOf(QString("Plane"), 0, Qt::CaseInsensitive) >= 0) {
+			size_t children_number = ent->getChildrenNumber();
+			for (size_t i = 0; i < children_number; ++i) {
+				ccPlane* plane = ccHObjectCaster::ToPlane(ent->getChild(i)->getChild(0));
+				if (!plane) {
+					continue;
+				}
+				CCVector3 N; float constVal;
+				plane->getEquation(N, constVal);
+			}
+		}
+	}
+}
+
+void MainWindow::doActionBDPolyFit()
+{
+
+
+
+
+// 	ccHObject* group = 0;
+// 	std::vector<int> image_lines;
+// 	ccColor::Rgb col = ccColor::blue;
+// 	for (auto & line : image_lines) {
+// 		ccPolyline* polyline = 0;
+// 		polyline->applyGLTransformation_recursive();
+// 		group->addChild(polyline);
+// 		//		polyline->setDisplay(true);
+// 		polyline->setColor(col);
+// 		polyline->showColors(true);
+// 		polyline->setVisible(true);
+// 	}
+// 	if (group) {
+// 		assert(group->getChildrenNumber() != 0);
+// 		dispToConsole("[Line3DPP] finished! Add to database!", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+// 		group->setVisible(true);
+// 		addToDB(group);
+// 		refreshAll();
+// 	}
+}
+
+void MainWindow::doActionBD3D4EM()
+{
+	if (!m_pbdr3d4emDlg)
+		m_pbdr3d4emDlg = new bdr3D4EMDlg(this);
+	
+	m_pbdr3d4emDlg->setModal(false);
+	m_pbdr3d4emDlg->setWindowModality(Qt::NonModal);
+	if (!m_pbdr3d4emDlg->exec()) {
+		return;
+	}
+	
+	std::string output_path = m_pbdr3d4emDlg->OutputFilePathLineEdit->text().toStdString();
+	std::string ini_path = m_pbdr3d4emDlg->ConfigureFilePathLineEdit->text().toStdString();
+
+	if (!m_pbdr3d4emDlg->PointcloudFilePathLineEdit->text().isEmpty()) {
+		// load from file
+		std::string point_path = m_pbdr3d4emDlg->PointcloudFilePathLineEdit->text().toStdString();
+		stocker::BuildingRecon_3D4EM(point_path.c_str(), output_path.c_str(), ini_path.c_str());
+	}
+	else {
+		std::vector<stocker::BdPoint3d> point_cloud;
+		if (!haveSelection()) {
+			assert(false);
+			return;
+		}
+		ccHObject *entity = getSelectedEntities().front();	
+		if (!entity->isA(CC_TYPES::POINT_CLOUD)) return;
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (!cloud)	{
+			return;
+		}
+		
+		for (ccHObject *entity : getSelectedEntities())
+		{
+			if (!entity)
+				continue;
+			ccPointCloud* cloud = nullptr;
+			if (entity->isA(CC_TYPES::POINT_CLOUD))	{
+				cloud = ccHObjectCaster::ToPointCloud(entity);				
+			}
+			else if (entity->isKindOf(CC_TYPES::MESH))
+			{
+				ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
+				if (mesh && mesh->getAssociatedCloud() && mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD)) {
+					cloud = static_cast<ccPointCloud*>(mesh->getAssociatedCloud());
+				}
+			}
+			if (!cloud)	{
+				return;
+			}
+			size_t n = cloud->size();
+			cloud->placeIteratorAtBeginning();
+			for (unsigned i = 0; i < n; i++)
+			{
+				CCVector3 pt = *(cloud->getNextPoint());
+				
+			}
+
+		}
+		stocker::BuildingRecon_3D4EM(point_cloud, output_path.c_str(), ini_path.c_str());
 	}
 }

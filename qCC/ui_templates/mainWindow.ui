@@ -493,8 +493,18 @@
     <property name="title">
      <string>BDRecon</string>
     </property>
+    <widget class="QMenu" name="menuGroup_Rename">
+     <property name="title">
+      <string>Group Rename</string>
+     </property>
+     <addaction name="actionBDRename_Plane"/>
+     <addaction name="actionBDRename_Line"/>
+    </widget>
     <addaction name="actionBDImage_Lines"/>
     <addaction name="actionBDPlane_Deduction"/>
+    <addaction name="actionBDPolyFit"/>
+    <addaction name="actionBD3D4EM"/>
+    <addaction name="menuGroup_Rename"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -2982,6 +2992,26 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDPlane_Deduction">
    <property name="text">
     <string>Plane Deduction</string>
+   </property>
+  </action>
+  <action name="actionBDPolyFit">
+   <property name="text">
+    <string>PolyFit</string>
+   </property>
+  </action>
+  <action name="actionBD3D4EM">
+   <property name="text">
+    <string>3D4EM</string>
+   </property>
+  </action>
+  <action name="actionBDRename_Plane">
+   <property name="text">
+    <string>Plane</string>
+   </property>
+  </action>
+  <action name="actionBDRename_Line">
+   <property name="text">
+    <string>Line</string>
    </property>
   </action>
  </widget>

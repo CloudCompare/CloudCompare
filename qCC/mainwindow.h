@@ -59,6 +59,11 @@ class ccSectionExtractionTool;
 class ccStdPluginInterface;
 class ccTracePolylineTool;
 
+class bdrLine3DppDlg;
+class bdrDeductionDlg;
+class bdrPolyFitDlg;
+class bdr3D4EMDlg;
+
 namespace Ui {
 	class MainWindow;
 } 
@@ -437,6 +442,12 @@ private slots:
 	void doActionBDImageLines();
 	//! Plane Deduction
 	void doActionBDPlaneDeduction();
+	//! PolyFit
+	void doActionBDPolyFit();
+	//! 3d4em
+	void doActionBD3D4EM();
+	//! Rename
+	
 
 private:
 	//! Shortcut: asks the user to select one cloud
@@ -601,6 +612,12 @@ private:
 	/*** plugins ***/
 	//! Manages plugins - menus, toolbars, and the about dialog
 	ccPluginUIManager	*m_pluginUIManager;
+
+	//! Building Reconstruction dialogs
+	bdrLine3DppDlg* m_pbdrl3dDlg;
+	bdrDeductionDlg* m_pbdrddtDlg;
+	bdrPolyFitDlg* m_pbdrpfDlg;
+	bdr3D4EMDlg* m_pbdr3d4emDlg;
 };
 
 #endif

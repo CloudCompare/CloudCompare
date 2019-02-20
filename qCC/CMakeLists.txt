@@ -176,3 +176,38 @@ else()
 	install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.vert ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Bilateral )
 	install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders/ColorRamp )
 endif()
+
+# building reconstruction
+option(STOCKER "Building Reconstruction" ON)
+if(STOCKER)
+	# try to find the vcg library
+	set (VCGLIB_INCLUDE_DIR_HINTS "")
+	find_package(vcglib REQUIRED)
+	if (VCGLIB_FOUND)
+	  message(STATUS "vcglib found in: ${VCGLIB_INCLUDE_DIRS}")
+	ENDIF (VCGLIB_FOUND)
+
+	find_package(Eigen)
+	if (EIGEN_FOUND)
+		message(STATUS "Eigen found in:")
+		message(STATUS ${EIGEN_INCLUDE_DIRS})
+	ENDIF (EIGEN_FOUND)
+
+	set(STOCKER_HOME $ENV{STOCKER_HOME} CACHE PATH "stocker home")
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_STOCKER )
+	# TODO:
+	set(STOCKER_INCLUDE_DIR ${STOCKER_HOME}/include CACHE PATH "stocker include")
+	set(STOCKER_LIBRARY_DEBUG_DIR ${STOCKER_HOME}/lib/${PLATFORM}/Debug CACHE PATH "stocker lib debug")
+	set(STOCKER_LIBRARY_RELEASE_DIR ${STOCKER_HOME}/lib/${PLATFORM}/Release CACHE PATH "stocker lib release")
+	set(STOCKER_BDLOD3_DEBUG ${STOCKER_LIBRARY_DEBUG_DIR}/builderlod3d.lib CACHE PATH "line3d lib debug")
+	set(STOCKER_BDLOD3_RELEASE ${STOCKER_LIBRARY_RELEASE_DIR}/builderlod3.lib CACHE PATH "line3d lib release")
+	set(STOCKER_B3D4EM_DEBUG ${STOCKER_LIBRARY_DEBUG_DIR}/builder3d4emd.lib CACHE PATH "3d4em lib debug")
+	set(STOCKER_B3D4EM_RELEASE ${STOCKER_LIBRARY_RELEASE_DIR}/builder3d4em.lib CACHE PATH "3d4em lib release")
+	target_include_directories(${PROJECT_NAME} 
+		PUBLIC	${STOCKER_INCLUDE_DIR}/modules/internal 
+				${STOCKER_INCLUDE_DIR}/modules/internal/blockbuilder 
+				${VCGLIB_INCLUDE_DIRS}
+				${EIGEN_INCLUDE_DIRS})
+	target_link_libraries(${PROJECT_NAME} debug ${STOCKER_BDLOD3_DEBUG} optimized ${STOCKER_BDLOD3_RELEASE})
+	target_link_libraries(${PROJECT_NAME} debug ${STOCKER_B3D4EM_DEBUG} optimized ${STOCKER_B3D4EM_RELEASE})
+endif()

@@ -10652,6 +10652,16 @@ void MainWindow::doActionBD3D4EM()
 	std::string output_path = m_pbdr3d4emDlg->OutputFilePathLineEdit->text().toStdString();
 	std::string ini_path = m_pbdr3d4emDlg->ConfigureFilePathLineEdit->text().toStdString();
 
+	QDir  workingDir_old = QCoreApplication::applicationDirPath();
+	QDir q_output_path(output_path.c_str());
+	QDir workingDir_current = q_output_path.dirName();
+	if (!workingDir_current.exists()) {
+		if (!workingDir_current.mkpath(workingDir_current.absolutePath())) {
+			return;
+		}
+	}
+	QDir::setCurrent(workingDir_current.absolutePath());
+
 	if (!m_pbdr3d4emDlg->PointcloudFilePathLineEdit->text().isEmpty()) {
 		// load from file
 		std::string point_path = m_pbdr3d4emDlg->PointcloudFilePathLineEdit->text().toStdString();
@@ -10664,39 +10674,30 @@ void MainWindow::doActionBD3D4EM()
 			return;
 		}
 		ccHObject *entity = getSelectedEntities().front();	
-		if (!entity->isA(CC_TYPES::POINT_CLOUD)) return;
-		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (!entity) return;
+		
+		ccPointCloud* cloud = nullptr;
+		if (entity->isA(CC_TYPES::POINT_CLOUD))	{
+			cloud = ccHObjectCaster::ToPointCloud(entity);				
+		}
+		else if (entity->isKindOf(CC_TYPES::MESH))
+		{
+			ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
+			if (mesh && mesh->getAssociatedCloud() && mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD)) {
+				cloud = static_cast<ccPointCloud*>(mesh->getAssociatedCloud());
+			}
+		}
 		if (!cloud)	{
 			return;
 		}
-		
-		for (ccHObject *entity : getSelectedEntities())
+		size_t n = cloud->size();
+		cloud->placeIteratorAtBeginning();
+		for (unsigned i = 0; i < n; i++)
 		{
-			if (!entity)
-				continue;
-			ccPointCloud* cloud = nullptr;
-			if (entity->isA(CC_TYPES::POINT_CLOUD))	{
-				cloud = ccHObjectCaster::ToPointCloud(entity);				
-			}
-			else if (entity->isKindOf(CC_TYPES::MESH))
-			{
-				ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
-				if (mesh && mesh->getAssociatedCloud() && mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD)) {
-					cloud = static_cast<ccPointCloud*>(mesh->getAssociatedCloud());
-				}
-			}
-			if (!cloud)	{
-				return;
-			}
-			size_t n = cloud->size();
-			cloud->placeIteratorAtBeginning();
-			for (unsigned i = 0; i < n; i++)
-			{
-				CCVector3 pt = *cloud->getNextPoint();
-				point_cloud.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
-			}
-
+			CCVector3 pt = *cloud->getNextPoint();
+			point_cloud.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
 		}
+
 		stocker::BuildingRecon_3D4EM(point_cloud, output_path.c_str(), ini_path.c_str());
 	}
 	if (!QFile::exists(QString(output_path.c_str()))) {
@@ -10705,4 +10706,7 @@ void MainWindow::doActionBD3D4EM()
 
 	QStringList files_add_to_db{ QString(output_path.c_str()) };
 	addToDB(files_add_to_db);
+
+	//! restore the working directory
+	QDir::setCurrent(workingDir_old.absolutePath());
 }

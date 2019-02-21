@@ -177,9 +177,14 @@ else()
 	install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders/ColorRamp )
 endif()
 
+option(OPTION_CONSOLE "show console window" ON)
+if(OPTION_CONSOLE)
+	set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS /SUBSYSTEM:CONSOLE)
+endif()
+
 # building reconstruction
-option(STOCKER "Building Reconstruction" ON)
-if(STOCKER)
+option(OPTION_USE_STOCKER "Building Reconstruction" ON)
+if(OPTION_USE_STOCKER)
 	# try to find the vcg library
 	set (VCGLIB_INCLUDE_DIR_HINTS "")
 	find_package(vcglib REQUIRED)
@@ -197,12 +202,16 @@ if(STOCKER)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_STOCKER )
 	# TODO:
 	set(STOCKER_INCLUDE_DIR ${STOCKER_HOME}/include CACHE PATH "stocker include")
-	set(STOCKER_LIBRARY_DEBUG_DIR ${STOCKER_HOME}/lib/${PLATFORM}/Debug CACHE PATH "stocker lib debug")
-	set(STOCKER_LIBRARY_RELEASE_DIR ${STOCKER_HOME}/lib/${PLATFORM}/Release CACHE PATH "stocker lib release")
-	set(STOCKER_BDLOD3_DEBUG ${STOCKER_LIBRARY_DEBUG_DIR}/builderlod3d.lib CACHE PATH "line3d lib debug")
-	set(STOCKER_BDLOD3_RELEASE ${STOCKER_LIBRARY_RELEASE_DIR}/builderlod3.lib CACHE PATH "line3d lib release")
-	set(STOCKER_B3D4EM_DEBUG ${STOCKER_LIBRARY_DEBUG_DIR}/builder3d4emd.lib CACHE PATH "3d4em lib debug")
-	set(STOCKER_B3D4EM_RELEASE ${STOCKER_LIBRARY_RELEASE_DIR}/builder3d4em.lib CACHE PATH "3d4em lib release")
+	set(STOCKER_LIBRARY_DIR ${STOCKER_HOME}/lib/${PLATFORM} CACHE PATH "stocker lib dir")
+	set(STOCKER_BIN_DIR ${STOCKER_HOME}/bin/${PLATFORM} CACHE PATH "stocker bin dir")
+	set(STOCKER_BDLOD3_DEBUG ${STOCKER_LIBRARY_DIR}/Debug/builderlod3d.lib CACHE PATH "line3d lib debug")
+	set(STOCKER_BDLOD3_RELEASE ${STOCKER_LIBRARY_DIR}/Release/builderlod3.lib CACHE PATH "line3d lib release")
+	set(STOCKER_B3D4EM_DEBUG ${STOCKER_LIBRARY_DIR}/Debug/builder3d4emd.lib CACHE PATH "3d4em lib debug")
+	set(STOCKER_B3D4EM_RELEASE ${STOCKER_LIBRARY_DIR}/Release/builder3d4em.lib CACHE PATH "3d4em lib release")
+	file(COPY ${STOCKER_BIN_DIR}/Debug/builderlod3d.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/debug/) 
+	file(COPY ${STOCKER_BIN_DIR}/release/builderlod3.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/release/) 
+	file(COPY ${STOCKER_BIN_DIR}/Debug/builder3d4emd.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/debug/) 
+	file(COPY ${STOCKER_BIN_DIR}/release/builder3d4em.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/release/) 
 	target_include_directories(${PROJECT_NAME} 
 		PUBLIC	${STOCKER_INCLUDE_DIR}/modules/internal 
 				${STOCKER_INCLUDE_DIR}/modules/internal/blockbuilder 

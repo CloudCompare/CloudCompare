@@ -55,9 +55,9 @@ void bdr3D4EMDlg::browsePointcloudFilename()
 
 void bdr3D4EMDlg::browseOutputFilename()
 {
-	QString Filename =
-		QFileDialog::getOpenFileName(this,
-			"Output model file",
+	QString Filename = 
+		QFileDialog::getSaveFileName(this, 
+			"Output model file", 
 			ConfigureFilePathLineEdit->text(),
 			"obj model file (*.obj)");
 

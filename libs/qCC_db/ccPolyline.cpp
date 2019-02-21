@@ -688,3 +688,22 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 
 	return cloud;
 }
+
+std::vector<CCVector3> ccPolyline::getPoints(bool close)
+{
+	std::vector<CCVector3> points;
+	
+	unsigned vertCount = size();
+	if (vertCount > 1 && m_theAssociatedCloud)
+	{
+		unsigned lastVert = isClosed() ? vertCount : vertCount - 1;
+		for (unsigned i = 0; i < lastVert; ++i)	{	
+			points.push_back(*getPoint(i));
+		}
+		if (close) {
+			points.push_back(points.front());
+		}
+	}
+
+	return points;
+}

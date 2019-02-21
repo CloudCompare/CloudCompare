@@ -20,7 +20,6 @@
 
 //CCLib
 #include <GenericCloud.h>
-#include <GenericMesh.h>
 #include <GenericIndexedMesh.h>
 #include <GenericProgressCallback.h>
 
@@ -36,7 +35,6 @@
 class PCV
 {
 public:
-
 	//! Simulates global illumination on a cloud (or a mesh) with OpenGL - shortcut version
 	/** Computes per-vertex illumination intensity as a scalar field.
 		\param numberOfRays (approxiamate) number of rays to generate
@@ -58,7 +56,7 @@ public:
 						unsigned width = 1024,
 						unsigned height = 1024,
 						CCLib::GenericProgressCallback* progressCb = nullptr,
-						QString entityName = QString());
+						const QString& entityName = QString());
 
 	//! Simulates global illumination on a cloud (or a mesh) with OpenGL
 	/** Computes per-vertex illumination intensity as a scalar field.
@@ -79,7 +77,7 @@ public:
 						unsigned width = 1024,
 						unsigned height = 1024,
 						CCLib::GenericProgressCallback* progressCb = nullptr,
-						QString entityName = QString());
+						const QString& entityName = QString());
 
 	//! Generates a given number of rays
 	static bool GenerateRays(	unsigned numberOfRays,

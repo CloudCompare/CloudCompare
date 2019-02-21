@@ -33,23 +33,19 @@ class qPCV : public QObject, public ccStdPluginInterface
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPCV" FILE "info.json")
 
 public:
-
 	//! Default constructor
 	explicit qPCV(QObject* parent = nullptr);
 	
-	virtual ~qPCV() = default;
+	~qPCV()override  = default;
 
 	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
-	virtual QList<QAction *> getActions() override;
+	void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	QList<QAction *> getActions() override;
 	void registerCommands(ccCommandLineInterface *cmd) override;
 
-protected slots:
-
+private:
 	//! Slot called when associated ation is triggered
 	void doAction();
-
-protected:
 
 	//! Associated action
 	QAction* m_action;

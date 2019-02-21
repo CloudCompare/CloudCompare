@@ -5,8 +5,15 @@
 # Find ffmpeg
 set( FFMPEG_INCLUDE_DIR "" CACHE PATH "ffmpeg include directory" )
 set( FFMPEG_LIBRARY_DIR "" CACHE PATH "ffmpeg library directory" )
+
 if (WIN32)
 	set( FFMPEG_BINARY_DIR "" CACHE PATH "ffmpeg binary directory (where the DLLs are ;-)" )
+elseif ( APPLE )
+	set( FFMPEG_X264_LIBRARY_DIR "" CACHE PATH "The directory containing the x264 library." )
+	
+	if ( NOT FFMPEG_X264_LIBRARY_DIR )
+		message( SEND_ERROR "No x264 library directory specified (FFMPEG_X264_LIBRARY_DIR)" )
+	endif()
 endif()
 
 if ( NOT FFMPEG_INCLUDE_DIR )
@@ -28,7 +35,7 @@ function( target_link_ffmpeg ) # 1 argument: ARGV0 = project name
 			if (WIN32)
 				LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_LIBRARY_DIR}/${libfile}.lib )
 			elseif ( APPLE )
-				LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_LIBRARY_DIR}/lib${libfile}.dylib )
+				LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_LIBRARY_DIR}/lib${libfile}.a )
 			else()
 				LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_LIBRARY_DIR}/lib${libfile}.so )
 			endif()
@@ -36,6 +43,15 @@ function( target_link_ffmpeg ) # 1 argument: ARGV0 = project name
 
 		target_link_libraries( ${ARGV0} ${FFMPEG_LIBRARIES} )
 
+		if ( APPLE )
+			target_link_libraries( ${ARGV0}
+				"-liconv"
+				"-L${FFMPEG_X264_LIBRARY_DIR} -lx264"
+				"-lz"
+				"-framework CoreVideo"
+				)
+		endif()
+		
 		# Required for some C99 defines
 		set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS __STDC_CONSTANT_MACROS )
 

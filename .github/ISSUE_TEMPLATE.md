@@ -21,4 +21,5 @@
 * CC Version: 
 * OS & Version: 
 * Graphics card: 
+* Qt Version (if compiling): 
 <!--- Include any other relevant details about your environment -->

@@ -82,6 +82,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 
 	//force update
 	resampleOptionToggled(m_UI->resampleCloudCheckBox->isChecked());
+	fillEmptyCellStrategyChanged(0);
 
 	connect(m_UI->buttonBox,	&QDialogButtonBox::accepted,	this,	&ccRasterizeTool::testAndAccept);
 	connect(m_UI->buttonBox,	&QDialogButtonBox::rejected,	this,	&ccRasterizeTool::testAndReject);
@@ -127,7 +128,8 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	if (m_cloud)
 	{
 		m_UI->cloudNameLabel->setText( QStringLiteral( "<b>%1</b> (%2 points)").arg( m_cloud->getName(), QLocale::system().toString( m_cloud->size() ) ) );
-		m_UI->interpolateSFFrame->setEnabled(cloud->hasScalarFields());
+		m_UI->interpolateSFCheckBox->setEnabled(cloud->hasScalarFields());
+		m_UI->scalarFieldProjection->setEnabled(cloud->hasScalarFields());
 
 		//populate layer box
 		m_UI->activeLayerComboBox->addItem(ccRasterGrid::GetDefaultFieldName(ccRasterGrid::PER_CELL_HEIGHT), QVariant(LAYER_HEIGHT));
@@ -155,6 +157,8 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	updateGridInfo();
 
 	gridIsUpToDate(false);
+	
+	resize( minimumSize() );
 }
 
 ccRasterizeTool::~ccRasterizeTool()
@@ -340,8 +344,11 @@ void ccRasterizeTool::fillEmptyCellStrategyChanged(int)
 {
 	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(m_UI->fillEmptyCellsComboBox);
 
-	m_UI->emptyValueDoubleSpinBox->setEnabled(	fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT
-										||	fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE );
+	bool active = fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT ||	fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE;
+	
+	m_UI->emptyValueDoubleSpinBox->setEnabled( active );
+	m_UI->emptyValueDoubleSpinBox->setVisible( active );
+
 	gridIsUpToDate(false);
 }
 
@@ -375,7 +382,7 @@ ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfProjection() const
 
 ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfSFInterpolation() const
 {
-	if (!m_UI->interpolateSFFrame->isEnabled() || !m_UI->interpolateSFCheckBox->isChecked())
+	if (!m_UI->interpolateSFCheckBox->isEnabled() || !m_UI->interpolateSFCheckBox->isChecked())
 		return ccRasterGrid::INVALID_PROJECTION_TYPE; //means that we don't want to keep SF values
 
 	switch (m_UI->scalarFieldProjection->currentIndex())

@@ -10648,6 +10648,26 @@ void MainWindow::doActionBD3D4EM()
 	if (!m_pbdr3d4emDlg->exec()) {
 		return;
 	}
+
+	std::vector<CCVector3> contour_points;
+	{
+		ccHObject::Container _container;
+		size_t cont = m_ccRoot->getRootEntity()->getChildrenNumber();
+		for (size_t i = 0; i < cont; ++i) {
+			_container.push_back(m_ccRoot->getRootEntity()->getChild(i));
+		}
+		int selectedIndex = 0;
+		ccPolyline* contour_polygon = nullptr;
+		if (!_container.empty()) {
+			selectedIndex = ccItemSelectionDlg::SelectEntity(_container, selectedIndex, this, "please select the contour polygon");
+			if (selectedIndex > 0 && selectedIndex < _container.size()) {
+				contour_polygon = ccHObjectCaster::ToPolyline(_container[selectedIndex]);
+			}
+		}
+		if (contour_polygon) {
+			contour_points = contour_polygon->getPoints();
+		}
+	}	
 	
 	std::string output_path = m_pbdr3d4emDlg->OutputFilePathLineEdit->text().toStdString();
 	std::string ini_path = m_pbdr3d4emDlg->ConfigureFilePathLineEdit->text().toStdString();

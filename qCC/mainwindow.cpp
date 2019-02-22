@@ -10698,7 +10698,6 @@ void MainWindow::doActionBD3D4EM()
 		// load from file
 		std::string point_path = m_pbdr3d4emDlg->PointcloudFilePathLineEdit->text().toStdString();
 
-		stocker::Builder3D4EM builder_3d4em;
 		builder_3d4em.SetBuildingPoints(point_path.c_str());
 //		std::vector<std::vector<stocker::BdPoint3d>> plane_points = builder_3d4em.GetSegmentedPoints();
 //		stocker::BuildingRecon_3D4EM(point_path.c_str(), output_path.c_str(), ini_path.c_str());

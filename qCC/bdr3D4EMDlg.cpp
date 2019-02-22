@@ -24,11 +24,6 @@
 #include <QToolButton>
 #include <QPushButton>
 
-#ifdef USE_STOCKER
-#include "builder3d4em/builder3d4em.h"
-#endif // USE_STOCKER
-
-
 bdr3D4EMDlg::bdr3D4EMDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
 	, Ui::BDR3D4EMDlg()
@@ -47,10 +42,16 @@ void bdr3D4EMDlg::browsePointcloudFilename()
 		QFileDialog::getOpenFileName(this,
 			"Open PointCloud file",
 			PointcloudFilePathLineEdit->text(),
-			"Point Cloud (*.ply)");
+			"Point Cloud (*.ply) | Las File (*.las *.laz)");
 
 	if (!Filename.isEmpty())
 		PointcloudFilePathLineEdit->setText(Filename);
+
+	if (OutputFilePathLineEdit->text().isEmpty()) {
+		QFileInfo filepath(Filename);
+		QString output_path = filepath.path() + "/" + filepath.completeBaseName() + ".obj";
+		OutputFilePathLineEdit->setText(output_path);
+	}
 }
 
 void bdr3D4EMDlg::browseOutputFilename()

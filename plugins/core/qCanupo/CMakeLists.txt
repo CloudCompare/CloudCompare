@@ -15,7 +15,7 @@ else()
 endif()
 
 include( ../../CMakePluginTpl.cmake )
-
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
 option( COMPILE_QCANUPO_WITH_PRIVATE_PARTS "Check to compile qCanupo plugin with private methods (CNRS/UEB only)" OFF )
 if ( COMPILE_QCANUPO_WITH_PRIVATE_PARTS )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS COMPILE_PRIVATE_CANUPO )

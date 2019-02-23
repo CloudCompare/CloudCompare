@@ -231,7 +231,8 @@ int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPer
 
 	int result = 0;
 
-	if (comparedOctree->executeFunctionForAllCellsAtLevel(	params.octreeLevel,
+	if ( (comparedOctree != nullptr) &&
+		 comparedOctree->executeFunctionForAllCellsAtLevel(	params.octreeLevel,
 															params.localModel == NO_MODEL ? computeCellHausdorffDistance : computeCellHausdorffDistanceWithLocalModel,
 															additionalParameters,
 															params.multiThread,

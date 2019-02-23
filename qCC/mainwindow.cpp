@@ -146,6 +146,7 @@
 //System
 #include <iostream>
 #include <random>
+#include <QMessageBox>
 
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance  = nullptr;
@@ -5663,7 +5664,9 @@ void MainWindow::doActionResetGUIElementsPos()
 	settings.remove(ccPS::MainWinGeom());
 	settings.remove(ccPS::MainWinState());
 
-	QMessageBox::information(this,"Restart","To finish the process, you'll have to close and restart CloudCompare");
+	QMessageBox::information(	this,
+								tr("Restart"),
+								tr("To finish the process, you'll have to close and restart CloudCompare"));
 
 	//to avoid saving them right away!
 	s_autoSaveGuiElementPos = false;
@@ -5719,12 +5722,16 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	//	event->ignore();
 	//}
 	//else
+	QMessageBox message_box(	QMessageBox::Question,
+								tr("Quit"),
+								tr("Are you sure you want to quit?"),
+								QMessageBox::Ok | QMessageBox::Cancel,
+								this);
+	message_box.setButtonText(QMessageBox::Ok, tr("Ok"));
+	message_box.setButtonText(QMessageBox::Cancel, tr("Cancel"));
 	{
-		if ((m_ccRoot && m_ccRoot->getRootEntity()->getChildrenNumber() == 0)
-			|| QMessageBox::question(	this,
-										"Quit",
-										"Are you sure you want to quit?",
-										QMessageBox::Ok, QMessageBox::Cancel) != QMessageBox::Cancel)
+		if (m_ccRoot && m_ccRoot->getRootEntity()->getChildrenNumber() == 0
+			|| message_box.exec() == QMessageBox::Ok)
 		{
 			event->accept();
 		}
@@ -5924,7 +5931,9 @@ void MainWindow::toggleExclusiveFullScreen(bool state)
 
 void MainWindow::doActionShowHelpDialog()
 {
-	QMessageBox::information(this, "Documentation", "Please visit http://www.cloudcompare.org/doc");
+	QMessageBox::information(	this,
+								tr("Documentation"),
+								tr("Please visit http://www.cloudcompare.org/doc"));
 }
 
 void MainWindow::freezeUI(bool state)
@@ -9289,7 +9298,16 @@ void MainWindow::closeAll()
 	if (!m_ccRoot)
 		return;
 
-	if (QMessageBox::question(	this, "Close all", "Are you sure you want to remove all loaded entities?", QMessageBox::Yes, QMessageBox::No ) != QMessageBox::Yes)
+	QMessageBox message_box(	QMessageBox::Question,
+								tr("Close all"),
+								tr("Are you sure you want to remove all loaded entities?"),
+								QMessageBox::Yes | QMessageBox::No,
+								this);
+
+	message_box.setButtonText(QMessageBox::Yes, tr("Yes"));
+	message_box.setButtonText(QMessageBox::No, tr("No"));
+
+	if (message_box.exec() == QMessageBox::No)
 		return;
 
 	m_ccRoot->unloadAll();
@@ -9335,7 +9353,7 @@ void MainWindow::doActionLoadFile()
 
 	//file choosing dialog
 	QStringList selectedFiles = QFileDialog::getOpenFileNames(	this,
-																"Open file(s)",
+																tr("Open file(s)"),
 																currentPath,
 																fileFilters.join(s_fileFilterSeparator),
 																&currentOpenDlgFilter,
@@ -9583,7 +9601,7 @@ void MainWindow::doActionSaveFile()
 
 	//ask the user for the output filename
 	QString selectedFilename = QFileDialog::getSaveFileName(this,
-															"Save file",
+															tr("Save file"),
 															fullPathName,
 															fileFilters.join(s_fileFilterSeparator),
 															&selectedFilter,

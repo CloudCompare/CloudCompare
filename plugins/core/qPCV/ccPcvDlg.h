@@ -24,7 +24,7 @@
 class ccPcvDlg : public QDialog, public Ui::PCVDialog
 {
 public:
-	explicit ccPcvDlg(QWidget* parent = 0);
+	explicit ccPcvDlg(QWidget* parent = nullptr);
 };
 
 #endif

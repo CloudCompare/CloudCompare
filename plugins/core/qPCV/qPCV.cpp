@@ -19,26 +19,32 @@
 #include "ccPcvDlg.h"
 
 //CCLib
-#include <ScalarField.h>
 #include <PCV.h>
+#include <ScalarField.h>
 
 //qCC_db
-#include <ccHObjectCaster.h>
-#include <ccGenericPointCloud.h>
-#include <ccPointCloud.h>
+#include <ccColorScalesManager.h>
 #include <ccGenericMesh.h>
+#include <ccGenericPointCloud.h>
+#include <ccHObjectCaster.h>
+#include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
-#include <ccColorScalesManager.h>
 
 //Qt
-#include <QtGui>
 #include <QMainWindow>
 #include <QProgressBar>
 
-#ifndef CC_PCV_FIELD_LABEL_NAME
-#define CC_PCV_FIELD_LABEL_NAME "Illuminance (PCV)"
-#endif
+
+constexpr const char* CC_PCV_FIELD_LABEL_NAME = "Illuminance (PCV)";
+
+//persistent settings during a single session
+static bool s_firstLaunch				= true;
+static int s_raysSpinBoxValue			= 256;
+static int s_resSpinBoxValue			= 1024;
+static bool s_mode180CheckBoxState		= true;
+static bool s_closedMeshCheckBoxState	= false;
+
 
 qPCV::qPCV(QObject* parent/*=0*/)
 	: QObject(parent)
@@ -72,19 +78,12 @@ QList<QAction *> qPCV::getActions()
 		m_action = new QAction(getName(),this);
 		m_action->setToolTip(getDescription());
 		m_action->setIcon(getIcon());
-		//connect signal
+
 		connect(m_action, &QAction::triggered, this, &qPCV::doAction);
 	}
 
 	return QList<QAction *>{ m_action };
 }
-
-//persistent settings during a single session
-static bool s_firstLaunch				= true;
-static int s_raysSpinBoxValue			= 256;
-static int s_resSpinBoxValue			= 1024;
-static bool s_mode180CheckBoxState		= true;
-static bool s_closedMeshCheckBoxState	= false;
 
 void qPCV::doAction()
 {
@@ -141,23 +140,26 @@ void qPCV::doAction()
 	{
 		ccHObject::Container clouds;
 		root->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
-		for (size_t i = 0; i < clouds.size(); ++i)
+		
+		for (auto & pointCloud : clouds)
 		{
 			//we keep only clouds with normals
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(clouds[i]);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud( pointCloud );
+			
 			if (cloud && cloud->hasNormals())
 			{
 				cloudsWithNormals.push_back(cloud);
-				QString cloudTitle = QString("%1 - %2 points").arg(cloud->getName()).arg(cloud->size());
+				QString cloudTitle = QStringLiteral("%1 - %2 points").arg(cloud->getName()).arg(cloud->size());
 				if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
 				{
-					cloudTitle.append(QString(" (%1)").arg(cloud->getParent()->getName()));
+					cloudTitle.append(QStringLiteral(" (%1)").arg(cloud->getParent()->getName()));
 				}
 
 				dlg.cloudsComboBox->addItem(cloudTitle);
 			}
 		}
 	}
+	
 	if (cloudsWithNormals.empty())
 	{
 		dlg.useCloudRadioButton->setEnabled(false);
@@ -169,13 +171,11 @@ void qPCV::doAction()
 	}
 
 	//save dialog state
-	{
-		s_firstLaunch				= false;
-		s_raysSpinBoxValue			= dlg.raysSpinBox->value();
-		s_mode180CheckBoxState		= dlg.mode180CheckBox->isChecked();
-		s_resSpinBoxValue			= dlg.resSpinBox->value();
-		s_closedMeshCheckBoxState	= dlg.closedMeshCheckBox->isChecked();
-	}
+	s_firstLaunch				= false;
+	s_raysSpinBoxValue			= dlg.raysSpinBox->value();
+	s_mode180CheckBoxState		= dlg.mode180CheckBox->isChecked();
+	s_resSpinBoxValue			= dlg.resSpinBox->value();
+	s_closedMeshCheckBoxState	= dlg.closedMeshCheckBox->isChecked();
 
 	unsigned raysNumber = dlg.raysSpinBox->value();
 	unsigned resolution = dlg.resSpinBox->value();
@@ -229,7 +229,7 @@ void qPCV::doAction()
 	{
 		ccPointCloud* cloud = nullptr;
 		ccGenericMesh* mesh = nullptr;
-		QString objName = "unknown";
+		QString objName( "unknown" );
 
 		assert(obj);
 		if (obj->isA(CC_TYPES::POINT_CLOUD))
@@ -244,15 +244,23 @@ void qPCV::doAction()
 			cloud = ccHObjectCaster::ToPointCloud(mesh->getAssociatedCloud());
 			objName = mesh->getName();
 		}
-		assert(cloud);
-
+		
+		if ( cloud == nullptr )
+		{
+			assert(cloud);
+			m_app->dispToConsole( tr( "Invalid object type" ), ccMainAppInterface::ERR_CONSOLE_MESSAGE );
+			continue;
+		}
+		
 		//we get the PCV field if it already exists
 		int sfIdx = cloud->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
+		
 		//otherwise we create it
 		if (sfIdx < 0)
 		{
 			sfIdx = cloud->addScalarField(CC_PCV_FIELD_LABEL_NAME);
 		}
+		
 		if (sfIdx < 0)
 		{
 			m_app->dispToConsole("Couldn't allocate a new scalar field for computing PCV field ! Try to free some memory ...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -263,7 +271,7 @@ void qPCV::doAction()
 		QString objNameForPorgressDialog = objName;
 		if (candidates.size() > 1)
 		{
-			objNameForPorgressDialog += QString("(%1/%2)").arg(++count).arg(candidates.size());
+			objNameForPorgressDialog += QStringLiteral("(%1/%2)").arg(++count).arg(candidates.size());
 		}
 
 		bool wasEnabled = obj->isEnabled();

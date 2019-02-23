@@ -32,7 +32,7 @@
 #endif
 
 //system
-#include <assert.h>
+#include <cassert>
 
 //type-less glVertex3Xv call (X=f,d)
 static inline void glVertex3v(const float* v) { glVertex3fv(v); }
@@ -53,8 +53,8 @@ using namespace CCLib;
 #endif
 
 PCVContext::PCVContext()
-	: m_vertices(0)
-	, m_mesh(0)
+	: m_vertices(nullptr)
+	, m_mesh(nullptr)
 	, m_zoom(1)
 	, m_pixBuffer(nullptr)
 	, m_width(0)
@@ -68,13 +68,9 @@ PCVContext::PCVContext()
 
 PCVContext::~PCVContext()
 {
-	if (m_pixBuffer)
-		delete m_pixBuffer;
-
-	if (m_snapZ)
-		delete[] m_snapZ;
-	if (m_snapC)
-		delete[] m_snapC;
+	delete m_pixBuffer;
+	delete[] m_snapZ;
+	delete[] m_snapC;
 }
 
 bool PCVContext::init(unsigned W,
@@ -97,7 +93,7 @@ bool PCVContext::init(unsigned W,
 	if (!m_snapZ)
 	{
 		delete m_pixBuffer;
-		m_pixBuffer = 0;
+		m_pixBuffer = nullptr;
 		return false;
 	}
 
@@ -109,9 +105,9 @@ bool PCVContext::init(unsigned W,
 		if (!m_snapC)
 		{
 			delete m_pixBuffer;
-			m_pixBuffer = 0;
+			m_pixBuffer = nullptr;
 			delete[] m_snapZ;
-			m_snapZ = 0;
+			m_snapZ = nullptr;
 			return false;
 		}
 	}

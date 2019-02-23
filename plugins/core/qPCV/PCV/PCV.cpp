@@ -28,10 +28,9 @@
 #endif
 
 //System
-#include <assert.h>
 #include <algorithm>
-#include <vector>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 using namespace CCLib;
 
@@ -213,7 +212,7 @@ int PCV::Launch(unsigned numberOfRays,
 				unsigned width/*=1024*/,
 				unsigned height/*=1024*/,
 				CCLib::GenericProgressCallback* progressCb/*=0*/,
-				QString entityName/*=QString()*/)
+				const QString& entityName/*=QString()*/)
 {
 	//generates light directions
 	std::vector<CCVector3> rays;
@@ -237,7 +236,7 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 				 unsigned width/*=1024*/,
 				 unsigned height/*=1024*/,
 				 CCLib::GenericProgressCallback* progressCb/*=0*/,
-				 QString entityName/*=QString()*/)
+				 const QString& entityName/*=QString()*/)
 {
 	if (rays.empty())
 		return false;

@@ -33,7 +33,6 @@ class QGLPixelBuffer;
 class PCVContext
 {
 	public:
-
 		//! Default constructor
 		PCVContext();
 
@@ -51,7 +50,7 @@ class PCVContext
 		bool init(	unsigned W,
 					unsigned H,
 					CCLib::GenericCloud* cloud,
-					CCLib::GenericMesh* mesh = 0,
+					CCLib::GenericMesh* mesh = nullptr,
 					bool closedMesh = true);
 
 		//! Set the viewing directions
@@ -64,10 +63,9 @@ class PCVContext
 		int GLAccumPixel(std::vector<int>& visibilityCount);
 
 	protected:
-
 		void glInit();
 		void drawEntity();
-		void associateToEntity(CCLib::GenericCloud* cloud, CCLib::GenericMesh* mesh = 0);
+		void associateToEntity(CCLib::GenericCloud* cloud, CCLib::GenericMesh* mesh = nullptr);
 
 		//! Displayed entity (cloud or mesh vertices)
 		CCLib::GenericCloud* m_vertices;
@@ -103,7 +101,6 @@ class PCVContext
 
 		//! Whether displayed mesh is closed or not
 		bool m_meshIsClosed;
-
 };
 
 #endif

@@ -11,6 +11,8 @@ set( CC_IS_IO_PLUGIN 1 )
 
 include( ../../../CMakePluginTpl.cmake )
 
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
+
 target_link_libraries(${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB)
 link_directories( ${PCL_LIBRARY_DIRS} )
 add_definitions( ${PCL_DEFINITIONS} )

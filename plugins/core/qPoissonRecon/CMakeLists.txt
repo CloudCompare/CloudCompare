@@ -9,7 +9,7 @@ if (INSTALL_QPOISSON_RECON_PLUGIN)
 	add_subdirectory (PoissonReconLib)
 	
 	include( ../../CMakePluginTpl.cmake )
-	
+	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
 	target_link_libraries( ${PROJECT_NAME} QPOISSON_RECON_LIB )
 	include_directories( ${QPOISSON_RECON_LIB_SOURCE_DIR}/Src )
 	include_directories( ${QPOISSON_RECON_LIB_SOURCE_DIR}/Src_CC_wrap )

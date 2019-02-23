@@ -14,7 +14,7 @@ if (INSTALL_QPCV_PLUGIN)
 	endif()
 
     include( ../../CMakePluginTpl.cmake )
-    
+    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
 	include_directories( ${OpenGL_INCLUDE_DIR} )
     include_directories( ${PCV_LIB_SOURCE_DIR} )
     

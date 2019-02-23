@@ -16,4 +16,6 @@ if (INSTALL_QHPR_PLUGIN)
     
     target_link_libraries( ${PROJECT_NAME} qhull )
     include_directories( ${QHULL_LIB_INCLUDE_DIR} )
+
+	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
 endif()

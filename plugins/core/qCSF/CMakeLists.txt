@@ -13,5 +13,5 @@ if (INSTALL_QCSF_PLUGIN)
 	add_subdirectory( ui )
 	
 	include( ../../CMakePluginTpl.cmake )
-
+	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
 endif()

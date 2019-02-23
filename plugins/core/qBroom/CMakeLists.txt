@@ -15,5 +15,5 @@ if (INSTALL_QBROOM_PLUGIN)
 	include( ../../CMakePluginTpl.cmake )
 	
 	include_directories( ${QBROOM_LIB_INCLUDE_DIR} )
-
+	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
 endif()

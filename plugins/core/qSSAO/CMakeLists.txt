@@ -10,7 +10,8 @@ if (INSTALL_QSSAO_PLUGIN)
     
     set( CC_SHADER_FOLDER SSAO )
     include( ../../CMakePluginTpl.cmake )
-    
+    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
+
     target_link_libraries( ${PROJECT_NAME} QSSAO_RANDOMKIT_LIB )
     include_directories( ${QSSAO_RANDOMKIT_LIB_SOURCE_DIR} )
 endif()

@@ -17,6 +17,8 @@ if (INSTALL_QRANSAC_SD_PLUGIN)
 	include_directories( ${QRANSAC_SD_PRIM_SHAPES_LIB_SOURCE_DIR} )
 	include_directories( ${QRANSAC_SD_PRIM_SHAPES_LIB_SOURCE_DIR}/GfxTL )
 
+	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
+
 if (OPENMP_FOUND AND NOT WIN32) #DGM: OpenMP doesn't work with Visual at least (the process loops infinitely)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS DOPARALLEL )
 endif()

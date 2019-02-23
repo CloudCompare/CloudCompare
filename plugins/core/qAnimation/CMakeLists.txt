@@ -19,7 +19,7 @@ if (INSTALL_QANIMATION_PLUGIN)
 	add_subdirectory( ui )
 
 	include( ../../CMakePluginTpl.cmake )
-
+	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
 	if (WITH_FFMPEG_SUPPORT)
 		target_link_libraries( ${PROJECT_NAME} QTFFMPEG_LIB )
 		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS QFFMPEG_SUPPORT )

@@ -34,4 +34,6 @@ if (INSTALL_QFACETS_PLUGIN)
 	target_link_libraries( ${PROJECT_NAME} SHAPELIB )
 	include_directories( ${SHAPELIB_SOURCE_DIR} )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_SHP_SUPPORT )
+
+	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
 endif()

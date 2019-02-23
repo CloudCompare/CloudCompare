@@ -12,4 +12,5 @@ if (INSTALL_QEDL_PLUGIN)
 	
     set( CC_SHADER_FOLDER EDL )
     include( ../../CMakePluginTpl.cmake )
+	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
 endif()

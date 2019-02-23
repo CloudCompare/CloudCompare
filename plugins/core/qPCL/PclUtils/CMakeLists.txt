@@ -53,3 +53,4 @@ target_link_libraries( ${PROJECT_NAME} ${PCL_LIBRARIES})
 # Qt
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets)
 
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 

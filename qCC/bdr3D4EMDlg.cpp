@@ -42,7 +42,7 @@ void bdr3D4EMDlg::browsePointcloudFilename()
 		QFileDialog::getOpenFileName(this,
 			"Open PointCloud file",
 			PointcloudFilePathLineEdit->text(),
-			"Point Cloud (*.ply) | Las File (*.las *.laz)");
+			"Point Cloud (*.ply);;Las File (*.las *.laz)");
 
 	if (!Filename.isEmpty())
 		PointcloudFilePathLineEdit->setText(Filename);

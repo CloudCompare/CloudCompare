@@ -10751,6 +10751,8 @@ void MainWindow::doActionBD3D4EM()
 	QStringList files_add_to_db{ QString(output_path.c_str()) };
 	addToDB(files_add_to_db);
 
+	dispToConsole("[BDRecon] Building Reconstruction LOD2 finished!", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
 	//! restore the working directory
 	QDir::setCurrent(workingDir_old.absolutePath());
 }

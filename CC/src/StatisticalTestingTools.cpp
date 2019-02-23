@@ -56,8 +56,8 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 															unsigned numberOfClasses,
 															unsigned& finalNumberOfClasses,
 															bool noClassCompression/*=false*/,
-															ScalarType* histoMin/*=0*/,
-															ScalarType* histoMax/*=0*/,
+															const ScalarType* histoMin/*=0*/,
+															const ScalarType* histoMax/*=0*/,
 															unsigned* histoValues/*=0*/,
 															double* npis/*=0*/)
 {

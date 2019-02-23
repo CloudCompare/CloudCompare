@@ -10673,37 +10673,36 @@ void MainWindow::doActionBD3D4EM()
 
 	stocker::Builder3D4EM builder_3d4em;
 
+	/// select polyline for foorprint
 	{
 		ccHObject::Container _container;
-		size_t cont = m_ccRoot->getRootEntity()->getChildrenNumber();
-		for (size_t i = 0; i < cont; ++i) {
-			_container.push_back(m_ccRoot->getRootEntity()->getChild(i));
-		}
-		int selectedIndex = 0;
-		ccPolyline* contour_polygon = nullptr;
+		m_ccRoot->getRootEntity()->filterChildren(_container, true, CC_TYPES::POLY_LINE, true);		
 		if (!_container.empty()) {
+			ccPolyline* contour_polygon = nullptr;
+			int selectedIndex = 0;
+			//ask the user to choose a polyline
 			selectedIndex = ccItemSelectionDlg::SelectEntity(_container, selectedIndex, this, "please select the contour polygon");
 			if (selectedIndex > 0 && selectedIndex < _container.size()) {
 				contour_polygon = ccHObjectCaster::ToPolyline(_container[selectedIndex]);
 			}
-		}
-		if (contour_polygon) {
-			std::vector<CCVector3> contour_points = contour_polygon->getPoints();
-			std::vector<std::vector<stocker::BdPoint3d>> bd_contour_points_;
-			std::vector<stocker::BdPoint3d> bd_contour_points;
-			if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
-				double user_defined_ground_height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
-				for (auto & pt : contour_points) {
-					bd_contour_points.push_back(stocker::BdPoint3d(pt.x, pt.y, user_defined_ground_height));
+			if (contour_polygon) {
+				std::vector<CCVector3> contour_points = contour_polygon->getPoints();
+				std::vector<std::vector<stocker::BdPoint3d>> bd_contour_points_;
+				std::vector<stocker::BdPoint3d> bd_contour_points;
+				if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
+					double user_defined_ground_height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
+					for (auto & pt : contour_points) {
+						bd_contour_points.push_back(stocker::BdPoint3d(pt.x, pt.y, user_defined_ground_height));
+					}
 				}
+				else {
+					for (auto & pt : contour_points) {
+						bd_contour_points.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
+					}
+				}
+				bd_contour_points_.push_back(bd_contour_points);
+				builder_3d4em.SetFootPrint(bd_contour_points_);
 			}
-			else {
-				for (auto & pt : contour_points) {
-					bd_contour_points.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
-				}
-			}			
-			bd_contour_points_.push_back(bd_contour_points);
-			builder_3d4em.SetOutline(bd_contour_points_);
 		}
 	}
 

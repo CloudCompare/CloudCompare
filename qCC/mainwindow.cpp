@@ -10673,13 +10673,25 @@ void MainWindow::doActionBD3D4EM()
 			std::vector<CCVector3> contour_points = contour_polygon->getPoints();
 			std::vector<std::vector<stocker::BdPoint3d>> bd_contour_points_;
 			std::vector<stocker::BdPoint3d> bd_contour_points;
-			for (auto & pt : contour_points) {
-				bd_contour_points.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
+			if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
+				double user_defined_ground_height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
+				for (auto & pt : contour_points) {
+					bd_contour_points.push_back(stocker::BdPoint3d(pt.x, pt.y, user_defined_ground_height));
+				}
 			}
+			else {
+				for (auto & pt : contour_points) {
+					bd_contour_points.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
+				}
+			}			
 			bd_contour_points_.push_back(bd_contour_points);
 			builder_3d4em.SetOutline(bd_contour_points_);
 		}
-	}		
+	}
+
+	if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
+		builder_3d4em.SetGroundHeight(m_pbdr3d4emDlg->UserDefinedGroundHeight());
+	}
 	
 	std::string output_path = m_pbdr3d4emDlg->OutputFilePathLineEdit->text().toStdString();
 	std::string ini_path = m_pbdr3d4emDlg->ConfigureFilePathLineEdit->text().toStdString();

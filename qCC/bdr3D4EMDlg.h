@@ -31,6 +31,10 @@ public:
 	//! Default constructor
 	explicit bdr3D4EMDlg(QWidget* parent = 0);
 
+	int GroundHeightMode();
+	double UserDefinedGroundHeight();
+	double ground_height;
+
 protected slots:
 
 	void browsePointcloudFilename();

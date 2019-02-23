@@ -54,6 +54,25 @@ void bdr3D4EMDlg::browsePointcloudFilename()
 	}
 }
 
+int bdr3D4EMDlg::GroundHeightMode()
+{
+	if (GroundHeightLowestRadioButton->isChecked()) {
+		return 0;
+	}
+	else if (GroundHeightContourRadioButton->isChecked()) {
+		return 1;
+	}
+	else if (GroundHeightUserRadioButton->isChecked()) {
+		return 2;
+	}
+	return 0;
+}
+
+double bdr3D4EMDlg::UserDefinedGroundHeight()
+{
+	return GroundHeightUserDoubleSpinBox->value();
+}
+
 void bdr3D4EMDlg::browseOutputFilename()
 {
 	QString Filename = 

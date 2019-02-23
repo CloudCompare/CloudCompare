@@ -116,6 +116,74 @@
     </item>
    </layout>
   </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>150</y>
+     <width>261</width>
+     <height>181</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Ground Height</string>
+   </property>
+   <widget class="QRadioButton" name="GroundHeightLowestRadioButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>82</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Lowest Point</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="GroundHeightContourRadioButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>40</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Contour Height</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="GroundHeightUserRadioButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>60</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>User Defined</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="GroundHeightUserDoubleSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>60</y>
+      <width>62</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <resources/>
  <connections>
@@ -148,6 +216,22 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GroundHeightUserRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>GroundHeightUserDoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>220</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>150</x>
+     <y>220</y>
     </hint>
    </hints>
   </connection>

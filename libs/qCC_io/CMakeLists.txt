@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.0)
-cmake_policy(SET CMP0071 NEW)
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )

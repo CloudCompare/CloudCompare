@@ -4,3 +4,6 @@
 [submodule "contrib/libE57Format"]
 	path = contrib/libE57Format
 	url = https://github.com/asmaloney/libE57Format
+[submodule "contrib/dlib"]
+	path = contrib/dlib
+	url = https://github.com/davisking/dlib

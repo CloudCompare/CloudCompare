@@ -19,8 +19,8 @@
 #include <CloudSamplingTools.h>
 
 //local
-#include <DistanceComputationTools.h>
 #include <DgmOctreeReferenceCloud.h>
+#include <DistanceComputationTools.h>
 #include <GenericProgressCallback.h>
 #include <Neighbourhood.h>
 #include <PointCloud.h>
@@ -572,7 +572,7 @@ ReferenceCloud* CloudSamplingTools::sorFilter(	GenericIndexedCloudPersist* input
 	if (!inputOctree)
 	{
 		delete octree;
-		octree = 0;
+		octree = nullptr;
 	}
 
 	return filteredCloud;

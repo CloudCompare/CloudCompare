@@ -1875,7 +1875,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 	else
 	{
 		//we need to build the list of triangles intersecting each cell of the 3D grid
-		if (!intersection.perCellTriangleList.init(gridSize.x, gridSize.y, gridSize.z, 0, 0))
+		if (!intersection.perCellTriangleList.init(gridSize.x, gridSize.y, gridSize.z, 0, nullptr))
 		{
 			return -4;
 		}

@@ -321,14 +321,14 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 
 			return static_cast<GenericIndexedMesh*>(dm);
 		}
-		break;
+
 	case DELAUNAY_2D_BEST_LS_PLANE:
 		{
 			Neighbourhood Yk(cloud);
 			GenericIndexedMesh* mesh = Yk.triangulateOnPlane(false,maxEdgeLength,errorStr);
 			return mesh;
 		}
-		break;
+
 	default:
 		//shouldn't happen
 		assert(false);

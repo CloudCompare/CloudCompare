@@ -146,7 +146,6 @@
 //System
 #include <iostream>
 #include <random>
-#include <QMessageBox>
 
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance  = nullptr;
@@ -5648,10 +5647,10 @@ void MainWindow::doActionResetGUIElementsPos()
 	settings.remove(ccPS::MainWinGeom());
 	settings.remove(ccPS::MainWinState());
 
-	QMessageBox::information(	this,
-								tr("Restart"),
-								tr("To finish the process, you'll have to close and restart CloudCompare"));
-
+	QMessageBox::information( this,
+							  tr("Restart"),
+							  tr("To finish the process, you'll have to close and restart CloudCompare") );
+	
 	//to avoid saving them right away!
 	s_autoSaveGuiElementPos = false;
 }
@@ -5913,9 +5912,9 @@ void MainWindow::toggleExclusiveFullScreen(bool state)
 
 void MainWindow::doActionShowHelpDialog()
 {
-	QMessageBox::information(	this,
-								tr("Documentation"),
-								tr("Please visit http://www.cloudcompare.org/doc"));
+	QMessageBox::information( this,
+							  tr("Documentation"),
+							  tr("Please visit http://www.cloudcompare.org/doc") );
 }
 
 void MainWindow::freezeUI(bool state)
@@ -9278,20 +9277,21 @@ ccColorScalesManager* MainWindow::getColorScalesManager()
 void MainWindow::closeAll()
 {
 	if (!m_ccRoot)
+	{
 		return;
-
-	QMessageBox message_box(	QMessageBox::Question,
-								tr("Close all"),
-								tr("Are you sure you want to remove all loaded entities?"),
-								QMessageBox::Yes | QMessageBox::No,
-								this);
-
-	message_box.setButtonText(QMessageBox::Yes, tr("Yes"));
-	message_box.setButtonText(QMessageBox::No, tr("No"));
-
+	}
+	
+	QMessageBox message_box( QMessageBox::Question,
+							 tr("Close all"),
+							 tr("Are you sure you want to remove all loaded entities?"),
+							 QMessageBox::Yes | QMessageBox::No,
+							 this );
+	
 	if (message_box.exec() == QMessageBox::No)
+	{
 		return;
-
+	}
+	
 	m_ccRoot->unloadAll();
 
 	redrawAll(false);

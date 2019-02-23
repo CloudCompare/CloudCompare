@@ -5700,22 +5700,20 @@ void MainWindow::showEvent(QShowEvent* event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-	//if (m_uiFrozen)
-	//{
-	//	ccConsole::Error("Close current dialog/interactor first!");
-	//	event->ignore();
-	//}
-	//else
-	QMessageBox message_box(	QMessageBox::Question,
-								tr("Quit"),
-								tr("Are you sure you want to quit?"),
-								QMessageBox::Ok | QMessageBox::Cancel,
-								this);
-	message_box.setButtonText(QMessageBox::Ok, tr("Ok"));
-	message_box.setButtonText(QMessageBox::Cancel, tr("Cancel"));
+	// If we don't have anything displayed, then just close...
+	if (m_ccRoot && (m_ccRoot->getRootEntity()->getChildrenNumber() == 0))
 	{
-		if (m_ccRoot && m_ccRoot->getRootEntity()->getChildrenNumber() == 0
-			|| message_box.exec() == QMessageBox::Ok)
+		event->accept();
+	}
+	else	// ...otherwise confirm
+	{
+		QMessageBox message_box( QMessageBox::Question,
+								 tr("Quit"),
+								 tr("Are you sure you want to quit?"),
+								 QMessageBox::Ok | QMessageBox::Cancel,
+								 this);
+		
+		if ( message_box.exec() == QMessageBox::Ok )
 		{
 			event->accept();
 		}

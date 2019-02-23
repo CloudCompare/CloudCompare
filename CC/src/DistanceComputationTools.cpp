@@ -1627,21 +1627,20 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 										trianglesToTest.resize(trianglesToTestCapacity);
 									}
 									//let's test all the triangles that intersect this cell
-									for (std::size_t p = 0; p < triList->indexes.size(); ++p)
+									for (unsigned int triIndex : triList->indexes)
 									{
 										if (!processTriangles.empty())
 										{
-											const unsigned& indexTri = triList->indexes[p];
 											//if the triangles has not been processed yet
-											if (processTriangles[indexTri] != cellIndex)
+											if (processTriangles[triIndex] != cellIndex)
 											{
-												trianglesToTest[trianglesToTestCount++] = indexTri;
-												processTriangles[indexTri] = cellIndex;
+												trianglesToTest[trianglesToTestCount++] = triIndex;
+												processTriangles[triIndex] = cellIndex;
 											}
 										}
 										else
 										{
-											trianglesToTest[trianglesToTestCount++] = triList->indexes[p];
+											trianglesToTest[trianglesToTestCount++] = triIndex;
 										}
 									}
 								}
@@ -1660,21 +1659,20 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 										trianglesToTest.resize(trianglesToTestCapacity);
 									}
 									//let's test all the triangles that intersect this cell
-									for (std::size_t p = 0; p < triList->indexes.size(); ++p)
+									for (unsigned int triIndex : triList->indexes)
 									{
 										if (!processTriangles.empty())
 										{
-											const unsigned& indexTri = triList->indexes[p];
 											//if the triangles has not been processed yet
-											if (processTriangles[indexTri] != cellIndex)
+											if (processTriangles[triIndex] != cellIndex)
 											{
-												trianglesToTest[trianglesToTestCount++] = indexTri;
-												processTriangles[indexTri] = cellIndex;
+												trianglesToTest[trianglesToTestCount++] = triIndex;
+												processTriangles[triIndex] = cellIndex;
 											}
 										}
 										else
 										{
-											trianglesToTest[trianglesToTestCount++] = triList->indexes[p];
+											trianglesToTest[trianglesToTestCount++] = triIndex;
 										}
 									}
 								}

@@ -254,12 +254,12 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 	//we compute the Chi2 distance with the remaining classes
 	double D2 = 0.0;
 	{
-		for (Chi2ClassList::iterator it = classes.begin(); it != classes.end(); ++it)
+		for (auto & klass : classes)
 		{
-			double npi = it->pi * numberOfValidValues;
+			double npi = klass.pi * numberOfValidValues;
 			if (npi != 0.0)
 			{
-				double temp = static_cast<double>(it->n) - npi;
+				double temp = static_cast<double>(klass.n) - npi;
 				D2 += temp*(temp/npi);
 				if (D2 >= CHI2_MAX)
 				{

@@ -16,6 +16,7 @@ file( GLOB TRANSLATION_FILES ${CMAKE_CURRENT_LIST_DIR}/*.ts )
 
 qt5_add_translation( TRANSLATION_QM ${TRANSLATION_FILES} )
 add_custom_target( translations ALL DEPENDS ${TRANSLATION_QM} )
+set_target_properties(translations PROPERTIES FOLDER "translations") 
 
 # For each language we have .ts files for, process Qt's qm files
 # (they need to be concatenated into one file)
@@ -59,6 +60,7 @@ foreach( TRANSLATION_FILE ${TRANSLATION_FILES} )
 			)
 		
 		add_custom_target( translations_${LANG_CODE} ALL DEPENDS qt_${LANG_CODE}.qm )
+		set_target_properties(translations_${LANG_CODE} PROPERTIES FOLDER "translations") 
 	endif()
 endforeach()
 

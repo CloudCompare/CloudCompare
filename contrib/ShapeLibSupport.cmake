@@ -5,6 +5,7 @@
 OPTION( OPTION_USE_SHAPE_LIB "Build with ShapeLib (SHP files support)" OFF )
 if( ${OPTION_USE_SHAPE_LIB} )
 	add_subdirectory(contrib/shapelib)
+	set_target_properties(SHAPELIB PROPERTIES FOLDER "3rdparty")
 	include_directories( ${SHAPELIB_SOURCE_DIR} )
 endif()
 

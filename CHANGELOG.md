@@ -1,10 +1,10 @@
 CloudCompare Version History
 ============================
 
-v2.10.2 (Zephyrus) - XX/XX/2019
+v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------
 
-- Bug fixes:
+- Bug fixes
   - Rasterize tool:
     - interpolating empty cells with the 'resample input cloud' option enabled would make CC crash
     - change layout so it works better on lower-resolution monitors
@@ -21,7 +21,12 @@ v2.10.2 (Zephyrus) - XX/XX/2019
     - fix pixel width & height
 
 
-- macOS note:
+- Translations
+  - updated Russian translation (thanks to Eugene Kalabin)
+  - added Japanese translation (thanks to the translators at CCCP)
+
+
+- macOS Note
   - I (Andy) had to update ffmpeg, which is used by the animation plugin, for this patch release. Normally I would wait for 2.11, but homebrew changed their policies and started including everything in their build, so I can no longer use it. The good news is that compiling ffmpeg myself and statically linking shaves about 30 MB off the size of CloudCompare.app...
   - it has been reported that this fixes a potential crash in ffmpeg's libavutil.56.dylib
 

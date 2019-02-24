@@ -10,3 +10,5 @@ file( GLOB source_list src/*.cpp )
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::OpenGL Qt5::OpenGLExtensions )
+
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "libs") 

@@ -9,7 +9,7 @@ file( GLOB header_list *.h)
 file( GLOB source_list *.cpp)
 
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} )
-
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "libs") 
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 

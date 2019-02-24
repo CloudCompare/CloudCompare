@@ -33,7 +33,10 @@ add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${impl_list} $
 
 # Add custom preprocessor definitions
 if (WIN32)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
+	if ( COMPILE_CC_CORE_LIB_SHARED )
+		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL )
+	endif()
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS QCC_DB_USE_AS_DLL )
 endif()
 
 #define the PCL_VER_1_6_OR_OLDER preprocessor to compile qPCL with older versions of PCL

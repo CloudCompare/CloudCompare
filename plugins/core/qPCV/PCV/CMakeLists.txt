@@ -20,4 +20,4 @@ if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL )
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "3rdparty") 

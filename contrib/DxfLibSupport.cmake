@@ -8,7 +8,7 @@ if( ${OPTION_USE_DXF_LIB} )
 	set( DXF_LIB_DIR "contrib/dxflib-3.17.0"  CACHE PATH "DXF lib path" )
 	add_subdirectory( "${DXF_LIB_DIR}" )
 	include_directories( "${DXF_LIB_DIR}/src" )
-	set_target_properties(DXF_LIB PROPERTIES FOLDER "plugins")
+	set_target_properties(DXF_LIB PROPERTIES FOLDER "3rdparty")
 endif()
 
 # Link project with dxflib library

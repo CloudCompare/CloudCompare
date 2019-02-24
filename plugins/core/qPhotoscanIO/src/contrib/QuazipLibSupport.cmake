@@ -36,7 +36,7 @@ file(GLOB source_list ${GLOBAL_PATH}/*.c ${GLOBAL_PATH}/*.cpp)
 file(GLOB header_list ${GLOBAL_PATH}/*.h)
 
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
-
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "3rdparty") 
 # Zlib
 target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES})
 # Qt

@@ -11,27 +11,34 @@ v2.11 (Anoia) - (in development)
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
 
-v2.10.2 (Zephyrus) - (in development)
+v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------
 
-- Bug fixes:
-  - the 'EXTRACT_VERTICES' command line option was not accessible
+- Bug fixes
   - Rasterize tool:
     - interpolating empty cells with the 'resample input cloud' option enabled would make CC crash
     - change layout so it works better on lower-resolution monitors
-  - Command line: calling the -RASTERIZE option would cause an infinite loop
-  - Command line: the Global Shift & Scale information of the input cloud was not transferred to the output cloud of the -RASTERIZE tool
+  - Command line:
+    - the 'EXTRACT_VERTICES' option was not accessible
+    - calling the -RASTERIZE option would cause an infinite loop
+    - the Global Shift & Scale information of the input cloud was not transferred to the output cloud of the -RASTERIZE tool
   - glitch fix: the 3D window was not properly updated after rendering the screen as a file with a zoom > 1
   - glitch fix: the name of the entity was not displayed at the right place when rendering the screen as a file with a zoom > 1
-  - the Surface and Volume Density features were potentially outputing wrong values (the wrong source scalar field was used when applying the dimensional scale!)
+  - the Surface and Volume Density features were potentially outputting incorrect values (the wrong source scalar field was used when applying the dimensional scale!)
   - the chosen octree level could be sub-optimal in some very particular cases
   - E57 pinhole images:
     - fix sensor array information (it was displaying total image size for the width of the image)
     - fix pixel width & height
 
 
-- macOS note:
+- Translations
+  - updated Russian translation (thanks to Eugene Kalabin)
+  - added Japanese translation (thanks to the translators at CCCP)
+
+
+- macOS Note
   - I (Andy) had to update ffmpeg, which is used by the animation plugin, for this patch release. Normally I would wait for 2.11, but homebrew changed their policies and started including everything in their build, so I can no longer use it. The good news is that compiling ffmpeg myself and statically linking shaves about 30 MB off the size of CloudCompare.app...
+  - it has been reported that this fixes a potential crash in ffmpeg's libavutil.56.dylib
 
 v2.10.1 (Zephyrus) - 01/16/2019
 ----------------------

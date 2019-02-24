@@ -10682,7 +10682,7 @@ void MainWindow::doActionBD3D4EM()
 			int selectedIndex = 0;
 			//ask the user to choose a polyline
 			selectedIndex = ccItemSelectionDlg::SelectEntity(_container, selectedIndex, this, "please select the contour polygon");
-			if (selectedIndex > 0 && selectedIndex < _container.size()) {
+			if (selectedIndex >= 0 && selectedIndex < _container.size()) {
 				contour_polygon = ccHObjectCaster::ToPolyline(_container[selectedIndex]);
 			}
 			if (contour_polygon) {

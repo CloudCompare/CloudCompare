@@ -7,6 +7,7 @@ echo "Updating translation files"
 %call lupdate
 cd ..\..
 %QT_DIR%\lupdate.exe %SRC_DIRS% -no-obsolete -ts qCC\translations\CloudCompare_fr.ts
+%QT_DIR%\lupdate.exe %SRC_DIRS% -no-obsolete -ts qCC\translations\CloudCompare_ja.ts
 %QT_DIR%\lupdate.exe %SRC_DIRS% -no-obsolete -ts qCC\translations\CloudCompare_pt.ts
 %QT_DIR%\lupdate.exe %SRC_DIRS% -no-obsolete -ts qCC\translations\CloudCompare_ru.ts
 cd scripts\windows

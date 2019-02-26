@@ -18,58 +18,58 @@
 #include "ccPropertiesTreeDelegate.h"
 
 //Local
-#include "sfEditDlg.h"
+#include "ccColorScaleEditorDlg.h"
+#include "ccColorScaleSelector.h"
+#include "mainwindow.h"
 #include "matrixDisplayDlg.h"
-#include "../mainwindow.h"
-#include "../ccColorScaleEditorDlg.h"
-#include "../ccColorScaleSelector.h"
+#include "sfEditDlg.h"
 
 //qCC_glWindow
 #include <ccGLWindow.h>
 #include <ccGuiParameters.h>
 
 //qCC_db
-#include <ccHObjectCaster.h>
-#include <ccHObject.h>
-#include <ccPointCloud.h>
-#include <ccMesh.h>
-#include <ccPlane.h>
-#include <ccPolyline.h>
-#include <ccSubMesh.h>
-#include <ccOctree.h>
-#include <ccKdTree.h>
-#include <ccImage.h>
 #include <cc2DLabel.h>
 #include <cc2DViewportLabel.h>
 #include <cc2DViewportObject.h>
-#include <ccGBLSensor.h>
-#include <ccCameraSensor.h>
-#include <ccMaterialSet.h>
 #include <ccAdvancedTypes.h>
-#include <ccGenericPrimitive.h>
-#include <ccSphere.h>
+#include <ccCameraSensor.h>
+#include <ccColorScalesManager.h>
 #include <ccCone.h>
 #include <ccFacet.h>
-#include <ccSensor.h>
+#include <ccGBLSensor.h>
+#include <ccGenericPrimitive.h>
+#include <ccHObject.h>
+#include <ccHObjectCaster.h>
+#include <ccImage.h>
 #include <ccIndexedTransformationBuffer.h>
+#include <ccKdTree.h>
+#include <ccMaterialSet.h>
+#include <ccMesh.h>
+#include <ccOctree.h>
+#include <ccPlane.h>
+#include <ccPointCloud.h>
+#include <ccPolyline.h>
 #include <ccScalarField.h>
-#include <ccColorScalesManager.h>
+#include <ccSensor.h>
+#include <ccSphere.h>
+#include <ccSubMesh.h>
 
 //Qt
-#include <QStandardItemModel>
 #include <QAbstractItemView>
-#include <QSpinBox>
-#include <QSlider>
-#include <QComboBox>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QHBoxLayout>
 #include <QLocale>
 #include <QPushButton>
 #include <QScrollBar>
-#include <QHBoxLayout>
+#include <QSlider>
+#include <QSpinBox>
+#include <QStandardItemModel>
 #include <QToolButton>
 
 //System
-#include <assert.h>
+#include <cassert>
 
 // Default 'None' string
 static const QString c_noneString = QString("None");
@@ -86,7 +86,7 @@ static const QString c_defaultPolyWidthSizeString = QString("Default Width");
 static QString SEPARATOR_STYLESHEET("QLabel { background-color : darkGray; color : white; }");
 
 //Shortcut to create a delegate item
-QStandardItem* ITEM(QString name,
+static QStandardItem* ITEM(const QString& name,
 	Qt::ItemFlag additionalFlags = Qt::NoItemFlags,
 	ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role = ccPropertiesTreeDelegate::OBJECT_NO_PROPERTY)
 {
@@ -101,7 +101,7 @@ QStandardItem* ITEM(QString name,
 }
 
 //Shortcut to create a checkable delegate item
-QStandardItem* CHECKABLE_ITEM(bool checkState, ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role)
+static QStandardItem* CHECKABLE_ITEM(bool checkState, ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role)
 {
 	QStandardItem* item = ITEM("", Qt::ItemIsUserCheckable, role);
 	//check state
@@ -111,7 +111,7 @@ QStandardItem* CHECKABLE_ITEM(bool checkState, ccPropertiesTreeDelegate::CC_PROP
 }
 
 //Shortcut to create a persistent editor item
-QStandardItem* PERSISTENT_EDITOR(ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role)
+static QStandardItem* PERSISTENT_EDITOR(ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role)
 {
 	return ITEM(QString(), Qt::ItemIsEditable, role);
 }
@@ -120,7 +120,7 @@ ccPropertiesTreeDelegate::ccPropertiesTreeDelegate(QStandardItemModel* model,
 	QAbstractItemView* view,
 	QObject *parent)
 	: QStyledItemDelegate(parent)
-	, m_currentObject(0)
+	, m_currentObject(nullptr)
 	, m_model(model)
 	, m_view(view)
 {
@@ -196,9 +196,13 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	}
 
 	if (m_currentObject->isHierarchy())
+	{
 		if (!m_currentObject->isA(CC_TYPES::VIEWPORT_2D_LABEL)) //don't need to display this kind of info for viewport labels!
+		{
 			fillWithHObject(m_currentObject);
-
+		}
+	}
+	
 	if (m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		fillWithPointCloud(ccHObjectCaster::ToGenericPointCloud(m_currentObject));
@@ -311,16 +315,15 @@ void ccPropertiesTreeDelegate::appendRow(QStandardItem* leftItem, QStandardItem*
 	if (m_model)
 	{
 		//append row
-		QList<QStandardItem*> rowItems;
-		{
-			rowItems.push_back(leftItem);
-			rowItems.push_back(rightItem);
-		}
+		QList<QStandardItem*> rowItems{ leftItem, rightItem };
+
 		m_model->appendRow(rowItems);
 
 		//the persistent editor (if any) is always the right one!
-		if (openPersistentEditor)
+		if (openPersistentEditor && (m_view != nullptr))
+		{
 			m_view->openPersistentEditor(m_model->index(m_model->rowCount() - 1, 1));
+		}
 	}
 }
 
@@ -332,13 +335,16 @@ void ccPropertiesTreeDelegate::appendWideRow(QStandardItem* item, bool openPersi
 	if (m_model)
 	{
 		m_model->appendRow(item);
-		if (openPersistentEditor)
+		
+		if (openPersistentEditor && (m_view != nullptr))
+		{
 			m_view->openPersistentEditor(m_model->index(m_model->rowCount() - 1, 0));
+		}
 	}
 }
 
 
-void ccPropertiesTreeDelegate::addSeparator(QString title)
+void ccPropertiesTreeDelegate::addSeparator(const QString& title)
 {
 	if (m_model)
 	{
@@ -348,7 +354,11 @@ void ccPropertiesTreeDelegate::addSeparator(QString title)
 		leftItem->setData(TREE_VIEW_HEADER);
 		leftItem->setAccessibleDescription(title);
 		m_model->appendRow(leftItem);
-		m_view->openPersistentEditor(m_model->index(m_model->rowCount() - 1, 0));
+		
+		if ( m_view != nullptr )
+		{
+			m_view->openPersistentEditor(m_model->index(m_model->rowCount() - 1, 0));
+		}
 	}
 }
 
@@ -357,28 +367,26 @@ void ccPropertiesTreeDelegate::fillWithMetaData(ccObject* _obj)
 	assert(_obj && m_model);
 
 	const QVariantMap& metaData = _obj->metaData();
-	if (metaData.size() == 0)
+	if (metaData.empty())
 		return;
 
 	addSeparator("Meta data");
 
 	for (QVariantMap::ConstIterator it = metaData.constBegin(); it != metaData.constEnd(); ++it)
 	{
+		QVariant var = it.value();
 		QString value;
-		if (it.value().canConvert(QVariant::String))
+		
+		if (var.canConvert(QVariant::String))
 		{
-			QVariant var = it.value();
 			var.convert(QVariant::String);
 			value = var.toString();
 		}
 		else
 		{
-			value = QString(QVariant::typeToName(it.value().type()));
+			value = QString(QVariant::typeToName(var.type()));
 		}
-		//switch (var.type())
-		//{
-		//	QVariant::Bool
-		//}
+
 		appendRow(ITEM(it.key()), ITEM(value));
 	}
 }
@@ -701,7 +709,7 @@ void ccPropertiesTreeDelegate::fillWithPointOctree(ccOctree* _obj)
 	assert(level > 0 && level <= ccOctree::MAX_OCTREE_LEVEL);
 
 	//cell size
-	PointCoordinateType cellSize = _obj->getCellSize(static_cast<unsigned char>(level));
+	const double cellSize = static_cast<double>(_obj->getCellSize(static_cast<unsigned char>(level)));
 	appendRow(ITEM("Cell size"), ITEM(QString::number(cellSize)));
 
 	//cell count
@@ -709,7 +717,7 @@ void ccPropertiesTreeDelegate::fillWithPointOctree(ccOctree* _obj)
 	appendRow(ITEM("Cell count"), ITEM(QLocale(QLocale::English).toString(cellCount)));
 
 	//total volume of filled cells
-	appendRow(ITEM("Filled volume"), ITEM(QString::number((double)cellCount*pow((double)cellSize, 3.0))));
+	appendRow(ITEM("Filled volume"), ITEM(QString::number(cellCount*pow(cellSize, 3.0))));
 }
 
 void ccPropertiesTreeDelegate::fillWithPointKdTree(ccKdTree* _obj)
@@ -1026,9 +1034,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 		comboBox->addItem(c_noneString);
 
-		for (unsigned i = 0; i < glWindows.size(); ++i)
+		for (auto &glWindow : glWindows)
 		{
-			comboBox->addItem(glWindows[i]->windowTitle());
+			comboBox->addItem(glWindow->windowTitle());
 		}
 
 		connect(comboBox, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
@@ -1494,7 +1502,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 		assert(cloud);
-		ccScalarField* sf = cloud ? cloud->getCurrentDisplayedScalarField() : 0;
+		ccScalarField* sf = cloud ? cloud->getCurrentDisplayedScalarField() : nullptr;
 		if (sf)
 			SetSpinBoxValue(editor, sf->getColorRampSteps(), true);
 		break;
@@ -1903,14 +1911,14 @@ void ccPropertiesTreeDelegate::spawnColorRampEditor()
 
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 	assert(cloud);
-	ccScalarField* sf = (cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : 0);
+	ccScalarField* sf = (cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : nullptr);
 	if (sf)
 	{
 		ccGLWindow* glWindow = static_cast<ccGLWindow*>(cloud->getDisplay());
 		ccColorScaleEditorDialog* editorDialog = new ccColorScaleEditorDialog(ccColorScalesManager::GetUniqueInstance(),
 			MainWindow::TheInstance(),
 			sf->getColorScale(),
-			glWindow ? glWindow->asWidget() : 0);
+			glWindow ? glWindow->asWidget() : nullptr);
 		editorDialog->setAssociatedScalarField(sf);
 		if (editorDialog->exec())
 		{
@@ -1953,7 +1961,7 @@ void ccPropertiesTreeDelegate::colorScaleChanged(int pos)
 	//get current SF
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 	assert(cloud);
-	ccScalarField* sf = cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : 0;
+	ccScalarField* sf = cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : nullptr;
 	if (sf && sf->getColorScale() != colorScale)
 	{
 		sf->setColorScale(colorScale);

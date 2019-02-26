@@ -24,29 +24,29 @@
 //Qt
 #include <QStyledItemDelegate>
 
-class ccHObject;
-class ccGenericPointCloud;
-class ccPolyline;
-class ccGenericMesh;
-class ccGenericPrimitive;
-class ccOctree;
-class ccKdTree;
-class ccImage;
-class ccGBLSensor;
-class ccCameraSensor;
-class ccMaterialSet;
 class cc2DLabel;
 class cc2DViewportObject;
+class ccCameraSensor;
 class ccFacet;
-class ccSensor;
+class ccGBLSensor;
+class ccGenericMesh;
+class ccGenericPointCloud;
+class ccGenericPrimitive;
+class ccHObject;
+class ccImage;
 class ccIndexedTransformationBuffer;
-class ccShiftedObject;
-class CCShareable;
+class ccKdTree;
+class ccMaterialSet;
+class ccOctree;
 class ccPlanarEntityInterface;
+class ccPolyline;
+class ccSensor;
+class CCShareable;
+class ccShiftedObject;
 
-class QStandardItemModel;
-class QStandardItem;
 class QAbstractItemView;
+class QStandardItem;
+class QStandardItemModel;
 
 //! GUI properties list dialog element
 class ccPropertiesTreeDelegate : public QStyledItemDelegate
@@ -105,18 +105,18 @@ public:
 	};
 
 	//! Default constructor
-	ccPropertiesTreeDelegate(QStandardItemModel* _model, QAbstractItemView* _view, QObject *parent = 0);
+	ccPropertiesTreeDelegate(QStandardItemModel* _model, QAbstractItemView* _view, QObject *parent = nullptr);
 
 	//! Default destructor
-	virtual ~ccPropertiesTreeDelegate();
+	~ccPropertiesTreeDelegate() override;
 
 	//inherited from QStyledItemDelegate
-	virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index ) const;
-	virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-	//virtual bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
-	virtual void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
-	virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
-	virtual void unbind();
+	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index ) const override;
+	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+	void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+	
+	void unbind();
 
 	//! Fill property view with QItems corresponding to object's type
 	void fillModel(ccHObject* hObject);
@@ -159,7 +159,7 @@ protected slots:
 
 protected:
 
-	void addSeparator(QString title);
+	void addSeparator(const QString& title);
 	void appendRow(QStandardItem* leftItem, QStandardItem* rightItem, bool openPersistentEditor = false);
 	void appendWideRow(QStandardItem* item, bool openPersistentEditor = true);
 

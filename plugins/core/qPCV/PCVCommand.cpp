@@ -49,7 +49,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 		{
 			cmd.arguments().pop_front();
 			bool conversionOk = false;
-			nRays = cmd.arguments().takeFirst().toFloat(&conversionOk);
+			nRays = cmd.arguments().takeFirst().toUInt(&conversionOk);
 			if (!conversionOk)
 			{
 				return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_PCV_N_RAYS));
@@ -59,7 +59,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 		{
 			cmd.arguments().pop_front();
 			bool conversionOk = false;
-			resolution = cmd.arguments().takeFirst().toFloat(&conversionOk);
+			resolution = cmd.arguments().takeFirst().toUInt(&conversionOk);
 			if (!conversionOk)
 			{
 				return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_PCV_RESOLUTION));

@@ -231,7 +231,8 @@ int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPer
 
 	int result = 0;
 
-	if (comparedOctree->executeFunctionForAllCellsAtLevel(	params.octreeLevel,
+	if ( (comparedOctree != nullptr) &&
+		 comparedOctree->executeFunctionForAllCellsAtLevel(	params.octreeLevel,
 															params.localModel == NO_MODEL ? computeCellHausdorffDistance : computeCellHausdorffDistanceWithLocalModel,
 															additionalParameters,
 															params.multiThread,
@@ -1626,21 +1627,20 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 										trianglesToTest.resize(trianglesToTestCapacity);
 									}
 									//let's test all the triangles that intersect this cell
-									for (std::size_t p = 0; p < triList->indexes.size(); ++p)
+									for (unsigned int triIndex : triList->indexes)
 									{
 										if (!processTriangles.empty())
 										{
-											const unsigned& indexTri = triList->indexes[p];
 											//if the triangles has not been processed yet
-											if (processTriangles[indexTri] != cellIndex)
+											if (processTriangles[triIndex] != cellIndex)
 											{
-												trianglesToTest[trianglesToTestCount++] = indexTri;
-												processTriangles[indexTri] = cellIndex;
+												trianglesToTest[trianglesToTestCount++] = triIndex;
+												processTriangles[triIndex] = cellIndex;
 											}
 										}
 										else
 										{
-											trianglesToTest[trianglesToTestCount++] = triList->indexes[p];
+											trianglesToTest[trianglesToTestCount++] = triIndex;
 										}
 									}
 								}
@@ -1659,21 +1659,20 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 										trianglesToTest.resize(trianglesToTestCapacity);
 									}
 									//let's test all the triangles that intersect this cell
-									for (std::size_t p = 0; p < triList->indexes.size(); ++p)
+									for (unsigned int triIndex : triList->indexes)
 									{
 										if (!processTriangles.empty())
 										{
-											const unsigned& indexTri = triList->indexes[p];
 											//if the triangles has not been processed yet
-											if (processTriangles[indexTri] != cellIndex)
+											if (processTriangles[triIndex] != cellIndex)
 											{
-												trianglesToTest[trianglesToTestCount++] = indexTri;
-												processTriangles[indexTri] = cellIndex;
+												trianglesToTest[trianglesToTestCount++] = triIndex;
+												processTriangles[triIndex] = cellIndex;
 											}
 										}
 										else
 										{
-											trianglesToTest[trianglesToTestCount++] = triList->indexes[p];
+											trianglesToTest[trianglesToTestCount++] = triIndex;
 										}
 									}
 								}
@@ -1874,7 +1873,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 	else
 	{
 		//we need to build the list of triangles intersecting each cell of the 3D grid
-		if (!intersection.perCellTriangleList.init(gridSize.x, gridSize.y, gridSize.z, 0, 0))
+		if (!intersection.perCellTriangleList.init(gridSize.x, gridSize.y, gridSize.z, 0, nullptr))
 		{
 			return -4;
 		}

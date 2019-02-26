@@ -30,9 +30,9 @@ ReferenceCloud::ReferenceCloud(GenericIndexedCloudPersist* associatedCloud)
 }
 
 ReferenceCloud::ReferenceCloud(const ReferenceCloud& refCloud)
-	: m_globalIterator(0)
+	: m_theIndexes(refCloud.m_theIndexes) //we don't catch any exception so that the caller of the constructor can do it!
+	, m_globalIterator(0)
 	, m_theAssociatedCloud(refCloud.m_theAssociatedCloud)
-	, m_theIndexes(refCloud.m_theIndexes) //we don't catch any exception so that the caller of the constructor can do it!
 {
 }
 

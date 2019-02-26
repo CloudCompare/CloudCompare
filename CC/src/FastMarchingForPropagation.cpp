@@ -167,9 +167,10 @@ bool FastMarchingForPropagation::extractPropagatedPoints(ReferenceCloud* points)
 
 	points->clear();
 
-	for (unsigned i = 0; i < m_activeCells.size(); ++i)
+	for (unsigned int activeCellIndex : m_activeCells)
 	{
-		PropagationCell* aCell = static_cast<PropagationCell*>(m_theGrid[m_activeCells[i]]);
+		PropagationCell* aCell = static_cast<PropagationCell*>(m_theGrid[activeCellIndex]);
+		
 		if (!m_octree->getPointsInCell(aCell->cellCode, m_gridLevel, points, true, false))
 			return false;
 	}
@@ -192,9 +193,9 @@ bool FastMarchingForPropagation::setPropagationTimingsAsDistances()
 
 	ReferenceCloud Yk(m_octree->associatedCloud());
 
-	for (unsigned i=0; i<m_activeCells.size(); ++i)
+	for (unsigned int activeCellIndex : m_activeCells)
 	{
-		PropagationCell* aCell = static_cast<PropagationCell*>(m_theGrid[m_activeCells[i]]);
+		PropagationCell* aCell = static_cast<PropagationCell*>(m_theGrid[activeCellIndex]);
 	
 		if (!m_octree->getPointsInCell(aCell->cellCode,m_gridLevel,&Yk,true))
 		{
@@ -268,9 +269,9 @@ void FastMarchingForPropagation::findPeaks()
 
 					//theCell->state = ACTIVE_CELL;
 
-					for (unsigned n=0; n<CC_FM_MAX_NUMBER_OF_NEIGHBOURS; ++n)
+					for (int n : m_neighboursIndexShift)
 					{
-						const PropagationCell* nCell = reinterpret_cast<const PropagationCell*>(m_theGrid[index+m_neighboursIndexShift[n]]);
+						const PropagationCell* nCell = reinterpret_cast<const PropagationCell*>(m_theGrid[index+n]);
 						if (nCell)
 						{
 							if (nCell->f > theCell->f)

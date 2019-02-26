@@ -191,9 +191,8 @@ bool FastMarching::setSeedCell(const Tuple3i& pos)
 
 void FastMarching::initTrialCells()
 {
-	for (std::size_t j = 0; j < m_activeCells.size(); ++j)
+	for (unsigned int index : m_activeCells)
 	{
-		const unsigned& index = m_activeCells[j];
 		Cell* aCell = m_theGrid[index];
 
 		assert(aCell != nullptr);

@@ -14,5 +14,6 @@ TRANSLATION_DIR="qCC/translations"
 echo "Updating translation files"
 
 "${LUPDATE}" ${SRC_DIRS} -no-obsolete -ts "${TRANSLATION_DIR}"/CloudCompare_fr.ts
+"${LUPDATE}" ${SRC_DIRS} -no-obsolete -ts "${TRANSLATION_DIR}"/CloudCompare_ja.ts
 "${LUPDATE}" ${SRC_DIRS} -no-obsolete -ts "${TRANSLATION_DIR}"/CloudCompare_pt.ts
 "${LUPDATE}" ${SRC_DIRS} -no-obsolete -ts "${TRANSLATION_DIR}"/CloudCompare_ru.ts

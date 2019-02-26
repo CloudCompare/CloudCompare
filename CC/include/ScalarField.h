@@ -30,7 +30,7 @@ namespace CCLib
 {
 
 //! A simple scalar field (to be associated to a point cloud)
-/** A mono-dimensionnal array of scalar values. It has also specific
+/** A monodimensional array of scalar values. It has also specific
 	parameters for display purposes.
 
 	Invalid values can be represented by NAN_VALUE.

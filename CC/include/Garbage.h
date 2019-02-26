@@ -110,9 +110,9 @@ public:
 	~Garbage()
 	{
 		//dispose of left over
-		for (std::unordered_set<CCLib::ScalarField*>::iterator it = m_items.begin(); it != m_items.end(); ++it)
+		for (auto item : m_items)
 		{
-			(*it)->release();
+			item->release();
 		}
 		m_items.clear();
 	}

@@ -129,7 +129,7 @@ void RegistrationTools::FilterTransformation(	const ScaledTransformation& inTran
 struct ModelCloud
 {
 	ModelCloud() : cloud(nullptr), weights(nullptr) {}
-	ModelCloud(const ModelCloud& m) : cloud(m.cloud), weights(m.weights) {}
+	ModelCloud(const ModelCloud& m) = default;
 	GenericIndexedCloudPersist* cloud;
 	ScalarField* weights;
 };

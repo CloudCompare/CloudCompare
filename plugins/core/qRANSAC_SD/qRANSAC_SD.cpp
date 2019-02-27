@@ -105,6 +105,7 @@ void doDetection()
 
 //for parameters persistence
 static unsigned s_supportPoints    = 500;	// this is the minimal numer of points required for a primitive
+static double	s_bitmap = 2.0;
 static double   s_maxNormalDev_deg = 25.0;	// maximal normal deviation from ideal shape (in degrees)
 static double   s_proba            = 0.01;	// probability that no better candidate was overlooked during sampling
 static bool s_primEnabled[5] = {true,true,true,false,false};
@@ -210,6 +211,7 @@ void qRansacSD::doAction()
 		s_supportPoints = rsdDlg.supportPointsSpinBox->value();
 		s_maxNormalDev_deg = rsdDlg.maxNormDevAngleSpinBox->value();
 		s_proba = rsdDlg.probaDoubleSpinBox->value();
+		s_bitmap = rsdDlg.bitmapEpsilonDoubleSpinBox->value();
 
 		//consistency check
 		{
@@ -377,6 +379,11 @@ void qRansacSD::doAction()
 		{
 			const PrimitiveShape* shape = it->first;
 			unsigned shapePointsCount = static_cast<unsigned>(it->second);
+
+			if (shapePointsCount < s_supportPoints)	{
+				m_app->dispToConsole("[Ransac Shape Detection] - shape points count small than the min support number", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				continue;
+			}
 
 			//too many points?!
 			if (shapePointsCount > count)

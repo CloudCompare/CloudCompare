@@ -129,7 +129,13 @@ signals:
 	void ccObjectAppearanceChanged(ccHObject* hObject) const;
 	void ccObjectAndChildrenAppearanceChanged(ccHObject* hObject) const;
 
-protected slots:
+private:
+	static const char* s_noneString;
+	static const char* s_rgbColor;
+	static const char* s_sfColor;
+	static const char* s_defaultPointSizeString;
+	static const char* s_defaultPolyWidthSizeString;
+	
 	void updateItem(QStandardItem*);
 	void scalarFieldChanged(int);
 	void colorScaleChanged(int);
@@ -157,8 +163,6 @@ protected slots:
 	void polyineWidthChanged(int);
 	void trihedronsScaleChanged(double);
 
-protected:
-
 	void addSeparator(const QString& title);
 	void appendRow(QStandardItem* leftItem, QStandardItem* rightItem, bool openPersistentEditor = false);
 	void appendWideRow(QStandardItem* item, bool openPersistentEditor = true);
@@ -184,7 +188,9 @@ protected:
 	void fillWithShareable(CCShareable*);
 	void fillWithMetaData(ccObject*);
 	void fillWithShifted(ccShiftedObject*);
-	template<class Type, int N, class ComponentType> void fillWithCCArray(ccArray<Type, N, ComponentType>*);
+	
+	template<class Type, int N, class ComponentType>
+	void fillWithCCArray(ccArray<Type, N, ComponentType>*);
 
 	//! Returns whether the editor is wide (i.e. spans on two columns) or not
 	bool isWideEditor(int itemData) const;

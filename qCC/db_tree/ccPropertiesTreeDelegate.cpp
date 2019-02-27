@@ -824,7 +824,7 @@ void ccPropertiesTreeDelegate::fillWithTransBuffer(ccIndexedTransformationBuffer
 	appendRow(ITEM( tr( "Count" ) ), ITEM(QString::number(_obj->size())));
 
 	//Show path as polyline
-	appendRow(ITEM( tr( "Show path" ) ), CHECKABLE_ITEM(_obj->isPathShonwAsPolyline(), OBJECT_SHOW_TRANS_BUFFER_PATH));
+	appendRow(ITEM( tr( "Show path" ) ), CHECKABLE_ITEM(_obj->isPathShownAsPolyline(), OBJECT_SHOW_TRANS_BUFFER_PATH));
 
 	//Show trihedrons
 	appendRow(ITEM( tr( "Show trihedrons" ) ), CHECKABLE_ITEM(_obj->triherdonsShown(), OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS));

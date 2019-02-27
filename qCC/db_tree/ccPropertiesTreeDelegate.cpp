@@ -362,7 +362,7 @@ void ccPropertiesTreeDelegate::addSeparator(const QString& title)
 	}
 }
 
-void ccPropertiesTreeDelegate::fillWithMetaData(ccObject* _obj)
+void ccPropertiesTreeDelegate::fillWithMetaData(const ccObject* _obj)
 {
 	assert(_obj && m_model);
 
@@ -453,7 +453,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 		appendRow(ITEM( tr( "Current Display" )), PERSISTENT_EDITOR(OBJECT_CURRENT_DISPLAY), true);
 }
 
-void ccPropertiesTreeDelegate::fillWithShifted(ccShiftedObject* _obj)
+void ccPropertiesTreeDelegate::fillWithShifted(const ccShiftedObject* _obj)
 {
 	assert(_obj && m_model);
 
@@ -486,7 +486,7 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 	//scan grid structure(s), waveform, etc.
 	if (_obj->isA(CC_TYPES::POINT_CLOUD))
 	{
-		ccPointCloud* cloud = static_cast<ccPointCloud*>(_obj);
+		const ccPointCloud* cloud = static_cast<const ccPointCloud*>(_obj);
 
 		//scan grid(s)
 		size_t gridCount = cloud->gridCount();
@@ -562,7 +562,7 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 	}
 }
 
-void ccPropertiesTreeDelegate::fillWithPrimitive(ccGenericPrimitive* _obj)
+void ccPropertiesTreeDelegate::fillWithPrimitive(const ccGenericPrimitive* _obj)
 {
 	assert(_obj && m_model);
 
@@ -597,11 +597,11 @@ void ccPropertiesTreeDelegate::fillWithPrimitive(ccGenericPrimitive* _obj)
 	else if (_obj->isKindOf(CC_TYPES::PLANE))
 	{
 		//planar entity commons
-		fillWithPlanarEntity(static_cast<ccPlane*>(_obj));
+		fillWithPlanarEntity(static_cast<const ccPlane*>(_obj));
 	}
 }
 
-void ccPropertiesTreeDelegate::fillWithFacet(ccFacet* _obj)
+void ccPropertiesTreeDelegate::fillWithFacet(const ccFacet* _obj)
 {
 	assert(_obj && m_model);
 
@@ -628,7 +628,7 @@ void ccPropertiesTreeDelegate::fillWithFacet(ccFacet* _obj)
 		appendRow(ITEM( tr( "Show polygon" ) ), CHECKABLE_ITEM(_obj->getPolygon()->isVisible(), OBJECT_FACET_MESH));
 }
 
-void ccPropertiesTreeDelegate::fillWithPlanarEntity(ccPlanarEntityInterface* _obj)
+void ccPropertiesTreeDelegate::fillWithPlanarEntity(const ccPlanarEntityInterface* _obj)
 {
 	//normal
 	CCVector3 N = _obj->getNormal();
@@ -643,7 +643,7 @@ void ccPropertiesTreeDelegate::fillWithPlanarEntity(ccPlanarEntityInterface* _ob
 	appendRow(ITEM( tr( "Show normal vector" ) ), CHECKABLE_ITEM(_obj->normalVectorIsShown(), OBJECT_PLANE_NORMAL_VECTOR));
 }
 
-void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
+void ccPropertiesTreeDelegate::fillWithMesh(const ccGenericMesh* _obj)
 {
 	assert(_obj && m_model);
 
@@ -663,7 +663,7 @@ void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
 
 	//stippling (ccMesh only)
 	//if (_obj->isA(CC_TYPES::MESH)) //DGM: can't remember why?
-	appendRow(ITEM( tr( "Stippling" ) ), CHECKABLE_ITEM(static_cast<ccMesh*>(_obj)->stipplingEnabled(), OBJECT_MESH_STIPPLING));
+	appendRow(ITEM( tr( "Stippling" ) ), CHECKABLE_ITEM(static_cast<const ccMesh*>(_obj)->stipplingEnabled(), OBJECT_MESH_STIPPLING));
 
 	//we also integrate vertices SF into mesh properties
 	ccGenericPointCloud* vertices = _obj->getAssociatedCloud();
@@ -671,7 +671,7 @@ void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
 		fillSFWithPointCloud(vertices);
 }
 
-void ccPropertiesTreeDelegate::fillWithPolyline(ccPolyline* _obj)
+void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)
 {
 	assert(_obj && m_model);
 
@@ -690,7 +690,7 @@ void ccPropertiesTreeDelegate::fillWithPolyline(ccPolyline* _obj)
 	fillWithShifted(_obj);
 }
 
-void ccPropertiesTreeDelegate::fillWithPointOctree(ccOctree* _obj)
+void ccPropertiesTreeDelegate::fillWithPointOctree(const ccOctree* _obj)
 {
 	assert(_obj && m_model);
 
@@ -720,7 +720,7 @@ void ccPropertiesTreeDelegate::fillWithPointOctree(ccOctree* _obj)
 	appendRow(ITEM( tr( "Filled volume" ) ), ITEM(QString::number(cellCount*pow(cellSize, 3.0))));
 }
 
-void ccPropertiesTreeDelegate::fillWithPointKdTree(ccKdTree* _obj)
+void ccPropertiesTreeDelegate::fillWithPointKdTree(const ccKdTree* _obj)
 {
 	assert(_obj && m_model);
 
@@ -757,7 +757,7 @@ void ccPropertiesTreeDelegate::fillWithPointKdTree(ccKdTree* _obj)
 	}
 }
 
-void ccPropertiesTreeDelegate::fillWithImage(ccImage* _obj)
+void ccPropertiesTreeDelegate::fillWithImage(const ccImage* _obj)
 {
 	assert(_obj && m_model);
 
@@ -780,7 +780,7 @@ void ccPropertiesTreeDelegate::fillWithImage(ccImage* _obj)
 	}
 }
 
-void ccPropertiesTreeDelegate::fillWithLabel(cc2DLabel* _obj)
+void ccPropertiesTreeDelegate::fillWithLabel(const cc2DLabel* _obj)
 {
 	assert(_obj && m_model);
 
@@ -797,7 +797,7 @@ void ccPropertiesTreeDelegate::fillWithLabel(cc2DLabel* _obj)
 	appendRow(ITEM( tr( "Show legend(s)" ) ), CHECKABLE_ITEM(_obj->isPointLegendDisplayed(), OBJECT_LABEL_POINT_LEGEND));
 }
 
-void ccPropertiesTreeDelegate::fillWithViewportObject(cc2DViewportObject* _obj)
+void ccPropertiesTreeDelegate::fillWithViewportObject(const cc2DViewportObject* _obj)
 {
 	assert(_obj && m_model);
 
@@ -814,7 +814,7 @@ void ccPropertiesTreeDelegate::fillWithViewportObject(cc2DViewportObject* _obj)
 	
 }
 
-void ccPropertiesTreeDelegate::fillWithTransBuffer(ccIndexedTransformationBuffer* _obj)
+void ccPropertiesTreeDelegate::fillWithTransBuffer(const ccIndexedTransformationBuffer* _obj)
 {
 	assert(_obj && m_model);
 
@@ -833,7 +833,7 @@ void ccPropertiesTreeDelegate::fillWithTransBuffer(ccIndexedTransformationBuffer
 	appendRow(ITEM( tr( "Scale" ) ), PERSISTENT_EDITOR(OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE), true);
 }
 
-void ccPropertiesTreeDelegate::fillWithSensor(ccSensor* _obj)
+void ccPropertiesTreeDelegate::fillWithSensor(const ccSensor* _obj)
 {
 	assert(_obj && m_model);
 
@@ -865,7 +865,7 @@ void ccPropertiesTreeDelegate::fillWithSensor(ccSensor* _obj)
 	}
 }
 
-void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
+void ccPropertiesTreeDelegate::fillWithGBLSensor(const ccGBLSensor* _obj)
 {
 	assert(_obj && m_model);
 
@@ -900,7 +900,7 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
 	fillWithSensor(_obj);
 }
 
-void ccPropertiesTreeDelegate::fillWithCameraSensor(ccCameraSensor* _obj)
+void ccPropertiesTreeDelegate::fillWithCameraSensor(const ccCameraSensor* _obj)
 {
 	assert(_obj && m_model);
 
@@ -939,7 +939,7 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(ccCameraSensor* _obj)
 	fillWithSensor(_obj);
 }
 
-void ccPropertiesTreeDelegate::fillWithMaterialSet(ccMaterialSet* _obj)
+void ccPropertiesTreeDelegate::fillWithMaterialSet(const ccMaterialSet* _obj)
 {
 	assert(_obj && m_model);
 
@@ -952,7 +952,7 @@ void ccPropertiesTreeDelegate::fillWithMaterialSet(ccMaterialSet* _obj)
 	fillWithShareable(_obj);
 }
 
-void ccPropertiesTreeDelegate::fillWithShareable(CCShareable* _obj)
+void ccPropertiesTreeDelegate::fillWithShareable(const CCShareable* _obj)
 {
 	assert(_obj && m_model);
 
@@ -964,7 +964,7 @@ void ccPropertiesTreeDelegate::fillWithShareable(CCShareable* _obj)
 }
 
 template<class Type, int N, class ComponentType>
-void ccPropertiesTreeDelegate::fillWithCCArray(ccArray<Type, N, ComponentType>* _obj)
+void ccPropertiesTreeDelegate::fillWithCCArray(const ccArray<Type, N, ComponentType>* _obj)
 {
 	assert(_obj && m_model);
 

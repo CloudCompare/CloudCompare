@@ -170,27 +170,27 @@ private:
 	void fillWithHObject(ccHObject*);
 	void fillWithPointCloud(ccGenericPointCloud*);
 	void fillSFWithPointCloud(ccGenericPointCloud*);
-	void fillWithMesh(ccGenericMesh*);
-	void fillWithFacet(ccFacet*);
-	void fillWithPlanarEntity(ccPlanarEntityInterface*);
-	void fillWithSensor(ccSensor*);
-	void fillWithTransBuffer(ccIndexedTransformationBuffer*);
-	void fillWithPolyline(ccPolyline*);
-	void fillWithPrimitive(ccGenericPrimitive*);
-	void fillWithPointOctree(ccOctree*);
-	void fillWithPointKdTree(ccKdTree*);
-	void fillWithImage(ccImage*);
-	void fillWithLabel(cc2DLabel*);
-	void fillWithViewportObject(cc2DViewportObject*);
-	void fillWithGBLSensor(ccGBLSensor*);
-	void fillWithCameraSensor(ccCameraSensor*);
-	void fillWithMaterialSet(ccMaterialSet*);
-	void fillWithShareable(CCShareable*);
-	void fillWithMetaData(ccObject*);
-	void fillWithShifted(ccShiftedObject*);
+	void fillWithMesh(const ccGenericMesh*);
+	void fillWithFacet(const ccFacet*);
+	void fillWithPlanarEntity(const ccPlanarEntityInterface*);
+	void fillWithSensor(const ccSensor*);
+	void fillWithTransBuffer(const ccIndexedTransformationBuffer*);
+	void fillWithPolyline(const ccPolyline*);
+	void fillWithPrimitive(const ccGenericPrimitive*);
+	void fillWithPointOctree(const ccOctree*);
+	void fillWithPointKdTree(const ccKdTree*);
+	void fillWithImage(const ccImage*);
+	void fillWithLabel(const cc2DLabel*);
+	void fillWithViewportObject(const cc2DViewportObject*);
+	void fillWithGBLSensor(const ccGBLSensor*);
+	void fillWithCameraSensor(const ccCameraSensor*);
+	void fillWithMaterialSet(const ccMaterialSet*);
+	void fillWithShareable(const CCShareable*);
+	void fillWithMetaData(const ccObject*);
+	void fillWithShifted(const ccShiftedObject*);
 	
 	template<class Type, int N, class ComponentType>
-	void fillWithCCArray(ccArray<Type, N, ComponentType>*);
+	void fillWithCCArray(const ccArray<Type, N, ComponentType>*);
 
 	//! Returns whether the editor is wide (i.e. spans on two columns) or not
 	bool isWideEditor(int itemData) const;

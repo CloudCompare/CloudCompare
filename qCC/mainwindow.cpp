@@ -10567,7 +10567,7 @@ void MainWindow::doActionEditPlane()
 #include <QtConcurrentRun>
 #ifdef USE_STOCKER
 #include "builderlod3/builderlod3.h"
-#include "builder3d4em/builder3d4em.h"
+#include "builderlod2/builderlod2.h"
 #include "ioctrl/StFileOperator.hpp"
 #endif // USE_STOCKER
 
@@ -10669,9 +10669,9 @@ void MainWindow::doActionBD3D4EM()
 		entity = getSelectedEntities().front();
 	}
 
-	stocker::Builder3D4EM builder_3d4em;
+	stocker::BuilderLOD2 builder_3d4em(true);
 
-	/// select polyline for foorprint
+	/// select polyline for footprint
 	{
 		ccHObject::Container _container;
 		m_ccRoot->getRootEntity()->filterChildren(_container, true, CC_TYPES::POLY_LINE, true);		
@@ -10726,54 +10726,50 @@ void MainWindow::doActionBD3D4EM()
 		std::string point_path = m_pbdr3d4emDlg->PointcloudFilePathLineEdit->text().toStdString();
 
 		builder_3d4em.SetBuildingPoints(point_path.c_str());
-//		std::vector<std::vector<stocker::BdPoint3d>> plane_points = builder_3d4em.GetSegmentedPoints();
-//		stocker::BuildingRecon_3D4EM(point_path.c_str(), output_path.c_str(), ini_path.c_str());
 	}
 	else if (entity) {
 
 		if (entity->isGroup()) {
-			int i = 0;
+			ccHObject::Container plane_container;
+			entity->filterChildren(plane_container, true, CC_TYPES::PLANE, true, entity->getDisplay());
+
 			std::vector<std::vector<stocker::BdPoint3d>> planes_points;
+			for (auto & planeObj : plane_container) {
+				ccHObject* parent = planeObj->getParent(); if (!parent) continue;
+				if (!planeObj->isEnabled() || !parent->isEnabled()) continue;
+				
+				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(parent);
+				if (!cloud) continue;
+				
+				std::vector<stocker::BdPoint3d> cur_plane_points;
+				for (unsigned i = 0; i < cloud->size(); i++) {
+					CCVector3 pt = *cloud->getPoint(i);
+					cur_plane_points.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
+				}
+				planes_points.push_back(cur_plane_points);
+			}
 			builder_3d4em.SetSegmentedPoints(planes_points);
 		}
 		else {
-			ccPointCloud* cloud = nullptr;
-			if (entity->isA(CC_TYPES::POINT_CLOUD)) {
-				cloud = ccHObjectCaster::ToPointCloud(entity);
-			}
-			else if (entity->isKindOf(CC_TYPES::MESH))
-			{
-				ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
-				if (mesh && mesh->getAssociatedCloud() && mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD)) {
-					cloud = static_cast<ccPointCloud*>(mesh->getAssociatedCloud());
-				}
-			}
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 			if (!cloud)	return;
 
 			std::vector<stocker::BdPoint3d> point_cloud;
-			size_t n = cloud->size();
-			cloud->placeIteratorAtBeginning();
-			for (unsigned i = 0; i < n; i++) {
-				CCVector3 pt = *cloud->getNextPoint();
+			for (unsigned i = 0; i < cloud->size(); i++) {
+				CCVector3 pt = *cloud->getPoint(i);
 				point_cloud.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
 			}
-
 			builder_3d4em.SetBuildingPoints(point_cloud);
 		}		
-		
-//		stocker::BuildingRecon_3D4EM(point_cloud, output_path.c_str(), ini_path.c_str());
 	}
 	else {
 		dispToConsole("[BDRecon] No points input, please select group of planes or point cloud", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
-
-	builder_3d4em.PlaneSegmentation(false);
-	builder_3d4em.BuildingReconstruction();
-
-	if (!QFile::exists(QString(output_path.c_str()))) {
-		return;
-	}
+	if (!builder_3d4em.PlaneSegmentation(false)) return;	
+	if (!builder_3d4em.BuildingReconstruction()) return;	
+	
+	if (!QFile::exists(QString(output_path.c_str()))) return;	
 
 	QStringList files_add_to_db{ QString(output_path.c_str()) };
 	addToDB(files_add_to_db);

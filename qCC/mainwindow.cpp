@@ -10572,8 +10572,7 @@ void MainWindow::doActionEditPlane()
 #ifdef USE_STOCKER
 #include "builderlod3/builderlod3.h"
 #include "builderlod2/builderlod2.h"
-#include "buildercore/TopoRecon.h"
-#include "buildercore/PointsetPro.h"
+#include "buildercore/StBuilder.h"
 #include "ioctrl/StFileOperator.hpp"
 #endif // USE_STOCKER
 
@@ -10604,8 +10603,109 @@ void MainWindow::doActionBDImageLines()
 	addToDB(files);
 }
 
+stocker::Contour3d GetPointsFromCloud(ccHObject* entity) {
+	stocker::Contour3d points;
+	if (!entity->isEnabled()) {
+		return points;
+	}
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+	if (!cloud) return points;
+
+	for (unsigned i = 0; i < cloud->size(); i++) {
+		CCVector3 pt = *cloud->getPoint(i);
+		points.push_back({ pt.x, pt.y, pt.z });
+	}
+	return points;
+}
+
+void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col) 
+{
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+
+	ccPointCloud* line_vert = new ccPointCloud(name);
+	int i(0);
+	for (auto & ln : lines) {
+		ccPolyline* cc_polyline = new ccPolyline(line_vert);
+		cc_polyline->setDisplay(entity->getDisplay());
+		cc_polyline->setColor(col);
+		cc_polyline->showColors(true);
+		char ln_name[32];
+		sprintf(ln_name, "%s%d", name.toStdString().c_str(), i);
+		cc_polyline->setName(ln_name);
+		cc_polyline->setWidth(1);
+		cc_polyline->setGlobalShift(cloud->getGlobalShift());
+		cc_polyline->setGlobalScale(cloud->getGlobalScale());
+		cc_polyline->reserve(2);
+		
+		line_vert->addPoint(CCVector3(vcgXYZ(ln.P0())));
+		cc_polyline->addPointIndex(line_vert->size() - 1);
+
+		line_vert->addPoint(CCVector3(vcgXYZ(ln.P1())));
+		cc_polyline->addPointIndex(line_vert->size() - 1);
+		
+		cc_polyline->setClosed(false);
+		line_vert->addChild(cc_polyline);
+		i++;
+	}
+
+	entity->addChild(line_vert);
+}
+
 void MainWindow::doActionBDPrimIntersections()
 {
+	ccHObject::Container entity_planes;
+	if (m_selectedEntities.front()->isGroup()) {
+		ccHObject * group = m_selectedEntities.front();
+		group->filterChildren(entity_planes, true, CC_TYPES::PLANE, true, group->getDisplay());
+	}
+	else if (m_selectedEntities.size() > 1) {
+		for (auto & entity : m_selectedEntities) {
+			if (entity->isA(CC_TYPES::PLANE)) {
+				entity_planes.push_back(entity);
+			}			
+		}
+	}
+	if (entity_planes.size() < 2) return;	
+
+	bool ok = true;
+	double distance = QInputDialog::getDouble(this, "Input Dialog", "Please input distance threshold", 2.0, 0.0, 999999.0, 1, &ok);
+	if (!ok) return;
+
+#ifdef USE_STOCKER
+	stocker::PlaneData plane_units;
+	for (size_t i = 0; i < entity_planes.size(); i++) {
+		if (!entity_planes[i]->isEnabled()) continue;
+
+		stocker::Contour3d cur_plane_points = GetPointsFromCloud(entity_planes[i]->getParent());
+		if (cur_plane_points.size() < 3) continue;
+
+		char name[32]; sprintf(name, "%d", i);
+		plane_units.push_back(FormPlaneUnit(cur_plane_points, name, true));
+	}
+	//////////////////////////////////////////////////////////////////////////
+	stocker::Polyline3d ints_all; vector<stocker::Polyline3d> ints_per_plane;
+	ints_per_plane.resize(plane_units.size());
+	for (size_t i = 0; i < plane_units.size() - 1; i++) {
+		for (size_t j = i + 1; j < plane_units.size(); j++) {
+			stocker::Seg3d cur_ints;
+			if (!stocker::IntersectionPlanePlaneStrict(plane_units[i], plane_units[j], cur_ints, distance))
+				continue;
+
+			ints_per_plane[i].push_back(cur_ints);
+			ints_per_plane[j].push_back(cur_ints);
+			ints_all.push_back(cur_ints);
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+	for (size_t i = 0; i < plane_units.size(); i++) {
+		int num;
+		sscanf(plane_units[i].GetName().Str().c_str(), "%d", &num);
+		AddSegmentsAsChildVertices(entity_planes[num]->getParent(), ints_per_plane[i], "Intersection", ccColor::magenta);
+	}
+// 	ccHObject* group = new ccHObject("Intersections");
+// 	AddSegmentsAsChildVertices(group, ints_all, "Intersection", ccColor::magenta);
+// 	addToDB(group);
+#endif // USE_STOCKER
 }
 
 void MainWindow::doActionBDPrimAssignSharpLines()
@@ -10630,17 +10730,13 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 void CalcPlaneBoundary(ccHObject* planeObj)
 {
 #ifdef USE_STOCKER
-	ccHObject* parent = planeObj->getParent(); if (!parent) return;
-	if (!planeObj->isEnabled() || !parent->isEnabled()) return;
+	if (!planeObj->isEnabled()) return;
 
-	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(parent);
-	if (!cloud) return;
-
-	stocker::Contour3d cur_plane_points;
-	for (unsigned i = 0; i < cloud->size(); i++) {
-		CCVector3 pt = *cloud->getPoint(i);
-		cur_plane_points.push_back({ pt.x, pt.y, pt.z });
+	stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
+	if (cur_plane_points.size() < 3) {
+		return;
 	}
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(planeObj->getParent());
 
 	//! get boundary
 	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, 5, false, 1);
@@ -10664,7 +10760,7 @@ void CalcPlaneBoundary(ccHObject* planeObj)
 			cc_polyline->addPointIndex(0);
 
 			cc_polyline->setClosed(true);
-			parent->addChild(cc_polyline);
+			cloud->addChild(cc_polyline);
 		}
 		
 	}

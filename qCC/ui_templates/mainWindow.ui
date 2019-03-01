@@ -500,7 +500,17 @@
      <addaction name="actionBDRename_Plane"/>
      <addaction name="actionBDRename_Line"/>
     </widget>
+    <widget class="QMenu" name="menuPrimitive">
+     <property name="title">
+      <string>Planar Primitive</string>
+     </property>
+     <addaction name="actionBDPrimIntersections"/>
+     <addaction name="actionBDPrimAssignSharpLines"/>
+     <addaction name="actionBDPrimBoundary"/>
+     <addaction name="actionBDPrimPlaneFrame"/>
+    </widget>
     <addaction name="actionBDImage_Lines"/>
+    <addaction name="menuPrimitive"/>
     <addaction name="actionBDPlane_Deduction"/>
     <addaction name="actionBDPolyFit"/>
     <addaction name="actionBD3D4EM"/>
@@ -3012,6 +3022,26 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDRename_Line">
    <property name="text">
     <string>Line</string>
+   </property>
+  </action>
+  <action name="actionBDPrimIntersections">
+   <property name="text">
+    <string>Intersections</string>
+   </property>
+  </action>
+  <action name="actionBDPrimAssignSharpLines">
+   <property name="text">
+    <string>Assign Sharp Lines</string>
+   </property>
+  </action>
+  <action name="actionBDPrimBoundary">
+   <property name="text">
+    <string>Boundary</string>
+   </property>
+  </action>
+  <action name="actionBDPrimPlaneFrame">
+   <property name="text">
+    <string>Plane Frame</string>
    </property>
   </action>
  </widget>

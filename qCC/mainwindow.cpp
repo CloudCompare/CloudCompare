@@ -754,6 +754,10 @@ void MainWindow::connectActions()
 	//////////////////////////////////////////////////////////////////////////
 	//Building Reconstruction
 	connect(m_UI->actionBDImage_Lines,				&QAction::triggered, this, &MainWindow::doActionBDImageLines);
+	connect(m_UI->actionBDPrimIntersections,		&QAction::triggered, this, &MainWindow::doActionBDPrimIntersections);
+	connect(m_UI->actionBDPrimAssignSharpLines,		&QAction::triggered, this, &MainWindow::doActionBDPrimAssignSharpLines);
+	connect(m_UI->actionBDPrimBoundary,				&QAction::triggered, this, &MainWindow::doActionBDPrimBoundary);
+	connect(m_UI->actionBDPrimPlaneFrame,			&QAction::triggered, this, &MainWindow::doActionBDPrimPlaneFrame);
 	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);
 	connect(m_UI->actionBDPolyFit,					&QAction::triggered, this, &MainWindow::doActionBDPolyFit);
 	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBD3D4EM);
@@ -10568,6 +10572,8 @@ void MainWindow::doActionEditPlane()
 #ifdef USE_STOCKER
 #include "builderlod3/builderlod3.h"
 #include "builderlod2/builderlod2.h"
+#include "buildercore/TopoRecon.h"
+#include "buildercore/PointsetPro.h"
 #include "ioctrl/StFileOperator.hpp"
 #endif // USE_STOCKER
 
@@ -10598,8 +10604,97 @@ void MainWindow::doActionBDImageLines()
 	addToDB(files);
 }
 
+void MainWindow::doActionBDPrimIntersections()
+{
+}
+
+void MainWindow::doActionBDPrimAssignSharpLines()
+{
+	//! select two groups, one for plane, one for line
+
+	//! first, select the sharp line group
+	ccHObject* sharp_group;
+
+	vector<ccPolyline> ccpolylines;
+	ccHObject::Container sharp_container;
+	sharp_group->filterChildren(sharp_container, true, CC_TYPES::POLY_LINE, true, sharp_group->getDisplay());
+
+	//! second, select the plane group
+	ccHObject* plane_group;
+	ccHObject::Container plane_container;
+	plane_group->filterChildren(plane_container, true, CC_TYPES::PLANE, true, plane_group->getDisplay());
+
+
+}
+
+void CalcPlaneBoundary(ccHObject* planeObj)
+{
+#ifdef USE_STOCKER
+	ccHObject* parent = planeObj->getParent(); if (!parent) return;
+	if (!planeObj->isEnabled() || !parent->isEnabled()) return;
+
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(parent);
+	if (!cloud) return;
+
+	stocker::Contour3d cur_plane_points;
+	for (unsigned i = 0; i < cloud->size(); i++) {
+		CCVector3 pt = *cloud->getPoint(i);
+		cur_plane_points.push_back({ pt.x, pt.y, pt.z });
+	}
+
+	//! get boundary
+	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, 5, false, 1);
+	for (vector<stocker::Contour3d> & component : contours_points) {
+		for (stocker::Contour3d & st_contours : component) {
+			ccPointCloud* line_vert = new ccPointCloud("Vertices");
+			ccPolyline* cc_polyline = new ccPolyline(line_vert);
+			cc_polyline->setDisplay(planeObj->getDisplay());
+			cc_polyline->setColor(ccColor::green);
+			cc_polyline->showColors(true);
+			cc_polyline->addChild(line_vert);
+			cc_polyline->setName("Boundary");
+			cc_polyline->setWidth(2);
+			cc_polyline->setGlobalShift(cloud->getGlobalShift());
+			cc_polyline->setGlobalScale(cloud->getGlobalScale());
+			cc_polyline->reserve(static_cast<unsigned>(st_contours.size() + 1));
+			for (auto & pt : st_contours) {
+				line_vert->addPoint(CCVector3(pt.X(), pt.Y(), pt.Z()));
+				cc_polyline->addPointIndex(line_vert->size() - 1);
+			}
+			cc_polyline->addPointIndex(0);
+
+			cc_polyline->setClosed(true);
+			parent->addChild(cc_polyline);
+		}
+		
+	}
+#endif // USE_STOCKER
+}
+
+void MainWindow::doActionBDPrimBoundary()
+{
+	ccHObject *entity = getSelectedEntities().front();
+	if (entity->isGroup()) {
+		ccHObject::Container plane_container;
+		entity->filterChildren(plane_container, true, CC_TYPES::PLANE, true, entity->getDisplay());
+
+		for (auto & planeObj : plane_container) {
+			CalcPlaneBoundary(planeObj);
+		}
+	}
+	else if (entity->isA(CC_TYPES::PLANE)) {
+		CalcPlaneBoundary(entity);
+	}
+}
+
+void MainWindow::doActionBDPrimPlaneFrame()
+{
+}
+
 void MainWindow::doActionBDPlaneDeduction()
 {
+	CCLib::Neighbourhood Yk(/*cloud*/);
+
 	if (!haveSelection()) {
 		assert(false);
 		return;
@@ -10614,22 +10709,29 @@ void MainWindow::doActionBDPlaneDeduction()
 		}
 		/// get Planes
 		else if (ent->getName().indexOf(QString("Plane"), 0, Qt::CaseInsensitive) >= 0) {
-			size_t children_number = ent->getChildrenNumber();
-			for (size_t i = 0; i < children_number; ++i) {
-				ccPlane* plane = ccHObjectCaster::ToPlane(ent->getChild(i)->getChild(0));
-				if (!plane) {
-					continue;
-				}
+
+			ccHObject::Container plane_container;
+			ent->filterChildren(plane_container, true, CC_TYPES::PLANE, true);
+
+			std::vector<std::vector<stocker::BdPoint3d>> planes_points;
+			for (auto & planeObj : plane_container) {
+				ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
+				if (!ccPlane) continue;
+
 				CCVector3 N; float constVal;
-				plane->getEquation(N, constVal);
+				ccPlane->getEquation(N, constVal);
+
+				vcg::Plane3d vcgPlane;
+				vcgPlane.SetDirection({ N.x, N.y, N.z });
+				vcgPlane.SetOffset(-constVal);
 			}
 		}
 	}
 }
 
 void MainWindow::doActionBDPolyFit()
-{
-
+{	
+	ccHObject* entity = getSelectedEntities().front();
 
 
 

@@ -438,15 +438,27 @@ private slots:
 
 	//////////////////////////////////////////////////////////////////////////
 	//! Building Reconstruction
-	//! Create Image Lines
+	/// Create Image Lines
 	void doActionBDImageLines();
-	//! Plane Deduction
+
+	//! Planar Primitives
+	/// Intersections - get intersection lines from planes
+	void doActionBDPrimIntersections();
+	/// Assign Sharp Lines - assign sharp lines for each plane
+	void doActionBDPrimAssignSharpLines();
+	/// Boundary - generate plane boundary
+	void doActionBDPrimBoundary();
+	/// Plane Frame - generate plane frames by optimization
+	void doActionBDPrimPlaneFrame();
+
+
+	/// Plane Deduction
 	void doActionBDPlaneDeduction();
-	//! PolyFit
+	/// PolyFit
 	void doActionBDPolyFit();
-	//! 3d4em
+	/// 3d4em
 	void doActionBD3D4EM();
-	//! Rename
+	/// Rename
 	
 
 private:

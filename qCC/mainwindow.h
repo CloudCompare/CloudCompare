@@ -625,6 +625,10 @@ private:
 	//! Manages plugins - menus, toolbars, and the about dialog
 	ccPluginUIManager	*m_pluginUIManager;
 
+	//////////////////////////////////////////////////////////////////////////
+	// XYLIU
+	ccHObject* askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
+
 	//! Building Reconstruction dialogs
 	bdrLine3DppDlg* m_pbdrl3dDlg;
 	bdrDeductionDlg* m_pbdrddtDlg;

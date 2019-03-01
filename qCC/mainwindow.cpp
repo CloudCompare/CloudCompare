@@ -10563,6 +10563,35 @@ void MainWindow::doActionEditPlane()
 }
 
 //////////////////////////////////////////////////////////////////////////
+ccHObject* MainWindow::askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultCloudEntity/*=0*/, QString inviteMessage/*=QString()*/)
+{
+	ccHObject::Container entites;
+	m_ccRoot->getRootEntity()->filterChildren(entites, true, type, true);
+	if (entites.empty())	{
+		ccConsole::Error("No data in database!");
+		return 0;
+	}
+	//default selected index
+	int selectedIndex = 0;
+	if (defaultCloudEntity) {
+		for (size_t i = 1; i < entites.size(); ++i) {
+			if (entites[i] == defaultCloudEntity) {
+				selectedIndex = static_cast<int>(i);
+				break;
+			}
+		}
+	}
+	//ask the user to choose a cloud
+	{
+		selectedIndex = ccItemSelectionDlg::SelectEntity(entites, selectedIndex, this, inviteMessage);
+		if (selectedIndex < 0)
+			return 0;
+	}
+
+	assert(selectedIndex >= 0 && static_cast<size_t>(selectedIndex) < entites.size());
+	return entites[selectedIndex];
+}
+//////////////////////////////////////////////////////////////////////////
 /// Building Reconstruction
 #include "bdrLine3DppDlg.h"
 #include "bdrDeductionDlg.h"
@@ -10577,8 +10606,9 @@ void MainWindow::doActionEditPlane()
 #endif // USE_STOCKER
 
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
+ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type);
 void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
-void CalcPlaneIntersections(ccHObject::Container entity_planes);
+void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
 void CalcPlaneBoundary(ccHObject* planeObj);
 //////////////////////////////////////////////////////////////////////////
 
@@ -10613,8 +10643,7 @@ void MainWindow::doActionBDPrimIntersections()
 {
 	ccHObject::Container entity_planes;
 	if (m_selectedEntities.front()->isGroup()) {
-		ccHObject * group = m_selectedEntities.front();
-		group->filterChildren(entity_planes, true, CC_TYPES::PLANE, true, group->getDisplay());
+		entity_planes = GetEnabledObjFromGroup(m_selectedEntities.front(), CC_TYPES::PLANE);
 	}
 	else if (m_selectedEntities.size() > 1) {
 		for (auto & entity : m_selectedEntities) {
@@ -10628,37 +10657,74 @@ void MainWindow::doActionBDPrimIntersections()
 	bool ok = true;
 	double distance = QInputDialog::getDouble(this, "Input Dialog", "Please input distance threshold", 2.0, 0.0, 999999.0, 1, &ok);
 	if (ok) 
-		CalcPlaneIntersections(entity_planes);	
+		CalcPlaneIntersections(entity_planes, distance);	
 }
 
 void MainWindow::doActionBDPrimAssignSharpLines()
 {
 	//! select two groups, one for plane, one for line
-
 	//! first, select the sharp line group
-	ccHObject* sharp_group;
-
-	vector<ccPolyline> ccpolylines;
-	ccHObject::Container sharp_container;
-	sharp_group->filterChildren(sharp_container, true, CC_TYPES::POLY_LINE, true, sharp_group->getDisplay());
-
+	ccHObject* sharp_group = askUserToSelect(CC_TYPES::HIERARCHY_OBJECT, 0, "please select a segments group");
+	ccHObject::Container sharp_container = GetEnabledObjFromGroup(sharp_group, CC_TYPES::POLY_LINE);
+	
 	//! second, select the plane group
-	ccHObject* plane_group;
-	ccHObject::Container plane_container;
-	plane_group->filterChildren(plane_container, true, CC_TYPES::PLANE, true, plane_group->getDisplay());
+	ccHObject* plane_group = askUserToSelect(CC_TYPES::HIERARCHY_OBJECT, 0, "please select a plane group");
+	ccHObject::Container plane_container = GetEnabledObjFromGroup(plane_group, CC_TYPES::PLANE);
+	bool ok = true;
+	double distance_threshold = QInputDialog::getDouble(this, "Input Dialog", "Please input distance threshold", 0.2, 0.0, 999999.0, 1, &ok);
+	if (!ok) return;
 
+	//////////////////////////////////////////////////////////////////////////
+	//! get sharps in bbox
+	ccBBox box = plane_group->getBB_recursive();
+	stocker::Polyline3d all_sharp_lines;
+	for (auto & polyline_entity : sharp_container) {
+		ccPolyline* ccpolyline = ccHObjectCaster::ToPolyline(polyline_entity);
+		stocker::Seg3d seg;
+		CCVector3 P0 = *(ccpolyline->getPoint(0));
+		CCVector3 P1 = *(ccpolyline->getPoint(1));
+		if (box.contains(P0) && box.contains(P1)) {
+			seg.P0() = stocker::parse_xyz(P0);
+			seg.P1() = stocker::parse_xyz(P1);
+			all_sharp_lines.push_back(seg);
+		}		
+	}	
+	//////////////////////////////////////////////////////////////////////////
+	stocker::Polyline3d unassigned_sharps; set<size_t>set_index;
 	for (auto & planeObj : plane_container) {
+		ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
+		if (!ccPlane) continue;
+		stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
+		if (cur_plane_points.size() < 3) { continue; }
+		stocker::PlaneUnit plane = stocker::FormPlaneUnit(cur_plane_points, "temp", true);
+		stocker::Polyline3d cur_plane_sharps;
+		vector<int> index_find;		
+		stocker::FindSegmentsInPlane(plane, all_sharp_lines, index_find, distance_threshold);
+		set_index.insert(index_find.begin(), index_find.end());
 
+		for (auto & index : index_find)	{
+			cur_plane_sharps.push_back(all_sharp_lines[index]);
+		}
+		AddSegmentsAsChildVertices(planeObj->getParent(), cur_plane_sharps, "ImageSharp", ccColor::darkBlue);		
 	}
+	for (size_t i = 0; i < all_sharp_lines.size(); i++) {
+		if (set_index.find(i) == set_index.end()) {
+			unassigned_sharps.push_back(all_sharp_lines[i]);
+		}
+	}
+	ccHObject* group = new ccHObject("Unassigned Image Sharps");
+	ccPointCloud* line_vert = new ccPointCloud("ImageSharps");
+	AddSegmentsAsChildVertices(group, unassigned_sharps, "ImageSharp", ccColor::black);
+	addToDB(group);
+	sharp_group->setEnabled(false);
 }
 
 void MainWindow::doActionBDPrimBoundary()
 {
 	ccHObject *entity = getSelectedEntities().front();
 	if (entity->isGroup()) {
-		ccHObject::Container plane_container;
-		entity->filterChildren(plane_container, true, CC_TYPES::PLANE, true, entity->getDisplay());
-
+		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+		
 		for (auto & planeObj : plane_container) {
 			CalcPlaneBoundary(planeObj);
 		}
@@ -10878,6 +10944,19 @@ stocker::Contour3d GetPointsFromCloud(ccHObject* entity) {
 	return points;
 }
 
+ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type)
+{
+	ccHObject::Container group, group_enabled;
+	if (entity) {
+		entity->filterChildren(group, true, type, true, entity->getDisplay());
+		for (auto & gp : group) {
+			if (gp->isEnabled())
+				group_enabled.push_back(gp);
+		}
+	}	
+	return group_enabled;
+}
+
 void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)
 {
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
@@ -10893,8 +10972,10 @@ void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QS
 		sprintf(ln_name, "%s%d", name.toStdString().c_str(), i);
 		cc_polyline->setName(ln_name);
 		cc_polyline->setWidth(1);
-		cc_polyline->setGlobalShift(cloud->getGlobalShift());
-		cc_polyline->setGlobalScale(cloud->getGlobalScale());
+		if (cloud) { 
+			cc_polyline->setGlobalShift(cloud->getGlobalShift());
+			cc_polyline->setGlobalScale(cloud->getGlobalScale());
+		}		
 		cc_polyline->reserve(2);
 
 		line_vert->addPoint(CCVector3(vcgXYZ(ln.P0())));
@@ -10911,7 +10992,7 @@ void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QS
 	entity->addChild(line_vert);
 }
 
-void CalcPlaneIntersections(ccHObject::Container entity_planes)
+void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)
 {
 #ifdef USE_STOCKER
 	stocker::PlaneData plane_units;
@@ -10942,7 +11023,7 @@ void CalcPlaneIntersections(ccHObject::Container entity_planes)
 	for (size_t i = 0; i < plane_units.size(); i++) {
 		int num;
 		sscanf(plane_units[i].GetName().Str().c_str(), "%d", &num);
-		AddSegmentsAsChildVertices(entity_planes[num]->getParent(), ints_per_plane[i], "Intersection", ccColor::magenta);
+		AddSegmentsAsChildVertices(entity_planes[num]->getParent(), ints_per_plane[i], "Intersection", ccColor::red);
 	}
 #endif // USE_STOCKER
 }

@@ -10612,6 +10612,7 @@ ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM typ
 void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
 void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
 void CalcPlaneBoundary(ccHObject* planeObj);
+void CalcPlaneOutlines(ccHObject* planeObj);
 void PlaneFrameOptimization(ccHObject* planeObj);
 //////////////////////////////////////////////////////////////////////////
 
@@ -10851,7 +10852,7 @@ void MainWindow::doActionBD3D4EM()
 				contour_polygon = ccHObjectCaster::ToPolyline(_container[selectedIndex]);
 			}
 			if (contour_polygon) {
-				std::vector<CCVector3> contour_points = contour_polygon->getPoints();
+				std::vector<CCVector3> contour_points = contour_polygon->getPoints(false);
 				std::vector<std::vector<stocker::BdPoint3d>> bd_contour_points_;
 				std::vector<stocker::BdPoint3d> bd_contour_points;
 				if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
@@ -10967,12 +10968,15 @@ stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities)
 	stocker::Polyline3d polyline;
 	for (auto & polyline_entity : entities) {
 		ccPolyline* ccpolyline = ccHObjectCaster::ToPolyline(polyline_entity);
-		stocker::Seg3d seg;
-		CCVector3 P0 = *(ccpolyline->getPoint(0));
-		CCVector3 P1 = *(ccpolyline->getPoint(1));
-		seg.P0() = stocker::parse_xyz(P0);
-		seg.P1() = stocker::parse_xyz(P1);
-		polyline.push_back(seg);
+		unsigned lastvert = ccpolyline->isClosed() ? ccpolyline->size() : ccpolyline->size() - 1;
+		for (size_t i = 0; i < lastvert; i++) {
+			stocker::Seg3d seg;
+			CCVector3 P0 = *(ccpolyline->getPoint(i));
+			CCVector3 P1 = *(ccpolyline->getPoint((i + 1) % ccpolyline->size()));
+			seg.P0() = stocker::parse_xyz(P0);
+			seg.P1() = stocker::parse_xyz(P1);
+			polyline.push_back(seg);
+		}
 	}
 	return polyline;
 }
@@ -11061,7 +11065,12 @@ void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)
 #endif // USE_STOCKER
 }
 
-void CalcPlaneBoundary(ccHObject* planeObj)
+void CalcPlaneBoundary(ccHObject* planeObj) 
+{
+
+}
+
+void CalcPlaneOutlines(ccHObject* planeObj)
 {
 #ifdef USE_STOCKER
 	if (!planeObj->isEnabled()) return;
@@ -11082,7 +11091,7 @@ void CalcPlaneBoundary(ccHObject* planeObj)
 			cc_polyline->setColor(ccColor::green);
 			cc_polyline->showColors(true);
 			cc_polyline->addChild(line_vert);
-			cc_polyline->setName("Boundary");
+			cc_polyline->setName("Outline");
 			cc_polyline->setWidth(2);
 			cc_polyline->setGlobalShift(cloud->getGlobalShift());
 			cc_polyline->setGlobalScale(cloud->getGlobalScale());
@@ -11091,13 +11100,12 @@ void CalcPlaneBoundary(ccHObject* planeObj)
 				line_vert->addPoint(CCVector3(pt.X(), pt.Y(), pt.Z()));
 				cc_polyline->addPointIndex(line_vert->size() - 1);
 			}
-			cc_polyline->addPointIndex(0);
-
 			cc_polyline->setClosed(true);
 			cloud->addChild(cc_polyline);
 		}
 	}
 #endif // USE_STOCKER
+
 }
 
 void PlaneFrameOptimization(ccHObject* planeObj)

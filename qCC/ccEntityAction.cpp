@@ -70,6 +70,8 @@
 //	TODO figure out a cleaner way to do this without having to include all of mainwindow.h
 #include "mainwindow.h"
 
+#include <unordered_set>
+
 
 namespace ccEntityAction
 {

@@ -662,7 +662,7 @@ ccBBox ccClipBox::getOwnBB(bool withGLFeatures/*=false*/)
 	return bbox;
 }
 
-PointCoordinateType ccClipBox::computeArrowsScale()
+PointCoordinateType ccClipBox::computeArrowsScale() const
 {
 	PointCoordinateType scale = m_box.getDiagNorm() / 10;
 

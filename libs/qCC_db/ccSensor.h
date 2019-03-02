@@ -38,14 +38,14 @@ class QCC_DB_LIB_API ccSensor : public ccHObject
 public:
 
 	//! Default constructor
-	ccSensor(QString name);
+	ccSensor(const QString& name);
 
 	//! Copy constructor
 	ccSensor(const ccSensor &sensor);
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SENSOR; }
-	virtual bool isSerializable() const override { return true; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SENSOR; }
+	bool isSerializable() const override { return true; }
 
 	//! Returns the sensor type
 	/** Should be re-implemented by sub-classes
@@ -65,7 +65,9 @@ public:
 	virtual inline unsigned char checkVisibility(const CCVector3& P) const { return POINT_VISIBLE; }
 
 	//! Returns associated positions
-	ccIndexedTransformationBuffer* getPositions()  { return m_posBuffer; }
+	ccIndexedTransformationBuffer* getPositions() { return m_posBuffer; }
+	//! Returns associated positions
+	const ccIndexedTransformationBuffer* getPositions() const { return m_posBuffer; }
 
 	//! Sets associated positions
 	void setPositions(ccIndexedTransformationBuffer* positions)  { m_posBuffer = positions; }
@@ -121,16 +123,16 @@ public:
 	/** \param win 3D view to which to apply the sensor viewport (or the associated 'display' if 0)
 		\return success
 	**/
-	virtual bool applyViewport(ccGenericGLDisplay* win = 0);
+	virtual bool applyViewport(ccGenericGLDisplay* win = nullptr);
 
 	//inherited from ccHObject
-	virtual void applyGLTransformation(const ccGLMatrix& trans) override;
+	void applyGLTransformation(const ccGLMatrix& trans) override;
 
 protected:
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//! Positions buffer (optional)
 	ccIndexedTransformationBuffer* m_posBuffer;

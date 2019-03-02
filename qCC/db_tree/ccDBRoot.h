@@ -74,7 +74,7 @@ public:
 protected:
 
 	//inherited from QTreeView
-	virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event=0) const;
+	QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event=nullptr) const override;
 };
 
 //! GUI database tree root
@@ -89,10 +89,10 @@ public:
 		\param propertiesTreeWidget widget for selected entity's properties tree display
 		\param parent widget QObject parent
 	**/
-	ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWidget, QObject* parent = 0);
+	ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWidget, QObject* parent = nullptr);
 
 	//! Destructor
-	virtual ~ccDBRoot();
+	~ccDBRoot() override;
 
 	//! Returns associated root object
 	ccHObject* getRootEntity();
@@ -141,20 +141,19 @@ public:
 	void unloadAll();
 
 	//inherited from QAbstractItemModel
-	virtual QVariant data(const QModelIndex &index, int role) const override;
-	virtual QModelIndex index(int row, int column, const QModelIndex &parentIndex = QModelIndex()) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
+	QModelIndex index(int row, int column, const QModelIndex &parentIndex = QModelIndex()) const override;
 	QModelIndex index(ccHObject* object);
-	virtual QModelIndex parent(const QModelIndex &index) const override;
-	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-	virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
-	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-	virtual Qt::DropActions supportedDropActions() const override;
-	virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
-	virtual QMap<int,QVariant> itemData(const QModelIndex& index) const override;
-	virtual Qt::DropActions supportedDragActions() const override { return Qt::MoveAction; }
+	QModelIndex parent(const QModelIndex &index) const override;
+	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+	Qt::ItemFlags flags(const QModelIndex &index) const override;
+	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+	Qt::DropActions supportedDropActions() const override;
+	bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
+	QMap<int,QVariant> itemData(const QModelIndex& index) const override;
+	Qt::DropActions supportedDragActions() const override { return Qt::MoveAction; }
 
-public slots:
 	void changeSelection(const QItemSelection & selected, const QItemSelection & deselected);
 	void reflectObjectPropChange(ccHObject* obj);
 	void redrawCCObject(ccHObject* object);
@@ -181,8 +180,7 @@ public slots:
 	**/
 	void selectEntities(const ccHObject::Container& entities, bool incremental = false);
 
-protected:
-
+private:
 	//! Entity property that can be toggled
 	enum TOGGLE_PROPERTY {	TG_ENABLE,
 							TG_VISIBLE,
@@ -195,7 +193,6 @@ protected:
 	//! Toggles a given property (enable state, visibility, normal, color, SF, etc.) on selected entities
 	void toggleSelectedEntitiesProperty(TOGGLE_PROPERTY prop);
 
-protected slots:
 	void showContextMenu(const QPoint&);
 
 	void expandBranch();
@@ -307,7 +304,6 @@ protected:
 
 	//! Last context menu pos
 	QPoint m_contextMenuPos;
-
 };
 
 #endif

@@ -122,6 +122,7 @@
 #include "ccRecentFiles.h"
 #include "ccRegistrationTools.h"
 #include "ccUtils.h"
+#include "db_tree/ccDBRoot.h"
 #include "pluginManager/ccPluginUIManager.h"
 
 //3D mouse handler

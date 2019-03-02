@@ -24,29 +24,29 @@
 //Qt
 #include <QStyledItemDelegate>
 
-class ccHObject;
-class ccGenericPointCloud;
-class ccPolyline;
-class ccGenericMesh;
-class ccGenericPrimitive;
-class ccOctree;
-class ccKdTree;
-class ccImage;
-class ccGBLSensor;
-class ccCameraSensor;
-class ccMaterialSet;
 class cc2DLabel;
 class cc2DViewportObject;
+class ccCameraSensor;
 class ccFacet;
-class ccSensor;
+class ccGBLSensor;
+class ccGenericMesh;
+class ccGenericPointCloud;
+class ccGenericPrimitive;
+class ccHObject;
+class ccImage;
 class ccIndexedTransformationBuffer;
-class ccShiftedObject;
-class CCShareable;
+class ccKdTree;
+class ccMaterialSet;
+class ccOctree;
 class ccPlanarEntityInterface;
+class ccPolyline;
+class ccSensor;
+class CCShareable;
+class ccShiftedObject;
 
-class QStandardItemModel;
-class QStandardItem;
 class QAbstractItemView;
+class QStandardItem;
+class QStandardItemModel;
 
 //! GUI properties list dialog element
 class ccPropertiesTreeDelegate : public QStyledItemDelegate
@@ -105,18 +105,18 @@ public:
 	};
 
 	//! Default constructor
-	ccPropertiesTreeDelegate(QStandardItemModel* _model, QAbstractItemView* _view, QObject *parent = 0);
+	ccPropertiesTreeDelegate(QStandardItemModel* _model, QAbstractItemView* _view, QObject *parent = nullptr);
 
 	//! Default destructor
-	virtual ~ccPropertiesTreeDelegate();
+	~ccPropertiesTreeDelegate() override;
 
 	//inherited from QStyledItemDelegate
-	virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index ) const;
-	virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-	//virtual bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
-	virtual void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
-	virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
-	virtual void unbind();
+	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index ) const override;
+	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+	void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+	
+	void unbind();
 
 	//! Fill property view with QItems corresponding to object's type
 	void fillModel(ccHObject* hObject);
@@ -129,7 +129,13 @@ signals:
 	void ccObjectAppearanceChanged(ccHObject* hObject) const;
 	void ccObjectAndChildrenAppearanceChanged(ccHObject* hObject) const;
 
-protected slots:
+private:
+	static const char* s_noneString;
+	static const char* s_rgbColor;
+	static const char* s_sfColor;
+	static const char* s_defaultPointSizeString;
+	static const char* s_defaultPolyWidthSizeString;
+	
 	void updateItem(QStandardItem*);
 	void scalarFieldChanged(int);
 	void colorScaleChanged(int);
@@ -157,34 +163,34 @@ protected slots:
 	void polyineWidthChanged(int);
 	void trihedronsScaleChanged(double);
 
-protected:
-
-	void addSeparator(QString title);
+	void addSeparator(const QString& title);
 	void appendRow(QStandardItem* leftItem, QStandardItem* rightItem, bool openPersistentEditor = false);
 	void appendWideRow(QStandardItem* item, bool openPersistentEditor = true);
 
 	void fillWithHObject(ccHObject*);
 	void fillWithPointCloud(ccGenericPointCloud*);
 	void fillSFWithPointCloud(ccGenericPointCloud*);
-	void fillWithMesh(ccGenericMesh*);
-	void fillWithFacet(ccFacet*);
-	void fillWithPlanarEntity(ccPlanarEntityInterface*);
-	void fillWithSensor(ccSensor*);
-	void fillWithTransBuffer(ccIndexedTransformationBuffer*);
-	void fillWithPolyline(ccPolyline*);
-	void fillWithPrimitive(ccGenericPrimitive*);
-	void fillWithPointOctree(ccOctree*);
-	void fillWithPointKdTree(ccKdTree*);
-	void fillWithImage(ccImage*);
-	void fillWithLabel(cc2DLabel*);
-	void fillWithViewportObject(cc2DViewportObject*);
-	void fillWithGBLSensor(ccGBLSensor*);
-	void fillWithCameraSensor(ccCameraSensor*);
-	void fillWithMaterialSet(ccMaterialSet*);
-	void fillWithShareable(CCShareable*);
-	void fillWithMetaData(ccObject*);
-	void fillWithShifted(ccShiftedObject*);
-	template<class Type, int N, class ComponentType> void fillWithCCArray(ccArray<Type, N, ComponentType>*);
+	void fillWithMesh(const ccGenericMesh*);
+	void fillWithFacet(const ccFacet*);
+	void fillWithPlanarEntity(const ccPlanarEntityInterface*);
+	void fillWithSensor(const ccSensor*);
+	void fillWithTransBuffer(const ccIndexedTransformationBuffer*);
+	void fillWithPolyline(const ccPolyline*);
+	void fillWithPrimitive(const ccGenericPrimitive*);
+	void fillWithPointOctree(const ccOctree*);
+	void fillWithPointKdTree(const ccKdTree*);
+	void fillWithImage(const ccImage*);
+	void fillWithLabel(const cc2DLabel*);
+	void fillWithViewportObject(const cc2DViewportObject*);
+	void fillWithGBLSensor(const ccGBLSensor*);
+	void fillWithCameraSensor(const ccCameraSensor*);
+	void fillWithMaterialSet(const ccMaterialSet*);
+	void fillWithShareable(const CCShareable*);
+	void fillWithMetaData(const ccObject*);
+	void fillWithShifted(const ccShiftedObject*);
+	
+	template<class Type, int N, class ComponentType>
+	void fillWithCCArray(const ccArray<Type, N, ComponentType>*);
 
 	//! Returns whether the editor is wide (i.e. spans on two columns) or not
 	bool isWideEditor(int itemData) const;

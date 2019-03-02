@@ -375,6 +375,9 @@ void qRansacSD::doAction()
 	if (shapes.size() > 0)
 	{
 		ccHObject* group = 0;
+
+		QString shape_name;
+		size_t count_plane(0), count_sphere(0), count_cylinder(0), count_cone(0), count_torus(0);
 		for (MiscLib::Vector<DetectedShape>::const_iterator it = shapes.begin(); it != shapes.end(); ++it)
 		{
 			const PrimitiveShape* shape = it->first;
@@ -473,7 +476,9 @@ void qRansacSD::doAction()
 
 				//plane primitive
 				prim = new ccPlane(dX,dY,&glMat);
-			
+
+				shape_name = QString(desc.c_str()) + QString::number(count_plane);
+				count_plane++;
 				}
 				break;
 
@@ -492,6 +497,8 @@ void qRansacSD::doAction()
 				prim = new ccSphere(radius,&glMat);
 				prim->setEnabled(false);
 			
+				shape_name = QString(desc.c_str()) + QString::number(count_sphere);
+				count_sphere++;
 				}
 				break;
 
@@ -520,6 +527,8 @@ void qRansacSD::doAction()
 				prim = new ccCylinder(r,h,&glMat);
 				prim->setEnabled(false);
 
+				shape_name = QString(desc.c_str()) + QString::number(count_cylinder);
+				count_cylinder++;
 				}
 				break;
 
@@ -580,7 +589,8 @@ void qRansacSD::doAction()
 					prim = new ccCone(maxRadius, minRadius, maxHeight-minHeight, 0, 0, &glMat);
 					prim->setEnabled(false);
 				}
-
+				shape_name = QString(desc.c_str()) + QString::number(count_cone);
+				count_cone++;
 				}
 				break;
 
@@ -613,7 +623,8 @@ void qRansacSD::doAction()
 					prim = new ccTorus(maxRadius-minRadius,maxRadius+minRadius,M_PI*2.0,false,0,&glMat);
 					prim->setEnabled(false);
 				}
-
+				shape_name = QString(desc.c_str()) + QString::number(count_torus);
+				count_torus++;
 				}
 				break;
 			}
@@ -621,6 +632,7 @@ void qRansacSD::doAction()
 			//is there a primitive to add to part cloud?
 			if (prim)
 			{
+				pcShape->setName(shape_name);
 				prim->applyGLTransformation_recursive();
 				pcShape->addChild(prim);
 				prim->setDisplay(pcShape->getDisplay());

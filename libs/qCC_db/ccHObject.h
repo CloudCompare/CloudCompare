@@ -169,6 +169,12 @@ public: //children management
 							bool strict = false,
 							ccGenericGLDisplay* inDisplay = nullptr) const;
 
+	unsigned filterChildrenByName(Container& filteredChildren,
+		bool recursive = false,
+		QString filter = QString(),
+		bool strict = false,
+		ccGenericGLDisplay* inDisplay = nullptr) const;
+
 	//! Detaches a specific child
 	/** This method does not delete the child.
 		Removes any dependency between the flag and this object

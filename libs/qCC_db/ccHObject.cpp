@@ -434,6 +434,37 @@ unsigned ccHObject::filterChildren(	Container& filteredChildren,
 	return static_cast<unsigned>(filteredChildren.size());
 }
 
+unsigned ccHObject::filterChildrenByName( Container& filteredChildren,
+	bool recursive = false,
+	QString filter = QString(),
+	bool strict = false,
+	ccGenericGLDisplay* inDisplay = nullptr) const 
+{
+	for (auto child : m_children)
+	{
+		QString child_name = child->getName();
+		if ((!strict && child_name.indexOf(filter))
+			|| (strict && child_name == filter))
+		{
+			if (!inDisplay || child->getDisplay() == inDisplay)
+			{
+				//warning: we have to handle unicity as a sibling may be in the same container as its parent!
+				if (std::find(filteredChildren.begin(), filteredChildren.end(), child) == filteredChildren.end()) //not yet in output vector?
+				{
+					filteredChildren.push_back(child);
+				}
+			}
+		}
+
+		if (recursive)
+		{
+			child->filterChildrenByName(filteredChildren, true, filter, strict, inDisplay);
+		}
+	}
+
+	return static_cast<unsigned>(filteredChildren.size());
+}
+
 int ccHObject::getChildIndex(const ccHObject* child) const
 {
 	for (size_t i=0; i<m_children.size(); ++i)

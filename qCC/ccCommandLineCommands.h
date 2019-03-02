@@ -2279,7 +2279,8 @@ struct CommandExtractVertices : public ccCommandLineInterface::Command
 
 		for (size_t i = 0; i < cmd.meshes().size(); ++i)
 		{
-			ccGenericPointCloud* cloud = cmd.meshes()[i].mesh->getAssociatedCloud();
+			ccGenericMesh* mesh = cmd.meshes()[i].mesh;
+			ccGenericPointCloud* cloud = mesh->getAssociatedCloud();
 			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(cloud);
 			if (!pc)
 			{
@@ -2289,6 +2290,13 @@ struct CommandExtractVertices : public ccCommandLineInterface::Command
 
 			//add the resulting cloud to the main set
 			cmd.clouds().emplace_back(pc, cmd.meshes()[i].basename + QObject::tr(".vertices"), cmd.meshes()[i].path);
+
+			//don't forget to detach the cloud before we delete the meshes!
+			assert(pc->getParent() == mesh);
+			if (pc->getParent())
+			{
+				pc->getParent()->detachChild(pc);
+			}
 
 			//save it as well
 			if (cmd.autoSaveMode())

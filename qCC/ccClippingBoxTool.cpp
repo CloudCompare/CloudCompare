@@ -25,6 +25,8 @@
 #include "ccGLWindow.h"
 #include "mainwindow.h"
 
+#include "db_tree/ccDBRoot.h"
+
 //qCC_db
 #include <ccClipBox.h>
 #include <ccPointCloud.h>

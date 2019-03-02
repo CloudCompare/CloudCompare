@@ -29,9 +29,6 @@
 //CCLib
 #include <AutoSegmentationTools.h>
 
-//internal db
-#include "db_tree/ccDBRoot.h"
-
 class QAction;
 class QMdiArea;
 class QMdiSubWindow;
@@ -42,6 +39,7 @@ class cc3DMouseManager;
 class ccCameraParamEditDlg;
 class ccClippingBoxTool;
 class ccComparisonDlg;
+class ccDBRoot;
 class ccDrawableObject;
 class ccGamepadManager;
 class ccGLWindow;
@@ -58,6 +56,8 @@ class ccRecentFiles;
 class ccSectionExtractionTool;
 class ccStdPluginInterface;
 class ccTracePolylineTool;
+
+struct dbTreeSelectionInfo;
 
 class bdrLine3DppDlg;
 class bdrDeductionDlg;

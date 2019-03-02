@@ -46,7 +46,7 @@
 //Qt
 #include <QIcon>
 
-ccHObject::ccHObject(QString name/*=QString()*/)
+ccHObject::ccHObject(const QString& name)
 	: ccObject(name)
 	, ccDrawableObject()
 	, m_parent(nullptr)
@@ -273,7 +273,7 @@ void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*
 	otherObject->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE);
 }
 
-int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject)
+int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject) const
 {
 	std::map<ccHObject*, int>::const_iterator it = m_dependencies.find(const_cast<ccHObject*>(otherObject)); //DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
 
@@ -383,12 +383,12 @@ unsigned int ccHObject::getChildCountRecursive() const
 	return count;
 }
 
-ccHObject* ccHObject::find(unsigned uniqueID)
+ccHObject* ccHObject::find(unsigned uniqueID) const
 {
 	//found the right item?
 	if (getUniqueID() == uniqueID)
 	{
-		return this;
+		return const_cast<ccHObject *>(this);
 	}
 	
 	//otherwise we are going to test all children recursively
@@ -583,7 +583,7 @@ bool ccHObject::isDisplayed() const
 	return (getDisplay() != nullptr) && isVisible() && isBranchEnabled();
 }
 
-bool ccHObject::isDisplayedIn(ccGenericGLDisplay* display) const
+bool ccHObject::isDisplayedIn(const ccGenericGLDisplay* display) const
 {
 	return (getDisplay() == display) && isVisible() && isBranchEnabled();
 }

@@ -17,26 +17,26 @@
 
 #include "ccFacet.h"
 #include "ccMesh.h"
-#include "ccPolyline.h"
 #include "ccPointCloud.h"
+#include "ccPolyline.h"
 
 //CCLib
 #include <Delaunay2dMesh.h>
 #include <DistanceComputationTools.h>
 #include <MeshSamplingTools.h>
 
-static const char DEFAULT_POLYGON_MESH_NAME[] = "2D polygon";
-static const char DEFAULT_CONTOUR_NAME[] = "Contour";
-static const char DEFAULT_CONTOUR_POINTS_NAME[] = "Contour points";
-static const char DEFAULT_ORIGIN_POINTS_NAME[] = "Origin points";
+constexpr const char* DEFAULT_POLYGON_MESH_NAME = "2D polygon";
+constexpr const char* DEFAULT_CONTOUR_NAME = "Contour";
+constexpr const char* DEFAULT_CONTOUR_POINTS_NAME = "Contour points";
+constexpr const char* DEFAULT_ORIGIN_POINTS_NAME = "Origin points";
 
 ccFacet::ccFacet(	PointCoordinateType maxEdgeLength/*=0*/,
-					QString name/*=QString("Facet")*/ )
+					const QString& name/*=QString("Facet")*/ )
 	: ccHObject(name)
-	, m_polygonMesh(0)
-	, m_contourPolyline(0)
-	, m_contourVertices(0)
-	, m_originPoints(0)
+	, m_polygonMesh(nullptr)
+	, m_contourPolyline(nullptr)
+	, m_contourVertices(nullptr)
+	, m_originPoints(nullptr)
 	, m_center(0,0,0)
 	, m_rms(0.0)
 	, m_surface(0.0)
@@ -49,10 +49,6 @@ ccFacet::ccFacet(	PointCoordinateType maxEdgeLength/*=0*/,
 
 	setVisible(true);
 	lockVisibility(false);
-}
-
-ccFacet::~ccFacet()
-{
 }
 
 ccFacet* ccFacet::clone() const
@@ -71,7 +67,7 @@ ccFacet* ccFacet::clone() const
 			//not enough memory?!
 			ccLog::Warning(QString("[ccFacet::clone][%1] Failed to clone countour!").arg(getName()));
 			delete facet;
-			return 0;
+			return nullptr;
 		}
 
 		//the copy constructor of ccPolyline creates a new cloud (the copy of this facet's 'contour points')
@@ -96,7 +92,7 @@ ccFacet* ccFacet::clone() const
 			//not enough memory?!
 			ccLog::Warning(QString("[ccFacet::clone][%1] Failed to clone polygon!").arg(getName()));
 			delete facet;
-			return 0;
+			return nullptr;
 		}
 		
 		facet->m_polygonMesh->setLocked(m_polygonMesh->isLocked());
@@ -148,7 +144,7 @@ ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
 	if (!cloud || cloud->size() < 3)
 	{
 		ccLog::Error("[ccFacet::Create] Need at least 3 points to create a valid facet!");
-		return 0;
+		return nullptr;
 	}
 
 	//create facet structure
@@ -156,7 +152,7 @@ ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
 	if (!facet->createInternalRepresentation(cloud, planeEquation))
 	{
 		delete facet;
-		return 0;
+		return nullptr;
 	}
 
 	ccPointCloud* pc = dynamic_cast<ccPointCloud*>(cloud);
@@ -205,7 +201,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 	//we project the input points on a plane
 	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
 	CCVector3 X, Y; //local base
-	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D, 0, &m_center, &X, &Y))
+	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D, nullptr, &m_center, &X, &Y))
 	{
 		ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
 		return false;
@@ -240,7 +236,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			if (!m_contourVertices->reserve(hullPtsCount))
 			{
 				delete m_contourVertices;
-				m_contourVertices = 0;
+				m_contourVertices = nullptr;
 				ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
 				return false;
 			}
@@ -273,7 +269,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			else
 			{
 				delete m_contourPolyline;
-				m_contourPolyline = 0;
+				m_contourPolyline = nullptr;
 				ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the contour polyline!");
 			}
 		}
@@ -348,7 +344,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 				else
 				{
 					delete m_polygonMesh;
-					m_polygonMesh = 0;
+					m_polygonMesh = nullptr;
 					ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the polygon mesh!");
 				}
 			}
@@ -409,7 +405,7 @@ bool ccFacet::toFile_MeOnly(QFile& out) const
 	//so instead we save it's unique ID (dataVersion>=32)
 	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
 	{
-		uint32_t originPointsUniqueID = (m_originPoints ? (uint32_t)m_originPoints->getUniqueID() : 0);
+		uint32_t originPointsUniqueID = (m_originPoints ? static_cast<uint32_t>(m_originPoints->getUniqueID()) : 0);
 		if (out.write((const char*)&originPointsUniqueID,4) < 0)
 			return WriteError();
 	}
@@ -418,7 +414,7 @@ bool ccFacet::toFile_MeOnly(QFile& out) const
 	//so instead we save it's unique ID (dataVersion>=32)
 	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
 	{
-		uint32_t contourPointsUniqueID = (m_contourVertices ? (uint32_t)m_contourVertices->getUniqueID() : 0);
+		uint32_t contourPointsUniqueID = (m_contourVertices ? static_cast<uint32_t>(m_contourVertices->getUniqueID()) : 0);
 		if (out.write((const char*)&contourPointsUniqueID,4) < 0)
 			return WriteError();
 	}
@@ -427,7 +423,7 @@ bool ccFacet::toFile_MeOnly(QFile& out) const
 	//so instead we save it's unique ID (dataVersion>=32)
 	//WARNING: the polyline must be saved in the same BIN file! (responsibility of the caller)
 	{
-		uint32_t contourPolyUniqueID = (m_contourPolyline ? (uint32_t)m_contourPolyline->getUniqueID() : 0);
+		uint32_t contourPolyUniqueID = (m_contourPolyline ? static_cast<uint32_t>(m_contourPolyline->getUniqueID()) : 0);
 		if (out.write((const char*)&contourPolyUniqueID,4) < 0)
 			return WriteError();
 	}
@@ -436,7 +432,7 @@ bool ccFacet::toFile_MeOnly(QFile& out) const
 	//so instead we save it's unique ID (dataVersion>=32)
 	//WARNING: the mesh must be saved in the same BIN file! (responsibility of the caller)
 	{
-		uint32_t polygonMeshUniqueID = (m_polygonMesh ? (uint32_t)m_polygonMesh->getUniqueID() : 0);
+		uint32_t polygonMeshUniqueID = (m_polygonMesh ? static_cast<uint32_t>(m_polygonMesh->getUniqueID()) : 0);
 		if (out.write((const char*)&polygonMeshUniqueID,4) < 0)
 			return WriteError();
 	}

@@ -24,13 +24,13 @@
 
 class ccGenericGLDisplay;
 
+
 //! Mesh (triangle) material
 class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial::CShared>, public CCShareable, public ccHObject
 {
 public:
-
 	//! Default constructor
-	ccMaterialSet(QString name = QString());
+	ccMaterialSet(const QString& name = QString());
 
 	//inherited from ccHObject
 	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MATERIAL_SET; }
@@ -39,12 +39,12 @@ public:
 	//! Finds material by name
 	/** \return material index or -1 if not found
 	**/
-	int findMaterialByName(QString mtlName);
+	int findMaterialByName(const QString& mtlName);
 
 	//! Finds material by unique identifier
 	/** \return material index or -1 if not found
 	**/
-	int findMaterialByUniqueID(QString uniqueID);
+	int findMaterialByUniqueID(const QString& uniqueID);
 
 	//! Adds a material
 	/** Ensures unicity of material names.
@@ -60,7 +60,7 @@ public:
 	static bool ParseMTL(QString path, const QString& filename, ccMaterialSet& materials, QStringList& errors);
 
 	//! Saves to an MTL file (+ associated texture images)
-	bool saveAsMTL(QString path, const QString& baseFilename, QStringList& errors) const;
+	bool saveAsMTL(const QString& path, const QString& baseFilename, QStringList& errors) const;
 
 	//! Clones materials set
 	ccMaterialSet* clone() const;
@@ -72,13 +72,12 @@ public:
 	bool isSerializable() const override { return true; }
 
 protected:
-
 	//inherited from ccHObject
 	bool toFile_MeOnly(QFile& out) const override;
 	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//! Default destructor (protected: use 'release' instead)
-	~ccMaterialSet() override;
+	~ccMaterialSet() override = default;
 };
 
 #endif //CC_MATERIAL_SET_HEADER

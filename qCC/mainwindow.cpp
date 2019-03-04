@@ -757,6 +757,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDImage_Lines,				&QAction::triggered, this, &MainWindow::doActionBDImageLines);
 	connect(m_UI->actionBDPrimIntersections,		&QAction::triggered, this, &MainWindow::doActionBDPrimIntersections);
 	connect(m_UI->actionBDPrimAssignSharpLines,		&QAction::triggered, this, &MainWindow::doActionBDPrimAssignSharpLines);
+	connect(m_UI->actionBDPrimPlaneFromSharp,		&QAction::triggered, this, &MainWindow::doActionBDPrimPlaneFromSharp);
 	connect(m_UI->actionBDPrimBoundary,				&QAction::triggered, this, &MainWindow::doActionBDPrimBoundary);
 	connect(m_UI->actionBDPrimPlaneFrame,			&QAction::triggered, this, &MainWindow::doActionBDPrimPlaneFrame);
 	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);
@@ -10717,10 +10718,80 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 		}
 	}
 	ccHObject* group = new ccHObject(plane_group->getName() + "-unassigned-sharp");
-	ccPointCloud* line_vert = new ccPointCloud("ImageSharps");
 	AddSegmentsAsChildVertices(group, unassigned_sharps, "ImageSharp", ccColor::black);
 	addToDB(group);
 	sharp_group->setEnabled(false);
+}
+
+void MainWindow::doActionBDPrimPlaneFromSharp()
+{
+	if (!haveSelection()) {
+		return;
+	}
+	ccHObject* unass_sharp_obj = m_selectedEntities.front();
+	ccHObject::Container entity_sharps = GetEnabledObjFromGroup(unass_sharp_obj, CC_TYPES::POLY_LINE);
+	stocker::Polyline3d unassigned_sharps = GetPolylineFromEntities(entity_sharps);
+
+	vector<vcg::Plane3d> planes; stocker::IntGroup indices;
+	stocker::PlaneSegmentationfromLines(unassigned_sharps, planes, indices, 1);
+	set<int> assigned_index;
+
+	ccHObject* group = new ccHObject(unass_sharp_obj->getName() + "-segmentation");
+	for (size_t i = 0; i < indices.size(); i++) {
+		ccPointCloud* plane_cloud = new ccPointCloud(QString("Plane") + QString::number(i));
+		ccColor::Rgb col = ccColor::Generator::Random();
+		plane_cloud->setRGBColor(col);
+		plane_cloud->showColors(true);
+
+		group->addChild(plane_cloud);
+		stocker::Polyline3d lines;
+		for (auto & ln_index : indices[i]) {
+			stocker::Seg3d seg = unassigned_sharps[ln_index];
+			plane_cloud->addPoint(CCVector3(seg.P0().X(), seg.P0().Y(), seg.P0().Z()));
+			plane_cloud->addPoint(CCVector3(seg.P1().X(), seg.P1().Y(), seg.P1().Z()));
+			lines.push_back(seg);
+			assigned_index.insert(ln_index);
+		}
+
+		//! add plane
+		{
+			ccHObject* plane = nullptr;
+			double rms = 0;
+			ccPlane* pPlane = ccPlane::Fit(plane_cloud, &rms);
+			if (pPlane) {
+				plane = static_cast<ccHObject*>(pPlane);
+				pPlane->setColor(col);
+				pPlane->enableStippling(true);
+			}
+			if (plane) {
+				plane->setName("Plane");
+				plane->applyGLTransformation_recursive();
+				plane->showColors(true);
+				plane->setVisible(true);
+
+				plane_cloud->addChild(plane);
+				plane->setDisplay(plane_cloud->getDisplay());
+				plane->prepareDisplayForRefresh_recursive();
+			}
+		}
+
+		AddSegmentsAsChildVertices(plane_cloud, lines, "ImageSharp", col);
+	}
+	addToDB(group);
+
+	stocker::Polyline3d remained_unassigned;
+	for (int i = 0; i < unassigned_sharps.size(); i++) {
+		if (assigned_index.find(i) == assigned_index.end())	{
+			remained_unassigned.push_back(unassigned_sharps[i]);
+		}
+	}
+	ccHObject* group_2 = new ccHObject(unass_sharp_obj->getName() + "-unassigned");
+	AddSegmentsAsChildVertices(group_2, remained_unassigned, "ImageSharp", ccColor::black);
+	addToDB(group_2);
+	unass_sharp_obj->setEnabled(false);
+
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDPrimBoundary()
@@ -10755,6 +10826,7 @@ void MainWindow::doActionBDPrimPlaneFrame()
 
 void MainWindow::doActionBDPlaneDeduction()
 {
+	ccHObject* point_cloud = askUserToSelect(CC_TYPES::POINT_CLOUD, 0, "please select the origin point cloud"); if (!point_cloud)return;
 	//! select two groups, one for plane, one for line
 	//! first, select the sharp line group
 	ccHObject* sharp_group = askUserToSelect(CC_TYPES::HIERARCHY_OBJECT, 0, "please select the unassigned segments group"); if (!sharp_group)return;
@@ -10763,43 +10835,185 @@ void MainWindow::doActionBDPlaneDeduction()
 	//! second, select the plane group
 	ccHObject* plane_group = askUserToSelect(CC_TYPES::HIERARCHY_OBJECT, 0, "please select the main planes group"); if (!plane_group)return;
 	ccHObject::Container plane_container = GetEnabledObjFromGroup(plane_group, CC_TYPES::PLANE);
-
-	ccHObject* point_cloud = askUserToSelect(CC_TYPES::POINT_CLOUD, 0, "please select the origin point cloud"); if (!point_cloud)return;
-
-	//////////////////////////////////////////////////////////////////////////
-	// unassigned sharps
-	stocker::Polyline3d unassigned_sharp_lines = GetPolylineFromEntities(sharp_container);
 	
-	// new_planes from segmentation_from_lines
-	std::vector<vcg::Plane3d> new_planes;
-	std::vector<std::vector<int>> line_indices;
-	double distance_epsilon = 1;
-	stocker::PlaneSegmentationfromLines(unassigned_sharp_lines, new_planes, line_indices, distance_epsilon);
-	stocker::PlaneData derived_planes;
+	bool balreadyseged = false;
+	ccHObject* plane_group_add = askUserToSelect(CC_TYPES::HIERARCHY_OBJECT, 0, "please select the segmented planes(if already segmented)"); 
+	if (plane_group_add) {
+		balreadyseged = true;
+	}
+	
+	//////////////////////////////////////////////////////////////////////////
+	vector<vcg::Plane3d>planes;
+	vector<stocker::Contour3d> planes_points;
+	vector<stocker::Polyline3d> planes_sharps;
+	stocker::Polyline3d unassigned_sharp_lines;
+	vector<stocker::Point_Normal> unassigned_points;
+	{
+		stocker::Contour3d used_points;
+		vector<stocker::Point_Normal> all_points;
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(point_cloud);
+		if (cloud) {
+			for (unsigned i = 0; i < cloud->size(); i++) {
+				CCVector3 pt = *cloud->getPoint(i);
+				CCVector3 n = cloud->getPointNormal(i);
+				all_points.push_back({ {pt.x, pt.y, pt.z}, {n.x, n.y, n.z} });
+			}
+		}
 
-	// merge to the old planes
-	for (auto & planeObj : plane_container) {
-		planeObj->getName();// TODO set plane name when generation
-		ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
-		if (!ccPlane) continue;
+		// unassigned sharps
+		unassigned_sharp_lines = GetPolylineFromEntities(sharp_container);
 
-		CCVector3 N; float constVal;
-		ccPlane->getEquation(N, constVal);
+		// sharp lines	
+		for (auto & plane_entity : plane_container) {
+			ccHObject* Plane_Cloud = plane_entity->getParent();
+			if (!Plane_Cloud->isEnabled()) { continue; }
+//			string plane_name = Plane_Cloud->getName().toStdString();			
+// 			// get plane
+// 			stocker::PlaneUnit plane_unit = stocker::FormPlaneUnit(GetPointsFromCloud(Plane_Cloud), plane_name, true);
+// 			pool_plane.push_back(plane_unit);
+// 			// get boundary lines
+// 			ccHObject::Container boundary_container;
+// 			Plane_Cloud->filterChildrenByName(boundary_container, false, "Boundary", true);	
+// 			for (auto & bdry_ent : boundary_container) {
+// 				ccHObject::Container polyline_container = GetEnabledObjFromGroup(bdry_ent, CC_TYPES::POLY_LINE);
+// 				stocker::Polyline3d bdry_lines = GetPolylineFromEntities(polyline_container);
+// 				for (auto & ln : bdry_lines) {
+// 					pool_line.push_back({ ln, plane_name });
+// 				}
+// 			}
 
-		vcg::Plane3d vcgPlane;
-		vcgPlane.SetDirection({ N.x, N.y, N.z });
-		vcgPlane.SetOffset(-constVal);
+			ccPlane* ccPlane = ccHObjectCaster::ToPlane(plane_entity);
+			if (!ccPlane) continue;
+
+			CCVector3 N; float constVal;
+			ccPlane->getEquation(N, constVal);
+
+			vcg::Plane3d vcgPlane;
+			vcgPlane.SetDirection({ N.x, N.y, N.z });
+			vcgPlane.SetOffset(-constVal);
+
+			planes.push_back(vcgPlane);
+
+			stocker::Contour3d cur_plane_points = GetPointsFromCloud(Plane_Cloud);
+			planes_points.push_back(cur_plane_points);
+			used_points.insert(used_points.end(), cur_plane_points.begin(), cur_plane_points.end());
+
+			ccHObject::Container sharp_container;
+			Plane_Cloud->filterChildrenByName(sharp_container, false, "ImageSharp", true);
+			if (sharp_container.empty()) { planes_sharps.push_back(stocker::Polyline3d()); continue; }
+			ccHObject::Container sharp_container_ = GetEnabledObjFromGroup(sharp_container.front(), CC_TYPES::POLY_LINE);
+			planes_sharps.push_back(GetPolylineFromEntities(sharp_container_));
+		}
+		unassigned_points = stocker::GetUnassignedPoints(used_points, all_points);
 	}
 
-	// update planes (retrieve points and sharps)
+	stocker::PrimitiveProj prim_proj;
+	prim_proj.option.outline_minarea = 3;
+	prim_proj.option.alpha_value = 5;
+	prim_proj.option.boundary_minpoints = 10;
+	prim_proj.PreparePlanes(planes, planes_points, planes_sharps);
+	prim_proj.PrepareSharps(unassigned_sharp_lines);
+
+	if (balreadyseged) {
+
+		vector<vcg::Plane3d>planes_seged;
+		vector<stocker::Polyline3d> planes_seged_sharps;
+
+		ccHObject::Container plane_container_add = GetEnabledObjFromGroup(plane_group_add, CC_TYPES::PLANE);
+		for (auto & plane_entity : plane_container_add) {
+			ccHObject* Plane_Cloud = plane_entity->getParent();
+			if (!Plane_Cloud->isEnabled()) { continue; }
+
+			ccPlane* ccPlane = ccHObjectCaster::ToPlane(plane_entity);
+			if (!ccPlane) continue;
+
+			CCVector3 N; float constVal;
+			ccPlane->getEquation(N, constVal);
+
+			vcg::Plane3d vcgPlane;
+			vcgPlane.SetDirection({ N.x, N.y, N.z });
+			vcgPlane.SetOffset(-constVal);			
+			
+			ccHObject::Container sharp_container;
+			Plane_Cloud->filterChildrenByName(sharp_container, false, "ImageSharp", true);
+			if (sharp_container.empty()) {
+				continue;
+			}
+			ccHObject::Container sharp_container_ = GetEnabledObjFromGroup(sharp_container.front(), CC_TYPES::POLY_LINE);
+			planes_seged_sharps.push_back(GetPolylineFromEntities(sharp_container_));
+			planes_seged.push_back(vcgPlane);
+		}
+		prim_proj.MergeNewPlanes(planes_seged, planes_seged_sharps, unassigned_points);
+		// TODO: get unassigned_sharps_remained the unassigned sharps is already in m_prim
+// 		stocker::Polyline3d unassigned_sharps_remained;
+// 		for (auto & sp : prim_proj.m_prim.ssharp) {
+// 			if (sp->data.line_shape == stocker::LineBorder_sharp &&
+// 				sp->data.head == "unassigned") {
+// 				unassigned_sharps_remained.push_back(sp->data.seg);
+// 			}			
+// 		}
+		// TODO: add unassigned points and sharps to DB
+		// TODO: prim_proj.DeriveJunctionPlane();
+	}
+	else {
+		prim_proj.PreparePoints(unassigned_points);
+		prim_proj.ReconstructPlaneDeduction();
+	}	
 	
+	// primitive to DB
+	ccHObject* group = new ccHObject(plane_group->getName() + "-deduction");
+	for (auto & prim : prim_proj.m_prim.splane) {
+		ccPointCloud* plane_cloud = new ccPointCloud(prim->GetName().Str().c_str());
+		ccColor::Rgb col = ccColor::Generator::Random();
+		plane_cloud->setRGBColor(col);
+		plane_cloud->showColors(true);
+
+		group->addChild(plane_cloud);
+
+		//! get plane points
+		for (auto & pt : prim->point) {
+			plane_cloud->addPoint(CCVector3(pt->data.vert.X(), pt->data.vert.Y(), pt->data.vert.Z()));
+		}
+
+		//! add plane
+		{
+			ccHObject* plane = nullptr;
+			double rms = 0;
+			ccPlane* pPlane = ccPlane::Fit(plane_cloud, &rms);
+			if (pPlane)	{
+				plane = static_cast<ccHObject*>(pPlane);
+				pPlane->setColor(col);
+				pPlane->enableStippling(true);
+			}
+			if (plane) {
+				plane->setName("Plane");
+				plane->applyGLTransformation_recursive();
+				plane->showColors(true);
+				plane->setVisible(true);
+
+				plane_cloud->addChild(plane);
+				plane->setDisplay(plane_cloud->getDisplay());
+				plane->prepareDisplayForRefresh_recursive();
+			}
+		}
+
+		//! get plane sharps
+		stocker::Polyline3d sharp_lines;
+		for (auto & ln : prim->sharp) {
+			if (ln->data.line_shape == stocker::LineBorder_sharp)
+				sharp_lines.push_back(ln->data.seg);
+		}
+		AddSegmentsAsChildVertices(plane_cloud, sharp_lines, "ImageSharp", col);		
+	}
+	addToDB(group);
+	refreshAll();
 }
 
 void MainWindow::doActionBDPolyFit()
 {	
 	ccHObject* entity = getSelectedEntities().front();
 
-
+	//! line sample on sharp
 
 // 	ccHObject* group = 0;
 // 	std::vector<int> image_lines;
@@ -10987,6 +11201,9 @@ ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM typ
 	if (entity) {
 		entity->filterChildren(group, true, type, true, entity->getDisplay());
 		for (auto & gp : group) {
+			if ((gp->getParent()) && (!gp->getParent()->isEnabled())) {
+				continue;
+			}
 			if (gp->isEnabled())
 				group_enabled.push_back(gp);
 		}
@@ -10996,6 +11213,9 @@ ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM typ
 
 void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)
 {
+	if (lines.empty()) {
+		return;
+	}
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 
 	ccPointCloud* line_vert = new ccPointCloud(name);

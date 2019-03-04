@@ -446,6 +446,8 @@ private slots:
 	void doActionBDPrimIntersections();
 	/// Assign Sharp Lines - assign sharp lines for each plane
 	void doActionBDPrimAssignSharpLines();
+	/// plane segmentation from sharp lines
+	void doActionBDPrimPlaneFromSharp();
 	/// Boundary - generate plane boundary
 	void doActionBDPrimBoundary();
 	/// Plane Frame - generate plane frames by optimization

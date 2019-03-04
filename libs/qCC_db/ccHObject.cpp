@@ -435,10 +435,10 @@ unsigned ccHObject::filterChildren(	Container& filteredChildren,
 }
 
 unsigned ccHObject::filterChildrenByName( Container& filteredChildren,
-	bool recursive = false,
-	QString filter = QString(),
-	bool strict = false,
-	ccGenericGLDisplay* inDisplay = nullptr) const 
+	bool recursive,
+	QString filter,
+	bool strict,
+	ccGenericGLDisplay* inDisplay) const 
 {
 	for (auto child : m_children)
 	{

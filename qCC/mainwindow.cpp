@@ -760,6 +760,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPrimPlaneFromSharp,		&QAction::triggered, this, &MainWindow::doActionBDPrimPlaneFromSharp);
 	connect(m_UI->actionBDPrimBoundary,				&QAction::triggered, this, &MainWindow::doActionBDPrimBoundary);
 	connect(m_UI->actionBDPrimPlaneFrame,			&QAction::triggered, this, &MainWindow::doActionBDPrimPlaneFrame);
+	connect(m_UI->actionBDPrimCreateGround,			&QAction::triggered, this, &MainWindow::doActionBDPrimCreateGround);
 	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);
 	connect(m_UI->actionBDPolyFit,					&QAction::triggered, this, &MainWindow::doActionBDPolyFit);
 	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBD3D4EM);
@@ -10824,6 +10825,59 @@ void MainWindow::doActionBDPrimPlaneFrame()
 	}
 }
 
+void MainWindow::doActionBDPrimCreateGround()
+{
+	bool ok = true;
+	double sample = QInputDialog::getDouble(this, "Input Dialog", "Please input sampling distance", 1.5, 0.0, 999999.0, 1, &ok);
+	if (!ok) return;
+	ccHObject* entity = getSelectedEntities().front(); if (!entity) return;
+	ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+	stocker::Contour3d planes_points;
+	for (auto & plane_entity : plane_container) {
+		ccHObject* Plane_Cloud = plane_entity->getParent();
+		stocker::Contour3d cur_plane_points = GetPointsFromCloud(Plane_Cloud);
+		planes_points.insert(planes_points.end(), cur_plane_points.begin(), cur_plane_points.end());
+	}
+	stocker::Contour3d ground_contour = stocker::CalcBuildingGround(planes_points, 0.5, 3, 3);
+	double ground_height = ground_contour.front().Z();
+	ccBBox box = entity->getBB_recursive();
+
+//	double ground_height = box.minCorner().z;
+	stocker::Vec3d box_min = stocker::parse_xyz(box.minCorner());
+	stocker::Vec3d box_max = stocker::parse_xyz(box.maxCorner());
+	stocker::BBox2d box_2d = stocker::BBox2d(stocker::ToVec2d(box_min), stocker::ToVec2d(box_max));
+	stocker::Contour2d pts_2d = stocker::PointSampleInBox2d(box_2d, sample);
+	
+	ccPointCloud* plane_cloud = new ccPointCloud("Ground");
+	ccColor::Rgb col = ccColor::Generator::Random();
+	plane_cloud->setRGBColor(col);
+	plane_cloud->showColors(true);
+
+	entity->addChild(plane_cloud);
+	for (auto & pt : pts_2d) {
+		plane_cloud->addPoint(CCVector3(pt.X(), pt.Y(), ground_height));
+	}
+	ccHObject* plane = nullptr;
+	double rms = 0;
+	ccPlane* pPlane = ccPlane::Fit(plane_cloud, &rms);
+	if (pPlane) {
+		plane = static_cast<ccHObject*>(pPlane);
+		pPlane->setColor(col);
+		pPlane->enableStippling(true);
+	}
+	if (plane) {
+		plane->setName("Plane");
+		plane->applyGLTransformation_recursive();
+		plane->showColors(true);
+		plane->setVisible(true);
+
+		plane_cloud->addChild(plane);
+		plane->setDisplay(plane_cloud->getDisplay());
+		plane->prepareDisplayForRefresh_recursive();
+	}
+	addToDB(plane_cloud);
+}
+
 void MainWindow::doActionBDPlaneDeduction()
 {
 	ccHObject* point_cloud = askUserToSelect(CC_TYPES::POINT_CLOUD, 0, "please select the origin point cloud"); if (!point_cloud)return;
@@ -11015,29 +11069,69 @@ void MainWindow::doActionBDPlaneDeduction()
 
 void MainWindow::doActionBDPolyFit()
 {	
-	ccHObject* entity = getSelectedEntities().front();
+	bool ok = true;
+	double line_sample = QInputDialog::getDouble(this, "Input Dialog", "Please input line sampling distance", 1.5, -1, 999999.0, 1, &ok);
+	bool b_add_line_sample = false;
+	if (ok && line_sample > 0) b_add_line_sample = true;
 
-	//! line sample on sharp
+	ccHObject* entity = getSelectedEntities().front(); if (!entity) return;
 
-// 	ccHObject* group = 0;
-// 	std::vector<int> image_lines;
-// 	ccColor::Rgb col = ccColor::blue;
-// 	for (auto & line : image_lines) {
-// 		ccPolyline* polyline = 0;
-// 		polyline->applyGLTransformation_recursive();
-// 		group->addChild(polyline);
-// 		//		polyline->setDisplay(true);
-// 		polyline->setColor(col);
-// 		polyline->showColors(true);
-// 		polyline->setVisible(true);
-// 	}
-// 	if (group) {
-// 		assert(group->getChildrenNumber() != 0);
-// 		dispToConsole("[Line3DPP] finished! Add to database!", ccMainAppInterface::STD_CONSOLE_MESSAGE);
-// 		group->setVisible(true);
-// 		addToDB(group);
-// 		refreshAll();
-// 	}
+	stocker::PolyFitRecon polyfit_recon;
+	ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+	stocker::PrimitiveProj prim_proj;
+	{
+		vector<vcg::Plane3d> planes;
+		vector<stocker::Contour3d> planes_points;
+		vector<stocker::Polyline3d> planes_sharps; 
+		for (auto & plane_entity : plane_container) {
+			ccHObject* Plane_Cloud = plane_entity->getParent();
+
+			ccPlane* ccPlane = ccHObjectCaster::ToPlane(plane_entity);
+			if (!ccPlane) continue;
+
+			CCVector3 N; float constVal;
+			ccPlane->getEquation(N, constVal);
+
+			vcg::Plane3d vcgPlane;
+			vcgPlane.SetDirection({ N.x, N.y, N.z });
+			vcgPlane.SetOffset(constVal);
+
+			planes.push_back(vcgPlane);
+
+			stocker::Contour3d cur_plane_points = GetPointsFromCloud(Plane_Cloud);
+			planes_points.push_back(cur_plane_points);
+
+			ccHObject::Container sharp_container;
+			Plane_Cloud->filterChildrenByName(sharp_container, false, "ImageSharp", true);
+			if (sharp_container.empty()) { planes_sharps.push_back(stocker::Polyline3d()); }
+			else {
+				ccHObject::Container sharp_container_ = GetEnabledObjFromGroup(sharp_container.front(), CC_TYPES::POLY_LINE);
+				stocker::Polyline3d cur_plane_sharps = GetPolylineFromEntities(sharp_container_);
+				planes_sharps.push_back(cur_plane_sharps);
+
+				if (b_add_line_sample) {
+					for (auto & ln : cur_plane_sharps) {
+						double _interval = line_sample / ln.Length();
+						int i(0);
+						do {
+							if (i * _interval > 1) break;
+							planes_points.back().push_back(ln.Lerp(i * _interval));
+							i++;
+						} while (1);
+					}
+				}
+			}			
+		}
+		prim_proj.PreparePlanes(planes, planes_points, planes_sharps);
+	}
+	polyfit_recon.SetLambda(0.4, 0.4, 0.2);
+	polyfit_recon.GenerateHypothesis(prim_proj.m_prim, "hypothesis.ply", "result.ply");
+
+	QStringList files;
+	files.append("result.ply.obj");
+	addToDB(files);
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBD3D4EM()

@@ -452,8 +452,8 @@ private slots:
 	void doActionBDPrimBoundary();
 	/// Plane Frame - generate plane frames by optimization
 	void doActionBDPrimPlaneFrame();
-
-
+	/// Create Ground Plane
+	void doActionBDPrimCreateGround();
 	/// Plane Deduction
 	void doActionBDPlaneDeduction();
 	/// PolyFit

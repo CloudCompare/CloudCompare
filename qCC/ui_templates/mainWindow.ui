@@ -509,6 +509,7 @@
      <addaction name="actionBDPrimPlaneFromSharp"/>
      <addaction name="actionBDPrimBoundary"/>
      <addaction name="actionBDPrimPlaneFrame"/>
+     <addaction name="actionBDPrimCreateGround"/>
     </widget>
     <addaction name="actionBDImage_Lines"/>
     <addaction name="menuPrimitive"/>
@@ -3048,6 +3049,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDPrimPlaneFromSharp">
    <property name="text">
     <string>Plane from Sharps</string>
+   </property>
+  </action>
+  <action name="actionBDPrimCreateGround">
+   <property name="text">
+    <string>Create Ground Plane</string>
    </property>
   </action>
  </widget>

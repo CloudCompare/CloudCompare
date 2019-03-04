@@ -10890,7 +10890,7 @@ void MainWindow::doActionBDPlaneDeduction()
 
 			vcg::Plane3d vcgPlane;
 			vcgPlane.SetDirection({ N.x, N.y, N.z });
-			vcgPlane.SetOffset(-constVal);
+			vcgPlane.SetOffset(constVal);
 
 			planes.push_back(vcgPlane);
 
@@ -10932,7 +10932,7 @@ void MainWindow::doActionBDPlaneDeduction()
 
 			vcg::Plane3d vcgPlane;
 			vcgPlane.SetDirection({ N.x, N.y, N.z });
-			vcgPlane.SetOffset(-constVal);			
+			vcgPlane.SetOffset(constVal);
 			
 			ccHObject::Container sharp_container;
 			Plane_Cloud->filterChildrenByName(sharp_container, false, "ImageSharp", true);
@@ -10972,7 +10972,17 @@ void MainWindow::doActionBDPlaneDeduction()
 
 		//! get plane points
 		for (auto & pt : prim->point) {
-			plane_cloud->addPoint(CCVector3(pt->data.vert.X(), pt->data.vert.Y(), pt->data.vert.Z()));
+			plane_cloud->addPoint(CCVector3(vcgXYZ(pt->data.vert)));
+		}
+
+		//! get plane sharps
+		stocker::Polyline3d sharp_lines;
+		for (auto & ln : prim->sharp) {
+			if (ln->data.line_shape == stocker::LineBorder_sharp) {
+				sharp_lines.push_back(ln->data.seg);
+				plane_cloud->addPoint(CCVector3(vcgXYZ(ln->data.seg.P0())));
+				plane_cloud->addPoint(CCVector3(vcgXYZ(ln->data.seg.P1())));
+			}			
 		}
 
 		//! add plane
@@ -10997,12 +11007,6 @@ void MainWindow::doActionBDPlaneDeduction()
 			}
 		}
 
-		//! get plane sharps
-		stocker::Polyline3d sharp_lines;
-		for (auto & ln : prim->sharp) {
-			if (ln->data.line_shape == stocker::LineBorder_sharp)
-				sharp_lines.push_back(ln->data.seg);
-		}
 		AddSegmentsAsChildVertices(plane_cloud, sharp_lines, "ImageSharp", col);		
 	}
 	addToDB(group);
@@ -11339,7 +11343,7 @@ void PlaneFrameOptimization(ccHObject* planeObj)
 
 	vcg::Plane3d vcgPlane;
 	vcgPlane.SetDirection({ N.x, N.y, N.z });
-	vcgPlane.SetOffset(-constVal);
+	vcgPlane.SetOffset(constVal);
 
 	
 #endif

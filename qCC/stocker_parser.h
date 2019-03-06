@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                    CLOUDCOMPARE PLUGIN: qRANSAC_SD                     #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,47 +11,28 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                  COPYRIGHT: Daniel Girardeau-Montaut                   #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#include "bdrLine3DppDlg.h"
+#ifndef __STOCKER_PARSER_HEADER__
+#define __STOCKER_PARSER_HEADER__
 
-//local
-#include "mainwindow.h"
+#include "ccHObject.h"
 
-#include <ccOctree.h>
-
-bdrLine3DppDlg::bdrLine3DppDlg(QWidget* parent)
-	: QDialog(parent, Qt::Tool)
-	, Ui::BDRLine3DppDlg()
-{
-	setupUi(this);
-
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(GenerateLines()));
-
-	if (MainWindow::TheInstance()) {
-		m_win = MainWindow::TheInstance();
-	}
-}
-
-void bdrLine3DppDlg::GenerateLines()
-{
-	saveSettings();
-
-#ifndef USE_STOCKER
-	if (m_win) {
-		m_win->dispToConsole("[Line3DPP] No stocker lib used!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-	}
-	return;
+#ifdef USE_STOCKER
+#include "builderlod3/builderlod3.h"
+#include "builderlod2/builderlod2.h"
+#include "buildercore/StBuilder.h"
+#include "ioctrl/StFileOperator.hpp"
 #endif // USE_STOCKER
 
-	if (m_win) {
-//		m_win->addToDB(plane);
-	}
-}
-
-void bdrLine3DppDlg::saveSettings()
-{
-
-}
+stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
+stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
+ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type);
+void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
+void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
+void CalcPlaneBoundary(ccHObject* planeObj);
+void CalcPlaneOutlines(ccHObject* planeObj);
+void PlaneFrameOptimization(ccHObject* planeObj);
+#endif

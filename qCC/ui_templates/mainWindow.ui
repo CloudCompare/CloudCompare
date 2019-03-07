@@ -504,16 +504,28 @@
      <property name="title">
       <string>Planar Primitive</string>
      </property>
-     <addaction name="actionBDPrimIntersections"/>
      <addaction name="actionBDPrimAssignSharpLines"/>
      <addaction name="actionBDPrimPlaneFromSharp"/>
-     <addaction name="actionBDPrimBoundary"/>
-     <addaction name="actionBDPrimPlaneFrame"/>
      <addaction name="actionBDPrimCreateGround"/>
+     <addaction name="actionBDPrimShrinkPlane"/>
+     <addaction name="actionBDPrimPlaneFrame"/>
     </widget>
+    <widget class="QMenu" name="menuLine_Primitive">
+     <property name="title">
+      <string>Line Primitive</string>
+     </property>
+     <addaction name="actionBDPrimIntersections"/>
+     <addaction name="actionBDPrimOutline"/>
+     <addaction name="actionBDPrimBoundary"/>
+    </widget>
+    <addaction name="actionBDProjectLoad"/>
+    <addaction name="separator"/>
     <addaction name="actionBDImage_Lines"/>
+    <addaction name="menuLine_Primitive"/>
+    <addaction name="separator"/>
     <addaction name="menuPrimitive"/>
     <addaction name="actionBDPlane_Deduction"/>
+    <addaction name="separator"/>
     <addaction name="actionBDPolyFit"/>
     <addaction name="actionBD3D4EM"/>
     <addaction name="menuGroup_Rename"/>
@@ -3054,6 +3066,21 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDPrimCreateGround">
    <property name="text">
     <string>Create Ground Plane</string>
+   </property>
+  </action>
+  <action name="actionBDPrimShrinkPlane">
+   <property name="text">
+    <string>Shrink Plane to Outline</string>
+   </property>
+  </action>
+  <action name="actionBDPrimOutline">
+   <property name="text">
+    <string>Outline</string>
+   </property>
+  </action>
+  <action name="actionBDProjectLoad">
+   <property name="text">
+    <string>Load Project</string>
    </property>
   </action>
  </widget>

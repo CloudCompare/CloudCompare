@@ -40,6 +40,8 @@ public:
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
 	virtual QList<QAction *> getActions() override;
 
+	void doActionOneEnt(ccHObject * ent, bool bDiag = false, double distance = 0.5, double bitmap = 2);
+
 protected slots:
 
 	//! Slot called when associated ation is triggered

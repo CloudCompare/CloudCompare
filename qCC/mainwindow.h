@@ -438,6 +438,8 @@ private slots:
 
 	//////////////////////////////////////////////////////////////////////////
 	//! Building Reconstruction
+	/// Load Project
+	void doActionBDProjectLoad();
 	/// Create Image Lines
 	void doActionBDImageLines();
 
@@ -450,10 +452,14 @@ private slots:
 	void doActionBDPrimPlaneFromSharp();
 	/// Boundary - generate plane boundary
 	void doActionBDPrimBoundary();
+	/// Outline - generate plane outlines
+	void doActionBDPrimOutline();
 	/// Plane Frame - generate plane frames by optimization
 	void doActionBDPrimPlaneFrame();
 	/// Create Ground Plane
 	void doActionBDPrimCreateGround();
+	/// Shrink plane to outline - remove points outside the alpha shape
+	void doActionBDPrimShrinkPlane();
 	/// Plane Deduction
 	void doActionBDPlaneDeduction();
 	/// PolyFit

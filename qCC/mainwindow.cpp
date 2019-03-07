@@ -754,13 +754,16 @@ void MainWindow::connectActions()
 
 	//////////////////////////////////////////////////////////////////////////
 	//Building Reconstruction
+	connect(m_UI->actionBDProjectLoad,				&QAction::triggered, this, &MainWindow::doActionBDProjectLoad);
 	connect(m_UI->actionBDImage_Lines,				&QAction::triggered, this, &MainWindow::doActionBDImageLines);
 	connect(m_UI->actionBDPrimIntersections,		&QAction::triggered, this, &MainWindow::doActionBDPrimIntersections);
 	connect(m_UI->actionBDPrimAssignSharpLines,		&QAction::triggered, this, &MainWindow::doActionBDPrimAssignSharpLines);
 	connect(m_UI->actionBDPrimPlaneFromSharp,		&QAction::triggered, this, &MainWindow::doActionBDPrimPlaneFromSharp);
 	connect(m_UI->actionBDPrimBoundary,				&QAction::triggered, this, &MainWindow::doActionBDPrimBoundary);
+	connect(m_UI->actionBDPrimOutline,				&QAction::triggered, this, &MainWindow::doActionBDPrimOutline);
 	connect(m_UI->actionBDPrimPlaneFrame,			&QAction::triggered, this, &MainWindow::doActionBDPrimPlaneFrame);
 	connect(m_UI->actionBDPrimCreateGround,			&QAction::triggered, this, &MainWindow::doActionBDPrimCreateGround);
+	connect(m_UI->actionBDPrimShrinkPlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimShrinkPlane);
 	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);
 	connect(m_UI->actionBDPolyFit,					&QAction::triggered, this, &MainWindow::doActionBDPolyFit);
 	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBD3D4EM);
@@ -10605,6 +10608,87 @@ ccHObject* MainWindow::askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultClo
 #include "stocker_parser.h"
 
 //////////////////////////////////////////////////////////////////////////
+bool IsBDBaseObj(ccHObject* obj) {
+	BDBaseHObject* prj = static_cast<BDBaseHObject*>(obj);
+	return prj->valid;
+}
+BDBaseHObject::Container GetBDBaseProjx(MainWindow* main) {
+	ccHObject* root_entity = main->db()->getRootEntity();
+	vector<BDBaseHObject*> prjx;
+	for (size_t i = 0; i < root_entity->getChildrenNumber(); i++) {
+		BDBaseHObject* prj = static_cast<BDBaseHObject*>(main->db()->getRootEntity()->getChild(i));
+		if (prj->valid) {
+			prjx.push_back(prj);
+		}
+	}
+	return prjx;
+}
+
+void MainWindow::doActionBDProjectLoad()
+{
+	QString Filename =
+		QFileDialog::getOpenFileName(this,
+			"Open project file",
+			"Project.ini",
+			"project (*.ini)");
+
+	if (Filename.isEmpty()) return;
+		
+	stocker::BlockProj block_prj; std::string error_info;
+	if (!stocker::LoadProject(Filename.toStdString(), block_prj, error_info)) {
+		dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	QFileInfo prj_file(Filename);
+	QString prj_name = prj_file.completeBaseName();
+
+	QString bin_file = prj_file.absolutePath() + "\\" + prj_name + ".bin";
+		
+	FileIOFilter::LoadParameters parameters;
+	{
+		CCVector3d loadCoordinatesShift(0, 0, 0);
+		bool loadCoordinatesTransEnabled = false;
+		parameters.alwaysDisplayLoadDialog = true;
+		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
+		parameters.coordinatesShift = &loadCoordinatesShift;
+		parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
+		parameters.parentWidget = this;
+	}
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+
+	if (QFileInfo(bin_file).exists()) {		
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(bin_file, parameters, result, QString());
+		BDBaseHObject* bd_grp = new BDBaseHObject(*newGroup);
+		bd_grp->setName(prj_name);
+		for (size_t i = 0; i < newGroup->getChildrenNumber(); i++) {
+			bd_grp->addChild(newGroup->getChild(i));
+		}
+		bd_grp->valid = true;
+		bd_grp->block_prj = block_prj;
+		addToDB(bd_grp);
+	}
+	else {
+		BDBaseHObject* group = new BDBaseHObject(prj_name);
+		group->block_prj = block_prj;
+		group->valid = true;
+		for (auto & bd : block_prj.m_builder.sbuild) {
+			QFileInfo point_path(bd->data.file_path.ori_points.c_str());
+			ccHObject* newGroup = FileIOFilter::LoadFromFile(point_path.absoluteFilePath(), parameters, result, QString());
+			ccHObject::Container clouds;
+			newGroup->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+			for (ccHObject* cloud : clouds)	{
+				if (cloud) {
+					static_cast<ccGenericPointCloud*>(cloud)->setName(point_path.baseName() + BDDB_ORIGIN_CLOUD_SUFFIX);
+					cloud->showColors(true);
+				}
+			}
+			group->addChild(newGroup);
+		}
+		addToDB(group);
+	}
+	refreshAll();
+	UpdateUI();
+}
 
 void MainWindow::doActionBDImageLines()
 {
@@ -10728,6 +10812,9 @@ void MainWindow::doActionBDPrimPlaneFromSharp()
 
 	ccHObject* group = new ccHObject(unass_sharp_obj->getName() + "-segmentation");
 	for (size_t i = 0; i < indices.size(); i++) {
+		if (indices[i].size() < 20)	{
+			continue;
+		}
 		ccPointCloud* plane_cloud = new ccPointCloud(QString("Plane") + QString::number(i));
 		ccColor::Rgb col = ccColor::Generator::Random();
 		plane_cloud->setRGBColor(col);
@@ -10786,10 +10873,10 @@ void MainWindow::doActionBDPrimPlaneFromSharp()
 
 void MainWindow::doActionBDPrimBoundary()
 {
+	if (!haveSelection()) return;
 	ccHObject *entity = getSelectedEntities().front();
 	if (entity->isGroup()) {
 		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
-		
 		for (auto & planeObj : plane_container) {
 			CalcPlaneBoundary(planeObj);
 		}
@@ -10797,6 +10884,23 @@ void MainWindow::doActionBDPrimBoundary()
 	else if (entity->isA(CC_TYPES::PLANE)) {
 		CalcPlaneBoundary(entity);
 	}
+}
+
+void MainWindow::doActionBDPrimOutline()
+{
+	ccHObject *entity = getSelectedEntities().front();
+	if (entity->isGroup()) {
+		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+
+		for (auto & planeObj : plane_container) {
+			CalcPlaneOutlines(planeObj);
+		}
+	}
+	else if (entity->isA(CC_TYPES::PLANE)) {
+		CalcPlaneOutlines(entity);
+	}
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDPrimPlaneFrame()
@@ -10812,6 +10916,8 @@ void MainWindow::doActionBDPrimPlaneFrame()
 	else if (entity->isA(CC_TYPES::PLANE)) {
 		PlaneFrameOptimization(entity);
 	}
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDPrimCreateGround()
@@ -10865,6 +10971,23 @@ void MainWindow::doActionBDPrimCreateGround()
 		plane->prepareDisplayForRefresh_recursive();
 	}
 	addToDB(plane_cloud);
+}
+
+void MainWindow::doActionBDPrimShrinkPlane()
+{
+	ccHObject *entity = getSelectedEntities().front();
+	if (entity->isGroup()) {
+		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+
+		for (auto & planeObj : plane_container) {
+			ShrinkPlaneToOutline(planeObj);
+		}
+	}
+	else if (entity->isA(CC_TYPES::PLANE)) {
+		ShrinkPlaneToOutline(entity);
+	}
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDPlaneDeduction()

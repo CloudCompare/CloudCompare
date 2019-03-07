@@ -22,9 +22,12 @@
 #include "ccPlane.h"
 #include "ccHObjectCaster.h"
 
+#include "QFileInfo"
+
 #ifdef USE_STOCKER
 using namespace stocker;
 #endif // USE_STOCKER
+
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity) {
 	stocker::Contour3d points;
 	if (!entity->isEnabled()) {
@@ -58,20 +61,27 @@ stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities)
 	return polyline;
 }
 
-ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type)
+ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable)
 {
-	ccHObject::Container group, group_enabled;
 	if (entity) {
+		ccHObject::Container group;
 		entity->filterChildren(group, true, type, true, entity->getDisplay());
-		for (auto & gp : group) {
-			if ((gp->getParent()) && (!gp->getParent()->isEnabled())) {
-				continue;
+		if (check_enable) {
+			ccHObject::Container group_enabled;
+			for (auto & gp : group) {
+				if ((gp->getParent()) && (!gp->getParent()->isEnabled())) {
+					continue;
+				}
+				if (gp->isEnabled())
+					group_enabled.push_back(gp);
 			}
-			if (gp->isEnabled())
-				group_enabled.push_back(gp);
+			return group_enabled;
 		}
+		else {
+			return group;
+		}		
 	}
-	return group_enabled;
+	return ccHObject::Container();
 }
 
 void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)
@@ -150,13 +160,17 @@ void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)
 
 void CalcPlaneBoundary(ccHObject* planeObj)
 {
+#ifdef USE_STOCKER
+	/// get boundary points
+	stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
+	/// get boundary lines
 
+#endif // USE_STOCKER
 }
 
 void CalcPlaneOutlines(ccHObject* planeObj)
 {
 #ifdef USE_STOCKER
-	if (!planeObj->isEnabled()) return;
 
 	stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
 	if (cur_plane_points.size() < 3) {
@@ -188,7 +202,13 @@ void CalcPlaneOutlines(ccHObject* planeObj)
 		}
 	}
 #endif // USE_STOCKER
+}
 
+void ShrinkPlaneToOutline(ccHObject * planeObj)
+{
+#ifdef USE_STOCKER
+
+#endif // USE_STOCKER
 }
 
 void PlaneFrameOptimization(ccHObject* planeObj)
@@ -206,4 +226,45 @@ void PlaneFrameOptimization(ccHObject* planeObj)
 
 
 #endif
+}
+
+
+ccHObject::Container BDBaseHObject::GetHObjContainer(CC_CLASS_ENUM type, QString suffix, bool check_enable)
+{
+	ccHObject::Container entities = GetEnabledObjFromGroup(this, type, check_enable);
+	ccHObject::Container output;
+	for (auto & entity : entities) {
+		if (entity->getName().endsWith(suffix)) {
+			output.push_back(entity);
+		}
+	}
+	return output;
+}
+ccHObject * BDBaseHObject::GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename, bool check_enable)
+{
+	ccHObject::Container entities = GetEnabledObjFromGroup(this, type, check_enable);
+	ccHObject* output = nullptr;
+	for (auto & entity : entities) {
+		QFileInfo name(entity->getName());	
+		if (entity->getName().endsWith(suffix) &&
+			name.baseName() == basename) {
+			return entity;
+		}
+	}
+	return nullptr;
+}
+ccHObject* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {
+	for (size_t i = 0; i < getChildrenNumber(); i++) 
+		if (getChild(i)->getName() == building_name) 
+			return getChild(i);
+	return nullptr;
+}
+ccHObject::Container BDBaseHObject::GetOriginPointCloud(bool check_enable) {
+	return GetHObjContainer(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX);
+}
+ccHObject * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check_enable) {
+	return GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name);
+}
+ccHObject * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
+	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_PRIMITIVE_SUFFIX, building_name);
 }

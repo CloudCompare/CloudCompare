@@ -168,7 +168,7 @@ void CalcPlaneBoundary(ccHObject* planeObj)
 #endif // USE_STOCKER
 }
 
-void CalcPlaneOutlines(ccHObject* planeObj)
+void CalcPlaneOutlines(ccHObject* planeObj, double alpha)
 {
 #ifdef USE_STOCKER
 
@@ -179,7 +179,7 @@ void CalcPlaneOutlines(ccHObject* planeObj)
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(planeObj->getParent());
 
 	//! get boundary
-	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, 5, false, 1);
+	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, alpha, false, 2);
 	for (vector<stocker::Contour3d> & component : contours_points) {
 		for (stocker::Contour3d & st_contours : component) {
 			ccPointCloud* line_vert = new ccPointCloud("Vertices");
@@ -203,11 +203,64 @@ void CalcPlaneOutlines(ccHObject* planeObj)
 	}
 #endif // USE_STOCKER
 }
-
-void ShrinkPlaneToOutline(ccHObject * planeObj)
+#include "vcg/space/intersection2.h"
+void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha)
 {
 #ifdef USE_STOCKER
+	ccHObject* parent_cloud = planeObj->getParent();
+	if (!parent_cloud) {
+		std::cout << "failed to shrink plane" << planeObj->getName().toStdString() << std::endl;
+		return;
+	}
+	stocker::Contour3d cur_plane_points = GetPointsFromCloud(parent_cloud);
+	if (cur_plane_points.size() < 3) {
+		parent_cloud->setEnabled(false);
+		return;
+	}
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(parent_cloud);
+	vcg::Plane3d plane;
+	PlaneUnit plane_unit = FormPlaneUnit(cur_plane_points, "temp", true);
+ 	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, alpha * 3, false, 2);
+ 	Contour3d concave_contour = contours_points.front().front();
+	Contour2d concave_2d = Point3dToPlpoint2d(plane_unit, concave_contour);
+	Polyline2d concave_polygon = MakeLoopPolylinefromContour2d(concave_2d);
+	
+	CCLib::ReferenceCloud remained(cloud);
+	int size = cloud->size();
+	for (size_t i = 0; i < size; i++) {
+		CCVector3 point = *cloud->getPoint(i);
+		vcg::Point2d pt_2d = plane_unit.Point3dPrjtoPlpoint2d({ parse_xyz(point) });
+		if (vcg::PointInsidePolygon(pt_2d, concave_polygon)) {
+			remained.addPointIndex(i);			
+		}
+	}
+	ccPointCloud* newCloud = cloud->partialClone(&remained);
+	newCloud->setName(cloud->getName());
+	parent_cloud->setEnabled(false);
+	ccHObject* parent = parent_cloud->getParent();
+//	parent->removeChild(parent_cloud);
+	parent->addChild(newCloud);
+	
+	ccHObject* cc_plane = nullptr;
+	double rms = 0;
+	ccPlane* pPlane = ccPlane::Fit(newCloud, &rms);
+	if (pPlane) {
+		cc_plane = static_cast<ccHObject*>(pPlane);
+		pPlane->setColor(newCloud->getPointColor(0));
+		pPlane->enableStippling(true);
+	}
+	if (cc_plane) {
+		cc_plane->setName("Plane");
+		cc_plane->applyGLTransformation_recursive();
+		cc_plane->showColors(true);
+		cc_plane->setVisible(true);
 
+		newCloud->addChild(cc_plane);
+		cc_plane->setDisplay(newCloud->getDisplay());
+		cc_plane->prepareDisplayForRefresh_recursive();
+	}
+	newCloud->redrawDisplay();
+	
 #endif // USE_STOCKER
 }
 
@@ -267,4 +320,14 @@ ccHObject * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check
 }
 ccHObject * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
 	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_PRIMITIVE_SUFFIX, building_name);
+}
+BDBaseHObject* GetRootBDBase(ccHObject* obj) {
+	do {
+		BDBaseHObject* bd_obj = static_cast<BDBaseHObject*>(obj->getParent());
+		if (bd_obj->valid) {
+			return bd_obj;
+		}
+	} while (obj->getParent());
+
+	return nullptr;
 }

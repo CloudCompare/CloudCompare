@@ -19,6 +19,7 @@
 #define __STOCKER_PARSER_HEADER__
 
 #include "ccHObject.h"
+#include "mainwindow.h"
 
 #ifdef USE_STOCKER
 #include "builderlod3/builderlod3.h"
@@ -35,8 +36,8 @@ ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM typ
 void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
 void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
 void CalcPlaneBoundary(ccHObject* planeObj);
-void CalcPlaneOutlines(ccHObject* planeObj);
-void ShrinkPlaneToOutline(ccHObject* planeObj);
+void CalcPlaneOutlines(ccHObject* planeObj, double alpha);
+void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha);
 void PlaneFrameOptimization(ccHObject* planeObj);
 
 #define BDDB_ORIGIN_CLOUD_SUFFIX ".original"
@@ -66,4 +67,7 @@ public:
 	ccHObject* GetOriginPointCloud(QString building_name, bool check_enable = false);
 	ccHObject* GetPrimitiveGroup(QString building_name, bool check_enable = false);
 };
+
+BDBaseHObject* GetRootBDBase(ccHObject* obj);
+
 #endif

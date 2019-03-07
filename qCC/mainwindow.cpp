@@ -10888,16 +10888,20 @@ void MainWindow::doActionBDPrimBoundary()
 
 void MainWindow::doActionBDPrimOutline()
 {
+	bool ok = true;
+	double alpha = QInputDialog::getDouble(this, "Input Dialog", "Please input alpha value", 2.0, 0.0, 999999.0, 1, &ok);
+	if (!ok) return;
+
 	ccHObject *entity = getSelectedEntities().front();
 	if (entity->isGroup()) {
 		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 
 		for (auto & planeObj : plane_container) {
-			CalcPlaneOutlines(planeObj);
+			CalcPlaneOutlines(planeObj, alpha);
 		}
 	}
 	else if (entity->isA(CC_TYPES::PLANE)) {
-		CalcPlaneOutlines(entity);
+		CalcPlaneOutlines(entity, alpha);
 	}
 	refreshAll();
 	UpdateUI();
@@ -10975,16 +10979,20 @@ void MainWindow::doActionBDPrimCreateGround()
 
 void MainWindow::doActionBDPrimShrinkPlane()
 {
+	bool ok = true;
+	double alpha = QInputDialog::getDouble(this, "Input Dialog", "Please input alpha value", 2.0, 0.0, 999999.0, 1, &ok);
+	if (!ok) return;
+
 	ccHObject *entity = getSelectedEntities().front();
 	if (entity->isGroup()) {
 		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 
 		for (auto & planeObj : plane_container) {
-			ShrinkPlaneToOutline(planeObj);
+			ShrinkPlaneToOutline(planeObj, alpha);
 		}
 	}
 	else if (entity->isA(CC_TYPES::PLANE)) {
-		ShrinkPlaneToOutline(entity);
+		ShrinkPlaneToOutline(entity, alpha);
 	}
 	refreshAll();
 	UpdateUI();

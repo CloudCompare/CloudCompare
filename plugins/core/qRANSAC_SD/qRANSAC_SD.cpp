@@ -106,7 +106,6 @@ void doDetection()
 //for parameters persistence
 static unsigned s_supportPoints    = 500;	// this is the minimal numer of points required for a primitive
 static double   s_maxNormalDev_deg = 25.0;	// maximal normal deviation from ideal shape (in degrees)
-static double	s_bitmap = 2.0;
 static double   s_proba            = 0.01;	// probability that no better candidate was overlooked during sampling
 static bool s_primEnabled[5] = {true,true,true,false,false};
 
@@ -185,37 +184,36 @@ void qRansacSD::doActionOneEnt(ccHObject* ent, bool bDiag, double distance, doub
 		rsdDlg.bitmapEpsilonDoubleSpinBox->setValue(.01f * scale);	// set bitmap resolution (= sampling resolution) to 1% of bounding box width
 		if (!rsdDlg.exec())
 			return;
+
+		//for parameters persistence
+		{
+			s_supportPoints = rsdDlg.supportPointsSpinBox->value();
+			s_maxNormalDev_deg = rsdDlg.maxNormDevAngleSpinBox->value();
+			s_proba = rsdDlg.probaDoubleSpinBox->value();
+
+			//consistency check
+			{
+				unsigned char primCount = 0;
+				for (unsigned char k = 0; k < 5; ++k)
+					primCount += (unsigned)s_primEnabled[k];
+				if (primCount == 0)
+				{
+					m_app->dispToConsole("No primitive type selected!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+					return;
+				}
+			}
+
+			s_primEnabled[0] = rsdDlg.planeCheckBox->isChecked();
+			s_primEnabled[1] = rsdDlg.sphereCheckBox->isChecked();
+			s_primEnabled[2] = rsdDlg.cylinderCheckBox->isChecked();
+			s_primEnabled[3] = rsdDlg.coneCheckBox->isChecked();
+			s_primEnabled[4] = rsdDlg.torusCheckBox->isChecked();
+		}
 	}
 	else {
 		rsdDlg.epsilonDoubleSpinBox->setValue(distance);		// set distance threshold to 0.5% of bounding box width
 		rsdDlg.bitmapEpsilonDoubleSpinBox->setValue(bitmap);	// set bitmap resolution (= sampling resolution) to 1% of bounding box width
 	}	
-
-	//for parameters persistence
-	{
-		s_supportPoints = rsdDlg.supportPointsSpinBox->value();
-		s_maxNormalDev_deg = rsdDlg.maxNormDevAngleSpinBox->value();
-		s_proba = rsdDlg.probaDoubleSpinBox->value();
-		s_bitmap = rsdDlg.bitmapEpsilonDoubleSpinBox->value();
-
-		//consistency check
-		{
-			unsigned char primCount = 0;
-			for (unsigned char k = 0; k < 5; ++k)
-				primCount += (unsigned)s_primEnabled[k];
-			if (primCount == 0)
-			{
-				m_app->dispToConsole("No primitive type selected!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-				return;
-			}
-		}
-
-		s_primEnabled[0] = rsdDlg.planeCheckBox->isChecked();
-		s_primEnabled[1] = rsdDlg.sphereCheckBox->isChecked();
-		s_primEnabled[2] = rsdDlg.cylinderCheckBox->isChecked();
-		s_primEnabled[3] = rsdDlg.coneCheckBox->isChecked();
-		s_primEnabled[4] = rsdDlg.torusCheckBox->isChecked();
-	}
 
 	//import parameters from dialog
 	RansacShapeDetector::Options ransacOptions;
@@ -777,6 +775,31 @@ void qRansacSD::doAction()
 		
 		if (!rsdDlg.exec())
 			return;
+
+		//for parameters persistence
+		{
+			s_supportPoints = rsdDlg.supportPointsSpinBox->value();
+			s_maxNormalDev_deg = rsdDlg.maxNormDevAngleSpinBox->value();
+			s_proba = rsdDlg.probaDoubleSpinBox->value();
+
+			//consistency check
+			{
+				unsigned char primCount = 0;
+				for (unsigned char k = 0; k < 5; ++k)
+					primCount += (unsigned)s_primEnabled[k];
+				if (primCount == 0)
+				{
+					m_app->dispToConsole("No primitive type selected!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+					return;
+				}
+			}
+
+			s_primEnabled[0] = rsdDlg.planeCheckBox->isChecked();
+			s_primEnabled[1] = rsdDlg.sphereCheckBox->isChecked();
+			s_primEnabled[2] = rsdDlg.cylinderCheckBox->isChecked();
+			s_primEnabled[3] = rsdDlg.coneCheckBox->isChecked();
+			s_primEnabled[4] = rsdDlg.torusCheckBox->isChecked();
+		}
 
 		for (ccHObject* ent : origin_clouds) {
 			doActionOneEnt(ent, false, 

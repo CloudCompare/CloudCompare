@@ -34,10 +34,10 @@ public:
 	{
 	}
 	
-	virtual ~ccGLFilterPluginInterface() {}
+	~ccGLFilterPluginInterface() override = default;
 
 	//inherited from ccPluginInterface
-	virtual CC_PLUGIN_TYPE getType() const { return CC_GL_FILTER_PLUGIN; }
+	CC_PLUGIN_TYPE getType() const override { return CC_GL_FILTER_PLUGIN; }
 
 	//! Returns a GL filter object
 	virtual ccGlFilter* getFilter() = 0;

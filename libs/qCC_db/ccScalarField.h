@@ -27,20 +27,20 @@
 //! A scalar field associated to display-related parameters
 /** Extends the CCLib::ScalarField object.
 **/
-class ccScalarField : public CCLib::ScalarField, public ccSerializableObject
+class QCC_DB_LIB_API ccScalarField : public CCLib::ScalarField, public ccSerializableObject
 {
 public:
 
 	//! Default constructor
 	/** \param name scalar field name
 	**/
-	QCC_DB_LIB_API explicit ccScalarField(const char* name = nullptr);
+	explicit ccScalarField(const char* name = nullptr);
 
 	//! Copy constructor
 	/** \param sf scalar field to copy
 		\warning May throw a std::bad_alloc exception
 	**/
-	QCC_DB_LIB_API ccScalarField(const ccScalarField& sf);
+	ccScalarField(const ccScalarField& sf);
 
 	/*** Scalar values display handling ***/
 
@@ -119,13 +119,13 @@ public:
 	inline const Range& logSaturationRange() const { return m_logSaturationRange; }
 
 	//! Sets the minimum displayed value
-	QCC_DB_LIB_API void setMinDisplayed(ScalarType val);
+	void setMinDisplayed(ScalarType val);
 	//! Sets the maximum displayed value
-	QCC_DB_LIB_API void setMaxDisplayed(ScalarType val);
+	void setMaxDisplayed(ScalarType val);
 	//! Sets the value at which to start color gradient
-	QCC_DB_LIB_API void setSaturationStart(ScalarType val);
+	void setSaturationStart(ScalarType val);
 	//! Sets the value at which to stop color gradient
-	QCC_DB_LIB_API void setSaturationStop(ScalarType val);
+	void setSaturationStop(ScalarType val);
 
 	//! Returns the color corresponding to a given value (wrt to the current display parameters)
 	/** Warning: must no be called if the SF is not associated to a color scale!
@@ -140,13 +140,13 @@ public:
 	inline const ccColor::Rgb* getValueColor(unsigned index) const { return getColor(getValue(index)); }
 
 	//! Sets whether NaN/out of displayed range values should be displayed in grey or hidden
-	QCC_DB_LIB_API void showNaNValuesInGrey(bool state);
+	void showNaNValuesInGrey(bool state);
 
 	//! Returns whether NaN values are displayed in grey or hidden
 	inline bool areNaNValuesShownInGrey() const { return m_showNaNValuesInGrey; }
 
 	//! Sets whether 0 should always appear in associated color ramp or not
-	QCC_DB_LIB_API void alwaysShowZero(bool state);
+	void alwaysShowZero(bool state);
 
 	//! Returns whether 0 should always appear in associated color ramp or not
 	inline bool isZeroAlwaysShown() const { return m_alwaysShowZero; }
@@ -154,7 +154,7 @@ public:
 	//! Sets whether the color scale should be symmetrical or not
 	/** For relative color scales only.
 	**/
-	QCC_DB_LIB_API void setSymmetricalScale(bool state);
+	void setSymmetricalScale(bool state);
 
 	//! Returns whether the color scale s symmetrical or not
 	/** For relative color scales only.
@@ -162,25 +162,25 @@ public:
 	inline bool symmetricalScale() const { return m_symmetricalScale; }
 
 	//! Sets whether scale is logarithmic or not
-	QCC_DB_LIB_API void setLogScale(bool state);
+	void setLogScale(bool state);
 
 	//! Returns whether scalar field is logarithmic or not
 	inline bool logScale() const { return m_logScale; }
 
 	//inherited
-	QCC_DB_LIB_API void computeMinAndMax() override;
+	void computeMinAndMax() override;
 
 	//! Returns associated color scale
 	inline const ccColorScale::Shared& getColorScale() const { return m_colorScale; }
 
 	//! Sets associated color scale
-	QCC_DB_LIB_API void setColorScale(ccColorScale::Shared scale);
+	void setColorScale(ccColorScale::Shared scale);
 
 	//! Returns number of color ramp steps
 	inline unsigned getColorRampSteps() const { return m_colorRampSteps; }
 
 	//! Sets number of color ramp steps used for display
-	QCC_DB_LIB_API void setColorRampSteps(unsigned steps);
+	void setColorRampSteps(unsigned steps);
 
 	//! Simple histogram structure
 	struct Histogram : std::vector<unsigned>
@@ -196,7 +196,7 @@ public:
 	/** 'Hidden' values are typically NaN values or values outside of the 'displayed' intervale
 		while those values are not displayed in grey (see ccScalarField::showNaNValuesInGrey).
 	**/
-	QCC_DB_LIB_API bool mayHaveHiddenValues() const;
+	bool mayHaveHiddenValues() const;
 
 	//! Sets modification flag state
 	inline void setModificationFlag(bool state) { m_modified = state; }
@@ -204,12 +204,12 @@ public:
 	inline bool getModificationFlag() const { return m_modified; }
 
 	//! Imports the parameters from another scalar field
-	QCC_DB_LIB_API void importParametersFrom(const ccScalarField* sf);
+	void importParametersFrom(const ccScalarField* sf);
 
 	//inherited from ccSerializableObject
 	inline bool isSerializable() const override { return true; }
-	QCC_DB_LIB_API bool toFile(QFile& out) const override;
-	QCC_DB_LIB_API bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool toFile(QFile& out) const override;
+	bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	//! Returns the global shift (if any)
 	inline double getGlobalShift() const { return m_globalShift; }
@@ -224,13 +224,13 @@ protected: //methods
 	~ccScalarField() override = default;
 
 	//! Updates saturation values
-	QCC_DB_LIB_API void updateSaturationBounds();
+	void updateSaturationBounds();
 
 	//! Normalizes a scalar value between 0 and 1 (wrt to current parameters)
 	/**	\param val scalar value
 		\return a number between 0 and 1 if inside displayed range or -1 otherwise
 	**/
-	QCC_DB_LIB_API ScalarType normalize(ScalarType val) const;
+	ScalarType normalize(ScalarType val) const;
 
 protected: //members
 

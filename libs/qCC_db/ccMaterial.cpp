@@ -29,7 +29,7 @@
 static QMap<QString, QImage> s_textureDB;
 static QMap<QString, QSharedPointer<QOpenGLTexture>> s_openGLTextureDB;
 
-ccMaterial::ccMaterial(QString name)
+ccMaterial::ccMaterial(const QString& name)
 	: m_name(name)
 	, m_uniqueID(QUuid::createUuid().toString())
 	, m_diffuseFront(ccColor::bright)
@@ -104,7 +104,7 @@ void ccMaterial::applyGL(const QOpenGLContext* context, bool lightEnabled, bool 
 	}
 }
 
-bool ccMaterial::loadAndSetTexture(QString absoluteFilename)
+bool ccMaterial::loadAndSetTexture(const QString& absoluteFilename)
 {
 	if (absoluteFilename.isEmpty())
 	{
@@ -241,12 +241,12 @@ void ccMaterial::MakeLightsNeutral(const QOpenGLContext* context)
 	}
 }
 
-QImage ccMaterial::GetTexture(QString absoluteFilename)
+QImage ccMaterial::GetTexture(const QString& absoluteFilename)
 {
 	return s_textureDB[absoluteFilename];
 }
 
-void ccMaterial::AddTexture(QImage image, QString absoluteFilename)
+void ccMaterial::AddTexture(QImage image, const QString& absoluteFilename)
 {
 	s_textureDB[absoluteFilename] = image;
 }

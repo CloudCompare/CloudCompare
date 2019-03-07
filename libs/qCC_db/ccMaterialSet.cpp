@@ -28,7 +28,8 @@
 //System
 #include <set>
 
-ccMaterialSet::ccMaterialSet(QString name/*=QString()*/)
+
+ccMaterialSet::ccMaterialSet(const QString& name)
 	: std::vector<ccMaterial::CShared>()
 	, CCShareable()
 	, ccHObject(name)
@@ -36,11 +37,7 @@ ccMaterialSet::ccMaterialSet(QString name/*=QString()*/)
 	setFlagState(CC_LOCKED,true);
 }
 
-ccMaterialSet::~ccMaterialSet()
-{
-}
-
-int ccMaterialSet::findMaterialByName(QString mtlName)
+int ccMaterialSet::findMaterialByName(const QString& mtlName)
 {
 	ccLog::PrintDebug(QString("[ccMaterialSet::findMaterialByName] Query: ") + mtlName);
 	
@@ -56,7 +53,7 @@ int ccMaterialSet::findMaterialByName(QString mtlName)
 	return -1;
 }
 
-int ccMaterialSet::findMaterialByUniqueID(QString uniqueID)
+int ccMaterialSet::findMaterialByUniqueID(const QString& uniqueID)
 {
 	ccLog::PrintDebug(QString("[ccMaterialSet::findMaterialByUniqueID] Query: ") + uniqueID);
 	
@@ -144,7 +141,8 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 
 	QString currentLine = stream.readLine();
 	unsigned currentLineIndex = 0;
-	ccMaterial::Shared currentMaterial(0);
+	ccMaterial::Shared currentMaterial( nullptr );
+	
 	while( !currentLine.isNull() )
 	{
 		++currentLineIndex;
@@ -165,7 +163,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			if (currentMaterial)
 			{
 				materials.addMaterial(currentMaterial);
-				currentMaterial = ccMaterial::Shared(0);
+				currentMaterial = ccMaterial::Shared( nullptr );
 			}
 
 			// get the name
@@ -295,7 +293,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 	return true;
 }
 
-bool ccMaterialSet::saveAsMTL(QString path, const QString& baseFilename, QStringList& errors) const
+bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, QStringList& errors) const
 {
 	//open mtl file
 	QString filename = path+QString('/')+baseFilename+QString(".mtl");
@@ -382,9 +380,8 @@ bool ccMaterialSet::append(const ccMaterialSet& source)
 {
 	try
 	{
-		for (ccMaterialSet::const_iterator it=source.begin(); it!=source.end(); ++it)
+		for (const auto &mtl : source)
 		{
-			ccMaterial::CShared mtl = *it;
 			if (addMaterial(mtl) <= 0)
 			{
 				ccLog::WarningDebug(QString("[ccMaterialSet::append] Material %1 couldn't be added to material set and will be ignored").arg(mtl->getName()));
@@ -407,7 +404,7 @@ ccMaterialSet* ccMaterialSet::clone() const
 	{
 		ccLog::Warning("[ccMaterialSet::clone] Not enough memory");
 		cloneSet->release();
-		cloneSet = 0;
+		cloneSet = nullptr;
 	}
 
 	return cloneSet;
@@ -427,9 +424,8 @@ bool ccMaterialSet::toFile_MeOnly(QFile& out) const
 	std::set<QString> texFilenames;
 
 	//Write each material
-	for (ccMaterialSet::const_iterator it = begin(); it!=end(); ++it)
+	for (const auto &mtl : *this)
 	{
-		ccMaterial::CShared mtl = *it;
 		mtl->toFile(out);
 
 		//remember its texture as well (if any)
@@ -443,10 +439,10 @@ bool ccMaterialSet::toFile_MeOnly(QFile& out) const
 	outStream << static_cast<uint32_t>(texFilenames.size());
 	//and save the textures (dataVersion>=37)
 	{
-		for (std::set<QString>::const_iterator it=texFilenames.begin(); it!=texFilenames.end(); ++it)
+		for (const auto &texFilename : texFilenames)
 		{
-			outStream << *it; //name
-			outStream << ccMaterial::GetTexture(*it); //then image
+			outStream << texFilename; //name
+			outStream << ccMaterial::GetTexture(texFilename); //then image
 		}
 	}
 

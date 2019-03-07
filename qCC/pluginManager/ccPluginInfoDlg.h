@@ -35,7 +35,7 @@ class ccPluginInfoDlg : public QDialog
 	
 public:
 	explicit ccPluginInfoDlg( QWidget *parent = nullptr );
-	~ccPluginInfoDlg();
+	~ccPluginInfoDlg() override;
 	
 	void	setPluginPaths( const QStringList &pluginPaths );
 	void	setPluginList( const QList<ccPluginInterface *> &pluginList );

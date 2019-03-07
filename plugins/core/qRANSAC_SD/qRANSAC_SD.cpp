@@ -688,7 +688,7 @@ void qRansacSD::doAction()
 	}
 	else {
 		ccHObject::Container children, origin_clouds;
-		ent->filterChildren(children, false, CC_TYPES::POINT_CLOUD, true);
+		ent->filterChildren(children, true, CC_TYPES::POINT_CLOUD, true);
 		for (auto & cd : children)	{
 			if (cd->getName().endsWith(".original")) {
 				origin_clouds.push_back(cd);

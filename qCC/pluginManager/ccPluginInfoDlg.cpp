@@ -142,11 +142,25 @@ void ccPluginInfoDlg::setPluginList( const QList<ccPluginInterface *> &pluginLis
 	
 	for ( const ccPluginInterface *plugin : pluginList )
 	{
-		QStandardItem *item = new QStandardItem( plugin->getName() );
+		auto name = plugin->getName();
+		auto tooltip = tr( "%1 Plugin" ).arg( plugin->getName() );
+		
+		if ( plugin->isCore() )
+		{
+			tooltip += tr( " (core)" );
+		}
+		else
+		{
+			name += " 👽";
+			tooltip += tr( " (3rd Party)" );
+		}
+		
+		QStandardItem *item = new QStandardItem( name );
 		
 		item->setData( QVariant::fromValue( plugin ), PLUGIN_PTR );
 		
 		item->setIcon( _Icons::sGetIcon( plugin->getType() ) );
+		item->setToolTip( tooltip );
 		
 		m_ItemModel->setItem( row, 0, item );
 		

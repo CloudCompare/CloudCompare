@@ -108,7 +108,7 @@ ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM typ
 	return ccHObject::Container();
 }
 
-void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)
+ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)
 {
 	if (lines.empty()) {
 		return;
@@ -144,6 +144,7 @@ void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QS
 	}
 
 	entity->addChild(line_vert);
+	return line_vert;
 }
 
 void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)
@@ -182,13 +183,39 @@ void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)
 #endif // USE_STOCKER
 }
 
-void CalcPlaneBoundary(ccHObject* planeObj)
+void CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary_minpts)
 {
 #ifdef USE_STOCKER
 	/// get boundary points
-	stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
-	/// get boundary lines
+	Contour2d boundary_points_2d;
+	Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
+	PlaneUnit plane_unit = FormPlaneUnit(cur_plane_points, "temp", true);
+	Contour2d points_2d = Point3dToPlpoint2d(plane_unit, cur_plane_points);
+	vector<bool>bd_check;
+	ComputeBoundaryPts2d(points_2d, bd_check, 32, true);
+	assert(points_2d.size() == bd_check.size());
+	for (size_t i = 0; i < bd_check.size(); i++) {
+		if (bd_check[i]) {
+			boundary_points_2d.push_back(points_2d[i]);
+		}
+	}
 
+	/// get boundary lines
+	Contour3d boundary_points_3d = Plpoint2dToPoint3d(plane_unit, boundary_points_2d);
+	Polyline3d ransac_lines; IndexGroup line_index_group;
+	LineRansacfromPoints(boundary_points_3d, ransac_lines, line_index_group, p2l_distance, boundary_minpts);
+
+	ccHObject* line_vert = AddSegmentsAsChildVertices(planeObj->getParent(), ransac_lines, "Boundary Lines", ccColor::yellow);
+
+	if (!line_vert) {
+		return;
+	}
+	ccPointCloud* line_cloud = ccHObjectCaster::ToPointCloud(line_vert);
+	line_cloud->setRGBColor(ccColor::yellow);
+	for (auto & pt : boundary_points_3d) {
+		line_cloud->addPoint(CCVector3(vcgXYZ(pt)));
+	}
+	line_cloud->redrawDisplay();
 #endif // USE_STOCKER
 }
 

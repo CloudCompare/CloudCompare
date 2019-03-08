@@ -78,6 +78,7 @@
 #include "ccAlignDlg.h" //Aurelien BEY
 #include "ccApplication.h"
 #include "ccApplyTransformationDlg.h"
+#include "ccAskTwoDoubleValuesDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
 #include "ccCamSensorProjectionDlg.h"
@@ -10871,18 +10872,25 @@ void MainWindow::doActionBDPrimPlaneFromSharp()
 	UpdateUI();
 }
 
+static double s_last_bdry_p2l = 0.5;
+static double s_last_bdry_minpts = 30;
 void MainWindow::doActionBDPrimBoundary()
 {
 	if (!haveSelection()) return;
+	ccAskTwoDoubleValuesDlg paraDlg("p2ldistance", "minpts", 0, 1.0e12, s_last_bdry_p2l, s_last_bdry_minpts, 6, "boundary generator", this);
+	if (!paraDlg.exec()) {
+		return;
+	}
+
 	ccHObject *entity = getSelectedEntities().front();
 	if (entity->isGroup()) {
 		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 		for (auto & planeObj : plane_container) {
-			CalcPlaneBoundary(planeObj);
+			CalcPlaneBoundary(planeObj, s_last_bdry_p2l, s_last_bdry_minpts);
 		}
 	}
 	else if (entity->isA(CC_TYPES::PLANE)) {
-		CalcPlaneBoundary(entity);
+		CalcPlaneBoundary(entity, s_last_bdry_p2l, s_last_bdry_minpts);
 	}
 }
 
@@ -11168,12 +11176,20 @@ void MainWindow::doActionBDPlaneDeduction()
 	refreshAll();
 }
 
+static double s_last_polyfit_datafit = 0.4;
+static double s_last_polyfit_coverage = 0.4;
+static double s_last_polyfit_complexity = 0.2;
 void MainWindow::doActionBDPolyFit()
 {	
 	bool ok = true;
 	double line_sample = QInputDialog::getDouble(this, "Input Dialog", "Please input line sampling distance", 1.5, -1, 999999.0, 1, &ok);
 	bool b_add_line_sample = false;
 	if (ok && line_sample > 0) b_add_line_sample = true;
+
+	ccAskThreeDoubleValuesDlg paraDlg("data fitting", "coverage", "complexity", 0, 1.0e12, s_last_polyfit_datafit, s_last_polyfit_coverage, s_last_polyfit_complexity, 6, "PolyFit parameters", this);
+	if (!paraDlg.exec()) {
+		return;
+	}
 
 	ccHObject* entity = getSelectedEntities().front(); if (!entity) return;
 
@@ -11225,7 +11241,7 @@ void MainWindow::doActionBDPolyFit()
 		}
 		prim_proj.PreparePlanes(planes, planes_points, planes_sharps);
 	}
-	polyfit_recon.SetLambda(0.4, 0.4, 0.2);
+	polyfit_recon.SetLambda(s_last_polyfit_datafit, s_last_polyfit_coverage, s_last_polyfit_complexity);
 	polyfit_recon.GenerateHypothesis(prim_proj.m_prim, "hypothesis.ply", "result.ply");
 
 	QStringList files;

@@ -11,6 +11,11 @@ v2.11 (Anoia) - (in development)
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
 
+- Bug fixes
+  - Command line:
+    - the 'EXTRACT_VERTICES' option was actually deleting the extracted vertices right after extracting them, causing a crash when trying to access them later :|
+
+
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------
 

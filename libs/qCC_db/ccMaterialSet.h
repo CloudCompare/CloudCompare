@@ -24,27 +24,27 @@
 
 class ccGenericGLDisplay;
 
+
 //! Mesh (triangle) material
-class ccMaterialSet : public std::vector<ccMaterial::CShared>, public CCShareable, public ccHObject
+class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial::CShared>, public CCShareable, public ccHObject
 {
 public:
-
 	//! Default constructor
-	QCC_DB_LIB_API ccMaterialSet(QString name = QString());
+	ccMaterialSet(const QString& name = QString());
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MATERIAL_SET; }
-	virtual bool isShareable() const override { return true; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MATERIAL_SET; }
+	bool isShareable() const override { return true; }
 
 	//! Finds material by name
 	/** \return material index or -1 if not found
 	**/
-	QCC_DB_LIB_API int findMaterialByName(QString mtlName);
+	int findMaterialByName(const QString& mtlName);
 
 	//! Finds material by unique identifier
 	/** \return material index or -1 if not found
 	**/
-	QCC_DB_LIB_API int findMaterialByUniqueID(QString uniqueID);
+	int findMaterialByUniqueID(const QString& uniqueID);
 
 	//! Adds a material
 	/** Ensures unicity of material names.
@@ -52,33 +52,32 @@ public:
 		\param allowDuplicateNames whether to allow duplicate names for materials or not (in which case the returned index is the one of the material with the same name)
 		\return material index
 	**/
-	QCC_DB_LIB_API int addMaterial(ccMaterial::CShared mat, bool allowDuplicateNames = false);
+	int addMaterial(ccMaterial::CShared mat, bool allowDuplicateNames = false);
 
 	//! MTL (material) file parser
 	/** Inspired from KIXOR.NET "objloader" (http://www.kixor.net/dev/objloader/)
 	**/
-	QCC_DB_LIB_API static bool ParseMTL(QString path, const QString& filename, ccMaterialSet& materials, QStringList& errors);
+	static bool ParseMTL(QString path, const QString& filename, ccMaterialSet& materials, QStringList& errors);
 
 	//! Saves to an MTL file (+ associated texture images)
-	QCC_DB_LIB_API bool saveAsMTL(QString path, const QString& baseFilename, QStringList& errors) const;
+	bool saveAsMTL(const QString& path, const QString& baseFilename, QStringList& errors) const;
 
 	//! Clones materials set
-	QCC_DB_LIB_API ccMaterialSet* clone() const;
+	ccMaterialSet* clone() const;
 
 	//! Appends materials from another set
-	QCC_DB_LIB_API bool append(const ccMaterialSet& source);
+	bool append(const ccMaterialSet& source);
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const override { return true; }
+	bool isSerializable() const override { return true; }
 
 protected:
-
 	//inherited from ccHObject
-	QCC_DB_LIB_API virtual bool toFile_MeOnly(QFile& out) const override;
-	QCC_DB_LIB_API virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//! Default destructor (protected: use 'release' instead)
-	QCC_DB_LIB_API virtual ~ccMaterialSet();
+	~ccMaterialSet() override = default;
 };
 
 #endif //CC_MATERIAL_SET_HEADER

@@ -111,7 +111,7 @@ ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM typ
 ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)
 {
 	if (lines.empty()) {
-		return;
+		return nullptr;
 	}
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 

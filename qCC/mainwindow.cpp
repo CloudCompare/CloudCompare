@@ -10988,11 +10988,11 @@ void MainWindow::doActionBDPrimShrinkPlane()
 		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 
 		for (auto & planeObj : plane_container) {
-			ShrinkPlaneToOutline(planeObj, alpha);
+			ShrinkPlaneToOutline(planeObj, alpha, this);
 		}
 	}
 	else if (entity->isA(CC_TYPES::PLANE)) {
-		ShrinkPlaneToOutline(entity, alpha);
+		ShrinkPlaneToOutline(entity, alpha, this);
 	}
 	refreshAll();
 	UpdateUI();
@@ -11158,28 +11158,9 @@ void MainWindow::doActionBDPlaneDeduction()
 				plane_cloud->addPoint(CCVector3(vcgXYZ(ln->data.seg.P1())));
 			}			
 		}
-
+		
 		//! add plane
-		{
-			ccHObject* plane = nullptr;
-			double rms = 0;
-			ccPlane* pPlane = ccPlane::Fit(plane_cloud, &rms);
-			if (pPlane)	{
-				plane = static_cast<ccHObject*>(pPlane);
-				pPlane->setColor(col);
-				pPlane->enableStippling(true);
-			}
-			if (plane) {
-				plane->setName("Plane");
-				plane->applyGLTransformation_recursive();
-				plane->showColors(true);
-				plane->setVisible(true);
-
-				plane_cloud->addChild(plane);
-				plane->setDisplay(plane_cloud->getDisplay());
-				plane->prepareDisplayForRefresh_recursive();
-			}
-		}
+		FitPlaneAndAddChild(plane_cloud);
 
 		AddSegmentsAsChildVertices(plane_cloud, sharp_lines, "ImageSharp", col);		
 	}

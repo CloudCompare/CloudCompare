@@ -30,6 +30,8 @@
 
 class BDBaseHObject;
 
+ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud);
+
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
 stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
 ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true);
@@ -37,7 +39,7 @@ void AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QS
 void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
 void CalcPlaneBoundary(ccHObject* planeObj);
 void CalcPlaneOutlines(ccHObject* planeObj, double alpha);
-void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha);
+void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, MainWindow* win);
 void PlaneFrameOptimization(ccHObject* planeObj);
 
 #define BDDB_ORIGIN_CLOUD_SUFFIX ".original"

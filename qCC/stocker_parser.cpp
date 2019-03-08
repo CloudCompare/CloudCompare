@@ -21,12 +21,36 @@
 #include "ccPolyline.h"
 #include "ccPlane.h"
 #include "ccHObjectCaster.h"
+#include "ccDBRoot.h"
 
 #include "QFileInfo"
 
 #ifdef USE_STOCKER
 using namespace stocker;
 #endif // USE_STOCKER
+
+ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud)
+{
+	ccHObject* cc_plane = nullptr;
+	double rms = 0;
+	ccPlane* pPlane = ccPlane::Fit(cloud, &rms);
+	if (pPlane) {
+		cc_plane = static_cast<ccHObject*>(pPlane);
+		pPlane->setColor(cloud->getPointColor(0));
+		pPlane->enableStippling(true);
+	}
+	if (cc_plane) {
+		cc_plane->setName("Plane");
+		cc_plane->applyGLTransformation_recursive();
+		cc_plane->showColors(true);
+		cc_plane->setVisible(true);
+
+		cloud->addChild(cc_plane);
+		cc_plane->setDisplay(cloud->getDisplay());
+		cc_plane->prepareDisplayForRefresh_recursive();
+	}
+	return cc_plane;
+}
 
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity) {
 	stocker::Contour3d points;
@@ -204,7 +228,7 @@ void CalcPlaneOutlines(ccHObject* planeObj, double alpha)
 #endif // USE_STOCKER
 }
 #include "vcg/space/intersection2.h"
-void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha)
+void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, MainWindow* win)
 {
 #ifdef USE_STOCKER
 	ccHObject* parent_cloud = planeObj->getParent();
@@ -241,25 +265,13 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha)
 //	parent->removeChild(parent_cloud);
 	parent->addChild(newCloud);
 	
-	ccHObject* cc_plane = nullptr;
-	double rms = 0;
-	ccPlane* pPlane = ccPlane::Fit(newCloud, &rms);
-	if (pPlane) {
-		cc_plane = static_cast<ccHObject*>(pPlane);
-		pPlane->setColor(newCloud->getPointColor(0));
-		pPlane->enableStippling(true);
-	}
-	if (cc_plane) {
-		cc_plane->setName("Plane");
-		cc_plane->applyGLTransformation_recursive();
-		cc_plane->showColors(true);
-		cc_plane->setVisible(true);
+	FitPlaneAndAddChild(newCloud);
 
-		newCloud->addChild(cc_plane);
-		cc_plane->setDisplay(newCloud->getDisplay());
-		cc_plane->prepareDisplayForRefresh_recursive();
-	}
+	int index_old = parent->getChildIndex(cloud);
+	int index_new = parent->getChildIndex(newCloud);
+	parent->swapChildren(index_old, index_new);
 	newCloud->redrawDisplay();
+	win->db()->removeElement(parent_cloud);
 	
 #endif // USE_STOCKER
 }

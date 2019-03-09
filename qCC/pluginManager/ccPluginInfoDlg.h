@@ -21,6 +21,7 @@
 #include <QList>
 
 class QModelIndex;
+class QSortFilterProxyModel;
 class QStandardItemModel;
 
 class ccPluginInterface;
@@ -50,7 +51,8 @@ private:
 	
 	Ui::ccPluginInfoDlg *m_UI;
 	
-	QStandardItemModel	*m_ItemModel;
+	QSortFilterProxyModel	*m_ProxyModel;
+	QStandardItemModel		*m_ItemModel;
 };
 
 #endif

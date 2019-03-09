@@ -17,6 +17,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 
 #include "ccPluginInfoDlg.h"
@@ -102,13 +103,23 @@ QMap<CC_PLUGIN_TYPE, QIcon>	_Icons::sIconMap;
 ccPluginInfoDlg::ccPluginInfoDlg( QWidget *parent ) :
 	QDialog( parent )
   , m_UI( new Ui::ccPluginInfoDlg )
+  , m_ProxyModel( new QSortFilterProxyModel( this ) )
   , m_ItemModel( new QStandardItemModel( this ) )
 {
 	m_UI->setupUi( this );
 	
 	setWindowTitle( tr("About Plugins" ) );
 	
-	m_UI->mPluginListView->setModel( m_ItemModel );
+	m_UI->mSearchLineEdit->setStyleSheet( "QLineEdit, QLineEdit:focus { border: none; }" );
+	m_UI->mSearchLineEdit->setAttribute( Qt::WA_MacShowFocusRect, false );
+				
+	m_ProxyModel->setFilterCaseSensitivity( Qt::CaseInsensitive );
+	m_ProxyModel->setSourceModel( m_ItemModel );
+	
+	m_UI->mPluginListView->setModel( m_ProxyModel );
+	m_UI->mPluginListView->setFocus();
+	
+	connect( m_UI->mSearchLineEdit, &QLineEdit::textEdited, m_ProxyModel, &QSortFilterProxyModel::setFilterFixedString );
 	
 	connect( m_UI->mPluginListView->selectionModel(), &QItemSelectionModel::currentChanged, 
 			 this, &ccPluginInfoDlg::selectionChanged );
@@ -181,15 +192,17 @@ void ccPluginInfoDlg::selectionChanged( const QModelIndex &current, const QModel
 {
 	Q_UNUSED( previous );
 	
-	QStandardItem *item = m_ItemModel->itemFromIndex( current );
+	auto sourceItem = m_ProxyModel->mapToSource( current );
+	auto item = m_ItemModel->itemFromIndex( sourceItem );
 	
 	if ( item == nullptr )
 	{
-		qWarning() << "Could not find item in model";
+		// This happens if we are filtering and there are no results
+		updatePluginInfo( nullptr );
 		return;
 	}
 	
-	const ccPluginInterface *plugin = item->data( PLUGIN_PTR ).value<const ccPluginInterface*>();
+	auto plugin = item->data( PLUGIN_PTR ).value<const ccPluginInterface*>();
 	
 	updatePluginInfo( plugin );	
 }

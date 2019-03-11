@@ -183,7 +183,7 @@ void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)
 #endif // USE_STOCKER
 }
 
-void CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary_minpts)
+void CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary_minpts, MainWindow* win)
 {
 #ifdef USE_STOCKER
 	/// get boundary points
@@ -211,11 +211,12 @@ void CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary
 		return;
 	}
 	ccPointCloud* line_cloud = ccHObjectCaster::ToPointCloud(line_vert);
-	line_cloud->setRGBColor(ccColor::yellow);
 	for (auto & pt : boundary_points_3d) {
 		line_cloud->addPoint(CCVector3(vcgXYZ(pt)));
 	}
-	line_cloud->redrawDisplay();
+	line_cloud->setRGBColor(ccColor::yellow);
+	line_cloud->showColors(true);
+	win->addToDB(line_vert);
 #endif // USE_STOCKER
 }
 

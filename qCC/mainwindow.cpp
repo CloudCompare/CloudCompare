@@ -10891,7 +10891,7 @@ void MainWindow::doActionBDPrimBoundary()
 		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 	
 	for (auto & planeObj : plane_container) {
-		CalcPlaneBoundary(planeObj, s_last_bdry_p2l, s_last_bdry_minpts);
+		CalcPlaneBoundary(planeObj, s_last_bdry_p2l, s_last_bdry_minpts, this);
 	}
 }
 

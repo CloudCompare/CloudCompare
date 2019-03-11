@@ -37,7 +37,7 @@ stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
 ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true);
 ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
 void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
-void CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary_minpts);
+void CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary_minpts, MainWindow* win);
 void CalcPlaneOutlines(ccHObject* planeObj, double alpha);
 void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, MainWindow* win);
 void PlaneFrameOptimization(ccHObject* planeObj);

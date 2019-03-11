@@ -226,7 +226,6 @@ if(OPTION_USE_STOCKER)
 	
 	target_include_directories(${PROJECT_NAME} 
 		PUBLIC	${STOCKER_INCLUDE_DIR}/modules/internal 
-				${STOCKER_INCLUDE_DIR}/modules/internal/blockbuilder 
 				${VCGLIB_INCLUDE_DIRS}
 				${EIGEN_INCLUDE_DIRS})
 endif()

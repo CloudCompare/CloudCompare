@@ -287,18 +287,20 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, MainWindow* win)
 	}
 	ccPointCloud* newCloud = cloud->partialClone(&remained);
 	newCloud->setName(cloud->getName());
+	cloud->setName(cloud->getName() + "-delete");
 	parent_cloud->setEnabled(false);
 	ccHObject* parent = parent_cloud->getParent();
-//	parent->removeChild(parent_cloud);
 	parent->addChild(newCloud);
 	
-	FitPlaneAndAddChild(newCloud);
+	FitPlaneAndAddChild(newCloud);	
 
 	int index_old = parent->getChildIndex(cloud);
 	int index_new = parent->getChildIndex(newCloud);
 	parent->swapChildren(index_old, index_new);
-	newCloud->redrawDisplay();
-	win->db()->removeElement(parent_cloud);
+	win->addToDB(newCloud);
+
+	win->removeFromDB(cloud);
+//	win->db()->removeElement(cloud);
 	
 #endif // USE_STOCKER
 }

@@ -10680,6 +10680,7 @@ void MainWindow::doActionBDProjectLoad()
 			for (ccHObject* cloud : clouds)	{
 				if (cloud) {
 					static_cast<ccGenericPointCloud*>(cloud)->setName(point_path.baseName() + BDDB_ORIGIN_CLOUD_SUFFIX);
+					cloud->showSF(false);
 					cloud->showColors(true);
 				}
 			}
@@ -10883,14 +10884,14 @@ void MainWindow::doActionBDPrimBoundary()
 	}
 
 	ccHObject *entity = getSelectedEntities().front();
-	if (entity->isGroup()) {
-		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
-		for (auto & planeObj : plane_container) {
-			CalcPlaneBoundary(planeObj, s_last_bdry_p2l, s_last_bdry_minpts);
-		}
-	}
-	else if (entity->isA(CC_TYPES::PLANE)) {
-		CalcPlaneBoundary(entity, s_last_bdry_p2l, s_last_bdry_minpts);
+	ccHObject::Container plane_container;
+	if (entity->isA(CC_TYPES::PLANE)) 
+		plane_container.push_back(entity);
+	else 
+		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+	
+	for (auto & planeObj : plane_container) {
+		CalcPlaneBoundary(planeObj, s_last_bdry_p2l, s_last_bdry_minpts);
 	}
 }
 

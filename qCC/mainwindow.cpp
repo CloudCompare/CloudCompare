@@ -10645,10 +10645,10 @@ void MainWindow::doActionBDProjectLoad()
 
 	QString bin_file = prj_file.absolutePath() + "\\" + prj_name + ".bin";
 		
+	CCVector3d loadCoordinatesShift(0, 0, 0);
+	bool loadCoordinatesTransEnabled = false;
 	FileIOFilter::LoadParameters parameters;
 	{
-		CCVector3d loadCoordinatesShift(0, 0, 0);
-		bool loadCoordinatesTransEnabled = false;
 		parameters.alwaysDisplayLoadDialog = true;
 		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
 		parameters.coordinatesShift = &loadCoordinatesShift;

@@ -54,9 +54,6 @@ ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud)
 
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity) {
 	stocker::Contour3d points;
-	if (!entity->isEnabled()) {
-		return points;
-	}
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 	if (!cloud) return points;
 
@@ -147,6 +144,124 @@ ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lin
 	return line_vert;
 }
 
+ccHObject* AddPlanesPointsAsNewGroup(QString name, std::vector<stocker::Contour3d> planes_points)
+{
+	ccHObject* group = new ccHObject(name);
+
+	for (size_t i = 0; i < planes_points.size(); i++) {
+		ccPointCloud* plane_cloud = new ccPointCloud("Plane" + QString::number(i));// TODO
+
+		//! get plane points
+		for (auto & pt : planes_points[i]) {
+			plane_cloud->addPoint(CCVector3(vcgXYZ(pt)));
+		}
+		ccColor::Rgb col = ccColor::Generator::Random();
+		plane_cloud->setRGBColor(col);
+		plane_cloud->showColors(true);
+
+		//! add plane
+		FitPlaneAndAddChild(plane_cloud);
+
+		group->addChild(plane_cloud);
+	}
+	return group;
+}
+
+ccHObject* PlaneSegmentationRgGrow(ccHObject* entity,
+	int min_pts, double distance_epsilon, double seed_raius,
+	double growing_radius,
+	double merge_threshold, double split_threshold)
+{
+	ccPointCloud* entity_cloud = ccHObjectCaster::ToPointCloud(entity);
+	if (!entity_cloud->hasNormals()) {
+		return nullptr;
+	}
+
+	std::vector<vcg::Plane3d> planes;
+	std::vector<stocker::Contour3d> planes_points;
+
+	stocker::BuilderLOD2 builder_3d4em(true);
+	std::vector<stocker::BdPoint3d> point_cloud;
+	for (unsigned i = 0; i < entity_cloud->size(); i++) {
+		CCVector3 pt = *entity_cloud->getPoint(i);
+		point_cloud.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
+	}
+	builder_3d4em.SetBuildingPoints(point_cloud);
+	builder_3d4em.SetPlaneSegOption(min_pts, distance_epsilon, seed_raius, growing_radius);
+	builder_3d4em.PlaneSegmentation();
+	std::vector<std::vector<stocker::BdPoint3d>> pp_3d4em = builder_3d4em.GetSegmentedPoints();
+
+	for (auto & pl : pp_3d4em) {
+		stocker::Contour3d pl_pts;
+		for (auto & pt : pl) {
+			pl_pts.push_back(parse_xyz(pt));			
+		}
+		vcg::Plane3d plane;
+		stocker::Vec3d cen;
+		stocker::FitPlane(pl_pts, plane, cen);
+		planes.push_back(plane);
+		planes_points.push_back(pl_pts);
+	}
+
+	if (merge_threshold > 0 || split_threshold > 0) {
+		stocker::Option_PlaneRefinement option_refine;
+		option_refine.merge_threshold = merge_threshold;
+		option_refine.split_threshold = split_threshold;
+		if (!stocker::PlaneRefinement(planes, planes_points, option_refine)) {
+			return nullptr;
+		}
+	}
+
+	ccHObject* group = AddPlanesPointsAsNewGroup(entity->getName() + BDDB_PRIMITIVE_SUFFIX, planes_points);
+
+	return group;
+}
+
+ccHObject* PlaneSegmentationRansac(ccHObject* entity,
+	int min_pts, double distance_epsilon, double seed_raius,
+	double normal_threshold, double ransac_probability,
+	double merge_threshold, double split_threshold)
+{
+	ccPointCloud* entity_cloud = ccHObjectCaster::ToPointCloud(entity);
+	if (!entity_cloud->hasNormals()) {
+		return nullptr;
+	}
+
+	stocker::GLMesh mesh;
+	for (unsigned i = 0; i < entity_cloud->size(); i++) {
+		CCVector3 pt = *entity_cloud->getPoint(i);
+		CCVector3 normal = entity_cloud->getPointNormal(i);
+		stocker::GLMeshAL::AddVertex(mesh, parse_xyz(pt), parse_xyz(normal));
+	}
+
+	std::vector<vcg::Plane3d> planes;
+	std::vector<stocker::Contour3d> planes_points;
+	std::vector<Point_Normal> unassigned_points;
+	
+	stocker::Option_PlaneSegmentation option;
+	option.min_points = min_pts;
+	option.distance_epsilon = distance_epsilon;
+	option.cluster_epsilon = seed_raius;
+	option.normal_threshold = normal_threshold;
+	option.ransac_probability = ransac_probability;
+	if (!stocker::PlaneSegmentation(mesh, planes, planes_points, unassigned_points, option)) {
+		return nullptr;
+	}
+	
+	if (merge_threshold > 0 || split_threshold > 0) {
+		stocker::Option_PlaneRefinement option_refine;
+		option_refine.merge_threshold = merge_threshold;
+		option_refine.split_threshold = split_threshold;
+		if (!stocker::PlaneRefinement(planes, planes_points, option_refine)) {
+			return nullptr;
+		}
+	}
+
+	ccHObject* group = AddPlanesPointsAsNewGroup(entity->getName() + BDDB_PRIMITIVE_SUFFIX, planes_points);
+	
+	return group;	
+}
+
 void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)
 {
 #ifdef USE_STOCKER
@@ -192,7 +307,7 @@ void CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary
 	PlaneUnit plane_unit = FormPlaneUnit(cur_plane_points, "temp", true);
 	Contour2d points_2d = Point3dToPlpoint2d(plane_unit, cur_plane_points);
 	vector<bool>bd_check;
-	ComputeBoundaryPts2d(points_2d, bd_check, 32, true);
+	stocker::ComputeBoundaryPts2d(points_2d, bd_check, 32, true);
 	assert(points_2d.size() == bd_check.size());
 	for (size_t i = 0; i < bd_check.size(); i++) {
 		if (bd_check[i]) {
@@ -201,11 +316,14 @@ void CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary
 	}
 
 	/// get boundary lines
-	Contour3d boundary_points_3d = Plpoint2dToPoint3d(plane_unit, boundary_points_2d);
-	Polyline3d ransac_lines; IndexGroup line_index_group;
-	LineRansacfromPoints(boundary_points_3d, ransac_lines, line_index_group, p2l_distance, boundary_minpts);
+	Polyline3d detected_lines;
+	stocker::LineFromPlanePoints(cur_plane_points, detected_lines);
 
-	ccHObject* line_vert = AddSegmentsAsChildVertices(planeObj->getParent(), ransac_lines, "Boundary Lines", ccColor::yellow);
+ 	Contour3d boundary_points_3d = Plpoint2dToPoint3d(plane_unit, boundary_points_2d);
+// 	IndexGroup line_index_group;
+// 	LineRansacfromPoints(boundary_points_3d, detected_lines, line_index_group, p2l_distance, boundary_minpts);
+
+	ccHObject* line_vert = AddSegmentsAsChildVertices(planeObj->getParent(), detected_lines, "Boundary Lines", ccColor::yellow);
 
 	if (!line_vert) {
 		return;

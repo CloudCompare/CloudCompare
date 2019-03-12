@@ -63,6 +63,7 @@ class bdrLine3DppDlg;
 class bdrDeductionDlg;
 class bdrPolyFitDlg;
 class bdr3D4EMDlg;
+class bdrPlaneSegDlg;
 
 namespace Ui {
 	class MainWindow;
@@ -440,6 +441,8 @@ private slots:
 	//! Building Reconstruction
 	/// Load Project
 	void doActionBDProjectLoad();
+	/// Plane Segmentation
+	void doActionBDPlaneSegmentation();
 	/// Create Image Lines
 	void doActionBDImageLines();
 
@@ -638,6 +641,7 @@ private:
 	ccHObject* askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
 
 	//! Building Reconstruction dialogs
+	bdrPlaneSegDlg* m_pbdrPSDlg;
 	bdrLine3DppDlg* m_pbdrl3dDlg;
 	bdrDeductionDlg* m_pbdrddtDlg;
 	bdrPolyFitDlg* m_pbdrpfDlg;

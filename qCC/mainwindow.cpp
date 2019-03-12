@@ -200,6 +200,7 @@ MainWindow::MainWindow()
 	, m_plpDlg(nullptr)
 	, m_pprDlg(nullptr)
 	, m_pfDlg(nullptr)
+	, m_pbdrPSDlg(nullptr)
 	, m_pbdrl3dDlg(nullptr)
 	, m_pbdrddtDlg(nullptr)
 	, m_pbdrpfDlg(nullptr)
@@ -756,6 +757,7 @@ void MainWindow::connectActions()
 	//////////////////////////////////////////////////////////////////////////
 	//Building Reconstruction
 	connect(m_UI->actionBDProjectLoad,				&QAction::triggered, this, &MainWindow::doActionBDProjectLoad);
+	connect(m_UI->actionBDPlaneSegmentation,		&QAction::triggered, this, &MainWindow::doActionBDPlaneSegmentation);	
 	connect(m_UI->actionBDImage_Lines,				&QAction::triggered, this, &MainWindow::doActionBDImageLines);
 	connect(m_UI->actionBDPrimIntersections,		&QAction::triggered, this, &MainWindow::doActionBDPrimIntersections);
 	connect(m_UI->actionBDPrimAssignSharpLines,		&QAction::triggered, this, &MainWindow::doActionBDPrimAssignSharpLines);
@@ -10600,6 +10602,7 @@ ccHObject* MainWindow::askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultClo
 }
 //////////////////////////////////////////////////////////////////////////
 /// Building Reconstruction
+#include "bdrPlaneSegDlg.h"
 #include "bdrLine3DppDlg.h"
 #include "bdrDeductionDlg.h"
 #include "bdrPolyFitDlg.h"
@@ -10690,6 +10693,78 @@ void MainWindow::doActionBDProjectLoad()
 	}
 	refreshAll();
 	UpdateUI();
+}
+
+void MainWindow::doActionBDPlaneSegmentation()
+{
+	if (!m_pbdrPSDlg) m_pbdrPSDlg = new bdrPlaneSegDlg(this);
+
+	ccHObject *entity = getSelectedEntities().front();
+	ccHObject::Container _container;
+	if (entity->isA(CC_TYPES::POINT_CLOUD))
+		_container.push_back(entity);
+	else
+		_container = GetEnabledObjFromGroup(entity, CC_TYPES::POINT_CLOUD);
+
+	// check have not normals
+	ccHObject::Container normal_container;
+	for (auto & planeObj : _container) {
+		ccPointCloud* entity_cloud = ccHObjectCaster::ToPointCloud(planeObj);
+		if (!entity_cloud->hasNormals()) {
+			normal_container.push_back(planeObj);
+		}
+	}
+	if (!normal_container.empty()) {
+		if (!ccEntityAction::computeNormals(normal_container, this))
+			return;
+	}	
+
+	if (!m_pbdrPSDlg->exec()) {
+		return;
+	}
+	double merge_threshold(-1), split_threshold(-1);
+	if (m_pbdrPSDlg->PlaneRefineGroupBox->isChecked()) {
+		merge_threshold = m_pbdrPSDlg->MergeThresholdDoubleSpinBox->value();
+		split_threshold = m_pbdrPSDlg->SplitThresholdDoubleSpinBox->value();
+	}
+	int support_pts = m_pbdrPSDlg->supportPointsSpinBox->value();
+	double distance_eps = m_pbdrPSDlg->DistanceEpsilonDoubleSpinBox->value();
+	double cluster_eps = m_pbdrPSDlg->ClusterEpsilonDoubleSpinBox->value();
+
+	if (m_pbdrPSDlg->PlaneSegRansacRadioButton->isChecked()) {
+		double normal_dev = cos(m_pbdrPSDlg->maxNormDevAngleSpinBox->value() * CC_DEG_TO_RAD);
+		double prob = m_pbdrPSDlg->probaDoubleSpinBox->value();
+		for (auto & planeObj : _container) {
+			ccHObject* seged = PlaneSegmentationRansac(entity, 
+				support_pts,
+				distance_eps,
+				cluster_eps,
+				normal_dev,
+				prob,
+				merge_threshold, split_threshold);
+			if (seged) {
+				addToDB(seged); 
+				planeObj->setEnabled(false);
+			}
+		}
+	}
+	else if (m_pbdrPSDlg->PlaneSegRegionGrowRadioButton->isChecked()) {
+		double growing_radius = m_pbdrPSDlg->GrowingRadiusDoubleSpinBox->value();
+		for (auto & planeObj : _container) {
+			ccHObject* seged = PlaneSegmentationRgGrow(entity, 
+				support_pts,
+				distance_eps,
+				cluster_eps,
+				growing_radius,
+				merge_threshold, split_threshold);
+			if (seged) {
+				addToDB(seged); 
+				planeObj->setEnabled(false);
+			}
+		}
+	}
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionBDImageLines()

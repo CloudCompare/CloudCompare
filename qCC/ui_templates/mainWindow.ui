@@ -520,6 +520,8 @@
     </widget>
     <addaction name="actionBDProjectLoad"/>
     <addaction name="separator"/>
+    <addaction name="actionBDPlaneSegmentation"/>
+    <addaction name="separator"/>
     <addaction name="actionBDImage_Lines"/>
     <addaction name="menuLine_Primitive"/>
     <addaction name="separator"/>
@@ -3081,6 +3083,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDProjectLoad">
    <property name="text">
     <string>Load Project</string>
+   </property>
+  </action>
+  <action name="actionBDPlaneSegmentation">
+   <property name="text">
+    <string>Plane Segmentation</string>
    </property>
   </action>
  </widget>

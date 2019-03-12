@@ -36,6 +36,8 @@ stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
 stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
 ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true);
 ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
+ccHObject* PlaneSegmentationRansac(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double normal_threshold, double ransac_probability, double merge_threshold = -1, double split_threshold = -1);
+ccHObject* PlaneSegmentationRgGrow(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double growing_radius, double merge_threshold = -1, double split_threshold = -1);
 void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
 void CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary_minpts, MainWindow* win);
 void CalcPlaneOutlines(ccHObject* planeObj, double alpha);

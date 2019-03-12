@@ -133,7 +133,7 @@ QString ccApplicationBase::versionLongStr( bool includeOS ) const
 #elif defined(CC_ENV_32)
 	const QString arch( "32-bit" );
 #else
-	const QString arch( "??-bit" );
+	const QString arch( "\?\?-bit" );
 #endif
 
 	if ( includeOS )

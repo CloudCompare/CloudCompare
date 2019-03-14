@@ -53,24 +53,26 @@ typedef CCLib::PointProjectionTools::IndexedCCVector2 Vertex2D;
 typedef std::list<Vertex2D*>::iterator VertexIterator;
 typedef std::list<Vertex2D*>::const_iterator ConstVertexIterator;
 
-struct Edge
+namespace 
 {
-	Edge() : nearestPointIndex(0), nearestPointSquareDist(-1.0f) {}
-	
-	Edge(const VertexIterator& A, unsigned _nearestPointIndex, float _nearestPointSquareDist)
-		: itA(A)
-		, nearestPointIndex(_nearestPointIndex)
-		, nearestPointSquareDist(_nearestPointSquareDist)
-	{}
-
-	//operator
-	inline bool operator< (const Edge& e) const { return nearestPointSquareDist < e.nearestPointSquareDist; }
-
-	VertexIterator itA;
-	unsigned nearestPointIndex;
-	float nearestPointSquareDist;
-};
-
+	struct Edge
+	{
+		Edge() : nearestPointIndex(0), nearestPointSquareDist(-1.0f) {}
+		
+		Edge(const VertexIterator& A, unsigned _nearestPointIndex, float _nearestPointSquareDist)
+			: itA(A)
+			, nearestPointIndex(_nearestPointIndex)
+			, nearestPointSquareDist(_nearestPointSquareDist)
+		{}
+		
+		//operator
+		inline bool operator< (const Edge& e) const { return nearestPointSquareDist < e.nearestPointSquareDist; }
+		
+		VertexIterator itA;
+		unsigned nearestPointIndex;
+		float nearestPointSquareDist;
+	};
+}
 
 //! Finds the nearest (available) point to an edge
 /** \return The nearest point distance (or -1 if no point was found!)

@@ -444,6 +444,10 @@ void PlaneFrameOptimization(ccHObject* planeObj)
 	vcg::Plane3d vcgPlane;
 	vcgPlane.SetDirection({ N.x, N.y, N.z });
 	vcgPlane.SetOffset(constVal);
+	Contour3d plane_points = GetPointsFromCloud(planeObj->getParent());
+
+	// 
+	stocker::FrameOptmzt frame_opt;
 
 
 #endif
@@ -490,12 +494,14 @@ ccHObject * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_e
 	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_PRIMITIVE_SUFFIX, building_name);
 }
 BDBaseHObject* GetRootBDBase(ccHObject* obj) {
+	ccHObject* bd_obj_ = obj;
 	do {
-		BDBaseHObject* bd_obj = static_cast<BDBaseHObject*>(obj->getParent());
+		BDBaseHObject* bd_obj = static_cast<BDBaseHObject*>(bd_obj_);
 		if (bd_obj->valid) {
 			return bd_obj;
 		}
-	} while (obj->getParent());
+		bd_obj_ = bd_obj_->getParent();
+	} while (bd_obj_);
 
 	return nullptr;
 }

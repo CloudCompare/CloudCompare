@@ -699,9 +699,11 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 	//CCVector3d Q2D;
 	//camera.project(C, Q2D);
 
-	
+	//! XYLIU 
+	QString name(getName()); 
+	QString name_show = name.mid(0, name.indexOf(' '));
 	QFont font = context.display->getTextDisplayFont(); //takes rendering zoom into account!
-	context.display->displayText(	getName(),
+	context.display->displayText(	name_show,
 									static_cast<int>(m_nameIn3DPos.x),
 									static_cast<int>(m_nameIn3DPos.y),
 									ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,

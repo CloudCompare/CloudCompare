@@ -29,8 +29,8 @@
 using namespace stocker;
 #endif // USE_STOCKER
 
-QString GetBaseName(QString name) {
-	QFileInfo base(name); return base.baseName();
+QString GetBaseName(QString name) {	
+	return name.mid(0, name.indexOf('.'));
 }
 
 ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud)

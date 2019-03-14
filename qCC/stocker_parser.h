@@ -67,6 +67,8 @@ public:
 	using Container = std::vector<BDBaseHObject *>;
 public:
 	stocker::BlockProj block_prj;
+	stocker::Vec3d global_shift;
+	double global_scale;
 	bool valid;
 private:
 	ccHObject::Container GetHObjContainer(CC_CLASS_ENUM type, QString suffix, bool check_enable = false);
@@ -77,6 +79,9 @@ public:
 	ccHObject::Container GetOriginPointCloud(bool check_enable = false);
 	ccHObject* GetOriginPointCloud(QString building_name, bool check_enable = false);
 	ccHObject* GetPrimitiveGroup(QString building_name, bool check_enable = false);
+
+	stocker::Vec3d ToLocal(stocker::Vec3d pt) { return (pt + global_shift)*global_scale; }
+	stocker::Vec3d ToGlobal(stocker::Vec3d pt) { return pt / global_scale - global_shift; }
 };
 
 BDBaseHObject* GetRootBDBase(ccHObject* obj);

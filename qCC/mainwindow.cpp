@@ -10629,7 +10629,7 @@ BDBaseHObject::Container GetBDBaseProjx(MainWindow* main) {
 }
 
 void MainWindow::doActionBDProjectLoad()
-{
+{		 
 	QString Filename =
 		QFileDialog::getOpenFileName(this,
 			"Open project file",
@@ -10660,21 +10660,17 @@ void MainWindow::doActionBDProjectLoad()
 	}
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
+	BDBaseHObject* bd_grp = nullptr;
 	if (QFileInfo(bin_file).exists()) {		
 		ccHObject* newGroup = FileIOFilter::LoadFromFile(bin_file, parameters, result, QString());
-		BDBaseHObject* bd_grp = new BDBaseHObject(*newGroup);
+		bd_grp = new BDBaseHObject(*newGroup);
 		bd_grp->setName(prj_name);
 		for (size_t i = 0; i < newGroup->getChildrenNumber(); i++) {
 			bd_grp->addChild(newGroup->getChild(i));
 		}
-		bd_grp->valid = true;
-		bd_grp->block_prj = block_prj;
-		addToDB(bd_grp);
 	}
 	else {
-		BDBaseHObject* group = new BDBaseHObject(prj_name);
-		group->block_prj = block_prj;
-		group->valid = true;
+		bd_grp = new BDBaseHObject(prj_name);		
 		for (auto & bd : block_prj.m_builder.sbuild) {
 			QFileInfo point_path(bd->data.file_path.ori_points.c_str());
 			ccHObject* newGroup = FileIOFilter::LoadFromFile(point_path.absoluteFilePath(), parameters, result, QString());
@@ -10687,9 +10683,21 @@ void MainWindow::doActionBDProjectLoad()
 					cloud->showColors(true);
 				}
 			}
-			group->addChild(newGroup);
+			bd_grp->addChild(newGroup);
 		}
-		addToDB(group);
+	}
+	if (bd_grp) {
+		bd_grp->block_prj = block_prj;
+		bd_grp->valid = true;
+		if (bd_grp->getChildrenNumber() <= 0) {
+			return;
+		}
+		ccHObject* first_cloud_ent = bd_grp->GetOriginPointCloud(GetBaseName(bd_grp->getChild(0)->getName()));
+		ccPointCloud* first_cloud = ccHObjectCaster::ToPointCloud(first_cloud_ent);
+		bd_grp->global_shift = stocker::parse_xyz(first_cloud->getGlobalShift());
+		bd_grp->global_scale = first_cloud->getGlobalScale();
+
+		addToDB(bd_grp);
 	}
 	refreshAll();
 	UpdateUI();
@@ -10708,10 +10716,10 @@ void MainWindow::doActionBDPlaneSegmentation()
 
 	// check have not normals
 	ccHObject::Container normal_container;
-	for (auto & planeObj : _container) {
-		ccPointCloud* entity_cloud = ccHObjectCaster::ToPointCloud(planeObj);
+	for (auto & cloudObj : _container) {
+		ccPointCloud* entity_cloud = ccHObjectCaster::ToPointCloud(cloudObj);
 		if (!entity_cloud->hasNormals()) {
-			normal_container.push_back(planeObj);
+			normal_container.push_back(cloudObj);
 		}
 	}
 	if (!normal_container.empty()) {
@@ -10734,8 +10742,8 @@ void MainWindow::doActionBDPlaneSegmentation()
 	if (m_pbdrPSDlg->PlaneSegRansacRadioButton->isChecked()) {
 		double normal_dev = cos(m_pbdrPSDlg->maxNormDevAngleSpinBox->value() * CC_DEG_TO_RAD);
 		double prob = m_pbdrPSDlg->probaDoubleSpinBox->value();
-		for (auto & planeObj : _container) {
-			ccHObject* seged = PlaneSegmentationRansac(entity, 
+		for (auto & cloudObj : _container) {
+			ccHObject* seged = PlaneSegmentationRansac(cloudObj,
 				support_pts,
 				distance_eps,
 				cluster_eps,
@@ -10744,14 +10752,14 @@ void MainWindow::doActionBDPlaneSegmentation()
 				merge_threshold, split_threshold);
 			if (seged) {
 				addToDB(seged); 
-				planeObj->setEnabled(false);
+				cloudObj->setEnabled(false);
 			}
 		}
 	}
 	else if (m_pbdrPSDlg->PlaneSegRegionGrowRadioButton->isChecked()) {
 		double growing_radius = m_pbdrPSDlg->GrowingRadiusDoubleSpinBox->value();
-		for (auto & planeObj : _container) {
-			ccHObject* seged = PlaneSegmentationRgGrow(entity, 
+		for (auto & cloudObj : _container) {
+			ccHObject* seged = PlaneSegmentationRgGrow(cloudObj,
 				support_pts,
 				distance_eps,
 				cluster_eps,
@@ -10759,7 +10767,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 				merge_threshold, split_threshold);
 			if (seged) {
 				addToDB(seged); 
-				planeObj->setEnabled(false);
+				cloudObj->setEnabled(false);
 			}
 		}
 	}
@@ -10824,10 +10832,10 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 
 	stocker::Polyline3d all_sharp_lines;
 	ccHObject::Container primitive_groups;
-
+	
 	if (haveSelection()) {
 		ccHObject* select = m_selectedEntities.front();
-		ccHObject::Container buildings;
+		ccHObject::Container buildings;	
 		BDBaseHObject* baseObj = nullptr;
 		if (IsBDBaseObj(select)) {
 			baseObj = static_cast<BDBaseHObject*>(select);
@@ -10841,12 +10849,20 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 			std::string error_info;
 			if (!stocker::LoadLine3D(baseObj->block_prj.m_options.prj_file.image_border, all_sharp_lines, error_info)) {
 				std::cout << error_info << std::endl;
+			}
+			//! to local
+			for (auto & seg : all_sharp_lines) {			
+				seg.P0() = baseObj->ToLocal(seg.P0());
+				seg.P1() = baseObj->ToLocal(seg.P1());
 			}			
 			for (auto & bd : buildings)	{
 				ccHObject* planegroup_get = baseObj->GetPrimitiveGroup(GetBaseName(bd->getName()), false);
 				if (planegroup_get)	primitive_groups.push_back(planegroup_get);
 			}
 		}
+	}
+	if (!all_sharp_lines.empty() && primitive_groups.empty()) {
+		return;
 	}
 	if (all_sharp_lines.empty()) {
 		//! select the sharp line group
@@ -10867,12 +10883,15 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 		stocker::Polyline3d sharps_in_bbox;
 		ccBBox box = plane_group->getBB_recursive();
 		for (stocker::Seg3d & seg : all_sharp_lines) {
-			if (box.contains(CCVector3(vcgXYZ(seg.P0()))) && box.contains(CCVector3(vcgXYZ(seg.P1())))) {
-				sharps_in_bbox.push_back(seg);
+			CCVector3 p0 = CCVector3(vcgXYZ(seg.P0()));
+			CCVector3 p1 = CCVector3(vcgXYZ(seg.P1()));			
+			if (box.contains(p0) && box.contains(p1)) {				
+				sharps_in_bbox.push_back(stocker::Seg3d(stocker::parse_xyz(p0), stocker::parse_xyz(p1)));
 			}
 		}
 		//! add sharps in bbox as a child
-		ccHObject* sharps_in_bbox_obj = AddSegmentsAsChildVertices(plane_group->getParent(), sharps_in_bbox, BDDB_IMAGELINE_PREFIX, ccColor::darkGrey);
+		QString sharps_name = GetBaseName(plane_group->getName()) + BDDB_IMAGELINE_SUFFIX;
+		ccHObject* sharps_in_bbox_obj = AddSegmentsAsChildVertices(plane_group->getParent(), sharps_in_bbox, sharps_name, ccColor::darkGrey);
 		if (sharps_in_bbox_obj) addToDB(sharps_in_bbox_obj);
 
 		//! assign to each plane

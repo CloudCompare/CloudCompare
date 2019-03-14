@@ -11002,15 +11002,9 @@ void MainWindow::doActionBDPrimPlaneFromSharp()
 	UpdateUI();
 }
 
-static double s_last_bdry_p2l = 0.5;
-static double s_last_bdry_minpts = 30;
 void MainWindow::doActionBDPrimBoundary()
 {
 	if (!haveSelection()) return;
-// 	ccAskTwoDoubleValuesDlg paraDlg("p2ldistance", "minpts", 0, 1.0e12, s_last_bdry_p2l, s_last_bdry_minpts, 6, "boundary generator", this);
-// 	if (!paraDlg.exec()) {
-// 		return;
-// 	}
 
 	ccHObject *entity = getSelectedEntities().front();
 	ccHObject::Container plane_container;
@@ -11128,17 +11122,18 @@ void MainWindow::doActionBDPrimShrinkPlane()
 	if (!paraDlg.exec()) {
 		return;
 	}
+	s_last_shrink_alpha = paraDlg.doubleSpinBox1->value();
+	s_last_shrink_distance = paraDlg.doubleSpinBox2->value();
 
 	ccHObject *entity = getSelectedEntities().front();
-	if (entity->isGroup()) {
-		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+	ccHObject::Container plane_container;
+	if (entity->isA(CC_TYPES::PLANE))
+		plane_container.push_back(entity);
+	else
+		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 
-		for (auto & planeObj : plane_container) {
-			ShrinkPlaneToOutline(planeObj, s_last_shrink_alpha, s_last_shrink_distance, this);
-		}
-	}
-	else if (entity->isA(CC_TYPES::PLANE)) {
-		ShrinkPlaneToOutline(entity, s_last_shrink_alpha, s_last_shrink_distance, this);
+	for (auto & planeObj : plane_container) {
+		ShrinkPlaneToOutline(planeObj, s_last_shrink_alpha, s_last_shrink_distance, this);
 	}
 	refreshAll();
 	UpdateUI();
@@ -11328,6 +11323,9 @@ void MainWindow::doActionBDPolyFit()
 	if (!paraDlg.exec()) {
 		return;
 	}
+	s_last_polyfit_datafit = paraDlg.doubleSpinBox1->value();
+	s_last_polyfit_coverage = paraDlg.doubleSpinBox2->value();
+	s_last_polyfit_complexity = paraDlg.doubleSpinBox3->value();
 
 	ccHObject* entity = getSelectedEntities().front(); if (!entity) return;
 

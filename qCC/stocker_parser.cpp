@@ -383,7 +383,7 @@ ccHObject* AddOutlinesAsChild(vector<vector<stocker::Contour3d>> contours_points
 	for (vector<stocker::Contour3d> & component : contours_points) {
 		for (stocker::Contour3d & st_contours : component) {
 			ccPolyline* cc_polyline = new ccPolyline(line_vert);
-// 			cc_polyline->setDisplay(planeObj->getDisplay());
+ 			cc_polyline->setDisplay(parent->getDisplay());
 			cc_polyline->setColor(ccColor::green);
 			cc_polyline->showColors(true);
 			line_vert->addChild(cc_polyline);

@@ -10820,8 +10820,13 @@ void MainWindow::doActionBDPrimIntersections()
 
 	bool ok = true;
 	double distance = QInputDialog::getDouble(this, "Input Dialog", "Please input distance threshold", 2.0, 0.0, 999999.0, 1, &ok);
-	if (ok) 
-		CalcPlaneIntersections(entity_planes, distance);	
+	if (!ok) return;
+	ccHObject::Container segs =	CalcPlaneIntersections(entity_planes, distance);
+	for (auto & seg : segs) {
+		addToDB(seg);
+	}
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionBDPrimAssignSharpLines()
@@ -11014,7 +11019,7 @@ void MainWindow::doActionBDPrimBoundary()
 		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 	
 	for (auto & planeObj : plane_container) {
-		ccHObject* boundary = CalcPlaneBoundary(planeObj, s_last_bdry_p2l, s_last_bdry_minpts);
+		ccHObject* boundary = CalcPlaneBoundary(planeObj/*, s_last_bdry_p2l, s_last_bdry_minpts*/);
 		if (boundary) addToDB(boundary);
 	}
 	refreshAll();

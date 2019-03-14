@@ -298,7 +298,7 @@ ccHObject* PlaneSegmentationRansac(ccHObject* entity,
 	return group;	
 }
 
-void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)
+ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)
 {
 #ifdef USE_STOCKER
 	stocker::PlaneData plane_units;
@@ -326,15 +326,18 @@ void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
+	ccHObject::Container segs_add;
 	for (size_t i = 0; i < plane_units.size(); i++) {
 		int num;
 		sscanf(plane_units[i].GetName().Str().c_str(), "%d", &num);
-		AddSegmentsAsChildVertices(entity_planes[num]->getParent(), ints_per_plane[i], "Intersection", ccColor::red);
+		ccHObject* add = AddSegmentsAsChildVertices(entity_planes[num]->getParent(), ints_per_plane[i], "Intersection", ccColor::red);
+		if (add) segs_add.push_back(add);
 	}
+	return segs_add;
 #endif // USE_STOCKER
 }
 
-ccHObject* CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary_minpts)
+ccHObject* CalcPlaneBoundary(ccHObject* planeObj)
 {
 #ifdef USE_STOCKER
 	/// get boundary points
@@ -461,7 +464,7 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 
 	vcg::Plane3d vcgPlane = GetVcgPlane(planeObj);
 	PlaneUnit plane_unit = FormPlaneUnit("temp", vcgPlane, cur_plane_points, true);
- 	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, alpha * 3, false, 2);
+ 	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, alpha, false, 2);
  	Contour3d concave_contour = contours_points.front().front();
 	Contour2d concave_2d = Point3dToPlpoint2d(plane_unit, concave_contour);
 	Polyline2d concave_polygon = MakeLoopPolylinefromContour2d(concave_2d);
@@ -535,7 +538,15 @@ ccHObject*  PlaneFrameOptimization(ccHObject* planeObj)
 		if (!outlines_points_all.empty()) {
 			Contour3d outline_points = outlines_points_all.front().front();
 			outline = MakeLoopPolylinefromContour3d(outline_points);
-		}		
+		}
+	}
+
+	// prepare intersection
+	Polyline3d intersections; {
+		ccHObject::Container container_find, container_objs;
+		planeObj->getParent()->filterChildrenByName(container_find, false, BDDB_INTERSECT_PREFIX, true);
+		container_find.back()->filterChildren(container_objs, false, CC_TYPES::POLY_LINE, true);
+		intersections = GetPolylineFromEntities(container_objs);
 	}
 
 	// prepare image lines

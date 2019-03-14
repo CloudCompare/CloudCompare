@@ -41,7 +41,7 @@ ccHObject* PlaneSegmentationRgGrow(ccHObject* entity, int min_pts, double distan
 void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
 void CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary_minpts, MainWindow* win);
 void CalcPlaneOutlines(ccHObject* planeObj, double alpha);
-void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, MainWindow* win);
+void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_epsilon, MainWindow* win);
 void PlaneFrameOptimization(ccHObject* planeObj);
 
 #define BDDB_ORIGIN_CLOUD_SUFFIX ".original"

@@ -44,6 +44,7 @@ ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud)
 		cc_plane->applyGLTransformation_recursive();
 		cc_plane->showColors(true);
 		cc_plane->setVisible(true);
+		cc_plane->showNormals(cloud->hasNormals());
 
 		cloud->addChild(cc_plane);
 		cc_plane->setDisplay(cloud->getDisplay());
@@ -213,7 +214,7 @@ ccHObject* PlaneSegmentationRgGrow(ccHObject* entity,
 	}
 
 	ccHObject* group = AddPlanesPointsAsNewGroup(entity->getName() + BDDB_PRIMITIVE_SUFFIX, planes_points);
-
+	entity->addChild(group);
 	return group;
 }
 
@@ -258,7 +259,7 @@ ccHObject* PlaneSegmentationRansac(ccHObject* entity,
 	}
 
 	ccHObject* group = AddPlanesPointsAsNewGroup(entity->getName() + BDDB_PRIMITIVE_SUFFIX, planes_points);
-	
+	entity->addChild(group);
 	return group;	
 }
 
@@ -374,7 +375,7 @@ void CalcPlaneOutlines(ccHObject* planeObj, double alpha)
 #endif // USE_STOCKER
 }
 #include "vcg/space/intersection2.h"
-void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, MainWindow* win)
+void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_epsilon, MainWindow* win)
 {
 #ifdef USE_STOCKER
 	ccHObject* parent_cloud = planeObj->getParent();
@@ -388,20 +389,27 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, MainWindow* win)
 		return;
 	}
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(parent_cloud);
-	vcg::Plane3d plane;
 	PlaneUnit plane_unit = FormPlaneUnit(cur_plane_points, "temp", true);
  	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, alpha * 3, false, 2);
  	Contour3d concave_contour = contours_points.front().front();
 	Contour2d concave_2d = Point3dToPlpoint2d(plane_unit, concave_contour);
 	Polyline2d concave_polygon = MakeLoopPolylinefromContour2d(concave_2d);
-	
-	CCLib::ReferenceCloud remained(cloud);
-	int size = cloud->size();
-	for (size_t i = 0; i < size; i++) {
+		
+	vector<size_t> inside_index;
+	stocker::Contour3d inside_points;
+	for (size_t i = 0; i < cloud->size(); i++) {
 		CCVector3 point = *cloud->getPoint(i);
 		vcg::Point2d pt_2d = plane_unit.Point3dPrjtoPlpoint2d({ parse_xyz(point) });
 		if (vcg::PointInsidePolygon(pt_2d, concave_polygon)) {
-			remained.addPointIndex(i);			
+			inside_index.push_back(i);
+			inside_points.push_back(parse_xyz(point));					
+		}
+	}
+	PlaneUnit plane_unit_inside = FormPlaneUnit(inside_points, "temp", true);
+	CCLib::ReferenceCloud remained(cloud);
+	for (size_t i = 0; i < inside_index.size(); i++) {
+		if (plane_unit_inside.IsInPlane(parse_xyz(*cloud->getPoint(i)), distance_epsilon)) {
+			remained.addPointIndex(i);
 		}
 	}
 	ccPointCloud* newCloud = cloud->partialClone(&remained);

@@ -10953,10 +10953,10 @@ static double s_last_bdry_minpts = 30;
 void MainWindow::doActionBDPrimBoundary()
 {
 	if (!haveSelection()) return;
-	ccAskTwoDoubleValuesDlg paraDlg("p2ldistance", "minpts", 0, 1.0e12, s_last_bdry_p2l, s_last_bdry_minpts, 6, "boundary generator", this);
-	if (!paraDlg.exec()) {
-		return;
-	}
+// 	ccAskTwoDoubleValuesDlg paraDlg("p2ldistance", "minpts", 0, 1.0e12, s_last_bdry_p2l, s_last_bdry_minpts, 6, "boundary generator", this);
+// 	if (!paraDlg.exec()) {
+// 		return;
+// 	}
 
 	ccHObject *entity = getSelectedEntities().front();
 	ccHObject::Container plane_container;
@@ -10975,7 +10975,7 @@ void MainWindow::doActionBDPrimOutline()
 	bool ok = true;
 	double alpha = QInputDialog::getDouble(this, "Input Dialog", "Please input alpha value", 2.0, 0.0, 999999.0, 1, &ok);
 	if (!ok) return;
-
+	
 	ccHObject *entity = getSelectedEntities().front();
 	if (entity->isGroup()) {
 		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
@@ -11061,22 +11061,25 @@ void MainWindow::doActionBDPrimCreateGround()
 	addToDB(plane_cloud);
 }
 
+static double s_last_shrink_alpha = 2.0;
+static double s_last_shrink_distance = 0.5;
 void MainWindow::doActionBDPrimShrinkPlane()
 {
-	bool ok = true;
-	double alpha = QInputDialog::getDouble(this, "Input Dialog", "Please input alpha value", 2.0, 0.0, 999999.0, 1, &ok);
-	if (!ok) return;
+	ccAskTwoDoubleValuesDlg paraDlg("alpha value", "distance", 0, 1.0e12, s_last_shrink_alpha, s_last_shrink_distance, 6, "refit plane", this);
+	if (!paraDlg.exec()) {
+		return;
+	}
 
 	ccHObject *entity = getSelectedEntities().front();
 	if (entity->isGroup()) {
 		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 
 		for (auto & planeObj : plane_container) {
-			ShrinkPlaneToOutline(planeObj, alpha, this);
+			ShrinkPlaneToOutline(planeObj, s_last_shrink_alpha, s_last_shrink_distance, this);
 		}
 	}
 	else if (entity->isA(CC_TYPES::PLANE)) {
-		ShrinkPlaneToOutline(entity, alpha, this);
+		ShrinkPlaneToOutline(entity, s_last_shrink_alpha, s_last_shrink_distance, this);
 	}
 	refreshAll();
 	UpdateUI();

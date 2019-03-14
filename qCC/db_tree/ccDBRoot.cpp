@@ -2234,7 +2234,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			}
 			
 			menu.addAction(m_gatherInformation);
-			menu.addAction(m_deselectOtherChildren);
+			if (selCount == 1) menu.addAction(m_deselectOtherChildren);
 			menu.addSeparator();
 			menu.addAction(m_toggleSelectedEntities);
 			if (toggleVisibility)
@@ -2313,18 +2313,27 @@ void ccDBRoot::deselectOtherChildren()
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
 	int selCount = selectedIndexes.size();
-	if (selCount == 0)
+	if (selCount != 1)
 		return;
-	for (int i = 0; i < selCount; ++i) {
-		ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-		ccHObject* parent = item->getParent();
-		if (!parent || parent->getChildrenNumber() < 2) continue;
+	
+	hidePropertiesView();
+	ccHObject* item = static_cast<ccHObject*>(selectedIndexes[0].internalPointer());
+	ccHObject* parent = item->getParent();
+	if (!parent || parent->getChildrenNumber() < 2) return;
 
-		int cur_index = parent->getChildIndex(item);
-		bool enable = !item->isEnabled();
-		for (size_t j = 0; j < parent->getChildrenNumber(); j++) {
-			if (j == cur_index) continue;
-			parent->getChild(j)->setEnabled(enable);
-		}
+	int cur_index = parent->getChildIndex(item);
+	bool enable = !item->isEnabled();
+	for (size_t i = 0; i < parent->getChildrenNumber(); i++) {
+		if (i == cur_index) continue;
+		parent->getChild(i)->setEnabled(enable);
+		parent->getChild(i)->prepareDisplayForRefresh();
 	}
+	
+	ccGLWindow* win = static_cast<ccGLWindow*>(item->getDisplay());
+	ccBBox box = item->getDisplayBB_recursive(false, win);
+	win->updateConstellationCenterAndZoom(&box);
+	//we restablish properties view
+	updatePropertiesView();
+
+	MainWindow::RefreshAllGLWindow(false);
 }

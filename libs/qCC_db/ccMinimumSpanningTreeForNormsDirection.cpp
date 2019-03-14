@@ -22,16 +22,16 @@
 
 //local
 #include "ccLog.h"
-#include "ccPointCloud.h"
-#include "ccScalarField.h"
-#include "ccProgressDialog.h"
 #include "ccOctree.h"
+#include "ccPointCloud.h"
+#include "ccProgressDialog.h"
+#include "ccScalarField.h"
 
 //system
-#include <set>
 #include <map>
-#include <vector>
 #include <queue>
+#include <set>
+#include <vector>
 
 namespace 
 {
@@ -41,7 +41,7 @@ namespace
 	public:
 		
 		//! Unique edge key type
-		typedef std::pair<unsigned, unsigned> Key;
+		using Key = std::pair<unsigned, unsigned>;
 		
 		//! Returns the unique key of an edge (no vertex order)
 		inline static Key ConstructKey(unsigned v1, unsigned v2)
@@ -83,10 +83,10 @@ namespace
 	public:
 		
 		//! Default constructor
-		Graph() {}
+		Graph() = default;
 		
 		//! Set of indexes
-		typedef std::set<unsigned> IndexSet;
+		using IndexSet = std::set<unsigned int>;
 		
 		//! Reserves memory for graph
 		/** Must be called before using the structure!
@@ -160,7 +160,7 @@ static bool ResolveNormalsWithMST(	ccPointCloud* cloud,
 									unsigned char level,
 									unsigned kNN,
 #endif
-									ccProgressDialog* progressCb = 0)
+									ccProgressDialog* progressCb = nullptr)
 {
 	assert(cloud && cloud->hasNormals());
 
@@ -271,7 +271,7 @@ static bool ResolveNormalsWithMST(	ccPointCloud* cloud,
 						//uAB.normalize();
 						//float weight = (fabs(CCVector3::vdot(uAB.u, N1) + fabs(CCVector3::vdot(uAB.u, N2)))) / 2;
 
-						priorityQueue.push(Edge(firstUnvisitedIndex, neighborIndex, weight));
+						priorityQueue.emplace( firstUnvisitedIndex, neighborIndex, weight );
 					}
 				}
 #endif
@@ -288,7 +288,7 @@ static bool ResolveNormalsWithMST(	ccPointCloud* cloud,
 			sf->setValue(static_cast<unsigned>(firstUnvisitedIndex),static_cast<ScalarType>(visitedCount));
 	#endif
 
-			while (!priorityQueue.empty() && visitedCount < vertexCount)
+			while (!priorityQueue.empty() && (visitedCount < vertexCount))
 			{
 				//process next edge (with the lowest 'weight')
 				Edge element = priorityQueue.top();
@@ -365,7 +365,7 @@ static bool ResolveNormalsWithMST(	ccPointCloud* cloud,
 							//uAB.normalize();
 							//float weight = (fabs(CCVector3::vdot(uAB.u, N1) + fabs(CCVector3::vdot(uAB.u, N2)))) / 2;
 
-							priorityQueue.push(Edge(v, neighborIndex, weight));
+							priorityQueue.emplace( v, neighborIndex, weight );
 						}
 					}
 #endif
@@ -407,6 +407,7 @@ static bool ResolveNormalsWithMST(	ccPointCloud* cloud,
 	return true;
 }
 
+#ifdef WITH_GRAPH
 static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 									void** additionalParameters,
 									CCLib::NormalizedProgress* nProgress/*=0*/)
@@ -488,6 +489,7 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 
 	return true;
 }
+#endif
 
 bool ccMinimumSpanningTreeForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 															unsigned kNN/*=6*/,

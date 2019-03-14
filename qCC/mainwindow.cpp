@@ -10966,8 +10966,11 @@ void MainWindow::doActionBDPrimBoundary()
 		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 	
 	for (auto & planeObj : plane_container) {
-		CalcPlaneBoundary(planeObj, s_last_bdry_p2l, s_last_bdry_minpts, this);
+		ccHObject* boundary = CalcPlaneBoundary(planeObj, s_last_bdry_p2l, s_last_bdry_minpts);
+		if (boundary) addToDB(boundary);
 	}
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDPrimOutline()
@@ -10975,34 +10978,36 @@ void MainWindow::doActionBDPrimOutline()
 	bool ok = true;
 	double alpha = QInputDialog::getDouble(this, "Input Dialog", "Please input alpha value", 2.0, 0.0, 999999.0, 1, &ok);
 	if (!ok) return;
-	
-	ccHObject *entity = getSelectedEntities().front();
-	if (entity->isGroup()) {
-		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 
-		for (auto & planeObj : plane_container) {
-			CalcPlaneOutlines(planeObj, alpha);
-		}
-	}
-	else if (entity->isA(CC_TYPES::PLANE)) {
-		CalcPlaneOutlines(entity, alpha);
-	}
+	if (!haveSelection()) return;
+	ccHObject *entity = getSelectedEntities().front();
+	ccHObject::Container plane_container;
+	if (entity->isA(CC_TYPES::PLANE))
+		plane_container.push_back(entity);
+	else
+		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+
+	for (auto & planeObj : plane_container) {
+		ccHObject* outline = CalcPlaneOutlines(planeObj, alpha);
+		if (outline) addToDB(outline);
+	}	
 	refreshAll();
 	UpdateUI();
 }
 
 void MainWindow::doActionBDPrimPlaneFrame()
 {
+	if (!haveSelection()) return;
 	ccHObject *entity = getSelectedEntities().front();
-	if (entity->isGroup()) {
-		ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+	ccHObject::Container plane_container;
+	if (entity->isA(CC_TYPES::PLANE))
+		plane_container.push_back(entity);
+	else
+		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 
-		for (auto & planeObj : plane_container) {
-			PlaneFrameOptimization(planeObj);
-		}
-	}
-	else if (entity->isA(CC_TYPES::PLANE)) {
-		PlaneFrameOptimization(entity);
+	for (auto & planeObj : plane_container) {
+		ccHObject* frame = PlaneFrameOptimization(planeObj);
+		addToDB(frame);
 	}
 	refreshAll();
 	UpdateUI();

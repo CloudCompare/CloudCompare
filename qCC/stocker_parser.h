@@ -39,14 +39,19 @@ ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lin
 ccHObject* PlaneSegmentationRansac(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double normal_threshold, double ransac_probability, double merge_threshold = -1, double split_threshold = -1);
 ccHObject* PlaneSegmentationRgGrow(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double growing_radius, double merge_threshold = -1, double split_threshold = -1);
 void CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
-void CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary_minpts, MainWindow* win);
-void CalcPlaneOutlines(ccHObject* planeObj, double alpha);
+ccHObject* CalcPlaneBoundary(ccHObject* planeObj, double p2l_distance, double boundary_minpts);
+ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha);
 void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_epsilon, MainWindow* win);
-void PlaneFrameOptimization(ccHObject* planeObj);
+ccHObject* PlaneFrameOptimization(ccHObject* planeObj);
 
-#define BDDB_ORIGIN_CLOUD_SUFFIX ".original"
-#define BDDB_PRIMITIVE_SUFFIX ".primitive"
-#define BDDB_IMAGELINE_SUFFIX ".imageline"
+#define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
+#define BDDB_PRIMITIVE_SUFFIX		".primitive"
+#define BDDB_IMAGELINE_SUFFIX		".imageline"
+#define BDDB_BOUNDARY_PREFIX		"Boundary"
+#define BDDB_PLANESEG_PREFIX		"Plane"
+#define BDDB_OUTLINE_PREFIX			"Outline"
+#define BDDB_IMAGELINE_PREFIX		"Imageline"
+#define BDDB_PLANEFRAME_PREFIX		"Frame"
 
 class BDBaseHObject : public ccHObject
 {

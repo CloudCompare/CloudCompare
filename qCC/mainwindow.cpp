@@ -10818,60 +10818,95 @@ void MainWindow::doActionBDPrimIntersections()
 
 void MainWindow::doActionBDPrimAssignSharpLines()
 {
-	//! select two groups, one for plane, one for line
-	//! first, select the sharp line group
-	ccHObject* sharp_group = askUserToSelect(CC_TYPES::HIERARCHY_OBJECT, 0, "please select a segments group");
-	ccHObject::Container sharp_container = GetEnabledObjFromGroup(sharp_group, CC_TYPES::POLY_LINE);
-	
-	//! second, select the plane group
-	ccHObject* plane_group = askUserToSelect(CC_TYPES::HIERARCHY_OBJECT, 0, "please select a plane group");
-	ccHObject::Container plane_container = GetEnabledObjFromGroup(plane_group, CC_TYPES::PLANE);
 	bool ok = true;
 	double distance_threshold = QInputDialog::getDouble(this, "Input Dialog", "Please input distance threshold", 0.2, 0.0, 999999.0, 1, &ok);
 	if (!ok) return;
 
-	//////////////////////////////////////////////////////////////////////////
-	//! get sharps in bbox
-	ccBBox box = plane_group->getBB_recursive();
 	stocker::Polyline3d all_sharp_lines;
-	for (auto & polyline_entity : sharp_container) {
-		ccPolyline* ccpolyline = ccHObjectCaster::ToPolyline(polyline_entity);
-		stocker::Seg3d seg;
-		CCVector3 P0 = *(ccpolyline->getPoint(0));
-		CCVector3 P1 = *(ccpolyline->getPoint(1));
-		if (box.contains(P0) && box.contains(P1)) {
-			seg.P0() = stocker::parse_xyz(P0);
-			seg.P1() = stocker::parse_xyz(P1);
-			all_sharp_lines.push_back(seg);
-		}		
-	}	
-	//////////////////////////////////////////////////////////////////////////
-	stocker::Polyline3d unassigned_sharps; set<size_t>set_index;
-	for (auto & planeObj : plane_container) {
-		ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
-		if (!ccPlane) continue;
-		stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
-		if (cur_plane_points.size() < 3) { continue; }
-		stocker::PlaneUnit plane = stocker::FormPlaneUnit(cur_plane_points, "temp", true);
-		stocker::Polyline3d cur_plane_sharps;
-		vector<int> index_find;		
-		stocker::FindSegmentsInPlane(plane, all_sharp_lines, index_find, distance_threshold);
-		set_index.insert(index_find.begin(), index_find.end());
+	ccHObject::Container primitive_groups;
 
-		for (auto & index : index_find)	{
-			cur_plane_sharps.push_back(all_sharp_lines[index]);
+	if (haveSelection()) {
+		ccHObject* select = m_selectedEntities.front();
+		ccHObject::Container buildings;
+		BDBaseHObject* baseObj = nullptr;
+		if (IsBDBaseObj(select)) {
+			baseObj = static_cast<BDBaseHObject*>(select);
+			buildings = GetEnabledObjFromGroup(select, CC_TYPES::HIERARCHY_OBJECT, true, false);
 		}
-		AddSegmentsAsChildVertices(planeObj->getParent(), cur_plane_sharps, "ImageSharp", ccColor::darkBlue);		
-	}
-	for (size_t i = 0; i < all_sharp_lines.size(); i++) {
-		if (set_index.find(i) == set_index.end()) {
-			unassigned_sharps.push_back(all_sharp_lines[i]);
+		else if (select->getParent() && IsBDBaseObj(select->getParent())) {
+			baseObj = static_cast<BDBaseHObject*>(select->getParent());
+			buildings.push_back(select);
+		}
+		if (!buildings.empty())	{
+			std::string error_info;
+			if (!stocker::LoadLine3D(baseObj->block_prj.m_options.prj_file.image_border, all_sharp_lines, error_info)) {
+				std::cout << error_info << std::endl;
+			}			
+			for (auto & bd : buildings)	{
+				ccHObject* planegroup_get = baseObj->GetPrimitiveGroup(GetBaseName(bd->getName()), false);
+				if (planegroup_get)	primitive_groups.push_back(planegroup_get);
+			}
 		}
 	}
-	ccHObject* group = new ccHObject(plane_group->getName() + "-unassigned-sharp");
-	AddSegmentsAsChildVertices(group, unassigned_sharps, "ImageSharp", ccColor::black);
-	addToDB(group);
-	sharp_group->setEnabled(false);
+	if (all_sharp_lines.empty()) {
+		//! select the sharp line group
+		ccHObject* sharp_group = askUserToSelect(CC_TYPES::HIERARCHY_OBJECT, 0, "please select a segments group");
+		ccHObject::Container sharp_container = GetEnabledObjFromGroup(sharp_group, CC_TYPES::POLY_LINE);
+		all_sharp_lines = GetPolylineFromEntities(sharp_container);
+		if (all_sharp_lines.empty()) return;
+	}
+	if (primitive_groups.empty()) {
+		//! select the plane group
+		ccHObject* plane_group_ = askUserToSelect(CC_TYPES::HIERARCHY_OBJECT, 0, "please select a plane group");
+		if (plane_group_) { primitive_groups.push_back(plane_group_); }
+		if (primitive_groups.empty()) return;
+	}
+	
+	for (auto & plane_group : primitive_groups)	{
+		//! get sharps in bbox
+		stocker::Polyline3d sharps_in_bbox;
+		ccBBox box = plane_group->getBB_recursive();
+		for (stocker::Seg3d & seg : all_sharp_lines) {
+			if (box.contains(CCVector3(vcgXYZ(seg.P0()))) && box.contains(CCVector3(vcgXYZ(seg.P1())))) {
+				sharps_in_bbox.push_back(seg);
+			}
+		}
+		//! add sharps in bbox as a child
+		ccHObject* sharps_in_bbox_obj = AddSegmentsAsChildVertices(plane_group->getParent(), sharps_in_bbox, BDDB_IMAGELINE_PREFIX, ccColor::darkGrey);
+		if (sharps_in_bbox_obj) addToDB(sharps_in_bbox_obj);
+
+		//! assign to each plane
+		ccHObject::Container plane_container = GetEnabledObjFromGroup(plane_group, CC_TYPES::PLANE);
+		stocker::Polyline3d unassigned_sharps; set<size_t>set_index;
+		for (auto & planeObj : plane_container) {
+			ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
+			if (!ccPlane) continue;
+			stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
+			if (cur_plane_points.size() < 3) { continue; }
+			stocker::PlaneUnit plane = stocker::FormPlaneUnit(cur_plane_points, "temp", true);
+			stocker::Polyline3d cur_plane_sharps;
+			vector<int> index_find;
+			stocker::FindSegmentsInPlane(plane, sharps_in_bbox, index_find, distance_threshold);
+			set_index.insert(index_find.begin(), index_find.end());
+
+			for (auto & index : index_find) {
+				cur_plane_sharps.push_back(sharps_in_bbox[index]);
+			}
+			ccHObject* cur_sharps_obj = AddSegmentsAsChildVertices(planeObj->getParent(), cur_plane_sharps, BDDB_IMAGELINE_PREFIX, ccColor::darkBlue);
+			if (cur_sharps_obj) addToDB(cur_sharps_obj);
+		}
+// 		for (size_t i = 0; i < sharps_in_bbox.size(); i++) {
+// 			if (set_index.find(i) == set_index.end()) {
+// 				unassigned_sharps.push_back(sharps_in_bbox[i]);
+// 			}
+// 		}
+// 		ccHObject* group = new ccHObject(plane_group->getName() + "-unassigned-sharp");
+// 		AddSegmentsAsChildVertices(group, unassigned_sharps, BDDB_IMAGELINE_PREFIX, ccColor::black);
+// 		addToDB(group);
+	}
+
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDPrimPlaneFromSharp()

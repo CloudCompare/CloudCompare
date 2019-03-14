@@ -29,6 +29,10 @@
 using namespace stocker;
 #endif // USE_STOCKER
 
+QString GetBaseName(QString name) {
+	QFileInfo base(name); return base.baseName();
+}
+
 ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud)
 {
 	ccHObject* cc_plane = nullptr;
@@ -105,11 +109,11 @@ vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject* entit
 	return contours_points;
 }
 
-ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable)
+ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable, bool recursive)
 {
 	if (entity) {
 		ccHObject::Container group;
-		entity->filterChildren(group, true, type, true, entity->getDisplay());
+		entity->filterChildren(group, recursive, type, true, entity->getDisplay());
 		if (check_enable) {
 			ccHObject::Container group_enabled;
 			for (auto & gp : group) {
@@ -128,6 +132,17 @@ ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM typ
 	return ccHObject::Container();
 }
 
+vcg::Plane3d GetVcgPlane(ccHObject* planeObj)
+{
+	ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
+	CCVector3 N; float constVal;
+	ccPlane->getEquation(N, constVal);
+	vcg::Plane3d vcgPlane;
+	vcgPlane.SetDirection({ N.x, N.y, N.z });
+	vcgPlane.SetOffset(constVal);
+	return vcgPlane;
+}
+
 ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)
 {
 	if (lines.empty()) {
@@ -142,9 +157,7 @@ ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lin
 		cc_polyline->setDisplay(entity->getDisplay());
 		cc_polyline->setColor(col);
 		cc_polyline->showColors(true);
-		char ln_name[32];
-		sprintf(ln_name, "%s%d", name.toStdString().c_str(), i);
-		cc_polyline->setName(ln_name);
+		cc_polyline->setName(name + QString::number(i));
 		cc_polyline->setWidth(1);
 		if (cloud) {
 			cc_polyline->setGlobalShift(cloud->getGlobalShift());
@@ -446,14 +459,7 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 	}
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(parent_cloud);
 
-	ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
-	if (!ccPlane) return;
-	CCVector3 N; float constVal;
-	ccPlane->getEquation(N, constVal);
-	vcg::Plane3d vcgPlane;
-	vcgPlane.SetDirection({ N.x, N.y, N.z });
-	vcgPlane.SetOffset(constVal);
-
+	vcg::Plane3d vcgPlane = GetVcgPlane(planeObj);
 	PlaneUnit plane_unit = FormPlaneUnit("temp", vcgPlane, cur_plane_points, true);
  	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, alpha * 3, false, 2);
  	Contour3d concave_contour = contours_points.front().front();
@@ -505,37 +511,25 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 ccHObject*  PlaneFrameOptimization(ccHObject* planeObj)
 {
 #ifdef USE_STOCKER
-	ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
-	if (!ccPlane) return nullptr;
-
-	CCVector3 N; float constVal;
-	ccPlane->getEquation(N, constVal);
-
-	vcg::Plane3d vcgPlane;
-	vcgPlane.SetDirection({ N.x, N.y, N.z });
-	vcgPlane.SetOffset(constVal);	
-
-	ccHObject::Container container_find;
-	ccHObject::Container container_objs;
-
 	//////////////////////////////////////////////////////////////////////////
 	// frame optimization
 	stocker::FrameOptmzt frame_opt(planeObj->getParent()->getName().toStdString());
+	vcg::Plane3d vcgPlane = GetVcgPlane(planeObj);
 
 	// prepare plane points
 	Contour3d plane_points = GetPointsFromCloud(planeObj->getParent());
 
 	// prepare boundary lines
-	Polyline3d boundary_lines;
-	{
+	Polyline3d boundary_lines; {
+		ccHObject::Container container_find, container_objs;
 		planeObj->getParent()->filterChildrenByName(container_find, false, BDDB_BOUNDARY_PREFIX, true);
 		container_find.back()->filterChildren(container_objs, false, CC_TYPES::POLY_LINE, true);
 		boundary_lines = GetPolylineFromEntities(container_objs);
 	}
 
 	// prepare outline
-	Polyline3d outline;
-	{
+	Polyline3d outline; {
+		ccHObject::Container container_find;
 		planeObj->getParent()->filterChildrenByName(container_find, false, BDDB_OUTLINE_PREFIX, true);
 		auto outlines_points_all = GetOutlinesFromOutlineParent(container_find.back());
 		if (!outlines_points_all.empty()) {
@@ -545,9 +539,11 @@ ccHObject*  PlaneFrameOptimization(ccHObject* planeObj)
 	}
 
 	// prepare image lines
-	Polyline3d image_lines;
-	{
-
+	Polyline3d image_lines;	{
+		ccHObject::Container container_find, container_objs;
+		planeObj->getParent()->filterChildrenByName(container_find, false, BDDB_IMAGELINE_PREFIX, true);
+		container_find.back()->filterChildren(container_objs, false, CC_TYPES::POLY_LINE, true);
+		image_lines = GetPolylineFromEntities(container_objs);
 	}
 
 	// boundary loop
@@ -573,9 +569,8 @@ ccHObject * BDBaseHObject::GetHObj(CC_CLASS_ENUM type, QString suffix, QString b
 	ccHObject::Container entities = GetEnabledObjFromGroup(this, type, check_enable);
 	ccHObject* output = nullptr;
 	for (auto & entity : entities) {
-		QFileInfo name(entity->getName());	
 		if (entity->getName().endsWith(suffix) &&
-			name.baseName() == basename) {
+			GetBaseName(entity->getName()) == basename) {
 			return entity;
 		}
 	}
@@ -588,13 +583,13 @@ ccHObject* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_ena
 	return nullptr;
 }
 ccHObject::Container BDBaseHObject::GetOriginPointCloud(bool check_enable) {
-	return GetHObjContainer(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX);
+	return GetHObjContainer(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, check_enable);
 }
 ccHObject * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check_enable) {
-	return GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name);
+	return GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name, check_enable);
 }
 ccHObject * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
-	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_PRIMITIVE_SUFFIX, building_name);
+	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_PRIMITIVE_SUFFIX, building_name, check_enable);
 }
 BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	ccHObject* bd_obj_ = obj;

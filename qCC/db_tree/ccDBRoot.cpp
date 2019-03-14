@@ -269,6 +269,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_alignCameraWithEntityReverse = new QAction("Align camera (reverse)", this);
 	m_enableBubbleViewMode = new QAction("Bubble-view", this);
 	m_editLabelScalarValue = new QAction("Edit scalar value", this);
+	m_deselectOtherChildren = new QAction("Deselect Others", this);
 
 	m_contextMenuPos = QPoint(-1,-1);
 
@@ -294,6 +295,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_alignCameraWithEntityReverse,		&QAction::triggered,					this, &ccDBRoot::alignCameraWithEntityIndirect);
 	connect(m_enableBubbleViewMode,				&QAction::triggered,					this, &ccDBRoot::enableBubbleViewMode);
 	connect(m_editLabelScalarValue,				&QAction::triggered,					this, &ccDBRoot::editLabelScalarValue);
+	connect(m_deselectOtherChildren,			&QAction::triggered,					this, &ccDBRoot::deselectOtherChildren);
 
 	//other DB tree signals/slots connection
 	connect(m_dbTreeWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ccDBRoot::changeSelection);
@@ -2232,6 +2234,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			}
 			
 			menu.addAction(m_gatherInformation);
+			menu.addAction(m_deselectOtherChildren);
 			menu.addSeparator();
 			menu.addAction(m_toggleSelectedEntities);
 			if (toggleVisibility)
@@ -2303,4 +2306,25 @@ QItemSelectionModel::SelectionFlags ccCustomQTreeView::selectionCommand(const QM
 	}
 
 	return QTreeView::selectionCommand(index,event);
+}
+
+void ccDBRoot::deselectOtherChildren()
+{
+	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
+	QModelIndexList selectedIndexes = qism->selectedIndexes();
+	int selCount = selectedIndexes.size();
+	if (selCount == 0)
+		return;
+	for (int i = 0; i < selCount; ++i) {
+		ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
+		ccHObject* parent = item->getParent();
+		if (!parent || parent->getChildrenNumber() < 2) continue;
+
+		int cur_index = parent->getChildIndex(item);
+		bool enable = !item->isEnabled();
+		for (size_t j = 0; j < parent->getChildrenNumber(); j++) {
+			if (j == cur_index) continue;
+			parent->getChild(j)->setEnabled(enable);
+		}
+	}
 }

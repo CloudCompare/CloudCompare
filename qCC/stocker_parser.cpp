@@ -355,6 +355,7 @@ ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, 
 	}
 	return segs_add;
 #endif // USE_STOCKER
+	return ccHObject::Container();
 }
 
 ccHObject* CalcPlaneBoundary(ccHObject* planeObj)
@@ -396,6 +397,32 @@ ccHObject* CalcPlaneBoundary(ccHObject* planeObj)
 
 	return line_vert;
 #endif // USE_STOCKER
+	return nullptr;
+}
+
+ccHObject* DetectLineRansac(ccHObject* entity, double distance, double minpts, double radius)
+{
+#ifdef USE_STOCKER
+	ccPolyline* poly_line = ccHObjectCaster::ToPolyline(entity);
+	if (entity) {
+		vector<CCVector3> points = poly_line->getPoints(false);
+		Contour3d cur_plane_points;
+		for (auto & pt : points) {
+			cur_plane_points.push_back(parse_xyz(pt));
+		}
+//		PlaneUnit plane_unit = FormPlaneUnit(cur_plane_points, "temp", true);
+//		Contour2d points_2d = Point3dToPlpoint2d(plane_unit, cur_plane_points);
+		Polyline3d bdry_lines_2d; IndexGroup indices;
+		LineRansacfromPoints(/*Contour2dTo3d(points_2d)*/cur_plane_points, bdry_lines_2d, indices, distance, minpts, radius);
+// 		Polyline2d bdry_lines_2d_real;
+// 		for (auto & ln : bdry_lines_2d)	{
+// 			bdry_lines_2d_real.push_back(Seg2d(ToVec2d(ln.P0()), ToVec2d(ln.P1())));
+// 		}
+		ccHObject* line_vert = AddSegmentsAsChildVertices(entity, bdry_lines_2d/*Plline2dToLine3d(plane_unit, bdry_lines_2d_real)*/, "RansacLine", ccColor::red);
+		return line_vert;
+	}
+#endif // USE_STOCKER
+	return nullptr;	
 }
 
 ccHObject* AddOutlinesAsChild(vector<vector<stocker::Contour3d>> contours_points, QString name, ccHObject* parent)
@@ -611,11 +638,13 @@ ccHObject*  PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption opt
 	frame_opt.PrepareBoundaryPoints(boundary_points);
 	frame_opt.PrepareImageLines(image_lines);
 	frame_opt.PrepareIntersection(intersections);
-	frame_opt.PrepareBoundaryLines(boundary_lines, option.snap_epsilon);
+//	frame_opt.PrepareBoundaryLines(boundary_lines, option.snap_epsilon);
+
+	Polyline3d boundary_to_loop = frame_opt.PrepareBoundaryLines(outline_points, option.snap_epsilon);
 
 	//! pre-process
-	Polyline3d boundary_to_loop;
-	boundary_to_loop = frame_opt.CloseBoundaryByConcaveHull(outline_points, option.snap_epsilon);
+//	Polyline3d boundary_to_loop;
+//	boundary_to_loop = frame_opt.CloseBoundaryByConcaveHull(outline_points, option.snap_epsilon);
 
 	//! candidate selection	
 // 	frame_opt.GenerateCandidate(option.candidate_buffer_h, option.candidate_buffer_v, output_prefix + "-candi.ply");

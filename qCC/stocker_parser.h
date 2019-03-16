@@ -36,12 +36,14 @@ ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud);
 
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
 stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
+vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject * entity);
 ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true, bool recursive = true);
 ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
 ccHObject* PlaneSegmentationRansac(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double normal_threshold, double ransac_probability, double merge_threshold = -1, double split_threshold = -1);
 ccHObject* PlaneSegmentationRgGrow(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double growing_radius, double merge_threshold = -1, double split_threshold = -1);
 ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
 ccHObject* CalcPlaneBoundary(ccHObject* planeObj);
+ccHObject * DetectLineRansac(ccHObject * entity, double distance, double minpts, double radius);
 ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha);
 void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_epsilon, MainWindow* win);
 ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option);

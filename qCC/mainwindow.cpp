@@ -11015,10 +11015,25 @@ void MainWindow::doActionBDPrimBoundary()
 	if (!haveSelection()) return;
 
 	ccHObject *entity = getSelectedEntities().front();
+	if (entity->isA(CC_TYPES::POLY_LINE)) {
+		double distance(0.5), minpts(10), radius(3);
+		ccAskThreeDoubleValuesDlg paraDlg("distance", "minpts", "radius", 0, 1.0e12, distance, minpts, radius, 6, "ransac", this);
+		if (!paraDlg.exec()) {
+			return;
+		}
+		ccHObject* bdry = DetectLineRansac(entity, distance, minpts, radius);
+		if (bdry) {
+			addToDB(bdry);
+			refreshAll();
+			updateUI();
+		}
+		return;
+	}
+
 	ccHObject::Container plane_container;
 	if (entity->isA(CC_TYPES::PLANE)) 
 		plane_container.push_back(entity);
-	else 
+	else
 		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 	
 	for (auto & planeObj : plane_container) {
@@ -11046,6 +11061,11 @@ void MainWindow::doActionBDPrimOutline()
 	for (auto & planeObj : plane_container) {
 		ccHObject* outline = CalcPlaneOutlines(planeObj, alpha);
 		if (outline) addToDB(outline);
+
+		auto outlines_points_all = GetOutlinesFromOutlineParent(outline);
+		if (!outlines_points_all.empty()) {
+			stocker::Contour3d outline_points = outlines_points_all.front().front();
+		}
 	}	
 	refreshAll();
 	UpdateUI();
@@ -11064,6 +11084,8 @@ void MainWindow::doActionBDPrimPlaneFrame()
 	option.lamda_coverage = 0.5;
 	option.lamda_sharpness = 0.5;
 	option.lamda_smooth_term = 10;
+	option.bdransac_epsilon = 1;
+	option.line_ptmin = 30;
 
 	ccHObject *entity = getSelectedEntities().front();
 	ccHObject::Container plane_container;

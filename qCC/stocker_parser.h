@@ -44,8 +44,9 @@ ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, 
 ccHObject* CalcPlaneBoundary(ccHObject* planeObj);
 ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha);
 void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_epsilon, MainWindow* win);
-ccHObject* PlaneFrameOptimization(ccHObject* planeObj);
+ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option);
 
+#define BDDB_PROJECTNAME_PREFIX		"Prj_"
 #define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
 #define BDDB_PRIMITIVE_SUFFIX		".primitive"
 #define BDDB_IMAGELINE_SUFFIX		".imageline"

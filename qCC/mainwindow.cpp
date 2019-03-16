@@ -10645,6 +10645,9 @@ void MainWindow::doActionBDProjectLoad()
 	}
 	QFileInfo prj_file(Filename);
 	QString prj_name = prj_file.completeBaseName();
+	if (!prj_name.startsWith(BDDB_PROJECTNAME_PREFIX)) {
+		prj_name = BDDB_PROJECTNAME_PREFIX + prj_name;
+	}
 
 	QString bin_file = prj_file.absolutePath() + "\\" + prj_name + ".bin";
 		
@@ -11029,7 +11032,7 @@ void MainWindow::doActionBDPrimBoundary()
 void MainWindow::doActionBDPrimOutline()
 {
 	bool ok = true;
-	double alpha = QInputDialog::getDouble(this, "Input Dialog", "Please input alpha value", 2.0, 0.0, 999999.0, 1, &ok);
+	double alpha = QInputDialog::getDouble(this, "Input Dialog", "Please input alpha value", 2.0, 0.0, 999999.0, 6, &ok);
 	if (!ok) return;
 
 	if (!haveSelection()) return;
@@ -11051,6 +11054,17 @@ void MainWindow::doActionBDPrimOutline()
 void MainWindow::doActionBDPrimPlaneFrame()
 {
 	if (!haveSelection()) return;
+
+	//! dialog
+	stocker::FrameOption option;
+	option.buffer_size = 1;
+	option.snap_epsilon = 1;
+	option.candidate_buffer_h = 1;
+	option.candidate_buffer_v = 2;
+	option.lamda_coverage = 0.5;
+	option.lamda_sharpness = 0.5;
+	option.lamda_smooth_term = 10;
+
 	ccHObject *entity = getSelectedEntities().front();
 	ccHObject::Container plane_container;
 	if (entity->isA(CC_TYPES::PLANE))
@@ -11059,7 +11073,7 @@ void MainWindow::doActionBDPrimPlaneFrame()
 		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 
 	for (auto & planeObj : plane_container) {
-		ccHObject* frame = PlaneFrameOptimization(planeObj);
+		ccHObject* frame = PlaneFrameOptimization(planeObj, option);
 		addToDB(frame);
 	}
 	refreshAll();

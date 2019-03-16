@@ -87,6 +87,26 @@ stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities)
 	return polyline;
 }
 
+bool GetBoundaryPointsAndLinesFromCloud(ccHObject* cloud_entity, stocker::Polyline3d & boundary_lines, stocker::Contour3d & boundary_points)
+{
+	boundary_lines.clear();
+	boundary_points.clear();
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(cloud_entity);
+	if (!cloud) return false;	
+
+	ccHObject::Container boundary_entities;
+	cloud_entity->filterChildren(boundary_entities, false, CC_TYPES::POLY_LINE, cloud_entity->getDisplay());
+
+	boundary_lines = GetPolylineFromEntities(boundary_entities);
+	
+	unsigned int pt_start = boundary_lines.size();
+	for (unsigned int i = pt_start; i < cloud->size(); i++) {
+		const CCVector3* P = cloud->getPoint(i);
+		boundary_points.push_back(stocker::parse_xyz(*P));
+	}
+	return true;
+}
+
 vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject* entity)
 {
 	ccHObject::Container container_find;
@@ -378,10 +398,10 @@ ccHObject* CalcPlaneBoundary(ccHObject* planeObj)
 #endif // USE_STOCKER
 }
 
-ccHObject* AddOutlinesAsChild(vector<vector<stocker::Contour3d>> contours_points, ccHObject* parent)
+ccHObject* AddOutlinesAsChild(vector<vector<stocker::Contour3d>> contours_points, QString name, ccHObject* parent)
 {
 	if (contours_points.empty()) return nullptr;
-	ccPointCloud* line_vert = new ccPointCloud(BDDB_OUTLINE_PREFIX);
+	ccPointCloud* line_vert = new ccPointCloud(name);
 	int component_number = 0;
 	for (vector<stocker::Contour3d> & component : contours_points) {
 		for (stocker::Contour3d & st_contours : component) {
@@ -390,7 +410,7 @@ ccHObject* AddOutlinesAsChild(vector<vector<stocker::Contour3d>> contours_points
 			cc_polyline->setColor(ccColor::green);
 			cc_polyline->showColors(true);
 			line_vert->addChild(cc_polyline);
-			cc_polyline->setName(BDDB_OUTLINE_PREFIX + QString::number(component_number));
+			cc_polyline->setName(name + QString::number(component_number));
 			cc_polyline->setWidth(2);
 // 			cc_polyline->setGlobalShift(cloud->getGlobalShift());
 // 			cc_polyline->setGlobalScale(cloud->getGlobalScale());
@@ -418,7 +438,7 @@ ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha)
 
 	//! get boundary
 	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, alpha, false, 2);
-	return AddOutlinesAsChild(contours_points, planeObj->getParent());
+	return AddOutlinesAsChild(contours_points, BDDB_OUTLINE_PREFIX, planeObj->getParent());
 //	if (contours_points.empty()) return nullptr;
 // 	ccPointCloud* line_vert = new ccPointCloud(BDDB_OUTLINE_PREFIX);
 // 	int component_number = 0;
@@ -504,61 +524,115 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 
 	vector<vector<stocker::Contour3d>> contours_points_remained;
 	contours_points_remained.push_back(contours_points.front());
-	ccHObject* outlines_add = AddOutlinesAsChild(contours_points_remained, newCloud);
+	ccHObject* outlines_add = AddOutlinesAsChild(contours_points_remained,BDDB_OUTLINE_PREFIX, newCloud);
 	win->addToDB(outlines_add);
 //	win->db()->removeElement(cloud);
 	
 #endif // USE_STOCKER
 }
 
-ccHObject*  PlaneFrameOptimization(ccHObject* planeObj)
+ccHObject*  PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option)
 {
 #ifdef USE_STOCKER
+	std::string base_name = GetBaseName(planeObj->getParent()->getParent()->getName()).toStdString();
+
+	BDBaseHObject* baseObj = GetRootBDBase(planeObj);
+	std::string output_prefix;
+	if (baseObj) {		
+		auto bd_find = baseObj->block_prj.m_builder.sbuild.find(BuilderBase::BuildNode::Create(base_name));
+		if (bd_find == baseObj->block_prj.m_builder.sbuild.end()) {
+			return nullptr;
+		}
+		output_prefix = (*bd_find)->data.file_path.root_dir + "\\primitives\\frame_opt\\";
+		CreateDir(output_prefix.c_str());
+		output_prefix = output_prefix + base_name;
+	}
+	
+
 	//////////////////////////////////////////////////////////////////////////
 	// frame optimization
+
+	std::string plane_unit_name = base_name + "-" + planeObj->getParent()->getName().toStdString();
 	stocker::FrameOptmzt frame_opt(planeObj->getParent()->getName().toStdString());
+	
+	frame_opt.SetOption(option);
+
 	vcg::Plane3d vcgPlane = GetVcgPlane(planeObj);
 
 	// prepare plane points
 	Contour3d plane_points = GetPointsFromCloud(planeObj->getParent());
 
 	// prepare boundary lines
-	Polyline3d boundary_lines; {
+	Polyline3d boundary_lines; Contour3d boundary_points; {		
 		ccHObject::Container container_find, container_objs;
 		planeObj->getParent()->filterChildrenByName(container_find, false, BDDB_BOUNDARY_PREFIX, true);
-		container_find.back()->filterChildren(container_objs, false, CC_TYPES::POLY_LINE, true);
-		boundary_lines = GetPolylineFromEntities(container_objs);
+		if (!container_find.empty()) {
+			GetBoundaryPointsAndLinesFromCloud(container_find.back(), boundary_lines, boundary_points);
+		}		
 	}
 
 	// prepare outline
-	Polyline3d outline; {
+	Contour3d outline_points; {
 		ccHObject::Container container_find;
 		planeObj->getParent()->filterChildrenByName(container_find, false, BDDB_OUTLINE_PREFIX, true);
-		auto outlines_points_all = GetOutlinesFromOutlineParent(container_find.back());
-		if (!outlines_points_all.empty()) {
-			Contour3d outline_points = outlines_points_all.front().front();
-			outline = MakeLoopPolylinefromContour3d(outline_points);
-		}
+		if (!container_find.empty()) {
+			auto outlines_points_all = GetOutlinesFromOutlineParent(container_find.back());
+			if (!outlines_points_all.empty()) {
+				outline_points = outlines_points_all.front().front();
+			}
+		}		
 	}
 
 	// prepare intersection
 	Polyline3d intersections; {
 		ccHObject::Container container_find, container_objs;
 		planeObj->getParent()->filterChildrenByName(container_find, false, BDDB_INTERSECT_PREFIX, true);
-		container_find.back()->filterChildren(container_objs, false, CC_TYPES::POLY_LINE, true);
-		intersections = GetPolylineFromEntities(container_objs);
+		if (!container_find.empty()) {
+			container_find.back()->filterChildren(container_objs, false, CC_TYPES::POLY_LINE, true);
+			intersections = GetPolylineFromEntities(container_objs);
+		}		
 	}
 
 	// prepare image lines
 	Polyline3d image_lines;	{
 		ccHObject::Container container_find, container_objs;
 		planeObj->getParent()->filterChildrenByName(container_find, false, BDDB_IMAGELINE_PREFIX, true);
-		container_find.back()->filterChildren(container_objs, false, CC_TYPES::POLY_LINE, true);
-		image_lines = GetPolylineFromEntities(container_objs);
+		if (!container_find.empty()) {
+			container_find.back()->filterChildren(container_objs, false, CC_TYPES::POLY_LINE, true);
+			image_lines = GetPolylineFromEntities(container_objs);
+		}		
 	}
 
-	// boundary loop
-	ccHObject* plane_frame = new ccHObject(BDDB_PLANEFRAME_PREFIX);
+	//! add data to frame
+	frame_opt.PreparePlanePoints(vcgPlane, plane_points);
+	if (baseObj) {
+		frame_opt.PrepareImageList(GetRootBDBase(planeObj)->block_prj.m_builder);
+	}	
+	frame_opt.PrepareBoundaryPoints(boundary_points);
+	frame_opt.PrepareImageLines(image_lines);
+	frame_opt.PrepareIntersection(intersections);
+	frame_opt.PrepareBoundaryLines(boundary_lines, option.snap_epsilon);
+
+	//! pre-process
+	Polyline3d boundary_to_loop;
+	boundary_to_loop = frame_opt.CloseBoundaryByConcaveHull(outline_points, option.snap_epsilon);
+
+	//! candidate selection	
+// 	frame_opt.GenerateCandidate(option.candidate_buffer_h, option.candidate_buffer_v, output_prefix + "-candi.ply");
+// 	frame_opt.ComputeConfidence(option.lamda_coverage, option.lamda_sharpness);
+// 	frame_opt.CandidateSelection(option.lamda_smooth_term);
+
+	//! post-process
+	Polyline3d frame_loop = frame_opt.GenerateFrame(boundary_to_loop);
+	frame_opt.ShrinkSharpVertex();
+
+	//! get result
+	Contour3d frame_points;
+	frame_opt.OutputFrame(frame_points);
+	vector<vector<Contour3d>> frames_to_add(1);
+	frames_to_add.back().push_back(frame_points);
+
+	ccHObject* plane_frame = AddOutlinesAsChild(frames_to_add, BDDB_PLANEFRAME_PREFIX, planeObj->getParent());
 	return plane_frame;
 #endif
 }
@@ -605,9 +679,8 @@ ccHObject * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_e
 BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	ccHObject* bd_obj_ = obj;
 	do {
-		BDBaseHObject* bd_obj = static_cast<BDBaseHObject*>(bd_obj_);
-		if (bd_obj->valid) {
-			return bd_obj;
+		if (bd_obj_->getName().startsWith(BDDB_PROJECTNAME_PREFIX)) {
+			return static_cast<BDBaseHObject*>(bd_obj_);
 		}
 		bd_obj_ = bd_obj_->getParent();
 	} while (bd_obj_);

@@ -1,9 +1,9 @@
 cmake_minimum_required( VERSION 3.0 )
 
-option( INSTALL_EXAMPLE_GL_PLUGIN "Check to install example GL plugin" OFF )
+option( PLUGIN_EXAMPLE_GL "Check to install example GL plugin" OFF )
 
 # CloudCompare example GL plugin
-if ( INSTALL_EXAMPLE_GL_PLUGIN )
+if ( PLUGIN_EXAMPLE_GL )
     project( ExampleGLPlugin )
     
     include( ../../CMakePluginTpl.cmake )

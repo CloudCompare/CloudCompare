@@ -10,10 +10,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/GfxTL )
 include_directories( ${QRANSAC_SD_MISC_LIB_SOURCE_DIR} )
 
-project( QRANSAC_SD_PRIM_SHAPES_LIB )
-
-set( SAMPLE_PROJECT_VERSION_MAJOR 1 )
-set( SAMPLE_PROJECT_VERSION_MINOR 1 )
+project( QRANSAC_SD_PRIM_SHAPES_LIB VERSION 1.1 )
 
 file( GLOB header_list *.h GfxTL/*.h )
 file( GLOB source_list *.cpp GfxTL/*.cpp )

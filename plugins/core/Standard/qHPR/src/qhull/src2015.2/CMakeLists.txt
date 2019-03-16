@@ -1,11 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 
-project( qhull )
+project( qhull VERSION 2015.2 )
 
 set( CMAKE_AUTOMOC OFF )
-
-set( SAMPLE_PROJECT_VERSION_MAJOR 2015 )
-set( SAMPLE_PROJECT_VERSION_MINOR 2 )
 
 #define global variables for use by other projects
 set ( QHULL_LIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE )

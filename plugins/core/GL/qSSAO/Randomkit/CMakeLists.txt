@@ -1,11 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 
-project( QSSAO_RANDOMKIT_LIB )
+project( QSSAO_RANDOMKIT_LIB VERSION 1.15 )
 
 set( CMAKE_AUTOMOC OFF )
-
-set( SAMPLE_PROJECT_VERSION_MAJOR 1 )
-set( SAMPLE_PROJECT_VERSION_MINOR 15 )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 

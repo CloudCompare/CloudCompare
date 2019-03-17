@@ -126,6 +126,8 @@
 #include "db_tree/ccDBRoot.h"
 #include "pluginManager/ccPluginUIManager.h"
 
+#include "GenericProgressCallback.h"
+
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
 #include "devices/3dConnexion/cc3DMouseManager.h"
@@ -11015,7 +11017,7 @@ void MainWindow::doActionBDPrimBoundary()
 	if (!haveSelection()) return;
 
 	ccHObject *entity = getSelectedEntities().front();
-	if (entity->isA(CC_TYPES::POLY_LINE)) {
+	if (entity->isA(CC_TYPES::POLY_LINE) || entity->isA(CC_TYPES::POINT_CLOUD)) {
 		double distance(0.5), minpts(10), radius(3);
 		ccAskThreeDoubleValuesDlg paraDlg("distance", "minpts", "radius", 0, 1.0e12, distance, minpts, radius, 6, "ransac", this);
 		if (!paraDlg.exec()) {
@@ -11035,6 +11037,11 @@ void MainWindow::doActionBDPrimBoundary()
 		plane_container.push_back(entity);
 	else
 		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+
+	if (plane_container.empty()) {
+		dispToConsole("[BDRecon] Please select polyline, point cloud or (group of) planes", ERR_CONSOLE_MESSAGE);
+		return;
+	}
 	
 	for (auto & planeObj : plane_container) {
 		ccHObject* boundary = CalcPlaneBoundary(planeObj/*, s_last_bdry_p2l, s_last_bdry_minpts*/);
@@ -11058,15 +11065,34 @@ void MainWindow::doActionBDPrimOutline()
 	else
 		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 
+	if (plane_container.empty()) {
+		dispToConsole("[BDRecon] Please select (group of) planes", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	ccProgressDialog progDlg(true, this);
+	progDlg.setAutoClose(false);
+
+	if (progDlg.textCanBeEdited()) {
+		progDlg.setMethodTitle("Frame Optimization");
+		char infosBuffer[256];
+		sprintf(infosBuffer, "Processing %d planes.", plane_container.size());
+		progDlg.setInfo(infosBuffer);
+	}
+	CCLib::NormalizedProgress nprogress(&progDlg, plane_container.size());
+
 	for (auto & planeObj : plane_container) {
 		ccHObject* outline = CalcPlaneOutlines(planeObj, alpha);
 		if (outline) addToDB(outline);
 
-		auto outlines_points_all = GetOutlinesFromOutlineParent(outline);
-		if (!outlines_points_all.empty()) {
-			stocker::Contour3d outline_points = outlines_points_all.front().front();
+		if (!nprogress.oneStep()) {
+			progDlg.stop();
+			return;
 		}
-	}	
+	}
+	progDlg.update(100.0f);
+	progDlg.stop();
+
 	refreshAll();
 	UpdateUI();
 }
@@ -11094,6 +11120,11 @@ void MainWindow::doActionBDPrimPlaneFrame()
 		plane_container.push_back(entity);
 	else
 		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+
+	if (plane_container.empty()) {
+		dispToConsole("[BDRecon] Please select (group of) planes", ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
 	for (auto & planeObj : plane_container) {
 		ccHObject* frame = PlaneFrameOptimization(planeObj, option);

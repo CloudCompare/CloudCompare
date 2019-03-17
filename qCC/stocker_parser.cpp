@@ -403,24 +403,23 @@ ccHObject* CalcPlaneBoundary(ccHObject* planeObj)
 ccHObject* DetectLineRansac(ccHObject* entity, double distance, double minpts, double radius)
 {
 #ifdef USE_STOCKER
-	ccPolyline* poly_line = ccHObjectCaster::ToPolyline(entity);
-	if (entity) {
+	Contour3d cur_plane_points;
+	if (entity->isA(CC_TYPES::POLY_LINE)) {
+		ccPolyline* poly_line = ccHObjectCaster::ToPolyline(entity);
+		if (!poly_line) return nullptr;
 		vector<CCVector3> points = poly_line->getPoints(false);
-		Contour3d cur_plane_points;
 		for (auto & pt : points) {
 			cur_plane_points.push_back(parse_xyz(pt));
 		}
-//		PlaneUnit plane_unit = FormPlaneUnit(cur_plane_points, "temp", true);
-//		Contour2d points_2d = Point3dToPlpoint2d(plane_unit, cur_plane_points);
-		Polyline3d bdry_lines_2d; IndexGroup indices;
-		LineRansacfromPoints(/*Contour2dTo3d(points_2d)*/cur_plane_points, bdry_lines_2d, indices, distance, minpts, radius);
-// 		Polyline2d bdry_lines_2d_real;
-// 		for (auto & ln : bdry_lines_2d)	{
-// 			bdry_lines_2d_real.push_back(Seg2d(ToVec2d(ln.P0()), ToVec2d(ln.P1())));
-// 		}
-		ccHObject* line_vert = AddSegmentsAsChildVertices(entity, bdry_lines_2d/*Plline2dToLine3d(plane_unit, bdry_lines_2d_real)*/, "RansacLine", ccColor::red);
-		return line_vert;
 	}
+	else if (entity->isA(CC_TYPES::POINT_CLOUD)) {
+		cur_plane_points = GetPointsFromCloud(entity);
+	}
+	Polyline3d bdry_lines_2d; IndexGroup indices;
+	LineRansacfromPoints(cur_plane_points, bdry_lines_2d, indices, distance, minpts, radius);
+
+	ccHObject* line_vert = AddSegmentsAsChildVertices(entity, bdry_lines_2d, "RansacLine", ccColor::red);
+	return line_vert;
 #endif // USE_STOCKER
 	return nullptr;	
 }
@@ -652,8 +651,11 @@ ccHObject*  PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption opt
 // 	frame_opt.CandidateSelection(option.lamda_smooth_term);
 
 	//! post-process
-	Polyline3d frame_loop = frame_opt.GenerateFrame(boundary_to_loop);
-	frame_opt.ShrinkSharpVertex();
+	Polyline3d frame_loop;
+	if (!frame_opt.GenerateFrame(boundary_to_loop, frame_loop)) {
+		std::cout << "cannot derive enclosed polygon" << std::endl;
+	}
+	frame_opt.ShrinkSharpVertex(CC_DEG_TO_RAD*25);
 
 	//! get result
 	Contour3d frame_points;

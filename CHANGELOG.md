@@ -4,6 +4,9 @@ CloudCompare Version History
 v2.10.3 (Zephyrus) - (In progress)
 ----------------------
 
+- Enhancements
+  - Speed up the Fit Sphere tool and point picking in the Registration Align (point pairs picking) tool
+
 - Bug fixes
   - Command line:
     - the 'EXTRACT_VERTICES' option was actually deleting the extracted vertices right after extracting them, causing a crash when trying to access them later :|

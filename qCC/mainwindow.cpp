@@ -11074,7 +11074,7 @@ void MainWindow::doActionBDPrimOutline()
 	progDlg.setAutoClose(false);
 
 	if (progDlg.textCanBeEdited()) {
-		progDlg.setMethodTitle("Frame Optimization");
+		progDlg.setMethodTitle("Calculate plane outline...");
 		char infosBuffer[256];
 		sprintf(infosBuffer, "Processing %d planes.", plane_container.size());
 		progDlg.setInfo(infosBuffer);
@@ -11126,10 +11126,29 @@ void MainWindow::doActionBDPrimPlaneFrame()
 		return;
 	}
 
+	ccProgressDialog progDlg(true, this);
+	progDlg.setAutoClose(false);
+
+	if (progDlg.textCanBeEdited()) {
+		progDlg.setMethodTitle("Frame Optimization");
+		char infosBuffer[256];
+		sprintf(infosBuffer, "Processing %d planes.", plane_container.size());
+		progDlg.setInfo(infosBuffer);
+	}
+	CCLib::NormalizedProgress nprogress(&progDlg, plane_container.size());
+
 	for (auto & planeObj : plane_container) {
 		ccHObject* frame = PlaneFrameOptimization(planeObj, option);
-		addToDB(frame);
+		if (frame) addToDB(frame);
+
+		if (!nprogress.oneStep()) {
+			progDlg.stop();
+			return;
+		}
 	}
+	progDlg.update(100.0f);
+	progDlg.stop();
+
 	refreshAll();
 	UpdateUI();
 }
@@ -11205,9 +11224,33 @@ void MainWindow::doActionBDPrimShrinkPlane()
 	else
 		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 
+	if (plane_container.empty()) {
+		dispToConsole("[BDRecon] Please select (group of) planes", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	ccProgressDialog progDlg(true, this);
+	progDlg.setAutoClose(false);
+
+	if (progDlg.textCanBeEdited()) {
+		progDlg.setMethodTitle("Frame Optimization");
+		char infosBuffer[256];
+		sprintf(infosBuffer, "Processing %d planes.", plane_container.size());
+		progDlg.setInfo(infosBuffer);
+	}
+	CCLib::NormalizedProgress nprogress(&progDlg, plane_container.size());
+
 	for (auto & planeObj : plane_container) {
 		ShrinkPlaneToOutline(planeObj, s_last_shrink_alpha, s_last_shrink_distance, this);
+
+		if (!nprogress.oneStep()) {
+			progDlg.stop();
+			return;
+		}
 	}
+	progDlg.update(100.0f);
+	progDlg.stop();
+
 	refreshAll();
 	UpdateUI();
 }

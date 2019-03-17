@@ -492,6 +492,7 @@ ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha)
 // 	return line_vert;
 #endif // USE_STOCKER
 }
+
 #include "vcg/space/intersection2.h"
 void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_epsilon, MainWindow* win)
 {
@@ -527,9 +528,12 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 	}
 	PlaneUnit plane_unit_inside = FormPlaneUnit(inside_points, "temp", true);
 	CCLib::ReferenceCloud remained(cloud);
+	Contour3d cur_plane_points_remained;
 	for (size_t i = 0; i < inside_index.size(); i++) {
-		if (plane_unit_inside.IsInPlane(parse_xyz(*cloud->getPoint(i)), distance_epsilon)) {
+		Vec3d st_pt = parse_xyz(*cloud->getPoint(i));
+		if (plane_unit_inside.IsInPlane(st_pt, distance_epsilon)) {
 			remained.addPointIndex(i);
+			cur_plane_points_remained.push_back(st_pt);
 		}
 	}
 	ccPointCloud* newCloud = cloud->partialClone(&remained);
@@ -548,9 +552,11 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 
 	win->removeFromDB(cloud);
 
-	vector<vector<stocker::Contour3d>> contours_points_remained;
-	contours_points_remained.push_back(contours_points.front());
-	ccHObject* outlines_add = AddOutlinesAsChild(contours_points_remained,BDDB_OUTLINE_PREFIX, newCloud);
+	vector<vector<stocker::Contour3d>> contours_points_remained = stocker::GetPlanePointsOutline(cur_plane_points_remained, alpha, false, 2);
+	do {
+		contours_points_remained.pop_back();
+	} while (contours_points_remained.size() > 1);
+	ccHObject* outlines_add = AddOutlinesAsChild(contours_points_remained, BDDB_OUTLINE_PREFIX, newCloud);
 	win->addToDB(outlines_add);
 //	win->db()->removeElement(cloud);
 	

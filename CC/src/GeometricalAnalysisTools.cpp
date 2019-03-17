@@ -903,10 +903,13 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 			PointCoordinateType error = (*cloud->getPoint(i) - thisCenter).norm() - thisRadius;
 			values[i] = error*error;
 		}
-		std::sort(values.begin(), values.end());
+		
+		const unsigned int	medianIndex = n / 2;
+
+		std::nth_element(values.begin(), values.begin() + medianIndex, values.end());
 
 		//the error is the median of the squared residuals
-		double error = values[n / 2];
+		double error = static_cast<double>(values[medianIndex]);
 
 		//we keep track of the solution with the least error
 		if (error < minError || minError < 0.0)

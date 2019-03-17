@@ -1,4 +1,4 @@
 
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/GL )
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/IO )
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/Standard )
+add_subdirectory( GL )
+add_subdirectory( IO )
+add_subdirectory( Standard )

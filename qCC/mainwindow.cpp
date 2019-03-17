@@ -11084,8 +11084,9 @@ void MainWindow::doActionBDPrimPlaneFrame()
 	option.lamda_coverage = 0.5;
 	option.lamda_sharpness = 0.5;
 	option.lamda_smooth_term = 10;
-	option.bdransac_epsilon = 1;
-	option.line_ptmin = 30;
+	option.bdransac_epsilon = 0.5;
+	option.line_ptmin = 10;
+	option.bdransac_radius = 3;
 
 	ccHObject *entity = getSelectedEntities().front();
 	ccHObject::Container plane_container;

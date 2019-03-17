@@ -60,11 +60,11 @@ public:
 	inline ScalarType getPointScalarValue(unsigned pointIndex) const override { assert(m_theAssociatedCloud && pointIndex < size()); return m_theAssociatedCloud->getPointScalarValue(m_theIndexes[pointIndex]); }
 
 	//**** inherited form GenericIndexedCloud ****//
-	inline const CCVector3* getPoint(unsigned index) override { assert(m_theAssociatedCloud && index < size()); return m_theAssociatedCloud->getPoint(m_theIndexes[index]); }
+	inline const CCVector3* getPoint(unsigned index) const override { assert(m_theAssociatedCloud && index < size()); return m_theAssociatedCloud->getPoint(m_theIndexes[index]); }
 	inline void getPoint(unsigned index, CCVector3& P) const override { assert(m_theAssociatedCloud && index < size()); m_theAssociatedCloud->getPoint(m_theIndexes[index], P); }
 
 	//**** inherited form GenericIndexedCloudPersist ****//
-	inline const CCVector3* getPointPersistentPtr(unsigned index) override { assert(m_theAssociatedCloud && index < size()); return m_theAssociatedCloud->getPointPersistentPtr(m_theIndexes[index]); }
+	inline const CCVector3* getPointPersistentPtr(unsigned index) const override { assert(m_theAssociatedCloud && index < size()); return m_theAssociatedCloud->getPointPersistentPtr(m_theIndexes[index]); }
 
 	//! Returns global index (i.e. relative to the associated cloud) of a given element
 	/** \param localIndex local index (i.e. relative to the internal index container)

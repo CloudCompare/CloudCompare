@@ -459,6 +459,8 @@ private slots:
 	void doActionBDPrimOutline();
 	/// Plane Frame - generate plane frames by optimization
 	void doActionBDPrimPlaneFrame();
+	/// Merge Selected Planes
+	void doActionBDPrimMergePlane();
 	/// Create Ground Plane
 	void doActionBDPrimCreateGround();
 	/// Shrink plane to outline - remove points outside the alpha shape

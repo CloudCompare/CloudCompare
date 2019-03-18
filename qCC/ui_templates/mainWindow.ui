@@ -506,16 +506,16 @@
      <property name="title">
       <string>Planar Primitive</string>
      </property>
-     <addaction name="actionBDPrimAssignSharpLines"/>
      <addaction name="actionBDPrimPlaneFromSharp"/>
      <addaction name="actionBDPrimCreateGround"/>
      <addaction name="actionBDPrimShrinkPlane"/>
-     <addaction name="actionBDPrimPlaneFrame"/>
+     <addaction name="actionBDPrimMergePlane"/>
     </widget>
     <widget class="QMenu" name="menuLine_Primitive">
      <property name="title">
       <string>Line Primitive</string>
      </property>
+     <addaction name="actionBDPrimAssignSharpLines"/>
      <addaction name="actionBDPrimIntersections"/>
      <addaction name="actionBDPrimOutline"/>
      <addaction name="actionBDPrimBoundary"/>
@@ -526,6 +526,7 @@
     <addaction name="separator"/>
     <addaction name="actionBDImage_Lines"/>
     <addaction name="menuLine_Primitive"/>
+    <addaction name="actionBDPrimPlaneFrame"/>
     <addaction name="separator"/>
     <addaction name="menuPrimitive"/>
     <addaction name="actionBDPlane_Deduction"/>
@@ -3106,6 +3107,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="shortcut">
     <string>Ctrl+Tab</string>
+   </property>
+  </action>
+  <action name="actionBDPrimMergePlane">
+   <property name="text">
+    <string>Merge Planes</string>
    </property>
   </action>
  </widget>

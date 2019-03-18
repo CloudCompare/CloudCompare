@@ -768,6 +768,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPrimBoundary,				&QAction::triggered, this, &MainWindow::doActionBDPrimBoundary);
 	connect(m_UI->actionBDPrimOutline,				&QAction::triggered, this, &MainWindow::doActionBDPrimOutline);
 	connect(m_UI->actionBDPrimPlaneFrame,			&QAction::triggered, this, &MainWindow::doActionBDPrimPlaneFrame);
+	connect(m_UI->actionBDPrimMergePlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimMergePlane);
 	connect(m_UI->actionBDPrimCreateGround,			&QAction::triggered, this, &MainWindow::doActionBDPrimCreateGround);
 	connect(m_UI->actionBDPrimShrinkPlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimShrinkPlane);
 	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);
@@ -11194,6 +11195,67 @@ void MainWindow::doActionBDPrimPlaneFrame()
 	UpdateUI();
 }
 
+void MainWindow::doActionBDPrimMergePlane()
+{
+	if (m_selectedEntities.size() < 2) {
+		dispToConsole("[BDRecon] Merge Plane - please select at least two planes", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	ccPointCloud* point_cloud = new ccPointCloud("Plane");
+	ccColor::Rgb col = ccColor::Generator::Random();
+
+	bool same_parent = true;
+	int valid_ent(0);
+	for (auto & ent_pc : m_selectedEntities) {
+		if (!ent_pc->isA(CC_TYPES::PLANE)) continue;
+		
+		if (ent_pc->getParent()->getParent() != m_selectedEntities.front()->getParent()->getParent())	{
+			same_parent = false;
+		}
+		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent_pc->getParent());
+		if (!pc) {
+			continue;
+		}
+		*point_cloud += pc;
+		if (pc->hasColors()) {
+			col = pc->getPointColor(0);
+		}
+		pc->setName(pc->getName() + "-del");
+		pc->getParent()->setEnabled(false);
+		valid_ent++;
+	}
+	if (valid_ent < 2) {
+		dispToConsole("[BDRecon] Merge Plane - please select at least two planes", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	point_cloud->setRGBColor(col);
+	point_cloud->showColors(true);
+	point_cloud->setDisplay(m_selectedEntities[0]->getDisplay());
+	FitPlaneAndAddChild(point_cloud);
+	if (same_parent) {
+		ccHObject* parent = m_selectedEntities[0]->getParent()->getParent();
+		parent->addChild(point_cloud);
+		set<int> plane_numbers;
+		ccHObject::Container plane_children;
+		parent->filterChildren(plane_children, true, CC_TYPES::PLANE, true);
+		for (auto & ent_pl : plane_children) {
+			QString name = ent_pl->getParent()->getName();
+			if (name.startsWith(BDDB_PLANESEG_PREFIX) && name.length() > QString(BDDB_PLANESEG_PREFIX).length()) {
+				QString number = name.mid(QString(BDDB_PLANESEG_PREFIX).length(), name.length());
+				plane_numbers.insert(number.toInt());
+			}
+		}
+		if (!plane_numbers.empty())	{
+			int biggest = *plane_numbers.rbegin();
+			point_cloud->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
+		}
+	}
+	
+	addToDB(point_cloud);
+	refreshAll();
+	UpdateUI();
+}
+
 void MainWindow::doActionBDPrimCreateGround()
 {
 	bool ok = true;
@@ -11245,6 +11307,8 @@ void MainWindow::doActionBDPrimCreateGround()
 		plane->prepareDisplayForRefresh_recursive();
 	}
 	addToDB(plane_cloud);
+	refreshAll();
+	UpdateUI();
 }
 
 static double s_last_shrink_alpha = 2.0;
@@ -11466,6 +11530,10 @@ void MainWindow::doActionBDPlaneDeduction()
 	refreshAll();
 }
 
+//! generate hypothesis
+
+//! face selection
+
 static double s_last_polyfit_datafit = 0.4;
 static double s_last_polyfit_coverage = 0.4;
 static double s_last_polyfit_complexity = 0.2;
@@ -11488,6 +11556,13 @@ void MainWindow::doActionBDPolyFit()
 
 	stocker::PolyFitRecon polyfit_recon;
 	ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+
+	for (auto & planeObj : plane_container) {
+
+	}
+
+
+
 	stocker::PrimitiveProj prim_proj;
 	{
 		vector<vcg::Plane3d> planes;

@@ -11,36 +11,32 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                        COPYRIGHT: CNRS / OSUR                          #
+//#                       COPYRIGHT: SAGE INGENIERIE                       #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_SIMPLE_BIN_FILTER_HEADER
-#define CC_SIMPLE_BIN_FILTER_HEADER
+#ifndef CC_HEIGHT_PROFILE_HEADER
+#define CC_HEIGHT_PROFILE_HEADER
 
 #include "FileIOFilter.h"
 
-//! Simple binary file (with attached text meta-file)
-class QCC_IO_LIB_API SimpleBinFilter : public FileIOFilter
+//! Polyline height profile I/O filter
+/** This file format contains a 2D series: (curvilinear absisca ; height)
+**/
+class QCC_IO_LIB_API HeightProfileFilter : public FileIOFilter
 {
 public:
-
 	//static accessors
-	static inline QString GetFileFilter() { return "Simple binary file (*.sbf)"; }
-	static inline QString GetDefaultExtension() { return "sbf"; }
+	static inline QString GetFileFilter() { return "Height profile (*.csv)"; }
+	static inline QString GetDefaultExtension() { return QString(); }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual bool exportSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
-
-protected:
-
+	bool exportSupported() const override { return true; }
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
+	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
+	QString getDefaultExtension() const override { return GetDefaultExtension(); }
+	bool canLoadExtension(const QString& upperCaseExt) const override { Q_UNUSED( upperCaseExt ); return false; }
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 };
 
-#endif //CC_SIMPLE_BIN_FILTER_HEADER
+#endif //CC_HEIGHT_PROFILE_HEADER

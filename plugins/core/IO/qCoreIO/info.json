@@ -1,0 +1,6 @@
+{
+	"type" : "I/O",
+	"core" : true,
+	"name" : "Core I/O",
+	"description": "Allows reading & writing of many file formats."
+}

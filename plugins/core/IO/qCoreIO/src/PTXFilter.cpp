@@ -18,17 +18,17 @@
 #include "PTXFilter.h"
 
 //qCC_db
-#include <ccLog.h>
-#include <ccPointCloud.h>
-#include <ccScalarField.h>
 #include <ccColorScalesManager.h>
-#include <ccProgressDialog.h>
 #include <ccGBLSensor.h>
 #include <ccGriddedTools.h>
+#include <ccLog.h>
+#include <ccPointCloud.h>
+#include <ccProgressDialog.h>
+#include <ccScalarField.h>
 
 //Qt
-#include <QTextStream>
 #include <QMessageBox>
+#include <QTextStream>
 
 //System
 #include <cassert>
@@ -43,11 +43,14 @@ bool PTXFilter::canLoadExtension(const QString& upperCaseExt) const
 
 bool PTXFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
+	Q_UNUSED( multiple );
+	Q_UNUSED( exclusive );
+	
 	//not supported yet
 	return false;
 }
 
-void CleanMatrix(ccGLMatrixd& mat)
+static void CleanMatrix(ccGLMatrixd& mat)
 {
 	//make the transform a little bit cleaner (necessary as it's read from ASCII!)
 	{
@@ -462,7 +465,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 				cloud->setCurrentDisplayedScalarField(intensitySFIndex);
 			}
 
-			ccGBLSensor* sensor = 0;
+			ccGBLSensor* sensor = nullptr;
 			if (hasIndexGrid && result != CC_FERR_CANCELED_BY_USER)
 			{
 				//determine best sensor parameters (mainly yaw and pitch steps)

@@ -32,9 +32,8 @@ using namespace PdmsTools;
 class PdmsLexer
 {
 public:
-	
 	PdmsLexer();
-	virtual ~PdmsLexer() {}
+	virtual ~PdmsLexer() = default;
 
 	virtual bool initializeSession();
 	bool gotoNextToken();
@@ -52,7 +51,6 @@ public:
 	void setLoadedObject(PdmsObjects::GenericItem *o) {loadedObject = o;}
 	
 protected:
-
 	/** \warning Never pass a 'constant initializer' by reference
 	**/
 	static const int c_max_buff_size = 2048;
@@ -84,15 +82,16 @@ protected:
 
 public:
 	PdmsFileSession(const std::string &filename);
-	virtual ~PdmsFileSession() {closeSession();}
-	virtual bool initializeSession() override;
-	virtual void closeSession(bool destroyLoadedObject=false) override;
-	virtual void printWarning(const char* str) override;
+	~PdmsFileSession() override { closeSession(); }
+	bool initializeSession() override;
+	void closeSession(bool destroyLoadedObject=false) override;
+	void printWarning(const char* str) override;
+
 protected:
-	virtual void parseCurrentToken() override;
-	virtual bool moveForward() override;
-	virtual void skipComment() override;
-	virtual void skipHandleCommand() override;
+	void parseCurrentToken() override;
+	bool moveForward() override;
+	void skipComment() override;
+	void skipHandleCommand() override;
 };
 
 //PDMS Parser
@@ -116,7 +115,6 @@ public:
 	PdmsObjects::GenericItem *getLoadedObject(bool forgetIt = true);
 
 protected:
-
 	bool processCurrentToken();
 
 	PdmsLexer *session;

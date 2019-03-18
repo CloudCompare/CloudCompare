@@ -53,11 +53,9 @@ enum CC_FILE_ERROR {CC_FERR_NO_ERROR,
 **/
 class FileIOFilter
 {
-public: //initialization
-
-	//! Destructor
-	virtual ~FileIOFilter() {}
-
+public:
+	virtual ~FileIOFilter() = default;
+	
 	//! Generic loading parameters
 	struct LoadParameters
 	{
@@ -72,7 +70,7 @@ public: //initialization
 			, parentWidget(nullptr)
 			, sessionStart(true)
 		{}
-
+		
 		//! How to handle big coordinates
 		ccGlobalShiftManager::Mode shiftHandlingMode;
 		//! Wether to always display a dialog (if any), even if automatic guess is possible
@@ -90,7 +88,7 @@ public: //initialization
 		//! Session start (whether the load action is the first of a session)
 		bool sessionStart;
 	};
-
+	
 	//! Generic saving parameters
 	struct SaveParameters
 	{
@@ -99,21 +97,21 @@ public: //initialization
 			: alwaysDisplaySaveDialog(true)
 			, parentWidget(nullptr)
 		{}
-
+		
 		//! Wether to always display a dialog (if any), even if automatic guess is possible
 		bool alwaysDisplaySaveDialog;
 		//! Parent widget (if any)
 		QWidget* parentWidget;
 	};
-
+	
 	//! Shared type
-	typedef QSharedPointer<FileIOFilter> Shared;
-
+	using Shared = QSharedPointer<FileIOFilter>;
+	
 public: //public interface (to be reimplemented by each I/O filter)
-
+	
 	//! Returns whether this I/O filter can import files
 	virtual bool importSupported() const { return false; }
-
+	
 	//! Loads one or more entities from a file
 	/** This method must be implemented by children classes.
 		\param filename file to load
@@ -125,12 +123,16 @@ public: //public interface (to be reimplemented by each I/O filter)
 									ccHObject& container,
 									LoadParameters& parameters)
 	{
-		 return CC_FERR_NOT_IMPLEMENTED;
+		Q_UNUSED( filename );
+		Q_UNUSED( container );
+		Q_UNUSED( parameters );
+		
+		return CC_FERR_NOT_IMPLEMENTED;
 	}
-
+	
 	//! Returns whether this I/O filter can export files
 	virtual bool exportSupported() const { return false; }
-
+	
 	//! Saves an entity (or a group of) to a file
 	/** This method must be implemented by children classes.
 		\param entity entity (or group of) to save
@@ -142,31 +144,29 @@ public: //public interface (to be reimplemented by each I/O filter)
 										const QString& filename,
 										const SaveParameters& parameters)
 	{
-		 return CC_FERR_NOT_IMPLEMENTED;
+		Q_UNUSED( entity );
+		Q_UNUSED( filename );
+		Q_UNUSED( parameters );
+		
+		return CC_FERR_NOT_IMPLEMENTED;
 	}
-
+	
 	//! Returns the file filter(s) for this I/O filter
 	/** E.g. 'ASCII file (*.asc)'
 		\param onImport whether the requested filters are for import or export
 		\return list of filters
 	**/
 	virtual QStringList getFileFilters(bool onImport) const = 0;
-
+	
 	//! Returns the default file extension
 	virtual QString getDefaultExtension() const = 0;
-
-	//! Returns whether a specific file can be loaded by this filter
-	/** Used when a file is dragged over the application window for instance.
-		Should remain simple (guess based on the file extension, etc.)
-	**/
-	//virtual bool canLoad(QString filename) const = 0;
-
+	
 	//! Returns whether a specific extension can be loaded by this filter
 	/** \param upperCaseExt upper case extension
 		\return whether the extension is (theoretically) handled by this filter
 	**/
 	virtual bool canLoadExtension(const QString& upperCaseExt) const = 0;
-
+	
 	//! Returns whether this I/O filter can save the specified type of entity
 	/** \param type entity type
 		\param multiple whether the filter can save multiple instances of this entity at once
@@ -174,9 +174,9 @@ public: //public interface (to be reimplemented by each I/O filter)
 		\return whether the entity type can be saved
 	**/
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const = 0;
-
+	
 public: //static methods
-
+	
 	//! Loads one or more entities from a file with a known filter
 	/** Shortcut to FileIOFilter::loadFile
 		\param filename filename
@@ -189,7 +189,7 @@ public: //static methods
 													LoadParameters& parameters,
 													Shared filter,
 													CC_FILE_ERROR& result);
-
+	
 	//! Loads one or more entities from a file with known type
 	/** Shortcut to the other version of FileIOFilter::LoadFromFile
 		\param filename filename
@@ -201,8 +201,8 @@ public: //static methods
 	QCC_IO_LIB_API static ccHObject* LoadFromFile(	const QString& filename,
 													LoadParameters& parameters,
 													CC_FILE_ERROR& result,
-													QString fileFilter = QString());
-
+													const QString& fileFilter = QString());
+	
 	//! Saves an entity (or a group of) to a specific file thanks to a given filter
 	/** Shortcut to FileIOFilter::saveFile
 		\param entities entity to save (can be a group of other entities)
@@ -215,7 +215,7 @@ public: //static methods
 													const QString& filename,
 													const SaveParameters& parameters,
 													Shared filter);
-
+	
 	//! Saves an entity (or a group of) to a specific file thanks to a given filter
 	/** Shortcut to the other version of FileIOFilter::SaveToFile
 		\param entities entity to save (can be a group of other entities)
@@ -228,7 +228,7 @@ public: //static methods
 													const QString& filename,
 													const SaveParameters& parameters,
 													const QString& fileFilter);
-
+	
 	//! Shortcut to the ccGlobalShiftManager mechanism specific for files
 	/** \param[in] P sample point (typically the first loaded)
 		\param[out] Pshift global shift
@@ -242,58 +242,57 @@ public: //static methods
 													bool& preserveCoordinateShift,
 													LoadParameters& loadParameters,
 													bool useInputCoordinatesShiftIfPossible = false);
-
+	
 	//! Displays (to console) the message corresponding to a given error code
 	/** \param err error code
 		\param action "saving", "reading", etc.
 		\param filename corresponding file
 	**/
 	QCC_IO_LIB_API static void DisplayErrorMessage(CC_FILE_ERROR err,
-									const QString& action,
-									const QString& filename);
-
+												   const QString& action,
+												   const QString& filename);
+	
 	//! Returns whether special characters are present in the input string
 	QCC_IO_LIB_API static bool CheckForSpecialChars(const QString& filename);
-
+	
 public: //loading "sessions" management
-
+	
 	//! Indicates to the I/O filters that a new loading/saving session has started (for "Apply all" buttons for instance)
 	QCC_IO_LIB_API static void ResetSesionCounter();
-
+	
 	//! Indicates to the I/O filters that a new loading/saving action has started
 	/** \return the updated session counter
 	**/
 	QCC_IO_LIB_API static unsigned IncreaseSesionCounter();
-
+	
 public: //global filters registration mechanism
-
+	
 	//! Init internal filters (should be called once)
 	QCC_IO_LIB_API static void InitInternalFilters();
-
+	
 	//! Registers a new filter
 	QCC_IO_LIB_API static void Register(Shared filter);
-
+	
 	//! Returns the filter corresponding to the given 'file filter'
 	QCC_IO_LIB_API static Shared GetFilter(const QString& fileFilter, bool onImport);
-
+	
 	//! Returns the best filter (presumably) to open a given file extension
 	QCC_IO_LIB_API static Shared FindBestFilterForExtension(const QString& ext);
-
+	
 	//! Type of a I/O filters container
-	typedef std::vector< FileIOFilter::Shared > FilterContainer;
-
+	using FilterContainer = std::vector<FileIOFilter::Shared>;
+	
 	//! Returns the set of all registered filters
 	QCC_IO_LIB_API static const FilterContainer& GetFilters();
-
+	
 	//! Unregisters all filters
 	/** Should be called at the end of the application
 	**/
 	QCC_IO_LIB_API static void UnregisterAll();
-
+	
 	//! Called when the filter is unregistered
 	/** Does nothing by default **/
 	virtual void unregister() {}
-
 };
 
 #endif

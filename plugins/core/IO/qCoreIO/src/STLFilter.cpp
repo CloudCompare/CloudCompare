@@ -108,7 +108,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidg
 	unsigned faceCount = mesh->size();
 
 	//progress
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parentWidget));
@@ -200,7 +200,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 	unsigned faceCount = mesh->size();
 
 	//progress
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parentWidget));
@@ -438,7 +438,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 			const int razValue = -1;
 			equivalentIndexes.resize(vertCount, razValue);
 			
-			QScopedPointer<ccProgressDialog> pDlg(0);
+			QScopedPointer<ccProgressDialog> pDlg(nullptr);
 			if (parameters.parentWidget)
 			{
 				pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -513,7 +513,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 							{
 								ccLog::Warning("[STL] After vertex fusion, all triangles would collapse! We'll keep the non-fused version...");
 								delete newVertices;
-								newVertices = 0;
+								newVertices = nullptr;
 							}
 							else
 							{
@@ -612,7 +612,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 	mesh->setName(name);
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -831,7 +831,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 					{
 						ccLog::Warning("[STL] Not enough memory: can't store normals!");
 						mesh->removePerTriangleNormalIndexes();
-						mesh->setTriNormsTable(0);
+						mesh->setTriNormsTable(nullptr);
 						normals->release();
 						normals = nullptr;
 					}
@@ -935,11 +935,11 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	{
 		ccLog::Warning("[STL] Not enough memory: can't store normals!");
 		mesh->removePerTriangleNormalIndexes();
-		mesh->setTriNormsTable(0);
+		mesh->setTriNormsTable(nullptr);
 	}
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -1062,4 +1062,3 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 
 	return CC_FERR_NO_ERROR;
 }
-

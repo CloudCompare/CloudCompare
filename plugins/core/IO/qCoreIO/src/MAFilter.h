@@ -15,32 +15,26 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_PDMS_FILTER_HEADER
-#define CC_PDMS_FILTER_HEADER
+#ifndef CC_MA_FILTER_HEADER
+#define CC_MA_FILTER_HEADER
 
-#ifdef CC_PDMS_SUPPORT
+#include "FileIOFilter.h"
 
-#include "../FileIOFilter.h"
-
-//! PDMS .mac file I/O filter
-class QCC_IO_LIB_API PDMSFilter : public FileIOFilter
+//! Maya ASCII meshes file I/O filter
+class QCC_IO_LIB_API MAFilter : public FileIOFilter
 {
 public:
-
 	//static accessors
-	static inline QString GetFileFilter() { return "PDMS primitives (*.pdms *.pdmsmac *.mac)"; }
-	static inline QString GetDefaultExtension() { return "pdms"; }
+	static inline QString GetFileFilter() { return "Maya ASCII mesh (*.ma)"; }
+	static inline QString GetDefaultExtension() { return "ma"; }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
-
+	bool exportSupported() const override { return true; }
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
+	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
+	QString getDefaultExtension() const override { return GetDefaultExtension(); }
+	bool canLoadExtension(const QString& upperCaseExt) const override;
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 };
 
-#endif //CC_PDMS_SUPPORT
-
-#endif //CC_PDMS_FILTER_HEADER
+#endif //CC_MA_FILTER_HEADER

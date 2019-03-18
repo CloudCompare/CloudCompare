@@ -31,9 +31,9 @@
 #include <cassert>
 
 //header: 32 first bytes
-static const size_t c_headerSize = 64;
+constexpr size_t c_headerSize = 64;
 //header flag
-static const quint16 s_headerFlagSBF = (static_cast<quint16>(42) | static_cast<quint16>(42 << 8));
+constexpr quint16 s_headerFlagSBF = (static_cast<quint16>(42) | static_cast<quint16>(42 << 8));
 
 bool SimpleBinFilter::canLoadExtension(const QString& upperCaseExt) const
 {
@@ -182,7 +182,7 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 	unsigned sfCount = cloud->getNumberOfScalarFields();
 	unsigned pointCount = cloud->size();
 
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -245,7 +245,8 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 		assert(false);
 		return CC_FERR_BAD_ARGUMENT;
 	}
-	if (!QFileInfo(filename).exists())
+	
+	if (!QFileInfo::exists(filename))
 	{
 		return CC_FERR_READING;
 	}
@@ -267,7 +268,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 	GlobalDescriptor descriptor;
 
 	//read the text file as an INI file
-	if (QFileInfo(headerFilename).exists())
+	if (QFileInfo::exists(headerFilename))
 	{
 		QSettings headerFile(headerFilename, QSettings::IniFormat);
 
@@ -351,7 +352,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 			{
 				QString key = QString("SF%1").arg(i + 1);
 				QStringList tokens = headerFile.value(key).toStringList();
-				if (tokens.size() > 0)
+				if (!tokens.empty())
 				{
 					descriptor.SFs[i].name = tokens[0];
 					if (tokens.size() > 1)
@@ -471,7 +472,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
 
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -584,9 +585,9 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 	//update scalar fields
 	if (!descriptor.SFs.empty())
 	{
-		for (size_t i = 0; i < descriptor.SFs.size(); ++i)
+		for (auto & SF : descriptor.SFs)
 		{
-			descriptor.SFs[i].sf->computeMinAndMax();
+			SF.sf->computeMinAndMax();
 		}
 		cloud->setCurrentDisplayedScalarField(0);
 		cloud->showSF(true);

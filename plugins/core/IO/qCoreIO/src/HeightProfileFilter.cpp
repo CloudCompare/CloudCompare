@@ -37,6 +37,8 @@ bool HeightProfileFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& excl
 
 CC_FILE_ERROR HeightProfileFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
+	Q_UNUSED( parameters )
+	
 	if (!entity || filename.isEmpty())
 	{
 		return CC_FERR_BAD_ARGUMENT;
@@ -70,7 +72,7 @@ CC_FILE_ERROR HeightProfileFilter::saveToFile(ccHObject* entity, const QString& 
 
 	//curvilinear abscissa
 	double s = 0;
-	const CCVector3* lastP = 0;
+	const CCVector3* lastP = nullptr;
 	for (unsigned j = 0; j < vertCount; ++j)
 	{
 		const CCVector3* P = poly->getPoint(j);

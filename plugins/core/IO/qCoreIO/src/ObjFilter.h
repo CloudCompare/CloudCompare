@@ -1,6 +1,3 @@
-#ifndef FILEIO_H
-#define FILEIO_H
-
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,31 +11,32 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#include <QString>
+#ifndef CC_OBJ_FILTER_HEADER
+#define CC_OBJ_FILTER_HEADER
 
-#include "qCC_io.h"
+#include "FileIOFilter.h"
 
-class FileIO
+//! Wavefront meshes file I/O filter
+class QCC_IO_LIB_API ObjFilter : public FileIOFilter
 {
 public:
-	FileIO() = delete;
-	
-	QCC_IO_LIB_API static void setWriterInfo( const QString &applicationName, const QString &version );
-	QCC_IO_LIB_API static QString writerInfo();
-	
-	QCC_IO_LIB_API static QString applicationName();
-	QCC_IO_LIB_API static QString version();
-	
-	QCC_IO_LIB_API static QString createdBy();
-	QCC_IO_LIB_API static QString createdDateTime();
-	
-private:
-	static QString s_applicationName;
-	static QString s_version;
-	static QString s_writerInfo;
+	//static accessors
+	static inline QString GetFileFilter() { return "OBJ mesh (*.obj)"; }
+	static inline QString GetDefaultExtension() { return "obj"; }
+
+	//inherited from FileIOFilter
+	bool importSupported() const override { return true; }
+	bool exportSupported() const override { return true; }
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
+	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
+	QString getDefaultExtension() const override { return GetDefaultExtension(); }
+	bool canLoadExtension(const QString& upperCaseExt) const override;
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 };
-#endif
+
+#endif //CC_OBJ_FILTER_HEADER

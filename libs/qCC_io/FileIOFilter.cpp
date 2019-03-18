@@ -17,30 +17,20 @@
 
 #include "FileIOFilter.h"
 
-//file wrappers
 //CLOUDS
 #include "AsciiFilter.h"
 #include "BinFilter.h"
 #include "E57Filter.h"
 #include "LASFilter.h"
-#include "PTXFilter.h"
-#include "SimpleBinFilter.h"
-#include "STLFilter.h"
-#include "VTKFilter.h"
+
 //MESHES
 #include "FBXFilter.h"
-#include "MAFilter.h"
-#include "ObjFilter.h"
-#include "OFFFilter.h"
 #include "PlyFilter.h"
-//CAD
-#include "PDMS/PDMSFilter.h"
+
 //OTHERS
 #include "DepthMapFileFilter.h"
 #include "DxfFilter.h"
-#include "HeightProfileFilter.h"
 #include "ImageFileFilter.h"
-#include "MascaretFilter.h"
 #include "RasterGridFilter.h"
 #include "ShpFilter.h"
 
@@ -85,13 +75,8 @@ void FileIOFilter::InitInternalFilters()
 #ifdef CC_E57_SUPPORT
 	Register(Shared(new E57Filter()));
 #endif
-	Register(Shared(new PTXFilter()));
-	Register(Shared(new SimpleBinFilter()));
 	Register(Shared(new PlyFilter()));
-	Register(Shared(new ObjFilter()));
-	Register(Shared(new VTKFilter()));
-	Register(Shared(new STLFilter()));
-	Register(Shared(new OFFFilter()));
+
 #ifdef CC_FBX_SUPPORT
 	Register(Shared(new FBXFilter()));
 #endif
@@ -101,17 +86,11 @@ void FileIOFilter::InitInternalFilters()
 #ifdef CC_SHP_SUPPORT
 	Register(Shared(new ShpFilter()));
 #endif
-#ifdef CC_PDMS_SUPPORT
-	Register(Shared(new PDMSFilter()));
-#endif
 #ifdef CC_GDAL_SUPPORT
 	Register(Shared(new RasterGridFilter()));
 #endif
 	Register(Shared(new ImageFileFilter()));
-	Register(Shared(new MAFilter()));
 	Register(Shared(new DepthMapFileFilter()));
-	Register(Shared(new MascaretFilter()));
-	Register(Shared(new HeightProfileFilter()));
 }
 
 void FileIOFilter::Register(Shared filter)
@@ -153,16 +132,16 @@ void FileIOFilter::Register(Shared filter)
 			return;
 	}
 
-	//insert filter
 	s_ioFilters.push_back(filter);
 }
 
 void FileIOFilter::UnregisterAll()
 {
-	for (FilterContainer::iterator it=s_ioFilters.begin(); it!=s_ioFilters.end(); ++it)
+	for (auto & filter : s_ioFilters)
 	{
-		(*it)->unregister();
+		filter->unregister();
 	}
+	
 	s_ioFilters.clear();
 }
 
@@ -293,7 +272,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 										LoadParameters& loadParameters,
 										CC_FILE_ERROR& result,
-										QString fileFilter/*=QString()*/)
+										const QString& fileFilter )
 {
 	Shared filter(nullptr);
 	

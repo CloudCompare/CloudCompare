@@ -11,32 +11,47 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_MA_FILTER_HEADER
-#define CC_MA_FILTER_HEADER
+#include "qCoreIO.h"
 
-#include "FileIOFilter.h"
+#include "HeightProfileFilter.h"
+#include "MAFilter.h"
+#include "MascaretFilter.h"
+#include "ObjFilter.h"
+#include "OFFFilter.h"
+#include "PDMSFilter.h"
+#include "PTXFilter.h"
+#include "SimpleBinFilter.h"
+#include "STLFilter.h"
+#include "VTKFilter.h"
 
-//! Maya ASCII meshes file I/O filter
-class QCC_IO_LIB_API MAFilter : public FileIOFilter
+
+qCoreIO::qCoreIO( QObject *parent ) :
+	QObject( parent ),
+	ccIOFilterPluginInterface( ":/CC/plugin/CoreIO/info.json" )
 {
-public:
+}
 
-	//static accessors
-	static inline QString GetFileFilter() { return "Maya ASCII mesh (*.ma)"; }
-	static inline QString GetDefaultExtension() { return "ma"; }
+void qCoreIO::registerCommands( ccCommandLineInterface *inCmdLine )
+{
+	Q_UNUSED( inCmdLine );
+}
 
-	//inherited from FileIOFilter
-	virtual bool exportSupported() const override { return true; }
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
-
-};
-
-#endif //CC_MA_FILTER_HEADER
+QVector<FileIOFilter::Shared> qCoreIO::getFilters()
+{
+	return QVector<FileIOFilter::Shared>{
+		FileIOFilter::Shared( new PTXFilter ),
+		FileIOFilter::Shared( new SimpleBinFilter ),
+		FileIOFilter::Shared( new ObjFilter ),
+		FileIOFilter::Shared( new VTKFilter ),
+		FileIOFilter::Shared( new STLFilter ),
+		FileIOFilter::Shared( new OFFFilter ),
+		FileIOFilter::Shared( new PDMSFilter ),
+		FileIOFilter::Shared( new MAFilter ),
+		FileIOFilter::Shared( new MascaretFilter ),
+		FileIOFilter::Shared( new HeightProfileFilter ),
+	};
+}

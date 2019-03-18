@@ -20,10 +20,10 @@
 #include "PdmsTools.h"
 
 //System
-#include <assert.h>
+#include <cassert>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include <stdlib.h>
-#include <string.h>
 
 //qCC_db
 //#include <ccLog.h>
@@ -38,7 +38,7 @@ using namespace PdmsObjects;
 #define memfail(e,s) memalert(e,s); abort();
 
 /////////// FUNCTIONS ////////////
-#define PDMS_SQR(a) (a*a)
+#define PDMS_SQR(a) ((a)*(a))
 
 /////////// GLOBALS ////////////
 Token DistanceValue::workingUnit = PDMS_MILLIMETRE;
@@ -47,7 +47,7 @@ static GroupElement defaultWorld(PDMS_WORLD);
 ///////////////////////////////
 // ITEM STACK
 ///////////////////////////////
-typedef QSet<PdmsObjects::GenericItem*> ElementsStack;
+using ElementsStack = QSet<PdmsObjects::GenericItem *>;
 static ElementsStack s_elementsStack;
 
 void PdmsObjects::Stack::Init()
@@ -674,7 +674,7 @@ bool ElementCreation::handle(const char*str)
 {
 	if (!elementType)
 		return false;
-	if (path.size() > 0)
+	if (!path.empty())
 		return false;
 	return splitPath(str);
 }
@@ -746,7 +746,7 @@ const char* ElementCreation::GetDefaultElementName(Token token)
 		break;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
@@ -857,7 +857,7 @@ bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 	}
 
 	newElement->creator = newElement->owner;
-	if (path.size())
+	if (!path.empty())
 	{
 		strcpy(newElement->name, path.back().c_str());
 	}
@@ -884,7 +884,7 @@ bool ElementEnding::execute(PdmsObjects::GenericItem* &item) const
 	{
 	case PDMS_OWNER:
 		//If the ending command is PDMS_OWNER, then we simply go back to the item owner
-		result = item ? item->owner : 0;
+		result = item ? item->owner : nullptr;
 		break;
 	case PDMS_END:
 		//Bug realworks : ignore END EXTRU command
@@ -924,7 +924,7 @@ bool ElementCreation::splitPath(const char *str)
 		if (str[i] == '/')
 		{
 			if (i != 0)
-				path.push_back(std::string(str, i));
+				path.emplace_back(str, i);
 			str = &str[i + 1];
 			i = 0;
 		}
@@ -936,9 +936,9 @@ bool ElementCreation::splitPath(const char *str)
 
 	//At the end, we have to create an entry for the last word
 	if (i != 0)
-		path.push_back(std::string(str, i));
+		path.emplace_back(str, i);
 
-	return (path.size() != 0);
+	return (!path.empty());
 }
 
 

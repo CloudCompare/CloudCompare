@@ -15,30 +15,27 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_VTK_FILTER_HEADER
-#define CC_VTK_FILTER_HEADER
+
+#ifndef CC_PTX_FILTER_HEADER
+#define CC_PTX_FILTER_HEADER
 
 #include "FileIOFilter.h"
 
-//! VTK point cloud or mesh I/O filter
-class QCC_IO_LIB_API VTKFilter : public FileIOFilter
+//! PTX point cloud I/O filter
+class QCC_IO_LIB_API PTXFilter : public FileIOFilter
 {
 public:
-
 	//static accessors
-	static inline QString GetFileFilter() { return "VTK cloud or mesh (*.vtk)"; }
-	static inline QString GetDefaultExtension() { return "vtk"; }
+	static inline QString GetFileFilter() { return "PTX cloud (*.ptx)"; }
+	static inline QString GetDefaultExtension() { return "ptx"; }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual bool exportSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
-
+	bool importSupported() const override { return true; }
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
+	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
+	QString getDefaultExtension() const override { return GetDefaultExtension(); }
+	bool canLoadExtension(const QString& upperCaseExt) const override;
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 };
 
-#endif //CC_VTK_FILTER_HEADER
+#endif //CC_PTX_FILTER_HEADER

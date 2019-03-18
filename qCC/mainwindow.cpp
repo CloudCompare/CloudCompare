@@ -611,6 +611,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionMatchBBCenters,				&QAction::triggered, this, &MainWindow::doActionMatchBBCenters);
 	connect(m_UI->actionMatchScales,				&QAction::triggered, this, &MainWindow::doActionMatchScales);
 	connect(m_UI->actionDelete,						&QAction::triggered,	m_ccRoot,	&ccDBRoot::deleteSelectedEntities);
+	connect(m_UI->actionGotoNext,					&QAction::triggered,	m_ccRoot,	&ccDBRoot::gotoNext);
+	connect(m_UI->actionGotoNextZoom,				&QAction::triggered,	m_ccRoot,	&ccDBRoot::gotoNextZoom);
 
 	//"Tools > Clean" menu
 	connect(m_UI->actionSORFilter,					&QAction::triggered, this, &MainWindow::doActionSORFilter);
@@ -10631,14 +10633,24 @@ BDBaseHObject::Container GetBDBaseProjx(MainWindow* main) {
 }
 
 void MainWindow::doActionBDProjectLoad()
-{		 
+{
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::LoadFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+
 	QString Filename =
 		QFileDialog::getOpenFileName(this,
 			"Open project file",
-			"Project.ini",
+			currentPath,
 			"project (*.ini)");
 
 	if (Filename.isEmpty()) return;
+
+	//save last loading parameters
+	currentPath = QFileInfo(Filename).absolutePath();
+	settings.setValue(ccPS::CurrentPath(), currentPath);
+	settings.endGroup();
 		
 	stocker::BlockProj block_prj; std::string error_info;
 	if (!stocker::LoadProject(Filename.toStdString(), block_prj, error_info)) {

@@ -180,6 +180,8 @@ public:
 	**/
 	void selectEntities(const ccHObject::Container& entities, bool incremental = false);
 
+	void gotoNext();
+	void gotoNextZoom();
 private:
 	//! Entity property that can be toggled
 	enum TOGGLE_PROPERTY {	TG_ENABLE,
@@ -304,6 +306,8 @@ protected:
 	QAction* m_editLabelScalarValue;
 	//! Context menu action: deselect other children
 	QAction* m_deselectOtherChildren;
+	//! goto the next child under the same level
+	QAction* m_gotoNext;
 
 	//! Last context menu pos
 	QPoint m_contextMenuPos;

@@ -488,6 +488,8 @@
     <addaction name="separator"/>
     <addaction name="menuSandBox"/>
     <addaction name="separator"/>
+    <addaction name="actionGotoNext"/>
+    <addaction name="actionGotoNextZoom"/>
    </widget>
    <widget class="QMenu" name="menuBDRecon">
     <property name="title">
@@ -3088,6 +3090,22 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDPlaneSegmentation">
    <property name="text">
     <string>Plane Segmentation</string>
+   </property>
+  </action>
+  <action name="actionGotoNext">
+   <property name="text">
+    <string>Go to Next</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Tab, Ctrl+Tab</string>
+   </property>
+  </action>
+  <action name="actionGotoNextZoom">
+   <property name="text">
+    <string>Go to Next and Zoom</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Tab</string>
    </property>
   </action>
  </widget>

@@ -180,7 +180,6 @@ public:
 	**/
 	void selectEntities(const ccHObject::Container& entities, bool incremental = false);
 
-	void gotoNext();
 	void gotoNextZoom();
 private:
 	//! Entity property that can be toggled

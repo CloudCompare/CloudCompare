@@ -2339,32 +2339,6 @@ void ccDBRoot::deselectOtherChildren()
 	MainWindow::RefreshAllGLWindow(false);
 }
 
-void ccDBRoot::gotoNext()
-{
-	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
-	QModelIndexList selectedIndexes = qism->selectedIndexes();
-	int selCount = selectedIndexes.size();
-	if (selCount != 1)
-		return;
-	ccHObject* item = static_cast<ccHObject*>(selectedIndexes[0].internalPointer());
-	ccHObject* parent = item->getParent();
-	if (!parent || parent->getChildrenNumber() < 2) return;
-
-	int cur_index = parent->getChildIndex(item);
-	if (cur_index + 1>= parent->getChildrenNumber()) return;
-
-	hidePropertiesView();
-	item->setEnabled(false);
-	unselectEntity(item);
-	item->prepareDisplayForRefresh();
-	ccHObject* next_entity = parent->getChild(cur_index + 1);
-	next_entity->setEnabled(true);
-	selectEntity(next_entity);
-	next_entity->prepareDisplayForRefresh();
-	updatePropertiesView();
-	MainWindow::RefreshAllGLWindow(false);
-}
-
 void ccDBRoot::gotoNextZoom()
 {
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
@@ -2377,13 +2351,13 @@ void ccDBRoot::gotoNextZoom()
 	if (!parent || parent->getChildrenNumber() < 2) return;
 
 	int cur_index = parent->getChildIndex(item);
-	if (cur_index + 1 >= parent->getChildrenNumber()) return;
+	int next_index = (cur_index + 1) % parent->getChildrenNumber();
 
 	hidePropertiesView();
 	item->setEnabled(false);
 	unselectEntity(item);
 	item->prepareDisplayForRefresh();
-	ccHObject* next_entity = parent->getChild(cur_index + 1);
+	ccHObject* next_entity = parent->getChild(next_index);
 	next_entity->setEnabled(true);
 	next_entity->setSelected(true);
 	selectEntity(next_entity);

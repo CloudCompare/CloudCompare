@@ -611,7 +611,6 @@ void MainWindow::connectActions()
 	connect(m_UI->actionMatchBBCenters,				&QAction::triggered, this, &MainWindow::doActionMatchBBCenters);
 	connect(m_UI->actionMatchScales,				&QAction::triggered, this, &MainWindow::doActionMatchScales);
 	connect(m_UI->actionDelete,						&QAction::triggered,	m_ccRoot,	&ccDBRoot::deleteSelectedEntities);
-	connect(m_UI->actionGotoNext,					&QAction::triggered,	m_ccRoot,	&ccDBRoot::gotoNext);
 	connect(m_UI->actionGotoNextZoom,				&QAction::triggered,	m_ccRoot,	&ccDBRoot::gotoNextZoom);
 
 	//"Tools > Clean" menu

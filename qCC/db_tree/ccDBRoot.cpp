@@ -2354,14 +2354,14 @@ void ccDBRoot::gotoNextZoom()
 	int next_index = (cur_index + 1) % parent->getChildrenNumber();
 
 	hidePropertiesView();
-	item->setEnabled(false);
-	unselectEntity(item);
-	item->prepareDisplayForRefresh();
-	ccHObject* next_entity = parent->getChild(next_index);
-	next_entity->setEnabled(true);
-	next_entity->setSelected(true);
-	selectEntity(next_entity);
-	next_entity->prepareDisplayForRefresh();
+	ccHObject* next_entity = parent->getChild(next_index);	
+
+	if (item->isEnabled() && !next_entity->isEnabled()) {
+		item->setEnabled(false);
+		next_entity->setEnabled(true);
+	}
+	unselectEntity(item);		item->prepareDisplayForRefresh();
+	selectEntity(next_entity);	next_entity->prepareDisplayForRefresh();
 
 	ccGLWindow* win = static_cast<ccGLWindow*>(item->getDisplay());
 	ccBBox box = next_entity->getDisplayBB_recursive(false, win);

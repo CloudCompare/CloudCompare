@@ -10730,6 +10730,11 @@ void MainWindow::doActionBDPlaneSegmentation()
 	else
 		_container = GetEnabledObjFromGroup(entity, CC_TYPES::POINT_CLOUD);
 
+	if (_container.empty()) {
+		dispToConsole("[BDRecon] Please select (group of) point cloud", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
 	// check have not normals
 	ccHObject::Container normal_container;
 	for (auto & cloudObj : _container) {
@@ -10754,6 +10759,17 @@ void MainWindow::doActionBDPlaneSegmentation()
 	int support_pts = m_pbdrPSDlg->supportPointsSpinBox->value();
 	double distance_eps = m_pbdrPSDlg->DistanceEpsilonDoubleSpinBox->value();
 	double cluster_eps = m_pbdrPSDlg->ClusterEpsilonDoubleSpinBox->value();
+	
+	ccProgressDialog progDlg(true, this);
+	progDlg.setAutoClose(false);
+
+	if (progDlg.textCanBeEdited()) {
+		progDlg.setMethodTitle("Plane Segmentation...");
+		char infosBuffer[256];
+		sprintf(infosBuffer, "Processing %d point clouds.", _container.size());
+		progDlg.setInfo(infosBuffer);
+	}
+	CCLib::NormalizedProgress nprogress(&progDlg, _container.size());
 
 	if (m_pbdrPSDlg->PlaneSegRansacRadioButton->isChecked()) {
 		double normal_dev = cos(m_pbdrPSDlg->maxNormDevAngleSpinBox->value() * CC_DEG_TO_RAD);
@@ -10770,6 +10786,11 @@ void MainWindow::doActionBDPlaneSegmentation()
 				addToDB(seged); 
 				cloudObj->setEnabled(false);
 			}
+
+			if (!nprogress.oneStep()) {
+				progDlg.stop();
+				return;
+			}
 		}
 	}
 	else if (m_pbdrPSDlg->PlaneSegRegionGrowRadioButton->isChecked()) {
@@ -10785,8 +10806,17 @@ void MainWindow::doActionBDPlaneSegmentation()
 				addToDB(seged); 
 				cloudObj->setEnabled(false);
 			}
+
+			if (!nprogress.oneStep()) {
+				progDlg.stop();
+				return;
+			}
 		}
 	}
+
+	progDlg.update(100.0f);
+	progDlg.stop();
+
 	refreshAll();
 	updateUI();
 }

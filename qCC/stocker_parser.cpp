@@ -178,7 +178,6 @@ ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lin
 		cc_polyline->setColor(col);
 		cc_polyline->showColors(true);
 		cc_polyline->setName(name + QString::number(i));
-		cc_polyline->setWidth(1);
 		if (cloud) {
 			cc_polyline->setGlobalShift(cloud->getGlobalShift());
 			cc_polyline->setGlobalScale(cloud->getGlobalScale());
@@ -268,7 +267,15 @@ ccHObject* PlaneSegmentationRgGrow(ccHObject* entity,
 		}
 	}
 
-	ccHObject* group = AddPlanesPointsAsNewGroup(entity->getName() + BDDB_PRIMITIVE_SUFFIX, planes_points);
+	ccHObject* group = AddPlanesPointsAsNewGroup(GetBaseName(entity->getName()) + BDDB_PRIMITIVE_SUFFIX, planes_points);
+	group->setDisplay_recursive(entity->getDisplay());
+	ccHObject::Container group_clouds;
+	group->filterChildren(group_clouds, false, CC_TYPES::POINT_CLOUD, true);
+	for (auto & ent : group_clouds) {
+		ccPointCloud* ent_cld = ccHObjectCaster::ToPointCloud(ent);
+		ent_cld->setGlobalShift(entity_cloud->getGlobalShift());
+		ent_cld->setGlobalScale(entity_cloud->getGlobalScale());
+	}
 	entity->getParent()->addChild(group);
 	return group;
 }
@@ -313,7 +320,15 @@ ccHObject* PlaneSegmentationRansac(ccHObject* entity,
 		}
 	}
 
-	ccHObject* group = AddPlanesPointsAsNewGroup(entity->getName() + BDDB_PRIMITIVE_SUFFIX, planes_points);
+	ccHObject* group = AddPlanesPointsAsNewGroup(GetBaseName(entity->getName()) + BDDB_PRIMITIVE_SUFFIX, planes_points);
+	group->setDisplay_recursive(entity->getDisplay());
+	ccHObject::Container group_clouds;
+	group->filterChildren(group_clouds, false, CC_TYPES::POINT_CLOUD, true);
+	for (auto & ent : group_clouds) {
+		ccPointCloud* ent_cld = ccHObjectCaster::ToPointCloud(ent);
+		ent_cld->setGlobalShift(entity_cloud->getGlobalShift());
+		ent_cld->setGlobalScale(entity_cloud->getGlobalScale());
+	}
 	entity->getParent()->addChild(group);
 	return group;	
 }
@@ -437,9 +452,6 @@ ccHObject* AddOutlinesAsChild(vector<vector<stocker::Contour3d>> contours_points
 			cc_polyline->showColors(true);
 			line_vert->addChild(cc_polyline);
 			cc_polyline->setName(name + QString::number(component_number));
-			cc_polyline->setWidth(2);
-// 			cc_polyline->setGlobalShift(cloud->getGlobalShift());
-// 			cc_polyline->setGlobalScale(cloud->getGlobalScale());
 			cc_polyline->reserve(static_cast<unsigned>(st_contours.size() + 1));
 			for (auto & pt : st_contours) {
 				line_vert->addPoint(CCVector3(pt.X(), pt.Y(), pt.Z()));

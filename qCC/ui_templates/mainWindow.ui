@@ -520,6 +520,16 @@
      <addaction name="actionBDPrimOutline"/>
      <addaction name="actionBDPrimBoundary"/>
     </widget>
+    <widget class="QMenu" name="menuPolyFit">
+     <property name="title">
+      <string>PolyFit</string>
+     </property>
+     <addaction name="actionBDPolyFit"/>
+     <addaction name="separator"/>
+     <addaction name="actionBDPolyFitHypothesis"/>
+     <addaction name="actionBDPolyFitConfidence"/>
+     <addaction name="actionBDPolyFitSelection"/>
+    </widget>
     <addaction name="actionBDProjectLoad"/>
     <addaction name="separator"/>
     <addaction name="actionBDPlaneSegmentation"/>
@@ -531,7 +541,7 @@
     <addaction name="menuPrimitive"/>
     <addaction name="actionBDPlane_Deduction"/>
     <addaction name="separator"/>
-    <addaction name="actionBDPolyFit"/>
+    <addaction name="menuPolyFit"/>
     <addaction name="actionBD3D4EM"/>
     <addaction name="menuGroup_Rename"/>
    </widget>
@@ -3025,7 +3035,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPolyFit">
    <property name="text">
-    <string>PolyFit</string>
+    <string>PolyFit Excute</string>
    </property>
   </action>
   <action name="actionBD3D4EM">
@@ -3112,6 +3122,21 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDPrimMergePlane">
    <property name="text">
     <string>Merge Planes</string>
+   </property>
+  </action>
+  <action name="actionBDPolyFitHypothesis">
+   <property name="text">
+    <string>Generate Hypothesis</string>
+   </property>
+  </action>
+  <action name="actionBDPolyFitConfidence">
+   <property name="text">
+    <string>Compute Confidence</string>
+   </property>
+  </action>
+  <action name="actionBDPolyFitSelection">
+   <property name="text">
+    <string>Face Selection</string>
    </property>
   </action>
  </widget>

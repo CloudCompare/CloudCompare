@@ -200,7 +200,7 @@ if(OPTION_USE_STOCKER)
 	set(STOCKER_HOME $ENV{STOCKER_HOME} CACHE PATH "stocker home")
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_STOCKER USE_STOCKER_AS_DLL )
 	# TODO:
-	set(STOCKER_LIBS BuilderBase BuilderCore builderlod2 builderlod3)
+	set(STOCKER_LIBS BuilderBase polyfit_basic polyfit_model polyfit_method BuilderCore builderlod2 builderlod3)
 	set(STOCKER_INCLUDE_DIR ${STOCKER_HOME}/include CACHE PATH "stocker include")
 	set(STOCKER_LIBRARY_DIR_DEBUG ${STOCKER_HOME}/lib/${PLATFORM}/Debug CACHE PATH "stocker lib dir")
 	set(STOCKER_LIBRARY_DIR_RELEASE ${STOCKER_HOME}/lib/${PLATFORM}/Release CACHE PATH "stocker lib dir")
@@ -216,7 +216,7 @@ if(OPTION_USE_STOCKER)
 			install( FILES ${STOCKER_BIN_DIR_DEBUG}/${_lib}d.dll CONFIGURATIONS Debug DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}_debug)
 		endif ()
 
-		if (EXISTS ${STOCKER_BIN_DIR_DEBUG}/${_lib}d.dll)
+		if (EXISTS ${STOCKER_BIN_DIR_DEBUG}/${_lib}.dll)
 			file(COPY ${STOCKER_BIN_DIR_RELEASE}/${_lib}.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/release/)		
 			install( FILES ${STOCKER_BIN_DIR_RELEASE}/${_lib}.dll CONFIGURATIONS Release DESTINATION ${CLOUDCOMPARE_DEST_FOLDER} )
 		endif ()
@@ -226,6 +226,7 @@ if(OPTION_USE_STOCKER)
 	
 	target_include_directories(${PROJECT_NAME} 
 		PUBLIC	${STOCKER_INCLUDE_DIR}/modules/internal 
+				${STOCKER_INCLUDE_DIR}/utils
 				${VCGLIB_INCLUDE_DIRS}
 				${EIGEN_INCLUDE_DIRS})
 endif()

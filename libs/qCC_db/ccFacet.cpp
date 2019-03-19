@@ -557,3 +557,183 @@ void ccFacet::invertNormal()
 		m_planeEquation[i] = -m_planeEquation[i];
 	}
 }
+
+ccFacet* ccFacet::CreateFromContour(std::vector<CCVector3> contour_points, const PointCoordinateType* planeEquation /*= 0*/)
+{
+	ccFacet* facet = new ccFacet(0, "facet");
+	facet->FormByContour(contour_points, planeEquation);
+	return facet;
+}
+
+bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, const PointCoordinateType* planeEquation/*=0*/)
+{
+	assert(!contour_points.empty());
+	unsigned hullPtsCount = contour_points.size();
+	if (hullPtsCount < 3)
+		return false;	
+
+	//create vertices
+	m_contourVertices = new ccPointCloud();
+	{
+		if (!m_contourVertices->reserve(hullPtsCount))
+		{
+			delete m_contourVertices;
+			m_contourVertices = nullptr;
+			ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
+			return false;
+		}
+
+		//projection on the LS plane (in 3D)
+		for (auto & pt : contour_points) {
+			m_contourVertices->addPoint(pt);
+		}
+		m_contourVertices->setName(DEFAULT_CONTOUR_POINTS_NAME);
+		m_contourVertices->setLocked(true);
+		m_contourVertices->setEnabled(false);
+		addChild(m_contourVertices);
+	}
+
+	CCLib::Neighbourhood Yk(m_contourVertices);
+
+	//get corresponding plane
+	if (!planeEquation)
+	{
+		planeEquation = Yk.getLSPlane();
+		if (!planeEquation)
+		{
+			ccLog::Warning("[ccFacet::createInternalRepresentation] Failed to compute the LS plane passing through the input points!");
+			return false;
+		}
+	}
+	memcpy(m_planeEquation, planeEquation, sizeof(PointCoordinateType) * 4);
+
+	//we project the input points on a plane
+	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
+	CCVector3 X, Y; //local base
+	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D, nullptr, &m_center, &X, &Y))
+	{
+		ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
+		return false;
+	}
+
+	//compute resulting RMS
+	m_rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(m_contourVertices, m_planeEquation);
+
+	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
+	{
+		for (unsigned i = 0; i < hullPtsCount; ++i)	{
+			points2D[i].index = i;
+		}
+	}
+
+	//try to get the points on the convex/concave hull to build the contour and the polygon
+	{
+		std::list<CCLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
+		for (CCLib::PointProjectionTools::IndexedCCVector2 & pt : points2D) {
+			hullPoints.push_back(&pt);
+		}
+		
+		//we create the corresponding (3D) polyline
+		{
+			m_contourPolyline = new ccPolyline(m_contourVertices);
+			if (m_contourPolyline->reserve(hullPtsCount))
+			{
+				m_contourPolyline->addPointIndex(0, hullPtsCount);
+				m_contourPolyline->setClosed(true);
+				m_contourPolyline->setVisible(true);
+				m_contourPolyline->setLocked(true);
+				m_contourPolyline->setName(DEFAULT_CONTOUR_NAME);
+				m_contourVertices->addChild(m_contourPolyline);
+				m_contourVertices->setEnabled(true);
+				m_contourVertices->setVisible(false);
+			}
+			else
+			{
+				delete m_contourPolyline;
+				m_contourPolyline = nullptr;
+				ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the contour polyline!");
+			}
+		}
+
+		//we create the corresponding (2D) mesh
+		std::vector<CCVector2> hullPointsVector;
+		try
+		{
+			hullPointsVector.reserve(hullPoints.size());
+			for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+			{
+				hullPointsVector.push_back(**it);
+			}
+		}
+		catch (...)
+		{
+			ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the contour mesh!");
+		}
+
+		//if we have computed a concave hull, we must remove triangles falling outside!
+		bool removePointsOutsideHull = (m_maxEdgeLength > 0);
+
+		if (!hullPointsVector.empty() && CCLib::Delaunay2dMesh::Available())
+		{
+			//compute the facet surface
+			CCLib::Delaunay2dMesh dm;
+			char errorStr[1024];
+			if (dm.buildMesh(hullPointsVector, 0, errorStr))
+			{
+				if (removePointsOutsideHull)
+					dm.removeOuterTriangles(hullPointsVector, hullPointsVector);
+				unsigned triCount = dm.size();
+				assert(triCount != 0);
+
+				m_polygonMesh = new ccMesh(m_contourVertices);
+				if (m_polygonMesh->reserve(triCount))
+				{
+					//import faces
+					for (unsigned i = 0; i < triCount; ++i)
+					{
+						const CCLib::VerticesIndexes* tsi = dm.getTriangleVertIndexes(i);
+						m_polygonMesh->addTriangle(tsi->i1, tsi->i2, tsi->i3);
+					}
+					m_polygonMesh->setVisible(true);
+					m_polygonMesh->enableStippling(true);
+
+					//unique normal for facets
+					if (m_polygonMesh->reservePerTriangleNormalIndexes())
+					{
+						NormsIndexesTableType* normsTable = new NormsIndexesTableType();
+						normsTable->reserve(1);
+						CCVector3 N(m_planeEquation);
+						normsTable->addElement(ccNormalVectors::GetNormIndex(N.u));
+						m_polygonMesh->setTriNormsTable(normsTable);
+						for (unsigned i = 0; i < triCount; ++i)
+							m_polygonMesh->addTriangleNormalIndexes(0, 0, 0); //all triangles will have the same normal!
+						m_polygonMesh->showNormals(true);
+						m_polygonMesh->setLocked(true);
+						m_polygonMesh->setName(DEFAULT_POLYGON_MESH_NAME);
+						m_contourVertices->addChild(m_polygonMesh);
+						m_contourVertices->setEnabled(true);
+						m_contourVertices->setVisible(false);
+					}
+					else
+					{
+						ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the polygon mesh's normals!");
+					}
+
+					//update facet surface
+					m_surface = CCLib::MeshSamplingTools::computeMeshArea(m_polygonMesh);
+				}
+				else
+				{
+					delete m_polygonMesh;
+					m_polygonMesh = nullptr;
+					ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the polygon mesh!");
+				}
+			}
+			else
+			{
+				ccLog::Warning(QString("[ccFacet::createInternalRepresentation] Failed to create the polygon mesh (third party lib. said '%1'").arg(errorStr));
+			}
+		}
+	}
+	return true;
+}

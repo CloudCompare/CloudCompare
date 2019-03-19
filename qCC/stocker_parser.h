@@ -26,6 +26,7 @@
 #include "builderlod2/builderlod2.h"
 #include "buildercore/StBuilder.h"
 #include "ioctrl/StFileOperator.hpp"
+#include "polyfit/model/map.h"
 #endif // USE_STOCKER
 
 class BDBaseHObject;
@@ -48,9 +49,13 @@ ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha);
 void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_epsilon, MainWindow* win);
 ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option);
 
+//! polyfit
+ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis_mesh_, HypothesisGenerator* hypothesis_);
+
 #define BDDB_PROJECTNAME_PREFIX		"Prj_"
 #define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
 #define BDDB_PRIMITIVE_SUFFIX		".primitive"
+#define BDDB_POLYFITHYPO_SUFFIX		".hypothesis"
 #define BDDB_IMAGELINE_SUFFIX		".imageline"
 #define BDDB_PLANESEG_PREFIX		"Plane"
 #define BDDB_BOUNDARY_PREFIX		"Boundary"
@@ -74,6 +79,9 @@ public:
 	stocker::Vec3d global_shift;
 	double global_scale;
 	bool valid;
+
+	std::map<std::string, Map*> building_hypomesh;
+//	std::map<std::string, HypothesisGenerator*> building_hypothesis;
 private:
 	ccHObject::Container GetHObjContainer(CC_CLASS_ENUM type, QString suffix, bool check_enable = false);
 	ccHObject* GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename = QString(), bool check_enable = false);

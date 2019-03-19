@@ -20,6 +20,7 @@
 #include "ccPointCloud.h"
 #include "ccPolyline.h"
 #include "ccPlane.h"
+#include "ccFacet.h"
 #include "ccHObjectCaster.h"
 #include "ccDBRoot.h"
 
@@ -575,7 +576,7 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 #endif // USE_STOCKER
 }
 
-ccHObject*  PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option)
+ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option)
 {
 #ifdef USE_STOCKER
 	std::string base_name = GetBaseName(planeObj->getParent()->getParent()->getName()).toStdString();
@@ -684,6 +685,148 @@ ccHObject*  PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption opt
 	ccHObject* plane_frame = AddOutlinesAsChild(frames_to_add, BDDB_PLANEFRAME_PREFIX, planeObj->getParent());
 	return plane_frame;
 #endif
+}
+
+#include "polyfit/method/hypothesis_generator.h"
+#include "polyfit/method/face_selection.h"
+#include "polyfit/method/method_global.h"
+#include "polyfit/model/point_set_io.h"
+#include "polyfit/model/point_set.h"
+#include "polyfit/model/map_geometry.h"
+#include "polyfit/model/map_io.h"
+#include "polyfit/basic/logger.h"
+
+PointSet* GetPointSetFromPlaneObjs(ccHObject::Container planeObjs)
+{
+	PointSet* pset = new PointSet;
+	std::vector<vec3>& points = pset->points();
+	std::vector<vec3>& normals = pset->normals();
+	unsigned int pt_idx(0);
+	for (auto & planeObj : planeObjs) {
+		ccPointCloud* cloud_entity = ccHObjectCaster::ToPointCloud(planeObj->getParent());
+		if (!cloud_entity) continue;
+
+		//////////////////////////////////////////////////////////////////////////
+		VertexGroup* plane_grp = new VertexGroup;
+		vcg::Plane3d vcg_pl = GetVcgPlane(planeObj);
+		plane_grp->set_plane(Plane3d(
+			vcg_pl.Direction().X(),
+			vcg_pl.Direction().Y(),
+			vcg_pl.Direction().Z(),
+			-vcg_pl.Offset()));
+
+		plane_grp->set_label(cloud_entity->getName().toStdString());
+
+		for (size_t i = 0; i < cloud_entity->getPointSize(); i++) {
+			CCVector3 pt_get = *(cloud_entity->getPoint(i));
+			points.push_back(vec3(pt_get.x, pt_get.y, pt_get.z));
+			pt_get = cloud_entity->getPointNormal(i);
+			normals.push_back(vec3(pt_get.x, pt_get.y, pt_get.z));
+			plane_grp->push_back(pt_idx++);
+		}
+
+		if (!plane_grp->empty()) {
+			plane_grp->set_point_set(pset);
+			pset->groups().push_back(plane_grp);
+		}
+	}
+	return pset;
+}
+
+ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis_mesh_, HypothesisGenerator* hypothesis_)
+{
+	ccHObject* hypoObj = nullptr;
+	ccHObject::Container planeObjs = GetEnabledObjFromGroup(primitive_group, CC_TYPES::PLANE, true, true);
+	PointSet* pset = GetPointSetFromPlaneObjs(planeObjs);
+	hypothesis_ = new HypothesisGenerator(pset);
+
+	std::cout << "generate hypothesis" << std::endl;
+	hypothesis_mesh_ = hypothesis_->generate();
+
+	hypoObj = new ccHObject(GetBaseName(primitive_group->getName()) + BDDB_POLYFITHYPO_SUFFIX);
+
+//	bd00000000.hypothesis
+//	-Plane0						point cloud
+//	 --Plane					Plane
+//	  ---vertices				(Plane accessory)
+//	  ---compressed normals		(Plane accessory)
+//	  ---Facet0					Facet
+//	   ----Contour points		(Facet accessory)
+	
+	for (VertexGroup* grp : pset->groups()) {
+		//! associate point cloud for this plane
+		ccPointCloud* plane_cloud = new ccPointCloud("vertices");
+		PointSet* pset = grp->point_set();
+		std::vector<vec3>& points = pset->points();
+		std::vector<vec3>& normals = pset->normals();
+
+		ccColor::Rgb col = ccColor::Generator::Random();
+		plane_cloud->setRGBColor(col);
+		plane_cloud->showColors(true);
+
+		for (size_t i = 0; i < points.size(); i++) {
+			vec3 pt = points[i];
+			vec3 normal = normals[i];
+			plane_cloud->addPoint(CCVector3(pt.data()[0], pt.data()[1], pt.data()[2]));
+			plane_cloud->addNorm(CCVector3(normal.data()[0], normal.data()[1], normal.data()[2]));
+		}
+		//! add plane as child of the point cloud
+		ccHObject* plane_entity = FitPlaneAndAddChild(plane_cloud);
+		plane_entity->setVisible(false);
+		
+		hypoObj->addChild(plane_cloud);
+	}
+
+	FOR_EACH_FACET(Map, hypothesis_mesh_, it) {
+		Map::Facet* f = it;
+
+		Polygon3d contour_polygon = Geom::facet_polygon(f);
+		vector<CCVector3> ccv_poly;
+		for (auto & pt : contour_polygon) {
+			ccv_poly.push_back(CCVector3(pt.data()[0], pt.data()[1], pt.data()[2]));
+		}
+		//! each facet is a facet entity under plane
+		ccFacet* facet_entity = ccFacet::CreateFromContour(ccv_poly);
+		ccPolyline* contour_entity = facet_entity->getContour();
+
+		//! add to the plane it belongs
+		MapFacetAttribute<VertexGroup*> facet_attrib_supporting_vertex_group_(hypothesis_mesh_, Method::Get_facet_attrib_supporting_vertex_group());
+
+		/// get plane by name
+		std::string support_plane_name = facet_attrib_supporting_vertex_group_[f]->label();
+		ccHObject::Container pc_find, pl_find;
+		hypoObj->filterChildrenByName(pc_find, false, support_plane_name.c_str(), true);
+		if (pc_find.empty()) continue;
+
+		pc_find.front()->filterChildren(pl_find, false, CC_TYPES::PLANE, true);
+		if (pl_find.empty()) continue;
+		ccHObject* plane_entity = pl_find.front();
+		plane_entity->addChild(facet_entity);
+
+		ccPointCloud* plane_cloud = ccHObjectCaster::ToPointCloud(plane_entity->getParent());
+		if (plane_cloud) {
+			contour_entity->setGlobalShift(plane_cloud->getGlobalShift());
+			contour_entity->setGlobalScale(plane_cloud->getGlobalScale());
+		}
+	}
+
+	return hypoObj;
+}
+
+void PolyfitComputeConfidence(ccHObject::Container planeObjs, Map* hypothesis_mesh_)
+{
+	
+}
+
+ccHObject* PolyfitFaceSelection(ccHObject* hypoObj, double data_fitting, double model_cov, double data_comp)
+{
+	//! collect valid hypothesis mesh and submesh
+	vector<pair<string, string>> name_group_facet;
+
+	ccHObject* polyfit_model = nullptr;
+
+
+	return polyfit_model;
 }
 
 

@@ -117,6 +117,9 @@ public:
 	//! Clones this facet
 	ccFacet* clone() const;
 
+	static ccFacet* CreateFromContour(std::vector<CCVector3> contour_points, const PointCoordinateType* planeEquation = 0);
+	bool FormByContour(std::vector<CCVector3> contour_points, const PointCoordinateType* planeEquation = 0);
+
 protected:
 
 	//inherited from ccDrawable

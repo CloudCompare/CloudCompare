@@ -11,4 +11,6 @@ if ( WIN32 )
     endif()
 endif()
 
-message( "cmake policies active:${POLICY_LIST}")
+if ( POLICY_LIST )
+	message( "cmake policies active:${POLICY_LIST}")
+endif()

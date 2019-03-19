@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project( CloudCompare VERSION 2.10.2 )
+project( CloudCompare VERSION 2.10.3 )
 
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )

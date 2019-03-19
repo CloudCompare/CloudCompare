@@ -10,6 +10,7 @@ v2.10.3 (Zephyrus) - (In progress)
 - Bug fixes
   - Command line:
     - the 'EXTRACT_VERTICES' option was actually deleting the extracted vertices right after extracting them, causing a crash when trying to access them later :|
+  - Fix loading LAS files with paths containing multi-byte characters when using PDAL
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------

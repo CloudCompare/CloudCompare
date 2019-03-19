@@ -470,7 +470,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	writerOptions.add("scale_y", lasScale.y);
 	writerOptions.add("scale_z", lasScale.z);
 
-	writerOptions.add("filename", filename.toLocal8Bit().toStdString());
+	writerOptions.add("filename", filename.toStdString());
 	writerOptions.add("extra_dims", "all");
 
 	const QVariant minor_version_meta_data = theCloud->getMetaData(LAS_VERSION_MINOR_META_DATA);
@@ -891,7 +891,7 @@ std::vector<ExtraDim> readExtraBytesVlr(LasHeader &header)
 CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	Options las_opts;
-	las_opts.add("filename", filename.toLocal8Bit().toStdString());
+	las_opts.add("filename", filename.toStdString());
 
 	FixedPointTable t(100);
 	LasReader lasReader;

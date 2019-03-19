@@ -469,6 +469,13 @@ private slots:
 	void doActionBDPlaneDeduction();
 	/// PolyFit
 	void doActionBDPolyFit();
+
+	void doActionBDPolyFitHypothesis();
+
+	void doActionBDPolyFitConfidence();
+
+	void doActionBDPolyFitSelection();
+
 	/// 3d4em
 	void doActionBD3D4EM();
 	/// Rename

@@ -612,7 +612,7 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, const PointCo
 	CCVector3 X, Y; //local base
 	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D, nullptr, &m_center, &X, &Y))
 	{
-		ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
+		ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory!");
 		return false;
 	}
 

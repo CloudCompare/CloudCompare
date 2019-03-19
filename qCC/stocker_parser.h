@@ -50,7 +50,7 @@ void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_eps
 ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option);
 
 //! polyfit
-ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis_mesh_, HypothesisGenerator* hypothesis_);
+ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis_mesh_);
 
 #define BDDB_PROJECTNAME_PREFIX		"Prj_"
 #define BDDB_ORIGIN_CLOUD_SUFFIX	".original"

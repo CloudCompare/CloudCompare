@@ -773,6 +773,9 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPrimShrinkPlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimShrinkPlane);
 	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);
 	connect(m_UI->actionBDPolyFit,					&QAction::triggered, this, &MainWindow::doActionBDPolyFit);
+	connect(m_UI->actionBDPolyFitHypothesis,		&QAction::triggered, this, &MainWindow::doActionBDPolyFitHypothesis);
+	connect(m_UI->actionBDPolyFitConfidence,		&QAction::triggered, this, &MainWindow::doActionBDPolyFitConfidence);
+	connect(m_UI->actionBDPolyFitSelection,			&QAction::triggered, this, &MainWindow::doActionBDPolyFitSelection);
 	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBD3D4EM);
 }
 
@@ -10617,16 +10620,15 @@ ccHObject* MainWindow::askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultClo
 
 //////////////////////////////////////////////////////////////////////////
 bool IsBDBaseObj(ccHObject* obj) {
-	BDBaseHObject* prj = static_cast<BDBaseHObject*>(obj);
-	return prj->valid;
+	return obj->getName().startsWith(BDDB_PROJECTNAME_PREFIX);
 }
 BDBaseHObject::Container GetBDBaseProjx(MainWindow* main) {
 	ccHObject* root_entity = main->db()->getRootEntity();
 	vector<BDBaseHObject*> prjx;
 	for (size_t i = 0; i < root_entity->getChildrenNumber(); i++) {
-		BDBaseHObject* prj = static_cast<BDBaseHObject*>(main->db()->getRootEntity()->getChild(i));
-		if (prj->valid) {
-			prjx.push_back(prj);
+		ccHObject* child = main->db()->getRootEntity()->getChild(i);
+		if (IsBDBaseObj(child))	{
+			prjx.push_back(static_cast<BDBaseHObject*>(child));
 		}
 	}
 	return prjx;
@@ -11617,6 +11619,74 @@ void MainWindow::doActionBDPolyFit()
 	addToDB(files);
 	refreshAll();
 	UpdateUI();
+}
+
+#include "polyfit/method/hypothesis_generator.h"
+void MainWindow::doActionBDPolyFitHypothesis()
+{
+	ccHObject* entity = getSelectedEntities().front(); if (!entity) return;
+		
+	if (!entity->isGroup()) {
+		return;
+	}
+
+	ccHObject::Container prmitive_groups;
+	if (entity->getName().endsWith(BDDB_PRIMITIVE_SUFFIX)) {
+		prmitive_groups.push_back(entity);
+	}
+	else {
+		entity->filterChildrenByName(prmitive_groups, true, BDDB_PRIMITIVE_SUFFIX, false);				
+	}
+
+	if (prmitive_groups.empty()) {
+		return;
+	}
+
+	BDBaseHObject* baseObj = GetRootBDBase(entity);
+	if (!baseObj) {
+		dispToConsole("[BDRecon] PolyFit - Please open the main project file", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	ccProgressDialog progDlg(true, this);
+	progDlg.setAutoClose(false);
+
+	if (progDlg.textCanBeEdited()) {
+		progDlg.setMethodTitle("Generate Hypothesis");
+		char infosBuffer[256];
+		sprintf(infosBuffer, "Processing %d primitive groups.", prmitive_groups.size());
+		progDlg.setInfo(infosBuffer);
+	}
+	CCLib::NormalizedProgress nprogress(&progDlg, prmitive_groups.size());
+
+	for (auto & primitiveObj : prmitive_groups) {
+		std::string building_name = GetBaseName(primitiveObj->getName()).toStdString();
+		Map* hypothesis_mesh_ = baseObj->building_hypomesh[building_name];
+		if (hypothesis_mesh_)	{
+			delete hypothesis_mesh_;
+		}
+		ccHObject* hypoObj = PolyfitGenerateHypothesis(primitiveObj, hypothesis_mesh_);
+		addToDB(hypoObj);
+
+		if (!nprogress.oneStep()) {
+			progDlg.stop();
+			return;
+		}
+	}
+
+	progDlg.update(100.0f);
+	progDlg.stop();
+
+	refreshAll();
+	UpdateUI();
+}
+
+void MainWindow::doActionBDPolyFitConfidence()
+{
+}
+
+void MainWindow::doActionBDPolyFitSelection()
+{
 }
 
 void MainWindow::doActionBD3D4EM()

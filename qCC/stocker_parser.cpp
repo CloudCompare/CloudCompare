@@ -26,6 +26,9 @@
 
 #include "QFileInfo"
 
+#include <concurrent_vector.h>
+#include <ppl.h>
+
 #ifdef USE_STOCKER
 using namespace stocker;
 #endif // USE_STOCKER
@@ -41,7 +44,9 @@ ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud)
 	ccPlane* pPlane = ccPlane::Fit(cloud, &rms);
 	if (pPlane) {
 		cc_plane = static_cast<ccHObject*>(pPlane);
-		pPlane->setColor(cloud->getPointColor(0));
+		if (cloud->hasColors())	{
+			pPlane->setColor(cloud->getPointColor(0));
+		}		
 		pPlane->enableStippling(true);
 	}
 	if (cc_plane) {
@@ -717,11 +722,16 @@ PointSet* GetPointSetFromPlaneObjs(ccHObject::Container planeObjs)
 
 		plane_grp->set_label(cloud_entity->getName().toStdString());
 
-		for (size_t i = 0; i < cloud_entity->getPointSize(); i++) {
+		for (size_t i = 0; i < cloud_entity->size(); i++) {
 			CCVector3 pt_get = *(cloud_entity->getPoint(i));
-			points.push_back(vec3(pt_get.x, pt_get.y, pt_get.z));
-			pt_get = cloud_entity->getPointNormal(i);
-			normals.push_back(vec3(pt_get.x, pt_get.y, pt_get.z));
+			points.push_back(vec3(pt_get.x, pt_get.y, pt_get.z));			
+			if (!cloud_entity->hasNormals()) {
+				normals.push_back(vec3(vcg_pl.Direction().X(), vcg_pl.Direction().Y(), vcg_pl.Direction().Z()));
+			}
+			else {
+				pt_get = cloud_entity->getPointNormal(i);
+				normals.push_back(vec3(pt_get.x, pt_get.y, pt_get.z));
+			}
 			plane_grp->push_back(pt_idx++);
 		}
 
@@ -733,12 +743,19 @@ PointSet* GetPointSetFromPlaneObjs(ccHObject::Container planeObjs)
 	return pset;
 }
 
-ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis_mesh_, HypothesisGenerator* hypothesis_)
+#define conc_ind c_in
+#define ConcPair(x) std::pair<size_t, x>
+#define ConcVector(x) Concurrency::concurrent_vector<std::pair<size_t, x>>
+#define ConcParForBegin(x) Concurrency::parallel_for((size_t)0, (size_t)x, [&](size_t conc_ind){
+#define ConcParForEnd });
+#define ConcSort(x, v) sort(begin(v), end(v), [](std::pair<size_t, x> _l, std::pair<size_t, x> _r) {return _l.first < _r.first; });
+
+ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis_mesh_)
 {
 	ccHObject* hypoObj = nullptr;
 	ccHObject::Container planeObjs = GetEnabledObjFromGroup(primitive_group, CC_TYPES::PLANE, true, true);
 	PointSet* pset = GetPointSetFromPlaneObjs(planeObjs);
-	hypothesis_ = new HypothesisGenerator(pset);
+	HypothesisGenerator* hypothesis_ = new HypothesisGenerator(pset);
 
 	std::cout << "generate hypothesis" << std::endl;
 	hypothesis_mesh_ = hypothesis_->generate();
@@ -753,41 +770,89 @@ ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis
 //	  ---Facet0					Facet
 //	   ----Contour points		(Facet accessory)
 	
-	for (VertexGroup* grp : pset->groups()) {
-		//! associate point cloud for this plane
-		ccPointCloud* plane_cloud = new ccPointCloud("vertices");
-		PointSet* pset = grp->point_set();
-		std::vector<vec3>& points = pset->points();
-		std::vector<vec3>& normals = pset->normals();
+	BDBaseHObject* baseObj = GetRootBDBase(primitive_group);
+	CCVector3d global_shift(0, 0, 0);
+	double global_scale(0);
+	if (baseObj) {
+		global_shift = CCVector3d(vcgXYZ(baseObj->global_shift));
+		global_scale = baseObj->global_scale;
+	}
+	ConcVector(ccPointCloud*) conc_plane_cloud;
+
+	for (size_t index = 0; index < pset->groups().size(); index++) {
+		VertexGroup* grp = pset->groups()[index];
+		ccPointCloud* plane_cloud = new ccPointCloud(grp->label().c_str());
+		PointSet* cur_pset = grp->point_set();
+		std::vector<vec3>& points = cur_pset->points();
+		std::vector<vec3>& normals = cur_pset->normals();
+
+		for (size_t i = 0; i < points.size(); i++) {
+			vec3 pt = points[i];
+			plane_cloud->addPoint(CCVector3(pt.data()[0], pt.data()[1], pt.data()[2]));
+		}
+		if (normals.size() == points.size() && plane_cloud->reserveTheNormsTable()) {
+			for (size_t i = 0; i < normals.size(); i++) {
+				vec3 normal = normals[i];
+				plane_cloud->addNorm(CCVector3(normal.data()[0], normal.data()[1], normal.data()[2]));
+			}
+		}
 
 		ccColor::Rgb col = ccColor::Generator::Random();
 		plane_cloud->setRGBColor(col);
 		plane_cloud->showColors(true);
+		plane_cloud->setGlobalShift(global_shift);
+		plane_cloud->setGlobalScale(global_scale);
 
-		for (size_t i = 0; i < points.size(); i++) {
-			vec3 pt = points[i];
-			vec3 normal = normals[i];
-			plane_cloud->addPoint(CCVector3(pt.data()[0], pt.data()[1], pt.data()[2]));
-			plane_cloud->addNorm(CCVector3(normal.data()[0], normal.data()[1], normal.data()[2]));
-		}
 		//! add plane as child of the point cloud
 		ccHObject* plane_entity = FitPlaneAndAddChild(plane_cloud);
 		plane_entity->setVisible(false);
-		
+
 		hypoObj->addChild(plane_cloud);
 	}
+	
 
+// 	ConcVector(ccPointCloud*) conc_plane_cloud;
+// 
+// 	ConcParForBegin(pset->groups().size())
+// 		VertexGroup* grp = pset->groups()[conc_ind];
+// 		//! associate point cloud for this plane
+// 		ccPointCloud* plane_cloud = new ccPointCloud(grp->label().c_str());
+// 		PointSet* cur_pset = grp->point_set();
+// 		std::vector<vec3>& points = cur_pset->points();
+// 		std::vector<vec3>& normals = cur_pset->normals();
+// 
+// 		for (size_t i = 0; i < points.size(); i++) {
+// 			vec3 pt = points[i];
+// 			plane_cloud->addPoint(CCVector3(pt.data()[0], pt.data()[1], pt.data()[2]));
+// 		}
+// 		if (normals.size() == points.size() && plane_cloud->reserveTheNormsTable()) {
+// 			for (size_t i = 0; i < normals.size(); i++) {
+// 				vec3 normal = normals[i];
+// 				plane_cloud->addNorm(CCVector3(normal.data()[0], normal.data()[1], normal.data()[2]));
+// 			}
+// 		}
+// 
+// 		ccColor::Rgb col = ccColor::Generator::Random();
+// 		plane_cloud->setRGBColor(col);
+// 		plane_cloud->showColors(true);
+// 		plane_cloud->setGlobalShift(global_shift);
+// 		plane_cloud->setGlobalScale(global_scale);
+// 
+// 		//! add plane as child of the point cloud
+// 		ccHObject* plane_entity = FitPlaneAndAddChild(plane_cloud);
+// 		plane_entity->setVisible(false);
+// 		conc_plane_cloud.push_back({ conc_ind, plane_cloud });
+// 	ConcParForEnd
+// 
+// 	ConcSort(ccPointCloud*, conc_plane_cloud);
+// 	for (auto & obj : conc_plane_cloud) {
+// 		hypoObj->addChild(obj.second);
+// 	}
+// 	conc_plane_cloud.clear(); conc_plane_cloud.shrink_to_fit();
+
+	int test(0);
 	FOR_EACH_FACET(Map, hypothesis_mesh_, it) {
 		Map::Facet* f = it;
-
-		Polygon3d contour_polygon = Geom::facet_polygon(f);
-		vector<CCVector3> ccv_poly;
-		for (auto & pt : contour_polygon) {
-			ccv_poly.push_back(CCVector3(pt.data()[0], pt.data()[1], pt.data()[2]));
-		}
-		//! each facet is a facet entity under plane
-		ccFacet* facet_entity = ccFacet::CreateFromContour(ccv_poly);
-		ccPolyline* contour_entity = facet_entity->getContour();
 
 		//! add to the plane it belongs
 		MapFacetAttribute<VertexGroup*> facet_attrib_supporting_vertex_group_(hypothesis_mesh_, Method::Get_facet_attrib_supporting_vertex_group());
@@ -801,14 +866,34 @@ ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis
 		pc_find.front()->filterChildren(pl_find, false, CC_TYPES::PLANE, true);
 		if (pl_find.empty()) continue;
 		ccHObject* plane_entity = pl_find.front();
-		plane_entity->addChild(facet_entity);
 
-		ccPointCloud* plane_cloud = ccHObjectCaster::ToPointCloud(plane_entity->getParent());
-		if (plane_cloud) {
-			contour_entity->setGlobalShift(plane_cloud->getGlobalShift());
-			contour_entity->setGlobalScale(plane_cloud->getGlobalScale());
+		Polygon3d contour_polygon = Geom::facet_polygon(f);
+		vector<CCVector3> ccv_poly;
+		for (auto & pt : contour_polygon) {
+			ccv_poly.push_back(CCVector3(pt.data()[0], pt.data()[1], pt.data()[2]));
 		}
+		//! each facet is a facet entity under plane
+		PointCoordinateType plane_equation[4];
+		ccPlane* cc_plane = ccHObjectCaster::ToPlane(plane_entity);
+		CCVector3 N; PointCoordinateType dis; cc_plane->getEquation(N, dis);
+		plane_equation[0] = N.x; plane_equation[1] = N.y; plane_equation[2] = N.z; plane_equation[3] = dis;
+		ccFacet* facet_entity = ccFacet::CreateFromContour(ccv_poly, plane_equation);
+		facet_entity->setName(f->label().c_str());
+		
+		ccPolyline* contour_entity = facet_entity->getContour();
+		if (contour_entity) {
+			contour_entity->setGlobalShift(global_shift);
+			contour_entity->setGlobalScale(global_scale);
+		}
+		else {
+			ccLog::Warning(support_plane_name.c_str());
+		}
+		plane_entity->addChild(facet_entity);
 	}
+	hypoObj->setDisplay_recursive(primitive_group->getDisplay());
+	if (primitive_group->getParent()) {
+		primitive_group->getParent()->addChild(hypoObj);
+	}	
 
 	return hypoObj;
 }

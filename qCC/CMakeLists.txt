@@ -200,7 +200,7 @@ if(OPTION_USE_STOCKER)
 	set(STOCKER_HOME $ENV{STOCKER_HOME} CACHE PATH "stocker home")
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_STOCKER USE_STOCKER_AS_DLL )
 	# TODO:
-	set(STOCKER_LIBS BuilderBase polyfit_basic polyfit_model polyfit_method BuilderCore builderlod2 builderlod3)
+	set(STOCKER_LIBS BuilderBase polyfit_basic polyfit_math polyfit_model polyfit_method BuilderCore builderlod2 builderlod3)
 	set(STOCKER_INCLUDE_DIR ${STOCKER_HOME}/include CACHE PATH "stocker include")
 	set(STOCKER_LIBRARY_DIR_DEBUG ${STOCKER_HOME}/lib/${PLATFORM}/Debug CACHE PATH "stocker lib dir")
 	set(STOCKER_LIBRARY_DIR_RELEASE ${STOCKER_HOME}/lib/${PLATFORM}/Release CACHE PATH "stocker lib dir")

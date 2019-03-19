@@ -743,12 +743,25 @@ PointSet* GetPointSetFromPlaneObjs(ccHObject::Container planeObjs)
 	return pset;
 }
 
-#define conc_ind c_in
+#define USE_PARRALEL_FOR
+
+#define conc_index concurr_index
+#ifdef USE_PARRALEL_FOR
 #define ConcPair(x) std::pair<size_t, x>
-#define ConcVector(x) Concurrency::concurrent_vector<std::pair<size_t, x>>
-#define ConcParForBegin(x) Concurrency::parallel_for((size_t)0, (size_t)x, [&](size_t conc_ind){
-#define ConcParForEnd });
-#define ConcSort(x, v) sort(begin(v), end(v), [](std::pair<size_t, x> _l, std::pair<size_t, x> _r) {return _l.first < _r.first; });
+#define ConcVector(x) Concurrency::concurrent_vector<ConcPair(x)>
+#define ConcParForBegin(x) Concurrency::parallel_for((size_t)0, (size_t)x, [&](size_t conc_index)
+#define ConcParForEnd );
+#define ConcPairObj(x) { conc_index, x }
+#define ConcSort(x, v) sort(begin(v), end(v), [](ConcPair(x) _l, ConcPair(x) _r) {return _l.first < _r.first; });
+#define GetConcObj(x) x.second
+#else
+#define ConcVector(x) std::vector<x>
+#define ConcParForBegin(x) for (size_t conc_ind = 0; conc_ind < x; conc_ind++)
+#define ConcParForEnd 
+#define ConcPairObj(x) x
+#define ConcSort(x, v)
+#define GetConcObj(x) x
+#endif // USE_PARRALEL_FOR
 
 ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis_mesh_)
 {
@@ -777,58 +790,20 @@ ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis
 		global_shift = CCVector3d(vcgXYZ(baseObj->global_shift));
 		global_scale = baseObj->global_scale;
 	}
-	ConcVector(ccPointCloud*) conc_plane_cloud;
 
-	for (size_t index = 0; index < pset->groups().size(); index++) {
-		VertexGroup* grp = pset->groups()[index];
-		ccPointCloud* plane_cloud = new ccPointCloud(grp->label().c_str());
-		PointSet* cur_pset = grp->point_set();
-		std::vector<vec3>& points = cur_pset->points();
-		std::vector<vec3>& normals = cur_pset->normals();
-
-		for (size_t i = 0; i < points.size(); i++) {
-			vec3 pt = points[i];
-			plane_cloud->addPoint(CCVector3(pt.data()[0], pt.data()[1], pt.data()[2]));
-		}
-		if (normals.size() == points.size() && plane_cloud->reserveTheNormsTable()) {
-			for (size_t i = 0; i < normals.size(); i++) {
-				vec3 normal = normals[i];
-				plane_cloud->addNorm(CCVector3(normal.data()[0], normal.data()[1], normal.data()[2]));
-			}
-		}
-
-		ccColor::Rgb col = ccColor::Generator::Random();
-		plane_cloud->setRGBColor(col);
-		plane_cloud->showColors(true);
-		plane_cloud->setGlobalShift(global_shift);
-		plane_cloud->setGlobalScale(global_scale);
-
-		//! add plane as child of the point cloud
-		ccHObject* plane_entity = FitPlaneAndAddChild(plane_cloud);
-		plane_entity->setVisible(false);
-
-		hypoObj->addChild(plane_cloud);
-	}
-	
-
-// 	ConcVector(ccPointCloud*) conc_plane_cloud;
-// 
-// 	ConcParForBegin(pset->groups().size())
-// 		VertexGroup* grp = pset->groups()[conc_ind];
-// 		//! associate point cloud for this plane
+	std::vector<vec3>& points = pset->points();
+	std::vector<vec3>& normals = pset->normals();
+// 	for (size_t index = 0; index < pset->groups().size(); index++) {
+// 		VertexGroup* grp = pset->groups()[index];
 // 		ccPointCloud* plane_cloud = new ccPointCloud(grp->label().c_str());
-// 		PointSet* cur_pset = grp->point_set();
-// 		std::vector<vec3>& points = cur_pset->points();
-// 		std::vector<vec3>& normals = cur_pset->normals();
-// 
-// 		for (size_t i = 0; i < points.size(); i++) {
-// 			vec3 pt = points[i];
-// 			plane_cloud->addPoint(CCVector3(pt.data()[0], pt.data()[1], pt.data()[2]));
+// 		for (unsigned int pt_index : *grp) {
+// 			vec3 pt_vert = points[pt_index];
+// 			plane_cloud->addPoint(CCVector3(pt_vert.data()[0], pt_vert.data()[1], pt_vert.data()[2]));
 // 		}
-// 		if (normals.size() == points.size() && plane_cloud->reserveTheNormsTable()) {
-// 			for (size_t i = 0; i < normals.size(); i++) {
-// 				vec3 normal = normals[i];
-// 				plane_cloud->addNorm(CCVector3(normal.data()[0], normal.data()[1], normal.data()[2]));
+// 		if (plane_cloud->reserveTheNormsTable()) {
+// 			for (unsigned int pt_index : *grp) {
+// 				vec3 pt_vert = normals[pt_index];
+// 				plane_cloud->addNorm(CCVector3(pt_vert.data()[0], pt_vert.data()[1], pt_vert.data()[2]));
 // 			}
 // 		}
 // 
@@ -841,14 +816,47 @@ ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis
 // 		//! add plane as child of the point cloud
 // 		ccHObject* plane_entity = FitPlaneAndAddChild(plane_cloud);
 // 		plane_entity->setVisible(false);
-// 		conc_plane_cloud.push_back({ conc_ind, plane_cloud });
-// 	ConcParForEnd
 // 
-// 	ConcSort(ccPointCloud*, conc_plane_cloud);
-// 	for (auto & obj : conc_plane_cloud) {
-// 		hypoObj->addChild(obj.second);
+// 		hypoObj->addChild(plane_cloud);
 // 	}
-// 	conc_plane_cloud.clear(); conc_plane_cloud.shrink_to_fit();
+	
+
+ 	ConcVector(ccPointCloud*) conc_plane_cloud;
+	
+	ConcParForBegin(pset->groups().size())
+	{
+		//! associate point cloud for this plane
+		VertexGroup* grp = pset->groups()[conc_index];
+		ccPointCloud* plane_cloud = new ccPointCloud(grp->label().c_str());
+		for (unsigned int pt_index : *grp) {
+			vec3 pt_vert = points[pt_index];
+			plane_cloud->addPoint(CCVector3(pt_vert.data()[0], pt_vert.data()[1], pt_vert.data()[2]));
+		}
+		if (plane_cloud->reserveTheNormsTable()) {
+			for (unsigned int pt_index : *grp) {
+				vec3 pt_vert = normals[pt_index];
+				plane_cloud->addNorm(CCVector3(pt_vert.data()[0], pt_vert.data()[1], pt_vert.data()[2]));
+			}
+		}
+
+		ccColor::Rgb col = ccColor::Generator::Random();
+		plane_cloud->setRGBColor(col);
+		plane_cloud->showColors(true);
+		plane_cloud->setGlobalShift(global_shift);
+		plane_cloud->setGlobalScale(global_scale);
+
+		//! add plane as child of the point cloud
+		ccHObject* plane_entity = FitPlaneAndAddChild(plane_cloud);
+		plane_entity->setVisible(false);
+		conc_plane_cloud.push_back(ConcPairObj(plane_cloud));
+	}
+	ConcParForEnd 
+
+ 	ConcSort(ccPointCloud*, conc_plane_cloud);
+ 	for (auto & obj : conc_plane_cloud) {
+ 		hypoObj->addChild(GetConcObj(obj));
+ 	}
+ 	conc_plane_cloud.clear(); conc_plane_cloud.shrink_to_fit();
 
 	int test(0);
 	FOR_EACH_FACET(Map, hypothesis_mesh_, it) {

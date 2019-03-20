@@ -11223,7 +11223,7 @@ void MainWindow::doActionBDPrimMergePlane()
 			col = pc->getPointColor(0);
 		}
 		pc->setName(pc->getName() + "-del");
-		pc->getParent()->setEnabled(false);
+		pc->setEnabled(false);
 		valid_ent++;
 	}
 	if (valid_ent < 2) {
@@ -11622,6 +11622,7 @@ void MainWindow::doActionBDPolyFit()
 }
 
 #include "polyfit/method/hypothesis_generator.h"
+PolyFitObj* polyfit_obj;
 void MainWindow::doActionBDPolyFitHypothesis()
 {
 	ccHObject* entity = getSelectedEntities().front(); if (!entity) return;
@@ -11647,35 +11648,43 @@ void MainWindow::doActionBDPolyFitHypothesis()
 		dispToConsole("[BDRecon] PolyFit - Please open the main project file", ERR_CONSOLE_MESSAGE);
 		return;
 	}
-
-	ccProgressDialog progDlg(true, this);
-	progDlg.setAutoClose(false);
-
-	if (progDlg.textCanBeEdited()) {
-		progDlg.setMethodTitle("Generate Hypothesis");
-		char infosBuffer[256];
-		sprintf(infosBuffer, "Processing %d primitive groups.", prmitive_groups.size());
-		progDlg.setInfo(infosBuffer);
+	ccHObject* primitiveObj = prmitive_groups.front();
+	if (prmitive_groups.size() > 1) {
+		ccLog::Warning("[BDRecon] - only the first primitive is calculated");
 	}
-	CCLib::NormalizedProgress nprogress(&progDlg, prmitive_groups.size());
-
-	for (auto & primitiveObj : prmitive_groups) {
-		std::string building_name = GetBaseName(primitiveObj->getName()).toStdString();
-		Map* hypothesis_mesh_ = baseObj->building_hypomesh[building_name];
-		if (hypothesis_mesh_)	{
-			delete hypothesis_mesh_;
-		}
-		ccHObject* hypoObj = PolyfitGenerateHypothesis(primitiveObj, hypothesis_mesh_);
-		addToDB(hypoObj);
-
-		if (!nprogress.oneStep()) {
-			progDlg.stop();
-			return;
-		}
+	if (polyfit_obj) {
+		polyfit_obj->clear();
 	}
+	ccHObject* hypoObj = PolyfitGenerateHypothesis(primitiveObj, polyfit_obj);
+	addToDB(hypoObj);
 
-	progDlg.update(100.0f);
-	progDlg.stop();
+// 	ccProgressDialog progDlg(true, this);
+// 	progDlg.setAutoClose(false);
+// 
+// 	if (progDlg.textCanBeEdited()) {
+// 		progDlg.setMethodTitle("Generate Hypothesis");
+// 		char infosBuffer[256];
+// 		sprintf(infosBuffer, "Processing %d primitive groups.", prmitive_groups.size());
+// 		progDlg.setInfo(infosBuffer);
+// 	}
+// 	CCLib::NormalizedProgress nprogress(&progDlg, prmitive_groups.size());
+// 
+// 	for (auto & primitiveObj : prmitive_groups) {
+// 		std::string building_name = GetBaseName(primitiveObj->getName()).toStdString();
+// 		Map* hypothesis_mesh_ = baseObj->building_hypomesh[building_name];
+// 		if (hypothesis_mesh_)	{
+// 			delete hypothesis_mesh_;
+// 		}
+// 		ccHObject* hypoObj = PolyfitGenerateHypothesis(primitiveObj, polyfit_obj);
+// 		addToDB(hypoObj);
+// 
+// 		if (!nprogress.oneStep()) {
+// 			progDlg.stop();
+// 			return;
+// 		}
+// 	}
+// 	progDlg.update(100.0f);
+// 	progDlg.stop();
 
 	refreshAll();
 	UpdateUI();

@@ -689,14 +689,7 @@ ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption opti
 #endif
 }
 
-#include "polyfit/method/hypothesis_generator.h"
-#include "polyfit/method/face_selection.h"
-#include "polyfit/method/method_global.h"
-#include "polyfit/model/point_set_io.h"
-#include "polyfit/model/point_set.h"
-#include "polyfit/model/map_geometry.h"
-#include "polyfit/model/map_io.h"
-#include "polyfit/basic/logger.h"
+
 
 PointSet* GetPointSetFromPlaneObjs(ccHObject::Container planeObjs)
 {
@@ -740,16 +733,22 @@ PointSet* GetPointSetFromPlaneObjs(ccHObject::Container planeObjs)
 	return pset;
 }
 
-ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis_mesh_)
+ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj* polyfit_obj)
 {
 	ccHObject* hypoObj = nullptr;
 	ccHObject::Container planeObjs = GetEnabledObjFromGroup(primitive_group, CC_TYPES::PLANE, true, true);
 	PointSet* pset = GetPointSetFromPlaneObjs(planeObjs);
 	HypothesisGenerator* hypothesis_ = new HypothesisGenerator(pset);
 
+	polyfit_obj->initGenerator(planeObjs);
+	
 	std::cout << "generate hypothesis" << std::endl;
-	hypothesis_mesh_ = hypothesis_->generate();
 
+	polyfit_obj->GenerateHypothesis();
+
+	if (!polyfit_obj->hypothesis_mesh_) {
+		throw "cannot generate hypothesis mesh";
+	}
 	hypoObj = new ccHObject(GetBaseName(primitive_group->getName()) + BDDB_POLYFITHYPO_SUFFIX);
 
 //	bd00000000.hypothesis
@@ -770,33 +769,6 @@ ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis
 
 	std::vector<vec3>& points = pset->points();
 	std::vector<vec3>& normals = pset->normals();
-// 	for (size_t index = 0; index < pset->groups().size(); index++) {
-// 		VertexGroup* grp = pset->groups()[index];
-// 		ccPointCloud* plane_cloud = new ccPointCloud(grp->label().c_str());
-// 		for (unsigned int pt_index : *grp) {
-// 			vec3 pt_vert = points[pt_index];
-// 			plane_cloud->addPoint(CCVector3(pt_vert.data()[0], pt_vert.data()[1], pt_vert.data()[2]));
-// 		}
-// 		if (plane_cloud->reserveTheNormsTable()) {
-// 			for (unsigned int pt_index : *grp) {
-// 				vec3 pt_vert = normals[pt_index];
-// 				plane_cloud->addNorm(CCVector3(pt_vert.data()[0], pt_vert.data()[1], pt_vert.data()[2]));
-// 			}
-// 		}
-// 
-// 		ccColor::Rgb col = ccColor::Generator::Random();
-// 		plane_cloud->setRGBColor(col);
-// 		plane_cloud->showColors(true);
-// 		plane_cloud->setGlobalShift(global_shift);
-// 		plane_cloud->setGlobalScale(global_scale);
-// 
-// 		//! add plane as child of the point cloud
-// 		ccHObject* plane_entity = FitPlaneAndAddChild(plane_cloud);
-// 		plane_entity->setVisible(false);
-// 
-// 		hypoObj->addChild(plane_cloud);
-// 	}
-	
 
  	ConcVector(ccPointCloud*) conc_plane_cloud;
 	
@@ -835,13 +807,12 @@ ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis
  	}
  	conc_plane_cloud.clear(); conc_plane_cloud.shrink_to_fit();
 
-	int test(0);
-	FOR_EACH_FACET(Map, hypothesis_mesh_, it) {
+	MapFacetAttribute<VertexGroup*> facet_attrib_supporting_vertex_group_(polyfit_obj->hypothesis_mesh_, Method::Get_facet_attrib_supporting_vertex_group());
+
+	FOR_EACH_FACET(Map, polyfit_obj->hypothesis_mesh_, it) {
 		Map::Facet* f = it;
 
 		//! add to the plane it belongs
-		MapFacetAttribute<VertexGroup*> facet_attrib_supporting_vertex_group_(hypothesis_mesh_, Method::Get_facet_attrib_supporting_vertex_group());
-
 		/// get plane by name
 		std::string support_plane_name = facet_attrib_supporting_vertex_group_[f]->label();
 		ccHObject::Container pc_find, pl_find;
@@ -949,4 +920,47 @@ BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	} while (bd_obj_);
 
 	return nullptr;
+}
+
+PolyFitObj::PolyFitObj()
+{
+}
+
+PolyFitObj::~PolyFitObj()
+{
+}
+
+void PolyFitObj::clear()
+{
+// 	if (point_set_)
+// 		point_set_.forget();
+
+	if (hypothesis_mesh_)
+		hypothesis_mesh_.forget();
+
+	if (optimized_mesh_)
+		optimized_mesh_.forget();
+
+	if (hypothesis_) {
+		delete hypothesis_;
+		hypothesis_ = 0;
+	}
+}
+
+void PolyFitObj::initGenerator(ccHObject::Container planeObjs)
+{
+	PointSet* pset = GetPointSetFromPlaneObjs(planeObjs);
+	hypothesis_ = new HypothesisGenerator(pset);
+}
+
+void PolyFitObj::GenerateHypothesis()
+{
+	if (!hypothesis_) {
+		throw "no hypothesis";
+		return;
+	}
+	if (hypothesis_mesh_) {
+		hypothesis_mesh_.forget();
+	}
+	hypothesis_mesh_ = hypothesis_->generate();
 }

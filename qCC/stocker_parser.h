@@ -26,10 +26,18 @@
 #include "builderlod2/builderlod2.h"
 #include "buildercore/StBuilder.h"
 #include "ioctrl/StFileOperator.hpp"
-#include "polyfit/model/map.h"
+
+#include "polyfit/method/hypothesis_generator.h"
+#include "polyfit/method/face_selection.h"
+#include "polyfit/method/method_global.h"
+#include "polyfit/model/point_set_io.h"
+#include "polyfit/model/point_set.h"
+#include "polyfit/model/map_geometry.h"
+#include "polyfit/model/map_io.h"
 #endif // USE_STOCKER
 
 class BDBaseHObject;
+class PolyFitObj;
 
 QString GetBaseName(QString name);
 
@@ -50,7 +58,7 @@ void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_eps
 ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option);
 
 //! polyfit
-ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis_mesh_);
+ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, PolyFitObj* polyfit_obj);
 
 #define BDDB_PROJECTNAME_PREFIX		"Prj_"
 #define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
@@ -98,6 +106,29 @@ public:
 
 BDBaseHObject* GetRootBDBase(ccHObject* obj);
 
+class PolyFitObj
+{
+public:
+	PolyFitObj();
+	~PolyFitObj();
+
+	void clear();
+
+	void initGenerator(ccHObject::Container planeObjs);
+
+	void GenerateHypothesis();
+
+	void ComputeConfidence();
+
+	void FacetOptimization();
+private:
+
+public:
+//	PointSet::Ptr			point_set_;
+	HypothesisGenerator*	hypothesis_;
+	Map::Ptr				hypothesis_mesh_;
+	Map::Ptr				optimized_mesh_;
+};
 
 #include <concurrent_vector.h>
 #include <ppl.h>

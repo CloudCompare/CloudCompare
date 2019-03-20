@@ -862,8 +862,7 @@ ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis
 		ccPlane* cc_plane = ccHObjectCaster::ToPlane(plane_entity);
 		CCVector3 N; PointCoordinateType dis; cc_plane->getEquation(N, dis);
 		plane_equation[0] = N.x; plane_equation[1] = N.y; plane_equation[2] = N.z; plane_equation[3] = dis;
-		ccFacet* facet_entity = ccFacet::CreateFromContour(ccv_poly, plane_equation);
-		facet_entity->setName(f->label().c_str());
+		ccFacet* facet_entity = ccFacet::CreateFromContour(ccv_poly, f->label().c_str(), plane_equation);
 		
 		ccPolyline* contour_entity = facet_entity->getContour();
 		if (contour_entity) {
@@ -871,13 +870,15 @@ ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, Map* hypothesis
 			contour_entity->setGlobalScale(global_scale);
 		}
 		else {
-			ccLog::Warning(support_plane_name.c_str());
+			std::string error_info = "error contour: plane-" + support_plane_name + " facet-" + f->label();
+			ccLog::Warning(error_info.c_str());
 		}
 		plane_entity->addChild(facet_entity);
 	}
 	hypoObj->setDisplay_recursive(primitive_group->getDisplay());
 	if (primitive_group->getParent()) {
 		primitive_group->getParent()->addChild(hypoObj);
+		primitive_group->setEnabled(false);
 	}	
 
 	return hypoObj;

@@ -558,9 +558,13 @@ void ccFacet::invertNormal()
 	}
 }
 
-ccFacet* ccFacet::CreateFromContour(std::vector<CCVector3> contour_points, const PointCoordinateType* planeEquation /*= 0*/)
+ccFacet* ccFacet::CreateFromContour(std::vector<CCVector3> contour_points, QString name /*= QString()*/, const PointCoordinateType* planeEquation /*= 0*/)
 {
-	ccFacet* facet = new ccFacet(0, "facet");
+	QString name_(name);
+	if (name_.isEmpty()) {
+		name_ = "facet";
+	}
+	ccFacet* facet = new ccFacet(0, name_);
 	facet->FormByContour(contour_points, planeEquation);
 	return facet;
 }

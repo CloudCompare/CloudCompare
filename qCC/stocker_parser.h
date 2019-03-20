@@ -98,4 +98,25 @@ public:
 
 BDBaseHObject* GetRootBDBase(ccHObject* obj);
 
+
+#include <concurrent_vector.h>
+#include <ppl.h>
+#define conc_index concurr_index
+#ifndef DISABLE_PARRALLEL_FOR
+#define ConcPair(x) std::pair<size_t, x>
+#define ConcVector(x) Concurrency::concurrent_vector<ConcPair(x)>
+#define ConcParForBegin(x) Concurrency::parallel_for((size_t)0, (size_t)x, [&](size_t conc_index)
+#define ConcParForEnd );
+#define ConcPairObj(x) { conc_index, x }
+#define ConcSort(x, v) sort(begin(v), end(v), [](ConcPair(x) _l, ConcPair(x) _r) {return _l.first < _r.first; });
+#define GetConcObj(x) x.second
+#else
+#define ConcVector(x) std::vector<x>
+#define ConcParForBegin(x) for (size_t conc_ind = 0; conc_ind < x; conc_ind++)
+#define ConcParForEnd 
+#define ConcPairObj(x) x
+#define ConcSort(x, v)
+#define GetConcObj(x) x
+#endif // USE_PARRALEL_FOR
+
 #endif

@@ -2437,28 +2437,43 @@ unsigned char DgmOctree::findBestLevelForComparisonWithOctree(const DgmOctree* t
 	unsigned ptsA = getNumberOfProjectedPoints();
 	unsigned ptsB = theOtherOctree->getNumberOfProjectedPoints();
 
-	int maxOctreeLevel = MAX_OCTREE_LEVEL;
+	unsigned char maxOctreeLevel = MAX_OCTREE_LEVEL;
+	
 	if (std::min(ptsA,ptsB) < 16)
-		maxOctreeLevel = std::min(maxOctreeLevel, 5); //very small clouds
+		maxOctreeLevel = std::min(maxOctreeLevel, static_cast<unsigned char>(5)); //very small clouds
 	else if (std::max(ptsA,ptsB) < 2000000)
-		maxOctreeLevel = std::min(maxOctreeLevel, 10); //average size clouds
+		maxOctreeLevel = std::min(maxOctreeLevel, static_cast<unsigned char>(10)); //average size clouds
 
-	double estimatedTime[MAX_OCTREE_LEVEL];
-	estimatedTime[0] = 0.0;
-	int bestLevel = 1;
+	double estimatedTime[MAX_OCTREE_LEVEL]{};
+	unsigned char bestLevel = 1;
+	
 	for (int i=1; i<maxOctreeLevel; ++i) //warning: i >= 1
 	{
-		int cellsA,cellsB,diffA,diffB;
-		diff(i,m_thePointsAndTheirCellCodes,theOtherOctree->m_thePointsAndTheirCellCodes,diffA,diffB,cellsA,cellsB);
+		int diffA = 0;
+		int diffB = 0;
+		int cellsA = 0;
+		int cellsB = 0;
+		
+		bool success = diff( i,
+							 m_thePointsAndTheirCellCodes, theOtherOctree->m_thePointsAndTheirCellCodes,
+							 diffA, diffB,
+							 cellsA, cellsB );
 
+		if ( !success )
+		{
+			continue;
+		}
+		
 		//we use a linear model for prediction
 		estimatedTime[i] = ((static_cast<double>(ptsA)*ptsB) / cellsB) * 0.001 + diffA;
 
 		if (estimatedTime[i] < estimatedTime[bestLevel])
+		{
 			bestLevel = i;
+		}
 	}
 
-	return static_cast<unsigned char>(bestLevel);
+	return bestLevel;
 }
 
 unsigned char DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const
@@ -2701,10 +2716,18 @@ void DgmOctree::diff(const cellCodesContainer& codesA, const cellCodesContainer&
 		diffB.push_back(*pB++);
 }
 
-void DgmOctree::diff(unsigned char octreeLevel, const cellsContainer &codesA, const cellsContainer &codesB, int &diffA, int &diffB, int &cellsA, int &cellsB) const
+bool DgmOctree::diff(unsigned char octreeLevel, const cellsContainer &codesA, const cellsContainer &codesB, int &diffA, int &diffB, int &cellsA, int &cellsB) const
 {
-	if (codesA.empty() && codesB.empty()) return;
+	diffA = 0;
+	diffB = 0;
+	cellsA = 0;
+	cellsB = 0;
 
+	if (codesA.empty() && codesB.empty())
+	{
+		return false;
+	}
+	
 	cellsContainer::const_iterator pA = codesA.begin();
 	cellsContainer::const_iterator pB = codesB.begin();
 
@@ -2716,9 +2739,6 @@ void DgmOctree::diff(unsigned char octreeLevel, const cellsContainer &codesA, co
 
 	CellCode currentCodeA = 0;
 	CellCode currentCodeB = 0;
-
-	diffA = diffB = 0;
-	cellsA = cellsB = 0;
 
 	//cell codes should already be sorted!
 	while ((pA != codesA.end()) && (pB != codesB.end()))
@@ -2762,6 +2782,8 @@ void DgmOctree::diff(unsigned char octreeLevel, const cellsContainer &codesA, co
 		while ((pB != codesB.end()) && ((currentCodeB = (pB->theCode >> bitDec)) == predCodeB)) ++pB;
 		predCodeB = currentCodeB;
 	}
+	
+	return true;
 }
 
 int DgmOctree::extractCCs(unsigned char level, bool sixConnexity, GenericProgressCallback* progressCb) const

@@ -1,8 +1,8 @@
 cmake_minimum_required( VERSION 3.0 )
 
-option( INSTALL_EXAMPLE_IO_PLUGIN "Check to install example I/O plugin" OFF )
+option( PLUGIN_EXAMPLE_IO "Check to install example I/O plugin" OFF )
 
-if (INSTALL_EXAMPLE_IO_PLUGIN)
+if (PLUGIN_EXAMPLE_IO)
 	project( ExampleIOPlugin )
 	
 	# Set to include this I/O plugin in ccViewer

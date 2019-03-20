@@ -109,9 +109,11 @@ void ccPluginManager::loadPlugins()
 
 	// "dynamic" plugins
 	loadFromPathsAndAddToList();
-
+	
 	// now iterate over plugins and automatically register what we can
-	for ( ccPluginInterface *plugin : m_pluginList )
+	const auto pluginList = m_pluginList;
+	
+	for ( ccPluginInterface *plugin : pluginList )
 	{
 		if ( plugin == nullptr )
 		{
@@ -127,29 +129,43 @@ void ccPluginManager::loadPlugins()
 
 				//see if this plugin provides an additional factory for objects
 				ccExternalFactory* factory = stdPlugin->getCustomObjectsFactory();
-				if (factory)
+				
+				if (factory != nullptr)
 				{
 					//if it's valid, add it to the factories set
 					Q_ASSERT(ccExternalFactory::Container::GetUniqueInstance());
 					ccExternalFactory::Container::GetUniqueInstance()->addFactory(factory);
 				}
-			}
+
 				break;
+			}
 
 			case CC_IO_FILTER_PLUGIN: //I/O filter
 			{
 				ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(plugin);
+
+				QStringList	ioExtensions;
 				
 				for ( auto &filter : ioPlugin->getFilters() )
 				{
 					if (filter)
 					{
 						FileIOFilter::Register(filter);
-						ccLog::Print(QString("[Plugin][%1] New file extension(s) registered: %2").arg(ioPlugin->getName(), filter->getDefaultExtension().toUpper()));
+
+						ioExtensions += filter->getDefaultExtension().toUpper();
 					}
 				}
-			}
+				
+				if ( !ioExtensions.empty() )
+				{
+					ioExtensions.sort();
+					
+					ccLog::Print( QStringLiteral( "[Plugin][%1] New file extensions registered: %2" )
+								  .arg( ioPlugin->getName(), ioExtensions.join( ' ' ) ) );
+				}
+				
 				break;
+			}
 
 			default:
 				//nothing to do at this point
@@ -188,7 +204,9 @@ void ccPluginManager::loadFromPathsAndAddToList()
 	//	This lets us override plugins by path.
 	QMap<QString, QPluginLoader *> fileNameToLoaderMap;
 	
-	for ( const QString &path : pluginPaths() )
+	const auto paths = pluginPaths();
+	
+	for ( const QString &path : paths )
 	{
 		ccLog::Print( tr( "[Plugin] Searching: %1" ).arg( path ) );
 		

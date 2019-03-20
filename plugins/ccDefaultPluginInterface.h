@@ -31,18 +31,18 @@ class ccDefaultPluginInterface : public ccPluginInterface
 public:
 	ccDefaultPluginInterface( const QString &resourcePath = QString() );
 
-	virtual ~ccDefaultPluginInterface();
+	~ccDefaultPluginInterface() override;
 	
-	virtual bool isCore() const override;
+	bool isCore() const override;
 
-	virtual QString getName() const override;
-	virtual QString getDescription() const override;
+	QString getName() const override;
+	QString getDescription() const override;
 	
-	virtual QIcon getIcon() const override;
+	QIcon getIcon() const override;
 	
-	virtual ReferenceList getReferences() const override;
-	virtual ContactList getAuthors() const override;
-	virtual ContactList getMaintainers() const override;
+	ReferenceList getReferences() const override;
+	ContactList getAuthors() const override;
+	ContactList getMaintainers() const override;
 	
 private:
 	ccDefaultPluginData	*m_data;

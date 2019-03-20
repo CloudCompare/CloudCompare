@@ -11,10 +11,17 @@ v2.11 (Anoia) - (in development)
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
 
+v2.10.3 (Zephyrus) - (In progress)
+----------------------
+
+- Enhancements
+  - Speed up the Fit Sphere tool and point picking in the Registration Align (point pairs picking) tool
+
 - Bug fixes
   - Command line:
-    - the 'EXTRACT_VERTICES' option was actually deleting the extracted vertices right after extracting them, causing a crash when trying to access them later :|
-
+    - the 'EXTRACT_VERTICES' option was actually deleting the extracted vertices right after extracting them, causing a crash when trying to access them later :| (#847)
+  - Fix loading LAS files with paths containing multi-byte characters when using PDAL (#869)
+  - Fix potential crash or use of incorrect data when comparing clouds (#871)
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------

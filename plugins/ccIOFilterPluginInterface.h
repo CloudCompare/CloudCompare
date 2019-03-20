@@ -36,10 +36,10 @@ public:
 	{
 	}
 	
-	virtual ~ccIOFilterPluginInterface() {}
+	~ccIOFilterPluginInterface() override = default;
 	
 	//inherited from ccPluginInterface
-	virtual CC_PLUGIN_TYPE getType() const { return CC_IO_FILTER_PLUGIN; }
+	CC_PLUGIN_TYPE getType() const override { return CC_IO_FILTER_PLUGIN; }
 
 	//! Returns an I/O filter instance
 	/** Either getFilter or getFilters should be reimplemented by the child class

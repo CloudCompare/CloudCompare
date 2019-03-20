@@ -38,7 +38,7 @@
 #endif
 
 //System
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 #include <set>
 
@@ -49,28 +49,30 @@ enum HullPointFlags {	POINT_NOT_USED	= 0,
 						POINT_FROZEN	= 3,
 };
 
-typedef CCLib::PointProjectionTools::IndexedCCVector2 Vertex2D;
-typedef std::list<Vertex2D*>::iterator VertexIterator;
-typedef std::list<Vertex2D*>::const_iterator ConstVertexIterator;
+using Vertex2D = CCLib::PointProjectionTools::IndexedCCVector2;
+using VertexIterator = std::list<Vertex2D *>::iterator;
+using ConstVertexIterator = std::list<Vertex2D *>::const_iterator;
 
-struct Edge
+namespace 
 {
-	Edge() : nearestPointIndex(0), nearestPointSquareDist(-1.0f) {}
-	
-	Edge(const VertexIterator& A, unsigned _nearestPointIndex, float _nearestPointSquareDist)
-		: itA(A)
-		, nearestPointIndex(_nearestPointIndex)
-		, nearestPointSquareDist(_nearestPointSquareDist)
-	{}
-
-	//operator
-	inline bool operator< (const Edge& e) const { return nearestPointSquareDist < e.nearestPointSquareDist; }
-
-	VertexIterator itA;
-	unsigned nearestPointIndex;
-	float nearestPointSquareDist;
-};
-
+	struct Edge
+	{
+		Edge() : nearestPointIndex(0), nearestPointSquareDist(-1.0f) {}
+		
+		Edge(const VertexIterator& A, unsigned _nearestPointIndex, float _nearestPointSquareDist)
+			: itA(A)
+			, nearestPointIndex(_nearestPointIndex)
+			, nearestPointSquareDist(_nearestPointSquareDist)
+		{}
+		
+		//operator
+		inline bool operator< (const Edge& e) const { return nearestPointSquareDist < e.nearestPointSquareDist; }
+		
+		VertexIterator itA;
+		unsigned nearestPointIndex;
+		float nearestPointSquareDist;
+	};
+}
 
 //! Finds the nearest (available) point to an edge
 /** \return The nearest point distance (or -1 if no point was found!)
@@ -337,9 +339,10 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 
 	//DEBUG MECHANISM
 	ccContourExtractorDlg debugDialog;
-	ccPointCloud* debugCloud = 0;
-	ccPolyline* debugContour = 0;
-	ccPointCloud* debugContourVertices = 0;
+	ccPointCloud* debugCloud = nullptr;
+	ccPolyline* debugContour = nullptr;
+	ccPointCloud* debugContourVertices = nullptr;
+	
 	if (enableVisualDebugMode)
 	{
 		debugDialog.init();
@@ -468,8 +471,9 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 				assert(pointFlags[P.index] == POINT_NOT_USED); //we don't consider already used points!
 
 				//create labels
-				cc2DLabel* edgeLabel = 0;
-				cc2DLabel* label = 0;
+				cc2DLabel* edgeLabel = nullptr;
+				cc2DLabel* label = nullptr;
+				
 				if (enableVisualDebugMode && !debugDialog.isSkipped())
 				{
 					edgeLabel = new cc2DLabel("edge");
@@ -670,7 +674,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 					assert(enableVisualDebugMode);
 					debugDialog.removFromDisplay(label);
 					delete label;
-					label = 0;
+					label = nullptr;
 					//debugDialog.refresh();
 				}
 
@@ -679,7 +683,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 					assert(enableVisualDebugMode);
 					debugDialog.removFromDisplay(edgeLabel);
 					delete edgeLabel;
-					edgeLabel = 0;
+					edgeLabel = nullptr;
 					//debugDialog.refresh();
 				}
 			}
@@ -697,7 +701,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 	return true;
 }
 
-typedef std::list<Vertex2D*> Hull2D;
+using Hull2D = std::list<Vertex2D *>;
 
 ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
 													bool allowMultiPass,
@@ -710,11 +714,14 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 													double maxAngleDeg/*=0.0*/)
 {
 	assert(points);
+	
 	if (!points)
-		return 0;
+		return nullptr;
+	
 	unsigned ptsCount = points->size();
+	
 	if (ptsCount < 3)
-		return 0;
+		return nullptr;
 
 	CCLib::Neighbourhood Yk(points);
 	CCVector3 O, X, Y; //local base
@@ -722,10 +729,12 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 
 	//we project the input points on a plane
 	std::vector<Vertex2D> points2D;
-	PointCoordinateType* planeEq = 0;
+	PointCoordinateType* planeEq = nullptr;
+	
 	//if the user has specified a default direction, we'll use it as 'projecting plane'
 	PointCoordinateType preferredPlaneEq[4] = {0, 0, 1, 0};
-	if (preferredNormDim != 0)
+	
+	if (preferredNormDim != nullptr)
 	{
 		const CCVector3* G = points->getPoint(0); //any point through which the plane passes is ok
 		preferredPlaneEq[0] = preferredNormDim[0];
@@ -747,13 +756,15 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 	if (!Yk.projectPointsOn2DPlane<Vertex2D>(points2D, planeEq, &O, &X, &Y, useOXYasBase))
 	{
 		ccLog::Warning("[ExtractFlatContour] Failed to project the points on the LS plane (not enough memory?)!");
-		return 0;
+		return nullptr;
 	}
 
 	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
 	{
 		for (unsigned i = 0; i < ptsCount; ++i)
+		{
 			points2D[i].index = i;
+		}
 	}
 
 	//try to get the points on the convex/concave hull to build the contour and the polygon
@@ -767,7 +778,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 								maxAngleDeg))
 	{
 		ccLog::Warning("[ExtractFlatContour] Failed to compute the convex hull of the input points!");
-		return 0;
+		return nullptr;
 	}
 
 	if (originalPointIndexes)
@@ -780,12 +791,14 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 		{
 			//not enough memory
 			ccLog::Error("[ExtractFlatContour] Not enough memory!");
-			return 0;
+			return nullptr;
 		}
 
 		unsigned i=0;
 		for (Hull2D::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it, ++i)
+		{
 			(*originalPointIndexes)[i] = (*it)->index;
+		}
 	}
 
 	unsigned hullPtsCount = static_cast<unsigned>(hullPoints.size());
@@ -796,14 +809,17 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 		if (!contourVertices->reserve(hullPtsCount))
 		{
 			delete contourVertices;
-			contourVertices = 0;
+			contourVertices = nullptr;
 			ccLog::Error("[ExtractFlatContour] Not enough memory!");
-			return 0;
+			return nullptr;
 		}
 
 		//projection on the LS plane (in 3D)
 		for (Hull2D::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+		{
 			contourVertices->addPoint(O + X*(*it)->x + Y*(*it)->y);
+		}
+		
 		contourVertices->setName("vertices");
 		contourVertices->setEnabled(false);
 	}
@@ -821,7 +837,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 	else
 	{
 		delete contourPolyline;
-		contourPolyline = 0;
+		contourPolyline = nullptr;
 		ccLog::Warning("[ExtractFlatContour] Not enough memory to create the contour polyline!");
 	}
 
@@ -839,7 +855,7 @@ bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* p
 	parts.clear();
 
 	//extract whole contour
-	ccPolyline* basePoly = ExtractFlatContour(points, allowMultiPass, maxEdgeLength, preferredDim, 0, FULL, 0, enableVisualDebugMode);
+	ccPolyline* basePoly = ExtractFlatContour(points, allowMultiPass, maxEdgeLength, preferredDim, nullptr, FULL, nullptr, enableVisualDebugMode);
 	if (!basePoly)
 	{
 		return false;
@@ -854,7 +870,7 @@ bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* p
 	bool success = basePoly->split(maxEdgeLength, parts);
 
 	delete basePoly;
-	basePoly = 0;
+	basePoly = nullptr;
 
 	return success;
 }

@@ -528,6 +528,8 @@
      <addaction name="actionBDPolyFitHypothesis"/>
      <addaction name="actionBDPolyFitConfidence"/>
      <addaction name="actionBDPolyFitSelection"/>
+     <addaction name="separator"/>
+     <addaction name="actionBDPolyFitSettings"/>
     </widget>
     <addaction name="actionBDProjectLoad"/>
     <addaction name="separator"/>
@@ -3128,6 +3130,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDPolyFitSelection">
    <property name="text">
     <string>Face Selection</string>
+   </property>
+  </action>
+  <action name="actionBDPolyFitSettings">
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

@@ -78,6 +78,7 @@ public:
 	inline double getRMS() const { return m_rms; }
 	//! Returns associated surface
 	inline double getSurface() const { return m_surface; }
+	inline void setSurface(double s) { m_surface = s; }
 	//! Returns plane equation
 	inline const PointCoordinateType* getPlaneEquation() const { return m_planeEquation; }
 	//! Inverts the facet normal
@@ -120,6 +121,12 @@ public:
 	static ccFacet* CreateFromContour(std::vector<CCVector3> contour_points, QString name = QString(), const PointCoordinateType* planeEquation = 0);
 	bool FormByContour(std::vector<CCVector3> contour_points, const PointCoordinateType* planeEquation = 0);
 
+	inline double getFitting() const { return m_fitting; }
+	inline void setFitting(double f) { m_fitting = f; }
+	inline double getCoverage() const { return m_coverage; }
+	inline void setCoverage(double c) { m_coverage = c; }
+	inline double getConfidence() const { return m_confidence; }
+	inline void setConfidence(double c) { m_confidence = c; }
 protected:
 
 	//inherited from ccDrawable
@@ -159,6 +166,10 @@ protected:
 
 	// ccHObject interface
 	void applyGLTransformation(const ccGLMatrix &trans) override;
+
+	double m_fitting;
+	double m_coverage;
+	double m_confidence;
 };
 
 #endif //CC_FACET_PRIMITIVE_HEADER

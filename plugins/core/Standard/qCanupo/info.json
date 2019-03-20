@@ -1,0 +1,27 @@
+{
+	"type" : "Standard",
+	"core" : true,
+	"name" : "CANUPO",
+	"icon" : ":/CC/plugin/qCanupoPlugin/iconClassify.png",
+	"description" : "Train or apply a classifier on a point cloud.",
+	"authors" : [
+		{
+		  "name": "N. Brodu, D. Lague (OSUR/CNRS)"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "D. Girardeau-Montaut (CC), Dimitri Lague (OSUR/CNRS)"
+		}
+	],
+	"references": [
+		{
+			"text" : "Dimitri Lague, Geosciences Rennes",
+			"url" : "https://geosciences.univ-rennes1.fr/interlocuteurs/dimitri-lague"
+		},
+		{
+			"text" : "Documentation",
+			"url" : "http://www.cloudcompare.org/doc/wiki/index.php?title=CANUPO_(plugin)"
+		}
+	]
+}

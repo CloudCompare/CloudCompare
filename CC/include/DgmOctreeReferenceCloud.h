@@ -50,10 +50,10 @@ public:
 	inline void setPointScalarValue(unsigned pointIndex, ScalarType value) override { assert(pointIndex < size()); m_set->at(pointIndex).squareDistd = static_cast<double>(value); }
 	inline ScalarType getPointScalarValue(unsigned pointIndex) const override { assert(pointIndex < size()); return static_cast<ScalarType>(m_set->at(pointIndex).squareDistd); }
 	//**** inherited form GenericIndexedCloud ****//
-	inline const CCVector3* getPoint(unsigned index) override { assert(index < size()); return m_set->at(index).point; }
+	inline const CCVector3* getPoint(unsigned index) const override { assert(index < size()); return m_set->at(index).point; }
 	inline void getPoint(unsigned index, CCVector3& P) const override { assert(index < size()); P = *m_set->at(index).point; }
 	//**** inherited form GenericIndexedCloudPersist ****//
-	inline const CCVector3* getPointPersistentPtr(unsigned index) override { assert(index < size()); return m_set->at(index).point; }
+	inline const CCVector3* getPointPersistentPtr(unsigned index) const override { assert(index < size()); return m_set->at(index).point; }
 
 	//! Forwards global iterator
 	inline void forwardIterator() { ++m_globalIterator; }

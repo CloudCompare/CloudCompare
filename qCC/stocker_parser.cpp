@@ -23,6 +23,7 @@
 #include "ccFacet.h"
 #include "ccHObjectCaster.h"
 #include "ccDBRoot.h"
+#include "ccColorScalesManager.h"
 
 #include "QFileInfo"
 
@@ -155,6 +156,17 @@ ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM typ
 	return ccHObject::Container();
 }
 
+ccHObject* GetPlaneEntityFromPrimGroup(ccHObject* prim, QString name)
+{
+	ccHObject::Container pc_find, pl_find;
+	prim->filterChildrenByName(pc_find, false, name, true);
+	if (pc_find.empty()) return nullptr;
+
+	pc_find.front()->filterChildren(pl_find, false, CC_TYPES::PLANE, true);
+	if (pl_find.empty()) return nullptr;
+	return pl_find.front();
+}
+
 vcg::Plane3d GetVcgPlane(ccHObject* planeObj)
 {
 	ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
@@ -164,6 +176,56 @@ vcg::Plane3d GetVcgPlane(ccHObject* planeObj)
 	vcgPlane.SetDirection({ N.x, N.y, N.z });
 	vcgPlane.SetOffset(constVal);
 	return vcgPlane;
+}
+
+ccHObject::Container BDBaseHObject::GetHObjContainer(CC_CLASS_ENUM type, QString suffix, bool check_enable)
+{
+	ccHObject::Container entities = GetEnabledObjFromGroup(this, type, check_enable);
+	ccHObject::Container output;
+	for (auto & entity : entities) {
+		if (entity->getName().endsWith(suffix)) {
+			output.push_back(entity);
+		}
+	}
+	return output;
+}
+ccHObject * BDBaseHObject::GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename, bool check_enable)
+{
+	ccHObject::Container entities = GetEnabledObjFromGroup(this, type, check_enable);
+	ccHObject* output = nullptr;
+	for (auto & entity : entities) {
+		if (entity->getName().endsWith(suffix) &&
+			GetBaseName(entity->getName()) == basename) {
+			return entity;
+		}
+	}
+	return nullptr;
+}
+ccHObject* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {
+	for (unsigned int i = 0; i < getChildrenNumber(); i++)
+		if (getChild(i)->getName() == building_name)
+			return getChild(i);
+	return nullptr;
+}
+ccHObject::Container BDBaseHObject::GetOriginPointCloud(bool check_enable) {
+	return GetHObjContainer(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, check_enable);
+}
+ccHObject * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check_enable) {
+	return GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name, check_enable);
+}
+ccHObject * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
+	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_PRIMITIVE_SUFFIX, building_name, check_enable);
+}
+BDBaseHObject* GetRootBDBase(ccHObject* obj) {
+	ccHObject* bd_obj_ = obj;
+	do {
+		if (bd_obj_->getName().startsWith(BDDB_PROJECTNAME_PREFIX)) {
+			return static_cast<BDBaseHObject*>(bd_obj_);
+		}
+		bd_obj_ = bd_obj_->getParent();
+	} while (bd_obj_);
+
+	return nullptr;
 }
 
 ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)
@@ -689,8 +751,6 @@ ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption opti
 #endif
 }
 
-
-
 PointSet* GetPointSetFromPlaneObjs(ccHObject::Container planeObjs)
 {
 	PointSet* pset = new PointSet;
@@ -733,23 +793,21 @@ PointSet* GetPointSetFromPlaneObjs(ccHObject::Container planeObjs)
 	return pset;
 }
 
-ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj* polyfit_obj)
+ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * polyfit_obj)
 {
-	ccHObject* hypoObj = nullptr;
+	if (!polyfit_obj) {
+		polyfit_obj = new PolyFitObj();
+	}
 	ccHObject::Container planeObjs = GetEnabledObjFromGroup(primitive_group, CC_TYPES::PLANE, true, true);
-	PointSet* pset = GetPointSetFromPlaneObjs(planeObjs);
-	HypothesisGenerator* hypothesis_ = new HypothesisGenerator(pset);
-
+	
 	polyfit_obj->initGenerator(planeObjs);
 	
-	std::cout << "generate hypothesis" << std::endl;
-
 	polyfit_obj->GenerateHypothesis();
 
 	if (!polyfit_obj->hypothesis_mesh_) {
 		throw "cannot generate hypothesis mesh";
 	}
-	hypoObj = new ccHObject(GetBaseName(primitive_group->getName()) + BDDB_POLYFITHYPO_SUFFIX);
+	ccHObject* hypoObj = new ccHObject(GetBaseName(primitive_group->getName()) + BDDB_POLYFITHYPO_SUFFIX);
 
 //	bd00000000.hypothesis
 //	-Plane0						point cloud
@@ -766,13 +824,13 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj* p
 		global_shift = CCVector3d(vcgXYZ(baseObj->global_shift));
 		global_scale = baseObj->global_scale;
 	}
-
+	PointSet* pset = polyfit_obj->hypothesis_->point_set();
 	std::vector<vec3>& points = pset->points();
 	std::vector<vec3>& normals = pset->normals();
 
  	ConcVector(ccPointCloud*) conc_plane_cloud;
 	
-	ConcParForBegin(pset->groups().size())
+	ConcParForBegin(polyfit_obj->hypothesis_->point_set()->groups().size())
 	{
 		//! associate point cloud for this plane
 		VertexGroup* grp = pset->groups()[conc_index];
@@ -815,13 +873,8 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj* p
 		//! add to the plane it belongs
 		/// get plane by name
 		std::string support_plane_name = facet_attrib_supporting_vertex_group_[f]->label();
-		ccHObject::Container pc_find, pl_find;
-		hypoObj->filterChildrenByName(pc_find, false, support_plane_name.c_str(), true);
-		if (pc_find.empty()) continue;
-
-		pc_find.front()->filterChildren(pl_find, false, CC_TYPES::PLANE, true);
-		if (pl_find.empty()) continue;
-		ccHObject* plane_entity = pl_find.front();
+		ccHObject* plane_entity = GetPlaneEntityFromPrimGroup(hypoObj, support_plane_name.c_str());
+		if (!plane_entity) throw "cannot find plane";
 
 		Polygon3d contour_polygon = Geom::facet_polygon(f);
 		vector<CCVector3> ccv_poly;
@@ -850,79 +903,124 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj* p
 	if (primitive_group->getParent()) {
 		primitive_group->getParent()->addChild(hypoObj);
 		primitive_group->setEnabled(false);
-	}	
-
+	}
 	return hypoObj;
 }
 
-void PolyfitComputeConfidence(ccHObject::Container planeObjs, Map* hypothesis_mesh_)
+void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj)
 {
-	
+	if (polyfit_obj->building_name != GetBaseName(hypothesis_group->getName()).toStdString() || polyfit_obj->status < PolyFitObj::STT_hypomesh) {
+		throw "please generate hypothesis firstly";
+		return;
+	}
+	ccHObject::Container planeObjs = GetEnabledObjFromGroup(hypothesis_group, CC_TYPES::PLANE, true, true);
+	polyfit_obj->ComputeConfidence();
+
+	MapFacetAttribute<VertexGroup*> facet_attrib_supporting_vertex_group_(polyfit_obj->hypothesis_mesh_, Method::Get_facet_attrib_supporting_vertex_group());
+
+	MapFacetAttribute<double> facet_attrib_supporting_point_num_(polyfit_obj->hypothesis_mesh_, Method::Get_facet_attrib_supporting_point_num());
+	MapFacetAttribute<double> facet_attrib_facet_area_(polyfit_obj->hypothesis_mesh_, Method::Get_facet_attrib_facet_area());
+	MapFacetAttribute<double> facet_attrib_covered_area_(polyfit_obj->hypothesis_mesh_, Method::Get_facet_attrib_covered_area());
+	MapFacetAttribute<double> facet_attrib_confidence_(polyfit_obj->hypothesis_mesh_, Method::Get_facet_attrib_confidence());
+
+	map<ccFacet*, double> Facet_conf;
+	vector<double> all_conf;
+	//! assign confidence information to hypothesis
+	FOR_EACH_FACET(Map, polyfit_obj->hypothesis_mesh_, it) {
+		Map::Facet* f = it;
+
+		//! add to the plane it belongs
+		/// get plane by name
+		std::string support_plane_name = facet_attrib_supporting_vertex_group_[f]->label();
+		
+		ccHObject* plane_entity = GetPlaneEntityFromPrimGroup(hypothesis_group, support_plane_name.c_str());
+		if (!plane_entity) throw "cannot find plane";
+
+		ccHObject::Container container_find = GetEnabledObjFromGroup(plane_entity, CC_TYPES::FACET, true, false);
+		for (auto & child : container_find) {
+			if (child->getName().toStdString() != f->label()) continue;
+
+			ccFacet* facet = ccHObjectCaster::ToFacet(child);
+			//! display
+			double fitting = facet_attrib_supporting_point_num_[f];
+			facet->setFitting(fitting);
+			double area = facet_attrib_facet_area_[f];
+			facet->setSurface(area);
+			double coverage = facet_attrib_covered_area_[f] / area;
+			facet->setCoverage(coverage);
+
+			double confidence = facet_attrib_confidence_[f];
+			
+			Facet_conf[facet] = confidence;
+			all_conf.push_back(confidence);
+			continue;
+		}		
+	}
+	//! colorize all the facet
+	sort(all_conf.begin(), all_conf.end());
+	double min_conf(all_conf.front()), max_conf(all_conf.back()), diag_conf;
+	if (all_conf.size() > 40) {
+		min_conf = all_conf[all_conf.size()*0.05];
+		max_conf = all_conf[all_conf.size()*0.95];
+	}
+	diag_conf = max_conf - min_conf;
+	ccColorScale::Shared colorScale = ccColorScalesManager::GetDefaultScale();
+	ccHObject::Container container_find = GetEnabledObjFromGroup(hypothesis_group, CC_TYPES::FACET, true, true);
+	for (auto & child : container_find)	{
+		ccFacet* facet = ccHObjectCaster::ToFacet(child);
+		double confidence = Facet_conf[facet];
+		double relativePos = (confidence - min_conf) / diag_conf;
+		relativePos = relativePos >= 1 ? 1 : relativePos;
+		relativePos = relativePos <= 0 ? 0 : relativePos;
+		const ccColor::Rgb* col = colorScale->getColorByRelativePos(relativePos);
+		facet->setColor(*col);
+	}
+
+	hypothesis_group->prepareDisplayForRefresh_recursive();
 }
 
-ccHObject* PolyfitFaceSelection(ccHObject* hypoObj, double data_fitting, double model_cov, double data_comp)
+vector<String_String> CollectValidFacet(ccHObject::Container planeObjs)
 {
-	//! collect valid hypothesis mesh and submesh
-	vector<pair<string, string>> name_group_facet;
+	vector<String_String> valid_facet;
+	for (auto & planeObj : planeObjs) {
+		ccHObject::Container facets_;
+		planeObj->filterChildren(facets_, false, CC_TYPES::FACET, true);
+
+		for (auto & f : facets_) {
+			if (f->isEnabled()) {
+				valid_facet.push_back({ planeObj->getName().toStdString(), f->getName().toStdString() });
+			}
+		}
+	}
+
+	return valid_facet;
+}
+
+void UpdateConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj)
+{
+	ccHObject::Container planeObjs = GetEnabledObjFromGroup(hypothesis_group, CC_TYPES::PLANE, true, true);
+	polyfit_obj->valid_group_facet_name = CollectValidFacet(planeObjs);
+	polyfit_obj->UpdateConfidence(planeObjs);
+}
+
+ccHObject* PolyfitFaceSelection(ccHObject* hypothesis_group, PolyFitObj * polyfit_obj)
+{
+	ccHObject::Container planeObjs = GetEnabledObjFromGroup(hypothesis_group, CC_TYPES::PLANE, true, true);
+	vector<String_String> name_group_facet = CollectValidFacet(planeObjs);
+	polyfit_obj->UpdateValidFacet(name_group_facet);
+	polyfit_obj->UpdateConfidence(planeObjs);
+	polyfit_obj->FacetOptimization();
 
 	ccHObject* polyfit_model = nullptr;
-
+	if (!polyfit_obj->optimized_mesh_) return nullptr;
+	
+	// plane, and sub facet
 
 	return polyfit_model;
 }
 
-
-ccHObject::Container BDBaseHObject::GetHObjContainer(CC_CLASS_ENUM type, QString suffix, bool check_enable)
-{
-	ccHObject::Container entities = GetEnabledObjFromGroup(this, type, check_enable);
-	ccHObject::Container output;
-	for (auto & entity : entities) {
-		if (entity->getName().endsWith(suffix)) {
-			output.push_back(entity);
-		}
-	}
-	return output;
-}
-ccHObject * BDBaseHObject::GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename, bool check_enable)
-{
-	ccHObject::Container entities = GetEnabledObjFromGroup(this, type, check_enable);
-	ccHObject* output = nullptr;
-	for (auto & entity : entities) {
-		if (entity->getName().endsWith(suffix) &&
-			GetBaseName(entity->getName()) == basename) {
-			return entity;
-		}
-	}
-	return nullptr;
-}
-ccHObject* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {
-	for (unsigned int i = 0; i < getChildrenNumber(); i++)
-		if (getChild(i)->getName() == building_name) 
-			return getChild(i);
-	return nullptr;
-}
-ccHObject::Container BDBaseHObject::GetOriginPointCloud(bool check_enable) {
-	return GetHObjContainer(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, check_enable);
-}
-ccHObject * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check_enable) {
-	return GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name, check_enable);
-}
-ccHObject * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
-	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_PRIMITIVE_SUFFIX, building_name, check_enable);
-}
-BDBaseHObject* GetRootBDBase(ccHObject* obj) {
-	ccHObject* bd_obj_ = obj;
-	do {
-		if (bd_obj_->getName().startsWith(BDDB_PROJECTNAME_PREFIX)) {
-			return static_cast<BDBaseHObject*>(bd_obj_);
-		}
-		bd_obj_ = bd_obj_->getParent();
-	} while (bd_obj_);
-
-	return nullptr;
-}
-
-PolyFitObj::PolyFitObj()
+PolyFitObj::PolyFitObj() :
+	status(STT_prepared)
 {
 }
 
@@ -945,6 +1043,8 @@ void PolyFitObj::clear()
 		delete hypothesis_;
 		hypothesis_ = 0;
 	}
+
+	status = STT_prepared;
 }
 
 void PolyFitObj::initGenerator(ccHObject::Container planeObjs)
@@ -963,4 +1063,62 @@ void PolyFitObj::GenerateHypothesis()
 		hypothesis_mesh_.forget();
 	}
 	hypothesis_mesh_ = hypothesis_->generate();
+}
+
+void PolyFitObj::ComputeConfidence()
+{
+	Method::UpdateGlobalDataFitting(data_fitting);
+	Method::UpdateGlobalModelCoverage(model_coverage);
+	Method::UpdateGlobalModelComplexity(model_complexity);
+	hypothesis_->compute_confidences(hypothesis_mesh_, use_confidence);
+}
+
+void PolyFitObj::FacetOptimization()
+{
+	if (status < STT_confidence){
+		throw "no available hypothesis and confidence";
+		return;
+	}
+}
+
+void PolyFitObj::UpdateValidFacet(std::vector<stocker::String_String> valid_update)
+{
+	vector<String_String> valid_for_selection;
+	for (auto & f : valid_group_facet_name) {
+		if (find(valid_update.begin(), valid_update.end(), f) != valid_update.end()) {
+			valid_for_selection.push_back(f);
+		}
+	}
+	swap(valid_group_facet_name, valid_for_selection);
+}
+
+void PolyFitObj::UpdateConfidence(ccHObject::Container PlaneObjs)
+{
+	MapFacetAttribute<VertexGroup*> facet_attrib_supporting_vertex_group_(hypothesis_mesh_, Method::Get_facet_attrib_supporting_vertex_group());
+
+	MapFacetAttribute<double> facet_attrib_confidence_(hypothesis_mesh_, Method::Get_facet_attrib_confidence());
+	vector<String_String> valid_facet;
+	for (auto & planeObj : PlaneObjs) {
+		ccHObject::Container facets_;
+		planeObj->filterChildren(facets_, false, CC_TYPES::FACET, true);
+
+		for (auto & f_ : facets_) {
+			if (f_->isEnabled()) {
+				ccFacet* facet = ccHObjectCaster::ToFacet(f_);
+				double confidence = facet->getConfidence();
+
+				FOR_EACH_FACET(Map, hypothesis_mesh_, it) {
+					Map::Facet* f = it;
+					VertexGroup* g = facet_attrib_supporting_vertex_group_[f];
+
+					if (f->label() == f_->getName().toStdString() &&
+						g->label() == planeObj->getName().toStdString()) {
+						facet_attrib_confidence_[f] = confidence;
+						break;
+					}
+					
+				}
+			}
+		}
+	}
 }

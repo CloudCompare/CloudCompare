@@ -60,6 +60,12 @@ ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption opti
 //! polyfit
 ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, PolyFitObj* polyfit_obj);
 
+void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj);
+
+void UpdateConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj);
+
+ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj);
+
 #define BDDB_PROJECTNAME_PREFIX		"Prj_"
 #define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
 #define BDDB_PRIMITIVE_SUFFIX		".primitive"
@@ -118,9 +124,16 @@ public:
 
 	void GenerateHypothesis();
 
+	//! all the facets are calculated
 	void ComputeConfidence();
 
 	void FacetOptimization();
+
+	void UpdateValidFacet(std::vector<stocker::String_String> valid);
+
+	//! only update valid planes
+	void UpdateConfidence(ccHObject::Container facetObjs);
+
 private:
 
 public:
@@ -128,6 +141,22 @@ public:
 	HypothesisGenerator*	hypothesis_;
 	Map::Ptr				hypothesis_mesh_;
 	Map::Ptr				optimized_mesh_;
+	std::vector<stocker::String_String> valid_group_facet_name;
+
+	std::string building_name;
+
+	double data_fitting;
+	double model_coverage;
+	double model_complexity;
+	bool use_confidence;
+	enum POLYFIT_STUTAS
+	{
+		STT_prepared,
+		STT_hypomesh,
+		STT_confidence,
+		STT_optimized,
+	};
+	POLYFIT_STUTAS status;	// 0-prepared, 1-hypomesh, 2-confidence, 3-optimized
 };
 
 #include <concurrent_vector.h>

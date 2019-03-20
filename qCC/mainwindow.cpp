@@ -776,6 +776,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPolyFitHypothesis,		&QAction::triggered, this, &MainWindow::doActionBDPolyFitHypothesis);
 	connect(m_UI->actionBDPolyFitConfidence,		&QAction::triggered, this, &MainWindow::doActionBDPolyFitConfidence);
 	connect(m_UI->actionBDPolyFitSelection,			&QAction::triggered, this, &MainWindow::doActionBDPolyFitSelection);
+	connect(m_UI->actionBDPolyFitSettings,			&QAction::triggered, this, &MainWindow::doActionBDPolyFitSettings);
 	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBD3D4EM);
 }
 
@@ -11625,23 +11626,18 @@ void MainWindow::doActionBDPolyFit()
 PolyFitObj* polyfit_obj;
 void MainWindow::doActionBDPolyFitHypothesis()
 {
-	ccHObject* entity = getSelectedEntities().front(); if (!entity) return;
+	if (!haveSelection()) return; 
+	ccHObject* entity = getSelectedEntities().front();
 		
-	if (!entity->isGroup()) {
-		return;
-	}
+	if (!entity->isGroup()) return;
 
 	ccHObject::Container prmitive_groups;
-	if (entity->getName().endsWith(BDDB_PRIMITIVE_SUFFIX)) {
-		prmitive_groups.push_back(entity);
-	}
-	else {
+	if (entity->getName().endsWith(BDDB_PRIMITIVE_SUFFIX)) 
+		prmitive_groups.push_back(entity);	
+	else 
 		entity->filterChildrenByName(prmitive_groups, true, BDDB_PRIMITIVE_SUFFIX, false);				
-	}
-
-	if (prmitive_groups.empty()) {
-		return;
-	}
+	
+	if (prmitive_groups.empty()) return;	
 
 	BDBaseHObject* baseObj = GetRootBDBase(entity);
 	if (!baseObj) {
@@ -11652,39 +11648,35 @@ void MainWindow::doActionBDPolyFitHypothesis()
 	if (prmitive_groups.size() > 1) {
 		ccLog::Warning("[BDRecon] - only the first primitive is calculated");
 	}
+	
 	if (polyfit_obj) {
 		polyfit_obj->clear();
 	}
-	ccHObject* hypoObj = PolyfitGenerateHypothesis(primitiveObj, polyfit_obj);
-	addToDB(hypoObj);
 
-// 	ccProgressDialog progDlg(true, this);
-// 	progDlg.setAutoClose(false);
-// 
-// 	if (progDlg.textCanBeEdited()) {
-// 		progDlg.setMethodTitle("Generate Hypothesis");
-// 		char infosBuffer[256];
-// 		sprintf(infosBuffer, "Processing %d primitive groups.", prmitive_groups.size());
-// 		progDlg.setInfo(infosBuffer);
-// 	}
-// 	CCLib::NormalizedProgress nprogress(&progDlg, prmitive_groups.size());
-// 
-// 	for (auto & primitiveObj : prmitive_groups) {
-// 		std::string building_name = GetBaseName(primitiveObj->getName()).toStdString();
-// 		Map* hypothesis_mesh_ = baseObj->building_hypomesh[building_name];
-// 		if (hypothesis_mesh_)	{
-// 			delete hypothesis_mesh_;
-// 		}
-// 		ccHObject* hypoObj = PolyfitGenerateHypothesis(primitiveObj, polyfit_obj);
-// 		addToDB(hypoObj);
-// 
-// 		if (!nprogress.oneStep()) {
-// 			progDlg.stop();
-// 			return;
-// 		}
-// 	}
-// 	progDlg.update(100.0f);
-// 	progDlg.stop();
+	ccHObject* hypoObj = PolyfitGenerateHypothesis(primitiveObj, polyfit_obj);
+	if (hypoObj) {
+		polyfit_obj->status = PolyFitObj::STT_hypomesh;
+		polyfit_obj->building_name = GetBaseName(primitiveObj->getName()).toStdString();
+		addToDB(hypoObj);
+	}
+	else {
+		polyfit_obj->status = PolyFitObj::STT_prepared;
+		return;
+	}
+
+	refreshAll();
+	UpdateUI();
+
+	QMessageBox::StandardButton rb = 
+	QMessageBox::question(this, "Compute Confidence?", "Compute Confidence Right Now", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+	if (rb == QMessageBox::No)
+		return;
+	
+	polyfit_obj->use_confidence = m_pbdrpfDlg->PolyfitcheckBox->isChecked();
+	polyfit_obj->data_fitting = m_pbdrpfDlg->PolyfitdoubleSpinBox1->value();
+	polyfit_obj->model_coverage = m_pbdrpfDlg->PolyfitdoubleSpinBox2->value();
+	polyfit_obj->model_complexity = m_pbdrpfDlg->PolyfitdoubleSpinBox3->value();
+	PolyfitComputeConfidence(hypoObj, polyfit_obj);
 
 	refreshAll();
 	UpdateUI();
@@ -11692,10 +11684,74 @@ void MainWindow::doActionBDPolyFitHypothesis()
 
 void MainWindow::doActionBDPolyFitConfidence()
 {
+	if (!haveSelection()) return;
+	ccHObject* entity = getSelectedEntities().front();
+
+	if (!entity->isGroup()) return;
+
+	ccHObject::Container prmitive_groups;
+	if (entity->getName().endsWith(BDDB_POLYFITHYPO_SUFFIX))
+		prmitive_groups.push_back(entity);
+	else
+		entity->filterChildrenByName(prmitive_groups, true, BDDB_POLYFITHYPO_SUFFIX, false);
+
+	if (prmitive_groups.empty()) return;
+
+	BDBaseHObject* baseObj = GetRootBDBase(entity);
+	if (!baseObj) {
+		dispToConsole("[BDRecon] PolyFit - Please open the main project file", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	ccHObject* HypoObj = prmitive_groups.front();
+	if (prmitive_groups.size() > 1) {
+		ccLog::Warning("[BDRecon] - only the first primitive is processed");
+	}
+
+	if (GetBaseName(HypoObj->getName()).toStdString() != polyfit_obj->building_name) {
+		dispToConsole("[BDRecon] PolyFit - Please generate hypothesis firstly", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	try {
+		polyfit_obj->use_confidence = m_pbdrpfDlg->PolyfitcheckBox->isChecked();
+		polyfit_obj->data_fitting = m_pbdrpfDlg->PolyfitdoubleSpinBox1->value();
+		polyfit_obj->model_coverage = m_pbdrpfDlg->PolyfitdoubleSpinBox2->value();
+		polyfit_obj->model_complexity = m_pbdrpfDlg->PolyfitdoubleSpinBox3->value();
+
+		if (polyfit_obj->status < 1) {
+			dispToConsole("[BDRecon] PolyFit - Please generate hypothesis firstly", ERR_CONSOLE_MESSAGE);
+			return;
+		}
+		if (polyfit_obj->status < 2) {
+			PolyfitComputeConfidence(HypoObj, polyfit_obj);
+			return;
+		}
+		//! update 
+		UpdateConfidence(HypoObj, polyfit_obj);
+	}
+	catch (const std::string& e) {
+		dispToConsole("[BDRecon] PolyFit - Please open the main project file", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDPolyFitSelection()
 {
+	if (!haveSelection()) { return; }
+	ccHObject* entity = getSelectedEntities().front();
+
+	if (!entity->isGroup()) {
+		return;
+	}
+}
+
+void MainWindow::doActionBDPolyFitSettings()
+{
+	m_pbdrpfDlg->setModal(false);
+	m_pbdrpfDlg->show();
 }
 
 void MainWindow::doActionBD3D4EM()

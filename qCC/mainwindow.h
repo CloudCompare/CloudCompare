@@ -476,6 +476,8 @@ private slots:
 
 	void doActionBDPolyFitSelection();
 
+	void doActionBDPolyFitSettings();
+
 	/// 3d4em
 	void doActionBD3D4EM();
 	/// Rename

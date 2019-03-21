@@ -1,3 +1,6 @@
+#ifndef QCORE_IO_HEADER
+#define QCORE_IO_HEADER
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -11,33 +14,27 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
+#include "ccIOFilterPluginInterface.h"
 
-#ifndef CC_PTX_FILTER_HEADER
-#define CC_PTX_FILTER_HEADER
 
-#include "FileIOFilter.h"
-
-//! PTX point cloud I/O filter
-class QCC_IO_LIB_API PTXFilter : public FileIOFilter
+class qCoreIO : public QObject, public ccIOFilterPluginInterface
 {
+	Q_OBJECT
+	Q_INTERFACES( ccIOFilterPluginInterface )
+	
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCoreIO" FILE "info.json")
+	
 public:
-
-	//static accessors
-	static inline QString GetFileFilter() { return "PTX cloud (*.ptx)"; }
-	static inline QString GetDefaultExtension() { return "ptx"; }
-
-	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
-
+	explicit qCoreIO( QObject *parent = nullptr );
+	
+protected:
+	void registerCommands( ccCommandLineInterface *inCmdLine ) override;
+	
+	QVector<FileIOFilter::Shared> getFilters() override;
 };
 
-#endif //CC_PTX_FILTER_HEADER
+#endif

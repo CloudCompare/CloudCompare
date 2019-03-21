@@ -11,36 +11,32 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                        COPYRIGHT: CNRS / OSUR                          #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_OFF_FILTER_HEADER
-#define CC_OFF_FILTER_HEADER
+#ifndef CC_SIMPLE_BIN_FILTER_HEADER
+#define CC_SIMPLE_BIN_FILTER_HEADER
 
 #include "FileIOFilter.h"
 
-//! OFF file I/O filter
-/** See http://people.sc.fsu.edu/~jburkardt/data/off/off.html
-**/
-class QCC_IO_LIB_API OFFFilter : public FileIOFilter
+//! Simple binary file (with attached text meta-file)
+class QCC_IO_LIB_API SimpleBinFilter : public FileIOFilter
 {
 public:
-
 	//static accessors
-	static inline QString GetFileFilter() { return "OFF mesh (*.off)"; }
-	static inline QString GetDefaultExtension() { return "off"; }
+	static inline QString GetFileFilter() { return "Simple binary file (*.sbf)"; }
+	static inline QString GetDefaultExtension() { return "sbf"; }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual bool exportSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
-
+	bool importSupported() const override { return true; }
+	bool exportSupported() const override { return true; }
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
+	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
+	QString getDefaultExtension() const override { return GetDefaultExtension(); }
+	bool canLoadExtension(const QString& upperCaseExt) const override;
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 };
 
-#endif //CC_OFF_FILTER_HEADER
+#endif //CC_SIMPLE_BIN_FILTER_HEADER

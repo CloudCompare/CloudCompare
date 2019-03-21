@@ -19,17 +19,17 @@
 #include "PdmsParser.h"
 
 //qCC_db
+#include <ccBox.h>
+#include <ccCone.h>
+#include <ccCylinder.h>
+#include <ccDish.h>
+#include <ccExtru.h>
 #include <ccLog.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
-#include <ccCylinder.h>
 #include <ccTorus.h>
-#include <ccBox.h>
-#include <ccCone.h>
-#include <ccDish.h>
-#include <ccExtru.h>
 
-#include <assert.h>
+#include <cassert>
 
 using namespace CCLib;
 
@@ -42,14 +42,20 @@ bool PDMSFilter::canLoadExtension(const QString& upperCaseExt) const
 
 bool PDMSFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
+	Q_UNUSED( type );
+	Q_UNUSED( multiple );
+	Q_UNUSED( exclusive );
+	
 	//not supported yet
 	return false;
 }
 
-typedef std::pair<PdmsTools::PdmsObjects::GenericItem*, ccHObject*> PdmsAndCCPair;
+using PdmsAndCCPair = std::pair<PdmsTools::PdmsObjects::GenericItem*, ccHObject*>;
 
 CC_FILE_ERROR PDMSFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
+	Q_UNUSED( parameters );
+	
 	PdmsParser parser;
 	PdmsFileSession session(qPrintable(filename)); //DGM: warning, toStdString doesn't preserve "local" characters
 
@@ -60,7 +66,7 @@ CC_FILE_ERROR PDMSFilter::loadFile(const QString& filename, ccHObject& container
 		assert(pdmsmodel);
 
 		std::vector< PdmsAndCCPair > treeSync;
-		treeSync.push_back(PdmsAndCCPair(pdmsmodel,&container));
+		treeSync.emplace_back(pdmsmodel,&container);
 
 		while (!treeSync.empty())
 		{
@@ -74,7 +80,7 @@ CC_FILE_ERROR PDMSFilter::loadFile(const QString& filename, ccHObject& container
 				//primitives
 				{
 					for (std::list<PdmsTools::PdmsObjects::DesignElement*>::const_iterator it = group->elements.begin(); it != group->elements.end(); ++it)
-						treeSync.push_back(PdmsAndCCPair(*it, currentPair.second));
+						treeSync.emplace_back(*it, currentPair.second);
 				}
 
 				//sub-groups
@@ -84,45 +90,45 @@ CC_FILE_ERROR PDMSFilter::loadFile(const QString& filename, ccHObject& container
 						ccHObject* subGroup = new ccHObject((*it)->name);
 						currentPair.second->addChild(subGroup);
 
-						treeSync.push_back(PdmsAndCCPair(*it, subGroup));
+						treeSync.emplace_back(*it, subGroup);
 					}
 				}
 			}
 			else
 			{
 				//Convert PDMS GenericItem to the corresponding ccHObject
-				ccMesh* primitive = 0;
+				ccMesh* primitive = nullptr;
 				QString unsupportedPrimitiveStr("unknown");
 				switch (currentPair.first->getType())
 				{
 				case PDMS_SCYLINDER:
 					{
 						PdmsTools::PdmsObjects::SCylinder* pdmsCyl = static_cast<PdmsTools::PdmsObjects::SCylinder*>(currentPair.first);
-						primitive = new ccCylinder(pdmsCyl->diameter / 2, pdmsCyl->height, 0, pdmsCyl->name);
+						primitive = new ccCylinder(pdmsCyl->diameter / 2, pdmsCyl->height, nullptr, pdmsCyl->name);
 					}
 					break;
 				case PDMS_CTORUS:
 					{
 						PdmsTools::PdmsObjects::CTorus* pdmsCTor = static_cast<PdmsTools::PdmsObjects::CTorus*>(currentPair.first);
-						primitive = new ccTorus(pdmsCTor->inside_radius, pdmsCTor->outside_radius, pdmsCTor->angle/**M_PI/180.0*/, false, 0, 0, pdmsCTor->name);
+						primitive = new ccTorus(pdmsCTor->inside_radius, pdmsCTor->outside_radius, pdmsCTor->angle/**M_PI/180.0*/, false, 0, nullptr, pdmsCTor->name);
 					}
 					break;
 				case PDMS_RTORUS:
 					{
 						PdmsTools::PdmsObjects::RTorus* pdmsRTor = static_cast<PdmsTools::PdmsObjects::RTorus*>(currentPair.first);
-						primitive = new ccTorus(pdmsRTor->inside_radius, pdmsRTor->outside_radius, pdmsRTor->angle/**M_PI/180.0*/, false, pdmsRTor->height, 0, pdmsRTor->name);
+						primitive = new ccTorus(pdmsRTor->inside_radius, pdmsRTor->outside_radius, pdmsRTor->angle/**M_PI/180.0*/, false, pdmsRTor->height, nullptr, pdmsRTor->name);
 					}
 					break;
 				case PDMS_DISH:
 					{
 						PdmsTools::PdmsObjects::Dish* pdmsDish = static_cast<PdmsTools::PdmsObjects::Dish*>(currentPair.first);
-						primitive = new ccDish(pdmsDish->diameter / 2, pdmsDish->height, pdmsDish->radius, 0, pdmsDish->name);
+						primitive = new ccDish(pdmsDish->diameter / 2, pdmsDish->height, pdmsDish->radius, nullptr, pdmsDish->name);
 					}
 					break;
 				case PDMS_CONE:
 					{
 						PdmsTools::PdmsObjects::Cone* pdmsCone = static_cast<PdmsTools::PdmsObjects::Cone*>(currentPair.first);
-						primitive = new ccCone(pdmsCone->dbottom / 2, pdmsCone->dtop / 2, pdmsCone->height, 0, 0, 0, pdmsCone->name);
+						primitive = new ccCone(pdmsCone->dbottom / 2, pdmsCone->dtop / 2, pdmsCone->height, 0, 0, nullptr, pdmsCone->name);
 					}
 					break;
 				case PDMS_PYRAMID:
@@ -131,13 +137,13 @@ CC_FILE_ERROR PDMSFilter::loadFile(const QString& filename, ccHObject& container
 				case PDMS_SNOUT:
 					{
 						PdmsTools::PdmsObjects::Snout* pdmsSnout = static_cast<PdmsTools::PdmsObjects::Snout*>(currentPair.first);
-						primitive = new ccCone(pdmsSnout->dbottom / 2, pdmsSnout->dtop / 2, pdmsSnout->height, pdmsSnout->xoff, pdmsSnout->yoff, 0, pdmsSnout->name);
+						primitive = new ccCone(pdmsSnout->dbottom / 2, pdmsSnout->dtop / 2, pdmsSnout->height, pdmsSnout->xoff, pdmsSnout->yoff, nullptr, pdmsSnout->name);
 					}
 					break;
 				case PDMS_BOX:
 					{
 						PdmsTools::PdmsObjects::Box* pdmsBox = static_cast<PdmsTools::PdmsObjects::Box*>(currentPair.first);
-						primitive = new ccBox(pdmsBox->lengths, 0, pdmsBox->name);
+						primitive = new ccBox(pdmsBox->lengths, nullptr, pdmsBox->name);
 					}
 					break;
 				case PDMS_NBOX:
@@ -154,7 +160,7 @@ CC_FILE_ERROR PDMSFilter::loadFile(const QString& filename, ccHObject& container
 							for (std::list<PdmsTools::PdmsObjects::Vertex*>::const_iterator it = pdmsExtru->loop->loop.begin(); it != pdmsExtru->loop->loop.end(); ++it)
 								profile.push_back((*it)->v);
 
-							primitive = new ccExtru(profile, pdmsExtru->height, 0, pdmsExtru->name);
+							primitive = new ccExtru(profile, pdmsExtru->height, nullptr, pdmsExtru->name);
 						}
 					}
 					break;

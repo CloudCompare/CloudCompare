@@ -18,10 +18,10 @@
 #include "PdmsParser.h"
 
 //system
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <stdio.h>
 
 //////////// STRING HANDLING ////////////////////
 inline void upperStr(char *s) { while (*s) { if (((*s) >= 'a') && ((*s) <= 'z')) (*s) += 'A' - 'a'; s++; } }
@@ -176,6 +176,7 @@ bool PdmsLexer::gotoNextToken()
 					metaGroupMask = leave_meta_group_mask;
 					break;
 				}
+				break;
 			case PDMS_UNUSED:
 				currentToken = PDMS_INVALID_TOKEN;
 				break;

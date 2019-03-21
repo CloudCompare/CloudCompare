@@ -56,7 +56,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	//look for either a cloud or a mesh
 	ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
 	unsigned triCount = 0;
-	ccGenericPointCloud* vertices = 0;
+	ccGenericPointCloud* vertices = nullptr;
 	if (mesh)
 	{
 		//input entity is a mesh
@@ -235,8 +235,8 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 	nextline = inFile.readLine();
 	ccLog::Print(QString("[VTK] ") + nextline);
 
-	ccMesh* mesh = 0;
-	ccPointCloud* vertices = 0;
+	ccMesh* mesh = nullptr;
+	ccPointCloud* vertices = nullptr;
 
 	std::vector<int> indexes; //global so as to avoid unnecessary mem. allocations
 	QString lastSfName;
@@ -655,7 +655,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 
 			//create scalar field?
-			ccScalarField* sf = 0;
+			ccScalarField* sf = nullptr;
 			if (createSF)
 			{
 				sf = new ccScalarField(qPrintable(lastSfName));
@@ -811,15 +811,15 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 	if (vertices && vertices->size() == 0)
 	{
 		delete vertices;
-		vertices = 0;
+		vertices = nullptr;
 		if (error == CC_FERR_NO_ERROR)
 			error = CC_FERR_NO_LOAD;
 	}
 
-	if (mesh && (mesh->size() == 0 || vertices == 0))
+	if (mesh && (mesh->size() == 0 || vertices == nullptr))
 	{
 		delete mesh;
-		mesh = 0;
+		mesh = nullptr;
 		if (error == CC_FERR_NO_ERROR)
 			error = CC_FERR_NO_LOAD;
 	}

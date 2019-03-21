@@ -46,6 +46,8 @@ bool OFFFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 
 CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
+	Q_UNUSED( parameters );
+	
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
 
@@ -298,7 +300,7 @@ CC_FILE_ERROR OFFFilter::loadFile(const QString& filename, ccHObject& container,
 		ccLog::Warning("[OFF] Failed to load any polygon!");
 		mesh->detachChild(vertices);
 		delete mesh;
-		mesh = 0;
+		mesh = nullptr;
 
 		container.addChild(vertices);
 		vertices->setEnabled(true);

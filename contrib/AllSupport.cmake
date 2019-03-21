@@ -8,8 +8,6 @@ include( contrib/E57Support.cmake )
 include( contrib/3DXSupport.cmake )
 # Gamepads support
 include( contrib/GamepadSupport.cmake )
-# PDMS support
-OPTION( OPTION_SUPPORT_MAC_PDMS_FORMAT "Build with .mac PDMS format" OFF )
 # DXF support
 include( contrib/DxfLibSupport.cmake )
 # GDAL support
@@ -39,10 +37,5 @@ function( target_link_contrib ) # 2 arguments: ARGV0 = project name / ARGV1 = sh
 	target_link_SHAPE_LIB( ${ARGV0} )
 	#OCULUS support
 	#target_link_OCULUS_SDK( ${ARGV0} )
-	
-	# PDMS support (see qCC_io)
-	if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_PDMS_SUPPORT )
-	endif()
 
 endfunction()

@@ -33,8 +33,52 @@
 #include <cassert>
 #include <cstring>
 
+namespace
+{
+	struct edge
+	{
+		int edgeIndex;
+		bool positif;
+		unsigned theOtherPoint;
+		edge* nextEdge;
+	};
+	
+	static void ReleaseEdgeList(edge**& theEdges, unsigned numberOfVertexes, CCLib::NormalizedProgress* nprogress = nullptr)
+	{
+		for (unsigned i = 0; i < numberOfVertexes; ++i)
+		{
+			if (theEdges[i])
+			{
+				edge* e = theEdges[i]->nextEdge;
+				while (e)
+				{
+					edge* nextE = e->nextEdge;
+					delete e;
+					e = nextE;
+				}
+				delete theEdges[i];
+			}
+	
+			if (nprogress)
+			{
+				nprogress->oneStep();
+			}
+		}
+		delete[] theEdges;
+		theEdges = nullptr;
+	}
+	
+	struct faceIndexes
+	{
+		int faceIndex;
+		faceIndexes* nextFace;
+	};	
+}
+
 bool MAFilter::canLoadExtension(const QString& upperCaseExt) const
 {
+	Q_UNUSED( upperCaseExt );
+	
 	//import not supported
 	return false;
 }
@@ -49,45 +93,6 @@ bool MAFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) cons
 	}
 	return false;
 }
-
-struct edge
-{
-	int edgeIndex;
-	bool positif;
-	unsigned theOtherPoint;
-	edge* nextEdge;
-};
-
-void ReleaseEdgeList(edge**& theEdges, unsigned numberOfVertexes, CCLib::NormalizedProgress* nprogress = 0)
-{
-	for (unsigned i = 0; i < numberOfVertexes; ++i)
-	{
-		if (theEdges[i])
-		{
-			edge* e = theEdges[i]->nextEdge;
-			while (e)
-			{
-				edge* nextE = e->nextEdge;
-				delete e;
-				e = nextE;
-			}
-			delete theEdges[i];
-		}
-
-		if (nprogress)
-		{
-			nprogress->oneStep();
-		}
-	}
-	delete[] theEdges;
-	theEdges = 0;
-}
-
-struct faceIndexes
-{
-	int faceIndex;
-	faceIndexes* nextFace;
-};
 
 CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
@@ -132,7 +137,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		return CC_FERR_WRITING;
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	const int coloursAdjustment = (hasColors ? 1 : 0);
 	if (parameters.parentWidget)
 	{
@@ -426,7 +431,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 
 	//free memory
 	{
-		ReleaseEdgeList(theEdges, numberOfVertexes, pDlg ? &nprogress : 0);
+		ReleaseEdgeList(theEdges, numberOfVertexes, pDlg ? &nprogress : nullptr);
 	}
 
 	//bonus track
@@ -543,7 +548,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 			}
 		}
 		delete[] theFacesIndexes;
-		theFacesIndexes = 0;
+		theFacesIndexes = nullptr;
 
 		if (fprintf(fp,"\tsetAttr \".cn\" -type \"string\" \"colorSet%i\";\n",currentMesh+1) < 0)
 		{

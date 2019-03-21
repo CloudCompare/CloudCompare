@@ -15,29 +15,26 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_OBJ_FILTER_HEADER
-#define CC_OBJ_FILTER_HEADER
+#ifndef CC_PDMS_FILTER_HEADER
+#define CC_PDMS_FILTER_HEADER
 
 #include "FileIOFilter.h"
 
-//! Wavefront meshes file I/O filter
-class QCC_IO_LIB_API ObjFilter : public FileIOFilter
+//! PDMS .mac file I/O filter
+class QCC_IO_LIB_API PDMSFilter : public FileIOFilter
 {
 public:
-
 	//static accessors
-	static inline QString GetFileFilter() { return "OBJ mesh (*.obj)"; }
-	static inline QString GetDefaultExtension() { return "obj"; }
+	static inline QString GetFileFilter() { return "PDMS primitives (*.pdms *.pdmsmac *.mac)"; }
+	static inline QString GetDefaultExtension() { return "pdms"; }
 
 	//inherited from FileIOFilter
 	bool importSupported() const override { return true; }
-	bool exportSupported() const override { return true; }
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
+	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
 	QString getDefaultExtension() const override { return GetDefaultExtension(); }
 	bool canLoadExtension(const QString& upperCaseExt) const override;
 	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 };
 
-#endif //CC_OBJ_FILTER_HEADER
+#endif //CC_PDMS_FILTER_HEADER

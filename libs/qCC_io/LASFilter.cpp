@@ -479,9 +479,9 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	{
 		bool ok = false;
 		int minor_version = minor_version_meta_data.toInt(&ok);
-		if (ok)
+		if (ok && minor_version != 0) // PDAL can read but not write LAS 1.0
 			writerOptions.add("minor_version", minor_version);
-		else
+		else if (!ok)
 			ccLog::Warning(QString("Could not convert minor_version to int"));
 	}
 	const QVariant point_format_meta_data = theCloud->getMetaData(LAS_POINT_FORMAT_META_DATA);

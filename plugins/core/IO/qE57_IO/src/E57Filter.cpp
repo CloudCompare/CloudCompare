@@ -18,8 +18,6 @@
 #include "E57Filter.h"
 #include "FileIO.h"
 
-#ifdef CC_E57_SUPPORT
-
 //Local
 #include "E57Header.h"
 
@@ -2368,5 +2366,3 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 
 	return result;
 }
-
-#endif

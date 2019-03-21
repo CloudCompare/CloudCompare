@@ -20,8 +20,6 @@
 
 #include "FileIOFilter.h"
 
-#ifdef CC_E57_SUPPORT
-
 //! E57 filter (based on libE57)
 class QCC_IO_LIB_API E57Filter : public FileIOFilter
 {
@@ -35,12 +33,10 @@ public:
 	bool exportSupported() const override { return true; }
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
+	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
 	QString getDefaultExtension() const override { return GetDefaultExtension(); }
 	bool canLoadExtension(const QString& upperCaseExt) const override;
 	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 };
-
-#endif //CC_E57_SUPPORT
 
 #endif //CC_E57_FILTER_HEADER

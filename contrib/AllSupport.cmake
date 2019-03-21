@@ -2,8 +2,6 @@
 
 # PDAL support
 include( contrib/PDALSupport.cmake )
-# E57 support
-include( contrib/E57Support.cmake )
 # 3DXWARE (3dConnexion devices) support
 include( contrib/3DXSupport.cmake )
 # Gamepads support
@@ -27,8 +25,6 @@ function( target_link_contrib ) # 2 arguments: ARGV0 = project name / ARGV1 = sh
 	target_link_PDAL( ${ARGV0} ${ARGV1} )
 	#GDAL support
 	target_link_GDAL( ${ARGV0} ${ARGV1} )
-	#E57 support
-	target_link_LIBE57FORMAT( ${ARGV0} )
 	#DXF support
 	target_link_DXFLIB( ${ARGV0} )
 	#FBX support

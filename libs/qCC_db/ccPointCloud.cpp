@@ -465,6 +465,18 @@ void ccPointCloud::notifyGeometryUpdate()
 	clearLOD();
 }
 
+void ccPointCloud::setDisplay(ccGenericGLDisplay* win)
+{
+	if (m_currentDisplay && win != m_currentDisplay)
+	{
+		//be sure to release the VBOs before switching to another (or no) display!
+		releaseVBOs();
+	}
+
+	BaseClass::setDisplay(win);
+}
+
+
 ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=0*/, bool ignoreChildren/*=false*/)
 {
 	if (destCloud && !destCloud->isA(CC_TYPES::POINT_CLOUD))

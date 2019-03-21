@@ -446,6 +446,7 @@ public: //other methods
 	bool hasScalarFields() const override;
 	bool hasDisplayedScalarField() const override;
 	void removeFromDisplay(const ccGenericGLDisplay* win) override; //for proper VBO release
+	void setDisplay(ccGenericGLDisplay* win) override;
 
 	//inherited from CCLib::GenericCloud
 	unsigned char testVisibility(const CCVector3& P) const override;

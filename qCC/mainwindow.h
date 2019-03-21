@@ -65,6 +65,8 @@ class bdrPolyFitDlg;
 class bdr3D4EMDlg;
 class bdrPlaneSegDlg;
 
+class PolyFitObj;
+
 namespace Ui {
 	class MainWindow;
 } 
@@ -657,6 +659,7 @@ private:
 	bdrDeductionDlg* m_pbdrddtDlg;
 	bdrPolyFitDlg* m_pbdrpfDlg;
 	bdr3D4EMDlg* m_pbdr3d4emDlg;
+	PolyFitObj* polyfit_obj;
 };
 
 #endif

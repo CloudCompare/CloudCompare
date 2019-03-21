@@ -443,7 +443,7 @@ unsigned ccHObject::filterChildrenByName( Container& filteredChildren,
 	for (auto child : m_children)
 	{
 		QString child_name = child->getName();
-		if ((!strict && child_name.indexOf(filter))
+		if ((!strict && child_name.indexOf(filter) >= 0)
 			|| (strict && child_name == filter))
 		{
 			if (!inDisplay || child->getDisplay() == inDisplay)

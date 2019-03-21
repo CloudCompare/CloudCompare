@@ -207,6 +207,7 @@ MainWindow::MainWindow()
 	, m_pbdrddtDlg(nullptr)
 	, m_pbdrpfDlg(nullptr)
 	, m_pbdr3d4emDlg(nullptr)
+	, polyfit_obj(nullptr)
 {
 	m_UI->setupUi( this );
 
@@ -11623,7 +11624,7 @@ void MainWindow::doActionBDPolyFit()
 }
 
 #include "polyfit/method/hypothesis_generator.h"
-PolyFitObj* polyfit_obj;
+
 void MainWindow::doActionBDPolyFitHypothesis()
 {
 	if (!haveSelection()) return; 
@@ -11652,6 +11653,9 @@ void MainWindow::doActionBDPolyFitHypothesis()
 	if (polyfit_obj) {
 		polyfit_obj->clear();
 	}
+	else {
+		polyfit_obj = new PolyFitObj();
+	}
 
 	ccHObject* hypoObj = PolyfitGenerateHypothesis(primitiveObj, polyfit_obj);
 	if (hypoObj) {
@@ -11672,6 +11676,13 @@ void MainWindow::doActionBDPolyFitHypothesis()
 	if (rb == QMessageBox::No)
 		return;
 	
+	if (!m_pbdrpfDlg) {
+		m_pbdrpfDlg = new bdrPolyFitDlg(this);
+		if (!m_pbdrpfDlg->exec()) {
+			return;
+		}
+	}
+
 	polyfit_obj->use_confidence = m_pbdrpfDlg->PolyfitcheckBox->isChecked();
 	polyfit_obj->data_fitting = m_pbdrpfDlg->PolyfitdoubleSpinBox1->value();
 	polyfit_obj->model_coverage = m_pbdrpfDlg->PolyfitdoubleSpinBox2->value();
@@ -11718,12 +11729,13 @@ void MainWindow::doActionBDPolyFitConfidence()
 		polyfit_obj->model_coverage = m_pbdrpfDlg->PolyfitdoubleSpinBox2->value();
 		polyfit_obj->model_complexity = m_pbdrpfDlg->PolyfitdoubleSpinBox3->value();
 
-		if (polyfit_obj->status < 1) {
+		if (polyfit_obj->status < PolyFitObj::STT_hypomesh) {
 			dispToConsole("[BDRecon] PolyFit - Please generate hypothesis firstly", ERR_CONSOLE_MESSAGE);
 			return;
 		}
-		if (polyfit_obj->status < 2) {
+		if (polyfit_obj->status < PolyFitObj::STT_confidence) {
 			PolyfitComputeConfidence(HypoObj, polyfit_obj);
+			polyfit_obj->status = PolyFitObj::STT_confidence;
 			return;
 		}
 		//! update 
@@ -11740,17 +11752,65 @@ void MainWindow::doActionBDPolyFitConfidence()
 
 void MainWindow::doActionBDPolyFitSelection()
 {
-	if (!haveSelection()) { return; }
+	if (!haveSelection()) return;
 	ccHObject* entity = getSelectedEntities().front();
 
-	if (!entity->isGroup()) {
+	if (!entity->isGroup()) return;
+
+	ccHObject::Container prmitive_groups;
+	if (entity->getName().endsWith(BDDB_POLYFITHYPO_SUFFIX))
+		prmitive_groups.push_back(entity);
+	else
+		entity->filterChildrenByName(prmitive_groups, true, BDDB_POLYFITHYPO_SUFFIX, false);
+
+	if (prmitive_groups.empty()) return;
+
+	BDBaseHObject* baseObj = GetRootBDBase(entity);
+	if (!baseObj) {
+		dispToConsole("[BDRecon] PolyFit - Please open the main project file", ERR_CONSOLE_MESSAGE);
 		return;
 	}
+	ccHObject* HypoObj = prmitive_groups.front();
+	if (prmitive_groups.size() > 1) {
+		ccLog::Warning("[BDRecon] - only the first primitive is processed");
+	}
+
+	if (GetBaseName(HypoObj->getName()).toStdString() != polyfit_obj->building_name) {
+		dispToConsole("[BDRecon] PolyFit - Please generate hypothesis firstly", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	try {
+		polyfit_obj->use_confidence = m_pbdrpfDlg->PolyfitcheckBox->isChecked();
+		polyfit_obj->data_fitting = m_pbdrpfDlg->PolyfitdoubleSpinBox1->value();
+		polyfit_obj->model_coverage = m_pbdrpfDlg->PolyfitdoubleSpinBox2->value();
+		polyfit_obj->model_complexity = m_pbdrpfDlg->PolyfitdoubleSpinBox3->value();
+
+		if (polyfit_obj->status < PolyFitObj::STT_confidence) {
+			dispToConsole("[BDRecon] PolyFit - no confidence calculated", ERR_CONSOLE_MESSAGE);
+			return;
+		}
+		ccHObject* optmizeObj = PolyfitFaceSelection(HypoObj, polyfit_obj);
+		if (optmizeObj)	{
+			polyfit_obj->status = PolyFitObj::STT_optimized;
+			addToDB(optmizeObj);
+			polyfit_obj->OutputResultToObjFile(baseObj);
+		}
+	}
+	catch (const std::string& e) {
+		dispToConsole("[BDRecon] PolyFit - Please open the main project file", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDPolyFitSettings()
 {
+	if (!m_pbdrpfDlg) m_pbdrpfDlg = new bdrPolyFitDlg(this);
 	m_pbdrpfDlg->setModal(false);
+	m_pbdrpfDlg->setWindowModality(Qt::NonModal);
 	m_pbdrpfDlg->show();
 }
 

@@ -28,6 +28,8 @@
 #include "QFileInfo"
 
 #ifdef USE_STOCKER
+#include "polyfit/model/map_enumerator.h"
+#include "polyfit/model/map_serializer.h"
 using namespace stocker;
 #endif // USE_STOCKER
 
@@ -805,7 +807,7 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 	polyfit_obj->GenerateHypothesis();
 
 	if (!polyfit_obj->hypothesis_mesh_) {
-		throw "cannot generate hypothesis mesh";
+		throw std::runtime_error("cannot generate hypothesis mesh");
 	}
 	ccHObject* hypoObj = new ccHObject(GetBaseName(primitive_group->getName()) + BDDB_POLYFITHYPO_SUFFIX);
 
@@ -874,7 +876,7 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 		/// get plane by name
 		std::string support_plane_name = facet_attrib_supporting_vertex_group_[f]->label();
 		ccHObject* plane_entity = GetPlaneEntityFromPrimGroup(hypoObj, support_plane_name.c_str());
-		if (!plane_entity) throw "cannot find plane";
+		if (!plane_entity) throw std::runtime_error("cannot find plane");
 
 		Polygon3d contour_polygon = Geom::facet_polygon(f);
 		vector<CCVector3> ccv_poly;
@@ -910,7 +912,7 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj)
 {
 	if (polyfit_obj->building_name != GetBaseName(hypothesis_group->getName()).toStdString() || polyfit_obj->status < PolyFitObj::STT_hypomesh) {
-		throw "please generate hypothesis firstly";
+		throw std::runtime_error("please generate hypothesis firstly");
 		return;
 	}
 	ccHObject::Container planeObjs = GetEnabledObjFromGroup(hypothesis_group, CC_TYPES::PLANE, true, true);
@@ -934,7 +936,7 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 		std::string support_plane_name = facet_attrib_supporting_vertex_group_[f]->label();
 		
 		ccHObject* plane_entity = GetPlaneEntityFromPrimGroup(hypothesis_group, support_plane_name.c_str());
-		if (!plane_entity) throw "cannot find plane";
+		if (!plane_entity) throw std::runtime_error("cannot find plane");
 
 		ccHObject::Container container_find = GetEnabledObjFromGroup(plane_entity, CC_TYPES::FACET, true, false);
 		for (auto & child : container_find) {
@@ -1013,9 +1015,34 @@ ccHObject* PolyfitFaceSelection(ccHObject* hypothesis_group, PolyFitObj * polyfi
 
 	ccHObject* polyfit_model = nullptr;
 	if (!polyfit_obj->optimized_mesh_) return nullptr;
+	polyfit_model = new ccHObject(GetBaseName(hypothesis_group->getName()) + BDDB_POLYFIOPTM_SUFFIX);
 	
-	// plane, and sub facet
+	// TODO: display
+	// Plane, and sub facet
+	// find subfacet by plane
 
+	Map* mesh = Geom::duplicate(polyfit_obj->optimized_mesh_);
+	Attribute<Map::Vertex, int>	vertex_id(mesh->vertex_attribute_manager());
+	MapEnumerator::enumerate_vertices(const_cast<Map*>(mesh), vertex_id, 0);
+
+	Map::Vertex_const_iterator begin = mesh->vertices_begin();
+
+	vector<Contour3d> all_contour_points;
+	//! subfacet
+	FOR_EACH_FACET_CONST(Map, mesh, it) {
+		Map::Halfedge* jt = it->halfedge();
+		it->label();
+		Contour3d contour_points;
+		do {
+			vec3 pt = (begin + vertex_id[jt->vertex()])->point();
+			contour_points.push_back({ pt.data()[0],pt.data()[1],pt.data()[2] });
+			jt = jt->next();
+		} while (jt != it->halfedge());
+	}
+
+	if (hypothesis_group->getParent()) {
+		hypothesis_group->getParent()->addChild(polyfit_model);
+	}
 	return polyfit_model;
 }
 
@@ -1056,7 +1083,7 @@ void PolyFitObj::initGenerator(ccHObject::Container planeObjs)
 void PolyFitObj::GenerateHypothesis()
 {
 	if (!hypothesis_) {
-		throw "no hypothesis";
+		throw std::runtime_error("no hypothesis");
 		return;
 	}
 	if (hypothesis_mesh_) {
@@ -1076,9 +1103,14 @@ void PolyFitObj::ComputeConfidence()
 void PolyFitObj::FacetOptimization()
 {
 	if (status < STT_confidence){
-		throw "no available hypothesis and confidence";
+		throw std::runtime_error("no available hypothesis and confidence");
 		return;
 	}
+	Map* mesh = Geom::duplicate(hypothesis_mesh_);
+	PointSet* point_set_ = hypothesis_->point_set();
+	const HypothesisGenerator::Adjacency& adjacency = hypothesis_->extract_adjacency(mesh);
+	FaceSelection selector(point_set_, mesh);
+	selector.optimize_cc(adjacency, valid_group_facet_name);
 }
 
 void PolyFitObj::UpdateValidFacet(std::vector<stocker::String_String> valid_update)
@@ -1090,6 +1122,60 @@ void PolyFitObj::UpdateValidFacet(std::vector<stocker::String_String> valid_upda
 		}
 	}
 	swap(valid_group_facet_name, valid_for_selection);
+}
+
+bool PolyFitObj::OutputResultToObjFile(BDBaseHObject* baseObj)
+{
+	if (status < STT_optimized) {
+		return false;
+	}
+	auto& bd = baseObj->block_prj.m_builder.sbuild.find(stocker::BuilderBase::BuildNode::Create(building_name));
+	std::string file_path = (*bd)->data.file_path.model_dir + building_name + MODEL_LOD3_OBJ_SUFFIX;
+
+	std::ofstream out(file_path.c_str());
+	if (out.fail()) {
+		std::string error_info = "cannot open file: " + file_path;
+		throw std::runtime_error(error_info.c_str());
+		return false;
+	}
+	out.precision(16);
+	// Obj files numbering starts with 1
+	Map* mesh = Geom::duplicate(optimized_mesh_);
+	Attribute<Map::Vertex, int>	vertex_id(mesh->vertex_attribute_manager());
+	MapEnumerator::enumerate_vertices(const_cast<Map*>(mesh), vertex_id, 1);
+
+	// Output Vertices
+	
+	FOR_EACH_VERTEX_CONST(Map, mesh, it) {
+		vec3 pt = it->point();
+		
+		Vec3d pt_ = baseObj->ToGlobal(Vec3d(pt.data()[0], pt.data()[1], pt.data()[2]));
+		out << "v " << pt_ << std::endl;
+	}
+
+	// Output facets
+	FOR_EACH_FACET_CONST(Map, mesh, it) {
+		Map::Halfedge* jt = it->halfedge();
+		out << "f ";
+		do {
+			out << vertex_id[jt->vertex()] << " ";
+			jt = jt->next();
+		} while (jt != it->halfedge());
+		out << std::endl;
+	}
+
+	MapVertexLock is_locked(const_cast<Map*>(mesh));
+	FOR_EACH_VERTEX_CONST(Map, mesh, it) {
+		if (is_locked[it]) {
+			out << "# anchor " << vertex_id[it] << std::endl;
+		}
+	}
+}
+
+bool PolyFitObj::FindValidFacet(std::string name_plane, std::string name_facet)
+{
+	return find(valid_group_facet_name.begin(),	valid_group_facet_name.end(),
+		String_String(name_plane, name_facet)) != valid_group_facet_name.end();
 }
 
 void PolyFitObj::UpdateConfidence(ccHObject::Container PlaneObjs)
@@ -1104,6 +1190,9 @@ void PolyFitObj::UpdateConfidence(ccHObject::Container PlaneObjs)
 
 		for (auto & f_ : facets_) {
 			if (f_->isEnabled()) {
+				if (!FindValidFacet(planeObj->getName().toStdString(), f_->getName().toStdString())) 
+					continue;
+				
 				ccFacet* facet = ccHObjectCaster::ToFacet(f_);
 				double confidence = facet->getConfidence();
 
@@ -1115,8 +1204,7 @@ void PolyFitObj::UpdateConfidence(ccHObject::Container PlaneObjs)
 						g->label() == planeObj->getName().toStdString()) {
 						facet_attrib_confidence_[f] = confidence;
 						break;
-					}
-					
+					}					
 				}
 			}
 		}

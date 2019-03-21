@@ -70,6 +70,7 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
 #define BDDB_PRIMITIVE_SUFFIX		".primitive"
 #define BDDB_POLYFITHYPO_SUFFIX		".hypothesis"
+#define BDDB_POLYFIOPTM_SUFFIX		".optimized"
 #define BDDB_IMAGELINE_SUFFIX		".imageline"
 #define BDDB_PLANESEG_PREFIX		"Plane"
 #define BDDB_BOUNDARY_PREFIX		"Boundary"
@@ -134,7 +135,11 @@ public:
 	//! only update valid planes
 	void UpdateConfidence(ccHObject::Container facetObjs);
 
+	bool OutputResultToObjFile(BDBaseHObject* baseObj);
+
 private:
+
+	bool FindValidFacet(std::string name_plane, std::string name_facet);
 
 public:
 //	PointSet::Ptr			point_set_;

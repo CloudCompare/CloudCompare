@@ -151,6 +151,11 @@
 #include <iostream>
 #include <random>
 
+#ifdef USE_STOCKER
+#include "polyfit/basic/logger.h"
+#endif // USE_STOCKER
+
+
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance  = nullptr;
 
@@ -310,6 +315,12 @@ MainWindow::MainWindow()
 #endif
 	
 	ccConsole::Print("CloudCompare started!");
+
+#ifdef USE_STOCKER
+	Logger::initialize();
+	Logger::instance()->set_value(Logger::LOG_REGISTER_FEATURES, "*");
+#endif // USE_STOCKER
+
 }
 
 MainWindow::~MainWindow()
@@ -344,6 +355,8 @@ MainWindow::~MainWindow()
 	m_pbdrddtDlg = nullptr;
 	m_pbdrpfDlg = nullptr;
 	m_pbdr3d4emDlg = nullptr;
+
+	Logger::terminate();
 
 	//release all 'overlay' dialogs
 	while (!m_mdiDialogs.empty())
@@ -11657,7 +11670,15 @@ void MainWindow::doActionBDPolyFitHypothesis()
 		polyfit_obj = new PolyFitObj();
 	}
 
-	ccHObject* hypoObj = PolyfitGenerateHypothesis(primitiveObj, polyfit_obj);
+	ccHObject* hypoObj = nullptr;
+	try	{
+		 hypoObj = PolyfitGenerateHypothesis(primitiveObj, polyfit_obj);
+	}
+	catch (std::runtime_error& e) {
+		dispToConsole(QString("[BDRecon] - hypothesis generated error: ") + e.what(), ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	
 	if (hypoObj) {
 		polyfit_obj->status = PolyFitObj::STT_hypomesh;
 		polyfit_obj->building_name = GetBaseName(primitiveObj->getName()).toStdString();
@@ -11687,8 +11708,16 @@ void MainWindow::doActionBDPolyFitHypothesis()
 	polyfit_obj->data_fitting = m_pbdrpfDlg->PolyfitdoubleSpinBox1->value();
 	polyfit_obj->model_coverage = m_pbdrpfDlg->PolyfitdoubleSpinBox2->value();
 	polyfit_obj->model_complexity = m_pbdrpfDlg->PolyfitdoubleSpinBox3->value();
-	PolyfitComputeConfidence(hypoObj, polyfit_obj);
 
+	try	{
+		PolyfitComputeConfidence(hypoObj, polyfit_obj);
+		polyfit_obj->status = PolyFitObj::STT_confidence;
+	}
+	catch (std::runtime_error& e) {
+		dispToConsole(QString("[BDRecon] - confidence calculated error: ") + e.what(), ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	
 	refreshAll();
 	UpdateUI();
 }
@@ -11733,16 +11762,18 @@ void MainWindow::doActionBDPolyFitConfidence()
 			dispToConsole("[BDRecon] PolyFit - Please generate hypothesis firstly", ERR_CONSOLE_MESSAGE);
 			return;
 		}
-		if (polyfit_obj->status < PolyFitObj::STT_confidence) {
+		else if (polyfit_obj->status < PolyFitObj::STT_confidence) {			
 			PolyfitComputeConfidence(HypoObj, polyfit_obj);
-			polyfit_obj->status = PolyFitObj::STT_confidence;
-			return;
+			polyfit_obj->status = PolyFitObj::STT_confidence;			
 		}
-		//! update 
-		UpdateConfidence(HypoObj, polyfit_obj);
+		else {
+			//! update 
+			UpdateConfidence(HypoObj, polyfit_obj);
+			polyfit_obj->status = PolyFitObj::STT_confidence;
+		}		
 	}
-	catch (const std::string& e) {
-		dispToConsole("[BDRecon] PolyFit - Please open the main project file", ERR_CONSOLE_MESSAGE);
+	catch (std::runtime_error& e) {
+		dispToConsole(QString("[BDRecon] - confidence calculated error: ") + e.what(), ERR_CONSOLE_MESSAGE);
 		return;
 	}
 	

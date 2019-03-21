@@ -1097,6 +1097,8 @@ void PolyFitObj::GenerateHypothesis()
 	if (hypothesis_mesh_) {
 		hypothesis_mesh_.forget();
 	}
+	hypothesis_->strict_intersect = strict_intersection;
+	hypothesis_->strict_ints_snap_squared = snap_intersection * snap_intersection;
 	hypothesis_mesh_ = hypothesis_->generate();
 }
 

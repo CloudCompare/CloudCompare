@@ -160,6 +160,8 @@ public:
 	double model_coverage;
 	double model_complexity;
 	bool use_confidence;
+	bool strict_intersection;
+	double snap_intersection;
 	enum POLYFIT_STUTAS
 	{
 		STT_prepared,

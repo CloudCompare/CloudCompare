@@ -11613,6 +11613,20 @@ void MainWindow::doActionBDPolyFitHypothesis()
 	else {
 		polyfit_obj = new PolyFitObj();
 	}
+
+	if (!m_pbdrpfDlg) {
+		m_pbdrpfDlg = new bdrPolyFitDlg(this);
+		if (!m_pbdrpfDlg->exec()) {
+			return;
+		}
+	}
+
+	polyfit_obj->strict_intersection = m_pbdrpfDlg->PolyfitcheckBox2->isChecked();
+	polyfit_obj->snap_intersection = m_pbdrpfDlg->PolyfitSnapSpinBox->value();
+	polyfit_obj->use_confidence = m_pbdrpfDlg->PolyfitcheckBox->isChecked();
+	polyfit_obj->data_fitting = m_pbdrpfDlg->PolyfitdoubleSpinBox1->value();
+	polyfit_obj->model_coverage = m_pbdrpfDlg->PolyfitdoubleSpinBox2->value();
+	polyfit_obj->model_complexity = m_pbdrpfDlg->PolyfitdoubleSpinBox3->value();
 	
 	ccHObject* hypoObj = nullptr;
 	try	{
@@ -11645,17 +11659,9 @@ void MainWindow::doActionBDPolyFitHypothesis()
 	if (rb == QMessageBox::No)
 		return;
 	
-	if (!m_pbdrpfDlg) {
-		m_pbdrpfDlg = new bdrPolyFitDlg(this);
-		if (!m_pbdrpfDlg->exec()) {
-			return;
-		}
-	}
+	
 
-	polyfit_obj->use_confidence = m_pbdrpfDlg->PolyfitcheckBox->isChecked();
-	polyfit_obj->data_fitting = m_pbdrpfDlg->PolyfitdoubleSpinBox1->value();
-	polyfit_obj->model_coverage = m_pbdrpfDlg->PolyfitdoubleSpinBox2->value();
-	polyfit_obj->model_complexity = m_pbdrpfDlg->PolyfitdoubleSpinBox3->value();
+	
 
 	try	{
 		ProgStart("Confidence Calculation")

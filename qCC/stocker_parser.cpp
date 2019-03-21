@@ -223,11 +223,8 @@ std::string BDBaseHObject::GetPathModelObj(std::string building_name)
 	auto& bd = block_prj.m_builder.sbuild.find(stocker::BuilderBase::BuildNode::Create(building_name));
 	if (bd == block_prj.m_builder.sbuild.end())	{
 		throw std::runtime_error("cannot find building!" + building_name);
-		return;
 	}
-	std::string file_path = (*bd)->data.file_path.model_dir + building_name + MODEL_LOD3_OBJ_SUFFIX;
-
-	return file_path;
+	return std::string((*bd)->data.file_path.model_dir + building_name + MODEL_LOD3_OBJ_SUFFIX);
 }
 BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	ccHObject* bd_obj_ = obj;

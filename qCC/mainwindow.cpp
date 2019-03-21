@@ -126,7 +126,6 @@
 #include "db_tree/ccDBRoot.h"
 #include "pluginManager/ccPluginUIManager.h"
 
-#include "GenericProgressCallback.h"
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
@@ -10778,17 +10777,8 @@ void MainWindow::doActionBDPlaneSegmentation()
 	double distance_eps = m_pbdrPSDlg->DistanceEpsilonDoubleSpinBox->value();
 	double cluster_eps = m_pbdrPSDlg->ClusterEpsilonDoubleSpinBox->value();
 	
-	ccProgressDialog progDlg(true, this);
-	progDlg.setAutoClose(false);
-
-	if (progDlg.textCanBeEdited()) {
-		progDlg.setMethodTitle("Plane Segmentation...");
-		char infosBuffer[256];
-		sprintf(infosBuffer, "Processing %d point clouds.", _container.size());
-		progDlg.setInfo(infosBuffer);
-	}
-	CCLib::NormalizedProgress nprogress(&progDlg, _container.size());
-
+	ProgStartNorm("Plane Segmentation", _container.size())
+	
 	if (m_pbdrPSDlg->PlaneSegRansacRadioButton->isChecked()) {
 		double normal_dev = cos(m_pbdrPSDlg->maxNormDevAngleSpinBox->value() * CC_DEG_TO_RAD);
 		double prob = m_pbdrPSDlg->probaDoubleSpinBox->value();
@@ -10805,10 +10795,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 				cloudObj->setEnabled(false);
 			}
 
-			if (!nprogress.oneStep()) {
-				progDlg.stop();
-				return;
-			}
+			ProgStep()
 		}
 	}
 	else if (m_pbdrPSDlg->PlaneSegRegionGrowRadioButton->isChecked()) {
@@ -10825,15 +10812,11 @@ void MainWindow::doActionBDPlaneSegmentation()
 				cloudObj->setEnabled(false);
 			}
 
-			if (!nprogress.oneStep()) {
-				progDlg.stop();
-				return;
-			}
+			ProgStep()
 		}
 	}
 
-	progDlg.update(100.0f);
-	progDlg.stop();
+	ProgEnd
 
 	refreshAll();
 	updateUI();
@@ -11129,28 +11112,15 @@ void MainWindow::doActionBDPrimOutline()
 		return;
 	}
 
-	ccProgressDialog progDlg(true, this);
-	progDlg.setAutoClose(false);
-
-	if (progDlg.textCanBeEdited()) {
-		progDlg.setMethodTitle("Calculate plane outline...");
-		char infosBuffer[256];
-		sprintf(infosBuffer, "Processing %d planes.", plane_container.size());
-		progDlg.setInfo(infosBuffer);
-	}
-	CCLib::NormalizedProgress nprogress(&progDlg, plane_container.size());
-
+	ProgStartNorm("Outline Calculation", plane_container.size())
+	
 	for (auto & planeObj : plane_container) {
 		ccHObject* outline = CalcPlaneOutlines(planeObj, alpha);
 		if (outline) addToDB(outline);
 
-		if (!nprogress.oneStep()) {
-			progDlg.stop();
-			return;
-		}
+		ProgStep()
 	}
-	progDlg.update(100.0f);
-	progDlg.stop();
+	ProgEnd
 
 	refreshAll();
 	UpdateUI();
@@ -11185,28 +11155,15 @@ void MainWindow::doActionBDPrimPlaneFrame()
 		return;
 	}
 
-	ccProgressDialog progDlg(true, this);
-	progDlg.setAutoClose(false);
-
-	if (progDlg.textCanBeEdited()) {
-		progDlg.setMethodTitle("Frame Optimization");
-		char infosBuffer[256];
-		sprintf(infosBuffer, "Processing %d planes.", plane_container.size());
-		progDlg.setInfo(infosBuffer);
-	}
-	CCLib::NormalizedProgress nprogress(&progDlg, plane_container.size());
-
+	ProgStartNorm("Frame Optimization", plane_container.size())
+	
 	for (auto & planeObj : plane_container) {
 		ccHObject* frame = PlaneFrameOptimization(planeObj, option);
 		if (frame) addToDB(frame);
 
-		if (!nprogress.oneStep()) {
-			progDlg.stop();
-			return;
-		}
+		ProgStep()
 	}
-	progDlg.update(100.0f);
-	progDlg.stop();
+	ProgEnd
 
 	refreshAll();
 	UpdateUI();
@@ -11351,27 +11308,14 @@ void MainWindow::doActionBDPrimShrinkPlane()
 		return;
 	}
 
-	ccProgressDialog progDlg(true, this);
-	progDlg.setAutoClose(false);
-
-	if (progDlg.textCanBeEdited()) {
-		progDlg.setMethodTitle("Frame Optimization");
-		char infosBuffer[256];
-		sprintf(infosBuffer, "Processing %d planes.", plane_container.size());
-		progDlg.setInfo(infosBuffer);
-	}
-	CCLib::NormalizedProgress nprogress(&progDlg, plane_container.size());
-
+	ProgStartNorm("Shrink Planes", plane_container.size())
+	
 	for (auto & planeObj : plane_container) {
 		ShrinkPlaneToOutline(planeObj, s_last_shrink_alpha, s_last_shrink_distance, this);
 
-		if (!nprogress.oneStep()) {
-			progDlg.stop();
-			return;
-		}
+		ProgStep()
 	}
-	progDlg.update(100.0f);
-	progDlg.stop();
+	ProgEnd
 
 	refreshAll();
 	UpdateUI();
@@ -11669,10 +11613,14 @@ void MainWindow::doActionBDPolyFitHypothesis()
 	else {
 		polyfit_obj = new PolyFitObj();
 	}
-
+	
 	ccHObject* hypoObj = nullptr;
 	try	{
-		 hypoObj = PolyfitGenerateHypothesis(primitiveObj, polyfit_obj);
+		ProgStart("Hypothesis Generation")
+
+		hypoObj = PolyfitGenerateHypothesis(primitiveObj, polyfit_obj);
+
+		ProgEnd
 	}
 	catch (std::runtime_error& e) {
 		dispToConsole(QString("[BDRecon] - hypothesis generated error: ") + e.what(), ERR_CONSOLE_MESSAGE);
@@ -11710,8 +11658,12 @@ void MainWindow::doActionBDPolyFitHypothesis()
 	polyfit_obj->model_complexity = m_pbdrpfDlg->PolyfitdoubleSpinBox3->value();
 
 	try	{
+		ProgStart("Confidence Calculation")
+
 		PolyfitComputeConfidence(hypoObj, polyfit_obj);
 		polyfit_obj->status = PolyFitObj::STT_confidence;
+
+		ProgEnd
 	}
 	catch (std::runtime_error& e) {
 		dispToConsole(QString("[BDRecon] - confidence calculated error: ") + e.what(), ERR_CONSOLE_MESSAGE);

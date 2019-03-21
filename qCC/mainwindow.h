@@ -662,4 +662,24 @@ private:
 	PolyFitObj* polyfit_obj;
 };
 
+#include "ccProgressDialog.h"
+#define ProgStart(title) \
+		ccProgressDialog progDlg(false, this);\
+		progDlg.setAutoClose(false);\
+		if (progDlg.textCanBeEdited()) {\
+			progDlg.setMethodTitle(title);\
+			progDlg.setInfo("Processing, please wait...");}\
+			progDlg.start();
+
+#define ProgStartNorm(title, number) \
+		ccProgressDialog progDlg(true, this);\
+		progDlg.setAutoClose(false);\
+		if (progDlg.textCanBeEdited()) {\
+			progDlg.setMethodTitle(title);\
+			char infos[256]; sprintf(infos, "Processing %d items...", number);\
+			progDlg.setInfo(infos);}\
+		CCLib::NormalizedProgress nprogress(&progDlg, number);
+#define ProgStep(x) if (!nprogress.oneStep()) {progDlg.stop();return x;}
+#define ProgEnd progDlg.update(100.0f); progDlg.stop();
+
 #endif

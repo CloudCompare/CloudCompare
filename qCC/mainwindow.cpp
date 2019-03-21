@@ -315,6 +315,10 @@ MainWindow::~MainWindow()
 	//we don't want any other dialog/function to use the following structures
 	ccDBRoot* ccRoot = m_ccRoot;
 	m_ccRoot = nullptr;
+
+	//remove all entities from 3D views before quitting to avoid any side-effect
+	//(this won't be done automatically since we've just reset m_ccRoot)
+	ccRoot->getRootEntity()->setDisplay_recursive(nullptr);
 	for (int i = 0; i < getGLWindowCount(); ++i)
 	{
 		getGLWindow(i)->setSceneDB(0);

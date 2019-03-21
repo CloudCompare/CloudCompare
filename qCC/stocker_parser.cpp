@@ -218,6 +218,17 @@ ccHObject * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check
 ccHObject * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
 	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_PRIMITIVE_SUFFIX, building_name, check_enable);
 }
+std::string BDBaseHObject::GetPathModelObj(std::string building_name)
+{
+	auto& bd = block_prj.m_builder.sbuild.find(stocker::BuilderBase::BuildNode::Create(building_name));
+	if (bd == block_prj.m_builder.sbuild.end())	{
+		throw std::runtime_error("cannot find building!" + building_name);
+		return;
+	}
+	std::string file_path = (*bd)->data.file_path.model_dir + building_name + MODEL_LOD3_OBJ_SUFFIX;
+
+	return file_path;
+}
 BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	ccHObject* bd_obj_ = obj;
 	do {
@@ -1111,6 +1122,7 @@ void PolyFitObj::FacetOptimization()
 	const HypothesisGenerator::Adjacency& adjacency = hypothesis_->extract_adjacency(mesh);
 	FaceSelection selector(point_set_, mesh);
 	selector.optimize_cc(adjacency, valid_group_facet_name);
+	optimized_mesh_ = mesh;
 }
 
 void PolyFitObj::UpdateValidFacet(std::vector<stocker::String_String> valid_update)
@@ -1130,8 +1142,8 @@ bool PolyFitObj::OutputResultToObjFile(BDBaseHObject* baseObj)
 		return false;
 	}
 	auto& bd = baseObj->block_prj.m_builder.sbuild.find(stocker::BuilderBase::BuildNode::Create(building_name));
-	std::string file_path = (*bd)->data.file_path.model_dir + building_name + MODEL_LOD3_OBJ_SUFFIX;
-
+	std::string file_path = baseObj->GetPathModelObj(building_name);
+	
 	std::ofstream out(file_path.c_str());
 	if (out.fail()) {
 		std::string error_info = "cannot open file: " + file_path;
@@ -1170,6 +1182,9 @@ bool PolyFitObj::OutputResultToObjFile(BDBaseHObject* baseObj)
 			out << "# anchor " << vertex_id[it] << std::endl;
 		}
 	}
+
+	std::cout << "[BDRecon] model file saved to: " << file_path << std::endl;
+	return true;
 }
 
 bool PolyFitObj::FindValidFacet(std::string name_plane, std::string name_facet)

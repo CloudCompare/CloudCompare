@@ -109,6 +109,12 @@ public:
 
 	stocker::Vec3d ToLocal(stocker::Vec3d pt) { return (pt + global_shift)*global_scale; }
 	stocker::Vec3d ToGlobal(stocker::Vec3d pt) { return pt / global_scale - global_shift; }
+
+public:
+	//! file path
+
+	std::string GetPathModelObj(std::string building_name);
+
 };
 
 BDBaseHObject* GetRootBDBase(ccHObject* obj);

@@ -151,7 +151,7 @@ public: //features deletion/clearing
 	/** Prefer ccPointCloud::clear by default.
 		\warning DANGEROUS
 	**/
-	void unalloactePoints();
+	void unallocatePoints();
 
 	//! Erases the cloud colors
 	void unallocateColors();

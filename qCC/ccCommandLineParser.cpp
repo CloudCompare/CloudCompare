@@ -174,7 +174,6 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandICP));
 	registerCommand(Command::Shared(new CommandChangeCloudOutputFormat));
 	registerCommand(Command::Shared(new CommandChangeMeshOutputFormat));
-	registerCommand(Command::Shared(new CommandChangeFBXOutputFormat));
 	registerCommand(Command::Shared(new CommandChangePLYExportFormat));
 	registerCommand(Command::Shared(new CommandForceNormalsComputation));
 	registerCommand(Command::Shared(new CommandSaveClouds));

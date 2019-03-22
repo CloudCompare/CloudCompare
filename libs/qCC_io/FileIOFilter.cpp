@@ -23,7 +23,6 @@
 #include "LASFilter.h"
 
 //MESHES
-#include "FBXFilter.h"
 #include "PlyFilter.h"
 
 //OTHERS
@@ -74,9 +73,6 @@ void FileIOFilter::InitInternalFilters()
 
 	Register(Shared(new PlyFilter()));
 
-#ifdef CC_FBX_SUPPORT
-	Register(Shared(new FBXFilter()));
-#endif
 #ifdef CC_DXF_SUPPORT
 	Register(Shared(new DxfFilter()));
 #endif

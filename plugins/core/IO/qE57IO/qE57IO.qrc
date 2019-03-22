@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/CC/plugin/E57_IO">
+    <qresource prefix="/CC/plugin/qE57IO">
         <file>info.json</file>
     </qresource>
 </RCC>

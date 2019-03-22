@@ -15,23 +15,23 @@
 //#                                                                        #
 //##########################################################################
 
-#include "E57_IO.h"
+#include "qE57IO.h"
 
 #include "E57Filter.h"
 
 
-E57_IO::E57_IO( QObject *parent ) :
+qE57IO::qE57IO( QObject *parent ) :
 	QObject( parent ),
-	ccIOFilterPluginInterface( ":/CC/plugin/E57_IO/info.json" )
+	ccIOFilterPluginInterface( ":/CC/plugin/qE57IO/info.json" )
 {
 }
 
-void E57_IO::registerCommands( ccCommandLineInterface *cmd )
+void qE57IO::registerCommands( ccCommandLineInterface *cmd )
 {
 	Q_UNUSED( cmd );
 }
 
-QVector<FileIOFilter::Shared> E57_IO::getFilters()
+QVector<FileIOFilter::Shared> qE57IO::getFilters()
 {
 	return { FileIOFilter::Shared( new E57Filter ) };
 }

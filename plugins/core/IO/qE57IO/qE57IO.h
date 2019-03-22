@@ -20,16 +20,15 @@
 
 #include "ccIOFilterPluginInterface.h"
 
-
-class E57_IO : public QObject, public ccIOFilterPluginInterface
+class qE57IO : public QObject, public ccIOFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES( ccIOFilterPluginInterface )
 	
-	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.E57_IO" FILE "info.json" )
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qE57IO" FILE "info.json" )
 	
 public:
-	explicit E57_IO( QObject *parent = nullptr );
+	explicit qE57IO( QObject *parent = nullptr );
 	
 	void registerCommands( ccCommandLineInterface *cmd ) override;
 	

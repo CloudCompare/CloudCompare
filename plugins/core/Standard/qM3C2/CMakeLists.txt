@@ -4,7 +4,7 @@ option( PLUGIN_STANDARD_QM3C2 "Check to install qM3C2 plugin" OFF )
 
 if (PLUGIN_STANDARD_QM3C2)
 
-	project( QM3C2_PLUGIN_DLL )
+	project( QM3C2_PLUGIN )
 
 	include_directories( src )
 

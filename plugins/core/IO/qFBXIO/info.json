@@ -1,0 +1,18 @@
+{
+	"type" : "I/O",
+	"core" : true,
+	"name" : "FBX",
+	"description": "Add FBX read/write capability using AutoDesk's FBX SDK.",
+	"authors" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		}
+	],
+	"references" : [
+		{
+			"text" : "FBX Overview (AutoDesk)",
+			"url" : "http://www.autodesk.com/products/fbx/overview"
+		}
+	]
+}

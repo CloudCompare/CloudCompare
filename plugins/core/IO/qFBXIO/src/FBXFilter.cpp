@@ -15,8 +15,6 @@
 //#                                                                        #
 //##########################################################################
 
-#ifdef CC_FBX_SUPPORT
-
 #include "FBXFilter.h"
 
 //qCC_db
@@ -341,8 +339,8 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 		{
 			const ccColor::Rgb& C = cloud->getPointColor(i);
 			FbxColor col(	static_cast<double>(C.r) / ccColor::MAX,
-							static_cast<double>(C.g) / ccColor::MAX,
-							static_cast<double>(C.b) / ccColor::MAX);
+			                static_cast<double>(C.g) / ccColor::MAX,
+			                static_cast<double>(C.b) / ccColor::MAX);
 			lGeometryElementVertexColor->GetDirectArray().SetAt(i, col);
 		}
 
@@ -411,8 +409,8 @@ static bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFi
 		}
 	}
 
-	// Set the export states. By default, the export states are always set to 
-	// true except for the option eEXPORT_TEXTURE_AS_EMBEDDED. The code below 
+	// Set the export states. By default, the export states are always set to
+	// true except for the option eEXPORT_TEXTURE_AS_EMBEDDED. The code below
 	// shows how to change these states
 	(*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_MATERIAL, true);
 	(*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_TEXTURE, true);
@@ -475,7 +473,7 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			if (child->isKindOf(CC_TYPES::MESH))
 			{
 				meshes.push_back(static_cast<ccGenericMesh*>(child));
-				
+
 				//manage custom units (if any)
 				if (child->hasMetaData(FBX_SCALE_METADATA_KEY))
 				{
@@ -785,7 +783,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 			if (vertColor->GetMappingMode() == FbxGeometryElement::eByControlPoint)
 			{
 				if (vertColor->GetReferenceMode() == FbxGeometryElement::eDirect
-					|| vertColor->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
+				    || vertColor->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
 				{
 					if (vertices->reserveTheRGBTable())
 					{
@@ -797,8 +795,8 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 							{
 								FbxColor c = vertColor->GetDirectArray().GetAt(i);
 								vertices->addRGBColor(static_cast<ColorCompType>(c.mRed	* ccColor::MAX),
-									static_cast<ColorCompType>(c.mGreen	* ccColor::MAX),
-									static_cast<ColorCompType>(c.mBlue	* ccColor::MAX));
+								    static_cast<ColorCompType>(c.mGreen	* ccColor::MAX),
+								    static_cast<ColorCompType>(c.mBlue	* ccColor::MAX));
 							}
 						}
 						break;
@@ -809,8 +807,8 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 								int id = vertColor->GetIndexArray().GetAt(i);
 								FbxColor c = vertColor->GetDirectArray().GetAt(id);
 								vertices->addRGBColor(static_cast<ColorCompType>(c.mRed	* ccColor::MAX),
-									static_cast<ColorCompType>(c.mGreen	* ccColor::MAX),
-									static_cast<ColorCompType>(c.mBlue	* ccColor::MAX));
+								    static_cast<ColorCompType>(c.mGreen	* ccColor::MAX),
+								    static_cast<ColorCompType>(c.mBlue	* ccColor::MAX));
 							}
 						}
 						break;
@@ -892,8 +890,8 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 				FbxVector4 N = normals.GetAt(id);
 				//convert to CC-structure
 				CCVector3 Npc(static_cast<PointCoordinateType>(N.Buffer()[0]),
-					static_cast<PointCoordinateType>(N.Buffer()[1]),
-					static_cast<PointCoordinateType>(N.Buffer()[2]));
+				    static_cast<PointCoordinateType>(N.Buffer()[1]),
+				    static_cast<PointCoordinateType>(N.Buffer()[2]));
 				vertices->addNorm(Npc);
 			}
 			vertices->showNormals(true);
@@ -1184,8 +1182,8 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 					FbxVector4 N;
 					fbxMesh->GetPolygonVertexNormal(i, j, N);
 					CCVector3 Npc(static_cast<PointCoordinateType>(N.Buffer()[0]),
-						static_cast<PointCoordinateType>(N.Buffer()[1]),
-						static_cast<PointCoordinateType>(N.Buffer()[2]));
+					    static_cast<PointCoordinateType>(N.Buffer()[1]),
+					    static_cast<PointCoordinateType>(N.Buffer()[2]));
 					normsTable->addElement(ccNormalVectors::GetNormIndex(Npc.u));
 				}
 
@@ -1244,8 +1242,8 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 		{
 			FbxGeometryElementMaterial* lMaterialElement = fbxMesh->GetElementMaterial(i);
 			if (lMaterialElement->GetMappingMode() == FbxGeometryElement::eByPolygon
-				&&	lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect
-				&&	lMaterialElement->GetIndexArray().GetCount() == fbxMesh->GetPolygonCount())
+			    &&	lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect
+			    &&	lMaterialElement->GetIndexArray().GetCount() == fbxMesh->GetPolygonCount())
 			{
 				if (mesh->reservePerTriangleMtlIndexes())
 				{
@@ -1264,7 +1262,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 				break;
 			}
 			else if (lMaterialElement->GetMappingMode() == FbxGeometryElement::eAllSame
-				/*&&	lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect*/)
+			    /*&&	lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect*/)
 			{
 				int mtlIndex = 0;
 				if (lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
@@ -1472,5 +1470,3 @@ CC_FILE_ERROR FBXFilter::loadFile(const QString& filename, ccHObject& container,
 
 	return result;
 }
-
-#endif

@@ -23,7 +23,6 @@
 
 //qCC_io
 #include <AsciiFilter.h>
-#include <FBXFilter.h>
 #include <PlyFilter.h>
 
 //qCC
@@ -109,7 +108,6 @@ static const char COMMAND_ICP_ENABLE_FARTHEST_REMOVAL[]		= "FARTHEST_REMOVAL";
 static const char COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT[]		= "MODEL_SF_AS_WEIGHTS";
 static const char COMMAND_ICP_USE_DATA_SF_AS_WEIGHT[]		= "DATA_SF_AS_WEIGHTS";
 static const char COMMAND_ICP_ROT[]				= "ROT";
-static const char COMMAND_FBX_EXPORT_FORMAT[]				= "FBX_EXPORT_FMT";
 static const char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 static const char COMMAND_COMPUTE_GRIDDED_NORMALS[]			= "COMPUTE_NORMALS";
 static const char COMMAND_COMPUTE_OCTREE_NORMALS[]			= "OCTREE_NORMALS";
@@ -3799,26 +3797,6 @@ struct CommandICP : public ccCommandLineInterface::Command
 		{
 			return false;
 		}
-
-		return true;
-	}
-};
-
-struct CommandChangeFBXOutputFormat : public ccCommandLineInterface::Command
-{
-	CommandChangeFBXOutputFormat() : ccCommandLineInterface::Command("Change FBX output format", COMMAND_FBX_EXPORT_FORMAT) {}
-
-	virtual bool process(ccCommandLineInterface& cmd) override
-	{
-		if (cmd.arguments().empty())
-			return cmd.error(QObject::tr("Missing parameter: FBX format (string) after '%1'").arg(COMMAND_FBX_EXPORT_FORMAT));
-
-		QString formatStr = cmd.arguments().takeFirst();
-		cmd.print(QObject::tr("FBX format: %1").arg(formatStr));
-
-#ifdef CC_FBX_SUPPORT
-		FBXFilter::SetDefaultOutputFormat(formatStr);
-#endif
 
 		return true;
 	}

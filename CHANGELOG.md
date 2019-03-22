@@ -11,6 +11,10 @@ v2.11 (Anoia) - (in development)
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
 
+- Changes
+  - Command line tool:
+    - The `-FBX_EXPORT_FMT` command is now split. Use `-FBX -EXPORT_FMT`.
+
 v2.10.3 (Zephyrus) - (In progress)
 ----------------------
 

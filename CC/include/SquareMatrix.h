@@ -128,7 +128,7 @@ namespace CCLib
 		//! The matrix rows
 		/** public for easy/fast access
 		**/
-		Scalar** m_values;
+		Scalar** m_values = nullptr;
 
 		//! Returns pointer to matrix row
 		inline Scalar* row(unsigned index) { return m_values[index]; }
@@ -658,8 +658,6 @@ namespace CCLib
 			m_matrixSize = size;
 			matrixSquareSize = m_matrixSize*m_matrixSize;
 
-			m_values = nullptr;
-
 			if ( size == 0 )
 			{
 				return true;
@@ -675,7 +673,7 @@ namespace CCLib
 									
 			for (unsigned i = 0; i < m_matrixSize; i++)
 			{
-				m_values[i] = &(m_underlyingData[i * m_matrixSize]);
+				m_values[i] = m_underlyingData + (i * m_matrixSize);
 			}			
 			
 			return true;

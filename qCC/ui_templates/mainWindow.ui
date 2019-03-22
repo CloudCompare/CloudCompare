@@ -714,8 +714,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionSave"/>
    <addaction name="separator"/>
    <addaction name="actionPointPicking"/>
-   <addaction name="actionPointListPicking"/>
-   <addaction name="actionTracePolyline"/>
    <addaction name="actionClone"/>
    <addaction name="actionMerge"/>
    <addaction name="actionDelete"/>
@@ -734,7 +732,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionSegment"/>
    <addaction name="actionTranslateRotate"/>
    <addaction name="actionCrossSection"/>
-   <addaction name="actionExtractSections"/>
   </widget>
   <widget class="QToolBar" name="toolBarSFTools">
    <property name="windowTitle">
@@ -834,8 +831,10 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionBDPrimIntersections"/>
    <addaction name="actionBDPrimPlaneFrame"/>
    <addaction name="separator"/>
-   <addaction name="actionBDPlane_Deduction"/>
    <addaction name="actionBDPrimMergePlane"/>
+   <addaction name="actionBDPlane_Deduction"/>
+   <addaction name="actionPointListPicking"/>
+   <addaction name="actionTracePolyline"/>
    <addaction name="actionBDPrimMakePlane"/>
    <addaction name="separator"/>
    <addaction name="actionBDPolyFitHypothesis"/>
@@ -843,6 +842,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionBDPolyFitSelection"/>
    <addaction name="actionBDPolyFitSettings"/>
    <addaction name="separator"/>
+   <addaction name="actionExtractSections"/>
    <addaction name="actionBD3D4EM"/>
   </widget>
   <widget class="QToolBar" name="toolBarView">
@@ -1979,10 +1979,13 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionPointListPicking">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/ccPointListPicking.png</normaloff>:/CC/images/ccPointListPicking.png</iconset>
+     <normaloff>:/CC/Stocker/images/stocker/pickpoint.png</normaloff>:/CC/Stocker/images/stocker/pickpoint.png</iconset>
    </property>
    <property name="text">
     <string>Point list picking</string>
+   </property>
+   <property name="iconText">
+    <string>PickPts</string>
    </property>
    <property name="statusTip">
     <string>Pick several points (and export them to ASCII file, a new cloud, etc.)</string>
@@ -2730,10 +2733,13 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionExtractSections">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
+     <normaloff>:/CC/Stocker/images/stocker/footprint.png</normaloff>:/CC/Stocker/images/stocker/footprint.png</iconset>
    </property>
    <property name="text">
     <string>Extract sections / Unfold</string>
+   </property>
+   <property name="iconText">
+    <string>FootPrint</string>
    </property>
    <property name="toolTip">
     <string>Extract cloud sections along polylines or unfold a cloud along a polyline</string>
@@ -2885,10 +2891,13 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionTracePolyline">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/ccTracePolyline.png</normaloff>:/CC/images/ccTracePolyline.png</iconset>
+     <normaloff>:/CC/Stocker/images/stocker/pickline.png</normaloff>:/CC/Stocker/images/stocker/pickline.png</iconset>
    </property>
    <property name="text">
     <string>Trace Polyline</string>
+   </property>
+   <property name="iconText">
+    <string>PickL</string>
    </property>
    <property name="toolTip">
     <string>Trace a polyline by point picking</string>
@@ -3074,8 +3083,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPlane_Deduction">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/modeler.png</normaloff>../images/stocker/modeler.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/deduction.png</normaloff>:/CC/Stocker/images/stocker/deduction.png</iconset>
    </property>
    <property name="text">
     <string>Plane Deduction</string>
@@ -3091,8 +3100,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBD3D4EM">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/lod2.png</normaloff>../images/stocker/lod2.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/lod2.png</normaloff>:/CC/Stocker/images/stocker/lod2.png</iconset>
    </property>
    <property name="text">
     <string>LoD2 Generation</string>
@@ -3113,8 +3122,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPrimIntersections">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/intersect.png</normaloff>../images/stocker/intersect.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/intersect.png</normaloff>:/CC/Stocker/images/stocker/intersect.png</iconset>
    </property>
    <property name="text">
     <string>Intersections</string>
@@ -3130,8 +3139,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPrimBoundary">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/boundary.png</normaloff>../images/stocker/boundary.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/boundary.png</normaloff>:/CC/Stocker/images/stocker/boundary.png</iconset>
    </property>
    <property name="text">
     <string>Boundary</string>
@@ -3139,8 +3148,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPrimPlaneFrame">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/frame.png</normaloff>../images/stocker/frame.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/frame.png</normaloff>:/CC/Stocker/images/stocker/frame.png</iconset>
    </property>
    <property name="text">
     <string>Plane Frame</string>
@@ -3166,8 +3175,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPrimOutline">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/outline.png</normaloff>../images/stocker/outline.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/outline.png</normaloff>:/CC/Stocker/images/stocker/outline.png</iconset>
    </property>
    <property name="text">
     <string>Outline</string>
@@ -3176,7 +3185,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDProjectLoad">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/dbContainerSymbol.png</normaloff>:/CC/images/dbContainerSymbol.png</iconset>
+     <normaloff>:/CC/Stocker/images/stocker/database.png</normaloff>:/CC/Stocker/images/stocker/database.png</iconset>
    </property>
    <property name="text">
     <string>Load Project</string>
@@ -3187,8 +3196,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPlaneSegmentation">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/segment.png</normaloff>../images/stocker/segment.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/segment.png</normaloff>:/CC/Stocker/images/stocker/segment.png</iconset>
    </property>
    <property name="text">
     <string>Plane Segmentation</string>
@@ -3207,8 +3216,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPrimMergePlane">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/merge.png</normaloff>../images/stocker/merge.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/merge.png</normaloff>:/CC/Stocker/images/stocker/merge.png</iconset>
    </property>
    <property name="text">
     <string>Merge Planes</string>
@@ -3219,8 +3228,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPolyFitHypothesis">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/facet.png</normaloff>../images/stocker/facet.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/facet.png</normaloff>:/CC/Stocker/images/stocker/facet.png</iconset>
    </property>
    <property name="text">
     <string>Generate Hypothesis</string>
@@ -3236,8 +3245,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPolyFitSelection">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/lod3.png</normaloff>../images/stocker/lod3.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/lod3.png</normaloff>:/CC/Stocker/images/stocker/lod3.png</iconset>
    </property>
    <property name="text">
     <string>Face Selection</string>
@@ -3248,8 +3257,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPolyFitSettings">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/setting.png</normaloff>../images/stocker/setting.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/setting.png</normaloff>:/CC/Stocker/images/stocker/setting.png</iconset>
    </property>
    <property name="text">
     <string>Settings</string>
@@ -3257,8 +3266,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPrimMakePlane">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/makeplane.png</normaloff>../images/stocker/makeplane.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/makeplane.png</normaloff>:/CC/Stocker/images/stocker/makeplane.png</iconset>
    </property>
    <property name="text">
     <string>Make Plane</string>
@@ -3269,8 +3278,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDDisplayPlaneOn">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/planeon.png</normaloff>../images/stocker/planeon.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/planeon.png</normaloff>:/CC/Stocker/images/stocker/planeon.png</iconset>
    </property>
    <property name="text">
     <string>PlaneOn</string>
@@ -3278,8 +3287,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDDisplayPlaneOff">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/planeoff.png</normaloff>../images/stocker/planeoff.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/planeoff.png</normaloff>:/CC/Stocker/images/stocker/planeoff.png</iconset>
    </property>
    <property name="text">
     <string>PlaneOff</string>
@@ -3287,8 +3296,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDDisplayPointOn">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/pointon.png</normaloff>../images/stocker/pointon.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/pointon.png</normaloff>:/CC/Stocker/images/stocker/pointon.png</iconset>
    </property>
    <property name="text">
     <string>PointOn</string>
@@ -3296,8 +3305,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDDisplayPointOff">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/pointoff.png</normaloff>../images/stocker/pointoff.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/pointoff.png</normaloff>:/CC/Stocker/images/stocker/pointoff.png</iconset>
    </property>
    <property name="text">
     <string>PointOff</string>
@@ -3305,8 +3314,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBDPolyFitFacetFilter">
    <property name="icon">
-    <iconset>
-     <normaloff>../images/stocker/filter.png</normaloff>../images/stocker/filter.png</iconset>
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/filter.png</normaloff>:/CC/Stocker/images/stocker/filter.png</iconset>
    </property>
    <property name="text">
     <string>Facet Filter</string>

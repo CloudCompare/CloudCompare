@@ -152,4 +152,27 @@
     <file>images/icon/cc_icon_32.png</file>
     <file>images/icon/cc_icon_64.png</file>
   </qresource>
+  <qresource prefix="CC/Stocker">
+    <file>images/stocker/database.png</file>
+    <file>images/stocker/boundary.png</file>
+    <file>images/stocker/deduction.png</file>
+    <file>images/stocker/facet.png</file>
+    <file>images/stocker/filter.png</file>
+    <file>images/stocker/footprint.png</file>
+    <file>images/stocker/frame.png</file>
+    <file>images/stocker/intersect.png</file>
+    <file>images/stocker/lod2.png</file>
+    <file>images/stocker/lod3.png</file>
+    <file>images/stocker/makeplane.png</file>
+    <file>images/stocker/merge.png</file>
+    <file>images/stocker/outline.png</file>
+    <file>images/stocker/pickline.png</file>
+    <file>images/stocker/pickpoint.png</file>
+    <file>images/stocker/planeoff.png</file>
+    <file>images/stocker/planeon.png</file>
+    <file>images/stocker/pointoff.png</file>
+    <file>images/stocker/pointon.png</file>
+    <file>images/stocker/segment.png</file>
+    <file>images/stocker/setting.png</file>
+  </qresource>
 </RCC>

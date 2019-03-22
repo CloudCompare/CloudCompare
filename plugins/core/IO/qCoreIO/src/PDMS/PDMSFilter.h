@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! PDMS .mac file I/O filter
-class QCC_IO_LIB_API PDMSFilter : public FileIOFilter
+class PDMSFilter : public FileIOFilter
 {
 public:
 	//static accessors

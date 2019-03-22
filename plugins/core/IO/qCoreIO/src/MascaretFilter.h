@@ -23,7 +23,7 @@
 //! Mascaret profile I/O filter
 /** See http://www.opentelemac.org/
 **/
-class QCC_IO_LIB_API MascaretFilter : public FileIOFilter
+class MascaretFilter : public FileIOFilter
 {
 public:
 	//static accessors

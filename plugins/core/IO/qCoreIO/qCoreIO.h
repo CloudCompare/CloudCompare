@@ -20,7 +20,6 @@
 
 #include "ccIOFilterPluginInterface.h"
 
-
 class qCoreIO : public QObject, public ccIOFilterPluginInterface
 {
 	Q_OBJECT
@@ -37,4 +36,4 @@ protected:
 	QVector<FileIOFilter::Shared> getFilters() override;
 };
 
-#endif
+#endif //QCORE_IO_HEADER

@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! VTK point cloud or mesh I/O filter
-class QCC_IO_LIB_API VTKFilter : public FileIOFilter
+class VTKFilter : public FileIOFilter
 {
 public:
 	//static accessors

@@ -22,7 +22,7 @@
 #include "FileIOFilter.h"
 
 //! PTX point cloud I/O filter
-class QCC_IO_LIB_API PTXFilter : public FileIOFilter
+class PTXFilter : public FileIOFilter
 {
 public:
 	//static accessors

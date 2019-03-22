@@ -18,10 +18,11 @@
 #ifndef CC_E57_FILTER_HEADER
 #define CC_E57_FILTER_HEADER
 
-#include "FileIOFilter.h"
+//qCC_IO
+#include <FileIOFilter.h>
 
-//! E57 filter (based on libE57)
-class QCC_IO_LIB_API E57Filter : public FileIOFilter
+//! E57 filter (relies on E57format lib)
+class E57Filter : public FileIOFilter
 {
 public:
 	//static accessors

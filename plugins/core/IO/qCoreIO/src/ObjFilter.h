@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! Wavefront meshes file I/O filter
-class QCC_IO_LIB_API ObjFilter : public FileIOFilter
+class ObjFilter : public FileIOFilter
 {
 public:
 	//static accessors

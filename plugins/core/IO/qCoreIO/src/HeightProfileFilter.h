@@ -23,7 +23,7 @@
 //! Polyline height profile I/O filter
 /** This file format contains a 2D series: (curvilinear absisca ; height)
 **/
-class QCC_IO_LIB_API HeightProfileFilter : public FileIOFilter
+class HeightProfileFilter : public FileIOFilter
 {
 public:
 	//static accessors

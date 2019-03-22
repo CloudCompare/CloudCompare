@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! Maya ASCII meshes file I/O filter
-class QCC_IO_LIB_API MAFilter : public FileIOFilter
+class MAFilter : public FileIOFilter
 {
 public:
 	//static accessors

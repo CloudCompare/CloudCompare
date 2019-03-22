@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! Simple binary file (with attached text meta-file)
-class QCC_IO_LIB_API SimpleBinFilter : public FileIOFilter
+class SimpleBinFilter : public FileIOFilter
 {
 public:
 	//static accessors

@@ -17,4 +17,8 @@ if ( PLUGIN_IO_QE57 )
 	include( ../../../CMakePluginTpl.cmake )
 	
 	target_link_libraries( ${PROJECT_NAME} E57Format ${XercesC_LIBRARIES} )
+	
+	if ( USING_STATIC_XERCES )
+		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS XERCES_STATIC_LIBRARY )
+    endif()	
 endif()

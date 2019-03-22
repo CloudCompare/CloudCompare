@@ -23,7 +23,7 @@
 //! OFF file I/O filter
 /** See http://people.sc.fsu.edu/~jburkardt/data/off/off.html
 **/
-class QCC_IO_LIB_API OFFFilter : public FileIOFilter
+class OFFFilter : public FileIOFilter
 {
 public:
 	//static accessors

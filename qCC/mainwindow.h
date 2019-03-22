@@ -469,6 +469,8 @@ private slots:
 	void doActionBDPrimShrinkPlane();
 	/// Plane Deduction
 	void doActionBDPlaneDeduction();
+	/// Make plane from line(s)
+	void doActionBDPlaneCreate();
 	/// PolyFit
 	void doActionBDPolyFit();
 
@@ -478,11 +480,17 @@ private slots:
 
 	void doActionBDPolyFitSelection();
 
+	void doActionBDPolyFitFacetFilter();
+
 	void doActionBDPolyFitSettings();
 
 	/// 3d4em
 	void doActionBD3D4EM();
-	/// Rename
+	/// display
+	void doActionBDDisplayPlaneOn();
+	void doActionBDDisplayPlaneOff();
+	void doActionBDDisplayPointOn();
+	void doActionBDDisplayPointOff();
 	
 
 private:

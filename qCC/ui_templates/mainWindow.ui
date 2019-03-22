@@ -23,7 +23,7 @@
    <bool>false</bool>
   </property>
   <property name="windowTitle">
-   <string>CloudCompare</string>
+   <string>BlockBuilder</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../icones.qrc">
@@ -509,6 +509,7 @@
      <addaction name="actionBDPrimCreateGround"/>
      <addaction name="actionBDPrimShrinkPlane"/>
      <addaction name="actionBDPrimMergePlane"/>
+     <addaction name="actionBDPrimMakePlane"/>
     </widget>
     <widget class="QMenu" name="menuLine_Primitive">
      <property name="title">
@@ -521,15 +522,25 @@
     </widget>
     <widget class="QMenu" name="menuPolyFit">
      <property name="title">
-      <string>PolyFit</string>
+      <string>LoD3 Generation</string>
      </property>
      <addaction name="actionBDPolyFit"/>
      <addaction name="separator"/>
      <addaction name="actionBDPolyFitHypothesis"/>
+     <addaction name="actionBDPolyFitFacetFilter"/>
      <addaction name="actionBDPolyFitConfidence"/>
      <addaction name="actionBDPolyFitSelection"/>
      <addaction name="separator"/>
      <addaction name="actionBDPolyFitSettings"/>
+    </widget>
+    <widget class="QMenu" name="menuDisplay_2">
+     <property name="title">
+      <string>Display</string>
+     </property>
+     <addaction name="actionBDDisplayPlaneOn"/>
+     <addaction name="actionBDDisplayPlaneOff"/>
+     <addaction name="actionBDDisplayPointOn"/>
+     <addaction name="actionBDDisplayPointOff"/>
     </widget>
     <addaction name="actionBDProjectLoad"/>
     <addaction name="separator"/>
@@ -545,6 +556,8 @@
     <addaction name="menuPolyFit"/>
     <addaction name="actionBD3D4EM"/>
     <addaction name="menuGroup_Rename"/>
+    <addaction name="separator"/>
+    <addaction name="menuDisplay_2"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -620,36 +633,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QToolBar" name="toolBarView">
-   <property name="windowTitle">
-    <string>Viewing tools</string>
-   </property>
-   <property name="toolTip">
-    <string>Viewing tools</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>LeftToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionDisplayOptions"/>
-   <addaction name="actionEditCamera"/>
-   <addaction name="actionGlobalZoom"/>
-   <addaction name="actionPickRotationCenter"/>
-   <addaction name="actionAutoPickRotationCenter"/>
-   <addaction name="actionLevel"/>
-   <addaction name="actionZoomAndCenter"/>
-   <addaction name="actionSetViewTop"/>
-   <addaction name="actionSetViewFront"/>
-   <addaction name="actionSetViewLeft"/>
-   <addaction name="actionSetViewBack"/>
-   <addaction name="actionSetViewRight"/>
-   <addaction name="actionSetViewBottom"/>
-   <addaction name="actionSetViewIso1"/>
-   <addaction name="actionSetViewIso2"/>
-   <addaction name="actionEnableStereo"/>
-  </widget>
   <widget class="QDockWidget" name="DockableConsole">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Ignored" vsizetype="Maximum">
@@ -828,6 +811,66 @@ QTreeView::branch:open:has-children:has-siblings  {
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBarBDRecon">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>true</bool>
+   </attribute>
+   <addaction name="actionBDProjectLoad"/>
+   <addaction name="separator"/>
+   <addaction name="actionBDPlaneSegmentation"/>
+   <addaction name="separator"/>
+   <addaction name="actionBDPrimBoundary"/>
+   <addaction name="actionBDPrimOutline"/>
+   <addaction name="actionBDPrimIntersections"/>
+   <addaction name="actionBDPrimPlaneFrame"/>
+   <addaction name="separator"/>
+   <addaction name="actionBDPlane_Deduction"/>
+   <addaction name="actionBDPrimMergePlane"/>
+   <addaction name="actionBDPrimMakePlane"/>
+   <addaction name="separator"/>
+   <addaction name="actionBDPolyFitHypothesis"/>
+   <addaction name="actionBDPolyFitFacetFilter"/>
+   <addaction name="actionBDPolyFitSelection"/>
+   <addaction name="actionBDPolyFitSettings"/>
+   <addaction name="separator"/>
+   <addaction name="actionBD3D4EM"/>
+  </widget>
+  <widget class="QToolBar" name="toolBarView">
+   <property name="windowTitle">
+    <string>Viewing tools</string>
+   </property>
+   <property name="toolTip">
+    <string>Viewing tools</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>LeftToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionBDDisplayPlaneOn"/>
+   <addaction name="actionBDDisplayPlaneOff"/>
+   <addaction name="actionBDDisplayPointOn"/>
+   <addaction name="actionBDDisplayPointOff"/>
+   <addaction name="actionGlobalZoom"/>
+   <addaction name="actionZoomAndCenter"/>
+   <addaction name="actionSetViewTop"/>
+   <addaction name="actionSetViewFront"/>
+   <addaction name="actionSetViewLeft"/>
+   <addaction name="actionSetViewBack"/>
+   <addaction name="actionSetViewRight"/>
+   <addaction name="actionSetViewBottom"/>
+   <addaction name="actionLevel"/>
   </widget>
   <action name="actionOpen">
    <property name="icon">
@@ -3030,8 +3073,15 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionBDPlane_Deduction">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/modeler.png</normaloff>../images/stocker/modeler.png</iconset>
+   </property>
    <property name="text">
     <string>Plane Deduction</string>
+   </property>
+   <property name="iconText">
+    <string>Deduce</string>
    </property>
   </action>
   <action name="actionBDPolyFit">
@@ -3040,8 +3090,15 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionBD3D4EM">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/lod2.png</normaloff>../images/stocker/lod2.png</iconset>
+   </property>
    <property name="text">
-    <string>3D4EM</string>
+    <string>LoD2 Generation</string>
+   </property>
+   <property name="iconText">
+    <string>LoD2</string>
    </property>
   </action>
   <action name="actionBDRename_Plane">
@@ -3055,8 +3112,15 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionBDPrimIntersections">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/intersect.png</normaloff>../images/stocker/intersect.png</iconset>
+   </property>
    <property name="text">
     <string>Intersections</string>
+   </property>
+   <property name="iconText">
+    <string>Intersect</string>
    </property>
   </action>
   <action name="actionBDPrimAssignSharpLines">
@@ -3065,13 +3129,24 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionBDPrimBoundary">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/boundary.png</normaloff>../images/stocker/boundary.png</iconset>
+   </property>
    <property name="text">
     <string>Boundary</string>
    </property>
   </action>
   <action name="actionBDPrimPlaneFrame">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/frame.png</normaloff>../images/stocker/frame.png</iconset>
+   </property>
    <property name="text">
     <string>Plane Frame</string>
+   </property>
+   <property name="iconText">
+    <string>Frame</string>
    </property>
   </action>
   <action name="actionBDPrimPlaneFromSharp">
@@ -3090,18 +3165,36 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionBDPrimOutline">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/outline.png</normaloff>../images/stocker/outline.png</iconset>
+   </property>
    <property name="text">
     <string>Outline</string>
    </property>
   </action>
   <action name="actionBDProjectLoad">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/dbContainerSymbol.png</normaloff>:/CC/images/dbContainerSymbol.png</iconset>
+   </property>
    <property name="text">
     <string>Load Project</string>
    </property>
+   <property name="iconText">
+    <string>Load Prj</string>
+   </property>
   </action>
   <action name="actionBDPlaneSegmentation">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/segment.png</normaloff>../images/stocker/segment.png</iconset>
+   </property>
    <property name="text">
     <string>Plane Segmentation</string>
+   </property>
+   <property name="iconText">
+    <string>PlaneFinder</string>
    </property>
   </action>
   <action name="actionGotoNextZoom">
@@ -3113,13 +3206,27 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionBDPrimMergePlane">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/merge.png</normaloff>../images/stocker/merge.png</iconset>
+   </property>
    <property name="text">
     <string>Merge Planes</string>
    </property>
+   <property name="iconText">
+    <string>Merge</string>
+   </property>
   </action>
   <action name="actionBDPolyFitHypothesis">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/facet.png</normaloff>../images/stocker/facet.png</iconset>
+   </property>
    <property name="text">
     <string>Generate Hypothesis</string>
+   </property>
+   <property name="iconText">
+    <string>Facet</string>
    </property>
   </action>
   <action name="actionBDPolyFitConfidence">
@@ -3128,13 +3235,84 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionBDPolyFitSelection">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/lod3.png</normaloff>../images/stocker/lod3.png</iconset>
+   </property>
    <property name="text">
     <string>Face Selection</string>
    </property>
+   <property name="iconText">
+    <string>LoD3</string>
+   </property>
   </action>
   <action name="actionBDPolyFitSettings">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/setting.png</normaloff>../images/stocker/setting.png</iconset>
+   </property>
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionBDPrimMakePlane">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/makeplane.png</normaloff>../images/stocker/makeplane.png</iconset>
+   </property>
+   <property name="text">
+    <string>Make Plane</string>
+   </property>
+   <property name="iconText">
+    <string>Create</string>
+   </property>
+  </action>
+  <action name="actionBDDisplayPlaneOn">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/planeon.png</normaloff>../images/stocker/planeon.png</iconset>
+   </property>
+   <property name="text">
+    <string>PlaneOn</string>
+   </property>
+  </action>
+  <action name="actionBDDisplayPlaneOff">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/planeoff.png</normaloff>../images/stocker/planeoff.png</iconset>
+   </property>
+   <property name="text">
+    <string>PlaneOff</string>
+   </property>
+  </action>
+  <action name="actionBDDisplayPointOn">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/pointon.png</normaloff>../images/stocker/pointon.png</iconset>
+   </property>
+   <property name="text">
+    <string>PointOn</string>
+   </property>
+  </action>
+  <action name="actionBDDisplayPointOff">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/pointoff.png</normaloff>../images/stocker/pointoff.png</iconset>
+   </property>
+   <property name="text">
+    <string>PointOff</string>
+   </property>
+  </action>
+  <action name="actionBDPolyFitFacetFilter">
+   <property name="icon">
+    <iconset>
+     <normaloff>../images/stocker/filter.png</normaloff>../images/stocker/filter.png</iconset>
+   </property>
+   <property name="text">
+    <string>Facet Filter</string>
+   </property>
+   <property name="iconText">
+    <string>Filter</string>
    </property>
   </action>
  </widget>

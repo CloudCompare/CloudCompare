@@ -215,7 +215,7 @@ MainWindow::MainWindow()
 {
 	m_UI->setupUi( this );
 
-	setWindowTitle(QStringLiteral("CloudCompare v") + ccApp->versionLongStr(false));
+	setWindowTitle(QStringLiteral("BlockBuilder v") + ccApp->versionLongStr(false));
 	
 	m_pluginUIManager = new ccPluginUIManager( this, this );
 	
@@ -313,7 +313,7 @@ MainWindow::MainWindow()
 					  .arg( QString::number( TBB_VERSION_MAJOR ), QString::number( TBB_VERSION_MINOR ) ) );
 #endif
 	
-	ccConsole::Print("CloudCompare started!");
+	ccConsole::Print("BlockBuilder started!");
 
 #ifdef USE_STOCKER
 	Logger::initialize();
@@ -785,12 +785,18 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPrimCreateGround,			&QAction::triggered, this, &MainWindow::doActionBDPrimCreateGround);
 	connect(m_UI->actionBDPrimShrinkPlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimShrinkPlane);
 	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);
+	connect(m_UI->actionBDPrimMakePlane,			&QAction::triggered, this, &MainWindow::doActionBDPlaneCreate);
 	connect(m_UI->actionBDPolyFit,					&QAction::triggered, this, &MainWindow::doActionBDPolyFit);
 	connect(m_UI->actionBDPolyFitHypothesis,		&QAction::triggered, this, &MainWindow::doActionBDPolyFitHypothesis);
 	connect(m_UI->actionBDPolyFitConfidence,		&QAction::triggered, this, &MainWindow::doActionBDPolyFitConfidence);
 	connect(m_UI->actionBDPolyFitSelection,			&QAction::triggered, this, &MainWindow::doActionBDPolyFitSelection);
+	connect(m_UI->actionBDPolyFitFacetFilter,		&QAction::triggered, this, &MainWindow::doActionBDPolyFitFacetFilter);
 	connect(m_UI->actionBDPolyFitSettings,			&QAction::triggered, this, &MainWindow::doActionBDPolyFitSettings);
 	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBD3D4EM);
+	connect(m_UI->actionBDDisplayPlaneOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPlaneOn);
+	connect(m_UI->actionBDDisplayPlaneOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPlaneOff);
+	connect(m_UI->actionBDDisplayPointOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOn);
+	connect(m_UI->actionBDDisplayPointOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOff);
 }
 
 void MainWindow::doActionColorize()
@@ -11491,6 +11497,26 @@ void MainWindow::doActionBDPlaneDeduction()
 	refreshAll();
 }
 
+void MainWindow::doActionBDPlaneCreate()
+{
+	if (!haveSelection()) return;
+	
+	std::vector<ccPolyline*> polylines;
+	for (auto & entity : m_selectedEntities) {
+		if (entity->isA(CC_TYPES::POLY_LINE)) {
+			polylines.push_back(ccHObjectCaster::ToPolyline(entity));
+		}
+	}
+	/// actually, this is plane deduction
+	if (polylines.size() == 1) {
+		//! only two point, return
+
+		//! three point
+
+		//! close the polygon
+	}
+}
+
 //! generate hypothesis
 
 //! face selection
@@ -11581,6 +11607,16 @@ void MainWindow::doActionBDPolyFit()
 }
 
 #include "polyfit/method/hypothesis_generator.h"
+void ParsePolyFitPara(PolyFitObj* poly, bdrPolyFitDlg* pdlg)
+{
+	poly->strict_intersection = pdlg->PolyfitStrictCheckBox->isChecked();
+	poly->auto_filter = pdlg->PolyfitAutoFilterCheckBox->isChecked();
+	poly->snap_intersection = pdlg->PolyfitSnapSpinBox->value();
+	poly->use_confidence = pdlg->PolyfitConfiCheckBox->isChecked();
+	poly->data_fitting = pdlg->PolyfitdoubleSpinBox1->value();
+	poly->model_coverage = pdlg->PolyfitdoubleSpinBox2->value();
+	poly->model_complexity = pdlg->PolyfitdoubleSpinBox3->value();
+}
 
 void MainWindow::doActionBDPolyFitHypothesis()
 {
@@ -11620,13 +11656,7 @@ void MainWindow::doActionBDPolyFitHypothesis()
 			return;
 		}
 	}
-
-	polyfit_obj->strict_intersection = m_pbdrpfDlg->PolyfitcheckBox2->isChecked();
-	polyfit_obj->snap_intersection = m_pbdrpfDlg->PolyfitSnapSpinBox->value();
-	polyfit_obj->use_confidence = m_pbdrpfDlg->PolyfitcheckBox->isChecked();
-	polyfit_obj->data_fitting = m_pbdrpfDlg->PolyfitdoubleSpinBox1->value();
-	polyfit_obj->model_coverage = m_pbdrpfDlg->PolyfitdoubleSpinBox2->value();
-	polyfit_obj->model_complexity = m_pbdrpfDlg->PolyfitdoubleSpinBox3->value();
+	ParsePolyFitPara(polyfit_obj, m_pbdrpfDlg);
 	
 	ccHObject* hypoObj = nullptr;
 	try	{
@@ -11658,10 +11688,6 @@ void MainWindow::doActionBDPolyFitHypothesis()
 	QMessageBox::question(this, "Compute Confidence?", "Compute Confidence Right Now", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 	if (rb == QMessageBox::No)
 		return;
-	
-	
-
-	
 
 	try	{
 		ProgStart("Confidence Calculation")
@@ -11711,23 +11737,29 @@ void MainWindow::doActionBDPolyFitConfidence()
 	}
 
 	try {
-		polyfit_obj->use_confidence = m_pbdrpfDlg->PolyfitcheckBox->isChecked();
-		polyfit_obj->data_fitting = m_pbdrpfDlg->PolyfitdoubleSpinBox1->value();
-		polyfit_obj->model_coverage = m_pbdrpfDlg->PolyfitdoubleSpinBox2->value();
-		polyfit_obj->model_complexity = m_pbdrpfDlg->PolyfitdoubleSpinBox3->value();
+		ParsePolyFitPara(polyfit_obj, m_pbdrpfDlg);
 
 		if (polyfit_obj->status < PolyFitObj::STT_hypomesh) {
-			dispToConsole("[BDRecon] PolyFit - Please generate hypothesis firstly", ERR_CONSOLE_MESSAGE);
+			dispToConsole("[BDRecon] Please generate hypothesis firstly", ERR_CONSOLE_MESSAGE);
 			return;
 		}
-		else if (polyfit_obj->status < PolyFitObj::STT_confidence) {			
+		else if (polyfit_obj->status < PolyFitObj::STT_confidence) {
+			ProgStart("Confidence Calculation")
+
 			PolyfitComputeConfidence(HypoObj, polyfit_obj);
-			polyfit_obj->status = PolyFitObj::STT_confidence;			
+			polyfit_obj->status = PolyFitObj::STT_confidence;
+
+			ProgEnd
+
+			dispToConsole("[BDRecon] Confidence calculated, check it and update again if needed.", WRN_CONSOLE_MESSAGE);
 		}
 		else {
-			//! update 
+			ProgStart("Confidence Update")
+
 			UpdateConfidence(HypoObj, polyfit_obj);
 			polyfit_obj->status = PolyFitObj::STT_confidence;
+
+			ProgEnd
 		}		
 	}
 	catch (std::runtime_error& e) {
@@ -11770,21 +11802,43 @@ void MainWindow::doActionBDPolyFitSelection()
 	}
 
 	try {
-		polyfit_obj->use_confidence = m_pbdrpfDlg->PolyfitcheckBox->isChecked();
-		polyfit_obj->data_fitting = m_pbdrpfDlg->PolyfitdoubleSpinBox1->value();
-		polyfit_obj->model_coverage = m_pbdrpfDlg->PolyfitdoubleSpinBox2->value();
-		polyfit_obj->model_complexity = m_pbdrpfDlg->PolyfitdoubleSpinBox3->value();
+		ParsePolyFitPara(polyfit_obj, m_pbdrpfDlg);
 
 		if (polyfit_obj->status < PolyFitObj::STT_confidence) {
 			dispToConsole("[BDRecon] PolyFit - no confidence calculated", ERR_CONSOLE_MESSAGE);
 			return;
 		}
+		ProgStart("Building Modelling")
+
 		ccHObject* optmizeObj = PolyfitFaceSelection(HypoObj, polyfit_obj);
 		if (optmizeObj)	{
 			polyfit_obj->status = PolyFitObj::STT_optimized;
 			addToDB(optmizeObj);
-			polyfit_obj->OutputResultToObjFile(baseObj);
+			std::string file_path;
+			if (polyfit_obj->OutputResultToObjFile(baseObj, file_path)) {
+				QString model_file(file_path.c_str());
+
+				CCVector3d loadCoordinatesShift(0, 0, 0);
+				bool loadCoordinatesTransEnabled = false;
+				FileIOFilter::LoadParameters parameters;
+				{
+					parameters.alwaysDisplayLoadDialog = false;
+					parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+					parameters.parentWidget = this;
+				}
+				CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+
+				if (QFileInfo(model_file).exists()) {
+					ccHObject* model = FileIOFilter::LoadFromFile(model_file, parameters, result, QString());
+					model->setDisplay_recursive(HypoObj->getDisplay());
+					HypoObj->getParent()->addChild(model);
+					HypoObj->setEnabled(false);
+					addToDB(model);
+				}
+			}
 		}
+
+		ProgEnd
 	}
 	catch (const std::string& e) {
 		dispToConsole("[BDRecon] PolyFit - Please open the main project file", ERR_CONSOLE_MESSAGE);
@@ -11793,6 +11847,11 @@ void MainWindow::doActionBDPolyFitSelection()
 
 	refreshAll();
 	UpdateUI();
+}
+
+void MainWindow::doActionBDPolyFitFacetFilter()
+{
+
 }
 
 void MainWindow::doActionBDPolyFitSettings()
@@ -11927,5 +11986,69 @@ void MainWindow::doActionBD3D4EM()
 
 	//! restore the working directory
 	QDir::setCurrent(workingDir_old.absolutePath());
+}
+
+void MainWindow::doActionBDDisplayPlaneOn()
+{
+	ccHObject* Root_Entity = nullptr;
+	if (haveSelection())
+		Root_Entity = m_selectedEntities.front();
+	else
+		Root_Entity = m_ccRoot->getRootEntity();
+
+	ccHObject::Container planeObjs;
+	Root_Entity->filterChildren(planeObjs, true, CC_TYPES::PLANE, true);
+
+	for (auto & planeObj : planeObjs) {
+		planeObj->setVisible(true);
+	}
+}
+
+void MainWindow::doActionBDDisplayPlaneOff()
+{
+	ccHObject* Root_Entity = nullptr;
+	if (haveSelection())
+		Root_Entity = m_selectedEntities.front();
+	else
+		Root_Entity = m_ccRoot->getRootEntity();
+
+	ccHObject::Container planeObjs;
+	Root_Entity->filterChildren(planeObjs, true, CC_TYPES::PLANE, true);
+
+	for (auto & planeObj : planeObjs) {
+		planeObj->setVisible(false);
+	}
+}
+
+void MainWindow::doActionBDDisplayPointOn()
+{
+	ccHObject* Root_Entity = nullptr;
+	if (haveSelection())
+		Root_Entity = m_selectedEntities.front();
+	else
+		Root_Entity = m_ccRoot->getRootEntity();
+
+	ccHObject::Container planeObjs;
+	Root_Entity->filterChildren(planeObjs, true, CC_TYPES::PLANE, true);
+
+	for (auto & planeObj : planeObjs) {
+		planeObj->setVisible(true);
+	}
+}
+
+void MainWindow::doActionBDDisplayPointOff()
+{
+	ccHObject* Root_Entity = nullptr;
+	if (haveSelection())
+		Root_Entity = m_selectedEntities.front();
+	else
+		Root_Entity = m_ccRoot->getRootEntity();
+
+	ccHObject::Container Objs;
+	Root_Entity->filterChildren(Objs, true, CC_TYPES::POINT_CLOUD, false);
+
+	for (auto & Obj : Objs) {
+		Obj->setVisible(false);
+	}
 }
 

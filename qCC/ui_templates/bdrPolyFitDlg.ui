@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>481</width>
+    <width>483</width>
     <height>102</height>
    </rect>
   </property>
@@ -117,64 +117,41 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="layoutWidget_2">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>70</y>
-     <width>461</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
-    <item>
-     <widget class="QCheckBox" name="PolyfitcheckBox">
-      <property name="text">
-       <string notr="true">use confidence</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="PolyfitcheckBox2">
-      <property name="text">
-       <string notr="true">strict intersection</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <spacer name="horizontalSpacer_2">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
-     <widget class="QDialogButtonBox" name="buttonBox">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="standardButtons">
-       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QDoubleSpinBox" name="PolyfitSnapSpinBox">
+  <widget class="QCheckBox" name="PolyfitConfiCheckBox">
    <property name="geometry">
     <rect>
      <x>90</x>
      <y>40</y>
-     <width>71</width>
+     <width>95</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string notr="true">use confidence</string>
+   </property>
+  </widget>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>70</y>
+     <width>156</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QDoubleSpinBox" name="PolyfitSnapSpinBox">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>70</y>
+     <width>81</width>
      <height>20</height>
     </rect>
    </property>
@@ -203,14 +180,46 @@
   <widget class="QLabel" name="label1_3">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>40</y>
+     <x>130</x>
+     <y>70</y>
      <width>71</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="text">
     <string>Snap Distance</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="PolyfitAutoFilterCheckBox">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>40</y>
+     <width>71</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string notr="true">Auto Filter</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="PolyfitStrictCheckBox">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>70</y>
+     <width>111</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string notr="true">strict intersection</string>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
    </property>
   </widget>
  </widget>
@@ -245,6 +254,38 @@
     <hint type="destinationlabel">
      <x>230</x>
      <y>38</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PolyfitStrictCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>label1_3</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>65</x>
+     <y>80</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>165</x>
+     <y>80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>PolyfitStrictCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>PolyfitSnapSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>65</x>
+     <y>80</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>260</x>
+     <y>79</y>
     </hint>
    </hints>
   </connection>

@@ -152,7 +152,7 @@
     <file>images/icon/cc_icon_32.png</file>
     <file>images/icon/cc_icon_64.png</file>
   </qresource>
-  <qresource prefix="CC/Stocker">
+  <qresource prefix="/CC/Stocker">
     <file>images/stocker/database.png</file>
     <file>images/stocker/boundary.png</file>
     <file>images/stocker/deduction.png</file>

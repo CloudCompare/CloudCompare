@@ -20,7 +20,6 @@
 //CLOUDS
 #include "AsciiFilter.h"
 #include "BinFilter.h"
-#include "LASFilter.h"
 
 //MESHES
 #include "PlyFilter.h"
@@ -67,9 +66,6 @@ void FileIOFilter::InitInternalFilters()
 	//from the most useful to the less one!
 	Register(Shared(new BinFilter()));
 	Register(Shared(new AsciiFilter()));
-#ifdef CC_LAS_SUPPORT
-	Register(Shared(new LASFilter()));
-#endif
 
 	Register(Shared(new PlyFilter()));
 

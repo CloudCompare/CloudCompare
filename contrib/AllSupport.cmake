@@ -1,7 +1,5 @@
 # ALL 'contrib' supported libraries 
 
-# PDAL support
-include( contrib/PDALSupport.cmake )
 # 3DXWARE (3dConnexion devices) support
 include( contrib/3DXSupport.cmake )
 # Gamepads support
@@ -19,8 +17,6 @@ function( target_link_contrib ) # 2 arguments: ARGV0 = project name / ARGV1 = sh
 
 	#libraries with dynamic linkage can automatically 'install' their DLLs
 
-	#PDAL support
-	target_link_PDAL( ${ARGV0} ${ARGV1} )
 	#GDAL support
 	target_link_GDAL( ${ARGV0} ${ARGV1} )
 	#DXF support

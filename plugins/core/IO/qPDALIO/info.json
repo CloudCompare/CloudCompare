@@ -1,0 +1,17 @@
+{
+	"type" : "I/O",
+	"core" : true,
+	"name" : "PDAL",
+	"description": "Add LAS read/write capability using the PDAL library.",
+	"authors" : [
+		{
+			"name" : "Thomas Montaigu"
+		}
+	],
+	"references" : [
+		{
+			"text" : "Point Data Abstraction Library",
+			"url" : "https://pdal.io/"
+		}
+	]
+}

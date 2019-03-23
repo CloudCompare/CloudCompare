@@ -65,8 +65,10 @@
       <string>Toolbars</string>
      </property>
      <addaction name="actionDisplayMainTools"/>
-     <addaction name="actionDisplayScalarFieldsTools"/>
+     <addaction name="actionDisplayBuildingReconTools"/>
+     <addaction name="actionDisplayEditorTools"/>
      <addaction name="actionDisplayViewTools"/>
+     <addaction name="actionDisplayScalarFieldsTools"/>
     </widget>
     <widget class="QMenu" name="menuLights">
      <property name="title">
@@ -704,6 +706,12 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="toolTip">
     <string>Main tools</string>
    </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -712,37 +720,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    </attribute>
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
-   <addaction name="separator"/>
-   <addaction name="actionSamplePointsOnMesh"/>
-   <addaction name="actionLabelConnectedComponents"/>
-   <addaction name="actionPrimitiveFactory"/>
-   <addaction name="actionRasterize"/>
-   <addaction name="actionSORFilter"/>
-   <addaction name="separator"/>
-   <addaction name="actionSegment"/>
-   <addaction name="actionTranslateRotate"/>
-   <addaction name="actionCrossSection"/>
-  </widget>
-  <widget class="QToolBar" name="toolBarSFTools">
-   <property name="windowTitle">
-    <string>Scalar field tools</string>
-   </property>
-   <property name="toolTip">
-    <string>Scalar field tools</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionShowHistogram"/>
-   <addaction name="actionComputeStatParams"/>
-   <addaction name="actionFilterByValue"/>
-   <addaction name="actionDeleteScalarField"/>
-   <addaction name="actionAddConstantSF"/>
-   <addaction name="actionScalarFieldArithmetic"/>
-   <addaction name="actionOpenColorScalesManager"/>
   </widget>
   <widget class="QDockWidget" name="DockableProperties">
    <property name="minimumSize">
@@ -810,7 +787,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>true</bool>
+    <bool>false</bool>
    </attribute>
    <addaction name="actionBDProjectLoad"/>
    <addaction name="separator"/>
@@ -863,11 +840,51 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionSetViewRight"/>
    <addaction name="actionSetViewBottom"/>
    <addaction name="actionLevel"/>
+   <addaction name="actionTranslateRotate"/>
+  </widget>
+  <widget class="QToolBar" name="toolBarSFTools">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Scalar field tools</string>
+   </property>
+   <property name="toolTip">
+    <string>Scalar field tools</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionShowHistogram"/>
+   <addaction name="actionComputeStatParams"/>
+   <addaction name="actionFilterByValue"/>
+   <addaction name="actionDeleteScalarField"/>
+   <addaction name="actionAddConstantSF"/>
+   <addaction name="actionScalarFieldArithmetic"/>
+   <addaction name="actionOpenColorScalesManager"/>
+  </widget>
+  <widget class="QToolBar" name="toolBarEditor">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionSegment"/>
+   <addaction name="actionCrossSection"/>
+   <addaction name="actionSORFilter"/>
+   <addaction name="actionShowHistogram"/>
   </widget>
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/ccOpen.png</normaloff>:/CC/images/ccOpen.png</iconset>
+     <normaloff>:/CC/Stocker/images/stocker/open.png</normaloff>:/CC/Stocker/images/stocker/open.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Open</string>
@@ -882,7 +899,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionSave">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
+     <normaloff>:/CC/Stocker/images/stocker/save.png</normaloff>:/CC/Stocker/images/stocker/save.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Save</string>
@@ -1216,6 +1233,18 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>Label connected components</string>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionSegment">
@@ -1725,7 +1754,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Scalar fields</string>
@@ -2889,7 +2918,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Trace Polyline</string>
    </property>
    <property name="iconText">
-    <string>PickL</string>
+    <string>PickLine</string>
    </property>
    <property name="toolTip">
     <string>Trace a polyline by point picking</string>
@@ -3316,6 +3345,28 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Filter</string>
    </property>
   </action>
+  <action name="actionDisplayBuildingReconTools">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>BuildingRecon</string>
+   </property>
+  </action>
+  <action name="actionDisplayEditorTools">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Model Editor</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -3442,6 +3493,38 @@ QTreeView::branch:open:has-children:has-siblings  {
     <hint type="destinationlabel">
      <x>-1</x>
      <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDisplayBuildingReconTools</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>toolBarBDRecon</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>458</x>
+     <y>46</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDisplayEditorTools</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>toolBarEditor</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1006</x>
+     <y>409</y>
     </hint>
    </hints>
   </connection>

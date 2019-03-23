@@ -157,7 +157,7 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 		QList<QAction *> actions = plugin->getActions();
 		
 		addActionsToMenu( plugin, actions );
-		addActionsToToolBar( plugin, actions );
+//		addActionsToToolBar( plugin, actions );
 
 		plugin->onNewSelection( m_appInterface->getSelectedEntities() );
 	}
@@ -172,7 +172,7 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 			QList<QAction *> actions = plugin->getActions();
 			
 			addActionsToMenu( plugin, actions );
-			addActionsToToolBar( plugin, actions );
+//			addActionsToToolBar( plugin, actions );
 
 			plugin->onNewSelection( m_appInterface->getSelectedEntities() );
 		}
@@ -182,7 +182,7 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 	for ( QAction *action : coreGLActions )
 	{
 		m_glFilterMenu->addAction( action );
-		m_glFiltersToolbar->addAction( action );				
+//		m_glFiltersToolbar->addAction( action );				
 	}
 	
 	// add 3rd GL party plugins to menu & tool bar (if any )
@@ -193,7 +193,7 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 		for ( QAction *action : thirdPartyGLActions )
 		{
 			m_glFilterMenu->addAction( action );
-			m_glFiltersToolbar->addAction( action );				
+//			m_glFiltersToolbar->addAction( action );				
 		}
 	}
 	
@@ -201,20 +201,20 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 	
 	if ( m_mainPluginToolbar->isEnabled() )
 	{
-		m_showPluginToolbar->setEnabled( true );
+//		m_showPluginToolbar->setEnabled( true );
 	}
 	
 	m_glFilterMenu->setEnabled( !m_glFilterMenu->isEmpty() );
-	m_glFiltersToolbar->setEnabled( !m_glFilterMenu->isEmpty() );	// [sic] we have toolbar actions if we have them in the menu
+//	m_glFiltersToolbar->setEnabled( !m_glFilterMenu->isEmpty() );	// [sic] we have toolbar actions if we have them in the menu
 	
-	m_showPluginToolbar->setChecked( m_mainPluginToolbar->isEnabled() );
+//	m_showPluginToolbar->setChecked( m_mainPluginToolbar->isEnabled() );
 	
 	if ( m_glFiltersToolbar->isEnabled() )
 	{
-		m_showGLFilterToolbar->setEnabled( true );
+//		m_showGLFilterToolbar->setEnabled( true );
 	}
 	
-	m_showGLFilterToolbar->setChecked( m_glFiltersToolbar->isEnabled() );
+//	m_showGLFilterToolbar->setChecked( m_glFiltersToolbar->isEnabled() );
 }
 
 QMenu *ccPluginUIManager::pluginMenu() const
@@ -353,7 +353,8 @@ void ccPluginUIManager::setupToolbars()
 	m_glFiltersToolbar = new QToolBar( tr( "GL Filters" ), m_parentWidget );
 	
 	m_glFiltersToolbar->setObjectName( QStringLiteral( "GL Plugin Toolbar" ) );
-	m_glFiltersToolbar->addAction( m_actionRemoveFilter );	
+	m_glFiltersToolbar->setVisible(false);
+//	m_glFiltersToolbar->addAction( m_actionRemoveFilter );	
 
 	connect( m_showGLFilterToolbar, &QAction::toggled, m_glFiltersToolbar, &QToolBar::setVisible );
 }
@@ -373,6 +374,7 @@ void ccPluginUIManager::addActionsToToolBar( ccStdPluginInterface *stdPlugin, co
 
 			toolBar->setObjectName( pluginName );
 			toolBar->setEnabled( true );
+			toolBar->setHidden(true);
 			
 			for ( QAction* action : actions )
 			{

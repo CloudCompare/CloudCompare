@@ -175,5 +175,7 @@
     <file>images/stocker/segment.png</file>
     <file>images/stocker/info.png</file>
     <file>images/stocker/setting.png</file>
+    <file>images/stocker/open.png</file>
+    <file>images/stocker/save.png</file>
   </qresource>
 </RCC>

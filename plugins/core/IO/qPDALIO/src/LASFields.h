@@ -88,7 +88,7 @@ const char LAS_FIELD_NAMES[][28] = {"X",
 };
 
 //! LAS field descriptor
-struct QCC_IO_LIB_API LasField
+struct LasField
 {
 	//! Shared type
 	typedef QSharedPointer<LasField> Shared;

@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! ASPRS LAS point cloud file I/O filter
-class QCC_IO_LIB_API LASFilter : public FileIOFilter
+class LASFilter : public FileIOFilter
 {
 public:
 	//static accessors

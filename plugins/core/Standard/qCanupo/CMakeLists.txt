@@ -12,7 +12,7 @@ if (PLUGIN_STANDARD_QCANUPO)
 		message( SEND_ERROR "No DLib library root specified (dlib_DIR)" )
 	else()
 		find_package(dlib REQUIRED)
-		include_directories( ${dlib_DIR} )
+		include_directories( ${dlib_INCLUDE_DIRS} )
 	endif()
 	
 	include( ../../../CMakePluginTpl.cmake )

@@ -26,8 +26,8 @@
 #include <ccColorScalesManager.h>
 #include <ccHObjectCaster.h>
 
-//qCC_io
-#include <LASFields.h>
+//qPDALIO
+#include "../qPDALIO/src/LASFields.h"
 
 //Qt
 #include <QCoreApplication>

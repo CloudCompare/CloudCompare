@@ -32,7 +32,7 @@ public:
 
 	void registerCommands( ccCommandLineInterface *cmd ) override;
 
-	QVector<FileIOFilter::Shared> getFilters() override;
+	FilterList getFilters() override;
 };
 
 #endif

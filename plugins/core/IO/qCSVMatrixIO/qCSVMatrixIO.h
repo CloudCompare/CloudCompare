@@ -30,10 +30,10 @@ class qCSVMatrixIO : public QObject, public ccIOFilterPluginInterface
 public:
 	qCSVMatrixIO(QObject* parent = nullptr);
 	
-	virtual ~qCSVMatrixIO() = default;
+	~qCSVMatrixIO() override = default;
 
 	//inherited from ccIOFilterPluginInterface
-	FileIOFilter::Shared getFilter() override;
+	FilterList getFilters() override;
 };
 
 #endif //Q_CSV_MATRIX_IO_PLUGIN_HEADER

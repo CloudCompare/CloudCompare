@@ -27,7 +27,7 @@ qPhotoscanIO::qPhotoscanIO( QObject* parent )
 {
 }
 
-FileIOFilter::Shared qPhotoscanIO::getFilter()
+ccIOFilterPluginInterface::FilterList qPhotoscanIO::getFilters()
 {
-	return FileIOFilter::Shared(new PhotoScanFilter);
+	return { FileIOFilter::Shared( new PhotoScanFilter ) };
 }

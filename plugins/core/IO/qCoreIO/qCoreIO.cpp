@@ -40,9 +40,9 @@ void qCoreIO::registerCommands( ccCommandLineInterface *inCmdLine )
 	Q_UNUSED( inCmdLine );
 }
 
-QVector<FileIOFilter::Shared> qCoreIO::getFilters()
+ccIOFilterPluginInterface::FilterList qCoreIO::getFilters()
 {
-	return QVector<FileIOFilter::Shared>{
+	return {
 		FileIOFilter::Shared( new PTXFilter ),
 		FileIOFilter::Shared( new SimpleBinFilter ),
 		FileIOFilter::Shared( new ObjFilter ),

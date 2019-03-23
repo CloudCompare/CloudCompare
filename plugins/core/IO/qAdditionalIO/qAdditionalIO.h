@@ -31,12 +31,12 @@ class qAdditionalIO : public QObject, public ccIOFilterPluginInterface
 public:
 	explicit qAdditionalIO( QObject* parent = nullptr );
 	
-	virtual ~qAdditionalIO() = default;
+	~qAdditionalIO() override = default;
 
-	virtual void registerCommands(ccCommandLineInterface* cmd) override;
+	void registerCommands(ccCommandLineInterface* cmd) override;
 	
 	// inherited from ccIOFilterPluginInterface
-	QVector<FileIOFilter::Shared> getFilters() override;
+	FilterList getFilters() override;
 };
 
 #endif

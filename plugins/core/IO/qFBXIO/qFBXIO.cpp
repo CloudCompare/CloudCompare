@@ -32,7 +32,7 @@ void qFBXIO::registerCommands( ccCommandLineInterface *cmd )
 	cmd->registerCommand( ccCommandLineInterface::Command::Shared( new FBXCommand ) );
 }
 
-QVector<FileIOFilter::Shared> qFBXIO::getFilters()
+ccIOFilterPluginInterface::FilterList qFBXIO::getFilters()
 {
 	return { FileIOFilter::Shared( new FBXFilter ) };
 }

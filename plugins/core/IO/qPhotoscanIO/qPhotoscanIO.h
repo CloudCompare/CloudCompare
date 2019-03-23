@@ -30,10 +30,10 @@ class qPhotoscanIO : public QObject, public ccIOFilterPluginInterface
 public:
 	explicit qPhotoscanIO( QObject *parent = nullptr );
 	
-	virtual ~qPhotoscanIO() = default;
+	~qPhotoscanIO() override = default;
 
 	//inherited from ccIOFilterPluginInterface
-	FileIOFilter::Shared getFilter() override;
+	FilterList getFilters() override;
 };
 
 #endif //Q_PHOTOSCAN_IO_PLUGIN_HEADER

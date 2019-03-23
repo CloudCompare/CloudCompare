@@ -173,6 +173,7 @@
     <file>images/stocker/pointoff.png</file>
     <file>images/stocker/pointon.png</file>
     <file>images/stocker/segment.png</file>
+    <file>images/stocker/info.png</file>
     <file>images/stocker/setting.png</file>
   </qresource>
 </RCC>

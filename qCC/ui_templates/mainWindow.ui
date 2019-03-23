@@ -713,17 +713,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
    <addaction name="separator"/>
-   <addaction name="actionPointPicking"/>
-   <addaction name="actionClone"/>
-   <addaction name="actionMerge"/>
-   <addaction name="actionDelete"/>
-   <addaction name="separator"/>
-   <addaction name="actionPointPairsAlign"/>
-   <addaction name="actionRegister"/>
-   <addaction name="actionSubsample"/>
    <addaction name="actionSamplePointsOnMesh"/>
-   <addaction name="actionCloudCloudDist"/>
-   <addaction name="actionCloudMeshDist"/>
    <addaction name="actionLabelConnectedComponents"/>
    <addaction name="actionPrimitiveFactory"/>
    <addaction name="actionRasterize"/>
@@ -844,6 +834,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="separator"/>
    <addaction name="actionExtractSections"/>
    <addaction name="actionBD3D4EM"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QToolBar" name="toolBarView">
    <property name="windowTitle">
@@ -862,6 +853,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionBDDisplayPlaneOff"/>
    <addaction name="actionBDDisplayPointOn"/>
    <addaction name="actionBDDisplayPointOff"/>
+   <addaction name="actionPointPicking"/>
    <addaction name="actionGlobalZoom"/>
    <addaction name="actionZoomAndCenter"/>
    <addaction name="actionSetViewTop"/>
@@ -1944,7 +1936,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionPointPicking">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/ccPointPicking.png</normaloff>:/CC/images/ccPointPicking.png</iconset>
+     <normaloff>:/CC/Stocker/images/stocker/info.png</normaloff>:/CC/Stocker/images/stocker/info.png</iconset>
    </property>
    <property name="text">
     <string>Point picking</string>

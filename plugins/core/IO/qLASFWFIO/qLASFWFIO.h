@@ -38,7 +38,7 @@ public:
 	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 
 	//inherited from ccIOFilterPluginInterface
-	FileIOFilter::Shared getFilter() override;
+	ccIOFilterPluginInterface::FilterList getFilters() override;
 };
 
 #endif //Q_LAS_FWF_IO_PLUGIN_HEADER

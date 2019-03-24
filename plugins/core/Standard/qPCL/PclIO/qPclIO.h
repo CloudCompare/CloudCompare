@@ -35,7 +35,7 @@ public:
 	explicit qPclIO(QObject* parent = nullptr);
 
 	//inherited from ccIOFilterPluginInterface
-	FileIOFilter::Shared getFilter() override;
+	ccIOFilterPluginInterface::FilterList getFilters() override;
 };
 
 #endif //Q_PCL_IO_PLUGIN_HEADER

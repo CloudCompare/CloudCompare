@@ -30,9 +30,9 @@ qLASFWFIO::qLASFWFIO(QObject *parent)
 {
 }
 
-FileIOFilter::Shared qLASFWFIO::getFilter()
+ccIOFilterPluginInterface::FilterList qLASFWFIO::getFilters()
 {
-	return FileIOFilter::Shared(new LASFWFFilter);
+	return { FileIOFilter::Shared(new LASFWFFilter) };
 }
 
 void qLASFWFIO::registerCommands(ccCommandLineInterface* cmd)

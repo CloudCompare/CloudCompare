@@ -218,6 +218,9 @@ ccHObject * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check
 ccHObject * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
 	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_PRIMITIVE_SUFFIX, building_name, check_enable);
 }
+ccHObject * BDBaseHObject::GetHypothesisGroup(QString building_name, bool check_enable) {
+	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_POLYFITHYPO_SUFFIX, building_name, check_enable);
+}
 std::string BDBaseHObject::GetPathModelObj(std::string building_name)
 {
 	auto& bd = block_prj.m_builder.sbuild.find(stocker::BuilderBase::BuildNode::Create(building_name));
@@ -876,7 +879,7 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
  	conc_plane_cloud.clear(); conc_plane_cloud.shrink_to_fit();
 
 	MapFacetAttribute<VertexGroup*> facet_attrib_supporting_vertex_group_(polyfit_obj->hypothesis_mesh_, Method::Get_facet_attrib_supporting_vertex_group());
-
+	
 	FOR_EACH_FACET(Map, polyfit_obj->hypothesis_mesh_, it) {
 		Map::Facet* f = it;
 
@@ -935,6 +938,23 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 
 	map<ccFacet*, double> Facet_conf;
 	vector<double> all_conf;
+
+	//////////////////////////////////////////////////////////////////////////AUTOFILTER
+	std::map<std::string, PlaneUnit*> plane_data;
+	std::map<std::string, stocker::Polyline2d> plane_convexhull;
+	if (polyfit_obj->auto_filter) {
+		for (auto & planeObj : planeObjs) {
+			stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
+			PlaneUnit plane_unit_ = FormPlaneUnit(planeObj->getName().toStdString(), GetVcgPlane(planeObj), cur_plane_points, true);
+			PlaneUnit* plane_unit = new PlaneUnit(planeObj->getName().toStdString(), GetVcgPlane(planeObj), plane_unit_.concave_hull_prj);
+
+			plane_data[planeObj->getName().toStdString()] = plane_unit;
+			stocker::Polyline2d plane_convex_hull = MakeLoopPolylinefromContour2d(Point3dToPlpoint2d(plane_unit_, plane_unit_.convex_hull_prj));
+			plane_convexhull[planeObj->getName().toStdString()] = plane_convex_hull;
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+
 	//! assign confidence information to hypothesis
 	FOR_EACH_FACET(Map, polyfit_obj->hypothesis_mesh_, it) {
 		Map::Facet* f = it;
@@ -963,7 +983,24 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 			
 			Facet_conf[facet] = confidence;
 			all_conf.push_back(confidence);
-			continue;
+
+			vcg::Plane3d vcg_plane = GetVcgPlane(plane_entity);
+			//! convex_hull, 
+			PlaneUnit plane_unit = *plane_data[plane_entity->getName().toStdString()];
+			stocker::Polyline2d plane_ch = plane_convexhull[plane_entity->getName().toStdString()];
+			ccPolyline* contour_entity = facet->getContour(); vector<CCVector3>ccv_poly = contour_entity->getPoints(true);
+			Contour3d facet_contour_temp; for (auto & pt : ccv_poly) { facet_contour_temp.push_back(parse_xyz(pt)); }
+			stocker::Polyline2d facet_contour = MakeLoopPolylinefromContour2d(Point3dToPlpoint2d(plane_unit, facet_contour_temp));
+			//! check overlap
+			double distance = DistancePolygonPolygon(facet_contour, plane_ch);
+			facet->setDistance(distance);
+			if (polyfit_obj->auto_filter) {
+				if (distance > 2 && facet->getFitting() < 1) {
+					facet->setEnabled(false);
+				}
+			}
+
+			break;
 		}		
 	}
 	//! colorize all the facet
@@ -1135,13 +1172,13 @@ void PolyFitObj::UpdateValidFacet(std::vector<stocker::String_String> valid_upda
 	swap(valid_group_facet_name, valid_for_selection);
 }
 
-bool PolyFitObj::OutputResultToObjFile(BDBaseHObject* baseObj)
+bool PolyFitObj::OutputResultToObjFile(BDBaseHObject* baseObj, std::string & file_path)
 {
 	if (status < STT_optimized) {
 		return false;
 	}
 	auto& bd = baseObj->block_prj.m_builder.sbuild.find(stocker::BuilderBase::BuildNode::Create(building_name));
-	std::string file_path = baseObj->GetPathModelObj(building_name);
+	file_path = baseObj->GetPathModelObj(building_name);
 	
 	std::ofstream out(file_path.c_str());
 	if (out.fail()) {
@@ -1168,6 +1205,17 @@ bool PolyFitObj::OutputResultToObjFile(BDBaseHObject* baseObj)
 	FOR_EACH_FACET_CONST(Map, mesh, it) {
 		Map::Halfedge* jt = it->halfedge();
 		out << "f ";
+		do {
+			out << vertex_id[jt->vertex()] << " ";
+			jt = jt->next();
+		} while (jt != it->halfedge());
+		out << std::endl;
+	}
+
+	// Output outlines
+	FOR_EACH_FACET_CONST(Map, mesh, it) {
+		Map::Halfedge* jt = it->halfedge();
+		out << "l ";
 		do {
 			out << vertex_id[jt->vertex()] << " ";
 			jt = jt->next();

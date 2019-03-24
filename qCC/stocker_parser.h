@@ -106,6 +106,7 @@ public:
 	ccHObject::Container GetOriginPointCloud(bool check_enable = false);
 	ccHObject* GetOriginPointCloud(QString building_name, bool check_enable = false);
 	ccHObject* GetPrimitiveGroup(QString building_name, bool check_enable = false);
+	ccHObject * GetHypothesisGroup(QString building_name, bool check_enable);
 
 	stocker::Vec3d ToLocal(stocker::Vec3d pt) { return (pt + global_shift)*global_scale; }
 	stocker::Vec3d ToGlobal(stocker::Vec3d pt) { return pt / global_scale - global_shift; }
@@ -136,13 +137,15 @@ public:
 
 	void FacetOptimization();
 
+	void AutoFilterByDistanceAndFitting();
+
 	void UpdateValidFacet(std::vector<stocker::String_String> valid);
 
 	//! only update valid planes
 	void UpdateConfidence(ccHObject::Container facetObjs);
 
-	bool OutputResultToObjFile(BDBaseHObject* baseObj);
-
+	bool OutputResultToObjFile(BDBaseHObject* baseObj, std::string & file_path);
+	
 private:
 
 	bool FindValidFacet(std::string name_plane, std::string name_facet);
@@ -162,6 +165,7 @@ public:
 	bool use_confidence;
 	bool strict_intersection;
 	double snap_intersection;
+	bool auto_filter;
 	enum POLYFIT_STUTAS
 	{
 		STT_prepared,

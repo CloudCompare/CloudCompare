@@ -154,6 +154,8 @@
 #include "polyfit/basic/logger.h"
 #endif // USE_STOCKER
 
+#include "bdrFacetFilterDlg.h"
+
 
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance  = nullptr;
@@ -211,6 +213,7 @@ MainWindow::MainWindow()
 	, m_pbdrddtDlg(nullptr)
 	, m_pbdrpfDlg(nullptr)
 	, m_pbdr3d4emDlg(nullptr)
+	, m_pbdrffDlg(nullptr)
 	, polyfit_obj(nullptr)
 {
 	m_UI->setupUi( this );
@@ -231,6 +234,8 @@ MainWindow::MainWindow()
 
 	// Set up dynamic menus
 	m_UI->menuFile->insertMenu(m_UI->actionSave, m_recentFiles->menu());
+
+	m_UI->toolBarSFTools->setVisible(false);
 	
 	//Console
 	ccConsole::Init(m_UI->consoleWidget, this, this);
@@ -388,20 +393,20 @@ void MainWindow::initPlugins( )
 	m_pluginUIManager->init( ccPluginManager::pluginList() );
 	
 	// Set up dynamic tool bars
-	addToolBar( Qt::RightToolBarArea, m_pluginUIManager->glFiltersToolbar() );
-	addToolBar( Qt::RightToolBarArea, m_pluginUIManager->mainPluginToolbar() );
-	
-	for ( QToolBar *toolbar : m_pluginUIManager->additionalPluginToolbars() )
-	{
-		addToolBar( Qt::TopToolBarArea, toolbar );
-	}
+// 	addToolBar( Qt::RightToolBarArea, m_pluginUIManager->glFiltersToolbar() );
+// 	addToolBar( Qt::RightToolBarArea, m_pluginUIManager->mainPluginToolbar() );
+// 	
+// 	for ( QToolBar *toolbar : m_pluginUIManager->additionalPluginToolbars() )
+// 	{
+// 		addToolBar( Qt::TopToolBarArea, toolbar );
+// 	}
 	
 	// Set up dynamic menus
 	m_UI->menubar->insertMenu( m_UI->menu3DViews->menuAction(), m_pluginUIManager->pluginMenu() );
 	m_UI->menuDisplay->insertMenu( m_UI->menuActiveScalarField->menuAction(), m_pluginUIManager->shaderAndFilterMenu() );
 
-	m_UI->menuToolbars->addAction( m_pluginUIManager->actionShowMainPluginToolbar() );
-	m_UI->menuToolbars->addAction( m_pluginUIManager->actionShowGLFilterToolbar() );
+// 	m_UI->menuToolbars->addAction( m_pluginUIManager->actionShowMainPluginToolbar() );
+// 	m_UI->menuToolbars->addAction( m_pluginUIManager->actionShowGLFilterToolbar() );
 }
 
 void MainWindow::doEnableQtWarnings(bool state)
@@ -5705,7 +5710,7 @@ void MainWindow::doActionResetGUIElementsPos()
 
 	QMessageBox::information( this,
 							  tr("Restart"),
-							  tr("To finish the process, you'll have to close and restart CloudCompare") );
+							  tr("To finish the process, you'll have to close and restart BlockBuilder") );
 	
 	//to avoid saving them right away!
 	s_autoSaveGuiElementPos = false;
@@ -5977,7 +5982,7 @@ void MainWindow::freezeUI(bool state)
 {
 	//freeze standard plugins
 	m_UI->toolBarMainTools->setDisabled(state);
-	m_UI->toolBarSFTools->setDisabled(state);
+	m_UI->toolBarSFTools->setDisabled(state); 
 	
 	m_pluginUIManager->mainPluginToolbar()->setDisabled(state);
 
@@ -10627,6 +10632,87 @@ ccHObject* MainWindow::askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultClo
 	assert(selectedIndex >= 0 && static_cast<size_t>(selectedIndex) < entites.size());
 	return entites[selectedIndex];
 }
+
+void MainWindow::doActionBDDisplayPlaneOn()
+{
+	ccHObject* Root_Entity = nullptr;
+	if (haveSelection())
+		Root_Entity = m_selectedEntities.front();
+	else
+		Root_Entity = m_ccRoot->getRootEntity();
+
+	ccHObject::Container Objs;
+	Root_Entity->filterChildren(Objs, true, CC_TYPES::PLANE, true);
+
+	ProgStart("Show Plane");
+	for (auto & Obj : Objs) {
+		Obj->setVisible(true);
+	}
+	ProgEnd
+
+	refreshAll();
+	UpdateUI();
+}
+
+void MainWindow::doActionBDDisplayPlaneOff()
+{
+	ccHObject* Root_Entity = nullptr;
+	if (haveSelection())
+		Root_Entity = m_selectedEntities.front();
+	else
+		Root_Entity = m_ccRoot->getRootEntity();
+
+	ccHObject::Container Objs;
+	Root_Entity->filterChildren(Objs, true, CC_TYPES::PLANE, true);
+	ProgStartNorm("Hide Plane", Objs.size());
+	for (auto & Obj : Objs) {
+		Obj->setVisible(false);
+		ProgStep()
+	}
+	ProgEnd
+
+	refreshAll();
+	UpdateUI();
+}
+
+void MainWindow::doActionBDDisplayPointOn()
+{
+	ccHObject* Root_Entity = nullptr;
+	if (haveSelection())
+		Root_Entity = m_selectedEntities.front();
+	else
+		Root_Entity = m_ccRoot->getRootEntity();
+
+	ccHObject::Container Objs;
+	Root_Entity->filterChildren(Objs, true, CC_TYPES::POINT_CLOUD, true);
+	ProgStart("Show Points");
+	for (auto & Obj : Objs) {
+		Obj->setVisible(true);
+	}
+	ProgEnd
+	refreshAll();
+	UpdateUI();
+}
+
+void MainWindow::doActionBDDisplayPointOff()
+{
+	ccHObject* Root_Entity = nullptr;
+	if (haveSelection())
+		Root_Entity = m_selectedEntities.front();
+	else
+		Root_Entity = m_ccRoot->getRootEntity();
+
+	ccHObject::Container Objs;
+	Root_Entity->filterChildren(Objs, true, CC_TYPES::POINT_CLOUD, false);
+	ProgStart("Hide Points");
+	for (auto & Obj : Objs) {
+		Obj->setVisible(false);
+	}
+	ProgEnd
+	refreshAll();
+	UpdateUI();
+}
+
 //////////////////////////////////////////////////////////////////////////
 /// Building Reconstruction
 #include "bdrPlaneSegDlg.h"
@@ -10744,6 +10830,7 @@ void MainWindow::doActionBDProjectLoad()
 
 void MainWindow::doActionBDPlaneSegmentation()
 {
+	if (!haveSelection()) return;
 	if (!m_pbdrPSDlg) m_pbdrPSDlg = new bdrPlaneSegDlg(this);
 
 	ccHObject *entity = getSelectedEntities().front();
@@ -11620,27 +11707,25 @@ void ParsePolyFitPara(PolyFitObj* poly, bdrPolyFitDlg* pdlg)
 
 void MainWindow::doActionBDPolyFitHypothesis()
 {
-	if (!haveSelection()) return; 
-	ccHObject* entity = getSelectedEntities().front();
-		
+	if (!haveSelection()) return; 	
+	ccHObject* entity = getSelectedEntities().front();		
 	if (!entity->isGroup()) return;
-
-	ccHObject::Container prmitive_groups;
-	if (entity->getName().endsWith(BDDB_PRIMITIVE_SUFFIX)) 
-		prmitive_groups.push_back(entity);	
-	else 
-		entity->filterChildrenByName(prmitive_groups, true, BDDB_PRIMITIVE_SUFFIX, false);				
-	
-	if (prmitive_groups.empty()) return;	
 
 	BDBaseHObject* baseObj = GetRootBDBase(entity);
 	if (!baseObj) {
 		dispToConsole("[BDRecon] PolyFit - Please open the main project file", ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	ccHObject* primitiveObj = prmitive_groups.front();
-	if (prmitive_groups.size() > 1) {
-		ccLog::Warning("[BDRecon] - only the first primitive is calculated");
+	ccHObject* primitiveObj = nullptr;
+	if (entity->getName().endsWith(BDDB_PRIMITIVE_SUFFIX))
+		primitiveObj = entity;
+	else {
+		primitiveObj = baseObj->GetPrimitiveGroup(GetBaseName(entity->getName()), true);
+	}
+
+	if (!primitiveObj) {
+		dispToConsole("[BDRecon] Please select a group contains primitives", ERR_CONSOLE_MESSAGE);
+		return; 
 	}
 	
 	if (polyfit_obj) {
@@ -11743,24 +11828,14 @@ void MainWindow::doActionBDPolyFitConfidence()
 			dispToConsole("[BDRecon] Please generate hypothesis firstly", ERR_CONSOLE_MESSAGE);
 			return;
 		}
-		else if (polyfit_obj->status < PolyFitObj::STT_confidence) {
+		else {
 			ProgStart("Confidence Calculation")
 
 			PolyfitComputeConfidence(HypoObj, polyfit_obj);
 			polyfit_obj->status = PolyFitObj::STT_confidence;
 
 			ProgEnd
-
-			dispToConsole("[BDRecon] Confidence calculated, check it and update again if needed.", WRN_CONSOLE_MESSAGE);
-		}
-		else {
-			ProgStart("Confidence Update")
-
-			UpdateConfidence(HypoObj, polyfit_obj);
-			polyfit_obj->status = PolyFitObj::STT_confidence;
-
-			ProgEnd
-		}		
+		}	
 	}
 	catch (std::runtime_error& e) {
 		dispToConsole(QString("[BDRecon] - confidence calculated error: ") + e.what(), ERR_CONSOLE_MESSAGE);
@@ -11851,7 +11926,47 @@ void MainWindow::doActionBDPolyFitSelection()
 
 void MainWindow::doActionBDPolyFitFacetFilter()
 {
+ 	if (!haveSelection()) return;
+ 	ccHObject* entity = getSelectedEntities().front();
+ 	if (!entity->isGroup()) return;
+ 
+ 	BDBaseHObject* baseObj = GetRootBDBase(entity);
+ 	if (!baseObj) {
+ 		dispToConsole("[BDRecon] LoD3 - Please open the main project file", ERR_CONSOLE_MESSAGE);
+ 		return;
+ 	}
+ 
+ 	ccHObject* hypothesisObj = nullptr;
+ 	if (entity->getName().endsWith(BDDB_POLYFITHYPO_SUFFIX))
+ 		hypothesisObj = entity;
+ 	else {
+ 		hypothesisObj = baseObj->GetHypothesisGroup(GetBaseName(entity->getName()), true);
+ 	}
+ 
+ 	if (!hypothesisObj) {
+ 		dispToConsole("[BDRecon] LoD3 - Please select a group contains hypothesis", ERR_CONSOLE_MESSAGE);
+ 		return;
+ 	}
 
+	ccHObject::Container facetObjs;
+	hypothesisObj->filterChildren(facetObjs, true, CC_TYPES::FACET, true, hypothesisObj->getDisplay());
+
+	if (facetObjs.empty()) {
+		dispToConsole("[BDRecon] LoD3 - invalid hypothesis", ERR_CONSOLE_MESSAGE);
+		return;
+ 	}	
+
+	ccGLWindow* win = getActiveGLWindow();
+	if (!win)
+		return;
+
+	if (!m_pbdrffDlg) m_pbdrffDlg = new bdrFacetFilterDlg(/*win, hypothesisObj, */this);
+	m_pbdrffDlg->initWith(win, facetObjs);
+	m_pbdrffDlg->setModal(false);
+	m_pbdrffDlg->setWindowModality(Qt::NonModal);
+	
+	
+	m_pbdrffDlg->show();
 }
 
 void MainWindow::doActionBDPolyFitSettings()
@@ -11988,67 +12103,13 @@ void MainWindow::doActionBD3D4EM()
 	QDir::setCurrent(workingDir_old.absolutePath());
 }
 
-void MainWindow::doActionBDDisplayPlaneOn()
+void MainWindow::doActionBDTextureMapping()
 {
-	ccHObject* Root_Entity = nullptr;
-	if (haveSelection())
-		Root_Entity = m_selectedEntities.front();
-	else
-		Root_Entity = m_ccRoot->getRootEntity();
-
-	ccHObject::Container planeObjs;
-	Root_Entity->filterChildren(planeObjs, true, CC_TYPES::PLANE, true);
-
-	for (auto & planeObj : planeObjs) {
-		planeObj->setVisible(true);
+	if (!haveSelection()) {
+		return;
 	}
-}
+	ccHObject* entity = getSelectedEntities().front();
 
-void MainWindow::doActionBDDisplayPlaneOff()
-{
-	ccHObject* Root_Entity = nullptr;
-	if (haveSelection())
-		Root_Entity = m_selectedEntities.front();
-	else
-		Root_Entity = m_ccRoot->getRootEntity();
 
-	ccHObject::Container planeObjs;
-	Root_Entity->filterChildren(planeObjs, true, CC_TYPES::PLANE, true);
-
-	for (auto & planeObj : planeObjs) {
-		planeObj->setVisible(false);
-	}
-}
-
-void MainWindow::doActionBDDisplayPointOn()
-{
-	ccHObject* Root_Entity = nullptr;
-	if (haveSelection())
-		Root_Entity = m_selectedEntities.front();
-	else
-		Root_Entity = m_ccRoot->getRootEntity();
-
-	ccHObject::Container planeObjs;
-	Root_Entity->filterChildren(planeObjs, true, CC_TYPES::PLANE, true);
-
-	for (auto & planeObj : planeObjs) {
-		planeObj->setVisible(true);
-	}
-}
-
-void MainWindow::doActionBDDisplayPointOff()
-{
-	ccHObject* Root_Entity = nullptr;
-	if (haveSelection())
-		Root_Entity = m_selectedEntities.front();
-	else
-		Root_Entity = m_ccRoot->getRootEntity();
-
-	ccHObject::Container Objs;
-	Root_Entity->filterChildren(Objs, true, CC_TYPES::POINT_CLOUD, false);
-
-	for (auto & Obj : Objs) {
-		Obj->setVisible(false);
-	}
 }
 

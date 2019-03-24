@@ -41,6 +41,10 @@ ccFacet::ccFacet(	PointCoordinateType maxEdgeLength/*=0*/,
 	, m_rms(0.0)
 	, m_surface(0.0)
 	, m_maxEdgeLength(maxEdgeLength)
+	, m_distance(-999999)
+	, m_confidence(-999999)
+	, m_fitting(-1)
+	, m_coverage(-1)
 {
 	m_planeEquation[0] = 0;
 	m_planeEquation[1] = 0;

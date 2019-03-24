@@ -64,6 +64,7 @@ class bdrDeductionDlg;
 class bdrPolyFitDlg;
 class bdr3D4EMDlg;
 class bdrPlaneSegDlg;
+class bdrFacetFilterDlg;
 
 class PolyFitObj;
 
@@ -666,6 +667,7 @@ private:
 	bdrLine3DppDlg* m_pbdrl3dDlg;
 	bdrDeductionDlg* m_pbdrddtDlg;
 	bdrPolyFitDlg* m_pbdrpfDlg;
+	bdrFacetFilterDlg* m_pbdrffDlg;
 	bdr3D4EMDlg* m_pbdr3d4emDlg;
 	PolyFitObj* polyfit_obj;
 };

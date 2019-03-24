@@ -625,6 +625,9 @@ void ccPropertiesTreeDelegate::fillWithFacet(const ccFacet* _obj)
 	//confidence
 	appendRow(ITEM(tr("Confidence")), ITEM(QLocale(QLocale::English).toString(_obj->getConfidence())));
 
+	//distance
+	appendRow(ITEM(tr("Distance")), ITEM(QLocale(QLocale::English).toString(_obj->getDistance())));
+
 	//center
 	appendRow(ITEM( tr( "Center" ) ), ITEM(QStringLiteral("(%1 ; %2 ; %3)").arg(_obj->getCenter().x).arg(_obj->getCenter().y).arg(_obj->getCenter().z)));
 

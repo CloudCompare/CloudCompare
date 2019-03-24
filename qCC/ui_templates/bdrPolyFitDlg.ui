@@ -148,7 +148,7 @@
   </widget>
   <widget class="QDoubleSpinBox" name="PolyfitSnapSpinBox">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>

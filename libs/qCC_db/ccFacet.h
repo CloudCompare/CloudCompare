@@ -127,6 +127,8 @@ public:
 	inline void setCoverage(double c) { m_coverage = c; }
 	inline double getConfidence() const { return m_confidence; }
 	inline void setConfidence(double c) { m_confidence = c; }
+	inline double getDistance() const { return m_distance; }
+	inline void setDistance(double c) { m_distance = c; }
 protected:
 
 	//inherited from ccDrawable
@@ -170,6 +172,7 @@ protected:
 	double m_fitting;
 	double m_coverage;
 	double m_confidence;
+	double m_distance;
 };
 
 #endif //CC_FACET_PRIMITIVE_HEADER

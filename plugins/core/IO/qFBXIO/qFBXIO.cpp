@@ -23,7 +23,7 @@
 
 qFBXIO::qFBXIO( QObject *parent ) :
     QObject( parent ),
-    ccIOFilterPluginInterface( ":/CC/plugin/qFBXIO/info.json" )
+    ccIOPluginInterface( ":/CC/plugin/qFBXIO/info.json" )
 {
 }
 
@@ -32,7 +32,7 @@ void qFBXIO::registerCommands( ccCommandLineInterface *cmd )
 	cmd->registerCommand( ccCommandLineInterface::Command::Shared( new FBXCommand ) );
 }
 
-ccIOFilterPluginInterface::FilterList qFBXIO::getFilters()
+ccIOPluginInterface::FilterList qFBXIO::getFilters()
 {
 	return { FileIOFilter::Shared( new FBXFilter ) };
 }

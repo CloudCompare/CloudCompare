@@ -21,24 +21,23 @@
 //Qt
 #include <QObject>
 
-#include "ccIOFilterPluginInterface.h"
+#include "ccIOPluginInterface.h"
 
-class qLASFWFIO : public QObject, public ccIOFilterPluginInterface
+class qLASFWFIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccIOFilterPluginInterface)
+	Q_INTERFACES( ccIOPluginInterface )
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qLAS_FWF_IO" FILE "info.json")
 
 public:
-
 	//! Default constructor
 	qLASFWFIO(QObject* parent = nullptr);
 
 	//inherited from ccPluginInterface
-	virtual void registerCommands(ccCommandLineInterface* cmd) override;
+	void registerCommands(ccCommandLineInterface* cmd) override;
 
-	//inherited from ccIOFilterPluginInterface
-	ccIOFilterPluginInterface::FilterList getFilters() override;
+	//inherited from ccIOPluginInterface
+	ccIOPluginInterface::FilterList getFilters() override;
 };
 
 #endif //Q_LAS_FWF_IO_PLUGIN_HEADER

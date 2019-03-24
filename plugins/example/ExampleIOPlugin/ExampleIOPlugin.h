@@ -18,7 +18,7 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccIOFilterPluginInterface.h"
+#include "ccIOPluginInterface.h"
 
 /** Replace 'ExampleIOPlugin' by your own plugin class name throughout and then
 	check 'ExampleIOPlugin.cpp' for more directions.
@@ -31,12 +31,12 @@
 **/
 
 //! Example I/O Plugin
-class ExampleIOPlugin : public QObject, public ccIOFilterPluginInterface
+class ExampleIOPlugin : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccIOFilterPluginInterface)
+	Q_INTERFACES( ccIOPluginInterface )
 	
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ExampleIO" FILE "info.json")
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.ExampleIO" FILE "info.json" )
 	
 public:
 	explicit ExampleIOPlugin( QObject *parent = nullptr );
@@ -44,8 +44,8 @@ public:
 	
 	void registerCommands( ccCommandLineInterface *cmd ) override;
 	
-	// inherited from ccIOFilterPluginInterface
-	QVector<FileIOFilter::Shared> getFilters() override;
+	// inherited from ccIOPluginInterface
+	ccIOPluginInterface::FilterList getFilters() override;
 };
 
 #endif

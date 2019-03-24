@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_IO_FILTER_PLUGIN_INTERFACE_HEADER
-#define CC_IO_FILTER_PLUGIN_INTERFACE_HEADER
+#ifndef CC_IO_PLUGIN_INTERFACE_HEADER
+#define CC_IO_PLUGIN_INTERFACE_HEADER
 
 #include <QVector>
 
@@ -28,18 +28,18 @@
 //! I/O filter plugin interface
 /** Version 1.2
 **/
-class ccIOFilterPluginInterface : public ccDefaultPluginInterface
+class ccIOPluginInterface : public ccDefaultPluginInterface
 {
 public:
 	using FilterList = QVector<FileIOFilter::Shared>;
 	
 public:
-	ccIOFilterPluginInterface( const QString &resourcePath = QString() ) :
+	ccIOPluginInterface( const QString &resourcePath = QString() ) :
 		ccDefaultPluginInterface( resourcePath )
 	{
 	}
 	
-	~ccIOFilterPluginInterface() override = default;
+	~ccIOPluginInterface() override = default;
 	
 	//inherited from ccPluginInterface
 	CC_PLUGIN_TYPE getType() const override { return CC_IO_FILTER_PLUGIN; }
@@ -48,7 +48,7 @@ public:
 	virtual FilterList getFilters() { return FilterList{}; }
 };
 
-Q_DECLARE_INTERFACE(ccIOFilterPluginInterface,
-                    "edf.rd.CloudCompare.ccIOFilterPluginInterface/1.2")
+Q_DECLARE_INTERFACE(ccIOPluginInterface,
+                    "edf.rd.CloudCompare.ccIOPluginInterface/1.2")
 
-#endif //CC_IO_FILTER_PLUGIN_INTERFACE_HEADER
+#endif //CC_IO_PLUGIN_INTERFACE_HEADER

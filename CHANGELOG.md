@@ -14,6 +14,10 @@ v2.11 (Anoia) - (in development)
 - Changes
   - Command line tool:
     - The `-FBX_EXPORT_FMT` command is now split. Use `-FBX -EXPORT_FMT`.
+  - Plugins:
+    - The I/O plugin interface has changed, so if you have your own I/O plugins, you will need to update them.
+      - The interface named changed from `ccIOFilterPluginInterface` to `ccIOPluginInterface`.
+      - The `getFilter()` method was removed in favour of `getFilters()`.
 
 v2.10.3 (Zephyrus) - (In progress)
 ----------------------

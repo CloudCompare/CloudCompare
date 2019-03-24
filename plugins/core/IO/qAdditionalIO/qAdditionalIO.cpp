@@ -31,7 +31,7 @@
 
 qAdditionalIO::qAdditionalIO( QObject* parent ) :
 	QObject( parent )
-  , ccIOFilterPluginInterface( ":/CC/plugin/qAdditionalIO/info.json" )
+  , ccIOPluginInterface( ":/CC/plugin/qAdditionalIO/info.json" )
 {
 }
 
@@ -40,7 +40,7 @@ void qAdditionalIO::registerCommands( ccCommandLineInterface *cmd )
 	cmd->registerCommand( ccCommandLineInterface::Command::Shared( new BundlerCommand ) );	
 }
 
-ccIOFilterPluginInterface::FilterList qAdditionalIO::getFilters()
+ccIOPluginInterface::FilterList qAdditionalIO::getFilters()
 {
 	return {
 		FileIOFilter::Shared( new BundlerFilter ),

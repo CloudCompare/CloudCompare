@@ -22,7 +22,7 @@
 
 qE57IO::qE57IO( QObject *parent ) :
 	QObject( parent ),
-	ccIOFilterPluginInterface( ":/CC/plugin/qE57IO/info.json" )
+	ccIOPluginInterface( ":/CC/plugin/qE57IO/info.json" )
 {
 }
 
@@ -31,7 +31,7 @@ void qE57IO::registerCommands( ccCommandLineInterface *cmd )
 	Q_UNUSED( cmd );
 }
 
-ccIOFilterPluginInterface::FilterList qE57IO::getFilters()
+ccIOPluginInterface::FilterList qE57IO::getFilters()
 {
 	return { FileIOFilter::Shared( new E57Filter ) };
 }

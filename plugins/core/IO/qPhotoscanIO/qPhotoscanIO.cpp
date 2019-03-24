@@ -23,11 +23,11 @@
 
 qPhotoscanIO::qPhotoscanIO( QObject* parent )
 	: QObject( parent )
-	, ccIOFilterPluginInterface( ":/CC/plugin/qPhotoscanIO/info.json" )
+	, ccIOPluginInterface( ":/CC/plugin/qPhotoscanIO/info.json" )
 {
 }
 
-ccIOFilterPluginInterface::FilterList qPhotoscanIO::getFilters()
+ccIOPluginInterface::FilterList qPhotoscanIO::getFilters()
 {
 	return { FileIOFilter::Shared( new PhotoScanFilter ) };
 }

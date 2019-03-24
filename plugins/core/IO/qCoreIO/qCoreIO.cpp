@@ -31,7 +31,7 @@
 
 qCoreIO::qCoreIO( QObject *parent ) :
 	QObject( parent ),
-	ccIOFilterPluginInterface( ":/CC/plugin/CoreIO/info.json" )
+	ccIOPluginInterface( ":/CC/plugin/CoreIO/info.json" )
 {
 }
 
@@ -40,7 +40,7 @@ void qCoreIO::registerCommands( ccCommandLineInterface *inCmdLine )
 	Q_UNUSED( inCmdLine );
 }
 
-ccIOFilterPluginInterface::FilterList qCoreIO::getFilters()
+ccIOPluginInterface::FilterList qCoreIO::getFilters()
 {
 	return {
 		FileIOFilter::Shared( new PTXFilter ),

@@ -18,12 +18,12 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccIOFilterPluginInterface.h"
+#include "ccIOPluginInterface.h"
 
-class qPDALIO : public QObject, public ccIOFilterPluginInterface
+class qPDALIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES( ccIOFilterPluginInterface )
+	Q_INTERFACES( ccIOPluginInterface )
 
 	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qPDALIO" FILE "info.json" )
 

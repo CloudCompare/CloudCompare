@@ -24,12 +24,12 @@
 #include <QtPlugin>
 
 qPclIO::qPclIO(QObject *parent)
-	: QObject(parent)
-	, ccIOFilterPluginInterface(":/CC/plugin/qPclIO/info.json")
+    : QObject(parent)
+    , ccIOFilterPluginInterface(":/CC/plugin/qPclIO/info.json")
 {
 }
 
-ccIOFilterPluginInterface::FilterList qPclIO::getFilters()
+ccIOPluginInterface::FilterList qPclIO::getFilter()
 {
-	return { FileIOFilter::Shared(new PcdFilter) };
+    return { FileIOFilter::Shared( new PcdFilter ) };
 }

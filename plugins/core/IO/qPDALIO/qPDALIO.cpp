@@ -22,7 +22,7 @@
 
 qPDALIO::qPDALIO( QObject *parent ) :
     QObject( parent ),
-    ccIOFilterPluginInterface( ":/CC/plugin/qPDALIO/info.json" )
+    ccIOPluginInterface( ":/CC/plugin/qPDALIO/info.json" )
 {
 }
 
@@ -31,7 +31,7 @@ void qPDALIO::registerCommands( ccCommandLineInterface *cmd )
 	Q_UNUSED( cmd );
 }
 
-ccIOFilterPluginInterface::FilterList qPDALIO::getFilters()
+ccIOPluginInterface::FilterList qPDALIO::getFilters()
 {
 	return { FileIOFilter::Shared( new LASFilter ) };
 }

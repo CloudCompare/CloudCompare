@@ -177,5 +177,6 @@
     <file>images/stocker/setting.png</file>
     <file>images/stocker/open.png</file>
     <file>images/stocker/save.png</file>
+    <file>images/stocker/texture.png</file>
   </qresource>
 </RCC>

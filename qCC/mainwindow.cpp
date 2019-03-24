@@ -798,6 +798,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPolyFitFacetFilter,		&QAction::triggered, this, &MainWindow::doActionBDPolyFitFacetFilter);
 	connect(m_UI->actionBDPolyFitSettings,			&QAction::triggered, this, &MainWindow::doActionBDPolyFitSettings);
 	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBD3D4EM);
+	connect(m_UI->actionBDTextureMapping,			&QAction::triggered, this, &MainWindow::doActionBDTextureMapping);
 	connect(m_UI->actionBDDisplayPlaneOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPlaneOn);
 	connect(m_UI->actionBDDisplayPlaneOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPlaneOff);
 	connect(m_UI->actionBDDisplayPointOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOn);

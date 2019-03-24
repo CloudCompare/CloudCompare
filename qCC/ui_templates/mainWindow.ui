@@ -496,13 +496,6 @@
     <property name="title">
      <string>BDRecon</string>
     </property>
-    <widget class="QMenu" name="menuGroup_Rename">
-     <property name="title">
-      <string>Group Rename</string>
-     </property>
-     <addaction name="actionBDRename_Plane"/>
-     <addaction name="actionBDRename_Line"/>
-    </widget>
     <widget class="QMenu" name="menuPrimitive">
      <property name="title">
       <string>Planar Primitive</string>
@@ -557,7 +550,6 @@
     <addaction name="separator"/>
     <addaction name="menuPolyFit"/>
     <addaction name="actionBD3D4EM"/>
-    <addaction name="menuGroup_Rename"/>
     <addaction name="separator"/>
     <addaction name="menuDisplay_2"/>
    </widget>
@@ -812,6 +804,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionExtractSections"/>
    <addaction name="actionBD3D4EM"/>
    <addaction name="separator"/>
+   <addaction name="actionBDTextureMapping"/>
   </widget>
   <widget class="QToolBar" name="toolBarView">
    <property name="windowTitle">
@@ -3365,6 +3358,18 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="text">
     <string>Model Editor</string>
+   </property>
+  </action>
+  <action name="actionBDTextureMapping">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/texture.png</normaloff>:/CC/Stocker/images/stocker/texture.png</iconset>
+   </property>
+   <property name="text">
+    <string>Texture Mapping</string>
+   </property>
+   <property name="iconText">
+    <string>Texture</string>
    </property>
   </action>
  </widget>

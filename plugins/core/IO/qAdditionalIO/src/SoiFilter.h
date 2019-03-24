@@ -21,22 +21,20 @@
 #include "FileIOFilter.h"
 
 //! Mensi Soisic point cloud file I/O filter
-class /*QCC_IO_LIB_API*/ SoiFilter : public FileIOFilter
+class SoiFilter : public FileIOFilter
 {
 public:
-
 	//static accessors
 	static inline QString GetFileFilter() { return "Mensi Soisic cloud (*.soi)"; }
 	static inline QString GetDefaultExtension() { return "soi"; }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
-
+	bool importSupported() const override { return true; }
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
+	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
+	QString getDefaultExtension() const override { return GetDefaultExtension(); }
+	bool canLoadExtension(const QString& upperCaseExt) const override;
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 };
 
 #endif //CC_SOI_FILTER_HEADER

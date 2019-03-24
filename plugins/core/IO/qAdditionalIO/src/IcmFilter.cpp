@@ -18,16 +18,16 @@
 #include "IcmFilter.h"
 
 //qCC_db
-#include <ccImage.h>
 #include <ccCameraSensor.h>
+#include <ccImage.h>
 #include <ccLog.h>
 
 //Qt
 #include <QFileInfo>
 
 //system
-#include <stdio.h>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
 
 //Max number of characters per line in an ASCII file
 //TODO: use QFile instead!
@@ -40,6 +40,10 @@ bool IcmFilter::canLoadExtension(const QString& upperCaseExt) const
 
 bool IcmFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
+	Q_UNUSED( type );
+	Q_UNUSED( multiple );
+	Q_UNUSED( exclusive );
+	
 	//export not supported
 	return false;
 }

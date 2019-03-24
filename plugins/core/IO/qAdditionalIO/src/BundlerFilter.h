@@ -26,18 +26,17 @@
 class BundlerFilter : public FileIOFilter
 {
 public:
-
 	//static accessors
 	static inline QString GetFileFilter() { return "Snavely's Bundler output (*.out)"; }
 	static inline QString GetDefaultExtension() { return "out"; }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	bool importSupported() const override { return true; }
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
+	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
+	QString getDefaultExtension() const override { return GetDefaultExtension(); }
+	bool canLoadExtension(const QString& upperCaseExt) const override;
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 
 	//! Specific load method
 	CC_FILE_ERROR loadFileExtended(	const QString& filename,
@@ -48,7 +47,6 @@ public:
 									bool generateColoredDTM = false,
 									unsigned coloredDTMVerticesCount = 1000000,
 									float scaleFactor = 1.0f);
-
 };
 
 #endif //CC_BUNDLER_FILTER_HEADER

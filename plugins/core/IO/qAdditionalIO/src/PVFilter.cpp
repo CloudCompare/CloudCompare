@@ -85,7 +85,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	float val = std::numeric_limits<float>::quiet_NaN();
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
@@ -151,7 +151,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 	unsigned numberOfPoints = static_cast<unsigned>(fileSize  / singlePointSize);
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
@@ -161,7 +161,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 	}
 	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
-	ccPointCloud* loadedCloud = 0;
+	ccPointCloud* loadedCloud = nullptr;
 	//if the file is too big, it will be chuncked in multiple parts
 	unsigned chunkIndex = 0;
 	unsigned fileChunkPos = 0;
@@ -193,9 +193,8 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 			if (!loadedCloud || !loadedCloud->reserveThePointsTable(fileChunkSize) || !loadedCloud->enableScalarField())
 			{
 				result = CC_FERR_NOT_ENOUGH_MEMORY;
-				if (loadedCloud)
-					delete loadedCloud;
-				loadedCloud = 0;
+				delete loadedCloud;
+				loadedCloud = nullptr;
 				break;
 			}
 		}

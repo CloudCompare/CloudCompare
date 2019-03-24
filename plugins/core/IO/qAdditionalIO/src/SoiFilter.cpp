@@ -33,6 +33,10 @@ bool SoiFilter::canLoadExtension(const QString& upperCaseExt) const
 
 bool SoiFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
+	Q_UNUSED( type );
+	Q_UNUSED( multiple );
+	Q_UNUSED( exclusive );
+	
 	//not supported
 	return false;
 }
@@ -80,7 +84,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	//Progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(false, parameters.parentWidget)); //cancel is not supported
@@ -160,4 +164,3 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 
 	return CC_FERR_NO_ERROR;
 }
-

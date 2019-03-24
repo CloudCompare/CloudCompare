@@ -65,6 +65,8 @@ bool PovFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 
 CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
+	Q_UNUSED( parameters );
+	
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
@@ -324,7 +326,7 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 					entities->detatchAllChildren();
 					delete entities;
 				}
-				entities = 0;
+				entities = nullptr;
 
 				for (size_t i = 0; i < clouds.size(); ++i)
 				{
@@ -350,7 +352,7 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 					{
 						ccLog::Warning(QString("[PovFilter::loadFile] failed to create sensor on cloud #%1 (%2)").arg(i).arg(theCloud->getName()));
 						delete gls;
-						gls = 0;
+						gls = nullptr;
 					}
 
 					//theCloud->setName(subFileName);

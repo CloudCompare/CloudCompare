@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.10.3 (Zephyrus) - (In progress)
+v2.10.3 (Zephyrus) - (in development)
 ----------------------
 
 - Enhancements
@@ -10,6 +10,7 @@ v2.10.3 (Zephyrus) - (In progress)
 - Bug fixes
   - Command line:
     - the 'EXTRACT_VERTICES' option was actually deleting the extracted vertices right after extracting them, causing a crash when trying to access them later :| (#847)
+    - fix handling of SF indices in SF_ARITHMETIC and COMMAND_SF_OP
   - Fix loading LAS files with paths containing multi-byte characters when using PDAL (#869)
   - When saving a cloud read from LAS 1.0 let PDAL choose the default LAS version (#874)
   - Fix potential crash or use of incorrect data when comparing clouds (#871)

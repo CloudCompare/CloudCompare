@@ -31,7 +31,7 @@ void qPDALIO::registerCommands( ccCommandLineInterface *cmd )
 	Q_UNUSED( cmd );
 }
 
-QVector<FileIOFilter::Shared> qPDALIO::getFilters()
+ccIOFilterPluginInterface::FilterList qPDALIO::getFilters()
 {
 	return { FileIOFilter::Shared( new LASFilter ) };
 }

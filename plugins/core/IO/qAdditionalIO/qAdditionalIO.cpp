@@ -40,9 +40,9 @@ void qAdditionalIO::registerCommands( ccCommandLineInterface *cmd )
 	cmd->registerCommand( ccCommandLineInterface::Command::Shared( new BundlerCommand ) );	
 }
 
-QVector<FileIOFilter::Shared> qAdditionalIO::getFilters()
+ccIOFilterPluginInterface::FilterList qAdditionalIO::getFilters()
 {
-	return QVector<FileIOFilter::Shared>{
+	return {
 		FileIOFilter::Shared( new BundlerFilter ),
 		FileIOFilter::Shared( new IcmFilter ),
 		FileIOFilter::Shared( new PNFilter ),

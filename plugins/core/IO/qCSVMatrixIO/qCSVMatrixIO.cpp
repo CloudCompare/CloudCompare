@@ -27,7 +27,7 @@ qCSVMatrixIO::qCSVMatrixIO(QObject *parent)
 {
 }
 
-FileIOFilter::Shared qCSVMatrixIO::getFilter()
+ccIOFilterPluginInterface::FilterList qCSVMatrixIO::getFilters()
 {
-	return FileIOFilter::Shared(new CSVMatrixFilter);
+	return { FileIOFilter::Shared( new CSVMatrixFilter ) };
 }

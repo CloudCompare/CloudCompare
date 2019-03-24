@@ -33,7 +33,7 @@ public:
 protected:
 	void registerCommands( ccCommandLineInterface *inCmdLine ) override;
 	
-	QVector<FileIOFilter::Shared> getFilters() override;
+	FilterList getFilters() override;
 };
 
 #endif //QCORE_IO_HEADER

@@ -31,7 +31,7 @@ void qE57IO::registerCommands( ccCommandLineInterface *cmd )
 	Q_UNUSED( cmd );
 }
 
-QVector<FileIOFilter::Shared> qE57IO::getFilters()
+ccIOFilterPluginInterface::FilterList qE57IO::getFilters()
 {
 	return { FileIOFilter::Shared( new E57Filter ) };
 }

@@ -3317,16 +3317,14 @@ struct CommandSFArithmetic : public ccCommandLineInterface::Command
 
 		//read sf index
 		int sfIndex = -1;
-		{
-			bool ok = true;
-			QString sfIndex = cmd.arguments().takeFirst();
-			if (sfIndex.toUpper() == OPTION_LAST)
-				sfIndex = -2;
-			else
-				sfIndex = sfIndex.toInt(&ok);
-			if (!ok || sfIndex < 0)
-				return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_ARITHMETIC));
-		}
+		bool ok = true;
+		QString sfIndexStr = cmd.arguments().takeFirst();
+		if (sfIndexStr.toUpper() == OPTION_LAST)
+			sfIndex = -2;
+		else
+			sfIndex = sfIndexStr.toInt(&ok);
+		if (!ok || sfIndex < 0)
+			return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_ARITHMETIC));
 
 		//read operation type
 		ccScalarFieldArithmeticsDlg::Operation operation = ccScalarFieldArithmeticsDlg::INVALID;
@@ -3406,18 +3404,16 @@ struct CommandSFOperation : public ccCommandLineInterface::Command
 
 		//read sf index
 		int sfIndex = -1;
-		{
-			bool ok = true;
-			QString sfIndex = cmd.arguments().takeFirst();
-			if (sfIndex.toUpper() == OPTION_LAST)
-				sfIndex = -2;
-			else
-				sfIndex = sfIndex.toInt(&ok);
+		bool ok = true;
+		QString sfIndexStr = cmd.arguments().takeFirst();
+		if (sfIndexStr.toUpper() == OPTION_LAST)
+			sfIndex = -2;
+		else
+			sfIndex = sfIndexStr.toInt(&ok);
 
-			if (!ok || sfIndex < 0)
-			{
-				return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
-			}
+		if (!ok || sfIndex < 0)
+		{
+			return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
 		}
 
 		//read operation type

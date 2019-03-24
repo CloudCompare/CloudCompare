@@ -552,6 +552,7 @@
     <addaction name="actionBD3D4EM"/>
     <addaction name="separator"/>
     <addaction name="menuDisplay_2"/>
+    <addaction name="actionBDConstrainedMesh"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -3370,6 +3371,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="iconText">
     <string>Texture</string>
+   </property>
+  </action>
+  <action name="actionBDConstrainedMesh">
+   <property name="text">
+    <string>Constrained Mesh</string>
    </property>
   </action>
  </widget>

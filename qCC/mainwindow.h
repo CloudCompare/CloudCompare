@@ -488,7 +488,9 @@ private slots:
 	/// 3d4em
 	void doActionBD3D4EM();
 
-	do doActionBDTextureMapping
+	void doActionBDTextureMapping();
+
+	void doActionBDConstrainedMesh();
 	/// display
 	void doActionBDDisplayPlaneOn();
 	void doActionBDDisplayPlaneOff();

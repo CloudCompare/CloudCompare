@@ -799,6 +799,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPolyFitSettings,			&QAction::triggered, this, &MainWindow::doActionBDPolyFitSettings);
 	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBD3D4EM);
 	connect(m_UI->actionBDTextureMapping,			&QAction::triggered, this, &MainWindow::doActionBDTextureMapping);
+	connect(m_UI->actionBDConstrainedMesh,			&QAction::triggered, this, &MainWindow::doActionBDConstrainedMesh);
 	connect(m_UI->actionBDDisplayPlaneOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPlaneOn);
 	connect(m_UI->actionBDDisplayPlaneOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPlaneOff);
 	connect(m_UI->actionBDDisplayPointOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOn);
@@ -12106,11 +12107,76 @@ void MainWindow::doActionBD3D4EM()
 
 void MainWindow::doActionBDTextureMapping()
 {
-	if (!haveSelection()) {
-		return;
-	}
+	if (!haveSelection()) return;
 	ccHObject* entity = getSelectedEntities().front();
 
+	ccHObject::Container planeObjs; {
+		if (entity->isA(CC_TYPES::PLANE)) planeObjs.push_back(entity);
+		else if (entity->getName().endsWith(BDDB_PRIMITIVE_SUFFIX)) 
+			ccHObject::Container planeObjs = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE, true, true);		
+	}	
 
+	//! fast mapping for each plane entity
+	if (!planeObjs.empty())	{
+		for (ccHObject* planeObj : planeObjs) {
+			try	{
+				FastPlanarTextureMapping(planeObj);
+			}
+			catch (std::runtime_error& e) {
+				dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+				dispToConsole("[BDRecon] Fast Planar Texture Mapping failed!", ERR_CONSOLE_MESSAGE);
+				return;
+			}			
+		}
+		refreshAll();
+		UpdateUI();
+		return;
+	}
+	else {
+		//! real tex-recon, generate obj mesh and then load the textured mesh
+		if (entity->getName().endsWith(BDDB_POLYFITOPTM_SUFFIX)) {
+
+		}
+		else if (entity->getName().endsWith(BDDB_FINALMODEL_SUFFIX)) {
+
+		}
+		else if (entity->isA(CC_TYPES::MESH)) {
+
+		}
+		entity->setLocked(true);
+		return;
+	}	
+}
+
+void MainWindow::doActionBDConstrainedMesh()
+{
+	if (!haveSelection()) return;
+	ccHObject* entity = getSelectedEntities().front();
+
+	ccHObject::Container planeObjs; {
+		if (entity->isA(CC_TYPES::PLANE)) planeObjs.push_back(entity);
+		else if (entity->getName().endsWith(BDDB_PRIMITIVE_SUFFIX))
+			ccHObject::Container planeObjs = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE, true, true);
+	}
+
+	if (planeObjs.empty()) {
+		return;
+	}
+
+	for (auto & planeObj : planeObjs) {
+		try	{
+			ccHObject* mesh = ConstrainedMesh(planeObj);
+			if (mesh) {
+				addToDB(mesh);
+				refreshAll();
+				UpdateUI();
+			}
+		}
+		catch (std::runtime_error& e) {
+			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+			dispToConsole("[BDRecon] Constrained mesh failed", ERR_CONSOLE_MESSAGE);
+			return;
+		}
+	}
 }
 

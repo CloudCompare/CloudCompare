@@ -70,7 +70,8 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
 #define BDDB_PRIMITIVE_SUFFIX		".primitive"
 #define BDDB_POLYFITHYPO_SUFFIX		".hypothesis"
-#define BDDB_POLYFIOPTM_SUFFIX		".optimized"
+#define BDDB_POLYFITOPTM_SUFFIX		".optimized"
+#define BDDB_FINALMODEL_SUFFIX		".model"
 #define BDDB_IMAGELINE_SUFFIX		".imageline"
 #define BDDB_PLANESEG_PREFIX		"Plane"
 #define BDDB_BOUNDARY_PREFIX		"Boundary"
@@ -197,3 +198,7 @@ public:
 #endif // USE_PARRALEL_FOR
 
 #endif
+
+bool FastPlanarTextureMapping(ccHObject * planeObj);
+
+ccHObject * ConstrainedMesh(ccHObject * planeObj);

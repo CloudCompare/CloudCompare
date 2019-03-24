@@ -26,6 +26,8 @@
 #include "ccColorScalesManager.h"
 
 #include "QFileInfo"
+#include <QImageReader>
+#include <QFileDialog>
 
 #ifdef USE_STOCKER
 #include "polyfit/model/map_enumerator.h"
@@ -942,7 +944,8 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 	//////////////////////////////////////////////////////////////////////////AUTOFILTER
 	std::map<std::string, PlaneUnit*> plane_data;
 	std::map<std::string, stocker::Polyline2d> plane_convexhull;
-	if (polyfit_obj->auto_filter) {
+//	if (polyfit_obj->auto_filter)
+	{
 		for (auto & planeObj : planeObjs) {
 			stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
 			PlaneUnit plane_unit_ = FormPlaneUnit(planeObj->getName().toStdString(), GetVcgPlane(planeObj), cur_plane_points, true);
@@ -1060,7 +1063,7 @@ ccHObject* PolyfitFaceSelection(ccHObject* hypothesis_group, PolyFitObj * polyfi
 
 	ccHObject* polyfit_model = nullptr;
 	if (!polyfit_obj->optimized_mesh_) return nullptr;
-	polyfit_model = new ccHObject(GetBaseName(hypothesis_group->getName()) + BDDB_POLYFIOPTM_SUFFIX);
+	polyfit_model = new ccHObject(GetBaseName(hypothesis_group->getName()) + BDDB_POLYFITOPTM_SUFFIX);
 	
 	// TODO: display
 	// Plane, and sub facet
@@ -1271,4 +1274,170 @@ void PolyFitObj::UpdateConfidence(ccHObject::Container PlaneObjs)
 			}
 		}
 	}
+}
+
+bool FastPlanarTextureMapping(ccHObject* planeObj)
+{
+	ccHObject* baseObj = GetRootBDBase(planeObj);
+	if (!baseObj) {
+		throw std::runtime_error("cannot get base project");
+		return false;
+	}
+	ccPlane* cc_plane = ccHObjectCaster::ToPlane(planeObj);
+	if (!cc_plane) {
+		return false;
+	}
+	QString imageFilename =
+		QFileDialog::getOpenFileName(NULL,
+			"Open image",
+			"",
+			"All (*.*);;png (*.png);;jpg (*.jpg)");
+	QImageReader reader(imageFilename);
+	//m_image = QImage(filename);
+	QImage image = reader.read();
+	if (image.isNull())
+	{
+		throw std::runtime_error(reader.errorString().toStdString());
+		return false;
+	}
+	cc_plane->setAsTexture(image, imageFilename);
+
+	planeObj->prepareDisplayForRefresh_recursive();
+	return true;
+}
+
+#include "vcg/space/distance3.h"
+bool SamePoint(Vec3d pt1, Vec3d pt2) {
+	return (pt1 - pt2).Norm() < 0.000001;
+}
+bool DistPoint(Vec3d pt1, Vec3d pt2) {
+	return (pt1 - pt2).Norm() > 0.01;
+}
+bool SegmentSegmentShouldMerge(Seg3d ln_1, Seg3d ln_2, double dist_thre = 1, double angle_thre = 0.9)
+{
+	if (SamePoint(ln_1.P0(), ln_2.P0()) && DistPoint(ln_1.P0(), ln_2.P1()))	{
+		return false;
+	}
+	if (SamePoint(ln_1.P1(), ln_2.P0()) && DistPoint(ln_1.P1(), ln_2.P1())) {
+		return false;
+	}
+
+	bool parallel; double dist;
+	vcg::Point3d pt1, pt2;
+	vcg::SegmentSegmentDistance(ln_1, ln_2, dist, parallel, pt1, pt2);
+	if (dist < 0.000001) {
+		return true;
+	}
+	Vec3d dir_1(ln_1.P1() - ln_1.P0());
+	Vec3d dir_2(ln_2.P1() - ln_2.P0());
+
+	// < 25 degree
+	if (dir_1*dir_2 > 0.9 && dist < 1) {
+		return true;
+	}
+	
+	return false;
+}
+bool SegmentCanAddToPolyline(Polyline3d lines, Seg3d ln, double dist_thre = 1, double angle_thre = 0.9)
+{
+	for (auto & ln_ : lines) {
+		if (SegmentSegmentShouldMerge(ln_, ln, dist_thre, angle_thre)) {
+			return false;
+		}
+	}
+	return true;
+}
+ccHObject* ConstrainedMesh(ccHObject* planeObj)
+{
+	ccHObject* plane_cloud_obj = planeObj->getParent();
+	if (!planeObj->isA(CC_TYPES::PLANE) || !plane_cloud_obj) {
+		throw std::runtime_error("invalid planar entity");
+		return nullptr;
+	}
+
+	Contour3d plane_points = GetPointsFromCloud(plane_cloud_obj);
+	PlaneUnit plane_unit = FormPlaneUnit(plane_points, "temp", true);
+	
+	Polyline3d plane_sharps;
+//	Contour3d boundary_points;
+	Contour3d alpha_shape;
+	GLMesh mesh_out;
+
+	// prepare boundary lines
+	Polyline3d boundary_lines; Contour3d boundary_points; {
+		ccHObject::Container container_find, container_objs;
+		planeObj->getParent()->filterChildrenByName(container_find, false, BDDB_BOUNDARY_PREFIX, true);
+		if (!container_find.empty()) {
+			GetBoundaryPointsAndLinesFromCloud(container_find.back(), boundary_lines, boundary_points);
+		}
+	}
+
+	// prepare outline
+	Contour3d outline_points; {
+		ccHObject::Container container_find;
+		planeObj->getParent()->filterChildrenByName(container_find, false, BDDB_OUTLINE_PREFIX, true);
+		if (!container_find.empty()) {
+			auto outlines_points_all = GetOutlinesFromOutlineParent(container_find.back());
+			if (!outlines_points_all.empty()) {
+				outline_points = outlines_points_all.front().front();
+			}
+		}
+	}
+
+	Polyline3d line_pool;
+	for (auto & ln : boundary_lines) {
+		if (SegmentCanAddToPolyline(line_pool, ln)) {
+			line_pool.push_back(ln);
+		}
+	}
+	for (auto & ln : boundary_lines) {
+		if (SegmentCanAddToPolyline(line_pool, ln)) {
+			line_pool.push_back(ln);
+		}
+	}
+	Contour3d point_pool;
+	for (auto pt : boundary_points) {		
+		if (DistancePointPolygon(pt,line_pool) < 1)	continue;
+		bool add = true;
+		for (auto & pt_ : point_pool) {
+			if (vcg::Distance(pt, pt_) < 1) {
+				add = false;
+				break;
+			}			
+		}
+		if (!add) continue;
+		
+		point_pool.push_back(pt);
+	}
+
+	PlaneConstrainedDelaunayTriangulation(plane_unit, point_pool, line_pool, mesh_out, false);
+
+	ccPointCloud* vertices = new ccPointCloud("vertices");
+	for (auto & pt : mesh_out.vert) {		
+		vertices->addPoint(CCVector3(vcgXYZ(pt.P())));
+	}
+	if (vertices->reserveTheNormsTable()) {
+		for (auto & pt : mesh_out.vert) {
+			vertices->addNorm(CCVector3(vcgXYZ(pt.N())));
+		}
+	}
+
+	Contour2d outline_points_2d = Point3dToPlpoint2d(plane_unit, outline_points);
+	Polyline2d outlines = MakeLoopPolylinefromContour2d(outline_points_2d);
+	ccMesh* mesh = new ccMesh(vertices);
+	mesh->setName(GetBaseName(planeObj->getParent()->getName() + ".cdt"));
+	mesh->addChild(vertices);
+	for (auto & face : mesh_out.face) {
+		Vec2d pt = plane_unit.Point3dPrjtoPlpoint2d( (face.P(0) + face.P(0) + face.P(0)) / 3);
+		if (vcg::PointInsidePolygon(pt, outlines)) {
+			mesh->addTriangle(
+				vcg::tri::Index(mesh_out, face.cV(0)),
+				vcg::tri::Index(mesh_out, face.cV(1)),
+				vcg::tri::Index(mesh_out, face.cV(2)));
+		}		
+	}
+	planeObj->getParent()->addChild(mesh);
+	planeObj->getParent()->prepareDisplayForRefresh_recursive();
+
+	return mesh;
 }

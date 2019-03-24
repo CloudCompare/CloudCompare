@@ -686,7 +686,8 @@ private:
 			progDlg.setMethodTitle(title);\
 			char infos[256]; sprintf(infos, "Processing %d items...", number);\
 			progDlg.setInfo(infos);}\
-		CCLib::NormalizedProgress nprogress(&progDlg, number);
+		CCLib::NormalizedProgress nprogress(&progDlg, number);\
+		progDlg.start();
 #define ProgStep(x) if (!nprogress.oneStep()) {progDlg.stop();return x;}
 #define ProgEnd progDlg.update(100.0f); progDlg.stop();
 

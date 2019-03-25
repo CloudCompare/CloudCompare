@@ -48,7 +48,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
    <property name="tickPosition">
-    <enum>QSlider::TicksAbove</enum>
+    <enum>QSlider::NoTicks</enum>
    </property>
   </widget>
   <widget class="QSlider" name="BDRFacetFilterConfSlider">
@@ -73,7 +73,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
    <property name="tickPosition">
-    <enum>QSlider::TicksAbove</enum>
+    <enum>QSlider::NoTicks</enum>
    </property>
   </widget>
   <widget class="QLabel" name="label">
@@ -128,7 +128,7 @@
     <string>Confidence</string>
    </property>
   </widget>
-  <widget class="QToolButton" name="BDRFacetFilterOpenDistHisto">
+  <widget class="QToolButton" name="BDRFacetFilterDistHisto">
    <property name="geometry">
     <rect>
      <x>390</x>
@@ -141,7 +141,7 @@
     <string>Histo</string>
    </property>
   </widget>
-  <widget class="QToolButton" name="BDRFacetFilterOpenConfHisto">
+  <widget class="QToolButton" name="BDRFacetFilterConfHisto">
    <property name="geometry">
     <rect>
      <x>390</x>

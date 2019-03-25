@@ -938,24 +938,24 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 	MapFacetAttribute<double> facet_attrib_covered_area_(polyfit_obj->hypothesis_mesh_, Method::Get_facet_attrib_covered_area());
 	MapFacetAttribute<double> facet_attrib_confidence_(polyfit_obj->hypothesis_mesh_, Method::Get_facet_attrib_confidence());
 
-	map<ccFacet*, double> Facet_conf;
 	vector<double> all_conf;
 
 	//////////////////////////////////////////////////////////////////////////AUTOFILTER
-	std::map<std::string, PlaneUnit*> plane_data;
-	std::map<std::string, stocker::Polyline2d> plane_convexhull;
+	std::map<ccHObject*, PlaneUnit*> plane_data;
+	std::map<ccHObject*, stocker::Polyline2d> plane_convexhull;
 //	if (polyfit_obj->auto_filter)
-	{
+//	{
 		for (auto & planeObj : planeObjs) {
+			std::string plane_name = GetBaseName(planeObj->getParent()->getName()).toStdString();
 			stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
-			PlaneUnit plane_unit_ = FormPlaneUnit(planeObj->getName().toStdString(), GetVcgPlane(planeObj), cur_plane_points, true);
-			PlaneUnit* plane_unit = new PlaneUnit(planeObj->getName().toStdString(), GetVcgPlane(planeObj), plane_unit_.concave_hull_prj);
+			PlaneUnit plane_unit_ = FormPlaneUnit(plane_name, GetVcgPlane(planeObj), cur_plane_points, true);
+			PlaneUnit* plane_unit = new PlaneUnit(plane_name, GetVcgPlane(planeObj), plane_unit_.convex_hull_prj);
 
-			plane_data[planeObj->getName().toStdString()] = plane_unit;
+			plane_data[planeObj] = plane_unit;
 			stocker::Polyline2d plane_convex_hull = MakeLoopPolylinefromContour2d(Point3dToPlpoint2d(plane_unit_, plane_unit_.convex_hull_prj));
-			plane_convexhull[planeObj->getName().toStdString()] = plane_convex_hull;
+			plane_convexhull[planeObj] = plane_convex_hull;
 		}
-	}
+//	}
 	//////////////////////////////////////////////////////////////////////////
 
 	//! assign confidence information to hypothesis
@@ -981,16 +981,14 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 			facet->setSurface(area);
 			double coverage = facet_attrib_covered_area_[f] / area;
 			facet->setCoverage(coverage);
-
 			double confidence = facet_attrib_confidence_[f];
+			facet->setConfidence(confidence);
 			
-			Facet_conf[facet] = confidence;
 			all_conf.push_back(confidence);
 
-			vcg::Plane3d vcg_plane = GetVcgPlane(plane_entity);
 			//! convex_hull, 
-			PlaneUnit plane_unit = *plane_data[plane_entity->getName().toStdString()];
-			stocker::Polyline2d plane_ch = plane_convexhull[plane_entity->getName().toStdString()];
+			PlaneUnit plane_unit = *plane_data[plane_entity];
+			stocker::Polyline2d plane_ch = plane_convexhull[plane_entity];
 			ccPolyline* contour_entity = facet->getContour(); vector<CCVector3>ccv_poly = contour_entity->getPoints(true);
 			Contour3d facet_contour_temp; for (auto & pt : ccv_poly) { facet_contour_temp.push_back(parse_xyz(pt)); }
 			stocker::Polyline2d facet_contour = MakeLoopPolylinefromContour2d(Point3dToPlpoint2d(plane_unit, facet_contour_temp));
@@ -1018,8 +1016,7 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 	ccHObject::Container container_find = GetEnabledObjFromGroup(hypothesis_group, CC_TYPES::FACET, true, true);
 	for (auto & child : container_find)	{
 		ccFacet* facet = ccHObjectCaster::ToFacet(child);
-		double confidence = Facet_conf[facet];
-		double relativePos = (confidence - min_conf) / diag_conf;
+		double relativePos = (facet->getConfidence() - min_conf) / diag_conf;
 		relativePos = relativePos >= 1 ? 1 : relativePos;
 		relativePos = relativePos <= 0 ? 0 : relativePos;
 		const ccColor::Rgb* col = colorScale->getColorByRelativePos(relativePos);

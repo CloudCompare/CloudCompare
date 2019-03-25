@@ -3160,6 +3160,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="text">
     <string>Boundary</string>
    </property>
+   <property name="iconText">
+    <string>Boundary</string>
+   </property>
   </action>
   <action name="actionBDPrimPlaneFrame">
    <property name="icon">
@@ -3206,7 +3209,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Load Project</string>
    </property>
    <property name="iconText">
-    <string>Load Prj</string>
+    <string>Load</string>
    </property>
   </action>
   <action name="actionBDPlaneSegmentation">
@@ -3218,7 +3221,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Plane Segmentation</string>
    </property>
    <property name="iconText">
-    <string>PlaneFinder</string>
+    <string>Primitive</string>
    </property>
   </action>
   <action name="actionGotoNextZoom">

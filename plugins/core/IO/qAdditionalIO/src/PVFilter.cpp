@@ -27,9 +27,17 @@
 //Qt
 #include <QFile>
 
-bool PVFilter::canLoadExtension(const QString& upperCaseExt) const
+
+PVFilter::PVFilter() :
+	FileIOFilter( {
+				  "+Point+Value Filter",
+				  QStringList{ "pv" },
+				  "pv",
+				  QStringList{ "Point+Value cloud (*.pv)" },
+				  QStringList{ "Point+Value cloud (*.pv)" },
+				  Import | Export | FromPlugin
+				  } )
 {
-	return (upperCaseExt == "PV");
 }
 
 bool PVFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

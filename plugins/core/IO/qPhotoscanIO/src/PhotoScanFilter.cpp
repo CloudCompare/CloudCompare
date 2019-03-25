@@ -68,11 +68,6 @@ struct MeshDesc
 	QString texture;
 };
 
-bool PhotoScanFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (upperCaseExt == "PSZ");
-}
-
 enum Sections { DOCUMENT, CHUNKS, CHUNK, SENSORS, CAMERAS, FRAMES, FRAME, TRANSFORM };
 
 QString ToName(Sections section)
@@ -387,6 +382,18 @@ static QString CreateTempFile(QuaZip& zip, QString zipFilename)
 	return tempFilename;
 }
 
+
+PhotoScanFilter::PhotoScanFilter() :
+	FileIOFilter( {
+				  "+PhotoScan Filter",
+				  QStringList{ "psz" },
+				  "psz",
+				  QStringList{ "Photoscan project (*.psz)" },
+				  QStringList(),
+				  Import | FromPlugin
+				  } )
+{
+}
 
 CC_FILE_ERROR PhotoScanFilter::loadFile(const QString& filename,
 										ccHObject& container,

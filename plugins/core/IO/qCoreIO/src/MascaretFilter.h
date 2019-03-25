@@ -26,18 +26,11 @@
 class MascaretFilter : public FileIOFilter
 {
 public:
-	//static accessors
-	static inline QString GetFileFilter() { return "(Geo-)Mascaret profile (*.georef)"; }
-	static inline QString GetDefaultExtension() { return "georef"; }
-
+	MascaretFilter();
+	
 	//inherited from FileIOFilter
-	bool importSupported() const override { return false; }
-	bool exportSupported() const override { return true; }
-	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
-	QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	bool canLoadExtension(const QString& upperCaseExt) const override { Q_UNUSED( upperCaseExt ); return false; }
 	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
 
 #endif //CC_MASCARET_FILTER_HEADER

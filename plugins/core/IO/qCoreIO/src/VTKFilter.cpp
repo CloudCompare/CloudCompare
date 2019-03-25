@@ -31,9 +31,17 @@
 //System
 #include <cstring>
 
-bool VTKFilter::canLoadExtension(const QString& upperCaseExt) const
+
+VTKFilter::VTKFilter() :
+	FileIOFilter( {
+				  "+VTK Filter",
+				  QStringList{ "vtk" },
+				  "vtk",
+				  QStringList{ "VTK cloud or mesh (*.vtk)" },
+				  QStringList{ "VTK cloud or mesh (*.vtk)" },
+				  Import | Export | FromPlugin
+				  } )
 {
-	return (upperCaseExt == "VTK");
 }
 
 bool VTKFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

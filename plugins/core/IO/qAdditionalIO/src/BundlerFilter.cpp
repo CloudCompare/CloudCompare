@@ -71,19 +71,16 @@ struct BundlerCamera
 	bool isValid;
 };
 
-bool BundlerFilter::canLoadExtension(const QString& upperCaseExt) const
+BundlerFilter::BundlerFilter() :
+	FileIOFilter( {
+				  "+Bundler Filter",
+				  QStringList{ "out" },
+				  "out",
+				  QStringList{ "Snavely's Bundler output (*.out)" },
+				  QStringList(),
+				  Import | FromPlugin
+				  } )
 {
-	return (upperCaseExt == "OUT");
-}
-
-bool BundlerFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
-{
-	Q_UNUSED( type );
-	Q_UNUSED( multiple );
-	Q_UNUSED( exclusive );
-	
-	//no output yet
-	return false;
 }
 
 CC_FILE_ERROR BundlerFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)

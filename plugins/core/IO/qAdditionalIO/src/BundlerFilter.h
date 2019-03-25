@@ -26,17 +26,10 @@
 class BundlerFilter : public FileIOFilter
 {
 public:
-	//static accessors
-	static inline QString GetFileFilter() { return "Snavely's Bundler output (*.out)"; }
-	static inline QString GetDefaultExtension() { return "out"; }
+	BundlerFilter();
 
 	//inherited from FileIOFilter
-	bool importSupported() const override { return true; }
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
-	QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	bool canLoadExtension(const QString& upperCaseExt) const override;
-	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 
 	//! Specific load method
 	CC_FILE_ERROR loadFileExtended(	const QString& filename,

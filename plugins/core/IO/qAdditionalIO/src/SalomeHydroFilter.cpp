@@ -27,6 +27,19 @@
 #include <QStringList>
 #include <QTextStream>
 
+
+SalomeHydroFilter::SalomeHydroFilter() :
+	FileIOFilter( {
+				  "+SalomeHydro Filter",
+				  QStringList{ "poly" },
+				  "poly",
+				  QStringList{ "Salome Hydro polylines (*.poly)" },
+				  QStringList{ "Salome Hydro polylines (*.poly)" },
+				  Import | Export | FromPlugin
+				  } )
+{	
+}
+
 bool SalomeHydroFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
 	if (type == CC_TYPES::POLY_LINE)
@@ -36,11 +49,6 @@ bool SalomeHydroFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclus
 		return true;
 	}
 	return false;
-}
-
-bool SalomeHydroFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (upperCaseExt == "POLY");
 }
 
 CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)

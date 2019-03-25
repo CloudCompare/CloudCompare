@@ -24,21 +24,13 @@
 class QCC_IO_LIB_API DxfFilter : public FileIOFilter
 {
 public:
-
-	//static accessors
-	static inline QString GetFileFilter() { return "DXF geometry (*.dxf)"; }
-	static inline QString GetDefaultExtension() { return "dxf"; }
+	DxfFilter();
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual bool exportSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;	
 };
 
 #endif //CC_DXF_FILTER_HEADER

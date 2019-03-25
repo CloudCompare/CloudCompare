@@ -24,16 +24,11 @@
 class FooFilter : public FileIOFilter
 {
 public:
-	// inherited from FileIOFilter
-	bool importSupported() const override;
-	bool exportSupported() const override;
+	FooFilter();
 	
+	// inherited from FileIOFilter
 	CC_FILE_ERROR loadFile( const QString &fileName, ccHObject &container, LoadParameters &parameters ) override;
 	
-	QStringList getFileFilters( bool onImport ) const override;
-	QString getDefaultExtension() const override;
-	
-	bool canLoadExtension( const QString &upperCaseExt ) const override;
 	bool canSave( CC_CLASS_ENUM type, bool &multiple, bool &exclusive ) const override;
 };
 

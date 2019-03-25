@@ -25,7 +25,7 @@
 
 qPclIO::qPclIO(QObject *parent)
     : QObject(parent)
-    , ccIOFilterPluginInterface(":/CC/plugin/qPclIO/info.json")
+    , ccIOPluginInterface(":/CC/plugin/qPclIO/info.json")
 {
 }
 

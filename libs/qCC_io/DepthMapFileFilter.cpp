@@ -31,10 +31,17 @@
 //system
 #include <cassert>
 
-bool DepthMapFileFilter::canLoadExtension(const QString& upperCaseExt) const
+
+DepthMapFileFilter::DepthMapFileFilter() :
+	FileIOFilter( {
+				  "_Depth Map Filter",
+				  QStringList(),
+				  "txt",
+				  QStringList(),
+				  QStringList{ "Depth Map [ascii] (*.txt *.asc)" },
+				  Export
+				  } )
 {
-	//import not supported
-	return false;
 }
 
 bool DepthMapFileFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

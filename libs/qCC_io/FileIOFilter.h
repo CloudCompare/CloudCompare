@@ -52,7 +52,7 @@ enum CC_FILE_ERROR {CC_FERR_NO_ERROR,
 	Must be implemented by any specific I/O filter.
 **/
 class FileIOFilter
-{
+{	
 public:
 	virtual ~FileIOFilter() = default;
 	
@@ -107,10 +107,25 @@ public:
 	//! Shared type
 	using Shared = QSharedPointer<FileIOFilter>;
 	
-public: //public interface (to be reimplemented by each I/O filter)
+public: //public interface
 	
 	//! Returns whether this I/O filter can import files
-	virtual bool importSupported() const { return false; }
+	bool importSupported() const;
+	
+	//! Returns whether this I/O filter can export files
+	bool exportSupported() const;
+	
+	//! Returns the file filter(s) for this I/O filter
+	/** E.g. 'ASCII file (*.asc)'
+		\param onImport whether the requested filters are for import or export
+		\return list of filters
+	**/
+	QStringList getFileFilters(bool onImport) const;
+	
+	//! Returns the default file extension
+	QString getDefaultExtension() const;
+	
+public: //public interface (to be reimplemented by each I/O filter)
 	
 	//! Loads one or more entities from a file
 	/** This method must be implemented by children classes.
@@ -130,9 +145,6 @@ public: //public interface (to be reimplemented by each I/O filter)
 		return CC_FERR_NOT_IMPLEMENTED;
 	}
 	
-	//! Returns whether this I/O filter can export files
-	virtual bool exportSupported() const { return false; }
-	
 	//! Saves an entity (or a group of) to a file
 	/** This method must be implemented by children classes.
 		\param entity entity (or group of) to save
@@ -151,29 +163,20 @@ public: //public interface (to be reimplemented by each I/O filter)
 		return CC_FERR_NOT_IMPLEMENTED;
 	}
 	
-	//! Returns the file filter(s) for this I/O filter
-	/** E.g. 'ASCII file (*.asc)'
-		\param onImport whether the requested filters are for import or export
-		\return list of filters
-	**/
-	virtual QStringList getFileFilters(bool onImport) const = 0;
-	
-	//! Returns the default file extension
-	virtual QString getDefaultExtension() const = 0;
-	
-	//! Returns whether a specific extension can be loaded by this filter
-	/** \param upperCaseExt upper case extension
-		\return whether the extension is (theoretically) handled by this filter
-	**/
-	virtual bool canLoadExtension(const QString& upperCaseExt) const = 0;
-	
 	//! Returns whether this I/O filter can save the specified type of entity
 	/** \param type entity type
 		\param multiple whether the filter can save multiple instances of this entity at once
 		\param exclusive whether the filter can only save this type of entity if selected or if it can be mixed with other types
 		\return whether the entity type can be saved
 	**/
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const = 0;
+	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+	{
+		Q_UNUSED( type );
+		Q_UNUSED( multiple );
+		Q_UNUSED( exclusive );
+		
+		return false;
+	}
 	
 public: //static methods
 	
@@ -293,6 +296,65 @@ public: //global filters registration mechanism
 	//! Called when the filter is unregistered
 	/** Does nothing by default **/
 	virtual void unregister() {}
+	
+public:
+	enum FilterFeature
+	{
+		NoFeatures = 0x0000,
+		
+		Import = 0x00001,	//< Imports data
+		Export = 0x0002,	//< Exports data
+		
+		FromPlugin = 0x0004,	//< Implemented in a plugin
+		
+		DynamicInfo = 0x0008,	//< FilterInfo cannot be set statically (this is used for internal consistency checking)
+	};
+	Q_DECLARE_FLAGS( FilterFeatures, FilterFeature )
+	
+protected:
+	struct FilterInfo
+	{
+		//! ID used to uniquely identify the filter (not user-visible)
+		QString mID;
+		
+		//! List of extensions this filter can read (lowercase)
+		//! e.g. "txt", "foo", "bin"
+		//! This is used in FindBestFilterForExtension()
+		QStringList mImportExtensions;
+		
+		//! The default file extension (for both import & export as applicable)
+		QString mDefaultExtension;
+		
+		//! List of file filters for import (e.g. "Test (*.txt)", "Foo (*.foo))
+		QStringList	mImportFileFilterStrings;
+		
+		//! List of file filters for export (e.g. "Test (*.txt)", "Foo (*.foo))
+		QStringList	mExportFileFilterStrings;
+		
+		//! Supported features \see FilterFeature
+		FilterFeatures mFeatures;
+	};
+	
+	explicit FileIOFilter( const FilterInfo &info );
+	
+	//! Allow import extensions to be set after construction
+	//! (e.g. for ImageFileFilter & QImageReader::supportedImageFormats())
+	void setImportExtensions( const QStringList &extensions );
+	
+	//! Allow import filter strings to be set after construction
+	//! (e.g. for ImageFileFilter & QImageReader::supportedImageFormats())
+	void setImportFileFilterStrings( const QStringList &filterStrings );
+
+	//! Allow export filter strings to be set after construction
+	//! (e.g. for ImageFileFilter & QImageReader::supportedImageFormats())
+	void setExportFileFilterStrings( const QStringList &filterStrings );
+	
+private:
+	void checkFilterInfo() const;
+	
+	FilterInfo mFilterInfo;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS( FileIOFilter::FilterFeatures )
 
 #endif

@@ -33,24 +33,19 @@
 
 using namespace CCLib;
 
-bool PDMSFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (	upperCaseExt == "MAC"
-			||	upperCaseExt == "PDMS"
-			||	upperCaseExt == "PDMSMAC" );
-}
-
-bool PDMSFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
-{
-	Q_UNUSED( type );
-	Q_UNUSED( multiple );
-	Q_UNUSED( exclusive );
-	
-	//not supported yet
-	return false;
-}
-
 using PdmsAndCCPair = std::pair<PdmsTools::PdmsObjects::GenericItem*, ccHObject*>;
+
+PDMSFilter::PDMSFilter() :
+	FileIOFilter( {
+				  "+PDMS Filter",
+				  QStringList{ "pdms", "pdmsmac", "mac" },
+				  "pdms",
+				  QStringList{ "PDMS primitives (*.pdms *.pdmsmac *.mac)" },
+				  QStringList(),
+				  Import | FromPlugin
+				  } )
+{
+}
 
 CC_FILE_ERROR PDMSFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {

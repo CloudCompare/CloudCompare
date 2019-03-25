@@ -37,11 +37,6 @@
 #include <string.h>
 #include <assert.h>
 
-bool CSVMatrixFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (upperCaseExt == "CSV");
-}
-
 //semi-persistent parameters
 static QChar s_separator(',');
 static double s_xSpacing = 1.0;
@@ -49,6 +44,19 @@ static double s_ySpacing = 1.0;
 static bool s_inverseRows = false;
 static bool s_loadAsMesh = false;
 static bool s_useTexture = false;
+
+CSVMatrixFilter::CSVMatrixFilter() :
+	FileIOFilter( {
+				  "+CSV Matrix Filter",
+				  QStringList{ "csv" },
+				  "csv",
+				  QStringList{ "CSV matrix cloud (*.csv)" },
+				  QStringList(),
+				  Import
+				  } )
+{
+}
+
 CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 									ccHObject& container,
 									LoadParameters& parameters)

@@ -75,12 +75,17 @@ namespace
 	};	
 }
 
-bool MAFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	Q_UNUSED( upperCaseExt );
-	
-	//import not supported
-	return false;
+
+MAFilter::MAFilter() :
+	FileIOFilter( {
+				  "+Height profile Filter",
+				  QStringList(),
+				  "ma",
+				  QStringList(),
+				  QStringList{ "Maya ASCII mesh (*.ma)" },
+				  Export | FromPlugin
+				  } )
+{	
 }
 
 bool MAFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

@@ -37,9 +37,17 @@
 //system
 #include <cassert>
 
-bool DxfFilter::canLoadExtension(const QString& upperCaseExt) const
+
+DxfFilter::DxfFilter() :
+	FileIOFilter( {
+				  "_DXF Filter",
+				  QStringList{ "dxf" },
+				  "dxf",
+				  QStringList{ "DXF geometry (*.dxf)" },
+				  QStringList{ "DXF geometry (*.dxf)" },
+				  Import | Export
+				  } )
 {
-	return (upperCaseExt == "DXF");
 }
 
 bool DxfFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

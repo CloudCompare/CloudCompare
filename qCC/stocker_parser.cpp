@@ -243,6 +243,27 @@ BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	return nullptr;
 }
 
+bool SetGlobalShiftAndScale(ccHObject* obj)
+{
+	BDBaseHObject* baseObj = GetRootBDBase(obj);
+	if (!baseObj) {
+		return false;
+	}
+	ccHObject::Container cloud_container;
+	if (obj->isA(CC_TYPES::POINT_CLOUD)) {
+		cloud_container.push_back(obj);
+	}
+	else {
+		obj->filterChildren(cloud_container, true, CC_TYPES::POINT_CLOUD, false);
+	}
+	for (auto & _cld : cloud_container)	{
+		ccPointCloud* cloud_entity = ccHObjectCaster::ToPointCloud(_cld);
+		cloud_entity->setGlobalScale(baseObj->global_scale);
+		cloud_entity->setGlobalShift(CCVector3d(vcgXYZ(baseObj->global_shift)));
+	}
+	return true;
+}
+
 ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)
 {
 	if (lines.empty()) {
@@ -1356,7 +1377,6 @@ ccHObject* ConstrainedMesh(ccHObject* planeObj)
 	PlaneUnit plane_unit = FormPlaneUnit(plane_points, "temp", true);
 	
 	Polyline3d plane_sharps;
-//	Contour3d boundary_points;
 	Contour3d alpha_shape;
 	GLMesh mesh_out;
 
@@ -1380,15 +1400,16 @@ ccHObject* ConstrainedMesh(ccHObject* planeObj)
 			}
 		}
 	}
+	Polyline3d outline_poly = MakeLoopPolylinefromContour3d(outline_points);
 
 	Polyline3d line_pool;
-	for (auto & ln : boundary_lines) {
-		if (SegmentCanAddToPolyline(line_pool, ln)) {
-			line_pool.push_back(ln);
-		}
-	}
-	for (auto & ln : boundary_lines) {
-		if (SegmentCanAddToPolyline(line_pool, ln)) {
+// 	for (auto & ln : boundary_lines) {
+// 		if (SegmentCanAddToPolyline(line_pool, ln)) {
+// 			line_pool.push_back(ln);
+// 		}
+// 	}
+	for (auto & ln : outline_poly) {
+		if (/*SegmentCanAddToPolyline(line_pool, ln)*/1) {
 			line_pool.push_back(ln);
 		}
 	}
@@ -1415,17 +1436,21 @@ ccHObject* ConstrainedMesh(ccHObject* planeObj)
 	}
 	if (vertices->reserveTheNormsTable()) {
 		for (auto & pt : mesh_out.vert) {
-			vertices->addNorm(CCVector3(vcgXYZ(pt.N())));
+//			vertices->addNorm(CCVector3(vcgXYZ(pt.N())));
+			vertices->addNorm(CCVector3(vcgXYZ(plane_unit.plane.Direction())));
 		}
 	}
 
-	Contour2d outline_points_2d = Point3dToPlpoint2d(plane_unit, outline_points);
-	Polyline2d outlines = MakeLoopPolylinefromContour2d(outline_points_2d);
+	Polyline2d outlines = Line3dToPlline2d(plane_unit, outline_poly);
 	ccMesh* mesh = new ccMesh(vertices);
 	mesh->setName(GetBaseName(planeObj->getParent()->getName() + ".cdt"));
 	mesh->addChild(vertices);
+	ccPointCloud* point_cloud_entity = ccHObjectCaster::ToPointCloud(plane_cloud_obj);
+	vertices->setGlobalShift(point_cloud_entity->getGlobalShift());
+	vertices->setGlobalScale(point_cloud_entity->getGlobalScale());	
+
 	for (auto & face : mesh_out.face) {
-		Vec2d pt = plane_unit.Point3dPrjtoPlpoint2d( (face.P(0) + face.P(0) + face.P(0)) / 3);
+		Vec2d pt = plane_unit.Point3dPrjtoPlpoint2d( (face.P(0) + face.P(1) + face.P(2)) / 3);
 		if (vcg::PointInsidePolygon(pt, outlines)) {
 			mesh->addTriangle(
 				vcg::tri::Index(mesh_out, face.cV(0)),

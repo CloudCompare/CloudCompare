@@ -121,6 +121,8 @@ public:
 
 BDBaseHObject* GetRootBDBase(ccHObject* obj);
 
+bool SetGlobalShiftAndScale(ccHObject * obj);
+
 class PolyFitObj
 {
 public:

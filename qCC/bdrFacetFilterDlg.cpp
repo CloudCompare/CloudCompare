@@ -51,6 +51,9 @@ bdrFacetFilterDlg::bdrFacetFilterDlg(/*ccGLWindow* win, ccHObject* _facet,*/ QWi
 	
 	connect(BDRFacetFilterChecktoolButton, &QAbstractButton::clicked, this, &bdrFacetFilterDlg::CheckModel);
 	connect(BDRFacetFilterRestoretoolButton, &QAbstractButton::clicked, this, &bdrFacetFilterDlg::Restore);
+
+	connect(buttonBox, SIGNAL(accepted()), this, SLOT(ConfirmAndExit()));
+	connect(buttonBox, SIGNAL(rejected()), this, SLOT(RestoreAndExit()));
 }
 
 bdrFacetFilterDlg::~bdrFacetFilterDlg()
@@ -109,14 +112,8 @@ void bdrFacetFilterDlg::initWith(ccGLWindow* win, ccHObject::Container _facet)
 			++m_confidence_histo[std::min(bin, g_bin_count - 1)];
 		}
 	}
-
-	BDRFacetFilterConfSpinBox->setMinimum(all_conf.front());
-	BDRFacetFilterConfSpinBox->setMaximum(all_conf.back());
-	BDRFacetFilterConfSpinBox->setValue(all_conf.front());
-
-	BDRFacetFilterConfSlider->setMinimum(all_conf.front());
-	BDRFacetFilterConfSlider->setMaximum(all_conf.back());
-	BDRFacetFilterConfSlider->setValue(all_conf.front());
+	m_val_dist = max_dist;
+	m_val_conf = min_conf;
 
 	BDRFacetFilterDistSpinBox->setMinimum(all_dist.front());
 	BDRFacetFilterDistSpinBox->setMaximum(all_dist.back());
@@ -125,18 +122,26 @@ void bdrFacetFilterDlg::initWith(ccGLWindow* win, ccHObject::Container _facet)
 	BDRFacetFilterDistSlider->setMinimum(all_dist.front());
 	BDRFacetFilterDistSlider->setMaximum(all_dist.back());
 	BDRFacetFilterDistSlider->setValue(all_dist.back());
+
+	BDRFacetFilterConfSpinBox->setMinimum(all_conf.front());
+	BDRFacetFilterConfSpinBox->setMaximum(all_conf.back());
+	BDRFacetFilterConfSpinBox->setValue(all_conf.front());
+
+	BDRFacetFilterConfSlider->setMinimum(all_conf.front());
+	BDRFacetFilterConfSlider->setMaximum(all_conf.back());
+	BDRFacetFilterConfSlider->setValue(all_conf.front());
 }
 
 void bdrFacetFilterDlg::Clear()
 {
 	m_distance_histo.clear();
 	m_confidence_histo.clear();
-	if (m_win) {
-		delete m_win;
-		m_win = nullptr;
-	}
+// 	if (m_win) {
+// 		delete m_win;
+// 		m_win = nullptr;
+// 	}
 	m_facetObjs.clear();
-	m_initialstate.clear();
+//	m_initialstate.clear();
 }
 
 void bdrFacetFilterDlg::ReflectThresholdChange(/*FILTER_TYPE type, double val*/)
@@ -194,24 +199,28 @@ void bdrFacetFilterDlg::ReflectThresholdChange(/*FILTER_TYPE type, double val*/)
 }
 
 void bdrFacetFilterDlg::iDistThresholdChanged(int val) {
+	m_val_dist = val;
 	BDRFacetFilterDistSpinBox->blockSignals(true);
 	BDRFacetFilterDistSpinBox->setValue(val);
 	BDRFacetFilterDistSpinBox->blockSignals(false);
 	ReflectThresholdChange();
 }
 void bdrFacetFilterDlg::iConfThresholdChanged(int val) {
+	m_val_conf = val;
 	BDRFacetFilterConfSpinBox->blockSignals(true);
 	BDRFacetFilterConfSpinBox->setValue(val);
 	BDRFacetFilterConfSpinBox->blockSignals(false);
 	ReflectThresholdChange();
 }
 void bdrFacetFilterDlg::dDistThresholdChanged(double val) {
+	m_val_dist = val;
 	BDRFacetFilterDistSlider->blockSignals(true);
 	BDRFacetFilterDistSlider->setValue(qFloor(val));
 	BDRFacetFilterDistSlider->blockSignals(false);
 	ReflectThresholdChange();
 }
 void bdrFacetFilterDlg::dConfThresholdChanged(double val) {
+	m_val_conf = val;
 	BDRFacetFilterConfSlider->blockSignals(true);
 	BDRFacetFilterConfSlider->setValue(qFloor(val));
 	BDRFacetFilterConfSlider->blockSignals(false);

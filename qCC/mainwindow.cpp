@@ -10965,6 +10965,7 @@ void MainWindow::doActionBDPrimIntersections()
 	if (!ok) return;
 	ccHObject::Container segs =	CalcPlaneIntersections(entity_planes, distance);
 	for (auto & seg : segs) {
+		SetGlobalShiftAndScale(seg);
 		addToDB(seg);
 	}
 	refreshAll();
@@ -11059,7 +11060,7 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 				cur_plane_sharps.push_back(sharps_in_bbox[index]);
 			}
 			ccHObject* cur_sharps_obj = AddSegmentsAsChildVertices(planeObj->getParent(), cur_plane_sharps, BDDB_IMAGELINE_PREFIX, ccColor::darkBlue);
-			if (cur_sharps_obj) addToDB(cur_sharps_obj);
+			if (cur_sharps_obj) { SetGlobalShiftAndScale(cur_sharps_obj); addToDB(cur_sharps_obj); }
 		}
 // 		for (size_t i = 0; i < sharps_in_bbox.size(); i++) {
 // 			if (set_index.find(i) == set_index.end()) {
@@ -11162,6 +11163,7 @@ void MainWindow::doActionBDPrimBoundary()
 		}
 		ccHObject* bdry = DetectLineRansac(entity, distance, minpts, radius);
 		if (bdry) {
+			SetGlobalShiftAndScale(bdry);
 			addToDB(bdry);
 			refreshAll();
 			updateUI();
@@ -11182,7 +11184,7 @@ void MainWindow::doActionBDPrimBoundary()
 	
 	for (auto & planeObj : plane_container) {
 		ccHObject* boundary = CalcPlaneBoundary(planeObj/*, s_last_bdry_p2l, s_last_bdry_minpts*/);
-		if (boundary) addToDB(boundary);
+		if (boundary) { SetGlobalShiftAndScale(boundary); addToDB(boundary); }
 	}
 	refreshAll();
 	UpdateUI();
@@ -11211,7 +11213,7 @@ void MainWindow::doActionBDPrimOutline()
 	
 	for (auto & planeObj : plane_container) {
 		ccHObject* outline = CalcPlaneOutlines(planeObj, alpha);
-		if (outline) addToDB(outline);
+		if (outline) { SetGlobalShiftAndScale(outline); addToDB(outline); }
 
 		ProgStep()
 	}
@@ -11254,7 +11256,7 @@ void MainWindow::doActionBDPrimPlaneFrame()
 	
 	for (auto & planeObj : plane_container) {
 		ccHObject* frame = PlaneFrameOptimization(planeObj, option);
-		if (frame) addToDB(frame);
+		if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame); }
 
 		ProgStep()
 	}
@@ -11761,6 +11763,7 @@ void MainWindow::doActionBDPolyFitHypothesis()
 	if (hypoObj) {
 		polyfit_obj->status = PolyFitObj::STT_hypomesh;
 		polyfit_obj->building_name = GetBaseName(primitiveObj->getName()).toStdString();
+		SetGlobalShiftAndScale(hypoObj);
 		addToDB(hypoObj);
 	}
 	else {

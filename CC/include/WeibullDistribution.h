@@ -119,9 +119,9 @@ protected:
 	//! internal function for parameters evaluation from sample points
 	/** inverseVmax can be optionally specified for overflow-safe version
 	**/
-	ScalarType computeG(const ScalarContainer& values, ScalarType a, ScalarType* inverseVmax = nullptr) const;
+	static double ComputeG(const ScalarContainer& values, double a, ScalarType valueShift, double valueRange);
 	//! internal function for parameters evaluation from sample points
-	ScalarType findGRoot(const ScalarContainer& values, ScalarType inverseMaxValue) const;
+	static double FindGRoot(const ScalarContainer& values, ScalarType valueShift, double valueRange);
 };
 
 }

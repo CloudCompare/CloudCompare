@@ -78,7 +78,7 @@ namespace
 
 MAFilter::MAFilter()
 	: FileIOFilter( {
-					"+Height profile Filter",
+					"+Maya ASCII Filter",
 					QStringList(),
 					"ma",
 					QStringList(),

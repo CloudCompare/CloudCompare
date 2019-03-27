@@ -20,15 +20,16 @@
 #include "FooFilter.h"
 
 
-FooFilter::FooFilter() :
-	FileIOFilter( {
-				  "Foo Filter",
-				  QStringList{ "foo", "txt" },
-				  "foo",
-				  QStringList{ "Foo file (*.foo)", "Text file (*.txt)" },
-				  QStringList(),
-				  Import
-				  } )
+FooFilter::FooFilter()
+	: FileIOFilter( {
+					"Foo Filter",
+					DEFAULT_PRIORITY,	// priority
+					QStringList{ "foo", "txt" },
+					"foo",
+					QStringList{ "Foo file (*.foo)", "Text file (*.txt)" },
+					QStringList(),
+					Import
+					} )
 {
 }
 

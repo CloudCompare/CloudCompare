@@ -27,7 +27,8 @@
 
 HeightProfileFilter::HeightProfileFilter()
 	: FileIOFilter( {
-					"+Height profile Filter",
+					"_Height profile Filter",
+					21.0f,	// priority
 					QStringList(),
 					"",
 					QStringList(),

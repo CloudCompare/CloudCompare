@@ -56,7 +56,8 @@ const char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
 
 E57Filter::E57Filter()
     : FileIOFilter( {
-                    "+E57 Filter",
+                    "_E57 Filter",
+					4.0f,	// priority
                     QStringList{ "e57" },
                     "e57",
                     QStringList{ "E57 cloud (*.e57)" },

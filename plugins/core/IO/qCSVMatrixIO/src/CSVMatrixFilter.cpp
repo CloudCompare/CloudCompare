@@ -47,7 +47,8 @@ static bool s_useTexture = false;
 
 CSVMatrixFilter::CSVMatrixFilter()
     : FileIOFilter( {
-                    "+CSV Matrix Filter",
+                    "_CSV Matrix Filter",
+					DEFAULT_PRIORITY,	// priority
                     QStringList{ "csv" },
                     "csv",
                     QStringList{ "CSV matrix cloud (*.csv)" },

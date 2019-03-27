@@ -51,6 +51,10 @@ static FileIOFilter::FilterContainer s_ioFilters;
 
 static unsigned s_sessionCounter = 0;
 
+// This extra definition is required in C++11.
+// In C++17, class-level "static constexpr" is implicitly inline, so these are not required.
+constexpr float FileIOFilter::DEFAULT_PRIORITY;
+
 
 FileIOFilter::FileIOFilter( const FileIOFilter::FilterInfo &info ) :
 	m_filterInfo( info )
@@ -189,38 +193,35 @@ void FileIOFilter::Register(Shared filter)
 		return;
 	}
 
-	//filters are uniquely recognized by their 'file filter' string
-	const QStringList fileFilters = filter->getFileFilters(true);
-	const QString filterName = filter->getDefaultExtension().toUpper();
-	for (FilterContainer::const_iterator it=s_ioFilters.begin(); it!=s_ioFilters.end(); ++it)
+	// check for an existing copy of this filter or one with the same ID
+	const QString id = filter->m_filterInfo.id;
+
+	auto compareFilters = [filter, id] ( const Shared& filter2 )
 	{
-		bool error = false;
-		if (*it == filter)
-		{
-			ccLog::Warning(QStringLiteral("[FileIOFilter::Register] I/O filter '%1' is already registered").arg(filterName));
-			error = true;
-		}
-		else
-		{
-			//we are going to compare the file filters as they should remain unique!
-			const QStringList otherFilters = (*it)->getFileFilters(true);
-			for (int i=0; i<fileFilters.size(); ++i)
-			{
-				if (otherFilters.contains(fileFilters[i]))
-				{
-					const QString otherFilterName = (*it)->getDefaultExtension().toUpper();;
-					ccLog::Warning(QStringLiteral("[FileIOFilter::Register] Internal error: file filter '%1' of filter '%2' is already handled by another filter ('%3')!").arg(fileFilters[i],filterName,otherFilterName));
-					error = true;
-					break;
-				}
-			}
-		}
-
-		if (error)
-			return;
+		return (filter == filter2) || (filter2->m_filterInfo.id == id);
+	};
+	
+	if ( std::any_of( s_ioFilters.cbegin(), s_ioFilters.cend(), compareFilters ) ) 
+	{
+		ccLog::Warning( QStringLiteral( "[FileIOFilter] I/O filter already registered with id '%1'" ).arg( id ) );
+		
+		return;
 	}
-
-	s_ioFilters.push_back(filter);
+	
+	// insert into the list, sorted by priority first, id second
+	auto comparePriorities = [] ( const Shared& filter1, const Shared& filter2 ) -> bool
+	{
+		if ( filter1->m_filterInfo.priority == filter2->m_filterInfo.priority )
+		{
+			return filter1->m_filterInfo.id < filter2->m_filterInfo.id;
+		}
+		
+		return filter1->m_filterInfo.priority < filter2->m_filterInfo.priority;
+	};
+	
+	auto pos = std::upper_bound( s_ioFilters.begin(), s_ioFilters.end(), filter, comparePriorities );
+	
+	s_ioFilters.insert( pos, filter );
 }
 
 void FileIOFilter::UnregisterAll()
@@ -266,6 +267,21 @@ FileIOFilter::Shared FileIOFilter::FindBestFilterForExtension(const QString& ext
 	}
 
 	return FileIOFilter::Shared( nullptr );
+}
+
+QStringList FileIOFilter::ImportFilterList()
+{
+	QStringList	list{ QObject::tr( "All (*.*)" ) };
+	
+	for ( const auto &filter : s_ioFilters )
+	{
+		if ( filter->importSupported() )
+		{
+			list += filter->m_filterInfo.importFileFilterStrings;
+		}
+	}	
+	
+	return list;
 }
 
 ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,

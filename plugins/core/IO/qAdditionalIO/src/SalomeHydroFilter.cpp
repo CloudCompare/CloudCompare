@@ -30,7 +30,8 @@
 
 SalomeHydroFilter::SalomeHydroFilter()
 	: FileIOFilter( {
-					"+SalomeHydro Filter",
+					"_SalomeHydro Filter",
+					DEFAULT_PRIORITY,	// priority
 					QStringList{ "poly" },
 					"poly",
 					QStringList{ "Salome Hydro polylines (*.poly)" },

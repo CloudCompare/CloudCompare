@@ -56,6 +56,7 @@
 BinFilter::BinFilter()
 	: FileIOFilter( {
 					"_CloudCompare BIN Filter",
+					1.0f,	// priority
 					QStringList{ "bin" },
 					"bin",
 					QStringList{ GetFileFilter() },

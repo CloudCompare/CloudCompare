@@ -74,6 +74,7 @@ AsciiOpenDlg* AsciiFilter::GetOpenDialog(QWidget* parentWidget/*=0*/)
 AsciiFilter::AsciiFilter()
 	: FileIOFilter( {
 					"_ASCII Filter",
+					2.0f,	// priority
 					QStringList{ "txt", "asc", "neu", "xyz", "pts", "csv" },
 					"asc",
 					QStringList{ GetFileFilter() },

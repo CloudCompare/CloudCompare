@@ -38,7 +38,8 @@ constexpr quint16 s_headerFlagSBF = (static_cast<quint16>(42) | static_cast<quin
 
 SimpleBinFilter::SimpleBinFilter()
 	: FileIOFilter( {
-					"+Simple binary Filter",
+					"_Simple binary Filter",
+					6.0f,	// priority
 					QStringList{ "sbf", "data" },
 					"sbf",
 					QStringList{ "Simple binary file (*.sbf)" },

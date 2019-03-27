@@ -507,6 +507,7 @@ public:
 ShpFilter::ShpFilter()
 	: FileIOFilter( {
 					"_Shape Filter",
+					14.0f,	// priority
 					QStringList{ "shp" },
 					"shp",
 					QStringList{ "SHP entity (*.shp)" },

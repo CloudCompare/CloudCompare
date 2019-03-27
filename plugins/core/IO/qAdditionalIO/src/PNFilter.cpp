@@ -32,7 +32,8 @@ static const CCVector3 s_defaultNorm(0,0,1);
 
 PNFilter::PNFilter()
 	: FileIOFilter( {
-					"+Point+Normal Filter",
+					"_Point+Normal Filter",
+					DEFAULT_PRIORITY,	// priority
 					QStringList{ "pn" },
 					"pn",
 					QStringList{ "Point+Normal cloud (*.pn)" },

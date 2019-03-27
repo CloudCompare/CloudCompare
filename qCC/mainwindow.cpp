@@ -151,8 +151,6 @@
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance  = nullptr;
 
-//default 'All files' file filter
-static const QString s_allFilesFilter("All (*.*)");
 //default file filter separator
 static const QString s_fileFilterSeparator(";;");
 
@@ -9311,38 +9309,19 @@ void MainWindow::doActionLoadFile()
 	QString currentOpenDlgFilter = settings.value(ccPS::SelectedInputFilter(), BinFilter::GetFileFilter()).toString();
 
 	// Add all available file I/O filters (with import capabilities)
-	QStringList fileFilters;
-	fileFilters.append(s_allFilesFilter);
-	bool defaultFilterFound = false;
+	const QStringList filterStrings = FileIOFilter::ImportFilterList();
+	const QString &allFilter = filterStrings.at( 0 );
+	
+	if ( !filterStrings.contains( currentOpenDlgFilter ) )
 	{
-		for ( const FileIOFilter::Shared &filter : FileIOFilter::GetFilters() )
-		{
-			if (filter->importSupported())
-			{
-				const QStringList	fileFilterList = filter->getFileFilters(true);
-				
-				for ( const QString &fileFilter : fileFilterList )
-				{
-					fileFilters.append( fileFilter );
-					//is it the (last) default filter?
-					if (!defaultFilterFound && (currentOpenDlgFilter == fileFilter))
-					{
-						defaultFilterFound = true;
-					}
-				}
-			}
-		}
+		currentOpenDlgFilter = allFilter;
 	}
-
-	//default filter is still valid?
-	if (!defaultFilterFound)
-		currentOpenDlgFilter = s_allFilesFilter;
-
+	
 	//file choosing dialog
 	QStringList selectedFiles = QFileDialog::getOpenFileNames(	this,
 																tr("Open file(s)"),
 																currentPath,
-																fileFilters.join(s_fileFilterSeparator),
+																filterStrings.join(s_fileFilterSeparator),
 																&currentOpenDlgFilter,
 																CCFileDialogOptions());
 	if (selectedFiles.isEmpty())
@@ -9354,9 +9333,11 @@ void MainWindow::doActionLoadFile()
 	settings.setValue(ccPS::SelectedInputFilter(),currentOpenDlgFilter);
 	settings.endGroup();
 
-	if (currentOpenDlgFilter == s_allFilesFilter)
+	if (currentOpenDlgFilter == allFilter)
+	{
 		currentOpenDlgFilter.clear(); //this way FileIOFilter will try to guess the file type automatically!
-
+	}
+	
 	//load files
 	addToDB(selectedFiles, currentOpenDlgFilter);
 }
@@ -9451,7 +9432,7 @@ void MainWindow::doActionSaveFile()
 		{
 			bool atLeastOneExclusive = false;
 
-			//does this filter can export one or several clouds?
+			//can this filter export one or several clouds?
 			bool canExportClouds = true;
 			if (hasCloud)
 			{
@@ -9462,7 +9443,7 @@ void MainWindow::doActionSaveFile()
 				atLeastOneExclusive |= isExclusive;
 			}
 
-			//does this filter can export one or several meshes?
+			//can this filter export one or several meshes?
 			bool canExportMeshes = true;
 			if (hasMesh)
 			{
@@ -9473,7 +9454,7 @@ void MainWindow::doActionSaveFile()
 				atLeastOneExclusive |= isExclusive;
 			}
 
-			//does this filter can export one or several polylines?
+			//can this filter export one or several polylines?
 			bool canExportPolylines = true;
 			if (hasPolylines)
 			{
@@ -9484,7 +9465,7 @@ void MainWindow::doActionSaveFile()
 				atLeastOneExclusive |= isExclusive;
 			}
 
-			//does this filter can export one or several images?
+			//can this filter export one or several images?
 			bool canExportImages = true;
 			if (hasImages)
 			{
@@ -9495,7 +9476,7 @@ void MainWindow::doActionSaveFile()
 				atLeastOneExclusive |= isExclusive;
 			}
 
-			//does this filter can export one or several other serializable entities?
+			//can this filter export one or several other serializable entities?
 			bool canExportSerializables = true;
 			if (hasSerializable)
 			{

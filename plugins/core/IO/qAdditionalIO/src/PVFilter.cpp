@@ -30,7 +30,8 @@
 
 PVFilter::PVFilter()
 	: FileIOFilter( {
-					"+Point+Value Filter",
+					"_Point+Value Filter",
+					DEFAULT_PRIORITY,	// priority
 					QStringList{ "pv" },
 					"pv",
 					QStringList{ "Point+Value cloud (*.pv)" },

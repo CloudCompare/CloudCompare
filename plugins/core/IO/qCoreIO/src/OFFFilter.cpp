@@ -31,7 +31,8 @@
 
 OFFFilter::OFFFilter()
 	: FileIOFilter( {
-					"+OFF Filter",
+					"_OFF Filter",
+					11.0f,	// priority
 					QStringList{ "off" },
 					"off",
 					QStringList{ "OFF mesh (*.off)" },

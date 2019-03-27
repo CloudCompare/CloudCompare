@@ -50,7 +50,8 @@ const char CC_SENSOR_ROTATION_ORDER_OLD_NAMES[][10] = {	"THETA_PHI",		//Rotation
 
 PovFilter::PovFilter()
 	: FileIOFilter( {
-					"+POV Filter",
+					"_POV Filter",
+					DEFAULT_PRIORITY,	// priority
 					QStringList{ "pov" },
 					"pov",
 					QStringList{ "Clouds + sensor info. [meta][ascii] (*.pov)" },

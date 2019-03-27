@@ -487,7 +487,7 @@ bool ccCommandLineParser::importFile(QString filename, FileIOFilter::Shared filt
 	//now look for the remaining clouds inside loaded DB
 	{
 		ccHObject::Container clouds;
-		db->filterChildren(clouds, false, CC_TYPES::POINT_CLOUD);
+		db->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
 		size_t count = clouds.size();
 		for (size_t i = 0; i < count; ++i)
 		{

@@ -62,10 +62,17 @@ public:
 //! Semi persistent save dialog
 QSharedPointer<LASSaveDlg> s_saveDlg(0);
 
-bool LASFWFFilter::canLoadExtension(const QString& upperCaseExt) const
+
+LASFWFFilter::LASFWFFilter() :
+	FileIOFilter( {
+				  "+LASFW Filter",
+				  QStringList{ "las", "laz" },
+				  "las",
+				  QStringList{ GetFileFilter() },
+				  QStringList{ GetFileFilter() },
+				  Import | Export | FromPlugin
+				  } )
 {
-	return (	upperCaseExt == "LAS"
-			||	upperCaseExt == "LAZ" );
 }
 
 bool LASFWFFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

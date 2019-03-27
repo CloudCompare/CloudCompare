@@ -26,7 +26,7 @@
 
 qLASFWFIO::qLASFWFIO(QObject *parent)
     : QObject(parent)
-    , ccIOFilterPluginInterface(":/CC/plugin/qLASFWFIO/info.json")
+    , ccIOPluginInterface(":/CC/plugin/qLASFWFIO/info.json")
 {
 }
 

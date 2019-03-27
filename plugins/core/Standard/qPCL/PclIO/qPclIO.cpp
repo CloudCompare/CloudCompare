@@ -25,11 +25,11 @@
 
 qPclIO::qPclIO(QObject *parent)
     : QObject(parent)
-    , ccIOFilterPluginInterface(":/CC/plugin/qPclIO/info.json")
+    , ccIOPluginInterface(":/CC/plugin/qPclIO/info.json")
 {
 }
 
-ccIOPluginInterface::FilterList qPclIO::getFilter()
+ccIOPluginInterface::FilterList qPclIO::getFilters()
 {
     return { FileIOFilter::Shared( new PcdFilter ) };
 }

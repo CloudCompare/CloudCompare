@@ -35,9 +35,17 @@ constexpr size_t c_headerSize = 64;
 //header flag
 constexpr quint16 s_headerFlagSBF = (static_cast<quint16>(42) | static_cast<quint16>(42 << 8));
 
-bool SimpleBinFilter::canLoadExtension(const QString& upperCaseExt) const
+
+SimpleBinFilter::SimpleBinFilter() :
+	FileIOFilter( {
+				  "+Simple binary Filter",
+				  QStringList{ "sbf", "data" },
+				  "sbf",
+				  QStringList{ "Simple binary file (*.sbf)" },
+				  QStringList{ "Simple binary file (*.sbf)" },
+				  Import | Export | FromPlugin
+				  } )
 {
-	return (upperCaseExt == "SBF" || upperCaseExt == "DATA");
 }
 
 bool SimpleBinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

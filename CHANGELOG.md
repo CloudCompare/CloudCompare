@@ -17,7 +17,14 @@ v2.11 (Anoia) - (in development)
   - Plugins:
     - The I/O plugin interface has changed, so if you have your own I/O plugins, you will need to update them.
       - The interface name changed from `ccIOFilterPluginInterface` to `ccIOPluginInterface`.
-      - The `getFilter()` method was removed in favour of `getFilters()`.
+      - The `ccIOPluginInterface::getFilter()` method was removed in favour of `ccIOPluginInterface::getFilters()`.
+      - The `FileIOFilter` base class now takes a struct as an argument containing all the static info about a filter - extensions, features (import/export), etc.. See `FooFilter` in the `ExampleIOPlugin` and the comments in `FileIOFilter::FilterInfo`.
+      - The use of `FileIOFilter::FilterInfo` means that the following virtual functions in I/O filters are no longer virtual/required:
+        - importSupported
+        - exportSupported
+        - getFileFilters
+        - getDefaultExtension
+        - canLoadExtension
 
 v2.10.3 (Zephyrus) - (in development)
 ----------------------

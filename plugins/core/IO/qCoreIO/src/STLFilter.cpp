@@ -39,9 +39,17 @@
 //System
 #include <cstring>
 
-bool STLFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (upperCaseExt == "STL");
+
+STLFilter::STLFilter() :
+	FileIOFilter( {
+				  "+STL Filter",
+				  QStringList{ "stl" },
+				  "stl",
+				  QStringList{ "STL mesh (*.stl)" },
+				  QStringList{ "STL mesh (*.stl)" },
+				  Import | Export | FromPlugin
+				  } )
+{	
 }
 
 bool STLFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

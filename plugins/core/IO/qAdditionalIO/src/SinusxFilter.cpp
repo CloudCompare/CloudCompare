@@ -30,6 +30,19 @@
 //System
 #include <cstring>
 
+
+SinusxFilter::SinusxFilter() :
+	FileIOFilter( {
+				  "+Sinusx Filter",
+				  QStringList{ "sx", "sinusx" },
+				  "sx",
+				  QStringList{ "Sinusx curve (*.sx)" },
+				  QStringList{ "Sinusx curve (*.sx)" },
+				  Import | Export | FromPlugin
+				  } )
+{
+}
+
 bool SinusxFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
 	if (type == CC_TYPES::POLY_LINE)
@@ -39,12 +52,6 @@ bool SinusxFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) 
 		return true;
 	}
 	return false;
-}
-
-bool SinusxFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (	upperCaseExt == "SX"
-			||	upperCaseExt == "SINUSX" );
 }
 
 QString MakeSinusxName(QString name)

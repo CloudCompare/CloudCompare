@@ -22,22 +22,13 @@
 #include <FileIOFilter.h>
 
 //! Photoscan (PSZ) file I/O filter
-class /*QCC_IO_LIB_API*/ PhotoScanFilter : public FileIOFilter
+class PhotoScanFilter : public FileIOFilter
 {
 public:
-
-	//static accessors
-	static inline QString GetFileFilter() { return "Photoscan project (*.psz)"; }
-	static inline QString GetDefaultExtension() { return "psz"; }
+	PhotoScanFilter();
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const { return true; }
 	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters);
-	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const { return false; }
-
 };
 
 #endif //CC_PHOTOSCAN_FILTER_HEADER

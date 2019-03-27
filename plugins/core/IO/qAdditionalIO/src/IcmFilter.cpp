@@ -33,19 +33,17 @@
 //TODO: use QFile instead!
 const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
 
-bool IcmFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (upperCaseExt == "ICM");
-}
 
-bool IcmFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+IcmFilter::IcmFilter() :
+	FileIOFilter( {
+				  "+ICM Filter",
+				  QStringList{ "icm" },
+				  "icm",
+				  QStringList{ "Clouds + calibrated images [meta][ascii] (*.icm)" },
+				  QStringList(),
+				  Import | FromPlugin
+				  } )
 {
-	Q_UNUSED( type );
-	Q_UNUSED( multiple );
-	Q_UNUSED( exclusive );
-	
-	//export not supported
-	return false;
 }
 
 CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)

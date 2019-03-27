@@ -106,10 +106,17 @@ public:
 	}
 };
 
-bool LASFilter::canLoadExtension(const QString& upperCaseExt) const
+
+LASFilter::LASFilter() :
+	FileIOFilter( {
+				  "+PDAL LAS Filter",
+				  QStringList{ "las" },
+				  "las",
+				  QStringList{ "LAS cloud (*.las *.laz)" },
+				  QStringList{ "LAS cloud (*.las *.laz)" },
+				  Import | Export | FromPlugin
+				  } )
 {
-	return (upperCaseExt == "LAS" ||
-	        upperCaseExt == "LAZ");
 }
 
 bool LASFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

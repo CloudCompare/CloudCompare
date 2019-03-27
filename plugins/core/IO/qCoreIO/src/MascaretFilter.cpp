@@ -47,6 +47,19 @@ public:
 	}
 };
 
+
+MascaretFilter::MascaretFilter() :
+	FileIOFilter( {
+				  "+Mascaret Filter",
+				  QStringList(),
+				  "georef",
+				  QStringList(),
+				  QStringList{ "(Geo-)Mascaret profile (*.georef)" },
+				  Export | FromPlugin
+				  } )
+{
+}
+
 bool MascaretFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
 	if (type == CC_TYPES::POLY_LINE)

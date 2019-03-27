@@ -26,19 +26,17 @@
 //TODO: use QFile instead!
 const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
 
-bool SoiFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (upperCaseExt == "SOI");
-}
 
-bool SoiFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+SoiFilter::SoiFilter() :
+	FileIOFilter( {
+				  "+Soisic Filter",
+				  QStringList{ "soi" },
+				  "soi",
+				  QStringList{ "Mensi Soisic cloud (*.soi)" },
+				  QStringList(),
+				  Import | FromPlugin
+				  } )
 {
-	Q_UNUSED( type );
-	Q_UNUSED( multiple );
-	Q_UNUSED( exclusive );
-	
-	//not supported
-	return false;
 }
 
 CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)

@@ -39,9 +39,17 @@
 
 static const char FBX_SCALE_METADATA_KEY[] = "FBX:ScaleToCM";
 
-bool FBXFilter::canLoadExtension(const QString& upperCaseExt) const
+
+FBXFilter::FBXFilter() :
+	FileIOFilter( {
+				  "+FBX Filter",
+				  QStringList{ "fbx" },
+				  "fbx",
+				  QStringList{ "FBX mesh (*.fbx)" },
+				  QStringList{ "FBX mesh (*.fbx)" },
+				  Import | Export | FromPlugin
+				  } )
 {
-	return (upperCaseExt == "FBX");
 }
 
 bool FBXFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
@@ -1302,7 +1310,6 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 	return mesh;
 }
 
-
 CC_FILE_ERROR FBXFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -1317,7 +1324,7 @@ CC_FILE_ERROR FBXFilter::loadFile(const QString& filename, ccHObject& container,
 		lSdkManager->SetIOSettings(ios);
 
 		// Import options determine what kind of data is to be imported.
-		// True is the default, but here we’ll set some to true explicitly, and others to false.
+		// True is the default, but here we'll set some to true explicitly, and others to false.
 		//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_MATERIAL,	true);
 		//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_TEXTURE,	true);
 

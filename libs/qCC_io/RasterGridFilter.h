@@ -28,19 +28,10 @@
 class QCC_IO_LIB_API RasterGridFilter : public FileIOFilter
 {
 public:
-
-	//static accessors
-	static inline QString GetFileFilter() { return "RASTER grid (*.*)"; }
-	static inline QString GetDefaultExtension() { return "tif"; }
+	RasterGridFilter();
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
-
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 };
 
 #endif //CC_GDAL_SUPPORT

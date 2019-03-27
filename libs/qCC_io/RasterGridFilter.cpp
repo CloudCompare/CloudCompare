@@ -20,32 +20,31 @@
 #include "RasterGridFilter.h"
 
 //qCC_db
-#include <ccPointCloud.h>
-#include <ccScalarField.h>
 #include <ccMesh.h>
 #include <ccPlane.h>
+#include <ccPointCloud.h>
+#include <ccScalarField.h>
 
 //GDAL
-#include <gdal_priv.h>
 #include <cpl_conv.h> // for CPLMalloc()
+#include <gdal_priv.h>
 
 //Qt
 #include <QMessageBox>
 
 //System
-#include <string.h> //for memset
+#include <cstring> //for memset
 
-bool RasterGridFilter::canLoadExtension(const QString& upperCaseExt) const
+RasterGridFilter::RasterGridFilter() :
+	FileIOFilter( {
+				  "_Raster Grid Filter",
+				  QStringList{ "tif", "tiff", "adf" },
+				  "tif",
+				  QStringList{ "RASTER grid (*.*)" },
+				  QStringList(),
+				  Import
+				  } )
 {
-	return (	upperCaseExt == "TIF"
-			||	upperCaseExt == "TIFF"
-			||	upperCaseExt == "ADF");
-}
-
-bool RasterGridFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
-{
-	//not supported yet
-	return false;
 }
 
 CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)

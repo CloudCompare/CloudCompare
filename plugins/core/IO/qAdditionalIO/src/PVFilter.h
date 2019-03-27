@@ -24,19 +24,13 @@
 class PVFilter : public FileIOFilter
 {
 public:
-	//static accessors
-	static inline QString GetFileFilter() { return "Point+Value cloud (*.pv)"; }
-	static inline QString GetDefaultExtension() { return "pv"; }
+	PVFilter();
 
 	//inherited from FileIOFilter
-	bool importSupported() const override { return true; }
-	bool exportSupported() const override { return true; }
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	QStringList getFileFilters(bool onImport) const override { Q_UNUSED( onImport ); return { GetFileFilter() }; }
-	QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	bool canLoadExtension(const QString& upperCaseExt) const override;
+
 	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
 
 #endif //CC_PV_FILTER_HEADER

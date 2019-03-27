@@ -43,9 +43,17 @@
 //System
 #include <cstring>
 
-bool ObjFilter::canLoadExtension(const QString& upperCaseExt) const
+
+ObjFilter::ObjFilter() :
+	FileIOFilter( {
+				  "+OBJ Filter",
+				  QStringList{ "obj" },
+				  "obj",
+				  QStringList{ "OBJ mesh (*.obj)" },
+				  QStringList{ "OBJ mesh (*.obj)" },
+				  Import | Export | FromPlugin
+				  } )
 {
-	return (upperCaseExt == "OBJ");
 }
 
 bool ObjFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

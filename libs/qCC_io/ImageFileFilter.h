@@ -24,41 +24,30 @@
 class QCC_IO_LIB_API ImageFileFilter : public FileIOFilter
 {
 public:
-
-	//! Default constructor
 	ImageFileFilter();
 
-	//static accessors
-	static inline QString GetDefaultExtension() { return "png"; }
-
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual bool exportSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override;
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
+
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 
 	//! Helper: select an input image filename
 	static QString GetLoadFilename(	const QString& dialogTitle,
 									const QString& imageLoadPath,
-									QWidget* parentWidget = 0);
+									QWidget* parentWidget = nullptr);
 
 	//! Helper: select an output image filename
 	static QString GetSaveFilename(	const QString& dialogTitle,
 									const QString& baseName,
 									const QString& imageSavePath,
-									QWidget* parentWidget = 0);
+									QWidget* parentWidget = nullptr);
 
-protected:
-
+private:
 	//! Supported (output) filters
 	QStringList m_outputFilters;
 	//! Supported (input) filters
 	QString m_inputFilter;
-
 };
 
 #endif //CC_IMAGE_FILE_FILTER_HEADER

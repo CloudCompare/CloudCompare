@@ -36,18 +36,17 @@
 
 const char CC_PTX_INTENSITY_FIELD_NAME[] = "Intensity";
 
-bool PTXFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (upperCaseExt == "PTX");
-}
 
-bool PTXFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+PTXFilter::PTXFilter() :
+	FileIOFilter( {
+				  "+PTX Filter",
+				  QStringList{ "ptx" },
+				  "ptx",
+				  QStringList{ "PTX cloud (*.ptx)" },
+				  QStringList(),
+				  Import | FromPlugin
+				  } )
 {
-	Q_UNUSED( multiple );
-	Q_UNUSED( exclusive );
-	
-	//not supported yet
-	return false;
 }
 
 static void CleanMatrix(ccGLMatrixd& mat)

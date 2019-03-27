@@ -43,7 +43,7 @@
 PcdFilter::PcdFilter()
     : FileIOFilter( {
                     "_Point Cloud Library Filter",
-                    DEFAULT_PRIORITY,	// priority
+                    13.0f,	// priority
                     QStringList{ "pcd" },
                     "pcd",
                     QStringList{ "Point Cloud Library cloud (*.pcd)" },

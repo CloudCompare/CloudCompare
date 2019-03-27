@@ -66,7 +66,7 @@ QSharedPointer<LASSaveDlg> s_saveDlg(0);
 LASFWFFilter::LASFWFFilter()
     : FileIOFilter( {
                     "_LASFW Filter",
-                    DEFAULT_PRIORITY,	// priority
+                    3.5f,	// priority
                     QStringList{ "las", "laz" },
                     "las",
                     QStringList{ GetFileFilter() },

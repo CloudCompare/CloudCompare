@@ -79,7 +79,7 @@ namespace
 MAFilter::MAFilter()
 	: FileIOFilter( {
 					"_Maya ASCII Filter",
-					18.0f,	// priority
+					DEFAULT_PRIORITY,	// priority
 					QStringList(),
 					"ma",
 					QStringList(),

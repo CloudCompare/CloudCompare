@@ -14,7 +14,6 @@ project( CC_CORE_LIB VERSION 1.0 )
 include ( ../cmake/CMakePolicies.cmake )
 include ( ../cmake/CMakeSetCompilerOptions.cmake )
 
-# CGAL takes precedence over triangle
 if (COMPILE_CC_CORE_LIB_WITH_CGAL)
 	include( cmake/CGALSupport.cmake )
 endif()
@@ -36,6 +35,15 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
 
 file( GLOB header_list include/*.h)
 file( GLOB source_list src/*.cpp src/*.h)
+
+if ( WIN32 )
+	# Add Qt5 natvis file
+	if ( COMPILE_CC_CORE_LIB_WITH_QT )
+		list( APPEND header_list ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
+		message(${header_list})
+	endif()
+endif()
+
 
 if (COMPILE_CC_CORE_LIB_SHARED)
 	add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} )

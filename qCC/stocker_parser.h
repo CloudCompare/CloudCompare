@@ -44,10 +44,16 @@ QString GetBaseName(QString name);
 ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud);
 
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
+stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject * entity, stocker::Polyline3d polygon);
+stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject * entity, stocker::Polyline3d polygon);
 stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
 vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject * entity);
 ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true, bool recursive = true);
+//! return -1 if no child exists
+int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix);
+
 ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
+
 ccHObject* PlaneSegmentationRansac(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double normal_threshold, double ransac_probability, double merge_threshold = -1, double split_threshold = -1);
 ccHObject* PlaneSegmentationRgGrow(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double growing_radius, double merge_threshold = -1, double split_threshold = -1);
 ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
@@ -73,12 +79,14 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_POLYFITOPTM_SUFFIX		".optimized"
 #define BDDB_FINALMODEL_SUFFIX		".model"
 #define BDDB_IMAGELINE_SUFFIX		".imageline"
+#define BDDB_FOORPRINT_SUFFIX		".footprint"
 #define BDDB_PLANESEG_PREFIX		"Plane"
 #define BDDB_BOUNDARY_PREFIX		"Boundary"
 #define BDDB_INTERSECT_PREFIX		"Intersection"
 #define BDDB_OUTLINE_PREFIX			"Outline"
 #define BDDB_IMAGELINE_PREFIX		"Imageline"
 #define BDDB_PLANEFRAME_PREFIX		"Frame"
+#define BDDB_FOOTPRINT_PREFIX		"Footprint"
 
 class BDBaseHObject : public ccHObject
 {
@@ -116,6 +124,8 @@ public:
 	//! file path
 
 	std::string GetPathModelObj(std::string building_name);
+
+	stocker::BuildUnit GetBuildingUnit(std::string building_name);
 
 };
 

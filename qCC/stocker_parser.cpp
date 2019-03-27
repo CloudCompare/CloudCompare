@@ -77,6 +77,55 @@ stocker::Contour3d GetPointsFromCloud(ccHObject* entity) {
 	return points;
 }
 
+stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker::Polyline3d polygon)
+{
+	stocker::Contour3d points;
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+	if (!cloud) return points;
+
+	std::vector<vcg::Segment2d> polygon_2d;
+	for (auto & seg : polygon) {
+		polygon_2d.push_back(vcg::Segment2d(ToVec2d(seg.P0()), ToVec2d(seg.P1())));
+	}
+	Concurrency::concurrent_vector<Vec3d> points_parallel;
+	Concurrency::parallel_for((size_t)0, (size_t)cloud->size(), [&](size_t i) {
+		CCVector3 pt = *cloud->getPoint(i);
+		if (vcg::PointInsidePolygon({ pt.x,pt.y }, polygon_2d)) {
+			points_parallel.push_back({ pt.x, pt.y, pt.z });
+		}
+	});
+	points.assign(points_parallel.begin(), points_parallel.end());
+	return points;
+}
+
+stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject* entity, stocker::Polyline3d polygon)
+{
+	stocker::Contour3d points;
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+	if (!cloud) return points;
+
+	//! FIT A PLANE
+	Contour3d polygon_points = ToContour(polygon);
+	PlaneUnit plane_unit = FormPlaneUnit(polygon_points);
+
+	//! PROJECT TO THE PLANE
+	Polyline2d polygon_2d = Line3dToPlline2d(plane_unit, polygon);
+	std::vector<vcg::Segment2d> vcg_polygon_2d;
+	for (auto & seg : polygon_2d) { vcg_polygon_2d.push_back(seg); }
+
+	//! GET INSIDE 2d	
+	Concurrency::concurrent_vector<Vec3d> points_parallel;
+	Concurrency::parallel_for((size_t)0, (size_t)cloud->size(), [&](size_t i) {
+		CCVector3 pt = *cloud->getPoint(i);
+		Vec2d pt_2d = plane_unit.ToPlpoint2d({ pt.x,pt.y,pt.z });
+		if (vcg::PointInsidePolygon(pt_2d, polygon_2d)) {
+			points_parallel.push_back({ pt.x, pt.y, pt.z });
+		}
+	});
+	points.assign(points_parallel.begin(), points_parallel.end());
+	return points;
+}
+
 stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities)
 {
 	stocker::Polyline3d polyline;
@@ -207,7 +256,7 @@ ccHObject * BDBaseHObject::GetHObj(CC_CLASS_ENUM type, QString suffix, QString b
 }
 ccHObject* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {
 	for (unsigned int i = 0; i < getChildrenNumber(); i++)
-		if (getChild(i)->getName() == building_name)
+		if (GetBaseName(getChild(i)->getName()) == building_name)
 			return getChild(i);
 	return nullptr;
 }
@@ -231,6 +280,15 @@ std::string BDBaseHObject::GetPathModelObj(std::string building_name)
 	}
 	return std::string((*bd)->data.file_path.model_dir + building_name + MODEL_LOD3_OBJ_SUFFIX);
 }
+
+stocker::BuildUnit BDBaseHObject::GetBuildingUnit(std::string building_name) {
+	auto iter = block_prj.m_builder.sbuild.find(BuilderBase::BuildNode::Create(building_name));
+	if (iter == block_prj.m_builder.sbuild.end()) {
+		return stocker::BuildUnit("invalid");
+	}
+	else return (*iter)->data;
+}
+
 BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	ccHObject* bd_obj_ = obj;
 	do {
@@ -262,6 +320,32 @@ bool SetGlobalShiftAndScale(ccHObject* obj)
 		cloud_entity->setGlobalShift(CCVector3d(vcgXYZ(baseObj->global_shift)));
 	}
 	return true;
+}
+
+int GetNumberExcludePrefix(ccHObject * obj, QString prefix)
+{
+	QString name = obj->getName();
+	if (name.startsWith(prefix) && name.length() > prefix.length()) {
+		QString number = name.mid(prefix.length(), name.length());
+		return number.toInt();
+	}
+	return -1;
+}
+
+int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix/*, CC_CLASS_ENUM type = CC_TYPES::OBJECT*/)
+{
+	set<int> name_numbers;
+	for (size_t i = 0; i < obj->getChildrenNumber(); i++) {
+		QString name = obj->getChild(i)->getName();
+		int number = GetNumberExcludePrefix(obj->getChild(i), prefix);
+		if (number >= 0) {
+			name_numbers.insert(number);
+		}
+	}
+	if (!name_numbers.empty()) {
+		return *name_numbers.rbegin();
+	}
+	return -1;
 }
 
 ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)

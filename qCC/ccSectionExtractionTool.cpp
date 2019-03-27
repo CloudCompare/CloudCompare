@@ -48,6 +48,11 @@
 #include <assert.h>
 #include <cmath>
 
+#ifdef USE_STOCKER
+#include "stocker_parser.h"
+#endif // USE_STOCKER
+
+
 //default parameters
 static const ccColor::Rgb& s_defaultPolylineColor = ccColor::magenta;
 static const ccColor::Rgb& s_defaultContourColor = ccColor::green;
@@ -827,6 +832,12 @@ void ccSectionExtractionTool::closePolyLine(int, int)
 	{
 		//remove last point!
 		m_editedPoly->resize(vertCount - 1); //can't fail --> smaller
+		CCVector3* end_point = const_cast<CCVector3*>(m_editedPolyVertices->getPoint(vertCount - 2));
+		CCVector3* start_point = const_cast<CCVector3*>(m_editedPolyVertices->getPoint(0));
+		if (((*start_point) - (*end_point)).norm2() < 10) {
+			*end_point = *start_point;
+			m_editedPoly->setPointIndex(vertCount - 2, 0);
+		}
 
 		//remove polyline from the 'temporary' world
 		if (m_associatedWin)
@@ -1215,18 +1226,97 @@ void ccSectionExtractionTool::exportSections()
 		return;
 	}
 
-	ccHObject* destEntity = getExportGroup(s_polyExportGroupID, "Exported sections");
-	assert(destEntity);
-
 	MainWindow* mainWin = MainWindow::TheInstance();
+	ccHObject* destEntity = nullptr;
+	bool stocker_entity = false;
+	BDBaseHObject* baseObj = nullptr;
+	std::string building_name;
+	double ground_height(0);
+	if (m_clouds.size() == 1) {
+		ccHObject* build_entity = m_clouds.front().entity->getParent();
+		if (build_entity) {
+			baseObj = GetRootBDBase(build_entity);
+			if (baseObj) {
+				stocker_entity = true;
+				building_name = GetBaseName(build_entity->getName()).toStdString();
+				stocker::BuildUnit _build = baseObj->GetBuildingUnit(building_name); 
+				ground_height = _build.ground_height;
+
+				QString dest_name = QString(building_name.c_str()) + BDDB_FOORPRINT_SUFFIX;
+				for (size_t i = 0; i < build_entity->getChildrenNumber(); i++) {
+					if (build_entity->getChild(i)->getName() == dest_name)
+						destEntity = build_entity->getChild(i);
+				}
+				if (!destEntity) {
+					destEntity = new ccHObject(dest_name);
+					build_entity->addChild(destEntity);
+				}
+
+				mainWin->addToDB(destEntity);
+				s_polyExportGroupID = destEntity->getUniqueID();
+			}			
+		}		
+	}
+	if (!destEntity) {
+		destEntity = getExportGroup(s_polyExportGroupID, "Exported sections");
+	}
+	
+	assert(destEntity);
 
 	//export entites
 	{
 		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
 		{
 			Section& section = *it;
-			if (section.entity && !section.isInDB)
-			{
+			if (section.entity && !section.isInDB) {
+				if (stocker_entity) {
+					ccPolyline* duplicatePoly = new ccPolyline(0);
+					ccPointCloud* duplicateVertices = 0;
+					if (duplicatePoly->initWith(duplicateVertices, *section.entity))
+					{
+						assert(duplicateVertices);
+						for (unsigned i = 0; i < duplicateVertices->size(); ++i) {
+							CCVector3& P = const_cast<CCVector3&>(*duplicateVertices->getPoint(i));
+							P.u[2] = ground_height;
+						}
+
+						duplicateVertices->invalidateBoundingBox();
+						duplicateVertices->setEnabled(false);
+						duplicatePoly->set2DMode(false);
+						duplicatePoly->setDisplay_recursive(section.entity->getDisplay());
+						duplicatePoly->setName(section.entity->getName());
+						duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
+						duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
+
+						section.entity = duplicatePoly;
+					}
+					else {
+						delete duplicatePoly;
+						duplicatePoly = 0;
+
+						ccLog::Error("Not enough memory to export polyline!");
+						return;
+					}
+
+// 					CCLib::GenericIndexedCloudPersist* vertices = section.entity->getAssociatedCloud();
+// 					ccPointCloud* verticesPC = dynamic_cast<ccPointCloud*>(vertices);
+// 					if (verticesPC)	{
+// 						for (unsigned i = 0; i < vertices->size(); ++i) {
+// 							CCVector3* Pscreen = const_cast<CCVector3*>(verticesPC->getPoint(i));
+// 							Pscreen->z = ground_height;
+// 						}
+// 						verticesPC->invalidateBoundingBox();						
+// 					}
+// 					else {
+// 						assert(false);
+// 						ccLog::Warning("failed to export polyline (internal inconsistency)");
+// 					}
+
+					int biggest_number = GetMaxNumberExcludeChildPrefix(destEntity, BDDB_FOOTPRINT_PREFIX);
+					QString cur_name = BDDB_FOOTPRINT_PREFIX + QString::number(biggest_number + 1);
+					section.entity->setName(cur_name);
+				}
+
 				destEntity->addChild(section.entity);
 				section.isInDB = true;
 				section.entity->setDisplay_recursive(destEntity->getDisplay());

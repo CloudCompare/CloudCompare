@@ -35,6 +35,7 @@
 DepthMapFileFilter::DepthMapFileFilter()
 	: FileIOFilter( {
 					"_Depth Map Filter",
+					19.0f,	// priority
 					QStringList(),
 					"txt",
 					QStringList(),

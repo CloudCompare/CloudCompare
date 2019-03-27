@@ -35,6 +35,7 @@
 ImageFileFilter::ImageFileFilter()
 	: FileIOFilter( {
 					"_Image Filter",
+					17.0f,	// priority
 					QStringList(),	// set below
 					"png",
 					QStringList(),	// set below

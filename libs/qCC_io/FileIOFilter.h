@@ -179,6 +179,9 @@ public: //public interface (to be reimplemented by each I/O filter)
 	}
 	
 public: //static methods
+	//! Get a list of all the available importer filter strings for use in a drop down menu.
+	//! Includes "All (*.)" as the first item in the list.
+	QCC_IO_LIB_API static QStringList ImportFilterList();
 	
 	//! Loads one or more entities from a file with a known filter
 	/** Shortcut to FileIOFilter::loadFile
@@ -317,6 +320,11 @@ protected:
 		//! ID used to uniquely identify the filter (not user-visible)
 		QString id;
 		
+		//! Priority used to determine sort order and which one is the default in the
+		//! case of multiple FileIOFilters registering the same extension.
+		//! Default is 25.0 /see DEFAULT_PRIORITY.
+		float priority;
+		
 		//! List of extensions this filter can read (lowercase)
 		//! e.g. "txt", "foo", "bin"
 		//! This is used in FindBestFilterForExtension()
@@ -334,6 +342,8 @@ protected:
 		//! Supported features \see FilterFeature
 		FilterFeatures features;
 	};
+	
+	static constexpr float DEFAULT_PRIORITY = 25.0f;
 	
 	QCC_IO_LIB_API explicit FileIOFilter( const FilterInfo &info );
 	

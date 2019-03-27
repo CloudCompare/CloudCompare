@@ -73,7 +73,8 @@ struct BundlerCamera
 
 BundlerFilter::BundlerFilter()
 	: FileIOFilter( {
-					"+Bundler Filter",
+					"_Snavely Bundler Filter",
+					DEFAULT_PRIORITY,	// priority
 					QStringList{ "out" },
 					"out",
 					QStringList{ "Snavely's Bundler output (*.out)" },

@@ -37,13 +37,14 @@
 
 RasterGridFilter::RasterGridFilter()
 	: FileIOFilter( {
-				  "_Raster Grid Filter",
-				  QStringList{ "tif", "tiff", "adf" },
-				  "tif",
-				  QStringList{ "RASTER grid (*.*)" },
-				  QStringList(),
-				  Import | BuiltIn
-				  } )
+					"_Raster Grid Filter",
+					16.0f,	// priority
+					QStringList{ "tif", "tiff", "adf" },
+					"tif",
+					QStringList{ "RASTER grid (*.*)" },
+					QStringList(),
+					Import | BuiltIn
+					} )
 {
 }
 

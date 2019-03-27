@@ -33,7 +33,8 @@
 
 SinusxFilter::SinusxFilter()
 	: FileIOFilter( {
-					"+Sinusx Filter",
+					"_Sinusx Filter",
+					DEFAULT_PRIORITY,	// priority
 					QStringList{ "sx", "sinusx" },
 					"sx",
 					QStringList{ "Sinusx curve (*.sx)" },

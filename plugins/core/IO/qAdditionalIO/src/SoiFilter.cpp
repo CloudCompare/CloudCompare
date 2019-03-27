@@ -29,7 +29,8 @@ const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
 
 SoiFilter::SoiFilter()
 	: FileIOFilter( {
-					"+Soisic Filter",
+					"_Soisic Filter",
+					DEFAULT_PRIORITY,	// priority
 					QStringList{ "soi" },
 					"soi",
 					QStringList{ "Mensi Soisic cloud (*.soi)" },

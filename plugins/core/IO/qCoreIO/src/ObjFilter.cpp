@@ -46,7 +46,8 @@
 
 ObjFilter::ObjFilter()
 	: FileIOFilter( {
-					"+OBJ Filter",
+					"_OBJ Filter",
+					8.0f,	// priority
 					QStringList{ "obj" },
 					"obj",
 					QStringList{ "OBJ mesh (*.obj)" },

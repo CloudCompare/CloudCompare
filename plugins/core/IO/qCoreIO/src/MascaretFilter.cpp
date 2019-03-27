@@ -50,7 +50,8 @@ public:
 
 MascaretFilter::MascaretFilter()
 	: FileIOFilter( {
-					"+Mascaret Filter",
+					"_Mascaret Filter",
+					20.0f,	// priority
 					QStringList(),
 					"georef",
 					QStringList(),

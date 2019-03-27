@@ -41,6 +41,7 @@
 DxfFilter::DxfFilter()
 	: FileIOFilter( {
 					"_DXF Filter",
+					13.0f,	// priority
 					QStringList{ "dxf" },
 					"dxf",
 					QStringList{ "DXF geometry (*.dxf)" },

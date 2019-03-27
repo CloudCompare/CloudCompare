@@ -36,7 +36,8 @@ const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
 
 IcmFilter::IcmFilter()
 	: FileIOFilter( {
-					"+ICM Filter",
+					"_ICM Filter",
+					DEFAULT_PRIORITY,	// priority
 					QStringList{ "icm" },
 					"icm",
 					QStringList{ "Clouds + calibrated images [meta][ascii] (*.icm)" },

@@ -53,6 +53,7 @@ using namespace CCLib;
 PlyFilter::PlyFilter()
 	: FileIOFilter( {
 					"_PLY Filter",
+					7.0f,	// priority
 					QStringList{ "ply" },
 					"ply",
 					QStringList{ "PLY mesh (*.ply)" },

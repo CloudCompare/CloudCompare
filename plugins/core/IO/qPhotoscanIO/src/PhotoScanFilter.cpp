@@ -385,7 +385,8 @@ static QString CreateTempFile(QuaZip& zip, QString zipFilename)
 
 PhotoScanFilter::PhotoScanFilter()
     : FileIOFilter( {
-                    "+PhotoScan Filter",
+                    "_PhotoScan Filter",
+					DEFAULT_PRIORITY,	// priority
                     QStringList{ "psz" },
                     "psz",
                     QStringList{ "Photoscan project (*.psz)" },

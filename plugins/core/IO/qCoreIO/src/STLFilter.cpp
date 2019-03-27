@@ -42,7 +42,8 @@
 
 STLFilter::STLFilter()
 	: FileIOFilter( {
-					"+STL Filter",
+					"_STL Filter",
+					10.0f,	// priority
 					QStringList{ "stl" },
 					"stl",
 					QStringList{ "STL mesh (*.stl)" },

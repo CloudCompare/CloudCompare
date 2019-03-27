@@ -34,7 +34,8 @@
 
 VTKFilter::VTKFilter()
 	: FileIOFilter( {
-					"+VTK Filter",
+					"_VTK Filter",
+					9.0f,	// priority
 					QStringList{ "vtk" },
 					"vtk",
 					QStringList{ "VTK cloud or mesh (*.vtk)" },

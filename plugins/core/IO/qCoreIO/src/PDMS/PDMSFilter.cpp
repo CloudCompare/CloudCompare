@@ -37,7 +37,8 @@ using PdmsAndCCPair = std::pair<PdmsTools::PdmsObjects::GenericItem*, ccHObject*
 
 PDMSFilter::PDMSFilter()
 	: FileIOFilter( {
-					"+PDMS Filter",
+					"_PDMS Filter",
+					15.0f,	// priority
 					QStringList{ "pdms", "pdmsmac", "mac" },
 					"pdms",
 					QStringList{ "PDMS primitives (*.pdms *.pdmsmac *.mac)" },

@@ -29,7 +29,7 @@ qPclIO::qPclIO(QObject *parent)
 {
 }
 
-ccIOPluginInterface::FilterList qPclIO::getFilter()
+ccIOPluginInterface::FilterList qPclIO::getFilters()
 {
     return { FileIOFilter::Shared( new PcdFilter ) };
 }

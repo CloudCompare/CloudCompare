@@ -40,9 +40,8 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/io/pcd_io.h>
 
-
-PcdFilter::PcdFilter() :
-    FileIOFilter( {
+PcdFilter::PcdFilter()
+	: FileIOFilter( {
                   "+Point Cloud Library Filter",
                   QStringList{ "pcd" },
                   "pcd",

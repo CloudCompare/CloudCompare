@@ -40,15 +40,15 @@
 #include <cstring>
 
 
-STLFilter::STLFilter() :
-	FileIOFilter( {
-				  "+STL Filter",
-				  QStringList{ "stl" },
-				  "stl",
-				  QStringList{ "STL mesh (*.stl)" },
-				  QStringList{ "STL mesh (*.stl)" },
-				  Import | Export | FromPlugin
-				  } )
+STLFilter::STLFilter()
+	: FileIOFilter( {
+					"+STL Filter",
+					QStringList{ "stl" },
+					"stl",
+					QStringList{ "STL mesh (*.stl)" },
+					QStringList{ "STL mesh (*.stl)" },
+					Import | Export
+					} )
 {	
 }
 

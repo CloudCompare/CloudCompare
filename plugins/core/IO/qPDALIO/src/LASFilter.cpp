@@ -107,15 +107,15 @@ public:
 };
 
 
-LASFilter::LASFilter() :
-	FileIOFilter( {
-				  "+PDAL LAS Filter",
-				  QStringList{ "las" },
-				  "las",
-				  QStringList{ "LAS cloud (*.las *.laz)" },
-				  QStringList{ "LAS cloud (*.las *.laz)" },
-				  Import | Export | FromPlugin
-				  } )
+LASFilter::LASFilter()
+    : FileIOFilter( {
+                    "+PDAL LAS Filter",
+                    QStringList{ "las" },
+                    "las",
+                    QStringList{ "LAS cloud (*.las *.laz)" },
+                    QStringList{ "LAS cloud (*.las *.laz)" },
+                    Import | Export
+                    } )
 {
 }
 

@@ -41,14 +41,14 @@
 #include <pcl/io/pcd_io.h>
 
 PcdFilter::PcdFilter()
-	: FileIOFilter( {
-                  "+Point Cloud Library Filter",
-                  QStringList{ "pcd" },
-                  "pcd",
-                  QStringList{ "Point Cloud Library cloud (*.pcd)" },
-                  QStringList(),
-                  Import | FromPlugin
-                  } )
+    : FileIOFilter( {
+                    "+Point Cloud Library Filter",
+                    QStringList{ "pcd" },
+                    "pcd",
+                    QStringList{ "Point Cloud Library cloud (*.pcd)" },
+                    QStringList(),
+                    Import
+                    } )
 {
 }
 

@@ -35,15 +35,15 @@ using namespace CCLib;
 
 using PdmsAndCCPair = std::pair<PdmsTools::PdmsObjects::GenericItem*, ccHObject*>;
 
-PDMSFilter::PDMSFilter() :
-	FileIOFilter( {
-				  "+PDMS Filter",
-				  QStringList{ "pdms", "pdmsmac", "mac" },
-				  "pdms",
-				  QStringList{ "PDMS primitives (*.pdms *.pdmsmac *.mac)" },
-				  QStringList(),
-				  Import | FromPlugin
-				  } )
+PDMSFilter::PDMSFilter()
+	: FileIOFilter( {
+					"+PDMS Filter",
+					QStringList{ "pdms", "pdmsmac", "mac" },
+					"pdms",
+					QStringList{ "PDMS primitives (*.pdms *.pdmsmac *.mac)" },
+					QStringList(),
+					Import
+					} )
 {
 }
 

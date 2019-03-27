@@ -29,15 +29,15 @@
 #include <string>
 
 
-OFFFilter::OFFFilter() :
-	FileIOFilter( {
-				  "+OFF Filter",
-				  QStringList{ "off" },
-				  "off",
-				  QStringList{ "OFF mesh (*.off)" },
-				  QStringList{ "OFF mesh (*.off)" },
-				  Import | Export | FromPlugin
-				  } )
+OFFFilter::OFFFilter()
+	: FileIOFilter( {
+					"+OFF Filter",
+					QStringList{ "off" },
+					"off",
+					QStringList{ "OFF mesh (*.off)" },
+					QStringList{ "OFF mesh (*.off)" },
+					Import | Export
+					} )
 {
 }
 

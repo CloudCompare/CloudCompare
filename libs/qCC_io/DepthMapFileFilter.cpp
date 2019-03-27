@@ -32,15 +32,15 @@
 #include <cassert>
 
 
-DepthMapFileFilter::DepthMapFileFilter() :
-	FileIOFilter( {
-				  "_Depth Map Filter",
-				  QStringList(),
-				  "txt",
-				  QStringList(),
-				  QStringList{ GetFileFilter() },
-				  Export
-				  } )
+DepthMapFileFilter::DepthMapFileFilter()
+	: FileIOFilter( {
+					"_Depth Map Filter",
+					QStringList(),
+					"txt",
+					QStringList(),
+					QStringList{ GetFileFilter() },
+					Export | BuiltIn
+					} )
 {
 }
 

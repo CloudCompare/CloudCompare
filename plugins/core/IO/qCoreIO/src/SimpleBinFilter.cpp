@@ -36,15 +36,15 @@ constexpr size_t c_headerSize = 64;
 constexpr quint16 s_headerFlagSBF = (static_cast<quint16>(42) | static_cast<quint16>(42 << 8));
 
 
-SimpleBinFilter::SimpleBinFilter() :
-	FileIOFilter( {
-				  "+Simple binary Filter",
-				  QStringList{ "sbf", "data" },
-				  "sbf",
-				  QStringList{ "Simple binary file (*.sbf)" },
-				  QStringList{ "Simple binary file (*.sbf)" },
-				  Import | Export | FromPlugin
-				  } )
+SimpleBinFilter::SimpleBinFilter()
+	: FileIOFilter( {
+					"+Simple binary Filter",
+					QStringList{ "sbf", "data" },
+					"sbf",
+					QStringList{ "Simple binary file (*.sbf)" },
+					QStringList{ "Simple binary file (*.sbf)" },
+					Import | Export
+					} )
 {
 }
 

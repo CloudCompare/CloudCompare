@@ -31,15 +31,15 @@
 #include <cstring>
 
 
-SinusxFilter::SinusxFilter() :
-	FileIOFilter( {
-				  "+Sinusx Filter",
-				  QStringList{ "sx", "sinusx" },
-				  "sx",
-				  QStringList{ "Sinusx curve (*.sx)" },
-				  QStringList{ "Sinusx curve (*.sx)" },
-				  Import | Export | FromPlugin
-				  } )
+SinusxFilter::SinusxFilter()
+	: FileIOFilter( {
+					"+Sinusx Filter",
+					QStringList{ "sx", "sinusx" },
+					"sx",
+					QStringList{ "Sinusx curve (*.sx)" },
+					QStringList{ "Sinusx curve (*.sx)" },
+					Import | Export
+					} )
 {
 }
 

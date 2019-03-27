@@ -504,15 +504,15 @@ public:
 	}
 };
 
-ShpFilter::ShpFilter() :
-	FileIOFilter( {
-				  "_Shape Filter",
-				  QStringList{ "shp" },
-				  "shp",
-				  QStringList{ "SHP entity (*.shp)" },
-				  QStringList{ "SHP entity (*.shp)" },
-				  Import | Export
-				  } )
+ShpFilter::ShpFilter()
+	: FileIOFilter( {
+					"_Shape Filter",
+					QStringList{ "shp" },
+					"shp",
+					QStringList{ "SHP entity (*.shp)" },
+					QStringList{ "SHP entity (*.shp)" },
+					Import | Export | BuiltIn
+					} )
 {
 }
 

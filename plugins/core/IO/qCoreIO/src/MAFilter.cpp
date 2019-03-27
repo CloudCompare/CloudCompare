@@ -76,15 +76,15 @@ namespace
 }
 
 
-MAFilter::MAFilter() :
-	FileIOFilter( {
-				  "+Height profile Filter",
-				  QStringList(),
-				  "ma",
-				  QStringList(),
-				  QStringList{ "Maya ASCII mesh (*.ma)" },
-				  Export | FromPlugin
-				  } )
+MAFilter::MAFilter()
+	: FileIOFilter( {
+					"+Height profile Filter",
+					QStringList(),
+					"ma",
+					QStringList(),
+					QStringList{ "Maya ASCII mesh (*.ma)" },
+					Export
+					} )
 {	
 }
 

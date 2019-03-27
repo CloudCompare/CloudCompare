@@ -28,15 +28,15 @@
 #include <QFile>
 
 
-PVFilter::PVFilter() :
-	FileIOFilter( {
-				  "+Point+Value Filter",
-				  QStringList{ "pv" },
-				  "pv",
-				  QStringList{ "Point+Value cloud (*.pv)" },
-				  QStringList{ "Point+Value cloud (*.pv)" },
-				  Import | Export | FromPlugin
-				  } )
+PVFilter::PVFilter()
+	: FileIOFilter( {
+					"+Point+Value Filter",
+					QStringList{ "pv" },
+					"pv",
+					QStringList{ "Point+Value cloud (*.pv)" },
+					QStringList{ "Point+Value cloud (*.pv)" },
+					Import | Export
+					} )
 {
 }
 

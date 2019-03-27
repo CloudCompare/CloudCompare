@@ -48,15 +48,15 @@ public:
 };
 
 
-MascaretFilter::MascaretFilter() :
-	FileIOFilter( {
-				  "+Mascaret Filter",
-				  QStringList(),
-				  "georef",
-				  QStringList(),
-				  QStringList{ "(Geo-)Mascaret profile (*.georef)" },
-				  Export | FromPlugin
-				  } )
+MascaretFilter::MascaretFilter()
+	: FileIOFilter( {
+					"+Mascaret Filter",
+					QStringList(),
+					"georef",
+					QStringList(),
+					QStringList{ "(Geo-)Mascaret profile (*.georef)" },
+					Export
+					} )
 {
 }
 

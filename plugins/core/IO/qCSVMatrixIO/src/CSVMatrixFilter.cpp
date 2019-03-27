@@ -45,15 +45,15 @@ static bool s_inverseRows = false;
 static bool s_loadAsMesh = false;
 static bool s_useTexture = false;
 
-CSVMatrixFilter::CSVMatrixFilter() :
-	FileIOFilter( {
-				  "+CSV Matrix Filter",
-				  QStringList{ "csv" },
-				  "csv",
-				  QStringList{ "CSV matrix cloud (*.csv)" },
-				  QStringList(),
-				  Import | FromPlugin
-				  } )
+CSVMatrixFilter::CSVMatrixFilter()
+    : FileIOFilter( {
+                    "+CSV Matrix Filter",
+                    QStringList{ "csv" },
+                    "csv",
+                    QStringList{ "CSV matrix cloud (*.csv)" },
+                    QStringList(),
+                    Import
+                    } )
 {
 }
 

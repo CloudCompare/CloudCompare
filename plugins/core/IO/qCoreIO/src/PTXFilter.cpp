@@ -37,15 +37,15 @@
 const char CC_PTX_INTENSITY_FIELD_NAME[] = "Intensity";
 
 
-PTXFilter::PTXFilter() :
-	FileIOFilter( {
-				  "+PTX Filter",
-				  QStringList{ "ptx" },
-				  "ptx",
-				  QStringList{ "PTX cloud (*.ptx)" },
-				  QStringList(),
-				  Import | FromPlugin
-				  } )
+PTXFilter::PTXFilter()
+	: FileIOFilter( {
+					"+PTX Filter",
+					QStringList{ "ptx" },
+					"ptx",
+					QStringList{ "PTX cloud (*.ptx)" },
+					QStringList(),
+					Import
+					} )
 {
 }
 

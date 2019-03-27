@@ -38,15 +38,15 @@
 #include <cassert>
 
 
-DxfFilter::DxfFilter() :
-	FileIOFilter( {
-				  "_DXF Filter",
-				  QStringList{ "dxf" },
-				  "dxf",
-				  QStringList{ "DXF geometry (*.dxf)" },
-				  QStringList{ "DXF geometry (*.dxf)" },
-				  Import | Export
-				  } )
+DxfFilter::DxfFilter()
+	: FileIOFilter( {
+					"_DXF Filter",
+					QStringList{ "dxf" },
+					"dxf",
+					QStringList{ "DXF geometry (*.dxf)" },
+					QStringList{ "DXF geometry (*.dxf)" },
+					Import | Export | BuiltIn
+					} )
 {
 }
 

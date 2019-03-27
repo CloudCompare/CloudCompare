@@ -71,15 +71,15 @@ struct BundlerCamera
 	bool isValid;
 };
 
-BundlerFilter::BundlerFilter() :
-	FileIOFilter( {
-				  "+Bundler Filter",
-				  QStringList{ "out" },
-				  "out",
-				  QStringList{ "Snavely's Bundler output (*.out)" },
-				  QStringList(),
-				  Import | FromPlugin
-				  } )
+BundlerFilter::BundlerFilter()
+	: FileIOFilter( {
+					"+Bundler Filter",
+					QStringList{ "out" },
+					"out",
+					QStringList{ "Snavely's Bundler output (*.out)" },
+					QStringList(),
+					Import
+					} )
 {
 }
 

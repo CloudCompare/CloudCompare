@@ -54,15 +54,15 @@ const char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
 const char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
 
 
-E57Filter::E57Filter() :
-	FileIOFilter( {
-				  "+E57 Filter",
-				  QStringList{ "e57" },
-				  "e57",
-				  QStringList{ "E57 cloud (*.e57)" },
-				  QStringList{ "E57 cloud (*.e57)" },
-				  Import | Export | FromPlugin
-				  } )
+E57Filter::E57Filter()
+    : FileIOFilter( {
+                    "+E57 Filter",
+                    QStringList{ "e57" },
+                    "e57",
+                    QStringList{ "E57 cloud (*.e57)" },
+                    QStringList{ "E57 cloud (*.e57)" },
+                    Import | Export
+                    } )
 {
 }
 

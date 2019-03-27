@@ -63,15 +63,15 @@ public:
 QSharedPointer<LASSaveDlg> s_saveDlg(0);
 
 
-LASFWFFilter::LASFWFFilter() :
-	FileIOFilter( {
-				  "+LASFW Filter",
-				  QStringList{ "las", "laz" },
-				  "las",
-				  QStringList{ GetFileFilter() },
-				  QStringList{ GetFileFilter() },
-				  Import | Export | FromPlugin
-				  } )
+LASFWFFilter::LASFWFFilter()
+    : FileIOFilter( {
+                    "+LASFW Filter",
+                    QStringList{ "las", "laz" },
+                    "las",
+                    QStringList{ GetFileFilter() },
+                    QStringList{ GetFileFilter() },
+                    Import | Export
+                    } )
 {
 }
 

@@ -25,15 +25,15 @@
 #include <QTextStream>
 
 
-HeightProfileFilter::HeightProfileFilter() :
-	FileIOFilter( {
-				  "+Height profile Filter",
-				  QStringList(),
-				  "",
-				  QStringList(),
-				  QStringList{ "Height profile (*.csv)" },
-				  Export | FromPlugin
-				  } )
+HeightProfileFilter::HeightProfileFilter()
+	: FileIOFilter( {
+					"+Height profile Filter",
+					QStringList(),
+					"",
+					QStringList(),
+					QStringList{ "Height profile (*.csv)" },
+					Export
+					} )
 {
 }
 

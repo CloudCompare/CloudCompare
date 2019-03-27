@@ -39,7 +39,7 @@ ImageFileFilter::ImageFileFilter()
 					"png",
 					QStringList(),	// set below
 					QStringList(),	// set below
-					Import | Export | DynamicInfo
+					Import | Export | BuiltIn | DynamicInfo
 					} )
 {
 	//output filters

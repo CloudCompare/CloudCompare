@@ -48,17 +48,18 @@ const char CC_SENSOR_ROTATION_ORDER_OLD_NAMES[][10] = {	"THETA_PHI",		//Rotation
 };
 
 
-PovFilter::PovFilter() :
-	FileIOFilter( {
-				  "+POV Filter",
-				  QStringList{ "pov" },
-				  "pov",
-				  QStringList{ "Clouds + sensor info. [meta][ascii] (*.pov)" },
-				  QStringList{ "Clouds + sensor info. [meta][ascii] (*.pov)" },
-				  Import | Export | FromPlugin
-				  } )
+PovFilter::PovFilter()
+	: FileIOFilter( {
+					"+POV Filter",
+					QStringList{ "pov" },
+					"pov",
+					QStringList{ "Clouds + sensor info. [meta][ascii] (*.pov)" },
+					QStringList{ "Clouds + sensor info. [meta][ascii] (*.pov)" },
+					Import | Export
+					} )
 {
 }
+
 bool PovFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
 	if (type == CC_TYPES::POINT_CLOUD)

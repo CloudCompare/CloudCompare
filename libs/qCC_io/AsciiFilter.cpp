@@ -71,15 +71,15 @@ AsciiOpenDlg* AsciiFilter::GetOpenDialog(QWidget* parentWidget/*=0*/)
 }
 
 
-AsciiFilter::AsciiFilter() :
-	FileIOFilter( {
-				  "_ASCII Filter",
-				  QStringList{ "txt", "asc", "neu", "xyz", "pts", "csv" },
-				  "asc",
-				  QStringList{ GetFileFilter() },
-				  QStringList{ GetFileFilter() },
-				  Import | Export
-				  } )
+AsciiFilter::AsciiFilter()
+	: FileIOFilter( {
+					"_ASCII Filter",
+					QStringList{ "txt", "asc", "neu", "xyz", "pts", "csv" },
+					"asc",
+					QStringList{ GetFileFilter() },
+					QStringList{ GetFileFilter() },
+					Import | Export | BuiltIn
+					} )
 {
 }
 

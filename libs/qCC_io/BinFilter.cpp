@@ -53,15 +53,15 @@
 #endif
 
 
-BinFilter::BinFilter() :
-	FileIOFilter( {
-				  "_CloudCompare BIN Filter",
-				  QStringList{ "bin" },
-				  "bin",
-				  QStringList{ GetFileFilter() },
-				  QStringList{ GetFileFilter() },
-				  Import | Export
-				  } )	
+BinFilter::BinFilter()
+	: FileIOFilter( {
+					"_CloudCompare BIN Filter",
+					QStringList{ "bin" },
+					"bin",
+					QStringList{ GetFileFilter() },
+					QStringList{ GetFileFilter() },
+					Import | Export | BuiltIn
+					} )	
 {
 }
 

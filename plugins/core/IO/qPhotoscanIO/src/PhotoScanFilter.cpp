@@ -383,15 +383,15 @@ static QString CreateTempFile(QuaZip& zip, QString zipFilename)
 }
 
 
-PhotoScanFilter::PhotoScanFilter() :
-	FileIOFilter( {
-				  "+PhotoScan Filter",
-				  QStringList{ "psz" },
-				  "psz",
-				  QStringList{ "Photoscan project (*.psz)" },
-				  QStringList(),
-				  Import | FromPlugin
-				  } )
+PhotoScanFilter::PhotoScanFilter()
+    : FileIOFilter( {
+                    "+PhotoScan Filter",
+                    QStringList{ "psz" },
+                    "psz",
+                    QStringList{ "Photoscan project (*.psz)" },
+                    QStringList(),
+                    Import
+                    } )
 {
 }
 

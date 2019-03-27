@@ -40,15 +40,15 @@
 static const char FBX_SCALE_METADATA_KEY[] = "FBX:ScaleToCM";
 
 
-FBXFilter::FBXFilter() :
-	FileIOFilter( {
-				  "+FBX Filter",
-				  QStringList{ "fbx" },
-				  "fbx",
-				  QStringList{ "FBX mesh (*.fbx)" },
-				  QStringList{ "FBX mesh (*.fbx)" },
-				  Import | Export | FromPlugin
-				  } )
+FBXFilter::FBXFilter()
+    : FileIOFilter( {
+                    "+FBX Filter",
+                    QStringList{ "fbx" },
+                    "fbx",
+                    QStringList{ "FBX mesh (*.fbx)" },
+                    QStringList{ "FBX mesh (*.fbx)" },
+                    Import | Export
+                    } )
 {
 }
 

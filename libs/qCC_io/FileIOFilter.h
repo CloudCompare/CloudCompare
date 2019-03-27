@@ -305,7 +305,7 @@ public:
 		Import = 0x00001,	//< Imports data
 		Export = 0x0002,	//< Exports data
 		
-		FromPlugin = 0x0004,	//< Implemented in a plugin
+		BuiltIn = 0x0004,	//< Implemented in the core
 		
 		DynamicInfo = 0x0008,	//< FilterInfo cannot be set statically (this is used for internal consistency checking)
 	};

@@ -50,15 +50,15 @@
 using namespace CCLib;
 
 
-PlyFilter::PlyFilter() :
-	FileIOFilter( {
-				  "_PLY Filter",
-				  QStringList{ "ply" },
-				  "ply",
-				  QStringList{ "PLY mesh (*.ply)" },
-				  QStringList{ "PLY mesh (*.ply)" },
-				  Import | Export
-				  } )
+PlyFilter::PlyFilter()
+	: FileIOFilter( {
+					"_PLY Filter",
+					QStringList{ "ply" },
+					"ply",
+					QStringList{ "PLY mesh (*.ply)" },
+					QStringList{ "PLY mesh (*.ply)" },
+					Import | Export | BuiltIn
+					} )
 {	
 }
 

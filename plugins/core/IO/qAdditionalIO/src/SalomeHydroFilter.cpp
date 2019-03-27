@@ -28,15 +28,15 @@
 #include <QTextStream>
 
 
-SalomeHydroFilter::SalomeHydroFilter() :
-	FileIOFilter( {
-				  "+SalomeHydro Filter",
-				  QStringList{ "poly" },
-				  "poly",
-				  QStringList{ "Salome Hydro polylines (*.poly)" },
-				  QStringList{ "Salome Hydro polylines (*.poly)" },
-				  Import | Export | FromPlugin
-				  } )
+SalomeHydroFilter::SalomeHydroFilter()
+	: FileIOFilter( {
+					"+SalomeHydro Filter",
+					QStringList{ "poly" },
+					"poly",
+					QStringList{ "Salome Hydro polylines (*.poly)" },
+					QStringList{ "Salome Hydro polylines (*.poly)" },
+					Import | Export
+					} )
 {	
 }
 

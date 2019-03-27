@@ -44,15 +44,15 @@
 #include <cstring>
 
 
-ObjFilter::ObjFilter() :
-	FileIOFilter( {
-				  "+OBJ Filter",
-				  QStringList{ "obj" },
-				  "obj",
-				  QStringList{ "OBJ mesh (*.obj)" },
-				  QStringList{ "OBJ mesh (*.obj)" },
-				  Import | Export | FromPlugin
-				  } )
+ObjFilter::ObjFilter()
+	: FileIOFilter( {
+					"+OBJ Filter",
+					QStringList{ "obj" },
+					"obj",
+					QStringList{ "OBJ mesh (*.obj)" },
+					QStringList{ "OBJ mesh (*.obj)" },
+					Import | Export
+					} )
 {
 }
 

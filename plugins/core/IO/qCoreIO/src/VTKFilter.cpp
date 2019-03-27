@@ -32,15 +32,15 @@
 #include <cstring>
 
 
-VTKFilter::VTKFilter() :
-	FileIOFilter( {
-				  "+VTK Filter",
-				  QStringList{ "vtk" },
-				  "vtk",
-				  QStringList{ "VTK cloud or mesh (*.vtk)" },
-				  QStringList{ "VTK cloud or mesh (*.vtk)" },
-				  Import | Export | FromPlugin
-				  } )
+VTKFilter::VTKFilter()
+	: FileIOFilter( {
+					"+VTK Filter",
+					QStringList{ "vtk" },
+					"vtk",
+					QStringList{ "VTK cloud or mesh (*.vtk)" },
+					QStringList{ "VTK cloud or mesh (*.vtk)" },
+					Import | Export
+					} )
 {
 }
 

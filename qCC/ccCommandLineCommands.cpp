@@ -3692,7 +3692,7 @@ bool CommandICP::process(ccCommandLineInterface &cmd)
 									overlap / 100.0,
 									dataSFAsWeights >= 0,
 									modelSFAsWeights >= 0,
-									CCLib::ICPRegistrationTools::SKIP_NONE,
+									transformationFilters,
 									maxThreadCount,
 									cmd.widgetParent()))
 	{

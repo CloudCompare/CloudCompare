@@ -315,24 +315,24 @@ protected:
 	struct FilterInfo
 	{
 		//! ID used to uniquely identify the filter (not user-visible)
-		QString mID;
+		QString id;
 		
 		//! List of extensions this filter can read (lowercase)
 		//! e.g. "txt", "foo", "bin"
 		//! This is used in FindBestFilterForExtension()
-		QStringList mImportExtensions;
+		QStringList importExtensions;
 		
 		//! The default file extension (for both import & export as applicable)
-		QString mDefaultExtension;
+		QString defaultExtension;
 		
 		//! List of file filters for import (e.g. "Test (*.txt)", "Foo (*.foo))
-		QStringList	mImportFileFilterStrings;
+		QStringList	importFileFilterStrings;
 		
 		//! List of file filters for export (e.g. "Test (*.txt)", "Foo (*.foo))
-		QStringList	mExportFileFilterStrings;
+		QStringList	exportFileFilterStrings;
 		
 		//! Supported features \see FilterFeature
-		FilterFeatures mFeatures;
+		FilterFeatures features;
 	};
 	
 	QCC_IO_LIB_API explicit FileIOFilter( const FilterInfo &info );
@@ -352,7 +352,7 @@ protected:
 private:
 	void checkFilterInfo() const;
 	
-	FilterInfo mFilterInfo;
+	FilterInfo m_filterInfo;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS( FileIOFilter::FilterFeatures )

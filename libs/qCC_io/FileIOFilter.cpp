@@ -53,10 +53,10 @@ static unsigned s_sessionCounter = 0;
 
 
 FileIOFilter::FileIOFilter( const FileIOFilter::FilterInfo &info ) :
-	mFilterInfo( info )
+	m_filterInfo( info )
 {
 #ifdef QT_DEBUG	
-	if ( !(mFilterInfo.mFeatures & DynamicInfo) )
+	if ( !(m_filterInfo.features & DynamicInfo) )
 	{
 		checkFilterInfo();
 	}
@@ -65,42 +65,42 @@ FileIOFilter::FileIOFilter( const FileIOFilter::FilterInfo &info ) :
 
 bool FileIOFilter::importSupported() const
 {
-	return mFilterInfo.mFeatures & Import;
+	return m_filterInfo.features & Import;
 }
 
 bool FileIOFilter::exportSupported() const
 {
-	return mFilterInfo.mFeatures & Export;
+	return m_filterInfo.features & Export;
 }
 
 QStringList FileIOFilter::getFileFilters( bool onImport ) const
 {
 	if ( onImport )
 	{
-		return mFilterInfo.mImportFileFilterStrings;
+		return m_filterInfo.importFileFilterStrings;
 	}
 	
-	return mFilterInfo.mExportFileFilterStrings;
+	return m_filterInfo.exportFileFilterStrings;
 }
 
 QString FileIOFilter::getDefaultExtension() const
 {
-	return mFilterInfo.mDefaultExtension;
+	return m_filterInfo.defaultExtension;
 }
 
 void FileIOFilter::setImportExtensions( const QStringList &extensions )
 {
-	mFilterInfo.mImportExtensions = extensions;
+	m_filterInfo.importExtensions = extensions;
 }
 
 void FileIOFilter::setImportFileFilterStrings( const QStringList &filterStrings )
 {
-	mFilterInfo.mImportFileFilterStrings = filterStrings;
+	m_filterInfo.importFileFilterStrings = filterStrings;
 }
 
 void FileIOFilter::setExportFileFilterStrings(const QStringList &filterStrings)
 {
-	mFilterInfo.mExportFileFilterStrings = filterStrings;
+	m_filterInfo.exportFileFilterStrings = filterStrings;
 }
 
 void FileIOFilter::checkFilterInfo() const
@@ -108,43 +108,43 @@ void FileIOFilter::checkFilterInfo() const
 #ifdef QT_DEBUG
 	// Check info for consistency
 	
-	if ( mFilterInfo.mFeatures & Import )
+	if ( m_filterInfo.features & Import )
 	{
-		if ( mFilterInfo.mImportFileFilterStrings.isEmpty() )
+		if ( m_filterInfo.importFileFilterStrings.isEmpty() )
 		{
-			ccLog::Warning( QStringLiteral( "I/O filter marked as import, but no filter strings set: %1" ).arg( mFilterInfo.mID ) );
+			ccLog::Warning( QStringLiteral( "I/O filter marked as import, but no filter strings set: %1" ).arg( m_filterInfo.id ) );
 		}
 		
-		if ( mFilterInfo.mImportExtensions.isEmpty() )
+		if ( m_filterInfo.importExtensions.isEmpty() )
 		{
-			ccLog::Warning( QStringLiteral( "I/O filter marked as import, but no extensions set: %1" ).arg( mFilterInfo.mID ) );
+			ccLog::Warning( QStringLiteral( "I/O filter marked as import, but no extensions set: %1" ).arg( m_filterInfo.id ) );
 		}
 	}
 	else
 	{
-		if ( !mFilterInfo.mImportFileFilterStrings.isEmpty() )
+		if ( !m_filterInfo.importFileFilterStrings.isEmpty() )
 		{
-			ccLog::Warning( QStringLiteral( "I/O filter not marked as import, but filter strings are set: %1" ).arg( mFilterInfo.mID ) );
+			ccLog::Warning( QStringLiteral( "I/O filter not marked as import, but filter strings are set: %1" ).arg( m_filterInfo.id ) );
 		}
 		
-		if ( !mFilterInfo.mImportExtensions.isEmpty() )
+		if ( !m_filterInfo.importExtensions.isEmpty() )
 		{
-			ccLog::Warning( QStringLiteral( "I/O filter not marked as import, but extensions are set: %1" ).arg( mFilterInfo.mID ) );
+			ccLog::Warning( QStringLiteral( "I/O filter not marked as import, but extensions are set: %1" ).arg( m_filterInfo.id ) );
 		}
 	}
 	
-	if ( mFilterInfo.mFeatures & Export )
+	if ( m_filterInfo.features & Export )
 	{
-		if ( mFilterInfo.mExportFileFilterStrings.isEmpty() )
+		if ( m_filterInfo.exportFileFilterStrings.isEmpty() )
 		{
-			ccLog::Warning( QStringLiteral( "I/O filter marked as export, but no filter strings set: %1" ).arg( mFilterInfo.mID ) );
+			ccLog::Warning( QStringLiteral( "I/O filter marked as export, but no filter strings set: %1" ).arg( m_filterInfo.id ) );
 		}
 	}
 	else
 	{
-		if ( !mFilterInfo.mExportFileFilterStrings.isEmpty() )
+		if ( !m_filterInfo.exportFileFilterStrings.isEmpty() )
 		{
-			ccLog::Warning( QStringLiteral( "I/O filter not marked as export, but filter strings are set: %1" ).arg( mFilterInfo.mID ) );
+			ccLog::Warning( QStringLiteral( "I/O filter not marked as export, but filter strings are set: %1" ).arg( m_filterInfo.id ) );
 		}		
 	}
 #endif
@@ -259,7 +259,7 @@ FileIOFilter::Shared FileIOFilter::FindBestFilterForExtension(const QString& ext
 	
 	for ( const auto &filter : s_ioFilters )
 	{
-		if ( filter->mFilterInfo.mImportExtensions.contains( lowerExt ) )
+		if ( filter->m_filterInfo.importExtensions.contains( lowerExt ) )
 		{
 			return filter;
 		}

@@ -52,7 +52,7 @@ CSVMatrixFilter::CSVMatrixFilter() :
 				  "csv",
 				  QStringList{ "CSV matrix cloud (*.csv)" },
 				  QStringList(),
-				  Import
+				  Import | FromPlugin
 				  } )
 {
 }

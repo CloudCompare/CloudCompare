@@ -227,6 +227,7 @@ if(OPTION_USE_STOCKER)
 	target_include_directories(${PROJECT_NAME} 
 		PUBLIC	${STOCKER_INCLUDE_DIR}/modules/internal 
 				${STOCKER_INCLUDE_DIR}/utils
+				${STOCKER_INCLUDE_DIR}/utils/3d4em/libs
 				${VCGLIB_INCLUDE_DIRS}
 				${EIGEN_INCLUDE_DIRS})
 endif()

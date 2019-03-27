@@ -45,6 +45,7 @@ ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud);
 
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject * entity, stocker::Polyline3d polygon);
+std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonXY(ccHObject::Container entities, stocker::Polyline3d polygon);
 stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject * entity, stocker::Polyline3d polygon);
 stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
 vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject * entity);
@@ -79,7 +80,7 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_POLYFITOPTM_SUFFIX		".optimized"
 #define BDDB_FINALMODEL_SUFFIX		".model"
 #define BDDB_IMAGELINE_SUFFIX		".imageline"
-#define BDDB_FOORPRINT_SUFFIX		".footprint"
+#define BDDB_FOOTPRINT_SUFFIX		".footprint"
 #define BDDB_PLANESEG_PREFIX		"Plane"
 #define BDDB_BOUNDARY_PREFIX		"Boundary"
 #define BDDB_INTERSECT_PREFIX		"Intersection"
@@ -87,6 +88,8 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_IMAGELINE_PREFIX		"Imageline"
 #define BDDB_PLANEFRAME_PREFIX		"Frame"
 #define BDDB_FOOTPRINT_PREFIX		"Footprint"
+#define BDDB_LOD2MODEL_PREFIX		".lod2.model"
+#define BDDB_LOD3MODEL_PREFIX		".lod3.model"
 
 class BDBaseHObject : public ccHObject
 {
@@ -115,6 +118,7 @@ public:
 	ccHObject::Container GetOriginPointCloud(bool check_enable = false);
 	ccHObject* GetOriginPointCloud(QString building_name, bool check_enable = false);
 	ccHObject* GetPrimitiveGroup(QString building_name, bool check_enable = false);
+	ccHObject * GetFootPrintGroup(QString building_name, bool check_enable);
 	ccHObject * GetHypothesisGroup(QString building_name, bool check_enable);
 
 	stocker::Vec3d ToLocal(stocker::Vec3d pt) { return (pt + global_shift)*global_scale; }
@@ -214,3 +218,5 @@ public:
 bool FastPlanarTextureMapping(ccHObject * planeObj);
 
 ccHObject * ConstrainedMesh(ccHObject * planeObj);
+
+ccHObject * LoD2FromFootPrint(ccHObject * buildingObj, bool preset_ground_height = false, double ground_height = DBL_MAX);

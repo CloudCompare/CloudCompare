@@ -1242,7 +1242,7 @@ void ccSectionExtractionTool::exportSections()
 				stocker::BuildUnit _build = baseObj->GetBuildingUnit(building_name); 
 				ground_height = _build.ground_height;
 
-				QString dest_name = QString(building_name.c_str()) + BDDB_FOORPRINT_SUFFIX;
+				QString dest_name = QString(building_name.c_str()) + BDDB_FOOTPRINT_SUFFIX;
 				for (size_t i = 0; i < build_entity->getChildrenNumber(); i++) {
 					if (build_entity->getChild(i)->getName() == dest_name)
 						destEntity = build_entity->getChild(i);

@@ -10767,6 +10767,11 @@ void MainWindow::doActionBDProjectLoad()
 		dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
+	if (!stocker::BuildingPrepare(block_prj, error_info)) {
+		dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	
 	QFileInfo prj_file(Filename);
 	QString prj_name = prj_file.completeBaseName();
 	if (!prj_name.startsWith(BDDB_PROJECTNAME_PREFIX)) {
@@ -11306,18 +11311,20 @@ void MainWindow::doActionBDPrimMergePlane()
 	if (same_parent) {
 		ccHObject* parent = m_selectedEntities[0]->getParent()->getParent();
 		parent->addChild(point_cloud);
-		set<int> plane_numbers;
-		ccHObject::Container plane_children;
-		parent->filterChildren(plane_children, true, CC_TYPES::PLANE, true);
-		for (auto & ent_pl : plane_children) {
-			QString name = ent_pl->getParent()->getName();
-			if (name.startsWith(BDDB_PLANESEG_PREFIX) && name.length() > QString(BDDB_PLANESEG_PREFIX).length()) {
-				QString number = name.mid(QString(BDDB_PLANESEG_PREFIX).length(), name.length());
-				plane_numbers.insert(number.toInt());
-			}
-		}
-		if (!plane_numbers.empty())	{
-			int biggest = *plane_numbers.rbegin();
+		int biggest = GetMaxNumberExcludeChildPrefix(parent, BDDB_PLANESEG_PREFIX);
+// 		set<int> plane_numbers;
+// 		ccHObject::Container plane_children;
+// 		parent->filterChildren(plane_children, true, CC_TYPES::PLANE, true);
+// 		for (auto & ent_pl : plane_children) {
+// 			QString name = ent_pl->getParent()->getName();
+// 			if (name.startsWith(BDDB_PLANESEG_PREFIX) && name.length() > QString(BDDB_PLANESEG_PREFIX).length()) {
+// 				QString number = name.mid(QString(BDDB_PLANESEG_PREFIX).length(), name.length());
+// 				plane_numbers.insert(number.toInt());
+// 			}
+// 		}
+// 		if (!plane_numbers.empty())	
+		{
+//			int biggest = *plane_numbers.rbegin();
 			point_cloud->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
 		}
 	}
@@ -11913,6 +11920,7 @@ void MainWindow::doActionBDPolyFitSelection()
 					model->setDisplay_recursive(HypoObj->getDisplay());
 					HypoObj->getParent()->addChild(model);
 					HypoObj->setEnabled(false);
+					SetGlobalShiftAndScale(model);
 					addToDB(model);
 				}
 			}
@@ -11992,9 +12000,43 @@ void MainWindow::doActionBD3D4EM()
 	if (!m_pbdr3d4emDlg->exec()) {
 		return;
 	}
-	ccHObject *entity = nullptr;
-	if (haveSelection()) {
-		entity = getSelectedEntities().front();
+	
+	if (haveSelection()) {	
+	
+	ccHObject *entity = getSelectedEntities().front();
+
+	BDBaseHObject* baseObj = GetRootBDBase(entity);
+
+	//! select the building
+	if (IsBDBaseObj(entity->getParent()) && entity->isGroup()) {
+		try	{
+			bool preset_height = false;
+			double height = DBL_MAX;
+			if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
+				preset_height = true;
+				height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
+			}
+			else if (m_pbdr3d4emDlg->GroundHeightMode() == 0) {
+				preset_height = true;
+				height = baseObj->GetBuildingUnit(GetBaseName(entity->getName()).toStdString()).ground_height;
+			}
+
+			ccHObject* bd_model_obj = LoD2FromFootPrint(entity, preset_height, height);
+			if (bd_model_obj) {
+				SetGlobalShiftAndScale(bd_model_obj);
+				addToDB(bd_model_obj);
+
+				refreshAll();
+				UpdateUI();
+				return;
+			}
+		}
+		catch (std::runtime_error& e) {
+			dispToConsole("[BDRecon] cannot build lod2 model", ERR_CONSOLE_MESSAGE);
+			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+		}
+	}
+
 	}
 
 	stocker::BuilderLOD2 builder_3d4em(true);
@@ -12013,17 +12055,17 @@ void MainWindow::doActionBD3D4EM()
 			}
 			if (contour_polygon) {
 				std::vector<CCVector3> contour_points = contour_polygon->getPoints(false);
-				std::vector<std::vector<stocker::BdPoint3d>> bd_contour_points_;
-				std::vector<stocker::BdPoint3d> bd_contour_points;
+				std::vector<stocker::Contour3d> bd_contour_points_;
+				stocker::Contour3d bd_contour_points;
 				if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
 					double user_defined_ground_height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
 					for (auto & pt : contour_points) {
-						bd_contour_points.push_back(stocker::BdPoint3d(pt.x, pt.y, user_defined_ground_height));
+						bd_contour_points.push_back(stocker::Vec3d(pt.x, pt.y, user_defined_ground_height));
 					}
 				}
 				else {
 					for (auto & pt : contour_points) {
-						bd_contour_points.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
+						bd_contour_points.push_back(stocker::Vec3d(pt.x, pt.y, pt.z));
 					}
 				}
 				bd_contour_points_.push_back(bd_contour_points);
@@ -12055,45 +12097,7 @@ void MainWindow::doActionBD3D4EM()
 
 		builder_3d4em.SetBuildingPoints(point_path.c_str());
 	}
-	else if (entity) {
-
-		if (entity->isGroup()) {
-			ccHObject::Container plane_container;
-			entity->filterChildren(plane_container, true, CC_TYPES::PLANE, true, entity->getDisplay());
-
-			std::vector<std::vector<stocker::BdPoint3d>> planes_points;
-			for (auto & planeObj : plane_container) {
-				ccHObject* parent = planeObj->getParent(); if (!parent) continue;
-				if (!planeObj->isEnabled() || !parent->isEnabled()) continue;
-				
-				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(parent);
-				if (!cloud) continue;
-				
-				std::vector<stocker::BdPoint3d> cur_plane_points;
-				for (unsigned i = 0; i < cloud->size(); i++) {
-					CCVector3 pt = *cloud->getPoint(i);
-					cur_plane_points.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
-				}
-				planes_points.push_back(cur_plane_points);
-			}
-			builder_3d4em.SetSegmentedPoints(planes_points);
-		}
-		else {
-			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-			if (!cloud)	return;
-
-			std::vector<stocker::BdPoint3d> point_cloud;
-			for (unsigned i = 0; i < cloud->size(); i++) {
-				CCVector3 pt = *cloud->getPoint(i);
-				point_cloud.push_back(stocker::BdPoint3d(pt.x, pt.y, pt.z));
-			}
-			builder_3d4em.SetBuildingPoints(point_cloud);
-		}		
-	}
-	else {
-		dispToConsole("[BDRecon] No points input, please select group of planes or point cloud", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
+	
 	if (!builder_3d4em.PlaneSegmentation(false)) return;	
 	if (!builder_3d4em.BuildingReconstruction()) return;	
 	

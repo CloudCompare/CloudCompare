@@ -68,8 +68,8 @@ LASFWFFilter::LASFWFFilter() :
 				  "+LASFW Filter",
 				  QStringList{ "las", "laz" },
 				  "las",
-				  QStringList{ "LAS 1.3 or 1.4 (*.las *.laz)" },
-				  QStringList{ "LAS 1.3 or 1.4 (*.las *.laz)" },
+				  QStringList{ GetFileFilter() },
+				  QStringList{ GetFileFilter() },
 				  Import | Export | FromPlugin
 				  } )
 {

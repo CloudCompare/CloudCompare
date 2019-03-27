@@ -76,8 +76,8 @@ AsciiFilter::AsciiFilter() :
 				  "_ASCII Filter",
 				  QStringList{ "txt", "asc", "neu", "xyz", "pts", "csv" },
 				  "asc",
-				  QStringList{ "ASCII cloud (*.txt *.asc *.neu *.xyz *.pts *.csv)" },
-				  QStringList{ "ASCII cloud (*.txt *.asc *.neu *.xyz *.pts *.csv)" },
+				  QStringList{ GetFileFilter() },
+				  QStringList{ GetFileFilter() },
 				  Import | Export
 				  } )
 {

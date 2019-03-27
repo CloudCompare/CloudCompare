@@ -58,8 +58,8 @@ BinFilter::BinFilter() :
 				  "_CloudCompare BIN Filter",
 				  QStringList{ "bin" },
 				  "bin",
-				  QStringList{ "CloudCompare entities (*.bin)" },
-				  QStringList{ "CloudCompare entities (*.bin)" },
+				  QStringList{ GetFileFilter() },
+				  QStringList{ GetFileFilter() },
 				  Import | Export
 				  } )	
 {

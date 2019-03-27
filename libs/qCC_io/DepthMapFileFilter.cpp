@@ -38,7 +38,7 @@ DepthMapFileFilter::DepthMapFileFilter() :
 				  QStringList(),
 				  "txt",
 				  QStringList(),
-				  QStringList{ "Depth Map [ascii] (*.txt *.asc)" },
+				  QStringList{ GetFileFilter() },
 				  Export
 				  } )
 {

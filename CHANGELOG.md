@@ -28,7 +28,7 @@ v2.11 (Anoia) - (in development)
 
 Bug fixes:
 	- The COMMAND_ICP_ROT option of the ICP command line tool was ignored
-
+	- When loading a BIN file from the command line, only the first-level clouds were considered
 v2.10.3 (Zephyrus) - (in development)
 ----------------------
 

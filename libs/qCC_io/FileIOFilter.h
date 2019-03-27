@@ -21,7 +21,7 @@
 //qCC_db
 #include <ccHObject.h>
 
-//Local
+//local
 #include "ccGlobalShiftManager.h"
 
 class QWidget;
@@ -110,20 +110,20 @@ public:
 public: //public interface
 	
 	//! Returns whether this I/O filter can import files
-	bool importSupported() const;
+	QCC_IO_LIB_API bool importSupported() const;
 	
 	//! Returns whether this I/O filter can export files
-	bool exportSupported() const;
+	QCC_IO_LIB_API bool exportSupported() const;
 	
 	//! Returns the file filter(s) for this I/O filter
 	/** E.g. 'ASCII file (*.asc)'
 		\param onImport whether the requested filters are for import or export
 		\return list of filters
 	**/
-	QStringList getFileFilters(bool onImport) const;
+	QCC_IO_LIB_API QStringList getFileFilters(bool onImport) const;
 	
 	//! Returns the default file extension
-	QString getDefaultExtension() const;
+	QCC_IO_LIB_API QString getDefaultExtension() const;
 	
 public: //public interface (to be reimplemented by each I/O filter)
 	
@@ -335,7 +335,7 @@ protected:
 		FilterFeatures mFeatures;
 	};
 	
-	explicit FileIOFilter( const FilterInfo &info );
+	QCC_IO_LIB_API explicit FileIOFilter( const FilterInfo &info );
 	
 	//! Allow import extensions to be set after construction
 	//! (e.g. for ImageFileFilter & QImageReader::supportedImageFormats())

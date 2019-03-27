@@ -1298,20 +1298,6 @@ void ccSectionExtractionTool::exportSections()
 						return;
 					}
 
-// 					CCLib::GenericIndexedCloudPersist* vertices = section.entity->getAssociatedCloud();
-// 					ccPointCloud* verticesPC = dynamic_cast<ccPointCloud*>(vertices);
-// 					if (verticesPC)	{
-// 						for (unsigned i = 0; i < vertices->size(); ++i) {
-// 							CCVector3* Pscreen = const_cast<CCVector3*>(verticesPC->getPoint(i));
-// 							Pscreen->z = ground_height;
-// 						}
-// 						verticesPC->invalidateBoundingBox();						
-// 					}
-// 					else {
-// 						assert(false);
-// 						ccLog::Warning("failed to export polyline (internal inconsistency)");
-// 					}
-
 					int biggest_number = GetMaxNumberExcludeChildPrefix(destEntity, BDDB_FOOTPRINT_PREFIX);
 					QString cur_name = BDDB_FOOTPRINT_PREFIX + QString::number(biggest_number + 1);
 					section.entity->setName(cur_name);

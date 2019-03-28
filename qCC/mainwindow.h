@@ -485,6 +485,8 @@ private slots:
 
 	void doActionBDPolyFitSettings();
 
+	void doActionBDLoD1Generation();
+
 	/// 3d4em
 	void doActionBD3D4EM();
 

@@ -548,8 +548,8 @@
     <addaction name="menuPrimitive"/>
     <addaction name="actionBDPlane_Deduction"/>
     <addaction name="separator"/>
-    <addaction name="menuPolyFit"/>
     <addaction name="actionBD3D4EM"/>
+    <addaction name="menuPolyFit"/>
     <addaction name="separator"/>
     <addaction name="menuDisplay_2"/>
     <addaction name="actionBDConstrainedMesh"/>
@@ -797,13 +797,14 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionTracePolyline"/>
    <addaction name="actionBDPrimMakePlane"/>
    <addaction name="separator"/>
+   <addaction name="actionExtractSections"/>
+   <addaction name="actionBDLoD1Generation"/>
+   <addaction name="actionBD3D4EM"/>
+   <addaction name="separator"/>
    <addaction name="actionBDPolyFitHypothesis"/>
    <addaction name="actionBDPolyFitFacetFilter"/>
    <addaction name="actionBDPolyFitSelection"/>
    <addaction name="actionBDPolyFitSettings"/>
-   <addaction name="separator"/>
-   <addaction name="actionExtractSections"/>
-   <addaction name="actionBD3D4EM"/>
    <addaction name="separator"/>
    <addaction name="actionBDTextureMapping"/>
   </widget>
@@ -3379,6 +3380,18 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDConstrainedMesh">
    <property name="text">
     <string>Constrained Mesh</string>
+   </property>
+  </action>
+  <action name="actionBDLoD1Generation">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/lod1.png</normaloff>:/CC/Stocker/images/stocker/lod1.png</iconset>
+   </property>
+   <property name="text">
+    <string>LoD1 Generation</string>
+   </property>
+   <property name="iconText">
+    <string>LoD1</string>
    </property>
   </action>
  </widget>

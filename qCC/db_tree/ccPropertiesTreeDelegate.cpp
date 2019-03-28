@@ -147,6 +147,8 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_OCTREE_TYPE:
 		case OBJECT_COLOR_RAMP_STEPS:
 		case OBJECT_CLOUD_POINT_SIZE:
+		case OBJECT_FACET_CONFIDENCE:
+		case OBJECT_FOOTPRINT_HEIGHT:
 			return QSize(50, 24);
 		case OBJECT_COLOR_SOURCE:
 		case OBJECT_POLYLINE_WIDTH:
@@ -623,7 +625,7 @@ void ccPropertiesTreeDelegate::fillWithFacet(const ccFacet* _obj)
 	appendRow(ITEM(tr("Coverage")), ITEM(QLocale(QLocale::English).toString(_obj->getCoverage())));
 
 	//confidence
-	appendRow(ITEM(tr("Confidence")), ITEM(QLocale(QLocale::English).toString(_obj->getConfidence())));
+	appendRow(ITEM(tr("Confidence")), PERSISTENT_EDITOR(OBJECT_FACET_CONFIDENCE), true);
 
 	//distance
 	appendRow(ITEM(tr("Distance")), ITEM(QLocale(QLocale::English).toString(_obj->getDistance())));
@@ -697,6 +699,9 @@ void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)
 
 	//custom line width
 	appendRow(ITEM( tr( "Line width" ) ), PERSISTENT_EDITOR(OBJECT_POLYLINE_WIDTH), true);
+
+	//footprint height
+	appendRow(ITEM(tr("FootPrH")), PERSISTENT_EDITOR(OBJECT_FOOTPRINT_HEIGHT), true);
 
 	//global shift & scale
 	fillWithShifted(_obj);
@@ -1380,6 +1385,36 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		}
 
 		outputWidget = comboBox;
+	}
+	break;
+	case OBJECT_FACET_CONFIDENCE:
+	{
+		ccFacet* facet = ccHObjectCaster::ToFacet(m_currentObject);
+		assert(facet);
+		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+		spinBox->setRange(-DBL_MAX, DBL_MAX);
+		spinBox->setSingleStep(1);
+		spinBox->setValue(facet->getConfidence());
+
+		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+			this, &ccPropertiesTreeDelegate::facetConfidenceChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
+	case OBJECT_FOOTPRINT_HEIGHT:
+	{
+		ccPolyline* polyline = ccHObjectCaster::ToPolyline(m_currentObject);
+		assert(polyline);
+		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+		spinBox->setRange(-DBL_MAX, DBL_MAX);
+		spinBox->setSingleStep(1);
+		spinBox->setValue(polyline->getFTHeight());
+
+ 		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+ 			this, &ccPropertiesTreeDelegate::footprintHeightChanged);
+
+		outputWidget = spinBox;
 	}
 	break;
 	default:
@@ -2376,4 +2411,24 @@ void ccPropertiesTreeDelegate::colorSourceChanged(const QString & source)
 	{
 		updateDisplay();
 	}
+}
+
+void ccPropertiesTreeDelegate::footprintHeightChanged(double pos)
+{
+	if (!m_currentObject)
+		return;
+
+	ccPolyline* polyline = ccHObjectCaster::ToPolyline(m_currentObject);
+	assert(polyline);
+	polyline->setFTHeight(pos);
+}
+
+void ccPropertiesTreeDelegate::facetConfidenceChanged(double pos)
+{
+	if (!m_currentObject)
+		return;
+
+	ccFacet* facet = ccHObjectCaster::ToFacet(m_currentObject);
+	assert(facet);
+	facet->setConfidence(pos);
 }

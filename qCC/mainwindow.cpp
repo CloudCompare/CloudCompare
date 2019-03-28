@@ -797,6 +797,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPolyFitSelection,			&QAction::triggered, this, &MainWindow::doActionBDPolyFitSelection);
 	connect(m_UI->actionBDPolyFitFacetFilter,		&QAction::triggered, this, &MainWindow::doActionBDPolyFitFacetFilter);
 	connect(m_UI->actionBDPolyFitSettings,			&QAction::triggered, this, &MainWindow::doActionBDPolyFitSettings);
+	connect(m_UI->actionBDLoD1Generation,			&QAction::triggered, this, &MainWindow::doActionBDLoD1Generation);
 	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBD3D4EM);
 	connect(m_UI->actionBDTextureMapping,			&QAction::triggered, this, &MainWindow::doActionBDTextureMapping);
 	connect(m_UI->actionBDConstrainedMesh,			&QAction::triggered, this, &MainWindow::doActionBDConstrainedMesh);
@@ -11990,6 +11991,37 @@ void MainWindow::doActionBDPolyFitSettings()
 	m_pbdrpfDlg->show();
 }
 
+void MainWindow::doActionBDLoD1Generation()
+{
+	if (!haveSelection()) {
+		return;
+	}
+	ccHObject *entity = getSelectedEntities().front();
+	
+	//! select the building
+	if (IsBDBaseObj(entity->getParent()) && entity->isGroup()) {
+		try {
+			ccHObject* bd_model_obj = LoD1FromFootPrint(entity);
+			if (bd_model_obj) {
+				SetGlobalShiftAndScale(bd_model_obj);
+				bd_model_obj->setDisplay_recursive(entity->getDisplay());
+				addToDB(bd_model_obj);
+
+				refreshAll();
+				UpdateUI();
+				return;
+			}
+		}
+		catch (std::runtime_error& e) {
+			dispToConsole("[BDRecon] cannot build lod1 model", ERR_CONSOLE_MESSAGE);
+			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+		}
+	}
+	else if (entity->isA(CC_TYPES::POLY_LINE)) {
+
+	}
+}
+
 void MainWindow::doActionBD3D4EM()
 {
 	if (!m_pbdr3d4emDlg)
@@ -12024,6 +12056,7 @@ void MainWindow::doActionBD3D4EM()
 			ccHObject* bd_model_obj = LoD2FromFootPrint(entity, preset_height, height);
 			if (bd_model_obj) {
 				SetGlobalShiftAndScale(bd_model_obj);
+				bd_model_obj->setDisplay_recursive(entity->getDisplay());
 				addToDB(bd_model_obj);
 
 				refreshAll();
@@ -12035,10 +12068,9 @@ void MainWindow::doActionBD3D4EM()
 			dispToConsole("[BDRecon] cannot build lod2 model", ERR_CONSOLE_MESSAGE);
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 		}
+		return;
 	}
-
 	}
-
 	stocker::BuilderLOD2 builder_3d4em(true);
 
 	/// select polyline for footprint

@@ -102,6 +102,8 @@ public:
 							OBJECT_HISTORY_MATRIX_EDITOR			,
 							OBJECT_GLTRANS_MATRIX_EDITOR			,
 							TREE_VIEW_HEADER						,
+							OBJECT_FACET_CONFIDENCE					,
+							OBJECT_FOOTPRINT_HEIGHT					,
 	};
 
 	//! Default constructor
@@ -156,6 +158,8 @@ private:
 	void updateDisplay();
 	void objectDisplayChanged(const QString &);
 	void colorSourceChanged(const QString &);
+	void footprintHeightChanged(double pos);
+	void facetConfidenceChanged(double pos);
 	void sensorScaleChanged(double);
 	void sensorUncertaintyChanged();
 	void sensorIndexChanged(double);

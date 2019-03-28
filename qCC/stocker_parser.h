@@ -44,9 +44,9 @@ QString GetBaseName(QString name);
 ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud);
 
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
-stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject * entity, stocker::Polyline3d polygon);
-std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonXY(ccHObject::Container entities, stocker::Polyline3d polygon);
-stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject * entity, stocker::Polyline3d polygon);
+stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject * entity, stocker::Polyline3d polygon, double height);
+std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonXY(ccHObject::Container entities, stocker::Polyline3d polygon, double height, bool skip_empty = true);
+stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject * entity, stocker::Polyline3d polygon, double distance_threshold = 0.01);
 stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
 vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject * entity);
 ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true, bool recursive = true);
@@ -74,13 +74,6 @@ void UpdateConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj);
 ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj);
 
 #define BDDB_PROJECTNAME_PREFIX		"Prj_"
-#define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
-#define BDDB_PRIMITIVE_SUFFIX		".primitive"
-#define BDDB_POLYFITHYPO_SUFFIX		".hypothesis"
-#define BDDB_POLYFITOPTM_SUFFIX		".optimized"
-#define BDDB_FINALMODEL_SUFFIX		".model"
-#define BDDB_IMAGELINE_SUFFIX		".imageline"
-#define BDDB_FOOTPRINT_SUFFIX		".footprint"
 #define BDDB_PLANESEG_PREFIX		"Plane"
 #define BDDB_BOUNDARY_PREFIX		"Boundary"
 #define BDDB_INTERSECT_PREFIX		"Intersection"
@@ -88,8 +81,20 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_IMAGELINE_PREFIX		"Imageline"
 #define BDDB_PLANEFRAME_PREFIX		"Frame"
 #define BDDB_FOOTPRINT_PREFIX		"Footprint"
-#define BDDB_LOD2MODEL_PREFIX		".lod2.model"
-#define BDDB_LOD3MODEL_PREFIX		".lod3.model"
+#define BDDB_LOD1MODEL_PREFIX		"LoD1_"
+#define BDDB_LOD2MODEL_PREFIX		"LoD2_"
+#define BDDB_LOD3MODEL_PREFIX		"LoD3_"
+
+#define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
+#define BDDB_PRIMITIVE_SUFFIX		".primitive"
+#define BDDB_POLYFITHYPO_SUFFIX		".hypothesis"
+#define BDDB_POLYFITOPTM_SUFFIX		".optimized"
+#define BDDB_FINALMODEL_SUFFIX		".model"
+#define BDDB_IMAGELINE_SUFFIX		".imageline"
+#define BDDB_FOOTPRINT_SUFFIX		".footprint"
+#define BDDB_LOD1MODEL_SUFFIX		".lod1.model"
+#define BDDB_LOD2MODEL_SUFFIX		".lod2.model"
+#define BDDB_LOD3MODEL_SUFFIX		".lod3.model"
 
 class BDBaseHObject : public ccHObject
 {
@@ -218,5 +223,7 @@ public:
 bool FastPlanarTextureMapping(ccHObject * planeObj);
 
 ccHObject * ConstrainedMesh(ccHObject * planeObj);
+
+ccHObject * LoD1FromFootPrint(ccHObject * buildingObj);
 
 ccHObject * LoD2FromFootPrint(ccHObject * buildingObj, bool preset_ground_height = false, double ground_height = DBL_MAX);

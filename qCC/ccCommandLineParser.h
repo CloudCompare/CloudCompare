@@ -57,6 +57,10 @@ protected: //other methods
 	/** Shouldn't be called by user.
 	**/
 	ccCommandLineParser();
+   
+   void  registerBuiltInCommands();
+   
+   void  cleanup();
 
 	//! Parses the command line
 	int start(QDialog* parent = nullptr);

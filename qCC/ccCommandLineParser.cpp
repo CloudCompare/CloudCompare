@@ -74,12 +74,14 @@ int ccCommandLineParser::Parse(int nargs, char** args, ccPluginInterfaceList& pl
 
 	//load arguments
 	QScopedPointer<ccCommandLineParser> parser(new ccCommandLineParser);
+	
+	parser->registerBuiltInCommands();
+	
+	for (int i = 1; i < nargs; ++i) //'i=1' because first argument is always program executable file!
 	{
-		for (int i = 1; i < nargs; ++i) //'i=1' because first argument is always program executable file!
-		{
-			parser->arguments().push_back(QString(args[i]));
-		}
+		parser->arguments().push_back(QString(args[i]));
 	}
+	
 	assert(!parser->arguments().empty());
 
 	//specific command: silent mode (will prevent the console dialog from appearing!
@@ -125,6 +127,7 @@ int ccCommandLineParser::Parse(int nargs, char** args, ccPluginInterfaceList& pl
 	}
 
 	//release the parser before the console (as its dialogs may be chidren of the console)
+	parser->cleanup();
 	parser.reset();
 
 	ccConsole::ReleaseInstance();
@@ -142,68 +145,10 @@ ccCommandLineParser::ccCommandLineParser()
 	, m_progressDialog(nullptr)
 	, m_parentWidget(nullptr)
 {
-	registerCommand(Command::Shared(new CommandLoad));
-	registerCommand(Command::Shared(new CommandSubsample));
-	registerCommand(Command::Shared(new CommandExtractCCs));
-	registerCommand(Command::Shared(new CommandCurvature));
-	registerCommand(Command::Shared(new CommandApproxDensity));
-	registerCommand(Command::Shared(new CommandDensity));
-	registerCommand(Command::Shared(new CommandSFGradient));
-	registerCommand(Command::Shared(new CommandRoughness));
-	registerCommand(Command::Shared(new CommandApplyTransformation));
-	registerCommand(Command::Shared(new CommandDropGlobalShift));
-	registerCommand(Command::Shared(new CommandFilterBySFValue));
-	registerCommand(Command::Shared(new CommandMergeClouds));
-	registerCommand(Command::Shared(new CommandMergeMeshes));
-	registerCommand(Command::Shared(new CommandSetActiveSF));
-	registerCommand(Command::Shared(new CommandRemoveAllSF));
-	registerCommand(Command::Shared(new CommandRemoveScanGrids));
-	registerCommand(Command::Shared(new CommandMatchBBCenters));
-	registerCommand(Command::Shared(new CommandMatchBestFitPlane));
-	registerCommand(Command::Shared(new CommandOrientNormalsMST));
-	registerCommand(Command::Shared(new CommandSORFilter));
-	registerCommand(Command::Shared(new CommandSampleMesh));
-	registerCommand(Command::Shared(new CommandExtractVertices));
-	registerCommand(Command::Shared(new CommandCrossSection));
-	registerCommand(Command::Shared(new CommandCrop));
-	registerCommand(Command::Shared(new CommandCrop2D));
-	registerCommand(Command::Shared(new CommandCoordToSF));
-	registerCommand(Command::Shared(new CommandColorBanding));
-	registerCommand(Command::Shared(new CommandC2MDist));
-	registerCommand(Command::Shared(new CommandC2CDist));
-	registerCommand(Command::Shared(new CommandStatTest));
-	registerCommand(Command::Shared(new CommandDelaunayTri));
-	registerCommand(Command::Shared(new CommandSFArithmetic));
-	registerCommand(Command::Shared(new CommandSFOperation));
-	registerCommand(Command::Shared(new CommandICP));
-	registerCommand(Command::Shared(new CommandChangeCloudOutputFormat));
-	registerCommand(Command::Shared(new CommandChangeMeshOutputFormat));
-	registerCommand(Command::Shared(new CommandChangePLYExportFormat));
-	registerCommand(Command::Shared(new CommandForceNormalsComputation));
-	registerCommand(Command::Shared(new CommandSaveClouds));
-	registerCommand(Command::Shared(new CommandSaveMeshes));
-	registerCommand(Command::Shared(new CommandAutoSave));
-	registerCommand(Command::Shared(new CommandLogFile));
-	registerCommand(Command::Shared(new CommandClear));
-	registerCommand(Command::Shared(new CommandClearClouds));
-	registerCommand(Command::Shared(new CommandPopClouds));
-	registerCommand(Command::Shared(new CommandClearMeshes));
-	registerCommand(Command::Shared(new CommandPopMeshes));
-	registerCommand(Command::Shared(new CommandSetNoTimestamp));
-	registerCommand(Command::Shared(new CommandVolume25D));
-	registerCommand(Command::Shared(new CommandRasterize));
-	registerCommand(Command::Shared(new CommandOctreeNormal));
-	registerCommand(Command::Shared(new CommandClearNormals));
-	registerCommand(Command::Shared(new CommandComputeMeshVolume));
-	registerCommand(Command::Shared(new CommandSFColorScale));
-	registerCommand(Command::Shared(new CommandSFConvertToRGB));
 }
 
 ccCommandLineParser::~ccCommandLineParser()
 {
-	removeClouds();
-	removeMeshes();
-
 	if (m_progressDialog)
 	{
 		m_progressDialog->close();
@@ -589,8 +534,10 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 		{
 			ccHObject tempContainer("Meshes");
 			{
-				for (size_t i = 0; i < m_meshes.size(); ++i)
-					tempContainer.addChild(m_meshes[i].getEntity(), ccHObject::DP_NONE);
+				for (auto &mesh : m_meshes)
+				{
+					tempContainer.addChild(mesh.getEntity(), ccHObject::DP_NONE);
+				}
 			}
 
 			//save output
@@ -614,17 +561,80 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 	}
 
 	//standard way: one file per mesh
+	for (auto &mesh : m_meshes)
 	{
-		for (size_t i = 0; i < m_meshes.size(); ++i)
-		{
-			//save output
-			QString errorStr = exportEntity(m_meshes[i], suffix);
-			if (!errorStr.isEmpty())
-				return error(errorStr);
-		}
+		//save output
+		QString errorStr = exportEntity(mesh, suffix);
+		if (!errorStr.isEmpty())
+			return error(errorStr);
 	}
 
 	return true;
+}
+
+void ccCommandLineParser::registerBuiltInCommands()
+{
+	registerCommand(Command::Shared(new CommandLoad));
+	registerCommand(Command::Shared(new CommandSubsample));
+	registerCommand(Command::Shared(new CommandExtractCCs));
+	registerCommand(Command::Shared(new CommandCurvature));
+	registerCommand(Command::Shared(new CommandApproxDensity));
+	registerCommand(Command::Shared(new CommandDensity));
+	registerCommand(Command::Shared(new CommandSFGradient));
+	registerCommand(Command::Shared(new CommandRoughness));
+	registerCommand(Command::Shared(new CommandApplyTransformation));
+	registerCommand(Command::Shared(new CommandDropGlobalShift));
+	registerCommand(Command::Shared(new CommandFilterBySFValue));
+	registerCommand(Command::Shared(new CommandMergeClouds));
+	registerCommand(Command::Shared(new CommandMergeMeshes));
+	registerCommand(Command::Shared(new CommandSetActiveSF));
+	registerCommand(Command::Shared(new CommandRemoveAllSF));
+	registerCommand(Command::Shared(new CommandRemoveScanGrids));
+	registerCommand(Command::Shared(new CommandMatchBBCenters));
+	registerCommand(Command::Shared(new CommandMatchBestFitPlane));
+	registerCommand(Command::Shared(new CommandOrientNormalsMST));
+	registerCommand(Command::Shared(new CommandSORFilter));
+	registerCommand(Command::Shared(new CommandSampleMesh));
+	registerCommand(Command::Shared(new CommandExtractVertices));
+	registerCommand(Command::Shared(new CommandCrossSection));
+	registerCommand(Command::Shared(new CommandCrop));
+	registerCommand(Command::Shared(new CommandCrop2D));
+	registerCommand(Command::Shared(new CommandCoordToSF));
+	registerCommand(Command::Shared(new CommandColorBanding));
+	registerCommand(Command::Shared(new CommandC2MDist));
+	registerCommand(Command::Shared(new CommandC2CDist));
+	registerCommand(Command::Shared(new CommandStatTest));
+	registerCommand(Command::Shared(new CommandDelaunayTri));
+	registerCommand(Command::Shared(new CommandSFArithmetic));
+	registerCommand(Command::Shared(new CommandSFOperation));
+	registerCommand(Command::Shared(new CommandICP));
+	registerCommand(Command::Shared(new CommandChangeCloudOutputFormat));
+	registerCommand(Command::Shared(new CommandChangeMeshOutputFormat));
+	registerCommand(Command::Shared(new CommandChangePLYExportFormat));
+	registerCommand(Command::Shared(new CommandForceNormalsComputation));
+	registerCommand(Command::Shared(new CommandSaveClouds));
+	registerCommand(Command::Shared(new CommandSaveMeshes));
+	registerCommand(Command::Shared(new CommandAutoSave));
+	registerCommand(Command::Shared(new CommandLogFile));
+	registerCommand(Command::Shared(new CommandClear));
+	registerCommand(Command::Shared(new CommandClearClouds));
+	registerCommand(Command::Shared(new CommandPopClouds));
+	registerCommand(Command::Shared(new CommandClearMeshes));
+	registerCommand(Command::Shared(new CommandPopMeshes));
+	registerCommand(Command::Shared(new CommandSetNoTimestamp));
+	registerCommand(Command::Shared(new CommandVolume25D));
+	registerCommand(Command::Shared(new CommandRasterize));
+	registerCommand(Command::Shared(new CommandOctreeNormal));
+	registerCommand(Command::Shared(new CommandClearNormals));
+	registerCommand(Command::Shared(new CommandComputeMeshVolume));
+	registerCommand(Command::Shared(new CommandSFColorScale));
+	registerCommand(Command::Shared(new CommandSFConvertToRGB));
+}
+
+void ccCommandLineParser::cleanup()
+{
+	removeClouds();
+	removeMeshes();
 }
 
 int ccCommandLineParser::start(QDialog* parent/*=0*/)

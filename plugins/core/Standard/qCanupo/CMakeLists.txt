@@ -5,7 +5,7 @@ option( PLUGIN_STANDARD_QCANUPO "Check to install qCanupo plugin" OFF )
 if (PLUGIN_STANDARD_QCANUPO)
 
 	#CloudCompare 'Canupo' plugin
-	project( QCANUPO_PLUGIN_DLL )
+	project( QCANUPO_PLUGIN )
 	
 	set( dlib_DIR "" CACHE PATH "DLib library root directory" )
 	if ( NOT dlib_DIR )

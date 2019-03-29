@@ -19,16 +19,30 @@
 
 //qCC_db
 #include <ccLog.h>
-#include <ccPolyline.h>
 #include <ccPointCloud.h>
+#include <ccPolyline.h>
 
 //Qt
+#include <QDialog>
 #include <QFile>
 #include <QTextStream>
-#include <QDialog>
 
 //System
-#include <string.h>
+#include <cstring>
+
+
+SinusxFilter::SinusxFilter()
+	: FileIOFilter( {
+					"_Sinusx Filter",
+					DEFAULT_PRIORITY,	// priority
+					QStringList{ "sx", "sinusx" },
+					"sx",
+					QStringList{ "Sinusx curve (*.sx)" },
+					QStringList{ "Sinusx curve (*.sx)" },
+					Import | Export
+					} )
+{
+}
 
 bool SinusxFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
@@ -39,12 +53,6 @@ bool SinusxFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) 
 		return true;
 	}
 	return false;
-}
-
-bool SinusxFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (	upperCaseExt == "SX"
-			||	upperCaseExt == "SINUSX" );
 }
 
 QString MakeSinusxName(QString name)
@@ -163,8 +171,8 @@ CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& contain
 	QTextStream stream(&file);
 
 	QString currentLine("C");
-	ccPolyline* currentPoly = 0;
-	ccPointCloud* currentVertices = 0;
+	ccPolyline* currentPoly = nullptr;
+	ccPointCloud* currentVertices = nullptr;
 	unsigned lineNumber = 0;
 	CurveType curveType = INVALID;
 	unsigned cpIndex = 0;
@@ -198,8 +206,8 @@ CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& contain
 				{
 					delete currentPoly;
 				}
-				currentPoly = 0;
-				currentVertices = 0;
+				currentPoly = nullptr;
+				currentVertices = nullptr;
 
 			}
 			//read type

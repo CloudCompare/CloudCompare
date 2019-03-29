@@ -6,7 +6,7 @@ option( PLUGIN_GL_QSSAO "Check to install qSSAO plugin" OFF )
 if (PLUGIN_GL_QSSAO)
     add_subdirectory (Randomkit)
     
-    project( QSSAO_PLUGIN )
+    project( QSSAO_GL_PLUGIN )
     
     set( CC_SHADER_FOLDER SSAO )
     include( ../../../CMakePluginTpl.cmake )    

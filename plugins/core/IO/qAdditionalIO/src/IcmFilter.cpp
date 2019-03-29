@@ -18,30 +18,33 @@
 #include "IcmFilter.h"
 
 //qCC_db
-#include <ccImage.h>
 #include <ccCameraSensor.h>
+#include <ccImage.h>
 #include <ccLog.h>
 
 //Qt
 #include <QFileInfo>
 
 //system
-#include <stdio.h>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
 
 //Max number of characters per line in an ASCII file
 //TODO: use QFile instead!
 const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
 
-bool IcmFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (upperCaseExt == "ICM");
-}
 
-bool IcmFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+IcmFilter::IcmFilter()
+	: FileIOFilter( {
+					"_ICM Filter",
+					DEFAULT_PRIORITY,	// priority
+					QStringList{ "icm" },
+					"icm",
+					QStringList{ "Clouds + calibrated images [meta][ascii] (*.icm)" },
+					QStringList(),
+					Import
+					} )
 {
-	//export not supported
-	return false;
 }
 
 CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)

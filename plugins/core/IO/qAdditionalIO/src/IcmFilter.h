@@ -21,24 +21,15 @@
 #include "FileIOFilter.h"
 
 //! Calibrated images and cloud meta-file I/O filter
-class /*QCC_IO_LIB_API*/ IcmFilter : public FileIOFilter
+class IcmFilter : public FileIOFilter
 {
 public:
-
-	//static accessors
-	static inline QString GetFileFilter() { return "Clouds + calibrated images [meta][ascii] (*.icm)"; }
-	static inline QString GetDefaultExtension() { return "icm"; }
+	IcmFilter();
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 
-protected:
-
+private:
 	static int LoadCalibratedImages(ccHObject* entities, const QString& path, const QString& imageDescFilename, const ccBBox& globalBBox);
 };
 

@@ -25,20 +25,13 @@
 class PcdFilter : public FileIOFilter
 {
 public:
-
-	//static accessors
-	static inline QString GetFileFilter() { return "Point Cloud Library cloud (*.pcd)"; }
-	static inline QString GetDefaultExtension() { return "pcd"; }
+	PcdFilter();
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters);
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters);
-	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
 
 #endif //CC_PCD_FILTER_HEADER

@@ -15,14 +15,6 @@ file( GLOB header_list *.h)
 file( GLOB source_list *.cpp *.c)
 file( GLOB ui_list ui_templates/*.ui )
 
-# PDMS support
-if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
-	file( GLOB PDMS_header_list PDMS/*.h )
-	file( GLOB PDMS_source_list PDMS/*.cpp )
-	list( APPEND header_list ${PDMS_header_list} )
-	list( APPEND source_list ${PDMS_source_list} )
-endif()
-
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${generated_ui_list} )
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "libs") 

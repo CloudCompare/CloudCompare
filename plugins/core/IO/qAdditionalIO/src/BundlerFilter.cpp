@@ -18,8 +18,8 @@
 #include "BundlerFilter.h"
 
 //Local
-#include "BundlerImportDlg.h"
 #include "BinFilter.h"
+#include "BundlerImportDlg.h"
 
 //qCC_db
 #include <ccCameraSensor.h>
@@ -71,15 +71,17 @@ struct BundlerCamera
 	bool isValid;
 };
 
-bool BundlerFilter::canLoadExtension(const QString& upperCaseExt) const
+BundlerFilter::BundlerFilter()
+	: FileIOFilter( {
+					"_Snavely Bundler Filter",
+					DEFAULT_PRIORITY,	// priority
+					QStringList{ "out" },
+					"out",
+					QStringList{ "Snavely's Bundler output (*.out)" },
+					QStringList(),
+					Import
+					} )
 {
-	return (upperCaseExt == "OUT");
-}
-
-bool BundlerFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
-{
-	//no output yet
-	return false;
 }
 
 CC_FILE_ERROR BundlerFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
@@ -213,15 +215,15 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 	//data
 	std::vector<BundlerCamera> cameras;
-	ccPointCloud* keypointsCloud = 0;
-	ccHObject* altEntity = 0;
-	typedef std::pair<unsigned,ccCameraSensor::KeyPoint> KeypointAndCamIndex;
+	ccPointCloud* keypointsCloud = nullptr;
+	ccHObject* altEntity = nullptr;
+	using KeypointAndCamIndex = std::pair<unsigned,ccCameraSensor::KeyPoint>;
 	std::vector<KeypointAndCamIndex> keypointsDescriptors;
 
 	//Read Bundler '.out' file
 	{
 		//progress dialog
-		QScopedPointer<ccProgressDialog> pDlg(0);
+		QScopedPointer<ccProgressDialog> pDlg(nullptr);
 		if (parameters.parentWidget)
 		{
 			pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
@@ -253,7 +255,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					return CC_FERR_MALFORMED_FILE;
 			}
 			//Rotation matrix
-			double* mat = (importImages ? it->trans.data() : 0);
+			double* mat = (importImages ? it->trans.data() : nullptr);
 			double sum = 0;
 			for (unsigned l=0; l<3; ++l)
 			{
@@ -593,8 +595,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				break;
 
 			QStringList parts = nextLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
-			if (parts.size() > 0)
+			if (!parts.empty())
+			{
 				imageFilenames << parts[0];
+			}
 			else
 			{
 				ccLog::Error(QString("[Bundler] Couldn't extract image name from line %1 in file '%2'!").arg(lineIndex).arg(imageListFilename));
@@ -617,7 +621,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	}
 
 	//let's try to open the image corresponding to each camera
-	QScopedPointer<ccProgressDialog> ipDlg(0);
+	QScopedPointer<ccProgressDialog> ipDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		ipDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
@@ -637,7 +641,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	CCLib::PointCloud* mntSamples = nullptr;
 	if (generateColoredDTM)
 	{
-		QScopedPointer<ccProgressDialog> toDlg(0);
+		QScopedPointer<ccProgressDialog> toDlg(nullptr);
 		if (parameters.parentWidget)
 		{
 			toDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
@@ -647,12 +651,12 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		}
 
 		//1st step: triangulate keypoints (or use existing one)
-		ccGenericMesh* baseDTMMesh = (altEntity ? ccHObjectCaster::ToGenericMesh(altEntity) : 0);
+		ccGenericMesh* baseDTMMesh = (altEntity ? ccHObjectCaster::ToGenericMesh(altEntity) : nullptr);
 		CCLib::GenericIndexedMesh* dummyMesh = baseDTMMesh;
 		if (!baseDTMMesh)
 		{
 			//alternative keypoints?
-			ccGenericPointCloud* altKeypoints = (altEntity ? ccHObjectCaster::ToGenericPointCloud(altEntity) : 0);
+			ccGenericPointCloud* altKeypoints = (altEntity ? ccHObjectCaster::ToGenericPointCloud(altEntity) : nullptr);
 			char errorStr[1024];
 			dummyMesh = CCLib::PointProjectionTools::computeTriangulation(	altKeypoints ? altKeypoints : keypointsCloud,
 																			DELAUNAY_2D_BEST_LS_PLANE,
@@ -671,7 +675,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			mntSamples = CCLib::MeshSamplingTools::samplePointsOnMesh((CCLib::GenericMesh*)dummyMesh, coloredDTMVerticesCount);
 			if (!baseDTMMesh)
 				delete dummyMesh;
-			dummyMesh = 0;
+			dummyMesh = nullptr;
 
 			if (mntSamples)
 			{
@@ -683,7 +687,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					//not enough memory
 					ccLog::Error("Not enough memory to store DTM colors! DTM generation cancelled");
 					delete mntSamples;
-					mntSamples = 0;
+					mntSamples = nullptr;
 					generateColoredDTM = false;
 				}
 				else
@@ -699,10 +703,11 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	double OR_globalCorners[4] = { 0, 0, 0, 0}; //corners for the global set
 
 	//alternative keypoints? (for ortho-rectification only)
-	ccGenericPointCloud* altKeypoints = 0, *_keypointsCloud = 0;
+	ccGenericPointCloud* altKeypoints = nullptr;
+	ccGenericPointCloud* _keypointsCloud = nullptr;
 	if (orthoRectifyImages)
 	{
-		altKeypoints = (altEntity ? ccHObjectCaster::ToGenericPointCloud(altEntity) : 0);
+		altKeypoints = (altEntity ? ccHObjectCaster::ToGenericPointCloud(altEntity) : nullptr);
 		_keypointsCloud = (altKeypoints ? altKeypoints : keypointsCloud);
 	}
 
@@ -721,7 +726,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		{
 			ccLog::Error(QString("[Bundler] %1 (image '%2')").arg(errorStr,imageFilenames[i]));
 			delete image;
-			image = 0;
+			image = nullptr;
 			break;
 		}
 
@@ -730,7 +735,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		image->setAlpha(0.75f); //semi transparent by default
 
 		//associate image with calibration information
-		ccCameraSensor* sensor = 0;
+		ccCameraSensor* sensor = nullptr;
 		{
 			ccCameraSensor::IntrinsicParameters params;
 			params.arrayWidth = static_cast<int>(image->getW());
@@ -840,7 +845,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					//for ortho-rectification log
 					ORImageInfo info;
 					double corners[8];
-					ccImage* orthoImage = 0;
+					ccImage* orthoImage = nullptr;
 					
 					//"standard" ortho-rectification method
 					if (orthoRectMethod == BundlerImportDlg::OPTIMIZED)
@@ -994,7 +999,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 #endif
 
 						delete orthoImage;
-						orthoImage = 0;
+						orthoImage = nullptr;
 
 						OR_infos.push_back(info);
 
@@ -1088,7 +1093,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		else
 		{
 			delete sensor;
-			sensor = 0;
+			sensor = nullptr;
 		}
 
 		QApplication::processEvents();
@@ -1102,11 +1107,11 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 	if (!importKeypoints && keypointsCloud)
 		delete keypointsCloud;
-	keypointsCloud = 0;
+	keypointsCloud = nullptr;
 
 	if (!importKeypoints && altEntity)
 		delete altEntity;
-	altEntity = 0;
+	altEntity = nullptr;
 
 	/*** post-processing steps ***/
 
@@ -1202,14 +1207,14 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				ccLog::Warning("[Bundler] Failed to generate DTM vertices cloud! (not enough memory?)");
 				delete mntCloud;
-				mntCloud = 0;
+				mntCloud = nullptr;
 			}
 		}
 
 		delete mntSamples;
-		mntSamples = 0;
+		mntSamples = nullptr;
 		delete[] mntColors;
-		mntColors = 0;
+		mntColors = nullptr;
 	}
 
 	return cancelledByUser ? CC_FERR_CANCELED_BY_USER : CC_FERR_NO_ERROR;

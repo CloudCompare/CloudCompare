@@ -26,15 +26,18 @@
 //TODO: use QFile instead!
 const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
 
-bool SoiFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (upperCaseExt == "SOI");
-}
 
-bool SoiFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+SoiFilter::SoiFilter()
+	: FileIOFilter( {
+					"_Soisic Filter",
+					DEFAULT_PRIORITY,	// priority
+					QStringList{ "soi" },
+					"soi",
+					QStringList{ "Mensi Soisic cloud (*.soi)" },
+					QStringList(),
+					Import
+					} )
 {
-	//not supported
-	return false;
 }
 
 CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
@@ -80,7 +83,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	//Progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(false, parameters.parentWidget)); //cancel is not supported
@@ -160,4 +163,3 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 
 	return CC_FERR_NO_ERROR;
 }
-

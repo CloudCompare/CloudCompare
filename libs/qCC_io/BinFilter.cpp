@@ -53,9 +53,17 @@
 #endif
 
 
-bool BinFilter::canLoadExtension(const QString& upperCaseExt) const
+BinFilter::BinFilter()
+	: FileIOFilter( {
+					"_CloudCompare BIN Filter",
+					1.0f,	// priority
+					QStringList{ "bin" },
+					"bin",
+					QStringList{ GetFileFilter() },
+					QStringList{ GetFileFilter() },
+					Import | Export | BuiltIn
+					} )	
 {
-	return (upperCaseExt == "BIN");
 }
 
 bool BinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

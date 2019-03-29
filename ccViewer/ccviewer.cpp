@@ -38,7 +38,7 @@
 
 //plugins
 #include "ccGLFilterPluginInterface.h"
-#include "ccIOFilterPluginInterface.h"
+#include "ccIOPluginInterface.h"
 #include "ccPluginManager.h"
 
 //3D mouse handler

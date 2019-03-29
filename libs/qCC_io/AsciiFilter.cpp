@@ -70,14 +70,18 @@ AsciiOpenDlg* AsciiFilter::GetOpenDialog(QWidget* parentWidget/*=0*/)
 	return s_openDialog;
 }
 
-bool AsciiFilter::canLoadExtension(const QString& upperCaseExt) const
+
+AsciiFilter::AsciiFilter()
+	: FileIOFilter( {
+					"_ASCII Filter",
+					2.0f,	// priority
+					QStringList{ "txt", "asc", "neu", "xyz", "pts", "csv" },
+					"asc",
+					QStringList{ GetFileFilter() },
+					QStringList{ GetFileFilter() },
+					Import | Export | BuiltIn
+					} )
 {
-	return (	upperCaseExt == "ASC"
-			||	upperCaseExt == "TXT"
-			||	upperCaseExt == "XYZ"
-			||	upperCaseExt == "NEU"
-			||	upperCaseExt == "PTS"
-			||	upperCaseExt == "CSV");
 }
 
 bool AsciiFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

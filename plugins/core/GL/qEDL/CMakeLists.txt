@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 
-option( INSTALL_QEDL_PLUGIN "Check to install qEDL plugin" OFF )
+option( PLUGIN_GL_QEDL "Check to install qEDL plugin" OFF )
 
 # CloudCompare 'EDL' plugin
-if (INSTALL_QEDL_PLUGIN)
-    project( QEDL_PLUGIN )
+if (PLUGIN_GL_QEDL)
+    project( QEDL_GL_PLUGIN )
     
 	include_directories( src )
 	

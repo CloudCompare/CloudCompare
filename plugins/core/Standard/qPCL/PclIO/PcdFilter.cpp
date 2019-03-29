@@ -40,9 +40,17 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/io/pcd_io.h>
 
-bool PcdFilter::canLoadExtension(const QString& upperCaseExt) const
+PcdFilter::PcdFilter()
+    : FileIOFilter( {
+                    "_Point Cloud Library Filter",
+                    13.0f,	// priority
+                    QStringList{ "pcd" },
+                    "pcd",
+                    QStringList{ "Point Cloud Library cloud (*.pcd)" },
+                    QStringList(),
+                    Import
+                    } )
 {
-	return (upperCaseExt == "PCD");
 }
 
 bool PcdFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
@@ -195,9 +203,9 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 		//Compute parameters
 		ccGenericPointCloud* pc = ccHObjectCaster::ToGenericPointCloud(ccCloud);
 		sensor->computeAutoParameters(pc);
-	
+
 		sensor->setEnabled(false);
-		
+
 		ccCloud->addChild(sensor);
 	}
 

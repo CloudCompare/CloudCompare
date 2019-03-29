@@ -23,7 +23,7 @@
 
 //plugins
 #include "ccGLFilterPluginInterface.h"
-#include "ccIOFilterPluginInterface.h"
+#include "ccIOPluginInterface.h"
 #include "ccStdPluginInterface.h"
 
 //Qt
@@ -142,7 +142,7 @@ void ccPluginManager::loadPlugins()
 
 			case CC_IO_FILTER_PLUGIN: //I/O filter
 			{
-				ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(plugin);
+				ccIOPluginInterface* ioPlugin = static_cast<ccIOPluginInterface*>(plugin);
 
 				QStringList	ioExtensions;
 				

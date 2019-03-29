@@ -23,11 +23,11 @@
 
 qCSVMatrixIO::qCSVMatrixIO(QObject *parent)
 	: QObject( parent )
-	, ccIOFilterPluginInterface( ":/CC/plugin/qCSVMatrixIO/info.json" )
+	, ccIOPluginInterface( ":/CC/plugin/qCSVMatrixIO/info.json" )
 {
 }
 
-FileIOFilter::Shared qCSVMatrixIO::getFilter()
+ccIOPluginInterface::FilterList qCSVMatrixIO::getFilters()
 {
-	return FileIOFilter::Shared(new CSVMatrixFilter);
+	return { FileIOFilter::Shared( new CSVMatrixFilter ) };
 }

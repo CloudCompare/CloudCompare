@@ -19,13 +19,27 @@
 
 //qCC_db
 #include <ccLog.h>
-#include <ccPolyline.h>
 #include <ccPointCloud.h>
+#include <ccPolyline.h>
 
 //Qt
 #include <QFile>
-#include <QTextStream>
 #include <QStringList>
+#include <QTextStream>
+
+
+SalomeHydroFilter::SalomeHydroFilter()
+	: FileIOFilter( {
+					"_SalomeHydro Filter",
+					DEFAULT_PRIORITY,	// priority
+					QStringList{ "poly" },
+					"poly",
+					QStringList{ "Salome Hydro polylines (*.poly)" },
+					QStringList{ "Salome Hydro polylines (*.poly)" },
+					Import | Export
+					} )
+{	
+}
 
 bool SalomeHydroFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
@@ -38,13 +52,10 @@ bool SalomeHydroFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclus
 	return false;
 }
 
-bool SalomeHydroFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (upperCaseExt == "POLY");
-}
-
 CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
+	Q_UNUSED( parameters );
+	
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
@@ -216,7 +227,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 					if (!currentVertices->reserve(currentVertices->size() + 64))
 					{
 						delete currentVertices;
-						currentVertices = 0;
+						currentVertices = nullptr;
 						result = CC_FERR_NOT_ENOUGH_MEMORY;
 						break;
 					}

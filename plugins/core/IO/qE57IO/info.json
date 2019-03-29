@@ -1,0 +1,22 @@
+{
+	"type" : "I/O",
+	"core" : true,
+	"name" : "E57",
+	"description": "Add E57 read/write capability using the libE57Format library.",
+	"authors" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		},
+		{
+			"name" : "Andy Maloney",
+			"email" : "asmaloney@gmail.com"
+		}
+	],
+	"references" : [
+		{
+			"text" : "libE57Format git repo",
+			"url" : "https://github.com/asmaloney/libE57Format"
+		}
+	]
+}

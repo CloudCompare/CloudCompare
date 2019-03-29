@@ -441,13 +441,13 @@ ccPointCloud::~ccPointCloud()
 
 void ccPointCloud::clear()
 {
-	unalloactePoints();
+	unallocatePoints();
 	unallocateColors();
 	unallocateNorms();
 	//enableTempColor(false); //DGM: why?
 }
 
-void ccPointCloud::unalloactePoints()
+void ccPointCloud::unallocatePoints()
 {
 	clearLOD();	// we have to clear the LOD structure before clearing the colors / SFs, so we can't leave it to notifyGeometryUpdate()
 	showSFColorsScale(false); //SFs will be destroyed
@@ -464,6 +464,18 @@ void ccPointCloud::notifyGeometryUpdate()
 	releaseVBOs();
 	clearLOD();
 }
+
+void ccPointCloud::setDisplay(ccGenericGLDisplay* win)
+{
+	if (m_currentDisplay && win != m_currentDisplay)
+	{
+		//be sure to release the VBOs before switching to another (or no) display!
+		releaseVBOs();
+	}
+
+	BaseClass::setDisplay(win);
+}
+
 
 ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=0*/, bool ignoreChildren/*=false*/)
 {

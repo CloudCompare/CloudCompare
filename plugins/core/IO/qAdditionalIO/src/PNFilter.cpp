@@ -29,9 +29,18 @@
 //default normal value
 static const CCVector3 s_defaultNorm(0,0,1);
 
-bool PNFilter::canLoadExtension(const QString& upperCaseExt) const
+
+PNFilter::PNFilter()
+	: FileIOFilter( {
+					"_Point+Normal Filter",
+					DEFAULT_PRIORITY,	// priority
+					QStringList{ "pn" },
+					"pn",
+					QStringList{ "Point+Normal cloud (*.pn)" },
+					QStringList{ "Point+Normal cloud (*.pn)" },
+					Import | Export
+					} )
 {
-	return (upperCaseExt == "PN");
 }
 
 bool PNFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

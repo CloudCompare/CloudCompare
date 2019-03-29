@@ -504,9 +504,17 @@ public:
 	}
 };
 
-bool ShpFilter::canLoadExtension(const QString& upperCaseExt) const
+ShpFilter::ShpFilter()
+	: FileIOFilter( {
+					"_Shape Filter",
+					14.0f,	// priority
+					QStringList{ "shp" },
+					"shp",
+					QStringList{ "SHP entity (*.shp)" },
+					QStringList{ "SHP entity (*.shp)" },
+					Import | Export | BuiltIn
+					} )
 {
-	return (upperCaseExt == "SHP");
 }
 
 bool ShpFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const

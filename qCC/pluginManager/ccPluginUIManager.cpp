@@ -23,7 +23,7 @@
 #include "ccConsole.h"
 #include "ccGLWindow.h"
 #include "ccGLFilterPluginInterface.h"
-#include "ccIOFilterPluginInterface.h"
+#include "ccIOPluginInterface.h"
 #include "ccMainAppInterface.h"
 #include "ccPluginInfoDlg.h"
 #include "ccPluginUIManager.h"
@@ -141,7 +141,7 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 				
 			case CC_IO_FILTER_PLUGIN:
 			{
-				ccIOFilterPluginInterface *ioPlugin = static_cast<ccIOFilterPluginInterface*>( plugin );
+				ccIOPluginInterface *ioPlugin = static_cast<ccIOPluginInterface*>( plugin );
 
 				// there are no menus or toolbars for I/O plugins
 				

@@ -21,24 +21,16 @@
 #include "FileIOFilter.h"
 
 //! Point+Scalar value binary point cloud file I/O filter
-class /*QCC_IO_LIB_API*/ PVFilter : public FileIOFilter
+class PVFilter : public FileIOFilter
 {
 public:
-
-	//static accessors
-	static inline QString GetFileFilter() { return "Point+Value cloud (*.pv)"; }
-	static inline QString GetDefaultExtension() { return "pv"; }
+	PVFilter();
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual bool exportSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
 
 #endif //CC_PV_FILTER_HEADER

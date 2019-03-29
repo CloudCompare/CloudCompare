@@ -11,7 +11,22 @@ v2.11 (Anoia) - (in development)
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
 
-v2.10.3 (Zephyrus) - (In progress)
+- Changes
+  - Command line tool:
+    - The `-FBX_EXPORT_FMT` command is now split. Use `-FBX -EXPORT_FMT`.
+  - Plugins:
+    - The I/O plugin interface has changed, so if you have your own I/O plugins, you will need to update them.
+      - The interface name changed from `ccIOFilterPluginInterface` to `ccIOPluginInterface`.
+      - The `ccIOPluginInterface::getFilter()` method was removed in favour of `ccIOPluginInterface::getFilters()`.
+      - The `FileIOFilter` base class now takes a struct as an argument containing all the static info about a filter - extensions, features (import/export), etc.. See `FooFilter` in the `ExampleIOPlugin` and the comments in `FileIOFilter::FilterInfo`.
+      - The use of `FileIOFilter::FilterInfo` means that the following virtual functions in I/O filters are no longer virtual/required:
+        - importSupported
+        - exportSupported
+        - getFileFilters
+        - getDefaultExtension
+        - canLoadExtension
+
+v2.10.3 (Zephyrus) - (in development)
 ----------------------
 
 - Enhancements
@@ -20,8 +35,13 @@ v2.10.3 (Zephyrus) - (In progress)
 - Bug fixes
   - Command line:
     - the 'EXTRACT_VERTICES' option was actually deleting the extracted vertices right after extracting them, causing a crash when trying to access them later :| (#847)
+    - fix handling of SF indices in SF_ARITHMETIC and COMMAND_SF_OP
+    - the COMMAND_ICP_ROT option of the ICP command line tool was ignored (#884)
+    - when loading a BIN file from the command line, only the first-level clouds were considered
   - Fix loading LAS files with paths containing multi-byte characters when using PDAL (#869)
+  - When saving a cloud read from LAS 1.0 let PDAL choose the default LAS version (#874)
   - Fix potential crash or use of incorrect data when comparing clouds (#871)
+  - Fix potential crash when quitting or switching displays
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------
@@ -88,7 +108,7 @@ v2.10 (Zephyrus) - 01/06/2019
 		- Display > Language translation
 		- currently supported languages:
 			* English (default)
-			* Brazilian portuguese (partial)
+			* Brazilian Portuguese (partial)
 			* French (very partial)
 			* Russian (partial)
 		- volunteers are welcome: https://www.cloudcompare.org/forum/viewtopic.php?t=1444
@@ -366,7 +386,7 @@ v2.9 (Omnia) - 10/22/2017
 			* optional argument: '-TO_FILE {filename}' to output the volume(s) in a file
 		- LAS files:
 			* when loading LAS files without any specification about Global Shift, no shift will be applied, not even the LAS file internal 'shift' (to avoid confusion)
-			* however, it is highly recommanded to always specifiy a Global Shift (AUTO or a specific vector) to avoid losing precision when dealing with big coordinates!
+			* however, it is highly recommended to always specify a Global Shift (AUTO or a specific vector) to avoid losing precision when dealing with big coordinates!
 		- Other improvements:
 			* the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
 			* the ASCII loading dialog shouldn't appear anymore in 'SILENT' mode (only if CC really can't guess anything)
@@ -760,7 +780,7 @@ v2.7.0 - 04/22/2016
 
 - Bug fix:
 	* The HSV to RGB method was broken
-	* The 'Convert normals to HSV colors' mehod doesn't rely on the Dip / Dip direction anymore as the way these values
+	* The 'Convert normals to HSV colors' method doesn't rely on the Dip / Dip direction anymore as the way these values
 		are computed have been changed recently (with a symmetry about the plane Z = 0)
 	* When playing with the 'skip lines' parameter of the ASCII file loading dialog, the roles assignments could be cleared
 		(when a line was reappearing while it had less elements than the other lines)
@@ -802,7 +822,7 @@ v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 	* Support for the NVidia 3D Vision glasses (thanks to Amfax (UK) - www.amfax.co.uk)
 		- new option of the 'Stereo' mode
 		- the graphic card must support OpenGL quad buffering (i.e. latest GeForce or Quadro cards)
-		- the 3D stereo mode must be enabled in the NVidia Control Pannel
+		- the 3D stereo mode must be enabled in the NVidia Control Panel
 		- the screen frequency must be manually set to the right frequency (i.e. 100 or 120Hz) if not already
 		- (the 3D view is forced to exclusive full-screen mode)
 		- shaders (EDL, etc.) are supported
@@ -1071,7 +1091,7 @@ v2.6.2 10/08/2015
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool
 	* The 'inverse (1/x)' function of the SF arithmetic tool was not accessible (the integer part was applied instead)
-	* If only one plugin was loaded (with mulitple methods such as qPCL) then the 'Plugins' menu was staying disabled
+	* If only one plugin was loaded (with multiple methods such as qPCL) then the 'Plugins' menu was staying disabled
 	* The scale value displayed in the 3D views (under the scale bar) was wrong when the zoom of the 'Render to file'
 		method was greater than 1
 	* The 'Apply all' option of the 'Global shift & scale' dialog wasn't taken into account when loading LAS/LAZ files
@@ -1096,7 +1116,7 @@ v2.6.2 10/08/2015
 	* In command line mode, the Delaunay command was ignoring the 'AUTO_SAVE OFF' option and was creating a looping hierarchy
 		(potentially causing infinite loops later...)
 	* OBJ files: when merging multiple models with textures having the same (local) filename, the images could overwrite each other once saved
-	* Rasterize: saving a raster with the currently displayed scalar field as additioanl layer would make CC crash (+ memory leak fixed)
+	* Rasterize: saving a raster with the currently displayed scalar field as additional layer would make CC crash (+ memory leak fixed)
 	* Point-pair based alignment: the markers picked on the aligned entity could become very big (or very small) when the scale was to be adjusted
 		and the scale of the aligned entity was very different from the reference one.
 	* The 'Apply Transformation' tool can now be applied on primitives
@@ -1337,7 +1357,7 @@ v2.6.0 10/24/2014
 		- this plugin is based on the LGPL Cork Library (https://github.com/gilbo/cork)
 		- allows to compute the difference, union or intersection of two CLOSED meshes
 		- current limitations:
-			* doesn't keep the mesh(es) attributes (color, nrormals, etc.)
+			* doesn't keep the mesh(es) attributes (color, normals, etc.)
 			* only available on Windows
 
 - Enhancements:
@@ -1533,7 +1553,7 @@ v2.5.5 07/06/2014
 				and or/rescaled automatically)
 			* this new method can be called on several clouds at once
 		- when a transformation (applied with 'Edit > Apply transformation') causes the cloud coordinates
-			to go overbounds, the same dialog appears in order for the user to optionaly update the global
+			to go out of bounds, the same dialog appears in order for the user to optionally update the global
 			shift/scale information instead.
 	* Bundler (.out) import:
 		- Big coordinates (for keypoints) are now properly handled (with the Global Shift & Scale mechanism)
@@ -1543,7 +1563,7 @@ v2.5.5 07/06/2014
 		- SQRT, POW2, POW3, EXP, LOG, LOG10, COS(radians), SIN(radians), TAN(radians), ACOS, ASIN, ATAN
 	* Point clouds are now pre-loaded in the graphic card memory if possible (via VBOs)
 		- allows for much faster display (up to 15 times!)
-		- tihs feature can be disabled in the "Display Options" dialog ("Other display options" tab)
+		- this feature can be disabled in the "Display Options" dialog ("Other display options" tab)
 	* Histogram display enhanced with the QCustomPlot library (http://www.qcustomplot.com/)
 	* Scalar-field properties editing dialog enhanced:
 		- sliders are replaced by interactors displayed over a representation of the SF histogram
@@ -1567,7 +1587,7 @@ v2.5.5 07/06/2014
 	* The 'Interactive Transformation' tool is now much more accurate
 		- only double-precision matrices are used
 		- before that, especially when lots of rotations were applied to an entity, the resulting transformation matrix
-			could have had accumulated too many numerical errors resulting in a slightly shrinked cloud
+			could have had accumulated too many numerical errors resulting in a slightly shrunk cloud
 	* (Mac OS X) Fonts on "retina" displays are no longer fuzzy
 	* 3D mouse support: CloudCompare now relies on the official 3dConnexion SDK
 		- wireless devices should now be handled correctly
@@ -1763,7 +1783,7 @@ v2.5.2 12/19/2013
 	- when selecting the 'min' or 'max height' projections, the user can now choose
 		to 'resample' the original cloud in order to produce a new cloud (instead
 		of generating a regularly sampled cloud using the grid cell's centers)
-	- the tool can now export the resulting grid as a true multiband raster (geotiff)
+	- the tool can now export the resulting grid as a true multi-band raster (geotiff)
 	- menu entry renamed: "Tools > Projection > Rasterize (Height grid generation)"
 - It is now possible to compile CloudCompare with 64 bits floating point values
 	(i.e 64 bits 'doubles' instead of 32 bits 'floats') for coordinates and/or scalars.
@@ -1797,7 +1817,7 @@ v2.5.2 12/19/2013
 - Other enhancements:
 	- 'Clipping-box' tool:
 		* the clipping box position and extension can now be edited
-			(see the 'advanced' button in the 'Box thicnkess' frame)
+			(see the 'advanced' button in the 'Box thickness' frame)
 		* when extracting contours, CC will now ask the user if he wishes/accepts
 			to split the initial contour in several parts so as to really respect
 			the 'max edge length' parameter (this gives a much nicer result).
@@ -1810,9 +1830,9 @@ v2.5.2 12/19/2013
 	- the 'Edit > Transformation' tool now offers 3 different ways to input a transformation:
 		* classical 4x4 transformation matrix
 		* rotation axis, rotation angle and translation vector
-		* euler angles and translation vector
+		* Euler angles and translation vector
 	- if you paste a transformation matrix copied from the console, the 'Edit > Transformation' tool
-		will now automatically remove the timetsamp (between square brackets)
+		will now automatically remove the timestamp (between square brackets)
 	- when using 'Local models' when computing cloud-to-cloud distances, CC will now take the
 		smallest distance between each point and either the local model or the nearest neighbor
 		(in order to avoid clearly erroneous distances due to badly shaped local models).
@@ -1821,7 +1841,7 @@ v2.5.2 12/19/2013
 		* a progress dialog is now displayed during loading/saving
 		* multiple loading sessions can be done concurrently (use drag & drop on a 3D view
 			- note: only interesting when loading files from different drives)
-		* additional check addded to detect corrupted meshes
+		* additional check added to detect corrupted meshes
 	- Global rescaling applying at loading time is now properly handled
 		* works just like global shift
 		* appears in the entity properties as well

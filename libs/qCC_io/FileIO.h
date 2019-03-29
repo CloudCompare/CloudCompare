@@ -24,21 +24,21 @@
 
 class FileIO
 {
-    public:
-        QCC_IO_LIB_API static void setWriterInfo( const QString &applicationName, const QString &version );
-        QCC_IO_LIB_API static QString writerInfo();
-
-		QCC_IO_LIB_API static QString applicationName();
-		QCC_IO_LIB_API static QString version();
-		
-		QCC_IO_LIB_API static QString createdBy();
-		QCC_IO_LIB_API static QString createdDateTime();
-		
-    private:
-        FileIO() = delete;
-
-		static QString s_applicationName;
-		static QString s_version;
-		static QString s_writerInfo;
+public:
+	FileIO() = delete;
+	
+	QCC_IO_LIB_API static void setWriterInfo( const QString &applicationName, const QString &version );
+	QCC_IO_LIB_API static QString writerInfo();
+	
+	QCC_IO_LIB_API static QString applicationName();
+	QCC_IO_LIB_API static QString version();
+	
+	QCC_IO_LIB_API static QString createdBy();
+	QCC_IO_LIB_API static QString createdDateTime();
+	
+private:
+	static QString s_applicationName;
+	static QString s_version;
+	static QString s_writerInfo;
 };
 #endif

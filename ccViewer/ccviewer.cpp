@@ -37,7 +37,7 @@
 #include <ccPointCloud.h>
 
 //plugins
-#include "ccGLFilterPluginInterface.h"
+#include "ccGLPluginInterface.h"
 #include "ccIOPluginInterface.h"
 #include "ccPluginManager.h"
 
@@ -196,7 +196,7 @@ void ccViewer::loadPlugins()
 		// is this a GL plugin?
 		if ( plugin->getType() == CC_GL_FILTER_PLUGIN )
 		{
-			ccGLFilterPluginInterface *glPlugin = static_cast<ccGLFilterPluginInterface*>( plugin );
+			ccGLPluginInterface *glPlugin = static_cast<ccGLPluginInterface*>( plugin );
 			
 			const QString pluginName = glPlugin->getName();
 			
@@ -255,7 +255,7 @@ void ccViewer::doEnableGLFilter()
 		return;
 	}
 	
-	ccGLFilterPluginInterface	*plugin = action->data().value<ccGLFilterPluginInterface *>();
+	ccGLPluginInterface	*plugin = action->data().value<ccGLPluginInterface *>();
 	
 	if ( plugin == nullptr )
 	{

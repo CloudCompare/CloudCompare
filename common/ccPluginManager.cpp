@@ -22,7 +22,7 @@
 #include <ccLog.h>
 
 //plugins
-#include "ccGLFilterPluginInterface.h"
+#include "ccGLPluginInterface.h"
 #include "ccIOPluginInterface.h"
 #include "ccStdPluginInterface.h"
 

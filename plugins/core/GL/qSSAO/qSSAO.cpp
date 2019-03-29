@@ -24,7 +24,7 @@
 
 qSSAO::qSSAO(QObject *parent)
 	: QObject(parent)
-	, ccGLFilterPluginInterface(":/CC/plugin/qSSAO/info.json")
+	, ccGLPluginInterface(":/CC/plugin/qSSAO/info.json")
 {
 }
 

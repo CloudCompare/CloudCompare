@@ -18,22 +18,22 @@
 #ifndef Q_EDL_PLUGIN_HEADER
 #define Q_EDL_PLUGIN_HEADER
 
-#include "ccGLFilterPluginInterface.h"
+#include "ccGLPluginInterface.h"
 
 //! EDL shader (Eye Dome Lighting)
-class qEDL : public QObject, public ccGLFilterPluginInterface
+class qEDL : public QObject, public ccGLPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccGLFilterPluginInterface)
+	Q_INTERFACES(ccGLPluginInterface)
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qEDL" FILE "info.json")
 
 public:
-	qEDL( QObject *parent = nullptr );
+	explicit qEDL( QObject *parent = nullptr );
 	
-	virtual ~qEDL() = default;
+	~qEDL() override = default;
 
 	//inherited from ccGLFilterPluginInterface
-	virtual ccGlFilter* getFilter() override;
+	ccGlFilter* getFilter() override;
 };
 
 #endif

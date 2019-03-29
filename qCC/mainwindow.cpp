@@ -117,7 +117,7 @@
 
 //other
 #include "ccCropTool.h"
-#include "ccGLFilterPluginInterface.h"
+#include "ccGLPluginInterface.h"
 #include "ccPersistentSettings.h"
 #include "ccRecentFiles.h"
 #include "ccRegistrationTools.h"

@@ -178,6 +178,8 @@
     <file>images/stocker/open.png</file>
     <file>images/stocker/save.png</file>
     <file>images/stocker/texture.png</file>
+    <file>images/stocker/setheight.png</file>
     <file>images/stocker/lod1.png</file>
+    <file>images/stocker/setground.png</file>
   </qresource>
 </RCC>

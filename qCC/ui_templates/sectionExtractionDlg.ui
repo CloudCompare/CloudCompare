@@ -109,6 +109,28 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="setFootPrintGroundtoolButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/setground.png</normaloff>:/CC/Stocker/images/stocker/setground.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="setFootPrintHeighttoolButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/setheight.png</normaloff>:/CC/Stocker/images/stocker/setheight.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="exportSectionsToolButton">
         <property name="enabled">
          <bool>false</bool>

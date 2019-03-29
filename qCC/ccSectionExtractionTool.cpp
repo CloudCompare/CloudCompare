@@ -90,7 +90,8 @@ ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	connect(extractPointsToolButton, SIGNAL(clicked()), this, SLOT(extractPoints()));
 	connect(unfoldToolButton, SIGNAL(clicked()), this, SLOT(unfoldPoints()));
 	connect(exportSectionsToolButton, SIGNAL(clicked()), this, SLOT(exportSections()));
-
+	connect(setFootPrintHeighttoolButton, SIGNAL(clicked()), this, SLOT(setHeight()));
+	connect(setFootPrintGroundtoolButton, SIGNAL(clicked()), this, SLOT(setGround()));
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Space);  //space bar for the "pause" button
 	addOverridenShortcut(Qt::Key_Escape); //cancel current polyline edition
@@ -1312,6 +1313,18 @@ void ccSectionExtractionTool::exportSections()
 	}
 
 	ccLog::Print(QString("[ccSectionExtractionTool] %1 sections exported").arg(exportCount));
+}
+
+void ccSectionExtractionTool::setGround()
+{
+	vertAxisComboBox->setCurrentIndex(1);
+	setVertDimension(vertAxisComboBox->currentIndex());
+}
+
+void ccSectionExtractionTool::setHeight()
+{
+	vertAxisComboBox->setCurrentIndex(1);
+	setVertDimension(vertAxisComboBox->currentIndex());
 }
 
 bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSection,

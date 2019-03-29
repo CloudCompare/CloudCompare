@@ -76,6 +76,8 @@ protected slots:
 	void extractPoints();
 	void unfoldPoints();
 	void exportSections();
+	void setGround();
+	void setHeight();
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
@@ -226,6 +228,9 @@ protected: //members
 
 	//! Global clouds bounding-box
 	ccBBox m_cloudsBox;
+
+	double m_ground;
+	double m_height;
 };
 
 #endif //CC_SECTION_EXTRACTION_TOOL_HEADER

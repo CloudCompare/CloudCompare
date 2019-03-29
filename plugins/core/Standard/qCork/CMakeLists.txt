@@ -10,6 +10,6 @@ if (PLUGIN_STANDARD_QCORK)
     include( CorkSupport.cmake )
     
 	include( ../../../CMakePluginTpl.cmake )
-    
+    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "plugins") 
     target_link_cork( ${PROJECT_NAME} )
 endif()

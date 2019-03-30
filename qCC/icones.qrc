@@ -178,8 +178,18 @@
     <file>images/stocker/open.png</file>
     <file>images/stocker/save.png</file>
     <file>images/stocker/texture.png</file>
+    <file>images/stocker/viewglobe.png</file>
+    <file>images/stocker/zoomfit.png</file>
     <file>images/stocker/setheight.png</file>
     <file>images/stocker/lod1.png</file>
     <file>images/stocker/setground.png</file>
+    <file>images/stocker/pickpts.png</file>
+    <file>images/stocker/pickline.png</file>
+    <file>images/stocker/viewback.png</file>
+    <file>images/stocker/viewbottom.png</file>
+    <file>images/stocker/viewfront.png</file>
+    <file>images/stocker/viewleft.png</file>
+    <file>images/stocker/viewright.png</file>
+    <file>images/stocker/viewtop.png</file>
   </qresource>
 </RCC>

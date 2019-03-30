@@ -22,7 +22,7 @@
 
 #include "ccConsole.h"
 #include "ccGLWindow.h"
-#include "ccGLFilterPluginInterface.h"
+#include "ccGLPluginInterface.h"
 #include "ccIOPluginInterface.h"
 #include "ccMainAppInterface.h"
 #include "ccPluginInfoDlg.h"
@@ -107,7 +107,7 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 				
 			case CC_GL_FILTER_PLUGIN: //GL filter
 			{
-				ccGLFilterPluginInterface *glPlugin = static_cast<ccGLFilterPluginInterface*>( plugin );
+				ccGLPluginInterface *glPlugin = static_cast<ccGLPluginInterface*>( plugin );
 								
 				QAction* action = new QAction( pluginName, this );
 				
@@ -404,7 +404,7 @@ void ccPluginUIManager::enableGLFilter()
 	
 	Q_ASSERT( action != nullptr );
 	
-	ccGLFilterPluginInterface	*plugin = action->data().value<ccGLFilterPluginInterface *>();
+	ccGLPluginInterface	*plugin = action->data().value<ccGLPluginInterface *>();
 	
 	if ( plugin == nullptr )
 	{

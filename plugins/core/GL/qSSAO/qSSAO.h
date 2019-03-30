@@ -18,24 +18,22 @@
 #ifndef Q_SSAO_PLUGIN_HEADER
 #define Q_SSAO_PLUGIN_HEADER
 
-#include "ccGLFilterPluginInterface.h"
+#include "ccGLPluginInterface.h"
 
 //! SSAO shader (Screen Space Ambient Occlusion)
-class qSSAO : public QObject, public ccGLFilterPluginInterface
+class qSSAO : public QObject, public ccGLPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccGLFilterPluginInterface)
+	Q_INTERFACES(ccGLPluginInterface)
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qSSAO" FILE "info.json")
 
 public:
-
-	//! Default constructor
 	explicit qSSAO(QObject* parent = nullptr);
 	
-	virtual ~qSSAO() = default;
+	~qSSAO() override = default;
 
 	//inherited from ccGLFilterPluginInterface
-	virtual ccGlFilter* getFilter() override;
+	ccGlFilter* getFilter() override;
 };
 
 #endif

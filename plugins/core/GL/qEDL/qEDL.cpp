@@ -21,7 +21,7 @@
 
 qEDL::qEDL( QObject *parent )
 	: QObject( parent )
-	, ccGLFilterPluginInterface( ":/CC/plugin/qEDL/info.json" )
+	, ccGLPluginInterface( ":/CC/plugin/qEDL/info.json" )
 {
 }
 

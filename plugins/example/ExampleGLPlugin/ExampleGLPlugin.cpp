@@ -41,7 +41,7 @@
 
 ExampleGLPlugin::ExampleGLPlugin( QObject *parent )
 	: QObject( parent )
-	, ccGLFilterPluginInterface( ":/CC/plugin/ExampleGLPlugin/info.json" )
+	, ccGLPluginInterface( ":/CC/plugin/ExampleGLPlugin/info.json" )
 {
 }
 

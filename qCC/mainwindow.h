@@ -170,7 +170,7 @@ public:
 	
 private slots:
 	//! Creates a new 3D GL sub-window
-	ccGLWindow* new3DView();
+	ccGLWindow* new3DView( bool allowEntitySelection );
 
 	//! Zooms in (current 3D view)
 	void zoomIn();

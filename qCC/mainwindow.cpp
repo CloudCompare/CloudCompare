@@ -283,7 +283,7 @@ MainWindow::MainWindow()
 
 	connectActions();
 
-	new3DView();
+	new3DView(true);
 
 	setupInputDevices();
 
@@ -5563,7 +5563,7 @@ void MainWindow::zoomOut()
 	}
 }
 
-ccGLWindow* MainWindow::new3DView()
+ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 {
 	assert(m_ccRoot && m_mdiArea);
 
@@ -5589,12 +5589,16 @@ ccGLWindow* MainWindow::new3DView()
 
 	m_mdiArea->addSubWindow(viewWidget);
 
-	connect(view3D,	&ccGLWindow::entitySelectionChanged, this, [=] (ccHObject *entity) {
-		m_ccRoot->selectEntity( entity );
-	});
-	connect(view3D,	&ccGLWindow::entitiesSelectionChanged, this, [=] (std::unordered_set<int> entities){
-		m_ccRoot->selectEntities( entities );
-	});
+	if ( allowEntitySelection )
+	{
+		connect(view3D, &ccGLWindow::entitySelectionChanged, this, [=] (ccHObject *entity) {
+			m_ccRoot->selectEntity( entity );
+		});
+		
+		connect(view3D, &ccGLWindow::entitiesSelectionChanged, this, [=] (std::unordered_set<int> entities){
+			m_ccRoot->selectEntities( entities );
+		});
+	}
 
 	//'echo' mode
 	connect(view3D,	&ccGLWindow::mouseWheelRotated, this, &MainWindow::echoMouseWheelRotate);
@@ -5992,7 +5996,7 @@ void MainWindow::activateRegisterPointPairTool()
 		registerOverlayDialog(m_pprDlg, Qt::TopRightCorner);
 	}
 
-	ccGLWindow* win = new3DView();
+	ccGLWindow* win = new3DView(true);
 	if (!win)
 	{
 		ccLog::Error("[PointPairRegistration] Failed to create dedicated 3D view!");
@@ -6075,15 +6079,12 @@ void MainWindow::activateSectionExtractionMode()
 		m_ccRoot->unselectAllEntities();
 	}
 
-	ccGLWindow* win = new3DView();
+	ccGLWindow* win = new3DView(false);
 	if (!win)
 	{
-		ccLog::Error("[PointPairRegistration] Failed to create dedicated 3D view!");
+		ccLog::Error("[SectionExtraction] Failed to create dedicated 3D view!");
 		return;
 	}
-
-	//warning: we must disable the entity picking signal!
-	win->disconnect(m_ccRoot, SLOT(selectEntity(ccHObject*)));
 
 	if (firstDisplay && firstDisplay->getGlFilter())
 	{

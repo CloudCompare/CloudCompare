@@ -45,6 +45,7 @@ ccPickingHub::ccPickingHub(ccMainAppInterface* app, QObject* parent/*=0*/)
 
 void ccPickingHub::togglePickingMode(bool state)
 {
+	//ccLog::Warning(QString("Toggle picking mode: ") + (state ? "ON" : "OFF") + " --> " + (m_activeGLWindow ? QString("View ") + QString::number(m_activeGLWindow->getUniqueID()) : QString("no view")));
 	if (m_activeGLWindow)
 	{
 		m_activeGLWindow->setPickingMode(state ? m_pickingMode : ccGLWindow::DEFAULT_PICKING);
@@ -54,6 +55,11 @@ void ccPickingHub::togglePickingMode(bool state)
 void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 {
 	ccGLWindow* glWindow = (mdiSubWindow ? GLWindowFromWidget(mdiSubWindow->widget()) : nullptr);
+	//if (glWindow)
+	//	ccLog::Warning("New active GL window: " + QString::number(glWindow->getUniqueID()));
+	//else
+	//	ccLog::Warning("No more active GL window");
+
 	if (m_activeGLWindow == glWindow)
 	{
 		//nothing to do
@@ -82,9 +88,12 @@ void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 	}
 }
 
-void ccPickingHub::onActiveWindowDeleted(QObject*)
+void ccPickingHub::onActiveWindowDeleted(QObject* obj)
 {
-	m_activeGLWindow = nullptr;
+	if (obj == m_activeGLWindow)
+	{
+		m_activeGLWindow = nullptr;
+	}
 }
 
 void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int x, int y, const CCVector3& P3D)

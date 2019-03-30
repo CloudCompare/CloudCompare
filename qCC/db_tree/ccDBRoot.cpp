@@ -130,7 +130,7 @@ private:
 							QIcon(QStringLiteral(":/CC/images/dbHObjectSymbolLocked.png")) } );
 		
 		const int	cloudIndex = mIconList.count();
-		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbCloudSymbol.png")),
+		mIconList.append( { QIcon(QStringLiteral(":/CC/Stocker/images/pointcloud.png")),
 							QIcon(QStringLiteral(":/CC/images/dbCloudSymbolLocked.png")) } );
 		
 		const int	geomIndex = mIconList.count();
@@ -188,11 +188,29 @@ private:
 		const int	viewportLabelIndex = mIconList.count();
 		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbAreaLabelSymbol.png")),
 							{} } );
+
+		const int	buildingIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/building.png")),{} });
+
+		const int	stprimitiveIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/primitive.png")),{} });
+
+		const int	footprintIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/footprintdb.png")),{} });
+
+		const int	blockIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/block.png")),{} });
+
+		const int	modelIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/buildingmodel.png")),{} });
+
+		const int	planeIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/plane.png")),{} });
 		
 		mIconMap = {
 			{ CC_TYPES::HIERARCHY_OBJECT, hObjectIndex },
 			{ CC_TYPES::POINT_CLOUD, cloudIndex },
-			{ CC_TYPES::PLANE, geomIndex },
+			{ CC_TYPES::PLANE, planeIndex },
 			{ CC_TYPES::SPHERE, geomIndex },
 			{ CC_TYPES::TORUS, geomIndex },
 			{ CC_TYPES::CYLINDER, geomIndex },
@@ -220,7 +238,11 @@ private:
 			{ CC_TYPES::TRANS_BUFFER, containerIndex },
 			{ CC_TYPES::LABEL_2D, labelIndex },
 			{ CC_TYPES::VIEWPORT_2D_OBJECT, viewportObjIndex },
-			{ CC_TYPES::VIEWPORT_2D_LABEL, viewportLabelIndex },
+			{ CC_TYPES::BUILDING, buildingIndex },
+			{ CC_TYPES::BLOCK, blockIndex },
+			{ CC_TYPES::STPRIMITIVE, stprimitiveIndex },
+			{ CC_TYPES::FOOTPRINT, footprintIndex },
+			{ CC_TYPES::MODEL, modelIndex },
 		};
 	}
 	

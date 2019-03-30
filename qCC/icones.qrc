@@ -191,5 +191,12 @@
     <file>images/stocker/viewleft.png</file>
     <file>images/stocker/viewright.png</file>
     <file>images/stocker/viewtop.png</file>
+    <file>images/stocker/block.png</file>
+    <file>images/stocker/building.png</file>
+    <file>images/stocker/primitive.png</file>
+    <file>images/stocker/buildingmodel.png</file>
+    <file>images/stocker/plane.png</file>
+    <file>images/stocker/pointcloud.png</file>
+    <file>images/stocker/footprintdb.png</file>
   </qresource>
 </RCC>

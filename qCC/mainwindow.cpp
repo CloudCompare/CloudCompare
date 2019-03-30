@@ -240,6 +240,7 @@ MainWindow::MainWindow()
 	m_UI->actionEnableQtWarnings->setChecked(ccConsole::QtMessagesEnabled());
 
 	//advanced widgets not handled by QDesigner
+	if (0)	// XYLIU, no need
 	{
 		//view mode pop-up menu
 		{

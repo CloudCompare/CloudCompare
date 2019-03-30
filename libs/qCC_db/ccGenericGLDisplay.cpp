@@ -25,7 +25,7 @@ ccViewportParameters::ccViewportParameters()
 	, zoom(1.0f)
 	, defaultPointSize(1)
 	, defaultLineWidth(1)
-	, perspectiveView(false)
+	, perspectiveView(true) // XYLIU 
 	, objectCenteredView(true)
 	, zNearCoef(0.005)
 	, zNear(0)

@@ -129,3 +129,4 @@ pip-log.txt
 private_plugins
 /data/
 /misc/
+cc_core_lib_export.h

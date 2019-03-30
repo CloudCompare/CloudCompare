@@ -35,7 +35,7 @@ namespace CCLib
 
 	Invalid values can be represented by NAN_VALUE.
 **/
-class ScalarField : public std::vector<ScalarType>, public CCShareable
+class CC_CORE_LIB_API ScalarField : public std::vector<ScalarType>, public CCShareable
 {
 public:
 
@@ -43,16 +43,16 @@ public:
 	/** [SHAREABLE] Call 'link' when associating this structure to an object.
 		\param name scalar field name
 	**/
-	CC_CORE_LIB_API explicit ScalarField(const char* name = nullptr);
+	explicit ScalarField(const char* name = nullptr);
 
 	//! Copy constructor
 	/** \param sf scalar field to copy
 		\warning May throw a std::bad_alloc exception
 	**/
-	CC_CORE_LIB_API ScalarField(const ScalarField& sf);
+	ScalarField(const ScalarField& sf);
 
 	//! Sets scalar field name
-	CC_CORE_LIB_API void setName(const char* name);
+	void setName(const char* name);
 
 	//! Returns scalar field name
 	inline const char* getName() const { return m_name; }
@@ -64,10 +64,10 @@ public:
 	/** \param mean a field to store the mean value
 		\param variance if not void, the variance will be computed and stored here
 	**/
-	CC_CORE_LIB_API void computeMeanAndVariance(ScalarType &mean, ScalarType* variance = nullptr) const;
+	void computeMeanAndVariance(ScalarType &mean, ScalarType* variance = nullptr) const;
 
 	//! Determines the min and max values
-	CC_CORE_LIB_API virtual void computeMinAndMax();
+	virtual void computeMinAndMax();
 
 	//! Returns whether a scalar value is valid or not
 	static inline bool ValidValue(ScalarType value) { return value == value; } //'value == value' fails for NaN values
@@ -84,9 +84,9 @@ public:
 	inline void fill(ScalarType fillValue = 0) { if (empty()) resize(capacity(), fillValue); else std::fill(begin(), end(), fillValue); }
 
 	//! Reserves memory (no exception thrown)
-	CC_CORE_LIB_API bool reserveSafe(std::size_t count);
+	bool reserveSafe(std::size_t count);
 	//! Resizes memory (no exception thrown)
-	CC_CORE_LIB_API bool resizeSafe(std::size_t count, bool initNewElements = false, ScalarType valueForNewElements = 0);
+	bool resizeSafe(std::size_t count, bool initNewElements = false, ScalarType valueForNewElements = 0);
 
 	//Shortcuts (for backward compatibility)
 	inline ScalarType& getValue(std::size_t index) { return at(index); }

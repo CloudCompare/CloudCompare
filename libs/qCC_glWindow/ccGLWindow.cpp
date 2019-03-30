@@ -3515,6 +3515,34 @@ CCVector3d ccGLWindow::getCurrentUpDir() const
 	return axis;
 }
 
+//QString ToString(ccGLWindow::PICKING_MODE mode)
+//{
+//	switch (mode)
+//	{
+//	case ccGLWindow::NO_PICKING:
+//		return "NO_PICKING";
+//	case ccGLWindow::ENTITY_PICKING:
+//		return "ENTITY_PICKING";
+//	case ccGLWindow::ENTITY_RECT_PICKING:
+//		return "ENTITY_RECT_PICKING";
+//	case ccGLWindow::FAST_PICKING:
+//		return "FAST_PICKING";
+//	case ccGLWindow::POINT_PICKING:
+//		return "POINT_PICKING";
+//	case ccGLWindow::TRIANGLE_PICKING:
+//		return "TRIANGLE_PICKING";
+//	case ccGLWindow::POINT_OR_TRIANGLE_PICKING:
+//		return "POINT_OR_TRIANGLE_PICKING";
+//	case ccGLWindow::LABEL_PICKING:
+//		return "LABEL_PICKING";
+//	case ccGLWindow::DEFAULT_PICKING:
+//		return "DEFAULT_PICKING";
+//	}
+//
+//	assert(false);
+//	return QString();
+//}
+
 void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 {
 	//is the picking mode locked?
@@ -3543,6 +3571,8 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 	}
 
 	m_pickingMode = mode;
+
+	//ccLog::Warning(QString("[%1] Picking mode set to: ").arg(m_uniqueID) + ToString(m_pickingMode));
 }
 
 CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)

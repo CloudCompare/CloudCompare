@@ -17,6 +17,7 @@ v2.10.3 (Zephyrus) - (in development)
   - When saving a cloud read from LAS 1.0 let PDAL choose the default LAS version (#874)
   - Fix potential crash or use of incorrect data when comparing clouds (#871)
   - Fix potential crash when quitting or switching displays
+  - Quitting the "Section extraction tool" (and probably any tool that uses a temporary 3D view, such as the Align tool) would break the picking hub mechanism (preventing the user from picking points typically) (#886)
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------

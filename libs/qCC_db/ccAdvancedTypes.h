@@ -32,8 +32,8 @@ class NormsIndexesTableType : public ccArray<CompressedNormType, 1, CompressedNo
 {
 public:
 	//! Default constructor
-	NormsIndexesTableType() : ccArray<CompressedNormType, 1, CompressedNormType>("Compressed normals") {}
-	virtual ~NormsIndexesTableType() = default;
+	QCC_DB_LIB_API NormsIndexesTableType();
+	~NormsIndexesTableType() override = default;
 	
 	//inherited from ccArray/ccHObject
 	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::NORMAL_INDEXES_ARRAY; }

@@ -168,8 +168,6 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 
 	if (oldWin)
 	{
-		m_associatedWin->disconnect(this);
-
 		//restore sections original display
 		{
 			for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)

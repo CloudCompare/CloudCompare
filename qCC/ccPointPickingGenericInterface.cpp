@@ -108,28 +108,8 @@ void ccPointPickingGenericInterface::stop(bool state)
 
 void ccPointPickingGenericInterface::onItemPicked(const PickedItem& pi)
 {
-	if (!m_processing || !pi.entity)
-		return;
-
-	if (pi.entity->isKindOf(CC_TYPES::POINT_CLOUD))
+	if (m_processing && pi.entity)
 	{
-		ccPointCloud* cloud = static_cast<ccPointCloud*>(pi.entity);
-		if (!cloud)
-		{
-			assert(false);
-			ccLog::Warning("[Item picking] Picked point is not in pickable entities DB?!");
-			return;
-		}
-		processPickedPoint(cloud, pi.itemIndex, pi.clickPoint.x(), pi.clickPoint.y());
-	}
-	else if (pi.entity->isKindOf(CC_TYPES::MESH))
-	{
-		//NOT HANDLED: 'POINT_PICKING' mode only for now
-		assert(false);
-	}
-	else
-	{
-		//unhandled entity
-		assert(false);
+		processPickedPoint(pi);
 	}
 }

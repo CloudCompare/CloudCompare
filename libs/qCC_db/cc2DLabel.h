@@ -26,6 +26,7 @@
 #include <QRect>
 
 class ccGenericPointCloud;
+class ccGenericMesh;
 
 //! 2D label (typically attached to points)
 class QCC_DB_LIB_API cc2DLabel : public ccHObject, public ccInteractor
@@ -70,16 +71,25 @@ public:
 	void clear(bool ignoreDependencies = false);
 
 	//! Returns current size
-	inline unsigned size() const { return static_cast<unsigned>(m_points.size()); }
+	inline unsigned size() const { return static_cast<unsigned>(m_pickedPoints.size()); }
 
-	//! Adds a point to label
+	//! Adds a point to this label
 	/** Adding a point to a label will automatically make it 'mutate'.
 		1 point  = 'point' label (point position, normal, color, etc.)
 		2 points = 'vector' label (vertices position, distance)
 		3 points = "triangle/plane' label (vertices position, area, normal)
 		\return false if 'full'
 	**/
-	bool addPoint(ccGenericPointCloud* cloud, unsigned pointIndex);
+	bool addPickedPoint(ccGenericPointCloud* cloud, unsigned pointIndex);
+
+	//! Adds a point to this label
+	/** Adding a point to a label will automatically make it 'mutate'.
+		1 point  = 'point' label (point position, normal, color, etc.)
+		2 points = 'vector' label (vertices position, distance)
+		3 points = "triangle/plane' label (vertices position, area, normal)
+		\return false if 'full'
+	**/
+	bool addPickedPoint(ccGenericMesh* mesh, unsigned triangleIndex, const CCVector2d& uv);
 
 	//! Whether to collapse label or not
 	inline void setCollapsed(bool state) { m_showFullBody = !state; }
@@ -102,34 +112,63 @@ public:
 	//! Picked point descriptor
 	/** Label 'points' can be shared between multiple entities
 	**/
-	struct PickedPoint
+	struct QCC_DB_LIB_API PickedPoint
 	{
 		//! Cloud
-		ccGenericPointCloud* cloud;
-		//! Index
+		ccGenericPointCloud* _cloud;
+		//! Mesh
+		ccGenericMesh* _mesh;
+		//! Point/triangle index
 		unsigned index;
 		//! Last known '2D' position (i.e. in screen space)
 		/** This position is updated on each call to drawMeOnly3D
 		**/
 		CCVector3d pos2D;
+		//! Barycentric coordinates (for triangles)
+		CCVector2d uv;
+
+		//! Returns the point position (3D)
+		CCVector3 getPointPosition() const;
+		//! Returns the cloud or the mesh vertices
+		ccGenericPointCloud* cloudOrVertices() const;
+		//! Returns the cloud or the mesh unique ID
+		unsigned getUniqueID() const;
+		//! Returns the associated entity (cloud or mesh)
+		ccHObject* entity() const;
 
 		//! Default constructor
 		PickedPoint()
-			: cloud(0)
+			: _cloud(nullptr)
+			, _mesh(nullptr)
 			, index(0)
 			, pos2D(0, 0, 0)
+			, uv(0, 0)
 		{}
 
 		//! Constructor from a point and its index
-		PickedPoint(ccGenericPointCloud* _cloud, unsigned _index)
-			: cloud(_cloud)
-			, index(_index)
+		PickedPoint(ccGenericPointCloud* _cloud, unsigned pointIndex)
+			: _cloud(_cloud)
+			, _mesh(nullptr)
+			, index(pointIndex)
 			, pos2D(0, 0, 0)
+			, uv(0, 0)
+		{}
+
+		//! Constructor from a triangle, its index and barycentric coordinates
+		PickedPoint(ccGenericMesh* _mesh, unsigned triIindex, const CCVector2d& _uv)
+			: _cloud(nullptr)
+			, _mesh(_mesh)
+			, index(triIindex)
+			, pos2D(0, 0, 0)
+			, uv(_uv)
 		{}
 	};
 
+	//! Adds a point to this label (direct - handle with care)
+	bool addPickedPoint(const PickedPoint& pp);
+
 	//! Returns a given point
-	inline const PickedPoint& getPoint(unsigned index) const { return m_points[index]; }
+	inline const PickedPoint& getPickedPoint(unsigned index) const { return m_pickedPoints[index]; }
 
 	//! Sets marker (relative) scale
 	/** Default value: 1.0
@@ -141,8 +180,6 @@ protected:
 	//! One-point label info
 	struct LabelInfo1
 	{
-		unsigned pointIndex;
-		ccGenericPointCloud* cloud;
 		bool hasNormal;
 		CCVector3 normal;
 		bool hasRGB;
@@ -154,12 +191,10 @@ protected:
 		QString sfName;
 		//! Default constructor
 		LabelInfo1()
-			: pointIndex(0)
-			, cloud(0)
-			, hasNormal(false)
-			, normal(0,0,0)
+			: hasNormal(false)
+			, normal(0, 0, 0)
 			, hasRGB(false)
-			, rgb(0,0,0)
+			, rgb(0, 0, 0)
 			, hasSF(false)
 			, sfValue(0)
 			, sfShiftedValue(0)
@@ -180,18 +215,10 @@ protected:
 	//! Two-points label info
 	struct LabelInfo2
 	{
-		unsigned point1Index;
-		ccGenericPointCloud* cloud1;
-		unsigned point2Index;
-		ccGenericPointCloud* cloud2;
 		CCVector3 diff;
 		//! Default constructor
 		LabelInfo2()
-			: point1Index(0)
-			, cloud1(0)
-			, point2Index(0)
-			, cloud2(0)
-			, diff(0,0,0)
+			: diff(0, 0, 0)
 		{}
 	};
 	//! Gets two-points label info
@@ -200,28 +227,16 @@ protected:
 	//! Three-points label info
 	struct LabelInfo3
 	{
-		unsigned point1Index;
-		ccGenericPointCloud* cloud1;
-		unsigned point2Index;
-		ccGenericPointCloud* cloud2;
-		unsigned point3Index;
-		ccGenericPointCloud* cloud3;
 		CCVector3 normal;
 		PointCoordinateType area;
 		CCVector3d angles;
 		CCVector3d edges;
 		//! Default constructor
 		LabelInfo3()
-			: point1Index(0)
-			, cloud1(0)
-			, point2Index(0)
-			, cloud2(0)
-			, point3Index(0)
-			, cloud3(0)
-			, normal(0,0,0)
+			: normal(0, 0, 0)
 			, area(0)
-			, angles(0,0,0)
-			, edges(0,0,0)
+			, angles(0, 0, 0)
+			, edges(0, 0, 0)
 		{}
 	};
 	//! Gets three-points label info
@@ -239,7 +254,7 @@ protected:
 	void drawMeOnly3D(CC_DRAW_CONTEXT& context);
 
 	//! Picked points
-	std::vector<PickedPoint> m_points;
+	std::vector<PickedPoint> m_pickedPoints;
 
 	//! Updates the label 'name'
 	void updateName();

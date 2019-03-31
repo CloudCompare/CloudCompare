@@ -317,7 +317,7 @@ void ccCompass::tryLoading()
 	//replace all "originals" with their corresponding "duplicates"
 	for (size_t i = 0; i < originals.size(); i++)
 	{
-		prg.setValue(50 + (50 * i) / originals.size());
+		prg.setValue(50 + static_cast<int>((50 * i) / originals.size()));
 
 		ccHObject* original = m_app->dbRootObject()->find(originals[i]);
 		ccHObject* replacement = replacements[i];
@@ -1801,7 +1801,7 @@ void ccCompass::estimateStructureNormals()
 							sne[p] = CCVector3(eigVectors.m_values[0][2], eigVectors.m_values[1][2], eigVectors.m_values[2][2]);
 							start[p] = _min;
 							end[p] = _max;
-							segmentID[p] = _max * px.size() + _min;
+							segmentID[p] = static_cast<int>(_max * px.size() + _min);
 							bestX[p] = X;
 							normal[p] = CCVector3(mnx, mny, mnz);
 						}
@@ -1880,7 +1880,7 @@ void ccCompass::estimateStructureNormals()
 				samples[r]->setName("SNE_Samples");
 				samples[r]->setGlobalScale(points[r]->getGlobalScale()); //copy global shift & scale onto new point cloud
 				samples[r]->setGlobalShift(points[r]->getGlobalShift());
-				samples[r]->reserve(px.size()*oversample);
+				samples[r]->reserve(static_cast<unsigned>(px.size())*oversample);
 				samples[r]->reserveTheNormsTable();
 				CCLib::ScalarField* startSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("StartPoint")));
 				CCLib::ScalarField* endSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("EndPoint")));

@@ -241,12 +241,12 @@ void ccCameraParamEditDlg::pickPointAsPivot(bool state)
 		if (state)
 		{
 			m_associatedWin->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING);
-			connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
+			connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&)));
 		}
 		else
 		{
 			m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
-			disconnect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
+			disconnect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&)));
 		}
 	}
 
@@ -277,7 +277,7 @@ void ccCameraParamEditDlg::onItemPicked(const PickedItem& pi)
 	pickPointAsPivot(false);
 }
 
-void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned, int, int, const CCVector3& P)
+void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned, int, int, const CCVector3& P, const CCVector3d& uvw)
 {
 	//without picking hub (ccViewer)
 	if (!m_associatedWin)

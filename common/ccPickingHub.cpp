@@ -96,7 +96,7 @@ void ccPickingHub::onActiveWindowDeleted(QObject* obj)
 	}
 }
 
-void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int x, int y, const CCVector3& P3D)
+void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int x, int y, const CCVector3& P3D, const CCVector3d& uvw)
 {
 	if (m_listeners.empty())
 	{
@@ -109,6 +109,7 @@ void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int 
 		item.entity = entity;
 		item.itemIndex = itemIndex;
 		item.P3D = P3D;
+		item.uvw = uvw;
 	}
 
 	//copy the list of listeners, in case the user call 'removeListener' in 'onItemPicked'

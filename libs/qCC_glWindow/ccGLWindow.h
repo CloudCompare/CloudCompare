@@ -678,8 +678,9 @@ signals:
 		\param x mouse cursor x position
 		\param y mouse cursor y position
 		\param P the picked point
+		\param uvw barycentric coordinates of the point (if picked on a mesh)
 	**/
-	void itemPicked(ccHObject* entity, unsigned subEntityID, int x, int y, const CCVector3& P);
+	void itemPicked(ccHObject* entity, unsigned subEntityID, int x, int y, const CCVector3& P, const CCVector3d& uvw);
 
 	//! Signal emitted when an item is picked (FAST_PICKING mode only)
 	/** \param entity entity
@@ -937,6 +938,7 @@ protected: //other methods
 								ccHObject* pickedEntity,
 								int pickedItemIndex,
 								const CCVector3* nearestPoint = nullptr,
+								const CCVector3d* nearestPointBC = nullptr, //barycentric coordinates
 								const std::unordered_set<int>* selectedIDs = nullptr);
 	
 	//! Updates currently active items list (m_activeItems)

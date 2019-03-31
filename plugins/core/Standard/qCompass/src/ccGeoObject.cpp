@@ -63,7 +63,7 @@ ccGeoObject::ccGeoObject(ccHObject* obj, ccMainAppInterface* app)
 void ccGeoObject::assignGID()
 {
 	//get uniquely descriptive hash
-	_gID = std::hash<std::string>{}(QString::asprintf("%s%d", getName().toLatin1().data(), getUniqueID()).toStdString());
+	_gID = static_cast<unsigned>(std::hash<std::string>{}(QString(getName() + QString::number(getUniqueID())).toStdString()));
 }
 
 void ccGeoObject::init(bool singleSurface)

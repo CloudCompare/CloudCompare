@@ -61,8 +61,6 @@ protected slots:
 	inline void continueEdition()  { restart(false); }
 	inline void resetLine() { restart(true); }
 
-	//void handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&);
-	//void addPointToPolyline(int x, int y);
 	void closePolyLine(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
 	void updatePolyLineTip(int x, int y, Qt::MouseButtons buttons);
 

@@ -1015,7 +1015,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 			if (cloudDesc.labelIndex >= 0)
 			{
 				cc2DLabel* label = new cc2DLabel();
-				label->addPoint(cloudDesc.cloud, cloudDesc.cloud->size() - 1);
+				label->addPickedPoint(cloudDesc.cloud, cloudDesc.cloud->size() - 1);
 				label->setName(parts[cloudDesc.labelIndex]);
 				label->setDisplayedIn2D(showLabelsIn2D);
 				label->displayPointLegend(!showLabelsIn2D);

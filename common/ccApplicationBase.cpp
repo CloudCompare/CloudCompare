@@ -106,7 +106,7 @@ ccApplicationBase::ccApplicationBase(int &argc, char **argv, const QString &vers
 #endif
 	
 	ccGLWindow::setShaderPath( m_ShaderPath );
-	ccPluginManager::setPaths( m_PluginPaths );
+	ccPluginManager::get().setPaths( m_PluginPaths );
 	
 	ccTranslationManager::get().registerTranslatorFile( QStringLiteral( "qt" ), m_TranslationPath );
 	ccTranslationManager::get().registerTranslatorFile( QStringLiteral( "CloudCompare" ), m_TranslationPath );

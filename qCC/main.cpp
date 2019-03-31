@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
 	//load the plugins
-	ccPluginManager::loadPlugins();
+	ccPluginManager::get().loadPlugins();
 	
 	int result = 0;
 
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
 	if (commandLine)
 	{
 		//command line processing (no GUI)
-		result = ccCommandLineParser::Parse(argc, argv, ccPluginManager::pluginList());
+		result = ccCommandLineParser::Parse(argc, argv, ccPluginManager::get().pluginList());
 	}
 	else
 	{
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 					QString pluginNameUpper = pluginName.toUpper();
 					//look for this plugin
 					bool found = false;
-					for ( ccPluginInterface *plugin : ccPluginManager::pluginList() )
+					for ( ccPluginInterface *plugin : ccPluginManager::get().pluginList() )
 					{
 						if (plugin->getName().replace(' ', '_').toUpper() == pluginNameUpper)
 						{
@@ -249,7 +249,7 @@ int main(int argc, char **argv)
 		}
 
 		//release the plugins
-		for ( ccPluginInterface *plugin : ccPluginManager::pluginList() )
+		for ( ccPluginInterface *plugin : ccPluginManager::get().pluginList() )
 		{
 			plugin->stop(); //just in case
 		}

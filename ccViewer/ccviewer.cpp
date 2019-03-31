@@ -183,9 +183,9 @@ void ccViewer::loadPlugins()
 {
 	ui.menuPlugins->setEnabled(false);
 
-	ccPluginManager::loadPlugins();
+	ccPluginManager::get().loadPlugins();
 
-	for ( ccPluginInterface *plugin : ccPluginManager::pluginList() )
+	for ( ccPluginInterface *plugin : ccPluginManager::get().pluginList() )
 	{
 		if ( plugin == nullptr )
 		{

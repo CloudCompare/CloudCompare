@@ -32,21 +32,25 @@ class ccPluginManager : public QObject
 	Q_OBJECT
 	
 public:
-	explicit ccPluginManager( QObject *parent = nullptr );
 	~ccPluginManager() override = default;
 	
-	static void setPaths( const QStringList &paths );
-	static QStringList pluginPaths();
+	static ccPluginManager& get();
 	
-	static void loadPlugins();
+	void setPaths( const QStringList& paths );
+	QStringList pluginPaths();
 	
-	static ccPluginInterfaceList &pluginList();
+	void loadPlugins();
 	
-private:	
-	static void loadFromPathsAndAddToList();	
+	ccPluginInterfaceList& pluginList();
 	
-	static QStringList m_PluginPaths;
-	static ccPluginInterfaceList m_pluginList;
+protected:
+	explicit ccPluginManager( QObject* parent = nullptr );
+
+private:
+	void loadFromPathsAndAddToList();
+	
+	QStringList m_pluginPaths;
+	ccPluginInterfaceList m_pluginList;
 };
 
 #endif

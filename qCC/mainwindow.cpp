@@ -361,7 +361,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::initPlugins( )
 {
-	m_pluginUIManager->init( ccPluginManager::pluginList() );
+	m_pluginUIManager->init( ccPluginManager::get().pluginList() );
 	
 	// Set up dynamic tool bars
 	addToolBar( Qt::RightToolBarArea, m_pluginUIManager->glFiltersToolbar() );

@@ -488,7 +488,7 @@ private slots:
 	void doActionBDLoD1Generation();
 
 	/// 3d4em
-	void doActionBD3D4EM();
+	void doActionBDLoD2Generation();
 
 	void doActionBDTextureMapping();
 

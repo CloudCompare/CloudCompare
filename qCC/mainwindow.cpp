@@ -801,7 +801,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPolyFitFacetFilter,		&QAction::triggered, this, &MainWindow::doActionBDPolyFitFacetFilter);
 	connect(m_UI->actionBDPolyFitSettings,			&QAction::triggered, this, &MainWindow::doActionBDPolyFitSettings);
 	connect(m_UI->actionBDLoD1Generation,			&QAction::triggered, this, &MainWindow::doActionBDLoD1Generation);
-	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBD3D4EM);
+	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBDLoD2Generation);
 	connect(m_UI->actionBDTextureMapping,			&QAction::triggered, this, &MainWindow::doActionBDTextureMapping);
 	connect(m_UI->actionBDConstrainedMesh,			&QAction::triggered, this, &MainWindow::doActionBDConstrainedMesh);
 	connect(m_UI->actionBDDisplayPlaneOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPlaneOn);
@@ -12018,7 +12018,7 @@ void MainWindow::doActionBDLoD1Generation()
 	}
 }
 
-void MainWindow::doActionBD3D4EM()
+void MainWindow::doActionBDLoD2Generation()
 {
 	if (!m_pbdr3d4emDlg)
 		m_pbdr3d4emDlg = new bdr3D4EMDlg(this);

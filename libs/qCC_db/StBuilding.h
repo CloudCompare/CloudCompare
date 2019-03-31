@@ -39,7 +39,7 @@ public:
 	~StBuilding() override;
 	
 	//! Returns class ID
-	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::BUILDING; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_BUILDING; }
 
 };
 

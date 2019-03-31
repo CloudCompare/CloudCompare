@@ -21,6 +21,14 @@
 #include "ccHObject.h"
 #include "mainwindow.h"
 
+#include "StBlock.h"
+#include "StBlockGroup.h"
+#include "StBuilding.h"
+#include "StFootPrint.h"
+#include "StFootPrintGroup.h"
+#include "StModel.h"
+#include "StPrimGroup.h"
+
 #ifdef USE_STOCKER
 #include "builderlod3/builderlod3.h"
 #include "builderlod2/builderlod2.h"
@@ -100,17 +108,20 @@ class BDBaseHObject : public ccHObject
 {
 public:
 	BDBaseHObject(QString name = QString()) :
-		ccHObject(name), valid(false) {}
+		ccHObject(name) {}
 	BDBaseHObject(const ccHObject& s) :
-		ccHObject(s), valid(false) {}
+		ccHObject(s) {}
 	~BDBaseHObject() {}
 
 	using Container = std::vector<BDBaseHObject *>;
+
+	//! Returns class ID
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_PROJECT; }
+
 public:
 	stocker::BlockProj block_prj;
 	stocker::Vec3d global_shift;
 	double global_scale;
-	bool valid;
 
 	std::map<std::string, Map*> building_hypomesh;
 //	std::map<std::string, HypothesisGenerator*> building_hypothesis;
@@ -137,6 +148,8 @@ public:
 	stocker::BuildUnit GetBuildingUnit(std::string building_name);
 
 };
+
+bool IsBDBaseObj(ccHObject * obj);
 
 BDBaseHObject* GetRootBDBase(ccHObject* obj);
 

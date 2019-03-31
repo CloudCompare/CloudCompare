@@ -39,7 +39,7 @@ public:
 	~StModel() override;
 	
 	//! Returns class ID
-	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MODEL; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_MODEL; }
 
 };
 

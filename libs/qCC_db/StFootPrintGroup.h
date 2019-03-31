@@ -35,7 +35,7 @@ public:
 	~StFootPrintGroup() override;
 	
 	//! Returns class ID
-	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::FOOTPRINTGROUP; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_FOOTPRINTGROUP; }
 
 };
 

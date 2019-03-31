@@ -130,7 +130,7 @@ private:
 							QIcon(QStringLiteral(":/CC/images/dbHObjectSymbolLocked.png")) } );
 		
 		const int	cloudIndex = mIconList.count();
-		mIconList.append( { QIcon(QStringLiteral(":/CC/Stocker/images/pointcloud.png")),
+		mIconList.append( { QIcon(QStringLiteral(":/CC/Stocker/images/stocker/pickpts.png")),
 							QIcon(QStringLiteral(":/CC/images/dbCloudSymbolLocked.png")) } );
 		
 		const int	geomIndex = mIconList.count();
@@ -188,24 +188,33 @@ private:
 		const int	viewportLabelIndex = mIconList.count();
 		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbAreaLabelSymbol.png")),
 							{} } );
+				
+		const int	projectIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/database.png")),{} });
 
 		const int	buildingIndex = mIconList.count();
-		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/building.png")),{} });
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/building.png")),{} });
 
 		const int	stprimitiveIndex = mIconList.count();
-		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/primitive.png")),{} });
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/primitive.png")),{} });
 
 		const int	footprintIndex = mIconList.count();
-		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/footprintdb.png")),{} });
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/footprintdb.png")),{} });
+
+		const int	blockgroupIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/blockgroup.png")),{} });
 
 		const int	blockIndex = mIconList.count();
-		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/block.png")),{} });
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/block.png")),{} });
 
 		const int	modelIndex = mIconList.count();
-		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/buildingmodel.png")),{} });
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/buildingmodel.png")),{} });
 
 		const int	planeIndex = mIconList.count();
-		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/plane.png")),{} });
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/plane.png")),{} });
+
+		const int	facetIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/primfacet.png")),{} });
 		
 		mIconMap = {
 			{ CC_TYPES::HIERARCHY_OBJECT, hObjectIndex },
@@ -218,7 +227,7 @@ private:
 			{ CC_TYPES::BOX, geomIndex },
 			{ CC_TYPES::DISH, geomIndex },
 			{ CC_TYPES::EXTRU, geomIndex },
-			{ CC_TYPES::FACET, geomIndex },
+			{ CC_TYPES::FACET, facetIndex },
 			{ CC_TYPES::QUADRIC, geomIndex },
 			{ CC_TYPES::MESH, meshIndex },
 			{ CC_TYPES::MESH_GROUP, subMeshIndex },
@@ -238,11 +247,13 @@ private:
 			{ CC_TYPES::TRANS_BUFFER, containerIndex },
 			{ CC_TYPES::LABEL_2D, labelIndex },
 			{ CC_TYPES::VIEWPORT_2D_OBJECT, viewportObjIndex },
-			{ CC_TYPES::BUILDING, buildingIndex },
-			{ CC_TYPES::BLOCK, blockIndex },
-			{ CC_TYPES::STPRIMITIVE, stprimitiveIndex },
-			{ CC_TYPES::FOOTPRINT, footprintIndex },
-			{ CC_TYPES::MODEL, modelIndex },
+			{ CC_TYPES::ST_PROJECT, projectIndex },
+			{ CC_TYPES::ST_BUILDING, buildingIndex },
+			{ CC_TYPES::ST_BLOCKGROUP, blockgroupIndex },
+			{ CC_TYPES::ST_BLOCK, blockIndex },
+			{ CC_TYPES::ST_PRIMITIVE, stprimitiveIndex },
+			{ CC_TYPES::ST_FOOTPRINT, footprintIndex },
+			{ CC_TYPES::ST_MODEL, modelIndex },
 		};
 	}
 	

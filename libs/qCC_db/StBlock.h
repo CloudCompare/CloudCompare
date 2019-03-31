@@ -66,7 +66,7 @@ public:
 	StBlock(QString name = QString("Block"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::BLOCK; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_BLOCK; }
 
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const override { return "Block"; }

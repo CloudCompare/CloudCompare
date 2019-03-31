@@ -627,7 +627,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     </layout>
    </widget>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>  
+  <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBarMainTools">
    <property name="windowTitle">
     <string>Main tools</string>
@@ -705,7 +705,7 @@ QTreeView::branch:open:has-children:has-siblings  {
      </item>
     </layout>
    </widget>
-  </widget> 
+  </widget>
   <widget class="QDockWidget" name="DockableConsole">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Ignored" vsizetype="Maximum">
@@ -769,7 +769,7 @@ QTreeView::branch:open:has-children:has-siblings  {
      </item>
     </layout>
    </widget>
-  </widget> 
+  </widget>
   <widget class="QToolBar" name="toolBarView">
    <property name="windowTitle">
     <string>Viewing tools</string>
@@ -3208,7 +3208,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDPlaneSegmentation">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/Stocker/images/stocker/segment.png</normaloff>:/CC/Stocker/images/stocker/segment.png</iconset>
+     <normaloff>:/CC/Stocker/images/stocker/primitives.png</normaloff>:/CC/Stocker/images/stocker/primitives.png</iconset>
    </property>
    <property name="text">
     <string>Plane Segmentation</string>

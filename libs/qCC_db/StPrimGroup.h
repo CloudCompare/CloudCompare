@@ -39,7 +39,7 @@ public:
 	~StPrimGroup() override;
 	
 	//! Returns class ID
-	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::STPRIMITIVE; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_PRIMITIVE; }
 
 };
 

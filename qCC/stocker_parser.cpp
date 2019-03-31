@@ -332,11 +332,25 @@ stocker::BuildUnit BDBaseHObject::GetBuildingUnit(std::string building_name) {
 	}
 	else return (*iter)->data;
 }
+StBuilding* GetParentBuilding(ccHObject* obj) {
+	ccHObject* bd_obj_ = obj;
+	do {
+		if (bd_obj_->isA(CC_TYPES::ST_BUILDING)) {
+			return static_cast<StBuilding*>(bd_obj_);
+		}
+		bd_obj_ = bd_obj_->getParent();
+	} while (bd_obj_);
 
+	return nullptr;
+}
+
+bool IsBDBaseObj(ccHObject* obj) {
+	return obj->isA(CC_TYPES::ST_PROJECT);
+}
 BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	ccHObject* bd_obj_ = obj;
 	do {
-		if (bd_obj_->getName().startsWith(BDDB_PROJECTNAME_PREFIX)) {
+		if (IsBDBaseObj(bd_obj_)) {
 			return static_cast<BDBaseHObject*>(bd_obj_);
 		}
 		bd_obj_ = bd_obj_->getParent();

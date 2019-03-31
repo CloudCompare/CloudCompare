@@ -10715,9 +10715,7 @@ void MainWindow::doActionBDDisplayPointOff()
 #include "stocker_parser.h"
 
 //////////////////////////////////////////////////////////////////////////
-bool IsBDBaseObj(ccHObject* obj) {
-	return obj->getName().startsWith(BDDB_PROJECTNAME_PREFIX);
-}
+
 BDBaseHObject::Container GetBDBaseProjx(MainWindow* main) {
 	ccHObject* root_entity = main->db()->getRootEntity();
 	vector<BDBaseHObject*> prjx;
@@ -10741,7 +10739,7 @@ void MainWindow::doActionBDProjectLoad()
 		QFileDialog::getOpenFileName(this,
 			"Open project file",
 			currentPath,
-			"project (*.ini)");
+			"project (*.bbprj)");
 
 	if (Filename.isEmpty()) return;
 
@@ -10781,43 +10779,54 @@ void MainWindow::doActionBDProjectLoad()
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
 	BDBaseHObject* bd_grp = nullptr;
-	if (QFileInfo(bin_file).exists()) {		
+	if (QFileInfo(bin_file).exists()) {
 		ccHObject* newGroup = FileIOFilter::LoadFromFile(bin_file, parameters, result, QString());
-		bd_grp = new BDBaseHObject(*newGroup);
+		bd_grp = new BDBaseHObject(*newGroup);		
 		bd_grp->setName(prj_name);
-		for (size_t i = 0; i < newGroup->getChildrenNumber(); i++) {
-			bd_grp->addChild(newGroup->getChild(i));
-		}
+		newGroup->transferChildren(*bd_grp);
 	}
 	else {
 		bd_grp = new BDBaseHObject(prj_name);		
 		for (auto & bd : block_prj.m_builder.sbuild) {
+			QString building_name = bd->GetName().Str().c_str();
 			QFileInfo point_path(bd->data.file_path.ori_points.c_str());
 			ccHObject* newGroup = FileIOFilter::LoadFromFile(point_path.absoluteFilePath(), parameters, result, QString());
+			StBuilding* building = new StBuilding(*newGroup);
+			building->setName(building_name);
+			newGroup->transferChildren(*building);			
 			ccHObject::Container clouds;
-			newGroup->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+			building->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
 			for (ccHObject* cloud : clouds)	{
 				if (cloud) {
-					static_cast<ccGenericPointCloud*>(cloud)->setName(point_path.baseName() + BDDB_ORIGIN_CLOUD_SUFFIX);
-					cloud->showSF(false);
-					cloud->showColors(true);
+					static_cast<ccGenericPointCloud*>(cloud)->setName(building_name + BDDB_ORIGIN_CLOUD_SUFFIX);
+					if (cloud->hasColors()) {
+						cloud->showSF(false);
+						cloud->showColors(true);
+					}					
 				}
 			}
-			bd_grp->addChild(newGroup);
+			bd_grp->addChild(building);
 		}
 	}
 	if (bd_grp) {
 		bd_grp->block_prj = block_prj;
-		bd_grp->valid = true;
 		if (bd_grp->getChildrenNumber() <= 0) {
 			return;
 		}
 		ccHObject* first_cloud_ent = bd_grp->GetOriginPointCloud(GetBaseName(bd_grp->getChild(0)->getName()));
+		if (!first_cloud_ent) {
+			dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
+			return;
+		}
 		ccPointCloud* first_cloud = ccHObjectCaster::ToPointCloud(first_cloud_ent);
 		bd_grp->global_shift = stocker::parse_xyz(first_cloud->getGlobalShift());
 		bd_grp->global_scale = first_cloud->getGlobalScale();
 
 		addToDB(bd_grp);
+	}
+	else {
+		dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
+		return;
 	}
 	refreshAll();
 	UpdateUI();

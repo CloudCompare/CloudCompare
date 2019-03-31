@@ -15,6 +15,8 @@ file( GLOB header_list *.h)
 file( GLOB source_list *.cpp *.c)
 file( GLOB ui_list ui_templates/*.ui )
 
+set( CMAKE_CXX_VISIBILITY_PRESET hidden )
+
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${generated_ui_list} )
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "libs") 
@@ -29,11 +31,13 @@ target_link_libraries(${PROJECT_NAME} Qt5::Core)
 target_link_contrib( ${PROJECT_NAME} )
 
 # Add custom preprocessor definitions
+target_compile_definitions( ${PROJECT_NAME} PRIVATE QCC_IO_LIBRARY_BUILD )
+
 if (WIN32)
 	if ( COMPILE_CC_CORE_LIB_SHARED )
 		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL )
 	endif()
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS QCC_DB_USE_AS_DLL QCC_IO_USE_AS_DLL )
+
 elseif( APPLE )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES
 		INSTALL_RPATH "." )

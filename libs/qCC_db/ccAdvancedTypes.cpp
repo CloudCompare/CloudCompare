@@ -17,6 +17,11 @@
 
 #include "ccAdvancedTypes.h"
 
+NormsIndexesTableType::NormsIndexesTableType()
+	: ccArray<CompressedNormType, 1, CompressedNormType>("Compressed normals")
+{
+}
+
 bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
 	if (dataVersion < 41)

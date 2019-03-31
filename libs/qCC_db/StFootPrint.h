@@ -37,6 +37,12 @@ public:
 	//! Returns class ID
 	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_FOOTPRINT; }
 
+	inline double getHeight() const;
+	void setHeight(double height);
+	inline double getGround() const { return m_ground; }
+	void setGround(double ground) { m_ground = ground; }
+
+	double m_ground;
 };
 
 #endif //ST_FOOTPRINT_HEADER

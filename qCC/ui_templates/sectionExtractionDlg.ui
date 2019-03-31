@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>399</width>
+    <width>357</width>
     <height>36</height>
    </rect>
   </property>
@@ -109,28 +109,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="setFootPrintGroundtoolButton">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../icones.qrc">
-          <normaloff>:/CC/Stocker/images/stocker/setground.png</normaloff>:/CC/Stocker/images/stocker/setground.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="setFootPrintHeighttoolButton">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../icones.qrc">
-          <normaloff>:/CC/Stocker/images/stocker/setheight.png</normaloff>:/CC/Stocker/images/stocker/setheight.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolButton" name="exportSectionsToolButton">
         <property name="enabled">
          <bool>false</bool>
@@ -155,6 +133,17 @@
         <property name="icon">
          <iconset resource="../icones.qrc">
           <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveFootprinttoolButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/footprint.png</normaloff>:/CC/Stocker/images/stocker/footprint.png</iconset>
         </property>
        </widget>
       </item>

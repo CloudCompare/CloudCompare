@@ -73,9 +73,12 @@ public:
 	virtual ccGenericPrimitive* clone() const override;
 	
 	//! Returns profile
-	const std::vector<CCVector3>& getTop() const;
-	const std::vector<CCVector3>& getBottom() const;
-	const std::vector<CCVector2>& getProfile() const;
+	std::vector<CCVector3> getTop();
+	std::vector<CCVector3> getBottom();
+	std::vector<CCVector2> getProfile();
+
+	void TopHeightAdd(double val);
+	void BottomHeightAdd(double val);
 
 protected:
 

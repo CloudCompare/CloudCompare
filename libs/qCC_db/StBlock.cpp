@@ -59,6 +59,9 @@ StBlock::StBlock(const std::vector<CCVector3>& top,
 	assert(top.size() > 2);
 	assert(top.size() == bottom.size());
 
+	m_top = ccFacet::CreateFromContour(top, "top");
+	m_bottom = ccFacet::CreateFromContour(bottom, "bottom");
+
 	updateRepresentation();
 }
 
@@ -94,17 +97,17 @@ ccGenericPrimitive* StBlock::clone() const
 	return finishCloneJob(new StBlock(m_top, m_bottom, &m_transformation, getName()));
 }
 
-const std::vector<CCVector3>& StBlock::getTop() const
+std::vector<CCVector3> StBlock::getTop() 
 {
 	return m_top->getContour()->getPoints(false);
 }
 
-const std::vector<CCVector3>& StBlock::getBottom() const
+std::vector<CCVector3> StBlock::getBottom() 
 {
 	return m_bottom->getContour()->getPoints(false);
 }
 
-const std::vector<CCVector2>& StBlock::getProfile() const
+std::vector<CCVector2> StBlock::getProfile()
 {
 	std::vector<CCVector2> profile;
 	std::vector<CCVector3> points = m_top->getContour()->getPoints(false);
@@ -112,6 +115,28 @@ const std::vector<CCVector2>& StBlock::getProfile() const
 		profile.push_back(CCVector2(pt.x, pt.y));
 	}
 	return profile;
+}
+
+void StBlock::TopHeightAdd(double val)
+{
+	ccPointCloud* cloud = m_top->getContourVertices();
+	
+	for (size_t i = 0; i < cloud->size(); i++) {
+		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
+		P.z += val;
+	}
+	cloud->invalidateBoundingBox();
+}
+
+void StBlock::BottomHeightAdd(double val)
+{
+	ccPointCloud* cloud = m_bottom->getContourVertices();
+
+	for (size_t i = 0; i < cloud->size(); i++) {
+		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
+		P.z += val;
+	}
+	cloud->invalidateBoundingBox();
 }
 
 bool StBlock::buildUp()
@@ -125,10 +150,14 @@ bool StBlock::buildUp()
 
 	//DGM: we check that last vertex is different from the first one!
 	//(yes it happens ;)
-// 	if (m_top.back().x == m_top.front().x &&  m_top.back().y == m_top.front().y)
-// 		--count;
+ 	
 
 	std::vector<CCVector2> profile = getProfile();
+
+	if (profile.back().x == profile.front().x &&  profile.back().y == profile.front().y) {
+		profile.pop_back();
+		--count;
+	}		
 
 	char errorStr[1024];
 	if (!mesh.buildMesh(profile, profile.size(), errorStr))
@@ -169,8 +198,8 @@ bool StBlock::buildUp()
 	//add profile vertices & normals
 	for (unsigned i = 0; i < count; ++i)
 	{
-		verts[i * 2] = m_top->getContourVertices()[i];
-		verts[i * 2 + 1] = m_bottom->getContourVertices()[i];
+		verts->addPoint(*(m_top->getContourVertices()->getPoint(i)));
+		verts->addPoint(*(m_bottom->getContourVertices()->getPoint(i)));
 
 		const CCVector2& P = profile[i];	
 		const CCVector2& PNext = profile[(i + 1) % count];

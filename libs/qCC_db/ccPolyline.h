@@ -148,9 +148,6 @@ public:
 
 	std::vector<CCVector3> ccPolyline::getPoints(bool close = false);
 
-	void setFTHeight(double height_) { m_height = height_; }
-	double getFTHeight() { return m_height; }
-
 public: //meta-data keys
 	
 	//! Meta data key: vertical direction (for 2D polylines, contour plots, etc.)
@@ -207,8 +204,6 @@ protected:
 	PointCoordinateType m_arrowLength;
 	//! Arrow index
 	unsigned m_arrowIndex;
-
-	double m_height;
 };
 
 #endif //CC_GL_POLYLINE_HEADER

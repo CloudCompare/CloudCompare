@@ -158,7 +158,13 @@ stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject* entity, stocker::P
 stocker::Polyline3d GetPolygonFromPolyline(ccHObject* entity)
 {
 	stocker::Polyline3d polyline;
-	ccPolyline* ccpolyline = ccHObjectCaster::ToPolyline(entity);
+	ccPolyline* ccpolyline = nullptr;
+	if (entity->isA(CC_TYPES::POLY_LINE)) {
+		ccpolyline = ccHObjectCaster::ToPolyline(entity);
+	}
+	else if (entity->isA(CC_TYPES::ST_FOOTPRINT)) {
+		ccpolyline = ccHObjectCaster::ToStFootPrint(entity);
+	}
 	if (!ccpolyline) {
 		throw std::runtime_error("not a polyline, internal error");
 		return polyline;
@@ -307,11 +313,25 @@ ccHObject::Container BDBaseHObject::GetOriginPointCloud(bool check_enable) {
 ccHObject * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check_enable) {
 	return GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name, check_enable);
 }
-ccHObject * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
-	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_PRIMITIVE_SUFFIX, building_name, check_enable);
+StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
+	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMITIVE, BDDB_PRIMITIVE_SUFFIX, building_name, check_enable);
+	if (obj) return static_cast<StPrimGroup*>(obj);
+	StPrimGroup* group = new StPrimGroup(building_name + BDDB_PRIMITIVE_SUFFIX);
+	if (group) {
+		ccHObject* bd = GetBuildingGroup(building_name, false);
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+	}
+	return nullptr;
 }
-ccHObject * BDBaseHObject::GetFootPrintGroup(QString building_name, bool check_enable) {
-	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_FOOTPRINT_SUFFIX, building_name, check_enable);
+StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name, bool check_enable) {
+	ccHObject* obj = GetHObj(CC_TYPES::ST_BLOCKGROUP, BDDB_BLOCKGROUP_SUFFIX, building_name, check_enable);
+	if (obj) return static_cast<StBlockGroup*>(obj);
+	StBlockGroup* group = new StBlockGroup(building_name + BDDB_BLOCKGROUP_SUFFIX);
+	if (group) { 
+		ccHObject* bd = GetBuildingGroup(building_name, false);
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+	}
+	return nullptr;
 }
 ccHObject * BDBaseHObject::GetHypothesisGroup(QString building_name, bool check_enable) {
 	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_POLYFITHYPO_SUFFIX, building_name, check_enable);
@@ -1603,6 +1623,45 @@ ccHObject* ConstrainedMesh(ccHObject* planeObj)
 	return mesh;
 }
 
+void DeduceFootPrintHeight(ccHObject* point_cloud, ccHObject* primitive, ccHObject* footprint, Contour3d & point_inside, double & height)
+{
+	StFootPrint* polyObj = ccHObjectCaster::ToStFootPrint(footprint);
+	assert(polyObj);
+	Polyline3d polygon = GetPolygonFromPolyline(polyObj);
+	Contour3d points = GetPointsFromCloudInsidePolygonXY(point_cloud, polygon, DBL_MAX);
+	sort(points.begin(), points.end(), [&](Vec3d _l, Vec3d _r) {return _l.Z() < _r.Z(); });
+	double min_height = points.front().Z();
+	double max_height = points.back().Z();
+	height = max_height;
+
+	// partite into 0.5m / layer
+	double step = 0.5;
+	int layer_index(0);
+	std::map<int, int> layer_count;
+//	[ min_height + step * layer_index, min_height + step * (layer_index + 1) )
+
+	for (size_t i = 0; i < points.size(); i++) {
+		if (points[i].Z() > min_height + step * (layer_index + 1)) {
+			layer_index++;
+			continue;
+		}
+		layer_count[layer_index]++;
+		if (min_height + step * (layer_index + 1) >= max_height) {
+			break;
+		}
+	}
+	ccPlane* cc_plane = nullptr;
+	for (auto layer : layer_count) {
+		if (layer.second > 0.8*points.size()) {
+			height = layer.first*step + min_height;
+		}			
+	}
+	//! check if there is a close one
+	if (primitive) {
+
+	}	
+}
+
 ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 {
 	std::vector<std::vector<int>> components;
@@ -1624,8 +1683,34 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 	ccHObject* cloudObj = baseObj->GetOriginPointCloud(building_name, true);
 	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name, true);
 
-	ccHObject* footprint_obj = baseObj->GetFootPrintGroup(building_name, true);
-	ccHObject::Container polygonObjs = GetEnabledObjFromGroup(footprint_obj, CC_TYPES::POLY_LINE, true, false);
+	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(building_name, true);
+	ccHObject::Container polygonObjs = blockgroup_obj->GetFootPrints();
+
+	for (size_t i = 0; i < polygonObjs.size(); i++) {
+		StFootPrint* foot_print = ccHObjectCaster::ToStFootPrint(polygonObjs[i]);
+		//! get height
+		Contour3d points_inside;
+		double height = foot_print->getHeight();
+		double ground = foot_print->getGround();
+		if (fabs(height - ground) < 1e-6) {
+			DeduceFootPrintHeight(cloudObj, prim_group_obj, polygonObjs[i], points_inside, height);
+		}		
+		
+		std::vector<CCVector3> foot_print_points = foot_print->getPoints(false);
+
+		std::vector<CCVector3> top_points;
+		std::vector<CCVector3> bottom_points;
+		for (auto & pt : foot_print_points) {
+			top_points.push_back(CCVector3(pt.x, pt.y, height));
+			bottom_points.push_back(CCVector3(pt.x, pt.y, ground));
+		}
+		StBlock* block_entity = new StBlock(top_points, bottom_points);
+		int biggest = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX);
+		block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(biggest + 1));
+		blockgroup_obj->addChild(block_entity);
+	}
+	return blockgroup_obj;
+	
 	std::vector<Polyline3d> polygons;
 	std::vector<double> ft_heights;
 
@@ -1634,9 +1719,10 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 		// now the polygons should not be overlapped
 		// if more than one polygons are given, will create multiple models
 		for (size_t i = 0; i < polygonObjs.size(); i++) {
-			ccHObject* polyObj = polygonObjs[i];
+			StFootPrint* polyObj = ccHObjectCaster::ToStFootPrint(polygonObjs[i]);
+			assert(polyObj);
 			Polyline3d polygon = GetPolygonFromPolyline(polyObj);
-			double footprint_height = ccHObjectCaster::ToPolyline(polyObj)->getFTHeight();
+			double footprint_height = polyObj->getHeight();
 			polygons.push_back(polygon);
 			ft_heights.push_back(footprint_height);
 		}		
@@ -1700,7 +1786,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, bool preset_ground_height, 
 	ccHObject* cloudObj = baseObj->GetOriginPointCloud(building_name, true);
 	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name, true);
 
-	ccHObject* footprint_obj = baseObj->GetFootPrintGroup(building_name, true);
+	ccHObject* footprint_obj = baseObj->GetBlockGroup(building_name, true);
 	ccHObject::Container polygonObjs = GetEnabledObjFromGroup(footprint_obj, CC_TYPES::POLY_LINE, true, false);
 	{
 		// TODO: get the relationships of the polygons
@@ -1735,7 +1821,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, bool preset_ground_height, 
 			Polyline3d polygon = GetPolygonFromPolyline(polyObj);
 			if (j == 0) {
 				first_polygon = polygon;
-				footprint_height = ccHObjectCaster::ToPolyline(polyObj)->getFTHeight();
+				footprint_height = ccHObjectCaster::ToStFootPrint(polyObj)->getHeight();
 			}
 			contours.push_back(ToContour(polygon, 0));
 		}

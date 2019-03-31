@@ -487,6 +487,7 @@
     <addaction name="actionPointPicking"/>
     <addaction name="actionPointListPicking"/>
     <addaction name="actionTracePolyline"/>
+    <addaction name="actionBDFootPrint"/>
     <addaction name="separator"/>
     <addaction name="menuSandBox"/>
     <addaction name="separator"/>
@@ -668,7 +669,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Properties</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>2</number>
+    <number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_4">
     <layout class="QVBoxLayout">
@@ -729,13 +730,13 @@ QTreeView::branch:open:has-children:has-siblings  {
     <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetFloatable</set>
    </property>
    <property name="allowedAreas">
-    <set>Qt::BottomDockWidgetArea|Qt::RightDockWidgetArea</set>
+    <set>Qt::BottomDockWidgetArea|Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
     <string>Output</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>2</number>
+    <number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout">
@@ -857,7 +858,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionTracePolyline"/>
    <addaction name="actionBDPrimMakePlane"/>
    <addaction name="separator"/>
-   <addaction name="actionExtractSections"/>
+   <addaction name="actionBDFootPrint"/>
    <addaction name="actionBDLoD1Generation"/>
    <addaction name="actionBD3D4EM"/>
    <addaction name="separator"/>
@@ -2741,7 +2742,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionExtractSections">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/Stocker/images/stocker/footprint.png</normaloff>:/CC/Stocker/images/stocker/footprint.png</iconset>
+     <normaloff>:/CC/images/sectionExtraction.png</normaloff>:/CC/images/sectionExtraction.png</iconset>
    </property>
    <property name="text">
     <string>Extract sections / Unfold</string>
@@ -3384,6 +3385,15 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="iconText">
     <string>LoD1</string>
+   </property>
+  </action>
+  <action name="actionBDFootPrint">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/footprint.png</normaloff>:/CC/Stocker/images/stocker/footprint.png</iconset>
+   </property>
+   <property name="text">
+    <string>FootPrint</string>
    </property>
   </action>
  </widget>

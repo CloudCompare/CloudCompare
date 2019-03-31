@@ -37,3 +37,10 @@ StBlockGroup::StBlockGroup(ccHObject& obj)
 StBlockGroup::~StBlockGroup()
 {
 }
+
+ccHObject::Container StBlockGroup::GetFootPrints()
+{
+	ccHObject::Container fts;
+	filterChildren(fts, false, CC_TYPES::ST_FOOTPRINT, true);
+	return fts;
+}

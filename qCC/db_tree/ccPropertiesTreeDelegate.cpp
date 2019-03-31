@@ -54,6 +54,12 @@
 #include <ccSensor.h>
 #include <ccSphere.h>
 #include <ccSubMesh.h>
+#include "StBlock.h"
+#include "StBlockGroup.h"
+#include "StBuilding.h"
+#include "StFootPrint.h"
+#include "StModel.h"
+#include "StPrimGroup.h"
 
 //Qt
 #include <QAbstractItemView>
@@ -67,6 +73,8 @@
 #include <QSpinBox>
 #include <QStandardItemModel>
 #include <QToolButton>
+
+#include "stocker_parser.h"
 
 //System
 #include <cassert>
@@ -149,6 +157,8 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_CLOUD_POINT_SIZE:
 		case OBJECT_FACET_CONFIDENCE:
 		case OBJECT_FOOTPRINT_HEIGHT:
+		case OBJECT_BLOCK_TOP_ADD:
+		case OBJECT_BLOCK_BOTTOM_ADD:
 			return QSize(50, 24);
 		case OBJECT_COLOR_SOURCE:
 		case OBJECT_POLYLINE_WIDTH:
@@ -197,13 +207,32 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 		m_model->setHeaderData(1, Qt::Horizontal, tr( "State/Value" ));
 	}
 
+	if (m_currentObject->isA(CC_TYPES::ST_FOOTPRINT)) {
+		fillWithStFootPrint(ccHObjectCaster::ToStFootPrint(m_currentObject));
+	}
+	else if (m_currentObject->isA(CC_TYPES::ST_BLOCK)) {
+		fillWithStBlock(ccHObjectCaster::ToStBlock(m_currentObject));
+	}
+	else if (m_currentObject->isA(CC_TYPES::ST_BLOCKGROUP)) {
+		fillWithStBlockGroup(ccHObjectCaster::ToStBlockGroup(m_currentObject));
+	}
+	else if (m_currentObject->isA(CC_TYPES::ST_BUILDING)) {
+		fillWithStBuilding(ccHObjectCaster::ToStBuilding(m_currentObject));
+	}
+	else if (m_currentObject->isA(CC_TYPES::ST_MODEL)) {
+		fillWithStModel(ccHObjectCaster::ToStModel(m_currentObject));
+	}
+	else if (m_currentObject->isA(CC_TYPES::ST_PRIMITIVE)) {
+		fillWithStPrimGroup(ccHObjectCaster::ToStPrimGroup(m_currentObject));
+	}
+
 	if (m_currentObject->isHierarchy())
 	{
 		if (!m_currentObject->isA(CC_TYPES::VIEWPORT_2D_LABEL)) //don't need to display this kind of info for viewport labels!
 		{
 			fillWithHObject(m_currentObject);
 		}
-	}
+	}	
 	
 	if (m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
@@ -699,9 +728,6 @@ void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)
 
 	//custom line width
 	appendRow(ITEM( tr( "Line width" ) ), PERSISTENT_EDITOR(OBJECT_POLYLINE_WIDTH), true);
-
-	//footprint height
-	appendRow(ITEM(tr("FootPrH")), PERSISTENT_EDITOR(OBJECT_FOOTPRINT_HEIGHT), true);
 
 	//global shift & scale
 	fillWithShifted(_obj);
@@ -1404,15 +1430,45 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	break;
 	case OBJECT_FOOTPRINT_HEIGHT:
 	{
-		ccPolyline* polyline = ccHObjectCaster::ToPolyline(m_currentObject);
-		assert(polyline);
+		StFootPrint* footprint = ccHObjectCaster::ToStFootPrint(m_currentObject);
+		assert(footprint);
 		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
 		spinBox->setRange(-DBL_MAX, DBL_MAX);
-		spinBox->setSingleStep(1);
-		spinBox->setValue(polyline->getFTHeight());
+		spinBox->setSingleStep(0.1);
+		spinBox->setValue(footprint->getHeight());
 
  		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
  			this, &ccPropertiesTreeDelegate::footprintHeightChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
+	case OBJECT_BLOCK_TOP_ADD:
+	{
+		StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
+		assert(block);
+		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+		spinBox->setRange(-DBL_MAX, DBL_MAX);
+		spinBox->setSingleStep(0.1);
+		spinBox->setValue(0.0);
+
+		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+			this, &ccPropertiesTreeDelegate::BlockTopAddChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
+	case OBJECT_BLOCK_BOTTOM_ADD:
+	{
+		StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
+		assert(block);
+		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+		spinBox->setRange(-DBL_MAX, DBL_MAX);
+		spinBox->setSingleStep(0.1);
+		spinBox->setValue(0.0);
+
+		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+			this, &ccPropertiesTreeDelegate::BlockBottomAddChanged);
 
 		outputWidget = spinBox;
 	}
@@ -2418,9 +2474,32 @@ void ccPropertiesTreeDelegate::footprintHeightChanged(double pos)
 	if (!m_currentObject)
 		return;
 
-	ccPolyline* polyline = ccHObjectCaster::ToPolyline(m_currentObject);
+	StFootPrint* polyline = ccHObjectCaster::ToStFootPrint(m_currentObject);
 	assert(polyline);
-	polyline->setFTHeight(pos);
+	polyline->setHeight(pos);
+	//updateDisplay();
+}
+
+void ccPropertiesTreeDelegate::BlockTopAddChanged(double pos)
+{
+	if (!m_currentObject)
+		return;
+
+	StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
+	assert(block);
+	block->TopHeightAdd(pos);
+	updateDisplay();
+}
+
+void ccPropertiesTreeDelegate::BlockBottomAddChanged(double pos)
+{
+	if (!m_currentObject)
+		return;
+
+	StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
+	assert(block);
+	block->BottomHeightAdd(pos);
+	updateDisplay();
 }
 
 void ccPropertiesTreeDelegate::facetConfidenceChanged(double pos)
@@ -2431,4 +2510,76 @@ void ccPropertiesTreeDelegate::facetConfidenceChanged(double pos)
 	ccFacet* facet = ccHObjectCaster::ToFacet(m_currentObject);
 	assert(facet);
 	facet->setConfidence(pos);
+}
+
+void ccPropertiesTreeDelegate::fillWithStBlock(const StBlock *_obj)
+{
+	assert(_obj && m_model);
+	addSeparator(tr("Block"));
+
+	//top height add 
+	appendRow(ITEM(tr("Top height add")), PERSISTENT_EDITOR(OBJECT_BLOCK_TOP_ADD), true);
+
+	//bottom height add
+	appendRow(ITEM(tr("Bottom height add")), PERSISTENT_EDITOR(OBJECT_BLOCK_BOTTOM_ADD), true);
+}
+
+void ccPropertiesTreeDelegate::fillWithStBlockGroup(const StBlockGroup *_obj)
+{
+	assert(_obj && m_model);
+	addSeparator(tr("Blocks"));
+	//footprint number
+	//block number
+}
+
+void ccPropertiesTreeDelegate::fillWithStBuilding(const StBuilding *_obj)
+{
+	assert(_obj && m_model);
+	addSeparator(tr("Building"));
+	
+	BDBaseHObject* baseObj = _obj->getParent()->isA(CC_TYPES::ST_PROJECT) ? static_cast<BDBaseHObject*>(_obj->getParent()) : 0;
+	if (baseObj) {
+		auto bd = baseObj->GetBuildingUnit(_obj->getName().toStdString());
+		//path
+		appendRow(ITEM(tr("Path")), ITEM(QString(bd.file_path.ori_points.c_str())));
+		//average spacing
+		appendRow(ITEM(tr("Average Spacing")), ITEM(QLocale(QLocale::English).toString(bd.average_spacing)));
+		//ground height
+		appendRow(ITEM(tr("Ground Height")), ITEM(QLocale(QLocale::English).toString(bd.ground_height)));
+		//image list
+		appendRow(ITEM(tr("Image List")), ITEM(QLocale(QLocale::English).toString(bd.image_list.size())));
+	}
+}
+
+void ccPropertiesTreeDelegate::fillWithStFootPrint(const StFootPrint *_obj)
+{
+	assert(_obj && m_model);
+	addSeparator(tr("FootPrint"));
+
+	//footprint height
+	appendRow(ITEM(tr("Height")), PERSISTENT_EDITOR(OBJECT_FOOTPRINT_HEIGHT), true);
+
+	//number of vertices
+	appendRow(ITEM(tr("Vertices")), ITEM(QLocale(QLocale::English).toString(_obj->size())));
+
+	//polyline length
+	appendRow(ITEM(tr("Length")), ITEM(QLocale(QLocale::English).toString(_obj->computeLength())));
+
+	//custom line width
+//	appendRow(ITEM(tr("Line width")), PERSISTENT_EDITOR(OBJECT_POLYLINE_WIDTH), true);
+
+	//global shift & scale
+	fillWithShifted(_obj);
+}
+
+void ccPropertiesTreeDelegate::fillWithStModel(const StModel *_obj)
+{
+	assert(_obj && m_model);
+	addSeparator(tr("Model"));
+	// lod
+
+}
+
+void ccPropertiesTreeDelegate::fillWithStPrimGroup(const StPrimGroup *_obj)
+{
 }

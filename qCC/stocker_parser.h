@@ -89,6 +89,7 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_IMAGELINE_PREFIX		"Imageline"
 #define BDDB_PLANEFRAME_PREFIX		"Frame"
 #define BDDB_FOOTPRINT_PREFIX		"Footprint"
+#define BDDB_BLOCK_PREFIX			"Block"
 #define BDDB_LOD1MODEL_PREFIX		"LoD1_"
 #define BDDB_LOD2MODEL_PREFIX		"LoD2_"
 #define BDDB_LOD3MODEL_PREFIX		"LoD3_"
@@ -99,7 +100,7 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_POLYFITOPTM_SUFFIX		".optimized"
 #define BDDB_FINALMODEL_SUFFIX		".model"
 #define BDDB_IMAGELINE_SUFFIX		".imageline"
-#define BDDB_FOOTPRINT_SUFFIX		".footprint"
+#define BDDB_BLOCKGROUP_SUFFIX		".block"
 #define BDDB_LOD1MODEL_SUFFIX		".lod1.model"
 #define BDDB_LOD2MODEL_SUFFIX		".lod2.model"
 #define BDDB_LOD3MODEL_SUFFIX		".lod3.model"
@@ -133,8 +134,8 @@ public:
 	ccHObject* GetBuildingGroup(QString building_name, bool check_enable = false);
 	ccHObject::Container GetOriginPointCloud(bool check_enable = false);
 	ccHObject* GetOriginPointCloud(QString building_name, bool check_enable = false);
-	ccHObject* GetPrimitiveGroup(QString building_name, bool check_enable = false);
-	ccHObject * GetFootPrintGroup(QString building_name, bool check_enable);
+	StPrimGroup* GetPrimitiveGroup(QString building_name, bool check_enable = false);
+	StBlockGroup * GetBlockGroup(QString building_name, bool check_enable);
 	ccHObject * GetHypothesisGroup(QString building_name, bool check_enable);
 
 	stocker::Vec3d ToLocal(stocker::Vec3d pt) { return (pt + global_shift)*global_scale; }
@@ -148,6 +149,8 @@ public:
 	stocker::BuildUnit GetBuildingUnit(std::string building_name);
 
 };
+
+StBuilding * GetParentBuilding(ccHObject * obj);
 
 bool IsBDBaseObj(ccHObject * obj);
 

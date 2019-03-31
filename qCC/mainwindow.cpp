@@ -808,6 +808,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDDisplayPlaneOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPlaneOff);
 	connect(m_UI->actionBDDisplayPointOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOn);
 	connect(m_UI->actionBDDisplayPointOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOff);
+	connect(m_UI->actionBDFootPrint,				&QAction::triggered, this, &MainWindow::doActionExtractFootPrint);
 }
 
 void MainWindow::doActionColorize()
@@ -6109,6 +6110,14 @@ void MainWindow::activateSectionExtractionMode()
 
 		registerOverlayDialog(m_seTool, Qt::TopRightCorner);
 	}
+	m_seTool->generateOrthoSectionsToolButton->setVisible(true);
+	m_seTool->extractPointsToolButton->setVisible(true);
+	m_seTool->unfoldToolButton->setVisible(true);
+	m_seTool->exportSectionsToolButton->setVisible(true);
+	m_seTool->saveFootprinttoolButton->setVisible(false);
+	m_seTool->label->setVisible(true);
+	m_seTool->vertAxisComboBox->setVisible(true);
+	m_seTool->setFixedWidth(357);
 
 	//add clouds
 	ccGLWindow* firstDisplay = nullptr;
@@ -11987,25 +11996,115 @@ void MainWindow::doActionBDPolyFitSettings()
 	m_pbdrpfDlg->show();
 }
 
+void MainWindow::doActionExtractFootPrint()
+{
+	if (!haveSelection())
+		return;
+
+	ccHObject *entity = getSelectedEntities().front();
+	StBuilding* building = GetParentBuilding(entity);
+	if (!building) {
+		ccConsole::Error("No building cloud in selection!");
+		return;
+	}
+	QString building_name(GetBaseName(building->getName()));
+		
+	BDBaseHObject* baseObj = GetRootBDBase(entity);
+	if (!baseObj) {
+		dispToConsole("please open the project", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	ccHObject* point_cloud = baseObj->GetOriginPointCloud(building_name, true);
+	StBlockGroup* block_group = baseObj->GetBlockGroup(building_name, false);
+	
+	if (!point_cloud || !block_group) {
+		dispToConsole("No building cloud in selection!", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	stocker::BuildUnit _build = baseObj->GetBuildingUnit(building_name.toStdString());
+	double ground = _build.ground_height;
+
+	if (!m_seTool)
+	{
+		m_seTool = new ccSectionExtractionTool(this);
+		connect(m_seTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateSectionExtractionMode);
+		registerOverlayDialog(m_seTool, Qt::TopRightCorner);
+	}
+
+	m_seTool->generateOrthoSectionsToolButton->setVisible(false);
+	m_seTool->extractPointsToolButton->setVisible(false);
+	m_seTool->unfoldToolButton->setVisible(false);
+	m_seTool->exportSectionsToolButton->setVisible(false);
+	m_seTool->saveFootprinttoolButton->setVisible(true);
+	m_seTool->label->setVisible(false);
+	m_seTool->vertAxisComboBox->setVisible(false);
+	m_seTool->SetDestAndGround(block_group, ground);
+	m_seTool->setFixedWidth(180);
+
+	//add clouds
+	ccGLWindow* firstDisplay = nullptr;
+	{		
+		if (m_seTool->addCloud(static_cast<ccGenericPointCloud*>(point_cloud))) {
+			if (!firstDisplay && point_cloud->getDisplay())	{
+				firstDisplay = static_cast<ccGLWindow*>(point_cloud->getDisplay());
+			}
+		}
+	}
+
+	//deselect all entities
+	if (m_ccRoot)
+	{
+		m_ccRoot->unselectAllEntities();
+	}
+
+	ccGLWindow* win = new3DView(false);
+	if (!win)
+	{
+		ccLog::Error("[SectionExtraction] Failed to create dedicated 3D view!");
+		return;
+	}
+
+	if (firstDisplay && firstDisplay->getGlFilter())
+	{
+		win->setGlFilter(firstDisplay->getGlFilter()->clone());
+	}
+	m_seTool->linkWith(win);
+
+	freezeUI(true);
+	m_UI->toolBarView->setDisabled(true);
+
+	//we disable all other windows
+	disableAllBut(win);
+
+	if (!m_seTool->start())
+		deactivateSectionExtractionMode(false);
+	else
+		updateOverlayDialogsPlacement();
+}
+
 void MainWindow::doActionBDLoD1Generation()
 {
 	if (!haveSelection()) {
 		return;
 	}
 	ccHObject *entity = getSelectedEntities().front();
-	
-	//! select the building
-	if (IsBDBaseObj(entity->getParent()) && entity->isGroup()) {
+
+	if (entity->isA(CC_TYPES::POLY_LINE)) {
+
+	}
+	else {
+		//! select the building
+		StBuilding* building = GetParentBuilding(entity);
+		if (!building) {
+			return;
+		}
+
 		try {
-			ccHObject* bd_model_obj = LoD1FromFootPrint(entity);
+			ccHObject* bd_model_obj = LoD1FromFootPrint(building);
 			if (bd_model_obj) {
 				SetGlobalShiftAndScale(bd_model_obj);
 				bd_model_obj->setDisplay_recursive(entity->getDisplay());
 				addToDB(bd_model_obj);
-
-				refreshAll();
-				UpdateUI();
-				return;
 			}
 		}
 		catch (std::runtime_error& e) {
@@ -12013,9 +12112,8 @@ void MainWindow::doActionBDLoD1Generation()
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 		}
 	}
-	else if (entity->isA(CC_TYPES::POLY_LINE)) {
-
-	}
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDLoD2Generation()

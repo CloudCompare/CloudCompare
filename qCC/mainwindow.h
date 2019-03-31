@@ -485,6 +485,8 @@ private slots:
 
 	void doActionBDPolyFitSettings();
 
+	void doActionExtractFootPrint();
+
 	void doActionBDLoD1Generation();
 
 	/// 3d4em

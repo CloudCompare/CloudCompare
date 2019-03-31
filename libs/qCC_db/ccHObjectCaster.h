@@ -50,6 +50,12 @@ class ccShiftedObject;
 class ccSphere;
 class ccSubMesh;
 class ccTorus;
+class StBlock;
+class StBlockGroup;
+class StBuilding;
+class StFootPrint;
+class StModel;
+class StPrimGroup;
 
 //! Useful class to (try to) statically cast a basic ccHObject to a given type
 class QCC_DB_LIB_API ccHObjectCaster
@@ -141,6 +147,12 @@ public:
 	//! Converts current object to ccIndexedTransformationBuffer (if possible)
 	static ccIndexedTransformationBuffer* ToTransBuffer(ccHObject* obj);
 
+	static StBlock*			ToStBlock(ccHObject* obj);
+	static StBlockGroup*	ToStBlockGroup(ccHObject* obj);
+	static StBuilding*		ToStBuilding(ccHObject* obj);
+	static StFootPrint*		ToStFootPrint(ccHObject* obj);
+	static StModel*			ToStModel(ccHObject* obj);
+	static StPrimGroup*		ToStPrimGroup(ccHObject* obj);
 };
 
 #endif //CC_HIERARCHY_OBJECT_CASTER_HEADER

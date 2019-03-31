@@ -20,20 +20,37 @@
 
 StFootPrint::StFootPrint(GenericIndexedCloudPersist* associatedCloud)
 	: ccPolyline(associatedCloud)
+	, m_ground(0)
 {
 }
 
 StFootPrint::StFootPrint(StFootPrint& obj)
 	: ccPolyline(obj)
+	, m_ground(obj.m_ground)
 {
 	
 }
 
 StFootPrint::StFootPrint(ccPolyline& obj)
 	: ccPolyline(obj)
+	, m_ground(0)
 {
 }
 
 StFootPrint::~StFootPrint()
 {
+}
+
+inline double StFootPrint::getHeight() const
+{
+	return getPoint(0)->z;
+}
+
+void StFootPrint::setHeight(double height)
+{
+	for (size_t i = 0; i < size(); i++) {
+		CCVector3& P = const_cast<CCVector3&>(*getPoint(i));
+		P.z = height;
+	}
+	invalidateBoundingBox();
 }

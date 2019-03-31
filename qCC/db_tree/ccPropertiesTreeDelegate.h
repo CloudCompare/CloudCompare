@@ -48,6 +48,13 @@ class QAbstractItemView;
 class QStandardItem;
 class QStandardItemModel;
 
+class StBlock;
+class StBlockGroup;
+class StBuilding;
+class StFootPrint;
+class StModel;
+class StPrimGroup;
+
 //! GUI properties list dialog element
 class ccPropertiesTreeDelegate : public QStyledItemDelegate
 {
@@ -104,6 +111,8 @@ public:
 							TREE_VIEW_HEADER						,
 							OBJECT_FACET_CONFIDENCE					,
 							OBJECT_FOOTPRINT_HEIGHT					,
+							OBJECT_BLOCK_TOP_ADD					,
+							OBJECT_BLOCK_BOTTOM_ADD					,
 	};
 
 	//! Default constructor
@@ -157,9 +166,7 @@ private:
 	void updateLabelViewport();
 	void updateDisplay();
 	void objectDisplayChanged(const QString &);
-	void colorSourceChanged(const QString &);
-	void footprintHeightChanged(double pos);
-	void facetConfidenceChanged(double pos);
+	void colorSourceChanged(const QString &);	
 	void sensorScaleChanged(double);
 	void sensorUncertaintyChanged();
 	void sensorIndexChanged(double);
@@ -205,6 +212,17 @@ private:
 	ccHObject* m_currentObject;
 	QStandardItemModel* m_model;
 	QAbstractItemView* m_view;
+
+	void footprintHeightChanged(double pos);
+	void BlockTopAddChanged(double pos);
+	void BlockBottomAddChanged(double pos);
+	void facetConfidenceChanged(double pos);
+	void fillWithStBlock(const StBlock*);
+	void fillWithStBlockGroup(const StBlockGroup*);
+	void fillWithStBuilding(const StBuilding*);
+	void fillWithStFootPrint(const StFootPrint*);
+	void fillWithStModel(const StModel*);
+	void fillWithStPrimGroup(const StPrimGroup*);
 };
 
 #endif

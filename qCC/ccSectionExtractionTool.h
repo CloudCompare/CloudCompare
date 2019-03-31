@@ -25,15 +25,17 @@
 //qCC_db
 #include <ccHObject.h>
 
-//GUI
-#include <ui_sectionExtractionDlg.h>
-
 class ccGenericPointCloud;
 class ccPointCloud;
 class ccGLWindow;
 
+namespace Ui
+{
+	class SectionExtractionDlg;
+}
+
 //! Section extraction tool
-class ccSectionExtractionTool : public ccOverlayDialog, public Ui::SectionExtractionDlg
+class ccSectionExtractionTool : public ccOverlayDialog
 {
 	Q_OBJECT
 
@@ -205,7 +207,8 @@ protected:
 	void updateCloudsBox();
 
 private: //members
-
+	Ui::SectionExtractionDlg	*m_UI;
+	
 	//! Pool of active sections
 	SectionPool m_sections;
 

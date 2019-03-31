@@ -44,6 +44,9 @@
 #include <QMdiSubWindow>
 #include <QMessageBox>
 
+//GUI
+#include <ui_sectionExtractionDlg.h>
+
 //System
 #include <cassert>
 #include <cmath>
@@ -67,32 +70,32 @@ static const PointCoordinateType s_defaultArrowSize = 20;
 
 ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	: ccOverlayDialog(parent)
-	, Ui::SectionExtractionDlg()
+	, m_UI( new Ui::SectionExtractionDlg )
 	, m_selectedPoly(nullptr)
 	, m_state(0)
 	, m_editedPoly(nullptr)
 	, m_editedPolyVertices(nullptr)
 {
-	setupUi(this);
+	m_UI->setupUi(this);
 
-	connect(undoToolButton, SIGNAL(clicked()), this, SLOT(undo()));
-	connect(validToolButton, SIGNAL(clicked()), this, SLOT(apply()));
-	connect(cancelToolButton, SIGNAL(clicked()), this, SLOT(cancel()));
-	connect(polylineToolButton, SIGNAL(toggled(bool)), this, SLOT(enableSectionEditingMode(bool)));
-	connect(importFromDBToolButton, SIGNAL(clicked()), this, SLOT(doImportPolylinesFromDB()));
-	connect(vertAxisComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setVertDimension(int)));
+	connect(m_UI->undoToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::undo);
+	connect(m_UI->validToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::apply);
+	connect(m_UI->cancelToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::cancel);
+	connect(m_UI->polylineToolButton, &QAbstractButton::toggled, this, &ccSectionExtractionTool::enableSectionEditingMode);
+	connect(m_UI->importFromDBToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::doImportPolylinesFromDB);
+	connect(m_UI->vertAxisComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccSectionExtractionTool::setVertDimension);
 
-	connect(generateOrthoSectionsToolButton, SIGNAL(clicked()), this, SLOT(generateOrthoSections()));
-	connect(extractPointsToolButton, SIGNAL(clicked()), this, SLOT(extractPoints()));
-	connect(unfoldToolButton, SIGNAL(clicked()), this, SLOT(unfoldPoints()));
-	connect(exportSectionsToolButton, SIGNAL(clicked()), this, SLOT(exportSections()));
+	connect(m_UI->generateOrthoSectionsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::generateOrthoSections);
+	connect(m_UI->extractPointsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::extractPoints);
+	connect(m_UI->unfoldToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::unfoldPoints);
+	connect(m_UI->exportSectionsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::exportSections);
 
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Space);  //space bar for the "pause" button
 	addOverridenShortcut(Qt::Key_Escape); //cancel current polyline edition
 	addOverridenShortcut(Qt::Key_Delete); //delete key to delete the selected polyline
 
-	connect(this, SIGNAL(shortcutTriggered(int)), this, SLOT(onShortcutTriggered(int)));
+	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccSectionExtractionTool::onShortcutTriggered);
 }
 
 ccSectionExtractionTool::~ccSectionExtractionTool()
@@ -104,6 +107,8 @@ ccSectionExtractionTool::~ccSectionExtractionTool()
 		delete m_editedPoly;
 		m_editedPoly = nullptr;
 	}
+	
+	delete m_UI;
 }
 
 void ccSectionExtractionTool::setVertDimension(int dim)
@@ -133,7 +138,7 @@ void ccSectionExtractionTool::onShortcutTriggered(int key)
 	switch (key)
 	{
 	case Qt::Key_Space:
-		polylineToolButton->toggle();
+		m_UI->polylineToolButton->toggle();
 		return;
 
 	case Qt::Key_Escape:
@@ -203,10 +208,10 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
-		connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
-		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLine(int, int, Qt::MouseButtons)));
-		connect(m_associatedWin, SIGNAL(entitySelectionChanged(ccHObject*)), this, SLOT(entitySelected(ccHObject*)));
+		connect(m_associatedWin, &ccGLWindow::leftButtonClicked, this, &ccSectionExtractionTool::addPointToPolyline);
+		connect(m_associatedWin, &ccGLWindow::rightButtonClicked, this, &ccSectionExtractionTool::closePolyLine);
+		connect(m_associatedWin, &ccGLWindow::mouseMoved, this, &ccSectionExtractionTool::updatePolyLine);
+		connect(m_associatedWin, &ccGLWindow::entitySelectionChanged, this, &ccSectionExtractionTool::entitySelected);
 
 		//import sections in current display
 		for (auto & section : m_sections)
@@ -240,7 +245,7 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 		}
 
 		//update view direction
-		setVertDimension(vertAxisComboBox->currentIndex());
+		setVertDimension(m_UI->vertAxisComboBox->currentIndex());
 
 		//section extraction only works in orthoraphic mode!
 		m_associatedWin->setPerspectiveState(false, true);
@@ -279,8 +284,8 @@ void ccSectionExtractionTool::selectPolyline(Section* poly, bool autoRefreshDisp
 		m_associatedWin->redraw();
 	}
 
-	generateOrthoSectionsToolButton->setEnabled(m_selectedPoly != nullptr);
-	unfoldToolButton->setEnabled(m_selectedPoly != nullptr);
+	m_UI->generateOrthoSectionsToolButton->setEnabled(m_selectedPoly != nullptr);
+	m_UI->unfoldToolButton->setEnabled(m_selectedPoly != nullptr);
 }
 
 void ccSectionExtractionTool::releasePolyline(Section* section)
@@ -322,7 +327,7 @@ void ccSectionExtractionTool::deleteSelectedPolyline()
 	//remove the section from the list
 	m_sections.removeOne(*selectedPoly);
 	m_undoCount.resize(0);
-	undoToolButton->setEnabled(false);
+	m_UI->undoToolButton->setEnabled(false);
 
 	if (m_associatedWin)
 	{
@@ -420,9 +425,9 @@ void ccSectionExtractionTool::undo()
 	}
 
 	//update GUI
-	exportSectionsToolButton->setEnabled(count != 0);
-	extractPointsToolButton->setEnabled(count != 0);
-	undoToolButton->setEnabled(!m_undoCount.empty());
+	m_UI->exportSectionsToolButton->setEnabled(count != 0);
+	m_UI->extractPointsToolButton->setEnabled(count != 0);
+	m_UI->undoToolButton->setEnabled(!m_undoCount.empty());
 
 	if (m_associatedWin)
 		m_associatedWin->redraw();
@@ -461,9 +466,9 @@ bool ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 	
 	m_sections.clear();
 	m_undoCount.resize(0);
-	undoToolButton->setEnabled(false);
-	exportSectionsToolButton->setEnabled(false);
-	extractPointsToolButton->setEnabled(false);
+	m_UI->undoToolButton->setEnabled(false);
+	m_UI->exportSectionsToolButton->setEnabled(false);
+	m_UI->extractPointsToolButton->setEnabled(false);
 
 	//and we remove only temporary clouds
 	for (int i = 0; i < m_clouds.size();)
@@ -554,7 +559,7 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 		const double half_h = camera.viewport[3] / 2.0;
 
 		//working dimension
-		int vertDim = vertAxisComboBox->currentIndex();
+		int vertDim = m_UI->vertAxisComboBox->currentIndex();
 		assert(vertDim >= 0 && vertDim < 3);
 
 		//get default altitude from the cloud(s) bouding-box
@@ -607,8 +612,8 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 	//add polyline to the 'sections' set
 	//(all its parameters will be backuped!)
 	m_sections.push_back(Section(inputPoly, alreadyInDB));
-	exportSectionsToolButton->setEnabled(true);
-	extractPointsToolButton->setEnabled(true);
+	m_UI->exportSectionsToolButton->setEnabled(true);
+	m_UI->extractPointsToolButton->setEnabled(true);
 
 	//apply default look
 	inputPoly->setEnabled(true);
@@ -897,10 +902,10 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 	}
 
 	//update mini-GUI
-	polylineToolButton->blockSignals(true);
-	polylineToolButton->setChecked(state);
-	frame->setEnabled(!state);
-	polylineToolButton->blockSignals(false);
+	m_UI->polylineToolButton->blockSignals(true);
+	m_UI->polylineToolButton->setChecked(state);
+	m_UI->frame->setEnabled(!state);
+	m_UI->polylineToolButton->blockSignals(false);
 
 	m_associatedWin->redraw();
 }
@@ -910,7 +915,7 @@ void ccSectionExtractionTool::addUndoStep()
 	if (m_undoCount.empty() || (static_cast<int>(m_undoCount.back()) < m_sections.size()))
 	{
 		m_undoCount.push_back(m_sections.size());
-		undoToolButton->setEnabled(true);
+		m_UI->undoToolButton->setEnabled(true);
 	}
 }
 
@@ -1047,7 +1052,7 @@ void ccSectionExtractionTool::generateOrthoSections()
 
 		//normal to the plane
 		CCVector3 N(0, 0, 0);
-		int vertDim = vertAxisComboBox->currentIndex();
+		int vertDim = m_UI->vertAxisComboBox->currentIndex();
 		assert(vertDim >= 0 && vertDim < 3);
 		{
 			N.u[vertDim] = 1.0;
@@ -1501,7 +1506,7 @@ void ccSectionExtractionTool::unfoldPoints()
 	s_defaultThickness = thickness;
 
 	//projection direction
-	int vertDim = vertAxisComboBox->currentIndex();
+	int vertDim = m_UI->vertAxisComboBox->currentIndex();
 	int xDim = (vertDim < 2 ? vertDim + 1 : 0);
 	int yDim = (xDim < 2 ? xDim + 1 : 0);
 
@@ -1796,7 +1801,7 @@ void ccSectionExtractionTool::extractPoints()
 		QCoreApplication::processEvents();
 	}
 
-	int vertDim = vertAxisComboBox->currentIndex();
+	int vertDim = m_UI->vertAxisComboBox->currentIndex();
 	int xDim = (vertDim < 2 ? vertDim + 1 : 0);
 	int yDim = (xDim < 2 ? xDim + 1 : 0);
 

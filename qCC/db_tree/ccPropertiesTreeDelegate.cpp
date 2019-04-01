@@ -2480,6 +2480,7 @@ void ccPropertiesTreeDelegate::footprintHeightChanged(double pos)
 	//updateDisplay();
 }
 
+double s_topHeightPrevious = 0.0;
 void ccPropertiesTreeDelegate::BlockTopAddChanged(double pos)
 {
 	if (!m_currentObject)
@@ -2487,10 +2488,12 @@ void ccPropertiesTreeDelegate::BlockTopAddChanged(double pos)
 
 	StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
 	assert(block);
-	block->TopHeightAdd(pos);
+	double add = pos - s_topHeightPrevious;
+	block->TopHeightAdd(add);
+	s_topHeightPrevious = pos;
 	updateDisplay();
 }
-
+double s_bottomHeightPrevious = 0.0;
 void ccPropertiesTreeDelegate::BlockBottomAddChanged(double pos)
 {
 	if (!m_currentObject)
@@ -2498,7 +2501,9 @@ void ccPropertiesTreeDelegate::BlockBottomAddChanged(double pos)
 
 	StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
 	assert(block);
-	block->BottomHeightAdd(pos);
+	double add = pos - s_bottomHeightPrevious;
+	block->BottomHeightAdd(add);
+	s_bottomHeightPrevious = pos;
 	updateDisplay();
 }
 

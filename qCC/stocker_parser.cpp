@@ -1661,7 +1661,7 @@ void DeduceFootPrintHeight(ccHObject* point_cloud, ccHObject* primitive, ccHObje
 
 	}	
 }
-
+#include "ccExtru.h"
 ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 {
 	std::vector<std::vector<int>> components;
@@ -1703,11 +1703,18 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 		for (auto & pt : foot_print_points) {
 			top_points.push_back(CCVector3(pt.x, pt.y, height));
 			bottom_points.push_back(CCVector3(pt.x, pt.y, ground));
-		}
+		}		
 		StBlock* block_entity = new StBlock(top_points, bottom_points);
 		int biggest = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX);
 		block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(biggest + 1));
 		blockgroup_obj->addChild(block_entity);
+		
+		std::vector<CCVector2> profiles;
+		for (auto & pt : top_points) {
+			profiles.push_back(CCVector2(pt.x, pt.y));
+		}
+		ccExtru* extru = new ccExtru(profiles, height);
+		blockgroup_obj->addChild(extru);
 	}
 	return blockgroup_obj;
 	

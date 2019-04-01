@@ -126,6 +126,13 @@ void StBlock::TopHeightAdd(double val)
 		P.z += val;
 	}
 	cloud->invalidateBoundingBox();
+
+	ccPointCloud* verts = vertices();
+	for (size_t i = 0; i < verts->size() / 2; i++) {
+		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2));
+		P.z += val;
+	}
+	verts->invalidateBoundingBox();
 }
 
 void StBlock::BottomHeightAdd(double val)
@@ -137,11 +144,17 @@ void StBlock::BottomHeightAdd(double val)
 		P.z += val;
 	}
 	cloud->invalidateBoundingBox();
+
+	ccPointCloud* verts = vertices();
+	for (size_t i = 0; i < verts->size() / 2; i++) {
+		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2 + 1));
+		P.z += val;
+	}
+	verts->invalidateBoundingBox();
 }
 
 bool StBlock::buildUp()
 {
-
 	unsigned count = static_cast<unsigned>(m_top->getContour()->size());
 	if (count < 3)
 		return false;
@@ -235,6 +248,15 @@ bool StBlock::buildUp()
 			}
 		}
 	}
+// 	setColor(ccColor::blue);
+// 	showColors(true);
+	setVisible(true);
+	enableStippling(true);
+	
+	showNormals(true);
+
+	addChild(m_top);
+	addChild(m_bottom);
 
 	return true;
 }

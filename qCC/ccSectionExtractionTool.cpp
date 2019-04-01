@@ -844,7 +844,9 @@ void ccSectionExtractionTool::closePolyLine(int, int)
 		CCVector3* start_point = const_cast<CCVector3*>(m_editedPolyVertices->getPoint(0));
 		if (((*start_point) - (*end_point)).norm2() < 10) {
 			*end_point = *start_point;
-			m_editedPoly->setPointIndex(vertCount - 2, 0);
+//			m_editedPoly->setPointIndex(vertCount - 2, 0);
+			m_editedPoly->resize(vertCount - 2);
+			m_editedPoly->setClosed(true);
 		}
 
 		//remove polyline from the 'temporary' world

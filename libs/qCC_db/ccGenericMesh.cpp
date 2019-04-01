@@ -1049,7 +1049,7 @@ bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv
 	getTriangleVertices(triIndex, A, B, C);
 
 	double z = 1.0 - uv.x - uv.y;
-	if (warningIfOutside && z < -1.0e-6 || z > 1.0 + 1.0e-6)
+	if (warningIfOutside && ((z < -1.0e-6) || (z > 1.0 + 1.0e-6)))
 	{
 		ccLog::Warning("Point falls outside of the triangle");
 	}

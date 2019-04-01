@@ -44,20 +44,40 @@ namespace
 Q_GLOBAL_STATIC( PrivatePluginManager, sPluginManager );
 
 
-// Check for metadata and warn if it's not there
-// This indicates that a plugin hasn't been converted to the new JSON metadata.
-// It is going to be required in a future verison of CloudCompare.
-static void	sWarnIfNoMetaData( QPluginLoader* loader, const QString& fileName )
+// Get the plugin's IID from the meta data
+static QString sPluginIID( QPluginLoader* loader )
 {
-	QJsonObject	metaObject = loader->metaData();
+	const QJsonObject metaObject = loader->metaData();
 	
+	if ( metaObject.isEmpty() )
+	{
+		const QString fileName = QFileInfo( loader->fileName() ).fileName();
+
+		ccLog::Warning( QStringLiteral( "\t%1 does not supply meta data in the Q_PLUGIN_METADATA (see one of the example plugins)." ).arg( fileName ) );
+		
+		return {};
+	}
+	
+	return metaObject["IID"].toString();
+}
+
+// Check for metadata and error if it's not there
+// This indicates that a plugin hasn't been converted to the new JSON metadata.
+static bool	sMetaDataValid( QPluginLoader* loader )
+{
+	const QJsonObject metaObject = loader->metaData();
+	
+	const QString fileName = QFileInfo( loader->fileName() ).fileName();
+		
 	if ( metaObject.isEmpty() || metaObject["MetaData"].toObject().isEmpty() )
 	{
-		ccLog::Warning( QStringLiteral( "\t%1 does not supply meta data in the Q_PLUGIN_METADATA (see one of the example plugins). This will be required in a future verison of CloudCompare." ).arg( fileName ) );				
+		ccLog::Error( QStringLiteral( "%1 does not supply meta data in the Q_PLUGIN_METADATA (see one of the example plugins)." ).arg( fileName ) );
+		
+		return false;
 	}
 	else
 	{
-		QJsonObject	data = metaObject["MetaData"].toObject();
+		const QJsonObject	data = metaObject["MetaData"].toObject();
 		
 		// The plugin type is going to be required
 		const QStringList validTypes{ "GL", "I/O", "Standard" };
@@ -66,9 +86,14 @@ static void	sWarnIfNoMetaData( QPluginLoader* loader, const QString& fileName )
 		
 		if ( !validTypes.contains( pluginType ) )
 		{
-			ccLog::Warning( QStringLiteral( "\t%1 does not supply a valid plugin type in its info.json. It must be one of: %2" ).arg( fileName, validTypes.join( ", " ) ) );
+			ccLog::Error( QStringLiteral( "%1 does not supply a valid plugin type in its info.json.\n\nFound: %2\n\nIt must be one of: %3" )
+						  .arg( fileName, pluginType, validTypes.join( ", " ) ) );
+			
+			return false;
 		}
 	}
+	
+	return true;
 }
 
 
@@ -211,9 +236,9 @@ void ccPluginManager::loadFromPathsAndAddToList()
 #endif
 	};
 	
-	// Map the plugin file name to its loader so we can unload it if necessary.
+	// Map the plugin's IID to its loader so we can unload it if necessary.
 	//	This lets us override plugins by path.
-	QMap<QString, QPluginLoader *> fileNameToLoaderMap;
+	QMap<QString, QPluginLoader *> pluginIIDToLoaderMap;
 	
 	const auto paths = pluginPaths();
 	
@@ -233,24 +258,32 @@ void ccPluginManager::loadFromPathsAndAddToList()
 			
 			QPluginLoader *loader = new QPluginLoader( pluginPath );
 			
-			sWarnIfNoMetaData( loader, fileName );
+			const QString pluginIID = sPluginIID( loader );
 			
-			QObject* plugin = loader->instance();
+			bool metaDataValid = sMetaDataValid( loader );
 			
-			if ( plugin == nullptr )
+			if ( !metaDataValid || pluginIID.isNull() )
 			{
-				ccLog::Warning( tr( "\t%1 does not seem to be a valid plugin\t(%2)" ).arg( fileName, loader->errorString() ) );
+				ccLog::Warning( tr( "\t%1 has invalid meta data\t" ).arg( fileName ) );
 				
 				delete loader;
 				
 				continue;
 			}
 			
+			QObject* plugin = loader->instance();
 			ccPluginInterface* ccPlugin = dynamic_cast<ccPluginInterface*>(plugin);
 			
-			if ( ccPlugin == nullptr )
+			if ( (plugin == nullptr) || (ccPlugin == nullptr) )
 			{				
-				ccLog::Warning( tr( "\t%1 does not seem to be a valid plugin or it is not supported by this version" ).arg( fileName ) );
+				if ( plugin == nullptr )
+				{
+					ccLog::Warning( tr( "\t%1 does not seem to be a valid plugin\t(%2)" ).arg( fileName, loader->errorString() ) );
+				}
+				else
+				{
+					ccLog::Warning( tr( "\t%1 does not seem to be a valid plugin or it is not supported by this version" ).arg( fileName ) );
+				}
 				
 				loader->unload();
 				
@@ -261,7 +294,7 @@ void ccPluginManager::loadFromPathsAndAddToList()
 			
 			if ( ccPlugin->getName().isEmpty() )
 			{
-				ccLog::Error( tr( "\tPlugin %1 has a blank name" ).arg( fileName ) );
+				ccLog::Error( tr( "Plugin %1 has a blank name" ).arg( fileName ) );
 				
 				loader->unload();
 				
@@ -270,9 +303,9 @@ void ccPluginManager::loadFromPathsAndAddToList()
 				continue;
 			}
 			
-			QPluginLoader* previousLoader = fileNameToLoaderMap.value( fileName );
+			QPluginLoader* previousLoader = pluginIIDToLoaderMap.value( pluginIID );
 			
-			// If we have already loaded a plugin with this file name, unload it and replace the interface in the plugin list
+			// If we have already loaded a plugin with this IID, unload it and replace the interface in the plugin list
 			if ( previousLoader != nullptr )
 			{
 				ccPluginInterface* pluginInterface = dynamic_cast<ccPluginInterface *>( previousLoader->instance() );
@@ -292,13 +325,13 @@ void ccPluginManager::loadFromPathsAndAddToList()
 				m_pluginList.push_back( ccPlugin );
 			}
 			
-			fileNameToLoaderMap[fileName] = loader;
+			pluginIIDToLoaderMap[pluginIID] = loader;
 			
 			ccLog::Print( tr( "\tPlugin found: %1 (%2)" ).arg( ccPlugin->getName(), fileName ) );
 		}
 	}
 	
-	const auto loaders = fileNameToLoaderMap.values();
+	const auto loaders = pluginIIDToLoaderMap.values();
 	
 	for ( QPluginLoader* loader : loaders )
 	{

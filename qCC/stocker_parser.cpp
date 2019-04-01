@@ -79,8 +79,19 @@ stocker::Contour3d GetPointsFromCloud(ccHObject* entity) {
 }
 
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker::Polyline3d polygon, double height)
-{
+{	
 	stocker::Contour3d points;
+	if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+		ccHObject::Container planes_container;
+		entity->filterChildren(planes_container, true, CC_TYPES::PLANE, true);
+		std::vector<Contour3d> planes_points;
+		planes_points = GetPointsFromCloudInsidePolygonXY(planes_container, polygon, height);
+		for (auto & pl_pts : planes_points) {
+			points.insert(points.end(), pl_pts.begin(), pl_pts.end());
+		}
+		return points;
+	}
+
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 	if (!cloud) return points;
 
@@ -1623,12 +1634,23 @@ ccHObject* ConstrainedMesh(ccHObject* planeObj)
 	return mesh;
 }
 
-void DeduceFootPrintHeight(ccHObject* point_cloud, ccHObject* primitive, ccHObject* footprint, Contour3d & point_inside, double & height)
+bool DeduceFootPrintHeight(ccHObject* point_cloud, ccHObject* primitive, ccHObject* footprint, Contour3d & point_inside, double & height)
 {
+	if (!point_cloud && !primitive) return false;
 	StFootPrint* polyObj = ccHObjectCaster::ToStFootPrint(footprint);
 	assert(polyObj);
 	Polyline3d polygon = GetPolygonFromPolyline(polyObj);
-	Contour3d points = GetPointsFromCloudInsidePolygonXY(point_cloud, polygon, DBL_MAX);
+	Contour3d points;
+	if (point_cloud) {
+		points = GetPointsFromCloudInsidePolygonXY(point_cloud, polygon, DBL_MAX);
+	}
+	else if (primitive) {
+		points = GetPointsFromCloudInsidePolygonXY(primitive, polygon, DBL_MAX);
+	}
+	if (points.empty()) {
+		return false;
+	}
+	
 	sort(points.begin(), points.end(), [&](Vec3d _l, Vec3d _r) {return _l.Z() < _r.Z(); });
 	double min_height = points.front().Z();
 	double max_height = points.back().Z();
@@ -1660,23 +1682,15 @@ void DeduceFootPrintHeight(ccHObject* point_cloud, ccHObject* primitive, ccHObje
 	if (primitive) {
 
 	}	
+	return true;
 }
-#include "ccExtru.h"
+
 ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
-{
-	std::vector<std::vector<int>> components;
+{	
 	BDBaseHObject* baseObj = GetRootBDBase(buildingObj);
 	if (!baseObj) {
 		return nullptr;
 	}
-
-	CCVector3d loadCoordinatesShift(0, 0, 0);
-	bool loadCoordinatesTransEnabled = false;
-	FileIOFilter::LoadParameters parameters; {
-		parameters.alwaysDisplayLoadDialog = false;
-		parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
-	}
-	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
 	QString building_name = GetBaseName(buildingObj->getName());
 	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
@@ -1687,13 +1701,18 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 	ccHObject::Container polygonObjs = blockgroup_obj->GetFootPrints();
 
 	for (size_t i = 0; i < polygonObjs.size(); i++) {
+		if (!polygonObjs[i]->isEnabled()) continue;
+
 		StFootPrint* foot_print = ccHObjectCaster::ToStFootPrint(polygonObjs[i]);
 		//! get height
 		Contour3d points_inside;
 		double height = foot_print->getHeight();
 		double ground = foot_print->getGround();
 		if (fabs(height - ground) < 1e-6) {
-			DeduceFootPrintHeight(cloudObj, prim_group_obj, polygonObjs[i], points_inside, height);
+			if (!DeduceFootPrintHeight(cloudObj, prim_group_obj, polygonObjs[i], points_inside, height)) {
+				std::cout << "cannot deduce height from footprint " << foot_print->getName().toStdString() << std::endl;
+				continue;
+			}			
 		}		
 		
 		std::vector<CCVector3> foot_print_points = foot_print->getPoints(false);
@@ -1712,6 +1731,16 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 	return blockgroup_obj;
 
 #if 0
+	std::vector<std::vector<int>> components;
+
+	CCVector3d loadCoordinatesShift(0, 0, 0);
+	bool loadCoordinatesTransEnabled = false;
+	FileIOFilter::LoadParameters parameters; {
+		parameters.alwaysDisplayLoadDialog = false;
+		parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+	}
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+
 	// deprecated
 	std::vector<Polyline3d> polygons;
 	std::vector<double> ft_heights;

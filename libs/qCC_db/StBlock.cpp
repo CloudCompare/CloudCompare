@@ -43,11 +43,12 @@ StBlock::StBlock(const std::vector<CCVector2>& profile,
 {
 	assert(profile.size() > 2);
 
+	std::vector<CCVector3> top, bottom;
 	for (auto & pt : profile) {
-		
+		top.push_back(CCVector3(pt.x, pt.y, top_height));
+		bottom.push_back(CCVector3(pt.x, pt.y, bottom_height));
 	}
-
-	updateRepresentation();
+	StBlock(top, bottom, transMat, name);
 }
 
 StBlock::StBlock(const std::vector<CCVector3>& top, 
@@ -58,9 +59,15 @@ StBlock::StBlock(const std::vector<CCVector3>& top,
 {
 	assert(top.size() > 2);
 	assert(top.size() == bottom.size());
-
-	m_top = ccFacet::CreateFromContour(top, "top");
-	m_bottom = ccFacet::CreateFromContour(bottom, "bottom");
+	PointCoordinateType plane_equation[4];
+	plane_equation[0] = 0;
+	plane_equation[1] = 0;
+	plane_equation[2] = 1;
+	plane_equation[3] = top.front().z;
+	m_top = ccFacet::CreateFromContour(top, "top", plane_equation);
+	plane_equation[2] = -1;
+	plane_equation[3] = -bottom.front().z;
+	m_bottom = ccFacet::CreateFromContour(bottom, "bottom", plane_equation);
 
 	updateRepresentation();
 }
@@ -72,6 +79,8 @@ StBlock::StBlock(CCLib::GenericIndexedCloudPersist * top_cloud,
 	const ccGLMatrix * transMat, QString name)
 	: ccGenericPrimitive(name, transMat)
 {
+	///< not realized yet
+	assert(true);
 	assert(top_index.size() > 2);
 	assert(top_index.size() == bottom_index.size());
 
@@ -216,7 +225,7 @@ bool StBlock::buildUp()
 
 		const CCVector2& P = profile[i];	
 		const CCVector2& PNext = profile[(i + 1) % count];
-		CCVector2 N(-(PNext.y - P.y), PNext.x - P.x);
+		CCVector2 N(PNext.y - P.y, -(PNext.x - P.x));
 		N.normalize();
 		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(N.x, N.y, 0.0).u));
 	}
@@ -248,12 +257,12 @@ bool StBlock::buildUp()
 			}
 		}
 	}
-// 	setColor(ccColor::blue);
-// 	showColors(true);
 	setVisible(true);
-	enableStippling(true);
-	
+	enableStippling(false);	
 	showNormals(true);
+
+	m_top->getPolygon()->enableStippling(false);
+	m_bottom->getPolygon()->enableStippling(false);
 
 	addChild(m_top);
 	addChild(m_bottom);

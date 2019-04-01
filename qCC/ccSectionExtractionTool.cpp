@@ -2194,9 +2194,15 @@ void ccSectionExtractionTool::exportFootprint()
 				if (duplicatePoly->initWith(duplicateVertices, *section.entity))
 				{
 					assert(duplicateVertices);
+					stocker::Contour2d stocker_points;
 					for (unsigned i = 0; i < duplicateVertices->size(); ++i) {
 						CCVector3& P = const_cast<CCVector3&>(*duplicateVertices->getPoint(i));
 						P.u[2] = m_ground;
+
+						stocker_points.push_back(stocker::parse_xy(P));
+					}
+					if (!stocker::IsCounterClockWise(stocker_points)) {
+						duplicatePoly->reverseVertexOrder();
 					}
 
 					duplicateVertices->invalidateBoundingBox();

@@ -41,6 +41,21 @@ StFootPrint::~StFootPrint()
 {
 }
 
+void StFootPrint::reverseVertexOrder()
+{
+	getAssociatedCloud();
+	size_t last = size();
+	size_t first = 0;
+	while ((first != last) && first != --last) {
+		///< swap first and last
+		size_t fist_index = getPointGlobalIndex(first);
+		setPointIndex(first, getPointGlobalIndex(last));
+		setPointIndex(last, fist_index);
+		++first;
+	}
+	setPointIndex(0, getPointGlobalIndex(0));
+}
+
 inline double StFootPrint::getHeight() const
 {
 	return getPoint(0)->z;

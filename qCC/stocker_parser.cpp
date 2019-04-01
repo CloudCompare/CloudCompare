@@ -1707,17 +1707,12 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 		StBlock* block_entity = new StBlock(top_points, bottom_points);
 		int biggest = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX);
 		block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(biggest + 1));
-		blockgroup_obj->addChild(block_entity);
-		
-		std::vector<CCVector2> profiles;
-		for (auto & pt : top_points) {
-			profiles.push_back(CCVector2(pt.x, pt.y));
-		}
-		ccExtru* extru = new ccExtru(profiles, height);
-		blockgroup_obj->addChild(extru);
+		foot_print->addChild(block_entity);
 	}
 	return blockgroup_obj;
-	
+
+#if 0
+	// deprecated
 	std::vector<Polyline3d> polygons;
 	std::vector<double> ft_heights;
 
@@ -1732,7 +1727,7 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 			double footprint_height = polyObj->getHeight();
 			polygons.push_back(polygon);
 			ft_heights.push_back(footprint_height);
-		}		
+		}
 	}
 
 	QString model_group_name = building_name + BDDB_LOD1MODEL_SUFFIX;
@@ -1745,16 +1740,16 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 	if (!model_group) {
 		model_group = new ccHObject(model_group_name);
 	}
-	
+
 	for (size_t i = 0; i < polygons.size(); i++) {
 
 		int biggest = GetMaxNumberExcludeChildPrefix(model_group, BDDB_LOD1MODEL_SUFFIX);
 		QString model_name = BDDB_LOD1MODEL_PREFIX + QString::number(biggest + 1);
-		
+
 		char output_path[256];
-		sprintf(output_path, "%s%s%s%s%s", 
+		sprintf(output_path, "%s%s%s%s%s",
 			build_unit.file_path.model_dir.c_str(),
-			building_name.toStdString().c_str(), ".", 
+			building_name.toStdString().c_str(), ".",
 			model_name.toStdString().c_str(), ".obj");
 
 		if (!LoD1FromFootPrintAndHeight(polygons[i], ft_heights[i], output_path)) {
@@ -1769,6 +1764,7 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 	}
 	buildingObj->addChild(model_group);
 	return model_group;
+#endif
 }
 
 //! 3D4EM	.lod2.model

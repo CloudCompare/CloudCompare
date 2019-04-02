@@ -25,7 +25,6 @@
 #include "StBlockGroup.h"
 #include "StBuilding.h"
 #include "StFootPrint.h"
-#include "StFootPrintGroup.h"
 #include "StModel.h"
 #include "StPrimGroup.h"
 

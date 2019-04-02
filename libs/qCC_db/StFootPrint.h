@@ -47,6 +47,11 @@ public:
 	void setHoleState(bool state) { m_hole = state; }
 
 protected:
+
+	//inherited from ccGenericPrimitive
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+
 	double m_ground;
 	bool m_hole;
 };

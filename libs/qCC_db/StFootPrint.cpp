@@ -79,3 +79,34 @@ void StFootPrint::setHeight(double height)
 	}
 	invalidateBoundingBox();
 }
+
+bool StFootPrint::toFile_MeOnly(QFile & out) const
+{
+	if (!ccPolyline::toFile_MeOnly(out)) {
+		return false;
+	}
+	
+	if (out.write((const char*)&m_ground, sizeof(double)) < 0)
+		return WriteError();
+
+	if (out.write((const char*)&m_hole, sizeof(bool)) < 0)
+		return WriteError();
+
+	return true;
+}
+
+bool StFootPrint::fromFile_MeOnly(QFile & in, short dataVersion, int flags)
+{
+	if (!ccPolyline::fromFile_MeOnly(in, dataVersion, flags)) {
+		return false;
+	}
+
+
+	if (in.read((char*)&m_ground, sizeof(double)) < 0)
+		return ReadError();
+
+	if (in.read((char*)&m_hole, sizeof(bool)) < 0)
+		return ReadError();
+
+	return true;
+}

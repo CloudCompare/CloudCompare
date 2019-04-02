@@ -104,19 +104,16 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_LOD2MODEL_SUFFIX		".lod2.model"
 #define BDDB_LOD3MODEL_SUFFIX		".lod3.model"
 
-class BDBaseHObject : public ccHObject
+class BDBaseHObject : public BDBaseHObject_
 {
 public:
 	BDBaseHObject(QString name = QString()) :
-		ccHObject(name) {}
+		BDBaseHObject_(name) {}
 	BDBaseHObject(const ccHObject& s) :
-		ccHObject(s) {}
+		BDBaseHObject_(s) {}
 	~BDBaseHObject() {}
 
 	using Container = std::vector<BDBaseHObject *>;
-
-	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_PROJECT; }
 
 public:
 	stocker::BlockProj block_prj;

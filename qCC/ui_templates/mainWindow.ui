@@ -651,6 +651,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
    <addaction name="actionBDProjectLoad"/>
+   <addaction name="actionBDProjectSave"/>
   </widget>
   <widget class="QDockWidget" name="DockableProperties">
    <property name="minimumSize">
@@ -793,6 +794,10 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionZoomAndCenter"/>
    <addaction name="actionSetViewTop"/>
    <addaction name="actionSetViewFront"/>
+   <addaction name="actionSetViewBottom"/>
+   <addaction name="actionSetViewBack"/>
+   <addaction name="actionSetViewLeft"/>
+   <addaction name="actionSetViewRight"/>
   </widget>
   <widget class="QToolBar" name="toolBarEditor">
    <property name="windowTitle">
@@ -3197,13 +3202,16 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDProjectLoad">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/Stocker/images/stocker/database.png</normaloff>:/CC/Stocker/images/stocker/database.png</iconset>
+     <normaloff>:/CC/Stocker/images/stocker/databaseload.png</normaloff>:/CC/Stocker/images/stocker/databaseload.png</iconset>
    </property>
    <property name="text">
     <string>Load Project</string>
    </property>
    <property name="iconText">
     <string>Load</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+O</string>
    </property>
   </action>
   <action name="actionBDPlaneSegmentation">
@@ -3394,6 +3402,18 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="text">
     <string>FootPrint</string>
+   </property>
+  </action>
+  <action name="actionBDProjectSave">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/databasesave.png</normaloff>:/CC/Stocker/images/stocker/databasesave.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
  </widget>

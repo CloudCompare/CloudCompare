@@ -69,12 +69,12 @@ enum CC_OBJECT_FLAG {	//CC_UNUSED			= 1, //DGM: not used anymore (former CC_FATH
 #define CC_QUADRIC_BIT					0x00000200000000	//Quadric (primitive)
 #define ST_PROJECT_BIT					0x00000400000000	//building
 #define ST_BUILDING_BIT					0x00000800000000	//building
-#define ST_STPRIMITIVE_BIT				0x00000400000000	//stprimitive
-#define ST_FOOTPRINT_BIT				0x00001000000000	//footprint
-#define ST_BLOCKGROUP_BIT				0x00002000000000	//blockgroup
-#define ST_BLOCK_BIT					0x00004000000000	//block
-#define ST_MODEL_BIT					0x00008000000000	//model
-#define ST_HYPOTHESIS_BIT				0x00010000000000	//hypothesis
+#define ST_STPRIMITIVE_BIT				0x00001000000000					//stprimitive
+#define ST_BLOCKGROUP_BIT				0x00002000000000	//footprint
+#define ST_MODEL_BIT					0x00004000000000	//blockgroup
+#define ST_BLOCK_BIT					0x00008000000000	//block
+#define ST_FOOTPRINT_BIT				0x00010000000000	//model
+#define ST_HYPOTHESIS_BIT				0x00020000000000	//hypothesis
 //#define 								0x00020000000000	//
 //#define CC_FREE_BIT					...
 
@@ -246,7 +246,17 @@ public:
 	inline bool isHierarchy() const { return (getClassID() & CC_HIERARCH_BIT) != 0; }
 
 	inline bool isKindOf(CC_CLASS_ENUM type) const { return (getClassID() & type) == type; }
-	inline bool isA(CC_CLASS_ENUM type) const { return (getClassID() == type); }
+	inline bool isA(CC_CLASS_ENUM type) const {
+		if (type == CC_TYPES::HIERARCHY_OBJECT) {
+			return getClassID() == type || 
+				getClassID() == CC_TYPES::ST_PROJECT || 
+				getClassID() == CC_TYPES::ST_BUILDING || 
+				getClassID() == CC_TYPES::ST_PRIMITIVE || 
+				getClassID() == CC_TYPES::ST_BLOCKGROUP || 
+				getClassID() == CC_TYPES::ST_MODEL;
+		}
+		return (getClassID() == type); 
+	}
 
 	//! Returns a new unassigned unique ID
 	/** Unique IDs are handled with persistent settings

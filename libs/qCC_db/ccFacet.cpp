@@ -461,6 +461,22 @@ bool ccFacet::toFile_MeOnly(QFile& out) const
 	if (out.write((const char*)&m_maxEdgeLength,sizeof(PointCoordinateType)) < 0)
 		return WriteError();
 
+	//m_fitting (dataVersion>=32)
+	if (out.write((const char*)&m_fitting, sizeof(double)) < 0)
+		return WriteError();
+
+	//m_coverage (dataVersion>=32)
+	if (out.write((const char*)&m_coverage, sizeof(double)) < 0)
+		return WriteError();
+
+	//m_confidence (dataVersion>=32)
+	if (out.write((const char*)&m_confidence, sizeof(double)) < 0)
+		return WriteError();
+
+	//m_distance (dataVersion>=32)
+	if (out.write((const char*)&m_distance, sizeof(double)) < 0)
+		return WriteError();
+
 	return true;
 }
 
@@ -535,6 +551,22 @@ bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//Max edge length (dataVersion>=31)
 	if (in.read((char*)&m_maxEdgeLength,sizeof(PointCoordinateType)) < 0)
 		return WriteError();
+
+	//m_fitting (dataVersion>=32)
+	if (in.read((char*)&m_fitting, sizeof(double)) < 0)
+		return ReadError();
+
+	//m_coverage (dataVersion>=32)
+	if (in.read((char*)&m_coverage, sizeof(double)) < 0)
+		return ReadError();
+
+	//m_confidence (dataVersion>=32)
+	if (in.read((char*)&m_confidence, sizeof(double)) < 0)
+		return ReadError();
+
+	//m_distance (dataVersion>=32)
+	if (in.read((char*)&m_distance, sizeof(double)) < 0)
+		return ReadError();
 
 	return true;
 }

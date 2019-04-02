@@ -497,4 +497,19 @@ inline void ConvertToGroup(const ccHObject::Container& origin, ccHObject& dest, 
 	}
 }
 
+class QCC_DB_LIB_API BDBaseHObject_ : public ccHObject
+{
+public:
+public:
+	BDBaseHObject_(QString name = QString()) :
+		ccHObject(name) {}
+	BDBaseHObject_(const ccHObject& s) :
+		ccHObject(s) {}
+	~BDBaseHObject_() {}
+
+	//! Returns class ID
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_PROJECT; }
+
+};
+
 #endif //CC_HIERARCHY_OBJECT_HEADER

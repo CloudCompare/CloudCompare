@@ -444,6 +444,7 @@ private slots:
 	//! Building Reconstruction
 	/// Load Project
 	void doActionBDProjectLoad();
+	void doActionBDProjectSave();
 	/// Plane Segmentation
 	void doActionBDPlaneSegmentation();
 	/// Create Image Lines

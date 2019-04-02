@@ -1243,7 +1243,7 @@ void ccSectionExtractionTool::exportSections()
 
 	MainWindow* mainWin = MainWindow::TheInstance();
 
-	//export entites
+	//export entities
 	{
 		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
 		{
@@ -2182,12 +2182,12 @@ void ccSectionExtractionTool::exportFootprintInside()
 		return;
 	}
 
-	//export entites
+	//export entities
 	{
 		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
 		{
 			Section& section = *it;
-			if (section.entity && !section.isInDB) {				
+			if (section.entity && !section.isInDB) {
 				StFootPrint* duplicatePoly = new StFootPrint(0);
 				ccPointCloud* duplicateVertices = 0;
 
@@ -2195,24 +2195,20 @@ void ccSectionExtractionTool::exportFootprintInside()
 				QString cur_name = BDDB_FOOTPRINT_PREFIX + QString::number(biggest_number + 1);
 				if (duplicatePoly->initWith(duplicateVertices, *section.entity))
 				{
+					duplicatePoly->setAssociatedCloud(duplicateVertices);
 					assert(duplicateVertices);
 					stocker::Contour2d stocker_points;
 					for (unsigned i = 0; i < duplicateVertices->size(); ++i) {
-						CCVector3& P = const_cast<CCVector3&>(*duplicateVertices->getPoint(i));
-						P.u[2] = m_ground;
-
-						stocker_points.push_back(stocker::parse_xy(P));
+						stocker_points.push_back(stocker::parse_xy(*duplicateVertices->getPoint(i)));
 					}
 					if (!stocker::IsCounterClockWise(stocker_points)) {
 						if (duplicatePoly->reverseVertexOrder()) {
 							duplicatePoly->setHoleState(false);
 						}
-						else {
-							return;
-						}
+						else return;
 					}
 
-					duplicateVertices->invalidateBoundingBox();
+					//duplicateVertices->invalidateBoundingBox();
 					duplicateVertices->setEnabled(false);
 					duplicatePoly->set2DMode(false);
 					duplicatePoly->setDisplay_recursive(m_dest_obj->getDisplay());
@@ -2220,6 +2216,7 @@ void ccSectionExtractionTool::exportFootprintInside()
 					duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
 					duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
 					duplicatePoly->setGround(m_ground);
+					duplicatePoly->setHeight(m_ground);
 					section.entity = duplicatePoly;
 				}
 				else {
@@ -2228,7 +2225,7 @@ void ccSectionExtractionTool::exportFootprintInside()
 
 					ccLog::Error("Not enough memory to export polyline!");
 					return;
-				}				
+				}
 				
 				section.isInDB = true;
 				m_dest_obj->addChild(duplicatePoly);
@@ -2284,24 +2281,20 @@ void ccSectionExtractionTool::exportFootprintOutside()
 				QString cur_name = BDDB_FOOTPRINT_PREFIX + QString::number(biggest_number + 1);
 				if (duplicatePoly->initWith(duplicateVertices, *section.entity))
 				{
+					duplicatePoly->setAssociatedCloud(duplicateVertices);
 					assert(duplicateVertices);
 					stocker::Contour2d stocker_points;
 					for (unsigned i = 0; i < duplicateVertices->size(); ++i) {
-						CCVector3& P = const_cast<CCVector3&>(*duplicateVertices->getPoint(i));
-						P.u[2] = m_ground;
-
-						stocker_points.push_back(stocker::parse_xy(P));
+						stocker_points.push_back(stocker::parse_xy(*duplicateVertices->getPoint(i)));
 					}
 					if (stocker::IsCounterClockWise(stocker_points)) {
 						if (duplicatePoly->reverseVertexOrder()) {
 							duplicatePoly->setHoleState(true);
 						}
-						else {
-							return;
-						}
+						else return;
 					}
 
-					duplicateVertices->invalidateBoundingBox();
+					//duplicateVertices->invalidateBoundingBox();
 					duplicateVertices->setEnabled(false);
 					duplicatePoly->set2DMode(false);
 					duplicatePoly->setDisplay_recursive(m_dest_obj->getDisplay());
@@ -2309,6 +2302,7 @@ void ccSectionExtractionTool::exportFootprintOutside()
 					duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
 					duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
 					duplicatePoly->setGround(m_ground);
+					duplicatePoly->setHeight(m_ground);
 					section.entity = duplicatePoly;
 				}
 				else {

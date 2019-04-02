@@ -46,20 +46,6 @@ public:
 		const ccGLMatrix* transMat = 0,
 		QString name = QString("Block"));
 
-	StBlock(CCLib::GenericIndexedCloudPersist* top_cloud,
-		const std::vector<int>& top_index,
-		CCLib::GenericIndexedCloudPersist* bottom_cloud,
-		const std::vector<int>& bottom_index,
-		const ccGLMatrix* transMat = 0,
-		QString name = QString("Block"));
-
-	StBlock(ccFacet* top,
-		ccFacet* bottom,
-		const ccGLMatrix* transMat = 0,
-		QString name = QString("Block"));
-
-
-
 	//! Simplified constructor
 	/** For ccHObject factory only!
 	**/
@@ -73,8 +59,8 @@ public:
 	virtual ccGenericPrimitive* clone() const override;
 	
 	//! Returns profile
-	std::vector<CCVector3> getTop();
-	std::vector<CCVector3> getBottom();
+	std::vector<CCVector3> getTop() { return m_top; };
+	std::vector<CCVector3> getBottom() { return m_bottom; };
 	std::vector<CCVector2> getProfile();
 
 	void TopHeightAdd(double val);
@@ -87,8 +73,11 @@ protected:
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 	virtual bool buildUp() override;
 
-	ccFacet* m_top;
-	ccFacet* m_bottom;
+// 	ccFacet* m_top;
+// 	ccFacet* m_bottom;
+
+	std::vector<CCVector3> m_top;
+	std::vector<CCVector3> m_bottom;
 
 };
 

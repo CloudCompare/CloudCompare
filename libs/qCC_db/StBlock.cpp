@@ -55,44 +55,13 @@ StBlock::StBlock(const std::vector<CCVector3>& top,
 	const std::vector<CCVector3>& bottom,
 	const ccGLMatrix * transMat,
 	QString name)
-	: ccGenericPrimitive(name, transMat)
+	: m_top(top)
+	, m_bottom(bottom)
+	, ccGenericPrimitive(name, transMat)
 {
 	assert(top.size() > 2);
 	assert(top.size() == bottom.size());
-	PointCoordinateType plane_equation[4];
-	plane_equation[0] = 0;
-	plane_equation[1] = 0;
-	plane_equation[2] = 1;
-	plane_equation[3] = top.front().z;
-	m_top = ccFacet::CreateFromContour(top, "top", plane_equation);
-	plane_equation[2] = -1;
-	plane_equation[3] = -bottom.front().z;
-	m_bottom = ccFacet::CreateFromContour(bottom, "bottom", plane_equation);
-
-	updateRepresentation();
-}
-
-StBlock::StBlock(CCLib::GenericIndexedCloudPersist * top_cloud,
-	const std::vector<int>& top_index, 
-	CCLib::GenericIndexedCloudPersist * bottom_cloud, 
-	const std::vector<int>& bottom_index,
-	const ccGLMatrix * transMat, QString name)
-	: ccGenericPrimitive(name, transMat)
-{
-	///< not realized yet
-	assert(true);
-	assert(top_index.size() > 2);
-	assert(top_index.size() == bottom_index.size());
-
 	
-
-	updateRepresentation();
-}
-
-StBlock::StBlock(ccFacet * top, ccFacet * bottom, const ccGLMatrix * transMat, QString name)
-{
-	m_top = top->clone();
-	m_bottom = bottom->clone();
 	updateRepresentation();
 }
 
@@ -106,21 +75,10 @@ ccGenericPrimitive* StBlock::clone() const
 	return finishCloneJob(new StBlock(m_top, m_bottom, &m_transformation, getName()));
 }
 
-std::vector<CCVector3> StBlock::getTop() 
-{
-	return m_top->getContour()->getPoints(false);
-}
-
-std::vector<CCVector3> StBlock::getBottom() 
-{
-	return m_bottom->getContour()->getPoints(false);
-}
-
 std::vector<CCVector2> StBlock::getProfile()
 {
 	std::vector<CCVector2> profile;
-	std::vector<CCVector3> points = m_top->getContour()->getPoints(false);
-	for (auto & pt : points) {
+	for (auto & pt : m_top) {
 		profile.push_back(CCVector2(pt.x, pt.y));
 	}
 	return profile;
@@ -128,15 +86,12 @@ std::vector<CCVector2> StBlock::getProfile()
 
 void StBlock::TopHeightAdd(double val)
 {
-	ccPointCloud* cloud = m_top->getContourVertices();
-	
-	for (size_t i = 0; i < cloud->size(); i++) {
-		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
-		P.z += val;
+	for (size_t i = 0; i < m_top.size(); i++) {
+		m_top.at(i).z += val;
 	}
-	cloud->invalidateBoundingBox();
 
 	ccPointCloud* verts = vertices();
+	if (!verts) { return; }
 	for (size_t i = 0; i < verts->size() / 2; i++) {
 		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2));
 		P.z += val;
@@ -146,15 +101,12 @@ void StBlock::TopHeightAdd(double val)
 
 void StBlock::BottomHeightAdd(double val)
 {
-	ccPointCloud* cloud = m_bottom->getContourVertices();
-
-	for (size_t i = 0; i < cloud->size(); i++) {
-		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
-		P.z += val;
+	for (size_t i = 0; i < m_bottom.size(); i++) {
+		m_bottom.at(i).z += val;
 	}
-	cloud->invalidateBoundingBox();
 
 	ccPointCloud* verts = vertices();
+	if (!verts) { return; }
 	for (size_t i = 0; i < verts->size() / 2; i++) {
 		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2 + 1));
 		P.z += val;
@@ -164,7 +116,7 @@ void StBlock::BottomHeightAdd(double val)
 
 bool StBlock::buildUp()
 {
-	unsigned count = static_cast<unsigned>(m_top->getContour()->size());
+	unsigned count = static_cast<unsigned>(m_top.size());
 	if (count < 3)
 		return false;
 
@@ -212,7 +164,7 @@ bool StBlock::buildUp()
 	assert(m_triNormals);
 
 	//bottom & top faces normals
-	if (0){
+	{
 		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, -1.0).u));
 		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, 1.0).u));
 	} 	
@@ -220,8 +172,8 @@ bool StBlock::buildUp()
 	//add profile vertices & normals
 	for (unsigned i = 0; i < count; ++i)
 	{
-		verts->addPoint(*(m_top->getContourVertices()->getPoint(i)));
-		verts->addPoint(*(m_bottom->getContourVertices()->getPoint(i)));
+		verts->addPoint(m_top.at(i));
+		verts->addPoint(m_bottom.at(i));
 
 		const CCVector2& P = profile[i];	
 		const CCVector2& PNext = profile[(i + 1) % count];
@@ -233,7 +185,6 @@ bool StBlock::buildUp()
 	//add faces
 	{
 		//side faces
-		if (0) //! represented by facet
 		{
 			const int* _triIndexes = triIndexes;
 			for (unsigned i = 0; i < numberOfTriangles; ++i, _triIndexes += 3)
@@ -251,21 +202,15 @@ bool StBlock::buildUp()
 			{
 				unsigned iNext = ((i + 1) % count);
 				addTriangle(i * 2, i * 2 + 1, iNext * 2);
-				addTriangleNormalIndexes(/*2 + */i, /*2 + */i, /*2 + */i);
+				addTriangleNormalIndexes(2 + i, 2 + i, 2 + i);
 				addTriangle(iNext * 2, i * 2 + 1, iNext * 2 + 1);
-				addTriangleNormalIndexes(/*2 + */i, /*2 + */i, /*2 + */i);
+				addTriangleNormalIndexes(2 + i, 2 + i, 2 + i);
 			}
 		}
 	}
 	setVisible(true);
 	enableStippling(false);	
 	showNormals(true);
-
-	m_top->getPolygon()->enableStippling(false);
-	m_bottom->getPolygon()->enableStippling(false);
-
-	addChild(m_top);
-	addChild(m_bottom);
 
 	return true;
 }
@@ -276,16 +221,26 @@ bool StBlock::toFile_MeOnly(QFile& out) const
 	if (!ccGenericPrimitive::toFile_MeOnly(out))
 		return false;
 
+	//parameters (dataVersion>=21)
+	QDataStream outStream(&out);
+	//m_top size
+	outStream << (qint32)m_top.size();
+	//m_top points (3D)
+	for (unsigned i = 0; i < m_top.size(); ++i)
 	{
-		uint32_t top = (m_top ? static_cast<uint32_t>(m_top->getUniqueID()) : 0);
-		if (out.write((const char*)&top, 4) < 0)
-			return WriteError();
+		outStream << m_top[i].x;
+		outStream << m_top[i].y;
+		outStream << m_top[i].z;
 	}
 
+	//m_bottom size
+	outStream << (qint32)m_bottom.size();
+	//m_bottom points (3D)
+	for (unsigned i = 0; i < m_bottom.size(); ++i)
 	{
-		uint32_t bottom = (m_bottom ? static_cast<uint32_t>(m_bottom->getUniqueID()) : 0);
-		if (out.write((const char*)&bottom, 4) < 0)
-			return WriteError();
+		outStream << m_bottom[i].x;
+		outStream << m_bottom[i].y;
+		outStream << m_bottom[i].z;
 	}
 
 	return true;
@@ -296,21 +251,32 @@ bool StBlock::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
-	{
-		uint32_t top = 0;
-		if (in.read((char*)&top, 4) < 0)
-			return ReadError();
-		//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'm_originPoints' pointer!!!
-		*(uint32_t*)(&m_top) = top;
+	//parameters (dataVersion>=21)
+	QDataStream inStream(&in);
+	//m_top size
+	qint32 vertCount;
+	inStream >> vertCount;
+	if (vertCount) {
+		m_top.resize(vertCount);
+		//m_top points (2D)
+		for (unsigned i = 0; i < m_top.size(); ++i)	{
+			ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_top[i].u, 3);
+		}
 	}
+	else
+		return false;	
 
-	{
-		uint32_t bottom = 0;
-		if (in.read((char*)&bottom, 4) < 0)
-			return ReadError();
-		//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'm_originPoints' pointer!!!
-		*(uint32_t*)(&m_bottom) = bottom;
+	//m_bottom size
+	inStream >> vertCount;
+	if (vertCount) {
+		m_bottom.resize(vertCount);
+		//m_bottom points (2D)
+		for (unsigned i = 0; i < m_bottom.size(); ++i) {
+			ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_bottom[i].u, 3);
+		}
 	}
+	else	
+		return false;
 
 	return true;
 }

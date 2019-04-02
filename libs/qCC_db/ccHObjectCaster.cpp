@@ -148,7 +148,7 @@ ccSubMesh* ccHObjectCaster::ToSubMesh(ccHObject* obj)
 
 ccPolyline* ccHObjectCaster::ToPolyline(ccHObject* obj)
 {
-	return (obj && obj->isA(CC_TYPES::POLY_LINE) ? static_cast<ccPolyline*>(obj) : 0);
+	return (obj && (obj->isA(CC_TYPES::POLY_LINE) || obj->isA(CC_TYPES::ST_FOOTPRINT)) ? static_cast<ccPolyline*>(obj) : 0);
 }
 
 ccFacet* ccHObjectCaster::ToFacet(ccHObject* obj)

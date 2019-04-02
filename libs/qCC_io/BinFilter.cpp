@@ -1042,8 +1042,13 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		for (unsigned i = 0; i < currentObject->getChildrenNumber(); ++i)
 			toCheck.push_back(currentObject->getChild(i));
 	}
-
-	if (root->isA(CC_TYPES::HIERARCHY_OBJECT))
+	
+	if (root->isA(CC_TYPES::HIERARCHY_OBJECT) ||
+		root->isA(CC_TYPES::ST_PROJECT) ||
+		root->isA(CC_TYPES::ST_BUILDING) ||
+		root->isA(CC_TYPES::ST_PRIMITIVE) ||
+		root->isA(CC_TYPES::ST_BLOCKGROUP) ||
+		root->isA(CC_TYPES::ST_MODEL))
 	{
 		//transfer children to container
 		root->transferChildren(container, true);

@@ -43,6 +43,14 @@
 #include "ccSubMesh.h"
 #include "ccTorus.h"
 
+#include "StBuilding.h"
+#include "StPrimGroup.h"
+#include "StBlockGroup.h"
+#include "StModel.h"
+
+#include "StBlock.h"
+#include "StFootPrint.h"
+
 //Qt
 #include <QIcon>
 
@@ -199,6 +207,20 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 		//construction this way is not supported (yet)
 		ccLog::ErrorDebug("[ccHObject::New] This object (type %i) can't be constructed this way (yet)!",objectType);
 		break;
+ 	case CC_TYPES::ST_PROJECT:
+ 		return new BDBaseHObject_(name);
+	case CC_TYPES::ST_BUILDING:
+		return new StBuilding(name);
+	case CC_TYPES::ST_PRIMITIVE:
+		return new StPrimGroup(name);
+	case CC_TYPES::ST_BLOCKGROUP:
+		return new StBlockGroup(name);
+	case CC_TYPES::ST_MODEL:
+		return new StModel(name);
+	case CC_TYPES::ST_BLOCK:
+		return new StBlock(name);
+	case CC_TYPES::ST_FOOTPRINT:
+		return new StFootPrint(nullptr);
 	default:
 		//unhandled ID
 		ccLog::ErrorDebug("[ccHObject::New] Invalid object type (%i)!",objectType);
@@ -977,7 +999,8 @@ void ccHObject::removeAllChildren()
 bool ccHObject::isSerializable() const
 {
 	//we only handle pure CC_TYPES::HIERARCHY_OBJECT here (object groups)
-	return (getClassID() == CC_TYPES::HIERARCHY_OBJECT);
+	return isA(CC_TYPES::HIERARCHY_OBJECT);
+//	return (getClassID() == CC_TYPES::HIERARCHY_OBJECT);
 }
 
 bool ccHObject::toFile(QFile& out) const

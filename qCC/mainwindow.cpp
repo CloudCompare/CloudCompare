@@ -781,6 +781,8 @@ void MainWindow::connectActions()
 	//////////////////////////////////////////////////////////////////////////
 	//Building Reconstruction
 	connect(m_UI->actionBDProjectLoad,				&QAction::triggered, this, &MainWindow::doActionBDProjectLoad);
+	connect(m_UI->actionBDProjectSave,				&QAction::triggered, this, &MainWindow::doActionBDProjectSave);
+	
 	connect(m_UI->actionBDPlaneSegmentation,		&QAction::triggered, this, &MainWindow::doActionBDPlaneSegmentation);	
 	connect(m_UI->actionBDImage_Lines,				&QAction::triggered, this, &MainWindow::doActionBDImageLines);
 	connect(m_UI->actionBDPrimIntersections,		&QAction::triggered, this, &MainWindow::doActionBDPrimIntersections);
@@ -10726,11 +10728,13 @@ void MainWindow::doActionBDDisplayPointOff()
 
 //////////////////////////////////////////////////////////////////////////
 
-BDBaseHObject::Container GetBDBaseProjx(MainWindow* main) {
+BDBaseHObject::Container GetBDBaseProjx() {
+	MainWindow* main = MainWindow::TheInstance();
 	ccHObject* root_entity = main->db()->getRootEntity();
+	assert(root_entity);
 	vector<BDBaseHObject*> prjx;
 	for (size_t i = 0; i < root_entity->getChildrenNumber(); i++) {
-		ccHObject* child = main->db()->getRootEntity()->getChild(i);
+		ccHObject* child = root_entity->getChild(i);
 		if (IsBDBaseObj(child))	{
 			prjx.push_back(static_cast<BDBaseHObject*>(child));
 		}
@@ -10791,11 +10795,13 @@ void MainWindow::doActionBDProjectLoad()
 	BDBaseHObject* bd_grp = nullptr;
 	if (QFileInfo(bin_file).exists()) {
 		ccHObject* newGroup = FileIOFilter::LoadFromFile(bin_file, parameters, result, QString());
-		bd_grp = new BDBaseHObject(*newGroup);		
-		bd_grp->setName(prj_name);
-		newGroup->transferChildren(*bd_grp);
+		if (newGroup) {
+			bd_grp = new BDBaseHObject(*newGroup);
+			bd_grp->setName(prj_name);
+			newGroup->transferChildren(*bd_grp);
+		}		
 	}
-	else {
+	if (!bd_grp) {
 		bd_grp = new BDBaseHObject(prj_name);		
 		for (auto & bd : block_prj.m_builder.sbuild) {
 			QString building_name = bd->GetName().Str().c_str();
@@ -10840,6 +10846,54 @@ void MainWindow::doActionBDProjectLoad()
 	}
 	refreshAll();
 	UpdateUI();
+}
+
+bool SaveProject(BDBaseHObject* proj)
+{
+	QFileInfo prj_file(proj->block_prj.m_options.prj_file.project_ini.c_str());
+	QString prj_name = prj_file.completeBaseName();
+	if (!prj_name.startsWith(BDDB_PROJECTNAME_PREFIX)) {
+		prj_name = BDDB_PROJECTNAME_PREFIX + prj_name;
+	}
+
+	QString selectedFilename = prj_file.absolutePath() + "\\" + prj_name + ".bin";
+
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	FileIOFilter::SaveParameters parameters;
+	{
+		parameters.alwaysDisplaySaveDialog = true;
+		parameters.parentWidget = MainWindow::TheInstance();
+	}
+
+	//specific case: BIN format			
+	result = FileIOFilter::SaveToFile(proj, selectedFilename, parameters, BinFilter::GetFileFilter());	
+		
+	return true;
+}
+
+void MainWindow::doActionBDProjectSave()
+{
+	BDBaseHObject::Container prjx;
+	if (haveSelection()) {
+		prjx.push_back(GetRootBDBase(getSelectedEntities().front()));		
+	}
+	else {	// save all projects		
+		prjx = GetBDBaseProjx();
+	}
+	
+	try {
+		for (BDBaseHObject* proj : prjx) {
+			if (!SaveProject(proj))	{
+				dispToConsole("cannot save project", ERR_CONSOLE_MESSAGE);
+				continue;
+			}			
+		}
+	}
+	catch (const std::runtime_error& e) {
+		dispToConsole("cannot save project", ERR_CONSOLE_MESSAGE);
+		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+		return;
+	}	
 }
 
 void MainWindow::doActionBDPlaneSegmentation()

@@ -318,17 +318,15 @@ ccHObject * BDBaseHObject::GetHObj(CC_CLASS_ENUM type, QString suffix, QString b
 	}
 	return nullptr;
 }
-ccHObject* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {
-	for (unsigned int i = 0; i < getChildrenNumber(); i++)
-		if (GetBaseName(getChild(i)->getName()) == building_name)
-			return getChild(i);
+StBuilding* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {
+	ccHObject* obj = GetHObj(CC_TYPES::ST_BUILDING, "", building_name, check_enable);
+	if (obj) return static_cast<StBuilding*>(obj);
 	return nullptr;
 }
-ccHObject::Container BDBaseHObject::GetOriginPointCloud(bool check_enable) {
-	return GetHObjContainer(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, check_enable);
-}
-ccHObject * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check_enable) {
-	return GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name, check_enable);
+ccPointCloud * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check_enable) {
+	ccHObject* obj = GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name, check_enable);
+	if(obj) return static_cast<ccPointCloud*>(obj);
+	return nullptr;
 }
 StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
 	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMITIVE, BDDB_PRIMITIVE_SUFFIX, building_name, check_enable);

@@ -127,9 +127,8 @@ private:
 	ccHObject* GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename = QString(), bool check_enable = false);
 
 public:	
-	ccHObject* GetBuildingGroup(QString building_name, bool check_enable = false);
-	ccHObject::Container GetOriginPointCloud(bool check_enable = false);
-	ccHObject* GetOriginPointCloud(QString building_name, bool check_enable = false);
+	StBuilding* GetBuildingGroup(QString building_name, bool check_enable = false);
+	ccPointCloud* GetOriginPointCloud(QString building_name, bool check_enable = false);
 	StPrimGroup* GetPrimitiveGroup(QString building_name, bool check_enable = false);
 	StBlockGroup * GetBlockGroup(QString building_name, bool check_enable);
 	ccHObject * GetHypothesisGroup(QString building_name, bool check_enable);

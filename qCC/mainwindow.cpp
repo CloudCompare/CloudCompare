@@ -12069,10 +12069,24 @@ void MainWindow::doActionExtractFootPrint()
 		dispToConsole("please open the project", ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	ccHObject* point_cloud = baseObj->GetOriginPointCloud(building_name, true);
+	ccPointCloud* viewer_cloud = nullptr;
+	viewer_cloud = baseObj->GetOriginPointCloud(building_name, true);
+	if (!viewer_cloud) {
+		StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name, true);
+		ccHObject::Container primObjs;
+		prim_group->filterChildren(primObjs, true, CC_TYPES::PLANE, true);
+		for (size_t i = 0; i < primObjs.size(); i++) {
+			if (i == 0) {
+				viewer_cloud =static_cast<ccPointCloud*>(primObjs[i]->getParent());
+			}
+			else {
+				*viewer_cloud += static_cast<ccPointCloud*>(primObjs[i]->getParent());
+			}
+		}
+	}
 	StBlockGroup* block_group = baseObj->GetBlockGroup(building_name, false);
 	
-	if (!point_cloud || !block_group) {
+	if (!viewer_cloud || !block_group) {
 		dispToConsole("No building cloud in selection!", ERR_CONSOLE_MESSAGE);
 		return;
 	}
@@ -12100,9 +12114,9 @@ void MainWindow::doActionExtractFootPrint()
 	//add clouds
 	ccGLWindow* firstDisplay = nullptr;
 	{		
-		if (m_seTool->addCloud(static_cast<ccGenericPointCloud*>(point_cloud))) {
-			if (!firstDisplay && point_cloud->getDisplay())	{
-				firstDisplay = static_cast<ccGLWindow*>(point_cloud->getDisplay());
+		if (m_seTool->addCloud(static_cast<ccGenericPointCloud*>(viewer_cloud))) {
+			if (!firstDisplay && viewer_cloud->getDisplay())	{
+				firstDisplay = static_cast<ccGLWindow*>(viewer_cloud->getDisplay());
 			}
 		}
 	}

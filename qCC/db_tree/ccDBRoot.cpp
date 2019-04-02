@@ -199,7 +199,7 @@ private:
 		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/primitive.png")),{} });
 
 		const int	footprintIndex = mIconList.count();
-		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/footprintdb.png")),{} });
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/footprint.png")),{} });
 
 		const int	blockgroupIndex = mIconList.count();
 		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/blockgroup.png")),{} });

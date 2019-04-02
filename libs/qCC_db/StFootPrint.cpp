@@ -17,16 +17,19 @@
 
 //Always first
 #include "StFootPrint.h"
+#include <iostream>
 
 StFootPrint::StFootPrint(GenericIndexedCloudPersist* associatedCloud)
 	: ccPolyline(associatedCloud)
 	, m_ground(0)
+	, m_hole(false)
 {
 }
 
 StFootPrint::StFootPrint(StFootPrint& obj)
 	: ccPolyline(obj)
 	, m_ground(obj.m_ground)
+	, m_hole(false)
 {
 	
 }
@@ -34,6 +37,7 @@ StFootPrint::StFootPrint(StFootPrint& obj)
 StFootPrint::StFootPrint(ccPolyline& obj)
 	: ccPolyline(obj)
 	, m_ground(0)
+	, m_hole(false)
 {
 }
 
@@ -41,19 +45,25 @@ StFootPrint::~StFootPrint()
 {
 }
 
-void StFootPrint::reverseVertexOrder()
+bool StFootPrint::reverseVertexOrder()
 {
-	getAssociatedCloud();
-	size_t last = size();
-	size_t first = 0;
-	while ((first != last) && first != --last) {
-		///< swap first and last
-		size_t fist_index = getPointGlobalIndex(first);
-		setPointIndex(first, getPointGlobalIndex(last));
-		setPointIndex(last, fist_index);
-		++first;
+	try {
+		getAssociatedCloud();
+		size_t last = size();
+		size_t first = 0;
+		while ((first != last) && first != --last) {
+			///< swap first and last
+			size_t fist_index = getPointGlobalIndex(first);
+			setPointIndex(first, getPointGlobalIndex(last));
+			setPointIndex(last, fist_index);
+			++first;
+		}
 	}
-	setPointIndex(0, getPointGlobalIndex(0));
+	catch (std::runtime_error& e) {
+		std::cout << "unknown error happens: " << e.what() << std::endl;
+		return false;
+	}
+	return true;
 }
 
 inline double StFootPrint::getHeight() const

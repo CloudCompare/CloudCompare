@@ -82,15 +82,21 @@ stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker:
 {	
 	stocker::Contour3d points;
 	if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
-		ccHObject::Container planes_container;
+		ccHObject::Container planes_container, plane_cloud_container;
 		entity->filterChildren(planes_container, true, CC_TYPES::PLANE, true);
+		for (ccHObject* pl_obj : planes_container) {
+			if (pl_obj->getParent() && pl_obj->getParent()->isEnabled()) {
+				plane_cloud_container.push_back(pl_obj->getParent());
+			}			
+		}
 		std::vector<Contour3d> planes_points;
-		planes_points = GetPointsFromCloudInsidePolygonXY(planes_container, polygon, height);
+		planes_points = GetPointsFromCloudInsidePolygonXY(plane_cloud_container, polygon, height);
 		for (auto & pl_pts : planes_points) {
 			points.insert(points.end(), pl_pts.begin(), pl_pts.end());
 		}
 		return points;
 	}
+	else if (!entity->isA(CC_TYPES::POINT_CLOUD)) return points;
 
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 	if (!cloud) return points;
@@ -1685,6 +1691,20 @@ bool DeduceFootPrintHeight(ccHObject* point_cloud, ccHObject* primitive, ccHObje
 	return true;
 }
 
+std::vector<std::vector<int>> GroupFootPrint(ccHObject::Container footprintObjs)
+{
+	// TODO: get the relationships of the polygons
+	// now the polygons should not be overlapped
+	// if more than one polygons are given, will create multiple models	
+	std::vector<std::vector<int>> components;
+	for (size_t i = 0; i < footprintObjs.size(); i++) {
+		std::vector<int> compo_temp;
+		compo_temp.push_back(0);
+		components.push_back(compo_temp);
+	}
+	return components;
+}
+
 ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 {	
 	BDBaseHObject* baseObj = GetRootBDBase(buildingObj);
@@ -1698,18 +1718,18 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name, true);
 
 	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(building_name, true);
-	ccHObject::Container polygonObjs = blockgroup_obj->GetFootPrints();
+	ccHObject::Container footprintObjs = blockgroup_obj->getFootPrints();
 
-	for (size_t i = 0; i < polygonObjs.size(); i++) {
-		if (!polygonObjs[i]->isEnabled()) continue;
+	for (size_t i = 0; i < footprintObjs.size(); i++) {
+		if (!footprintObjs[i]->isEnabled()) continue;
 
-		StFootPrint* foot_print = ccHObjectCaster::ToStFootPrint(polygonObjs[i]);
+		StFootPrint* foot_print = ccHObjectCaster::ToStFootPrint(footprintObjs[i]);
 		//! get height
 		Contour3d points_inside;
 		double height = foot_print->getHeight();
 		double ground = foot_print->getGround();
 		if (fabs(height - ground) < 1e-6) {
-			if (!DeduceFootPrintHeight(cloudObj, prim_group_obj, polygonObjs[i], points_inside, height)) {
+			if (!DeduceFootPrintHeight(cloudObj, prim_group_obj, footprintObjs[i], points_inside, height)) {
 				std::cout << "cannot deduce height from footprint " << foot_print->getName().toStdString() << std::endl;
 				continue;
 			}			
@@ -1722,7 +1742,7 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 		for (auto & pt : foot_print_points) {
 			top_points.push_back(CCVector3(pt.x, pt.y, height));
 			bottom_points.push_back(CCVector3(pt.x, pt.y, ground));
-		}		
+		}
 		StBlock* block_entity = new StBlock(top_points, bottom_points);
 		int biggest = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX);
 		block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(biggest + 1));
@@ -1798,107 +1818,102 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 
 //! 3D4EM	.lod2.model
 ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, bool preset_ground_height, double ground_height)
-{
-	std::vector<std::vector<int>> components;
+{	
 	BDBaseHObject* baseObj = GetRootBDBase(buildingObj);
 	if (!baseObj) {
 		return nullptr;
 	}
 
-	CCVector3d loadCoordinatesShift(0, 0, 0);
-	bool loadCoordinatesTransEnabled = false;
-	FileIOFilter::LoadParameters parameters; {
-		parameters.alwaysDisplayLoadDialog = false;
-		parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
-	}
-	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-
 	QString building_name = GetBaseName(buildingObj->getName());
 	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
 	ccHObject* cloudObj = baseObj->GetOriginPointCloud(building_name, true);
 	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name, true);
+	
+	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(building_name, true);
+	ccHObject::Container footprintObjs = blockgroup_obj->getFootPrints();
 
-	ccHObject* footprint_obj = baseObj->GetBlockGroup(building_name, true);
-	ccHObject::Container polygonObjs = GetEnabledObjFromGroup(footprint_obj, CC_TYPES::POLY_LINE, true, false);
-	{
-		// TODO: get the relationships of the polygons
-		// now the polygons should not be overlapped
-		// if more than one polygons are given, will create multiple models			
-		for (size_t i = 0; i < polygonObjs.size(); i++) {
-			std::vector<int> compo_temp;
-			compo_temp.push_back(0);
-			components.push_back(compo_temp);
-		}		
-	}
+	std::vector<std::vector<int>> components = GroupFootPrint(footprintObjs);
 
-	QString model_group_name = building_name + BDDB_LOD2MODEL_SUFFIX;
-	ccHObject* model_group = nullptr;
-	for (size_t i = 0; i < buildingObj->getChildrenNumber(); i++) {
-		if (buildingObj->getChild(i)->getName() == model_group_name) {
-			model_group = buildingObj->getChild(i);
-		}
-	}
-	if (!model_group) {
-		model_group = new ccHObject(model_group_name);
-	}
+	double used_ground_height = preset_ground_height ? ground_height : build_unit.ground_height;
 
-	for (size_t i = 0; i < components.size(); i++) {
-		stocker::BuilderLOD2 builder_3d4em(true);
-
-		std::vector<Contour3d> contours;
-		std::vector<int> cur_component = components[i];
-		Polyline3d first_polygon; double footprint_height(-999999);
-		for (size_t j = 0; j < cur_component.size(); j++) {
-			ccHObject* polyObj = polygonObjs[cur_component[j]];
-			Polyline3d polygon = GetPolygonFromPolyline(polyObj);
-			if (j == 0) {
-				first_polygon = polygon;
-				footprint_height = ccHObjectCaster::ToStFootPrint(polyObj)->getHeight();
+ 	for (size_t i = 0; i < components.size(); i++) {
+ 		stocker::BuilderLOD2 builder_3d4em(true);
+ 
+ 		std::vector<Contour3d> contours;
+ 		std::vector<int> cur_component = components[i];
+ 		Polyline3d first_polygon; double footprint_height(-999999);
+		bool valid = false;
+		ccHObject* first_footprint = nullptr;
+ 		for (size_t j = 0; j < cur_component.size(); j++) {
+			first_footprint = footprintObjs[cur_component[j]];
+			if (!first_footprint->isEnabled()) {
+				continue;
 			}
-			contours.push_back(ToContour(polygon, 0));
+ 			Polyline3d polygon = GetPolygonFromPolyline(first_footprint);
+ 			if (j == 0) {
+				valid = true;
+ 				first_polygon = polygon;
+ 				footprint_height = ccHObjectCaster::ToStFootPrint(first_footprint)->getHeight();
+ 			}
+ 			contours.push_back(ToContour(polygon, 0));
+ 		}
+		if (!valid)	{
+			continue;
 		}
-		builder_3d4em.SetFootPrint(contours);
+ 		builder_3d4em.SetFootPrint(contours);
 
-		int biggest = GetMaxNumberExcludeChildPrefix(model_group, BDDB_LOD2MODEL_SUFFIX);
-		QString model_name = BDDB_LOD2MODEL_PREFIX + QString::number(biggest + 1);
-		
 		char output_path[256];
-		sprintf(output_path, "%s%s%s%s%s", 
-			build_unit.file_path.model_dir.c_str(),
-			building_name.toStdString().c_str(), ".", model_name.toStdString().c_str(), ".obj");
-		builder_3d4em.SetOutputPath(output_path);
-
-		if (preset_ground_height) {
-			builder_3d4em.SetGroundHeight(ground_height);
+		{
+			//! just for debug 
+			QString model_name = BDDB_LOD2MODEL_PREFIX + QString::number(i);			
+			sprintf(output_path, "%s%s%s%s%s",
+				build_unit.file_path.model_dir.c_str(),
+				building_name.toStdString().c_str(), ".", model_name.toStdString().c_str(), ".obj");
+			builder_3d4em.SetOutputPath(output_path);
 		}
-
-		if (cloudObj) {
-			Contour3d points = GetPointsFromCloudInsidePolygonXY(cloudObj, first_polygon, footprint_height);
-			builder_3d4em.SetBuildingPoints(points);
-			if (!builder_3d4em.PlaneSegmentation()) return nullptr;
-		}
-		else if (prim_group_obj) {
+ 		builder_3d4em.SetGroundHeight(used_ground_height);
+ 
+		// primitive first
+		if (prim_group_obj) {
 			ccHObject::Container prim_objs = GetEnabledObjFromGroup(prim_group_obj, CC_TYPES::PLANE, true, true);
 			ccHObject::Container point_cloud_objs;
 			for (ccHObject* obj : prim_objs) {
-				if (obj->getParent()) { point_cloud_objs.push_back(obj->getParent()); }
+				if (obj->getParent() && obj->getParent()->isEnabled()) { point_cloud_objs.push_back(obj->getParent()); }
 			}			
 			std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonXY(point_cloud_objs, first_polygon, footprint_height);
 			builder_3d4em.SetSegmentedPoints(points);
 		}
-		else {
-			throw std::runtime_error("cannot find original points or primitive group");
-			return nullptr;
+ 		else if (cloudObj) {
+ 			Contour3d points = GetPointsFromCloudInsidePolygonXY(cloudObj, first_polygon, footprint_height);
+ 			builder_3d4em.SetBuildingPoints(points);
+ 			if (!builder_3d4em.PlaneSegmentation()) continue;;
+ 		}
+ 		else {
+ 			throw std::runtime_error("cannot find original points or primitive group");
+ 			continue;
+ 		}
+ 
+ 		if (!builder_3d4em.BuildingReconstruction()) continue;
+ 
+ 		if (!QFile::exists(QString(output_path))) continue;
+
+		std::vector<Contour3d> roof_polygons = builder_3d4em.GetRoofPolygons();
+		for (Contour3d roof_points : roof_polygons) {
+			std::vector<CCVector3> top_points;
+			std::vector<CCVector3> bottom_points;
+			for (auto & pt : roof_points) {
+				top_points.push_back(CCVector3(pt.X(), pt.Y(), footprint_height));
+				bottom_points.push_back(CCVector3(pt.X(), pt.Y(), used_ground_height));
+			}
+			StBlock* block_entity = new StBlock(top_points, bottom_points);
+			int biggest = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX);
+			block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(biggest + 1));
+			first_footprint->addChild(block_entity);
 		}
-
-		if (!builder_3d4em.BuildingReconstruction()) return nullptr;
-
-		if (!QFile::exists(QString(output_path))) return nullptr;
-
-		ccHObject* cur_model = FileIOFilter::LoadFromFile(output_path, parameters, result, QString());
-		cur_model->setName(model_name);
-		model_group->addChild(cur_model);
-	}
-	buildingObj->addChild(model_group);
-	return model_group;
+ 
+// 		ccHObject* cur_model = FileIOFilter::LoadFromFile(output_path, parameters, result, QString());
+// 		cur_model->setName(model_name);
+// 		model_group->addChild(cur_model);
+ 	}
+	return blockgroup_obj;
 }

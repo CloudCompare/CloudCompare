@@ -37,14 +37,18 @@ public:
 	//! Returns class ID
 	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_FOOTPRINT; }
 
-	void reverseVertexOrder();
+	bool reverseVertexOrder();
 
 	inline double getHeight() const;
 	void setHeight(double height);
 	inline double getGround() const { return m_ground; }
 	void setGround(double ground) { m_ground = ground; }
+	inline bool isHole() const { return m_hole; }
+	void setHoleState(bool state) { m_hole = state; }
 
+protected:
 	double m_ground;
+	bool m_hole;
 };
 
 #endif //ST_FOOTPRINT_HEADER

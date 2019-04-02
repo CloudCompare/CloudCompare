@@ -79,7 +79,8 @@ protected slots:
 	void extractPoints();
 	void unfoldPoints();
 	void exportSections();
-	void exportFootprint();
+	void exportFootprintInside();
+	void exportFootprintOutside();
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);

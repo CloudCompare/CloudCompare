@@ -42,7 +42,11 @@ public:
 	//! Returns class ID
 	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_BLOCKGROUP; }
 
-	ccHObject::Container GetFootPrints();
+	ccHObject::Container getFootPrints();
+
+	void groupFootPrint();
+
+	std::vector<std::vector<int>> getFootPrintGroup();
 
 };
 

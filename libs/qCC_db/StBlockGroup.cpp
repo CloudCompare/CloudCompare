@@ -38,9 +38,20 @@ StBlockGroup::~StBlockGroup()
 {
 }
 
-ccHObject::Container StBlockGroup::GetFootPrints()
+ccHObject::Container StBlockGroup::getFootPrints()
 {
 	ccHObject::Container fts;
 	filterChildren(fts, false, CC_TYPES::ST_FOOTPRINT, true);
 	return fts;
+}
+
+void StBlockGroup::groupFootPrint()
+{
+	ccHObject::Container footprintObjs = getFootPrints();
+
+}
+
+std::vector<std::vector<int>> StBlockGroup::getFootPrintGroup()
+{
+	return std::vector<std::vector<int>>();
 }

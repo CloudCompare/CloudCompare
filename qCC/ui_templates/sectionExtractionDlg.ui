@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>357</width>
-    <height>36</height>
+    <width>426</width>
+    <height>33</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -137,13 +137,24 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="saveFootprinttoolButton">
+       <widget class="QToolButton" name="saveFootprintInsidetoolButton">
         <property name="text">
          <string>...</string>
         </property>
         <property name="icon">
          <iconset resource="../icones.qrc">
           <normaloff>:/CC/Stocker/images/stocker/footprint.png</normaloff>:/CC/Stocker/images/stocker/footprint.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveFootprintOutsidetoolButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/footprintdb.png</normaloff>:/CC/Stocker/images/stocker/footprintdb.png</iconset>
         </property>
        </widget>
       </item>

@@ -96,8 +96,10 @@ ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	addOverridenShortcut(Qt::Key_Delete); //delete key to delete the selected polyline
 
 	connect(this, SIGNAL(shortcutTriggered(int)), this, SLOT(onShortcutTriggered(int)));
-	connect(saveFootprinttoolButton, SIGNAL(clicked()), this, SLOT(exportFootprint()));
-	saveFootprinttoolButton->setVisible(false);
+	connect(saveFootprintInsidetoolButton, SIGNAL(clicked()), this, SLOT(exportFootprintInside()));
+	connect(saveFootprintOutsidetoolButton, SIGNAL(clicked()), this, SLOT(exportFootprintOutside()));
+	saveFootprintInsidetoolButton->setVisible(false);
+	saveFootprintOutsidetoolButton->setVisible(false);
 }
 
 ccSectionExtractionTool::~ccSectionExtractionTool()
@@ -2149,7 +2151,7 @@ void ccSectionExtractionTool::extractPoints()
 	}
 }
 
-void ccSectionExtractionTool::exportFootprint()
+void ccSectionExtractionTool::exportFootprintInside()
 {
 	if (m_sections.empty())
 		return;
@@ -2202,7 +2204,12 @@ void ccSectionExtractionTool::exportFootprint()
 						stocker_points.push_back(stocker::parse_xy(P));
 					}
 					if (!stocker::IsCounterClockWise(stocker_points)) {
-						duplicatePoly->reverseVertexOrder();
+						if (duplicatePoly->reverseVertexOrder()) {
+							duplicatePoly->setHoleState(false);
+						}
+						else {
+							return;
+						}
 					}
 
 					duplicateVertices->invalidateBoundingBox();
@@ -2230,5 +2237,94 @@ void ccSectionExtractionTool::exportFootprint()
 		}
 	}
 
-	ccLog::Print(QString("[ccSectionExtractionTool] %1 sections exported").arg(exportCount));
+	ccLog::Print(QString("[FootPrint Extraction] %1 footprints exported").arg(exportCount));
+}
+
+void ccSectionExtractionTool::exportFootprintOutside()
+{
+	if (m_sections.empty())
+		return;
+
+	//we only export 'temporary' objects
+	unsigned exportCount = 0;
+	{
+		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
+		{
+			Section& section = *it;
+			if (section.entity && !section.isInDB)
+				++exportCount;
+		}
+	}
+
+	if (!exportCount)
+	{
+		//nothing to do
+		ccLog::Warning("[ccSectionExtractionTool] All active sections are already in DB");
+		return;
+	}
+
+	assert(m_clouds.size() == 1);
+
+	MainWindow* mainWin = MainWindow::TheInstance();
+
+	if (!m_dest_obj) {
+		return;
+	}
+
+	//export entites
+	{
+		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
+		{
+			Section& section = *it;
+			if (section.entity && !section.isInDB) {
+				StFootPrint* duplicatePoly = new StFootPrint(0);
+				ccPointCloud* duplicateVertices = 0;
+
+				int biggest_number = GetMaxNumberExcludeChildPrefix(m_dest_obj, BDDB_FOOTPRINT_PREFIX);
+				QString cur_name = BDDB_FOOTPRINT_PREFIX + QString::number(biggest_number + 1);
+				if (duplicatePoly->initWith(duplicateVertices, *section.entity))
+				{
+					assert(duplicateVertices);
+					stocker::Contour2d stocker_points;
+					for (unsigned i = 0; i < duplicateVertices->size(); ++i) {
+						CCVector3& P = const_cast<CCVector3&>(*duplicateVertices->getPoint(i));
+						P.u[2] = m_ground;
+
+						stocker_points.push_back(stocker::parse_xy(P));
+					}
+					if (stocker::IsCounterClockWise(stocker_points)) {
+						if (duplicatePoly->reverseVertexOrder()) {
+							duplicatePoly->setHoleState(true);
+						}
+						else {
+							return;
+						}
+					}
+
+					duplicateVertices->invalidateBoundingBox();
+					duplicateVertices->setEnabled(false);
+					duplicatePoly->set2DMode(false);
+					duplicatePoly->setDisplay_recursive(m_dest_obj->getDisplay());
+					duplicatePoly->setName(cur_name);
+					duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
+					duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
+					duplicatePoly->setGround(m_ground);
+					section.entity = duplicatePoly;
+				}
+				else {
+					delete duplicatePoly;
+					duplicatePoly = 0;
+
+					ccLog::Error("Not enough memory to export polyline!");
+					return;
+				}
+
+				section.isInDB = true;
+				m_dest_obj->addChild(duplicatePoly);
+				mainWin->addToDB(duplicatePoly, false, false);
+			}
+		}
+	}
+
+	ccLog::Print(QString("[FootPrint Extraction] %1 footprints exported").arg(exportCount));
 }

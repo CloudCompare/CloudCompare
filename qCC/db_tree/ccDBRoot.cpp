@@ -196,7 +196,7 @@ private:
 		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/building.png")),{} });
 
 		const int	stprimitiveIndex = mIconList.count();
-		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/primitive.png")),{} });
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/primitives.png")),{} });
 
 		const int	footprintIndex = mIconList.count();
 		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/footprint.png")),{} });

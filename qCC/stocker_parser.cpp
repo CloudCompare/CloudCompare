@@ -479,9 +479,9 @@ ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lin
 	return line_vert;
 }
 
-ccHObject* AddPlanesPointsAsNewGroup(QString name, std::vector<stocker::Contour3d> planes_points)
+StPrimGroup* AddPlanesPointsAsNewGroup(QString name, std::vector<stocker::Contour3d> planes_points)
 {
-	ccHObject* group = new ccHObject(name);
+	StPrimGroup* group = new StPrimGroup(name);
 
 	for (size_t i = 0; i < planes_points.size(); i++) {
 		ccPointCloud* plane_cloud = new ccPointCloud(BDDB_PLANESEG_PREFIX + QString::number(i));// TODO
@@ -543,7 +543,7 @@ ccHObject* PlaneSegmentationRgGrow(ccHObject* entity,
 		}
 	}
 
-	ccHObject* group = AddPlanesPointsAsNewGroup(GetBaseName(entity->getName()) + BDDB_PRIMITIVE_SUFFIX, planes_points);
+	StPrimGroup* group = AddPlanesPointsAsNewGroup(GetBaseName(entity->getName()) + BDDB_PRIMITIVE_SUFFIX, planes_points);
 	group->setDisplay_recursive(entity->getDisplay());
 	ccHObject::Container group_clouds;
 	group->filterChildren(group_clouds, false, CC_TYPES::POINT_CLOUD, true);
@@ -596,7 +596,7 @@ ccHObject* PlaneSegmentationRansac(ccHObject* entity,
 		}
 	}
 
-	ccHObject* group = AddPlanesPointsAsNewGroup(GetBaseName(entity->getName()) + BDDB_PRIMITIVE_SUFFIX, planes_points);
+	StPrimGroup* group = AddPlanesPointsAsNewGroup(GetBaseName(entity->getName()) + BDDB_PRIMITIVE_SUFFIX, planes_points);
 	group->setDisplay_recursive(entity->getDisplay());
 	ccHObject::Container group_clouds;
 	group->filterChildren(group_clouds, false, CC_TYPES::POINT_CLOUD, true);

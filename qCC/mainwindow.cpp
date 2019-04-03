@@ -275,7 +275,9 @@ MainWindow::MainWindow()
 		}
 	}
 
-	//tabifyDockWidget(DockableDBTree,DockableProperties);
+	//tabifyDockWidget(m_UI->DockableDBTree, m_UI->DockableProperties);
+	tabifyDockWidget(m_UI->DockableProperties, m_UI->DockableConsole);
+	m_UI->DockableProperties->raise();
 
 	//db-tree
 	{
@@ -12069,24 +12071,24 @@ void MainWindow::doActionExtractFootPrint()
 		dispToConsole("please open the project", ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	ccPointCloud* viewer_cloud = nullptr;
-	viewer_cloud = baseObj->GetOriginPointCloud(building_name, true);
-	if (!viewer_cloud) {
+	ccHObject::Container viewer_clouds;
+	ccHObject* viewer_cloud = baseObj->GetOriginPointCloud(building_name, true);
+	if (viewer_cloud) {
+		viewer_clouds.push_back(viewer_cloud);
+	}
+	else {
 		StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name, true);
-		ccHObject::Container primObjs;
-		prim_group->filterChildren(primObjs, true, CC_TYPES::PLANE, true);
+		if (!prim_group) { return; }
+		ccHObject::Container primObjs = GetEnabledObjFromGroup(prim_group, CC_TYPES::PLANE, true, true);
 		for (size_t i = 0; i < primObjs.size(); i++) {
-			if (i == 0) {
-				viewer_cloud =static_cast<ccPointCloud*>(primObjs[i]->getParent());
-			}
-			else {
-				*viewer_cloud += static_cast<ccPointCloud*>(primObjs[i]->getParent());
-			}
+			if (primObjs[i]->getParent() && primObjs[i]->getParent()->isA(CC_TYPES::POINT_CLOUD)) {
+				viewer_clouds.push_back(primObjs[i]->getParent());
+			}			
 		}
 	}
 	StBlockGroup* block_group = baseObj->GetBlockGroup(building_name, false);
 	
-	if (!viewer_cloud || !block_group) {
+	if (viewer_clouds.empty() || !block_group) {
 		dispToConsole("No building cloud in selection!", ERR_CONSOLE_MESSAGE);
 		return;
 	}
@@ -12114,11 +12116,13 @@ void MainWindow::doActionExtractFootPrint()
 	//add clouds
 	ccGLWindow* firstDisplay = nullptr;
 	{		
-		if (m_seTool->addCloud(static_cast<ccGenericPointCloud*>(viewer_cloud))) {
-			if (!firstDisplay && viewer_cloud->getDisplay())	{
-				firstDisplay = static_cast<ccGLWindow*>(viewer_cloud->getDisplay());
+		for (ccHObject* pc : viewer_clouds)	{
+			if (m_seTool->addCloud(static_cast<ccGenericPointCloud*>(pc))) {
+				if (!firstDisplay && pc->getDisplay()) {
+					firstDisplay = static_cast<ccGLWindow*>(pc->getDisplay());
+				}
 			}
-		}
+		}		
 	}
 
 	//deselect all entities
@@ -12159,15 +12163,13 @@ void MainWindow::doActionBDLoD1Generation()
 	}
 	ccHObject *entity = getSelectedEntities().front();
 
-	if (entity->isA(CC_TYPES::POLY_LINE)) {
+	if (entity->isA(CC_TYPES::ST_FOOTPRINT)) {
 
 	}
 	else {
 		//! select the building
 		StBuilding* building = GetParentBuilding(entity);
-		if (!building) {
-			return;
-		}
+		if (!building) { return; }
 
 		try {
 			ccHObject* bd_model_obj = LoD1FromFootPrint(building);
@@ -12180,6 +12182,7 @@ void MainWindow::doActionBDLoD1Generation()
 		catch (std::runtime_error& e) {
 			dispToConsole("[BDRecon] cannot build lod1 model", ERR_CONSOLE_MESSAGE);
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+			return;
 		}
 	}
 	refreshAll();
@@ -12193,54 +12196,49 @@ void MainWindow::doActionBDLoD2Generation()
 	
 	m_pbdr3d4emDlg->setModal(false);
 	m_pbdr3d4emDlg->setWindowModality(Qt::NonModal);
-	if (!m_pbdr3d4emDlg->exec()) {
-		return;
-	}
+	if (!m_pbdr3d4emDlg->exec()) return;
 	
-	if (haveSelection()) {	
+	if (!haveSelection()) return;
 	
 	ccHObject *entity = getSelectedEntities().front();
 
 	BDBaseHObject* baseObj = GetRootBDBase(entity);
 
-	//! select the building
-	if (IsBDBaseObj(entity->getParent()) && entity->isGroup()) {
-		try	{
-			bool preset_height = false;
-			double height = DBL_MAX;
-			if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
-				preset_height = true;
-				height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
-			}
-			else if (m_pbdr3d4emDlg->GroundHeightMode() == 0) {
-				preset_height = true;
-				height = baseObj->GetBuildingUnit(GetBaseName(entity->getName()).toStdString()).ground_height;
-			}
+	double height = DBL_MAX;
+	if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
+		height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
+	}
+	else /*if (m_pbdr3d4emDlg->GroundHeightMode() == 0)*/ {
+		height = baseObj->GetBuildingUnit(GetBaseName(entity->getName()).toStdString()).ground_height;
+	}
 
-			ccHObject* bd_model_obj = LoD2FromFootPrint(entity, preset_height, height);
-			if (bd_model_obj) {
-				SetGlobalShiftAndScale(bd_model_obj);
-				bd_model_obj->setDisplay_recursive(entity->getDisplay());
-				addToDB(bd_model_obj);
+	ccHObject* bd_entity = entity->isA(CC_TYPES::ST_FOOTPRINT) ? entity : GetParentBuilding(entity);
+	if (!bd_entity) return;
 
-				refreshAll();
-				UpdateUI();
-				return;
-			}
+	try {
+		ccHObject* bd_model_obj = LoD2FromFootPrint(bd_entity, height);
+		if (bd_model_obj) {
+			SetGlobalShiftAndScale(bd_model_obj);
+			bd_model_obj->setDisplay_recursive(bd_entity->getDisplay());
+			addToDB(bd_model_obj);
 		}
-		catch (std::runtime_error& e) {
-			dispToConsole("[BDRecon] cannot build lod2 model", ERR_CONSOLE_MESSAGE);
-			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
-		}
+	}
+	catch (std::runtime_error& e) {
+		dispToConsole("[BDRecon] cannot build lod2 model", ERR_CONSOLE_MESSAGE);
+		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	}
+
+	refreshAll();
+	UpdateUI();
+
+#if 0 //deprecated
 	stocker::BuilderLOD2 builder_3d4em(true);
 
 	/// select polyline for footprint
 	{
 		ccHObject::Container _container;
-		m_ccRoot->getRootEntity()->filterChildren(_container, true, CC_TYPES::POLY_LINE, true);		
+		m_ccRoot->getRootEntity()->filterChildren(_container, true, CC_TYPES::POLY_LINE, true);
 		if (!_container.empty()) {
 			ccPolyline* contour_polygon = nullptr;
 			int selectedIndex = 0;
@@ -12273,7 +12271,7 @@ void MainWindow::doActionBDLoD2Generation()
 	if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
 		builder_3d4em.SetGroundHeight(m_pbdr3d4emDlg->UserDefinedGroundHeight());
 	}
-	
+
 	std::string output_path = m_pbdr3d4emDlg->OutputFilePathLineEdit->text().toStdString();
 	std::string ini_path = m_pbdr3d4emDlg->ConfigureFilePathLineEdit->text().toStdString();
 	builder_3d4em.SetOutputPath(output_path.c_str());
@@ -12281,10 +12279,10 @@ void MainWindow::doActionBDLoD2Generation()
 
 	QDir workingDir_old = QCoreApplication::applicationDirPath();
 	QDir workingDir_current = GetFileDirectory(output_path.c_str());
-	if (!workingDir_current.exists()) 
-		if (!workingDir_current.mkpath(workingDir_current.absolutePath())) 
-			return;		
-	
+	if (!workingDir_current.exists())
+		if (!workingDir_current.mkpath(workingDir_current.absolutePath()))
+			return;
+
 	QDir::setCurrent(workingDir_current.absolutePath());
 
 	if (!m_pbdr3d4emDlg->PointcloudFilePathLineEdit->text().isEmpty()) {
@@ -12293,11 +12291,11 @@ void MainWindow::doActionBDLoD2Generation()
 
 		builder_3d4em.SetBuildingPoints(point_path.c_str());
 	}
-	
-	if (!builder_3d4em.PlaneSegmentation(false)) return;	
-	if (!builder_3d4em.BuildingReconstruction()) return;	
-	
-	if (!QFile::exists(QString(output_path.c_str()))) return;	
+
+	if (!builder_3d4em.PlaneSegmentation(false)) return;
+	if (!builder_3d4em.BuildingReconstruction()) return;
+
+	if (!QFile::exists(QString(output_path.c_str()))) return;
 
 	QStringList files_add_to_db{ QString(output_path.c_str()) };
 	addToDB(files_add_to_db);
@@ -12306,6 +12304,7 @@ void MainWindow::doActionBDLoD2Generation()
 
 	//! restore the working directory
 	QDir::setCurrent(workingDir_old.absolutePath());
+#endif	
 }
 
 void MainWindow::doActionBDTextureMapping()

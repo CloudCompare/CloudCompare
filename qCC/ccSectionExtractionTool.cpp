@@ -2174,8 +2174,6 @@ void ccSectionExtractionTool::exportFootprintInside()
 		return;
 	}
 
-	assert(m_clouds.size() == 1);
-
 	MainWindow* mainWin = MainWindow::TheInstance();
 	
 	if (!m_dest_obj) {
@@ -2259,8 +2257,6 @@ void ccSectionExtractionTool::exportFootprintOutside()
 		ccLog::Warning("[ccSectionExtractionTool] All active sections are already in DB");
 		return;
 	}
-
-	assert(m_clouds.size() == 1);
 
 	MainWindow* mainWin = MainWindow::TheInstance();
 

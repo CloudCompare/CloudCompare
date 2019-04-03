@@ -237,4 +237,4 @@ ccHObject * ConstrainedMesh(ccHObject * planeObj);
 
 ccHObject * LoD1FromFootPrint(ccHObject * buildingObj);
 
-ccHObject * LoD2FromFootPrint(ccHObject * buildingObj, bool preset_ground_height = false, double ground_height = DBL_MAX);
+ccHObject * LoD2FromFootPrint(ccHObject * buildingObj, double ground_height = DBL_MAX);

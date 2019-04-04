@@ -10799,6 +10799,7 @@ void MainWindow::doActionBDProjectLoad()
 			QString building_name = bd->GetName().Str().c_str();
 			QFileInfo point_path(bd->data.file_path.ori_points.c_str());
 			ccHObject* newGroup = FileIOFilter::LoadFromFile(point_path.absoluteFilePath(), parameters, result, QString());
+			if (!newGroup) { continue; }
 			StBuilding* building = new StBuilding(*newGroup);
 			building->setName(building_name);
 			newGroup->transferChildren(*building);			

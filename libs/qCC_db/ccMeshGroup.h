@@ -39,7 +39,9 @@ public:
 	virtual ccGenericPointCloud* getAssociatedCloud() const override { return 0; }
 	virtual void refreshBB() override {}
 	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override { return false; }
+	virtual bool interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override { return false; }
 	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb) override { return false; }
+	virtual bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& rgb) override { return false; }
 	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb, bool interpolateColorIfNoTexture) override { return false; }
 	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& rgb, bool returnColorIfNoTexture) override { return false; }
 	virtual bool hasMaterials() const override { return false; }
@@ -55,7 +57,12 @@ public:
 	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override { return false; }
 	virtual NormsIndexesTableType* getTriNormsTable() const override { return 0; }
 	virtual unsigned capacity() const override { return 0; }
-	virtual bool trianglePicking(const CCVector2d& clickPos, const ccGLCameraParameters& camera, int& nearestTriIndex, double& nearestSquareDist, CCVector3d& nearestPoint) override { return false; }
+	virtual bool trianglePicking(	const CCVector2d& clickPos,
+									const ccGLCameraParameters& camera,
+									int& nearestTriIndex,
+									double& nearestSquareDist,
+									CCVector3d& nearestPoint,
+									CCVector3d* barycentricCoords = nullptr) const override { return false; }
 
 	//inherited methods (ccHObject)
 	virtual bool isSerializable() const override { return true; }

@@ -1587,25 +1587,36 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	if (obj->isA(CC_TYPES::LABEL_2D)) //2D label with 3 points?
 	{
 		cc2DLabel* label = static_cast<cc2DLabel*>(obj);
-		//work only with labels with 3 points!
+		//work only with labels with 3 points or labels picked on a triangle!
+		CCVector3 A, B, C;
 		if (label->size() == 3)
 		{
-			const cc2DLabel::PickedPoint& A = label->getPoint(0);
-			const CCVector3* _A = A.cloud->getPoint(A.index);
-			const cc2DLabel::PickedPoint& B = label->getPoint(1);
-			const CCVector3* _B = B.cloud->getPoint(B.index);
-			const cc2DLabel::PickedPoint& C = label->getPoint(2);
-			const CCVector3* _C = C.cloud->getPoint(C.index);
-			CCVector3 N = (*_B - *_A).cross(*_C - *_A);
-			planeNormal = CCVector3d::fromArray(N.u);
-			planeVertDir = /*(*_B-*_A)*/win->getCurrentUpDir();
-			center = (*_A + *_B + *_C) / 3;
+			A = label->getPickedPoint(0).getPointPosition();
+			B = label->getPickedPoint(1).getPointPosition();
+			C = label->getPickedPoint(2).getPointPosition();
+		}
+		else if (label->size() == 1)
+		{
+			const cc2DLabel::PickedPoint& pp = label->getPickedPoint(0);
+			if (pp._mesh)
+			{
+				pp._mesh->getTriangleVertices(pp.index, A, B, C);
+			}
+			else
+			{
+				ccLog::Error("Works only with 3-points labels or labels picked on a triangle");
+				return;
+			}
 		}
 		else
 		{
-			assert(false);
+			ccLog::Error("Works only with 3-points labels or labels picked on a triangle");
 			return;
 		}
+		CCVector3 N = (B - A).cross(C - A);
+		planeNormal = CCVector3d::fromArray(N.u);
+		planeVertDir = win->getCurrentUpDir();
+		center = (A + B + C) / 3;
 	}
 	else if (obj->isA(CC_TYPES::PLANE)) //plane
 	{
@@ -1727,7 +1738,7 @@ void ccDBRoot::gatherRecursiveInformation()
 			unsigned meshSize = mesh->size();
 			info.triangleCount += meshSize;
 			info.normalCount += (mesh->hasTriNormals() ? meshSize : 0);
-			info.materialCount += (mesh->getMaterialSet() ? mesh->getMaterialSet()->size() : 0);
+			info.materialCount += (mesh->getMaterialSet() ? static_cast<unsigned>(mesh->getMaterialSet()->size()) : 0);
 		}
 		else if (ent->isKindOf(CC_TYPES::LABEL_2D))
 		{
@@ -2127,19 +2138,19 @@ void ccDBRoot::editLabelScalarValue()
 		return;
 	}
 
-	const cc2DLabel::PickedPoint& P = label->getPoint(0);
-	if (!P.cloud)
+	const cc2DLabel::PickedPoint& P = label->getPickedPoint(0);
+	if (!P._cloud)
 	{
 		assert(false);
 		return;
 	}
 
-	if (!P.cloud->isA(CC_TYPES::POINT_CLOUD) || !P.cloud->hasScalarFields())
+	if (!P._cloud->isA(CC_TYPES::POINT_CLOUD) || !P._cloud->hasScalarFields())
 	{
 		return;
 	}
 	
-	ccPointCloud* pc = static_cast<ccPointCloud*>(P.cloud);
+	ccPointCloud* pc = static_cast<ccPointCloud*>(P._cloud);
 	ccScalarField* sf = pc->getCurrentDisplayedScalarField();
 	if (!sf)
 	{
@@ -2188,11 +2199,11 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			bool toggleOtherProperties = false;
 			bool toggleMaterials = false;
 			bool hasMoreThanOneChild = false;
-			bool hasExactlyOnePlanarEntity = false;
 			bool leafObject = false;
 			bool hasExacltyOneGBLSenor = false;
 			bool hasExactlyOnePlane = false;
 			bool canEditLabelScalarValue = false;
+			unsigned planarEntityCount = 0;
 			for (int i = 0; i < selCount; ++i)
 			{
 				ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
@@ -2223,25 +2234,25 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 					{
 						if (item->isA(CC_TYPES::LABEL_2D))
 						{
-							hasExactlyOnePlanarEntity = (static_cast<cc2DLabel*>(item)->size() == 3);
 							cc2DLabel* label = ccHObjectCaster::To2DLabel(item);
-							if (label)
+							if (label->size() == 3)
+								++planarEntityCount;
+							else if (label->size() == 1 && label->getPickedPoint(0)._mesh)
+								++planarEntityCount;
+
+							if (label->size() == 1)
 							{
-								canEditLabelScalarValue = (	label->size() == 1
-														&&	label->getPoint(0).cloud
-														&&	label->getPoint(0).cloud->hasScalarFields()
-														&&	label->getPoint(0).cloud->isA(CC_TYPES::POINT_CLOUD)
-														&&	static_cast<ccPointCloud*>(label->getPoint(0).cloud)->getCurrentDisplayedScalarField() != nullptr
+								const cc2DLabel::PickedPoint& pp = label->getPickedPoint(0);
+								canEditLabelScalarValue = (	pp._cloud
+														&&	pp._cloud->hasScalarFields()
+														&&	pp._cloud->isA(CC_TYPES::POINT_CLOUD)
+														&&	static_cast<ccPointCloud*>(pp._cloud)->getCurrentDisplayedScalarField() != nullptr
 														);
-							}
-							else
-							{
-								assert(false);
 							}
 						}
 						else if (item->isA(CC_TYPES::PLANE) || item->isA(CC_TYPES::FACET))
 						{
-							hasExactlyOnePlanarEntity = true;
+							++planarEntityCount;
 							hasExactlyOnePlane = item->isKindOf(CC_TYPES::PLANE);
 						}
 						else if (item->isA(CC_TYPES::GBL_SENSOR))
@@ -2252,7 +2263,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				}
 			}
 
-			if (hasExactlyOnePlanarEntity)
+			if (planarEntityCount == 1)
 			{
 				menu.addAction(m_alignCameraWithEntity);
 				menu.addAction(m_alignCameraWithEntityReverse);

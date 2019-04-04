@@ -4618,11 +4618,12 @@ void ccGLWindow::startPicking(PickingParameters& params)
 	}
 }
 
-void ccGLWindow::processPickingResult(const PickingParameters& params,
-	ccHObject* pickedEntity,
-	int pickedItemIndex,
-	const CCVector3* nearestPoint/*=0*/,
-	const std::unordered_set<int>* selectedIDs/*=0*/)
+void ccGLWindow::processPickingResult(	const PickingParameters& params,
+										ccHObject* pickedEntity,
+										int pickedItemIndex,
+										const CCVector3* nearestPoint/*=nullptr*/,
+										const CCVector3d* nearestPointBC/*=nullptr*/,
+										const std::unordered_set<int>* selectedIDs/*=nullptr*/)
 {
 	//standard "entity" picking
 	if (params.mode == ENTITY_PICKING)
@@ -4643,9 +4644,9 @@ void ccGLWindow::processPickingResult(const PickingParameters& params,
 			||	params.mode == POINT_OR_TRIANGLE_PICKING)
 	{
 		assert(pickedEntity == nullptr || pickedItemIndex >= 0);
-		assert(nearestPoint);
+		assert(nearestPoint && nearestPointBC);
 
-		emit itemPicked(pickedEntity, static_cast<unsigned>(pickedItemIndex), params.centerX, params.centerY, *nearestPoint);
+		emit itemPicked(pickedEntity, static_cast<unsigned>(pickedItemIndex), params.centerX, params.centerY, *nearestPoint, *nearestPointBC);
 	}
 	//fast picking (labels, interactors, etc.)
 	else if (params.mode == FAST_PICKING)
@@ -4664,25 +4665,15 @@ void ccGLWindow::processPickingResult(const PickingParameters& params,
 			if (pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
 				label = new cc2DLabel();
-				label->addPoint(ccHObjectCaster::ToGenericPointCloud(pickedEntity), pickedItemIndex);
+				label->addPickedPoint(ccHObjectCaster::ToGenericPointCloud(pickedEntity), pickedItemIndex);
 				pickedEntity->addChild(label);
 			}
 			else if (pickedEntity->isKindOf(CC_TYPES::MESH))
 			{
+				assert(nearestPointBC);
 				label = new cc2DLabel();
-				ccGenericMesh *mesh = ccHObjectCaster::ToGenericMesh(pickedEntity);
-				ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
-				assert(cloud);
-				CCLib::VerticesIndexes *vertexIndexes = mesh->getTriangleVertIndexes(pickedItemIndex);
-				label->addPoint(cloud, vertexIndexes->i1);
-				label->addPoint(cloud, vertexIndexes->i2);
-				label->addPoint(cloud, vertexIndexes->i3);
-				cloud->addChild(label);
-				if (!cloud->isEnabled())
-				{
-					cloud->setVisible(false);
-					cloud->setEnabled(true);
-				}
+				label->addPickedPoint(ccHObjectCaster::ToGenericMesh(pickedEntity), pickedItemIndex, CCVector2d(nearestPointBC->x, nearestPointBC->y));
+				pickedEntity->addChild(label);
 			}
 
 			if (label)
@@ -4881,7 +4872,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 					if (selectedID < 0 || minDepth < minMinDepth)
 					{
 						selectedID = currentID;
-						pickedItemIndex = (n>1 ? _selectBuf[4] : -1);
+						pickedItemIndex = (n > 1 ? _selectBuf[4] : -1);
 						minMinDepth = minDepth;
 					}
 				}
@@ -4917,15 +4908,33 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	}
 
 	CCVector3 P(0, 0, 0);
+	CCVector3d PBC(0, 0, 0);
 	CCVector3* pickedPoint = nullptr;
-	if (pickedEntity && pickedItemIndex >= 0 && pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
+	CCVector3d* pickedBarycenter = nullptr;
+	if (pickedEntity && pickedItemIndex >= 0)
 	{
-		P = *(static_cast<ccGenericPointCloud*>(pickedEntity)->getPoint(pickedItemIndex));
-		pickedPoint = &P;
+		//we need to retrieve the point coordinates
+		//(and even the barycentric coordinates if the point is picked on a mesh!)
+		if (pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			P = *(static_cast<ccGenericPointCloud*>(pickedEntity)->getPoint(pickedItemIndex));
+			pickedPoint = &P;
+		}
+		else if (pickedEntity->isKindOf(CC_TYPES::MESH))
+		{
+			CCVector2d clickedPos(params.centerX, m_glViewport.height() - 1 - params.centerY);
+			ccGLCameraParameters camera;
+			getGLCameraParameters(camera);
+			CCVector3d Pd(0, 0, 0);
+			static_cast<ccGenericMesh*>(pickedEntity)->trianglePicking(static_cast<unsigned>(pickedItemIndex), clickedPos, camera, Pd, &PBC);
+			P = CCVector3::fromArray(Pd.u);
+			pickedPoint = &P;
+			pickedBarycenter = &PBC;
+		}
 	}
 
 	//we must always emit a signal!
-	processPickingResult(params, pickedEntity, pickedItemIndex, pickedPoint, &selectedIDs);
+	processPickingResult(params, pickedEntity, pickedItemIndex, pickedPoint, pickedBarycenter, &selectedIDs);
 }
 
 void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
@@ -4938,6 +4947,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	int nearestElementIndex = -1;
 	double nearestElementSquareDist = -1.0;
 	CCVector3 nearestPoint(0, 0, 0);
+	CCVector3d nearestPointBC(0, 0, 0);
 	static const unsigned MIN_POINTS_FOR_OCTREE_COMPUTATION = 128;
 
 	static ccGui::ParamStruct::ComputeOctreeForPicking autoComputeOctreeThisSession = ccGui::ParamStruct::ASK_USER;
@@ -5072,12 +5082,13 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 
 					int nearestTriIndex = -1;
 					double nearestSquareDist = 0.0;
-					CCVector3d P;
+					CCVector3d P, barycentricCoords;
 					if (mesh->trianglePicking(	clickedPos,
 												camera,
 												nearestTriIndex,
 												nearestSquareDist,
-												P))
+												P,
+												&barycentricCoords))
 					{
 						if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
@@ -5085,6 +5096,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 							nearestElementIndex = nearestTriIndex;
 							nearestPoint = CCVector3::fromArray(P.u);
 							nearestEntity = mesh;
+							nearestPointBC = barycentricCoords;
 						}
 					}
 				}
@@ -5116,7 +5128,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	//ccLog::Print(QString("[Picking][CPU] Time: %1 ms").arg(dt));
 
 	//we must always emit a signal!
-	processPickingResult(params, nearestEntity, nearestElementIndex, &nearestPoint);
+	processPickingResult(params, nearestEntity, nearestElementIndex, &nearestPoint, &nearestPointBC);
 }
 
 void ccGLWindow::displayNewMessage(	const QString& message,

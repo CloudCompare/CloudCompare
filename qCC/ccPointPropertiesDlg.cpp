@@ -25,6 +25,7 @@
 //qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
+#include <ccGenericMesh.h>
 #include <cc2DViewportLabel.h>
 #include <cc2DLabel.h>
 
@@ -242,7 +243,7 @@ void ccPointPropertiesDlg::exportCurrentLabel()
 	else
 	{
 		//attach old label to first point cloud by default
-		m_label->getPoint(0).cloud->addChild(labelObject);
+		m_label->getPickedPoint(0).entity()->addChild(labelObject);
 		newLabelObject = m_label = new cc2DLabel();
 		m_label->setSelected(true);
 	}
@@ -256,9 +257,9 @@ void ccPointPropertiesDlg::exportCurrentLabel()
 	}	
 }
 
-void ccPointPropertiesDlg::processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y)
+void ccPointPropertiesDlg::processPickedPoint(const PickedItem& picked)
 {
-	assert(cloud);
+	assert(picked.entity);
 	assert(m_label);
 	assert(m_associatedWin);
 
@@ -279,12 +280,21 @@ void ccPointPropertiesDlg::processPickedPoint(ccPointCloud* cloud, unsigned poin
 		return; //we don't use this slot for 2D mode
 	}
 
-	m_label->addPoint(cloud, pointIndex);
+	if (picked.entity->isKindOf(CC_TYPES::POINT_CLOUD))
+		m_label->addPickedPoint(static_cast<ccGenericPointCloud*>(picked.entity), picked.itemIndex);
+	else if (picked.entity->isKindOf(CC_TYPES::MESH))
+		m_label->addPickedPoint(static_cast<ccGenericMesh*>(picked.entity), picked.itemIndex, CCVector2d(picked.uvw.x, picked.uvw.y));
+	else
+	{
+		assert(false);
+		return;
+	}
+	
 	m_label->setVisible(true);
 	m_label->displayPointLegend(m_label->size() == 3); //we need to display 'A', 'B' and 'C' for 3-points labels
 	if (m_label->size() == 1 && m_associatedWin)
 	{
-		m_label->setPosition(static_cast<float>(x + 20) / m_associatedWin->glWidth(), static_cast<float>(y + 20) / m_associatedWin->glHeight());
+		m_label->setPosition(static_cast<float>(picked.clickPoint.x() + 20) / m_associatedWin->glWidth(), static_cast<float>(picked.clickPoint.y() + 20) / m_associatedWin->glHeight());
 	}
 
 	//output info to Console

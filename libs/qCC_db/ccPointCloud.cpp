@@ -1029,11 +1029,13 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				cc2DLabel* newLabel = new cc2DLabel(label->getName());
 				for (unsigned j = 0; j < label->size(); ++j)
 				{
-					const cc2DLabel::PickedPoint& P = label->getPoint(j);
-					if (P.cloud == addedCloud)
-						newLabel->addPoint(this, pointCountBefore + P.index);
-					else
-						newLabel->addPoint(P.cloud, P.index);
+					cc2DLabel::PickedPoint P = label->getPickedPoint(j);
+					if (P._cloud == addedCloud)
+					{
+						P._cloud = this;
+						P.index += pointCountBefore;
+					}
+					newLabel->addPickedPoint(P);
 				}
 				newLabel->displayPointLegend(label->isPointLegendDisplayed());
 				newLabel->setDisplayedIn2D(label->isDisplayedIn2D());

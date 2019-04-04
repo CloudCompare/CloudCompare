@@ -885,11 +885,83 @@ void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVecto
 	weights /= sum;
 }
 
+bool ccGenericMesh::trianglePicking(unsigned triIndex,
+									const CCVector2d& clickPos,
+									const ccGLMatrix& trans,
+									bool noGLTrans,
+									const ccGenericPointCloud& vertices,
+									const ccGLCameraParameters& camera,
+									CCVector3d& point,
+									CCVector3d* barycentricCoords/*=nullptr*/) const
+{
+	assert(triIndex < size());
+
+	CCVector3 A3D, B3D, C3D;
+	getTriangleVertices(triIndex, A3D, B3D, C3D);
+
+	CCVector3d A2D, B2D, C2D;
+	if (noGLTrans)
+	{
+		camera.project(A3D, A2D);
+		camera.project(B3D, B2D);
+		camera.project(C3D, C2D);
+	}
+	else
+	{
+		CCVector3 A3Dp = A3D;
+		CCVector3 B3Dp = B3D;
+		CCVector3 C3Dp = C3D;
+		trans.apply(A3Dp);
+		trans.apply(B3Dp);
+		trans.apply(C3Dp);
+		camera.project(A3Dp, A2D);
+		camera.project(B3Dp, B2D);
+		camera.project(C3Dp, C2D);
+	}
+
+	//barycentric coordinates
+	GLdouble detT =  (B2D.y - C2D.y) *      (A2D.x - C2D.x) + (C2D.x - B2D.x) *      (A2D.y - C2D.y);
+	GLdouble l1   = ((B2D.y - C2D.y) * (clickPos.x - C2D.x) + (C2D.x - B2D.x) * (clickPos.y - C2D.y)) / detT;
+	GLdouble l2   = ((C2D.y - A2D.y) * (clickPos.x - C2D.x) + (A2D.x - C2D.x) * (clickPos.y - C2D.y)) / detT;
+
+	//does the point falls inside the triangle?
+	if (l1 >= 0 && l1 <= 1.0 && l2 >= 0.0 && l2 <= 1.0)
+	{
+		double l1l2 = l1 + l2;
+		assert(l1l2 >= -1.0e-12);
+		if (l1l2 > 1.0)
+		{
+			//we fall outside of the triangle!
+			return false;
+		}
+
+		GLdouble l3 = 1.0 - l1 - l2;
+		assert(l3 >= -1.0e-12);
+
+		//now deduce the 3D position
+		point = CCVector3d(	l1 * A3D.x + l2 * B3D.x + l3 * C3D.x,
+							l1 * A3D.y + l2 * B3D.y + l3 * C3D.y,
+							l1 * A3D.z + l2 * B3D.z + l3 * C3D.z);
+
+		if (barycentricCoords)
+		{
+			*barycentricCoords = CCVector3d(l1, l2, l3);
+		}
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 									const ccGLCameraParameters& camera,
 									int& nearestTriIndex,
 									double& nearestSquareDist,
-									CCVector3d& nearestPoint)
+									CCVector3d& nearestPoint,
+									CCVector3d* barycentricCoords/*=nullptr*/) const
 {
 	ccGLMatrix trans;
 	bool noGLTrans = !getAbsoluteGLTransformation(trans);
@@ -905,6 +977,8 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 	nearestTriIndex = -1;
 	nearestSquareDist = -1.0;
 	nearestPoint = CCVector3d(0, 0, 0);
+	if (barycentricCoords)
+		*barycentricCoords = CCVector3d(0, 0, 0);
 
 	ccGenericPointCloud* vertices = getAssociatedCloud();
 	if (!vertices)
@@ -918,63 +992,71 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 #endif
 	for (int i = 0; i < static_cast<int>(size()); ++i)
 	{
-		CCLib::VerticesIndexes* tsi = getTriangleVertIndexes(i);
-		const CCVector3* A3D = vertices->getPoint(tsi->i1);
-		const CCVector3* B3D = vertices->getPoint(tsi->i2);
-		const CCVector3* C3D = vertices->getPoint(tsi->i3);
+		CCVector3d P;
+		CCVector3d BC;
+		if (!trianglePicking(i, clickPos, trans, noGLTrans, *vertices, camera, P, barycentricCoords ? &BC : nullptr))
+			continue;
 
-		CCVector3d A2D, B2D, C2D;
-		if (noGLTrans)
+		double squareDist = (X - P).norm2d();
+		if (nearestTriIndex < 0 || squareDist < nearestSquareDist)
 		{
-			camera.project(*A3D, A2D);
-			camera.project(*B3D, B2D);
-			camera.project(*C3D, C2D);
-		}
-		else
-		{
-			CCVector3 A3Dp = *A3D;
-			CCVector3 B3Dp = *B3D;
-			CCVector3 C3Dp = *C3D;
-			trans.apply(A3Dp);
-			trans.apply(B3Dp);
-			trans.apply(C3Dp);
-			camera.project(A3Dp, A2D);
-			camera.project(B3Dp, B2D);
-			camera.project(C3Dp, C2D);
-		}
-
-		//barycentric coordinates
-		GLdouble detT =  (B2D.y - C2D.y) *      (A2D.x - C2D.x) + (C2D.x - B2D.x) *      (A2D.y - C2D.y);
-		GLdouble l1   = ((B2D.y - C2D.y) * (clickPos.x - C2D.x) + (C2D.x - B2D.x) * (clickPos.y - C2D.y)) / detT;
-		GLdouble l2   = ((C2D.y - A2D.y) * (clickPos.x - C2D.x) + (A2D.x - C2D.x) * (clickPos.y - C2D.y)) / detT;
-
-		//does the point falls inside the triangle?
-		if (l1 >= 0 && l1 <= 1.0 && l2 >= 0.0 && l2 <= 1.0)
-		{
-			double l1l2 = l1+l2;
-			assert(l1l2 >= 0);
-			if (l1l2 > 1.0)
-			{
-				//we fall outside of the triangle!
-				continue;
-			}
-
-			GLdouble l3 = 1.0 - l1 - l2;
-			assert(l3 >= -1.0e-12);
-
-			//now deduce the 3D position
-			CCVector3d P(	l1 * A3D->x + l2 * B3D->x + l3 * C3D->x,
-							l1 * A3D->y + l2 * B3D->y + l3 * C3D->y,
-							l1 * A3D->z + l2 * B3D->z + l3 * C3D->z);
-			double squareDist = (X - P).norm2d();
-			if (nearestTriIndex < 0 || squareDist < nearestSquareDist)
-			{
-				nearestSquareDist = squareDist;
-				nearestTriIndex = static_cast<int>(i);
-				nearestPoint = P;
-			}
+			nearestSquareDist = squareDist;
+			nearestTriIndex = static_cast<int>(i);
+			nearestPoint = P;
+			if (barycentricCoords)
+				*barycentricCoords = BC;
 		}
 	}
 
 	return (nearestTriIndex >= 0);
+}
+
+bool ccGenericMesh::trianglePicking(unsigned triIndex,
+									const CCVector2d& clickPos,
+									const ccGLCameraParameters& camera,
+									CCVector3d& point,
+									CCVector3d* barycentricCoords/*=nullptr*/) const
+{
+	if (triIndex >= size())
+	{
+		assert(false);
+		return false;
+	}
+
+	ccGLMatrix trans;
+	bool noGLTrans = !getAbsoluteGLTransformation(trans);
+
+	ccGenericPointCloud* vertices = getAssociatedCloud();
+	if (!vertices)
+	{
+		assert(false);
+		return false;
+	}
+
+	return trianglePicking(triIndex, clickPos, trans, noGLTrans, *vertices, camera, point, barycentricCoords);
+}
+
+bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv, CCVector3& P, bool warningIfOutside/*=true*/) const
+{
+	if (triIndex >= size())
+	{
+		assert(false);
+		ccLog::Warning("Index out of range");
+		return true;
+	}
+	
+	CCVector3 A, B, C;
+	getTriangleVertices(triIndex, A, B, C);
+
+	double z = 1.0 - uv.x - uv.y;
+	if (warningIfOutside && ((z < -1.0e-6) || (z > 1.0 + 1.0e-6)))
+	{
+		ccLog::Warning("Point falls outside of the triangle");
+	}
+	
+	P = CCVector3(	static_cast<PointCoordinateType>(uv.x * A.x + uv.y * B.x + z * C.x),
+					static_cast<PointCoordinateType>(uv.x * A.y + uv.y * B.y + z * C.y),
+					static_cast<PointCoordinateType>(uv.x * A.z + uv.y * B.z + z * C.z));
+
+	return true;
 }

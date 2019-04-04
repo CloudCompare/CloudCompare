@@ -55,7 +55,7 @@ static const char s_defaultLabelBaseName[] = "Point #";
 ccPointListPickingDlg::ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* parent)
     : ccPointPickingGenericInterface(pickingHub, parent)
     , Ui::PointListPickingDlg()
-    , m_associatedCloud(nullptr)
+    , m_associatedEntity(nullptr)
     , m_lastPreviousID(0)
     , m_orderedLabelsContainer(nullptr)
 {
@@ -130,17 +130,17 @@ unsigned ccPointListPickingDlg::getPickedPoints(std::vector<cc2DLabel*>& pickedP
 	return static_cast<unsigned>(pickedPoints.size());
 }
 
-void ccPointListPickingDlg::linkWithCloud(ccPointCloud* cloud)
+void ccPointListPickingDlg::linkWithEntity(ccHObject* entity)
 {
-	m_associatedCloud = cloud;
+	m_associatedEntity = entity;
 	m_lastPreviousID = 0;
 
-	if (m_associatedCloud)
+	if (m_associatedEntity)
 	{
 		//find default container
 		m_orderedLabelsContainer = nullptr;
 		ccHObject::Container groups;
-		m_associatedCloud->filterChildren(groups,true,CC_TYPES::HIERARCHY_OBJECT);
+		m_associatedEntity->filterChildren(groups, true, CC_TYPES::HIERARCHY_OBJECT);
 
 		for (ccHObject::Container::const_iterator it = groups.begin(); it != groups.end(); ++it)
 		{
@@ -160,7 +160,13 @@ void ccPointListPickingDlg::linkWithCloud(ccPointCloud* cloud)
 		}
 	}
 
-	showGlobalCoordsCheckBox->setEnabled(cloud ? cloud->isShifted() : false);
+	ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(entity);
+	if (!asCloud)
+	{
+		assert(false);
+	}
+
+	showGlobalCoordsCheckBox->setEnabled(asCloud ? asCloud->isShifted() : false);
 	updateList();
 }
 
@@ -190,14 +196,14 @@ void ccPointListPickingDlg::cancelAndExit()
 		if (m_orderedLabelsContainer->getChildrenNumber() == 0)
 		{
 			dbRoot->removeElement(m_orderedLabelsContainer);
-			//m_associatedCloud->removeChild(m_orderedLabelsContainer);
+			//m_associatedEntity->removeChild(m_orderedLabelsContainer);
 			m_orderedLabelsContainer = nullptr;
 		}
 	}
 
 	m_toBeDeleted.resize(0);
 	m_toBeAdded.resize(0);
-	m_associatedCloud = nullptr;
+	m_associatedEntity = nullptr;
 	m_orderedLabelsContainer = nullptr;
 
 	MainWindow::RefreshAllGLWindow();
@@ -209,7 +215,7 @@ void ccPointListPickingDlg::cancelAndExit()
 
 void ccPointListPickingDlg::exportToNewCloud()
 {
-	if (!m_associatedCloud)
+	if (!m_associatedEntity)
 		return;
 
 	//get all labels
@@ -223,14 +229,23 @@ void ccPointListPickingDlg::exportToNewCloud()
 			cloud->setName("Picking list");
 			for (unsigned i = 0; i < count; ++i)
 			{
-				const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
-				const CCVector3* P = PP.cloud->getPoint(PP.index);
-				cloud->addPoint(*P);
+				const cc2DLabel::PickedPoint& PP = labels[i]->getPickedPoint(0);
+				cloud->addPoint(PP.getPointPosition());
 			}
 
-			cloud->setDisplay(m_associatedCloud->getDisplay());
-			cloud->setGlobalShift(m_associatedCloud->getGlobalShift());
-			cloud->setGlobalScale(m_associatedCloud->getGlobalScale());
+			cloud->setDisplay(m_associatedEntity->getDisplay());
+
+			//retrieve Shift & Scale values
+			ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(m_associatedEntity);
+			if (asCloud)
+			{
+				cloud->setGlobalShift(asCloud->getGlobalShift());
+				cloud->setGlobalScale(asCloud->getGlobalScale());
+			}
+			else
+			{
+				assert(false);
+			}
 			MainWindow::TheInstance()->addToDB(cloud);
 		}
 		else
@@ -248,7 +263,7 @@ void ccPointListPickingDlg::exportToNewCloud()
 
 void ccPointListPickingDlg::exportToNewPolyline()
 {
-	if (!m_associatedCloud)
+	if (!m_associatedEntity)
 		return;
 
 	//get all labels
@@ -270,16 +285,25 @@ void ccPointListPickingDlg::exportToNewPolyline()
 
 		for (unsigned i = 0; i < count; ++i)
 		{
-			const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
-			vertices->addPoint(*PP.cloud->getPoint(PP.index));
+			const cc2DLabel::PickedPoint& PP = labels[i]->getPickedPoint(0);
+			vertices->addPoint(PP.getPointPosition());
 		}
 		polyline->addPointIndex(0, count);
 		polyline->setVisible(true);
 		vertices->setEnabled(false);
-		polyline->setGlobalShift(m_associatedCloud->getGlobalShift());
-		polyline->setGlobalScale(m_associatedCloud->getGlobalScale());
+		//retrieve Shift & Scale values
+		ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(m_associatedEntity);
+		if (asCloud)
+		{
+			polyline->setGlobalShift(asCloud->getGlobalShift());
+			polyline->setGlobalScale(asCloud->getGlobalScale());
+		}
+		else
+		{
+			assert(false);
+		}
 		polyline->addChild(vertices);
-		polyline->setDisplay_recursive(m_associatedCloud->getDisplay());
+		polyline->setDisplay_recursive(m_associatedEntity->getDisplay());
 
 		MainWindow::TheInstance()->addToDB(polyline);
 	}
@@ -291,11 +315,11 @@ void ccPointListPickingDlg::exportToNewPolyline()
 
 void ccPointListPickingDlg::applyAndExit()
 {
-	if (m_associatedCloud && !m_toBeDeleted.empty())
+	if (m_associatedEntity && !m_toBeDeleted.empty())
 	{
 		//apply modifications
 		MainWindow::TheInstance()->db()->removeElements(m_toBeDeleted); //no need to redraw as they should already be invisible
-		m_associatedCloud = nullptr;
+		m_associatedEntity = nullptr;
 	}
 
 	m_toBeDeleted.resize(0);
@@ -309,7 +333,7 @@ void ccPointListPickingDlg::applyAndExit()
 
 void ccPointListPickingDlg::removeLastEntry()
 {
-	if (!m_associatedCloud)
+	if (!m_associatedEntity)
 		return;
 
 	//get all labels
@@ -344,7 +368,7 @@ void ccPointListPickingDlg::removeLastEntry()
 			MainWindow::TheInstance()->db()->removeElement(lastVisibleLabel);
 		}
 		else
-			m_associatedCloud->detachChild(lastVisibleLabel);
+			m_associatedEntity->detachChild(lastVisibleLabel);
 	}
 
 	updateList();
@@ -385,7 +409,7 @@ void ccPointListPickingDlg::markerSizeChanged(int size)
 
 void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 {
-	if (!m_associatedCloud)
+	if (!m_associatedEntity)
 		return;
 
 	//get all labels
@@ -419,8 +443,14 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	}
 
 	//if a global shift exists, ask the user if it should be applied
-	CCVector3d shift = m_associatedCloud->getGlobalShift();
-	double scale = m_associatedCloud->getGlobalScale();
+	CCVector3d shift;
+	double scale = 1.0;
+	ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(m_associatedEntity);
+	if (asCloud)
+	{
+		shift = asCloud->getGlobalShift();
+		scale = asCloud->getGlobalScale();
+	}
 
 	if (shift.norm2() != 0 || scale != 1.0)
 	{
@@ -442,8 +472,8 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	for (unsigned i = 0; i < count; ++i)
 	{
 		assert(labels[i]->size() == 1);
-		const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
-		const CCVector3* P = PP.cloud->getPoint(PP.index);
+		const cc2DLabel::PickedPoint& PP = labels[i]->getPickedPoint(0);
+		CCVector3 P = PP.getPointPosition();
 
 		switch (format)
 		{
@@ -461,9 +491,9 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 			break;
 		}
 
-		fprintf(fp, "%.12f,%.12f,%.12f\n",	static_cast<double>(P->x) / scale - shift.x,
-		                                    static_cast<double>(P->y) / scale - shift.y,
-		                                    static_cast<double>(P->z) / scale - shift.z);
+		fprintf(fp, "%.12f,%.12f,%.12f\n",	static_cast<double>(P.x) / scale - shift.x,
+		                                    static_cast<double>(P.y) / scale - shift.y,
+		                                    static_cast<double>(P.z) / scale - shift.z);
 	}
 
 	fclose(fp);
@@ -514,9 +544,9 @@ void ccPointListPickingDlg::updateList()
 	{
 		cc2DLabel* label = labels[static_cast<unsigned int>( i )];
 
-		const cc2DLabel::PickedPoint& PP = label->getPoint(0);
-		const CCVector3* P = PP.cloud->getPoint(PP.index);
-		CCVector3d Pd = (showAbsolute ? PP.cloud->toGlobal3d(*P) : CCVector3d::fromArray(P->u));
+		const cc2DLabel::PickedPoint& PP = label->getPickedPoint(0);
+		CCVector3 P = PP.getPointPosition();
+		CCVector3d Pd = (showAbsolute ? PP.cloudOrVertices()->toGlobal3d(P) : CCVector3d::fromArray(P.u));
 
 		//point index in list
 		tableWidget->verticalHeaderItem( i )->setText( QStringLiteral( "%1" ).arg( i + startIndex ) );
@@ -540,31 +570,44 @@ void ccPointListPickingDlg::updateList()
 	tableWidget->scrollToBottom();
 }
 
-void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y)
+void ccPointListPickingDlg::processPickedPoint(const PickedItem& picked)
 {
-	if (cloud != m_associatedCloud || !cloud || !MainWindow::TheInstance())
+	if (!picked.entity || picked.entity != m_associatedEntity || !MainWindow::TheInstance())
 		return;
 
 	cc2DLabel* newLabel = new cc2DLabel();
-	newLabel->addPoint(cloud,pointIndex);
+	if (picked.entity->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		newLabel->addPickedPoint(static_cast<ccGenericPointCloud*>(picked.entity), picked.itemIndex);
+	}
+	else if (picked.entity->isKindOf(CC_TYPES::MESH))
+	{
+		newLabel->addPickedPoint(static_cast<ccGenericMesh*>(picked.entity), picked.itemIndex, CCVector2d(picked.uvw.x, picked.uvw.y));
+	}
+	else
+	{
+		delete newLabel;
+		assert(false);
+		return;
+	}
 	newLabel->setVisible(true);
 	newLabel->setDisplayedIn2D(false);
 	newLabel->displayPointLegend(true);
 	newLabel->setCollapsed(true);
-	ccGenericGLDisplay* display = m_associatedCloud->getDisplay();
+	ccGenericGLDisplay* display = m_associatedEntity->getDisplay();
 	if (display)
 	{
 		newLabel->setDisplay(display);
 		QSize size = display->getScreenSize();
-		newLabel->setPosition(	static_cast<float>(x + 20) / size.width(),
-		                        static_cast<float>(y + 20) / size.height() );
+		newLabel->setPosition(	static_cast<float>(picked.clickPoint.x() + 20) / size.width(),
+		                        static_cast<float>(picked.clickPoint.y() + 20) / size.height() );
 	}
 
 	//add default container if necessary
 	if (!m_orderedLabelsContainer)
 	{
 		m_orderedLabelsContainer = new ccHObject(s_pickedPointContainerName);
-		m_associatedCloud->addChild(m_orderedLabelsContainer);
+		m_associatedEntity->addChild(m_orderedLabelsContainer);
 		m_orderedLabelsContainer->setDisplay(display);
 		MainWindow::TheInstance()->addToDB(m_orderedLabelsContainer, false, true, false, false);
 	}
@@ -577,10 +620,10 @@ void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned poi
 	QClipboard* clipboard = QApplication::clipboard();
 	if (clipboard)
 	{
-		const CCVector3* P = cloud->getPoint(pointIndex);
+		CCVector3 P = newLabel->getPickedPoint(0).getPointPosition();
 		int precision = m_associatedWin ? m_associatedWin->getDisplayParameters().displayedNumPrecision : 6;
 		int indexInList = startIndexSpinBox->value() + static_cast<int>(m_orderedLabelsContainer->getChildrenNumber()) - 1;
-		clipboard->setText(QString("CC_POINT_#%0(%1;%2;%3)").arg(indexInList).arg(P->x, 0, 'f', precision).arg(P->y, 0, 'f', precision).arg(P->z, 0, 'f', precision));
+		clipboard->setText(QString("CC_POINT_#%0(%1;%2;%3)").arg(indexInList).arg(P.x, 0, 'f', precision).arg(P.y, 0, 'f', precision).arg(P.z, 0, 'f', precision));
 	}
 
 	updateList();

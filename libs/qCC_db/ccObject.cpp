@@ -59,8 +59,9 @@
 	v4.6 - 11/03/2016 - Null normal vector code added
 	v4.7 - 12/22/2016 - Return index added to ccWaveform
 	v4.8 - 10/19/2018 - The CC_CAMERA_BIT and CC_QUADRIC_BIT were wrongly defined
+	v4.9 - 03/31/2019 - Point labels can now be picked on meshes
 **/
-const unsigned c_currentDBVersion = 48; //4.8
+const unsigned c_currentDBVersion = 49; //4.9
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);

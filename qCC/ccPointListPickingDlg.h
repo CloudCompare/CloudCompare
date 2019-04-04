@@ -41,8 +41,8 @@ public:
 	//! Default constructor
 	explicit ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* parent);
 
-	//! Associates dialog with cloud
-	void linkWithCloud(ccPointCloud* cloud);
+	//! Associates dialog with a cloud or a mesh
+	void linkWithEntity(ccHObject* entity);
 
 protected slots:
 
@@ -75,7 +75,7 @@ protected slots:
 protected:
 
 	//inherited from ccPointPickingGenericInterface
-	void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y) override;
+	void processPickedPoint(const PickedItem& picked) override;
 
 	//! Gets current (visible) picked points from the associated cloud
 	unsigned getPickedPoints(std::vector<cc2DLabel*>& pickedPoints);
@@ -92,8 +92,8 @@ protected:
 	//! Exports list to an ASCII file
 	void exportToASCII(ExportFormat format);
 
-	//! Associated cloud
-	ccPointCloud* m_associatedCloud;
+	//! Associated cloud or mesh
+	ccHObject* m_associatedEntity;
 
 	//! Last existing label unique ID on load
 	unsigned m_lastPreviousID;

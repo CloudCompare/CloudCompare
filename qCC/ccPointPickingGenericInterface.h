@@ -58,12 +58,7 @@ public:
 protected:
 
 	//! Generic method to process picked points
-	/** \param cloud picked point cloud
-		\param pointIndex point index in cloud
-		\param x picked pixel X position
-		\param y picked pixel Y position
-	**/
-	virtual void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y) = 0;
+	virtual void processPickedPoint(const PickedItem& picked) = 0;
 
 	//! Picking hub
 	ccPickingHub* m_pickingHub;

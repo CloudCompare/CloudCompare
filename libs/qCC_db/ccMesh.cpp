@@ -3092,15 +3092,27 @@ bool ccMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3
 
 	const CCLib::VerticesIndexes& tri = m_triVertIndexes->getValue(triIndex);
 
-	return interpolateNormals(tri, P, N, hasTriNormals() ? &m_triNormalIndexes->at(triIndex) : nullptr);
-}
-
-bool ccMesh::interpolateNormals(const CCLib::VerticesIndexes& vertIndexes, const CCVector3& P, CCVector3& N, const Tuple3i* triNormIndexes/*=0*/)
-{
 	//intepolation weights
 	CCVector3d w;
-	computeInterpolationWeights(vertIndexes, P, w);
+	computeInterpolationWeights(tri, P, w);
 
+	return interpolateNormals(tri, w, N, hasTriNormals() ? &m_triNormalIndexes->at(triIndex) : nullptr);
+}
+
+bool ccMesh::interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N)
+{
+	assert(triIndex < size());
+
+	if (!hasNormals())
+		return false;
+
+	const CCLib::VerticesIndexes& tri = m_triVertIndexes->getValue(triIndex);
+
+	return interpolateNormals(tri, w, N, hasTriNormals() ? &m_triNormalIndexes->at(triIndex) : nullptr);
+}
+
+bool ccMesh::interpolateNormals(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, CCVector3& N, const Tuple3i* triNormIndexes/*=0*/)
+{
 	CCVector3d Nd(0, 0, 0);
 	{
 		if (!triNormIndexes || triNormIndexes->u[0] >= 0)
@@ -3137,15 +3149,27 @@ bool ccMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::R
 
 	const CCLib::VerticesIndexes& tri = m_triVertIndexes->getValue(triIndex);
 
-	return interpolateColors(tri, P, C);
-}
-
-bool ccMesh::interpolateColors(const CCLib::VerticesIndexes& vertIndexes, const CCVector3& P, ccColor::Rgb& rgb)
-{
 	//intepolation weights
 	CCVector3d w;
-	computeInterpolationWeights(vertIndexes, P, w);
+	computeInterpolationWeights(tri, P, w);
 
+	return interpolateColors(tri, w, C);
+}
+
+bool ccMesh::interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& C)
+{
+	assert(triIndex < size());
+
+	if (!hasColors())
+		return false;
+
+	const CCLib::VerticesIndexes& tri = m_triVertIndexes->getValue(triIndex);
+
+	return interpolateColors(tri, w, C);
+}
+
+bool ccMesh::interpolateColors(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, ccColor::Rgb& rgb)
+{
 	const ccColor::Rgb& C1 = m_associatedCloud->getPointColor(vertIndexes.i1);
 	const ccColor::Rgb& C2 = m_associatedCloud->getPointColor(vertIndexes.i2);
 	const ccColor::Rgb& C3 = m_associatedCloud->getPointColor(vertIndexes.i3);
@@ -3246,7 +3270,7 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	if (matIndex < 0)
 	{
 		if (interpolateColorIfNoTexture)
-			return interpolateColors(triIndex,P,rgb);
+			return interpolateColors(triIndex, P, rgb);
 		return false;
 	}
 
@@ -3277,7 +3301,7 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	{
 		//assert(false);
 		if (interpolateColorIfNoTexture)
-			return interpolateColors(triIndex,P,rgb);
+			return interpolateColors(triIndex, P, rgb);
 		return false;
 	}
 
@@ -3402,8 +3426,11 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//}
 				if (vertices->hasColors())
 				{
+					CCLib::VerticesIndexes tri(indexA, indexB, indexC);
+					CCVector3d w1;
+					computeInterpolationWeights(tri, G1, w1);
 					ccColor::Rgb C;
-					interpolateColors(CCLib::VerticesIndexes(indexA, indexB, indexC), G1, C);
+					interpolateColors(CCLib::VerticesIndexes(indexA, indexB, indexC), w1, C);
 					vertices->addRGBColor(C);
 				}
 				//and add it to the map
@@ -3434,8 +3461,11 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//}
 				if (vertices->hasColors())
 				{
+					CCLib::VerticesIndexes tri(indexA, indexB, indexC);
+					CCVector3d w2;
+					computeInterpolationWeights(tri, G2, w2);
 					ccColor::Rgb C;
-					interpolateColors(CCLib::VerticesIndexes(indexA, indexB, indexC), G2, C);
+					interpolateColors(CCLib::VerticesIndexes(indexA, indexB, indexC), w2, C);
 					vertices->addRGBColor(C);
 				}
 				//and add it to the map
@@ -3466,8 +3496,11 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//}
 				if (vertices->hasColors())
 				{
+					CCLib::VerticesIndexes tri(indexA, indexB, indexC);
+					CCVector3d w3;
+					computeInterpolationWeights(tri, G3, w3);
 					ccColor::Rgb C;
-					interpolateColors(CCLib::VerticesIndexes(indexA, indexB, indexC), G3, C);
+					interpolateColors(CCLib::VerticesIndexes(indexA, indexB, indexC), w3, C);
 					vertices->addRGBColor(C);
 				}
 				//and add it to the map

@@ -37,3 +37,15 @@ StPrimGroup::StPrimGroup(ccHObject& obj)
 StPrimGroup::~StPrimGroup()
 {
 }
+
+ccHObject::Container StPrimGroup::getValidPlanes()
+{
+	ccHObject::Container all, valid;
+	filterChildren(all, false, CC_TYPES::PLANE, true);
+	for (auto pl : all) {
+		if (pl->isEnabled() && !pl->getName().endsWith("-del")) {
+			valid.push_back(pl);
+		}
+	}
+	return valid;
+}

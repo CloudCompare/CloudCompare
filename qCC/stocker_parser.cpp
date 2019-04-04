@@ -66,15 +66,29 @@ ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud)
 	return cc_plane;
 }
 
-stocker::Contour3d GetPointsFromCloud(ccHObject* entity) {
+stocker::Contour3d GetPointsFromCloud(ccHObject* entity) 
+{	
 	stocker::Contour3d points;
-	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-	if (!cloud) return points;
+	if (!entity) return points;
+	if (entity->isA(CC_TYPES::POINT_CLOUD)) {
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (!cloud) return points;
 
-	for (unsigned i = 0; i < cloud->size(); i++) {
-		CCVector3 pt = *cloud->getPoint(i);
-		points.push_back({ pt.x, pt.y, pt.z });
+		for (unsigned i = 0; i < cloud->size(); i++) {
+			CCVector3 pt = *cloud->getPoint(i);
+			points.push_back({ pt.x, pt.y, pt.z });
+		}
 	}
+	else if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+		StPrimGroup* primGroup = ccHObjectCaster::ToStPrimGroup(entity);
+		if (!primGroup) return points;				
+		ccHObject::Container plane_container = primGroup->getValidPlanes();
+		for (auto & pl : plane_container) {			
+			stocker::Contour3d cur_points = GetPointsFromCloud(pl->getParent());
+			points.insert(points.end(), cur_points.begin(), cur_points.end());
+		}
+	}
+	
 	return points;
 }
 
@@ -394,6 +408,14 @@ BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	return nullptr;
 }
 
+ccHObject* GetPlaneCloud(ccHObject* planeObj) {
+	if (planeObj->isA(CC_TYPES::PLANE))
+		return planeObj->getParent();
+	else if (planeObj->isA(CC_TYPES::POINT_CLOUD))
+		return planeObj;
+	else return nullptr;
+}
+
 bool SetGlobalShiftAndScale(ccHObject* obj)
 {
 	BDBaseHObject* baseObj = GetRootBDBase(obj);
@@ -650,9 +672,11 @@ ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, 
 ccHObject* CalcPlaneBoundary(ccHObject* planeObj)
 {
 #ifdef USE_STOCKER
+	ccHObject* point_cloud_obj = GetPlaneCloud(planeObj);
+	if (!point_cloud_obj) return nullptr;
 	/// get boundary points
 	Contour2d boundary_points_2d;
-	Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
+	Contour3d cur_plane_points = GetPointsFromCloud(point_cloud_obj);
 	PlaneUnit plane_unit = FormPlaneUnit(cur_plane_points, "temp", true);
 	Contour2d points_2d = Point3dToPlpoint2d(plane_unit, cur_plane_points);
 	vector<bool>bd_check;
@@ -672,7 +696,7 @@ ccHObject* CalcPlaneBoundary(ccHObject* planeObj)
 // 	IndexGroup line_index_group;
 // 	LineRansacfromPoints(boundary_points_3d, detected_lines, line_index_group, p2l_distance, boundary_minpts);
 
-	ccHObject* line_vert = AddSegmentsAsChildVertices(planeObj->getParent(), detected_lines, BDDB_BOUNDARY_PREFIX, ccColor::yellow);
+	ccHObject* line_vert = AddSegmentsAsChildVertices(point_cloud_obj, detected_lines, BDDB_BOUNDARY_PREFIX, ccColor::yellow);
 
 	if (!line_vert) {
 		return nullptr;
@@ -692,22 +716,16 @@ ccHObject* CalcPlaneBoundary(ccHObject* planeObj)
 ccHObject* DetectLineRansac(ccHObject* entity, double distance, double minpts, double radius)
 {
 #ifdef USE_STOCKER
+	ccHObject* point_cloud_obj = GetPlaneCloud(entity);
+	if (!point_cloud_obj) return nullptr;
 	Contour3d cur_plane_points;
-	if (entity->isA(CC_TYPES::POLY_LINE)) {
-		ccPolyline* poly_line = ccHObjectCaster::ToPolyline(entity);
-		if (!poly_line) return nullptr;
-		vector<CCVector3> points = poly_line->getPoints(false);
-		for (auto & pt : points) {
-			cur_plane_points.push_back(parse_xyz(pt));
-		}
-	}
-	else if (entity->isA(CC_TYPES::POINT_CLOUD)) {
-		cur_plane_points = GetPointsFromCloud(entity);
-	}
+	
+	cur_plane_points = GetPointsFromCloud(point_cloud_obj);
+	
 	Polyline3d bdry_lines_2d; IndexGroup indices;
 	LineRansacfromPoints(cur_plane_points, bdry_lines_2d, indices, distance, minpts, radius);
 
-	ccHObject* line_vert = AddSegmentsAsChildVertices(entity, bdry_lines_2d, "RansacLine", ccColor::red);
+	ccHObject* line_vert = AddSegmentsAsChildVertices(point_cloud_obj, bdry_lines_2d, "RansacLine", ccColor::red);
 	return line_vert;
 #endif // USE_STOCKER
 	return nullptr;	
@@ -742,15 +760,17 @@ ccHObject* AddOutlinesAsChild(vector<vector<stocker::Contour3d>> contours_points
 ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha)
 {
 #ifdef USE_STOCKER
-	stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
+	ccHObject* point_cloud_obj = GetPlaneCloud(planeObj);
+	if (!point_cloud_obj) return nullptr;
+	stocker::Contour3d cur_plane_points = GetPointsFromCloud(point_cloud_obj);
 	if (cur_plane_points.size() < 3) {
 		return nullptr;
 	}
-	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(planeObj->getParent());
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(point_cloud_obj);
 
 	//! get boundary
 	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, alpha, false, 2);
-	return AddOutlinesAsChild(contours_points, BDDB_OUTLINE_PREFIX, planeObj->getParent());
+	return AddOutlinesAsChild(contours_points, BDDB_OUTLINE_PREFIX, point_cloud_obj);
 //	if (contours_points.empty()) return nullptr;
 // 	ccPointCloud* line_vert = new ccPointCloud(BDDB_OUTLINE_PREFIX);
 // 	int component_number = 0;
@@ -780,7 +800,7 @@ ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha)
 }
 
 #include "vcg/space/intersection2.h"
-void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_epsilon, MainWindow* win)
+void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_epsilon)
 {
 #ifdef USE_STOCKER
 	ccHObject* parent_cloud = planeObj->getParent();
@@ -824,7 +844,7 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 	}
 	ccPointCloud* newCloud = cloud->partialClone(&remained);
 	newCloud->setName(cloud->getName());
-	cloud->setName(cloud->getName() + "-delete");
+	cloud->setName(cloud->getName() + "-del");
 	parent_cloud->setEnabled(false);
 	ccHObject* parent = parent_cloud->getParent();
 	parent->addChild(newCloud);
@@ -834,6 +854,7 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 	int index_old = parent->getChildIndex(cloud);
 	int index_new = parent->getChildIndex(newCloud);
 	parent->swapChildren(index_old, index_new);
+	MainWindow* win = MainWindow::TheInstance();
 	win->addToDB(newCloud);
 
 	win->removeFromDB(cloud);
@@ -852,7 +873,10 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option)
 {
 #ifdef USE_STOCKER
-	std::string base_name = GetBaseName(planeObj->getParent()->getParent()->getName()).toStdString();
+	ccHObject* point_cloud_obj = GetPlaneCloud(planeObj);
+	if (!point_cloud_obj) return nullptr;
+	
+	std::string base_name = GetParentBuilding(point_cloud_obj)->getName().toStdString();
 
 	BDBaseHObject* baseObj = GetRootBDBase(planeObj);
 	std::string output_prefix;
@@ -870,15 +894,15 @@ ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption opti
 	//////////////////////////////////////////////////////////////////////////
 	// frame optimization
 
-	std::string plane_unit_name = base_name + "-" + planeObj->getParent()->getName().toStdString();
-	stocker::FrameOptmzt frame_opt(planeObj->getParent()->getName().toStdString());
+	std::string plane_unit_name = base_name + "-" + point_cloud_obj->getName().toStdString();
+	stocker::FrameOptmzt frame_opt(plane_unit_name);
 	
 	frame_opt.SetOption(option);
 
 	vcg::Plane3d vcgPlane = GetVcgPlane(planeObj);
 
 	// prepare plane points
-	Contour3d plane_points = GetPointsFromCloud(planeObj->getParent());
+	Contour3d plane_points = GetPointsFromCloud(point_cloud_obj);
 
 	// prepare boundary lines
 	Polyline3d boundary_lines; Contour3d boundary_points; {		
@@ -924,7 +948,7 @@ ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption opti
 	//! add data to frame
 	frame_opt.PreparePlanePoints(vcgPlane, plane_points);
 	if (baseObj) {
-		frame_opt.PrepareImageList(GetRootBDBase(planeObj)->block_prj.m_builder);
+		frame_opt.PrepareImageList(baseObj->block_prj.m_builder);
 	}	
 	frame_opt.PrepareBoundaryPoints(boundary_points);
 	frame_opt.PrepareImageLines(image_lines);
@@ -955,7 +979,7 @@ ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption opti
 	vector<vector<Contour3d>> frames_to_add(1);
 	frames_to_add.back().push_back(frame_points);
 
-	ccHObject* plane_frame = AddOutlinesAsChild(frames_to_add, BDDB_PLANEFRAME_PREFIX, planeObj->getParent());
+	ccHObject* plane_frame = AddOutlinesAsChild(frames_to_add, BDDB_PLANEFRAME_PREFIX, point_cloud_obj);
 	return plane_frame;
 #endif
 }
@@ -1095,7 +1119,7 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 		ccPlane* cc_plane = ccHObjectCaster::ToPlane(plane_entity);
 		CCVector3 N; PointCoordinateType dis; cc_plane->getEquation(N, dis);
 		plane_equation[0] = N.x; plane_equation[1] = N.y; plane_equation[2] = N.z; plane_equation[3] = dis;
-		ccFacet* facet_entity = ccFacet::CreateFromContour(ccv_poly, f->label().c_str(), plane_equation);
+		ccFacet* facet_entity = ccFacet::CreateFromContour(ccv_poly, f->label().c_str(), false, plane_equation);
 		
 		ccPolyline* contour_entity = facet_entity->getContour();
 		if (contour_entity) {

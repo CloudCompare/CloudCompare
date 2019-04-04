@@ -68,7 +68,7 @@ ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, 
 ccHObject* CalcPlaneBoundary(ccHObject* planeObj);
 ccHObject * DetectLineRansac(ccHObject * entity, double distance, double minpts, double radius);
 ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha);
-void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_epsilon, MainWindow* win);
+void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_epsilon);
 ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option);
 
 //! polyfit
@@ -150,6 +150,8 @@ StBuilding * GetParentBuilding(ccHObject * obj);
 bool IsBDBaseObj(ccHObject * obj);
 
 BDBaseHObject* GetRootBDBase(ccHObject* obj);
+
+ccHObject * GetPlaneCloud(ccHObject * planeObj);
 
 bool SetGlobalShiftAndScale(ccHObject * obj);
 

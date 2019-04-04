@@ -10719,7 +10719,7 @@ void MainWindow::doActionBDDisplayPointOff()
 #include "stocker_parser.h"
 
 //////////////////////////////////////////////////////////////////////////
-
+QString s_no_project_error = "please open the main project!";
 BDBaseHObject::Container GetBDBaseProjx() {
 	MainWindow* main = MainWindow::TheInstance();
 	ccHObject* root_entity = main->db()->getRootEntity();
@@ -10890,18 +10890,33 @@ void MainWindow::doActionBDProjectSave()
 
 void MainWindow::doActionBDPlaneSegmentation()
 {
-	if (!haveSelection()) return;
-	if (!m_pbdrPSDlg) m_pbdrPSDlg = new bdrPlaneSegDlg(this);
+	if (!haveSelection()) return;	
 
 	ccHObject *entity = getSelectedEntities().front();
 	ccHObject::Container _container;
 	if (entity->isA(CC_TYPES::POINT_CLOUD))
 		_container.push_back(entity);
-	else
-		_container = GetEnabledObjFromGroup(entity, CC_TYPES::POINT_CLOUD);
+	else {
+		ccHObject::Container building_groups;
+		BDBaseHObject* baseObj = GetRootBDBase(entity);
+		if (!baseObj) {
+			dispToConsole(s_no_project_error, ERR_CONSOLE_MESSAGE);
+			return;
+		}
+		if (IsBDBaseObj(entity)) {
+			building_groups = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
+		}
+		else if (entity->isA(CC_TYPES::ST_BUILDING)){			
+			building_groups.push_back(entity);
+		}
+		for (ccHObject* bd : building_groups) {
+			ccHObject* pc = baseObj->GetOriginPointCloud(bd->getName(), true);
+			if (pc) _container.push_back(pc);
+		}
+	}
 
 	if (_container.empty()) {
-		dispToConsole("[BDRecon] Please select (group of) point cloud", ERR_CONSOLE_MESSAGE);
+		dispToConsole("[BDRecon] Please select (group of) point cloud / building", ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
@@ -10916,8 +10931,9 @@ void MainWindow::doActionBDPlaneSegmentation()
 	if (!normal_container.empty()) {
 		if (!ccEntityAction::computeNormals(normal_container, this))
 			return;
-	}	
+	}
 
+	if (!m_pbdrPSDlg) m_pbdrPSDlg = new bdrPlaneSegDlg(this);
 	if (!m_pbdrPSDlg->exec()) {
 		return;
 	}
@@ -10935,6 +10951,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 	if (m_pbdrPSDlg->PlaneSegRansacRadioButton->isChecked()) {
 		double normal_dev = cos(m_pbdrPSDlg->maxNormDevAngleSpinBox->value() * CC_DEG_TO_RAD);
 		double prob = m_pbdrPSDlg->probaDoubleSpinBox->value();
+#pragma omp parallel for
 		for (auto & cloudObj : _container) {
 			ccHObject* seged = PlaneSegmentationRansac(cloudObj,
 				support_pts,
@@ -10947,12 +10964,13 @@ void MainWindow::doActionBDPlaneSegmentation()
 				addToDB(seged); 
 				cloudObj->setEnabled(false);
 			}
-
+#pragma omp critical
 			ProgStep()
 		}
 	}
 	else if (m_pbdrPSDlg->PlaneSegRegionGrowRadioButton->isChecked()) {
 		double growing_radius = m_pbdrPSDlg->GrowingRadiusDoubleSpinBox->value();
+#pragma omp parallel for
 		for (auto & cloudObj : _container) {
 			ccHObject* seged = PlaneSegmentationRgGrow(cloudObj,
 				support_pts,
@@ -10964,7 +10982,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 				addToDB(seged); 
 				cloudObj->setEnabled(false);
 			}
-
+#pragma omp critical
 			ProgStep()
 		}
 	}
@@ -11005,68 +11023,91 @@ void MainWindow::doActionBDImageLines()
 
 void MainWindow::doActionBDPrimIntersections()
 {
-	ccHObject::Container entity_planes;
-	if (m_selectedEntities.front()->isGroup()) {
-		entity_planes = GetEnabledObjFromGroup(m_selectedEntities.front(), CC_TYPES::PLANE);
+	if (!haveSelection()) return;
+	std::vector<ccHObject::Container> building_prims;
+	
+	if (m_selectedEntities.size() == 1) {
+		ccHObject* entity = m_selectedEntities.front();
+		if (IsBDBaseObj(entity)) {
+			BDBaseHObject* baseObj = GetRootBDBase(entity);
+			ccHObject::Container buildings = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
+			for (ccHObject* bd : buildings)	{
+				StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
+				primGroup->getValidPlanes();				 
+			}
+		}
+		else if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+			ccHObject::Container entity_planes = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+			if (entity_planes.size() >= 2) {
+				building_prims.push_back(entity_planes);
+			}			
+		}
 	}
-	else if (m_selectedEntities.size() > 1) {
+	else {
+		ccHObject::Container entity_planes;
 		for (auto & entity : m_selectedEntities) {
 			if (entity->isA(CC_TYPES::PLANE)) {
 				entity_planes.push_back(entity);
 			}			
 		}
+		if (entity_planes.size() >= 2) {
+			building_prims.push_back(entity_planes);
+		}
 	}
-	if (entity_planes.size() < 2) return;	
+	if (building_prims.empty()) return;
 
 	bool ok = true;
 	double distance = QInputDialog::getDouble(this, "Input Dialog", "Please input distance threshold", 2.0, 0.0, 999999.0, 1, &ok);
 	if (!ok) return;
-	ccHObject::Container segs =	CalcPlaneIntersections(entity_planes, distance);
-	for (auto & seg : segs) {
-		SetGlobalShiftAndScale(seg);
-		addToDB(seg);
+	ProgStartNorm("Plane Intersection", building_prims.size())
+	for (size_t i = 0; i < building_prims.size(); i++) {
+		ccHObject::Container segs = CalcPlaneIntersections(building_prims[i], distance);
+		for (auto & seg : segs) {
+			SetGlobalShiftAndScale(seg);
+			addToDB(seg);
+		}
+		ProgStep()
 	}
+	ProgEnd
 	refreshAll();
 	updateUI();
 }
 
 void MainWindow::doActionBDPrimAssignSharpLines()
 {
+	if (!haveSelection()) return;
 	bool ok = true;
 	double distance_threshold = QInputDialog::getDouble(this, "Input Dialog", "Please input distance threshold", 0.2, 0.0, 999999.0, 1, &ok);
 	if (!ok) return;
 
 	stocker::Polyline3d all_sharp_lines;
-	ccHObject::Container primitive_groups;
+	ccHObject::Container primitive_groups;	
 	
-	if (haveSelection()) {
-		ccHObject* select = m_selectedEntities.front();
-		ccHObject::Container buildings;	
-		BDBaseHObject* baseObj = nullptr;
-		if (IsBDBaseObj(select)) {
-			baseObj = static_cast<BDBaseHObject*>(select);
-			buildings = GetEnabledObjFromGroup(select, CC_TYPES::HIERARCHY_OBJECT, true, false);
+	ccHObject* select = m_selectedEntities.front();
+	ccHObject::Container buildings;
+	if (IsBDBaseObj(select)) {
+		buildings = GetEnabledObjFromGroup(select, CC_TYPES::ST_BUILDING, true, false);
+	}
+	else if (select->isA(CC_TYPES::ST_BUILDING)) {			
+		buildings.push_back(select);
+	}
+	if (!buildings.empty())	{
+		BDBaseHObject* baseObj = GetRootBDBase(select);
+		std::string error_info;
+		if (!stocker::LoadLine3D(baseObj->block_prj.m_options.prj_file.image_border, all_sharp_lines, error_info)) {
+			std::cout << error_info << std::endl;
 		}
-		else if (select->getParent() && IsBDBaseObj(select->getParent())) {
-			baseObj = static_cast<BDBaseHObject*>(select->getParent());
-			buildings.push_back(select);
-		}
-		if (!buildings.empty())	{
-			std::string error_info;
-			if (!stocker::LoadLine3D(baseObj->block_prj.m_options.prj_file.image_border, all_sharp_lines, error_info)) {
-				std::cout << error_info << std::endl;
-			}
-			//! to local
-			for (auto & seg : all_sharp_lines) {			
-				seg.P0() = baseObj->ToLocal(seg.P0());
-				seg.P1() = baseObj->ToLocal(seg.P1());
-			}			
-			for (auto & bd : buildings)	{
-				ccHObject* planegroup_get = baseObj->GetPrimitiveGroup(GetBaseName(bd->getName()), false);
-				if (planegroup_get)	primitive_groups.push_back(planegroup_get);
-			}
+		//! to local
+		for (auto & seg : all_sharp_lines) {			
+			seg.P0() = baseObj->ToLocal(seg.P0());
+			seg.P1() = baseObj->ToLocal(seg.P1());
+		}			
+		for (auto & bd : buildings)	{
+			ccHObject* planegroup_get = baseObj->GetPrimitiveGroup(GetBaseName(bd->getName()), false);
+			if (planegroup_get)	primitive_groups.push_back(planegroup_get);
 		}
 	}
+	
 	if (!all_sharp_lines.empty() && primitive_groups.empty()) {
 		return;
 	}
@@ -11084,6 +11125,7 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 		if (primitive_groups.empty()) return;
 	}
 	
+	ProgStartNorm("Assign Image Lines", primitive_groups.size());
 	for (auto & plane_group : primitive_groups)	{
 		//! get sharps in bbox
 		stocker::Polyline3d sharps_in_bbox;
@@ -11098,8 +11140,8 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 		//! add sharps in bbox as a child
 		QString sharps_name = GetBaseName(plane_group->getName()) + BDDB_IMAGELINE_SUFFIX;
 		ccHObject* sharps_in_bbox_obj = AddSegmentsAsChildVertices(plane_group->getParent(), sharps_in_bbox, sharps_name, ccColor::darkGrey);
-		if (sharps_in_bbox_obj) addToDB(sharps_in_bbox_obj);
-
+		if (sharps_in_bbox_obj) { SetGlobalShiftAndScale(sharps_in_bbox_obj); addToDB(sharps_in_bbox_obj); }
+		
 		//! assign to each plane
 		ccHObject::Container plane_container = GetEnabledObjFromGroup(plane_group, CC_TYPES::PLANE);
 		stocker::Polyline3d unassigned_sharps; set<size_t>set_index;
@@ -11120,16 +11162,9 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 			ccHObject* cur_sharps_obj = AddSegmentsAsChildVertices(planeObj->getParent(), cur_plane_sharps, BDDB_IMAGELINE_PREFIX, ccColor::darkBlue);
 			if (cur_sharps_obj) { SetGlobalShiftAndScale(cur_sharps_obj); addToDB(cur_sharps_obj); }
 		}
-// 		for (size_t i = 0; i < sharps_in_bbox.size(); i++) {
-// 			if (set_index.find(i) == set_index.end()) {
-// 				unassigned_sharps.push_back(sharps_in_bbox[i]);
-// 			}
-// 		}
-// 		ccHObject* group = new ccHObject(plane_group->getName() + "-unassigned-sharp");
-// 		AddSegmentsAsChildVertices(group, unassigned_sharps, BDDB_IMAGELINE_PREFIX, ccColor::black);
-// 		addToDB(group);
+		ProgStep()
 	}
-
+	ProgEnd
 	refreshAll();
 	UpdateUI();
 }
@@ -11212,38 +11247,73 @@ void MainWindow::doActionBDPrimBoundary()
 {
 	if (!haveSelection()) return;
 
-	ccHObject *entity = getSelectedEntities().front();
-	if (entity->isA(CC_TYPES::POLY_LINE) || entity->isA(CC_TYPES::POINT_CLOUD)) {
-		double distance(0.5), minpts(10), radius(3);
+	QStringList methods;
+	methods.append("image based");
+	methods.append("ransac based");
+	bool ok;
+	QString used_method = QInputDialog::getItem(this, "Boundary extraction", "method", methods, 0, false, &ok);
+	if (!ok) return;
+
+	double distance(0.5), minpts(10), radius(3);
+	if (used_method == "ransac based") {
 		ccAskThreeDoubleValuesDlg paraDlg("distance", "minpts", "radius", 0, 1.0e12, distance, minpts, radius, 6, "ransac", this);
 		if (!paraDlg.exec()) {
 			return;
 		}
-		ccHObject* bdry = DetectLineRansac(entity, distance, minpts, radius);
-		if (bdry) {
-			SetGlobalShiftAndScale(bdry);
-			addToDB(bdry);
-			refreshAll();
-			updateUI();
-		}
-		return;
 	}
-
-	ccHObject::Container plane_container;
-	if (entity->isA(CC_TYPES::PLANE)) 
-		plane_container.push_back(entity);
-	else
-		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
-
-	if (plane_container.empty()) {
-		dispToConsole("[BDRecon] Please select polyline, point cloud or (group of) planes", ERR_CONSOLE_MESSAGE);
-		return;
-	}
+	ccHObject *entity = getSelectedEntities().front();
 	
-	for (auto & planeObj : plane_container) {
-		ccHObject* boundary = CalcPlaneBoundary(planeObj/*, s_last_bdry_p2l, s_last_bdry_minpts*/);
-		if (boundary) { SetGlobalShiftAndScale(boundary); addToDB(boundary); }
+	ccHObject::Container _container;// plane or point cloud
+	if (entity->isA(CC_TYPES::POINT_CLOUD)) {
+		_container.push_back(entity);
 	}
+	else if (entity->isA(CC_TYPES::PLANE)) {
+		_container.push_back(entity);
+	}
+	else if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+		StPrimGroup* plane_group = ccHObjectCaster::ToStPrimGroup(entity);
+		if (plane_group) {
+			_container = plane_group->getValidPlanes();
+		}		
+	}
+	else {
+		BDBaseHObject* baseObj = GetRootBDBase(entity);
+		if (!baseObj) return;
+		ccHObject::Container building_group;
+		if (entity->isA(CC_TYPES::ST_BUILDING)) {
+			building_group.push_back(entity);
+		}
+		else if (IsBDBaseObj(entity)) {
+			building_group = GetEnabledObjFromGroup(entity, CC_TYPES::ST_BUILDING, true, false);
+		}
+		for (ccHObject* bd : building_group) {
+			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
+			ccHObject::Container cur_container = primGroup->getValidPlanes();
+			_container.insert(_container.end(), cur_container.begin(), cur_container.end());
+		}
+	}
+
+	if (_container.empty()) {
+		dispToConsole("[BDRecon] Please select point cloud / (group of) planes / buildings", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	ProgStartNorm("Boundary Extraction", _container.size());
+	for (auto & planeObj : _container) {
+		ccHObject* boundary = nullptr;		
+		try {
+			if (used_method == "ransac based")
+				boundary = DetectLineRansac(planeObj, distance, minpts, radius);
+			else
+				boundary = CalcPlaneBoundary(planeObj);
+		}
+		catch (std::runtime_error& e) {
+			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+			return;
+		}
+		if (boundary) { SetGlobalShiftAndScale(boundary); addToDB(boundary); }
+		ProgStep()
+	}
+	ProgEnd
 	refreshAll();
 	UpdateUI();
 }
@@ -11256,23 +11326,52 @@ void MainWindow::doActionBDPrimOutline()
 
 	if (!haveSelection()) return;
 	ccHObject *entity = getSelectedEntities().front();
-	ccHObject::Container plane_container;
-	if (entity->isA(CC_TYPES::PLANE))
-		plane_container.push_back(entity);
-	else
-		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+	ccHObject::Container _container;// plane or point cloud
+	if (entity->isA(CC_TYPES::POINT_CLOUD)) {
+		_container.push_back(entity);
+	}
+	else if (entity->isA(CC_TYPES::PLANE)) {
+		_container.push_back(entity);
+	}
+	else if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+		StPrimGroup* plane_group = ccHObjectCaster::ToStPrimGroup(entity);
+		if (plane_group) {
+			_container = plane_group->getValidPlanes();
+		}
+	}
+	else {
+		BDBaseHObject* baseObj = GetRootBDBase(entity);
+		if (!baseObj) return;
+		ccHObject::Container building_group;
+		if (entity->isA(CC_TYPES::ST_BUILDING)) {
+			building_group.push_back(entity);
+		}
+		else if (IsBDBaseObj(entity)) {
+			building_group = GetEnabledObjFromGroup(entity, CC_TYPES::ST_BUILDING, true, false);
+		}
+		for (ccHObject* bd : building_group) {
+			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
+			ccHObject::Container cur_container = primGroup->getValidPlanes();
+			_container.insert(_container.end(), cur_container.begin(), cur_container.end());
+		}
+	}
 
-	if (plane_container.empty()) {
-		dispToConsole("[BDRecon] Please select (group of) planes", ERR_CONSOLE_MESSAGE);
+	if (_container.empty()) {
+		dispToConsole("[BDRecon] Please select point cloud / (group of) planes / buildings", ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
-	ProgStartNorm("Outline Calculation", plane_container.size())
+	ProgStartNorm("Outline Calculation", _container.size())
 	
-	for (auto & planeObj : plane_container) {
-		ccHObject* outline = CalcPlaneOutlines(planeObj, alpha);
-		if (outline) { SetGlobalShiftAndScale(outline); addToDB(outline); }
-
+	for (auto & planeObj : _container) {
+		try	{
+			ccHObject* outline = CalcPlaneOutlines(planeObj, alpha);
+			if (outline) { SetGlobalShiftAndScale(outline); addToDB(outline); }
+		}
+		catch (const std::runtime_error& e)	{
+			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+			return;
+		}
 		ProgStep()
 	}
 	ProgEnd
@@ -11300,22 +11399,48 @@ void MainWindow::doActionBDPrimPlaneFrame()
 
 	ccHObject *entity = getSelectedEntities().front();
 	ccHObject::Container plane_container;
-	if (entity->isA(CC_TYPES::PLANE))
+	if (entity->isA(CC_TYPES::PLANE)) {
 		plane_container.push_back(entity);
-	else
-		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+	}
+	else if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+		StPrimGroup* plane_group = ccHObjectCaster::ToStPrimGroup(entity);
+		if (plane_group) {
+			plane_container = plane_group->getValidPlanes();
+		}
+	}
+	else {
+		BDBaseHObject* baseObj = GetRootBDBase(entity);
+		if (!baseObj) return;
+		ccHObject::Container building_group;
+		if (entity->isA(CC_TYPES::ST_BUILDING)) {
+			building_group.push_back(entity);
+		}
+		else if (IsBDBaseObj(entity)) {
+			building_group = GetEnabledObjFromGroup(entity, CC_TYPES::ST_BUILDING, true, false);
+		}
+		for (ccHObject* bd : building_group) {
+			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
+			ccHObject::Container cur_container = primGroup->getValidPlanes();
+			plane_container.insert(plane_container.end(), cur_container.begin(), cur_container.end());
+		}
+	}
 
 	if (plane_container.empty()) {
-		dispToConsole("[BDRecon] Please select (group of) planes", ERR_CONSOLE_MESSAGE);
+		dispToConsole("[BDRecon] Please select  (group of) planes / buildings", ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
 	ProgStartNorm("Frame Optimization", plane_container.size())
 	
 	for (auto & planeObj : plane_container) {
-		ccHObject* frame = PlaneFrameOptimization(planeObj, option);
-		if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame); }
-
+		try	{
+			ccHObject* frame = PlaneFrameOptimization(planeObj, option);
+			if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame); }
+		}
+		catch (const std::runtime_error& e)	{
+			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+			return;
+		}
 		ProgStep()
 	}
 	ProgEnd
@@ -11326,61 +11451,43 @@ void MainWindow::doActionBDPrimPlaneFrame()
 
 void MainWindow::doActionBDPrimMergePlane()
 {
+	if (!haveSelection()) return;
+	
 	if (m_selectedEntities.size() < 2) {
 		dispToConsole("[BDRecon] Merge Plane - please select at least two planes", ERR_CONSOLE_MESSAGE);
 		return;
 	}
 	ccPointCloud* point_cloud = new ccPointCloud("Plane");
 	ccColor::Rgb col = ccColor::Generator::Random();
-
-	bool same_parent = true;
-	int valid_ent(0);
+	
+	ccHObject* first_cloud = GetPlaneCloud(m_selectedEntities.front());
+	if (!first_cloud) return;
+	ccHObject* prim_group = first_cloud->getParent();
+	if (!prim_group) return;
 	for (auto & ent_pc : m_selectedEntities) {
-		if (!ent_pc->isA(CC_TYPES::PLANE)) continue;
+		ccHObject* plane_cloud = GetPlaneCloud(ent_pc);
+		if (!plane_cloud) return;		
 		
-		if (ent_pc->getParent()->getParent() != m_selectedEntities.front()->getParent()->getParent())	{
-			same_parent = false;
-		}
-		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent_pc->getParent());
-		if (!pc) {
-			continue;
-		}
+		if (plane_cloud->getParent() != prim_group) return;
+		
+		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(plane_cloud);
+		if (!pc) return;
+
 		*point_cloud += pc;
 		if (pc->hasColors()) {
 			col = pc->getPointColor(0);
 		}
 		pc->setName(pc->getName() + "-del");
-		pc->setEnabled(false);
-		valid_ent++;
-	}
-	if (valid_ent < 2) {
-		dispToConsole("[BDRecon] Merge Plane - please select at least two planes", ERR_CONSOLE_MESSAGE);
-		return;
+		pc->setEnabled(false);		
 	}
 	point_cloud->setRGBColor(col);
 	point_cloud->showColors(true);
 	point_cloud->setDisplay(m_selectedEntities[0]->getDisplay());
 	FitPlaneAndAddChild(point_cloud);
-	if (same_parent) {
-		ccHObject* parent = m_selectedEntities[0]->getParent()->getParent();
-		parent->addChild(point_cloud);
-		int biggest = GetMaxNumberExcludeChildPrefix(parent, BDDB_PLANESEG_PREFIX);
-// 		set<int> plane_numbers;
-// 		ccHObject::Container plane_children;
-// 		parent->filterChildren(plane_children, true, CC_TYPES::PLANE, true);
-// 		for (auto & ent_pl : plane_children) {
-// 			QString name = ent_pl->getParent()->getName();
-// 			if (name.startsWith(BDDB_PLANESEG_PREFIX) && name.length() > QString(BDDB_PLANESEG_PREFIX).length()) {
-// 				QString number = name.mid(QString(BDDB_PLANESEG_PREFIX).length(), name.length());
-// 				plane_numbers.insert(number.toInt());
-// 			}
-// 		}
-// 		if (!plane_numbers.empty())	
-		{
-//			int biggest = *plane_numbers.rbegin();
-			point_cloud->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
-		}
-	}
+	
+	prim_group->addChild(point_cloud);
+	int biggest = GetMaxNumberExcludeChildPrefix(prim_group, BDDB_PLANESEG_PREFIX);
+	point_cloud->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
 	
 	addToDB(point_cloud);
 	refreshAll();
@@ -11389,55 +11496,91 @@ void MainWindow::doActionBDPrimMergePlane()
 
 void MainWindow::doActionBDPrimCreateGround()
 {
+	if (!haveSelection()) return;
 	bool ok = true;
 	double sample = QInputDialog::getDouble(this, "Input Dialog", "Please input sampling distance", 1.5, 0.0, 999999.0, 1, &ok);
 	if (!ok) return;
-	ccHObject* entity = getSelectedEntities().front(); if (!entity) return;
-	ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
-	stocker::Contour3d planes_points;
-	for (auto & plane_entity : plane_container) {
-		ccHObject* Plane_Cloud = plane_entity->getParent();
-		stocker::Contour3d cur_plane_points = GetPointsFromCloud(Plane_Cloud);
-		planes_points.insert(planes_points.end(), cur_plane_points.begin(), cur_plane_points.end());
-	}
-	stocker::Contour3d ground_contour = stocker::CalcBuildingGround(planes_points, 0.5, 3, 3);
-	double ground_height = ground_contour.front().Z();
-	ccBBox box = entity->getBB_recursive();
-
-//	double ground_height = box.minCorner().z;
-	stocker::Vec3d box_min = stocker::parse_xyz(box.minCorner());
-	stocker::Vec3d box_max = stocker::parse_xyz(box.maxCorner());
-	stocker::BBox2d box_2d = stocker::BBox2d(stocker::ToVec2d(box_min), stocker::ToVec2d(box_max));
-	stocker::Contour2d pts_2d = stocker::PointSampleInBox2d(box_2d, sample);
+	ccHObject* entity = getSelectedEntities().front(); assert(entity);
 	
-	ccPointCloud* plane_cloud = new ccPointCloud("Ground");
-	ccColor::Rgb col = ccColor::Generator::Random();
-	plane_cloud->setRGBColor(col);
-	plane_cloud->showColors(true);
+	BDBaseHObject* baseObj = GetRootBDBase(entity);
 
-	entity->addChild(plane_cloud);
-	for (auto & pt : pts_2d) {
-		plane_cloud->addPoint(CCVector3(pt.X(), pt.Y(), ground_height));
+	std::vector<StPrimGroup*> prim_groups;
+	if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+		StPrimGroup* plane_group = ccHObjectCaster::ToStPrimGroup(entity);
+		if (plane_group) {
+			prim_groups.push_back(prim_groups);
+		}
 	}
-	ccHObject* plane = nullptr;
-	double rms = 0;
-	ccPlane* pPlane = ccPlane::Fit(plane_cloud, &rms);
-	if (pPlane) {
-		plane = static_cast<ccHObject*>(pPlane);
-		pPlane->setColor(col);
-		pPlane->enableStippling(true);
+	else {		
+		if (!baseObj) return;
+		ccHObject::Container building_group;
+		if (entity->isA(CC_TYPES::ST_BUILDING)) {
+			building_group.push_back(entity);
+		}
+		else if (IsBDBaseObj(entity)) {
+			building_group = GetEnabledObjFromGroup(entity, CC_TYPES::ST_BUILDING, true, false);
+		}
+		for (ccHObject* bd : building_group) {
+			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
+			prim_groups.push_back(primGroup);
+		}
 	}
-	if (plane) {
-		plane->setName("Plane");
-		plane->applyGLTransformation_recursive();
-		plane->showColors(true);
-		plane->setVisible(true);
+	ProgStartNorm("Create Ground Plane", prim_groups.size());
+	for (StPrimGroup* primGroup : prim_groups) {
+		double ground_height;
+		stocker::Polyline2d ground_convex;
+		if (baseObj) {
+			stocker::BuildUnit bd_unit = baseObj->GetBuildingUnit(GetBaseName(primGroup->getName()).toStdString());
+			ground_height = bd_unit.ground_height;
+			ground_convex = stocker::MakeLoopPolylinefromContour2d(bd_unit.convex_hull_xy);
+		}
+		else {
+			stocker::Contour3d planes_points = GetPointsFromCloud(primGroup);
+			stocker::Contour3d ground_contour_3d = stocker::CalcBuildingGround(planes_points, 0.5, 3, 3);			
+			ground_height = ground_contour_3d.front().Z();
+			ground_convex = stocker::MakeLoopPolylinefromContour2d(stocker::ToContour2d(ground_contour_3d));
+		}
+		ccBBox box = entity->getBB_recursive();
 
-		plane_cloud->addChild(plane);
-		plane->setDisplay(plane_cloud->getDisplay());
-		plane->prepareDisplayForRefresh_recursive();
-	}
-	addToDB(plane_cloud);
+		stocker::Vec3d box_min = stocker::parse_xyz(box.minCorner());
+		stocker::Vec3d box_max = stocker::parse_xyz(box.maxCorner());
+		stocker::BBox2d box_2d = stocker::BBox2d(stocker::ToVec2d(box_min), stocker::ToVec2d(box_max));
+		stocker::Contour2d pts_2d = stocker::PointSampleInBox2d(box_2d, sample);
+
+		ccPointCloud* plane_cloud = new ccPointCloud("Ground");
+		ccColor::Rgb col = ccColor::Generator::Random();
+		plane_cloud->setRGBColor(col);
+		plane_cloud->showColors(true);
+
+		entity->addChild(plane_cloud);
+		for (auto & pt : pts_2d) {
+			if (vcg::PointInsidePolygon(pt, ground_convex))	{
+				plane_cloud->addPoint(CCVector3(pt.X(), pt.Y(), ground_height));
+			}
+		}
+		ccHObject* plane = nullptr;
+		double rms = 0;
+		ccPlane* pPlane = ccPlane::Fit(plane_cloud, &rms);
+		if (pPlane) {
+			plane = static_cast<ccHObject*>(pPlane);
+			pPlane->setColor(col);
+			pPlane->enableStippling(true);
+		}
+		if (plane) {
+			plane->setName("Plane");
+			plane->applyGLTransformation_recursive();
+			plane->showColors(true);
+			plane->setVisible(true);
+
+			plane_cloud->addChild(plane);
+			plane->setDisplay(plane_cloud->getDisplay());
+			plane->prepareDisplayForRefresh_recursive();
+		}
+		addToDB(plane_cloud);
+		ProgStep()
+	}	
+	ProgEnd
+
 	refreshAll();
 	UpdateUI();
 }
@@ -11455,21 +11598,47 @@ void MainWindow::doActionBDPrimShrinkPlane()
 
 	ccHObject *entity = getSelectedEntities().front();
 	ccHObject::Container plane_container;
-	if (entity->isA(CC_TYPES::PLANE))
+	if (entity->isA(CC_TYPES::PLANE)) {
 		plane_container.push_back(entity);
-	else
-		plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
+	}
+	else if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+		StPrimGroup* plane_group = ccHObjectCaster::ToStPrimGroup(entity);
+		if (plane_group) {
+			plane_container = plane_group->getValidPlanes();
+		}
+	}
+	else {
+		BDBaseHObject* baseObj = GetRootBDBase(entity);
+		if (!baseObj) return;
+		ccHObject::Container building_group;
+		if (entity->isA(CC_TYPES::ST_BUILDING)) {
+			building_group.push_back(entity);
+		}
+		else if (IsBDBaseObj(entity)) {
+			building_group = GetEnabledObjFromGroup(entity, CC_TYPES::ST_BUILDING, true, false);
+		}
+		for (ccHObject* bd : building_group) {
+			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
+			ccHObject::Container cur_container = primGroup->getValidPlanes();
+			plane_container.insert(plane_container.end(), cur_container.begin(), cur_container.end());
+		}
+	}
 
 	if (plane_container.empty()) {
-		dispToConsole("[BDRecon] Please select (group of) planes", ERR_CONSOLE_MESSAGE);
+		dispToConsole("[BDRecon] Please select  (group of) planes / buildings", ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
 	ProgStartNorm("Shrink Planes", plane_container.size())
 	
 	for (auto & planeObj : plane_container) {
-		ShrinkPlaneToOutline(planeObj, s_last_shrink_alpha, s_last_shrink_distance, this);
-
+		try {
+			ShrinkPlaneToOutline(planeObj, s_last_shrink_alpha, s_last_shrink_distance);
+		}
+		catch (std::runtime_error& e) {
+			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+			return;			
+		}
 		ProgStep()
 	}
 	ProgEnd
@@ -11691,15 +11860,10 @@ void MainWindow::doActionBDPolyFit()
 	s_last_polyfit_complexity = paraDlg.doubleSpinBox3->value();
 
 	ccHObject* entity = getSelectedEntities().front(); if (!entity) return;
-
+	StPrimGroup* primgroupObj = ccHObjectCaster::ToStPrimGroup(entity);
+	if (!primgroupObj) { return; }
 	stocker::PolyFitRecon polyfit_recon;
-	ccHObject::Container plane_container = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
-
-	for (auto & planeObj : plane_container) {
-
-	}
-
-
+	ccHObject::Container plane_container = primgroupObj->getValidPlanes();
 
 	stocker::PrimitiveProj prim_proj;
 	{

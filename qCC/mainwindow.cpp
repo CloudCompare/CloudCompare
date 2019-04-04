@@ -10887,7 +10887,7 @@ void MainWindow::doActionBDProjectSave()
 		return;
 	}	
 }
-#include "omp.h"
+
 void MainWindow::doActionBDPlaneSegmentation()
 {
 	if (!haveSelection()) return;	

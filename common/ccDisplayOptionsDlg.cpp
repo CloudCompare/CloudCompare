@@ -142,7 +142,7 @@ void ccDisplayOptionsDlg::refresh()
 
 	const ccColor::Rgbub& tdc = parameters.textDefaultCol;
 	textDefaultCol.setRgb(tdc.r, tdc.g, tdc.b);
-	ccQtHelpers::SetButtonColor(m_ui->pointsColorButton, textDefaultCol);
+	ccQtHelpers::SetButtonColor(m_ui->textColorButton, textDefaultCol);
 
 	m_ui->doubleSidedCheckBox->setChecked(parameters.lightDoubleSided);
 	m_ui->enableGradientCheckBox->setChecked(parameters.drawBackgroundGradient);
@@ -285,7 +285,7 @@ void ccDisplayOptionsDlg::changeTextColor()
 		return;
 
 	textDefaultCol = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->pointsColorButton, textDefaultCol);
+	ccQtHelpers::SetButtonColor(m_ui->textColorButton, textDefaultCol);
 	parameters.textDefaultCol = ccColor::FromQColor(textDefaultCol);
 
 	update();

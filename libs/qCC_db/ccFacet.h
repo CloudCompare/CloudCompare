@@ -118,8 +118,8 @@ public:
 	//! Clones this facet
 	ccFacet* clone() const;
 
-	static ccFacet* CreateFromContour(std::vector<CCVector3> contour_points, QString name = QString(), const PointCoordinateType* planeEquation = 0);
-	bool FormByContour(std::vector<CCVector3> contour_points, const PointCoordinateType* planeEquation = 0);
+	static ccFacet* CreateFromContour(std::vector<CCVector3> contour_points, QString name = QString(), bool polygon = false, const PointCoordinateType* planeEquation = 0);
+	bool FormByContour(std::vector<CCVector3> contour_points, bool polygon = false, const PointCoordinateType* planeEquation = 0);
 
 	inline double getFitting() const { return m_fitting; }
 	inline void setFitting(double f) { m_fitting = f; }

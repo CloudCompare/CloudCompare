@@ -63,6 +63,9 @@ public:
 	std::vector<CCVector3> getBottom() { return m_bottom; };
 	std::vector<CCVector2> getProfile();
 
+	ccFacet* getTopFacet();
+	ccFacet* getBottomFacet();
+
 	void TopHeightAdd(double val);
 	void BottomHeightAdd(double val);
 

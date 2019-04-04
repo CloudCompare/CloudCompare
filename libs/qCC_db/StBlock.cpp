@@ -43,12 +43,11 @@ StBlock::StBlock(const std::vector<CCVector2>& profile,
 {
 	assert(profile.size() > 2);
 
-	std::vector<CCVector3> top, bottom;
 	for (auto & pt : profile) {
-		top.push_back(CCVector3(pt.x, pt.y, top_height));
-		bottom.push_back(CCVector3(pt.x, pt.y, bottom_height));
+		m_top.push_back(CCVector3(pt.x, pt.y, top_height));
+		m_bottom.push_back(CCVector3(pt.x, pt.y, bottom_height));
 	}
-	StBlock(top, bottom, transMat, name);
+	StBlock(m_top, m_bottom, transMat, name);
 }
 
 StBlock::StBlock(const std::vector<CCVector3>& top, 
@@ -84,6 +83,26 @@ std::vector<CCVector2> StBlock::getProfile()
 	return profile;
 }
 
+ccFacet * StBlock::getTopFacet()
+{
+	for (size_t i = 0; i < getChildrenNumber(); i++) {
+		if (getChild(i)->getName()=="top" && getChild(i)->isA(CC_TYPES::FACET)) {
+			return static_cast<ccFacet*>(getChild(i));
+		}
+	}
+	return nullptr;
+}
+
+ccFacet * StBlock::getBottomFacet()
+{
+	for (size_t i = 0; i < getChildrenNumber(); i++) {
+		if (getChild(i)->getName() == "bottom" && getChild(i)->isA(CC_TYPES::FACET)) {
+			return static_cast<ccFacet*>(getChild(i));
+		}
+	}
+	return nullptr;
+}
+
 void StBlock::TopHeightAdd(double val)
 {
 	for (size_t i = 0; i < m_top.size(); i++) {
@@ -97,6 +116,16 @@ void StBlock::TopHeightAdd(double val)
 		P.z += val;
 	}
 	verts->invalidateBoundingBox();
+
+	ccFacet* top = getTopFacet();
+	if (!top) return;
+	ccPointCloud* cloud = top->getContourVertices();
+	if (!cloud) return;
+	for (size_t i = 0; i < cloud->size(); i++) {
+		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
+		P.z += val;
+	}
+	cloud->invalidateBoundingBox();
 }
 
 void StBlock::BottomHeightAdd(double val)
@@ -112,13 +141,28 @@ void StBlock::BottomHeightAdd(double val)
 		P.z += val;
 	}
 	verts->invalidateBoundingBox();
+
+	ccFacet* bottom = getBottomFacet();
+	if (!bottom) return;
+	ccPointCloud* cloud = bottom->getContourVertices();
+	if (!cloud) return;
+	for (size_t i = 0; i < cloud->size(); i++) {
+		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
+		P.z += val;
+	}
+	cloud->invalidateBoundingBox();
 }
 
 bool StBlock::buildUp()
 {
 	unsigned count = static_cast<unsigned>(m_top.size());
-	if (count < 3)
-		return false;
+	assert(count >= 3);
+
+	ccFacet* top_facet = ccFacet::CreateFromContour(m_top, "top", true);
+	ccFacet* bottom_facet = ccFacet::CreateFromContour(m_bottom, "bottom", true);;
+
+	addChild(top_facet);
+	addChild(bottom_facet);
 
 	CCLib::Delaunay2dMesh mesh;
 
@@ -216,7 +260,6 @@ bool StBlock::buildUp()
 
 	return true;
 }
-
 
 bool StBlock::toFile_MeOnly(QFile& out) const
 {

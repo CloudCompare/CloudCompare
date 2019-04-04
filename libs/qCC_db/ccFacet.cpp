@@ -594,7 +594,7 @@ void ccFacet::invertNormal()
 	}
 }
 
-ccFacet* ccFacet::CreateFromContour(std::vector<CCVector3> contour_points, QString name /*= QString()*/, const PointCoordinateType* planeEquation /*= 0*/)
+ccFacet* ccFacet::CreateFromContour(std::vector<CCVector3> contour_points, QString name /*= QString()*/, bool polygon, const PointCoordinateType* planeEquation /*= 0*/)
 {
 	QString name_(name);
 	if (name_.isEmpty()) {
@@ -605,7 +605,16 @@ ccFacet* ccFacet::CreateFromContour(std::vector<CCVector3> contour_points, QStri
 	return facet;
 }
 
-bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, const PointCoordinateType* planeEquation/*=0*/)
+inline double angle_facet_(CCVector3 p1, CCVector3 p2) {
+	PointCoordinateType w = p1.norm()*p2.norm();
+	if (w == 0) return -1;
+	PointCoordinateType t = p1.dot(p2) / w;
+	if (t > 1) t = 1;
+	else if (t < -1) t = -1;
+	return (PointCoordinateType)acos(t);
+}
+
+bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon, const PointCoordinateType* planeEquation/*=0*/)
 {
 	assert(!contour_points.empty());
 	unsigned hullPtsCount = contour_points.size();
@@ -636,13 +645,22 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, const PointCo
 	CCLib::Neighbourhood Yk(m_contourVertices);
 
 	//get corresponding plane
-	if (!planeEquation)
-	{
+	if (!planeEquation) {
 		planeEquation = Yk.getLSPlane();
 		if (!planeEquation)
 		{
 			ccLog::Warning("[ccFacet::createInternalRepresentation] Failed to compute the LS plane passing through the input points!");
 			return false;
+		}
+		if (polygon) {
+			CCVector3 normal = (contour_points[1] - contour_points[0]).cross(contour_points[2] - contour_points[1]);
+			CCVector3 plane_normal = CCVector3(planeEquation[0], planeEquation[1], planeEquation[2]);
+			if (angle_facet_(normal, plane_normal) > M_PI_2) {
+				for (size_t i = 0; i < 4; i++) {
+					PointCoordinateType& t = const_cast<PointCoordinateType&>(planeEquation[i]);
+					t = -planeEquation[i];
+				}
+			}
 		}
 	}
 	memcpy(m_planeEquation, planeEquation, sizeof(PointCoordinateType) * 4);

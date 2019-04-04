@@ -287,6 +287,45 @@ ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM typ
 	return ccHObject::Container();
 }
 
+ccHObject::Container GetPlaneEntitiesBySelected(ccHObject* entity)
+{	
+	ccHObject::Container plane_container;
+	if (!entity) { return plane_container; }
+	
+	if (entity->isA(CC_TYPES::POINT_CLOUD)) {
+		if (entity->getChildrenNumber() >= 1) {
+			if (entity->getChild(0)->isA(CC_TYPES::PLANE)) {
+				plane_container.push_back(entity->getChild(0));
+			}
+		}
+	}	
+	else if (entity->isA(CC_TYPES::PLANE)) {
+		plane_container.push_back(entity);
+	}
+	else if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+		StPrimGroup* plane_group = ccHObjectCaster::ToStPrimGroup(entity);
+		if (plane_group) {
+			plane_container = plane_group->getValidPlanes();
+		}
+	}
+	else {
+		BDBaseHObject* baseObj = GetRootBDBase(entity);
+		if (!baseObj) return;
+		ccHObject::Container building_group;
+		if (entity->isA(CC_TYPES::ST_BUILDING)) {
+			building_group.push_back(entity);
+		}
+		else if (IsBDBaseObj(entity)) {
+			building_group = GetEnabledObjFromGroup(entity, CC_TYPES::ST_BUILDING, true, false);
+		}
+		for (ccHObject* bd : building_group) {
+			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
+			ccHObject::Container cur_container = primGroup->getValidPlanes();
+			plane_container.insert(plane_container.end(), cur_container.begin(), cur_container.end());
+		}
+	}
+}
+
 ccHObject* GetPlaneEntityFromPrimGroup(ccHObject* prim, QString name)
 {
 	ccHObject::Container pc_find, pl_find;

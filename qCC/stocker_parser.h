@@ -57,6 +57,7 @@ stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject * entity, stocker::
 stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
 vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject * entity);
 ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true, bool recursive = true);
+ccHObject::Container GetPlaneEntitiesBySelected(ccHObject * entity);
 //! return -1 if no child exists
 int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix);
 

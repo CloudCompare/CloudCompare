@@ -56,13 +56,14 @@ public:
 	
 	//! Removes all registered entities (clouds & polylines)
 	void removeAllEntities();
-
-	void SetDestAndGround(ccHObject* dest, double ground);
-	
+		
 	//inherited from ccOverlayDialog
 	bool linkWith(ccGLWindow* win) override;
 	bool start() override;
 	void stop(bool accepted) override;
+
+	void setExtractMode(bool extract_section = true);
+	void SetDestAndGround(ccHObject* dest, double ground);
 
 protected:
 

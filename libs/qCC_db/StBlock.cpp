@@ -165,8 +165,10 @@ bool StBlock::buildUp()
 
 	// top & bottom faces normals
 	{
-		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, -1.0).u));
-		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, -1.0).u));
+		CCVector3 normal = (m_top[1] - m_top[0]).cross(m_top[2] - m_top[1]);
+		m_triNormals->addElement(ccNormalVectors::GetNormIndex((normal).u/*CCVector3(0.0, 0.0, 1.0).u*/));
+		normal = (m_bottom[1] - m_bottom[0]).cross(m_bottom[2] - m_bottom[1]);
+		m_triNormals->addElement(ccNormalVectors::GetNormIndex((-normal).u/*CCVector3(0.0, 0.0, -1.0).u*/));
 	} 	
 
 	//add profile vertices & normals
@@ -189,9 +191,9 @@ bool StBlock::buildUp()
 			const int* _triIndexes = triIndexes;
 			for (unsigned i = 0; i < numberOfTriangles; ++i, _triIndexes += 3)
 			{
-				addTriangle(_triIndexes[0] * 2, _triIndexes[2] * 2, _triIndexes[1] * 2);
+				addTriangle(_triIndexes[0] * 2, _triIndexes[1] * 2, _triIndexes[2] * 2);
 				addTriangleNormalIndexes(0, 0, 0);
-				addTriangle(_triIndexes[0] * 2 + 1, _triIndexes[1] * 2 + 1, _triIndexes[2] * 2 + 1);
+				addTriangle(_triIndexes[0] * 2 + 1, _triIndexes[2] * 2 + 1, _triIndexes[1] * 2 + 1);
 				addTriangleNormalIndexes(1, 1, 1);
 			}
 		}

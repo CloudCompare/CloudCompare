@@ -6114,15 +6114,7 @@ void MainWindow::activateSectionExtractionMode()
 
 		registerOverlayDialog(m_seTool, Qt::TopRightCorner);
 	}
-	m_seTool->generateOrthoSectionsToolButton->setVisible(true);
-	m_seTool->extractPointsToolButton->setVisible(true);
-	m_seTool->unfoldToolButton->setVisible(true);
-	m_seTool->exportSectionsToolButton->setVisible(true);
-	m_seTool->saveFootprintInsidetoolButton->setVisible(false);
-	m_seTool->saveFootprintOutsidetoolButton->setVisible(false);
-	m_seTool->label->setVisible(true);
-	m_seTool->vertAxisComboBox->setVisible(true);
-	m_seTool->setFixedWidth(360);
+	m_seTool->setExtractMode(true);
 
 	//add clouds
 	ccGLWindow* firstDisplay = nullptr;
@@ -12100,16 +12092,9 @@ void MainWindow::doActionExtractFootPrint()
 		registerOverlayDialog(m_seTool, Qt::TopRightCorner);
 	}
 
-	m_seTool->generateOrthoSectionsToolButton->setVisible(false);
-	m_seTool->extractPointsToolButton->setVisible(false);
-	m_seTool->unfoldToolButton->setVisible(false);
-	m_seTool->exportSectionsToolButton->setVisible(false);
-	m_seTool->saveFootprintInsidetoolButton->setVisible(true);
-	m_seTool->saveFootprintOutsidetoolButton->setVisible(true);
-	m_seTool->label->setVisible(false);
-	m_seTool->vertAxisComboBox->setVisible(false);
+	m_seTool->setExtractMode(false);
 	m_seTool->SetDestAndGround(block_group, ground);
-	m_seTool->setFixedWidth(210);
+	
 
 	//add clouds
 	ccGLWindow* firstDisplay = nullptr;

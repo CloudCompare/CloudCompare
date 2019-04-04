@@ -101,10 +101,10 @@ ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	addOverridenShortcut(Qt::Key_Delete); //delete key to delete the selected polyline
 
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccSectionExtractionTool::onShortcutTriggered);
-	connect(saveFootprintInsidetoolButton, SIGNAL(clicked()), this, SLOT(exportFootprintInside()));
-	connect(saveFootprintOutsidetoolButton, SIGNAL(clicked()), this, SLOT(exportFootprintOutside()));
-	saveFootprintInsidetoolButton->setVisible(false);
-	saveFootprintOutsidetoolButton->setVisible(false);
+	connect(m_UI->saveFootprintInsidetoolButton, SIGNAL(clicked()), this, SLOT(exportFootprintInside()));
+	connect(m_UI->saveFootprintOutsidetoolButton, SIGNAL(clicked()), this, SLOT(exportFootprintOutside()));
+
+	setExtractMode(true);
 }
 
 ccSectionExtractionTool::~ccSectionExtractionTool()
@@ -399,6 +399,32 @@ void ccSectionExtractionTool::removeAllEntities()
 	
 	m_clouds.clear();
 	m_cloudsBox.clear();
+}
+
+void ccSectionExtractionTool::setExtractMode(bool extract_section)
+{
+	if (extract_section) {
+		m_UI->generateOrthoSectionsToolButton->setVisible(true);
+		m_UI->extractPointsToolButton->setVisible(true);
+		m_UI->unfoldToolButton->setVisible(true);
+		m_UI->exportSectionsToolButton->setVisible(true);
+		m_UI->saveFootprintInsidetoolButton->setVisible(false);
+		m_UI->saveFootprintOutsidetoolButton->setVisible(false);
+		m_UI->label->setVisible(true);
+		m_UI->vertAxisComboBox->setVisible(true);
+		setFixedWidth(360);
+	}
+	else {
+		m_UI->generateOrthoSectionsToolButton->setVisible(false);
+		m_UI->extractPointsToolButton->setVisible(false);
+		m_UI->unfoldToolButton->setVisible(false);
+		m_UI->exportSectionsToolButton->setVisible(false);
+		m_UI->saveFootprintInsidetoolButton->setVisible(true);
+		m_UI->saveFootprintOutsidetoolButton->setVisible(true);
+		m_UI->label->setVisible(false);
+		m_UI->vertAxisComboBox->setVisible(false);
+		setFixedWidth(210);
+	}
 }
 
 void ccSectionExtractionTool::SetDestAndGround(ccHObject * dest, double ground)

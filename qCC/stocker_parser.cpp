@@ -310,7 +310,7 @@ ccHObject::Container GetPlaneEntitiesBySelected(ccHObject* entity)
 	}
 	else {
 		BDBaseHObject* baseObj = GetRootBDBase(entity);
-		if (!baseObj) return;
+		if (!baseObj) return plane_container;
 		ccHObject::Container building_group;
 		if (entity->isA(CC_TYPES::ST_BUILDING)) {
 			building_group.push_back(entity);
@@ -324,6 +324,7 @@ ccHObject::Container GetPlaneEntitiesBySelected(ccHObject* entity)
 			plane_container.insert(plane_container.end(), cur_container.begin(), cur_container.end());
 		}
 	}
+	return plane_container;
 }
 
 ccHObject* GetPlaneEntityFromPrimGroup(ccHObject* prim, QString name)

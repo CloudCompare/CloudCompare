@@ -11267,12 +11267,12 @@ void MainWindow::doActionBDPrimBoundary()
 	// plane or point cloud
 	ccHObject::Container plane_container = GetPlaneEntitiesBySelected(entity);
 
-	if (_container.empty()) {
+	if (plane_container.empty()) {
 		dispToConsole("[BDRecon] Please select point cloud / (group of) planes / buildings", ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	ProgStartNorm("Boundary Extraction", _container.size());
-	for (auto & planeObj : _container) {
+	ProgStartNorm("Boundary Extraction", plane_container.size());
+	for (auto & planeObj : plane_container) {
 		ccHObject* boundary = nullptr;		
 		try {
 			if (used_method == "ransac based")

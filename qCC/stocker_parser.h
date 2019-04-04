@@ -81,7 +81,7 @@ void UpdateConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj);
 
 ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj);
 
-#define BDDB_PROJECTNAME_PREFIX		"Prj_"
+#define BDDB_PROJECTNAME_PREFIX		""
 #define BDDB_PLANESEG_PREFIX		"Plane"
 #define BDDB_BOUNDARY_PREFIX		"Boundary"
 #define BDDB_INTERSECT_PREFIX		"Intersection"

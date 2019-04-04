@@ -284,7 +284,7 @@ void ccPluginUIManager::showAboutDialog() const
 {
 	ccPluginInfoDlg	about;
 	
-	about.setPluginPaths( ccPluginManager::pluginPaths() );
+	about.setPluginPaths( ccPluginManager::get().pluginPaths() );
 	about.setPluginList( m_plugins );
 	
 	about.exec();

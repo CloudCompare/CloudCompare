@@ -86,7 +86,7 @@ public slots:
 
 	void onActiveWindowChanged(QMdiSubWindow*);
 	void onActiveWindowDeleted(QObject*);
-	void processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&);
+	void processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&);
 
 protected:
 

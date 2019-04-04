@@ -26,52 +26,69 @@
 //system
 #include <cmath>
 
-//! 4-Tuple structure (templated version)
-template <class Type> class Tuple4Tpl
+//! 2D Vector
+template <typename Type> class Vector2Tpl
 {
 public:
 
-	// The 4 tuple values as a union (array/separate values)
 	union
 	{
 		struct
 		{
-			Type x, y, z, w;
+			Type x, y;
 		};
-		Type u[4];
+		Type u[2];
 	};
 
 	//! Default constructor
-	/** Inits tuple to (0, 0, 0, 0).
+	/** Inits vector to (0,0).
+		\param s default init value for both coordinates
 	**/
-	inline Tuple4Tpl() : x(0), y(0), z(0), w(0) {}
+	inline explicit Vector2Tpl(Type s = 0) : x(s), y(s) {}
 
-	//! Constructor from a triplet of values
-	/** Inits typle to (a,b,c).
+	//! Constructor from a couple of coordinates
+	/** Inits vector to (x,y).
+		\param _x x coordinate
+		\param _y y coordinate
 	**/
-	inline Tuple4Tpl(Type a, Type b, Type c, Type d) : x(a), y(b), z(c), w(d) {}
+	inline Vector2Tpl(Type _x, Type _y) : x(_x), y(_y) {}
 
-	//! Constructor from an array of 4 elements
-	inline explicit Tuple4Tpl(const Type p[]) : x(p[0]), y(p[1]), z(p[2]), w(p[3]) {}
+	//! Returns vector square norm
+	inline Type norm2() const { return (x*x) + (y*y); }
+	//! Returns vector norm
+	inline Type norm() const { return std::sqrt(norm2()); }
+	//! Sets vector norm to unity
+	inline void normalize() { Type n = norm2(); if (n > 0) *this /= std::sqrt(n); }
+
+	//! Dot product
+	inline Type dot(const Vector2Tpl& v) const { return (x*v.x) + (y*v.y); }
+	//! Cross product
+	/** \return a positive value if (u,v) makes a counter-clockwise turn, negative for clockwise turn, and zero if the vectors are parallel
+	**/
+	inline Type cross(const Vector2Tpl& v) const { return x * v.y - y * v.x; }
 
 	//! Inverse operator
-	inline Tuple4Tpl operator - () const { Tuple4Tpl V(-x, -y, -z, -w); return V; }
+	inline Vector2Tpl& operator - () { x = -x; y = -y; return *this; }
 	//! In-place addition operator
-	inline Tuple4Tpl& operator += (const Tuple4Tpl& v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
+	inline Vector2Tpl& operator += (const Vector2Tpl& v) { x += v.x; y += v.y; return *this; }
 	//! In-place subtraction operator
-	inline Tuple4Tpl& operator -= (const Tuple4Tpl& v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; }
+	inline Vector2Tpl& operator -= (const Vector2Tpl& v) { x -= v.x; y -= v.y; return *this; }
 	//! In-place multiplication (by a scalar) operator
-	inline Tuple4Tpl& operator *= (Type v) { x *= v; y *= v; z *= v; w *= v; return *this; }
+	inline Vector2Tpl& operator *= (Type v) { x *= v; y *= v; return *this; }
 	//! In-place division (by a scalar) operator
-	inline Tuple4Tpl& operator /= (Type v) { x /= v; y /= v; z /= v; w /= v; return *this; }
+	inline Vector2Tpl& operator /= (Type v) { x /= v; y /= v; return *this; }
 	//! Addition operator
-	inline Tuple4Tpl operator + (const Tuple4Tpl& v) const { return Tuple4Tpl(x + v.x, y + v.y, z + v.z, w + v.w); }
+	inline Vector2Tpl operator + (const Vector2Tpl& v) const { return Vector2Tpl(x + v.x, y + v.y); }
 	//! Subtraction operator
-	inline Tuple4Tpl operator - (const Tuple4Tpl& v) const { return Tuple4Tpl(x - v.x, y - v.y, z - v.z, w - v.w); }
+	inline Vector2Tpl operator - (const Vector2Tpl& v) const { return Vector2Tpl(x - v.x, y - v.y); }
 	//! Multiplication operator
-	inline Tuple4Tpl operator * (Type s) const { return Tuple4Tpl(x*s, y*s, z*s, w*s); }
+	inline Vector2Tpl operator * (Type s) const { return Vector2Tpl(x*s, y*s); }
 	//! Division operator
-	inline Tuple4Tpl operator / (Type s) const { return Tuple4Tpl(x/s, y/s, z/s, w/s); }
+	inline Vector2Tpl operator / (Type s) const { return Vector2Tpl(x / s, y / s); }
+	//! Direct coordinate access
+	inline Type& operator [] (unsigned i) { return u[i]; }
+	//! Direct coordinate access (const)
+	inline const Type& operator [] (unsigned i) const { return u[i]; }
 };
 
 //! 3-Tuple structure (templated version)
@@ -155,6 +172,9 @@ public:
 
 	//! Constructor from an array of 3 elements
 	inline explicit Vector3Tpl(const Type p[]) : Tuple3Tpl<Type>(p) {}
+
+	//! Constructor from a 2D vector (and a third value)
+	inline explicit Vector3Tpl(const Vector2Tpl<Type>& t2D, Type c) : Tuple3Tpl<Type>(t2D.x, t2D.y, c) {}
 
 	//! Constructor from an int array
 	static inline Vector3Tpl fromArray(const int a[3]) { return Vector3Tpl(static_cast<Type>(a[0]), static_cast<Type>(a[1]), static_cast<Type>(a[2])); }
@@ -246,83 +266,53 @@ public:
 
 };
 
-//! Multiplication of a 3D vector by a scalar (front) operator (float version)
-inline Vector3Tpl<float> operator * (float s, const Vector3Tpl<float> &v) { return v*s; }
-// Multiplication of a 3D vector by a scalar (front) operator (double version)
-inline Vector3Tpl<double> operator * (double s, const Vector3Tpl<double> &v) { return v*s; }
-
-//! 2D Vector
-template <typename Type> class Vector2Tpl
+//! 4-Tuple structure (templated version)
+template <class Type> class Tuple4Tpl
 {
 public:
 
+	// The 4 tuple values as a union (array/separate values)
 	union
 	{
 		struct
 		{
-			Type x,y;
+			Type x, y, z, w;
 		};
-		Type u[2];
+		Type u[4];
 	};
 
 	//! Default constructor
-	/** Inits vector to (0,0).
-		\param s default init value for both coordinates
+	/** Inits tuple to (0, 0, 0, 0).
 	**/
-	inline explicit Vector2Tpl(Type s = 0) : x(s), y(s) {}
+	inline Tuple4Tpl() : x(0), y(0), z(0), w(0) {}
 
-	//! Constructor from a couple of coordinates
-	/** Inits vector to (x,y).
-		\param _x x coordinate
-		\param _y y coordinate
+	//! Constructor from a triplet of values
+	/** Inits typle to (a,b,c).
 	**/
-	inline Vector2Tpl(Type _x, Type _y) : x(_x), y(_y) {}
+	inline Tuple4Tpl(Type a, Type b, Type c, Type d) : x(a), y(b), z(c), w(d) {}
 
-	//! Returns vector square norm
-	inline Type norm2() const { return (x*x) + (y*y); }
-	//! Returns vector norm
-	inline Type norm() const { return std::sqrt(norm2()); }
-	//! Sets vector norm to unity
-	inline void normalize() { Type n = norm2(); if (n > 0) *this /= std::sqrt(n); }
-
-	//! Dot product
-	inline Type dot(const Vector2Tpl& v) const { return (x*v.x) + (y*v.y); }
-	//! Cross product
-	/** \return a positive value if (u,v) makes a counter-clockwise turn, negative for clockwise turn, and zero if the vectors are parallel
-	**/
-	inline Type cross(const Vector2Tpl& v) const { return x * v.y - y * v.x; }
+	//! Constructor from an array of 4 elements
+	inline explicit Tuple4Tpl(const Type p[]) : x(p[0]), y(p[1]), z(p[2]), w(p[3]) {}
 
 	//! Inverse operator
-	inline Vector2Tpl& operator - () { x = -x; y = -y; return *this; }
+	inline Tuple4Tpl operator - () const { Tuple4Tpl V(-x, -y, -z, -w); return V; }
 	//! In-place addition operator
-	inline Vector2Tpl& operator += (const Vector2Tpl& v) { x += v.x; y += v.y; return *this; }
+	inline Tuple4Tpl& operator += (const Tuple4Tpl& v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
 	//! In-place subtraction operator
-	inline Vector2Tpl& operator -= (const Vector2Tpl& v) { x -= v.x; y -= v.y; return *this; }
+	inline Tuple4Tpl& operator -= (const Tuple4Tpl& v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; }
 	//! In-place multiplication (by a scalar) operator
-	inline Vector2Tpl& operator *= (Type v) { x *= v; y *= v; return *this; }
+	inline Tuple4Tpl& operator *= (Type v) { x *= v; y *= v; z *= v; w *= v; return *this; }
 	//! In-place division (by a scalar) operator
-	inline Vector2Tpl& operator /= (Type v) { x /= v; y /= v; return *this; }
+	inline Tuple4Tpl& operator /= (Type v) { x /= v; y /= v; z /= v; w /= v; return *this; }
 	//! Addition operator
-	inline Vector2Tpl operator + (const Vector2Tpl& v) const { return Vector2Tpl(x + v.x, y + v.y); }
+	inline Tuple4Tpl operator + (const Tuple4Tpl& v) const { return Tuple4Tpl(x + v.x, y + v.y, z + v.z, w + v.w); }
 	//! Subtraction operator
-	inline Vector2Tpl operator - (const Vector2Tpl& v) const { return Vector2Tpl(x - v.x, y - v.y); }
+	inline Tuple4Tpl operator - (const Tuple4Tpl& v) const { return Tuple4Tpl(x - v.x, y - v.y, z - v.z, w - v.w); }
 	//! Multiplication operator
-	inline Vector2Tpl operator * (Type s) const {return Vector2Tpl(x*s, y*s);}
+	inline Tuple4Tpl operator * (Type s) const { return Tuple4Tpl(x*s, y*s, z*s, w*s); }
 	//! Division operator
-	inline Vector2Tpl operator / (Type s) const {return Vector2Tpl(x/s, y/s);}
-	//! Direct coordinate access
-	inline Type& operator [] (unsigned i) { return u[i]; }
-	//! Direct coordinate access (const)
-	inline const Type& operator [] (unsigned i) const { return u[i]; }
+	inline Tuple4Tpl operator / (Type s) const { return Tuple4Tpl(x / s, y / s, z / s, w / s); }
 };
-
-//! Default 3D Vector
-using CCVector3 = Vector3Tpl<PointCoordinateType>;
-
-//! Double 3D Vector
-using CCVector3f = Vector3Tpl<float>;
-//! Double 3D Vector
-using CCVector3d = Vector3Tpl<double>;
 
 //! Default 2D Vector
 using CCVector2 = Vector2Tpl<PointCoordinateType>;
@@ -332,5 +322,18 @@ using CCVector2d = Vector2Tpl<double>;
 
 //! Int 2D Vector
 using CCVector2i = Vector2Tpl<int>;
+
+//! Multiplication of a 3D vector by a scalar (front) operator (float version)
+inline Vector3Tpl<float> operator * (float s, const Vector3Tpl<float> &v) { return v*s; }
+// Multiplication of a 3D vector by a scalar (front) operator (double version)
+inline Vector3Tpl<double> operator * (double s, const Vector3Tpl<double> &v) { return v*s; }
+
+//! Default 3D Vector
+using CCVector3 = Vector3Tpl<PointCoordinateType>;
+
+//! Double 3D Vector
+using CCVector3f = Vector3Tpl<float>;
+//! Double 3D Vector
+using CCVector3d = Vector3Tpl<double>;
 
 #endif //CC_GEOM_HEADER

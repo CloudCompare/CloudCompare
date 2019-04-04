@@ -395,7 +395,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::initPlugins( )
 {
-	m_pluginUIManager->init( ccPluginManager::pluginList() );
+	m_pluginUIManager->init( ccPluginManager::get().pluginList() );
 	
 	// Set up dynamic tool bars
 // 	addToolBar( Qt::RightToolBarArea, m_pluginUIManager->glFiltersToolbar() );
@@ -6291,7 +6291,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							bool removeLabel = false;
 							for (unsigned i = 0; i < label->size(); ++i)
 							{
-								if (label->getPoint(i).cloud == entity)
+								if (label->getPickedPoint(i).entity() == entity)
 								{
 									removeLabel = true;
 									break;
@@ -6569,16 +6569,16 @@ void MainWindow::activatePointListPickingMode()
 		return;
 	}
 
-	ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_selectedEntities[0]);
-	if (!pc)
+	ccHObject* entity = m_selectedEntities[0];
+	if (!entity->isKindOf(CC_TYPES::POINT_CLOUD) && !entity->isKindOf(CC_TYPES::MESH))
 	{
-		ccConsole::Error("Wrong type of entity");
+		ccConsole::Error("Select a cloud or a mesh");
 		return;
 	}
 
-	if (!pc->isVisible() || !pc->isEnabled())
+	if (!entity->isVisible() || !entity->isEnabled())
 	{
-		ccConsole::Error("Points must be visible!");
+		ccConsole::Error("Entity must be visible!");
 		return;
 	}
 
@@ -6594,7 +6594,7 @@ void MainWindow::activatePointListPickingMode()
 	m_plpDlg->markerSizeSpinBox->setValue(win->getDisplayParameters().labelMarkerSize);
 
 	m_plpDlg->linkWith(win);
-	m_plpDlg->linkWithCloud(pc);
+	m_plpDlg->linkWithEntity(entity);
 
 	freezeUI(true);
 
@@ -6611,8 +6611,7 @@ void MainWindow::deactivatePointListPickingMode(bool state)
 {
 	if (m_plpDlg)
 	{
-		//m_plpDlg->linkWith(0);
-		m_plpDlg->linkWithCloud(0);
+		m_plpDlg->linkWithEntity(nullptr);
 	}
 
 	//we enable all GL windows
@@ -7173,7 +7172,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 			s_levelMarkersCloud->addPoint(pickedPoint);
 			unsigned markerCount = s_levelMarkersCloud->size();
 			cc2DLabel* label = new cc2DLabel();
-			label->addPoint(s_levelMarkersCloud, markerCount - 1);
+			label->addPickedPoint(s_levelMarkersCloud, markerCount - 1);
 			label->setName(QString("P#%1").arg(markerCount));
 			label->setDisplayedIn2D(false);
 			label->setDisplay(s_pickingWindow);
@@ -9879,7 +9878,6 @@ void MainWindow::updateMenus()
 	m_UI->actionSegment->setEnabled(hasMdiChild && hasSelectedEntities);
 	m_UI->actionTranslateRotate->setEnabled(hasMdiChild && hasSelectedEntities);
 	m_UI->actionPointPicking->setEnabled(hasMdiChild && hasLoadedEntities);
-	//actionPointListPicking->setEnabled(hasMdiChild);
 	m_UI->actionTestFrameRate->setEnabled(hasMdiChild);
 	m_UI->actionRenderToFile->setEnabled(hasMdiChild);
 	m_UI->actionToggleSunLight->setEnabled(hasMdiChild);
@@ -10165,7 +10163,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionRasterize->setEnabled(exactlyOneCloud);
 	m_UI->actionCompute2HalfDimVolume->setEnabled(selInfo.cloudCount == selInfo.selCount && selInfo.cloudCount >= 1 && selInfo.cloudCount <= 2); //one or two clouds!
 
-	m_UI->actionPointListPicking->setEnabled(exactlyOneEntity);
+	m_UI->actionPointListPicking->setEnabled(exactlyOneCloud || exactlyOneMesh);
 
 	// == 2
 	bool exactlyTwoEntities = (selInfo.selCount == 2);

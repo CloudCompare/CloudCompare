@@ -547,7 +547,7 @@ static QToolButton* CreateDeleteButton()
 static cc2DLabel* CreateLabel(cc2DLabel* label, ccPointCloud* cloud, unsigned pointIndex, QString pointName, ccGenericGLDisplay* display = 0)
 {
 	assert(label);
-	label->addPoint(cloud, pointIndex);
+	label->addPickedPoint(cloud, pointIndex);
 	label->setName(pointName);
 	label->setVisible(true);
 	label->setDisplayedIn2D(false);

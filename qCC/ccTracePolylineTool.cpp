@@ -308,8 +308,6 @@ bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 
 	if (m_associatedWin)
 	{
-		//connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
-		//connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
 		connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
 		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLineTip(int, int, Qt::MouseButtons)));
 	}

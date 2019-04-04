@@ -146,7 +146,7 @@ qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=0*/)
 
 	//connect signals/slots
 	{
-		connect(m_glWindow, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
+		connect(m_glWindow, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&)));
 
 		connect(m_glWindow, SIGNAL(leftButtonClicked(int,int)), this, SLOT(onLeftButtonClicked(int,int)));
 		//connect(m_glWindow, SIGNAL(rightButtonClicked(int,int)), this, SLOT(onRightButtonClicked(int,int)));
@@ -201,7 +201,7 @@ qBroomDlg::~qBroomDlg()
 cc2DLabel* qBroomDlg::Picking::addLabel(ccGenericPointCloud* cloud, unsigned pointIndex)
 {
 	cc2DLabel* label = new cc2DLabel(QString("%1").arg(labels.size()+1));
-	label->addPoint(cloud, pointIndex);
+	label->addPickedPoint(cloud, pointIndex);
 
 	//label->setEnabled(false);
 	label->setDisplayedIn2D(false);
@@ -1109,7 +1109,7 @@ bool qBroomDlg::positionBroom(const CCVector3& P0, const CCVector3& P1)
 	return true;
 }
 
-void qBroomDlg::handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3&)
+void qBroomDlg::handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3&, const CCVector3d&)
 {
 	assert(m_glWindow && m_glWindow->getPickingMode() == ccGLWindow::POINT_PICKING);
 
@@ -1145,18 +1145,18 @@ void qBroomDlg::handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int
 
 	if (m_picking.labels.size() == 2)
 	{
-		const cc2DLabel::PickedPoint& L0 = m_picking.labels[0]->getPoint(0);
-		const cc2DLabel::PickedPoint& L1 = m_picking.labels[1]->getPoint(0);
+		const cc2DLabel::PickedPoint& L0 = m_picking.labels[0]->getPickedPoint(0);
+		const cc2DLabel::PickedPoint& L1 = m_picking.labels[1]->getPickedPoint(0);
 
-		const CCVector3* P0 = L0.cloud->getPoint(L0.index);
-		const CCVector3* P1 = L1.cloud->getPoint(L1.index);
+		CCVector3 P0 = L0.getPointPosition();
+		CCVector3 P1 = L1.getPointPosition();
 
 		switch (m_picking.mode)
 		{
 		case Picking::BROOM_PICKING:
 			{
 				//extract the points around the broom
-				bool success = positionBroom(*P0, *P1);
+				bool success = positionBroom(P0, P1);
 				automatePushButton->setEnabled(success);
 				stopBroomPicking();
 			}
@@ -1343,7 +1343,7 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 						fakeCloud->reserve(1);
 						fakeCloud->addPoint(m_lastMousePos3D);
 						cc2DLabel* la = new cc2DLabel;
-						la->addPoint(fakeCloud, 0);
+						la->addPickedPoint(fakeCloud, 0);
 						la->setDisplayedIn2D(false);
 						la->setDisplay(m_glWindow);
 						la->setVisible(true);

@@ -71,7 +71,7 @@ protected slots:
 	void onAutomate();
 
 	//! Handles picked item (points)
-	void handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&);
+	void handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&);
 
 	//! Slot called when the left mouse button is clicked (on the 3D view)
 	void onLeftButtonClicked(int, int);

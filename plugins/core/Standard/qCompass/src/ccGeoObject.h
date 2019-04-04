@@ -56,7 +56,7 @@ public:
 	ccTopologyRelation* addRelationTo(ccGeoObject* obj2, int type, ccMainAppInterface* app);
 
 	//returns the GID of this geo-object
-	unsigned int getGID() { return _gID; };
+	unsigned int getGID() { return _gID; }
 
 	//flags defining different mapping regions
 	static const int INTERIOR = 0;
@@ -100,9 +100,10 @@ private:
 	void assignGID();
 
 	unsigned int _gID; //unique and persistent id for this geoObject
-//static functions
-public:
-	//returns true if object is a ccGeoObject
+
+public://static functions
+
+   //returns true if object is a ccGeoObject
 	static bool isGeoObject(ccHObject* object);
 
 	//returns true if object is the upper component of a ccGeoObject

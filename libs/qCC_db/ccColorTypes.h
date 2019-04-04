@@ -139,13 +139,13 @@ namespace ccColor
 	constexpr Rgbaf dark					(0.34f, 0.34f, 0.34f, 1.00f);
 	constexpr Rgbaf darker					(0.17f, 0.17f, 0.17f, 1.00f);
 	constexpr Rgbaf darkest					(0.08f, 0.08f, 0.08f, 1.00f);
-	constexpr Rgbaf night					(0.00f, 0.00f, 0.00f, 1.00F);
-	constexpr Rgbaf defaultMeshFrontDiff	(0.33f, 0.66f, 1.00f, 1.00f);	//(0.00f, 0.90f, 0.27f, 1.00f);
+	constexpr Rgbaf night					(0.09f, 0.09f, 0.09f, 1.00F);	//(0.00f, 0.00f, 0.00f, 1.00F);
+	constexpr Rgbaf defaultMeshFrontDiff	(0.35f, 0.72f, 1.00f, 1.00f);	//(0.00f, 0.90f, 0.27f, 1.00f);
 	constexpr Rgbaf defaultMeshBackDiff		(0.27f, 0.90f, 0.90f, 1.00f);
 
 	// Default foreground color (unsigned byte)
 	constexpr Rgbub defaultColor			(255, 255, 255);	// white
-	constexpr Rgbub defaultBkgColor			(255, 255, 255);	// white	( 10, 102, 151);	// dark blue
+	constexpr Rgbub defaultBkgColor			(222, 222, 222);	// white	( 10, 102, 151);	// dark blue
 	constexpr Rgbub defaultLabelBkgColor	(255, 255, 255);	// white
 	constexpr Rgbub defaultLabelMarkerColor	(255,   0, 255);	// magenta
 

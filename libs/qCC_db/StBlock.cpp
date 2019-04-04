@@ -163,10 +163,10 @@ bool StBlock::buildUp()
 	assert(verts);
 	assert(m_triNormals);
 
-	//bottom & top faces normals
+	// top & bottom faces normals
 	{
 		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, -1.0).u));
-		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, 1.0).u));
+		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, -1.0).u));
 	} 	
 
 	//add profile vertices & normals

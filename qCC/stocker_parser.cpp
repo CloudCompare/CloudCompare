@@ -1897,7 +1897,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 			std::vector<CCVector3> top_points;
 			std::vector<CCVector3> bottom_points;
 			for (auto & pt : roof_points) {
-				top_points.push_back(CCVector3(pt.X(), pt.Y(), footprint_height));
+				top_points.push_back(CCVector3(vcgXYZ(pt)));
 				bottom_points.push_back(CCVector3(pt.X(), pt.Y(), ground_height));
 			}
 			StBlock* block_entity = new StBlock(top_points, bottom_points);
@@ -1905,10 +1905,6 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 			block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(biggest + 1));
 			first_footprint->addChild(block_entity);
 		}
-
-		// 		ccHObject* cur_model = FileIOFilter::LoadFromFile(output_path, parameters, result, QString());
-		// 		cur_model->setName(model_name);
-		// 		model_group->addChild(cur_model);
 	}
 	return blockgroup_obj;
 }

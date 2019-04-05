@@ -80,38 +80,6 @@ void ScalarField::computeMeanAndVariance(ScalarType &mean, ScalarType* variance)
 	}
 }
 
-void ScalarField::computeMinAndMax()
-{
-	if (!empty())
-	{
-		bool minMaxInitialized = false;
-		for (std::size_t i = 0; i < size(); ++i)
-		{
-			const ScalarType& val = at(i);
-			if (ValidValue(val))
-			{
-				if (minMaxInitialized)
-				{
-					if (val < m_minVal)
-						m_minVal = val;
-					else if (val > m_maxVal)
-						m_maxVal = val;
-				}
-				else
-				{
-					//first valid value is used to init min and max
-					m_minVal = m_maxVal = val;
-					minMaxInitialized = true;
-				}
-			}
-		}
-	}
-	else //particular case: no value
-	{
-		m_minVal = m_maxVal = 0;
-	}
-}
-
 bool ScalarField::reserveSafe(std::size_t count)
 {
 	try

@@ -417,7 +417,7 @@ bool ccMaterialSet::toFile_MeOnly(QFile& out) const
 
 	//Materials count (dataVersion>=20)
 	uint32_t count = (uint32_t)size();
-	if (out.write((const char*)&count,4) < 0)
+	if (out.write((const char*)&count, 4) < 0)
 		return WriteError();
 
 	//texture filenames
@@ -456,38 +456,38 @@ bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//Materials count (dataVersion>=20)
 	uint32_t count = 0;;
-	if (in.read((char*)&count,4) < 0)
+	if (in.read((char*)&count, 4) < 0)
 		return ReadError();
 	if (count == 0)
 		return true;
 
 	//Load each material
 	{
-		for (uint32_t i=0; i<count; ++i)
+		for (uint32_t i = 0; i < count; ++i)
 		{
 			ccMaterial::Shared mtl(new ccMaterial);
-			if (!mtl->fromFile(in,dataVersion,flags))
+			if (!mtl->fromFile(in, dataVersion, flags))
 				return false;
-			addMaterial(mtl,true); //if we load a file, we can't allow that materials are not in the same order as before!
+			addMaterial(mtl, true); //if we load a file, we can't allow that materials are not in the same order as before!
 		}
 	}
 
 	if (dataVersion >= 37)
 	{
 		QDataStream inStream(&in);
-	
+
 		//now load the number of textures (dataVersion>=37)
 		uint32_t texCount = 0;
 		inStream >> texCount;
 		//and load the textures (dataVersion>=37)
 		{
-			for (uint32_t i=0; i<texCount; ++i)
+			for (uint32_t i = 0; i < texCount; ++i)
 			{
 				QString filename;
 				inStream >> filename;
 				QImage image;
 				inStream >> image;
-				ccMaterial::AddTexture(image,filename);
+				ccMaterial::AddTexture(image, filename);
 			}
 		}
 	}

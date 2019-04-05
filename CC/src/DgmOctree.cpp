@@ -742,7 +742,7 @@ unsigned DgmOctree::getCellIndex(CellCode truncatedCellCode, unsigned char bitDe
 }
 #endif
 
-unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
+unsigned DgmOctree::findPointNeighbourhood(	const CCVector3* queryPoint,
 											ReferenceCloud* Yk,
 											unsigned maxNumberOfNeighbors,
 											unsigned char level,

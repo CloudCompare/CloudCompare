@@ -1244,10 +1244,6 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 	ccLog::Print(transMat.toString(12,' ')); //full precision
 	ccLog::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 
-	//reselect previously selected entities!
-	if (m_ccRoot)
-		m_ccRoot->selectEntities(selectedEntities);
-
 	refreshAll();
 }
 
@@ -10926,24 +10922,6 @@ void MainWindow::doActionBDImagesLoad()
 	if (!baseObj) {
 		return;
 	}
-	
-	//persistent settings
-	QSettings settings;
-	settings.beginGroup(ccPS::LoadFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
-
-	QString Filename =
-		QFileDialog::getOpenFileName(this,
-			"Import images",
-			currentPath,
-			"Bundler output (*.out)");
-
-	if (Filename.isEmpty()) return;
-
-	//save last loading parameters
-	currentPath = QFileInfo(Filename).absolutePath();
-	settings.setValue(ccPS::CurrentPath(), currentPath);
-	settings.endGroup();
 
 	CCVector3d loadCoordinatesShift = CCVector3d(vcgXYZ(baseObj->global_shift));
 	bool loadCoordinatesTransEnabled = false;
@@ -10959,17 +10937,77 @@ void MainWindow::doActionBDImagesLoad()
 	QString out_file, image_list;
 	if (baseObj->block_prj.m_options.with_image) {
 		out_file = baseObj->block_prj.m_options.prj_file.sfm_out.c_str();
-		image_list = baseObj->block_prj.m_options.prj_file.image_list.c_str();
-		parameters.additionInfo = (void*)(&image_list);
-	}	
-
-	if (QFileInfo(out_file).exists() && QFileInfo(image_list).exists()) {
-		ccHObject* newGroup = FileIOFilter::LoadFromFile(out_file, parameters, result, QString());
-		if (newGroup) {			
-			newGroup->setName(baseObj->getName() + BDDB_CAMERA_SUFFIX);
-			addToDB(newGroup);
-		}
+		image_list = baseObj->block_prj.m_options.prj_file.image_list.c_str();		
 	}
+
+	if (!QFileInfo(out_file).exists() || !QFileInfo(image_list).exists()) {
+		dispToConsole("no .out or image list exists", ERR_CONSOLE_MESSAGE);
+
+		//persistent settings
+		QSettings settings;
+		settings.beginGroup(ccPS::LoadFile());
+		QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+		
+		out_file =
+			QFileDialog::getOpenFileName(this,
+				"Import images",
+				currentPath,
+				"Bundler output (*.out)");
+		if (out_file.isEmpty()) return;
+
+		//save last loading parameters
+		currentPath = QFileInfo(out_file).absolutePath();
+		settings.setValue(ccPS::CurrentPath(), currentPath);
+		settings.endGroup();
+
+		image_list =
+			QFileDialog::getOpenFileName(this,
+				"Import images",
+				currentPath,
+				"Image list (All (*.*);;*.txt");
+		if (image_list.isEmpty()) return;
+		
+		//save last loading parameters
+		currentPath = QFileInfo(out_file).absolutePath();
+		settings.setValue(ccPS::CurrentPath(), currentPath);
+		settings.endGroup();
+	}		
+	ccPointCloud* hackObj = new ccPointCloud(image_list);
+	hackObj->setGlobalShift(CCVector3d(vcgXYZ(baseObj->global_shift)));
+	ccBBox base_box = baseObj->getBB_recursive(false, false);
+	hackObj->reserve(2);
+	hackObj->addPoint(base_box.getCenter() + base_box.getDiagVec() / 2);
+	hackObj->addPoint(base_box.getCenter() - base_box.getDiagVec() / 2);
+	parameters.additionInfo = (void*)hackObj;
+
+	ccHObject* newGroup = FileIOFilter::LoadFromFile(out_file, parameters, result, QString());
+	if (!newGroup) {
+		return;
+	}
+
+	newGroup->setName(baseObj->getName() + BDDB_CAMERA_SUFFIX);
+	addToDB(newGroup);	
+
+	if (hackObj) {
+		delete hackObj;
+		hackObj = nullptr;
+	}
+// 	ccHObject::Container children;
+// 	newGroup->filterChildren(children, true);
+// 
+// 	assert(m_ccRoot);
+// 	if (!m_ccRoot) return;
+// 
+// 	m_ccRoot->unselectAllEntities();
+// 	m_ccRoot->selectEntities(children);
+// 	if (!baseObj) {	return; }
+// 	
+// 	CCVector3d X(1, 0, 0),Y(0, 1, 0),Z(0, 0, 1), Tr(CCVector3d(vcgXYZ(baseObj->global_shift)));
+// 	ccGLMatrixd mat = ccGLMatrixd(X, Y, Z, Tr);
+// 	applyTransformation(mat);
+// 	m_ccRoot->unselectAllEntities();	
+
+	refreshAll();
 }
 
 void MainWindow::doActionBDPlaneSegmentation()

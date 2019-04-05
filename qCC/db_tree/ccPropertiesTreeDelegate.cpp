@@ -1759,6 +1759,17 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	}
 	case OBJECT_SENSOR_DISPLAY_SCALE:
 	{
+		if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {			
+			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
+				ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject->getChild(i));
+				if (sensor) {
+					SetDoubleSpinBoxValue(editor, sensor->getGraphicScale());
+					break;
+				}
+			}
+			break;
+		}
+
 		ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 		assert(sensor);
 		SetDoubleSpinBoxValue(editor, sensor ? sensor->getGraphicScale() : 0.0);
@@ -1804,6 +1815,30 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		SetComboBoxIndex(editor, currentIndex);
 		break;
 	}
+	case OBJECT_FACET_CONFIDENCE:
+	{
+		ccFacet* facet = ccHObjectCaster::ToFacet(m_currentObject);
+		assert(facet);
+		SetDoubleSpinBoxValue(editor, facet ? facet->getConfidence() : -999999);
+	}
+	break;
+	case OBJECT_FOOTPRINT_HEIGHT:
+	{
+		StFootPrint* footprint = ccHObjectCaster::ToStFootPrint(m_currentObject);
+		assert(footprint);
+		SetDoubleSpinBoxValue(editor, footprint ? footprint->getHeight() : -999999);
+	}
+	break;
+	case OBJECT_BLOCK_TOP_ADD:
+	{		
+		SetDoubleSpinBoxValue(editor, 0.0);
+	}
+	break;
+	case OBJECT_BLOCK_BOTTOM_ADD:
+	{
+		SetDoubleSpinBoxValue(editor, 0.0);
+	}
+	break;
 	default:
 		QStyledItemDelegate::setEditorData(editor, index);
 		break;

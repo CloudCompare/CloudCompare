@@ -162,15 +162,11 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	BundlerImportDlg::OrthoRectMethod orthoRectMethod = BundlerImportDlg::OPTIMIZED;
 
 	//default paths
-	QString imageListFilename;
-	QString* list_path = (QString*)parameters.additionInfo;
-	bool stocker_parse = false;
-	if (list_path) {
-		stocker_parse = true;
-		imageListFilename = *list_path;
-	}
-	else {
-		imageListFilename = QFileInfo(f).dir().absoluteFilePath("list.txt");
+	QString imageListFilename = QFileInfo(f).dir().absoluteFilePath("list.txt");
+
+	ccPointCloud* hackCloud = (ccPointCloud*)parameters.additionInfo;
+	if (hackCloud) {
+		imageListFilename = hackCloud->getName();
 	}
 	QString altKeypointsFilename = QFileInfo(f).dir().absoluteFilePath("pmvs.ply");
 
@@ -183,8 +179,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		biDlg.setVer(majorVer,minorVer);
 		biDlg.setImageListFilename(imageListFilename);
 		biDlg.setAltKeypointsFilename(altKeypointsFilename);
-		if (stocker_parse) {
+		if (hackCloud) {
 			biDlg.keepImagesInMemoryCheckBox->setChecked(true);
+			biDlg.generateColoredDTMGroupBox->setChecked(false);
 		}
 
 		if (!biDlg.exec())
@@ -734,9 +731,16 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 		ccImage* image = new ccImage();
 		QString errorStr;
-		if (!image->load(imageDir.absoluteFilePath(imageFilenames[i]), errorStr))
+		QFileInfo load_info(imageFilenames[i]);
+		QString image_load = load_info.path() + "/" + load_info.completeBaseName() + "_thumb." + load_info.suffix();		
+		if (!QFileInfo(image_load).exists()) {
+			image_load = imageFilenames[i];
+		}		
+
+		//! don't save the image in memory
+		if (!image->load(imageDir.absoluteFilePath(image_load), errorStr))
 		{
-			ccLog::Error(QString("[Bundler] %1 (image '%2')").arg(errorStr,imageFilenames[i]));
+			ccLog::Error(QString("[Bundler] %1 (image '%2')").arg(errorStr, image_load));
 			delete image;
 			image = nullptr;
 			break;
@@ -762,17 +766,35 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 			//camera position/orientation
 			ccGLMatrix transf(cameras[i].trans.inverse().data());
+			if (hackCloud) {
+				transf.setTranslation(transf.getTranslationAsVec3D() + CCVector3::fromArray(hackCloud->getGlobalShift().u));
+			}
 			
 			//dist to cloud
 			PointCoordinateType dist = keypointsCloud ? (transf.getTranslationAsVec3D() - keypointsCloud->getOwnBB().getCenter()).norm() : PC_ONE;
+			if (hackCloud) {
+				dist = (transf.getTranslationAsVec3D() - hackCloud->getOwnBB().getCenter()).norm();
+			}
 			params.zFar_mm = dist;
 			params.zNear_mm = 0.001f;
 
 			sensor = new ccCameraSensor(params);
 			sensor->setName(QString("Camera #%1").arg(i + 1));
+			if (hackCloud) {
+				QFileInfo fileInfo(image->getName());
+				QString sensor_name = fileInfo.completeBaseName();
+				if (sensor_name.endsWith("_thumb"))	{
+					sensor_name = sensor_name.mid(0, sensor_name.length() - 5);
+				}
+				sensor->setName(sensor_name);
+			}
 			sensor->setEnabled(true);
 			sensor->setVisible(true/*false*/);
 			sensor->setGraphicScale(keypointsCloud ? keypointsCloud->getOwnBB().getDiagNorm() / 10 : PC_ONE);
+			if (hackCloud) {
+				sensor->setGraphicScale(hackCloud->getOwnBB().getDiagNorm() / 10);
+			}			
+			
 			sensor->setRigidTransformation(transf);
 
 			//distortion parameters
@@ -795,7 +817,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		}
 		//the image is a child of the sensor!
 		image->setAssociatedSensor(sensor);
-		sensor->addChild(image);
+		sensor->addChild(image);		
 
 		//ortho-rectification
 		if (orthoRectifyImages)

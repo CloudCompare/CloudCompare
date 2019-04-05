@@ -395,6 +395,7 @@ StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check
 	if (group) {
 		ccHObject* bd = GetBuildingGroup(building_name, false);
 		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		else { delete group; group = nullptr; }
 	}
 	return nullptr;
 }
@@ -405,6 +406,7 @@ StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name, bool check_en
 	if (group) { 
 		ccHObject* bd = GetBuildingGroup(building_name, false);
 		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		else { delete group; group = nullptr; }
 	}
 	return nullptr;
 }
@@ -1213,7 +1215,7 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 			std::string plane_name = GetBaseName(planeObj->getParent()->getName()).toStdString();
 			stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
 			PlaneUnit plane_unit_ = FormPlaneUnit(plane_name, GetVcgPlane(planeObj), cur_plane_points, true);
-			PlaneUnit* plane_unit = new PlaneUnit(plane_name, GetVcgPlane(planeObj), plane_unit_.convex_hull_prj);
+			PlaneUnit* plane_unit = new PlaneUnit(plane_name, GetVcgPlane(planeObj), plane_unit_.convex_hull_prj); // TODO: delete or add to planedata in primitivegroup info
 
 			plane_data[planeObj] = plane_unit;
 			stocker::Polyline2d plane_convex_hull = MakeLoopPolylinefromContour2d(Point3dToPlpoint2d(plane_unit_, plane_unit_.convex_hull_prj));

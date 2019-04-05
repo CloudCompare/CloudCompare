@@ -69,6 +69,7 @@ public:
 			, autoComputeNormals(false)
 			, parentWidget(nullptr)
 			, sessionStart(true)
+			, additionInfo(nullptr)
 		{}
 		
 		//! How to handle big coordinates

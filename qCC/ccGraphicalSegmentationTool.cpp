@@ -1011,4 +1011,13 @@ void ccGraphicalSegmentationTool::setPlaneSegMode(bool mode)
 	inButton->setVisible(!mode);
 	outButton->setVisible(!mode);
 	m_planeseg_mode = mode;
+
+	if (mode) {
+		validAndDeleteButton->setToolTip("Confirm and delete points inside the polygon");
+		validButton->setToolButtonStyle("Create a new plane by points inside the polygon");
+	}
+	else {
+		validAndDeleteButton->setToolTip("Confirm and delete hidden points");
+		validButton->setToolButtonStyle("Confirm segmentation");
+	}
 }

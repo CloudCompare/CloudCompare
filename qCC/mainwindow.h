@@ -465,6 +465,8 @@ private slots:
 	void doActionBDPrimPlaneFrame();
 	/// Merge Selected Planes
 	void doActionBDPrimMergePlane();
+	/// split selected plane
+	void doActionBDPrimSplitPlane();
 	/// Create Ground Plane
 	void doActionBDPrimCreateGround();
 	/// Shrink plane to outline - remove points outside the alpha shape

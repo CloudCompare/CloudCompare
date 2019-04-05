@@ -799,6 +799,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPrimOutline,				&QAction::triggered, this, &MainWindow::doActionBDPrimOutline);
 	connect(m_UI->actionBDPrimPlaneFrame,			&QAction::triggered, this, &MainWindow::doActionBDPrimPlaneFrame);
 	connect(m_UI->actionBDPrimMergePlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimMergePlane);
+	connect(m_UI->actionBDPrimSplitPlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimSplitPlane);	
 	connect(m_UI->actionBDPrimCreateGround,			&QAction::triggered, this, &MainWindow::doActionBDPrimCreateGround);
 	connect(m_UI->actionBDPrimShrinkPlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimShrinkPlane);
 	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);
@@ -6219,12 +6220,6 @@ void MainWindow::activateSegmentationMode()
 	}
 
 	m_gsTool->linkWith(win);
-
-	ccHObject* first_entity = getSelectedEntities().front();
-	bool planeseg_mode = getSelectedEntities().size() == 1 && isPlaneCloud(first_entity) && first_entity->getName().startsWith(BDDB_PLANESEG_PREFIX);
-	
-	m_gsTool->setPlaneSegMode(planeseg_mode);	
-
 	for ( ccHObject *entity : getSelectedEntities() )
 	{
 		if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH)) {
@@ -6409,6 +6404,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						//no need to put back the entity in DB if we delete it afterwards!
 						if (!deleteOriginalEntity)
 						{
+							//! XYLIU
 							if (m_gsTool->isPlaneSegMode()) {								
 								int biggest = GetMaxNumberExcludeChildPrefix(objContext.parent, BDDB_PLANESEG_PREFIX);
 								segmentationResult->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
@@ -6429,12 +6425,15 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					{
 						//keep original name(s)
 						segmentationResult->setName(entity->getName());
-						ccPointCloud* segment_cloud = ccHObjectCaster::ToPointCloud(segmentationResult);
-						if (segment_cloud) {
-							segment_cloud->setRGBColor(segment_cloud->hasColors() ? segment_cloud->getPointColor(0) : ccColor::Generator::Random());
-							ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
-							if (new_plane) addToDB(new_plane);
-						}
+						//! XYLIU
+						if (m_gsTool->isPlaneSegMode())	{
+							ccPointCloud* segment_cloud = ccHObjectCaster::ToPointCloud(segmentationResult);
+							if (segment_cloud) {
+								segment_cloud->setRGBColor(segment_cloud->hasColors() ? segment_cloud->getPointColor(0) : ccColor::Generator::Random());
+								ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
+								if (new_plane) addToDB(new_plane);
+							}
+						}						
 						if (entity->isKindOf(CC_TYPES::MESH) && segmentationResult->isKindOf(CC_TYPES::MESH))
 						{
 							ccGenericMesh* meshEntity = ccHObjectCaster::ToGenericMesh(entity);
@@ -11437,6 +11436,58 @@ void MainWindow::doActionBDPrimMergePlane()
 	addToDB(point_cloud);
 	refreshAll();
 	UpdateUI();
+}
+
+void MainWindow::doActionBDPrimSplitPlane()
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (!win)
+		return;
+
+	if (!haveSelection())
+		return;
+
+	if (!m_gsTool)
+	{
+		m_gsTool = new ccGraphicalSegmentationTool(this);
+		connect(m_gsTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateSegmentationMode);
+
+		registerOverlayDialog(m_gsTool, Qt::TopRightCorner);
+	}
+
+	m_gsTool->linkWith(win);
+
+	ccHObject* first_entity = getSelectedEntities().front();
+	bool planeseg_mode = getSelectedEntities().size() == 1 && isPlaneCloud(first_entity);
+	if (!planeseg_mode) {
+		dispToConsole("Please select the point cloud of a plane", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	m_gsTool->setPlaneSegMode(planeseg_mode);
+
+	for (ccHObject *entity : getSelectedEntities())
+	{
+		if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH)) {
+			m_gsTool->addEntity(entity);
+		}
+	}
+
+	if (m_gsTool->getNumberOfValidEntities() == 0)
+	{
+		ccConsole::Error("No segmentable entity in active window!");
+		return;
+	}
+
+	freezeUI(true);
+	m_UI->toolBarView->setDisabled(false);
+
+	//we disable all other windows
+	disableAllBut(win);
+
+	if (!m_gsTool->start())
+		deactivateSegmentationMode(false);
+	else
+		updateOverlayDialogsPlacement();
 }
 
 void MainWindow::doActionBDPrimCreateGround()

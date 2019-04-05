@@ -56,6 +56,7 @@ v2.10.3 (Zephyrus) - (in development)
   - Fix potential crash when quitting or switching displays
   - quitting the "Section extraction tool" (and probably any tool that uses a temporary 3D view, such as the Align tool)
 		would break the picking hub mechanism (preventing the user from picking points typically)
+  - the 'Export cloud' button of the Rasterize tool was not working anymore
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------

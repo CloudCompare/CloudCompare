@@ -151,11 +151,16 @@
 #include <random>
 
 #ifdef USE_STOCKER
-#include "polyfit/basic/logger.h"
-#endif // USE_STOCKER
-
+#include "bdrPlaneSegDlg.h"
+#include "bdrLine3DppDlg.h"
+#include "bdrDeductionDlg.h"
+#include "bdrPolyFitDlg.h"
+#include "bdr3D4EMDlg.h"
 #include "bdrFacetFilterDlg.h"
 
+#include "stocker_parser.h"
+#include "polyfit/basic/logger.h"
+#endif // USE_STOCKER
 
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance  = nullptr;
@@ -6215,9 +6220,16 @@ void MainWindow::activateSegmentationMode()
 
 	m_gsTool->linkWith(win);
 
+	ccHObject* first_entity = getSelectedEntities().front();
+	bool planeseg_mode = getSelectedEntities().size() == 1 && isPlaneCloud(first_entity) && first_entity->getName().startsWith(BDDB_PLANESEG_PREFIX);
+	
+	m_gsTool->setPlaneSegMode(planeseg_mode);	
+
 	for ( ccHObject *entity : getSelectedEntities() )
 	{
-		m_gsTool->addEntity(entity);
+		if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH)) {
+			m_gsTool->addEntity(entity);
+		}		
 	}
 
 	if (m_gsTool->getNumberOfValidEntities() == 0)
@@ -6397,7 +6409,19 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						//no need to put back the entity in DB if we delete it afterwards!
 						if (!deleteOriginalEntity)
 						{
-							entity->setName(entity->getName() + QString(".remaining"));
+							if (m_gsTool->isPlaneSegMode()) {								
+								int biggest = GetMaxNumberExcludeChildPrefix(objContext.parent, BDDB_PLANESEG_PREFIX);
+								segmentationResult->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
+// 								ccPointCloud* segment_cloud = ccHObjectCaster::ToPointCloud(segmentationResult);
+// 								if (segment_cloud) {
+// 									segment_cloud->setRGBColor(ccColor::Generator::Random());
+// 									ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
+// 									if (new_plane) addToDB(new_plane);										
+// 								}
+							}
+							else {
+								entity->setName(entity->getName() + QString(".remaining"));
+							}
 							putObjectBackIntoDBTree(entity, objContext);
 						}
 					}
@@ -10709,14 +10733,7 @@ void MainWindow::doActionBDDisplayPointOff()
 
 //////////////////////////////////////////////////////////////////////////
 /// Building Reconstruction
-#include "bdrPlaneSegDlg.h"
-#include "bdrLine3DppDlg.h"
-#include "bdrDeductionDlg.h"
-#include "bdrPolyFitDlg.h"
-#include "bdr3D4EMDlg.h"
-#include <QtConcurrentRun>
 
-#include "stocker_parser.h"
 
 //////////////////////////////////////////////////////////////////////////
 QString s_no_project_error = "please open the main project!";

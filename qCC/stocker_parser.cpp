@@ -327,6 +327,12 @@ ccHObject::Container GetPlaneEntitiesBySelected(ccHObject* entity)
 	return plane_container;
 }
 
+bool isPlaneCloud(ccHObject * entity)
+{
+	if (entity->getChildrenNumber() < 1) return false;	
+	return entity->getChild(0)->isA(CC_TYPES::PLANE);	
+}
+
 ccHObject* GetPlaneEntityFromPrimGroup(ccHObject* prim, QString name)
 {
 	ccHObject::Container pc_find, pl_find;

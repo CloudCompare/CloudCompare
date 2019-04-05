@@ -589,7 +589,10 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	//set the default import/export icon to 'export' mode
 	loadSaveToolButton->setDefaultAction(actionExportSegmentationPolyline);
 	allowPolylineExport(m_segmentationPoly->size() > 1);
-
+	if (m_planeseg_mode) {
+		validButton->setEnabled(m_segmentationPoly->size() > 1);
+		validAndDeleteButton->setEnabled(m_segmentationPoly->size() > 1);
+	}	
 	if (m_associatedWin)
 	{
 		m_associatedWin->redraw(true, false);
@@ -975,12 +978,18 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 
 void ccGraphicalSegmentationTool::apply()
 {
+	if (m_planeseg_mode) {
+		segmentIn();
+	}
 	m_deleteHiddenParts = false;
 	stop(true);
 }
 
 void ccGraphicalSegmentationTool::applyAndDelete()
 {
+	if (m_planeseg_mode) {
+		segmentOut();
+	}
 	m_deleteHiddenParts = true;
 	stop(true);
 }
@@ -990,4 +999,16 @@ void ccGraphicalSegmentationTool::cancel()
 	reset();
 	m_deleteHiddenParts = false;
 	stop(false);
+}
+
+void ccGraphicalSegmentationTool::setPlaneSegMode(bool mode)
+{
+	if (mode) 
+		setFixedWidth(210);	
+	else 
+		setFixedWidth(250);
+	
+	inButton->setVisible(!mode);
+	outButton->setVisible(!mode);
+	m_planeseg_mode = mode;
 }

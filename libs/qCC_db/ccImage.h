@@ -48,15 +48,17 @@ public:
 		\param error a human readable description of what went wrong (if method fails)
 		\return success
 	**/
-	bool load(const QString& filename, QString& error);
+	bool load(const QString& filename, QString& error, bool fake = false);
+
+	bool loadWithWidthHeight(const QString& filename, int width, int height, QString& error);
 
 	//! Returns image data
-	inline QImage& data() { return m_image; }
+	inline QImage& data();
 	//! Returns image data (const version)
-	inline const QImage& data() const { return m_image; }
+	inline const QImage& data() const;
 
 	//! Sets image data
-	void setData(const QImage& image);
+	void setData(const QImage& image, bool fake = false);
 
 	//! Returns image width
 	inline unsigned getW() const { return m_width; }
@@ -115,6 +117,8 @@ protected:
 
 	//! Associated sensor
 	ccCameraSensor* m_associatedSensor;
+
+	QString m_file_name;
 };
 
 #endif //CC_IMAGE_HEADER

@@ -57,7 +57,7 @@ ccImage::ccImage(const QImage& image, const QString& name)
 	setEnabled(true);
 }
 
-bool ccImage::load(const QString& filename, QString& error)
+bool ccImage::load(const QString& filename, QString& error, bool fake)
 {
 	QImageReader reader(filename);
 	//m_image = QImage(filename);
@@ -68,7 +68,8 @@ bool ccImage::load(const QString& filename, QString& error)
 		return false;
 	}
 
-	setData(image);
+	setData(image, fake);
+	m_file_name = filename;
 
 	setName(QFileInfo(filename).fileName());
 	setEnabled(true);
@@ -76,11 +77,47 @@ bool ccImage::load(const QString& filename, QString& error)
 	return true;
 }
 
-void ccImage::setData(const QImage& image)
+bool ccImage::loadWithWidthHeight(const QString & filename, int width, int height, QString & error)
 {
-	m_image = image;
-	m_width = m_image.width();
-	m_height = m_image.height();
+	m_file_name = filename;
+	setName(QFileInfo(filename).fileName());
+	setEnabled(true);
+
+	m_width = width;
+	m_height = height;
+	updateAspectRatio();
+	return true;
+}
+
+inline QImage & ccImage::data()
+{
+	if (m_image.isNull()) {
+		QImageReader reader(m_file_name);
+		return reader.read();
+	}
+	else {
+		return m_image;
+	}
+}
+
+inline const QImage & ccImage::data() const
+{
+	if (m_image.isNull()) {
+		QImageReader reader(m_file_name);
+		return reader.read();
+	}
+	else {
+		return m_image;
+	}
+}
+
+void ccImage::setData(const QImage& image, bool fake)
+{
+	if (!fake) {
+		m_image = image;
+	}	
+	m_width = image.width();
+	m_height = image.height();
 	updateAspectRatio();
 }
 
@@ -91,8 +128,7 @@ void ccImage::updateAspectRatio()
 
 void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	if (m_image.isNull())
-		return;
+	QImage image = data();
 
 	if (!MACRO_Draw2D(context) || !MACRO_Foreground(context))
 		return;
@@ -111,7 +147,7 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glFunc->glPushAttrib(GL_ENABLE_BIT);
 	glFunc->glEnable(GL_TEXTURE_2D);
 
-	QOpenGLTexture texture(m_image);
+	QOpenGLTexture texture(image);
 	texture.bind();
 	{
 		//we make the texture fit inside viewport
@@ -185,8 +221,7 @@ bool ccImage::toFile_MeOnly(QFile& out) const
 	outStream << texV;
 	outStream << m_texAlpha;
 	outStream << m_image;
-	QString fakeString;
-	outStream << fakeString; //formerly: 'complete filename'
+	outStream << m_file_name; //formerly: 'complete filename'
 
 	return true;
 }
@@ -215,8 +250,7 @@ bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	inStream >> texV;
 	inStream >> m_texAlpha;
 	inStream >> m_image;
-	QString fakeString;
-	inStream >> fakeString; //formerly: 'complete filename'
+	inStream >> m_file_name; //formerly: 'complete filename'
 
 	return true;
 }

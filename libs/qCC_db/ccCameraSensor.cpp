@@ -1856,6 +1856,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 	const QRgb blackValue = qRgb(0, 0, 0);
 	const QRgb blackAlphaZero = qRgba(0, 0, 0, 0);
 
+	QImage image_data = image->data();
 	for (unsigned i = 0; i < w; ++i)
 	{
 		PointCoordinateType xip = static_cast<PointCoordinateType>(minC[0] + i*_pixelSize);
@@ -1873,7 +1874,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 				int y = static_cast<int>(imageCoord.y);
 				if (x >= 0 && x < width && y >= 0 && y < height)
 				{
-					rgb = image->data().pixel(x,y);
+					rgb = image_data.pixel(x,y);
 				}
 			}
 

@@ -579,7 +579,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	QDir imageDir = QFileInfo(f).dir(); //by default we look in the Bundler file folder
 
 	//let's try to open the images list file (if necessary)
-	QStringList imageFilenames;
+	QStringList imageFilenames; std::vector<std::pair<int, int>> image_width_height;
 	{
 		imageFilenames.clear();
 		QFile imageListFile(imageListFilename);
@@ -612,6 +612,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				ccLog::Error(QString("[Bundler] Couldn't extract image name from line %1 in file '%2'!").arg(lineIndex).arg(imageListFilename));
 				break;
+			}
+			if (parts.size() >= 3) {				
+				image_width_height.push_back({ parts[1].toInt(), parts[2].toInt() });
 			}
 		}
 	}
@@ -731,16 +734,13 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 		ccImage* image = new ccImage();
 		QString errorStr;
-		QFileInfo load_info(imageFilenames[i]);
-		QString image_load = load_info.path() + "/" + load_info.completeBaseName() + "_thumb." + load_info.suffix();		
-		if (!QFileInfo(image_load).exists()) {
-			image_load = imageFilenames[i];
-		}		
 
 		//! don't save the image in memory
-		if (!image->load(imageDir.absoluteFilePath(image_load), errorStr))
-		{
-			ccLog::Error(QString("[Bundler] %1 (image '%2')").arg(errorStr, image_load));
+		if (image_width_height.size() == camCount) {
+			image->loadWithWidthHeight(imageDir.absoluteFilePath(imageFilenames[i]), image_width_height[i].first, image_width_height[i].second, errorStr);
+		}
+		else if (!image->load(imageDir.absoluteFilePath(imageFilenames[i]), errorStr, true)) {
+			ccLog::Error(QString("[Bundler] %1 (image '%2')").arg(errorStr, imageFilenames[i]));
 			delete image;
 			image = nullptr;
 			break;
@@ -781,12 +781,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			sensor = new ccCameraSensor(params);
 			sensor->setName(QString("Camera #%1").arg(i + 1));
 			if (hackCloud) {
-				QFileInfo fileInfo(image->getName());
-				QString sensor_name = fileInfo.completeBaseName();
-				if (sensor_name.endsWith("_thumb"))	{
-					sensor_name = sensor_name.mid(0, sensor_name.length() - 5);
-				}
-				sensor->setName(sensor_name);
+				sensor->setName(QFileInfo(image->getName()).completeBaseName());
 			}
 			sensor->setEnabled(true);
 			sensor->setVisible(true/*false*/);
@@ -1085,6 +1080,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			ccGLMatrix sensorMatrix = sensor->getRigidTransformation().inverse();
 
 			//back project each MNT samples in this image to get color
+			const QImage image_data = image->data();
 			for (unsigned k=0; k<sampleCount; ++k)
 			{
 				CCVector3 P = *mntSamples->getPointPersistentPtr(k);
@@ -1105,7 +1101,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						int py = static_cast<int>(image->getH() / 2.0f - pprime.y);
 						if (py >= 0 && py < static_cast<int>(image->getH()))
 						{
-							QRgb rgb = image->data().pixel(px, py);
+							QRgb rgb = image_data.pixel(px, py);
 							if (qAlpha(rgb) != 0 && rgb != blackValue) //black pixels are ignored
 							{
 								int* col = mntColors + 4 * k;

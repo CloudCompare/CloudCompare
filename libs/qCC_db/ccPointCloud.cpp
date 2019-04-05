@@ -2718,7 +2718,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//if some points are hidden (= visibility table instantiated), we can't use display arrays :(
 			if (isVisibilityTableInstantiated())
 			{
-				assert(m_pointsVisibility.capacity() == m_points.size());
+				assert(m_pointsVisibility.size() == m_points.size());
 				//compressed normals set
 				const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
 				assert(compressedNormals);

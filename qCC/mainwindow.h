@@ -445,6 +445,7 @@ private slots:
 	/// Load Project
 	void doActionBDProjectLoad();
 	void doActionBDProjectSave();
+	void doActionBDImagesLoad();
 	/// Plane Segmentation
 	void doActionBDPlaneSegmentation();
 	/// Create Image Lines

@@ -207,6 +207,10 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 		m_model->setHeaderData(1, Qt::Horizontal, tr( "State/Value" ));
 	}
 
+	if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
+		fiilWithCameraGroup(m_currentObject);
+	}
+
 	if (m_currentObject->isA(CC_TYPES::ST_FOOTPRINT)) {
 		fillWithStFootPrint(ccHObjectCaster::ToStFootPrint(m_currentObject));
 	}
@@ -2331,6 +2335,17 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
 	if (!m_currentObject)
 		return;
 
+	if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {		
+		for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
+			ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject->getChild(i));
+			if (sensor && sensor->getGraphicScale() != static_cast<PointCoordinateType>(val)) {
+				sensor->setGraphicScale(static_cast<PointCoordinateType>(val));
+				updateDisplay();
+			}
+		}
+		return;
+	}
+
 	ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 	assert(sensor);
 
@@ -2587,4 +2602,13 @@ void ccPropertiesTreeDelegate::fillWithStModel(const StModel *_obj)
 
 void ccPropertiesTreeDelegate::fillWithStPrimGroup(const StPrimGroup *_obj)
 {
+}
+
+void ccPropertiesTreeDelegate::fiilWithCameraGroup(const ccHObject *_obj)
+{
+	assert(_obj && m_model);
+
+	//Sensor drawing scale
+	addSeparator(tr("Cameras"));
+	appendRow(ITEM(tr("Drawing scale")), PERSISTENT_EDITOR(OBJECT_SENSOR_DISPLAY_SCALE), true);
 }

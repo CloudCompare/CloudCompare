@@ -223,6 +223,7 @@ private:
 	void fillWithStFootPrint(const StFootPrint*);
 	void fillWithStModel(const StModel*);
 	void fillWithStPrimGroup(const StPrimGroup*);
+	void fiilWithCameraGroup(const ccHObject*);
 };
 
 #endif

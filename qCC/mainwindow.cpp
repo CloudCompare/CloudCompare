@@ -150,6 +150,7 @@
 #include <iostream>
 #include <random>
 
+#include "core/IO/qAdditionalIO/src/BundlerFilter.h"
 #ifdef USE_STOCKER
 #include "bdrPlaneSegDlg.h"
 #include "bdrLine3DppDlg.h"
@@ -789,6 +790,7 @@ void MainWindow::connectActions()
 	//Building Reconstruction
 	connect(m_UI->actionBDProjectLoad,				&QAction::triggered, this, &MainWindow::doActionBDProjectLoad);
 	connect(m_UI->actionBDProjectSave,				&QAction::triggered, this, &MainWindow::doActionBDProjectSave);
+	connect(m_UI->actionBDImagesLoad,				&QAction::triggered, this, &MainWindow::doActionBDImagesLoad);
 	
 	connect(m_UI->actionBDPlaneSegmentation,		&QAction::triggered, this, &MainWindow::doActionBDPlaneSegmentation);	
 	connect(m_UI->actionBDImage_Lines,				&QAction::triggered, this, &MainWindow::doActionBDImageLines);
@@ -10670,6 +10672,7 @@ void MainWindow::doActionBDDisplayPlaneOn()
 	ProgStart("Show Plane");
 	for (auto & Obj : Objs) {
 		Obj->setVisible(true);
+		Obj->redrawDisplay();
 	}
 	ProgEnd
 
@@ -10690,6 +10693,7 @@ void MainWindow::doActionBDDisplayPlaneOff()
 	ProgStartNorm("Hide Plane", Objs.size());
 	for (auto & Obj : Objs) {
 		Obj->setVisible(false);
+		Obj->redrawDisplay();
 		ProgStep()
 	}
 	ProgEnd
@@ -10711,6 +10715,7 @@ void MainWindow::doActionBDDisplayPointOn()
 	ProgStart("Show Points");
 	for (auto & Obj : Objs) {
 		Obj->setVisible(true);
+		Obj->redrawDisplay();
 	}
 	ProgEnd
 	refreshAll();
@@ -10730,6 +10735,7 @@ void MainWindow::doActionBDDisplayPointOff()
 	ProgStart("Hide Points");
 	for (auto & Obj : Objs) {
 		Obj->setVisible(false);
+		Obj->redrawDisplay();
 	}
 	ProgEnd
 	refreshAll();
@@ -10909,6 +10915,61 @@ void MainWindow::doActionBDProjectSave()
 		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 		return;
 	}	
+}
+
+void MainWindow::doActionBDImagesLoad()
+{
+	if (!haveSelection()) {
+		return;
+	}
+	BDBaseHObject* baseObj = GetRootBDBase(getSelectedEntities().front());
+	if (!baseObj) {
+		return;
+	}
+	
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::LoadFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+
+	QString Filename =
+		QFileDialog::getOpenFileName(this,
+			"Import images",
+			currentPath,
+			"Bundler output (*.out)");
+
+	if (Filename.isEmpty()) return;
+
+	//save last loading parameters
+	currentPath = QFileInfo(Filename).absolutePath();
+	settings.setValue(ccPS::CurrentPath(), currentPath);
+	settings.endGroup();
+
+	CCVector3d loadCoordinatesShift = CCVector3d(vcgXYZ(baseObj->global_shift));
+	bool loadCoordinatesTransEnabled = false;
+	FileIOFilter::LoadParameters parameters;
+	{
+		parameters.alwaysDisplayLoadDialog = true;
+		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
+		parameters.coordinatesShift = &loadCoordinatesShift;
+		parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
+		parameters.parentWidget = this;
+	}
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	QString out_file, image_list;
+	if (baseObj->block_prj.m_options.with_image) {
+		out_file = baseObj->block_prj.m_options.prj_file.sfm_out.c_str();
+		image_list = baseObj->block_prj.m_options.prj_file.image_list.c_str();
+		parameters.additionInfo = (void*)(&image_list);
+	}	
+
+	if (QFileInfo(out_file).exists() && QFileInfo(image_list).exists()) {
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(out_file, parameters, result, QString());
+		if (newGroup) {			
+			newGroup->setName(baseObj->getName() + BDDB_CAMERA_SUFFIX);
+			addToDB(newGroup);
+		}
+	}
 }
 
 void MainWindow::doActionBDPlaneSegmentation()

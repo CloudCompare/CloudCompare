@@ -95,6 +95,7 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_LOD2MODEL_PREFIX		"LoD2_"
 #define BDDB_LOD3MODEL_PREFIX		"LoD3_"
 
+#define BDDB_CAMERA_SUFFIX			".camera"
 #define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
 #define BDDB_PRIMITIVE_SUFFIX		".primitive"
 #define BDDB_POLYFITHYPO_SUFFIX		".hypothesis"

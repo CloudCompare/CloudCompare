@@ -162,7 +162,16 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	BundlerImportDlg::OrthoRectMethod orthoRectMethod = BundlerImportDlg::OPTIMIZED;
 
 	//default paths
-	QString imageListFilename = QFileInfo(f).dir().absoluteFilePath("list.txt");
+	QString imageListFilename;
+	QString* list_path = (QString*)parameters.additionInfo;
+	bool stocker_parse = false;
+	if (list_path) {
+		stocker_parse = true;
+		imageListFilename = *list_path;
+	}
+	else {
+		imageListFilename = QFileInfo(f).dir().absoluteFilePath("list.txt");
+	}
 	QString altKeypointsFilename = QFileInfo(f).dir().absoluteFilePath("pmvs.ply");
 
 	if (parameters.alwaysDisplayLoadDialog)
@@ -174,6 +183,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		biDlg.setVer(majorVer,minorVer);
 		biDlg.setImageListFilename(imageListFilename);
 		biDlg.setAltKeypointsFilename(altKeypointsFilename);
+		if (stocker_parse) {
+			biDlg.keepImagesInMemoryCheckBox->setChecked(true);
+		}
 
 		if (!biDlg.exec())
 			return CC_FERR_CANCELED_BY_USER;

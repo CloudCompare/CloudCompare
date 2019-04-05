@@ -87,6 +87,8 @@ public:
 		QWidget* parentWidget;
 		//! Session start (whether the load action is the first of a session)
 		bool sessionStart;
+		//! additional information
+		void* additionInfo;
 	};
 	
 	//! Generic saving parameters

@@ -652,6 +652,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionSave"/>
    <addaction name="actionBDProjectLoad"/>
    <addaction name="actionBDProjectSave"/>
+   <addaction name="actionBDImagesLoad"/>
   </widget>
   <widget class="QDockWidget" name="DockableProperties">
    <property name="minimumSize">
@@ -3427,6 +3428,15 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="iconText">
     <string>Split</string>
+   </property>
+  </action>
+  <action name="actionBDImagesLoad">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/camera.png</normaloff>:/CC/Stocker/images/stocker/camera.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Images</string>
    </property>
   </action>
  </widget>

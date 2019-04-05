@@ -53,7 +53,7 @@ public:
 	bool loadWithWidthHeight(const QString& filename, int width, int height, QString& error);
 
 	//! Returns image data
-	inline QImage& data();
+	//inline QImage& data();
 	//! Returns image data (const version)
 	inline const QImage& data() const;
 

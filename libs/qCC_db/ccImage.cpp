@@ -89,16 +89,16 @@ bool ccImage::loadWithWidthHeight(const QString & filename, int width, int heigh
 	return true;
 }
 
-inline QImage & ccImage::data()
-{
-	if (m_image.isNull()) {
-		QImageReader reader(m_file_name);
-		return reader.read();
-	}
-	else {
-		return m_image;
-	}
-}
+// inline QImage & ccImage::data()
+// {
+// 	if (m_image.isNull()) {
+// 		QImageReader reader(m_file_name);
+// 		return reader.read();
+// 	}
+// 	else {
+// 		return m_image;
+// 	}
+// }
 
 inline const QImage & ccImage::data() const
 {
@@ -128,7 +128,9 @@ void ccImage::updateAspectRatio()
 
 void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	QImage image = data();
+	if (m_image.isNull()) {
+		return;
+	}
 
 	if (!MACRO_Draw2D(context) || !MACRO_Foreground(context))
 		return;
@@ -147,7 +149,7 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glFunc->glPushAttrib(GL_ENABLE_BIT);
 	glFunc->glEnable(GL_TEXTURE_2D);
 
-	QOpenGLTexture texture(image);
+	QOpenGLTexture texture(m_image);
 	texture.bind();
 	{
 		//we make the texture fit inside viewport

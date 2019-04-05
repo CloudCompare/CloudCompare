@@ -305,8 +305,6 @@ protected:
 	QAction* m_editLabelScalarValue;
 	//! Context menu action: deselect other children
 	QAction* m_deselectOtherChildren;
-	//! goto the next child under the same level
-	QAction* m_gotoNext;
 
 	//! Last context menu pos
 	QPoint m_contextMenuPos;

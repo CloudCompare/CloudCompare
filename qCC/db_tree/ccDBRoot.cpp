@@ -303,7 +303,6 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_enableBubbleViewMode = new QAction("Bubble-view", this);
 	m_editLabelScalarValue = new QAction("Edit scalar value", this);
 	m_deselectOtherChildren = new QAction("Deselect Others", this);
-	m_gotoNext = new QAction("Go to Next", this);
 
 	m_contextMenuPos = QPoint(-1,-1);
 

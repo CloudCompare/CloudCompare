@@ -619,12 +619,6 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 	case SELECTION_FIT_BBOX:
 		{
 			//get the set of OpenGL functions (version 2.1)
-			QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-			assert( glFunc != nullptr );
-			
-			if ( glFunc == nullptr )
-				break;
-			
 			ccGLMatrix trans;
 			ccBBox box = getOwnFitBB(trans);
 			if (box.isValid())

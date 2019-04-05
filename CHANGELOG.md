@@ -18,6 +18,7 @@ v2.10.3 (Zephyrus) - (in development)
   - Fix potential crash or use of incorrect data when comparing clouds (#871)
   - Fix potential crash when quitting or switching displays
   - Quitting the "Section extraction tool" (and probably any tool that uses a temporary 3D view, such as the Align tool) would break the picking hub mechanism (preventing the user from picking points typically) (#886)
+  - Fix the camera name being displayed in the wrong place (#902)
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------

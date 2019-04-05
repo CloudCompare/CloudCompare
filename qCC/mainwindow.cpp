@@ -6412,12 +6412,12 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							if (m_gsTool->isPlaneSegMode()) {								
 								int biggest = GetMaxNumberExcludeChildPrefix(objContext.parent, BDDB_PLANESEG_PREFIX);
 								segmentationResult->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
-// 								ccPointCloud* segment_cloud = ccHObjectCaster::ToPointCloud(segmentationResult);
-// 								if (segment_cloud) {
-// 									segment_cloud->setRGBColor(ccColor::Generator::Random());
-// 									ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
-// 									if (new_plane) addToDB(new_plane);										
-// 								}
+								ccPointCloud* segment_cloud = ccHObjectCaster::ToPointCloud(segmentationResult);
+								if (segment_cloud) {
+									segment_cloud->setRGBColor(ccColor::Generator::Random());
+									ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
+									if (new_plane) addToDB(new_plane);
+ 								}
 							}
 							else {
 								entity->setName(entity->getName() + QString(".remaining"));
@@ -6429,6 +6429,12 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					{
 						//keep original name(s)
 						segmentationResult->setName(entity->getName());
+						ccPointCloud* segment_cloud = ccHObjectCaster::ToPointCloud(segmentationResult);
+						if (segment_cloud) {
+							segment_cloud->setRGBColor(segment_cloud->hasColors() ? segment_cloud->getPointColor(0) : ccColor::Generator::Random());
+							ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
+							if (new_plane) addToDB(new_plane);
+						}
 						if (entity->isKindOf(CC_TYPES::MESH) && segmentationResult->isKindOf(CC_TYPES::MESH))
 						{
 							ccGenericMesh* meshEntity = ccHObjectCaster::ToGenericMesh(entity);

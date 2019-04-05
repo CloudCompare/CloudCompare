@@ -858,6 +858,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionBDPrimPlaneFrame"/>
    <addaction name="separator"/>
    <addaction name="actionBDPrimMergePlane"/>
+   <addaction name="actionBDPrimSplitPlane"/>
    <addaction name="actionBDPlane_Deduction"/>
    <addaction name="actionPointListPicking"/>
    <addaction name="actionTracePolyline"/>
@@ -3414,6 +3415,18 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionBDPrimSplitPlane">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/splitplane.png</normaloff>:/CC/Stocker/images/stocker/splitplane.png</iconset>
+   </property>
+   <property name="text">
+    <string>Split Plane</string>
+   </property>
+   <property name="iconText">
+    <string>Split</string>
    </property>
   </action>
  </widget>

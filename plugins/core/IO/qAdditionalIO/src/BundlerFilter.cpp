@@ -812,7 +812,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		}
 		//the image is a child of the sensor!
 		image->setAssociatedSensor(sensor);
-		sensor->addChild(image);		
+		sensor->addChild(image);
+		sensor->setImagePath(image->getImagePath());
 
 		//ortho-rectification
 		if (orthoRectifyImages)

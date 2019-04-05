@@ -113,6 +113,7 @@ public:
 							OBJECT_FOOTPRINT_HEIGHT					,
 							OBJECT_BLOCK_TOP_ADD					,
 							OBJECT_BLOCK_BOTTOM_ADD					,
+							OBJECT_SENSOR_DRAW_IMAGE				,
 	};
 
 	//! Default constructor

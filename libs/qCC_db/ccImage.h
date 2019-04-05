@@ -87,6 +87,8 @@ public:
 	//! Returns associated sensor (const version)
 	const ccCameraSensor* getAssociatedSensor() const { return m_associatedSensor; }
 
+	QString getImagePath() { return m_file_name; }
+
 protected:
 
 	//inherited from ccHObject

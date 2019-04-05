@@ -981,6 +981,7 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(const ccCameraSensor* _obj)
 	//Draw frustum
 	appendRow(ITEM( tr( "Show lines" ) ), CHECKABLE_ITEM(_obj->frustumIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM));
 	appendRow(ITEM( tr( "Show side planes" ) ), CHECKABLE_ITEM(_obj->frustumPlanesAreDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM_PLANES));
+	appendRow(ITEM(tr("Show image")), CHECKABLE_ITEM(_obj->imageIsDrawn(), OBJECT_SENSOR_DRAW_IMAGE));
 
 	//Positions
 	fillWithSensor(_obj);
@@ -1981,6 +1982,13 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	{
 		ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
 		sensor->drawFrustumPlanes(item->checkState() == Qt::Checked);
+	}
+	redraw = true;
+	break;
+	case OBJECT_SENSOR_DRAW_IMAGE:
+	{
+		ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
+		sensor->drawImage(item->checkState() == Qt::Checked);
 	}
 	redraw = true;
 	break;

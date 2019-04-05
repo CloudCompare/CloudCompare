@@ -31,6 +31,8 @@
 //Qt
 #include <QDir>
 #include <QTextStream>
+#include <QImageReader>
+#include <QOpenGLTexture>
 
 ccCameraSensor::IntrinsicParameters::IntrinsicParameters()
 	: vertFocal_pix(1.0f)
@@ -104,6 +106,7 @@ ccCameraSensor::FrustumInformation::FrustumInformation()
 	, drawSidePlanes(false)
 	, frustumCorners(nullptr)
 	, frustumHull(nullptr)
+	, drawImage(false)
 {}
 
 ccCameraSensor::FrustumInformation::~FrustumInformation()
@@ -485,6 +488,7 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 	outStream << m_frustumInfos.center.x;
 	outStream << m_frustumInfos.center.y;
 	outStream << m_frustumInfos.center.z;
+	outStream << m_frustumInfos.drawImage;
 
 	return true;
 }
@@ -604,6 +608,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	inStream >> m_frustumInfos.drawFrustum;
 	inStream >> m_frustumInfos.drawSidePlanes;
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_frustumInfos.center.u, 3);
+	inStream >> m_frustumInfos.drawImage;
 
 	if (dataVersion < 38)
 	{
@@ -1527,6 +1532,39 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glEnd();
 
 		glFunc->glPopAttrib(); //GL_LINE_BIT
+	}
+
+	if (m_frustumInfos.drawImage) {
+		if (m_image.isNull()) {
+			//! load
+			QImageReader reader(m_image_path);
+			QImage image_tmp = reader.read();
+			m_image = image_tmp.scaled(300, 300 * image_tmp.height() / image_tmp.width(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+		}
+		if (!m_image.isNull()) {
+			glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
+			glFunc->glEnable(GL_BLEND);
+			glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			glFunc->glPushAttrib(GL_ENABLE_BIT);
+			glFunc->glEnable(GL_TEXTURE_2D);
+
+			QOpenGLTexture texture(m_image);
+			texture.bind();
+			{
+				glFunc->glColor4f(1, 1, 1, 0.8);
+				glFunc->glBegin(GL_QUADS);
+				glFunc->glTexCoord2f(1, 0); glFunc->glVertex3f(upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);
+				glFunc->glTexCoord2f(0, 0); glFunc->glVertex3f(-upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);
+				glFunc->glTexCoord2f(0, 1); glFunc->glVertex3f(-upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+				glFunc->glTexCoord2f(1, 1); glFunc->glVertex3f(upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+				glFunc->glEnd();
+			}
+			texture.release();
+
+			glFunc->glPopAttrib();
+			glFunc->glPopAttrib();
+		}
 	}
 
 	if (pushName)

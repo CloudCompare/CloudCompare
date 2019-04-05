@@ -25,6 +25,8 @@
 //system
 #include <unordered_set>
 
+#include <QImage>
+
 class ccImage;
 class ccMesh;
 class ccPointCloud;
@@ -171,6 +173,8 @@ public: //general
 		ccPointCloud* frustumCorners;
 		ccMesh* frustumHull;
 		CCVector3 center;					/**< center of the circumscribed sphere **/
+
+		bool drawImage;
 	};
 
 	//! Default constructor
@@ -237,6 +241,16 @@ public: //frustum display
 
 	//! Sets whether the frustum planes should be displayed or not
 	inline void drawFrustumPlanes(bool state) { m_frustumInfos.drawSidePlanes = state; }
+
+public: //image
+	//! Returns whether the image should be displayed or not
+	inline bool imageIsDrawn() const { return m_frustumInfos.drawImage; }
+
+	//! Sets whether the image should be displayed or not
+	inline void drawImage(bool state) { m_frustumInfos.drawImage = state; }
+
+	inline QString imagePath() const { return m_image_path; }
+	inline void setImagePath(QString path) { m_image_path = path; }
 
 public: //coordinate systems conversion methods
 
@@ -514,6 +528,9 @@ protected:
 	ccGLMatrix m_projectionMatrix;
 	//! Whether the intrinsic matrix is valid or not
 	bool m_projectionMatrixIsValid;
+
+	QImage m_image;
+	QString m_image_path;
 };
 
 class ccOctreeFrustumIntersector

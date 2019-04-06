@@ -20,6 +20,8 @@ v2.11 (Anoia) - (in development)
 		CC won't spawn a 3-points label anymore, but a single point label at the right position
 	- labels picked on a mesh can be used to re-orient the camera (right-click on the label entry in the DB)
 	- note: for now, labels associated to meshes are not preserved when cloning or merging the meshes
+	- points are now excusively picked inside the current fustrum (no more points behind the camera)
+
 
 - Changes
   - Command line tool:

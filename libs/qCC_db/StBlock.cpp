@@ -235,9 +235,20 @@ bool StBlock::buildUp()
 			const int* _triIndexes = triIndexes;
 			for (unsigned i = 0; i < numberOfTriangles; ++i, _triIndexes += 3)
 			{
-				addTriangle(_triIndexes[0] * 2, _triIndexes[1] * 2, _triIndexes[2] * 2);
+				if (ccNormalVectors::GetUniqueInstance()->getNormal(m_triNormals->getValue(0)).z < 0) {
+					addTriangle(_triIndexes[0] * 2, _triIndexes[2] * 2, _triIndexes[1] * 2);
+				}
+				else {
+					addTriangle(_triIndexes[0] * 2, _triIndexes[1] * 2, _triIndexes[2] * 2);
+				}				
 				addTriangleNormalIndexes(0, 0, 0);
-				addTriangle(_triIndexes[0] * 2 + 1, _triIndexes[2] * 2 + 1, _triIndexes[1] * 2 + 1);
+
+				if (ccNormalVectors::GetUniqueInstance()->getNormal(m_triNormals->getValue(1)).z > 0) {
+					addTriangle(_triIndexes[0] * 2 + 1, _triIndexes[1] * 2 + 1, _triIndexes[2] * 2 + 1);
+				}
+				else {
+					addTriangle(_triIndexes[0] * 2 + 1, _triIndexes[2] * 2 + 1, _triIndexes[1] * 2 + 1);
+				}				
 				addTriangleNormalIndexes(1, 1, 1);
 			}
 		}

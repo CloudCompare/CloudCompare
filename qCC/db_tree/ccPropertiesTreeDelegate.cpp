@@ -1995,13 +1995,13 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 				if (sensor) {
-					sensor->drawBaseAxis(item->checkState() == Qt::Checked);
+					sensor->drawNearPlane(item->checkState() == Qt::Checked);
 				}
 			}
 		}
 		else {
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-			sensor->drawBaseAxis(item->checkState() == Qt::Checked);
+			sensor->drawNearPlane(item->checkState() == Qt::Checked);
 		}
 	}
 	redraw = true;

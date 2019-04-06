@@ -50,12 +50,12 @@ enum CC_DRAWING_FLAGS
 	CC_SKIP_SELECTED						= 0x0020,
 	CC_SKIP_ALL								= 0x0030,		// = CC_SKIP_UNSELECTED | CC_SKIP_SELECTED
 	CC_DRAW_ENTITY_NAMES					= 0x0040,
-	//CC_FREE_FLAG							= 0x0080,		// UNUSED (formerly CC_DRAW_POINT_NAMES)
+	CC_DRAW_BBOX							= 0x0080,		//XYLIU // UNUSED (formerly CC_DRAW_POINT_NAMES)
 	//CC_FREE_FLAG							= 0x0100,		// UNUSED (formerly CC_DRAW_TRI_NAMES)
 	CC_DRAW_FAST_NAMES_ONLY					= 0x0200,
 	//CC_FREE_FLAG							= 0x03C0,		// UNUSED (formerly CC_DRAW_ANY_NAMES = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES)
 	CC_LOD_ACTIVATED						= 0x0400,
-	CC_VIRTUAL_TRANS_ENABLED				= 0x0800
+	CC_VIRTUAL_TRANS_ENABLED				= 0x0800,
 };
 
 // Drawing flags testing macros (see ccDrawableObject)
@@ -69,6 +69,7 @@ enum CC_DRAWING_FLAGS
 #define MACRO_Foreground(context)          (context.drawingFlags & CC_DRAW_FOREGROUND)
 #define MACRO_LODActivated(context)        (context.drawingFlags & CC_LOD_ACTIVATED)
 #define MACRO_VirtualTransEnabled(context) (context.drawingFlags & CC_VIRTUAL_TRANS_ENABLED)
+#define MACRO_DRAW_BBOX(context)		   (context.drawingFlags & CC_DRAW_BBOX)
 
 //! Display context
 struct ccGLDrawContext

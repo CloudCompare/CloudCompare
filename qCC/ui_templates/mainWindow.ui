@@ -914,6 +914,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionSetViewBack"/>
    <addaction name="actionSetViewLeft"/>
    <addaction name="actionSetViewRight"/>
+   <addaction name="actionDisplayShowBBox"/>
   </widget>
   <widget class="QToolBar" name="toolBarEditor">
    <property name="windowTitle">
@@ -3552,6 +3553,21 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="text">
     <string>Load Images</string>
+   </property>
+  </action>
+  <action name="actionDisplayShowBBox">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/primBox.gif</normaloff>:/CC/images/primBox.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Show BBox</string>
    </property>
   </action>
  </widget>

@@ -378,6 +378,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_ignoreMouseReleaseEvent(false)
 	, m_rotationAxisLocked(false)
 	, m_lockedRotationAxis(0, 0, 1)
+	, m_drawBBox(true)
 {
 	//start internal timer
 	m_timer.start();
@@ -2370,6 +2371,13 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 			//we display it as a litle 3D star
 			drawCustomLight();
 		}
+	}
+
+	if (m_drawBBox) {
+		CONTEXT.drawingFlags |= CC_DRAW_BBOX;
+	}
+	else {
+		CONTEXT.drawingFlags &= (~CC_DRAW_BBOX);
 	}
 
 	//we draw 3D entities

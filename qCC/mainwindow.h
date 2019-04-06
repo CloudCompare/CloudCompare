@@ -674,6 +674,8 @@ private:
 	// XYLIU
 	ccHObject* askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
 
+	void toggleDrawBBox();
+
 	//! Building Reconstruction dialogs
 	bdrPlaneSegDlg* m_pbdrPSDlg;
 	bdrLine3DppDlg* m_pbdrl3dDlg;

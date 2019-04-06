@@ -536,6 +536,8 @@ public:
 	//! Returns the OpenGL context size
 	QSize glSize() const { return m_glViewport.size(); }
 
+	void toggleDrawBBox() { m_drawBBox = !m_drawBBox; };
+
 public: //LOD
 
 	//! Returns whether LOD is enabled on this display or not
@@ -1323,6 +1325,7 @@ protected: //members
 	bool m_rotationAxisLocked;
 	//! Locked rotation axis
 	CCVector3d m_lockedRotationAxis;
+	bool m_drawBBox;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

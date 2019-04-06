@@ -748,6 +748,7 @@ void MainWindow::connectActions()
 
 	//"Display" menu
 	connect(m_UI->actionResetGUIElementsPos,		&QAction::triggered, this, &MainWindow::doActionResetGUIElementsPos);
+	connect(m_UI->actionDisplayShowBBox,			&QAction::triggered, this, &MainWindow::toggleDrawBBox);
 
 	//"3D Views" menu
 	connect(m_UI->menu3DViews,						&QMenu::aboutToShow, this, &MainWindow::update3DViewsMenu);
@@ -10672,6 +10673,15 @@ ccHObject* MainWindow::askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultClo
 
 	assert(selectedIndex >= 0 && static_cast<size_t>(selectedIndex) < entites.size());
 	return entites[selectedIndex];
+}
+
+void MainWindow::toggleDrawBBox() {
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		win->toggleDrawBBox();
+		win->redraw(false);
+	}
 }
 
 void MainWindow::doActionBDDisplayPlaneOn()

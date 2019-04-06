@@ -3643,7 +3643,7 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 {
 	double xc = static_cast<double>(width() / 2);
-	double yc = static_cast<double>(height() / 2); //DGM FIME: is it scaled coordinates or not?!
+	double yc = static_cast<double>(height() / 2); //DGM FIXME: is it scaled coordinates or not?!
 
 	CCVector3d Q2D;
 	if (m_viewportParams.objectCenteredView)

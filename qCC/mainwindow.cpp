@@ -10922,7 +10922,31 @@ void MainWindow::doActionBDImagesLoad()
 	if (!baseObj) {
 		return;
 	}
-
+	ccHObject* camera_group = baseObj->GetCameraGroup();
+	/// temporarily put this function here, need add a button
+	if (getSelectedEntities().front()->isA(CC_TYPES::ST_BUILDING)) {
+		if (camera_group) {
+			QStringList building_images;
+			for (ccHObject* bd : getSelectedEntities()) {
+				stocker::BuildUnit bd_unit = baseObj->GetBuildingUnit(bd->getName().toStdString());
+				for (auto img : bd_unit.image_list)	{
+					QFileInfo img_path(img.c_str());
+					building_images.append(img_path.path() + "/" + img_path.completeBaseName());
+				}
+			}			
+			filterCameraByName(camera_group, building_images);
+			refreshAll();
+			return;
+		}
+	}
+	
+	if (camera_group) {
+		if (QMessageBox::question(this,	
+			"Import camera", "cameras exist, import again?",
+			QMessageBox::Yes, QMessageBox::No)
+			== QMessageBox::No)
+			return;
+	}
 	CCVector3d loadCoordinatesShift = CCVector3d(vcgXYZ(baseObj->global_shift));
 	bool loadCoordinatesTransEnabled = false;
 	FileIOFilter::LoadParameters parameters;

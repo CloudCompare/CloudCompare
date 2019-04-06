@@ -135,7 +135,7 @@ public:
 	StPrimGroup* GetPrimitiveGroup(QString building_name, bool check_enable = false);
 	StBlockGroup * GetBlockGroup(QString building_name, bool check_enable);
 	ccHObject * GetHypothesisGroup(QString building_name, bool check_enable);
-
+	ccHObject* GetCameraGroup();
 	stocker::Vec3d ToLocal(stocker::Vec3d pt) { return (pt + global_shift)*global_scale; }
 	stocker::Vec3d ToGlobal(stocker::Vec3d pt) { return pt / global_scale - global_shift; }
 
@@ -157,6 +157,8 @@ BDBaseHObject* GetRootBDBase(ccHObject* obj);
 ccHObject * GetPlaneCloud(ccHObject * planeObj);
 
 bool SetGlobalShiftAndScale(ccHObject * obj);
+
+void filterCameraByName(ccHObject* camera_group, QStringList name_list);
 
 class PolyFitObj
 {

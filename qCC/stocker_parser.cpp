@@ -413,6 +413,19 @@ StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name, bool check_en
 ccHObject * BDBaseHObject::GetHypothesisGroup(QString building_name, bool check_enable) {
 	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_POLYFITHYPO_SUFFIX, building_name, check_enable);
 }
+ccHObject * BDBaseHObject::GetCameraGroup()
+{
+	ccHObject* root = getParent();
+	if (root && root->getChildrenNumber() > 1) {
+		for (size_t i = 0; i < getChildrenNumber(); i++) {
+			QString camera_group_name = getName() + BDDB_CAMERA_SUFFIX;
+			if (getChild(i)->getName() == camera_group_name) {
+				return getChild(i);
+			}
+		}
+	}
+	return nullptr;
+}
 std::string BDBaseHObject::GetPathModelObj(std::string building_name)
 {
 	auto& bd = block_prj.m_builder.sbuild.find(stocker::BuilderBase::BuildNode::Create(building_name));
@@ -483,6 +496,19 @@ bool SetGlobalShiftAndScale(ccHObject* obj)
 		cloud_entity->setGlobalShift(CCVector3d(vcgXYZ(baseObj->global_shift)));
 	}
 	return true;
+}
+
+void filterCameraByName(ccHObject * camera_group, QStringList name_list)
+{
+	for (size_t i = 0; i < camera_group->getChildrenNumber(); i++) {
+		ccHObject* camera = camera_group->getChild(i); 
+		camera->setEnabled(false);
+		for (QString name : name_list) {
+			if (camera->getName() == name) {
+				camera->setEnabled(true);
+			}
+		}
+	}
 }
 
 int GetNumberExcludePrefix(ccHObject * obj, QString prefix)

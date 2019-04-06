@@ -101,8 +101,8 @@ ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	addOverridenShortcut(Qt::Key_Delete); //delete key to delete the selected polyline
 
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccSectionExtractionTool::onShortcutTriggered);
-	connect(m_UI->saveFootprintInsidetoolButton, SIGNAL(clicked()), this, SLOT(exportFootprintInside()));
-	connect(m_UI->saveFootprintOutsidetoolButton, SIGNAL(clicked()), this, SLOT(exportFootprintOutside()));
+	connect(m_UI->saveFootprintInsidetoolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::exportFootprintInside);
+	connect(m_UI->saveFootprintOutsidetoolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::exportFootprintOutside);
 
 	setExtractMode(true);
 }
@@ -883,8 +883,10 @@ void ccSectionExtractionTool::closePolyLine(int, int)
 		}
 		m_editedPoly = nullptr;
 		m_editedPolyVertices = nullptr;
-	}
 
+		enableSectionEditingMode(false); return;	//XYLIU stop now 
+	}
+	
 	//stop
 	m_state &= (~RUNNING);
 

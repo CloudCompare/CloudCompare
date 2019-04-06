@@ -566,15 +566,18 @@
   <widget class="QDockWidget" name="DockableDBTree">
    <property name="minimumSize">
     <size>
-     <width>146</width>
-     <height>175</height>
+     <width>168</width>
+     <height>290</height>
     </size>
    </property>
    <property name="floating">
     <bool>false</bool>
    </property>
    <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+    <set>QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::LeftDockWidgetArea</set>
    </property>
    <property name="windowTitle">
     <string>Project</string>
@@ -585,9 +588,44 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout">
      <item>
-      <widget class="ccCustomQTreeView" name="dbTreeView">
-       <property name="styleSheet">
-        <string notr="true">QTreeView::branch:has-siblings:!adjoins-item {
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="tabPosition">
+        <enum>QTabWidget::West</enum>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="Buildings">
+        <attribute name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/building.png</normaloff>:/CC/Stocker/images/stocker/building.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>Buildings</string>
+        </attribute>
+        <widget class="ccCustomQTreeView" name="dbTreeView">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>231</width>
+           <height>280</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>250</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QTreeView::branch:has-siblings:!adjoins-item {
     border-image: url(:/CC/images/QTreeView/vline.png) 0;
 }
 
@@ -610,19 +648,95 @@ QTreeView::branch:open:has-children:has-siblings  {
         border-image: none;
         image: url(:/CC/images/QTreeView/branch-open.png);
 }</string>
-       </property>
-       <property name="dragEnabled">
-        <bool>true</bool>
-       </property>
-       <property name="dragDropMode">
-        <enum>QAbstractItemView::InternalMove</enum>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::ExtendedSelection</enum>
-       </property>
-       <property name="uniformRowHeights">
-        <bool>true</bool>
-       </property>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::InternalMove</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="uniformRowHeights">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="Images">
+        <attribute name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/camera.png</normaloff>:/CC/Stocker/images/stocker/camera.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>Images</string>
+        </attribute>
+        <widget class="ccCustomQTreeView" name="dbImageTreeView">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>231</width>
+           <height>281</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>250</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(:/CC/images/QTreeView/vline.png) 0;
+}
+
+QTreeView::branch:has-siblings:adjoins-item {
+    border-image: url(:/CC/images/QTreeView/branch-more.png) 0;
+}
+
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(:/CC/images/QTreeView/branch-end.png) 0;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+        border-image: none;
+        image: url(:/CC/images/QTreeView/branch-closed.png);
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+        border-image: none;
+        image: url(:/CC/images/QTreeView/branch-open.png);
+}</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::InternalMove</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="uniformRowHeights">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </widget>
       </widget>
      </item>
     </layout>

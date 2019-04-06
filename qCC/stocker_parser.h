@@ -48,8 +48,6 @@ class PolyFitObj;
 
 QString GetBaseName(QString name);
 
-ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud);
-
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject * entity, stocker::Polyline3d polygon, double height);
 std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonXY(ccHObject::Container entities, stocker::Polyline3d polygon, double height, bool skip_empty = true);
@@ -62,7 +60,15 @@ bool isPlaneCloud(ccHObject* entity);
 //! return -1 if no child exists
 int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix);
 
-ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
+ccPlane* FitPlaneAndAddChild(ccPointCloud* cloud);
+
+ccPointCloud* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
+
+ccPointCloud * AddPointsAsPlane(stocker::Contour3d points, QString name, ccColor::Rgb col);
+
+ccPointCloud* AddSegmentsAsPlane(stocker::Polyline3d lines, QString lines_prefix, ccColor::Rgb col, ccHObject* _exist_cloud = nullptr);
+
+StPrimGroup * AddPlanesPointsAsNewGroup(QString name, std::vector<stocker::Contour3d> planes_points);
 
 ccHObject* PlaneSegmentationRansac(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double normal_threshold, double ransac_probability, double merge_threshold = -1, double split_threshold = -1);
 ccHObject* PlaneSegmentationRgGrow(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double growing_radius, double merge_threshold = -1, double split_threshold = -1);

@@ -40,31 +40,6 @@ QString GetBaseName(QString name) {
 	return name.mid(0, name.indexOf('.'));
 }
 
-ccHObject* FitPlaneAndAddChild(ccPointCloud* cloud)
-{
-	ccHObject* cc_plane = nullptr;
-	double rms = 0;
-	ccPlane* pPlane = ccPlane::Fit(cloud, &rms);
-	if (pPlane) {
-		cc_plane = static_cast<ccHObject*>(pPlane);
-		if (cloud->hasColors())	{
-			pPlane->setColor(cloud->getPointColor(0));
-		}		
-		pPlane->enableStippling(true);
-	}
-	if (cc_plane) {
-		cc_plane->setName("Plane");
-		cc_plane->applyGLTransformation_recursive();
-		cc_plane->showColors(true);
-		cc_plane->setVisible(true);
-		cc_plane->showNormals(cloud->hasNormals());
-
-		cloud->addChild(cc_plane);
-		cc_plane->setDisplay(cloud->getDisplay());
-		cc_plane->prepareDisplayForRefresh_recursive();
-	}
-	return cc_plane;
-}
 
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity) 
 {	
@@ -539,7 +514,33 @@ int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix/*, CC_CLASS_E
 	return -1;
 }
 
-ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)
+ccPlane* FitPlaneAndAddChild(ccPointCloud* cloud)
+{
+	//	ccHObject* cc_plane = nullptr;
+	double rms = 0;
+	ccPlane* pPlane = ccPlane::Fit(cloud, &rms);
+	if (pPlane) {
+		//		cc_plane = static_cast<ccHObject*>(pPlane);
+		if (cloud->hasColors()) {
+			pPlane->setColor(cloud->getPointColor(0));
+		}
+		pPlane->enableStippling(true);
+	}
+	if (pPlane) {
+		pPlane->setName("Plane");
+		pPlane->applyGLTransformation_recursive();
+		pPlane->showColors(true);
+		pPlane->setVisible(true);
+		pPlane->showNormals(cloud->hasNormals());
+
+		cloud->addChild(pPlane);
+		pPlane->setDisplay(cloud->getDisplay());
+		pPlane->prepareDisplayForRefresh_recursive();
+	}
+	return pPlane;
+}
+
+ccPointCloud* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col)
 {
 	if (lines.empty()) {
 		return nullptr;
@@ -570,9 +571,50 @@ ccHObject* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lin
 		line_vert->addChild(cc_polyline);
 		i++;
 	}
-
-	entity->addChild(line_vert);
+	if (line_vert) {
+		entity->addChild(line_vert);
+	}
+	
 	return line_vert;
+}
+
+ccPointCloud* AddPointsAsPlane(stocker::Contour3d points, QString name, ccColor::Rgb col)
+{	
+	ccPointCloud* plane_cloud = new ccPointCloud(name);
+
+	//! get plane points
+	for (auto & pt : points) {
+		plane_cloud->addPoint(CCVector3(vcgXYZ(pt)));
+	}
+	plane_cloud->setRGBColor(col);
+	plane_cloud->showColors(true);
+
+	//! add plane
+	ccPlane* plane = FitPlaneAndAddChild(plane_cloud);
+	if (!plane && plane_cloud) {
+		delete plane_cloud;
+		plane_cloud = nullptr;
+	}
+	return plane_cloud;
+}
+
+ccPointCloud* AddSegmentsAsPlane(stocker::Polyline3d lines, QString lines_prefix, ccColor::Rgb col, ccHObject* _exist_cloud)
+{
+	ccPointCloud* plane_cloud = nullptr;
+	if (_exist_cloud) {
+		plane_cloud = ccHObjectCaster::ToPointCloud(_exist_cloud);
+	}
+	else {		
+		plane_cloud = AddPointsAsPlane(stocker::ToContour(lines, 0), "Plane", col);
+	}
+	ccPointCloud* line_vert = AddSegmentsAsChildVertices(plane_cloud, lines, lines_prefix, col);
+
+	if (!line_vert && plane_cloud && !_exist_cloud) {
+		delete plane_cloud;
+		plane_cloud = nullptr;
+	}
+
+	return plane_cloud;
 }
 
 StPrimGroup* AddPlanesPointsAsNewGroup(QString name, std::vector<stocker::Contour3d> planes_points)
@@ -580,20 +622,12 @@ StPrimGroup* AddPlanesPointsAsNewGroup(QString name, std::vector<stocker::Contou
 	StPrimGroup* group = new StPrimGroup(name);
 
 	for (size_t i = 0; i < planes_points.size(); i++) {
-		ccPointCloud* plane_cloud = new ccPointCloud(BDDB_PLANESEG_PREFIX + QString::number(i));// TODO
-
-		//! get plane points
-		for (auto & pt : planes_points[i]) {
-			plane_cloud->addPoint(CCVector3(vcgXYZ(pt)));
+		ccPointCloud* plane_cloud = AddPointsAsPlane(planes_points[i],
+			BDDB_PLANESEG_PREFIX + QString::number(i),
+			ccColor::Generator::Random());
+		if (plane_cloud) {
+			group->addChild(plane_cloud);
 		}
-		ccColor::Rgb col = ccColor::Generator::Random();
-		plane_cloud->setRGBColor(col);
-		plane_cloud->showColors(true);
-
-		//! add plane
-		FitPlaneAndAddChild(plane_cloud);
-
-		group->addChild(plane_cloud);
 	}
 	return group;
 }

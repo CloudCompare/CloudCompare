@@ -62,6 +62,10 @@
 #include <cassert>
 #include <cstring>
 
+#ifdef USE_STOCKER
+#include "stocker_parser.h"
+#endif // USE_STOCKER
+
 //Minimum width of the left column of the properties tree view
 static const int c_propViewLeftColumnWidth = 115;
 
@@ -215,6 +219,9 @@ private:
 
 		const int	facetIndex = mIconList.count();
 		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/primfacet.png")),{} });
+
+		const int	cameragroupIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/camera.png")),{} });
 		
 		mIconMap = {
 			{ CC_TYPES::HIERARCHY_OBJECT, hObjectIndex },
@@ -254,6 +261,7 @@ private:
 			{ CC_TYPES::ST_PRIMITIVE, stprimitiveIndex },
 			{ CC_TYPES::ST_FOOTPRINT, footprintIndex },
 			{ CC_TYPES::ST_MODEL, modelIndex },
+			{ CC_TYPES::ST_CAMERAGROUP, cameragroupIndex },
 		};
 	}
 	
@@ -697,6 +705,9 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 		switch (item->getClassID())
 		{
 			case CC_TYPES::HIERARCHY_OBJECT:
+				if (item->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
+					return gDBRootIcons->icon(CC_TYPES::ST_CAMERAGROUP, false);
+				}				
 				if ( item->getChildrenNumber() )
 				{
 					return gDBRootIcons->icon( item->getClassID(), locked );

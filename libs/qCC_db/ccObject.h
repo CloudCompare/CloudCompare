@@ -132,6 +132,8 @@ namespace CC_TYPES
 		//! stocker type
 		ST_FOOTPRINT = HIERARCHY_OBJECT | POLY_LINE | ST_FOOTPRINT_BIT,
 		ST_BLOCK = HIERARCHY_OBJECT | PRIMITIVE | ST_BLOCK_BIT,
+
+		ST_CAMERAGROUP = ST_MODEL | CC_CUSTOM_BIT,	// now, only used for show icon in tree
 		
 		//  Custom types
 		/** Custom objects are typically defined by plugins. They can be inserted in an object

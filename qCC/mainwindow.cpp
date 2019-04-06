@@ -10954,6 +10954,7 @@ void MainWindow::doActionBDImagesLoad()
 				}
 			}			
 			filterCameraByName(camera_group, building_images);
+			//m_UI->ProjectTabWidget->setCurrentIndex(1);
 			refreshAll();
 			return;
 		}
@@ -11035,21 +11036,8 @@ void MainWindow::doActionBDImagesLoad()
 		delete hackObj;
 		hackObj = nullptr;
 	}
-// 	ccHObject::Container children;
-// 	newGroup->filterChildren(children, true);
-// 
-// 	assert(m_ccRoot);
-// 	if (!m_ccRoot) return;
-// 
-// 	m_ccRoot->unselectAllEntities();
-// 	m_ccRoot->selectEntities(children);
-// 	if (!baseObj) {	return; }
-// 	
-// 	CCVector3d X(1, 0, 0),Y(0, 1, 0),Z(0, 0, 1), Tr(CCVector3d(vcgXYZ(baseObj->global_shift)));
-// 	ccGLMatrixd mat = ccGLMatrixd(X, Y, Z, Tr);
-// 	applyTransformation(mat);
-// 	m_ccRoot->unselectAllEntities();	
 
+	//m_UI->ProjectTabWidget->setCurrentIndex(1);
 	refreshAll();
 }
 

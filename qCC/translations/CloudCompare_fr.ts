@@ -5684,7 +5684,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="797"/>
         <source>&amp;Save</source>
-        <translation>Enregi$strer</translation>
+        <translation>Enregi&amp;strer</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="800"/>
@@ -5740,7 +5740,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="863"/>
         <source>&amp;About ...</source>
-        <translation>$A propos...</translation>
+        <translation>&amp;A propos...</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="866"/>
@@ -13078,12 +13078,12 @@ Cells: %2 x %3</source>
     <message>
         <location filename="../ccRecentFiles.cpp" line="36"/>
         <source>Open Recent...</source>
-        <translation type="unfinished"></translation>
+        <translation>Récemments ouverts...</translation>
     </message>
     <message>
         <location filename="../ccRecentFiles.cpp" line="38"/>
         <source>Clear Menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Effacer le menu</translation>
     </message>
 </context>
 <context>

@@ -1377,8 +1377,8 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	const PointCoordinateType baseHalfWidth		= 1 * upperLeftPoint.x / 5;
 
 	glFunc->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	ccGL::Color3v(glFunc, m_color.rgb);
-
+	ccGL::Color3v(glFunc, ccColor::FromRgbf(ccColor::defaultMeshBackDiff).rgb/*m_color.rgb*/);
+	
 	if (m_frustumInfos.drawNearPlane)
 	{
 		//near plane
@@ -1570,7 +1570,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			QOpenGLTexture texture(m_image);
 			texture.bind();
 			{
-				glFunc->glColor4f(1, 1, 1, 0.8);
+				glFunc->glColor4f(1, 1, 1, 0.9);
 				glFunc->glBegin(GL_QUADS);
 				glFunc->glTexCoord2f(1, 0); glFunc->glVertex3f(upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);
 				glFunc->glTexCoord2f(0, 0); glFunc->glVertex3f(-upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);

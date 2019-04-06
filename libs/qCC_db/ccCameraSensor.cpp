@@ -107,6 +107,8 @@ ccCameraSensor::FrustumInformation::FrustumInformation()
 	, frustumCorners(nullptr)
 	, frustumHull(nullptr)
 	, drawImage(false)
+	, drawBaseAxis(false)
+	, drawNearPlane(true)
 {}
 
 ccCameraSensor::FrustumInformation::~FrustumInformation()
@@ -1377,7 +1379,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glFunc->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	ccGL::Color3v(glFunc, m_color.rgb);
 
-	if (m_frustumInfos.drawFrustum)
+	if (m_frustumInfos.drawNearPlane)
 	{
 		//near plane
 		glFunc->glBegin(GL_LINE_LOOP);
@@ -1386,8 +1388,10 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		ccGL::Vertex3(glFunc, -upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
 		ccGL::Vertex3(glFunc, upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
 		glFunc->glEnd();
+	}
 
-
+	if (m_frustumInfos.drawFrustum)
+	{
 		//force line size
 		glFunc->glPushAttrib(GL_LINE_BIT);
 		glFunc->glLineWidth(1.0f);
@@ -1405,7 +1409,10 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glEnd();
 
 		glFunc->glPopAttrib(); //GL_LINE_BIT
+	}
 
+	if (m_frustumInfos.drawBaseAxis)
+	{
 		//base
 		glFunc->glBegin(GL_QUADS);
 		ccGL::Vertex3(glFunc, -baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
@@ -1420,7 +1427,9 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		ccGL::Vertex3(glFunc, -arrowHalfWidth, baseHeight, -upperLeftPoint.z);
 		ccGL::Vertex3(glFunc, arrowHalfWidth, baseHeight, -upperLeftPoint.z);
 		glFunc->glEnd();
+
 	}
+		
 	//frustum
 	if (/*m_frustumInfos.drawFrustum ||*/ m_frustumInfos.drawSidePlanes)
 	{
@@ -1506,7 +1515,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	//axis (for test)
-	if (!pushName && m_frustumInfos.drawFrustum)
+	if (!pushName && m_frustumInfos.drawBaseAxis)
 	{
 		glFunc->glPushAttrib(GL_LINE_BIT);
 		glFunc->glLineWidth(2.0f);

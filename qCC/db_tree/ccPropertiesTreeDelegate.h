@@ -114,6 +114,8 @@ public:
 							OBJECT_BLOCK_TOP_ADD					,
 							OBJECT_BLOCK_BOTTOM_ADD					,
 							OBJECT_SENSOR_DRAW_IMAGE				,
+							OBJECT_SENSOR_DRAW_BASEAXIS				,
+							OBJECT_SENSOR_DRAW_FRUSTUM_FRAME		,
 	};
 
 	//! Default constructor

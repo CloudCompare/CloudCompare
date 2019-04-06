@@ -168,13 +168,15 @@ public: //general
 		bool initFrustumHull();
 
 		bool isComputed;
-		bool drawFrustum;	// XYLIU use this to control all the lines
+		bool drawFrustum;	// XYLIU use this to control LINES
 		bool drawSidePlanes;
 		ccPointCloud* frustumCorners;
 		ccMesh* frustumHull;
 		CCVector3 center;					/**< center of the circumscribed sphere **/
 
 		bool drawImage;
+		bool drawBaseAxis;
+		bool drawNearPlane;
 	};
 
 	//! Default constructor
@@ -241,6 +243,12 @@ public: //frustum display
 
 	//! Sets whether the frustum planes should be displayed or not
 	inline void drawFrustumPlanes(bool state) { m_frustumInfos.drawSidePlanes = state; }
+
+	inline bool nearPlaneIsDrawn() const { return m_frustumInfos.drawNearPlane; }
+	inline void drawNearPlane(bool state) { m_frustumInfos.drawNearPlane = state; }
+
+	inline bool baseAxisIsDrawn() const { return m_frustumInfos.drawBaseAxis; }
+	inline void drawBaseAxis(bool state) { m_frustumInfos.drawBaseAxis = state; }
 
 public: //image
 	//! Returns whether the image should be displayed or not

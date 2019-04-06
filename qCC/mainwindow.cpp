@@ -281,7 +281,21 @@ MainWindow::MainWindow()
 		}
 	}
 
-	//tabifyDockWidget(m_UI->DockableDBTree, m_UI->DockableProperties);
+	QWidget *titleWidget = m_UI->DockableDBTree->titleBarWidget();
+	QWidget *tempWidget1 = new QWidget();
+	m_UI->DockableDBTree->setTitleBarWidget(tempWidget1);
+	delete titleWidget; titleWidget = nullptr;
+
+	// 	titleWidget = m_UI->DockableProperties->titleBarWidget();
+	// 	QWidget *tempWidget2 = new QWidget();
+	// 	m_UI->DockableProperties->setTitleBarWidget(tempWidget2);
+	// 	delete titleWidget; titleWidget = nullptr;
+
+	// 	titleWidget = m_UI->DockableConsole->titleBarWidget();
+	// 	QWidget *tempWidget3 = new QWidget();
+	// 	m_UI->DockableConsole->setTitleBarWidget(tempWidget3);
+	// 	delete titleWidget; titleWidget = nullptr;
+
 	tabifyDockWidget(m_UI->DockableProperties, m_UI->DockableConsole);
 	m_UI->DockableProperties->raise();
 
@@ -307,6 +321,12 @@ MainWindow::MainWindow()
 		m_pickingHub = new ccPickingHub(this, this);
 		connect(m_mdiArea, &QMdiArea::subWindowActivated, m_pickingHub, &ccPickingHub::onActiveWindowChanged);
 	}
+
+	m_UI->vboxLayout->setContentsMargins(0, 0, 0, 0);
+	m_UI->vboxLayout1->setContentsMargins(0, 0, 0, 0);
+	m_UI->vboxLayout2->setContentsMargins(0, 0, 0, 0);
+	m_UI->vboxLayout3->setContentsMargins(0, 0, 0, 0);
+	m_UI->vboxLayout4->setContentsMargins(0, 0, 0, 0);
 
 	connectActions();
 

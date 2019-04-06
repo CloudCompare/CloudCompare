@@ -588,7 +588,7 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout">
      <item>
-      <widget class="QTabWidget" name="tabWidget">
+      <widget class="QTabWidget" name="ProjectTabWidget">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -609,8 +609,8 @@
         <attribute name="title">
          <string>Buildings</string>
         </attribute>
-        <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
+        <layout class="QVBoxLayout">
+         <item>
           <widget class="ccCustomQTreeView" name="dbTreeView">
            <property name="minimumSize">
             <size>
@@ -673,23 +673,17 @@ QTreeView::branch:open:has-children:has-siblings  {
         <attribute name="title">
          <string>Images</string>
         </attribute>
-        <widget class="ccCustomQTreeView" name="dbImageTreeView">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>231</width>
-           <height>281</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>150</width>
-           <height>250</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QTreeView::branch:has-siblings:!adjoins-item {
+        <layout class="QVBoxLayout">
+         <item>
+          <widget class="ccCustomQTreeView" name="dbImageTreeView">
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>250</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QTreeView::branch:has-siblings:!adjoins-item {
     border-image: url(:/CC/images/QTreeView/vline.png) 0;
 }
 
@@ -712,26 +706,28 @@ QTreeView::branch:open:has-children:has-siblings  {
         border-image: none;
         image: url(:/CC/images/QTreeView/branch-open.png);
 }</string>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Plain</enum>
-         </property>
-         <property name="dragEnabled">
-          <bool>true</bool>
-         </property>
-         <property name="dragDropMode">
-          <enum>QAbstractItemView::InternalMove</enum>
-         </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::ExtendedSelection</enum>
-         </property>
-         <property name="uniformRowHeights">
-          <bool>true</bool>
-         </property>
-        </widget>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="dragEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::InternalMove</enum>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+           <property name="uniformRowHeights">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </widget>
      </item>
@@ -787,6 +783,12 @@ QTreeView::branch:open:has-children:has-siblings  {
     <layout class="QVBoxLayout">
      <item>
       <widget class="QTreeView" name="propertiesTreeView">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
        </property>
@@ -865,6 +867,9 @@ QTreeView::branch:open:has-children:has-siblings  {
          <width>0</width>
          <height>80</height>
         </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
        </property>
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>

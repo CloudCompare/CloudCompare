@@ -102,7 +102,7 @@ void ccCameraSensor::BrownDistortionParameters::GetKinectDefaults(BrownDistortio
 
 ccCameraSensor::FrustumInformation::FrustumInformation()
 	: isComputed(false)
-	, drawFrustum(false)
+	, drawFrustum(true)
 	, drawSidePlanes(false)
 	, frustumCorners(nullptr)
 	, frustumHull(nullptr)
@@ -1506,7 +1506,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	//axis (for test)
-	if (!pushName)
+	if (!pushName && m_frustumInfos.drawFrustum)
 	{
 		glFunc->glPushAttrib(GL_LINE_BIT);
 		glFunc->glLineWidth(2.0f);

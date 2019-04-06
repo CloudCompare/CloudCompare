@@ -1377,49 +1377,52 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glFunc->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	ccGL::Color3v(glFunc, m_color.rgb);
 
-	//near plane
-	glFunc->glBegin(GL_LINE_LOOP);
-	ccGL::Vertex3(glFunc,  upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-	ccGL::Vertex3(glFunc, -upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-	ccGL::Vertex3(glFunc, -upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-	ccGL::Vertex3(glFunc,  upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-	glFunc->glEnd();
+	if (m_frustumInfos.drawFrustum)
+	{
+		//near plane
+		glFunc->glBegin(GL_LINE_LOOP);
+		ccGL::Vertex3(glFunc, upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);
+		ccGL::Vertex3(glFunc, -upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);
+		ccGL::Vertex3(glFunc, -upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+		ccGL::Vertex3(glFunc, upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+		glFunc->glEnd();
 
-	//force line size
-	glFunc->glPushAttrib(GL_LINE_BIT);
-	glFunc->glLineWidth(1.0f);
 
-	//side lines
-	glFunc->glBegin(GL_LINES);
-	glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
-	ccGL::Vertex3(glFunc,  upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-	glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
-	ccGL::Vertex3(glFunc, -upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-	glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
-	ccGL::Vertex3(glFunc, -upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-	glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
-	ccGL::Vertex3(glFunc,  upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-	glFunc->glEnd();
+		//force line size
+		glFunc->glPushAttrib(GL_LINE_BIT);
+		glFunc->glLineWidth(1.0f);
 
-	glFunc->glPopAttrib(); //GL_LINE_BIT
+		//side lines
+		glFunc->glBegin(GL_LINES);
+		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+		ccGL::Vertex3(glFunc, upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);
+		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+		ccGL::Vertex3(glFunc, -upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);
+		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+		ccGL::Vertex3(glFunc, -upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+		ccGL::Vertex3(glFunc, upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+		glFunc->glEnd();
 
-	//base
-	glFunc->glBegin(GL_QUADS);
-	ccGL::Vertex3(glFunc, -baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
-	ccGL::Vertex3(glFunc,  baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
-	ccGL::Vertex3(glFunc,  baseHalfWidth, baseHeight,       -upperLeftPoint.z);
-	ccGL::Vertex3(glFunc, -baseHalfWidth, baseHeight,       -upperLeftPoint.z);
-	glFunc->glEnd();
+		glFunc->glPopAttrib(); //GL_LINE_BIT
 
-	//arrow
-	glFunc->glBegin(GL_TRIANGLES);
-	ccGL::Vertex3(glFunc,  0,              arrowHeight, -upperLeftPoint.z);
-	ccGL::Vertex3(glFunc, -arrowHalfWidth, baseHeight,  -upperLeftPoint.z);
-	ccGL::Vertex3(glFunc,  arrowHalfWidth, baseHeight,  -upperLeftPoint.z);
-	glFunc->glEnd();
+		//base
+		glFunc->glBegin(GL_QUADS);
+		ccGL::Vertex3(glFunc, -baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
+		ccGL::Vertex3(glFunc, baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
+		ccGL::Vertex3(glFunc, baseHalfWidth, baseHeight, -upperLeftPoint.z);
+		ccGL::Vertex3(glFunc, -baseHalfWidth, baseHeight, -upperLeftPoint.z);
+		glFunc->glEnd();
 
+		//arrow
+		glFunc->glBegin(GL_TRIANGLES);
+		ccGL::Vertex3(glFunc, 0, arrowHeight, -upperLeftPoint.z);
+		ccGL::Vertex3(glFunc, -arrowHalfWidth, baseHeight, -upperLeftPoint.z);
+		ccGL::Vertex3(glFunc, arrowHalfWidth, baseHeight, -upperLeftPoint.z);
+		glFunc->glEnd();
+	}
 	//frustum
-	if (m_frustumInfos.drawFrustum || m_frustumInfos.drawSidePlanes)
+	if (/*m_frustumInfos.drawFrustum ||*/ m_frustumInfos.drawSidePlanes)
 	{
 		if (!m_frustumInfos.isComputed)
 			computeFrustumCorners();
@@ -1427,7 +1430,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (m_frustumInfos.frustumCorners && m_frustumInfos.frustumCorners->size() >= 8)
 		{
 			//frustum area (lines)
-			if (m_frustumInfos.drawFrustum)
+			if (m_frustumInfos.drawSidePlanes/*drawFrustum*/)
 			{
 				const CCVector3* P0 = m_frustumInfos.frustumCorners->getPoint(0);
 				const CCVector3* P1 = m_frustumInfos.frustumCorners->getPoint(1);

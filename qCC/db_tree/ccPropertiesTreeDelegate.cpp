@@ -210,8 +210,7 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
 		fiilWithCameraGroup(m_currentObject);
 	}
-
-	if (m_currentObject->isA(CC_TYPES::ST_FOOTPRINT)) {
+	else if (m_currentObject->isA(CC_TYPES::ST_FOOTPRINT)) {
 		fillWithStFootPrint(ccHObjectCaster::ToStFootPrint(m_currentObject));
 	}
 	else if (m_currentObject->isA(CC_TYPES::ST_BLOCK)) {
@@ -230,15 +229,7 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 		fillWithStPrimGroup(ccHObjectCaster::ToStPrimGroup(m_currentObject));
 	}
 
-	if (m_currentObject->isHierarchy())
-	{
-		if (!m_currentObject->isA(CC_TYPES::VIEWPORT_2D_LABEL)) //don't need to display this kind of info for viewport labels!
-		{
-			fillWithHObject(m_currentObject);
-		}
-	}	
-	
-	if (m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
+	else if (m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		fillWithPointCloud(ccHObjectCaster::ToGenericPointCloud(m_currentObject));
 	}
@@ -310,6 +301,14 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	else if (m_currentObject->isA(CC_TYPES::TRANS_BUFFER))
 	{
 		fillWithTransBuffer(static_cast<ccIndexedTransformationBuffer*>(m_currentObject));
+	}
+
+	if (m_currentObject->isHierarchy())
+	{
+		if (!m_currentObject->isA(CC_TYPES::VIEWPORT_2D_LABEL)) //don't need to display this kind of info for viewport labels!
+		{
+			fillWithHObject(m_currentObject);
+		}
 	}
 
 	//transformation history
@@ -974,13 +973,13 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(const ccCameraSensor* _obj)
 	appendRow(ITEM( tr( "Field of view" ) ), ITEM(QString::number(params.vFOV_rad * CC_RAD_TO_DEG) + " deg."));
 
 	//Skewness
-	appendRow(ITEM( tr( "Skew" ) ), ITEM(QString::number(params.skew)));
+	appendRow(ITEM( tr( "Skew" ) ), ITEM(QString::number(params.skew)));	
 
-	addSeparator( tr( "Frustum display" ) );
+	addSeparator(tr("Frustum display"));
 
 	//Draw frustum
-	appendRow(ITEM( tr( "Show lines" ) ), CHECKABLE_ITEM(_obj->frustumIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM));
-	appendRow(ITEM( tr( "Show side planes" ) ), CHECKABLE_ITEM(_obj->frustumPlanesAreDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM_PLANES));
+	appendRow(ITEM(tr("Show frustum")), CHECKABLE_ITEM(_obj->frustumIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM));
+	appendRow(ITEM(tr("Show side frame")), CHECKABLE_ITEM(_obj->frustumPlanesAreDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM_PLANES));
 	appendRow(ITEM(tr("Show image")), CHECKABLE_ITEM(_obj->imageIsDrawn(), OBJECT_SENSOR_DRAW_IMAGE));
 
 	//Positions
@@ -1973,22 +1972,52 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	break;
 	case OBJECT_SENSOR_DRAW_FRUSTUM:
 	{
-		ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-		sensor->drawFrustum(item->checkState() == Qt::Checked);
+		if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
+			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
+				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
+				if (sensor) {
+					sensor->drawFrustumPlanes(item->checkState() == Qt::Checked);
+				}
+			}
+		}
+		else {
+			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
+			sensor->drawFrustum(item->checkState() == Qt::Checked);
+		}
 	}
 	redraw = true;
 	break;
 	case OBJECT_SENSOR_DRAW_FRUSTUM_PLANES:
 	{
-		ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-		sensor->drawFrustumPlanes(item->checkState() == Qt::Checked);
+		if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
+			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
+				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
+				if (sensor) {
+					sensor->drawFrustumPlanes(item->checkState() == Qt::Checked);
+				}
+			}
+		}
+		else {
+			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
+			sensor->drawFrustumPlanes(item->checkState() == Qt::Checked);
+		}
 	}
 	redraw = true;
 	break;
 	case OBJECT_SENSOR_DRAW_IMAGE:
 	{
-		ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-		sensor->drawImage(item->checkState() == Qt::Checked);
+		if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
+			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
+				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
+				if (sensor) {
+					sensor->drawImage(item->checkState() == Qt::Checked);
+				}
+			}
+		}
+		else {
+			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
+			sensor->drawImage(item->checkState() == Qt::Checked);
+		}
 	}
 	redraw = true;
 	break;
@@ -2652,6 +2681,14 @@ void ccPropertiesTreeDelegate::fiilWithCameraGroup(const ccHObject *_obj)
 	assert(_obj && m_model);
 
 	//Sensor drawing scale
-	addSeparator(tr("Cameras"));
+	addSeparator(tr("Cameras Display"));
 	appendRow(ITEM(tr("Drawing scale")), PERSISTENT_EDITOR(OBJECT_SENSOR_DISPLAY_SCALE), true);
+	ccHObject::Container camera_children;
+	_obj->filterChildren(camera_children, false, CC_TYPES::CAMERA_SENSOR, true, _obj->getDisplay());
+	if (camera_children.empty()) return;
+	ccCameraSensor* first_cam = ccHObjectCaster::ToCameraSensor(camera_children.front());
+	//Draw frustum
+	appendRow(ITEM(tr("Show frustum")), CHECKABLE_ITEM(first_cam->frustumIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM));
+	appendRow(ITEM(tr("Show side frame")), CHECKABLE_ITEM(first_cam->frustumPlanesAreDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM_PLANES));
+	appendRow(ITEM(tr("Show image")), CHECKABLE_ITEM(first_cam->imageIsDrawn(), OBJECT_SENSOR_DRAW_IMAGE));
 }

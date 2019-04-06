@@ -168,7 +168,7 @@ public: //general
 		bool initFrustumHull();
 
 		bool isComputed;
-		bool drawFrustum;
+		bool drawFrustum;	// XYLIU use this to control all the lines
 		bool drawSidePlanes;
 		ccPointCloud* frustumCorners;
 		ccMesh* frustumHull;

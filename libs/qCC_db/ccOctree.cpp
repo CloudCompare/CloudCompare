@@ -707,7 +707,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 
 				CCVector3d Q2D;
 				
-				if(camera.project(Q, Q2D))
+				if(camera.project(Q, Q2D, true))
 				{
 					if (	fabs(Q2D.x - clickPos.x) <= pickWidth_pix
 						&&	fabs(Q2D.y - clickPos.y) <= pickWidth_pix )

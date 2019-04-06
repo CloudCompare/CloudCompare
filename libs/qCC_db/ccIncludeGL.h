@@ -19,7 +19,6 @@
 #define CC_INCLUDE_GL_HEADER
 
 #include <cmath>
-#include <iostream>
 
 //Local
 #include "ccGLMatrix.h"
@@ -203,8 +202,7 @@ public: //GLU equivalent methods
 		//Check if the point is in frustrum
 		if(checkInFrustrum)
 		{
-			if (Pp.x < -Pp.w  || Pp.y < -Pp.w || Pp.z < -Pp.w
-				|| Pp.x > Pp.w || Pp.y > Pp.w || Pp.z > Pp.w)
+			if (std::abs(Pp.x) > Pp.w || std::abs(Pp.y) > Pp.w || std::abs(Pp.z) > Pp.w)
 			{
 				return false;
 			}

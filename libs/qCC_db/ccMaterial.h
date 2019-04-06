@@ -44,6 +44,9 @@ public:
 	//! Copy constructor
 	ccMaterial(const ccMaterial& mtl);
 
+	//! Destructor
+	~ccMaterial();
+
 	//! Returns the material name
 	inline const QString& getName() const { return m_name; }
 	//! Returns the texture filename (if any)

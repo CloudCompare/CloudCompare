@@ -169,20 +169,20 @@ bool ccCameraSensor::FrustumInformation::initFrustumHull()
 	frustumHull->addTriangle(0, 2, 3);
 	frustumHull->addTriangle(0, 3, 1);
 
-	frustumHull->addTriangle(2,4,5);
-	frustumHull->addTriangle(2,5,3);
+	frustumHull->addTriangle(2, 4, 5);
+	frustumHull->addTriangle(2, 5, 3);
 
-	frustumHull->addTriangle(4,6,7);
-	frustumHull->addTriangle(4,7,5);
+	frustumHull->addTriangle(4, 6, 7);
+	frustumHull->addTriangle(4, 7, 5);
 
-	frustumHull->addTriangle(6,0,1);
-	frustumHull->addTriangle(6,1,7);
+	frustumHull->addTriangle(6, 0, 1);
+	frustumHull->addTriangle(6, 1, 7);
 
-	frustumHull->addTriangle(6,4,2);
-	frustumHull->addTriangle(6,2,0);
+	frustumHull->addTriangle(6, 4, 2);
+	frustumHull->addTriangle(6, 2, 0);
 
-	frustumHull->addTriangle(1,3,5);
-	frustumHull->addTriangle(1,5,7);
+	frustumHull->addTriangle(1, 3, 5);
+	frustumHull->addTriangle(1, 5, 7);
 
 	frustumHull->setVisible(true);
 

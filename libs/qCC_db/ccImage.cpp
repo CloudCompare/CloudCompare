@@ -28,7 +28,6 @@
 #include <QImageReader>
 #include <QOpenGLTexture>
 
-
 ccImage::ccImage()
 	: ccHObject("Not loaded")
 	, m_width(0)
@@ -39,6 +38,7 @@ ccImage::ccImage()
 {
 	setVisible(true);
 	lockVisibility(false);
+	setSelectionBehavior(SELECTION_FIT_BBOX); //same as the camera sensors that are (generally) associated to images
 	setEnabled(false);
 }
 
@@ -255,4 +255,19 @@ bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	inStream >> m_file_name; //formerly: 'complete filename'
 
 	return true;
+}
+
+ccBBox ccImage::getOwnFitBB(ccGLMatrix& trans)
+{
+	ccHObject::Container sensors;
+	filterChildren(sensors, false, CC_TYPES::SENSOR, false, m_currentDisplay);
+
+	//if we have exactly one sensor child, we use its own bounding-box
+	if (sensors.size() == 1)
+	{
+		return sensors.front()->getOwnFitBB(trans);
+	}
+
+	//otherwise we stick to the default behavior
+	return ccHObject::getOwnFitBB(trans);
 }

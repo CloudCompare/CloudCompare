@@ -88,6 +88,8 @@ public:
 	const ccCameraSensor* getAssociatedSensor() const { return m_associatedSensor; }
 
 	QString getImagePath() { return m_file_name; }
+	//inherited from ccHObject
+	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 protected:
 

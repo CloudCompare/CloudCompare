@@ -33,12 +33,7 @@ target_link_contrib( ${PROJECT_NAME} )
 # Add custom preprocessor definitions
 target_compile_definitions( ${PROJECT_NAME} PRIVATE QCC_IO_LIBRARY_BUILD )
 
-if (WIN32)
-	if ( COMPILE_CC_CORE_LIB_SHARED )
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL )
-	endif()
-
-elseif( APPLE )
+if( APPLE )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES
 		INSTALL_RPATH "." )
 endif()

@@ -47,11 +47,6 @@ add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${
 if (OPTION_GL_QUAD_BUFFER_SUPPORT)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_GL_WINDOW_USE_QWINDOW )
 endif()
-if( WIN32 )
-	if ( COMPILE_CC_CORE_LIB_SHARED )
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL )
-	endif()
-endif()
 
 # Plugins need the QT_NO_DEBUG preprocessor in release!
 if( WIN32 )

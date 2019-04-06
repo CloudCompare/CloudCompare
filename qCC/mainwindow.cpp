@@ -6450,7 +6450,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							if (segment_cloud) {
 								segment_cloud->setRGBColor(segment_cloud->hasColors() ? segment_cloud->getPointColor(0) : ccColor::Generator::Random());
 								ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
-								if (new_plane) addToDB(new_plane);
+								if (new_plane) addToDB(new_plane, false, false);
 							}
 						}						
 						if (entity->isKindOf(CC_TYPES::MESH) && segmentationResult->isKindOf(CC_TYPES::MESH))
@@ -6491,7 +6491,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					segmentationResult->setDisplay_recursive(entity->getDisplay());
 					segmentationResult->prepareDisplayForRefresh_recursive();
 
-					addToDB(segmentationResult);
+					addToDB(segmentationResult, false, false);
 
 					if (!firstResult)
 					{
@@ -11125,7 +11125,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 				prob,
 				merge_threshold, split_threshold);
 			if (seged) {
-				addToDB(seged); 
+				addToDB(seged, false, false);
 				cloudObj->setEnabled(false);
 			}
 //#pragma omp critical
@@ -11144,7 +11144,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 				growing_radius,
 				merge_threshold, split_threshold);
 			if (seged) {
-				addToDB(seged); 
+				addToDB(seged, false, false);
 				cloudObj->setEnabled(false);
 			}
 //#pragma omp critical
@@ -11229,7 +11229,7 @@ void MainWindow::doActionBDPrimIntersections()
 		ccHObject::Container segs = CalcPlaneIntersections(building_prims[i], distance);
 		for (auto & seg : segs) {
 			SetGlobalShiftAndScale(seg);
-			addToDB(seg);
+			addToDB(seg, false, false);
 		}
 		ProgStep()
 	}
@@ -11447,7 +11447,7 @@ void MainWindow::doActionBDPrimBoundary()
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 			return;
 		}
-		if (boundary) { SetGlobalShiftAndScale(boundary); addToDB(boundary); }
+		if (boundary) { SetGlobalShiftAndScale(boundary); addToDB(boundary, false, false); }
 		ProgStep()
 	}
 	ProgEnd
@@ -11475,7 +11475,7 @@ void MainWindow::doActionBDPrimOutline()
 	for (auto & planeObj : plane_container) {
 		try	{
 			ccHObject* outline = CalcPlaneOutlines(planeObj, alpha);
-			if (outline) { SetGlobalShiftAndScale(outline); addToDB(outline); }
+			if (outline) { SetGlobalShiftAndScale(outline); addToDB(outline, false, false); }
 		}
 		catch (const std::runtime_error& e)	{
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
@@ -11519,7 +11519,7 @@ void MainWindow::doActionBDPrimPlaneFrame()
 	for (auto & planeObj : plane_container) {
 		try	{
 			ccHObject* frame = PlaneFrameOptimization(planeObj, option);
-			if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame); }
+			if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame, false, false); }
 		}
 		catch (const std::runtime_error& e)	{
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
@@ -11573,7 +11573,7 @@ void MainWindow::doActionBDPrimMergePlane()
 	int biggest = GetMaxNumberExcludeChildPrefix(prim_group, BDDB_PLANESEG_PREFIX);
 	point_cloud->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
 	
-	addToDB(point_cloud);
+	addToDB(point_cloud, false, false);
 	refreshAll();
 	UpdateUI();
 }
@@ -11712,7 +11712,7 @@ void MainWindow::doActionBDPrimCreateGround()
 			plane->setDisplay(plane_cloud->getDisplay());
 			plane->prepareDisplayForRefresh_recursive();
 		}
-		addToDB(plane_cloud);
+		addToDB(plane_cloud, false, false);
 		ProgStep()
 	}	
 	ProgEnd

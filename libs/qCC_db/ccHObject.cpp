@@ -610,7 +610,7 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 	glFunc->glPushAttrib(GL_LINE_BIT);
 	glFunc->glLineWidth(1.0f);
 
-	switch (m_selectionBehavior)
+	switch (getSelectionBehavior())
 	{
 	case SELECTION_AA_BBOX:
 		getDisplayBB_recursive(true, m_currentDisplay).draw(context, col);
@@ -619,12 +619,6 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 	case SELECTION_FIT_BBOX:
 		{
 			//get the set of OpenGL functions (version 2.1)
-			QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-			assert( glFunc != nullptr );
-			
-			if ( glFunc == nullptr )
-				break;
-			
 			ccGLMatrix trans;
 			ccBBox box = getOwnFitBB(trans);
 			if (box.isValid())
@@ -748,7 +742,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 		if (MACRO_Draw3D(context))
 		{
 			//we have to comute the 2D position during the 3D pass!
-			ccBBox bBox = getBB_recursive();
+			ccBBox bBox = getBB_recursive(true); //DGM: take the OpenGL features into account (as some entities are purely 'GL'!)
 			if (bBox.isValid())
 			{
 				ccGLCameraParameters camera;

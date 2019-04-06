@@ -11930,12 +11930,19 @@ void MainWindow::doActionBDPlaneDeduction()
 
 void MainWindow::doActionBDPlaneCreate()
 {
-	if (!haveSelection()) return;
+	if (m_selectedEntities.size() < 2)
+		return;
 	
+	//! check availability
+	{
+
+	}
+	stocker::Polyline3d lines_pool;
 	std::vector<ccPolyline*> polylines;
 	for (auto & entity : m_selectedEntities) {
 		if (entity->isA(CC_TYPES::POLY_LINE)) {
 			polylines.push_back(ccHObjectCaster::ToPolyline(entity));
+			
 		}
 	}
 	/// actually, this is plane deduction
@@ -11945,6 +11952,73 @@ void MainWindow::doActionBDPlaneCreate()
 		//! three point
 
 		//! close the polygon
+	}
+
+	vector<vcg::Plane3d> planes; stocker::IntGroup indices;
+	stocker::PlaneSegmentationfromLines(lines_pool, planes, indices, 1);
+	set<int> assigned_index;
+
+	ccHObject* group;// TODO
+	int biggest = GetMaxNumberExcludeChildPrefix(group, BDDB_PLANESEG_PREFIX); biggest++;
+	for (size_t i = 0; i < indices.size(); i++) {
+		if (indices[i].size() < 20) {
+			continue;
+		}
+		stocker::Polyline3d lines;
+		for (auto & ln_index : indices[i]) {
+			stocker::Seg3d seg = lines_pool[ln_index];
+			lines.push_back(seg);
+			assigned_index.insert(ln_index);
+		}
+		ccPointCloud* plane_cloud = AddSegmentsAsPlane(lines, "Deduced", ccColor::Generator::Random());
+		plane_cloud->setName(BDDB_PLANESEG_PREFIX + biggest++);
+		group->addChild(plane_cloud);
+	}
+	if (group) {
+		addToDB(group);
+	}
+	
+
+
+
+
+	ccPolyline* p1 = ccHObjectCaster::ToPolyline(m_selectedEntities[0]);
+	ccPolyline* p2 = ccHObjectCaster::ToPolyline(m_selectedEntities[1]);
+
+	//Ask the user how the 2D projection should be computed
+	bool useViewingDir = false;
+	CCVector3 viewingDir(0, 0, 0);
+	if (p1->getDisplay())
+	{
+		useViewingDir = (QMessageBox::question(this, "Projection method", "Use best fit plane (yes) or the current viewing direction (no)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No);
+		if (useViewingDir)
+		{
+			viewingDir = -CCVector3::fromArray(static_cast<ccGLWindow*>(p1->getDisplay())->getCurrentViewDir().u);
+		}
+	}
+
+	ccMesh* mesh = ccMesh::TriangulateTwoPolylines(p1, p2, useViewingDir ? &viewingDir : 0);
+	if (mesh)
+	{
+		addToDB(mesh);
+		if (mesh->computePerVertexNormals())
+		{
+			mesh->showNormals(true);
+		}
+		else
+		{
+			ccLog::Warning("[Mesh two polylines] Failed to compute normals!");
+		}
+
+		if (mesh->getDisplay())
+		{
+			mesh->getDisplay()->redraw();
+		}
+	}
+	else
+	{
+		ccLog::Error("Failed to create mesh (see Console)");
+		forceConsoleDisplay();
 	}
 }
 

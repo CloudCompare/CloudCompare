@@ -19,6 +19,7 @@
 #define CC_INCLUDE_GL_HEADER
 
 #include <cmath>
+#include <iostream>
 
 //Local
 #include "ccGLMatrix.h"
@@ -198,6 +199,14 @@ public: //GLU equivalent methods
 		{
 			return false;
 		}
+
+		// Check if the point is in frustrum
+		if (Pp.x < -Pp.w  || Pp.y < -Pp.w || Pp.z < -Pp.w
+			|| Pp.x > Pp.w || Pp.y > Pp.w || Pp.z > Pp.w)
+		{
+			return false;
+		}
+
 		//Perspective division
 		Pp.x /= Pp.w;
 		Pp.y /= Pp.w;

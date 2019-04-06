@@ -1797,7 +1797,7 @@ std::vector<std::vector<int>> GroupFootPrint(ccHObject::Container footprintObjs)
 	std::vector<std::vector<int>> components;
 	for (size_t i = 0; i < footprintObjs.size(); i++) {
 		std::vector<int> compo_temp;
-		compo_temp.push_back(0);
+		compo_temp.push_back(i);
 		components.push_back(compo_temp);
 	}
 	return components;
@@ -1993,6 +1993,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 		if (!QFile::exists(QString(output_path))) continue;
 
 		std::vector<Contour3d> roof_polygons = builder_3d4em.GetRoofPolygons();
+		int block_number = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX) + 1;
 		for (Contour3d roof_points : roof_polygons) {
 			std::vector<CCVector3> top_points;
 			std::vector<CCVector3> bottom_points;
@@ -2001,8 +2002,8 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 				bottom_points.push_back(CCVector3(pt.X(), pt.Y(), ground_height));
 			}
 			StBlock* block_entity = new StBlock(top_points, bottom_points);
-			int biggest = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX);
-			block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(biggest + 1));
+			
+			block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(block_number++));
 			first_footprint->addChild(block_entity);
 		}
 	}

@@ -1539,10 +1539,16 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (m_frustumInfos.drawImage) {
 		if (m_image.isNull()) {
-			//! load
-			QImageReader reader(m_image_path);
-			QImage image_tmp = reader.read();
-			m_image = image_tmp.scaled(300, 300 * image_tmp.height() / image_tmp.width(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+			//! load thumb first
+			QFileInfo imgpath(m_image_path);
+			QString thumb = imgpath.path() + "/" + imgpath.completeBaseName();
+			if (QFileInfo(thumb + "_thumb.jpg").exists()) {	thumb = thumb + "_thumb.jpg"; }
+			else if(QFileInfo(thumb + "_thumb.tif").exists()){ thumb = thumb + "_thumb.tif"; }
+			else { thumb = m_image_path; }
+			QImageReader reader(thumb);
+			QImage image_tmp = reader.read();			
+			m_image = image_tmp.width() < 400 ? image_tmp : 
+				image_tmp.scaled(400, 400 * image_tmp.height() / image_tmp.width(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 		}
 		if (!m_image.isNull()) {
 			glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);

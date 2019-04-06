@@ -10930,8 +10930,7 @@ void MainWindow::doActionBDImagesLoad()
 			for (ccHObject* bd : getSelectedEntities()) {
 				stocker::BuildUnit bd_unit = baseObj->GetBuildingUnit(bd->getName().toStdString());
 				for (auto img : bd_unit.image_list)	{
-					QFileInfo img_path(img.c_str());
-					building_images.append(img_path.path() + "/" + img_path.completeBaseName());
+					building_images.append(img.c_str());
 				}
 			}			
 			filterCameraByName(camera_group, building_images);

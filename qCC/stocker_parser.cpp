@@ -505,9 +505,11 @@ void filterCameraByName(ccHObject * camera_group, QStringList name_list)
 		camera->setEnabled(false);
 		for (QString name : name_list) {
 			if (camera->getName() == name) {
-				camera->setEnabled(true);
+				camera->setEnabled(true);				
+				break;
 			}
 		}
+		camera->redrawDisplay();
 	}
 }
 

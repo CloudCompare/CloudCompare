@@ -417,10 +417,10 @@ ccHObject * BDBaseHObject::GetCameraGroup()
 {
 	ccHObject* root = getParent();
 	if (root && root->getChildrenNumber() > 1) {
-		for (size_t i = 0; i < getChildrenNumber(); i++) {
+		for (size_t i = 0; i < root->getChildrenNumber(); i++) {
 			QString camera_group_name = getName() + BDDB_CAMERA_SUFFIX;
-			if (getChild(i)->getName() == camera_group_name) {
-				return getChild(i);
+			if (root->getChild(i)->getName() == camera_group_name) {
+				return root->getChild(i);
 			}
 		}
 	}

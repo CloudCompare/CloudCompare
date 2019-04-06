@@ -2726,7 +2726,7 @@ void ccPropertiesTreeDelegate::fiilWithCameraGroup(const ccHObject *_obj)
 	//Draw frustum
 	appendRow(ITEM(tr("Show image")), CHECKABLE_ITEM(first_cam->imageIsDrawn(), OBJECT_SENSOR_DRAW_IMAGE));
 	appendRow(ITEM(tr("Show frustum")), CHECKABLE_ITEM(first_cam->frustumIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM));
-	appendRow(ITEM(tr("Show near plane")), CHECKABLE_ITEM(first_cam->nearPlaneIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM));
+	appendRow(ITEM(tr("Show near plane")), CHECKABLE_ITEM(first_cam->nearPlaneIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM_FRAME));
 	appendRow(ITEM(tr("Show side frame")), CHECKABLE_ITEM(first_cam->frustumPlanesAreDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM_PLANES));
 	appendRow(ITEM(tr("Show base and axis")), CHECKABLE_ITEM(first_cam->baseAxisIsDrawn(), OBJECT_SENSOR_DRAW_BASEAXIS));
 }

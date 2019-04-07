@@ -205,7 +205,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 	//we project the input points on a plane
 	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
 	CCVector3 X, Y; //local base
-	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D, nullptr, &m_center, &X, &Y))
+	if (!Yk.projectIndexedPointsOn2DPlane/*<CCLib::PointProjectionTools::IndexedCCVector2>*/(points2D, nullptr, &m_center, &X, &Y, false))
 	{
 		ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
 		return false;
@@ -214,13 +214,14 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 	//compute resulting RMS
 	m_rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(points, m_planeEquation);
 	
-	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
-	{
-		for (unsigned i = 0; i < ptsCount; ++i)
-		{
-			points2D[i].index = i;
-		}
-	}
+	//! XYLIU done by projectIndexedPointsOn2DPlane
+//  //update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
+//  {
+//  	for (unsigned i = 0; i < ptsCount; ++i)
+//  	{
+//  		points2D[i].index = i;
+//  	}
+//  }
 
 	//try to get the points on the convex/concave hull to build the contour and the polygon
 	{
@@ -668,7 +669,7 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 	//we project the input points on a plane
 	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
 	CCVector3 X, Y; //local base
-	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D, nullptr, &m_center, &X, &Y))
+	if (!Yk.projectIndexedPointsOn2DPlane(points2D, nullptr, &m_center, &X, &Y))
 	{
 		ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory!");
 		return false;
@@ -677,12 +678,12 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 	//compute resulting RMS
 	m_rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(m_contourVertices, m_planeEquation);
 
-	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
-	{
-		for (unsigned i = 0; i < hullPtsCount; ++i)	{
-			points2D[i].index = i;
-		}
-	}
+// 	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
+// 	{
+// 		for (unsigned i = 0; i < hullPtsCount; ++i)	{
+// 			points2D[i].index = i;
+// 		}
+// 	}
 
 	//try to get the points on the convex/concave hull to build the contour and the polygon
 	{

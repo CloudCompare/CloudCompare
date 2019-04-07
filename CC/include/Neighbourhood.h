@@ -23,7 +23,7 @@
 #include "CCMiscTools.h"
 #include "GenericIndexedCloudPersist.h"
 #include "SquareMatrix.h"
-
+#include "PointProjectionTools.h"
 
 namespace CCLib
 {
@@ -159,6 +159,13 @@ class CC_CORE_LIB_API Neighbourhood
 
 			return true;
 		}
+
+		bool projectIndexedPointsOn2DPlane(std::vector<CCLib::PointProjectionTools::IndexedCCVector2>& points2D,
+			const PointCoordinateType* planeEquation = nullptr,
+			CCVector3* O = nullptr,
+			CCVector3* X = nullptr,
+			CCVector3* Y = nullptr,
+			bool useOXYasBase = false);
 
 		//! Geometric feature computed from eigen values/vectors
 		/** Most of them are defined in "Contour detection in unstructured 3D point clouds", Hackel et al, 2016

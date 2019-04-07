@@ -868,6 +868,76 @@ ScalarType Neighbourhood::computeMomentOrder1(const CCVector3& P)
 	return (m2 < std::numeric_limits<double>::epsilon() ? NAN_VALUE : static_cast<ScalarType>((m1 * m1) / m2));
 }
 
+bool CCLib::Neighbourhood::projectIndexedPointsOn2DPlane(std::vector<CCLib::PointProjectionTools::IndexedCCVector2>& points2D, const PointCoordinateType * planeEquation, CCVector3 * O, CCVector3 * X, CCVector3 * Y, bool useOXYasBase)
+{
+	typedef CCLib::PointProjectionTools::IndexedCCVector2 Vec2D;
+	//need at least one point ;)
+	unsigned count = (m_associatedCloud ? m_associatedCloud->size() : 0);
+	if (!count)
+		return false;
+
+	//if no custom plane equation is provided, get the default best LS one
+	if (!planeEquation)
+	{
+		planeEquation = getLSPlane();
+		if (!planeEquation)
+			return false;
+	}
+
+	//reserve memory for output set
+	try
+	{
+		points2D.resize(count);
+	}
+	catch (const std::bad_alloc&)
+	{
+		//out of memory
+		return false;
+	}
+
+	//we construct the plane local base
+	CCVector3 G(0, 0, 0), u(1, 0, 0), v(0, 1, 0);
+	if (useOXYasBase && O && X && Y)
+	{
+		G = *O;
+		u = *X;
+		v = *Y;
+	}
+	else
+	{
+		CCVector3 N(planeEquation);
+		CCMiscTools::ComputeBaseVectors(N, u, v);
+		//get the barycenter
+		const CCVector3* _G = getGravityCenter();
+		assert(_G);
+		G = *_G;
+	}
+
+	//project the points
+	for (unsigned i = 0; i < count; ++i)
+	{
+		//we recenter current point
+		const CCVector3 P = *m_associatedCloud->getPoint(i) - G;
+
+		//then we project it on plane (with scalar prods)
+		points2D[i] = Vec2D(P.dot(u), P.dot(v));
+		points2D[i].index = i;
+	}
+
+	//output the local base if necessary
+	if (!useOXYasBase)
+	{
+		if (O)
+			*O = G;
+		if (X)
+			*X = u;
+		if (Y)
+			*Y = v;
+	}
+
+	return true;
+}
+
 double Neighbourhood::computeFeature(GeomFeature feature)
 {
 	if (!m_associatedCloud || m_associatedCloud->size() < 3)

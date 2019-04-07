@@ -1538,12 +1538,10 @@ void ccGLWindow::paintGL()
 	}
 	assert(m_context);
 	makeCurrent();
-#endif
 
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-#ifdef CC_GL_WINDOW_USE_QWINDOW
 	glFunc->glViewport(m_glViewport.x(), m_glViewport.y(), m_glViewport.width(), m_glViewport.height());
 #endif
 

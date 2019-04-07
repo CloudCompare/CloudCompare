@@ -204,19 +204,19 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		ccGL::Color3v(glFunc, m_rgbColor.rgb);
 
 	//display polyline
+	bool line_bit_pushed = false;
 	if (m_width != 0)
 	{
 		glFunc->glPushAttrib(GL_LINE_BIT);
-		if (isSelected()) {
-			glFunc->glLineWidth(static_cast<GLfloat>(m_width + 2));
-		}
-		else {
-			glFunc->glLineWidth(static_cast<GLfloat>(m_width));
-		}
+		line_bit_pushed = true;
+		glFunc->glLineWidth(static_cast<GLfloat>(m_width));
 	}
-	else if (isSelected()) {
-		glFunc->glPushAttrib(GL_LINE_BIT);
-		glFunc->glLineWidth(static_cast<GLfloat>(2));
+	if (isSelected()) {
+		if (!line_bit_pushed) {
+			glFunc->glPushAttrib(GL_LINE_BIT);
+			line_bit_pushed = true;
+		}		
+		glFunc->glLineWidth(static_cast<GLfloat>(m_width + 4));
 	}
 
 	//DGM: we do the 'GL_LINE_LOOP' manually as I have a strange bug
@@ -287,9 +287,9 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 	}
 
-	if (m_width != 0)
+	if (line_bit_pushed/*m_width != 0*/)
 	{
-		glFunc->glPopAttrib();
+		glFunc->glPopAttrib();	//GL_LINE_BIT
 	}
 
 	//display vertices
@@ -305,7 +305,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		glFunc->glEnd();
 
-		glFunc->glPopAttrib();
+		glFunc->glPopAttrib();//GL_POINT_BIT
 	}
 
 	if (pushName)

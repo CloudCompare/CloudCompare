@@ -744,7 +744,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	bool draw3D = MACRO_Draw3D(context);
 	
 	//the entity must be either visible or selected, and of course it should be displayed in this context
-	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context.display);
+	bool drawInThisContext = (((m_visible || isA(CC_TYPES::PLANE)) || m_selected) && m_currentDisplay == context.display);
 
 	if (draw3D)
 	{
@@ -766,7 +766,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	//draw entity
-	if (m_visible && drawInThisContext)
+	if (/*m_visible && */drawInThisContext) // even if it is not visible, once selected, display it!
 	{
 		if (( !m_selected || !MACRO_SkipSelected(context) ) &&
 			(  m_selected || !MACRO_SkipUnselected(context) ))

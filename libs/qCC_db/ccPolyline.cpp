@@ -216,7 +216,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glPushAttrib(GL_LINE_BIT);
 			line_bit_pushed = true;
 		}		
-		glFunc->glLineWidth(static_cast<GLfloat>(m_width + 4));
+		glFunc->glLineWidth(static_cast<GLfloat>(m_width + 2));
 	}
 
 	//DGM: we do the 'GL_LINE_LOOP' manually as I have a strange bug

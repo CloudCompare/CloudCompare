@@ -24,6 +24,8 @@
 #include <GeometricalAnalysisTools.h>
 #include <ManualSegmentationTools.h>
 #include <ReferenceCloud.h>
+#include "ccPlane.h"
+#include "ccHObjectCaster.h"
 
 //local
 #include "cc2DLabel.h"
@@ -2661,7 +2663,16 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			colorMaterialEnabled = true;
 		}
 
-		if (glParams.showColors && isColorOverriden())
+		if (isSelected() && !MACRO_DRAW_BBOX(context)) {
+			ccGL::Color3v(glFunc, ccColor::red.rgb);
+			if (getChildrenNumber() > 0) {
+				ccPlane* plane = ccHObjectCaster::ToPlane(getChild(0));
+				if (plane) {
+					plane->draw(context);
+				}
+			}
+		}
+		else if (glParams.showColors && isColorOverriden())
 		{
 			ccGL::Color3v(glFunc, m_tempColor.rgb);
 			glParams.showColors = false;
@@ -2708,8 +2719,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//custom point size?
 		if (m_pointSize != 0)
-		{
-			glFunc->glPointSize(static_cast<GLfloat>(m_pointSize));
+		{			
+			glFunc->glPointSize(static_cast<GLfloat>(m_pointSize));			
+		}
+		if (isSelected() && !MACRO_DRAW_BBOX(context)) {
+			glFunc->glPointSize(static_cast<GLfloat>(m_pointSize + 2));
 		}
 
 		//main display procedure

@@ -410,13 +410,19 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 				CCVector3d Q2D;
 				if (noGLTrans)
 				{
-					camera.project(*P, Q2D);
+					if(!camera.project(*P, Q2D, true))
+					{
+						continue; // Point is not in frustrum
+					}
 				}
 				else
 				{
 					CCVector3 P3D = *P;
 					trans.apply(P3D);
-					camera.project(P3D, Q2D);
+					if(!camera.project(P3D, Q2D, true))
+					{
+						continue; // Point is not in frustrum 
+					}
 				}
 
 				if (	fabs(Q2D.x - clickPos.x) <= pickWidth

@@ -2664,7 +2664,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		if (isSelected() && !MACRO_DRAW_BBOX(context)) {
-			ccGL::Color3v(glFunc, ccColor::red.rgb);
 			if (getChildrenNumber() > 0) {
 				ccPlane* plane = ccHObjectCaster::ToPlane(getChild(0));
 				if (plane) {
@@ -2672,7 +2671,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 		}
-		else if (glParams.showColors && isColorOverriden())
+		
+		if (glParams.showColors && isColorOverriden())
 		{
 			ccGL::Color3v(glFunc, m_tempColor.rgb);
 			glParams.showColors = false;

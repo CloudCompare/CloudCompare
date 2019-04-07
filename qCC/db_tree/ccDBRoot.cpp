@@ -220,8 +220,11 @@ private:
 		const int	facetIndex = mIconList.count();
 		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/primfacet.png")),{} });
 
-		const int	cameragroupIndex = mIconList.count();
-		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/camera.png")),{} });
+// 		const int	cameragroupIndex = mIconList.count();
+// 		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/camera.png")),{} });
+// 
+// 		const int	todoIndex = mIconList.count();
+// 		mIconList.append({ QIcon(QStringLiteral(":/CC/Stocker/images/stocker/task.png")),{} });
 		
 		mIconMap = {
 			{ CC_TYPES::HIERARCHY_OBJECT, hObjectIndex },
@@ -261,7 +264,7 @@ private:
 			{ CC_TYPES::ST_PRIMITIVE, stprimitiveIndex },
 			{ CC_TYPES::ST_FOOTPRINT, footprintIndex },
 			{ CC_TYPES::ST_MODEL, modelIndex },
-			{ CC_TYPES::ST_CAMERAGROUP, cameragroupIndex },
+			//{ CC_TYPES::ST_CAMERAGROUP, cameragroupIndex },
 		};
 	}
 	
@@ -706,8 +709,11 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 		{
 			case CC_TYPES::HIERARCHY_OBJECT:
 				if (item->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
-					return gDBRootIcons->icon(CC_TYPES::ST_CAMERAGROUP, false);
-				}				
+					return QIcon(QStringLiteral(":/CC/Stocker/images/stocker/camera.png"));
+				}
+				else if (item->getName().endsWith(BDDB_TODOGROUP_SUFFIX)) {
+					return QIcon(QStringLiteral(":/CC/Stocker/images/stocker/task.png"));
+				}
 				if ( item->getChildrenNumber() )
 				{
 					return gDBRootIcons->icon( item->getClassID(), locked );

@@ -202,6 +202,9 @@
     <file>images/stocker/databaseload.png</file>
     <file>images/stocker/databasesave.png</file>
     <file>images/stocker/camera.png</file>
+    <file>images/stocker/minus.png</file>
+    <file>images/stocker/plus.png</file>
+    <file>images/stocker/task.png</file>
     <file>images/stocker/splitplane.png</file>
   </qresource>
 </RCC>

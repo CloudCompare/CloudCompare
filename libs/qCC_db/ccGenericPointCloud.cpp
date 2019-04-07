@@ -412,7 +412,12 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 				{
 					if(!camera.project(*P, Q2D, true))
 					{
-						continue; // Point is not in frustrum
+						// Point is not in frustrum
+						#ifdef USE_TBB
+							return;
+						#else
+							continue; 
+						#endif
 					}
 				}
 				else
@@ -421,7 +426,12 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 					trans.apply(P3D);
 					if(!camera.project(P3D, Q2D, true))
 					{
-						continue; // Point is not in frustrum 
+						// Point is not in frustrum
+						#ifdef USE_TBB
+							return;
+						#else
+							continue; 
+						#endif
 					}
 				}
 

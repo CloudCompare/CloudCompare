@@ -1928,9 +1928,6 @@ void ccRasterizeTool::generateContours()
 		QApplication::processEvents();
 		CCLib::NormalizedProgress nProgress(&pDlg, levelCount);
 
-		int lineWidth = m_UI->contourWidthSpinBox->value();
-		bool colorize = m_UI->colorizeContoursCheckBox->isChecked();
-
 		double v = startValue;
 		while (v <= activeLayer->getMax() && !memoryError)
 		{
@@ -2010,13 +2007,13 @@ void ccRasterizeTool::generateContours()
 							else
 							{
 								delete poly;
-								poly = 0;
+								poly = nullptr;
 							}
 						}
 						else
 						{
 							delete poly;
-							poly = 0;
+							poly = nullptr;
 							ccLog::Error("Not enough memory!");
 							memoryError = true; //early stop
 							break;

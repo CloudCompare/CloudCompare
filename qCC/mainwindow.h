@@ -448,6 +448,7 @@ private slots:
 	void doActionBDImagesLoad();
 	/// Plane Segmentation
 	void doActionBDPlaneSegmentation();
+	void doActionBDRetrieve();
 	/// Create Image Lines
 	void doActionBDImageLines();
 

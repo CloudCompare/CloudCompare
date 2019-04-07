@@ -125,7 +125,7 @@ std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonXY(ccHObject::Con
 	std::vector<stocker::Contour3d> all_points;
 	for (ccHObject* entity : entities) {
 		stocker::Contour3d points = GetPointsFromCloudInsidePolygonXY(entity, polygon, height);
-		if (points.size() > 0) {
+		if (!skip_empty || (skip_empty && points.size() > 0)) {
 			all_points.push_back(points);
 		}		
 	}
@@ -407,9 +407,54 @@ ccHObject * BDBaseHObject::GetTodoGroup(QString building_name, bool check_enable
 	if (obj) return static_cast<StBlockGroup*>(obj);
 	StBlockGroup* group = new StBlockGroup(building_name + BDDB_TODOGROUP_SUFFIX);
 	if (group) {
+		group->setDisplay(getDisplay());
 		ccHObject* bd = GetBuildingGroup(building_name, false);
 		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
 		else { delete group; group = nullptr; }
+	}
+	return nullptr;
+}
+ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name, bool check_enable)
+{
+	ccHObject* todo_group = GetTodoGroup(buildig_name, false);
+	assert(todo_group);
+	ccHObject::Container todo_children;
+	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOPOINT_PREFIX, true, CC_TYPES::POINT_CLOUD);
+	if (!todo_children.empty()) {
+		return ccHObjectCaster::ToPointCloud(todo_children.front());
+	}
+	else {
+		ccPointCloud* todo_point = new ccPointCloud(BDDB_TODOPOINT_PREFIX);
+		todo_point->setGlobalScale(global_scale);
+		todo_point->setGlobalShift(CCVector3d(vcgXYZ(global_shift)));
+		todo_point->setDisplay(todo_group->getDisplay());
+		todo_point->showColors(true);
+		todo_group->addChild(todo_point);
+		MainWindow* win = MainWindow::TheInstance();
+		assert(win);
+		win->addToDB(todo_point, false, false);
+		return todo_point;
+	}
+	return nullptr;
+}
+ccPointCloud * BDBaseHObject::GetTodoLine(QString buildig_name, bool check_enable)
+{
+	ccHObject* todo_group = GetTodoGroup(buildig_name, false);
+	assert(todo_group);
+	ccHObject::Container todo_children;
+	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOLINE_PREFIX, true, CC_TYPES::POINT_CLOUD);
+	if (!todo_children.empty()) {
+		return ccHObjectCaster::ToPointCloud(todo_children.front());
+	}
+	else {
+		ccPointCloud* todo_point = new ccPointCloud(BDDB_TODOLINE_PREFIX);
+		todo_point->setGlobalScale(global_scale);
+		todo_point->setGlobalShift(CCVector3d(vcgXYZ(global_shift)));
+		todo_group->addChild(todo_point);
+		MainWindow* win = MainWindow::TheInstance();
+		assert(win);
+		win->addToDB(todo_point, false, false);
+		return todo_point;
 	}
 	return nullptr;
 }
@@ -704,7 +749,7 @@ ccHObject* PlaneSegmentationRgGrow(ccHObject* entity,
 ccHObject* PlaneSegmentationRansac(ccHObject* entity,
 	int min_pts, double distance_epsilon, double seed_raius,
 	double normal_threshold, double ransac_probability,
-	double merge_threshold, double split_threshold)
+	double merge_threshold, double split_threshold, ccPointCloud* todo_cloud)
 {
 	ccPointCloud* entity_cloud = ccHObjectCaster::ToPointCloud(entity);
 	if (!entity_cloud->hasNormals()) {
@@ -751,7 +796,46 @@ ccHObject* PlaneSegmentationRansac(ccHObject* entity,
 		ent_cld->setGlobalScale(entity_cloud->getGlobalScale());
 	}
 	entity->getParent()->addChild(group);
+	if (todo_cloud)	{
+		ccColor::Rgb col = ccColor::Generator::Random();
+		bool has_color = false;
+		if (todo_cloud->size() > 0)	{
+			if (todo_cloud->hasColors()) {
+				has_color = true;
+				col = todo_cloud->getPointColor(0);
+			}
+		}
+		for (auto & pt : unassigned_points) {
+			todo_cloud->addPoint(CCVector3(vcgXYZ(pt.first)));
+		}
+		if (has_color) {
+			todo_cloud->resizeTheRGBTable();
+			todo_cloud->setRGBColor(col);
+		}
+		else {
+			todo_cloud->reserveTheRGBTable();
+			todo_cloud->setRGBColor(col);
+		}		
+	}
+
 	return group;	
+}
+
+void RetrieveUnassignedPoints(ccHObject* original_cloud, ccHObject* prim_group, ccPointCloud* todo_point)
+{
+	Contour3d all_points = GetPointsFromCloud(original_cloud);
+	Contour3d used_points = GetPointsFromCloud(prim_group);
+	Contour3d unassigned_points = stocker::GetUnassignedPoints(used_points, all_points);
+	std::cout << "found " << unassigned_points.size() << std::endl;
+	if (!todo_point) {
+		throw std::runtime_error("nullptr todo point");
+		return;
+	}
+	for (auto & pt : unassigned_points) {
+		todo_point->addPoint(CCVector3(vcgXYZ(pt)));
+	}
+	todo_point->setRGBColor(ccColor::black);
+	todo_point->showColors(true);
 }
 
 ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)

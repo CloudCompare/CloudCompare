@@ -813,7 +813,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDProjectSave,				&QAction::triggered, this, &MainWindow::doActionBDProjectSave);
 	connect(m_UI->actionBDImagesLoad,				&QAction::triggered, this, &MainWindow::doActionBDImagesLoad);
 	
-	connect(m_UI->actionBDPlaneSegmentation,		&QAction::triggered, this, &MainWindow::doActionBDPlaneSegmentation);	
+	connect(m_UI->actionBDPlaneSegmentation,		&QAction::triggered, this, &MainWindow::doActionBDPlaneSegmentation);
+	connect(m_UI->actionBDRetrieve,					&QAction::triggered, this, &MainWindow::doActionBDRetrieve);
 	connect(m_UI->actionBDImage_Lines,				&QAction::triggered, this, &MainWindow::doActionBDImageLines);
 	connect(m_UI->actionBDPrimIntersections,		&QAction::triggered, this, &MainWindow::doActionBDPrimIntersections);
 	connect(m_UI->actionBDPrimAssignSharpLines,		&QAction::triggered, this, &MainWindow::doActionBDPrimAssignSharpLines);
@@ -11058,11 +11059,12 @@ void MainWindow::doActionBDPlaneSegmentation()
 
 	ccHObject *entity = getSelectedEntities().front();
 	ccHObject::Container _container;
+	BDBaseHObject* baseObj = GetRootBDBase(entity);
+
 	if (entity->isA(CC_TYPES::POINT_CLOUD))
 		_container.push_back(entity);
 	else {
-		ccHObject::Container building_groups;
-		BDBaseHObject* baseObj = GetRootBDBase(entity);
+		ccHObject::Container building_groups;		
 		if (!baseObj) {
 			dispToConsole(s_no_project_error, ERR_CONSOLE_MESSAGE);
 			return;
@@ -11111,7 +11113,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 	int support_pts = m_pbdrPSDlg->supportPointsSpinBox->value();
 	double distance_eps = m_pbdrPSDlg->DistanceEpsilonDoubleSpinBox->value();
 	double cluster_eps = m_pbdrPSDlg->ClusterEpsilonDoubleSpinBox->value();
-	
+
 	ProgStartNorm("Plane Segmentation", _container.size())
 	
 	if (m_pbdrPSDlg->PlaneSegRansacRadioButton->isChecked()) {
@@ -11119,14 +11121,20 @@ void MainWindow::doActionBDPlaneSegmentation()
 		double prob = m_pbdrPSDlg->probaDoubleSpinBox->value();
 //#pragma omp parallel for
 		for (int i = 0; i < _container.size(); i++) {
-			ccHObject* cloudObj = _container[i];		
+			ccHObject* cloudObj = _container[i];
+			ccPointCloud* todo_point = nullptr;
+			if (baseObj) {
+				todo_point = baseObj->GetTodoPoint(GetBaseName(cloudObj->getName()), false);
+			}
 			ccHObject* seged = PlaneSegmentationRansac(cloudObj,
 				support_pts,
 				distance_eps,
 				cluster_eps,
 				normal_dev,
 				prob,
-				merge_threshold, split_threshold);
+				merge_threshold, split_threshold,
+				todo_point
+			);
 			if (seged) {
 				addToDB(seged, false, false);
 				cloudObj->setEnabled(false);
@@ -11140,6 +11148,10 @@ void MainWindow::doActionBDPlaneSegmentation()
 //#pragma omp parallel for
 		for (int i = 0; i < _container.size(); i++) {
 			ccHObject* cloudObj = _container[i];
+			ccPointCloud* todo_point = nullptr; // no unassigned points returned by line grow
+			if (baseObj) {
+				todo_point = baseObj->GetTodoPoint(GetBaseName(cloudObj->getName()), false);
+			}
 			ccHObject* seged = PlaneSegmentationRgGrow(cloudObj,
 				support_pts,
 				distance_eps,
@@ -11159,6 +11171,38 @@ void MainWindow::doActionBDPlaneSegmentation()
 
 	refreshAll();
 	updateUI();
+}
+
+void MainWindow::doActionBDRetrieve()
+{
+	if (!haveSelection()) return;
+	//! retrieve unassigned points from original
+	ccHObject* select = m_selectedEntities.front();
+	ccHObject::Container buildings;
+	if (IsBDBaseObj(select)) {
+		buildings = GetEnabledObjFromGroup(select, CC_TYPES::ST_BUILDING, true, false);
+	}
+	else if (select->isA(CC_TYPES::ST_BUILDING)) {
+		buildings.push_back(select);
+	}
+	BDBaseHObject* baseObj = GetRootBDBase(select);
+	if (!baseObj) {
+		return;
+	}
+	for (ccHObject* building_entity : buildings) {
+		QString building_name = building_entity->getName();
+		StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name, false);
+		ccPointCloud* orig_cloud = baseObj->GetOriginPointCloud(building_name, false);
+		ccPointCloud* todo_cloud = baseObj->GetTodoPoint(building_name, false);
+		
+		if (!prim_group || !orig_cloud || !todo_cloud) {
+			continue;
+		}
+		todo_cloud->clear();
+		RetrieveUnassignedPoints(orig_cloud, prim_group, todo_cloud);
+		todo_cloud->prepareDisplayForRefresh_recursive();
+	}
+	refreshAll();
 }
 
 void MainWindow::doActionBDImageLines()
@@ -11252,6 +11296,8 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 	ccHObject::Container primitive_groups;	
 	
 	ccHObject* select = m_selectedEntities.front();
+	BDBaseHObject* baseObj = GetRootBDBase(select);
+
 	ccHObject::Container buildings;
 	if (IsBDBaseObj(select)) {
 		buildings = GetEnabledObjFromGroup(select, CC_TYPES::ST_BUILDING, true, false);
@@ -11259,8 +11305,7 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 	else if (select->isA(CC_TYPES::ST_BUILDING)) {			
 		buildings.push_back(select);
 	}
-	if (!buildings.empty())	{
-		BDBaseHObject* baseObj = GetRootBDBase(select);
+	if (!buildings.empty() && baseObj) {
 		std::string error_info;
 		if (!stocker::LoadLine3D(baseObj->block_prj.m_options.prj_file.image_border, all_sharp_lines, error_info)) {
 			std::cout << error_info << std::endl;
@@ -11292,8 +11337,6 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 		if (plane_group_) { primitive_groups.push_back(plane_group_); }
 		if (primitive_groups.empty()) return;
 	}
-	
-	BDBaseHObject* baseObj = GetRootBDBase(select);
 
 	ProgStartNorm("Assign Image Lines", primitive_groups.size());
 	for (auto & plane_group : primitive_groups)	{
@@ -11343,22 +11386,10 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 		//! add unassigned sharps in bbox to .todo-TodoLine
 		{
 			ccHObject* sharps_in_bbox_obj = AddSegmentsAsChildVertices(nullptr, unassigned_sharps, BDDB_TODOLINE_PREFIX, ccColor::black);
-
-			ccHObject* todo_group = nullptr;
-			if (baseObj) {
-				todo_group = baseObj->GetTodoGroup(GetBaseName(plane_group->getName()), false);
-			}
-			else {
-				todo_group = plane_group->getParent();
-			}
-
-			ccHObject::Container todo_children;
-			todo_group->filterChildrenByName(todo_children, false, BDDB_TODOLINE_PREFIX, true, CC_TYPES::POINT_CLOUD);
-			if (todo_children.empty()) {
-				todo_group->addChild(sharps_in_bbox_obj);
-			}
-			else {
-				ccHObject* existing_todo_line = todo_children.front();
+			ccHObject* existing_todo_line = nullptr;
+			if (baseObj) existing_todo_line = baseObj->GetTodoLine(GetBaseName(plane_group->getName()), false);
+			
+			if (existing_todo_line)	{
 				int biggest = GetMaxNumberExcludeChildPrefix(existing_todo_line, BDDB_TODOLINE_PREFIX);
 				biggest++;
 				// rename
@@ -11368,10 +11399,10 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 				sharps_in_bbox_obj->transferChildren(*existing_todo_line);
 				delete sharps_in_bbox_obj; sharps_in_bbox_obj = nullptr;
 			}
-
-			if (todo_group) { SetGlobalShiftAndScale(todo_group); addToDB(todo_group, false, false); }
+			else {
+				plane_group->getParent()->addChild(sharps_in_bbox_obj);
+			}
 		}
-		
 
 		ProgStep()
 	}

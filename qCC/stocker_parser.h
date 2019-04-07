@@ -70,7 +70,8 @@ ccPointCloud* AddSegmentsAsPlane(stocker::Polyline3d lines, QString lines_prefix
 
 StPrimGroup * AddPlanesPointsAsNewGroup(QString name, std::vector<stocker::Contour3d> planes_points);
 
-ccHObject* PlaneSegmentationRansac(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double normal_threshold, double ransac_probability, double merge_threshold = -1, double split_threshold = -1);
+ccHObject* PlaneSegmentationRansac(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double normal_threshold, double ransac_probability, double merge_threshold = -1, double split_threshold = -1, ccPointCloud* todo_cloud = nullptr);
+void RetrieveUnassignedPoints(ccHObject * original_cloud, ccHObject * prim_group, ccPointCloud * todo_point);
 ccHObject* PlaneSegmentationRgGrow(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double growing_radius, double merge_threshold = -1, double split_threshold = -1);
 ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
 ccHObject* CalcPlaneBoundary(ccHObject* planeObj);
@@ -146,6 +147,8 @@ public:
 	ccHObject * GetHypothesisGroup(QString building_name, bool check_enable);
 	ccHObject* GetCameraGroup();
 	ccHObject* GetTodoGroup(QString building_name, bool check_enable);
+	ccPointCloud* GetTodoPoint(QString buildig_name, bool check_enable);
+	ccPointCloud* GetTodoLine(QString buildig_name, bool check_enable);
 	stocker::Vec3d ToLocal(stocker::Vec3d pt) { return (pt + global_shift)*global_scale; }
 	stocker::Vec3d ToGlobal(stocker::Vec3d pt) { return pt / global_scale - global_shift; }
 

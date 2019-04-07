@@ -539,6 +539,7 @@
      <addaction name="actionBDDisplayPointOff"/>
     </widget>
     <addaction name="actionBDProjectLoad"/>
+    <addaction name="actionBDProjectSave"/>
     <addaction name="separator"/>
     <addaction name="actionBDPlaneSegmentation"/>
     <addaction name="separator"/>
@@ -552,6 +553,7 @@
     <addaction name="actionBD3D4EM"/>
     <addaction name="menuPolyFit"/>
     <addaction name="separator"/>
+    <addaction name="actionBDRetrieve"/>
     <addaction name="menuDisplay_2"/>
     <addaction name="actionBDConstrainedMesh"/>
    </widget>
@@ -3568,6 +3570,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="text">
     <string>Show BBox</string>
+   </property>
+  </action>
+  <action name="actionBDRetrieve">
+   <property name="text">
+    <string>Retrieve Unassigned Points</string>
    </property>
   </action>
  </widget>

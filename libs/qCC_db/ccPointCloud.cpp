@@ -2722,7 +2722,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{			
 			glFunc->glPointSize(static_cast<GLfloat>(m_pointSize));			
 		}
-		if (isSelected() && !MACRO_DRAW_BBOX(context)) {
+		if (isSelected()) {
 			glFunc->glPointSize(static_cast<GLfloat>(m_pointSize + 2));
 		}
 

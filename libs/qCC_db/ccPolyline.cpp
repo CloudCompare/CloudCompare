@@ -195,8 +195,8 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (pushName)
 		glFunc->glPushName(getUniqueIDForDisplay());
 
-	if (isSelected()) {
-		ccGL::Color3v(glFunc, ccColor::green.rgb);
+	if (isSelected() && !MACRO_DRAW_BBOX(context)) {
+		ccGL::Color3v(glFunc, ccColor::red.rgb);
 	}
 	else if (isColorOverriden())
 		ccGL::Color3v(glFunc, getTempColor().rgb);
@@ -213,6 +213,10 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		else {
 			glFunc->glLineWidth(static_cast<GLfloat>(m_width));
 		}
+	}
+	else if (isSelected()) {
+		glFunc->glPushAttrib(GL_LINE_BIT);
+		glFunc->glLineWidth(static_cast<GLfloat>(2));
 	}
 
 	//DGM: we do the 'GL_LINE_LOOP' manually as I have a strange bug

@@ -6246,6 +6246,7 @@ void MainWindow::activateSegmentationMode()
 			m_gsTool->addEntity(entity);
 		}		
 	}
+	m_gsTool->setPlaneSegMode(false);
 
 	if (m_gsTool->getNumberOfValidEntities() == 0)
 	{

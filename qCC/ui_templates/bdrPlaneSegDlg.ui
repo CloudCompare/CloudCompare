@@ -171,9 +171,12 @@
     <string>Plane Refinement</string>
    </property>
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <widget class="QDoubleSpinBox" name="MergeThresholdDoubleSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>260</x>
@@ -201,20 +204,10 @@
      <double>10.000000000000000</double>
     </property>
    </widget>
-   <widget class="QLabel" name="label_7">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>20</y>
-      <width>178</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>merge threshold</string>
-    </property>
-   </widget>
    <widget class="QDoubleSpinBox" name="SplitThresholdDoubleSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>260</x>
@@ -245,13 +238,26 @@
      <double>5.000000000000000</double>
     </property>
    </widget>
-   <widget class="QLabel" name="label_8">
+   <widget class="QCheckBox" name="MergeCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>111</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>merge threshold</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="SplitCheckBox">
     <property name="geometry">
      <rect>
       <x>20</x>
       <y>50</y>
-      <width>178</width>
-      <height>20</height>
+      <width>101</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -600,46 +606,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>PlaneRefineGroupBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>label_7</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>240</x>
-     <y>349</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>118</x>
-     <y>339</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>PlaneRefineGroupBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>label_8</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>240</x>
-     <y>349</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>118</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>PlaneRefineGroupBox</sender>
+   <sender>MergeCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>MergeThresholdDoubleSpinBox</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>240</x>
-     <y>349</y>
+     <x>85</x>
+     <y>340</y>
     </hint>
     <hint type="destinationlabel">
      <x>360</x>
@@ -648,14 +622,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>PlaneRefineGroupBox</sender>
+   <sender>SplitCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>SplitThresholdDoubleSpinBox</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>240</x>
-     <y>349</y>
+     <x>80</x>
+     <y>370</y>
     </hint>
     <hint type="destinationlabel">
      <x>360</x>

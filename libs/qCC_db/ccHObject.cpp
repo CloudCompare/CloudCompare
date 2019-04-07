@@ -460,10 +460,14 @@ unsigned ccHObject::filterChildrenByName( Container& filteredChildren,
 	bool recursive,
 	QString filter,
 	bool strict,
-	ccGenericGLDisplay* inDisplay) const 
+	CC_CLASS_ENUM type_filter/*=CC_TYPES::OBJECT*/,
+	ccGenericGLDisplay* inDisplay/*=0*/) const
 {
 	for (auto child : m_children)
 	{
+		if (!child->isA(type_filter)) {
+			continue;
+		}
 		QString child_name = child->getName();
 		if ((!strict && child_name.indexOf(filter) >= 0)
 			|| (strict && child_name == filter))
@@ -480,7 +484,7 @@ unsigned ccHObject::filterChildrenByName( Container& filteredChildren,
 
 		if (recursive)
 		{
-			child->filterChildrenByName(filteredChildren, true, filter, strict, inDisplay);
+			child->filterChildrenByName(filteredChildren, true, filter, strict, type_filter, inDisplay);
 		}
 	}
 

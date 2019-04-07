@@ -172,7 +172,7 @@ public: //children management
 	unsigned filterChildrenByName(Container& filteredChildren,
 		bool recursive = false,
 		QString filter = QString(),
-		bool strict = false,
+		bool strict = false, CC_CLASS_ENUM type_filter = CC_TYPES::OBJECT,
 		ccGenericGLDisplay* inDisplay = nullptr) const;
 
 	//! Detaches a specific child

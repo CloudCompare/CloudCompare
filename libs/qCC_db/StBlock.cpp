@@ -312,27 +312,23 @@ bool StBlock::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//m_top size
 	qint32 vertCount;
 	inStream >> vertCount;
-	if (vertCount) {
+	if (vertCount > 0) {
 		m_top.resize(vertCount);
 		//m_top points (2D)
 		for (unsigned i = 0; i < m_top.size(); ++i)	{
 			ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_top[i].u, 3);
 		}
-	}
-	else
-		return false;	
+	}		
 
 	//m_bottom size
 	inStream >> vertCount;
-	if (vertCount) {
+	if (vertCount > 0) {
 		m_bottom.resize(vertCount);
 		//m_bottom points (2D)
 		for (unsigned i = 0; i < m_bottom.size(); ++i) {
 			ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_bottom[i].u, 3);
 		}
-	}
-	else	
-		return false;
+	}	
 
 	return true;
 }

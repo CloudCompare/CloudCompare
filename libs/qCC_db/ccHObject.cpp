@@ -465,7 +465,7 @@ unsigned ccHObject::filterChildrenByName( Container& filteredChildren,
 {
 	for (auto child : m_children)
 	{
-		if (!child->isA(type_filter)) {
+		if (!child->isKindOf(type_filter)) {
 			continue;
 		}
 		QString child_name = child->getName();

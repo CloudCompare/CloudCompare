@@ -100,6 +100,8 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_LOD1MODEL_PREFIX		"LoD1_"
 #define BDDB_LOD2MODEL_PREFIX		"LoD2_"
 #define BDDB_LOD3MODEL_PREFIX		"LoD3_"
+#define BDDB_TODOPOINT_PREFIX		"TodoPoint"
+#define BDDB_TODOLINE_PREFIX		"TodoLine"
 
 #define BDDB_CAMERA_SUFFIX			".camera"
 #define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
@@ -112,6 +114,7 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_LOD1MODEL_SUFFIX		".lod1.model"
 #define BDDB_LOD2MODEL_SUFFIX		".lod2.model"
 #define BDDB_LOD3MODEL_SUFFIX		".lod3.model"
+#define BDDB_TODOGROUP_SUFFIX		".todo"
 
 class BDBaseHObject : public BDBaseHObject_
 {
@@ -136,12 +139,13 @@ private:
 	ccHObject* GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename = QString(), bool check_enable = false);
 
 public:	
-	StBuilding* GetBuildingGroup(QString building_name, bool check_enable = false);
-	ccPointCloud* GetOriginPointCloud(QString building_name, bool check_enable = false);
-	StPrimGroup* GetPrimitiveGroup(QString building_name, bool check_enable = false);
+	StBuilding* GetBuildingGroup(QString building_name, bool check_enable);
+	ccPointCloud* GetOriginPointCloud(QString building_name, bool check_enable);
+	StPrimGroup* GetPrimitiveGroup(QString building_name, bool check_enable);
 	StBlockGroup * GetBlockGroup(QString building_name, bool check_enable);
 	ccHObject * GetHypothesisGroup(QString building_name, bool check_enable);
 	ccHObject* GetCameraGroup();
+	ccHObject* GetTodoGroup(QString building_name, bool check_enable);
 	stocker::Vec3d ToLocal(stocker::Vec3d pt) { return (pt + global_shift)*global_scale; }
 	stocker::Vec3d ToGlobal(stocker::Vec3d pt) { return pt / global_scale - global_shift; }
 

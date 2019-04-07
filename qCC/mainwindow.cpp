@@ -10877,7 +10877,7 @@ void MainWindow::doActionBDProjectLoad()
 		if (bd_grp->getChildrenNumber() <= 0) {
 			return;
 		}
-		ccHObject* first_cloud_ent = bd_grp->GetOriginPointCloud(GetBaseName(bd_grp->getChild(0)->getName()));
+		ccHObject* first_cloud_ent = bd_grp->GetOriginPointCloud(GetBaseName(bd_grp->getChild(0)->getName()), false);
 		if (!first_cloud_ent) {
 			dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
 			return;
@@ -11288,48 +11288,91 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 	}
 	if (primitive_groups.empty()) {
 		//! select the plane group
-		ccHObject* plane_group_ = askUserToSelect(CC_TYPES::HIERARCHY_OBJECT, 0, "please select a plane group");
+		ccHObject* plane_group_ = askUserToSelect(CC_TYPES::ST_PRIMITIVE, 0, "please select a plane group");
 		if (plane_group_) { primitive_groups.push_back(plane_group_); }
 		if (primitive_groups.empty()) return;
 	}
 	
+	BDBaseHObject* baseObj = GetRootBDBase(select);
+
 	ProgStartNorm("Assign Image Lines", primitive_groups.size());
 	for (auto & plane_group : primitive_groups)	{
 		//! get sharps in bbox
-		stocker::Polyline3d sharps_in_bbox;
-		ccBBox box = plane_group->getBB_recursive();
-		for (stocker::Seg3d & seg : all_sharp_lines) {
-			CCVector3 p0 = CCVector3(vcgXYZ(seg.P0()));
-			CCVector3 p1 = CCVector3(vcgXYZ(seg.P1()));			
-			if (box.contains(p0) && box.contains(p1)) {				
-				sharps_in_bbox.push_back(stocker::Seg3d(stocker::parse_xyz(p0), stocker::parse_xyz(p1)));
+		stocker::Polyline3d sharps_in_bbox; 
+		{
+			ccBBox box = plane_group->getBB_recursive();
+			for (stocker::Seg3d & seg : all_sharp_lines) {
+				CCVector3 p0 = CCVector3(vcgXYZ(seg.P0()));
+				CCVector3 p1 = CCVector3(vcgXYZ(seg.P1()));
+				if (box.contains(p0) && box.contains(p1)) {
+					sharps_in_bbox.push_back(stocker::Seg3d(stocker::parse_xyz(p0), stocker::parse_xyz(p1)));
+				}
 			}
 		}
-		//! add sharps in bbox as a child
-		QString sharps_name = GetBaseName(plane_group->getName()) + BDDB_IMAGELINE_SUFFIX;
-		ccHObject* sharps_in_bbox_obj = AddSegmentsAsChildVertices(plane_group->getParent(), sharps_in_bbox, sharps_name, ccColor::darkGrey);
-		if (sharps_in_bbox_obj) { SetGlobalShiftAndScale(sharps_in_bbox_obj); addToDB(sharps_in_bbox_obj); }
-		
-		//! assign to each plane
-		ccHObject::Container plane_container = GetEnabledObjFromGroup(plane_group, CC_TYPES::PLANE);
-		stocker::Polyline3d unassigned_sharps; set<size_t>set_index;
-		for (auto & planeObj : plane_container) {
-			ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
-			if (!ccPlane) continue;
-			stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
-			if (cur_plane_points.size() < 3) { continue; }
-			stocker::PlaneUnit plane = stocker::FormPlaneUnit(cur_plane_points, "temp", true);
-			stocker::Polyline3d cur_plane_sharps;
-			vector<int> index_find;
-			stocker::FindSegmentsInPlane(plane, sharps_in_bbox, index_find, distance_threshold);
-			set_index.insert(index_find.begin(), index_find.end());
 
-			for (auto & index : index_find) {
-				cur_plane_sharps.push_back(sharps_in_bbox[index]);
+		stocker::Polyline3d unassigned_sharps; 
+
+		//! assign to each plane
+		{
+			ccHObject::Container plane_container = GetEnabledObjFromGroup(plane_group, CC_TYPES::PLANE);
+			set<size_t>assigned_index;
+			for (auto & planeObj : plane_container) {
+				ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
+				if (!ccPlane) continue;
+				stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
+				if (cur_plane_points.size() < 3) { continue; }
+				stocker::PlaneUnit plane = stocker::FormPlaneUnit(cur_plane_points, "temp", true);
+				stocker::Polyline3d cur_plane_sharps;
+				vector<int> index_find;
+				stocker::FindSegmentsInPlane(plane, sharps_in_bbox, index_find, distance_threshold);
+				assigned_index.insert(index_find.begin(), index_find.end());
+
+				for (auto & index : index_find) {
+					cur_plane_sharps.push_back(sharps_in_bbox[index]);
+				}
+				ccHObject* cur_sharps_obj = AddSegmentsAsChildVertices(planeObj->getParent(), cur_plane_sharps, BDDB_IMAGELINE_PREFIX, ccColor::darkBlue);
+				if (cur_sharps_obj) { SetGlobalShiftAndScale(cur_sharps_obj); addToDB(cur_sharps_obj); }
 			}
-			ccHObject* cur_sharps_obj = AddSegmentsAsChildVertices(planeObj->getParent(), cur_plane_sharps, BDDB_IMAGELINE_PREFIX, ccColor::darkBlue);
-			if (cur_sharps_obj) { SetGlobalShiftAndScale(cur_sharps_obj); addToDB(cur_sharps_obj); }
+			for (size_t i = 0; i < sharps_in_bbox.size(); i++) {
+				if (assigned_index.find(i) == assigned_index.end()) {
+					unassigned_sharps.push_back(sharps_in_bbox[i]);
+				}
+			}
+		}		
+
+		//! add unassigned sharps in bbox to .todo-TodoLine
+		{
+			ccHObject* sharps_in_bbox_obj = AddSegmentsAsChildVertices(nullptr, unassigned_sharps, BDDB_TODOLINE_PREFIX, ccColor::black);
+
+			ccHObject* todo_group = nullptr;
+			if (baseObj) {
+				todo_group = baseObj->GetTodoGroup(GetBaseName(plane_group->getName()), false);
+			}
+			else {
+				todo_group = plane_group->getParent();
+			}
+
+			ccHObject::Container todo_children;
+			todo_group->filterChildrenByName(todo_children, false, BDDB_TODOLINE_PREFIX, true, CC_TYPES::POINT_CLOUD);
+			if (todo_children.empty()) {
+				todo_group->addChild(sharps_in_bbox_obj);
+			}
+			else {
+				ccHObject* existing_todo_line = todo_children.front();
+				int biggest = GetMaxNumberExcludeChildPrefix(existing_todo_line, BDDB_TODOLINE_PREFIX);
+				biggest++;
+				// rename
+				for (size_t i = 0; i < sharps_in_bbox_obj->getChildrenNumber(); i++) {
+					sharps_in_bbox_obj->getChild(i)->setName(BDDB_TODOLINE_PREFIX + QString::number(biggest++));
+				}
+				sharps_in_bbox_obj->transferChildren(*existing_todo_line);
+				delete sharps_in_bbox_obj; sharps_in_bbox_obj = nullptr;
+			}
+
+			if (todo_group) { SetGlobalShiftAndScale(todo_group); addToDB(todo_group, false, false); }
 		}
+		
+
 		ProgStep()
 	}
 	ProgEnd

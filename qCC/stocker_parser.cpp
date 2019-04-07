@@ -401,6 +401,18 @@ ccHObject * BDBaseHObject::GetCameraGroup()
 	}
 	return nullptr;
 }
+ccHObject * BDBaseHObject::GetTodoGroup(QString building_name, bool check_enable)
+{
+	ccHObject* obj = GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_TODOGROUP_SUFFIX, building_name, check_enable);
+	if (obj) return static_cast<StBlockGroup*>(obj);
+	StBlockGroup* group = new StBlockGroup(building_name + BDDB_TODOGROUP_SUFFIX);
+	if (group) {
+		ccHObject* bd = GetBuildingGroup(building_name, false);
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		else { delete group; group = nullptr; }
+	}
+	return nullptr;
+}
 std::string BDBaseHObject::GetPathModelObj(std::string building_name)
 {
 	auto& bd = block_prj.m_builder.sbuild.find(stocker::BuilderBase::BuildNode::Create(building_name));
@@ -545,13 +557,16 @@ ccPointCloud* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d 
 	if (lines.empty()) {
 		return nullptr;
 	}
-	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+	ccPointCloud* cloud = nullptr;
+	if (entity) {
+		cloud = ccHObjectCaster::ToPointCloud(entity);
+	}
 
 	ccPointCloud* line_vert = new ccPointCloud(name);
 	int i(0);
 	for (auto & ln : lines) {
 		ccPolyline* cc_polyline = new ccPolyline(line_vert);
-		cc_polyline->setDisplay(entity->getDisplay());
+		if (entity)	cc_polyline->setDisplay(entity->getDisplay());
 		cc_polyline->setColor(col);
 		cc_polyline->showColors(true);
 		cc_polyline->setName(name + QString::number(i));
@@ -571,7 +586,7 @@ ccPointCloud* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d 
 		line_vert->addChild(cc_polyline);
 		i++;
 	}
-	if (line_vert) {
+	if (line_vert && entity) {
 		entity->addChild(line_vert);
 	}
 	

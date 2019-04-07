@@ -2614,7 +2614,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				int x = margin;
 				yStart += margin;
 
-				static const float radius = static_cast<float>(lodIconSize / 2) - lodPartsRadius;
+				static const float radius = lodIconSize / 2.0f - lodPartsRadius;
 				static const float alpha = static_cast<float>((2 * M_PI) / lodIconParts);
 				int cx = x + lodIconSize / 2 - m_glViewport.width() / 2;
 				int cy = m_glViewport.height() / 2 - (yStart + lodIconSize / 2);
@@ -3279,7 +3279,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 		//compute the aspect ratio
 		double ar = static_cast<double>(m_glViewport.width()) / m_glViewport.height();
 
-		double currentFov_deg = static_cast<double>(getFov());
+		double currentFov_deg = getFov();
 
 		//DGM: take now 'frustumAsymmetry' into account (for stereo rendering)
 		//return ccGLUtils::Perspective(currentFov_deg,ar,zNear,zFar);
@@ -3404,7 +3404,7 @@ ccGLMatrixd ccGLWindow::computeModelViewMatrix(const CCVector3d& cameraCenter) c
 	else //ortho. mode
 	{
 		//apply zoom
-		double totalZoom = static_cast<double>(m_viewportParams.zoom / m_viewportParams.pixelSize);
+		double totalZoom = m_viewportParams.zoom / m_viewportParams.pixelSize;
 		//glScalef(totalZoom,totalZoom,totalZoom);
 		scaleMatd.data()[0] = totalZoom;
 		scaleMatd.data()[5] = totalZoom;
@@ -3642,8 +3642,8 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 
 CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 {
-	double xc = static_cast<double>(width() / 2);
-	double yc = static_cast<double>(height() / 2); //DGM FIXME: is it scaled coordinates or not?!
+	double xc = width() / 2.0;
+	double yc = height() / 2.0; //DGM FIXME: is it scaled coordinates or not?!
 
 	CCVector3d Q2D;
 	if (m_viewportParams.objectCenteredView)
@@ -4530,7 +4530,7 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 		event->accept();
 
 		//see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
-		float wheelDelta_deg = static_cast<float>(event->delta()) / 8;
+		float wheelDelta_deg = event->delta() / 8.0f;
 		onWheelEvent(wheelDelta_deg);
 
 		emit mouseWheelRotated(wheelDelta_deg);
@@ -5384,7 +5384,7 @@ static void glDrawUnitCircle(QOpenGLContext* context, unsigned char dim, unsigne
 		return;
 	}
 
-	double thetaStep = 2.0 * M_PI / static_cast<double>(steps);
+	double thetaStep = (2.0 * M_PI) / steps;
 	unsigned char dimX = (dim < 2 ? dim + 1 : 0);
 	unsigned char dimY = (dimX < 2 ? dimX + 1 : 0);
 
@@ -5531,7 +5531,7 @@ double ccGLWindow::computeActualPixelSize() const
 {
 	if (!m_viewportParams.perspectiveView)
 	{
-		return static_cast<double>(m_viewportParams.pixelSize / m_viewportParams.zoom);
+		return m_viewportParams.pixelSize / m_viewportParams.zoom;
 	}
 
 	int minScreenDim = std::min(m_glViewport.width(), m_glViewport.height());
@@ -5541,8 +5541,7 @@ double ccGLWindow::computeActualPixelSize() const
 	//Camera center to pivot vector
 	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
 
-	double currentFov_deg = static_cast<double>(getFov());
-	return zoomEquivalentDist * std::tan(std::min(currentFov_deg, 75.0) * CC_DEG_TO_RAD) / minScreenDim; //tan(75) = 3.73 (then it quickly increases!)
+	return zoomEquivalentDist * std::tan(std::min(getFov(), 75.0f) * CC_DEG_TO_RAD) / minScreenDim; //tan(75) = 3.73 (then it quickly increases!)
 }
 
 float ccGLWindow::computePerspectiveZoom() const
@@ -5617,7 +5616,7 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 			//we compute the camera position that gives 'quite' the same view as the ortho one
 			//(i.e. we replace the zoom by setting the camera at the right distance from
 			//the pivot point)
-			double currentFov_deg = static_cast<double>(getFov());
+			double currentFov_deg = getFov();
 			assert(currentFov_deg > ZERO_TOLERANCE);
 			double screenSize = std::min(m_glViewport.width(), m_glViewport.height()) * m_viewportParams.pixelSize; //see how pixelSize is computed!
 			if (screenSize > 0.0)

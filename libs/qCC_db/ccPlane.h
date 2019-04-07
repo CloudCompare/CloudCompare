@@ -87,7 +87,7 @@ public:
 		\param[out] rms plane fitting rms (optional)
 		\return plane primitive (if successful)
 	**/
-	static ccPlane* Fit(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0);
+	static ccPlane* Fit(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0, std::vector<CCVector3> * profile = 0);
 
 	//! Returns the equation of the plane
 	/** Equation:
@@ -95,6 +95,9 @@ public:
 		i.e. Nx.x + Ny.y + Nz.z + constVal = 0
 	**/
 	void getEquation(CCVector3& N, PointCoordinateType& constVal) const;
+
+	void setProfile(std::vector<CCVector3> profile) { m_profile = profile; }
+	std::vector<CCVector3> getProfile() { return m_profile; }
 
 protected:
 
@@ -111,6 +114,8 @@ protected:
 
 	//! Width along 'Y' dimension
 	PointCoordinateType m_yWidth;
+
+	std::vector<CCVector3> m_profile;
 };
 
 #endif //CC_PLANE_PRIMITIVE_HEADER

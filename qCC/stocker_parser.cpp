@@ -517,8 +517,8 @@ int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix/*, CC_CLASS_E
 ccPlane* FitPlaneAndAddChild(ccPointCloud* cloud)
 {
 	//	ccHObject* cc_plane = nullptr;
-	double rms = 0;
-	ccPlane* pPlane = ccPlane::Fit(cloud, &rms);
+	double rms = 0; std::vector<CCVector3> c_hull;
+	ccPlane* pPlane = ccPlane::Fit(cloud, &rms, &c_hull);
 	if (pPlane) {
 		//		cc_plane = static_cast<ccHObject*>(pPlane);
 		if (cloud->hasColors()) {
@@ -771,7 +771,7 @@ ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, 
 	for (size_t i = 0; i < plane_units.size(); i++) {
 		int num;
 		sscanf(plane_units[i].GetName().Str().c_str(), "%d", &num);
-		ccHObject* add = AddSegmentsAsChildVertices(entity_planes[num]->getParent(), ints_per_plane[i], "Intersection", ccColor::red);
+		ccHObject* add = AddSegmentsAsChildVertices(entity_planes[num]->getParent(), ints_per_plane[i], "Intersection", ccColor::cyan);
 		if (add) segs_add.push_back(add);
 	}
 	return segs_add;

@@ -7886,7 +7886,8 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 			}
 			else
 			{
-				ccPlane* pPlane = ccPlane::Fit(cloud, &rms);
+				std::vector<CCVector3> c_hull;
+				ccPlane* pPlane = ccPlane::Fit(cloud, &rms, &c_hull);
 				if (pPlane)
 				{
 					plane = static_cast<ccHObject*>(pPlane);
@@ -11370,8 +11371,8 @@ void MainWindow::doActionBDPrimPlaneFromSharp()
 		//! add plane
 		{
 			ccHObject* plane = nullptr;
-			double rms = 0;
-			ccPlane* pPlane = ccPlane::Fit(plane_cloud, &rms);
+			double rms = 0;  std::vector<CCVector3> c_hull;
+			ccPlane* pPlane = ccPlane::Fit(plane_cloud, &rms, &c_hull);
 			if (pPlane) {
 				plane = static_cast<ccHObject*>(pPlane);
 				pPlane->setColor(col);
@@ -11695,8 +11696,8 @@ void MainWindow::doActionBDPrimCreateGround()
 			}
 		}
 		ccHObject* plane = nullptr;
-		double rms = 0;
-		ccPlane* pPlane = ccPlane::Fit(plane_cloud, &rms);
+		double rms = 0; std::vector<CCVector3> c_hull;
+		ccPlane* pPlane = ccPlane::Fit(plane_cloud, &rms, &c_hull);
 		if (pPlane) {
 			plane = static_cast<ccHObject*>(pPlane);
 			pPlane->setColor(col);

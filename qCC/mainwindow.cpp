@@ -11102,8 +11102,10 @@ void MainWindow::doActionBDPlaneSegmentation()
 		return;
 	}
 	double merge_threshold(-1), split_threshold(-1);
-	if (m_pbdrPSDlg->PlaneRefineGroupBox->isChecked()) {
-		merge_threshold = m_pbdrPSDlg->MergeThresholdDoubleSpinBox->value();
+	if (m_pbdrPSDlg->MergeCheckBox->isChecked()) {
+		merge_threshold = m_pbdrPSDlg->MergeThresholdDoubleSpinBox->value();		
+	}
+	if (m_pbdrPSDlg->SplitCheckBox->isChecked()) {
 		split_threshold = m_pbdrPSDlg->SplitThresholdDoubleSpinBox->value();
 	}
 	int support_pts = m_pbdrPSDlg->supportPointsSpinBox->value();

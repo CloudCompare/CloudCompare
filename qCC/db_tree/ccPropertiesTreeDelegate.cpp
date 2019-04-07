@@ -1928,9 +1928,21 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	break;
 	case OBJECT_MESH_STIPPLING:
 	{
-		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(m_currentObject);
-		assert(mesh);
-		mesh->enableStippling(item->checkState() == Qt::Checked);
+		if (m_currentObject->isA(CC_TYPES::ST_PRIMITIVE)) {
+			ccHObject::Container plane_children;
+			m_currentObject->filterChildren(plane_children, true, CC_TYPES::PLANE, true, m_currentObject->getDisplay());
+			if (plane_children.empty()) return;
+			for (auto pl : plane_children) {
+				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(pl);
+				if (mesh)
+					mesh->enableStippling(item->checkState() == Qt::Checked);
+			}
+		}
+		else {
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(m_currentObject);
+			assert(mesh);
+			mesh->enableStippling(item->checkState() == Qt::Checked);
+		}
 	}
 	redraw = true;
 	break;
@@ -2710,6 +2722,16 @@ void ccPropertiesTreeDelegate::fillWithStModel(const StModel *_obj)
 
 void ccPropertiesTreeDelegate::fillWithStPrimGroup(const StPrimGroup *_obj)
 {
+	assert(_obj && m_model);
+
+	//Sensor drawing scale
+	addSeparator(tr("Primitive Display"));
+	ccHObject::Container plane_children;
+	_obj->filterChildren(plane_children, true, CC_TYPES::PLANE, true, _obj->getDisplay());
+	if (plane_children.empty()) return;
+	ccPlane* first_plane = ccHObjectCaster::ToPlane(plane_children.front());
+
+	appendRow(ITEM(tr("Stippling")), CHECKABLE_ITEM(static_cast<const ccMesh*>(first_plane)->stipplingEnabled(), OBJECT_MESH_STIPPLING));
 }
 
 void ccPropertiesTreeDelegate::fiilWithCameraGroup(const ccHObject *_obj)

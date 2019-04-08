@@ -680,8 +680,8 @@ ccPointCloud* AddSegmentsAsPlane(stocker::Polyline3d lines, QString lines_prefix
 	if (_exist_cloud) {
 		plane_cloud = ccHObjectCaster::ToPointCloud(_exist_cloud);
 	}
-	else {		
-		plane_cloud = AddPointsAsPlane(stocker::ToContour(lines, 0), "Plane", col);
+	else {
+		plane_cloud = AddPointsAsPlane(stocker::ToContour(lines, 3), "Plane", col);
 	}
 	ccPointCloud* line_vert = AddSegmentsAsChildVertices(plane_cloud, lines, lines_prefix, col);
 

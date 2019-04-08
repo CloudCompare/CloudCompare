@@ -615,7 +615,8 @@ ccPointCloud* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d 
 			line_vert->setGlobalShift(cloud->getGlobalShift());
 			line_vert->setGlobalScale(cloud->getGlobalScale());
 		}
-	}	
+		entity->addChild(line_vert);
+	}
 	AddSegmentsToVertices(line_vert, lines, name, col);
 	return line_vert;
 }

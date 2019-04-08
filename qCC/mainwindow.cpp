@@ -6249,7 +6249,7 @@ void MainWindow::activateSegmentationMode()
 			m_gsTool->addEntity(entity);
 		}		
 	}
-	m_gsTool->setPlaneSegMode(false);
+	m_gsTool->setSegmentMode(0);
 
 	if (m_gsTool->getNumberOfValidEntities() == 0)
 	{
@@ -6421,7 +6421,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							}
 						} //for each child
 					}
-
+					StPrimGroup* prim_group = nullptr;
 					//we must take care of the remaining part
 					if (!deleteHiddenParts)
 					{
@@ -6429,7 +6429,13 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						if (!deleteOriginalEntity)
 						{
 							//! XYLIU
-							if (m_gsTool->isPlaneSegMode()) {								
+							switch (m_gsTool->getSegmentMode())
+							{
+							case 0:
+								entity->setName(entity->getName() + QString(".remaining"));
+								break;
+							case 1: 
+							{
 								int biggest = GetMaxNumberExcludeChildPrefix(objContext.parent, BDDB_PLANESEG_PREFIX);
 								segmentationResult->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
 								ccPointCloud* segment_cloud = ccHObjectCaster::ToPointCloud(segmentationResult);
@@ -6437,10 +6443,31 @@ void MainWindow::deactivateSegmentationMode(bool state)
 									segment_cloud->setRGBColor(ccColor::Generator::Random());
 									ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
 									if (new_plane) addToDB(new_plane);
- 								}
+								}
+								break;
 							}
-							else {
-								entity->setName(entity->getName() + QString(".remaining"));
+							case 2:
+							{
+								//! get primitive group
+								StBuilding* cur_building = GetParentBuilding(objContext.parent);
+								if (!cur_building) { break; }
+								BDBaseHObject* baseObj = GetRootBDBase(cur_building);
+								if (!baseObj) { break; }
+								prim_group = baseObj->GetPrimitiveGroup(cur_building->getName(), false);
+								if (!prim_group) { break; }
+
+								int biggest = GetMaxNumberExcludeChildPrefix(prim_group, BDDB_PLANESEG_PREFIX);
+								segmentationResult->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
+								ccPointCloud* segment_cloud = ccHObjectCaster::ToPointCloud(segmentationResult);
+								if (segment_cloud) {
+									segment_cloud->setRGBColor(ccColor::Generator::Random());
+									ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
+									if (new_plane) addToDB(new_plane);
+								}
+								break;
+							}							
+							default:
+								break;
 							}
 							putObjectBackIntoDBTree(entity, objContext);
 						}
@@ -6450,7 +6477,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						//keep original name(s)
 						segmentationResult->setName(entity->getName());
 						//! XYLIU
-						if (m_gsTool->isPlaneSegMode())	{
+						if (m_gsTool->getSegmentMode() == 1) {
 							ccPointCloud* segment_cloud = ccHObjectCaster::ToPointCloud(segmentationResult);
 							if (segment_cloud) {
 								segment_cloud->setRGBColor(segment_cloud->hasColors() ? segment_cloud->getPointColor(0) : ccColor::Generator::Random());
@@ -6474,7 +6501,11 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						//deleteOriginalEntity = true;
 					}
 
-					if (segmentationResult->isA(CC_TYPES::SUB_MESH))
+					if (prim_group) // XYLIU
+					{
+						objContext.parent = prim_group;
+					}
+					else if (segmentationResult->isA(CC_TYPES::SUB_MESH))
 					{
 						//for sub-meshes, we have no choice but to use its parent mesh!
 						objContext.parent = static_cast<ccSubMesh*>(segmentationResult)->getAssociatedMesh();
@@ -6487,7 +6518,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							objContext.parent = objContext.parent->getParent();
 						}
 					}
-
+					
 					if (objContext.parent)
 					{
 						objContext.parent->addChild(segmentationResult); //FiXME: objContext.parentFlags?
@@ -11676,7 +11707,7 @@ void MainWindow::doActionBDPrimSplitPlane()
 		dispToConsole("Please select the point cloud of a plane", ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	m_gsTool->setPlaneSegMode(planeseg_mode);
+	m_gsTool->setSegmentMode(1);
 
 	for (ccHObject *entity : getSelectedEntities())
 	{
@@ -11837,7 +11868,7 @@ void MainWindow::doActionBDPlaneFromPoints()
 	if (!win)
 		return;
 
-	if (!haveSelection())
+	if (!haveSelection() || !getSelectedEntities().front()->isA(CC_TYPES::POINT_CLOUD))	//! only parse todo points
 		return;
 
 	if (!m_gsTool)
@@ -11850,13 +11881,7 @@ void MainWindow::doActionBDPlaneFromPoints()
 
 	m_gsTool->linkWith(win);
 
-	ccHObject* first_entity = getSelectedEntities().front();
-	bool planeseg_mode = getSelectedEntities().size() == 1 && isPlaneCloud(first_entity);
-	if (!planeseg_mode) {
-		dispToConsole("Please select the point cloud of a plane", ERR_CONSOLE_MESSAGE);
-		return;
-	}
-	m_gsTool->setPlaneSegMode(planeseg_mode);
+	m_gsTool->setSegmentMode(2);
 
 	for (ccHObject *entity : getSelectedEntities())
 	{

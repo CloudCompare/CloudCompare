@@ -589,7 +589,7 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	//set the default import/export icon to 'export' mode
 	loadSaveToolButton->setDefaultAction(actionExportSegmentationPolyline);
 	allowPolylineExport(m_segmentationPoly->size() > 1);
-	if (m_planeseg_mode) {
+	if (m_segment_mode == 1 || m_segment_mode == 2) {
 		validButton->setEnabled(m_segmentationPoly->size() > 1);
 		validAndDeleteButton->setEnabled(m_segmentationPoly->size() > 1);
 	}	
@@ -978,7 +978,7 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 
 void ccGraphicalSegmentationTool::apply()
 {
-	if (m_planeseg_mode) {
+	if (m_segment_mode != 0) {
 		segmentIn();
 	}
 	m_deleteHiddenParts = false;
@@ -987,7 +987,7 @@ void ccGraphicalSegmentationTool::apply()
 
 void ccGraphicalSegmentationTool::applyAndDelete()
 {
-	if (m_planeseg_mode) {
+	if (m_segment_mode != 0) {
 		segmentOut();
 	}
 	m_deleteHiddenParts = true;
@@ -1001,23 +1001,34 @@ void ccGraphicalSegmentationTool::cancel()
 	stop(false);
 }
 
-void ccGraphicalSegmentationTool::setPlaneSegMode(bool mode)
+void ccGraphicalSegmentationTool::setSegmentMode(int mode)
 {
-	if (mode) 
+	if (mode != 0) 
 		setFixedWidth(210);	
 	else 
 		setFixedWidth(250);
-	
-	inButton->setVisible(!mode);
-	outButton->setVisible(!mode);
-	m_planeseg_mode = mode;
 
-	if (mode) {
-		validAndDeleteButton->setToolTip("Confirm and delete points inside the polygon");
-		validButton->setToolTip("Create a new plane by points inside the polygon");
-	}
-	else {
+	m_segment_mode = mode;
+	switch (mode)
+	{
+	case 0: 
+	{
+		inButton->setVisible(true);
+		outButton->setVisible(true);
 		validAndDeleteButton->setToolTip("Confirm and delete hidden points");
 		validButton->setToolTip("Confirm segmentation");
+		break;
+	}
+	case 1: 
+	case 2: 
+	{
+		inButton->setVisible(false);
+		outButton->setVisible(false);
+		validAndDeleteButton->setToolTip("Confirm and delete points inside the polygon");
+		validButton->setToolTip("Create a new plane by points inside the polygon");		
+	}
+		break;
+	default:
+		break;
 	}
 }

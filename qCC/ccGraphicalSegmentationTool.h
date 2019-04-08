@@ -78,8 +78,8 @@ public:
 	**/
 	void removeAllEntities(bool unallocateVisibilityArrays);
 
-	void setPlaneSegMode(bool mode);
-	bool isPlaneSegMode() {	return m_planeseg_mode; }
+	void setSegmentMode(int mode);
+	int getSegmentMode() {	return m_segment_mode; }
 
 protected slots:
 
@@ -141,7 +141,7 @@ protected:
 	//! Whether to delete hidden parts after segmentation
 	bool m_deleteHiddenParts;
 
-	bool m_planeseg_mode;
+	int m_segment_mode;
 };
 
 #endif //CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER

@@ -6603,6 +6603,7 @@ void MainWindow::activateTracePolylineMode()
 	}
 
 	m_tplTool->linkWith(win);
+	m_tplTool->setTraceMode(0);
 
 	freezeUI(true);
 	m_UI->toolBarView->setDisabled(false);
@@ -11890,6 +11891,14 @@ void MainWindow::doActionBDPlaneFromPoints()
 
 void MainWindow::doActionBDPlaneFromPolygon()
 {
+	if (!haveSelection()) {
+		return;
+	}
+	ccHObject* prim_group = getSelectedEntities().front();
+	if (!prim_group->isA(CC_TYPES::ST_PRIMITIVE)) { // TODO: set it automatically, but now, select manually
+		dispToConsole("please select a primitive group", ERR_CONSOLE_MESSAGE);
+		return;
+	}
 	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 	{
@@ -11903,7 +11912,9 @@ void MainWindow::doActionBDPlaneFromPolygon()
 		registerOverlayDialog(m_tplTool, Qt::TopRightCorner);
 	}
 
+
 	m_tplTool->linkWith(win);
+	m_tplTool->setTraceMode(1, prim_group);
 
 	freezeUI(true);
 	m_UI->toolBarView->setDisabled(false);

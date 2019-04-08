@@ -50,6 +50,11 @@
 
 #include <iostream>
 
+#ifdef USE_STOCKER
+#include "stocker_parser.h"
+#endif // USE_STOCKER
+
+
 ccTracePolylineTool::SegmentGLParams::SegmentGLParams(ccGenericGLDisplay* display, int x , int y)
 {
 	if (display)
@@ -69,6 +74,8 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 	, m_poly3DVertices(0)
 	, m_done(false)
 	, m_pickingHub(pickingHub)
+	, m_trace_mode(0)
+	, m_dest_prim_group(nullptr)
 {
 	assert(pickingHub);
 
@@ -103,6 +110,8 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 	m_polyTip->addChild(m_polyTipVertices);
 
 	validButton->setEnabled(false);
+	label_4->setVisible(false);
+	DistanceDoubleSpinBox->setVisible(false);
 }
 
 ccTracePolylineTool::~ccTracePolylineTool()
@@ -380,6 +389,10 @@ void ccTracePolylineTool::stop(bool accepted)
 	s_defaultPickingRadius = snapSizeSpinBox->value();
 	s_overSamplingCount = oversampleSpinBox->value();
 
+	if (m_dest_prim_group) {
+		m_dest_prim_group = nullptr;
+	}
+
 	ccOverlayDialog::stop(accepted);
 }
 
@@ -625,6 +638,12 @@ void ccTracePolylineTool::exportLine()
 		return;
 	}
 
+	// TODO: cannot be as the same line
+	if (m_trace_mode == 1 && m_dest_prim_group && m_poly3D->size() < 3) {
+		ccLog::Error("trace at least two lines to make a plane");
+		return;
+	}
+
 	if (m_associatedWin)
 	{
 		m_associatedWin->removeFromOwnDB(m_poly3D);
@@ -645,13 +664,33 @@ void ccTracePolylineTool::exportLine()
 
 	m_poly3D->enableTempColor(false);
 	m_poly3D->setDisplay(m_associatedWin); //just in case
-	if (MainWindow::TheInstance())
-	{
-		MainWindow::TheInstance()->addToDB(m_poly3D);
+
+	MainWindow* win = MainWindow::TheInstance();
+	assert(win);
+
+	if (m_trace_mode == 0) {
+		win->addToDB(m_poly3D);
 	}
-	else
-	{
-		assert(false);
+	else if (m_trace_mode == 1 && m_dest_prim_group) {
+		//! make a plane
+		stocker::Polyline3d export_line = GetPolygonFromPolyline(m_poly3D);
+		assert(export_line.size() > 1);
+		ccPointCloud* new_plane_cloud =	AddSegmentsAsPlane(export_line, BDDB_DEDUCED_PREFIX, ccColor::Generator::Random());
+		if (new_plane_cloud) {
+			int biggest = GetMaxNumberExcludeChildPrefix(m_dest_prim_group, BDDB_PLANESEG_PREFIX);
+			QString new_plane_name = BDDB_PLANESEG_PREFIX + QString::number(biggest + 1);
+			new_plane_cloud->setName(new_plane_name);
+			m_dest_prim_group->addChild(new_plane_cloud);
+			win->addToDB(new_plane_cloud, false, false);
+
+			BDBaseHObject* baseObj = GetRootBDBase(m_dest_prim_group);
+			if (baseObj) {
+				ccPointCloud* todo_point = baseObj->GetTodoPoint(GetBaseName(m_dest_prim_group->getName()), false);
+				if (todo_point) {
+					RetrieveAssignedPoints(todo_point, new_plane_cloud, DistanceDoubleSpinBox->value());
+				}
+			}
+		}
 	}
 
 	m_poly3D = 0;
@@ -689,5 +728,40 @@ void ccTracePolylineTool::onWidthSizeChanged(int width)
 	if (m_associatedWin)
 	{
 		m_associatedWin->redraw(m_poly3D == 0, false);
+	}
+}
+
+void ccTracePolylineTool::setTraceMode(int mode, ccHObject* prim_group)
+{
+	m_trace_mode = mode; 
+	switch (m_trace_mode)
+	{
+	case  0:	// original trace polyline
+	{
+		setFixedWidth(495);
+		label_3->setVisible(true);
+		widthSpinBox->setVisible(true);
+		label_2->setVisible(true);
+		oversampleSpinBox->setVisible(true);
+		label_4->setVisible(false);
+		DistanceDoubleSpinBox->setVisible(false);
+
+		break;
+	}
+	case  1: // trace polyline and make a plane
+	{
+		setFixedWidth(250);
+		label_3->setVisible(false);
+		widthSpinBox->setVisible(false);
+		label_2->setVisible(false);
+		oversampleSpinBox->setVisible(false);
+		m_dest_prim_group = prim_group ? prim_group : nullptr;
+		label_4->setVisible(true);
+		label_4->setText("Distance Threshold");
+		DistanceDoubleSpinBox->setVisible(true);
+		break;
+	}
+	default:
+		break;
 	}
 }

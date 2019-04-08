@@ -51,7 +51,8 @@ QString GetBaseName(QString name);
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject * entity, stocker::Polyline3d polygon, double height);
 std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonXY(ccHObject::Container entities, stocker::Polyline3d polygon, double height, bool skip_empty = true);
-stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject * entity, stocker::Polyline3d polygon, Contour3d & remained, double distance_threshold);
+stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject * entity, stocker::Polyline3d polygon, stocker::Contour3d & remained, double distance_threshold);
+stocker::Polyline3d GetPolygonFromPolyline(ccHObject * entity);
 stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
 vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject * entity);
 ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true, bool recursive = true);
@@ -74,6 +75,7 @@ StPrimGroup * AddPlanesPointsAsNewGroup(QString name, std::vector<stocker::Conto
 
 ccHObject* PlaneSegmentationRansac(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double normal_threshold, double ransac_probability, double merge_threshold = -1, double split_threshold = -1, ccPointCloud* todo_cloud = nullptr);
 void RetrieveUnassignedPoints(ccHObject * original_cloud, ccHObject * prim_group, ccPointCloud * todo_point);
+void RetrieveAssignedPoints(ccPointCloud * todo_cloud, ccPointCloud * plane_cloud, double distance_threshold);
 ccHObject* PlaneSegmentationRgGrow(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double growing_radius, double merge_threshold = -1, double split_threshold = -1);
 ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
 ccHObject* CalcPlaneBoundary(ccHObject* planeObj);
@@ -105,6 +107,7 @@ ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * poly
 #define BDDB_LOD3MODEL_PREFIX		"LoD3_"
 #define BDDB_TODOPOINT_PREFIX		"TodoPoint"
 #define BDDB_TODOLINE_PREFIX		"TodoLine"
+#define BDDB_DEDUCED_PREFIX			"Deduced"
 
 #define BDDB_CAMERA_SUFFIX			".camera"
 #define BDDB_ORIGIN_CLOUD_SUFFIX	".original"

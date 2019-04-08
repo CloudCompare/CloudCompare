@@ -53,6 +53,9 @@ public:
 	virtual bool start() override;
 	virtual void stop(bool accepted) override;
 
+	void setTraceMode(int mode, ccHObject* prim_group = nullptr);
+	int getTraceMode() { return m_trace_mode; }
+
 protected slots:
 
 	void apply();
@@ -108,6 +111,8 @@ protected:
 	//! Picking hub
 	ccPickingHub* m_pickingHub;
 
+	int m_trace_mode;
+	ccHObject* m_dest_prim_group;
 };
 
 #endif //CC_TRACE_POLY_LINE_TOOL_HEADER

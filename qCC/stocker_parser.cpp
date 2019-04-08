@@ -132,7 +132,7 @@ std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonXY(ccHObject::Con
 	return all_points;
 }
 
-stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject* entity, stocker::Polyline3d polygon, Contour3d& remained, double distance_threshold)
+stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject* entity, stocker::Polyline3d polygon, stocker::Contour3d& remained, double distance_threshold)
 {
 	stocker::Contour3d points;
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);

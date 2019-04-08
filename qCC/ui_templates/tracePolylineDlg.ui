@@ -122,6 +122,20 @@
     </widget>
    </item>
    <item>
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>T</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDoubleSpinBox" name="DistanceDoubleSpinBox">
+     <property name="toolTip">
+      <string>Distance Threshold to Retrieve TodoPoints</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

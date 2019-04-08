@@ -903,8 +903,8 @@ bool ccGenericMesh::trianglePicking(unsigned triIndex,
 	if (noGLTrans)
 	{
 		// if none of its points fall into the frustrum the triangle is not visible...
-		if(!camera.project(A3D, A2D, true) ||
-			!camera.project(B3D, B2D, true) ||
+		if(!camera.project(A3D, A2D, true) &&
+			!camera.project(B3D, B2D, true) &&
 			!camera.project(C3D, C2D, true)) 
 		{
 			return false;
@@ -919,8 +919,8 @@ bool ccGenericMesh::trianglePicking(unsigned triIndex,
 		trans.apply(B3Dp);
 		trans.apply(C3Dp);
 		// if none of its points fall into the frustrum the triangle is not visible...
-		if(!camera.project(A3Dp, A2D, true) ||
-			!camera.project(B3Dp, B2D, true) ||
+		if(!camera.project(A3Dp, A2D, true) &&
+			!camera.project(B3Dp, B2D, true) &&
 			!camera.project(C3Dp, C2D, true)) 
 		{
 			return false;

@@ -5,26 +5,24 @@ v2.11 (Anoia) - (in development)
 ----------------------
 
 - Improvements
-  
   - Command line tool:
     - The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
       In this case the first mesh vertices are used as compared cloud.
-  
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
-
   - Point picking:
-	- points can now be picked on meshes (triangles)
-	- the Point List Picking tool can now be used on meshes
-	- when using 'Shift+left click' or the Point picking tool on a mesh,
-		CC won't spawn a 3-points label anymore, but a single point label at the right position
-	- labels picked on a mesh can be used to re-orient the camera (right-click on the label entry in the DB)
-	- note: for now, labels associated to meshes are not preserved when cloning or merging the meshes
-	- points are now exclusively picked inside the current fustrum (no more points behind the camera)
-
-	- Graphical Segmentation
-		- points are now exclusively segmented inside/outside the frustrum  
-
+    - points can now be picked on meshes (triangles)
+    - the Point List Picking tool can now be used on meshes
+    - when using 'Shift+left click' or the Point picking tool on a mesh, CC won't spawn a 3-points label anymore, but a single point label at the right position
+    - labels picked on a mesh can be used to re-orient the camera (right-click on the label entry in the DB)
+    - note: for now, labels associated to meshes are not preserved when cloning or merging the meshes
+    - points are now exclusively picked inside the current fustrum (no more points behind the camera)
+  - Graphical Segmentation
+    - points are now exclusively segmented inside/outside the frustrum
+  - Plugins
+    - plugins may now be enabled/disbled in the plugin info window
+    - to take effect, CloudCompare must be restarted
+    - all plugins are still available on the command line
 
 - Changes
   - Command line tool:

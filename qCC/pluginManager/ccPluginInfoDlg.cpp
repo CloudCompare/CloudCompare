@@ -21,6 +21,7 @@
 #include <QStandardItemModel>
 
 #include "ccPluginInfoDlg.h"
+#include "ccPluginManager.h"
 #include "ccStdPluginInterface.h"
 
 #include "ui_ccPluginInfoDlg.h"
@@ -113,6 +114,10 @@ ccPluginInfoDlg::ccPluginInfoDlg( QWidget *parent ) :
 	
 	setWindowTitle( tr("About Plugins" ) );
 	
+	m_UI->mWarningLabel->setText( tr( "Enabling/disabling plugins will take effect next time you run %1" ).arg( QApplication::applicationName() ) );
+	m_UI->mWarningLabel->setStyleSheet( QStringLiteral( "QLabel { background-color : #FFFF99; color : black; }" ) );
+	m_UI->mWarningLabel->hide();
+	
 	m_UI->mSearchLineEdit->setStyleSheet( "QLineEdit, QLineEdit:focus { border: none; }" );
 	m_UI->mSearchLineEdit->setAttribute( Qt::WA_MacShowFocusRect, false );
 				
@@ -170,9 +175,15 @@ void ccPluginInfoDlg::setPluginList( const QList<ccPluginInterface *> &pluginLis
 		}
 		
 		QStandardItem *item = new QStandardItem( name );
+				
+		item->setCheckable( true );
 		
-		item->setData( QVariant::fromValue( plugin ), PLUGIN_PTR );
+		if ( ccPluginManager::get().isEnabled( plugin ) )
+		{
+			item->setCheckState( Qt::Checked );
+		}
 		
+		item->setData( QVariant::fromValue( plugin ), PLUGIN_PTR );		
 		item->setIcon( _Icons::sGetIcon( plugin->getType() ) );
 		item->setToolTip( tooltip );
 		
@@ -189,6 +200,13 @@ void ccPluginInfoDlg::setPluginList( const QList<ccPluginInterface *> &pluginLis
 		
 		m_UI->mPluginListView->setCurrentIndex( index );
 	}
+	
+	connect( m_ItemModel, &QStandardItemModel::itemChanged, this, &ccPluginInfoDlg::itemChanged );
+}
+
+const ccPluginInterface *ccPluginInfoDlg::pluginFromItemData( const QStandardItem *item ) const
+{
+	return item->data( PLUGIN_PTR ).value<const ccPluginInterface*>();;
 }
 
 void ccPluginInfoDlg::selectionChanged( const QModelIndex &current, const QModelIndex &previous )
@@ -205,9 +223,27 @@ void ccPluginInfoDlg::selectionChanged( const QModelIndex &current, const QModel
 		return;
 	}
 	
-	auto plugin = item->data( PLUGIN_PTR ).value<const ccPluginInterface*>();
+	auto plugin = pluginFromItemData( item );
 	
 	updatePluginInfo( plugin );	
+}
+
+void ccPluginInfoDlg::itemChanged( QStandardItem *item )
+{
+	bool checked = item->checkState() == Qt::Checked;
+	auto plugin = pluginFromItemData( item );
+	
+	if ( plugin != nullptr )
+	{
+		ccPluginManager::get().setPluginEnabled( plugin, checked );
+		
+		if ( m_UI->mWarningLabel->isHidden() )
+		{
+			ccLog::Warning( m_UI->mWarningLabel->text() );
+			
+			m_UI->mWarningLabel->show();
+		}
+	}
 }
 
 void ccPluginInfoDlg::updatePluginInfo( const ccPluginInterface *plugin )

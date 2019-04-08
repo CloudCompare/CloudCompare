@@ -22,6 +22,7 @@
 
 class QModelIndex;
 class QSortFilterProxyModel;
+class QStandardItem;
 class QStandardItemModel;
 
 class ccPluginInterface;
@@ -46,7 +47,11 @@ private:
 		PLUGIN_PTR = Qt::UserRole + 1
 	};
 	
+	const ccPluginInterface* pluginFromItemData( const QStandardItem* item ) const;
+	
 	void	selectionChanged( const QModelIndex &current, const QModelIndex &previous );
+	void	itemChanged( QStandardItem* item );
+	
 	void	updatePluginInfo( const ccPluginInterface *plugin );
 	
 	Ui::ccPluginInfoDlg *m_UI;

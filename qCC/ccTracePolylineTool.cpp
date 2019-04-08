@@ -141,6 +141,10 @@ void ccTracePolylineTool::onShortcutTriggered(int key)
 		cancel();
 		return;
 
+	case Qt::Key_Space:
+		continueToolButton->click();
+		return;
+
 	default:
 		//nothing to do
 		break;
@@ -672,6 +676,21 @@ void ccTracePolylineTool::exportLine()
 		win->addToDB(m_poly3D);
 	}
 	else if (m_trace_mode == 1 && m_dest_prim_group) {
+		//! close
+		CCVector3 last_point = *m_poly3D->getPoint(m_poly3D->size() - 1);
+		CCVector3 first_point = *m_poly3D->getPoint(0);
+		if ((last_point - first_point).norm2() > 1e-6) {
+			//try to add one more point
+			if (!m_poly3DVertices->reserve(m_poly3DVertices->size() + 1)
+				|| !m_poly3D->reserve(m_poly3DVertices->size() + 1)) {
+				ccLog::Error("Not enough memory");
+				return;
+			}
+			m_poly3DVertices->addPoint(first_point);
+			m_poly3D->addPointIndex(m_poly3DVertices->size() - 1);
+		}
+		m_poly3D->setClosed(true);
+
 		//! make a plane
 		stocker::Polyline3d export_line = GetPolygonFromPolyline(m_poly3D);
 		assert(export_line.size() > 1);
@@ -680,16 +699,19 @@ void ccTracePolylineTool::exportLine()
 			int biggest = GetMaxNumberExcludeChildPrefix(m_dest_prim_group, BDDB_PLANESEG_PREFIX);
 			QString new_plane_name = BDDB_PLANESEG_PREFIX + QString::number(biggest + 1);
 			new_plane_cloud->setName(new_plane_name);
-			m_dest_prim_group->addChild(new_plane_cloud);
-			win->addToDB(new_plane_cloud, false, false);
 
 			BDBaseHObject* baseObj = GetRootBDBase(m_dest_prim_group);
 			if (baseObj) {
 				ccPointCloud* todo_point = baseObj->GetTodoPoint(GetBaseName(m_dest_prim_group->getName()), false);
 				if (todo_point) {
 					RetrieveAssignedPoints(todo_point, new_plane_cloud, DistanceDoubleSpinBox->value());
-				}
+				}				
 			}
+
+			SetGlobalShiftAndScale(new_plane_cloud);
+			m_dest_prim_group->addChild(new_plane_cloud);
+			new_plane_cloud->setDisplay_recursive(m_dest_prim_group->getDisplay());
+			win->addToDB(new_plane_cloud, false, false);
 		}
 	}
 

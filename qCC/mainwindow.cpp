@@ -6442,7 +6442,11 @@ void MainWindow::deactivateSegmentationMode(bool state)
 								if (segment_cloud) {
 									segment_cloud->setRGBColor(ccColor::Generator::Random());
 									ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
-									if (new_plane) addToDB(new_plane);
+									if (new_plane) { 
+										new_plane->setDisplay_recursive(getActiveGLWindow());
+										SetGlobalShiftAndScale(new_plane);
+										addToDB(new_plane);
+									}
 								}
 								break;
 							}
@@ -6462,7 +6466,11 @@ void MainWindow::deactivateSegmentationMode(bool state)
 								if (segment_cloud) {
 									segment_cloud->setRGBColor(ccColor::Generator::Random());
 									ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
-									if (new_plane) addToDB(new_plane);
+									if (new_plane) { 
+										new_plane->setDisplay_recursive(getActiveGLWindow());
+										SetGlobalShiftAndScale(new_plane);
+										addToDB(new_plane); 
+									}
 								}
 								break;
 							}							
@@ -6524,8 +6532,9 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						objContext.parent->addChild(segmentationResult); //FiXME: objContext.parentFlags?
 					}
 
-					segmentationResult->setDisplay_recursive(entity->getDisplay());
+					segmentationResult->setDisplay_recursive(getActiveGLWindow());
 					segmentationResult->prepareDisplayForRefresh_recursive();
+					SetGlobalShiftAndScale(segmentationResult);
 
 					addToDB(segmentationResult, false, false);
 
@@ -11901,6 +11910,8 @@ void MainWindow::doActionBDPlaneFromPolygon()
 		dispToConsole("please select a primitive group", ERR_CONSOLE_MESSAGE);
 		return;
 	}
+	// TODO: get what is available now, return their display status, sometimes octree picking changes the color
+
 	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 	{
@@ -12151,6 +12162,9 @@ void MainWindow::doActionBDPlaneCreate()
 		return;
 	}
 
+	SetGlobalShiftAndScale(plane_cloud);
+	plane_cloud->setDisplay_recursive(prim_group->getDisplay());
+	prim_group->addChild(plane_cloud);	
 	addToDB(plane_cloud, false, false);
 	refreshAll();
 }

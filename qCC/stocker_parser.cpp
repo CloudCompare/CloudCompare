@@ -132,7 +132,7 @@ std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonXY(ccHObject::Con
 	return all_points;
 }
 
-stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject* entity, stocker::Polyline3d polygon, stocker::Contour3d& remained, double distance_threshold)
+stocker::Contour3d GetPointsFromCloudInsidePolygon3d(ccHObject* entity, stocker::Polyline3d polygon, stocker::Contour3d& remained, double distance_threshold)
 {
 	stocker::Contour3d points;
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
@@ -141,7 +141,6 @@ stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject* entity, stocker::P
 	//! FIT A PLANE
 	Contour3d polygon_points = ToContour(polygon, 0);
 	PlaneUnit plane_unit = FormPlaneUnit(polygon_points);
-
 	//! PROJECT TO THE PLANE
 	Polyline2d polygon_2d = Line3dToPlline2d(plane_unit, polygon);
 	std::vector<vcg::Segment2d> vcg_polygon_2d;
@@ -153,7 +152,8 @@ stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject* entity, stocker::P
 		CCVector3 pt = *cloud->getPoint(i);
 		Vec3d pt_3d(pt.x, pt.y, pt.z);
 		Vec2d pt_2d = plane_unit.ToPlpoint2d(pt_3d);
-		if (vcg::PointInsidePolygon(pt_2d, polygon_2d) && vcg::SignedDistancePointPlane(pt_3d, plane_unit.plane) < distance_threshold) {
+		double distance = vcg::SignedDistancePointPlane(pt_3d, plane_unit.plane);
+		if (fabs(distance) < distance_threshold && vcg::PointInsidePolygon(pt_2d, polygon_2d)) {
 			points_parallel.push_back({ pt.x, pt.y, pt.z });
 		}
 		else {
@@ -661,7 +661,11 @@ ccPointCloud* AddPointsAsPlane(stocker::Contour3d points, QString name, ccColor:
 	plane_cloud->showColors(true);
 
 	//! add plane
-	ccPlane* plane = FitPlaneAndAddChild(plane_cloud);
+	ccPlane* plane = FitPlaneAndAddChild(plane_cloud);	
+#ifdef DEBUG_TEST
+	CCVector3 n; float o; plane->getEquation(n, o);
+	std::cout << "cc plane: " << n.x << " " << n.y << " " << n.z << " " << o << std::endl;
+#endif // DEBUG_TEST
 	if (!plane && plane_cloud) {
 		delete plane_cloud;
 		plane_cloud = nullptr;
@@ -851,7 +855,7 @@ void RetrieveAssignedPoints(ccPointCloud* todo_cloud, ccPointCloud* plane_cloud,
 	for (auto pt : profile) { st_profile.push_back(parse_xyz(pt)); }
 	Polyline3d convex_hull = MakeLoopPolylinefromContour3d(st_profile);
 	Contour3d remained;
-	Contour3d points_in_plane = GetPointsFromCloudInsidePolygon(todo_cloud, convex_hull, remained, distance_threshold);
+	Contour3d points_in_plane = GetPointsFromCloudInsidePolygon3d(todo_cloud, convex_hull, remained, distance_threshold);
 	if (points_in_plane.empty()) {
 		return;
 	}
@@ -860,23 +864,24 @@ void RetrieveAssignedPoints(ccPointCloud* todo_cloud, ccPointCloud* plane_cloud,
 		plane_cloud->addPoint(CCVector3(vcgXYZ(pt)));
 	}
 	ccColor::Rgb col = plane_cloud->hasColors() ? plane_cloud->getPointColor(0) : ccColor::Generator::Random();
-	if (!plane_cloud->reserveTheRGBTable()) {
+	if (!plane_cloud->resizeTheRGBTable(true)) {
 		throw runtime_error("not enough memory");
 		return;
 	}
 	plane_cloud->setRGBColor(col);
+	plane_cloud->showColors(true);
 
 	todo_cloud->clear();
 	todo_cloud->reserveThePointsTable(remained.size());
 	for (auto & pt : remained) {
 		todo_cloud->addPoint(CCVector3(vcgXYZ(pt)));
-	}
-	if (!todo_cloud->reserveTheRGBTable()) {
+	}	
+	if (!todo_cloud->resizeTheRGBTable(true)) {
 		throw runtime_error("not enough memory");
 		return;
 	}
 	todo_cloud->setRGBColor(ccColor::black);
-
+	todo_cloud->showColors(true);
 }
 
 ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, double distance)

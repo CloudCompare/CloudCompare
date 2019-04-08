@@ -860,10 +860,10 @@ void RetrieveAssignedPoints(ccPointCloud* todo_cloud, ccPointCloud* plane_cloud,
 		plane_cloud->addPoint(CCVector3(vcgXYZ(pt)));
 	}
 	ccColor::Rgb col = plane_cloud->hasColors() ? plane_cloud->getPointColor(0) : ccColor::Generator::Random();
-	if (plane_cloud->reserveTheRGBTable()) {
+	if (!plane_cloud->reserveTheRGBTable()) {
 		throw runtime_error("not enough memory");
 		return;
-	}	
+	}
 	plane_cloud->setRGBColor(col);
 
 	todo_cloud->clear();
@@ -871,7 +871,7 @@ void RetrieveAssignedPoints(ccPointCloud* todo_cloud, ccPointCloud* plane_cloud,
 	for (auto & pt : remained) {
 		todo_cloud->addPoint(CCVector3(vcgXYZ(pt)));
 	}
-	if (todo_cloud->reserveTheRGBTable()) {
+	if (!todo_cloud->reserveTheRGBTable()) {
 		throw runtime_error("not enough memory");
 		return;
 	}

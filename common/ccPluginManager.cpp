@@ -15,6 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
+#include "ccApplicationBase.h"
 #include "ccPluginManager.h"
 
 //qCC_db
@@ -32,6 +33,7 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QSet>
+#include <QSettings>
 #include <QStandardPaths>
 
 
@@ -149,11 +151,21 @@ void ccPluginManager::loadPlugins()
 	// now iterate over plugins and automatically register what we can
 	const auto pluginList = m_pluginList;
 	
+	const QStringList disabledList = disabledPluginIIDs();
+	
 	for ( ccPluginInterface* plugin : pluginList )
 	{
 		if ( plugin == nullptr )
 		{
 			Q_ASSERT(false);
+			continue;
+		}
+		
+		// Disable if we are not running on the command line and it's in the disabled list
+		if ( !ccApp->isCommandLine() && disabledList.contains( plugin->IID() ) )
+		{
+			ccLog::Print( tr( "[Plugin][%1] Disabled" ).arg( plugin->getName() ) );
+						
 			continue;
 		}
 		
@@ -220,6 +232,38 @@ ccPluginInterfaceList &ccPluginManager::pluginList()
 #endif
 	
 	return m_pluginList;
+}
+
+void ccPluginManager::setPluginEnabled( const ccPluginInterface* plugin, bool enabled )
+{	
+	QStringList list = disabledPluginIIDs();
+	
+	const QString &iid = plugin->IID();
+	
+	if ( enabled )
+	{
+		list.removeAll( iid );
+	}
+	else
+	{
+		if ( !list.contains( iid ) )
+		{
+			list.append( iid );
+		}
+	}
+	
+	QSettings settings;
+	
+	settings.beginGroup( "Plugins" );
+	
+	settings.setValue( "Disabled", list );
+}
+
+bool ccPluginManager::isEnabled( const ccPluginInterface *plugin ) const
+{
+	const QString &iid = plugin->IID();
+	
+	return !disabledPluginIIDs().contains( iid );
 }
 
 void ccPluginManager::loadFromPathsAndAddToList()
@@ -303,6 +347,8 @@ void ccPluginManager::loadFromPathsAndAddToList()
 				continue;
 			}
 			
+			ccPlugin->setIID( pluginIID );
+			
 			QPluginLoader* previousLoader = pluginIIDToLoaderMap.value( pluginIID );
 			
 			// If we have already loaded a plugin with this IID, unload it and replace the interface in the plugin list
@@ -337,4 +383,13 @@ void ccPluginManager::loadFromPathsAndAddToList()
 	{
 		delete loader;
 	}
+}
+
+QStringList ccPluginManager::disabledPluginIIDs() const
+{	
+	QSettings settings;
+	
+	settings.beginGroup( "Plugins" );
+	
+	return settings.value( "Disabled" ).toStringList();
 }

@@ -17,10 +17,10 @@ v2.11 (Anoia) - (in development)
     - labels picked on a mesh can be used to re-orient the camera (right-click on the label entry in the DB)
     - note: for now, labels associated to meshes are not preserved when cloning or merging the meshes
     - points are now exclusively picked inside the current fustrum (no more points behind the camera)
-  - Graphical Segmentation
+  - Graphical segmentation:
     - points are now exclusively segmented inside/outside the frustrum
-  - Plugins
-    - plugins may now be enabled/disbled in the plugin info window
+  - Plugins:
+    - plugins may now be enabled/disabled in the plugin info window
     - to take effect, CloudCompare must be restarted
     - all plugins are still available on the command line
 

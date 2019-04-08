@@ -22,6 +22,9 @@ v2.11 (Anoia) - (in development)
 	- note: for now, labels associated to meshes are not preserved when cloning or merging the meshes
 	- points are now exclusively picked inside the current fustrum (no more points behind the camera)
 
+	- Graphical Segmentation
+		- points are now exclusively segmented inside/outside the frustrum  
+
 
 - Changes
   - Command line tool:

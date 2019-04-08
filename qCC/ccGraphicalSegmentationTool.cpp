@@ -651,12 +651,12 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 				const CCVector3* P3D = cloud->getPoint(i);
 
 				CCVector3d Q2D;
-				camera.project(*P3D, Q2D);
+				bool pointInFrustrum = camera.project(*P3D, Q2D, true);
 
 				CCVector2 P2D(	static_cast<PointCoordinateType>(Q2D.x-half_w),
 								static_cast<PointCoordinateType>(Q2D.y-half_h) );
 				
-				bool pointInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
+				bool pointInside = pointInFrustrum && CCLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
 
 				visibilityArray[i] = (keepPointsInside != pointInside ? POINT_HIDDEN : POINT_VISIBLE);
 			}

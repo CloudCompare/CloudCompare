@@ -69,36 +69,39 @@ static QString sFormatContactList( const ccPluginInterface::ContactList &list, c
 	return formattedText;
 }
 
-class _Icons
+namespace
 {
-public:
-	static QIcon   sGetIcon( CC_PLUGIN_TYPE inPluginType )
+	class _Icons
 	{
-		if ( sIconMap.empty() )
+	public:
+		static QIcon   sGetIcon( CC_PLUGIN_TYPE inPluginType )
 		{
-			_init();
+			if ( sIconMap.empty() )
+			{
+				_init();
+			}
+			
+			return sIconMap[inPluginType];
 		}
 		
-		return sIconMap[inPluginType];
-	}
-	
-private:
-	static void	_init()
-	{
-		if ( !sIconMap.empty() )
+	private:
+		static void	_init()
 		{
-			return;
+			if ( !sIconMap.empty() )
+			{
+				return;
+			}
+			
+			sIconMap[CC_STD_PLUGIN] = QIcon( ":/CC/pluginManager/images/std_plugin.png" );
+			sIconMap[CC_GL_FILTER_PLUGIN] = QIcon( ":/CC/pluginManager/images/gl_plugin.png" );
+			sIconMap[CC_IO_FILTER_PLUGIN] = QIcon( ":/CC/pluginManager/images/io_plugin.png" );
 		}
 		
-		sIconMap[CC_STD_PLUGIN] = QIcon( ":/CC/pluginManager/images/std_plugin.png" );
-		sIconMap[CC_GL_FILTER_PLUGIN] = QIcon( ":/CC/pluginManager/images/gl_plugin.png" );
-		sIconMap[CC_IO_FILTER_PLUGIN] = QIcon( ":/CC/pluginManager/images/io_plugin.png" );
-	}
+		static QMap<CC_PLUGIN_TYPE, QIcon>	sIconMap;
+	};
 	
-	static QMap<CC_PLUGIN_TYPE, QIcon>	sIconMap;
-};
-
-QMap<CC_PLUGIN_TYPE, QIcon>	_Icons::sIconMap;
+	QMap<CC_PLUGIN_TYPE, QIcon>	_Icons::sIconMap;
+}
 
 ccPluginInfoDlg::ccPluginInfoDlg( QWidget *parent ) :
 	QDialog( parent )

@@ -11451,62 +11451,42 @@ void MainWindow::doActionBDPrimPlaneFromSharp()
 	stocker::PlaneSegmentationfromLines(unassigned_sharps, planes, indices, 1);
 	set<int> assigned_index;
 
-	ccHObject* group = new ccHObject(unass_sharp_obj->getName() + "-segmentation");
+	BDBaseHObject* baseObj = GetRootBDBase(unass_sharp_obj);
+	StBuilding* buildingObj = GetParentBuilding(unass_sharp_obj);
+	if (!buildingObj || !baseObj) {
+		ccLog::Error("no parent building or project found!");
+		return;
+	}
+	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(buildingObj->getName(), false); assert(prim_group);
+	int biggest = GetMaxNumberExcludeChildPrefix(prim_group, BDDB_PLANESEG_PREFIX); biggest++;
 	for (size_t i = 0; i < indices.size(); i++) {
-		if (indices[i].size() < 20)	{
+		if (indices[i].size() < 20) {
 			continue;
 		}
-		ccPointCloud* plane_cloud = new ccPointCloud(QString("Plane") + QString::number(i));
-		ccColor::Rgb col = ccColor::Generator::Random();
-		plane_cloud->setRGBColor(col);
-		plane_cloud->showColors(true);
-
-		group->addChild(plane_cloud);
 		stocker::Polyline3d lines;
 		for (auto & ln_index : indices[i]) {
 			stocker::Seg3d seg = unassigned_sharps[ln_index];
-			plane_cloud->addPoint(CCVector3(seg.P0().X(), seg.P0().Y(), seg.P0().Z()));
-			plane_cloud->addPoint(CCVector3(seg.P1().X(), seg.P1().Y(), seg.P1().Z()));
 			lines.push_back(seg);
 			assigned_index.insert(ln_index);
 		}
-
-		//! add plane
-		{
-			ccHObject* plane = nullptr;
-			double rms = 0;  std::vector<CCVector3> c_hull;
-			ccPlane* pPlane = ccPlane::Fit(plane_cloud, &rms, &c_hull);
-			if (pPlane) {
-				plane = static_cast<ccHObject*>(pPlane);
-				pPlane->setColor(col);
-				pPlane->enableStippling(true);
-			}
-			if (plane) {
-				plane->setName("Plane");
-				plane->applyGLTransformation_recursive();
-				plane->showColors(true);
-				plane->setVisible(true);
-
-				plane_cloud->addChild(plane);
-				plane->setDisplay(plane_cloud->getDisplay());
-				plane->prepareDisplayForRefresh_recursive();
-			}
-		}
-
-		AddSegmentsAsChildVertices(plane_cloud, lines, "ImageSharp", col);
+		ccPointCloud* plane_cloud = AddSegmentsAsPlane(lines, "Deduced", ccColor::Generator::Random());
+		plane_cloud->setName(BDDB_PLANESEG_PREFIX + biggest++);
+		prim_group->addChild(plane_cloud);
 	}
-	addToDB(group);
-
-	stocker::Polyline3d remained_unassigned;
-	for (int i = 0; i < unassigned_sharps.size(); i++) {
-		if (assigned_index.find(i) == assigned_index.end())	{
-			remained_unassigned.push_back(unassigned_sharps[i]);
-		}
+	if (prim_group) {
+		addToDB(prim_group);
 	}
-	ccHObject* group_2 = new ccHObject(unass_sharp_obj->getName() + "-unassigned");
-	AddSegmentsAsChildVertices(group_2, remained_unassigned, "ImageSharp", ccColor::black);
-	addToDB(group_2);
-	unass_sharp_obj->setEnabled(false);
+
+// 	stocker::Polyline3d remained_unassigned;
+// 	for (int i = 0; i < unassigned_sharps.size(); i++) {
+// 		if (assigned_index.find(i) == assigned_index.end())	{
+// 			remained_unassigned.push_back(unassigned_sharps[i]);
+// 		}
+// 	}
+// 	ccHObject* group_2 = new ccHObject(unass_sharp_obj->getName() + "-unassigned");
+// 	AddSegmentsAsChildVertices(group_2, remained_unassigned, "ImageSharp", ccColor::black);
+// 	addToDB(group_2);
+// 	unass_sharp_obj->setEnabled(false);
 
 	refreshAll();
 	UpdateUI();
@@ -12111,56 +12091,40 @@ void MainWindow::doActionBDPlaneCreate()
 {
 	if (m_selectedEntities.size() < 2)
 		return;
+	ccHObject* first_selected = getSelectedEntities().front();
+	BDBaseHObject* baseObj = GetRootBDBase(first_selected);
+	StBuilding* buildingObj = GetParentBuilding(first_selected);
+	if (!buildingObj || !baseObj) {
+		ccLog::Error("no parent building or project found!");
+		return;
+	}
+	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(buildingObj->getName(), false); assert(prim_group);
 	
-	//! check availability
-	{
-
-	}
-	stocker::Polyline3d lines_pool;
-	std::vector<ccPolyline*> polylines;
+	ccHObject::Container polylines;
 	for (auto & entity : m_selectedEntities) {
-		if (entity->isA(CC_TYPES::POLY_LINE)) {
-			polylines.push_back(ccHObjectCaster::ToPolyline(entity));
-			
+		if (entity->isA(CC_TYPES::POLY_LINE) && GetParentBuilding(entity) == buildingObj) {
+			polylines.push_back(entity);
 		}
 	}
-	/// actually, this is plane deduction
-	if (polylines.size() == 1) {
-		//! only two point, return
-
-		//! three point
-
-		//! close the polygon
+	
+	if (polylines.size() < 2) {
+		return;
 	}
 
-	vector<vcg::Plane3d> planes; stocker::IntGroup indices;
-	stocker::PlaneSegmentationfromLines(lines_pool, planes, indices, 1);
-	set<int> assigned_index;
+	stocker::Polyline3d lines_pool = GetPolylineFromEntities(polylines);
 
-	ccHObject* group;// TODO
-	int biggest = GetMaxNumberExcludeChildPrefix(group, BDDB_PLANESEG_PREFIX); biggest++;
-	for (size_t i = 0; i < indices.size(); i++) {
-		if (indices[i].size() < 20) {
-			continue;
-		}
-		stocker::Polyline3d lines;
-		for (auto & ln_index : indices[i]) {
-			stocker::Seg3d seg = lines_pool[ln_index];
-			lines.push_back(seg);
-			assigned_index.insert(ln_index);
-		}
-		ccPointCloud* plane_cloud = AddSegmentsAsPlane(lines, "Deduced", ccColor::Generator::Random());
-		plane_cloud->setName(BDDB_PLANESEG_PREFIX + biggest++);
-		group->addChild(plane_cloud);
-	}
-	if (group) {
-		addToDB(group);
-	}
+	ccPointCloud* plane_cloud = AddSegmentsAsPlane(lines_pool, "Deduced", ccColor::Generator::Random());
+	if (!plane_cloud) { dispToConsole("cannot add segments as plane!", ERR_CONSOLE_MESSAGE); return; }
+	
+	int biggest = GetMaxNumberExcludeChildPrefix(prim_group, BDDB_PLANESEG_PREFIX);
+	plane_cloud->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
+
+	//! retrieve plane cloud from todo points
+
+
+	addToDB(plane_cloud, false, false);
+	refreshAll();
 }
-
-//! generate hypothesis
-
-//! face selection
 
 static double s_last_polyfit_datafit = 0.4;
 static double s_last_polyfit_coverage = 0.4;
@@ -12253,7 +12217,7 @@ void ParsePolyFitPara(PolyFitObj* poly, bdrPolyFitDlg* pdlg)
 	poly->model_coverage = pdlg->PolyfitdoubleSpinBox2->value();
 	poly->model_complexity = pdlg->PolyfitdoubleSpinBox3->value();
 }
-
+//! generate hypothesis
 void MainWindow::doActionBDPolyFitHypothesis()
 {
 	if (!haveSelection()) return; 	
@@ -12395,7 +12359,7 @@ void MainWindow::doActionBDPolyFitConfidence()
 	refreshAll();
 	UpdateUI();
 }
-
+//! face selection
 void MainWindow::doActionBDPolyFitSelection()
 {
 	if (!haveSelection()) return;

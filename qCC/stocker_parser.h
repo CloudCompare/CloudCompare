@@ -64,6 +64,8 @@ ccPlane* FitPlaneAndAddChild(ccPointCloud* cloud);
 
 ccPointCloud* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
 
+void AddSegmentsToVertices(ccPointCloud * cloud, stocker::Polyline3d lines, QString Prefix, ccColor::Rgb col);
+
 ccPointCloud * AddPointsAsPlane(stocker::Contour3d points, QString name, ccColor::Rgb col);
 
 ccPointCloud* AddSegmentsAsPlane(stocker::Polyline3d lines, QString lines_prefix, ccColor::Rgb col, ccHObject* _exist_cloud = nullptr);

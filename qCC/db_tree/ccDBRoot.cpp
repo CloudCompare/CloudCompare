@@ -453,7 +453,7 @@ void ccDBRoot::addElement(ccHObject* object, bool autoExpand/*=true*/)
 	}
 	else //if (parentObject)
 	{
-		m_dbTreeWidget->expand(insertNodeIndex);
+	//	m_dbTreeWidget->expand(insertNodeIndex);
 	}
 
 	if (wasEmpty && m_treeRoot->getChildrenNumber() != 0)

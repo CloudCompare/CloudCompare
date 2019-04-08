@@ -11374,7 +11374,7 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 				for (auto & index : index_find) {
 					cur_plane_sharps.push_back(sharps_in_bbox[index]);
 				}
-				ccHObject* cur_sharps_obj = AddSegmentsAsChildVertices(planeObj->getParent(), cur_plane_sharps, BDDB_IMAGELINE_PREFIX, ccColor::darkBlue);
+				ccHObject* cur_sharps_obj = AddSegmentsAsChildVertices(planeObj->getParent(), cur_plane_sharps, BDDB_IMAGELINE_PREFIX, ccColor::orange);
 				if (cur_sharps_obj) { SetGlobalShiftAndScale(cur_sharps_obj); addToDB(cur_sharps_obj); }
 			}
 			for (size_t i = 0; i < sharps_in_bbox.size(); i++) {
@@ -11386,22 +11386,14 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 
 		//! add unassigned sharps in bbox to .todo-TodoLine
 		{
-			ccHObject* sharps_in_bbox_obj = AddSegmentsAsChildVertices(nullptr, unassigned_sharps, BDDB_TODOLINE_PREFIX, ccColor::black);
-			ccHObject* existing_todo_line = nullptr;
+			ccPointCloud* existing_todo_line = nullptr;
 			if (baseObj) existing_todo_line = baseObj->GetTodoLine(GetBaseName(plane_group->getName()), false);
 			
 			if (existing_todo_line)	{
-				int biggest = GetMaxNumberExcludeChildPrefix(existing_todo_line, BDDB_TODOLINE_PREFIX);
-				biggest++;
-				// rename
-				for (size_t i = 0; i < sharps_in_bbox_obj->getChildrenNumber(); i++) {
-					sharps_in_bbox_obj->getChild(i)->setName(BDDB_TODOLINE_PREFIX + QString::number(biggest++));
-				}
-				sharps_in_bbox_obj->transferChildren(*existing_todo_line);
-				delete sharps_in_bbox_obj; sharps_in_bbox_obj = nullptr;
+				AddSegmentsToVertices(existing_todo_line, unassigned_sharps, BDDB_TODOLINE_PREFIX, ccColor::darkGrey);
 			}
 			else {
-				plane_group->getParent()->addChild(sharps_in_bbox_obj);
+				AddSegmentsAsChildVertices(plane_group->getParent(), unassigned_sharps, BDDB_TODOLINE_PREFIX, ccColor::darkGrey);
 			}
 		}
 

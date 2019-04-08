@@ -450,6 +450,7 @@ ccPointCloud * BDBaseHObject::GetTodoLine(QString buildig_name, bool check_enabl
 		ccPointCloud* todo_point = new ccPointCloud(BDDB_TODOLINE_PREFIX);
 		todo_point->setGlobalScale(global_scale);
 		todo_point->setGlobalShift(CCVector3d(vcgXYZ(global_shift)));
+		todo_point->setDisplay(getDisplay());
 		todo_group->addChild(todo_point);
 		MainWindow* win = MainWindow::TheInstance();
 		assert(win);
@@ -638,6 +639,35 @@ ccPointCloud* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d 
 	return line_vert;
 }
 
+void AddSegmentsToVertices(ccPointCloud* cloud, stocker::Polyline3d lines, QString Prefix, ccColor::Rgb col)
+{
+	if (lines.empty() || !cloud) {
+		return;
+	}
+		
+	int index = GetMaxNumberExcludeChildPrefix(cloud, Prefix) + 1;
+	MainWindow* win = MainWindow::TheInstance();
+	assert(win);
+	for (auto & ln : lines) {
+		ccPolyline* cc_polyline = new ccPolyline(cloud);
+		cc_polyline->setDisplay(cloud->getDisplay());
+		cc_polyline->setColor(col);
+		cc_polyline->showColors(true);
+		cc_polyline->setName(Prefix + QString::number(index++));
+		cc_polyline->reserve(2);
+
+		cloud->addPoint(CCVector3(vcgXYZ(ln.P0())));
+		cc_polyline->addPointIndex(cloud->size() - 1);
+
+		cloud->addPoint(CCVector3(vcgXYZ(ln.P1())));
+		cc_polyline->addPointIndex(cloud->size() - 1);
+
+		cc_polyline->setClosed(false);
+		cloud->addChild(cc_polyline);
+		win->addToDB(cc_polyline, false, false);
+	}
+}
+
 ccPointCloud* AddPointsAsPlane(stocker::Contour3d points, QString name, ccColor::Rgb col)
 {	
 	ccPointCloud* plane_cloud = new ccPointCloud(name);
@@ -796,26 +826,12 @@ ccHObject* PlaneSegmentationRansac(ccHObject* entity,
 		ent_cld->setGlobalScale(entity_cloud->getGlobalScale());
 	}
 	entity->getParent()->addChild(group);
-	if (todo_cloud)	{
-		ccColor::Rgb col = ccColor::Generator::Random();
-		bool has_color = false;
-		if (todo_cloud->size() > 0)	{
-			if (todo_cloud->hasColors()) {
-				has_color = true;
-				col = todo_cloud->getPointColor(0);
-			}
-		}
+	if (todo_cloud)	{		
 		for (auto & pt : unassigned_points) {
 			todo_cloud->addPoint(CCVector3(vcgXYZ(pt.first)));
 		}
-		if (has_color) {
-			todo_cloud->resizeTheRGBTable();
-			todo_cloud->setRGBColor(col);
-		}
-		else {
-			todo_cloud->reserveTheRGBTable();
-			todo_cloud->setRGBColor(col);
-		}		
+		todo_cloud->reserveTheRGBTable();
+		todo_cloud->setRGBColor(ccColor::black);			
 	}
 
 	return group;	

@@ -854,7 +854,7 @@ void RetrieveAssignedPoints(ccPointCloud* todo_cloud, ccPointCloud* plane_cloud,
 	if (!plane) { return; }
 	std::vector<CCVector3> profile = plane->getProfile(); Contour3d st_profile;
 	for (auto pt : profile) { st_profile.push_back(parse_xyz(pt)); }
-	Polyline3d convex_hull = MakeLoopPolylinefromContour3d(st_profile);
+	Polyline3d convex_hull = MakeLoopPolylinefromContour(st_profile);
 	Contour3d remained;
 	Contour3d points_in_plane = GetPointsFromCloudInsidePolygon3d(todo_cloud, convex_hull, remained, distance_threshold);
 	if (points_in_plane.empty()) {
@@ -1076,7 +1076,7 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
  	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, alpha, false, 2);
  	Contour3d concave_contour = contours_points.front().front();
 	Contour2d concave_2d = Point3dToPlpoint2d(plane_unit, concave_contour);
-	Polyline2d concave_polygon = MakeLoopPolylinefromContour2d(concave_2d);
+	Polyline2d concave_polygon = MakeLoopPolylinefromContour(concave_2d);
 		
 	vector<size_t> inside_index;
 	stocker::Contour3d inside_points;
@@ -1426,7 +1426,7 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 			PlaneUnit* plane_unit = new PlaneUnit(plane_name, GetVcgPlane(planeObj), plane_unit_.convex_hull_prj); // TODO: delete or add to planedata in primitivegroup info
 
 			plane_data[planeObj] = plane_unit;
-			stocker::Polyline2d plane_convex_hull = MakeLoopPolylinefromContour2d(Point3dToPlpoint2d(plane_unit_, plane_unit_.convex_hull_prj));
+			stocker::Polyline2d plane_convex_hull = MakeLoopPolylinefromContour(Point3dToPlpoint2d(plane_unit_, plane_unit_.convex_hull_prj));
 			plane_convexhull[planeObj] = plane_convex_hull;
 		}
 //	}
@@ -1465,7 +1465,7 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 			stocker::Polyline2d plane_ch = plane_convexhull[plane_entity];
 			ccPolyline* contour_entity = facet->getContour(); vector<CCVector3>ccv_poly = contour_entity->getPoints(true);
 			Contour3d facet_contour_temp; for (auto & pt : ccv_poly) { facet_contour_temp.push_back(parse_xyz(pt)); }
-			stocker::Polyline2d facet_contour = MakeLoopPolylinefromContour2d(Point3dToPlpoint2d(plane_unit, facet_contour_temp));
+			stocker::Polyline2d facet_contour = MakeLoopPolylinefromContour(Point3dToPlpoint2d(plane_unit, facet_contour_temp));
 			//! check overlap
 			double distance = DistancePolygonPolygon(facet_contour, plane_ch);
 			facet->setDistance(distance);
@@ -1854,7 +1854,7 @@ ccHObject* ConstrainedMesh(ccHObject* planeObj)
 			}
 		}
 	}
-	Polyline3d outline_poly = MakeLoopPolylinefromContour3d(outline_points);
+	Polyline3d outline_poly = MakeLoopPolylinefromContour(outline_points);
 
 	Polyline3d line_pool;
 // 	for (auto & ln : boundary_lines) {

@@ -11764,13 +11764,13 @@ void MainWindow::doActionBDPrimCreateGround()
 		if (baseObj) {
 			stocker::BuildUnit bd_unit = baseObj->GetBuildingUnit(GetBaseName(primGroup->getName()).toStdString());
 			ground_height = bd_unit.ground_height;
-			ground_convex = stocker::MakeLoopPolylinefromContour2d(bd_unit.convex_hull_xy);
+			ground_convex = stocker::MakeLoopPolylinefromContour(bd_unit.convex_hull_xy);
 		}
 		else {
 			stocker::Contour3d planes_points = GetPointsFromCloud(primGroup);
 			stocker::Contour3d ground_contour_3d = stocker::CalcBuildingGround(planes_points, 0.5, 3, 3);			
 			ground_height = ground_contour_3d.front().Z();
-			ground_convex = stocker::MakeLoopPolylinefromContour2d(stocker::ToContour2d(ground_contour_3d));
+			ground_convex = stocker::MakeLoopPolylinefromContour(stocker::ToContour2d(ground_contour_3d));
 		}
 		ccBBox box = entity->getBB_recursive();
 

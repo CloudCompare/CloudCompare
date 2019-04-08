@@ -11321,12 +11321,14 @@ void MainWindow::doActionBDPrimIntersections()
 	updateUI();
 }
 
+double s_assign_image_line_distance = 0.2;
 void MainWindow::doActionBDPrimAssignSharpLines()
 {
 	if (!haveSelection()) return;
 	bool ok = true;
-	double distance_threshold = QInputDialog::getDouble(this, "Input Dialog", "Please input distance threshold", 0.2, 0.0, 999999.0, 1, &ok);
+	double input = QInputDialog::getDouble(this, "Input Dialog", "Please input distance threshold", s_assign_image_line_distance, 0.0, 999999.0, 1, &ok);
 	if (!ok) return;
+	s_assign_image_line_distance = input;
 
 	stocker::Polyline3d all_sharp_lines;
 	ccHObject::Container primitive_groups;	
@@ -11403,7 +11405,7 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 				stocker::PlaneUnit plane = stocker::FormPlaneUnit(cur_plane_points, "temp", true);
 				stocker::Polyline3d cur_plane_sharps;
 				vector<int> index_find;
-				stocker::FindSegmentsInPlane(plane, sharps_in_bbox, index_find, distance_threshold);
+				stocker::FindSegmentsInPlane(plane, sharps_in_bbox, index_find, s_assign_image_line_distance);
 				assigned_index.insert(index_find.begin(), index_find.end());
 
 				for (auto & index : index_find) {
@@ -12098,6 +12100,7 @@ void MainWindow::doActionBDPlaneDeduction()
 	refreshAll();
 }
 
+double s_snap_todo_distance_threshold = 0.01;
 void MainWindow::doActionBDPlaneCreate()
 {
 	if (m_selectedEntities.size() < 2)
@@ -12134,7 +12137,12 @@ void MainWindow::doActionBDPlaneCreate()
 	ccPointCloud* todo_cloud = baseObj->GetTodoPoint(baseObj->getName(), false);
 	assert(todo_cloud);
 	try	{
-		RetrieveAssignedPoints(todo_cloud, plane_cloud, 0.01);
+		bool ok = true;
+		double input = QInputDialog::getDouble(this, "Input Dialog", "Please input distance threshold", s_snap_todo_distance_threshold, 0.0, 999999.0, 3, &ok);
+		if (!ok) return;
+		s_snap_todo_distance_threshold = input;
+
+		RetrieveAssignedPoints(todo_cloud, plane_cloud, s_snap_todo_distance_threshold);
 	}
 	catch (const std::runtime_error& e)	{
 		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);

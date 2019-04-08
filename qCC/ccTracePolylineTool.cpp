@@ -743,22 +743,30 @@ void ccTracePolylineTool::setTraceMode(int mode, ccHObject* prim_group)
 		widthSpinBox->setVisible(true);
 		label_2->setVisible(true);
 		oversampleSpinBox->setVisible(true);
+		label->setVisible(true);
+		snapSizeSpinBox->setVisible(true);
+
 		label_4->setVisible(false);
 		DistanceDoubleSpinBox->setVisible(false);
 
+		m_dest_prim_group = prim_group ? prim_group : nullptr;
 		break;
 	}
 	case  1: // trace polyline and make a plane
 	{
-		setFixedWidth(250);
+		setFixedWidth(380);
 		label_3->setVisible(false);
 		widthSpinBox->setVisible(false);
 		label_2->setVisible(false);
 		oversampleSpinBox->setVisible(false);
-		m_dest_prim_group = prim_group ? prim_group : nullptr;
+		label->setVisible(true);
+		snapSizeSpinBox->setVisible(true);
+		
 		label_4->setVisible(true);
 		label_4->setText("Distance Threshold");
 		DistanceDoubleSpinBox->setVisible(true);
+
+		m_dest_prim_group = prim_group ? prim_group : nullptr;
 		break;
 	}
 	default:

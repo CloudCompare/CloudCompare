@@ -51,7 +51,7 @@ QString GetBaseName(QString name);
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject * entity, stocker::Polyline3d polygon, double height);
 std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonXY(ccHObject::Container entities, stocker::Polyline3d polygon, double height, bool skip_empty = true);
-stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject * entity, stocker::Polyline3d polygon, double distance_threshold = 0.01);
+stocker::Contour3d GetPointsFromCloudInsidePolygon(ccHObject * entity, stocker::Polyline3d polygon, Contour3d & remained, double distance_threshold);
 stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
 vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject * entity);
 ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true, bool recursive = true);

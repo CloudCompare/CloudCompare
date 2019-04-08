@@ -979,8 +979,8 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionBDPrimMergePlane"/>
    <addaction name="actionBDPrimSplitPlane"/>
    <addaction name="actionBDPlane_Deduction"/>
-   <addaction name="actionPointListPicking"/>
-   <addaction name="actionTracePolyline"/>
+   <addaction name="actionBDPlaneFromPoints"/>
+   <addaction name="actionBDPlaneFromPolygon"/>
    <addaction name="actionBDPrimMakePlane"/>
    <addaction name="separator"/>
    <addaction name="actionBDFootPrint"/>
@@ -3025,7 +3025,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionTracePolyline">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/Stocker/images/stocker/pickline.png</normaloff>:/CC/Stocker/images/stocker/pickline.png</iconset>
+     <normaloff>:/CC/images/ccTracePolyline.png</normaloff>:/CC/images/ccTracePolyline.png</iconset>
    </property>
    <property name="text">
     <string>Trace Polyline</string>
@@ -3575,6 +3575,30 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDRetrieve">
    <property name="text">
     <string>Retrieve Unassigned Points</string>
+   </property>
+  </action>
+  <action name="actionBDPlaneFromPolygon">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/pickline.png</normaloff>:/CC/Stocker/images/stocker/pickline.png</iconset>
+   </property>
+   <property name="text">
+    <string>PickLine</string>
+   </property>
+   <property name="toolTip">
+    <string>Create Plane From Polygon</string>
+   </property>
+  </action>
+  <action name="actionBDPlaneFromPoints">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/pickpts.png</normaloff>:/CC/Stocker/images/stocker/pickpts.png</iconset>
+   </property>
+   <property name="text">
+    <string>PickPts</string>
+   </property>
+   <property name="toolTip">
+    <string>Extract Plane From Points</string>
    </property>
   </action>
  </widget>

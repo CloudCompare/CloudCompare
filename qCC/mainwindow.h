@@ -473,6 +473,8 @@ private slots:
 	void doActionBDPrimCreateGround();
 	/// Shrink plane to outline - remove points outside the alpha shape
 	void doActionBDPrimShrinkPlane();
+	void doActionBDPlaneFromPoints();
+	void doActionBDPlaneFromPolygon();
 	/// Plane Deduction
 	void doActionBDPlaneDeduction();
 	/// Make plane from line(s)

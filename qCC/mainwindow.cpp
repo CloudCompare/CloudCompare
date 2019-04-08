@@ -826,7 +826,10 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPrimSplitPlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimSplitPlane);	
 	connect(m_UI->actionBDPrimCreateGround,			&QAction::triggered, this, &MainWindow::doActionBDPrimCreateGround);
 	connect(m_UI->actionBDPrimShrinkPlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimShrinkPlane);
-	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);
+	connect(m_UI->actionBDPlaneFromPoints,			&QAction::triggered, this, &MainWindow::doActionBDPlaneFromPoints);
+	connect(m_UI->actionBDPlaneFromPolygon,			&QAction::triggered, this, &MainWindow::doActionBDPlaneFromPolygon);
+	connect(m_UI->actionBDPlane_Deduction,			&QAction::triggered, this, &MainWindow::doActionBDPlaneDeduction);	
+		
 	connect(m_UI->actionBDPrimMakePlane,			&QAction::triggered, this, &MainWindow::doActionBDPlaneCreate);
 	connect(m_UI->actionBDPolyFit,					&QAction::triggered, this, &MainWindow::doActionBDPolyFit);
 	connect(m_UI->actionBDPolyFitHypothesis,		&QAction::triggered, this, &MainWindow::doActionBDPolyFitHypothesis);
@@ -11828,6 +11831,87 @@ void MainWindow::doActionBDPrimShrinkPlane()
 	UpdateUI();
 }
 
+void MainWindow::doActionBDPlaneFromPoints()
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (!win)
+		return;
+
+	if (!haveSelection())
+		return;
+
+	if (!m_gsTool)
+	{
+		m_gsTool = new ccGraphicalSegmentationTool(this);
+		connect(m_gsTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateSegmentationMode);
+
+		registerOverlayDialog(m_gsTool, Qt::TopRightCorner);
+	}
+
+	m_gsTool->linkWith(win);
+
+	ccHObject* first_entity = getSelectedEntities().front();
+	bool planeseg_mode = getSelectedEntities().size() == 1 && isPlaneCloud(first_entity);
+	if (!planeseg_mode) {
+		dispToConsole("Please select the point cloud of a plane", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	m_gsTool->setPlaneSegMode(planeseg_mode);
+
+	for (ccHObject *entity : getSelectedEntities())
+	{
+		if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH)) {
+			m_gsTool->addEntity(entity);
+		}
+	}
+
+	if (m_gsTool->getNumberOfValidEntities() == 0)
+	{
+		ccConsole::Error("No segmentable entity in active window!");
+		return;
+	}
+
+	freezeUI(true);
+	m_UI->toolBarView->setDisabled(false);
+
+	//we disable all other windows
+	disableAllBut(win);
+
+	if (!m_gsTool->start())
+		deactivateSegmentationMode(false);
+	else
+		updateOverlayDialogsPlacement();
+}
+
+void MainWindow::doActionBDPlaneFromPolygon()
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (!win)
+	{
+		return;
+	}
+
+	if (!m_tplTool)
+	{
+		m_tplTool = new ccTracePolylineTool(m_pickingHub, this);
+		connect(m_tplTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateTracePolylineMode);
+		registerOverlayDialog(m_tplTool, Qt::TopRightCorner);
+	}
+
+	m_tplTool->linkWith(win);
+
+	freezeUI(true);
+	m_UI->toolBarView->setDisabled(false);
+
+	//we disable all other windows
+	disableAllBut(win);
+
+	if (!m_tplTool->start())
+		deactivateTracePolylineMode(false);
+	else
+		updateOverlayDialogsPlacement();
+}
+
 void MainWindow::doActionBDPlaneDeduction()
 {
 	ccHObject* point_cloud = askUserToSelect(CC_TYPES::POINT_CLOUD, 0, "please select the origin point cloud"); if (!point_cloud)return;
@@ -12046,49 +12130,6 @@ void MainWindow::doActionBDPlaneCreate()
 	}
 	if (group) {
 		addToDB(group);
-	}
-	
-
-
-
-
-	ccPolyline* p1 = ccHObjectCaster::ToPolyline(m_selectedEntities[0]);
-	ccPolyline* p2 = ccHObjectCaster::ToPolyline(m_selectedEntities[1]);
-
-	//Ask the user how the 2D projection should be computed
-	bool useViewingDir = false;
-	CCVector3 viewingDir(0, 0, 0);
-	if (p1->getDisplay())
-	{
-		useViewingDir = (QMessageBox::question(this, "Projection method", "Use best fit plane (yes) or the current viewing direction (no)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No);
-		if (useViewingDir)
-		{
-			viewingDir = -CCVector3::fromArray(static_cast<ccGLWindow*>(p1->getDisplay())->getCurrentViewDir().u);
-		}
-	}
-
-	ccMesh* mesh = ccMesh::TriangulateTwoPolylines(p1, p2, useViewingDir ? &viewingDir : 0);
-	if (mesh)
-	{
-		addToDB(mesh);
-		if (mesh->computePerVertexNormals())
-		{
-			mesh->showNormals(true);
-		}
-		else
-		{
-			ccLog::Warning("[Mesh two polylines] Failed to compute normals!");
-		}
-
-		if (mesh->getDisplay())
-		{
-			mesh->getDisplay()->redraw();
-		}
-	}
-	else
-	{
-		ccLog::Error("Failed to create mesh (see Console)");
-		forceConsoleDisplay();
 	}
 }
 

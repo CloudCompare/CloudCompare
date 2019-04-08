@@ -64,9 +64,12 @@ int main(int argc, char **argv)
 	bool commandLine = (argc > 1) && (argv[1][0] == '-');
 #endif
    
-	ccApplication::init(commandLine);
+	if ( !commandLine )
+	{
+		ccApplication::initOpenGL();
+	}
 	
-	ccApplication app(argc, argv);
+	ccApplication app(argc, argv, commandLine);
 
 	//store the log message until a valid logging instance is registered
 	ccLog::EnableMessageBackup(true);

@@ -603,39 +603,16 @@ ccPointCloud* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d 
 	if (lines.empty()) {
 		return nullptr;
 	}
-	ccPointCloud* cloud = nullptr;
-	if (entity) {
-		cloud = ccHObjectCaster::ToPointCloud(entity);
-	}
-
 	ccPointCloud* line_vert = new ccPointCloud(name);
-	int i(0);
-	for (auto & ln : lines) {
-		ccPolyline* cc_polyline = new ccPolyline(line_vert);
-		if (entity)	cc_polyline->setDisplay(entity->getDisplay());
-		cc_polyline->setColor(col);
-		cc_polyline->showColors(true);
-		cc_polyline->setName(name + QString::number(i));
+	if (entity) {
+		line_vert->setDisplay(entity->getDisplay());
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 		if (cloud) {
-			cc_polyline->setGlobalShift(cloud->getGlobalShift());
-			cc_polyline->setGlobalScale(cloud->getGlobalScale());
+			line_vert->setGlobalShift(cloud->getGlobalShift());
+			line_vert->setGlobalScale(cloud->getGlobalScale());
 		}
-		cc_polyline->reserve(2);
-
-		line_vert->addPoint(CCVector3(vcgXYZ(ln.P0())));
-		cc_polyline->addPointIndex(line_vert->size() - 1);
-
-		line_vert->addPoint(CCVector3(vcgXYZ(ln.P1())));
-		cc_polyline->addPointIndex(line_vert->size() - 1);
-
-		cc_polyline->setClosed(false);
-		line_vert->addChild(cc_polyline);
-		i++;
-	}
-	if (line_vert && entity) {
-		entity->addChild(line_vert);
-	}
-	
+	}	
+	AddSegmentsToVertices(line_vert, lines, name, col);
 	return line_vert;
 }
 

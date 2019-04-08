@@ -133,6 +133,9 @@
      <property name="toolTip">
       <string>Distance Threshold to Retrieve TodoPoints</string>
      </property>
+     <property name="value">
+      <double>0.100000000000000</double>
+     </property>
     </widget>
    </item>
    <item>

@@ -72,6 +72,13 @@ void ccPluginUIManager::init()
 			continue;
 		}
 		
+		if ( !ccPluginManager::get().isEnabled( plugin ) )
+		{
+			m_plugins.push_back( plugin );
+			
+			continue;	
+		}
+		
 		const QString pluginName = plugin->getName();
 		
 		Q_ASSERT( !pluginName.isEmpty() );

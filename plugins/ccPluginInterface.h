@@ -67,7 +67,7 @@ public:
 public:
 	//! Virtual destructor
 	virtual ~ccPluginInterface() = default;
-
+	
 	//! Returns plugin type (standard or OpenGL filter)
 	virtual CC_PLUGIN_TYPE getType() const = 0;
 
@@ -130,6 +130,16 @@ public:
 			(use a unique prefix for all commands if possible)
 	**/
 	virtual void registerCommands(ccCommandLineInterface* cmd) { Q_UNUSED( cmd ); }
+	
+protected:	
+	friend class ccPluginManager;
+
+	//! Set the IID of the plugin (which comes from Q_PLUGIN_METADATA).
+	//! It is used to uniquely identify the plugin.
+	virtual void setIID( const QString& iid ) = 0;
+	
+	//! Get the IID of the plugin.
+	virtual const QString& IID() const = 0;
 };
 
 Q_DECLARE_METATYPE(const ccPluginInterface *);

@@ -12113,14 +12113,24 @@ void MainWindow::doActionBDPlaneCreate()
 
 	stocker::Polyline3d lines_pool = GetPolylineFromEntities(polylines);
 
-	ccPointCloud* plane_cloud = AddSegmentsAsPlane(lines_pool, "Deduced", ccColor::Generator::Random());
+	ccPointCloud* plane_cloud = AddSegmentsAsPlane(lines_pool, BDDB_DEDUCED_PREFIX, ccColor::Generator::Random());
 	if (!plane_cloud) { dispToConsole("cannot add segments as plane!", ERR_CONSOLE_MESSAGE); return; }
 	
 	int biggest = GetMaxNumberExcludeChildPrefix(prim_group, BDDB_PLANESEG_PREFIX);
 	plane_cloud->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
 
 	//! retrieve plane cloud from todo points
-
+	ccPointCloud* todo_cloud = baseObj->GetTodoPoint(baseObj->getName(), false);
+	assert(todo_cloud);
+	try	{
+		RetrieveAssignedPoints(todo_cloud, plane_cloud, 0.01);
+	}
+	catch (const std::runtime_error& e)	{
+		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+		delete plane_cloud;
+		plane_cloud = nullptr;
+		return;
+	}
 
 	addToDB(plane_cloud, false, false);
 	refreshAll();

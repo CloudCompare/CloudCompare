@@ -266,50 +266,60 @@ ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM typ
 	return ccHObject::Container();
 }
 
-ccHObject::Container GetPlaneEntitiesBySelected(ccHObject* entity)
+ccHObject::Container GetPlaneEntitiesBySelected(ccHObject* select)
 {	
 	ccHObject::Container plane_container;
-	if (!entity) { return plane_container; }
+	if (!select) { return plane_container; }
 	
-	if (entity->isA(CC_TYPES::POINT_CLOUD)) {
-		if (entity->getChildrenNumber() >= 1) {
-			if (entity->getChild(0)->isA(CC_TYPES::PLANE)) {
-				plane_container.push_back(entity->getChild(0));
+	if (IsBDBaseObj(select)) {
+		BDBaseHObject* baseObj = GetRootBDBase(select); assert(baseObj);
+		ccHObject::Container buildings = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
+		for (ccHObject* bd : buildings) {
+			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
+			if (!primGroup) { continue; }
+			ccHObject::Container cur_valid_planes = primGroup->getValidPlanes();
+			if (!cur_valid_planes.empty()) {
+				plane_container.insert(plane_container.end(), cur_valid_planes.begin(), cur_valid_planes.end());
 			}
 		}
-	}	
-	else if (entity->isA(CC_TYPES::PLANE)) {
-		plane_container.push_back(entity);
 	}
-	else if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
-		StPrimGroup* plane_group = ccHObjectCaster::ToStPrimGroup(entity);
-		if (plane_group) {
-			plane_container = plane_group->getValidPlanes();
+	else if (select->isA(CC_TYPES::ST_PRIMITIVE)) {
+		StPrimGroup* primGroup = ccHObjectCaster::ToStPrimGroup(select); assert(primGroup);
+		ccHObject::Container cur_valid_planes = primGroup->getValidPlanes();
+		if (!cur_valid_planes.empty()) {
+			plane_container.insert(plane_container.end(), cur_valid_planes.begin(), cur_valid_planes.end());
 		}
 	}
 	else {
-		BDBaseHObject* baseObj = GetRootBDBase(entity);
-		if (!baseObj) return plane_container;
-		ccHObject::Container building_group;
-		if (entity->isA(CC_TYPES::ST_BUILDING)) {
-			building_group.push_back(entity);
-		}
-		else if (IsBDBaseObj(entity)) {
-			building_group = GetEnabledObjFromGroup(entity, CC_TYPES::ST_BUILDING, true, false);
-		}
-		for (ccHObject* bd : building_group) {
-			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
-			ccHObject::Container cur_container = primGroup->getValidPlanes();
-			plane_container.insert(plane_container.end(), cur_container.begin(), cur_container.end());
+		ccHObject* plane = GetPlaneFromPlaneOrCloud(select);
+		if (plane) {
+			plane_container.push_back(plane);
 		}
 	}
 	return plane_container;
 }
 
-bool isPlaneCloud(ccHObject * entity)
+ccPlane* GetPlaneFromCloud(ccHObject * entity)
 {
-	if (entity->getChildrenNumber() < 1) return false;	
-	return entity->getChild(0)->isA(CC_TYPES::PLANE);	
+	if (entity->isA(CC_TYPES::POINT_CLOUD)) {
+		for (size_t i = 0; i < entity->getChildrenNumber(); i++) {
+			if (entity->getChild(i)->isA(CC_TYPES::PLANE)) {
+				return ccHObjectCaster::ToPlane(entity->getChild(i));
+			}
+		}
+	}
+	return nullptr;
+}
+ccPlane* GetPlaneFromPlaneOrCloud(ccHObject * entity)
+{
+	if (entity->isA(CC_TYPES::PLANE)) {
+		return ccHObjectCaster::ToPlane(entity);
+	}
+	else {
+		ccPlane* plane = GetPlaneFromCloud(entity);
+		if (plane) { return plane; }
+	}
+	return nullptr;
 }
 
 ccHObject* GetPlaneEntityFromPrimGroup(ccHObject* prim, QString name)
@@ -421,7 +431,7 @@ ccHObject * BDBaseHObject::GetTodoGroup(QString building_name, bool check_enable
 ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name, bool check_enable)
 {
 	ccHObject* todo_group = GetTodoGroup(buildig_name, false);
-	assert(todo_group);
+	if (!todo_group) { throw std::runtime_error("internal error"); return nullptr; }
 	ccHObject::Container todo_children;
 	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOPOINT_PREFIX, true, CC_TYPES::POINT_CLOUD);
 	if (!todo_children.empty()) {
@@ -444,7 +454,7 @@ ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name, bool check_enab
 ccPointCloud * BDBaseHObject::GetTodoLine(QString buildig_name, bool check_enable)
 {
 	ccHObject* todo_group = GetTodoGroup(buildig_name, false);
-	assert(todo_group);
+	if (!todo_group) { throw std::runtime_error("internal error"); return nullptr; }
 	ccHObject::Container todo_children;
 	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOLINE_PREFIX, true, CC_TYPES::POINT_CLOUD);
 	if (!todo_children.empty()) {

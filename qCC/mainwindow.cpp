@@ -815,6 +815,7 @@ void MainWindow::connectActions()
 	
 	connect(m_UI->actionBDPlaneSegmentation,		&QAction::triggered, this, &MainWindow::doActionBDPlaneSegmentation);
 	connect(m_UI->actionBDRetrieve,					&QAction::triggered, this, &MainWindow::doActionBDRetrieve);
+	connect(m_UI->actionBDRetrievePlanePoints,		&QAction::triggered, this, &MainWindow::doActionBDRetrievePlanePoints);
 	connect(m_UI->actionBDImage_Lines,				&QAction::triggered, this, &MainWindow::doActionBDImageLines);
 	connect(m_UI->actionBDPrimIntersections,		&QAction::triggered, this, &MainWindow::doActionBDPrimIntersections);
 	connect(m_UI->actionBDPrimAssignSharpLines,		&QAction::triggered, this, &MainWindow::doActionBDPrimAssignSharpLines);
@@ -11098,6 +11099,7 @@ void MainWindow::doActionBDImagesLoad()
 	refreshAll();
 }
 
+// for point cloud (.original by default)
 void MainWindow::doActionBDPlaneSegmentation()
 {
 	if (!haveSelection()) return;	
@@ -11218,6 +11220,8 @@ void MainWindow::doActionBDPlaneSegmentation()
 	updateUI();
 }
 
+// for plane/plane_cloud (.primitive by default)
+// this function is useless if the plane segmentation is done by ourselves.
 void MainWindow::doActionBDRetrieve()
 {
 	if (!haveSelection()) return;
@@ -11248,6 +11252,27 @@ void MainWindow::doActionBDRetrieve()
 		todo_cloud->prepareDisplayForRefresh_recursive();
 	}
 	refreshAll();
+}
+
+void MainWindow::doActionBDRetrievePlanePoints()
+{
+	return; // TODO: didn't finished yet
+	if (getSelectedEntities().size() != 1) { dispToConsole("select only one entity", ERR_CONSOLE_MESSAGE); return; }
+
+	ccHObject* select = getSelectedEntities().front();
+	ccHObject::Container plane_container = GetPlaneEntitiesBySelected(select);
+	BDBaseHObject* baseObj = GetRootBDBase(select); 
+	if (!baseObj) { dispToConsole(s_no_project_error, ERR_CONSOLE_MESSAGE); return; }
+	ProgStartNorm("retrieve plane points", plane_container.size())
+	for (auto pl : plane_container) {
+		GetParentBuilding(pl);
+
+		ProgStep()
+	}
+	ProgEnd
+
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDImageLines()
@@ -11281,6 +11306,9 @@ void MainWindow::doActionBDImageLines()
 void MainWindow::doActionBDPrimIntersections()
 {
 	if (!haveSelection()) return;
+
+	// Available selection, root / primitive group / planes under the same primitive group
+
 	std::vector<ccHObject::Container> building_prims;
 	
 	if (m_selectedEntities.size() == 1) {
@@ -11290,17 +11318,21 @@ void MainWindow::doActionBDPrimIntersections()
 			ccHObject::Container buildings = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
 			for (ccHObject* bd : buildings)	{
 				StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
-				primGroup->getValidPlanes();				 
+				ccHObject::Container cur_valid_planes = primGroup->getValidPlanes();
+				if (cur_valid_planes.size() > 1) {
+					building_prims.push_back(cur_valid_planes);
+				}
 			}
 		}
 		else if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
 			ccHObject::Container entity_planes = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 			if (entity_planes.size() >= 2) {
 				building_prims.push_back(entity_planes);
-			}			
+			}
 		}
 	}
 	else {
+		// TODO select planes / plane clouds under the same primitive group
 		ccHObject::Container entity_planes;
 		for (auto & entity : m_selectedEntities) {
 			if (entity->isA(CC_TYPES::PLANE)) {
@@ -11694,7 +11726,7 @@ void MainWindow::doActionBDPrimSplitPlane()
 	m_gsTool->linkWith(win);
 
 	ccHObject* first_entity = getSelectedEntities().front();
-	bool planeseg_mode = getSelectedEntities().size() == 1 && isPlaneCloud(first_entity);
+	bool planeseg_mode = getSelectedEntities().size() == 1 && GetPlaneFromCloud(first_entity);
 	if (!planeseg_mode) {
 		dispToConsole("Please select the point cloud of a plane", ERR_CONSOLE_MESSAGE);
 		return;
@@ -12145,8 +12177,10 @@ void MainWindow::doActionBDPlaneCreate()
 	plane_cloud->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
 
 	//! retrieve plane cloud from todo points
-	ccPointCloud* todo_cloud = baseObj->GetTodoPoint(baseObj->getName(), false);
+	ccPointCloud* todo_cloud = baseObj->GetTodoPoint(buildingObj->getName(), false);
 	assert(todo_cloud);
+	if (!todo_cloud) { delete plane_cloud; plane_cloud = nullptr; return; }
+
 	try	{
 		bool ok = true;
 		double input = QInputDialog::getDouble(this, "Input Dialog", "Please input distance threshold", s_snap_todo_distance_threshold, 0.0, 999999.0, 3, &ok);

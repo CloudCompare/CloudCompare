@@ -556,6 +556,7 @@
     <addaction name="actionBDRetrieve"/>
     <addaction name="menuDisplay_2"/>
     <addaction name="actionBDConstrainedMesh"/>
+    <addaction name="actionBDRetrievePlanePoints"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -3599,6 +3600,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Extract Plane From Points</string>
+   </property>
+  </action>
+  <action name="actionBDRetrievePlanePoints">
+   <property name="text">
+    <string>Retrieve Plane Points</string>
    </property>
   </action>
  </widget>

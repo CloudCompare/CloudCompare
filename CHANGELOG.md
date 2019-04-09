@@ -23,6 +23,7 @@ v2.11 (Anoia) - (in development)
     - plugins may now be enabled/disabled in the plugin info window
     - to take effect, CloudCompare must be restarted
     - all plugins are still available on the command line
+  - PCD file load now supports more field types (16 bits signed and unsigned, 32 bits unsigned, 64 bits floating point)
 
 - Changes
   - Command line tool:

@@ -424,7 +424,7 @@ Delaunay2dMesh* Delaunay2dMesh::TesselateContour(const std::vector<CCVector2>& c
 	if (count < 3)
 	{
 		//not enough points
-		return false;
+		return nullptr;
 	}
 
 	//DGM: we check that last vertex is different from the first one!
@@ -438,14 +438,14 @@ Delaunay2dMesh* Delaunay2dMesh::TesselateContour(const std::vector<CCVector2>& c
 	{
 		//triangulation failed
 		delete mesh;
-		return false;
+		return nullptr;
 	}
 
 	if (!mesh->removeOuterTriangles(contourPoints, contourPoints, true) || mesh->size() == 0)
 	{
 		//an error occurred
 		delete mesh;
-		return false;
+		return nullptr;
 	}
 
 	return mesh;

@@ -65,7 +65,7 @@ bool ccExtru::buildUp()
 		--count;
 
 	char errorStr[1024];
-	if (!mesh.buildMesh(m_profile,count,errorStr))
+	if (!mesh.buildMesh(m_profile, count, errorStr))
 	{
 		ccLog::Warning(QString("[ccPlane::buildUp] Profile triangulation failed (CClib said: '%1'").arg(errorStr));
 		return false;
@@ -78,13 +78,13 @@ bool ccExtru::buildUp()
 		return false;
 
 	//vertices
-	unsigned vertCount = 2*count;
+	unsigned vertCount = 2 * count;
 	//faces
-	unsigned faceCount = 2*numberOfTriangles+2*count;
+	unsigned faceCount = 2 * numberOfTriangles + 2 * count;
 	//faces normals
-	unsigned faceNormCount = 2+count;
+	unsigned faceNormCount = 2 + count;
 
-	if (!init(vertCount,false,faceCount,faceNormCount))
+	if (!init(vertCount, false, faceCount, faceNormCount))
 	{
 		ccLog::Error("[ccPlane::buildUp] Not enough memory");
 		return false;
@@ -95,20 +95,20 @@ bool ccExtru::buildUp()
 	assert(m_triNormals);
 
 	//bottom & top faces normals
-	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0,0.0,-1.0).u));
-	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0,0.0,1.0).u));
+	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, -1.0).u));
+	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0,  1.0).u));
 
 	//add profile vertices & normals
-	for (unsigned i=0;i<count;++i)
+	for (unsigned i = 0; i < count; ++i)
 	{
 		const CCVector2& P = m_profile[i];
-		verts->addPoint(CCVector3(P.x,P.y,0));
-		verts->addPoint(CCVector3(P.x,P.y,m_height));
+		verts->addPoint(CCVector3(P.x, P.y, 0));
+		verts->addPoint(CCVector3(P.x, P.y, m_height));
 
-		const CCVector2& PNext = m_profile[(i+1)%count];
-		CCVector2 N(-(PNext.y-P.y),PNext.x-P.x);
+		const CCVector2& PNext = m_profile[(i + 1) % count];
+		CCVector2 N(-(PNext.y - P.y), PNext.x - P.x);
 		N.normalize();
-		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(N.x,N.y,0.0).u));
+		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(N.x, N.y, 0.0).u));
 	}
 
 	//add faces
@@ -116,24 +116,24 @@ bool ccExtru::buildUp()
 		//side faces
 		{
 			const int* _triIndexes = triIndexes;
-			for (unsigned i=0;i<numberOfTriangles;++i,_triIndexes+=3)
+			for (unsigned i = 0; i < numberOfTriangles; ++i, _triIndexes += 3)
 			{
-				addTriangle(_triIndexes[0]*2,_triIndexes[2]*2,_triIndexes[1]*2);
-				addTriangleNormalIndexes(0,0,0);
-				addTriangle(_triIndexes[0]*2+1,_triIndexes[1]*2+1,_triIndexes[2]*2+1);
-				addTriangleNormalIndexes(1,1,1);
+				addTriangle(_triIndexes[0] * 2, _triIndexes[2] * 2, _triIndexes[1] * 2);
+				addTriangleNormalIndexes(0, 0, 0);
+				addTriangle(_triIndexes[0] * 2 + 1, _triIndexes[1] * 2 + 1, _triIndexes[2] * 2 + 1);
+				addTriangleNormalIndexes(1, 1, 1);
 			}
 		}
 
 		//thickness
 		{
-			for (unsigned i=0;i<count;++i)
+			for (unsigned i = 0; i < count; ++i)
 			{
-				unsigned iNext = ((i+1)%count);
-				addTriangle(i*2,i*2+1,iNext*2);
-				addTriangleNormalIndexes(2+i,2+i,2+i);
-				addTriangle(iNext*2,i*2+1,iNext*2+1);
-				addTriangleNormalIndexes(2+i,2+i,2+i);
+				unsigned iNext = ((i + 1) % count);
+				addTriangle(i * 2, i * 2 + 1, iNext * 2);
+				addTriangleNormalIndexes(2 + i, 2 + i, 2 + i);
+				addTriangle(iNext * 2, i * 2 + 1, iNext * 2 + 1);
+				addTriangleNormalIndexes(2 + i, 2 + i, 2 + i);
 			}
 		}
 	}

@@ -249,7 +249,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 																CC_TRIANGULATION_TYPES type/*=DELAUNAY_2D_AXIS_ALIGNED*/,
 																PointCoordinateType maxEdgeLength/*=0*/,
 																unsigned char dim/*=0*/,
-																char* errorStr/*=0*/)
+																char* errorStr/*=nullptr*/)
 {
 	if (!cloud)
 	{
@@ -259,7 +259,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 	}
 
 
-	switch(type)
+	switch (type)
 	{
 	case DELAUNAY_2D_AXIS_ALIGNED:
 		{
@@ -270,8 +270,8 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 				return nullptr;
 			}
 			const unsigned char Z = static_cast<unsigned char>(dim);
-			const unsigned char X = Z == 2 ? 0 : Z+1;
-			const unsigned char Y = X == 2 ? 0 : X+1;
+			const unsigned char X = (Z == 2 ? 0 : Z + 1);
+			const unsigned char Y = (X == 2 ? 0 : X + 1);
 
 			unsigned count = cloud->size();
 			std::vector<CCVector2> the2DPoints;
@@ -287,7 +287,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 			}
 
 			cloud->placeIteratorAtBeginning();
-			for (unsigned i=0; i<count; ++i)
+			for (unsigned i = 0; i < count; ++i)
 			{
 				const CCVector3* P = cloud->getPoint(i);
 				the2DPoints[i].x = P->u[X];
@@ -296,14 +296,14 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 
 			Delaunay2dMesh* dm = new Delaunay2dMesh();
 			char triLibErrorStr[1024];
-			if (!dm->buildMesh(the2DPoints,0,triLibErrorStr))
+			if (!dm->buildMesh(the2DPoints, 0, triLibErrorStr))
 			{
 				if (errorStr)
 					strcpy(errorStr, triLibErrorStr);
 				delete dm;
 				return nullptr;
 			}
-			dm->linkMeshWith(cloud,false);
+			dm->linkMeshWith(cloud, false);
 
 			//remove triangles with too long edges
 			if (maxEdgeLength > 0)
@@ -325,7 +325,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 	case DELAUNAY_2D_BEST_LS_PLANE:
 		{
 			Neighbourhood Yk(cloud);
-			GenericIndexedMesh* mesh = Yk.triangulateOnPlane(false,maxEdgeLength,errorStr);
+			GenericIndexedMesh* mesh = Yk.triangulateOnPlane(false, maxEdgeLength, errorStr);
 			return mesh;
 		}
 

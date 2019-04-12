@@ -4222,8 +4222,8 @@ void MainWindow::doConvertPolylinesToMesh()
 	assert(dim >= 0 && dim < 3);
 
 	const unsigned char Z = static_cast<unsigned char>(dim);
-	const unsigned char X = Z == 2 ? 0 : Z + 1;
-	const unsigned char Y = X == 2 ? 0 : X + 1;
+	const unsigned char X = (Z == 2 ? 0 : Z + 1);
+	const unsigned char Y = (X == 2 ? 0 : X + 1);
 
 	//number of segments
 	unsigned segmentCount = 0;

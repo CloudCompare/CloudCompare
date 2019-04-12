@@ -24,6 +24,10 @@ v2.11 (Anoia) - (in development)
     - to take effect, CloudCompare must be restarted
     - all plugins are still available on the command line
   - PCD file load now supports more field types (16 bits signed and unsigned, 32 bits unsigned, 64 bits floating point)
+  - OBJ files:
+	- we now correctly handle faces with more than 4 vertices! (they should be properly tesselated)
+	- support of escaped lines ('\' at the end of the line)
+	- CC now accepts MTL files with the 'Tf' keyword (well, CC just ignores it and doesn't complain about a wrong MTL file anymore ;)
 
 - Changes
   - Command line tool:

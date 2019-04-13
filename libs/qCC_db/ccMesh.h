@@ -49,7 +49,7 @@ public:
 	~ccMesh() override;
 	
 	//! Returns class ID
-	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MESH; }
+	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MESH; }
 
 	//! Sets the associated vertices cloud (warning)
 	void setAssociatedCloud(ccGenericPointCloud* cloud);
@@ -380,7 +380,7 @@ public:
 	//! Transforms the mesh per-triangle normals
 	void transformTriNormals(const ccGLMatrix& trans);
 
-protected:
+protected: //methods
 
 	//inherited from ccHObject
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
@@ -424,6 +424,8 @@ protected:
 
 	//recursive equivalents of some of ccGenericMesh methods (applied to sub-meshes as well)
 	ccMesh_extended_call1(showNormals, bool, showNormals_extended)
+
+protected: //members
 
 	//! associated cloud (vertices)
 	ccGenericPointCloud* m_associatedCloud;

@@ -43,11 +43,16 @@ public:
 	
 	ccPluginInterfaceList& pluginList();
 	
+	void setPluginEnabled( const ccPluginInterface* plugin, bool enabled );
+	bool isEnabled( const ccPluginInterface* plugin ) const;
+	
 protected:
 	explicit ccPluginManager( QObject* parent = nullptr );
 
 private:
 	void loadFromPathsAndAddToList();
+	
+	QStringList disabledPluginIIDs() const;
 	
 	QStringList m_pluginPaths;
 	ccPluginInterfaceList m_pluginList;

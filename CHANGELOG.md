@@ -5,21 +5,29 @@ v2.11 (Anoia) - (in development)
 ----------------------
 
 - Improvements
-  
   - Command line tool:
     - The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
       In this case the first mesh vertices are used as compared cloud.
-  
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
-
   - Point picking:
-	- points can now be picked on meshes (triangles)
-	- the Point List Picking tool can now be used on meshes
-	- when using 'Shift+left click' or the Point picking tool on a mesh,
-		CC won't spawn a 3-points label anymore, but a single point label at the right position
-	- labels picked on a mesh can be used to re-orient the camera (right-click on the label entry in the DB)
-	- note: for now, labels associated to meshes are not preserved when cloning or merging the meshes
+    - points can now be picked on meshes (triangles)
+    - the Point List Picking tool can now be used on meshes
+    - when using 'Shift+left click' or the Point picking tool on a mesh, CC won't spawn a 3-points label anymore, but a single point label at the right position
+    - labels picked on a mesh can be used to re-orient the camera (right-click on the label entry in the DB)
+    - note: for now, labels associated to meshes are not preserved when cloning or merging the meshes
+    - points are now exclusively picked inside the current fustrum (no more points behind the camera)
+  - Graphical segmentation:
+    - points are now exclusively segmented inside/outside the frustrum
+  - Plugins:
+    - plugins may now be enabled/disabled in the plugin info window
+    - to take effect, CloudCompare must be restarted
+    - all plugins are still available on the command line
+  - PCD file load now supports more field types (16 bits signed and unsigned, 32 bits unsigned, 64 bits floating point)
+  - OBJ files:
+	- we now correctly handle faces with more than 4 vertices! (they should be properly tesselated)
+	- support of escaped lines ('\' at the end of the line)
+	- CC now accepts MTL files with the 'Tf' keyword (well, CC just ignores it and doesn't complain about a wrong MTL file anymore ;)
 
 - Changes
   - Command line tool:
@@ -56,6 +64,7 @@ v2.10.3 (Zephyrus) - (in development)
   - Fix potential crash when quitting or switching displays
   - Quitting the "Section extraction tool" (and probably any tool that uses a temporary 3D view, such as the Align tool) would break the picking hub mechanism (preventing the user from picking points typically) (#886)
   - Fix the camera name being displayed in the wrong place (#902)
+  - The layers management of the Rasterize tool was partially broken
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------

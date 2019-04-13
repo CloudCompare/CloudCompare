@@ -40,6 +40,9 @@
 #include <ccProgressDialog.h>
 #include <ccSubMesh.h>
 
+//CCLib
+#include <Delaunay2dMesh.h>
+
 //System
 #include <cstring>
 
@@ -516,6 +519,25 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				QApplication::processEvents();
 			}
 
+			//specific case for weird files
+			while (currentLine.endsWith('\\'))
+			{
+				currentLine.resize(currentLine.length() - 1);
+				currentLine += stream.readLine();
+				++lineCount;
+				if (pDlg && ((lineCount % 2048) == 0))
+				{
+					if (pDlg->wasCanceled())
+					{
+						error = true;
+						objWarnings[CANCELLED_BY_USER] = true;
+						break;
+					}
+					pDlg->setValue(static_cast<int>(file.pos()));
+					QApplication::processEvents();
+				}
+			}
+
 			const QStringList tokens = currentLine.split( spacesRegExp, QString::SkipEmptyParts );
 
 			//skip comments & empty lines
@@ -817,35 +839,144 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					break;
 
 				//Now, let's tesselate the whole polygon
-				//FIXME: yeah, we do very ulgy tesselation here!
-				std::vector<facetElement>::const_iterator B = A + 1;
-				std::vector<facetElement>::const_iterator C = B + 1;
-				for (; C != currentFace.end(); ++B, ++C)
+				bool shouldTesselate = (currentFace.size() > 4 && vertices);
+				if (shouldTesselate)
 				{
-					//need more space?
-					if (baseMesh->size() == baseMesh->capacity())
+					for (const facetElement& fe : currentFace)
 					{
-						if (!baseMesh->reserve(baseMesh->size() + 4096))
+						if (fe.vIndex < 0 || vertices->size() <= static_cast<unsigned>(fe.vIndex))
 						{
-							objWarnings[NOT_ENOUGH_MEMORY] = true;
-							error = true;
+							//we haven't loaded all the vertices?! Too bad, we can't tesselate properly :(
+							ccLog::Warning("[OBJ] Failed to tesselate face");
+							shouldTesselate = false;
 							break;
 						}
 					}
+				}
+				if (shouldTesselate)
+				{
+					try
+					{
+						CCLib::PointCloud contour;
+						contour.reserve(static_cast<unsigned>(currentFace.size()));
 
-					//push new triangle
-					baseMesh->addTriangle(A->vIndex, B->vIndex, C->vIndex);
-					++facesRead;
-					++totalFacesRead;
+						for (const facetElement& fe : currentFace)
+						{
+							contour.addPoint(*vertices->getPoint(fe.vIndex));
+						}
+						CCLib::Delaunay2dMesh* dMesh = CCLib::Delaunay2dMesh::TesselateContour(&contour);
+						if (dMesh)
+						{
+							//need more space?
+							unsigned triCount = dMesh->size();
+							if (baseMesh->size() + triCount >= baseMesh->capacity())
+							{
+								if (!baseMesh->reserve(baseMesh->size() + std::max(triCount, 4096u)))
+								{
+									objWarnings[NOT_ENOUGH_MEMORY] = true;
+									error = true;
+									break;
+								}
+							}
 
-					if (hasMaterial)
-						baseMesh->addTriangleMtlIndex(currentMaterial);
+							//push new triangle
+							const int* _triIndexes = dMesh->getTriangleVertIndexesArray();
+							//determine if the triangles must be flipped or not
+							bool flip = false;
+							{
+								for (unsigned i = 0; i < triCount; ++i, _triIndexes += 3)
+								{
+									int i1 = _triIndexes[0];
+									int i2 = _triIndexes[1];
+									int i3 = _triIndexes[2];
+									//by definition the first edge of the original polygon
+									//should be in the same 'direction' of the triangle that uses it
+									if (	(i1 == 0 || i2 == 0 || i3 == 0)
+										&&	(i1 == 1 || i2 == 1 || i3 == 1) )
+									{
+										if (	(i1 == 1 && i2 == 0)
+											||	(i2 == 1 && i3 == 0)
+											||	(i3 == 1 && i1 == 0) )
+										{
+											flip = true;
+										}
+										break;
+									}
+								}
+							}
 
-					if (hasTexCoords)
-						baseMesh->addTriangleTexCoordIndexes(A->tcIndex, B->tcIndex, C->tcIndex);
+							_triIndexes = dMesh->getTriangleVertIndexesArray();
+							for (unsigned i = 0; i < triCount; ++i, _triIndexes += 3)
+							{
+								const facetElement& f1 = currentFace[_triIndexes[0]];
+								facetElement f2 = currentFace[_triIndexes[1]];
+								facetElement f3 = currentFace[_triIndexes[2]];
 
-					if (normalsPerFacet)
-						baseMesh->addTriangleNormalIndexes(A->nIndex, B->nIndex, C->nIndex);
+								if (flip)
+									std::swap(f2, f3);
+
+								baseMesh->addTriangle(f1.vIndex, f2.vIndex, f3.vIndex);
+
+								if (hasMaterial)
+									baseMesh->addTriangleMtlIndex(currentMaterial);
+
+								if (hasTexCoords)
+									baseMesh->addTriangleTexCoordIndexes(f1.tcIndex, f2.tcIndex, f3.tcIndex);
+
+								if (normalsPerFacet)
+									baseMesh->addTriangleNormalIndexes(f1.nIndex, f2.nIndex, f3.nIndex);
+
+								++facesRead;
+								++totalFacesRead;
+							}
+
+							delete dMesh;
+							dMesh = nullptr;
+						}
+						else
+						{
+							ccLog::Warning("[OBJ] Failed to tesselate face");
+							shouldTesselate = false;
+						}
+					}
+					catch (const std::bad_alloc&)
+					{
+						//not enough memory to tesselate!
+						shouldTesselate = false;
+					}
+				}
+
+				if (!shouldTesselate)
+				{
+					std::vector<facetElement>::const_iterator B = A + 1;
+					std::vector<facetElement>::const_iterator C = B + 1;
+					for (; C != currentFace.end(); ++B, ++C)
+					{
+						//need more space?
+						if (baseMesh->size() == baseMesh->capacity())
+						{
+							if (!baseMesh->reserve(baseMesh->size() + 4096))
+							{
+								objWarnings[NOT_ENOUGH_MEMORY] = true;
+								error = true;
+								break;
+							}
+						}
+
+						//push new triangle
+						baseMesh->addTriangle(A->vIndex, B->vIndex, C->vIndex);
+						++facesRead;
+						++totalFacesRead;
+
+						if (hasMaterial)
+							baseMesh->addTriangleMtlIndex(currentMaterial);
+
+						if (hasTexCoords)
+							baseMesh->addTriangleTexCoordIndexes(A->tcIndex, B->tcIndex, C->tcIndex);
+
+						if (normalsPerFacet)
+							baseMesh->addTriangleNormalIndexes(A->nIndex, B->nIndex, C->nIndex);
+					}
 				}
 			}
 			/*** polyline ***/

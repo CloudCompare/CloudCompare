@@ -902,9 +902,13 @@ bool ccGenericMesh::trianglePicking(unsigned triIndex,
 	CCVector3d A2D, B2D, C2D;
 	if (noGLTrans)
 	{
-		camera.project(A3D, A2D);
-		camera.project(B3D, B2D);
-		camera.project(C3D, C2D);
+		// if none of its points fall into the frustrum the triangle is not visible...
+		if(!camera.project(A3D, A2D, true) &&
+			!camera.project(B3D, B2D, true) &&
+			!camera.project(C3D, C2D, true)) 
+		{
+			return false;
+		}
 	}
 	else
 	{
@@ -914,9 +918,13 @@ bool ccGenericMesh::trianglePicking(unsigned triIndex,
 		trans.apply(A3Dp);
 		trans.apply(B3Dp);
 		trans.apply(C3Dp);
-		camera.project(A3Dp, A2D);
-		camera.project(B3Dp, B2D);
-		camera.project(C3Dp, C2D);
+		// if none of its points fall into the frustrum the triangle is not visible...
+		if(!camera.project(A3Dp, A2D, true) &&
+			!camera.project(B3Dp, B2D, true) &&
+			!camera.project(C3Dp, C2D, true)) 
+		{
+			return false;
+		}
 	}
 
 	//barycentric coordinates

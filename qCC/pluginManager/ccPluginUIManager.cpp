@@ -21,11 +21,12 @@
 #include <QWidget>
 
 #include "ccConsole.h"
-#include "ccGLWindow.h"
 #include "ccGLPluginInterface.h"
+#include "ccGLWindow.h"
 #include "ccIOPluginInterface.h"
 #include "ccMainAppInterface.h"
 #include "ccPluginInfoDlg.h"
+#include "ccPluginManager.h"
 #include "ccPluginUIManager.h"
 #include "ccStdPluginInterface.h"
 
@@ -48,12 +49,10 @@ ccPluginUIManager::ccPluginUIManager( ccMainAppInterface *appInterface, QWidget 
 	setupToolbars();
 }
 
-ccPluginUIManager::~ccPluginUIManager()
+void ccPluginUIManager::init()
 {
-}
-
-void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
-{	
+	auto plugins = ccPluginManager::get().pluginList();
+	
 	m_pluginMenu->setEnabled( false );
 	m_glFilterMenu->setEnabled( false );
 	
@@ -71,6 +70,13 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 		{
 			Q_ASSERT( false );
 			continue;
+		}
+		
+		if ( !ccPluginManager::get().isEnabled( plugin ) )
+		{
+			m_plugins.push_back( plugin );
+			
+			continue;	
 		}
 		
 		const QString pluginName = plugin->getName();
@@ -269,7 +275,9 @@ void ccPluginUIManager::handleSelectionChanged()
 {
 	const ccHObject::Container &selectedEntities = m_appInterface->getSelectedEntities();
 	
-	for ( ccPluginInterface *plugin : m_plugins )
+	const auto &list = m_plugins;
+	
+	for ( ccPluginInterface *plugin : list )
 	{
 		if ( plugin->getType() == CC_STD_PLUGIN )
 		{

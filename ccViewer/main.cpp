@@ -44,9 +44,9 @@
 
 int main(int argc, char *argv[])
 {
-	ccViewerApplication::init(false);
+	ccViewerApplication::initOpenGL();
 	
-	ccViewerApplication a(argc, argv);
+	ccViewerApplication a(argc, argv, false);
 
 #ifdef USE_VLD
 	VLDEnable();

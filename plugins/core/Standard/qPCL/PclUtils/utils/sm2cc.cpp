@@ -223,22 +223,21 @@ bool sm2ccConverter::addRGB(ccPointCloud * cloud)
 	return true;
 }
 
-bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& name, bool overwrite_if_exist/*=true*/)
+bool sm2ccConverter::addScalarField(ccPointCloud* cloud, const std::string& name, bool overwrite_if_exist/*=true*/)
 {
 	assert(m_sm_cloud && cloud);
 	if (!m_sm_cloud || !cloud)
 		return false;
 
-	//get the field
-	PCLScalarField field = m_sm_cloud->fields.at(pcl::getFieldIndex(*m_sm_cloud, name));
-
-	//if this field already exist, simply delete it
+	//if the input field already exists...
 	int id = cloud->getScalarFieldIndexByName(name.c_str());
 	if (id >= 0)
 	{
 		if (overwrite_if_exist)
+			//we simply delete it
 			cloud->deleteScalarField(id);
 		else
+			//we keep it as is
 			return false;
 	}
 
@@ -253,36 +252,95 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 	}
 
 	//get PCL field
-	PCLScalarField pclField = m_sm_cloud->fields.at(pcl::getFieldIndex(*m_sm_cloud, name));
-
-	//check if int or float
-	bool floatField = (pclField.datatype == PCLScalarField::FLOAT32 || pclField.datatype == PCLScalarField::FLOAT64);
-
-	//temporary change the name of the given field to something else -> S5c4laR should be a pretty uncommon name,
 	int field_index = pcl::getFieldIndex(*m_sm_cloud, name);
-	m_sm_cloud->fields[field_index].name = std::string("S5c4laR");
+	PCLScalarField& pclField = m_sm_cloud->fields[field_index];
+	//temporary change the name of the given field to something else -> S5c4laR should be a pretty uncommon name,
+	pclField.name = std::string("S5c4laR");
 
-	if (floatField)
+	switch (pclField.datatype)
+	{
+	case PCLScalarField::FLOAT32:
 	{
 		pcl::PointCloud<FloatScalar>::Ptr pcl_scalar(new pcl::PointCloud<FloatScalar>);
 		FROM_PCL_CLOUD(*m_sm_cloud, *pcl_scalar);
 
 		for (size_t i = 0; i < pointCount; ++i)
 		{
-			ScalarType scalar = (ScalarType)pcl_scalar->points[i].S5c4laR;
+			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
 			cc_scalar_field->addElement(scalar);
 		}
 	}
-	else
+	break;
+
+	case PCLScalarField::FLOAT64:
+	{
+		pcl::PointCloud<DoubleScalar>::Ptr pcl_scalar(new pcl::PointCloud<DoubleScalar>);
+		FROM_PCL_CLOUD(*m_sm_cloud, *pcl_scalar);
+
+		for (size_t i = 0; i < pointCount; ++i)
+		{
+			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
+			cc_scalar_field->addElement(scalar);
+		}
+	}
+	break;
+
+	case PCLScalarField::INT16:
+	{
+		pcl::PointCloud<ShortScalar>::Ptr pcl_scalar(new pcl::PointCloud<ShortScalar>);
+		FROM_PCL_CLOUD(*m_sm_cloud, *pcl_scalar);
+
+		for (size_t i = 0; i < pointCount; ++i)
+		{
+			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
+			cc_scalar_field->addElement(scalar);
+		}
+	}
+	break;
+
+	case PCLScalarField::UINT16:
+	{
+		pcl::PointCloud<UShortScalar>::Ptr pcl_scalar(new pcl::PointCloud<UShortScalar>);
+		FROM_PCL_CLOUD(*m_sm_cloud, *pcl_scalar);
+
+		for (size_t i = 0; i < pointCount; ++i)
+		{
+			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
+			cc_scalar_field->addElement(scalar);
+		}
+	}
+	break;
+
+	case PCLScalarField::UINT32:
+	{
+		pcl::PointCloud<UIntScalar>::Ptr pcl_scalar(new pcl::PointCloud<UIntScalar>);
+		FROM_PCL_CLOUD(*m_sm_cloud, *pcl_scalar);
+
+		for (size_t i = 0; i < pointCount; ++i)
+		{
+			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
+			cc_scalar_field->addElement(scalar);
+		}
+	}
+	break;
+
+	case PCLScalarField::INT32:
 	{
 		pcl::PointCloud<IntScalar>::Ptr pcl_scalar(new pcl::PointCloud<IntScalar>);
 		FROM_PCL_CLOUD(*m_sm_cloud, *pcl_scalar);
 
 		for (size_t i = 0; i < pointCount; ++i)
 		{
-			ScalarType scalar = (ScalarType)pcl_scalar->points[i].S5c4laR;
+			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
 			cc_scalar_field->addElement(scalar);
 		}
+	}
+	break;
+
+	default:
+		ccLog::Warning(QString("[PCL] Field with an unmanaged type (= %1)").arg(pclField.datatype));
+		cc_scalar_field->release();
+		return false;
 	}
 
 	cc_scalar_field->computeMinAndMax();

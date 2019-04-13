@@ -22,8 +22,6 @@
 #include <QList>
 #include <QObject>
 
-#include "ccPluginManager.h"
-
 class QAction;
 class QMenu;
 class QString;
@@ -41,9 +39,9 @@ class ccPluginUIManager : public QObject
 	
 public:
 	ccPluginUIManager( ccMainAppInterface *appInterface, QWidget *parent );
-	~ccPluginUIManager();
+	~ccPluginUIManager() override = default;
 	
-	void	init( const ccPluginInterfaceList &plugins );
+	void	init();
 	
 	QMenu	*pluginMenu() const;
 	QMenu	*shaderAndFilterMenu() const;

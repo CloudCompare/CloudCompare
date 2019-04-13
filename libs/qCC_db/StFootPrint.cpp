@@ -49,11 +49,11 @@ bool StFootPrint::reverseVertexOrder()
 {
 	try {
 		getAssociatedCloud();
-		size_t last = size();
-		size_t first = 0;
+		unsigned int last = size();
+		unsigned int first = 0;
 		while ((first != last) && first != --last) {
 			///< swap first and last
-			size_t fist_index = getPointGlobalIndex(first);
+			unsigned int fist_index = getPointGlobalIndex(first);
 			setPointIndex(first, getPointGlobalIndex(last));
 			setPointIndex(last, fist_index);
 			++first;
@@ -73,7 +73,7 @@ inline double StFootPrint::getHeight() const
 
 void StFootPrint::setHeight(double height)
 {
-	for (size_t i = 0; i < size(); i++) {
+	for (unsigned int i = 0; i < size(); i++) {
 		CCVector3& P = const_cast<CCVector3&>(*getPoint(i));
 		P.z = height;
 	}

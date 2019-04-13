@@ -41,12 +41,12 @@ StPrimGroup::~StPrimGroup()
 ccHObject::Container StPrimGroup::getValidPlanes()
 {
 	ccHObject::Container valid;
-	for (size_t i = 0; i < getChildrenNumber(); i++) {
+	for (unsigned int i = 0; i < getChildrenNumber(); i++) {
 		ccHObject* child_cloud = getChild(i);
 
 		if (!child_cloud->isEnabled() || !child_cloud->isA(CC_TYPES::POINT_CLOUD)) continue;
 
-		for (size_t j = 0; j < child_cloud->getChildrenNumber(); j++) {
+		for (unsigned int j = 0; j < child_cloud->getChildrenNumber(); j++) {
 			ccHObject* pl = child_cloud->getChild(j);
 			if (pl->isEnabled() && !pl->getName().endsWith("-del")) {
 				valid.push_back(pl);

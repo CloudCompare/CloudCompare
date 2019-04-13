@@ -85,7 +85,7 @@ std::vector<CCVector2> StBlock::getProfile()
 
 ccFacet * StBlock::getTopFacet()
 {
-	for (size_t i = 0; i < getChildrenNumber(); i++) {
+	for (unsigned int i = 0; i < getChildrenNumber(); i++) {
 		if (getChild(i)->getName()=="top" && getChild(i)->isA(CC_TYPES::FACET)) {
 			return static_cast<ccFacet*>(getChild(i));
 		}
@@ -95,7 +95,7 @@ ccFacet * StBlock::getTopFacet()
 
 ccFacet * StBlock::getBottomFacet()
 {
-	for (size_t i = 0; i < getChildrenNumber(); i++) {
+	for (unsigned int i = 0; i < getChildrenNumber(); i++) {
 		if (getChild(i)->getName() == "bottom" && getChild(i)->isA(CC_TYPES::FACET)) {
 			return static_cast<ccFacet*>(getChild(i));
 		}
@@ -111,7 +111,7 @@ void StBlock::TopHeightAdd(double val)
 
 	ccPointCloud* verts = vertices();
 	if (!verts) { return; }
-	for (size_t i = 0; i < verts->size() / 2; i++) {
+	for (unsigned int i = 0; i < verts->size() / 2; i++) {
 		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2));
 		P.z += val;
 	}
@@ -121,7 +121,7 @@ void StBlock::TopHeightAdd(double val)
 	if (!top) return;
 	ccPointCloud* cloud = top->getContourVertices();
 	if (!cloud) return;
-	for (size_t i = 0; i < cloud->size(); i++) {
+	for (unsigned int i = 0; i < cloud->size(); i++) {
 		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
 		P.z += val;
 	}
@@ -136,7 +136,7 @@ void StBlock::BottomHeightAdd(double val)
 
 	ccPointCloud* verts = vertices();
 	if (!verts) { return; }
-	for (size_t i = 0; i < verts->size() / 2; i++) {
+	for (unsigned int i = 0; i < verts->size() / 2; i++) {
 		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2 + 1));
 		P.z += val;
 	}
@@ -146,7 +146,7 @@ void StBlock::BottomHeightAdd(double val)
 	if (!bottom) return;
 	ccPointCloud* cloud = bottom->getContourVertices();
 	if (!cloud) return;
-	for (size_t i = 0; i < cloud->size(); i++) {
+	for (unsigned int i = 0; i < cloud->size(); i++) {
 		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
 		P.z += val;
 	}

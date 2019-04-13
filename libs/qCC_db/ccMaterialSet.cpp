@@ -251,6 +251,11 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			{
 				//ignored
 			}
+			// Transmission filter
+			else if (tokens.front() == "Tf")
+			{
+				//ignored
+			}
 			// texture map
 			else if (tokens.front() == "map_Ka"
 					|| tokens.front() == "map_Kd"

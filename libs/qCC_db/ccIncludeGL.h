@@ -173,7 +173,7 @@ public: //GLU equivalent methods
 	}
 
 	template <typename iType, typename oType>
-	static bool Project(const Vector3Tpl<iType>& input3D, const oType* modelview, const oType* projection, const int* viewport, Vector3Tpl<oType>& output2D)
+	static bool Project(const Vector3Tpl<iType>& input3D, const oType* modelview, const oType* projection, const int* viewport, Vector3Tpl<oType>& output2D, bool checkInFrustrum = false)
 	{
 		//Modelview transform
 		Tuple4Tpl<oType> Pm;
@@ -198,6 +198,16 @@ public: //GLU equivalent methods
 		{
 			return false;
 		}
+
+		//Check if the point is in frustrum
+		if(checkInFrustrum)
+		{
+			if (std::abs(Pp.x) > Pp.w || std::abs(Pp.y) > Pp.w || std::abs(Pp.z) > Pp.w)
+			{
+				return false;
+			}
+		}
+
 		//Perspective division
 		Pp.x /= Pp.w;
 		Pp.y /= Pp.w;

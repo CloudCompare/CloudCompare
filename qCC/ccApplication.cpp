@@ -27,8 +27,8 @@
 #include "ccApplication.h"
 #include "mainwindow.h"
 
-ccApplication::ccApplication(int &argc, char **argv)
-	: ccApplicationBase( argc, argv, QStringLiteral( "1.0-beta" ) )
+ccApplication::ccApplication( int &argc, char **argv, bool isCommandLine )
+	: ccApplicationBase( argc, argv, isCommandLine, QStringLiteral( "1.0-beta" ) )
 {
 	setApplicationName( "BlockBuilder" );
 	

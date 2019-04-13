@@ -29,10 +29,8 @@ class ccDefaultPluginData;
 class ccDefaultPluginInterface : public ccPluginInterface
 {
 public:
-	ccDefaultPluginInterface( const QString &resourcePath = QString() );
-
 	~ccDefaultPluginInterface() override;
-	
+		
 	bool isCore() const override;
 
 	QString getName() const override;
@@ -43,8 +41,14 @@ public:
 	ReferenceList getReferences() const override;
 	ContactList getAuthors() const override;
 	ContactList getMaintainers() const override;
+
+protected:
+	ccDefaultPluginInterface( const QString &resourcePath = QString() );
 	
 private:
+	void setIID( const QString& iid ) override;
+	const QString& IID() const override;
+		
 	ccDefaultPluginData	*m_data;
 };
 

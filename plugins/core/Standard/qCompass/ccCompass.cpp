@@ -83,6 +83,14 @@ ccCompass::~ccCompass()
 	delete m_pinchNodeTool;
 }
 
+void ccCompass::stop()
+{
+	stopMeasuring(true);
+	m_dlg = nullptr;
+
+	ccStdPluginInterface::stop();
+}
+
 void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 {
 	//disable the main plugin icon if no entity is loaded
@@ -506,6 +514,12 @@ bool ccCompass::startMeasuring()
 //Exits measuring
 bool ccCompass::stopMeasuring(bool finalStop/*=false*/)
 {
+	// Check if we were ever loaded. If the plugin wasn't loaded this will be nullptr.
+	if ( m_app == nullptr )
+	{
+		return true;
+	}
+	
 	//remove click listener
 	if (m_app->getActiveGLWindow())
 	{

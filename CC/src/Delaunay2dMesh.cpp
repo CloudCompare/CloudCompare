@@ -106,23 +106,25 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 	CDT cdt;
 
 	//We build the constraints
-	for(std::size_t i = 0; i < constrCount; ++i) {
+	for(std::size_t i = 0; i < constrCount; ++i)
+	{
 		const CCVector2 * pt = &points2D[segments2D[i]];
 		constraints.emplace_back(cgalPoint(pt->x, pt->y), segments2D[i]);
 	}
 	//The CDT  is built according to the constraints
 	cdt.insert(constraints.begin(), constraints.end());
 
-	m_numberOfTriangles = static_cast<unsigned >(cdt.number_of_faces());
-	m_triIndexes = new int[cdt.number_of_faces()*3];
+	m_numberOfTriangles = static_cast<unsigned>(cdt.number_of_faces());
+	m_triIndexes = new int[cdt.number_of_faces() * 3];
 
 	//The cgal data structure is converted into CC one
 	if (m_numberOfTriangles > 0) {
 		int faceCount = 0;
-		for (CDT::Face_iterator face = cdt.faces_begin(); face != cdt.faces_end(); ++face, faceCount+=3) {
-			m_triIndexes[0+faceCount] = static_cast<int>(face->vertex(0)->info());
-			m_triIndexes[1+faceCount] = static_cast<int>(face->vertex(1)->info());
-			m_triIndexes[2+faceCount] = static_cast<int>(face->vertex(2)->info());
+		for (CDT::Face_iterator face = cdt.faces_begin(); face != cdt.faces_end(); ++face, faceCount += 3)
+		{
+			m_triIndexes[0 + faceCount] = static_cast<int>(face->vertex(0)->info());
+			m_triIndexes[1 + faceCount] = static_cast<int>(face->vertex(1)->info());
+			m_triIndexes[2 + faceCount] = static_cast<int>(face->vertex(2)->info());
 		};
 	}
 
@@ -172,7 +174,8 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 	try
 	{
 		pts.reserve(pointCount);
-	} catch (const std::bad_alloc&)
+	}
+	catch (const std::bad_alloc&)
 	{
 		if (outputErrorStr)
 			strcpy(outputErrorStr, "Not enough memory");
@@ -186,7 +189,8 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 		m_triIndexes = nullptr;
 	}
 
-	for(std::size_t i = 0; i < pointCount; ++i) {
+	for (std::size_t i = 0; i < pointCount; ++i)
+	{
 		const CCVector2 * pt = &points2D[i];
 		pts.emplace_back(cgalPoint(pt->x, pt->y), i);
 	}
@@ -198,12 +202,14 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 	m_triIndexes = new int[dt.number_of_faces()*3];
 
 	//The cgal data structure is converted into CC one
-	if (m_numberOfTriangles > 0) {
+	if (m_numberOfTriangles > 0)
+	{
 		int faceCount = 0;
-		for (DT::Face_iterator face = dt.faces_begin(); face != dt.faces_end(); ++face, faceCount+=3) {
-			m_triIndexes[0+faceCount] = static_cast<int>(face->vertex(0)->info());
-			m_triIndexes[1+faceCount] = static_cast<int>(face->vertex(1)->info());
-			m_triIndexes[2+faceCount] = static_cast<int>(face->vertex(2)->info());
+		for (DT::Face_iterator face = dt.faces_begin(); face != dt.faces_end(); ++face, faceCount += 3)
+		{
+			m_triIndexes[0 + faceCount] = static_cast<int>(face->vertex(0)->info());
+			m_triIndexes[1 + faceCount] = static_cast<int>(face->vertex(1)->info());
+			m_triIndexes[2 + faceCount] = static_cast<int>(face->vertex(2)->info());
 		};
 	}
 
@@ -282,22 +288,22 @@ bool Delaunay2dMesh::removeTrianglesWithEdgesLongerThan(PointCoordinateType maxE
 	if (!m_associatedCloud || maxEdgeLength <= 0)
 		return false;
 
-	PointCoordinateType squareMaxEdgeLength = maxEdgeLength*maxEdgeLength;
+	PointCoordinateType squareMaxEdgeLength = maxEdgeLength * maxEdgeLength;
 
 	unsigned lastValidIndex = 0;
 	const int* _triIndexes = m_triIndexes;
-	for (unsigned i=0; i<m_numberOfTriangles; ++i, _triIndexes+=3)
+	for (unsigned i = 0; i < m_numberOfTriangles; ++i, _triIndexes += 3)
 	{
 		const CCVector3* A = m_associatedCloud->getPoint(_triIndexes[0]);
 		const CCVector3* B = m_associatedCloud->getPoint(_triIndexes[1]);
 		const CCVector3* C = m_associatedCloud->getPoint(_triIndexes[2]);
 
-		if ((*B-*A).norm2() <= squareMaxEdgeLength &&
-			(*C-*A).norm2() <= squareMaxEdgeLength &&
-			(*C-*B).norm2() <= squareMaxEdgeLength)
+		if ((*B - *A).norm2() <= squareMaxEdgeLength &&
+			(*C - *A).norm2() <= squareMaxEdgeLength &&
+			(*C - *B).norm2() <= squareMaxEdgeLength)
 		{
 			if (lastValidIndex != i)
-				memcpy(m_triIndexes+3*lastValidIndex, _triIndexes, sizeof(int)*3);
+				memcpy(m_triIndexes + 3 * lastValidIndex, _triIndexes, sizeof(int) * 3);
 			++lastValidIndex;
 		}
 	}
@@ -308,7 +314,7 @@ bool Delaunay2dMesh::removeTrianglesWithEdgesLongerThan(PointCoordinateType maxE
 		if (m_numberOfTriangles != 0)
 		{
 			//shouldn't fail as m_numberOfTriangles is smaller than before!
-			m_triIndexes = static_cast<int*>(realloc(m_triIndexes,sizeof(int)*3*m_numberOfTriangles));
+			m_triIndexes = static_cast<int*>(realloc(m_triIndexes, sizeof(int) * 3 * m_numberOfTriangles));
 		}
 		else //no more triangles?!
 		{
@@ -316,7 +322,7 @@ bool Delaunay2dMesh::removeTrianglesWithEdgesLongerThan(PointCoordinateType maxE
 			m_triIndexes = nullptr;
 		}
 		m_globalIterator = m_triIndexes;
-		m_globalIteratorEnd = m_triIndexes + 3*m_numberOfTriangles;
+		m_globalIteratorEnd = m_triIndexes + 3 * m_numberOfTriangles;
 	}
 
 	return true;
@@ -330,7 +336,7 @@ void Delaunay2dMesh::forEach(genericTriangleAction action)
 	CCLib::SimpleTriangle tri;
 
 	const int* _triIndexes = m_triIndexes;
-	for (unsigned i=0; i<m_numberOfTriangles; ++i, _triIndexes+=3)
+	for (unsigned i = 0; i < m_numberOfTriangles; ++i, _triIndexes += 3)
 	{
 		tri.A = *m_associatedCloud->getPoint(_triIndexes[0]);
 		tri.B = *m_associatedCloud->getPoint(_triIndexes[1]);
@@ -348,11 +354,11 @@ GenericTriangle* Delaunay2dMesh::_getNextTriangle()
 {
 	assert(m_associatedCloud);
 	if (m_globalIterator >= m_globalIteratorEnd)
-        return nullptr;
+		return nullptr;
 
-	m_associatedCloud->getPoint(*m_globalIterator++,m_dumpTriangle.A);
-	m_associatedCloud->getPoint(*m_globalIterator++,m_dumpTriangle.B);
-	m_associatedCloud->getPoint(*m_globalIterator++,m_dumpTriangle.C);
+	m_associatedCloud->getPoint(*m_globalIterator++, m_dumpTriangle.A);
+	m_associatedCloud->getPoint(*m_globalIterator++, m_dumpTriangle.B);
+	m_associatedCloud->getPoint(*m_globalIterator++, m_dumpTriangle.C);
 
 	return &m_dumpTriangle; //temporary!
 }
@@ -375,10 +381,10 @@ GenericTriangle* Delaunay2dMesh::_getTriangle(unsigned triangleIndex)
 {
 	assert(m_associatedCloud && triangleIndex < m_numberOfTriangles);
 
-	const int* tri = m_triIndexes + 3*triangleIndex;
-	m_associatedCloud->getPoint(*tri++,m_dumpTriangle.A);
-	m_associatedCloud->getPoint(*tri++,m_dumpTriangle.B);
-	m_associatedCloud->getPoint(*tri++,m_dumpTriangle.C);
+	const int* tri = m_triIndexes + 3 * triangleIndex;
+	m_associatedCloud->getPoint(*tri++, m_dumpTriangle.A);
+	m_associatedCloud->getPoint(*tri++, m_dumpTriangle.B);
+	m_associatedCloud->getPoint(*tri++, m_dumpTriangle.C);
 
 	return static_cast<GenericTriangle*>(&m_dumpTriangle);
 }
@@ -387,10 +393,10 @@ void Delaunay2dMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, C
 {
 	assert(m_associatedCloud && triangleIndex < m_numberOfTriangles);
 
-	const int* tri = m_triIndexes + 3*triangleIndex;
-	m_associatedCloud->getPoint(*tri++,A);
-	m_associatedCloud->getPoint(*tri++,B);
-	m_associatedCloud->getPoint(*tri++,C);
+	const int* tri = m_triIndexes + 3 * triangleIndex;
+	m_associatedCloud->getPoint(*tri++, A);
+	m_associatedCloud->getPoint(*tri++, B);
+	m_associatedCloud->getPoint(*tri++, C);
 }
 
 VerticesIndexes* Delaunay2dMesh::getTriangleVertIndexes(unsigned triangleIndex)
@@ -404,10 +410,95 @@ void Delaunay2dMesh::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 {
 	if (m_associatedCloud)
 	{
-		m_associatedCloud->getBoundingBox(bbMin,bbMax);
+		m_associatedCloud->getBoundingBox(bbMin, bbMax);
 	}
 	else
 	{
-		bbMin = bbMax = CCVector3(0,0,0);
+		bbMin = bbMax = CCVector3(0, 0, 0);
 	}
+}
+
+Delaunay2dMesh* Delaunay2dMesh::TesselateContour(const std::vector<CCVector2>& contourPoints)
+{
+	size_t count = contourPoints.size();
+	if (count < 3)
+	{
+		//not enough points
+		return nullptr;
+	}
+
+	//DGM: we check that last vertex is different from the first one!
+	//(yes it happens ;)
+	if (contourPoints.back().x == contourPoints.front().x &&  contourPoints.back().y == contourPoints.front().y)
+		--count;
+
+	char errorStr[1024];
+	Delaunay2dMesh* mesh = new Delaunay2dMesh();
+	if (!mesh->buildMesh(contourPoints, count, errorStr) || mesh->size() == 0)
+	{
+		//triangulation failed
+		delete mesh;
+		return nullptr;
+	}
+
+	if (!mesh->removeOuterTriangles(contourPoints, contourPoints, true) || mesh->size() == 0)
+	{
+		//an error occurred
+		delete mesh;
+		return nullptr;
+	}
+
+	return mesh;
+}
+
+Delaunay2dMesh* Delaunay2dMesh::TesselateContour(GenericIndexedCloudPersist* contourPoints, int flatDimension/*=-1*/)
+{
+	if (!contourPoints)
+	{
+		assert(false);
+		return nullptr;
+	}
+	
+	unsigned count = contourPoints->size();
+	if (count < 3)
+	{
+		//Not enough input points
+		return nullptr;
+	}
+
+	std::vector<CCVector2> contourPoints2D;
+	try
+	{
+		contourPoints2D.reserve(count);
+	}
+	catch (const std::bad_alloc&)
+	{
+		//Not enough memory
+		return nullptr;
+	}
+
+	if (flatDimension >= 0 && flatDimension <= 2) //X, Y or Z
+	{
+		const unsigned char Z = static_cast<unsigned char>(flatDimension);
+		const unsigned char X = (Z == 2 ? 0 : Z + 1);
+		const unsigned char Y = (X == 2 ? 0 : X + 1);
+		for (unsigned i = 0; i < contourPoints->size(); ++i)
+		{
+			const CCVector3* P = contourPoints->getPoint(i);
+			contourPoints2D.push_back(CCVector2(P->u[X], P->u[Y]));
+		}
+	}
+	else
+	{
+		assert(flatDimension < 0);
+		Neighbourhood Yk(contourPoints);
+		if (!Yk.projectPointsOn2DPlane<CCVector2>(contourPoints2D))
+		{
+			//something bad happened
+			return nullptr;
+		}
+	}
+
+	CCLib::Delaunay2dMesh* dMesh = CCLib::Delaunay2dMesh::TesselateContour(contourPoints2D);
+	return dMesh;
 }

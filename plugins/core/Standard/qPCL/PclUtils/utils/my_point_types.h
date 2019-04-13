@@ -59,9 +59,37 @@ struct FloatScalar
 
 } EIGEN_ALIGN16;
 
+struct DoubleScalar
+{
+	double S5c4laR;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+} EIGEN_ALIGN16;
+
 struct IntScalar
 {
 	int S5c4laR;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+} EIGEN_ALIGN16;
+
+struct UIntScalar
+{
+	unsigned S5c4laR;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+} EIGEN_ALIGN16;
+
+struct ShortScalar
+{
+	short S5c4laR;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+} EIGEN_ALIGN16;
+
+struct UShortScalar
+{
+	short S5c4laR;
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 } EIGEN_ALIGN16;
@@ -160,8 +188,24 @@ POINT_CLOUD_REGISTER_POINT_STRUCT (FloatScalar,
 	(float, S5c4laR, S5c4laR)
 	)
 
+POINT_CLOUD_REGISTER_POINT_STRUCT (DoubleScalar,
+	(double, S5c4laR, S5c4laR)
+	)
+
 POINT_CLOUD_REGISTER_POINT_STRUCT (IntScalar,
 	(int, S5c4laR, S5c4laR)
+	)
+
+POINT_CLOUD_REGISTER_POINT_STRUCT (UIntScalar,
+	(unsigned int, S5c4laR, S5c4laR)
+	)
+
+POINT_CLOUD_REGISTER_POINT_STRUCT (ShortScalar,
+	(short, S5c4laR, S5c4laR)
+	)
+
+POINT_CLOUD_REGISTER_POINT_STRUCT (UShortScalar,
+	(unsigned short, S5c4laR, S5c4laR)
 	)
 
 POINT_CLOUD_REGISTER_POINT_STRUCT (OnlyNormals,

@@ -127,9 +127,18 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 
 	if (m_cloud)
 	{
-		m_UI->cloudNameLabel->setText( QStringLiteral( "<b>%1</b> (%2 points)").arg( m_cloud->getName(), QLocale::system().toString( m_cloud->size() ) ) );
-		m_UI->interpolateSFCheckBox->setEnabled(cloud->hasScalarFields());
-		m_UI->scalarFieldProjection->setEnabled(cloud->hasScalarFields());
+		m_UI->cloudNameLabel->setText(QStringLiteral("<b>%1</b> (%2 points)").arg(m_cloud->getName(), QLocale::system().toString(m_cloud->size())));
+		if (m_cloud->hasScalarFields())
+		{
+			m_UI->interpolateSFCheckBox->setEnabled(true);
+			m_UI->scalarFieldProjection->setEnabled(true);
+		}
+		else
+		{
+			m_UI->interpolateSFCheckBox->setChecked(false);
+			m_UI->interpolateSFCheckBox->setEnabled(false);
+			m_UI->scalarFieldProjection->setEnabled(false);
+		}
 
 		//populate layer box
 		m_UI->activeLayerComboBox->addItem(ccRasterGrid::GetDefaultFieldName(ccRasterGrid::PER_CELL_HEIGHT), QVariant(LAYER_HEIGHT));
@@ -272,9 +281,9 @@ void ccRasterizeTool::projectionDirChanged(int dir)
 
 void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*/)
 {
-	if (layerIndex != 0) //0 is always the cell height
+	if (m_UI->activeLayerComboBox->itemData(layerIndex).toInt() == LAYER_SF && m_UI->activeLayerComboBox->itemText(layerIndex) != HILLSHADE_FIELD_NAME)
 	{
-		m_UI->interpolateSFCheckBox->setChecked(true);
+		m_UI->interpolateSFCheckBox->setChecked(true); //force the choice of a SF projection strategy
 		m_UI->interpolateSFCheckBox->setEnabled(false);
 		m_UI->generateImagePushButton->setEnabled(false);
 		m_UI->generateASCIIPushButton->setEnabled(false);
@@ -282,8 +291,9 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 	}
 	else
 	{
+		//m_UI->interpolateSFCheckBox->setChecked(false); //DGM: we can't force that, just let the user decide
+		m_UI->interpolateSFCheckBox->setEnabled(m_cloud && m_cloud->hasScalarFields()); //we need SF fields!
 		m_UI->generateImagePushButton->setEnabled(true);
-		m_UI->interpolateSFCheckBox->setEnabled(true);
 		m_UI->generateASCIIPushButton->setEnabled(true);
 		m_UI->projectContoursOnAltCheckBox->setEnabled(false);
 	}
@@ -328,7 +338,7 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 			}
 			else
 			{
-				m_UI->gridLayerRangeLabel->setText("invalid layer?!");
+				m_UI->gridLayerRangeLabel->setText("Layer not computed");
 				gridIsUpToDate(false);
 			}
 		}
@@ -382,8 +392,10 @@ ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfProjection() const
 
 ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfSFInterpolation() const
 {
-	if (!m_UI->interpolateSFCheckBox->isEnabled() || !m_UI->interpolateSFCheckBox->isChecked())
+	if (/*!m_UI->interpolateSFCheckBox->isEnabled() || */!m_UI->interpolateSFCheckBox->isChecked()) //DGM: the check-box might be disabled to actually 'force' the user to choose a projection type
+	{
 		return ccRasterGrid::INVALID_PROJECTION_TYPE; //means that we don't want to keep SF values
+	}
 
 	switch (m_UI->scalarFieldProjection->currentIndex())
 	{
@@ -638,7 +650,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 			//but we may also have to compute the 'original SF(s)' layer(s)
 			QString activeLayerName = m_UI->activeLayerComboBox->currentText();
 			m_rasterCloud = convertGridToCloud(	exportedFields,
-												/*interpolateSF=*/activeLayerIsSF,
+												/*interpolateSF=*/interpolateSF,
 												/*interpolateColors=*/activeLayerIsRGB,
 												/*copyHillshadeSF=*/false,
 												activeLayerName,
@@ -1916,9 +1928,6 @@ void ccRasterizeTool::generateContours()
 		QApplication::processEvents();
 		CCLib::NormalizedProgress nProgress(&pDlg, levelCount);
 
-		int lineWidth = m_UI->contourWidthSpinBox->value();
-		bool colorize = m_UI->colorizeContoursCheckBox->isChecked();
-
 		double v = startValue;
 		while (v <= activeLayer->getMax() && !memoryError)
 		{
@@ -1998,13 +2007,13 @@ void ccRasterizeTool::generateContours()
 							else
 							{
 								delete poly;
-								poly = 0;
+								poly = nullptr;
 							}
 						}
 						else
 						{
 							delete poly;
-							poly = 0;
+							poly = nullptr;
 							ccLog::Error("Not enough memory!");
 							memoryError = true; //early stop
 							break;

@@ -56,7 +56,7 @@ public:
 	~ccCompass() override;
 
 	//inherited from ccPluginInterface
-	void stop() override { stopMeasuring(true); m_dlg = nullptr; ccStdPluginInterface::stop(); } //called when the plugin is being stopped
+	void stop() override;
 
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;

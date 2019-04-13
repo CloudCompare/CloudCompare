@@ -1570,12 +1570,12 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			QOpenGLTexture texture(m_image);
 			texture.bind();
 			{
-				glFunc->glColor4f(1, 1, 1, 0.9);
+				glFunc->glColor4f(1.0f, 1.0f, 1.0f, 0.9f);
 				glFunc->glBegin(GL_QUADS);
-				glFunc->glTexCoord2f(1, 0); glFunc->glVertex3f(upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);
-				glFunc->glTexCoord2f(0, 0); glFunc->glVertex3f(-upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);
-				glFunc->glTexCoord2f(0, 1); glFunc->glVertex3f(-upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-				glFunc->glTexCoord2f(1, 1); glFunc->glVertex3f(upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+				glFunc->glTexCoord2f(1.0f, 0.0f); glFunc->glVertex3f(upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);
+				glFunc->glTexCoord2f(0.0f, 0.0f); glFunc->glVertex3f(-upperLeftPoint.x, upperLeftPoint.y, -upperLeftPoint.z);
+				glFunc->glTexCoord2f(0.0f, 1.0f); glFunc->glVertex3f(-upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+				glFunc->glTexCoord2f(1.0f, 1.0f); glFunc->glVertex3f(upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
 				glFunc->glEnd();
 			}
 			texture.release();

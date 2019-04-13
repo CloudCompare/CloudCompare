@@ -99,8 +99,8 @@ bool ccImage::loadWithWidthHeight(const QString & filename, int width, int heigh
 // 		return m_image;
 // 	}
 // }
-
-inline const QImage & ccImage::data() const
+QImage ccImage::data() const
+//inline const QImage & ccImage::data() const
 {
 	if (m_image.isNull()) {
 		QImageReader reader(m_file_name);

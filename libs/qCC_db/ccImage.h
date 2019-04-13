@@ -55,7 +55,8 @@ public:
 	//! Returns image data
 	//inline QImage& data();
 	//! Returns image data (const version)
-	inline const QImage& data() const;
+	//inline const QImage& data() const;
+	QImage ccImage::data() const;
 
 	//! Sets image data
 	void setData(const QImage& image, bool fake = false);

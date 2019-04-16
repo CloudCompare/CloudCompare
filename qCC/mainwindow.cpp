@@ -10898,6 +10898,8 @@ void MainWindow::doActionBDProjectLoad()
 	if (!bd_grp) {
 		bd_grp = new BDBaseHObject(prj_name);		
 		for (auto & bd : block_prj.m_builder.sbuild) {
+			if (bd->data.convex_hull_xy.empty()) { continue; }
+
 			QString building_name = bd->GetName().Str().c_str();
 			QFileInfo point_path(bd->data.file_path.ori_points.c_str());
 			ccHObject* newGroup = FileIOFilter::LoadFromFile(point_path.absoluteFilePath(), parameters, result, QString());

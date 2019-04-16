@@ -99,13 +99,24 @@ namespace ccEntityAction
 	// Colours
 	bool setColor(ccHObject::Container selectedEntities, bool colorize, QWidget *parent)
 	{
-		QColor colour = QColorDialog::getColor(Qt::white, parent);
-		
-		if (!colour.isValid())
-			return false;
-		
+		ccColor::Rgb col;
+		bool random = false;
+		if (colorize) {
+			random = QMessageBox::question(parent, "random?", "randomly set color?",
+				QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes;
+		}
+		if (!random) {
+			QColor colour = QColorDialog::getColor(Qt::white, parent);
+			if (!colour.isValid())
+				return false;
+			col = ccColor::FromQColor(colour);
+		}
+
 		while (!selectedEntities.empty())
 		{
+			if (random) {
+				col = ccColor::Generator::Random();
+			}
 			ccHObject* ent = selectedEntities.back();
 			selectedEntities.pop_back();
 			if (ent->isA(CC_TYPES::HIERARCHY_OBJECT))
@@ -136,15 +147,13 @@ namespace ccEntityAction
 					cloud = static_cast<ccPointCloud*>(vertices);
 				}
 				
-				if (colorize)
+				if (colorize && !random)
 				{
-					cloud->colorize(static_cast<float>(colour.redF()),
-									static_cast<float>(colour.greenF()),
-									static_cast<float>(colour.blueF()) );
+					cloud->colorize(col.r / ccColor::MAX, col.g / ccColor::MAX, col.b / ccColor::MAX);
 				}
 				else
 				{
-					cloud->setRGBColor(	ccColor::FromQColor(colour) );
+					cloud->setRGBColor(col);
 				}
 				cloud->showColors(true);
 				cloud->showSF(false); //just in case
@@ -163,9 +172,7 @@ namespace ccEntityAction
 			else if (ent->isKindOf(CC_TYPES::PRIMITIVE))
 			{
 				ccGenericPrimitive* prim = ccHObjectCaster::ToPrimitive(ent);
-				ccColor::Rgb col(	static_cast<ColorCompType>(colour.red()),
-									static_cast<ColorCompType>(colour.green()),
-									static_cast<ColorCompType>(colour.blue()) );
+				
 				prim->setColor(col);
 				ent->showColors(true);
 				ent->showSF(false); //just in case
@@ -174,7 +181,7 @@ namespace ccEntityAction
 			else if (ent->isA(CC_TYPES::POLY_LINE))
 			{
 				ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
-				poly->setColor(ccColor::FromQColor(colour));
+				poly->setColor(col);
 				ent->showColors(true);
 				ent->showSF(false); //just in case
 				ent->prepareDisplayForRefresh();
@@ -182,7 +189,7 @@ namespace ccEntityAction
 			else if (ent->isA(CC_TYPES::FACET))
 			{
 				ccFacet* facet = ccHObjectCaster::ToFacet(ent);
-				facet->setColor(ccColor::FromQColor(colour));
+				facet->setColor(col);
 				ent->showColors(true);
 				ent->showSF(false); //just in case
 				ent->prepareDisplayForRefresh();

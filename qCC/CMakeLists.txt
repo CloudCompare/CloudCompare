@@ -218,6 +218,8 @@ if(OPTION_USE_STOCKER)
 
 		target_link_libraries(${PROJECT_NAME} debug ${STOCKER_LIB_DEBUG} optimized ${STOCKER_LIB_RELEASE})
 	endforeach()
+	include( ../cmake/LASLibSupport.cmake )
+	target_link_LASLib( ${PROJECT_NAME} )
 	
 	target_include_directories(${PROJECT_NAME} 
 		PUBLIC	${STOCKER_INCLUDE_DIR}/modules/internal 

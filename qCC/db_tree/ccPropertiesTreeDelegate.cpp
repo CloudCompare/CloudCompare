@@ -1930,7 +1930,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	{
 		if (m_currentObject->isA(CC_TYPES::ST_PRIMITIVE)) {
 			ccHObject::Container plane_children;
-			m_currentObject->filterChildren(plane_children, true, CC_TYPES::PLANE, true, m_currentObject->getDisplay());
+			m_currentObject->filterChildren(plane_children, true, CC_TYPES::MESH, false, m_currentObject->getDisplay());
 			if (plane_children.empty()) return;
 			for (auto pl : plane_children) {
 				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(pl);

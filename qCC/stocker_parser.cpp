@@ -1473,7 +1473,12 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 			//! convex_hull, 
 			PlaneUnit plane_unit = *plane_data[plane_entity];
 			stocker::Polyline2d plane_ch = plane_convexhull[plane_entity];
-			ccPolyline* contour_entity = facet->getContour(); vector<CCVector3>ccv_poly = contour_entity->getPoints(true);
+			ccPolyline* contour_entity = facet->getContour(); 
+			if (!contour_entity) {
+				facet->setDistance(-1);
+				break;
+			}
+			vector<CCVector3>ccv_poly = contour_entity->getPoints(true);
 			Contour3d facet_contour_temp; for (auto & pt : ccv_poly) { facet_contour_temp.push_back(parse_xyz(pt)); }
 			stocker::Polyline2d facet_contour = MakeLoopPolylinefromContour(Point3dToPlpoint2d(plane_unit, facet_contour_temp));
 			//! check overlap

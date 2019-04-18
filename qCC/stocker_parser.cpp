@@ -399,8 +399,16 @@ StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name, bool check_en
 	}
 	return nullptr;
 }
-ccHObject * BDBaseHObject::GetHypothesisGroup(QString building_name, bool check_enable) {
-	return GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_POLYFITHYPO_SUFFIX, building_name, check_enable);
+StPrimGroup * BDBaseHObject::GetHypothesisGroup(QString building_name, bool check_enable) {
+	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMITIVE, BDDB_POLYFITHYPO_SUFFIX, building_name, check_enable);
+	if (obj) return static_cast<StPrimGroup*>(obj);
+	StPrimGroup* group = new StPrimGroup(building_name + BDDB_POLYFITHYPO_SUFFIX);
+	if (group) {
+		ccHObject* bd = GetBuildingGroup(building_name, false);
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		else { delete group; group = nullptr; }
+	}
+	return nullptr;
 }
 ccHObject * BDBaseHObject::GetCameraGroup()
 {
@@ -1306,7 +1314,6 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 	if (!polyfit_obj->hypothesis_mesh_) {
 		throw std::runtime_error("cannot generate hypothesis mesh");
 	}
-	ccHObject* hypoObj = new ccHObject(GetBaseName(primitive_group->getName()) + BDDB_POLYFITHYPO_SUFFIX);
 
 //	bd00000000.hypothesis
 //	-Plane0						point cloud
@@ -1315,13 +1322,18 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 //	  ---compressed normals		(Plane accessory)
 //	  ---Facet0					Facet
 //	   ----Contour points		(Facet accessory)
-	
+
+	StPrimGroup* hypoObj;
 	BDBaseHObject* baseObj = GetRootBDBase(primitive_group);
 	CCVector3d global_shift(0, 0, 0);
 	double global_scale(0);
 	if (baseObj) {
 		global_shift = CCVector3d(vcgXYZ(baseObj->global_shift));
 		global_scale = baseObj->global_scale;
+		hypoObj = baseObj->GetHypothesisGroup(GetBaseName(primitive_group->getName()), false);
+	}
+	else {
+		hypoObj = new StPrimGroup(GetBaseName(primitive_group->getName()) + BDDB_POLYFITHYPO_SUFFIX);
 	}
 	PointSet* pset = polyfit_obj->hypothesis_->point_set();
 	std::vector<vec3>& points = pset->points();
@@ -1400,7 +1412,9 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 	}
 	hypoObj->setDisplay_recursive(primitive_group->getDisplay());
 	if (primitive_group->getParent()) {
-		primitive_group->getParent()->addChild(hypoObj);
+		if (!hypoObj->getParent()) {
+			primitive_group->getParent()->addChild(hypoObj);
+		}
 		primitive_group->setEnabled(false);
 	}
 	return hypoObj;

@@ -150,7 +150,7 @@ public:
 	ccPointCloud* GetOriginPointCloud(QString building_name, bool check_enable);
 	StPrimGroup* GetPrimitiveGroup(QString building_name, bool check_enable);
 	StBlockGroup * GetBlockGroup(QString building_name, bool check_enable);
-	ccHObject * GetHypothesisGroup(QString building_name, bool check_enable);
+	StPrimGroup * GetHypothesisGroup(QString building_name, bool check_enable);
 	ccHObject* GetCameraGroup();
 	ccHObject* GetTodoGroup(QString building_name, bool check_enable);
 	ccPointCloud* GetTodoPoint(QString buildig_name, bool check_enable);

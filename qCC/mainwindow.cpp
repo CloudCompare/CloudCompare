@@ -11798,7 +11798,12 @@ void MainWindow::doActionBDPrimCreateGround()
 		if (baseObj) {
 			stocker::BuildUnit bd_unit = baseObj->GetBuildingUnit(GetBaseName(primGroup->getName()).toStdString());
 			ground_height = bd_unit.ground_height;
-			ground_convex = stocker::MakeLoopPolylinefromContour(bd_unit.convex_hull_xy);
+			stocker::Contour2d c_h_local;
+			for (auto & pt : bd_unit.convex_hull_xy) {
+				c_h_local.push_back(ToVec2d(baseObj->ToLocal(ToVec3d(pt))));
+			}
+			ground_convex = stocker::MakeLoopPolylinefromContour(c_h_local);
+			
 		}
 		else {
 			stocker::Contour3d planes_points = GetPointsFromCloud(primGroup);

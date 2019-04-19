@@ -1387,6 +1387,7 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 
 	MapFacetAttribute<VertexGroup*> facet_attrib_supporting_vertex_group_(polyfit_obj->hypothesis_mesh_, Method::Get_facet_attrib_supporting_vertex_group());
 	
+	int facet_count = 0;
 	FOR_EACH_FACET(Map, polyfit_obj->hypothesis_mesh_, it) {
 		Map::Facet* f = it;
 
@@ -1435,7 +1436,9 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 			ccLog::Warning(error_info.c_str());
 		}
 		plane_entity->addChild(facet_entity);
+		facet_count++;
 	}
+	std::cout << facet_count << " facets generated!" << std::endl;
 	hypoObj->setDisplay_recursive(primitive_group->getDisplay());
 	if (primitive_group->getParent()) {
 		if (!hypoObj->getParent()) {

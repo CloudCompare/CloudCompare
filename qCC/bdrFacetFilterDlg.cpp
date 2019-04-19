@@ -68,7 +68,6 @@ void bdrFacetFilterDlg::initWith(ccGLWindow* win, ccHObject::Container _facet)
  		return;
  
  	if (m_win) {
- 		delete m_win;
  		m_win = nullptr;
  	}
  	m_win = win;
@@ -141,7 +140,7 @@ void bdrFacetFilterDlg::Clear()
 // 		m_win = nullptr;
 // 	}
 	m_facetObjs.clear();
-//	m_initialstate.clear();
+	m_initialstate.clear();
 }
 
 void bdrFacetFilterDlg::ReflectThresholdChange(/*FILTER_TYPE type, double val*/)

@@ -114,20 +114,20 @@ void bdrFacetFilterDlg::initWith(ccGLWindow* win, ccHObject::Container _facet)
 	m_val_dist = max_dist;
 	m_val_conf = min_conf;
 
-	BDRFacetFilterDistSpinBox->setMinimum(all_dist.front());
-	BDRFacetFilterDistSpinBox->setMaximum(all_dist.back());
+	BDRFacetFilterDistSpinBox->setMinimum(all_dist.front() - 0.1);
+	BDRFacetFilterDistSpinBox->setMaximum(all_dist.back() + 0.1);
 	BDRFacetFilterDistSpinBox->setValue(all_dist.back());
 
-	BDRFacetFilterDistSlider->setMinimum(all_dist.front());
-	BDRFacetFilterDistSlider->setMaximum(all_dist.back());
+	BDRFacetFilterDistSlider->setMinimum(all_dist.front() - 0.1);
+	BDRFacetFilterDistSlider->setMaximum(all_dist.back() + 0.1);
 	BDRFacetFilterDistSlider->setValue(all_dist.back());
 
-	BDRFacetFilterConfSpinBox->setMinimum(all_conf.front());
-	BDRFacetFilterConfSpinBox->setMaximum(all_conf.back());
+	BDRFacetFilterConfSpinBox->setMinimum(all_conf.front() - 0.1);
+	BDRFacetFilterConfSpinBox->setMaximum(all_conf.back() + 0.1);
 	BDRFacetFilterConfSpinBox->setValue(all_conf.front());
 
-	BDRFacetFilterConfSlider->setMinimum(all_conf.front());
-	BDRFacetFilterConfSlider->setMaximum(all_conf.back());
+	BDRFacetFilterConfSlider->setMinimum(all_conf.front() - 0.1);
+	BDRFacetFilterConfSlider->setMaximum(all_conf.back() + 0.1);
 	BDRFacetFilterConfSlider->setValue(all_conf.front());
 }
 
@@ -135,12 +135,9 @@ void bdrFacetFilterDlg::Clear()
 {
 	m_distance_histo.clear();
 	m_confidence_histo.clear();
-// 	if (m_win) {
-// 		delete m_win;
-// 		m_win = nullptr;
-// 	}
 	m_facetObjs.clear();
 	m_initialstate.clear();
+	m_oldstate.clear();
 }
 
 void bdrFacetFilterDlg::ReflectThresholdChange(/*FILTER_TYPE type, double val*/)

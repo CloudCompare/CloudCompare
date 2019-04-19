@@ -228,10 +228,6 @@ void bdrFacetFilterDlg::dConfThresholdChanged(double val) {
 
 void bdrFacetFilterDlg::CheckModel()
 {
-// 	for (ccHObject* facetObj : m_facetObjs) {
-// 		facetObj->setEnabled(false);
-// 		facetObj->prepareDisplayForRefresh();
-// 	}
 	typedef stocker::PolyMesh PMesh;
 	typedef stocker::PMeshAL PMeshAL;
 	PMesh pmesh;
@@ -249,51 +245,45 @@ void bdrFacetFilterDlg::CheckModel()
 
 		PMesh::VertexIterator vi = PMeshAL::AddVertices(pmesh, contour_points.size());
 		PMesh::FaceIterator fi = PMeshAL::AddFaces(pmesh, 1);
+		(*fi).Alloc(contour_points.size());
 		for (size_t _p = 0; _p < contour_points.size(); _p++) {
-			vi->P() = stocker::parse_xyz(contour_points[_p]); /*vi->Q() = confidences[i];*/ ++vi;
+			vi->P() = stocker::parse_xyz(contour_points[_p]); 
 			fi->V(_p) = &(*vi);
+			++vi;
 		}
-		fi->Q() = static_cast<double>(i);/*confidences[i];*/
+		fi->Q() = static_cast<double>(i);	//! trick: set the global index of facets as quality
 		used_index.push_back(i);
 	}
 	
-	vcg::tri::Clean<PMesh>::MergeCloseVertex(pmesh, 0.000000001);
+	vcg::tri::Clean<PMesh>::MergeCloseVertex(pmesh, 0.000000001);	
 
-	do 
-	{
+	do {
 		vcg::tri::UpdateFlags<PMesh>::FaceBorderFromNone(pmesh);
-		vcg::tri::UpdateFlags<PMesh>::VertexBorderFromFaceBorder(pmesh);
-		vcg::tri::UpdateSelection<PMesh>::FaceFromBorderFlag(pmesh);
-		vcg::tri::UpdateSelection<PMesh>::VertexFromBorderFlag(pmesh);
 
-		size_t select_face = vcg::tri::UpdateSelection<PMesh>::FaceCount(pmesh);
-		size_t select_vertex = vcg::tri::UpdateSelection<PMesh>::VertexCount(pmesh);
-
-		if (select_face == 0) { break; }
-		vcg::tri::UpdateSelection<PMesh>::VertexClear(pmesh);
-		vcg::tri::UpdateSelection<PMesh>::VertexFromFaceStrict(pmesh);
-		int vvn = pmesh.vn;
+		size_t del_face = 0;
 		int ffn = pmesh.fn;
-		PMesh::FaceIterator fi;
-		PMesh::VertexIterator vi;
-		for (fi = pmesh.face.begin(); fi != pmesh.face.end(); ++fi)
-			if (!(*fi).IsD() && (*fi).IsS())
+		for (auto fi = pmesh.face.begin(); fi != pmesh.face.end(); ++fi) if (!(*fi).IsD()) 
+		{
+			bool bordFlag = false;
+			for (int i = 0; i < (*fi).VN(); ++i)
+				if ((*fi).IsB(i)) { bordFlag = true; break; }
+			if (bordFlag) {
 				vcg::tri::Allocator<PMesh>::DeleteFace(pmesh, *fi);
-		for (vi = pmesh.vert.begin(); vi != pmesh.vert.end(); ++vi)
-			if (!(*vi).IsD() && (*vi).IsS())
-				vcg::tri::Allocator<PMesh>::DeleteVertex(pmesh, *vi);
+				++del_face;
+			}
+		}
 
-		vcg::tri::UpdateTopology<PMesh>::FaceFace(pmesh);
-		vcg::tri::UpdateFlags<PMesh>::Clear(pmesh);
-		//	Log("Deleted %i faces, %i vertices.", ffn - m.cm.fn, vvn - m.cm.vn);
+		if (del_face == 0) { break; }		
+		assert(del_face == ffn - pmesh.fn);
+		std::cout << "Deleted " << del_face << " faces " << std::endl;
 	} while (1);
-		
+	
 	for (size_t i = 0; i < used_index.size(); i++) {
-		ccHObject* facetEnt = m_facetObjs[i];
+		ccHObject* facetEnt = m_facetObjs[used_index[i]];
 		ccFacet* facetObj = ccHObjectCaster::ToFacet(facetEnt);
 		assert(facetObj);
-
-		if (!pmesh.face[i].IsD()) {
+		assert(used_index[i] == (int)pmesh.face[i].Q());
+		if (pmesh.face[i].IsD()) {
 			facetObj->setEnabled(false);
 			facetObj->prepareDisplayForRefresh_recursive();
 		}

@@ -160,6 +160,80 @@ class CC_CORE_LIB_API Neighbourhood
 			return true;
 		}
 
+		template<class Vec2D, class Vec3D> bool projectPointsOn2DPlane(std::vector<Vec2D>& points2D,
+			std::vector<Vec3D>& points3D,
+			const PointCoordinateType* planeEquation = nullptr,
+			CCVector3* O = nullptr,
+			CCVector3* X = nullptr,
+			CCVector3* Y = nullptr,
+			bool useOXYasBase = false)
+		{
+			//need at least one point ;)
+			unsigned count = points3D.size();
+			if (!count)
+				return false;
+
+			//if no custom plane equation is provided, get the default best LS one
+			if (!planeEquation)
+			{
+				planeEquation = getLSPlane();
+				if (!planeEquation)
+					return false;
+			}
+
+			//reserve memory for output set
+			try
+			{
+				points2D.resize(count);
+			}
+			catch (const std::bad_alloc&)
+			{
+				//out of memory
+				return false;
+			}
+
+			//we construct the plane local base
+			CCVector3 G(0, 0, 0), u(1, 0, 0), v(0, 1, 0);
+			if (useOXYasBase && O && X && Y)
+			{
+				G = *O;
+				u = *X;
+				v = *Y;
+			}
+			else
+			{
+				CCVector3 N(planeEquation);
+				CCMiscTools::ComputeBaseVectors(N, u, v);
+				//get the barycenter
+				const CCVector3* _G = getGravityCenter();
+				assert(_G);
+				G = *_G;
+			}
+
+			//project the points
+			for (unsigned i = 0; i < count; ++i)
+			{
+				//we recenter current point
+				const CCVector3 P = CCVector3(points3D[i].x, points3D[i].y, points3D[i].z) - G;
+				
+				//then we project it on plane (with scalar prods)
+				points2D[i] = Vec2D(P.dot(u), P.dot(v));
+			}
+
+			//output the local base if necessary
+			if (!useOXYasBase)
+			{
+				if (O)
+					*O = G;
+				if (X)
+					*X = u;
+				if (Y)
+					*Y = v;
+			}
+
+			return true;
+		}
+
 		bool projectIndexedPointsOn2DPlane(std::vector<CCLib::PointProjectionTools::IndexedCCVector2>& points2D,
 			const PointCoordinateType* planeEquation = nullptr,
 			CCVector3* O = nullptr,

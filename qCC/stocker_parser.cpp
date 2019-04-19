@@ -668,16 +668,25 @@ void AddSegmentsToVertices(ccPointCloud* cloud, stocker::Polyline3d lines, QStri
 	}
 }
 
-ccPointCloud* AddPointsAsPlane(stocker::Contour3d points, QString name, ccColor::Rgb col)
-{	
-	ccPointCloud* plane_cloud = new ccPointCloud(name);
+ccPointCloud* AddPointsAsPointCloud(stocker::Contour3d points, QString name, ccColor::Rgb col= ccColor::white)
+{
+	if (points.empty()) { return nullptr; }
+	ccPointCloud* cloud = new ccPointCloud(name);
 
 	//! get plane points
 	for (auto & pt : points) {
-		plane_cloud->addPoint(CCVector3(vcgXYZ(pt)));
+		cloud->addPoint(CCVector3(vcgXYZ(pt)));
 	}
-	plane_cloud->setRGBColor(col);
-	plane_cloud->showColors(true);
+	cloud->setRGBColor(col);
+	cloud->showColors(true);
+	return cloud;
+}
+
+ccPointCloud* AddPointsAsPlane(stocker::Contour3d points, QString name, ccColor::Rgb col)
+{	
+	ccPointCloud* plane_cloud = AddPointsAsPointCloud(points, name, col);
+	if (!plane_cloud)return nullptr;
+
 
 	//! add plane
 	ccPlane* plane = FitPlaneAndAddChild(plane_cloud);	
@@ -1403,8 +1412,25 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 		if (contour_entity) {
 			contour_entity->setGlobalShift(global_shift);
 			contour_entity->setGlobalScale(global_scale);
+
+			//! get the distance
+			{
+				CCLib::Neighbourhood YK(facet_entity->getContourVertices());
+				Contour2d contour_points_2d;
+				CCVector3 O, X, Y;
+				YK.projectPointsOn2DPlane<Vec2d>(contour_points_2d, plane_equation, &O, &X, &Y, false);
+				stocker::Polyline2d facet_contour = MakeLoopPolylinefromContour(contour_points_2d);
+
+				Contour2d contour_points_2d_plane;
+				YK.projectPointsOn2DPlane<Vec2d, CCVector3>(contour_points_2d_plane, cc_plane->getProfile(), plane_equation, &O, &X, &Y, false);
+				stocker::Polyline2d plane_contour = MakeLoopPolylinefromContour(contour_points_2d_plane);
+
+				double distance = DistancePolygonPolygon(facet_contour, plane_contour);
+				facet_entity->setDistance(distance);
+			}
 		}
 		else {
+			facet_entity->setDistance(-1);
 			std::string error_info = "error contour: plane-" + support_plane_name + " facet-" + f->label();
 			ccLog::Warning(error_info.c_str());
 		}
@@ -1420,6 +1446,23 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 	return hypoObj;
 }
 
+vector<String_String> CollectValidFacet(ccHObject::Container planeObjs)
+{
+	vector<String_String> valid_facet;
+	for (auto & planeObj : planeObjs) {
+		ccHObject::Container facets_;
+		planeObj->filterChildren(facets_, false, CC_TYPES::FACET, true);
+
+		for (auto & f : facets_) {
+			if (f->isEnabled()) {
+				valid_facet.push_back({ planeObj->getName().toStdString(), f->getName().toStdString() });
+			}
+		}
+	}
+
+	return valid_facet;
+}
+
 void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj)
 {
 	if (polyfit_obj->building_name != GetBaseName(hypothesis_group->getName()).toStdString() || polyfit_obj->status < PolyFitObj::STT_hypomesh) {
@@ -1427,6 +1470,9 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 		return;
 	}
 	ccHObject::Container planeObjs = GetEnabledObjFromGroup(hypothesis_group, CC_TYPES::PLANE, true, true);
+
+	vector<String_String> name_group_facet = CollectValidFacet(planeObjs);
+	polyfit_obj->UpdateValidFacet(name_group_facet);
 	polyfit_obj->ComputeConfidence();
 
 	MapFacetAttribute<VertexGroup*> facet_attrib_supporting_vertex_group_(polyfit_obj->hypothesis_mesh_, Method::Get_facet_attrib_supporting_vertex_group());
@@ -1484,10 +1530,11 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 			
 			all_conf.push_back(confidence);
 
+#if 0
 			//! convex_hull, 
 			PlaneUnit plane_unit = *plane_data[plane_entity];
 			stocker::Polyline2d plane_ch = plane_convexhull[plane_entity];
-			ccPolyline* contour_entity = facet->getContour(); 
+			ccPolyline* contour_entity = facet->getContour();
 			if (!contour_entity) {
 				facet->setDistance(-1);
 				break;
@@ -1503,6 +1550,7 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 					facet->setEnabled(false);
 				}
 			}
+#endif
 
 			break;
 		}		
@@ -1527,23 +1575,6 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 	}
 
 	hypothesis_group->prepareDisplayForRefresh_recursive();
-}
-
-vector<String_String> CollectValidFacet(ccHObject::Container planeObjs)
-{
-	vector<String_String> valid_facet;
-	for (auto & planeObj : planeObjs) {
-		ccHObject::Container facets_;
-		planeObj->filterChildren(facets_, false, CC_TYPES::FACET, true);
-
-		for (auto & f : facets_) {
-			if (f->isEnabled()) {
-				valid_facet.push_back({ planeObj->getName().toStdString(), f->getName().toStdString() });
-			}
-		}
-	}
-
-	return valid_facet;
 }
 
 void UpdateConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj)
@@ -1647,7 +1678,7 @@ void PolyFitObj::ComputeConfidence()
 	Method::UpdateGlobalDataFitting(data_fitting);
 	Method::UpdateGlobalModelCoverage(model_coverage);
 	Method::UpdateGlobalModelComplexity(model_complexity);
-	hypothesis_->compute_confidences(hypothesis_mesh_, use_confidence);
+	hypothesis_->compute_confidences_cc(hypothesis_mesh_, valid_group_facet_name, use_confidence);
 }
 
 void PolyFitObj::FacetOptimization()

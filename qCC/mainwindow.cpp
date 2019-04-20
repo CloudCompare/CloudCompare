@@ -12492,13 +12492,13 @@ void MainWindow::doActionBDPolyFitSelection()
 				QString model_file(file_path.c_str());
 
 				CCVector3d loadCoordinatesShift(vcgXYZ(baseObj->global_shift));
-				bool loadCoordinatesTransEnabled = false;
+				bool loadCoordinatesTransEnabled = true;
 				FileIOFilter::LoadParameters parameters;
 				{
 					parameters.alwaysDisplayLoadDialog = false;
 					parameters.coordinatesShift = &loadCoordinatesShift;
 					parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
-					parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+					parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
 					parameters.parentWidget = this;
 				}
 				CC_FILE_ERROR result = CC_FERR_NO_ERROR;

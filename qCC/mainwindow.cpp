@@ -12491,11 +12491,13 @@ void MainWindow::doActionBDPolyFitSelection()
 			if (polyfit_obj->OutputResultToObjFile(baseObj, file_path)) {
 				QString model_file(file_path.c_str());
 
-				CCVector3d loadCoordinatesShift(0, 0, 0);
+				CCVector3d loadCoordinatesShift(vcgXYZ(baseObj->global_shift));
 				bool loadCoordinatesTransEnabled = false;
 				FileIOFilter::LoadParameters parameters;
 				{
 					parameters.alwaysDisplayLoadDialog = false;
+					parameters.coordinatesShift = &loadCoordinatesShift;
+					parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
 					parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
 					parameters.parentWidget = this;
 				}
@@ -12503,10 +12505,13 @@ void MainWindow::doActionBDPolyFitSelection()
 
 				if (QFileInfo(model_file).exists()) {
 					ccHObject* model = FileIOFilter::LoadFromFile(model_file, parameters, result, QString());
+					if (!model)	{
+						return;
+					}
 					model->setDisplay_recursive(HypoObj->getDisplay());
 					HypoObj->getParent()->addChild(model);
 					HypoObj->setEnabled(false);
-					SetGlobalShiftAndScale(model);
+					//SetGlobalShiftAndScale(model);
 					addToDB(model);
 				}
 			}

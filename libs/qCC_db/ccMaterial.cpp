@@ -24,7 +24,6 @@
 //Qt
 #include <QFileSystemWatcher>
 #include <QFileInfo>
-#include <QOpenGLTexture>
 #include <QUuid>
 
 class ccMaterialDB : public QObject
@@ -164,6 +163,8 @@ ccMaterial::ccMaterial(const QString& name)
 	, m_ambient(ccColor::night)
 	, m_specular(ccColor::night)
 	, m_emission(ccColor::night)
+	, m_texMinificationFilter(QOpenGLTexture::Nearest)
+	, m_texMagnificationFilter(QOpenGLTexture::Linear)
 {
 	setShininess(50.0);
 };
@@ -179,6 +180,8 @@ ccMaterial::ccMaterial(const ccMaterial& mtl)
 	, m_emission(mtl.m_emission)
 	, m_shininessFront(mtl.m_shininessFront)
 	, m_shininessBack(mtl.m_shininessFront)
+	, m_texMinificationFilter(mtl.m_texMinificationFilter)
+	, m_texMagnificationFilter(mtl.m_texMagnificationFilter)
 {
 }
 
@@ -327,7 +330,7 @@ GLuint ccMaterial::getTextureID() const
 		{
 			tex = QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target2D);
 			tex->setAutoMipMapGenerationEnabled(false);
-			tex->setMinMagFilters(QOpenGLTexture::Nearest, QOpenGLTexture::Linear);
+			tex->setMinMagFilters(m_texMinificationFilter, m_texMagnificationFilter);
 			tex->setFormat(QOpenGLTexture::RGB8_UNorm);
 			tex->setData(getTexture(), QOpenGLTexture::DontGenerateMipMaps);
 			tex->create();
@@ -491,4 +494,20 @@ bool ccMaterial::compare(const ccMaterial& mtl) const
 	}
 
 	return true;
+}
+
+void ccMaterial::setTextureMinMagFilters(QOpenGLTexture::Filter minificationFilter, QOpenGLTexture::Filter magnificationFilter)
+{
+	if (	minificationFilter  != m_texMinificationFilter
+		||	magnificationFilter != m_texMagnificationFilter)
+	{
+		m_texMinificationFilter = minificationFilter;
+		m_texMagnificationFilter = magnificationFilter;
+
+		if (!m_textureFilename.isEmpty() && s_materialDB.openGLTextures.contains(m_textureFilename))
+		{
+			//remove the existing texture (if any) so that it's initialized again next time
+			s_materialDB.openGLTextures.remove(m_textureFilename);
+		}
+	}
 }

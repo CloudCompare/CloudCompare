@@ -24,6 +24,7 @@
 
 //Qt
 #include <QSharedPointer>
+#include <QOpenGLTexture>
 #include <QtGui/qopengl.h>
 
 class QImage;
@@ -153,6 +154,9 @@ public:
 	//! Returns unique identifier (UUID)
 	inline QString getUniqueIdentifier() const { return m_uniqueID; }
 
+	//! Sets the texture minification and magnification filters
+	void setTextureMinMagFilters(QOpenGLTexture::Filter minificationFilter, QOpenGLTexture::Filter magnificationFilter);
+
 protected:
 	QString m_name;
 	QString m_textureFilename;
@@ -165,6 +169,9 @@ protected:
 	ccColor::Rgbaf m_emission;
 	float m_shininessFront;
 	float m_shininessBack;
+
+	QOpenGLTexture::Filter m_texMinificationFilter;
+	QOpenGLTexture::Filter m_texMagnificationFilter;
 };
 
 #endif //CC_MATERIAL_HEADER

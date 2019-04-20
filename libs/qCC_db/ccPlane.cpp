@@ -206,12 +206,12 @@ ccBBox ccPlane::getOwnFitBB(ccGLMatrix& trans)
 	return ccBBox(CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0), CCVector3(m_xWidth / 2, m_yWidth / 2, 0));
 }
 
-bool ccPlane::setAsTexture(QImage image, QString imageFilename/*=QString()*/)
+ccMaterial::Shared ccPlane::setAsTexture(QImage image, QString imageFilename/*=QString()*/)
 {
 	return SetQuadTexture(this, image, imageFilename);
 }
 
-bool ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilename/*=QString()*/)
+ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilename/*=QString()*/)
 {
 	if (	!quadMesh
 		||	quadMesh->size() > 2 //they may not be reserved yet?
@@ -223,7 +223,7 @@ bool ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilena
 	if (image.isNull())
 	{
 		ccLog::Warning("[ccPlane::SetQuadTexture] Invalid texture image!");
-		return false;
+		return ccMaterial::Shared(nullptr);
 	}
 
 	//texture coordinates
@@ -236,7 +236,7 @@ bool ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilena
 			//not enough memory
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
 			delete texCoords;
-			return false;
+			return ccMaterial::Shared(nullptr);
 		}
 
 		//create default texture coordinates
@@ -260,7 +260,7 @@ bool ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilena
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
 			quadMesh->setTexCoordinatesTable(0);
 			quadMesh->removePerTriangleMtlIndexes();
-			return false;
+			return ccMaterial::Shared(nullptr);
 		}
 		
 		//set default texture indexes
@@ -276,7 +276,7 @@ bool ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilena
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
 			quadMesh->setTexCoordinatesTable(0);
 			quadMesh->removePerTriangleTexCoordIndexes();
-			return false;
+			return ccMaterial::Shared(nullptr);
 		}
 
 		//set default material indexes
@@ -294,13 +294,11 @@ bool ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilena
 	//remove old materials (if any)
 	materialSet->clear();
 	//add new material
-	{
-		ccMaterial::Shared material(new ccMaterial("texture"));
-		material->setTexture(image, imageFilename, false);
-		materialSet->addMaterial(material);
-	}
+	ccMaterial::Shared material(new ccMaterial("texture"));
+	material->setTexture(image, imageFilename, false);
+	materialSet->addMaterial(material);
 
 	quadMesh->showMaterials(true);
 
-	return true;
+	return material;
 }

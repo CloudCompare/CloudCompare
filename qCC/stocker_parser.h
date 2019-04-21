@@ -84,6 +84,7 @@ ccHObject * DetectLineRansac(ccHObject * entity, double distance, double minpts,
 ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha);
 void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_epsilon);
 ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option);
+ccHObject* PlaneFrameLineGrow(ccHObject* planeObj, double alpha, double intersection, double minpts);
 
 //! polyfit
 ccHObject* PolyfitGenerateHypothesis(ccHObject* primitive_group, PolyFitObj* polyfit_obj);

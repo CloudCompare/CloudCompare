@@ -11623,6 +11623,14 @@ void MainWindow::doActionBDPrimPlaneFrame()
 {
 	if (!haveSelection()) return;
 
+	QStringList methods;
+	methods.append("optimization");
+	methods.append("linegrow");
+	methods.append("houghline");
+	bool ok;
+	QString used_method = QInputDialog::getItem(this, "Boundary extraction", "method", methods, 0, false, &ok);
+	if (!ok) return;
+
 	//! dialog
 	stocker::FrameOption option;
 	option.buffer_size = 1;
@@ -11648,8 +11656,19 @@ void MainWindow::doActionBDPrimPlaneFrame()
 	
 	for (auto & planeObj : plane_container) {
 		try	{
-			ccHObject* frame = PlaneFrameOptimization(planeObj, option);
-			if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame, false, false); }
+			if (used_method == "linegrow") {
+				double alpha(0.5), intersection(1), minpts(10);
+				ccAskThreeDoubleValuesDlg paraDlg("alpha", "intersection", "minpts", 0, 1.0e12, alpha, intersection, minpts, 6, "line grow", this);
+				if (!paraDlg.exec()) {
+					return;
+				}
+				ccHObject* frame = PlaneFrameLineGrow(planeObj, alpha, intersection, minpts);
+				if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame, false, false); }
+			}
+			else if (used_method == "optimization") {
+				ccHObject* frame = PlaneFrameOptimization(planeObj, option);
+				if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame, false, false); }
+			}
 		}
 		catch (const std::runtime_error& e)	{
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);

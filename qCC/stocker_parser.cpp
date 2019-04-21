@@ -33,6 +33,7 @@
 #ifdef USE_STOCKER
 #include "polyfit/model/map_enumerator.h"
 #include "polyfit/model/map_serializer.h"
+#include "builderlod2/lod2parser.h"
 using namespace stocker;
 #endif // USE_STOCKER
 
@@ -1267,6 +1268,52 @@ ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption opti
 #endif
 }
 
+ccHObject * PlaneFrameLineGrow(ccHObject * planeObj, double alpha, double intersection, double minpts)
+{
+	ccHObject* point_cloud_obj = GetPlaneCloud(planeObj);
+	if (!point_cloud_obj) return nullptr;
+
+	std::string base_name = GetParentBuilding(point_cloud_obj)->getName().toStdString();
+
+	BDBaseHObject* baseObj = GetRootBDBase(planeObj);
+	std::string output_prefix;
+	if (baseObj) {
+		auto bd_find = baseObj->block_prj.m_builder.sbuild.find(BuilderBase::BuildNode::Create(base_name));
+		if (bd_find == baseObj->block_prj.m_builder.sbuild.end()) {
+			return nullptr;
+		}
+		output_prefix = (*bd_find)->data.file_path.root_dir + "\\primitives\\frame_opt\\";
+		CreateDir(output_prefix.c_str());
+		output_prefix = output_prefix + base_name;
+	}
+	vector<vector<Contour3d>> frames_to_add(1);
+	if (0) {
+
+	}
+	else {
+		Contour3d outline_points; {
+			ccHObject::Container container_find;
+			planeObj->getParent()->filterChildrenByName(container_find, false, BDDB_OUTLINE_PREFIX, true);
+			if (!container_find.empty()) {
+				auto outlines_points_all = GetOutlinesFromOutlineParent(container_find.back());
+				if (!outlines_points_all.empty()) {
+					outline_points = outlines_points_all.front().front();
+				}
+			}
+		}
+
+		if (outline_points.empty()) {
+			Contour3d plane_points = GetPointsFromCloud(point_cloud_obj);
+			PolygonGeneralizationLineGrow_Plane(plane_points, frames_to_add.back(), alpha, false, intersection);
+		}
+		else {
+			PolygonGeneralizationLineGrow_Contour(outline_points, frames_to_add.back(), alpha, false, intersection);
+		}
+	}
+	ccHObject* plane_frame = AddOutlinesAsChild(frames_to_add, BDDB_PLANEFRAME_PREFIX, point_cloud_obj);
+	return plane_frame;
+}
+
 PointSet* GetPointSetFromPlaneObjs(ccHObject::Container planeObjs)
 {
 	PointSet* pset = new PointSet;
@@ -1334,15 +1381,20 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 
 	StPrimGroup* hypoObj;
 	BDBaseHObject* baseObj = GetRootBDBase(primitive_group);
+	QString building_name = GetBaseName(primitive_group->getName());
 	CCVector3d global_shift(0, 0, 0);
 	double global_scale(0);
+	Polyline2d building_convex_hull_2d;
 	if (baseObj) {
 		global_shift = CCVector3d(vcgXYZ(baseObj->global_shift));
 		global_scale = baseObj->global_scale;
-		hypoObj = baseObj->GetHypothesisGroup(GetBaseName(primitive_group->getName()), false);
+		hypoObj = baseObj->GetHypothesisGroup(building_name, false);
+		Contour2d bd_cvx = baseObj->GetBuildingUnit(building_name.toStdString()).convex_hull_xy;
+		assert(!bd_cvx.empty());
+		building_convex_hull_2d = MakeLoopPolylinefromContour(bd_cvx);
 	}
 	else {
-		hypoObj = new StPrimGroup(GetBaseName(primitive_group->getName()) + BDDB_POLYFITHYPO_SUFFIX);
+		hypoObj = new StPrimGroup(building_name + BDDB_POLYFITHYPO_SUFFIX);
 	}
 	PointSet* pset = polyfit_obj->hypothesis_->point_set();
 	std::vector<vec3>& points = pset->points();
@@ -1398,10 +1450,25 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 		if (!plane_entity) throw std::runtime_error("cannot find plane");
 
 		Polygon3d contour_polygon = Geom::facet_polygon(f);
-		vector<CCVector3> ccv_poly;
+		vector<CCVector3> ccv_poly; 
 		for (auto & pt : contour_polygon) {
 			ccv_poly.push_back(CCVector3(pt.data()[0], pt.data()[1], pt.data()[2]));
 		}
+		//! check if the facet inside the building's convex hull
+		
+		if (polyfit_obj->auto_filter && !building_convex_hull_2d.empty()) {
+			bool facet_inside_convex = false;			
+			for (auto pt : ccv_poly) {
+				if (vcg::PointInsidePolygon(ToVec2d(baseObj->ToGlobal(parse_xyz(pt))), building_convex_hull_2d)) {
+					facet_inside_convex = true;
+					break;
+				}
+			}
+			if (!facet_inside_convex) {
+				continue;
+			}
+		}
+		
 		//! each facet is a facet entity under plane
 		PointCoordinateType plane_equation[4];
 		ccPlane* cc_plane = ccHObjectCaster::ToPlane(plane_entity);
@@ -1458,7 +1525,7 @@ vector<String_String> CollectValidFacet(ccHObject::Container planeObjs)
 
 		for (auto & f : facets_) {
 			if (f->isEnabled()) {
-				valid_facet.push_back({ planeObj->getName().toStdString(), f->getName().toStdString() });
+				valid_facet.push_back({ planeObj->getParent()->getName().toStdString(), f->getName().toStdString() });
 			}
 		}
 	}
@@ -1488,10 +1555,10 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 	vector<double> all_conf;
 
 	//////////////////////////////////////////////////////////////////////////AUTOFILTER
+#if 0	
 	std::map<ccHObject*, PlaneUnit*> plane_data;
 	std::map<ccHObject*, stocker::Polyline2d> plane_convexhull;
-//	if (polyfit_obj->auto_filter)
-//	{
+	{
 		for (auto & planeObj : planeObjs) {
 			std::string plane_name = GetBaseName(planeObj->getParent()->getName()).toStdString();
 			stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
@@ -1502,7 +1569,8 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 			stocker::Polyline2d plane_convex_hull = MakeLoopPolylinefromContour(Point3dToPlpoint2d(plane_unit_, plane_unit_.convex_hull_prj));
 			plane_convexhull[planeObj] = plane_convex_hull;
 		}
-//	}
+	}
+#endif
 	//////////////////////////////////////////////////////////////////////////
 
 	//! assign confidence information to hypothesis
@@ -1700,13 +1768,15 @@ void PolyFitObj::FacetOptimization()
 
 void PolyFitObj::UpdateValidFacet(std::vector<stocker::String_String> valid_update)
 {
-	vector<String_String> valid_for_selection;
-	for (auto & f : valid_group_facet_name) {
-		if (find(valid_update.begin(), valid_update.end(), f) != valid_update.end()) {
-			valid_for_selection.push_back(f);
-		}
-	}
-	swap(valid_group_facet_name, valid_for_selection);
+// 	vector<String_String> valid_for_selection;
+// 	for (auto & f : valid_group_facet_name) {
+// 		if (find(valid_update.begin(), valid_update.end(), f) != valid_update.end()) {
+// 			valid_for_selection.push_back(f);
+// 		}
+// 	}
+//	swap(valid_group_facet_name, valid_for_selection);
+	valid_group_facet_name.clear(); valid_group_facet_name.shrink_to_fit();
+	valid_group_facet_name.assign(valid_update.begin(), valid_update.end());
 }
 
 bool PolyFitObj::OutputResultToObjFile(BDBaseHObject* baseObj, std::string & file_path)

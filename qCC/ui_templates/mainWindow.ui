@@ -403,6 +403,7 @@
      <addaction name="actionCloudCloudDist"/>
      <addaction name="actionCloudMeshDist"/>
      <addaction name="actionCPS"/>
+     <addaction name="actionCloudModelDist"/>
     </widget>
     <widget class="QMenu" name="menuRegistration">
      <property name="title">
@@ -3605,6 +3606,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDRetrievePlanePoints">
    <property name="text">
     <string>Retrieve Plane Points</string>
+   </property>
+  </action>
+  <action name="actionCloudModelDist">
+   <property name="text">
+    <string>Cloud/Model Dist</string>
    </property>
   </action>
  </widget>

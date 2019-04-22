@@ -2230,7 +2230,7 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 //! 3D4EM	.lod2.model
 ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footprintObjs, double ground_height)
 {
-	if (!buildingObj || footprintObjs.empty()) { return nullptr; }
+	if (!buildingObj) { return nullptr; }
 	BDBaseHObject* baseObj = GetRootBDBase(buildingObj);
 	if (!baseObj) {
 		return nullptr;
@@ -2241,6 +2241,32 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name, true);
 
 	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName(), true);
+
+	bool use_footprint = true;
+	if (footprintObjs.empty()) {
+		use_footprint = false;		
+		Contour3d convex_points;
+		for (auto & pt : build_unit.convex_hull_xy)	{
+			convex_points.push_back(Vec3d(pt.X(), pt.Y(), ground_height));
+		}
+		Polyline3d convex_lines = MakeLoopPolylinefromContour(convex_points);
+		ccPointCloud* convex_cloud = AddPointsAsPointCloud(convex_points, "vertices");
+		convex_cloud->setDisplay(buildingObj->getDisplay());
+		convex_cloud->setGlobalShift(CCVector3d(vcgXYZ(baseObj->global_shift)));
+		convex_cloud->setGlobalScale(baseObj->global_scale);
+		StFootPrint* convex_hull = new StFootPrint(convex_cloud);
+		convex_hull->setName(BDDB_FOOTPRINT_PREFIX + QString::number(0));
+		convex_hull->setColor(ccColor::magenta);
+		convex_hull->showColors(true);
+		convex_hull->reserve(convex_points.size());
+		for (size_t i = 0; i < convex_points.size(); i++) {
+			convex_hull->addPointIndex(i, (i + 1) % convex_points.size());		
+		}
+		convex_hull->setClosed(false);
+		convex_hull->addChild(convex_cloud);
+		blockgroup_obj->addChild(convex_hull);
+		footprintObjs.push_back(convex_hull);
+	}
 
 	std::vector<std::vector<int>> components = GroupFootPrint(footprintObjs);
 
@@ -2268,7 +2294,9 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 		if (!valid) {
 			continue;
 		}
-		builder_3d4em.SetFootPrint(contours);
+		if (use_footprint) {
+			builder_3d4em.SetFootPrint(contours);
+		}
 
 		char output_path[256];
 		{

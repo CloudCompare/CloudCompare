@@ -679,6 +679,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionCloudCloudDist,				&QAction::triggered, this, &MainWindow::doActionCloudCloudDist);
 	connect(m_UI->actionCloudMeshDist,				&QAction::triggered, this, &MainWindow::doActionCloudMeshDist);
 	connect(m_UI->actionCPS,						&QAction::triggered, this, &MainWindow::doActionComputeCPS);
+	connect(m_UI->actionCloudModelDist,				&QAction::triggered, this, &MainWindow::doActionCloudModelDist);
 	//"Tools > Volume" menu
 	connect(m_UI->actionCompute2HalfDimVolume,		&QAction::triggered, this, &MainWindow::doCompute2HalfDimVolume);
 	//"Tools > Statistics" menu
@@ -12746,8 +12747,8 @@ void MainWindow::doActionBDLoD2Generation()
 	if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
 		height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
 	}
-	else /*if (m_pbdr3d4emDlg->GroundHeightMode() == 0)*/ {
-		height = baseObj->GetBuildingUnit(GetBaseName(entity->getName()).toStdString()).ground_height;
+	else /*if (m_pbdr3d4emDlg->GroundHeightMode() == 0)*/ {		
+		height = baseObj->GetBuildingUnit(GetParentBuilding(entity)->getName().toStdString()).ground_height;
 	}
 
 	ccHObject* bd_entity = entity->isA(CC_TYPES::ST_FOOTPRINT) ? entity : GetParentBuilding(entity);
@@ -12915,3 +12916,67 @@ void MainWindow::doActionBDConstrainedMesh()
 	}
 }
 
+void MainWindow::doActionCloudModelDist()
+{
+	if (getSelectedEntities().size() != 2)
+	{
+		ccConsole::Error("Select 2 entities!");
+		return;
+	}
+
+	bool isMesh[2] = { false,false };
+	unsigned meshNum = 0;
+	unsigned cloudNum = 0;
+	for (unsigned i = 0; i < 2; ++i)
+	{
+		if (m_selectedEntities[i]->isKindOf(CC_TYPES::MESH))
+		{
+			++meshNum;
+			isMesh[i] = true;
+		}
+		else if (m_selectedEntities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			++cloudNum;
+		}
+	}
+
+	if (meshNum == 0)
+	{
+		ccConsole::Error("Select at least one mesh!");
+		return;
+	}
+	else if (meshNum + cloudNum < 2)
+	{
+		ccConsole::Error("Select one mesh and one cloud or two meshes!");
+		return;
+	}
+
+	ccHObject* compEnt = nullptr;
+	ccGenericMesh* refMesh = nullptr;
+
+	if (meshNum == 1)
+	{
+		compEnt = m_selectedEntities[isMesh[0] ? 1 : 0];
+		refMesh = ccHObjectCaster::ToGenericMesh(m_selectedEntities[isMesh[0] ? 0 : 1]);
+	}
+	else
+	{
+		ccOrderChoiceDlg dlg(m_selectedEntities[0], "Compared",
+			m_selectedEntities[1], "Reference",
+			this);
+		if (!dlg.exec())
+			return;
+
+		compEnt = dlg.getFirstEntity();
+		refMesh = ccHObjectCaster::ToGenericMesh(dlg.getSecondEntity());
+	}
+
+	//assert(!m_compDlg);
+	if (m_compDlg)
+		delete m_compDlg;
+	m_compDlg = new ccComparisonDlg(compEnt, refMesh, ccComparisonDlg::CLOUDMODEL_DIST, this);
+	connect(m_compDlg, &QDialog::finished, this, &MainWindow::deactivateComparisonMode);
+	m_compDlg->show();
+
+	freezeUI(true);
+}

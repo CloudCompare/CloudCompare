@@ -44,6 +44,7 @@ public:
 	{
 		CLOUDCLOUD_DIST = 0,
 		CLOUDMESH_DIST  = 1,
+		CLOUDMODEL_DIST = 2,
 	};
 
 	//! Default constructor

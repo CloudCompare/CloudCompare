@@ -408,6 +408,7 @@ private slots:
 	void doActionCloudCloudDist();
 	void doActionCloudMeshDist();
 	void deactivateComparisonMode(int);
+	void doActionCloudModelDist();
 
 	//Point picking mechanism
 	void activatePointPickingMode();

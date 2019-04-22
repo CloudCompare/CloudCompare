@@ -159,7 +159,7 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 	//compared entity
 	if (!m_compEnt->isA(CC_TYPES::POINT_CLOUD)) //TODO --> pas possible avec des GenericPointCloud ? :(
 	{
-		if (m_compType == CLOUDCLOUD_DIST || (m_compType == CLOUDMESH_DIST && !m_compEnt->isKindOf(CC_TYPES::MESH)))
+		if (m_compType == CLOUDCLOUD_DIST || ((m_compType == CLOUDMESH_DIST || m_compType == CLOUDMODEL_DIST) && !m_compEnt->isKindOf(CC_TYPES::MESH)))
 		{
 			ccLog::Error("Dialog initialization error! (bad entity type)");
 			return false;
@@ -191,14 +191,14 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 		m_oldSfName = QString(m_compCloud->getScalarFieldName(oldSfIdx));
 
 	//reference entity
-	if (	(m_compType == CLOUDMESH_DIST && !m_refEnt->isKindOf(CC_TYPES::MESH))
+	if (	((m_compType == CLOUDMESH_DIST || m_compType == CLOUDMODEL_DIST) && !m_refEnt->isKindOf(CC_TYPES::MESH))
 		||	(m_compType == CLOUDCLOUD_DIST && !m_refEnt->isA(CC_TYPES::POINT_CLOUD)) )
 	{
 		ccLog::Error("Dialog initialization error! (bad entity type)");
 		return false;
 	}
 
-	if (m_compType == CLOUDMESH_DIST)
+	if (m_compType == CLOUDMESH_DIST || m_compType == CLOUDMODEL_DIST)
 	{
 		m_refMesh = ccHObjectCaster::ToGenericMesh(m_refEnt);
 		m_refCloud = m_refMesh->getAssociatedCloud();
@@ -852,7 +852,33 @@ bool ccComparisonDlg::computeDistances()
 																				&progressDlg,
 																				m_compOctree.data());
 		break;
+
+
+	case CLOUDMODEL_DIST: //cloud-model
+
+		if (multiThread && maxDistCheckBox->isChecked())
+		{
+			ccLog::Warning("[Cloud/Mesh comparison] Max search distance is not supported in multi-thread mode! Switching to single thread mode...");
+		}
+
+		//setup parameters
+		{
+			c2mParams.octreeLevel = static_cast<unsigned char>(octreeLevel);
+			c2mParams.maxSearchDist = maxSearchDist;
+			c2mParams.useDistanceMap = false;
+			c2mParams.signedDistances = signedDistances;
+			c2mParams.flipNormals = flipNormals;
+			c2mParams.multiThread = multiThread;
+		}
+
+		result = CCLib::DistanceComputationTools::computeCloud2MeshDistance(m_compCloud,
+			m_refMesh,
+			c2mParams,
+			&progressDlg,
+			m_compOctree.data());
+		break;
 	}
+	
 	qint64 elapsedTime_ms = eTimer.elapsed();
 
 	progressDlg.stop();

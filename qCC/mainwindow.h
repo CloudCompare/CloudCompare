@@ -494,7 +494,8 @@ private slots:
 
 	void doActionBDPolyFitSettings();
 
-	void doActionExtractFootPrint();
+	void doActionBDFootPrintAuto();
+	void doActionBDFootPrintManual();
 
 	void doActionBDLoD1Generation();
 

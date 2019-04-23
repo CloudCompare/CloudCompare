@@ -488,7 +488,7 @@
     <addaction name="actionPointPicking"/>
     <addaction name="actionPointListPicking"/>
     <addaction name="actionTracePolyline"/>
-    <addaction name="actionBDFootPrint"/>
+    <addaction name="actionBDFootPrintManual"/>
     <addaction name="separator"/>
     <addaction name="menuSandBox"/>
     <addaction name="separator"/>
@@ -985,7 +985,8 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionBDPlaneFromPolygon"/>
    <addaction name="actionBDPrimMakePlane"/>
    <addaction name="separator"/>
-   <addaction name="actionBDFootPrint"/>
+   <addaction name="actionBDFootPrintAuto"/>
+   <addaction name="actionBDFootPrintManual"/>
    <addaction name="actionBDLoD1Generation"/>
    <addaction name="actionBD3D4EM"/>
    <addaction name="separator"/>
@@ -3517,13 +3518,19 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>LoD1</string>
    </property>
   </action>
-  <action name="actionBDFootPrint">
+  <action name="actionBDFootPrintManual">
    <property name="icon">
     <iconset resource="../icones.qrc">
      <normaloff>:/CC/Stocker/images/stocker/footprint.png</normaloff>:/CC/Stocker/images/stocker/footprint.png</iconset>
    </property>
    <property name="text">
-    <string>FootPrint</string>
+    <string>FootPrint Manual</string>
+   </property>
+   <property name="iconText">
+    <string>Manual</string>
+   </property>
+   <property name="toolTip">
+    <string>extract footPrint manually</string>
    </property>
   </action>
   <action name="actionBDProjectSave">
@@ -3611,6 +3618,18 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionCloudModelDist">
    <property name="text">
     <string>Cloud/Model Dist</string>
+   </property>
+  </action>
+  <action name="actionBDFootPrintAuto">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/footprint.png</normaloff>:/CC/Stocker/images/stocker/footprint.png</iconset>
+   </property>
+   <property name="text">
+    <string>FootPrint</string>
+   </property>
+   <property name="toolTip">
+    <string>extract footprints</string>
    </property>
   </action>
  </widget>

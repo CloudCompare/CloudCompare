@@ -847,7 +847,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDDisplayPlaneOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPlaneOff);
 	connect(m_UI->actionBDDisplayPointOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOn);
 	connect(m_UI->actionBDDisplayPointOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOff);
-	connect(m_UI->actionBDFootPrint,				&QAction::triggered, this, &MainWindow::doActionExtractFootPrint);
+	connect(m_UI->actionBDFootPrintAuto,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintAuto);
+	connect(m_UI->actionBDFootPrintManual,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintManual);
 }
 
 void MainWindow::doActionColorize()
@@ -12601,7 +12602,12 @@ void MainWindow::doActionBDPolyFitSettings()
 	m_pbdrpfDlg->show();
 }
 
-void MainWindow::doActionExtractFootPrint()
+void MainWindow::doActionBDFootPrintAuto()
+{
+
+}
+
+void MainWindow::doActionBDFootPrintManual()
 {
 	if (!haveSelection()) return;
 

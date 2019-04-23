@@ -79,6 +79,8 @@
 //System
 #include <cassert>
 
+#define VALID_MINUS_INT -999999
+
 // Default 'None' string
 const char* ccPropertiesTreeDelegate::s_noneString = QT_TR_NOOP( "None" );
 
@@ -157,8 +159,8 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_CLOUD_POINT_SIZE:
 		case OBJECT_FACET_CONFIDENCE:
 		case OBJECT_FOOTPRINT_HEIGHT:
-		case OBJECT_BLOCK_TOP_ADD:
-		case OBJECT_BLOCK_BOTTOM_ADD:
+		case OBJECT_BLOCK_TOP:
+		case OBJECT_BLOCK_BOTTOM:
 			return QSize(50, 24);
 		case OBJECT_COLOR_SOURCE:
 		case OBJECT_POLYLINE_WIDTH:
@@ -1434,12 +1436,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	break;
 	case OBJECT_FOOTPRINT_HEIGHT:
 	{
-		StFootPrint* footprint = ccHObjectCaster::ToStFootPrint(m_currentObject);
-		assert(footprint);
 		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
 		spinBox->setRange(-DBL_MAX, DBL_MAX);
 		spinBox->setSingleStep(0.1);
-		spinBox->setValue(footprint->getHeight());
 
  		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
  			this, &ccPropertiesTreeDelegate::footprintHeightChanged);
@@ -1447,32 +1446,26 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		outputWidget = spinBox;
 	}
 	break;
-	case OBJECT_BLOCK_TOP_ADD:
+	case OBJECT_BLOCK_TOP:
 	{
-		StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
-		assert(block);
 		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
 		spinBox->setRange(-DBL_MAX, DBL_MAX);
 		spinBox->setSingleStep(0.1);
-		spinBox->setValue(0.0);
 
 		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-			this, &ccPropertiesTreeDelegate::BlockTopAddChanged);
+			this, &ccPropertiesTreeDelegate::BlockTopChanged);
 
 		outputWidget = spinBox;
 	}
 	break;
-	case OBJECT_BLOCK_BOTTOM_ADD:
+	case OBJECT_BLOCK_BOTTOM:
 	{
-		StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
-		assert(block);
 		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
 		spinBox->setRange(-DBL_MAX, DBL_MAX);
 		spinBox->setSingleStep(0.1);
-		spinBox->setValue(0.0);
 
 		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-			this, &ccPropertiesTreeDelegate::BlockBottomAddChanged);
+			this, &ccPropertiesTreeDelegate::BlockBottomChanged);
 
 		outputWidget = spinBox;
 	}
@@ -1819,24 +1812,28 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		ccFacet* facet = ccHObjectCaster::ToFacet(m_currentObject);
 		assert(facet);
-		SetDoubleSpinBoxValue(editor, facet ? facet->getConfidence() : -999999);
+		SetDoubleSpinBoxValue(editor, facet ? facet->getConfidence() : VALID_MINUS_INT);
 	}
 	break;
 	case OBJECT_FOOTPRINT_HEIGHT:
 	{
 		StFootPrint* footprint = ccHObjectCaster::ToStFootPrint(m_currentObject);
 		assert(footprint);
-		SetDoubleSpinBoxValue(editor, footprint ? footprint->getHeight() : -999999);
+		SetDoubleSpinBoxValue(editor, footprint ? footprint->getHeight() : VALID_MINUS_INT);
 	}
 	break;
-	case OBJECT_BLOCK_TOP_ADD:
-	{		
-		SetDoubleSpinBoxValue(editor, 0.0);
-	}
-	break;
-	case OBJECT_BLOCK_BOTTOM_ADD:
+	case OBJECT_BLOCK_TOP:
 	{
-		SetDoubleSpinBoxValue(editor, 0.0);
+		StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
+		assert(block); 
+		SetDoubleSpinBoxValue(editor, (block && !block->getTop().empty()) ? block->getTop().front().z : VALID_MINUS_INT);
+	}
+	break;
+	case OBJECT_BLOCK_BOTTOM:
+	{
+		StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
+		assert(block);
+		SetDoubleSpinBoxValue(editor, (block && !block->getBottom().empty()) ? block->getBottom().front().z : VALID_MINUS_INT);
 	}
 	break;
 	default:
@@ -2615,30 +2612,25 @@ void ccPropertiesTreeDelegate::footprintHeightChanged(double pos)
 	//updateDisplay();
 }
 
-double s_topHeightPrevious = 0.0;
-void ccPropertiesTreeDelegate::BlockTopAddChanged(double pos)
+void ccPropertiesTreeDelegate::BlockTopChanged(double pos)
 {
 	if (!m_currentObject)
 		return;
 
 	StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
 	assert(block);
-	double add = pos - s_topHeightPrevious;
-	block->TopHeightAdd(add);
-	s_topHeightPrevious = pos;
+	block->setTopHeight(pos);
 	updateDisplay();
 }
-double s_bottomHeightPrevious = 0.0;
-void ccPropertiesTreeDelegate::BlockBottomAddChanged(double pos)
+
+void ccPropertiesTreeDelegate::BlockBottomChanged(double pos)
 {
 	if (!m_currentObject)
 		return;
 
 	StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
 	assert(block);
-	double add = pos - s_bottomHeightPrevious;
-	block->BottomHeightAdd(add);
-	s_bottomHeightPrevious = pos;
+	block->setBottomHeight(pos);
 	updateDisplay();
 }
 
@@ -2658,10 +2650,10 @@ void ccPropertiesTreeDelegate::fillWithStBlock(const StBlock *_obj)
 	addSeparator(tr("Block"));
 
 	//top height add 
-	appendRow(ITEM(tr("Top height add")), PERSISTENT_EDITOR(OBJECT_BLOCK_TOP_ADD), true);
+	appendRow(ITEM(tr("Top height")), PERSISTENT_EDITOR(OBJECT_BLOCK_TOP), true);
 
 	//bottom height add
-	appendRow(ITEM(tr("Bottom height add")), PERSISTENT_EDITOR(OBJECT_BLOCK_BOTTOM_ADD), true);
+	appendRow(ITEM(tr("Bottom height")), PERSISTENT_EDITOR(OBJECT_BLOCK_BOTTOM), true);
 }
 
 void ccPropertiesTreeDelegate::fillWithStBlockGroup(const StBlockGroup *_obj)

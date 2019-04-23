@@ -103,17 +103,17 @@ ccFacet * StBlock::getBottomFacet()
 	return nullptr;
 }
 
-void StBlock::TopHeightAdd(double val)
+void StBlock::setTopHeight(double val)
 {
 	for (size_t i = 0; i < m_top.size(); i++) {
-		m_top.at(i).z += val;
+		m_top.at(i).z = val;
 	}
 
 	ccPointCloud* verts = vertices();
 	if (!verts) { return; }
 	for (unsigned int i = 0; i < verts->size() / 2; i++) {
 		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2));
-		P.z += val;
+		P.z = val;
 	}
 	verts->invalidateBoundingBox();
 
@@ -123,22 +123,22 @@ void StBlock::TopHeightAdd(double val)
 	if (!cloud) return;
 	for (unsigned int i = 0; i < cloud->size(); i++) {
 		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
-		P.z += val;
+		P.z = val;
 	}
 	cloud->invalidateBoundingBox();
 }
 
-void StBlock::BottomHeightAdd(double val)
+void StBlock::setBottomHeight(double val)
 {
 	for (size_t i = 0; i < m_bottom.size(); i++) {
-		m_bottom.at(i).z += val;
+		m_bottom.at(i).z = val;
 	}
 
 	ccPointCloud* verts = vertices();
 	if (!verts) { return; }
 	for (unsigned int i = 0; i < verts->size() / 2; i++) {
 		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2 + 1));
-		P.z += val;
+		P.z = val;
 	}
 	verts->invalidateBoundingBox();
 
@@ -148,7 +148,7 @@ void StBlock::BottomHeightAdd(double val)
 	if (!cloud) return;
 	for (unsigned int i = 0; i < cloud->size(); i++) {
 		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
-		P.z += val;
+		P.z = val;
 	}
 	cloud->invalidateBoundingBox();
 }

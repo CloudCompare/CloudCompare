@@ -111,8 +111,8 @@ public:
 							TREE_VIEW_HEADER						,
 							OBJECT_FACET_CONFIDENCE					,
 							OBJECT_FOOTPRINT_HEIGHT					,
-							OBJECT_BLOCK_TOP_ADD					,
-							OBJECT_BLOCK_BOTTOM_ADD					,
+							OBJECT_BLOCK_TOP						,
+							OBJECT_BLOCK_BOTTOM						,
 							OBJECT_SENSOR_DRAW_IMAGE				,
 							OBJECT_SENSOR_DRAW_BASEAXIS				,
 							OBJECT_SENSOR_DRAW_FRUSTUM_FRAME		,
@@ -217,8 +217,8 @@ private:
 	QAbstractItemView* m_view;
 
 	void footprintHeightChanged(double pos);
-	void BlockTopAddChanged(double pos);
-	void BlockBottomAddChanged(double pos);
+	void BlockTopChanged(double pos);
+	void BlockBottomChanged(double pos);
 	void facetConfidenceChanged(double pos);
 	void fillWithStBlock(const StBlock*);
 	void fillWithStBlockGroup(const StBlockGroup*);

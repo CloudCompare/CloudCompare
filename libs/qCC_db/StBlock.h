@@ -66,8 +66,8 @@ public:
 	ccFacet* getTopFacet();
 	ccFacet* getBottomFacet();
 
-	void TopHeightAdd(double val);
-	void BottomHeightAdd(double val);
+	void setTopHeight(double val);
+	void setBottomHeight(double val);
 
 protected:
 

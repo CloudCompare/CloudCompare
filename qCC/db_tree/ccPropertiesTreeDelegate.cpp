@@ -227,7 +227,7 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	else if (m_currentObject->isA(CC_TYPES::ST_MODEL)) {
 		fillWithStModel(ccHObjectCaster::ToStModel(m_currentObject));
 	}
-	else if (m_currentObject->isA(CC_TYPES::ST_PRIMITIVE)) {
+	else if (m_currentObject->isA(CC_TYPES::ST_PRIMGROUP)) {
 		fillWithStPrimGroup(ccHObjectCaster::ToStPrimGroup(m_currentObject));
 	}
 
@@ -1925,7 +1925,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	break;
 	case OBJECT_MESH_STIPPLING:
 	{
-		if (m_currentObject->isA(CC_TYPES::ST_PRIMITIVE)) {
+		if (m_currentObject->isA(CC_TYPES::ST_PRIMGROUP)) {
 			ccHObject::Container plane_children;
 			m_currentObject->filterChildren(plane_children, true, CC_TYPES::MESH, false, m_currentObject->getDisplay());
 			if (plane_children.empty()) return;

@@ -261,7 +261,7 @@ private:
 			{ CC_TYPES::ST_BUILDING, buildingIndex },
 			{ CC_TYPES::ST_BLOCKGROUP, blockgroupIndex },
 			{ CC_TYPES::ST_BLOCK, blockIndex },
-			{ CC_TYPES::ST_PRIMITIVE, stprimitiveIndex },
+			{ CC_TYPES::ST_PRIMGROUP, stprimitiveIndex },
 			{ CC_TYPES::ST_FOOTPRINT, footprintIndex },
 			{ CC_TYPES::ST_MODEL, modelIndex },
 			//{ CC_TYPES::ST_CAMERAGROUP, cameragroupIndex },

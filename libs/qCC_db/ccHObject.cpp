@@ -211,7 +211,7 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
  		return new BDBaseHObject_(name);
 	case CC_TYPES::ST_BUILDING:
 		return new StBuilding(name);
-	case CC_TYPES::ST_PRIMITIVE:
+	case CC_TYPES::ST_PRIMGROUP:
 		return new StPrimGroup(name);
 	case CC_TYPES::ST_BLOCKGROUP:
 		return new StBlockGroup(name);

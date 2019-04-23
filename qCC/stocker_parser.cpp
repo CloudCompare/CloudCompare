@@ -55,7 +55,7 @@ stocker::Contour3d GetPointsFromCloud(ccHObject* entity)
 			points.push_back({ pt.x, pt.y, pt.z });
 		}
 	}
-	else if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+	else if (entity->isA(CC_TYPES::ST_PRIMGROUP)) {
 		StPrimGroup* primGroup = ccHObjectCaster::ToStPrimGroup(entity);
 		if (!primGroup) return points;				
 		ccHObject::Container plane_container = primGroup->getValidPlanes();
@@ -71,7 +71,7 @@ stocker::Contour3d GetPointsFromCloud(ccHObject* entity)
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker::Polyline3d polygon, double height)
 {	
 	stocker::Contour3d points;
-	if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+	if (entity->isA(CC_TYPES::ST_PRIMGROUP)) {
 		ccHObject::Container planes_container, plane_cloud_container;
 		entity->filterChildren(planes_container, true, CC_TYPES::PLANE, true);
 		for (ccHObject* pl_obj : planes_container) {
@@ -284,7 +284,7 @@ ccHObject::Container GetPlaneEntitiesBySelected(ccHObject* select)
 			}
 		}
 	}
-	else if (select->isA(CC_TYPES::ST_PRIMITIVE)) {
+	else if (select->isA(CC_TYPES::ST_PRIMGROUP)) {
 		StPrimGroup* primGroup = ccHObjectCaster::ToStPrimGroup(select); assert(primGroup);
 		ccHObject::Container cur_valid_planes = primGroup->getValidPlanes();
 		if (!cur_valid_planes.empty()) {
@@ -379,7 +379,7 @@ ccPointCloud * BDBaseHObject::GetOriginPointCloud(QString building_name, bool ch
 	return nullptr;
 }
 StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMITIVE, BDDB_PRIMITIVE_SUFFIX, building_name, check_enable);
+	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_PRIMITIVE_SUFFIX, building_name, check_enable);
 	if (obj) return static_cast<StPrimGroup*>(obj);
 	StPrimGroup* group = new StPrimGroup(building_name + BDDB_PRIMITIVE_SUFFIX);
 	if (group) {
@@ -401,7 +401,7 @@ StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name, bool check_en
 	return nullptr;
 }
 StPrimGroup * BDBaseHObject::GetHypothesisGroup(QString building_name, bool check_enable) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMITIVE, BDDB_POLYFITHYPO_SUFFIX, building_name, check_enable);
+	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_POLYFITHYPO_SUFFIX, building_name, check_enable);
 	if (obj) return static_cast<StPrimGroup*>(obj);
 	StPrimGroup* group = new StPrimGroup(building_name + BDDB_POLYFITHYPO_SUFFIX);
 	if (group) {

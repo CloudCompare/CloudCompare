@@ -295,5 +295,5 @@ StModel * ccHObjectCaster::ToStModel(ccHObject * obj)
 
 StPrimGroup * ccHObjectCaster::ToStPrimGroup(ccHObject * obj)
 {
-	return obj && obj->isKindOf(CC_TYPES::ST_PRIMITIVE) ? static_cast<StPrimGroup*>(obj) : nullptr;
+	return obj && obj->isKindOf(CC_TYPES::ST_PRIMGROUP) ? static_cast<StPrimGroup*>(obj) : nullptr;
 }

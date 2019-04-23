@@ -1079,7 +1079,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 	if (root->isA(CC_TYPES::HIERARCHY_OBJECT) ||
 		root->isA(CC_TYPES::ST_PROJECT) ||
 		root->isA(CC_TYPES::ST_BUILDING) ||
-		root->isA(CC_TYPES::ST_PRIMITIVE) ||
+		root->isA(CC_TYPES::ST_PRIMGROUP) ||
 		root->isA(CC_TYPES::ST_BLOCKGROUP) ||
 		root->isA(CC_TYPES::ST_MODEL))
 	{

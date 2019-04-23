@@ -11328,7 +11328,7 @@ void MainWindow::doActionBDPrimIntersections()
 				}
 			}
 		}
-		else if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+		else if (entity->isA(CC_TYPES::ST_PRIMGROUP)) {
 			ccHObject::Container entity_planes = GetEnabledObjFromGroup(entity, CC_TYPES::PLANE);
 			if (entity_planes.size() >= 2) {
 				building_prims.push_back(entity_planes);
@@ -11416,7 +11416,7 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 	}
 	if (primitive_groups.empty()) {
 		//! select the plane group
-		ccHObject* plane_group_ = askUserToSelect(CC_TYPES::ST_PRIMITIVE, 0, "please select a plane group");
+		ccHObject* plane_group_ = askUserToSelect(CC_TYPES::ST_PRIMGROUP, 0, "please select a plane group");
 		if (plane_group_) { primitive_groups.push_back(plane_group_); }
 		if (primitive_groups.empty()) return;
 	}
@@ -11792,7 +11792,7 @@ void MainWindow::doActionBDPrimCreateGround()
 	BDBaseHObject* baseObj = GetRootBDBase(entity);
 
 	std::vector<StPrimGroup*> prim_groups;
-	if (entity->isA(CC_TYPES::ST_PRIMITIVE)) {
+	if (entity->isA(CC_TYPES::ST_PRIMGROUP)) {
 		StPrimGroup* plane_group = ccHObjectCaster::ToStPrimGroup(entity);
 		if (plane_group) {
 			prim_groups.push_back(plane_group);
@@ -11966,7 +11966,7 @@ void MainWindow::doActionBDPlaneFromPolygon()
 		return;
 	}
 	ccHObject* prim_group = getSelectedEntities().front();
-	if (!prim_group->isA(CC_TYPES::ST_PRIMITIVE)) { // TODO: set it automatically, but now, select manually
+	if (!prim_group->isA(CC_TYPES::ST_PRIMGROUP)) { // TODO: set it automatically, but now, select manually
 		dispToConsole("please select a primitive group", ERR_CONSOLE_MESSAGE);
 		return;
 	}

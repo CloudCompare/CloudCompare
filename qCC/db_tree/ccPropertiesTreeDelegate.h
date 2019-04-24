@@ -110,6 +110,7 @@ public:
 							OBJECT_GLTRANS_MATRIX_EDITOR			,
 							TREE_VIEW_HEADER						,
 							OBJECT_FACET_CONFIDENCE					,
+							OBJECT_FOOTPRINT_TOP					,
 							OBJECT_FOOTPRINT_HEIGHT					,
 							OBJECT_BLOCK_TOP						,
 							OBJECT_BLOCK_BOTTOM						,
@@ -217,6 +218,7 @@ private:
 	QAbstractItemView* m_view;
 
 	void footprintHeightChanged(double pos);
+	void footprintTopChanged(double pos);
 	void BlockTopChanged(double pos);
 	void BlockBottomChanged(double pos);
 	void facetConfidenceChanged(double pos);

@@ -23,6 +23,7 @@ StFootPrint::StFootPrint(GenericIndexedCloudPersist* associatedCloud)
 	: ccPolyline(associatedCloud)
 	, m_ground(0)
 	, m_hole(false)
+	, m_componentId(-1)
 {
 }
 
@@ -30,6 +31,7 @@ StFootPrint::StFootPrint(StFootPrint& obj)
 	: ccPolyline(obj)
 	, m_ground(obj.m_ground)
 	, m_hole(false)
+	, m_componentId(-1)
 {
 	
 }
@@ -38,6 +40,7 @@ StFootPrint::StFootPrint(ccPolyline& obj)
 	: ccPolyline(obj)
 	, m_ground(0)
 	, m_hole(false)
+	, m_componentId(-1)
 {
 }
 
@@ -78,6 +81,79 @@ void StFootPrint::setHeight(double height)
 		P.z = height;
 	}
 	invalidateBoundingBox();
+}
+
+void StFootPrint::drawMeOnly(CC_DRAW_CONTEXT & context)
+{
+	//call parent method
+	ccPolyline::drawMeOnly(context);
+
+	if (!MACRO_Draw3D(context))
+		return;
+
+	if (isSelected()) {
+		unsigned vertCount = size();
+		if (vertCount < 2)
+			return;
+
+		//get the set of OpenGL functions (version 2.1)
+		QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+		assert(glFunc != nullptr);
+
+		if (glFunc == nullptr)
+			return;
+
+		//standard case: list names pushing
+		bool pushName = MACRO_DrawEntityNames(context);
+		if (pushName)
+			glFunc->glPushName(getUniqueIDForDisplay());
+
+		if (isColorOverriden())
+			ccGL::Color3v(glFunc, getTempColor().rgb);
+		else if (colorsShown())
+			ccGL::Color3v(glFunc, m_rgbColor.rgb);
+
+		//display polyline
+		bool line_bit_pushed = false;
+		if (m_width != 0)
+		{
+			glFunc->glPushAttrib(GL_LINE_BIT);
+			line_bit_pushed = true;
+			glFunc->glLineWidth(static_cast<GLfloat>(m_width));
+		}
+
+		//DGM: we do the 'GL_LINE_LOOP' manually as I have a strange bug
+	//on one on my graphic card with this mode!
+	//glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
+		glFunc->glBegin(GL_LINE_STRIP);
+		for (unsigned i = 0; i < vertCount; ++i)
+		{
+			CCVector3* p = const_cast<CCVector3*>(getPoint(i));
+			float v[3];
+			v[0] = p->x;
+			v[1] = p->y;
+			v[2] = m_top;
+			ccGL::Vertex3v(glFunc, v);
+		}
+		if (m_isClosed)
+		{
+			CCVector3* p = const_cast<CCVector3*>(getPoint(0));
+			float v[3];
+			v[0] = p->x;
+			v[1] = p->y;
+			v[2] = m_top;
+			ccGL::Vertex3v(glFunc, v);
+		}
+		glFunc->glEnd();
+
+		if (line_bit_pushed/*m_width != 0*/)
+		{
+			glFunc->glPopAttrib();	//GL_LINE_BIT
+		}
+
+		if (pushName)
+			glFunc->glPopName();
+	}
 }
 
 bool StFootPrint::toFile_MeOnly(QFile & out) const

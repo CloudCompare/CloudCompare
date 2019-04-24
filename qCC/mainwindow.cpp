@@ -11633,19 +11633,6 @@ void MainWindow::doActionBDPrimPlaneFrame()
 	QString used_method = QInputDialog::getItem(this, "Boundary extraction", "method", methods, 0, false, &ok);
 	if (!ok) return;
 
-	//! dialog
-	stocker::FrameOption option;
-	option.buffer_size = 1;
-	option.snap_epsilon = 1;
-	option.candidate_buffer_h = 1;
-	option.candidate_buffer_v = 2;
-	option.lamda_coverage = 0.5;
-	option.lamda_sharpness = 0.5;
-	option.lamda_smooth_term = 10;
-	option.bdransac_epsilon = 0.5;
-	option.line_ptmin = 10;
-	option.bdransac_radius = 3;
-
 	ccHObject *entity = getSelectedEntities().front();
 	ccHObject::Container plane_container = GetPlaneEntitiesBySelected(entity);
 
@@ -11668,6 +11655,19 @@ void MainWindow::doActionBDPrimPlaneFrame()
 				if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame, false, false); }
 			}
 			else if (used_method == "optimization") {
+				//! dialog
+				stocker::FrameOption option;
+				option.buffer_size = 1;
+				option.snap_epsilon = 1;
+				option.candidate_buffer_h = 1;
+				option.candidate_buffer_v = 2;
+				option.lamda_coverage = 0.5;
+				option.lamda_sharpness = 0.5;
+				option.lamda_smooth_term = 10;
+				option.bdransac_epsilon = 0.5;
+				option.line_ptmin = 10;
+				option.bdransac_radius = 3;
+
 				ccHObject* frame = PlaneFrameOptimization(planeObj, option);
 				if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame, false, false); }
 			}
@@ -12602,9 +12602,47 @@ void MainWindow::doActionBDPolyFitSettings()
 	m_pbdrpfDlg->show();
 }
 
+#include "builderlod2/lod2parser.h"
 void MainWindow::doActionBDFootPrintAuto()
 {
+	if (!haveSelection()){
+		return;
+	}
+	ccHObject *entity = getSelectedEntities().front();
+	StBuilding* building = GetParentBuilding(entity);
+	if (!building) {
+		ccConsole::Error("No building in selection!");
+		return;
+	}
+	QString building_name(GetBaseName(building->getName()));
 
+	BDBaseHObject* baseObj = GetRootBDBase(entity);
+	if (!baseObj) {
+		dispToConsole(s_no_project_error, ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name, false);
+	if (!prim_group) { 
+		dispToConsole("generate primitives first!", ERR_CONSOLE_MESSAGE); 
+		return; 
+	}
+	
+	try {
+		ccHObject::Container footprints = GenerateFootPrints(prim_group);
+		for (ccHObject* ft : footprints) {
+			if (ft && ft->isA(CC_TYPES::ST_FOOTPRINT)) {
+				SetGlobalShiftAndScale(ft);
+				ft->setDisplay_recursive(entity->getDisplay());
+				addToDB(ft, true, false);				
+			}			
+		}
+	}
+	catch (const std::runtime_error& e) {
+		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDFootPrintManual()
@@ -12614,7 +12652,7 @@ void MainWindow::doActionBDFootPrintManual()
 	ccHObject *entity = getSelectedEntities().front();
 	StBuilding* building = GetParentBuilding(entity);
 	if (!building) {
-		ccConsole::Error("No building cloud in selection!");
+		ccConsole::Error("No building in selection!");
 		return;
 	}
 	QString building_name(GetBaseName(building->getName()));
@@ -12722,7 +12760,7 @@ void MainWindow::doActionBDLoD1Generation()
 			if (bd_model_obj) {
 				SetGlobalShiftAndScale(bd_model_obj);
 				bd_model_obj->setDisplay_recursive(entity->getDisplay());
-				addToDB(bd_model_obj);
+				addToDB(bd_model_obj, true, false);
 			}
 		}
 		catch (std::runtime_error& e) {

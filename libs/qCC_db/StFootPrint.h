@@ -40,20 +40,32 @@ public:
 	bool reverseVertexOrder();
 
 	inline double getHeight() const;
-	void setHeight(double height);
+	void setHeight(double height);	//! attention: will set all the points z to height
+
+	inline double getTop() const { return m_top; }
+	void setTop(double top) { m_top = top; }
+
 	inline double getGround() const { return m_ground; }
 	void setGround(double ground) { m_ground = ground; }
+	
 	inline bool isHole() const { return m_hole; }
 	void setHoleState(bool state) { m_hole = state; }
 
+	inline int getComponentId() { return m_componentId; }
+	void setComponentId(int id) { m_componentId = id; }
+
 protected:
+	//inherited from ccDrawable
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const override;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
+	double m_top;
 	double m_ground;
 	bool m_hole;
+	int m_componentId;
 };
 
 #endif //ST_FOOTPRINT_HEADER

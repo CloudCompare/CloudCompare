@@ -159,6 +159,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_CLOUD_POINT_SIZE:
 		case OBJECT_FACET_CONFIDENCE:
 		case OBJECT_FOOTPRINT_HEIGHT:
+		case OBJECT_FOOTPRINT_TOP:
 		case OBJECT_BLOCK_TOP:
 		case OBJECT_BLOCK_BOTTOM:
 			return QSize(50, 24);
@@ -1446,6 +1447,18 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		outputWidget = spinBox;
 	}
 	break;
+	case OBJECT_FOOTPRINT_TOP:
+	{
+		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+		spinBox->setRange(-DBL_MAX, DBL_MAX);
+		spinBox->setSingleStep(0.1);
+
+		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+			this, &ccPropertiesTreeDelegate::footprintTopChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
 	case OBJECT_BLOCK_TOP:
 	{
 		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
@@ -1820,6 +1833,13 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		StFootPrint* footprint = ccHObjectCaster::ToStFootPrint(m_currentObject);
 		assert(footprint);
 		SetDoubleSpinBoxValue(editor, footprint ? footprint->getHeight() : VALID_MINUS_INT);
+	}
+	break;
+	case OBJECT_FOOTPRINT_TOP:
+	{
+		StFootPrint* footprint = ccHObjectCaster::ToStFootPrint(m_currentObject);
+		assert(footprint);
+		SetDoubleSpinBoxValue(editor, footprint ? footprint->getTop() : VALID_MINUS_INT);
 	}
 	break;
 	case OBJECT_BLOCK_TOP:
@@ -2609,7 +2629,18 @@ void ccPropertiesTreeDelegate::footprintHeightChanged(double pos)
 	StFootPrint* polyline = ccHObjectCaster::ToStFootPrint(m_currentObject);
 	assert(polyline);
 	polyline->setHeight(pos);
-	//updateDisplay();
+	updateDisplay();
+}
+
+void ccPropertiesTreeDelegate::footprintTopChanged(double pos)
+{
+	if (!m_currentObject)
+		return;
+
+	StFootPrint* polyline = ccHObjectCaster::ToStFootPrint(m_currentObject);
+	assert(polyline);
+	polyline->setTop(pos);
+	updateDisplay();
 }
 
 void ccPropertiesTreeDelegate::BlockTopChanged(double pos)
@@ -2688,8 +2719,9 @@ void ccPropertiesTreeDelegate::fillWithStFootPrint(const StFootPrint *_obj)
 	assert(_obj && m_model);
 	addSeparator(tr("FootPrint"));
 
-	//footprint height
-	appendRow(ITEM(tr("Height")), PERSISTENT_EDITOR(OBJECT_FOOTPRINT_HEIGHT), true);
+	//footprint TOP height
+	appendRow(ITEM(tr("top height")), PERSISTENT_EDITOR(OBJECT_FOOTPRINT_TOP), true);
+/*OBJECT_FOOTPRINT_HEIGHT*/
 
 	//number of vertices
 	appendRow(ITEM(tr("Vertices")), ITEM(QLocale(QLocale::English).toString(_obj->size())));

@@ -88,8 +88,12 @@ stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker:
 	}
 	else if (!entity->isA(CC_TYPES::POINT_CLOUD)) return points;
 
+	if (polygon.empty()) {
+		return GetPointsFromCloud(entity);
+	}
+
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-	if (!cloud) return points;
+	if (!cloud) return points;	
 
 	std::vector<vcg::Segment2d> polygon_2d;
 	bool use_height = false;
@@ -494,6 +498,7 @@ std::string BDBaseHObject::GetPathModelObj(std::string building_name)
 stocker::BuildUnit BDBaseHObject::GetBuildingUnit(std::string building_name) {
 	auto iter = block_prj.m_builder.sbuild.find(BuilderBase::BuildNode::Create(building_name));
 	if (iter == block_prj.m_builder.sbuild.end()) {
+		throw runtime_error("internal error: cannot find building");
 		return stocker::BuildUnit("invalid");
 	}
 	else return (*iter)->data;
@@ -719,6 +724,33 @@ ccPointCloud* AddSegmentsAsPlane(stocker::Polyline3d lines, QString lines_prefix
 	}
 
 	return plane_cloud;
+}
+
+ccPolyline* AddPolygonAsPolyline(stocker::Contour3d points, QString name, ccColor::Rgb col, bool close)
+{
+	ccPointCloud* cloudObj = AddPointsAsPointCloud(points, "vertices", col);
+	if (!cloudObj) { return nullptr; }
+	ccPolyline* polylineObj = new ccPolyline(cloudObj);
+	polylineObj->reserve(cloudObj->size());
+	for (size_t i = 0; i < cloudObj->size(); i++) {
+		polylineObj->addPointIndex(i);
+	}
+	if (close) {
+		polylineObj->addPointIndex(0);
+		polylineObj->setClosed(true);
+	}
+	else {
+		polylineObj->setClosed(false);
+	}
+	polylineObj->addChild(cloudObj);
+
+	return polylineObj;
+}
+
+ccPolyline* AddPolygonAsPolyline(stocker::Polyline3d polygon, QString name, ccColor::Rgb col, bool close)
+{
+	Contour3d points = ToContour(polygon, 3);
+	return AddPolygonAsPolyline(points, name, col, close);
 }
 
 StPrimGroup* AddPlanesPointsAsNewGroup(QString name, std::vector<stocker::Contour3d> planes_points)
@@ -2114,6 +2146,72 @@ std::vector<std::vector<int>> GroupFootPrint(ccHObject::Container footprintObjs)
 		components.push_back(compo_temp);
 	}
 	return components;
+}
+
+ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
+{
+	ccHObject::Container foot_print_objs;
+	BDBaseHObject* baseObj = GetRootBDBase(prim_group);
+	if (!baseObj) { return foot_print_objs; }
+
+	ccHObject::Container primObjs_temp = GetEnabledObjFromGroup(prim_group, CC_TYPES::PLANE, true, true);
+	//! skip walls
+	ccHObject::Container primObjs;
+	double err_angle = 15 * CC_DEG_TO_RAD;
+	for (auto & plane_entity : primObjs_temp) {
+		ccPlane* planeObj = ccHObjectCaster::ToPlane(plane_entity);
+		if (!planeObj) { continue; }
+		//! skip vertical
+		CCVector3 N; PointCoordinateType d;
+		planeObj->getEquation(N, d);
+		double product = N.dot(CCVector3(0, 0, 1));
+		if ((product > 0 && product < err_angle) || (product < 0 && product > -err_angle)) {
+			continue;
+		}
+		primObjs.push_back(planeObj->getParent());
+	}
+
+	std::vector<stocker::Contour3d> planes_points = GetPointsFromCloudInsidePolygonXY(primObjs, stocker::Polyline3d(), false);
+	if (planes_points.empty()) { return foot_print_objs; }
+
+	std::vector<std::vector<Contour3d>> components_foots;
+	std::vector<std::vector<double>> components_top_heights;
+	DeriveRoofLayerFootPrints(planes_points, components_foots, components_top_heights, 1, false, 1, 50, 50);
+
+	int cur_compo_count = 0; // TODO: get component count from block
+	
+	QString building_name = GetBaseName(prim_group->getName());
+	auto buildUnit = baseObj->GetBuildingUnit(building_name.toStdString());
+
+	StBlockGroup* block_group = baseObj->GetBlockGroup(building_name, false);
+	int biggest = GetMaxNumberExcludeChildPrefix(block_group, BDDB_FOOTPRINT_PREFIX);
+	assert(components_foots.size() == components_top_heights.size());
+	for (size_t i = 0; i < components_foots.size(); i++) {
+		int compoId = cur_compo_count + i;
+		assert(components_top_heights[i].size() == components_foots[i].size());
+		std::vector<double> footprints_tops = components_top_heights[i];
+		for (size_t j = 0; j < components_foots[i].size(); j++) {
+			Contour3d foot_print = components_foots[i][j];
+			double top_height = components_top_heights[i][j];
+			QString name = BDDB_FOOTPRINT_PREFIX + QString::number(++biggest);
+			ccPolyline* polyline = AddPolygonAsPolyline(foot_print, name, ccColor::magenta, true);
+			StFootPrint* footptObj = new StFootPrint(0);			
+			ccPointCloud* vertices = 0;
+			footptObj->initWith(vertices, *polyline);
+			footptObj->setAssociatedCloud(vertices);			
+			footptObj->setColor(ccColor::magenta);
+			footptObj->setName(name);
+			footptObj->setComponentId(compoId);
+			footptObj->setTop(top_height);
+			footptObj->setGround(buildUnit.ground_height);
+
+			foot_print_objs.push_back(footptObj);
+			block_group->addChild(footptObj);
+			delete polyline;
+			polyline = nullptr;
+		}
+	}
+	return foot_print_objs;
 }
 
 ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)

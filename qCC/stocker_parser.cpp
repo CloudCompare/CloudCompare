@@ -71,7 +71,7 @@ stocker::Contour3d GetPointsFromCloud(ccHObject* entity)
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker::Polyline3d polygon, double height)
 {	
 	stocker::Contour3d points;
-	if (entity->isA(CC_TYPES::ST_PRIMGROUP)) {
+	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT)) {
 		ccHObject::Container planes_container, plane_cloud_container;
 		entity->filterChildren(planes_container, true, CC_TYPES::PLANE, true);
 		for (ccHObject* pl_obj : planes_container) {
@@ -79,8 +79,7 @@ stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker:
 				plane_cloud_container.push_back(pl_obj->getParent());
 			}			
 		}
-		std::vector<Contour3d> planes_points;
-		planes_points = GetPointsFromCloudInsidePolygonXY(plane_cloud_container, polygon, height);
+		std::vector<Contour3d> planes_points = GetPointsFromCloudInsidePolygonsXY(plane_cloud_container, polygon, height);
 		for (auto & pl_pts : planes_points) {
 			points.insert(points.end(), pl_pts.begin(), pl_pts.end());
 		}
@@ -125,7 +124,7 @@ stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker:
 	return points;
 }
 
-std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonXY(ccHObject::Container entities, stocker::Polyline3d polygon, double height, bool skip_empty)
+std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonsXY(ccHObject::Container entities, stocker::Polyline3d polygon, double height, bool skip_empty)
 {
 	std::vector<stocker::Contour3d> all_points;
 	for (ccHObject* entity : entities) {
@@ -135,6 +134,17 @@ std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonXY(ccHObject::Con
 		}		
 	}
 	return all_points;
+}
+std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonsXY(ccHObject* entity, stocker::Polyline3d polygon, double height, bool skip_empty)
+{
+	ccHObject::Container planes_container, plane_cloud_container;
+	entity->filterChildren(planes_container, true, CC_TYPES::PLANE, true);
+	for (ccHObject* pl_obj : planes_container) {
+		if (pl_obj->isEnabled() && pl_obj->getParent() && pl_obj->getParent()->isEnabled()) {
+			plane_cloud_container.push_back(pl_obj->getParent());
+		}
+	}
+	return GetPointsFromCloudInsidePolygonsXY(plane_cloud_container, polygon, height, skip_empty);
 }
 
 stocker::Contour3d GetPointsFromCloudInsidePolygon3d(ccHObject* entity, stocker::Polyline3d polygon, stocker::Contour3d& remained, double distance_threshold)
@@ -2160,7 +2170,7 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 	double err_angle = 15 * CC_DEG_TO_RAD;
 	for (auto & plane_entity : primObjs_temp) {
 		ccPlane* planeObj = ccHObjectCaster::ToPlane(plane_entity);
-		if (!planeObj) { continue; }
+		if (!planeObj || !planeObj->isEnabled()) { continue; }
 		//! skip vertical
 		CCVector3 N; PointCoordinateType d;
 		planeObj->getEquation(N, d);
@@ -2168,10 +2178,11 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 		if ((product > 0 && product < err_angle) || (product < 0 && product > -err_angle)) {
 			continue;
 		}
+		if (!planeObj->getParent() || !planeObj->getParent()->isEnabled()) { continue; }
 		primObjs.push_back(planeObj->getParent());
 	}
 
-	std::vector<stocker::Contour3d> planes_points = GetPointsFromCloudInsidePolygonXY(primObjs, stocker::Polyline3d(), false);
+	std::vector<stocker::Contour3d> planes_points = GetPointsFromCloudInsidePolygonsXY(primObjs, stocker::Polyline3d(), false);
 	if (planes_points.empty()) { return foot_print_objs; }
 
 	std::vector<std::vector<Contour3d>> components_foots;
@@ -2326,19 +2337,17 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 }
 
 //! 3D4EM	.lod2.model
-ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footprintObjs, double ground_height)
+ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Container footprintObjs, double ground_height)
 {
 	if (!buildingObj) { return nullptr; }
 	BDBaseHObject* baseObj = GetRootBDBase(buildingObj);
-	if (!baseObj) {
-		return nullptr;
-	}
+	if (!baseObj) { return nullptr;	}
 	QString building_name = buildingObj->getName();
 	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
 	ccHObject* cloudObj = baseObj->GetOriginPointCloud(building_name, true);
 	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
-
 	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
+	if (!cloudObj || !prim_group_obj || !blockgroup_obj) { return nullptr; }
 
 	bool use_footprint = true;
 	if (footprintObjs.empty()) {
@@ -2409,12 +2418,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 
 		// primitive first
 		if (prim_group_obj) {
-			ccHObject::Container prim_objs = GetEnabledObjFromGroup(prim_group_obj, CC_TYPES::PLANE, true, true);
-			ccHObject::Container point_cloud_objs;
-			for (ccHObject* obj : prim_objs) {
-				if (obj->getParent() && obj->getParent()->isEnabled()) { point_cloud_objs.push_back(obj->getParent()); }
-			}
-			std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonXY(point_cloud_objs, first_polygon, footprint_height);
+			std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(prim_group_obj, first_polygon, footprint_height);
 			builder_3d4em.SetSegmentedPoints(points);
 		}
 		else if (cloudObj) {

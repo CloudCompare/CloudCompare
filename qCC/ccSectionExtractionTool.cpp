@@ -2216,7 +2216,8 @@ void ccSectionExtractionTool::exportFootprintInside()
 					duplicatePoly->setName(cur_name);
 					duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
 					duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
-					duplicatePoly->setGround(m_ground);
+					duplicatePoly->setBottom(m_ground);
+					duplicatePoly->setTop(m_ground);
 					duplicatePoly->setHeight(m_ground);
 					section.entity = duplicatePoly;
 				}
@@ -2300,8 +2301,9 @@ void ccSectionExtractionTool::exportFootprintOutside()
 					duplicatePoly->setName(cur_name);
 					duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
 					duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
-					duplicatePoly->setGround(m_ground);
+					duplicatePoly->setBottom(m_ground);
 					duplicatePoly->setHeight(m_ground);
+					duplicatePoly->setTop(m_ground);
 					section.entity = duplicatePoly;
 				}
 				else {

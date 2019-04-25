@@ -21,7 +21,7 @@
 
 StFootPrint::StFootPrint(GenericIndexedCloudPersist* associatedCloud)
 	: ccPolyline(associatedCloud)
-	, m_ground(0)
+	, m_bottom(0)
 	, m_hole(false)
 	, m_componentId(-1)
 {
@@ -29,7 +29,7 @@ StFootPrint::StFootPrint(GenericIndexedCloudPersist* associatedCloud)
 
 StFootPrint::StFootPrint(StFootPrint& obj)
 	: ccPolyline(obj)
-	, m_ground(obj.m_ground)
+	, m_bottom(obj.m_bottom)
 	, m_hole(false)
 	, m_componentId(-1)
 {
@@ -38,7 +38,7 @@ StFootPrint::StFootPrint(StFootPrint& obj)
 
 StFootPrint::StFootPrint(ccPolyline& obj)
 	: ccPolyline(obj)
-	, m_ground(0)
+	, m_bottom(0)
 	, m_hole(false)
 	, m_componentId(-1)
 {
@@ -162,10 +162,16 @@ bool StFootPrint::toFile_MeOnly(QFile & out) const
 		return false;
 	}
 	
-	if (out.write((const char*)&m_ground, sizeof(double)) < 0)
+	if (out.write((const char*)&m_bottom, sizeof(double)) < 0)
 		return WriteError();
 
 	if (out.write((const char*)&m_hole, sizeof(bool)) < 0)
+		return WriteError();
+
+	if (out.write((const char*)&m_top, sizeof(double)) < 0)
+		return WriteError();
+
+	if (out.write((const char*)&m_componentId, sizeof(int)) < 0)
 		return WriteError();
 
 	return true;
@@ -178,10 +184,16 @@ bool StFootPrint::fromFile_MeOnly(QFile & in, short dataVersion, int flags)
 	}
 
 
-	if (in.read((char*)&m_ground, sizeof(double)) < 0)
+	if (in.read((char*)&m_bottom, sizeof(double)) < 0)
 		return ReadError();
 
 	if (in.read((char*)&m_hole, sizeof(bool)) < 0)
+		return ReadError();
+
+	if (in.read((char*)&m_top, sizeof(double)) < 0)
+		return ReadError();
+
+	if (in.read((char*)&m_componentId, sizeof(int)) < 0)
 		return ReadError();
 
 	return true;

@@ -45,8 +45,8 @@ public:
 	inline double getTop() const { return m_top; }
 	void setTop(double top) { m_top = top; }
 
-	inline double getGround() const { return m_ground; }
-	void setGround(double ground) { m_ground = ground; }
+	inline double getBottom() const { return m_bottom; }
+	void setBottom(double bottom) { m_bottom = bottom; }
 	
 	inline bool isHole() const { return m_hole; }
 	void setHoleState(bool state) { m_hole = state; }
@@ -63,7 +63,7 @@ protected:
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	double m_top;
-	double m_ground;
+	double m_bottom;
 	bool m_hole;
 	int m_componentId;
 };

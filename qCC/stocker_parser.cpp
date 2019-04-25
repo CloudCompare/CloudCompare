@@ -95,18 +95,18 @@ stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker:
 	if (!cloud) return points;	
 
 	std::vector<vcg::Segment2d> polygon_2d;
-	bool use_height = false;
+	double min_polygon_height = DBL_MAX;
 	for (auto & seg : polygon) {
 		polygon_2d.push_back(vcg::Segment2d(ToVec2d(seg.P0()), ToVec2d(seg.P1())));
-		if (height > seg.P0().Z() || height > seg.P1().Z()) {
-			use_height = true;
-		}
+		if (seg.P0().Z() < min_polygon_height) { min_polygon_height = seg.P0().Z(); }
+		if (seg.P1().Z() < min_polygon_height) { min_polygon_height = seg.P1().Z(); }
 	}
+	
 	Concurrency::concurrent_vector<Vec3d> points_parallel;
-	if (use_height) {
+	if (height > min_polygon_height) {
 		Concurrency::parallel_for((size_t)0, (size_t)cloud->size(), [&](size_t i) {
 			CCVector3 pt = *cloud->getPoint(i);
-			if (vcg::PointInsidePolygon({ pt.x,pt.y }, polygon_2d) && pt.z < height) {
+			if (vcg::PointInsidePolygon({ pt.x,pt.y }, polygon_2d) && pt.z < height && pt.z > min_polygon_height) {
 				points_parallel.push_back({ pt.x, pt.y, pt.z });
 			}
 		});
@@ -2099,12 +2099,13 @@ bool DeduceFootPrintHeight(ccHObject* point_cloud, ccHObject* primitive, ccHObje
 	StFootPrint* polyObj = ccHObjectCaster::ToStFootPrint(footprint);
 	assert(polyObj);
 	Polyline3d polygon = GetPolygonFromPolyline(polyObj);
+	
 	Contour3d points;
 	if (point_cloud) {
-		points = GetPointsFromCloudInsidePolygonXY(point_cloud, polygon, DBL_MAX);
+		points = GetPointsFromCloudInsidePolygonXY(point_cloud, polygon, -DBL_MAX);
 	}
 	else if (primitive) {
-		points = GetPointsFromCloudInsidePolygonXY(primitive, polygon, DBL_MAX);
+		points = GetPointsFromCloudInsidePolygonXY(primitive, polygon, -DBL_MAX);
 	}
 	if (points.empty()) {
 		return false;
@@ -2158,16 +2159,11 @@ std::vector<std::vector<int>> GroupFootPrint(ccHObject::Container footprintObjs)
 	return components;
 }
 
-ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
+ccHObject::Container GetNonHorizontalPlaneClouds(ccHObject* stprim_group, double angle_degree = 15)
 {
-	ccHObject::Container foot_print_objs;
-	BDBaseHObject* baseObj = GetRootBDBase(prim_group);
-	if (!baseObj) { return foot_print_objs; }
-
-	ccHObject::Container primObjs_temp = GetEnabledObjFromGroup(prim_group, CC_TYPES::PLANE, true, true);
-	//! skip walls
+	ccHObject::Container primObjs_temp = GetEnabledObjFromGroup(stprim_group, CC_TYPES::PLANE, true, true);
 	ccHObject::Container primObjs;
-	double err_angle = 15 * CC_DEG_TO_RAD;
+	double err_angle = angle_degree * CC_DEG_TO_RAD;
 	for (auto & plane_entity : primObjs_temp) {
 		ccPlane* planeObj = ccHObjectCaster::ToPlane(plane_entity);
 		if (!planeObj || !planeObj->isEnabled()) { continue; }
@@ -2181,13 +2177,25 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 		if (!planeObj->getParent() || !planeObj->getParent()->isEnabled()) { continue; }
 		primObjs.push_back(planeObj->getParent());
 	}
+	return primObjs;
+}
+
+ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
+{
+	ccHObject::Container foot_print_objs;
+	BDBaseHObject* baseObj = GetRootBDBase(prim_group);
+	if (!baseObj) { return foot_print_objs; }
+
+	//! skip walls
+	ccHObject::Container primObjs = GetNonHorizontalPlaneClouds(prim_group, 15);
 
 	std::vector<stocker::Contour3d> planes_points = GetPointsFromCloudInsidePolygonsXY(primObjs, stocker::Polyline3d(), false);
 	if (planes_points.empty()) { return foot_print_objs; }
 
 	std::vector<std::vector<Contour3d>> components_foots;
 	std::vector<std::vector<double>> components_top_heights;
-	DeriveRoofLayerFootPrints(planes_points, components_foots, components_top_heights, 1, false, 1, 50, 50);
+	std::vector<std::vector<double>> components_bottom_heights;
+	DeriveRoofLayerFootPrints(planes_points, components_foots, components_top_heights, components_bottom_heights, 1, false, 1, 50, 50);
 
 	int cur_compo_count = 0; // TODO: get component count from block
 	
@@ -2204,6 +2212,7 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 		for (size_t j = 0; j < components_foots[i].size(); j++) {
 			Contour3d foot_print = components_foots[i][j];
 			double top_height = components_top_heights[i][j];
+			double bottom_height = components_bottom_heights[i][j];
 			QString name = BDDB_FOOTPRINT_PREFIX + QString::number(++biggest);
 			ccPolyline* polyline = AddPolygonAsPolyline(foot_print, name, ccColor::magenta, true);
 			StFootPrint* footptObj = new StFootPrint(0);			
@@ -2211,10 +2220,11 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 			footptObj->initWith(vertices, *polyline);
 			footptObj->setAssociatedCloud(vertices);			
 			footptObj->setColor(ccColor::magenta);
+			footptObj->showColors(true);
 			footptObj->setName(name);
 			footptObj->setComponentId(compoId);
 			footptObj->setTop(top_height);
-			footptObj->setGround(buildUnit.ground_height);
+			footptObj->setBottom(bottom_height);
 
 			foot_print_objs.push_back(footptObj);
 			block_group->addChild(footptObj);
@@ -2241,13 +2251,13 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 	ccHObject::Container footprintObjs = blockgroup_obj->getFootPrints();
 
 	for (size_t i = 0; i < footprintObjs.size(); i++) {
-		if (!footprintObjs[i]->isEnabled()) continue;
-
 		StFootPrint* foot_print = ccHObjectCaster::ToStFootPrint(footprintObjs[i]);
+		if (!foot_print || !foot_print->isEnabled()) continue;
+		
 		//! get height
 		Contour3d points_inside;
 		double height = foot_print->getHeight();
-		double ground = foot_print->getGround();
+		double ground = build_unit.ground_height;
 		if (fabs(height - ground) < 1e-6) {
 			if (!DeduceFootPrintHeight(cloudObj, prim_group_obj, footprintObjs[i], points_inside, height)) {
 				std::cout << "cannot deduce height from footprint " << foot_print->getName().toStdString() << std::endl;
@@ -2344,10 +2354,9 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 	if (!baseObj) { return nullptr;	}
 	QString building_name = buildingObj->getName();
 	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
-	ccHObject* cloudObj = baseObj->GetOriginPointCloud(building_name, true);
 	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
 	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
-	if (!cloudObj || !prim_group_obj || !blockgroup_obj) { return nullptr; }
+	if (!prim_group_obj || !blockgroup_obj) { return nullptr; }
 
 	bool use_footprint = true;
 	if (footprintObjs.empty()) {
@@ -2394,7 +2403,7 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 			if (j == 0) {
 				valid = true;
 				first_polygon = polygon;
-				footprint_height = ccHObjectCaster::ToStFootPrint(first_footprint)->getHeight();
+				footprint_height = ccHObjectCaster::ToStFootPrint(first_footprint)->getTop();
 			}
 			contours.push_back(ToContour(polygon, 0));
 		}
@@ -2416,20 +2425,9 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 		}
 		builder_3d4em.SetGroundHeight(ground_height);
 
-		// primitive first
-		if (prim_group_obj) {
-			std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(prim_group_obj, first_polygon, footprint_height);
-			builder_3d4em.SetSegmentedPoints(points);
-		}
-		else if (cloudObj) {
-			Contour3d points = GetPointsFromCloudInsidePolygonXY(cloudObj, first_polygon, footprint_height);
-			builder_3d4em.SetBuildingPoints(points);
-			if (!builder_3d4em.PlaneSegmentation()) continue;;
-		}
-		else {
-			throw std::runtime_error("cannot find original points or primitive group");
-			continue;
-		}
+		ccHObject::Container primObjs = GetNonHorizontalPlaneClouds(prim_group_obj, 15);
+		std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(primObjs, first_polygon, footprint_height);
+		builder_3d4em.SetSegmentedPoints(points);		
 
 		if (!builder_3d4em.BuildingReconstruction()) continue;
 
@@ -2453,12 +2451,85 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 	return blockgroup_obj;
 }
 
+ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footprintObjs, double ground_height)
+{
+	if (!buildingObj || footprintObjs.empty()) { return nullptr; }
+	BDBaseHObject* baseObj = GetRootBDBase(buildingObj);
+	if (!baseObj) { return nullptr; }
+	QString building_name = buildingObj->getName();
+	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
+	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
+	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
+	if (!prim_group_obj || !blockgroup_obj) { return nullptr; }
+
+	for (size_t i = 0; i < footprintObjs.size(); i++) {
+		StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(footprintObjs[i]);
+		if (!ftObj) { continue; }
+
+		std::vector<Contour3d> contours;
+		Polyline3d polygon = GetPolygonFromPolyline(ftObj);
+		for (auto & pt : polygon) {
+			pt.P0().Z() = ftObj->getBottom();
+			pt.P1().Z() = ftObj->getBottom();
+		}
+		contours.push_back(ToContour(polygon, 0));
+
+		stocker::BuilderLOD2 builder_3d4em(true);
+		builder_3d4em.SetFootPrint(contours);
+
+		char output_path[256];
+		{
+			//! just for debug 
+			QString model_name = BDDB_LOD2MODEL_PREFIX + ftObj->getName();
+			sprintf(output_path, "%s%s%s%s%s",
+				build_unit.file_path.model_dir.c_str(),
+				building_name.toStdString().c_str(), ".", model_name.toStdString().c_str(), ".obj");
+			builder_3d4em.SetOutputPath(output_path);
+		}
+		builder_3d4em.SetGroundHeight(ground_height);
+
+		ccHObject::Container primObjs = GetNonHorizontalPlaneClouds(prim_group_obj, 15);
+		std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(primObjs, polygon, ftObj->getTop());
+		builder_3d4em.SetSegmentedPoints(points);
+
+		if (!builder_3d4em.BuildingReconstruction()) continue;
+
+		if (!QFile::exists(QString(output_path))) continue;
+
+		std::vector<Contour3d> roof_polygons = builder_3d4em.GetRoofPolygons();
+		int block_number = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX) + 1;
+		for (Contour3d roof_points : roof_polygons) {
+			std::vector<CCVector3> top_points;
+			std::vector<CCVector3> bottom_points;
+			for (auto & pt : roof_points) {
+				top_points.push_back(CCVector3(vcgXYZ(pt)));
+				bottom_points.push_back(CCVector3(pt.X(), pt.Y(), ground_height));
+			}
+			StBlock* block_entity = new StBlock(top_points, bottom_points);
+
+			block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(block_number++));
+			ftObj->addChild(block_entity);
+		}
+	}
+	return blockgroup_obj;
+}
+
+#include <QMessageBox>
 ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, double ground_height)
-{	
+{
+	QMessageBox::StandardButton rb =
+		QMessageBox::question(NULL, "manual?", "Is the footprints generated all manually?", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+	bool manual = (rb == QMessageBox::Yes);
+
 	if (buildingObj->isA(CC_TYPES::ST_FOOTPRINT)) {
 		ccHObject::Container footprintObjs;
 		footprintObjs.push_back(buildingObj);
-		return LoD2FromFootPrint(GetParentBuilding(buildingObj), footprintObjs, ground_height);
+		if (manual) { // manual		
+			return LoD2FromFootPrint_WholeProcess(GetParentBuilding(buildingObj), footprintObjs, ground_height);
+		}
+		else {
+			return LoD2FromFootPrint(GetParentBuilding(buildingObj), footprintObjs, ground_height);
+		}
 	}
 	else if (buildingObj->isA(CC_TYPES::ST_BUILDING)) {
 		BDBaseHObject* baseObj = GetRootBDBase(buildingObj);
@@ -2467,6 +2538,11 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, double ground_height)
 		}
 		StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
 		ccHObject::Container footprintObjs = blockgroup_obj->getFootPrints();
-		return LoD2FromFootPrint(buildingObj, footprintObjs, ground_height);
+		if (manual) { // manual
+			return LoD2FromFootPrint_WholeProcess(buildingObj, footprintObjs, ground_height);
+		}
+		else {
+			return LoD2FromFootPrint(buildingObj, footprintObjs, ground_height);
+		}
 	}
 }

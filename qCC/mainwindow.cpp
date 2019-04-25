@@ -6460,7 +6460,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 								if (!cur_building) { break; }
 								BDBaseHObject* baseObj = GetRootBDBase(cur_building);
 								if (!baseObj) { break; }
-								prim_group = baseObj->GetPrimitiveGroup(cur_building->getName(), false);
+								prim_group = baseObj->GetPrimitiveGroup(cur_building->getName());
 								if (!prim_group) { break; }
 
 								int biggest = GetMaxNumberExcludeChildPrefix(prim_group, BDDB_PLANESEG_PREFIX);
@@ -11175,7 +11175,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 			ccHObject* cloudObj = _container[i];
 			ccPointCloud* todo_point = nullptr;
 			if (baseObj) {
-				todo_point = baseObj->GetTodoPoint(GetBaseName(cloudObj->getName()), false);
+				todo_point = baseObj->GetTodoPoint(GetBaseName(cloudObj->getName()));
 			}
 			ccHObject* seged = PlaneSegmentationRansac(cloudObj,
 				support_pts,
@@ -11201,7 +11201,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 			ccHObject* cloudObj = _container[i];
 			ccPointCloud* todo_point = nullptr; // no unassigned points returned by line grow
 			if (baseObj) {
-				todo_point = baseObj->GetTodoPoint(GetBaseName(cloudObj->getName()), false);
+				todo_point = baseObj->GetTodoPoint(GetBaseName(cloudObj->getName()));
 			}
 			ccHObject* seged = PlaneSegmentationRgGrow(cloudObj,
 				support_pts,
@@ -11244,9 +11244,9 @@ void MainWindow::doActionBDRetrieve()
 	}
 	for (ccHObject* building_entity : buildings) {
 		QString building_name = building_entity->getName();
-		StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name, false);
+		StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name);
 		ccPointCloud* orig_cloud = baseObj->GetOriginPointCloud(building_name, false);
-		ccPointCloud* todo_cloud = baseObj->GetTodoPoint(building_name, false);
+		ccPointCloud* todo_cloud = baseObj->GetTodoPoint(building_name);
 		
 		if (!prim_group || !orig_cloud || !todo_cloud) {
 			continue;
@@ -11321,7 +11321,8 @@ void MainWindow::doActionBDPrimIntersections()
 			BDBaseHObject* baseObj = GetRootBDBase(entity);
 			ccHObject::Container buildings = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
 			for (ccHObject* bd : buildings)	{
-				StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
+				StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName());
+				if (!primGroup->isEnabled()) continue;
 				ccHObject::Container cur_valid_planes = primGroup->getValidPlanes();
 				if (cur_valid_planes.size() > 1) {
 					building_prims.push_back(cur_valid_planes);
@@ -11399,7 +11400,7 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 			seg.P1() = baseObj->ToLocal(seg.P1());
 		}			
 		for (auto & bd : buildings)	{
-			ccHObject* planegroup_get = baseObj->GetPrimitiveGroup(GetBaseName(bd->getName()), false);
+			ccHObject* planegroup_get = baseObj->GetPrimitiveGroup(GetBaseName(bd->getName()));
 			if (planegroup_get)	primitive_groups.push_back(planegroup_get);
 		}
 	}
@@ -11469,7 +11470,7 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 		//! add unassigned sharps in bbox to .todo-TodoLine
 		{
 			ccPointCloud* existing_todo_line = nullptr;
-			if (baseObj) existing_todo_line = baseObj->GetTodoLine(GetBaseName(plane_group->getName()), false);
+			if (baseObj) existing_todo_line = baseObj->GetTodoLine(GetBaseName(plane_group->getName()));
 			
 			if (existing_todo_line)	{
 				AddSegmentsToVertices(existing_todo_line, unassigned_sharps, BDDB_TODOLINE_PREFIX, ccColor::darkGrey);
@@ -11505,7 +11506,7 @@ void MainWindow::doActionBDPrimPlaneFromSharp()
 		ccLog::Error("no parent building or project found!");
 		return;
 	}
-	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(buildingObj->getName(), false); assert(prim_group);
+	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(buildingObj->getName()); assert(prim_group);
 	int biggest = GetMaxNumberExcludeChildPrefix(prim_group, BDDB_PLANESEG_PREFIX); biggest++;
 	for (size_t i = 0; i < indices.size(); i++) {
 		if (indices[i].size() < 20) {
@@ -11808,7 +11809,8 @@ void MainWindow::doActionBDPrimCreateGround()
 			building_group = GetEnabledObjFromGroup(entity, CC_TYPES::ST_BUILDING, true, false);
 		}
 		for (ccHObject* bd : building_group) {
-			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
+			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName());
+			if (!primGroup->isEnabled()) { continue; }
 			prim_groups.push_back(primGroup);
 		}
 	}
@@ -12183,7 +12185,7 @@ void MainWindow::doActionBDPlaneCreate()
 		ccLog::Error("no parent building or project found!");
 		return;
 	}
-	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(buildingObj->getName(), false); assert(prim_group);
+	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(buildingObj->getName()); assert(prim_group);
 	
 	ccHObject::Container polylines;
 	for (auto & entity : m_selectedEntities) {
@@ -12205,7 +12207,7 @@ void MainWindow::doActionBDPlaneCreate()
 	plane_cloud->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
 
 	//! retrieve plane cloud from todo points
-	ccPointCloud* todo_cloud = baseObj->GetTodoPoint(buildingObj->getName(), false);
+	ccPointCloud* todo_cloud = baseObj->GetTodoPoint(buildingObj->getName());
 	assert(todo_cloud);
 	if (!todo_cloud) { delete plane_cloud; plane_cloud = nullptr; return; }
 
@@ -12338,7 +12340,7 @@ void MainWindow::doActionBDPolyFitHypothesis()
 	if (entity->getName().endsWith(BDDB_PRIMITIVE_SUFFIX))
 		primitiveObj = entity;
 	else {
-		primitiveObj = baseObj->GetPrimitiveGroup(GetBaseName(entity->getName()), true);
+		primitiveObj = baseObj->GetPrimitiveGroup(GetBaseName(entity->getName()));
 	}
 
 	if (!primitiveObj) {
@@ -12565,7 +12567,7 @@ void MainWindow::doActionBDPolyFitFacetFilter()
  	if (entity->getName().endsWith(BDDB_POLYFITHYPO_SUFFIX))
  		hypothesisObj = entity;
  	else {
- 		hypothesisObj = baseObj->GetHypothesisGroup(GetBaseName(entity->getName()), true);
+ 		hypothesisObj = baseObj->GetHypothesisGroup(GetBaseName(entity->getName()));
  	}
  
  	if (!hypothesisObj) {
@@ -12621,7 +12623,7 @@ void MainWindow::doActionBDFootPrintAuto()
 		dispToConsole(s_no_project_error, ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name, false);
+	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name);
 	if (!prim_group) { 
 		dispToConsole("generate primitives first!", ERR_CONSOLE_MESSAGE); 
 		return; 
@@ -12668,8 +12670,8 @@ void MainWindow::doActionBDFootPrintManual()
 		viewer_clouds.push_back(viewer_cloud);
 	}
 	else {
-		StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name, true);
-		if (!prim_group) { return; }
+		StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name);
+		if (!prim_group || !prim_group->isEnabled()) { return; }
 		ccHObject::Container primObjs = GetEnabledObjFromGroup(prim_group, CC_TYPES::PLANE, true, true);
 		for (size_t i = 0; i < primObjs.size(); i++) {
 			if (primObjs[i]->getParent() && primObjs[i]->getParent()->isA(CC_TYPES::POINT_CLOUD)) {
@@ -12677,7 +12679,7 @@ void MainWindow::doActionBDFootPrintManual()
 			}			
 		}
 	}
-	StBlockGroup* block_group = baseObj->GetBlockGroup(building_name, false);
+	StBlockGroup* block_group = baseObj->GetBlockGroup(building_name);
 	
 	if (viewer_clouds.empty() || !block_group) {
 		dispToConsole("No building cloud in selection!", ERR_CONSOLE_MESSAGE);

@@ -149,13 +149,13 @@ private:
 public:	
 	StBuilding* GetBuildingGroup(QString building_name, bool check_enable);
 	ccPointCloud* GetOriginPointCloud(QString building_name, bool check_enable);
-	StPrimGroup* GetPrimitiveGroup(QString building_name, bool check_enable);
-	StBlockGroup * GetBlockGroup(QString building_name, bool check_enable);
-	StPrimGroup * GetHypothesisGroup(QString building_name, bool check_enable);
+	StPrimGroup* GetPrimitiveGroup(QString building_name);
+	StBlockGroup * GetBlockGroup(QString building_name);
+	StPrimGroup * GetHypothesisGroup(QString building_name);
 	ccHObject* GetCameraGroup();
-	ccHObject* GetTodoGroup(QString building_name, bool check_enable);
-	ccPointCloud* GetTodoPoint(QString buildig_name, bool check_enable);
-	ccPointCloud* GetTodoLine(QString buildig_name, bool check_enable);
+	ccHObject* GetTodoGroup(QString building_name);
+	ccPointCloud* GetTodoPoint(QString buildig_name);
+	ccPointCloud* GetTodoLine(QString buildig_name);
 	stocker::Vec3d ToLocal(stocker::Vec3d pt) { return (pt + global_shift)*global_scale; }
 	stocker::Vec3d ToGlobal(stocker::Vec3d pt) { return pt / global_scale - global_shift; }
 

@@ -280,8 +280,8 @@ ccHObject::Container GetPlaneEntitiesBySelected(ccHObject* select)
 		BDBaseHObject* baseObj = GetRootBDBase(select); assert(baseObj);
 		ccHObject::Container buildings = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
 		for (ccHObject* bd : buildings) {
-			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName(), true);
-			if (!primGroup) { continue; }
+			StPrimGroup* primGroup = baseObj->GetPrimitiveGroup(bd->getName());
+			if (!primGroup || !primGroup->isEnabled()) { continue; }
 			ccHObject::Container cur_valid_planes = primGroup->getValidPlanes();
 			if (!cur_valid_planes.empty()) {
 				plane_container.insert(plane_container.end(), cur_valid_planes.begin(), cur_valid_planes.end());
@@ -382,8 +382,8 @@ ccPointCloud * BDBaseHObject::GetOriginPointCloud(QString building_name, bool ch
 	if(obj) return static_cast<ccPointCloud*>(obj);
 	return nullptr;
 }
-StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check_enable) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_PRIMITIVE_SUFFIX, building_name, check_enable);
+StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name) {
+	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_PRIMITIVE_SUFFIX, building_name, false);
 	if (obj) return static_cast<StPrimGroup*>(obj);
 	StPrimGroup* group = new StPrimGroup(building_name + BDDB_PRIMITIVE_SUFFIX);
 	if (group) {
@@ -393,8 +393,8 @@ StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name, bool check
 	}
 	return nullptr;
 }
-StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name, bool check_enable) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_BLOCKGROUP, BDDB_BLOCKGROUP_SUFFIX, building_name, check_enable);
+StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name) {
+	ccHObject* obj = GetHObj(CC_TYPES::ST_BLOCKGROUP, BDDB_BLOCKGROUP_SUFFIX, building_name, false);
 	if (obj) return static_cast<StBlockGroup*>(obj);
 	StBlockGroup* group = new StBlockGroup(building_name + BDDB_BLOCKGROUP_SUFFIX);
 	if (group) { 
@@ -404,8 +404,8 @@ StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name, bool check_en
 	}
 	return nullptr;
 }
-StPrimGroup * BDBaseHObject::GetHypothesisGroup(QString building_name, bool check_enable) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_POLYFITHYPO_SUFFIX, building_name, check_enable);
+StPrimGroup * BDBaseHObject::GetHypothesisGroup(QString building_name) {
+	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_POLYFITHYPO_SUFFIX, building_name, false);
 	if (obj) return static_cast<StPrimGroup*>(obj);
 	StPrimGroup* group = new StPrimGroup(building_name + BDDB_POLYFITHYPO_SUFFIX);
 	if (group) {
@@ -428,9 +428,9 @@ ccHObject * BDBaseHObject::GetCameraGroup()
 	}
 	return nullptr;
 }
-ccHObject * BDBaseHObject::GetTodoGroup(QString building_name, bool check_enable)
+ccHObject * BDBaseHObject::GetTodoGroup(QString building_name)
 {
-	ccHObject* obj = GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_TODOGROUP_SUFFIX, building_name, check_enable);
+	ccHObject* obj = GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_TODOGROUP_SUFFIX, building_name, false);
 	if (obj) return static_cast<StBlockGroup*>(obj);
 	StBlockGroup* group = new StBlockGroup(building_name + BDDB_TODOGROUP_SUFFIX);
 	if (group) {
@@ -441,9 +441,9 @@ ccHObject * BDBaseHObject::GetTodoGroup(QString building_name, bool check_enable
 	}
 	return nullptr;
 }
-ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name, bool check_enable)
+ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name)
 {
-	ccHObject* todo_group = GetTodoGroup(buildig_name, false);
+	ccHObject* todo_group = GetTodoGroup(buildig_name);
 	if (!todo_group) { throw std::runtime_error("internal error"); return nullptr; }
 	ccHObject::Container todo_children;
 	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOPOINT_PREFIX, true, CC_TYPES::POINT_CLOUD);
@@ -464,9 +464,9 @@ ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name, bool check_enab
 	}
 	return nullptr;
 }
-ccPointCloud * BDBaseHObject::GetTodoLine(QString buildig_name, bool check_enable)
+ccPointCloud * BDBaseHObject::GetTodoLine(QString buildig_name)
 {
-	ccHObject* todo_group = GetTodoGroup(buildig_name, false);
+	ccHObject* todo_group = GetTodoGroup(buildig_name);
 	if (!todo_group) { throw std::runtime_error("internal error"); return nullptr; }
 	ccHObject::Container todo_children;
 	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOLINE_PREFIX, true, CC_TYPES::POINT_CLOUD);
@@ -1420,7 +1420,7 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 	if (baseObj) {
 		global_shift = CCVector3d(vcgXYZ(baseObj->global_shift));
 		global_scale = baseObj->global_scale;
-		hypoObj = baseObj->GetHypothesisGroup(building_name, false);
+		hypoObj = baseObj->GetHypothesisGroup(building_name);
 		Contour2d bd_cvx = baseObj->GetBuildingUnit(building_name.toStdString()).convex_hull_xy;
 		assert(!bd_cvx.empty());
 		building_convex_hull_2d = MakeLoopPolylinefromContour(bd_cvx);
@@ -2183,7 +2183,7 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 	QString building_name = GetBaseName(prim_group->getName());
 	auto buildUnit = baseObj->GetBuildingUnit(building_name.toStdString());
 
-	StBlockGroup* block_group = baseObj->GetBlockGroup(building_name, false);
+	StBlockGroup* block_group = baseObj->GetBlockGroup(building_name);
 	int biggest = GetMaxNumberExcludeChildPrefix(block_group, BDDB_FOOTPRINT_PREFIX);
 	assert(components_foots.size() == components_top_heights.size());
 	for (size_t i = 0; i < components_foots.size(); i++) {
@@ -2224,9 +2224,9 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 	QString building_name = GetBaseName(buildingObj->getName());
 	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
 	ccHObject* cloudObj = baseObj->GetOriginPointCloud(building_name, true);
-	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name, true);
+	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
 
-	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(building_name, true);
+	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(building_name);
 	ccHObject::Container footprintObjs = blockgroup_obj->getFootPrints();
 
 	for (size_t i = 0; i < footprintObjs.size(); i++) {
@@ -2336,9 +2336,9 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 	QString building_name = buildingObj->getName();
 	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
 	ccHObject* cloudObj = baseObj->GetOriginPointCloud(building_name, true);
-	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name, true);
+	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
 
-	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName(), true);
+	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
 
 	bool use_footprint = true;
 	if (footprintObjs.empty()) {
@@ -2461,7 +2461,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, double ground_height)
 		if (!baseObj) {
 			return nullptr;
 		}
-		StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName(), true);
+		StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
 		ccHObject::Container footprintObjs = blockgroup_obj->getFootPrints();
 		return LoD2FromFootPrint(buildingObj, footprintObjs, ground_height);
 	}

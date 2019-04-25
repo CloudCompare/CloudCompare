@@ -702,7 +702,7 @@ void ccTracePolylineTool::exportLine()
 
 			BDBaseHObject* baseObj = GetRootBDBase(m_dest_prim_group);
 			if (baseObj) {
-				ccPointCloud* todo_point = baseObj->GetTodoPoint(GetBaseName(m_dest_prim_group->getName()), false);
+				ccPointCloud* todo_point = baseObj->GetTodoPoint(GetBaseName(m_dest_prim_group->getName()));
 				if (todo_point) {
 					RetrieveAssignedPoints(todo_point, new_plane_cloud, DistanceDoubleSpinBox->value());
 				}				

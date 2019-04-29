@@ -12808,7 +12808,7 @@ void MainWindow::doActionBDLoD2Generation()
 			addToDB(bd_model_obj);
 		}
 	}
-	catch (std::runtime_error& e) {
+	catch (const std::exception& e) {
 		dispToConsole("[BDRecon] cannot build lod2 model", ERR_CONSOLE_MESSAGE);
 		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 		return;

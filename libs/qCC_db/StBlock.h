@@ -61,6 +61,8 @@ public:
 	//! Returns profile
 	std::vector<CCVector3> getTop() { return m_top; };
 	std::vector<CCVector3> getBottom() { return m_bottom; };
+	CCVector3 getCenterTop();
+	CCVector3 getCenterBottom();
 	std::vector<CCVector2> getProfile();
 
 	ccFacet* getTopFacet();

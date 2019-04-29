@@ -74,6 +74,26 @@ ccGenericPrimitive* StBlock::clone() const
 	return finishCloneJob(new StBlock(m_top, m_bottom, &m_transformation, getName()));
 }
 
+CCVector3 StBlock::getCenterTop()
+{
+	CCVector3 center(0, 0, 0);
+	for (auto & pt : m_top)	{
+		center += pt;
+	}
+	center /= m_top.size();
+	return center;
+}
+
+CCVector3 StBlock::getCenterBottom()
+{
+	CCVector3 center(0, 0, 0);
+	for (auto & pt : m_bottom) {
+		center += pt;
+	}
+	center /= m_bottom.size();
+	return center;
+}
+
 std::vector<CCVector2> StBlock::getProfile()
 {
 	std::vector<CCVector2> profile;
@@ -105,15 +125,22 @@ ccFacet * StBlock::getBottomFacet()
 
 void StBlock::setTopHeight(double val)
 {
+	double center_height = 0;
 	for (size_t i = 0; i < m_top.size(); i++) {
-		m_top.at(i).z = val;
+		center_height += m_top.at(i).z;		
+	}
+	center_height /= m_top.size();
+	double add = val - center_height;
+
+	for (size_t i = 0; i < m_top.size(); i++) {
+		m_top.at(i).z += add;
 	}
 
 	ccPointCloud* verts = vertices();
 	if (!verts) { return; }
 	for (unsigned int i = 0; i < verts->size() / 2; i++) {
 		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2));
-		P.z = val;
+		P.z += add;
 	}
 	verts->invalidateBoundingBox();
 
@@ -123,22 +150,29 @@ void StBlock::setTopHeight(double val)
 	if (!cloud) return;
 	for (unsigned int i = 0; i < cloud->size(); i++) {
 		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
-		P.z = val;
+		P.z += add;
 	}
 	cloud->invalidateBoundingBox();
 }
 
 void StBlock::setBottomHeight(double val)
 {
+	double center_height = 0;
 	for (size_t i = 0; i < m_bottom.size(); i++) {
-		m_bottom.at(i).z = val;
+		center_height += m_bottom.at(i).z;
+	}
+	center_height /= m_bottom.size();
+	double add = val - center_height;
+
+	for (size_t i = 0; i < m_bottom.size(); i++) {
+		m_bottom.at(i).z += add;
 	}
 
 	ccPointCloud* verts = vertices();
 	if (!verts) { return; }
 	for (unsigned int i = 0; i < verts->size() / 2; i++) {
 		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2 + 1));
-		P.z = val;
+		P.z += add;
 	}
 	verts->invalidateBoundingBox();
 
@@ -148,7 +182,7 @@ void StBlock::setBottomHeight(double val)
 	if (!cloud) return;
 	for (unsigned int i = 0; i < cloud->size(); i++) {
 		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
-		P.z = val;
+		P.z += add;
 	}
 	cloud->invalidateBoundingBox();
 }
@@ -157,35 +191,45 @@ bool StBlock::buildUp()
 {
 	unsigned count = static_cast<unsigned>(m_top.size());
 	assert(count >= 3);
-
+	if (count < 3) { return false; }
 	ccFacet* top_facet = ccFacet::CreateFromContour(m_top, "top", true);
 	ccFacet* bottom_facet = ccFacet::CreateFromContour(m_bottom, "bottom", true);;
 
 	addChild(top_facet);
 	addChild(bottom_facet);
 
-	CCLib::Delaunay2dMesh mesh;
-
-	//DGM: we check that last vertex is different from the first one!
-	//(yes it happens ;)
- 	
-
 	std::vector<CCVector2> profile = getProfile();
-
-	if (profile.back().x == profile.front().x &&  profile.back().y == profile.front().y) {
-		profile.pop_back();
-		--count;
-	}		
-
+	CCLib::Delaunay2dMesh mesh;
 	char errorStr[1024];
 	if (!mesh.buildMesh(profile, profile.size(), errorStr))
 	{
 		ccLog::Warning(QString("[ccPlane::buildUp] Profile triangulation failed (CClib said: '%1'").arg(errorStr));
 		return false;
 	}
+	mesh.removeOuterTriangles(profile, profile);
 
 	unsigned numberOfTriangles = mesh.size();
 	int* triIndexes = mesh.getTriangleVertIndexesArray();
+	//determine if the triangles must be flipped or not
+	bool flip = false;
+	{
+		for (unsigned i = 0; i < numberOfTriangles; ++i, triIndexes += 3) {
+			int i1 = triIndexes[0];
+			int i2 = triIndexes[1];
+			int i3 = triIndexes[2];
+			//by definition the first edge of the original polygon
+			//should be in the same 'direction' of the triangle that uses it
+			if ((i1 == 0 || i2 == 0 || i3 == 0)
+				&& (i1 == 1 || i2 == 1 || i3 == 1))	{
+				if ((i1 == 1 && i2 == 0)
+					|| (i2 == 1 && i3 == 0)
+					|| (i3 == 1 && i1 == 0)) {
+					flip = true;
+				}
+				break;
+			}
+		}
+	}
 
 	if (numberOfTriangles == 0)
 		return false;
@@ -232,23 +276,25 @@ bool StBlock::buildUp()
 	{
 		//side faces
 		{
-			const int* _triIndexes = triIndexes;
+			const int* _triIndexes = mesh.getTriangleVertIndexesArray();
 			for (unsigned i = 0; i < numberOfTriangles; ++i, _triIndexes += 3)
 			{
-				if (ccNormalVectors::GetUniqueInstance()->getNormal(m_triNormals->getValue(0)).z < 0) {
-					addTriangle(_triIndexes[0] * 2, _triIndexes[2] * 2, _triIndexes[1] * 2);
-				}
-				else {
-					addTriangle(_triIndexes[0] * 2, _triIndexes[1] * 2, _triIndexes[2] * 2);
-				}				
+				int first = 1, second = 2;
+				if (ccNormalVectors::GetUniqueInstance()->getNormal(m_triNormals->getValue(0)).z < 0)
+					std::swap(first, second);
+				if (flip)
+					std::swap(first, second);
+
+				addTriangle(_triIndexes[0] * 2, _triIndexes[first] * 2, _triIndexes[second] * 2);
 				addTriangleNormalIndexes(0, 0, 0);
 
-				if (ccNormalVectors::GetUniqueInstance()->getNormal(m_triNormals->getValue(1)).z > 0) {
-					addTriangle(_triIndexes[0] * 2 + 1, _triIndexes[1] * 2 + 1, _triIndexes[2] * 2 + 1);
-				}
-				else {
-					addTriangle(_triIndexes[0] * 2 + 1, _triIndexes[2] * 2 + 1, _triIndexes[1] * 2 + 1);
-				}				
+				first = 1, second = 2;
+				if (ccNormalVectors::GetUniqueInstance()->getNormal(m_triNormals->getValue(1)).z < 0)
+					std::swap(first, second);
+				if (flip)
+					std::swap(first, second);
+
+				addTriangle(_triIndexes[0] * 2, _triIndexes[first] * 2 + 1, _triIndexes[second] * 2 + 1);
 				addTriangleNormalIndexes(1, 1, 1);
 			}
 		}
@@ -268,7 +314,6 @@ bool StBlock::buildUp()
 	setVisible(true);
 	enableStippling(false);	
 	showNormals(true);
-
 	return true;
 }
 

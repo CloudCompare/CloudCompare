@@ -618,6 +618,7 @@ inline double angle_facet_(CCVector3 p1, CCVector3 p2) {
 bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon, const PointCoordinateType* planeEquation/*=0*/)
 {
 	assert(!contour_points.empty());
+	
 	unsigned int hullPtsCount = static_cast<unsigned>(contour_points.size());
 	if (hullPtsCount < 3)
 		return false;	
@@ -730,7 +731,7 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 		}
 
 		//if we have computed a concave hull, we must remove triangles falling outside!
-		bool removePointsOutsideHull = (m_maxEdgeLength > 0);
+		bool removePointsOutsideHull = (m_maxEdgeLength > 0) || hullPointsVector.size() > 4;
 
 		if (!hullPointsVector.empty() && CCLib::Delaunay2dMesh::Available())
 		{

@@ -1846,14 +1846,14 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
 		assert(block); 
-		SetDoubleSpinBoxValue(editor, (block && !block->getTop().empty()) ? block->getTop().front().z : VALID_MINUS_INT);
+		SetDoubleSpinBoxValue(editor, block ? block->getCenterTop().z : VALID_MINUS_INT);
 	}
 	break;
 	case OBJECT_BLOCK_BOTTOM:
 	{
 		StBlock* block = ccHObjectCaster::ToStBlock(m_currentObject);
 		assert(block);
-		SetDoubleSpinBoxValue(editor, (block && !block->getBottom().empty()) ? block->getBottom().front().z : VALID_MINUS_INT);
+		SetDoubleSpinBoxValue(editor, block ? block->getCenterBottom().z : VALID_MINUS_INT);
 	}
 	break;
 	default:

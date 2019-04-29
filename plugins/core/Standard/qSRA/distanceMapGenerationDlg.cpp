@@ -774,25 +774,25 @@ void DistanceMapGenerationDlg::updateMapTexture()
 		return;
 	}
 
-	for (size_t i=0; i<texturedEntities.size(); ++i)
+	for (ccHObject* texturedEntity : texturedEntities)
 	{
 		//we release the old texture!
-		texturedEntities[i]->setDisplay(0);
-		texturedEntities[i]->setDisplay(m_window);
-		
+		texturedEntity->setDisplay(nullptr);
+		texturedEntity->setDisplay(m_window);
+
 		//set new image as texture
-		if (mode == PROJ_CYLINDRICAL && texturedEntities[i]->isA(CC_TYPES::PLANE))
+		if (mode == PROJ_CYLINDRICAL && texturedEntity->isA(CC_TYPES::PLANE))
 		{
-			if (!static_cast<ccPlane*>(texturedEntities[i])->setAsTexture(mapImage))
+			if (!static_cast<ccPlane*>(texturedEntity)->setAsTexture(mapImage))
 			{
 				if (m_app)
-					m_app->dispToConsole(QString("Not enough memory to update the map!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+					m_app->dispToConsole(QString("Not enough memory to update the map!"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 				return;
 			}
 		}
-		if (mode == PROJ_CONICAL && texturedEntities[i]->isA(CC_TYPES::MESH))
+		if (mode == PROJ_CONICAL && texturedEntity->isA(CC_TYPES::MESH))
 		{
-			ccMesh* mesh = static_cast<ccMesh*>(texturedEntities[i]);
+			ccMesh* mesh = static_cast<ccMesh*>(texturedEntity);
 			//set material
 			ccMaterialSet* materialSet = const_cast<ccMaterialSet*>(mesh->getMaterialSet());
 			assert(materialSet);
@@ -801,7 +801,7 @@ void DistanceMapGenerationDlg::updateMapTexture()
 			//add new material
 			{
 				ccMaterial::Shared material(new ccMaterial("texture"));
-				material->setTexture(mapImage,QString(),false);
+				material->setTexture(mapImage, QString(), false);
 				materialSet->addMaterial(material);
 			}
 		}

@@ -15,7 +15,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
+#include <QtGui/qopengl.h>
 #include <Delaunay2dMesh.h>
 
 //local
@@ -30,6 +30,10 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Triangulation_vertex_base_with_info_2.h>
 #endif
+
+#ifdef __gl_h_
+	#include "wrap/gl/glu_tesselator.h"
+#endif // __gl_h_
 
 
 using namespace CCLib;
@@ -421,33 +425,67 @@ void Delaunay2dMesh::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 Delaunay2dMesh* Delaunay2dMesh::TesselateContour(const std::vector<CCVector2>& contourPoints)
 {
 	size_t count = contourPoints.size();
-	if (count < 3)
-	{
+	if (count < 3) {
+		//not enough points
+		return nullptr;
+	}
+	std::vector<CCVector2> used_contourpoints = contourPoints;
+	do {
+		//DGM: we check that last vertex is different from the first one!
+		//(yes it happens ;)
+		if (used_contourpoints.back().x == used_contourpoints.front().x && used_contourpoints.back().y == used_contourpoints.front().y) {
+			used_contourpoints.pop_back();
+			--count;
+		}
+		else
+			break;
+	} while (!used_contourpoints.empty());
+
+	if (count < 3) {
 		//not enough points
 		return nullptr;
 	}
 
-	//DGM: we check that last vertex is different from the first one!
-	//(yes it happens ;)
-	if (contourPoints.back().x == contourPoints.front().x &&  contourPoints.back().y == contourPoints.front().y)
-		--count;
+	std::vector<int> indexTriangulatedVect;
+#ifdef __gl_h_
+	std::vector<std::vector<vcg::Point2f>> _contours_(1);
+	for (auto & pt : used_contourpoints) {
+		_contours_[0].emplace_back(pt.x, pt.y);
+	}
+	vcg::glu_tesselator::tesselate<vcg::Point2f>(_contours_, indexTriangulatedVect);
+#endif // __gl_h_
 
-	char errorStr[1024];
 	Delaunay2dMesh* mesh = new Delaunay2dMesh();
-	if (!mesh->buildMesh(contourPoints, count, errorStr) || mesh->size() == 0)
-	{
-		//triangulation failed
-		delete mesh;
-		return nullptr;
-	}
 
-	if (!mesh->removeOuterTriangles(contourPoints, contourPoints, true) || mesh->size() == 0)
-	{
-		//an error occurred
-		delete mesh;
-		return nullptr;
-	}
+	if (!indexTriangulatedVect.empty())	{
+		mesh->m_numberOfTriangles = static_cast<unsigned>(indexTriangulatedVect.size() / 3);
+		mesh->m_triIndexes = new int[indexTriangulatedVect.size()];
 
+		if (mesh->m_numberOfTriangles > 0) {
+			for (size_t faceCount = 0; faceCount < indexTriangulatedVect.size(); faceCount += 3) {
+				for (size_t iii = 0; iii < 3; iii++) {
+					mesh->m_triIndexes[iii + faceCount] = static_cast<int>(indexTriangulatedVect[iii + faceCount]);
+				}
+			}
+		}
+
+		mesh->m_globalIterator = mesh->m_triIndexes;
+		mesh->m_globalIteratorEnd = mesh->m_triIndexes + 3 * mesh->m_numberOfTriangles;
+	}
+	else {
+		char errorStr[1024];
+		if (!mesh->buildMesh(contourPoints, count, errorStr) || mesh->size() == 0) {
+			//triangulation failed
+			delete mesh;
+			return nullptr;
+		}
+
+		if (!mesh->removeOuterTriangles(contourPoints, contourPoints, true) || mesh->size() == 0) {
+			//an error occurred
+			delete mesh;
+			return nullptr;
+		}
+	}
 	return mesh;
 }
 

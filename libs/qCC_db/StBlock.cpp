@@ -186,50 +186,50 @@ void StBlock::setBottomHeight(double val)
 	}
 	cloud->invalidateBoundingBox();
 }
-
+#include <iostream>
 bool StBlock::buildUp()
 {
-	unsigned count = static_cast<unsigned>(m_top.size());
-	assert(count >= 3);
-	if (count < 3) { return false; }
+// 	unsigned count = static_cast<unsigned>(m_top.size());
+// 	assert(count >= 3);
+ 	if (m_top.size() < 3) { return false; }
 	ccFacet* top_facet = ccFacet::CreateFromContour(m_top, "top", true);
 	ccFacet* bottom_facet = ccFacet::CreateFromContour(m_bottom, "bottom", true);;
-
+	bottom_facet->invertNormal();
+	
 	addChild(top_facet);
 	addChild(bottom_facet);
 
 	std::vector<CCVector2> profile = getProfile();
-	CCLib::Delaunay2dMesh mesh;
-	char errorStr[1024];
-	if (!mesh.buildMesh(profile, profile.size(), errorStr))
-	{
-		ccLog::Warning(QString("[ccPlane::buildUp] Profile triangulation failed (CClib said: '%1'").arg(errorStr));
+	ccMesh* mesh = top_facet->getPolygon();	
+	
+	if (!mesh) {
+		ccLog::Warning(QString("[ccPlane::buildUp] Profile triangulation failed"));
 		return false;
 	}
-	mesh.removeOuterTriangles(profile, profile);
 
-	unsigned numberOfTriangles = mesh.size();
-	int* triIndexes = mesh.getTriangleVertIndexesArray();
+	unsigned count = mesh->getAssociatedCloud()->size();
+	unsigned numberOfTriangles = mesh->size();
+//	int* triIndexes = mesh->getTriangleVertIndexesArray();
 	//determine if the triangles must be flipped or not
 	bool flip = false;
-	{
-		for (unsigned i = 0; i < numberOfTriangles; ++i, triIndexes += 3) {
-			int i1 = triIndexes[0];
-			int i2 = triIndexes[1];
-			int i3 = triIndexes[2];
-			//by definition the first edge of the original polygon
-			//should be in the same 'direction' of the triangle that uses it
-			if ((i1 == 0 || i2 == 0 || i3 == 0)
-				&& (i1 == 1 || i2 == 1 || i3 == 1))	{
-				if ((i1 == 1 && i2 == 0)
-					|| (i2 == 1 && i3 == 0)
-					|| (i3 == 1 && i1 == 0)) {
-					flip = true;
-				}
-				break;
-			}
-		}
-	}
+// 	{
+// 		for (unsigned i = 0; i < numberOfTriangles; ++i, triIndexes += 3) {
+// 			int i1 = triIndexes[0];
+// 			int i2 = triIndexes[1];
+// 			int i3 = triIndexes[2];
+// 			//by definition the first edge of the original polygon
+// 			//should be in the same 'direction' of the triangle that uses it
+// 			if ((i1 == 0 || i2 == 0 || i3 == 0)
+// 				&& (i1 == 1 || i2 == 1 || i3 == 1))	{
+// 				if ((i1 == 1 && i2 == 0)
+// 					|| (i2 == 1 && i3 == 0)
+// 					|| (i3 == 1 && i1 == 0)) {
+// 					flip = true;
+// 				}
+// 				break;
+// 			}
+// 		}
+// 	}
 
 	if (numberOfTriangles == 0)
 		return false;
@@ -253,10 +253,8 @@ bool StBlock::buildUp()
 
 	// top & bottom faces normals
 	{
-		CCVector3 normal = (m_top[1] - m_top[0]).cross(m_top[2] - m_top[1]);
-		m_triNormals->addElement(ccNormalVectors::GetNormIndex((normal).u/*CCVector3(0.0, 0.0, 1.0).u*/));
-		normal = (m_bottom[1] - m_bottom[0]).cross(m_bottom[2] - m_bottom[1]);
-		m_triNormals->addElement(ccNormalVectors::GetNormIndex((-normal).u/*CCVector3(0.0, 0.0, -1.0).u*/));
+		m_triNormals->addElement(ccNormalVectors::GetNormIndex(top_facet->getNormal().u));
+		m_triNormals->addElement(ccNormalVectors::GetNormIndex(bottom_facet->getNormal().u));
 	} 	
 
 	//add profile vertices & normals
@@ -276,25 +274,28 @@ bool StBlock::buildUp()
 	{
 		//side faces
 		{
-			const int* _triIndexes = mesh.getTriangleVertIndexesArray();
-			for (unsigned i = 0; i < numberOfTriangles; ++i, _triIndexes += 3)
-			{
-				int first = 1, second = 2;
-				if (ccNormalVectors::GetUniqueInstance()->getNormal(m_triNormals->getValue(0)).z < 0)
-					std::swap(first, second);
-				if (flip)
-					std::swap(first, second);
+			int first_top = 1, second_top = 2;
+			if (ccNormalVectors::GetUniqueInstance()->getNormal(m_triNormals->getValue(0)).z < 0)
+				std::swap(first_top, second_top);
+			if (flip)
+				std::swap(first_top, second_top);
 
-				addTriangle(_triIndexes[0] * 2, _triIndexes[first] * 2, _triIndexes[second] * 2);
+			int first_bot = 1, second_bot = 2;
+			if (ccNormalVectors::GetUniqueInstance()->getNormal(m_triNormals->getValue(1)).z < 0)
+				std::swap(first_bot, second_bot);
+			if (flip)
+				std::swap(first_bot, second_bot);
+
+			std::cout << "top: " << first_top << " " << second_top << std::endl;
+			std::cout << "top: " << first_bot << " " << second_bot << std::endl;
+
+			for (unsigned ti = 0; ti < numberOfTriangles; ++ti) {
+				unsigned int* _triIndexes = mesh->getTriangleVertIndexes(ti)->i;
+				
+				addTriangle(_triIndexes[0] * 2, _triIndexes[first_top] * 2, _triIndexes[second_top] * 2);
 				addTriangleNormalIndexes(0, 0, 0);
 
-				first = 1, second = 2;
-				if (ccNormalVectors::GetUniqueInstance()->getNormal(m_triNormals->getValue(1)).z < 0)
-					std::swap(first, second);
-				if (flip)
-					std::swap(first, second);
-
-				addTriangle(_triIndexes[0] * 2, _triIndexes[first] * 2 + 1, _triIndexes[second] * 2 + 1);
+				addTriangle(_triIndexes[0] * 2 + 1, _triIndexes[first_bot] * 2 + 1, _triIndexes[second_bot] * 2 + 1);
 				addTriangleNormalIndexes(1, 1, 1);
 			}
 		}
@@ -314,6 +315,8 @@ bool StBlock::buildUp()
 	setVisible(true);
 	enableStippling(false);	
 	showNormals(true);
+
+
 	return true;
 }
 

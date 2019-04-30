@@ -18,6 +18,13 @@ target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 # Qt
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL)
 
+find_package( OpenGL REQUIRED )
+if( NOT OPENGL_FOUND )
+	message( SEND_ERROR "OpenGL required, but not found with 'find_package()'" )
+endif()
+include_directories( ${OpenGL_INCLUDE_DIR} )
+target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES} )
+
 # Add custom preprocessor definitions
 
 if ( COMPILE_CC_CORE_LIB_SHARED )

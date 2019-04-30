@@ -25,6 +25,8 @@
 #include <DistanceComputationTools.h>
 #include <MeshSamplingTools.h>
 
+#include "wrap/gl/glu_tesselator.h"
+
 constexpr const char* DEFAULT_POLYGON_MESH_NAME = "2D polygon";
 constexpr const char* DEFAULT_CONTOUR_NAME = "Contour";
 constexpr const char* DEFAULT_CONTOUR_POINTS_NAME = "Contour points";
@@ -654,16 +656,6 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 			ccLog::Warning("[ccFacet::createInternalRepresentation] Failed to compute the LS plane passing through the input points!");
 			return false;
 		}
-		if (polygon) {
-			CCVector3 normal = (contour_points[1] - contour_points[0]).cross(contour_points[2] - contour_points[1]);
-			CCVector3 plane_normal = CCVector3(planeEquation[0], planeEquation[1], planeEquation[2]);
-			if (angle_facet_(normal, plane_normal) > M_PI_2) {
-				for (size_t i = 0; i < 4; i++) {
-					PointCoordinateType& t = const_cast<PointCoordinateType&>(planeEquation[i]);
-					t = -planeEquation[i];
-				}
-			}
-		}
 	}
 	memcpy(m_planeEquation, planeEquation, sizeof(PointCoordinateType) * 4);
 
@@ -674,6 +666,20 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 	{
 		ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory!");
 		return false;
+	}
+	if (polygon) {
+		double   area = 0;
+		for (size_t i = 0, j = points2D.size() - 1; i < points2D.size(); i++) {
+			area += (points2D[j][0] + points2D[i][0])*(points2D[j][1] - points2D[i][1]);
+			j = i;
+		}
+		area = -area * .5;
+		if (area < 0) {
+			for (size_t i = 0; i < 4; i++) {
+				PointCoordinateType& t = const_cast<PointCoordinateType&>(planeEquation[i]);
+				t = -planeEquation[i];
+			}
+		}
 	}
 
 	//compute resulting RMS
@@ -688,11 +694,6 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 
 	//try to get the points on the convex/concave hull to build the contour and the polygon
 	{
-		std::list<CCLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
-		for (CCLib::PointProjectionTools::IndexedCCVector2 & pt : points2D) {
-			hullPoints.push_back(&pt);
-		}
-		
 		//we create the corresponding (3D) polyline
 		{
 			m_contourPolyline = new ccPolyline(m_contourVertices);
@@ -719,10 +720,9 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 		std::vector<CCVector2> hullPointsVector;
 		try
 		{
-			hullPointsVector.reserve(hullPoints.size());
-			for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
-			{
-				hullPointsVector.push_back(**it);
+			hullPointsVector.reserve(points2D.size());
+			for (auto & pt : points2D) {
+				hullPointsVector.push_back(pt);
 			}
 		}
 		catch (...)
@@ -730,19 +730,14 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 			ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the contour mesh!");
 		}
 
-		//if we have computed a concave hull, we must remove triangles falling outside!
-		bool removePointsOutsideHull = (m_maxEdgeLength > 0) || hullPointsVector.size() > 4;
-
 		if (!hullPointsVector.empty() && CCLib::Delaunay2dMesh::Available())
 		{
 			//compute the facet surface
-			CCLib::Delaunay2dMesh dm;
-			char errorStr[1024];
-			if (dm.buildMesh(hullPointsVector, 0, errorStr))
+
+			CCLib::Delaunay2dMesh* dm = CCLib::Delaunay2dMesh::TesselateContour(hullPointsVector);
+			if (dm)
 			{
-				if (removePointsOutsideHull)
-					dm.removeOuterTriangles(hullPointsVector, hullPointsVector);
-				unsigned triCount = dm.size();
+				unsigned triCount = dm->size();
 				assert(triCount != 0);
 
 				m_polygonMesh = new ccMesh(m_contourVertices);
@@ -751,7 +746,7 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 					//import faces
 					for (unsigned i = 0; i < triCount; ++i)
 					{
-						const CCLib::VerticesIndexes* tsi = dm.getTriangleVertIndexes(i);
+						const CCLib::VerticesIndexes* tsi = dm->getTriangleVertIndexes(i);
 						m_polygonMesh->addTriangle(tsi->i1, tsi->i2, tsi->i3);
 					}
 					m_polygonMesh->setVisible(true);
@@ -788,10 +783,12 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 					m_polygonMesh = nullptr;
 					ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the polygon mesh!");
 				}
+				delete dm;
+				dm = nullptr;
 			}
 			else
 			{
-				ccLog::Warning(QString("[ccFacet::createInternalRepresentation] Failed to create the polygon mesh (third party lib. said '%1'").arg(errorStr));
+				ccLog::Warning(QString("[ccFacet::createInternalRepresentation] Failed to create the polygon mesh"));
 			}
 		}
 	}

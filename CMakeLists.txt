@@ -98,6 +98,8 @@ endif()
 # Load advanced scripts
 include( cmake/CMakeInclude.cmake )
 
+include( contrib/VcgLibSupport.cmake )
+
 add_subdirectory( CC )
 
 # Add external libraries

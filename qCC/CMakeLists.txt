@@ -179,19 +179,11 @@ endif()
 # building reconstruction
 option(OPTION_USE_STOCKER "Building Reconstruction" ON)
 if(OPTION_USE_STOCKER)
-	# try to find the vcg library
-	set (VCGLIB_INCLUDE_DIR_HINTS "")
-	find_package(vcglib REQUIRED)
-	if (VCGLIB_FOUND)
-	  message(STATUS "vcglib found in: ${VCGLIB_INCLUDE_DIRS}")
-	ENDIF (VCGLIB_FOUND)
-
-	find_package(Eigen)
-	if (EIGEN_FOUND)
-		message(STATUS "Eigen found in:")
-		message(STATUS ${EIGEN_INCLUDE_DIRS})
-	ENDIF (EIGEN_FOUND)
-
+    if(VCGLIB_FOUND)
+    else()
+		message(FATAL_ERROR "no vcglib support")
+    endif(VCGLIB_FOUND)
+	
 	set(STOCKER_HOME $ENV{STOCKER_HOME} CACHE PATH "stocker home")
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_STOCKER USE_STOCKER_AS_DLL )
 	# TODO:

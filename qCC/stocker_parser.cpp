@@ -2498,7 +2498,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 
 		std::vector<Contour3d> roof_polygons = builder_3d4em.GetRoofPolygons();
 		int block_number = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX) + 1;
-		for (Contour3d roof_points : roof_polygons) {
+		for (Contour3d & roof_points : roof_polygons) {
 			std::vector<CCVector3> top_points;
 			std::vector<CCVector3> bottom_points;
 			for (auto & pt : roof_points) {

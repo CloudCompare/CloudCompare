@@ -12,8 +12,6 @@ include( contrib/GDALSupport.cmake )
 include( contrib/ShapeLibSupport.cmake )
 # Oculus support
 include( contrib/OculusSupport.cmake )
-# vcglib support
-include( contrib/VcgLibSupport.cmake )
 
 function( target_link_contrib ) # 2 arguments: ARGV0 = project name / ARGV1 = shared lib export base folder (optional - '_debug' will be appended for debug configuration)
 

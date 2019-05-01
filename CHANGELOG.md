@@ -20,6 +20,7 @@ v2.10.3 (Zephyrus) - (in development)
   - Quitting the "Section extraction tool" (and probably any tool that uses a temporary 3D view, such as the Align tool) would break the picking hub mechanism (preventing the user from picking points typically) (#886)
   - Fix the camera name being displayed in the wrong place (#902)
   - The layers management of the Rasterize tool was partially broken
+  - the C2C/C2M distance computation tool called through the command line was always displaying progress dialogs even in SILENT mode
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------

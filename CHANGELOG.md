@@ -24,6 +24,7 @@ v2.10.3 (Zephyrus) - (in development)
   - The layers management of the Rasterize tool was partially broken
   - the C2C/C2M distance computation tool called through the command line was always displaying progress dialogs even in SILENT mode
   - the ICP registration tool called through the command line was always displaying progress dialogs even in SILENT mode
+  - Fix potential crash with qCSF (see github issue #909)
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------

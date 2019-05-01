@@ -6,6 +6,8 @@ v2.10.3 (Zephyrus) - (in development)
 
 - Enhancements
   - Speed up the Fit Sphere tool and point picking in the Registration Align (point pairs picking) tool
+  - Translation:
+	- new (argentinian) Spanish translation
 
 - Bug fixes
   - Command line:

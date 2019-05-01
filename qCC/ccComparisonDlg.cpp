@@ -139,8 +139,11 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 
 	//be sure to show the dialog before computing the approx distances
 	//(otherwise the progress bars appear anywhere!)
-	show();
-	QCoreApplication::processEvents();
+	if (!m_noDisplay)
+	{
+		show();
+		QCoreApplication::processEvents();
+	}
 
 	//compute approximate results and unlock GUI
 	computeApproxDistances();
@@ -333,8 +336,12 @@ bool ccComparisonDlg::computeApproxDistances()
 	assert(sf);
 
 	//prepare the octree structures
-	ccProgressDialog progressDlg(true, this);
-	progressDlg.show();
+	QScopedPointer<ccProgressDialog> progressDlg;
+	if (parentWidget())
+	{
+		progressDlg.reset(new ccProgressDialog(true, this));
+		progressDlg->show();
+	}
 
 	int approxResult = -1;
 	QElapsedTimer eTimer;
@@ -347,7 +354,7 @@ bool ccComparisonDlg::computeApproxDistances()
 																								m_refCloud,
 																								DEFAULT_OCTREE_LEVEL,
 																								0,
-																								&progressDlg,
+																								progressDlg.data(),
 																								m_compOctree.data(),
 																								m_refOctree.data());
 		}
@@ -367,7 +374,7 @@ bool ccComparisonDlg::computeApproxDistances()
 			approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
 																						m_refMesh,
 																						c2mParams,
-																						&progressDlg,
+																						progressDlg.data(),
 																						m_compOctree.data());
 		}
 		break;
@@ -378,7 +385,10 @@ bool ccComparisonDlg::computeApproxDistances()
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();
 
-	progressDlg.stop();
+	if (progressDlg)
+	{
+		progressDlg->stop();
+	}
 
 	//if the approximate distances comptation failed...
 	if (approxResult < 0)
@@ -523,11 +533,15 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	int theBestOctreeLevel = s_minOctreeLevel;
 
 	//we don't test the very first and very last level
-	ccProgressDialog progressCb(false, this);
-	progressCb.setMethodTitle(tr("Determining optimal octree level"));
-	progressCb.setInfo(tr("Testing %1 levels...").arg(MAX_OCTREE_LEVEL)); //we lie here ;)
-	CCLib::NormalizedProgress nProgress(&progressCb, MAX_OCTREE_LEVEL - 2);
-	progressCb.start();
+	QScopedPointer<ccProgressDialog> progressDlg;
+	if (parentWidget())
+	{
+		progressDlg.reset(new ccProgressDialog(false, this));
+		progressDlg->setMethodTitle(tr("Determining optimal octree level"));
+		progressDlg->setInfo(tr("Testing %1 levels...").arg(MAX_OCTREE_LEVEL)); //we lie here ;)
+		progressDlg->start();
+	}
+	CCLib::NormalizedProgress nProgress(progressDlg.data(), MAX_OCTREE_LEVEL - 2);
 	QApplication::processEvents();
 
 	bool maxDistanceDefined = maxDistCheckBox->isChecked();
@@ -706,7 +720,11 @@ bool ccComparisonDlg::computeDistances()
 	c2cParams.maxThreadCount = c2mParams.maxThreadCount = maxThreadCountSpinBox->value();
 
 	int result = -1;
-	ccProgressDialog progressDlg(true, this);
+	QScopedPointer<ccProgressDialog> progressDlg;
+	if (parentWidget())
+	{
+		progressDlg.reset(new ccProgressDialog(true, this));
+	}
 
 	QElapsedTimer eTimer;
 	eTimer.start();
@@ -824,7 +842,7 @@ bool ccComparisonDlg::computeDistances()
 		result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(	m_compCloud,
 																				m_refCloud,
 																				c2cParams,
-																				&progressDlg,
+																				progressDlg.data(),
 																				m_compOctree.data(),
 																				m_refOctree.data());
 		break;
@@ -849,13 +867,16 @@ bool ccComparisonDlg::computeDistances()
 		result = CCLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
 																				m_refMesh,
 																				c2mParams,
-																				&progressDlg,
+																				progressDlg.data(),
 																				m_compOctree.data());
 		break;
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();
 
-	progressDlg.stop();
+	if (progressDlg)
+	{
+		progressDlg->stop();
+	}
 
 	if (result >= 0)
 	{

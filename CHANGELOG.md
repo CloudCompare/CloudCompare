@@ -28,6 +28,8 @@ v2.11 (Anoia) - (in development)
 	- we now correctly handle faces with more than 4 vertices! (they should be properly tesselated)
 	- support of escaped lines ('\' at the end of the line)
 	- CC now accepts MTL files with the 'Tf' keyword (well, CC just ignores it and doesn't complain about a wrong MTL file anymore ;)
+  - Translation:
+	- new (argentinian) Spanish translation
 
 - Changes
   - Command line tool:

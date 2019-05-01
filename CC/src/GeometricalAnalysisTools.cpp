@@ -808,12 +808,15 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 	CCVector3& center,
 	PointCoordinateType& radius,
 	double& rms,
-	GenericProgressCallback* progressCb/*=0*/,
+	GenericProgressCallback* progressCb/*=nullptr*/,
 	double confidence/*=0.99*/,
 	unsigned seed/*=0*/)
 {
 	if (!cloud)
+	{
+		assert(false);
 		return InvalidInput;
+	}
 
 	unsigned n = cloud->size();
 	if (n < 4)
@@ -821,8 +824,6 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 
 	assert(confidence < 1.0);
 	confidence = std::min(confidence, 1.0 - FLT_EPSILON);
-
-	const unsigned p = 4;
 
 	//we'll need an array (sorted) to compute the medians
 	std::vector<PointCoordinateType> values;
@@ -838,6 +839,7 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 
 	//number of samples
 	unsigned m = 1;
+	const unsigned p = 4;
 	if (n > p)
 	{
 		m = static_cast<unsigned>(log(1.0 - confidence) / log(1.0 - pow(1.0 - outliersRatio, static_cast<double>(p))));
@@ -869,11 +871,12 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 	unsigned sampleCount = 0;
 	unsigned attempts = 0;
 	double minError = -1.0;
+	std::vector<unsigned> indexes;
+	indexes.resize(p);
 	while (sampleCount < m && attempts < 2*m)
 	{
 		//get 4 random (different) indexes
-		unsigned indexes[4] = { 0, 0, 0, 0 };
-		for (unsigned j = 0; j < 4; ++j)
+		for (unsigned j = 0; j < p; ++j)
 		{
 			bool isOK = false;
 			while (!isOK)
@@ -886,6 +889,7 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 			}
 		}
 
+		assert(p == 4);
 		const CCVector3* A = cloud->getPoint(indexes[0]);
 		const CCVector3* B = cloud->getPoint(indexes[1]);
 		const CCVector3* C = cloud->getPoint(indexes[2]);

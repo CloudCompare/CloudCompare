@@ -205,7 +205,7 @@ compute the overall displacement of a particle accroding to the rigidness
 //	}
 
 	double maxDiff = 0;
-#pragma omp parallel for
+//#pragma omp parallel for //see https://github.com/CloudCompare/CloudCompare/issues/909
 	for (int i = 0; i < particleCount; i++)
 	{
 		if (particles[i].isMovable())

@@ -174,6 +174,12 @@ bool StFootPrint::toFile_MeOnly(QFile & out) const
 	if (out.write((const char*)&m_componentId, sizeof(int)) < 0)
 		return WriteError();
 
+	QDataStream outStream(&out);
+	outStream << m_plane_names.size();
+	for (auto & name : m_plane_names) {
+		outStream << name;
+	}
+
 	return true;
 }
 
@@ -182,7 +188,6 @@ bool StFootPrint::fromFile_MeOnly(QFile & in, short dataVersion, int flags)
 	if (!ccPolyline::fromFile_MeOnly(in, dataVersion, flags)) {
 		return false;
 	}
-
 
 	if (in.read((char*)&m_bottom, sizeof(double)) < 0)
 		return ReadError();
@@ -195,6 +200,15 @@ bool StFootPrint::fromFile_MeOnly(QFile & in, short dataVersion, int flags)
 
 	if (in.read((char*)&m_componentId, sizeof(int)) < 0)
 		return ReadError();
+
+	QDataStream inStream(&in);
+	int plane_num;
+	inStream >> plane_num;
+	for (size_t i = 0; i < plane_num; i++) {
+		QString name;
+		inStream >> name;
+		m_plane_names.append(name);
+	}
 
 	return true;
 }

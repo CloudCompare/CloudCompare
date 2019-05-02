@@ -2180,7 +2180,7 @@ ccHObject::Container GetNonHorizontalPlaneClouds(ccHObject* stprim_group, double
 	return primObjs;
 }
 
-ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
+ccHObject::Container GenerateFootPrints_PP(ccHObject* prim_group)
 {
 	ccHObject::Container foot_print_objs;
 	BDBaseHObject* baseObj = GetRootBDBase(prim_group);
@@ -2195,7 +2195,7 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 	std::vector<std::vector<Contour3d>> components_foots;
 	std::vector<std::vector<double>> components_top_heights;
 	std::vector<std::vector<double>> components_bottom_heights;
-	DeriveRoofLayerFootPrints(planes_points, components_foots, components_top_heights, components_bottom_heights, 1, false, 1, 50, 50);
+	DeriveRoofLayerFootPrints_PP(planes_points, components_foots, components_top_heights, components_bottom_heights, 1, false, 1, 50, 50);
 
 	int cur_compo_count = 0; // TODO: get component count from block
 	
@@ -2233,6 +2233,82 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 		}
 	}
 	return foot_print_objs;
+}
+
+ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
+{
+	ccHObject::Container foot_print_objs;
+	BDBaseHObject* baseObj = GetRootBDBase(prim_group);
+	if (!baseObj) { return foot_print_objs; }
+
+	//! skip walls
+	ccHObject::Container primObjs = GetNonHorizontalPlaneClouds(prim_group, 15);
+
+	std::vector<stocker::Contour3d> planes_points = GetPointsFromCloudInsidePolygonsXY(primObjs, stocker::Polyline3d(), DBL_MAX, true);
+	if (planes_points.empty()) { return foot_print_objs; }
+
+	std::vector<std::vector<Contour3d>> components_foots;
+	std::vector<IntGroup> components_planes;
+	DeriveRoofLayerFootPrints(planes_points, components_foots, components_planes, 1, false, 1, 50, 50);
+	if (components_foots.size() != components_planes.size()) {
+		return foot_print_objs;
+	}
+
+	int cur_compo_count = 0; // TODO: get component count from block
+
+	QString building_name = GetBaseName(prim_group->getName());
+	auto buildUnit = baseObj->GetBuildingUnit(building_name.toStdString());
+
+	StBlockGroup* block_group = baseObj->GetBlockGroup(building_name);
+	int biggest = GetMaxNumberExcludeChildPrefix(block_group, BDDB_FOOTPRINT_PREFIX);
+	for (size_t i = 0; i < components_foots.size(); i++) {
+		assert(components_foots[i].size() == components_planes[i].size());
+		int compoId = cur_compo_count + i;
+		for (size_t j = 0; j < components_foots[i].size(); j++) {
+			Contour3d foot_print = components_foots[i][j];
+			IntVector foot_planes = components_planes[i][j];
+
+			//! get names and top and bottom height from planes
+			QStringList cur_plane_names;			
+			Contour3d cur_all_points;
+			for (int plane_index : foot_planes) {
+				assert(plane_index < primObjs.size()); 
+				if(plane_index >= primObjs.size()) continue;
+				cur_plane_names.append(primObjs[plane_index]->getName());
+				cur_all_points.insert(cur_all_points.end(), planes_points[plane_index].begin(), planes_points[plane_index].end());
+			}
+			Concurrency::parallel_sort(cur_all_points.begin(), cur_all_points.end(), [&](Vec3d l, Vec3d r) {return l.Z() < r.Z(); });
+			double top_height = cur_all_points.back().Z();
+			double bottom_height = cur_all_points.front().Z();
+
+			//! construct the footprint			
+			QString name = BDDB_FOOTPRINT_PREFIX + QString::number(++biggest);
+			ccPolyline* polyline = AddPolygonAsPolyline(foot_print, name, ccColor::magenta, true);
+			StFootPrint* footptObj = new StFootPrint(0);
+			ccPointCloud* vertices = 0;
+			footptObj->initWith(vertices, *polyline);
+			footptObj->setAssociatedCloud(vertices);
+			footptObj->setColor(ccColor::magenta);
+			footptObj->showColors(true);
+			footptObj->setName(name);
+			footptObj->setComponentId(compoId);
+			footptObj->setTop(top_height);
+			footptObj->setBottom(bottom_height);
+			footptObj->setPlaneNames(cur_plane_names);
+
+			foot_print_objs.push_back(footptObj);
+			block_group->addChild(footptObj);
+			delete polyline;
+			polyline = nullptr;
+		}
+	}
+	return foot_print_objs;
+}
+
+bool PlanarPartition(ccHObject* block_group, ccHObject* prim_group)
+{
+
+	return true;
 }
 
 ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)

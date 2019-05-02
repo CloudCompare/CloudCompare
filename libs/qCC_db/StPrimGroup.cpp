@@ -56,3 +56,11 @@ ccHObject::Container StPrimGroup::getValidPlanes()
 	}
 	return valid;
 }
+
+void StPrimGroup::filterByName(QStringList name_list)
+{
+	for (unsigned int i = 0; i < getChildrenNumber(); i++) {
+		ccHObject* child_cloud = getChild(i); if (!child_cloud) return;
+		child_cloud->setEnabled(name_list.indexOf(child_cloud->getName()) >= 0);
+	}
+}

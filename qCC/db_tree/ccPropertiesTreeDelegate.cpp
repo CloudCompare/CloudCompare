@@ -158,7 +158,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_COLOR_RAMP_STEPS:
 		case OBJECT_CLOUD_POINT_SIZE:
 		case OBJECT_FACET_CONFIDENCE:
-		case OBJECT_FOOTPRINT_HEIGHT:
+		case OBJECT_FOOTPRINT_BOTTOM:
 		case OBJECT_FOOTPRINT_TOP:
 		case OBJECT_BLOCK_TOP:
 		case OBJECT_BLOCK_BOTTOM:
@@ -1422,12 +1422,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	break;
 	case OBJECT_FACET_CONFIDENCE:
 	{
-		ccFacet* facet = ccHObjectCaster::ToFacet(m_currentObject);
-		assert(facet);
 		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
 		spinBox->setRange(-DBL_MAX, DBL_MAX);
 		spinBox->setSingleStep(1);
-		spinBox->setValue(facet->getConfidence());
 
 		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 			this, &ccPropertiesTreeDelegate::facetConfidenceChanged);
@@ -1435,14 +1432,14 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		outputWidget = spinBox;
 	}
 	break;
-	case OBJECT_FOOTPRINT_HEIGHT:
+	case OBJECT_FOOTPRINT_BOTTOM:
 	{
 		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
 		spinBox->setRange(-DBL_MAX, DBL_MAX);
 		spinBox->setSingleStep(0.1);
 
  		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
- 			this, &ccPropertiesTreeDelegate::footprintHeightChanged);
+ 			this, &ccPropertiesTreeDelegate::footprintBottomChanged);
 
 		outputWidget = spinBox;
 	}
@@ -1457,6 +1454,27 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			this, &ccPropertiesTreeDelegate::footprintTopChanged);
 
 		outputWidget = spinBox;
+	}
+	break;
+	case OBJECT_APPLY_FOOTPRINT_PLANES:
+	{
+		StFootPrint* fp = ccHObjectCaster::ToStFootPrint(m_currentObject);
+		assert(fp);
+		QString button_name = tr("Apply ") + QString::number(fp->getPlaneNames().size());
+		QPushButton* button = new QPushButton(button_name, parent);
+		connect(button, &QAbstractButton::clicked, this, &ccPropertiesTreeDelegate::applyFootprintPlanes);
+
+		button->setMinimumHeight(30);
+		outputWidget = button;
+	}
+	break;
+	case OBJECT_UPDATE_FOOTPRINT_PLANES:
+	{
+		QPushButton* button = new QPushButton(tr("Update"), parent);
+		connect(button, &QAbstractButton::clicked, this, &ccPropertiesTreeDelegate::updateFootprintPlanes);
+
+		button->setMinimumHeight(30);
+		outputWidget = button;
 	}
 	break;
 	case OBJECT_BLOCK_TOP:
@@ -1828,11 +1846,11 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		SetDoubleSpinBoxValue(editor, facet ? facet->getConfidence() : VALID_MINUS_INT);
 	}
 	break;
-	case OBJECT_FOOTPRINT_HEIGHT:
+	case OBJECT_FOOTPRINT_BOTTOM:
 	{
 		StFootPrint* footprint = ccHObjectCaster::ToStFootPrint(m_currentObject);
 		assert(footprint);
-		SetDoubleSpinBoxValue(editor, footprint ? footprint->getHeight() : VALID_MINUS_INT);
+		SetDoubleSpinBoxValue(editor, footprint ? footprint->getBottom() : VALID_MINUS_INT);
 	}
 	break;
 	case OBJECT_FOOTPRINT_TOP:
@@ -2621,14 +2639,14 @@ void ccPropertiesTreeDelegate::colorSourceChanged(const QString & source)
 	}
 }
 
-void ccPropertiesTreeDelegate::footprintHeightChanged(double pos)
+void ccPropertiesTreeDelegate::footprintBottomChanged(double pos)
 {
 	if (!m_currentObject)
 		return;
 
 	StFootPrint* polyline = ccHObjectCaster::ToStFootPrint(m_currentObject);
 	assert(polyline);
-	polyline->setHeight(pos);
+	polyline->setBottom(pos);
 	updateDisplay();
 }
 
@@ -2641,6 +2659,44 @@ void ccPropertiesTreeDelegate::footprintTopChanged(double pos)
 	assert(polyline);
 	polyline->setTop(pos);
 	updateDisplay();
+}
+
+void ccPropertiesTreeDelegate::applyFootprintPlanes()
+{
+	if (!m_currentObject)
+		return;
+
+	StFootPrint* fp = ccHObjectCaster::ToStFootPrint(m_currentObject);
+	assert(fp);
+
+	//! get block group
+	BDBaseHObject* baseObj = GetRootBDBase(fp); if (!baseObj) return;
+	ccHObject* building = GetParentBuilding(fp); if (!building) return;
+	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building->getName()); if (!prim_group) return;
+	
+	prim_group->filterByName(fp->getPlaneNames()); 
+	prim_group->prepareDisplayForRefresh_recursive();
+	updateDisplay();
+}
+
+void ccPropertiesTreeDelegate::updateFootprintPlanes()
+{
+	if (!m_currentObject)
+		return;
+
+	StFootPrint* fp = ccHObjectCaster::ToStFootPrint(m_currentObject);
+	assert(fp);
+
+	//! get block group
+	BDBaseHObject* baseObj = GetRootBDBase(fp); if (!baseObj) return;
+	ccHObject* building = GetParentBuilding(fp); if (!building) return;
+	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building->getName()); if (!prim_group) return;
+
+	ccHObject::Container planes = prim_group->getValidPlanes();
+	QStringList names;
+	for (ccHObject* pl : planes) { names.append(pl->getName()); }
+
+	fp->setPlaneNames(names);
 }
 
 void ccPropertiesTreeDelegate::BlockTopChanged(double pos)
@@ -2721,19 +2777,18 @@ void ccPropertiesTreeDelegate::fillWithStFootPrint(const StFootPrint *_obj)
 
 	//footprint TOP height
 	appendRow(ITEM(tr("top height")), PERSISTENT_EDITOR(OBJECT_FOOTPRINT_TOP), true);
-/*OBJECT_FOOTPRINT_HEIGHT*/
 
-	//number of vertices
-	appendRow(ITEM(tr("Vertices")), ITEM(QLocale(QLocale::English).toString(_obj->size())));
+	//footprint bottom height
+	appendRow(ITEM(tr("bottom height")), PERSISTENT_EDITOR(OBJECT_FOOTPRINT_BOTTOM), true);
 
-	//polyline length
-	appendRow(ITEM(tr("Length")), ITEM(QLocale(QLocale::English).toString(_obj->computeLength())));
+	//"Apply planes" button
+	appendRow(ITEM(tr("Apply planes")), PERSISTENT_EDITOR(OBJECT_APPLY_FOOTPRINT_PLANES), true);
 
-	//custom line width
-//	appendRow(ITEM(tr("Line width")), PERSISTENT_EDITOR(OBJECT_POLYLINE_WIDTH), true);
+	//"Update planes" button
+	appendRow(ITEM(tr("Update planes")), PERSISTENT_EDITOR(OBJECT_UPDATE_FOOTPRINT_PLANES), true);
 
-	//global shift & scale
-	fillWithShifted(_obj);
+
+	fillWithPolyline(_obj);
 }
 
 void ccPropertiesTreeDelegate::fillWithStModel(const StModel *_obj)

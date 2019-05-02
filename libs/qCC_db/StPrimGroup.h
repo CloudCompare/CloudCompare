@@ -43,6 +43,8 @@ public:
 
 	ccHObject::Container getValidPlanes();
 
+	void filterByName(QStringList name_list);
+
 };
 
 #endif //ST_PRIMGROUP_HEADER

@@ -54,6 +54,9 @@ public:
 	inline int getComponentId() { return m_componentId; }
 	void setComponentId(int id) { m_componentId = id; }
 
+	inline QStringList getPlaneNames() { return m_plane_names; }
+	void setPlaneNames(QStringList names) { m_plane_names = names; }
+
 protected:
 	//inherited from ccDrawable
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
@@ -66,6 +69,7 @@ protected:
 	double m_bottom;
 	bool m_hole;
 	int m_componentId;
+	QStringList m_plane_names;
 };
 
 #endif //ST_FOOTPRINT_HEADER

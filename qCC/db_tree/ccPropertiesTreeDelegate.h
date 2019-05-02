@@ -111,7 +111,9 @@ public:
 							TREE_VIEW_HEADER						,
 							OBJECT_FACET_CONFIDENCE					,
 							OBJECT_FOOTPRINT_TOP					,
-							OBJECT_FOOTPRINT_HEIGHT					,
+							OBJECT_FOOTPRINT_BOTTOM					,
+							OBJECT_APPLY_FOOTPRINT_PLANES			,
+							OBJECT_UPDATE_FOOTPRINT_PLANES			,
 							OBJECT_BLOCK_TOP						,
 							OBJECT_BLOCK_BOTTOM						,
 							OBJECT_SENSOR_DRAW_IMAGE				,
@@ -217,8 +219,10 @@ private:
 	QStandardItemModel* m_model;
 	QAbstractItemView* m_view;
 
-	void footprintHeightChanged(double pos);
+	void footprintBottomChanged(double pos);
 	void footprintTopChanged(double pos);
+	void applyFootprintPlanes();
+	void updateFootprintPlanes();
 	void BlockTopChanged(double pos);
 	void BlockBottomChanged(double pos);
 	void facetConfidenceChanged(double pos);

@@ -903,25 +903,26 @@ bool ccGenericMesh::trianglePicking(unsigned triIndex,
 	if (noGLTrans)
 	{
 		// if none of its points fall into the frustrum the triangle is not visible...
-		if(!camera.project(A3D, A2D, true) &&
-			!camera.project(B3D, B2D, true) &&
-			!camera.project(C3D, C2D, true)) 
+		//DGM: we need to project ALL the points in case at least one is visible
+		bool insideA = camera.project(A3D, A2D, true);
+		bool insideB = camera.project(B3D, B2D, true);
+		bool insideC = camera.project(C3D, C2D, true);
+		if (!insideA && !insideB && !insideC)
 		{
 			return false;
 		}
 	}
 	else
 	{
-		CCVector3 A3Dp = A3D;
-		CCVector3 B3Dp = B3D;
-		CCVector3 C3Dp = C3D;
-		trans.apply(A3Dp);
-		trans.apply(B3Dp);
-		trans.apply(C3Dp);
+		CCVector3 A3Dp = trans * A3D;
+		CCVector3 B3Dp = trans * B3D;
+		CCVector3 C3Dp = trans * C3D;
 		// if none of its points fall into the frustrum the triangle is not visible...
-		if(!camera.project(A3Dp, A2D, true) &&
-			!camera.project(B3Dp, B2D, true) &&
-			!camera.project(C3Dp, C2D, true)) 
+		//DGM: we need to project ALL the points in case at least one is visible
+		bool insideA = camera.project(A3Dp, A2D, true);
+		bool insideB = camera.project(B3Dp, B2D, true);
+		bool insideC = camera.project(C3Dp, C2D, true);
+		if (!insideA && !insideB && !insideC)
 		{
 			return false;
 		}
@@ -995,7 +996,7 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 		return false;
 	}
 
-#if defined(_OPENMP)
+#if defined(_OPENMP) && !defined(_DEBUG)
 	#pragma omp parallel for
 #endif
 	for (int i = 0; i < static_cast<int>(size()); ++i)

@@ -1056,7 +1056,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 		s_M3C2Params.outputCloud->showNormals(true);
 		s_M3C2Params.outputCloud->setVisible(true);
 
-		if (s_M3C2Params.outputCloud != s_M3C2Params.corePoints)
+		if (s_M3C2Params.outputCloud != cloud1 && s_M3C2Params.outputCloud != cloud2)
 		{
 			s_M3C2Params.outputCloud->setName(outputName);
 			s_M3C2Params.outputCloud->setDisplay(s_M3C2Params.corePoints->getDisplay());

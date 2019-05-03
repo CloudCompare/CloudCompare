@@ -848,7 +848,9 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDDisplayPointOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOn);
 	connect(m_UI->actionBDDisplayPointOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOff);
 	connect(m_UI->actionBDFootPrintAuto,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintAuto);
-	connect(m_UI->actionBDFootPrintManual,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintManual);
+	connect(m_UI->actionBDFootPrintManual,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintManual); 
+	connect(m_UI->actionBDFootPrintPack,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintPack);
+	connect(m_UI->actionBDFootPrintGetPlane,		&QAction::triggered, this, &MainWindow::doActionBDFootPrintGetPlane);
 }
 
 void MainWindow::doActionColorize()
@@ -12635,7 +12637,7 @@ void MainWindow::doActionBDFootPrintAuto()
 			if (ft && ft->isA(CC_TYPES::ST_FOOTPRINT)) {
 				SetGlobalShiftAndScale(ft);
 				ft->setDisplay_recursive(entity->getDisplay());
-				addToDB(ft, true, false);				
+				addToDB(ft, false, false);				
 			}			
 		}
 	}
@@ -12740,6 +12742,82 @@ void MainWindow::doActionBDFootPrintManual()
 		deactivateSectionExtractionMode(false);
 	else
 		updateOverlayDialogsPlacement();
+}
+
+void MainWindow::doActionBDFootPrintPack()
+{
+	if (!haveSelection()) return;
+	ccHObject *entity = getSelectedEntities().front();
+	BDBaseHObject* baseObj = GetRootBDBase(entity);
+	ccHObject* bd_entity = GetParentBuilding(entity);
+	if (!bd_entity) return;
+
+	try	{
+		if (!PackFootprints(bd_entity)) {
+			return;
+		}
+	}
+	catch (const std::exception& e)	{
+		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	refreshAll();
+	UpdateUI();
+}
+
+void MainWindow::doActionBDFootPrintGetPlane()
+{
+	if (!haveSelection()) {
+		return;
+	}
+	bool bClearExist = QMessageBox::question(this, "Vertical", "Get Vertical Planes?",
+		QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes;
+
+	CCVector3 s_settings;
+	ccAskThreeDoubleValuesDlg setDlg("xy-bias", "z-bias", "minpts", -1.0e12, 1.0e12, 1, 1, 30, 4, "Get planes inside the footprint", this);
+	setDlg.showCheckbox("Vertical planes", true, "Get vertical planes?");
+	if (setDlg.buttonBox->button(QDialogButtonBox::Ok))
+		setDlg.buttonBox->button(QDialogButtonBox::Ok)->setFocus();
+	if (!setDlg.exec())
+		return;
+	s_settings.x = setDlg.doubleSpinBox1->value();
+	s_settings.y = setDlg.doubleSpinBox2->value();
+	s_settings.z = setDlg.doubleSpinBox3->value();
+	bool bVertical = setDlg.getCheckboxState();
+
+	ccHObject* select_ent = getSelectedEntities().front();
+	ccHObject::Container building_entites = GetBuildingEntitiesBySelected(select_ent);
+	if (building_entites.empty()) return;
+
+	BDBaseHObject* baseObj = GetRootBDBase(select_ent);
+	ProgStartNorm("Get planes inside footprints", building_entites.size());
+	try	{
+		for (ccHObject* buildingEntity : building_entites) {
+			StBlockGroup* block_group = baseObj->GetBlockGroup(buildingEntity->getName());
+			StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(buildingEntity->getName());
+			if (block_group && prim_group) {
+				ccHObject::Container footprints;
+				if (select_ent->isA(CC_TYPES::ST_FOOTPRINT)) {
+					footprints.push_back(select_ent);
+				}
+				else {
+					footprints = block_group->getValidFootPrints();
+				}
+				for (ccHObject* ft : footprints) {
+					GetPlanesInsideFootPrint(ft, prim_group, s_settings, bVertical, bClearExist);
+				}
+			}
+			ProgStep()
+		}
+	}
+	catch (const std::exception& e) {
+		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+	}
+	ProgEnd
+
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionBDLoD1Generation()

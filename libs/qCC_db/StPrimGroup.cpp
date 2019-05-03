@@ -44,17 +44,33 @@ ccHObject::Container StPrimGroup::getValidPlanes()
 	for (unsigned int i = 0; i < getChildrenNumber(); i++) {
 		ccHObject* child_cloud = getChild(i);
 
-		if (!child_cloud->isEnabled() || !child_cloud->isA(CC_TYPES::POINT_CLOUD)) continue;
+		if (!child_cloud->isEnabled() || !child_cloud->isA(CC_TYPES::POINT_CLOUD) || child_cloud->getName().endsWith("-del")) continue;
 
 		for (unsigned int j = 0; j < child_cloud->getChildrenNumber(); j++) {
 			ccHObject* pl = child_cloud->getChild(j);
-			if (pl->isEnabled() && !pl->getName().endsWith("-del")) {
+			if (pl->isEnabled() && pl->isA(CC_TYPES::PLANE)) {
 				valid.push_back(pl);
 				break;
 			}
 		}
 	}
 	return valid;
+}
+
+ccPlane * StPrimGroup::getPlaneByName(QString name)
+{
+	for (unsigned int i = 0; i < getChildrenNumber(); i++) {
+		ccHObject* child_cloud = getChild(i);
+		if (!(child_cloud->getName() == name) || !child_cloud->isA(CC_TYPES::POINT_CLOUD) || child_cloud->getName().endsWith("-del")) continue;
+
+		for (unsigned int j = 0; j < child_cloud->getChildrenNumber(); j++) {
+			ccHObject* pl = child_cloud->getChild(j);
+			if (pl->isA(CC_TYPES::PLANE)) {
+				return static_cast<ccPlane*>(pl);
+			}
+		}
+	}
+	return nullptr;
 }
 
 void StPrimGroup::filterByName(QStringList name_list)

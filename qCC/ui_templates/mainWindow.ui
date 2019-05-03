@@ -558,6 +558,7 @@
     <addaction name="menuDisplay_2"/>
     <addaction name="actionBDConstrainedMesh"/>
     <addaction name="actionBDRetrievePlanePoints"/>
+    <addaction name="actionBDFootPrintGetPlane"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -987,6 +988,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="separator"/>
    <addaction name="actionBDFootPrintAuto"/>
    <addaction name="actionBDFootPrintManual"/>
+   <addaction name="actionBDFootPrintPack"/>
    <addaction name="actionBDLoD1Generation"/>
    <addaction name="actionBD3D4EM"/>
    <addaction name="separator"/>
@@ -3630,6 +3632,29 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>extract footprints</string>
+   </property>
+  </action>
+  <action name="actionBDFootPrintPack">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/footprint.png</normaloff>:/CC/Stocker/images/stocker/footprint.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pack Footprints</string>
+   </property>
+   <property name="iconText">
+    <string>Pack</string>
+   </property>
+   <property name="toolTip">
+    <string>Pack Footprints</string>
+   </property>
+  </action>
+  <action name="actionBDFootPrintGetPlane">
+   <property name="text">
+    <string>Get Plane in footprint</string>
+   </property>
+   <property name="toolTip">
+    <string>Get Plane in footprint</string>
    </property>
   </action>
  </widget>

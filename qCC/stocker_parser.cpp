@@ -41,6 +41,43 @@ QString GetBaseName(QString name) {
 	return name.mid(0, name.indexOf('.'));
 }
 
+template <typename T1, typename T2>
+auto ccToPoints2(std::vector<T1> points, bool parallel = false)->std::vector<T2>
+{
+	std::vector<T2> pointsTO;
+	if (parallel) {
+		Concurrency::concurrent_vector<T2> points_To_Conc;
+		Concurrency::parallel_for((size_t)0, points.size(), [&](size_t i) {
+			points_To_Conc.push_back(T2(points[i].x, points[i].y));
+		});
+		pointsTO.assign(points_To_Conc.begin(), points_To_Conc.end());
+	}
+	else {
+		for (auto & pt : points) {
+			pointsTO.emplace_back(pt.x, pt.y);
+		}
+	}	
+	return pointsTO;
+}
+
+template <typename T1, typename T2>
+auto ccToPoints3(std::vector<T1> points, bool parallel = false)->std::vector<T2>
+{
+	std::vector<T2> pointsTO;
+	if (parallel) {
+		Concurrency::concurrent_vector<T2> points_To_Conc;
+		Concurrency::parallel_for((size_t)0, points.size(), [&](size_t i) {
+			points_To_Conc.push_back(T2(points[i].x, points[i].y, points[i].z));
+		});
+		pointsTO.assign(points_To_Conc.begin(), points_To_Conc.end());
+	}
+	else {
+		for (auto & pt : points) {
+			pointsTO.emplace_back(pt.x, pt.y, pt.z);
+		}
+	}
+	return pointsTO;
+}
 
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity) 
 {	
@@ -314,6 +351,22 @@ ccHObject::Container GetPlaneEntitiesBySelected(ccHObject* select)
 	return plane_container;
 }
 
+ccHObject::Container GetBuildingEntitiesBySelected(ccHObject* select)
+{
+	ccHObject::Container building_container;
+	if (!select) { return building_container; }
+
+	if (IsBDBaseObj(select)) {
+		BDBaseHObject* baseObj = GetRootBDBase(select); assert(baseObj);
+		building_container = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
+	}
+	else {
+		ccHObject* bd = GetParentBuilding(select);
+		if (bd) building_container.push_back(bd);
+	}
+	return building_container;
+}
+
 ccPlane* GetPlaneFromCloud(ccHObject * entity)
 {
 	if (entity->isA(CC_TYPES::POINT_CLOUD)) {
@@ -540,12 +593,8 @@ BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	return nullptr;
 }
 
-ccHObject* GetPlaneCloud(ccHObject* planeObj) {
-	if (planeObj->isA(CC_TYPES::PLANE))
-		return planeObj->getParent();
-	else if (planeObj->isA(CC_TYPES::POINT_CLOUD))
-		return planeObj;
-	else return nullptr;
+ccPointCloud* GetPlaneCloud(ccHObject* planeObj) {
+	return ccHObjectCaster::ToPointCloud(planeObj->isA(CC_TYPES::PLANE) ? planeObj->getParent() : planeObj);
 }
 
 bool SetGlobalShiftAndScale(ccHObject* obj)
@@ -554,17 +603,25 @@ bool SetGlobalShiftAndScale(ccHObject* obj)
 	if (!baseObj) {
 		return false;
 	}
-	ccHObject::Container cloud_container;
-	if (obj->isA(CC_TYPES::POINT_CLOUD)) {
-		cloud_container.push_back(obj);
+	
+	if (obj->isKindOf(CC_TYPES::POLY_LINE)) {
+		ccShiftedObject* shift = ccHObjectCaster::ToShifted(obj);
+		shift->setGlobalScale(baseObj->global_scale);
+		shift->setGlobalShift(CCVector3d(vcgXYZ(baseObj->global_shift)));
 	}
 	else {
-		obj->filterChildren(cloud_container, true, CC_TYPES::POINT_CLOUD, false);
-	}
-	for (auto & _cld : cloud_container)	{
-		ccPointCloud* cloud_entity = ccHObjectCaster::ToPointCloud(_cld);
-		cloud_entity->setGlobalScale(baseObj->global_scale);
-		cloud_entity->setGlobalShift(CCVector3d(vcgXYZ(baseObj->global_shift)));
+		ccHObject::Container cloud_container;
+		if (obj->isA(CC_TYPES::POINT_CLOUD)) {
+			cloud_container.push_back(obj);
+		}
+		else {
+			obj->filterChildren(cloud_container, true, CC_TYPES::POINT_CLOUD, false);
+		}
+		for (auto & _cld : cloud_container) {
+			ccPointCloud* cloud_entity = ccHObjectCaster::ToPointCloud(_cld);
+			cloud_entity->setGlobalScale(baseObj->global_scale);
+			cloud_entity->setGlobalShift(CCVector3d(vcgXYZ(baseObj->global_shift)));
+		}
 	}
 	return true;
 }
@@ -1086,42 +1143,16 @@ ccHObject* AddOutlinesAsChild(vector<vector<stocker::Contour3d>> contours_points
 ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha)
 {
 #ifdef USE_STOCKER
-	ccHObject* point_cloud_obj = GetPlaneCloud(planeObj);
+	ccPointCloud* point_cloud_obj = GetPlaneCloud(planeObj);
 	if (!point_cloud_obj) return nullptr;
 	stocker::Contour3d cur_plane_points = GetPointsFromCloud(point_cloud_obj);
 	if (cur_plane_points.size() < 3) {
 		return nullptr;
 	}
-	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(point_cloud_obj);
 
 	//! get boundary
 	vector<vector<stocker::Contour3d>> contours_points = stocker::GetPlanePointsOutline(cur_plane_points, alpha, false, 2);
 	return AddOutlinesAsChild(contours_points, BDDB_OUTLINE_PREFIX, point_cloud_obj);
-//	if (contours_points.empty()) return nullptr;
-// 	ccPointCloud* line_vert = new ccPointCloud(BDDB_OUTLINE_PREFIX);
-// 	int component_number = 0;
-// 	for (vector<stocker::Contour3d> & component : contours_points) {
-// 		for (stocker::Contour3d & st_contours : component) {
-// 			ccPolyline* cc_polyline = new ccPolyline(line_vert);
-// 			cc_polyline->setDisplay(planeObj->getDisplay());
-// 			cc_polyline->setColor(ccColor::green);
-// 			cc_polyline->showColors(true);
-// 			line_vert->addChild(cc_polyline);
-// 			cc_polyline->setName(BDDB_OUTLINE_PREFIX + QString::number(component_number));
-// 			cc_polyline->setWidth(2);
-// 			cc_polyline->setGlobalShift(cloud->getGlobalShift());
-// 			cc_polyline->setGlobalScale(cloud->getGlobalScale());
-// 			cc_polyline->reserve(static_cast<unsigned>(st_contours.size() + 1));
-// 			for (auto & pt : st_contours) {
-// 				line_vert->addPoint(CCVector3(pt.X(), pt.Y(), pt.Z()));
-// 				cc_polyline->addPointIndex(line_vert->size() - 1);
-// 			}
-// 			cc_polyline->setClosed(true);
-// 		}
-// 		component_number++;
-// 	}
-// 	planeObj->getParent()->addChild(line_vert);
-// 	return line_vert;
 #endif // USE_STOCKER
 }
 
@@ -2159,19 +2190,20 @@ std::vector<std::vector<int>> GroupFootPrint(ccHObject::Container footprintObjs)
 	return components;
 }
 
-ccHObject::Container GetNonHorizontalPlaneClouds(ccHObject* stprim_group, double angle_degree = 15)
+bool isVertical(ccPlane* planeObj, double angle_degree = 15)
+{
+	return planeObj->isVerticalToDirection(CCVector3(0, 0, 1), angle_degree);
+}
+
+ccHObject::Container GetNonVerticalPlaneClouds(ccHObject* stprim_group, double angle_degree = 15)
 {
 	ccHObject::Container primObjs_temp = GetEnabledObjFromGroup(stprim_group, CC_TYPES::PLANE, true, true);
 	ccHObject::Container primObjs;
-	double err_angle = angle_degree * CC_DEG_TO_RAD;
 	for (auto & plane_entity : primObjs_temp) {
 		ccPlane* planeObj = ccHObjectCaster::ToPlane(plane_entity);
 		if (!planeObj || !planeObj->isEnabled()) { continue; }
 		//! skip vertical
-		CCVector3 N; PointCoordinateType d;
-		planeObj->getEquation(N, d);
-		double product = N.dot(CCVector3(0, 0, 1));
-		if ((product > 0 && product < err_angle) || (product < 0 && product > -err_angle)) {
+		if (isVertical(planeObj, angle_degree)) {
 			continue;
 		}
 		if (!planeObj->getParent() || !planeObj->getParent()->isEnabled()) { continue; }
@@ -2187,7 +2219,7 @@ ccHObject::Container GenerateFootPrints_PP(ccHObject* prim_group)
 	if (!baseObj) { return foot_print_objs; }
 
 	//! skip walls
-	ccHObject::Container primObjs = GetNonHorizontalPlaneClouds(prim_group, 15);
+	ccHObject::Container primObjs = GetNonVerticalPlaneClouds(prim_group, 15);
 
 	std::vector<stocker::Contour3d> planes_points = GetPointsFromCloudInsidePolygonsXY(primObjs, stocker::Polyline3d(), false);
 	if (planes_points.empty()) { return foot_print_objs; }
@@ -2242,7 +2274,7 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 	if (!baseObj) { return foot_print_objs; }
 
 	//! skip walls
-	ccHObject::Container primObjs = GetNonHorizontalPlaneClouds(prim_group, 15);
+	ccHObject::Container primObjs = GetNonVerticalPlaneClouds(prim_group, 15);
 
 	std::vector<stocker::Contour3d> planes_points = GetPointsFromCloudInsidePolygonsXY(primObjs, stocker::Polyline3d(), DBL_MAX, true);
 	if (planes_points.empty()) { return foot_print_objs; }
@@ -2324,7 +2356,7 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
 
 	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(building_name);
-	ccHObject::Container footprintObjs = blockgroup_obj->getFootPrints();
+	ccHObject::Container footprintObjs = blockgroup_obj->getValidFootPrints();
 
 	for (size_t i = 0; i < footprintObjs.size(); i++) {
 		StFootPrint* foot_print = ccHObjectCaster::ToStFootPrint(footprintObjs[i]);
@@ -2501,7 +2533,7 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 		}
 		builder_3d4em.SetGroundHeight(ground_height);
 
-		ccHObject::Container primObjs = GetNonHorizontalPlaneClouds(prim_group_obj, 15);
+		ccHObject::Container primObjs = GetNonVerticalPlaneClouds(prim_group_obj, 15);
 		std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(primObjs, first_polygon, footprint_height);
 		builder_3d4em.SetSegmentedPoints(points);		
 
@@ -2564,7 +2596,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 		}
 		builder_3d4em.SetGroundHeight(ground_height);
 
-		ccHObject::Container primObjs = GetNonHorizontalPlaneClouds(prim_group_obj, 15);
+		ccHObject::Container primObjs = GetNonVerticalPlaneClouds(prim_group_obj, 15);
 		std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(primObjs, polygon, ftObj->getTop());
 		builder_3d4em.SetSegmentedPoints(points);
 
@@ -2613,7 +2645,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, double ground_height)
 			return nullptr;
 		}
 		StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
-		ccHObject::Container footprintObjs = blockgroup_obj->getFootPrints();
+		ccHObject::Container footprintObjs = blockgroup_obj->getValidFootPrints();
 		if (manual) { // manual
 			return LoD2FromFootPrint_WholeProcess(buildingObj, footprintObjs, ground_height);
 		}
@@ -2621,4 +2653,150 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, double ground_height)
 			return LoD2FromFootPrint(buildingObj, footprintObjs, ground_height);
 		}
 	}
+}
+
+void SubstituteFootPrintContour(StFootPrint* footptObj, stocker::Contour3d points)
+{
+	ccHObject* existing_cloud = nullptr;
+	for (size_t ci = 0; ci < footptObj->getChildrenNumber(); ci++) {
+		ccHObject* child = footptObj->getChild(ci);
+		if (child->isA(CC_TYPES::POINT_CLOUD) && child->getName() == "vertices") {
+			existing_cloud = child;
+			break;
+		}
+	}
+	MainWindow* win = MainWindow::TheInstance();
+	ccPointCloud* vertices = AddPointsAsPointCloud(points, "vertices", ccColor::magenta);
+	footptObj->clear();
+	footptObj->initWith(vertices, *footptObj);
+	footptObj->addPointIndex(0);
+	footptObj->setClosed(true);
+	win->addToDB(vertices, false, false);
+
+	if (existing_cloud) {
+		win->db()->unselectAllEntities();
+		win->db()->selectEntity(existing_cloud);
+		win->db()->deleteSelectedEntities();
+	}
+}
+
+bool PackFootprints(ccHObject* buildingObj)
+{
+	BDBaseHObject* baseObj = GetRootBDBase(buildingObj); if (!baseObj) return false;
+	QString building_name = buildingObj->getName();
+	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
+	StPrimGroup* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
+	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
+	if (!prim_group_obj || !blockgroup_obj) { return false; }
+
+	//! get footprints
+	ccHObject::Container footprints = blockgroup_obj->getValidFootPrints();
+	std::vector<std::vector<Contour3d>> layers_planes_points;
+	std::vector<stocker::Contour3d> footprints_points;
+	for (ccHObject* ft_entity : footprints) {
+		StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(ft_entity);
+		QStringList plane_names = ftObj->getPlaneNames();
+		std::vector<Contour3d> planes_points;
+		for (auto & pl_name : plane_names) {
+			ccPlane* pl_entity = prim_group_obj->getPlaneByName(pl_name); if (!pl_entity) continue;
+			if (isVertical(pl_entity, 15)) continue;
+			ccPointCloud* plane_cloud = GetPlaneCloud(pl_entity); if (!plane_cloud) continue;
+			planes_points.push_back(GetPointsFromCloud(plane_cloud));
+		}
+		layers_planes_points.push_back(planes_points);
+
+		Contour3d ft_pts;
+		for (auto & pt : ftObj->getPoints(false)) {
+			ft_pts.emplace_back(pt.x, pt.y, pt.z);
+		}
+		footprints_points.push_back(ft_pts);
+	}
+	if (!FootPrintsPlanarPartition(layers_planes_points, footprints_points)) return false;	
+	if (footprints.size() != footprints_points.size())return false;
+
+	for (auto & polygon : footprints_points) {
+		RepairPolygon(polygon, CC_DEG_TO_RAD * 5);
+	}
+	
+	for (size_t i = 0; i < footprints.size(); i++) {
+		StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(footprints[i]);
+		SubstituteFootPrintContour(ftObj, footprints_points[i]);
+		ftObj->prepareDisplayForRefresh();
+	}
+
+	return true;
+}
+
+void GetPlanesInsideFootPrint(ccHObject* footprint, ccHObject* prim_group, CCVector3 settings, bool bVertical, bool clearExisting) 
+{
+	StFootPrint* footprintObj = ccHObjectCaster::ToStFootPrint(footprint);
+	StPrimGroup* primgroupObj = ccHObjectCaster::ToStPrimGroup(prim_group);
+
+	QStringList plane_names;
+	if (!clearExisting)	{
+		plane_names = footprintObj->getPlaneNames();
+	}
+
+	std::vector<CCVector3> ftpts = footprintObj->getPoints(false);
+	Contour3d ftpts_stocker; for (auto & pt : ftpts) { ftpts_stocker.emplace_back(pt.x, pt.y, pt.z); }
+	Polyline2d footprint_polygon = MakeLoopPolylinefromContour(ToContour2d(ftpts_stocker));
+	double min_z = footprintObj->getBottom() - settings.y;
+	double max_z = footprintObj->getTop() + settings.y;
+
+	ccHObject::Container all_planes = primgroupObj->getValidPlanes();
+	for (ccHObject* plane : all_planes) {
+		ccPlane* planeObj = ccHObjectCaster::ToPlane(plane);
+
+		bool is_plane_vertical = planeObj->isVerticalToDirection(CCVector3(0, 0, 1), 15);
+		if (!bVertical && is_plane_vertical) { continue; }
+		ccPointCloud* plane_cloud = GetPlaneCloud(plane);
+		assert(plane_cloud); if (!plane_cloud) continue;
+		if (!clearExisting && plane_names.indexOf(plane_cloud->getName()) >= 0) { continue; }
+				
+		Polyline2d plane_polygon = MakeLoopPolylinefromContour(ccToPoints2<CCVector3, Vec2d>(planeObj->getProfile(), true));
+		if (plane_polygon.empty()) continue;
+
+		Contour3d planes_points = GetPointsFromCloud(plane_cloud);
+		if (planes_points.size() < settings.z) { continue; }
+		
+		//! vertical plane, center point to the footprint distance
+		if (is_plane_vertical) {
+			CCVector3 center_pt = CalcMean(planeObj->getProfile());
+			if (!vcg::PointInsidePolygon(Vec2d(center_pt.x, center_pt.y), footprint_polygon)) continue;
+
+// 			Concurrency::concurrent_vector<short> count;
+// 			bool min_count_achieved = false;
+// 			Concurrency::parallel_for((size_t)0, planes_points.size(), [&](size_t pi) {
+// 				if (planes_points[pi].Z() > min_z && planes_points[pi].Z() < max_z) {
+// 					count.push_back(0);
+// 					if (count.size() >= (size_t)settings.z) {
+// 						min_count_achieved = true;
+// 						return;
+// 					}
+// 				}
+// 			});
+// 			if (min_count_achieved) { plane_names.push_back(plane_cloud->getName()); }
+		}
+		//! non-vertical plane, 
+		else {
+			if (DistancePolygonPolygon(footprint_polygon, plane_polygon) > settings.x) continue;
+		
+			Concurrency::concurrent_vector<short> count;
+			bool min_count_achieved = false;
+			Concurrency::parallel_for((size_t)0, planes_points.size(), [&](size_t pi) {
+				if (vcg::PointInsidePolygon(planes_points[pi].ToVec2(), footprint_polygon)
+					&& planes_points[pi].Z() > min_z && planes_points[pi].Z() < max_z) {
+					count.push_back(0);
+					if (count.size() >= (size_t)settings.z) {
+						min_count_achieved = true;
+						return;
+					}
+				}
+			});
+			if (min_count_achieved) { plane_names.push_back(plane_cloud->getName()); }
+		}
+	}
+
+	footprintObj->setPlaneNames(plane_names);
+	footprintObj->prepareDisplayForRefresh();
 }

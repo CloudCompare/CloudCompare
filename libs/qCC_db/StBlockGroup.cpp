@@ -38,16 +38,20 @@ StBlockGroup::~StBlockGroup()
 {
 }
 
-ccHObject::Container StBlockGroup::getFootPrints()
+ccHObject::Container StBlockGroup::getValidFootPrints()
 {
-	ccHObject::Container fts;
-	filterChildren(fts, false, CC_TYPES::ST_FOOTPRINT, true);
-	return fts;
+	ccHObject::Container valid;
+	for (size_t i = 0; i < getChildrenNumber(); i++) {
+		ccHObject* child_fp = getChild(i);
+		if (!child_fp->isEnabled() || !child_fp->isA(CC_TYPES::ST_FOOTPRINT) || child_fp->getName().endsWith("-del")) continue;
+		valid.push_back(child_fp);
+	}
+	return valid;
 }
 
 void StBlockGroup::groupFootPrint()
 {
-	ccHObject::Container footprintObjs = getFootPrints();
+	ccHObject::Container footprintObjs = getValidFootPrints();
 
 }
 

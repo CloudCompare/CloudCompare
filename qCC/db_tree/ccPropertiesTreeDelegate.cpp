@@ -2694,7 +2694,7 @@ void ccPropertiesTreeDelegate::updateFootprintPlanes()
 
 	ccHObject::Container planes = prim_group->getValidPlanes();
 	QStringList names;
-	for (ccHObject* pl : planes) { names.append(pl->getName()); }
+	for (ccHObject* pl : planes) {  names.append(GetPlaneCloud(pl)->getName()); }
 
 	fp->setPlaneNames(names);
 }

@@ -100,6 +100,8 @@ public:
 	**/
 	void getEquation(CCVector3& N, PointCoordinateType& constVal) const;
 
+	bool isVerticalToDirection(CCVector3 dir, double angle_degree = 15);
+
 	void setProfile(std::vector<CCVector3> profile) { m_profile = profile; }
 	std::vector<CCVector3> getProfile() { return m_profile; }
 

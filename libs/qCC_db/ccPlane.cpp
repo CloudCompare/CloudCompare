@@ -122,6 +122,18 @@ void ccPlane::getEquation(CCVector3& N, PointCoordinateType& constVal) const
 	constVal = m_transformation.getTranslationAsVec3D().dot(N);
 }
 
+bool ccPlane::isVerticalToDirection(CCVector3 dir, double angle_degree)
+{
+	double err_angle = angle_degree * CC_DEG_TO_RAD;
+	CCVector3 N; PointCoordinateType d;
+	getEquation(N, d);
+	double product = N.dot(dir);
+	if ((product > 0 && product < err_angle) || (product < 0 && product > -err_angle)) {
+		return true;
+	}
+	return false;
+}
+
 ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*/, std::vector<CCVector3> * profile /*= 0*/)
 {
 	//number of points

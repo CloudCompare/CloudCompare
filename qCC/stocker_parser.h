@@ -58,6 +58,7 @@ stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
 vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject * entity);
 ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true, bool recursive = true);
 ccHObject::Container GetPlaneEntitiesBySelected(ccHObject * select);
+ccHObject::Container GetBuildingEntitiesBySelected(ccHObject * select);
 ccPlane * GetPlaneFromCloud(ccHObject * entity);
 ccPlane * GetPlaneFromPlaneOrCloud(ccHObject * entity);
 //! return -1 if no child exists
@@ -175,7 +176,7 @@ bool IsBDBaseObj(ccHObject * obj);
 
 BDBaseHObject* GetRootBDBase(ccHObject* obj);
 
-ccHObject * GetPlaneCloud(ccHObject * planeObj);
+ccPointCloud * GetPlaneCloud(ccHObject * planeObj);
 
 bool SetGlobalShiftAndScale(ccHObject * obj);
 
@@ -268,3 +269,8 @@ ccHObject::Container GenerateFootPrints(ccHObject * prim_group);
 ccHObject * LoD1FromFootPrint(ccHObject * buildingObj);
 
 ccHObject * LoD2FromFootPrint(ccHObject * buildingObj, double ground_height = DBL_MAX);
+
+bool PackFootprints(ccHObject * buildingObj);
+
+//! settings.x - xybias, y - zbias, z - minPts
+void GetPlanesInsideFootPrint(ccHObject * footprint, ccHObject * prim_group, CCVector3 settings, bool bVertical, bool clearExisting);

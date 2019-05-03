@@ -19,6 +19,7 @@
 #define ST_PRIMGROUP_HEADER
 
 #include "ccHObject.h"
+#include "ccPlane.h"
 
 // block
 class QCC_DB_LIB_API StPrimGroup : public ccHObject
@@ -42,6 +43,8 @@ public:
 	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_PRIMGROUP; }
 
 	ccHObject::Container getValidPlanes();
+
+	ccPlane* getPlaneByName(QString name);
 
 	void filterByName(QStringList name_list);
 

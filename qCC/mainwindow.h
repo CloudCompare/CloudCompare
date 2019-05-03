@@ -496,6 +496,8 @@ private slots:
 
 	void doActionBDFootPrintAuto();
 	void doActionBDFootPrintManual();
+	void doActionBDFootPrintPack();
+	void doActionBDFootPrintGetPlane();
 
 	void doActionBDLoD1Generation();
 

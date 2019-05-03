@@ -2761,21 +2761,22 @@ void GetPlanesInsideFootPrint(ccHObject* footprint, ccHObject* prim_group, CCVec
 		
 		//! vertical plane, center point to the footprint distance
 		if (is_plane_vertical) {
-			CCVector3 center_pt = CalcMean(planeObj->getProfile());
-			if (!vcg::PointInsidePolygon(Vec2d(center_pt.x, center_pt.y), footprint_polygon)) continue;
-			plane_names.push_back(plane_cloud->getName());
-// 			Concurrency::concurrent_vector<short> count;
-// 			bool min_count_achieved = false;
-// 			Concurrency::parallel_for((size_t)0, planes_points.size(), [&](size_t pi) {
-// 				if (planes_points[pi].Z() > min_z && planes_points[pi].Z() < max_z) {
-// 					count.push_back(0);
-// 					if (count.size() >= (size_t)settings.z) {
-// 						min_count_achieved = true;
-// 						return;
-// 					}
-// 				}
-// 			});
-// 			if (min_count_achieved) { plane_names.push_back(plane_cloud->getName()); }
+// 			CCVector3 center_pt = CalcMean(planeObj->getProfile());
+// 			if (!vcg::PointInsidePolygon(Vec2d(center_pt.x, center_pt.y), footprint_polygon)) continue;
+			
+			Concurrency::concurrent_vector<short> count;
+			bool min_count_achieved = false;
+			Concurrency::parallel_for((size_t)0, planes_points.size(), [&](size_t pi) {
+				if (vcg::PointInsidePolygon(planes_points[pi].ToVec2(), footprint_polygon)
+					/*&& planes_points[pi].Z() > min_z && planes_points[pi].Z() < max_z*/) {
+					count.push_back(0);
+					if (count.size() >= (size_t)settings.z) {
+						min_count_achieved = true;
+						return;
+					}
+				}
+			});
+ 			if (min_count_achieved) { plane_names.push_back(plane_cloud->getName()); }
 		}
 		//! non-vertical plane, 
 		else {

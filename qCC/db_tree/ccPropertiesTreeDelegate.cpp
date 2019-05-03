@@ -2697,6 +2697,7 @@ void ccPropertiesTreeDelegate::updateFootprintPlanes()
 	for (ccHObject* pl : planes) {  names.append(GetPlaneCloud(pl)->getName()); }
 
 	fp->setPlaneNames(names);
+	updateModel();
 }
 
 void ccPropertiesTreeDelegate::BlockTopChanged(double pos)

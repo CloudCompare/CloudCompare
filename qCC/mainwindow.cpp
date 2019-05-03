@@ -12771,7 +12771,7 @@ void MainWindow::doActionBDFootPrintGetPlane()
 	if (!haveSelection()) {
 		return;
 	}
-	bool bClearExist = QMessageBox::question(this, "Vertical", "Get Vertical Planes?",
+	bool bClearExist = QMessageBox::question(this, "Get planes", "Clear existing planes?",
 		QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes;
 
 	CCVector3 s_settings;

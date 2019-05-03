@@ -2763,7 +2763,7 @@ void GetPlanesInsideFootPrint(ccHObject* footprint, ccHObject* prim_group, CCVec
 		if (is_plane_vertical) {
 			CCVector3 center_pt = CalcMean(planeObj->getProfile());
 			if (!vcg::PointInsidePolygon(Vec2d(center_pt.x, center_pt.y), footprint_polygon)) continue;
-
+			plane_names.push_back(plane_cloud->getName());
 // 			Concurrency::concurrent_vector<short> count;
 // 			bool min_count_achieved = false;
 // 			Concurrency::parallel_for((size_t)0, planes_points.size(), [&](size_t pi) {

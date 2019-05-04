@@ -85,6 +85,7 @@ ccHObject* CalcPlaneBoundary(ccHObject* planeObj);
 ccHObject * DetectLineRansac(ccHObject * entity, double distance, double minpts, double radius);
 ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha);
 void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_epsilon);
+void CreateIntersectionPoint(ccHObject * p1, ccHObject * p2);
 ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option);
 ccHObject* PlaneFrameLineGrow(ccHObject* planeObj, double alpha, double intersection, double minpts);
 
@@ -268,7 +269,7 @@ ccHObject::Container GenerateFootPrints(ccHObject * prim_group);
 
 ccHObject * LoD1FromFootPrint(ccHObject * buildingObj);
 
-ccHObject * LoD2FromFootPrint(ccHObject * buildingObj, double ground_height = DBL_MAX);
+ccHObject * LoD2FromFootPrint(ccHObject * entity, double ground_height = DBL_MAX);
 
 bool PackFootprints(ccHObject * buildingObj);
 

@@ -11341,13 +11341,23 @@ void MainWindow::doActionBDPrimIntersections()
 	else {
 		// TODO select planes / plane clouds under the same primitive group
 		ccHObject::Container entity_planes;
+		ccHObject::Container entity_polylines;
 		for (auto & entity : m_selectedEntities) {
 			if (entity->isA(CC_TYPES::PLANE)) {
 				entity_planes.push_back(entity);
-			}			
+			}
+			else if (entity->isA(CC_TYPES::POLY_LINE)) {
+				entity_polylines.push_back(entity);
+			}
 		}
 		if (entity_planes.size() >= 2) {
 			building_prims.push_back(entity_planes);
+		}
+		if (entity_polylines.size() == 2) {
+			CreateIntersectionPoint(entity_polylines[0], entity_polylines[1]);	// temporily put here for test
+			refreshAll();
+			updateUI();
+			return;
 		}
 	}
 	if (building_prims.empty()) return;

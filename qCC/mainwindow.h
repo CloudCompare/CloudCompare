@@ -470,13 +470,13 @@ private slots:
 	/// Merge Selected Planes
 	void doActionBDPrimMergePlane();
 	/// split selected plane
-	void doActionBDPrimSplitPlane();
+	void doActionBDPrimSplitPlane();			///< ccGraphicalSegmentationTool
 	/// Create Ground Plane
 	void doActionBDPrimCreateGround();
 	/// Shrink plane to outline - remove points outside the alpha shape
 	void doActionBDPrimShrinkPlane();
-	void doActionBDPlaneFromPoints();
-	void doActionBDPlaneFromPolygon();
+	void doActionBDPlaneFromPoints();			///< ccGraphicalSegmentationTool
+	void doActionBDPlaneFromPolygon();			///< ccTracePolylineTool
 	/// Plane Deduction
 	void doActionBDPlaneDeduction();
 	/// Make plane from line(s)
@@ -495,7 +495,7 @@ private slots:
 	void doActionBDPolyFitSettings();
 
 	void doActionBDFootPrintAuto();
-	void doActionBDFootPrintManual();
+	void doActionBDFootPrintManual();			///< ccSectionExtractionTool
 	void doActionBDFootPrintPack();
 	void doActionBDFootPrintGetPlane();
 

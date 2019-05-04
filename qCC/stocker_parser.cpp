@@ -1227,6 +1227,31 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 #endif // USE_STOCKER
 }
 
+void CreateIntersectionPoint(ccHObject* p1, ccHObject* p2)
+{
+	ccPolyline* line1 = ccHObjectCaster::ToPolyline(p1); if (!line1) return;
+	ccPolyline* line2 = ccHObjectCaster::ToPolyline(p2); if (!line2) return;
+
+	StBuilding* buildingObj = GetParentBuilding(line1);
+	if (!buildingObj || buildingObj != GetParentBuilding(line2)) { return; }
+
+	BDBaseHObject* baseObj = GetRootBDBase(buildingObj); if (!baseObj) return;
+	ccPointCloud* todoCloud = baseObj->GetTodoPoint(buildingObj->getName()); if (!todoCloud) return;
+
+	Polyline3d seg1_temp = GetPolygonFromPolyline(line1); if (seg1_temp.empty()) return;
+	Polyline3d seg2_temp = GetPolygonFromPolyline(line2); if (seg2_temp.empty()) return;
+
+	Seg3d seg1 = seg1_temp.front();
+	Seg3d seg2 = seg2_temp.front();
+
+	Vec3d ints_pt;
+	if (!IntersectionLineLine(seg1, seg2, ints_pt))return;
+
+	todoCloud->addPoint(CCVector3(vcgXYZ(ints_pt)));
+	todoCloud->setPointColor(todoCloud->size() - 1, ccColor::red);
+	todoCloud->prepareDisplayForRefresh();
+}
+
 ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption option)
 {
 #ifdef USE_STOCKER
@@ -2574,16 +2599,11 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 		StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(footprintObjs[i]);
 		if (!ftObj) { continue; }
 
-		std::vector<Contour3d> contours;
 		Polyline3d polygon = GetPolygonFromPolyline(ftObj);
-		for (auto & pt : polygon) {
-			pt.P0().Z() = ftObj->getBottom();
-			pt.P1().Z() = ftObj->getBottom();
-		}
-		contours.push_back(ToContour(polygon, 0));
-
 		stocker::BuilderLOD2 builder_3d4em(true);
-		builder_3d4em.SetFootPrint(contours);
+		if (polygon.size() >= 3) {
+			builder_3d4em.SetFootPrint(ToContour(polygon, 0));
+		}
 
 		char output_path[256];
 		{
@@ -2597,6 +2617,10 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 		builder_3d4em.SetGroundHeight(ground_height);
 
 		ccHObject::Container primObjs = GetNonVerticalPlaneClouds(prim_group_obj, 15);
+		for (auto & pt : polygon) {
+			pt.P0().Z() = ftObj->getBottom();
+			pt.P1().Z() = ftObj->getBottom();
+		}
 		std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(primObjs, polygon, ftObj->getTop());
 		builder_3d4em.SetSegmentedPoints(points);
 
@@ -2623,36 +2647,25 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 }
 
 #include <QMessageBox>
-ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, double ground_height)
+ccHObject* LoD2FromFootPrint(ccHObject* entity, double ground_height)
 {
-	QMessageBox::StandardButton rb =
-		QMessageBox::question(NULL, "manual?", "Is the footprints generated all manually?", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-	bool manual = (rb == QMessageBox::Yes);
-
-	if (buildingObj->isA(CC_TYPES::ST_FOOTPRINT)) {
-		ccHObject::Container footprintObjs;
-		footprintObjs.push_back(buildingObj);
-		if (manual) { // manual		
-			return LoD2FromFootPrint_WholeProcess(GetParentBuilding(buildingObj), footprintObjs, ground_height);
-		}
-		else {
-			return LoD2FromFootPrint(GetParentBuilding(buildingObj), footprintObjs, ground_height);
-		}
+	ccHObject* buildingObj = nullptr;
+	ccHObject::Container footprintObjs;
+	if (entity->isA(CC_TYPES::ST_FOOTPRINT)) {
+		footprintObjs.push_back(entity);
+		buildingObj = GetParentBuilding(entity);
 	}
-	else if (buildingObj->isA(CC_TYPES::ST_BUILDING)) {
-		BDBaseHObject* baseObj = GetRootBDBase(buildingObj);
+	else if (entity->isA(CC_TYPES::ST_BUILDING)) {
+		BDBaseHObject* baseObj = GetRootBDBase(entity);
 		if (!baseObj) {
 			return nullptr;
 		}
+		buildingObj = entity;
 		StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
-		ccHObject::Container footprintObjs = blockgroup_obj->getValidFootPrints();
-		if (manual) { // manual
-			return LoD2FromFootPrint_WholeProcess(buildingObj, footprintObjs, ground_height);
-		}
-		else {
-			return LoD2FromFootPrint(buildingObj, footprintObjs, ground_height);
-		}
+		footprintObjs = blockgroup_obj->getValidFootPrints();
 	}
+
+	return LoD2FromFootPrint(buildingObj, footprintObjs, ground_height);
 }
 
 void SubstituteFootPrintContour(StFootPrint* footptObj, stocker::Contour3d points)

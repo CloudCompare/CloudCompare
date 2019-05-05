@@ -892,7 +892,7 @@ bool ccComparisonDlg::computeDistances()
 		result = CCLib::DistanceComputationTools::computeCloud2MeshDistance(m_compCloud,
 			m_refMesh,
 			c2mParams,
-			&progressDlg,
+			progressDlg.data(),
 			m_compOctree.data());
 		break;
 	}

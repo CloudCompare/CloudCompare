@@ -29,14 +29,14 @@ ccCone::ccCone(PointCoordinateType bottomRadius,
 				const ccGLMatrix* transMat/*=0*/,
 				QString name/*="Cylinder"*/,
 				unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
-	: ccGenericPrimitive(name,transMat)
+	: ccGenericPrimitive(name, transMat)
 	, m_bottomRadius(fabs(bottomRadius))
 	, m_topRadius(fabs(topRadius))
 	, m_xOff(xOff)
 	, m_yOff(yOff)
 	, m_height(fabs(height))
 {
-	setDrawingPrecision(std::max<unsigned>(precision,MIN_DRAWING_PRECISION)); //automatically calls buildUp & applyTransformationToVertices
+	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION)); //automatically calls buildUp & applyTransformationToVertices
 }
 
 ccCone::ccCone(QString name/*="Cylinder"*/)
@@ -51,7 +51,7 @@ ccCone::ccCone(QString name/*="Cylinder"*/)
 
 ccGenericPrimitive* ccCone::clone() const
 {
-	return finishCloneJob(new ccCone(m_bottomRadius,m_topRadius,m_height,m_xOff,m_yOff,&m_transformation,getName(),m_drawPrecision));
+	return finishCloneJob(new ccCone(m_bottomRadius, m_topRadius, m_height, m_xOff, m_yOff, &m_transformation, getName(), m_drawPrecision));
 }
 
 bool ccCone::buildUp()
@@ -77,7 +77,7 @@ bool ccCone::buildUp()
 	if (!singlePointTop)
 		vertCount += steps;
 	//normals
-	unsigned faceNormCounts = steps+2;
+	unsigned faceNormCounts = steps + 2;
 	//vertices
 	unsigned facesCount = steps;
 	if (!singlePointBottom)
@@ -88,7 +88,7 @@ bool ccCone::buildUp()
 		facesCount += steps;
 
 	//allocate (& clear) structures
-	if (!init(vertCount,false,facesCount,faceNormCounts))
+	if (!init(vertCount, false, facesCount, faceNormCounts))
 	{
 		ccLog::Error("[ccCone::buildUp] Not enough memory");
 		return false;
@@ -99,26 +99,26 @@ bool ccCone::buildUp()
 	assert(m_triNormals);
 
 	//2 first points: centers of the top & bottom surfaces
-	CCVector3 bottomCenter = CCVector3(m_xOff,m_yOff,-m_height)/2;
-	CCVector3 topCenter = CCVector3(-m_xOff,-m_yOff,m_height)/2;
+	CCVector3 bottomCenter = CCVector3(m_xOff, m_yOff, -m_height) / 2;
+	CCVector3 topCenter = CCVector3(-m_xOff, -m_yOff, m_height) / 2;
 	{
 		//bottom center
 		verts->addPoint(bottomCenter);
-		CompressedNormType nIndex = ccNormalVectors::GetNormIndex(CCVector3(0,0,-1).u);
+		CompressedNormType nIndex = ccNormalVectors::GetNormIndex(CCVector3(0, 0, -1).u);
 		m_triNormals->addElement(nIndex);
 		//top center
 		verts->addPoint(topCenter);
-		nIndex = ccNormalVectors::GetNormIndex(CCVector3(0,0,1).u);
+		nIndex = ccNormalVectors::GetNormIndex(CCVector3(0, 0, 1).u);
 		m_triNormals->addElement(nIndex);
 	}
-	
+
 	//then, angular sweep for top and/or bottom surfaces
 	{
-		PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(2.0*M_PI)/static_cast<PointCoordinateType>(steps);
+		PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(2.0*M_PI) / static_cast<PointCoordinateType>(steps);
 		//bottom surface
 		if (!singlePointBottom)
 		{
-			for (unsigned i=0; i<steps; ++i)
+			for (unsigned i = 0; i < steps; ++i)
 			{
 				CCVector3 P(bottomCenter.x + cos(angle_rad_step*i)*m_bottomRadius,
 							bottomCenter.y + sin(angle_rad_step*i)*m_bottomRadius,
@@ -129,7 +129,7 @@ bool ccCone::buildUp()
 		//top surface
 		if (!singlePointTop)
 		{
-			for (unsigned i=0; i<steps; ++i)
+			for (unsigned i = 0; i < steps; ++i)
 			{
 				CCVector3 P(topCenter.x + cos(angle_rad_step*i)*m_topRadius,
 							topCenter.y + sin(angle_rad_step*i)*m_topRadius,
@@ -139,10 +139,10 @@ bool ccCone::buildUp()
 		}
 		//side normals
 		{
-			for (unsigned i=0; i<steps; ++i)
+			for (unsigned i = 0; i < steps; ++i)
 			{
 				//slope
-				CCVector3 u(-sin(angle_rad_step*i),cos(angle_rad_step*i),0);
+				CCVector3 u(-sin(angle_rad_step*i), cos(angle_rad_step*i), 0);
 				CCVector3 v(bottomCenter.x-topCenter.x + u.y*(m_bottomRadius-m_topRadius),
 							bottomCenter.y-topCenter.y - u.x*(m_bottomRadius-m_topRadius),
 							bottomCenter.z-topCenter.z);
@@ -160,54 +160,54 @@ bool ccCone::buildUp()
 		assert(m_triVertIndexes);
 
 		unsigned bottomIndex = 2;
-		unsigned topIndex = 2+(singlePointBottom ? 0 : steps);
+		unsigned topIndex = 2 + (singlePointBottom ? 0 : steps);
 
 		//bottom surface
 		if (!singlePointBottom)
 		{
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i = 0; i < steps; ++i)
 			{
-				addTriangle(0,bottomIndex+(i+1)%steps,bottomIndex+i);
-				addTriangleNormalIndexes(0,0,0);
+				addTriangle(0, bottomIndex + (i + 1) % steps, bottomIndex + i);
+				addTriangleNormalIndexes(0, 0, 0);
 			}
 		}
 		//top surface
 		if (!singlePointTop)
 		{
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i = 0; i < steps; ++i)
 			{
-				addTriangle(1,topIndex+i,topIndex+(i+1)%steps);
-				addTriangleNormalIndexes(1,1,1);
+				addTriangle(1, topIndex + i, topIndex + (i + 1) % steps);
+				addTriangleNormalIndexes(1, 1, 1);
 			}
 		}
 
 		if (!singlePointBottom && !singlePointTop)
 		{
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i = 0; i < steps; ++i)
 			{
-				unsigned iNext = (i+1)%steps;
-				addTriangle(bottomIndex+i,bottomIndex+iNext,topIndex+i);
-				addTriangleNormalIndexes(2+i,2+iNext,2+i);
-				addTriangle(topIndex+i,bottomIndex+iNext,topIndex+iNext);
-				addTriangleNormalIndexes(2+i,2+iNext,2+iNext);
+				unsigned iNext = (i + 1) % steps;
+				addTriangle(bottomIndex + i, bottomIndex + iNext, topIndex + i);
+				addTriangleNormalIndexes(2 + i, 2 + iNext, 2 + i);
+				addTriangle(topIndex + i, bottomIndex + iNext, topIndex + iNext);
+				addTriangleNormalIndexes(2 + i, 2 + iNext, 2 + iNext);
 			}
 		}
 		else if (!singlePointTop)
 		{
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i = 0; i < steps; ++i)
 			{
-				unsigned iNext = (i+1)%steps;
-				addTriangle(topIndex+i,0,topIndex+iNext);
-				addTriangleNormalIndexes(2+i,2+iNext,2+iNext); //TODO: middle normal should be halfbetween?!
+				unsigned iNext = (i + 1) % steps;
+				addTriangle(topIndex + i, 0, topIndex + iNext);
+				addTriangleNormalIndexes(2 + i, 2 + iNext, 2 + iNext); //TODO: middle normal should be halfbetween?!
 			}
 		}
 		else //if (!singlePointBottom)
 		{
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i = 0; i < steps; ++i)
 			{
-				unsigned iNext = (i+1)%steps;
-				addTriangle(bottomIndex+i,bottomIndex+iNext,1);
-				addTriangleNormalIndexes(2+i,2+iNext,2+i); //TODO: last normal should be halfbetween?!
+				unsigned iNext = (i + 1) % steps;
+				addTriangle(bottomIndex + i, bottomIndex + iNext, 1);
+				addTriangleNormalIndexes(2 + i, 2 + iNext, 2 + i); //TODO: last normal should be halfbetween?!
 			}
 		}
 	}
@@ -277,11 +277,11 @@ bool ccCone::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_bottomRadius);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_topRadius);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_xOff);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_yOff);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_height);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_bottomRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_topRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_xOff);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_yOff);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_height);
 
 	return true;
 }

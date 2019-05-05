@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.0)
 
 option( PLUGIN_STANDARD_QCOMPASS "Check to install compass plugin" OFF )
 
-# CloudCompare 'compass' plugin
 if (PLUGIN_STANDARD_QCOMPASS)
+
+	# CloudCompare 'compass' plugin
 	project( QCOMPASS_PLUGIN )
 
 	# we need includes from the main CC source dir

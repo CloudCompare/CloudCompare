@@ -135,7 +135,7 @@ PointCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsign
 		progressCb->start();
 	}
 
-	for (unsigned i=0; i<count; i++)
+	for (unsigned i = 0; i < count; i++)
 	{
 		const CCVector3 *Q = cloud->getNextPoint();
 		CCVector3 P = *Q-center;

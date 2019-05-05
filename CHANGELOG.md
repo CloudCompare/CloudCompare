@@ -28,6 +28,8 @@ v2.11 (Anoia) - (in development)
 	- we now correctly handle faces with more than 4 vertices! (they should be properly tesselated)
 	- support of escaped lines ('\' at the end of the line)
 	- CC now accepts MTL files with the 'Tf' keyword (well, CC just ignores it and doesn't complain about a wrong MTL file anymore ;)
+  - Translation:
+	- new (argentinian) Spanish translation
 
 - Changes
   - Command line tool:
@@ -65,6 +67,10 @@ v2.10.3 (Zephyrus) - (in development)
   - Quitting the "Section extraction tool" (and probably any tool that uses a temporary 3D view, such as the Align tool) would break the picking hub mechanism (preventing the user from picking points typically) (#886)
   - Fix the camera name being displayed in the wrong place (#902)
   - The layers management of the Rasterize tool was partially broken
+  - the C2C/C2M distance computation tool called through the command line was always displaying progress dialogs even in SILENT mode
+  - the ICP registration tool called through the command line was always displaying progress dialogs even in SILENT mode
+  - Fix potential crash with qCSF (see github issue #909)
+  - In some cases, the (subsampled) core points cloud was not exported and saved at the end of the call to M3C2 through the command line
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------

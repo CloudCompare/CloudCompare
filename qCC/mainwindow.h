@@ -498,6 +498,7 @@ private slots:
 	void doActionBDFootPrintManual();			///< ccSectionExtractionTool
 	void doActionBDFootPrintPack();
 	void doActionBDFootPrintGetPlane();
+	void doActionBDMeshToBlock();
 
 	void doActionBDLoD1Generation();
 

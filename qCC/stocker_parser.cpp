@@ -2814,3 +2814,35 @@ void GetPlanesInsideFootPrint(ccHObject* footprint, ccHObject* prim_group, CCVec
 	footprintObj->setPlaneNames(plane_names);
 	footprintObj->prepareDisplayForRefresh();
 }
+#include "vcg/complex/algorithms/crease_cut.h"
+#include "vcg/math/base.h"
+#include "vcg/complex/algorithms/update/topology.h"
+ccHObject::Container LoadMeshAsBlock(QString filename)
+{
+	ccHObject::Container blocks;
+	typedef vcg::tri::io::ImporterOBJ<PolyMesh> PMeshIObj;
+	GLMesh poly_mesh;	int loadmask;
+	GLMeshIObj::LoadMask(filename.toStdString().c_str(), loadmask);
+	if (GLMeshIObj::Open(poly_mesh, filename.toStdString().c_str(), loadmask) != vcg::ply::E_NOERROR) {
+		return blocks;
+	}
+	vcg::tri::Clean<GLMesh>::MergeCloseVertex(poly_mesh, 0.00001);
+	vcg::tri::UpdateTopology<GLMesh>::FaceFace(poly_mesh);
+	vcg::tri::CreaseCut(poly_mesh, vcg::math::ToRad(20.f));
+	GLMesh out_mesh;
+	vcg::tri::BuildFromFaceEdgeSel(poly_mesh, out_mesh);
+
+	FILE * fp = fopen("D:/2.obj", "w");
+
+	int vert_count(1);
+	for (size_t i = 0; i < out_mesh.edge.size(); i++) {
+		vcg::Point3d pt = out_mesh.edge[i].P(0);
+		fprintf(fp, "v %lf %lf %lf\n", pt.X(), pt.Y(), pt.Z());
+		pt = out_mesh.edge[i].P(1);
+		fprintf(fp, "v %lf %lf %lf\n", pt.X(), pt.Y(), pt.Z());
+
+		fprintf(fp, "l %d %d\n", vert_count++, vert_count++);
+	}
+	fclose(fp);
+	return blocks;
+}

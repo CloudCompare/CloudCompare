@@ -275,3 +275,5 @@ bool PackFootprints(ccHObject * buildingObj);
 
 //! settings.x - xybias, y - zbias, z - minPts
 void GetPlanesInsideFootPrint(ccHObject * footprint, ccHObject * prim_group, CCVector3 settings, bool bVertical, bool clearExisting);
+
+ccHObject::Container LoadMeshAsBlock(QString filename);

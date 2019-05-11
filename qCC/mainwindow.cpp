@@ -851,6 +851,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDFootPrintManual,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintManual); 
 	connect(m_UI->actionBDFootPrintPack,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintPack);
 	connect(m_UI->actionBDFootPrintGetPlane,		&QAction::triggered, this, &MainWindow::doActionBDFootPrintGetPlane);
+	connect(m_UI->actionBDMeshToBlock,				&QAction::triggered, this, &MainWindow::doActionBDMeshToBlock);
 }
 
 void MainWindow::doActionColorize()
@@ -12828,6 +12829,19 @@ void MainWindow::doActionBDFootPrintGetPlane()
 
 	refreshAll();
 	UpdateUI();
+}
+
+void MainWindow::doActionBDMeshToBlock()
+{
+	LoadMeshAsBlock("D:/1.obj");
+	
+
+	if (!haveSelection()) {
+		return;
+	}
+	ccMesh* mesh = ccHObjectCaster::ToMesh(getSelectedEntities().front());
+	if (!mesh) { return; }
+	StBlock* block = new StBlock();
 }
 
 void MainWindow::doActionBDLoD1Generation()

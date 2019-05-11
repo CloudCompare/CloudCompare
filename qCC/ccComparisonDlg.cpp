@@ -454,7 +454,7 @@ bool ccComparisonDlg::computeApproxDistances()
 	}
 
 	computeButton->setEnabled(true);
-	preciseGroupBox->setEnabled(true);
+	preciseResultsTabWidget->setEnabled(true);
 	//we don't let the user leave with approximate distances!!!
 	okButton->setEnabled(false);
 

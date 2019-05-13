@@ -170,7 +170,6 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 		plane->setMetaData(QString("RMS"), QVariant(*rms));
 	}
 
-
 	return plane;
 }
 

@@ -144,7 +144,7 @@
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="258"/>
         <source>For each attempt (see above parameter), candidate bases are found. If there are too much candidates, the program may take a long time to finish. Check this box to bound the number of candidates.</source>
-        <translation>Поиск каднидатов для каждой итерации (см. выше). Чем больше кандидатов, тем дольше расчет. Отметьте этот пункт для ввода кол-ва кандидатов.</translation>
+        <translation>Поиск кандидатов для каждой итерации (см. выше). Чем больше кандидатов, тем дольше расчет. Отметьте этот пункт для ввода кол-ва кандидатов.</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="261"/>
@@ -175,7 +175,7 @@
         <location filename="../ui_templates/alignDlg.ui" line="346"/>
         <location filename="../ui_templates/alignDlg.ui" line="466"/>
         <source>None</source>
-        <translation>Мало</translation>
+        <translation>Пусто</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="369"/>
@@ -300,11 +300,11 @@ reduce the flicker that is often present in animations). Super resolution is onl
 applied on the output video (= not visible in Preview mode)
 - Zoom: render the frame and the animation at a higher resolution (2, 3 or 4 times
 larger). You may have to increase the points size beforehand.</source>
-        <translation>- Супер разрешение: записывает кадр с большим размерением (в 2, 3 или 4 раза
+        <translation>- Супер разрешение: записывает кадр с большим разрешением (в 2, 3 или 4 раза
 больше) а затем уменьшает обратно до исходного размера (это может уменьшить
 шум и снизить мерцание, случающееся в анимации). Супер разрешение относится
 только к видео выводу (= не видно в режиме предпросмотра)
-- Масштаб: записывает кадр и анимацию с большим размерением (в 2, 3 или 4 раза
+- Масштаб: записывает кадр и анимацию с большим разрешением (в 2, 3 или 4 раза
 больше). Возможно вам потребуется увеличить размер точек на экране.</translation>
     </message>
     <message>
@@ -945,7 +945,7 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="498"/>
         <source>Cancel</source>
-        <translation>Отнема</translation>
+        <translation>Отмена</translation>
     </message>
 </context>
 <context>
@@ -1018,7 +1018,7 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="213"/>
         <source>To orthorectify images (as new images saved next to the original ones)</source>
-        <translation>Для ортокоррекции изображений (новые изображения сохраняются рядом с исходыми)</translation>
+        <translation>Для ортокоррекции изображений (новые изображения сохраняются рядом с исходными)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="216"/>
@@ -1205,7 +1205,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;.SF NS Text&apos;; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/CC/plugin/qCSF/icon.png&quot; /&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;	&lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:11pt; font-weight:600;&quot;&gt;CSF Plugin Instruction&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt; font-weight:600;&quot;&gt;Cloth Simulation Filter (CSF)&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt; is a tool to extract of ground points in discrete return LiDAR pointclouds. The detailed theory and algorithms could be found in the following paper:&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;OLE_LINK22&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;Z&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;hang W, Qi J, Wan P, Wang H, Xie D, Wang X, Yan G. An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth Simulation. &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; font-style:italic; color:#000000;&quot;&gt;Remote Sensing&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;. 2016; 8(6):501.&lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;OLE_LINK22&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;Z&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;hang W, Qi J, Wan P, Wang H, Xie D, Wang X, Yan G. An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth Simulation.&#xa0;&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; font-style:italic; color:#000000;&quot;&gt;Remote Sensing&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;. 2016; 8(6):501.&lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;And please cite the paper, If you use Cloth Simulation Filter (CSF) in your work.&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;You can download the paper from &lt;/span&gt;&lt;a href=&quot;https://www.researchgate.net/profile/Wuming_Zhang2)&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; text-decoration: underline; color:#0000ff; background-color:#cce8cf;&quot;&gt;https://www.researchgate.net/profile/Wuming_Zhang2 .&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;You can also visit the homepage : &lt;/span&gt;&lt;a href=&quot;http://ramm.bnu.edu.cn/researchers/wumingzhang/english/default_contributions.htm&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; text-decoration: underline; color:#0000ff; background-color:#cce8cf;&quot;&gt;http://ramm.bnu.edu.cn/researchers/wumingzhang/english/default_contributions.htm&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt; for more information.&lt;/span&gt;&lt;/p&gt;
@@ -2028,7 +2028,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/qCanupoTrainingDialog.ui" line="288"/>
         <source>Check this to add more points to the 2D classifier behavior representation</source>
-        <translation>Больше точек для предствленния 2D-классификатора</translation>
+        <translation>Больше точек для представления 2D-классификатора</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/qCanupoTrainingDialog.ui" line="291"/>
@@ -2233,7 +2233,7 @@ Output facet normals may be randomly oriented
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Multi-scale dimensionality classification (CANUPO)&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu and Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram. Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu and Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram.&#xa0;Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
@@ -2786,7 +2786,7 @@ that could not have been seen (hidden/out of range/out of field of view).</sourc
         <source>Maximum number of threads/cores to be used
 (CC or your computer might not respond for a while if you use all available cores)</source>
         <translation>Максимальное число используемых потоков/ядер процессора
-(При использовании CC всех ядер ПК может не отвечать на дайствия пользователя)</translation>
+(При использовании CC всех ядер ПК может не отвечать на действия пользователя)</translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="252"/>
@@ -2851,32 +2851,32 @@ to help you set the general parameters</source>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="971"/>
         <source>Array</source>
-        <translation type="unfinished"></translation>
+        <translation>Массив</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="974"/>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="974"/>
         <source>undefined</source>
-        <translation type="unfinished"></translation>
+        <translation>неопределенный</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="977"/>
         <source>Elements</source>
-        <translation type="unfinished">Элементы</translation>
+        <translation>Элементы</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="980"/>
         <source>Capacity</source>
-        <translation type="unfinished"></translation>
+        <translation>Емкость</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="983"/>
         <source>Memory</source>
-        <translation type="unfinished"></translation>
+        <translation>Память</translation>
     </message>
 </context>
 <context>
@@ -3144,7 +3144,7 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Point cloud comparison with M3C2&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Lague et al., Accurate 3D comparison of complex topography with terrestrial laser scanner, ISPRS j. of Photogram. Rem. Sens., 2013&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Lague et al., Accurate 3D comparison of complex topography with terrestrial laser scanner, ISPRS j. of Photogram.&#xa0;Rem. Sens., 2013&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2,serif&apos;; font-size:8pt; color:#aa007f; background-color:#ffffff;&quot;&gt;This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;arial,sans-serif&apos;; font-size:10pt; font-style:italic; color:#222222; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
@@ -3866,7 +3866,7 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../../plugins/core/Standard/qSRA/distanceMapGenerationDlg.ui" line="1267"/>
         <source>Mean radius (for map display, export as a cloud, etc. )</source>
-        <translation>Означает радиус (для показа карты, экспорта облака, и.т.д)</translation>
+        <translation>Означает радиус (для показа карты, экспорта облака, и т.д)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/distanceMapGenerationDlg.ui" line="1284"/>
@@ -4514,12 +4514,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../libs/qCC_io/ui_templates/globalShiftAndScaleDlg.ui" line="76"/>
         <source>Coordinates are too big (original precision may be lost)!</source>
-        <translation>Координаты слишком большие (чревато снижением точности рачетов)!</translation>
+        <translation>Координаты слишком большие (чревато снижением точности расчетов)!</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui_templates/globalShiftAndScaleDlg.ui" line="86"/>
         <source>More information about this issue</source>
-        <translation>Больше иформации по данному вопросу</translation>
+        <translation>Больше информации по данному вопросу</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui_templates/globalShiftAndScaleDlg.ui" line="132"/>
@@ -4561,12 +4561,12 @@ coordinate system (on disk)</source>
     <message>
         <location filename="../../libs/qCC_io/ui_templates/globalShiftAndScaleDlg.ui" line="563"/>
         <source>You can add default items to this list by placing a text file named &lt;span style=&quot; font-weight:600;&quot;&gt;global_shift_list.txt&lt;/span&gt; next to the application executable file. On each line you should define 5 items separated by semicolon characters: name ; ShiftX ; ShiftY ; ShiftZ ; scale</source>
-        <translation>Вы можете добавить значения по умолчанию в этот список, поместив текстовый файл с именем &lt;span style=&quot; font-weight:600;&quot;&gt;global_shift_list.txt&lt;/span&gt; в каталог, куда установлена программа. На каждую строку должны быть заданы 5 значений, разеленных запятыми : имя ; СдвигX ; СдвигY ; СдвигZ ; масштаб</translation>
+        <translation>Вы можете добавить значения по умолчанию в этот список, поместив текстовый файл с именем &lt;span style=&quot; font-weight:600;&quot;&gt;global_shift_list.txt&lt;/span&gt; в каталог, куда установлена программа. На каждую строку должны быть заданы 5 значений, разделенных запятыми : имя ; СдвигX ; СдвигY ; СдвигZ ; масштаб</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui_templates/globalShiftAndScaleDlg.ui" line="605"/>
         <source>This version is the one CloudCompare will work with. Mind the digits!</source>
-        <translation>Эта версия то, с чем будет работать CloudCompare. Помните о разниче в значениях координат!</translation>
+        <translation>Эта версия то, с чем будет работать CloudCompare. Помните о разнице в значениях координат!</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui_templates/globalShiftAndScaleDlg.ui" line="629"/>
@@ -4869,7 +4869,7 @@ CloudCompare как и большинство графических адапт�
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="39"/>
         <source>size of step of the grid generated (in the same units as the coordinates of the point cloud)</source>
-        <translation>интерал точек сетки (в тех же единицах, что и координаты облака)</translation>
+        <translation>интервал точек сетки (в тех же единицах, что и координаты облака)</translation>
     </message>
     <message>
         <location filename="../ui_templates/heightGridGenerationDlg.ui" line="61"/>
@@ -5535,7 +5535,7 @@ CloudCompare как и большинство графических адапт�
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="599"/>
         <source>Only search points in the positive half-space (relatively to the normal)</source>
-        <translation>Поиск точек тоолько в положительном полупространстве (относительно нормали)</translation>
+        <translation>Поиск точек только в положительном полупространстве (относительно нормали)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="606"/>
@@ -5642,7 +5642,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="963"/>
         <source>Export point density at projection scale</source>
-        <translation>Экспорт плоности точек в масштабе проекции</translation>
+        <translation>Экспорт плотности точек в масштабе проекции</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="989"/>
@@ -6263,7 +6263,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1155"/>
         <source>Show histogram</source>
-        <translation>Показать гисторамму</translation>
+        <translation>Показать гистограмму</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1164"/>
@@ -7023,7 +7023,7 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="1852"/>
         <location filename="../ui_templates/mainWindow.ui" line="1855"/>
         <source>Point picking (point information, distance between 2 points, angles between 3 points, etc.)</source>
-        <translation>Определение точки (координаты точки, расстояние между 2-мя точками, углы между 3-мя точками, и.т.п.)</translation>
+        <translation>Определение точки (координаты точки, расстояние между 2-мя точками, углы между 3-мя точками, и т.п.)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1860"/>
@@ -7171,7 +7171,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2015"/>
         <source>Save viewport as object</source>
-        <translation>Сохранить положение камеры</translation>
+        <translation>Сохранить точку обзора</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2018"/>
@@ -7280,7 +7280,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2136"/>
         <source>Add constant SF</source>
-        <translation>Добавиь константу скалярного поля</translation>
+        <translation>Добавить константу скалярного поля</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2141"/>
@@ -7469,7 +7469,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2382"/>
         <source>Adds a scalar field with ordered integers for each point in the cloud</source>
-        <translation>Добавляет скаларное поле с упорядоченными номерами для каждой точки облака</translation>
+        <translation>Добавляет скалярное поле с упорядоченными номерами для каждой точки облака</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2387"/>
@@ -7833,7 +7833,7 @@ Parameter</source>
     <message>
         <location filename="../mainwindow.cpp" line="2492"/>
         <source>Compute visibility</source>
-        <translation>Вычислить видиимость</translation>
+        <translation>Вычислить видимость</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2493"/>
@@ -7858,12 +7858,12 @@ Parameter</source>
     <message>
         <location filename="../mainwindow.cpp" line="5658"/>
         <source>Restart</source>
-        <translation type="unfinished"></translation>
+        <translation>Перезапуск</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5659"/>
         <source>To finish the process, you&apos;ll have to close and restart CloudCompare</source>
-        <translation type="unfinished"></translation>
+        <translation>Для завершения процесса Вам нужно закрыть и запустить CloudCompare снова</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5698"/>
@@ -7874,17 +7874,17 @@ Parameter</source>
     <message>
         <location filename="../mainwindow.cpp" line="5718"/>
         <source>Are you sure you want to quit?</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы действительно хотите выйти?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5923"/>
         <source>Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Документация</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5924"/>
         <source>Please visit http://www.cloudcompare.org/doc</source>
-        <translation type="unfinished"></translation>
+        <translation>Посетите http://www.cloudcompare.org/doc</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8212"/>
@@ -7899,17 +7899,17 @@ Parameter</source>
     <message>
         <location filename="../mainwindow.cpp" line="9289"/>
         <source>Are you sure you want to remove all loaded entities?</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы действительно хотите удалить все загруженные элементы?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9322"/>
         <source>Open file(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть файл(ы)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9572"/>
         <source>Save file</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить файл</translation>
     </message>
 </context>
 <context>
@@ -8138,7 +8138,7 @@ Should be used after one of the previous methods!</source>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="81"/>
         <source>Using scan grid(s) instead of the octree</source>
-        <translation>Использовать сетку(и) сканов вуместо октодерева</translation>
+        <translation>Использовать сетку(и) сканов вместо октодерева</translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="84"/>
@@ -8153,13 +8153,13 @@ Should be used after one of the previous methods!</source>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="138"/>
         <source>Min angle of local triangles (in degrees)</source>
-        <translation>Допуск на значение минимального угола в треугольниках (°)</translation>
+        <translation>Допуск на значение минимального угла в треугольниках (°)</translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="223"/>
         <location filename="../ui_templates/normalComputationDlg.ui" line="233"/>
         <source>Radius of the sphere in which the neighbors will be extracted</source>
-        <translation>Радус сферу, где будут искаться соседи</translation>
+        <translation>Радиус сферу, где будут искаться соседи</translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="226"/>
@@ -8417,7 +8417,7 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="461"/>
         <source>Info</source>
-        <translation>Ифно</translation>
+        <translation>Инфо</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="467"/>
@@ -8437,7 +8437,7 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="509"/>
         <source>Force reading colors as 8-bit values (even if the standard is 16-bit)</source>
-        <translation>Принудительно чистать цвета как 8-битные значения (даже если стандартно 16-бит)</translation>
+        <translation>Принудительно читать цвета как 8-битные значения (даже если стандартно 16-бит)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="512"/>
@@ -9449,7 +9449,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="388"/>
         <source>Missing parameter: global shift vector or %1 after &apos;%2&apos;</source>
-        <translation>Отсутствует параметр: глобальный сдвиг или %1 послеr &apos;%2&apos;</translation>
+        <translation>Отсутствует параметр: глобальный сдвиг или %1 после &apos;%2&apos;</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="405"/>
@@ -9519,7 +9519,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="598"/>
         <source>cloud-&gt;hasNormals: %1</source>
-        <translation>облако-&gt;имеетНормали: %1</translation>
+        <translation>облако-&gt;Нормали: %1</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="605"/>
@@ -9600,7 +9600,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccCommandLineCommands.cpp" line="768"/>
         <location filename="../ccCommandLineCommands.cpp" line="860"/>
         <source>	Octree level: %1</source>
-        <translation>	Уровень октодереваl: %1</translation>
+        <translation>	Уровень октодерева: %1</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="803"/>
@@ -9719,7 +9719,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccCommandLineCommands.cpp" line="1195"/>
         <location filename="../ccCommandLineCommands.cpp" line="1407"/>
         <source>Invalid boolean value after &quot;-%1&quot;. Got &apos;%2&apos; instead of TRUE or FALSE.</source>
-        <translation>Неверное логическое значение после &quot;-%1&quot;. Полчил &apos;%2&apos; вместо ИСТИНА или ЛОЖЬ.</translation>
+        <translation>Неверное логическое значение после &quot;-%1&quot;. Получил &apos;%2&apos; вместо ИСТИНА или ЛОЖЬ.</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1199"/>
@@ -9812,7 +9812,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1425"/>
         <source>cmd.warning: cloud &apos;%1&apos; has no active scalar field (it will be ignored)</source>
-        <translation>cmd.warning: облако &apos;%1&apos; не меет активного скалярного поля (и будет игнорировано)</translation>
+        <translation>cmd.warning: облако &apos;%1&apos; не имеет активного скалярного поля (и будет игнорировано)</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1439"/>
@@ -10629,7 +10629,7 @@ Points: %2</source>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="648"/>
         <source>Preparing colored DTM</source>
-        <translation>Полготовка ЦМР в заливке</translation>
+        <translation>Подготовка ЦМР в заливке</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="98"/>
@@ -10721,7 +10721,7 @@ Source points: %2</source>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/Filter/LASFWFFilter.cpp" line="399"/>
         <source>Export LAS file</source>
-        <translation>Эскпорт файла LAS</translation>
+        <translation>Экспорт файла LAS</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/Filter/LASFWFFilter.cpp" line="400"/>
@@ -11056,7 +11056,7 @@ Cells: %L2 x %L3</source>
     <message>
         <location filename="../../libs/qCC_io/FileIOFilter.cpp" line="274"/>
         <source>All (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Все (*.*)</translation>
     </message>
 </context>
 <context>
@@ -11271,7 +11271,7 @@ Cells: %L2 x %L3</source>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="78"/>
         <source>size of step of the grid generated (in the same units as the coordinates of the point cloud)</source>
-        <translation>интерал точек сетки (в тех же единицах, что и координаты облака)</translation>
+        <translation>интервал точек сетки (в тех же единицах, что и координаты облака)</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="100"/>
@@ -11793,7 +11793,7 @@ replaced by the cell&apos;s average height!</source>
         <source>Maximum number of threads/cores to be used
 (CC or your computer might not respond for a while if you use all available cores)</source>
         <translation>Максимальное число используемых потоков/ядер процессора
-(При использовании CC всех ядер ПК может не отвечать на дайствия пользователя)</translation>
+(При использовании CC всех ядер ПК может не отвечать на действия пользователя)</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="319"/>
@@ -11829,7 +11829,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="491"/>
         <source>Enable farthest points removal</source>
-        <translation>Не учытывать далекие точки</translation>
+        <translation>Не учитывать далекие точки</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="498"/>
@@ -11974,7 +11974,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="202"/>
         <source>Update the first scalar field directly (instead of creating a new SF)</source>
-        <translation>Обновить непостредственно первое скалярное поле (вместо создания нового скал. поля)</translation>
+        <translation>Обновить непосредственно первое скалярное поле (вместо создания нового скал. поля)</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="205"/>
@@ -12810,7 +12810,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="54"/>
         <source>none</source>
-        <translation>мало</translation>
+        <translation>ничего</translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="77"/>
@@ -12932,7 +12932,7 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Classifier training based on multi-scale dimensionality (CANUPO)&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu and Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram. Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu and Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram.&#xa0;Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
@@ -13169,7 +13169,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="315"/>
         <source>size of step of the grid generated (in the same units as the coordinates of the point cloud)</source>
-        <translation>интерал точек сетки (в тех же единицах, что и координаты облака)</translation>
+        <translation>интервал точек сетки (в тех же единицах, что и координаты облака)</translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="337"/>
@@ -13194,7 +13194,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="370"/>
         <source>Projection direction (X, Y or Z)</source>
-        <translation>Нправление проекции (X, Y или Z)</translation>
+        <translation>Направление проекции (X, Y или Z)</translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="395"/>
@@ -13395,17 +13395,17 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../../libs/qCC_db/ccMaterial.cpp" line="57"/>
         <source>File &apos;%1&apos; has been updated</source>
-        <translation type="unfinished"></translation>
+        <translation>Файл &apos;%1&apos; был обновлен</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_db/ccMaterial.cpp" line="67"/>
         <source>Failed to load the new version of the file</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось загрузить новую версию файла</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_db/ccMaterial.cpp" line="72"/>
         <source>File &apos;%1&apos; has been deleted or renamed</source>
-        <translation type="unfinished"></translation>
+        <translation>Файл &apos;%1&apos; был удален или переименован</translation>
     </message>
 </context>
 <context>
@@ -13418,12 +13418,12 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="33"/>
         <source>Filter list by plugin name</source>
-        <translation type="unfinished"></translation>
+        <translation>Фильтр по имени плагина</translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="36"/>
         <source>🔍</source>
-        <translation type="unfinished"></translation>
+        <translation>🔍</translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="122"/>
@@ -13489,22 +13489,22 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="117"/>
         <source>Enabling/disabling plugins will take effect next time you run %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Включение/выключение плагинов будет доступно при следующем запуске %1</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="165"/>
         <source>%1 Plugin</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 плагин</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="169"/>
         <source> (core)</source>
-        <translation type="unfinished"></translation>
+        <translation> (ядро)</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="174"/>
         <source> (3rd Party)</source>
-        <translation type="unfinished"></translation>
+        <translation> (сторонние)</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="254"/>
@@ -13527,17 +13527,17 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../common/ccPluginManager.cpp" line="143"/>
         <source>[Plugin] Found: %1 (STATIC)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Плагин] найден: %1 (статич.)</translation>
     </message>
     <message>
         <location filename="../../common/ccPluginManager.cpp" line="167"/>
         <source>[Plugin][%1] Disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>[Плагин][%1] отключен</translation>
     </message>
     <message>
         <location filename="../../common/ccPluginManager.cpp" line="211"/>
         <source>[Plugin][%1] New file extensions registered: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>[Плагин][%1] Зарегистрировано новое расширение файлов: %2</translation>
     </message>
     <message>
         <location filename="../../common/ccPluginManager.cpp" line="291"/>
@@ -13547,7 +13547,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../common/ccPluginManager.cpp" line="311"/>
         <source>	%1 has invalid meta data	</source>
-        <translation type="unfinished"></translation>
+        <translation>	%1 имеет неверные метаданные	</translation>
     </message>
     <message>
         <location filename="../../common/ccPluginManager.cpp" line="325"/>
@@ -13562,7 +13562,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../common/ccPluginManager.cpp" line="341"/>
         <source>Plugin %1 has a blank name</source>
-        <translation type="unfinished"></translation>
+        <translation>У плагина %1 пустое имя</translation>
     </message>
     <message>
         <location filename="../../common/ccPluginManager.cpp" line="367"/>
@@ -13606,185 +13606,185 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="75"/>
         <source>None</source>
-        <translation type="unfinished">Мало</translation>
+        <translation>Пусто</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="79"/>
         <source>Scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Скалярное поле</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="82"/>
         <source>Default</source>
-        <translation type="unfinished">По умолчанию</translation>
+        <translation>По умолчанию</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="83"/>
         <source>Default Width</source>
-        <translation type="unfinished"></translation>
+        <translation>Ширина по умолчанию</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="194"/>
         <source>Property</source>
-        <translation type="unfinished"></translation>
+        <translation>Свойство</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="195"/>
         <source>State/Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Состояние/Значение</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="287"/>
         <source>Transformation history</source>
-        <translation type="unfinished"></translation>
+        <translation>История трансформации</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="292"/>
         <source>Display transformation</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать трансформацию</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="373"/>
         <source>Meta data</source>
-        <translation type="unfinished"></translation>
+        <translation>Метаданные</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="398"/>
         <source>CC Object</source>
-        <translation type="unfinished"></translation>
+        <translation>Объект CC</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="401"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="807"/>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="405"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="555"/>
         <source>Visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Видимый</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="409"/>
         <source>Normals</source>
-        <translation type="unfinished">Нормали</translation>
+        <translation>Нормали</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="412"/>
         <source>Show name (in 3D)</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать имя (в 3D)</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="416"/>
         <source>Colors</source>
-        <translation type="unfinished">Цвета</translation>
+        <translation>Цвета</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="438"/>
         <source>Local box dimensions</source>
-        <translation type="unfinished"></translation>
+        <translation>Локаль. размеры границ</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="438"/>
         <source>Box dimensions</source>
-        <translation type="unfinished"></translation>
+        <translation>Размеры границ</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="443"/>
         <source>Box center</source>
-        <translation type="unfinished"></translation>
+        <translation>Центр</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="449"/>
         <source>Info</source>
-        <translation type="unfinished">Ифно</translation>
+        <translation>Инфо</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="449"/>
         <source>Object ID: %1 - Children: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>ID объекта: %1 - Дочерние: %2</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="453"/>
         <source>Current Display</source>
-        <translation type="unfinished"></translation>
+        <translation>Текущий вид</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="462"/>
         <source>Global shift</source>
-        <translation type="unfinished"></translation>
+        <translation>Глобальный сдвиг</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="465"/>
         <source>Global scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Глобальный масштаб</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="472"/>
         <source>Cloud</source>
-        <translation type="unfinished">Облако</translation>
+        <translation>Облако</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="475"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1131"/>
         <source>Points</source>
-        <translation type="unfinished">Точки</translation>
+        <translation>Точек</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="481"/>
         <source>Point size</source>
-        <translation type="unfinished"></translation>
+        <translation>Размер точек</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="496"/>
         <source>Scan grids</source>
-        <translation type="unfinished"></translation>
+        <translation>Сетки сканов</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="498"/>
         <source>Scan grid</source>
-        <translation type="unfinished"></translation>
+        <translation>Сетка скана</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="504"/>
         <source>Scan #%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Скан #%1</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="504"/>
         <source>%1 x %2 (%3 points)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 x %2 (%3 точек)</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="511"/>
         <source>Waveform</source>
-        <translation type="unfinished">Форма волны</translation>
+        <translation>Форма волны</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="512"/>
         <source>Waves</source>
-        <translation type="unfinished"></translation>
+        <translation>Волны</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="513"/>
         <source>Descriptors</source>
-        <translation type="unfinished"></translation>
+        <translation>Дескрипторы</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="516"/>
         <source>Data size</source>
-        <translation type="unfinished"></translation>
+        <translation>Размер данных</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="534"/>
         <source>Scalar Fields</source>
-        <translation type="unfinished"></translation>
+        <translation>Скалярные поля</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="534"/>
         <source>Scalar Field</source>
-        <translation type="unfinished">Скалярное поле</translation>
+        <translation>Скалярное поле</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="537"/>
@@ -13792,478 +13792,478 @@ p, li { white-space: pre-wrap; }
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="854"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="949"/>
         <source>Count</source>
-        <translation type="unfinished">Кол-во</translation>
+        <translation>Кол-во</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="540"/>
         <source>Active</source>
-        <translation type="unfinished"></translation>
+        <translation>Активное</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="549"/>
         <source>Current</source>
-        <translation type="unfinished">Текущий</translation>
+        <translation>Текущий</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="552"/>
         <source>Steps</source>
-        <translation type="unfinished">Дискретность</translation>
+        <translation>Дискретность</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="557"/>
         <source>SF display params</source>
-        <translation type="unfinished"></translation>
+        <translation>Параметры показа СП</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="569"/>
         <source>Primitive</source>
-        <translation type="unfinished"></translation>
+        <translation>Примитив</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="572"/>
         <source>Type</source>
-        <translation type="unfinished">Тип</translation>
+        <translation>Тип</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="577"/>
         <source>Drawing precision</source>
-        <translation type="unfinished"></translation>
+        <translation>Точность отрисовки</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="582"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="589"/>
         <source>Radius</source>
-        <translation type="unfinished">Радиус</translation>
+        <translation>Радиус</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="586"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="770"/>
         <source>Height</source>
-        <translation type="unfinished"></translation>
+        <translation>Высота</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="593"/>
         <source>Bottom radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Нижний радиус</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="594"/>
         <source>Top radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Верхний радиус</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="608"/>
         <source>Facet</source>
-        <translation type="unfinished"></translation>
+        <translation>Грань</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="614"/>
         <source>Surface</source>
-        <translation type="unfinished"></translation>
+        <translation>Поверхность</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="617"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="737"/>
         <source>RMS</source>
-        <translation type="unfinished"></translation>
+        <translation>СКО</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="620"/>
         <source>Center</source>
-        <translation type="unfinished">Центр</translation>
+        <translation>Центр</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="624"/>
         <source>Show contour</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать контур</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="628"/>
         <source>Show polygon</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать полигон</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="635"/>
         <source>Normal</source>
-        <translation type="unfinished">Нормаль</translation>
+        <translation>Нормаль</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="640"/>
         <source>Dip / Dip dir.</source>
-        <translation type="unfinished"></translation>
+        <translation>Падение/Азим.</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="643"/>
         <source>Show normal vector</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать вектор нормали</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="652"/>
         <source>Sub-mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Части ЦМР</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="652"/>
         <source>Mesh</source>
-        <translation type="unfinished">Цифровая модель</translation>
+        <translation>Цифровая модель</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="655"/>
         <source>Faces</source>
-        <translation type="unfinished">Грани</translation>
+        <translation>Грани</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="659"/>
         <source>Materials/textures</source>
-        <translation type="unfinished">Материалы/текстуры</translation>
+        <translation>Материалы/текстуры</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="662"/>
         <source>Wireframe</source>
-        <translation type="unfinished"></translation>
+        <translation>Каркас</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="666"/>
         <source>Stippling</source>
-        <translation type="unfinished"></translation>
+        <translation>Зернение</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="678"/>
         <source>Polyline</source>
-        <translation type="unfinished">Полилиния</translation>
+        <translation>Полилиния</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="681"/>
         <source>Vertices</source>
-        <translation type="unfinished"></translation>
+        <translation>Вершины</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="684"/>
         <source>Length</source>
-        <translation type="unfinished"></translation>
+        <translation>Длина</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="687"/>
         <source>Line width</source>
-        <translation type="unfinished">Толщина линий</translation>
+        <translation>Толщина линий</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="697"/>
         <source>Octree</source>
-        <translation type="unfinished">Октодерево</translation>
+        <translation>Октодерево</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="700"/>
         <source>Display mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Показывать как</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="703"/>
         <source>Display level</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать уровень</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="705"/>
         <source>Current level</source>
-        <translation type="unfinished"></translation>
+        <translation>Текущий уровень</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="713"/>
         <source>Cell size</source>
-        <translation type="unfinished"></translation>
+        <translation>Размер ячейки</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="717"/>
         <source>Cell count</source>
-        <translation type="unfinished"></translation>
+        <translation>Кол-во ячеек</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="720"/>
         <source>Filled volume</source>
-        <translation type="unfinished"></translation>
+        <translation>Объем заполнения</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="727"/>
         <source>Kd-tree</source>
-        <translation type="unfinished">K-мерное дерево</translation>
+        <translation>K-мерное дерево</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="730"/>
         <source>Max Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Макс. ошибка</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="740"/>
         <source>Max dist @ 68%</source>
-        <translation type="unfinished"></translation>
+        <translation>Макс. дист. @ 68%</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="743"/>
         <source>Max dist @ 95%</source>
-        <translation type="unfinished"></translation>
+        <translation>Макс. дист. @ 95%</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="746"/>
         <source>Max dist @ 99%</source>
-        <translation type="unfinished"></translation>
+        <translation>Макс. дист. @ 99%</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="749"/>
         <source>Max distance</source>
-        <translation type="unfinished">Макс. дистанция</translation>
+        <translation>Макс. дистанция</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="753"/>
         <source>unknown</source>
-        <translation type="unfinished"></translation>
+        <translation>неизвестно</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="756"/>
         <source>Error measure</source>
-        <translation type="unfinished"></translation>
+        <translation>Ошибка измерения</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="764"/>
         <source>Image</source>
-        <translation type="unfinished">Изображение</translation>
+        <translation>Изображение</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="767"/>
         <source>Width</source>
-        <translation type="unfinished">Ширина</translation>
+        <translation>Ширина</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="773"/>
         <source>Alpha</source>
-        <translation type="unfinished"></translation>
+        <translation>Альфа</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="777"/>
         <source>Sensor</source>
-        <translation type="unfinished"></translation>
+        <translation>Датчик</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="779"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="844"/>
         <source>Apply Viewport</source>
-        <translation type="unfinished"></translation>
+        <translation>Применить точку обзора</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="787"/>
         <source>Label</source>
-        <translation type="unfinished">Имя</translation>
+        <translation>Метка</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="791"/>
         <source>Body</source>
-        <translation type="unfinished"></translation>
+        <translation>Тело</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="794"/>
         <source>Show 2D label</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать 2D-метки</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="797"/>
         <source>Show legend(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать легенду</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="804"/>
         <source>Viewport</source>
-        <translation type="unfinished"></translation>
+        <translation>Точка обзора</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="807"/>
         <source>undefined</source>
-        <translation type="unfinished"></translation>
+        <translation>не задано</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="810"/>
         <source>Apply viewport</source>
-        <translation type="unfinished"></translation>
+        <translation>Применить точку обзора</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="813"/>
         <source>Update viewport</source>
-        <translation type="unfinished"></translation>
+        <translation>Обновить точку обзора</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="821"/>
         <source>Trans. buffer</source>
-        <translation type="unfinished"></translation>
+        <translation>Транс. буфер</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="827"/>
         <source>Show path</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать трассу</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="830"/>
         <source>Show trihedrons</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать трехгранники</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="833"/>
         <source>Scale</source>
-        <translation type="unfinished">Масштаб</translation>
+        <translation>Масштаб</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="841"/>
         <source>Drawing scale</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="847"/>
         <source>Position/Orientation</source>
-        <translation type="unfinished"></translation>
+        <translation>Положение/Ориентация</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="851"/>
         <source>Associated positions</source>
-        <translation type="unfinished"></translation>
+        <translation>Связанные позиции</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="861"/>
         <source>Indices</source>
-        <translation type="unfinished"></translation>
+        <translation>Индексы</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="864"/>
         <source>Active index</source>
-        <translation type="unfinished"></translation>
+        <translation>Активный индекс</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="872"/>
         <source>TLS/GBL Sensor</source>
-        <translation type="unfinished"></translation>
+        <translation>Сканер</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="875"/>
         <source>Uncertainty</source>
-        <translation type="unfinished">Точность</translation>
+        <translation>Точность</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="878"/>
         <source>Angular viewport (degrees)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ось визирования (градусы)</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="883"/>
         <source>Yaw span</source>
-        <translation type="unfinished"></translation>
+        <translation>Аз. сектор</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="887"/>
         <source>Yaw step</source>
-        <translation type="unfinished"></translation>
+        <translation>Аз. шаг</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="892"/>
         <source>Pitch span</source>
-        <translation type="unfinished"></translation>
+        <translation>Сектор тангажа</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="896"/>
         <source>Pitch step</source>
-        <translation type="unfinished"></translation>
+        <translation>Шаг тангажа</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="907"/>
         <source>Camera Sensor</source>
-        <translation type="unfinished"></translation>
+        <translation>Камера</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="912"/>
         <source>Vert. focal</source>
-        <translation type="unfinished"></translation>
+        <translation>Верт. фокус</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="915"/>
         <source>Array size</source>
-        <translation type="unfinished"></translation>
+        <translation>Размер массива</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="918"/>
         <source>Principal point</source>
-        <translation type="unfinished"></translation>
+        <translation>Главная точка</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="923"/>
         <source>Pixel size</source>
-        <translation type="unfinished"></translation>
+        <translation>Размер пикселя</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="927"/>
         <source>Field of view</source>
-        <translation type="unfinished">Угол поля зрения</translation>
+        <translation>Поле зрения</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="930"/>
         <source>Skew</source>
-        <translation type="unfinished"></translation>
+        <translation>Завал</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="932"/>
         <source>Frustum display</source>
-        <translation type="unfinished"></translation>
+        <translation>Сектор показа</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="935"/>
         <source>Show lines</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать линии</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="936"/>
         <source>Show side planes</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать стороны плоск-ей</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="946"/>
         <source>Material set</source>
-        <translation type="unfinished"></translation>
+        <translation>Материал</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="959"/>
         <source>Array</source>
-        <translation type="unfinished"></translation>
+        <translation>Массив</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="963"/>
         <source>Shared</source>
-        <translation type="unfinished"></translation>
+        <translation>В доступе</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="963"/>
         <source>No</source>
-        <translation type="unfinished"></translation>
+        <translation>Нет</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="963"/>
         <source>Yes (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Да (%1)</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1130"/>
         <source>Wire</source>
-        <translation type="unfinished"></translation>
+        <translation>Каркас</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1132"/>
         <source>Plain cubes</source>
-        <translation type="unfinished"></translation>
+        <translation>Кубы</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1260"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1270"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1280"/>
         <source>Apply</source>
-        <translation type="unfinished">Применить</translation>
+        <translation>Применить</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1289"/>
         <source>Update</source>
-        <translation type="unfinished">Обновить</translation>
+        <translation>Обновить</translation>
     </message>
 </context>
 <context>
@@ -14360,7 +14360,7 @@ Number of points: %2</source>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="20"/>
         <source>Compass</source>
-        <translation>Компасс</translation>
+        <translation>Компас</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="38"/>
@@ -14658,7 +14658,7 @@ At least 2 viewports must be selected.</source>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/qPCV.cpp" line="251"/>
         <source>Invalid object type</source>
-        <translation type="unfinished"></translation>
+        <translation>Неверный тип объекта</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/qPCV.cpp" line="288"/>

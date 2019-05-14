@@ -427,7 +427,7 @@ bool cc2DLabel::toFile_MeOnly(QFile& out) const
 
 		//mesh ID (dataVersion >= 49 - will be retrieved later --> make sure that the mesh is saved alongside!)
 		uint32_t meshID = static_cast<uint32_t>(it->_mesh ? it->_mesh->getUniqueID() : 0);
-		if (out.write((const char*)&cloudID, 4) < 0)
+		if (out.write((const char*)&meshID, 4) < 0)
 			return WriteError();
 		
 		//uv coordinates in the triangle (dataVersion >= 49)

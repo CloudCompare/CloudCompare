@@ -9537,7 +9537,7 @@ void MainWindow::doActionSaveFile()
 	ccHObject other("other");
 	ccHObject otherSerializable("serializable");
 	ccHObject::Container entitiesToDispatch;
-	entitiesToDispatch.insert(entitiesToDispatch.begin(),m_selectedEntities.begin(),m_selectedEntities.end());
+	entitiesToDispatch.insert(entitiesToDispatch.begin(), m_selectedEntities.begin(), m_selectedEntities.end());
 	ccHObject entitiesToSave;
 	while (!entitiesToDispatch.empty())
 	{
@@ -9571,8 +9571,8 @@ void MainWindow::doActionSaveFile()
 			//we don't want double insertions if the user has clicked both the father and child
 			if (!dest->find(child->getUniqueID()))
 			{
-				dest->addChild(child,ccHObject::DP_NONE);
-				entitiesToSave.addChild(child,ccHObject::DP_NONE);
+				dest->addChild(child, ccHObject::DP_NONE);
+				entitiesToSave.addChild(child, ccHObject::DP_NONE);
 			}
 		}
 	}
@@ -9719,7 +9719,7 @@ void MainWindow::doActionSaveFile()
 		QString defaultFileName(m_selectedEntities.front()->getName());
 		if (m_selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
-			QStringList parts = defaultFileName.split(' ',QString::SkipEmptyParts);
+			QStringList parts = defaultFileName.split(' ', QString::SkipEmptyParts);
 			if (!parts.empty())
 			{
 				defaultFileName = parts[0];
@@ -9774,7 +9774,7 @@ void MainWindow::doActionSaveFile()
 	{
 		if ( haveOneSelection() )
 		{
-			result = FileIOFilter::SaveToFile(m_selectedEntities.front(),selectedFilename,parameters,selectedFilter);
+			result = FileIOFilter::SaveToFile(m_selectedEntities.front(), selectedFilename, parameters, selectedFilter);
 		}
 		else
 		{

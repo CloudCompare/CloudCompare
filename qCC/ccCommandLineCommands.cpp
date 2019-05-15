@@ -46,6 +46,7 @@ constexpr char COMMAND_OPEN[]							= "O";				//+file name
 constexpr char COMMAND_OPEN_SKIP_LINES[]				= "SKIP";			//+number of lines to skip
 constexpr char COMMAND_OPEN_SHIFT_ON_LOAD[]				= "GLOBAL_SHIFT";	//+global shift
 constexpr char COMMAND_OPEN_SHIFT_ON_LOAD_AUTO[]		= "AUTO";			//"AUTO" keyword
+constexpr char COMMAND_OPEN_SHIFT_ON_LOAD_FIRST[]		= "FIRST";			//"FIRST" keyword
 constexpr char COMMAND_SUBSAMPLE[]						= "SS";				//+ method (RANDOM/SPATIAL/OCTREE) + parameter (resp. point count / spatial step / octree level)
 constexpr char COMMAND_EXTRACT_CC[]						= "EXTRACT_CC";
 constexpr char COMMAND_CURVATURE[]						= "CURV";			//+ curvature type (MEAN/GAUSS)
@@ -356,6 +357,15 @@ bool CommandLoad::process(ccCommandLineInterface &cmd)
 	
 	//optional parameters
 	int skipLines = 0;
+
+	bool firstGlobalShift = false;
+	static bool s_coordinatesShiftWasEnabled = false;
+	static CCVector3d s_formerCoordinatesShift;
+	if (!s_coordinatesShiftWasEnabled)
+	{
+		firstGlobalShift = true;
+	}
+
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
@@ -385,7 +395,7 @@ bool CommandLoad::process(ccCommandLineInterface &cmd)
 			
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: global shift vector or %1 after '%2'").arg(COMMAND_OPEN_SHIFT_ON_LOAD_AUTO, COMMAND_OPEN_SHIFT_ON_LOAD));
+				return cmd.error(QObject::tr("Missing parameter: global shift vector or %1 or %2 after '%3'").arg(COMMAND_OPEN_SHIFT_ON_LOAD_AUTO, COMMAND_OPEN_SHIFT_ON_LOAD_FIRST, COMMAND_OPEN_SHIFT_ON_LOAD));
 			}
 			
 			QString firstParam = cmd.arguments().takeFirst();
@@ -394,11 +404,18 @@ bool CommandLoad::process(ccCommandLineInterface &cmd)
 			loadParams.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
 			loadParams.m_coordinatesShiftEnabled = false;
 			loadParams.m_coordinatesShift = CCVector3d(0, 0, 0);
-			
+
 			if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_AUTO)
 			{
 				//let CC handle the global shift automatically
 				loadParams.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+			}
+			else if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_FIRST)
+			{
+				//use the first encountered global shift value (if any)
+				loadParams.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+				loadParams.m_coordinatesShiftEnabled = s_coordinatesShiftWasEnabled;
+				loadParams.m_coordinatesShift = s_formerCoordinatesShift;
 			}
 			else if (cmd.arguments().size() < 2)
 			{
@@ -439,7 +456,20 @@ bool CommandLoad::process(ccCommandLineInterface &cmd)
 	
 	//open specified file
 	QString filename(cmd.arguments().takeFirst());
-	return cmd.importFile(filename);
+	if (!cmd.importFile(filename))
+	{
+		return false;
+	}
+
+	if (firstGlobalShift)
+	{
+		//we need to store 
+		ccCommandLineInterface::CLLoadParameters& loadParams = cmd.fileLoadingParams();
+		s_coordinatesShiftWasEnabled = loadParams.m_coordinatesShiftEnabled;
+		s_formerCoordinatesShift = loadParams.m_coordinatesShift;
+	}
+
+	return true;
 }
 
 CommandClearNormals::CommandClearNormals()

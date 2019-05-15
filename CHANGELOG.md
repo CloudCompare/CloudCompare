@@ -7,7 +7,9 @@ v2.11 (Anoia) - (in development)
 - Improvements
   - Command line tool:
     - The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
-      In this case the first mesh vertices are used as compared cloud.
+        In this case the first mesh vertices are used as compared cloud.
+	- New suboption for the -O -GLOBAL_SHIFT option: 'FIRST'
+		To use the first encountered (non null) global shift for all loaded entities (must be defined for all entities nevertheless ;)
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
   - Point picking:

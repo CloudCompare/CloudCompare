@@ -1,0 +1,41 @@
+--- a/CC/include/CCConst.h
++++ b/CC/include/CCConst.h
+@@ -40,10 +40,10 @@ constexpr double M_PI_2 = (M_PI/2.0);
+ constexpr double SQRT_3 = 1.7320508075688772935274463415059;
+ 
+ //! Conversion factor from radians to degrees
+-constexpr double CC_RAD_TO_DEG = (180.0/M_PI);
++const double CC_RAD_TO_DEG = (180.0/M_PI);
+ 
+ //! Conversion factor from degrees to radians
+-constexpr double CC_DEG_TO_RAD = (M_PI/180.0);
++const double CC_DEG_TO_RAD = (M_PI/180.0);
+ 
+ //! Numerical threshold for considering a value as "zero"
+ constexpr double ZERO_TOLERANCE = static_cast<double>(FLT_EPSILON);
+diff --git a/libs/qCC_db/ccCameraSensor.cpp b/libs/qCC_db/ccCameraSensor.cpp
+index 79a3f257..b591991b 100644
+--- a/libs/qCC_db/ccCameraSensor.cpp
++++ b/libs/qCC_db/ccCameraSensor.cpp
+@@ -53,8 +53,8 @@ void ccCameraSensor::IntrinsicParameters::GetKinectDefaults(IntrinsicParameters&
+ 	//default Kinect parameters from:
+ 	// "Accuracy and Resolution of Kinect Depth Data for Indoor Mapping Applications"
+ 	// Kourosh Khoshelham and Sander Oude Elberink
+-	constexpr float focal_mm		= static_cast<float>(5.45 * 1.0e-3);	// focal length (real distance in meter)
+-	constexpr float pixelSize_mm	= static_cast<float>(9.3 * 1.0e-6);		// pixel size (real distance in meter)
++	const float focal_mm			= static_cast<float>(5.45 * 1.0e-3);	// focal length (real distance in meter)
++	const float pixelSize_mm		= static_cast<float>(9.3 * 1.0e-6);		// pixel size (real distance in meter)
+ 	
+ 	params.vertFocal_pix      = ConvertFocalMMToPix(focal_mm, pixelSize_mm);
+ 	params.pixelSize_mm[0]    = pixelSize_mm;
+--- a/libs/qCC_db/ccColorTypes.h
++++ b/libs/qCC_db/ccColorTypes.h
+@@ -119,7 +119,7 @@ namespace ccColor
+ 
+ 	// Predefined colors (default type)
+ 	constexpr Rgb white						(MAX, MAX, MAX);
+-	constexpr Rgb lightGrey					(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8));
++	const Rgb lightGrey						(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8));
+ 	constexpr Rgb darkGrey					(MAX / 2, MAX / 2, MAX / 2);
+ 	constexpr Rgb red						(MAX, 0, 0);
+ 	constexpr Rgb green						(0, MAX, 0);

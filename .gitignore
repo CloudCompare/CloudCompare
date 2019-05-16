@@ -130,3 +130,6 @@ private_plugins
 /data/
 /misc/
 CCCoreLibExport.h
+
+# flatpak builder cache
+.flatpak-builder

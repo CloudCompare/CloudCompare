@@ -1,0 +1,30 @@
+--- a/src/cpp/CMakeLists.txt	2016-08-05 00:20:50.000000000 +0100
++++ b/src/cpp/CMakeLists.txt	2019-06-12 14:06:51.376660000 +0100
+@@ -29,12 +29,12 @@
+ endif()
+ 
+ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_COMPILER_IS_GNUCC)
+-    add_library(flann_cpp SHARED "")
++    add_library(flann_cpp SHARED empty.cpp)
+     set_target_properties(flann_cpp PROPERTIES LINKER_LANGUAGE CXX)
+     target_link_libraries(flann_cpp -Wl,-whole-archive flann_cpp_s -Wl,-no-whole-archive)
+ 
+     if (BUILD_CUDA_LIB)
+-	    cuda_add_library(flann_cuda SHARED "")
++	    cuda_add_library(flann_cuda SHARED empty.cpp)
+         set_target_properties(flann_cuda PROPERTIES LINKER_LANGUAGE CXX)
+         target_link_libraries(flann_cuda -Wl,-whole-archive flann_cuda_s -Wl,-no-whole-archive)
+         set_property(TARGET flann_cpp_s PROPERTY COMPILE_DEFINITIONS FLANN_USE_CUDA)
+@@ -83,7 +83,7 @@
+     set_property(TARGET flann_s PROPERTY COMPILE_DEFINITIONS FLANN_STATIC)
+ 
+     if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_COMPILER_IS_GNUCC)
+-        add_library(flann SHARED "")
++        add_library(flann SHARED empty.cpp)
+         set_target_properties(flann PROPERTIES LINKER_LANGUAGE CXX)
+         target_link_libraries(flann -Wl,-whole-archive flann_s -Wl,-no-whole-archive)
+     else()
+--- a/src/cpp/empty.cpp	1970-01-01 01:00:00.000000000 +0100
++++ b/src/cpp/empty.cpp	2019-06-12 14:29:25.225211713 +0100
+@@ -0,0 +1 @@
++// empty

@@ -1,0 +1,312 @@
+app-id: net.danielgm.CloudCompare
+runtime: org.kde.Platform
+runtime-version: "5.12"
+sdk: org.kde.Sdk
+command: CloudCompare
+finish-args:
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  - --device=dri
+  - --share=network
+  - --filesystem=home
+  - --filesystem=host
+
+cleanup:
+    - /bin/applygeo
+    - /bin/cgal_*
+    - /bin/CreateDOMDocument
+    - /bin/DOM*
+    - /bin/EnumVal
+    - /bin/flann*
+    - /bin/gdal*
+    - /bin/geotifcp
+    - /bin/gnmanalyse
+    - /bin/gnmmanage
+    - /bin/listgeo
+    - /bin/MemParse
+    - /bin/nearblack
+    - /bin/ogr*
+    - /bin/pdal*
+    - /bin/PParse
+    - /bin/PSVIWriter
+    - /bin/Redirect
+    - /bin/SAX*
+    - /bin/SCMPrint
+    - /bin/SEnumVal
+    - /bin/StdInParse
+    - /bin/testepsg
+    - /bin/XInclude
+
+    - /lib/cmake
+    - /lib/debug
+    - /lib/gdalplugins
+    - /lib/pkgconfig
+    - "*.a"
+    - "*.la"
+
+    - /share/doc
+    - /share/eigen3
+    - /share/flann
+    - /share/gdal
+    - /share/info
+    - /share/man
+    - /share/pcl-1.9
+    - /share/pkgconfig
+    - /share/proj
+
+    - /include
+
+modules:
+  - name: MPFR
+    sources:
+      - type: archive
+        url: https://www.mpfr.org/mpfr-current/mpfr-4.0.2.tar.xz
+        sha256: 1d3be708604eae0e42d578ba93b390c2a145f17743a744d8f3f8c2ad5855a38a
+    buildsystem: autotools
+    builddir: true
+
+  - name: boost
+    sources:
+      - type: archive
+        url: https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.gz
+        sha256: 9a2c2819310839ea373f42d69e733c339b4e9a19deab6bfec448281554aa4dbb
+    buildsystem: simple
+    build-commands:
+    - ./bootstrap.sh --prefix=/app --with-libraries=thread,system,date_time,filesystem,iostreams,atomic,chrono
+    - ./b2 install -j8
+
+  - name: CGAL
+    sources:
+      - type: archive
+        url: https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.14/CGAL-4.14.tar.xz
+        sha256: 59464b1eaee892f2223ba570a7642892c999e29524ab102a6efd7c29c94a29f7
+    buildsystem: cmake
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCGAL_HEADER_ONLY=ON
+
+  - name: PROJ
+    sources:
+      - type: archive
+        url: http://download.osgeo.org/proj/proj-6.1.0.tar.gz
+        md5: 4ec5d9240b0e290670886519f250946c
+    buildsystem: cmake
+    builddir: true
+    config-opts:
+      - -DPROJ_TESTS=OFF
+      - -DBUILD_CCT=OFF
+      - -DBUILD_CS2CS=OFF
+      - -DBUILD_GEOD=OFF
+      - -DBUILD_GIE=OFF
+      - -DBUILD_PROJ=OFF
+      - -DBUILD_PROJINFO=OFF
+
+  - name: GDAL
+    sources:
+      - type: archive
+        url: https://github.com/OSGeo/gdal/releases/download/v3.0.0/gdal-3.0.0.tar.gz
+        md5: 797a4400e673aa2ba647603c57b9b2b6
+    buildsystem: autotools
+    config-opts:
+      - --disable-all-optional-drivers
+
+  - name: GeoTIFF
+    sources:
+      - type: archive
+        url: http://download.osgeo.org/geotiff/libgeotiff/libgeotiff-1.5.1.tar.gz
+        sha256: f9e99733c170d11052f562bcd2c7cb4de53ed405f7acdde4f16195cd3ead612c
+    builddir: true
+    buildsystem: simple
+    build-commands:
+      - ./configure --prefix=/app
+      - make install -j
+
+  - name: PDAL
+    sources:
+      - type: archive
+        url: https://github.com/PDAL/PDAL/releases/download/1.9.1/PDAL-1.9.1-src.tar.gz
+        md5: 8955f5a5e621b928b543dd541ee0e7b9
+    buildsystem: cmake
+    builddir: true
+    config-opts:
+      - -DWITH_TESTS=OFF
+
+  - name: TBB
+    sources:
+      - type: archive
+        url: https://github.com/intel/tbb/archive/2019_U8.tar.gz
+        sha256: 7b1fd8caea14be72ae4175896510bf99c809cd7031306a1917565e6de7382fba
+      # CMake support
+      - type: patch
+        path: patches/tbb_cmake.patch
+    buildsystem: cmake
+    builddir: true
+
+  - name: XercesC
+    sources:
+      - type: archive
+        url: http://apache.mirror.iweb.ca//xerces/c/3/sources/xerces-c-3.2.2.tar.gz
+        sha256: dd6191f8aa256d3b4686b64b0544eea2b450d98b4254996ffdfe630e0c610413
+    buildsystem: autotools
+    builddir: true
+
+  - name: Eigen
+    sources:
+      - type: archive
+        url: http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2
+        sha256: 9f13cf90dedbe3e52a19f43000d71fdf72e986beb9a5436dddcd61ff9d77a3ce
+    builddir: true
+    buildsystem: cmake
+
+  - name: FLANN
+    sources:
+      - type: archive
+        url: https://github.com/mariusmuja/flann/archive/1.9.1.tar.gz
+        sha256: b23b5f4e71139faa3bcb39e6bbcc76967fbaf308c4ee9d4f5bfbeceaa76cc5d3
+      # patch FLANN to prevent empty source for 'add_library'
+      - type: patch
+        path: patches/flann_empty_source.patch
+    builddir: true
+    buildsystem: cmake
+
+  - name: Dlib
+    sources:
+      - type: archive
+        url: http://dlib.net/files/dlib-19.17.tar.bz2
+        sha256: 24772f9b2b99cf59a85fd1243ca1327cbf7340d83395b32a6c16a3a16136327b
+    buildsystem: cmake
+    builddir: true
+    config-opts:
+      - -DDLIB_NO_GUI_SUPPORT=ON
+
+  - name: PCL
+    sources:
+      - type: archive
+        url: https://github.com/PointCloudLibrary/pcl/archive/pcl-1.9.1.tar.gz
+        sha256: 0add34d53cd27f8c468a59b8e931a636ad3174b60581c0387abb98a9fc9cddb6
+    buildsystem: cmake
+    builddir: true
+    config-opts:
+      - -DWITH_LIBUSB=OFF
+      - -DWITH_QT=OFF
+      - -DWITH_VTK=OFF
+      - -DWITH_PCAP=OFF
+      - -DPCL_ONLY_CORE_POINT_TYPES=ON
+      - -DOpenGL_GL_PREFERENCE=GLVND
+      - -DBUILD_2d=ON
+      - -DBUILD_CUDA=OFF
+      - -DBUILD_GPU=OFF
+      - -DBUILD_apps=OFF
+      - -DBUILD_common=ON
+      - -DBUILD_examples=OFF
+      - -DBUILD_features=ON
+      - -DBUILD_filters=ON
+      - -DBUILD_geometry=OFF
+      - -DBUILD_global_tests=OFF
+      - -DBUILD_io=ON
+      - -DBUILD_kdtree=ON
+      - -DBUILD_keypoints=ON
+      - -DBUILD_ml=OFF
+      - -DBUILD_octree=ON
+      - -DBUILD_outofcore=OFF
+      - -DBUILD_people=OFF
+      - -DBUILD_recognition=OFF
+      - -DBUILD_registration=OFF
+      - -DBUILD_sample_consensus=ON
+      - -DBUILD_search=ON
+      - -DBUILD_segmentation=OFF
+      - -DBUILD_simulation=OFF
+      - -DBUILD_stereo=OFF
+      - -DBUILD_surface=ON
+      - -DBUILD_tools=OFF
+      - -DBUILD_tracking=OFF
+      - -DBUILD_visualization=OFF
+
+  # - name: GMP
+  #   sources:
+  #       - type: archive
+  #         url: https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
+  #         sha256: 87b565e89a9a684fe4ebeeddb8399dce2599f9c9049854ca8c0dfbdea0e21912
+  #   buildsystem: autotools
+  #   builddir: true
+  #   config-opts:
+  #     - --enable-cxx
+
+  # - name: Cork
+  #   sources:
+  #       - type: git
+  #         url: https://github.com/CloudCompare/cork.git
+  #         tag: master
+  #   buildsystem: autotools
+  #   no-autogen: true
+  #   builddir: true
+  #   make-args:
+  #     - GMP_INC_DIR=/app/include
+  #     - GMP_LIB_DIR=/app/lib
+
+  - name: CloudCompare
+    sources:
+      # use the source directory relative to manifest
+      - type: dir
+        path: ".."
+        skip: [flatpak, .flatpak-builder, snap]
+      # patch: replace constexpr by const for floating point operations
+      # see https://github.com/CloudCompare/CloudCompare/issues/848
+      - type: patch
+        path: patches/cc_constexpr_double.patch
+    builddir: true
+    buildsystem: cmake
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCOMPILE_CC_CORE_LIB_WITH_CGAL=ON
+      - -DCOMPILE_CC_CORE_LIB_WITH_TBB=ON
+      - -DOPTION_USE_GDAL=ON
+      - -DOPTION_USE_DXF_LIB=ON
+      - -DOPTION_USE_SHAPE_LIB=ON
+      - -DDLIB_ROOT=/app/include
+      - -DEIGEN_ROOT_DIR=/app/include/eigen3
+      - -DPLUGIN_GL_QEDL=ON
+      - -DPLUGIN_GL_QSSAO=ON
+      - -DPLUGIN_IO_QADDITIONAL=ON
+      - -DPLUGIN_IO_QCORE=ON
+      - -DPLUGIN_IO_QCSV_MATRIX=ON
+      - -DPLUGIN_IO_QE57=ON
+      - -DPLUGIN_IO_QFBX=OFF  # Autodesk FBX not available
+      - -DPLUGIN_IO_QPDAL=ON
+      - -DPLUGIN_IO_QPHOTOSCAN=ON
+      - -DPLUGIN_STANDARD_QANIMATION=ON
+      - -DPLUGIN_STANDARD_QBROOM=ON
+      - -DPLUGIN_STANDARD_QCANUPO=ON
+      - -DPLUGIN_STANDARD_QCOMPASS=ON
+      - -DPLUGIN_STANDARD_QCORK=OFF # error: no matching conversion for functional-style cast from 'const char [14]' to 'std::exception'
+      - -DPLUGIN_STANDARD_QCSF=ON
+      - -DPLUGIN_STANDARD_QFACETS=ON
+      - -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON
+      - -DPLUGIN_STANDARD_QHPR=ON
+      - -DPLUGIN_STANDARD_QM3C2=ON
+      - -DPLUGIN_STANDARD_QPCL=ON
+      - -DPLUGIN_STANDARD_QPCV=OFF  # GL/glu.h: No such file or directory
+      - -DPLUGIN_STANDARD_QPOISSON_RECON=ON
+      - -DPLUGIN_STANDARD_QRANSAC_SD=ON
+      - -DPLUGIN_STANDARD_QSRA=ON
+
+  - name: launchers
+    buildsystem: simple
+    sources:
+      - type: file
+        path: net.danielgm.CloudCompare.desktop
+      - type: file
+        path: net.danielgm.CloudCompare.png
+      - type: file
+        path: net.danielgm.CloudCompare.Viewer.desktop
+      - type: file
+        path: net.danielgm.CloudCompare.Viewer.png
+    build-commands:
+      - install -d /app/share/applications
+      - install -m644 net.danielgm.CloudCompare.desktop /app/share/applications/net.danielgm.CloudCompare.desktop
+      - install -m644 net.danielgm.CloudCompare.Viewer.desktop /app/share/applications/net.danielgm.CloudCompare.Viewer.desktop
+      - install -d /app/share/icons/hicolor/256x256/apps
+      - install -m644 net.danielgm.CloudCompare.png /app/share/icons/hicolor/256x256/apps/net.danielgm.CloudCompare.png
+      - install -m644 net.danielgm.CloudCompare.Viewer.png /app/share/icons/hicolor/256x256/apps/net.danielgm.CloudCompare.Viewer.png

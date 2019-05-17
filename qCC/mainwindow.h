@@ -500,6 +500,7 @@ private slots:
 	void doActionBDFootPrintPack();
 	void doActionBDFootPrintGetPlane();
 	void doActionBDMeshToBlock();
+	void doActionShowBestImage();
 
 	void doActionBDLoD1Generation();
 

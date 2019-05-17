@@ -859,6 +859,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDFootPrintPack,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintPack);
 	connect(m_UI->actionBDFootPrintGetPlane,		&QAction::triggered, this, &MainWindow::doActionBDFootPrintGetPlane);
 	connect(m_UI->actionBDMeshToBlock,				&QAction::triggered, this, &MainWindow::doActionBDMeshToBlock);
+	connect(m_UI->actionShowBestImage,				&QAction::triggered, this, &MainWindow::doActionShowBestImage);
 }
 
 void MainWindow::doActionColorize()
@@ -12849,6 +12850,11 @@ void MainWindow::doActionBDMeshToBlock()
 	ccMesh* mesh = ccHObjectCaster::ToMesh(getSelectedEntities().front());
 	if (!mesh) { return; }
 	StBlock* block = new StBlock();
+}
+
+void MainWindow::doActionShowBestImage()
+{
+	m_pbdrImshow->setImage("D:/Libraries/Documents/Project/Stocker_Test/Work/Dublin_nyu/T_316000_234000/T_316000_234000_StOcker/images/BW_2231741.jpg");
 }
 
 void MainWindow::doActionBDLoD1Generation()

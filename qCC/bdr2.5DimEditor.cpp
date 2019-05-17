@@ -140,18 +140,6 @@ void bdr2Point5DimEditor::create2DView(QFrame* parentFrame)
 
 			parentFrame->setLayout( layout );
 		}
-
-		m_image = new ccImage;
-		m_image->setDisplayType(ccImage::IMAGE_DISPLAY_3D);
-		m_image->setDisplay(m_glWindow);
-		QString error;
-		m_image->load("D:/Libraries/Documents/Project/Stocker_Test/Work/Dublin_nyu/T_316000_234000/T_316000_234000_StOcker/images/BW_2231741_thumb.jpg", error);
-		m_glWindow->addToOwnDB(m_image);
-		ccBBox box; /*= m_image->getDisplayBB_recursive(false, m_glWindow);*/
-		box.add(CCVector3(0,0,0));
-		box.add(CCVector3(m_image->getW(), m_image->getH(), 0));
-
-		update2DDisplayZoom(box);
 	}
 }
 
@@ -280,6 +268,26 @@ ccPointCloud* bdr2Point5DimEditor::convertGridToCloud(	const std::vector<ccRaste
 									fillEmptyCells,
 									emptyCellsHeight,
 									exportToOriginalCS);
+}
+
+void bdr2Point5DimEditor::setImage(QString image_path)
+{
+	if (m_image) {
+		if (m_glWindow)
+			m_glWindow->removeFromOwnDB(m_image);
+		delete m_image;
+		m_image = nullptr;
+	}
+	m_image = new ccImage;
+	m_image->setDisplayType(ccImage::IMAGE_DISPLAY_3D);
+	m_image->setDisplay(m_glWindow);
+	QString error;
+	m_image->load(image_path, error);
+	m_glWindow->addToOwnDB(m_image);
+	ccBBox box; 
+	box.add(CCVector3(0, 0, 0));
+	box.add(CCVector3(m_image->getW(), m_image->getH(), 0));
+	update2DDisplayZoom(box);
 }
 
 ccRasterGrid::EmptyCellFillOption bdr2Point5DimEditor::getFillEmptyCellsStrategy(QComboBox* comboBox) const

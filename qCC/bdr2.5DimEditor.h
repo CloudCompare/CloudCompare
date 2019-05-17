@@ -75,7 +75,7 @@ public: //raster grid related stuff
 										bool fillEmptyCells,
 										double emptyCellsHeight,
 										bool exportToOriginalCS) const;
-
+	void setImage(QString image_path);
 protected: //members
 
 	//! Raster grid

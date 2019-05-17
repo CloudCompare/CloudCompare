@@ -65,6 +65,7 @@ class bdrPolyFitDlg;
 class bdr3D4EMDlg;
 class bdrPlaneSegDlg;
 class bdrFacetFilterDlg;
+class bdr2Point5DimEditor;
 
 class PolyFitObj;
 
@@ -692,6 +693,7 @@ private:
 	bdrPolyFitDlg* m_pbdrpfDlg;
 	bdrFacetFilterDlg* m_pbdrffDlg;
 	bdr3D4EMDlg* m_pbdr3d4emDlg;
+	bdr2Point5DimEditor* m_pbdrImshow;
 	PolyFitObj* polyfit_obj;
 };
 

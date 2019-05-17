@@ -158,6 +158,7 @@
 #include "bdrPolyFitDlg.h"
 #include "bdr3D4EMDlg.h"
 #include "bdrFacetFilterDlg.h"
+#include "bdr2.5DimEditor.h"
 
 #include "stocker_parser.h"
 #include "polyfit/basic/logger.h"
@@ -191,7 +192,7 @@ static QFileDialog::Options CCFileDialogOptions()
 }
 
 MainWindow::MainWindow()
-	: m_UI( new Ui::MainWindow )
+	: m_UI(new Ui::MainWindow)
 	, m_ccRoot(nullptr)
 	, m_uiFrozen(false)
 	, m_recentFiles(new ccRecentFiles(this))
@@ -218,6 +219,7 @@ MainWindow::MainWindow()
 	, m_pbdrpfDlg(nullptr)
 	, m_pbdr3d4emDlg(nullptr)
 	, m_pbdrffDlg(nullptr)
+	, m_pbdrImshow(nullptr)
 	, polyfit_obj(nullptr)
 {
 	m_UI->setupUi( this );
@@ -297,6 +299,7 @@ MainWindow::MainWindow()
 	// 	delete titleWidget; titleWidget = nullptr;
 
 	tabifyDockWidget(m_UI->DockableProperties, m_UI->DockableConsole);
+	tabifyDockWidget(m_UI->DockableProperties, m_UI->DockableImage);
 	m_UI->DockableProperties->raise();
 
 	//db-tree
@@ -327,10 +330,14 @@ MainWindow::MainWindow()
 	m_UI->vboxLayout2->setContentsMargins(0, 0, 0, 0);
 	m_UI->vboxLayout3->setContentsMargins(0, 0, 0, 0);
 	m_UI->vboxLayout4->setContentsMargins(0, 0, 0, 0);
+	m_UI->verticalLayout->setContentsMargins(0, 0, 0, 0);
 
 	connectActions();
 
 	new3DView(true);
+
+	m_pbdrImshow = new bdr2Point5DimEditor();
+	m_pbdrImshow->create2DView(m_UI->mapFrame);
 
 	setupInputDevices();
 

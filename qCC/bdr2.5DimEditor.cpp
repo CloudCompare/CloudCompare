@@ -28,6 +28,7 @@
 #include <ccScalarField.h>
 #include <ccProgressDialog.h>
 #include <ccColorTypes.h>
+#include <ccImage.h>
 
 //qCC_gl
 #include <ccGLWidget.h>
@@ -44,6 +45,7 @@ bdr2Point5DimEditor::bdr2Point5DimEditor()
 	: m_bbEditorDlg(0)
 	, m_glWindow(0)
 	, m_rasterCloud(0)
+	, m_image(nullptr)
 {
 }
 
@@ -55,6 +57,12 @@ bdr2Point5DimEditor::~bdr2Point5DimEditor()
 			m_glWindow->removeFromOwnDB(m_rasterCloud);
 		delete m_rasterCloud;
 		m_rasterCloud = 0;
+	}
+	if (m_image) {
+		if (m_glWindow)
+			m_glWindow->removeFromOwnDB(m_image);
+		delete m_image;
+		m_image = nullptr;
 	}
 }
 
@@ -119,7 +127,8 @@ void bdr2Point5DimEditor::create2DView(QFrame* parentFrame)
 		m_glWindow->setPerspectiveState(false,true);
 		m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS);
 		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
-		m_glWindow->displayOverlayEntities(false);
+		m_glWindow->displayOverlayEntities(true);
+		m_glWindow->showCursorCoordinates(true);
 		
 		//add window to the input frame (if any)
 		if (parentFrame)
@@ -131,6 +140,18 @@ void bdr2Point5DimEditor::create2DView(QFrame* parentFrame)
 
 			parentFrame->setLayout( layout );
 		}
+
+		m_image = new ccImage;
+		m_image->setDisplayType(ccImage::IMAGE_DISPLAY_3D);
+		m_image->setDisplay(m_glWindow);
+		QString error;
+		m_image->load("D:/Libraries/Documents/Project/Stocker_Test/Work/Dublin_nyu/T_316000_234000/T_316000_234000_StOcker/images/BW_2231741_thumb.jpg", error);
+		m_glWindow->addToOwnDB(m_image);
+		ccBBox box; /*= m_image->getDisplayBB_recursive(false, m_glWindow);*/
+		box.add(CCVector3(0,0,0));
+		box.add(CCVector3(m_image->getW(), m_image->getH(), 0));
+
+		update2DDisplayZoom(box);
 	}
 }
 
@@ -170,12 +191,13 @@ void bdr2Point5DimEditor::gridIsUpToDate(bool state)
 
 void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 {
-	if (!m_glWindow || !m_grid.isValid())
+	if (!m_glWindow /*|| !m_grid.isValid()*/)
 		return;
 
 	//equivalent to 'ccGLWindow::updateConstellationCenterAndZoom' but we take aspect ratio into account
 
 	//we compute the pixel size (in world coordinates)
+	if (m_grid.isValid())
 	{
 		ccViewportParameters params = m_glWindow->getViewportParameters();
 
@@ -208,6 +230,14 @@ void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 
 		m_glWindow->setViewportParameters(params);
 		m_glWindow->setPointSize(pointSize);
+	}
+	else {
+		ccViewportParameters params = m_glWindow->getViewportParameters();
+		params.pixelSize = 1.0f/*static_cast<float>(std::max(realGridWidth / screenWidth, realGridHeight / screenHeight))*/;
+		params.zoom = 1.0f;
+
+		m_glWindow->setViewportParameters(params);
+		m_glWindow->setPointSize(1.0f);
 	}
 	
 	//we set the pivot point on the box center

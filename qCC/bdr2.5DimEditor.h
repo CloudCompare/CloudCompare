@@ -9,6 +9,7 @@ class ccGLWindow;
 class QWidget;
 class QFrame;
 class QComboBox;
+class ccImage;
 
 //! 2.5D data editor (generic interface)
 class bdr2Point5DimEditor
@@ -88,6 +89,8 @@ protected: //members
 
 	//! 'Raster' cloud
 	ccPointCloud* m_rasterCloud;
+
+	ccImage* m_image;
 };
 
 #endif //BDR_2_5D_EDITOR_HEADER

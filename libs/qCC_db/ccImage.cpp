@@ -131,47 +131,110 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (m_image.isNull()) {
 		return;
 	}
-
-	if (!MACRO_Draw2D(context) || !MACRO_Foreground(context))
-		return;
-		
-	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert( glFunc != nullptr );
 	
-	if ( glFunc == nullptr )
-		return;
-
-	glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
-	glFunc->glEnable(GL_BLEND);
-	glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glFunc->glPushAttrib(GL_ENABLE_BIT);
-	glFunc->glEnable(GL_TEXTURE_2D);
-
-	QOpenGLTexture texture(m_image);
-	texture.bind();
+	switch (m_display_type)
 	{
-		//we make the texture fit inside viewport
-		int realWidth = static_cast<int>(m_height * m_aspectRatio); //take aspect ratio into account!
-		GLfloat cw = static_cast<GLfloat>(context.glW) /realWidth;
-		GLfloat ch = static_cast<GLfloat>(context.glH) /m_height;
-		GLfloat zoomFactor = (cw > ch ? ch : cw) / 2;
-		GLfloat dX = realWidth*zoomFactor;
-		GLfloat dY = m_height*zoomFactor;
+	case ccImage::IMAGE_DISPLAY_2D:
+	{
+		if (!MACRO_Draw2D(context) || !MACRO_Foreground(context))
+			return;
 
-		glFunc->glColor4f(1, 1, 1, m_texAlpha);
-		glFunc->glBegin(GL_QUADS);
-		glFunc->glTexCoord2f(0, 1); glFunc->glVertex2f(-dX, -dY);
-		glFunc->glTexCoord2f(1, 1); glFunc->glVertex2f( dX, -dY);
-		glFunc->glTexCoord2f(1, 0); glFunc->glVertex2f( dX,  dY);
-		glFunc->glTexCoord2f(0, 0); glFunc->glVertex2f(-dX,  dY);
+		//get the set of OpenGL functions (version 2.1)
+		QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+		assert(glFunc != nullptr);
+
+		if (glFunc == nullptr)
+			return;
+
+		glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
+		glFunc->glEnable(GL_BLEND);
+		glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glFunc->glPushAttrib(GL_ENABLE_BIT);
+		glFunc->glEnable(GL_TEXTURE_2D);
+
+		QOpenGLTexture texture(m_image);
+		texture.bind();
+		{
+			//we make the texture fit inside viewport
+			int realWidth = static_cast<int>(m_height * m_aspectRatio); //take aspect ratio into account!
+			GLfloat cw = static_cast<GLfloat>(context.glW) / realWidth;
+			GLfloat ch = static_cast<GLfloat>(context.glH) / m_height;
+			GLfloat zoomFactor = (cw > ch ? ch : cw) / 2;
+			GLfloat dX = realWidth * zoomFactor;
+			GLfloat dY = m_height * zoomFactor;
+
+			glFunc->glColor4f(1, 1, 1, m_texAlpha);
+			glFunc->glBegin(GL_QUADS);
+			glFunc->glTexCoord2f(0, 1); glFunc->glVertex2f(-dX, -dY);
+			glFunc->glTexCoord2f(1, 1); glFunc->glVertex2f(dX, -dY);
+			glFunc->glTexCoord2f(1, 0); glFunc->glVertex2f(dX, dY);
+			glFunc->glTexCoord2f(0, 0); glFunc->glVertex2f(-dX, dY);
+			glFunc->glEnd();
+		}
+		texture.release();
+
+		glFunc->glPopAttrib();
+		glFunc->glPopAttrib();
+
+		break;
+	}		
+	case ccImage::IMAGE_DISPLAY_3D:
+	{
+		if (!MACRO_Draw3D(context))
+			return;
+
+		//get the set of OpenGL functions (version 2.1)
+		QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+		assert(glFunc != nullptr);
+
+		if (glFunc == nullptr)
+			return;
+
+		glFunc->glMatrixMode(GL_MODELVIEW);
+		glFunc->glPushMatrix();
+
+		glFunc->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		ccGL::Color3v(glFunc, ccColor::FromRgbf(ccColor::defaultMeshBackDiff).rgb);
+
+		glFunc->glBegin(GL_LINE_LOOP);
+		ccGL::Vertex3(glFunc, 0.f, 0.f, 0.f);
+		ccGL::Vertex3(glFunc, m_width, 0.f, 0.f);
+		ccGL::Vertex3(glFunc, m_width, m_height, 0.f);
+		ccGL::Vertex3(glFunc, 0.f, m_height, 0.f);
 		glFunc->glEnd();
-	}
-	texture.release();
 
-	glFunc->glPopAttrib();
-	glFunc->glPopAttrib();
+		glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
+		glFunc->glEnable(GL_BLEND);
+		glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glFunc->glPushAttrib(GL_ENABLE_BIT);
+		glFunc->glEnable(GL_TEXTURE_2D);
+
+		QOpenGLTexture texture(m_image);
+		texture.bind();
+		{
+			glFunc->glColor4f(1, 1, 1, m_texAlpha);
+			glFunc->glBegin(GL_QUADS);			
+			glFunc->glTexCoord2f(0, 1); glFunc->glVertex3f(0, 0, 0);
+			glFunc->glTexCoord2f(1, 1); glFunc->glVertex3f(m_width, 0, 0);
+			glFunc->glTexCoord2f(1, 0); glFunc->glVertex3f(m_width, m_height,0);
+			glFunc->glTexCoord2f(0, 0); glFunc->glVertex3f(0, m_height, 0);
+			glFunc->glEnd();
+		}
+		texture.release();
+
+		glFunc->glPopAttrib();
+		glFunc->glPopAttrib();
+
+		glFunc->glPopMatrix();
+
+		break;
+	}		
+	default:
+		break;
+	}
+	
 }
 
 void ccImage::setAlpha(float value)

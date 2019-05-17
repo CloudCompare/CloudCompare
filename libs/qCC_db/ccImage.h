@@ -31,6 +31,12 @@ class QCC_DB_LIB_API ccImage : public ccHObject
 {
 public:
 
+	enum IMAGE_DISPLAY_TYPE
+	{
+		IMAGE_DISPLAY_2D,
+		IMAGE_DISPLAY_3D,
+	};
+
 	//! Default constructor
 	ccImage();
 
@@ -92,6 +98,8 @@ public:
 	//inherited from ccHObject
 	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
+	void setDisplayType(IMAGE_DISPLAY_TYPE type) { m_display_type = type; }
+
 protected:
 
 	//inherited from ccHObject
@@ -124,6 +132,8 @@ protected:
 	ccCameraSensor* m_associatedSensor;
 
 	QString m_file_name;
+
+	IMAGE_DISPLAY_TYPE m_display_type;
 };
 
 #endif //CC_IMAGE_HEADER

@@ -32,6 +32,8 @@ v2.11 (Anoia) - (in development)
 	- CC now accepts MTL files with the 'Tf' keyword (well, CC just ignores it and doesn't complain about a wrong MTL file anymore ;)
   - Translation:
 	- new (argentinian) Spanish translation
+  - Others:
+    - CC now saves the radius (parameter) after computing normals (as meta-data associated to the cloud)
 
 - Changes
   - Command line tool:

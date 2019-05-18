@@ -1387,6 +1387,8 @@ namespace ccEntityAction
 			return false;
 		}
 		
+		static const QString s_NormalScaleKey("Normal scale");
+
 		//look for clouds and meshes
 		std::vector<ccPointCloud*> clouds;
 		bool withScanGrid = false;
@@ -1403,19 +1405,40 @@ namespace ccEntityAction
 					ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
 					clouds.push_back(cloud);
 					
-					if (cloud->gridCount() > 0)
+					if (!withScanGrid)
 					{
-						withScanGrid = true;
+						withScanGrid = (cloud->gridCount() > 0);
 					}
-					for (unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
+
+					if (!withSensor)
 					{
-						if (cloud->hasSensor())
+						for (unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
 						{
-							withSensor = true;
+							if (cloud->hasSensor())
+							{
+								withSensor = true;
+								break; //no need to look anyfurther
+							}
 						}
 					}
 
-					if (defaultRadius == 0)
+					//does the cloud has a former radius value saved as meta-data?
+					if (cloud->hasMetaData(s_NormalScaleKey))
+					{
+						bool ok = false;
+						double formerRadius = cloud->getMetaData(s_NormalScaleKey).toDouble(&ok);
+						if (ok)
+						{
+							//remember the largest radius
+							defaultRadius = std::max(defaultRadius, static_cast<PointCoordinateType>(formerRadius));
+						}
+						else
+						{
+							assert(false);
+						}
+					}
+
+					if (defaultRadius == 0.0)
 					{
 						//default radius
 						defaultRadius = ccNormalVectors::GuessNaiveRadius(cloud);
@@ -1533,6 +1556,11 @@ namespace ccEntityAction
 					//compute normals with the octree
 					normalsAlreadyOriented = orientNormals && (preferredOrientation != ccNormalVectors::UNDEFINED);
 					result = cloud->computeNormalsWithOctree(model, orientNormals ? preferredOrientation : ccNormalVectors::UNDEFINED, defaultRadius, &pDlg);
+					if (result)
+					{
+						//save the normal computation radius as meta-data
+						cloud->setMetaData(s_NormalScaleKey, defaultRadius);
+					}
 				}
 				
 				//do we need to orient the normals? (this may have been already done if 'orientNormalsForThisCloud' is true)

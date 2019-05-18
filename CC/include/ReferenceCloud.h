@@ -26,6 +26,8 @@
 //System
 #include <cassert>
 #include <vector>
+#include <mutex>
+#include <atomic>
 
 namespace CCLib
 {
@@ -33,6 +35,9 @@ namespace CCLib
 //! A very simple point cloud (no point duplication)
 /** Implements the GenericIndexedCloudPersist interface. A simple point cloud
 	that stores references to Generic3dPoint instances in a vector.
+
+	Partial thread safety for all methods that can change the size of the cloud
+	or that change or rely on point ordering.
 **/
 class CC_CORE_LIB_API ReferenceCloud : public GenericIndexedCloudPersist
 {
@@ -89,11 +94,14 @@ public:
 	inline virtual void forwardIterator() { ++m_globalIterator; }
 
 	//! Clears the cloud
+	/** Thread safe.
+	**/
 	virtual void clear(bool releaseMemory = false);
 
 	//! Point global index insertion mechanism
 	/** \param globalIndex a point global index
 		\return false if not enough memory
+		Thread safe.
 	**/
 	virtual bool addPointIndex(unsigned globalIndex);
 
@@ -101,6 +109,7 @@ public:
 	/** \param firstIndex first point global index of range
 		\param lastIndex last point global index of range (excluded)
 		\return false if not enough memory
+		Thread safe.
 	**/
 	virtual bool addPointIndex(unsigned firstIndex, unsigned lastIndex);
 
@@ -112,11 +121,13 @@ public:
 
 	//! Reserves some memory for hosting the point references
 	/** \param n the number of points (references)
+		Thread safe.
 	**/
 	virtual bool reserve(unsigned n);
 
 	//! Presets the size of the vector used to store point references
 	/** \param n the number of points (references)
+		Thread safe.
 	**/
 	virtual bool resize(unsigned n);
 
@@ -128,16 +139,19 @@ public:
 		number of "reserved" points (see ReferenceCloud::reserve).
 		\param i the first point index
 		\param j the second point index
+		Thread safe.
 	**/
-	inline virtual void swap(unsigned i, unsigned j) { std::swap(m_theIndexes[i], m_theIndexes[j]); }
+	inline virtual void swap(unsigned i, unsigned j) { m_mutex.lock(); std::swap(m_theIndexes[i], m_theIndexes[j]); m_mutex.unlock(); }
 
 	//! Removes current element
-	/** WARNING: this method change the structure size!
+	/** WARNING: this method changes the cloud size!
+		Thread safe.
 	**/
 	inline virtual void removeCurrentPointGlobalIndex() { removePointGlobalIndex(m_globalIterator); }
 
 	//! Removes a given element
-	/** WARNING: this method change the structure size!
+	/** WARNING: this method changes the cloud size!
+		Thread safe.
 	**/
 	virtual void removePointGlobalIndex(unsigned localIndex);
 
@@ -151,9 +165,9 @@ public:
 	virtual void setAssociatedCloud(GenericIndexedCloudPersist* cloud);
 
 	//! Add another reference cloud
-	/** Warnings:
-		- the clouds must have the same reference cloud!
-		- no verification for duplicates!
+	/** \warning Both clouds should have the same reference cloud!
+		\warning No verification for duplicates!
+		Thread safe.
 	**/
 	bool add(const ReferenceCloud& cloud);
 	
@@ -169,7 +183,7 @@ protected:
 	ReferencesContainer m_theIndexes;
 
 	//! Iterator on the point references container
-	unsigned m_globalIterator;
+	std::atomic<unsigned> m_globalIterator;
 
 	//! Bounding-box
 	BoundingBox m_bbox;
@@ -180,6 +194,9 @@ protected:
 		is used to 'implement' the ReferenceCloud one.
 	**/
 	GenericIndexedCloudPersist* m_theAssociatedCloud;
+
+	//! For concurrent access
+	std::mutex m_mutex;
 };
 
 }

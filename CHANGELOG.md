@@ -26,6 +26,7 @@ v2.10.3 (Zephyrus) - (in development)
   - the ICP registration tool called through the command line was always displaying progress dialogs even in SILENT mode
   - Fix potential crash with qCSF (see github issue #909)
   - In some cases, the (subsampled) core points cloud was not exported and saved at the end of the call to M3C2 through the command line
+  - Some points were incorrectly removed by the 'Clean > Noise filer' method (parallelism issue)
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------

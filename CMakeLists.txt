@@ -28,10 +28,8 @@ set( INSTALL_DESTINATIONS CloudCompare )
 # RPATH Linux/Unix: (dynamic) libs are put in a subdir of prefix/lib,
 # since they are only used by qCC/ccViewer
 if( UNIX AND NOT APPLE )
-	if( NOT CMAKE_INSTALL_LIBDIR )
-		set( CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib CACHE PATH "CloudCompare lib dir" )
-	endif( NOT CMAKE_INSTALL_LIBDIR )
-	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_LIBDIR}/cloudcompare")
+	include( GNUInstallDirs )
+	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}/cloudcompare")
 endif()
 
 # CCViewer

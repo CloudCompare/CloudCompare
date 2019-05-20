@@ -284,7 +284,12 @@ void bdr2Point5DimEditor::setImage(QString image_path)
 	QString error;
 	m_image->load(image_path, error);
 	m_glWindow->addToOwnDB(m_image);
-	ccBBox box; 
+	ZoomFit();
+}
+
+void bdr2Point5DimEditor::ZoomFit()
+{
+	ccBBox box;
 	box.add(CCVector3(0, 0, 0));
 	box.add(CCVector3(m_image->getW(), m_image->getH(), 0));
 	update2DDisplayZoom(box);

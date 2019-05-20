@@ -159,6 +159,7 @@
 #include "bdr3D4EMDlg.h"
 #include "bdrFacetFilterDlg.h"
 #include "bdr2.5DimEditor.h"
+#include "bdrImageEditorPanel.h"
 
 #include "stocker_parser.h"
 #include "polyfit/basic/logger.h"
@@ -336,8 +337,7 @@ MainWindow::MainWindow()
 
 	new3DView(true);
 
-	m_pbdrImshow = new bdr2Point5DimEditor();
-	m_pbdrImshow->create2DView(m_UI->mapFrame);
+	CreateImageEditor();
 
 	setupInputDevices();
 
@@ -860,6 +860,17 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDFootPrintGetPlane,		&QAction::triggered, this, &MainWindow::doActionBDFootPrintGetPlane);
 	connect(m_UI->actionBDMeshToBlock,				&QAction::triggered, this, &MainWindow::doActionBDMeshToBlock);
 	connect(m_UI->actionShowBestImage,				&QAction::triggered, this, &MainWindow::doActionShowBestImage);
+}
+
+void MainWindow::CreateImageEditor()
+{
+	m_pbdrImshow = new bdr2Point5DimEditor();
+	m_pbdrImshow->create2DView(m_UI->mapFrame);
+/*
+	m_pbdrImagePanel = new bdrImageEditorPanel(m_pbdrImshow, this);
+	m_UI->verticalLayoutImageEditor->addWidget(m_pbdrImagePanel);
+*/
+	
 }
 
 void MainWindow::doActionColorize()

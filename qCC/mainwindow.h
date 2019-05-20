@@ -66,6 +66,7 @@ class bdr3D4EMDlg;
 class bdrPlaneSegDlg;
 class bdrFacetFilterDlg;
 class bdr2Point5DimEditor;
+class bdrImageEditorPanel;
 
 class PolyFitObj;
 
@@ -687,6 +688,8 @@ private:
 
 	void toggleDrawBBox();
 
+	void CreateImageEditor();
+
 	//! Building Reconstruction dialogs
 	bdrPlaneSegDlg* m_pbdrPSDlg;
 	bdrLine3DppDlg* m_pbdrl3dDlg;
@@ -695,6 +698,7 @@ private:
 	bdrFacetFilterDlg* m_pbdrffDlg;
 	bdr3D4EMDlg* m_pbdr3d4emDlg;
 	bdr2Point5DimEditor* m_pbdrImshow;
+	bdrImageEditorPanel* m_pbdrImagePanel;
 	PolyFitObj* polyfit_obj;
 };
 

@@ -1011,6 +1011,16 @@ QTreeView::branch:open:has-children:has-siblings  {
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
+      <layout class="QVBoxLayout" name="verticalLayoutImageEditor">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+      </layout>
+     </item>
+     <item>
       <widget class="QFrame" name="mapFrame">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Ignored" vsizetype="Ignored">

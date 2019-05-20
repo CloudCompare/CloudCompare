@@ -76,6 +76,10 @@ public: //raster grid related stuff
 										double emptyCellsHeight,
 										bool exportToOriginalCS) const;
 	void setImage(QString image_path);
+
+public: // buttons
+	void ZoomFit();
+
 protected: //members
 
 	//! Raster grid

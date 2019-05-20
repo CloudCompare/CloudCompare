@@ -221,6 +221,7 @@ MainWindow::MainWindow()
 	, m_pbdr3d4emDlg(nullptr)
 	, m_pbdrffDlg(nullptr)
 	, m_pbdrImshow(nullptr)
+	, m_imageRoot(nullptr)
 	, polyfit_obj(nullptr)
 {
 	m_UI->setupUi( this );
@@ -309,6 +310,13 @@ MainWindow::MainWindow()
 		connect(m_ccRoot, &ccDBRoot::selectionChanged,    this, &MainWindow::updateUIWithSelection);
 		connect(m_ccRoot, &ccDBRoot::dbIsEmpty,           [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
 		connect(m_ccRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+	}
+	//db-image-tree // XYLIU
+	{
+		m_imageRoot = new ccDBRoot(m_UI->dbImageTreeView, m_UI->propertiesTreeView, this);
+		connect(m_imageRoot, &ccDBRoot::selectionChanged,	 this, &MainWindow::updateUIWithSelection);
+		connect(m_imageRoot, &ccDBRoot::dbIsEmpty,			 [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+		connect(m_imageRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
 	}
 
 	//MDI Area
@@ -866,11 +874,13 @@ void MainWindow::CreateImageEditor()
 {
 	m_pbdrImshow = new bdr2Point5DimEditor();
 	m_pbdrImshow->create2DView(m_UI->mapFrame);
-/*
+
 	m_pbdrImagePanel = new bdrImageEditorPanel(m_pbdrImshow, this);
+	m_pbdrImagePanel->setFixedHeight(22);
 	m_UI->verticalLayoutImageEditor->addWidget(m_pbdrImagePanel);
-*/
-	
+
+	connect(m_pbdrImagePanel->PreviousToolButton,	&QAbstractButton::clicked, this, &MainWindow::showPreviousImage);
+	connect(m_pbdrImagePanel->NextToolButton,		&QAbstractButton::clicked, this, &MainWindow::showNextImage);
 }
 
 void MainWindow::doActionColorize()
@@ -9252,7 +9262,8 @@ void MainWindow::addToDB(	ccHObject* obj,
 							bool updateZoom/*=true*/,
 							bool autoExpandDBTree/*=true*/,
 							bool checkDimensions/*=true*/,
-							bool autoRedraw/*=true*/)
+							bool autoRedraw/*=true*/,
+							DB_SOURCE dest)
 {
 	//let's check that the new entity is not too big nor too far from scene center!
 	if (checkDimensions)
@@ -9312,14 +9323,26 @@ void MainWindow::addToDB(	ccHObject* obj,
 	}
 
 	//add object to DB root
-	if (m_ccRoot)
+	ccDBRoot* root = nullptr;
+	switch (dest)
+	{
+	case MainWindow::DB_BUILDING:
+		root = m_ccRoot;
+		break;
+	case MainWindow::DB_IMAGE:
+		root = m_imageRoot;
+		break;
+	default:
+		break;
+	}
+	if (/*m_ccRoot*/root)
 	{
 		//force a 'global zoom' if the DB was emtpy!
-		if (!m_ccRoot->getRootEntity() || m_ccRoot->getRootEntity()->getChildrenNumber() == 0)
+		if (!root->getRootEntity() || root->getRootEntity()->getChildrenNumber() == 0)
 		{
 			updateZoom = true;
 		}
-		m_ccRoot->addElement(obj, autoExpandDBTree);
+		root->addElement(obj, autoExpandDBTree);
 	}
 	else
 	{
@@ -9379,7 +9402,7 @@ void MainWindow::addToDBAuto(const QStringList& filenames)
 
 void MainWindow::addToDB(	const QStringList& filenames,
 							QString fileFilter/*=QString()*/,
-							ccGLWindow* destWin/*=0*/)
+							ccGLWindow* destWin/*=0*/, DB_SOURCE dest)
 {
 	//to use the same 'global shift' for multiple files
 	CCVector3d loadCoordinatesShift(0,0,0);
@@ -9425,7 +9448,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 			{
 				newGroup->setDisplay_recursive(destWin);
 			}
-			addToDB(newGroup, true, true, false);
+			addToDB(newGroup, true, true, false, dest);
 
 			m_recentFiles->addFilePath( filename );
 		}
@@ -10083,6 +10106,80 @@ void MainWindow::updatePropertiesView()
 	}
 }
 
+ccHObject * MainWindow::getCameraGroup(QString name)
+{
+	ccDBRoot* image_db = db_image();
+	ccHObject* root = image_db->getRootEntity();
+	for (size_t i = 0; i < root->getChildrenNumber(); i++) {
+		if (root->getChild(i)->getName() == name) {
+			return root->getChild(i);
+		}
+	}
+	return nullptr;
+}
+
+void MainWindow::showNextImage(bool check_enable)
+{
+	ccHObject* cur_sensor = m_pbdrImshow->getImage()->getAssociatedSensor();
+	if (!cur_sensor) { return; }
+	ccHObject* parent = cur_sensor->getParent(); if (!parent) { return; }
+	unsigned cam_count = parent->getChildrenNumber();
+	if (cam_count <= 1) { return; }
+	for (size_t i = 0; i < cam_count; i++) {
+		if (parent->getChild(i) == cur_sensor) {
+			ccHObject* to_show = nullptr;
+			unsigned show_index = i;
+			do 
+			{
+				show_index = (show_index + 1) % cam_count;
+				if (!check_enable || (check_enable && parent->getChild(show_index)->isEnabled())) {
+					to_show = parent->getChild(show_index);
+					break;
+				}
+				if (show_index == i) {
+					break;
+				}
+			} while (1);
+			if (to_show) {
+				ccCameraSensor* to_show_cam = ccHObjectCaster::ToCameraSensor(to_show);
+				m_pbdrImshow->setImageAndCamera(to_show_cam);
+			}
+			return;
+		}
+	}
+}
+
+void MainWindow::showPreviousImage(bool check_enable)
+{
+	ccHObject* cur_sensor = m_pbdrImshow->getImage()->getAssociatedSensor();
+	if (!cur_sensor) { return; }
+	ccHObject* parent = cur_sensor->getParent(); if (!parent) { return; }
+	unsigned cam_count = parent->getChildrenNumber();
+	if (cam_count <= 1) { return; }
+	for (size_t i = 0; i < cam_count; i++) {
+		if (parent->getChild(i) == cur_sensor) {
+			ccHObject* to_show = nullptr;
+			unsigned show_index = i;
+			do
+			{
+				show_index = (show_index - 1) % cam_count;
+				if (!check_enable || (check_enable && parent->getChild(show_index)->isEnabled())) {
+					to_show = parent->getChild(show_index);
+					break;
+				}
+				if (show_index == i) {
+					break;
+				}
+			} while (1);
+			if (to_show) {
+				ccCameraSensor* to_show_cam = ccHObjectCaster::ToCameraSensor(to_show);
+				m_pbdrImshow->setImageAndCamera(to_show_cam);
+			}
+			return;
+		}
+	}
+}
+
 void MainWindow::updateUIWithSelection()
 {
 	dbTreeSelectionInfo selInfo;
@@ -10538,6 +10635,10 @@ void MainWindow::UpdateUI()
 ccDBRoot* MainWindow::db()
 {
 	return m_ccRoot;
+}
+ccDBRoot* MainWindow::db_image()
+{
+	return m_imageRoot;
 }
 
 void MainWindow::addEditPlaneAction( QMenu &menu ) const
@@ -11026,7 +11127,7 @@ void MainWindow::doActionBDImagesLoad()
 	if (!baseObj) {
 		return;
 	}
-	ccHObject* camera_group = baseObj->GetCameraGroup();
+	ccHObject* camera_group = getCameraGroup(baseObj->getName());
 	/// temporarily put this function here, need add a button
 	if (getSelectedEntities().front()->isA(CC_TYPES::ST_BUILDING)) {
 		if (camera_group) {
@@ -11108,13 +11209,16 @@ void MainWindow::doActionBDImagesLoad()
 	hackObj->addPoint(base_box.getCenter() - base_box.getDiagVec() / 2);
 	parameters.additionInfo = (void*)hackObj;
 
+	BDImageBaseHObject* bd_grp = nullptr;
 	ccHObject* newGroup = FileIOFilter::LoadFromFile(out_file, parameters, result, QString());
 	if (!newGroup) {
 		return;
 	}
-
-	newGroup->setName(baseObj->getName() + BDDB_CAMERA_SUFFIX);
-	addToDB(newGroup);	
+	bd_grp = new BDImageBaseHObject(*newGroup);
+	bd_grp->setName(baseObj->getName());
+	newGroup->transferChildren(*bd_grp);
+		
+	addToDB(bd_grp, false, false, false, true, DB_IMAGE);
 
 	if (hackObj) {
 		delete hackObj;
@@ -12865,7 +12969,20 @@ void MainWindow::doActionBDMeshToBlock()
 
 void MainWindow::doActionShowBestImage()
 {
+	ccCameraSensor* cur_cam;
+	cur_cam->imagePath();
 	m_pbdrImshow->setImage("D:/Libraries/Documents/Project/Stocker_Test/Work/Dublin_nyu/T_316000_234000/T_316000_234000_StOcker/images/BW_2231741.jpg");
+}
+
+void MainWindow::doActionShowSelectedImage()
+{
+	if (!haveSelection()) {
+		return;
+	}
+	ccHObject* sel = getSelectedEntities().front();
+	ccCameraSensor* cam = ccHObjectCaster::ToCameraSensor(sel);
+	if (!cam) {	return;	}
+	m_pbdrImshow->setImageAndCamera(cam);
 }
 
 void MainWindow::doActionBDLoD1Generation()

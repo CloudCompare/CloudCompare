@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>783</height>
+    <height>793</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -560,7 +560,9 @@
     <addaction name="actionBDRetrievePlanePoints"/>
     <addaction name="actionBDFootPrintGetPlane"/>
     <addaction name="actionBDMeshToBlock"/>
+    <addaction name="separator"/>
     <addaction name="actionShowBestImage"/>
+    <addaction name="actionShowSelectedImage"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -3711,6 +3713,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionShowBestImage">
    <property name="text">
     <string>Show Best Image</string>
+   </property>
+  </action>
+  <action name="actionShowSelectedImage">
+   <property name="text">
+    <string>Show Selected Image</string>
    </property>
   </action>
  </widget>

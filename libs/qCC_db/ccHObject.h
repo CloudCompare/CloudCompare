@@ -497,6 +497,11 @@ inline void ConvertToGroup(const ccHObject::Container& origin, ccHObject& dest, 
 	}
 }
 
+enum DB_SOURCE
+{
+	DB_BUILDING,
+	DB_IMAGE,
+};
 class QCC_DB_LIB_API BDBaseHObject_ : public ccHObject
 {
 public:
@@ -509,7 +514,7 @@ public:
 
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_PROJECT; }
-
+	virtual DB_SOURCE getDBSourceType() const { return DB_BUILDING; }
 };
 
 #endif //CC_HIERARCHY_OBJECT_HEADER

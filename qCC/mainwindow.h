@@ -128,17 +128,19 @@ public:
 	/** \param filenames list of all filenames
 		\param fileFilter selected file filter (i.e. type)
 		\param destWin destination window (0 = active one)
-	**/
+	**/	
 	virtual void addToDB( const QStringList& filenames,
 						  QString fileFilter = QString(),
-						  ccGLWindow* destWin = nullptr );
+						  ccGLWindow* destWin = nullptr, 
+						  DB_SOURCE dest = DB_BUILDING);
 	
 	//inherited from ccMainAppInterface
 	void addToDB( ccHObject* obj,
 				  bool updateZoom = false,
 				  bool autoExpandDBTree = true,
 				  bool checkDimensions = false,
-				  bool autoRedraw = true ) override;
+				  bool autoRedraw = true,
+				  DB_SOURCE dest = DB_BUILDING) override;
 	
 	void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
 	void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
@@ -166,6 +168,7 @@ public:
 	
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
+	virtual ccDBRoot* db_image();
 
 	//! Adds the "Edit Plane" action to the given menu.
 	/**
@@ -178,6 +181,12 @@ public:
 
 	//! Updates the 'Properties' view
 	void updatePropertiesView();
+
+	//! XYLIU images
+
+	ccHObject* getCameraGroup(QString name);
+	void showNextImage(bool check_enable);
+	void showPreviousImage(bool check_enable);
 	
 private slots:
 	//! Creates a new 3D GL sub-window
@@ -501,7 +510,6 @@ private slots:
 	void doActionBDFootPrintPack();
 	void doActionBDFootPrintGetPlane();
 	void doActionBDMeshToBlock();
-	void doActionShowBestImage();
 
 	void doActionBDLoD1Generation();
 
@@ -516,6 +524,11 @@ private slots:
 	void doActionBDDisplayPlaneOff();
 	void doActionBDDisplayPointOn();
 	void doActionBDDisplayPointOff();
+
+	/// image
+	void doActionShowBestImage();
+	void doActionShowSelectedImage();
+
 	
 
 private:
@@ -601,6 +614,9 @@ private:
 	
 	//DB & DB Tree
 	ccDBRoot* m_ccRoot;
+
+	//Image DB Tree
+	ccDBRoot* m_imageRoot;
 
 	//! Currently selected entities;
 	ccHObject::Container m_selectedEntities;

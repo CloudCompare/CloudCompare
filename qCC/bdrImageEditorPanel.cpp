@@ -14,7 +14,7 @@ bdrImageEditorPanel::bdrImageEditorPanel(bdr2Point5DimEditor* img, QWidget* pare
 	, Ui::bdrImageEditorPanelDlg()
 {
 	setupUi(this);
-	connect(ZoomFitToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::ZoomFit);
+	connect(ZoomFitToolButton,		&QAbstractButton::clicked, this, &bdrImageEditorPanel::ZoomFit);
 }
 void bdrImageEditorPanel::ZoomFit()
 {

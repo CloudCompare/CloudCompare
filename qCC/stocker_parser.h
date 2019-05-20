@@ -150,6 +150,8 @@ private:
 	ccHObject* GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename = QString(), bool check_enable = false);
 
 public:	
+	virtual DB_SOURCE getSourceType() const { return DB_BUILDING; }
+
 	StBuilding* GetBuildingGroup(QString building_name, bool check_enable);
 	ccPointCloud* GetOriginPointCloud(QString building_name, bool check_enable);
 	StPrimGroup* GetPrimitiveGroup(QString building_name);
@@ -170,6 +172,23 @@ public:
 	stocker::BuildUnit GetBuildingUnit(std::string building_name);
 
 };
+
+class BDImageBaseHObject : public BDBaseHObject_
+{
+public:
+	BDImageBaseHObject(QString name = QString()) :
+		BDBaseHObject_(name) {}
+	BDImageBaseHObject(const ccHObject& s) :
+		BDBaseHObject_(s) {}
+	~BDImageBaseHObject() {}
+
+	using Container = std::vector<BDImageBaseHObject *>;
+
+public:
+	virtual DB_SOURCE getSourceType() const { return DB_IMAGE; }
+
+};
+
 
 StBuilding * GetParentBuilding(ccHObject * obj);
 

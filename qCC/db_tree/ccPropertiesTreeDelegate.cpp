@@ -74,7 +74,9 @@
 #include <QStandardItemModel>
 #include <QToolButton>
 
+#ifdef USE_STOCKER
 #include "stocker_parser.h"
+#endif // USE_STOCKER
 
 //System
 #include <cassert>
@@ -210,7 +212,8 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 		m_model->setHeaderData(1, Qt::Horizontal, tr( "State/Value" ));
 	}
 
-	if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
+	if (m_currentObject->isA(CC_TYPES::ST_PROJECT)) {
+		
 		fiilWithCameraGroup(m_currentObject);
 	}
 	else if (m_currentObject->isA(CC_TYPES::ST_FOOTPRINT)) {

@@ -10,6 +10,7 @@ class QWidget;
 class QFrame;
 class QComboBox;
 class ccImage;
+class ccCameraSensor;
 
 //! 2.5D data editor (generic interface)
 class bdr2Point5DimEditor
@@ -76,6 +77,8 @@ public: //raster grid related stuff
 										double emptyCellsHeight,
 										bool exportToOriginalCS) const;
 	void setImage(QString image_path);
+	void setImageAndCamera(ccCameraSensor* cam);
+	ccImage* getImage() { return m_image; }
 
 public: // buttons
 	void ZoomFit();

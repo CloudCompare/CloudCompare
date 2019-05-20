@@ -2217,6 +2217,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			bool hasMoreThanOneChild = false;
 			bool leafObject = false;
 			bool hasExacltyOneGBLSenor = false;
+			bool hasExacltyOneCamSenor = false;
 			bool hasExactlyOnePlane = false;
 			bool canEditLabelScalarValue = false;
 			unsigned planarEntityCount = 0;
@@ -2274,6 +2275,10 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 						else if (item->isA(CC_TYPES::GBL_SENSOR))
 						{
 							hasExacltyOneGBLSenor = true;
+						}
+						else if (item->isA(CC_TYPES::CAMERA_SENSOR))
+						{
+							hasExacltyOneCamSenor = true;
 						}
 					}
 				}

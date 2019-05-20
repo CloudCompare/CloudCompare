@@ -29,6 +29,7 @@
 #include <ccProgressDialog.h>
 #include <ccColorTypes.h>
 #include <ccImage.h>
+#include <ccCameraSensor.h>
 
 //qCC_gl
 #include <ccGLWidget.h>
@@ -221,8 +222,12 @@ void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 	}
 	else {
 		ccViewportParameters params = m_glWindow->getViewportParameters();
+		static const int screnMargin = 5;
+		int screenWidth = std::max(1, m_glWindow->glWidth() - 2 * screnMargin);
+		int screenHeight = std::max(1, m_glWindow->glHeight() - 2 * screnMargin);
+
 		params.pixelSize = 1.0f/*static_cast<float>(std::max(realGridWidth / screenWidth, realGridHeight / screenHeight))*/;
-		params.zoom = 1.0f;
+		params.zoom = static_cast<float>(std::max((double)screenWidth / (double)m_image->getW(), (double)screenHeight / (double)m_image->getH()));
 
 		m_glWindow->setViewportParameters(params);
 		m_glWindow->setPointSize(1.0f);
@@ -285,6 +290,12 @@ void bdr2Point5DimEditor::setImage(QString image_path)
 	m_image->load(image_path, error);
 	m_glWindow->addToOwnDB(m_image);
 	ZoomFit();
+}
+
+void bdr2Point5DimEditor::setImageAndCamera(ccCameraSensor * cam)
+{
+	setImage(cam->imagePath());
+	m_image->setAssociatedSensor(cam);
 }
 
 void bdr2Point5DimEditor::ZoomFit()

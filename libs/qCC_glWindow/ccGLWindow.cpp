@@ -346,7 +346,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_activeGLFilter(nullptr)
 	, m_glFiltersEnabled(false)
 	, m_winDBRoot(nullptr)
-	, m_globalDBRoot(nullptr) //external DB
+//	, m_globalDBRoot(nullptr) //external DB
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	, m_font(QFont())
 #else
@@ -502,9 +502,10 @@ ccGLWindow::~ccGLWindow()
 	disableStereoMode();
 
 	//we must unlink entities currently linked to this window
-	if (m_globalDBRoot)
-	{
-		m_globalDBRoot->removeFromDisplay_recursive(this);
+	if (!m_globalDBRoot.empty()) {
+		for (ccHObject* v : m_globalDBRoot)	{
+			v->removeFromDisplay_recursive(this);
+		}
 	}
 	if (m_winDBRoot)
 	{
@@ -2379,9 +2380,8 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	}
 
 	//we draw 3D entities
-	if (m_globalDBRoot)
-	{
-		m_globalDBRoot->draw(CONTEXT);
+	for (ccHObject* v : m_globalDBRoot) {	// XYLIU
+		v->draw(CONTEXT);
 	}
 
 	if (m_winDBRoot)
@@ -2400,9 +2400,14 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 		}
 	}
 
-	if (m_globalDBRoot && m_globalDBRoot->getChildrenNumber())
-	{
-		//draw pivot
+	bool draw_pivot = false;
+	if (!m_globalDBRoot.empty()) {
+		for (ccHObject* v : m_globalDBRoot)	{
+			if (v->getChildrenNumber())
+				draw_pivot = true;
+		}
+	}
+	if (draw_pivot) {//draw pivot
 		drawPivot();
 	}
 
@@ -2494,8 +2499,9 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 	}
 
 	//we draw 2D entities
-	if (m_globalDBRoot)
-		m_globalDBRoot->draw(CONTEXT);
+	for (ccHObject* v : m_globalDBRoot)	{
+		v->draw(CONTEXT);
+	}
 	if (m_winDBRoot)
 		m_winDBRoot->draw(CONTEXT);
 
@@ -3004,13 +3010,23 @@ void ccGLWindow::setPixelSize(float pixelSize)
 	deprecate3DLayer();
 }
 
-void ccGLWindow::setSceneDB(ccHObject* root)
+void ccGLWindow::setSceneDB(ccHObject::Container root)
 {
 	m_globalDBRoot = root;
 	zoomGlobal();
 }
 
-ccHObject* ccGLWindow::getSceneDB()
+void ccGLWindow::addSceneDB(ccHObject* v) {
+	for (ccHObject* _v : m_globalDBRoot) {
+		if (_v == v) {
+			return;
+		}
+	}
+	m_globalDBRoot.push_back(v);
+	zoomGlobal();
+}
+
+ccHObject::Container ccGLWindow::getSceneDB()
 {
 	return m_globalDBRoot;
 }
@@ -3183,10 +3199,9 @@ CCVector3d ccGLWindow::getRealCameraCenter() const
 void ccGLWindow::getVisibleObjectsBB(ccBBox& box) const
 {
 	//compute center of visible objects constellation
-	if (m_globalDBRoot)
-	{
-		//get whole bounding-box
-		box = m_globalDBRoot->getDisplayBB_recursive(false, this);
+	//get whole bounding-box
+	for (ccHObject* v : m_globalDBRoot)	{
+		box += v->getDisplayBB_recursive(false, this);
 	}
 
 	//incorporate window own db
@@ -3211,7 +3226,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 	CCVector3d bbCenter(0, 0, 0);
 
 	//compute center of visible objects constellation
-	if (m_globalDBRoot || m_winDBRoot)
+	if (!m_globalDBRoot.empty() || m_winDBRoot)
 	{
 		//get whole bounding-box
 		ccBBox box;
@@ -3727,8 +3742,9 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 			{
 				//we get the other selected labels as well!
 				ccHObject::Container labels;
-				if (m_globalDBRoot)
-					m_globalDBRoot->filterChildren(labels, true, CC_TYPES::LABEL_2D);
+				for (ccHObject* v : m_globalDBRoot) {
+					v->filterChildren(labels, true, CC_TYPES::LABEL_2D);
+				}
 				if (m_winDBRoot)
 					m_winDBRoot->filterChildren(labels, true, CC_TYPES::LABEL_2D);
 
@@ -4602,7 +4618,7 @@ void ccGLWindow::startPicking(PickingParameters& params)
 	params.centerX *= retinaScale;
 	params.centerY *= retinaScale;
 
-	if (!m_globalDBRoot && !m_winDBRoot)
+	if (m_globalDBRoot.empty() && !m_winDBRoot)
 	{
 		//we must always emit a signal!
 		processPickingResult(params, nullptr, -1);
@@ -4661,7 +4677,7 @@ void ccGLWindow::processPickingResult(	const PickingParameters& params,
 	}
 	else if (params.mode == LABEL_PICKING)
 	{
-		if (m_globalDBRoot && pickedEntity && pickedItemIndex >= 0)
+		if (!m_globalDBRoot.empty() && pickedEntity && pickedItemIndex >= 0)
 		{
 			//qint64 stopTime = m_timer.nsecsElapsed();
 			//ccLog::Print(QString("[Picking] entity ID %1 - item #%2 (time: %3 ms)").arg(selectedID).arg(pickedItemIndex).arg((stopTime-startTime) / 1.0e6));
@@ -4783,8 +4799,9 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 		//display 3D objects
 		//DGM: all of them, even if we don't pick the own DB for instance, as they can hide the other objects!
-		if (m_globalDBRoot)
-			m_globalDBRoot->draw(CONTEXT);
+		for (ccHObject* v : m_globalDBRoot) {
+			v->draw(CONTEXT);
+		}
 		if (m_winDBRoot)
 			m_winDBRoot->draw(CONTEXT);
 
@@ -4822,8 +4839,9 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 		//we display 2D objects
 		//DGM: all of them, even if we don't pick the own DB for instance, as they can hide the other objects!
-		if (m_globalDBRoot)
-			m_globalDBRoot->draw(CONTEXT);
+		for (ccHObject* v : m_globalDBRoot) {
+			v->draw(CONTEXT);
+		}
 		if (m_winDBRoot)
 			m_winDBRoot->draw(CONTEXT);
 
@@ -4903,9 +4921,13 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	ccHObject* pickedEntity = nullptr;
 	if (selectedID >= 0)
 	{
-		if (params.pickInSceneDB && m_globalDBRoot)
+		if (params.pickInSceneDB && !m_globalDBRoot.empty())
 		{
-			pickedEntity = m_globalDBRoot->find(selectedID);
+			for (ccHObject* v : m_globalDBRoot) {
+				pickedEntity = v->find(selectedID);
+				if (pickedEntity) break;
+			}
+			//pickedEntity = m_globalDBRoot->find(selectedID);
 		}
 		if (!pickedEntity && params.pickInLocalDB && m_winDBRoot)
 		{
@@ -4966,8 +4988,9 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	try
 	{
 		ccHObject::Container toProcess;
-		if (m_globalDBRoot)
-			toProcess.push_back(m_globalDBRoot);
+		for (ccHObject* v : m_globalDBRoot)	{
+			toProcess.push_back(v);
+		}
 		if (m_winDBRoot)
 			toProcess.push_back(m_winDBRoot);
 
@@ -6182,8 +6205,9 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	setStandardOrthoCenter();
 
 	//we draw 2D entities (mainly for the color ramp!)
-	if (m_globalDBRoot)
-		m_globalDBRoot->draw(CONTEXT);
+	for (ccHObject* v : m_globalDBRoot) {
+		v->draw(CONTEXT);
+	}
 	if (m_winDBRoot)
 		m_winDBRoot->draw(CONTEXT);
 

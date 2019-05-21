@@ -159,10 +159,12 @@ public:
 #endif
 
 	//! Sets 'scene graph' root
-	void setSceneDB(ccHObject* root);
+	void setSceneDB(std::vector<ccHObject*> root);
+
+	void addSceneDB(ccHObject* v);
 
 	//! Returns current 'scene graph' root
-	ccHObject* getSceneDB();
+	std::vector<ccHObject*> getSceneDB();
 
 	//replacement for the missing methods of QGLWidget
 	void renderText(int x, int y, const QString & str, const QFont & font = QFont());
@@ -1214,7 +1216,7 @@ protected: //members
 	ccHObject* m_winDBRoot;
 
 	//! CC main DB
-	ccHObject* m_globalDBRoot;
+	std::vector<ccHObject*> m_globalDBRoot;
 
 	//! Default font
 	QFont m_font;

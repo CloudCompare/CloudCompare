@@ -386,12 +386,16 @@ MainWindow::~MainWindow()
 	ccDBRoot* ccRoot = m_ccRoot;
 	m_ccRoot = nullptr;
 
+	ccDBRoot* imgRoot = m_imageRoot;
+	m_imageRoot = nullptr;
+
 	//remove all entities from 3D views before quitting to avoid any side-effect
 	//(this won't be done automatically since we've just reset m_ccRoot)
 	ccRoot->getRootEntity()->setDisplay_recursive(nullptr);
+	imgRoot->getRootEntity()->setDisplay_recursive(nullptr);
 	for (int i = 0; i < getGLWindowCount(); ++i)
-	{
-		getGLWindow(i)->setSceneDB(0);
+	{	
+		getGLWindow(i)->getSceneDB().clear();
 	}
 	m_cpeDlg = nullptr;
 	m_gsTool = nullptr;
@@ -429,6 +433,11 @@ MainWindow::~MainWindow()
 	{
 		delete ccRoot;
 		ccRoot = nullptr;
+	}
+	if (imgRoot)
+	{
+		delete imgRoot;
+		imgRoot = nullptr;
 	}
 
 	delete m_UI;
@@ -5765,9 +5774,11 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 		connect(view3D, &QObject::destroyed, m_pickingHub, &ccPickingHub::onActiveWindowDeleted);
 	}
 
-	view3D->setSceneDB(m_ccRoot->getRootEntity());
+	view3D->addSceneDB(m_ccRoot->getRootEntity());
+	view3D->addSceneDB(m_imageRoot->getRootEntity());
 	viewWidget->setAttribute(Qt::WA_DeleteOnClose);
 	m_ccRoot->updatePropertiesView();
+	m_imageRoot->updatePropertiesView();
 
 	QMainWindow::statusBar()->showMessage(QString("New 3D View"), 2000);
 
@@ -5779,7 +5790,7 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 
 void MainWindow::prepareWindowDeletion(QObject* glWindow)
 {
-	if (!m_ccRoot)
+	if (!m_ccRoot || !m_imageRoot)
 		return;
 
 	//we assume only ccGLWindow can be connected to this slot!
@@ -5788,6 +5799,10 @@ void MainWindow::prepareWindowDeletion(QObject* glWindow)
 	m_ccRoot->hidePropertiesView();
 	m_ccRoot->getRootEntity()->removeFromDisplay_recursive(win);
 	m_ccRoot->updatePropertiesView();
+
+	m_imageRoot->hidePropertiesView();
+	m_imageRoot->getRootEntity()->removeFromDisplay_recursive(win);
+	m_imageRoot->updatePropertiesView();
 }
 
 static bool s_autoSaveGuiElementPos = true;
@@ -6225,6 +6240,10 @@ void MainWindow::activateSectionExtractionMode()
 	{
 		m_ccRoot->unselectAllEntities();
 	}
+	if (m_imageRoot)
+	{
+		m_imageRoot->unselectAllEntities();
+	}
 
 	ccGLWindow* win = new3DView(false);
 	if (!win)
@@ -6351,6 +6370,10 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					if (m_ccRoot)
 					{
 						m_ccRoot->getRootEntity()->filterChildren(labels,true,CC_TYPES::LABEL_2D);
+					}
+					if (m_imageRoot)
+					{
+						m_imageRoot->getRootEntity()->filterChildren(labels, true, CC_TYPES::LABEL_2D);
 					}
 					for (ccHObject::Container::iterator it = labels.begin(); it != labels.end(); ++it)
 					{
@@ -6768,6 +6791,10 @@ void MainWindow::activatePointPickingMode()
 	{
 		m_ccRoot->unselectAllEntities(); //we don't want any entity selected (especially existing labels!)
 	}
+	if (m_imageRoot)
+	{
+		m_imageRoot->unselectAllEntities(); //we don't want any entity selected (especially existing labels!)
+	}
 
 	if (!m_ppDlg)
 	{
@@ -6916,7 +6943,7 @@ void MainWindow::deactivateTranslateRotateMode(bool state)
 	if (m_transTool)
 	{
 		//reselect previously selected entities!
-		if (state && m_ccRoot)
+		if (state && m_ccRoot && m_imageRoot)
 		{
 			const ccHObject& transformedSet = m_transTool->getValidEntities();
 			try
@@ -6928,6 +6955,7 @@ void MainWindow::deactivateTranslateRotateMode(bool state)
 					transformedEntities[i] = transformedSet.getChild(i);
 				}
 				m_ccRoot->selectEntities(transformedEntities);
+				m_imageRoot->selectEntities(transformedEntities);
 			}
 			catch (const std::bad_alloc&)
 			{
@@ -7641,6 +7669,10 @@ void MainWindow::doActionCrop()
 	if (m_ccRoot)
 	{
 		m_ccRoot->unselectAllEntities();
+	}
+	if (m_imageRoot)
+	{
+		m_imageRoot->unselectAllEntities();
 	}
 
 	//cropping box
@@ -9506,7 +9538,7 @@ ccColorScalesManager* MainWindow::getColorScalesManager()
 
 void MainWindow::closeAll()
 {
-	if (!m_ccRoot)
+	if (!m_ccRoot || !m_imageRoot)
 	{
 		return;
 	}
@@ -9523,6 +9555,7 @@ void MainWindow::closeAll()
 	}
 	
 	m_ccRoot->unloadAll();
+	m_imageRoot->unloadAll();
 
 	redrawAll(false);
 }
@@ -10000,8 +10033,10 @@ void MainWindow::updateMenus()
 	ccGLWindow* active3DView = getActiveGLWindow();
 	bool hasMdiChild = (active3DView != nullptr);
 	int mdiChildCount = getGLWindowCount();
-	bool hasLoadedEntities = (m_ccRoot && m_ccRoot->getRootEntity() && m_ccRoot->getRootEntity()->getChildrenNumber() != 0);
-	bool hasSelectedEntities = (m_ccRoot && m_ccRoot->countSelectedEntities() > 0);
+	bool hasLoadedEntities = (m_ccRoot && m_ccRoot->getRootEntity() && m_ccRoot->getRootEntity()->getChildrenNumber() != 0) ||
+		(m_imageRoot && m_imageRoot->getRootEntity() && m_imageRoot->getRootEntity()->getChildrenNumber() != 0);
+	bool hasSelectedEntities = (m_ccRoot && m_ccRoot->countSelectedEntities() > 0) ||
+		(m_imageRoot && m_imageRoot->countSelectedEntities() > 0);
 
 	//General Menu
 	m_UI->menuEdit->setEnabled(true/*hasSelectedEntities*/);
@@ -10175,7 +10210,8 @@ void MainWindow::disableAllBut(ccGLWindow* win)
 
 void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 {
-	bool dbIsEmpty = (!m_ccRoot || !m_ccRoot->getRootEntity() || m_ccRoot->getRootEntity()->getChildrenNumber() == 0);
+	bool dbIsEmpty = (!m_ccRoot || !m_ccRoot->getRootEntity() || m_ccRoot->getRootEntity()->getChildrenNumber() == 0) && 
+		(!m_imageRoot || !m_imageRoot->getRootEntity() || m_imageRoot->getRootEntity()->getChildrenNumber() == 0);
 	bool atLeastOneEntity = (selInfo.selCount > 0);
 	bool atLeastOneCloud = (selInfo.cloudCount > 0);
 	bool atLeastOneMesh = (selInfo.meshCount > 0);

@@ -166,10 +166,11 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 		return 0;
 	}
 
-	ccHObject::Container clouds;
-	m_associatedWin->getSceneDB()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, false, m_associatedWin);
-	ccHObject::Container meshes;
-	m_associatedWin->getSceneDB()->filterChildren(meshes, true, CC_TYPES::MESH, false, m_associatedWin);
+	ccHObject::Container clouds, meshes;
+	for (ccHObject* v : m_associatedWin->getSceneDB()) {
+		v->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, false, m_associatedWin);
+		v->filterChildren(meshes, true, CC_TYPES::MESH, false, m_associatedWin);
+	}
 
 	if (clouds.empty() && meshes.empty())
 	{

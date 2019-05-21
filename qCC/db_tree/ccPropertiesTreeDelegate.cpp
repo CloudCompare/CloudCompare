@@ -212,8 +212,7 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 		m_model->setHeaderData(1, Qt::Horizontal, tr( "State/Value" ));
 	}
 
-	if (m_currentObject->isA(CC_TYPES::ST_PROJECT)) {
-		
+	if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {		
 		fiilWithCameraGroup(m_currentObject);
 	}
 	else if (m_currentObject->isA(CC_TYPES::ST_FOOTPRINT)) {
@@ -1786,7 +1785,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	}
 	case OBJECT_SENSOR_DISPLAY_SCALE:
 	{
-		if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {			
+		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {			
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject->getChild(i));
 				if (sensor) {
@@ -2493,7 +2492,8 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
 	if (!m_currentObject)
 		return;
 
-	if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {		
+	if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
+	//if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {		
 		for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 			ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject->getChild(i));
 			if (sensor && sensor->getGraphicScale() != static_cast<PointCoordinateType>(val)) {
@@ -2505,7 +2505,7 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
 	}
 
 	ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
-	assert(sensor);
+	assert(sensor);	if (!sensor) { return; }
 
 	if (sensor && sensor->getGraphicScale() != static_cast<PointCoordinateType>(val))
 	{

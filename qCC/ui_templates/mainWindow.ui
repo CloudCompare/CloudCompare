@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>793</height>
+    <height>834</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -118,6 +118,7 @@
     <addaction name="menuToolbars"/>
     <addaction name="menuLanguage"/>
     <addaction name="actionResetGUIElementsPos"/>
+    <addaction name="actionImageViewer"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -773,7 +774,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="minimumSize">
     <size>
      <width>109</width>
-     <height>135</height>
+     <height>184</height>
     </size>
    </property>
    <property name="floating">
@@ -827,6 +828,43 @@ QTreeView::branch:open:has-children:has-siblings  {
        </attribute>
       </widget>
      </item>
+     <item>
+      <widget class="QTreeView" name="propertiesTreeView_Image">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="showDropIndicator" stdset="0">
+        <bool>false</bool>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::NoSelection</enum>
+       </property>
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
+       <property name="itemsExpandable">
+        <bool>false</bool>
+       </property>
+       <property name="allColumnsShowFocus">
+        <bool>true</bool>
+       </property>
+       <property name="expandsOnDoubleClick">
+        <bool>false</bool>
+       </property>
+       <attribute name="headerDefaultSectionSize">
+        <number>200</number>
+       </attribute>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>
@@ -840,7 +878,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="minimumSize">
     <size>
      <width>91</width>
-     <height>128</height>
+     <height>120</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -3720,6 +3758,17 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Show Selected Image</string>
    </property>
   </action>
+  <action name="actionImageViewer">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Image Viewer</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -3878,6 +3927,22 @@ QTreeView::branch:open:has-children:has-siblings  {
     <hint type="destinationlabel">
      <x>1006</x>
      <y>409</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DockableImage</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>actionImageViewer</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>774</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

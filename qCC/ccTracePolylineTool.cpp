@@ -29,6 +29,7 @@
 
 //qCC_db
 #include <ccLog.h>
+#include <ccHObject.h>
 #include <ccPolyline.h>
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>

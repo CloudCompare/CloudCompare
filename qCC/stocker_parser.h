@@ -46,7 +46,7 @@
 class BDBaseHObject;
 class PolyFitObj;
 
-QString GetBaseName(QString name);
+
 
 stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject * entity, stocker::Polyline3d polygon, double height);
@@ -56,7 +56,7 @@ stocker::Contour3d GetPointsFromCloudInsidePolygon3d(ccHObject * entity, stocker
 stocker::Polyline3d GetPolygonFromPolyline(ccHObject * entity);
 stocker::Polyline3d GetPolylineFromEntities(ccHObject::Container entities);
 vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject * entity);
-ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true, bool recursive = true);
+
 ccHObject::Container GetPlaneEntitiesBySelected(ccHObject * select);
 ccHObject::Container GetBuildingEntitiesBySelected(ccHObject * select);
 ccPlane * GetPlaneFromCloud(ccHObject * entity);
@@ -143,21 +143,18 @@ public:
 	stocker::Vec3d global_shift;
 	double global_scale;
 
-	std::map<std::string, Map*> building_hypomesh;
+//	std::map<std::string, Map*> building_hypomesh;
 //	std::map<std::string, HypothesisGenerator*> building_hypothesis;
-private:
-	ccHObject::Container GetHObjContainer(CC_CLASS_ENUM type, QString suffix, bool check_enable = false);
-	ccHObject* GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename = QString(), bool check_enable = false);
 
 public:	
-	virtual DB_SOURCE getSourceType() const { return DB_BUILDING; }
+	virtual DB_SOURCE getDBSourceType() const override { return CC_TYPES::DB_BUILDING; }
 
 	StBuilding* GetBuildingGroup(QString building_name, bool check_enable);
 	ccPointCloud* GetOriginPointCloud(QString building_name, bool check_enable);
 	StPrimGroup* GetPrimitiveGroup(QString building_name);
 	StBlockGroup * GetBlockGroup(QString building_name);
 	StPrimGroup * GetHypothesisGroup(QString building_name);
-	ccHObject* GetCameraGroup();
+	
 	ccHObject* GetTodoGroup(QString building_name);
 	ccPointCloud* GetTodoPoint(QString buildig_name);
 	ccPointCloud* GetTodoLine(QString buildig_name);
@@ -185,7 +182,7 @@ public:
 	using Container = std::vector<BDImageBaseHObject *>;
 
 public:
-	virtual DB_SOURCE getSourceType() const { return DB_IMAGE; }
+	virtual DB_SOURCE getDBSourceType() const override { return CC_TYPES::DB_IMAGE; }
 
 };
 

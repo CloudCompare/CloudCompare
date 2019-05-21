@@ -313,11 +313,14 @@ MainWindow::MainWindow()
 	}
 	//db-image-tree // XYLIU
 	{
-		m_imageRoot = new ccDBRoot(m_UI->dbImageTreeView, m_UI->propertiesTreeView, this);
-		connect(m_imageRoot, &ccDBRoot::selectionChanged,	 this, &MainWindow::updateUIWithSelection);
-		connect(m_imageRoot, &ccDBRoot::dbIsEmpty,			 [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
-		connect(m_imageRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+		m_imageRoot = new ccDBRoot(m_UI->dbImageTreeView, m_UI->propertiesTreeView_Image, this);
+ 		connect(m_imageRoot, &ccDBRoot::selectionChanged, this, &MainWindow::updateUIWithSelection);
+ 		connect(m_imageRoot, &ccDBRoot::dbIsEmpty, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+  		connect(m_imageRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
 	}
+	m_UI->ProjectTabWidget->setCurrentIndex(0);
+	m_UI->propertiesTreeView->setVisible(true);
+	m_UI->propertiesTreeView_Image->setVisible(false);
 
 	//MDI Area
 	{
@@ -867,7 +870,15 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDFootPrintPack,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintPack);
 	connect(m_UI->actionBDFootPrintGetPlane,		&QAction::triggered, this, &MainWindow::doActionBDFootPrintGetPlane);
 	connect(m_UI->actionBDMeshToBlock,				&QAction::triggered, this, &MainWindow::doActionBDMeshToBlock);
-	connect(m_UI->actionShowBestImage,				&QAction::triggered, this, &MainWindow::doActionShowBestImage);
+	connect(m_UI->actionShowBestImage,				&QAction::triggered, this, &MainWindow::doActionShowBestImage); 
+	connect(m_UI->actionShowSelectedImage,			&QAction::triggered, this, &MainWindow::doActionShowSelectedImage);
+	connect(m_UI->ProjectTabWidget,					SIGNAL(currentChanged(int)), this, SLOT(doActionChangeTabTree(int)));
+}
+
+void MainWindow::doActionChangeTabTree(int index)
+{
+ 	m_UI->propertiesTreeView->setVisible(index == 0);
+ 	m_UI->propertiesTreeView_Image->setVisible(index == 1);
 }
 
 void MainWindow::CreateImageEditor()
@@ -880,7 +891,7 @@ void MainWindow::CreateImageEditor()
 	m_UI->verticalLayoutImageEditor->addWidget(m_pbdrImagePanel);
 
 	connect(m_pbdrImagePanel->PreviousToolButton,	&QAbstractButton::clicked, this, &MainWindow::showPreviousImage);
-	connect(m_pbdrImagePanel->NextToolButton,		&QAbstractButton::clicked, this, &MainWindow::showNextImage);
+	connect(m_pbdrImagePanel->NextToolButton, &QAbstractButton::clicked, this, [this]() {showNextImage(true); });
 }
 
 void MainWindow::doActionColorize()
@@ -5698,7 +5709,7 @@ void MainWindow::zoomOut()
 
 ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 {
-	assert(m_ccRoot && m_mdiArea);
+	assert(m_ccRoot && m_imageRoot && m_mdiArea);
 
 	QWidget* viewWidget = nullptr;
 	ccGLWindow* view3D = nullptr;
@@ -5726,10 +5737,12 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 	{
 		connect(view3D, &ccGLWindow::entitySelectionChanged, this, [=] (ccHObject *entity) {
 			m_ccRoot->selectEntity( entity );
+			m_imageRoot->selectEntity(entity);
 		});
 		
 		connect(view3D, &ccGLWindow::entitiesSelectionChanged, this, [=] (std::unordered_set<int> entities){
 			m_ccRoot->selectEntities( entities );
+			m_imageRoot->selectEntities(entities);
 		});
 	}
 
@@ -9324,12 +9337,13 @@ void MainWindow::addToDB(	ccHObject* obj,
 
 	//add object to DB root
 	ccDBRoot* root = nullptr;
+	
 	switch (dest)
 	{
-	case MainWindow::DB_BUILDING:
+	case CC_TYPES::DB_BUILDING:
 		root = m_ccRoot;
 		break;
-	case MainWindow::DB_IMAGE:
+	case CC_TYPES::DB_IMAGE:
 		root = m_imageRoot;
 		break;
 	default:
@@ -10104,81 +10118,12 @@ void MainWindow::updatePropertiesView()
 	{
 		m_ccRoot->updatePropertiesView();
 	}
-}
-
-ccHObject * MainWindow::getCameraGroup(QString name)
-{
-	ccDBRoot* image_db = db_image();
-	ccHObject* root = image_db->getRootEntity();
-	for (size_t i = 0; i < root->getChildrenNumber(); i++) {
-		if (root->getChild(i)->getName() == name) {
-			return root->getChild(i);
-		}
-	}
-	return nullptr;
-}
-
-void MainWindow::showNextImage(bool check_enable)
-{
-	ccHObject* cur_sensor = m_pbdrImshow->getImage()->getAssociatedSensor();
-	if (!cur_sensor) { return; }
-	ccHObject* parent = cur_sensor->getParent(); if (!parent) { return; }
-	unsigned cam_count = parent->getChildrenNumber();
-	if (cam_count <= 1) { return; }
-	for (size_t i = 0; i < cam_count; i++) {
-		if (parent->getChild(i) == cur_sensor) {
-			ccHObject* to_show = nullptr;
-			unsigned show_index = i;
-			do 
-			{
-				show_index = (show_index + 1) % cam_count;
-				if (!check_enable || (check_enable && parent->getChild(show_index)->isEnabled())) {
-					to_show = parent->getChild(show_index);
-					break;
-				}
-				if (show_index == i) {
-					break;
-				}
-			} while (1);
-			if (to_show) {
-				ccCameraSensor* to_show_cam = ccHObjectCaster::ToCameraSensor(to_show);
-				m_pbdrImshow->setImageAndCamera(to_show_cam);
-			}
-			return;
-		}
+	if (m_imageRoot)
+	{
+		m_imageRoot->updatePropertiesView();
 	}
 }
 
-void MainWindow::showPreviousImage(bool check_enable)
-{
-	ccHObject* cur_sensor = m_pbdrImshow->getImage()->getAssociatedSensor();
-	if (!cur_sensor) { return; }
-	ccHObject* parent = cur_sensor->getParent(); if (!parent) { return; }
-	unsigned cam_count = parent->getChildrenNumber();
-	if (cam_count <= 1) { return; }
-	for (size_t i = 0; i < cam_count; i++) {
-		if (parent->getChild(i) == cur_sensor) {
-			ccHObject* to_show = nullptr;
-			unsigned show_index = i;
-			do
-			{
-				show_index = (show_index - 1) % cam_count;
-				if (!check_enable || (check_enable && parent->getChild(show_index)->isEnabled())) {
-					to_show = parent->getChild(show_index);
-					break;
-				}
-				if (show_index == i) {
-					break;
-				}
-			} while (1);
-			if (to_show) {
-				ccCameraSensor* to_show_cam = ccHObjectCaster::ToCameraSensor(to_show);
-				m_pbdrImshow->setImageAndCamera(to_show_cam);
-			}
-			return;
-		}
-	}
-}
 
 void MainWindow::updateUIWithSelection()
 {
@@ -10186,10 +10131,16 @@ void MainWindow::updateUIWithSelection()
 
 	m_selectedEntities.clear();
 
-	if (m_ccRoot)
+	if (m_ccRoot && m_UI->ProjectTabWidget->currentIndex() == 0)
 	{
 		m_ccRoot->getSelectedEntities(m_selectedEntities, CC_TYPES::OBJECT, &selInfo);
 	}
+	else if (m_imageRoot && m_UI->ProjectTabWidget->currentIndex() == 1)
+	{
+		m_imageRoot->getSelectedEntities(m_selectedEntities, CC_TYPES::OBJECT, &selInfo);
+	}
+	m_UI->propertiesTreeView->setVisible(m_UI->ProjectTabWidget->currentIndex() == 0);
+	m_UI->propertiesTreeView_Image->setVisible(m_UI->ProjectTabWidget->currentIndex() == 1);
 
 	enableUIItems(selInfo);
 }
@@ -11218,7 +11169,7 @@ void MainWindow::doActionBDImagesLoad()
 	bd_grp->setName(baseObj->getName());
 	newGroup->transferChildren(*bd_grp);
 		
-	addToDB(bd_grp, false, false, false, true, DB_IMAGE);
+	addToDB(bd_grp, false, false, false, true, CC_TYPES::DB_IMAGE);
 
 	if (hackObj) {
 		delete hackObj;
@@ -12967,24 +12918,6 @@ void MainWindow::doActionBDMeshToBlock()
 	StBlock* block = new StBlock();
 }
 
-void MainWindow::doActionShowBestImage()
-{
-	ccCameraSensor* cur_cam;
-	cur_cam->imagePath();
-	m_pbdrImshow->setImage("D:/Libraries/Documents/Project/Stocker_Test/Work/Dublin_nyu/T_316000_234000/T_316000_234000_StOcker/images/BW_2231741.jpg");
-}
-
-void MainWindow::doActionShowSelectedImage()
-{
-	if (!haveSelection()) {
-		return;
-	}
-	ccHObject* sel = getSelectedEntities().front();
-	ccCameraSensor* cam = ccHObjectCaster::ToCameraSensor(sel);
-	if (!cam) {	return;	}
-	m_pbdrImshow->setImageAndCamera(cam);
-}
-
 void MainWindow::doActionBDLoD1Generation()
 {
 	if (!haveSelection()) {
@@ -13268,4 +13201,96 @@ void MainWindow::doActionCloudModelDist()
 	m_compDlg->show();
 
 	freezeUI(true);
+}
+
+ccHObject * MainWindow::getCameraGroup(QString name)
+{
+	ccDBRoot* image_db = db_image();
+	ccHObject* root = image_db->getRootEntity();
+	for (size_t i = 0; i < root->getChildrenNumber(); i++) {
+		if (root->getChild(i)->getName() == name) {
+			return root->getChild(i);
+		}
+	}
+	return nullptr;
+}
+
+void MainWindow::showNextImage(bool check_enable)
+{
+	ccHObject* cur_sensor = m_pbdrImshow->getImage()->getAssociatedSensor();
+	if (!cur_sensor) { return; }
+	ccHObject* parent = cur_sensor->getParent(); if (!parent) { return; }
+	unsigned cam_count = parent->getChildrenNumber();
+	if (cam_count <= 1) { return; }
+	for (size_t i = 0; i < cam_count; i++) {
+		if (parent->getChild(i) == cur_sensor) {
+			ccHObject* to_show = nullptr;
+			unsigned show_index = i;
+			do
+			{
+				show_index = (show_index + 1) % cam_count;
+				if (!check_enable || (check_enable && parent->getChild(show_index)->isEnabled())) {
+					to_show = parent->getChild(show_index);
+					break;
+				}
+				if (show_index == i) {
+					break;
+				}
+			} while (1);
+			if (to_show) {
+				ccCameraSensor* to_show_cam = ccHObjectCaster::ToCameraSensor(to_show);
+				m_pbdrImshow->setImageAndCamera(to_show_cam);
+			}
+			return;
+		}
+	}
+}
+
+void MainWindow::showPreviousImage(bool check_enable)
+{
+	ccHObject* cur_sensor = m_pbdrImshow->getImage()->getAssociatedSensor();
+	if (!cur_sensor) { return; }
+	ccHObject* parent = cur_sensor->getParent(); if (!parent) { return; }
+	unsigned cam_count = parent->getChildrenNumber();
+	if (cam_count <= 1) { return; }
+	for (size_t i = 0; i < cam_count; i++) {
+		if (parent->getChild(i) == cur_sensor) {
+			ccHObject* to_show = nullptr;
+			unsigned show_index = i;
+			do
+			{
+				show_index = (show_index - 1) % cam_count;
+				if (!check_enable || (check_enable && parent->getChild(show_index)->isEnabled())) {
+					to_show = parent->getChild(show_index);
+					break;
+				}
+				if (show_index == i) {
+					break;
+				}
+			} while (1);
+			if (to_show) {
+				ccCameraSensor* to_show_cam = ccHObjectCaster::ToCameraSensor(to_show);
+				m_pbdrImshow->setImageAndCamera(to_show_cam);
+			}
+			return;
+		}
+	}
+}
+
+void MainWindow::doActionShowBestImage()
+{
+// 	ccCameraSensor* cur_cam;
+// 	cur_cam->imagePath();
+	m_pbdrImshow->setImage("D:/Libraries/Documents/Project/Stocker_Test/Work/Dublin_nyu/T_316000_234000/T_316000_234000_StOcker/images/BW_2231741.jpg");
+}
+
+void MainWindow::doActionShowSelectedImage()
+{
+	if (!haveSelection()) {
+		return;
+	}
+	ccHObject* sel = getSelectedEntities().front();
+	ccCameraSensor* cam = ccHObjectCaster::ToCameraSensor(sel);
+	if (!cam) { return; }
+	m_pbdrImshow->setImageAndCamera(cam);
 }

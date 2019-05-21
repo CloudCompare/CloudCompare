@@ -132,7 +132,7 @@ public:
 	virtual void addToDB( const QStringList& filenames,
 						  QString fileFilter = QString(),
 						  ccGLWindow* destWin = nullptr, 
-						  DB_SOURCE dest = DB_BUILDING);
+						  DB_SOURCE dest = CC_TYPES::DB_BUILDING);
 	
 	//inherited from ccMainAppInterface
 	void addToDB( ccHObject* obj,
@@ -140,7 +140,7 @@ public:
 				  bool autoExpandDBTree = true,
 				  bool checkDimensions = false,
 				  bool autoRedraw = true,
-				  DB_SOURCE dest = DB_BUILDING) override;
+				  DB_SOURCE dest = CC_TYPES::DB_BUILDING) override;
 	
 	void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
 	void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
@@ -529,7 +529,7 @@ private slots:
 	void doActionShowBestImage();
 	void doActionShowSelectedImage();
 
-	
+	void doActionChangeTabTree(int index);
 
 private:
 	//! Shortcut: asks the user to select one cloud

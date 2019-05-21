@@ -17,6 +17,7 @@
 
 #include "stocker_parser.h"
 
+#include "ccHObject.h"
 #include "ccPointCloud.h"
 #include "ccPolyline.h"
 #include "ccPlane.h"
@@ -36,10 +37,6 @@
 #include "builderlod2/lod2parser.h"
 using namespace stocker;
 #endif // USE_STOCKER
-
-QString GetBaseName(QString name) {	
-	return name.mid(0, name.indexOf('.'));
-}
 
 template <typename T1, typename T2>
 auto ccToPoints2(std::vector<T1> points, bool parallel = false)->std::vector<T2>
@@ -295,29 +292,6 @@ vector<vector<stocker::Contour3d>> GetOutlinesFromOutlineParent(ccHObject* entit
 	return contours_points;
 }
 
-ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable, bool recursive)
-{
-	if (entity) {
-		ccHObject::Container group;
-		entity->filterChildren(group, recursive, type, true, entity->getDisplay());
-		if (check_enable) {
-			ccHObject::Container group_enabled;
-			for (auto & gp : group) {
-				if ((gp->getParent()) && (!gp->getParent()->isEnabled())) {
-					continue;
-				}
-				if (gp->isEnabled())
-					group_enabled.push_back(gp);
-			}
-			return group_enabled;
-		}
-		else {
-			return group;
-		}		
-	}
-	return ccHObject::Container();
-}
-
 ccHObject::Container GetPlaneEntitiesBySelected(ccHObject* select)
 {	
 	ccHObject::Container plane_container;
@@ -412,29 +386,6 @@ vcg::Plane3d GetVcgPlane(ccHObject* planeObj)
 	return vcgPlane;
 }
 
-ccHObject::Container BDBaseHObject::GetHObjContainer(CC_CLASS_ENUM type, QString suffix, bool check_enable)
-{
-	ccHObject::Container entities = GetEnabledObjFromGroup(this, type, check_enable);
-	ccHObject::Container output;
-	for (auto & entity : entities) {
-		if (entity->getName().endsWith(suffix)) {
-			output.push_back(entity);
-		}
-	}
-	return output;
-}
-ccHObject * BDBaseHObject::GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename, bool check_enable)
-{
-	ccHObject::Container entities = GetEnabledObjFromGroup(this, type, check_enable);
-	ccHObject* output = nullptr;
-	for (auto & entity : entities) {
-		if (entity->getName().endsWith(suffix) &&
-			GetBaseName(entity->getName()) == basename) {
-			return entity;
-		}
-	}
-	return nullptr;
-}
 StBuilding* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {
 	ccHObject* obj = GetHObj(CC_TYPES::ST_BUILDING, "", building_name, check_enable);
 	if (obj) return static_cast<StBuilding*>(obj);
@@ -475,19 +426,6 @@ StPrimGroup * BDBaseHObject::GetHypothesisGroup(QString building_name) {
 		ccHObject* bd = GetBuildingGroup(building_name, false);
 		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
 		else { delete group; group = nullptr; }
-	}
-	return nullptr;
-}
-ccHObject * BDBaseHObject::GetCameraGroup()
-{
-	ccHObject* root = getParent();
-	if (root && root->getChildrenNumber() > 1) {
-		for (size_t i = 0; i < root->getChildrenNumber(); i++) {
-			QString camera_group_name = getName() + BDDB_CAMERA_SUFFIX;
-			if (root->getChild(i)->getName() == camera_group_name) {
-				return root->getChild(i);
-			}
-		}
 	}
 	return nullptr;
 }

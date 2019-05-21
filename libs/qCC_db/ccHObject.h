@@ -61,6 +61,7 @@ public: //base members access
 	/** \return class unique ID
 	**/
 	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::HIERARCHY_OBJECT; }
+	virtual DB_SOURCE getDBSourceType() const override { return CC_TYPES::DB_BUILDING; }
 
 	//! Returns whether the instance is a group
 	inline bool isGroup() const { return isA(CC_TYPES::HIERARCHY_OBJECT);/*getClassID() == static_cast<CC_CLASS_ENUM>(CC_TYPES::HIERARCHY_OBJECT);*/ }
@@ -497,11 +498,32 @@ inline void ConvertToGroup(const ccHObject::Container& origin, ccHObject& dest, 
 	}
 }
 
-enum DB_SOURCE
+inline QString GetBaseName(QString name){ return name.mid(0, name.indexOf('.')); }
+
+inline ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true, bool recursive = true)
 {
-	DB_BUILDING,
-	DB_IMAGE,
-};
+	if (entity) {
+		ccHObject::Container group;
+		entity->filterChildren(group, recursive, type, true, entity->getDisplay());
+		if (check_enable) {
+			ccHObject::Container group_enabled;
+			for (auto & gp : group) {
+				if ((gp->getParent()) && (!gp->getParent()->isEnabled())) {
+					continue;
+				}
+				if (gp->isEnabled())
+					group_enabled.push_back(gp);
+			}
+			return group_enabled;
+		}
+		else {
+			return group;
+		}
+	}
+	return ccHObject::Container();
+}
+
+// project
 class QCC_DB_LIB_API BDBaseHObject_ : public ccHObject
 {
 public:
@@ -514,7 +536,10 @@ public:
 
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_PROJECT; }
-	virtual DB_SOURCE getDBSourceType() const { return DB_BUILDING; }
+	virtual DB_SOURCE getDBSourceType() const override { return CC_TYPES::DB_BUILDING; }
+
+	ccHObject::Container GetHObjContainer(CC_CLASS_ENUM type, QString suffix, bool check_enable = false);
+	ccHObject* GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename = QString(), bool check_enable = false);
 };
 
 #endif //CC_HIERARCHY_OBJECT_HEADER

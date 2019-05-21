@@ -91,7 +91,7 @@ public:
 							bool autoExpandDBTree = true,
 							bool checkDimensions = false,
 							bool autoRedraw = true, 
-							DB_SOURCE dest = DB_BUILDING) = 0;
+							DB_SOURCE dest = CC_TYPES::DB_BUILDING) = 0;
 
 	//! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.

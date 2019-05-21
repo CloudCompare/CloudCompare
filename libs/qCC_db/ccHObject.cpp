@@ -1273,3 +1273,28 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	return true;
 }
+
+ccHObject::Container BDBaseHObject_::GetHObjContainer(CC_CLASS_ENUM type, QString suffix, bool check_enable)
+{
+	ccHObject::Container entities = GetEnabledObjFromGroup(this, type, check_enable);
+	ccHObject::Container output;
+	for (auto & entity : entities) {
+		if (entity->getName().endsWith(suffix)) {
+			output.push_back(entity);
+		}
+	}
+	return output;
+}
+
+ccHObject * BDBaseHObject_::GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename, bool check_enable)
+{
+	ccHObject::Container entities = GetEnabledObjFromGroup(this, type, check_enable);
+	ccHObject* output = nullptr;
+	for (auto & entity : entities) {
+		if (entity->getName().endsWith(suffix) &&
+			GetBaseName(entity->getName()) == basename) {
+			return entity;
+		}
+	}
+	return nullptr;
+}

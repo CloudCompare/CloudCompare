@@ -343,6 +343,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 
 	//other DB tree signals/slots connection
 	connect(m_dbTreeWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ccDBRoot::changeSelection);
+	connect(m_dbTreeWidget, &QAbstractItemView::clicked, this, &ccDBRoot::clickItem);
 
 	//Properties Tree
 	assert(propertiesTreeWidget);
@@ -2433,4 +2434,9 @@ void ccDBRoot::gotoNextZoom()
 	win->updateConstellationCenterAndZoom(&box);
 	updatePropertiesView();
 	MainWindow::RefreshAllGLWindow(false);
+}
+
+void ccDBRoot::clickItem(const QModelIndex &index)
+{
+	emit itemClicked();
 }

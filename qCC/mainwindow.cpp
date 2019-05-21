@@ -310,13 +310,15 @@ MainWindow::MainWindow()
 		connect(m_ccRoot, &ccDBRoot::selectionChanged,    this, &MainWindow::updateUIWithSelection);
 		connect(m_ccRoot, &ccDBRoot::dbIsEmpty,           [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
 		connect(m_ccRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+		connect(m_ccRoot, &ccDBRoot::itemClicked,		  [&]() { updateDBSelection(CC_TYPES::DB_BUILDING); });
 	}
 	//db-image-tree // XYLIU
 	{
 		m_imageRoot = new ccDBRoot(m_UI->dbImageTreeView, m_UI->propertiesTreeView_Image, this);
- 		connect(m_imageRoot, &ccDBRoot::selectionChanged, this, &MainWindow::updateUIWithSelection);
- 		connect(m_imageRoot, &ccDBRoot::dbIsEmpty, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
-  		connect(m_imageRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+ 		connect(m_imageRoot, &ccDBRoot::selectionChanged,		this, &MainWindow::updateUIWithSelection);
+ 		connect(m_imageRoot, &ccDBRoot::dbIsEmpty,				[&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+  		connect(m_imageRoot, &ccDBRoot::dbIsNotEmptyAnymore,	[&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+		connect(m_imageRoot, &ccDBRoot::itemClicked,			[&]() { updateDBSelection(CC_TYPES::DB_IMAGE); });
 	}
 	m_UI->ProjectTabWidget->setCurrentIndex(0);
 	m_UI->propertiesTreeView->setVisible(true);
@@ -888,6 +890,23 @@ void MainWindow::doActionChangeTabTree(int index)
 {
  	m_UI->propertiesTreeView->setVisible(index == 0);
  	m_UI->propertiesTreeView_Image->setVisible(index == 1);
+}
+
+void MainWindow::updateDBSelection(DB_SOURCE type)
+{
+	if (!(QApplication::keyboardModifiers() & Qt::ControlModifier)) {
+		switch (type)
+		{
+		case CC_TYPES::DB_BUILDING:
+			m_imageRoot->unselectAllEntities();
+			break;
+		case CC_TYPES::DB_IMAGE:
+			m_ccRoot->unselectAllEntities();
+			break;
+		default:
+			break;
+		}
+	}	
 }
 
 void MainWindow::CreateImageEditor()

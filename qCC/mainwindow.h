@@ -531,6 +531,8 @@ private slots:
 
 	void doActionChangeTabTree(int index);
 
+	void updateDBSelection(DB_SOURCE type);
+
 private:
 	//! Shortcut: asks the user to select one cloud
 	/** \param defaultCloudEntity a cloud to select by default (optional)

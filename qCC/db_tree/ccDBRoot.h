@@ -181,6 +181,8 @@ public:
 	void selectEntities(const ccHObject::Container& entities, bool incremental = false);
 
 	void gotoNextZoom();
+
+	void clickItem(const QModelIndex &index);
 private:
 	//! Entity property that can be toggled
 	enum TOGGLE_PROPERTY {	TG_ENABLE,
@@ -223,6 +225,7 @@ signals:
 	void selectionChanged();
 	void dbIsEmpty();
 	void dbIsNotEmptyAnymore();
+	void itemClicked();
 
 protected:
 

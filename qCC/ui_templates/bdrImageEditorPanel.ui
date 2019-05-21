@@ -36,7 +36,7 @@
      <normaloff>:/CC/Stocker/images/stocker/zoomfit.png</normaloff>:/CC/Stocker/images/stocker/zoomfit.png</iconset>
    </property>
    <property name="autoRaise">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="arrowType">
     <enum>Qt::NoArrow</enum>
@@ -45,7 +45,7 @@
   <widget class="QToolButton" name="PreviousToolButton">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>20</x>
      <y>0</y>
      <width>21</width>
      <height>21</height>
@@ -58,7 +58,7 @@
     <string>...</string>
    </property>
    <property name="autoRaise">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="arrowType">
     <enum>Qt::LeftArrow</enum>
@@ -67,7 +67,7 @@
   <widget class="QToolButton" name="NextToolButton">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>40</x>
      <y>0</y>
      <width>21</width>
      <height>21</height>
@@ -80,10 +80,33 @@
     <string>...</string>
    </property>
    <property name="autoRaise">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="arrowType">
     <enum>Qt::RightArrow</enum>
+   </property>
+  </widget>
+  <widget class="QToolButton" name="OverlayToolButton">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>0</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>...</string>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/plus.png</normaloff>:/CC/Stocker/images/stocker/plus.png</iconset>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="autoRaise">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>

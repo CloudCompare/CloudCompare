@@ -884,6 +884,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionShowBestImage,				&QAction::triggered, this, &MainWindow::doActionShowBestImage); 
 	connect(m_UI->actionShowSelectedImage,			&QAction::triggered, this, &MainWindow::doActionShowSelectedImage);
 	connect(m_UI->ProjectTabWidget,					SIGNAL(currentChanged(int)), this, SLOT(doActionChangeTabTree(int)));
+	connect(m_UI->actionImageOverlay,				&QAction::triggered, this, &MainWindow::toggleImageOverlay);
 }
 
 void MainWindow::doActionChangeTabTree(int index)
@@ -909,6 +910,14 @@ void MainWindow::updateDBSelection(DB_SOURCE type)
 	}	
 }
 
+bool s_display_overlay_image = false;
+void MainWindow::toggleImageOverlay()
+{
+	s_display_overlay_image = !s_display_overlay_image;
+	m_UI->actionImageOverlay->setChecked(s_display_overlay_image);
+	m_pbdrImagePanel->OverlayToolButton->setChecked(s_display_overlay_image);
+}
+
 void MainWindow::CreateImageEditor()
 {
 	m_pbdrImshow = new bdr2Point5DimEditor();
@@ -918,8 +927,9 @@ void MainWindow::CreateImageEditor()
 	m_pbdrImagePanel->setFixedHeight(22);
 	m_UI->verticalLayoutImageEditor->addWidget(m_pbdrImagePanel);
 
-	connect(m_pbdrImagePanel->PreviousToolButton,	&QAbstractButton::clicked, this, &MainWindow::showPreviousImage);
-	connect(m_pbdrImagePanel->NextToolButton, &QAbstractButton::clicked, this, [this]() {showNextImage(true); });
+	connect(m_pbdrImagePanel->PreviousToolButton, &QAbstractButton::clicked, this, [this]() { showPreviousImage(true); });
+	connect(m_pbdrImagePanel->NextToolButton, &QAbstractButton::clicked, this, [this]() { showNextImage(true); });
+	connect(m_pbdrImagePanel->OverlayToolButton, &QAbstractButton::clicked, this, &MainWindow::toggleImageOverlay);
 }
 
 void MainWindow::doActionColorize()
@@ -13272,6 +13282,9 @@ ccHObject * MainWindow::getCameraGroup(QString name)
 
 void MainWindow::showNextImage(bool check_enable)
 {
+	if (!m_pbdrImshow->getImage()) {
+		return;
+	}
 	ccHObject* cur_sensor = m_pbdrImshow->getImage()->getAssociatedSensor();
 	if (!cur_sensor) { return; }
 	ccHObject* parent = cur_sensor->getParent(); if (!parent) { return; }
@@ -13303,6 +13316,9 @@ void MainWindow::showNextImage(bool check_enable)
 
 void MainWindow::showPreviousImage(bool check_enable)
 {
+	if (!m_pbdrImshow->getImage()) {
+		return;
+	}
 	ccHObject* cur_sensor = m_pbdrImshow->getImage()->getAssociatedSensor();
 	if (!cur_sensor) { return; }
 	ccHObject* parent = cur_sensor->getParent(); if (!parent) { return; }

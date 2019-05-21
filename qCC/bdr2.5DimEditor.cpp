@@ -300,6 +300,9 @@ void bdr2Point5DimEditor::setImageAndCamera(ccCameraSensor * cam)
 
 void bdr2Point5DimEditor::ZoomFit()
 {
+	if (!m_image) {
+		return;
+	}
 	ccBBox box;
 	box.add(CCVector3(0, 0, 0));
 	box.add(CCVector3(m_image->getW(), m_image->getH(), 0));

@@ -167,3 +167,14 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags)
 
 	return true;
 }
+
+CCVector3d ccViewportParameters::getViewPoint()
+{
+	CCVector3d viewPoint = cameraCenter;
+	if (objectCenteredView)	{
+		CCVector3d pc = cameraCenter - pivotPoint;
+		viewMat.inverse().apply(pc);
+		viewPoint = pivotPoint + pc;
+	}
+	return viewPoint;
+}

@@ -227,7 +227,7 @@ void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 		int screenHeight = std::max(1, m_glWindow->glHeight() - 2 * screnMargin);
 
 		params.pixelSize = 1.0f/*static_cast<float>(std::max(realGridWidth / screenWidth, realGridHeight / screenHeight))*/;
-		params.zoom = static_cast<float>(std::max((double)screenWidth / (double)m_image->getW(), (double)screenHeight / (double)m_image->getH()));
+		params.zoom = static_cast<float>(std::min((double)screenWidth / (double)m_image->getW(), (double)screenHeight / (double)m_image->getH()));
 
 		m_glWindow->setViewportParameters(params);
 		m_glWindow->setPointSize(1.0f);

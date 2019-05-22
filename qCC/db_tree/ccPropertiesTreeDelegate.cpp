@@ -863,6 +863,8 @@ void ccPropertiesTreeDelegate::fillWithViewportObject(const cc2DViewportObject* 
 	//"Update Viewport" button
 	appendRow(ITEM( tr( "Update viewport" ) ), PERSISTENT_EDITOR(OBJECT_UPDATE_LABEL_VIEWPORT), true);
 	
+	addSeparator(tr("Position/Orientation"));
+	appendWideRow(PERSISTENT_EDITOR(OBJECT_SENSOR_MATRIX_EDITOR));
 }
 
 void ccPropertiesTreeDelegate::fillWithTransBuffer(const ccIndexedTransformationBuffer* _obj)
@@ -1682,19 +1684,32 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		if (!mdd)
 			return;
 
-		ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
-		assert(sensor);
+		if (m_currentObject->isKindOf(CC_TYPES::SENSOR)) {
+			ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
+			assert(sensor);
 
-		ccIndexedTransformation trans;
-		if (sensor->getActiveAbsoluteTransformation(trans))
-		{
-			mdd->fillDialogWith(trans);
+			ccIndexedTransformation trans;
+			if (sensor->getActiveAbsoluteTransformation(trans))
+			{
+				mdd->fillDialogWith(trans);
+			}
+			else
+			{
+				mdd->clear();
+				mdd->setEnabled(false);
+			}
 		}
-		else
-		{
-			mdd->clear();
-			mdd->setEnabled(false);
+		else if (m_currentObject->isKindOf(CC_TYPES::VIEWPORT_2D_OBJECT)) {
+			cc2DViewportObject* v = ccHObjectCaster::To2DViewportObject(m_currentObject);
+			if (v) {
+				ccViewportParameters params = v->getParameters();
+				ccGLMatrixd mat = params.viewMat;
+				CCVector3d tra = params.getViewPoint();
+				mat.setTranslation(tra);
+				mdd->fillDialogWith(mat);
+			}
 		}
+		
 		break;
 	}
 	case TREE_VIEW_HEADER:
@@ -2021,7 +2036,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	break;
 	case OBJECT_SENSOR_DRAW_FRUSTUM:
 	{
-		if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
+		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 				if (sensor) {
@@ -2031,16 +2046,18 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		}
 		else {
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-			sensor->drawFrustum(item->checkState() == Qt::Checked);
-			sensor->drawNearPlane(item->checkState() == Qt::Checked);
-			sensor->drawBaseAxis(item->checkState() == Qt::Checked);
+			if (sensor) {
+				sensor->drawFrustum(item->checkState() == Qt::Checked);
+				sensor->drawNearPlane(item->checkState() == Qt::Checked);
+				sensor->drawBaseAxis(item->checkState() == Qt::Checked);
+			}
 		}
 	}
 	redraw = true;
 	break;
 	case OBJECT_SENSOR_DRAW_FRUSTUM_FRAME:
 	{
-		if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
+		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 				if (sensor) {
@@ -2050,14 +2067,14 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		}
 		else {
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-			sensor->drawNearPlane(item->checkState() == Qt::Checked);
+			if (sensor) sensor->drawNearPlane(item->checkState() == Qt::Checked);
 		}
 	}
 	redraw = true;
 	break;
 	case OBJECT_SENSOR_DRAW_FRUSTUM_PLANES:
 	{
-		if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
+		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 				if (sensor) {
@@ -2067,14 +2084,16 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		}
 		else {
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-			sensor->drawFrustumPlanes(item->checkState() == Qt::Checked);
+			if (sensor)	{
+				sensor->drawFrustumPlanes(item->checkState() == Qt::Checked);
+			}
 		}
 	}
 	redraw = true;
 	break;
 	case OBJECT_SENSOR_DRAW_IMAGE:
 	{
-		if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
+		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 				if (sensor) {
@@ -2084,14 +2103,16 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		}
 		else {
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-			sensor->drawImage(item->checkState() == Qt::Checked);
+			if (sensor)	{
+				sensor->drawImage(item->checkState() == Qt::Checked);
+			}
 		}
 	}
 	redraw = true;
 	break;
 	case OBJECT_SENSOR_DRAW_BASEAXIS:
 	{
-		if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {
+		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 				if (sensor) {
@@ -2101,7 +2122,9 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		}
 		else {
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-			sensor->drawBaseAxis(item->checkState() == Qt::Checked);
+			if (sensor)	{
+				sensor->drawBaseAxis(item->checkState() == Qt::Checked);
+			}			
 		}
 	}
 	redraw = true;
@@ -2460,8 +2483,9 @@ void ccPropertiesTreeDelegate::updateLabelViewport()
 	ccGLWindow* win = MainWindow::GetActiveGLWindow();
 	if (!win)
 		return;
-
+	
 	viewport->setParameters(win->getViewportParameters());
+	updateModel();
 	ccLog::Print(QString("Viewport '%1' has been updated").arg(viewport->getName()));
 }
 

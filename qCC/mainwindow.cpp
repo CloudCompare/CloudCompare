@@ -916,6 +916,9 @@ void MainWindow::toggleImageOverlay()
 	s_display_overlay_image = !s_display_overlay_image;
 	m_UI->actionImageOverlay->setChecked(s_display_overlay_image);
 	m_pbdrImagePanel->OverlayToolButton->setChecked(s_display_overlay_image);
+
+	//! add a camera sensor to GL database
+	//ccCameraSensor* camera_sensor = new ccCameraSensor();
 }
 
 void MainWindow::CreateImageEditor()
@@ -10195,13 +10198,32 @@ void MainWindow::updateUIWithSelection()
 
 	m_selectedEntities.clear();
 
-	if (m_ccRoot && m_UI->ProjectTabWidget->currentIndex() == 0)
+	if (m_ccRoot /*&& m_UI->ProjectTabWidget->currentIndex() == 0*/)
 	{
 		m_ccRoot->getSelectedEntities(m_selectedEntities, CC_TYPES::OBJECT, &selInfo);
 	}
-	else if (m_imageRoot && m_UI->ProjectTabWidget->currentIndex() == 1)
+	ccHObject::Container sel_img;
+	if (m_imageRoot /*&& m_UI->ProjectTabWidget->currentIndex() == 1*/)
 	{
-		m_imageRoot->getSelectedEntities(m_selectedEntities, CC_TYPES::OBJECT, &selInfo);
+		dbTreeSelectionInfo selInfo_img;
+		m_imageRoot->getSelectedEntities(sel_img, CC_TYPES::OBJECT, &selInfo_img);
+		m_selectedEntities.insert(m_selectedEntities.end(), sel_img.begin(), sel_img.end());
+		
+		selInfo.selCount += selInfo_img.selCount;
+		selInfo.sfCount += selInfo_img.sfCount;
+		selInfo.colorCount += selInfo_img.colorCount;
+		selInfo.normalsCount += selInfo_img.normalsCount;
+		selInfo.groupCount += selInfo_img.groupCount;
+		selInfo.cloudCount += selInfo_img.cloudCount;
+		selInfo.octreeCount += selInfo_img.octreeCount;
+		selInfo.gridCound += selInfo_img.gridCound;
+		selInfo.meshCount += selInfo_img.meshCount;
+		selInfo.planeCount += selInfo_img.planeCount;
+		selInfo.polylineCount += selInfo_img.polylineCount;
+		selInfo.sensorCount += selInfo_img.sensorCount;
+		selInfo.gblSensorCount += selInfo_img.gblSensorCount;
+		selInfo.cameraSensorCount += selInfo_img.cameraSensorCount;
+		selInfo.kdTreeCount += selInfo_img.kdTreeCount;
 	}
 	m_UI->propertiesTreeView->setVisible(m_UI->ProjectTabWidget->currentIndex() == 0);
 	m_UI->propertiesTreeView_Image->setVisible(m_UI->ProjectTabWidget->currentIndex() == 1);
@@ -11143,31 +11165,31 @@ void MainWindow::doActionBDImagesLoad()
 	if (!baseObj) {
 		return;
 	}
-	ccHObject* camera_group = getCameraGroup(baseObj->getName());
+	//ccHObject* camera_group = getCameraGroup(baseObj->getName());
+	ccHObject::Container camera_groups = GetEnabledObjFromGroup(m_imageRoot->getRootEntity(), CC_TYPES::ST_PROJECT);
 	/// temporarily put this function here, need add a button
 	if (getSelectedEntities().front()->isA(CC_TYPES::ST_BUILDING)) {
-		if (camera_group) {
+		for (ccHObject* camera_group : camera_groups) {
 			QStringList building_images;
 			for (ccHObject* bd : getSelectedEntities()) {
 				stocker::BuildUnit bd_unit = baseObj->GetBuildingUnit(bd->getName().toStdString());
-				for (auto img : bd_unit.image_list)	{
+				for (auto img : bd_unit.image_list) {
 					building_images.append(img.c_str());
 				}
-			}			
+			}
 			filterCameraByName(camera_group, building_images);
-			//m_UI->ProjectTabWidget->setCurrentIndex(1);
-			refreshAll();
-			return;
 		}
+		refreshAll();
+		return;
 	}
 	
-	if (camera_group) {
-		if (QMessageBox::question(this,	
-			"Import camera", "cameras exist, import again?",
-			QMessageBox::Yes, QMessageBox::No)
-			== QMessageBox::No)
-			return;
-	}
+// 	if (camera_group) {
+// 		if (QMessageBox::question(this,	
+// 			"Import camera", "cameras exist, import again?",
+// 			QMessageBox::Yes, QMessageBox::No)
+// 			== QMessageBox::No)
+// 			return;
+// 	}
 	CCVector3d loadCoordinatesShift = CCVector3d(vcgXYZ(baseObj->global_shift));
 	bool loadCoordinatesTransEnabled = false;
 	FileIOFilter::LoadParameters parameters;
@@ -11225,14 +11247,32 @@ void MainWindow::doActionBDImagesLoad()
 	hackObj->addPoint(base_box.getCenter() - base_box.getDiagVec() / 2);
 	parameters.additionInfo = (void*)hackObj;
 
+	QString group_name = GetBaseName(out_file);
 	BDImageBaseHObject* bd_grp = nullptr;
+	for (ccHObject* cam_group : camera_groups) {
+		if (cam_group->getName() == group_name) {
+			bd_grp = static_cast<BDImageBaseHObject*>(cam_group);
+			break;
+		}
+	}
 	ccHObject* newGroup = FileIOFilter::LoadFromFile(out_file, parameters, result, QString());
 	if (!newGroup) {
 		return;
 	}
-	bd_grp = new BDImageBaseHObject(*newGroup);
-	bd_grp->setName(baseObj->getName());
-	newGroup->transferChildren(*bd_grp);
+	if (!bd_grp) {
+		bd_grp = new BDImageBaseHObject(*newGroup);
+		bd_grp->setName(baseObj->getName());
+	}
+	for (int i = 0; i < newGroup->getChildrenNumber(); i++) {
+		ccHObject* child = newGroup->getChild(i);
+		ccHObject::Container check_exist;
+		bd_grp->filterChildrenByName(check_exist, false, child->getName(), true);
+		if (check_exist.empty()) {
+			newGroup->transferChild(child, *bd_grp);
+			i--;
+		}
+	}
+	//newGroup->transferChildren(*bd_grp);
 		
 	addToDB(bd_grp, false, false, false, true, CC_TYPES::DB_IMAGE);
 
@@ -11240,7 +11280,10 @@ void MainWindow::doActionBDImagesLoad()
 		delete hackObj;
 		hackObj = nullptr;
 	}
-
+	if (newGroup) {
+		delete newGroup;
+		newGroup = nullptr;
+	}
 	//m_UI->ProjectTabWidget->setCurrentIndex(1);
 	refreshAll();
 }
@@ -13350,9 +13393,50 @@ void MainWindow::showPreviousImage(bool check_enable)
 
 void MainWindow::doActionShowBestImage()
 {
-// 	ccCameraSensor* cur_cam;
-// 	cur_cam->imagePath();
-	m_pbdrImshow->setImage("D:/Libraries/Documents/Project/Stocker_Test/Work/Dublin_nyu/T_316000_234000/T_316000_234000_StOcker/images/BW_2231741.jpg");
+	ccGLWindow* glwin = GetActiveGLWindow(); assert(glwin); if (!glwin) return;
+	ccViewportParameters params = glwin->getViewportParameters();
+	CCVector3d viewPoint = params.getViewPoint();
+//	CCVector3d viewDir = glwin->getCurrentViewDir();
+	CCVector3 objCenter = m_ccRoot->getRootEntity()->getDisplayBB_recursive(false).getCenter();
+	CCVector3d viewDir = CCVector3d(objCenter.x, objCenter.y, objCenter.z) - viewPoint;
+	viewDir.normalize();
+	std::cout << viewDir.x << " " << viewDir.y << " " << viewDir.z << std::endl;
+
+	//! get all cameras available 
+	ccHObject::Container cameras = GetEnabledObjFromGroup(m_imageRoot->getRootEntity(), CC_TYPES::CAMERA_SENSOR, true, true);
+	ccCameraSensor* best_cam = nullptr;
+	// sort by dir and distance
+	double min_angle = DBL_MAX;
+	for (ccHObject* cam : cameras) {
+		if (!cam->isEnabled()) {
+			continue;
+		}
+		setSelectedInDB(cam, false);
+		ccCameraSensor* csObj = ccHObjectCaster::ToCameraSensor(cam);
+		csObj->drawImage(false);
+		if (!csObj) { continue; }
+		ccIndexedTransformation trans;
+		csObj->getActiveAbsoluteTransformation(trans);
+		const float* M = trans.data();
+		CCVector3 axis(-M[2], -M[6], -M[10]);
+		axis.normalize();
+
+		std::cout << "cam: " << cam->getName().toStdString() << " axis: " << axis.x << " " << axis.y << " " << axis.z << std::endl;
+		double angle_rad = vcg::Angle(vcg::Point3d(viewDir.x, viewDir.y, viewDir.z), vcg::Point3d(axis.x, axis.y, axis.z));
+		std::cout << "angle: " << angle_rad << std::endl;
+		if (min_angle > angle_rad) {
+			min_angle = angle_rad;
+			best_cam = csObj;
+		}
+	}
+	
+	if (best_cam) {
+		if (best_cam->getParent() && best_cam->getParent()->isEnabled()) {
+			setSelectedInDB(best_cam, true);
+			best_cam->drawImage(true);
+		}
+		m_pbdrImshow->setImageAndCamera(best_cam);
+	}
 }
 
 void MainWindow::doActionShowSelectedImage()

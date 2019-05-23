@@ -610,7 +610,7 @@ ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay
 
 	if (!display || display == m_currentDisplay)
 		box = getOwnBB(true);
-
+	
 	for (auto child : m_children)
 	{
 		if (child->isEnabled())
@@ -634,6 +634,55 @@ ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay
 
 	return box;
 }
+
+ccBBox ccHObject::getDisplayScreenBB_recursive(bool relative, const ccGenericGLDisplay* display, bool check_in_screen)
+{
+	ccBBox box;
+
+	if (!display || display == m_currentDisplay) {
+		box = getOwnBB(true);
+		if (display) {
+			ccGenericGLDisplay* dis = const_cast<ccGenericGLDisplay*>(display);
+			ccGLCameraParameters cam;
+			dis->getGLCameraParameters(cam);
+
+			bool in_frustrum = false;
+			ccBBox box_2d;
+			for (size_t i = 0; i < 8; i++) {
+				CCVector3d b_2d;
+				if (cam.project(box.P(i), b_2d, true)) {
+					in_frustrum = true;
+				}
+				box_2d.add(CCVector3(b_2d.x, b_2d.y, 0));
+			}
+			if (!in_frustrum) box.clear();
+		}
+	}
+
+	for (auto child : m_children)
+	{
+		if (child->isEnabled())
+		{
+			ccBBox childBox = child->getDisplayScreenBB_recursive(true, display, check_in_screen);
+			if (child->isGLTransEnabled())
+			{
+				childBox = childBox * child->getGLTransformation();
+			}
+			box += childBox;
+		}
+	}
+
+	if (!relative && box.isValid())
+	{
+		//get absolute bounding-box?
+		ccGLMatrix trans;
+		getAbsoluteGLTransformation(trans);
+		box = box * trans;
+	}
+
+	return box;
+}
+
 
 bool ccHObject::isDisplayed() const
 {

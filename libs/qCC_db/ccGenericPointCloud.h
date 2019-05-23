@@ -178,7 +178,7 @@ public:
 		\param silent don't issue warnings if no visible point is present
 		\return the visible points as a ReferenceCloud
 	**/
-	virtual CCLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = nullptr, bool silent = false) const;
+	virtual CCLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = nullptr, bool silent = false) const;	
 	
 	//! Returns whether the visiblity array is allocated or not
 	virtual bool isVisibilityTableInstantiated() const;
@@ -188,11 +188,15 @@ public:
 	**/
 	virtual bool resetVisibilityArray();
 
+	virtual bool resetVisibilityLODArray();
+
 	//! Inverts the visiblity array
 	virtual void invertVisibilityArray();
 
 	//! Erases the points visibility information
 	virtual void unallocateVisibilityArray();
+
+	virtual void unallocateVisibilityLODArray();
 
 
 	/***************************************************
@@ -274,6 +278,8 @@ protected:
 		will be considered as visible/selected.
 	**/
 	VisibilityTableType m_pointsVisibility;
+
+	VisibilityTableType m_pointsVisibleLOD;
 
 	//! Point size (won't be applied if 0)
 	unsigned char m_pointSize;

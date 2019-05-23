@@ -22,7 +22,7 @@ public:
 	//! Destructor
 	virtual ~bdr2Point5DimEditor();
 
-protected: //standard methods
+public: //standard methods
 
 	//! Returns projection grid step
 	virtual double getGridStep() const;

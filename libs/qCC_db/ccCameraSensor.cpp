@@ -730,7 +730,11 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 	imageCoord.y = static_cast<PointCoordinateType>(p2.y);
 
 #endif
-
+	if (imageCoord.x < 0 || imageCoord.x >= m_intrinsicParams.arrayWidth
+		|| imageCoord.y < 0 || imageCoord.y >= m_intrinsicParams.arrayHeight)
+	{
+		return false;
+	}
 	return true;
 }
 

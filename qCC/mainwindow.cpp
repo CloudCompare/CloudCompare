@@ -13394,19 +13394,64 @@ void MainWindow::showPreviousImage(bool check_enable)
 void MainWindow::doActionShowBestImage()
 {
 	ccGLWindow* glwin = GetActiveGLWindow(); assert(glwin); if (!glwin) return;
+	//setCenteredPerspectiveView(glwin);
 	ccViewportParameters params = glwin->getViewportParameters();
+	ccGLCameraParameters camParas; glwin->getGLCameraParameters(camParas);
+
 	CCVector3d viewPoint = params.getViewPoint();
 //	CCVector3d viewDir = glwin->getCurrentViewDir();
-	CCVector3 objCenter = m_ccRoot->getRootEntity()->getDisplayBB_recursive(false).getCenter();
-	CCVector3d viewDir = CCVector3d(objCenter.x, objCenter.y, objCenter.z) - viewPoint;
-	viewDir.normalize();
-	std::cout << viewDir.x << " " << viewDir.y << " " << viewDir.z << std::endl;
+	ccBBox objBox;
+	{
+		CCVector3d p;
+		if (glwin->getClick3DPos(10, 10, p)) { objBox.add(CCVector3::fromArray(p.u)); }
+		else goto clearbox;
+		if (glwin->getClick3DPos(glwin->glWidth() - 10, 10, p)) { objBox.add(CCVector3::fromArray(p.u)); }
+		else goto clearbox;
+		if (glwin->getClick3DPos(glwin->glWidth() - 10, glwin->glHeight() - 10, p)) { objBox.add(CCVector3::fromArray(p.u)); }
+		else goto clearbox;
+		if (glwin->getClick3DPos(10, glwin->glHeight() - 10, p)) { objBox.add(CCVector3::fromArray(p.u)); }
+		else goto clearbox;
+	clearbox:
+		objBox.clear();
+	}
+	if (!objBox.isValid()) {
+		//! TODO: mesh.. refer to graphical segmentation
+ 		ccHObject::Container point_clouds = GetEnabledObjFromGroup(m_ccRoot->getRootEntity(), CC_TYPES::POINT_CLOUD, true, true);
+		
+ 		for (ccHObject* pc : point_clouds) {
+ 			ccPointCloud* pcObj = ccHObjectCaster::ToPointCloud(pc);
+ 			if (!pcObj) { continue; }
+			std::vector<CCVector3> cur_hull = pcObj->getTheVisiblePointsHUll(camParas);
+			for (auto pt : cur_hull) {
+				objBox.add(pt);
+			}
+ 		}
+
+		//objBox = m_ccRoot->getRootEntity()->getDisplayScreenBB_recursive(false, glwin, true);
+	}
+	
+	if (!objBox.isValid()) {
+		return;
+	}
+	//! if the four corners are available
+	
+
+	CCVector3 objCenter = params.objectCenteredView ? CCVector3::fromArray(params.pivotPoint.u) : 
+		objBox.getCenter();	// should be seen from the view
+	CCVector3 view_to_obj = objCenter - CCVector3::fromArray(viewPoint.u);
+	view_to_obj.normalize();
+	std::cout << view_to_obj.x << " " << view_to_obj.y << " " << view_to_obj.z << std::endl;
+	CCVector3 obj_to_view = -view_to_obj;
+	vcg::Point3f n(view_to_obj.u), u, v;
+	vcg::GetUV(n, u, v);
+	CCVector3 obj_u = objCenter + CCVector3::fromArray(u.V());
+	CCVector3 obj_v = objCenter + CCVector3::fromArray(v.V());
 
 	//! get all cameras available 
 	ccHObject::Container cameras = GetEnabledObjFromGroup(m_imageRoot->getRootEntity(), CC_TYPES::CAMERA_SENSOR, true, true);
 	ccCameraSensor* best_cam = nullptr;
 	// sort by dir and distance
-	double min_angle = DBL_MAX;
+	double max_area = -DBL_MAX;
 	for (ccHObject* cam : cameras) {
 		if (!cam->isEnabled()) {
 			continue;
@@ -13415,17 +13460,29 @@ void MainWindow::doActionShowBestImage()
 		ccCameraSensor* csObj = ccHObjectCaster::ToCameraSensor(cam);
 		csObj->drawImage(false);
 		if (!csObj) { continue; }
-		ccIndexedTransformation trans;
-		csObj->getActiveAbsoluteTransformation(trans);
+		ccIndexedTransformation trans; csObj->getActiveAbsoluteTransformation(trans);
 		const float* M = trans.data();
-		CCVector3 axis(-M[2], -M[6], -M[10]);
-		axis.normalize();
 
-		std::cout << "cam: " << cam->getName().toStdString() << " axis: " << axis.x << " " << axis.y << " " << axis.z << std::endl;
-		double angle_rad = vcg::Angle(vcg::Point3d(viewDir.x, viewDir.y, viewDir.z), vcg::Point3d(axis.x, axis.y, axis.z));
-		std::cout << "angle: " << angle_rad << std::endl;
-		if (min_angle > angle_rad) {
-			min_angle = angle_rad;
+		CCVector3 cam_dir(-M[2], -M[6], -M[10]); cam_dir.normalize();
+		CCVector3 cam_center; csObj->getActiveAbsoluteCenter(cam_center);
+		CCVector3 cam_to_obj = (objCenter - cam_center); cam_to_obj.normalize();
+		CCVector3 obj_to_cam = -cam_to_obj;
+		double obj_angle = obj_to_cam.dot(obj_to_view);
+		double cam_angle = cam_dir.dot(cam_to_obj);
+		if (obj_angle < 0.0f || cam_angle < 0.0f) {
+			continue;
+		}
+
+		//! sort by projection area
+		CCVector2 objCenter_img, objU_img, objV_img;
+		if (!csObj->fromGlobalCoordToImageCoord(objCenter, objCenter_img) || 
+			!csObj->fromGlobalCoordToImageCoord(obj_u, objU_img) ||
+			!csObj->fromGlobalCoordToImageCoord(obj_v, objV_img)) {
+			continue;	//! skip temporarily
+		}
+		float double_area = (objU_img - objCenter_img).cross(objV_img - objCenter_img);
+		if (double_area > max_area)	{
+			max_area = double_area;
 			best_cam = csObj;
 		}
 	}
@@ -13436,6 +13493,18 @@ void MainWindow::doActionShowBestImage()
 			best_cam->drawImage(true);
 		}
 		m_pbdrImshow->setImageAndCamera(best_cam);
+		//! zoom
+		ccBBox box_2d;
+		for (size_t i = 0; i < 8; i++) {
+			CCVector2 b_2d;
+			best_cam->fromGlobalCoordToImageCoord(objBox.P(i), b_2d);
+			
+			box_2d.add(CCVector3(b_2d.x, b_2d.y, 0));
+		}
+		box_2d = ccBBox(box_2d.getCenter() - box_2d.getDiagVec()*0.3, box_2d.getCenter() + box_2d.getDiagVec()*0.3);
+		if (box_2d.isValid()) {
+			m_pbdrImshow->update2DDisplayZoom(box_2d);
+		}
 	}
 }
 

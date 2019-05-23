@@ -227,7 +227,7 @@ void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 		int screenHeight = std::max(1, m_glWindow->glHeight() - 2 * screnMargin);
 
 		params.pixelSize = 1.0f/*static_cast<float>(std::max(realGridWidth / screenWidth, realGridHeight / screenHeight))*/;
-		params.zoom = static_cast<float>(std::min((double)screenWidth / (double)m_image->getW(), (double)screenHeight / (double)m_image->getH()));
+		params.zoom = static_cast<float>(std::min((double)screenWidth / (double)box.getDiagVec().x, (double)screenHeight / (double)box.getDiagVec().y));
 
 		m_glWindow->setViewportParameters(params);
 		m_glWindow->setPointSize(1.0f);
@@ -235,6 +235,7 @@ void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 	
 	//we set the pivot point on the box center
 	CCVector3 P = box.getCenter();
+	P.y = m_image->getH() - P.y;
 	m_glWindow->setPivotPoint(CCVector3d::fromArray(P.u));
 	m_glWindow->setCameraPos(CCVector3d::fromArray(P.u));
 

@@ -101,6 +101,13 @@ namespace CCLib
 					P.z >= m_bbMin.z && P.z <= m_bbMax.z);
 		}
 
+		inline CCVector3 P(const int & i) const {
+			return CCVector3(
+				m_bbMin.x + (i % 2) * (m_bbMax.x - m_bbMin.x),
+				m_bbMin.y + ((i / 2) % 2) * (m_bbMax.y - m_bbMin.y), 
+				m_bbMin.z + (i > 3)* (m_bbMax.z - m_bbMin.z));
+		}
+
 	protected:
 
 		//! Lower min. corner

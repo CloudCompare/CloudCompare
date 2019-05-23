@@ -242,6 +242,8 @@ public: //bounding-box
 	**/
 	virtual ccBBox getDisplayBB_recursive(bool relative, const ccGenericGLDisplay* display = nullptr);
 
+	virtual ccBBox getDisplayScreenBB_recursive(bool relative, const ccGenericGLDisplay* display, bool check_in_screen);
+
 	//! Returns best-fit bounding-box (if available)
 	/** \warning Only suitable for leaf objects (i.e. without children)
 		Therefore children bboxes are always ignored.
@@ -508,11 +510,9 @@ inline ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_E
 		if (check_enable) {
 			ccHObject::Container group_enabled;
 			for (auto & gp : group) {
-				if ((gp->getParent()) && (!gp->getParent()->isEnabled())) {
-					continue;
-				}
-				if (gp->isEnabled())
+				if (gp->isBranchEnabled()) {
 					group_enabled.push_back(gp);
+				}	
 			}
 			return group_enabled;
 		}

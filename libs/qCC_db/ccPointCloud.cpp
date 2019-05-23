@@ -2564,7 +2564,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				)
 			{
 				bool skipLoD = false;
-
+				resetVisibilityLODArray();
 				//is there a LoD structure associated yet?
 				if (!m_lod || !m_lod->isBroken())
 				{
@@ -2761,6 +2761,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							ccGL::Normal3v(glFunc, compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
 						}
 						ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
+						if (m_pointsVisibleLOD.size() == m_points.size()) {
+							m_pointsVisibleLOD[pointIndex] = POINT_VISIBLE;
+						}
 					}
 				}
 
@@ -5928,4 +5931,32 @@ bool ccPointCloud::exportCoordToSF(bool exportDims[3])
 	}
 
 	return true;
+}
+
+std::vector<CCVector3> ccPointCloud::getTheVisiblePointsHUll(ccGLCameraParameters camParas) const
+{
+	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
+	
+	for (size_t i = 0; i < m_points.size(); i++)
+	{
+		if (m_pointsVisibleLOD.size() == m_points.size()) {
+			if (!m_pointsVisibleLOD[i]) {
+				continue;
+			}
+		}
+		
+		CCVector3d p2d;
+		if (camParas.project(m_points[i], p2d, true)) {
+			points2D.emplace_back(p2d.x, p2d.y, i);
+		}
+	}
+	
+	std::list<CCLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
+	CCLib::PointProjectionTools::extractConvexHull2D(points2D, hullPoints);
+	std::vector<CCVector3> hulls;
+	for (auto pt : hullPoints) {
+		hulls.push_back(*getPoint((*pt).index));
+	// 		(*profile).push_back(*(cloud->getPoint((*pt).index)));
+	}
+	return hulls;
 }

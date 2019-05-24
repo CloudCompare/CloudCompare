@@ -5960,3 +5960,19 @@ std::vector<CCVector3> ccPointCloud::getTheVisiblePointsHUll(ccGLCameraParameter
 	}
 	return hulls;
 }
+ccBBox ccPointCloud::getTheVisiblePointsBBox(ccGLCameraParameters camParas) const
+{
+	ccBBox box;
+	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
+
+	for (size_t i = 0; i < m_points.size(); i++)
+	{
+		if (m_pointsVisibleLOD.size() == m_points.size()) {
+			if (!m_pointsVisibleLOD[i]) {
+				continue;
+			}
+		}
+		box.add(m_points[i]);
+	}
+	return box;
+}

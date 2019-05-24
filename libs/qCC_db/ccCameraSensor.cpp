@@ -625,6 +625,23 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	return true;
 }
 
+inline QImage ccCameraSensor::getImage()
+{
+	if (m_image_thumb.isNull()) {
+		//! load thumb first
+		QFileInfo imgpath(m_image_path);
+		QString thumb = imgpath.path() + "/" + imgpath.completeBaseName();
+		if (QFileInfo(thumb + "_thumb.jpg").exists()) { thumb = thumb + "_thumb.jpg"; }
+		else if (QFileInfo(thumb + "_thumb.tif").exists()) { thumb = thumb + "_thumb.tif"; }
+		else { thumb = m_image_path; }
+		QImageReader reader(thumb);
+		QImage image_tmp = reader.read();
+		m_image_thumb = image_tmp.width() < 400 ? image_tmp :
+			image_tmp.scaled(400, 400 * image_tmp.height() / image_tmp.width(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	}
+	return m_image_thumb;
+}
+
 bool ccCameraSensor::fromLocalCoordToGlobalCoord(const CCVector3& localCoord, CCVector3& globalCoord) const
 {
 	ccIndexedTransformation trans;
@@ -1551,19 +1568,8 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	if (m_frustumInfos.drawImage) {
-		if (m_image.isNull()) {
-			//! load thumb first
-			QFileInfo imgpath(m_image_path);
-			QString thumb = imgpath.path() + "/" + imgpath.completeBaseName();
-			if (QFileInfo(thumb + "_thumb.jpg").exists()) {	thumb = thumb + "_thumb.jpg"; }
-			else if(QFileInfo(thumb + "_thumb.tif").exists()){ thumb = thumb + "_thumb.tif"; }
-			else { thumb = m_image_path; }
-			QImageReader reader(thumb);
-			QImage image_tmp = reader.read();			
-			m_image = image_tmp.width() < 400 ? image_tmp : 
-				image_tmp.scaled(400, 400 * image_tmp.height() / image_tmp.width(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-		}
-		if (!m_image.isNull()) {
+		QImage image = getImage();
+		if (!image.isNull()) {
 			glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
 			glFunc->glEnable(GL_BLEND);
 			glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1571,7 +1577,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glPushAttrib(GL_ENABLE_BIT);
 			glFunc->glEnable(GL_TEXTURE_2D);
 
-			QOpenGLTexture texture(m_image);
+			QOpenGLTexture texture(image);
 			texture.bind();
 			{
 				glFunc->glColor4f(1.0f, 1.0f, 1.0f, 0.9f);

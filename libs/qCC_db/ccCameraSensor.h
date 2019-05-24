@@ -260,6 +260,8 @@ public: //image
 	inline QString imagePath() const { return m_image_path; }
 	inline void setImagePath(QString path) { m_image_path = path; }
 
+	inline QImage getImage();
+
 public: //coordinate systems conversion methods
 
 	//! Computes the coordinates of a 3D point in the global coordinate system knowing its coordinates in the sensor coordinate system.
@@ -537,7 +539,7 @@ protected:
 	//! Whether the intrinsic matrix is valid or not
 	bool m_projectionMatrixIsValid;
 
-	QImage m_image;
+	QImage m_image_thumb;
 	QString m_image_path;
 };
 

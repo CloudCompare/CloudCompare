@@ -710,7 +710,7 @@ public: //other methods
 	bool exportCoordToSF(bool exportDims[3]);
 
 	std::vector<CCVector3> getTheVisiblePointsHUll(ccGLCameraParameters camParas) const;
-
+	ccBBox getTheVisiblePointsBBox(ccGLCameraParameters camParas) const;
 protected:
 
 	//inherited from ccHObject

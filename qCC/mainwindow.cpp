@@ -222,6 +222,7 @@ MainWindow::MainWindow()
 	, m_pbdrffDlg(nullptr)
 	, m_pbdrImshow(nullptr)
 	, m_imageRoot(nullptr)
+	, m_pbdrImagePanel(nullptr)
 	, polyfit_obj(nullptr)
 {
 	m_UI->setupUi( this );
@@ -926,13 +927,14 @@ void MainWindow::CreateImageEditor()
 	m_pbdrImshow = new bdr2Point5DimEditor();
 	m_pbdrImshow->create2DView(m_UI->mapFrame);
 
-	m_pbdrImagePanel = new bdrImageEditorPanel(m_pbdrImshow, this);
-	m_pbdrImagePanel->setFixedHeight(22);
+	m_pbdrImagePanel = new bdrImageEditorPanel(m_pbdrImshow, m_imageRoot, this);
 	m_UI->verticalLayoutImageEditor->addWidget(m_pbdrImagePanel);
 
 	connect(m_pbdrImagePanel->PreviousToolButton, &QAbstractButton::clicked, this, [this]() { showPreviousImage(true); });
 	connect(m_pbdrImagePanel->NextToolButton, &QAbstractButton::clicked, this, [this]() { showNextImage(true); });
 	connect(m_pbdrImagePanel->OverlayToolButton, &QAbstractButton::clicked, this, &MainWindow::toggleImageOverlay);
+
+	connect(m_pbdrImagePanel, &bdrImageEditorPanel::imageDisplayed, this, &MainWindow::doActionShowSelectedImage);
 }
 
 void MainWindow::doActionColorize()
@@ -13421,10 +13423,12 @@ void MainWindow::doActionShowBestImage()
  		for (ccHObject* pc : point_clouds) {
  			ccPointCloud* pcObj = ccHObjectCaster::ToPointCloud(pc);
  			if (!pcObj) { continue; }
-			std::vector<CCVector3> cur_hull = pcObj->getTheVisiblePointsHUll(camParas);
-			for (auto pt : cur_hull) {
-				objBox.add(pt);
-			}
+			ccBBox box_ = pcObj->getTheVisiblePointsBBox(camParas);
+			objBox += box_;
+// 			std::vector<CCVector3> cur_hull = pcObj->getTheVisiblePointsHUll(camParas);
+// 			for (auto pt : cur_hull) {
+// 				objBox.add(pt);
+// 			}
  		}
 
 		//objBox = m_ccRoot->getRootEntity()->getDisplayScreenBB_recursive(false, glwin, true);
@@ -13444,21 +13448,23 @@ void MainWindow::doActionShowBestImage()
 	CCVector3 obj_to_view = -view_to_obj;
 	vcg::Point3f n(view_to_obj.u), u, v;
 	vcg::GetUV(n, u, v);
-	CCVector3 obj_u = objCenter + CCVector3::fromArray(u.V());
-	CCVector3 obj_v = objCenter + CCVector3::fromArray(v.V());
+	CCVector3 obj_u = objCenter + CCVector3::fromArray(u.V()) * objBox.getDiagNorm() / 3;
+	CCVector3 obj_v = objCenter + CCVector3::fromArray(v.V()) * objBox.getDiagNorm() / 3;
 
 	//! get all cameras available 
 	ccHObject::Container cameras = GetEnabledObjFromGroup(m_imageRoot->getRootEntity(), CC_TYPES::CAMERA_SENSOR, true, true);
 	ccCameraSensor* best_cam = nullptr;
 	// sort by dir and distance
 	double max_area = -DBL_MAX;
+	ccHObject::Container visible_items; int best_index = -1;
 	for (ccHObject* cam : cameras) {
 		if (!cam->isEnabled()) {
 			continue;
 		}
-		setSelectedInDB(cam, false);
+		//m_imageRoot->selectEntity(cam, false);
+		
 		ccCameraSensor* csObj = ccHObjectCaster::ToCameraSensor(cam);
-		csObj->drawImage(false);
+		//csObj->drawImage(false);
 		if (!csObj) { continue; }
 		ccIndexedTransformation trans; csObj->getActiveAbsoluteTransformation(trans);
 		const float* M = trans.data();
@@ -13480,17 +13486,19 @@ void MainWindow::doActionShowBestImage()
 			!csObj->fromGlobalCoordToImageCoord(obj_v, objV_img)) {
 			continue;	//! skip temporarily
 		}
+		visible_items.push_back(cam); 
 		float double_area = (objU_img - objCenter_img).cross(objV_img - objCenter_img);
 		if (double_area > max_area)	{
 			max_area = double_area;
 			best_cam = csObj;
+			best_index = visible_items.size() - 1;
 		}
 	}
 	
 	if (best_cam) {
 		if (best_cam->getParent() && best_cam->getParent()->isEnabled()) {
-			setSelectedInDB(best_cam, true);
-			best_cam->drawImage(true);
+			m_imageRoot->selectEntity(best_cam, true);
+			//best_cam->drawImage(true);
 		}
 		m_pbdrImshow->setImageAndCamera(best_cam);
 		//! zoom
@@ -13506,6 +13514,8 @@ void MainWindow::doActionShowBestImage()
 			m_pbdrImshow->update2DDisplayZoom(box_2d);
 		}
 	}
+	
+	m_pbdrImagePanel->setItems(visible_items, best_index);
 }
 
 void MainWindow::doActionShowSelectedImage()
@@ -13513,7 +13523,12 @@ void MainWindow::doActionShowSelectedImage()
 	if (!haveSelection()) {
 		return;
 	}
-	ccHObject* sel = getSelectedEntities().front();
+	ccHObject::Container sels;
+	m_imageRoot->getSelectedEntities(sels, CC_TYPES::CAMERA_SENSOR);
+	if (sels.empty()) {
+		return;
+	}
+	ccHObject* sel = sels.front();
 	ccCameraSensor* cam = ccHObjectCaster::ToCameraSensor(sel);
 	if (!cam) { return; }
 	m_pbdrImshow->setImageAndCamera(cam);

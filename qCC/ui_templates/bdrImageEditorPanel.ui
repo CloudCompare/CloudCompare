@@ -147,7 +147,7 @@
       <enum>QListView::SinglePass</enum>
      </property>
      <property name="spacing">
-      <number>0</number>
+      <number>10</number>
      </property>
      <property name="viewMode">
       <enum>QListView::IconMode</enum>

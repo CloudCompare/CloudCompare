@@ -22,11 +22,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QListWidget" name="listWidget">
-     <property name="spacing">
-      <number>10</number>
-     </property>
-    </widget>
+    <widget class="QListWidget" name="listWidget"/>
    </item>
    <item>
     <spacer name="verticalSpacer">

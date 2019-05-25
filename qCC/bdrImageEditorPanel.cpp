@@ -6,8 +6,14 @@
 #include "ccDBRoot.h"
 #include "ccHObject.h"
 #include "ccCameraSensor.h"
+#include "ccImage.h"
+#include "ccGLWindow.h"
+#include "ccPointCloud.h"
 #include "ccHObjectCaster.h"
+#include "ccBBox.h"
+#include "vcg/space/point3.h"
 
+#include <iostream>
 #include <QFileDialog>
 #include <QToolButton>
 #include <QPushButton>
@@ -20,16 +26,21 @@ bdrImageEditorPanel::bdrImageEditorPanel(bdr2Point5DimEditor* img, ccDBRoot* roo
 {
 	setupUi(this);
 	verticalLayout->setContentsMargins(0, 0, 0, 0);
-	setMinimumHeight(25);
-	setMaximumHeight(150);
+	setMinimumHeight(23);
+	setMaximumHeight(155);
 	m_image_display_height = 80;
 
 	connect(ZoomFitToolButton,		&QAbstractButton::clicked, this, &bdrImageEditorPanel::ZoomFit);
 	connect(toggleListToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::toogleImageList);
+	connect(displayAllToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::display);
+	connect(PreviousToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::previous);
+	connect(NextToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::next);
 	//imageListWidget
+	imageListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
 	connect(imageListWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &bdrImageEditorPanel::changeSelection);
 	// double click list
 	connect(imageListWidget, &QAbstractItemView::doubleClicked, this, &bdrImageEditorPanel::displayImage);
+	
 	connect(m_root, &ccDBRoot::selectionChanged, this, &bdrImageEditorPanel::selectImage);
 
 }
@@ -41,7 +52,7 @@ void bdrImageEditorPanel::ZoomFit()
 }
 void bdrImageEditorPanel::toogleImageList()
 {
-	setFixedHeight(toggleListToolButton->isChecked() ? 150 : 23);
+	setFixedHeight(toggleListToolButton->isChecked() ? 155 : 23);
 }
 void bdrImageEditorPanel::changeSelection()
 {
@@ -51,9 +62,11 @@ void bdrImageEditorPanel::changeSelection()
 		sel_item->text();
 		ccHObject::Container children;
 		m_root->getRootEntity()->filterChildrenByName(children, true, sel_item->text(), true);
+		m_root->unselectAllEntities();
 		if (!children.empty()) {
 			m_root->selectEntity(children.front());
 		}
+		imageListWidget->scrollToItem(sel_item);
 	}
 	else {
 		//m_root->unselectAllEntities();
@@ -69,8 +82,71 @@ void bdrImageEditorPanel::displayImage()
 
 void bdrImageEditorPanel::selectImage()
 {
-	//imageListWidget->scr
-	//imageListWidget->setCurrentItem()
+	ccHObject::Container sels;
+	m_root->getSelectedEntities(sels, CC_TYPES::CAMERA_SENSOR);
+	if (sels.empty()) {
+		return;
+	}
+	for (size_t i = 0; i < imageListWidget->count(); i++) {
+		QListWidgetItem* item = imageListWidget->item(i);
+		if (sels.back()->getName() == item->text())	{
+			item->setSelected(true);
+			break;
+		}
+	}
+}
+
+void bdrImageEditorPanel::previous()
+{
+	if (imageListWidget->count() < 2) {
+		return;
+	}
+	ccImage* cur_img = m_pbdrImshow->getImage();
+	if (!cur_img) { return; }
+
+	ccHObject* cam = cur_img->getAssociatedSensor();
+	if (!cam) return;
+
+	m_root->selectEntity(cam);
+	
+	QList<QListWidgetItem*> list = imageListWidget->selectedItems();
+	if (list.empty()) { return; }
+
+	int cur_index = imageListWidget->row(list.front());
+	imageListWidget->item((cur_index - 1) % imageListWidget->count())->setSelected(true);
+	displayImage();
+}
+
+void bdrImageEditorPanel::next()
+{
+	if (imageListWidget->count() < 2) {
+		return;
+	}
+	ccImage* cur_img = m_pbdrImshow->getImage();
+	if (!cur_img) { return; }
+
+	ccHObject* cam = cur_img->getAssociatedSensor();
+	if (!cam) return;
+
+	m_root->selectEntity(cam);
+
+	QList<QListWidgetItem*> list = imageListWidget->selectedItems();
+	if (list.empty()) { return; }
+
+	int cur_index = imageListWidget->row(list.front());
+	imageListWidget->setItemSelected(imageListWidget->item((cur_index + 1) % imageListWidget->count()), true);
+	displayImage();
+}
+
+void bdrImageEditorPanel::toogleDisplayAll()
+{
+	display(!displayAllToolButton->isChecked());
+}
+
+void bdrImageEditorPanel::clearAll()
+{
+	imageListWidget->clear();
+	m_pbdrImshow->clearAll();
 }
 
 void bdrImageEditorPanel::setItems(std::vector<ccHObject*> items, int defaultSelectedIndex)
@@ -103,3 +179,84 @@ void bdrImageEditorPanel::setItems(std::vector<ccHObject*> items, int defaultSel
 		imageListWidget->setItemSelected(imageListWidget->item(defaultSelectedIndex), true);
 	}
 }
+
+void bdrImageEditorPanel::setItems(std::vector<ccCameraSensor*> items, int defaultSelectedIndex)
+{
+	imageListWidget->clear();
+	if (items.empty()) { return; }
+	int max_width = -1;
+	for (size_t i = 0; i < items.size(); i++) {
+		ccCameraSensor* camObj = items[i];
+
+		QListWidgetItem *item = new QListWidgetItem;
+		QImage image = camObj->getImage();
+		if (!image.isNull()) {
+			int width = static_cast<int>((double)image.width() / (double)image.height() * (double)m_image_display_height);
+			item->setSizeHint(QSize(width, m_image_display_height + 20));
+			item->setIcon(QIcon(QPixmap::fromImage(image)));
+			if (max_width < width) {
+				max_width = width;
+			}
+		}
+		item->setText(camObj->getName());
+		imageListWidget->addItem(item);
+
+	}
+	if (max_width <= 0) {
+		return;
+	}
+	imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
+	if (defaultSelectedIndex >= 0 && defaultSelectedIndex < items.size()) {
+		imageListWidget->setItemSelected(imageListWidget->item(defaultSelectedIndex), true);
+	}
+}
+
+void bdrImageEditorPanel::display(bool display_all)
+{
+	displayAllToolButton->setChecked(display_all);
+	//! sort by area
+	ccHObject::Container children =	GetEnabledObjFromGroup(m_root->getRootEntity(), CC_TYPES::CAMERA_SENSOR, true, true);
+	std::vector<ccCameraSensor*> items;
+	for (ccHObject* obj : children)	{
+		ccCameraSensor* camObj = ccHObjectCaster::ToCameraSensor(obj);
+		assert(camObj); if (!camObj) { return; }
+		if (!camObj->isBranchEnabled())	{
+			continue;
+		}
+		if (!display_all && camObj->getDisplayOrder() < 0) {
+			continue;
+		}
+		else {
+			items.push_back(camObj);
+		}
+	}
+	if (!display_all) {
+		if (!items.empty()) {
+			std::sort(items.begin(), items.end(), [](ccCameraSensor* _l, ccCameraSensor* _r) {
+				return _l->getDisplayOrder() < _r->getDisplayOrder();
+			});
+		}
+	}
+	setItems(items, 0);
+}
+
+double bdrImageEditorPanel::getBoxScale()
+{
+	return BoxScaleDoubleSpinBox->value();
+}
+
+ccBBox bdrImageEditorPanel::getObjBox()
+{
+	return m_obj_box;
+}
+
+void bdrImageEditorPanel::setObjBox(ccBBox box)
+{
+	m_obj_box = box;
+}
+
+bool bdrImageEditorPanel::isObjChecked()
+{
+	return m_obj_box.isValid() && CheckObjToolButton->isChecked();	
+}
+

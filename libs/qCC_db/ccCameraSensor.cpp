@@ -194,6 +194,7 @@ bool ccCameraSensor::FrustumInformation::initFrustumHull()
 ccCameraSensor::ccCameraSensor()
 	: ccSensor("Camera Sensor")
 	, m_projectionMatrixIsValid(false)
+	, m_display_order(-1)
 {
 	//graphic representation
 	lockVisibility(false);
@@ -203,6 +204,7 @@ ccCameraSensor::ccCameraSensor()
 ccCameraSensor::ccCameraSensor(const IntrinsicParameters& iParams)
 	: ccSensor("Camera Sensor")
 	, m_projectionMatrixIsValid(false)
+	, m_display_order(-1)
 {
 	//graphic representation
 	lockVisibility(false);
@@ -216,6 +218,7 @@ ccCameraSensor::ccCameraSensor(const ccCameraSensor& sensor)
 	: ccSensor(sensor)
 	, m_projectionMatrix(sensor.m_projectionMatrix)
 	, m_projectionMatrixIsValid(false)
+	, m_display_order(-1)
 {
 	setIntrinsicParameters(sensor.m_intrinsicParams);
 

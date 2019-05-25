@@ -2719,11 +2719,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//custom point size?
 		if (m_pointSize != 0)
-		{			
-			glFunc->glPointSize(static_cast<GLfloat>(m_pointSize));			
-		}
-		if (isSelected()) {
-			glFunc->glPointSize(static_cast<GLfloat>(m_pointSize + 2));
+		{
+			glFunc->glPointSize(static_cast<GLfloat>(m_pointSize));
+// 			if (isSelected()) {
+// 				glFunc->glPointSize(static_cast<GLfloat>(m_pointSize + 2));
+// 			}
 		}
 
 		//main display procedure
@@ -5940,7 +5940,7 @@ std::vector<CCVector3> ccPointCloud::getTheVisiblePointsHUll(ccGLCameraParameter
 	for (size_t i = 0; i < m_points.size(); i++)
 	{
 		if (m_pointsVisibleLOD.size() == m_points.size()) {
-			if (!m_pointsVisibleLOD[i]) {
+			if (m_pointsVisibleLOD[i] == POINT_HIDDEN) {
 				continue;
 			}
 		}
@@ -5967,12 +5967,14 @@ ccBBox ccPointCloud::getTheVisiblePointsBBox(ccGLCameraParameters camParas) cons
 
 	for (size_t i = 0; i < m_points.size(); i++)
 	{
-		if (m_pointsVisibleLOD.size() == m_points.size()) {
-			if (!m_pointsVisibleLOD[i]) {
-				continue;
-			}
-		}
-		box.add(m_points[i]);
+// 		if (m_pointsVisibleLOD.size() == m_points.size()) {
+// 			if (m_pointsVisibleLOD[i] == POINT_HIDDEN) {
+// 				continue;
+// 			}
+// 		}
+		CCVector3d p2d;
+		if (camParas.project(m_points[i], p2d, true))
+			box.add(m_points[i]);
 	}
 	return box;
 }

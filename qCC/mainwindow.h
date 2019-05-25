@@ -129,7 +129,7 @@ public:
 		\param fileFilter selected file filter (i.e. type)
 		\param destWin destination window (0 = active one)
 	**/	
-	virtual void addToDB( const QStringList& filenames,
+	virtual std::vector<ccHObject*> addToDB( const QStringList& filenames,
 						  QString fileFilter = QString(),
 						  ccGLWindow* destWin = nullptr, 
 						  DB_SOURCE dest = CC_TYPES::DB_BUILDING);
@@ -185,8 +185,6 @@ public:
 	//! XYLIU images
 
 	ccHObject* getCameraGroup(QString name);
-	void showNextImage(bool check_enable);
-	void showPreviousImage(bool check_enable);
 	
 private slots:
 	//! Creates a new 3D GL sub-window
@@ -534,6 +532,8 @@ private slots:
 	void updateDBSelection(DB_SOURCE type);
 
 	void toggleImageOverlay();
+
+	void clearImagePanel();
 
 private:
 	//! Shortcut: asks the user to select one cloud

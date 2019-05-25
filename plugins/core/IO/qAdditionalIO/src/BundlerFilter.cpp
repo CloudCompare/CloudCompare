@@ -166,7 +166,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 	ccPointCloud* hackCloud = (ccPointCloud*)parameters.additionInfo;
 	if (hackCloud) {
-		imageListFilename = hackCloud->getName();
+		if (QFileInfo(hackCloud->getName()).exists())
+			imageListFilename = hackCloud->getName();
 	}
 	QString altKeypointsFilename = QFileInfo(f).dir().absoluteFilePath("pmvs.ply");
 

@@ -22,6 +22,8 @@ public:
 	//! Destructor
 	virtual ~bdr2Point5DimEditor();
 
+	void clearAll();
+
 public: //standard methods
 
 	//! Returns projection grid step

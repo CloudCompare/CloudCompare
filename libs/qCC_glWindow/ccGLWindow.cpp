@@ -7022,29 +7022,33 @@ bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 	return true;
 }
 
-GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/)
+GLfloat ccGLWindow::getGLDepth(int x, int y, int extendToNeighbors/*=false*/)
 {
 	makeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	GLfloat z[9];
+	//GLfloat z[9];
+	
+	
 	int kernel[2] = { 1, 1 };
 
-	if (extendToNeighbors)
+	if (extendToNeighbors > 0)
 	{
-		if (x > 0 && x + 1 < m_glViewport.width())
+		if (x > extendToNeighbors && x + extendToNeighbors < m_glViewport.width())
 		{
-			kernel[0] = 3;
-			--x;
+			kernel[0] = 2* extendToNeighbors+1;
+			x -= extendToNeighbors;//--x; 
 		}
-		if (y > 0 && y + 1 < m_glViewport.height())
+		if (y > extendToNeighbors && y + extendToNeighbors < m_glViewport.height())
 		{
-			kernel[1] = 3;
-			--y;
+			kernel[1] = 2* extendToNeighbors+1;
+			y -= extendToNeighbors;// --y;
 		}
 	}
+
+	GLfloat* z = new GLfloat[kernel[0] * kernel[1]];
 
 	ccFrameBufferObject* formerFBO = m_activeFbo;
 	if (m_fbo && m_activeFbo != m_fbo)
@@ -7064,13 +7068,17 @@ GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/)
 	GLfloat minZ = z[(kernelSize + 1) / 2 - 1];
 
 	//if the depth is not defined...
-	if (minZ == 1.0f && extendToNeighbors)
+	if (minZ == 1.0f && extendToNeighbors>0)
 	{
 		//...extend the search to the neighbors
 		for (int i = 0; i < kernelSize; ++i)
 		{
 			minZ = std::min(minZ, z[i]);
 		}
+	}
+	if (z) {
+		delete []z;
+		z = nullptr;
 	}
 
 	//test: read depth texture
@@ -7086,13 +7094,13 @@ GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/)
 	return minZ;
 }
 
-bool ccGLWindow::getClick3DPos(int x, int y, CCVector3d& P3D)
+bool ccGLWindow::getClick3DPos(int x, int y, CCVector3d& P3D, int extend)
 {
 	ccGLCameraParameters camera;
 	getGLCameraParameters(camera);
 
 	y = m_glViewport.height() - 1 - y;
-	GLfloat glDepth = getGLDepth(x, y);
+	GLfloat glDepth = getGLDepth(x, y, extend);
 	if (glDepth == 1.0f)
 	{
 		return false;
@@ -7107,4 +7115,24 @@ void ccGLWindow::lockRotationAxis(bool state, const CCVector3d& axis)
 	m_rotationAxisLocked = state;
 	m_lockedRotationAxis = axis;
 	m_lockedRotationAxis.normalize();
+}
+
+ccBBox ccGLWindow::getCunrrentViewBB()
+{
+// 	int grid_size = 10;
+// 	int grid_w = glWidth() / grid_size;
+// 	int grid_h = glHeight() / grid_size;
+// 	int grid_extend = std::min(grid_w, grid_h);
+// 	//! left_min
+// 	for (size_t i = 0; i < grid_size; i++) {
+// 		for (size_t j = 0; j < grid_size; j++) {
+// 			int center_x = (double)grid_w *(i + 0.5);
+// 			int center_y = (double)grid_h *(i + 0.5);
+// 			CCVector3d p;
+// 			if (getClick3DPos(center_x, center_y, p, grid_extend)) {
+// 
+// 			}
+// 		}
+// 	}
+	return ccBBox();
 }

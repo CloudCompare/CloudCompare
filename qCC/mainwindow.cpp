@@ -317,7 +317,7 @@ MainWindow::MainWindow()
 	{
 		m_imageRoot = new ccDBRoot(m_UI->dbImageTreeView, m_UI->propertiesTreeView_Image, this);
  		connect(m_imageRoot, &ccDBRoot::selectionChanged,		this, &MainWindow::updateUIWithSelection);
- 		connect(m_imageRoot, &ccDBRoot::dbIsEmpty,				[&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+		connect(m_imageRoot, &ccDBRoot::dbIsEmpty,				[&]() { clearImagePanel();  updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
   		connect(m_imageRoot, &ccDBRoot::dbIsNotEmptyAnymore,	[&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
 		connect(m_imageRoot, &ccDBRoot::itemClicked,			[&]() { updateDBSelection(CC_TYPES::DB_IMAGE); });
 	}
@@ -922,6 +922,11 @@ void MainWindow::toggleImageOverlay()
 	//ccCameraSensor* camera_sensor = new ccCameraSensor();
 }
 
+void MainWindow::clearImagePanel()
+{
+	m_pbdrImagePanel->clearAll();
+}
+
 void MainWindow::CreateImageEditor()
 {
 	m_pbdrImshow = new bdr2Point5DimEditor();
@@ -930,9 +935,8 @@ void MainWindow::CreateImageEditor()
 	m_pbdrImagePanel = new bdrImageEditorPanel(m_pbdrImshow, m_imageRoot, this);
 	m_UI->verticalLayoutImageEditor->addWidget(m_pbdrImagePanel);
 
-	connect(m_pbdrImagePanel->PreviousToolButton, &QAbstractButton::clicked, this, [this]() { showPreviousImage(true); });
-	connect(m_pbdrImagePanel->NextToolButton, &QAbstractButton::clicked, this, [this]() { showNextImage(true); });
 	connect(m_pbdrImagePanel->OverlayToolButton, &QAbstractButton::clicked, this, &MainWindow::toggleImageOverlay);
+	connect(m_pbdrImagePanel->displayBestToolButton, &QAbstractButton::clicked, this, &MainWindow::doActionShowBestImage);
 
 	connect(m_pbdrImagePanel, &bdrImageEditorPanel::imageDisplayed, this, &MainWindow::doActionShowSelectedImage);
 }
@@ -5811,6 +5815,9 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 	view3D->addSceneDB(m_ccRoot->getRootEntity());
 	view3D->addSceneDB(m_imageRoot->getRootEntity());
 	viewWidget->setAttribute(Qt::WA_DeleteOnClose);
+	viewWidget->setWindowFlags(viewWidget->windowFlags()&~Qt::WindowCloseButtonHint);
+	viewWidget->setWindowFlags(viewWidget->windowFlags()&~Qt::WindowMinimizeButtonHint);
+	viewWidget->setWindowFlags(viewWidget->windowFlags()&~Qt::WindowMaximizeButtonHint);
 	m_ccRoot->updatePropertiesView();
 	m_imageRoot->updatePropertiesView();
 
@@ -5818,6 +5825,7 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 
 	viewWidget->showMaximized();
 	viewWidget->update();
+	setCenteredPerspectiveView(view3D);
 
 	return view3D;
 }
@@ -9476,14 +9484,40 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 void MainWindow::addToDBAuto(const QStringList& filenames)
 {
 	ccGLWindow* win = qobject_cast<ccGLWindow*>(QObject::sender());
-
-	addToDB(filenames, QString(), win);
+	ccHObject::Container loaded;
+	if (m_UI->ProjectTabWidget->currentIndex() == 0) {
+		loaded = addToDB(filenames, QString(), win, CC_TYPES::DB_BUILDING);
+	}
+	else if (m_UI->ProjectTabWidget->currentIndex() == 1) {
+		loaded = addToDB(filenames, QString(), win, CC_TYPES::DB_IMAGE);
+	}
+	for (ccHObject* obj : loaded) {
+		ccHObject::Container pcs;
+		if (obj->isGroup())	{
+			pcs = GetEnabledObjFromGroup(obj, CC_TYPES::POINT_CLOUD, false);
+		}
+		else {
+			if (obj->isA(CC_TYPES::POINT_CLOUD)) {
+				pcs.push_back(obj);
+			}
+		}
+		for (ccHObject* _p : pcs) {
+			ccPointCloud* pcObj = ccHObjectCaster::ToPointCloud(_p);
+			if (!pcObj) { continue; }
+			bool exportDims[3] = { false,false,true };
+			pcObj->exportCoordToSF(exportDims);
+			pcObj->prepareDisplayForRefresh();
+		}
+	}
+	refreshAll();
+	UpdateUI();
 }
 
-void MainWindow::addToDB(	const QStringList& filenames,
+std::vector<ccHObject*> MainWindow::addToDB(	const QStringList& filenames,
 							QString fileFilter/*=QString()*/,
 							ccGLWindow* destWin/*=0*/, DB_SOURCE dest)
 {
+	ccHObject::Container loads;
 	//to use the same 'global shift' for multiple files
 	CCVector3d loadCoordinatesShift(0,0,0);
 	bool loadCoordinatesTransEnabled = false;
@@ -9529,6 +9563,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 				newGroup->setDisplay_recursive(destWin);
 			}
 			addToDB(newGroup, true, true, false, dest);
+			loads.push_back(newGroup);
 
 			m_recentFiles->addFilePath( filename );
 		}
@@ -9541,6 +9576,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	}
 
 	QMainWindow::statusBar()->showMessage(QString("%1 file(s) loaded").arg(filenames.size()),2000);
+	return loads;
 }
 
 void MainWindow::handleNewLabel(ccHObject* entity)
@@ -11161,30 +11197,34 @@ void MainWindow::doActionBDProjectSave()
 void MainWindow::doActionBDImagesLoad()
 {
 	if (!haveSelection()) {
+		dispToConsole("please load project or select a point cloud", ERR_CONSOLE_MESSAGE);
 		return;
 	}
 	BDBaseHObject* baseObj = GetRootBDBase(getSelectedEntities().front());
-	if (!baseObj) {
-		return;
-	}
-	//ccHObject* camera_group = getCameraGroup(baseObj->getName());
 	ccHObject::Container camera_groups = GetEnabledObjFromGroup(m_imageRoot->getRootEntity(), CC_TYPES::ST_PROJECT);
-	/// temporarily put this function here, need add a button
-	if (getSelectedEntities().front()->isA(CC_TYPES::ST_BUILDING)) {
-		for (ccHObject* camera_group : camera_groups) {
-			QStringList building_images;
-			for (ccHObject* bd : getSelectedEntities()) {
-				stocker::BuildUnit bd_unit = baseObj->GetBuildingUnit(bd->getName().toStdString());
-				for (auto img : bd_unit.image_list) {
-					building_images.append(img.c_str());
+	if (baseObj) {
+		//ccHObject* camera_group = getCameraGroup(baseObj->getName());
+		
+		/// temporarily put this function here, need add a button
+		if (getSelectedEntities().front()->isA(CC_TYPES::ST_BUILDING)) {
+			for (ccHObject* camera_group : camera_groups) {
+				QStringList building_images;
+				for (ccHObject* bd : getSelectedEntities()) {
+					stocker::BuildUnit bd_unit = baseObj->GetBuildingUnit(bd->getName().toStdString());
+					for (auto img : bd_unit.image_list) {
+						building_images.append(img.c_str());
+					}
 				}
+				filterCameraByName(camera_group, building_images);
 			}
-			filterCameraByName(camera_group, building_images);
+			refreshAll();
+			return;
 		}
-		refreshAll();
+	}
+	if (!baseObj && !getSelectedEntities().front()->isA(CC_TYPES::POINT_CLOUD))	{
+		dispToConsole("please load project or select a point cloud", ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	
 // 	if (camera_group) {
 // 		if (QMessageBox::question(this,	
 // 			"Import camera", "cameras exist, import again?",
@@ -11192,7 +11232,7 @@ void MainWindow::doActionBDImagesLoad()
 // 			== QMessageBox::No)
 // 			return;
 // 	}
-	CCVector3d loadCoordinatesShift = CCVector3d(vcgXYZ(baseObj->global_shift));
+	CCVector3d loadCoordinatesShift = baseObj ? CCVector3d(vcgXYZ(baseObj->global_shift)) : CCVector3d(0, 0, 0);
 	bool loadCoordinatesTransEnabled = false;
 	FileIOFilter::LoadParameters parameters;
 	{
@@ -11204,13 +11244,15 @@ void MainWindow::doActionBDImagesLoad()
 	}
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	QString out_file, image_list;
-	if (baseObj->block_prj.m_options.with_image) {
+	if (baseObj && baseObj->block_prj.m_options.with_image) {
 		out_file = baseObj->block_prj.m_options.prj_file.sfm_out.c_str();
 		image_list = baseObj->block_prj.m_options.prj_file.image_list.c_str();		
 	}
 
 	if (!QFileInfo(out_file).exists() || !QFileInfo(image_list).exists()) {
-		dispToConsole("no .out or image list exists", ERR_CONSOLE_MESSAGE);
+		if (baseObj) {
+			dispToConsole("no .out or image list exists", ERR_CONSOLE_MESSAGE);
+		}
 
 		//persistent settings
 		QSettings settings;
@@ -11228,26 +11270,35 @@ void MainWindow::doActionBDImagesLoad()
 		currentPath = QFileInfo(out_file).absolutePath();
 		settings.setValue(ccPS::CurrentPath(), currentPath);
 		settings.endGroup();
+		if (baseObj) {
+			image_list =
+				QFileDialog::getOpenFileName(this,
+					"Import images",
+					currentPath,
+					"Image list (All (*.*);;*.txt");
+			if (image_list.isEmpty()) return;
 
-		image_list =
-			QFileDialog::getOpenFileName(this,
-				"Import images",
-				currentPath,
-				"Image list (All (*.*);;*.txt");
-		if (image_list.isEmpty()) return;
-		
-		//save last loading parameters
-		currentPath = QFileInfo(out_file).absolutePath();
-		settings.setValue(ccPS::CurrentPath(), currentPath);
-		settings.endGroup();
-	}		
-	ccPointCloud* hackObj = new ccPointCloud(image_list);
-	hackObj->setGlobalShift(CCVector3d(vcgXYZ(baseObj->global_shift)));
-	ccBBox base_box = baseObj->getBB_recursive(false, false);
-	hackObj->reserve(2);
-	hackObj->addPoint(base_box.getCenter() + base_box.getDiagVec() / 2);
-	hackObj->addPoint(base_box.getCenter() - base_box.getDiagVec() / 2);
-	parameters.additionInfo = (void*)hackObj;
+			//save last loading parameters
+			currentPath = QFileInfo(image_list).absolutePath();
+			settings.setValue(ccPS::CurrentPath(), currentPath);
+			settings.endGroup();
+		}
+	}
+	ccPointCloud* hackObj = nullptr;
+	if (baseObj) {
+		hackObj = new ccPointCloud(image_list);
+		hackObj->setGlobalShift(CCVector3d(vcgXYZ(baseObj->global_shift)));
+		ccBBox base_box = baseObj->getBB_recursive(false, false);
+		hackObj->reserve(2);
+		hackObj->addPoint(base_box.getCenter() + base_box.getDiagVec() / 2);
+		hackObj->addPoint(base_box.getCenter() - base_box.getDiagVec() / 2);
+	}
+	else {
+		hackObj = ccHObjectCaster::ToPointCloud(getSelectedEntities().front());
+	}
+	if (hackObj) {
+		parameters.additionInfo = (void*)hackObj;
+	}
 
 	QString group_name = GetBaseName(out_file);
 	BDImageBaseHObject* bd_grp = nullptr;
@@ -11263,7 +11314,7 @@ void MainWindow::doActionBDImagesLoad()
 	}
 	if (!bd_grp) {
 		bd_grp = new BDImageBaseHObject(*newGroup);
-		bd_grp->setName(baseObj->getName());
+		bd_grp->setName(group_name);
 	}
 	for (int i = 0; i < newGroup->getChildrenNumber(); i++) {
 		ccHObject* child = newGroup->getChild(i);
@@ -11278,7 +11329,7 @@ void MainWindow::doActionBDImagesLoad()
 		
 	addToDB(bd_grp, false, false, false, true, CC_TYPES::DB_IMAGE);
 
-	if (hackObj) {
+	if (baseObj && hackObj) {
 		delete hackObj;
 		hackObj = nullptr;
 	}
@@ -11286,7 +11337,7 @@ void MainWindow::doActionBDImagesLoad()
 		delete newGroup;
 		newGroup = nullptr;
 	}
-	//m_UI->ProjectTabWidget->setCurrentIndex(1);
+		
 	refreshAll();
 }
 
@@ -13325,93 +13376,33 @@ ccHObject * MainWindow::getCameraGroup(QString name)
 	return nullptr;
 }
 
-void MainWindow::showNextImage(bool check_enable)
-{
-	if (!m_pbdrImshow->getImage()) {
-		return;
-	}
-	ccHObject* cur_sensor = m_pbdrImshow->getImage()->getAssociatedSensor();
-	if (!cur_sensor) { return; }
-	ccHObject* parent = cur_sensor->getParent(); if (!parent) { return; }
-	unsigned cam_count = parent->getChildrenNumber();
-	if (cam_count <= 1) { return; }
-	for (size_t i = 0; i < cam_count; i++) {
-		if (parent->getChild(i) == cur_sensor) {
-			ccHObject* to_show = nullptr;
-			unsigned show_index = i;
-			do
-			{
-				show_index = (show_index + 1) % cam_count;
-				if (!check_enable || (check_enable && parent->getChild(show_index)->isEnabled())) {
-					to_show = parent->getChild(show_index);
-					break;
-				}
-				if (show_index == i) {
-					break;
-				}
-			} while (1);
-			if (to_show) {
-				ccCameraSensor* to_show_cam = ccHObjectCaster::ToCameraSensor(to_show);
-				m_pbdrImshow->setImageAndCamera(to_show_cam);
-			}
-			return;
-		}
-	}
-}
-
-void MainWindow::showPreviousImage(bool check_enable)
-{
-	if (!m_pbdrImshow->getImage()) {
-		return;
-	}
-	ccHObject* cur_sensor = m_pbdrImshow->getImage()->getAssociatedSensor();
-	if (!cur_sensor) { return; }
-	ccHObject* parent = cur_sensor->getParent(); if (!parent) { return; }
-	unsigned cam_count = parent->getChildrenNumber();
-	if (cam_count <= 1) { return; }
-	for (size_t i = 0; i < cam_count; i++) {
-		if (parent->getChild(i) == cur_sensor) {
-			ccHObject* to_show = nullptr;
-			unsigned show_index = i;
-			do
-			{
-				show_index = (show_index - 1) % cam_count;
-				if (!check_enable || (check_enable && parent->getChild(show_index)->isEnabled())) {
-					to_show = parent->getChild(show_index);
-					break;
-				}
-				if (show_index == i) {
-					break;
-				}
-			} while (1);
-			if (to_show) {
-				ccCameraSensor* to_show_cam = ccHObjectCaster::ToCameraSensor(to_show);
-				m_pbdrImshow->setImageAndCamera(to_show_cam);
-			}
-			return;
-		}
-	}
-}
-
 void MainWindow::doActionShowBestImage()
 {
 	ccGLWindow* glwin = GetActiveGLWindow(); assert(glwin); if (!glwin) return;
-	//setCenteredPerspectiveView(glwin);
 	ccViewportParameters params = glwin->getViewportParameters();
 	ccGLCameraParameters camParas; glwin->getGLCameraParameters(camParas);
 
 	CCVector3d viewPoint = params.getViewPoint();
-//	CCVector3d viewDir = glwin->getCurrentViewDir();
 	ccBBox objBox;
+	if (params.objectCenteredView)
+	{
+		float scale_width = std::min(glwin->glWidth(), glwin->glHeight());
+		scale_width = scale_width * params.pixelSize / params.zoom;
+		CCVector3 half_box(scale_width / 2, scale_width / 2, scale_width / 2);
+		objBox.add(CCVector3::fromArray(params.pivotPoint.u) + half_box);
+		objBox.add(CCVector3::fromArray(params.pivotPoint.u) - half_box);
+	}
+	if (!objBox.isValid())
 	{
 		CCVector3d p;
-		if (glwin->getClick3DPos(10, 10, p)) { objBox.add(CCVector3::fromArray(p.u)); }
+		int extend = 50;	// TODO: the extend should be smaller than glwidth
+		if (glwin->getClick3DPos(extend, extend, p, extend-1)) { objBox.add(CCVector3::fromArray(p.u)); }
 		else goto clearbox;
-		if (glwin->getClick3DPos(glwin->glWidth() - 10, 10, p)) { objBox.add(CCVector3::fromArray(p.u)); }
+		if (glwin->getClick3DPos(glwin->glWidth() - extend, extend, p, extend-1)) { objBox.add(CCVector3::fromArray(p.u)); }
 		else goto clearbox;
-		if (glwin->getClick3DPos(glwin->glWidth() - 10, glwin->glHeight() - 10, p)) { objBox.add(CCVector3::fromArray(p.u)); }
+		if (glwin->getClick3DPos(glwin->glWidth() - extend, glwin->glHeight() - extend, p, extend-1)) { objBox.add(CCVector3::fromArray(p.u)); }
 		else goto clearbox;
-		if (glwin->getClick3DPos(10, glwin->glHeight() - 10, p)) { objBox.add(CCVector3::fromArray(p.u)); }
+		if (glwin->getClick3DPos(extend, glwin->glHeight() - extend, p, extend-1)) { objBox.add(CCVector3::fromArray(p.u)); }
 		else goto clearbox;
 	clearbox:
 		objBox.clear();
@@ -13425,47 +13416,48 @@ void MainWindow::doActionShowBestImage()
  			if (!pcObj) { continue; }
 			ccBBox box_ = pcObj->getTheVisiblePointsBBox(camParas);
 			objBox += box_;
-// 			std::vector<CCVector3> cur_hull = pcObj->getTheVisiblePointsHUll(camParas);
-// 			for (auto pt : cur_hull) {
-// 				objBox.add(pt);
-// 			}
  		}
-
-		//objBox = m_ccRoot->getRootEntity()->getDisplayScreenBB_recursive(false, glwin, true);
+		std::cout << "calc bbox from clouds" << std::endl;
 	}
+	std::cout << objBox.minCorner().x << " " << objBox.minCorner().y << " " << objBox.minCorner().z << std::endl;
+	std::cout << objBox.maxCorner().x << " " << objBox.maxCorner().y << " " << objBox.maxCorner().z << std::endl;
 	
 	if (!objBox.isValid()) {
 		return;
 	}
-	//! if the four corners are available
-	
 
-	CCVector3 objCenter = params.objectCenteredView ? CCVector3::fromArray(params.pivotPoint.u) : 
+	CCVector3 objCenter = //params.objectCenteredView ? CCVector3::fromArray(params.pivotPoint.u) : 
 		objBox.getCenter();	// should be seen from the view
 	CCVector3 view_to_obj = objCenter - CCVector3::fromArray(viewPoint.u);
 	view_to_obj.normalize();
-	std::cout << view_to_obj.x << " " << view_to_obj.y << " " << view_to_obj.z << std::endl;
+	
 	CCVector3 obj_to_view = -view_to_obj;
 	vcg::Point3f n(view_to_obj.u), u, v;
 	vcg::GetUV(n, u, v);
-	CCVector3 obj_u = objCenter + CCVector3::fromArray(u.V()) * objBox.getDiagNorm() / 3;
-	CCVector3 obj_v = objCenter + CCVector3::fromArray(v.V()) * objBox.getDiagNorm() / 3;
+	double scale_box = m_pbdrImagePanel->getBoxScale();
+	objBox = ccBBox(objBox.getCenter() - objBox.getDiagVec()*scale_box, objBox.getCenter() + objBox.getDiagVec()*scale_box);
+	m_pbdrImagePanel->setObjBox(objBox);
+
+	CCVector3 obj_o = objCenter - CCVector3::fromArray((u + v).V()) * objBox.getDiagNorm() / 2;
+	CCVector3 obj_u = obj_o + CCVector3::fromArray(u.V()) * objBox.getDiagNorm();
+	CCVector3 obj_v = obj_o + CCVector3::fromArray(v.V()) * objBox.getDiagNorm();
 
 	//! get all cameras available 
 	ccHObject::Container cameras = GetEnabledObjFromGroup(m_imageRoot->getRootEntity(), CC_TYPES::CAMERA_SENSOR, true, true);
-	ccCameraSensor* best_cam = nullptr;
+	
 	// sort by dir and distance
-	double max_area = -DBL_MAX;
-	ccHObject::Container visible_items; int best_index = -1;
+	typedef std::pair<ccCameraSensor*, double> HArea;
+	std::vector<HArea> visible_area;
 	for (ccHObject* cam : cameras) {
-		if (!cam->isEnabled()) {
+		ccCameraSensor* csObj = ccHObjectCaster::ToCameraSensor(cam); if (!csObj) { continue; }
+		csObj->setDisplayOrder(-1);
+		if (!csObj->isEnabled()) { continue; }
+
+		CCVector2 objCenter_img;
+		if (!csObj->fromGlobalCoordToImageCoord(objCenter, objCenter_img))
 			continue;
-		}
-		//m_imageRoot->selectEntity(cam, false);
-		
-		ccCameraSensor* csObj = ccHObjectCaster::ToCameraSensor(cam);
-		//csObj->drawImage(false);
-		if (!csObj) { continue; }
+		visible_area.push_back({ csObj, 0 });
+
 		ccIndexedTransformation trans; csObj->getActiveAbsoluteTransformation(trans);
 		const float* M = trans.data();
 
@@ -13480,49 +13472,52 @@ void MainWindow::doActionShowBestImage()
 		}
 
 		//! sort by projection area
-		CCVector2 objCenter_img, objU_img, objV_img;
-		if (!csObj->fromGlobalCoordToImageCoord(objCenter, objCenter_img) || 
+		CCVector2 objO_img, objU_img, objV_img;
+		if (!csObj->fromGlobalCoordToImageCoord(obj_o, objO_img) ||
 			!csObj->fromGlobalCoordToImageCoord(obj_u, objU_img) ||
 			!csObj->fromGlobalCoordToImageCoord(obj_v, objV_img)) {
 			continue;	//! skip temporarily
 		}
-		visible_items.push_back(cam); 
-		float double_area = (objU_img - objCenter_img).cross(objV_img - objCenter_img);
-		if (double_area > max_area)	{
-			max_area = double_area;
-			best_cam = csObj;
-			best_index = visible_items.size() - 1;
-		}
+		
+		float double_area = (objU_img - objO_img).cross(objV_img - objO_img);
+		visible_area.back().second = double_area;
 	}
-	
-	if (best_cam) {
-		if (best_cam->getParent() && best_cam->getParent()->isEnabled()) {
-			m_imageRoot->selectEntity(best_cam, true);
-			//best_cam->drawImage(true);
-		}
-		m_pbdrImshow->setImageAndCamera(best_cam);
-		//! zoom
-		ccBBox box_2d;
-		for (size_t i = 0; i < 8; i++) {
-			CCVector2 b_2d;
-			best_cam->fromGlobalCoordToImageCoord(objBox.P(i), b_2d);
-			
-			box_2d.add(CCVector3(b_2d.x, b_2d.y, 0));
-		}
-		box_2d = ccBBox(box_2d.getCenter() - box_2d.getDiagVec()*0.3, box_2d.getCenter() + box_2d.getDiagVec()*0.3);
-		if (box_2d.isValid()) {
-			m_pbdrImshow->update2DDisplayZoom(box_2d);
-		}
+	if (visible_area.empty()) {
+		return;
 	}
-	
-	m_pbdrImagePanel->setItems(visible_items, best_index);
+	std::sort(visible_area.begin(), visible_area.end(), [](HArea _l, HArea _r) {
+		return _l.second > _r.second;
+	});
+	for (size_t i = 0; i < visible_area.size(); i++) {
+		ccCameraSensor* camObj = visible_area[i].first;
+		assert(camObj); if (!camObj) return;
+		camObj->setDisplayOrder(i);
+	}
+// 	ccCameraSensor* best_cam = visible_area.front().first;	
+// 	if (best_cam) {
+// 		if (best_cam->getParent() && best_cam->getParent()->isEnabled()) {
+// 			m_imageRoot->selectEntity(best_cam, true);
+// 			//best_cam->drawImage(true);
+// 		}
+// 		m_pbdrImshow->setImageAndCamera(best_cam);
+// 		//! zoom
+// 		ccBBox box_2d;
+// 		for (size_t i = 0; i < 8; i++) {
+// 			CCVector2 b_2d;
+// 			best_cam->fromGlobalCoordToImageCoord(objBox.P(i), b_2d);
+// 			box_2d.add(CCVector3(b_2d.x, b_2d.y, 0));
+// 		}
+// 		if (box_2d.isValid()) {
+// 			m_pbdrImshow->update2DDisplayZoom(box_2d);
+// 		}
+// 	}
+	m_pbdrImagePanel->display(false);
+
+	doActionShowSelectedImage();
 }
 
 void MainWindow::doActionShowSelectedImage()
 {
-	if (!haveSelection()) {
-		return;
-	}
 	ccHObject::Container sels;
 	m_imageRoot->getSelectedEntities(sels, CC_TYPES::CAMERA_SENSOR);
 	if (sels.empty()) {
@@ -13531,5 +13526,19 @@ void MainWindow::doActionShowSelectedImage()
 	ccHObject* sel = sels.front();
 	ccCameraSensor* cam = ccHObjectCaster::ToCameraSensor(sel);
 	if (!cam) { return; }
+
 	m_pbdrImshow->setImageAndCamera(cam);
+	if (m_pbdrImagePanel->isObjChecked()) {
+		ccBBox box_2d;
+		for (size_t i = 0; i < 8; i++) {
+			CCVector2 b_2d;
+			cam->fromGlobalCoordToImageCoord(m_pbdrImagePanel->getObjBox().P(i), b_2d);
+			box_2d.add(CCVector3(b_2d.x, b_2d.y, 0));
+		}
+		if (box_2d.isValid()) {
+			std::cout << box_2d.minCorner().x << " " << box_2d.minCorner().y << " " << box_2d.minCorner().z << std::endl;
+			std::cout << box_2d.maxCorner().x << " " << box_2d.maxCorner().y << " " << box_2d.maxCorner().z << std::endl;
+			m_pbdrImshow->update2DDisplayZoom(box_2d);
+		}
+	}
 }

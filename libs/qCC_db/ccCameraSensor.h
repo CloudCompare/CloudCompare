@@ -262,6 +262,9 @@ public: //image
 
 	inline QImage getImage();
 
+	inline void setDisplayOrder(int order) { m_display_order = order ; }
+	inline int getDisplayOrder() { return m_display_order; }
+
 public: //coordinate systems conversion methods
 
 	//! Computes the coordinates of a 3D point in the global coordinate system knowing its coordinates in the sensor coordinate system.
@@ -541,6 +544,7 @@ protected:
 
 	QImage m_image_thumb;
 	QString m_image_path;
+	int m_display_order;		// sort by area visible
 };
 
 class ccOctreeFrustumIntersector

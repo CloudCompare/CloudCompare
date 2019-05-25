@@ -616,6 +616,8 @@ public: //stereo mode
 	//! Lock the rotation axis
 	void lockRotationAxis(bool state, const CCVector3d& axis);
 
+	ccBBox getCunrrentViewBB();
+
 	//! Returns whether the rotation axis is locaked or not
 	bool isRotationAxisLocked() const { return m_rotationAxisLocked; }
 
@@ -1028,10 +1030,10 @@ protected: //other methods
 	//! Returns the (relative) depth value at a given pixel position
 	/** \return the (relative) depth or 1.0 if none is defined
 	**/
-	GLfloat getGLDepth(int x, int y, bool extendToNeighbors = false);
+	GLfloat getGLDepth(int x, int y, int extendToNeighbors = 0);
 public:
 	//! Returns the approximate 3D position of the clicked pixel
-	bool getClick3DPos(int x, int y, CCVector3d& P3D);
+	bool getClick3DPos(int x, int y, CCVector3d& P3D, int extend = 0);
 
 protected: //members
 

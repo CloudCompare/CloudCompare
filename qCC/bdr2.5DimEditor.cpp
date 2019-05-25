@@ -52,6 +52,11 @@ bdr2Point5DimEditor::bdr2Point5DimEditor()
 
 bdr2Point5DimEditor::~bdr2Point5DimEditor()
 {
+	clearAll();
+}
+
+void bdr2Point5DimEditor::clearAll()
+{
 	if (m_rasterCloud)
 	{
 		if (m_glWindow)
@@ -126,11 +131,11 @@ void bdr2Point5DimEditor::create2DView(QFrame* parentFrame)
 		params.colorScaleUseShader = false;
 		m_glWindow->setDisplayParameters(params,true);
 		m_glWindow->setPerspectiveState(false,true);
-		m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS);
+		m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS | ccGLWindow::INTERACT_ROTATE);
 		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 		m_glWindow->displayOverlayEntities(true);
 		m_glWindow->showCursorCoordinates(true);
-		
+		m_glWindow->lockRotationAxis(true, CCVector3d(0, 0, 1));
 		//add window to the input frame (if any)
 		if (parentFrame)
 		{
@@ -182,7 +187,7 @@ void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 {
 	if (!m_glWindow /*|| !m_grid.isValid()*/)
 		return;
-
+	m_glWindow->setView(CC_TOP_VIEW);
 	//equivalent to 'ccGLWindow::updateConstellationCenterAndZoom' but we take aspect ratio into account
 
 	//we compute the pixel size (in world coordinates)
@@ -228,7 +233,7 @@ void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 
 		params.pixelSize = 1.0f/*static_cast<float>(std::max(realGridWidth / screenWidth, realGridHeight / screenHeight))*/;
 		params.zoom = static_cast<float>(std::min((double)screenWidth / (double)box.getDiagVec().x, (double)screenHeight / (double)box.getDiagVec().y));
-
+		
 		m_glWindow->setViewportParameters(params);
 		m_glWindow->setPointSize(1.0f);
 	}

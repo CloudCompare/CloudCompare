@@ -1165,7 +1165,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 			||	maxTriNormIndex >= normsRead)
 		{
 			//hum, we've got a problem here
-			ccLog::Warning("[OBJ] Malformed file: indexes go higher than the number of elements! (v=%i/tc=%i/n=%i)",maxVertexIndex,maxTexCoordIndex,maxTriNormIndex);
+			ccLog::Warning("[OBJ] Malformed file: indexes go higher than the number of elements! (v=%i/tc=%i/n=%i)", maxVertexIndex, maxTexCoordIndex, maxTriNormIndex);
 			if (maxVertexIndex >= pointsRead)
 			{
 				error = true;
@@ -1175,15 +1175,24 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				objWarnings[INVALID_INDEX] = true;
 				if (maxTexCoordIndex >= texCoordsRead)
 				{
-					texCoords->release();
-					texCoords = nullptr;
-					materials->release();
-					materials = nullptr;
+					if (texCoords)
+					{
+						texCoords->release();
+						texCoords = nullptr;
+					}
+					if (materials)
+					{
+						materials->release();
+						materials = nullptr;
+					}
 				}
 				if (maxTriNormIndex >= normsRead)
 				{
-					normals->release();
-					normals = nullptr;
+					if (normals)
+					{
+						normals->release();
+						normals = nullptr;
+					}
 				}
 			}
 		}

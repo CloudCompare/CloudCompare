@@ -18,7 +18,7 @@
 #include "bdr2.5DimEditor.h"
 
 //Local
-#include "ccBoundingBoxEditorDlg.h"
+#include <QtWidgets/QHBoxLayout>
 #include "ccPersistentSettings.h"
 #include "mainwindow.h"
 
@@ -30,6 +30,9 @@
 #include <ccColorTypes.h>
 #include <ccImage.h>
 #include <ccCameraSensor.h>
+#include <ccPolyline.h>
+#include <ccGLWindow.h>
+#include <ccBBox.h>
 
 //qCC_gl
 #include <ccGLWidget.h>
@@ -42,11 +45,13 @@
 //System
 #include <assert.h>
 
+#include "stocker_parser.h"
+
 bdr2Point5DimEditor::bdr2Point5DimEditor()
-	: m_bbEditorDlg(0)
-	, m_glWindow(0)
-	, m_rasterCloud(0)
+	: m_glWindow(nullptr)
+	, m_associate_3DView(nullptr)
 	, m_image(nullptr)
+	, m_cursor_cross(nullptr)
 {
 }
 
@@ -57,13 +62,6 @@ bdr2Point5DimEditor::~bdr2Point5DimEditor()
 
 void bdr2Point5DimEditor::clearAll()
 {
-	if (m_rasterCloud)
-	{
-		if (m_glWindow)
-			m_glWindow->removeFromOwnDB(m_rasterCloud);
-		delete m_rasterCloud;
-		m_rasterCloud = 0;
-	}
 	if (m_image) {
 		if (m_glWindow)
 			m_glWindow->removeFromOwnDB(m_image);
@@ -72,115 +70,64 @@ void bdr2Point5DimEditor::clearAll()
 	}
 }
 
-double bdr2Point5DimEditor::getGridStep() const
+void bdr2Point5DimEditor::updateCursorPos(int x, int y, Qt::MouseButtons buttons)
 {
-	return 0.0;
-}
-
-unsigned char bdr2Point5DimEditor::getProjectionDimension() const
-{
-	return 0;
-}
-
-ccRasterGrid::ProjectionType bdr2Point5DimEditor::getTypeOfProjection() const
-{
-	return ccRasterGrid::ProjectionType();
-}
-
-bool bdr2Point5DimEditor::showGridBoxEditor()
-{
-	if (m_bbEditorDlg)
-	{
-		unsigned char projDim = getProjectionDimension();
-		assert(projDim < 3);
-		m_bbEditorDlg->set2DMode(true, projDim);
-		if (m_bbEditorDlg->exec())
-		{
-			gridIsUpToDate(false);
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void bdr2Point5DimEditor::createBoundingBoxEditor(const ccBBox& gridBBox, QWidget* parent)
-{
-	if (!m_bbEditorDlg)
-	{
-		m_bbEditorDlg = new ccBoundingBoxEditorDlg(parent);
-		m_bbEditorDlg->setBaseBBox(gridBBox, false);
-	}
+	if (!m_cursor_cross || !m_associate_3DView) { return; }
+	const CCVector3* V0 = m_cursor_cross->getPoint(0);
+	float x1, y1; *const_cast<CCVector3*>(V0) = CCVector3(0, 0, 0);
+	V0->x;
+	V0->y;
 }
 
 void bdr2Point5DimEditor::create2DView(QFrame* parentFrame)
 {
-	if (!m_glWindow)
+	if (m_glWindow) return;
+	
+	QWidget* glWidget = 0;
+	CreateGLWindow(m_glWindow, glWidget, false, true);
+	assert(m_glWindow && glWidget);
+
+	ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
+	//black (text) & white (background) display by default
+	params.backgroundCol = ccColor::white;
+	params.textDefaultCol = ccColor::black;
+	params.drawBackgroundGradient = false;
+	params.decimateMeshOnMove = false;
+	params.displayCross = false;
+	params.colorScaleUseShader = false;
+	m_glWindow->setDisplayParameters(params, true);
+	m_glWindow->setPerspectiveState(false, true);
+	m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS | ccGLWindow::INTERACT_ROTATE);
+	m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
+	m_glWindow->displayOverlayEntities(true);
+	m_glWindow->showCursorCoordinates(true);
+	m_glWindow->lockRotationAxis(true, CCVector3d(0, 0, 1));
+
+	ccPointCloud* pc;
+	m_cursor_cross = new ccPolyline(pc);
+	//m_cursor_cross->add()
+
+	//add window to the input frame (if any)
+	if (parentFrame)
 	{
-		QWidget* glWidget = 0;
-		CreateGLWindow(m_glWindow, glWidget, false, true);
-		assert(m_glWindow && glWidget);
-		
-		ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
-		//black (text) & white (background) display by default
-		params.backgroundCol = ccColor::white;
-		params.textDefaultCol = ccColor::black;
-		params.drawBackgroundGradient = false;
-		params.decimateMeshOnMove = false;
-		params.displayCross = false;
-		params.colorScaleUseShader = false;
-		m_glWindow->setDisplayParameters(params,true);
-		m_glWindow->setPerspectiveState(false,true);
-		m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS | ccGLWindow::INTERACT_ROTATE);
-		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
-		m_glWindow->displayOverlayEntities(true);
-		m_glWindow->showCursorCoordinates(true);
-		m_glWindow->lockRotationAxis(true, CCVector3d(0, 0, 1));
-		//add window to the input frame (if any)
-		if (parentFrame)
-		{
-			auto	layout = new QHBoxLayout;
-			
-			layout->setContentsMargins( 0, 0, 0, 0 );
-			layout->addWidget( glWidget) ;
+		auto	layout = new QHBoxLayout;
 
-			parentFrame->setLayout( layout );
-		}
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->addWidget(glWidget);
+
+		parentFrame->setLayout(layout);
+	}	
+}
+
+void bdr2Point5DimEditor::setAssociate3DView(ccGLWindow * win)
+{
+	if (!win) {
+		return;
 	}
-}
-
-bool bdr2Point5DimEditor::getGridSize(unsigned& gridWidth, unsigned& gridHeight) const
-{
-	//vertical dimension
-	const unsigned char Z = getProjectionDimension();
-
-	//cloud bounding-box --> grid size
-	ccBBox box = getCustomBBox();
-
-	//grid step
-	double gridStep = getGridStep();
-
-	return ccRasterGrid::ComputeGridSize(Z, box, gridStep, gridWidth, gridHeight);
-}
-
-QString bdr2Point5DimEditor::getGridSizeAsString() const
-{
-	unsigned gridWidth = 0, gridHeight = 0;
-	if (!getGridSize(gridWidth, gridHeight))
-	{
-		return QObject::tr("invalid grid box");
+	if (m_associate_3DView && m_associate_3DView == win) {
+		return;
 	}
-
-	return QString("%1 x %2").arg(gridWidth).arg(gridHeight);
-}
-
-ccBBox bdr2Point5DimEditor::getCustomBBox() const
-{
-	return (m_bbEditorDlg ? m_bbEditorDlg->getBox() : ccBBox());
-}
-
-void bdr2Point5DimEditor::gridIsUpToDate(bool state)
-{
+	m_associate_3DView = win;
 }
 
 void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
@@ -191,41 +138,7 @@ void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 	//equivalent to 'ccGLWindow::updateConstellationCenterAndZoom' but we take aspect ratio into account
 
 	//we compute the pixel size (in world coordinates)
-	if (m_grid.isValid())
 	{
-		ccViewportParameters params = m_glWindow->getViewportParameters();
-
-		double realGridWidth  = m_grid.width  * m_grid.gridStep;
-		double realGridHeight = m_grid.height * m_grid.gridStep;
-
-		static const int screnMargin = 20;
-		int screenWidth = std::max(1, m_glWindow->glWidth() - 2 * screnMargin);
-		int screenHeight = std::max(1, m_glWindow->glHeight() - 2 * screnMargin);
-
-		int pointSize = 1;
-		if (	static_cast<int>(m_grid.width)  < screenWidth
-			&&	static_cast<int>(m_grid.height) < screenHeight)
-		{
-			int vPointSize = static_cast<int>(ceil(static_cast<float>(screenWidth) / m_grid.width));
-			int hPointSize = static_cast<int>(ceil(static_cast<float>(screenHeight) / m_grid.height));
-			pointSize = std::min(vPointSize, hPointSize);
-
-			//if the grid is too small (i.e. necessary point size > 10)
-			if (pointSize > 10)
-			{
-				pointSize = 10;
-				screenWidth  = m_grid.width  * pointSize;
-				screenHeight = m_grid.height * pointSize;
-			}
-		}
-
-		params.pixelSize = static_cast<float>(std::max(realGridWidth / screenWidth, realGridHeight / screenHeight));
-		params.zoom = 1.0f;
-
-		m_glWindow->setViewportParameters(params);
-		m_glWindow->setPointSize(pointSize);
-	}
-	else {
 		ccViewportParameters params = m_glWindow->getViewportParameters();
 		static const int screnMargin = 5;
 		int screenWidth = std::max(1, m_glWindow->glWidth() - 2 * screnMargin);
@@ -248,37 +161,6 @@ void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 	m_glWindow->invalidateVisualization();
 	m_glWindow->deprecate3DLayer();
 	m_glWindow->redraw();
-}
-
-ccPointCloud* bdr2Point5DimEditor::convertGridToCloud(	const std::vector<ccRasterGrid::ExportableFields>& exportedFields,
-														bool interpolateSF,
-														bool interpolateColors,
-														bool resampleInputCloudXY,
-														bool resampleInputCloudZ,
-														ccGenericPointCloud* inputCloud,
-														bool fillEmptyCells,
-														double emptyCellsHeight,
-														bool exportToOriginalCS) const
-{
-	//projection dimension
-	const unsigned char Z = getProjectionDimension();
-	assert(Z <= 2);
-
-	//cloud bounding-box
-	ccBBox box = getCustomBBox();
-	assert(box.isValid());
-
-	return m_grid.convertToCloud(	exportedFields,
-									interpolateSF,
-									interpolateColors,
-									resampleInputCloudXY,
-									resampleInputCloudZ,
-									inputCloud,
-									Z,
-									box,
-									fillEmptyCells,
-									emptyCellsHeight,
-									exportToOriginalCS);
 }
 
 void bdr2Point5DimEditor::setImage(QString image_path)
@@ -315,32 +197,3 @@ void bdr2Point5DimEditor::ZoomFit()
 	update2DDisplayZoom(box);
 }
 
-ccRasterGrid::EmptyCellFillOption bdr2Point5DimEditor::getFillEmptyCellsStrategy(QComboBox* comboBox) const
-{
-	if (!comboBox)
-	{
-		assert(false);
-		return ccRasterGrid::LEAVE_EMPTY;
-	}
-
-	switch (comboBox->currentIndex())
-	{
-	case 0:
-		return ccRasterGrid::LEAVE_EMPTY;
-	case 1:
-		return ccRasterGrid::FILL_MINIMUM_HEIGHT;
-	case 2:
-		return ccRasterGrid::FILL_AVERAGE_HEIGHT;
-	case 3:
-		return ccRasterGrid::FILL_MAXIMUM_HEIGHT;
-	case 4:
-		return ccRasterGrid::FILL_CUSTOM_HEIGHT;
-	case 5:
-		return ccRasterGrid::INTERPOLATE;
-	default:
-		//shouldn't be possible for this option!
-		assert(false);
-	}
-
-	return ccRasterGrid::LEAVE_EMPTY;
-}

@@ -11,6 +11,7 @@
 #include "ccPointCloud.h"
 #include "ccHObjectCaster.h"
 #include "ccBBox.h"
+#include "bdrTraceFootprintDlg.h"
 #include "vcg/space/point3.h"
 
 #include <iostream>
@@ -26,6 +27,14 @@ bdrImageEditorPanel::bdrImageEditorPanel(bdr2Point5DimEditor* img, ccDBRoot* roo
 {
 	setupUi(this);
 	verticalLayout->setContentsMargins(0, 0, 0, 0);
+	verticalLayout->setSpacing(0);
+
+	m_pbdrTraceFP = new bdrTraceFootprint(parent);
+	m_pbdrTraceFP->setFixedHeight(23);
+	m_pbdrTraceFP->hide();
+	connect(m_pbdrTraceFP, &ccOverlayDialog::processFinished, this, &bdrImageEditorPanel::stopEditor);
+	verticalLayoutTraceFP->addWidget(m_pbdrTraceFP);
+
 	setMinimumHeight(23);
 	setMaximumHeight(155);
 	m_image_display_height = 80;
@@ -35,6 +44,8 @@ bdrImageEditorPanel::bdrImageEditorPanel(bdr2Point5DimEditor* img, ccDBRoot* roo
 	connect(displayAllToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::display);
 	connect(PreviousToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::previous);
 	connect(NextToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::next);
+	connect(polyEditToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::startEditor);
+
 	//imageListWidget
 	imageListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
 	connect(imageListWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &bdrImageEditorPanel::changeSelection);
@@ -44,16 +55,34 @@ bdrImageEditorPanel::bdrImageEditorPanel(bdr2Point5DimEditor* img, ccDBRoot* roo
 	connect(m_root, &ccDBRoot::selectionChanged, this, &bdrImageEditorPanel::selectImage);
 
 }
+
 void bdrImageEditorPanel::ZoomFit()
 {
 	if (m_pbdrImshow) {
 		m_pbdrImshow->ZoomFit();
 	}
 }
+
 void bdrImageEditorPanel::toogleImageList()
 {
-	setFixedHeight(toggleListToolButton->isChecked() ? 155 : 23);
+	if (toggleListToolButton->isChecked()) {
+		if (m_pbdrTraceFP->isHidden()) {
+			setFixedHeight(155);
+		}
+		else {
+			setFixedHeight(178);
+		}
+	}
+	else {
+		if (m_pbdrTraceFP->isHidden()) {
+			setFixedHeight(23);
+		}
+		else {
+			setFixedHeight(46);
+		}
+	}
 }
+
 void bdrImageEditorPanel::changeSelection()
 {
 	QList<QListWidgetItem*> list = imageListWidget->selectedItems();
@@ -141,6 +170,30 @@ void bdrImageEditorPanel::next()
 void bdrImageEditorPanel::toogleDisplayAll()
 {
 	display(!displayAllToolButton->isChecked());
+}
+
+void bdrImageEditorPanel::startEditor()
+{
+	if (!m_pbdrTraceFP) {
+		return;
+	}
+	polyEditToolButton->setChecked(true);
+	//m_pbdrTraceFP->setExtractMode();
+	m_pbdrTraceFP->linkWith(m_pbdrImshow->getGLWindow());
+	if (!m_pbdrTraceFP->start()) {
+		stopEditor(false);
+	}
+}
+
+void bdrImageEditorPanel::stopEditor(bool state)
+{
+	polyEditToolButton->setChecked(false);
+	if (state) {
+		
+	}
+	if (m_pbdrTraceFP) {
+		m_pbdrTraceFP->removeAllEntities();
+	}
 }
 
 void bdrImageEditorPanel::clearAll()
@@ -259,4 +312,5 @@ bool bdrImageEditorPanel::isObjChecked()
 {
 	return m_obj_box.isValid() && CheckObjToolButton->isChecked();	
 }
+
 

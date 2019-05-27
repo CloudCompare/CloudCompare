@@ -710,6 +710,8 @@ private:
 
 	void CreateImageEditor();
 
+	void Link3DAnd2DWindow();
+
 	//! Building Reconstruction dialogs
 	bdrPlaneSegDlg* m_pbdrPSDlg;
 	bdrLine3DppDlg* m_pbdrl3dDlg;

@@ -932,13 +932,25 @@ void MainWindow::CreateImageEditor()
 	m_pbdrImshow = new bdr2Point5DimEditor();
 	m_pbdrImshow->create2DView(m_UI->mapFrame);
 
-	m_pbdrImagePanel = new bdrImageEditorPanel(m_pbdrImshow, m_imageRoot, this);
-	m_UI->verticalLayoutImageEditor->addWidget(m_pbdrImagePanel);
+	m_pbdrImagePanel = new bdrImageEditorPanel(m_pbdrImshow, m_imageRoot, this);	
+	m_UI->verticalLayoutImageEditor->addWidget(m_pbdrImagePanel);	
 
 	connect(m_pbdrImagePanel->OverlayToolButton, &QAbstractButton::clicked, this, &MainWindow::toggleImageOverlay);
 	connect(m_pbdrImagePanel->displayBestToolButton, &QAbstractButton::clicked, this, &MainWindow::doActionShowBestImage);
 
 	connect(m_pbdrImagePanel, &bdrImageEditorPanel::imageDisplayed, this, &MainWindow::doActionShowSelectedImage);
+	Link3DAnd2DWindow();
+}
+
+void MainWindow::Link3DAnd2DWindow()
+{
+	if (!m_pbdrImshow) { return; }
+	m_pbdrImshow->setAssociate3DView(getActiveGLWindow());
+	ccGLWindow* win = m_pbdrImshow->getAssociate3DView();
+	if (win) {
+		connect(win, &ccGLWindow::mouseMoved, m_pbdrImshow, &bdr2Point5DimEditor::updateCursorPos);
+		connect(win, &QObject::destroyed, m_pbdrImshow, &bdr2Point5DimEditor::destroyAss3DView);
+	}
 }
 
 void MainWindow::doActionColorize()
@@ -13384,15 +13396,16 @@ void MainWindow::doActionShowBestImage()
 
 	CCVector3d viewPoint = params.getViewPoint();
 	ccBBox objBox;
-	if (params.objectCenteredView)
+	//! wrong - bug remains
+	if (/*params.objectCenteredView*/0)
 	{
-		float scale_width = std::min(glwin->glWidth(), glwin->glHeight());
+		float scale_width = std::min(glwin->glWidth(), glwin->glHeight()) * 0.8;
 		scale_width = scale_width * params.pixelSize / params.zoom;
 		CCVector3 half_box(scale_width / 2, scale_width / 2, scale_width / 2);
 		objBox.add(CCVector3::fromArray(params.pivotPoint.u) + half_box);
 		objBox.add(CCVector3::fromArray(params.pivotPoint.u) - half_box);
 	}
-	if (!objBox.isValid())
+	if (/*!objBox.isValid()*/0)
 	{
 		CCVector3d p;
 		int extend = 50;	// TODO: the extend should be smaller than glwidth
@@ -13435,7 +13448,7 @@ void MainWindow::doActionShowBestImage()
 	vcg::Point3f n(view_to_obj.u), u, v;
 	vcg::GetUV(n, u, v);
 	double scale_box = m_pbdrImagePanel->getBoxScale();
-	objBox = ccBBox(objBox.getCenter() - objBox.getDiagVec()*scale_box, objBox.getCenter() + objBox.getDiagVec()*scale_box);
+	objBox = ccBBox(objBox.getCenter() - objBox.getDiagVec()*scale_box / 2, objBox.getCenter() + objBox.getDiagVec()*scale_box / 2);
 	m_pbdrImagePanel->setObjBox(objBox);
 
 	CCVector3 obj_o = objCenter - CCVector3::fromArray((u + v).V()) * objBox.getDiagNorm() / 2;

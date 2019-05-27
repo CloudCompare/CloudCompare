@@ -20,6 +20,23 @@
       <number>0</number>
      </property>
      <item>
+      <widget class="QToolButton" name="polyEditToolButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icones.qrc">
+         <normaloff>:/CC/Stocker/images/stocker/pen.png</normaloff>:/CC/Stocker/images/stocker/pen.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QToolButton" name="ZoomFitToolButton">
        <property name="toolTip">
         <string>Zoom Fit</string>
@@ -206,7 +223,16 @@
     </layout>
    </item>
    <item>
+    <layout class="QVBoxLayout" name="verticalLayoutTraceFP"/>
+   </item>
+   <item>
     <widget class="QListWidget" name="imageListWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>

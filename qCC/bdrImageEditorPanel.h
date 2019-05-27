@@ -8,6 +8,7 @@ class ccDBRoot;
 class ccHObject;
 class ccBBox;
 class ccCameraSensor;
+class bdrTraceFootprint;
 #include "ccBBox.h"
 
 //! Dialog for qRansacSD plugin
@@ -29,6 +30,9 @@ protected slots:
 	void previous();
 	void next();
 	void toogleDisplayAll();
+	void startEditor();
+	void stopEditor(bool);
+	
 signals:
 	void imageDisplayed();
 public:
@@ -43,6 +47,7 @@ public:
 	
 private:
 	bdr2Point5DimEditor* m_pbdrImshow;
+	bdrTraceFootprint* m_pbdrTraceFP;
 	ccDBRoot* m_root;
 	ccBBox m_obj_box;
 	int m_image_display_height;

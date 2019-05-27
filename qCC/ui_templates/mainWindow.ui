@@ -3249,6 +3249,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Show cursor coordinates</string>
    </property>

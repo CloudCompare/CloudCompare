@@ -76,9 +76,13 @@ void bdr2Point5DimEditor::clearAll()
 	}
 }
 
-void bdr2Point5DimEditor::updateCursorPos(const CCVector3d& P)
+void bdr2Point5DimEditor::updateCursorPos(const CCVector3d& P, bool b3d)
 {
-	if (!m_cursor_cross || m_cursor_cross->size() < 5 || !m_associate_3DView) { m_cursor_cross->setVisible(false); return; }
+	if (!m_cursor_cross || m_cursor_cross->size() < 5 || !m_associate_3DView) { return; }
+	if (!b3d) {
+		m_cursor_cross->setVisible(false);
+		return;
+	}
 	CCVector3 image_pt;
 	if (FromGlobalToImage(CCVector3::fromArray(P.u), image_pt)) {
 		*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(0)) = image_pt;
@@ -101,6 +105,7 @@ bool bdr2Point5DimEditor::FromGlobalToImage(const CCVector3 & P_global, CCVector
 		return false;
 	}
 	else {
+		p_2d.y = m_image->getH() - p_2d.y;
 		P_local = CCVector3(p_2d, 1);
 		return true;
 	}

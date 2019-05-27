@@ -939,7 +939,6 @@ void MainWindow::CreateImageEditor()
 	connect(m_pbdrImagePanel->displayBestToolButton, &QAbstractButton::clicked, this, &MainWindow::doActionShowBestImage);
 
 	connect(m_pbdrImagePanel, &bdrImageEditorPanel::imageDisplayed, this, &MainWindow::doActionShowSelectedImage);
-	Link3DAnd2DWindow();
 }
 
 void MainWindow::Link3DAnd2DWindow()
@@ -5823,7 +5822,7 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 		//we must notify the picking hub as well if the window is destroyed
 		connect(view3D, &QObject::destroyed, m_pickingHub, &ccPickingHub::onActiveWindowDeleted);
 	}
-
+	view3D->showCursorCoordinates(true);
 	view3D->addSceneDB(m_ccRoot->getRootEntity());
 	view3D->addSceneDB(m_imageRoot->getRootEntity());
 	viewWidget->setAttribute(Qt::WA_DeleteOnClose);
@@ -6344,7 +6343,6 @@ void MainWindow::deactivateSectionExtractionMode(bool state)
 	ccGLWindow* win = getActiveGLWindow();
 	if (win) {
 		win->redraw();
-		Link3DAnd2DWindow();
 	}
 }
 
@@ -10031,6 +10029,7 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		m_UI->actionAutoPickRotationCenter->setChecked(win->autoPickPivotAtCenter());
 		m_UI->actionAutoPickRotationCenter->blockSignals(false);
 	}
+	Link3DAnd2DWindow();
 
 	m_UI->actionLockRotationAxis->setEnabled(win != nullptr);
 	m_UI->actionEnableStereo->setEnabled(win != nullptr);
@@ -12991,7 +12990,6 @@ void MainWindow::doActionBDFootPrintManual()
 		win->setGlFilter(firstDisplay->getGlFilter()->clone());
 	}
 	m_seTool->linkWith(win);
-	Link3DAnd2DWindow();
 
 	freezeUI(true);
 	m_UI->toolBarView->setDisabled(true);

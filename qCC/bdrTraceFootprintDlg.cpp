@@ -157,7 +157,9 @@ void bdrTraceFootprint::onShortcutTriggered(int key)
 	case Qt::Key_Delete:
 		deleteSelectedPolyline();
 		return;
+	case Qt::Key_Enter:
 
+		return;
 	default:
 		//nothing to do
 		break;
@@ -605,7 +607,7 @@ bool bdrTraceFootprint::addPolyline(ccPolyline* inputPoly, bool alreadyInDB/*=tr
 		assert(vertDim >= 0 && vertDim < 3);
 
 		//get default altitude from the cloud(s) bouding-box
-		PointCoordinateType defaultZ = 1e-6;
+		PointCoordinateType defaultZ = 1;//! XYLIU for image in 2d (3d fake)
 		if (m_cloudsBox.isValid())
 		{
 			defaultZ = m_cloudsBox.maxCorner()[vertDim];
@@ -837,6 +839,30 @@ void bdrTraceFootprint::addPointToPolyline(int x, int y)
 	}
 
 	m_associatedWin->redraw(true, false);
+}
+
+void bdrTraceFootprint::addCurrentPointToPolyline()
+{
+	if (!m_associatedWin)
+	{
+		assert(false);
+		return;
+	}
+
+	//process not started yet?
+	if ((m_state & RUNNING) == 0)
+		return;
+
+	if (!m_editedPoly)
+		return;
+
+	unsigned vertCount = m_editedPolyVertices->size();
+	if (vertCount < 2)
+		return;
+
+	//we replace last point by the current one
+	CCVector3* lastP = const_cast<CCVector3*>(m_editedPolyVertices->getPointPersistentPtr(vertCount - 1));
+	addPointToPolyline(lastP->x, lastP->y);
 }
 
 void bdrTraceFootprint::closePolyLine(int, int)

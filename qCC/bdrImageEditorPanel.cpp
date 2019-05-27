@@ -196,9 +196,9 @@ void bdrImageEditorPanel::stopEditor(bool state)
 	}
 }
 
-void bdrImageEditorPanel::updateCursorPos(const CCVector3d & P)
+void bdrImageEditorPanel::updateCursorPos(const CCVector3d & P, bool b3d)
 {
-	m_pbdrImshow->updateCursorPos(P);
+	m_pbdrImshow->updateCursorPos(P, b3d);
 }
 
 void bdrImageEditorPanel::clearAll()

@@ -44,7 +44,7 @@ public:
 	ccBBox getObjBox(); 
 	void setObjBox(ccBBox box); 
 	bool isObjChecked();
-	void updateCursorPos(const CCVector3d& P);
+	void updateCursorPos(const CCVector3d& P, bool b3d);
 private:
 	bdr2Point5DimEditor* m_pbdrImshow;
 	bdrTraceFootprint* m_pbdrTraceFP;

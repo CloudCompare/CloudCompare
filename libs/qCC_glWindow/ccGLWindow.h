@@ -758,7 +758,7 @@ signals:
 	**/
 	void mouseMoved(int x, int y, Qt::MouseButtons buttons);
 
-	void mouseMoved3D(const CCVector3d&);
+	void mouseMoved3D(const CCVector3d& P, bool b3d);
 
 	//! Signal emitted when a mouse button is released (cursor on the window)
 	/** See INTERACT_SIG_BUTTON_RELEASED.

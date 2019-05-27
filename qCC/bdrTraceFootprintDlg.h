@@ -72,6 +72,7 @@ protected:
 	void apply();
 	void cancel();
 	void addPointToPolyline(int x, int y);
+	void addCurrentPointToPolyline();
 	void closePolyLine(int x=0, int y=0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
 	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
 	void enableSectionEditingMode(bool);

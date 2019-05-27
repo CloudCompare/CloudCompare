@@ -36,7 +36,7 @@ public:
 	ccGLWindow* getAssociate3DView() { return m_associate_3DView; }
 	void destroyAss3DView() { m_associate_3DView = nullptr; }
 
-	void updateCursorPos(const CCVector3d& P);
+	void updateCursorPos(const CCVector3d& P, bool b3d);
  
 	bool FromGlobalToImage(const CCVector3 & P_global, CCVector3 & P_local, bool withLensError = true);
 

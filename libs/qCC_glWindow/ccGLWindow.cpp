@@ -3891,6 +3891,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			if (getClick3DPos(x, y, P))
 			{
 				message += QString(" --> 3D (%1 ; %2 ; %3)").arg(P.x).arg(P.y).arg(P.z);
+				emit mouseMoved3D(P);
 			}
 			this->displayNewMessage(message, LOWER_LEFT_MESSAGE, false, 2, SCREEN_SIZE_MESSAGE);
 			redraw(true, false);

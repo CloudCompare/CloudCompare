@@ -948,8 +948,8 @@ void MainWindow::Link3DAnd2DWindow()
 	m_pbdrImshow->setAssociate3DView(getActiveGLWindow());
 	ccGLWindow* win = m_pbdrImshow->getAssociate3DView();
 	if (win) {
-		connect(win, &ccGLWindow::mouseMoved, m_pbdrImshow, &bdr2Point5DimEditor::updateCursorPos);
-		connect(win, &QObject::destroyed, m_pbdrImshow, &bdr2Point5DimEditor::destroyAss3DView);
+	connect(win, &ccGLWindow::mouseMoved3D, m_pbdrImagePanel, &bdrImageEditorPanel::updateCursorPos);
+//	connect(win, &ccGLWindow::destroyed, m_pbdrImshow, &bdr2Point5DimEditor::destroyAss3DView);
 	}
 }
 
@@ -6342,8 +6342,10 @@ void MainWindow::deactivateSectionExtractionMode(bool state)
 	updateUI();
 
 	ccGLWindow* win = getActiveGLWindow();
-	if (win)
+	if (win) {
 		win->redraw();
+		Link3DAnd2DWindow();
+	}
 }
 
 void MainWindow::activateSegmentationMode()
@@ -12989,6 +12991,7 @@ void MainWindow::doActionBDFootPrintManual()
 		win->setGlFilter(firstDisplay->getGlFilter()->clone());
 	}
 	m_seTool->linkWith(win);
+	Link3DAnd2DWindow();
 
 	freezeUI(true);
 	m_UI->toolBarView->setDisabled(true);

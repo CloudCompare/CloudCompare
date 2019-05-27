@@ -2,7 +2,6 @@
 #define BDR_2_5D_EDITOR_HEADER
 
 //qCC_db
-#include <QDialog>
 class ccGLWindow;
 class QWidget;
 class QFrame;
@@ -10,7 +9,7 @@ class QComboBox;
 class ccImage;
 class ccCameraSensor;
 class ccBBox;
-class ccPolyline;
+#include "ccPolyline.h"
 
 //! 2.5D data editor (generic interface)
 class bdr2Point5DimEditor
@@ -37,7 +36,9 @@ public:
 	ccGLWindow* getAssociate3DView() { return m_associate_3DView; }
 	void destroyAss3DView() { m_associate_3DView = nullptr; }
 
-	void updateCursorPos(int x, int y, Qt::MouseButtons buttons);
+	void updateCursorPos(const CCVector3d& P);
+ 
+	bool FromGlobalToImage(const CCVector3 & P_global, CCVector3 & P_local, bool withLensError = true);
 
 	void setImage(QString image_path);
 	void setImageAndCamera(ccCameraSensor* cam);

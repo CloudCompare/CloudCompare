@@ -67,6 +67,7 @@ public:
 	//**** inherited form GenericIndexedCloud ****//
 	inline const CCVector3* getPoint(unsigned index) const override { assert(m_theAssociatedCloud && index < size()); return m_theAssociatedCloud->getPoint(m_theIndexes[index]); }
 	inline void getPoint(unsigned index, CCVector3& P) const override { assert(m_theAssociatedCloud && index < size()); m_theAssociatedCloud->getPoint(m_theIndexes[index], P); }
+	inline const CCVector3* getPoint_local(unsigned index) const { assert(m_theAssociatedCloud && index < m_theAssociatedCloud->size()); return m_theAssociatedCloud->getPoint(index); }
 
 	//**** inherited form GenericIndexedCloudPersist ****//
 	inline const CCVector3* getPointPersistentPtr(unsigned index) const override { assert(m_theAssociatedCloud && index < size()); return m_theAssociatedCloud->getPointPersistentPtr(m_theIndexes[index]); }

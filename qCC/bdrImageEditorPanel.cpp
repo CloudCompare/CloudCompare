@@ -196,6 +196,11 @@ void bdrImageEditorPanel::stopEditor(bool state)
 	}
 }
 
+void bdrImageEditorPanel::updateCursorPos(const CCVector3d & P)
+{
+	m_pbdrImshow->updateCursorPos(P);
+}
+
 void bdrImageEditorPanel::clearAll()
 {
 	imageListWidget->clear();

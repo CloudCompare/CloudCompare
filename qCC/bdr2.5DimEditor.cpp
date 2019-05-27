@@ -58,6 +58,12 @@ bdr2Point5DimEditor::bdr2Point5DimEditor()
 bdr2Point5DimEditor::~bdr2Point5DimEditor()
 {
 	clearAll();
+	if (m_cursor_cross) {
+		if (m_glWindow)
+			m_glWindow->removeFromOwnDB(m_cursor_cross);
+		delete m_cursor_cross;
+		m_cursor_cross = nullptr;
+	}
 }
 
 void bdr2Point5DimEditor::clearAll()
@@ -70,13 +76,34 @@ void bdr2Point5DimEditor::clearAll()
 	}
 }
 
-void bdr2Point5DimEditor::updateCursorPos(int x, int y, Qt::MouseButtons buttons)
+void bdr2Point5DimEditor::updateCursorPos(const CCVector3d& P)
 {
-	if (!m_cursor_cross || !m_associate_3DView) { return; }
-	const CCVector3* V0 = m_cursor_cross->getPoint(0);
-	float x1, y1; *const_cast<CCVector3*>(V0) = CCVector3(0, 0, 0);
-	V0->x;
-	V0->y;
+	if (!m_cursor_cross || m_cursor_cross->size() < 5 || !m_associate_3DView) { m_cursor_cross->setVisible(false); return; }
+	CCVector3 image_pt;
+	if (FromGlobalToImage(CCVector3::fromArray(P.u), image_pt)) {
+		*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(0)) = image_pt;
+		*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(1)) = image_pt + CCVector3(0, 50, 0);
+		*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(2)) = image_pt - CCVector3(50, 0, 0);
+		*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(3)) = image_pt - CCVector3(0, 50, 0);
+		*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(4)) = image_pt + CCVector3(50, 0, 0);
+		m_cursor_cross->setVisible(true);
+		m_glWindow->redraw();
+	}
+}
+
+bool bdr2Point5DimEditor::FromGlobalToImage(const CCVector3 & P_global, CCVector3 & P_local, bool withLensError)
+{
+	if (!m_image || !m_image->getAssociatedSensor()) {
+		return false;
+	}
+	CCVector2 p_2d;
+	if (!m_image->getAssociatedSensor()->fromGlobalCoordToImageCoord(P_global, p_2d, withLensError)) {
+		return false;
+	}
+	else {
+		P_local = CCVector3(p_2d, 1);
+		return true;
+	}
 }
 
 void bdr2Point5DimEditor::create2DView(QFrame* parentFrame)
@@ -103,9 +130,20 @@ void bdr2Point5DimEditor::create2DView(QFrame* parentFrame)
 	m_glWindow->showCursorCoordinates(true);
 	m_glWindow->lockRotationAxis(true, CCVector3d(0, 0, 1));
 
-	ccPointCloud* pc;
+	ccPointCloud* pc = new ccPointCloud();
+	for (size_t i = 0; i < 5; i++) { pc->addPoint(CCVector3(0, 0, 0)); }	
 	m_cursor_cross = new ccPolyline(pc);
-	//m_cursor_cross->add()
+	
+	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(1);
+	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(2);
+	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(3);
+	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(4);
+	m_cursor_cross->setVisible(false);
+	m_cursor_cross->setDisplay(m_glWindow);
+	m_cursor_cross->setColor(ccColor::red);
+	m_cursor_cross->showColors(true);
+	m_cursor_cross->setWidth(2);
+	m_glWindow->addToOwnDB(m_cursor_cross);
 
 	//add window to the input frame (if any)
 	if (parentFrame)

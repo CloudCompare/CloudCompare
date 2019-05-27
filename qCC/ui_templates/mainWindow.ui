@@ -1271,24 +1271,33 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionClose3DView">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Cl&amp;ose</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+F4</string>
-   </property>
   </action>
   <action name="actionCloseAll3DViews">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Close &amp;All</string>
    </property>
   </action>
   <action name="actionTile3DViews">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Tile</string>
    </property>
   </action>
   <action name="actionCascade3DViews">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Cascade</string>
    </property>
@@ -1304,11 +1313,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionNew3DView">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>New</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+F3</string>
    </property>
   </action>
   <action name="actionClone">

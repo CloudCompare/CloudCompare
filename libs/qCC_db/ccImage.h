@@ -33,8 +33,9 @@ public:
 
 	enum IMAGE_DISPLAY_TYPE
 	{
-		IMAGE_DISPLAY_2D,
-		IMAGE_DISPLAY_3D,
+		IMAGE_DISPLAY_2D,	// 2d as foreground
+		IMAGE_DISPLAY_2P5D,	// fake 3D
+		IMAGE_DISPLAY_3D,	// real 3D
 	};
 
 	//! Default constructor

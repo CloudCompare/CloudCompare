@@ -10,6 +10,7 @@ class ccImage;
 class ccCameraSensor;
 class ccBBox;
 #include "ccPolyline.h"
+#define IMAGE_MARKER_DISPLAY_Z 1
 
 //! 2.5D data editor (generic interface)
 class bdr2Point5DimEditor
@@ -25,7 +26,7 @@ public:
 
 public: //standard methods
 
-	//! Updates the 2D display zoom
+	//! Updates the 2D display zoom	// left bottom
 	virtual void update2DDisplayZoom(ccBBox& box);
 
 public:
@@ -36,9 +37,12 @@ public:
 	ccGLWindow* getAssociate3DView() { return m_associate_3DView; }
 	void destroyAss3DView() { m_associate_3DView = nullptr; }
 
-	void updateCursorPos(const CCVector3d& P, bool b3d);
+	void updateCursorPos(const CCVector3d& P, bool b3d, bool move);
  
+	//! left-bottom
 	bool FromGlobalToImage(const CCVector3 & P_global, CCVector3 & P_local, bool withLensError = true);
+
+	void init2DView();
 
 	void setImage(QString image_path);
 	void setImageAndCamera(ccCameraSensor* cam);

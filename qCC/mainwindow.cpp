@@ -947,7 +947,7 @@ void MainWindow::Link3DAnd2DWindow()
 	m_pbdrImshow->setAssociate3DView(getActiveGLWindow());
 	ccGLWindow* win = m_pbdrImshow->getAssociate3DView();
 	if (win) {
-	connect(win, &ccGLWindow::mouseMoved3D, m_pbdrImagePanel, &bdrImageEditorPanel::updateCursorPos);
+		connect(win, &ccGLWindow::mouseMoved3D, m_pbdrImagePanel, &bdrImageEditorPanel::updateCursorPos);
 //	connect(win, &ccGLWindow::destroyed, m_pbdrImshow, &bdr2Point5DimEditor::destroyAss3DView);
 	}
 }
@@ -11312,8 +11312,7 @@ void MainWindow::doActionBDImagesLoad()
 	if (hackObj) {
 		parameters.additionInfo = (void*)hackObj;
 	}
-
-	QString group_name = GetBaseName(out_file);
+	QString group_name = QFileInfo(out_file).baseName();
 	BDImageBaseHObject* bd_grp = nullptr;
 	for (ccHObject* cam_group : camera_groups) {
 		if (cam_group->getName() == group_name) {
@@ -13507,24 +13506,6 @@ void MainWindow::doActionShowBestImage()
 		assert(camObj); if (!camObj) return;
 		camObj->setDisplayOrder(i);
 	}
-// 	ccCameraSensor* best_cam = visible_area.front().first;	
-// 	if (best_cam) {
-// 		if (best_cam->getParent() && best_cam->getParent()->isEnabled()) {
-// 			m_imageRoot->selectEntity(best_cam, true);
-// 			//best_cam->drawImage(true);
-// 		}
-// 		m_pbdrImshow->setImageAndCamera(best_cam);
-// 		//! zoom
-// 		ccBBox box_2d;
-// 		for (size_t i = 0; i < 8; i++) {
-// 			CCVector2 b_2d;
-// 			best_cam->fromGlobalCoordToImageCoord(objBox.P(i), b_2d);
-// 			box_2d.add(CCVector3(b_2d.x, b_2d.y, 0));
-// 		}
-// 		if (box_2d.isValid()) {
-// 			m_pbdrImshow->update2DDisplayZoom(box_2d);
-// 		}
-// 	}
 	m_pbdrImagePanel->display(false);
 
 	doActionShowSelectedImage();
@@ -13545,9 +13526,9 @@ void MainWindow::doActionShowSelectedImage()
 	if (m_pbdrImagePanel->isObjChecked()) {
 		ccBBox box_2d;
 		for (size_t i = 0; i < 8; i++) {
-			CCVector2 b_2d;
-			cam->fromGlobalCoordToImageCoord(m_pbdrImagePanel->getObjBox().P(i), b_2d);
-			box_2d.add(CCVector3(b_2d.x, b_2d.y, 0));
+			CCVector3 b_2d;
+			m_pbdrImshow->FromGlobalToImage(m_pbdrImagePanel->getObjBox().P(i), b_2d);
+			box_2d.add(b_2d);
 		}
 		if (box_2d.isValid()) {
 			std::cout << box_2d.minCorner().x << " " << box_2d.minCorner().y << " " << box_2d.minCorner().z << std::endl;

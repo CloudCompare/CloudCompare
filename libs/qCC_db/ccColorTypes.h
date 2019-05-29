@@ -117,14 +117,21 @@ namespace ccColor
 	//! 4 components, default type
 	using Rgba = RgbaTpl<ColorCompType>;
 
+	// https://www.sioe.cn/yingyong/yanse-rgb-16/
 	// Predefined colors (default type)
 	constexpr Rgb white						(MAX, MAX, MAX);
 	constexpr Rgb lightGrey					(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8));
 	constexpr Rgb darkGrey					(MAX / 2, MAX / 2, MAX / 2);
 	constexpr Rgb red						(MAX, 0, 0);
 	constexpr Rgb green						(0, MAX, 0);
+	constexpr Rgb springGreen				(60, 179, 113); 
+	constexpr Rgb lightGreen				(144, 238, 144);
 	constexpr Rgb blue						(0, 0, MAX);
 	constexpr Rgb darkBlue					(0, 0, MAX / 2);
+	constexpr Rgb doderBlue					(30, 144, 255);
+	constexpr Rgb skyBlue					(135, 206, 235);
+	constexpr Rgb lightCoral				(240, 128, 128);
+	
 	constexpr Rgb magenta					(MAX, 0, MAX);
 	constexpr Rgb cyan						(0, MAX, MAX);
 	constexpr Rgb orange					(MAX, MAX / 2, 0);

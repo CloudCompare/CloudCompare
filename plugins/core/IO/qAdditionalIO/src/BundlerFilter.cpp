@@ -737,7 +737,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		QString errorStr;
 
 		//! don't save the image in memory
-		if (image_width_height.size() == camCount) {
+		if (image_width_height.size() == camCount && !orthoRectifyImages && !undistortImages && !generateColoredDTM) {
 			image->loadWithWidthHeight(imageDir.absoluteFilePath(imageFilenames[i]), image_width_height[i].first, image_width_height[i].second, errorStr);
 		}
 		else if (!image->load(imageDir.absoluteFilePath(imageFilenames[i]), errorStr, true)) {
@@ -812,8 +812,11 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			}
 		}
 		//the image is a child of the sensor!
-		image->setAssociatedSensor(sensor);
-		sensor->addChild(image);
+		//! XYLIU don't add child
+		if (orthoRectifyImages || undistortImages || generateColoredDTM) {
+			image->setAssociatedSensor(sensor);
+			sensor->addChild(image);
+		}
 		sensor->setImagePath(image->getImagePath());
 
 		//ortho-rectification
@@ -1127,6 +1130,11 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			delete sensor;
 			sensor = nullptr;
 		}
+		if (!orthoRectifyImages && !undistortImages && !generateColoredDTM)
+			if (image) {
+				delete image;
+				image = nullptr;
+			}
 
 		QApplication::processEvents();
 

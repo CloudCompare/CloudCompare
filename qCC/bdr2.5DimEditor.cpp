@@ -76,23 +76,35 @@ void bdr2Point5DimEditor::clearAll()
 	}
 }
 
-void bdr2Point5DimEditor::updateCursorPos(const CCVector3d& P, bool b3d)
+void bdr2Point5DimEditor::updateCursorPos(const CCVector3d& P, bool b3d, bool move)
 {
-	if (!m_cursor_cross || m_cursor_cross->size() < 5 || !m_associate_3DView) { return; }
-	if (!b3d) {
+	if (!m_cursor_cross || m_cursor_cross->size() < 5) { return; }
+	if (!b3d || !m_associate_3DView || !m_image) {
 		m_cursor_cross->setVisible(false);
-		return;
 	}
-	CCVector3 image_pt;
-	if (FromGlobalToImage(CCVector3::fromArray(P.u), image_pt)) {
-		*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(0)) = image_pt;
-		*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(1)) = image_pt + CCVector3(0, 50, 0);
-		*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(2)) = image_pt - CCVector3(50, 0, 0);
-		*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(3)) = image_pt - CCVector3(0, 50, 0);
-		*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(4)) = image_pt + CCVector3(50, 0, 0);
-		m_cursor_cross->setVisible(true);
-		m_glWindow->redraw();
+	else {
+		CCVector3 image_pt;
+		if (FromGlobalToImage(CCVector3::fromArray(P.u), image_pt)) {
+			if (move) {
+				ccGLCameraParameters cam;
+				m_glWindow->getGLCameraParameters(cam);
+				CCVector3d p2d;
+				if (!cam.project(image_pt, p2d, true)) {
+					m_glWindow->setPivotPoint(CCVector3d::fromArray(image_pt.u));
+					m_glWindow->setCameraPos(CCVector3d::fromArray(image_pt.u));
+				}
+			}
+			
+			image_pt.z = IMAGE_MARKER_DISPLAY_Z;
+			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(0)) = image_pt;
+			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(1)) = image_pt + CCVector3(0, 50, 0);
+			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(2)) = image_pt - CCVector3(50, 0, 0);
+			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(3)) = image_pt - CCVector3(0, 50, 0);
+			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(4)) = image_pt + CCVector3(50, 0, 0);
+			m_cursor_cross->setVisible(true);
+		}
 	}
+	m_glWindow->redraw();
 }
 
 bool bdr2Point5DimEditor::FromGlobalToImage(const CCVector3 & P_global, CCVector3 & P_local, bool withLensError)
@@ -101,24 +113,18 @@ bool bdr2Point5DimEditor::FromGlobalToImage(const CCVector3 & P_global, CCVector
 		return false;
 	}
 	CCVector2 p_2d;
-	if (!m_image->getAssociatedSensor()->fromGlobalCoordToImageCoord(P_global, p_2d, withLensError)) {
-		return false;
-	}
-	else {
-		p_2d.y = m_image->getH() - p_2d.y;
-		P_local = CCVector3(p_2d, 1);
-		return true;
-	}
+	bool b_in_image = m_image->getAssociatedSensor()->fromGlobalCoordToImageCoord(P_global, p_2d, withLensError);
+	p_2d.y = m_image->getH() - p_2d.y;
+	P_local = CCVector3(p_2d, 0);
+
+	return b_in_image;
 }
 
-void bdr2Point5DimEditor::create2DView(QFrame* parentFrame)
+void bdr2Point5DimEditor::init2DView()
 {
-	if (m_glWindow) return;
-	
-	QWidget* glWidget = 0;
-	CreateGLWindow(m_glWindow, glWidget, false, true);
-	assert(m_glWindow && glWidget);
-
+	if (!m_glWindow) {
+		return;
+	}
 	ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
 	//black (text) & white (background) display by default
 	params.backgroundCol = ccColor::white;
@@ -134,6 +140,17 @@ void bdr2Point5DimEditor::create2DView(QFrame* parentFrame)
 	m_glWindow->displayOverlayEntities(true);
 	m_glWindow->showCursorCoordinates(true);
 	m_glWindow->lockRotationAxis(true, CCVector3d(0, 0, 1));
+}
+
+void bdr2Point5DimEditor::create2DView(QFrame* parentFrame)
+{
+	if (m_glWindow) return;
+	
+	QWidget* glWidget = 0;
+	CreateGLWindow(m_glWindow, glWidget, false, true);
+	assert(m_glWindow && glWidget);
+
+	init2DView();
 
 	ccPointCloud* pc = new ccPointCloud();
 	for (size_t i = 0; i < 5; i++) { pc->addPoint(CCVector3(0, 0, 0)); }	
@@ -147,7 +164,7 @@ void bdr2Point5DimEditor::create2DView(QFrame* parentFrame)
 	m_cursor_cross->setDisplay(m_glWindow);
 	m_cursor_cross->setColor(ccColor::red);
 	m_cursor_cross->showColors(true);
-	m_cursor_cross->setWidth(2);
+	m_cursor_cross->setWidth(1);
 	m_glWindow->addToOwnDB(m_cursor_cross);
 
 	//add window to the input frame (if any)
@@ -196,7 +213,7 @@ void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 	
 	//we set the pivot point on the box center
 	CCVector3 P = box.getCenter();
-	P.y = m_image->getH() - P.y;
+//	P.y = m_image->getH() - P.y;
 	m_glWindow->setPivotPoint(CCVector3d::fromArray(P.u));
 	m_glWindow->setCameraPos(CCVector3d::fromArray(P.u));
 
@@ -215,7 +232,7 @@ void bdr2Point5DimEditor::setImage(QString image_path)
 		m_image = nullptr;
 	}
 	m_image = new ccImage;
-	m_image->setDisplayType(ccImage::IMAGE_DISPLAY_3D);
+	m_image->setDisplayType(ccImage::IMAGE_DISPLAY_2P5D);
 	m_image->setDisplay(m_glWindow);
 	QString error;
 	m_image->load(image_path, error);

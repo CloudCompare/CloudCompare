@@ -63,14 +63,14 @@ CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, const QString& fi
 	std::vector<ccPolyline*> candidates;
 	try
 	{
-		if (entity->isA(CC_TYPES::POLY_LINE))
+		if (entity->isA(CC_TYPES::POLY_LINE) || entity->isA(CC_TYPES::ST_FOOTPRINT))
 		{
 			candidates.push_back(static_cast<ccPolyline*>(entity));
 		}
 		else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
 			for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
-				if (entity->getChild(i) && entity->getChild(i)->isA(CC_TYPES::POLY_LINE))
+				if (entity->getChild(i) && (entity->getChild(i)->isA(CC_TYPES::POLY_LINE) || entity->isA(CC_TYPES::ST_FOOTPRINT)))
 					candidates.push_back(static_cast<ccPolyline*>(entity->getChild(i)));
 		}
 	}

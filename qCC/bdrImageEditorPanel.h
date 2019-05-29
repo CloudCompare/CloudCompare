@@ -30,6 +30,7 @@ protected slots:
 	void previous();
 	void next();
 	void toogleDisplayAll();
+	ccHObject * getTraceBlock(QString image_name);
 	void startEditor();
 	void stopEditor(bool);
 	
@@ -45,6 +46,7 @@ public:
 	void setObjBox(ccBBox box); 
 	bool isObjChecked();
 	void updateCursorPos(const CCVector3d& P, bool b3d);
+	bool isLinkToMainView();
 private:
 	bdr2Point5DimEditor* m_pbdrImshow;
 	bdrTraceFootprint* m_pbdrTraceFP;

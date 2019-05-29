@@ -35,6 +35,7 @@ ccImage::ccImage()
 	, m_aspectRatio(1.0f)
 	, m_texAlpha(1.0f)
 	, m_associatedSensor(0)
+	, m_display_type(IMAGE_DISPLAY_2D)
 {
 	setVisible(true);
 	lockVisibility(false);
@@ -50,6 +51,7 @@ ccImage::ccImage(const QImage& image, const QString& name)
 	, m_texAlpha(1.0f)
 	, m_image(image)
 	, m_associatedSensor(0)
+	, m_display_type(IMAGE_DISPLAY_2D)
 {
 	updateAspectRatio();
 	setVisible(true);
@@ -179,7 +181,7 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		break;
 	}		
-	case ccImage::IMAGE_DISPLAY_3D:
+	case ccImage::IMAGE_DISPLAY_2P5D:
 	{
 		if (!MACRO_Draw3D(context))
 			return;
@@ -230,7 +232,15 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glPopMatrix();
 
 		break;
-	}		
+	}
+	case ccImage::IMAGE_DISPLAY_3D:
+	{
+		if (!m_associatedSensor) {
+			return;
+		}
+		//! now it is displayed in camera sensor
+		break;
+	}
 	default:
 		break;
 	}

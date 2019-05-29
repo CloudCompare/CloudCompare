@@ -62,8 +62,10 @@ public:
 	bool start() override;
 	void stop(bool accepted) override;
 
-	void setExtractMode(bool extract_section = true);
+	void setTraceViewMode(bool trace_image = true);
 	void SetDestAndGround(ccHObject* dest, double ground);
+
+	void importEntities(ccHObject::Container entities);
 
 protected:
 
@@ -73,6 +75,7 @@ protected:
 	void cancel();
 	void addPointToPolyline(int x, int y);
 	void addCurrentPointToPolyline();
+	void closeFootprint();
 	void closePolyLine(int x=0, int y=0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
 	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
 	void enableSectionEditingMode(bool);
@@ -81,6 +84,7 @@ protected:
 	void entitySelected(ccHObject*);
 	void generateOrthoSections();
 	void extractPoints();
+	void exportFootprints();
 	void unfoldPoints();
 	void exportSections();
 	void exportFootprintInside();
@@ -123,6 +127,13 @@ protected:
 	//! Creates (if necessary) and returns a group to store entities in the main DB
 	ccHObject* getExportGroup(unsigned& defaultGroupID, const QString& defaultName);
 
+	enum POLYLINE_TYPE
+	{
+		FOOTPRINT_NORMAL,	// polygon counterclockwise
+		FOOTPRINT_HOLE,		// polygon clockwise
+		POLYLINE_OPEN,		// polyline
+	};
+
 	//! Imported entity
 	template<class EntityType> struct ImportedEntity
 	{
@@ -162,6 +173,24 @@ protected:
 				//backup thickness
 				backupWidth = poly->getWidth();
 			}
+			if (e->isA(CC_TYPES::ST_FOOTPRINT))
+			{
+				StFootPrint* poly = reinterpret_cast<StFootPrint*>(e);
+				//backup color
+				backupColor = poly->getColor();
+				backupColorShown = poly->colorsShown();
+				//backup thickness
+				backupWidth = poly->getWidth();
+
+				if (!poly->isClosed()) {
+					type = POLYLINE_OPEN;
+				}
+				else {
+					//! hole state
+					if (poly->isHole()) type = FOOTPRINT_HOLE;
+					else type = FOOTPRINT_NORMAL;
+				}
+			}
 		}
 
 		bool operator ==(const ImportedEntity& ie) { return entity == ie.entity; }
@@ -174,6 +203,9 @@ protected:
 		ccColor::Rgb backupColor;
 		bool backupColorShown;
 		PointCoordinateType backupWidth;
+
+		//! for footprint only
+		POLYLINE_TYPE type;
 	};
 
 	//! Section
@@ -241,6 +273,8 @@ private: //members
 
 	double m_ground;
 	ccHObject* m_dest_obj;
+
+	bool m_trace_image;
 };
 
 #endif //BDR_TRACE_FOOTPRINT_HEADER

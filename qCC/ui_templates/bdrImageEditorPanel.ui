@@ -149,6 +149,26 @@
       </widget>
      </item>
      <item>
+      <widget class="QToolButton" name="linkViewToolButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icones.qrc">
+         <normaloff>:/CC/Stocker/images/stocker/link.png</normaloff>:/CC/Stocker/images/stocker/link.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QToolButton" name="CheckObjToolButton">
        <property name="toolTip">
         <string>Check Object BBox</string>

@@ -46,6 +46,7 @@
 
 //GUI
 #include <ui_bdrTraceFootprintDlg.h>
+#include <bdr2.5DimEditor.h>
 
 //System
 #include <cassert>
@@ -57,7 +58,9 @@
 
 
 //default parameters
-static const ccColor::Rgb& s_defaultPolylineColor = ccColor::magenta;
+static const ccColor::Rgb& s_defaultPolylineColor = ccColor::lightCoral;
+static const ccColor::Rgb& s_defaultFpNormalColor = ccColor::doderBlue;
+static const ccColor::Rgb& s_defaultFpHoleColor = ccColor::skyBlue;
 static const ccColor::Rgb& s_defaultContourColor = ccColor::green;
 static const ccColor::Rgb& s_defaultEditedPolylineColor = ccColor::green;
 static const ccColor::Rgb& s_defaultSelectedPolylineColor = ccColor::red;
@@ -99,12 +102,14 @@ bdrTraceFootprint::bdrTraceFootprint(QWidget* parent)
 	addOverridenShortcut(Qt::Key_Space);  //space bar for the "pause" button
 	addOverridenShortcut(Qt::Key_Escape); //cancel current polyline edition
 	addOverridenShortcut(Qt::Key_Delete); //delete key to delete the selected polyline
+	addOverridenShortcut(Qt::Key_Enter);  //close
+	addOverridenShortcut(Qt::Key_C);		// click
 
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &bdrTraceFootprint::onShortcutTriggered);
 	connect(m_UI->saveFootprintInsidetoolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::exportFootprintInside);
 	connect(m_UI->saveFootprintOutsidetoolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::exportFootprintOutside);
 
-	setExtractMode(true);
+	setTraceViewMode(true);
 }
 
 bdrTraceFootprint::~bdrTraceFootprint()
@@ -158,7 +163,10 @@ void bdrTraceFootprint::onShortcutTriggered(int key)
 		deleteSelectedPolyline();
 		return;
 	case Qt::Key_Enter:
-
+		closeFootprint();
+		return;
+	case Qt::Key_C:
+		// Add point
 		return;
 	default:
 		//nothing to do
@@ -403,17 +411,19 @@ void bdrTraceFootprint::removeAllEntities()
 	m_cloudsBox.clear();
 }
 
-void bdrTraceFootprint::setExtractMode(bool extract_section)
+void bdrTraceFootprint::setTraceViewMode(bool trace_image)
 {
-	if (extract_section) {
-		m_UI->generateOrthoSectionsToolButton->setVisible(true);
-		m_UI->extractPointsToolButton->setVisible(true);
-		m_UI->unfoldToolButton->setVisible(true);
-		m_UI->exportSectionsToolButton->setVisible(true);
+	m_trace_image = trace_image;
+	if (trace_image) {
+		m_UI->importFromDBToolButton->setVisible(true);
+		m_UI->generateOrthoSectionsToolButton->setVisible(false);
+		m_UI->extractPointsToolButton->setVisible(false);
+		m_UI->unfoldToolButton->setVisible(false);
+		m_UI->exportSectionsToolButton->setVisible(false);
 		m_UI->saveFootprintInsidetoolButton->setVisible(false);
 		m_UI->saveFootprintOutsidetoolButton->setVisible(false);
-		m_UI->label->setVisible(true);
-		m_UI->vertAxisComboBox->setVisible(true);
+		m_UI->label->setVisible(false);
+		m_UI->vertAxisComboBox->setVisible(false);
 		setFixedWidth(360);
 	}
 	else {
@@ -433,6 +443,11 @@ void bdrTraceFootprint::SetDestAndGround(ccHObject * dest, double ground)
 {
 	m_dest_obj = dest;
 	m_ground = ground;
+}
+
+void bdrTraceFootprint::importEntities(ccHObject::Container entities)
+{
+
 }
 
 void bdrTraceFootprint::undo()
@@ -607,7 +622,7 @@ bool bdrTraceFootprint::addPolyline(ccPolyline* inputPoly, bool alreadyInDB/*=tr
 		assert(vertDim >= 0 && vertDim < 3);
 
 		//get default altitude from the cloud(s) bouding-box
-		PointCoordinateType defaultZ = 1;//! XYLIU for image in 2d (3d fake)
+		PointCoordinateType defaultZ = IMAGE_MARKER_DISPLAY_Z;//! XYLIU for image in 2d (3d fake)
 		if (m_cloudsBox.isValid())
 		{
 			defaultZ = m_cloudsBox.maxCorner()[vertDim];
@@ -865,6 +880,11 @@ void bdrTraceFootprint::addCurrentPointToPolyline()
 	addPointToPolyline(lastP->x, lastP->y);
 }
 
+void bdrTraceFootprint::closeFootprint()
+{
+
+}
+
 void bdrTraceFootprint::closePolyLine(int, int)
 {
 	//only in RUNNING mode
@@ -899,7 +919,7 @@ void bdrTraceFootprint::closePolyLine(int, int)
 		m_editedPoly->setColor(s_defaultPolylineColor);
 		m_editedPoly->setWidth(s_defaultPolylineWidth);
 		if (!m_clouds.isEmpty())
-			m_editedPoly->setDisplay_recursive(m_clouds.front().originalDisplay); //set the same 'default' display as the cloud
+			m_editedPoly->setDisplay_recursive(m_associatedWin); //set the same 'default' display as the cloud
 		m_editedPoly->setName(QString("Polyline #%1").arg(m_sections.size() + 1));
 		//save polyline
 		if (!addPolyline(m_editedPoly, false))
@@ -999,6 +1019,12 @@ void bdrTraceFootprint::addUndoStep()
 
 void bdrTraceFootprint::doImportPolylinesFromDB()
 {
+	//! from file
+	if (m_trace_image) {
+		
+		return;
+	}
+
 	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (!mainWindow)
 		return;
@@ -2180,8 +2206,118 @@ void bdrTraceFootprint::extractPoints()
 	}
 }
 
+void bdrTraceFootprint::exportFootprints()
+{
+	if (m_sections.empty())
+		return;
+
+	//we only export 'temporary' objects
+	unsigned exportCount = 0;
+	{
+		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
+		{
+			Section& section = *it;
+			if (section.entity && !section.isInDB)
+				++exportCount;
+		}
+	}
+
+	if (!exportCount)
+	{
+		//nothing to do
+		ccLog::Warning("[bdrTraceFootprint] All active sections are already in DB");
+		return;
+	}
+
+	MainWindow* mainWin = MainWindow::TheInstance();
+
+	if (!m_dest_obj) {
+		return;
+	}
+
+	//export entities
+	{
+		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
+		{
+			Section& section = *it;
+			if (section.entity && !section.isInDB) {
+				StFootPrint* duplicatePoly = new StFootPrint(0);
+				ccPointCloud* duplicateVertices = 0;
+
+				int biggest_number = GetMaxNumberExcludeChildPrefix(m_dest_obj, BDDB_FOOTPRINT_PREFIX);
+				QString cur_name = BDDB_FOOTPRINT_PREFIX + QString::number(biggest_number + 1);
+				if (duplicatePoly->initWith(duplicateVertices, *section.entity))
+				{
+					duplicatePoly->setAssociatedCloud(duplicateVertices);
+					assert(duplicateVertices);
+
+					if (section.type != POLYLINE_OPEN) {
+						stocker::Contour2d stocker_points;
+						for (unsigned i = 0; i < duplicateVertices->size(); ++i) {
+							stocker_points.push_back(stocker::parse_xy(*duplicateVertices->getPoint(i)));
+						}
+						if (section.type == FOOTPRINT_NORMAL) {
+							if (!stocker::IsCounterClockWise(stocker_points)) {
+								if (duplicatePoly->reverseVertexOrder()) {
+									duplicatePoly->setHoleState(false);
+								}
+								else return;
+							}
+						}
+						else if(section.type == FOOTPRINT_HOLE) {
+							if (stocker::IsCounterClockWise(stocker_points)) {
+								if (duplicatePoly->reverseVertexOrder()) {
+									duplicatePoly->setHoleState(true);
+								}
+								else return;
+							}
+						}
+					}
+					
+					//duplicateVertices->invalidateBoundingBox();
+					duplicateVertices->setEnabled(false);
+					duplicatePoly->set2DMode(false);
+					duplicatePoly->setDisplay_recursive(m_dest_obj->getDisplay());
+					duplicatePoly->setName(cur_name);
+					duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
+					duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
+					duplicatePoly->setBottom(m_ground);
+					duplicatePoly->setTop(m_ground);
+					duplicatePoly->setHeight(m_ground);
+
+					section.entity = duplicatePoly;
+
+				}
+				else {
+					delete duplicatePoly;
+					duplicatePoly = 0;
+
+					ccLog::Error("Not enough memory to export polyline!");
+					return;
+				}
+
+				section.isInDB = true;
+				m_dest_obj->addChild(duplicatePoly);
+				if (m_trace_image) {
+					mainWin->addToDB(duplicatePoly, false, false, CC_TYPES::DB_IMAGE);
+				}
+				else {
+					mainWin->addToDB(duplicatePoly, false, false, CC_TYPES::DB_BUILDING);
+				}
+				
+			}
+		}
+	}
+
+	ccLog::Print(QString("[FootPrint Extraction] %1 footprints exported").arg(exportCount));
+}
+
 void bdrTraceFootprint::exportFootprintInside()
 {
+	if (m_trace_image) {
+		return;
+	}
+
 	if (m_sections.empty())
 		return;
 
@@ -2267,6 +2403,9 @@ void bdrTraceFootprint::exportFootprintInside()
 
 void bdrTraceFootprint::exportFootprintOutside()
 {
+	if (m_trace_image) {
+		return;
+	}
 	if (m_sections.empty())
 		return;
 

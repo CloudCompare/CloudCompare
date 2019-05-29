@@ -19,6 +19,8 @@
 #include <QToolButton>
 #include <QPushButton>
 
+#include "stocker_parser.h"
+
 bdrImageEditorPanel::bdrImageEditorPanel(bdr2Point5DimEditor* img, ccDBRoot* root, QWidget* parent)
 	: m_pbdrImshow(img)
 	, m_root(root)
@@ -172,14 +174,65 @@ void bdrImageEditorPanel::toogleDisplayAll()
 	display(!displayAllToolButton->isChecked());
 }
 
+ccHObject* bdrImageEditorPanel::getTraceBlock(QString image_name)
+{
+	ccHObject* cam = nullptr;
+	ccHObject* dest = nullptr;
+	if (image_name.isEmpty()) {
+		//! get current camera
+		if (m_pbdrImshow->getImage()) {
+			cam = m_pbdrImshow->getImage()->getAssociatedSensor();		
+		}
+	}
+	else {
+		assert(true); // not finished
+		//! get camera by name
+		//MainWindow::TheInstance()->db_image()->getRootEntity()->filterChildrenByName();
+	}
+
+	if (cam) {
+		for (size_t i = 0; i < cam->getChildrenNumber(); i++) {
+			ccHObject* child = cam->getChild(i);
+			if (child->isA(CC_TYPES::ST_BLOCKGROUP) && child->getName() == (cam->getName() + BDDB_BLOCKGROUP_SUFFIX)) {
+				dest = child;
+				break;
+			}
+		}
+		if (!dest) {
+			StBlockGroup* group = new StBlockGroup(cam->getName() + BDDB_BLOCKGROUP_SUFFIX);
+			if (group) {
+				MainWindow::TheInstance()->addToDB(group, false, false, false, true, CC_TYPES::DB_IMAGE);
+				cam->addChild(group);
+				dest = group;
+			}
+		}
+		return dest;
+	}
+
+	return nullptr;
+}
+
 void bdrImageEditorPanel::startEditor()
 {
 	if (!m_pbdrTraceFP) {
 		return;
 	}
 	polyEditToolButton->setChecked(true);
-	//m_pbdrTraceFP->setExtractMode();
+	m_pbdrTraceFP->setTraceViewMode(true);
 	m_pbdrTraceFP->linkWith(m_pbdrImshow->getGLWindow());
+
+	//! destination
+	ccHObject* dest_block = getTraceBlock(QString());
+	if (!dest_block) {
+		dest_block = MainWindow::TheInstance()->db_image()->getRootEntity();
+	}
+	if (!dest_block) { return; }
+	m_pbdrTraceFP->SetDestAndGround(dest_block, 0);
+// 	//! import
+// 	ccHObject::Container footprints;
+// 	dest_block->filterChildren(footprints, true, CC_TYPES::ST_FOOTPRINT, true, nullptr);
+// 	m_pbdrTraceFP->importeEntities(footprints);
+
 	if (!m_pbdrTraceFP->start()) {
 		stopEditor(false);
 	}
@@ -188,17 +241,23 @@ void bdrImageEditorPanel::startEditor()
 void bdrImageEditorPanel::stopEditor(bool state)
 {
 	polyEditToolButton->setChecked(false);
-	if (state) {
-		
-	}
 	if (m_pbdrTraceFP) {
 		m_pbdrTraceFP->removeAllEntities();
 	}
+	//! reset gl
+	m_pbdrImshow->init2DView();
 }
 
 void bdrImageEditorPanel::updateCursorPos(const CCVector3d & P, bool b3d)
 {
-	m_pbdrImshow->updateCursorPos(P, b3d);
+	if (isLinkToMainView()) {
+		m_pbdrImshow->updateCursorPos(P, b3d, !polyEditToolButton->isChecked());
+	}
+}
+
+bool bdrImageEditorPanel::isLinkToMainView()
+{
+	return linkViewToolButton->isChecked();
 }
 
 void bdrImageEditorPanel::clearAll()

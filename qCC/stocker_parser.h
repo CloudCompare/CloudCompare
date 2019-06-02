@@ -61,6 +61,7 @@ ccHObject::Container GetPlaneEntitiesBySelected(ccHObject * select);
 ccHObject::Container GetBuildingEntitiesBySelected(ccHObject * select);
 ccPlane * GetPlaneFromCloud(ccHObject * entity);
 ccPlane * GetPlaneFromPlaneOrCloud(ccHObject * entity);
+vcg::Plane3d GetVcgPlane(ccHObject * planeObj);
 //! return -1 if no child exists
 int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix);
 

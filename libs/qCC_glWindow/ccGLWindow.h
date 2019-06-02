@@ -105,6 +105,8 @@ public:
 		INTERACT_SIG_MOUSE_MOVED = 512,      //mouse moved (only if a button is clicked)
 		INTERACT_SIG_BUTTON_RELEASED = 1024, //mouse button released
 		INTERACT_SEND_ALL_SIGNALS = INTERACT_SIG_RB_CLICKED | INTERACT_SIG_LB_CLICKED | INTERACT_SIG_MOUSE_MOVED | INTERACT_SIG_BUTTON_RELEASED,
+
+		INTERACT_IMAGE_VIEW = 2048,
 	};
 	Q_DECLARE_FLAGS(INTERACTION_FLAGS, INTERACTION_FLAG)
 
@@ -240,6 +242,8 @@ public:
 		- only taken into account if pivot visibility is set to PIVOT_SHOW_ON_MOVE
 	**/
 	virtual void showPivotSymbol(bool state);
+
+	double getCenterRadius(double scale = 0.8);
 
 	//! Sets pixel size (i.e. zoom base)
 	/** Emits the 'pixelSizeChanged' signal.
@@ -798,6 +802,10 @@ protected: //rendering
 	//we need to automatically bind our own afterwards!
 	//(Sadly QOpenGLWidget::makeCurrentmakeCurrent is not virtual)
 	void makeCurrent();
+
+	void resetCursor();
+
+	void drawCursor();
 
 	//! Binds an FBO or releases the current one (if input is nullptr)
 	/** This method must be called instead of the FBO's own 'start' and 'stop' methods

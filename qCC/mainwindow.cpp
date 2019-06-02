@@ -857,6 +857,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPrimMergePlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimMergePlane);
 	connect(m_UI->actionBDPrimSplitPlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimSplitPlane);	
 	connect(m_UI->actionBDPrimCreateGround,			&QAction::triggered, this, &MainWindow::doActionBDPrimCreateGround);
+	connect(m_UI->actionBDPrimPointProjection,		&QAction::triggered, this, &MainWindow::doActionBDPrimPointProjection);
 	connect(m_UI->actionBDPrimShrinkPlane,			&QAction::triggered, this, &MainWindow::doActionBDPrimShrinkPlane);
 	connect(m_UI->actionBDPlaneFromPoints,			&QAction::triggered, this, &MainWindow::doActionBDPlaneFromPoints);
 	connect(m_UI->actionBDPlaneFromPolygon,			&QAction::triggered, this, &MainWindow::doActionBDPlaneFromPolygon);
@@ -12143,6 +12144,9 @@ static double s_last_shrink_alpha = 2.0;
 static double s_last_shrink_distance = 0.5;
 void MainWindow::doActionBDPrimShrinkPlane()
 {
+	if (!haveSelection()) {
+		return;
+	}
 	ccAskTwoDoubleValuesDlg paraDlg("alpha value", "distance", 0, 1.0e12, s_last_shrink_alpha, s_last_shrink_distance, 6, "refit plane", this);
 	if (!paraDlg.exec()) {
 		return;
@@ -12172,6 +12176,27 @@ void MainWindow::doActionBDPrimShrinkPlane()
 	}
 	ProgEnd
 
+	refreshAll();
+	UpdateUI();
+}
+
+void MainWindow::doActionBDPrimPointProjection()
+{
+	if (!haveSelection()) return;
+	ccHObject *entity = getSelectedEntities().front();
+	ccHObject::Container plane_container = GetPlaneEntitiesBySelected(entity);
+
+	for (ccHObject* plEnt : plane_container) {
+		ccPointCloud* pcObj = GetPlaneCloud(plEnt);
+		ccPlane* planeObj = ccHObjectCaster::ToPlane(plEnt);
+
+		vcg::Plane3d plane = GetVcgPlane(plEnt);
+		for (size_t i = 0; i < pcObj->size(); i++) {
+			CCVector3* P = const_cast<CCVector3*>(pcObj->getPoint(i));
+			(*P) = CCVector3(vcgXYZ(plane.Projection(vcg::Point3d(P->x, P->y, P->z))));
+		}
+		pcObj->refreshBB();
+	}
 	refreshAll();
 	UpdateUI();
 }
@@ -12889,6 +12914,7 @@ void MainWindow::doActionBDFootPrintAuto()
 		return; 
 	}
 	
+	ProgStart("Generate footprints")
 	try {
 		ccHObject::Container footprints = GenerateFootPrints(prim_group);
 		for (ccHObject* ft : footprints) {
@@ -12903,6 +12929,7 @@ void MainWindow::doActionBDFootPrintAuto()
 		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 		return;
 	}
+	ProgEnd
 	refreshAll();
 	UpdateUI();
 }
@@ -13149,6 +13176,7 @@ void MainWindow::doActionBDLoD2Generation()
 	ccHObject* bd_entity = entity->isA(CC_TYPES::ST_FOOTPRINT) ? entity : GetParentBuilding(entity);
 	if (!bd_entity) return;
 
+	ProgStart("LoD2 generation")
 	try {
 		ccHObject* bd_model_obj = LoD2FromFootPrint(bd_entity, height);
 		if (bd_model_obj) {
@@ -13162,6 +13190,7 @@ void MainWindow::doActionBDLoD2Generation()
 		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 		return;
 	}
+	ProgEnd
 
 	refreshAll();
 	UpdateUI();
@@ -13397,11 +13426,10 @@ void MainWindow::doActionShowBestImage()
 	CCVector3d viewPoint = params.getViewPoint();
 	ccBBox objBox;
 	//! wrong - bug remains
-	if (/*params.objectCenteredView*/0)
+	if (params.perspectiveView)
 	{
-		float scale_width = std::min(glwin->glWidth(), glwin->glHeight()) * 0.8;
-		scale_width = scale_width * params.pixelSize / params.zoom;
-		CCVector3 half_box(scale_width / 2, scale_width / 2, scale_width / 2);
+		float scale_width = glwin->getCenterRadius(m_pbdrImagePanel->getBoxScale());
+		CCVector3 half_box(scale_width, scale_width, scale_width);
 		objBox.add(CCVector3::fromArray(params.pivotPoint.u) + half_box);
 		objBox.add(CCVector3::fromArray(params.pivotPoint.u) - half_box);
 	}

@@ -508,6 +508,7 @@
      <addaction name="actionBDPrimShrinkPlane"/>
      <addaction name="actionBDPrimMergePlane"/>
      <addaction name="actionBDPrimMakePlane"/>
+     <addaction name="actionBDPrimPointProjection"/>
     </widget>
     <widget class="QMenu" name="menuLine_Primitive">
      <property name="title">
@@ -1044,7 +1045,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </widget>
   <widget class="QDockWidget" name="DockableImage">
    <property name="windowTitle">
-    <string>Image</string>
+    <string>Image(F8)</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -1263,9 +1264,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="text">
     <string>Console</string>
    </property>
-   <property name="shortcut">
-    <string>F8</string>
-   </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
    </property>
@@ -1353,7 +1351,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Delete</string>
    </property>
    <property name="shortcut">
-    <string>Del</string>
+    <string>Shift+Del</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -3787,6 +3785,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="text">
     <string>Image Viewer</string>
    </property>
+   <property name="shortcut">
+    <string>F8</string>
+   </property>
   </action>
   <action name="actionImageOverlay">
    <property name="checkable">
@@ -3794,6 +3795,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="text">
     <string>Image Overlay</string>
+   </property>
+  </action>
+  <action name="actionBDPrimPointProjection">
+   <property name="text">
+    <string>Points Project to Plane</string>
    </property>
   </action>
  </widget>

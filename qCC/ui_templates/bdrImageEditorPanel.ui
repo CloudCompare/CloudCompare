@@ -196,8 +196,14 @@
        <property name="toolTip">
         <string>BBox scale to find visible view</string>
        </property>
-       <property name="value">
+       <property name="maximum">
         <double>1.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.050000000000000</double>
+       </property>
+       <property name="value">
+        <double>0.800000000000000</double>
        </property>
       </widget>
      </item>

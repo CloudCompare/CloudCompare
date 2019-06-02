@@ -582,6 +582,30 @@ void ccGLWindow::makeCurrent()
 	}
 }
 
+void ccGLWindow::resetCursor()
+{
+	switch (m_pickingMode)
+	{
+	case DEFAULT_PICKING:
+	case NO_PICKING:
+	case ENTITY_PICKING:
+		setCursor(QCursor(Qt::ArrowCursor));
+		break;
+	case POINT_OR_TRIANGLE_PICKING:
+	case TRIANGLE_PICKING:
+	case POINT_PICKING:
+		setCursor(QCursor(Qt::PointingHandCursor));
+		break;
+	default:
+		break;
+	}
+}
+
+void ccGLWindow::drawCursor()
+{
+	setCursor(QCursor(Qt::BlankCursor));
+}
+
 bool ccGLWindow::bindFBO(ccFrameBufferObject* fbo)
 {
 	if (fbo) //bind
@@ -3804,7 +3828,8 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 			||	((QApplication::keyboardModifiers() & Qt::ControlModifier) && (m_interactionFlags & INTERACT_CTRL_PAN))
 			)
 		{
-			QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor));
+			setCursor(QCursor(Qt::SizeAllCursor));
+			//QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor));
 		}
 
 		if (m_interactionFlags & INTERACT_SIG_RB_CLICKED)
@@ -3819,7 +3844,8 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 		//left click = rotation
 		if (m_interactionFlags & INTERACT_ROTATE)
 		{
-			QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
+			setCursor(QCursor(Qt::PointingHandCursor));
+			//QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
 		}
 
 		if (m_interactionFlags & INTERACT_SIG_LB_CLICKED)
@@ -4223,7 +4249,8 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					rotateBaseViewMat(rotMat);
 
 					showPivotSymbol(true);
-					QApplication::changeOverrideCursor(QCursor(Qt::ClosedHandCursor));
+					setCursor(QCursor(Qt::ClosedHandCursor));
+					//QApplication::changeOverrideCursor(QCursor(Qt::ClosedHandCursor));
 
 					//feedback for 'echo' mode
 					emit viewMatRotated(rotMat);
@@ -5460,6 +5487,12 @@ void ccGLWindow::showPivotSymbol(bool state)
 	}
 
 	m_pivotSymbolShown = state;
+}
+
+double ccGLWindow::getCenterRadius(double scale)
+{
+	double symbolRadius = scale * std::min(m_glViewport.width(), m_glViewport.height()) / 2.0;
+	return symbolRadius * computeActualPixelSize();
 }
 
 void ccGLWindow::drawPivot()

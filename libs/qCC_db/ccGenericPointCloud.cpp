@@ -59,7 +59,6 @@ ccGenericPointCloud::~ccGenericPointCloud()
 void ccGenericPointCloud::clear()
 {
 	unallocateVisibilityArray();
-	unallocateVisibilityLODArray();
 	deleteOctree();
 	enableTempColor(false);
 }
@@ -77,22 +76,6 @@ bool ccGenericPointCloud::resetVisibilityArray()
 	}
 
 	std::fill(m_pointsVisibility.begin(), m_pointsVisibility.end(), POINT_VISIBLE); //by default, all points are visible
-
-	return true;
-}
-bool ccGenericPointCloud::resetVisibilityLODArray()
-{
-	try
-	{
-		m_pointsVisibleLOD.resize(size());
-	}
-	catch (const std::bad_alloc&)
-	{
-		unallocateVisibilityArray();
-		return false;
-	}
-
-	std::fill(m_pointsVisibleLOD.begin(), m_pointsVisibleLOD.end(), POINT_HIDDEN); //by default, all points are visible
 
 	return true;
 }
@@ -114,11 +97,6 @@ void ccGenericPointCloud::invertVisibilityArray()
 void ccGenericPointCloud::unallocateVisibilityArray()
 {
 	m_pointsVisibility.resize(0);
-}
-
-void ccGenericPointCloud::unallocateVisibilityLODArray()
-{
-	m_pointsVisibleLOD.resize(0);
 }
 
 bool ccGenericPointCloud::isVisibilityTableInstantiated() const

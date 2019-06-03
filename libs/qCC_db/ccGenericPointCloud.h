@@ -188,15 +188,11 @@ public:
 	**/
 	virtual bool resetVisibilityArray();
 
-	virtual bool resetVisibilityLODArray();
-
 	//! Inverts the visiblity array
 	virtual void invertVisibilityArray();
 
 	//! Erases the points visibility information
 	virtual void unallocateVisibilityArray();
-
-	virtual void unallocateVisibilityLODArray();
 
 
 	/***************************************************
@@ -278,8 +274,6 @@ protected:
 		will be considered as visible/selected.
 	**/
 	VisibilityTableType m_pointsVisibility;
-
-	VisibilityTableType m_pointsVisibleLOD;
 
 	//! Point size (won't be applied if 0)
 	unsigned char m_pointSize;

@@ -1939,7 +1939,7 @@ namespace ccEntityAction
 	//////////
 	// Octree
 
-	bool computeOctree(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool computeOctree(const ccHObject::Container &selectedEntities, QWidget *parent, bool defaultNoWindow)
 	{
 		ccBBox bbox;
 		std::unordered_set<ccGenericPointCloud*> clouds;
@@ -1984,8 +1984,10 @@ namespace ccEntityAction
 		const double minCellSize = static_cast<double>(maxBoxSize) / (1 << ccOctree::MAX_OCTREE_LEVEL);
 
 		ccComputeOctreeDlg coDlg(bbox, minCellSize, parent);
-		if (!coDlg.exec())
-			return false;
+		if (!defaultNoWindow) {
+			if (!coDlg.exec())
+				return false;
+		}
 
 		ccProgressDialog pDlg(true, parent);
 		pDlg.setAutoClose(false);
@@ -2054,6 +2056,7 @@ namespace ccEntityAction
 				cloud->setEnabled(true); //for mesh vertices!
 				ccOctreeProxy* proxy = cloud->getOctreeProxy();
 				assert(proxy);
+				proxy->setEnabled(false);
 				proxy->setVisible(true);
 				proxy->prepareDisplayForRefresh();
 			}

@@ -64,7 +64,7 @@ namespace ccEntityAction
 	bool	convertNormalsTo(const ccHObject::Container &selectedEntities, NORMAL_CONVERSION_DEST dest);
 	
 	// Octrees
-	bool	computeOctree(const ccHObject::Container &selectedEntities, QWidget *parent);
+	bool	computeOctree(const ccHObject::Container &selectedEntities, QWidget *parent, bool defaultNoWindow = false);
 	
 	// Properties
 	enum class CLEAR_PROPERTY {

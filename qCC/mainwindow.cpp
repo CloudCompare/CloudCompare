@@ -9514,12 +9514,24 @@ void MainWindow::addToDBAuto(const QStringList& filenames)
 				pcs.push_back(obj);
 			}
 		}
+		int point_size = 0;
+	
+		ProgStartNorm("prepare point clouds", pcs.size())
 		for (ccHObject* _p : pcs) {
 			ccPointCloud* pcObj = ccHObjectCaster::ToPointCloud(_p);
 			if (!pcObj) { continue; }
 			bool exportDims[3] = { false,false,true };
-			pcObj->exportCoordToSF(exportDims);
+			pcObj->exportCoordToSF(exportDims);			
+			point_size += pcObj->size();
+
 			pcObj->prepareDisplayForRefresh();
+			ProgStep()
+		}
+		ProgEnd
+
+		if (point_size > 10000000) {
+			ccEntityAction::computeOctree(pcs, this, true);
+			std::cout << point_size << " points lod computed" << std::endl;
 		}
 	}
 	refreshAll();

@@ -1980,20 +1980,17 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	break;
 	case OBJECT_MESH_STIPPLING:
 	{
-		if (m_currentObject->isA(CC_TYPES::ST_PRIMGROUP)) {
-			ccHObject::Container plane_children;
-			m_currentObject->filterChildren(plane_children, true, CC_TYPES::MESH, false, m_currentObject->getDisplay());
-			if (plane_children.empty()) return;
-			for (auto pl : plane_children) {
-				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(pl);
-				if (mesh)
-					mesh->enableStippling(item->checkState() == Qt::Checked);
-			}
+		ccHObject::Container mesh_container;
+		if (m_currentObject->isKindOf(CC_TYPES::MESH)) {
+			mesh_container.push_back(m_currentObject);
 		}
 		else {
-			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(m_currentObject);
-			assert(mesh);
-			mesh->enableStippling(item->checkState() == Qt::Checked);
+			m_currentObject->filterChildren(mesh_container, true, CC_TYPES::MESH, false, m_currentObject->getDisplay());
+		}
+		for (auto m : mesh_container) {
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(m);
+			if (mesh)
+				mesh->enableStippling(item->checkState() == Qt::Checked);
 		}
 	}
 	redraw = true;
@@ -2769,6 +2766,8 @@ void ccPropertiesTreeDelegate::fillWithStBlock(const StBlock *_obj)
 
 	//bottom height add
 	appendRow(ITEM(tr("Bottom height")), PERSISTENT_EDITOR(OBJECT_BLOCK_BOTTOM), true);
+
+	appendRow(ITEM(tr("Stippling")), CHECKABLE_ITEM(false, OBJECT_MESH_STIPPLING));
 }
 
 void ccPropertiesTreeDelegate::fillWithStBlockGroup(const StBlockGroup *_obj)
@@ -2777,6 +2776,7 @@ void ccPropertiesTreeDelegate::fillWithStBlockGroup(const StBlockGroup *_obj)
 	addSeparator(tr("Blocks"));
 	//footprint number
 	//block number
+	appendRow(ITEM(tr("Stippling")), CHECKABLE_ITEM(false, OBJECT_MESH_STIPPLING));
 }
 
 void ccPropertiesTreeDelegate::fillWithStBuilding(const StBuilding *_obj)
@@ -2815,6 +2815,8 @@ void ccPropertiesTreeDelegate::fillWithStFootPrint(const StFootPrint *_obj)
 	//"Update planes" button
 	appendRow(ITEM(tr("Update planes")), PERSISTENT_EDITOR(OBJECT_UPDATE_FOOTPRINT_PLANES), true);
 
+	appendRow(ITEM(tr("Stippling")), CHECKABLE_ITEM(false, OBJECT_MESH_STIPPLING));
+
 
 	fillWithPolyline(_obj);
 }
@@ -2824,7 +2826,7 @@ void ccPropertiesTreeDelegate::fillWithStModel(const StModel *_obj)
 	assert(_obj && m_model);
 	addSeparator(tr("Model"));
 	// lod
-
+	appendRow(ITEM(tr("Stippling")), CHECKABLE_ITEM(false, OBJECT_MESH_STIPPLING));
 }
 
 void ccPropertiesTreeDelegate::fillWithStPrimGroup(const StPrimGroup *_obj)
@@ -2833,12 +2835,7 @@ void ccPropertiesTreeDelegate::fillWithStPrimGroup(const StPrimGroup *_obj)
 
 	//Sensor drawing scale
 	addSeparator(tr("Primitive Display"));
-	ccHObject::Container plane_children;
-	_obj->filterChildren(plane_children, true, CC_TYPES::PLANE, true, _obj->getDisplay());
-	if (plane_children.empty()) return;
-	ccPlane* first_plane = ccHObjectCaster::ToPlane(plane_children.front());
-
-	appendRow(ITEM(tr("Stippling")), CHECKABLE_ITEM(static_cast<const ccMesh*>(first_plane)->stipplingEnabled(), OBJECT_MESH_STIPPLING));
+	appendRow(ITEM(tr("Stippling")), CHECKABLE_ITEM(false, OBJECT_MESH_STIPPLING));
 }
 
 void ccPropertiesTreeDelegate::fiilWithCameraGroup(const ccHObject *_obj)

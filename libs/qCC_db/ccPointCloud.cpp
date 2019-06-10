@@ -1119,8 +1119,7 @@ bool ccPointCloud::reserveTheRGBTable()
 {
 	if (m_points.capacity() == 0)
 	{
-		ccLog::Warning("[ccPointCloud::reserveTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling reserveTheRGBTable with an zero capacity cloud");
 	}
 
 	if (!m_rgbColors)
@@ -1147,8 +1146,7 @@ bool ccPointCloud::resizeTheRGBTable(bool fillWithWhite/*=false*/)
 {
 	if (m_points.empty())
 	{
-		ccLog::Warning("[ccPointCloud::resizeTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling resizeTheRGBTable with an empty cloud");
 	}
 
 	if (!m_rgbColors)
@@ -1176,8 +1174,7 @@ bool ccPointCloud::reserveTheNormsTable()
 {
 	if (m_points.capacity() == 0)
 	{
-		ccLog::Warning("[ccPointCloud::reserveTheNormsTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling reserveTheNormsTable with an zero capacity cloud");
 	}
 
 	if (!m_normals)
@@ -1205,8 +1202,7 @@ bool ccPointCloud::resizeTheNormsTable()
 {
 	if (m_points.empty())
 	{
-		ccLog::Warning("[ccPointCloud::resizeTheNormsTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling resizeTheNormsTable with an empty cloud");
 	}
 
 	if (!m_normals)
@@ -1312,8 +1308,7 @@ bool ccPointCloud::reserveTheFWFTable()
 {
 	if (m_points.capacity() == 0)
 	{
-		ccLog::Warning("[ccPointCloud::reserveTheFWFTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling reserveTheFWFTable with a zero capacity cloud");
 	}
 
 	try
@@ -1369,8 +1364,7 @@ bool ccPointCloud::resizeTheFWFTable()
 {
 	if (m_points.capacity() == 0)
 	{
-		ccLog::Warning("[ccPointCloud::resizeTheFWFTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling resizeTheFWFTable with an empty cloud");
 	}
 
 	try

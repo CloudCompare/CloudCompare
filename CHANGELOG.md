@@ -27,6 +27,7 @@ v2.10.3 (Zephyrus) - (in development)
   - Fix potential crash with qCSF (see github issue #909)
   - In some cases, the (subsampled) core points cloud was not exported and saved at the end of the call to M3C2 through the command line
   - Some points were incorrectly removed by the 'Clean > Noise filer' method (parallelism issue)
+  - The radius was not updated during the refinement pass of the Sphere fitting algorithm  (i.e. the final radius was not optimal)
 
 v2.10.2 (Zephyrus) - 24/02/2019
 ----------------------

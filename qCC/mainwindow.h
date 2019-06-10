@@ -244,6 +244,7 @@ private slots:
 	void setPivotOff();
 	void toggleActiveWindowAutoPickRotCenter(bool);
 	void toggleActiveWindowShowCursorCoords(bool);
+	void toggleActiveWindowPointViewEditMode(bool);
 
 	//! Handles new label
 	void handleNewLabel(ccHObject*);

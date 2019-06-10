@@ -793,6 +793,9 @@ void MainWindow::connectActions()
 	connect(m_UI->actionNext3DView,					&QAction::triggered, m_mdiArea, &QMdiArea::activateNextSubWindow);
 	connect(m_UI->actionPrevious3DView,				&QAction::triggered, m_mdiArea, &QMdiArea::activatePreviousSubWindow);
 
+	connect(m_UI->actionPointViewEditMode,			&QAction::triggered, this, &MainWindow::toggleActiveWindowPointViewEditMode);
+	
+
 	//"About" menu entry
 	connect(m_UI->actionHelp,						&QAction::triggered, this, &MainWindow::doActionShowHelpDialog);
 	connect(m_UI->actionAboutPlugins,				&QAction::triggered, m_pluginUIManager, &ccPluginUIManager::showAboutDialog);
@@ -9085,6 +9088,15 @@ void MainWindow::toggleActiveWindowShowCursorCoords(bool state)
 	}
 }
 
+void MainWindow::toggleActiveWindowPointViewEditMode(bool state)
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		win->setPointViewEditMode(state);
+	}
+}
+
 void MainWindow::toggleActiveWindowStereoVision(bool state)
 {
 	ccGLWindow* win = getActiveGLWindow();
@@ -10037,6 +10049,10 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		m_UI->actionShowCursor3DCoordinates->blockSignals(true);
 		m_UI->actionShowCursor3DCoordinates->setChecked(win->cursorCoordinatesShown());
 		m_UI->actionShowCursor3DCoordinates->blockSignals(false);
+
+		m_UI->actionPointViewEditMode->blockSignals(true);
+		m_UI->actionPointViewEditMode->setChecked(win->pointViewEditMode());
+		m_UI->actionPointViewEditMode->blockSignals(false);
 
 		m_UI->actionAutoPickRotationCenter->blockSignals(true);
 		m_UI->actionAutoPickRotationCenter->setChecked(win->autoPickPivotAtCenter());

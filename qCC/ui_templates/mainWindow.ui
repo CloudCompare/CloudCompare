@@ -119,6 +119,7 @@
     <addaction name="menuLanguage"/>
     <addaction name="actionResetGUIElementsPos"/>
     <addaction name="actionImageViewer"/>
+    <addaction name="actionPointViewEditMode"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -3800,6 +3801,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionBDPrimPointProjection">
    <property name="text">
     <string>Points Project to Plane</string>
+   </property>
+  </action>
+  <action name="actionPointViewEditMode">
+   <property name="text">
+    <string>Enter point-view edit mode</string>
    </property>
   </action>
  </widget>

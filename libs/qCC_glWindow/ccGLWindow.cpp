@@ -379,6 +379,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_rotationAxisLocked(false)
 	, m_lockedRotationAxis(0, 0, 1)
 	, m_drawBBox(true)
+	, m_pointPickBuffer(0.0)
 {
 	//start internal timer
 	m_timer.start();
@@ -603,7 +604,10 @@ void ccGLWindow::resetCursor()
 
 void ccGLWindow::drawCursor()
 {
-	setCursor(QCursor(Qt::BlankCursor));
+	if (m_interactionFlags & INTERACT_POINT_VIEW) {
+		setCursor(QCursor(Qt::CrossCursor));
+
+	}
 }
 
 bool ccGLWindow::bindFBO(ccFrameBufferObject* fbo)
@@ -3004,6 +3008,14 @@ void ccGLWindow::setPivotPoint(	const CCVector3d& P,
 	m_autoPivotCandidate = CCVector3d(0, 0, 0);
 	invalidateViewport();
 	invalidateVisualization();
+}
+
+void ccGLWindow::setPointViewEditMode(bool state)
+{
+	if (!state && (m_interactionFlags & INTERACT_POINT_VIEW))
+		m_interactionFlags &= ~INTERACT_POINT_VIEW;
+	else if (state && !(m_interactionFlags & INTERACT_POINT_VIEW))
+		m_interactionFlags &= INTERACT_POINT_VIEW;
 }
 
 void ccGLWindow::setAutoPickPivotAtCenter(bool state)

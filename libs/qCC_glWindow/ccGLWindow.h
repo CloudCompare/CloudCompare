@@ -107,6 +107,7 @@ public:
 		INTERACT_SEND_ALL_SIGNALS = INTERACT_SIG_RB_CLICKED | INTERACT_SIG_LB_CLICKED | INTERACT_SIG_MOUSE_MOVED | INTERACT_SIG_BUTTON_RELEASED,
 
 		INTERACT_IMAGE_VIEW = 2048,
+		INTERACT_POINT_VIEW = 4096,
 	};
 	Q_DECLARE_FLAGS(INTERACTION_FLAGS, INTERACTION_FLAG)
 
@@ -611,6 +612,9 @@ public: //stereo mode
 	void showCursorCoordinates(bool state) { m_showCursorCoordinates = state; }
 	//! Whether the coordinates of the point below the cursor position are displayed or not
 	bool cursorCoordinatesShown() const { return m_showCursorCoordinates; }
+
+	void setPointViewEditMode(bool state);
+	bool pointViewEditMode() { return m_interactionFlags & INTERACT_POINT_VIEW; }
 
 	//! Toggles the automatic setting of the pivot point at the center of the screen
 	void setAutoPickPivotAtCenter(bool state);
@@ -1322,7 +1326,7 @@ protected: //members
 
 	//! Whether to display the coordinates of the point below the cursor position
 	bool m_showCursorCoordinates;
-
+	
 	//! Whether the pivot point is automatically picked at the center of the screen (when possible)
 	bool m_autoPickPivotAtCenter;
 
@@ -1340,6 +1344,8 @@ protected: //members
 	//! Locked rotation axis
 	CCVector3d m_lockedRotationAxis;
 	bool m_drawBBox;
+
+	double m_pointPickBuffer;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

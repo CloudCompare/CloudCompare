@@ -131,7 +131,7 @@ void ccPrimitiveFactoryDlg::setSpherePositionFromClipboard()
 	QClipboard *clipboard = QApplication::clipboard();
 	if (clipboard != nullptr)
 	{
-		QStringList valuesStr = clipboard->text().split(QRegExp("\\s+"), QString::SkipEmptyParts);
+		QStringList valuesStr = clipboard->text().simplified().split(QChar(' '), QString::SkipEmptyParts);
 		if (valuesStr.size() == 3)
 		{
 			CCVector3d vec;

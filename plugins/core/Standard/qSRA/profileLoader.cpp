@@ -60,7 +60,7 @@ ccPolyline* ProfileLoader::Load(QString filename, CCVector3& origin, ccMainAppIn
 			}
 			QString centerLine = stream.readLine();
 			{
-				QStringList tokens = centerLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
+				QStringList tokens = centerLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
 				bool validLine = false;
 				if (tokens.size() == 3)
 				{
@@ -95,7 +95,7 @@ ccPolyline* ProfileLoader::Load(QString filename, CCVector3& origin, ccMainAppIn
 			std::vector< CCVector2d > points;
 			while (!line.isEmpty())
 			{
-				QStringList tokens = line.split(QRegExp("\\s+"),QString::SkipEmptyParts);
+				QStringList tokens = line.simplified().split(QChar(' '), QString::SkipEmptyParts);
 				if (tokens.size() < 2)
 				{
 					if (app)

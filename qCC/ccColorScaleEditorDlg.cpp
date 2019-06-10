@@ -500,7 +500,7 @@ bool ccColorScaleEditorDialog::exportCustomLabelsList(ccColorScale::LabelSet& la
 	labels.clear();
 
 	QString text = customLabelsPlainTextEdit->toPlainText();
-	QStringList items = text.split(QRegExp("\\s+"),QString::SkipEmptyParts);
+	QStringList items = text.simplified().split(QChar(' '), QString::SkipEmptyParts);
 	if (items.size() < 2)
 	{
 		assert(false);
@@ -533,7 +533,7 @@ bool ccColorScaleEditorDialog::exportCustomLabelsList(ccColorScale::LabelSet& la
 bool ccColorScaleEditorDialog::checkCustomLabelsList(bool showWarnings)
 {
 	QString text = customLabelsPlainTextEdit->toPlainText();
-	QStringList items = text.split(QRegExp("\\s+"),QString::SkipEmptyParts);
+	QStringList items = text.simplified().split(QChar(' '), QString::SkipEmptyParts);
 	if (items.size() < 2)
 	{
 		if (showWarnings)

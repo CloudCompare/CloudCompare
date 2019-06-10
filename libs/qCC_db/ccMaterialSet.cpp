@@ -147,7 +147,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 	{
 		++currentLineIndex;
 
-		QStringList tokens = currentLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
+		QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
 
 		//skip comments & empty lines
 		if( tokens.empty() || tokens.front().startsWith('/',Qt::CaseInsensitive) || tokens.front().startsWith('#',Qt::CaseInsensitive) )

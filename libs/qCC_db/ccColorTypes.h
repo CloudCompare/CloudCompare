@@ -119,7 +119,7 @@ namespace ccColor
 
 	// Predefined colors (default type)
 	constexpr Rgb white						(MAX, MAX, MAX);
-	constexpr Rgb lightGrey					(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8));
+	const Rgb lightGrey					(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8));
 	constexpr Rgb darkGrey					(MAX / 2, MAX / 2, MAX / 2);
 	constexpr Rgb red						(MAX, 0, 0);
 	constexpr Rgb green						(0, MAX, 0);

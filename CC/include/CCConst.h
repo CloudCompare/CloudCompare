@@ -40,10 +40,10 @@ constexpr double M_PI_2 = (M_PI/2.0);
 constexpr double SQRT_3 = 1.7320508075688772935274463415059;
 
 //! Conversion factor from radians to degrees
-constexpr double CC_RAD_TO_DEG = (180.0/M_PI);
+const double CC_RAD_TO_DEG = (180.0/M_PI);
 
 //! Conversion factor from degrees to radians
-constexpr double CC_DEG_TO_RAD = (M_PI/180.0);
+const double CC_DEG_TO_RAD = (M_PI/180.0);
 
 //! Numerical threshold for considering a value as "zero"
 constexpr double ZERO_TOLERANCE = static_cast<double>(FLT_EPSILON);

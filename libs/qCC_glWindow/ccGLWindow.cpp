@@ -379,7 +379,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_rotationAxisLocked(false)
 	, m_lockedRotationAxis(0, 0, 1)
 	, m_drawBBox(true)
-	, m_pointPickBuffer(0.0)
+	, m_pointPickBuffer(5)
 {
 	//start internal timer
 	m_timer.start();
@@ -585,6 +585,10 @@ void ccGLWindow::makeCurrent()
 
 void ccGLWindow::resetCursor()
 {
+	if (pointViewEditMode()) {
+		setCursor(QCursor(Qt::CrossCursor));
+		return;
+	}
 	switch (m_pickingMode)
 	{
 	case DEFAULT_PICKING:
@@ -604,9 +608,34 @@ void ccGLWindow::resetCursor()
 
 void ccGLWindow::drawCursor()
 {
-	if (m_interactionFlags & INTERACT_POINT_VIEW) {
-		setCursor(QCursor(Qt::CrossCursor));
+	if (!m_drawCursor) {
+		return;
+	}
+	if (m_curMousePos.x() <= 0 || m_curMousePos.y() <= 0 || m_curMousePos.x() >= m_glViewport.width() - 1 || m_curMousePos.y() >= m_glViewport.height() - 1) {
+		return;
+	}
+	Qt::KeyboardModifiers keyboardModifiers = QApplication::keyboardModifiers();
+	if (pointViewEditMode() && (keyboardModifiers & Qt::ShiftModifier)) {
+		ccQOpenGLFunctions* glFunc = functions();
+		assert(glFunc);
 
+		//force line width
+		glFunc->glPushAttrib(GL_LINE_BIT);
+		glFunc->glLineWidth(1.0f);
+
+		//cross OpenGL drawing
+		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::skyBlue.rgb);
+		glFunc->glBegin(GL_LINE_LOOP);
+
+		QPointF posA = toCenteredGLCoordinates(m_curMousePos.x(), m_curMousePos.y());
+
+		glFunc->glVertex3f(posA.x() - m_pointPickBuffer, posA.y() - m_pointPickBuffer, 0.0f);
+		glFunc->glVertex3f(posA.x() + m_pointPickBuffer, posA.y() - m_pointPickBuffer, 0.0f);
+		glFunc->glVertex3f(posA.x() + m_pointPickBuffer, posA.y() + m_pointPickBuffer, 0.0f);
+		glFunc->glVertex3f(posA.x() - m_pointPickBuffer, posA.y() + m_pointPickBuffer, 0.0f);
+		glFunc->glEnd();
+
+		glFunc->glPopAttrib(); //GL_LINE_BIT
 	}
 }
 
@@ -1092,6 +1121,28 @@ bool ccGLWindow::event(QEvent* evt)
 	case QEvent::Drop:
 	{
 		dropEvent(static_cast<QDropEvent*>(evt));
+	}
+	return true;
+
+	//! XYLIU
+	case QEvent::Leave:
+	{
+		if (pointViewEditMode()) {
+			m_drawCursor = false;
+			evt->accept();
+			redraw(true, false);
+		}
+	}
+	return true;
+
+	//! XYLIU
+	case QEvent::Enter:
+	{
+		if (pointViewEditMode()) {
+			m_drawCursor = true;
+			evt->accept();
+			redraw(true, false);
+		}
 	}
 	return true;
 
@@ -2685,6 +2736,8 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 		}
 	}
 
+	drawCursor();
+
 	logGLError("ccGLWindow::drawForeground");
 }
 
@@ -3015,7 +3068,8 @@ void ccGLWindow::setPointViewEditMode(bool state)
 	if (!state && (m_interactionFlags & INTERACT_POINT_VIEW))
 		m_interactionFlags &= ~INTERACT_POINT_VIEW;
 	else if (state && !(m_interactionFlags & INTERACT_POINT_VIEW))
-		m_interactionFlags &= INTERACT_POINT_VIEW;
+		m_interactionFlags |= INTERACT_POINT_VIEW;
+	resetCursor();
 }
 
 void ccGLWindow::setAutoPickPivotAtCenter(bool state)
@@ -3891,11 +3945,16 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	const int x = event->x();
 	const int y = event->y();
 
+	m_curMousePos = event->pos();
+	redraw(true, false);
+
 	if (m_interactionFlags & INTERACT_SIG_MOUSE_MOVED)
 	{
 		emit mouseMoved(x, y, event->buttons());
 		event->accept();
 	}
+
+	bool bPointEdit = pointViewEditMode();
 
 	//no button pressed
 	if (event->buttons() == Qt::NoButton)
@@ -3922,13 +3981,22 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		}
 		
 		//display the 3D coordinates of the pixel below the mouse cursor (if possible)
-		if (m_showCursorCoordinates)
+		if (m_showCursorCoordinates || bPointEdit)
 		{
 			CCVector3d P;
 			QString message = QString("2D (%1 ; %2)").arg(x).arg(y);
-			bool b3D = getClick3DPos(x, y, P);
-			if (b3D)
-			{
+			//bool b3D = getClick3DPos(x, y, P);
+
+ 			m_glDepth = getGLDepth(x, m_glViewport.height() - 1 - y, 0);
+ 
+ 			if (bPointEdit)	{
+ 				if (m_glDepth == 1.0f) 
+ 					m_glDepth = getGLDepth(x, m_glViewport.height() - 1 - y, m_pointPickBuffer);
+ 				message += QString(" ; d%1").arg(m_glDepth);
+ 			}
+ 			
+ 			bool b3D = getClick3DPos(x, y, m_glDepth, P);
+			if (b3D) {
 				message += QString(" --> 3D (%1 ; %2 ; %3)").arg(P.x).arg(P.y).arg(P.z);
 			}
 			emit mouseMoved3D(P, b3D);
@@ -4472,6 +4540,8 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 		m_activeItems.clear();
 	}
 
+	resetCursor();
+
 	refresh(false);
 }
 
@@ -4558,7 +4628,25 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 	{
 		event->accept();
 
-		if (m_viewportParams.perspectiveView)
+		if (pointViewEditMode()) {
+			float newDepth = m_glDepth + (event->delta() < 0 ? -0.001 : 0.001);
+			newDepth = std::max(0.0f, newDepth);
+			if (newDepth != m_glDepth) {
+				m_glDepth = newDepth;
+			}
+			int x(m_curMousePos.x()), y(m_curMousePos.y());
+			QString message = QString("2D (%1 ; %2)").arg(x).arg(y);
+			message += QString(" ; d%1").arg(m_glDepth);
+			CCVector3d P;
+			bool b3D = getClick3DPos(x, y, m_glDepth, P);
+			if (b3D) {
+				message += QString(" --> 3D (%1 ; %2 ; %3)").arg(P.x).arg(P.y).arg(P.z);
+			}
+			emit mouseMoved3D(P, b3D);
+			this->displayNewMessage(message, LOWER_LEFT_MESSAGE, false, 2, SCREEN_SIZE_MESSAGE);
+			redraw(true, false);
+		}
+		else if (m_viewportParams.perspectiveView)
 		{
 			//same shortcut as Meshlab: change the zNear value
 			static const int MAX_INCREMENT = 150;
@@ -4576,7 +4664,15 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 	{
 		event->accept();
 		
-		if (m_viewportParams.perspectiveView)
+		if (pointViewEditMode()) {
+			int newBuffer = m_pointPickBuffer + (event->delta() < 0 ? -1 : 1);
+			newBuffer = std::max(0, newBuffer);
+			if (newBuffer != m_pointPickBuffer) {
+				m_pointPickBuffer = newBuffer;
+			}
+			redraw(true, false);
+		}
+		else if (m_viewportParams.perspectiveView)
 		{
 			//same shortcut as Meshlab: change the fov value
 			float newFOV = (m_viewportParams.fov + (event->delta() < 0 ? -1.0f : 1.0f));
@@ -7139,6 +7235,20 @@ GLfloat ccGLWindow::getGLDepth(int x, int y, int extendToNeighbors/*=false*/)
 	//}
 
 	return minZ;
+}
+
+bool ccGLWindow::getClick3DPos(int x, int y, float depth, CCVector3d& P3D)
+{
+	if (depth == 1.0f) {
+		return false;
+	}
+
+	ccGLCameraParameters camera;
+	getGLCameraParameters(camera);
+
+	y = m_glViewport.height() - 1 - y;
+	CCVector3d P2D(x, y, depth);
+	return camera.unproject(P2D, P3D);
 }
 
 bool ccGLWindow::getClick3DPos(int x, int y, CCVector3d& P3D, int extend)

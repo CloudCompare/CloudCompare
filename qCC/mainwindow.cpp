@@ -793,7 +793,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionNext3DView,					&QAction::triggered, m_mdiArea, &QMdiArea::activateNextSubWindow);
 	connect(m_UI->actionPrevious3DView,				&QAction::triggered, m_mdiArea, &QMdiArea::activatePreviousSubWindow);
 
-	connect(m_UI->actionPointViewEditMode,			&QAction::triggered, this, &MainWindow::toggleActiveWindowPointViewEditMode);
+	connect(m_UI->actionPointViewEditMode,			&QAction::toggled, this, &MainWindow::toggleActiveWindowPointViewEditMode);
 	
 
 	//"About" menu entry

@@ -3804,6 +3804,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionPointViewEditMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Enter point-view edit mode</string>
    </property>

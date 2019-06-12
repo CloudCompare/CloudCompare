@@ -1045,6 +1045,7 @@ protected: //other methods
 	/** \return the (relative) depth or 1.0 if none is defined
 	**/
 	GLfloat getGLDepth(int x, int y, int extendToNeighbors = 0);
+	bool getClick3DPos(int x, int y, float depth, CCVector3d & P3D);
 public:
 	//! Returns the approximate 3D position of the clicked pixel
 	bool getClick3DPos(int x, int y, CCVector3d& P3D, int extend = 0);
@@ -1084,6 +1085,10 @@ protected: //members
 
     //! Last mouse position
 	QPoint m_lastMousePos;
+
+	//! current mouse position - mouse move
+	QPoint m_curMousePos;	//XYLIU
+	bool m_drawCursor;
 
 	//! Complete visualization matrix (GL style - double version)
 	ccGLMatrixd m_viewMatd;
@@ -1345,7 +1350,9 @@ protected: //members
 	CCVector3d m_lockedRotationAxis;
 	bool m_drawBBox;
 
-	double m_pointPickBuffer;
+	int m_pointPickBuffer;
+
+	float m_glDepth;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

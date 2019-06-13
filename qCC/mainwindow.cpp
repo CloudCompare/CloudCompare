@@ -13461,22 +13461,7 @@ void MainWindow::doActionShowBestImage()
 		objBox.add(CCVector3::fromArray(params.pivotPoint.u) + half_box);
 		objBox.add(CCVector3::fromArray(params.pivotPoint.u) - half_box);
 	}
-	if (/*!objBox.isValid()*/0)
-	{
-		CCVector3d p;
-		int extend = 50;	// TODO: the extend should be smaller than glwidth
-		if (glwin->getClick3DPos(extend, extend, p, extend-1)) { objBox.add(CCVector3::fromArray(p.u)); }
-		else goto clearbox;
-		if (glwin->getClick3DPos(glwin->glWidth() - extend, extend, p, extend-1)) { objBox.add(CCVector3::fromArray(p.u)); }
-		else goto clearbox;
-		if (glwin->getClick3DPos(glwin->glWidth() - extend, glwin->glHeight() - extend, p, extend-1)) { objBox.add(CCVector3::fromArray(p.u)); }
-		else goto clearbox;
-		if (glwin->getClick3DPos(extend, glwin->glHeight() - extend, p, extend-1)) { objBox.add(CCVector3::fromArray(p.u)); }
-		else goto clearbox;
-	clearbox:
-		objBox.clear();
-	}
-	if (!objBox.isValid()) {
+	else {
 		//! TODO: mesh.. refer to graphical segmentation
  		ccHObject::Container point_clouds = GetEnabledObjFromGroup(m_ccRoot->getRootEntity(), CC_TYPES::POINT_CLOUD, true, true);
 		
@@ -13486,14 +13471,19 @@ void MainWindow::doActionShowBestImage()
 			ccBBox box_ = pcObj->getTheVisiblePointsBBox(camParas);
 			objBox += box_;
  		}
+		double scale_box = m_pbdrImagePanel->getBoxScale();
+		objBox = ccBBox(objBox.getCenter() - objBox.getDiagVec()*scale_box / 2, objBox.getCenter() + objBox.getDiagVec()*scale_box / 2);
 		std::cout << "calc bbox from clouds" << std::endl;
 	}
-	std::cout << objBox.minCorner().x << " " << objBox.minCorner().y << " " << objBox.minCorner().z << std::endl;
-	std::cout << objBox.maxCorner().x << " " << objBox.maxCorner().y << " " << objBox.maxCorner().z << std::endl;
+	std::cout << "obj_bbox_min: " << objBox.minCorner().x << " " << objBox.minCorner().y << " " << objBox.minCorner().z << std::endl;
+	std::cout << "obj_bbox_max: " << objBox.maxCorner().x << " " << objBox.maxCorner().y << " " << objBox.maxCorner().z << std::endl;
+	std::cout << "up dir: " << glwin->getCurrentUpDir().x << " " << glwin->getCurrentUpDir().y << " " << glwin->getCurrentUpDir().z << std::endl;
 	
 	if (!objBox.isValid()) {
 		return;
 	}
+	m_pbdrImagePanel->setObjViewBox(objBox);
+	m_pbdrImagePanel->setObjViewUpDir(glwin->getCurrentUpDir());
 
 	CCVector3 objCenter = //params.objectCenteredView ? CCVector3::fromArray(params.pivotPoint.u) : 
 		objBox.getCenter();	// should be seen from the view
@@ -13503,9 +13493,6 @@ void MainWindow::doActionShowBestImage()
 	CCVector3 obj_to_view = -view_to_obj;
 	vcg::Point3f n(view_to_obj.u), u, v;
 	vcg::GetUV(n, u, v);
-	double scale_box = m_pbdrImagePanel->getBoxScale();
-	objBox = ccBBox(objBox.getCenter() - objBox.getDiagVec()*scale_box / 2, objBox.getCenter() + objBox.getDiagVec()*scale_box / 2);
-	m_pbdrImagePanel->setObjBox(objBox);
 
 	CCVector3 obj_o = objCenter - CCVector3::fromArray((u + v).V()) * objBox.getDiagNorm() / 2;
 	CCVector3 obj_u = obj_o + CCVector3::fromArray(u.V()) * objBox.getDiagNorm();
@@ -13583,13 +13570,24 @@ void MainWindow::doActionShowSelectedImage()
 		ccBBox box_2d;
 		for (size_t i = 0; i < 8; i++) {
 			CCVector3 b_2d;
-			m_pbdrImshow->FromGlobalToImage(m_pbdrImagePanel->getObjBox().P(i), b_2d);
+			m_pbdrImshow->FromGlobalToImage(m_pbdrImagePanel->getObjViewBox().P(i), b_2d);
 			box_2d.add(b_2d);
 		}
-		if (box_2d.isValid()) {
-			std::cout << box_2d.minCorner().x << " " << box_2d.minCorner().y << " " << box_2d.minCorner().z << std::endl;
-			std::cout << box_2d.maxCorner().x << " " << box_2d.maxCorner().y << " " << box_2d.maxCorner().z << std::endl;
-			m_pbdrImshow->update2DDisplayZoom(box_2d);
-		}
+		if (!box_2d.isValid()) return;
+
+		CCVector3d up_3d = m_pbdrImagePanel->getObjViewUpDir();
+
+		CCVector3 center; m_pbdrImshow->FromGlobalToImage(m_pbdrImagePanel->getObjViewBox().getCenter(), center);
+		CCVector3 to_end;  m_pbdrImshow->FromGlobalToImage(CCVector3::fromArray(up_3d.u) + m_pbdrImagePanel->getObjViewBox().getCenter(), to_end);
+		CCVector3 up_2d = to_end - center; up_2d.normalize();
+		
+		m_pbdrImshow->update2DDisplayZoom(box_2d, CCVector3d::fromArray(up_2d.u));
+
+		std::cout << "img_bbox_min: " << box_2d.minCorner().x << " " << box_2d.minCorner().y << " " << box_2d.minCorner().z << std::endl;
+		std::cout << "img_bbox_max: " << box_2d.maxCorner().x << " " << box_2d.maxCorner().y << " " << box_2d.maxCorner().z << std::endl;
+		std::cout << "up dir: " << up_2d.x << " " << up_2d.y << " " << up_2d.z << std::endl;
+	}
+	else {
+		m_pbdrImshow->ZoomFit();
 	}
 }

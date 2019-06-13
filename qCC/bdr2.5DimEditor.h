@@ -27,7 +27,7 @@ public:
 public: //standard methods
 
 	//! Updates the 2D display zoom	// left bottom
-	virtual void update2DDisplayZoom(ccBBox& box);
+	virtual void update2DDisplayZoom(ccBBox& box, CCVector3d up = CCVector3d(0, 1, 0));
 
 public:
 	//! Creates the 2D view

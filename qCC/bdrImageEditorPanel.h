@@ -42,8 +42,12 @@ public:
 	void setItems(std::vector<ccCameraSensor*> items, int defaultSelectedIndex);
 	void display(bool display_all);
 	double getBoxScale();
-	ccBBox getObjBox(); 
-	void setObjBox(ccBBox box); 
+
+	ccBBox getObjViewBox() { return m_objViewBox; }
+	void setObjViewBox(ccBBox box) { m_objViewBox = box; }
+	CCVector3d getObjViewUpDir() { return m_objViewUpDir.norm2d() < 1e-6 ? CCVector3d(0, 1, 0) : m_objViewUpDir; }
+	void setObjViewUpDir(CCVector3d up) { m_objViewUpDir = up; }
+
 	bool isObjChecked();
 	void updateCursorPos(const CCVector3d& P, bool b3d);
 	bool isLinkToMainView();
@@ -51,7 +55,8 @@ private:
 	bdr2Point5DimEditor* m_pbdrImshow;
 	bdrTraceFootprint* m_pbdrTraceFP;
 	ccDBRoot* m_root;
-	ccBBox m_obj_box;
+	ccBBox m_objViewBox;
+	CCVector3d m_objViewUpDir;
 	int m_image_display_height;
 };
 

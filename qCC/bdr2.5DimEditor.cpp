@@ -190,11 +190,11 @@ void bdr2Point5DimEditor::setAssociate3DView(ccGLWindow * win)
 	m_associate_3DView = win;
 }
 
-void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
+void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box, CCVector3d up)
 {
 	if (!m_glWindow /*|| !m_grid.isValid()*/)
 		return;
-	m_glWindow->setView(CC_TOP_VIEW);
+//	m_glWindow->setView(CC_TOP_VIEW, false);
 	//equivalent to 'ccGLWindow::updateConstellationCenterAndZoom' but we take aspect ratio into account
 
 	//we compute the pixel size (in world coordinates)
@@ -217,6 +217,9 @@ void bdr2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 	m_glWindow->setPivotPoint(CCVector3d::fromArray(P.u));
 	m_glWindow->setCameraPos(CCVector3d::fromArray(P.u));
 
+	ccGLMatrixd viewMat = ccGLMatrixd::FromViewDirAndUpDir(CCVector3d(0, 0, -1), up);
+	m_glWindow->setBaseViewMat(viewMat);
+
 	m_glWindow->invalidateViewport();
 	m_glWindow->invalidateVisualization();
 	m_glWindow->deprecate3DLayer();
@@ -237,7 +240,7 @@ void bdr2Point5DimEditor::setImage(QString image_path)
 	QString error;
 	m_image->load(image_path, error);
 	m_glWindow->addToOwnDB(m_image);
-	ZoomFit();
+	//ZoomFit();	// called outside
 }
 
 void bdr2Point5DimEditor::setImageAndCamera(ccCameraSensor * cam)

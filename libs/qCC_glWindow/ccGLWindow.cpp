@@ -1132,6 +1132,7 @@ bool ccGLWindow::event(QEvent* evt)
 			evt->accept();
 			redraw(true, false);
 		}
+		emit mouseMoved3D(CCVector3d(), false);
 	}
 	return true;
 

@@ -55,7 +55,6 @@ bdrImageEditorPanel::bdrImageEditorPanel(bdr2Point5DimEditor* img, ccDBRoot* roo
 	connect(imageListWidget, &QAbstractItemView::doubleClicked, this, &bdrImageEditorPanel::displayImage);
 	
 	connect(m_root, &ccDBRoot::selectionChanged, this, &bdrImageEditorPanel::selectImage);
-
 }
 
 void bdrImageEditorPanel::ZoomFit()
@@ -362,19 +361,9 @@ double bdrImageEditorPanel::getBoxScale()
 	return BoxScaleDoubleSpinBox->value();
 }
 
-ccBBox bdrImageEditorPanel::getObjBox()
-{
-	return m_obj_box;
-}
-
-void bdrImageEditorPanel::setObjBox(ccBBox box)
-{
-	m_obj_box = box;
-}
-
 bool bdrImageEditorPanel::isObjChecked()
 {
-	return m_obj_box.isValid() && CheckObjToolButton->isChecked();	
+	return m_objViewBox.isValid() && CheckObjToolButton->isChecked();	
 }
 
 

@@ -70,7 +70,7 @@ endif()
 
 if (COMPILE_CC_CORE_LIB_WITH_TBB)
 	include_directories( ${TBB_INCLUDE_DIRS} )
-	target_link_libraries( ${PROJECT_NAME} ${TBB_LIBRARIES} )
+	target_link_libraries( ${PROJECT_NAME} debug ${TBB_LIBRARIES_DEBUG} optimized ${TBB_LIBRARIES_RELEASE})
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_TBB )
 endif()
 

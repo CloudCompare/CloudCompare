@@ -108,17 +108,17 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 
 	if (m_cloud)
 	{
-		m_UI->cloudNameLabel->setText(QStringLiteral("<b>%1</b> (%2 points)").arg(m_cloud->getName(), QLocale::system().toString(m_cloud->size())));
+		cloudNameLabel->setText(QStringLiteral("<b>%1</b> (%2 points)").arg(m_cloud->getName(), QLocale::system().toString(m_cloud->size())));
 		if (m_cloud->hasScalarFields())
 		{
-			m_UI->interpolateSFCheckBox->setEnabled(true);
-			m_UI->scalarFieldProjection->setEnabled(true);
+			interpolateSFCheckBox->setEnabled(true);
+			scalarFieldProjection->setEnabled(true);
 		}
 		else
 		{
-			m_UI->interpolateSFCheckBox->setChecked(false);
-			m_UI->interpolateSFCheckBox->setEnabled(false);
-			m_UI->scalarFieldProjection->setEnabled(false);
+			interpolateSFCheckBox->setChecked(false);
+			interpolateSFCheckBox->setEnabled(false);
+			scalarFieldProjection->setEnabled(false);
 		}
 
 		//populate layer box
@@ -259,21 +259,21 @@ void ccRasterizeTool::projectionDirChanged(int dir)
 
 void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*/)
 {
-	if (m_UI->activeLayerComboBox->itemData(layerIndex).toInt() == LAYER_SF && m_UI->activeLayerComboBox->itemText(layerIndex) != HILLSHADE_FIELD_NAME)
+	if (activeLayerComboBox->itemData(layerIndex).toInt() == LAYER_SF && activeLayerComboBox->itemText(layerIndex) != HILLSHADE_FIELD_NAME)
 	{
-		m_UI->interpolateSFCheckBox->setChecked(true); //force the choice of a SF projection strategy
-		m_UI->interpolateSFCheckBox->setEnabled(false);
-		m_UI->generateImagePushButton->setEnabled(false);
-		m_UI->generateASCIIPushButton->setEnabled(false);
-		m_UI->projectContoursOnAltCheckBox->setEnabled(true);
+		interpolateSFCheckBox->setChecked(true); //force the choice of a SF projection strategy
+		interpolateSFCheckBox->setEnabled(false);
+		generateImagePushButton->setEnabled(false);
+		generateASCIIPushButton->setEnabled(false);
+		projectContoursOnAltCheckBox->setEnabled(true);
 	}
 	else
 	{
-		//m_UI->interpolateSFCheckBox->setChecked(false); //DGM: we can't force that, just let the user decide
-		m_UI->interpolateSFCheckBox->setEnabled(m_cloud && m_cloud->hasScalarFields()); //we need SF fields!
-		m_UI->generateImagePushButton->setEnabled(true);
-		m_UI->generateASCIIPushButton->setEnabled(true);
-		m_UI->projectContoursOnAltCheckBox->setEnabled(false);
+		//interpolateSFCheckBox->setChecked(false); //DGM: we can't force that, just let the user decide
+		interpolateSFCheckBox->setEnabled(m_cloud && m_cloud->hasScalarFields()); //we need SF fields!
+		generateImagePushButton->setEnabled(true);
+		generateASCIIPushButton->setEnabled(true);
+		projectContoursOnAltCheckBox->setEnabled(false);
 	}
 
 	if (m_rasterCloud)
@@ -316,7 +316,7 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 			}
 			else
 			{
-				m_UI->gridLayerRangeLabel->setText("Layer not computed");
+				gridLayerRangeLabel->setText("Layer not computed");
 				gridIsUpToDate(false);
 			}
 		}
@@ -369,7 +369,7 @@ ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfProjection() const
 
 ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfSFInterpolation() const
 {
-	if (/*!m_UI->interpolateSFCheckBox->isEnabled() || */!m_UI->interpolateSFCheckBox->isChecked()) //DGM: the check-box might be disabled to actually 'force' the user to choose a projection type
+	if (/*!interpolateSFCheckBox->isEnabled() || */!interpolateSFCheckBox->isChecked()) //DGM: the check-box might be disabled to actually 'force' the user to choose a projection type
 	{
 		return ccRasterGrid::INVALID_PROJECTION_TYPE; //means that we don't want to keep SF values
 	}

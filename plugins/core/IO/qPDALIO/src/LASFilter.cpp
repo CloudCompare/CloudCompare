@@ -111,7 +111,7 @@ LASFilter::LASFilter()
     : FileIOFilter( {
                     "_PDAL LAS Filter",
                     3.0f,	// priority
-                    QStringList{ "las" },
+                    QStringList{ "las", "laz" },
                     "las",
                     QStringList{ "LAS cloud (*.las *.laz)" },
                     QStringList{ "LAS cloud (*.las *.laz)" },

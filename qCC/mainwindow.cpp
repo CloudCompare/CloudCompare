@@ -13454,7 +13454,7 @@ void MainWindow::doActionShowBestImage()
 	CCVector3d viewPoint = params.getViewPoint();
 	ccBBox objBox;
 	//! wrong - bug remains
-	if (params.perspectiveView)
+	if (params.objectCenteredView)
 	{
 		float scale_width = glwin->getCenterRadius(m_pbdrImagePanel->getBoxScale());
 		CCVector3 half_box(scale_width, scale_width, scale_width);

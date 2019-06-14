@@ -624,8 +624,6 @@ public: //stereo mode
 	//! Lock the rotation axis
 	void lockRotationAxis(bool state, const CCVector3d& axis);
 
-	ccBBox getCunrrentViewBB();
-
 	//! Returns whether the rotation axis is locaked or not
 	bool isRotationAxisLocked() const { return m_rotationAxisLocked; }
 

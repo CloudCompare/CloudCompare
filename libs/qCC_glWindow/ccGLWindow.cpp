@@ -3947,7 +3947,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	const int y = event->y();
 
 	m_curMousePos = event->pos();
-	redraw(true, false);
+	//redraw(true, false);
 
 	if (m_interactionFlags & INTERACT_SIG_MOUSE_MOVED)
 	{
@@ -4339,6 +4339,13 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			}
 		}
 	}
+	else if (event->buttons() & Qt::MiddleButton)	// XYLIU
+	{
+		float wheelDelta_deg = dy * 2.0f;
+		onWheelEvent(wheelDelta_deg);
+
+		emit mouseWheelRotated(wheelDelta_deg);
+	}
 
 	m_mouseMoved = true;
 	m_lastMousePos = event->pos();
@@ -4690,7 +4697,7 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 		event->accept();
 
 		//see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
-		float wheelDelta_deg = event->delta() / 8.0f;
+		float wheelDelta_deg = event->delta() / 16.0f;//8.0f;	//XYLIU
 		onWheelEvent(wheelDelta_deg);
 
 		emit mouseWheelRotated(wheelDelta_deg);
@@ -7273,24 +7280,4 @@ void ccGLWindow::lockRotationAxis(bool state, const CCVector3d& axis)
 	m_rotationAxisLocked = state;
 	m_lockedRotationAxis = axis;
 	m_lockedRotationAxis.normalize();
-}
-
-ccBBox ccGLWindow::getCunrrentViewBB()
-{
-// 	int grid_size = 10;
-// 	int grid_w = glWidth() / grid_size;
-// 	int grid_h = glHeight() / grid_size;
-// 	int grid_extend = std::min(grid_w, grid_h);
-// 	//! left_min
-// 	for (size_t i = 0; i < grid_size; i++) {
-// 		for (size_t j = 0; j < grid_size; j++) {
-// 			int center_x = (double)grid_w *(i + 0.5);
-// 			int center_y = (double)grid_h *(i + 0.5);
-// 			CCVector3d p;
-// 			if (getClick3DPos(center_x, center_y, p, grid_extend)) {
-// 
-// 			}
-// 		}
-// 	}
-	return ccBBox();
 }

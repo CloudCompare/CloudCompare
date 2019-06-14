@@ -626,12 +626,12 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	catch (const pdal::pdal_error& p)
 	{
 		ccLog::Error(QString("PDAL exception: %1").arg(p.what()));
-		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 	catch (const std::exception& e)
 	{
 		ccLog::Error(QString("PDAL generic exception: %1").arg(e.what()));
-		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 	catch (...)
 	{
@@ -1017,18 +1017,18 @@ std::vector<ExtraDim> readExtraBytesVlr(LasHeader &header)
 
 CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
-	Options las_opts;
-	las_opts.add("filename", filename.toStdString());
-
-	FixedPointTable t(100);
-	LasReader lasReader;
-	LasHeader lasHeader;
-	QuickInfo file_info;
-	std::vector<ExtraDim> extraDims;
-	PointLayoutPtr layout(t.layout());
-
 	try
 	{
+		Options las_opts;
+		las_opts.add("filename", filename.toStdString());
+
+		FixedPointTable t(100);
+		LasReader lasReader;
+		LasHeader lasHeader;
+		QuickInfo file_info;
+		std::vector<ExtraDim> extraDims;
+		PointLayoutPtr layout(t.layout());
+
 		lasReader.setOptions(las_opts);
 		lasReader.prepare(t);
 		lasHeader = lasReader.header();
@@ -1041,90 +1041,78 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		extraDims = readExtraBytesVlr(lasHeader);
 
 		file_info = lasReader.preview();
-	}
-	catch (const std::exception& e)
-	{
-		ccLog::Error(QString("PDAL exception '%1'").arg(e.what()));
-		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
-	}
-	catch (...)
-	{
-		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
-	}
 
-	CCVector3d bbMin(lasHeader.minX(), lasHeader.minY(), lasHeader.minZ());
-	CCVector3d bbMax(lasHeader.maxX(), lasHeader.maxY(), lasHeader.maxZ());
+		CCVector3d bbMin(lasHeader.minX(), lasHeader.minY(), lasHeader.minZ());
+		CCVector3d bbMax(lasHeader.maxX(), lasHeader.maxY(), lasHeader.maxZ());
 
-	CCVector3d lasScale = CCVector3d(lasHeader.scaleX(), lasHeader.scaleY(), lasHeader.scaleZ());
-	CCVector3d lasOffset = CCVector3d(lasHeader.offsetX(), lasHeader.offsetY(), lasHeader.offsetZ());
+		CCVector3d lasScale = CCVector3d(lasHeader.scaleX(), lasHeader.scaleY(), lasHeader.scaleZ());
+		CCVector3d lasOffset = CCVector3d(lasHeader.offsetX(), lasHeader.offsetY(), lasHeader.offsetZ());
 
-	auto nbOfPoints = static_cast<unsigned int>(lasHeader.pointCount());
-	if (nbOfPoints == 0)
-	{
-		//strange file ;)
-		return CC_FERR_NO_LOAD;
-	}
-
-	const uint8_t pointFormat = lasHeader.pointFormat();
-	ccLog::Print("[LAS] Point format: " + QString::number(pointFormat));
-
-	if (!s_lasOpenDlg)
-	{
-		s_lasOpenDlg = QSharedPointer<LASOpenDlg>(new LASOpenDlg());
-	}
-	s_lasOpenDlg->setDimensions(file_info.m_dimNames);
-	s_lasOpenDlg->clearEVLRs();
-	s_lasOpenDlg->setInfos(filename, nbOfPoints, bbMin, bbMax);
-	s_lasOpenDlg->classifOverlapCheckBox->setEnabled(pointFormat >= 6);
-
-	for (ExtraDim &dim : extraDims)
-	{
-		s_lasOpenDlg->addEVLR(QString("%1").arg(QString::fromStdString(dim.m_name)));
-	}
-
-	if (parameters.sessionStart)
-	{
-		//we do this AFTER restoring the previous context because it may still be
-		//good that the previous configuration is restored even though the user needs
-		//to confirm it
-		s_lasOpenDlg->resetApplyAll();
-	}
-
-	if (parameters.alwaysDisplayLoadDialog && !s_lasOpenDlg->autoSkipMode() && !s_lasOpenDlg->exec())
-	{
-		return CC_FERR_CANCELED_BY_USER;
-	}
-
-	bool ignoreDefaultFields = s_lasOpenDlg->ignoreDefaultFieldsCheckBox->isChecked();
-
-	unsigned int short rgbColorMask[3] = { 0, 0, 0 };
-	if (s_lasOpenDlg->doLoad(LAS_RED))
-		rgbColorMask[0] = (~0);
-	if (s_lasOpenDlg->doLoad(LAS_GREEN))
-		rgbColorMask[1] = (~0);
-	if (s_lasOpenDlg->doLoad(LAS_BLUE))
-		rgbColorMask[2] = (~0);
-	bool loadColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
-
-	//by default we read colors as triplets of 8 bits integers but we might dynamically change this
-	//if we encounter values using 16 bits (16 bits is the standard!)
-	unsigned char colorCompBitShift = 0;
-	bool forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
-	ccColor::Rgb rgb(0, 0, 0);
-
-	StringList extraNamesToLoad;
-	std::string extraDimsArg;
-	for (unsigned i = 0; i < extraDims.size(); ++i)
-	{
-		if (s_lasOpenDlg->doLoadEVLR(i))
+		auto nbOfPoints = static_cast<unsigned int>(lasHeader.pointCount());
+		if (nbOfPoints == 0)
 		{
-			extraDimsArg += extraDims[i].m_name + "=" + interpretationName(extraDims[i].m_dimType.m_type) + ",";
-			extraNamesToLoad.push_back(extraDims[i].m_name);
+			//strange file ;)
+			return CC_FERR_NO_LOAD;
 		}
-	}
 
-	try
-	{
+		const uint8_t pointFormat = lasHeader.pointFormat();
+		ccLog::Print("[LAS] Point format: " + QString::number(pointFormat));
+
+		if (!s_lasOpenDlg)
+		{
+			s_lasOpenDlg = QSharedPointer<LASOpenDlg>(new LASOpenDlg());
+		}
+		s_lasOpenDlg->setDimensions(file_info.m_dimNames);
+		s_lasOpenDlg->clearEVLRs();
+		s_lasOpenDlg->setInfos(filename, nbOfPoints, bbMin, bbMax);
+		s_lasOpenDlg->classifOverlapCheckBox->setEnabled(pointFormat >= 6);
+
+		for (ExtraDim &dim : extraDims)
+		{
+			s_lasOpenDlg->addEVLR(QString("%1").arg(QString::fromStdString(dim.m_name)));
+		}
+
+		if (parameters.sessionStart)
+		{
+			//we do this AFTER restoring the previous context because it may still be
+			//good that the previous configuration is restored even though the user needs
+			//to confirm it
+			s_lasOpenDlg->resetApplyAll();
+		}
+
+		if (parameters.alwaysDisplayLoadDialog && !s_lasOpenDlg->autoSkipMode() && !s_lasOpenDlg->exec())
+		{
+			return CC_FERR_CANCELED_BY_USER;
+		}
+
+		bool ignoreDefaultFields = s_lasOpenDlg->ignoreDefaultFieldsCheckBox->isChecked();
+
+		unsigned int short rgbColorMask[3] = { 0, 0, 0 };
+		if (s_lasOpenDlg->doLoad(LAS_RED))
+			rgbColorMask[0] = (~0);
+		if (s_lasOpenDlg->doLoad(LAS_GREEN))
+			rgbColorMask[1] = (~0);
+		if (s_lasOpenDlg->doLoad(LAS_BLUE))
+			rgbColorMask[2] = (~0);
+		bool loadColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
+
+		//by default we read colors as triplets of 8 bits integers but we might dynamically change this
+		//if we encounter values using 16 bits (16 bits is the standard!)
+		unsigned char colorCompBitShift = 0;
+		bool forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
+		ccColor::Rgb rgb(0, 0, 0);
+
+		StringList extraNamesToLoad;
+		std::string extraDimsArg;
+		for (unsigned i = 0; i < extraDims.size(); ++i)
+		{
+			if (s_lasOpenDlg->doLoadEVLR(i))
+			{
+				extraDimsArg += extraDims[i].m_name + "=" + interpretationName(extraDims[i].m_dimType.m_type) + ",";
+				extraNamesToLoad.push_back(extraDims[i].m_name);
+			}
+		}
+
 		if (!extraNamesToLoad.empty())
 		{
 			// If extra fields are requested, reload the file with the new extra_dims parameters
@@ -1594,9 +1582,14 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 		}
 	}
+	catch (const pdal::pdal_error& p)
+	{
+		ccLog::Error(QString("PDAL exception: %1").arg(p.what()));
+		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+	}
 	catch (const std::exception& e)
 	{
-		ccLog::Error(QString("PDAL exception '%1'").arg(e.what()));
+		ccLog::Error(QString("PDAL generic exception: %1").arg(e.what()));
 		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 	catch (...)

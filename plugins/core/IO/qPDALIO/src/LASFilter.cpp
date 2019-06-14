@@ -977,42 +977,47 @@ std::vector<ExtraDim> ExtraBytesIf::toExtraDims()
 	return eds;
 }
 
-std::vector<ExtraDim> readExtraBytesVlr(LasHeader &header)
+static bool ReadExtraBytesVlr(LasHeader &header, std::vector<ExtraDim>& extraDims)
 {
-	std::vector<ExtraDim> extraDims;
-
 	const LasVLR *vlr = header.findVlr(SPEC_USER_ID, EXTRA_BYTES_RECORD_ID);
-
 	if (!vlr)
 	{
-		return extraDims;
+		return false;
 	}
-	const char *pos = vlr->data();
+	
 	size_t size = vlr->dataLen();
 	if (size % sizeof(ExtraBytesSpec) != 0)
 	{
-		ccLog::Warning("Bad size for extra bytes VLR. Ignoring.");
-		return extraDims;
+		ccLog::Warning("[LAS] Bad size for extra bytes VLR. Ignoring.");
+		return false;
 	}
-	size /= sizeof(ExtraBytesSpec);
+	size_t count = size / sizeof(ExtraBytesSpec);
+	ccLog::PrintDebug("[LAS] VLR count: " + QString::number(count));
 
-	std::vector<ExtraBytesIf> ebList;
-
-	while (size--)
+	try
 	{
-		ExtraBytesIf eb;
-		eb.readFrom(pos);
-		ebList.push_back(eb);
-		pos += sizeof(ExtraBytesSpec);
+		const char* pos = vlr->data();
+		for (size_t i = 0; i < count; ++i)
+		{
+			ExtraBytesIf eb;
+			eb.readFrom(pos);
+			pos += sizeof(ExtraBytesSpec);
+
+			std::vector<ExtraDim> eds = eb.toExtraDims();
+			for (const ExtraDim& ed : eds)
+			{
+				ccLog::PrintDebug(QString("[LAS] VLR #%1: %2").arg(i + 1).arg(QString::fromStdString(ed.m_name)));
+				extraDims.push_back(ed);
+			}
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("[LAS] Not enough memory to retrieve the extra bytes fields.");
+		return false;
 	}
 
-	for (ExtraBytesIf& eb : ebList)
-	{
-		std::vector<ExtraDim> eds = eb.toExtraDims();
-		for (auto& ed : eds)
-			extraDims.push_back(std::move(ed));
-	}
-	return extraDims;
+	return true;
 }
 
 CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
@@ -1022,38 +1027,32 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		Options las_opts;
 		las_opts.add("filename", filename.toStdString());
 
-		FixedPointTable t(100);
 		LasReader lasReader;
-		LasHeader lasHeader;
-		QuickInfo file_info;
-		std::vector<ExtraDim> extraDims;
-		PointLayoutPtr layout(t.layout());
-
 		lasReader.setOptions(las_opts);
-		lasReader.prepare(t);
-		lasHeader = lasReader.header();
+		FixedPointTable fields(100);
+		PointLayoutPtr layout(fields.layout());
+		lasReader.prepare(fields);
+		LasHeader lasHeader = lasReader.header();
 
-		/* The VLR record describing the extra bytes has been added to LAS 1.4 to formalize
-		a process that has been used in prior versions of LAS.
-		So PDAL doesn't read this VLR if the version is <= 1.3.
-		The idea is to read the VLR manually, make a string of the names and data types,
-		and pass that back to the PDAL reader.*/
-		extraDims = readExtraBytesVlr(lasHeader);
-
-		file_info = lasReader.preview();
-
-		CCVector3d bbMin(lasHeader.minX(), lasHeader.minY(), lasHeader.minZ());
-		CCVector3d bbMax(lasHeader.maxX(), lasHeader.maxY(), lasHeader.maxZ());
-
-		CCVector3d lasScale = CCVector3d(lasHeader.scaleX(), lasHeader.scaleY(), lasHeader.scaleZ());
-		CCVector3d lasOffset = CCVector3d(lasHeader.offsetX(), lasHeader.offsetY(), lasHeader.offsetZ());
-
-		auto nbOfPoints = static_cast<unsigned int>(lasHeader.pointCount());
+		unsigned nbOfPoints = static_cast<unsigned>(lasHeader.pointCount());
 		if (nbOfPoints == 0)
 		{
 			//strange file ;)
 			return CC_FERR_NO_LOAD;
 		}
+
+		//The VLR record describing the extra bytes has been added to LAS 1.4 to formalize
+		//a process that has been used in prior versions of LAS.
+		//So PDAL doesn't read this VLR if the version is <= 1.3.
+		//The idea is to read the VLR manually, make a string of the names and data types,
+		//and pass that back to the PDAL reader.
+		std::vector<ExtraDim> extraDims;
+		ReadExtraBytesVlr(lasHeader, extraDims);
+
+		CCVector3d bbMin(lasHeader.minX(), lasHeader.minY(), lasHeader.minZ());
+		CCVector3d bbMax(lasHeader.maxX(), lasHeader.maxY(), lasHeader.maxZ());
+		CCVector3d lasScale(lasHeader.scaleX(), lasHeader.scaleY(), lasHeader.scaleZ());
+		CCVector3d lasOffset(lasHeader.offsetX(), lasHeader.offsetY(), lasHeader.offsetZ());
 
 		const uint8_t pointFormat = lasHeader.pointFormat();
 		ccLog::Print("[LAS] Point format: " + QString::number(pointFormat));
@@ -1062,12 +1061,14 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		{
 			s_lasOpenDlg = QSharedPointer<LASOpenDlg>(new LASOpenDlg());
 		}
+
+		QuickInfo file_info = lasReader.preview();
 		s_lasOpenDlg->setDimensions(file_info.m_dimNames);
 		s_lasOpenDlg->clearEVLRs();
 		s_lasOpenDlg->setInfos(filename, nbOfPoints, bbMin, bbMax);
 		s_lasOpenDlg->classifOverlapCheckBox->setEnabled(pointFormat >= 6);
 
-		for (ExtraDim &dim : extraDims)
+		for (const ExtraDim& dim : extraDims)
 		{
 			s_lasOpenDlg->addEVLR(QString("%1").arg(QString::fromStdString(dim.m_name)));
 		}
@@ -1120,7 +1121,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 			las_opts2.add("extra_dims", extraDimsArg);
 
 			lasReader.addOptions(las_opts2);
-			lasReader.prepare(t);
+			lasReader.prepare(fields);
 		}
 
 		std::vector<Id> extraDimensionsIds;
@@ -1517,8 +1518,8 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		};
 
 		f.setCallback(ccProcessOne);
-		f.prepare(t);
-		f.execute(t);
+		f.prepare(fields);
+		f.execute(fields);
 
 		if (callbackError != CC_FERR_NO_ERROR)
 		{

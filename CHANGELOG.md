@@ -54,7 +54,7 @@ v2.11 (Anoia) - (in development)
     - The GL plugin interface has changed, so if you have your own GL plugins, you will need to update them.
       - The interface name changed from `ccGLFilterPluginInterface` to `ccGLPluginInterface`.
 
-v2.10.3 (Zephyrus) - (in development)
+v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------
 
 - Enhancements

@@ -39,6 +39,8 @@ v2.11 (Anoia) - (in development)
   - LAS:
 	- the standard LAS Filter now handles the OVERLAP classification bit (for point format >= 6)
 	- improved/fixed management of classification and classification flags
+	- LAS offset (chosen at saving time) should be a little bit smarter (CC will try to keep the previous one,
+		or use the bounding-box min corner ONLY if the coordinates are too large)
 
 - Changes
   - Command line tool:

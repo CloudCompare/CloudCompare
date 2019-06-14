@@ -322,6 +322,18 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 	}
 
+	bool hasOffsetMetaData = false;
+	CCVector3d lasOffset(0, 0, 0);
+	lasOffset.x = theCloud->getMetaData(LAS_OFFSET_X_META_DATA).toDouble(&hasOffsetMetaData);
+	if (hasOffsetMetaData)
+	{
+		lasOffset.y = theCloud->getMetaData(LAS_OFFSET_Y_META_DATA).toDouble(&hasOffsetMetaData);
+		if (hasOffsetMetaData)
+		{
+			lasOffset.z = theCloud->getMetaData(LAS_OFFSET_Z_META_DATA).toDouble(&hasOffsetMetaData);
+		}
+	}
+
 	//optimal scale (for accuracy) --> 1e-9 because the maximum integer is roughly +/-2e+9
 	CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, ZERO_TOLERANCE),
 	                        1.0e-9 * std::max<double>(diag.y, ZERO_TOLERANCE),
@@ -535,9 +547,20 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		//Set offset & scale, as points will be stored as boost::int32_t values (between 0 and 4294967296)
 		//int_value = (double_value-offset)/scale
-		writerOptions.add("offset_x", bbMin.x);
-		writerOptions.add("offset_y", bbMin.y);
-		writerOptions.add("offset_z", bbMin.z);
+		if (hasOffsetMetaData & ccGlobalShiftManager::NeedShift(bbMax - lasOffset))
+		{
+			//the previous offset can't be used
+			hasOffsetMetaData = false;
+			lasOffset = CCVector3d(0, 0, 0);
+		}
+		if (!hasOffsetMetaData && ccGlobalShiftManager::NeedShift(bbMax))
+		{
+			//we have no choice, we'll use the min bounding box
+			lasOffset = bbMin;
+		}
+		writerOptions.add("offset_x", lasOffset.x);
+		writerOptions.add("offset_y", lasOffset.y);
+		writerOptions.add("offset_z", lasOffset.z);
 
 		writerOptions.add("scale_x", lasScale.x);
 		writerOptions.add("scale_y", lasScale.y);
@@ -1033,7 +1056,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 	CCVector3d bbMax(lasHeader.maxX(), lasHeader.maxY(), lasHeader.maxZ());
 
 	CCVector3d lasScale = CCVector3d(lasHeader.scaleX(), lasHeader.scaleY(), lasHeader.scaleZ());
-	CCVector3d lasShift = -CCVector3d(lasHeader.offsetX(), lasHeader.offsetY(), lasHeader.offsetZ());
+	CCVector3d lasOffset = CCVector3d(lasHeader.offsetX(), lasHeader.offsetY(), lasHeader.offsetZ());
 
 	auto nbOfPoints = static_cast<unsigned int>(lasHeader.pointCount());
 	if (nbOfPoints == 0)
@@ -1300,14 +1323,14 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 
 				//backup input global parameters
 				ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
-				bool useLasShift = false;
-				//set the lasShift as default if none was provided
-				if (lasShift.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
+				bool useLasOffset = false;
+				//set the lasOffset as default if none was provided
+				if (lasOffset.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
 				{
 					    if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
 						{
-							useLasShift = true;
-							Pshift = lasShift;
+							useLasOffset = true;
+							Pshift = -lasOffset;
 							if (csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
 							{
 								parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
@@ -1315,7 +1338,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 						}
 				}
 
-				if (HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters, useLasShift))
+				if (HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters, useLasOffset))
 				{
 					if (preserveCoordinateShift)
 					{
@@ -1551,6 +1574,10 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 					loadedCloud->setMetaData(LAS_SCALE_X_META_DATA, QVariant(lasScale.x));
 					loadedCloud->setMetaData(LAS_SCALE_Y_META_DATA, QVariant(lasScale.y));
 					loadedCloud->setMetaData(LAS_SCALE_Z_META_DATA, QVariant(lasScale.z));
+					loadedCloud->setMetaData(LAS_OFFSET_X_META_DATA, QVariant(lasOffset.x));
+					loadedCloud->setMetaData(LAS_OFFSET_Y_META_DATA, QVariant(lasOffset.y));
+					loadedCloud->setMetaData(LAS_OFFSET_Z_META_DATA, QVariant(lasOffset.z));
+
 					loadedCloud->setMetaData(LAS_VERSION_MAJOR_META_DATA, QVariant(lasHeader.versionMajor()));
 					loadedCloud->setMetaData(LAS_VERSION_MINOR_META_DATA, QVariant(lasHeader.versionMinor()));
 					loadedCloud->setMetaData(LAS_POINT_FORMAT_META_DATA, QVariant(pointFormat));

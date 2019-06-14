@@ -117,7 +117,6 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 			laswriteopener.set_format(LAS_TOOLS_FORMAT_LAS);
 		}
 
-		bool hasTime = (cloud->getScalarFieldIndexByName(LAS_FIELD_NAMES[LAS_TIME]) >= 0);
 		bool hasFWF = cloud->hasFWF();
 		bool hasColors = cloud->hasColors();
 		bool hasIntensity = (cloud->getScalarFieldIndexByName(LAS_FIELD_NAMES[LAS_INTENSITY]) >= 0);
@@ -169,6 +168,11 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 				ccLog::Print(QString("[LAS_FWF] FWF data file written: %1").arg(fwFilename));
 			}
 		}
+
+		//match cloud SFs with official LAS fields
+		std::vector<LasField> fieldsToSave;
+		uint8_t minPointFormat = 0;
+		LasField::GetLASFields(cloud, fieldsToSave, minPointFormat);
 
 		LASheader lasheader;
 		{
@@ -253,84 +257,11 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 			lasheader.x_scale_factor = lasScale.x;
 			lasheader.y_scale_factor = lasScale.y;
 			lasheader.z_scale_factor = lasScale.z;
+
+			minPointFormat = LasField::UpdateMinPointFormat(minPointFormat, hasColors, hasFWF, false); //no legacy format with this plugin
 			
-#ifdef USE_LEGACY_FORMATS //LAS formats up to 5
-			//LAS formats:
-			//0 - base
-			//1 - base + GPS
-			//2 - base + RGB
-			//3 - base + GPS + RGB
-			//4 - base + GPS + FWF
-			//5 - base + GPS + FWF + RGB
-			lasheader.point_data_format = 0;
-			lasheader.point_data_record_length = 20;
-			//GPS time?
-			if (hasTime)
-			{
-				lasheader.point_data_format = 1;
-				lasheader.point_data_record_length = 20 + 8;
-			}
-			//FWF data?
-			if (hasFWF)
-			{
-				//0, 1 --> 4
-				lasheader.point_data_format = 4;
-				lasheader.point_data_record_length = 20 + 8 + 29;
-			}
-			//Colors?
-			if (hasColors)
-			{
-				if (lasheader.point_data_format == 4)
-				{
-					//4 --> 5
-					lasheader.point_data_format = 5;
-				}
-				else
-				{
-					//0 --> 2
-					//1 --> 3
-					lasheader.point_data_format += 2;
-				}
-				lasheader.point_data_record_length += 6;
-			}
-#else
-			//we use extended versions (up to 15 returns, up to 256 classes for classification, higher precision scan angle)
-			//LAS formats:
-			//6  - base (GPS included)
-			//7  - base + RGB
-			//8  - base + RGB + NIR (not used)
-			//9  - base + FWF
-			//10 - base + FWF + RGB + NIR
-			lasheader.point_data_format = 6;
-			lasheader.point_data_record_length = 30;
-			//FWF data?
-			if (hasFWF)
-			{
-				//6 --> 9
-				lasheader.point_data_format = 9;
-				lasheader.point_data_record_length = 30 + 29;
-			}
-			//Colors?
-			if (hasColors)
-			{
-				if (lasheader.point_data_format == 6)
-				{
-					//6 --> 7
-					lasheader.point_data_format = 7;
-					lasheader.point_data_record_length += 6;
-				}
-				else if (lasheader.point_data_format == 9)
-				{
-					//9 --> 10
-					lasheader.point_data_format = 10;
-					lasheader.point_data_record_length += 6 + 2;
-				}
-				else
-				{
-					assert(false);
-				}
-			}
-#endif
+			lasheader.point_data_format = minPointFormat;
+			lasheader.point_data_record_length = LasField::GetFormatRecordLength(lasheader.point_data_format);
 
 			//FWF descriptors and other parameters
 			if (hasFWF)
@@ -402,10 +333,6 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 			QCoreApplication::processEvents();
 		}
 		CCLib::NormalizedProgress nProgress(progressDialog.data(), cloud->size());
-
-		//match cloud SFs with official LAS fields
-		std::vector<LasField> fieldsToSave;
-		LasField::GetLASFields(cloud, fieldsToSave);
 
 		bool hasReturnNumberField = false;
 		bool hasPlainClassificationField = false;

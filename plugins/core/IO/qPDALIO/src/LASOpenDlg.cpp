@@ -153,6 +153,8 @@ bool LASOpenDlg::doLoad(LAS_FIELDS field) const
 		return classifCheckBox->isEnabled() && classifCheckBox->isChecked() && decomposeClassifGroupBox->isChecked() && classifKeypointCheckBox->isChecked();
 	case LAS_CLASSIF_WITHHELD:
 		return classifCheckBox->isEnabled() && classifCheckBox->isChecked() && decomposeClassifGroupBox->isChecked() && classifWithheldCheckBox->isChecked();
+	case LAS_CLASSIF_OVERLAP:
+		return classifCheckBox->isEnabled() && classifCheckBox->isChecked() && decomposeClassifGroupBox->isChecked() && classifOverlapCheckBox->isChecked();
 	case LAS_INVALID:
 	default:
 		assert(false);

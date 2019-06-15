@@ -36,6 +36,11 @@ v2.11 (Anoia) - (in development)
 	- the computation speed should be improved when using a small projection radius (smarter selection of the octree level)
   - Others:
     - CC now saves the radius (parameter) after computing normals (as meta-data associated to the cloud)
+  - LAS:
+	- the standard LAS Filter now handles the OVERLAP classification bit (for point format >= 6)
+	- improved/fixed management of classification and classification flags
+	- LAS offset (chosen at saving time) should be a little bit smarter (CC will try to keep the previous one,
+		or use the bounding-box min corner ONLY if the coordinates are too large)
 
 - Changes
   - Command line tool:
@@ -54,7 +59,10 @@ v2.11 (Anoia) - (in development)
     - The GL plugin interface has changed, so if you have your own GL plugins, you will need to update them.
       - The interface name changed from `ccGLFilterPluginInterface` to `ccGLPluginInterface`.
 
-v2.10.3 (Zephyrus) - (in development)
+- Bug fix:
+	- LAS classification flags were not always properly extracted/saved by the standard LAS filter (depending on the point format)
+
+v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------
 
 - Enhancements

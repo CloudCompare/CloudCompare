@@ -890,6 +890,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionShowSelectedImage,			&QAction::triggered, this, &MainWindow::doActionShowSelectedImage);
 	connect(m_UI->ProjectTabWidget,					SIGNAL(currentChanged(int)), this, SLOT(doActionChangeTabTree(int)));
 	connect(m_UI->actionImageOverlay,				&QAction::triggered, this, &MainWindow::toggleImageOverlay);
+	connect(m_UI->actionProjectToImage,				&QAction::triggered, this, &MainWindow::doActionProjectToImage);
 }
 
 void MainWindow::doActionChangeTabTree(int index)
@@ -13589,5 +13590,13 @@ void MainWindow::doActionShowSelectedImage()
 	}
 	else {
 		m_pbdrImshow->ZoomFit();
+	}
+}
+
+void MainWindow::doActionProjectToImage()
+{
+	if (!haveSelection()) { return; }
+	for (ccHObject* obj : m_selectedEntities) {
+		m_pbdrImshow->projectToImage(obj);
 	}
 }

@@ -567,6 +567,7 @@
     <addaction name="actionShowBestImage"/>
     <addaction name="actionShowSelectedImage"/>
     <addaction name="actionImageOverlay"/>
+    <addaction name="actionProjectToImage"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -3809,6 +3810,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="text">
     <string>Enter point-view edit mode</string>
+   </property>
+  </action>
+  <action name="actionProjectToImage">
+   <property name="text">
+    <string>Project To Image</string>
    </property>
   </action>
  </widget>

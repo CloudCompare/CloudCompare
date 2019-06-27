@@ -539,6 +539,8 @@ private slots:
 
 	void clearImagePanel();
 
+	void doActionProjectToImage();
+
 private:
 	//! Shortcut: asks the user to select one cloud
 	/** \param defaultCloudEntity a cloud to select by default (optional)

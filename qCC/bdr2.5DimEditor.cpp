@@ -249,6 +249,39 @@ void bdr2Point5DimEditor::setImageAndCamera(ccCameraSensor * cam)
 	m_image->setAssociatedSensor(cam);
 }
 
+void bdr2Point5DimEditor::projectToImage(ccHObject * obj)
+{
+	if (!getImage()) { return; }
+	ccCameraSensor* cam = m_image->getAssociatedSensor();
+	if (!cam) { return; }
+	
+	ccHObject* to_add = nullptr;
+	ccGenericPointCloud* point_clone = nullptr;
+	if (obj->isKindOf(CC_TYPES::POINT_CLOUD)) {
+		point_clone = ccHObjectCaster::ToGenericPointCloud(obj)->clone();
+		to_add = point_clone;
+	}
+	else if (obj->isA(CC_TYPES::MESH)) {
+		ccMesh* mesh_clone = ccHObjectCaster::ToMesh(obj)->cloneMesh();
+		mesh_clone->getAssociatedCloud();
+	}
+	else if (obj->isA(CC_TYPES::POLY_LINE)) {
+		ccPolyline* poly = ccHObjectCaster::ToPolyline(obj);
+		to_add = (poly ? new ccPolyline(*poly) : 0);
+	}
+	else if (obj->isA(CC_TYPES::LABEL_2D)) {
+
+	}
+	//! add to cam
+	if (to_add && point_clone) {
+
+		to_add->setDisplay(m_glWindow);
+		cam->addChild(to_add);
+		MainWindow* win = MainWindow::TheInstance(); assert(win);
+		win->addToDB(to_add, true, false, true, true, CC_TYPES::DB_IMAGE);
+	}
+}
+
 void bdr2Point5DimEditor::ZoomFit()
 {
 	if (!m_image) {

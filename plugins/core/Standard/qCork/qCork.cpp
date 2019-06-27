@@ -43,9 +43,9 @@
 
 
 qCork::qCork(QObject* parent/*=0*/)
-    : QObject(parent)
-    , ccStdPluginInterface(":/CC/plugin/qCork/info.json")
-    , m_action(nullptr)
+	: QObject(parent)
+	, ccStdPluginInterface(":/CC/plugin/qCork/info.json")
+	, m_action(nullptr)
 {
 }
 
@@ -54,7 +54,7 @@ QList<QAction *> qCork::getActions()
 	//default action
 	if (!m_action)
 	{
-		m_action = new QAction(getName(),this);
+		m_action = new QAction(getName(), this);
 		m_action->setToolTip(getDescription());
 		m_action->setIcon(getIcon());
 		//connect signal
@@ -69,9 +69,9 @@ void qCork::onNewSelection(const ccHObject::Container& selectedEntities)
 	if (m_action)
 	{
 		//we need two and only two meshes!
-		m_action->setEnabled(	selectedEntities.size() == 2
-							&&	selectedEntities[0]->isKindOf(CC_TYPES::MESH)
-							&&	selectedEntities[1]->isKindOf(CC_TYPES::MESH));
+		m_action->setEnabled(selectedEntities.size() == 2
+			&& selectedEntities[0]->isKindOf(CC_TYPES::MESH)
+			&& selectedEntities[1]->isKindOf(CC_TYPES::MESH));
 	}
 }
 
@@ -80,7 +80,7 @@ bool ToCorkMesh(const ccMesh* in, CorkMesh& out, ccMainAppInterface* app = 0)
 	if (!in || !in->getAssociatedCloud())
 	{
 		if (app)
-			app->dispToConsole("[Cork] Invalid input mesh!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole("[Cork] Invalid input mesh!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		assert(false);
 		return false;
 	}
@@ -101,20 +101,20 @@ bool ToCorkMesh(const ccMesh* in, CorkMesh& out, ccMainAppInterface* app = 0)
 	catch (const std::bad_alloc&)
 	{
 		if (app)
-			app->dispToConsole("[Cork] Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole("[Cork] Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 
-	if(outVerts.empty() || outTris.empty())
+	if (outVerts.empty() || outTris.empty())
 	{
 		if (app)
-			app->dispToConsole(QString("[Cork] Input mesh '%1' is empty?!").arg(in->getName()),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			app->dispToConsole(QString("[Cork] Input mesh '%1' is empty?!").arg(in->getName()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 		return false;
 	}
 
 	//import triangle indexes
 	{
-		for(unsigned i=0; i<triCount; i++)
+		for (unsigned i = 0; i < triCount; i++)
 		{
 			const CCLib::VerticesIndexes* tsi = in->getTriangleVertIndexes(i);
 			CorkTriangle corkTri;
@@ -131,7 +131,7 @@ bool ToCorkMesh(const ccMesh* in, CorkMesh& out, ccMainAppInterface* app = 0)
 
 	//import vertices
 	{
-		for(unsigned i=0; i<vertCount; i++)
+		for (unsigned i = 0; i < vertCount; i++)
 		{
 			const CCVector3* P = vertices->getPoint(i);
 			outVerts[i].pos.x = static_cast<double>(P->x);
@@ -151,7 +151,7 @@ ccMesh* FromCorkMesh(const CorkMesh& in, ccMainAppInterface* app = 0)
 	if (inTris.empty() || inVerts.empty())
 	{
 		if (app)
-			app->dispToConsole("[Cork] Output mesh is empty?!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			app->dispToConsole("[Cork] Output mesh is empty?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 		return 0;
 	}
 
@@ -162,7 +162,7 @@ ccMesh* FromCorkMesh(const CorkMesh& in, ccMainAppInterface* app = 0)
 	if (!vertices->reserve(vertCount))
 	{
 		if (app)
-			app->dispToConsole("[Cork] Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole("[Cork] Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		delete vertices;
 		return 0;
 	}
@@ -172,29 +172,29 @@ ccMesh* FromCorkMesh(const CorkMesh& in, ccMainAppInterface* app = 0)
 	if (!mesh->reserve(triCount))
 	{
 		if (app)
-			app->dispToConsole("[Cork] Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole("[Cork] Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		delete mesh;
 		return 0;
 	}
 
 	//import vertices
 	{
-		for(unsigned i=0; i<vertCount; i++)
+		for (unsigned i = 0; i < vertCount; i++)
 		{
 			const CorkVertex& P = inVerts[i];
-			CCVector3 Pout(	static_cast<PointCoordinateType>(P.pos.x),
-							static_cast<PointCoordinateType>(P.pos.y),
-							static_cast<PointCoordinateType>(P.pos.z) );
+			CCVector3 Pout(static_cast<PointCoordinateType>(P.pos.x),
+				static_cast<PointCoordinateType>(P.pos.y),
+				static_cast<PointCoordinateType>(P.pos.z));
 			vertices->addPoint(Pout);
 		}
 	}
 
 	//import triangle indexes
 	{
-		for(unsigned i=0; i<triCount; i++)
+		for (unsigned i = 0; i < triCount; i++)
 		{
 			const CorkMesh::Tri& tri = inTris[i];
-			mesh->addTriangle(tri.a,tri.b,tri.c);
+			mesh->addTriangle(tri.a, tri.b, tri.c);
 		}
 	}
 
@@ -240,31 +240,31 @@ bool doPerformBooleanOp()
 			if (s_params.corkA->isSelfIntersecting())
 			{
 				if (s_params.app)
-					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(s_params.nameA),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(s_params.nameA), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				s_params.meshesAreOk = false;
 			}
 			else if (!s_params.corkA->isClosed())
 			{
 				if (s_params.app)
-					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(s_params.nameA),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(s_params.nameA), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				s_params.meshesAreOk = false;
 			}
 			if (s_params.corkB->isSelfIntersecting())
 			{
 				if (s_params.app)
-					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(s_params.nameB),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(s_params.nameB), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				s_params.meshesAreOk = false;
 			}
 			else if (!s_params.corkB->isClosed())
 			{
 				if (s_params.app)
-					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(s_params.nameB),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(s_params.nameB), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				s_params.meshesAreOk = false;
 			}
 		}
 
 		//perform the boolean operation
-		switch(s_params.operation)
+		switch (s_params.operation)
 		{
 		case ccCorkDlg::UNION:
 			s_params.corkA->boolUnion(*s_params.corkB);
@@ -285,14 +285,14 @@ bool doPerformBooleanOp()
 		default:
 			assert(false);
 			if (s_params.app)
-				s_params.app->dispToConsole("Unhandled operation?!",ccMainAppInterface::WRN_CONSOLE_MESSAGE); //DGM: can't issue an error message (i.e. with dialog) in another thread!
+				s_params.app->dispToConsole("Unhandled operation?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE); //DGM: can't issue an error message (i.e. with dialog) in another thread!
 			break;
 		}
 	}
-	catch(const std::exception& e)
+	catch (const std::exception& e)
 	{
 		if (s_params.app)
-			s_params.app->dispToConsole(QString("Exception caught: %1").arg(e.what()),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			s_params.app->dispToConsole(QString("Exception caught: %1").arg(e.what()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 		return false;
 	}
 
@@ -307,12 +307,12 @@ void qCork::doAction()
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	size_t selNum = selectedEntities.size();
-	if (	selNum != 2
-		||	!selectedEntities[0]->isKindOf(CC_TYPES::MESH)
-		||	!selectedEntities[1]->isKindOf(CC_TYPES::MESH) )
+	if (selNum != 2
+		|| !selectedEntities[0]->isKindOf(CC_TYPES::MESH)
+		|| !selectedEntities[1]->isKindOf(CC_TYPES::MESH))
 	{
 		assert(false);
-		m_app->dispToConsole("Select two and only two meshes!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Select two and only two meshes!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
@@ -321,11 +321,11 @@ void qCork::doAction()
 
 	//show dialog to let the user choose the operation to perform
 	ccCorkDlg cDlg(m_app->getMainWindow());
-	cDlg.setNames(meshA->getName(),meshB->getName());
+	cDlg.setNames(meshA->getName(), meshB->getName());
 	if (!cDlg.exec())
 		return;
 	if (cDlg.isSwapped())
-		std::swap(meshA,meshB);
+		std::swap(meshA, meshB);
 
 	//try to convert both meshes to CorkMesh structures
 	CorkMesh corkA;
@@ -338,7 +338,7 @@ void qCork::doAction()
 	//launch process
 	{
 		//run in a separate thread
-		QProgressDialog pDlg("Operation in progress",QString(),0,0,m_app->getMainWindow());
+		QProgressDialog pDlg("Operation in progress", QString(), 0, 0, m_app->getMainWindow());
 		pDlg.setWindowTitle("Cork");
 		pDlg.show();
 		QApplication::processEvents();
@@ -349,7 +349,7 @@ void qCork::doAction()
 		s_params.nameA = meshA->getName();
 		s_params.nameB = meshB->getName();
 		s_params.operation = cDlg.getSelectedOperation();
-			
+
 		QFuture<bool> future = QtConcurrent::run(doPerformBooleanOp);
 
 		//wait until process is finished!
@@ -361,7 +361,7 @@ void qCork::doAction()
 			usleep(500 * 1000);
 #endif
 
-			pDlg.setValue(pDlg.value()+1);
+			pDlg.setValue(pDlg.value() + 1);
 			QApplication::processEvents();
 		}
 
@@ -375,7 +375,7 @@ void qCork::doAction()
 		if (!future.result())
 		{
 			if (m_app)
-				m_app->dispToConsole(s_params.meshesAreOk ? "Computation failed!" : "Computation failed! (check console)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				m_app->dispToConsole(s_params.meshesAreOk ? "Computation failed!" : "Computation failed! (check console)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			//an error occurred
 			return;
 		}
@@ -392,7 +392,7 @@ void qCork::doAction()
 
 		//set name
 		QString opName;
-		switch(cDlg.getSelectedOperation())
+		switch (cDlg.getSelectedOperation())
 		{
 		case ccCorkDlg::UNION:
 			opName = "union";

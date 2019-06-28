@@ -61,6 +61,7 @@ v2.11 (Anoia) - (in development)
 
 - Bug fix:
 	- LAS classification flags were not always properly extracted/saved by the standard LAS filter (depending on the point format)
+	- Trace Polyline tool: when changing the OpenGL camera position while tracing a polyline AND using oversampling, strange spikes could appear
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

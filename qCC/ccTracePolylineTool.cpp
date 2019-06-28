@@ -209,13 +209,22 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 		const CCVector3* p1 = m_poly3DVertices->getPoint(i);
 		newVertices->addPoint(*p1);
 
+
 		unsigned i2 = (i + 1) % n_verts;
-		CCVector2d v = m_segmentParams[i2].clickPos - m_segmentParams[i].clickPos;
+		CCVector2d clickPos1/* = m_segmentParams[i].clickPos*/;
+		{
+			//we actually retro-project the 3D point in the second vertex camera frame so as to get a proper behavior
+			CCVector3d P2D;
+			m_segmentParams[i2].params.project(*p1, P2D, false);
+			clickPos1 = CCVector2d(P2D.x, P2D.y);
+		}
+
+		CCVector2d v = m_segmentParams[i2].clickPos - clickPos1;
 		v /= steps;
 
 		for (unsigned j = 1; j < steps; j++)
 		{
-			CCVector2d vj = m_segmentParams[i].clickPos + v * j;
+			CCVector2d vj = clickPos1 + v * j;
 
 			CCVector3 nearestPoint;
 			double nearestElementSquareDist = -1.0;

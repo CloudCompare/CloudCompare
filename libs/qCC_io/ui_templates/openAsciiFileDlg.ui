@@ -74,8 +74,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>984</width>
-        <height>430</height>
+        <width>990</width>
+        <height>486</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -152,28 +152,30 @@
      <item>
       <layout class="QHBoxLayout">
        <item>
-        <widget class="QToolButton" name="toolButtonShortcutESP">
-         <property name="text">
-          <string>ESP</string>
+        <widget class="QToolButton" name="toolButtonShortcutSpace">
+         <property name="toolTip">
+          <string>space</string>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="toolButtonShortcutTAB">
          <property name="text">
-          <string>TAB</string>
+          <string>whitespace </string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QToolButton" name="toolButtonShortcutComma">
+         <property name="toolTip">
+          <string>comma</string>
+         </property>
          <property name="text">
           <string notr="true">,</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="toolButtonShortcutDotcomma">
+        <widget class="QToolButton" name="toolButtonShortcutSemicolon">
+         <property name="toolTip">
+          <string>semicolon</string>
+         </property>
          <property name="text">
           <string notr="true">;</string>
          </property>
@@ -191,6 +193,13 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="commaDecimalCheckBox">
+         <property name="text">
+          <string>use comma as decimal character</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QCheckBox" name="show2DLabelsCheckBox">

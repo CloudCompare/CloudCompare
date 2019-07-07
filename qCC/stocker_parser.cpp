@@ -2575,10 +2575,22 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 				top_points.push_back(CCVector3(vcgXYZ(pt)));
 				bottom_points.push_back(CCVector3(pt.X(), pt.Y(), ground_height));
 			}
-			StBlock* block_entity = new StBlock(top_points, bottom_points);
 
-			block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(block_number++));
-			ftObj->addChild(block_entity);
+			StBlock* block_entity = nullptr;
+			try	{
+				block_entity = new StBlock(top_points, bottom_points);
+			}
+			catch (const std::exception& e)	{
+				if (block_entity) {
+					delete block_entity;
+					block_entity = nullptr;
+				}
+				continue;
+			}
+			if (block_entity) {
+				block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(block_number));
+				ftObj->addChild(block_entity);
+			}
 		}
 	}
 	return blockgroup_obj;

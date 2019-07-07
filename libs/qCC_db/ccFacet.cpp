@@ -604,7 +604,9 @@ ccFacet* ccFacet::CreateFromContour(std::vector<CCVector3> contour_points, QStri
 		name_ = "facet";
 	}
 	ccFacet* facet = new ccFacet(0, name_);
-	facet->FormByContour(contour_points, planeEquation);
+	if (!facet->FormByContour(contour_points, polygon, planeEquation)) {
+		return nullptr;
+	}
 	return facet;
 }
 
@@ -679,6 +681,9 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 				PointCoordinateType& t = const_cast<PointCoordinateType&>(planeEquation[i]);
 				t = -planeEquation[i];
 			}
+		}
+		if (fabs(area) < 1e-6) {
+			return false;
 		}
 	}
 

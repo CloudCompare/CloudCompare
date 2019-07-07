@@ -12924,41 +12924,54 @@ void MainWindow::doActionBDFootPrintAuto()
 	if (!haveSelection()){
 		return;
 	}
-	ccHObject *entity = getSelectedEntities().front();
-	StBuilding* building = GetParentBuilding(entity);
-	if (!building) {
+
+	ccHObject::Container building_entites;
+	for (ccHObject* ent : getSelectedEntities()) {
+		ccHObject::Container bds = GetBuildingEntitiesBySelected(ent);
+		building_entites.insert(building_entites.end(), bds.begin(), bds.end());
+	}
+	if (building_entites.empty()) {
 		ccConsole::Error("No building in selection!");
 		return;
 	}
-	QString building_name(GetBaseName(building->getName()));
-
-	BDBaseHObject* baseObj = GetRootBDBase(entity);
-	if (!baseObj) {
-		dispToConsole(s_no_project_error, ERR_CONSOLE_MESSAGE);
-		return;
-	}
-	StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name);
-	if (!prim_group) { 
-		dispToConsole("generate primitives first!", ERR_CONSOLE_MESSAGE); 
-		return; 
-	}
-	
-	ProgStart("Generate footprints")
-	try {
-		ccHObject::Container footprints = GenerateFootPrints(prim_group);
-		for (ccHObject* ft : footprints) {
-			if (ft && ft->isA(CC_TYPES::ST_FOOTPRINT)) {
-				SetGlobalShiftAndScale(ft);
-				ft->setDisplay_recursive(entity->getDisplay());
-				addToDB(ft, false, false);				
-			}			
+	ProgStartNorm("Generate footprints", building_entites.size())
+	for (ccHObject* entity : building_entites) {
+		StBuilding* building = GetParentBuilding(entity);
+		if (!building) {
+			ccConsole::Error("No building in selection!");
+			return;
 		}
-	}
-	catch (const std::runtime_error& e) {
-		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
-		return;
+		QString building_name(GetBaseName(building->getName()));
+
+		BDBaseHObject* baseObj = GetRootBDBase(entity);
+		if (!baseObj) {
+			dispToConsole(s_no_project_error, ERR_CONSOLE_MESSAGE);
+			return;
+		}
+		StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name);
+		if (!prim_group) {
+			dispToConsole("generate primitives first!", ERR_CONSOLE_MESSAGE);
+			return;
+		}
+
+		try {
+			ccHObject::Container footprints = GenerateFootPrints(prim_group);
+			for (ccHObject* ft : footprints) {
+				if (ft && ft->isA(CC_TYPES::ST_FOOTPRINT)) {
+					SetGlobalShiftAndScale(ft);
+					ft->setDisplay_recursive(entity->getDisplay());
+					addToDB(ft, false, false);
+				}
+			}
+		}
+		catch (const std::runtime_error& e) {
+			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+			//return;
+		}
+		ProgStep()
 	}
 	ProgEnd
+	doActionBDProjectSave();
 	refreshAll();
 	UpdateUI();
 }
@@ -13189,38 +13202,61 @@ void MainWindow::doActionBDLoD2Generation()
 	m_pbdr3d4emDlg->setModal(false);
 	m_pbdr3d4emDlg->setWindowModality(Qt::NonModal);
 	if (!m_pbdr3d4emDlg->exec()) return;
+
+	ccHObject::Container sels = m_selectedEntities;
+	//doActionBDFootPrintAuto();	// TODO: TEMP!!!!
 	
-	ccHObject *entity = getSelectedEntities().front();
-
-	BDBaseHObject* baseObj = GetRootBDBase(entity);
-
-	double height = DBL_MAX;
-	if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
-		height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
+	ccHObject::Container building_entites;	// could be a footprint or building entities
+	if (sels.size() == 1 && sels.front()->isA(CC_TYPES::ST_FOOTPRINT)) {
+		building_entites.push_back(sels.front());
 	}
-	else /*if (m_pbdr3d4emDlg->GroundHeightMode() == 0)*/ {		
-		height = baseObj->GetBuildingUnit(GetParentBuilding(entity)->getName().toStdString()).ground_height;
-	}
-
-	ccHObject* bd_entity = entity->isA(CC_TYPES::ST_FOOTPRINT) ? entity : GetParentBuilding(entity);
-	if (!bd_entity) return;
-
-	ProgStart("LoD2 generation")
-	try {
-		ccHObject* bd_model_obj = LoD2FromFootPrint(bd_entity, height);
-		if (bd_model_obj) {
-			SetGlobalShiftAndScale(bd_model_obj);
-			bd_model_obj->setDisplay_recursive(bd_entity->getDisplay());
-			addToDB(bd_model_obj);
+	else {
+		for (ccHObject* ent : sels) {
+			ccHObject::Container bds = GetBuildingEntitiesBySelected(ent);
+			building_entites.insert(building_entites.end(), bds.begin(), bds.end());
 		}
 	}
-	catch (const std::exception& e) {
-		dispToConsole("[BDRecon] cannot build lod2 model", ERR_CONSOLE_MESSAGE);
-		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+	
+	if (building_entites.empty()) {
+		ccConsole::Error("No building in selection!");
 		return;
 	}
-	ProgEnd
 
+	ProgStartNorm("LoD2 generation", building_entites.size())
+	for (ccHObject* bd_entity : building_entites) {
+		BDBaseHObject* baseObj = GetRootBDBase(bd_entity);
+
+		double height = DBL_MAX;
+		if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
+			height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
+		}
+		else /*if (m_pbdr3d4emDlg->GroundHeightMode() == 0)*/ {
+			height = baseObj->GetBuildingUnit(GetParentBuilding(bd_entity)->getName().toStdString()).ground_height;
+		}
+
+		//ccHObject* bd_entity = entity->isA(CC_TYPES::ST_FOOTPRINT) ? entity : GetParentBuilding(entity);
+		//if (!bd_entity) return;
+		
+		try {
+			ccHObject* bd_model_obj = LoD2FromFootPrint(bd_entity, height);
+			if (bd_model_obj) {
+				SetGlobalShiftAndScale(bd_model_obj);
+				bd_model_obj->setDisplay_recursive(bd_entity->getDisplay());
+				addToDB(bd_model_obj);
+			}
+		}
+		catch (const std::exception& e) {
+			std::cout << "[BDRecon] cannot build lod2 model - ";
+			std::cout << e.what() << std::endl;
+			//continue;
+			//dispToConsole("[BDRecon] cannot build lod2 model", ERR_CONSOLE_MESSAGE);
+			//dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+			//return;
+		}
+		//doActionBDProjectSave();
+		ProgStep()
+	}
+	ProgEnd
 	refreshAll();
 	UpdateUI();
 

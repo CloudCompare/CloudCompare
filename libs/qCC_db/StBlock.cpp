@@ -61,7 +61,9 @@ StBlock::StBlock(const std::vector<CCVector3>& top,
 	assert(top.size() > 2);
 	assert(top.size() == bottom.size());
 	
-	updateRepresentation();
+	if (!updateRepresentation()) {
+		throw std::runtime_error("internal error");
+	}
 }
 
 StBlock::StBlock(QString name/*="Block"*/)
@@ -193,7 +195,9 @@ bool StBlock::buildUp()
 // 	assert(count >= 3);
  	if (m_top.size() < 3) { return false; }
 	ccFacet* top_facet = ccFacet::CreateFromContour(m_top, "top", true);
-	ccFacet* bottom_facet = ccFacet::CreateFromContour(m_bottom, "bottom", true);;
+	if (!top_facet) { return false; }
+	ccFacet* bottom_facet = ccFacet::CreateFromContour(m_bottom, "bottom", true);
+	if (!bottom_facet) { return false; }
 	bottom_facet->invertNormal();
 	
 	addChild(top_facet);
@@ -286,8 +290,8 @@ bool StBlock::buildUp()
 			if (flip)
 				std::swap(first_bot, second_bot);
 
-			std::cout << "top: " << first_top << " " << second_top << std::endl;
-			std::cout << "top: " << first_bot << " " << second_bot << std::endl;
+			//std::cout << "top: " << first_top << " " << second_top << std::endl;
+			//std::cout << "top: " << first_bot << " " << second_bot << std::endl;
 
 			for (unsigned ti = 0; ti < numberOfTriangles; ++ti) {
 				unsigned int* _triIndexes = mesh->getTriangleVertIndexes(ti)->i;

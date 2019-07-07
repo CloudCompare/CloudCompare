@@ -45,6 +45,10 @@ v2.11 (Anoia) - (in development)
 	- CloudCompare can now load ASCII files with mixed whitespaces (spaces / tabs)
 	- the ASCII load dialog option has now an option to load numerical values with a comma as digit separator
 		('use comma as decimal character' checkbox)
+  - Unroll
+	- ability to set the start and stop angles for the cone unrolling options
+	- new unrolling mode: 'Straightened cone' (the previous one has been renamed 'Straightened cone (fixed radius)'). This new mode unrolls the cone as a cylinder but with a varying radius.
+	- the 'Straightened cone' options are now using the real curvilinear abscissa (0 = cone apex)
 
 - Changes
   - Command line tool:
@@ -66,6 +70,7 @@ v2.11 (Anoia) - (in development)
 - Bug fix:
 	- LAS classification flags were not always properly extracted/saved by the standard LAS filter (depending on the point format)
 	- Trace Polyline tool: when changing the OpenGL camera position while tracing a polyline AND using oversampling, strange spikes could appear
+	- the Unroll dialog was not enabling all the apex coordinate fields after switching from Cylinder to Cone mode
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

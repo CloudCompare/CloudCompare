@@ -5419,49 +5419,50 @@ void MainWindow::doActionUnroll()
 		return;
 	unrollDlg.toPersistentSettings();
 
-	ccUnrollDlg::Type mode = unrollDlg.getType();
+	ccPointCloud::UnrollMode mode = unrollDlg.getType();
 	PointCoordinateType radius = static_cast<PointCoordinateType>(unrollDlg.getRadius());
 	unsigned char dim = static_cast<unsigned char>(unrollDlg.getAxisDimension());
 	bool exportDeviationSF = unrollDlg.exportDeviationSF();
-	CCVector3* pCenter = nullptr;
-	CCVector3 center;
-	if (mode != ccUnrollDlg::CYLINDER || !unrollDlg.isAxisPositionAuto())
-	{
-		//we need the axis center point
-		center = unrollDlg.getAxisPosition();
-		pCenter = &center;
-	}
+	CCVector3 center = unrollDlg.getAxisPosition();
 
 	//let's rock unroll ;)
 	ccProgressDialog pDlg(true, this);
 
+	double startAngle_deg = 0.0, stopAngle_deg = 360.0;
+	unrollDlg.getAngleRange(startAngle_deg, stopAngle_deg);
+	if (startAngle_deg >= stopAngle_deg)
+	{
+		QMessageBox::critical(this, "Error", "Invalid angular range");
+		return;
+	}
+
 	ccPointCloud* output = nullptr;
 	switch (mode)
 	{
-	case ccUnrollDlg::CYLINDER:
+	case ccPointCloud::CYLINDER:
 	{
-		double startAngle_deg = 0.0, stopAngle_deg = 360.0;
-		unrollDlg.getAngleRange(startAngle_deg, stopAngle_deg);
-		if (startAngle_deg >= stopAngle_deg)
+		ccPointCloud::UnrollCylinderParams params;
+		params.radius = radius;
+		params.axisDim = dim;
+		if (unrollDlg.isAxisPositionAuto())
 		{
-			QMessageBox::critical(this, "Error", "Invalid angular range");
-			return;
+			center = pc->getOwnBB().getCenter();
 		}
-		output = pc->unrollOnCylinder(radius, dim, pCenter, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
+		params.center = center;
+		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
 	}
 	break;
 
-	case ccUnrollDlg::CONE:
+	case ccPointCloud::CONE:
+	case ccPointCloud::STRAIGHTENED_CONE:
+	case ccPointCloud::STRAIGHTENED_CONE2:
 	{
-		double coneHalfAngle_deg = unrollDlg.getConeHalfAngle();
-		output = pc->unrollOnCone(coneHalfAngle_deg, center, dim, false, 0, exportDeviationSF, &pDlg);
-	}
-	break;
-	
-	case ccUnrollDlg::STRAIGHTENED_CONE:
-	{
-		double coneHalfAngle_deg = unrollDlg.getConeHalfAngle();
-		output = pc->unrollOnCone(coneHalfAngle_deg, center, dim, true, radius, exportDeviationSF, &pDlg);
+		ccPointCloud::UnrollConeParams params;
+		params.radius = (mode == ccPointCloud::CONE ? 0 : radius);
+		params.apex = center;
+		params.coneAngle_deg = unrollDlg.getConeHalfAngle();
+		params.axisDim = dim;
+		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
 	}
 	break;
 	

@@ -41,6 +41,10 @@ v2.11 (Anoia) - (in development)
 	- improved/fixed management of classification and classification flags
 	- LAS offset (chosen at saving time) should be a little bit smarter (CC will try to keep the previous one,
 		or use the bounding-box min corner ONLY if the coordinates are too large)
+  - ASCII:
+	- CloudCompare can now load ASCII files with mixed whitespaces (spaces / tabs)
+	- the ASCII load dialog option has now an option to load numerical values with a comma as digit separator
+		('use comma as decimal character' checkbox)
 
 - Changes
   - Command line tool:

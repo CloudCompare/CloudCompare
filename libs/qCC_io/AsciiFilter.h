@@ -44,6 +44,7 @@ public:
 													ccHObject& container,
 													const AsciiOpenDlg::Sequence& openSequence,
 													char separator,
+													bool commaAsDecimal,
 													unsigned approximateNumberOfLines,
 													qint64 fileSize,
 													unsigned maxCloudSize,

@@ -22,6 +22,8 @@
 
 //CCLib
 #include <CCGeom.h>
+//qCC_db
+#include <ccPointCloud.h>
 
 //! Dialog: unroll clould on a cylinder or a cone
 class ccUnrollDlg : public QDialog, public Ui::UnrollDialog
@@ -33,10 +35,7 @@ public:
 	//! Default constructor
 	explicit ccUnrollDlg(QWidget* parent = 0);
 
-	//! Projection type
-	enum Type { CYLINDER, CONE, STRAIGHTENED_CONE };
-
-	Type getType() const;
+	ccPointCloud::UnrollMode getType() const;
 	int getAxisDimension() const;
 	bool isAxisPositionAuto() const;
 	CCVector3 getAxisPosition() const;

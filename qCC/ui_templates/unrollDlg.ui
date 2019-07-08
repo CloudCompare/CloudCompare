@@ -37,6 +37,11 @@
        </item>
        <item>
         <property name="text">
+         <string>Straightened cone (fixed radius)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>Straightened cone</string>
         </property>
        </item>

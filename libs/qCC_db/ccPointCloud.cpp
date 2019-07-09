@@ -5006,7 +5006,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 	return true;
 }
 
-int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* reallocated/*=0*/)
+int VBO::init(int count, bool withColors, bool withNormals, bool* reallocated/*=0*/)
 {
 	//required memory
 	int totalSizeBytes = sizeof(PointCoordinateType) * count * 3;

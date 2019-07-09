@@ -41,6 +41,60 @@ class QGLBuffer;
 class ccProgressDialog;
 class ccPointCloudLOD;
 
+class VBO : public QGLBuffer
+{
+public:
+	int rgbShift;
+	int normalShift;
+
+	//! Inits the VBO
+	/** \return the number of allocated bytes (or -1 if an error occurred)
+	**/
+	int init(int count, bool withColors, bool withNormals, bool* reallocated = nullptr);
+
+	VBO()
+		: QGLBuffer(QGLBuffer::VertexBuffer)
+		, rgbShift(0)
+		, normalShift(0)
+	{}
+};
+
+//! VBO set
+struct vboSet
+{
+	//! States of the VBO(s)
+	enum STATES { NEW, INITIALIZED, FAILED };
+
+	//! Update flags
+	enum UPDATE_FLAGS {
+		UPDATE_POINTS = 1,
+		UPDATE_COLORS = 2,
+		UPDATE_NORMALS = 4,
+		UPDATE_ALL = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS
+	};
+
+	vboSet()
+		: hasColors(false)
+		, colorIsSF(false)
+		, sourceSF(nullptr)
+		, hasNormals(false)
+		, totalMemSizeBytes(0)
+		, updateFlags(0)
+		, state(NEW)
+	{}
+
+	std::vector<VBO*> vbos;
+	bool hasColors;
+	bool colorIsSF;
+	ccScalarField* sourceSF;
+	bool hasNormals;
+	int totalMemSizeBytes;
+	int updateFlags;
+
+	//! Current state
+	STATES state;
+};
+
 /***************************************************
 				ccPointCloud
 ***************************************************/
@@ -754,59 +808,6 @@ protected: // VBO
 	//! Release VBOs
 	void releaseVBOs();
 
-	class VBO : public QGLBuffer
-	{
-	public:
-		int rgbShift;
-		int normalShift;
-
-		//! Inits the VBO
-		/** \return the number of allocated bytes (or -1 if an error occurred)
-		**/
-		int init(int count, bool withColors, bool withNormals, bool* reallocated = nullptr);
-
-		VBO()
-			: QGLBuffer(QGLBuffer::VertexBuffer)
-			, rgbShift(0)
-			, normalShift(0)
-		{}
-	};
-
-	//! VBO set
-	struct vboSet
-	{
-		//! States of the VBO(s)
-		enum STATES { NEW, INITIALIZED, FAILED };
-
-		//! Update flags
-		enum UPDATE_FLAGS {
-			UPDATE_POINTS = 1,
-			UPDATE_COLORS = 2,
-			UPDATE_NORMALS = 4,
-			UPDATE_ALL = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS
-		};
-
-		vboSet()
-			: hasColors(false)
-			, colorIsSF(false)
-			, sourceSF(nullptr)
-			, hasNormals(false)
-			, totalMemSizeBytes(0)
-			, updateFlags(0)
-			, state(NEW)
-		{}
-
-		std::vector<VBO*> vbos;
-		bool hasColors;
-		bool colorIsSF;
-		ccScalarField* sourceSF;
-		bool hasNormals;
-		int totalMemSizeBytes;
-		int updateFlags;
-
-		//! Current state
-		STATES state;
-	};
 
 	//! Set of VBOs attached to this cloud
 	vboSet m_vboManager;

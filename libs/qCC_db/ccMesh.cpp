@@ -1665,6 +1665,9 @@ unsigned ccMesh::getUniqueIDForDisplay() const
 
 void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
+	ccGenericMesh::drawMeOnly(context);
+	return;
+
 	if (!m_associatedCloud)
 		return;
 
@@ -1790,7 +1793,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			auto rgb = context.defaultMat->getDiffuseFront().rgba;
 			glFunc->glColor3fv(context.defaultMat->getDiffuseFront().rgba);
 		}
 

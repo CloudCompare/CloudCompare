@@ -206,6 +206,9 @@
     <file>images/stocker/databasesave.png</file>
     <file>images/stocker/camera.png</file>
     <file>images/stocker/minus.png</file>
+    <file>images/stocker/normalface.png</file>
+    <file>images/stocker/normalvert.png</file>
+    <file>images/stocker/showframe.png</file>
     <file>images/stocker/plus.png</file>
     <file>images/stocker/task.png</file>
     <file>images/stocker/splitplane.png</file>

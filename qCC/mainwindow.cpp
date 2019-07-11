@@ -881,6 +881,9 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDDisplayPlaneOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPlaneOff);
 	connect(m_UI->actionBDDisplayPointOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOn);
 	connect(m_UI->actionBDDisplayPointOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOff);
+	connect(m_UI->actionDisplayWireframe,			&QAction::triggered, this, &MainWindow::doActionDisplayWireframe);
+	connect(m_UI->actionDisplayNormalPerFace,		&QAction::triggered, this, &MainWindow::doActionDisplayNormalPerFace);
+	connect(m_UI->actionDisplayNormalPerVertex,		&QAction::triggered, this, &MainWindow::doActionDisplayNormalPerVertex);
 	connect(m_UI->actionBDFootPrintAuto,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintAuto);
 	connect(m_UI->actionBDFootPrintManual,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintManual); 
 	connect(m_UI->actionBDFootPrintPack,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintPack);
@@ -10273,7 +10276,6 @@ void MainWindow::updatePropertiesView()
 	}
 }
 
-
 void MainWindow::updateUIWithSelection()
 {
 	dbTreeSelectionInfo selInfo;
@@ -10311,6 +10313,21 @@ void MainWindow::updateUIWithSelection()
 	m_UI->propertiesTreeView_Image->setVisible(m_UI->ProjectTabWidget->currentIndex() == 1);
 
 	enableUIItems(selInfo);
+	updateViewStateWithSelection();
+}
+
+void MainWindow::updateViewStateWithSelection()
+{
+	if (m_selectedEntities.size() != 1) {
+		return;
+	}
+	ccHObject* obj = m_selectedEntities[0];
+	if (obj->isA(CC_TYPES::MESH)) {
+		ccMesh* mesh = ccHObjectCaster::ToMesh(obj);
+		m_UI->actionDisplayWireframe->setChecked(mesh->isShownAsWire());
+		m_UI->actionDisplayNormalPerFace->setChecked(mesh->triNormsShown());
+		m_UI->actionDisplayNormalPerVertex->setChecked(mesh->normalsShown() && !mesh->triNormsShown());
+	}
 }
 
 void MainWindow::enableAll()
@@ -11059,6 +11076,47 @@ void MainWindow::doActionBDDisplayPointOff()
 	ProgEnd
 	refreshAll();
 	UpdateUI();
+}
+
+void MainWindow::doActionDisplayWireframe()
+{
+	for (size_t i = 0; i < m_selectedEntities.size(); i++) {
+		ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
+		if (mesh) {
+			mesh->showWired(m_UI->actionDisplayWireframe->isChecked());
+		}
+	}
+}
+
+void MainWindow::doActionDisplayNormalPerFace()
+{
+	for (size_t i = 0; i < m_selectedEntities.size(); i++) {
+		ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
+		if (mesh) {
+			if (m_UI->actionDisplayNormalPerFace->isChecked()) {
+				if (!mesh->hasTriNormals()) {
+					mesh->computeNormals(false);
+				}
+			}
+			mesh->showTriNorms(m_UI->actionDisplayNormalPerFace->isChecked());
+		}
+	}
+}
+
+void MainWindow::doActionDisplayNormalPerVertex()
+{
+	for (size_t i = 0; i < m_selectedEntities.size(); i++) {
+		ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
+		if (mesh) {
+			if (m_UI->actionDisplayNormalPerVertex->isChecked()) {
+				if (!mesh->getAssociatedCloud()->hasNormals()) {
+					mesh->computeNormals(true);
+				}
+			}
+			mesh->showNormals(m_UI->actionDisplayNormalPerVertex->isChecked());
+			mesh->showTriNorms(m_UI->actionDisplayNormalPerFace->isChecked());
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

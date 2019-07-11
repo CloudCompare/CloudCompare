@@ -541,6 +541,12 @@
      <addaction name="actionBDDisplayPlaneOff"/>
      <addaction name="actionBDDisplayPointOn"/>
      <addaction name="actionBDDisplayPointOff"/>
+     <addaction name="actionDisplayWireframe"/>
+     <addaction name="actionDisplayNormalPerFace"/>
+     <addaction name="actionDisplayNormalPerVertex"/>
+     <addaction name="actionSetPivotAlwaysOn"/>
+     <addaction name="actionSetPivotRotationOnly"/>
+     <addaction name="actionSetPivotOff"/>
     </widget>
     <addaction name="actionBDProjectLoad"/>
     <addaction name="actionBDProjectSave"/>
@@ -952,6 +958,10 @@ QTreeView::branch:open:has-children:has-siblings  {
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionDisplayShowBBox"/>
+   <addaction name="actionDisplayWireframe"/>
+   <addaction name="actionDisplayNormalPerFace"/>
+   <addaction name="actionDisplayNormalPerVertex"/>
    <addaction name="actionBDDisplayPlaneOn"/>
    <addaction name="actionBDDisplayPlaneOff"/>
    <addaction name="actionBDDisplayPointOn"/>
@@ -965,7 +975,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionSetViewBack"/>
    <addaction name="actionSetViewLeft"/>
    <addaction name="actionSetViewRight"/>
-   <addaction name="actionDisplayShowBBox"/>
   </widget>
   <widget class="QToolBar" name="toolBarEditor">
    <property name="windowTitle">
@@ -3815,6 +3824,51 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionProjectToImage">
    <property name="text">
     <string>Project To Image</string>
+   </property>
+  </action>
+  <action name="actionDisplayWireframe">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/showframe.png</normaloff>:/CC/Stocker/images/stocker/showframe.png</iconset>
+   </property>
+   <property name="text">
+    <string>Wireframe</string>
+   </property>
+   <property name="toolTip">
+    <string>Display Wireframe</string>
+   </property>
+  </action>
+  <action name="actionDisplayNormalPerFace">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/normalface.png</normaloff>:/CC/Stocker/images/stocker/normalface.png</iconset>
+   </property>
+   <property name="text">
+    <string>Normal Per Face</string>
+   </property>
+   <property name="toolTip">
+    <string>Display Normal Per Face</string>
+   </property>
+  </action>
+  <action name="actionDisplayNormalPerVertex">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/normalvert.png</normaloff>:/CC/Stocker/images/stocker/normalvert.png</iconset>
+   </property>
+   <property name="text">
+    <string>Normal Per Vertex</string>
+   </property>
+   <property name="toolTip">
+    <string>Display Normal Per Vertex</string>
    </property>
   </action>
  </widget>

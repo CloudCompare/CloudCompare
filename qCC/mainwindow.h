@@ -260,6 +260,7 @@ private slots:
 	void updateMenus();
 	void on3DViewActivated(QMdiSubWindow*);
 	void updateUIWithSelection();
+	void updateViewStateWithSelection();
 	void addToDBAuto(const QStringList& filenames);
 
 	void echoMouseWheelRotate(float);
@@ -526,6 +527,9 @@ private slots:
 	void doActionBDDisplayPlaneOff();
 	void doActionBDDisplayPointOn();
 	void doActionBDDisplayPointOff();
+	void doActionDisplayWireframe();
+	void doActionDisplayNormalPerFace();
+	void doActionDisplayNormalPerVertex();
 
 	/// image
 	void doActionShowBestImage();

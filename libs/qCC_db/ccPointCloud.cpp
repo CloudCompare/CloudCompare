@@ -4795,7 +4795,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 #ifndef DONT_LOAD_NORMALS_IN_VBOS
 		if ( glParams.showNorms && !m_vboManager.hasNormals )
 		{
-			updateFlags |= UPDATE_NORMALS;
+			m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS;
 		}
 #endif
 		//nothing to do?
@@ -4846,9 +4846,9 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		assert(!glParams.showSF		|| m_currentDisplayedScalarField);
 		assert(!glParams.showColors	|| m_rgbColors);
 #ifndef DONT_LOAD_NORMALS_IN_VBOS
-		assert(!glParams.showNorms	|| (m_normals && m_normals->chunksCount() >= chunksCount));
+		assert(!glParams.showNorms	|| (m_normals && ccChunk::Count(*m_normals) >= chunksCount));
 #endif
-
+		
 		m_vboManager.hasColors  = glParams.showSF || glParams.showColors;
 		m_vboManager.colorIsSF  = glParams.showSF;
 		m_vboManager.sourceSF   = glParams.showSF ? m_currentDisplayedScalarField : nullptr;
@@ -4929,10 +4929,10 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				}
 #ifndef DONT_LOAD_NORMALS_IN_VBOS
 				//load normals
-				if (glParams.showNorms && (chunkUpdateFlags & UPDATE_NORMALS))
+				if (glParams.showNorms && (chunkUpdateFlags & vboSet::UPDATE_NORMALS))
 				{
 					//we must decode the normals first!
-					CompressedNormType* inNorms = m_normals->chunkStartPtr(i);
+					CompressedNormType* inNorms = ccChunk::Start(*m_normals, i); //m_normals->chunkStartPtr(i);
 					PointCoordinateType* outNorms = s_normalBuffer;
 					for (int j=0; j<chunkSize; ++j)
 					{
@@ -5035,7 +5035,7 @@ int VBO::init(int count, bool withColors, bool withNormals, bool* reallocated/*=
 
 	if (!bind())
 	{
-		ccLog::Warning("[ccPointCloud::VBO::init] Failed to bind VBO to active context!");
+		ccLog::Warning("[VBO::init] Failed to bind VBO to active context!");
 		destroy();
 		return -1;
 	}
@@ -5048,7 +5048,7 @@ int VBO::init(int count, bool withColors, bool withNormals, bool* reallocated/*=
 
 		if (size() != totalSizeBytes)
 		{
-			ccLog::Warning("[ccPointCloud::VBO::init] Not enough (GPU) memory!");
+			ccLog::Warning("[VBO::init] Not enough (GPU) memory!");
 			release();
 			destroy();
 			return -1;

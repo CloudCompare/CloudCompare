@@ -384,6 +384,7 @@ void ccSubMesh::clear(bool releaseMemory)
 	else
 		m_triIndexes.clear();
 	m_bBox.setValidity(false);
+	notifyGeometryUpdate();
 }
 
 bool ccSubMesh::addTriangleIndex(unsigned globalIndex)
@@ -399,7 +400,7 @@ bool ccSubMesh::addTriangleIndex(unsigned globalIndex)
 	}
 
 	m_bBox.setValidity(false);
-
+	notifyGeometryUpdate();
 	return true;
 }
 
@@ -429,7 +430,7 @@ bool ccSubMesh::addTriangleIndex(unsigned firstIndex, unsigned lastIndex)
 	}
 
 	m_bBox.setValidity(false);
-
+	notifyGeometryUpdate();
 	return true;
 }
 
@@ -438,6 +439,7 @@ void ccSubMesh::setTriangleIndex(unsigned localIndex, unsigned globalIndex)
 	assert(localIndex < size());
 	m_triIndexes[localIndex] = globalIndex;
 	m_bBox.setValidity(false);
+	notifyGeometryUpdate();
 }
 
 bool ccSubMesh::reserve(size_t n)
@@ -459,6 +461,7 @@ bool ccSubMesh::resize(size_t n)
 	try
 	{
 		m_triIndexes.resize(n);
+		notifyGeometryUpdate();
 	}
 	catch (const std::bad_alloc&)
 	{

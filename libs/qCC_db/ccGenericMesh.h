@@ -24,6 +24,7 @@
 //Local
 #include "ccAdvancedTypes.h"
 #include "ccGenericGLDisplay.h"
+#include "ccPointCloud.h"
 
 namespace CCLib
 {
@@ -254,6 +255,39 @@ protected:
 
 	//! Handles the color ramp display
 	void handleColorRamp(CC_DRAW_CONTEXT& context);
+
+public:
+
+	void notifyGeometryUpdate() override;
+
+	void removeFromDisplay(const ccGenericGLDisplay* win) override; //for proper VBO release
+
+	void setDisplay(ccGenericGLDisplay* win) override;
+
+	void notifyNormalUpdate();
+
+	void notifyColorUpdate();
+
+	void notifyTextureUpdate();
+
+protected:	// VBO
+
+	//! Init/updates VBOs
+	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams);
+
+	//! Release VBOs
+	void releaseVBOs();
+
+	//! Set of VBOs attached to this mesh
+	vboSet m_vboManager;
+
+	//per-block data transfer to the GPU (VBO or standard mode)
+	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
+
+protected:
 
 	//! Per-triangle normals display flag
 	bool m_triNormsShown;

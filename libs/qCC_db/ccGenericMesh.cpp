@@ -188,6 +188,35 @@ void ccGenericMesh::handleColorRamp(CC_DRAW_CONTEXT& context)
 	}
 }
 
+void ccGenericMesh::notifyGeometryUpdate()
+{
+	ccHObject::notifyGeometryUpdate();
+
+	releaseVBOs();
+}
+
+void ccGenericMesh::removeFromDisplay(const ccGenericGLDisplay * win)
+{
+	if (win == m_currentDisplay)
+	{
+		releaseVBOs();
+	}
+
+	//call parent's method
+	ccHObject::removeFromDisplay(win);
+}
+
+void ccGenericMesh::setDisplay(ccGenericGLDisplay * win)
+{
+	if (m_currentDisplay && win != m_currentDisplay)
+	{
+		//be sure to release the VBOs before switching to another (or no) display!
+		releaseVBOs();
+	}
+
+	ccHObject::setDisplay(win);
+}
+
 void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	ccGenericPointCloud* vertices = getAssociatedCloud();
@@ -339,21 +368,25 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || greyForNanScalarValues))
 		{
+			bool useVBOs = false;
+			if (!lodEnabled && context.useVBOs)
+				useVBOs = updateVBOs(context, glParams);	// TODO
+
 			//the GL type depends on the PointCoordinateType 'size' (float or double)
 			GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
 
 			glFunc->glEnableClientState(GL_VERTEX_ARRAY);
-			glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, GetVertexBuffer());
+//			glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, GetVertexBuffer());
 
 			if (glParams.showNorms)
 			{
 				glFunc->glEnableClientState(GL_NORMAL_ARRAY);
-				glFunc->glNormalPointer(GL_COORD_TYPE, 0, GetNormalsBuffer());
+//				glFunc->glNormalPointer(GL_COORD_TYPE, 0, GetNormalsBuffer());
 			}
 			if (glParams.showSF || glParams.showColors)
 			{
 				glFunc->glEnableClientState(GL_COLOR_ARRAY);
-				glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, GetColorsBuffer());
+//				glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, GetColorsBuffer());
 			}
 
 			//we can scan and process each chunk separately in an optimized way
@@ -366,6 +399,20 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				const size_t chunkSize = ccChunk::Size(k, displayedTriNum);
 
 				//vertices
+				glChunkVertexPointer(context, k, decimStep, useVBOs);
+
+				//scalar field
+				if (glParams.showSF)
+					glChunkSFPointer(context, k, decimStep, useVBOs);
+				//colors
+				else if (glParams.showColors)
+					glChunkColorPointer(context, k, decimStep, useVBOs);
+				
+				if (glParams.showNorms)
+					glChunkNormalPointer(context, k, decimStep, useVBOs);
+
+
+/*				//vertices
 				CCVector3* _vertices = GetVertexBuffer();
 				for (size_t n = 0; n < chunkSize; n += decimStep)
 				{
@@ -428,7 +475,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 					}
 				}
-
+*/
 				if (!showWired)
 				{
 					glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, (static_cast<int>(chunkSize) / decimStep) * 3);
@@ -866,6 +913,8 @@ void ccGenericMesh::importParametersFrom(const ccGenericMesh* mesh)
 	setGLTransformationHistory(mesh->getGLTransformationHistory());
 	//and meta-data
 	setMetaData(mesh->metaData());
+
+	releaseVBOs();
 }
 
 void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const
@@ -1068,4 +1117,600 @@ bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv
 					static_cast<PointCoordinateType>(uv.x * A.z + uv.y * B.z + z * C.z));
 
 	return true;
+}
+
+static bool CatchGLErrors(GLenum err, const char* context)
+{
+	//catch GL errors
+	{
+		//see http://www.opengl.org/sdk/docs/man/xhtml/glGetError.xml
+		switch (err)
+		{
+		case GL_NO_ERROR:
+			return false;
+		case GL_INVALID_ENUM:
+			ccLog::Warning("[%s] OpenGL error: invalid enumerator", context);
+			break;
+		case GL_INVALID_VALUE:
+			ccLog::Warning("[%s] OpenGL error: invalid value", context);
+			break;
+		case GL_INVALID_OPERATION:
+			ccLog::Warning("[%s] OpenGL error: invalid operation", context);
+			break;
+		case GL_STACK_OVERFLOW:
+			ccLog::Warning("[%s] OpenGL error: stack overflow", context);
+			break;
+		case GL_STACK_UNDERFLOW:
+			ccLog::Warning("[%s] OpenGL error: stack underflow", context);
+			break;
+		case GL_OUT_OF_MEMORY:
+			ccLog::Warning("[%s] OpenGL error: out of memory", context);
+			break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:
+			ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation", context);
+			break;
+		}
+	}
+
+	return true;
+}
+
+//#define DONT_LOAD_NORMALS_IN_VBOS
+
+bool ccGenericMesh::updateVBOs(const CC_DRAW_CONTEXT & context, const glDrawParams & glParams)
+{
+	if (isColorOverriden())
+	{
+		//nothing to do (we don't display true colors, SF or normals!)
+		return false;
+	}
+
+	if (m_vboManager.state == vboSet::FAILED)
+	{
+		//ccLog::Warning(QString("[ccPointCloud::updateVBOs] VBOs are in a 'failed' state... we won't try to update them! (cloud '%1')").arg(getName()));
+		return false;
+	}
+
+	if (!m_currentDisplay)
+	{
+		ccLog::Warning(QString("[ccPointCloud::updateVBOs] Need an associated GL context! (cloud '%1')").arg(getName()));
+		//assert(false);
+		return false;
+	}
+
+	bool pushName = MACRO_DrawEntityNames(context);
+	ccGenericPointCloud* vertices = getAssociatedCloud(); if (!vertices) return false;
+	
+	ccScalarField* currentDisplayedScalarField = nullptr;
+	bool greyForNanScalarValues = true;
+	ccColorScale::Shared colorScale(nullptr);
+
+	if (glParams.showSF) {
+		ccPointCloud* cloud = static_cast<ccPointCloud*>(vertices); assert(cloud);
+		
+		currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
+		colorScale = currentDisplayedScalarField->getColorScale();
+		//colorRampSteps = currentDisplayedScalarField->getColorRampSteps();
+
+		assert(colorScale);
+		//get default color ramp if cloud has no scale associated?!
+		if (!colorScale)
+			colorScale = ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR);
+	}
+	
+
+	if (m_vboManager.state == vboSet::INITIALIZED)
+	{
+		//let's check if something has changed
+		if (glParams.showColors && (!m_vboManager.hasColors || m_vboManager.colorIsSF))
+		{
+			m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
+		}
+
+		if (glParams.showSF
+			&& (!m_vboManager.hasColors
+				|| !m_vboManager.colorIsSF
+				|| m_vboManager.sourceSF != currentDisplayedScalarField
+				|| currentDisplayedScalarField->getModificationFlag() == true))
+		{
+			m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
+		}
+
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+		if (glParams.showNorms && !m_vboManager.hasNormals)
+		{
+			m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS;
+		}
+#endif
+		//nothing to do?
+		if (m_vboManager.updateFlags == 0)
+		{
+			return true;
+		}
+	}
+	else
+	{
+		m_vboManager.updateFlags = vboSet::UPDATE_ALL;
+	}
+	
+	size_t chunksCount = ccChunk::Count(size());
+	//allocate per-chunk descriptors if necessary
+	if (m_vboManager.vbos.size() != chunksCount)
+	{
+		//properly remove the elements that are not needed anymore!
+		for (size_t i = chunksCount; i < m_vboManager.vbos.size(); ++i)
+		{
+			if (m_vboManager.vbos[i])
+			{
+				m_vboManager.vbos[i]->destroy();
+				delete m_vboManager.vbos[i];
+				m_vboManager.vbos[i] = nullptr;
+			}
+		}
+
+		//resize the container
+		try
+		{
+			m_vboManager.vbos.resize(chunksCount, nullptr);
+		}
+		catch (const std::bad_alloc&)
+		{
+			ccLog::Warning(QString("[ccPointCloud::updateVBOs] Not enough memory! (cloud '%1')").arg(getName()));
+			m_vboManager.state = vboSet::FAILED;
+			return false;
+		}
+	}
+
+	//init VBOs
+	unsigned pointsInVBOs = 0;
+	int totalSizeBytesBefore = m_vboManager.totalMemSizeBytes;
+	m_vboManager.totalMemSizeBytes = 0;
+	{
+		//DGM: the context should be already active as this method should only be called from 'drawMeOnly'
+		assert(!glParams.showSF || currentDisplayedScalarField);
+		//assert(!glParams.showColors || m_rgbColors);	// TODO
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+		//assert(!glParams.showNorms || (m_normals && m_normals->chunksCount() >= chunksCount));	// TODO
+#endif
+
+		m_vboManager.hasColors = glParams.showSF || glParams.showColors;
+		m_vboManager.colorIsSF = glParams.showSF;
+		m_vboManager.sourceSF = glParams.showSF ? currentDisplayedScalarField : nullptr;
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+		m_vboManager.hasNormals = glParams.showNorms;
+#else
+		m_vboManager.hasNormals = false;
+#endif
+
+		//per-triangle normals?
+		bool showTriNormals = (hasTriNormals() && triNormsShown());
+
+		size_t decimStep = 1;
+		//process each chunk
+		size_t chunkStart = 0;
+		for (size_t i = 0; i < chunksCount; ++i, chunkStart+= ccChunk::SIZE)
+		{
+			int chunkSize = static_cast<int>(ccChunk::Size(i, size()));
+
+			int chunkUpdateFlags = m_vboManager.updateFlags;
+			bool reallocated = false;
+			if (!m_vboManager.vbos[i])
+			{
+				m_vboManager.vbos[i] = new VBO;
+			}
+
+			//allocate memory for current VBO
+			int vboSizeBytes = m_vboManager.vbos[i]->init(chunkSize * 3, m_vboManager.hasColors, m_vboManager.hasNormals, &reallocated);	// XYLIU * 3 for triangle drawing
+
+			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+			if (glFunc)
+			{
+				CatchGLErrors(glFunc->glGetError(), "vbo.init");
+			}
+
+			if (vboSizeBytes > 0)
+			{
+				//ccLog::Print(QString("[VBO] VBO #%1 initialized (ID=%2)").arg(i).arg(m_vboManager.vbos[i]->bufferId()));
+
+				if (reallocated)
+				{
+					//if the vbo is reallocated, then all its content has been cleared!
+					chunkUpdateFlags = vboSet::UPDATE_ALL;
+				}
+
+				m_vboManager.vbos[i]->bind();
+
+				//load points
+				if (chunkUpdateFlags & vboSet::UPDATE_POINTS)
+				{
+					CCVector3* _vertices = GetVertexBuffer();
+					for (size_t n = 0; n < chunkSize; n += decimStep)
+					{
+						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+  						assert(ti->i1 < vertices->size());
+  						assert(ti->i2 < vertices->size());
+  						assert(ti->i3 < vertices->size());
+						*_vertices++ = *vertices->getPoint(ti->i1);
+						*_vertices++ = *vertices->getPoint(ti->i2);
+						*_vertices++ = *vertices->getPoint(ti->i3);
+					}
+					m_vboManager.vbos[i]->write(0, GetVertexBuffer(), sizeof(CCVector3)*chunkSize * 3);
+				}
+				//load colors
+				if (chunkUpdateFlags & vboSet::UPDATE_COLORS)
+				{
+					if (glParams.showSF) {
+						//copy SF colors in static array
+						{
+							ccColor::Rgb* _sfColors = GetColorsBuffer();
+							for (unsigned n = 0; n < chunkSize; n += decimStep)	{
+								const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+								*_sfColors++ = *currentDisplayedScalarField->getValueColor(ti->i1);
+								*_sfColors++ = *currentDisplayedScalarField->getValueColor(ti->i2);
+								*_sfColors++ = *currentDisplayedScalarField->getValueColor(ti->i3);
+							}
+						}
+						//then send them in VRAM
+						m_vboManager.vbos[i]->write(m_vboManager.vbos[i]->rgbShift, GetColorsBuffer(), sizeof(ccColor::Rgb)*chunkSize * 3);
+						//upadte 'modification' flag for current displayed SF
+						m_vboManager.sourceSF->setModificationFlag(false);
+					}
+					else if (glParams.showColors) {
+						ColorsTableType* rgbColorsTable = static_cast<ccPointCloud*>(vertices)->rgbColors();
+						ccColor::Rgb* _rgbColors = GetColorsBuffer();
+						for (unsigned n = 0; n < chunkSize; n += decimStep)
+						{
+							const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+							*_rgbColors++ = rgbColorsTable->at(ti->i1);
+							*_rgbColors++ = rgbColorsTable->at(ti->i2);
+							*_rgbColors++ = rgbColorsTable->at(ti->i3);
+						}
+						m_vboManager.vbos[i]->write(m_vboManager.vbos[i]->rgbShift, GetColorsBuffer(), sizeof(ccColor::Rgb)*chunkSize * 3);
+					}
+				}
+
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+				//load normals
+				if (glParams.showNorms && (chunkUpdateFlags & vboSet::UPDATE_NORMALS))
+				{
+					//we must decode the normals first!
+					CCVector3* _normals = GetNormalsBuffer();
+					if (showTriNormals)	{
+						for (unsigned n = 0; n < chunkSize; n += decimStep)
+						{
+							CCVector3 Na, Nb, Nc;
+							getTriangleNormals(static_cast<unsigned>(chunkStart + n), Na, Nb, Nc);
+							*_normals++ = Na;
+							*_normals++ = Nb;
+							*_normals++ = Nc;
+						}
+					}
+					else {
+						for (unsigned n = 0; n < chunkSize; n += decimStep)
+						{
+							const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+							*_normals++ = vertices->getPointNormal(ti->i1);
+							*_normals++ = vertices->getPointNormal(ti->i2);
+							*_normals++ = vertices->getPointNormal(ti->i3);
+						}
+					}
+					m_vboManager.vbos[i]->write(m_vboManager.vbos[i]->normalShift, GetNormalsBuffer(), sizeof(CCVector3)*chunkSize * 3);
+				}
+#endif
+				m_vboManager.vbos[i]->release();
+
+				//if an error is detected
+				QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+				assert(glFunc != nullptr);
+				if (CatchGLErrors(glFunc->glGetError(), "ccMesh::updateVBOs"))
+				{
+					vboSizeBytes = -1;
+				}
+				else
+				{
+					m_vboManager.totalMemSizeBytes += vboSizeBytes;
+					pointsInVBOs += chunkSize;
+				}
+			}
+
+			if (vboSizeBytes < 0) //VBO initialization failed
+			{
+				m_vboManager.vbos[i]->destroy();
+				delete m_vboManager.vbos[i];
+				m_vboManager.vbos[i] = nullptr;
+
+				//we can stop here
+				if (i == 0)
+				{
+					ccLog::Warning(QString("[ccMesh::updateVBOs] Failed to initialize VBOs (not enough memory?) (mesh '%1')").arg(getName()));
+					m_vboManager.state = vboSet::FAILED;
+					m_vboManager.vbos.resize(0);
+					return false;
+				}
+				else
+				{
+					//shouldn't be better for the next VBOs!
+					break;
+				}
+			}
+		}
+	}
+
+	//Display vbo(s) status
+	//{
+	//	for (unsigned i=0; i<chunksCount; ++i)
+	//		ccLog::Print(QString("[VBO] VBO #%1 status: %2 (ID=%3)")
+	//			.arg(i)
+	//			.arg(m_vboManager.vbos[i] && m_vboManager.vbos[i]->isCreated() ? "created" : "not created")
+	//			.arg(m_vboManager.vbos[i] ? m_vboManager.vbos[i]->bufferId() : -1));
+	//}
+
+#ifdef _DEBUG
+	if (m_vboManager.totalMemSizeBytes != totalSizeBytesBefore)
+		ccLog::Print(QString("[VBO] VBO(s) (re)initialized for mesh '%1' (%2 Mb = %3% of triangles could be loaded)")
+			.arg(getName())
+			.arg(static_cast<double>(m_vboManager.totalMemSizeBytes) / (1 << 20), 0, 'f', 2)
+			.arg(static_cast<double>(pointsInVBOs) / size() * 100.0, 0, 'f', 2));
+#endif
+
+	m_vboManager.state = vboSet::INITIALIZED;
+	m_vboManager.updateFlags = 0;
+
+	return true;
+}
+
+void ccGenericMesh::releaseVBOs()
+{
+	if (m_vboManager.state == vboSet::NEW)
+		return;
+
+	if (m_currentDisplay)
+	{
+		//'destroy' all vbos
+		for (size_t i = 0; i < m_vboManager.vbos.size(); ++i)
+		{
+			if (m_vboManager.vbos[i])
+			{
+				m_vboManager.vbos[i]->destroy();
+				delete m_vboManager.vbos[i];
+				m_vboManager.vbos[i] = nullptr;
+			}
+		}
+	}
+	else
+	{
+		assert(m_vboManager.vbos.empty());
+	}
+
+	m_vboManager.vbos.resize(0);
+	m_vboManager.hasColors = false;
+	m_vboManager.hasNormals = false;
+	m_vboManager.colorIsSF = false;
+	m_vboManager.sourceSF = nullptr;
+	m_vboManager.totalMemSizeBytes = 0;
+	m_vboManager.state = vboSet::NEW;
+}
+
+// update for vbo
+void ccGenericMesh::notifyNormalUpdate() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; }
+void ccGenericMesh::notifyColorUpdate() { m_vboManager.updateFlags |= vboSet::UPDATE_COLORS; }
+void ccGenericMesh::notifyTextureUpdate() { m_vboManager.updateFlags |= vboSet::UPDATE_TEXTURE; }
+
+//the GL type depends on the PointCoordinateType 'size' (float or double)
+static GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
+
+void ccGenericMesh::glChunkVertexPointer(const CC_DRAW_CONTEXT & context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
+{
+	unsigned displayedTriNum = size() / decimStep;	if (displayedTriNum == 0) return;
+
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (useVBOs
+		&&	m_vboManager.state == vboSet::INITIALIZED
+		&&	m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
+		&& m_vboManager.vbos[chunkIndex]
+		&& m_vboManager.vbos[chunkIndex]->isCreated())
+	{
+		//we can use VBOs directly
+		if (m_vboManager.vbos[chunkIndex]->bind())
+		{
+			glFunc->glVertexPointer(3, GL_COORD_TYPE, GLsizei(0), nullptr);
+			m_vboManager.vbos[chunkIndex]->release();
+		}
+		else
+		{
+			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
+			m_vboManager.state = vboSet::FAILED;
+			//recall the method
+			glChunkVertexPointer(context, chunkIndex, decimStep, false);
+		}
+	}
+	else
+	{
+		//standard OpenGL copy
+		glFunc->glVertexPointer(3, GL_COORD_TYPE, GLsizei(0)/*decimStep * 3 * sizeof(CCVector3)*/, GetVertexBuffer()/*ccChunk::Start(m_points, chunkIndex)*/);
+
+		int chunkSize = static_cast<int>(ccChunk::Size(chunkIndex, displayedTriNum));
+		const CCLib::VerticesIndexes* _vertIndexesChunkOrigin = getTriangleVertIndexes(ccChunk::StartPos(chunkIndex));
+		const CCLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
+		CCVector3* _vertices = GetVertexBuffer();
+		ccGenericPointCloud* vertices = getAssociatedCloud();
+		for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+		{
+			assert(_vertIndexes->i1 < vertices->size());
+			assert(_vertIndexes->i2 < vertices->size());
+			assert(_vertIndexes->i3 < vertices->size());
+			*_vertices++ = *vertices->getPoint(_vertIndexes->i1);
+			*_vertices++ = *vertices->getPoint(_vertIndexes->i2);
+			*_vertices++ = *vertices->getPoint(_vertIndexes->i3);
+		}
+	}
+}
+
+void ccGenericMesh::glChunkColorPointer(const CC_DRAW_CONTEXT & context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
+{
+	unsigned displayedTriNum = size() / decimStep;	if (displayedTriNum == 0) return;
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (useVBOs
+		&&	m_vboManager.state == vboSet::INITIALIZED
+		&&	m_vboManager.hasColors
+		&&	m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
+		&& m_vboManager.vbos[chunkIndex]
+		&& m_vboManager.vbos[chunkIndex]->isCreated())
+	{
+		//we can use VBOs directly
+		if (m_vboManager.vbos[chunkIndex]->bind())
+		{
+			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
+			int colorDataShift = m_vboManager.vbos[chunkIndex]->rgbShift;
+			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, GLsizei(0), static_cast<const GLvoid*>(start + colorDataShift));
+			m_vboManager.vbos[chunkIndex]->release();
+		}
+		else
+		{
+			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
+			m_vboManager.state = vboSet::FAILED;
+			//recall the method
+			glChunkColorPointer(context, chunkIndex, decimStep, false);
+		}
+	}
+	else 
+	{
+		//standard OpenGL copy
+		size_t chunkSize = ccChunk::Size(chunkIndex, displayedTriNum);
+		unsigned chunkStart = ccChunk::StartPos(chunkIndex);
+		
+		ccGenericPointCloud* vertices = getAssociatedCloud();	if (!vertices) return;
+		ColorsTableType* rgbColorsTable = static_cast<ccPointCloud*>(vertices)->rgbColors(); if (!rgbColorsTable) return;
+
+		ccColor::Rgb* _rgbColors = GetColorsBuffer();
+		for (unsigned n = 0; n < chunkSize; n += decimStep)
+		{
+			const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+			*_rgbColors++ = rgbColorsTable->at(ti->i1);
+			*_rgbColors++ = rgbColorsTable->at(ti->i2);
+			*_rgbColors++ = rgbColorsTable->at(ti->i3);
+		}
+
+		glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, GLsizei(0), GetColorsBuffer());
+	}
+}
+
+void ccGenericMesh::glChunkSFPointer(const CC_DRAW_CONTEXT & context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
+{
+	unsigned displayedTriNum = size() / decimStep;	if (displayedTriNum == 0) return;
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (useVBOs
+		&&	m_vboManager.state == vboSet::INITIALIZED
+		&&	m_vboManager.hasColors
+		&&	m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
+		&& m_vboManager.vbos[chunkIndex]
+		&& m_vboManager.vbos[chunkIndex]->isCreated())
+	{
+		//assert(m_vboManager.colorIsSF && m_vboManager.sourceSF == currentDisplayedScalarField);
+		//we can use VBOs directly
+		if (m_vboManager.vbos[chunkIndex]->bind())
+		{
+			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
+			int colorDataShift = m_vboManager.vbos[chunkIndex]->rgbShift;
+			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, GLsizei(0), static_cast<const GLvoid*>(start + colorDataShift));
+			m_vboManager.vbos[chunkIndex]->release();
+		}
+		else
+		{
+			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
+			m_vboManager.state = vboSet::FAILED;
+			//recall the method
+			glChunkSFPointer(context, chunkIndex, decimStep, false);
+		}
+	}
+	else //if (m_currentDisplayedScalarField)
+	{
+		size_t chunkSize = ccChunk::Size(chunkIndex, displayedTriNum);
+		unsigned chunkStart = ccChunk::StartPos(chunkIndex);
+
+		ccGenericPointCloud* vertices = getAssociatedCloud();
+		ccScalarField* currentDisplayedScalarField = static_cast<ccPointCloud*>(vertices)->getCurrentDisplayedScalarField();
+		if (!currentDisplayedScalarField) { return; }
+
+		//we must convert the scalar values to RGB colors in a dedicated static array
+		ccColor::Rgb* _sfColors = GetColorsBuffer();
+		for (unsigned n = 0; n < chunkSize; n += decimStep)
+		{
+			const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+			*_sfColors++ = *currentDisplayedScalarField->getValueColor(ti->i1);
+			*_sfColors++ = *currentDisplayedScalarField->getValueColor(ti->i2);
+			*_sfColors++ = *currentDisplayedScalarField->getValueColor(ti->i3);
+		}
+		glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, GLsizei(0), GetColorsBuffer());
+	}
+}
+
+void ccGenericMesh::glChunkNormalPointer(const CC_DRAW_CONTEXT & context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
+{
+	//assert(m_normals);
+	unsigned displayedTriNum = size() / decimStep;	if (displayedTriNum == 0) return;
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (useVBOs
+		&&	m_vboManager.state == vboSet::INITIALIZED
+		&&	m_vboManager.hasNormals
+		&&	m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
+		&& m_vboManager.vbos[chunkIndex]
+		&& m_vboManager.vbos[chunkIndex]->isCreated())
+	{
+		//we can use VBOs directly
+		if (m_vboManager.vbos[chunkIndex]->bind())
+		{
+			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
+			int normalDataShift = m_vboManager.vbos[chunkIndex]->normalShift;
+			glFunc->glNormalPointer(GL_COORD_TYPE, GLsizei(0), static_cast<const GLvoid*>(start + normalDataShift));
+			m_vboManager.vbos[chunkIndex]->release();
+		}
+		else
+		{
+			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
+			m_vboManager.state = vboSet::FAILED;
+			//recall the method
+			glChunkNormalPointer(context, chunkIndex, decimStep, false);
+		}
+	}
+	else
+	{
+		//we must decode normals in a dedicated static array
+
+		//per-triangle normals?
+		bool showTriNormals = (hasTriNormals() && triNormsShown());
+		size_t chunkSize = ccChunk::Size(chunkIndex, displayedTriNum);
+		unsigned chunkStart = ccChunk::StartPos(chunkIndex);
+
+		CCVector3* _normals = GetNormalsBuffer();
+		if (showTriNormals) {
+			for (unsigned n = 0; n < chunkSize; n += decimStep)
+			{
+				CCVector3 Na, Nb, Nc;
+				getTriangleNormals(static_cast<unsigned>(chunkStart + n), Na, Nb, Nc);
+				*_normals++ = Na;
+				*_normals++ = Nb;
+				*_normals++ = Nc;
+			}
+		}
+		else {
+			ccGenericPointCloud* vertices = getAssociatedCloud();
+			for (unsigned n = 0; n < chunkSize; n += decimStep)
+			{
+				const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+				*_normals++ = vertices->getPointNormal(ti->i1);
+				*_normals++ = vertices->getPointNormal(ti->i2);
+				*_normals++ = vertices->getPointNormal(ti->i3);
+			}
+		}
+		glFunc->glNormalPointer(GL_COORD_TYPE, GLsizei(0), GetNormalsBuffer());
+	}
 }

@@ -1647,16 +1647,18 @@ namespace ccEntityAction
 			{
 				Q_ASSERT(mesh != nullptr);
 				
+				// XYLIU // TODO: The compressed normals are not updated in the database
 				//we remove temporarily the mesh as its normals may be removed (and they can be a child object)
-				MainWindow* instance = dynamic_cast<MainWindow*>(parent);
-				MainWindow::ccHObjectContext objContext;
-				if (instance)
-					objContext = instance->removeObjectTemporarilyFromDBTree(mesh);
-				mesh->clearTriNormals();
+				//MainWindow* instance = dynamic_cast<MainWindow*>(parent);
+				//MainWindow::ccHObjectContext objContext;
+				//if (instance)
+					//objContext = instance->removeObjectTemporarilyFromDBTree(mesh);
+				//mesh->clearTriNormals();
 				mesh->showNormals(false);
 				bool result = mesh->computeNormals(computePerVertexNormals);
-				if (instance)
-					instance->putObjectBackIntoDBTree(mesh,objContext);
+				mesh->showTriNorms(!computePerVertexNormals);
+				//if (instance)
+					//instance->putObjectBackIntoDBTree(mesh,objContext);
 				
 				if (!result)
 				{
@@ -1688,6 +1690,7 @@ namespace ccEntityAction
 				if (ccCloud->hasNormals())
 				{
 					ccCloud->invertNormals();
+					if (ent->isKindOf(CC_TYPES::MESH)) { static_cast<ccGenericMesh*>(ent)->notifyNormalUpdate(); }
 					ccCloud->showNormals(true);
 					ccCloud->prepareDisplayForRefresh_recursive();
 				}

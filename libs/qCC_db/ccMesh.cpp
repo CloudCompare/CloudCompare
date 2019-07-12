@@ -261,6 +261,8 @@ bool ccMesh::computePerVertexNormals()
 
 	if (!normalsWereAllocated)
 		cloud->showNormals(true);
+	
+	cloud->normalsHaveChanged();
 
 	return true;
 }

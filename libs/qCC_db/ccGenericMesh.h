@@ -172,6 +172,12 @@ public:
 	//! Sets whether mesh should be displayed as a wire or with plain facets
 	virtual void showWired(bool state) { m_showWired = state; }
 
+	//! Returns whether the mesh is displayed as wired or with plain facets
+	virtual bool isShownAsFace() const { return m_showFaces; }
+
+	//! Sets whether mesh should be displayed as a wire or with plain facets
+	virtual void showFaces(bool state) { m_showFaces = state; }
+
 	//! Returns whether per-triangle normals are shown or not 
 	virtual bool triNormsShown() const { return m_triNormsShown; }
 
@@ -297,6 +303,10 @@ protected:
 
 	//! Wireframe display mode
 	bool m_showWired;
+
+	//! face display mode
+	// show face - no normal / normal per face / normal per vert
+	bool m_showFaces;
 
 	//! Polygon stippling state
 	bool m_stippling;

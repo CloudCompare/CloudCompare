@@ -212,6 +212,7 @@
     <file>images/stocker/plus.png</file>
     <file>images/stocker/task.png</file>
     <file>images/stocker/splitplane.png</file>
+    <file>images/stocker/showface.png</file>
     <file>images/stocker/link.png</file>
   </qresource>
 </RCC>

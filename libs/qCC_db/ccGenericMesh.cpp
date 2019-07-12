@@ -47,6 +47,7 @@ ccGenericMesh::ccGenericMesh(QString name/*=QString()*/)
 	, m_triNormsShown(false)
 	, m_materialsShown(false)
 	, m_showWired(false)
+	, m_showFaces(true)
 	, m_stippling(false)
 {
 	setVisible(true);
@@ -217,6 +218,9 @@ void ccGenericMesh::setDisplay(ccGenericGLDisplay * win)
 	ccHObject::setDisplay(win);
 }
 
+//the GL type depends on the PointCoordinateType 'size' (float or double)
+static GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
+
 void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	ccGenericPointCloud* vertices = getAssociatedCloud();
@@ -256,6 +260,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//wireframe ? (not compatible with LOD)
 		bool showWired = isShownAsWire() && !lodEnabled;
+		bool showFaces = isShownAsFace();
 
 		//per-triangle normals?
 		bool showTriNormals = (hasTriNormals() && triNormsShown());
@@ -370,27 +375,21 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			bool useVBOs = false;
 			if (!lodEnabled && context.useVBOs)
-				useVBOs = updateVBOs(context, glParams);	// TODO
-
-			//the GL type depends on the PointCoordinateType 'size' (float or double)
-			GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
+				useVBOs = updateVBOs(context, glParams);
 
 			glFunc->glEnableClientState(GL_VERTEX_ARRAY);
-//			glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, GetVertexBuffer());
 
 			if (glParams.showNorms)
 			{
 				glFunc->glEnableClientState(GL_NORMAL_ARRAY);
-//				glFunc->glNormalPointer(GL_COORD_TYPE, 0, GetNormalsBuffer());
 			}
 			if (glParams.showSF || glParams.showColors)
 			{
 				glFunc->glEnableClientState(GL_COLOR_ARRAY);
-//				glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, GetColorsBuffer());
 			}
 
 			//we can scan and process each chunk separately in an optimized way
-			//we mimic the way ccMesh beahves by using virtual chunks!
+			//we mimic the way ccMesh behaves by using virtual chunks!
 			size_t chunkCount = ccChunk::Count(displayedTriNum);
 			size_t chunkStart = 0;
 			for (size_t k = 0; k < chunkCount; ++k, chunkStart += ccChunk::SIZE)
@@ -411,77 +410,10 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showNorms)
 					glChunkNormalPointer(context, k, decimStep, useVBOs);
 
-
-/*				//vertices
-				CCVector3* _vertices = GetVertexBuffer();
-				for (size_t n = 0; n < chunkSize; n += decimStep)
-				{
-					const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
-					*_vertices++ = *vertices->getPoint(ti->i1);
-					*_vertices++ = *vertices->getPoint(ti->i2);
-					*_vertices++ = *vertices->getPoint(ti->i3);
-				}
-
-				//scalar field
-				if (glParams.showSF)
-				{
-					ccColor::Rgb* _rgbColors = GetColorsBuffer();
-					assert(colorScale);
-					for (unsigned n = 0; n < chunkSize; n += decimStep)
-					{
-						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
-						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(ti->i1);
-						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(ti->i2);
-						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(ti->i3);
-					}
-				}
-				//colors
-				else if (glParams.showColors)
-				{
-					ccColor::Rgb* _rgbColors = GetColorsBuffer();
-
-					for (unsigned n = 0; n < chunkSize; n += decimStep)
-					{
-						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
-						*_rgbColors++ = rgbColorsTable->at(ti->i1);
-						*_rgbColors++ = rgbColorsTable->at(ti->i2);
-						*_rgbColors++ = rgbColorsTable->at(ti->i3);
-					}
-				}
-
-				//normals
-				if (glParams.showNorms)
-				{
-					CCVector3* _normals = GetNormalsBuffer();
-					if (showTriNormals)
-					{
-						for (unsigned n = 0; n < chunkSize; n += decimStep)
-						{
-							CCVector3 Na, Nb, Nc;
-							getTriangleNormals(static_cast<unsigned>(chunkStart + n), Na, Nb, Nc);
-							*_normals++ = Na;
-							*_normals++ = Nb;
-							*_normals++ = Nc;
-						}
-					}
-					else
-					{
-						for (unsigned n = 0; n < chunkSize; n += decimStep)
-						{
-							const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
-							*_normals++ = vertices->getPointNormal(ti->i1);
-							*_normals++ = vertices->getPointNormal(ti->i2);
-							*_normals++ = vertices->getPointNormal(ti->i3);
-						}
-					}
-				}
-*/
-				if (!showWired)
-				{
+				if (showFaces) {
 					glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, (static_cast<int>(chunkSize) / decimStep) * 3);
 				}
-				else
-				{
+				if (showWired) {
 					glFunc->glDrawElements(GL_LINES, (static_cast<int>(chunkSize) / decimStep) * 6, GL_UNSIGNED_INT, GetWireVertexIndexes());
 				}
 			}
@@ -1495,9 +1427,6 @@ void ccGenericMesh::releaseVBOs()
 void ccGenericMesh::notifyNormalUpdate() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; }
 void ccGenericMesh::notifyColorUpdate() { m_vboManager.updateFlags |= vboSet::UPDATE_COLORS; }
 void ccGenericMesh::notifyTextureUpdate() { m_vboManager.updateFlags |= vboSet::UPDATE_TEXTURE; }
-
-//the GL type depends on the PointCoordinateType 'size' (float or double)
-static GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
 
 void ccGenericMesh::glChunkVertexPointer(const CC_DRAW_CONTEXT & context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
 {

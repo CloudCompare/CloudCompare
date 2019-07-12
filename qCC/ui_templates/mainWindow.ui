@@ -542,6 +542,7 @@
      <addaction name="actionBDDisplayPointOn"/>
      <addaction name="actionBDDisplayPointOff"/>
      <addaction name="actionDisplayWireframe"/>
+     <addaction name="actionDisplayFace"/>
      <addaction name="actionDisplayNormalPerFace"/>
      <addaction name="actionDisplayNormalPerVertex"/>
      <addaction name="actionSetPivotAlwaysOn"/>
@@ -960,6 +961,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    </attribute>
    <addaction name="actionDisplayShowBBox"/>
    <addaction name="actionDisplayWireframe"/>
+   <addaction name="actionDisplayFace"/>
    <addaction name="actionDisplayNormalPerFace"/>
    <addaction name="actionDisplayNormalPerVertex"/>
    <addaction name="actionBDDisplayPlaneOn"/>
@@ -3835,7 +3837,7 @@ QTreeView::branch:open:has-children:has-siblings  {
      <normaloff>:/CC/Stocker/images/stocker/showframe.png</normaloff>:/CC/Stocker/images/stocker/showframe.png</iconset>
    </property>
    <property name="text">
-    <string>Wireframe</string>
+    <string>Display Wireframe</string>
    </property>
    <property name="toolTip">
     <string>Display Wireframe</string>
@@ -3869,6 +3871,27 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Display Normal Per Vertex</string>
+   </property>
+  </action>
+  <action name="actionDisplayFace">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/showface.png</normaloff>:/CC/Stocker/images/stocker/showface.png</iconset>
+   </property>
+   <property name="text">
+    <string>Display Face</string>
+   </property>
+   <property name="iconText">
+    <string>Display Face</string>
+   </property>
+   <property name="toolTip">
+    <string>Display Face</string>
    </property>
   </action>
  </widget>

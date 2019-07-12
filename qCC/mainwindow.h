@@ -528,6 +528,7 @@ private slots:
 	void doActionBDDisplayPointOn();
 	void doActionBDDisplayPointOff();
 	void doActionDisplayWireframe();
+	void doActionDisplayFace();
 	void doActionDisplayNormalPerFace();
 	void doActionDisplayNormalPerVertex();
 

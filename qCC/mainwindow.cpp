@@ -882,6 +882,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDDisplayPointOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOn);
 	connect(m_UI->actionBDDisplayPointOff,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPointOff);
 	connect(m_UI->actionDisplayWireframe,			&QAction::triggered, this, &MainWindow::doActionDisplayWireframe);
+	connect(m_UI->actionDisplayFace,				&QAction::triggered, this, &MainWindow::doActionDisplayFace);
 	connect(m_UI->actionDisplayNormalPerFace,		&QAction::triggered, this, &MainWindow::doActionDisplayNormalPerFace);
 	connect(m_UI->actionDisplayNormalPerVertex,		&QAction::triggered, this, &MainWindow::doActionDisplayNormalPerVertex);
 	connect(m_UI->actionBDFootPrintAuto,			&QAction::triggered, this, &MainWindow::doActionBDFootPrintAuto);
@@ -10322,11 +10323,23 @@ void MainWindow::updateViewStateWithSelection()
 		return;
 	}
 	ccHObject* obj = m_selectedEntities[0];
-	if (obj->isA(CC_TYPES::MESH)) {
+	if (obj->isKindOf(CC_TYPES::MESH)) {
 		ccMesh* mesh = ccHObjectCaster::ToMesh(obj);
-		m_UI->actionDisplayWireframe->setChecked(mesh->isShownAsWire());
-		m_UI->actionDisplayNormalPerFace->setChecked(mesh->triNormsShown());
-		m_UI->actionDisplayNormalPerVertex->setChecked(mesh->normalsShown() && !mesh->triNormsShown());
+		if (mesh) {
+			m_UI->actionDisplayWireframe->setChecked(mesh->isShownAsWire());
+			m_UI->actionDisplayFace->setChecked(mesh->isShownAsFace());
+			m_UI->actionDisplayNormalPerFace->setChecked(mesh->isShownAsFace() && mesh->triNormsShown());
+			m_UI->actionDisplayNormalPerVertex->setChecked(mesh->isShownAsFace() && mesh->normalsShown() && !mesh->triNormsShown());
+		}
+	}
+	else if (obj->isKindOf(CC_TYPES::POINT_CLOUD)) {
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
+		if (cloud) {
+			m_UI->actionDisplayWireframe->setChecked(false);
+			m_UI->actionDisplayFace->setChecked(false);
+			m_UI->actionDisplayNormalPerFace->setChecked(false);
+			m_UI->actionDisplayNormalPerVertex->setChecked(cloud->normalsShown());
+		}
 	}
 }
 
@@ -11084,39 +11097,101 @@ void MainWindow::doActionDisplayWireframe()
 		ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
 		if (mesh) {
 			mesh->showWired(m_UI->actionDisplayWireframe->isChecked());
+			mesh->prepareDisplayForRefresh_recursive();
 		}
 	}
+
+	UpdateUI();
+	refreshAll();
+}
+
+void MainWindow::doActionDisplayFace()
+{
+	for (size_t i = 0; i < m_selectedEntities.size(); i++) {
+		ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
+		if (mesh) {
+			mesh->showFaces(m_UI->actionDisplayFace->isChecked());
+			mesh->prepareDisplayForRefresh_recursive();
+		}
+	}
+
+	UpdateUI();
+	refreshAll();
 }
 
 void MainWindow::doActionDisplayNormalPerFace()
 {
+	ProgStartNorm("display normal per face", m_selectedEntities.size())
 	for (size_t i = 0; i < m_selectedEntities.size(); i++) {
 		ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
-		if (mesh) {
-			if (m_UI->actionDisplayNormalPerFace->isChecked()) {
-				if (!mesh->hasTriNormals()) {
-					mesh->computeNormals(false);
+		if (!mesh) continue;
+		if (m_UI->actionDisplayNormalPerFace->isChecked()) {
+			if (!mesh->hasTriNormals()) {
+				if (!mesh->computeNormals(false)) {
+					continue;
 				}
 			}
-			mesh->showTriNorms(m_UI->actionDisplayNormalPerFace->isChecked());
+			mesh->showFaces(true);
+			mesh->showTriNorms(true);
+			mesh->notifyNormalUpdate();
+			mesh->getAssociatedCloud()->notifyGeometryUpdate();
+			mesh->prepareDisplayForRefresh_recursive();
 		}
+		else {
+			if (!m_UI->actionDisplayNormalPerVertex->isChecked()) {// both disable
+				mesh->showNormals(false);
+				mesh->notifyNormalUpdate();
+				mesh->getAssociatedCloud()->notifyGeometryUpdate();
+				mesh->prepareDisplayForRefresh_recursive();
+			}
+		}
+		ProgStep()
 	}
+	ProgEnd
+
+	UpdateUI();
+	refreshAll();
 }
 
 void MainWindow::doActionDisplayNormalPerVertex()
 {
+	ProgStartNorm("display normal per vertex", m_selectedEntities.size())
 	for (size_t i = 0; i < m_selectedEntities.size(); i++) {
-		ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
-		if (mesh) {
+		if (m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD)) {
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
+			if (!cloud) continue;
+			cloud->showNormals(m_UI->actionDisplayNormalPerVertex->isChecked() && cloud->hasNormals());
+		}
+		else if (m_selectedEntities[i]->isKindOf(CC_TYPES::MESH)) {
+			ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
+			if (!mesh) continue;
 			if (m_UI->actionDisplayNormalPerVertex->isChecked()) {
 				if (!mesh->getAssociatedCloud()->hasNormals()) {
-					mesh->computeNormals(true);
+					if (!mesh->computeNormals(true)) {
+						continue;
+					}
+				}
+				mesh->showFaces(true);
+				mesh->showNormals(true);
+				mesh->showTriNorms(false);
+				mesh->notifyNormalUpdate();
+				mesh->getAssociatedCloud()->notifyGeometryUpdate();
+				mesh->prepareDisplayForRefresh_recursive();
+			}
+			else {
+				if (!m_UI->actionDisplayNormalPerFace->isChecked()) {// both disable
+					mesh->showNormals(false);
+					mesh->getAssociatedCloud()->notifyGeometryUpdate();
+					mesh->prepareDisplayForRefresh_recursive();
 				}
 			}
-			mesh->showNormals(m_UI->actionDisplayNormalPerVertex->isChecked());
-			mesh->showTriNorms(m_UI->actionDisplayNormalPerFace->isChecked());
 		}
+		ProgStep()
 	}
+	ProgEnd
+
+	UpdateUI();
+	refreshAll();
 }
 
 //////////////////////////////////////////////////////////////////////////

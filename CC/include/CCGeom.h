@@ -26,8 +26,8 @@
 //system
 #include <cmath>
 
-//! 2D Vector
-template <typename Type> class Vector2Tpl
+//! 2-Tuple structure (templated version)
+template <class Type> class Tuple2Tpl
 {
 public:
 
@@ -44,14 +44,76 @@ public:
 	/** Inits vector to (0,0).
 		\param s default init value for both coordinates
 	**/
-	inline explicit Vector2Tpl(Type s = 0) : x(s), y(s) {}
+	inline explicit Tuple2Tpl(Type s = 0) : x(s), y(s) {}
 
 	//! Constructor from a couple of coordinates
 	/** Inits vector to (x,y).
 		\param _x x coordinate
 		\param _y y coordinate
 	**/
-	inline Vector2Tpl(Type _x, Type _y) : x(_x), y(_y) {}
+	inline Tuple2Tpl(Type _x, Type _y) : x(_x), y(_y) {}
+
+	//! Constructor from an array of 3 elements
+	inline explicit Tuple2Tpl(const Type p[]) : x(p[0]), y(p[1]) {}
+	
+	//! Inverse operator
+	inline Tuple2Tpl& operator - () { x = -x; y = -y; return *this; }
+	//! In-place addition operator
+	inline Tuple2Tpl& operator += (const Tuple2Tpl& v) { x += v.x; y += v.y; return *this; }
+	//! In-place subtraction operator
+	inline Tuple2Tpl& operator -= (const Tuple2Tpl& v) { x -= v.x; y -= v.y; return *this; }
+	//! In-place multiplication (by a scalar) operator
+	inline Tuple2Tpl& operator *= (Type v) { x *= v; y *= v; return *this; }
+	//! In-place division (by a scalar) operator
+	inline Tuple2Tpl& operator /= (Type v) { x /= v; y /= v; return *this; }
+	//! Addition operator
+	inline Tuple2Tpl operator + (const Tuple2Tpl& v) const { return Tuple2Tpl(x + v.x, y + v.y); }
+	//! Subtraction operator
+	inline Tuple2Tpl operator - (const Tuple2Tpl& v) const { return Tuple2Tpl(x - v.x, y - v.y); }
+	//! Multiplication operator
+	inline Tuple2Tpl operator * (Type s) const { return Tuple2Tpl(x*s, y*s); }
+	//! Division operator
+	inline Tuple2Tpl operator / (Type s) const { return Tuple2Tpl(x / s, y / s); }
+	//! Direct coordinate access
+	inline Type& operator [] (unsigned i) { return u[i]; }
+	//! Direct coordinate access (const)
+	inline const Type& operator [] (unsigned i) const { return u[i]; }
+};
+template <typename Type> class Vector3Tpl;
+//! 2D Vector
+template <typename Type> class Vector2Tpl : public Tuple2Tpl<Type>
+{
+public:
+
+	using Tuple2Tpl<Type>::x;
+	using Tuple2Tpl<Type>::y;
+	using Tuple2Tpl<Type>::u;
+
+	//! Default constructor
+	/** Inits vector to (0,0).
+		\param s default init value for both coordinates
+	**/
+	inline explicit Vector2Tpl(Type s = 0) : Tuple2Tpl<Type>(s) {}
+
+	//! Constructor from a couple of coordinates
+	/** Inits vector to (x,y).
+		\param _x x coordinate
+		\param _y y coordinate
+	**/
+	inline Vector2Tpl(Type _x, Type _y) : Tuple2Tpl<Type>(_x, _y) {}
+
+	//! Constructor from an array of 3 elements
+	inline explicit Vector2Tpl(const Type p[]) : Tuple2Tpl<Type>(p) {}
+
+	//! Constructor from a 2D vector (and a third value)
+	inline explicit Vector2Tpl(const Vector3Tpl<Type>& t3D) : Tuple2Tpl<Type>(t2D.x, t2D.y) {}
+
+	//! Constructor from an int array
+	static inline Vector2Tpl fromArray(const int a[2]) { return Vector2Tpl(static_cast<Type>(a[0]), static_cast<Type>(a[1])); }
+	//! Constructor from a float array
+	static inline Vector2Tpl fromArray(const float a[2]) { return Vector2Tpl(static_cast<Type>(a[0]), static_cast<Type>(a[1])); }
+	//! Constructor from a double array
+	static inline Vector2Tpl fromArray(const double a[2]) { return Vector2Tpl(static_cast<Type>(a[0]), static_cast<Type>(a[1])); }
 
 	//! Returns vector square norm
 	inline Type norm2() const { return (x*x) + (y*y); }

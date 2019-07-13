@@ -46,16 +46,19 @@ class VBO : public QGLBuffer
 public:
 	int rgbShift;
 	int normalShift;
+	int texShift;
+	std::vector<std::pair<int, unsigned int>> matIndexTrisNum; // texture id and triangle number for each material
 
 	//! Inits the VBO
 	/** \return the number of allocated bytes (or -1 if an error occurred)
 	**/
-	int init(int count, bool withColors, bool withNormals, bool* reallocated = nullptr);
+	int init(int count, bool withColors, bool withNormals, bool withTex, bool* reallocated = nullptr);
 
 	VBO()
 		: QGLBuffer(QGLBuffer::VertexBuffer)
 		, rgbShift(0)
 		, normalShift(0)
+		, texShift(0)
 	{}
 };
 
@@ -79,6 +82,7 @@ struct vboSet
 		, colorIsSF(false)
 		, sourceSF(nullptr)
 		, hasNormals(false)
+		, hasTexture(false)
 		, totalMemSizeBytes(0)
 		, updateFlags(0)
 		, state(NEW)
@@ -89,6 +93,7 @@ struct vboSet
 	bool colorIsSF;
 	ccScalarField* sourceSF;
 	bool hasNormals;
+	bool hasTexture;
 	int totalMemSizeBytes;
 	int updateFlags;
 

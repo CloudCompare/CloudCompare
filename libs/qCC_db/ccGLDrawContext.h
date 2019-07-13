@@ -37,6 +37,8 @@ struct glDrawParams
 	bool showColors;
 	//! Display normals
 	bool showNorms;
+	//! Display texture
+	bool showTexture;
 };
 
 // Drawing flags (type: short)

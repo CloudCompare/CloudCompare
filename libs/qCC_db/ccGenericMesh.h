@@ -237,6 +237,7 @@ protected:
 	static CCVector3* GetVertexBuffer();
 	static CCVector3* GetNormalsBuffer();
 	static ccColor::Rgb* GetColorsBuffer();
+	static CCVector2* GetTextureBuffer();
 
 	//! Triangle picking (single triangle)
 	virtual bool trianglePicking(	unsigned triIndex,
@@ -292,6 +293,7 @@ protected:	// VBO
 	void glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
 	void glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
 	void glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkTexturePointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
 
 protected:
 

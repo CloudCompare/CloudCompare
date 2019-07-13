@@ -137,6 +137,12 @@ ccColor::Rgb* ccGenericMesh::GetColorsBuffer()
 	return s_rgbBuffer;
 }
 
+CCVector2 * ccGenericMesh::GetTextureBuffer()
+{
+	static CCVector2 s_texBuffer[ccChunk::SIZE * 3];
+	return s_texBuffer;
+}
+
 //Vertex indexes buffer (for wired display)
 static unsigned s_vertWireIndexes[ccChunk::SIZE * 6];
 static bool s_vertIndexesInitialized = false;
@@ -265,11 +271,13 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//per-triangle normals?
 		bool showTriNormals = (hasTriNormals() && triNormsShown());
 		//fix 'showNorms'
-		glParams.showNorms = showTriNormals || (vertices->hasNormals() && m_normalsDisplayed);
+		glParams.showNorms = showTriNormals || (vertices->hasNormals() && normalsShown());
 
 		//materials & textures
 		bool applyMaterials = (hasMaterials() && materialsShown());
 		bool showTextures = (hasTextures() && materialsShown() && !lodEnabled);
+
+		
 
 		//GL name pushing
 		bool pushName = MACRO_DrawEntityNames(context);
@@ -365,13 +373,18 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			compressedNormals = ccNormalVectors::GetUniqueInstance();
 		}
 
+		glParams.showTexture = applyMaterials || showTextures;
+
+		//materials
+		const ccMaterialSet* materials = getMaterialSet();
+
 		//stipple mask
 		if (stipplingEnabled())
 		{
 			EnableGLStippleMask(context.qGLContext, true);
 		}
 
-		if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || greyForNanScalarValues))
+		if (!visFiltering /*&& !(applyMaterials || showTextures)*/ && (!glParams.showSF || greyForNanScalarValues))
 		{
 			bool useVBOs = false;
 			if (!lodEnabled && context.useVBOs)
@@ -379,13 +392,14 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			glFunc->glEnableClientState(GL_VERTEX_ARRAY);
 
-			if (glParams.showNorms)
-			{
+			if (glParams.showNorms) 
 				glFunc->glEnableClientState(GL_NORMAL_ARRAY);
-			}
 			if (glParams.showSF || glParams.showColors)
-			{
 				glFunc->glEnableClientState(GL_COLOR_ARRAY);
+			if (glParams.showTexture) {
+				glFunc->glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				glFunc->glPushAttrib(GL_ENABLE_BIT);
+				glFunc->glEnable(GL_TEXTURE_2D);
 			}
 
 			//we can scan and process each chunk separately in an optimized way
@@ -410,9 +424,43 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showNorms)
 					glChunkNormalPointer(context, k, decimStep, useVBOs);
 
-				if (showFaces) {
-					glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, (static_cast<int>(chunkSize) / decimStep) * 3);
+				if (showTextures) {
+					glChunkTexturePointer(context, k, decimStep, useVBOs);
 				}
+
+				if (showFaces || glParams.showTexture) {
+					if (glParams.showTexture){
+						int firstTriangleOffset = 0;
+						GLuint oldTexID = 0;
+						glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+						// draw by material
+						for (auto _in_tri : m_vboManager.vbos[k]->matIndexTrisNum) {
+							int mat_index = _in_tri.first;
+							unsigned int tri_num = _in_tri.second;
+							
+							if (showTextures) {
+								GLuint newTexID = (mat_index >= 0 && mat_index < materials->size()) ? materials->at(mat_index)->getTextureID() : 0;
+								if (newTexID != oldTexID) {
+									glFunc->glBindTexture(GL_TEXTURE_2D, newTexID);
+									oldTexID = newTexID;
+								}
+ 							}
+
+							if (mat_index >= 0)
+								(*materials)[mat_index]->applyGL(context.qGLContext, glParams.showNorms, false);
+							else
+								context.defaultMat->applyGL(context.qGLContext, glParams.showNorms, false);
+
+							if (showFaces) {
+								glFunc->glDrawArrays(GL_TRIANGLES, firstTriangleOffset, tri_num * 3);
+								firstTriangleOffset += tri_num * 3;
+							}
+						}
+					}
+					else 
+						glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, (static_cast<int>(chunkSize) / decimStep) * 3);
+				}
+				
 				if (showWired) {
 					glFunc->glDrawElements(GL_LINES, (static_cast<int>(chunkSize) / decimStep) * 6, GL_UNSIGNED_INT, GetWireVertexIndexes());
 				}
@@ -424,6 +472,12 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glFunc->glDisableClientState(GL_NORMAL_ARRAY);
 			if (glParams.showSF || glParams.showColors)
 				glFunc->glDisableClientState(GL_COLOR_ARRAY);
+			if (glParams.showTexture) {
+				glFunc->glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+				glFunc->glPopAttrib();
+				glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+				glFunc->glDisable(GL_TEXTURE_2D);
+			}
 		}
 		else
 		{
@@ -448,8 +502,6 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			//per-triangle normals
 			const NormsIndexesTableType* triNormals = getTriNormsTable();
-			//materials
-			const ccMaterialSet* materials = getMaterialSet();
 
 			GLuint currentTexID = 0;
 
@@ -1154,6 +1206,11 @@ bool ccGenericMesh::updateVBOs(const CC_DRAW_CONTEXT & context, const glDrawPara
 			m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS;
 		}
 #endif
+
+		if (glParams.showTexture && !m_vboManager.hasTexture) {
+			m_vboManager.updateFlags |= vboSet::UPDATE_TEXTURE;
+		}
+
 		//nothing to do?
 		if (m_vboManager.updateFlags == 0)
 		{
@@ -1213,6 +1270,7 @@ bool ccGenericMesh::updateVBOs(const CC_DRAW_CONTEXT & context, const glDrawPara
 #else
 		m_vboManager.hasNormals = false;
 #endif
+		m_vboManager.hasTexture = glParams.showTexture;
 
 		//per-triangle normals?
 		bool showTriNormals = (hasTriNormals() && triNormsShown());
@@ -1277,9 +1335,9 @@ bool ccGenericMesh::updateVBOs(const CC_DRAW_CONTEXT & context, const glDrawPara
 							ccColor::Rgb* _sfColors = GetColorsBuffer();
 							for (unsigned n = 0; n < chunkSize; n += decimStep)	{
 								const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
-								*_sfColors++ = *currentDisplayedScalarField->getValueColor(ti->i1);
-								*_sfColors++ = *currentDisplayedScalarField->getValueColor(ti->i2);
-								*_sfColors++ = *currentDisplayedScalarField->getValueColor(ti->i3);
+								*_sfColors++ = *m_vboManager.sourceSF->getValueColor(ti->i1);
+								*_sfColors++ = *m_vboManager.sourceSF->getValueColor(ti->i2);
+								*_sfColors++ = *m_vboManager.sourceSF->getValueColor(ti->i3);
 							}
 						}
 						//then send them in VRAM
@@ -1308,8 +1366,7 @@ bool ccGenericMesh::updateVBOs(const CC_DRAW_CONTEXT & context, const glDrawPara
 					//we must decode the normals first!
 					CCVector3* _normals = GetNormalsBuffer();
 					if (showTriNormals)	{
-						for (unsigned n = 0; n < chunkSize; n += decimStep)
-						{
+						for (unsigned n = 0; n < chunkSize; n += decimStep)	{
 							CCVector3 Na, Nb, Nc;
 							getTriangleNormals(static_cast<unsigned>(chunkStart + n), Na, Nb, Nc);
 							*_normals++ = Na;
@@ -1329,6 +1386,42 @@ bool ccGenericMesh::updateVBOs(const CC_DRAW_CONTEXT & context, const glDrawPara
 					m_vboManager.vbos[i]->write(m_vboManager.vbos[i]->normalShift, GetNormalsBuffer(), sizeof(CCVector3)*chunkSize * 3);
 				}
 #endif
+
+				if (glParams.showTexture && (chunkUpdateFlags & vboSet::UPDATE_TEXTURE)) {
+					std::vector<std::pair<int, unsigned int>> & _matIndTrisNum = m_vboManager.vbos[i]->matIndexTrisNum;
+					_matIndTrisNum.clear();
+					//loop on all triangles
+					int lasMtlIndex = -1;
+
+					//materials
+					const ccMaterialSet* materials = getMaterialSet();
+
+					CCVector2* _texIndex = GetTextureBuffer();
+					for (unsigned n = 0; n < chunkSize; n += decimStep)	{
+						int newMatlIndex = this->getTriangleMtlIndex(chunkStart + n);
+						//do we need to change material?
+						if (lasMtlIndex != newMatlIndex) {
+							if (newMatlIndex >= 0 && newMatlIndex < static_cast<int>(materials->size())) { //currentTexID = materials->at(newMatlIndex)->getTextureID();
+								_matIndTrisNum.push_back(std::make_pair(newMatlIndex, 0));
+							}
+							lasMtlIndex = newMatlIndex;
+						}
+						if (!_matIndTrisNum.empty()) {
+							_matIndTrisNum.back().second++;
+						}
+
+						TexCoords2D *Tx1 = nullptr, *Tx2 = nullptr, *Tx3 = nullptr;
+						getTriangleTexCoordinates(static_cast<unsigned>(chunkStart + n), Tx1, Tx2, Tx3);
+						*_texIndex++ = CCVector2(Tx1->t);
+						*_texIndex++ = CCVector2(Tx2->t);
+						*_texIndex++ = CCVector2(Tx3->t);
+					}
+					m_vboManager.vbos[i]->write(m_vboManager.vbos[i]->texShift, GetTextureBuffer(), sizeof(CCVector2)*chunkSize * 3);
+
+					//! the triangle numbers per material
+
+				}
+
 				m_vboManager.vbos[i]->release();
 
 				//if an error is detected
@@ -1643,3 +1736,52 @@ void ccGenericMesh::glChunkNormalPointer(const CC_DRAW_CONTEXT & context, size_t
 		glFunc->glNormalPointer(GL_COORD_TYPE, GLsizei(0), GetNormalsBuffer());
 	}
 }
+
+void ccGenericMesh::glChunkTexturePointer(const CC_DRAW_CONTEXT & context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
+{
+	//assert(m_normals);
+	unsigned displayedTriNum = size() / decimStep;	if (displayedTriNum == 0) return;
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (useVBOs
+		&& m_vboManager.state == vboSet::INITIALIZED
+		&& m_vboManager.hasTexture
+		&& m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
+		&& m_vboManager.vbos[chunkIndex]
+		&& m_vboManager.vbos[chunkIndex]->isCreated())
+	{
+		//we can use VBOs directly
+		if (m_vboManager.vbos[chunkIndex]->bind())
+		{
+			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
+			int texDataShift = m_vboManager.vbos[chunkIndex]->texShift;
+			glFunc->glTexCoordPointer(2, GL_COORD_TYPE, 0, static_cast<const GLvoid*>(start + texDataShift));
+			m_vboManager.vbos[chunkIndex]->release();
+		}
+		else
+		{
+			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
+			m_vboManager.state = vboSet::FAILED;
+			//recall the method
+			glChunkTexturePointer(context, chunkIndex, decimStep, false);
+		}
+	}
+	else {
+		//we must decode normals in a dedicated static array
+		size_t chunkSize = ccChunk::Size(chunkIndex, displayedTriNum);
+		unsigned chunkStart = ccChunk::StartPos(chunkIndex);
+
+		CCVector2* _texIndex = GetTextureBuffer();
+		for (unsigned n = 0; n < chunkSize; n += decimStep)
+		{
+			TexCoords2D *Tx1 = nullptr, *Tx2 = nullptr, *Tx3 = nullptr;
+			getTriangleTexCoordinates(static_cast<unsigned>(chunkStart + n), Tx1, Tx2, Tx3);
+			*_texIndex++ = CCVector2(Tx1->t);
+			*_texIndex++ = CCVector2(Tx2->t);
+			*_texIndex++ = CCVector2(Tx3->t);
+		}
+		glFunc->glTexCoordPointer(2, GL_COORD_TYPE, GLsizei(0), GetTextureBuffer());
+	}
+}
+

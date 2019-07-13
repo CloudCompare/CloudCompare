@@ -4871,7 +4871,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			}
 
 			//allocate memory for current VBO
-			int vboSizeBytes = m_vboManager.vbos[i]->init(chunkSize, m_vboManager.hasColors, m_vboManager.hasNormals, &reallocated);
+			int vboSizeBytes = m_vboManager.vbos[i]->init(chunkSize, m_vboManager.hasColors, m_vboManager.hasNormals, false, &reallocated);
 
 			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>(); 
 			if (glFunc)
@@ -5006,7 +5006,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 	return true;
 }
 
-int VBO::init(int count, bool withColors, bool withNormals, bool* reallocated/*=0*/)
+int VBO::init(int count, bool withColors, bool withNormals, bool withTex, bool* reallocated/*=0*/)
 {
 	//required memory
 	int totalSizeBytes = sizeof(PointCoordinateType) * count * 3;
@@ -5019,6 +5019,10 @@ int VBO::init(int count, bool withColors, bool withNormals, bool* reallocated/*=
 	{
 		normalShift = totalSizeBytes;
 		totalSizeBytes += sizeof(PointCoordinateType) * count * 3;
+	}
+	if (withTex) {
+		texShift = totalSizeBytes;
+		totalSizeBytes += sizeof(PointCoordinateType) * count * 2;
 	}
 
 	if (!isCreated())

@@ -25,6 +25,7 @@
 #include <QImage>
 
 class ccCameraSensor;
+class QGLBuffer;
 
 //! Generic image
 class QCC_DB_LIB_API ccImage : public ccHObject
@@ -43,6 +44,8 @@ public:
 
 	//! Constructor from QImage
 	ccImage(const QImage& image, const QString& name = QString("unknown"));
+
+	~ccImage();
 
 	//inherited methods (ccHObject)
 	virtual bool isSerializable() const override { return true; }
@@ -95,6 +98,10 @@ public:
 	//! Returns associated sensor (const version)
 	const ccCameraSensor* getAssociatedSensor() const { return m_associatedSensor; }
 
+	void removeFromDisplay(const ccGenericGLDisplay* win) override; //for proper VBO release
+
+	void setDisplay(ccGenericGLDisplay* win) override;
+
 	QString getImagePath() { return m_file_name; }
 	//inherited from ccHObject
 	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
@@ -135,6 +142,17 @@ protected:
 	QString m_file_name;
 
 	IMAGE_DISPLAY_TYPE m_display_type;
+
+// vbo
+	QGLBuffer* m_vbo;
+	GLuint m_texture_id;
+	int m_vbo_state;// 0-new, 1-initialized, 2-failed
+	int vboInit(int count);
+	bool updateVBO(const CC_DRAW_CONTEXT & context);
+	void releaseVBO();
+public:
+	bool updateTexBuffer();
+
 };
 
 #endif //CC_IMAGE_HEADER

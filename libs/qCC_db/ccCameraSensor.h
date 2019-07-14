@@ -260,7 +260,7 @@ public: //image
 	inline QString imagePath() const { return m_image_path; }
 	inline void setImagePath(QString path) { m_image_path = path; }
 
-	inline QImage getImage();
+	inline QImage getImage(bool forceLoad = true, bool save = false);
 
 	inline void setDisplayOrder(int order) { m_display_order = order ; }
 	inline int getDisplayOrder() { return m_display_order; }

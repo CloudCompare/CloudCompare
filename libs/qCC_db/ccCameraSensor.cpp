@@ -628,19 +628,30 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	return true;
 }
 
-inline QImage ccCameraSensor::getImage()
+inline QImage ccCameraSensor::getImage(bool forceLoad, bool save)
 {
 	if (m_image_thumb.isNull()) {
 		//! load thumb first
 		QFileInfo imgpath(m_image_path);
-		QString thumb = imgpath.path() + "/" + imgpath.completeBaseName();
-		if (QFileInfo(thumb + "_thumb.jpg").exists()) { thumb = thumb + "_thumb.jpg"; }
-		else if (QFileInfo(thumb + "_thumb.tif").exists()) { thumb = thumb + "_thumb.tif"; }
-		else { thumb = m_image_path; }
-		QImageReader reader(thumb);
-		QImage image_tmp = reader.read();
-		m_image_thumb = image_tmp.width() < 400 ? image_tmp :
-			image_tmp.scaled(400, 400 * image_tmp.height() / image_tmp.width(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+		QString thumb = imgpath.path() + "/" + imgpath.completeBaseName() + "_thumb";
+// 		if (QFileInfo(thumb + "_thumb.jpg").exists()) { thumb = thumb + "_thumb.jpg"; }
+// 		else if (QFileInfo(thumb + "_thumb.tif").exists()) { thumb = thumb + "_thumb.tif"; }
+// 		else if (forceLoad) { thumb = m_image_path; }
+// 		else return m_image_thumb;
+		
+		QImage image_tmp = QImageReader(thumb).read();
+		if (image_tmp.isNull() && forceLoad) {
+			image_tmp = QImageReader(m_image_path).read();
+		}
+		if (!image_tmp.isNull()) {
+			m_image_thumb = image_tmp.width() <= 400 ? image_tmp :
+				image_tmp.scaled(400, 400 * image_tmp.height() / image_tmp.width(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+			if (save) {
+				if (!m_image_thumb.save(thumb + ".jpg", "JPG", 100)) {
+					throw std::runtime_error(("failed to save image in: " + thumb.toStdString() + ".jpg").c_str());
+				}
+			}
+		}
 	}
 	return m_image_thumb;
 }

@@ -301,27 +301,57 @@ void bdrImageEditorPanel::setItems(std::vector<ccCameraSensor*> items, int defau
 	imageListWidget->clear();
 	if (items.empty()) { return; }
 	int max_width = -1;
+
+	int corruptNum = -1;
 	for (size_t i = 0; i < items.size(); i++) {
 		ccCameraSensor* camObj = items[i];
 
 		QListWidgetItem *item = new QListWidgetItem;
-		QImage image = camObj->getImage();
+		QImage image = camObj->getImage(false);
 		if (!image.isNull()) {
 			int width = static_cast<int>((double)image.width() / (double)image.height() * (double)m_image_display_height);
 			item->setSizeHint(QSize(width, m_image_display_height + 20));
 			item->setIcon(QIcon(QPixmap::fromImage(image)));
 			if (max_width < width) {
 				max_width = width;
+				imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
 			}
+			item->setText(camObj->getName());
+			imageListWidget->addItem(item);
 		}
-		item->setText(camObj->getName());
-		imageListWidget->addItem(item);
-
+		else {
+			corruptNum = i;
+			break;
+		}
 	}
+
+	if (corruptNum >= 0) {
+		ProgStartNorm_("get image thumbs", items.size() - corruptNum)
+			for (size_t i = corruptNum; i < items.size(); i++) {
+				ccCameraSensor* camObj = items[i];
+
+				QListWidgetItem *item = new QListWidgetItem;
+				QImage image = camObj->getImage(true, true);
+				if (!image.isNull()) {
+					int width = static_cast<int>((double)image.width() / (double)image.height() * (double)m_image_display_height);
+					item->setSizeHint(QSize(width, m_image_display_height + 20));
+					item->setIcon(QIcon(QPixmap::fromImage(image)));
+					if (max_width < width) {
+						max_width = width;
+						imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
+					}
+					item->setText(camObj->getName());
+					imageListWidget->addItem(item);
+				}
+				ProgStep()
+			}
+		ProgEnd
+	}
+	
 	if (max_width <= 0) {
 		return;
 	}
-	imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
+	//imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
 	if (defaultSelectedIndex >= 0 && defaultSelectedIndex < items.size()) {
 		imageListWidget->setItemSelected(imageListWidget->item(defaultSelectedIndex), true);
 	}

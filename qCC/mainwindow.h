@@ -34,6 +34,9 @@ class QMdiArea;
 class QMdiSubWindow;
 class QToolBar;
 class QToolButton;
+class QPushButton;
+class QProgressBar;
+class QLabel;
 
 class cc3DMouseManager;
 class ccCameraParamEditDlg;
@@ -269,6 +272,8 @@ private slots:
 	void echoCameraPosChanged(const CCVector3d&);
 	void echoPivotPointChanged(const CCVector3d&);
 	void echoPixelSizeChanged(float);
+	void echoMouseMoved3D(const CCVector3d & P, bool b3d);
+	void echoMouseMoved2D(int x, int y, double depth);
 
 	void doActionRenderToFile();
 
@@ -661,6 +666,17 @@ private:
 	ccPickingHub* m_pickingHub;
 
 	/******************************/
+	/***      STATUS BAR        ***/
+	/******************************/
+	QLabel* m_progressLabel;
+	QProgressBar* m_progressBar;
+	QPushButton* m_progressButton;
+
+	QLabel* m_coord2D;
+	QLabel* m_coord3D;
+	QToolButton* m_show_coord3D;
+
+	/******************************/
 	/***        MDI AREA        ***/
 	/******************************/
 
@@ -753,7 +769,16 @@ private:
 			progDlg.setInfo(infos);}\
 		CCLib::NormalizedProgress nprogress(&progDlg, number);\
 		progDlg.start();
-#define ProgStep(x) if (!nprogress.oneStep()) {progDlg.stop();return x;}
+#define ProgStartNorm_(title, number) \
+		ccProgressDialog progDlg(true, MainWindow::TheInstance());\
+		progDlg.setAutoClose(false);\
+		if (progDlg.textCanBeEdited()) {\
+			progDlg.setMethodTitle(title);\
+			char infos[256]; sprintf(infos, "Processing %d items...", number);\
+			progDlg.setInfo(infos);}\
+		CCLib::NormalizedProgress nprogress(&progDlg, number);\
+		progDlg.start();
+#define ProgStep(x) if (!nprogress.oneStep()) {progDlg.stop(); return x;}
 #define ProgEnd progDlg.update(100.0f); progDlg.stop();
 
 #endif

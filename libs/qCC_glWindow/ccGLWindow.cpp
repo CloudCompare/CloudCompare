@@ -3995,6 +3995,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
  					m_glDepth = getGLDepth(x, m_glViewport.height() - 1 - y, m_pointPickBuffer);
  				message += QString(" ; d%1").arg(m_glDepth);
  			}
+			emit mouseMove2D(x, y, m_glDepth);
  			
  			bool b3D = getClick3DPos(x, y, m_glDepth, P);
 			if (b3D) {

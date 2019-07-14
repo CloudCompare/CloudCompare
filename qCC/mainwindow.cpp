@@ -203,6 +203,11 @@ MainWindow::MainWindow()
 	, m_pivotVisibilityPopupButton(nullptr)
 	, m_FirstShow(true)
 	, m_pickingHub(nullptr)
+	// status bar
+	, m_progressLabel(nullptr)
+	, m_progressBar(nullptr)
+	, m_progressButton(nullptr)
+	// dialog
 	, m_cpeDlg(nullptr)
 	, m_gsTool(nullptr)
 	, m_tplTool(nullptr)
@@ -346,6 +351,35 @@ MainWindow::MainWindow()
 	m_UI->vboxLayout3->setContentsMargins(0, 0, 0, 0);
 	m_UI->vboxLayout4->setContentsMargins(0, 0, 0, 0);
 	m_UI->verticalLayout->setContentsMargins(0, 0, 0, 0);
+
+	//////////////////////////////////////////////////////////////////////////
+	// TODO: status bar
+	m_progressLabel = new QLabel; 
+	m_progressLabel->setText("items"); 
+	m_progressLabel->setMaximumSize(300, 50);
+
+	m_progressBar = new QProgressBar; 
+	m_progressBar->setFixedWidth(500);
+
+	m_progressButton = new QPushButton;
+	m_progressButton->setText("Cancel");
+
+	QStatusBar* status_bar = QMainWindow::statusBar();
+	status_bar->addPermanentWidget(m_progressLabel); m_progressLabel->hide();
+	status_bar->addPermanentWidget(m_progressBar); m_progressBar->hide();
+	status_bar->addPermanentWidget(m_progressButton); m_progressButton->hide();
+
+	// TODO: COORDINATE
+	m_coord2D = new QLabel();
+	status_bar->addPermanentWidget(m_coord2D);
+
+	m_show_coord3D = new QToolButton();
+	m_show_coord3D->addAction(m_UI->actionShowCursor3DCoordinates);
+	status_bar->addPermanentWidget(m_show_coord3D);
+
+	m_coord3D = new QLabel();
+	status_bar->addPermanentWidget(m_coord3D);
+	//////////////////////////////////////////////////////////////////////////
 
 	connectActions();
 
@@ -5821,6 +5855,8 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 	connect(view3D,	&ccGLWindow::cameraPosChanged, this, &MainWindow::echoCameraPosChanged);
 	connect(view3D,	&ccGLWindow::pivotPointChanged, this, &MainWindow::echoPivotPointChanged);
 	connect(view3D,	&ccGLWindow::pixelSizeChanged, this, &MainWindow::echoPixelSizeChanged);
+	connect(view3D, &ccGLWindow::mouseMoved2D, this, &MainWindow::echoMouseMoved2D);
+	connect(view3D, &ccGLWindow::mouseMoved3D, this, &MainWindow::echoMouseMoved3D);
 
 	connect(view3D,	&QObject::destroyed, this, &MainWindow::prepareWindowDeletion);
 	connect(view3D,	&ccGLWindow::filesDropped, this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
@@ -10686,6 +10722,21 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 			 child->redraw();
 		 }
 	 }
+ }
+
+ void MainWindow::echoMouseMoved3D(const CCVector3d & P, bool b3d)
+ {
+	 QString string;
+	 if (b3d) {
+		 string = QString("3D (%1, %2, %3)").arg(P.x).arg(P.y).arg(P.z);
+	 }
+	 m_coord3D->setText(string);
+ }
+
+ void MainWindow::echoMouseMoved2D(int x, int y, double depth)
+ {
+	 QString string = QString("2D (%1, %2; [%3])").arg(x).arg(y).arg(depth);
+	 m_coord2D->setText(string);
  }
 
 void MainWindow::dispToConsole(QString message, ConsoleMessageLevel level/*=STD_CONSOLE_MESSAGE*/)

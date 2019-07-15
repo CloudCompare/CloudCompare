@@ -22,7 +22,6 @@
     <file>images/smallSphere.png</file>
     <file>images/ccLevel.png</file>
     <file>images/ccGrid.png</file>
-    <file>images/stocker/pointCoord.png</file>
     <file>images/sectionExtraction.png</file>
     <file>images/orthoSections.png</file>
     <file>images/ccExit.png</file>
@@ -213,6 +212,8 @@
     <file>images/stocker/task.png</file>
     <file>images/stocker/splitplane.png</file>
     <file>images/stocker/showface.png</file>
+    <file>images/stocker/global.png</file>
+    <file>images/stocker/pointCoord.png</file>
     <file>images/stocker/link.png</file>
   </qresource>
 </RCC>

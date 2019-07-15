@@ -4001,10 +4001,9 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 //				message += QString(" --> 3D (%1 ; %2 ; %3)").arg(P.x).arg(P.y).arg(P.z);
 //			}
 			emit mouseMoved3D(P, b3D);
-#if 0	// now we display the message in the status bar
-			this->displayNewMessage(message, LOWER_LEFT_MESSAGE, false, 2, SCREEN_SIZE_MESSAGE);
+	// now we display the message in the status bar
+//			this->displayNewMessage(message, LOWER_LEFT_MESSAGE, false, 2, SCREEN_SIZE_MESSAGE);
 			redraw(true, false);
-#endif
 		}
 
 		//don't need to process any further

@@ -3265,7 +3265,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/stocker/pointCoord.png</normaloff>:/CC/images/stocker/pointCoord.png</iconset>
+     <normaloff>:/CC/Stocker/images/stocker/pointCoord.png</normaloff>:/CC/Stocker/images/stocker/pointCoord.png</iconset>
    </property>
    <property name="text">
     <string>Show cursor coordinates</string>
@@ -3902,6 +3902,24 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Display Face</string>
+   </property>
+  </action>
+  <action name="actionDisplayGlobalCoord">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/global.png</normaloff>:/CC/Stocker/images/stocker/global.png</iconset>
+   </property>
+   <property name="text">
+    <string>Display global coord</string>
+   </property>
+   <property name="toolTip">
+    <string>display global coord</string>
+   </property>
+   <property name="statusTip">
+    <string>display global coord or local coord</string>
    </property>
   </action>
  </widget>

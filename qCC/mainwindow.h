@@ -293,6 +293,8 @@ private slots:
 	void doActionChangeColorLevels();
 	void doActionEnhanceRGBWithIntensities();
 
+	void doActionDisplayGlobalCoord();
+
 	void doActionSFGaussianFilter();
 	void doActionSFBilateralFilter();
 	void doActionSFConvertToRGB();
@@ -681,6 +683,7 @@ private:
 	QSpinBox* m_status_pointSnapBufferSpinBox;
 	QLabel* m_status_depth;
 	QToolButton* m_status_show_coord3D;
+	QToolButton* m_status_show_global;
 	QLabel* m_status_coord3D;
 	QLabel* m_status_coord2D;
 	

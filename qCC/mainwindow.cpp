@@ -210,6 +210,8 @@ MainWindow::MainWindow()
 	, m_status_pointSnapBufferSpinBox(nullptr)
 	, m_status_coord2D(nullptr)
 	, m_status_show_coord3D(nullptr)
+	, m_status_show_global(nullptr)
+	, m_status_depth(nullptr)
 	, m_status_coord3D(nullptr)
 	// dialog
 	, m_cpeDlg(nullptr)
@@ -374,6 +376,12 @@ MainWindow::MainWindow()
 	status_bar->addPermanentWidget(m_progressButton); m_progressButton->hide();
 
 	// TODO: COORDINATE
+	m_status_depth = new QLabel();
+	m_status_depth->setToolTip("GL depth");
+	m_status_depth->setStatusTip("GL depth at current cursor");
+	m_status_depth->setMinimumWidth(100);
+	status_bar->addPermanentWidget(m_status_depth);
+
 	m_status_pointSnapBufferSpinBox = new QSpinBox();
 	m_status_pointSnapBufferSpinBox->setMinimum(0);
 	m_status_pointSnapBufferSpinBox->setToolTip("buffer distance to deduce GL depth for point snapping");
@@ -382,26 +390,24 @@ MainWindow::MainWindow()
 		this, &MainWindow::pointSnapBufferChanged);
 	status_bar->addPermanentWidget(m_status_pointSnapBufferSpinBox);
 
-	m_status_depth = new QLabel();
-	m_status_depth->setToolTip("GL depth");
-	m_status_depth->setStatusTip("GL depth");
-	m_status_depth->setMinimumWidth(50);
-	status_bar->addPermanentWidget(m_status_depth);
-
 	m_status_show_coord3D = new QToolButton();
 	m_status_show_coord3D->setDefaultAction(m_UI->actionShowCursor3DCoordinates);
 	status_bar->addPermanentWidget(m_status_show_coord3D);
 
+	m_status_show_global = new QToolButton();
+	m_status_show_global->setDefaultAction(m_UI->actionDisplayGlobalCoord);
+	status_bar->addPermanentWidget(m_status_show_global);
+
 	m_status_coord3D = new QLabel();
 	m_status_coord3D->setToolTip("3D coord snapped");
-	m_status_coord3D->setStatusTip("3D coord the mouse pointed");
-	m_status_coord3D->setMinimumWidth(180);
+	m_status_coord3D->setStatusTip("3D coord the cursor snapped to");
+	m_status_coord3D->setMinimumWidth(200);
 	status_bar->addPermanentWidget(m_status_coord3D);
 
 	m_status_coord2D = new QLabel();
 	m_status_coord2D->setToolTip("Image Coord");
 	m_status_coord2D->setStatusTip("Image Coord");
-	m_status_coord2D->setMinimumWidth(100);
+	m_status_coord2D->setMinimumWidth(150);
 	status_bar->addPermanentWidget(m_status_coord2D);
 	//////////////////////////////////////////////////////////////////////////
 
@@ -838,6 +844,7 @@ void MainWindow::connectActions()
 	//"Display" menu
 	connect(m_UI->actionResetGUIElementsPos,		&QAction::triggered, this, &MainWindow::doActionResetGUIElementsPos);
 	connect(m_UI->actionDisplayShowBBox,			&QAction::triggered, this, &MainWindow::toggleDrawBBox);
+	connect(m_UI->actionDisplayGlobalCoord,			&QAction::triggered, this, &MainWindow::doActionDisplayGlobalCoord);
 
 	//"3D Views" menu
 	connect(m_UI->menu3DViews,						&QMenu::aboutToShow, this, &MainWindow::update3DViewsMenu);
@@ -5882,6 +5889,7 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 	connect(view3D,	&ccGLWindow::pixelSizeChanged, this, &MainWindow::echoPixelSizeChanged);
 	connect(view3D, &ccGLWindow::mouseMoved2D, this, &MainWindow::echoMouseMoved2D);
 	connect(view3D, &ccGLWindow::mouseMoved3D, this, &MainWindow::echoMouseMoved3D);
+	connect(view3D, &ccGLWindow::pointSnapBufferChanged, this, &MainWindow::echopointSnapBufferChanged);		
 
 	connect(view3D,	&QObject::destroyed, this, &MainWindow::prepareWindowDeletion);
 	connect(view3D,	&ccGLWindow::filesDropped, this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
@@ -10751,16 +10759,19 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 
 void MainWindow::echoMouseMoved3D(const CCVector3d & P, bool b3d)
 {
-	QString string;
+	QString string = "3D ";
 	if (b3d) {
-		string = QString("3D (%1, %2, %3)").arg(P.x).arg(P.y).arg(P.z);
+		if (m_UI->actionDisplayGlobalCoord) {
+			// TODO: 
+		}
+		string += QString("(%1, %2, %3)").arg(P.x).arg(P.y).arg(P.z);
 	}
 	m_status_coord3D->setText(string);
 }
 
 void MainWindow::echoMouseMoved2D(int x, int y, double depth)
 {
-	QString string = QString("GLdepth %1").arg(depth);
+	QString string = QString("GLdepth %1").arg(depth, 0, 'f', 6);
 	m_status_depth->setText(string);
 }
 
@@ -10782,9 +10793,9 @@ void MainWindow::pointSnapBufferChanged(int buffer)
 
 void MainWindow::setStatusImageCoord(const CCVector3d & P, bool b3d)
 {
-	QString string;
+	QString string = "Image ";
 	if (b3d) {
-		string = QString("Image (%1, %2)").arg(P.x).arg(P.y);
+		string += QString("(%1, %2)").arg(P.x).arg(P.y);
 	}
 	m_status_coord2D->setText(string);
 }
@@ -11097,6 +11108,16 @@ ccHObject* MainWindow::askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultClo
 
 	assert(selectedIndex >= 0 && static_cast<size_t>(selectedIndex) < entites.size());
 	return entites[selectedIndex];
+}
+
+void MainWindow::doActionDisplayGlobalCoord()
+{
+	if (m_UI->actionDisplayGlobalCoord->isChecked()) {
+		// TODO
+	}
+	else {
+
+	}
 }
 
 void MainWindow::toggleDrawBBox() {

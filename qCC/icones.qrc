@@ -22,6 +22,7 @@
     <file>images/smallSphere.png</file>
     <file>images/ccLevel.png</file>
     <file>images/ccGrid.png</file>
+    <file>images/stocker/pointCoord.png</file>
     <file>images/sectionExtraction.png</file>
     <file>images/orthoSections.png</file>
     <file>images/ccExit.png</file>
@@ -183,7 +184,6 @@
     <file>images/stocker/texture.png</file>
     <file>images/stocker/viewglobe.png</file>
     <file>images/stocker/zoomfit.png</file>
-    <file>images/stocker/setheight.png</file>
     <file>images/stocker/lod1.png</file>
     <file>images/stocker/setground.png</file>
     <file>images/stocker/pickpts.png</file>

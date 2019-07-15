@@ -785,7 +785,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="minimumSize">
     <size>
      <width>109</width>
-     <height>184</height>
+     <height>210</height>
     </size>
    </property>
    <property name="floating">
@@ -3263,11 +3263,21 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="checked">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/stocker/pointCoord.png</normaloff>:/CC/images/stocker/pointCoord.png</iconset>
+   </property>
    <property name="text">
     <string>Show cursor coordinates</string>
    </property>
+   <property name="iconText">
+    <string>P</string>
+   </property>
    <property name="toolTip">
-    <string>Show cursor coordinates (2D and 3D if possible)</string>
+    <string>Snap to a point when mouse moving</string>
+   </property>
+   <property name="statusTip">
+    <string>snap to a point when mouse moving, may be slow if points are massive</string>
    </property>
   </action>
   <action name="actionDeleteScanGrid">

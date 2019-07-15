@@ -37,6 +37,7 @@ class QToolButton;
 class QPushButton;
 class QProgressBar;
 class QLabel;
+class QSpinBox;
 
 class cc3DMouseManager;
 class ccCameraParamEditDlg;
@@ -188,7 +189,8 @@ public:
 	//! XYLIU images
 
 	ccHObject* getCameraGroup(QString name);
-	
+	void setStatusImageCoord(const CCVector3d & P, bool b3d);
+
 private slots:
 	//! Creates a new 3D GL sub-window
 	ccGLWindow* new3DView( bool allowEntitySelection );
@@ -274,6 +276,10 @@ private slots:
 	void echoPixelSizeChanged(float);
 	void echoMouseMoved3D(const CCVector3d & P, bool b3d);
 	void echoMouseMoved2D(int x, int y, double depth);
+	void echopointSnapBufferChanged(int buffer);
+	void echoImageCursorPos(const CCVector3d & P, bool b3d);
+
+	void pointSnapBufferChanged(int buffer);
 
 	void doActionRenderToFile();
 
@@ -672,9 +678,12 @@ private:
 	QProgressBar* m_progressBar;
 	QPushButton* m_progressButton;
 
-	QLabel* m_coord2D;
-	QLabel* m_coord3D;
-	QToolButton* m_show_coord3D;
+	QSpinBox* m_status_pointSnapBufferSpinBox;
+	QLabel* m_status_depth;
+	QToolButton* m_status_show_coord3D;
+	QLabel* m_status_coord3D;
+	QLabel* m_status_coord2D;
+	
 
 	/******************************/
 	/***        MDI AREA        ***/

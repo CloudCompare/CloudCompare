@@ -78,12 +78,12 @@ void bdr2Point5DimEditor::clearAll()
 
 void bdr2Point5DimEditor::updateCursorPos(const CCVector3d& P, bool b3d, bool move)
 {
+	CCVector3 image_pt;
 	if (!m_cursor_cross || m_cursor_cross->size() < 5) { return; }
 	if (!b3d || !m_associate_3DView || !m_image) {
 		m_cursor_cross->setVisible(false);
 	}
 	else {
-		CCVector3 image_pt;
 		if (FromGlobalToImage(CCVector3::fromArray(P.u), image_pt)) {
 			if (move) {
 				ccGLCameraParameters cam;
@@ -96,6 +96,9 @@ void bdr2Point5DimEditor::updateCursorPos(const CCVector3d& P, bool b3d, bool mo
 			}
 			
 			image_pt.z = IMAGE_MARKER_DISPLAY_Z;
+
+			//! update image cursor pos
+			CCVector3 image_pt = CCVector3::fromArray(P.u);
 			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(0)) = image_pt;
 			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(1)) = image_pt + CCVector3(0, 50, 0);
 			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(2)) = image_pt - CCVector3(50, 0, 0);
@@ -104,6 +107,7 @@ void bdr2Point5DimEditor::updateCursorPos(const CCVector3d& P, bool b3d, bool mo
 			m_cursor_cross->setVisible(true);
 		}
 	}
+	MainWindow::TheInstance()->setStatusImageCoord(CCVector3d::fromArray(image_pt.u), b3d);
 	m_glWindow->redraw();
 }
 
@@ -139,6 +143,8 @@ void bdr2Point5DimEditor::init2DView()
 	m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 	m_glWindow->displayOverlayEntities(true);
 	m_glWindow->showCursorCoordinates(true);
+	m_glWindow->setBBoxDisplayType(ccGLWindow::BBOX_HIDE);
+	m_glWindow->setWindowEditorType(ccGLWindow::IMAGE_EDITOR_25D);
 	m_glWindow->lockRotationAxis(true, CCVector3d(0, 0, 1));
 }
 

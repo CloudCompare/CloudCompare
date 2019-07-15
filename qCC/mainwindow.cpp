@@ -207,6 +207,10 @@ MainWindow::MainWindow()
 	, m_progressLabel(nullptr)
 	, m_progressBar(nullptr)
 	, m_progressButton(nullptr)
+	, m_status_pointSnapBufferSpinBox(nullptr)
+	, m_status_coord2D(nullptr)
+	, m_status_show_coord3D(nullptr)
+	, m_status_coord3D(nullptr)
 	// dialog
 	, m_cpeDlg(nullptr)
 	, m_gsTool(nullptr)
@@ -370,15 +374,35 @@ MainWindow::MainWindow()
 	status_bar->addPermanentWidget(m_progressButton); m_progressButton->hide();
 
 	// TODO: COORDINATE
-	m_coord2D = new QLabel();
-	status_bar->addPermanentWidget(m_coord2D);
+	m_status_pointSnapBufferSpinBox = new QSpinBox();
+	m_status_pointSnapBufferSpinBox->setMinimum(0);
+	m_status_pointSnapBufferSpinBox->setToolTip("buffer distance to deduce GL depth for point snapping");
+	m_status_pointSnapBufferSpinBox->setStatusTip("buffer distance to deduce GL depth for point snapping");
+	connect(m_status_pointSnapBufferSpinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+		this, &MainWindow::pointSnapBufferChanged);
+	status_bar->addPermanentWidget(m_status_pointSnapBufferSpinBox);
 
-	m_show_coord3D = new QToolButton();
-	m_show_coord3D->addAction(m_UI->actionShowCursor3DCoordinates);
-	status_bar->addPermanentWidget(m_show_coord3D);
+	m_status_depth = new QLabel();
+	m_status_depth->setToolTip("GL depth");
+	m_status_depth->setStatusTip("GL depth");
+	m_status_depth->setMinimumWidth(50);
+	status_bar->addPermanentWidget(m_status_depth);
 
-	m_coord3D = new QLabel();
-	status_bar->addPermanentWidget(m_coord3D);
+	m_status_show_coord3D = new QToolButton();
+	m_status_show_coord3D->setDefaultAction(m_UI->actionShowCursor3DCoordinates);
+	status_bar->addPermanentWidget(m_status_show_coord3D);
+
+	m_status_coord3D = new QLabel();
+	m_status_coord3D->setToolTip("3D coord snapped");
+	m_status_coord3D->setStatusTip("3D coord the mouse pointed");
+	m_status_coord3D->setMinimumWidth(180);
+	status_bar->addPermanentWidget(m_status_coord3D);
+
+	m_status_coord2D = new QLabel();
+	m_status_coord2D->setToolTip("Image Coord");
+	m_status_coord2D->setStatusTip("Image Coord");
+	m_status_coord2D->setMinimumWidth(100);
+	status_bar->addPermanentWidget(m_status_coord2D);
 	//////////////////////////////////////////////////////////////////////////
 
 	connectActions();
@@ -974,10 +998,11 @@ void MainWindow::CreateImageEditor()
 {
 	m_pbdrImshow = new bdr2Point5DimEditor();
 	m_pbdrImshow->create2DView(m_UI->mapFrame);
+	connect(m_pbdrImshow->getGLWindow(), &ccGLWindow::mouseMoved3D, this, &MainWindow::echoImageCursorPos);
 
 	m_pbdrImagePanel = new bdrImageEditorPanel(m_pbdrImshow, m_imageRoot, this);	
 	m_UI->verticalLayoutImageEditor->addWidget(m_pbdrImagePanel);	
-
+	
 	connect(m_pbdrImagePanel->OverlayToolButton, &QAbstractButton::clicked, this, &MainWindow::toggleImageOverlay);
 	connect(m_pbdrImagePanel->displayBestToolButton, &QAbstractButton::clicked, this, &MainWindow::doActionShowBestImage);
 
@@ -10724,20 +10749,45 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 }
  }
 
- void MainWindow::echoMouseMoved3D(const CCVector3d & P, bool b3d)
- {
-	 QString string;
-	 if (b3d) {
-		 string = QString("3D (%1, %2, %3)").arg(P.x).arg(P.y).arg(P.z);
-	 }
-	 m_coord3D->setText(string);
- }
+void MainWindow::echoMouseMoved3D(const CCVector3d & P, bool b3d)
+{
+	QString string;
+	if (b3d) {
+		string = QString("3D (%1, %2, %3)").arg(P.x).arg(P.y).arg(P.z);
+	}
+	m_status_coord3D->setText(string);
+}
 
- void MainWindow::echoMouseMoved2D(int x, int y, double depth)
- {
-	 QString string = QString("2D (%1, %2; [%3])").arg(x).arg(y).arg(depth);
-	 m_coord2D->setText(string);
- }
+void MainWindow::echoMouseMoved2D(int x, int y, double depth)
+{
+	QString string = QString("GLdepth %1").arg(depth);
+	m_status_depth->setText(string);
+}
+
+void MainWindow::echopointSnapBufferChanged(int buffer)
+{
+	m_status_pointSnapBufferSpinBox->setValue(buffer);
+}
+
+void MainWindow::echoImageCursorPos(const CCVector3d & P, bool b3d)
+{
+	setStatusImageCoord(P, b3d);
+}
+
+void MainWindow::pointSnapBufferChanged(int buffer)
+{
+	if (GetActiveGLWindow())
+		GetActiveGLWindow()->setPointPickBuffer(buffer);
+}
+
+void MainWindow::setStatusImageCoord(const CCVector3d & P, bool b3d)
+{
+	QString string;
+	if (b3d) {
+		string = QString("Image (%1, %2)").arg(P.x).arg(P.y);
+	}
+	m_status_coord2D->setText(string);
+}
 
 void MainWindow::dispToConsole(QString message, ConsoleMessageLevel level/*=STD_CONSOLE_MESSAGE*/)
 {

@@ -140,6 +140,16 @@ public:
 							PIVOT_ALWAYS_SHOW,
 	};
 
+	enum BBoxDisplayType {	BBOX_HIDE,
+							BBOX_SHOW_ON_SELECT,
+							BBOX_ALWAYS_SHOW,
+	};
+
+	enum WindowEditorType {	POINTS_EDITOR_3D,
+							IMAGE_EDITOR_25D,
+							IMAGE_DISPLAY_25D,
+	};
+
 	//! Default constructor
 	ccGLWindow(QSurfaceFormat* format = nullptr, ccGLWindowParent* parent = nullptr, bool silentInitialization = false);
 
@@ -544,6 +554,16 @@ public:
 	QSize glSize() const { return m_glViewport.size(); }
 
 	void toggleDrawBBox() { m_drawBBox = !m_drawBBox; };
+
+	//! Sets bbox display type
+	virtual void setBBoxDisplayType(BBoxDisplayType box) { m_bboxDisplayType = box; }
+	//! Returns bbox display type
+	virtual BBoxDisplayType getBBoxDisplayType() const { return m_bboxDisplayType; }
+
+	//! Sets window editor type
+	virtual void setWindowEditorType(WindowEditorType win) { m_windowEditorType = win; }
+	//! Returns window editor type
+	virtual WindowEditorType getWindowEditorType() const { return m_windowEditorType; }
 
 public: //LOD
 
@@ -1357,6 +1377,9 @@ protected: //members
 	int m_pointSnapBuffer;
 
 	float m_glDepth;
+
+	WindowEditorType m_windowEditorType;
+	BBoxDisplayType	m_bboxDisplayType;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

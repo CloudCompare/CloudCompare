@@ -3985,25 +3985,26 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		if (m_showCursorCoordinates || bPointEdit)
 		{
 			CCVector3d P;
-			QString message = QString("2D (%1 ; %2)").arg(x).arg(y);
-			//bool b3D = getClick3DPos(x, y, P);
+//			QString message = QString("2D (%1 ; %2)").arg(x).arg(y);
 
  			m_glDepth = getGLDepth(x, m_glViewport.height() - 1 - y, 0);
  
  			if (bPointEdit)	{
  				if (m_glDepth == 1.0f) 
  					m_glDepth = getGLDepth(x, m_glViewport.height() - 1 - y, m_pointSnapBuffer);
- 				message += QString(" ; d%1").arg(m_glDepth);
+ //				message += QString(" ; d%1").arg(m_glDepth);
  			}
 			emit mouseMoved2D(x, y, m_glDepth);
  			
  			bool b3D = getClick3DPos(x, y, m_glDepth, P);
-			if (b3D) {
-				message += QString(" --> 3D (%1 ; %2 ; %3)").arg(P.x).arg(P.y).arg(P.z);
-			}
+//			if (b3D) {
+//				message += QString(" --> 3D (%1 ; %2 ; %3)").arg(P.x).arg(P.y).arg(P.z);
+//			}
 			emit mouseMoved3D(P, b3D);
+#if 0	// now we display the message in the status bar
 			this->displayNewMessage(message, LOWER_LEFT_MESSAGE, false, 2, SCREEN_SIZE_MESSAGE);
 			redraw(true, false);
+#endif
 		}
 
 		//don't need to process any further

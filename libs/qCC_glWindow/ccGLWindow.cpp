@@ -379,7 +379,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_rotationAxisLocked(false)
 	, m_lockedRotationAxis(0, 0, 1)
 	, m_drawBBox(true)
-	, m_pointPickBuffer(5)
+	, m_pointSnapBuffer(5)
 {
 	//start internal timer
 	m_timer.start();
@@ -629,10 +629,10 @@ void ccGLWindow::drawCursor()
 
 		QPointF posA = toCenteredGLCoordinates(m_curMousePos.x(), m_curMousePos.y());
 
-		glFunc->glVertex3f(posA.x() - m_pointPickBuffer, posA.y() - m_pointPickBuffer, 0.0f);
-		glFunc->glVertex3f(posA.x() + m_pointPickBuffer, posA.y() - m_pointPickBuffer, 0.0f);
-		glFunc->glVertex3f(posA.x() + m_pointPickBuffer, posA.y() + m_pointPickBuffer, 0.0f);
-		glFunc->glVertex3f(posA.x() - m_pointPickBuffer, posA.y() + m_pointPickBuffer, 0.0f);
+		glFunc->glVertex3f(posA.x() - m_pointSnapBuffer, posA.y() - m_pointSnapBuffer, 0.0f);
+		glFunc->glVertex3f(posA.x() + m_pointSnapBuffer, posA.y() - m_pointSnapBuffer, 0.0f);
+		glFunc->glVertex3f(posA.x() + m_pointSnapBuffer, posA.y() + m_pointSnapBuffer, 0.0f);
+		glFunc->glVertex3f(posA.x() - m_pointSnapBuffer, posA.y() + m_pointSnapBuffer, 0.0f);
 		glFunc->glEnd();
 
 		glFunc->glPopAttrib(); //GL_LINE_BIT
@@ -3992,10 +3992,10 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
  
  			if (bPointEdit)	{
  				if (m_glDepth == 1.0f) 
- 					m_glDepth = getGLDepth(x, m_glViewport.height() - 1 - y, m_pointPickBuffer);
+ 					m_glDepth = getGLDepth(x, m_glViewport.height() - 1 - y, m_pointSnapBuffer);
  				message += QString(" ; d%1").arg(m_glDepth);
  			}
-			emit mouseMove2D(x, y, m_glDepth);
+			emit mouseMoved2D(x, y, m_glDepth);
  			
  			bool b3D = getClick3DPos(x, y, m_glDepth, P);
 			if (b3D) {
@@ -4651,6 +4651,7 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 			if (b3D) {
 				message += QString(" --> 3D (%1 ; %2 ; %3)").arg(P.x).arg(P.y).arg(P.z);
 			}
+			emit mouseMoved2D(x, y, m_glDepth);
 			emit mouseMoved3D(P, b3D);
 			this->displayNewMessage(message, LOWER_LEFT_MESSAGE, false, 2, SCREEN_SIZE_MESSAGE);
 			redraw(true, false);
@@ -4674,11 +4675,12 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 		event->accept();
 		
 		if (pointViewEditMode()) {
-			int newBuffer = m_pointPickBuffer + (event->delta() < 0 ? -1 : 1);
+			int newBuffer = m_pointSnapBuffer + (event->delta() < 0 ? -1 : 1);
 			newBuffer = std::max(0, newBuffer);
-			if (newBuffer != m_pointPickBuffer) {
-				m_pointPickBuffer = newBuffer;
+			if (newBuffer != m_pointSnapBuffer) {
+				m_pointSnapBuffer = newBuffer;
 			}
+			emit pointSnapBufferChanged(m_pointSnapBuffer);
 			redraw(true, false);
 		}
 		else if (m_viewportParams.perspectiveView)

@@ -764,9 +764,11 @@ signals:
 	**/
 	void mouseMoved(int x, int y, Qt::MouseButtons buttons);
 
-	void mouseMove2D(int x, int y, double d);
+	void mouseMoved2D(int x, int y, double d);
 
 	void mouseMoved3D(const CCVector3d& P, bool b3d);
+
+	void pointSnapBufferChanged(int buffer);
 
 	//! Signal emitted when a mouse button is released (cursor on the window)
 	/** See INTERACT_SIG_BUTTON_RELEASED.
@@ -1049,6 +1051,8 @@ protected: //other methods
 public:
 	//! Returns the approximate 3D position of the clicked pixel
 	bool getClick3DPos(int x, int y, CCVector3d& P3D, int extend = 0);
+
+	void setPointPickBuffer(int buffer) { m_pointSnapBuffer = buffer; }
 
 protected: //members
 
@@ -1350,7 +1354,7 @@ protected: //members
 	CCVector3d m_lockedRotationAxis;
 	bool m_drawBBox;
 
-	int m_pointPickBuffer;
+	int m_pointSnapBuffer;
 
 	float m_glDepth;
 };

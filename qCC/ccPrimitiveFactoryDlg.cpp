@@ -122,7 +122,7 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 
 	if (primitive)
 	{
-		m_win->addToDB(primitive, true, true, true);
+		m_win->addToDB(primitive, m_win->getCurrentDB() true, true, true);
 	}
 }
 

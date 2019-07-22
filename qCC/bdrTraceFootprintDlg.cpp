@@ -1145,7 +1145,7 @@ void bdrTraceFootprint::generateOrthoSections()
 				destEntity->addChild(m_selectedPoly->entity);
 				m_selectedPoly->isInDB = true;
 				m_selectedPoly->entity->setDisplay_recursive(destEntity->getDisplay());
-				MainWindow::TheInstance()->addToDB(m_selectedPoly->entity, false, false);
+				MainWindow::TheInstance()->addToDB_Build(m_selectedPoly->entity, false, false);
 			}
 			//and remove
 			deleteSelectedPolyline();
@@ -1279,7 +1279,7 @@ ccHObject* bdrTraceFootprint::getExportGroup(unsigned& defaultGroupID, const QSt
 				break;
 			}
 		}
-		mainWin->addToDB(destEntity);
+		mainWin->addToDB_Main(destEntity);
 		defaultGroupID = destEntity->getUniqueID();
 	}
 	return destEntity;
@@ -1319,7 +1319,7 @@ void bdrTraceFootprint::exportSections()
 			destEntity->addChild(section.entity);
 			section.isInDB = true;
 			section.entity->setDisplay_recursive(destEntity->getDisplay());
-			mainWin->addToDB(section.entity, false, false);
+			mainWin->addToDB_Build(section.entity, false, false);
 		}
 	}
 
@@ -1460,7 +1460,7 @@ bool bdrTraceFootprint::extractSectionContour(const ccPolyline* originalSection,
 			//add to main DB
 			destEntity->addChild(contourPart);
 			contourPart->setDisplay_recursive(destEntity->getDisplay());
-			MainWindow::TheInstance()->addToDB(contourPart, false, false);
+			MainWindow::TheInstance()->addToDB_Build(contourPart, false, false);
 		}
 
 		contourGenerated = true;
@@ -1544,7 +1544,7 @@ bool bdrTraceFootprint::extractSectionCloud(const std::vector<CCLib::ReferenceCl
 
 		//add to main DB
 		destEntity->addChild(sectionCloud);
-		MainWindow::TheInstance()->addToDB(sectionCloud, false, false);
+		MainWindow::TheInstance()->addToDB_Build(sectionCloud, false, false);
 
 		cloudGenerated = true;
 	}
@@ -1802,7 +1802,7 @@ void bdrTraceFootprint::unfoldPoints()
 
 			unfoldedCloud->shrinkToFit();
 			unfoldedCloud->setDisplay(pc.originalDisplay);
-			MainWindow::TheInstance()->addToDB(unfoldedCloud);
+			MainWindow::TheInstance()->addToDB_Build(unfoldedCloud);
 
 			++exportedClouds;
 		}
@@ -2299,10 +2299,10 @@ void bdrTraceFootprint::exportFootprints()
 				section.isInDB = true;
 				m_dest_obj->addChild(duplicatePoly);
 				if (m_trace_image) {
-					mainWin->addToDB(duplicatePoly, false, false, CC_TYPES::DB_IMAGE);
+					mainWin->addToDB_Image(duplicatePoly, false, false);
 				}
 				else {
-					mainWin->addToDB(duplicatePoly, false, false, CC_TYPES::DB_BUILDING);
+					mainWin->addToDB_Build(duplicatePoly, false, false,);
 				}
 				
 			}
@@ -2393,7 +2393,7 @@ void bdrTraceFootprint::exportFootprintInside()
 				
 				section.isInDB = true;
 				m_dest_obj->addChild(duplicatePoly);
-				mainWin->addToDB(duplicatePoly, false, false);
+				mainWin->addToDB_Build(duplicatePoly, false, false);
 			}
 		}
 	}
@@ -2481,7 +2481,7 @@ void bdrTraceFootprint::exportFootprintOutside()
 
 				section.isInDB = true;
 				m_dest_obj->addChild(duplicatePoly);
-				mainWin->addToDB(duplicatePoly, false, false);
+				mainWin->addToDB_Build(duplicatePoly, false, false);
 			}
 		}
 	}

@@ -120,7 +120,7 @@ void ccPlaneEditDlg::saveParamsAndAccept()
 		}
 		if (MainWindow::TheInstance())
 		{
-			MainWindow::TheInstance()->addToDB(plane);
+			MainWindow::TheInstance()->addToDB(plane, MainWindow::TheInstance()->getCurrentDB());
 		}
 		else
 		{

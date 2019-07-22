@@ -462,7 +462,7 @@ void ccClippingBoxTool::exportSlice()
 			result->prepareDisplayForRefresh();
 			if (obj->getParent())
 				obj->getParent()->addChild(result);
-			MainWindow::TheInstance()->addToDB(result);
+			MainWindow::TheInstance()->addToDB(result, s_dbSource);
 		}
 	}
 }
@@ -1170,7 +1170,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		{
 			sliceGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());
 		}
-		MainWindow::TheInstance()->addToDB(sliceGroup);
+		MainWindow::TheInstance()->addToDB(sliceGroup, s_dbSource);
 	}
 	else if (!singleContourMode)
 	{
@@ -1191,7 +1191,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		{
 			contourGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());
 		}
-		MainWindow::TheInstance()->addToDB(contourGroup);
+		MainWindow::TheInstance()->addToDB(contourGroup, s_dbSource);
 
 		s_lastContourUniqueIDs.clear();
 		s_lastContourUniqueIDs.push_back(contourGroup->getUniqueID());

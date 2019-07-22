@@ -284,7 +284,7 @@ void bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 		to_add->setDisplay(m_glWindow);
 		cam->addChild(to_add);
 		MainWindow* win = MainWindow::TheInstance(); assert(win);
-		win->addToDB(to_add, true, false, true, true, CC_TYPES::DB_IMAGE);
+		win->addToDB_Image(to_add, true, false, true, true);
 	}
 }
 

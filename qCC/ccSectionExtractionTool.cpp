@@ -73,6 +73,9 @@ static unsigned s_cloudExportGroupID = 0;
 //default arrow size
 static const PointCoordinateType s_defaultArrowSize = 20;
 
+// database
+static CC_TYPES::DB_SOURCE s_dbSource;
+
 ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	: ccOverlayDialog(parent)
 	, m_UI( new Ui::SectionExtractionDlg )
@@ -706,6 +709,9 @@ bool ccSectionExtractionTool::addCloud(ccGenericPointCloud* inputCloud, bool alr
 	}
 
 	m_clouds.push_back(Cloud(inputCloud, alreadyInDB));
+
+	s_dbSource = inputCloud->getDBSourceType();
+
 	if (m_associatedWin)
 	{
 		inputCloud->setDisplay(m_associatedWin);
@@ -1093,7 +1099,7 @@ void ccSectionExtractionTool::generateOrthoSections()
 				destEntity->addChild(m_selectedPoly->entity);
 				m_selectedPoly->isInDB = true;
 				m_selectedPoly->entity->setDisplay_recursive(destEntity->getDisplay());
-				MainWindow::TheInstance()->addToDB(m_selectedPoly->entity, false, false);
+				MainWindow::TheInstance()->addToDB(m_selectedPoly->entity, s_dbSource, false, false);
 			}
 			//and remove
 			deleteSelectedPolyline();
@@ -1227,7 +1233,7 @@ ccHObject* ccSectionExtractionTool::getExportGroup(unsigned& defaultGroupID, con
 				break;
 			}
 		}
-		mainWin->addToDB(destEntity);
+		mainWin->addToDB(destEntity, s_dbSource);
 		defaultGroupID = destEntity->getUniqueID();
 	}
 	return destEntity;
@@ -1267,7 +1273,7 @@ void ccSectionExtractionTool::exportSections()
 			destEntity->addChild(section.entity);
 			section.isInDB = true;
 			section.entity->setDisplay_recursive(destEntity->getDisplay());
-			mainWin->addToDB(section.entity, false, false);
+			mainWin->addToDB(section.entity, s_dbSource, false, false);
 		}
 	}
 
@@ -1408,7 +1414,7 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 			//add to main DB
 			destEntity->addChild(contourPart);
 			contourPart->setDisplay_recursive(destEntity->getDisplay());
-			MainWindow::TheInstance()->addToDB(contourPart, false, false);
+			MainWindow::TheInstance()->addToDB(contourPart, s_dbSource, false, false);
 		}
 
 		contourGenerated = true;
@@ -1492,7 +1498,7 @@ bool ccSectionExtractionTool::extractSectionCloud(const std::vector<CCLib::Refer
 
 		//add to main DB
 		destEntity->addChild(sectionCloud);
-		MainWindow::TheInstance()->addToDB(sectionCloud, false, false);
+		MainWindow::TheInstance()->addToDB(sectionCloud, s_dbSource, false, false);
 
 		cloudGenerated = true;
 	}
@@ -1750,7 +1756,7 @@ void ccSectionExtractionTool::unfoldPoints()
 
 			unfoldedCloud->shrinkToFit();
 			unfoldedCloud->setDisplay(pc.originalDisplay);
-			MainWindow::TheInstance()->addToDB(unfoldedCloud);
+			MainWindow::TheInstance()->addToDB(unfoldedCloud, s_dbSource);
 
 			++exportedClouds;
 		}
@@ -2231,7 +2237,7 @@ void ccSectionExtractionTool::exportFootprintInside()
 				
 				section.isInDB = true;
 				m_dest_obj->addChild(duplicatePoly);
-				mainWin->addToDB(duplicatePoly, false, false);
+				mainWin->addToDB(duplicatePoly, s_dbSource, false, false);
 			}
 		}
 	}
@@ -2316,7 +2322,7 @@ void ccSectionExtractionTool::exportFootprintOutside()
 
 				section.isInDB = true;
 				m_dest_obj->addChild(duplicatePoly);
-				mainWin->addToDB(duplicatePoly, false, false);
+				mainWin->addToDB(duplicatePoly, s_dbSource, false, false);
 			}
 		}
 	}

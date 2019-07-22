@@ -128,23 +128,33 @@ public:
 	//! Returns the number of 3D views
 	int getGLWindowCount() const;
 
+	CC_TYPES::DB_SOURCE getCurrentDB();
+
 	//! Tries to load several files (and then pushes them into main DB)
 	/** \param filenames list of all filenames
 		\param fileFilter selected file filter (i.e. type)
 		\param destWin destination window (0 = active one)
 	**/	
-	virtual std::vector<ccHObject*> addToDB( const QStringList& filenames,
+	virtual std::vector<ccHObject*> addToDB( const QStringList& filenames, 
+						  CC_TYPES::DB_SOURCE dest,
 						  QString fileFilter = QString(),
-						  ccGLWindow* destWin = nullptr, 
-						  CC_TYPES::DB_SOURCE dest = CC_TYPES::DB_BUILDING);
+						  ccGLWindow* destWin = nullptr);
 	
 	//inherited from ccMainAppInterface
 	void addToDB( ccHObject* obj,
+				  CC_TYPES::DB_SOURCE dest,
 				  bool updateZoom = false,
 				  bool autoExpandDBTree = true,
 				  bool checkDimensions = false,
-				  bool autoRedraw = true,
-				  CC_TYPES::DB_SOURCE dest = CC_TYPES::DB_BUILDING) override;
+				  bool autoRedraw = true ) override;
+
+	virtual std::vector<ccHObject*> addToDB_Main(const QStringList& filenames, QString fileFilter = QString(), ccGLWindow* destWin = nullptr) {	return addToDB(filenames, CC_TYPES::DB_MAINDB); }
+	virtual std::vector<ccHObject*> addToDB_Build(const QStringList& filenames,	QString fileFilter = QString(),	ccGLWindow* destWin = nullptr) { return addToDB(filenames, CC_TYPES::DB_BUILDING); }
+	virtual std::vector<ccHObject*> addToDB_Image(const QStringList& filenames,	QString fileFilter = QString(), ccGLWindow* destWin = nullptr) { return addToDB(filenames, CC_TYPES::DB_IMAGE);	}
+
+	void addToDB_Main(ccHObject* obj, bool updateZoom = false, bool autoExpandDBTree = true, bool checkDimensions = false, bool autoRedraw = true) { addToDB(obj, CC_TYPES::DB_MAINDB);	}
+	void addToDB_Build(ccHObject* obj, bool updateZoom = false, bool autoExpandDBTree = true, bool checkDimensions = false, bool autoRedraw = true) { addToDB(obj, CC_TYPES::DB_BUILDING); }
+	void addToDB_Image(ccHObject* obj, bool updateZoom = false, bool autoExpandDBTree = true, bool checkDimensions = false, bool autoRedraw = true) { addToDB(obj, CC_TYPES::DB_IMAGE); }
 	
 	void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
 	void unregisterOverlayDialog(ccOverlayDialog* dlg) override;

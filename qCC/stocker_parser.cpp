@@ -402,7 +402,7 @@ StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name) {
 	StPrimGroup* group = new StPrimGroup(building_name + BDDB_PRIMITIVE_SUFFIX);
 	if (group) {
 		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
 	return nullptr;
@@ -413,7 +413,7 @@ StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name) {
 	StBlockGroup* group = new StBlockGroup(building_name + BDDB_BLOCKGROUP_SUFFIX);
 	if (group) { 
 		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
 	return nullptr;
@@ -424,7 +424,7 @@ StPrimGroup * BDBaseHObject::GetHypothesisGroup(QString building_name) {
 	StPrimGroup* group = new StPrimGroup(building_name + BDDB_POLYFITHYPO_SUFFIX);
 	if (group) {
 		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
 	return nullptr;
@@ -437,7 +437,7 @@ ccHObject * BDBaseHObject::GetTodoGroup(QString building_name)
 	if (group) {
 		group->setDisplay(getDisplay());
 		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
 	return nullptr;
@@ -460,7 +460,7 @@ ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name)
 		todo_group->addChild(todo_point);
 		MainWindow* win = MainWindow::TheInstance();
 		assert(win);
-		win->addToDB(todo_point, false, false);
+		win->addToDB(todo_point, this->getDBSourceType(), false, false);
 		return todo_point;
 	}
 	return nullptr;
@@ -482,7 +482,7 @@ ccPointCloud * BDBaseHObject::GetTodoLine(QString buildig_name)
 		todo_group->addChild(todo_point);
 		MainWindow* win = MainWindow::TheInstance();
 		assert(win);
-		win->addToDB(todo_point, false, false);
+		win->addToDB(todo_point, this->getDBSourceType(), false, false);
 		return todo_point;
 	}
 	return nullptr;
@@ -675,7 +675,7 @@ void AddSegmentsToVertices(ccPointCloud* cloud, stocker::Polyline3d lines, QStri
 
 		cc_polyline->setClosed(false);
 		cloud->addChild(cc_polyline);
-		win->addToDB(cc_polyline, false, false);
+		win->addToDB(cc_polyline, cloud->getDBSourceType(), false, false);
 	}
 }
 
@@ -1150,7 +1150,7 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 	int index_new = parent->getChildIndex(newCloud);
 	parent->swapChildren(index_old, index_new);
 	MainWindow* win = MainWindow::TheInstance();
-	win->addToDB(newCloud);
+	win->addToDB(newCloud, planeObj->getDBSourceType());
 
 	win->removeFromDB(cloud);
 
@@ -1159,7 +1159,7 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 		contours_points_remained.pop_back();
 	} while (contours_points_remained.size() > 1);
 	ccHObject* outlines_add = AddOutlinesAsChild(contours_points_remained, BDDB_OUTLINE_PREFIX, newCloud);
-	win->addToDB(outlines_add);
+	win->addToDB(outlines_add, planeObj->getDBSourceType());
 	
 #endif // USE_STOCKER
 }
@@ -2633,12 +2633,12 @@ void SubstituteFootPrintContour(StFootPrint* footptObj, stocker::Contour3d point
 	footptObj->initWith(vertices, *footptObj);
 	footptObj->addPointIndex(0);
 	footptObj->setClosed(true);
-	win->addToDB(vertices, false, false);
+	win->addToDB(vertices, footptObj->getDBSourceType(), false, false);
 
 	if (existing_cloud) {
-		win->db_building()->unselectAllEntities();
-		win->db_building()->selectEntity(existing_cloud);
-		win->db_building()->deleteSelectedEntities();
+		win->db(footptObj->getDBSourceType())->unselectAllEntities();
+		win->db(footptObj->getDBSourceType())->selectEntity(existing_cloud);
+		win->db(footptObj->getDBSourceType())->deleteSelectedEntities();
 	}
 }
 

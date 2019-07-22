@@ -1647,6 +1647,21 @@ ccColorScalesManager* MainWindow::getColorScalesManager()
 
 // DB
 
+CC_TYPES::DB_SOURCE MainWindow::getCurrentDB()
+{
+	CC_TYPES::DB_SOURCE tp;
+	if (m_UI->ProjectTabWidget->currentIndex() == 0) {
+		tp = CC_TYPES::DB_MAINDB;
+	}
+	else if (m_UI->ProjectTabWidget->currentIndex() == 1) {
+		tp = CC_TYPES::DB_BUILDING;
+	}
+	else if (m_UI->ProjectTabWidget->currentIndex() == 2) {
+		tp = CC_TYPES::DB_IMAGE;
+	}
+	return tp;
+}
+
 void MainWindow::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
 {
 	if (!obj)
@@ -1663,21 +1678,23 @@ void MainWindow::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
 
 void MainWindow::setSelectedInDB(ccHObject* obj, bool selected)
 {
-	if (obj && m_ccRoot)
+
+	ccDBRoot* root = obj ? db(obj->getDBSourceType()) : nullptr;
+	if (root)
 	{
 		if (selected)
-			m_ccRoot->selectEntity(obj);
+			root->selectEntity(obj);
 		else
-			m_ccRoot->unselectEntity(obj);
+			root->unselectEntity(obj);
 	}
 }
 
 void MainWindow::addToDB(ccHObject* obj,
+	CC_TYPES::DB_SOURCE dest,
 	bool updateZoom/*=true*/,
 	bool autoExpandDBTree/*=true*/,
 	bool checkDimensions/*=true*/,
-	bool autoRedraw/*=true*/,
-	CC_TYPES::DB_SOURCE dest)
+	bool autoRedraw/*=true*/)
 {
 	//let's check that the new entity is not too big nor too far from scene center!
 	if (checkDimensions)
@@ -1737,19 +1754,8 @@ void MainWindow::addToDB(ccHObject* obj,
 	}
 
 	//add object to DB root
-	ccDBRoot* root = nullptr;
+	ccDBRoot* root = db(dest);
 
-	switch (dest)
-	{
-	case CC_TYPES::DB_BUILDING:
-		root = m_ccRoot;
-		break;
-	case CC_TYPES::DB_IMAGE:
-		root = m_imageRoot;
-		break;
-	default:
-		break;
-	}
 	if (/*m_ccRoot*/root)
 	{
 		//force a 'global zoom' if the DB was emtpy!
@@ -1792,13 +1798,8 @@ void MainWindow::addToDB(ccHObject* obj,
 void MainWindow::addToDBAuto(const QStringList& filenames)
 {
 	ccGLWindow* win = qobject_cast<ccGLWindow*>(QObject::sender());
-	ccHObject::Container loaded;
-	if (m_UI->ProjectTabWidget->currentIndex() == 0) {
-		loaded = addToDB(filenames, QString(), win, CC_TYPES::DB_BUILDING);
-	}
-	else if (m_UI->ProjectTabWidget->currentIndex() == 1) {
-		loaded = addToDB(filenames, QString(), win, CC_TYPES::DB_IMAGE);
-	}
+	ccHObject::Container loaded = addToDB(filenames, getCurrentDB(), QString(), win);
+	
 	for (ccHObject* obj : loaded) {
 		ccHObject::Container pcs;
 		if (obj->isGroup()) {
@@ -1834,8 +1835,9 @@ void MainWindow::addToDBAuto(const QStringList& filenames)
 }
 
 std::vector<ccHObject*> MainWindow::addToDB(const QStringList& filenames,
+	CC_TYPES::DB_SOURCE dest,
 	QString fileFilter/*=QString()*/,
-	ccGLWindow* destWin/*=0*/, CC_TYPES::DB_SOURCE dest)
+	ccGLWindow* destWin/*=0*/)
 {
 	ccHObject::Container loads;
 	//to use the same 'global shift' for multiple files
@@ -1882,7 +1884,7 @@ std::vector<ccHObject*> MainWindow::addToDB(const QStringList& filenames,
 			{
 				newGroup->setDisplay_recursive(destWin);
 			}
-			addToDB(newGroup, true, true, false, dest);
+			addToDB(newGroup, dest, true, true, false);
 			loads.push_back(newGroup);
 
 			m_recentFiles->addFilePath(filename);
@@ -1947,14 +1949,17 @@ void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext&
 	//ineffective!
 	obj->notifyGeometryUpdate();
 
-	m_ccRoot->addElement(obj, false);
+	ccDBRoot* root = db(obj->getDBSourceType());
+	if (root) {
+		root->addElement(obj, false);
+	}
 }
 
 void MainWindow::handleNewLabel(ccHObject* entity)
 {
 	if (entity)
 	{
-		addToDB(entity);
+		addToDB(entity, getCurrentDB()); // TODO
 	}
 	else
 	{
@@ -2878,7 +2883,7 @@ void MainWindow::doActionLoadFile()
 	}
 
 	//load files
-	addToDB(selectedFiles, currentOpenDlgFilter);
+	addToDB(selectedFiles, getCurrentDB(), currentOpenDlgFilter);
 }
 
 //Helper: check for a filename validity
@@ -3447,7 +3452,7 @@ void MainWindow::doActionComputeKdTree()
 		kdtree->convertCellIndexToRandomColor();
 #endif
 
-		addToDB(kdtree);
+		addToDB(kdtree, cloud->getDBSourceType());
 
 		refreshAll();
 		updateUI();
@@ -3531,7 +3536,7 @@ void MainWindow::doActionResampleWithOctree()
 
 				if (newCloud)
 				{
-					addToDB(newCloud);
+					addToDB(newCloud, cloud->getDBSourceType());
 					newCloud->setDisplay(cloud->getDisplay());
 					newCloud->prepareDisplayForRefresh();
 				}
@@ -3644,7 +3649,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 		if (mesh)
 		{
 			cloud->setVisible(false); //can't disable the cloud as the resulting mesh will be its child!
-			cloud->addChild(mesh);
+			cloud->addChild(mesh, cloud->getDBSourceType());
 			cloud->prepareDisplayForRefresh_recursive();
 			addToDB(mesh);
 			if (i == 0)
@@ -3705,7 +3710,7 @@ void MainWindow::doMeshTwoPolylines()
 	ccMesh* mesh = ccMesh::TriangulateTwoPolylines(p1, p2, useViewingDir ? &viewingDir : 0);
 	if (mesh)
 	{
-		addToDB(mesh);
+		addToDB(mesh, p1->getDBSourceType());
 		if (mesh->computePerVertexNormals())
 		{
 			mesh->showNormals(true);
@@ -3765,7 +3770,7 @@ void MainWindow::doActionMeshScanGrids()
 				cloud->addChild(gridMesh);
 				cloud->setVisible(false); //hide the cloud
 				gridMesh->setDisplay(cloud->getDisplay());
-				addToDB(gridMesh, false, true, false, false);
+				addToDB(gridMesh, cloud->getDBSourceType(), false, true, false, false);
 				gridMesh->prepareDisplayForRefresh();
 			}
 		}
@@ -3831,7 +3836,7 @@ void MainWindow::doActionSamplePointsOnMesh()
 
 		if (cloud)
 		{
-			addToDB(cloud);
+			addToDB(cloud, entity->getDBSourceType());
 		}
 		else
 		{
@@ -3920,7 +3925,7 @@ void MainWindow::doActionSubdivideMesh()
 					subdividedMesh->setDisplay(mesh->getDisplay());
 					mesh->redrawDisplay();
 					mesh->setEnabled(false);
-					addToDB(subdividedMesh);
+					addToDB(subdividedMesh, entity->getDBSourceType());
 				}
 				else
 				{
@@ -4140,7 +4145,7 @@ void MainWindow::doActionSamplePointsOnPolyline()
 
 		if (cloud)
 		{
-			addToDB(cloud);
+			addToDB(cloud, entity->getDBSourceType());
 		}
 		else
 		{
@@ -4484,7 +4489,7 @@ void MainWindow::doActionCreateGBLSensor()
 					win->updateConstellationCenterAndZoom(&box);
 				}
 
-				addToDB(sensor);
+				addToDB(sensor, entity->getDBSourceType());
 			}
 			else
 			{
@@ -4557,7 +4562,7 @@ void MainWindow::doActionCreateCameraSensor()
 		}
 	}
 
-	addToDB(sensor);
+	addToDB(sensor, ent ? ent->getDBSourceType() ? getCurrentDB());
 
 	updateUI();
 }
@@ -5202,7 +5207,7 @@ void MainWindow::doActionFilterByValue()
 				ent->setEnabled(false);
 				resultInside->setDisplay(ent->getDisplay());
 				resultInside->prepareDisplayForRefresh();
-				addToDB(resultInside);
+				addToDB(resultInside, ent->getDBSourceType());
 
 				results.push_back(resultInside);
 			}
@@ -5212,7 +5217,7 @@ void MainWindow::doActionFilterByValue()
 				resultOutside->setDisplay(ent->getDisplay());
 				resultOutside->prepareDisplayForRefresh();
 				resultOutside->setName(resultOutside->getName() + ".outside");
-				addToDB(resultOutside);
+				addToDB(resultOutside, ent->getDBSourceType());
 
 				results.push_back(resultOutside);
 			}
@@ -5501,7 +5506,7 @@ void MainWindow::doActionClone()
 			//copy display
 			clone->setDisplay(entity->getDisplay());
 
-			addToDB(clone);
+			addToDB(clone, entity->getDBSourceType());
 			lastClone = clone;
 		}
 	}
@@ -5742,7 +5747,7 @@ void MainWindow::doActionMerge()
 
 		baseMesh->setDisplay_recursive(meshes.front()->getDisplay());
 		baseMesh->setVisible(true);
-		addToDB(baseMesh);
+		addToDB(baseMesh, meshes.front()->getDBSourceType());
 
 		if (m_ccRoot)
 			m_ccRoot->selectEntity(baseMesh);
@@ -6145,7 +6150,7 @@ void MainWindow::doActionCrop()
 				if (entity->getParent())
 					entity->getParent()->addChild(croppedEnt);
 				entity->setEnabled(false);
-				addToDB(croppedEnt);
+				addToDB(croppedEnt, entity->getDBSourceType());
 				//select output entity
 				m_ccRoot->selectEntity(croppedEnt, true);
 				successes = true;
@@ -6419,7 +6424,7 @@ void MainWindow::doActionSubsample()
 				addToDB(newPointCloud);
 
 				newPointCloud->prepareDisplayForRefresh();
-				resultingClouds.push_back(newPointCloud);
+				resultingClouds.push_back(newPointCloud, cloud->getDBSourceType());
 
 				if (warnings)
 				{
@@ -6617,7 +6622,7 @@ void MainWindow::doActionSORFilter()
 					cleanCloud->setDisplay(cloud->getDisplay());
 					if (cloud->getParent())
 						cloud->getParent()->addChild(cleanCloud);
-					addToDB(cleanCloud);
+					addToDB(cleanCloud, cloud->getDBSourceType());
 
 					cloud->setEnabled(false);
 					if (firstCloud)
@@ -6738,7 +6743,7 @@ void MainWindow::doActionFilterNoise()
 					cleanCloud->setDisplay(cloud->getDisplay());
 					if (cloud->getParent())
 						cloud->getParent()->addChild(cleanCloud);
-					addToDB(cleanCloud);
+					addToDB(cleanCloud, cloud->getDBSourceType());
 
 					cloud->setEnabled(false);
 					if (firstCloud)
@@ -6872,7 +6877,7 @@ void MainWindow::doActionUnroll()
 		{
 			pc->getParent()->addChild(output);
 		}
-		addToDB(output, true, true, false, true);
+		addToDB(output, pc->getDBSourceType() true, true, false, true);
 
 		updateUI();
 	}
@@ -7084,7 +7089,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		mesh->addChild(vertices);
 		mesh->setVisible(true);
 		vertices->setEnabled(false);
-		addToDB(mesh);
+		addToDB(mesh, polylines.front()->getDBSourceType());
 		if (mesh->computePerVertexNormals())
 		{
 			mesh->showNormals(true);
@@ -7263,7 +7268,7 @@ void MainWindow::doActionRegister()
 					if (newMesh)
 					{
 						newMesh->setDisplay(data->getDisplay());
-						addToDB(newMesh);
+						addToDB(newMesh, data->getDBSourceType());
 						data = newMesh;
 						pc = newMesh->getAssociatedCloud();
 					}
@@ -7490,7 +7495,7 @@ void MainWindow::doActionComputeCPS()
 		newCloud->setName(QString("[%1]->CPSet(%2)").arg(srcCloud->getName(), compCloud->getName()));
 		newCloud->setDisplay(compCloud->getDisplay());
 		newCloud->prepareDisplayForRefresh();
-		addToDB(newCloud);
+		addToDB(newCloud, compCloud->getDBSourceType());
 
 		//we hide the source cloud (for a clearer display)
 		srcCloud->setEnabled(false);
@@ -7747,7 +7752,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		else
 		{
 			ccGroup->setDisplay(cloud->getDisplay());
-			addToDB(ccGroup);
+			addToDB(ccGroup, cloud->getDBSourceType());
 
 			ccConsole::Print(QString("[createComponentsClouds] %1 component(s) were created from cloud '%2'").arg(ccGroup->getChildrenNumber()).arg(cloud->getName()));
 		}
@@ -7958,7 +7963,7 @@ void MainWindow::doActionFitSphere()
 		cloud->addChild(sphere);
 		//sphere->setDisplay(cloud->getDisplay());
 		sphere->prepareDisplayForRefresh();
-		addToDB(sphere, false, false, false);
+		addToDB(sphere, entity->getDBSourceType(), false, false, false);
 	}
 
 	refreshAll();
@@ -8092,7 +8097,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 				entity->addChild(plane);
 				plane->setDisplay(entity->getDisplay());
 				plane->prepareDisplayForRefresh_recursive();
-				addToDB(plane);
+				addToDB(plane, entity->getDBSourceType());
 
 				if (firstEntity)
 				{
@@ -8131,7 +8136,7 @@ void MainWindow::doActionFitQuadric()
 				quadric->setName(QString("Quadric (%1)").arg(cloud->getName()));
 				quadric->setDisplay(cloud->getDisplay());
 				quadric->prepareDisplayForRefresh();
-				addToDB(quadric);
+				addToDB(quadric, cloud->getDBSourceType());
 
 				ccConsole::Print(QString("[doActionFitQuadric] Quadric local coordinate system:"));
 				ccConsole::Print(quadric->getTransformation().toString(12, ' ')); //full precision
@@ -8532,7 +8537,7 @@ void MainWindow::doRemoveDuplicatePoints()
 						filteredCloud->setName(QString("%1.clean").arg(cloud->getName()));
 						filteredCloud->setDisplay(cloud->getDisplay());
 						filteredCloud->prepareDisplayForRefresh();
-						addToDB(filteredCloud);
+						addToDB(filteredCloud, cloud->getDBSourceType());
 						if (first)
 						{
 							m_ccRoot->unselectAllEntities();
@@ -8742,7 +8747,7 @@ void MainWindow::doActionComputeDistanceMap()
 				gridCloud->setDisplay(entity->getDisplay());
 				gridCloud->shrinkToFit();
 				entity->prepareDisplayForRefresh();
-				addToDB(gridCloud);
+				addToDB(gridCloud, entity->getDBSourceType());
 			}
 		}
 	}
@@ -8847,7 +8852,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 				newCloud->setDisplay(cloud->getDisplay());
 				newCloud->prepareDisplayForRefresh();
 
-				addToDB(newCloud);
+				addToDB(newCloud, cloud->getDBSourceType());
 			}
 			else
 			{
@@ -8998,7 +9003,7 @@ void MainWindow::doAction4pcsRegister()
 		newDataCloud->setDisplay(data->getDisplay());
 		newDataCloud->prepareDisplayForRefresh();
 		zoomOn(newDataCloud);
-		addToDB(newDataCloud);
+		addToDB(newDataCloud, data->getDBSourceType());
 
 		data->setEnabled(false);
 		data->prepareDisplayForRefresh_recursive();
@@ -9218,7 +9223,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 	cloud->setCurrentDisplayedScalarField(sfIdx);
 	cloud->showSF(true);
 
-	addToDB(cloud);
+	addToDB(cloud, getCurrentDB());
 
 	refreshAll();
 	updateUI();
@@ -9252,7 +9257,7 @@ void MainWindow::doActionFindBiggestInnerRectangle()
 		box->setVisible(true);
 		box->setDisplay(cloud->getDisplay());
 		box->setDisplay(cloud->getDisplay());
-		addToDB(box);
+		addToDB(box, cloud->getDBSourceType());
 	}
 
 	updateUI();
@@ -9303,7 +9308,7 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 		centers->resize(centers->size());
 		centers->setPointSize(10);
 		centers->setVisible(true);
-		addToDB(centers);
+		addToDB(centers, getSelectedEntities().front()->getDBSourceType());
 	}
 }
 
@@ -9484,7 +9489,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					ccHObject* group = new ccHObject(QString("Best case #%1 / #%2 - RMS = %3").arg(i + 1).arg(j + 1).arg(minRMS));
 					group->addChild(bestB);
 					group->setDisplay_recursive(A->getDisplay());
-					addToDB(group);
+					addToDB(group, A->getDBSourceType());
 					ccLog::Print(QString("[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: min RMS = %3 (phi = %4 / theta = %5 deg.)").arg(i + 1).arg(j + 1).arg(minRMS).arg(matrixAngles[bestMatrixIndex].first).arg(matrixAngles[bestMatrixIndex].second));
 				}
 				else
@@ -9707,7 +9712,7 @@ void MainWindow::doActionSaveViewportAsCamera()
 	viewportObject->setParameters(win->getViewportParameters());
 	viewportObject->setDisplay(win);
 
-	addToDB(viewportObject);
+	addToDB_Main(viewportObject);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -10660,7 +10665,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 									if (new_plane) { 
 										new_plane->setDisplay_recursive(getActiveGLWindow());
 										SetGlobalShiftAndScale(new_plane);
-										addToDB(new_plane);
+										addToDB(new_plane, entity->getDBSourceType());
 									}
 								}
 								break;
@@ -10684,7 +10689,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 									if (new_plane) { 
 										new_plane->setDisplay_recursive(getActiveGLWindow());
 										SetGlobalShiftAndScale(new_plane);
-										addToDB(new_plane); 
+										addToDB(new_plane, entity->getDBSourceType());
 									}
 								}
 								break;
@@ -10705,7 +10710,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							if (segment_cloud) {
 								segment_cloud->setRGBColor(segment_cloud->hasColors() ? segment_cloud->getPointColor(0) : ccColor::Generator::Random());
 								ccHObject* new_plane = FitPlaneAndAddChild(segment_cloud);
-								if (new_plane) addToDB(new_plane, false, false);
+								if (new_plane) addToDB(new_plane, segment_cloud->getDBSourceType(), false, false);
 							}
 						}						
 						if (entity->isKindOf(CC_TYPES::MESH) && segmentationResult->isKindOf(CC_TYPES::MESH))
@@ -10751,7 +10756,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					segmentationResult->prepareDisplayForRefresh_recursive();
 					SetGlobalShiftAndScale(segmentationResult);
 
-					addToDB(segmentationResult, false, false);
+					addToDB(segmentationResult, entity->getDBSourceType(), false, false);
 
 					if (!firstResult)
 					{
@@ -11680,7 +11685,7 @@ void MainWindow::doActionBDProjectLoad()
 		bd_grp->global_shift = stocker::parse_xyz(first_cloud->getGlobalShift());
 		bd_grp->global_scale = first_cloud->getGlobalScale();
 
-		addToDB(bd_grp);
+		addToDB_Build(bd_grp);
 	}
 	else {
 		dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
@@ -11870,7 +11875,7 @@ void MainWindow::doActionBDImagesLoad()
 	}
 	//newGroup->transferChildren(*bd_grp);
 		
-	addToDB(bd_grp, false, false, false, true, CC_TYPES::DB_IMAGE);
+	addToDB_Image(bd_grp, false, false, false, true);
 
 	if (baseObj && hackObj) {
 		delete hackObj;
@@ -11968,7 +11973,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 				todo_point
 			);
 			if (seged) {
-				addToDB(seged, false, false);
+				addToDB(seged, entity->getDBSourceType(), false, false);
 				cloudObj->setEnabled(false);
 			}
 //#pragma omp critical
@@ -11991,7 +11996,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 				growing_radius,
 				merge_threshold, split_threshold);
 			if (seged) {
-				addToDB(seged, false, false);
+				addToDB(seged, entity->getDBSourceType(), false, false);
 				cloudObj->setEnabled(false);
 			}
 //#pragma omp critical
@@ -12085,7 +12090,7 @@ void MainWindow::doActionBDImageLines()
 	QStringList files;
 	QString file_path = QString(output_dir.c_str()) + QString(output_name.c_str());
 	files.append(file_path);
-	addToDB(files);
+	addToDB_Build(files);
 }
 
 void MainWindow::doActionBDPrimIntersections()
@@ -12149,7 +12154,7 @@ void MainWindow::doActionBDPrimIntersections()
 		ccHObject::Container segs = CalcPlaneIntersections(building_prims[i], distance);
 		for (auto & seg : segs) {
 			SetGlobalShiftAndScale(seg);
-			addToDB(seg, false, false);
+			addToDB(seg, building_prims[i].front()->getDBSourceType(), false, false);
 		}
 		ProgStep()
 	}
@@ -12249,7 +12254,7 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 					cur_plane_sharps.push_back(sharps_in_bbox[index]);
 				}
 				ccHObject* cur_sharps_obj = AddSegmentsAsChildVertices(planeObj->getParent(), cur_plane_sharps, BDDB_IMAGELINE_PREFIX, ccColor::orange);
-				if (cur_sharps_obj) { SetGlobalShiftAndScale(cur_sharps_obj); addToDB(cur_sharps_obj); }
+				if (cur_sharps_obj) { SetGlobalShiftAndScale(cur_sharps_obj); addToDB(cur_sharps_obj, planeObj->getDBSourceType()); }
 			}
 			for (size_t i = 0; i < sharps_in_bbox.size(); i++) {
 				if (assigned_index.find(i) == assigned_index.end()) {
@@ -12314,7 +12319,7 @@ void MainWindow::doActionBDPrimPlaneFromSharp()
 		prim_group->addChild(plane_cloud);
 	}
 	if (prim_group) {
-		addToDB(prim_group);
+		addToDB(prim_group, baseObj->getDBSourceType());
 	}
 
 // 	stocker::Polyline3d remained_unassigned;
@@ -12371,7 +12376,7 @@ void MainWindow::doActionBDPrimBoundary()
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 			return;
 		}
-		if (boundary) { SetGlobalShiftAndScale(boundary); addToDB(boundary, false, false); }
+		if (boundary) { SetGlobalShiftAndScale(boundary); addToDB(boundary, planeObj->getDBSourceType(), false, false); }
 		ProgStep()
 	}
 	ProgEnd
@@ -12399,7 +12404,7 @@ void MainWindow::doActionBDPrimOutline()
 	for (auto & planeObj : plane_container) {
 		try	{
 			ccHObject* outline = CalcPlaneOutlines(planeObj, alpha);
-			if (outline) { SetGlobalShiftAndScale(outline); addToDB(outline, false, false); }
+			if (outline) { SetGlobalShiftAndScale(outline); addToDB(outline, planeObj->getDBSourceType(), false, false); }
 		}
 		catch (const std::runtime_error& e)	{
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
@@ -12444,7 +12449,7 @@ void MainWindow::doActionBDPrimPlaneFrame()
 					return;
 				}
 				ccHObject* frame = PlaneFrameLineGrow(planeObj, alpha, intersection, minpts);
-				if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame, false, false); }
+				if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame, planeObj->getDBSourceType(), false, false); }
 			}
 			else if (used_method == "optimization") {
 				//! dialog
@@ -12461,7 +12466,7 @@ void MainWindow::doActionBDPrimPlaneFrame()
 				option.bdransac_radius = 3;
 
 				ccHObject* frame = PlaneFrameOptimization(planeObj, option);
-				if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame, false, false); }
+				if (frame) { SetGlobalShiftAndScale(frame); addToDB(frame, planeObj->getDBSourceType(), false, false); }
 			}
 		}
 		catch (const std::runtime_error& e)	{
@@ -12516,7 +12521,7 @@ void MainWindow::doActionBDPrimMergePlane()
 	int biggest = GetMaxNumberExcludeChildPrefix(prim_group, BDDB_PLANESEG_PREFIX);
 	point_cloud->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
 	
-	addToDB(point_cloud, false, false);
+	addToDB(point_cloud, m_selectedEntities[0]->getDBSourceType(), false, false);
 	refreshAll();
 	UpdateUI();
 }
@@ -12661,7 +12666,7 @@ void MainWindow::doActionBDPrimCreateGround()
 			plane->setDisplay(plane_cloud->getDisplay());
 			plane->prepareDisplayForRefresh_recursive();
 		}
-		addToDB(plane_cloud, false, false);
+		addToDB(plane_cloud, entity->getDBSourceType(), false, false);
 		ProgStep()
 	}	
 	ProgEnd
@@ -12984,7 +12989,7 @@ void MainWindow::doActionBDPlaneDeduction()
 
 		AddSegmentsAsChildVertices(plane_cloud, sharp_lines, "ImageSharp", col);		
 	}
-	addToDB(group);
+	addToDB(group, point_cloud->getDBSourceType());
 	refreshAll();
 }
 
@@ -13044,7 +13049,7 @@ void MainWindow::doActionBDPlaneCreate()
 	SetGlobalShiftAndScale(plane_cloud);
 	plane_cloud->setDisplay_recursive(prim_group->getDisplay());
 	prim_group->addChild(plane_cloud);	
-	addToDB(plane_cloud, false, false);
+	addToDB(plane_cloud, prim_group->getDBSourceType(), false, false);
 	refreshAll();
 }
 
@@ -13123,7 +13128,7 @@ void MainWindow::doActionBDPolyFit()
 
 	QStringList files;
 	files.append("result.ply.obj");
-	addToDB(files);
+	addToDB(files, entity->getDBSourceType());
 	refreshAll();
 	UpdateUI();
 }
@@ -13195,7 +13200,7 @@ void MainWindow::doActionBDPolyFitHypothesis()
 		polyfit_obj->status = PolyFitObj::STT_hypomesh;
 		polyfit_obj->building_name = GetBaseName(primitiveObj->getName()).toStdString();
 		SetGlobalShiftAndScale(hypoObj);
-		addToDB(hypoObj);
+		addToDB(hypoObj, entity->getDBSourceType());
 	}
 	else {
 		polyfit_obj->status = PolyFitObj::STT_prepared;
@@ -13324,7 +13329,7 @@ void MainWindow::doActionBDPolyFitSelection()
 		ccHObject* optmizeObj = PolyfitFaceSelection(HypoObj, polyfit_obj);
 		if (optmizeObj)	{
 			polyfit_obj->status = PolyFitObj::STT_optimized;
-			addToDB(optmizeObj);
+			addToDB(optmizeObj, baseObj->getDBSourceType());
 			std::string file_path;
 			if (polyfit_obj->OutputResultToObjFile(baseObj, file_path)) {
 				QString model_file(file_path.c_str());
@@ -13350,7 +13355,7 @@ void MainWindow::doActionBDPolyFitSelection()
 					HypoObj->getParent()->addChild(model);
 					HypoObj->setEnabled(false);
 					//SetGlobalShiftAndScale(model);
-					addToDB(model);
+					addToDB(model, baseObj->getDBSourceType());
 				}
 			}
 		}
@@ -13461,7 +13466,7 @@ void MainWindow::doActionBDFootPrintAuto()
 				if (ft && ft->isA(CC_TYPES::ST_FOOTPRINT)) {
 					SetGlobalShiftAndScale(ft);
 					ft->setDisplay_recursive(entity->getDisplay());
-					addToDB(ft, false, false);
+					addToDB(ft, baseObj->getDBSourceType(), false, false);
 				}
 			}
 		}
@@ -13681,7 +13686,7 @@ void MainWindow::doActionBDLoD1Generation()
 			if (bd_model_obj) {
 				SetGlobalShiftAndScale(bd_model_obj);
 				bd_model_obj->setDisplay_recursive(entity->getDisplay());
-				addToDB(bd_model_obj, true, false);
+				addToDB(bd_model_obj, entity->getDBSourceType(), true, false);
 			}
 		}
 		catch (std::runtime_error& e) {
@@ -13743,7 +13748,7 @@ void MainWindow::doActionBDLoD2Generation()
 			if (bd_model_obj) {
 				SetGlobalShiftAndScale(bd_model_obj);
 				bd_model_obj->setDisplay_recursive(bd_entity->getDisplay());
-				addToDB(bd_model_obj);
+				addToDB(bd_model_obj, baseObj->getDBSourceType());
 			}
 		}
 		catch (const std::exception& e) {
@@ -13893,7 +13898,7 @@ void MainWindow::doActionBDConstrainedMesh()
 		try	{
 			ccHObject* mesh = ConstrainedMesh(planeObj);
 			if (mesh) {
-				addToDB(mesh);
+				addToDB(mesh, planeObj->getDBSourceType());
 				refreshAll();
 				UpdateUI();
 			}

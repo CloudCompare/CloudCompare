@@ -45,6 +45,8 @@
 //System
 #include <assert.h>
 
+static CC_TYPES::DB_SOURCE s_dbSource;
+
 ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	: ccOverlayDialog(parent)
 	, Ui::GraphicalSegmentationDlg()
@@ -372,6 +374,10 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 		//automatically add entity's children
 		for (unsigned i=0;i<entity->getChildrenNumber();++i)
 			result |= addEntity(entity->getChild(i));
+	}
+
+	if (result && getNumberOfValidEntities() == 1) {
+		s_dbSource = entity->getDBSourceType();
 	}
 
 	return result;
@@ -971,7 +977,7 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 		viewportObject->setDisplay(m_associatedWin);
 		poly->addChild(viewportObject);
 
-		mainWindow->addToDB(poly, false, false, false);
+		mainWindow->addToDB(poly, s_dbSource, false, false, false);
 		ccLog::Print(QString("[Segmentation] Polyline exported (%1 vertices)").arg(poly->size()));
 	}
 }

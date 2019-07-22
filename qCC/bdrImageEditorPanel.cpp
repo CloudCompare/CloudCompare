@@ -200,7 +200,7 @@ ccHObject* bdrImageEditorPanel::getTraceBlock(QString image_name)
 		if (!dest) {
 			StBlockGroup* group = new StBlockGroup(cam->getName() + BDDB_BLOCKGROUP_SUFFIX);
 			if (group) {
-				MainWindow::TheInstance()->addToDB(group, false, false, false, true, CC_TYPES::DB_IMAGE);
+				MainWindow::TheInstance()->addToDB_Image(group, false, false, false, true);
 				cam->addChild(group);
 				dest = group;
 			}

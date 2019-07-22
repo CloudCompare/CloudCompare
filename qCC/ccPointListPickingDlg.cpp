@@ -246,7 +246,7 @@ void ccPointListPickingDlg::exportToNewCloud()
 			{
 				assert(false);
 			}
-			MainWindow::TheInstance()->addToDB(cloud);
+			MainWindow::TheInstance()->addToDB(cloud, m_associatedEntity->getDBSourceType());
 		}
 		else
 		{
@@ -305,7 +305,7 @@ void ccPointListPickingDlg::exportToNewPolyline()
 		polyline->addChild(vertices);
 		polyline->setDisplay_recursive(m_associatedEntity->getDisplay());
 
-		MainWindow::TheInstance()->addToDB(polyline);
+		MainWindow::TheInstance()->addToDB(polyline, m_associatedEntity->getDBSourceType());
 	}
 	else
 	{
@@ -609,11 +609,11 @@ void ccPointListPickingDlg::processPickedPoint(const PickedItem& picked)
 		m_orderedLabelsContainer = new ccHObject(s_pickedPointContainerName);
 		m_associatedEntity->addChild(m_orderedLabelsContainer);
 		m_orderedLabelsContainer->setDisplay(display);
-		MainWindow::TheInstance()->addToDB(m_orderedLabelsContainer, false, true, false, false);
+		MainWindow::TheInstance()->addToDB(m_orderedLabelsContainer, m_associatedEntity->getDBSourceType(), false, true, false, false);
 	}
 	assert(m_orderedLabelsContainer);
 	m_orderedLabelsContainer->addChild(newLabel);
-	MainWindow::TheInstance()->addToDB(newLabel, false, true, false, false);
+	MainWindow::TheInstance()->addToDB(newLabel, m_associatedEntity->getDBSourceType(), false, true, false, false);
 	m_toBeAdded.push_back(newLabel);
 
 	//automatically send the new point coordinates to the clipboard

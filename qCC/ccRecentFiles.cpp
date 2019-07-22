@@ -110,7 +110,7 @@ void ccRecentFiles::openFileFromAction()
 	
 	QStringList	fileListOfOne{ fileName };
 	
-	MainWindow::TheInstance()->addToDB( fileListOfOne );
+	MainWindow::TheInstance()->addToDB(fileListOfOne, MainWindow::TheInstance()->getCurrentDB());
 }
 
 QStringList ccRecentFiles::listRecent()

@@ -87,11 +87,11 @@ public:
 		\param autoRedraw whether to redraw the 3D view automatically or not (warning: if 'updateZoom' is true, the 3D view will always be redrawn)
 	**/
 	virtual void addToDB(	ccHObject* obj,
+							CC_TYPES::DB_SOURCE dest,
 							bool updateZoom = false,
 							bool autoExpandDBTree = true,
 							bool checkDimensions = false,
-							bool autoRedraw = true, 
-							CC_TYPES::DB_SOURCE dest = CC_TYPES::DB_MAINDB) = 0;
+							bool autoRedraw = true) = 0;
 
 	//! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.

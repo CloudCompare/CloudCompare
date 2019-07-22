@@ -195,6 +195,8 @@ static QFileDialog::Options CCFileDialogOptions()
 MainWindow::MainWindow()
 	: m_UI(new Ui::MainWindow)
 	, m_ccRoot(nullptr)
+	, m_buildingRoot(nullptr)
+	, m_imageRoot(nullptr)
 	, m_uiFrozen(false)
 	, m_recentFiles(new ccRecentFiles(this))
 	, m_3DMouseManager(nullptr)
@@ -231,8 +233,7 @@ MainWindow::MainWindow()
 	, m_pbdrpfDlg(nullptr)
 	, m_pbdr3d4emDlg(nullptr)
 	, m_pbdrffDlg(nullptr)
-	, m_pbdrImshow(nullptr)
-	, m_imageRoot(nullptr)
+	, m_pbdrImshow(nullptr)	
 	, m_pbdrImagePanel(nullptr)
 	, polyfit_obj(nullptr)
 {
@@ -316,14 +317,24 @@ MainWindow::MainWindow()
 	tabifyDockWidget(m_UI->DockableProperties, m_UI->DockableImage);
 	m_UI->DockableProperties->raise();
 
-	//db-tree
+	//db-main-tree
 	{
-		m_ccRoot = new ccDBRoot(m_UI->dbTreeView, m_UI->propertiesTreeView, this);
+		m_ccRoot = new ccDBRoot(m_UI->dbMainTreeView, m_UI->propertiesTreeView_Main, this);
 		connect(m_ccRoot, &ccDBRoot::selectionChanged,    this, &MainWindow::updateUIWithSelection);
 		connect(m_ccRoot, &ccDBRoot::dbIsEmpty,           [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
 		connect(m_ccRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
-		connect(m_ccRoot, &ccDBRoot::itemClicked,		  [&]() { updateDBSelection(CC_TYPES::DB_BUILDING); });
+		connect(m_ccRoot, &ccDBRoot::itemClicked,		  [&]() { updateDBSelection(CC_TYPES::DB_MAINDB); });
 	}
+
+	//db-build-tree
+	{
+		m_buildingRoot = new ccDBRoot(m_UI->dbBuildTreeView, m_UI->propertiesTreeView_Build, this);
+		connect(m_buildingRoot, &ccDBRoot::selectionChanged,	this, &MainWindow::updateUIWithSelection);
+		connect(m_buildingRoot, &ccDBRoot::dbIsEmpty,			[&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+		connect(m_buildingRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+		connect(m_buildingRoot, &ccDBRoot::itemClicked,			[&]() { updateDBSelection(CC_TYPES::DB_BUILDING); });
+	}
+
 	//db-image-tree // XYLIU
 	{
 		m_imageRoot = new ccDBRoot(m_UI->dbImageTreeView, m_UI->propertiesTreeView_Image, this);
@@ -333,7 +344,8 @@ MainWindow::MainWindow()
 		connect(m_imageRoot, &ccDBRoot::itemClicked,			[&]() { updateDBSelection(CC_TYPES::DB_IMAGE); });
 	}
 	m_UI->ProjectTabWidget->setCurrentIndex(0);
-	m_UI->propertiesTreeView->setVisible(true);
+	m_UI->propertiesTreeView_Main->setVisible(true);
+	m_UI->propertiesTreeView_Build->setVisible(false);
 	m_UI->propertiesTreeView_Image->setVisible(false);
 
 	//MDI Area
@@ -445,13 +457,18 @@ MainWindow::~MainWindow()
 
 	cancelPreviousPickingOperation(false); //just in case
 
-	assert(m_ccRoot && m_mdiArea);
+	assert(m_ccRoot && m_mdiArea && m_buildingRoot && m_imageRoot);
 	m_ccRoot->disconnect();
+	m_buildingRoot->disconnect();
+	m_imageRoot->disconnect();
 	m_mdiArea->disconnect();
 
 	//we don't want any other dialog/function to use the following structures
 	ccDBRoot* ccRoot = m_ccRoot;
 	m_ccRoot = nullptr;
+
+	ccDBRoot* bdRoot = m_buildingRoot;
+	m_buildingRoot = nullptr;
 
 	ccDBRoot* imgRoot = m_imageRoot;
 	m_imageRoot = nullptr;
@@ -459,6 +476,7 @@ MainWindow::~MainWindow()
 	//remove all entities from 3D views before quitting to avoid any side-effect
 	//(this won't be done automatically since we've just reset m_ccRoot)
 	ccRoot->getRootEntity()->setDisplay_recursive(nullptr);
+	bdRoot->getRootEntity()->setDisplay_recursive(nullptr);
 	imgRoot->getRootEntity()->setDisplay_recursive(nullptr);
 	for (int i = 0; i < getGLWindowCount(); ++i)
 	{	
@@ -500,6 +518,11 @@ MainWindow::~MainWindow()
 	{
 		delete ccRoot;
 		ccRoot = nullptr;
+	}
+	if (bdRoot)
+	{
+		delete bdRoot;
+		bdRoot = nullptr;
 	}
 	if (imgRoot)
 	{
@@ -594,6 +617,8 @@ void MainWindow::destroyInputDevices()
 void MainWindow::connectActions()
 {
 	assert(m_ccRoot);
+	assert(m_buildingRoot);
+	assert(m_imageRoot);
 	assert(m_mdiArea);
 	
 	//Keyboard shortcuts
@@ -753,8 +778,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSubsample,					&QAction::triggered, this, &MainWindow::doActionSubsample);
 	connect(m_UI->actionMatchBBCenters,				&QAction::triggered, this, &MainWindow::doActionMatchBBCenters);
 	connect(m_UI->actionMatchScales,				&QAction::triggered, this, &MainWindow::doActionMatchScales);
-	connect(m_UI->actionDelete,						&QAction::triggered,	m_ccRoot,	&ccDBRoot::deleteSelectedEntities);
-	connect(m_UI->actionGotoNextZoom,				&QAction::triggered,	m_ccRoot,	&ccDBRoot::gotoNextZoom);
+	connect(m_UI->actionDelete,						&QAction::triggered, m_buildingRoot,	&ccDBRoot::deleteSelectedEntities);	// TODO
+	connect(m_UI->actionGotoNextZoom,				&QAction::triggered, m_buildingRoot,	&ccDBRoot::gotoNextZoom);
 
 	//"Tools > Clean" menu
 	connect(m_UI->actionSORFilter,					&QAction::triggered, this, &MainWindow::doActionSORFilter);
@@ -964,8 +989,9 @@ void MainWindow::connectActions()
 
 void MainWindow::doActionChangeTabTree(int index)
 {
- 	m_UI->propertiesTreeView->setVisible(index == 0);
- 	m_UI->propertiesTreeView_Image->setVisible(index == 1);
+	m_UI->propertiesTreeView_Main->setVisible(index == 0);
+ 	m_UI->propertiesTreeView_Build->setVisible(index == 1);
+ 	m_UI->propertiesTreeView_Image->setVisible(index == 2);
 }
 
 void MainWindow::updateDBSelection(CC_TYPES::DB_SOURCE type)
@@ -1093,7 +1119,7 @@ int MainWindow::getGLWindowCount() const
 
 void MainWindow::prepareWindowDeletion(QObject* glWindow)
 {
-	if (!m_ccRoot || !m_imageRoot)
+	if (!m_ccRoot || !m_imageRoot || !m_buildingRoot)
 		return;
 
 	//we assume only ccGLWindow can be connected to this slot!
@@ -1102,6 +1128,10 @@ void MainWindow::prepareWindowDeletion(QObject* glWindow)
 	m_ccRoot->hidePropertiesView();
 	m_ccRoot->getRootEntity()->removeFromDisplay_recursive(win);
 	m_ccRoot->updatePropertiesView();
+
+	m_buildingRoot->hidePropertiesView();
+	m_buildingRoot->getRootEntity()->removeFromDisplay_recursive(win);
+	m_buildingRoot->updatePropertiesView();
 
 	m_imageRoot->hidePropertiesView();
 	m_imageRoot->getRootEntity()->removeFromDisplay_recursive(win);
@@ -1154,7 +1184,9 @@ static bool s_autoSaveGuiElementPos = true;
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	// If we don't have anything displayed, then just close...
-	if (m_ccRoot && (m_ccRoot->getRootEntity()->getChildrenNumber() == 0))
+	if (m_ccRoot && (m_ccRoot->getRootEntity()->getChildrenNumber() == 0) &&
+		m_buildingRoot && (m_buildingRoot->getRootEntity()->getChildrenNumber() == 0) &&
+		m_imageRoot && (m_imageRoot->getRootEntity()->getChildrenNumber() == 0))
 	{
 		event->accept();
 	}
@@ -1569,6 +1601,22 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 	cancelPreviousPickingOperation(false);
 }
 
+void MainWindow::unselectAllInDB()
+{
+	if (m_ccRoot)
+	{
+		m_ccRoot->unselectAllEntities(); //we don't want any entity selected (especially existing labels!)
+	}
+	if (m_buildingRoot)
+	{
+		m_buildingRoot->unselectAllEntities(); //we don't want any entity selected (especially existing labels!)
+	}
+	if (m_imageRoot)
+	{
+		m_imageRoot->unselectAllEntities(); //we don't want any entity selected (especially existing labels!)
+	}
+}
+
 ccDBRoot * MainWindow::db(CC_TYPES::DB_SOURCE tp)
 {
 	switch (tp)
@@ -1591,7 +1639,8 @@ ccDBRoot * MainWindow::db(CC_TYPES::DB_SOURCE tp)
 ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=0*/, QString inviteMessage/*=QString()*/)
 {
 	ccHObject::Container clouds;
-	m_ccRoot->getRootEntity()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
+	ccDBRoot* root = db(getCurrentDB());
+	root->getRootEntity()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
 	if (clouds.empty())
 	{
 		ccConsole::Error("No cloud in database!");
@@ -1696,6 +1745,8 @@ void MainWindow::addToDB(ccHObject* obj,
 	bool checkDimensions/*=true*/,
 	bool autoRedraw/*=true*/)
 {
+	obj->setDBSourceType(dest);
+
 	//let's check that the new entity is not too big nor too far from scene center!
 	if (checkDimensions)
 	{
@@ -1901,9 +1952,10 @@ std::vector<ccHObject*> MainWindow::addToDB(const QStringList& filenames,
 	return loads;
 }
 
-ccHObject* MainWindow::dbRootObject()
+ccHObject* MainWindow::dbRootObject(CC_TYPES::DB_SOURCE rt)
 {
-	return (m_ccRoot ? m_ccRoot->getRootEntity() : nullptr);
+	ccDBRoot* root = db(rt);
+	return (root ? root->getRootEntity() : nullptr);
 }
 
 MainWindow::ccHObjectContext MainWindow::removeObjectTemporarilyFromDBTree(ccHObject* obj)
@@ -1911,7 +1963,8 @@ MainWindow::ccHObjectContext MainWindow::removeObjectTemporarilyFromDBTree(ccHOb
 	ccHObjectContext context;
 
 	assert(obj);
-	if (!m_ccRoot || !obj)
+	ccDBRoot* root = db(obj->getDBSourceType());
+	if (!root || !obj)
 		return context;
 
 	//mandatory (to call putObjectBackIntoDBTree)
@@ -1927,7 +1980,7 @@ MainWindow::ccHObjectContext MainWindow::removeObjectTemporarilyFromDBTree(ccHOb
 		obj->removeDependencyWith(context.parent);
 	}
 
-	m_ccRoot->removeElement(obj);
+	root->removeElement(obj);
 
 	return context;
 }
@@ -1935,7 +1988,7 @@ MainWindow::ccHObjectContext MainWindow::removeObjectTemporarilyFromDBTree(ccHOb
 void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context)
 {
 	assert(obj);
-	if (!obj || !m_ccRoot)
+	if (!obj || (!m_ccRoot && !m_buildingRoot && !m_imageRoot))
 		return;
 
 	if (context.parent)
@@ -1980,7 +2033,11 @@ void MainWindow::forceConsoleDisplay()
 ccHObject* MainWindow::askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultCloudEntity/*=0*/, QString inviteMessage/*=QString()*/)
 {
 	ccHObject::Container entites;
-	m_ccRoot->getRootEntity()->filterChildren(entites, true, type, true);
+	ccDBRoot* root = db(getCurrentDB());
+	if (root) {
+		root->getRootEntity()->filterChildren(entites, true, type, true);
+	}
+	
 	if (entites.empty()) {
 		ccConsole::Error("No data in database!");
 		return 0;
@@ -2128,8 +2185,10 @@ void MainWindow::updateMenus()
 	bool hasMdiChild = (active3DView != nullptr);
 	int mdiChildCount = getGLWindowCount();
 	bool hasLoadedEntities = (m_ccRoot && m_ccRoot->getRootEntity() && m_ccRoot->getRootEntity()->getChildrenNumber() != 0) ||
+		(m_buildingRoot && m_buildingRoot->getRootEntity() && m_buildingRoot->getRootEntity()->getChildrenNumber() != 0) ||
 		(m_imageRoot && m_imageRoot->getRootEntity() && m_imageRoot->getRootEntity()->getChildrenNumber() != 0);
 	bool hasSelectedEntities = (m_ccRoot && m_ccRoot->countSelectedEntities() > 0) ||
+		(m_buildingRoot && m_buildingRoot->countSelectedEntities() > 0) ||
 		(m_imageRoot && m_imageRoot->countSelectedEntities() > 0);
 
 	//General Menu
@@ -2247,6 +2306,10 @@ void MainWindow::updatePropertiesView()
 	{
 		m_ccRoot->updatePropertiesView();
 	}
+	if (m_buildingRoot)
+	{
+		m_buildingRoot->updatePropertiesView();
+	}
 	if (m_imageRoot)
 	{
 		m_imageRoot->updatePropertiesView();
@@ -2259,12 +2322,37 @@ void MainWindow::updateUIWithSelection()
 
 	m_selectedEntities.clear();
 
-	if (m_ccRoot /*&& m_UI->ProjectTabWidget->currentIndex() == 0*/)
+	if (m_ccRoot)
 	{
 		m_ccRoot->getSelectedEntities(m_selectedEntities, CC_TYPES::OBJECT, &selInfo);
 	}
+
+	ccHObject::Container sel_bd;
+	if (m_buildingRoot)
+	{
+		dbTreeSelectionInfo selInfo_img;
+		m_buildingRoot->getSelectedEntities(sel_bd, CC_TYPES::OBJECT, &selInfo_img);
+		m_selectedEntities.insert(m_selectedEntities.end(), sel_bd.begin(), sel_bd.end());
+
+		selInfo.selCount += selInfo_img.selCount;
+		selInfo.sfCount += selInfo_img.sfCount;
+		selInfo.colorCount += selInfo_img.colorCount;
+		selInfo.normalsCount += selInfo_img.normalsCount;
+		selInfo.groupCount += selInfo_img.groupCount;
+		selInfo.cloudCount += selInfo_img.cloudCount;
+		selInfo.octreeCount += selInfo_img.octreeCount;
+		selInfo.gridCound += selInfo_img.gridCound;
+		selInfo.meshCount += selInfo_img.meshCount;
+		selInfo.planeCount += selInfo_img.planeCount;
+		selInfo.polylineCount += selInfo_img.polylineCount;
+		selInfo.sensorCount += selInfo_img.sensorCount;
+		selInfo.gblSensorCount += selInfo_img.gblSensorCount;
+		selInfo.cameraSensorCount += selInfo_img.cameraSensorCount;
+		selInfo.kdTreeCount += selInfo_img.kdTreeCount;
+	}
+
 	ccHObject::Container sel_img;
-	if (m_imageRoot /*&& m_UI->ProjectTabWidget->currentIndex() == 1*/)
+	if (m_imageRoot)
 	{
 		dbTreeSelectionInfo selInfo_img;
 		m_imageRoot->getSelectedEntities(sel_img, CC_TYPES::OBJECT, &selInfo_img);
@@ -2286,8 +2374,16 @@ void MainWindow::updateUIWithSelection()
 		selInfo.cameraSensorCount += selInfo_img.cameraSensorCount;
 		selInfo.kdTreeCount += selInfo_img.kdTreeCount;
 	}
-	m_UI->propertiesTreeView->setVisible(m_UI->ProjectTabWidget->currentIndex() == 0);
-	m_UI->propertiesTreeView_Image->setVisible(m_UI->ProjectTabWidget->currentIndex() == 1);
+
+	if (m_UI->propertiesTreeView_Main->isVisible() != (m_UI->ProjectTabWidget->currentIndex() == 0)) {
+		m_UI->propertiesTreeView_Main->setVisible(m_UI->ProjectTabWidget->currentIndex() == 0);
+	}
+	if (m_UI->propertiesTreeView_Build->isVisible() != (m_UI->ProjectTabWidget->currentIndex() == 1)) {
+		m_UI->propertiesTreeView_Build->setVisible(m_UI->ProjectTabWidget->currentIndex() == 1);
+	}
+	if (m_UI->propertiesTreeView_Image->isVisible() != (m_UI->ProjectTabWidget->currentIndex() == 2)) {
+		m_UI->propertiesTreeView_Image->setVisible(m_UI->ProjectTabWidget->currentIndex() == 2);
+	}
 
 	enableUIItems(selInfo);
 	updateViewStateWithSelection();
@@ -2350,6 +2446,7 @@ void MainWindow::disableAllBut(ccGLWindow* win)
 void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 {
 	bool dbIsEmpty = (!m_ccRoot || !m_ccRoot->getRootEntity() || m_ccRoot->getRootEntity()->getChildrenNumber() == 0) &&
+		(!m_buildingRoot || !m_buildingRoot->getRootEntity() || m_buildingRoot->getRootEntity()->getChildrenNumber() == 0) &&
 		(!m_imageRoot || !m_imageRoot->getRootEntity() || m_imageRoot->getRootEntity()->getChildrenNumber() == 0);
 	bool atLeastOneEntity = (selInfo.selCount > 0);
 	bool atLeastOneCloud = (selInfo.cloudCount > 0);
@@ -3181,9 +3278,9 @@ void MainWindow::doActionSaveFile()
 			parameters,
 			selectedFilter);
 
-		if (result == CC_FERR_NO_ERROR && m_ccRoot)
+		if (result == CC_FERR_NO_ERROR)
 		{
-			m_ccRoot->unselectAllEntities();
+			unselectAllInDB();
 		}
 	}
 
@@ -3249,7 +3346,7 @@ void MainWindow::doShowPrimitiveFactory()
 
 void MainWindow::closeAll()
 {
-	if (!m_ccRoot || !m_imageRoot)
+	if (!m_ccRoot || !m_imageRoot || !m_buildingRoot)
 	{
 		return;
 	}
@@ -3266,6 +3363,7 @@ void MainWindow::closeAll()
 	}
 
 	m_ccRoot->unloadAll();
+	m_buildingRoot->unloadAll();
 	m_imageRoot->unloadAll();
 
 	redrawAll(false);
@@ -3654,7 +3752,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 			addToDB(mesh, cloud->getDBSourceType());
 			if (i == 0)
 			{
-				m_ccRoot->selectEntity(mesh); //auto-select first element
+				setSelectedInDB(mesh, true); //auto-select first element
 			}
 		}
 		else
@@ -5228,9 +5326,10 @@ void MainWindow::doActionFilterByValue()
 	if (!results.empty())
 	{
 		ccConsole::Warning("Previously selected entities (sources) have been hidden!");
-		if (m_ccRoot)
+		ccDBRoot* root = db(results.front()->getDBSourceType());
+		if (root)
 		{
-			m_ccRoot->selectEntities(results);
+			root->selectEntities(results);
 		}
 	}
 
@@ -5511,9 +5610,9 @@ void MainWindow::doActionClone()
 		}
 	}
 
-	if (lastClone && m_ccRoot)
+	if (lastClone)
 	{
-		m_ccRoot->selectEntity(lastClone);
+		setSelectedInDB(lastClone, true);
 	}
 
 	updateUI();
@@ -5607,12 +5706,8 @@ void MainWindow::doActionMerge()
 	if (!clouds.empty())
 	{
 		//we deselect all selected entities (as most of them are going to disappear)
-		if (m_ccRoot)
-		{
-			m_ccRoot->unselectAllEntities();
-			assert(!haveSelection());
-			//m_selectedEntities.clear();
-		}
+		unselectAllInDB();
+		assert(!haveSelection());
 
 		//we will remove the useless clouds/meshes later
 		ccHObject::Container toBeRemoved;
@@ -5703,9 +5798,10 @@ void MainWindow::doActionMerge()
 		//something to remove?
 		while (!toBeRemoved.empty())
 		{
-			if (toBeRemoved.back() && m_ccRoot)
+			if (toBeRemoved.back())
 			{
-				m_ccRoot->removeElement(toBeRemoved.back());
+				ccDBRoot* root = db(toBeRemoved.back()->getDBSourceType());
+				if (root) root->removeElement(toBeRemoved.back());
 			}
 			toBeRemoved.pop_back();
 		}
@@ -5714,8 +5810,7 @@ void MainWindow::doActionMerge()
 		if (firstCloud)
 		{
 			putObjectBackIntoDBTree(firstCloud, firstCloudContext);
-			if (m_ccRoot)
-				m_ccRoot->selectEntity(firstCloud);
+			setSelectedInDB(firstCloud, true);
 		}
 	}
 	//merge meshes?
@@ -5748,9 +5843,7 @@ void MainWindow::doActionMerge()
 		baseMesh->setDisplay_recursive(meshes.front()->getDisplay());
 		baseMesh->setVisible(true);
 		addToDB(baseMesh, meshes.front()->getDBSourceType());
-
-		if (m_ccRoot)
-			m_ccRoot->selectEntity(baseMesh);
+		setSelectedInDB(baseMesh, true);
 	}
 
 	refreshAll();
@@ -5769,6 +5862,9 @@ void MainWindow::doActionApplyTransformation()
 
 void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 {
+	if (!haveSelection()) {
+		return;
+	}
 	//if the transformation is partly converted to global shift/scale
 	bool updateGlobalShiftAndScale = false;
 	double scaleChange = 1.0;
@@ -5918,8 +6014,8 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 	}
 
 	//reselect previously selected entities!
-	if (m_ccRoot)
-		m_ccRoot->selectEntities(selectedEntities);
+	ccDBRoot* root = db(selectedEntities.front());
+	if (root) root->selectEntities(selectedEntities);
 
 	ccLog::Print("[ApplyTransformation] Applied transformation matrix:");
 	ccLog::Print(transMat.toString(12, ' ')); //full precision
@@ -5931,6 +6027,9 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 typedef std::pair<ccHObject*, ccGenericPointCloud*> EntityCloudAssociation;
 void MainWindow::doActionApplyScale()
 {
+	if (!haveSelection()) {
+		return;
+	}
 	ccScaleDlg dlg(this);
 	if (!dlg.exec())
 		return;
@@ -6076,8 +6175,8 @@ void MainWindow::doActionApplyScale()
 	}
 
 	//reselect previously selected entities!
-	if (m_ccRoot)
-		m_ccRoot->selectEntities(selectedEntities);
+	ccDBRoot* root = db(selectedEntities.front());
+	if (root) root->selectEntities(selectedEntities);
 
 	if (!keepInPlace)
 		zoomOnSelectedEntities();
@@ -6123,14 +6222,7 @@ void MainWindow::doActionCrop()
 	}
 
 	//deselect all entities
-	if (m_ccRoot)
-	{
-		m_ccRoot->unselectAllEntities();
-	}
-	if (m_imageRoot)
-	{
-		m_imageRoot->unselectAllEntities();
-	}
+	unselectAllInDB();
 
 	//cropping box
 	ccBBox box = bbeDlg.getBox();
@@ -6152,7 +6244,7 @@ void MainWindow::doActionCrop()
 				entity->setEnabled(false);
 				addToDB(croppedEnt, entity->getDBSourceType());
 				//select output entity
-				m_ccRoot->selectEntity(croppedEnt, true);
+				db(croppedEnt)->selectEntity(croppedEnt, true);
 				successes = true;
 			}
 			else
@@ -6447,8 +6539,10 @@ void MainWindow::doActionSubsample()
 		}
 	}
 
-	if (m_ccRoot)
-		m_ccRoot->selectEntities(resultingClouds);
+	if (!resultingClouds.empty()) {
+		ccDBRoot* root = db(resultingClouds.front());
+		if (root) root->selectEntities(resultingClouds);
+	}
 
 	refreshAll();
 	updateUI();
@@ -6493,8 +6587,10 @@ void MainWindow::doActionMatchBBCenters()
 	}
 
 	//reselect previously selected entities!
-	if (m_ccRoot)
-		m_ccRoot->selectEntities(selectedEntities);
+	if (!selectedEntities.empty()) {
+		ccDBRoot* root = db(selectedEntities.front());
+		if (root) root->selectEntities(selectedEntities);
+	}
 
 	zoomOnSelectedEntities();
 
@@ -6555,8 +6651,10 @@ void MainWindow::doActionMatchScales()
 		this);
 
 	//reselect previously selected entities!
-	if (m_ccRoot)
-		m_ccRoot->selectEntities(selectedEntities);
+	if (!selectedEntities.empty()) {
+		ccDBRoot* root = db(selectedEntities.front());
+		if (root) root->selectEntities(selectedEntities);
+	}
 
 	refreshAll();
 	updateUI();
@@ -6629,7 +6727,7 @@ void MainWindow::doActionSORFilter()
 					{
 						ccConsole::Warning("Previously selected entities (sources) have been hidden!");
 						firstCloud = false;
-						m_ccRoot->selectEntity(cleanCloud, true);
+						db(cleanCloud)->selectEntity(cleanCloud, true);
 					}
 				}
 				else
@@ -6750,7 +6848,7 @@ void MainWindow::doActionFilterNoise()
 					{
 						ccConsole::Warning("Previously selected entities (sources) have been hidden!");
 						firstCloud = false;
-						m_ccRoot->selectEntity(cleanCloud, true);
+						db(cleanCloud)->selectEntity(cleanCloud, true);
 					}
 				}
 				else
@@ -7728,8 +7826,8 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 					//we add new CC to group
 					ccGroup->addChild(compCloud);
 
-					if (selectComponents && m_ccRoot)
-						m_ccRoot->selectEntity(compCloud, true);
+					if (selectComponents)
+						db(compCloud)->selectEntity(compCloud, true);
 				}
 				else
 				{
@@ -7799,10 +7897,7 @@ void MainWindow::doActionLabelConnectedComponents()
 
 	//we unselect all entities as we are going to automatically select the created components
 	//(otherwise the user won't perceive the change!)
-	if (m_ccRoot)
-	{
-		m_ccRoot->unselectAllEntities();
-	}
+	unselectAllInDB();
 
 	for (ccGenericPointCloud *cloud : clouds)
 	{
@@ -8101,8 +8196,8 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 
 				if (firstEntity)
 				{
-					m_ccRoot->unselectAllEntities();
-					m_ccRoot->selectEntity(plane);
+					unselectAllInDB();
+					setSelectedInDB(plane, true);
 				}
 			}
 			else
@@ -8540,11 +8635,11 @@ void MainWindow::doRemoveDuplicatePoints()
 						addToDB(filteredCloud, cloud->getDBSourceType());
 						if (first)
 						{
-							m_ccRoot->unselectAllEntities();
+							db(filteredCloud)->unselectAllEntities();
 							first = false;
 						}
 						cloud->setEnabled(false);
-						m_ccRoot->selectEntity(filteredCloud, true);
+						db(filteredCloud)->selectEntity(filteredCloud, true);
 					}
 				}
 			}
@@ -9613,8 +9708,7 @@ void MainWindow::doActionEnableBubbleViewMode()
 	//special case: the selected entity is a TLS sensor or a cloud with a TLS sensor
 	if (m_ccRoot)
 	{
-		ccHObject::Container selectedEntities;
-		m_ccRoot->getSelectedEntities(selectedEntities);
+		ccHObject::Container selectedEntities = getSelectedEntities();
 
 		if (selectedEntities.size() == 1)
 		{
@@ -9932,12 +10026,15 @@ ccGLWindow* MainWindow::new3DView(bool allowEntitySelection)
 	if (allowEntitySelection)
 	{
 		connect(view3D, &ccGLWindow::entitySelectionChanged, this, [=](ccHObject *entity) {
-			m_ccRoot->selectEntity(entity);
-			m_imageRoot->selectEntity(entity);
+			setSelectedInDB(entity, true);
+// 			m_ccRoot->selectEntity(entity);
+// 			m_buildingRoot->selectEntity(entity);
+// 			m_imageRoot->selectEntity(entity);
 		});
 
 		connect(view3D, &ccGLWindow::entitiesSelectionChanged, this, [=](std::unordered_set<int> entities) {
 			m_ccRoot->selectEntities(entities);
+			m_buildingRoot->selectEntities(entities);
 			m_imageRoot->selectEntities(entities);
 		});
 	}
@@ -9965,13 +10062,13 @@ ccGLWindow* MainWindow::new3DView(bool allowEntitySelection)
 	}
 	view3D->showCursorCoordinates(true);
 	view3D->addSceneDB(m_ccRoot->getRootEntity());
+	view3D->addSceneDB(m_buildingRoot->getRootEntity());
 	view3D->addSceneDB(m_imageRoot->getRootEntity());
 	viewWidget->setAttribute(Qt::WA_DeleteOnClose);
 	viewWidget->setWindowFlags(viewWidget->windowFlags()&~Qt::WindowCloseButtonHint);
 	viewWidget->setWindowFlags(viewWidget->windowFlags()&~Qt::WindowMinimizeButtonHint);
 	viewWidget->setWindowFlags(viewWidget->windowFlags()&~Qt::WindowMaximizeButtonHint);
-	m_ccRoot->updatePropertiesView();
-	m_imageRoot->updatePropertiesView();
+	updatePropertiesView();
 
 	QMainWindow::statusBar()->showMessage(QString("New 3D View"), 2000);
 
@@ -10249,12 +10346,12 @@ void MainWindow::deactivateComparisonMode(int result)
 	//m_compDlg = 0;
 
 	//if the comparison is a success, we select only the compared entity
-	if (m_compDlg && result == QDialog::Accepted && m_ccRoot)
+	if (m_compDlg && result == QDialog::Accepted)
 	{
 		ccHObject* compEntity = m_compDlg->getComparedEntity();
 		if (compEntity)
 		{
-			m_ccRoot->selectEntity(compEntity);
+			setSelectedInDB(compEntity, true);
 		}
 	}
 
@@ -10384,14 +10481,7 @@ void MainWindow::activateSectionExtractionMode()
 	}
 
 	//deselect all entities
-	if (m_ccRoot)
-	{
-		m_ccRoot->unselectAllEntities();
-	}
-	if (m_imageRoot)
-	{
-		m_imageRoot->unselectAllEntities();
-	}
+	unselectAllInDB();
 
 	ccGLWindow* win = new3DView(false);
 	if (!win)
@@ -10519,6 +10609,10 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					if (m_ccRoot)
 					{
 						m_ccRoot->getRootEntity()->filterChildren(labels,true,CC_TYPES::LABEL_2D);
+					}
+					if (m_buildingRoot)
+					{
+						m_buildingRoot->getRootEntity()->filterChildren(labels, true, CC_TYPES::LABEL_2D);
 					}
 					if (m_imageRoot)
 					{
@@ -10791,9 +10885,8 @@ void MainWindow::deactivateSegmentationMode(bool state)
 			}
 		}
 
-		if (firstResult && m_ccRoot)
-		{
-			m_ccRoot->selectEntity(firstResult);
+		if (firstResult) {
+			setSelectedInDB(firstResult, true);
 		}
 	}
 
@@ -10940,6 +11033,10 @@ void MainWindow::activatePointPickingMode()
 	{
 		m_ccRoot->unselectAllEntities(); //we don't want any entity selected (especially existing labels!)
 	}
+	if (m_buildingRoot)
+	{
+		m_buildingRoot->unselectAllEntities(); //we don't want any entity selected (especially existing labels!)
+	}
 	if (m_imageRoot)
 	{
 		m_imageRoot->unselectAllEntities(); //we don't want any entity selected (especially existing labels!)
@@ -11006,7 +11103,7 @@ void MainWindow::activateClippingBoxMode()
 		if (m_clipTool->addAssociatedEntity(entity))
 		{
 			//automatically deselect the entity (to avoid seeing its bounding box ;)
-			m_ccRoot->unselectEntity(entity);
+			unselectAllInDB();
 		}
 	}
 
@@ -11092,7 +11189,7 @@ void MainWindow::deactivateTranslateRotateMode(bool state)
 	if (m_transTool)
 	{
 		//reselect previously selected entities!
-		if (state && m_ccRoot && m_imageRoot)
+		if (state && m_ccRoot && m_buildingRoot && m_imageRoot)
 		{
 			const ccHObject& transformedSet = m_transTool->getValidEntities();
 			try
@@ -11104,6 +11201,7 @@ void MainWindow::deactivateTranslateRotateMode(bool state)
 					transformedEntities[i] = transformedSet.getChild(i);
 				}
 				m_ccRoot->selectEntities(transformedEntities);
+				m_buildingRoot->selectEntities(transformedEntities);
 				m_imageRoot->selectEntities(transformedEntities);
 			}
 			catch (const std::bad_alloc&)
@@ -11386,7 +11484,7 @@ void MainWindow::doActionBDDisplayPlaneOn()
 	if (haveSelection())
 		Root_Entity = m_selectedEntities.front();
 	else
-		Root_Entity = m_ccRoot->getRootEntity();
+		Root_Entity = db(getCurrentDB())->getRootEntity();
 
 	ccHObject::Container Objs;
 	Root_Entity->filterChildren(Objs, true, CC_TYPES::PLANE, true);
@@ -11408,7 +11506,7 @@ void MainWindow::doActionBDDisplayPlaneOff()
 	if (haveSelection())
 		Root_Entity = m_selectedEntities.front();
 	else
-		Root_Entity = m_ccRoot->getRootEntity();
+		Root_Entity = db(getCurrentDB())->getRootEntity();
 
 	ccHObject::Container Objs;
 	Root_Entity->filterChildren(Objs, true, CC_TYPES::PLANE, true);
@@ -11430,7 +11528,7 @@ void MainWindow::doActionBDDisplayPointOn()
 	if (haveSelection())
 		Root_Entity = m_selectedEntities.front();
 	else
-		Root_Entity = m_ccRoot->getRootEntity();
+		Root_Entity = db(getCurrentDB())->getRootEntity();
 
 	ccHObject::Container Objs;
 	Root_Entity->filterChildren(Objs, true, CC_TYPES::POINT_CLOUD, true);
@@ -11450,7 +11548,7 @@ void MainWindow::doActionBDDisplayPointOff()
 	if (haveSelection())
 		Root_Entity = m_selectedEntities.front();
 	else
-		Root_Entity = m_ccRoot->getRootEntity();
+		Root_Entity = db(getCurrentDB())->getRootEntity();
 
 	ccHObject::Container Objs;
 	Root_Entity->filterChildren(Objs, true, CC_TYPES::POINT_CLOUD, false);
@@ -11686,6 +11784,9 @@ void MainWindow::doActionBDProjectLoad()
 		bd_grp->global_scale = first_cloud->getGlobalScale();
 
 		addToDB_Build(bd_grp);
+
+		m_UI->ProjectTabWidget->setCurrentIndex(1);
+		m_UI->propertiesTreeView_Build->setVisible(true);
 	}
 	else {
 		dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
@@ -13547,10 +13648,7 @@ void MainWindow::doActionBDFootPrintManual()
 	}
 
 	//deselect all entities
-	if (m_ccRoot)
-	{
-		m_ccRoot->unselectAllEntities();
-	}
+	unselectAllInDB();
 
 	ccGLWindow* win = new3DView(false);
 	if (!win)
@@ -13941,7 +14039,7 @@ void MainWindow::doActionShowBestImage()
 	}
 	else {
 		//! TODO: mesh.. refer to graphical segmentation
- 		ccHObject::Container point_clouds = GetEnabledObjFromGroup(m_ccRoot->getRootEntity(), CC_TYPES::POINT_CLOUD, true, true);
+ 		ccHObject::Container point_clouds = GetEnabledObjFromGroup(dbRootObject(getCurrentDB()), CC_TYPES::POINT_CLOUD, true, true);
 		
  		for (ccHObject* pc : point_clouds) {
  			ccPointCloud* pcObj = ccHObjectCaster::ToPointCloud(pc);

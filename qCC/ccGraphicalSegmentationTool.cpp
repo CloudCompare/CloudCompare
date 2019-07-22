@@ -772,7 +772,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (mainWindow)
 	{
-		ccHObject* root = mainWindow->dbRootObject();
+		ccHObject* root = mainWindow->dbRootObject(s_dbSource);
 		ccHObject::Container polylines;
 		if (root)
 		{

@@ -1029,7 +1029,7 @@ void bdrTraceFootprint::doImportPolylinesFromDB()
 	if (!mainWindow)
 		return;
 
-	ccHObject* root = mainWindow->dbRootObject();
+	ccHObject* root = mainWindow->dbRootObject(mainWindow->getCurrentDB());
 	ccHObject::Container polylines;
 	if (root)
 	{
@@ -1258,7 +1258,7 @@ void bdrTraceFootprint::generateOrthoSections()
 ccHObject* bdrTraceFootprint::getExportGroup(unsigned& defaultGroupID, const QString& defaultName)
 {
 	MainWindow* mainWin = MainWindow::TheInstance();
-	ccHObject* root = mainWin ? mainWin->dbRootObject() : nullptr;
+	ccHObject* root = mainWin ? mainWin->dbRootObject(mainWin->getCurrentDB()) : nullptr;
 	if (!root)
 	{
 		ccLog::Warning("Internal error (no MainWindow or DB?!)");

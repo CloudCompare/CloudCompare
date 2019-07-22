@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>834</height>
+    <height>768</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -622,6 +622,74 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
+       <widget class="QWidget" name="Database">
+        <attribute name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/database.png</normaloff>:/CC/Stocker/images/stocker/database.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>Database</string>
+        </attribute>
+        <widget class="ccCustomQTreeView" name="dbMainTreeView">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>257</width>
+           <height>250</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>250</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(:/CC/images/QTreeView/vline.png) 0;
+}
+
+QTreeView::branch:has-siblings:adjoins-item {
+    border-image: url(:/CC/images/QTreeView/branch-more.png) 0;
+}
+
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(:/CC/images/QTreeView/branch-end.png) 0;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+        border-image: none;
+        image: url(:/CC/images/QTreeView/branch-closed.png);
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+        border-image: none;
+        image: url(:/CC/images/QTreeView/branch-open.png);
+}</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::InternalMove</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="uniformRowHeights">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </widget>
        <widget class="QWidget" name="Buildings">
         <attribute name="icon">
          <iconset resource="../icones.qrc">
@@ -632,7 +700,7 @@
         </attribute>
         <layout class="QVBoxLayout">
          <item>
-          <widget class="ccCustomQTreeView" name="dbTreeView">
+          <widget class="ccCustomQTreeView" name="dbBuildTreeView">
            <property name="minimumSize">
             <size>
              <width>150</width>
@@ -785,7 +853,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="minimumSize">
     <size>
      <width>109</width>
-     <height>210</height>
+     <height>100</height>
     </size>
    </property>
    <property name="floating">
@@ -803,7 +871,44 @@ QTreeView::branch:open:has-children:has-siblings  {
    <widget class="QWidget" name="dockWidgetContents_4">
     <layout class="QVBoxLayout">
      <item>
-      <widget class="QTreeView" name="propertiesTreeView">
+      <widget class="QTreeView" name="propertiesTreeView_Main">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="showDropIndicator" stdset="0">
+        <bool>false</bool>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::NoSelection</enum>
+       </property>
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
+       <property name="itemsExpandable">
+        <bool>false</bool>
+       </property>
+       <property name="allColumnsShowFocus">
+        <bool>true</bool>
+       </property>
+       <property name="expandsOnDoubleClick">
+        <bool>false</bool>
+       </property>
+       <attribute name="headerDefaultSectionSize">
+        <number>200</number>
+       </attribute>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTreeView" name="propertiesTreeView_Build">
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
@@ -889,7 +994,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="minimumSize">
     <size>
      <width>91</width>
-     <height>120</height>
+     <height>50</height>
     </size>
    </property>
    <property name="maximumSize">

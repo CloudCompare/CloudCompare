@@ -128,7 +128,7 @@ public:
 	//! Returns the number of 3D views
 	int getGLWindowCount() const;
 
-	CC_TYPES::DB_SOURCE getCurrentDB();
+	CC_TYPES::DB_SOURCE getCurrentDB() override;
 
 	//! Tries to load several files (and then pushes them into main DB)
 	/** \param filenames list of all filenames
@@ -160,10 +160,10 @@ public:
 	void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
 	void updateOverlayDialogsPlacement() override;
 	void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
-	void setSelectedInDB(ccHObject* obj, bool selected) override;
+	void setSelectedInDB(ccHObject* obj, bool selected) override;	
 	void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
 	void forceConsoleDisplay() override;
-	ccHObject* dbRootObject() override;
+	ccHObject* dbRootObject(CC_TYPES::DB_SOURCE rt) override;
 	inline  QMainWindow* getMainWindow() override { return this; }
 	inline  const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
 	void createGLWindow(ccGLWindow*& window, QWidget*& widget) const override;
@@ -179,9 +179,12 @@ public:
 	
 	//! Inherited from ccPickingListener
 	void onItemPicked(const PickedItem& pi) override;
+
+	void unselectAllInDB();
 	
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db(CC_TYPES::DB_SOURCE tp);
+	virtual ccDBRoot* db(ccHObject* obj) { return db(obj->getDBSourceType()); }
 	virtual ccDBRoot* db_main() { return m_ccRoot; }
 	virtual ccDBRoot* db_building() { return m_buildingRoot; }
 	virtual ccDBRoot* db_image() { return m_imageRoot; }

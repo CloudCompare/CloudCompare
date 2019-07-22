@@ -155,7 +155,9 @@ public:
 	virtual void forceConsoleDisplay() = 0;
 
 	//! Returns DB root (as a ccHObject)
-	virtual ccHObject* dbRootObject() = 0;
+	virtual ccHObject* dbRootObject(CC_TYPES::DB_SOURCE rt) = 0;
+
+	virtual CC_TYPES::DB_SOURCE getCurrentDB() = 0;
 
 	//! Forces redraw of all GL windows
 	/** \param only2D whether to redraw everything (false) or only the 2D layer (true)

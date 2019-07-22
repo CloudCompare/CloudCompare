@@ -983,7 +983,7 @@ void ccSectionExtractionTool::doImportPolylinesFromDB()
 	if (!mainWindow)
 		return;
 
-	ccHObject* root = mainWindow->dbRootObject();
+	ccHObject* root = mainWindow->dbRootObject(s_dbSource);
 	ccHObject::Container polylines;
 	if (root)
 	{
@@ -1212,7 +1212,7 @@ void ccSectionExtractionTool::generateOrthoSections()
 ccHObject* ccSectionExtractionTool::getExportGroup(unsigned& defaultGroupID, const QString& defaultName)
 {
 	MainWindow* mainWin = MainWindow::TheInstance();
-	ccHObject* root = mainWin ? mainWin->dbRootObject() : nullptr;
+	ccHObject* root = mainWin ? mainWin->dbRootObject(s_dbSource) : nullptr;
 	if (!root)
 	{
 		ccLog::Warning("Internal error (no MainWindow or DB?!)");

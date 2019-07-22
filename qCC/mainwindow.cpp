@@ -1872,15 +1872,6 @@ std::vector<ccHObject*> MainWindow::addToDB(const QStringList& filenames,
 	return loads;
 }
 
-ccDBRoot* MainWindow::db()
-{
-	return m_ccRoot;
-}
-ccDBRoot* MainWindow::db_image()
-{
-	return m_imageRoot;
-}
-
 ccHObject* MainWindow::dbRootObject()
 {
 	return (m_ccRoot ? m_ccRoot->getRootEntity() : nullptr);

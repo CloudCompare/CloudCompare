@@ -61,7 +61,6 @@ public: //base members access
 	/** \return class unique ID
 	**/
 	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::HIERARCHY_OBJECT; }
-	virtual DB_SOURCE getDBSourceType() const override { return CC_TYPES::DB_BUILDING; }
 
 	//! Returns whether the instance is a group
 	inline bool isGroup() const { return isA(CC_TYPES::HIERARCHY_OBJECT);/*getClassID() == static_cast<CC_CLASS_ENUM>(CC_TYPES::HIERARCHY_OBJECT);*/ }
@@ -536,7 +535,6 @@ public:
 
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::ST_PROJECT; }
-	virtual DB_SOURCE getDBSourceType() const override { return CC_TYPES::DB_BUILDING; }
 
 	ccHObject::Container GetHObjContainer(CC_CLASS_ENUM type, QString suffix, bool check_enable = false);
 	ccHObject* GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename = QString(), bool check_enable = false);

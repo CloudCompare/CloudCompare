@@ -80,7 +80,6 @@ enum CC_OBJECT_FLAG {	//CC_UNUSED			= 1, //DGM: not used anymore (former CC_FATH
 
 //! Type of object type flags (64 bits)
 using CC_CLASS_ENUM = int64_t;
-using DB_SOURCE = int;
 
 //! CloudCompare object type flags
 namespace CC_TYPES
@@ -157,8 +156,9 @@ namespace CC_TYPES
 		CUSTOM_LEAF_OBJECT	=	CUSTOM_H_OBJECT | CC_LEAF_BIT,
 	};
 
-	enum : DB_SOURCE
+	enum DB_SOURCE
 	{
+		DB_MAINDB,
 		DB_BUILDING,
 		DB_IMAGE,
 	};
@@ -211,8 +211,10 @@ public:
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const = 0;
 
-	//! Returns class ID
-	virtual DB_SOURCE getDBSourceType() const { return CC_TYPES::DB_BUILDING; }
+	//! Returns database
+	virtual CC_TYPES::DB_SOURCE getDBSourceType() const { return m_dbSource; }
+	//! set database
+	virtual inline void setDBSourceType(const CC_TYPES::DB_SOURCE tp) { m_dbSource = tp; }
 
 	//! Returns object name
 	virtual inline QString getName() const { return m_name; }
@@ -351,6 +353,8 @@ protected:
 
 	//! Associated meta-data
 	QVariantMap m_metaData;
+
+	CC_TYPES::DB_SOURCE m_dbSource;
 
 private:
 

@@ -171,8 +171,9 @@ public:
 	void onItemPicked(const PickedItem& pi) override;
 	
 	//! Returns real 'dbRoot' object
-	virtual ccDBRoot* db();
-	virtual ccDBRoot* db_image();
+	virtual ccDBRoot* db() { return m_ccRoot; }
+	virtual ccDBRoot* db_building() { return m_buildingRoot; }
+	virtual ccDBRoot* db_image() { return m_imageRoot; }
 
 	//! Adds the "Edit Plane" action to the given menu.
 	/**
@@ -642,7 +643,8 @@ private:
 	
 	//DB & DB Tree
 	ccDBRoot* m_ccRoot;
-
+	//Building DB Tree
+	ccDBRoot* m_buildingRoot;
 	//Image DB Tree
 	ccDBRoot* m_imageRoot;
 

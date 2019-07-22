@@ -2302,7 +2302,7 @@ void bdrTraceFootprint::exportFootprints()
 					mainWin->addToDB_Image(duplicatePoly, false, false);
 				}
 				else {
-					mainWin->addToDB_Build(duplicatePoly, false, false,);
+					mainWin->addToDB_Build(duplicatePoly, false, false);
 				}
 				
 			}

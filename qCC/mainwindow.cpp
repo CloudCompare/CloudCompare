@@ -3649,9 +3649,9 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 		if (mesh)
 		{
 			cloud->setVisible(false); //can't disable the cloud as the resulting mesh will be its child!
-			cloud->addChild(mesh, cloud->getDBSourceType());
+			cloud->addChild(mesh);
 			cloud->prepareDisplayForRefresh_recursive();
-			addToDB(mesh);
+			addToDB(mesh, cloud->getDBSourceType());
 			if (i == 0)
 			{
 				m_ccRoot->selectEntity(mesh); //auto-select first element
@@ -4562,7 +4562,7 @@ void MainWindow::doActionCreateCameraSensor()
 		}
 	}
 
-	addToDB(sensor, ent ? ent->getDBSourceType() ? getCurrentDB());
+	addToDB(sensor, ent ? ent->getDBSourceType() : getCurrentDB());
 
 	updateUI();
 }
@@ -6421,10 +6421,10 @@ void MainWindow::doActionSubsample()
 				if (cloud->getParent())
 					cloud->getParent()->addChild(newPointCloud);
 				cloud->setEnabled(false);
-				addToDB(newPointCloud);
+				addToDB(newPointCloud, cloud->getDBSourceType());
 
 				newPointCloud->prepareDisplayForRefresh();
-				resultingClouds.push_back(newPointCloud, cloud->getDBSourceType());
+				resultingClouds.push_back(newPointCloud);
 
 				if (warnings)
 				{
@@ -6877,7 +6877,7 @@ void MainWindow::doActionUnroll()
 		{
 			pc->getParent()->addChild(output);
 		}
-		addToDB(output, pc->getDBSourceType() true, true, false, true);
+		addToDB(output, pc->getDBSourceType(), true, true, false, true);
 
 		updateUI();
 	}

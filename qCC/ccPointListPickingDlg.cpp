@@ -172,7 +172,7 @@ void ccPointListPickingDlg::linkWithEntity(ccHObject* entity)
 
 void ccPointListPickingDlg::cancelAndExit()
 {
-	ccDBRoot* dbRoot = MainWindow::TheInstance()->db();
+	ccDBRoot* dbRoot = MainWindow::TheInstance()->db(m_associatedEntity->getDBSourceType());
 	if (!dbRoot)
 	{
 		assert(false);
@@ -318,7 +318,7 @@ void ccPointListPickingDlg::applyAndExit()
 	if (m_associatedEntity && !m_toBeDeleted.empty())
 	{
 		//apply modifications
-		MainWindow::TheInstance()->db()->removeElements(m_toBeDeleted); //no need to redraw as they should already be invisible
+		MainWindow::TheInstance()->db(m_associatedEntity->getDBSourceType())->removeElements(m_toBeDeleted); //no need to redraw as they should already be invisible
 		m_associatedEntity = nullptr;
 	}
 
@@ -365,7 +365,7 @@ void ccPointListPickingDlg::removeLastEntry()
 				lastVisibleLabel->removeDependencyWith(lastVisibleLabel->getParent());
 			}
 			//m_orderedLabelsContainer->removeChild(lastVisibleLabel);
-			MainWindow::TheInstance()->db()->removeElement(lastVisibleLabel);
+			MainWindow::TheInstance()->db(m_associatedEntity->getDBSourceType())->removeElement(lastVisibleLabel);
 		}
 		else
 			m_associatedEntity->detachChild(lastVisibleLabel);

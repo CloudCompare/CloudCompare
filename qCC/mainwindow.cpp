@@ -968,16 +968,22 @@ void MainWindow::doActionChangeTabTree(int index)
  	m_UI->propertiesTreeView_Image->setVisible(index == 1);
 }
 
-void MainWindow::updateDBSelection(DB_SOURCE type)
+void MainWindow::updateDBSelection(CC_TYPES::DB_SOURCE type)
 {
 	if (!(QApplication::keyboardModifiers() & Qt::ControlModifier)) {
 		switch (type)
 		{
+		case CC_TYPES::DB_MAINDB:
+			m_buildingRoot->unselectAllEntities();
+			m_imageRoot->unselectAllEntities();
+			break;
 		case CC_TYPES::DB_BUILDING:
+			m_ccRoot->unselectAllEntities();
 			m_imageRoot->unselectAllEntities();
 			break;
 		case CC_TYPES::DB_IMAGE:
 			m_ccRoot->unselectAllEntities();
+			m_buildingRoot->unselectAllEntities();
 			break;
 		default:
 			break;
@@ -1144,6 +1150,7 @@ void MainWindow::showEvent(QShowEvent* event)
 #endif
 }
 
+static bool s_autoSaveGuiElementPos = true;
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	// If we don't have anything displayed, then just close...
@@ -1562,6 +1569,25 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 	cancelPreviousPickingOperation(false);
 }
 
+ccDBRoot * MainWindow::db(CC_TYPES::DB_SOURCE tp)
+{
+	switch (tp)
+	{
+	case CC_TYPES::DB_MAINDB:
+		return db_main();
+		break;
+	case CC_TYPES::DB_BUILDING:
+		return db_building();
+		break;
+	case CC_TYPES::DB_IMAGE:
+		return db_image();
+		break;
+	default:
+		break;
+	}
+	return nullptr;
+}
+
 ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=0*/, QString inviteMessage/*=QString()*/)
 {
 	ccHObject::Container clouds;
@@ -1630,8 +1656,9 @@ void MainWindow::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
 	if (!autoDelete && obj->getParent())
 		obj->getParent()->removeDependencyWith(obj);
 
-	if (m_ccRoot)
-		m_ccRoot->removeElement(obj);
+	ccDBRoot* root = db(obj->getDBSourceType());
+	if (root)
+		root->removeElement(obj);
 }
 
 void MainWindow::setSelectedInDB(ccHObject* obj, bool selected)
@@ -1650,7 +1677,7 @@ void MainWindow::addToDB(ccHObject* obj,
 	bool autoExpandDBTree/*=true*/,
 	bool checkDimensions/*=true*/,
 	bool autoRedraw/*=true*/,
-	DB_SOURCE dest)
+	CC_TYPES::DB_SOURCE dest)
 {
 	//let's check that the new entity is not too big nor too far from scene center!
 	if (checkDimensions)
@@ -1808,7 +1835,7 @@ void MainWindow::addToDBAuto(const QStringList& filenames)
 
 std::vector<ccHObject*> MainWindow::addToDB(const QStringList& filenames,
 	QString fileFilter/*=QString()*/,
-	ccGLWindow* destWin/*=0*/, DB_SOURCE dest)
+	ccGLWindow* destWin/*=0*/, CC_TYPES::DB_SOURCE dest)
 {
 	ccHObject::Container loads;
 	//to use the same 'global shift' for multiple files
@@ -9811,7 +9838,6 @@ void MainWindow::doActionShowActiveSFNext()
 
 //"Display" menu
 
-static bool s_autoSaveGuiElementPos = true;
 void MainWindow::doActionResetGUIElementsPos()
 {
 	// show the user it will be maximized
@@ -11543,7 +11569,7 @@ void MainWindow::doActionDisplayNormalPerVertex()
 QString s_no_project_error = "please open the main project!";
 BDBaseHObject::Container GetBDBaseProjx() {
 	MainWindow* main = MainWindow::TheInstance();
-	ccHObject* root_entity = main->db()->getRootEntity();
+	ccHObject* root_entity = main->db_building()->getRootEntity();
 	assert(root_entity);
 	vector<BDBaseHObject*> prjx;
 	for (size_t i = 0; i < root_entity->getChildrenNumber(); i++) {

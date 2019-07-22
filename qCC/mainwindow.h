@@ -136,7 +136,7 @@ public:
 	virtual std::vector<ccHObject*> addToDB( const QStringList& filenames,
 						  QString fileFilter = QString(),
 						  ccGLWindow* destWin = nullptr, 
-						  DB_SOURCE dest = CC_TYPES::DB_BUILDING);
+						  CC_TYPES::DB_SOURCE dest = CC_TYPES::DB_BUILDING);
 	
 	//inherited from ccMainAppInterface
 	void addToDB( ccHObject* obj,
@@ -144,7 +144,7 @@ public:
 				  bool autoExpandDBTree = true,
 				  bool checkDimensions = false,
 				  bool autoRedraw = true,
-				  DB_SOURCE dest = CC_TYPES::DB_BUILDING) override;
+				  CC_TYPES::DB_SOURCE dest = CC_TYPES::DB_BUILDING) override;
 	
 	void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
 	void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
@@ -171,7 +171,8 @@ public:
 	void onItemPicked(const PickedItem& pi) override;
 	
 	//! Returns real 'dbRoot' object
-	virtual ccDBRoot* db() { return m_ccRoot; }
+	virtual ccDBRoot* db(CC_TYPES::DB_SOURCE tp);
+	virtual ccDBRoot* db_main() { return m_ccRoot; }
 	virtual ccDBRoot* db_building() { return m_buildingRoot; }
 	virtual ccDBRoot* db_image() { return m_imageRoot; }
 
@@ -552,7 +553,7 @@ private slots:
 
 	void doActionChangeTabTree(int index);
 
-	void updateDBSelection(DB_SOURCE type);
+	void updateDBSelection(CC_TYPES::DB_SOURCE type);
 
 	void toggleImageOverlay();
 

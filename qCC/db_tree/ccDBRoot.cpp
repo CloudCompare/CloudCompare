@@ -2440,3 +2440,21 @@ void ccDBRoot::clickItem(const QModelIndex &index)
 {
 	emit itemClicked();
 }
+
+StDBMainRoot::StDBMainRoot(ccCustomQTreeView * dbTreeWidget, QTreeView * propertiesTreeWidget, QObject * parent)
+	: ccDBRoot(dbTreeWidget, propertiesTreeWidget, parent)
+{
+	m_treeRoot->setDBSourceType(CC_TYPES::DB_MAINDB);
+}
+
+StDBBuildingRoot::StDBBuildingRoot(ccCustomQTreeView * dbTreeWidget, QTreeView * propertiesTreeWidget, QObject * parent)
+	: ccDBRoot(dbTreeWidget, propertiesTreeWidget, parent)
+{
+	m_treeRoot->setDBSourceType(CC_TYPES::DB_BUILDING);
+}
+
+StDBImageRoot::StDBImageRoot(ccCustomQTreeView * dbTreeWidget, QTreeView * propertiesTreeWidget, QObject * parent)
+	: ccDBRoot(dbTreeWidget, propertiesTreeWidget, parent)
+{
+	m_treeRoot->setDBSourceType(CC_TYPES::DB_IMAGE);
+}

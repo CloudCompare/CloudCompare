@@ -1160,7 +1160,6 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 	} while (contours_points_remained.size() > 1);
 	ccHObject* outlines_add = AddOutlinesAsChild(contours_points_remained, BDDB_OUTLINE_PREFIX, newCloud);
 	win->addToDB(outlines_add);
-//	win->db()->removeElement(cloud);
 	
 #endif // USE_STOCKER
 }
@@ -2637,9 +2636,9 @@ void SubstituteFootPrintContour(StFootPrint* footptObj, stocker::Contour3d point
 	win->addToDB(vertices, false, false);
 
 	if (existing_cloud) {
-		win->db()->unselectAllEntities();
-		win->db()->selectEntity(existing_cloud);
-		win->db()->deleteSelectedEntities();
+		win->db_building()->unselectAllEntities();
+		win->db_building()->selectEntity(existing_cloud);
+		win->db_building()->deleteSelectedEntities();
 	}
 }
 

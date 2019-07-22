@@ -98,7 +98,6 @@ void bdr2Point5DimEditor::updateCursorPos(const CCVector3d& P, bool b3d, bool mo
 			image_pt.z = IMAGE_MARKER_DISPLAY_Z;
 
 			//! update image cursor pos
-			CCVector3 image_pt = CCVector3::fromArray(P.u);
 			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(0)) = image_pt;
 			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(1)) = image_pt + CCVector3(0, 50, 0);
 			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(2)) = image_pt - CCVector3(50, 0, 0);

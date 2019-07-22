@@ -745,7 +745,7 @@ private:
 	// XYLIU
 	ccHObject* askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
 
-	void toggleDrawBBox();
+	void doActionToggleDrawBBox();
 
 	void CreateImageEditor();
 

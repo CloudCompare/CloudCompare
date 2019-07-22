@@ -211,9 +211,6 @@ private slots:
 	//! Toggles the 'show Qt warnings in Console' option
 	void doEnableQtWarnings(bool);
 
-	//! Clones currently selected entities
-	void doActionClone();
-
 	//! Updates entities display target when a gl sub-window is deleted
 	/** \param glWindow the window that is going to be delete
 	**/
@@ -396,6 +393,9 @@ private slots:
 	void doActionExportCoordToSF();
 	void doComputeBestFitBB();
 	void doActionCrop();
+
+	//! Clones currently selected entities
+	void doActionClone();
 
 	void doActionEditCamera();
 	void doActionAdjustZoom();

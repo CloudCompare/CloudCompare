@@ -93,6 +93,12 @@ public:
 							bool checkDimensions = false,
 							bool autoRedraw = true) = 0;
 
+	virtual void addToDB(ccHObject* obj,
+		bool updateZoom = false,
+		bool autoExpandDBTree = true,
+		bool checkDimensions = false,
+		bool autoRedraw = true) = 0;
+
 	//! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.
 		\param obj entity
@@ -156,6 +162,8 @@ public:
 
 	//! Returns DB root (as a ccHObject)
 	virtual ccHObject* dbRootObject(CC_TYPES::DB_SOURCE rt) = 0;
+
+	virtual ccHObject* dbRootObject() = 0;
 
 	virtual CC_TYPES::DB_SOURCE getCurrentDB() = 0;
 

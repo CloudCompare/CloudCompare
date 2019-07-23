@@ -74,6 +74,10 @@ class bdrImageEditorPanel;
 
 class PolyFitObj;
 
+class StDBMainRoot;
+class StDBBuildingRoot;
+class StDBImageRoot;
+
 namespace Ui {
 	class MainWindow;
 } 
@@ -148,6 +152,12 @@ public:
 				  bool checkDimensions = false,
 				  bool autoRedraw = true ) override;
 
+	void addToDB(ccHObject* obj,
+		bool updateZoom = false,
+		bool autoExpandDBTree = true,
+		bool checkDimensions = false,
+		bool autoRedraw = true) override;
+
 	virtual std::vector<ccHObject*> addToDB_Main(const QStringList& filenames, QString fileFilter = QString(), ccGLWindow* destWin = nullptr) {	return addToDB(filenames, CC_TYPES::DB_MAINDB); }
 	virtual std::vector<ccHObject*> addToDB_Build(const QStringList& filenames,	QString fileFilter = QString(),	ccGLWindow* destWin = nullptr) { return addToDB(filenames, CC_TYPES::DB_BUILDING); }
 	virtual std::vector<ccHObject*> addToDB_Image(const QStringList& filenames,	QString fileFilter = QString(), ccGLWindow* destWin = nullptr) { return addToDB(filenames, CC_TYPES::DB_IMAGE);	}
@@ -164,6 +174,7 @@ public:
 	void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
 	void forceConsoleDisplay() override;
 	ccHObject* dbRootObject(CC_TYPES::DB_SOURCE rt) override;
+	ccHObject* dbRootObject() override;
 	inline  QMainWindow* getMainWindow() override { return this; }
 	inline  const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
 	void createGLWindow(ccGLWindow*& window, QWidget*& widget) const override;
@@ -181,13 +192,15 @@ public:
 	void onItemPicked(const PickedItem& pi) override;
 
 	void unselectAllInDB();
+
+	void switchDatabase(CC_TYPES::DB_SOURCE src);
 	
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db(CC_TYPES::DB_SOURCE tp);
 	virtual ccDBRoot* db(ccHObject* obj) { return db(obj->getDBSourceType()); }
-	virtual ccDBRoot* db_main() { return m_ccRoot; }
-	virtual ccDBRoot* db_building() { return m_buildingRoot; }
-	virtual ccDBRoot* db_image() { return m_imageRoot; }
+	virtual StDBMainRoot* db_main() { return m_ccRoot; }
+	virtual StDBBuildingRoot* db_building() { return m_buildingRoot; }
+	virtual StDBImageRoot* db_image() { return m_imageRoot; }
 
 	//! Adds the "Edit Plane" action to the given menu.
 	/**
@@ -656,11 +669,11 @@ private:
 	Ui::MainWindow	*m_UI;
 	
 	//DB & DB Tree
-	ccDBRoot* m_ccRoot;
+	StDBMainRoot* m_ccRoot;
 	//Building DB Tree
-	ccDBRoot* m_buildingRoot;
+	StDBBuildingRoot* m_buildingRoot;
 	//Image DB Tree
-	ccDBRoot* m_imageRoot;
+	StDBImageRoot* m_imageRoot;
 
 	//! Currently selected entities;
 	ccHObject::Container m_selectedEntities;

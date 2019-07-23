@@ -319,7 +319,7 @@ MainWindow::MainWindow()
 
 	//db-main-tree
 	{
-		m_ccRoot = new ccDBRoot(m_UI->dbMainTreeView, m_UI->propertiesTreeView_Main, this);
+		m_ccRoot = new StDBMainRoot(m_UI->dbMainTreeView, m_UI->propertiesTreeView_Main, this);
 		connect(m_ccRoot, &ccDBRoot::selectionChanged,    this, &MainWindow::updateUIWithSelection);
 		connect(m_ccRoot, &ccDBRoot::dbIsEmpty,           [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
 		connect(m_ccRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
@@ -328,7 +328,7 @@ MainWindow::MainWindow()
 
 	//db-build-tree
 	{
-		m_buildingRoot = new ccDBRoot(m_UI->dbBuildTreeView, m_UI->propertiesTreeView_Build, this);
+		m_buildingRoot = new StDBBuildingRoot(m_UI->dbBuildTreeView, m_UI->propertiesTreeView_Build, this);
 		connect(m_buildingRoot, &ccDBRoot::selectionChanged,	this, &MainWindow::updateUIWithSelection);
 		connect(m_buildingRoot, &ccDBRoot::dbIsEmpty,			[&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
 		connect(m_buildingRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
@@ -337,16 +337,13 @@ MainWindow::MainWindow()
 
 	//db-image-tree // XYLIU
 	{
-		m_imageRoot = new ccDBRoot(m_UI->dbImageTreeView, m_UI->propertiesTreeView_Image, this);
+		m_imageRoot = new StDBImageRoot(m_UI->dbImageTreeView, m_UI->propertiesTreeView_Image, this);
  		connect(m_imageRoot, &ccDBRoot::selectionChanged,		this, &MainWindow::updateUIWithSelection);
 		connect(m_imageRoot, &ccDBRoot::dbIsEmpty,				[&]() { clearImagePanel();  updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
   		connect(m_imageRoot, &ccDBRoot::dbIsNotEmptyAnymore,	[&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
 		connect(m_imageRoot, &ccDBRoot::itemClicked,			[&]() { updateDBSelection(CC_TYPES::DB_IMAGE); });
 	}
-	m_UI->ProjectTabWidget->setCurrentIndex(0);
-	m_UI->propertiesTreeView_Main->setVisible(true);
-	m_UI->propertiesTreeView_Build->setVisible(false);
-	m_UI->propertiesTreeView_Image->setVisible(false);
+	switchDatabase(CC_TYPES::DB_MAINDB);
 
 	//MDI Area
 	{
@@ -1617,6 +1614,37 @@ void MainWindow::unselectAllInDB()
 	}
 }
 
+void MainWindow::switchDatabase(CC_TYPES::DB_SOURCE src)
+{
+	int i = -1;
+	switch (src)
+	{
+	case CC_TYPES::DB_MAINDB:
+		i = 0;
+		break;
+	case CC_TYPES::DB_BUILDING:
+		i = 1;
+		break;
+	case CC_TYPES::DB_IMAGE:
+		i = 2;
+		break;
+	default:
+		break;
+	}
+	if (i < 0)return;
+	
+	m_UI->ProjectTabWidget->setCurrentIndex(i);
+	if (m_UI->propertiesTreeView_Main->isVisible() != (i == 0)) {
+		m_UI->propertiesTreeView_Main->setVisible(i == 0);
+	}
+	if (m_UI->propertiesTreeView_Build->isVisible() != (i == 1)) {
+		m_UI->propertiesTreeView_Build->setVisible(i == 1);
+	}
+	if (m_UI->propertiesTreeView_Image->isVisible() != (i == 2)) {
+		m_UI->propertiesTreeView_Image->setVisible(i == 2);
+	}
+}
+
 ccDBRoot * MainWindow::db(CC_TYPES::DB_SOURCE tp)
 {
 	switch (tp)
@@ -1745,7 +1773,7 @@ void MainWindow::addToDB(ccHObject* obj,
 	bool checkDimensions/*=true*/,
 	bool autoRedraw/*=true*/)
 {
-	obj->setDBSourceType(dest);
+	obj->setDBSourceType_recursive(dest);
 
 	//let's check that the new entity is not too big nor too far from scene center!
 	if (checkDimensions)
@@ -1844,6 +1872,15 @@ void MainWindow::addToDB(ccHObject* obj,
 	{
 		obj->redrawDisplay();
 	}
+}
+
+void MainWindow::addToDB(ccHObject* obj,
+	bool updateZoom/* = false*/,
+	bool autoExpandDBTree/* = true*/,
+	bool checkDimensions /*= false*/,
+	bool autoRedraw /*= true*/) 
+{
+	addToDB(obj, getCurrentDB(), updateZoom, autoExpandDBTree, checkDimensions, autoRedraw);
 }
 
 void MainWindow::addToDBAuto(const QStringList& filenames)
@@ -1956,6 +1993,11 @@ ccHObject* MainWindow::dbRootObject(CC_TYPES::DB_SOURCE rt)
 {
 	ccDBRoot* root = db(rt);
 	return (root ? root->getRootEntity() : nullptr);
+}
+
+ccHObject* MainWindow::dbRootObject()
+{
+	return dbRootObject(getCurrentDB());
 }
 
 MainWindow::ccHObjectContext MainWindow::removeObjectTemporarilyFromDBTree(ccHObject* obj)
@@ -2375,15 +2417,7 @@ void MainWindow::updateUIWithSelection()
 		selInfo.kdTreeCount += selInfo_img.kdTreeCount;
 	}
 
-	if (m_UI->propertiesTreeView_Main->isVisible() != (m_UI->ProjectTabWidget->currentIndex() == 0)) {
-		m_UI->propertiesTreeView_Main->setVisible(m_UI->ProjectTabWidget->currentIndex() == 0);
-	}
-	if (m_UI->propertiesTreeView_Build->isVisible() != (m_UI->ProjectTabWidget->currentIndex() == 1)) {
-		m_UI->propertiesTreeView_Build->setVisible(m_UI->ProjectTabWidget->currentIndex() == 1);
-	}
-	if (m_UI->propertiesTreeView_Image->isVisible() != (m_UI->ProjectTabWidget->currentIndex() == 2)) {
-		m_UI->propertiesTreeView_Image->setVisible(m_UI->ProjectTabWidget->currentIndex() == 2);
-	}
+	switchDatabase(getCurrentDB());
 
 	enableUIItems(selInfo);
 	updateViewStateWithSelection();
@@ -11713,6 +11747,8 @@ void MainWindow::doActionBDProjectLoad()
 		dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
+
+	switchDatabase(CC_TYPES::DB_BUILDING);
 	
 	QFileInfo prj_file(Filename);
 	QString prj_name = prj_file.completeBaseName();
@@ -11784,9 +11820,6 @@ void MainWindow::doActionBDProjectLoad()
 		bd_grp->global_scale = first_cloud->getGlobalScale();
 
 		addToDB_Build(bd_grp);
-
-		m_UI->ProjectTabWidget->setCurrentIndex(1);
-		m_UI->propertiesTreeView_Build->setVisible(true);
 	}
 	else {
 		dispToConsole("error load project", ERR_CONSOLE_MESSAGE);

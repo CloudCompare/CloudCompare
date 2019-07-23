@@ -438,6 +438,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 
 	//name
 	appendRow(ITEM( tr( "Name" ) ), ITEM(_obj->getName(), Qt::ItemIsEditable, OBJECT_NAME));
+	appendRow(ITEM(tr("DBSource")), ITEM(QString::number(int(_obj->getDBSourceType()))));
 
 	//visibility
 	if (!_obj->isVisiblityLocked())

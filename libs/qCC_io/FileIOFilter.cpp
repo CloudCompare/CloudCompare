@@ -364,6 +364,11 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 				newName.replace(QString("unnamed"), fi.baseName());
 				child->setName(newName);
 			}
+			else if (newName.isEmpty())
+			{
+				//just in case
+				child->setName(fi.baseName());
+			}
 		}
 	}
 	else

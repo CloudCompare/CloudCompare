@@ -637,8 +637,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	/*** pre-processing steps (colored MNT computation, etc.) ***/
 
 	//for colored DTM generation
-	int* mntColors = nullptr;
-	CCLib::PointCloud* mntSamples = nullptr;
+	std::vector<int> mntColors;
+	QScopedPointer<CCLib::PointCloud> mntSamples;
 	if (generateColoredDTM)
 	{
 		QScopedPointer<ccProgressDialog> toDlg(nullptr);
@@ -672,7 +672,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		if (dummyMesh)
 		{
 			//2nd step: samples points on resulting mesh
-			mntSamples = CCLib::MeshSamplingTools::samplePointsOnMesh((CCLib::GenericMesh*)dummyMesh, coloredDTMVerticesCount);
+			mntSamples.reset(CCLib::MeshSamplingTools::samplePointsOnMesh((CCLib::GenericMesh*)dummyMesh, coloredDTMVerticesCount));
 			if (!baseDTMMesh)
 				delete dummyMesh;
 			dummyMesh = nullptr;
@@ -681,20 +681,21 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				//3rd step: project each point in all images and get average color
 				unsigned count = mntSamples->size();
-				mntColors = new int[4 * count]; //R + G + B + accum count
-				if (!mntColors)
+				try
+				{
+					mntColors.resize(4 * count, 0); //R + G + B + accum count
+				}
+				catch (const std::bad_alloc&)
 				{
 					//not enough memory
 					ccLog::Error("Not enough memory to store DTM colors! DTM generation cancelled");
-					delete mntSamples;
-					mntSamples = nullptr;
 					generateColoredDTM = false;
 				}
-				else
-				{
-					memset(mntColors, 0, sizeof(int) * 4 * count);
-				}
 			}
+		}
+		else
+		{
+			generateColoredDTM = false;
 		}
 	}
 
@@ -1044,7 +1045,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		//DTM color 'blending'
 		if (sensor && generateColoredDTM)
 		{
-			assert(mntSamples && mntColors);
+			assert(mntSamples && !mntColors.empty());
 			unsigned sampleCount = mntSamples->size();
 			const QRgb blackValue = qRgb(0, 0, 0);
 
@@ -1074,7 +1075,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 							QRgb rgb = image->data().pixel(px, py);
 							if (qAlpha(rgb) != 0 && rgb != blackValue) //black pixels are ignored
 							{
-								int* col = mntColors + 4 * k;
+								int* col = mntColors.data() + 4 * k;
 								col[0] += qRed(rgb);
 								col[1] += qGreen(rgb);
 								col[2] += qBlue(rgb);
@@ -1147,7 +1148,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 	if (generateColoredDTM)
 	{
-		assert(mntSamples && mntColors);
+		assert(mntSamples && !mntColors.empty());
 
 		if (!cancelledByUser)
 		{
@@ -1158,9 +1159,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			if (mntCloud->reserve(sampleCount) && mntCloud->reserveTheRGBTable())
 			{
 				//for each point
-				unsigned realCount=0;
-				const int* col = mntColors;
-				for (unsigned i=0; i<sampleCount; ++i,col+=4)
+				unsigned realCount = 0;
+				const int* col = mntColors.data();
+				for (unsigned i = 0; i < sampleCount; ++i, col += 4)
 				{
 					if (col[3] > 0) //accum
 					{
@@ -1210,11 +1211,6 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				mntCloud = nullptr;
 			}
 		}
-
-		delete mntSamples;
-		mntSamples = nullptr;
-		delete[] mntColors;
-		mntColors = nullptr;
 	}
 
 	return cancelledByUser ? CC_FERR_CANCELED_BY_USER : CC_FERR_NO_ERROR;

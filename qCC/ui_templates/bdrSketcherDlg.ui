@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>bdrTraceFootprintDlg</class>
- <widget class="QDialog" name="bdrTraceFootprintDlg">
+ <class>bdrSketcherDlg</class>
+ <widget class="QDialog" name="bdrSketcherDlg">
   <property name="windowModality">
    <enum>Qt::NonModal</enum>
   </property>
@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Trace Footprint</string>
+   <string>Sketcher</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>false</bool>

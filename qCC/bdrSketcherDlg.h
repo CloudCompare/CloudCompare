@@ -32,20 +32,20 @@ class ccGLWindow;
 
 namespace Ui
 {
-	class bdrTraceFootprintDlg;
+	class bdrSketcherDlg;
 }
 
 //! Section extraction tool
-class bdrTraceFootprint : public ccOverlayDialog
+class bdrSketcher : public ccOverlayDialog
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	explicit bdrTraceFootprint(QWidget* parent);
+	explicit bdrSketcher(QWidget* parent);
 	//! Destructor
-	~bdrTraceFootprint() override;
+	~bdrSketcher() override;
 
 	//! Adds a cloud to the 'clouds' pool
 	bool addCloud(ccGenericPointCloud* cloud, bool alreadyInDB = true);
@@ -246,7 +246,7 @@ protected:
 	void updateCloudsBox();
 
 private: //members
-	Ui::bdrTraceFootprintDlg	*m_UI;
+	Ui::bdrSketcherDlg	*m_UI;
 	
 	//! Pool of active sections
 	SectionPool m_sections;

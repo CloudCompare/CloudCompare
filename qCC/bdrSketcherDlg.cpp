@@ -15,7 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#include "bdrTraceFootprintDlg.h"
+#include "bdrSketcherDlg.h"
 
 //Local
 #include "ccContourExtractor.h"
@@ -45,7 +45,7 @@
 #include <QMessageBox>
 
 //GUI
-#include <ui_bdrTraceFootprintDlg.h>
+#include <ui_bdrSketcherDlg.h>
 #include <bdr2.5DimEditor.h>
 
 //System
@@ -76,9 +76,9 @@ static unsigned s_cloudExportGroupID = 0;
 //default arrow size
 static const PointCoordinateType s_defaultArrowSize = 20;
 
-bdrTraceFootprint::bdrTraceFootprint(QWidget* parent)
+bdrSketcher::bdrSketcher(QWidget* parent)
 	: ccOverlayDialog(parent)
-	, m_UI( new Ui::bdrTraceFootprintDlg )
+	, m_UI( new Ui::bdrSketcherDlg )
 	, m_selectedPoly(nullptr)
 	, m_state(0)
 	, m_editedPoly(nullptr)
@@ -86,17 +86,17 @@ bdrTraceFootprint::bdrTraceFootprint(QWidget* parent)
 {
 	m_UI->setupUi(this);
 
-	connect(m_UI->undoToolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::undo);
-	connect(m_UI->validToolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::apply);
-	connect(m_UI->cancelToolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::cancel);
-	connect(m_UI->polylineToolButton, &QAbstractButton::toggled, this, &bdrTraceFootprint::enableSectionEditingMode);
-	connect(m_UI->importFromDBToolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::doImportPolylinesFromDB);
-	connect(m_UI->vertAxisComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &bdrTraceFootprint::setVertDimension);
+	connect(m_UI->undoToolButton, &QAbstractButton::clicked, this, &bdrSketcher::undo);
+	connect(m_UI->validToolButton, &QAbstractButton::clicked, this, &bdrSketcher::apply);
+	connect(m_UI->cancelToolButton, &QAbstractButton::clicked, this, &bdrSketcher::cancel);
+	connect(m_UI->polylineToolButton, &QAbstractButton::toggled, this, &bdrSketcher::enableSectionEditingMode);
+	connect(m_UI->importFromDBToolButton, &QAbstractButton::clicked, this, &bdrSketcher::doImportPolylinesFromDB);
+	connect(m_UI->vertAxisComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &bdrSketcher::setVertDimension);
 
-	connect(m_UI->generateOrthoSectionsToolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::generateOrthoSections);
-	connect(m_UI->extractPointsToolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::extractPoints);
-	connect(m_UI->unfoldToolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::unfoldPoints);
-	connect(m_UI->exportSectionsToolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::exportSections);
+	connect(m_UI->generateOrthoSectionsToolButton, &QAbstractButton::clicked, this, &bdrSketcher::generateOrthoSections);
+	connect(m_UI->extractPointsToolButton, &QAbstractButton::clicked, this, &bdrSketcher::extractPoints);
+	connect(m_UI->unfoldToolButton, &QAbstractButton::clicked, this, &bdrSketcher::unfoldPoints);
+	connect(m_UI->exportSectionsToolButton, &QAbstractButton::clicked, this, &bdrSketcher::exportSections);
 
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Space);  //space bar for the "pause" button
@@ -105,14 +105,14 @@ bdrTraceFootprint::bdrTraceFootprint(QWidget* parent)
 	addOverridenShortcut(Qt::Key_Enter);  //close
 	addOverridenShortcut(Qt::Key_C);		// click
 
-	connect(this, &ccOverlayDialog::shortcutTriggered, this, &bdrTraceFootprint::onShortcutTriggered);
-	connect(m_UI->saveFootprintInsidetoolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::exportFootprintInside);
-	connect(m_UI->saveFootprintOutsidetoolButton, &QAbstractButton::clicked, this, &bdrTraceFootprint::exportFootprintOutside);
+	connect(this, &ccOverlayDialog::shortcutTriggered, this, &bdrSketcher::onShortcutTriggered);
+	connect(m_UI->saveFootprintInsidetoolButton, &QAbstractButton::clicked, this, &bdrSketcher::exportFootprintInside);
+	connect(m_UI->saveFootprintOutsidetoolButton, &QAbstractButton::clicked, this, &bdrSketcher::exportFootprintOutside);
 
 	setTraceViewMode(true);
 }
 
-bdrTraceFootprint::~bdrTraceFootprint()
+bdrSketcher::~bdrSketcher()
 {
 	if (m_editedPoly)
 	{
@@ -125,7 +125,7 @@ bdrTraceFootprint::~bdrTraceFootprint()
 	delete m_UI;
 }
 
-void bdrTraceFootprint::setVertDimension(int dim)
+void bdrSketcher::setVertDimension(int dim)
 {
 	assert(dim >= 0 && dim < 3);
 	if (!m_associatedWin)
@@ -147,7 +147,7 @@ void bdrTraceFootprint::setVertDimension(int dim)
 	m_associatedWin->updateConstellationCenterAndZoom();
 }
 
-void bdrTraceFootprint::onShortcutTriggered(int key)
+void bdrSketcher::onShortcutTriggered(int key)
 {
 	switch (key)
 	{
@@ -174,7 +174,7 @@ void bdrTraceFootprint::onShortcutTriggered(int key)
 	}
 }
 
-bool bdrTraceFootprint::linkWith(ccGLWindow* win)
+bool bdrSketcher::linkWith(ccGLWindow* win)
 {
 	ccGLWindow* oldWin = m_associatedWin;
 
@@ -227,10 +227,10 @@ bool bdrTraceFootprint::linkWith(ccGLWindow* win)
 
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, &ccGLWindow::leftButtonClicked, this, &bdrTraceFootprint::addPointToPolyline);
-		connect(m_associatedWin, &ccGLWindow::rightButtonClicked, this, &bdrTraceFootprint::closePolyLine);
-		connect(m_associatedWin, &ccGLWindow::mouseMoved, this, &bdrTraceFootprint::updatePolyLine);
-		connect(m_associatedWin, &ccGLWindow::entitySelectionChanged, this, &bdrTraceFootprint::entitySelected);
+		connect(m_associatedWin, &ccGLWindow::leftButtonClicked, this, &bdrSketcher::addPointToPolyline);
+		connect(m_associatedWin, &ccGLWindow::rightButtonClicked, this, &bdrSketcher::closePolyLine);
+		connect(m_associatedWin, &ccGLWindow::mouseMoved, this, &bdrSketcher::updatePolyLine);
+		connect(m_associatedWin, &ccGLWindow::entitySelectionChanged, this, &bdrSketcher::entitySelected);
 
 		//import sections in current display
 		for (auto & section : m_sections)
@@ -273,7 +273,7 @@ bool bdrTraceFootprint::linkWith(ccGLWindow* win)
 	return true;
 }
 
-void bdrTraceFootprint::selectPolyline(Section* poly, bool autoRefreshDisplay/*=true*/)
+void bdrSketcher::selectPolyline(Section* poly, bool autoRefreshDisplay/*=true*/)
 {
 	bool redraw = false;
 
@@ -307,7 +307,7 @@ void bdrTraceFootprint::selectPolyline(Section* poly, bool autoRefreshDisplay/*=
 	m_UI->unfoldToolButton->setEnabled(m_selectedPoly != nullptr);
 }
 
-void bdrTraceFootprint::releasePolyline(Section* section)
+void bdrSketcher::releasePolyline(Section* section)
 {
 	if (section && section->entity)
 	{
@@ -331,7 +331,7 @@ void bdrTraceFootprint::releasePolyline(Section* section)
 	}
 }
 
-void bdrTraceFootprint::deleteSelectedPolyline()
+void bdrSketcher::deleteSelectedPolyline()
 {
 	if (!m_selectedPoly)
 		return;
@@ -354,7 +354,7 @@ void bdrTraceFootprint::deleteSelectedPolyline()
 	}
 }
 
-void bdrTraceFootprint::entitySelected(ccHObject* entity)
+void bdrSketcher::entitySelected(ccHObject* entity)
 {
 	if (!entity)
 	{
@@ -372,7 +372,7 @@ void bdrTraceFootprint::entitySelected(ccHObject* entity)
 	}
 }
 
-bool bdrTraceFootprint::start()
+bool bdrSketcher::start()
 {
 	assert(!m_editedPolyVertices && !m_editedPoly);
 
@@ -392,7 +392,7 @@ bool bdrTraceFootprint::start()
 	return ccOverlayDialog::start();
 }
 
-void bdrTraceFootprint::removeAllEntities()
+void bdrSketcher::removeAllEntities()
 {
 	reset(false);
 
@@ -411,7 +411,7 @@ void bdrTraceFootprint::removeAllEntities()
 	m_cloudsBox.clear();
 }
 
-void bdrTraceFootprint::setTraceViewMode(bool trace_image)
+void bdrSketcher::setTraceViewMode(bool trace_image)
 {
 	m_trace_image = trace_image;
 	if (trace_image) {
@@ -439,18 +439,18 @@ void bdrTraceFootprint::setTraceViewMode(bool trace_image)
 	}
 }
 
-void bdrTraceFootprint::SetDestAndGround(ccHObject * dest, double ground)
+void bdrSketcher::SetDestAndGround(ccHObject * dest, double ground)
 {
 	m_dest_obj = dest;
 	m_ground = ground;
 }
 
-void bdrTraceFootprint::importEntities(ccHObject::Container entities)
+void bdrSketcher::importEntities(ccHObject::Container entities)
 {
 
 }
 
-void bdrTraceFootprint::undo()
+void bdrSketcher::undo()
 {
 	if (m_undoCount.empty())
 		return;
@@ -491,7 +491,7 @@ void bdrTraceFootprint::undo()
 		m_associatedWin->redraw();
 }
 
-bool bdrTraceFootprint::reset(bool askForConfirmation/*=true*/)
+bool bdrSketcher::reset(bool askForConfirmation/*=true*/)
 {
 	if (m_sections.empty() && m_clouds.empty())
 	{
@@ -555,7 +555,7 @@ bool bdrTraceFootprint::reset(bool askForConfirmation/*=true*/)
 	return true;
 }
 
-void bdrTraceFootprint::stop(bool accepted)
+void bdrSketcher::stop(bool accepted)
 {
 	if (m_editedPoly)
 	{
@@ -580,7 +580,7 @@ void bdrTraceFootprint::stop(bool accepted)
 	ccOverlayDialog::stop(accepted);
 }
 
-void bdrTraceFootprint::updateCloudsBox()
+void bdrSketcher::updateCloudsBox()
 {
 	m_cloudsBox.clear();
 
@@ -591,7 +591,7 @@ void bdrTraceFootprint::updateCloudsBox()
 	}
 }
 
-bool bdrTraceFootprint::addPolyline(ccPolyline* inputPoly, bool alreadyInDB/*=true*/)
+bool bdrSketcher::addPolyline(ccPolyline* inputPoly, bool alreadyInDB/*=true*/)
 {
 	if (!inputPoly)
 	{
@@ -694,7 +694,7 @@ bool bdrTraceFootprint::addPolyline(ccPolyline* inputPoly, bool alreadyInDB/*=tr
 
 static bool s_mixedShiftAndScaleInfo = false;
 
-bool bdrTraceFootprint::addCloud(ccGenericPointCloud* inputCloud, bool alreadyInDB/*=true*/)
+bool bdrSketcher::addCloud(ccGenericPointCloud* inputCloud, bool alreadyInDB/*=true*/)
 {
 	assert(inputCloud);
 
@@ -716,7 +716,7 @@ bool bdrTraceFootprint::addCloud(ccGenericPointCloud* inputCloud, bool alreadyIn
 			if (cloud.entity->getGlobalScale() != inputCloud->getGlobalScale()
 				|| (cloud.entity->getGlobalShift() - inputCloud->getGlobalShift()).norm() < ZERO_TOLERANCE)
 			{
-				ccLog::Warning("[bdrTraceFootprint] Clouds have different shift & scale information! Only the first one will be used");
+				ccLog::Warning("[bdrSketcher] Clouds have different shift & scale information! Only the first one will be used");
 				s_mixedShiftAndScaleInfo = true;
 			}
 		}
@@ -733,7 +733,7 @@ bool bdrTraceFootprint::addCloud(ccGenericPointCloud* inputCloud, bool alreadyIn
 	return true;
 }
 
-void bdrTraceFootprint::updatePolyLine(int x, int y, Qt::MouseButtons buttons)
+void bdrSketcher::updatePolyLine(int x, int y, Qt::MouseButtons buttons)
 {
 	Q_UNUSED( buttons );
 	
@@ -766,7 +766,7 @@ void bdrTraceFootprint::updatePolyLine(int x, int y, Qt::MouseButtons buttons)
 	m_associatedWin->redraw(true, false);
 }
 
-void bdrTraceFootprint::addPointToPolyline(int x, int y)
+void bdrSketcher::addPointToPolyline(int x, int y)
 {
 	if ((m_state & STARTED) == 0)
 	{
@@ -856,7 +856,7 @@ void bdrTraceFootprint::addPointToPolyline(int x, int y)
 	m_associatedWin->redraw(true, false);
 }
 
-void bdrTraceFootprint::addCurrentPointToPolyline()
+void bdrSketcher::addCurrentPointToPolyline()
 {
 	if (!m_associatedWin)
 	{
@@ -880,12 +880,12 @@ void bdrTraceFootprint::addCurrentPointToPolyline()
 	addPointToPolyline(lastP->x, lastP->y);
 }
 
-void bdrTraceFootprint::closeFootprint()
+void bdrSketcher::closeFootprint()
 {
 
 }
 
-void bdrTraceFootprint::closePolyLine(int, int)
+void bdrSketcher::closePolyLine(int, int)
 {
 	//only in RUNNING mode
 	if ((m_state & RUNNING) == 0 || !m_editedPoly)
@@ -942,7 +942,7 @@ void bdrTraceFootprint::closePolyLine(int, int)
 	}
 }
 
-void bdrTraceFootprint::cancelCurrentPolyline()
+void bdrSketcher::cancelCurrentPolyline()
 {
 	if ((m_state & STARTED) == 0
 		|| !m_editedPoly)
@@ -961,7 +961,7 @@ void bdrTraceFootprint::cancelCurrentPolyline()
 		m_associatedWin->redraw();
 }
 
-void bdrTraceFootprint::enableSectionEditingMode(bool state)
+void bdrSketcher::enableSectionEditingMode(bool state)
 {
 	if (!m_associatedWin)
 		return;
@@ -1008,7 +1008,7 @@ void bdrTraceFootprint::enableSectionEditingMode(bool state)
 	m_associatedWin->redraw();
 }
 
-void bdrTraceFootprint::addUndoStep()
+void bdrSketcher::addUndoStep()
 {
 	if (m_undoCount.empty() || (static_cast<int>(m_undoCount.back()) < m_sections.size()))
 	{
@@ -1017,7 +1017,7 @@ void bdrTraceFootprint::addUndoStep()
 	}
 }
 
-void bdrTraceFootprint::doImportPolylinesFromDB()
+void bdrSketcher::doImportPolylinesFromDB()
 {
 	//! from file
 	if (m_trace_image) {
@@ -1070,14 +1070,14 @@ void bdrTraceFootprint::doImportPolylinesFromDB()
 	}
 }
 
-void bdrTraceFootprint::cancel()
+void bdrSketcher::cancel()
 {
 	reset(false);
 
 	stop(false);
 }
 
-void bdrTraceFootprint::apply()
+void bdrSketcher::apply()
 {
 	if (!reset(true))
 		return;
@@ -1088,11 +1088,11 @@ void bdrTraceFootprint::apply()
 static double s_orthoSectionWidth = -1.0;
 static double s_orthoSectionStep = -1.0;
 static bool s_autoSaveAndRemoveGeneratrix = true;
-void bdrTraceFootprint::generateOrthoSections()
+void bdrSketcher::generateOrthoSections()
 {
 	if (!m_selectedPoly)
 	{
-		ccLog::Warning("[bdrTraceFootprint] No polyline selected");
+		ccLog::Warning("[bdrSketcher] No polyline selected");
 		return;
 	}
 
@@ -1101,7 +1101,7 @@ void bdrTraceFootprint::generateOrthoSections()
 	unsigned vertCount = (poly ? poly->size() : 0);
 	if (vertCount < 2)
 	{
-		ccLog::Warning("[bdrTraceFootprint] Invalid polyline");
+		ccLog::Warning("[bdrSketcher] Invalid polyline");
 		return;
 	}
 
@@ -1255,7 +1255,7 @@ void bdrTraceFootprint::generateOrthoSections()
 		m_associatedWin->redraw();
 }
 
-ccHObject* bdrTraceFootprint::getExportGroup(unsigned& defaultGroupID, const QString& defaultName)
+ccHObject* bdrSketcher::getExportGroup(unsigned& defaultGroupID, const QString& defaultName)
 {
 	MainWindow* mainWin = MainWindow::TheInstance();
 	ccHObject* root = mainWin ? mainWin->dbRootObject(mainWin->getCurrentDB()) : nullptr;
@@ -1285,7 +1285,7 @@ ccHObject* bdrTraceFootprint::getExportGroup(unsigned& defaultGroupID, const QSt
 	return destEntity;
 }
 
-void bdrTraceFootprint::exportSections()
+void bdrSketcher::exportSections()
 {
 	if (m_sections.empty())
 		return;
@@ -1302,7 +1302,7 @@ void bdrTraceFootprint::exportSections()
 	if (!exportCount)
 	{
 		//nothing to do
-		ccLog::Warning("[bdrTraceFootprint] All active sections are already in DB");
+		ccLog::Warning("[bdrSketcher] All active sections are already in DB");
 		return;
 	}
 
@@ -1323,10 +1323,10 @@ void bdrTraceFootprint::exportSections()
 		}
 	}
 
-	ccLog::Print(QString("[bdrTraceFootprint] %1 sections exported").arg(exportCount));
+	ccLog::Print(QString("[bdrSketcher] %1 sections exported").arg(exportCount));
 }
 
-bool bdrTraceFootprint::extractSectionContour(const ccPolyline* originalSection,
+bool bdrSketcher::extractSectionContour(const ccPolyline* originalSection,
 	const ccPointCloud* originalSectionCloud,
 	ccPointCloud* unrolledSectionCloud,
 	unsigned sectionIndex,
@@ -1341,14 +1341,14 @@ bool bdrTraceFootprint::extractSectionContour(const ccPolyline* originalSection,
 
 	if (!originalSectionCloud || !unrolledSectionCloud)
 	{
-		ccLog::Warning("[bdrTraceFootprint][extract contour] Internal error: invalid input parameter(s)");
+		ccLog::Warning("[bdrSketcher][extract contour] Internal error: invalid input parameter(s)");
 		return false;
 	}
 
 	if (originalSectionCloud->size() < 2)
 	{
 		//nothing to do
-		ccLog::Warning(QString("[bdrTraceFootprint][extract contour] Section #%1 contains less than 2 points and will be ignored").arg(sectionIndex));
+		ccLog::Warning(QString("[bdrSketcher][extract contour] Section #%1 contains less than 2 points and will be ignored").arg(sectionIndex));
 		return true;
 	}
 
@@ -1385,7 +1385,7 @@ bool bdrTraceFootprint::extractSectionContour(const ccPolyline* originalSection,
 			}
 			else
 			{
-				ccLog::Warning("[bdrTraceFootprint][extract contour] Internal error (couldn't fetch original points indexes?!)");
+				ccLog::Warning("[bdrSketcher][extract contour] Internal error (couldn't fetch original points indexes?!)");
 				delete contour;
 				return false;
 			}
@@ -1469,7 +1469,7 @@ bool bdrTraceFootprint::extractSectionContour(const ccPolyline* originalSection,
 	return true;
 }
 
-bool bdrTraceFootprint::extractSectionCloud(const std::vector<CCLib::ReferenceCloud*>& refClouds,
+bool bdrSketcher::extractSectionCloud(const std::vector<CCLib::ReferenceCloud*>& refClouds,
 	unsigned sectionIndex,
 	bool& cloudGenerated)
 {
@@ -1518,7 +1518,7 @@ bool bdrTraceFootprint::extractSectionCloud(const std::vector<CCLib::ReferenceCl
 				if (sectionCloud->size() != cloudSizeBefore + partSize)
 				{
 					//not enough memory
-					ccLog::Warning("[bdrTraceFootprint][extract cloud] Not enough memory");
+					ccLog::Warning("[bdrSketcher][extract cloud] Not enough memory");
 					delete sectionCloud;
 					return false;
 				}
@@ -1527,7 +1527,7 @@ bool bdrTraceFootprint::extractSectionCloud(const std::vector<CCLib::ReferenceCl
 		else
 		{
 			//not enough memory
-			ccLog::Warning("[bdrTraceFootprint][extract cloud] Not enough memory");
+			ccLog::Warning("[bdrSketcher][extract cloud] Not enough memory");
 			delete sectionCloud;
 			return false;
 		}
@@ -1566,7 +1566,7 @@ struct Segment
 	PointCoordinateType d, curvPos;
 };
 
-void bdrTraceFootprint::unfoldPoints()
+void bdrSketcher::unfoldPoints()
 {
 	if (!m_selectedPoly || !m_selectedPoly->entity)
 	{
@@ -1825,7 +1825,7 @@ struct Segment2D
 	PointCoordinateType s; //curvilinear coordinate
 };
 
-void bdrTraceFootprint::extractPoints()
+void bdrSketcher::extractPoints()
 {
 	static double s_defaultSectionThickness = -1.0;
 	static double s_contourMaxEdgeLength = 0;
@@ -2062,7 +2062,7 @@ void bdrTraceFootprint::extractPoints()
 										if (!refCloud->reserve(refCloudSize))
 										{
 											//not enough memory
-											ccLog::Warning("[bdrTraceFootprint] Not enough memory");
+											ccLog::Warning("[bdrSketcher] Not enough memory");
 											error = true;
 											break;
 										}
@@ -2084,7 +2084,7 @@ void bdrTraceFootprint::extractPoints()
 											|| !unrolledSlicePoints->reserve(cloudSize))
 										{
 											//not enough memory
-											ccLog::Warning("[bdrTraceFootprint] Not enough memory");
+											ccLog::Warning("[bdrSketcher] Not enough memory");
 											error = true;
 											break;
 										}
@@ -2183,7 +2183,7 @@ void bdrTraceFootprint::extractPoints()
 
 			if (!nprogress.oneStep())
 			{
-				ccLog::Warning("[bdrTraceFootprint] Canceled by user");
+				ccLog::Warning("[bdrSketcher] Canceled by user");
 				error = true;
 			}
 
@@ -2202,11 +2202,11 @@ void bdrTraceFootprint::extractPoints()
 	}
 	else
 	{
-		ccLog::Print(QString("[bdrTraceFootprint] Job done (%1 contour(s) and %2 cloud(s) were generated)").arg(generatedContours).arg(generatedClouds));
+		ccLog::Print(QString("[bdrSketcher] Job done (%1 contour(s) and %2 cloud(s) were generated)").arg(generatedContours).arg(generatedClouds));
 	}
 }
 
-void bdrTraceFootprint::exportFootprints()
+void bdrSketcher::exportFootprints()
 {
 	if (m_sections.empty())
 		return;
@@ -2225,7 +2225,7 @@ void bdrTraceFootprint::exportFootprints()
 	if (!exportCount)
 	{
 		//nothing to do
-		ccLog::Warning("[bdrTraceFootprint] All active sections are already in DB");
+		ccLog::Warning("[bdrSketcher] All active sections are already in DB");
 		return;
 	}
 
@@ -2312,7 +2312,7 @@ void bdrTraceFootprint::exportFootprints()
 	ccLog::Print(QString("[FootPrint Extraction] %1 footprints exported").arg(exportCount));
 }
 
-void bdrTraceFootprint::exportFootprintInside()
+void bdrSketcher::exportFootprintInside()
 {
 	if (m_trace_image) {
 		return;
@@ -2335,7 +2335,7 @@ void bdrTraceFootprint::exportFootprintInside()
 	if (!exportCount)
 	{
 		//nothing to do
-		ccLog::Warning("[bdrTraceFootprint] All active sections are already in DB");
+		ccLog::Warning("[bdrSketcher] All active sections are already in DB");
 		return;
 	}
 
@@ -2401,7 +2401,7 @@ void bdrTraceFootprint::exportFootprintInside()
 	ccLog::Print(QString("[FootPrint Extraction] %1 footprints exported").arg(exportCount));
 }
 
-void bdrTraceFootprint::exportFootprintOutside()
+void bdrSketcher::exportFootprintOutside()
 {
 	if (m_trace_image) {
 		return;
@@ -2423,7 +2423,7 @@ void bdrTraceFootprint::exportFootprintOutside()
 	if (!exportCount)
 	{
 		//nothing to do
-		ccLog::Warning("[bdrTraceFootprint] All active sections are already in DB");
+		ccLog::Warning("[bdrSketcher] All active sections are already in DB");
 		return;
 	}
 

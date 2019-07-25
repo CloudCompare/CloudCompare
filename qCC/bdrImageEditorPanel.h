@@ -8,7 +8,7 @@ class ccDBRoot;
 class ccHObject;
 class ccBBox;
 class ccCameraSensor;
-class bdrTraceFootprint;
+class bdrSketcher;
 #include "ccBBox.h"
 
 //! Dialog for qRansacSD plugin
@@ -53,7 +53,7 @@ public:
 	bool isLinkToMainView();
 private:
 	bdr2Point5DimEditor* m_pbdrImshow;
-	bdrTraceFootprint* m_pbdrTraceFP;
+	bdrSketcher* m_pbdrTraceFP;
 	ccDBRoot* m_root;
 	ccBBox m_objViewBox;
 	CCVector3d m_objViewUpDir;

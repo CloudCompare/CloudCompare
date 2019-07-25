@@ -11,7 +11,7 @@
 #include "ccPointCloud.h"
 #include "ccHObjectCaster.h"
 #include "ccBBox.h"
-#include "bdrTraceFootprintDlg.h"
+#include "bdrSketcherDlg.h"
 #include "vcg/space/point3.h"
 
 #include <iostream>
@@ -31,7 +31,7 @@ bdrImageEditorPanel::bdrImageEditorPanel(bdr2Point5DimEditor* img, ccDBRoot* roo
 	verticalLayout->setContentsMargins(0, 0, 0, 0);
 	verticalLayout->setSpacing(0);
 
-	m_pbdrTraceFP = new bdrTraceFootprint(parent);
+	m_pbdrTraceFP = new bdrSketcher(parent);
 	m_pbdrTraceFP->setFixedHeight(23);
 	m_pbdrTraceFP->hide();
 	connect(m_pbdrTraceFP, &ccOverlayDialog::processFinished, this, &bdrImageEditorPanel::stopEditor);

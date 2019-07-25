@@ -23,36 +23,37 @@
 
 bdrImageEditorPanel::bdrImageEditorPanel(bdr2Point5DimEditor* img, ccDBRoot* root, QWidget* parent)
 	: m_pbdrImshow(img)
+	, m_UI(new Ui::bdrImageEditorPanelDlg)
 	, m_root(root)
 	, QDialog(parent, Qt::Tool)
-	, Ui::bdrImageEditorPanelDlg()
 {
-	setupUi(this);
-	verticalLayout->setContentsMargins(0, 0, 0, 0);
-	verticalLayout->setSpacing(0);
+	m_UI->setupUi(this);
+	m_UI->verticalLayout->setContentsMargins(0, 0, 0, 0);
+	m_UI->verticalLayout->setSpacing(0);
 
 	m_pSketcher = new bdrSketcher(parent);
 	m_pSketcher->setFixedHeight(23);
 	m_pSketcher->hide();
 	connect(m_pSketcher, &ccOverlayDialog::processFinished, this, &bdrImageEditorPanel::stopEditor);
-	verticalLayoutTraceFP->addWidget(m_pSketcher);
+	m_UI->verticalLayoutTraceFP->addWidget(m_pSketcher);
 
 	setMinimumHeight(23);
 	setMaximumHeight(155);
 	m_image_display_height = 80;
 
-	connect(ZoomFitToolButton,		&QAbstractButton::clicked, this, &bdrImageEditorPanel::ZoomFit);
-	connect(toggleListToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::toogleImageList);
-	connect(displayAllToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::display);
-	connect(PreviousToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::previous);
-	connect(NextToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::next);
-	connect(polyEditToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::startEditor);
+	connect(m_UI->ZoomFitToolButton,		&QAbstractButton::clicked, this, &bdrImageEditorPanel::ZoomFit);
+	connect(m_UI->toggleListToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::toogleImageList);
+	connect(m_UI->displayAllToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::display);
+	connect(m_UI->PreviousToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::previous);
+	connect(m_UI->NextToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::next);
+	connect(m_UI->polyEditToolButton, &QAbstractButton::clicked, this, &bdrImageEditorPanel::startEditor);
+
 
 	//imageListWidget
-	imageListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-	connect(imageListWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &bdrImageEditorPanel::changeSelection);
+	m_UI->imageListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+	connect(m_UI->imageListWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &bdrImageEditorPanel::changeSelection);
 	// double click list
-	connect(imageListWidget, &QAbstractItemView::doubleClicked, this, &bdrImageEditorPanel::displayImage);
+	connect(m_UI->imageListWidget, &QAbstractItemView::doubleClicked, this, &bdrImageEditorPanel::displayImage);
 	
 	connect(m_root, &ccDBRoot::selectionChanged, this, &bdrImageEditorPanel::selectImage);
 }
@@ -66,7 +67,7 @@ void bdrImageEditorPanel::ZoomFit()
 
 void bdrImageEditorPanel::toogleImageList()
 {
-	if (toggleListToolButton->isChecked()) {
+	if (m_UI->toggleListToolButton->isChecked()) {
 		if (m_pSketcher->isHidden()) {
 			setFixedHeight(155);
 		}
@@ -86,7 +87,7 @@ void bdrImageEditorPanel::toogleImageList()
 
 void bdrImageEditorPanel::changeSelection()
 {
-	QList<QListWidgetItem*> list = imageListWidget->selectedItems();
+	QList<QListWidgetItem*> list = m_UI->imageListWidget->selectedItems();
 	if (!list.empty()) {
 		QListWidgetItem* sel_item = list.front();
 		sel_item->text();
@@ -96,7 +97,7 @@ void bdrImageEditorPanel::changeSelection()
 		if (!children.empty()) {
 			m_root->selectEntity(children.front());
 		}
-		imageListWidget->scrollToItem(sel_item);
+		m_UI->imageListWidget->scrollToItem(sel_item);
 	}
 	else {
 		//m_root->unselectAllEntities();
@@ -117,8 +118,8 @@ void bdrImageEditorPanel::selectImage()
 	if (sels.empty()) {
 		return;
 	}
-	for (size_t i = 0; i < imageListWidget->count(); i++) {
-		QListWidgetItem* item = imageListWidget->item(i);
+	for (size_t i = 0; i < m_UI->imageListWidget->count(); i++) {
+		QListWidgetItem* item = m_UI->imageListWidget->item(i);
 		if (sels.back()->getName() == item->text())	{
 			item->setSelected(true);
 			break;
@@ -128,7 +129,7 @@ void bdrImageEditorPanel::selectImage()
 
 void bdrImageEditorPanel::previous()
 {
-	if (imageListWidget->count() < 2) {
+	if (m_UI->imageListWidget->count() < 2) {
 		return;
 	}
 	ccImage* cur_img = m_pbdrImshow->getImage();
@@ -139,17 +140,17 @@ void bdrImageEditorPanel::previous()
 
 	m_root->selectEntity(cam);
 	
-	QList<QListWidgetItem*> list = imageListWidget->selectedItems();
+	QList<QListWidgetItem*> list = m_UI->imageListWidget->selectedItems();
 	if (list.empty()) { return; }
 
-	int cur_index = imageListWidget->row(list.front());
-	imageListWidget->item((cur_index - 1) % imageListWidget->count())->setSelected(true);
+	int cur_index = m_UI->imageListWidget->row(list.front());
+	m_UI->imageListWidget->item((cur_index - 1) % m_UI->imageListWidget->count())->setSelected(true);
 	displayImage();
 }
 
 void bdrImageEditorPanel::next()
 {
-	if (imageListWidget->count() < 2) {
+	if (m_UI->imageListWidget->count() < 2) {
 		return;
 	}
 	ccImage* cur_img = m_pbdrImshow->getImage();
@@ -160,17 +161,17 @@ void bdrImageEditorPanel::next()
 
 	m_root->selectEntity(cam);
 
-	QList<QListWidgetItem*> list = imageListWidget->selectedItems();
+	QList<QListWidgetItem*> list = m_UI->imageListWidget->selectedItems();
 	if (list.empty()) { return; }
 
-	int cur_index = imageListWidget->row(list.front());
-	imageListWidget->setItemSelected(imageListWidget->item((cur_index + 1) % imageListWidget->count()), true);
+	int cur_index = m_UI->imageListWidget->row(list.front());
+	m_UI->imageListWidget->setItemSelected(m_UI->imageListWidget->item((cur_index + 1) % m_UI->imageListWidget->count()), true);
 	displayImage();
 }
 
 void bdrImageEditorPanel::toogleDisplayAll()
 {
-	display(!displayAllToolButton->isChecked());
+	display(!m_UI->displayAllToolButton->isChecked());
 }
 
 ccHObject* bdrImageEditorPanel::getTraceBlock(QString image_name)
@@ -216,7 +217,7 @@ void bdrImageEditorPanel::startEditor()
 	if (!m_pSketcher) {
 		return;
 	}
-	polyEditToolButton->setChecked(true);
+	m_UI->polyEditToolButton->setChecked(true);
 	m_pSketcher->setTraceViewMode(true);
 	m_pSketcher->linkWith(m_pbdrImshow->getGLWindow());
 
@@ -239,7 +240,7 @@ void bdrImageEditorPanel::startEditor()
 
 void bdrImageEditorPanel::stopEditor(bool state)
 {
-	polyEditToolButton->setChecked(false);
+	m_UI->polyEditToolButton->setChecked(false);
 	if (m_pSketcher) {
 		m_pSketcher->removeAllEntities();
 	}
@@ -250,24 +251,24 @@ void bdrImageEditorPanel::stopEditor(bool state)
 void bdrImageEditorPanel::updateCursorPos(const CCVector3d & P, bool b3d)
 {
 	if (isLinkToMainView()) {
-		m_pbdrImshow->updateCursorPos(P, b3d, !polyEditToolButton->isChecked());
+		m_pbdrImshow->updateCursorPos(P, b3d, !m_UI->polyEditToolButton->isChecked());
 	}
 }
 
 bool bdrImageEditorPanel::isLinkToMainView()
 {
-	return linkViewToolButton->isChecked();
+	return m_UI->linkViewToolButton->isChecked();
 }
 
 void bdrImageEditorPanel::clearAll()
 {
-	imageListWidget->clear();
+	m_UI->imageListWidget->clear();
 	m_pbdrImshow->clearAll();
 }
 
 void bdrImageEditorPanel::setItems(std::vector<ccHObject*> items, int defaultSelectedIndex)
 {
-	imageListWidget->clear();
+	m_UI->imageListWidget->clear();
 	if (items.empty()) { return; }
 	int max_width = -1;
 	for (size_t i = 0; i < items.size(); i++) {
@@ -284,21 +285,21 @@ void bdrImageEditorPanel::setItems(std::vector<ccHObject*> items, int defaultSel
 			}
 		}
 		item->setText(camObj->getName());
-		imageListWidget->addItem(item);
+		m_UI->imageListWidget->addItem(item);
 		
 	}
 	if (max_width <= 0) {
 		return;
 	}
-	imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
+	m_UI->imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
 	if (defaultSelectedIndex >= 0 && defaultSelectedIndex < items.size()) {
-		imageListWidget->setItemSelected(imageListWidget->item(defaultSelectedIndex), true);
+		m_UI->imageListWidget->setItemSelected(m_UI->imageListWidget->item(defaultSelectedIndex), true);
 	}
 }
 
 void bdrImageEditorPanel::setItems(std::vector<ccCameraSensor*> items, int defaultSelectedIndex)
 {
-	imageListWidget->clear();
+	m_UI->imageListWidget->clear();
 	if (items.empty()) { return; }
 	int max_width = -1;
 
@@ -314,10 +315,10 @@ void bdrImageEditorPanel::setItems(std::vector<ccCameraSensor*> items, int defau
 			item->setIcon(QIcon(QPixmap::fromImage(image)));
 			if (max_width < width) {
 				max_width = width;
-				imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
+				m_UI->imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
 			}
 			item->setText(camObj->getName());
-			imageListWidget->addItem(item);
+			m_UI->imageListWidget->addItem(item);
 		}
 		else {
 			corruptNum = i;
@@ -338,10 +339,10 @@ void bdrImageEditorPanel::setItems(std::vector<ccCameraSensor*> items, int defau
 					item->setIcon(QIcon(QPixmap::fromImage(image)));
 					if (max_width < width) {
 						max_width = width;
-						imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
+						m_UI->imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
 					}
 					item->setText(camObj->getName());
-					imageListWidget->addItem(item);
+					m_UI->imageListWidget->addItem(item);
 				}
 				ProgStep()
 			}
@@ -353,13 +354,13 @@ void bdrImageEditorPanel::setItems(std::vector<ccCameraSensor*> items, int defau
 	}
 	//imageListWidget->setIconSize(QSize(max_width, m_image_display_height));
 	if (defaultSelectedIndex >= 0 && defaultSelectedIndex < items.size()) {
-		imageListWidget->setItemSelected(imageListWidget->item(defaultSelectedIndex), true);
+		m_UI->imageListWidget->setItemSelected(m_UI->imageListWidget->item(defaultSelectedIndex), true);
 	}
 }
 
 void bdrImageEditorPanel::display(bool display_all)
 {
-	displayAllToolButton->setChecked(display_all);
+	m_UI->displayAllToolButton->setChecked(display_all);
 	//! sort by area
 	ccHObject::Container children =	GetEnabledObjFromGroup(m_root->getRootEntity(), CC_TYPES::CAMERA_SENSOR, true, true);
 	std::vector<ccCameraSensor*> items;
@@ -388,12 +389,12 @@ void bdrImageEditorPanel::display(bool display_all)
 
 double bdrImageEditorPanel::getBoxScale()
 {
-	return BoxScaleDoubleSpinBox->value();
+	return m_UI->BoxScaleDoubleSpinBox->value();
 }
 
 bool bdrImageEditorPanel::isObjChecked()
 {
-	return m_objViewBox.isValid() && CheckObjToolButton->isChecked();	
+	return m_objViewBox.isValid() && m_UI->CheckObjToolButton->isChecked();
 }
 
 

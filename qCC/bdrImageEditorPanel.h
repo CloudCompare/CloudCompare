@@ -11,8 +11,13 @@ class ccCameraSensor;
 class bdrSketcher;
 #include "ccBBox.h"
 
+namespace Ui
+{
+	class bdrImageEditorPanelDlg;
+}
+
 //! Dialog for qRansacSD plugin
-class bdrImageEditorPanel : public QDialog, public Ui::bdrImageEditorPanelDlg
+class bdrImageEditorPanel : public QDialog
 {
 	Q_OBJECT
 
@@ -52,6 +57,7 @@ public:
 	void updateCursorPos(const CCVector3d& P, bool b3d);
 	bool isLinkToMainView();
 private:
+	Ui::bdrImageEditorPanelDlg *m_UI;
 	bdr2Point5DimEditor* m_pbdrImshow;
 	bdrSketcher* m_pSketcher;
 	ccDBRoot* m_root;

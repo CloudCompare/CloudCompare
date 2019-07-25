@@ -1014,12 +1014,12 @@ void MainWindow::updateDBSelection(CC_TYPES::DB_SOURCE type)
 	}	
 }
 
-bool s_display_overlay_image = false;
+//bool s_display_overlay_image = false;
 void MainWindow::toggleImageOverlay()
 {
-	s_display_overlay_image = !s_display_overlay_image;
-	m_UI->actionImageOverlay->setChecked(s_display_overlay_image);
-	m_pbdrImagePanel->OverlayToolButton->setChecked(s_display_overlay_image);
+//	s_display_overlay_image = !s_display_overlay_image;
+//	m_UI->actionImageOverlay->setChecked(s_display_overlay_image);
+//	m_pbdrImagePanel->OverlayToolButton->setChecked(s_display_overlay_image);
 
 	//! add a camera sensor to GL database
 	//ccCameraSensor* camera_sensor = new ccCameraSensor();
@@ -1039,8 +1039,8 @@ void MainWindow::CreateImageEditor()
 	m_pbdrImagePanel = new bdrImageEditorPanel(m_pbdrImshow, m_imageRoot, this);	
 	m_UI->verticalLayoutImageEditor->addWidget(m_pbdrImagePanel);	
 	
-	connect(m_pbdrImagePanel->OverlayToolButton, &QAbstractButton::clicked, this, &MainWindow::toggleImageOverlay);
-	connect(m_pbdrImagePanel->displayBestToolButton, &QAbstractButton::clicked, this, &MainWindow::doActionShowBestImage);
+//	connect(m_pbdrImagePanel->OverlayToolButton, &QAbstractButton::clicked, this, &MainWindow::toggleImageOverlay);
+//	connect(m_pbdrImagePanel->displayBestToolButton, &QAbstractButton::clicked, this, &MainWindow::doActionShowBestImage);
 
 	connect(m_pbdrImagePanel, &bdrImageEditorPanel::imageDisplayed, this, &MainWindow::doActionShowSelectedImage);
 }

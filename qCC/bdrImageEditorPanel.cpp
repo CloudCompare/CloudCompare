@@ -31,11 +31,11 @@ bdrImageEditorPanel::bdrImageEditorPanel(bdr2Point5DimEditor* img, ccDBRoot* roo
 	verticalLayout->setContentsMargins(0, 0, 0, 0);
 	verticalLayout->setSpacing(0);
 
-	m_pbdrTraceFP = new bdrSketcher(parent);
-	m_pbdrTraceFP->setFixedHeight(23);
-	m_pbdrTraceFP->hide();
-	connect(m_pbdrTraceFP, &ccOverlayDialog::processFinished, this, &bdrImageEditorPanel::stopEditor);
-	verticalLayoutTraceFP->addWidget(m_pbdrTraceFP);
+	m_pSketcher = new bdrSketcher(parent);
+	m_pSketcher->setFixedHeight(23);
+	m_pSketcher->hide();
+	connect(m_pSketcher, &ccOverlayDialog::processFinished, this, &bdrImageEditorPanel::stopEditor);
+	verticalLayoutTraceFP->addWidget(m_pSketcher);
 
 	setMinimumHeight(23);
 	setMaximumHeight(155);
@@ -67,7 +67,7 @@ void bdrImageEditorPanel::ZoomFit()
 void bdrImageEditorPanel::toogleImageList()
 {
 	if (toggleListToolButton->isChecked()) {
-		if (m_pbdrTraceFP->isHidden()) {
+		if (m_pSketcher->isHidden()) {
 			setFixedHeight(155);
 		}
 		else {
@@ -75,7 +75,7 @@ void bdrImageEditorPanel::toogleImageList()
 		}
 	}
 	else {
-		if (m_pbdrTraceFP->isHidden()) {
+		if (m_pSketcher->isHidden()) {
 			setFixedHeight(23);
 		}
 		else {
@@ -213,12 +213,12 @@ ccHObject* bdrImageEditorPanel::getTraceBlock(QString image_name)
 
 void bdrImageEditorPanel::startEditor()
 {
-	if (!m_pbdrTraceFP) {
+	if (!m_pSketcher) {
 		return;
 	}
 	polyEditToolButton->setChecked(true);
-	m_pbdrTraceFP->setTraceViewMode(true);
-	m_pbdrTraceFP->linkWith(m_pbdrImshow->getGLWindow());
+	m_pSketcher->setTraceViewMode(true);
+	m_pSketcher->linkWith(m_pbdrImshow->getGLWindow());
 
 	//! destination
 	ccHObject* dest_block = getTraceBlock(QString());
@@ -226,13 +226,13 @@ void bdrImageEditorPanel::startEditor()
 		dest_block = MainWindow::TheInstance()->db_image()->getRootEntity();
 	}
 	if (!dest_block) { return; }
-	m_pbdrTraceFP->SetDestAndGround(dest_block, 0);
+	m_pSketcher->SetDestAndGround(dest_block, 0);
 // 	//! import
 // 	ccHObject::Container footprints;
 // 	dest_block->filterChildren(footprints, true, CC_TYPES::ST_FOOTPRINT, true, nullptr);
-// 	m_pbdrTraceFP->importeEntities(footprints);
+// 	m_pSketcher->importeEntities(footprints);
 
-	if (!m_pbdrTraceFP->start()) {
+	if (!m_pSketcher->start()) {
 		stopEditor(false);
 	}
 }
@@ -240,8 +240,8 @@ void bdrImageEditorPanel::startEditor()
 void bdrImageEditorPanel::stopEditor(bool state)
 {
 	polyEditToolButton->setChecked(false);
-	if (m_pbdrTraceFP) {
-		m_pbdrTraceFP->removeAllEntities();
+	if (m_pSketcher) {
+		m_pSketcher->removeAllEntities();
 	}
 	//! reset gl
 	m_pbdrImshow->init2DView();

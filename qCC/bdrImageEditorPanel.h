@@ -53,7 +53,7 @@ public:
 	bool isLinkToMainView();
 private:
 	bdr2Point5DimEditor* m_pbdrImshow;
-	bdrSketcher* m_pbdrTraceFP;
+	bdrSketcher* m_pSketcher;
 	ccDBRoot* m_root;
 	ccBBox m_objViewBox;
 	CCVector3d m_objViewUpDir;

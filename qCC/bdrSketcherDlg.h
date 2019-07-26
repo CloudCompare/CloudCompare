@@ -30,6 +30,7 @@ class ccGenericPointCloud;
 class ccPointCloud;
 class ccGLWindow;
 class ccPlane;
+class QToolButton;
 
 namespace Ui
 {
@@ -76,12 +77,32 @@ protected:
 	bool reset(bool askForConfirmation = true);
 	void apply();
 	void cancel();
+	void enableSketcherEditingMode(bool);
+	enum SketchObjectMode {
+		SO_POINT,
+		SO_POLYLINE,
+		SO_CIRCLE_CENTER,
+		SO_CIRCLE_3POINT,
+		SO_ARC_CENTER,
+		SO_ARC_3POINT,
+		SO_CURVE_BEZIER,
+		SO_CURVE_BEZIER3,
+		SO_CURVE_BSPLINE,
+		SO_NPOLYGON,
+		SO_RECTANGLE,
+	};
+	void createSketchObject(SketchObjectMode mode);
+	QToolButton* getCurrentSOButton();
+
+
 	void addPointToPolyline(int x, int y);
-	void addCurrentPointToPolyline();
-	void closeFootprint();
 	void closePolyLine(int x=0, int y=0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
 	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
-	void enableSketcherEditingMode(bool);
+
+	void addCurrentPointToPolyline();
+	void closeFootprint();
+
+
 	void doImportPolylinesFromDB();
 	void setVertDimension(int);
 	void entitySelected(ccHObject*);
@@ -92,6 +113,12 @@ protected:
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
+
+	//! echo glview signals
+	void echoLeftButtonClicked(int x, int y);
+	void echoRightButtonClicked(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
+	void echoMouseMoved(int x, int y, Qt::MouseButtons buttons);
+
 
 protected:
 
@@ -216,10 +243,10 @@ protected:
 		//...			= 2,
 		//...			= 4,
 		//...			= 8,
-		EDITING			= 16,
-		PAUSED			= 32,
-		STARTED			= 64,
-		RUNNING			= 128,
+		PS_EDITING			= 16,
+		PS_PAUSED			= 32,
+		PS_STARTED			= 64,
+		PS_RUNNING			= 128,
 	};
 
 	//! Deselects the currently selected polyline
@@ -236,6 +263,8 @@ private: //members
 
 	//! Selected polyline (if any)
 	Section* m_selectedPoly;
+
+	CCVector3* m_selectedVert;
 
 	//! Pool of clouds
 	CloudPool m_clouds;
@@ -260,6 +289,8 @@ private: //members
 	bool m_trace_image;
 
 	ccPlane* m_workingPlane;
+
+	SketchObjectMode m_currentSOMode;
 };
 
 #endif //BDR_TRACE_FOOTPRINT_HEADER

@@ -115,6 +115,9 @@
      <property name="checkable">
       <bool>true</bool>
      </property>
+     <property name="popupMode">
+      <enum>QToolButton::MenuButtonPopup</enum>
+     </property>
     </widget>
    </item>
    <item>
@@ -129,6 +132,9 @@
      <property name="checkable">
       <bool>true</bool>
      </property>
+     <property name="popupMode">
+      <enum>QToolButton::MenuButtonPopup</enum>
+     </property>
     </widget>
    </item>
    <item>
@@ -138,10 +144,13 @@
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
-       <normaloff>:/CC/Stocker/images/stocker/arcbycenter.png</normaloff>:/CC/Stocker/images/stocker/arcbycenter.png</iconset>
+       <normaloff>:/CC/Stocker/images/stocker/beziercurve3.png</normaloff>:/CC/Stocker/images/stocker/beziercurve3.png</iconset>
      </property>
      <property name="checkable">
       <bool>true</bool>
+     </property>
+     <property name="popupMode">
+      <enum>QToolButton::MenuButtonPopup</enum>
      </property>
     </widget>
    </item>

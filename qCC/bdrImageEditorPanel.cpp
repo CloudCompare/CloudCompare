@@ -214,10 +214,10 @@ ccHObject* bdrImageEditorPanel::getTraceBlock(QString image_name)
 
 void bdrImageEditorPanel::startEditor()
 {
-	if (!m_pSketcher) {
+	if (!m_pSketcher || !m_pbdrImshow->getImage()) {
 		return;
 	}
-	m_UI->polyEditToolButton->setChecked(true);
+	//m_UI->polyEditToolButton->setChecked(true);
 	m_pSketcher->setTraceViewMode(true);
 	m_pSketcher->linkWith(m_pbdrImshow->getGLWindow());
 

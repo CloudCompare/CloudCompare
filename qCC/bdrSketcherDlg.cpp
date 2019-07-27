@@ -81,7 +81,7 @@ static const PointCoordinateType s_defaultArrowSize = 20;
 bdrSketcher::bdrSketcher(QWidget* parent)
 	: ccOverlayDialog(parent)
 	, m_UI( new Ui::bdrSketcherDlg )
-	, m_selectedPoly(nullptr)
+	, m_selectedSO(nullptr)
 	, m_state(0)
 	, m_editedPoly(nullptr)
 	, m_editedPolyVertices(nullptr)
@@ -94,6 +94,7 @@ bdrSketcher::bdrSketcher(QWidget* parent)
 	connect(m_UI->validToolButton, &QAbstractButton::clicked, this, &bdrSketcher::apply);
 	connect(m_UI->cancelToolButton, &QAbstractButton::clicked, this, &bdrSketcher::cancel);
 
+	//////////////////////////////////////////////////////////////////////////
 
 	//! sketch objects
 	///< point
@@ -140,16 +141,17 @@ bdrSketcher::bdrSketcher(QWidget* parent)
 	///< rectangle
 	connect(m_UI->soRectangleToolButton, &QAbstractButton::clicked, this, [=]() { createSketchObject(SO_RECTANGLE); });
 
-
-
-
-
 	//////////////////////////////////////////////////////////////////////////
+
+	connect(m_UI->editingToolButton, &QAbstractButton::toggled, this, &bdrSketcher::enableSelectedSOEditingMode);
+	
 
 	connect(m_UI->importFromDBToolButton, &QAbstractButton::clicked, this, &bdrSketcher::doImportPolylinesFromDB);
 	//connect(m_UI->vertAxisComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &bdrSketcher::setVertDimension);
 
 	connect(m_UI->exportSectionsToolButton, &QAbstractButton::clicked, this, &bdrSketcher::exportSections);
+
+	//////////////////////////////////////////////////////////////////////////
 
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Space);  //space bar for the "pause" button
@@ -205,7 +207,7 @@ void bdrSketcher::onShortcutTriggered(int key)
 	switch (key)
 	{
 	case Qt::Key_Space:
-		getCurrentSOButton()->click();
+		getCurrentSOButton()->clicked();
 		return;
 
 	case Qt::Key_Escape:
@@ -436,23 +438,23 @@ void bdrSketcher::selectPolyline(Section* poly, bool autoRefreshDisplay/*=true*/
 	bool redraw = false;
 
 	//deselect previously selected polyline
-	if (m_selectedPoly && m_selectedPoly->entity)
+	if (m_selectedSO && m_selectedSO->entity)
 	{
-		m_selectedPoly->entity->showColors(true);
-		m_selectedPoly->entity->setColor(s_defaultPolylineColor);
-		m_selectedPoly->entity->setWidth(s_defaultPolylineWidth);
+		m_selectedSO->entity->showColors(true);
+		m_selectedSO->entity->setColor(s_defaultPolylineColor);
+		m_selectedSO->entity->setWidth(s_defaultPolylineWidth);
 		redraw = true;
 	}
 
-	m_selectedPoly = poly;
+	m_selectedSO = poly;
 
 	//select new polyline (if any)
-	if (m_selectedPoly)
+	if (m_selectedSO)
 	{
-		m_selectedPoly->entity->showColors(true);
-		m_selectedPoly->entity->setColor(s_defaultSelectedPolylineColor);
-		m_selectedPoly->entity->setWidth(s_defaultSelectedPolylineWidth);
-		m_selectedPoly->entity->setSelected(false); //as the window selects it by default (with bounding-box, etc.) and we don't want that
+		m_selectedSO->entity->showColors(true);
+		m_selectedSO->entity->setColor(s_defaultSelectedPolylineColor);
+		m_selectedSO->entity->setWidth(s_defaultSelectedPolylineWidth);
+		m_selectedSO->entity->setSelected(false); //as the window selects it by default (with bounding-box, etc.) and we don't want that
 		redraw = true;
 	}
 
@@ -488,10 +490,10 @@ void bdrSketcher::releasePolyline(Section* section)
 
 void bdrSketcher::deleteSelectedPolyline()
 {
-	if (!m_selectedPoly)
+	if (!m_selectedSO)
 		return;
 
-	Section* selectedPoly = m_selectedPoly;
+	Section* selectedPoly = m_selectedSO;
 
 	//deslect polyline before anything
 	selectPolyline(nullptr, false);
@@ -1173,6 +1175,40 @@ void bdrSketcher::createSketchObject(SketchObjectMode mode)
 	else {
 		m_currentSOMode = mode;
 		enableSketcherEditingMode(true);
+
+		// FIXME: the checked state is wrong
+		switch (m_currentSOMode)
+		{
+		case bdrSketcher::SO_POINT:
+		case bdrSketcher::SO_POLYLINE:
+			break;
+		case bdrSketcher::SO_CIRCLE_CENTER:
+			m_UI->soCircleToolButton->setDefaultAction(m_UI->actionSoCircleByCenter);
+			break;
+		case bdrSketcher::SO_CIRCLE_3POINT:
+			m_UI->soCircleToolButton->setDefaultAction(m_UI->actionSoCircleBy3Points);
+			break;
+		case bdrSketcher::SO_ARC_CENTER:
+			m_UI->soArcToolButton->setDefaultAction(m_UI->actionSoArcByCenter);
+			break;
+		case bdrSketcher::SO_ARC_3POINT:
+			m_UI->soArcToolButton->setDefaultAction(m_UI->actionSoArcBy3Points);
+			break;
+		case bdrSketcher::SO_CURVE_BEZIER:
+			m_UI->soCurveToolButton->setDefaultAction(m_UI->actionSoCurveBezier);
+			break;
+		case bdrSketcher::SO_CURVE_BEZIER3:
+			m_UI->soCurveToolButton->setDefaultAction(m_UI->actionSoCurveCubicBezier);
+			break;
+		case bdrSketcher::SO_CURVE_BSPLINE:
+			m_UI->soCurveToolButton->setDefaultAction(m_UI->actionSoCurveBSpline);
+			break;
+		case bdrSketcher::SO_NPOLYGON:
+		case bdrSketcher::SO_RECTANGLE:
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -1203,6 +1239,18 @@ QToolButton * bdrSketcher::getCurrentSOButton()
 		break;
 	}
 	return nullptr;
+}
+
+void bdrSketcher::enableSelectedSOEditingMode(bool state)
+{
+	if (state && m_selectedSO) {
+		m_state = PS_EDITING;
+		m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
+	}
+	else {
+		m_state = PS_PAUSED;
+		m_associatedWin->setPickingMode(ccGLWindow::ENTITY_PICKING);
+	}
 }
 
 void bdrSketcher::addUndoStep()

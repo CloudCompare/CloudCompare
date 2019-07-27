@@ -77,6 +77,7 @@ protected:
 	bool reset(bool askForConfirmation = true);
 	void apply();
 	void cancel();
+
 	void enableSketcherEditingMode(bool);
 	enum SketchObjectMode {
 		SO_POINT,
@@ -94,18 +95,16 @@ protected:
 	void createSketchObject(SketchObjectMode mode);
 	QToolButton* getCurrentSOButton();
 
+	///< edit the selected object
+	void enableSelectedSOEditingMode(bool);
 
-	void addPointToPolyline(int x, int y);
-	void closePolyLine(int x=0, int y=0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
-	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
 
 	void addCurrentPointToPolyline();
 	void closeFootprint();
 
-
 	void doImportPolylinesFromDB();
 	void setVertDimension(int);
-	void entitySelected(ccHObject*);
+	
 	void exportFootprints();
 	void exportSections();
 	void exportFootprintInside();
@@ -114,11 +113,20 @@ protected:
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
 
+	//////////////////////////////////////////////////////////////////////////
+
 	//! echo glview signals
 	void echoLeftButtonClicked(int x, int y);
 	void echoRightButtonClicked(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
 	void echoMouseMoved(int x, int y, Qt::MouseButtons buttons);
+	void entitySelected(ccHObject*);
 
+	///< polyline
+	void addPointToPolyline(int x, int y);
+	void closePolyLine(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
+	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
+
+	//////////////////////////////////////////////////////////////////////////
 
 protected:
 
@@ -262,7 +270,7 @@ private: //members
 	SectionPool m_sections;
 
 	//! Selected polyline (if any)
-	Section* m_selectedPoly;
+	Section* m_selectedSO;
 
 	CCVector3* m_selectedVert;
 

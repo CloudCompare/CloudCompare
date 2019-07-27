@@ -61,6 +61,8 @@
 
 //default parameters
 static const ccColor::Rgb& s_defaultPolylineColor = ccColor::lightCoral;
+static const ccColor::Rgb& s_defaultVerticeColor = ccColor::green;
+static const ccColor::Rgb& s_defaultSelectedVerticeColor = ccColor::yellow;
 static const ccColor::Rgb& s_defaultFpNormalColor = ccColor::doderBlue;
 static const ccColor::Rgb& s_defaultFpHoleColor = ccColor::skyBlue;
 static const ccColor::Rgb& s_defaultContourColor = ccColor::green;
@@ -69,6 +71,8 @@ static const ccColor::Rgb& s_defaultSelectedPolylineColor = ccColor::red;
 
 constexpr int	s_defaultPolylineWidth = 1;
 constexpr int	s_defaultSelectedPolylineWidth = 3;
+constexpr int	s_defaultVerticesSize = 5;
+constexpr int	s_defaultSelectedVertexSize = 8;
 
 //default export groups
 static unsigned s_polyExportGroupID = 0;
@@ -77,6 +81,20 @@ static unsigned s_cloudExportGroupID = 0;
 
 //default arrow size
 static const PointCoordinateType s_defaultArrowSize = 20;
+
+inline ccPointCloud* getEntityAssociateCloud(ccHObject* entity) {
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+	if (!cloud) {
+		if (entity->isKindOf(CC_TYPES::POLY_LINE)) {
+			CCLib::GenericIndexedCloudPersist* associatedCloud = static_cast<ccPolyline*>(entity)->getAssociatedCloud();
+			if (associatedCloud) {
+				cloud = dynamic_cast<ccPointCloud*>(associatedCloud);
+			}
+		}
+	}
+	
+	return cloud;
+}
 
 bdrSketcher::bdrSketcher(QWidget* parent)
 	: ccOverlayDialog(parent)
@@ -87,6 +105,7 @@ bdrSketcher::bdrSketcher(QWidget* parent)
 	, m_editedPolyVertices(nullptr)
 	, m_workingPlane(nullptr)
 	, m_currentSOMode(SO_POINT)
+	, m_selectedVert(nullptr)
 {
 	m_UI->setupUi(this);
 
@@ -302,6 +321,12 @@ void bdrSketcher::echoRightButtonClicked(int x, int y)
 
 void bdrSketcher::echoMouseMoved(int x, int y, Qt::MouseButtons buttons)
 {
+	if ((buttons & Qt::LeftButton) && m_selectedSO && (m_state & PS_EDITING)) {
+		//! detect if the mouse is on the segment or on the corner point
+
+		return;
+	}
+
 	switch (m_currentSOMode)
 	{
 	case bdrSketcher::SO_POINT:
@@ -331,6 +356,27 @@ void bdrSketcher::echoMouseMoved(int x, int y, Qt::MouseButtons buttons)
 		break;
 	default:
 		break;
+	}
+}
+
+void bdrSketcher::echoItemPicked(ccHObject * entity, unsigned subEntityID, int x, int y, const CCVector3 & P, const CCVector3d & uvw)
+{
+	if ((m_state & PS_EDITING) && entity) {
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (cloud) {
+			m_selectedVert = const_cast<CCVector3*>(cloud->getPoint(subEntityID));
+			cloud->setRGBColor(s_defaultVerticeColor);
+			cloud->setPointColor(subEntityID, s_defaultSelectedPolylineColor);
+		}
+		
+		//_cloud->getPointPersistentPtr(index);
+		m_associatedWin->redraw();
+	}
+	else {
+		if (m_selectedSO) {
+			//m_selectedSO->entity->getAssociatedCloud();// setcolor
+			m_selectedVert = nullptr;
+		}
 	}
 }
 
@@ -390,6 +436,7 @@ bool bdrSketcher::linkWith(ccGLWindow* win)
 		connect(m_associatedWin, &ccGLWindow::leftButtonClicked, this, &bdrSketcher::echoLeftButtonClicked);
 		connect(m_associatedWin, &ccGLWindow::rightButtonClicked, this, &bdrSketcher::echoRightButtonClicked);
 		connect(m_associatedWin, &ccGLWindow::mouseMoved, this, &bdrSketcher::echoMouseMoved);
+		connect(m_associatedWin, &ccGLWindow::itemPicked, this, &bdrSketcher::echoItemPicked);
 		connect(m_associatedWin, &ccGLWindow::entitySelectionChanged, this, &bdrSketcher::entitySelected);
 
 		//import sections in current display
@@ -440,10 +487,13 @@ void bdrSketcher::selectPolyline(Section* poly, bool autoRefreshDisplay/*=true*/
 	//deselect previously selected polyline
 	if (m_selectedSO && m_selectedSO->entity)
 	{
-		m_selectedSO->entity->showColors(true);
-		m_selectedSO->entity->setColor(s_defaultPolylineColor);
-		m_selectedSO->entity->setWidth(s_defaultPolylineWidth);
-		redraw = true;
+		ccPolyline* sectionPolyline = ccHObjectCaster::ToPolyline(m_selectedSO->entity);
+		if (sectionPolyline) {
+			sectionPolyline->showColors(true);
+			sectionPolyline->setColor(s_defaultPolylineColor);
+			sectionPolyline->setWidth(s_defaultPolylineWidth);
+			redraw = true;
+		}
 	}
 
 	m_selectedSO = poly;
@@ -451,11 +501,14 @@ void bdrSketcher::selectPolyline(Section* poly, bool autoRefreshDisplay/*=true*/
 	//select new polyline (if any)
 	if (m_selectedSO)
 	{
-		m_selectedSO->entity->showColors(true);
-		m_selectedSO->entity->setColor(s_defaultSelectedPolylineColor);
-		m_selectedSO->entity->setWidth(s_defaultSelectedPolylineWidth);
-		m_selectedSO->entity->setSelected(false); //as the window selects it by default (with bounding-box, etc.) and we don't want that
-		redraw = true;
+		ccPolyline* sectionPolyline = ccHObjectCaster::ToPolyline(m_selectedSO->entity);
+		if (sectionPolyline) {
+			sectionPolyline->showColors(true);
+			sectionPolyline->setColor(s_defaultSelectedPolylineColor);
+			sectionPolyline->setWidth(s_defaultSelectedPolylineWidth);
+			sectionPolyline->setSelected(false); //as the window selects it by default (with bounding-box, etc.) and we don't want that
+			redraw = true;
+		}
 	}
 
 	if (redraw && autoRefreshDisplay && m_associatedWin)
@@ -480,10 +533,13 @@ void bdrSketcher::releasePolyline(Section* section)
 		else
 		{
 			//restore original display and style
-			section->entity->showColors(section->backupColorShown);
-			section->entity->setColor(section->backupColor);
-			section->entity->setWidth(section->backupWidth);
-			section->entity->setDisplay_recursive(section->originalDisplay);
+			ccPolyline* sectionPolyline = ccHObjectCaster::ToPolyline(section->entity);
+			if (sectionPolyline) {
+				sectionPolyline->showColors(section->backupColorShown);
+				sectionPolyline->setColor(section->backupColor);
+				sectionPolyline->setWidth(section->backupWidth);
+				sectionPolyline->setDisplay_recursive(section->originalDisplay);
+			}
 		}
 	}
 }
@@ -891,7 +947,10 @@ void bdrSketcher::updatePolyLine(int x, int y, Qt::MouseButtons buttons)
 
 	if (m_state & PS_EDITING) {
 		//! edit the polyline
-
+		
+		if (buttons & Qt::LeftButton) {
+			int i = 0;
+		}
 
 
 		return;
@@ -1072,9 +1131,13 @@ void bdrSketcher::closePolyLine(int, int)
 		m_editedPoly->showColors(true);
 		m_editedPoly->setColor(s_defaultPolylineColor);
 		m_editedPoly->setWidth(s_defaultPolylineWidth);
-		if (!m_clouds.isEmpty())
-			m_editedPoly->setDisplay_recursive(m_associatedWin); //set the same 'default' display as the cloud
+		// if (!m_clouds.isEmpty())
+		m_editedPoly->setDisplay_recursive(m_associatedWin); //set the same 'default' display as the cloud
 		m_editedPoly->setName(QString("Polyline #%1").arg(m_sections.size() + 1));
+
+		m_editedPolyVertices->setRGBColor(s_defaultVerticeColor);
+		m_editedPolyVertices->showColors(true);
+		m_editedPolyVertices->setPointSize(s_defaultVerticesSize);
 		//save polyline
 		if (!addPolyline(m_editedPoly, false))
 		{
@@ -1244,13 +1307,24 @@ QToolButton * bdrSketcher::getCurrentSOButton()
 void bdrSketcher::enableSelectedSOEditingMode(bool state)
 {
 	if (state && m_selectedSO) {
+		ccPointCloud* cloud = getEntityAssociateCloud(m_selectedSO->entity); if (cloud) { goto exit; }
+		cloud->setEnabled(true);
+
 		m_state = PS_EDITING;
 		m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
 	}
 	else {
+		ccPointCloud* cloud = getEntityAssociateCloud(m_selectedSO->entity); if (cloud) { goto exit; }
+		cloud->setEnabled(false);
+
 		m_state = PS_PAUSED;
 		m_associatedWin->setPickingMode(ccGLWindow::ENTITY_PICKING);
 	}
+
+	m_associatedWin->redraw();
+
+exit:
+	return;
 }
 
 void bdrSketcher::addUndoStep()
@@ -1435,13 +1509,14 @@ void bdrSketcher::exportFootprints()
 		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
 		{
 			Section& section = *it;
-			if (section.entity && !section.isInDB) {
+			ccPolyline* sectionPolyline = ccHObjectCaster::ToPolyline(section.entity);
+			if (sectionPolyline && !section.isInDB) {
 				StFootPrint* duplicatePoly = new StFootPrint(0);
 				ccPointCloud* duplicateVertices = 0;
 
 				int biggest_number = GetMaxNumberExcludeChildPrefix(m_dest_obj, BDDB_FOOTPRINT_PREFIX);
 				QString cur_name = BDDB_FOOTPRINT_PREFIX + QString::number(biggest_number + 1);
-				if (duplicatePoly->initWith(duplicateVertices, *section.entity))
+				if (duplicatePoly->initWith(duplicateVertices, *sectionPolyline))
 				{
 					duplicatePoly->setAssociatedCloud(duplicateVertices);
 					assert(duplicateVertices);
@@ -1474,13 +1549,13 @@ void bdrSketcher::exportFootprints()
 					duplicatePoly->set2DMode(false);
 					duplicatePoly->setDisplay_recursive(m_dest_obj->getDisplay());
 					duplicatePoly->setName(cur_name);
-					duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
-					duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
+					duplicatePoly->setGlobalScale(sectionPolyline->getGlobalScale());
+					duplicatePoly->setGlobalShift(sectionPolyline->getGlobalShift());
 					duplicatePoly->setBottom(m_ground);
 					duplicatePoly->setTop(m_ground);
 					duplicatePoly->setHeight(m_ground);
 
-					section.entity = duplicatePoly;
+					sectionPolyline = duplicatePoly;
 
 				}
 				else {
@@ -1545,13 +1620,14 @@ void bdrSketcher::exportFootprintInside()
 		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
 		{
 			Section& section = *it;
-			if (section.entity && !section.isInDB) {
+			ccPolyline* sectionPolyline = ccHObjectCaster::ToPolyline(section.entity);
+			if (sectionPolyline && !section.isInDB) {
 				StFootPrint* duplicatePoly = new StFootPrint(0);
 				ccPointCloud* duplicateVertices = 0;
 
 				int biggest_number = GetMaxNumberExcludeChildPrefix(m_dest_obj, BDDB_FOOTPRINT_PREFIX);
 				QString cur_name = BDDB_FOOTPRINT_PREFIX + QString::number(biggest_number + 1);
-				if (duplicatePoly->initWith(duplicateVertices, *section.entity))
+				if (duplicatePoly->initWith(duplicateVertices, *sectionPolyline))
 				{
 					duplicatePoly->setAssociatedCloud(duplicateVertices);
 					assert(duplicateVertices);
@@ -1571,12 +1647,12 @@ void bdrSketcher::exportFootprintInside()
 					duplicatePoly->set2DMode(false);
 					duplicatePoly->setDisplay_recursive(m_dest_obj->getDisplay());
 					duplicatePoly->setName(cur_name);
-					duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
-					duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
+					duplicatePoly->setGlobalScale(sectionPolyline->getGlobalScale());
+					duplicatePoly->setGlobalShift(sectionPolyline->getGlobalShift());
 					duplicatePoly->setBottom(m_ground);
 					duplicatePoly->setTop(m_ground);
 					duplicatePoly->setHeight(m_ground);
-					section.entity = duplicatePoly;
+					sectionPolyline = duplicatePoly;
 				}
 				else {
 					delete duplicatePoly;
@@ -1633,13 +1709,14 @@ void bdrSketcher::exportFootprintOutside()
 		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
 		{
 			Section& section = *it;
-			if (section.entity && !section.isInDB) {
+			ccPolyline* sectionPolyline = ccHObjectCaster::ToPolyline(section.entity);
+			if (sectionPolyline && !section.isInDB) {
 				StFootPrint* duplicatePoly = new StFootPrint(0);
 				ccPointCloud* duplicateVertices = 0;
 
 				int biggest_number = GetMaxNumberExcludeChildPrefix(m_dest_obj, BDDB_FOOTPRINT_PREFIX);
 				QString cur_name = BDDB_FOOTPRINT_PREFIX + QString::number(biggest_number + 1);
-				if (duplicatePoly->initWith(duplicateVertices, *section.entity))
+				if (duplicatePoly->initWith(duplicateVertices, *sectionPolyline))
 				{
 					duplicatePoly->setAssociatedCloud(duplicateVertices);
 					assert(duplicateVertices);
@@ -1659,12 +1736,12 @@ void bdrSketcher::exportFootprintOutside()
 					duplicatePoly->set2DMode(false);
 					duplicatePoly->setDisplay_recursive(m_dest_obj->getDisplay());
 					duplicatePoly->setName(cur_name);
-					duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
-					duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
+					duplicatePoly->setGlobalScale(sectionPolyline->getGlobalScale());
+					duplicatePoly->setGlobalShift(sectionPolyline->getGlobalShift());
 					duplicatePoly->setBottom(m_ground);
 					duplicatePoly->setHeight(m_ground);
 					duplicatePoly->setTop(m_ground);
-					section.entity = duplicatePoly;
+					sectionPolyline = duplicatePoly;
 				}
 				else {
 					delete duplicatePoly;

@@ -95,6 +95,12 @@ protected:
 	void createSketchObject(SketchObjectMode mode);
 	QToolButton* getCurrentSOButton();
 
+	struct PickedVert {
+		bool button_down;	// button is down or just hover
+
+
+	};
+
 	///< edit the selected object
 	void enableSelectedSOEditingMode(bool);
 
@@ -119,6 +125,7 @@ protected:
 	void echoLeftButtonClicked(int x, int y);
 	void echoRightButtonClicked(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
 	void echoMouseMoved(int x, int y, Qt::MouseButtons buttons);
+	void echoItemPicked(ccHObject* entity, unsigned subEntityID, int x, int y, const CCVector3& P, const CCVector3d& uvw);
 	void entitySelected(ccHObject*);
 
 	///< polyline
@@ -153,10 +160,10 @@ protected:
 	};
 
 	//! Imported entity
-	template<class EntityType> struct ImportedEntity
+	template<class EntityType = ccHObject> struct SketcherObject
 	{
 		//! Default constructor
-		ImportedEntity()
+		SketcherObject()
 			: entity(0)
 			, originalDisplay(nullptr)
 			, isInDB(false)
@@ -165,7 +172,7 @@ protected:
 		{}
 		
 		//! Copy constructor
-		ImportedEntity(const ImportedEntity& section)
+		SketcherObject(const SketcherObject& section)
 			: entity(section.entity)
 			, originalDisplay(section.originalDisplay)
 			, isInDB(section.isInDB)
@@ -176,7 +183,7 @@ protected:
 		}
 		
 		//! Constructor from an entity
-		ImportedEntity(EntityType* e, bool alreadyInDB)
+		SketcherObject(EntityType* e, bool alreadyInDB)
 			: entity(e)
 			, originalDisplay(e->getDisplay())
 			, isInDB(alreadyInDB)
@@ -211,8 +218,8 @@ protected:
 			}
 		}
 
-		bool operator ==(const ImportedEntity& ie) { return entity == ie.entity; }
-		
+		bool operator ==(const SketcherObject& ie) { return entity == ie.entity; }
+				
 		EntityType* entity;
 		ccGenericGLDisplay* originalDisplay;
 		bool isInDB;
@@ -224,10 +231,12 @@ protected:
 
 		//! for footprint only
 		POLYLINE_TYPE type;
+
+		SketchObjectMode soMode;
 	};
 
 	//! Section
-	using Section = ImportedEntity<ccPolyline>;
+	using Section = SketcherObject<ccHObject>;
 
 	//! Releases a polyline
 	/** The polyline is removed from display. Then it is
@@ -236,7 +245,7 @@ protected:
 	void releasePolyline(Section* section);
 
 	//! Cloud
-	using Cloud = ImportedEntity<ccGenericPointCloud>;
+	using Cloud = SketcherObject<ccGenericPointCloud>;
 
 	//! Type of the pool of active sections
 	using SectionPool = QList<Section>;

@@ -647,6 +647,10 @@ public: //stereo mode
 	//! Returns whether the rotation axis is locaked or not
 	bool isRotationAxisLocked() const { return m_rotationAxisLocked; }
 
+	void setCrossCursor();
+
+	void setMoveCursor();
+
 
 public slots:
 

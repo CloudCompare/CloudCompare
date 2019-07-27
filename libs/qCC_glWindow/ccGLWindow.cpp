@@ -583,6 +583,16 @@ void ccGLWindow::makeCurrent()
 	}
 }
 
+void ccGLWindow::setCrossCursor()
+{
+	setCursor(QCursor(Qt::CrossCursor));
+}
+
+void ccGLWindow::setMoveCursor()
+{
+	setCursor(QCursor(Qt::SizeAllCursor));
+}
+
 void ccGLWindow::resetCursor()
 {
 	if (pointViewEditMode()) {

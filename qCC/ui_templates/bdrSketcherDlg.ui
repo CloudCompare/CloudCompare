@@ -280,6 +280,9 @@
    </item>
   </layout>
   <action name="actionSoCircleByCenter">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../icones.qrc">
      <normaloff>:/CC/Stocker/images/stocker/circlebycenter.png</normaloff>:/CC/Stocker/images/stocker/circlebycenter.png</iconset>
@@ -295,6 +298,9 @@
    </property>
   </action>
   <action name="actionSoCircleBy3Points">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../icones.qrc">
      <normaloff>:/CC/Stocker/images/stocker/circleby3points.png</normaloff>:/CC/Stocker/images/stocker/circleby3points.png</iconset>
@@ -310,6 +316,9 @@
    </property>
   </action>
   <action name="actionSoArcByCenter">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../icones.qrc">
      <normaloff>:/CC/Stocker/images/stocker/arcbycenter.png</normaloff>:/CC/Stocker/images/stocker/arcbycenter.png</iconset>
@@ -325,6 +334,9 @@
    </property>
   </action>
   <action name="actionSoArcBy3Points">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../icones.qrc">
      <normaloff>:/CC/Stocker/images/stocker/arcby3points.png</normaloff>:/CC/Stocker/images/stocker/arcby3points.png</iconset>
@@ -340,6 +352,9 @@
    </property>
   </action>
   <action name="actionSoCurveBezier">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../icones.qrc">
      <normaloff>:/CC/Stocker/images/stocker/beziercurve.png</normaloff>:/CC/Stocker/images/stocker/beziercurve.png</iconset>
@@ -355,6 +370,9 @@
    </property>
   </action>
   <action name="actionSoCurveCubicBezier">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../icones.qrc">
      <normaloff>:/CC/Stocker/images/stocker/beziercurve3.png</normaloff>:/CC/Stocker/images/stocker/beziercurve3.png</iconset>
@@ -373,6 +391,9 @@
    </property>
   </action>
   <action name="actionSoCurveBSpline">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../icones.qrc">
      <normaloff>:/CC/Stocker/images/stocker/bsplinecurve.png</normaloff>:/CC/Stocker/images/stocker/bsplinecurve.png</iconset>

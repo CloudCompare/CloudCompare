@@ -215,6 +215,7 @@ ccHObject* bdrImageEditorPanel::getTraceBlock(QString image_name)
 void bdrImageEditorPanel::startEditor()
 {
 	if (!m_pSketcher || !m_pbdrImshow->getImage()) {
+		m_UI->polyEditToolButton->setChecked(false);
 		return;
 	}
 	//m_UI->polyEditToolButton->setChecked(true);

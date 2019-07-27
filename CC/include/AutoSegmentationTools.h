@@ -104,8 +104,8 @@ public:
 		\return success
 	**/
 	static bool frontPropagationBasedSegmentation(	GenericIndexedCloudPersist* theCloud,
-													ScalarType minSeedDist,
 													PointCoordinateType radius,
+													ScalarType minSeedDist,
 													unsigned char octreeLevel,
 													ReferenceCloudContainer& theSegmentedLists,
 													CCLib::GenericProgressCallback* progressCb = nullptr,

@@ -398,8 +398,8 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
 
-	m_moveCursor = new QCursor(QPixmap(":/CC/Stocker/images/stocker/cursorMove.png"), -1, -1);
-	m_boardCursor = new QCursor(QPixmap(":/CC/Stocker/images/stocker/cursorBoard.png"), -1, -1);
+ 	m_moveCursor = new QCursor(QPixmap(":/CC/Stocker/images/stocker/cursorMove.png"), -1, -1);
+ 	m_boardCursor = new QCursor(QPixmap(":/CC/Stocker/images/stocker/cursorBoard.png"), -1, -1);
 
 	//GL window own DB
 	m_winDBRoot = new ccHObject(QString("DB.3DView_%1").arg(m_uniqueID));

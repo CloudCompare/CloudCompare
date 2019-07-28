@@ -106,6 +106,7 @@ bdrSketcher::bdrSketcher(QWidget* parent)
 	, m_workingPlane(nullptr)
 	, m_currentSOMode(SO_POINT)
 	, m_selectedVert(nullptr)
+	, m_pickingVertex(nullptr)
 {
 	m_UI->setupUi(this);
 
@@ -248,6 +249,107 @@ void bdrSketcher::onShortcutTriggered(int key)
 	}
 }
 
+bool bdrSketcher::linkWith(ccGLWindow* win)
+{
+	ccGLWindow* oldWin = m_associatedWin;
+
+	if (!ccOverlayDialog::linkWith(win))
+	{
+		return false;
+	}
+
+	selectPolyline(nullptr);
+
+	if (oldWin)
+	{
+		//restore sections original display
+		for (auto & section : m_sections)
+		{
+			if (section.entity)
+			{
+				if (!section.isInDB)
+					oldWin->removeFromOwnDB(section.entity);
+				section.entity->setDisplay_recursive(section.originalDisplay);
+			}
+		}
+
+		//Restore clouds original display
+		for (auto & cloud : m_clouds)
+		{
+			if (cloud.entity)
+			{
+				if (!cloud.isInDB)
+					oldWin->removeFromOwnDB(cloud.entity);
+				cloud.entity->setDisplay(cloud.originalDisplay);
+			}
+		}
+
+		if (m_editedPoly)
+		{
+			m_editedPoly->setDisplay_recursive(nullptr);
+		}
+
+		//auto-close formerly associated window
+		if (MainWindow::TheInstance())
+		{
+			QMdiSubWindow* subWindow = MainWindow::TheInstance()->getMDISubWindow(oldWin);
+			if (subWindow)
+			{
+				subWindow->close();
+			}
+		}
+	}
+
+	if (m_associatedWin)
+	{
+		connect(m_associatedWin, &ccGLWindow::leftButtonClicked, this, &bdrSketcher::echoLeftButtonClicked);
+		connect(m_associatedWin, &ccGLWindow::rightButtonClicked, this, &bdrSketcher::echoRightButtonClicked);
+		connect(m_associatedWin, &ccGLWindow::mouseMoved, this, &bdrSketcher::echoMouseMoved);
+		connect(m_associatedWin, &ccGLWindow::itemPicked, this, &bdrSketcher::echoItemPicked);
+		connect(m_associatedWin, &ccGLWindow::buttonReleased, this, &bdrSketcher::echoButtonReleased);
+		connect(m_associatedWin, &ccGLWindow::entitySelectionChanged, this, &bdrSketcher::entitySelected);
+
+		//import sections in current display
+		for (auto & section : m_sections)
+		{
+			if (section.entity)
+			{
+				section.originalDisplay = section.entity->getDisplay();
+				section.entity->setDisplay_recursive(m_associatedWin);
+				if (!section.isInDB)
+					m_associatedWin->addToOwnDB(section.entity);
+			}
+		}
+
+		//import clouds in current display
+		for (auto & cloud : m_clouds)
+		{
+			if (cloud.entity)
+			{
+				cloud.originalDisplay = cloud.entity->getDisplay();
+				cloud.entity->setDisplay(m_associatedWin);
+				if (!cloud.isInDB)
+				{
+					m_associatedWin->addToOwnDB(cloud.entity);
+				}
+			}
+		}
+
+		if (m_editedPoly)
+		{
+			m_editedPoly->setDisplay_recursive(m_associatedWin);
+		}
+
+		//update view direction	// TODO: set plane
+//		setVertDimension(m_UI->vertAxisComboBox->currentIndex());
+
+		//section extraction only works in orthoraphic mode!
+		m_associatedWin->setPerspectiveState(false, true);
+	}
+
+	return true;
+}
+
 void bdrSketcher::echoLeftButtonClicked(int x, int y)
 {
 	switch (m_currentSOMode)
@@ -319,10 +421,137 @@ void bdrSketcher::echoRightButtonClicked(int x, int y)
 	}
 }
 
+void bdrSketcher::changePickingCursor()
+{
+	if (m_pickingVertex) {
+		if (m_pickingVertex->nearestEntitiy) {
+
+			if (m_pickingVertex->button_down) {
+				//! snap
+				m_associatedWin->setCrossCursor(); // TODO: WHAT'S SNAPPING CURSOR??
+			}
+			else {
+				//! point
+				if (m_pickingVertex->nearestEntitiy->isKindOf(CC_TYPES::POINT_CLOUD)) {
+					m_associatedWin->setMoveCursor();
+				}
+				//! on a polyline
+				else if (m_pickingVertex->nearestEntitiy->isKindOf(CC_TYPES::POLY_LINE)) {
+					m_associatedWin->setCrossCursor();
+				}
+			}
+		}
+		else {
+			m_associatedWin->resetCursor();
+		}
+	}
+	else {
+		m_associatedWin->resetCursor();
+	}
+}
+
+struct bdrSketcher::SOPickingParams {
+	//! Default constructor
+	SOPickingParams(
+		int _centerX = 0,
+		int _centerY = 0,
+		int _pickRadius = 5)
+		: centerX(_centerX)
+		, centerY(_centerY)
+		, pickRadius(_pickRadius)
+	{}
+
+	int centerX;
+	int centerY;
+	int pickRadius;
+};
+
+void bdrSketcher::startCPUPointPicking(const SOPickingParams& params)
+{
+	if (!m_pickingVertex || m_pickingVertex->picking_repo.empty()) return;
+	
+	//! save processPickingResult to picking vertex
+
+	ccGLCameraParameters camera;
+	m_associatedWin->getGLCameraParameters(camera);
+	CCVector2d clickedPos(params.centerX, m_associatedWin->glHeight() - 1 - params.centerY);
+
+	ccHObject* nearestEntity = nullptr;
+	int nearestElementIndex = -1;
+	double nearestElementSquareDist = -1.0;
+	CCVector3 nearestPoint(0, 0, 0);
+	CCVector3d nearestPointBC(0, 0, 0);
+
+	SectionPool toProcess = m_pickingVertex->picking_repo;
+
+	while (!toProcess.empty()) {
+		ccHObject* ent = toProcess.back().entity;
+		bool isindb = toProcess.back().isInDB;
+		toProcess.pop_back();
+		if (!ent->isEnabled()) continue;
+		
+		if (ent->isDisplayedIn(m_associatedWin)) {
+			if (ent->isKindOf(CC_TYPES::POINT_CLOUD)) {
+				ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
+
+				int nearestPointIndex = -1;
+				double nearestSquareDist = 0.0;
+
+				if (cloud->pointPicking(clickedPos,
+					camera,
+					nearestPointIndex,
+					nearestSquareDist,
+					params.pickRadius,
+					params.pickRadius,
+					false))
+				{
+					if (nearestElementIndex < 0 || (nearestPointIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
+					{
+						nearestElementSquareDist = nearestSquareDist;
+						nearestElementIndex = nearestPointIndex;
+						nearestPoint = *(cloud->getPoint(nearestPointIndex));
+						nearestEntity = cloud;
+					}
+				}
+			}
+			else if (ent->isKindOf(CC_TYPES::POLY_LINE)) {
+
+			}
+		}
+
+		// add children
+		for (unsigned i = 0; i < ent->getChildrenNumber(); ++i) {
+			toProcess.push_back(Section(ent->getChild(i), isindb));
+		}
+	}
+
+	m_pickingVertex->nearestEntitiy = nearestEntity;
+
+	changePickingCursor();
+}
+
 void bdrSketcher::echoMouseMoved(int x, int y, Qt::MouseButtons buttons)
 {
-	if ((buttons & Qt::LeftButton) && m_selectedSO && (m_state & PS_EDITING)) {
+
+	if (m_selectedSO && (m_state & PS_EDITING)) {
+		SOPickingParams params(x, y, m_associatedWin->getPickingRadius());
+
 		//! detect if the mouse is on the segment or on the corner point
+
+		///< if the mouse hover, detect only the editing item
+		if (buttons == Qt::NoButton) {
+			setPickingRepoHover();
+
+			startCPUPointPicking(params);
+
+			
+		}
+		///< if the button is down, detect all the items in the editing pool for snapping
+		else if (buttons & Qt::LeftButton) {
+			setPickingRepoButtonDown();
+			startCPUPointPicking(params);
+
+		}
 
 		return;
 	}
@@ -332,7 +561,7 @@ void bdrSketcher::echoMouseMoved(int x, int y, Qt::MouseButtons buttons)
 	case bdrSketcher::SO_POINT:
 		break;
 	case bdrSketcher::SO_POLYLINE:
-		if ((m_state & PS_RUNNING) || (m_state & PS_EDITING)) {
+		if ((m_state & PS_RUNNING)) {
 			updatePolyLine(x, y, buttons);
 		}
 		break;
@@ -380,105 +609,11 @@ void bdrSketcher::echoItemPicked(ccHObject * entity, unsigned subEntityID, int x
 	}
 }
 
-bool bdrSketcher::linkWith(ccGLWindow* win)
+void bdrSketcher::echoButtonReleased()
 {
-	ccGLWindow* oldWin = m_associatedWin;
 
-	if (!ccOverlayDialog::linkWith(win))
-	{
-		return false;
-	}
-
-	selectPolyline(nullptr);
-
-	if (oldWin)
-	{
-		//restore sections original display
-		for (auto & section : m_sections)
-		{
-			if (section.entity)
-			{
-				if (!section.isInDB)
-					oldWin->removeFromOwnDB(section.entity);
-				section.entity->setDisplay_recursive(section.originalDisplay);
-			}
-		}
-
-		//Restore clouds original display
-		for (auto & cloud : m_clouds)
-		{
-			if (cloud.entity)
-			{
-				if (!cloud.isInDB)
-					oldWin->removeFromOwnDB(cloud.entity);
-				cloud.entity->setDisplay(cloud.originalDisplay);
-			}
-		}
-
-		if (m_editedPoly)
-		{
-			m_editedPoly->setDisplay_recursive(nullptr);
-		}
-
-		//auto-close formerly associated window
-		if (MainWindow::TheInstance())
-		{
-			QMdiSubWindow* subWindow = MainWindow::TheInstance()->getMDISubWindow(oldWin);
-			if (subWindow)
-			{
-				subWindow->close();
-			}
-		}
-	}
-
-	if (m_associatedWin)
-	{
-		connect(m_associatedWin, &ccGLWindow::leftButtonClicked, this, &bdrSketcher::echoLeftButtonClicked);
-		connect(m_associatedWin, &ccGLWindow::rightButtonClicked, this, &bdrSketcher::echoRightButtonClicked);
-		connect(m_associatedWin, &ccGLWindow::mouseMoved, this, &bdrSketcher::echoMouseMoved);
-		connect(m_associatedWin, &ccGLWindow::itemPicked, this, &bdrSketcher::echoItemPicked);
-		connect(m_associatedWin, &ccGLWindow::entitySelectionChanged, this, &bdrSketcher::entitySelected);
-
-		//import sections in current display
-		for (auto & section : m_sections)
-		{
-			if (section.entity)
-			{
-				section.originalDisplay = section.entity->getDisplay();
-				section.entity->setDisplay_recursive(m_associatedWin);
-				if (!section.isInDB)
-					m_associatedWin->addToOwnDB(section.entity);
-			}
-		}
-
-		//import clouds in current display
-		for (auto & cloud : m_clouds)
-		{
-			if (cloud.entity)
-			{
-				cloud.originalDisplay = cloud.entity->getDisplay();
-				cloud.entity->setDisplay(m_associatedWin);
-				if (!cloud.isInDB)
-				{
-					m_associatedWin->addToOwnDB(cloud.entity);
-				}
-			}
-		}
-
-		if (m_editedPoly)
-		{
-			m_editedPoly->setDisplay_recursive(m_associatedWin);
-		}
-
-		//update view direction	// TODO: set plane
-//		setVertDimension(m_UI->vertAxisComboBox->currentIndex());
-
-		//section extraction only works in orthoraphic mode!
-		m_associatedWin->setPerspectiveState(false, true);
-	}
-
-	return true;
 }
+
 
 void bdrSketcher::selectPolyline(Section* poly, bool autoRefreshDisplay/*=true*/)
 {
@@ -792,6 +927,21 @@ void bdrSketcher::updateCloudsBox()
 	}
 }
 
+void bdrSketcher::setPickingRepoButtonDown()
+{
+	if (m_pickingVertex) {
+		m_pickingVertex->picking_repo = m_sections;
+	}
+}
+
+void bdrSketcher::setPickingRepoHover()
+{
+	if (m_pickingVertex) {
+		m_pickingVertex->picking_repo.clear();
+		m_pickingVertex->picking_repo.push_back(*m_selectedSO);
+	}
+}
+
 bool bdrSketcher::addPolyline(ccPolyline* inputPoly, bool alreadyInDB/*=true*/)
 {
 	if (!inputPoly)
@@ -874,6 +1024,14 @@ bool bdrSketcher::addPolyline(ccPolyline* inputPoly, bool alreadyInDB/*=true*/)
 	//add polyline to the 'sections' set
 	//(all its parameters will be backuped!)
 	m_sections.push_back(Section(inputPoly, alreadyInDB));
+
+	m_sections.back().soMode = SO_POLYLINE;
+	//backup color
+	m_sections.back().backupColor = inputPoly->getColor();
+	m_sections.back().backupColorShown = inputPoly->colorsShown();
+	//backup thickness
+	m_sections.back().backupWidth = inputPoly->getWidth();
+
 	m_UI->exportSectionsToolButton->setEnabled(true);
 
 	//apply default look
@@ -1307,17 +1465,29 @@ QToolButton * bdrSketcher::getCurrentSOButton()
 void bdrSketcher::enableSelectedSOEditingMode(bool state)
 {
 	if (state && m_selectedSO) {
-		ccPointCloud* cloud = getEntityAssociateCloud(m_selectedSO->entity); if (cloud) { goto exit; }
+		ccPointCloud* cloud = getEntityAssociateCloud(m_selectedSO->entity); if (!cloud) { goto exit; }
 		cloud->setEnabled(true);
 
 		m_state = PS_EDITING;
-		m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
+		if (m_pickingVertex) {
+			delete m_pickingVertex;
+			m_pickingVertex = nullptr;
+		}
+		m_pickingVertex = new PickingVertex();
+
+		m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_CTRL_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
+		//m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
 	}
 	else {
-		ccPointCloud* cloud = getEntityAssociateCloud(m_selectedSO->entity); if (cloud) { goto exit; }
+		ccPointCloud* cloud = getEntityAssociateCloud(m_selectedSO->entity); if (!cloud) { goto exit; }
 		cloud->setEnabled(false);
 
 		m_state = PS_PAUSED;
+		if (m_pickingVertex) {
+			delete m_pickingVertex;
+			m_pickingVertex = nullptr;
+		}
+		m_associatedWin->setInteractionMode(ccGLWindow::PAN_ONLY());
 		m_associatedWin->setPickingMode(ccGLWindow::ENTITY_PICKING);
 	}
 

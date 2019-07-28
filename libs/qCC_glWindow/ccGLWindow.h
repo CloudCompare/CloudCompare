@@ -42,7 +42,7 @@
 #include <list>
 #include <unordered_set>
 
-class QCursor
+class QCursor;
 
 class QOpenGLDebugMessage;
 
@@ -649,6 +649,8 @@ public: //stereo mode
 	//! Returns whether the rotation axis is locaked or not
 	bool isRotationAxisLocked() const { return m_rotationAxisLocked; }
 
+	void resetCursor();
+
 	void setCrossCursor();
 
 	void setMoveCursor();
@@ -834,8 +836,6 @@ protected: //rendering
 	//we need to automatically bind our own afterwards!
 	//(Sadly QOpenGLWidget::makeCurrentmakeCurrent is not virtual)
 	void makeCurrent();
-
-	void resetCursor();
 
 	void drawCursor();
 
@@ -1387,8 +1387,8 @@ protected: //members
 	WindowEditorType m_windowEditorType;
 	BBoxDisplayType	m_bboxDisplayType;
 
-	QCursor *m_moveCursor;
-	QCursor *m_boardCursor;
+ 	QCursor *m_moveCursor;
+ 	QCursor *m_boardCursor;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

@@ -95,11 +95,7 @@ protected:
 	void createSketchObject(SketchObjectMode mode);
 	QToolButton* getCurrentSOButton();
 
-	struct PickedVert {
-		bool button_down;	// button is down or just hover
-
-
-	};
+	
 
 	///< edit the selected object
 	void enableSelectedSOEditingMode(bool);
@@ -124,8 +120,14 @@ protected:
 	//! echo glview signals
 	void echoLeftButtonClicked(int x, int y);
 	void echoRightButtonClicked(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
+	void changePickingCursor();
+
+	struct SOPickingParams;
+	void startCPUPointPicking(const SOPickingParams& params);
+
 	void echoMouseMoved(int x, int y, Qt::MouseButtons buttons);
 	void echoItemPicked(ccHObject* entity, unsigned subEntityID, int x, int y, const CCVector3& P, const CCVector3d& uvw);
+	void echoButtonReleased();
 	void entitySelected(ccHObject*);
 
 	///< polyline
@@ -188,10 +190,12 @@ protected:
 			, originalDisplay(e->getDisplay())
 			, isInDB(alreadyInDB)
 		{
+#if 0
 			//specific case: polylines
 			if (e->isA(CC_TYPES::POLY_LINE))
 			{
 				ccPolyline* poly = reinterpret_cast<ccPolyline*>(e);
+				
 				//backup color
 				backupColor = poly->getColor();
 				backupColorShown = poly->colorsShown();
@@ -216,6 +220,7 @@ protected:
 					else type = FOOTPRINT_NORMAL;
 				}
 			}
+#endif
 		}
 
 		bool operator ==(const SketcherObject& ie) { return entity == ie.entity; }
@@ -272,6 +277,9 @@ protected:
 	//! Updates the global clouds bounding-box
 	void updateCloudsBox();
 
+	void setPickingRepoButtonDown();
+	void setPickingRepoHover();
+
 private: //members
 	Ui::bdrSketcherDlg	*m_UI;
 	
@@ -308,6 +316,21 @@ private: //members
 	ccPlane* m_workingPlane;
 
 	SketchObjectMode m_currentSOMode;
+
+	struct PickingVertex {
+		PickingVertex() :
+			button_down(false)
+		{}
+
+		bool button_down;	// button is down or just hover
+
+		SectionPool picking_repo;	// for picking
+
+		//! picking result
+		ccHObject* nearestEntitiy;
+	};
+
+	PickingVertex* m_pickingVertex;
 };
 
 #endif //BDR_TRACE_FOOTPRINT_HEADER

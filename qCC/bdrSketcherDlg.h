@@ -26,6 +26,7 @@
 //qCC_db
 //#include <ccHObject.h>
 
+
 class ccGenericPointCloud;
 class ccPointCloud;
 class ccGLWindow;
@@ -319,15 +320,27 @@ private: //members
 
 	struct PickingVertex {
 		PickingVertex() :
-			button_down(false)
+			buttonState(Qt::NoButton)
+			, nearestEntitiy(nullptr)
+			, nearestVert(nullptr)
+			, nearestVertIndex(-1)
+			, selectedEntitiy(nullptr)
+			, selectedVert(nullptr)
+			, selectedVertIndex(-1)
 		{}
 
-		bool button_down;	// button is down or just hover
+		Qt::MouseButtons buttonState;	// button is down or just hover
 
 		SectionPool picking_repo;	// for picking
 
-		//! picking result
+		//! mouse move
 		ccHObject* nearestEntitiy;
+		CCVector3* nearestVert;
+		int nearestVertIndex;
+		//! picking result
+		ccHObject* selectedEntitiy;
+		CCVector3* selectedVert;
+		int selectedVertIndex;
 	};
 
 	PickingVertex* m_pickingVertex;

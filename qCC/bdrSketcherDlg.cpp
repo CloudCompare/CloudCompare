@@ -352,6 +352,27 @@ bool bdrSketcher::linkWith(ccGLWindow* win)
 
 void bdrSketcher::echoLeftButtonClicked(int x, int y)
 {
+	if (m_selectedSO && m_pickingVertex && (m_state & PS_EDITING)) {
+		m_pickingVertex->buttonState = Qt::LeftButton;
+
+		if ((m_state & PS_RUNNING) == 0) {
+			if (m_pickingVertex->nearestEntitiy) {
+				m_state |= PS_RUNNING;
+
+				m_pickingVertex->selectedEntitiy	= m_pickingVertex->nearestEntitiy;
+				m_pickingVertex->selectedVert		= m_pickingVertex->nearestVert;
+				m_pickingVertex->selectedVertIndex	= m_pickingVertex->nearestVertIndex;
+				m_pickingVertex->nearestEntitiy = nullptr;
+				m_pickingVertex->nearestVert = nullptr;
+				m_pickingVertex->nearestVertIndex = -1;
+			}
+			else {
+				//! end 
+			}
+		}
+		return;
+	}
+
 	switch (m_currentSOMode)
 	{
 	case bdrSketcher::SO_POINT:
@@ -426,7 +447,7 @@ void bdrSketcher::changePickingCursor()
 	if (m_pickingVertex) {
 		if (m_pickingVertex->nearestEntitiy) {
 
-			if (m_pickingVertex->button_down) {
+			if (m_pickingVertex->buttonState == Qt::LeftButton) {
 				//! snap
 				m_associatedWin->setCrossCursor(); // TODO: WHAT'S SNAPPING CURSOR??
 			}
@@ -453,16 +474,16 @@ void bdrSketcher::changePickingCursor()
 struct bdrSketcher::SOPickingParams {
 	//! Default constructor
 	SOPickingParams(
-		int _centerX = 0,
-		int _centerY = 0,
+		int _clickedPosX = 0,
+		int _clickedPosY = 0,
 		int _pickRadius = 5)
-		: centerX(_centerX)
-		, centerY(_centerY)
+		: clickedPosX(_clickedPosX)
+		, clickedPosY(_clickedPosY)
 		, pickRadius(_pickRadius)
 	{}
 
-	int centerX;
-	int centerY;
+	int clickedPosX;
+	int clickedPosY;
 	int pickRadius;
 };
 
@@ -474,14 +495,16 @@ void bdrSketcher::startCPUPointPicking(const SOPickingParams& params)
 
 	ccGLCameraParameters camera;
 	m_associatedWin->getGLCameraParameters(camera);
-	CCVector2d clickedPos(params.centerX, m_associatedWin->glHeight() - 1 - params.centerY);
+	CCVector2d clickedPos(params.clickedPosX, params.clickedPosY);
 
 	ccHObject* nearestEntity = nullptr;
+	CCVector3* nearestPoint = nullptr;
 	int nearestElementIndex = -1;
 	double nearestElementSquareDist = -1.0;
-	CCVector3 nearestPoint(0, 0, 0);
+	
+	//! for mesh triangle
 	CCVector3d nearestPointBC(0, 0, 0);
-
+	
 	SectionPool toProcess = m_pickingVertex->picking_repo;
 
 	while (!toProcess.empty()) {
@@ -497,6 +520,10 @@ void bdrSketcher::startCPUPointPicking(const SOPickingParams& params)
 				int nearestPointIndex = -1;
 				double nearestSquareDist = 0.0;
 
+				if (ent == m_pickingVertex->selectedEntitiy && m_pickingVertex->selectedVertIndex >= 0) {
+					nearestPointIndex = m_pickingVertex->selectedVertIndex;
+				}
+
 				if (cloud->pointPicking(clickedPos,
 					camera,
 					nearestPointIndex,
@@ -509,7 +536,7 @@ void bdrSketcher::startCPUPointPicking(const SOPickingParams& params)
 					{
 						nearestElementSquareDist = nearestSquareDist;
 						nearestElementIndex = nearestPointIndex;
-						nearestPoint = *(cloud->getPoint(nearestPointIndex));
+						nearestPoint = const_cast<CCVector3*>(cloud->getPoint(nearestPointIndex)); //*(cloud->getPoint(nearestPointIndex));
 						nearestEntity = cloud;
 					}
 				}
@@ -526,31 +553,46 @@ void bdrSketcher::startCPUPointPicking(const SOPickingParams& params)
 	}
 
 	m_pickingVertex->nearestEntitiy = nearestEntity;
+	m_pickingVertex->nearestVert = nearestPoint;
+	m_pickingVertex->nearestVertIndex = nearestElementIndex;
 
 	changePickingCursor();
 }
 
 void bdrSketcher::echoMouseMoved(int x, int y, Qt::MouseButtons buttons)
 {
+	CCVector3d clickedPos(x, m_associatedWin->glHeight() - 1 - y, 0);
+	SOPickingParams params(clickedPos.x, clickedPos.y, m_associatedWin->getPickingRadius());
 
-	if (m_selectedSO && (m_state & PS_EDITING)) {
-		SOPickingParams params(x, y, m_associatedWin->getPickingRadius());
+	ccGLCameraParameters camera;
+	m_associatedWin->getGLCameraParameters(camera);
 
+	if (m_selectedSO && m_pickingVertex && (m_state & PS_EDITING)) {
 		//! detect if the mouse is on the segment or on the corner point
-
 		///< if the mouse hover, detect only the editing item
-		if (buttons == Qt::NoButton) {
+		if ((m_state & PS_RUNNING) == 0) {	// m_state & PS_RUNNING
 			setPickingRepoHover();
-
 			startCPUPointPicking(params);
-
-			
 		}
 		///< if the button is down, detect all the items in the editing pool for snapping
-		else if (buttons & Qt::LeftButton) {
+		else if (m_state & PS_RUNNING) {
 			setPickingRepoButtonDown();
 			startCPUPointPicking(params);
 
+			if (m_pickingVertex->selectedEntitiy && m_pickingVertex->selectedVert) {
+				//! change the polyline
+				if ((m_pickingVertex->nearestEntitiy && m_pickingVertex->nearestVert) && (m_pickingVertex->selectedVert != m_pickingVertex->nearestVert)) {
+					*m_pickingVertex->selectedVert = *m_pickingVertex->nearestVert;
+				}
+				else {
+					CCVector3d X(0, 0, 0);
+					if (camera.unproject(clickedPos, X)) {
+						*m_pickingVertex->selectedVert = CCVector3(X.x, X.y, IMAGE_MARKER_DISPLAY_Z);
+						m_pickingVertex->selectedEntitiy->notifyGeometryUpdate();
+						m_associatedWin->redraw();
+					}
+				}
+			}
 		}
 
 		return;
@@ -611,7 +653,15 @@ void bdrSketcher::echoItemPicked(ccHObject * entity, unsigned subEntityID, int x
 
 void bdrSketcher::echoButtonReleased()
 {
-
+	if (m_selectedSO && m_pickingVertex && (m_state & PS_EDITING)) {
+		if ((m_state & PS_RUNNING) && (m_pickingVertex->buttonState == Qt::LeftButton)) {			
+			m_pickingVertex->buttonState = Qt::NoButton;
+			
+			m_state &= ~PS_RUNNING;
+			//! the polyline is changed and automatically saved
+			
+		}
+	}
 }
 
 

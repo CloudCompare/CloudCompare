@@ -44,6 +44,7 @@
 #include <QSettings>
 #include <QTouchEvent>
 #include <QWheelEvent>
+#include <QCursor>
 
 #if defined( Q_OS_MAC ) || defined( Q_OS_LINUX )
 #include <QDir>
@@ -397,6 +398,9 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
 
+	m_moveCursor = new QCursor(QPixmap(":/CC/Stocker/images/stocker/cursorMove.png"), -1, -1);
+	m_boardCursor = new QCursor(QPixmap(":/CC/Stocker/images/stocker/cursorBoard.png"), -1, -1);
+
 	//GL window own DB
 	m_winDBRoot = new ccHObject(QString("DB.3DView_%1").arg(m_uniqueID));
 
@@ -590,7 +594,7 @@ void ccGLWindow::setCrossCursor()
 
 void ccGLWindow::setMoveCursor()
 {
-	setCursor(QCursor(Qt::SizeAllCursor));
+	setCursor(*m_moveCursor);
 }
 
 void ccGLWindow::resetCursor()

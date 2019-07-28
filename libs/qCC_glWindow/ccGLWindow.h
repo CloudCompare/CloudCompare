@@ -42,6 +42,8 @@
 #include <list>
 #include <unordered_set>
 
+class QCursor
+
 class QOpenGLDebugMessage;
 
 class ccBBox;
@@ -1384,6 +1386,9 @@ protected: //members
 
 	WindowEditorType m_windowEditorType;
 	BBoxDisplayType	m_bboxDisplayType;
+
+	QCursor *m_moveCursor;
+	QCursor *m_boardCursor;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

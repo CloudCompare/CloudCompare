@@ -229,6 +229,7 @@ protected:
 		bool operator ==(const SketcherObject& ie) { return entity == ie.entity; }
 				
 		EntityType* entity;
+		ccHObject* projected_from;
 		ccGenericGLDisplay* originalDisplay;
 		bool isInDB;
 		bool isModified;

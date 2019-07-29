@@ -849,16 +849,12 @@ void bdrSketcher::importEntities3D(std::vector<std::pair<ccHObject*, ccHObject*>
 		ccHObject* ent_3d = ent.first;
 
 		if (ent_2d && ent_2d->isKindOf(CC_TYPES::POLY_LINE)) {
-			ccPolyline* poly = ccHObjectCaster::ToPolyline(ent_2d);
-			if (poly) {
-				addPolyline(poly, true);
+			ccPolyline* poly = ccHObjectCaster::ToPolyline(ent_2d); if (!poly) continue;
+			if (addPolyline(poly, true) && ent_3d) {
+				m_sections.back().projected_from = ent_3d;
 			}
-			
 		}
 		else { continue; }
-	
-
-
 	}
 }
 

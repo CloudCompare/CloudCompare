@@ -277,6 +277,11 @@ void bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 	else if (obj->isA(CC_TYPES::LABEL_2D)) {
 
 	}
+	else if (obj->isA(CC_TYPES::ST_BLOCK)) {
+		//! get top
+
+
+	}
 	//! add to cam
 	if (to_add && point_clone) {
 

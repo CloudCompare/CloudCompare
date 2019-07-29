@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>768</height>
+    <height>907</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -853,7 +853,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="minimumSize">
     <size>
      <width>109</width>
-     <height>100</height>
+     <height>259</height>
     </size>
    </property>
    <property name="floating">
@@ -994,7 +994,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="minimumSize">
     <size>
      <width>91</width>
-     <height>50</height>
+     <height>120</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -1150,6 +1150,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="separator"/>
    <addaction name="actionBDFootPrintAuto"/>
    <addaction name="actionBDFootPrintManual"/>
+   <addaction name="actionProjectToImage"/>
    <addaction name="actionBDFootPrintPack"/>
    <addaction name="actionBDLoD1Generation"/>
    <addaction name="actionBD3D4EM"/>
@@ -3939,8 +3940,15 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionProjectToImage">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/imgedit.png</normaloff>:/CC/Stocker/images/stocker/imgedit.png</iconset>
+   </property>
    <property name="text">
     <string>Project To Image</string>
+   </property>
+   <property name="iconText">
+    <string>ToImage</string>
    </property>
   </action>
   <action name="actionDisplayWireframe">

@@ -93,7 +93,7 @@ public:
 		//camera interactions
 		INTERACT_ROTATE          =  1,
 		INTERACT_PAN             =  2,
-		INTERACT_CTRL_PAN        =  4,
+		INTERACT_SHIFT_PAN        =  4,
 		INTERACT_ZOOM_CAMERA     =  8,
 		INTERACT_2D_ITEMS        = 16, //labels, etc.
 		INTERACT_CLICKABLE_ITEMS = 32, //hot zone

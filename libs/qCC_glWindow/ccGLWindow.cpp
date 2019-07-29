@@ -3906,7 +3906,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 	{
 		//right click = panning (2D translation)
 		if (	(m_interactionFlags & INTERACT_PAN)
-			||	((QApplication::keyboardModifiers() & Qt::ControlModifier) && (m_interactionFlags & INTERACT_CTRL_PAN))
+			||	((QApplication::keyboardModifiers() & Qt::ShiftModifier) && (m_interactionFlags & INTERACT_SHIFT_PAN))
 			)
 		{
 			setCursor(QCursor(Qt::SizeAllCursor));

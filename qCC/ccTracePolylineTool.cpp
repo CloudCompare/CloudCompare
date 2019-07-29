@@ -361,7 +361,7 @@ bool ccTracePolylineTool::start()
 	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
 	m_associatedWin->setInteractionMode(	ccGLWindow::TRANSFORM_CAMERA()
 										|	ccGLWindow::INTERACT_SIG_RB_CLICKED
-										|	ccGLWindow::INTERACT_CTRL_PAN
+										|	ccGLWindow::INTERACT_SHIFT_PAN
 										|	ccGLWindow::INTERACT_SIG_MOUSE_MOVED);
 	m_associatedWin->setCursor(Qt::CrossCursor);
 
@@ -558,7 +558,7 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 
 void ccTracePolylineTool::closePolyLine(int, int)
 {
-	if (!m_poly3D || (QApplication::keyboardModifiers() & Qt::ControlModifier)) //CTRL + right click = panning
+	if (!m_poly3D || (QApplication::keyboardModifiers() & Qt::ShiftModifier)) //CTRL + right click = panning
 	{
 		return;
 	}

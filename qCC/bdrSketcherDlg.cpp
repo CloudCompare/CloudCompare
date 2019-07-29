@@ -654,6 +654,9 @@ void bdrSketcher::echoItemPicked(ccHObject * entity, unsigned subEntityID, int x
 void bdrSketcher::echoButtonReleased()
 {
 	if (m_selectedSO && m_pickingVertex && (m_state & PS_EDITING)) {
+		if ((QApplication::keyboardModifiers() & Qt::ShiftModifier)) {
+			return;
+		}
 		if ((m_state & PS_RUNNING) && (m_pickingVertex->buttonState == Qt::LeftButton)) {			
 			m_pickingVertex->buttonState = Qt::NoButton;
 			m_pickingVertex->resetSelected();
@@ -1526,7 +1529,7 @@ void bdrSketcher::enableSelectedSOEditingMode(bool state)
 		}
 		m_pickingVertex = new PickingVertex();
 
-		m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_CTRL_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
+		m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_SHIFT_PAN | ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
 		//m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
 	}
 	else {

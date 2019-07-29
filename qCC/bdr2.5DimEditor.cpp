@@ -279,7 +279,11 @@ ccHObject* bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 		
 		ccPolyline* new_poly = new ccPolyline(*poly); if (!new_poly) return nullptr;
 		associate_cloud = dynamic_cast<ccPointCloud*>(new_poly->getAssociatedCloud());
-		if (!associate_cloud) return nullptr;
+		if (!associate_cloud) { 
+			delete new_poly;
+			new_poly = nullptr;
+			return nullptr;
+		}
 
 		entity_in_image_2d = new_poly;
 	}
@@ -289,9 +293,18 @@ ccHObject* bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 	else if (obj->isA(CC_TYPES::ST_BLOCK)) {
 		//! get top
 		StBlock* block = ccHObjectCaster::ToStBlock(obj); if (!block) return nullptr;
-		ccFacet* top_facet = block->getTopFacet();
-		entity_in_image_2d = top_facet;
-		associate_cloud = block->getAssociatedCloud();
+		ccFacet* top_facet = block->getTopFacet(); if (!top_facet) return nullptr;
+		ccPolyline* contour = top_facet->getContour(); if (!contour) return nullptr;
+		ccPolyline* new_poly = new ccPolyline(*contour); if (!new_poly) return nullptr;
+
+		associate_cloud = dynamic_cast<ccPointCloud*>(new_poly->getAssociatedCloud());
+		if (!associate_cloud) {
+			delete new_poly;
+			new_poly = nullptr;
+			return nullptr;
+		}
+
+		entity_in_image_2d = new_poly;
 	}
 
 	//! project to image

@@ -70,7 +70,7 @@ public:
 
 	void setWorkingPlane();
 
-	void importEntities(ccHObject::Container entities);
+	void importEntities3D(std::vector<std::pair<ccHObject*, ccHObject*>> entities);
 
 protected:
 

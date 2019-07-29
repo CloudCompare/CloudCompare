@@ -842,9 +842,24 @@ void bdrSketcher::SetDestAndGround(ccHObject * dest, double ground)
 	m_ground = ground;
 }
 
-void bdrSketcher::importEntities(ccHObject::Container entities)
+void bdrSketcher::importEntities3D(std::vector<std::pair<ccHObject*, ccHObject*>> entities)
 {
+	for (auto& ent : entities) {
+		ccHObject* ent_2d = ent.first;
+		ccHObject* ent_3d = ent.first;
 
+		if (ent_2d && ent_2d->isKindOf(CC_TYPES::POLY_LINE)) {
+			ccPolyline* poly = ccHObjectCaster::ToPolyline(ent_2d);
+			if (poly) {
+				addPolyline(poly, true);
+			}
+			
+		}
+		else { continue; }
+	
+
+
+	}
 }
 
 void bdrSketcher::undo()

@@ -229,10 +229,15 @@ void bdrImageEditorPanel::startEditor()
 	}
 	if (!dest_block) { return; }
 	m_pSketcher->SetDestAndGround(dest_block, 0);
-// 	//! import
-// 	ccHObject::Container footprints;
+
+	//////////////////////////////////////////////////////////////////////////
+
+ 	//! import
+ 	ccHObject::Container footprints;
 // 	dest_block->filterChildren(footprints, true, CC_TYPES::ST_FOOTPRINT, true, nullptr);
-// 	m_pSketcher->importeEntities(footprints);
+ 	m_pSketcher->importEntities3D(m_projected_2D_3D);
+
+	//////////////////////////////////////////////////////////////////////////
 
 	if (!m_pSketcher->start()) {
 		stopEditor(false);

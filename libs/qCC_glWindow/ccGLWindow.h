@@ -557,6 +557,7 @@ public:
 
 	void toggleDrawBBox() { m_drawBBox = !m_drawBBox; };
 
+	//! TODO:
 	//! Sets bbox display type
 	virtual void setBBoxDisplayType(BBoxDisplayType box) { m_bboxDisplayType = box; }
 	//! Returns bbox display type

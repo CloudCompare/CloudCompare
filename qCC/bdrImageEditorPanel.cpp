@@ -261,6 +261,20 @@ bool bdrImageEditorPanel::isLinkToMainView()
 	return m_UI->linkViewToolButton->isChecked();
 }
 
+void bdrImageEditorPanel::setProjection(std::vector<ccHObject*> project_entities)
+{
+	m_projected_2D_3D.clear();
+	for (ccHObject* ent : project_entities) {
+		ccHObject* projected = m_pbdrImshow->projectToImage(ent);
+		if (projected) {
+			m_projected_2D_3D.push_back(std::make_pair(projected, ent));
+		}
+	}
+	if (!m_projected_2D_3D.empty()) {
+		m_pbdrImshow->getGLWindow()->redraw();
+	}
+}
+
 void bdrImageEditorPanel::clearAll()
 {
 	m_UI->imageListWidget->clear();

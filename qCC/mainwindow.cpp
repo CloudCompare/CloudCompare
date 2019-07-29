@@ -1034,6 +1034,7 @@ void MainWindow::CreateImageEditor()
 {
 	m_pbdrImshow = new bdr2Point5DimEditor();
 	m_pbdrImshow->create2DView(m_UI->mapFrame);
+	m_pbdrImshow->getGLWindow()->addSceneDB(m_imageRoot->getRootEntity());
 	connect(m_pbdrImshow->getGLWindow(), &ccGLWindow::mouseMoved3D, this, &MainWindow::echoImageCursorPos);
 
 	m_pbdrImagePanel = new bdrImageEditorPanel(m_pbdrImshow, m_imageRoot, this);	
@@ -2884,6 +2885,10 @@ void MainWindow::GetGLWindows(std::vector<ccGLWindow*>& glWindows)
 	for (QMdiSubWindow *window : windows)
 	{
 		glWindows.push_back(GLWindowFromWidget(window->widget()));
+	}
+	ccGLWindow* imgGL = TheInstance()->m_pbdrImshow->getGLWindow();
+	if (imgGL) {
+		glWindows.push_back(imgGL);
 	}
 }
 
@@ -14204,7 +14209,10 @@ void MainWindow::doActionShowSelectedImage()
 void MainWindow::doActionProjectToImage()
 {
 	if (!haveSelection()) { return; }
-	for (ccHObject* obj : m_selectedEntities) {
-		m_pbdrImshow->projectToImage(obj);
+	if (!m_pbdrImshow->getImage()) {
+		doActionShowBestImage();
+	}
+	if (m_pbdrImshow->getImage()) {
+		m_pbdrImagePanel->setProjection(m_selectedEntities);
 	}
 }

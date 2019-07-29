@@ -1567,17 +1567,11 @@ void bdrSketcher::addUndoStep()
 
 void bdrSketcher::doImportPolylinesFromDB()
 {
-	//! from file
-	if (m_trace_image) {
-		
-		return;
-	}
-
 	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (!mainWindow)
 		return;
 
-	ccHObject* root = mainWindow->dbRootObject(mainWindow->getCurrentDB());
+	ccHObject* root = m_trace_image ? mainWindow->dbRootObject(CC_TYPES::DB_IMAGE) : mainWindow->dbRootObject(mainWindow->getCurrentDB());
 	ccHObject::Container polylines;
 	if (root)
 	{

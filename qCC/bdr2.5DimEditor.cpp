@@ -254,42 +254,86 @@ void bdr2Point5DimEditor::setImageAndCamera(ccCameraSensor * cam)
 	m_image->setAssociatedSensor(cam);
 }
 
-void bdr2Point5DimEditor::projectToImage(ccHObject * obj)
+ccHObject* bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 {
-	if (!getImage()) { return; }
+	if (!getImage()) { return nullptr; }
 	ccCameraSensor* cam = m_image->getAssociatedSensor();
-	if (!cam) { return; }
+	if (!cam) { return nullptr; }
 	
-	ccHObject* to_add = nullptr;
-	ccGenericPointCloud* point_clone = nullptr;
+	ccHObject* entity_in_image_2d = nullptr;
+	//! keep the index but project the point in associate cloud to 2d image
+	//! get the associate cloud
+	ccGenericPointCloud* associate_cloud = nullptr;
+
 	if (obj->isKindOf(CC_TYPES::POINT_CLOUD)) {
-		point_clone = ccHObjectCaster::ToGenericPointCloud(obj)->clone();
-		to_add = point_clone;
+		associate_cloud = ccHObjectCaster::ToGenericPointCloud(obj)->clone();
+		entity_in_image_2d = associate_cloud;
 	}
 	else if (obj->isA(CC_TYPES::MESH)) {
 		ccMesh* mesh_clone = ccHObjectCaster::ToMesh(obj)->cloneMesh();
-		mesh_clone->getAssociatedCloud();
+		associate_cloud = mesh_clone->getAssociatedCloud();
+		entity_in_image_2d = mesh_clone;
 	}
 	else if (obj->isA(CC_TYPES::POLY_LINE)) {
 		ccPolyline* poly = ccHObjectCaster::ToPolyline(obj);
-		to_add = (poly ? new ccPolyline(*poly) : 0);
+		
+		ccPolyline* new_poly = new ccPolyline(*poly); if (!new_poly) return nullptr;
+		associate_cloud = dynamic_cast<ccPointCloud*>(new_poly->getAssociatedCloud());
+		if (!associate_cloud) return nullptr;
+
+		entity_in_image_2d = new_poly;
 	}
 	else if (obj->isA(CC_TYPES::LABEL_2D)) {
 
 	}
 	else if (obj->isA(CC_TYPES::ST_BLOCK)) {
 		//! get top
-
-
+		StBlock* block = ccHObjectCaster::ToStBlock(obj); if (!block) return nullptr;
+		ccFacet* top_facet = block->getTopFacet();
+		entity_in_image_2d = top_facet;
+		associate_cloud = block->getAssociatedCloud();
 	}
+
+	//! project to image
+	unsigned inside_image(0);
+	if (associate_cloud && entity_in_image_2d) {
+		associate_cloud->setGlobalShift(CCVector3d());
+		associate_cloud->setGlobalScale(0);
+
+		for (size_t i = 0; i < associate_cloud->size(); i++) {
+			CCVector3* v = const_cast<CCVector3*>(associate_cloud->getPoint(i));
+			CCVector3 image_pt;
+			if (FromGlobalToImage(*v, image_pt)) {
+				inside_image++;
+			}			
+			image_pt.z = IMAGE_MARKER_DISPLAY_Z;
+			*v = image_pt;
+		}
+		// project even if the point is out of range, but remove that no point is inside
+		if (inside_image == 0) {
+			delete associate_cloud;
+			associate_cloud = nullptr;
+			delete entity_in_image_2d;
+			entity_in_image_2d = nullptr;
+		}
+	}
+	
+
 	//! add to cam
-	if (to_add && point_clone) {
+	if (entity_in_image_2d) {
+		ccShiftedObject* shift = ccHObjectCaster::ToShifted(entity_in_image_2d);
+		if (shift) {
+			shift->setGlobalShift(CCVector3d());
+			shift->setGlobalScale(0);
+		}
 
-		to_add->setDisplay(m_glWindow);
-		cam->addChild(to_add);
+		entity_in_image_2d->setDisplay_recursive(m_glWindow);
+		entity_in_image_2d->setEnabled(true);
+		cam->addChild(entity_in_image_2d);
 		MainWindow* win = MainWindow::TheInstance(); assert(win);
-		win->addToDB_Image(to_add, true, false, true, true);
+		win->addToDB_Image(entity_in_image_2d, true, false, true, true);
 	}
+	return entity_in_image_2d;
 }
 
 void bdr2Point5DimEditor::ZoomFit()

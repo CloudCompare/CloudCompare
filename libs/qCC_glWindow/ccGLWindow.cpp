@@ -2466,7 +2466,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 		}
 	}
 
-	if (m_drawBBox) {
+	if (m_drawBBox && m_bboxDisplayType != BBOX_HIDE) {
 		CONTEXT.drawingFlags |= CC_DRAW_BBOX;
 	}
 	else {

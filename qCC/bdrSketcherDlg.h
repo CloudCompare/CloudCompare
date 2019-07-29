@@ -328,6 +328,17 @@ private: //members
 			, selectedVert(nullptr)
 			, selectedVertIndex(-1)
 		{}
+		void resetNearest() {
+			nearestEntitiy = nullptr;
+			nearestVert = nullptr;
+			nearestVertIndex = -1;
+		}
+
+		void resetSelected() {
+			selectedEntitiy = nullptr;
+			selectedVert = nullptr;
+			selectedVertIndex = -1;
+		}
 
 		Qt::MouseButtons buttonState;	// button is down or just hover
 

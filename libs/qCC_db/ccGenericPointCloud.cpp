@@ -360,7 +360,8 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 	}
 
 	//otherwise we go 'brute force' (works quite well in fact?!)
-//	nearestPointIndex = -1;	// XYLIU
+	int exclude_index = nearestPointIndex >= 0 ? nearestPointIndex : -1;
+	nearestPointIndex = -1;	// XYLIU
 	nearestSquareDist = -1.0;
 	{
 		//back project the clicked point in 3D
@@ -403,7 +404,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 			//we shouldn't test points that are actually hidden!
 			if (	(!visTable || visTable->at(i) == POINT_VISIBLE)
 				&&	(!activeSF || activeSF->getColor(activeSF->getValue(i)))
-				&& nearestPointIndex != i						// XYLIU
+				&& exclude_index != i						// XYLIU
 				)
 			{
 				const CCVector3* P = getPoint(i);

@@ -656,6 +656,7 @@ void bdrSketcher::echoButtonReleased()
 	if (m_selectedSO && m_pickingVertex && (m_state & PS_EDITING)) {
 		if ((m_state & PS_RUNNING) && (m_pickingVertex->buttonState == Qt::LeftButton)) {			
 			m_pickingVertex->buttonState = Qt::NoButton;
+			m_pickingVertex->resetSelected();
 			
 			m_state &= ~PS_RUNNING;
 			//! the polyline is changed and automatically saved

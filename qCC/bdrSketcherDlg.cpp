@@ -659,6 +659,11 @@ void bdrSketcher::echoButtonReleased()
 		}
 		if ((m_state & PS_RUNNING) && (m_pickingVertex->buttonState == Qt::LeftButton)) {			
 			m_pickingVertex->buttonState = Qt::NoButton;
+			m_selectedSO->isModified = true;
+
+			m_pickingVertex->nearestEntitiy = m_pickingVertex->selectedEntitiy;
+			m_pickingVertex->nearestVert = m_pickingVertex->selectedVert;
+			m_pickingVertex->nearestVertIndex = m_pickingVertex->selectedVertIndex;
 			m_pickingVertex->resetSelected();
 			
 			m_state &= ~PS_RUNNING;

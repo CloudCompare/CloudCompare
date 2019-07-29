@@ -172,6 +172,7 @@ protected:
 			, isInDB(false)
 			, backupColorShown(false)
 			, backupWidth(1)
+			, isModified(false)
 		{}
 		
 		//! Copy constructor
@@ -181,6 +182,7 @@ protected:
 			, isInDB(section.isInDB)
 			, backupColorShown(section.backupColorShown)
 			, backupWidth(section.backupWidth)
+			, isModified(section.isModified)
 		{
 			backupColor = section.backupColor;
 		}
@@ -229,6 +231,7 @@ protected:
 		EntityType* entity;
 		ccGenericGLDisplay* originalDisplay;
 		bool isInDB;
+		bool isModified;
 
 		//backup info (for polylines only)
 		ccColor::Rgb backupColor;

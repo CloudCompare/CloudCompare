@@ -5592,11 +5592,12 @@ static void glDrawUnitCircle(QOpenGLContext* context, unsigned char dim, unsigne
 	glFunc->glEnd();
 }
 
-void ccGLWindow::setPivotVisibility(PivotVisibility vis)
+void ccGLWindow::setPivotVisibility(PivotVisibility vis, bool save_setting)
 {
 	m_pivotVisibility = vis;
 
 	//auto-save last pivot visibility settings
+	if (save_setting)
 	{
 		QSettings settings;
 		settings.beginGroup(c_ps_groupName);

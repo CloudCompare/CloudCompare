@@ -244,7 +244,7 @@ public:
 	virtual void updateZoom(float zoomFactor);
 
 	//! Sets pivot visibility
-	virtual void setPivotVisibility(PivotVisibility vis);
+	virtual void setPivotVisibility(PivotVisibility vis, bool save_setting = true);
 
 	//! Returns pivot visibility
 	virtual PivotVisibility getPivotVisibility() const;

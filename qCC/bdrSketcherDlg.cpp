@@ -698,19 +698,19 @@ void bdrSketcher::echoButtonReleased()
 		if ((QApplication::keyboardModifiers() & Qt::ShiftModifier)) {
 			return;
 		}
-		if ((m_state & PS_RUNNING) && (m_pickingVertex->buttonState == Qt::LeftButton)) {			
-			m_pickingVertex->buttonState = Qt::NoButton;
-			m_selectedSO->isModified = true;
+		m_selectedSO->isModified = true;
 
+		if ((m_state & PS_RUNNING) && (m_pickingVertex->buttonState == Qt::LeftButton)) {
 			m_pickingVertex->nearestEntitiy = m_pickingVertex->selectedEntitiy;
 			m_pickingVertex->nearestVert = m_pickingVertex->selectedVert;
 			m_pickingVertex->nearestVertIndex = m_pickingVertex->selectedVertIndex;
 			m_pickingVertex->resetSelected();
 			
 			m_state &= ~PS_RUNNING;
-			//! the polyline is changed and automatically saved
-			
+			//! the polyline is changed and automatically saved			
 		}
+		
+		m_pickingVertex->buttonState = Qt::NoButton;
 	}
 }
 
@@ -888,7 +888,7 @@ void bdrSketcher::importEntities3D(std::vector<std::pair<ccHObject*, ccHObject*>
 {
 	for (auto& ent : entities) {
 		ccHObject* ent_2d = ent.first;
-		ccHObject* ent_3d = ent.first;
+		ccHObject* ent_3d = ent.second;
 
 		if (ent_2d && ent_2d->isKindOf(CC_TYPES::POLY_LINE)) {
 			ccPolyline* poly = ccHObjectCaster::ToPolyline(ent_2d); if (!poly) continue;

@@ -252,6 +252,14 @@ void bdrImageEditorPanel::stopEditor(bool state)
 	}
 	//! reset gl
 	m_pbdrImshow->init2DView();
+
+	if (state) {
+		//! reproject the entities back to 3d
+		for (ProjectedPair prj_2d_3d : m_projected_2D_3D) {
+			prj_2d_3d.first;
+			prj_2d_3d.second;
+		}
+	}
 }
 
 void bdrImageEditorPanel::updateCursorPos(const CCVector3d & P, bool b3d)

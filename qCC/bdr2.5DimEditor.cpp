@@ -313,6 +313,7 @@ ccHObject* bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 	if (associate_cloud && entity_in_image_2d) {
 		associate_cloud->setGlobalShift(CCVector3d());
 		associate_cloud->setGlobalScale(0);
+		associate_cloud->setVisible(true);
 
 		for (size_t i = 0; i < associate_cloud->size(); i++) {
 			CCVector3* v = const_cast<CCVector3*>(associate_cloud->getPoint(i));
@@ -343,11 +344,28 @@ ccHObject* bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 
 		entity_in_image_2d->setDisplay_recursive(m_glWindow);
 		entity_in_image_2d->setEnabled(true);
+		entity_in_image_2d->setLocked(false);
 		cam->addChild(entity_in_image_2d);
 		MainWindow* win = MainWindow::TheInstance(); assert(win);
 		win->addToDB_Image(entity_in_image_2d, true, false, true, true);
 	}
 	return entity_in_image_2d;
+}
+
+bool bdr2Point5DimEditor::projectBack(ccHObject* obj2D, ccHObject* onj3D)
+{
+	if (!m_image) { return false; }
+	
+	ccCameraSensor* cam = m_image->getAssociatedSensor();
+	CCVector3 camera_center;
+	cam->getActiveAbsoluteCenter(camera_center);
+	//! line 
+
+	//! plane
+
+	//! intersection
+
+	//! top set contour
 }
 
 void bdr2Point5DimEditor::ZoomFit()

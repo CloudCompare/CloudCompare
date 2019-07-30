@@ -52,6 +52,8 @@ public:
 
 	ccHObject* projectToImage(ccHObject* obj);
 
+	bool projectBack(ccHObject * obj2D, ccHObject * onj3D);
+
 public: // buttons
 	void ZoomFit();
 

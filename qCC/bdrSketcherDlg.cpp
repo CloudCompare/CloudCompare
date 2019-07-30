@@ -58,6 +58,8 @@
 #include "stocker_parser.h"
 #endif // USE_STOCKER
 
+#define BUTTON_STATE_CTRL_PUSHED (QApplication::keyboardModifiers() & Qt::ControlModifier)
+
 
 //default parameters
 static const ccColor::Rgb& s_defaultPolylineColor = ccColor::lightCoral;
@@ -258,7 +260,7 @@ bool bdrSketcher::linkWith(ccGLWindow* win)
 		return false;
 	}
 
-	selectPolyline(nullptr);
+	selectSketcherObject(nullptr);
 
 	if (oldWin)
 	{
@@ -350,25 +352,61 @@ bool bdrSketcher::linkWith(ccGLWindow* win)
 	return true;
 }
 
+bool deleteVertex(ccHObject* obj, ccHObject* point_cloud, CCVector3* selectedVert, int selectedIndex)
+{
+	if (obj && obj->isKindOf(CC_TYPES::POLY_LINE)) {
+		ccPolyline* poly = ccHObjectCaster::ToPolyline(obj);
+		ccPointCloud* cloud = getEntityAssociateCloud(poly);
+		ccPointCloud* selected_cloud = ccHObjectCaster::ToPointCloud(point_cloud);
+		if (cloud && selected_cloud && (cloud == selected_cloud) && (selectedIndex >= 0)) {
+			if (poly->removePointGlobalIndexByGlobal(selectedIndex)) {
+				ccGenericPointCloud::VisibilityTableType& visibilityArray = selected_cloud->getTheVisibilityArray();
+				if (visibilityArray.empty()) {
+					if (!selected_cloud->resetVisibilityArray()) return false;
+				}
+				visibilityArray[selectedIndex] = POINT_HIDDEN;
+				return true;
+			}
+			else return false;
+		}
+		else return false;
+	}
+	return true;
+}
+
 void bdrSketcher::echoLeftButtonClicked(int x, int y)
 {
+	bool redraw = false;
 	if (m_selectedSO && m_pickingVertex && (m_state & PS_EDITING)) {
 		m_pickingVertex->buttonState = Qt::LeftButton;
 
 		if ((m_state & PS_RUNNING) == 0) {
 			if (m_pickingVertex->nearestEntitiy) {
-				m_state |= PS_RUNNING;
 
-				m_pickingVertex->selectedEntitiy	= m_pickingVertex->nearestEntitiy;
-				m_pickingVertex->selectedVert		= m_pickingVertex->nearestVert;
-				m_pickingVertex->selectedVertIndex	= m_pickingVertex->nearestVertIndex;
-				m_pickingVertex->nearestEntitiy = nullptr;
-				m_pickingVertex->nearestVert = nullptr;
-				m_pickingVertex->nearestVertIndex = -1;
+				m_pickingVertex->selectedEntitiy = m_pickingVertex->nearestEntitiy;
+				m_pickingVertex->selectedVert = m_pickingVertex->nearestVert;
+				m_pickingVertex->selectedVertIndex = m_pickingVertex->nearestVertIndex;
+				m_pickingVertex->resetNearest();
+
+				//! delete the selected point
+				if (BUTTON_STATE_CTRL_PUSHED) {
+					if (deleteVertex(m_selectedSO->entity, m_pickingVertex->selectedEntitiy, m_pickingVertex->selectedVert, m_pickingVertex->selectedVertIndex)) {
+						redraw = true;
+						m_pickingVertex->resetSelected();
+					}
+				}
+				//! start vertex moving
+				else {
+					m_state |= PS_RUNNING;
+				}
 			}
 			else {
 				//! end 
 			}
+		}
+
+		if (redraw) {
+			m_associatedWin->redraw();
 		}
 		return;
 	}
@@ -450,6 +488,9 @@ void bdrSketcher::changePickingCursor()
 			if (m_pickingVertex->buttonState == Qt::LeftButton) {
 				//! snap
 				m_associatedWin->setCrossCursor(); // TODO: WHAT'S SNAPPING CURSOR??
+			}
+			else if (BUTTON_STATE_CTRL_PUSHED && ((m_state & PS_RUNNING) == 0) && (m_state & PS_EDITING)) {
+				m_associatedWin->setRemoveCursor();
 			}
 			else {
 				//! point
@@ -541,7 +582,7 @@ void bdrSketcher::startCPUPointPicking(const SOPickingParams& params)
 					}
 				}
 			}
-			else if (ent->isKindOf(CC_TYPES::POLY_LINE)) {
+			else if (!BUTTON_STATE_CTRL_PUSHED && ent->isKindOf(CC_TYPES::POLY_LINE)) {
 
 			}
 		}
@@ -746,7 +787,7 @@ void bdrSketcher::deleteSelectedPolyline()
 	Section* selectedPoly = m_selectedSO;
 
 	//deslect polyline before anything
-	selectPolyline(nullptr, false);
+	selectSketcherObject(nullptr, false);
 
 	releasePolyline(selectedPoly);
 
@@ -879,7 +920,7 @@ void bdrSketcher::undo()
 		return;
 	}
 
-	selectPolyline(nullptr);
+	selectSketcherObject(nullptr);
 
 	//we remove all polylines after a given point
 	{
@@ -922,7 +963,7 @@ bool bdrSketcher::reset(bool askForConfirmation/*=true*/)
 		}
 	}
 
-	selectPolyline(nullptr);
+	selectSketcherObject(nullptr);
 
 	//we remove all polylines
 	for (auto & section : m_sections)
@@ -1423,7 +1464,7 @@ void bdrSketcher::enableSketcherEditingMode(bool state)
 	{
 		//select the last polyline by default (if any)
 		if (!m_sections.empty() && !m_sections.back().isInDB)
-			selectPolyline(&m_sections.back());
+			selectSketcherObject(&m_sections.back());
 
 		m_state = PS_PAUSED;
 
@@ -1437,7 +1478,7 @@ void bdrSketcher::enableSketcherEditingMode(bool state)
 	else
 	{
 		//deselect all currently selected polylines
-		selectPolyline(nullptr);
+		selectSketcherObject(nullptr);
 
 		//set new 'undo' step
 		addUndoStep();
@@ -1546,6 +1587,9 @@ void bdrSketcher::enableSelectedSOEditingMode(bool state)
 		}
 		if (m_selectedSO && m_selectedSO->entity) {
 			ccPointCloud* cloud = getEntityAssociateCloud(m_selectedSO->entity); if (!cloud) { goto exit; }
+			cloud->setRGBColor(s_defaultVerticeColor);
+			cloud->setPointSize(s_defaultVerticesSize);
+			cloud->showColors(true);
 			cloud->setEnabled(true);
 
 			m_state = PS_EDITING;
@@ -1625,7 +1669,7 @@ void bdrSketcher::doImportPolylinesFromDB()
 		
 		//auto-select the last one
 		if (!m_sections.empty())
-			selectPolyline(&(m_sections.back()));
+			selectSketcherObject(&(m_sections.back()));
 		if (m_associatedWin)
 			m_associatedWin->redraw();
 	}

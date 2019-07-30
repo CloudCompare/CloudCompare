@@ -99,6 +99,8 @@ public:
 	**/
 	virtual void clear(bool releaseMemory = false);
 
+	bool insertPointIndex(unsigned globalIndex, unsigned globalIndexInsert);
+
 	//! Point global index insertion mechanism
 	/** \param globalIndex a point global index
 		\return false if not enough memory
@@ -155,6 +157,8 @@ public:
 		Thread safe.
 	**/
 	virtual void removePointGlobalIndex(unsigned localIndex);
+
+	virtual bool removePointGlobalIndexByGlobal(unsigned globalIndex);
 
     //! Returns the associated (source) cloud
 	inline virtual GenericIndexedCloudPersist* getAssociatedCloud() { return m_theAssociatedCloud; }

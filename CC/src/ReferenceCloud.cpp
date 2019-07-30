@@ -106,6 +106,22 @@ const CCVector3* ReferenceCloud::getCurrentPointCoordinates() const
 	return m_theAssociatedCloud->getPointPersistentPtr(m_theIndexes[m_globalIterator]);
 }
 
+bool ReferenceCloud::insertPointIndex(unsigned globalIndex, unsigned globalIndexInsert)
+{
+	m_mutex.lock();
+	try {
+		m_theIndexes.insert(m_theIndexes.begin() + globalIndex + 1, globalIndexInsert);
+	}
+	catch (const std::bad_alloc&) {
+		m_mutex.unlock();
+		return false;
+	}
+	invalidateBoundingBox();
+
+	m_mutex.unlock();
+	return true;
+}
+
 bool ReferenceCloud::addPointIndex(unsigned globalIndex)
 {
 	m_mutex.lock();
@@ -198,8 +214,35 @@ void ReferenceCloud::removePointGlobalIndex(unsigned localIndex)
 	{
 		assert(false);
 	}
-	
+
 	m_mutex.unlock();
+}
+
+bool CCLib::ReferenceCloud::removePointGlobalIndexByGlobal(unsigned globalIndex)
+{
+	m_mutex.lock();
+
+	int remained_number = m_theIndexes.size();
+	for (size_t i = 0; i < m_theIndexes.size(); i++) {
+		if (m_theIndexes[i] == globalIndex) {
+			remained_number--;
+		}
+	}
+	if (remained_number < 2) {
+		return false;
+	}
+
+	for (ReferencesContainer::iterator p = m_theIndexes.begin(); p != m_theIndexes.end(); ) {
+		if ((*p == globalIndex) && (m_theIndexes.size() >= 3)) {
+			p = m_theIndexes.erase(p);
+		}
+		else {
+			++p;
+		}
+	}
+	invalidateBoundingBox();
+	m_mutex.unlock();
+	return true;
 }
 
 void ReferenceCloud::setAssociatedCloud(GenericIndexedCloudPersist* cloud)

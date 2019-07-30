@@ -652,6 +652,8 @@ public: //stereo mode
 
 	void resetCursor();
 
+	void setRemoveCursor();
+
 	void setCrossCursor();
 
 	void setMoveCursor();
@@ -1389,6 +1391,7 @@ protected: //members
 	BBoxDisplayType	m_bboxDisplayType;
 
  	QCursor *m_moveCursor;
+	QCursor *m_removeCursor;
  	QCursor *m_boardCursor;
 };
 

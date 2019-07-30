@@ -353,7 +353,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 #else
 	, m_font(font())
 #endif
-	, m_pivotVisibility(PIVOT_SHOW_ON_MOVE)
+	, m_pivotVisibility(PIVOT_HIDE/*PIVOT_SHOW_ON_MOVE*/)		// TODO: why you delete the viewer toolbar...
 	, m_pivotSymbolShown(false)
 	, m_allowRectangularEntityPicking(true)
 	, m_rectPickingPoly(nullptr)

@@ -141,6 +141,7 @@ void bdr2Point5DimEditor::init2DView()
 	m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS | ccGLWindow::INTERACT_ROTATE);
 	m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 	m_glWindow->displayOverlayEntities(true);
+	m_glWindow->setPivotVisibility(ccGLWindow::PIVOT_HIDE, false);
 	m_glWindow->showCursorCoordinates(true);
 	m_glWindow->setBBoxDisplayType(ccGLWindow::BBOX_HIDE);
 	m_glWindow->setWindowEditorType(ccGLWindow::IMAGE_EDITOR_25D);
@@ -274,7 +275,7 @@ ccHObject* bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 		associate_cloud = mesh_clone->getAssociatedCloud();
 		entity_in_image_2d = mesh_clone;
 	}
-	else if (obj->isA(CC_TYPES::POLY_LINE)) {
+	else if (obj->isKindOf(CC_TYPES::POLY_LINE)) {
 		ccPolyline* poly = ccHObjectCaster::ToPolyline(obj);
 		
 		ccPolyline* new_poly = new ccPolyline(*poly); if (!new_poly) return nullptr;

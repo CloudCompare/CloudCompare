@@ -146,6 +146,8 @@ protected:
 	//! Cancels currently edited polyline
 	void cancelCurrentPolyline();
 
+	void setDefaultInteractionPickingMode();
+
 	//! Deletes currently selected polyline
 	void deleteSelectedPolyline();
 
@@ -277,7 +279,7 @@ protected:
 	};
 
 	//! Deselects the currently selected polyline
-	void selectPolyline(Section* poly, bool autoRefreshDisplay = true);
+	void selectSketcherObject(Section* poly, bool autoRefreshDisplay = true);
 
 	//! Updates the global clouds bounding-box
 	void updateCloudsBox();
@@ -332,6 +334,13 @@ private: //members
 			, selectedVert(nullptr)
 			, selectedVertIndex(-1)
 		{}
+
+		void reset() {
+			picking_repo.clear();
+			resetSelected();
+			resetNearest();
+		}
+
 		void resetNearest() {
 			nearestEntitiy = nullptr;
 			nearestVert = nullptr;

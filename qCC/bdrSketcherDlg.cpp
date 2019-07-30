@@ -674,7 +674,7 @@ void bdrSketcher::echoButtonReleased()
 }
 
 
-void bdrSketcher::selectPolyline(Section* poly, bool autoRefreshDisplay/*=true*/)
+void bdrSketcher::selectSketcherObject(Section* poly, bool autoRefreshDisplay/*=true*/)
 {
 	bool redraw = false;
 
@@ -773,7 +773,7 @@ void bdrSketcher::entitySelected(ccHObject* entity)
 	{
 		if (section.entity == entity)
 		{
-			selectPolyline(&section);
+			selectSketcherObject(&section);
 			break;
 		}
 	}
@@ -795,6 +795,7 @@ bool bdrSketcher::start()
 	updateCloudsBox();
 
 	//enableSketcherEditingMode(true);	// XYLIU NOT START BY DEFAULT
+	setDefaultInteractionPickingMode();
 
 	return ccOverlayDialog::start();
 }
@@ -1406,6 +1407,13 @@ void bdrSketcher::cancelCurrentPolyline()
 		m_associatedWin->redraw();
 }
 
+void bdrSketcher::setDefaultInteractionPickingMode()
+{
+	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
+	m_associatedWin->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+	m_associatedWin->setPickingMode(ccGLWindow::ENTITY_PICKING); //to be able to select polylines!
+}
+
 void bdrSketcher::enableSketcherEditingMode(bool state)
 {
 	if (!m_associatedWin)
@@ -1424,9 +1432,7 @@ void bdrSketcher::enableSketcherEditingMode(bool state)
 			m_editedPoly->clear();
 			m_editedPolyVertices->clear();
 		}
-		m_associatedWin->setInteractionMode(ccGLWindow::PAN_ONLY());
-		m_associatedWin->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-		m_associatedWin->setPickingMode(ccGLWindow::ENTITY_PICKING); //to be able to select polylines!
+		setDefaultInteractionPickingMode();
 	}
 	else
 	{
@@ -1534,31 +1540,37 @@ QToolButton * bdrSketcher::getCurrentSOButton()
 
 void bdrSketcher::enableSelectedSOEditingMode(bool state)
 {
-	if (state && m_selectedSO) {
-		ccPointCloud* cloud = getEntityAssociateCloud(m_selectedSO->entity); if (!cloud) { goto exit; }
-		cloud->setEnabled(true);
-
-		m_state = PS_EDITING;
-		if (m_pickingVertex) {
-			delete m_pickingVertex;
-			m_pickingVertex = nullptr;
+	if (state) {
+		if (!m_selectedSO && !m_sections.empty()) {
+			selectSketcherObject(&m_sections.back());
 		}
-		m_pickingVertex = new PickingVertex();
+		if (m_selectedSO && m_selectedSO->entity) {
+			ccPointCloud* cloud = getEntityAssociateCloud(m_selectedSO->entity); if (!cloud) { goto exit; }
+			cloud->setEnabled(true);
 
-		m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_SHIFT_PAN | ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
-		//m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
+			m_state = PS_EDITING;
+			if (m_pickingVertex) {
+				m_pickingVertex->reset();
+			}
+			else {
+				m_pickingVertex = new PickingVertex();
+			}
+
+			m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_SHIFT_PAN | ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
+			//m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
+		}
 	}
 	else {
-		ccPointCloud* cloud = getEntityAssociateCloud(m_selectedSO->entity); if (!cloud) { goto exit; }
-		cloud->setEnabled(false);
+		if (m_selectedSO && m_selectedSO->entity) {
+			ccPointCloud* cloud = getEntityAssociateCloud(m_selectedSO->entity); if (!cloud) { goto exit; }
+			cloud->setEnabled(false);
+		}
 
 		m_state = PS_PAUSED;
 		if (m_pickingVertex) {
-			delete m_pickingVertex;
-			m_pickingVertex = nullptr;
+			m_pickingVertex->reset();
 		}
-		m_associatedWin->setInteractionMode(ccGLWindow::PAN_ONLY());
-		m_associatedWin->setPickingMode(ccGLWindow::ENTITY_PICKING);
+		setDefaultInteractionPickingMode();
 	}
 
 	m_associatedWin->redraw();

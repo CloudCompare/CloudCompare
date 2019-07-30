@@ -1875,7 +1875,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		StFootPrint* footprint = ccHObjectCaster::ToStFootPrint(m_currentObject);
 		assert(footprint);
-		SetDoubleSpinBoxValue(editor, footprint ? footprint->getTop() : VALID_MINUS_INT);
+		SetDoubleSpinBoxValue(editor, footprint ? footprint->getHighest() : VALID_MINUS_INT);
 	}
 	break;
 	case OBJECT_BLOCK_TOP:
@@ -2704,7 +2704,7 @@ void ccPropertiesTreeDelegate::footprintTopChanged(double pos)
 
 	StFootPrint* polyline = ccHObjectCaster::ToStFootPrint(m_currentObject);
 	assert(polyline);
-	polyline->setTop(pos);
+	polyline->setHighest(pos);
 	updateDisplay();
 }
 

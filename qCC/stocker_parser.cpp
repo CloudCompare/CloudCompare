@@ -2217,8 +2217,9 @@ ccHObject::Container GenerateFootPrints_PP(ccHObject* prim_group)
 			footptObj->showColors(true);
 			footptObj->setName(name);
 			footptObj->setComponentId(compoId);
-			footptObj->setTop(top_height);
+			footptObj->setHighest(top_height);
 			footptObj->setBottom(bottom_height);
+			footptObj->setLowest(bottom_height);
 
 			foot_print_objs.push_back(footptObj);
 			block_group->addChild(footptObj);
@@ -2286,8 +2287,10 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 			footptObj->showColors(true);
 			footptObj->setName(name);
 			footptObj->setComponentId(compoId);
-			footptObj->setTop(top_height);
+			footptObj->setHighest(top_height);
 			footptObj->setBottom(bottom_height);
+			footptObj->setLowest(bottom_height);
+
 			footptObj->setPlaneNames(cur_plane_names);
 
 			foot_print_objs.push_back(footptObj);
@@ -2473,7 +2476,7 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 			if (j == 0) {
 				valid = true;
 				first_polygon = polygon;
-				footprint_height = ccHObjectCaster::ToStFootPrint(first_footprint)->getTop();
+				footprint_height = ccHObjectCaster::ToStFootPrint(first_footprint)->getHighest();
 			}
 			contours.push_back(ToContour(polygon, 0));
 		}
@@ -2551,14 +2554,16 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 				building_name.toStdString().c_str(), ".", model_name.toStdString().c_str(), ".obj");
 			builder_3d4em.SetOutputPath(output_path);
 		}
+
+		ftObj->setBottom(ground_height);	// TODO
 		builder_3d4em.SetGroundHeight(ground_height);
 
 		ccHObject::Container primObjs = GetNonVerticalPlaneClouds(prim_group_obj, 15);
 		for (auto & pt : polygon) {
-			pt.P0().Z() = ftObj->getBottom();
-			pt.P1().Z() = ftObj->getBottom();
+			pt.P0().Z() = ftObj->getLowest();
+			pt.P1().Z() = ftObj->getLowest();
 		}
-		std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(primObjs, polygon, ftObj->getTop());
+		std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(primObjs, polygon, ftObj->getHighest());
 		builder_3d4em.SetSegmentedPoints(points);
 
 		if (!builder_3d4em.BuildingReconstruction()) continue;
@@ -2587,7 +2592,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 				continue;
 			}
 			if (block_entity) {
-				block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(block_number));
+				block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(block_number++));
 				ftObj->addChild(block_entity);
 			}
 		}
@@ -2613,7 +2618,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* entity, double ground_height)
 		StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
 		footprintObjs = blockgroup_obj->getValidFootPrints();
 	}
-
+	
 	return LoD2FromFootPrint(buildingObj, footprintObjs, ground_height);
 }
 
@@ -2702,8 +2707,8 @@ void GetPlanesInsideFootPrint(ccHObject* footprint, ccHObject* prim_group, CCVec
 	std::vector<CCVector3> ftpts = footprintObj->getPoints(false);
 	Contour3d ftpts_stocker; for (auto & pt : ftpts) { ftpts_stocker.emplace_back(pt.x, pt.y, pt.z); }
 	Polyline2d footprint_polygon = MakeLoopPolylinefromContour(ToContour2d(ftpts_stocker));
-	double min_z = footprintObj->getBottom() - settings.y;
-	double max_z = footprintObj->getTop() + settings.y;
+	double min_z = footprintObj->getLowest() - settings.y;
+	double max_z = footprintObj->getHighest() + settings.y;
 
 	ccHObject::Container all_planes = primgroupObj->getValidPlanes();
 	for (ccHObject* plane : all_planes) {

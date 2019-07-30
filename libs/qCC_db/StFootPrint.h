@@ -19,6 +19,7 @@
 #define ST_FOOTPRINT_HEADER
 
 #include "ccPolyline.h"
+class StBlock;
 
 // block
 class QCC_DB_LIB_API StFootPrint : public ccPolyline
@@ -42,11 +43,17 @@ public:
 	inline double getHeight() const;
 	void setHeight(double height);	//! attention: will set all the points z to height
 
-	inline double getTop() const { return m_top; }
-	void setTop(double top) { m_top = top; }
+	//! the highest plane point
+	inline double getHighest() const { return m_highest; }
+	void setHighest(double top) { m_highest = top; }
 
+	//! the lowest plane point
+	inline double getLowest() const { return m_lowest; }
+	void setLowest(double low) { m_lowest = low; }
+
+	//! the bottom of footprint, same as the child block
 	inline double getBottom() const { return m_bottom; }
-	void setBottom(double bottom) { m_bottom = bottom; }
+	void setBottom(double bottom);
 	
 	inline bool isHole() const { return m_hole; }
 	void setHoleState(bool state) { m_hole = state; }
@@ -57,6 +64,8 @@ public:
 	inline QStringList getPlaneNames() { return m_plane_names; }
 	void setPlaneNames(QStringList names) { m_plane_names = names; }
 
+	std::vector<StBlock*> getBlocks();
+
 protected:
 	//inherited from ccDrawable
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
@@ -65,7 +74,8 @@ protected:
 	virtual bool toFile_MeOnly(QFile& out) const override;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
-	double m_top;
+	double m_highest;
+	double m_lowest;
 	double m_bottom;
 	bool m_hole;
 	int m_componentId;

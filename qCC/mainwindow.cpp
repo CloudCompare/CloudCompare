@@ -13822,7 +13822,7 @@ void MainWindow::doActionBDLoD1Generation()
 			if (bd_model_obj) {
 				SetGlobalShiftAndScale(bd_model_obj);
 				bd_model_obj->setDisplay_recursive(entity->getDisplay());
-				addToDB(bd_model_obj, entity->getDBSourceType(), true, false);
+				addToDB(bd_model_obj, entity->getDBSourceType(), false, false);
 			}
 		}
 		catch (std::runtime_error& e) {
@@ -13843,7 +13843,7 @@ void MainWindow::doActionBDLoD2Generation()
 	
 	m_pbdr3d4emDlg->setModal(false);
 	m_pbdr3d4emDlg->setWindowModality(Qt::NonModal);
-	if (!m_pbdr3d4emDlg->exec()) return;
+	//if (!m_pbdr3d4emDlg->exec()) return;	// TODO: TEMP!!! 20190731
 
 	ccHObject::Container sels = m_selectedEntities;
 	//doActionBDFootPrintAuto();	// TODO: TEMP!!!!

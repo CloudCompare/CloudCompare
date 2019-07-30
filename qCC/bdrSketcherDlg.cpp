@@ -1842,11 +1842,13 @@ void bdrSketcher::exportFootprints()
 					duplicatePoly->setGlobalScale(sectionPolyline->getGlobalScale());
 					duplicatePoly->setGlobalShift(sectionPolyline->getGlobalShift());
 					duplicatePoly->setBottom(m_ground);
-					duplicatePoly->setTop(m_ground);
-					duplicatePoly->setHeight(m_ground);
+					duplicatePoly->setLowest(m_ground);
+
+					double highest = (m_cloudsBox.isValid()) ? m_cloudsBox.maxCorner()[2] : m_ground;
+					duplicatePoly->setHighest(highest);
+					duplicatePoly->setHeight(highest);
 
 					sectionPolyline = duplicatePoly;
-
 				}
 				else {
 					delete duplicatePoly;
@@ -1940,8 +1942,12 @@ void bdrSketcher::exportFootprintInside()
 					duplicatePoly->setGlobalScale(sectionPolyline->getGlobalScale());
 					duplicatePoly->setGlobalShift(sectionPolyline->getGlobalShift());
 					duplicatePoly->setBottom(m_ground);
-					duplicatePoly->setTop(m_ground);
-					duplicatePoly->setHeight(m_ground);
+					duplicatePoly->setLowest(m_ground);
+
+					double highest = (m_cloudsBox.isValid()) ? m_cloudsBox.maxCorner()[2] : m_ground;
+					duplicatePoly->setHighest(highest);
+					duplicatePoly->setHeight(highest);
+
 					sectionPolyline = duplicatePoly;
 				}
 				else {
@@ -2029,8 +2035,12 @@ void bdrSketcher::exportFootprintOutside()
 					duplicatePoly->setGlobalScale(sectionPolyline->getGlobalScale());
 					duplicatePoly->setGlobalShift(sectionPolyline->getGlobalShift());
 					duplicatePoly->setBottom(m_ground);
-					duplicatePoly->setHeight(m_ground);
-					duplicatePoly->setTop(m_ground);
+					duplicatePoly->setLowest(m_ground);
+
+					double highest = (m_cloudsBox.isValid()) ? m_cloudsBox.maxCorner()[2] : m_ground;
+					duplicatePoly->setHighest(highest);
+					duplicatePoly->setHeight(highest);
+
 					sectionPolyline = duplicatePoly;
 				}
 				else {

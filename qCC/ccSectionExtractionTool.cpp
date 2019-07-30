@@ -2223,8 +2223,12 @@ void ccSectionExtractionTool::exportFootprintInside()
 					duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
 					duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
 					duplicatePoly->setBottom(m_ground);
-					duplicatePoly->setTop(m_ground);
-					duplicatePoly->setHeight(m_ground);
+					duplicatePoly->setLowest(m_ground);
+
+					double highest = (m_cloudsBox.isValid()) ? m_cloudsBox.maxCorner()[2] : m_ground;
+					duplicatePoly->setHighest(highest);
+					duplicatePoly->setHeight(highest);
+						
 					section.entity = duplicatePoly;
 				}
 				else {
@@ -2308,8 +2312,12 @@ void ccSectionExtractionTool::exportFootprintOutside()
 					duplicatePoly->setGlobalScale(section.entity->getGlobalScale());
 					duplicatePoly->setGlobalShift(section.entity->getGlobalShift());
 					duplicatePoly->setBottom(m_ground);
-					duplicatePoly->setHeight(m_ground);
-					duplicatePoly->setTop(m_ground);
+					duplicatePoly->setLowest(m_ground);
+
+					double highest = (m_cloudsBox.isValid()) ? m_cloudsBox.maxCorner()[2] : m_ground;
+					duplicatePoly->setHighest(highest);
+					duplicatePoly->setHeight(highest);
+
 					section.entity = duplicatePoly;
 				}
 				else {

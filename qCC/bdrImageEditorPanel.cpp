@@ -256,8 +256,7 @@ void bdrImageEditorPanel::stopEditor(bool state)
 	if (state) {
 		//! reproject the entities back to 3d
 		for (ProjectedPair prj_2d_3d : m_projected_2D_3D) {
-			prj_2d_3d.first;
-			prj_2d_3d.second;
+			m_pbdrImshow->projectBack(prj_2d_3d.first, prj_2d_3d.second);
 		}
 	}
 }

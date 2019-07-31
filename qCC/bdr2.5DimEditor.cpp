@@ -46,6 +46,7 @@
 #include <assert.h>
 
 #include "stocker_parser.h"
+#include "vcg/space/intersection3.h"
 
 bdr2Point5DimEditor::bdr2Point5DimEditor()
 	: m_glWindow(nullptr)
@@ -352,20 +353,79 @@ ccHObject* bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 	return entity_in_image_2d;
 }
 
-bool bdr2Point5DimEditor::projectBack(ccHObject* obj2D, ccHObject* onj3D)
+// TODO: this function can be put in other classes, such as camera
+bool bdr2Point5DimEditor::projectBack(ccHObject* obj2D, ccHObject* obj3D)
 {
 	if (!m_image) { return false; }
 	
 	ccCameraSensor* cam = m_image->getAssociatedSensor();
 	CCVector3 camera_center;
 	cam->getActiveAbsoluteCenter(camera_center);
-	//! line 
 
-	//! plane
+	if (obj3D->isA(CC_TYPES::ST_BLOCK) && obj2D->isKindOf(CC_TYPES::POLY_LINE)) {
+		
+		StBlock* block = ccHObjectCaster::ToStBlock(obj3D);
+		ccPolyline* polyline = ccHObjectCaster::ToPolyline(obj2D); if (!polyline) return false;
+		
+		ccFacet* facet = block->getTopFacet(); if (!facet) return false;
+		std::vector<CCVector3> contours = block->getTop();
 
-	//! intersection
+		const PointCoordinateType *eq = facet->getPlaneEquation();
+		vcg::Plane3d plane;
+		plane.SetDirection({ eq[0],eq[1],eq[2] });
+		plane.SetOffset(eq[3]);
 
-	//! top set contour
+		std::vector<CCVector3> top_points;
+		for (size_t i = 0; i < polyline->size(); i++) {
+			CCVector3 pt = *polyline->getPoint(i);
+			//! get world coordinate
+			CCVector3 pt_global;
+			CCVector2 image_coord(pt.x, m_image->getH() - pt.y);
+			if (!cam->fromImageCoordToGlobalCoord(image_coord, pt_global, 100)) {
+				return false;
+			}
+
+			vcg::Line3d line;
+			line.SetOrigin(stocker::parse_xyz(camera_center));
+			line.SetDirection(stocker::parse_xyz(pt_global - camera_center));
+
+			vcg::Point3d point;
+			if (!vcg::IntersectionLinePlane(line, plane, point)) {
+				return false;
+			}
+			top_points.push_back(CCVector3(vcgXYZ(point)));
+		}
+		if (top_points.size() < 3) return false;
+
+		//! project to the bottom
+		std::vector<CCVector3> bottom_points;
+		ccFacet* facet_bottom = block->getBottomFacet(); if (!facet_bottom) return false;
+		eq = facet_bottom->getPlaneEquation();
+		plane.SetDirection({ eq[0],eq[1],eq[2] });
+		plane.SetOffset(eq[3]);
+		for (auto & v : top_points) {
+			vcg::Line3d line;
+			line.SetOrigin(stocker::parse_xyz(v));
+			line.SetDirection({ 0,0,-1 });
+
+			vcg::Point3d point;
+			if (!vcg::IntersectionLinePlane(line, plane, point)) {
+				return false;
+			}
+			bottom_points.push_back(CCVector3(vcgXYZ(point)));
+		}
+		if (bottom_points.size() != top_points.size()) { return false; }
+
+		//! set to block
+		ccHObject* parent = block->getParent(); if (!parent) { return false; }
+		
+		StBlock* new_block = new StBlock(top_points, bottom_points);
+		new_block->setName(block->getName());
+		MainWindow::TheInstance()->removeFromDB(block);
+		
+		parent->addChild(new_block);
+		MainWindow::TheInstance()->addToDB_Build(new_block);
+	}
 }
 
 void bdr2Point5DimEditor::ZoomFit()

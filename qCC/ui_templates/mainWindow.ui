@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>907</height>
+    <height>909</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -94,11 +94,20 @@
       <string>Language Translation</string>
      </property>
     </widget>
+    <widget class="QMenu" name="menuSet_Pivot_Display_State">
+     <property name="title">
+      <string>Set Pivot Display State</string>
+     </property>
+     <addaction name="actionSetPivotAlwaysOn"/>
+     <addaction name="actionSetPivotRotationOnly"/>
+     <addaction name="actionSetPivotOff"/>
+    </widget>
     <addaction name="actionFullScreen"/>
     <addaction name="actionExclusiveFullScreen"/>
     <addaction name="actionRefresh"/>
     <addaction name="actionToggleCenteredPerspective"/>
     <addaction name="actionToggleViewerBasedPerspective"/>
+    <addaction name="menuSet_Pivot_Display_State"/>
     <addaction name="actionShowCursor3DCoordinates"/>
     <addaction name="actionLockRotationAxis"/>
     <addaction name="actionEnterBubbleViewMode"/>

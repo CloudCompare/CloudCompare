@@ -2092,7 +2092,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	case OBJECT_SENSOR_DRAW_IMAGE:
 	{
 		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
-			if (item->checkState() == Qt::Checked) {
+			if (item->checkState() != Qt::Checked) {
 				for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 					ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 					if (sensor) sensor->drawImage(false);

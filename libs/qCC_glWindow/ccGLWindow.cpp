@@ -4055,7 +4055,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			u *= retinaScale;
 
 			bool entityMovingMode = (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
-				|| ((QApplication::keyboardModifiers() & Qt::ControlModifier) && m_customLightEnabled);
+				|| ((QApplication::keyboardModifiers() & Qt::ShiftModifier) && m_customLightEnabled);
 			if (entityMovingMode)
 			{
 				//apply inverse view matrix

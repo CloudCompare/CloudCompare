@@ -2171,6 +2171,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 					ccLog::Warning("[SHP] No numerical field in the associated DBF file!");
 				}
 			}
+			DBFClose(dbfHandle);
 		}
 		else
 		{

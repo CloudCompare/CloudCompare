@@ -228,6 +228,7 @@
     <file>images/stocker/cursorBoard.png</file>
     <file>images/stocker/cursorMove.png</file>
     <file>images/stocker/cursorRemove.png</file>
+    <file>images/stocker/editplane.png</file>
     <file>images/stocker/imgedit.png</file>
   </qresource>
 </RCC>

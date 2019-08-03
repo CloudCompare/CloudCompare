@@ -160,6 +160,7 @@
 #include "bdrFacetFilterDlg.h"
 #include "bdr2.5DimEditor.h"
 #include "bdrImageEditorPanel.h"
+#include "bdrPlaneEditorDlg.h"
 
 #include "stocker_parser.h"
 #include "polyfit/basic/logger.h"
@@ -235,6 +236,7 @@ MainWindow::MainWindow()
 	, m_pbdrffDlg(nullptr)
 	, m_pbdrImshow(nullptr)	
 	, m_pbdrImagePanel(nullptr)
+	, m_pbdrPlaneEditDlg(nullptr)
 	, polyfit_obj(nullptr)
 {
 	m_UI->setupUi( this );
@@ -981,7 +983,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionShowSelectedImage,			&QAction::triggered, this, &MainWindow::doActionShowSelectedImage);
 	connect(m_UI->ProjectTabWidget,					SIGNAL(currentChanged(int)), this, SLOT(doActionChangeTabTree(int)));
 	connect(m_UI->actionImageOverlay,				&QAction::triggered, this, &MainWindow::toggleImageOverlay);
-	connect(m_UI->actionProjectToImage,				&QAction::triggered, this, &MainWindow::doActionProjectToImage);
+	connect(m_UI->actionProjectToImage,				&QAction::triggered, this, &MainWindow::doActionProjectToImage); 
+	connect(m_UI->actionSelectWorkingPlane,			&QAction::triggered, this, &MainWindow::doActionSelectWorkingPlane);
 }
 
 void MainWindow::doActionChangeTabTree(int index)
@@ -14215,4 +14218,20 @@ void MainWindow::doActionProjectToImage()
 	if (m_pbdrImshow->getImage()) {
 		m_pbdrImagePanel->setProjection(m_selectedEntities);
 	}
+}
+
+void MainWindow::doActionSelectWorkingPlane()
+{
+	if (!m_pbdrPlaneEditDlg)
+		m_pbdrPlaneEditDlg = new bdrPlaneEditorDlg(m_pickingHub, this);
+	
+	if (haveSelection())
+	{
+		ccPlane* plane = ccHObjectCaster::ToPlane(m_selectedEntities.front());
+		if (plane) {
+			m_pbdrPlaneEditDlg->initWithPlane(plane);
+		}
+	}
+
+	m_pbdrPlaneEditDlg->show();
 }

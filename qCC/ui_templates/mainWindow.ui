@@ -584,6 +584,7 @@
     <addaction name="actionShowSelectedImage"/>
     <addaction name="actionImageOverlay"/>
     <addaction name="actionProjectToImage"/>
+    <addaction name="actionSelectWorkingPlane"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1156,6 +1157,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionBDPlaneFromPoints"/>
    <addaction name="actionBDPlaneFromPolygon"/>
    <addaction name="actionBDPrimMakePlane"/>
+   <addaction name="actionSelectWorkingPlane"/>
    <addaction name="separator"/>
    <addaction name="actionBDFootPrintAuto"/>
    <addaction name="actionBDFootPrintManual"/>
@@ -4042,6 +4044,24 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>display global coord or local coord</string>
+   </property>
+  </action>
+  <action name="actionSelectWorkingPlane">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/editplane.png</normaloff>:/CC/Stocker/images/stocker/editplane.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select Working Plane</string>
+   </property>
+   <property name="iconText">
+    <string>Plane</string>
+   </property>
+   <property name="statusTip">
+    <string>Select a working plane for sketcher</string>
    </property>
   </action>
  </widget>

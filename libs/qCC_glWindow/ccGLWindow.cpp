@@ -4362,7 +4362,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	}
 	else if (event->buttons() & Qt::MiddleButton)	// XYLIU
 	{
-		float wheelDelta_deg = dy * 2.0f;
+		float wheelDelta_deg = -dy * 2.0f;
 		onWheelEvent(wheelDelta_deg);
 
 		emit mouseWheelRotated(wheelDelta_deg);
@@ -5297,6 +5297,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 						}
 					}
 				}
+				
 			}
 
 			//add children

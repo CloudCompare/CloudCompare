@@ -71,6 +71,7 @@ class bdrPlaneSegDlg;
 class bdrFacetFilterDlg;
 class bdr2Point5DimEditor;
 class bdrImageEditorPanel;
+class bdrPlaneEditorDlg;
 
 class PolyFitObj;
 
@@ -599,6 +600,8 @@ private slots:
 
 	void doActionProjectToImage();
 
+	void doActionSelectWorkingPlane();
+
 private:
 	//! Shortcut: asks the user to select one cloud
 	/** \param defaultCloudEntity a cloud to select by default (optional)
@@ -801,6 +804,8 @@ private:
 	bdr3D4EMDlg* m_pbdr3d4emDlg;
 	bdr2Point5DimEditor* m_pbdrImshow;
 	bdrImageEditorPanel* m_pbdrImagePanel;
+	bdrPlaneEditorDlg* m_pbdrPlaneEditDlg;
+
 	PolyFitObj* polyfit_obj;
 };
 

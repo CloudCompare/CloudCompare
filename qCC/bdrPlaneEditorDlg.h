@@ -63,16 +63,26 @@ public slots:
 	void onDipDirChanged(double);
 	void onDipDirModified(bool);
 	void onNormalChanged(double);
+	void cancle();
 
 protected slots:
 
 	void saveParamsAndAccept();
 
+	void preview();
 	void restore();
 
-	void cancle();
+	
 
 protected: //members
+
+	//! to store the initial plane parameters
+	struct planeParams {
+		CCVector3 normal;
+		CCVector3 center;
+		CCVector2 size;
+	};
+	planeParams m_planePara;
 
 	//! Picking window (if any)
 	ccGLWindow* m_pickingWin;

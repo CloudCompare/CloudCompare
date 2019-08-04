@@ -14222,6 +14222,9 @@ void MainWindow::doActionProjectToImage()
 
 void MainWindow::doActionSelectWorkingPlane()
 {
+	if (m_pbdrPlaneEditDlg && !m_pbdrPlaneEditDlg->isHidden())	{
+		m_pbdrPlaneEditDlg->cancle();
+	}
 	if (!m_pbdrPlaneEditDlg)
 		m_pbdrPlaneEditDlg = new bdrPlaneEditorDlg(m_pickingHub, this);
 	

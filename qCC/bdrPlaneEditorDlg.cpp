@@ -72,6 +72,8 @@ bdrPlaneEditorDlg::bdrPlaneEditorDlg(ccPickingHub* pickingHub, QWidget* parent)
 	connect(nyDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onNormalChanged(double)));
 	connect(nzDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onNormalChanged(double)));
 
+	connect(previewCheckBox, &QAbstractButton::clicked, this, &bdrPlaneEditorDlg::preview);
+	connect(restoreToolButton, &QAbstractButton::clicked, this, &bdrPlaneEditorDlg::restore);
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveParamsAndAccept()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(cancle()));
 
@@ -138,7 +140,7 @@ void bdrPlaneEditorDlg::saveParamsAndAccept()
 
 	accept();
 
-	deleteLater();
+//	deleteLater();
 }
 
 void bdrPlaneEditorDlg::onDipDirModified(bool)
@@ -198,15 +200,100 @@ void bdrPlaneEditorDlg::onNormalChanged(double)
 	}
 }
 
+void bdrPlaneEditorDlg::preview()
+{
+	if (previewCheckBox->isChecked()) {
+		updateParams();
+	}
+	else {
+		restore();
+	}
+}
+
 void bdrPlaneEditorDlg::restore()
 {
-	// TODO
+	if (!m_associatedPlane) {
+		return;
+	}
+	CCVector3 Nd = m_planePara.normal;
+	CCVector3 Cd = m_planePara.center;
+	PointCoordinateType width = m_planePara.size.x;
+	PointCoordinateType height = m_planePara.size.y;
+
+	double dip = 0;
+	double dipDir = 0;
+
+	CCVector3 N = m_associatedPlane->getNormal();
+	CCVector3 C = m_associatedPlane->getCenter();
+
+	//shall we transform (translate and / or rotate) the plane?
+	ccGLMatrix trans;
+	bool needToApplyTrans = false;
+	bool needToApplyRot = false;
+
+	needToApplyRot = (fabs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
+	needToApplyTrans = needToApplyRot || ((C - Cd).norm2d() != 0);
+
+	if (needToApplyTrans)
+	{
+		trans.setTranslation(-C);
+		needToApplyTrans = true;
+	}
+	if (needToApplyRot)
+	{
+		ccGLMatrix rotation;
+		//special case: plane parallel to XY
+		if (fabs(N.z) > PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
+		{
+			ccGLMatrix rotX; rotX.initFromParameters(-dip * CC_DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
+			ccGLMatrix rotZ; rotZ.initFromParameters(dipDir * CC_DEG_TO_RAD, CCVector3(0, 0, -1), CCVector3(0, 0, 0));
+			rotation = rotZ * rotX;
+		}
+		else //general case
+		{
+			rotation = ccGLMatrix::FromToRotation(N, Nd);
+		}
+		trans = rotation * trans;
+	}
+	if (needToApplyTrans)
+	{
+		trans.setTranslation(trans.getTranslationAsVec3D() + Cd);
+	}
+	if (needToApplyRot || needToApplyTrans)
+	{
+		m_associatedPlane->applyGLTransformation_recursive(&trans);
+
+		ccLog::Print("[Plane edit] Applied transformation matrix:");
+		ccLog::Print(trans.toString(12, ' ')); //full precision
+	}
+
+	if (m_associatedPlane->getXWidth() != width
+		|| m_associatedPlane->getYWidth() != height)
+	{
+		m_associatedPlane->setXWidth(width, false);
+		m_associatedPlane->setYWidth(height, true);
+	}
+
+	nxDoubleSpinBox->setValue(m_planePara.normal.x);
+	nyDoubleSpinBox->setValue(m_planePara.normal.y);
+	nzDoubleSpinBox->setValue(m_planePara.normal.z);
+	
+	wDoubleSpinBox->setValue(m_planePara.size.x);
+	hDoubleSpinBox->setValue(m_planePara.size.y);
+
+	cxAxisDoubleSpinBox->setValue(m_planePara.center.x);
+	cyAxisDoubleSpinBox->setValue(m_planePara.center.y);
+	czAxisDoubleSpinBox->setValue(m_planePara.center.z);
+
+	if (MainWindow::TheInstance())
+		MainWindow::TheInstance()->updatePropertiesView();
+	m_associatedPlane->redrawDisplay();
 }
 
 void bdrPlaneEditorDlg::cancle()
 {
 	restore();
-	deleteLater();
+	//deleteLater();
 }
 
 void bdrPlaneEditorDlg::pickPointAsCenter(bool state)
@@ -255,7 +342,9 @@ void bdrPlaneEditorDlg::onItemPicked(const PickedItem& pi)
 
 void bdrPlaneEditorDlg::initWithPlane(ccPlane* plane)
 {
-	m_associatedPlane = plane;
+	if (m_associatedPlane != plane) {
+		m_associatedPlane = plane;
+	}
 	if (!plane)
 	{
 		assert(false);
@@ -292,6 +381,10 @@ void bdrPlaneEditorDlg::initWithPlane(ccPlane* plane)
 	cxAxisDoubleSpinBox->setValue(C.x);
 	cyAxisDoubleSpinBox->setValue(C.y);
 	czAxisDoubleSpinBox->setValue(C.z);
+
+	m_planePara.normal = N;
+	m_planePara.center = C;
+	m_planePara.size = CCVector2(plane->getXWidth(), plane->getYWidth());
 }
 
 void bdrPlaneEditorDlg::updatePlane(ccPlane* plane)

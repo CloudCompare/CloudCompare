@@ -108,7 +108,7 @@ parts:
   laszip:
     plugin: cmake
     source: https://github.com/LASzip/LASzip.git
-    source-tag: "3.2.0"
+    source-tag: "3.2.9"
     build-packages:
       - build-essential
     configflags:
@@ -131,7 +131,7 @@ parts:
     after: [laszip, eigen]
     plugin: cmake
     source: https://github.com/PDAL/PDAL.git
-    source-tag: "1.7.1"
+    source-tag: "1.8.0"
     build-packages:
       - build-essential
       - libgdal-dev

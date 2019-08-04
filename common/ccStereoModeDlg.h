@@ -24,10 +24,13 @@
 //Qt
 #include <QDialog>
 
-#include <ui_stereoModeDlg.h>
+namespace Ui
+{
+	class StereoModeDialog;
+}
 
 //! Dialog to define the parameters of the stereo mode (for 3D views)
-class ccStereoModeDlg : public QDialog, public Ui::StereoModeDialog
+class ccStereoModeDlg : public QDialog
 {
 	Q_OBJECT
 
@@ -35,6 +38,7 @@ public:
 
 	//! Default constructor
 	explicit ccStereoModeDlg(QWidget* parent);
+	~ccStereoModeDlg() override;
 
 	//! Returns the current parameters
 	ccGLWindow::StereoParams getParameters() const;
@@ -46,6 +50,9 @@ protected slots:
 
 	//! Slot called when the glass type is modified
 	void glassTypeChanged(int);
+	
+private:
+	Ui::StereoModeDialog* m_ui;
 };
 
 #endif //CC_STEREO_MODE_DLG_HEADER

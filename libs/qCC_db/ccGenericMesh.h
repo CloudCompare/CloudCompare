@@ -111,7 +111,7 @@ public:
 
 	//! Returns per-triangle normals shared array
 	virtual NormsIndexesTableType* getTriNormsTable() const = 0;
-	
+
 	//! Returns the (barycentric) interpolation weights for a given triangle
 	virtual void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const;
 
@@ -123,6 +123,14 @@ public:
 	**/
 	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) = 0;
 
+	//! Interpolates normal(s) inside a given triangle
+	/** \param triIndex triangle index
+		\param w barycentric coordinates
+		\param[out] N interpolated normal
+		\return success
+	**/
+	virtual bool interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) = 0;
+
 	//! Interpolates RGB colors inside a given triangle
 	/** \param triIndex triangle index
 		\param P point where to interpolate (should be inside the triangle!)
@@ -130,6 +138,14 @@ public:
 		\return success
 	**/
 	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C) = 0;
+
+	//! Interpolates RGB colors inside a given triangle
+	/** \param triIndex triangle index
+		\param w barycentric coordinates
+		\param[out] C interpolated color
+		\return success
+	**/
+	virtual bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& C) = 0;
 
 	//! Returns RGB color fom a given triangle material/texture
 	/** \param triIndex triangle index
@@ -191,7 +207,18 @@ public:
 									const ccGLCameraParameters& camera,
 									int& nearestTriIndex,
 									double& nearestSquareDist,
-									CCVector3d& nearestPoint);
+									CCVector3d& nearestPoint,
+									CCVector3d* barycentricCoords = nullptr) const;
+
+	//! Triangle picking (single triangle)
+	virtual bool trianglePicking(	unsigned triIndex,
+									const CCVector2d& clickPos,
+									const ccGLCameraParameters& camera,
+									CCVector3d& point,
+									CCVector3d* barycentricCoords = nullptr) const;
+
+	//! Computes the point that corresponds to the given uv (barycentric) coordinates
+	bool computePointPosition(unsigned triIndex, const CCVector2d& uv, CCVector3& P, bool warningIfOutside = true) const;
 
 protected:
 
@@ -203,6 +230,16 @@ protected:
 	static CCVector3* GetVertexBuffer();
 	static CCVector3* GetNormalsBuffer();
 	static ccColor::Rgb* GetColorsBuffer();
+
+	//! Triangle picking (single triangle)
+	virtual bool trianglePicking(	unsigned triIndex,
+									const CCVector2d& clickPos,
+									const ccGLMatrix& trans,
+									bool noGLTrans,
+									const ccGenericPointCloud& vertices,
+									const ccGLCameraParameters& camera,
+									CCVector3d& point,
+									CCVector3d* barycentricCoords = nullptr) const;
 
 	//! Returns a pre-initialized array of vertex indexes for wired display
 	/** Array size is MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*6 by default

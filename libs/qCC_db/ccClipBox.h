@@ -133,7 +133,7 @@ protected: //methods
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Computes arrows display scale
-	PointCoordinateType computeArrowsScale();
+	PointCoordinateType computeArrowsScale() const;
 
 protected: //members
 	

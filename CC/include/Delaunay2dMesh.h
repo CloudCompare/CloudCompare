@@ -20,6 +20,7 @@
 #define DELAUNAY2D_MESH_HEADER
 
 //Local
+#include "GenericIndexedCloudPersist.h"
 #include "GenericIndexedMesh.h"
 #include "SimpleTriangle.h"
 
@@ -66,8 +67,8 @@ public:
 		\return success
 	**/
 	virtual bool buildMesh(	const std::vector<CCVector2>& points2D,
-								std::size_t pointCountToUse = 0,
-								char* outputErrorStr = nullptr);
+							std::size_t pointCountToUse = 0,
+							char* outputErrorStr = nullptr);
 
 	//! Build the Delaunay mesh from a set of 2D polylines
 	/** \param points2D a set of 2D points
@@ -88,6 +89,8 @@ public:
 	virtual bool removeOuterTriangles(	const std::vector<CCVector2>& vertices2D,
 										const std::vector<CCVector2>& polygon2D,
 										bool removeOutside = true);
+
+
 
 	//inherited methods (see GenericMesh)
 	unsigned size() const override { return m_numberOfTriangles; }
@@ -113,6 +116,13 @@ public:
 
 	//! Returns associated cloud
 	inline GenericIndexedCloud* getAssociatedCloud() { return m_associatedCloud; }
+
+	//! Tesselates a 2D polyline (shortcut to buildMesh and removeOuterTriangles)
+	static Delaunay2dMesh* TesselateContour(const std::vector<CCVector2>& contourPoints);
+
+	//! Tesselates a 2D polyline (not necessarily axis-aligned)
+	static Delaunay2dMesh* TesselateContour(GenericIndexedCloudPersist* contourPoints, int flatDimension = -1);
+
 
 protected:
 

@@ -227,7 +227,7 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 	bool keepOtherProps = (vertCount ==  verts->size());
 	if (keepOtherProps)
 	{
-		verts->unalloactePoints();
+		verts->unallocatePoints();
 		verts->unallocateNorms();
 	}
 	else

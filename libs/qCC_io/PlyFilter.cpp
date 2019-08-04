@@ -22,35 +22,45 @@
 #include "PlyOpenDlg.h"
 
 //Qt
-#include <QImage>
 #include <QFileInfo>
+#include <QImage>
 #include <QMessageBox>
 #include <QPushButton>
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
-#include <ccMesh.h>
-#include <ccPointCloud.h>
 #include <ccMaterial.h>
 #include <ccMaterialSet.h>
+#include <ccMesh.h>
+#include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
 //System
-#include <string.h>
-#include <assert.h>
+#include <cassert>
+#include <cstring>
 #if defined(CC_WINDOWS)
 #include <windows.h>
 #else
-#include <time.h>
+#include <ctime>
 #include <unistd.h>
 #endif
 
 using namespace CCLib;
 
-bool PlyFilter::canLoadExtension(const QString& upperCaseExt) const
-{
-	return (upperCaseExt == "PLY");
+
+PlyFilter::PlyFilter()
+	: FileIOFilter( {
+					"_PLY Filter",
+					7.0f,	// priority
+					QStringList{ "ply" },
+					"ply",
+					QStringList{ "PLY mesh (*.ply)" },
+					QStringList{ "PLY mesh (*.ply)" },
+					Import | Export | BuiltIn
+					} )
+{	
 }
 
 bool PlyFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
@@ -66,6 +76,7 @@ bool PlyFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 }
 
 static e_ply_storage_mode s_defaultOutputFormat = PLY_DEFAULT;
+
 void PlyFilter::SetDefaultOutputFormat(e_ply_storage_mode format)
 {
 	s_defaultOutputFormat = format;

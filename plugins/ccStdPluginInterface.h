@@ -19,8 +19,8 @@
 #define CC_STD_PLUGIN_INTERFACE_HEADER
 
 //Qt
-#include <QWidget>
 #include <QActionGroup>
+#include <QWidget>
 
 //qCC_db
 #include <ccHObject.h>
@@ -52,10 +52,10 @@ public:
 	}
 	
 	//! Destructor
-	virtual ~ccStdPluginInterface() = default;
+	~ccStdPluginInterface() override = default;
 
 	//inherited from ccPluginInterface
-	virtual CC_PLUGIN_TYPE getType() const override { return CC_STD_PLUGIN; }
+	CC_PLUGIN_TYPE getType() const override { return CC_STD_PLUGIN; }
 
 	//! Sets application entry point
 	/** Called just after plugin creation by qCC
@@ -87,7 +87,7 @@ public:
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) { /*ignored by default*/ }
 
 	//! Shortcut to ccMainAppInterface::dispToConsole
-	inline virtual void dispToConsole(QString message, ccMainAppInterface::ConsoleMessageLevel level = ccMainAppInterface::STD_CONSOLE_MESSAGE)
+	inline virtual void dispToConsole(const QString& message, ccMainAppInterface::ConsoleMessageLevel level = ccMainAppInterface::STD_CONSOLE_MESSAGE)
 	{
 		if (m_app)
 		{

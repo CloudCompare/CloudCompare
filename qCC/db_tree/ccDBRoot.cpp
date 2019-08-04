@@ -247,13 +247,6 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_dbTreeWidget->setAcceptDrops(true);
 	m_dbTreeWidget->setDropIndicatorShown(true);
 
-	//already done in ui file!
-	//m_dbTreeWidget->setDragDropMode(QAbstractItemView::InternalMove);
-	//m_dbTreeWidget->setEditTriggers(QAbstractItemView::EditKeyPressed);
-	//m_dbTreeWidget->setDragDropMode(QAbstractItemView::InternalMove);
-	//m_dbTreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
-	//m_dbTreeWidget->setUniformRowHeights(true);
-
 	//context menu on DB tree elements
 	m_dbTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_expandBranch = new QAction("Expand branch", this);
@@ -280,30 +273,30 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_contextMenuPos = QPoint(-1,-1);
 
 	//connect custom context menu actions
-	connect(m_dbTreeWidget,						SIGNAL(customContextMenuRequested(const QPoint&)),	this, SLOT(showContextMenu(const QPoint&)));
-	connect(m_expandBranch,						SIGNAL(triggered()),								this, SLOT(expandBranch()));
-	connect(m_collapseBranch,					SIGNAL(triggered()),								this, SLOT(collapseBranch()));
-	connect(m_gatherInformation,				SIGNAL(triggered()),								this, SLOT(gatherRecursiveInformation()));
-	connect(m_sortChildrenAZ,					SIGNAL(triggered()),								this, SLOT(sortChildrenAZ()));
-	connect(m_sortChildrenZA,					SIGNAL(triggered()),								this, SLOT(sortChildrenZA()));
-	connect(m_sortChildrenType,					SIGNAL(triggered()),								this, SLOT(sortChildrenType()));
-	connect(m_selectByTypeAndName,              SIGNAL(triggered()),								this, SLOT(selectByTypeAndName()));
-	connect(m_deleteSelectedEntities,			SIGNAL(triggered()),								this, SLOT(deleteSelectedEntities()));
-	connect(m_toggleSelectedEntities,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities()));
-	connect(m_toggleSelectedEntitiesVisibility,	SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesVisibility()));
-	connect(m_toggleSelectedEntitiesColor,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesColor()));
-	connect(m_toggleSelectedEntitiesNormals,	SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesNormals()));
-	connect(m_toggleSelectedEntitiesMat,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesMat()));
-	connect(m_toggleSelectedEntitiesSF,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesSF()));
-	connect(m_toggleSelectedEntities3DName,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities3DName()));
-	connect(m_addEmptyGroup,					SIGNAL(triggered()),								this, SLOT(addEmptyGroup()));
-	connect(m_alignCameraWithEntity,			SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityDirect()));
-	connect(m_alignCameraWithEntityReverse,		SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityIndirect()));
-	connect(m_enableBubbleViewMode,				SIGNAL(triggered()),								this, SLOT(enableBubbleViewMode()));
-	connect(m_editLabelScalarValue,				SIGNAL(triggered()),								this, SLOT(editLabelScalarValue()));
+	connect(m_dbTreeWidget,						&QWidget::customContextMenuRequested,	this, &ccDBRoot::showContextMenu);
+	connect(m_expandBranch,						&QAction::triggered,					this, &ccDBRoot::expandBranch);
+	connect(m_collapseBranch,					&QAction::triggered,					this, &ccDBRoot::collapseBranch);
+	connect(m_gatherInformation,				&QAction::triggered,					this, &ccDBRoot::gatherRecursiveInformation);
+	connect(m_sortChildrenAZ,					&QAction::triggered,					this, &ccDBRoot::sortChildrenAZ);
+	connect(m_sortChildrenZA,					&QAction::triggered,					this, &ccDBRoot::sortChildrenZA);
+	connect(m_sortChildrenType,					&QAction::triggered,					this, &ccDBRoot::sortChildrenType);
+	connect(m_selectByTypeAndName,              &QAction::triggered,					this, &ccDBRoot::selectByTypeAndName);
+	connect(m_deleteSelectedEntities,			&QAction::triggered,					this, &ccDBRoot::deleteSelectedEntities);
+	connect(m_toggleSelectedEntities,			&QAction::triggered,					this, &ccDBRoot::toggleSelectedEntities);
+	connect(m_toggleSelectedEntitiesVisibility,	&QAction::triggered,					this, &ccDBRoot::toggleSelectedEntitiesVisibility);
+	connect(m_toggleSelectedEntitiesColor,		&QAction::triggered,					this, &ccDBRoot::toggleSelectedEntitiesColor);
+	connect(m_toggleSelectedEntitiesNormals,	&QAction::triggered,					this, &ccDBRoot::toggleSelectedEntitiesNormals);
+	connect(m_toggleSelectedEntitiesMat,		&QAction::triggered,					this, &ccDBRoot::toggleSelectedEntitiesMat);
+	connect(m_toggleSelectedEntitiesSF,			&QAction::triggered,					this, &ccDBRoot::toggleSelectedEntitiesSF);
+	connect(m_toggleSelectedEntities3DName,		&QAction::triggered,					this, &ccDBRoot::toggleSelectedEntities3DName);
+	connect(m_addEmptyGroup,					&QAction::triggered,					this, &ccDBRoot::addEmptyGroup);
+	connect(m_alignCameraWithEntity,			&QAction::triggered,					this, &ccDBRoot::alignCameraWithEntityDirect);
+	connect(m_alignCameraWithEntityReverse,		&QAction::triggered,					this, &ccDBRoot::alignCameraWithEntityIndirect);
+	connect(m_enableBubbleViewMode,				&QAction::triggered,					this, &ccDBRoot::enableBubbleViewMode);
+	connect(m_editLabelScalarValue,				&QAction::triggered,					this, &ccDBRoot::editLabelScalarValue);
 
 	//other DB tree signals/slots connection
-	connect(m_dbTreeWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(changeSelection(const QItemSelection&, const QItemSelection&)));
+	connect(m_dbTreeWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ccDBRoot::changeSelection);
 
 	//Properties Tree
 	assert(propertiesTreeWidget);
@@ -312,17 +305,13 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_ccPropDelegate = new ccPropertiesTreeDelegate(m_propertiesModel, m_propertiesTreeWidget);
 	m_propertiesTreeWidget->setItemDelegate(m_ccPropDelegate);
 	m_propertiesTreeWidget->setModel(m_propertiesModel);
-	//already done in ui file!
-	//m_propertiesTreeWidget->setSelectionMode(QAbstractItemView::NoSelection);
-	//m_propertiesTreeWidget->setAllColumnsShowFocus(true);
-	//m_propertiesTreeWidget->header()->setStretchLastSection(true);
 	m_propertiesTreeWidget->header()->setSectionResizeMode(QHeaderView::Interactive);
 	m_propertiesTreeWidget->setEnabled(false);
 
 	//Properties tree signals/slots connection
-	connect(m_ccPropDelegate, SIGNAL(ccObjectPropertiesChanged(ccHObject*)), this, SLOT(updateCCObject(ccHObject*)));
-	connect(m_ccPropDelegate, SIGNAL(ccObjectAppearanceChanged(ccHObject*)), this, SLOT(redrawCCObject(ccHObject*)));
-	connect(m_ccPropDelegate, SIGNAL(ccObjectAndChildrenAppearanceChanged(ccHObject*)), this, SLOT(redrawCCObjectAndChildren(ccHObject*)));
+	connect(m_ccPropDelegate, &ccPropertiesTreeDelegate::ccObjectPropertiesChanged, this, &ccDBRoot::updateCCObject);
+	connect(m_ccPropDelegate, &ccPropertiesTreeDelegate::ccObjectAppearanceChanged, this, &ccDBRoot::redrawCCObject);
+	connect(m_ccPropDelegate, &ccPropertiesTreeDelegate::ccObjectAndChildrenAppearanceChanged, this, &ccDBRoot::redrawCCObjectAndChildren);
 }
 
 ccDBRoot::~ccDBRoot()
@@ -685,7 +674,6 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 				return gDBRootIcons->icon( item->getClassID(), locked );
 			}
 		}
-		break;
 	}
 
 	case Qt::CheckStateRole:
@@ -978,22 +966,24 @@ void ccDBRoot::selectEntities(std::unordered_set<int> entIDs)
 
 	//convert input list of IDs to proper entities
 	ccHObject::Container entities;
+	
+	try
 	{
-		try
-		{
-			entities.reserve(entIDs.size());
-		}
-		catch (const std::bad_alloc&)
-		{
-			ccLog::Warning("[ccDBRoot::selectEntities] Not enough memory");
-			return;
-		}
+		entities.reserve(entIDs.size());
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("[ccDBRoot::selectEntities] Not enough memory");
+		return;
+	}
 
-		for (std::unordered_set<int>::const_iterator it = entIDs.begin(); it != entIDs.end(); ++it)
+	for (auto entID : entIDs)
+	{
+		ccHObject* obj = find(entID);
+		
+		if (obj != nullptr)
 		{
-			ccHObject* obj = find(*it);
-			if (obj)
-				entities.push_back(obj);
+			entities.push_back(obj);
 		}
 	}
 
@@ -1008,46 +998,51 @@ void ccDBRoot::selectEntities(const ccHObject::Container& entities, bool increme
 
 	//count the number of lables
 	size_t labelCount = 0;
+	
+	for (auto entity : entities)
 	{
-		for (size_t i = 0; i < entities.size(); ++i)
+		if (entity == nullptr)
 		{
-			ccHObject* ent = entities[i];
-			if (!ent)
-			{
-				assert(false);
-				continue;
-			}
-			if (ent->isA(CC_TYPES::LABEL_2D))
-				++labelCount;
+			assert(false);
+			continue;
+		}
+		
+		if (entity->isA(CC_TYPES::LABEL_2D))
+		{
+			++labelCount;
 		}
 	}
 
 	//create new selection structure
 	QItemSelection newSelection;
+	
+	//shall we keep labels?
+	bool keepLabels = false;
 	{
-		//shall we keep labels?
-		bool keepLabels = false;
-		{
-			QModelIndexList formerSelectedIndexes = selectionModel->selectedIndexes();
-			if (formerSelectedIndexes.isEmpty() || !incremental)
-				keepLabels = (labelCount == entities.size()); //yes if they are the only selected entities
-			else if (incremental)
-				keepLabels = static_cast<ccHObject*>(formerSelectedIndexes[0].internalPointer())->isA(CC_TYPES::LABEL_2D); //yes if previously selected entities were already labels
-		}
+		QModelIndexList formerSelectedIndexes = selectionModel->selectedIndexes();
+		if (formerSelectedIndexes.isEmpty() || !incremental)
+			keepLabels = (labelCount == entities.size()); //yes if they are the only selected entities
+		else if (incremental)
+			keepLabels = static_cast<ccHObject*>(formerSelectedIndexes[0].internalPointer())->isA(CC_TYPES::LABEL_2D); //yes if previously selected entities were already labels
+	}
 
-		for (size_t i = 0; i < entities.size(); ++i)
+	for (auto entity : entities)
+	{
+		if (entity == nullptr)
 		{
-			ccHObject* ent = entities[i];
-			if (ent)
+			continue;
+		}
+		
+		//filter input selection (can't keep both labels and standard entities --> we can't mix them!)
+		bool isLabel = entity->isA(CC_TYPES::LABEL_2D);
+		
+		if (isLabel == keepLabels && (!incremental || !entity->isSelected()))
+		{
+			QModelIndex selectedIndex = index(entity);
+			
+			if (selectedIndex.isValid())
 			{
-				//filter input selection (can't keep both labels and standard entities --> we can't mix them!)
-				bool isLabel = ent->isA(CC_TYPES::LABEL_2D);
-				if (isLabel == keepLabels && (!incremental || !ent->isSelected()))
-				{
-					QModelIndex selectedIndex = index(ent);
-					if (selectedIndex.isValid())
-						newSelection.merge(QItemSelection(selectedIndex,selectedIndex),QItemSelectionModel::Select);
-				}
+				newSelection.merge(QItemSelection(selectedIndex,selectedIndex),QItemSelectionModel::Select);
 			}
 		}
 	}
@@ -1455,9 +1450,9 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 			item->addDependency(oldParent,itemDependencyFlags & (~ccHObject::DP_PARENT_OF_OTHER));
 		}
 
-		if (newParent->getDisplay() == 0)
+		if (newParent->getDisplay() == nullptr)
 			newParent->setDisplay(item->getDisplay());
-		else if (item->getDisplay() == 0)
+		else if (item->getDisplay() == nullptr)
 			item->setDisplay(newParent->getDisplay());
 
 		//add item back
@@ -1556,25 +1551,36 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	if (obj->isA(CC_TYPES::LABEL_2D)) //2D label with 3 points?
 	{
 		cc2DLabel* label = static_cast<cc2DLabel*>(obj);
-		//work only with labels with 3 points!
+		//work only with labels with 3 points or labels picked on a triangle!
+		CCVector3 A, B, C;
 		if (label->size() == 3)
 		{
-			const cc2DLabel::PickedPoint& A = label->getPoint(0);
-			const CCVector3* _A = A.cloud->getPoint(A.index);
-			const cc2DLabel::PickedPoint& B = label->getPoint(1);
-			const CCVector3* _B = B.cloud->getPoint(B.index);
-			const cc2DLabel::PickedPoint& C = label->getPoint(2);
-			const CCVector3* _C = C.cloud->getPoint(C.index);
-			CCVector3 N = (*_B - *_A).cross(*_C - *_A);
-			planeNormal = CCVector3d::fromArray(N.u);
-			planeVertDir = /*(*_B-*_A)*/win->getCurrentUpDir();
-			center = (*_A + *_B + *_C) / 3;
+			A = label->getPickedPoint(0).getPointPosition();
+			B = label->getPickedPoint(1).getPointPosition();
+			C = label->getPickedPoint(2).getPointPosition();
+		}
+		else if (label->size() == 1)
+		{
+			const cc2DLabel::PickedPoint& pp = label->getPickedPoint(0);
+			if (pp._mesh)
+			{
+				pp._mesh->getTriangleVertices(pp.index, A, B, C);
+			}
+			else
+			{
+				ccLog::Error("Works only with 3-points labels or labels picked on a triangle");
+				return;
+			}
 		}
 		else
 		{
-			assert(false);
+			ccLog::Error("Works only with 3-points labels or labels picked on a triangle");
 			return;
 		}
+		CCVector3 N = (B - A).cross(C - A);
+		planeNormal = CCVector3d::fromArray(N.u);
+		planeVertDir = win->getCurrentUpDir();
+		center = (A + B + C) / 3;
 	}
 	else if (obj->isA(CC_TYPES::PLANE)) //plane
 	{
@@ -1696,7 +1702,7 @@ void ccDBRoot::gatherRecursiveInformation()
 			unsigned meshSize = mesh->size();
 			info.triangleCount += meshSize;
 			info.normalCount += (mesh->hasTriNormals() ? meshSize : 0);
-			info.materialCount += (mesh->getMaterialSet() ? (unsigned)mesh->getMaterialSet()->size() : 0);
+			info.materialCount += (mesh->getMaterialSet() ? static_cast<unsigned>(mesh->getMaterialSet()->size()) : 0);
 		}
 		else if (ent->isKindOf(CC_TYPES::LABEL_2D))
 		{
@@ -2096,19 +2102,19 @@ void ccDBRoot::editLabelScalarValue()
 		return;
 	}
 
-	const cc2DLabel::PickedPoint& P = label->getPoint(0);
-	if (!P.cloud)
+	const cc2DLabel::PickedPoint& P = label->getPickedPoint(0);
+	if (!P._cloud)
 	{
 		assert(false);
 		return;
 	}
 
-	if (!P.cloud->isA(CC_TYPES::POINT_CLOUD) || !P.cloud->hasScalarFields())
+	if (!P._cloud->isA(CC_TYPES::POINT_CLOUD) || !P._cloud->hasScalarFields())
 	{
 		return;
 	}
 	
-	ccPointCloud* pc = static_cast<ccPointCloud*>(P.cloud);
+	ccPointCloud* pc = static_cast<ccPointCloud*>(P._cloud);
 	ccScalarField* sf = pc->getCurrentDisplayedScalarField();
 	if (!sf)
 	{
@@ -2157,11 +2163,11 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			bool toggleOtherProperties = false;
 			bool toggleMaterials = false;
 			bool hasMoreThanOneChild = false;
-			bool hasExactlyOnePlanarEntity = false;
 			bool leafObject = false;
 			bool hasExacltyOneGBLSenor = false;
 			bool hasExactlyOnePlane = false;
 			bool canEditLabelScalarValue = false;
+			unsigned planarEntityCount = 0;
 			for (int i = 0; i < selCount; ++i)
 			{
 				ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
@@ -2192,25 +2198,25 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 					{
 						if (item->isA(CC_TYPES::LABEL_2D))
 						{
-							hasExactlyOnePlanarEntity = (static_cast<cc2DLabel*>(item)->size() == 3);
 							cc2DLabel* label = ccHObjectCaster::To2DLabel(item);
-							if (label)
+							if (label->size() == 3)
+								++planarEntityCount;
+							else if (label->size() == 1 && label->getPickedPoint(0)._mesh)
+								++planarEntityCount;
+
+							if (label->size() == 1)
 							{
-								canEditLabelScalarValue = (	label->size() == 1
-														&&	label->getPoint(0).cloud
-														&&	label->getPoint(0).cloud->hasScalarFields()
-														&&	label->getPoint(0).cloud->isA(CC_TYPES::POINT_CLOUD)
-														&&	static_cast<ccPointCloud*>(label->getPoint(0).cloud)->getCurrentDisplayedScalarField() != 0
+								const cc2DLabel::PickedPoint& pp = label->getPickedPoint(0);
+								canEditLabelScalarValue = (	pp._cloud
+														&&	pp._cloud->hasScalarFields()
+														&&	pp._cloud->isA(CC_TYPES::POINT_CLOUD)
+														&&	static_cast<ccPointCloud*>(pp._cloud)->getCurrentDisplayedScalarField() != nullptr
 														);
-							}
-							else
-							{
-								assert(false);
 							}
 						}
 						else if (item->isA(CC_TYPES::PLANE) || item->isA(CC_TYPES::FACET))
 						{
-							hasExactlyOnePlanarEntity = true;
+							++planarEntityCount;
 							hasExactlyOnePlane = item->isKindOf(CC_TYPES::PLANE);
 						}
 						else if (item->isA(CC_TYPES::GBL_SENSOR))
@@ -2221,7 +2227,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				}
 			}
 
-			if (hasExactlyOnePlanarEntity)
+			if (planarEntityCount == 1)
 			{
 				menu.addAction(m_alignCameraWithEntity);
 				menu.addAction(m_alignCameraWithEntityReverse);

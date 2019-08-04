@@ -28,7 +28,7 @@ class ccViewerApplication : public ccApplicationBase
 	Q_OBJECT
 	
 public:
-	ccViewerApplication( int &argc, char **argv );
+	ccViewerApplication( int &argc, char **argv, bool isCommandLine );
 
 	void  setViewer( ccViewer *inViewer );
 	

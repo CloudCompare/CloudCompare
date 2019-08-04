@@ -520,7 +520,7 @@ void ScalarFieldTools::computeScalarFieldHistogram(const GenericCloud* theCloud,
 
 	try
 	{
-		histo.resize(numberOfClasses,0);
+		histo.resize(numberOfClasses, 0);
 	}
 	catch (const std::bad_alloc)
 	{

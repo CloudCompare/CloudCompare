@@ -23,6 +23,7 @@
 #include "ccGenericGLDisplay.h"
 #include "ccGenericPointCloud.h"
 #include "ccPointCloud.h"
+#include "ccGenericMesh.h"
 #include "ccScalarField.h"
 #include "ccSphere.h"
 
@@ -35,6 +36,53 @@
 
 //'Delta' character
 static const QChar MathSymbolDelta(0x0394);
+
+CCVector3 cc2DLabel::PickedPoint::getPointPosition() const
+{
+	CCVector3 P;
+
+	if (_cloud)
+		P = *_cloud->getPointPersistentPtr(index);
+	else if (_mesh)
+		_mesh->computePointPosition(index, uv, P);
+	else
+		assert(false);
+
+	return P;
+}
+
+unsigned cc2DLabel::PickedPoint::getUniqueID() const
+{
+	if (_cloud)
+		return _cloud->getUniqueID();
+	if (_mesh)
+		return _mesh->getUniqueID();
+
+	assert(false);
+	return 0;
+}
+
+ccGenericPointCloud* cc2DLabel::PickedPoint::cloudOrVertices() const
+{
+	if (_cloud)
+		return _cloud;
+	if (_mesh)
+		return _mesh->getAssociatedCloud();
+	
+	assert(false);
+	return nullptr;
+}
+
+ccHObject* cc2DLabel::PickedPoint::entity() const
+{
+	if (_cloud)
+		return _cloud;
+	if (_mesh)
+		return _mesh;
+
+	assert(false);
+	return nullptr;
+}
 
 cc2DLabel::cc2DLabel(QString name/*=QString()*/)
 	: ccHObject(name.isEmpty() ? "label" : name)
@@ -54,9 +102,9 @@ cc2DLabel::cc2DLabel(QString name/*=QString()*/)
 static const QString POINT_INDEX_0("pi0");
 static const QString POINT_INDEX_1("pi1");
 static const QString POINT_INDEX_2("pi2");
-static const QString CLOUD_INDEX_0("ci0");
-static const QString CLOUD_INDEX_1("ci1");
-static const QString CLOUD_INDEX_2("ci2");
+static const QString ENTITY_INDEX_0("ei0");
+static const QString ENTITY_INDEX_1("ei1");
+static const QString ENTITY_INDEX_2("ei2");
 
 //return angle between two vectors (in degrees)
 //warning: vectors will be normalized by default
@@ -100,11 +148,11 @@ QString cc2DLabel::GetSFValueAsString(const LabelInfo1& info, int precision)
 QString cc2DLabel::getTitle(int precision) const
 {
 	QString title;
-	size_t count = m_points.size();
+	size_t count = m_pickedPoints.size();
 	if (count == 1)
 	{
 		title = m_name;
-		title.replace(POINT_INDEX_0, QString::number(m_points[0].index));
+		title.replace(POINT_INDEX_0, QString::number(m_pickedPoints[0].index));
 
 		//if available, we display the point SF value
 		LabelInfo1 info;
@@ -138,22 +186,21 @@ QString cc2DLabel::getName() const
 {
 	QString processedName = m_name;
 
-	size_t count = m_points.size();
+	size_t count = m_pickedPoints.size();
 	if (count > 0)
 	{
-		processedName.replace(POINT_INDEX_0, QString::number(m_points[0].index));
+		processedName.replace(POINT_INDEX_0, QString::number(m_pickedPoints[0].index));
 		if (count > 1)
 		{
-			processedName.replace(POINT_INDEX_1, QString::number(m_points[1].index));
-			if (m_points[0].cloud)
-				processedName.replace(CLOUD_INDEX_0, QString::number(m_points[0].cloud->getUniqueID()));
-			if (m_points[1].cloud)
-				processedName.replace(CLOUD_INDEX_1, QString::number(m_points[1].cloud->getUniqueID()));
+			processedName.replace(ENTITY_INDEX_0, QString::number(m_pickedPoints[0].getUniqueID()));
+
+			processedName.replace(POINT_INDEX_1, QString::number(m_pickedPoints[1].index));
+			processedName.replace(ENTITY_INDEX_1, QString::number(m_pickedPoints[1].getUniqueID()));
+
 			if (count > 2)
 			{
-				processedName.replace(POINT_INDEX_2, QString::number(m_points[2].index));
-				if (m_points[2].cloud)
-					processedName.replace(CLOUD_INDEX_2, QString::number(m_points[2].cloud->getUniqueID()));
+				processedName.replace(POINT_INDEX_2, QString::number(m_pickedPoints[2].index));
+				processedName.replace(ENTITY_INDEX_2, QString::number(m_pickedPoints[2].getUniqueID()));
 			}
 		}
 	}
@@ -181,15 +228,19 @@ void cc2DLabel::clear(bool ignoreDependencies)
 {
 	if (ignoreDependencies)
 	{
-		m_points.clear();
+		m_pickedPoints.resize(0);
 	}
 	else
 	{
 		//remove all dependencies first!
-		while (!m_points.empty())
+		while (!m_pickedPoints.empty())
 		{
-			m_points.back().cloud->removeDependencyWith(this);
-			m_points.pop_back();
+			PickedPoint& pp = m_pickedPoints.back();
+			if (pp._cloud)
+				pp._cloud->removeDependencyWith(this);
+			else if (pp._mesh)
+				pp._mesh->removeDependencyWith(this);
+			m_pickedPoints.pop_back();
 		}
 	}
 
@@ -206,15 +257,15 @@ void cc2DLabel::onDeletionOf(const ccHObject* obj)
 	//check that associated clouds are not about to be deleted!
 	size_t pointsToRemove = 0;
 	{
-		for (size_t i = 0; i < m_points.size(); ++i)
-			if (m_points[i].cloud == obj)
+		for (size_t i = 0; i < m_pickedPoints.size(); ++i)
+			if (m_pickedPoints[i]._cloud == obj || m_pickedPoints[i]._mesh == obj)
 				++pointsToRemove;
 	}
 
 	if (pointsToRemove == 0)
 		return;
 
-	if (pointsToRemove == m_points.size())
+	if (pointsToRemove == m_pickedPoints.size())
 	{
 		clear(true); //don't call clear as we don't want/need to update input object's dependencies!
 	}
@@ -222,17 +273,17 @@ void cc2DLabel::onDeletionOf(const ccHObject* obj)
 	{
 		//remove only the necessary points
 		size_t j = 0;
-		for (size_t i = 0; i < m_points.size(); ++i)
+		for (size_t i = 0; i < m_pickedPoints.size(); ++i)
 		{
-			if (m_points[i].cloud != obj)
+			if (m_pickedPoints[i]._cloud != obj && m_pickedPoints[i]._mesh != obj)
 			{
 				if (i != j)
-					std::swap(m_points[i], m_points[j]);
+					std::swap(m_pickedPoints[i], m_pickedPoints[j]);
 				j++;
 			}
 		}
 		assert(j != 0);
-		m_points.resize(j);
+		m_pickedPoints.resize(j);
 	}
 
 	updateName();
@@ -240,42 +291,95 @@ void cc2DLabel::onDeletionOf(const ccHObject* obj)
 
 void cc2DLabel::updateName()
 {
-	switch (m_points.size())
+	switch (m_pickedPoints.size())
 	{
 	case 0:
 		setName("Label");
 		break;
 	case 1:
-		setName(QString("Point #") + POINT_INDEX_0);
-		break;
+	{
+		setName(QString(m_pickedPoints[0]._cloud ? "Point #" : "Point@Tri#") + POINT_INDEX_0);
+	}
+	break;
+	
 	case 2:
-		if (m_points[0].cloud == m_points[1].cloud)
-			setName(QString("Vector #") + POINT_INDEX_0 + QString(" - #") + POINT_INDEX_1);
+	{
+		bool hasCloud1 = (m_pickedPoints[0]._cloud != nullptr);
+		bool hasCloud2 = (m_pickedPoints[1]._cloud != nullptr);
+		if (m_pickedPoints[0]._cloud == m_pickedPoints[1]._cloud && m_pickedPoints[0]._mesh == m_pickedPoints[1]._mesh)
+		{
+			setName(	QString(hasCloud1 ? "Vector Point#" : "Vector Point@Tri#") + POINT_INDEX_0
+					+	QString(hasCloud2 ? " - Point#" : " - Point@Tri#")        + POINT_INDEX_1);
+		}
 		else
-			setName(QString("Vector #") + POINT_INDEX_0 + QString("@") + CLOUD_INDEX_0
-				+ QString(" - #") + POINT_INDEX_1 + QString("@") + CLOUD_INDEX_1);
-		break;
+		{
+			setName(	QString(hasCloud1 ? "Vector Point#" : "Vector Point@Tri#") + POINT_INDEX_0 + QString("@") + ENTITY_INDEX_0
+					+	QString(hasCloud2 ? " - Point#" : " - Point@Tri#")         + POINT_INDEX_1 + QString("@") + ENTITY_INDEX_1);
+		}
+	}
+	break;
+	
 	case 3:
-		if (m_points[0].cloud == m_points[2].cloud && m_points[1].cloud == m_points[2].cloud)
-			setName(QString("Triplet #") + POINT_INDEX_0 + QString(" - #") + POINT_INDEX_1 + QString(" - #") + POINT_INDEX_2);
+	{
+		bool hasCloud1 = (m_pickedPoints[0]._cloud != nullptr);
+		bool hasCloud2 = (m_pickedPoints[1]._cloud != nullptr);
+		bool hasCloud3 = (m_pickedPoints[2]._cloud != nullptr);
+		if (	m_pickedPoints[0]._cloud == m_pickedPoints[2]._cloud && m_pickedPoints[1]._cloud == m_pickedPoints[2]._cloud
+			&&	m_pickedPoints[0]._mesh == m_pickedPoints[2]._mesh  && m_pickedPoints[1]._mesh == m_pickedPoints[2]._mesh)
+		{
+			setName(	QString(hasCloud1 ? "Triplet Point#" : "Triplet Point@Tri#") + POINT_INDEX_0
+					+	QString(hasCloud2 ? " - Point#" : " - Point@Tri#")           + POINT_INDEX_1
+					+	QString(hasCloud3 ? " - Point#" : " - Point@Tri#")           + POINT_INDEX_2);
+		}
 		else
-			setName(QString("Triplet #") + POINT_INDEX_0 + QString("@") + CLOUD_INDEX_0
-				+ QString(" - #") + POINT_INDEX_1 + QString("@") + CLOUD_INDEX_1
-				+ QString(" - #") + POINT_INDEX_2 + QString("@") + CLOUD_INDEX_2);
-		break;
+		{
+			setName(	QString(hasCloud1 ? "Triplet Point#" : "Triplet Point@Tri#") + POINT_INDEX_0 + QString("@") + ENTITY_INDEX_0
+					+	QString(hasCloud2 ? " - Point#" : " - Point@Tri#")           + POINT_INDEX_1 + QString("@") + ENTITY_INDEX_1
+					+	QString(hasCloud3 ? " - Point#" : " - Point@Tri#")           + POINT_INDEX_2 + QString("@") + ENTITY_INDEX_2);
+		}
+	}
+	break;
+	
 	}
 }
 
-bool cc2DLabel::addPoint(ccGenericPointCloud* cloud, unsigned pointIndex)
+bool cc2DLabel::addPickedPoint(ccGenericPointCloud* cloud, unsigned pointIndex)
 {
-	assert(cloud && cloud->size() > pointIndex);
-
-	if (m_points.size() == 3)
+	if (!cloud || pointIndex >= cloud->size())
 		return false;
+
+	PickedPoint pp;
+	pp._cloud = cloud;
+	pp.index = pointIndex;
+
+	return addPickedPoint(pp);
+
+	return true;
+}
+
+bool cc2DLabel::addPickedPoint(ccGenericMesh* mesh, unsigned triangleIndex, const CCVector2d& uv)
+{
+	if (!mesh || triangleIndex >= mesh->size())
+		return false;
+
+	PickedPoint pp;
+	pp._mesh = mesh;
+	pp.index = triangleIndex;
+	pp.uv = uv;
+
+	return addPickedPoint(pp);
+}
+
+bool cc2DLabel::addPickedPoint(const PickedPoint& pp)
+{
+	if (m_pickedPoints.size() == 3)
+	{
+		return false;
+	}
 
 	try
 	{
-		m_points.resize(m_points.size() + 1);
+		m_pickedPoints.resize(m_pickedPoints.size() + 1);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -283,16 +387,18 @@ bool cc2DLabel::addPoint(ccGenericPointCloud* cloud, unsigned pointIndex)
 		return false;
 	}
 
-	m_points.back().cloud = cloud;
-	m_points.back().index = pointIndex;
+	m_pickedPoints.back() = pp;
+
+	//we want to be notified whenever an associated mesh is deleted (in which case
+	//we'll automatically clear the label)
+	if (pp._mesh)
+		pp._mesh->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE);
+	else if (pp._cloud)
+		pp._cloud->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE);
+	//we must also warn the cloud or mesh whenever we delete this label
+	//--> DGM: automatically done by the previous call to addDependency!
 
 	updateName();
-
-	//we want to be notified whenever an associated cloud is deleted (in which case
-	//we'll automatically clear the label)
-	cloud->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE);
-	//we must also warn the cloud whenever we delete this label
-	//addDependency(cloud,DP_NOTIFY_OTHER_ON_DELETE); //DGM: automatically done by the previous call to addDependency!
 
 	return true;
 }
@@ -303,20 +409,29 @@ bool cc2DLabel::toFile_MeOnly(QFile& out) const
 		return false;
 
 	//points count (dataVersion >= 20)
-	uint32_t count = (uint32_t)m_points.size();
+	uint32_t count = (uint32_t)m_pickedPoints.size();
 	if (out.write((const char*)&count, 4) < 0)
 		return WriteError();
 
 	//points & associated cloud ID (dataVersion >= 20)
-	for (std::vector<PickedPoint>::const_iterator it = m_points.begin(); it != m_points.end(); ++it)
+	for (std::vector<PickedPoint>::const_iterator it = m_pickedPoints.begin(); it != m_pickedPoints.end(); ++it)
 	{
 		//point index
-		uint32_t index = (uint32_t)it->index;
+		uint32_t index = static_cast<uint32_t>(it->index);
 		if (out.write((const char*)&index, 4) < 0)
 			return WriteError();
 		//cloud ID (will be retrieved later --> make sure that the cloud is saved alongside!)
-		uint32_t cloudID = (uint32_t)it->cloud->getUniqueID();
+		uint32_t cloudID = static_cast<uint32_t>(it->_cloud ? it->_cloud->getUniqueID() : 0);
 		if (out.write((const char*)&cloudID, 4) < 0)
+			return WriteError();
+
+		//mesh ID (dataVersion >= 49 - will be retrieved later --> make sure that the mesh is saved alongside!)
+		uint32_t meshID = static_cast<uint32_t>(it->_mesh ? it->_mesh->getUniqueID() : 0);
+		if (out.write((const char*)&meshID, 4) < 0)
+			return WriteError();
+		
+		//uv coordinates in the triangle (dataVersion >= 49)
+		if (out.write((const char*)it->uv.u, sizeof(double) * 2) < 0)
 			return WriteError();
 	}
 
@@ -349,26 +464,65 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (in.read((char*)&count, 4) < 0)
 		return ReadError();
 
-	//points & associated cloud ID (dataVersion >= 20)
-	assert(m_points.empty());
+	//points & associated cloud/mesh ID (dataVersion >= 20)
+	assert(m_pickedPoints.empty());
 	for (uint32_t i = 0; i < count; ++i)
 	{
 		//point index
 		uint32_t index = 0;
 		if (in.read((char*)&index, 4) < 0)
 			return ReadError();
-		//cloud ID (will be retrieved later --> make sure that the cloud is saved alongside!)
-		uint32_t cloudID = 0;
-		if (in.read((char*)&cloudID, 4) < 0)
-			return ReadError();
 
-		//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'PickedPoint::cloud' pointer!!!
-		PickedPoint pp;
-		pp.index = (unsigned)index;
-		*(uint32_t*)(&pp.cloud) = cloudID;
-		m_points.push_back(pp);
-		if (m_points.size() != i + 1)
-			return MemoryError();
+		//cloud ID (will be retrieved later)
+		{
+			uint32_t cloudID = 0;
+			if (in.read((char*)&cloudID, 4) < 0)
+				return ReadError();
+
+			if (cloudID != 0)
+			{
+				try
+				{
+					m_pickedPoints.resize(m_pickedPoints.size() + 1);
+					m_pickedPoints.back().index = static_cast<unsigned>(index);
+					//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'PickedPoint::_cloud' pointer!!!
+					*(uint32_t*)(&m_pickedPoints.back()._cloud) = cloudID;
+				}
+				catch (const std::bad_alloc)
+				{
+					return MemoryError();
+				}
+			}
+		}
+
+		if (dataVersion >= 49)
+		{
+			//mesh ID (dataVersion >= 49 - will be retrieved later)
+			uint32_t meshID = 0;
+			if (in.read((char*)&meshID, 4) < 0)
+				return ReadError();
+
+			//uv coordinates in the triangle (dataVersion >= 49)
+			CCVector2d uv;
+			if (in.read((char*)uv.u, sizeof(double) * 2) < 0)
+				return ReadError();
+
+			if (meshID != 0)
+			{
+				try
+				{
+					m_pickedPoints.resize(m_pickedPoints.size() + 1);
+					m_pickedPoints.back().index = static_cast<unsigned>(index);
+					m_pickedPoints.back().uv = uv;
+					//[DIRTY] WARNING: temporarily, we set the mesh unique ID in the 'PickedPoint::_mesh' pointer!!!
+					*(uint32_t*)(&m_pickedPoints.back()._mesh) = meshID;
+				}
+				catch (const std::bad_alloc)
+				{
+					return MemoryError();
+				}
+			}
+		}
 	}
 
 	//Relative screen position (dataVersion >= 20)
@@ -393,78 +547,179 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	return true;
 }
 
-void AddPointCoordinates(QStringList& body, unsigned pointIndex, ccGenericPointCloud* cloud, int precision, QString pointName = QString())
+void AddPointCoordinates(QStringList& body, QString pointShortName, const CCVector3& P, const ccShiftedObject& shiftedObject, int precision)
 {
-	assert(cloud);
-	const CCVector3* P = cloud->getPointPersistentPtr(pointIndex);
-	bool isShifted = cloud->isShifted();
+	bool isShifted = shiftedObject.isShifted();
 
-	QString coordStr = QString("P#%0:").arg(pointIndex);
-	if (!pointName.isEmpty())
-		coordStr = QString("%1 (%2)").arg(pointName, coordStr);
+	QString coordStr = pointShortName;
 	if (isShifted)
 	{
 		body << coordStr;
 		coordStr = QString("  [shifted]");
 	}
 
-	coordStr += QString(" (%1;%2;%3)").arg(P->x, 0, 'f', precision).arg(P->y, 0, 'f', precision).arg(P->z, 0, 'f', precision);
+	coordStr += QString(" (%1;%2;%3)").arg(P.x, 0, 'f', precision).arg(P.y, 0, 'f', precision).arg(P.z, 0, 'f', precision);
 	body << coordStr;
 
 	if (isShifted)
 	{
-		CCVector3d Pg = cloud->toGlobal3d(*P);
+		CCVector3d Pg = shiftedObject.toGlobal3d(P);
 		QString globCoordStr = QString("  [original] (%1;%2;%3)").arg(Pg.x, 0, 'f', precision).arg(Pg.y, 0, 'f', precision).arg(Pg.z, 0, 'f', precision);
 		body << globCoordStr;
 	}
 }
 
+void AddPointCoordinates(QStringList& body, const cc2DLabel::PickedPoint& pp, int precision, QString pointName = QString())
+{
+	QString pointShortName;
+	ccShiftedObject* shiftedObject = nullptr;
+	
+	if (pp._cloud)
+	{
+		shiftedObject = pp._cloud;
+		pointShortName = QString("P#%0").arg(pp.index);
+	}
+	else if (pp._mesh)
+	{
+		ccGenericPointCloud* vertices = pp._mesh->getAssociatedCloud();
+		if (!vertices)
+		{
+			assert(false);
+			return;
+		}
+		shiftedObject = vertices;
+		pointShortName = QString("Tri#%0").arg(pp.index);
+	}
+
+	if (!pointName.isEmpty())
+		pointShortName = QString("%1 (%2)").arg(pointName, pointShortName);
+
+	assert(shiftedObject);
+	AddPointCoordinates(body, pointShortName, pp.getPointPosition(), *shiftedObject, precision);
+}
+
 void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 {
-	info.cloud = 0;
-	if (m_points.size() != 1)
+	info = LabelInfo1();
+
+	if (m_pickedPoints.size() != 1)
 		return;
+
+	const PickedPoint& pp = m_pickedPoints[0];
 
 	//cloud and point index
-	info.cloud = m_points[0].cloud;
-	if (!info.cloud)
+	if (pp._cloud)
 	{
-		assert(false);
-		return;
-	}
-	info.pointIndex = m_points[0].index;
-	//normal
-	info.hasNormal = info.cloud->hasNormals();
-	if (info.hasNormal)
-	{
-		info.normal = info.cloud->getPointNormal(info.pointIndex);
-	}
-	//color
-	info.hasRGB = info.cloud->hasColors();
-	if (info.hasRGB)
-	{
-		info.rgb = info.cloud->getPointColor(info.pointIndex);
-	}
-	//scalar field
-	info.hasSF = info.cloud->hasDisplayedScalarField();
-	if (info.hasSF)
-	{
-		info.sfValue = info.cloud->getPointScalarValue(info.pointIndex);
-
-		info.sfName = "Scalar";
-		//fetch the real scalar field name if possible
-		if (info.cloud->isA(CC_TYPES::POINT_CLOUD))
+		//normal
+		info.hasNormal = pp._cloud->hasNormals();
+		if (info.hasNormal)
 		{
-			ccPointCloud* pc = static_cast<ccPointCloud*>(info.cloud);
-			if (pc->getCurrentDisplayedScalarField())
+			info.normal = pp._cloud->getPointNormal(pp.index);
+		}
+		//color
+		info.hasRGB = pp._cloud->hasColors();
+		if (info.hasRGB)
+		{
+			info.rgb = pp._cloud->getPointColor(pp.index);
+		}
+		//scalar field
+		info.hasSF = pp._cloud->hasDisplayedScalarField();
+		if (info.hasSF)
+		{
+			ccScalarField* sf = nullptr;
+
+			//fetch the real scalar field if possible
+			if (pp._cloud->isA(CC_TYPES::POINT_CLOUD))
 			{
-				ccScalarField* sf = pc->getCurrentDisplayedScalarField();
-				info.sfName = QString(sf->getName());
+				sf = static_cast<ccPointCloud*>(pp._cloud)->getCurrentDisplayedScalarField();
+			}
+
+			if (sf)
+			{
+				info.sfValue = sf->getValue(pp.index);
+				info.sfName = sf->getName();
 				if (ccScalarField::ValidValue(info.sfValue) && sf->getGlobalShift() != 0)
 				{
 					info.sfShiftedValue = sf->getGlobalShift() + info.sfValue;
 					info.sfValueIsShifted = true;
 				}
+			}
+			else
+			{
+				info.sfValue = pp._cloud->getPointScalarValue(pp.index);
+				info.sfName = "Scalar";
+			}
+		}
+	}
+	else if (pp._mesh)
+	{
+		CCVector3d w(pp.uv, 1.0 - pp.uv.x - pp.uv.y);
+		//normal
+		info.hasNormal = pp._mesh->hasNormals();
+		if (info.hasNormal)
+		{
+			pp._mesh->interpolateNormalsBC(pp.index, w, info.normal);
+		}
+		//color
+		info.hasRGB = pp._mesh->hasColors();
+		if (info.hasRGB)
+		{
+			pp._mesh->interpolateColorsBC(pp.index, w, info.rgb);
+		}
+		//scalar field
+		info.hasSF = pp._mesh->hasDisplayedScalarField();
+		if (info.hasSF)
+		{
+			CCLib::VerticesIndexes* vi = pp._mesh->getTriangleVertIndexes(pp.index);
+			assert(vi);
+
+			//fetch the real scalar field name if possible
+			ccGenericPointCloud* vertices = pp._mesh->getAssociatedCloud();
+			assert(vertices);
+
+			ccScalarField* sf = nullptr;
+
+			//fetch the real scalar field if possible
+			if (vertices->isA(CC_TYPES::POINT_CLOUD))
+			{
+				sf = static_cast<ccPointCloud*>(vertices)->getCurrentDisplayedScalarField();
+			}
+
+			ScalarType s1 = NAN_VALUE;
+			ScalarType s2 = NAN_VALUE;
+			ScalarType s3 = NAN_VALUE;
+
+			if (sf)
+			{
+				s1 = sf->getValue(vi->i1);
+				s2 = sf->getValue(vi->i2);
+				s3 = sf->getValue(vi->i3);
+			}
+			else
+			{
+				s1 = vertices->getPointScalarValue(vi->i1);
+				s2 = vertices->getPointScalarValue(vi->i2);
+				s3 = vertices->getPointScalarValue(vi->i3);
+			}
+			
+			//interpolate the SF value
+			if (ccScalarField::ValidValue(s1) && ccScalarField::ValidValue(s2) && ccScalarField::ValidValue(s3))
+			{
+				info.sfValue = static_cast<ScalarType>(s1 * w.u[0] + s2 * w.u[1] + s3 * w.u[2]);
+			}
+
+			if (sf)
+			{
+				info.sfName = sf->getName();
+				if (ccScalarField::ValidValue(info.sfValue) && sf->getGlobalShift() != 0)
+				{
+					info.sfShiftedValue = sf->getGlobalShift() + info.sfValue;
+					info.sfValueIsShifted = true;
+				}
+			}
+			else
+			{
+				info.sfName = "Scalar";
 			}
 		}
 	}
@@ -472,44 +727,37 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 
 void cc2DLabel::getLabelInfo2(LabelInfo2& info) const
 {
-	info.cloud1 = info.cloud2 = 0;
-	if (m_points.size() != 2)
+	info = LabelInfo2();
+
+	if (m_pickedPoints.size() != 2)
 		return;
 
 	//1st point
-	info.cloud1 = m_points[0].cloud;
-	info.point1Index = m_points[0].index;
-	const CCVector3* P1 = info.cloud1->getPointPersistentPtr(info.point1Index);
+	CCVector3 P1 = m_pickedPoints[0].getPointPosition();
 	//2nd point
-	info.cloud2 = m_points[1].cloud;
-	info.point2Index = m_points[1].index;
-	const CCVector3* P2 = info.cloud2->getPointPersistentPtr(info.point2Index);
+	CCVector3 P2 = m_pickedPoints[1].getPointPosition();
 
-	info.diff = *P2 - *P1;
+	info.diff = P2 - P1;
 }
 
 void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 {
-	info.cloud1 = info.cloud2 = info.cloud3 = 0;
-	if (m_points.size() != 3)
+	info = LabelInfo3();
+
+	if (m_pickedPoints.size() != 3)
 		return;
+
 	//1st point
-	info.cloud1 = m_points[0].cloud;
-	info.point1Index = m_points[0].index;
-	const CCVector3* P1 = info.cloud1->getPointPersistentPtr(info.point1Index);
+	CCVector3 P1 = m_pickedPoints[0].getPointPosition();
 	//2nd point
-	info.cloud2 = m_points[1].cloud;
-	info.point2Index = m_points[1].index;
-	const CCVector3* P2 = info.cloud2->getPointPersistentPtr(info.point2Index);
+	CCVector3 P2 = m_pickedPoints[1].getPointPosition();
 	//3rd point
-	info.cloud3 = m_points[2].cloud;
-	info.point3Index = m_points[2].index;
-	const CCVector3* P3 = info.cloud3->getPointPersistentPtr(info.point3Index);
+	CCVector3 P3 = m_pickedPoints[2].getPointPosition();
 
 	//area
-	CCVector3 P1P2 = *P2 - *P1;
-	CCVector3 P1P3 = *P3 - *P1;
-	CCVector3 P2P3 = *P3 - *P2;
+	CCVector3 P1P2 = P2 - P1;
+	CCVector3 P1P3 = P3 - P1;
+	CCVector3 P2P3 = P3 - P2;
 	CCVector3 N = P1P2.cross(P1P3); //N = ABxAC
 	info.area = N.norm() / 2;
 
@@ -523,8 +771,8 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 	info.edges.u[2] = P1P3.normd();  //edge 3-1
 
 	//angle
-	info.angles.u[0] = GetAngle_deg(P1P2, P1P3);   //angleAtP1
-	info.angles.u[1] = GetAngle_deg(P2P3, -P1P2);  //angleAtP2
+	info.angles.u[0] = GetAngle_deg( P1P2,  P1P3); //angleAtP1
+	info.angles.u[1] = GetAngle_deg( P2P3, -P1P2); //angleAtP2
 	info.angles.u[2] = GetAngle_deg(-P1P3, -P2P3); //angleAtP3 (should be equal to 180-a1-a2!)
 }
 
@@ -532,7 +780,7 @@ QStringList cc2DLabel::getLabelContent(int precision) const
 {
 	QStringList body;
 
-	switch (m_points.size())
+	switch (m_pickedPoints.size())
 	{
 	case 0:
 		//can happen if the associated cloud(s) has(ve) been deleted!
@@ -543,11 +791,9 @@ QStringList cc2DLabel::getLabelContent(int precision) const
 	{
 		LabelInfo1 info;
 		getLabelInfo1(info);
-		if (!info.cloud)
-			break;
 
 		//coordinates
-		AddPointCoordinates(body, info.pointIndex, info.cloud, precision);
+		AddPointCoordinates(body, m_pickedPoints[0], precision);
 
 		//normal
 		if (info.hasNormal)
@@ -575,17 +821,15 @@ QStringList cc2DLabel::getLabelContent(int precision) const
 	{
 		LabelInfo2 info;
 		getLabelInfo2(info);
-		if (!info.cloud1 || !info.cloud2)
-			break;
 
 		//distance is now the default label title
 		//PointCoordinateType dist = info.diff.norm();
 		//QString distStr = QString("Distance = %1").arg(dist,0,'f',precision);
 		//body << distStr;
 
-		QString vecStr = MathSymbolDelta + QString("X: %1\t").arg(info.diff.x, 0, 'f', precision)
-			+ MathSymbolDelta + QString("Y: %1\t").arg(info.diff.y, 0, 'f', precision)
-			+ MathSymbolDelta + QString("Z: %1").arg(info.diff.z, 0, 'f', precision);
+		QString vecStr =	MathSymbolDelta + QString("X: %1\t").arg(info.diff.x, 0, 'f', precision)
+						+	MathSymbolDelta + QString("Y: %1\t").arg(info.diff.y, 0, 'f', precision)
+						+	MathSymbolDelta + QString("Z: %1"  ).arg(info.diff.z, 0, 'f', precision);
 
 		body << vecStr;
 
@@ -593,13 +837,13 @@ QStringList cc2DLabel::getLabelContent(int precision) const
 		PointCoordinateType dXZ = sqrt(info.diff.x*info.diff.x + info.diff.z*info.diff.z);
 		PointCoordinateType dZY = sqrt(info.diff.z*info.diff.z + info.diff.y*info.diff.y);
 
-		vecStr = MathSymbolDelta + QString("XY: %1\t").arg(dXY, 0, 'f', precision)
-			+ MathSymbolDelta + QString("XZ: %1\t").arg(dXZ, 0, 'f', precision)
-			+ MathSymbolDelta + QString("ZY: %1").arg(dZY, 0, 'f', precision);
+		vecStr =	MathSymbolDelta + QString("XY: %1\t").arg(dXY, 0, 'f', precision)
+				+	MathSymbolDelta + QString("XZ: %1\t").arg(dXZ, 0, 'f', precision)
+				+	MathSymbolDelta + QString("ZY: %1"  ).arg(dZY, 0, 'f', precision);
 		body << vecStr;
 
-		AddPointCoordinates(body, info.point1Index, info.cloud1, precision);
-		AddPointCoordinates(body, info.point2Index, info.cloud2, precision);
+		AddPointCoordinates(body, m_pickedPoints[0], precision);
+		AddPointCoordinates(body, m_pickedPoints[1], precision);
 	}
 	break;
 
@@ -613,9 +857,9 @@ QStringList cc2DLabel::getLabelContent(int precision) const
 		body << areaStr;
 
 		//coordinates
-		AddPointCoordinates(body, info.point1Index, info.cloud1, precision, "A");
-		AddPointCoordinates(body, info.point2Index, info.cloud2, precision, "B");
-		AddPointCoordinates(body, info.point3Index, info.cloud3, precision, "C");
+		AddPointCoordinates(body, m_pickedPoints[0], precision, "A");
+		AddPointCoordinates(body, m_pickedPoints[1], precision, "B");
+		AddPointCoordinates(body, m_pickedPoints[2], precision, "C");
 
 		//normal
 		QString normStr = QString("Normal: (%1;%2;%3)").arg(info.normal.x, 0, 'f', precision).arg(info.normal.y, 0, 'f', precision).arg(info.normal.z, 0, 'f', precision);
@@ -662,7 +906,7 @@ bool cc2DLabel::acceptClick(int x, int y, Qt::MouseButton button)
 
 void cc2DLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	if (m_points.empty())
+	if (m_pickedPoints.empty())
 		return;
 
 	//2D foreground only
@@ -684,7 +928,7 @@ static QSharedPointer<ccSphere> c_unitPointMarker(0);
 
 void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 {
-	size_t count = m_points.size();
+	size_t count = m_pickedPoints.size();
 	if (count == 0)
 	{
 		return;
@@ -723,8 +967,8 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		for (size_t i = 0; i < count; i++)
 		{
 			//project the point in 2D
-			const CCVector3* P3D = m_points[i].cloud->getPoint(m_points[i].index);
-			camera.project(*P3D, m_points[i].pos2D);
+			CCVector3 P3D = m_pickedPoints[i].getPointPosition();
+			camera.project(P3D, m_pickedPoints[i].pos2D);
 		}
 	}
 
@@ -739,9 +983,12 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		//we draw the triangle
 		glFunc->glColor4ub(255, 255, 0, 128);
 		glFunc->glBegin(GL_TRIANGLES);
-		ccGL::Vertex3v(glFunc, m_points[0].cloud->getPoint(m_points[0].index)->u);
-		ccGL::Vertex3v(glFunc, m_points[1].cloud->getPoint(m_points[1].index)->u);
-		ccGL::Vertex3v(glFunc, m_points[2].cloud->getPoint(m_points[2].index)->u);
+		CCVector3 P3D = m_pickedPoints[0].getPointPosition();
+		ccGL::Vertex3v(glFunc, P3D.u);
+		P3D = m_pickedPoints[1].getPointPosition();
+		ccGL::Vertex3v(glFunc, P3D.u);
+		P3D = m_pickedPoints[2].getPointPosition();
+		ccGL::Vertex3v(glFunc, P3D.u);
 		glFunc->glEnd();
 
 		glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
@@ -766,8 +1013,10 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		//{
 		//	if (i+1<count || loop)
 		//	{
-		//		ccGL::Vertex3v(glFunc, m_points[i].cloud->getPoint(m_points[i].index)->u);
-		//		ccGL::Vertex3v(glFunc, m_points[(i+1)%count].cloud->getPoint(m_points[(i+1)%count].index)->u);
+		//		CCVector3 P3D = m_pickedPoints[i].getPointPosition();
+		//		ccGL::Vertex3v(glFunc, P3D.u);
+		//		P3D = m_pickedPoints[(i+1)%count].getPointPosition();
+		//		ccGL::Vertex3v(glFunc, P3D.u);
 		//	}
 		//}
 		//glFunc->glEnd();
@@ -801,13 +1050,13 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			{
 				glFunc->glMatrixMode(GL_MODELVIEW);
 				glFunc->glPushMatrix();
-				const CCVector3* P = m_points[i].cloud->getPoint(m_points[i].index);
-				ccGL::Translate(glFunc, P->x, P->y, P->z);
+				CCVector3 P = m_pickedPoints[i].getPointPosition();
+				ccGL::Translate(glFunc, P.x, P.y, P.z);
 				float scale = context.labelMarkerSize * m_relMarkerScale;
 				if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 				{
 					//in perspective view, the actual scale depends on the distance to the camera!
-					double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
+					double d = (camera.modelViewMat * CCVector3d::fromArray(P.u)).norm();
 					double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
 					scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
 				}
@@ -904,7 +1153,7 @@ struct Tab
 
 void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 {
-	assert(!m_points.empty());
+	assert(!m_pickedPoints.empty());
 
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -924,7 +1173,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	float halfW = context.glW / 2.0f;
 	float halfH = context.glH / 2.0f;
 
-	size_t count = m_points.size();
+	size_t count = m_pickedPoints.size();
 	assert(count != 0);
 
 	//we should already be in orthoprojective & centered mode
@@ -937,7 +1186,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		size_t visibleCount = 0;
 		for (unsigned j = 0; j < count; ++j)
 		{
-			if (m_points[j].pos2D.z >= 0.0 && m_points[j].pos2D.z <= 1.0)
+			if (m_pickedPoints[j].pos2D.z >= 0.0 && m_pickedPoints[j].pos2D.z <= 1.0)
 			{
 				++visibleCount;
 			}
@@ -965,7 +1214,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				glFunc->glBegin(count == 2 ? GL_LINES : GL_LINE_LOOP);
 				for (unsigned j = 0; j < count; ++j)
 				{
-					glFunc->glVertex2d(m_points[j].pos2D.x - halfW, m_points[j].pos2D.y - halfH);
+					glFunc->glVertex2d(m_pickedPoints[j].pos2D.x - halfW, m_pickedPoints[j].pos2D.y - halfH);
 				}
 				glFunc->glEnd();
 				glFunc->glPopAttrib(); //GL_LINE_BIT
@@ -988,11 +1237,11 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 					else if (count == 3)
 						title = ABC[j]; //for triangle-labels, we only display "A","B","C"
 					else
-						title = QString("P#%0").arg(m_points[j].index);
+						title = QString("P#%0").arg(m_pickedPoints[j].index);
 
 					context.display->displayText(title,
-						static_cast<int>(m_points[j].pos2D.x) + context.labelMarkerTextShift_pix,
-						static_cast<int>(m_points[j].pos2D.y) + context.labelMarkerTextShift_pix,
+						static_cast<int>(m_pickedPoints[j].pos2D.x) + context.labelMarkerTextShift_pix,
+						static_cast<int>(m_pickedPoints[j].pos2D.y) + context.labelMarkerTextShift_pix,
 						ccGenericGLDisplay::ALIGN_DEFAULT,
 						context.labelOpacity / 100.0f,
 						ccColor::white.rgb,
@@ -1038,9 +1287,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 #endif
 
 	//render zoom
-	int margin = static_cast<int>(c_margin        * context.renderZoom);
-	int tabMarginX = static_cast<int>(c_tabMarginX    * context.renderZoom);
-	int tabMarginY = static_cast<int>(c_tabMarginY    * context.renderZoom);
+	int margin        = static_cast<int>(c_margin        * context.renderZoom);
+	int tabMarginX    = static_cast<int>(c_tabMarginX    * context.renderZoom);
+	int tabMarginY    = static_cast<int>(c_tabMarginY    * context.renderZoom);
 	int arrowBaseSize = static_cast<int>(c_arrowBaseSize * context.renderZoom);
 
 	int titleHeight = 0;
@@ -1078,7 +1327,10 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						LabelInfo1 info;
 						getLabelInfo1(info);
 
-						bool isShifted = info.cloud->isShifted();
+						ccGenericPointCloud* cloud = m_pickedPoints[0].cloudOrVertices();
+						assert(cloud);
+						bool isShifted = cloud->isShifted();
+						CCVector3 P = m_pickedPoints[0].getPointPosition();
 						//1st block: X, Y, Z (local)
 						{
 							int c = tab.add2x3Block();
@@ -1087,19 +1339,18 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 							{
 								suffix = 'l'; //'l' for local
 							}
-							const CCVector3* P = info.cloud->getPoint(info.pointIndex);
-							tab.colContent[c] << QString("X") + suffix; tab.colContent[c + 1] << QString::number(P->x, 'f', precision);
-							tab.colContent[c] << QString("Y") + suffix; tab.colContent[c + 1] << QString::number(P->y, 'f', precision);
-							tab.colContent[c] << QString("Z") + suffix; tab.colContent[c + 1] << QString::number(P->z, 'f', precision);
+							tab.colContent[c] << QString("X") + suffix; tab.colContent[c + 1] << QString::number(P.x, 'f', precision);
+							tab.colContent[c] << QString("Y") + suffix; tab.colContent[c + 1] << QString::number(P.y, 'f', precision);
+							tab.colContent[c] << QString("Z") + suffix; tab.colContent[c + 1] << QString::number(P.z, 'f', precision);
 						}
 						//next block:  X, Y, Z (global)
 						if (isShifted)
 						{
 							int c = tab.add2x3Block();
-							CCVector3d P = info.cloud->toGlobal3d(*info.cloud->getPoint(info.pointIndex));
-							tab.colContent[c] << "Xg"; tab.colContent[c + 1] << QString::number(P.x, 'f', precision);
-							tab.colContent[c] << "Yg"; tab.colContent[c + 1] << QString::number(P.y, 'f', precision);
-							tab.colContent[c] << "Zg"; tab.colContent[c + 1] << QString::number(P.z, 'f', precision);
+							CCVector3d Pd = cloud->toGlobal3d(P);
+							tab.colContent[c] << "Xg"; tab.colContent[c + 1] << QString::number(Pd.x, 'f', precision);
+							tab.colContent[c] << "Yg"; tab.colContent[c + 1] << QString::number(Pd.y, 'f', precision);
+							tab.colContent[c] << "Zg"; tab.colContent[c + 1] << QString::number(Pd.z, 'f', precision);
 						}
 						//next block: normal
 						if (info.hasNormal)
@@ -1151,9 +1402,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						//next block: indexes
 						{
 							int c = tab.add2x3Block();
-							tab.colContent[c] << "index.A"; tab.colContent[c + 1] << QString::number(info.point1Index);
-							tab.colContent[c] << "index.B"; tab.colContent[c + 1] << QString::number(info.point2Index);
-							tab.colContent[c] << "index.C"; tab.colContent[c + 1] << QString::number(info.point3Index);
+							tab.colContent[c] << "index.A"; tab.colContent[c + 1] << QString::number(m_pickedPoints[0].index);
+							tab.colContent[c] << "index.B"; tab.colContent[c + 1] << QString::number(m_pickedPoints[1].index);
+							tab.colContent[c] << "index.C"; tab.colContent[c + 1] << QString::number(m_pickedPoints[2].index);
 						}
 						//next block: edges length
 						{
@@ -1262,7 +1513,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		CCVector3d arrowDest2D(0, 0, 0);
 		for (size_t i = 0; i < count; ++i)
 		{
-			arrowDest2D += m_points[i].pos2D;
+			arrowDest2D += m_pickedPoints[i].pos2D;
 		}
 		arrowDest2D /= static_cast<PointCoordinateType>(count);
 		//arrowDest2D.x -= halfW;

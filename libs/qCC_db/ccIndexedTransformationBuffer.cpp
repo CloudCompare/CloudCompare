@@ -20,7 +20,7 @@
 //CCLib
 #include <ParallelSort.h>
 
-ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(QString name)
+ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(const QString& name)
 	: ccHObject(name)
 	, m_bBoxValidSize(0)
 	, m_showAsPolyline(false)
@@ -75,7 +75,7 @@ bool ccIndexedTransformationBuffer::findNearest(double index,
 		return false;
 	}
 
-	trans1 = trans2 = 0;
+	trans1 = trans2 = nullptr;
 	if (trans1IndexInBuffer)
 		*trans1IndexInBuffer = 0;
 	if (trans2IndexInBuffer)
@@ -161,7 +161,8 @@ bool ccIndexedTransformationBuffer::getInterpolatedTransformation(	double index,
 																	ccIndexedTransformation& trans,
 																	double maxIndexDistForInterpolation/*=DBL_MAX*/) const
 {
-	const ccIndexedTransformation *t1=0, *t2=0;
+	const ccIndexedTransformation *t1 = nullptr;
+	const ccIndexedTransformation *t2 = nullptr;
 
 	if (!findNearest(index, t1, t2))
 		return false;

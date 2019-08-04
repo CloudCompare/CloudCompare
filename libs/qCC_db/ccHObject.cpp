@@ -46,7 +46,7 @@
 //Qt
 #include <QIcon>
 
-ccHObject::ccHObject(QString name/*=QString()*/)
+ccHObject::ccHObject(const QString& name)
 	: ccObject(name)
 	, ccDrawableObject()
 	, m_parent(nullptr)
@@ -273,7 +273,7 @@ void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*
 	otherObject->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE);
 }
 
-int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject)
+int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject) const
 {
 	std::map<ccHObject*, int>::const_iterator it = m_dependencies.find(const_cast<ccHObject*>(otherObject)); //DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
 
@@ -383,12 +383,12 @@ unsigned int ccHObject::getChildCountRecursive() const
 	return count;
 }
 
-ccHObject* ccHObject::find(unsigned uniqueID)
+ccHObject* ccHObject::find(unsigned uniqueID) const
 {
 	//found the right item?
 	if (getUniqueID() == uniqueID)
 	{
-		return this;
+		return const_cast<ccHObject *>(this);
 	}
 	
 	//otherwise we are going to test all children recursively
@@ -583,7 +583,7 @@ bool ccHObject::isDisplayed() const
 	return (getDisplay() != nullptr) && isVisible() && isBranchEnabled();
 }
 
-bool ccHObject::isDisplayedIn(ccGenericGLDisplay* display) const
+bool ccHObject::isDisplayedIn(const ccGenericGLDisplay* display) const
 {
 	return (getDisplay() == display) && isVisible() && isBranchEnabled();
 }
@@ -610,7 +610,7 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 	glFunc->glPushAttrib(GL_LINE_BIT);
 	glFunc->glLineWidth(1.0f);
 
-	switch (m_selectionBehavior)
+	switch (getSelectionBehavior())
 	{
 	case SELECTION_AA_BBOX:
 		getDisplayBB_recursive(true, m_currentDisplay).draw(context, col);
@@ -619,12 +619,6 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 	case SELECTION_FIT_BBOX:
 		{
 			//get the set of OpenGL functions (version 2.1)
-			QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-			assert( glFunc != nullptr );
-			
-			if ( glFunc == nullptr )
-				break;
-			
 			ccGLMatrix trans;
 			ccBBox box = getOwnFitBB(trans);
 			if (box.isValid())
@@ -654,24 +648,25 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		return;
 
 	//we display it in the 2D layer in fact!
-	ccBBox bBox = getBB_recursive();
-	if (!bBox.isValid())
-		return;
+	//ccBBox bBox = getBB_recursive();
+	//if (!bBox.isValid())
+	//	return;
 	
-	ccGLMatrix trans;
-	getAbsoluteGLTransformation(trans);
+	//ccGLMatrix trans;
+	//getAbsoluteGLTransformation(trans);
 
-	ccGLCameraParameters camera;
-	context.display->getGLCameraParameters(camera);
+	//ccGLCameraParameters camera;
+	//context.display->getGLCameraParameters(camera);
 
-	CCVector3 C = bBox.getCenter();
-	CCVector3d Q2D;
-	camera.project(C, Q2D);
+	//CCVector3 C = bBox.getCenter();
+	//CCVector3d Q2D;
+	//camera.project(C, Q2D);
 
+	
 	QFont font = context.display->getTextDisplayFont(); //takes rendering zoom into account!
 	context.display->displayText(	getName(),
-									static_cast<int>(Q2D.x),
-									static_cast<int>(Q2D.y),
+									static_cast<int>(m_nameIn3DPos.x),
+									static_cast<int>(m_nameIn3DPos.y),
 									ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
 									0.75f,
 									nullptr,
@@ -742,9 +737,28 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	//draw name - container objects are not visible but can still show a name
-	if (m_currentDisplay == context.display && m_showNameIn3D && MACRO_Draw2D(context) && MACRO_Foreground(context) && !MACRO_DrawEntityNames(context))
+	if (m_currentDisplay == context.display && m_showNameIn3D && !MACRO_DrawEntityNames(context))
 	{
-		drawNameIn3D(context);
+		if (MACRO_Draw3D(context))
+		{
+			//we have to comute the 2D position during the 3D pass!
+			ccBBox bBox = getBB_recursive(true); //DGM: take the OpenGL features into account (as some entities are purely 'GL'!)
+			if (bBox.isValid())
+			{
+				ccGLCameraParameters camera;
+				glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
+				glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
+				glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
+
+				CCVector3 C = bBox.getCenter();
+				camera.project(C, m_nameIn3DPos);
+			}
+		}
+		else if (MACRO_Draw2D(context) && MACRO_Foreground(context))
+		{
+			//then we can display the name during the 2D pass
+			drawNameIn3D(context);
+		}
 	}
 
 	//draw entity's children

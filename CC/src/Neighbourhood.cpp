@@ -247,7 +247,7 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 	unsigned pointCount = (m_associatedCloud ? m_associatedCloud->size() : 0);
 
 	//we need at least 3 points to compute a plane
-	assert(CC_LOCAL_MODEL_MIN_SIZE[LS] >= 3);
+	static_assert(CC_LOCAL_MODEL_MIN_SIZE[LS] >= 3, "Invalid CC_LOCAL_MODEL_MIN_SIZE size");
 	if (pointCount < CC_LOCAL_MODEL_MIN_SIZE[LS])
 	{
 		//not enough points!
@@ -359,7 +359,7 @@ bool Neighbourhood::computeQuadric()
 
 	unsigned count = m_associatedCloud->size();
 	
-	assert(CC_LOCAL_MODEL_MIN_SIZE[QUADRIC] >= 5);
+	static_assert(CC_LOCAL_MODEL_MIN_SIZE[QUADRIC] >= 5, "Invalid CC_LOCAL_MODEL_MIN_SIZE size");
 	if (count < CC_LOCAL_MODEL_MIN_SIZE[QUADRIC])
 		return false;
 
@@ -645,7 +645,7 @@ bool Neighbourhood::compute3DQuadric(double quadricEquation[10])
 	}
 
 	//we don't need M anymore
-	M.clear();
+	M.resize(0);
 
 	//now we compute eigen values and vectors of D
 #ifdef USE_EIGEN

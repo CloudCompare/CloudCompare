@@ -17,9 +17,11 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 
 #include "ccPluginInfoDlg.h"
+#include "ccPluginManager.h"
 #include "ccStdPluginInterface.h"
 
 #include "ui_ccPluginInfoDlg.h"
@@ -68,16 +70,64 @@ static QString sFormatContactList( const ccPluginInterface::ContactList &list, c
 	return formattedText;
 }
 
+namespace
+{
+	class _Icons
+	{
+	public:
+		static QIcon   sGetIcon( CC_PLUGIN_TYPE inPluginType )
+		{
+			if ( sIconMap.empty() )
+			{
+				_init();
+			}
+			
+			return sIconMap[inPluginType];
+		}
+		
+	private:
+		static void	_init()
+		{
+			if ( !sIconMap.empty() )
+			{
+				return;
+			}
+			
+			sIconMap[CC_STD_PLUGIN] = QIcon( ":/CC/pluginManager/images/std_plugin.png" );
+			sIconMap[CC_GL_FILTER_PLUGIN] = QIcon( ":/CC/pluginManager/images/gl_plugin.png" );
+			sIconMap[CC_IO_FILTER_PLUGIN] = QIcon( ":/CC/pluginManager/images/io_plugin.png" );
+		}
+		
+		static QMap<CC_PLUGIN_TYPE, QIcon>	sIconMap;
+	};
+	
+	QMap<CC_PLUGIN_TYPE, QIcon>	_Icons::sIconMap;
+}
+
 ccPluginInfoDlg::ccPluginInfoDlg( QWidget *parent ) :
 	QDialog( parent )
   , m_UI( new Ui::ccPluginInfoDlg )
+  , m_ProxyModel( new QSortFilterProxyModel( this ) )
   , m_ItemModel( new QStandardItemModel( this ) )
 {
 	m_UI->setupUi( this );
 	
 	setWindowTitle( tr("About Plugins" ) );
 	
-	m_UI->mPluginListView->setModel( m_ItemModel );
+	m_UI->mWarningLabel->setText( tr( "Enabling/disabling plugins will take effect next time you run %1" ).arg( QApplication::applicationName() ) );
+	m_UI->mWarningLabel->setStyleSheet( QStringLiteral( "QLabel { background-color : #FFFF99; color : black; }" ) );
+	m_UI->mWarningLabel->hide();
+	
+	m_UI->mSearchLineEdit->setStyleSheet( "QLineEdit, QLineEdit:focus { border: none; }" );
+	m_UI->mSearchLineEdit->setAttribute( Qt::WA_MacShowFocusRect, false );
+				
+	m_ProxyModel->setFilterCaseSensitivity( Qt::CaseInsensitive );
+	m_ProxyModel->setSourceModel( m_ItemModel );
+	
+	m_UI->mPluginListView->setModel( m_ProxyModel );
+	m_UI->mPluginListView->setFocus();
+	
+	connect( m_UI->mSearchLineEdit, &QLineEdit::textEdited, m_ProxyModel, &QSortFilterProxyModel::setFilterFixedString );
 	
 	connect( m_UI->mPluginListView->selectionModel(), &QItemSelectionModel::currentChanged, 
 			 this, &ccPluginInfoDlg::selectionChanged );
@@ -111,30 +161,31 @@ void ccPluginInfoDlg::setPluginList( const QList<ccPluginInterface *> &pluginLis
 	
 	for ( const ccPluginInterface *plugin : pluginList )
 	{
-		QStandardItem *item = new QStandardItem( plugin->getName() );
+		auto name = plugin->getName();
+		auto tooltip = tr( "%1 Plugin" ).arg( plugin->getName() );
 		
-		item->setData( QVariant::fromValue( plugin ), PLUGIN_PTR );
-		
-		switch ( plugin->getType() )
+		if ( plugin->isCore() )
 		{
-			case CC_STD_PLUGIN:
-			{
-				item->setIcon( QIcon( ":/CC/pluginManager/images/std_plugin.png" ) );
-				break;				
-			}
-				
-			case CC_GL_FILTER_PLUGIN:
-			{
-				item->setIcon( QIcon( ":/CC/pluginManager/images/gl_plugin.png" ) );
-				break;
-			}
-				
-			case CC_IO_FILTER_PLUGIN:
-			{
-				item->setIcon( QIcon( ":/CC/pluginManager/images/io_plugin.png" ) );
-				break;
-			}
+			tooltip += tr( " (core)" );
 		}
+		else
+		{
+			name += " 👽";
+			tooltip += tr( " (3rd Party)" );
+		}
+		
+		QStandardItem *item = new QStandardItem( name );
+				
+		item->setCheckable( true );
+		
+		if ( ccPluginManager::get().isEnabled( plugin ) )
+		{
+			item->setCheckState( Qt::Checked );
+		}
+		
+		item->setData( QVariant::fromValue( plugin ), PLUGIN_PTR );		
+		item->setIcon( _Icons::sGetIcon( plugin->getType() ) );
+		item->setToolTip( tooltip );
 		
 		m_ItemModel->setItem( row, 0, item );
 		
@@ -149,23 +200,50 @@ void ccPluginInfoDlg::setPluginList( const QList<ccPluginInterface *> &pluginLis
 		
 		m_UI->mPluginListView->setCurrentIndex( index );
 	}
+	
+	connect( m_ItemModel, &QStandardItemModel::itemChanged, this, &ccPluginInfoDlg::itemChanged );
+}
+
+const ccPluginInterface *ccPluginInfoDlg::pluginFromItemData( const QStandardItem *item ) const
+{
+	return item->data( PLUGIN_PTR ).value<const ccPluginInterface*>();;
 }
 
 void ccPluginInfoDlg::selectionChanged( const QModelIndex &current, const QModelIndex &previous )
 {
 	Q_UNUSED( previous );
 	
-	QStandardItem *item = m_ItemModel->itemFromIndex( current );
+	auto sourceItem = m_ProxyModel->mapToSource( current );
+	auto item = m_ItemModel->itemFromIndex( sourceItem );
 	
 	if ( item == nullptr )
 	{
-		qWarning() << "Could not find item in model";
+		// This happens if we are filtering and there are no results
+		updatePluginInfo( nullptr );
 		return;
 	}
 	
-	const ccPluginInterface *plugin = item->data( PLUGIN_PTR ).value<const ccPluginInterface*>();
+	auto plugin = pluginFromItemData( item );
 	
 	updatePluginInfo( plugin );	
+}
+
+void ccPluginInfoDlg::itemChanged( QStandardItem *item )
+{
+	bool checked = item->checkState() == Qt::Checked;
+	auto plugin = pluginFromItemData( item );
+	
+	if ( plugin != nullptr )
+	{
+		ccPluginManager::get().setPluginEnabled( plugin, checked );
+		
+		if ( m_UI->mWarningLabel->isHidden() )
+		{
+			ccLog::Warning( m_UI->mWarningLabel->text() );
+			
+			m_UI->mWarningLabel->show();
+		}
+	}
 }
 
 void ccPluginInfoDlg::updatePluginInfo( const ccPluginInterface *plugin )
@@ -225,7 +303,7 @@ void ccPluginInfoDlg::updatePluginInfo( const ccPluginInterface *plugin )
 			break;
 		}
 	}
-
+	
 	m_UI->mIcon->setPixmap( iconPixmap );
 	
 	m_UI->mNameLabel->setText( plugin->getName() );

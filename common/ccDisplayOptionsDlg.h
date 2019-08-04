@@ -24,25 +24,22 @@
 //qCC_gl
 #include <ccGuiParameters.h>
 
-//CCLib
-#include <CCPlatform.h>
-
 //Qt
 #include <QDialog>
 
-//system
-#include <cassert>
-
-#include <ui_displayOptionsDlg.h>
+namespace Ui
+{
+	class DisplayOptionsDlg;
+}
 
 //! Dialog to setup display settings
-class ccDisplayOptionsDlg : public QDialog, public Ui::DisplayOptionsDlg
+class ccDisplayOptionsDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
 	explicit ccDisplayOptionsDlg(QWidget* parent);
-	~ccDisplayOptionsDlg() override = default;
+	~ccDisplayOptionsDlg() override;
 
 signals:
 	void aspectHasChanged();
@@ -107,6 +104,9 @@ protected:
 	ccGui::ParamStruct oldParameters;
 	//! Old options (for restore)
 	ccOptions oldOptions;
+	
+private:
+	Ui::DisplayOptionsDlg* m_ui;
 };
 
 #endif

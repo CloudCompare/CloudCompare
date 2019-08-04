@@ -30,7 +30,7 @@ namespace CCLib
 {
 
 //! A simple scalar field (to be associated to a point cloud)
-/** A mono-dimensionnal array of scalar values. It has also specific
+/** A monodimensional array of scalar values. It has also specific
 	parameters for display purposes.
 
 	Invalid values can be represented by NAN_VALUE.
@@ -50,7 +50,7 @@ public:
 		\warning May throw a std::bad_alloc exception
 	**/
 	CC_CORE_LIB_API ScalarField(const ScalarField& sf);
-
+	
 	//! Sets scalar field name
 	CC_CORE_LIB_API void setName(const char* name);
 
@@ -101,7 +101,7 @@ protected: //methods
 	//! Default destructor
 	/** Call release instead.
 	**/
-	~ScalarField() override = default;
+	CC_CORE_LIB_API ~ScalarField() override = default;
 
 protected: //members
 
@@ -113,6 +113,38 @@ protected: //members
 	//! Maximum value
 	ScalarType m_maxVal;
 };
+
+inline void ScalarField::computeMinAndMax()
+{
+	if (!empty())
+	{
+		bool minMaxInitialized = false;
+		for (std::size_t i = 0; i < size(); ++i)
+		{
+			const ScalarType& val = at(i);
+			if (ValidValue(val))
+			{
+				if (minMaxInitialized)
+				{
+					if (val < m_minVal)
+						m_minVal = val;
+					else if (val > m_maxVal)
+						m_maxVal = val;
+				}
+				else
+				{
+					//first valid value is used to init min and max
+					m_minVal = m_maxVal = val;
+					minMaxInitialized = true;
+				}
+			}
+		}
+	}
+	else //particular case: no value
+	{
+		m_minVal = m_maxVal = 0;
+	}
+}
 
 }
 

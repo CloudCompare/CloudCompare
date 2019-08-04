@@ -194,13 +194,22 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 		const CCVector3* p1 = m_poly3DVertices->getPoint(i);
 		newVertices->addPoint(*p1);
 
+
 		unsigned i2 = (i + 1) % n_verts;
-		CCVector2d v = m_segmentParams[i2].clickPos - m_segmentParams[i].clickPos;
+		CCVector2d clickPos1/* = m_segmentParams[i].clickPos*/;
+		{
+			//we actually retro-project the 3D point in the second vertex camera frame so as to get a proper behavior
+			CCVector3d P2D;
+			m_segmentParams[i2].params.project(*p1, P2D, false);
+			clickPos1 = CCVector2d(P2D.x, P2D.y);
+		}
+
+		CCVector2d v = m_segmentParams[i2].clickPos - clickPos1;
 		v /= steps;
 
 		for (unsigned j = 1; j < steps; j++)
 		{
-			CCVector2d vj = m_segmentParams[i].clickPos + v * j;
+			CCVector2d vj = clickPos1 + v * j;
 
 			CCVector3 nearestPoint;
 			double nearestElementSquareDist = -1.0;
@@ -308,8 +317,6 @@ bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 
 	if (m_associatedWin)
 	{
-		//connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
-		//connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
 		connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
 		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLineTip(int, int, Qt::MouseButtons)));
 	}
@@ -488,7 +495,7 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 			m_poly3D->setGlobalScale(cloud->getGlobalScale());
 		}
 
-		m_segmentParams.clear(); //just in case
+		m_segmentParams.resize(0); //just in case
 
 		m_associatedWin->addToOwnDB(m_poly3D);
 	}
@@ -587,7 +594,7 @@ void ccTracePolylineTool::restart(bool reset)
 			}
 
 			delete m_poly3D;
-			m_segmentParams.clear();
+			m_segmentParams.resize(0);
 			//delete m_poly3DVertices;
 			m_poly3D = 0;
 			m_poly3DVertices = 0;
@@ -639,7 +646,7 @@ void ccTracePolylineTool::exportLine()
 		if (poly)
 		{
 			delete m_poly3D;
-			m_segmentParams.clear();
+			m_segmentParams.resize(0);
 			m_poly3DVertices = 0;
 			m_poly3D = poly;
 		}
@@ -657,7 +664,7 @@ void ccTracePolylineTool::exportLine()
 	}
 
 	m_poly3D = 0;
-	m_segmentParams.clear();
+	m_segmentParams.resize(0);
 	m_poly3DVertices = 0;
 
 	resetLine(); //to update the GUI

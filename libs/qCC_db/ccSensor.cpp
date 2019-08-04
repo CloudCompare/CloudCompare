@@ -17,9 +17,9 @@
 
 #include "ccSensor.h"
 
-ccSensor::ccSensor(QString name)
+ccSensor::ccSensor(const QString& name)
 	: ccHObject(name)
-	, m_posBuffer(0)
+	, m_posBuffer(nullptr)
 	, m_activeIndex(0)
 	, m_color(ccColor::green)
 	, m_scale(PC_ONE)
@@ -29,7 +29,7 @@ ccSensor::ccSensor(QString name)
 
 ccSensor::ccSensor(const ccSensor &sensor)
 	: ccHObject(sensor)
-	, m_posBuffer(0)
+	, m_posBuffer(nullptr)
 	, m_rigidTransformation(sensor.m_rigidTransformation)
 	, m_activeIndex(sensor.m_activeIndex)
 	, m_color(sensor.m_color)
@@ -158,7 +158,7 @@ bool ccSensor::toFile_MeOnly(QFile& out) const
 	//we can't save the associated position buffer (as it may be shared by multiple sensors)
 	//so instead we save it's unique ID (dataVersion>=34)
 	//WARNING: the buffer must be saved in the same BIN file! (responsibility of the caller)
-	uint32_t bufferUniqueID = (m_posBuffer ? (uint32_t)m_posBuffer->getUniqueID() : 0);
+	uint32_t bufferUniqueID = (m_posBuffer ? static_cast<uint32_t>(m_posBuffer->getUniqueID()) : 0);
 	if (out.write((const char*)&bufferUniqueID,4) < 0)
 		return WriteError();
 

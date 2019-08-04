@@ -44,6 +44,7 @@ public:
 		ccHObject* entity; //picked entity (if any)
 		unsigned itemIndex; //e.g. point or triangle index
 		CCVector3 P3D; //picked point in 3D (if any)
+		CCVector3d uvw; //picked point barycentric coordinates (if picked on a triangle)
 	};
 
 	//! Method called whenever an item is picked

@@ -24,38 +24,27 @@
 #include "AsciiOpenDlg.h"
 #include "AsciiSaveDlg.h"
 
-template <class T> struct AutoDeletePtr
-{
-	AutoDeletePtr(T* _ptr = nullptr) : ptr(_ptr) {}
-	~AutoDeletePtr() { release(); }
-	inline void release() { delete ptr; ptr = nullptr; }
-	T* ptr;
-};
-
 //! ASCII point cloud I/O filter
 class QCC_IO_LIB_API AsciiFilter : public FileIOFilter
 {
 public:
-
+	AsciiFilter();
+	
 	//static accessors
 	static inline QString GetFileFilter() { return "ASCII cloud (*.txt *.asc *.neu *.xyz *.pts *.csv)"; }
-	static inline QString GetDefaultExtension() { return "asc"; }
 
 	//inherited from FileIOFilter
-	bool importSupported() const override { return true; }
-	bool exportSupported() const override { return true; }
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	bool canLoadExtension(const QString& upperCaseExt) const override;
+
 	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 
 	//! Loads an ASCII file with a predefined format
 	CC_FILE_ERROR loadCloudFromFormatedAsciiFile(	const QString& filename,
 													ccHObject& container,
 													const AsciiOpenDlg::Sequence& openSequence,
 													char separator,
+													bool commaAsDecimal,
 													unsigned approximateNumberOfLines,
 													qint64 fileSize,
 													unsigned maxCloudSize,
@@ -68,15 +57,9 @@ public:
 	//! Returns associated dialog (creates it if necessary)
 	static AsciiSaveDlg* GetSaveDialog(QWidget* parentWidget = nullptr);
 
-protected:
-
+private:
 	//! Internal use only
 	CC_FILE_ERROR saveFile(ccHObject* entity, FILE *theFile);
-
-	//! Associated (export) dialog
-	static AutoDeletePtr<AsciiSaveDlg> s_saveDialog;
-	//! Associated (import) dialog
-	static AutoDeletePtr<AsciiOpenDlg> s_openDialog;
 };
 
 #endif //CC_ASCII_FILTER_HEADER

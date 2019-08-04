@@ -21,7 +21,6 @@
 //Qt
 #include <QDialog>
 #include <QList>
-#include <QWidget>
 
 class ccGLWindow;
 

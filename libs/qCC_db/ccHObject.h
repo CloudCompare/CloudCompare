@@ -32,7 +32,7 @@ public: //construction
 	//! Default constructor
 	/** \param name object name (optional)
 	**/
-	ccHObject(QString name = QString());
+	ccHObject(const QString& name = QString());
 	//! Copy constructor
 	ccHObject(const ccHObject& object);
 
@@ -61,6 +61,9 @@ public: //base members access
 	/** \return class unique ID
 	**/
 	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::HIERARCHY_OBJECT; }
+
+	//! Returns whether the instance is a group
+	inline bool isGroup() const { return getClassID() == static_cast<CC_CLASS_ENUM>(CC_TYPES::HIERARCHY_OBJECT); }
 
 	//! Returns parent object
 	/** \return parent object (nullptr if no parent)
@@ -95,7 +98,7 @@ public: //dependencies management
 	//! Returns the dependency flags with a given object
 	/** \param otherObject other object
 	**/
-	int getDependencyFlagsWith(const ccHObject* otherObject);
+	int getDependencyFlagsWith(const ccHObject* otherObject) const;
 
 	//! Removes any dependency flags with a given object
 	/** \param otherObject other object
@@ -141,7 +144,7 @@ public: //children management
 	/** \param uniqueID child unique ID
 		\return child (or nullptr if not found)
 	**/
-	ccHObject* find(unsigned uniqueID);
+	ccHObject* find(unsigned uniqueID) const;
 
 	//! Standard instances container (for children, etc.)
 	using Container = std::vector<ccHObject *>;
@@ -276,7 +279,7 @@ public: //display
 	virtual bool isDisplayed() const;
 
 	//! Returns whether the object is actually displayed (visible) in a given display or not
-	virtual bool isDisplayedIn(ccGenericGLDisplay* display) const;
+	virtual bool isDisplayedIn(const ccGenericGLDisplay* display) const;
 
 	//! Returns whether the object and all its ancestors are enabled
 	virtual bool isBranchEnabled() const;

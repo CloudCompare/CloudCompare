@@ -18,20 +18,26 @@
 #ifndef CC_SF_ARITMETHIC_DLG_HEADER
 #define CC_SF_ARITMETHIC_DLG_HEADER
 
-#include <ui_sfArithmeticsDlg.h>
+#include <QDialog>
 
 class ccPointCloud;
 
+namespace Ui
+{
+	class SFArithmeticsDlg;
+}
+
 //! Dialog to choose 2 scalar fields (SF) and one operation for arithmetics processing
-class ccScalarFieldArithmeticsDlg : public QDialog, public Ui::SFArithmeticsDlg
+class ccScalarFieldArithmeticsDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	ccScalarFieldArithmeticsDlg(ccPointCloud* cloud, QWidget* parent = 0);
-
+	ccScalarFieldArithmeticsDlg(ccPointCloud* cloud, QWidget* parent = nullptr);
+	~ccScalarFieldArithmeticsDlg() override;
+	
 	//! Arithmetic operations
 	enum Operation {	/* Operations requiring two SFs */
 						PLUS		= 0,
@@ -61,10 +67,10 @@ public:
 	Operation getOperation() const;
 
 	//! Returns the operation enumerator based on its name
-	static Operation GetOperationByName(QString name);
+	static Operation GetOperationByName(const QString& name);
 
 	//! Returns operation name
-	static QString GetOperationName(Operation op, QString sf1, QString sf2 = QString());
+	static QString GetOperationName(Operation op, const QString& sf1, const QString& sf2 = QString());
 
 	//! Applies operation on a given cloud
 	/** Should be applied on the same cloud as the one input to the constructor
@@ -97,7 +103,7 @@ public:
 		\param parent parent widget (optional)
 		\return success
 	**/
-	static bool Apply(ccPointCloud* cloud, Operation op, int sf1Idx, bool inplace, SF2* sf2 = 0, QWidget* parent = 0);
+	static bool Apply(ccPointCloud* cloud, Operation op, int sf1Idx, bool inplace, SF2* sf2 = nullptr, QWidget* parent = nullptr);
 
 protected slots:
 	
@@ -113,10 +119,9 @@ protected:
 	int getSF1Index();
 	//! Returns second selected SF index
 	int getSF2Index();
-
-	//! Returns selected operation name
-	QString getOperationName(QString sf1, QString sf2 = QString()) const;
-
+	
+private:
+	Ui::SFArithmeticsDlg* m_ui;
 };
 
 #endif //CC_SF_ARITMETHIC_DLG_HEADER

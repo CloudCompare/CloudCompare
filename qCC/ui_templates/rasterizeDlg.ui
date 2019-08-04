@@ -6,194 +6,198 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>1019</height>
+    <width>1024</width>
+    <height>873</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Rasterize</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_7">
    <item>
-    <widget class="QFrame" name="leftFrame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+     <property name="spacing">
+      <number>-1</number>
      </property>
-     <property name="minimumSize">
-      <size>
-       <width>270</width>
-       <height>0</height>
-      </size>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item>
-       <widget class="QGroupBox" name="cloudInfoGroupBox">
-        <property name="title">
-         <string>Cloud</string>
+     <item>
+      <widget class="QFrame" name="leftFrame">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,1,0,0">
+        <property name="leftMargin">
+         <number>0</number>
         </property>
-        <layout class="QFormLayout" name="formLayout">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Name</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="cloudNameLabel">
-           <property name="text">
-            <string>Unknown</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Points</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLabel" name="pointCountLabel">
-           <property name="text">
-            <string notr="true">0</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="updateGridPushButton">
-        <property name="styleSheet">
-         <string notr="true">color: white; background-color:red;</string>
+        <property name="topMargin">
+         <number>0</number>
         </property>
-        <property name="text">
-         <string>Update grid</string>
+        <property name="rightMargin">
+         <number>0</number>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox">
-        <property name="title">
-         <string>Grid</string>
+        <property name="bottomMargin">
+         <number>0</number>
         </property>
-        <layout class="QGridLayout" name="gridLayout">
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>size</string>
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>Grid</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <property name="verticalSpacing">
+            <number>6</number>
            </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>step</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLabel" name="gridWidthLabel">
-           <property name="text">
-            <string notr="true">640 x 480</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <widget class="QDoubleSpinBox" name="gridStepDoubleSpinBox">
-             <property name="toolTip">
-              <string>size of step of the grid generated (in the same units as the coordinates of the point cloud)</string>
-             </property>
-             <property name="decimals">
-              <number>6</number>
-             </property>
-             <property name="minimum">
-              <double>0.000010000000000</double>
-             </property>
-             <property name="maximum">
-              <double>100000.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.001000000000000</double>
-             </property>
-             <property name="value">
-              <double>1.000000000000000</double>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>size</string>
              </property>
             </widget>
            </item>
-           <item>
-            <widget class="QToolButton" name="editGridToolButton">
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>Edit grid</string>
+              <string>step</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLabel" name="gridWidthLabel">
+             <property name="text">
+              <string notr="true">640 x 480</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QDoubleSpinBox" name="gridStepDoubleSpinBox">
+               <property name="toolTip">
+                <string>size of step of the grid generated (in the same units as the coordinates of the point cloud)</string>
+               </property>
+               <property name="decimals">
+                <number>6</number>
+               </property>
+               <property name="minimum">
+                <double>0.000010000000000</double>
+               </property>
+               <property name="maximum">
+                <double>100000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.001000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="editGridToolButton">
+               <property name="text">
+                <string>Edit grid</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_13">
+             <property name="toolTip">
+              <string>Active layer (or 'scalar field')</string>
+             </property>
+             <property name="text">
+              <string>active layer</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QComboBox" name="activeLayerComboBox"/>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>range</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QLabel" name="gridLayerRangeLabel">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
           </layout>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_13">
-           <property name="toolTip">
-            <string>Active layer (or 'scalar field')</string>
-           </property>
-           <property name="text">
-            <string>active layer</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QComboBox" name="activeLayerComboBox"/>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_7">
-           <property name="text">
-            <string>range</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QLabel" name="gridLayerRangeLabel">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox_2">
-        <property name="title">
-         <string>Projection</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Projection</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="2" column="1">
+            <widget class="QComboBox" name="scalarFieldProjection">
+             <property name="toolTip">
+              <string>SF interpolation method</string>
+             </property>
+             <property name="currentIndex">
+              <number>1</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>minimum value</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>average value</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>maximum value</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>cell height</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
             <widget class="QLabel" name="label_9">
              <property name="text">
               <string>direction</string>
              </property>
             </widget>
            </item>
-           <item>
+           <item row="3" column="0">
+            <widget class="QCheckBox" name="resampleCloudCheckBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Use the nearest point of the input cloud in each cell instead of the cell center</string>
+             </property>
+             <property name="text">
+              <string>resample input cloud</string>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
             <widget class="QComboBox" name="dimensionComboBox">
              <property name="currentIndex">
               <number>0</number>
@@ -215,18 +219,7 @@
              </item>
             </widget>
            </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="layout_2">
-           <item>
-            <widget class="QLabel" name="label_8">
-             <property name="text">
-              <string>cell height</string>
-             </property>
-            </widget>
-           </item>
-           <item>
+           <item row="1" column="1">
             <widget class="QComboBox" name="heightProjectionComboBox">
              <property name="toolTip">
               <string>Per-cell height computation method:
@@ -235,8 +228,99 @@
  - maximum = highest point in the cell</string>
              </property>
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
+             <item>
+              <property name="text">
+               <string>minimum</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>average</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>maximum</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="interpolateSFCheckBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Interpolate scalar field(s)</string>
+             </property>
+             <property name="text">
+              <string>interpolate SF(s)</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="2">
+            <widget class="QLabel" name="warningResampleWithAverageLabel">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color:red;</string>
+             </property>
+             <property name="text">
+              <string>Warning: the original point's height will be
+replaced by the cell's average height!</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="emptyCellsFrame">
+          <property name="title">
+           <string>Empty cells</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout">
+           <property name="fieldGrowthPolicy">
+            <enum>QFormLayout::ExpandingFieldsGrow</enum>
+           </property>
+           <property name="verticalSpacing">
+            <number>6</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Fill with</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="fillEmptyCellsComboBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>leave empty</string>
+              </property>
+             </item>
              <item>
               <property name="text">
                <string>minimum height</string>
@@ -252,734 +336,695 @@
                <string>maximum height</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>user specified value</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>interpolate</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="emptyValueDoubleSpinBox">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Custom value for empty cells</string>
+             </property>
+             <property name="decimals">
+              <number>6</number>
+             </property>
+             <property name="minimum">
+              <double>-999999999.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>999999999.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.000000000000000</double>
+             </property>
             </widget>
            </item>
           </layout>
-         </item>
-         <item>
-          <widget class="QFrame" name="interpolateSFFrame">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="updateGridPushButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: white; background-color:red;</string>
+          </property>
+          <property name="text">
+           <string>Update grid</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::MinimumExpanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QTabWidget" name="tabWidget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="exportTab">
+           <attribute name="title">
+            <string>Export</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
             <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
+             <number>8</number>
             </property>
             <property name="rightMargin">
-             <number>0</number>
+             <number>8</number>
             </property>
             <property name="bottomMargin">
              <number>0</number>
             </property>
             <item>
-             <widget class="QCheckBox" name="interpolateSFCheckBox">
-              <property name="toolTip">
-               <string>Interpolate scalar field(s)</string>
-              </property>
-              <property name="text">
-               <string>interpolate SF(s)</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="scalarFieldProjection">
-              <property name="toolTip">
-               <string>SF interpolation method</string>
-              </property>
-              <property name="currentIndex">
-               <number>1</number>
-              </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
               <item>
-               <property name="text">
-                <string>minimum value</string>
-               </property>
+               <widget class="QPushButton" name="generateCloudPushButton">
+                <property name="toolTip">
+                 <string>Export grid as a point cloud</string>
+                </property>
+                <property name="text">
+                 <string>Cloud</string>
+                </property>
+               </widget>
               </item>
               <item>
-               <property name="text">
-                <string>average value</string>
-               </property>
+               <widget class="QPushButton" name="generateMeshPushButton">
+                <property name="toolTip">
+                 <string>Export grid as a mesh</string>
+                </property>
+                <property name="text">
+                 <string>Mesh</string>
+                </property>
+               </widget>
               </item>
-              <item>
-               <property name="text">
-                <string>maximum value</string>
-               </property>
-              </item>
-             </widget>
+             </layout>
             </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="resampleCloudCheckBox">
-           <property name="toolTip">
-            <string>Use the nearest point of the input cloud in each cell instead of the cell center</string>
-           </property>
-           <property name="text">
-            <string>resample input cloud</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="warningResampleWithAverageLabel">
-           <property name="styleSheet">
-            <string notr="true">color:red;</string>
-           </property>
-           <property name="text">
-            <string>Warning: the original point's height will be
-replaced by the cell's average height!</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="emptyCellsFrame">
-        <property name="title">
-         <string>Empty cells</string>
-        </property>
-        <layout class="QFormLayout" name="formLayout_2">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Fill with</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="fillEmptyCellsComboBox">
-           <property name="toolTip">
-            <string>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>leave empty</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>minimum height</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>average height</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>maximum height</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>user specified value</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>interpolate</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QDoubleSpinBox" name="emptyValueDoubleSpinBox">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Custom value for empty cells</string>
-           </property>
-           <property name="decimals">
-            <number>6</number>
-           </property>
-           <property name="minimum">
-            <double>-999999999.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>999999999.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>0.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTabWidget" name="tabWidget">
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <widget class="QWidget" name="exportTab">
-         <attribute name="title">
-          <string>Export</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
-             <widget class="QPushButton" name="generateCloudPushButton">
-              <property name="toolTip">
-               <string>Export grid as a point cloud</string>
-              </property>
+             <widget class="QLabel" name="label_12">
               <property name="text">
-               <string>Cloud</string>
+               <string>Export per-cell statistics as SF(s):</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="generateMeshPushButton">
-              <property name="toolTip">
-               <string>Export grid as a mesh</string>
+             <widget class="QFrame" name="exportCloudSFFrame">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
-              <property name="text">
-               <string>Mesh</string>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
               </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>Export per-cell statistics as SF(s):</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QFrame" name="exportCloudSFFrame">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QFormLayout" name="formLayout_4">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item row="0" column="0">
-              <widget class="QCheckBox" name="generateCountSFcheckBox">
-               <property name="toolTip">
-                <string>Adds a scalar field with the grid density (= number of points inside each cell)</string>
-               </property>
-               <property name="text">
-                <string>population</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QCheckBox" name="generateMinHeightSFcheckBox">
-               <property name="toolTip">
-                <string>Adds a scalar field with the min. height of the points inside the cell</string>
-               </property>
-               <property name="text">
-                <string>min height</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="generateAvgHeightSFcheckBox">
-               <property name="toolTip">
-                <string>Adds a scalar field with the average height of the points inside the cell</string>
-               </property>
-               <property name="text">
-                <string>average height</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QCheckBox" name="generateMaxHeightSFcheckBox">
-               <property name="toolTip">
-                <string>Adds a scalar field with the max. height of the points inside the cell</string>
-               </property>
-               <property name="text">
-                <string>max height</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QCheckBox" name="generateStdDevHeightSFcheckBox">
-               <property name="toolTip">
-                <string>Adds a scalar field with the standard deviation of the heights of the points inside the cell</string>
-               </property>
-               <property name="text">
-                <string>height std. dev.</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QCheckBox" name="generateHeightRangeSFcheckBox">
-               <property name="toolTip">
-                <string>Adds a scalar field with the standard deviation of the heights of the points inside the cell</string>
-               </property>
-               <property name="text">
-                <string>height range</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="Line" name="line">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_8">
-            <item>
-             <widget class="QPushButton" name="generateRasterPushButton">
-              <property name="toolTip">
-               <string>Export grid as a raster (geotiff)</string>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
               </property>
-              <property name="text">
-               <string>Raster</string>
-              </property>
+              <layout class="QFormLayout" name="formLayout_4">
+               <property name="labelAlignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="leftMargin">
+                <number>6</number>
+               </property>
+               <property name="topMargin">
+                <number>6</number>
+               </property>
+               <property name="rightMargin">
+                <number>6</number>
+               </property>
+               <property name="bottomMargin">
+                <number>6</number>
+               </property>
+               <item row="0" column="0">
+                <widget class="QCheckBox" name="generateCountSFcheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field with the grid density (= number of points inside each cell)</string>
+                 </property>
+                 <property name="text">
+                  <string>population</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QCheckBox" name="generateMinHeightSFcheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field with the min. height of the points inside the cell</string>
+                 </property>
+                 <property name="text">
+                  <string>min height</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QCheckBox" name="generateAvgHeightSFcheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field with the average height of the points inside the cell</string>
+                 </property>
+                 <property name="text">
+                  <string>average height</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QCheckBox" name="generateMaxHeightSFcheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field with the max. height of the points inside the cell</string>
+                 </property>
+                 <property name="text">
+                  <string>max height</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QCheckBox" name="generateStdDevHeightSFcheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field with the standard deviation of the heights of the points inside the cell</string>
+                 </property>
+                 <property name="text">
+                  <string>height std. dev.</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QCheckBox" name="generateHeightRangeSFcheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field with the standard deviation of the heights of the points inside the cell</string>
+                 </property>
+                 <property name="text">
+                  <string>height range</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="generateImagePushButton">
-              <property name="toolTip">
-               <string>Export grid as an image</string>
-              </property>
-              <property name="text">
-               <string>Image</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="generateASCIIPushButton">
-              <property name="toolTip">
-               <string>Export grid as a matrix (text file)</string>
-              </property>
-              <property name="text">
-               <string>Matrix</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>28</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="contourTab">
-         <attribute name="title">
-          <string>Contour plot</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QLabel" name="label_15">
-            <property name="font">
-             <font>
-              <italic>true</italic>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: blue;</string>
-            </property>
-            <property name="text">
-             <string>The contour plot is computed on the active layer</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QFormLayout" name="formLayout_3">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Start value</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QDoubleSpinBox" name="contourStartDoubleSpinBox">
-              <property name="decimals">
-               <number>6</number>
-              </property>
-              <property name="minimum">
-               <double>-1000000000.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>1000000000.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_10">
-              <property name="text">
-               <string>Step</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QDoubleSpinBox" name="contourStepDoubleSpinBox">
-              <property name="decimals">
-               <number>6</number>
-              </property>
-              <property name="minimum">
-               <double>0.000001000000000</double>
-              </property>
-              <property name="maximum">
-               <double>1000000000.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_11">
-              <property name="text">
-               <string>Min. vertex count</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QSpinBox" name="minVertexCountSpinBox">
-              <property name="toolTip">
-               <string>Min vertex count per iso-line (to ignore the smallest ones)</string>
-              </property>
-              <property name="minimum">
-               <number>3</number>
-              </property>
-              <property name="maximum">
-               <number>10000000</number>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_14">
-              <property name="text">
-               <string>Line width</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QSpinBox" name="contourWidthSpinBox">
-              <property name="toolTip">
-               <string>Default contour lines width</string>
-              </property>
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="maximum">
-               <number>10</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="QCheckBox" name="colorizeContoursCheckBox">
-              <property name="text">
-               <string>colorize</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="ignoreContourBordersCheckBox">
-              <property name="text">
-               <string>ignore borders</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer">
+             <spacer name="verticalSpacer">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Vertical</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>40</width>
-                <height>20</height>
+                <width>20</width>
+                <height>40</height>
                </size>
               </property>
              </spacer>
             </item>
+            <item>
+             <widget class="Line" name="line">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <widget class="QPushButton" name="generateRasterPushButton">
+                <property name="toolTip">
+                 <string>Export grid as a raster (geotiff)</string>
+                </property>
+                <property name="text">
+                 <string>Raster</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="generateImagePushButton">
+                <property name="toolTip">
+                 <string>Export grid as an image</string>
+                </property>
+                <property name="text">
+                 <string>Image</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="generateASCIIPushButton">
+                <property name="toolTip">
+                 <string>Export grid as a matrix (text file)</string>
+                </property>
+                <property name="text">
+                 <string>Matrix</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
            </layout>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="projectContoursOnAltCheckBox">
-            <property name="enabled">
-             <bool>false</bool>
+          </widget>
+          <widget class="QWidget" name="contourTab">
+           <attribute name="title">
+            <string>Contour plot</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <property name="leftMargin">
+             <number>8</number>
             </property>
-            <property name="text">
-             <string>project contours on the altitude layer</string>
+            <property name="rightMargin">
+             <number>8</number>
             </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
-             <widget class="QPushButton" name="clearContoursPushButton">
-              <property name="enabled">
-               <bool>false</bool>
+             <widget class="QLabel" name="label_15">
+              <property name="font">
+               <font>
+                <italic>true</italic>
+               </font>
               </property>
-              <property name="toolTip">
-               <string>Remove all contour lines</string>
+              <property name="styleSheet">
+               <string notr="true">color: blue;</string>
               </property>
               <property name="text">
-               <string>Clear</string>
+               <string>The contour plot is computed on the active layer</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="exportContoursPushButton">
+             <layout class="QFormLayout" name="formLayout_3">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>Start value</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="contourStartDoubleSpinBox">
+                <property name="decimals">
+                 <number>6</number>
+                </property>
+                <property name="minimum">
+                 <double>-1000000000.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000000000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_10">
+                <property name="text">
+                 <string>Step</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="contourStepDoubleSpinBox">
+                <property name="decimals">
+                 <number>6</number>
+                </property>
+                <property name="minimum">
+                 <double>0.000001000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000000000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>Min. vertex count</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QSpinBox" name="minVertexCountSpinBox">
+                <property name="toolTip">
+                 <string>Min vertex count per iso-line (to ignore the smallest ones)</string>
+                </property>
+                <property name="minimum">
+                 <number>3</number>
+                </property>
+                <property name="maximum">
+                 <number>10000000</number>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_14">
+                <property name="text">
+                 <string>Line width</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QSpinBox" name="contourWidthSpinBox">
+                <property name="toolTip">
+                 <string>Default contour lines width</string>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>10</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QCheckBox" name="colorizeContoursCheckBox">
+                <property name="text">
+                 <string>colorize</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="ignoreContourBordersCheckBox">
+                <property name="text">
+                 <string>ignore borders</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="projectContoursOnAltCheckBox">
               <property name="enabled">
                <bool>false</bool>
               </property>
-              <property name="toolTip">
-               <string>Export contour lines to the DB tree</string>
-              </property>
               <property name="text">
-               <string>Export</string>
+               <string>project contours on the altitude layer</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="generateContoursPushButton">
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QPushButton" name="clearContoursPushButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Remove all contour lines</string>
+                </property>
+                <property name="text">
+                 <string>Clear</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="exportContoursPushButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Export contour lines to the DB tree</string>
+                </property>
+                <property name="text">
+                 <string>Export</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="generateContoursPushButton">
+                <property name="text">
+                 <string>Generate</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="hillshadeTab">
+           <attribute name="title">
+            <string>Hillshade</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_16">
+              <property name="font">
+               <font>
+                <italic>true</italic>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: blue;</string>
+              </property>
+              <property name="text">
+               <string>Hillshade is computed on the height layer</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QFormLayout" name="formLayout_5">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_17">
+                <property name="text">
+                 <string>Sun zenith</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QSpinBox" name="sunZenithSpinBox">
+                <property name="toolTip">
+                 <string>Zenith angle (in degrees) = 90 - altitude angle</string>
+                </property>
+                <property name="suffix">
+                 <string> deg.</string>
+                </property>
+                <property name="maximum">
+                 <number>90</number>
+                </property>
+                <property name="singleStep">
+                 <number>5</number>
+                </property>
+                <property name="value">
+                 <number>45</number>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_18">
+                <property name="text">
+                 <string>Sun azimuth</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QSpinBox" name="sunAzimuthSpinBox">
+                <property name="toolTip">
+                 <string>Azimuth angle (in degrees)</string>
+                </property>
+                <property name="suffix">
+                 <string> deg.</string>
+                </property>
+                <property name="maximum">
+                 <number>360</number>
+                </property>
+                <property name="singleStep">
+                 <number>5</number>
+                </property>
+                <property name="value">
+                 <number>315</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="generateHillshadePushButton">
               <property name="text">
                <string>Generate</string>
               </property>
              </widget>
             </item>
            </layout>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="hillshadeTab">
-         <attribute name="title">
-          <string>Hillshade</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <widget class="QLabel" name="label_16">
-            <property name="font">
-             <font>
-              <italic>true</italic>
-             </font>
+          </widget>
+          <widget class="QWidget" name="volumeTab">
+           <attribute name="title">
+            <string>Volume</string>
+           </attribute>
+           <layout class="QFormLayout" name="formLayout_6">
+            <property name="bottomMargin">
+             <number>0</number>
             </property>
-            <property name="styleSheet">
-             <string notr="true">color: blue;</string>
-            </property>
-            <property name="text">
-             <string>Hillshade is computed on the height layer</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QFormLayout" name="formLayout_5">
             <item row="0" column="0">
-             <widget class="QLabel" name="label_17">
+             <widget class="QLabel" name="label_19">
               <property name="text">
-               <string>Sun zenith</string>
+               <string>Volume</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QSpinBox" name="sunZenithSpinBox">
-              <property name="toolTip">
-               <string>Zenith angle (in degrees) = 90 - altitude angle</string>
-              </property>
-              <property name="suffix">
-               <string> deg.</string>
-              </property>
-              <property name="maximum">
-               <number>90</number>
-              </property>
-              <property name="singleStep">
-               <number>5</number>
-              </property>
-              <property name="value">
-               <number>45</number>
+             <widget class="QLabel" name="volumeLabel">
+              <property name="text">
+               <string notr="true">0</string>
               </property>
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_18">
+             <widget class="QLabel" name="label_20">
               <property name="text">
-               <string>Sun azimuth</string>
+               <string>Non empty cells</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QSpinBox" name="sunAzimuthSpinBox">
-              <property name="toolTip">
-               <string>Azimuth angle (in degrees)</string>
-              </property>
-              <property name="suffix">
-               <string> deg.</string>
-              </property>
-              <property name="maximum">
-               <number>360</number>
-              </property>
-              <property name="singleStep">
-               <number>5</number>
-              </property>
-              <property name="value">
-               <number>315</number>
+             <widget class="QLabel" name="filledCellsPercentageLabel">
+              <property name="text">
+               <string notr="true">0%</string>
               </property>
              </widget>
             </item>
            </layout>
-          </item>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,1">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QGroupBox" name="cloudInfoGroupBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <property name="leftMargin">
+           <number>12</number>
+          </property>
+          <property name="topMargin">
+           <number>6</number>
+          </property>
+          <property name="rightMargin">
+           <number>12</number>
+          </property>
+          <property name="bottomMargin">
+           <number>6</number>
+          </property>
           <item>
-           <spacer name="verticalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
+           <widget class="QLabel" name="cloudNameLabel">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="generateHillshadePushButton">
-            <property name="text">
-             <string>Generate</string>
+            <property name="textInteractionFlags">
+             <set>Qt::NoTextInteraction</set>
             </property>
            </widget>
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="volumeTab">
-         <attribute name="title">
-          <string>Volume</string>
-         </attribute>
-         <layout class="QFormLayout" name="formLayout_6">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_19">
-            <property name="text">
-             <string>Volume</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="volumeLabel">
-            <property name="text">
-             <string notr="true">0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>Non empty cells</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="filledCellsPercentageLabel">
-            <property name="text">
-             <string notr="true">0%</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+       </item>
+       <item>
+        <widget class="QFrame" name="mapFrame">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>512</width>
+           <height>512</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
         </widget>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>59</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QDialogButtonBox" name="buttonBox">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="standardButtons">
-         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-        </property>
-        <property name="centerButtons">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </item>
    <item>
-    <widget class="QFrame" name="mapFrame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>512</width>
-       <height>512</height>
-      </size>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

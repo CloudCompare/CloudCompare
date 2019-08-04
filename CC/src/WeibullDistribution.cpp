@@ -145,7 +145,7 @@ bool WeibullDistribution::setParameters(ScalarType a, ScalarType b, ScalarType v
 	m_b = b;
 
 	//for the Chi2 test
-	chi2ClassesPositions.clear();
+	chi2ClassesPositions.resize(0);
 
 	if (m_a > 0.0 && m_b >= 0.0)
 	{
@@ -200,39 +200,37 @@ bool WeibullDistribution::computeParameters(const ScalarContainer& values)
 		return false;
 	}
 
-	m_valueShift = minValue - std::numeric_limits<ScalarType>::epsilon();
-	assert(maxValue > m_valueShift);
+	double valueRange = maxValue - minValue;
+	if (valueRange < std::numeric_limits<ScalarType>::epsilon())
+	{
+		return false;
+	}
 
-	ScalarType inverseMaxValue = static_cast<ScalarType>(1.0) / (maxValue - m_valueShift);
-
-	m_a = findGRoot(values, inverseMaxValue);
-
-	if (m_a < 0)
+	double a = FindGRoot(values, minValue, valueRange);
+	if (a < 0.0)
 		return false;
 
 	//we can compute b
-	m_b = 0;
+	double b = 0;
 	unsigned counter = 0;
 	for (size_t i = 0; i < n; ++i)
 	{
 		ScalarType v = values[i];
 		if (ScalarField::ValidValue(v)) //we ignore NaN values
 		{
-			v -= m_valueShift;
-			if (v >= 0)
+			if (v >= minValue)
 			{
-				m_b += pow(v*inverseMaxValue, m_a);
+				b += pow((static_cast<double>(v) - minValue) / valueRange, a);
 				++counter;
 			}
 		}
 	}
-
 	if (counter == 0)
 		return false;
 
-	m_b = (maxValue - m_valueShift) * pow(m_b / counter, 1 / m_a);
-
-	return setParameters(m_a, m_b, m_valueShift);
+	return setParameters(	static_cast<ScalarType>(a),
+							static_cast<ScalarType>(valueRange * pow(b / counter, 1.0 / a)),
+							minValue );
 }
 
 double WeibullDistribution::computeP(ScalarType _x) const
@@ -261,13 +259,13 @@ double WeibullDistribution::computeP(ScalarType x1, ScalarType x2) const
 	return exp(-pow(static_cast<double>(x1 - m_valueShift) / m_b, static_cast<double>(m_a))) - exp(-pow(static_cast<double>(x2 - m_valueShift) / m_b, static_cast<double>(m_a)));
 }
 
-ScalarType WeibullDistribution::computeG(const ScalarContainer& values, ScalarType r, ScalarType* inverseVmax/*=0*/) const
+double WeibullDistribution::ComputeG(const ScalarContainer& values, double r, ScalarType valueShift, double valueRange)
 {
 	size_t n = values.size();
 
 	//a & n should be strictly positive!
-	if (r <= 0 || n == 0)
-		return static_cast<ScalarType>(1.0); //a positive value means that computeG failed
+	if (r <= 0.0 || n == 0)
+		return 1.0; //a positive value means that ComputeG failed
 
 	double p = 0, q = 0, s = 0;
 	unsigned counter = 0, zeroValues = 0;
@@ -277,13 +275,11 @@ ScalarType WeibullDistribution::computeG(const ScalarContainer& values, ScalarTy
 		ScalarType v = values[i];
 		if (ScalarField::ValidValue(v)) //we ignore NaN values
 		{
-			v -= m_valueShift;
-			if (v > ZERO_TOLERANCE)
+			double v0 = static_cast<double>(v) - valueShift;
+			if (v0 > ZERO_TOLERANCE)
 			{
-				double ln_v = log(v);
-				if (inverseVmax)
-					v *= (*inverseVmax);
-				double v_a = pow(v, r);
+				double ln_v = log(v0);
+				double v_a = pow(v0 / valueRange, r);
 
 				s += ln_v;
 				q += v_a;
@@ -301,10 +297,7 @@ ScalarType WeibullDistribution::computeG(const ScalarContainer& values, ScalarTy
 	if (zeroValues)
 	{
 		double ln_v = log(ZERO_TOLERANCE) * zeroValues;
-		double epsilon = ZERO_TOLERANCE;
-		if (inverseVmax)
-			epsilon *= (*inverseVmax);
-		double v_a = pow(epsilon, static_cast<double>(r));
+		double v_a = pow(ZERO_TOLERANCE / valueRange, static_cast<double>(r));
 		s += ln_v;
 		q += v_a * zeroValues;
 		p += ln_v * v_a;
@@ -313,24 +306,24 @@ ScalarType WeibullDistribution::computeG(const ScalarContainer& values, ScalarTy
 
 	if (counter == 0)
 	{
-		return static_cast<ScalarType>(1.0); //a positive value will make computeG fail
+		return 1.0; //a positive value will make ComputeG fail
 	}
 
-	return static_cast<ScalarType>((p / q - s / counter) * r - 1.0);
+	return (p / q - s / counter) * r - 1.0;
 }
 
-ScalarType WeibullDistribution::findGRoot(const ScalarContainer& values, ScalarType inverseMaxValue) const
+double WeibullDistribution::FindGRoot(const ScalarContainer& values, ScalarType valueShift, double valueRange)
 {
-	ScalarType r = -static_cast<ScalarType>(1.0);
-	ScalarType aMin = 1.0, aMax = 1.0;
-	ScalarType v, vMin, vMax;
-	vMin = vMax = v = computeG(values, aMin, &inverseMaxValue);
+	double r = -1.0;
+	double aMin = 1.0, aMax = 1.0;
+	double v, vMin, vMax;
+	vMin = vMax = v = ComputeG(values, aMin, valueShift, valueRange);
 
-	//find min value for binary search so that computeG(aMin) < 0
+	//find min value for binary search so that ComputeG(aMin) < 0
 	while (vMin > 0 && aMin > ZERO_TOLERANCE)
 	{
 		aMin /= 10;
-		vMin = computeG(values, aMin, &inverseMaxValue);
+		vMin = ComputeG(values, aMin, valueShift, valueRange);
 	}
 
 	if (std::abs(vMin) < ZERO_TOLERANCE)
@@ -338,11 +331,11 @@ ScalarType WeibullDistribution::findGRoot(const ScalarContainer& values, ScalarT
 	else if (vMin > 0)
 		return r; //r = -1 (i.e. problem)
 
-	//find max value for binary search so that computeG(aMax) > 0
+	//find max value for binary search so that ComputeG(aMax) > 0
 	while (vMax < 0 && aMax < 1.0e3)
 	{
 		aMax *= 2; //tends to become huge quickly as we compute x^a!!!!
-		vMax = computeG(values, aMax, &inverseMaxValue);
+		vMax = ComputeG(values, aMax, valueShift, valueRange);
 	}
 
 	if (std::abs(vMax) < ZERO_TOLERANCE)
@@ -350,12 +343,12 @@ ScalarType WeibullDistribution::findGRoot(const ScalarContainer& values, ScalarT
 	else if (vMax < 0)
 		return r; //r = -1 (i.e. problem)
 
-	//binary search to find r so that std::abs(computeG(r)) < ZERO_TOLERANCE
+	//binary search to find r so that std::abs(ComputeG(r)) < ZERO_TOLERANCE
 	while (std::abs(v) * 100 > ZERO_TOLERANCE) //DGM: *100 ?! (can't remember why ;)
 	{
 		r = (aMin + aMax) / 2;
-		ScalarType old_v = v;
-		v = computeG(values, r, &inverseMaxValue);
+		double old_v = v;
+		v = ComputeG(values, r, valueShift, valueRange);
 
 		if (std::abs(old_v - v) < ZERO_TOLERANCE)
 			return r;
@@ -366,8 +359,7 @@ ScalarType WeibullDistribution::findGRoot(const ScalarContainer& values, ScalarT
 			aMax = r;
 	}
 
-	assert(false);
-	return r; //shouldn't happen!
+	return r;
 }
 
 double WeibullDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, int* inputHisto)
@@ -436,7 +428,7 @@ double WeibullDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned 
 
 bool WeibullDistribution::setChi2ClassesPositions(unsigned numberOfClasses)
 {
-	chi2ClassesPositions.clear();
+	chi2ClassesPositions.resize(0);
 
 	if (!isValid() || numberOfClasses < 2)
 		return false;

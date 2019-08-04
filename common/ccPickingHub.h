@@ -21,11 +21,8 @@
 //Local
 #include "ccPickingListener.h"
 
-//Plugins
-#include <ccMainAppInterface.h>
-
 //qCC_gl
-#include <ccGLWidget.h>
+#include <ccGLWindow.h>
 
 //Qt
 #include <QObject>
@@ -35,6 +32,7 @@
 
 class QMdiSubWindow;
 class ccHObject;
+class ccMainAppInterface;
 
 //! Point/triangle picking hub
 class ccPickingHub : public QObject
@@ -88,7 +86,7 @@ public slots:
 
 	void onActiveWindowChanged(QMdiSubWindow*);
 	void onActiveWindowDeleted(QObject*);
-	void processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&);
+	void processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&);
 
 protected:
 

@@ -18,7 +18,7 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccGLFilterPluginInterface.h"
+#include "ccGLPluginInterface.h"
 
 /** Replace 'ExampleGLPlugin' by your own plugin class name throughout and then
 	check 'ExampleGLPlugin.cpp' for more directions.
@@ -31,10 +31,10 @@
 **/
 
 //! Example GL Plugin
-class ExampleGLPlugin : public QObject, public ccGLFilterPluginInterface
+class ExampleGLPlugin : public QObject, public ccGLPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccGLFilterPluginInterface)
+	Q_INTERFACES(ccGLPluginInterface)
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ExampleGL" FILE "info.json")
 	
 public:

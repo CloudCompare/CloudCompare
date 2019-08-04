@@ -17,26 +17,34 @@
 
 #include "ccStereoModeDlg.h"
 
+#include "ui_stereoModeDlg.h"
+
 //system
 #include <cassert>
 
 //combo-box items order
-const int COMBO_INDEX_RED_BLUE  = 0;
-const int COMBO_INDEX_BLUE_RED  = 1;
-const int COMBO_INDEX_RED_CYAN  = 2;
-const int COMBO_INDEX_CYAN_RED  = 3;
-const int COMBO_INDEX_NV_VISION = 4;
-const int COMBO_INDEX_OCULUS    = 5;
+constexpr int COMBO_INDEX_RED_BLUE  = 0;
+constexpr int COMBO_INDEX_BLUE_RED  = 1;
+constexpr int COMBO_INDEX_RED_CYAN  = 2;
+constexpr int COMBO_INDEX_CYAN_RED  = 3;
+constexpr int COMBO_INDEX_NV_VISION = 4;
+constexpr int COMBO_INDEX_OCULUS    = 5;
 
 ccStereoModeDlg::ccStereoModeDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
-	, Ui::StereoModeDialog()
+	, m_ui( new Ui::StereoModeDialog )
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	glassTypeChanged(glassTypeComboBox->currentIndex());
+	glassTypeChanged(m_ui->glassTypeComboBox->currentIndex());
 
-	connect(glassTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(glassTypeChanged(int)));
+	connect(m_ui->glassTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(glassTypeChanged(int)));
+}
+
+ccStereoModeDlg::~ccStereoModeDlg()
+{
+	delete m_ui;
+	m_ui = nullptr;
 }
 
 void ccStereoModeDlg::glassTypeChanged(int index)
@@ -47,13 +55,13 @@ void ccStereoModeDlg::glassTypeChanged(int index)
 	case COMBO_INDEX_RED_CYAN:
 	case COMBO_INDEX_BLUE_RED:
 	case COMBO_INDEX_CYAN_RED:
-		paramsGroupBox->setEnabled(true);
-		warningTextEdit->setVisible(false);
+		m_ui->paramsGroupBox->setEnabled(true);
+		m_ui->warningTextEdit->setVisible(false);
 		break;
 	case COMBO_INDEX_NV_VISION:
-		paramsGroupBox->setEnabled(true);
-		warningTextEdit->setVisible(true);
-		warningTextEdit->setHtml(
+		m_ui->paramsGroupBox->setEnabled(true);
+		m_ui->warningTextEdit->setVisible(true);
+		m_ui->warningTextEdit->setHtml(
 			"To make this mode work properly make sure that:\
 			<ul>\
 			<li>the NVidia Vision IR emitter is plugged and enabled (<i>dim green light</i>)</li>\
@@ -65,9 +73,9 @@ void ccStereoModeDlg::glassTypeChanged(int index)
 			);
 		break;
 	case COMBO_INDEX_OCULUS:
-		paramsGroupBox->setEnabled(false);
-		warningTextEdit->setVisible(true);
-		warningTextEdit->setText(
+		m_ui->paramsGroupBox->setEnabled(false);
+		m_ui->warningTextEdit->setVisible(true);
+		m_ui->warningTextEdit->setText(
 			"To use the Oculus Rift make sure that:\
 			<ul>\
 			<li>the entities units are expressed in <b>meters</b> (<i>use the 'Edit > Scale' tool if necessary</i>)</li>\
@@ -78,8 +86,8 @@ void ccStereoModeDlg::glassTypeChanged(int index)
 		break;
 	default:
 		assert(false);
-		paramsGroupBox->setEnabled(false);
-		warningTextEdit->setVisible(false);
+		m_ui->paramsGroupBox->setEnabled(false);
+		m_ui->warningTextEdit->setVisible(false);
 		break;
 	}
 }
@@ -89,7 +97,7 @@ ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const
 	ccGLWindow::StereoParams params;
 
 	//glass type
-	switch (glassTypeComboBox->currentIndex())
+	switch (m_ui->glassTypeComboBox->currentIndex())
 	{
 	case COMBO_INDEX_RED_BLUE:
 		params.glassType = ccGLWindow::StereoParams::RED_BLUE;
@@ -113,11 +121,11 @@ ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const
 	}
 
 	//focal
-	params.autoFocal = autoFocalCheckBox->isChecked();
-	params.focalDist = focalDoubleSpinBox->value();
+	params.autoFocal = m_ui->autoFocalCheckBox->isChecked();
+	params.focalDist = m_ui->focalDoubleSpinBox->value();
 
 	//eye separation
-	params.eyeSepFactor = eyeSepDoubleSpinBox->value();
+	params.eyeSepFactor = m_ui->eyeSepDoubleSpinBox->value();
 
 	return params;
 }
@@ -128,22 +136,22 @@ void ccStereoModeDlg::setParameters(const ccGLWindow::StereoParams& params)
 	switch (params.glassType)
 	{
 	case ccGLWindow::StereoParams::RED_BLUE:
-		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_RED_BLUE);
+		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_RED_BLUE);
 		break;
 	case ccGLWindow::StereoParams::BLUE_RED:
-		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_BLUE_RED);
+		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_BLUE_RED);
 		break;
 	case ccGLWindow::StereoParams::RED_CYAN:
-		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_RED_CYAN);
+		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_RED_CYAN);
 		break;
 	case ccGLWindow::StereoParams::CYAN_RED:
-		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_CYAN_RED);
+		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_CYAN_RED);
 		break;
 	case ccGLWindow::StereoParams::NVIDIA_VISION:
-		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_NV_VISION);
+		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_NV_VISION);
 		break;
 	case ccGLWindow::StereoParams::OCULUS:
-		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_OCULUS);
+		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_OCULUS);
 		break;
 	default:
 		assert(false);
@@ -151,9 +159,9 @@ void ccStereoModeDlg::setParameters(const ccGLWindow::StereoParams& params)
 	}
 
 	//focal
-	autoFocalCheckBox->setChecked(params.autoFocal);
-	focalDoubleSpinBox->setValue(params.focalDist);
+	m_ui->autoFocalCheckBox->setChecked(params.autoFocal);
+	m_ui->focalDoubleSpinBox->setValue(params.focalDist);
 
 	//eye separation
-	eyeSepDoubleSpinBox->setValue(params.eyeSepFactor);
+	m_ui->eyeSepDoubleSpinBox->setValue(params.eyeSepFactor);
 }

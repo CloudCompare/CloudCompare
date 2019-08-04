@@ -26,7 +26,7 @@
 #endif
 
 //System
-#include <stdint.h>
+#include <cstdint>
 
 /** Versions:
 	V1.0 = prior to 05/04/2012 = old version
@@ -59,8 +59,9 @@
 	v4.6 - 11/03/2016 - Null normal vector code added
 	v4.7 - 12/22/2016 - Return index added to ccWaveform
 	v4.8 - 10/19/2018 - The CC_CAMERA_BIT and CC_QUADRIC_BIT were wrongly defined
+	v4.9 - 03/31/2019 - Point labels can now be picked on meshes
 **/
-const unsigned c_currentDBVersion = 48; //4.8
+const unsigned c_currentDBVersion = 49; //4.9
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);
@@ -100,7 +101,7 @@ unsigned ccObject::GetLastUniqueID()
 	return s_uniqueIDGenerator ? s_uniqueIDGenerator->getLast() : 0;
 }
 
-ccObject::ccObject(QString name)
+ccObject::ccObject(const QString& name)
 	: m_name(name.isEmpty() ? "unnamed" : name)
 	, m_flags(CC_ENABLED)
 	, m_uniqueID(GetNextUniqueID())
@@ -214,17 +215,17 @@ CC_CLASS_ENUM ccObject::ReadClassIDFromFile(QFile& in, short dataVersion)
 	return classID;
 }
 
-QVariant ccObject::getMetaData(QString key) const
+QVariant ccObject::getMetaData(const QString& key) const
 {
 	return m_metaData.value(key,QVariant());
 }
 
-bool ccObject::removeMetaData(QString key)
+bool ccObject::removeMetaData(const QString& key)
 {
 	return m_metaData.remove(key) != 0;
 }
 
-void ccObject::setMetaData(QString key, QVariant data)
+void ccObject::setMetaData(const QString& key, const QVariant& data)
 {
 	m_metaData.insert(key,data);
 }
@@ -240,7 +241,7 @@ void ccObject::setMetaData(const QVariantMap& dataset, bool overwrite/*=false*/)
 	}
 }
 
-bool ccObject::hasMetaData(QString key) const
+bool ccObject::hasMetaData(const QString& key) const
 {
 	return m_metaData.contains(key);
 }

@@ -176,7 +176,7 @@ public:
 	//! Default constructor
 	/** \param name object name (optional)
 	**/
-	ccObject(QString name = QString());
+	ccObject(const QString& name = QString());
 
 	//! Copy constructor
 	ccObject(const ccObject& object);
@@ -230,7 +230,6 @@ public:
 	virtual inline void setLocked(bool state) { setFlagState(CC_LOCKED,state); }
 
 	//shortcuts
-	inline bool isGroup() const { return (getClassID() & CC_GROUP_BIT) != 0; }
 	inline bool isLeaf() const {return (getClassID() & CC_LEAF_BIT) != 0; }
 	inline bool isCustom() const {return (getClassID() & CC_CUSTOM_BIT) != 0; }
 	inline bool isHierarchy() const { return (getClassID() & CC_HIERARCH_BIT) != 0; }
@@ -261,19 +260,19 @@ public:
 	/** \param key meta data unique identifier (case sensitive)
 		\return meta data (if any) or an invalid QVariant
 	**/
-	QVariant getMetaData(QString key) const;
+	QVariant getMetaData(const QString& key) const;
 
 	//! Removes a given associated meta-data
 	/** \param key meta-data unique identifier (case sensitive)
 		\return success
 	**/
-	bool removeMetaData(QString key);
+	bool removeMetaData(const QString& key);
 
 	//! Sets a meta-data element
 	/** \param key meta-data unique identifier (case sensitive)
 		\param data data
 	**/
-	void setMetaData(QString key, QVariant data);
+	void setMetaData(const QString& key, const QVariant& data);
 
 	//! Sets several meta-data elements at a time
 	/** \param dataset meta-data set
@@ -285,7 +284,7 @@ public:
 	/** \param key meta-data unique identifier (case sensitive)
 		\return whether the element exists or not
 	**/
-	bool hasMetaData(QString key) const;
+	bool hasMetaData(const QString& key) const;
 
 	//! Returns meta-data map (const only)
 	const QVariantMap& metaData() const { return m_metaData; }

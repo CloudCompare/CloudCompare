@@ -37,8 +37,8 @@
 
 
 ExampleIOPlugin::ExampleIOPlugin( QObject* parent )
-	: QObject( parent )
-	, ccIOFilterPluginInterface( ":/CC/plugin/ExampleIOPlugin/info.json" )
+    : QObject( parent )
+    , ccIOPluginInterface( ":/CC/plugin/ExampleIOPlugin/info.json" )
 {
 }
 
@@ -47,10 +47,10 @@ void ExampleIOPlugin::registerCommands( ccCommandLineInterface *cmd )
 	// If you want to register this plugin for the command line, create a
 	// ccCommandLineInterface::Command and add it here. e.g.:
 	//
-	// cmd->registerCommand( ccCommandLineInterface::Command::Shared( new FooCommand ) );	
+	// cmd->registerCommand( ccCommandLineInterface::Command::Shared( new FooCommand ) );
 }
 
-QVector<FileIOFilter::Shared> ExampleIOPlugin::getFilters()
+ccIOPluginInterface::FilterList ExampleIOPlugin::getFilters()
 {
 	return {
 		FileIOFilter::Shared( new FooFilter ),

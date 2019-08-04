@@ -196,11 +196,11 @@ DgmOctree::DgmOctree(GenericIndexedCloudPersist* cloud)
 void DgmOctree::clear()
 {
 	//reset internal tables
-	m_dimMin = m_pointsMin = m_dimMax = m_pointsMax = CCVector3(0,0,0);
+	m_dimMin = m_pointsMin = m_dimMax = m_pointsMax = CCVector3(0, 0, 0);
 
 	m_numberOfProjectedPoints = 0;
 	m_nearestPow2 = 0;
-	m_thePointsAndTheirCellCodes.clear();
+	m_thePointsAndTheirCellCodes.resize(0);
 
 	memset(m_fillIndexes, 0, sizeof(int)*(MAX_OCTREE_LEVEL + 1) * 6);
 	memset(m_cellSize, 0, sizeof(PointCoordinateType)*(MAX_OCTREE_LEVEL + 2));
@@ -344,7 +344,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 
 		if (!nprogress.oneStep())
 		{
-			m_thePointsAndTheirCellCodes.clear();
+			m_thePointsAndTheirCellCodes.resize(0);
 			m_numberOfProjectedPoints = 0;
 			if (progressCb)
 			{
@@ -742,7 +742,7 @@ unsigned DgmOctree::getCellIndex(CellCode truncatedCellCode, unsigned char bitDe
 }
 #endif
 
-unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
+unsigned DgmOctree::findPointNeighbourhood(	const CCVector3* queryPoint,
 											ReferenceCloud* Yk,
 											unsigned maxNumberOfNeighbors,
 											unsigned char level,
@@ -766,6 +766,12 @@ unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
 	if (maxNumberOfNeighbors == 1)
 	{
 		maxSquareDist = findTheNearestNeighborStartingFromCell(nNSS);
+
+		if (finalNeighbourhoodSize)
+		{
+			*finalNeighbourhoodSize = nNSS.alreadyVisitedNeighbourhoodSize;
+		}
+
 		if (maxSquareDist >= 0)
 		{
 			Yk->addPointIndex(nNSS.theNearestPointIndex);
@@ -2431,61 +2437,64 @@ unsigned char DgmOctree::findBestLevelForComparisonWithOctree(const DgmOctree* t
 	unsigned ptsA = getNumberOfProjectedPoints();
 	unsigned ptsB = theOtherOctree->getNumberOfProjectedPoints();
 
-	int maxOctreeLevel = MAX_OCTREE_LEVEL;
+	unsigned char maxOctreeLevel = MAX_OCTREE_LEVEL;
+	
 	if (std::min(ptsA,ptsB) < 16)
-		maxOctreeLevel = std::min(maxOctreeLevel, 5); //very small clouds
+		maxOctreeLevel = std::min(maxOctreeLevel, static_cast<unsigned char>(5)); //very small clouds
 	else if (std::max(ptsA,ptsB) < 2000000)
-		maxOctreeLevel = std::min(maxOctreeLevel, 10); //average size clouds
+		maxOctreeLevel = std::min(maxOctreeLevel, static_cast<unsigned char>(10)); //average size clouds
 
-	double estimatedTime[MAX_OCTREE_LEVEL];
-	estimatedTime[0] = 0.0;
-	int bestLevel = 1;
+	double estimatedTime[MAX_OCTREE_LEVEL]{};
+	unsigned char bestLevel = 1;
+	
 	for (int i=1; i<maxOctreeLevel; ++i) //warning: i >= 1
 	{
-		int cellsA,cellsB,diffA,diffB;
-		diff(i,m_thePointsAndTheirCellCodes,theOtherOctree->m_thePointsAndTheirCellCodes,diffA,diffB,cellsA,cellsB);
+		int diffA = 0;
+		int diffB = 0;
+		int cellsA = 0;
+		int cellsB = 0;
+		
+		bool success = diff( i,
+							 m_thePointsAndTheirCellCodes, theOtherOctree->m_thePointsAndTheirCellCodes,
+							 diffA, diffB,
+							 cellsA, cellsB );
 
+		if ( !success )
+		{
+			continue;
+		}
+		
 		//we use a linear model for prediction
 		estimatedTime[i] = ((static_cast<double>(ptsA)*ptsB) / cellsB) * 0.001 + diffA;
 
 		if (estimatedTime[i] < estimatedTime[bestLevel])
+		{
 			bestLevel = i;
+		}
 	}
 
-	return static_cast<unsigned char>(bestLevel);
+	return bestLevel;
 }
 
 unsigned char DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const
 {
-	double density = 0, prevDensity = 0;
-
-	unsigned char level = MAX_OCTREE_LEVEL;
-	for (level = MAX_OCTREE_LEVEL; level > 0; --level)
+	for (unsigned char level = MAX_OCTREE_LEVEL; level > 0; --level)
 	{
-		prevDensity = density;
-		density = static_cast<double>(m_numberOfProjectedPoints) / getCellNumber(level);
-		if (density >= indicativeNumberOfPointsPerCell)
+		if (m_averageCellPopulation[level] > indicativeNumberOfPointsPerCell) //density can only increase. If it's above the target, no need to look further
 		{
-			break;
+			//we take the closest match between this level and the previous one
+			if (level == MAX_OCTREE_LEVEL || (m_averageCellPopulation[level] - indicativeNumberOfPointsPerCell <= indicativeNumberOfPointsPerCell - m_averageCellPopulation[level + 1])) //by definition "m_averageCellPopulation[level + 1] <= indicativeNumberOfPointsPerCell"
+			{
+				return level;
+			}
+			else
+			{
+				return level + 1;
+			}
 		}
 	}
 
-	if (level < MAX_OCTREE_LEVEL)
-	{
-		if (level == 0)
-		{
-			prevDensity = density;
-			density = static_cast<double>(m_numberOfProjectedPoints);
-		}
-
-		//we take the closest match
-		if (density - indicativeNumberOfPointsPerCell > indicativeNumberOfPointsPerCell - prevDensity)
-		{
-			++level;
-		}
-	}
-
-	return level;
+	return 1;
 }
 
 unsigned char DgmOctree::findBestLevelForAGivenCellNumber(unsigned indicativeNumberOfCells) const
@@ -2707,10 +2716,18 @@ void DgmOctree::diff(const cellCodesContainer& codesA, const cellCodesContainer&
 		diffB.push_back(*pB++);
 }
 
-void DgmOctree::diff(unsigned char octreeLevel, const cellsContainer &codesA, const cellsContainer &codesB, int &diffA, int &diffB, int &cellsA, int &cellsB) const
+bool DgmOctree::diff(unsigned char octreeLevel, const cellsContainer &codesA, const cellsContainer &codesB, int &diffA, int &diffB, int &cellsA, int &cellsB) const
 {
-	if (codesA.empty() && codesB.empty()) return;
+	diffA = 0;
+	diffB = 0;
+	cellsA = 0;
+	cellsB = 0;
 
+	if (codesA.empty() && codesB.empty())
+	{
+		return false;
+	}
+	
 	cellsContainer::const_iterator pA = codesA.begin();
 	cellsContainer::const_iterator pB = codesB.begin();
 
@@ -2722,9 +2739,6 @@ void DgmOctree::diff(unsigned char octreeLevel, const cellsContainer &codesA, co
 
 	CellCode currentCodeA = 0;
 	CellCode currentCodeB = 0;
-
-	diffA = diffB = 0;
-	cellsA = cellsB = 0;
 
 	//cell codes should already be sorted!
 	while ((pA != codesA.end()) && (pB != codesB.end()))
@@ -2768,6 +2782,8 @@ void DgmOctree::diff(unsigned char octreeLevel, const cellsContainer &codesA, co
 		while ((pB != codesB.end()) && ((currentCodeB = (pB->theCode >> bitDec)) == predCodeB)) ++pB;
 		predCodeB = currentCodeB;
 	}
+	
+	return true;
 }
 
 int DgmOctree::extractCCs(unsigned char level, bool sixConnexity, GenericProgressCallback* progressCb) const
@@ -3094,8 +3110,8 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	}
 
 	//release some memory
-	slice.clear();
-	oldSlice.clear();
+	slice.resize(0);
+	oldSlice.resize(0);
 
 	if (progressCb)
 	{
@@ -3219,10 +3235,10 @@ DgmOctree::octreeCell::octreeCell(const DgmOctree* _parentOctree)
 
 DgmOctree::octreeCell::octreeCell(const octreeCell& cell)
 	: parentOctree(cell.parentOctree)
-	, level(cell.level)
 	, truncatedCode(cell.truncatedCode)
 	, index(cell.index)
 	, points(nullptr)
+	, level(cell.level)
 {
 	//copy constructor shouldn't be used (we can't properly share the 'points' reference)
 	assert(false);
@@ -3230,8 +3246,7 @@ DgmOctree::octreeCell::octreeCell(const octreeCell& cell)
 
 DgmOctree::octreeCell::~octreeCell()
 {
-	if (points)
-		delete points;
+	delete points;
 }
 
 #ifdef ENABLE_MT_OCTREE
@@ -4104,7 +4119,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 
 		//if something went wrong, we clear everything and return 0!
 		if (!s_cellFunc_MT_success)
-			cells.clear();
+			cells.resize(0);
 
 		return static_cast<unsigned>(cells.size());
 	}
@@ -4138,7 +4153,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 	if (!AABB<PointCoordinateType>(m_dimMin - margin, m_dimMax + margin).intersects(ray))
 	{
 		//no intersection
-		output.clear();
+		output.resize(0);
 		return true;
 	}
 

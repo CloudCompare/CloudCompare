@@ -73,6 +73,7 @@ public:
 		return list;
 	}
 	
+	QString	m_IID;
 	QJsonDocument	doc;
 };
 
@@ -112,6 +113,11 @@ ccDefaultPluginInterface::~ccDefaultPluginInterface()
 	delete m_data;
 }
 
+const QString &ccDefaultPluginInterface::IID() const
+{
+	return m_data->m_IID;
+}
+
 bool ccDefaultPluginInterface::isCore() const
 {	
 	return m_data->doc.object().value( "core" ).toBool();
@@ -145,4 +151,9 @@ ccPluginInterface::ContactList ccDefaultPluginInterface::getAuthors() const
 ccPluginInterface::ContactList ccDefaultPluginInterface::getMaintainers() const
 {
 	return m_data->contacts( "maintainers" );
+}
+
+void ccDefaultPluginInterface::setIID(const QString &iid)
+{
+	m_data->m_IID = iid;
 }

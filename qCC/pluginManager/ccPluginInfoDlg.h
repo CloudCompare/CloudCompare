@@ -21,6 +21,8 @@
 #include <QList>
 
 class QModelIndex;
+class QSortFilterProxyModel;
+class QStandardItem;
 class QStandardItemModel;
 
 class ccPluginInterface;
@@ -35,7 +37,7 @@ class ccPluginInfoDlg : public QDialog
 	
 public:
 	explicit ccPluginInfoDlg( QWidget *parent = nullptr );
-	~ccPluginInfoDlg();
+	~ccPluginInfoDlg() override;
 	
 	void	setPluginPaths( const QStringList &pluginPaths );
 	void	setPluginList( const QList<ccPluginInterface *> &pluginList );
@@ -45,12 +47,17 @@ private:
 		PLUGIN_PTR = Qt::UserRole + 1
 	};
 	
+	const ccPluginInterface* pluginFromItemData( const QStandardItem* item ) const;
+	
 	void	selectionChanged( const QModelIndex &current, const QModelIndex &previous );
+	void	itemChanged( QStandardItem* item );
+	
 	void	updatePluginInfo( const ccPluginInterface *plugin );
 	
 	Ui::ccPluginInfoDlg *m_UI;
 	
-	QStandardItemModel	*m_ItemModel;
+	QSortFilterProxyModel	*m_ProxyModel;
+	QStandardItemModel		*m_ItemModel;
 };
 
 #endif

@@ -157,12 +157,10 @@ namespace CCLib
 			return m_scalarFields[m_currentOutScalarFieldIndex]->getValue(pointIndex);
 		}
 
-		inline const CCVector3* getPoint(unsigned index) override { return point(index); }
-		inline const CCVector3* getPoint(unsigned index) const { return point(index); }
+		inline const CCVector3* getPoint(unsigned index) const override { return point(index); }
 		inline void getPoint(unsigned index, CCVector3& P) const override { P = *point(index); }
 
-		inline const CCVector3* getPointPersistentPtr(unsigned index) override { return point(index); }
-		inline const CCVector3* getPointPersistentPtr(unsigned index) const { return point(index); }
+		inline const CCVector3* getPointPersistentPtr(unsigned index) const override { return point(index); }
 
 		//! Resizes the point database
 		/** The cloud database is resized with the specified size. If the new size
@@ -243,7 +241,7 @@ namespace CCLib
 		**/
 		void reset()
 		{
-			m_points.clear();
+			m_points.resize(0);
 			deleteAllScalarFields();
 			placeIteratorAtBeginning();
 			invalidateBoundingBox();

@@ -115,22 +115,20 @@ namespace CCLib
 		**/
 		void invalidate()
 		{
-			if (m_values)
-			{
-				for (unsigned i = 0; i < m_matrixSize; i++)
-					if (m_values[i])
-						delete[] m_values[i];
-				delete[] m_values;
-				m_values = nullptr;
-			}
+			delete [] m_underlyingData;
+			m_underlyingData = nullptr;
+			
+			delete [] m_values;
+			m_values = nullptr;
 
-			m_matrixSize = matrixSquareSize = 0;
+			m_matrixSize = 0;
+			matrixSquareSize = 0;
 		}
 
 		//! The matrix rows
 		/** public for easy/fast access
 		**/
-		Scalar** m_values;
+		Scalar** m_values = nullptr;
 
 		//! Returns pointer to matrix row
 		inline Scalar* row(unsigned index) { return m_values[index]; }
@@ -651,8 +649,7 @@ namespace CCLib
 			M16d[15] = 1.0;
 		}
 
-	protected:
-
+	private:
 		//! Internal initialization
 		/** \return initilization success
 		**/
@@ -661,36 +658,24 @@ namespace CCLib
 			m_matrixSize = size;
 			matrixSquareSize = m_matrixSize*m_matrixSize;
 
-			m_values = nullptr;
-
-			if (size != 0)
+			if ( size == 0 )
 			{
-				m_values = new Scalar*[m_matrixSize];
-				if (m_values)
-				{
-					memset(m_values, 0, sizeof(Scalar*) * m_matrixSize);
-					for (unsigned i = 0; i < m_matrixSize; i++)
-					{
-						m_values[i] = new Scalar[m_matrixSize];
-						if (m_values[i])
-						{
-							memset(m_values[i], 0, sizeof(Scalar)*m_matrixSize);
-						}
-						else
-						{
-							//not enough memory!
-							invalidate();
-							return false;
-						}
-					}
-				}
-				else
-				{
-					//not enough memory!
-					return false;
-				}
+				return true;
 			}
-
+			
+			m_values = new Scalar*[m_matrixSize]{};
+			m_underlyingData = new Scalar[matrixSquareSize]{};
+			
+			if ( (m_values == nullptr) || (m_underlyingData == nullptr) )
+			{
+				return false;
+			}
+									
+			for (unsigned i = 0; i < m_matrixSize; i++)
+			{
+				m_values[i] = m_underlyingData + (i * m_matrixSize);
+			}			
+			
 			return true;
 		}
 
@@ -734,6 +719,9 @@ namespace CCLib
 
 		//! Matrix square-size
 		unsigned matrixSquareSize;
+		
+		//! Stores the actual data, indexed by m_values
+		Scalar	*m_underlyingData = nullptr;
 	};
 
 	//! Default CC square matrix type (PointCoordinateType)

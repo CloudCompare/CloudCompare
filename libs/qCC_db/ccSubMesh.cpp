@@ -101,10 +101,30 @@ bool ccSubMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVect
 	return false;
 }
 
+bool ccSubMesh::interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N)
+{
+	if (m_associatedMesh && triIndex < size())
+		return m_associatedMesh->interpolateNormalsBC(getTriGlobalIndex(triIndex), w, N);
+
+	//shouldn't happen
+	assert(false);
+	return false;
+}
+
 bool ccSubMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb)
 {
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->interpolateColors(getTriGlobalIndex(triIndex), P, rgb);
+
+	//shouldn't happen
+	assert(false);
+	return false;
+}
+
+bool ccSubMesh::interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& rgb)
+{
+	if (m_associatedMesh && triIndex < size())
+		return m_associatedMesh->interpolateColorsBC(getTriGlobalIndex(triIndex), w, rgb);
 
 	//shouldn't happen
 	assert(false);

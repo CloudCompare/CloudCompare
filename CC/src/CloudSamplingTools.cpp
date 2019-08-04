@@ -19,8 +19,8 @@
 #include <CloudSamplingTools.h>
 
 //local
-#include <DistanceComputationTools.h>
 #include <DgmOctreeReferenceCloud.h>
+#include <DistanceComputationTools.h>
 #include <GenericProgressCallback.h>
 #include <Neighbourhood.h>
 #include <PointCloud.h>
@@ -97,11 +97,11 @@ PointCloud* CloudSamplingTools::resampleCloudWithOctreeAtLevel(GenericIndexedClo
 										reinterpret_cast<void*>(&resamplingMethod) };
 
 	if (octree->executeFunctionForAllCellsAtLevel(	octreeLevel,
-														&resampleCellAtLevel,
-														additionalParameters,
-														false, //the process is so simple that MT is slower!
-														progressCb,
-														"Cloud Resampling") == 0)
+													&resampleCellAtLevel,
+													additionalParameters,
+													false, //the process is so simple that MT is slower!
+													progressCb,
+													"Cloud Resampling") == 0)
 	{
 		//something went wrong
 		delete cloud;
@@ -572,7 +572,7 @@ ReferenceCloud* CloudSamplingTools::sorFilter(	GenericIndexedCloudPersist* input
 	if (!inputOctree)
 	{
 		delete octree;
-		octree = 0;
+		octree = nullptr;
 	}
 
 	return filteredCloud;
@@ -819,7 +819,9 @@ bool CloudSamplingTools::applyNoiseFilterAtLevel(	const DgmOctree::octreeCell& c
 				double d = std::abs(CCLib::DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint, lsPlane));
 
 				if (d <= maxD)
+				{
 					cloud->addPointIndex(globalIndex);
+				}
 			}
 			else
 			{

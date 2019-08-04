@@ -22,14 +22,140 @@
 #include "ccMaterial.h"
 
 //Qt
-#include <QOpenGLTexture>
+#include <QFileSystemWatcher>
+#include <QFileInfo>
 #include <QUuid>
 
-//Textures DB
-static QMap<QString, QImage> s_textureDB;
-static QMap<QString, QSharedPointer<QOpenGLTexture>> s_openGLTextureDB;
+class ccMaterialDB : public QObject
+{
+public:
 
-ccMaterial::ccMaterial(QString name)
+	ccMaterialDB()
+		: m_initialized(false)
+	{}
+
+	void init()
+	{
+		if (!m_initialized)
+		{
+			connect(&m_watcher, &QFileSystemWatcher::fileChanged, this, &ccMaterialDB::onFileChanged);
+			m_initialized = true;
+		}
+	}
+
+	void onFileChanged(const QString& filename)
+	{
+		if (!m_textures.contains(filename))
+		{
+			assert(false);
+			m_watcher.removePath(filename);
+			return;
+		}
+		
+		if (QFileInfo(filename).exists()) //make sure the image still exists
+		{
+			ccLog::Warning(tr("File '%1' has been updated").arg(filename));
+			QImage image;
+			if (image.load(filename))
+			{
+				//update the texture
+				m_textures[filename].image = image;
+				openGLTextures.remove(filename);
+			}
+			else
+			{
+				ccLog::Warning(tr("Failed to load the new version of the file"));
+			}
+		}
+		else
+		{
+			ccLog::Warning(tr("File '%1' has been deleted or renamed").arg(filename));
+		}
+	}
+
+	inline bool hasTexture(const QString& filename) const
+	{
+		return m_textures.contains(filename);
+	}
+
+	inline QImage getTexture(const QString& filename) const
+	{
+		return m_textures.contains(filename) ? m_textures[filename].image : QImage();
+	}
+
+	void addTexture(const QString& filename, const QImage& image)
+	{
+		if (!m_initialized)
+			init();
+
+		if (m_textures.contains(filename))
+		{
+			++m_textures[filename].counter;
+		}
+		else
+		{
+			m_textures[filename].image = image;
+			m_textures[filename].counter = 1;
+			m_watcher.addPath(filename);
+		}
+	}
+
+	void increaseTextureCounter(const QString& filename)
+	{
+		if (m_textures.contains(filename))
+		{
+			assert(m_textures[filename].counter >= 1);
+			++m_textures[filename].counter;
+		}
+		else
+		{
+			assert(false);
+		}
+	}
+
+	void releaseTexture(const QString& filename)
+	{
+		if (m_textures.contains(filename))
+		{
+			if (m_textures[filename].counter > 1)
+			{
+				--m_textures[filename].counter;
+			}
+			else
+			{
+				removeTexture(filename);
+			}
+		}
+	}
+
+	void removeTexture(const QString& filename)
+	{
+		m_textures.remove(filename);
+		m_watcher.removePath(filename);
+
+		assert(QOpenGLContext::currentContext());
+		openGLTextures.remove(filename);
+	}
+
+	QMap<QString, QSharedPointer<QOpenGLTexture> > openGLTextures;
+
+protected:
+
+	struct TextureInfo
+	{
+		QImage image;
+		unsigned counter = 0;
+	};
+
+	bool m_initialized;
+	QFileSystemWatcher m_watcher;
+	QMap<QString, TextureInfo> m_textures;
+};
+
+//Textures DB
+static ccMaterialDB s_materialDB;
+
+ccMaterial::ccMaterial(const QString& name)
 	: m_name(name)
 	, m_uniqueID(QUuid::createUuid().toString())
 	, m_diffuseFront(ccColor::bright)
@@ -37,6 +163,8 @@ ccMaterial::ccMaterial(QString name)
 	, m_ambient(ccColor::night)
 	, m_specular(ccColor::night)
 	, m_emission(ccColor::night)
+	, m_texMinificationFilter(QOpenGLTexture::Nearest)
+	, m_texMagnificationFilter(QOpenGLTexture::Linear)
 {
 	setShininess(50.0);
 };
@@ -52,8 +180,16 @@ ccMaterial::ccMaterial(const ccMaterial& mtl)
 	, m_emission(mtl.m_emission)
 	, m_shininessFront(mtl.m_shininessFront)
 	, m_shininessBack(mtl.m_shininessFront)
+	, m_texMinificationFilter(mtl.m_texMinificationFilter)
+	, m_texMagnificationFilter(mtl.m_texMagnificationFilter)
 {
 }
+
+ccMaterial::~ccMaterial()
+{
+	releaseTexture();
+}
+
 
 void ccMaterial::setDiffuse(const ccColor::Rgbaf& color)
 {
@@ -104,7 +240,7 @@ void ccMaterial::applyGL(const QOpenGLContext* context, bool lightEnabled, bool 
 	}
 }
 
-bool ccMaterial::loadAndSetTexture(QString absoluteFilename)
+bool ccMaterial::loadAndSetTexture(const QString& absoluteFilename)
 {
 	if (absoluteFilename.isEmpty())
 	{
@@ -113,10 +249,11 @@ bool ccMaterial::loadAndSetTexture(QString absoluteFilename)
 	}
 	ccLog::PrintDebug(QString("[ccMaterial::loadAndSetTexture] absolute filename = %1").arg(absoluteFilename));
 
-	if (s_textureDB.contains(absoluteFilename))
+	if (s_materialDB.hasTexture(absoluteFilename))
 	{
 		//if the image is already in memory, we simply update the texture filename for this amterial
 		m_textureFilename = absoluteFilename;
+		s_materialDB.increaseTextureCounter(absoluteFilename);
 	}
 	else
 	{
@@ -144,19 +281,21 @@ void ccMaterial::setTexture(QImage image, QString absoluteFilename/*=QString()*/
 	{
 		//if the user hasn't provided any filename, we generate a fake one
 		absoluteFilename = QString("tex_%1.jpg").arg(m_uniqueID);
-		assert(!s_textureDB.contains(absoluteFilename));
+		assert(!s_materialDB.hasTexture(absoluteFilename));
 	}
 	else
 	{
 		//if the texture has already been loaded
-		if (s_textureDB.contains(absoluteFilename))
+		if (s_materialDB.hasTexture(absoluteFilename))
 		{
 			//check that the size is compatible at least
-			if (s_textureDB[absoluteFilename].size() != image.size())
+			if (s_materialDB.getTexture(absoluteFilename).size() != image.size())
 			{
+				assert(false); //shouldn't happen anymore
 				ccLog::Warning(QString("[ccMaterial] A texture with the same name (%1) but with a different size has already been loaded!").arg(absoluteFilename));
 			}
 			m_textureFilename = absoluteFilename;
+			s_materialDB.increaseTextureCounter(absoluteFilename);
 			return;
 		}
 	}
@@ -164,12 +303,12 @@ void ccMaterial::setTexture(QImage image, QString absoluteFilename/*=QString()*/
 	m_textureFilename = absoluteFilename;
 
 	//insert image into DB if necessary
-	s_textureDB[m_textureFilename] = mirrorImage ? image.mirrored() : image;
+	s_materialDB.addTexture(m_textureFilename, mirrorImage ? image.mirrored() : image);
 }
 
 const QImage ccMaterial::getTexture() const
 {
-	return s_textureDB[m_textureFilename];
+	return s_materialDB.getTexture(m_textureFilename);
 }
 
 GLuint ccMaterial::getTextureID() const
@@ -181,16 +320,21 @@ GLuint ccMaterial::getTextureID() const
 		{
 			return 0;
 		}
-		QSharedPointer<QOpenGLTexture> tex = s_openGLTextureDB[m_textureFilename];
+		QSharedPointer<QOpenGLTexture> tex;
+		if (s_materialDB.openGLTextures.contains(m_textureFilename))
+		{
+			tex = s_materialDB.openGLTextures[m_textureFilename];
+		}
+
 		if (!tex)
 		{
 			tex = QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target2D);
 			tex->setAutoMipMapGenerationEnabled(false);
-			tex->setMinMagFilters(QOpenGLTexture::Nearest, QOpenGLTexture::Linear);
+			tex->setMinMagFilters(m_texMinificationFilter, m_texMagnificationFilter);
 			tex->setFormat(QOpenGLTexture::RGB8_UNorm);
 			tex->setData(getTexture(), QOpenGLTexture::DontGenerateMipMaps);
 			tex->create();
-			s_openGLTextureDB[m_textureFilename] = tex;
+			s_materialDB.openGLTextures[m_textureFilename] = tex;
 		}
 		return tex->textureId();
 	}
@@ -198,12 +342,11 @@ GLuint ccMaterial::getTextureID() const
 	{
 		return 0;
 	}
-
 }
 
 bool ccMaterial::hasTexture() const
 {
-	return m_textureFilename.isEmpty() ? false : !s_textureDB[m_textureFilename].isNull();
+	return m_textureFilename.isEmpty() ? false : s_materialDB.hasTexture(m_textureFilename) && !s_materialDB.getTexture(m_textureFilename).isNull();
 }
 
 void ccMaterial::MakeLightsNeutral(const QOpenGLContext* context)
@@ -217,8 +360,8 @@ void ccMaterial::MakeLightsNeutral(const QOpenGLContext* context)
 
 	GLint maxLightCount;
 	glFunc->glGetIntegerv(GL_MAX_LIGHTS, &maxLightCount);
-	
-	for (int i=0; i<maxLightCount; ++i)
+
+	for (int i = 0; i < maxLightCount; ++i)
 	{
 		if (glFunc->glIsEnabled(GL_LIGHT0 + i))
 		{
@@ -241,14 +384,14 @@ void ccMaterial::MakeLightsNeutral(const QOpenGLContext* context)
 	}
 }
 
-QImage ccMaterial::GetTexture(QString absoluteFilename)
+QImage ccMaterial::GetTexture(const QString& absoluteFilename)
 {
-	return s_textureDB[absoluteFilename];
+	return s_materialDB.getTexture(absoluteFilename);
 }
 
-void ccMaterial::AddTexture(QImage image, QString absoluteFilename)
+void ccMaterial::AddTexture(QImage image, const QString& absoluteFilename)
 {
-	s_textureDB[absoluteFilename] = image;
+	s_materialDB.addTexture(absoluteFilename, image);
 }
 
 void ccMaterial::ReleaseTextures()
@@ -259,22 +402,16 @@ void ccMaterial::ReleaseTextures()
 		return;
 	}
 
-	s_openGLTextureDB.clear();
+	s_materialDB.openGLTextures.clear();
 }
 
 void ccMaterial::releaseTexture()
 {
-	if (m_textureFilename.isEmpty())
+	if (!m_textureFilename.isEmpty())
 	{
-		//nothing to do
-		return;
+		s_materialDB.releaseTexture(m_textureFilename);
+		m_textureFilename.clear();
 	}
-
-	assert(QOpenGLContext::currentContext());
-
-	s_textureDB.remove(m_textureFilename);
-	s_openGLTextureDB.remove(m_textureFilename);
-	m_textureFilename.clear();
 }
 
 bool ccMaterial::toFile(QFile& out) const
@@ -357,4 +494,20 @@ bool ccMaterial::compare(const ccMaterial& mtl) const
 	}
 
 	return true;
+}
+
+void ccMaterial::setTextureMinMagFilters(QOpenGLTexture::Filter minificationFilter, QOpenGLTexture::Filter magnificationFilter)
+{
+	if (	minificationFilter  != m_texMinificationFilter
+		||	magnificationFilter != m_texMagnificationFilter)
+	{
+		m_texMinificationFilter = minificationFilter;
+		m_texMagnificationFilter = magnificationFilter;
+
+		if (!m_textureFilename.isEmpty() && s_materialDB.openGLTextures.contains(m_textureFilename))
+		{
+			//remove the existing texture (if any) so that it's initialized again next time
+			s_materialDB.openGLTextures.remove(m_textureFilename);
+		}
+	}
 }

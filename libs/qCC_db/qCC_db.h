@@ -16,23 +16,15 @@
 //#                                                                        #
 //##########################################################################
 
-#ifdef QCC_DB_USE_AS_DLL
+#ifndef CC_DB_HEADER
+#define CC_DB_HEADER
 
-// The following ifdef block is the standard way of creating macros which make exporting
-// from a DLL simpler. All files within this DLL are compiled with the QCC_DB_LIB_EXPORTS
-// symbol defined on the command line. this symbol should not be defined on any project
-// that uses this DLL. This way any other project whose source files include this file see
-// QCC_DB_LIB_API functions as being imported from a DLL, whereas this DLL sees symbols
-// defined with this macro as being exported.
-#ifdef QCC_DB_LIB_EXPORTS
+#include <QtCore/QtGlobal>
 
-#define QCC_DB_LIB_API __declspec(dllexport)
-#else //NOT QCC_DB_LIB_EXPORTS
-#define QCC_DB_LIB_API __declspec(dllimport)
-#endif //NOT QCC_DB_LIB_EXPORTS
+#if defined( QCC_DB_LIBRARY_BUILD )
+#  define QCC_DB_LIB_API Q_DECL_EXPORT
+#else
+#  define QCC_DB_LIB_API Q_DECL_IMPORT
+#endif
 
-#else //NOT QCC_DB_USE_AS_DLL
-
-#define QCC_DB_LIB_API
-
-#endif //NOT QCC_DB_USE_AS_DLL
+#endif //CC_DB_HEADER

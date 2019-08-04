@@ -17,7 +17,6 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccColorScale.h"
 #include "ccMesh.h"
 
 class QWidget;

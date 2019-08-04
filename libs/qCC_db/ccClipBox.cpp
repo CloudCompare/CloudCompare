@@ -318,7 +318,11 @@ bool ccClipBox::addAssociatedEntity(ccHObject* entity)
 {
 	m_entityContainer.addChild(entity, DP_NONE); //no dependency!
 
-	reset();
+	//no need to reset the clipping box if the entity has not a valid bounding-box
+	if (entity->getBB_recursive().isValid())
+	{
+		reset();
+	}
 
 	return true;
 }
@@ -658,7 +662,7 @@ ccBBox ccClipBox::getOwnBB(bool withGLFeatures/*=false*/)
 	return bbox;
 }
 
-PointCoordinateType ccClipBox::computeArrowsScale()
+PointCoordinateType ccClipBox::computeArrowsScale() const
 {
 	PointCoordinateType scale = m_box.getDiagNorm() / 10;
 

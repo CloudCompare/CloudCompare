@@ -62,8 +62,8 @@ public:
 											unsigned numberOfClasses,
 											unsigned &finalNumberOfClasses,
 											bool noClassCompression = false,
-											ScalarType* histoMin = nullptr,
-											ScalarType* histoMax = nullptr,
+											const ScalarType* histoMin = nullptr,
+											const ScalarType* histoMax = nullptr,
 											unsigned* histoValues = nullptr,
 											double* npis = nullptr);
 

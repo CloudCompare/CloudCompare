@@ -29,22 +29,26 @@ class ccDefaultPluginData;
 class ccDefaultPluginInterface : public ccPluginInterface
 {
 public:
+	~ccDefaultPluginInterface() override;
+		
+	bool isCore() const override;
+
+	QString getName() const override;
+	QString getDescription() const override;
+	
+	QIcon getIcon() const override;
+	
+	ReferenceList getReferences() const override;
+	ContactList getAuthors() const override;
+	ContactList getMaintainers() const override;
+
+protected:
 	ccDefaultPluginInterface( const QString &resourcePath = QString() );
-
-	virtual ~ccDefaultPluginInterface();
-	
-	virtual bool isCore() const override;
-
-	virtual QString getName() const override;
-	virtual QString getDescription() const override;
-	
-	virtual QIcon getIcon() const override;
-	
-	virtual ReferenceList getReferences() const override;
-	virtual ContactList getAuthors() const override;
-	virtual ContactList getMaintainers() const override;
 	
 private:
+	void setIID( const QString& iid ) override;
+	const QString& IID() const override;
+		
 	ccDefaultPluginData	*m_data;
 };
 

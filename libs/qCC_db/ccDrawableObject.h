@@ -228,7 +228,7 @@ public: //Transformation matrix management (for display only)
 public: //clipping planes
 
 	//! Removes all clipping planes (if any)
-	virtual void removeAllClipPlanes() { m_clipPlanes.clear(); }
+	virtual void removeAllClipPlanes() { m_clipPlanes.resize(0); }
 
 	//! Registers a new clipping plane
 	/** \return false if the planes couldn't be added (not enough memory)
@@ -276,6 +276,8 @@ protected: //members
 
 	//! Whether name is displayed in 3D or not
 	bool m_showNameIn3D;
+	//! Last 2D position of the '3D' name
+	CCVector3d m_nameIn3DPos;
 
 	//! Currently associated GL display
 	ccGenericGLDisplay* m_currentDisplay;

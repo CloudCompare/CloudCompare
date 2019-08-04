@@ -33,11 +33,12 @@
 
 //qCC_db
 #include <ccGenericMesh.h>
+#include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
 
 //plugins
-#include "ccGLFilterPluginInterface.h"
-#include "ccIOFilterPluginInterface.h"
+#include "ccGLPluginInterface.h"
+#include "ccIOPluginInterface.h"
 #include "ccPluginManager.h"
 
 //3D mouse handler
@@ -182,9 +183,9 @@ void ccViewer::loadPlugins()
 {
 	ui.menuPlugins->setEnabled(false);
 
-	ccPluginManager::loadPlugins();
+	ccPluginManager::get().loadPlugins();
 
-	for ( ccPluginInterface *plugin : ccPluginManager::pluginList() )
+	for ( ccPluginInterface *plugin : ccPluginManager::get().pluginList() )
 	{
 		if ( plugin == nullptr )
 		{
@@ -195,7 +196,7 @@ void ccViewer::loadPlugins()
 		// is this a GL plugin?
 		if ( plugin->getType() == CC_GL_FILTER_PLUGIN )
 		{
-			ccGLFilterPluginInterface *glPlugin = static_cast<ccGLFilterPluginInterface*>( plugin );
+			ccGLPluginInterface *glPlugin = static_cast<ccGLPluginInterface*>( plugin );
 			
 			const QString pluginName = glPlugin->getName();
 			
@@ -254,7 +255,7 @@ void ccViewer::doEnableGLFilter()
 		return;
 	}
 	
-	ccGLFilterPluginInterface	*plugin = action->data().value<ccGLFilterPluginInterface *>();
+	ccGLPluginInterface	*plugin = action->data().value<ccGLPluginInterface *>();
 	
 	if ( plugin == nullptr )
 	{

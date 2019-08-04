@@ -28,7 +28,8 @@
 //System
 #include <set>
 
-ccMaterialSet::ccMaterialSet(QString name/*=QString()*/)
+
+ccMaterialSet::ccMaterialSet(const QString& name)
 	: std::vector<ccMaterial::CShared>()
 	, CCShareable()
 	, ccHObject(name)
@@ -36,11 +37,7 @@ ccMaterialSet::ccMaterialSet(QString name/*=QString()*/)
 	setFlagState(CC_LOCKED,true);
 }
 
-ccMaterialSet::~ccMaterialSet()
-{
-}
-
-int ccMaterialSet::findMaterialByName(QString mtlName)
+int ccMaterialSet::findMaterialByName(const QString& mtlName)
 {
 	ccLog::PrintDebug(QString("[ccMaterialSet::findMaterialByName] Query: ") + mtlName);
 	
@@ -56,7 +53,7 @@ int ccMaterialSet::findMaterialByName(QString mtlName)
 	return -1;
 }
 
-int ccMaterialSet::findMaterialByUniqueID(QString uniqueID)
+int ccMaterialSet::findMaterialByUniqueID(const QString& uniqueID)
 {
 	ccLog::PrintDebug(QString("[ccMaterialSet::findMaterialByUniqueID] Query: ") + uniqueID);
 	
@@ -144,12 +141,13 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 
 	QString currentLine = stream.readLine();
 	unsigned currentLineIndex = 0;
-	ccMaterial::Shared currentMaterial(0);
+	ccMaterial::Shared currentMaterial( nullptr );
+	
 	while( !currentLine.isNull() )
 	{
 		++currentLineIndex;
 
-		QStringList tokens = currentLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
+		QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
 
 		//skip comments & empty lines
 		if( tokens.empty() || tokens.front().startsWith('/',Qt::CaseInsensitive) || tokens.front().startsWith('#',Qt::CaseInsensitive) )
@@ -165,7 +163,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			if (currentMaterial)
 			{
 				materials.addMaterial(currentMaterial);
-				currentMaterial = ccMaterial::Shared(0);
+				currentMaterial = ccMaterial::Shared( nullptr );
 			}
 
 			// get the name
@@ -253,6 +251,11 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			{
 				//ignored
 			}
+			// Transmission filter
+			else if (tokens.front() == "Tf")
+			{
+				//ignored
+			}
 			// texture map
 			else if (tokens.front() == "map_Ka"
 					|| tokens.front() == "map_Kd"
@@ -295,7 +298,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 	return true;
 }
 
-bool ccMaterialSet::saveAsMTL(QString path, const QString& baseFilename, QStringList& errors) const
+bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, QStringList& errors) const
 {
 	//open mtl file
 	QString filename = path+QString('/')+baseFilename+QString(".mtl");
@@ -382,9 +385,8 @@ bool ccMaterialSet::append(const ccMaterialSet& source)
 {
 	try
 	{
-		for (ccMaterialSet::const_iterator it=source.begin(); it!=source.end(); ++it)
+		for (const auto &mtl : source)
 		{
-			ccMaterial::CShared mtl = *it;
 			if (addMaterial(mtl) <= 0)
 			{
 				ccLog::WarningDebug(QString("[ccMaterialSet::append] Material %1 couldn't be added to material set and will be ignored").arg(mtl->getName()));
@@ -407,7 +409,7 @@ ccMaterialSet* ccMaterialSet::clone() const
 	{
 		ccLog::Warning("[ccMaterialSet::clone] Not enough memory");
 		cloneSet->release();
-		cloneSet = 0;
+		cloneSet = nullptr;
 	}
 
 	return cloneSet;
@@ -420,16 +422,15 @@ bool ccMaterialSet::toFile_MeOnly(QFile& out) const
 
 	//Materials count (dataVersion>=20)
 	uint32_t count = (uint32_t)size();
-	if (out.write((const char*)&count,4) < 0)
+	if (out.write((const char*)&count, 4) < 0)
 		return WriteError();
 
 	//texture filenames
 	std::set<QString> texFilenames;
 
 	//Write each material
-	for (ccMaterialSet::const_iterator it = begin(); it!=end(); ++it)
+	for (const auto &mtl : *this)
 	{
-		ccMaterial::CShared mtl = *it;
 		mtl->toFile(out);
 
 		//remember its texture as well (if any)
@@ -443,10 +444,10 @@ bool ccMaterialSet::toFile_MeOnly(QFile& out) const
 	outStream << static_cast<uint32_t>(texFilenames.size());
 	//and save the textures (dataVersion>=37)
 	{
-		for (std::set<QString>::const_iterator it=texFilenames.begin(); it!=texFilenames.end(); ++it)
+		for (const auto &texFilename : texFilenames)
 		{
-			outStream << *it; //name
-			outStream << ccMaterial::GetTexture(*it); //then image
+			outStream << texFilename; //name
+			outStream << ccMaterial::GetTexture(texFilename); //then image
 		}
 	}
 
@@ -460,38 +461,38 @@ bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//Materials count (dataVersion>=20)
 	uint32_t count = 0;;
-	if (in.read((char*)&count,4) < 0)
+	if (in.read((char*)&count, 4) < 0)
 		return ReadError();
 	if (count == 0)
 		return true;
 
 	//Load each material
 	{
-		for (uint32_t i=0; i<count; ++i)
+		for (uint32_t i = 0; i < count; ++i)
 		{
 			ccMaterial::Shared mtl(new ccMaterial);
-			if (!mtl->fromFile(in,dataVersion,flags))
+			if (!mtl->fromFile(in, dataVersion, flags))
 				return false;
-			addMaterial(mtl,true); //if we load a file, we can't allow that materials are not in the same order as before!
+			addMaterial(mtl, true); //if we load a file, we can't allow that materials are not in the same order as before!
 		}
 	}
 
 	if (dataVersion >= 37)
 	{
 		QDataStream inStream(&in);
-	
+
 		//now load the number of textures (dataVersion>=37)
 		uint32_t texCount = 0;
 		inStream >> texCount;
 		//and load the textures (dataVersion>=37)
 		{
-			for (uint32_t i=0; i<texCount; ++i)
+			for (uint32_t i = 0; i < texCount; ++i)
 			{
 				QString filename;
 				inStream >> filename;
 				QImage image;
 				inStream >> image;
-				ccMaterial::AddTexture(image,filename);
+				ccMaterial::AddTexture(image, filename);
 			}
 		}
 	}

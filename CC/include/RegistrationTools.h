@@ -269,10 +269,10 @@ protected:
     //! FCPS base
     struct Base
     {
-        unsigned a,b,c,d;
-        void init(unsigned _a, unsigned _b, unsigned _c, unsigned _d) {a=_a; b=_b; c=_c; d=_d;}
-        void copy(const struct Base& b) {init(b.a, b.b, b.c, b.d);}
-        unsigned getIndex(unsigned i) {if(i==0) return a; if(i==1) return b; if(i==2) return c; if(i==3) return d; return 0;}
+		unsigned a, b, c, d;
+		void init(unsigned _a, unsigned _b, unsigned _c, unsigned _d) { a = _a; b = _b; c = _c; d = _d; }
+        void copy(const struct Base& _b) {init(_b.a, _b.b, _b.c, _b.d);}
+		unsigned getIndex(unsigned i) { if (i == 0) return a; if (i == 1) return b; if (i == 2) return c; if (i == 3) return d; return 0; }
     };
 
     //! Randomly finds a 4 points base in a cloud

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/CC/plugin/qFBXIO">
+        <file>info.json</file>
+    </qresource>
+</RCC>

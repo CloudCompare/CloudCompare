@@ -17,32 +17,19 @@
 
 #include "FileIOFilter.h"
 
-//file wrappers
 //CLOUDS
-#include "BinFilter.h"
-#include "SimpleBinFilter.h"
 #include "AsciiFilter.h"
-#include "VTKFilter.h"
-#include "STLFilter.h"
-#include "LASFilter.h"
-#include "E57Filter.h"
-#include "PTXFilter.h"
+#include "BinFilter.h"
+
 //MESHES
-#include "ObjFilter.h"
 #include "PlyFilter.h"
-#include "MAFilter.h"
-#include "FBXFilter.h"
-#include "OFFFilter.h"
-//CAD
-#include "PDMS/PDMSFilter.h"
+
 //OTHERS
 #include "DepthMapFileFilter.h"
-#include "RasterGridFilter.h"
-#include "ImageFileFilter.h"
 #include "DxfFilter.h"
+#include "ImageFileFilter.h"
+#include "RasterGridFilter.h"
 #include "ShpFilter.h"
-#include "MascaretFilter.h"
-#include "HeightProfileFilter.h"
 
 //Qt
 #include <QFileInfo>
@@ -64,6 +51,109 @@ static FileIOFilter::FilterContainer s_ioFilters;
 
 static unsigned s_sessionCounter = 0;
 
+// This extra definition is required in C++11.
+// In C++17, class-level "static constexpr" is implicitly inline, so these are not required.
+constexpr float FileIOFilter::DEFAULT_PRIORITY;
+
+
+FileIOFilter::FileIOFilter( const FileIOFilter::FilterInfo &info ) :
+	m_filterInfo( info )
+{
+#ifdef QT_DEBUG	
+	if ( !(m_filterInfo.features & DynamicInfo) )
+	{
+		checkFilterInfo();
+	}
+#endif
+}
+
+bool FileIOFilter::importSupported() const
+{
+	return m_filterInfo.features & Import;
+}
+
+bool FileIOFilter::exportSupported() const
+{
+	return m_filterInfo.features & Export;
+}
+
+QStringList FileIOFilter::getFileFilters( bool onImport ) const
+{
+	if ( onImport )
+	{
+		return m_filterInfo.importFileFilterStrings;
+	}
+	
+	return m_filterInfo.exportFileFilterStrings;
+}
+
+QString FileIOFilter::getDefaultExtension() const
+{
+	return m_filterInfo.defaultExtension;
+}
+
+void FileIOFilter::setImportExtensions( const QStringList &extensions )
+{
+	m_filterInfo.importExtensions = extensions;
+}
+
+void FileIOFilter::setImportFileFilterStrings( const QStringList &filterStrings )
+{
+	m_filterInfo.importFileFilterStrings = filterStrings;
+}
+
+void FileIOFilter::setExportFileFilterStrings(const QStringList &filterStrings)
+{
+	m_filterInfo.exportFileFilterStrings = filterStrings;
+}
+
+void FileIOFilter::checkFilterInfo() const
+{
+#ifdef QT_DEBUG
+	// Check info for consistency
+	
+	if ( m_filterInfo.features & Import )
+	{
+		if ( m_filterInfo.importFileFilterStrings.isEmpty() )
+		{
+			ccLog::Warning( QStringLiteral( "I/O filter marked as import, but no filter strings set: %1" ).arg( m_filterInfo.id ) );
+		}
+		
+		if ( m_filterInfo.importExtensions.isEmpty() )
+		{
+			ccLog::Warning( QStringLiteral( "I/O filter marked as import, but no extensions set: %1" ).arg( m_filterInfo.id ) );
+		}
+	}
+	else
+	{
+		if ( !m_filterInfo.importFileFilterStrings.isEmpty() )
+		{
+			ccLog::Warning( QStringLiteral( "I/O filter not marked as import, but filter strings are set: %1" ).arg( m_filterInfo.id ) );
+		}
+		
+		if ( !m_filterInfo.importExtensions.isEmpty() )
+		{
+			ccLog::Warning( QStringLiteral( "I/O filter not marked as import, but extensions are set: %1" ).arg( m_filterInfo.id ) );
+		}
+	}
+	
+	if ( m_filterInfo.features & Export )
+	{
+		if ( m_filterInfo.exportFileFilterStrings.isEmpty() )
+		{
+			ccLog::Warning( QStringLiteral( "I/O filter marked as export, but no filter strings set: %1" ).arg( m_filterInfo.id ) );
+		}
+	}
+	else
+	{
+		if ( !m_filterInfo.exportFileFilterStrings.isEmpty() )
+		{
+			ccLog::Warning( QStringLiteral( "I/O filter not marked as export, but filter strings are set: %1" ).arg( m_filterInfo.id ) );
+		}		
+	}
+#endif
+}
+
 void FileIOFilter::ResetSesionCounter()
 {
 	s_sessionCounter = 0;
@@ -79,39 +169,20 @@ void FileIOFilter::InitInternalFilters()
 	//from the most useful to the less one!
 	Register(Shared(new BinFilter()));
 	Register(Shared(new AsciiFilter()));
-#ifdef CC_LAS_SUPPORT
-	Register(Shared(new LASFilter()));
-#endif
-#ifdef CC_E57_SUPPORT
-	Register(Shared(new E57Filter()));
-#endif
-	Register(Shared(new PTXFilter()));
-	Register(Shared(new SimpleBinFilter()));
+
 	Register(Shared(new PlyFilter()));
-	Register(Shared(new ObjFilter()));
-	Register(Shared(new VTKFilter()));
-	Register(Shared(new STLFilter()));
-	Register(Shared(new OFFFilter()));
-#ifdef CC_FBX_SUPPORT
-	Register(Shared(new FBXFilter()));
-#endif
+
 #ifdef CC_DXF_SUPPORT
 	Register(Shared(new DxfFilter()));
 #endif
 #ifdef CC_SHP_SUPPORT
 	Register(Shared(new ShpFilter()));
 #endif
-#ifdef CC_PDMS_SUPPORT
-	Register(Shared(new PDMSFilter()));
-#endif
 #ifdef CC_GDAL_SUPPORT
 	Register(Shared(new RasterGridFilter()));
 #endif
 	Register(Shared(new ImageFileFilter()));
-	Register(Shared(new MAFilter()));
 	Register(Shared(new DepthMapFileFilter()));
-	Register(Shared(new MascaretFilter()));
-	Register(Shared(new HeightProfileFilter()));
 }
 
 void FileIOFilter::Register(Shared filter)
@@ -122,47 +193,44 @@ void FileIOFilter::Register(Shared filter)
 		return;
 	}
 
-	//filters are uniquely recognized by their 'file filter' string
-	const QStringList fileFilters = filter->getFileFilters(true);
-	const QString filterName = filter->getDefaultExtension().toUpper();
-	for (FilterContainer::const_iterator it=s_ioFilters.begin(); it!=s_ioFilters.end(); ++it)
+	// check for an existing copy of this filter or one with the same ID
+	const QString id = filter->m_filterInfo.id;
+
+	auto compareFilters = [filter, id] ( const Shared& filter2 )
 	{
-		bool error = false;
-		if (*it == filter)
-		{
-			ccLog::Warning(QStringLiteral("[FileIOFilter::Register] I/O filter '%1' is already registered").arg(filterName));
-			error = true;
-		}
-		else
-		{
-			//we are going to compare the file filters as they should remain unique!
-			const QStringList otherFilters = (*it)->getFileFilters(true);
-			for (int i=0; i<fileFilters.size(); ++i)
-			{
-				if (otherFilters.contains(fileFilters[i]))
-				{
-					const QString otherFilterName = (*it)->getDefaultExtension().toUpper();;
-					ccLog::Warning(QStringLiteral("[FileIOFilter::Register] Internal error: file filter '%1' of filter '%2' is already handled by another filter ('%3')!").arg(fileFilters[i],filterName,otherFilterName));
-					error = true;
-					break;
-				}
-			}
-		}
-
-		if (error)
-			return;
+		return (filter == filter2) || (filter2->m_filterInfo.id == id);
+	};
+	
+	if ( std::any_of( s_ioFilters.cbegin(), s_ioFilters.cend(), compareFilters ) ) 
+	{
+		ccLog::Warning( QStringLiteral( "[FileIOFilter] I/O filter already registered with id '%1'" ).arg( id ) );
+		
+		return;
 	}
-
-	//insert filter
-	s_ioFilters.push_back(filter);
+	
+	// insert into the list, sorted by priority first, id second
+	auto comparePriorities = [] ( const Shared& filter1, const Shared& filter2 ) -> bool
+	{
+		if ( filter1->m_filterInfo.priority == filter2->m_filterInfo.priority )
+		{
+			return filter1->m_filterInfo.id < filter2->m_filterInfo.id;
+		}
+		
+		return filter1->m_filterInfo.priority < filter2->m_filterInfo.priority;
+	};
+	
+	auto pos = std::upper_bound( s_ioFilters.begin(), s_ioFilters.end(), filter, comparePriorities );
+	
+	s_ioFilters.insert( pos, filter );
 }
 
 void FileIOFilter::UnregisterAll()
 {
-	for (FilterContainer::iterator it=s_ioFilters.begin(); it!=s_ioFilters.end(); ++it)
+	for (auto & filter : s_ioFilters)
 	{
-		(*it)->unregister();
+		filter->unregister();
 	}
+	
 	s_ioFilters.clear();
 }
 
@@ -188,15 +256,32 @@ const FileIOFilter::FilterContainer& FileIOFilter::GetFilters()
 
 FileIOFilter::Shared FileIOFilter::FindBestFilterForExtension(const QString& ext)
 {
-	const QString upperExt = ext.toUpper();
-
-	for (FilterContainer::const_iterator it=s_ioFilters.begin(); it!=s_ioFilters.end(); ++it)
+	const QString lowerExt = ext.toLower();
+	
+	for ( const auto &filter : s_ioFilters )
 	{
-		if ((*it)->canLoadExtension(upperExt))
-			return *it;
+		if ( filter->m_filterInfo.importExtensions.contains( lowerExt ) )
+		{
+			return filter;
+		}
 	}
 
-	return Shared(nullptr);
+	return FileIOFilter::Shared( nullptr );
+}
+
+QStringList FileIOFilter::ImportFilterList()
+{
+	QStringList	list{ QObject::tr( "All (*.*)" ) };
+	
+	for ( const auto &filter : s_ioFilters )
+	{
+		if ( filter->importSupported() )
+		{
+			list += filter->m_filterInfo.importFileFilterStrings;
+		}
+	}	
+	
+	return list;
 }
 
 ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
@@ -279,6 +364,11 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 				newName.replace(QString("unnamed"), fi.baseName());
 				child->setName(newName);
 			}
+			else if (newName.isEmpty())
+			{
+				//just in case
+				child->setName(fi.baseName());
+			}
 		}
 	}
 	else
@@ -293,7 +383,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 										LoadParameters& loadParameters,
 										CC_FILE_ERROR& result,
-										QString fileFilter/*=QString()*/)
+										const QString& fileFilter )
 {
 	Shared filter(nullptr);
 	

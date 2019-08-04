@@ -190,244 +190,241 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 		return nullptr;
 	}
 
-	unsigned n = selection->size();
-	if (n == 0)
-	{
-		ccLog::Warning("[ccPointCloud::partialClone] Selection is empty");
-		return nullptr;
-	}
-
 	ccPointCloud* result = new ccPointCloud(getName() + QString(".extract"));
-
-	if (!result->reserveThePointsTable(n))
-	{
-		ccLog::Error("[ccPointCloud::partialClone] Not enough memory to duplicate cloud!");
-		delete result;
-		return nullptr;
-	}
-
-	//import points
-	{
-		for (unsigned i = 0; i < n; i++)
-		{
-			result->addPoint(*getPointPersistentPtr(selection->getPointGlobalIndex(i)));
-		}
-	}
 
 	//visibility
 	result->setVisible(isVisible());
 	result->setDisplay(getDisplay());
 	result->setEnabled(isEnabled());
 
-	//RGB colors
-	if (hasColors())
+	//other parameters
+	result->importParametersFrom(this);
+
+	//from now on we will need some points to proceed ;)
+	unsigned n = selection->size();
+	if (n)
 	{
-		if (result->reserveTheRGBTable())
+		if (!result->reserveThePointsTable(n))
+		{
+			ccLog::Error("[ccPointCloud::partialClone] Not enough memory to duplicate cloud!");
+			delete result;
+			return nullptr;
+		}
+
+		//import points
 		{
 			for (unsigned i = 0; i < n; i++)
 			{
-				result->addRGBColor(getPointColor(selection->getPointGlobalIndex(i)));
+				result->addPoint(*getPointPersistentPtr(selection->getPointGlobalIndex(i)));
 			}
-			result->showColors(colorsShown());
 		}
-		else
-		{
-			ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy RGB colors!");
-			if (warnings)
-				*warnings |= WRN_OUT_OF_MEM_FOR_COLORS;
-		}
-	}
 
-	//normals
-	if (hasNormals())
-	{
-		if (result->reserveTheNormsTable())
+		//RGB colors
+		if (hasColors())
 		{
-			for (unsigned i = 0; i < n; i++)
-			{
-				result->addNormIndex(getPointNormalIndex(selection->getPointGlobalIndex(i)));
-			}
-			result->showNormals(normalsShown());
-		}
-		else
-		{
-			ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy normals!");
-			if (warnings)
-				*warnings |= WRN_OUT_OF_MEM_FOR_NORMALS;
-		}
-	}
-
-	//waveform
-	if (hasFWF())
-	{
-		if (result->reserveTheFWFTable())
-		{
-			try
+			if (result->reserveTheRGBTable())
 			{
 				for (unsigned i = 0; i < n; i++)
 				{
-					const ccWaveform& w = m_fwfWaveforms[selection->getPointGlobalIndex(i)];
-					if (!result->fwfDescriptors().contains(w.descriptorID()))
-					{
-						//copy only the necessary descriptors
-						result->fwfDescriptors().insert(w.descriptorID(), m_fwfDescriptors[w.descriptorID()]);
-					}
-					result->waveforms().push_back(w);
+					result->addRGBColor(getPointColor(selection->getPointGlobalIndex(i)));
 				}
-				//we will use the same FWF data container
-				result->fwfData() = fwfData();
+				result->showColors(colorsShown());
 			}
-			catch (const std::bad_alloc&)
+			else
+			{
+				ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy RGB colors!");
+				if (warnings)
+					*warnings |= WRN_OUT_OF_MEM_FOR_COLORS;
+			}
+		}
+
+		//normals
+		if (hasNormals())
+		{
+			if (result->reserveTheNormsTable())
+			{
+				for (unsigned i = 0; i < n; i++)
+				{
+					result->addNormIndex(getPointNormalIndex(selection->getPointGlobalIndex(i)));
+				}
+				result->showNormals(normalsShown());
+			}
+			else
+			{
+				ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy normals!");
+				if (warnings)
+					*warnings |= WRN_OUT_OF_MEM_FOR_NORMALS;
+			}
+		}
+
+		//waveform
+		if (hasFWF())
+		{
+			if (result->reserveTheFWFTable())
+			{
+				try
+				{
+					for (unsigned i = 0; i < n; i++)
+					{
+						const ccWaveform& w = m_fwfWaveforms[selection->getPointGlobalIndex(i)];
+						if (!result->fwfDescriptors().contains(w.descriptorID()))
+						{
+							//copy only the necessary descriptors
+							result->fwfDescriptors().insert(w.descriptorID(), m_fwfDescriptors[w.descriptorID()]);
+						}
+						result->waveforms().push_back(w);
+					}
+					//we will use the same FWF data container
+					result->fwfData() = fwfData();
+				}
+				catch (const std::bad_alloc&)
+				{
+					ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy waveform signals!");
+					result->clearFWFData();
+					if (warnings)
+						*warnings |= WRN_OUT_OF_MEM_FOR_FWF;
+				}
+			}
+			else
 			{
 				ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy waveform signals!");
-				result->clearFWFData();
 				if (warnings)
 					*warnings |= WRN_OUT_OF_MEM_FOR_FWF;
 			}
 		}
-		else
-		{
-			ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy waveform signals!");
-			if (warnings)
-				*warnings |= WRN_OUT_OF_MEM_FOR_FWF;
-		}
-	}
 
-	//scalar fields
-	unsigned sfCount = getNumberOfScalarFields();
-	if (sfCount != 0)
-	{
-		for (unsigned k = 0; k < sfCount; ++k)
+		//scalar fields
+		unsigned sfCount = getNumberOfScalarFields();
+		if (sfCount != 0)
 		{
-			const ccScalarField* sf = static_cast<ccScalarField*>(getScalarField(k));
-			assert(sf);
-			if (sf)
+			for (unsigned k = 0; k < sfCount; ++k)
 			{
-				//we create a new scalar field with same name
-				int sfIdx = result->addScalarField(sf->getName());
-				if (sfIdx >= 0) //success
+				const ccScalarField* sf = static_cast<ccScalarField*>(getScalarField(k));
+				assert(sf);
+				if (sf)
 				{
-					ccScalarField* currentScalarField = static_cast<ccScalarField*>(result->getScalarField(sfIdx));
-					assert(currentScalarField);
-					if (currentScalarField->resizeSafe(n))
+					//we create a new scalar field with same name
+					int sfIdx = result->addScalarField(sf->getName());
+					if (sfIdx >= 0) //success
 					{
-						currentScalarField->setGlobalShift(sf->getGlobalShift());
+						ccScalarField* currentScalarField = static_cast<ccScalarField*>(result->getScalarField(sfIdx));
+						assert(currentScalarField);
+						if (currentScalarField->resizeSafe(n))
+						{
+							currentScalarField->setGlobalShift(sf->getGlobalShift());
 
-						//we copy data to new SF
-						for (unsigned i = 0; i < n; i++)
-							currentScalarField->setValue(i, sf->getValue(selection->getPointGlobalIndex(i)));
+							//we copy data to new SF
+							for (unsigned i = 0; i < n; i++)
+								currentScalarField->setValue(i, sf->getValue(selection->getPointGlobalIndex(i)));
 
-						currentScalarField->computeMinAndMax();
-						//copy display parameters
-						currentScalarField->importParametersFrom(sf);
+							currentScalarField->computeMinAndMax();
+							//copy display parameters
+							currentScalarField->importParametersFrom(sf);
+						}
+						else
+						{
+							//if we don't have enough memory, we cancel SF creation
+							result->deleteScalarField(sfIdx);
+							ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy scalar field '%1'!").arg(sf->getName()));
+							if (warnings)
+								*warnings |= WRN_OUT_OF_MEM_FOR_SFS;
+						}
 					}
+				}
+			}
+
+			unsigned copiedSFCount = getNumberOfScalarFields();
+			if (copiedSFCount)
+			{
+				//we display the same scalar field as the source (if we managed to copy it!)
+				if (getCurrentDisplayedScalarField())
+				{
+					int sfIdx = result->getScalarFieldIndexByName(getCurrentDisplayedScalarField()->getName());
+					if (sfIdx >= 0)
+						result->setCurrentDisplayedScalarField(sfIdx);
 					else
+						result->setCurrentDisplayedScalarField(static_cast<int>(copiedSFCount) - 1);
+				}
+				//copy visibility
+				result->showSF(sfShown());
+			}
+		}
+
+		//scan grids
+		if (gridCount() != 0)
+		{
+			try
+			{
+				//we need a map between old and new indexes
+				std::vector<int> newIndexMap(size(), -1);
+				{
+					for (unsigned i = 0; i < n; i++)
 					{
-						//if we don't have enough memory, we cancel SF creation
-						result->deleteScalarField(sfIdx);
-						ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy scalar field '%1'!").arg(sf->getName()));
-						if (warnings)
-							*warnings |= WRN_OUT_OF_MEM_FOR_SFS;
+						newIndexMap[selection->getPointGlobalIndex(i)] = i;
+					}
+				}
+
+				//duplicate the grid structure(s)
+				std::vector<Grid::Shared> newGrids;
+				{
+					for (size_t i = 0; i < gridCount(); ++i)
+					{
+						const Grid::Shared& scanGrid = grid(i);
+						if (scanGrid->validCount != 0) //no need to copy empty grids!
+						{
+							//duplicate the grid
+							newGrids.push_back(Grid::Shared(new Grid(*scanGrid)));
+						}
+					}
+				}
+
+				//then update the indexes
+				UpdateGridIndexes(newIndexMap, newGrids);
+
+				//and keep the valid (non empty) ones
+				for (Grid::Shared& scanGrid : newGrids)
+				{
+					if (scanGrid->validCount)
+					{
+						result->addGrid(scanGrid);
 					}
 				}
 			}
+			catch (const std::bad_alloc&)
+			{
+				//not enough memory
+				ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy the grid structure(s)"));
+			}
 		}
 
-		unsigned copiedSFCount = getNumberOfScalarFields();
-		if (copiedSFCount)
+		//Meshes //TODO
+		/*Lib::GenericIndexedMesh* theMesh = source->_getMesh();
+		if (theMesh)
 		{
-			//we display the same scalar field as the source (if we managed to copy it!)
-			if (getCurrentDisplayedScalarField())
-			{
-				int sfIdx = result->getScalarFieldIndexByName(getCurrentDisplayedScalarField()->getName());
-				if (sfIdx >= 0)
-					result->setCurrentDisplayedScalarField(sfIdx);
-				else
-					result->setCurrentDisplayedScalarField(static_cast<int>(copiedSFCount)-1);
-			}
-			//copy visibility
-			result->showSF(sfShown());
+		//REVOIR --> on pourrait le faire pour chaque sous-mesh non ?
+		CCLib::GenericIndexedMesh* newTri = CCLib::ManualSegmentationTools::segmentMesh(theMesh,selection,true,nullptr,this);
+		setMesh(newTri);
+		if (source->areMeshesDisplayed()) showTri();
 		}
-	}
 
-	//scan grids
-	if (gridCount() != 0)
-	{
-		try
+		//PoV & Scanners
+		bool importScanners = true;
+		if (source->isMultipleScansModeActivated())
+		if (activateMultipleScansMode())
 		{
-			//we need a map between old and new indexes
-			std::vector<int> newIndexMap(size(), -1);
-			{
-				for (unsigned i = 0; i < n; i++)
-				{
-					newIndexMap[selection->getPointGlobalIndex(i)] = i;
-				}
-			}
-
-			//duplicate the grid structure(s)
-			std::vector<Grid::Shared> newGrids;
-			{
-				for (size_t i = 0; i < gridCount(); ++i)
-				{
-					const Grid::Shared& scanGrid = grid(i);
-					if (scanGrid->validCount != 0) //no need to copy empty grids!
-					{
-						//duplicate the grid
-						newGrids.push_back(Grid::Shared (new Grid(*scanGrid)));
-					}
-				}
-			}
-
-			//then update the indexes
-			UpdateGridIndexes(newIndexMap, newGrids);
-
-			//and keep the valid (non empty) ones
-			for (Grid::Shared& scanGrid : newGrids)
-			{
-				if (scanGrid->validCount)
-				{
-					result->addGrid(scanGrid);
-				}
-			}
+		scanIndexesTableType* _theScans = source->getTheScansIndexesArray();
+		for (i=0; i<n; ++i) cubeVertexesIndexes.setValue(i,_theScans->getValue(i));
 		}
-		catch (const std::bad_alloc&)
+		else importScanners=false;
+
+		if (importScanners)
 		{
-			//not enough memory
-			ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy the grid structure(s)"));
+		//on insere les objets "capteur" (pas de copie ici, la meme instance peut-etre partagee par plusieurs listes)
+		for (i=1;i<=source->getNumberOfSensors();++i)
+		setSensor(source->_getSensor(i),i);
 		}
+		*/
 	}
-
-	//Meshes //TODO
-	/*Lib::GenericIndexedMesh* theMesh = source->_getMesh();
-	if (theMesh)
-	{
-	//REVOIR --> on pourrait le faire pour chaque sous-mesh non ?
-	CCLib::GenericIndexedMesh* newTri = CCLib::ManualSegmentationTools::segmentMesh(theMesh,selection,true,nullptr,this);
-	setMesh(newTri);
-	if (source->areMeshesDisplayed()) showTri();
-	}
-
-	//PoV & Scanners
-	bool importScanners = true;
-	if (source->isMultipleScansModeActivated())
-	if (activateMultipleScansMode())
-	{
-	scanIndexesTableType* _theScans = source->getTheScansIndexesArray();
-	for (i=0; i<n; ++i) cubeVertexesIndexes.setValue(i,_theScans->getValue(i));
-	}
-	else importScanners=false;
-
-	if (importScanners)
-	{
-	//on insere les objets "capteur" (pas de copie ici, la meme instance peut-etre partagee par plusieurs listes)
-	for (i=1;i<=source->getNumberOfSensors();++i)
-	setSensor(source->_getSensor(i),i);
-	}
-	*/
-
-	//other parameters
-	result->importParametersFrom(this);
-
 	return result;
 }
 
@@ -444,13 +441,13 @@ ccPointCloud::~ccPointCloud()
 
 void ccPointCloud::clear()
 {
-	unalloactePoints();
+	unallocatePoints();
 	unallocateColors();
 	unallocateNorms();
 	//enableTempColor(false); //DGM: why?
 }
 
-void ccPointCloud::unalloactePoints()
+void ccPointCloud::unallocatePoints()
 {
 	clearLOD();	// we have to clear the LOD structure before clearing the colors / SFs, so we can't leave it to notifyGeometryUpdate()
 	showSFColorsScale(false); //SFs will be destroyed
@@ -467,6 +464,18 @@ void ccPointCloud::notifyGeometryUpdate()
 	releaseVBOs();
 	clearLOD();
 }
+
+void ccPointCloud::setDisplay(ccGenericGLDisplay* win)
+{
+	if (m_currentDisplay && win != m_currentDisplay)
+	{
+		//be sure to release the VBOs before switching to another (or no) display!
+		releaseVBOs();
+	}
+
+	BaseClass::setDisplay(win);
+}
+
 
 ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=0*/, bool ignoreChildren/*=false*/)
 {
@@ -934,7 +943,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				catch (const std::bad_alloc&)
 				{
 					//not enough memory
-					m_grids.clear();
+					m_grids.resize(0);
 					ccLog::Warning(QString("[ccPointCloud::fusion] Not enough memory: failed to copy the grid structure(s) from '%1'").arg(addedCloud->getName()));
 					break;
 				}
@@ -948,7 +957,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	else if (gridCount() != 0) //otherwise we'll have to drop the former grid structures!
 	{
 		ccLog::Warning(QString("[ccPointCloud::fusion] Grid structure(s) will be dropped as the merged cloud is unstructured"));
-		m_grids.clear();
+		m_grids.resize(0);
 	}
 
 	//has the cloud been recentered/rescaled?
@@ -1020,11 +1029,13 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				cc2DLabel* newLabel = new cc2DLabel(label->getName());
 				for (unsigned j = 0; j < label->size(); ++j)
 				{
-					const cc2DLabel::PickedPoint& P = label->getPoint(j);
-					if (P.cloud == addedCloud)
-						newLabel->addPoint(this, pointCountBefore + P.index);
-					else
-						newLabel->addPoint(P.cloud, P.index);
+					cc2DLabel::PickedPoint P = label->getPickedPoint(j);
+					if (P._cloud == addedCloud)
+					{
+						P._cloud = this;
+						P.index += pointCountBefore;
+					}
+					newLabel->addPickedPoint(P);
 				}
 				newLabel->displayPointLegend(label->isPointLegendDisplayed());
 				newLabel->setDisplayedIn2D(label->isDisplayedIn2D());
@@ -1083,7 +1094,7 @@ void ccPointCloud::unallocateColors()
 	{
 		if (m_grids[i])
 		{
-			m_grids[i]->colors.clear();
+			m_grids[i]->colors.resize(0);
 		}
 	}
 
@@ -1108,8 +1119,7 @@ bool ccPointCloud::reserveTheRGBTable()
 {
 	if (m_points.capacity() == 0)
 	{
-		ccLog::Warning("[ccPointCloud::reserveTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling reserveTheRGBTable with an zero capacity cloud");
 	}
 
 	if (!m_rgbColors)
@@ -1136,8 +1146,7 @@ bool ccPointCloud::resizeTheRGBTable(bool fillWithWhite/*=false*/)
 {
 	if (m_points.empty())
 	{
-		ccLog::Warning("[ccPointCloud::resizeTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling resizeTheRGBTable with an empty cloud");
 	}
 
 	if (!m_rgbColors)
@@ -1165,8 +1174,7 @@ bool ccPointCloud::reserveTheNormsTable()
 {
 	if (m_points.capacity() == 0)
 	{
-		ccLog::Warning("[ccPointCloud::reserveTheNormsTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling reserveTheNormsTable with an zero capacity cloud");
 	}
 
 	if (!m_normals)
@@ -1194,8 +1202,7 @@ bool ccPointCloud::resizeTheNormsTable()
 {
 	if (m_points.empty())
 	{
-		ccLog::Warning("[ccPointCloud::resizeTheNormsTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling resizeTheNormsTable with an empty cloud");
 	}
 
 	if (!m_normals)
@@ -1301,8 +1308,7 @@ bool ccPointCloud::reserveTheFWFTable()
 {
 	if (m_points.capacity() == 0)
 	{
-		ccLog::Warning("[ccPointCloud::reserveTheFWFTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling reserveTheFWFTable with a zero capacity cloud");
 	}
 
 	try
@@ -1312,7 +1318,7 @@ bool ccPointCloud::reserveTheFWFTable()
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("[ccPointCloud::reserveTheFWFTable] Not enough memory!");
-		m_fwfWaveforms.clear();
+		m_fwfWaveforms.resize(0);
 	}
 
 	//double check
@@ -1358,8 +1364,7 @@ bool ccPointCloud::resizeTheFWFTable()
 {
 	if (m_points.capacity() == 0)
 	{
-		ccLog::Warning("[ccPointCloud::resizeTheFWFTable] Internal error: properties (re)allocation before points allocation is forbidden!");
-		return false;
+		ccLog::Warning("[ccPointCloud] Calling resizeTheFWFTable with an empty cloud");
 	}
 
 	try
@@ -1369,7 +1374,7 @@ bool ccPointCloud::resizeTheFWFTable()
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("[ccPointCloud::resizeTheFWFTable] Not enough memory!");
-		m_fwfWaveforms.clear();
+		m_fwfWaveforms.resize(0);
 	}
 
 	//double check
@@ -2015,7 +2020,7 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 				removeChild(kdtrees[kdtrees.size() - 1 - i]); //faster to remove the last objects
 			}
 		}
-		kdtrees.clear();
+		kdtrees.resize(0);
 	}
 
 	//new we have to compute a proper transformation matrix
@@ -2613,9 +2618,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							context.moreLODPointsAvailable = (remainingPointsAtThisLevel != 0);
 							context.higherLODLevelsAvailable = (!m_lod->allDisplayed() && context.currentLODLevel + 1 <= maxLevel);
 						}
-						else
-						{
-						}
 					}
 				}
 
@@ -2709,7 +2711,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//if some points are hidden (= visibility table instantiated), we can't use display arrays :(
 			if (isVisibilityTableInstantiated())
 			{
-				assert(m_pointsVisibility.capacity() == m_points.size());
+				assert(m_pointsVisibility.size() == m_points.size());
 				//compressed normals set
 				const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
 				assert(compressedNormals);
@@ -3235,7 +3237,7 @@ void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 	}
 }
 
-ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool removeSelectedPoints/*=false*/, VisibilityTableType* visTable/*=0*/)
+ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool removeSelectedPoints/*=false*/, VisibilityTableType* visTable/*=nullptr*/, bool silent/*=false*/)
 {
 	if (!visTable)
 	{
@@ -3259,14 +3261,13 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 	ccPointCloud* result = nullptr;
 	{
 		//we create a temporary entity with the visible points only
-		CCLib::ReferenceCloud* rc = getTheVisiblePoints(visTable);
+		CCLib::ReferenceCloud* rc = getTheVisiblePoints(visTable, silent);
 		if (!rc)
 		{
 			//a warning message has already been issued by getTheVisiblePoints!
 			//ccLog::Warning("[ccPointCloud] An error occurred during points selection!");
 			return nullptr;
 		}
-		assert(rc->size() != 0);
 
 		//convert selection to cloud
 		result = partialClone(rc);
@@ -3317,7 +3318,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 			{
 				if (grid->validCount == 0)
 				{
-					grid->indexes.clear();
+					grid->indexes.resize(0);
 				}
 			}
 		}
@@ -3335,6 +3336,8 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 				++lastPoint;
 			}
 		}
+
+		unallocateVisibilityArray();
 
 		//TODO: handle associated meshes
 
@@ -3484,99 +3487,155 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 											CCLib::GenericProgressCallback* progressCb/*=nullptr*/,
 											unsigned char octreeLevel/*=0*/)
 {
-if (!otherCloud || otherCloud->size() == 0)
-{
-	ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Invalid/empty input cloud!");
-	return false;
-}
-
-//check that both bounding boxes intersect!
-ccBBox box = getOwnBB();
-ccBBox otherBox = otherCloud->getOwnBB();
-
-CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
-CCVector3 dist = box.getCenter() - otherBox.getCenter();
-if (fabs(dist.x) > dimSum.x / 2
-	|| fabs(dist.y) > dimSum.y / 2
-	|| fabs(dist.z) > dimSum.z / 2)
-{
-	ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Clouds are too far from each other! Can't proceed.");
-	return false;
-}
-
-//compute the closest-point set of 'this cloud' relatively to 'input cloud'
-//(to get a mapping between the resulting vertices and the input points)
-QSharedPointer<CCLib::ReferenceCloud> CPSet = computeCPSet(*otherCloud, progressCb, octreeLevel);
-if (!CPSet)
-{
-	return false;
-}
-
-if (!resizeTheRGBTable(false))
-{
-	ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
-	return false;
-}
-
-//import colors
-unsigned CPSetSize = CPSet->size();
-assert(CPSetSize == size());
-for (unsigned i = 0; i < CPSetSize; ++i)
-{
-	unsigned index = CPSet->getPointGlobalIndex(i);
-	setPointColor(i, otherCloud->getPointColor(index));
-}
-
-//We must update the VBOs
-colorsHaveChanged();
-
-return true;
-}
-
-ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
-	unsigned char coneAxisDim,
-	CCVector3* center,
-	bool exportDeviationSF/*=false*/,
-	double startAngle_deg/*=0.0*/,
-	double stopAngle_deg/*=360.0*/,
-	CCLib::GenericProgressCallback* progressCb/*=nullptr*/) const
-{
-
-	if (startAngle_deg >= stopAngle_deg)
+	if (!otherCloud || otherCloud->size() == 0)
 	{
+		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Invalid/empty input cloud!");
+		return false;
+	}
+
+	//check that both bounding boxes intersect!
+	ccBBox box = getOwnBB();
+	ccBBox otherBox = otherCloud->getOwnBB();
+
+	CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
+	CCVector3 dist = box.getCenter() - otherBox.getCenter();
+	if (	fabs(dist.x) > dimSum.x / 2
+		||	fabs(dist.y) > dimSum.y / 2
+		||	fabs(dist.z) > dimSum.z / 2)
+	{
+		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Clouds are too far from each other! Can't proceed.");
+		return false;
+	}
+
+	//compute the closest-point set of 'this cloud' relatively to 'input cloud'
+	//(to get a mapping between the resulting vertices and the input points)
+	QSharedPointer<CCLib::ReferenceCloud> CPSet = computeCPSet(*otherCloud, progressCb, octreeLevel);
+	if (!CPSet)
+	{
+		return false;
+	}
+
+	if (!resizeTheRGBTable(false))
+	{
+		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
+		return false;
+	}
+
+	//import colors
+	unsigned CPSetSize = CPSet->size();
+	assert(CPSetSize == size());
+	for (unsigned i = 0; i < CPSetSize; ++i)
+	{
+		unsigned index = CPSet->getPointGlobalIndex(i);
+		setPointColor(i, otherCloud->getPointColor(index));
+	}
+
+	//We must update the VBOs
+	colorsHaveChanged();
+
+	return true;
+}
+
+static void ProjectOnCylinder(	const CCVector3& AP,
+								const Tuple3ub& dim,
+								PointCoordinateType radius,
+								PointCoordinateType& delta,
+								PointCoordinateType& phi_rad)
+{
+	//2D distance to the center (XY plane)
+	PointCoordinateType APnorm_XY = sqrt(AP.u[dim.x] * AP.u[dim.x] + AP.u[dim.y] * AP.u[dim.y]);
+	//longitude (0 = +X = east)
+	phi_rad = atan2(AP.u[dim.y], AP.u[dim.x]);
+	//deviation
+	delta = APnorm_XY - radius;
+}
+
+static void ProjectOnCone(	const CCVector3& AP,
+							PointCoordinateType alpha_rad,
+							const Tuple3ub& dim,
+							PointCoordinateType& s,
+							PointCoordinateType& delta,
+							PointCoordinateType& phi_rad)
+{
+	//3D distance to the apex
+	PointCoordinateType normAP = AP.norm();
+	//2D distance to the apex (XY plane)
+	PointCoordinateType normAP_XY = sqrt(AP.u[dim.x] * AP.u[dim.x] + AP.u[dim.y] * AP.u[dim.y]);
+
+	//angle between +Z and AP
+	PointCoordinateType beta_rad = atan2(normAP_XY, -AP.u[dim.z]);
+	//angular deviation
+	PointCoordinateType gamma_rad = beta_rad - alpha_rad; //if gamma_rad > 0, the point is outside the cone
+
+	//projection on the cone
+	{
+		//longitude (0 = +X = east)
+		phi_rad = atan2(AP.u[dim.y], AP.u[dim.x]);
+		//curvilinear distance from the Apex
+		s = normAP * cos(gamma_rad);
+		//(normal) deviation
+		delta = normAP * sin(gamma_rad);
+	}
+}
+
+ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
+									UnrollBaseParams* params,
+									bool exportDeviationSF/*=false*/,
+									double startAngle_deg/*=0.0*/,
+									double stopAngle_deg/*=360.0*/,
+									CCLib::GenericProgressCallback* progressCb/*=nullptr*/) const
+{
+	if (	!params
+		||	params->axisDim > 2
+		||	startAngle_deg >= stopAngle_deg)
+	{
+		//invalid input parameters
 		assert(false);
 		return nullptr;
 	}
-	if (coneAxisDim > 2)
+
+	QString modeStr;
+	UnrollCylinderParams* cylParams = nullptr;
+	UnrollConeParams* coneParams = nullptr;
+
+	switch (mode)
 	{
+	case CYLINDER:
+		modeStr = "Cylinder";
+		cylParams = static_cast<UnrollCylinderParams*>(params);
+		break;
+	case CONE:
+		modeStr = "Cone";
+		coneParams = static_cast<UnrollConeParams*>(params);
+		break;
+	case STRAIGHTENED_CONE:
+	case STRAIGHTENED_CONE2:
+		modeStr = "Straightened cone";
+		coneParams = static_cast<UnrollConeParams*>(params);
+		break;
+	default:
 		assert(false);
 		return nullptr;
 	}
 
 	Tuple3ub dim;
-	dim.z = coneAxisDim;
+	dim.z = params->axisDim;
 	dim.x = (dim.z < 2 ? dim.z + 1 : 0);
 	dim.y = (dim.x < 2 ? dim.x + 1 : 0);
 
 	unsigned numberOfPoints = size();
-
 	CCLib::NormalizedProgress nprogress(progressCb, numberOfPoints);
 	if (progressCb)
 	{
 		if (progressCb->textCanBeEdited())
 		{
-			progressCb->setMethodTitle("Unroll (cylinder)");
+			progressCb->setMethodTitle(qPrintable(QString("Unroll (%1)").arg(modeStr)));
 			progressCb->setInfo(qPrintable(QString("Number of points = %1").arg(numberOfPoints)));
 		}
 		progressCb->update(0);
 		progressCb->start();
 	}
 
-	//ccPointCloud* clone = const_cast<ccPointCloud*>(this)->cloneThis(0, true);
-	//if (!clone)
-	//{
-	//	return 0;
-	//}
 	CCLib::ReferenceCloud duplicatedPoints(const_cast<ccPointCloud*>(this));
 	std::vector<CCVector3> unrolledPoints;
 	{
@@ -3599,10 +3658,19 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 		}
 	}
 
-	
-	std::vector<CCVector3> unrolledNormals;
 	std::vector<ScalarType> deviationValues;
+	if (exportDeviationSF)
+	try
+	{
+		deviationValues.resize(size());
+	}
+	catch (const std::bad_alloc&)
+	{
+		//not enough memory
+		return nullptr;
+	}
 
+	std::vector<CCVector3> unrolledNormals;
 	bool withNormals = hasNormals();
 	if (withNormals)
 	{
@@ -3611,7 +3679,6 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 		try
 		{
 			unrolledNormals.resize(size());
-			deviationValues.resize(size());
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -3620,67 +3687,164 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 		}
 	}
 	
-	//compute cylinder center (if none was provided)
-	CCVector3 C;
-	if (!center)
-	{
-		C = const_cast<ccPointCloud*>(this)->getOwnBB().getCenter();
-		center = &C;
-	}
-
 	double startAngle_rad = startAngle_deg * CC_DEG_TO_RAD;
 	double stopAngle_rad = stopAngle_deg * CC_DEG_TO_RAD;
+
+	PointCoordinateType alpha_rad = 0, sin_alpha = 0;
+	if (mode != CYLINDER)
+	{
+		alpha_rad = coneParams->coneAngle_deg * CC_DEG_TO_RAD;
+		sin_alpha = static_cast<PointCoordinateType>(sin(alpha_rad));
+	}
 
 	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
 		const CCVector3* Pin = getPoint(i);
-		
-		CCVector3 CP = *Pin - *center;
-
-		PointCoordinateType u = sqrt(CP.u[dim.x] * CP.u[dim.x] + CP.u[dim.y] * CP.u[dim.y]);
-		double longitude_rad = atan2(static_cast<double>(CP.u[dim.x]), static_cast<double>(CP.u[dim.y]));
 
 		//we project the point
-		CCVector3 Pout;
-		//Pout.u[dim.x] = longitude_rad * radius;
-		Pout.u[dim.y] = u - radius;
-		Pout.u[dim.z] = Pin->u[dim.z];
+		CCVector3 AP, Pout;
+		PointCoordinateType longitude_rad = 0; //longitude (rad)
+		PointCoordinateType delta = 0; //distance to the cone/cylinder surface
+		PointCoordinateType coneAbscissa = 0;
 
+		switch (mode)
+		{
+		case CYLINDER:
+		{
+			AP = *Pin - cylParams->center;
+			ProjectOnCylinder(AP, dim, params->radius, delta, longitude_rad);
+
+			//we project the point
+			//Pout.u[dim.x] = longitude_rad * radius;
+			Pout.u[dim.y] = -delta;
+			Pout.u[dim.z] = Pin->u[dim.z];
+		}
+		break;
+
+		case STRAIGHTENED_CONE:
+		{
+			AP = *Pin - coneParams->apex;
+			ProjectOnCone(AP, alpha_rad, dim, coneAbscissa, delta, longitude_rad);
+			//we simply develop the cone as a cylinder
+			//Pout.u[dim.x] = phi_rad * params->radius;
+			Pout.u[dim.y] = -delta;
+			//Pout.u[dim.z] = Pin->u[dim.z];
+			Pout.u[dim.z] = coneParams->apex.u[dim.z] - coneAbscissa;
+		}
+		break;
+
+		case STRAIGHTENED_CONE2:
+		{
+			AP = *Pin - coneParams->apex;
+			ProjectOnCone(AP, alpha_rad, dim, coneAbscissa, delta, longitude_rad);
+			//we simply develop the cone as a cylinder
+			//Pout.u[dim.x] = phi_rad * coneAbscissa * sin_alpha;
+			Pout.u[dim.y] = -delta;
+			//Pout.u[dim.z] = Pin->u[dim.z];
+			Pout.u[dim.z] = coneParams->apex.u[dim.z] - coneAbscissa;
+		}
+		break;
+
+		case CONE:
+		{
+			AP = *Pin - coneParams->apex;
+			ProjectOnCone(AP, alpha_rad, dim, coneAbscissa, delta, longitude_rad);
+			//unrolling
+			PointCoordinateType theta_rad = longitude_rad * sin_alpha; //sin_alpha is a bit arbitrary here. The aim is mostly to reduce the angular range
+			//project the point
+			Pout.u[dim.y] = -coneAbscissa * cos(theta_rad);
+			Pout.u[dim.x] =  coneAbscissa * sin(theta_rad);
+			Pout.u[dim.z] = delta;
+		}
+		break;
+
+		default:
+			assert(false);
+		}
+		
 		// first unroll its normal if necessary
 		if (withNormals)
 		{
 			const CCVector3& N = getPointNormal(i);
-
-			PointCoordinateType px = CP.u[dim.x] + N.u[dim.x];
-			PointCoordinateType py = CP.u[dim.y] + N.u[dim.y];
-			PointCoordinateType nu = sqrt(px*px + py*py);
-			double nLongitude_rad = atan2(static_cast<double>(px), static_cast<double>(py));
-
+			CCVector3 AP2 = AP + N;
 			CCVector3 N2;
-			N2.u[dim.x] = static_cast<PointCoordinateType>((nLongitude_rad - longitude_rad) * radius);
-			N2.u[dim.y] = nu - u;
-			N2.u[dim.z] = N.u[dim.z];
+
+			switch (mode)
+			{
+			case CYLINDER:
+			{
+				PointCoordinateType delta2, longitude2_rad;
+				ProjectOnCylinder(AP2, dim, params->radius, delta2, longitude2_rad);
+
+				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
+				N2.u[dim.y] = -(delta2 - delta);
+				N2.u[dim.z] = N.u[dim.z];
+			}
+			break;
+
+			case STRAIGHTENED_CONE:
+			{
+				PointCoordinateType coneAbscissa2, delta2, longitude2_rad;
+				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
+				//we simply develop the cone as a cylinder
+				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
+				N2.u[dim.y] = -(delta2 - delta);
+				N2.u[dim.z] = coneAbscissa - coneAbscissa2;
+			}
+			break;
+
+			case STRAIGHTENED_CONE2:
+			{
+				PointCoordinateType coneAbscissa2, delta2, longitude2_rad;
+				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
+				//we simply develop the cone as a cylinder
+				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad * coneAbscissa - longitude_rad * coneAbscissa2) * sin_alpha);
+				N2.u[dim.y] = -(delta2 - delta);
+				N2.u[dim.z] = coneAbscissa - coneAbscissa2;
+			}
+			break;
+
+			case CONE:
+			{
+				PointCoordinateType coneAbscissa2, delta2, longitude2_rad;
+				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
+				//unrolling
+				PointCoordinateType theta2_rad = longitude2_rad * sin_alpha; //sin_alpha is a bit arbitrary here. The aim is mostly to reduce the angular range
+				//project the point
+				CCVector3 P2out;
+				P2out.u[dim.x] =  coneAbscissa2 * sin(theta2_rad);
+				P2out.u[dim.y] = -coneAbscissa2 * cos(theta2_rad);
+				P2out.u[dim.z] = delta2;
+				N2 = P2out - Pout;
+			}
+			break;
+
+			default:
+				assert(false);
+				break;
+			}
+
 			N2.normalize();
 			unrolledNormals[i] = N2;
-			//clone->setPointNormal(i, N2);
 		}
 
 		//then compute the deviation (if necessary)
 		if (exportDeviationSF)
 		{
-			deviationValues[i] = static_cast<ScalarType>(Pout.u[dim.y]);
+			deviationValues[i] = static_cast<ScalarType>(delta);
 		}
 
 		//then repeat the unrolling process for the coordinates
-		//1) poition the 'point' at the beginning of the angular range
-		while (longitude_rad >= startAngle_rad)
+		//1) position the 'point' at the beginning of the angular range
+		double dLongitude_rad = longitude_rad;
+		while (dLongitude_rad >= startAngle_rad)
 		{
-			longitude_rad -= 2 * M_PI;
+			dLongitude_rad -= 2 * M_PI;
 		}
-		longitude_rad += 2 * M_PI;
+		dLongitude_rad += 2 * M_PI;
 
 		//2) repeat the unrolling process
-		for (; longitude_rad < stopAngle_rad; longitude_rad += 2 * M_PI)
+		for (; dLongitude_rad < stopAngle_rad; dLongitude_rad += 2 * M_PI)
 		{
 			//do we need to reserve more memory?
 			if (duplicatedPoints.size() == duplicatedPoints.capacity())
@@ -3704,7 +3868,26 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 			}
 
 			//add the point
-			Pout.u[dim.x] = longitude_rad * radius;
+			switch (mode)
+			{
+			case CYLINDER:
+			case STRAIGHTENED_CONE:
+				Pout.u[dim.x] = dLongitude_rad * params->radius;
+				break;
+			case STRAIGHTENED_CONE2:
+				Pout.u[dim.x] = dLongitude_rad * coneAbscissa * sin_alpha;
+				break;
+
+			case CONE:
+				Pout.u[dim.x] =  coneAbscissa * sin(dLongitude_rad);
+				Pout.u[dim.y] = -coneAbscissa * cos(dLongitude_rad);
+				//Pout = coneParams->apex + Pout; //nope, this projection is arbitrary and should be centered on (0, 0, 0)
+				break;
+
+			default:
+				assert(false);
+			}
+
 			unrolledPoints.push_back(Pout);
 			duplicatedPoints.addPointIndex(i);
 		}
@@ -3775,192 +3958,6 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 	return clone;
 }
 
-static void ProjectOnCone(	const CCVector3& P,
-							const CCVector3& coneApex,
-							PointCoordinateType alpha_rad,
-							const Tuple3ub& dim,
-							PointCoordinateType& s,
-							PointCoordinateType& delta,
-							PointCoordinateType& phi_rad)
-{
-	CCVector3 AP = P - coneApex;
-	//3D distance to the apex
-	PointCoordinateType normAP = AP.norm();
-	//2D distance to the apex (XY plane)
-	PointCoordinateType u = sqrt(AP.u[dim.x] * AP.u[dim.x] + AP.u[dim.y] * AP.u[dim.y]);
-
-	//angle between +Z and AP
-	PointCoordinateType beta_rad = atan2(u, -AP.u[dim.z]);
-	//angular deviation
-	PointCoordinateType gamma_rad = beta_rad - alpha_rad; //if gamma_rad > 0, the point is outside the cone
-
-	//projection on the cone
-	{
-		//longitude (0 = +X = east)
-		phi_rad = atan2(AP.u[dim.y], AP.u[dim.x]);
-		//curvilinear distance from the Apex
-		s = normAP * cos(gamma_rad);
-		//(normal) deviation
-		delta = normAP * sin(gamma_rad);
-	}
-}
-
-ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
-											const CCVector3& coneApex,
-											unsigned char coneAxisDim,
-											bool developStraightenedCone,
-											PointCoordinateType baseRadius,
-											bool exportDeviationSF/*=false*/,
-											CCLib::GenericProgressCallback* progressCb/*=nullptr*/) const
-{
-	if (coneAxisDim > 2)
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	Tuple3ub dim;
-	dim.z = coneAxisDim;
-	dim.x = (dim.z < 2 ? dim.z + 1 : 0);
-	dim.y = (dim.x < 2 ? dim.x + 1 : 0);
-
-	unsigned numberOfPoints = size();
-
-	CCLib::NormalizedProgress nprogress(progressCb, numberOfPoints);
-	if (progressCb)
-	{
-		if (progressCb->textCanBeEdited())
-		{
-			progressCb->setMethodTitle("Unroll (cone)");
-			progressCb->setInfo(qPrintable(QString("Number of points = %1").arg(numberOfPoints)));
-		}
-		progressCb->update(0);
-		progressCb->start();
-	}
-
-	ccPointCloud* clone = const_cast<ccPointCloud*>(this)->cloneThis(nullptr, true);
-	if (!clone)
-	{
-		return nullptr;
-	}
-
-	CCLib::ScalarField* deviationSF = nullptr;
-	if (exportDeviationSF)
-	{
-		int sfIdx = clone->getScalarFieldIndexByName(s_deviationSFName);
-		if (sfIdx < 0)
-		{
-			sfIdx = clone->addScalarField(s_deviationSFName);
-			if (sfIdx < 0)
-			{
-				ccLog::Warning("[unrollOnCone] Not enough memory to init the deviation scalar field");
-			}
-		}
-		if (sfIdx >= 0)
-		{
-			deviationSF = clone->getScalarField(sfIdx);
-		}
-		clone->setCurrentDisplayedScalarField(sfIdx);
-		clone->showSF(true);
-	}
-	
-	PointCoordinateType alpha_rad = coneAngle_deg * CC_DEG_TO_RAD;
-	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>( sin(alpha_rad) );
-
-	for (unsigned i = 0; i < numberOfPoints; i++)
-	{
-		const CCVector3* Pin = getPoint(i);
-
-		PointCoordinateType s, delta, phi_rad;
-		ProjectOnCone(*Pin, coneApex, alpha_rad, dim, s, delta, phi_rad);
-
-		if (deviationSF)
-		{
-			deviationSF->setValue(i, delta);
-		}
-
-		CCVector3 Pout;
-		if (developStraightenedCone)
-		{
-			//we simply develop the cone as a cylinder
-			Pout.u[dim.x] = (baseRadius + delta) * cos(phi_rad);
-			Pout.u[dim.y] = (baseRadius + delta) * sin(phi_rad);
-			Pout.u[dim.z] = coneApex.u[dim.z] - s;
-		}
-		else
-		{
-			//unrolling
-			PointCoordinateType theta_rad = phi_rad * sin_alpha;
-
-			//project the point
-			Pout.u[dim.y] = -s * cos(theta_rad);
-			Pout.u[dim.x] =  s * sin(theta_rad);
-			Pout.u[dim.z] = delta;
-		}
-
-		//replace the point in the destination cloud
-		*clone->point(i) = Pout;
-
-		//and its normal if necessary
-		if (clone->hasNormals())
-		{
-			const CCVector3& N = clone->getPointNormal(i);
-
-			PointCoordinateType s2, delta2, phi2_rad;
-			ProjectOnCone(*Pin + N, coneApex, alpha_rad, dim, s2, delta2, phi2_rad);
-
-			CCVector3 P2out;
-			if (developStraightenedCone)
-			{
-				//we simply develop the cone as a cylinder
-				P2out.u[dim.x] = (baseRadius + delta2) * cos(phi2_rad);
-				P2out.u[dim.y] = (baseRadius + delta2) * sin(phi2_rad);
-				P2out.u[dim.z] = coneApex.u[dim.z] - s2;
-			}
-			else
-			{
-				//unrolling
-				PointCoordinateType theta2_rad = phi2_rad * sin_alpha;
-
-				//project the point
-				P2out.u[dim.y] = -s2 * cos(theta2_rad);
-				P2out.u[dim.x] =  s2 * sin(theta2_rad);
-				P2out.u[dim.z] = delta2;
-			}
-
-			CCVector3 N2 = P2out - Pout;
-			N2.normalize();
-
-			clone->setPointNormal(i, N2);
-		}
-
-		//process canceled by user?
-		if (progressCb && !nprogress.oneStep())
-		{
-			delete clone;
-			clone = nullptr;
-			break;
-		}
-	}
-
-	if (progressCb)
-	{
-		progressCb->stop();
-	}
-
-	if (clone)
-	{
-		if (deviationSF)
-		{
-			deviationSF->computeMinAndMax();
-		}
-
-		clone->setName(getName() + ".unrolled");
-		clone->refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
-	}
-
-	return clone;
-}
 
 //void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
 //	double alpha_deg,
@@ -4960,7 +4957,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				{
 					ccLog::Warning(QString("[ccPointCloud::updateVBOs] Failed to initialize VBOs (not enough memory?) (cloud '%1')").arg(getName()));
 					m_vboManager.state = vboSet::FAILED;
-					m_vboManager.vbos.clear();
+					m_vboManager.vbos.resize(0);
 					return false;
 				}
 				else
@@ -4981,11 +4978,13 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 	//			.arg(m_vboManager.vbos[i] ? m_vboManager.vbos[i]->bufferId() : -1));
 	//}
 
+#ifdef _DEBUG
 	if (m_vboManager.totalMemSizeBytes != totalSizeBytesBefore)
 		ccLog::Print(QString("[VBO] VBO(s) (re)initialized for cloud '%1' (%2 Mb = %3% of points could be loaded)")
 			.arg(getName())
 			.arg(static_cast<double>(m_vboManager.totalMemSizeBytes) / (1 << 20), 0, 'f', 2)
 			.arg(static_cast<double>(pointsInVBOs) / size() * 100.0, 0, 'f', 2));
+#endif
 
 	m_vboManager.state = vboSet::INITIALIZED;
 	m_vboManager.updateFlags = 0;
@@ -5074,7 +5073,7 @@ void ccPointCloud::releaseVBOs()
 		assert(m_vboManager.vbos.empty());
 	}
 
-	m_vboManager.vbos.clear();
+	m_vboManager.vbos.resize(0);
 	m_vboManager.hasColors = false;
 	m_vboManager.hasNormals = false;
 	m_vboManager.colorIsSF = false;
@@ -5594,7 +5593,7 @@ void ccPointCloud::clearLOD()
 
 void ccPointCloud::clearFWFData()
 {
-	m_fwfWaveforms.clear();
+	m_fwfWaveforms.resize(0);
 	m_fwfDescriptors.clear();
 }
 

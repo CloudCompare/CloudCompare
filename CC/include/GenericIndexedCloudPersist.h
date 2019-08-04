@@ -42,7 +42,7 @@ public:
 		\param index of the requested point (between 0 and the cloud size minus 1)
 		\return the requested point (or 0 if index is invalid)
 	**/
-	virtual const CCVector3* getPointPersistentPtr(unsigned index) = 0;
+	virtual const CCVector3* getPointPersistentPtr(unsigned index) const = 0;
 };
 
 }

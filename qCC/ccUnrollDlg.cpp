@@ -36,9 +36,9 @@ ccUnrollDlg::ccUnrollDlg(QWidget* parent/*=0*/)
 	axisDimensionChanged(comboBoxAxisDimension->currentIndex());
 }
 
-ccUnrollDlg::Type ccUnrollDlg::getType() const
+ccPointCloud::UnrollMode ccUnrollDlg::getType() const
 {
-	return static_cast<Type>(comboBoxUnrollShapeType->currentIndex());
+	return static_cast<ccPointCloud::UnrollMode>(comboBoxUnrollShapeType->currentIndex());
 }
 
 int ccUnrollDlg::getAxisDimension() const
@@ -83,7 +83,7 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 {
 	switch (index)
 	{
-	case CYLINDER: //cylinder
+	case ccPointCloud::CYLINDER: //cylinder
 	{
 		angleFrame->setVisible(false);
 		autoCenterFrame->setVisible(true);
@@ -91,10 +91,9 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 		groupBoxAxisPosition->setTitle("Axis position");
 		radiusLabel->setText("Radius");
 		axisAutoStateChanged(checkBoxAuto->checkState());
-		unrollRangeGroupBox->setVisible(true);
 	}
 	break;
-	case CONE: //cone
+	case ccPointCloud::CONE: //cone
 	{
 		angleFrame->setVisible(true);
 		autoCenterFrame->setVisible(false);
@@ -102,17 +101,24 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 		radiusLabel->setText("Base radius");
 		groupBoxAxisPosition->setTitle("Cone apex");
 		axisAutoStateChanged(Qt::Unchecked);
-		unrollRangeGroupBox->setVisible(false);
+		//may be disabled if we were in cylinder mode previously
+		doubleSpinBoxAxisX->setDisabled(false);
+		doubleSpinBoxAxisY->setDisabled(false);
+		doubleSpinBoxAxisZ->setDisabled(false);
 	}
 	break;
-	case STRAIGHTENED_CONE: //straightened cone
+	case ccPointCloud::STRAIGHTENED_CONE: //straightened cone (fixed radius)
+	case ccPointCloud::STRAIGHTENED_CONE2: //straightened cone 2
 	{
 		angleFrame->setVisible(true);
 		radiusFrame->setVisible(true);
 		autoCenterFrame->setVisible(false);
 		groupBoxAxisPosition->setTitle("Cone apex");
 		axisAutoStateChanged(Qt::Unchecked);
-		unrollRangeGroupBox->setVisible(false);
+		//may be disabled if we were in cylinder mode previously
+		doubleSpinBoxAxisX->setDisabled(false);
+		doubleSpinBoxAxisY->setDisabled(false);
+		doubleSpinBoxAxisZ->setDisabled(false);
 	}
 	break;
 	};

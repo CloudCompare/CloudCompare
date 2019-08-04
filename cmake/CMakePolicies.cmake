@@ -11,10 +11,6 @@ if ( WIN32 )
     endif()
 endif()
 
-# https://cmake.org/cmake/help/v3.0/policy/CMP0043.html
-if (POLICY CMP0043)
-    cmake_policy(SET CMP0043 OLD)
-    set( POLICY_LIST "${POLICY_LIST} CMP0043" )
+if ( POLICY_LIST )
+	message( "cmake policies active:${POLICY_LIST}")
 endif()
-
-message( "cmake policies active:${POLICY_LIST}")

@@ -29,9 +29,11 @@ class ccApplicationBase : public QApplication
 public:
 	//! This must be called before instantiating the application class so it
 	//! can setup OpenGL first.
-	static void	init(bool noOpenGLSupport);
+	static void	initOpenGL();
 	
-	ccApplicationBase( int &argc, char **argv, const QString &version );
+	ccApplicationBase( int &argc, char **argv, bool isCommandLine, const QString &version );
+	
+	bool isCommandLine() const { return c_CommandLine; }
 	
 	QString versionStr() const;
 	QString versionLongStr( bool includeOS ) const;
@@ -46,6 +48,8 @@ private:
 	QString	m_ShaderPath;
 	QString	m_TranslationPath;
 	QStringList m_PluginPaths;
+	
+	const bool c_CommandLine;
 };
 
 #endif

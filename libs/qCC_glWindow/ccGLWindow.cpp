@@ -62,29 +62,31 @@ static OculusHMD s_oculus;
 #include <vld.h>
 #endif
 
-const float ccGLWindow::MIN_POINT_SIZE_F = 1.0f;
-const float ccGLWindow::MAX_POINT_SIZE_F = 16.0f;
-const float ccGLWindow::MIN_LINE_WIDTH_F = 1.0f;
-const float ccGLWindow::MAX_LINE_WIDTH_F = 16.0f;
+// These extra definitions are required in C++11.
+// In C++17, class-level "static constexpr" is implicitly inline, so these are not required.
+constexpr float ccGLWindow::MIN_POINT_SIZE_F;
+constexpr float ccGLWindow::MAX_POINT_SIZE_F;
+constexpr float ccGLWindow::MIN_LINE_WIDTH_F;
+constexpr float ccGLWindow::MAX_LINE_WIDTH_F;
 
 //Min and max zoom ratio (relative)
-static const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
-static const float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
+constexpr float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
+constexpr float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
 
 //Vaious overlay elements dimensions
-static const double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8; //percentage of the smallest screen dimension
-static const double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0;
-static const float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
-static const float  CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
+constexpr double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8; //percentage of the smallest screen dimension
+constexpr double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0;
+constexpr float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
+constexpr float  CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
 
 //Max click duration for enabling picking mode (in ms)
-static const int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
+constexpr int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
 
 //invalid GL list index
-static const GLuint GL_INVALID_LIST_ID = (~0);
+constexpr GLuint GL_INVALID_LIST_ID = (~0);
 
 //GL filter banner margin (height = 2*margin + current font height)
-static const int CC_GL_FILTER_BANNER_MARGIN = 5;
+constexpr int CC_GL_FILTER_BANNER_MARGIN = 5;
 
 //default interaction flags
 ccGLWindow::INTERACTION_FLAGS ccGLWindow::PAN_ONLY()           { ccGLWindow::INTERACTION_FLAGS flags = INTERACT_PAN | INTERACT_ZOOM_CAMERA | INTERACT_2D_ITEMS | INTERACT_CLICKABLE_ITEMS; return flags; }
@@ -93,13 +95,13 @@ ccGLWindow::INTERACTION_FLAGS ccGLWindow::TRANSFORM_ENTITIES() { ccGLWindow::INT
 
 /*** Persistent settings ***/
 
-static const char c_ps_groupName[] = "ccGLWindow";
-static const char c_ps_perspectiveView[] = "perspectiveView";
-static const char c_ps_objectMode[] = "objectCenteredView";
-static const char c_ps_sunLight[] = "sunLightEnabled";
-static const char c_ps_customLight[] = "customLightEnabled";
-static const char c_ps_pivotVisibility[] = "pivotVisibility";
-static const char c_ps_stereoGlassType[] = "stereoGlassType";
+constexpr char c_ps_groupName[] = "ccGLWindow";
+constexpr char c_ps_perspectiveView[] = "perspectiveView";
+constexpr char c_ps_objectMode[] = "objectCenteredView";
+constexpr char c_ps_sunLight[] = "sunLightEnabled";
+constexpr char c_ps_customLight[] = "customLightEnabled";
+constexpr char c_ps_pivotVisibility[] = "pivotVisibility";
+constexpr char c_ps_stereoGlassType[] = "stereoGlassType";
 
 //Unique GL window ID
 static int s_GlWindowNumber = 0;
@@ -237,6 +239,69 @@ struct HotZone
 		return areaRect;
 	}
 };
+
+//! Rendering params
+struct ccGLWindow::RenderingParams
+{
+	// Next LOD state
+	LODState nextLODState;
+
+	// Pass info
+	unsigned char passIndex = 0;
+	unsigned char passCount = 1;
+
+	// 2D background
+	bool drawBackground = true;
+	bool clearDepthLayer = true;
+	bool clearColorLayer = true;
+
+	// 3D central layer
+	bool draw3DPass = true;
+	bool useFBO = false;
+	bool draw3DCross = false;
+
+	// 2D foreground
+	bool drawForeground = true;
+};
+
+//! Optional output metrics (from computeProjectionMatrix)
+struct ccGLWindow::ProjectionMetrics
+{
+	double zNear = 0.0;
+	double zFar = 0.0;
+	double cameraToBBCenterDist = 0.0;
+	double bbHalfDiag = 0.0;
+};
+
+//! Picking parameters
+struct ccGLWindow::PickingParameters
+{
+	//! Default constructor
+	PickingParameters(	PICKING_MODE _mode = NO_PICKING,
+						int _centerX = 0,
+						int _centerY = 0,
+						int _pickWidth = 5,
+						int _pickHeight = 5,
+						bool _pickInSceneDB = true,
+						bool _pickInLocalDB = true)
+		: mode(_mode)
+		, centerX(_centerX)
+		, centerY(_centerY)
+		, pickWidth(_pickWidth)
+		, pickHeight(_pickHeight)
+		, pickInSceneDB(_pickInSceneDB)
+		, pickInLocalDB(_pickInLocalDB)
+	{}
+
+	PICKING_MODE mode;
+	int centerX;
+	int centerY;
+	int pickWidth;
+	int pickHeight;
+	bool pickInSceneDB;
+	bool pickInLocalDB;
+};
+
 
 ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 						ccGLWindowParent* parent/*=0*/,
@@ -1074,6 +1139,7 @@ void ccGLWindow::setGLViewport(const QRect& rect)
 	//correction for HD screens
 	const int retinaScale = devicePixelRatio();
 	m_glViewport = QRect(rect.left() * retinaScale, rect.top() * retinaScale, rect.width() * retinaScale, rect.height() * retinaScale);
+	invalidateViewport();
 
 	if (context() && context()->isValid())
 	{
@@ -1088,7 +1154,6 @@ void ccGLWindow::resizeGL(int w, int h)
 	//update OpenGL viewport
 	setGLViewport(0, 0, w, h);
 
-	invalidateViewport();
 	invalidateVisualization();
 	deprecate3DLayer();
 
@@ -1473,12 +1538,10 @@ void ccGLWindow::paintGL()
 	}
 	assert(m_context);
 	makeCurrent();
-#endif
 
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-#ifdef CC_GL_WINDOW_USE_QWINDOW
 	glFunc->glViewport(m_glViewport.x(), m_glViewport.y(), m_glViewport.width(), m_glViewport.height());
 #endif
 
@@ -2549,7 +2612,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				int x = margin;
 				yStart += margin;
 
-				static const float radius = static_cast<float>(lodIconSize / 2) - lodPartsRadius;
+				static const float radius = lodIconSize / 2.0f - lodPartsRadius;
 				static const float alpha = static_cast<float>((2 * M_PI) / lodIconParts);
 				int cx = x + lodIconSize / 2 - m_glViewport.width() / 2;
 				int cy = m_glViewport.height() / 2 - (yStart + lodIconSize / 2);
@@ -3214,7 +3277,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 		//compute the aspect ratio
 		double ar = static_cast<double>(m_glViewport.width()) / m_glViewport.height();
 
-		double currentFov_deg = static_cast<double>(getFov());
+		double currentFov_deg = getFov();
 
 		//DGM: take now 'frustumAsymmetry' into account (for stereo rendering)
 		//return ccGLUtils::Perspective(currentFov_deg,ar,zNear,zFar);
@@ -3339,7 +3402,7 @@ ccGLMatrixd ccGLWindow::computeModelViewMatrix(const CCVector3d& cameraCenter) c
 	else //ortho. mode
 	{
 		//apply zoom
-		double totalZoom = static_cast<double>(m_viewportParams.zoom / m_viewportParams.pixelSize);
+		double totalZoom = m_viewportParams.zoom / m_viewportParams.pixelSize;
 		//glScalef(totalZoom,totalZoom,totalZoom);
 		scaleMatd.data()[0] = totalZoom;
 		scaleMatd.data()[5] = totalZoom;
@@ -3515,6 +3578,34 @@ CCVector3d ccGLWindow::getCurrentUpDir() const
 	return axis;
 }
 
+//QString ToString(ccGLWindow::PICKING_MODE mode)
+//{
+//	switch (mode)
+//	{
+//	case ccGLWindow::NO_PICKING:
+//		return "NO_PICKING";
+//	case ccGLWindow::ENTITY_PICKING:
+//		return "ENTITY_PICKING";
+//	case ccGLWindow::ENTITY_RECT_PICKING:
+//		return "ENTITY_RECT_PICKING";
+//	case ccGLWindow::FAST_PICKING:
+//		return "FAST_PICKING";
+//	case ccGLWindow::POINT_PICKING:
+//		return "POINT_PICKING";
+//	case ccGLWindow::TRIANGLE_PICKING:
+//		return "TRIANGLE_PICKING";
+//	case ccGLWindow::POINT_OR_TRIANGLE_PICKING:
+//		return "POINT_OR_TRIANGLE_PICKING";
+//	case ccGLWindow::LABEL_PICKING:
+//		return "LABEL_PICKING";
+//	case ccGLWindow::DEFAULT_PICKING:
+//		return "DEFAULT_PICKING";
+//	}
+//
+//	assert(false);
+//	return QString();
+//}
+
 void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 {
 	//is the picking mode locked?
@@ -3543,12 +3634,14 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 	}
 
 	m_pickingMode = mode;
+
+	//ccLog::Warning(QString("[%1] Picking mode set to: ").arg(m_uniqueID) + ToString(m_pickingMode));
 }
 
 CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 {
-	double xc = static_cast<double>(width() / 2);
-	double yc = static_cast<double>(height() / 2); //DGM FIME: is it scaled coordinates or not?!
+	double xc = width() / 2.0;
+	double yc = height() / 2.0; //DGM FIXME: is it scaled coordinates or not?!
 
 	CCVector3d Q2D;
 	if (m_viewportParams.objectCenteredView)
@@ -4435,7 +4528,7 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 		event->accept();
 
 		//see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
-		float wheelDelta_deg = static_cast<float>(event->delta()) / 8;
+		float wheelDelta_deg = event->delta() / 8.0f;
 		onWheelEvent(wheelDelta_deg);
 
 		emit mouseWheelRotated(wheelDelta_deg);
@@ -4523,11 +4616,12 @@ void ccGLWindow::startPicking(PickingParameters& params)
 	}
 }
 
-void ccGLWindow::processPickingResult(const PickingParameters& params,
-	ccHObject* pickedEntity,
-	int pickedItemIndex,
-	const CCVector3* nearestPoint/*=0*/,
-	const std::unordered_set<int>* selectedIDs/*=0*/)
+void ccGLWindow::processPickingResult(	const PickingParameters& params,
+										ccHObject* pickedEntity,
+										int pickedItemIndex,
+										const CCVector3* nearestPoint/*=nullptr*/,
+										const CCVector3d* nearestPointBC/*=nullptr*/,
+										const std::unordered_set<int>* selectedIDs/*=nullptr*/)
 {
 	//standard "entity" picking
 	if (params.mode == ENTITY_PICKING)
@@ -4548,9 +4642,9 @@ void ccGLWindow::processPickingResult(const PickingParameters& params,
 			||	params.mode == POINT_OR_TRIANGLE_PICKING)
 	{
 		assert(pickedEntity == nullptr || pickedItemIndex >= 0);
-		assert(nearestPoint);
+		assert(nearestPoint && nearestPointBC);
 
-		emit itemPicked(pickedEntity, static_cast<unsigned>(pickedItemIndex), params.centerX, params.centerY, *nearestPoint);
+		emit itemPicked(pickedEntity, static_cast<unsigned>(pickedItemIndex), params.centerX, params.centerY, *nearestPoint, *nearestPointBC);
 	}
 	//fast picking (labels, interactors, etc.)
 	else if (params.mode == FAST_PICKING)
@@ -4569,25 +4663,15 @@ void ccGLWindow::processPickingResult(const PickingParameters& params,
 			if (pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
 				label = new cc2DLabel();
-				label->addPoint(ccHObjectCaster::ToGenericPointCloud(pickedEntity), pickedItemIndex);
+				label->addPickedPoint(ccHObjectCaster::ToGenericPointCloud(pickedEntity), pickedItemIndex);
 				pickedEntity->addChild(label);
 			}
 			else if (pickedEntity->isKindOf(CC_TYPES::MESH))
 			{
+				assert(nearestPointBC);
 				label = new cc2DLabel();
-				ccGenericMesh *mesh = ccHObjectCaster::ToGenericMesh(pickedEntity);
-				ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
-				assert(cloud);
-				CCLib::VerticesIndexes *vertexIndexes = mesh->getTriangleVertIndexes(pickedItemIndex);
-				label->addPoint(cloud, vertexIndexes->i1);
-				label->addPoint(cloud, vertexIndexes->i2);
-				label->addPoint(cloud, vertexIndexes->i3);
-				cloud->addChild(label);
-				if (!cloud->isEnabled())
-				{
-					cloud->setVisible(false);
-					cloud->setEnabled(true);
-				}
+				label->addPickedPoint(ccHObjectCaster::ToGenericMesh(pickedEntity), pickedItemIndex, CCVector2d(nearestPointBC->x, nearestPointBC->y));
+				pickedEntity->addChild(label);
 			}
 
 			if (label)
@@ -4786,7 +4870,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 					if (selectedID < 0 || minDepth < minMinDepth)
 					{
 						selectedID = currentID;
-						pickedItemIndex = (n>1 ? _selectBuf[4] : -1);
+						pickedItemIndex = (n > 1 ? _selectBuf[4] : -1);
 						minMinDepth = minDepth;
 					}
 				}
@@ -4822,15 +4906,33 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	}
 
 	CCVector3 P(0, 0, 0);
+	CCVector3d PBC(0, 0, 0);
 	CCVector3* pickedPoint = nullptr;
-	if (pickedEntity && pickedItemIndex >= 0 && pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
+	CCVector3d* pickedBarycenter = nullptr;
+	if (pickedEntity && pickedItemIndex >= 0)
 	{
-		P = *(static_cast<ccGenericPointCloud*>(pickedEntity)->getPoint(pickedItemIndex));
-		pickedPoint = &P;
+		//we need to retrieve the point coordinates
+		//(and even the barycentric coordinates if the point is picked on a mesh!)
+		if (pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			P = *(static_cast<ccGenericPointCloud*>(pickedEntity)->getPoint(pickedItemIndex));
+			pickedPoint = &P;
+		}
+		else if (pickedEntity->isKindOf(CC_TYPES::MESH))
+		{
+			CCVector2d clickedPos(params.centerX, m_glViewport.height() - 1 - params.centerY);
+			ccGLCameraParameters camera;
+			getGLCameraParameters(camera);
+			CCVector3d Pd(0, 0, 0);
+			static_cast<ccGenericMesh*>(pickedEntity)->trianglePicking(static_cast<unsigned>(pickedItemIndex), clickedPos, camera, Pd, &PBC);
+			P = CCVector3::fromArray(Pd.u);
+			pickedPoint = &P;
+			pickedBarycenter = &PBC;
+		}
 	}
 
 	//we must always emit a signal!
-	processPickingResult(params, pickedEntity, pickedItemIndex, pickedPoint, &selectedIDs);
+	processPickingResult(params, pickedEntity, pickedItemIndex, pickedPoint, pickedBarycenter, &selectedIDs);
 }
 
 void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
@@ -4843,6 +4945,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	int nearestElementIndex = -1;
 	double nearestElementSquareDist = -1.0;
 	CCVector3 nearestPoint(0, 0, 0);
+	CCVector3d nearestPointBC(0, 0, 0);
 	static const unsigned MIN_POINTS_FOR_OCTREE_COMPUTATION = 128;
 
 	static ccGui::ParamStruct::ComputeOctreeForPicking autoComputeOctreeThisSession = ccGui::ParamStruct::ASK_USER;
@@ -4927,10 +5030,10 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 							{
 								autoComputeOctree = (clickedButton == always);
 								//update the global application parameters
-								ccGui::ParamStruct params = ccGui::Parameters();
-								params.autoComputeOctree = autoComputeOctree ? ccGui::ParamStruct::ALWAYS : ccGui::ParamStruct::NEVER;
-								ccGui::Set(params);
-								params.toPersistentSettings();
+								ccGui::ParamStruct globalParams = ccGui::Parameters();
+								globalParams.autoComputeOctree = autoComputeOctree ? ccGui::ParamStruct::ALWAYS : ccGui::ParamStruct::NEVER;
+								ccGui::Set(globalParams);
+								globalParams.toPersistentSettings();
 							}
 						}
 						break;
@@ -4977,12 +5080,13 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 
 					int nearestTriIndex = -1;
 					double nearestSquareDist = 0.0;
-					CCVector3d P;
+					CCVector3d P, barycentricCoords;
 					if (mesh->trianglePicking(	clickedPos,
 												camera,
 												nearestTriIndex,
 												nearestSquareDist,
-												P))
+												P,
+												&barycentricCoords))
 					{
 						if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
@@ -4990,6 +5094,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 							nearestElementIndex = nearestTriIndex;
 							nearestPoint = CCVector3::fromArray(P.u);
 							nearestEntity = mesh;
+							nearestPointBC = barycentricCoords;
 						}
 					}
 				}
@@ -5021,7 +5126,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	//ccLog::Print(QString("[Picking][CPU] Time: %1 ms").arg(dt));
 
 	//we must always emit a signal!
-	processPickingResult(params, nearestEntity, nearestElementIndex, &nearestPoint);
+	processPickingResult(params, nearestEntity, nearestElementIndex, &nearestPoint, &nearestPointBC);
 }
 
 void ccGLWindow::displayNewMessage(	const QString& message,
@@ -5277,7 +5382,7 @@ static void glDrawUnitCircle(QOpenGLContext* context, unsigned char dim, unsigne
 		return;
 	}
 
-	double thetaStep = 2.0 * M_PI / static_cast<double>(steps);
+	double thetaStep = (2.0 * M_PI) / steps;
 	unsigned char dimX = (dim < 2 ? dim + 1 : 0);
 	unsigned char dimY = (dimX < 2 ? dimX + 1 : 0);
 
@@ -5424,7 +5529,7 @@ double ccGLWindow::computeActualPixelSize() const
 {
 	if (!m_viewportParams.perspectiveView)
 	{
-		return static_cast<double>(m_viewportParams.pixelSize / m_viewportParams.zoom);
+		return m_viewportParams.pixelSize / m_viewportParams.zoom;
 	}
 
 	int minScreenDim = std::min(m_glViewport.width(), m_glViewport.height());
@@ -5434,8 +5539,7 @@ double ccGLWindow::computeActualPixelSize() const
 	//Camera center to pivot vector
 	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
 
-	double currentFov_deg = static_cast<double>(getFov());
-	return zoomEquivalentDist * std::tan(std::min(currentFov_deg, 75.0) * CC_DEG_TO_RAD) / minScreenDim; //tan(75) = 3.73 (then it quickly increases!)
+	return zoomEquivalentDist * std::tan(std::min(getFov(), 75.0f) * CC_DEG_TO_RAD) / minScreenDim; //tan(75) = 3.73 (then it quickly increases!)
 }
 
 float ccGLWindow::computePerspectiveZoom() const
@@ -5510,7 +5614,7 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 			//we compute the camera position that gives 'quite' the same view as the ortho one
 			//(i.e. we replace the zoom by setting the camera at the right distance from
 			//the pivot point)
-			double currentFov_deg = static_cast<double>(getFov());
+			double currentFov_deg = getFov();
 			assert(currentFov_deg > ZERO_TOLERANCE);
 			double screenSize = std::min(m_glViewport.width(), m_glViewport.height()) * m_viewportParams.pixelSize; //see how pixelSize is computed!
 			if (screenSize > 0.0)
@@ -6132,6 +6236,10 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	m_captureMode.enabled = false;
 	m_captureMode.zoomFactor = 1.0f;
 	setFontPointSize(getFontPointSize());
+
+	invalidateViewport();
+	invalidateVisualization();
+	redraw(true);
 
 	return outputImage;
 }

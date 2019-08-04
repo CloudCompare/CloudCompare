@@ -151,12 +151,12 @@ void ccPointPairRegistrationDlg::clear()
 		refPointsTableWidget->removeRow(refPointsTableWidget->rowCount() - 1);
 
 	m_alignedPoints.removeAllChildren();
-	m_alignedPoints.clear();
+	m_alignedPoints.resize(0);
 	m_alignedPoints.setGlobalShift(0, 0, 0);
 	m_alignedPoints.setGlobalScale(1.0);
 	m_aligned.entity = 0;
 	m_refPoints.removeAllChildren();
-	m_refPoints.clear();
+	m_refPoints.resize(0);
 	m_refPoints.setGlobalShift(0, 0, 0);
 	m_refPoints.setGlobalScale(1.0);
 	m_reference.entity = 0;
@@ -443,7 +443,7 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 		double rms;
 		ccProgressDialog pDlg(true, this);
 		//first roughly search for the sphere
-		if (CCLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.9))
+		if (CCLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.9) == CCLib::GeometricalAnalysisTools::NoError)
 		{
 			if (radius / searchRadius < 0.5 || radius / searchRadius > 2.0)
 			{
@@ -457,7 +457,7 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 					box.clear();
 					box.add(C - CCVector3(1, 1, 1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
 					box.add(C + CCVector3(1, 1, 1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
-					part = cloud->crop(box,true);
+					part = cloud->crop(box, true);
 					if (part && part->size() > 16)
 						CCLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.99);
 				}
@@ -547,7 +547,7 @@ static QToolButton* CreateDeleteButton()
 static cc2DLabel* CreateLabel(cc2DLabel* label, ccPointCloud* cloud, unsigned pointIndex, QString pointName, ccGenericGLDisplay* display = 0)
 {
 	assert(label);
-	label->addPoint(cloud, pointIndex);
+	label->addPickedPoint(cloud, pointIndex);
 	label->setName(pointName);
 	label->setVisible(true);
 	label->setDisplayedIn2D(false);

@@ -21,11 +21,12 @@
 #include <QWidget>
 
 #include "ccConsole.h"
+#include "ccGLPluginInterface.h"
 #include "ccGLWindow.h"
-#include "ccGLFilterPluginInterface.h"
-#include "ccIOFilterPluginInterface.h"
+#include "ccIOPluginInterface.h"
 #include "ccMainAppInterface.h"
 #include "ccPluginInfoDlg.h"
+#include "ccPluginManager.h"
 #include "ccPluginUIManager.h"
 #include "ccStdPluginInterface.h"
 
@@ -48,12 +49,10 @@ ccPluginUIManager::ccPluginUIManager( ccMainAppInterface *appInterface, QWidget 
 	setupToolbars();
 }
 
-ccPluginUIManager::~ccPluginUIManager()
+void ccPluginUIManager::init()
 {
-}
-
-void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
-{	
+	auto plugins = ccPluginManager::get().pluginList();
+	
 	m_pluginMenu->setEnabled( false );
 	m_glFilterMenu->setEnabled( false );
 	
@@ -71,6 +70,13 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 		{
 			Q_ASSERT( false );
 			continue;
+		}
+		
+		if ( !ccPluginManager::get().isEnabled( plugin ) )
+		{
+			m_plugins.push_back( plugin );
+			
+			continue;	
 		}
 		
 		const QString pluginName = plugin->getName();
@@ -107,7 +113,7 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 				
 			case CC_GL_FILTER_PLUGIN: //GL filter
 			{
-				ccGLFilterPluginInterface *glPlugin = static_cast<ccGLFilterPluginInterface*>( plugin );
+				ccGLPluginInterface *glPlugin = static_cast<ccGLPluginInterface*>( plugin );
 								
 				QAction* action = new QAction( pluginName, this );
 				
@@ -141,7 +147,7 @@ void ccPluginUIManager::init( const ccPluginInterfaceList &plugins )
 				
 			case CC_IO_FILTER_PLUGIN:
 			{
-				ccIOFilterPluginInterface *ioPlugin = static_cast<ccIOFilterPluginInterface*>( plugin );
+				ccIOPluginInterface *ioPlugin = static_cast<ccIOPluginInterface*>( plugin );
 
 				// there are no menus or toolbars for I/O plugins
 				
@@ -269,7 +275,9 @@ void ccPluginUIManager::handleSelectionChanged()
 {
 	const ccHObject::Container &selectedEntities = m_appInterface->getSelectedEntities();
 	
-	for ( ccPluginInterface *plugin : m_plugins )
+	const auto &list = m_plugins;
+	
+	for ( ccPluginInterface *plugin : list )
 	{
 		if ( plugin->getType() == CC_STD_PLUGIN )
 		{
@@ -284,7 +292,7 @@ void ccPluginUIManager::showAboutDialog() const
 {
 	ccPluginInfoDlg	about;
 	
-	about.setPluginPaths( ccPluginManager::pluginPaths() );
+	about.setPluginPaths( ccPluginManager::get().pluginPaths() );
 	about.setPluginList( m_plugins );
 	
 	about.exec();
@@ -402,7 +410,7 @@ void ccPluginUIManager::enableGLFilter()
 	
 	Q_ASSERT( action != nullptr );
 	
-	ccGLFilterPluginInterface	*plugin = action->data().value<ccGLFilterPluginInterface *>();
+	ccGLPluginInterface	*plugin = action->data().value<ccGLPluginInterface *>();
 	
 	if ( plugin == nullptr )
 	{

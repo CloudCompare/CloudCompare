@@ -147,18 +147,18 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::ComputeCharactersi
 		)
 	{
 		//compute the right dimensional coef based on the expected output
-		double dimensionalCoef = 1.0;
+		ScalarType dimensionalCoef = 1.0f;
 		switch (static_cast<Density>(subOption))
 		{
 		case DENSITY_KNN:
 			assert(false);
-			dimensionalCoef = 1.0;
+			dimensionalCoef = 1.0f;
 			break;
 		case DENSITY_2D:
-			dimensionalCoef = M_PI * pow(kernelRadius, 2.0);
+			dimensionalCoef = static_cast<ScalarType>(M_PI * pow(kernelRadius, 2.0));
 			break;
 		case DENSITY_3D:
-			dimensionalCoef = s_UnitSphereVolume * pow(kernelRadius, 3.0);
+			dimensionalCoef = static_cast<ScalarType>(s_UnitSphereVolume * pow(kernelRadius, 3.0));
 			break;
 		default:
 			assert(false);
@@ -169,7 +169,7 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::ComputeCharactersi
 		for (unsigned i = 0; i < numberOfPoints; ++i)
 		{
 			ScalarType s = cloud->getPointScalarValue(i);
-			s = static_cast<ScalarType>(dimensionalCoef * s);
+			s /= dimensionalCoef;
 			cloud->setPointScalarValue(i, s);
 		}
 	}
@@ -741,7 +741,7 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::ComputeWeightedCrossCovarianceMat
 bool GeometricalAnalysisTools::RefineSphereLS(	GenericIndexedCloudPersist* cloud,
 												CCVector3& center,
 												PointCoordinateType& radius,
-												double minReltaiveCenterShift/*=1.0e-3*/)
+												double minRelativeCenterShift/*=1.0e-3*/)
 {
 	if (!cloud || cloud->size() < 5)
 	{
@@ -791,11 +791,11 @@ bool GeometricalAnalysisTools::RefineSphereLS(	GenericIndexedCloudPersist* cloud
 		CCVector3d c0 = c;
 		//deduce new center
 		c = G - derivatives * meanNorm;
-		double r = meanNorm;
+		radius = static_cast<PointCoordinateType>(meanNorm);
 
 		double shift = (c-c0).norm();
-		double relativeShift = shift / r;
-		if (relativeShift < minReltaiveCenterShift)
+		double relativeShift = shift / radius;
+		if (relativeShift < minRelativeCenterShift)
 			break;
 	}
 
@@ -808,12 +808,15 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 	CCVector3& center,
 	PointCoordinateType& radius,
 	double& rms,
-	GenericProgressCallback* progressCb/*=0*/,
+	GenericProgressCallback* progressCb/*=nullptr*/,
 	double confidence/*=0.99*/,
 	unsigned seed/*=0*/)
 {
 	if (!cloud)
+	{
+		assert(false);
 		return InvalidInput;
+	}
 
 	unsigned n = cloud->size();
 	if (n < 4)
@@ -821,8 +824,6 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 
 	assert(confidence < 1.0);
 	confidence = std::min(confidence, 1.0 - FLT_EPSILON);
-
-	const unsigned p = 4;
 
 	//we'll need an array (sorted) to compute the medians
 	std::vector<PointCoordinateType> values;
@@ -838,6 +839,7 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 
 	//number of samples
 	unsigned m = 1;
+	const unsigned p = 4;
 	if (n > p)
 	{
 		m = static_cast<unsigned>(log(1.0 - confidence) / log(1.0 - pow(1.0 - outliersRatio, static_cast<double>(p))));
@@ -869,11 +871,12 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 	unsigned sampleCount = 0;
 	unsigned attempts = 0;
 	double minError = -1.0;
+	std::vector<unsigned> indexes;
+	indexes.resize(p);
 	while (sampleCount < m && attempts < 2*m)
 	{
 		//get 4 random (different) indexes
-		unsigned indexes[4] = { 0, 0, 0, 0 };
-		for (unsigned j = 0; j < 4; ++j)
+		for (unsigned j = 0; j < p; ++j)
 		{
 			bool isOK = false;
 			while (!isOK)
@@ -886,6 +889,7 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 			}
 		}
 
+		assert(p == 4);
 		const CCVector3* A = cloud->getPoint(indexes[0]);
 		const CCVector3* B = cloud->getPoint(indexes[1]);
 		const CCVector3* C = cloud->getPoint(indexes[2]);
@@ -894,7 +898,7 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 		++attempts;
 		CCVector3 thisCenter;
 		PointCoordinateType thisRadius;
-		if (!ComputeSphereFrom4(*A, *B, *C, *D, thisCenter, thisRadius))
+		if (ComputeSphereFrom4(*A, *B, *C, *D, thisCenter, thisRadius) != NoError)
 			continue;
 
 		//compute residuals
@@ -903,10 +907,13 @@ GeometricalAnalysisTools::ErrorCode GeometricalAnalysisTools::DetectSphereRobust
 			PointCoordinateType error = (*cloud->getPoint(i) - thisCenter).norm() - thisRadius;
 			values[i] = error*error;
 		}
-		std::sort(values.begin(), values.end());
+		
+		const unsigned int	medianIndex = n / 2;
+
+		std::nth_element(values.begin(), values.begin() + medianIndex, values.end());
 
 		//the error is the median of the squared residuals
-		double error = values[n / 2];
+		double error = static_cast<double>(values[medianIndex]);
 
 		//we keep track of the solution with the least error
 		if (error < minError || minError < 0.0)

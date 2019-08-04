@@ -151,7 +151,7 @@ public: //features deletion/clearing
 	/** Prefer ccPointCloud::clear by default.
 		\warning DANGEROUS
 	**/
-	void unalloactePoints();
+	void unallocatePoints();
 
 	//! Erases the cloud colors
 	void unallocateColors();
@@ -344,7 +344,7 @@ public: //associated (scan) grid structure
 	//! Adds an associated grid
 	inline bool addGrid(Grid::Shared grid) { try{ m_grids.push_back(grid); } catch (const std::bad_alloc&) { return false; } return true; }
 	//! Remove all associated grids
-	inline void removeGrids() { m_grids.clear(); }
+	inline void removeGrids() { m_grids.resize(0); }
 
 	//! Meshes a scan grid
 	/** \warning The mesh vertices will be this cloud instance!
@@ -446,6 +446,7 @@ public: //other methods
 	bool hasScalarFields() const override;
 	bool hasDisplayedScalarField() const override;
 	void removeFromDisplay(const ccGenericGLDisplay* win) override; //for proper VBO release
+	void setDisplay(ccGenericGLDisplay* win) override;
 
 	//inherited from CCLib::GenericCloud
 	unsigned char testVisibility(const CCVector3& P) const override;
@@ -460,7 +461,7 @@ public: //other methods
 	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
 	void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
 	/** \warning if removeSelectedPoints is true, any attached octree will be deleted. **/
-	ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr) override;
+	ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, bool silent = false) override;
 	void applyRigidTransformation(const ccGLMatrix& trans) override;
 	inline void refreshBB() override { invalidateBoundingBox(); }
 
@@ -632,41 +633,40 @@ public: //other methods
 	**/
 	void hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal);
 
-	//! Unrolls the cloud and its normals on a cylinder
+	enum UnrollMode { CYLINDER = 0, CONE = 1, STRAIGHTENED_CONE = 2, STRAIGHTENED_CONE2 = 3 };
+
+	struct UnrollBaseParams
+	{
+		PointCoordinateType radius;	//!< unrolling cylinder radius (or cone base radius)
+		unsigned char axisDim;		//!< unrolling cylinder/cone axis (X=0, Y=1 or Z=2)
+	};
+	struct UnrollCylinderParams : public UnrollBaseParams
+	{
+		CCVector3 center;			//! A point belonging to the cylinder axis
+	};
+	struct UnrollConeParams : public UnrollBaseParams
+	{
+		CCVector3 apex;				//! Cone apex
+		double coneAngle_deg;		//! Cone aperture angle (in degrees)
+	};
+
+	//! Unrolls the cloud and its normals on a cylinder or a cone
 	/** This method is redundant with the "developCloudOnCylinder" method of CCLib,
 		apart that it can also handle the cloud normals.
-		\param radius unrolling cylinder radius
-		\param coneAxisDim dimension along which the cylinder axis is aligned (X=0, Y=1, Z=2)
-		\param center a point belonging to the cylinder axis (automatically computed if not specified)
+		\param mode unrolling mode
+		\param params unrolling parameters (must match the unrolling mode)
 		\param exportDeviationSF to export the deviation fro the ideal cone as a scalar field
+		\param startAngle_deg start angle (in degrees) - 0 corresponds to +X (east)
+		\param stopAngle_deg stop angle (in degrees)
 		\param progressCb for progress notification
 		\return the unrolled point cloud
 		**/
-	ccPointCloud* unrollOnCylinder(	PointCoordinateType radius,
-									unsigned char coneAxisDim,
-									CCVector3* center = nullptr,
-									bool exportDeviationSF = false,
-									double startAngle_deg = 0.0,
-									double stopAngle_deg = 360.0,
-									CCLib::GenericProgressCallback* progressCb = nullptr) const;
-
-	//! Unrolls the cloud (and its normals) on a cone
-	/** \param coneAngle_deg cone apex angle (between 0 and 180 degrees)
-		\param coneApex cone apex 3D position
-		\param coneAxisDim dimension along which the cone axis is aligned (X=0, Y=1, Z=2)
-		\param developStraightenedCone if true, this method will unroll a straightened version of the cone (as a cylinder)
-		\param baseRadius unrolling straightened cone base radius (necessary if developStraightenedCone is true)
-		\param exportDeviationSF to export the deviation fro the ideal cone as a scalar field
-		\param progressCb for progress notification
-		\return the unrolled point cloud
-	**/
-	ccPointCloud* unrollOnCone(	double coneAngle_deg,
-								const CCVector3& coneApex,
-								unsigned char coneAxisDim,
-								bool developStraightenedCone,
-								PointCoordinateType baseRadius,
-								bool exportDeviationSF = false,
-								CCLib::GenericProgressCallback* progressCb = nullptr) const;
+	ccPointCloud* unroll(	UnrollMode mode,
+							UnrollBaseParams* params,
+							bool exportDeviationSF = false,
+							double startAngle_deg = 0.0,
+							double stopAngle_deg = 360.0,
+							CCLib::GenericProgressCallback* progressCb = nullptr) const;
 
 	//! Adds associated SF color ramp info to current GL context
 	void addColorRampInfo(CC_DRAW_CONTEXT& context);

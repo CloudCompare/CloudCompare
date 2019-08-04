@@ -913,8 +913,8 @@ public:	/***** CELLS POSITION HANDLING *****/
 	**/
 	unsigned char findBestLevelForComparisonWithOctree(const DgmOctree* theOtherOctree) const;
 
-	//! Determines the best subdivision level of the octree to assure a mean number of points per cell
-	/** \param indicativeNumberOfPointsPerCell 'desired' number of points per cell
+	//! Determines the best subdivision level of the octree that gives the average population per cell closest to the input value
+	/** \param indicativeNumberOfPointsPerCell 'desired' average number of points per cell
 		\return the 'best' level
 	**/
 	unsigned char findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const;
@@ -977,8 +977,9 @@ public:	/***** CELLS POSITION HANDLING *****/
 		\param diffB the number of cells of the second octree that are not in the first octree
 		\param cellsA the number of cells of the first octree for the given number of subdivision
 		\param cellsB the number of cells of the second octree for the given number of subdivision
+		\return false if it could not calculate the differences
 	**/
-	void diff(unsigned char octreeLevel, const cellsContainer &codesA, const cellsContainer &codesB, int &diffA, int &diffB, int &cellsA, int &cellsB) const;
+	bool diff(unsigned char octreeLevel, const cellsContainer &codesA, const cellsContainer &codesB, int &diffA, int &diffB, int &cellsA, int &cellsB) const;
 
 	//! Returns the number of cells for a given level of subdivision
 	inline const unsigned& getCellNumber(unsigned char level) const

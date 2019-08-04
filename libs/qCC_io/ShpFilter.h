@@ -31,41 +31,48 @@
 
 class GenericDBFField;
 
-//! ESRI Shapefile file filter (output only)
+//! ESRI Shapefile file filter
 /** See http://www.esri.com/library/whitepapers/pdfs/shapefile.pdf
 **/
 class QCC_IO_LIB_API ShpFilter : public FileIOFilter
 {
 public:
-	//static accessors
-	static inline QString GetFileFilter() { return "SHP entity (*.shp)"; }
-	static inline QString GetDefaultExtension() { return "shp"; }
-
+	ShpFilter();
+	
 	//inherited from FileIOFilter
-	virtual bool importSupported() const override { return true; }
-	virtual bool exportSupported() const override { return true; }
-	virtual CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
-	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(const QString& upperCaseExt) const override;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 
-	//! Default constructor
-	ShpFilter() : FileIOFilter(), m_closedPolylinesAsPolygons(true) {}
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 
 	//! Special method to save multiple entities with attributes
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters);
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters);
 
 	//! Sets whether to consider closed polylines as polygons or not
 	void treatClosedPolylinesAsPolygons(bool state) { m_closedPolylinesAsPolygons = state; }
 	//! Returns whether closed polylines are considered as polygons or not
 	bool areClosedPolylinesAsPolygons() const { return m_closedPolylinesAsPolygons; }
 
-protected:
+	//! Sets whether to save polyline as 2D
+	void save3DPolyAs2D(bool state) { m_save3DPolyAs2D = state; }
 
+	//! Sets whether to save polyline's height in .dbf
+	void save3DPolyHeightInDBF(bool state) { m_save3DPolyHeightInDBF = state; }
+
+private:
 	//! Whether to consider closed polylines as polygons or not
-	bool m_closedPolylinesAsPolygons;
+	bool m_closedPolylinesAsPolygons = true;
+
+	//! Whether to save 3D poly as 2D
+	//! Note that all Polylines from shapefiles are loaded as 3D
+	bool m_save3DPolyAs2D = false;
+
+	//! Whether to save the 3D height in .dbf file
+	bool m_save3DPolyHeightInDBF = false;
+
+	int m_poly2DVertDim = 2;
+
+	double m_dbfFieldImportScale = 1.0;
 };
 
 #endif //CC_SHP_SUPPORT

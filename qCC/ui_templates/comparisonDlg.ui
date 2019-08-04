@@ -13,39 +13,31 @@
   <property name="windowTitle">
    <string>Distance computation</string>
   </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/CC/Old/images/old_cc/old_cc.gif</normaloff>:/CC/Old/images/old_cc/old_cc.gif</iconset>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
-    <layout class="QHBoxLayout">
-     <item>
+    <layout class="QFormLayout" name="formLayout_2">
+     <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Compared</string>
        </property>
       </widget>
      </item>
-     <item>
+     <item row="0" column="1">
       <widget class="QLineEdit" name="compName">
        <property name="readOnly">
         <bool>true</bool>
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout">
-     <item>
+     <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Reference</string>
        </property>
       </widget>
      </item>
-     <item>
+     <item row="1" column="1">
       <widget class="QLineEdit" name="refName">
        <property name="readOnly">
         <bool>true</bool>
@@ -55,128 +47,369 @@
     </layout>
    </item>
    <item>
-    <widget class="QGroupBox" name="preciseGroupBox">
-     <property name="title">
-      <string>Precise results</string>
+    <widget class="QTabWidget" name="preciseResultsTabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_6">
-      <item>
-       <widget class="QTabWidget" name="preciseResultsTabWidget">
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <widget class="QWidget" name="generalParamsTab">
-         <attribute name="title">
-          <string>General parameters</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <item>
-           <layout class="QFormLayout" name="formLayout">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_5">
-              <property name="toolTip">
-               <string>Level of subdivision used for computing the distances</string>
-              </property>
+     <widget class="QWidget" name="generalParamsTab">
+      <attribute name="title">
+       <string>General parameters</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <item>
+        <layout class="QFormLayout" name="formLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="toolTip">
+            <string>Level of subdivision used for computing the distances</string>
+           </property>
+           <property name="text">
+            <string>Octree level</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="octreeLevelComboBox"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="maxDistCheckBox">
+           <property name="toolTip">
+            <string>Acceleration: distances above this limit won't be computed accurately</string>
+           </property>
+           <property name="text">
+            <string>max. distance</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="maxSearchDistSpinBox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+            <string>Acceleration: distances above this limit won't be computed accurately</string>
+           </property>
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="maximum">
+            <double>1000000000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="signedDistCheckBox">
+           <property name="toolTip">
+            <string>compute signed distances (slower)</string>
+           </property>
+           <property name="statusTip">
+            <string>compute signed distances (slower)</string>
+           </property>
+           <property name="text">
+            <string>signed distances</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="flipNormalsCheckBox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>flip normals</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="split3DCheckBox">
+         <property name="toolTip">
+          <string>Generate 3 supplementary scalar fields with distances along each dimension</string>
+         </property>
+         <property name="statusTip">
+          <string>Generate 3 supplementary scalar fields with distances along each dimension</string>
+         </property>
+         <property name="text">
+          <string>split X,Y and Z components</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="filterVisibilityCheckBox">
+         <property name="toolTip">
+          <string>Use the sensor associated to the reference cloud to ignore the points in the compared cloud
+that could not have been seen (hidden/out of range/out of field of view).</string>
+         </property>
+         <property name="text">
+          <string>use reference sensor to filter hidden points</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QCheckBox" name="multiThreadedCheckBox">
+           <property name="text">
+            <string>multi-threaded</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QFrame" name="threadCountFrame">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_6">
               <property name="text">
-               <string>Octree level</string>
+               <string>max thread count</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="octreeLevelComboBox"/>
-            </item>
-            <item row="1" column="0">
-             <widget class="QCheckBox" name="maxDistCheckBox">
+            <item>
+             <widget class="QSpinBox" name="maxThreadCountSpinBox">
               <property name="toolTip">
-               <string>Acceleration: distances above this limit won't be computed accurately</string>
+               <string>Maximum number of threads/cores to be used
+(CC or your computer might not respond for a while if you use all available cores)</string>
               </property>
-              <property name="text">
-               <string>max. distance</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QDoubleSpinBox" name="maxSearchDistSpinBox">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="toolTip">
-               <string>Acceleration: distances above this limit won't be computed accurately</string>
-              </property>
-              <property name="decimals">
-               <number>6</number>
-              </property>
-              <property name="maximum">
-               <double>1000000000.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QCheckBox" name="signedDistCheckBox">
-              <property name="toolTip">
-               <string>compute signed distances (slower)</string>
-              </property>
-              <property name="statusTip">
-               <string>compute signed distances (slower)</string>
-              </property>
-              <property name="text">
-               <string>signed distances</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QCheckBox" name="flipNormalsCheckBox">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>flip normals</string>
+              <property name="suffix">
+               <string notr="true"> / 8</string>
               </property>
              </widget>
             </item>
            </layout>
-          </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>87</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="localModelingTab">
+      <attribute name="title">
+       <string>Local modeling</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Local model</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="localModelComboBox"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QFrame" name="localModelParamsFrame">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
-           <widget class="QCheckBox" name="split3DCheckBox">
-            <property name="toolTip">
-             <string>Generate 3 supplementary scalar fields with distances along each dimension</string>
-            </property>
-            <property name="statusTip">
-             <string>Generate 3 supplementary scalar fields with distances along each dimension</string>
-            </property>
-            <property name="text">
-             <string>split X,Y and Z components</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="filterVisibilityCheckBox">
-            <property name="toolTip">
-             <string>Use the sensor associated to the reference cloud to ignore the points in the compared cloud
-that could not have been seen (hidden/out of range/out of field of view).</string>
-            </property>
-            <property name="text">
-             <string>use reference sensor to filter hidden points</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QCheckBox" name="multiThreadedCheckBox">
-              <property name="text">
-               <string>multi-threaded</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <layout class="QVBoxLayout" name="verticalLayout_2">
+              <item>
+               <widget class="QRadioButton" name="lmKNNRadioButton">
+                <property name="text">
+                 <string>Points (kNN)</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="lmKNNSpinBox">
+                <property name="minimum">
+                 <number>3</number>
+                </property>
+                <property name="value">
+                 <number>6</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item>
-             <spacer name="horizontalSpacer">
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <item>
+               <widget class="QRadioButton" name="lmRadiusRadioButton">
+                <property name="text">
+                 <string>Radius (Sphere)</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="lmRadiusDoubleSpinBox">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="decimals">
+                 <number>6</number>
+                </property>
+                <property name="maximum">
+                 <double>1000000000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="lmOptimizeCheckBox">
+            <property name="toolTip">
+             <string>faster but more ... approximate</string>
+            </property>
+            <property name="text">
+             <string>use the same model for nearby points</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="approxTab">
+      <attribute name="title">
+       <string>Approximate distances</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QFrame" name="approxResultsInnerFrame">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="styleSheet">
+             <string notr="true">color: red;</string>
+            </property>
+            <property name="text">
+             <string>Warning: approximate distances are only provided
+to help advanced users setting the general parameters</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="approxStats">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>150</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout">
+            <item>
+             <spacer>
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -189,300 +422,36 @@ that could not have been seen (hidden/out of range/out of field of view).</strin
              </spacer>
             </item>
             <item>
-             <widget class="QFrame" name="threadCountFrame">
-              <property name="frameShape">
-               <enum>QFrame::StyledPanel</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_8">
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="label_6">
-                 <property name="text">
-                  <string>max thread count</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="maxThreadCountSpinBox">
-                 <property name="toolTip">
-                  <string>Maximum number of threads/cores to be used
-(CC or your computer might not respond for a while if you use all available cores)</string>
-                 </property>
-                 <property name="suffix">
-                  <string notr="true"> / 8</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="localModelingTab">
-         <attribute name="title">
-          <string>Local modeling</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <layout class="QHBoxLayout">
-            <item>
-             <widget class="QLabel" name="label_3">
+             <widget class="QToolButton" name="histoButton">
               <property name="text">
-               <string>Local model</string>
+               <string notr="true">...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../icones.qrc">
+                <normaloff>:/CC/images/ccHistogram.png</normaloff>:/CC/images/ccHistogram.png</iconset>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QComboBox" name="localModelComboBox"/>
-            </item>
            </layout>
           </item>
-          <item>
-           <widget class="QFrame" name="localModelParamsFrame">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_4">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_2">
-                 <item>
-                  <widget class="QRadioButton" name="lmKNNRadioButton">
-                   <property name="text">
-                    <string>Points (kNN)</string>
-                   </property>
-                   <property name="checked">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QSpinBox" name="lmKNNSpinBox">
-                   <property name="minimum">
-                    <number>3</number>
-                   </property>
-                   <property name="value">
-                    <number>6</number>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout">
-                 <item>
-                  <widget class="QRadioButton" name="lmRadiusRadioButton">
-                   <property name="text">
-                    <string>Radius (Sphere)</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QDoubleSpinBox" name="lmRadiusDoubleSpinBox">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="decimals">
-                    <number>6</number>
-                   </property>
-                   <property name="maximum">
-                    <double>1000000000.000000000000000</double>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="lmOptimizeCheckBox">
-               <property name="toolTip">
-                <string>faster but more ... approximate</string>
-               </property>
-               <property name="text">
-                <string>use the same model for nearby points</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="approxTab">
-         <attribute name="title">
-          <string>Approx. results</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_9">
-          <item>
-           <widget class="QFrame" name="approxResultsInnerFrame">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_8">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLabel" name="label_4">
-               <property name="styleSheet">
-                <string notr="true">color: red;</string>
-               </property>
-               <property name="text">
-                <string>Warning: approximate results are only provided
-to help you set the general parameters</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QTableWidget" name="approxStats">
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>150</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout">
-               <item>
-                <spacer>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QToolButton" name="histoButton">
-                 <property name="text">
-                  <string notr="true">...</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../icones.qrc">
-                   <normaloff>:/CC/images/ccHistogram.png</normaloff>:/CC/images/ccHistogram.png</iconset>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout">
-        <item>
-         <spacer>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="computeButton">
-          <property name="styleSheet">
-           <string notr="true">background-color:red; color: white;</string>
-          </property>
-          <property name="text">
-           <string>Compute</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -499,6 +468,16 @@ to help you set the general parameters</string>
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="computeButton">
+       <property name="styleSheet">
+        <string notr="true">background-color:red; color: white;</string>
+       </property>
+       <property name="text">
+        <string>Compute</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="okButton">
@@ -525,86 +504,5 @@ to help you set the general parameters</string>
   <include location="../icones.qrc"/>
   <include location="../icones.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>maxDistCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>maxSearchDistSpinBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>83</x>
-     <y>324</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>215</x>
-     <y>324</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>lmKNNRadioButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>lmKNNSpinBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>100</x>
-     <y>405</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>100</x>
-     <y>429</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>lmKNNRadioButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>lmRadiusDoubleSpinBox</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>100</x>
-     <y>405</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>246</x>
-     <y>429</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>signedDistCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>flipNormalsCheckBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>81</x>
-     <y>180</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>262</x>
-     <y>180</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>multiThreadedCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>threadCountFrame</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>77</x>
-     <y>253</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>313</x>
-     <y>253</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

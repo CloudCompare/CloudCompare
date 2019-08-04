@@ -25,6 +25,8 @@
 #include "ccGLWindow.h"
 #include "mainwindow.h"
 
+#include "db_tree/ccDBRoot.h"
+
 //qCC_db
 #include <ccClipBox.h>
 #include <ccPointCloud.h>
@@ -183,13 +185,20 @@ bool ccClippingBoxTool::addAssociatedEntity(ccHObject* entity)
 		assert(false);
 		return false;
 	}
-
-	bool firstEntity = (m_clipBox && m_clipBox->getContainer().getChildrenNumber() == 0);
-	if (firstEntity)
+	
+	//special case
+	if (entity->isGroup())
 	{
-		restoreToolButton->setEnabled(false);
-		contourGroupBox->setEnabled(false);
+		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
+		{
+			if (!addAssociatedEntity(entity->getChild(i)))
+			{
+				return false;
+			}
+		}
+		return true;
 	}
+
 	if (!m_associatedWin || !m_clipBox)
 	{
 		ccLog::Error(QString("[Clipping box] No associated 3D view or no valid clipping box!"));
@@ -201,6 +210,13 @@ bool ccClippingBoxTool::addAssociatedEntity(ccHObject* entity)
 	{
 		ccLog::Warning(QString("[Clipping box] Can't use entity '%1' cause it's not displayed in the active 3D view!").arg(entity->getName()));
 		return false;
+	}
+
+	bool firstEntity = (m_clipBox && m_clipBox->getContainer().getChildrenNumber() == 0);
+	if (firstEntity)
+	{
+		restoreToolButton->setEnabled(false);
+		contourGroupBox->setEnabled(false);
 	}
 
 	if (!m_clipBox->addAssociatedEntity(entity))
@@ -238,7 +254,7 @@ bool ccClippingBoxTool::addAssociatedEntity(ccHObject* entity)
 	}
 
 	s_maxEdgeLength = -1.0;
-	s_lastContourUniqueIDs.clear();
+	s_lastContourUniqueIDs.resize(0);
 	removeLastContourToolButton->setEnabled(false);
 
 	return true;
@@ -350,7 +366,7 @@ void ccClippingBoxTool::removeLastContour()
 		}
 	}
 
-	s_lastContourUniqueIDs.clear();
+	s_lastContourUniqueIDs.resize(0);
 	removeLastContourToolButton->setEnabled(false);
 }
 
@@ -382,11 +398,16 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 		}
 		clipBox->flagPointsInside(inputCloud, &selectionTable);
 		
-		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, &selectionTable);
-		
-		if (!sliceCloud && !silent)
+		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, &selectionTable, true);
+		if (!sliceCloud)
 		{
-			ccLog::Error("Not enough memory!");
+			if (!silent)
+				ccLog::Error("Not enough memory!");
+		}
+		else if (sliceCloud->size() == 0)
+		{
+			delete sliceCloud;
+			sliceCloud = nullptr;
 		}
 		return sliceCloud;
 	}
@@ -894,7 +915,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 			ccGLMatrix invLocalTrans = localTrans.inverse();
 			PointCoordinateType* preferredOrientation = (preferredDim != -1 ? invLocalTrans.getColumn(preferredDim) : 0);
 
-			assert(cloudSliceCount < outputSlices.size());
+			assert(cloudSliceCount <= outputSlices.size());
 
 			//process all the slices originating from point clouds
 			for (size_t i = 0; i < cloudSliceCount; ++i)
@@ -964,7 +985,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 			{
 				delete slice;
 			}
-			outputSlices.clear();
+			outputSlices.resize(0);
 		}
 
 		if (error)

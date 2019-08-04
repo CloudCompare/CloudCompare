@@ -32,9 +32,11 @@ class ccExternalFactory;
 class ccCommandLineInterface;
 
 //! Plugin type
-enum  CC_PLUGIN_TYPE {	CC_STD_PLUGIN               = 1,
-						CC_GL_FILTER_PLUGIN         = 2,
-						CC_IO_FILTER_PLUGIN         = 4,
+enum  CC_PLUGIN_TYPE
+{
+    CC_STD_PLUGIN       = 1,
+    CC_GL_FILTER_PLUGIN = 2,
+    CC_IO_FILTER_PLUGIN = 4,
 };
 
 //! Standard CC plugin interface
@@ -44,27 +46,28 @@ class ccPluginInterface
 {
 public:	
 	// Contact represents a person and is used for authors and maintainer lists
-	struct Contact {
+	struct Contact
+   {
 		QString name;
 		QString email;
 	};
 	
-	typedef QList<Contact> ContactList;
+	using ContactList = QList<Contact>;
 	
 	// Reference represents a journal article or online post about the plugin where
 	// the user can find more information.
-	struct Reference {
+	struct Reference
+   {
 		QString article;
 		QString	url;
 	};
 	
-	typedef QList<Reference> ReferenceList;
+	using ReferenceList = QList<Reference>;
 	
 public:
-
 	//! Virtual destructor
 	virtual ~ccPluginInterface() = default;
-
+	
 	//! Returns plugin type (standard or OpenGL filter)
 	virtual CC_PLUGIN_TYPE getType() const = 0;
 
@@ -126,7 +129,17 @@ public:
 		\warning: don't use keywords that are already used by the main application or other plugins!
 			(use a unique prefix for all commands if possible)
 	**/
-	virtual void registerCommands(ccCommandLineInterface* cmd) {}
+	virtual void registerCommands(ccCommandLineInterface* cmd) { Q_UNUSED( cmd ); }
+	
+protected:	
+	friend class ccPluginManager;
+
+	//! Set the IID of the plugin (which comes from Q_PLUGIN_METADATA).
+	//! It is used to uniquely identify the plugin.
+	virtual void setIID( const QString& iid ) = 0;
+	
+	//! Get the IID of the plugin.
+	virtual const QString& IID() const = 0;
 };
 
 Q_DECLARE_METATYPE(const ccPluginInterface *);

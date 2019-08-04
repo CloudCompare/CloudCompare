@@ -38,7 +38,6 @@
 
 ccGenericPointCloud::ccGenericPointCloud(QString name)
 	: ccShiftedObject(name)
-	, m_pointsVisibility(0)
 	, m_pointSize(0)
 {
 	setVisible(true);
@@ -89,21 +88,20 @@ void ccGenericPointCloud::invertVisibilityArray()
 		return;
 	}
 
-	size_t count = m_pointsVisibility.size();
-	for (size_t i = 0; i < count; ++i)
+	for (unsigned char& vis : m_pointsVisibility)
 	{
-		m_pointsVisibility[i] = (m_pointsVisibility[i] == POINT_HIDDEN ? POINT_VISIBLE : POINT_HIDDEN);
+		vis = (vis == POINT_HIDDEN ? POINT_VISIBLE : POINT_HIDDEN);
 	}
 }
 
 void ccGenericPointCloud::unallocateVisibilityArray()
 {
-	m_pointsVisibility.clear();
+	m_pointsVisibility.resize(0);
 }
 
 bool ccGenericPointCloud::isVisibilityTableInstantiated() const
 {
-	return 	!m_pointsVisibility.empty();
+	return !m_pointsVisibility.empty();
 }
 
 void ccGenericPointCloud::deleteOctree()
@@ -412,13 +410,29 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 				CCVector3d Q2D;
 				if (noGLTrans)
 				{
-					camera.project(*P, Q2D);
+					if(!camera.project(*P, Q2D, true))
+					{
+						// Point is not in frustrum
+						#ifdef USE_TBB
+							return;
+						#else
+							continue; 
+						#endif
+					}
 				}
 				else
 				{
 					CCVector3 P3D = *P;
 					trans.apply(P3D);
-					camera.project(P3D, Q2D);
+					if(!camera.project(P3D, Q2D, true))
+					{
+						// Point is not in frustrum
+						#ifdef USE_TBB
+							return;
+						#else
+							continue; 
+						#endif
+					}
 				}
 
 				if (	fabs(Q2D.x - clickPos.x) <= pickWidth
@@ -441,7 +455,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 	return (nearestPointIndex >= 0);
 }
 
-CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable/*=nullptr*/) const
+CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable/*=nullptr*/, bool silent/*=false*/) const
 {
 	if (!visTable)
 	{
@@ -468,29 +482,31 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibility
 		}
 	}
 
-	if (pointCount == 0)
-	{
-		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No point in selection");
-		return nullptr;
-	}
-
 	//we create an entity with the 'visible' vertices only
 	CCLib::ReferenceCloud* rc = new CCLib::ReferenceCloud(const_cast<ccGenericPointCloud*>(this));
-	if (rc->reserve(pointCount))
+
+	if (pointCount)
 	{
-		for (unsigned i = 0; i < count; ++i)
+		if (rc->reserve(pointCount))
 		{
-			if (visTable->at(i) == POINT_VISIBLE)
+			for (unsigned i = 0; i < count; ++i)
 			{
-				rc->addPointIndex(i); //can't fail (see above)
+				if (visTable->at(i) == POINT_VISIBLE)
+				{
+					rc->addPointIndex(i); //can't fail (see above)
+				}
 			}
 		}
+		else
+		{
+			ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] Not enough memory!");
+			delete rc;
+			rc = nullptr;
+		}
 	}
-	else
+	else if (!silent)
 	{
-		delete rc;
-		rc = nullptr;
-		ccLog::Error("[ccGenericPointCloud::getTheVisiblePoints] Not enough memory!");
+		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No point in selection");
 	}
 
 	return rc;

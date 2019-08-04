@@ -49,7 +49,7 @@ public:
 	~ccMesh() override;
 	
 	//! Returns class ID
-	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MESH; }
+	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MESH; }
 
 	//! Sets the associated vertices cloud (warning)
 	void setAssociatedCloud(ccGenericPointCloud* cloud);
@@ -96,7 +96,9 @@ public:
 	inline ccGenericPointCloud* getAssociatedCloud() const override { return m_associatedCloud; }
 	void refreshBB() override;
 	bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override;
+	bool interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override;
 	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C) override;
+	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& C) override;
 	void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const override;
 	bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C, bool interpolateColorIfNoTexture) override;
 	bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& C, bool returnColorIfNoTexture) override;
@@ -378,7 +380,7 @@ public:
 	//! Transforms the mesh per-triangle normals
 	void transformTriNormals(const ccGLMatrix& trans);
 
-protected:
+protected: //methods
 
 	//inherited from ccHObject
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
@@ -391,9 +393,9 @@ protected:
 	//! Same as other 'computeInterpolationWeights' method with a set of 3 vertices indexes
 	void computeInterpolationWeights(const CCLib::VerticesIndexes& vertIndexes, const CCVector3& P, CCVector3d& weights) const;
 	//! Same as other 'interpolateNormals' method with a set of 3 vertices indexes
-	bool interpolateNormals(const CCLib::VerticesIndexes& vertIndexes, const CCVector3& P, CCVector3& N, const Tuple3i* triNormIndexes = nullptr);
+	bool interpolateNormals(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, CCVector3& N, const Tuple3i* triNormIndexes = nullptr);
 	//! Same as other 'interpolateColors' method with a set of 3 vertices indexes
-	bool interpolateColors(const CCLib::VerticesIndexes& vertIndexes, const CCVector3& P, ccColor::Rgb& C);
+	bool interpolateColors(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, ccColor::Rgb& C);
 
 	//! Used internally by 'subdivide'
 	bool pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC);
@@ -422,6 +424,8 @@ protected:
 
 	//recursive equivalents of some of ccGenericMesh methods (applied to sub-meshes as well)
 	ccMesh_extended_call1(showNormals, bool, showNormals_extended)
+
+protected: //members
 
 	//! associated cloud (vertices)
 	ccGenericPointCloud* m_associatedCloud;

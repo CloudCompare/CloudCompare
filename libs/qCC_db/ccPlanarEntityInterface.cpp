@@ -3,18 +3,23 @@
 //Local
 #include <ccCylinder.h>
 #include <ccCone.h>
+#include "ccSphere.h"
+#include "ccTorus.h"
 
 //Qt
 #include <QSharedPointer>
 
 ccPlanarEntityInterface::ccPlanarEntityInterface()
 	: m_showNormalVector(false)
+	, m_editable(false)
 {
 }
 
 //unit normal representation
 static QSharedPointer<ccCylinder> c_unitNormalSymbol(0);
 static QSharedPointer<ccCone> c_unitNormalHeadSymbol(0);
+
+
 
 void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVector3& pos, float scale, const ccColor::Rgb* color/*=0*/)
 {
@@ -69,4 +74,249 @@ void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVec
 	glFunc->glTranslatef(0, 0, 0.45f);
 	c_unitNormalHeadSymbol->draw(normalContext);
 	glFunc->glPopMatrix();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+//! editable normal
+
+//Components geometry
+static QSharedPointer<ccCylinder> c_arrowShaft(nullptr);
+static QSharedPointer<ccCone> c_arrowHead(nullptr);
+static QSharedPointer<ccSphere> c_centralSphere(nullptr);
+static QSharedPointer<ccTorus> c_torus(nullptr);
+
+static void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+{
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
+	if (ID > 0)
+	{
+		glFunc->glLoadName(ID);
+	}
+
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
+
+	ccGL::Translate(glFunc, start.x, start.y, start.z);
+	ccGL::Scale(glFunc, scale, scale, scale);
+
+	//we compute scalar prod between the two vectors
+	CCVector3 Z(0.0, 0.0, 1.0);
+	PointCoordinateType ps = Z.dot(direction);
+
+	if (ps < 1)
+	{
+		CCVector3 axis(1, 0, 0);
+		PointCoordinateType angle_deg = static_cast<PointCoordinateType>(180.0);
+
+		if (ps > -1)
+		{
+			//we deduce angle from scalar prod
+			angle_deg = acos(ps) * static_cast<PointCoordinateType>(CC_RAD_TO_DEG);
+
+			//we compute rotation axis with scalar prod
+			axis = Z.cross(direction);
+		}
+
+		ccGL::Rotate(glFunc, angle_deg, axis.x, axis.y, axis.z);
+	}
+
+	if (!c_arrowShaft)
+		c_arrowShaft = QSharedPointer<ccCylinder>(new ccCylinder(0.02f/*0.15f*/, /*0.9f*/0.6f, nullptr, "ArrowShaft", 12));
+	if (!c_arrowHead)
+		c_arrowHead = QSharedPointer<ccCone>(new ccCone(0.05f/*0.3f*/, 0, 0.1f/*0.4f*/, 0, 0, nullptr, "ArrowHead", 12/*24*/));
+
+	glFunc->glTranslatef(0, 0, /*0.45f*/0.3f); // half of 0.9
+	c_arrowShaft->setTempColor(col);
+	c_arrowShaft->draw(context);
+	glFunc->glTranslatef(0, 0, /*0.45f*/0.3f + 0.05f);
+	c_arrowHead->setTempColor(col);
+	c_arrowHead->draw(context);
+
+	glFunc->glPopMatrix();
+}
+
+static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+{
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
+	if (ID > 0)
+		glFunc->glLoadName(ID);
+
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
+
+	ccGL::Translate(glFunc, center.x, center.y, center.z);
+	ccGL::Scale(glFunc, scale, scale, scale);
+
+	//we compute scalar prod between the two vectors
+	CCVector3 Z(0, 0, 1);
+	PointCoordinateType ps = Z.dot(direction);
+
+	if (ps < 1)
+	{
+		CCVector3 axis(1, 0, 0);
+		PointCoordinateType angle_deg = 180;
+
+		if (ps > -1)
+		{
+			//we deduce angle from scalar prod
+			angle_deg = acos(ps) * static_cast<PointCoordinateType>(CC_RAD_TO_DEG);
+
+			//we compute rotation axis with scalar prod
+			axis = Z.cross(direction);
+		}
+
+		ccGL::Rotate(glFunc, angle_deg, axis.x, axis.y, axis.z);
+	}
+
+	if (!c_torus)
+		c_torus = QSharedPointer<ccTorus>(new ccTorus(0.05f/*0.2f*/, 0.10/*0.4f*/, 2.0*M_PI, false, 0, nullptr, "Torus", 12));
+
+	glFunc->glTranslatef(0, 0, 0.45f);
+	c_torus->setTempColor(col);
+	c_torus->draw(context);
+
+	glFunc->glPopMatrix();
+}
+
+//Unused function
+static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+{
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
+	if (ID > 0)
+		glFunc->glLoadName(ID);
+
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
+
+	ccGL::Translate(glFunc, center.x, center.y, center.z);
+	ccGL::Scale(glFunc, radius, radius, radius);
+
+	if (!c_centralSphere)
+		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1, 0, "CentralSphere", 24));
+
+	c_centralSphere->setTempColor(col);
+	c_centralSphere->draw(context);
+
+	glFunc->glPopMatrix();
+}
+
+static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+{
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
+	if (ID > 0)
+		glFunc->glLoadName(ID);
+
+	scale /= 6;
+	DrawUnitArrow(0, center, CCVector3(-1, 0, 0), scale, col, context);
+	DrawUnitArrow(0, center, CCVector3(1, 0, 0), scale, col, context);
+	DrawUnitArrow(0, center, CCVector3(0, -1, 0), scale, col, context);
+	DrawUnitArrow(0, center, CCVector3(0, 1, 0), scale, col, context);
+	DrawUnitArrow(0, center, CCVector3(0, 0, -1), scale, col, context);
+	DrawUnitArrow(0, center, CCVector3(0, 0, 1), scale, col, context);
+}
+
+void ccPlanarEntityInterface::glDrawNormalEditable(CC_DRAW_CONTEXT& context, unsigned int id, const CCVector3& pos, float scale, const ccColor::Rgb* color/*=0*/)
+{
+	if (!MACRO_Draw3D(context))
+		return;
+
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
+	//standard case: list names pushing (1st level)
+	bool pushName = MACRO_DrawEntityNames(context);
+	if (pushName)
+	{
+		glFunc->glPushName(id);
+	}
+
+	{
+		//custom arrow 'context'
+		CC_DRAW_CONTEXT componentContext = context;
+		componentContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the arows don't push their own!
+		componentContext.display = nullptr;
+
+		if (pushName) //2nd level = sub-item
+		{
+			glFunc->glPushName(0); //fake ID, will be replaced by the arrows one if any
+		}
+
+		//force the light on
+		glFunc->glPushAttrib(GL_LIGHTING_BIT);
+		glFunc->glEnable(GL_LIGHT0);
+
+		//! draw normal
+		DrawUnitArrow(NORMAL_ARROW*pushName, pos, getNormal(), scale, color ? *color : ccColor::green, componentContext);
+
+		//! draw interactors
+		if (1/*m_editable*/) {
+			DrawUnitTorus(NORMAL_TORUS*pushName, pos, getNormal(), scale, ccColor::green, componentContext);
+			DrawUnitSphere(CENTER_SPHERE*pushName, pos, scale/2, ccColor::yellow, componentContext);
+			//DrawUnitCross(CROSS*pushName, pos, scale, ccColor::green, componentContext);
+		}
+
+		glFunc->glPopAttrib();
+
+		if (pushName)
+		{
+			glFunc->glPopName();
+		}
+	}
+
+	if (pushName)
+	{
+		glFunc->glPopName();
+	}
+}
+
+bool ccPlanarEntityInterface::move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight)
+{
+	return false;
+}
+
+bool ccPlanarEntityInterface::move3D(const CCVector3d & u)
+{
+	return false;
+}
+
+void ccPlanarEntityInterface::setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrixd & viewMatrix)
+{
+}
+
+void ccPlanarEntityInterface::setActiveComponent(int id)
+{
+}
+
+void ccPlanarEntityInterface::notifyPlanarEntityChanged()
+{
+	//! change by normal, notify the plane or facet
 }

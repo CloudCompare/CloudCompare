@@ -28,6 +28,9 @@
 #include <ccPolyline.h>
 #include <ccSphere.h> //for the pivot symbol
 #include <ccSubMesh.h>
+#include "ccPlane.h"
+#include "ccFacet.h"
+#include "ccPlanarEntityInterface.h"
 
 //CCFbo
 #include <ccFrameBufferObject.h>
@@ -3891,6 +3894,24 @@ void ccGLWindow::onItemPickedFast(ccHObject* pickedEntity, int pickedItemIndex, 
 			cbox->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
 
 			m_activeItems.push_back(cbox);
+		}
+		else if (pickedEntity->isA(CC_TYPES::PLANE)) {
+  			ccPlane* plane = static_cast<ccPlane*>(pickedEntity);
+  			if (plane) {
+  				plane->setActiveComponent(pickedItemIndex);
+  				plane->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
+  
+  				m_activeItems.push_back(plane);
+    			}
+		}
+		else if (pickedEntity->isA(CC_TYPES::FACET)) {
+			ccFacet* plane = static_cast<ccFacet*>(pickedEntity);
+			if (plane) {
+				plane->setActiveComponent(pickedItemIndex);
+				plane->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
+
+				m_activeItems.push_back(plane);
+ 			}
 		}
 	}
 

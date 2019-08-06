@@ -48,6 +48,9 @@ public:
 	//! Destructor
 	~ccFacet() override = default;
 
+	//! for planar entity
+	ccHObject* getPlane() override { return this; }
+
 	//! Creates a facet from a set of points
 	/** The facet boundary can either be the convex hull (maxEdgeLength = 0)
 		or the concave hull (maxEdgeLength > 0).
@@ -74,6 +77,8 @@ public:
 	//inherited from ccPlanarEntityInterface
 	inline CCVector3 getNormal() const override { return CCVector3(m_planeEquation); }
 
+	void notifyPlanarEntityChanged(ccGLMatrix mat, bool trans) override;
+
 	//! Returns associated RMS
 	inline double getRMS() const { return m_rms; }
 	//! Returns associated surface
@@ -84,7 +89,7 @@ public:
 	//! Inverts the facet normal
 	void invertNormal();
 	//! Returns the facet center
-	inline const CCVector3& getCenter() const { return m_center; }
+	CCVector3 getCenter() const override { return m_center; }
 
 	//! Returns polygon mesh (if any)
 	inline ccMesh* getPolygon() { return m_polygonMesh; }

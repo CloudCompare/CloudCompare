@@ -7,10 +7,14 @@
 
 //qCC_gl
 #include <ccGLDrawContext.h>
+#include <QObject>
+
+class ccHObject;
 
 //! Interface for a planar entity
-class QCC_DB_LIB_API ccPlanarEntityInterface : public ccInteractor
+class QCC_DB_LIB_API ccPlanarEntityInterface : public QObject, public ccInteractor
 {
+	Q_OBJECT
 public:
 	
 	//! Default constructor
@@ -21,8 +25,12 @@ public:
 	//! Whether normal vector is shown or not
 	inline bool normalVectorIsShown() const { return m_showNormalVector; }
 
+	virtual CCVector3 getCenter() const = 0;
+
 	//! Returns the entity normal
 	virtual CCVector3 getNormal() const = 0;
+
+	virtual ccHObject* getPlane() = 0;
 
 	//////////////////////////////////////////////////////////////////////////
 
@@ -49,7 +57,10 @@ public:
 	**/
 	void setActiveComponent(int id);
 
-	void notifyPlanarEntityChanged();
+	virtual void notifyPlanarEntityChanged(ccGLMatrix mat, bool trans) = 0;
+
+signals:
+	void planarEntityChanged();
 
 protected: //members
 

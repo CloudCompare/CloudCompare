@@ -800,3 +800,16 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 	}
 	return true;
 }
+
+void ccFacet::notifyPlanarEntityChanged(ccGLMatrix mat, bool trans)
+{
+	if (trans) {
+		m_glTrans = m_glTrans * mat;
+	}
+	else {
+		//rotateGL(mat);
+		applyGLTransformation_recursive(&mat);
+	}
+
+	refreshDisplay();
+}

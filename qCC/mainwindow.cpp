@@ -14230,11 +14230,11 @@ void MainWindow::doActionSelectWorkingPlane()
 	
 	if (haveSelection())
 	{
-		ccPlane* plane = ccHObjectCaster::ToPlane(m_selectedEntities.front());
+		ccPlanarEntityInterface* plane = ccHObjectCaster::ToPlanarEntity(m_selectedEntities.front());
 		if (plane) {
 			plane->showNormalVector(true);
 			m_pbdrPlaneEditDlg->initWithPlane(plane);
-			plane->refreshDisplay();
+			plane->getPlane()->refreshDisplay();
 		}
 	}
 

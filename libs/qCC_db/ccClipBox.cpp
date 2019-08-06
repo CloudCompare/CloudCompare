@@ -421,7 +421,7 @@ bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 	transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
 
 	//rotateGL(transMat);
-	m_glTrans = ccGLMatrix(transMat.inverse().data()) * m_glTrans;
+	m_glTrans = ccGLMatrix(transMat.inverse().data())*m_glTrans;
 	enableGLTransformation(true);
 
 	m_lastOrientation = currentOrientation;
@@ -529,11 +529,6 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		}
 		
 		CCVector3d R = Rb;
-		if (m_glTransEnabled)
-		{
-			m_glTrans.applyRotation(R);
-		}
-
 		CCVector3d RxU = R.cross(u);
 
 		//look for the most parallel dimension
@@ -561,6 +556,11 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		transMat = rotMat * transMat;
 		transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
 
+		//////////////////////////////////////////////////////////////////////////
+		if (m_glTransEnabled)
+		{
+			m_glTrans.applyRotation(R);
+		}
 		m_glTrans = m_glTrans * ccGLMatrix(transMat.inverse().data());
 		enableGLTransformation(true);
 	}

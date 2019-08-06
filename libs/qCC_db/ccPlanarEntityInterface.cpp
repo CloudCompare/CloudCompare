@@ -332,8 +332,25 @@ bool ccPlanarEntityInterface::move2D(int x, int y, int dx, int dy, int screenWid
 		return false;
 	}
 
-	notifyPlanarEntityChanged();
+	//convert mouse position to vector (screen-centered)
+	CCVector3d currentOrientation = PointToVector(x, y, screenWidth, screenHeight);
 
+	ccGLMatrixd rotMat = ccGLMatrixd::FromToRotation(m_lastOrientation, currentOrientation);
+
+	CCVector3 C = getCenter();
+
+	ccGLMatrixd transMat;
+	transMat.setTranslation(-C);
+	transMat = rotMat.inverse() * transMat; //rotMat * transMat;	//XYLIU 
+	transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
+	
+	//m_glTrans = ccGLMatrix(transMat.inverse().data()) * m_glTrans;
+	//enableGLTransformation(true);
+	notifyPlanarEntityChanged(ccGLMatrix(transMat.inverse().data()), false);
+	emit planarEntityChanged();
+
+	m_lastOrientation = currentOrientation;
+	
 	return true;
 }
 
@@ -342,8 +359,6 @@ bool ccPlanarEntityInterface::move3D(const CCVector3d & u)
 	if (m_activeComponent < NORMAL_TORUS) {
 		return false;
 	}
-
-	
 
 	return true;
 }
@@ -373,9 +388,4 @@ void ccPlanarEntityInterface::setActiveComponent(int id)
 	default:
 		m_activeComponent = NONE;
 	}
-}
-
-void ccPlanarEntityInterface::notifyPlanarEntityChanged()
-{
-	//! change by normal, notify the plane or facet
 }

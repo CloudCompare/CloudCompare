@@ -46,6 +46,9 @@ public:
 	**/
 	ccPlane(QString name = QString("Plane"));
 
+	//! for planar entity
+	ccHObject* getPlane() override { return this; }
+
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::PLANE; }
 
@@ -63,7 +66,7 @@ public:
 	PointCoordinateType getYWidth() const { return m_yWidth; }
 
 	//! Returns the center
-	CCVector3 getCenter() const { return m_transformation.getTranslationAsVec3D(); }
+	CCVector3 getCenter() const override { return m_transformation.getTranslationAsVec3D(); }
 
 	//! Sets 'X' width
 	void setXWidth(PointCoordinateType w, bool autoUpdate = true) { m_xWidth = w; if (autoUpdate) updateRepresentation(); }
@@ -73,6 +76,8 @@ public:
 
 	//inherited from ccPlanarEntityInterface
 	CCVector3 getNormal() const override { return m_transformation.getColumnAsVec3D(2); }
+
+	void notifyPlanarEntityChanged(ccGLMatrix mat, bool trans) override;
 
 	//! Sets an image as texture
 	/** \return The created material (if successful)

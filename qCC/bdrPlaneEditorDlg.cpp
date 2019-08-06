@@ -25,6 +25,7 @@
 
 //qCC_db
 #include <ccPlane.h>
+#include <ccFacet.h>
 #include <ccNormalVectors.h>
 
 //qCC_gl
@@ -76,7 +77,7 @@ bdrPlaneEditorDlg::bdrPlaneEditorDlg(ccPickingHub* pickingHub, QWidget* parent)
 	connect(restoreToolButton, &QAbstractButton::clicked, this, &bdrPlaneEditorDlg::restore);
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveParamsAndAccept()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(cancle()));
-
+	
 	//auto disable picking mode on quit
 	connect(this, &QDialog::finished, [&]()
 	{
@@ -95,7 +96,8 @@ void bdrPlaneEditorDlg::updateParams()
 		updatePlane(m_associatedPlane);
 		if (MainWindow::TheInstance())
 			MainWindow::TheInstance()->updatePropertiesView();
-		m_associatedPlane->redrawDisplay();
+
+		m_associatedPlane->getPlane()->redrawDisplay();
 	}
 }
 
@@ -118,7 +120,6 @@ void bdrPlaneEditorDlg::saveParamsAndAccept()
 	if (m_associatedPlane)
 	{
 		updateParams();
-		m_associatedPlane->normalEditState(false);
 	}
 	else //creation
 	{
@@ -139,6 +140,7 @@ void bdrPlaneEditorDlg::saveParamsAndAccept()
 		}
 	}
 
+	disconnectPlane();
 	accept();
 
 //	deleteLater();
@@ -262,17 +264,19 @@ void bdrPlaneEditorDlg::restore()
 	}
 	if (needToApplyRot || needToApplyTrans)
 	{
-		m_associatedPlane->applyGLTransformation_recursive(&trans);
+		m_associatedPlane->getPlane()->applyGLTransformation_recursive(&trans);
 
 		ccLog::Print("[Plane edit] Applied transformation matrix:");
 		ccLog::Print(trans.toString(12, ' ')); //full precision
 	}
 
-	if (m_associatedPlane->getXWidth() != width
-		|| m_associatedPlane->getYWidth() != height)
-	{
-		m_associatedPlane->setXWidth(width, false);
-		m_associatedPlane->setYWidth(height, true);
+	if (m_associatedPlane->getPlane()->isA(CC_TYPES::PLANE)) {
+		ccPlane* plane = static_cast<ccPlane*>(m_associatedPlane);
+		if (plane->getXWidth() != width
+			|| plane->getYWidth() != height) {
+			plane->setXWidth(width, false);
+			plane->setYWidth(height, true);
+		}
 	}
 
 	nxDoubleSpinBox->setValue(m_planePara.normal.x);
@@ -288,15 +292,14 @@ void bdrPlaneEditorDlg::restore()
 
 	if (MainWindow::TheInstance())
 		MainWindow::TheInstance()->updatePropertiesView();
-	m_associatedPlane->redrawDisplay();
+	m_associatedPlane->getPlane()->redrawDisplay();
 }
 
 void bdrPlaneEditorDlg::cancle()
 {
 	restore();
-	if (m_associatedPlane) {
-		m_associatedPlane->normalEditState(false);
-	}
+	disconnectPlane();
+	
 	//deleteLater();
 }
 
@@ -344,16 +347,18 @@ void bdrPlaneEditorDlg::onItemPicked(const PickedItem& pi)
 	}
 }
 
-void bdrPlaneEditorDlg::initWithPlane(ccPlane* plane)
+void bdrPlaneEditorDlg::initWithPlane(ccPlanarEntityInterface* plane)
 {
+	if (!plane) { assert(false); return; }
+
 	if (m_associatedPlane != plane) {
 		if (m_associatedPlane) {
-			m_associatedPlane->normalEditState(false);	// restore old plane edit state
+			disconnectPlane();
 		}
 		m_associatedPlane = plane;
+		m_associatedPlane->normalEditState(true);
+		connect(m_associatedPlane, SIGNAL(planarEntityChanged()), this, SLOT(updateUI()));
 	}
-	if (!m_associatedPlane) { assert(false); return; }
-	m_associatedPlane->normalEditState(true);
 	
 	CCVector3 N = plane->getNormal();
 
@@ -378,8 +383,13 @@ void bdrPlaneEditorDlg::initWithPlane(ccPlane* plane)
 	//dipDirDoubleSpinBox->setValue(dipDir);
 	//upwardCheckBox->setChecked(N.z >= 0);
 
-	wDoubleSpinBox->setValue(plane->getXWidth());
-	hDoubleSpinBox->setValue(plane->getYWidth());
+	ccPlane* plane_ = static_cast<ccPlane*>(plane);
+	if (plane_) {
+		wDoubleSpinBox->setValue(plane_->getXWidth());
+		hDoubleSpinBox->setValue(plane_->getYWidth());
+		m_planePara.size = CCVector2(plane_->getXWidth(), plane_->getYWidth());
+	}
+	
 	
 	CCVector3 C = plane->getCenter();
 	cxAxisDoubleSpinBox->setValue(C.x);
@@ -388,10 +398,34 @@ void bdrPlaneEditorDlg::initWithPlane(ccPlane* plane)
 
 	m_planePara.normal = N;
 	m_planePara.center = C;
-	m_planePara.size = CCVector2(plane->getXWidth(), plane->getYWidth());
+	//m_planePara.size = CCVector2(plane->getXWidth(), plane->getYWidth());
 }
 
-void bdrPlaneEditorDlg::updatePlane(ccPlane* plane)
+void bdrPlaneEditorDlg::disconnectPlane()
+{
+	if (m_associatedPlane) {
+		m_associatedPlane->normalEditState(false);	// restore old plane edit state
+		disconnect(m_associatedPlane, SIGNAL(planarEntityChanged), this, SLOT(updateUI));
+		m_associatedPlane = nullptr;
+	}
+}
+
+void bdrPlaneEditorDlg::updateUI()
+{
+	if (m_associatedPlane) {
+		initWithPlane(m_associatedPlane);
+
+		if (MainWindow::TheInstance())
+			MainWindow::TheInstance()->updatePropertiesView();
+	}
+}
+
+void bdrPlaneEditorDlg::closeEvent(QCloseEvent *)
+{
+	disconnectPlane();
+}
+
+void bdrPlaneEditorDlg::updatePlane(ccPlanarEntityInterface* plane)
 {
 	if (!plane)
 	{
@@ -445,18 +479,22 @@ void bdrPlaneEditorDlg::updatePlane(ccPlane* plane)
 	{
 		trans.setTranslation(trans.getTranslationAsVec3D() + Cd);
 	}
+	
 	if (needToApplyRot || needToApplyTrans)
 	{
-		plane->applyGLTransformation_recursive(&trans);
+		m_associatedPlane->getPlane()->applyGLTransformation_recursive(&trans);
 
 		ccLog::Print("[Plane edit] Applied transformation matrix:");
 		ccLog::Print(trans.toString(12, ' ')); //full precision
 	}
 
-	if (	plane->getXWidth() != width
-		||	plane->getYWidth() != height)
-	{
-		plane->setXWidth(width, false);
-		plane->setYWidth(height, true);
+	ccPlane* plane_ = static_cast<ccPlane*> (plane);
+	if (plane_) {
+		if (plane_->getXWidth() != width
+			|| plane_->getYWidth() != height)
+		{
+			plane_->setXWidth(width, false);
+			plane_->setYWidth(height, true);
+		}
 	}
 }

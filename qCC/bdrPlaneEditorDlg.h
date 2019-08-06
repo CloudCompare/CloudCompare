@@ -32,6 +32,7 @@ class ccGLWindow;
 class ccPlane;
 class ccHObject;
 class ccPickingHub;
+class ccPlanarEntityInterface;
 
 //! Dialog to create (or edit the parameters) of a plane
 class bdrPlaneEditorDlg : public QDialog, public ccPickingListener, public Ui::BDRPlaneEditorDlg
@@ -49,10 +50,12 @@ public:
 	void updateParams();
 
 	//! Links this dialog with an existing plane
-	void initWithPlane(ccPlane* plane);
+	void initWithPlane(ccPlanarEntityInterface* plane);
+
+	void disconnectPlane();
 
 	//! Updates a plane with the current parameters
-	void updatePlane(ccPlane* plane);
+	void updatePlane(ccPlanarEntityInterface* plane);
 
 	//! Inherited from ccPickingListener
 	virtual void onItemPicked(const PickedItem& pi);
@@ -66,13 +69,15 @@ public slots:
 	void cancle();
 
 protected slots:
-
 	void saveParamsAndAccept();
 
 	void preview();
 	void restore();
 
-	
+	void updateUI();
+
+protected:
+	void closeEvent(QCloseEvent *) override;
 
 protected: //members
 
@@ -88,7 +93,7 @@ protected: //members
 	ccGLWindow* m_pickingWin;
 
 	//! Associated plane (if any)
-	ccPlane* m_associatedPlane;
+	ccPlanarEntityInterface* m_associatedPlane;
 
 	//! Picking hub
 	ccPickingHub* m_pickingHub;

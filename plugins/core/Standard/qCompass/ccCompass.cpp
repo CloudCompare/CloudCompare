@@ -4460,8 +4460,8 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 		out->writeTextElement("Ny", QString::asprintf("%f", f->getNormal().y));
 		out->writeTextElement("Nz", QString::asprintf("%f", f->getNormal().z));
 		out->writeTextElement("Cx", QString::asprintf("%f", f->getCenter().x));
-		out->writeTextElement("Cy", QString::asprintf("%f", f->getCenter().x));
-		out->writeTextElement("Cz", QString::asprintf("%f", f->getCenter().x));
+		out->writeTextElement("Cy", QString::asprintf("%f", f->getCenter().y));
+		out->writeTextElement("Cz", QString::asprintf("%f", f->getCenter().z));
 		out->writeTextElement("rms", QString::asprintf("%f", f->getRMS()));
 		out->writeTextElement("surface", QString::asprintf("%f", f->getSurface()));
 	}

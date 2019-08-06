@@ -171,6 +171,7 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 		ccLog::Warning("[PCL] An error occurred while converting PCD cloud to CloudCompare cloud!");
 		return CC_FERR_CONSOLE_ERROR;
 	}
+	ccCloud->setName(QStringLiteral("unnamed"));
 
 	//now we construct a ccGBLSensor
 	{

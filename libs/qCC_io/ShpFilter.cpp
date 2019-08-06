@@ -267,7 +267,7 @@ static bool areVerticesCounterClockwise(const CCLib::GenericIndexedCloudPersist 
 		CCVector3 P2;
 		vertices->getPoint(i, P1);
 		vertices->getPoint((i + 1) % realNumPoints, P2);
-		sum += (P2.u[dim1] - P2.u[dim1]) * (P2.u[dim2] + P1.u[dim2]);
+		sum += (P2.u[dim1] - P1.u[dim1]) * (P2.u[dim2] + P1.u[dim2]);
 	}
 
 	//negative sum = counter-clockwise
@@ -2171,6 +2171,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 					ccLog::Warning("[SHP] No numerical field in the associated DBF file!");
 				}
 			}
+			DBFClose(dbfHandle);
 		}
 		else
 		{

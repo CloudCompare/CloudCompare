@@ -87,7 +87,7 @@ void ccPlane::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (MACRO_Draw3D(context) && normalVectorIsShown())
 		{
 			PointCoordinateType scale = sqrt(m_xWidth * m_yWidth) / 2; //DGM: highly empirical ;)
-			glDrawNormal(context, m_transformation.getTranslationAsVec3D(), scale);
+			glDrawNormal(context, getUniqueIDForDisplay(), m_transformation.getTranslationAsVec3D(), scale, nullptr);
 		}
 	}	
 	

@@ -118,6 +118,7 @@ void bdrPlaneEditorDlg::saveParamsAndAccept()
 	if (m_associatedPlane)
 	{
 		updateParams();
+		m_associatedPlane->normalEditState(false);
 	}
 	else //creation
 	{
@@ -293,6 +294,9 @@ void bdrPlaneEditorDlg::restore()
 void bdrPlaneEditorDlg::cancle()
 {
 	restore();
+	if (m_associatedPlane) {
+		m_associatedPlane->normalEditState(false);
+	}
 	//deleteLater();
 }
 
@@ -343,13 +347,13 @@ void bdrPlaneEditorDlg::onItemPicked(const PickedItem& pi)
 void bdrPlaneEditorDlg::initWithPlane(ccPlane* plane)
 {
 	if (m_associatedPlane != plane) {
+		if (m_associatedPlane) {
+			m_associatedPlane->normalEditState(false);	// restore old plane edit state
+		}
 		m_associatedPlane = plane;
 	}
-	if (!plane)
-	{
-		assert(false);
-		return;
-	}
+	if (!m_associatedPlane) { assert(false); return; }
+	m_associatedPlane->normalEditState(true);
 	
 	CCVector3 N = plane->getNormal();
 

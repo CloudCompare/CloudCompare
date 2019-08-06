@@ -19,8 +19,6 @@ ccPlanarEntityInterface::ccPlanarEntityInterface()
 static QSharedPointer<ccCylinder> c_unitNormalSymbol(0);
 static QSharedPointer<ccCone> c_unitNormalHeadSymbol(0);
 
-
-
 void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVector3& pos, float scale, const ccColor::Rgb* color/*=0*/)
 {
 	//get the set of OpenGL functions (version 2.1)
@@ -211,7 +209,7 @@ static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType 
 	ccGL::Scale(glFunc, radius, radius, radius);
 
 	if (!c_centralSphere)
-		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1, 0, "CentralSphere", 24));
+		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(0.05f, 0, "CentralSphere", 24));
 
 	c_centralSphere->setTempColor(col);
 	c_centralSphere->draw(context);
@@ -240,8 +238,12 @@ static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType s
 	DrawUnitArrow(0, center, CCVector3(0, 0, 1), scale, col, context);
 }
 
-void ccPlanarEntityInterface::glDrawNormalEditable(CC_DRAW_CONTEXT& context, unsigned int id, const CCVector3& pos, float scale, const ccColor::Rgb* color/*=0*/)
+void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, unsigned int id, const CCVector3& pos, float scale, const ccColor::Rgb* color/*=0*/)
 {
+// 	if (!m_editable) {
+// 		glDrawNormal(context, pos, scale, color);
+// 		return;
+// 	}
 	if (!MACRO_Draw3D(context))
 		return;
 
@@ -253,7 +255,7 @@ void ccPlanarEntityInterface::glDrawNormalEditable(CC_DRAW_CONTEXT& context, uns
 		return;
 
 	//standard case: list names pushing (1st level)
-	bool pushName = MACRO_DrawEntityNames(context);
+	bool pushName = MACRO_DrawEntityNames(context) && m_editable;
 	if (pushName)
 	{
 		glFunc->glPushName(id);
@@ -275,12 +277,12 @@ void ccPlanarEntityInterface::glDrawNormalEditable(CC_DRAW_CONTEXT& context, uns
 		glFunc->glEnable(GL_LIGHT0);
 
 		//! draw normal
-		DrawUnitArrow(NORMAL_ARROW*pushName, pos, getNormal(), scale, color ? *color : ccColor::green, componentContext);
+		DrawUnitArrow(NORMAL_ARROW*(m_editable && pushName), pos, getNormal(), scale, color ? *color : ccColor::green, componentContext);
 
 		//! draw interactors
-		if (1/*m_editable*/) {
+		if (m_editable) {
 			DrawUnitTorus(NORMAL_TORUS*pushName, pos, getNormal(), scale, ccColor::green, componentContext);
-			DrawUnitSphere(CENTER_SPHERE*pushName, pos, scale/2, ccColor::yellow, componentContext);
+			DrawUnitSphere(CENTER_SPHERE*pushName, pos, scale, ccColor::yellow, componentContext);
 			//DrawUnitCross(CROSS*pushName, pos, scale, ccColor::green, componentContext);
 		}
 
@@ -298,22 +300,79 @@ void ccPlanarEntityInterface::glDrawNormalEditable(CC_DRAW_CONTEXT& context, uns
 	}
 }
 
+static CCVector3d PointToVector(int x, int y, int screenWidth, int screenHeight)
+{
+	//convert mouse position to vector (screen-centered)
+	CCVector3d v(static_cast<double>(2 * std::max(std::min(x, screenWidth - 1), -screenWidth + 1) - screenWidth) / static_cast<double>(screenWidth),
+		static_cast<double>(screenHeight - 2 * std::max(std::min(y, screenHeight - 1), -screenHeight + 1)) / static_cast<double>(screenHeight),
+		0);
+
+	//square 'radius'
+	double d2 = v.x*v.x + v.y*v.y;
+
+	//projection on the unit sphere
+	if (d2 > 1)
+	{
+		double d = sqrt(d2);
+		v.x /= d;
+		v.y /= d;
+	}
+	else
+	{
+		v.z = sqrt(1 - d2);
+	}
+
+	return v;
+}
+
 bool ccPlanarEntityInterface::move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight)
 {
-	return false;
+	//! rotation
+	if (m_activeComponent != NORMAL_ARROW) {
+		return false;
+	}
+
+	notifyPlanarEntityChanged();
+
+	return true;
 }
 
 bool ccPlanarEntityInterface::move3D(const CCVector3d & u)
 {
-	return false;
+	if (m_activeComponent < NORMAL_TORUS) {
+		return false;
+	}
+
+	
+
+	return true;
 }
 
 void ccPlanarEntityInterface::setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrixd & viewMatrix)
 {
+	m_lastOrientation = PointToVector(x, y, screenWidth, screenHeight);
+	m_viewMatrix = viewMatrix;
 }
 
 void ccPlanarEntityInterface::setActiveComponent(int id)
 {
+	switch (id)
+	{
+	case 1:
+		m_activeComponent = NORMAL_ARROW;
+		break;
+	case 2:
+		m_activeComponent = NORMAL_TORUS;
+		break;
+	case 3:
+		m_activeComponent = CENTER_SPHERE;
+		break;
+	case 4:
+		m_activeComponent = CROSS;
+		break;
+	default:
+		m_activeComponent = NONE;
+	}
 }
 
 void ccPlanarEntityInterface::notifyPlanarEntityChanged()

@@ -38,9 +38,9 @@ public:
 	//! Components
 	enum Components {
 		NONE = 0,
-		NORMAL_ARROW = 1,	// normal vector, for display
+		NORMAL_ARROW = 1,	// normal vector, for rotation
 		NORMAL_TORUS = 2,	// rotate locked by normal direction
-		CENTER_SPHERE = 3,			// upside the normal vector // for rotation
+		CENTER_SPHERE = 3,	// upside the normal vector // for move
 		CROSS = 4,			// center location
 	};
 
@@ -56,7 +56,7 @@ protected: //members
 	//! Draws a normal vector (OpenGL)
 	void glDrawNormal(CC_DRAW_CONTEXT& context, const CCVector3& pos, float scale, const ccColor::Rgb* color = 0);
 
-	void glDrawNormalEditable(CC_DRAW_CONTEXT & context, unsigned int id,  const CCVector3 & pos, float scale, const ccColor::Rgb * color);
+	void glDrawNormal(CC_DRAW_CONTEXT & context, unsigned int id,  const CCVector3 & pos, float scale, const ccColor::Rgb * color);
 
 	//! Whether the facet normal vector should be displayed or not
 	bool m_showNormalVector;

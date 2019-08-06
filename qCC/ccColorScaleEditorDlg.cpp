@@ -637,10 +637,10 @@ bool ccColorScaleEditorDialog::saveCurrentScale()
 
 	//DGM: warning, if the relative state has changed
 	//we must update all the SFs currently relying on this scale!
-	if ((!isRelative || isRelative != wasRelative) && m_mainApp && m_mainApp->dbRootObject())
+	if ((!isRelative || isRelative != wasRelative) && m_mainApp && m_mainApp->dbRootObject(m_mainApp->getCurrentDB()))
 	{
 		ccHObject::Container clouds;
-		m_mainApp->dbRootObject()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
+		m_mainApp->dbRootObject(m_mainApp->getCurrentDB())->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
 		for (size_t i=0; i<clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(clouds[i]);

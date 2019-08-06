@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>bdrSketcherDlg</class>
+ <widget class="QDialog" name="bdrSketcherDlg">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>473</width>
+    <height>33</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Sketcher</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>false</bool>
+  </property>
+  <property name="modal">
+   <bool>false</bool>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
+    <number>2</number>
+   </property>
+   <item>
+    <widget class="QToolButton" name="soPointToolButton">
+     <property name="toolTip">
+      <string>create a point object</string>
+     </property>
+     <property name="statusTip">
+      <string>create a point object</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Stocker/images/stocker/pickpts.png</normaloff>:/CC/Stocker/images/stocker/pickpts.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="soPolylineToolButton">
+     <property name="toolTip">
+      <string>create a polyline made of multiple line segments</string>
+     </property>
+     <property name="statusTip">
+      <string>create a polyline made of multiple line segments</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Stocker/images/stocker/pickline.png</normaloff>:/CC/Stocker/images/stocker/pickline.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="soNPolyToolButton">
+     <property name="toolTip">
+      <string>create a regular polygon from center, radius, and number of sides</string>
+     </property>
+     <property name="statusTip">
+      <string>create a regular polygon from center, radius, and number of sides</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Stocker/images/stocker/polygonbycenter.png</normaloff>:/CC/Stocker/images/stocker/polygonbycenter.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="soRectangleToolButton">
+     <property name="toolTip">
+      <string>create rectangle from 2 corner points</string>
+     </property>
+     <property name="statusTip">
+      <string>create rectangle from 2 corner points</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Stocker/images/stocker/rectangleby2corner.png</normaloff>:/CC/Stocker/images/stocker/rectangleby2corner.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="soCircleToolButton">
+     <property name="toolTip">
+      <string>create a circle</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Stocker/images/stocker/circlebycenter.png</normaloff>:/CC/Stocker/images/stocker/circlebycenter.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="popupMode">
+      <enum>QToolButton::MenuButtonPopup</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="soArcToolButton">
+     <property name="toolTip">
+      <string>create an arc segment</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Stocker/images/stocker/arcbycenter.png</normaloff>:/CC/Stocker/images/stocker/arcbycenter.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="popupMode">
+      <enum>QToolButton::MenuButtonPopup</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="soCurveToolButton">
+     <property name="toolTip">
+      <string>create a curve</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Stocker/images/stocker/beziercurve3.png</normaloff>:/CC/Stocker/images/stocker/beziercurve3.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="popupMode">
+      <enum>QToolButton::MenuButtonPopup</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frame">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QToolButton" name="editingToolButton">
+        <property name="toolTip">
+         <string>editor the selected object</string>
+        </property>
+        <property name="statusTip">
+         <string>editor the selected object</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/editor1.png</normaloff>:/CC/Stocker/images/stocker/editor1.png</iconset>
+        </property>
+        <property name="shortcut">
+         <string>E</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="importFromDBToolButton">
+        <property name="toolTip">
+         <string>Import one or several polylines from DB</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/dbHObjectSymbol.png</normaloff>:/CC/images/dbHObjectSymbol.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="exportSectionsToolButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Export manually defined sections to DB</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="undoToolButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Undo last polyline(s) addition</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveFootprintOutsidetoolButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/footprintdb.png</normaloff>:/CC/Stocker/images/stocker/footprintdb.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveFootprintInsidetoolButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/footprint.png</normaloff>:/CC/Stocker/images/stocker/footprint.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="cancelToolButton">
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="validToolButton">
+        <property name="toolTip">
+         <string>Close the tool</string>
+        </property>
+        <property name="statusTip">
+         <string>Close the tool</string>
+        </property>
+        <property name="text">
+         <string>OK</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionSoCircleByCenter">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/circlebycenter.png</normaloff>:/CC/Stocker/images/stocker/circlebycenter.png</iconset>
+   </property>
+   <property name="text">
+    <string>Circle by center and radius</string>
+   </property>
+   <property name="toolTip">
+    <string>create a circle from center point and radius</string>
+   </property>
+   <property name="statusTip">
+    <string>create a circle from center point and radius</string>
+   </property>
+  </action>
+  <action name="actionSoCircleBy3Points">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/circleby3points.png</normaloff>:/CC/Stocker/images/stocker/circleby3points.png</iconset>
+   </property>
+   <property name="text">
+    <string>Circle by 3 points</string>
+   </property>
+   <property name="toolTip">
+    <string>create a circle by 3 points located in the circumference</string>
+   </property>
+   <property name="statusTip">
+    <string>create a circle by 3 points located in the circumference</string>
+   </property>
+  </action>
+  <action name="actionSoArcByCenter">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/arcbycenter.png</normaloff>:/CC/Stocker/images/stocker/arcbycenter.png</iconset>
+   </property>
+   <property name="text">
+    <string>Arc by center</string>
+   </property>
+   <property name="toolTip">
+    <string>create an arc segment from center, radius, start angle and end angle</string>
+   </property>
+   <property name="statusTip">
+    <string>create an arc segment from center, radius, start angle and end angle</string>
+   </property>
+  </action>
+  <action name="actionSoArcBy3Points">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/arcby3points.png</normaloff>:/CC/Stocker/images/stocker/arcby3points.png</iconset>
+   </property>
+   <property name="text">
+    <string>Arc by 3 points</string>
+   </property>
+   <property name="toolTip">
+    <string>create a circular arc segment from 3 points located in the circumference</string>
+   </property>
+   <property name="statusTip">
+    <string>create a circular arc segment from 3 points located in the circumference</string>
+   </property>
+  </action>
+  <action name="actionSoCurveBezier">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/beziercurve.png</normaloff>:/CC/Stocker/images/stocker/beziercurve.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bezier Curve</string>
+   </property>
+   <property name="toolTip">
+    <string>create a Bezier curve from a series of points</string>
+   </property>
+   <property name="statusTip">
+    <string>create a Bezier curve from a series of points</string>
+   </property>
+  </action>
+  <action name="actionSoCurveCubicBezier">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/beziercurve3.png</normaloff>:/CC/Stocker/images/stocker/beziercurve3.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bezier3 Curve</string>
+   </property>
+   <property name="iconText">
+    <string>Bezier3 Curve</string>
+   </property>
+   <property name="toolTip">
+    <string>create a cubic Bezier curve by dragging two points</string>
+   </property>
+   <property name="statusTip">
+    <string>create a cubic Bezier curve by dragging two points</string>
+   </property>
+  </action>
+  <action name="actionSoCurveBSpline">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/bsplinecurve.png</normaloff>:/CC/Stocker/images/stocker/bsplinecurve.png</iconset>
+   </property>
+   <property name="text">
+    <string>Spline Curve</string>
+   </property>
+   <property name="toolTip">
+    <string>create a B-Spline curve from a series of points</string>
+   </property>
+   <property name="statusTip">
+    <string>create a B-Spline curve from a series of points</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../icones.qrc"/>
+ </resources>
+ <connections/>
+</ui>

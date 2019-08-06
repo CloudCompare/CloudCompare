@@ -71,8 +71,13 @@ class bdrPlaneSegDlg;
 class bdrFacetFilterDlg;
 class bdr2Point5DimEditor;
 class bdrImageEditorPanel;
+class bdrPlaneEditorDlg;
 
 class PolyFitObj;
+
+class StDBMainRoot;
+class StDBBuildingRoot;
+class StDBImageRoot;
 
 namespace Ui {
 	class MainWindow;
@@ -128,31 +133,60 @@ public:
 	//! Returns the number of 3D views
 	int getGLWindowCount() const;
 
+	CC_TYPES::DB_SOURCE getCurrentDB() override;
+
 	//! Tries to load several files (and then pushes them into main DB)
 	/** \param filenames list of all filenames
 		\param fileFilter selected file filter (i.e. type)
 		\param destWin destination window (0 = active one)
 	**/	
-	virtual std::vector<ccHObject*> addToDB( const QStringList& filenames,
+	virtual std::vector<ccHObject*> addToDB( const QStringList& filenames, 
+						  CC_TYPES::DB_SOURCE dest,
 						  QString fileFilter = QString(),
-						  ccGLWindow* destWin = nullptr, 
-						  DB_SOURCE dest = CC_TYPES::DB_BUILDING);
+						  ccGLWindow* destWin = nullptr);
 	
 	//inherited from ccMainAppInterface
 	void addToDB( ccHObject* obj,
+				  CC_TYPES::DB_SOURCE dest,
 				  bool updateZoom = false,
 				  bool autoExpandDBTree = true,
 				  bool checkDimensions = false,
-				  bool autoRedraw = true,
-				  DB_SOURCE dest = CC_TYPES::DB_BUILDING) override;
+				  bool autoRedraw = true ) override;
+
+	void addToDB(ccHObject* obj,
+		bool updateZoom = false,
+		bool autoExpandDBTree = true,
+		bool checkDimensions = false,
+		bool autoRedraw = true) override;
+
+	virtual std::vector<ccHObject*> addToDB_Main(const QStringList& filenames, QString fileFilter = QString(), ccGLWindow* destWin = nullptr) {	
+		return addToDB(filenames, CC_TYPES::DB_MAINDB, fileFilter, destWin); 
+	}
+	virtual std::vector<ccHObject*> addToDB_Build(const QStringList& filenames, QString fileFilter = QString(), ccGLWindow* destWin = nullptr) {
+		return addToDB(filenames, CC_TYPES::DB_BUILDING, fileFilter, destWin);
+	}
+	virtual std::vector<ccHObject*> addToDB_Image(const QStringList& filenames, QString fileFilter = QString(), ccGLWindow* destWin = nullptr) {
+		return addToDB(filenames, CC_TYPES::DB_IMAGE, fileFilter, destWin);
+	}
+
+	void addToDB_Main(ccHObject* obj, bool updateZoom = false, bool autoExpandDBTree = true, bool checkDimensions = false, bool autoRedraw = true) { 
+		addToDB(obj, CC_TYPES::DB_MAINDB, updateZoom, autoExpandDBTree, checkDimensions, autoRedraw); 
+	}
+	void addToDB_Build(ccHObject* obj, bool updateZoom = false, bool autoExpandDBTree = true, bool checkDimensions = false, bool autoRedraw = true) {
+		addToDB(obj, CC_TYPES::DB_BUILDING, updateZoom, autoExpandDBTree, checkDimensions, autoRedraw);
+	}
+	void addToDB_Image(ccHObject* obj, bool updateZoom = false, bool autoExpandDBTree = true, bool checkDimensions = false, bool autoRedraw = true) {
+		addToDB(obj, CC_TYPES::DB_IMAGE, updateZoom, autoExpandDBTree, checkDimensions, autoRedraw);
+	}
 	
 	void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
 	void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
 	void updateOverlayDialogsPlacement() override;
 	void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
-	void setSelectedInDB(ccHObject* obj, bool selected) override;
+	void setSelectedInDB(ccHObject* obj, bool selected) override;	
 	void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
 	void forceConsoleDisplay() override;
+	ccHObject* dbRootObject(CC_TYPES::DB_SOURCE rt) override;
 	ccHObject* dbRootObject() override;
 	inline  QMainWindow* getMainWindow() override { return this; }
 	inline  const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
@@ -169,10 +203,17 @@ public:
 	
 	//! Inherited from ccPickingListener
 	void onItemPicked(const PickedItem& pi) override;
+
+	void unselectAllInDB();
+
+	void switchDatabase(CC_TYPES::DB_SOURCE src);
 	
 	//! Returns real 'dbRoot' object
-	virtual ccDBRoot* db();
-	virtual ccDBRoot* db_image();
+	virtual ccDBRoot* db(CC_TYPES::DB_SOURCE tp);
+	virtual ccDBRoot* db(ccHObject* obj) { return db(obj->getDBSourceType()); }
+	virtual StDBMainRoot* db_main() { return m_ccRoot; }
+	virtual StDBBuildingRoot* db_building() { return m_buildingRoot; }
+	virtual StDBImageRoot* db_image() { return m_imageRoot; }
 
 	//! Adds the "Edit Plane" action to the given menu.
 	/**
@@ -210,9 +251,6 @@ private slots:
 	void doActionGlobalShiftSeetings();
 	//! Toggles the 'show Qt warnings in Console' option
 	void doEnableQtWarnings(bool);
-
-	//! Clones currently selected entities
-	void doActionClone();
 
 	//! Updates entities display target when a gl sub-window is deleted
 	/** \param glWindow the window that is going to be delete
@@ -397,6 +435,9 @@ private slots:
 	void doComputeBestFitBB();
 	void doActionCrop();
 
+	//! Clones currently selected entities
+	void doActionClone();
+
 	void doActionEditCamera();
 	void doActionAdjustZoom();
 	void doActionSaveViewportAsCamera();
@@ -551,13 +592,15 @@ private slots:
 
 	void doActionChangeTabTree(int index);
 
-	void updateDBSelection(DB_SOURCE type);
+	void updateDBSelection(CC_TYPES::DB_SOURCE type);
 
 	void toggleImageOverlay();
 
 	void clearImagePanel();
 
 	void doActionProjectToImage();
+
+	void doActionSelectWorkingPlane();
 
 private:
 	//! Shortcut: asks the user to select one cloud
@@ -641,10 +684,11 @@ private:
 	Ui::MainWindow	*m_UI;
 	
 	//DB & DB Tree
-	ccDBRoot* m_ccRoot;
-
+	StDBMainRoot* m_ccRoot;
+	//Building DB Tree
+	StDBBuildingRoot* m_buildingRoot;
 	//Image DB Tree
-	ccDBRoot* m_imageRoot;
+	StDBImageRoot* m_imageRoot;
 
 	//! Currently selected entities;
 	ccHObject::Container m_selectedEntities;
@@ -745,7 +789,7 @@ private:
 	// XYLIU
 	ccHObject* askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
 
-	void toggleDrawBBox();
+	void doActionToggleDrawBBox();
 
 	void CreateImageEditor();
 
@@ -760,6 +804,8 @@ private:
 	bdr3D4EMDlg* m_pbdr3d4emDlg;
 	bdr2Point5DimEditor* m_pbdrImshow;
 	bdrImageEditorPanel* m_pbdrImagePanel;
+	bdrPlaneEditorDlg* m_pbdrPlaneEditDlg;
+
 	PolyFitObj* polyfit_obj;
 };
 

@@ -87,7 +87,7 @@ void ccPlane::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (MACRO_Draw3D(context) && normalVectorIsShown())
 		{
 			PointCoordinateType scale = sqrt(m_xWidth * m_yWidth) / 2; //DGM: highly empirical ;)
-			glDrawNormal(context, m_transformation.getTranslationAsVec3D(), scale);
+			glDrawNormal(context, getUniqueIDForDisplay(), m_transformation.getTranslationAsVec3D(), scale, nullptr);
 		}
 	}	
 	
@@ -369,4 +369,18 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 	quadMesh->showMaterials(true);
 
 	return material;
+}
+
+void ccPlane::notifyPlanarEntityChanged(ccGLMatrix mat, bool trans)
+{
+	if (trans) {
+		m_glTrans = m_glTrans * mat;
+	}
+	else {
+		//rotateGL(mat);
+		applyGLTransformation_recursive(&mat);
+		notifyNormalUpdate();
+	}
+	
+	refreshDisplay();
 }

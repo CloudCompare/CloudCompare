@@ -132,9 +132,13 @@ class BDBaseHObject : public BDBaseHObject_
 {
 public:
 	BDBaseHObject(QString name = QString()) :
-		BDBaseHObject_(name) {}
+		BDBaseHObject_(name) {
+		setDBSourceType(CC_TYPES::DB_BUILDING);
+	}
 	BDBaseHObject(const ccHObject& s) :
-		BDBaseHObject_(s) {}
+		BDBaseHObject_(s) {
+		setDBSourceType(CC_TYPES::DB_BUILDING);
+	}
 	~BDBaseHObject() {}
 
 	using Container = std::vector<BDBaseHObject *>;
@@ -148,7 +152,6 @@ public:
 //	std::map<std::string, HypothesisGenerator*> building_hypothesis;
 
 public:	
-	virtual DB_SOURCE getDBSourceType() const override { return CC_TYPES::DB_BUILDING; }
 
 	StBuilding* GetBuildingGroup(QString building_name, bool check_enable);
 	ccPointCloud* GetOriginPointCloud(QString building_name, bool check_enable);
@@ -168,23 +171,22 @@ public:
 	std::string GetPathModelObj(std::string building_name);
 
 	stocker::BuildUnit GetBuildingUnit(std::string building_name);
-
 };
 
 class BDImageBaseHObject : public BDBaseHObject_
 {
 public:
 	BDImageBaseHObject(QString name = QString()) :
-		BDBaseHObject_(name) {}
+		BDBaseHObject_(name) {
+		setDBSourceType(CC_TYPES::DB_IMAGE);
+	}
 	BDImageBaseHObject(const ccHObject& s) :
-		BDBaseHObject_(s) {}
+		BDBaseHObject_(s) {
+		setDBSourceType(CC_TYPES::DB_IMAGE);
+	}
 	~BDImageBaseHObject() {}
 
 	using Container = std::vector<BDImageBaseHObject *>;
-
-public:
-	virtual DB_SOURCE getDBSourceType() const override { return CC_TYPES::DB_IMAGE; }
-
 };
 
 

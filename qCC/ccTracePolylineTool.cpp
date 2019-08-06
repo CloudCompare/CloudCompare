@@ -361,7 +361,7 @@ bool ccTracePolylineTool::start()
 	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
 	m_associatedWin->setInteractionMode(	ccGLWindow::TRANSFORM_CAMERA()
 										|	ccGLWindow::INTERACT_SIG_RB_CLICKED
-										|	ccGLWindow::INTERACT_CTRL_PAN
+										|	ccGLWindow::INTERACT_SHIFT_PAN
 										|	ccGLWindow::INTERACT_SIG_MOUSE_MOVED);
 	m_associatedWin->setCursor(Qt::CrossCursor);
 
@@ -558,7 +558,7 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 
 void ccTracePolylineTool::closePolyLine(int, int)
 {
-	if (!m_poly3D || (QApplication::keyboardModifiers() & Qt::ControlModifier)) //CTRL + right click = panning
+	if (!m_poly3D || (QApplication::keyboardModifiers() & Qt::ShiftModifier)) //CTRL + right click = panning
 	{
 		return;
 	}
@@ -684,7 +684,7 @@ void ccTracePolylineTool::exportLine()
 	assert(win);
 
 	if (m_trace_mode == 0) {
-		win->addToDB(m_poly3D);
+		win->addToDB(m_poly3D, win->getCurrentDB());
 	}
 	else if (m_trace_mode == 1 && m_dest_prim_group) {
 		//! close
@@ -722,7 +722,7 @@ void ccTracePolylineTool::exportLine()
 			SetGlobalShiftAndScale(new_plane_cloud);
 			m_dest_prim_group->addChild(new_plane_cloud);
 			new_plane_cloud->setDisplay_recursive(m_dest_prim_group->getDisplay());
-			win->addToDB(new_plane_cloud, false, false);
+			win->addToDB(new_plane_cloud, win->getCurrentDB(), false, false);
 		}
 	}
 

@@ -8,15 +8,21 @@ class ccDBRoot;
 class ccHObject;
 class ccBBox;
 class ccCameraSensor;
-class bdrTraceFootprint;
+class bdrSketcher;
 #include "ccBBox.h"
 
+namespace Ui
+{
+	class bdrImageEditorPanelDlg;
+}
+
 //! Dialog for qRansacSD plugin
-class bdrImageEditorPanel : public QDialog, public Ui::bdrImageEditorPanelDlg
+class bdrImageEditorPanel : public QDialog
 {
 	Q_OBJECT
 
 public:
+	using ProjectedPair = std::pair<ccHObject*, ccHObject*>;
 
 	//! Default constructor
 	explicit bdrImageEditorPanel(bdr2Point5DimEditor* img, ccDBRoot* root, QWidget* parent = 0);
@@ -51,9 +57,16 @@ public:
 	bool isObjChecked();
 	void updateCursorPos(const CCVector3d& P, bool b3d);
 	bool isLinkToMainView();
+
+	void setProjection(std::vector<ccHObject*> project_entities);
+	std::vector<ProjectedPair> getProjectedObjects() { return m_projected_2D_3D; }
+protected:
+	std::vector<ProjectedPair> m_projected_2D_3D;
+
 private:
+	Ui::bdrImageEditorPanelDlg *m_UI;
 	bdr2Point5DimEditor* m_pbdrImshow;
-	bdrTraceFootprint* m_pbdrTraceFP;
+	bdrSketcher* m_pSketcher;
 	ccDBRoot* m_root;
 	ccBBox m_objViewBox;
 	CCVector3d m_objViewUpDir;

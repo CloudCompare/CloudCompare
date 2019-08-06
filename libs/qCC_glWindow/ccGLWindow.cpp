@@ -28,6 +28,9 @@
 #include <ccPolyline.h>
 #include <ccSphere.h> //for the pivot symbol
 #include <ccSubMesh.h>
+#include "ccPlane.h"
+#include "ccFacet.h"
+#include "ccPlanarEntityInterface.h"
 
 //CCFbo
 #include <ccFrameBufferObject.h>
@@ -44,6 +47,7 @@
 #include <QSettings>
 #include <QTouchEvent>
 #include <QWheelEvent>
+#include <QCursor>
 
 #if defined( Q_OS_MAC ) || defined( Q_OS_LINUX )
 #include <QDir>
@@ -352,7 +356,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 #else
 	, m_font(font())
 #endif
-	, m_pivotVisibility(PIVOT_SHOW_ON_MOVE)
+	, m_pivotVisibility(PIVOT_HIDE/*PIVOT_SHOW_ON_MOVE*/)		// TODO: why you delete the viewer toolbar...
 	, m_pivotSymbolShown(false)
 	, m_allowRectangularEntityPicking(true)
 	, m_rectPickingPoly(nullptr)
@@ -396,6 +400,10 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 #endif
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
+
+ 	m_moveCursor = new QCursor(QPixmap(":/CC/Stocker/images/stocker/cursorMove.png"));
+	m_removeCursor = new QCursor(QPixmap(":/CC/Stocker/images/stocker/cursorRemove.png"));
+ 	m_boardCursor = new QCursor(QPixmap(":/CC/Stocker/images/stocker/cursorBoard.png"));
 
 	//GL window own DB
 	m_winDBRoot = new ccHObject(QString("DB.3DView_%1").arg(m_uniqueID));
@@ -581,6 +589,21 @@ void ccGLWindow::makeCurrent()
 	{
 		m_activeFbo->start();
 	}
+}
+
+void ccGLWindow::setRemoveCursor()
+{
+	setCursor(*m_removeCursor);
+}
+
+void ccGLWindow::setCrossCursor()
+{
+	setCursor(QCursor(Qt::CrossCursor));
+}
+
+void ccGLWindow::setMoveCursor()
+{
+	setCursor(*m_moveCursor);
 }
 
 void ccGLWindow::resetCursor()
@@ -2452,7 +2475,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 		}
 	}
 
-	if (m_drawBBox) {
+	if (m_drawBBox && m_bboxDisplayType != BBOX_HIDE) {
 		CONTEXT.drawingFlags |= CC_DRAW_BBOX;
 	}
 	else {
@@ -3872,6 +3895,24 @@ void ccGLWindow::onItemPickedFast(ccHObject* pickedEntity, int pickedItemIndex, 
 
 			m_activeItems.push_back(cbox);
 		}
+		else if (pickedEntity->isA(CC_TYPES::PLANE)) {
+  			ccPlane* plane = static_cast<ccPlane*>(pickedEntity);
+  			if (plane) {
+  				plane->setActiveComponent(pickedItemIndex);
+  				plane->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
+  
+  				m_activeItems.push_back(plane);
+    			}
+		}
+		else if (pickedEntity->isA(CC_TYPES::FACET)) {
+			ccFacet* plane = static_cast<ccFacet*>(pickedEntity);
+			if (plane) {
+				plane->setActiveComponent(pickedItemIndex);
+				plane->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
+
+				m_activeItems.push_back(plane);
+ 			}
+		}
 	}
 
 	emit fastPickingFinished();
@@ -3892,7 +3933,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 	{
 		//right click = panning (2D translation)
 		if (	(m_interactionFlags & INTERACT_PAN)
-			||	((QApplication::keyboardModifiers() & Qt::ControlModifier) && (m_interactionFlags & INTERACT_CTRL_PAN))
+			||	((QApplication::keyboardModifiers() & Qt::ShiftModifier) && (m_interactionFlags & INTERACT_SHIFT_PAN))
 			)
 		{
 			setCursor(QCursor(Qt::SizeAllCursor));
@@ -4035,7 +4076,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			u *= retinaScale;
 
 			bool entityMovingMode = (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
-				|| ((QApplication::keyboardModifiers() & Qt::ControlModifier) && m_customLightEnabled);
+				|| ((QApplication::keyboardModifiers() & Qt::ShiftModifier) && m_customLightEnabled);
 			if (entityMovingMode)
 			{
 				//apply inverse view matrix
@@ -4342,7 +4383,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	}
 	else if (event->buttons() & Qt::MiddleButton)	// XYLIU
 	{
-		float wheelDelta_deg = dy * 2.0f;
+		float wheelDelta_deg = -dy * 2.0f;
 		onWheelEvent(wheelDelta_deg);
 
 		emit mouseWheelRotated(wheelDelta_deg);
@@ -5277,6 +5318,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 						}
 					}
 				}
+				
 			}
 
 			//add children
@@ -5578,11 +5620,12 @@ static void glDrawUnitCircle(QOpenGLContext* context, unsigned char dim, unsigne
 	glFunc->glEnd();
 }
 
-void ccGLWindow::setPivotVisibility(PivotVisibility vis)
+void ccGLWindow::setPivotVisibility(PivotVisibility vis, bool save_setting)
 {
 	m_pivotVisibility = vis;
 
 	//auto-save last pivot visibility settings
+	if (save_setting)
 	{
 		QSettings settings;
 		settings.beginGroup(c_ps_groupName);

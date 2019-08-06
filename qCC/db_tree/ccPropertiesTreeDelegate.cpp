@@ -438,6 +438,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 
 	//name
 	appendRow(ITEM( tr( "Name" ) ), ITEM(_obj->getName(), Qt::ItemIsEditable, OBJECT_NAME));
+	appendRow(ITEM(tr("DBSource")), ITEM(QString::number(int(_obj->getDBSourceType()))));
 
 	//visibility
 	if (!_obj->isVisiblityLocked())
@@ -1874,7 +1875,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		StFootPrint* footprint = ccHObjectCaster::ToStFootPrint(m_currentObject);
 		assert(footprint);
-		SetDoubleSpinBoxValue(editor, footprint ? footprint->getTop() : VALID_MINUS_INT);
+		SetDoubleSpinBoxValue(editor, footprint ? footprint->getHighest() : VALID_MINUS_INT);
 	}
 	break;
 	case OBJECT_BLOCK_TOP:
@@ -2091,7 +2092,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	case OBJECT_SENSOR_DRAW_IMAGE:
 	{
 		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
-			if (item->checkState() == Qt::Checked) {
+			if (item->checkState() != Qt::Checked) {
 				for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 					ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 					if (sensor) sensor->drawImage(false);
@@ -2703,7 +2704,7 @@ void ccPropertiesTreeDelegate::footprintTopChanged(double pos)
 
 	StFootPrint* polyline = ccHObjectCaster::ToStFootPrint(m_currentObject);
 	assert(polyline);
-	polyline->setTop(pos);
+	polyline->setHighest(pos);
 	updateDisplay();
 }
 

@@ -50,7 +50,9 @@ public:
 
 	ccGLWindow* getGLWindow() { return m_glWindow; }
 
-	void projectToImage(ccHObject* obj);
+	ccHObject* projectToImage(ccHObject* obj);
+
+	bool projectBack(ccHObject * obj2D, ccHObject * obj3D);
 
 public: // buttons
 	void ZoomFit();

@@ -36,7 +36,7 @@ static QSharedPointer<ccCone> c_arrowHead(nullptr);
 static QSharedPointer<ccSphere> c_centralSphere(nullptr);
 static QSharedPointer<ccTorus> c_torus(nullptr);
 
-void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+static void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -142,32 +142,32 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 }
 
 //Unused function
-//static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
-//{
-//	//get the set of OpenGL functions (version 2.1)
-//	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-//	assert(glFunc != nullptr);
-//
-//	if (glFunc == nullptr)
-//		return;
-//
-//	if (ID > 0)
-//		glFunc->glLoadName(ID);
-//
-//	glFunc->glMatrixMode(GL_MODELVIEW);
-//	glFunc->glPushMatrix();
-//
-//	ccGL::Translate(glFunc, center.x, center.y, center.z);
-//	ccGL::Scale(glFunc, radius, radius, radius);
-//
-//	if (!c_centralSphere)
-//		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1, 0, "CentralSphere", 24));
-//
-//	c_centralSphere->setTempColor(col);
-//	c_centralSphere->draw(context);
-//
-//	glFunc->glPopMatrix();
-//}
+static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+{
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
+	if (ID > 0)
+		glFunc->glLoadName(ID);
+
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
+
+	ccGL::Translate(glFunc, center.x, center.y, center.z);
+	ccGL::Scale(glFunc, radius, radius, radius);
+
+	if (!c_centralSphere)
+		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1, 0, "CentralSphere", 24));
+
+	c_centralSphere->setTempColor(col);
+	c_centralSphere->draw(context);
+
+	glFunc->glPopMatrix();
+}
 
 static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
@@ -421,7 +421,7 @@ bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 	transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
 
 	//rotateGL(transMat);
-	m_glTrans = ccGLMatrix(transMat.inverse().data()) * m_glTrans;
+	m_glTrans = ccGLMatrix(transMat.inverse().data())*m_glTrans;
 	enableGLTransformation(true);
 
 	m_lastOrientation = currentOrientation;
@@ -529,11 +529,6 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		}
 		
 		CCVector3d R = Rb;
-		if (m_glTransEnabled)
-		{
-			m_glTrans.applyRotation(R);
-		}
-
 		CCVector3d RxU = R.cross(u);
 
 		//look for the most parallel dimension
@@ -561,6 +556,11 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		transMat = rotMat * transMat;
 		transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
 
+		//////////////////////////////////////////////////////////////////////////
+		if (m_glTransEnabled)
+		{
+			m_glTrans.applyRotation(R);
+		}
 		m_glTrans = m_glTrans * ccGLMatrix(transMat.inverse().data());
 		enableGLTransformation(true);
 	}
@@ -743,7 +743,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		DrawUnitArrow(Z_MINUS_ARROW*pushName, CCVector3(center.x, center.y, minC.z), CCVector3(0.0, 0.0, -1.0), scale, ccColor::blue, componentContext);
 		DrawUnitArrow(Z_PLUS_ARROW*pushName, CCVector3(center.x, center.y, maxC.z), CCVector3(0.0, 0.0, 1.0), scale, ccColor::blue, componentContext);
 		DrawUnitCross(CROSS*pushName, minC - CCVector3(scale, scale, scale) / 2.0, scale, ccColor::yellow, componentContext);
-		//DrawUnitSphere(SPHERE*pushName, maxC + CCVector3(scale, scale, scale) / 2.0, scale / 2.0, ccColor::yellow, componentContext);
+		DrawUnitSphere(SPHERE*pushName, maxC + CCVector3(scale, scale, scale) / 2.0, scale / 2.0, ccColor::yellow, componentContext);
 		DrawUnitTorus(X_MINUS_TORUS*pushName, CCVector3(minC.x, center.y, center.z), CCVector3(-1.0, 0.0, 0.0), scale, c_lightRed, componentContext);
 		DrawUnitTorus(Y_MINUS_TORUS*pushName, CCVector3(center.x, minC.y, center.z), CCVector3(0.0, -1.0, 0.0), scale, c_lightGreen, componentContext);
 		DrawUnitTorus(Z_MINUS_TORUS*pushName, CCVector3(center.x, center.y, minC.z), CCVector3(0.0, 0.0, -1.0), scale, c_lightBlue, componentContext);

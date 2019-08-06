@@ -399,7 +399,8 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			scale = sqrt(m_contourPolyline->computeLength());
 		}
-		glDrawNormal(context, m_center, scale, &m_contourPolyline->getColor());
+		//glDrawNormal(context, m_center, scale, &m_contourPolyline->getColor());
+		glDrawNormal(context, getUniqueIDForDisplay(), m_center, scale, &m_contourPolyline->getColor());
 	}
 }
 
@@ -798,4 +799,17 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 		}
 	}
 	return true;
+}
+
+void ccFacet::notifyPlanarEntityChanged(ccGLMatrix mat, bool trans)
+{
+	if (trans) {
+		m_glTrans = m_glTrans * mat;
+	}
+	else {
+		//rotateGL(mat);
+		applyGLTransformation_recursive(&mat);
+	}
+
+	refreshDisplay();
 }

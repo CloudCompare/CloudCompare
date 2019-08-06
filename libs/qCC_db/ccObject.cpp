@@ -105,12 +105,14 @@ ccObject::ccObject(const QString& name)
 	: m_name(name.isEmpty() ? "unnamed" : name)
 	, m_flags(CC_ENABLED)
 	, m_uniqueID(GetNextUniqueID())
+	, m_dbSource(CC_TYPES::DB_MAINDB)
 {}
 
 ccObject::ccObject(const ccObject& object)
 	: m_name(object.m_name)
 	, m_flags(object.m_flags)
 	, m_uniqueID(GetNextUniqueID())
+	, m_dbSource(CC_TYPES::DB_MAINDB)
 {}
 
 void ccObject::setUniqueID(unsigned ID)

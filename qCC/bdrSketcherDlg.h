@@ -24,28 +24,31 @@
 #include "StFootPrint.h"
 
 //qCC_db
-#include <ccHObject.h>
+//#include <ccHObject.h>
+
 
 class ccGenericPointCloud;
 class ccPointCloud;
 class ccGLWindow;
+class ccPlane;
+class QToolButton;
 
 namespace Ui
 {
-	class bdrTraceFootprintDlg;
+	class bdrSketcherDlg;
 }
 
 //! Section extraction tool
-class bdrTraceFootprint : public ccOverlayDialog
+class bdrSketcher : public ccOverlayDialog
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	explicit bdrTraceFootprint(QWidget* parent);
+	explicit bdrSketcher(QWidget* parent);
 	//! Destructor
-	~bdrTraceFootprint() override;
+	~bdrSketcher() override;
 
 	//! Adds a cloud to the 'clouds' pool
 	bool addCloud(ccGenericPointCloud* cloud, bool alreadyInDB = true);
@@ -65,7 +68,9 @@ public:
 	void setTraceViewMode(bool trace_image = true);
 	void SetDestAndGround(ccHObject* dest, double ground);
 
-	void importEntities(ccHObject::Container entities);
+	void setWorkingPlane();
+
+	void importEntities3D(std::vector<std::pair<ccHObject*, ccHObject*>> entities);
 
 protected:
 
@@ -73,25 +78,65 @@ protected:
 	bool reset(bool askForConfirmation = true);
 	void apply();
 	void cancel();
-	void addPointToPolyline(int x, int y);
+
+	void enableSketcherEditingMode(bool);
+	enum SketchObjectMode {
+		SO_POINT,
+		SO_POLYLINE,
+		SO_CIRCLE_CENTER,
+		SO_CIRCLE_3POINT,
+		SO_ARC_CENTER,
+		SO_ARC_3POINT,
+		SO_CURVE_BEZIER,
+		SO_CURVE_BEZIER3,
+		SO_CURVE_BSPLINE,
+		SO_NPOLYGON,
+		SO_RECTANGLE,
+	};
+	void createSketchObject(SketchObjectMode mode);
+	QToolButton* getCurrentSOButton();
+
+	
+
+	///< edit the selected object
+	void enableSelectedSOEditingMode(bool);
+
+
 	void addCurrentPointToPolyline();
 	void closeFootprint();
-	void closePolyLine(int x=0, int y=0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
-	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
-	void enableSectionEditingMode(bool);
+
 	void doImportPolylinesFromDB();
 	void setVertDimension(int);
-	void entitySelected(ccHObject*);
-	void generateOrthoSections();
-	void extractPoints();
+	
 	void exportFootprints();
-	void unfoldPoints();
 	void exportSections();
 	void exportFootprintInside();
 	void exportFootprintOutside();
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
+
+	//////////////////////////////////////////////////////////////////////////
+
+	//! echo glview signals
+	void echoLeftButtonClicked(int x, int y);
+	void echoRightButtonClicked(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
+	void changePickingCursor();
+
+	struct SOPickingParams;
+	void startCPUPointPicking(const SOPickingParams& params);
+
+	void echoMouseMoved(int x, int y, Qt::MouseButtons buttons);
+	void echoItemPicked(ccHObject* entity, unsigned subEntityID, int x, int y, const CCVector3& P, const CCVector3d& uvw);
+	void echoButtonReleased();
+	void entitySelected(ccHObject*);
+
+	///< polyline
+	void addPointToPolyline(int x, int y);
+	void closePolyLine(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
+	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
+
+	//////////////////////////////////////////////////////////////////////////
 
 protected:
 
@@ -101,28 +146,13 @@ protected:
 	//! Cancels currently edited polyline
 	void cancelCurrentPolyline();
 
+	void setDefaultInteractionPickingMode();
+
 	//! Deletes currently selected polyline
 	void deleteSelectedPolyline();
 
 	//! Adds a 'step' on the undo stack
 	void addUndoStep();
-
-	//! Convert one or several ReferenceCloud instances to a single cloud and add it to the main DB
-	bool extractSectionCloud(	const std::vector<CCLib::ReferenceCloud*>& refClouds,
-								unsigned sectionIndex,
-								bool& cloudGenerated);
-
-	//! Extract the contour from a set of 2D points and add it to the main DB
-	bool extractSectionContour(	const ccPolyline* originalSection,
-								const ccPointCloud* originalSectionCloud,
-								ccPointCloud* unrolledSectionCloud, //'2D' cloud with Z = 0
-								unsigned sectionIndex,
-								ccContourExtractor::ContourType type,
-								PointCoordinateType maxEdgeLength,
-								bool multiPass,
-								bool splitContour,
-								bool& contourGenerated,
-								bool visualDebugMode = false);
 
 	//! Creates (if necessary) and returns a group to store entities in the main DB
 	ccHObject* getExportGroup(unsigned& defaultGroupID, const QString& defaultName);
@@ -135,38 +165,42 @@ protected:
 	};
 
 	//! Imported entity
-	template<class EntityType> struct ImportedEntity
+	template<class EntityType = ccHObject> struct SketcherObject
 	{
 		//! Default constructor
-		ImportedEntity()
+		SketcherObject()
 			: entity(0)
 			, originalDisplay(nullptr)
 			, isInDB(false)
 			, backupColorShown(false)
 			, backupWidth(1)
+			, isModified(false)
 		{}
 		
 		//! Copy constructor
-		ImportedEntity(const ImportedEntity& section)
+		SketcherObject(const SketcherObject& section)
 			: entity(section.entity)
 			, originalDisplay(section.originalDisplay)
 			, isInDB(section.isInDB)
 			, backupColorShown(section.backupColorShown)
 			, backupWidth(section.backupWidth)
+			, isModified(section.isModified)
 		{
 			backupColor = section.backupColor;
 		}
 		
 		//! Constructor from an entity
-		ImportedEntity(EntityType* e, bool alreadyInDB)
+		SketcherObject(EntityType* e, bool alreadyInDB)
 			: entity(e)
 			, originalDisplay(e->getDisplay())
 			, isInDB(alreadyInDB)
 		{
+#if 0
 			//specific case: polylines
 			if (e->isA(CC_TYPES::POLY_LINE))
 			{
 				ccPolyline* poly = reinterpret_cast<ccPolyline*>(e);
+				
 				//backup color
 				backupColor = poly->getColor();
 				backupColorShown = poly->colorsShown();
@@ -191,13 +225,16 @@ protected:
 					else type = FOOTPRINT_NORMAL;
 				}
 			}
+#endif
 		}
 
-		bool operator ==(const ImportedEntity& ie) { return entity == ie.entity; }
-		
+		bool operator ==(const SketcherObject& ie) { return entity == ie.entity; }
+				
 		EntityType* entity;
+		ccHObject* projected_from;
 		ccGenericGLDisplay* originalDisplay;
 		bool isInDB;
+		bool isModified;
 
 		//backup info (for polylines only)
 		ccColor::Rgb backupColor;
@@ -206,10 +243,12 @@ protected:
 
 		//! for footprint only
 		POLYLINE_TYPE type;
+
+		SketchObjectMode soMode;
 	};
 
 	//! Section
-	using Section = ImportedEntity<ccPolyline>;
+	using Section = SketcherObject<ccHObject>;
 
 	//! Releases a polyline
 	/** The polyline is removed from display. Then it is
@@ -218,7 +257,7 @@ protected:
 	void releasePolyline(Section* section);
 
 	//! Cloud
-	using Cloud = ImportedEntity<ccGenericPointCloud>;
+	using Cloud = SketcherObject<ccGenericPointCloud>;
 
 	//! Type of the pool of active sections
 	using SectionPool = QList<Section>;
@@ -233,26 +272,31 @@ protected:
 		//...			= 2,
 		//...			= 4,
 		//...			= 8,
-		//...			= 16,
-		PAUSED			= 32,
-		STARTED			= 64,
-		RUNNING			= 128,
+		PS_EDITING			= 16,
+		PS_PAUSED			= 32,
+		PS_STARTED			= 64,
+		PS_RUNNING			= 128,
 	};
 
 	//! Deselects the currently selected polyline
-	void selectPolyline(Section* poly, bool autoRefreshDisplay = true);
+	void selectSketcherObject(Section* poly, bool autoRefreshDisplay = true);
 
 	//! Updates the global clouds bounding-box
 	void updateCloudsBox();
 
+	void setPickingRepoButtonDown();
+	void setPickingRepoHover();
+
 private: //members
-	Ui::bdrTraceFootprintDlg	*m_UI;
+	Ui::bdrSketcherDlg	*m_UI;
 	
 	//! Pool of active sections
 	SectionPool m_sections;
 
 	//! Selected polyline (if any)
-	Section* m_selectedPoly;
+	Section* m_selectedSO;
+
+	CCVector3* m_selectedVert;
 
 	//! Pool of clouds
 	CloudPool m_clouds;
@@ -275,6 +319,55 @@ private: //members
 	ccHObject* m_dest_obj;
 
 	bool m_trace_image;
+
+	ccPlane* m_workingPlane;
+
+	SketchObjectMode m_currentSOMode;
+
+	struct PickingVertex {
+		PickingVertex() :
+			buttonState(Qt::NoButton)
+			, nearestEntitiy(nullptr)
+			, nearestVert(nullptr)
+			, nearestVertIndex(-1)
+			, selectedEntitiy(nullptr)
+			, selectedVert(nullptr)
+			, selectedVertIndex(-1)
+		{}
+
+		void reset() {
+			picking_repo.clear();
+			resetSelected();
+			resetNearest();
+		}
+
+		void resetNearest() {
+			nearestEntitiy = nullptr;
+			nearestVert = nullptr;
+			nearestVertIndex = -1;
+		}
+
+		void resetSelected() {
+			selectedEntitiy = nullptr;
+			selectedVert = nullptr;
+			selectedVertIndex = -1;
+		}
+
+		Qt::MouseButtons buttonState;	// button is down or just hover
+
+		SectionPool picking_repo;	// for picking
+
+		//! mouse move
+		ccHObject* nearestEntitiy;
+		CCVector3* nearestVert;
+		int nearestVertIndex;
+		//! picking result
+		ccHObject* selectedEntitiy;
+		CCVector3* selectedVert;
+		int selectedVertIndex;
+	};
+
+	PickingVertex* m_pickingVertex;
 };
 
 #endif //BDR_TRACE_FOOTPRINT_HEADER

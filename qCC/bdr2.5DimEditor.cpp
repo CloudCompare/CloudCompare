@@ -46,6 +46,7 @@
 #include <assert.h>
 
 #include "stocker_parser.h"
+#include "vcg/space/intersection3.h"
 
 bdr2Point5DimEditor::bdr2Point5DimEditor()
 	: m_glWindow(nullptr)
@@ -98,12 +99,11 @@ void bdr2Point5DimEditor::updateCursorPos(const CCVector3d& P, bool b3d, bool mo
 			image_pt.z = IMAGE_MARKER_DISPLAY_Z;
 
 			//! update image cursor pos
-			CCVector3 image_pt = CCVector3::fromArray(P.u);
-			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(0)) = image_pt;
-			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(1)) = image_pt + CCVector3(0, 50, 0);
-			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(2)) = image_pt - CCVector3(50, 0, 0);
-			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(3)) = image_pt - CCVector3(0, 50, 0);
-			*const_cast<CCVector3*>(m_cursor_cross->getPoint_local(4)) = image_pt + CCVector3(50, 0, 0);
+			*const_cast<CCVector3*>(m_cursor_cross->getPointByGlobalIndex(0)) = image_pt;
+			*const_cast<CCVector3*>(m_cursor_cross->getPointByGlobalIndex(1)) = image_pt + CCVector3(0, 50, 0);
+			*const_cast<CCVector3*>(m_cursor_cross->getPointByGlobalIndex(2)) = image_pt - CCVector3(50, 0, 0);
+			*const_cast<CCVector3*>(m_cursor_cross->getPointByGlobalIndex(3)) = image_pt - CCVector3(0, 50, 0);
+			*const_cast<CCVector3*>(m_cursor_cross->getPointByGlobalIndex(4)) = image_pt + CCVector3(50, 0, 0);
 			m_cursor_cross->setVisible(true);
 		}
 	}
@@ -142,6 +142,7 @@ void bdr2Point5DimEditor::init2DView()
 	m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS | ccGLWindow::INTERACT_ROTATE);
 	m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 	m_glWindow->displayOverlayEntities(true);
+	m_glWindow->setPivotVisibility(ccGLWindow::PIVOT_HIDE, false);
 	m_glWindow->showCursorCoordinates(true);
 	m_glWindow->setBBoxDisplayType(ccGLWindow::BBOX_HIDE);
 	m_glWindow->setWindowEditorType(ccGLWindow::IMAGE_EDITOR_25D);
@@ -255,36 +256,175 @@ void bdr2Point5DimEditor::setImageAndCamera(ccCameraSensor * cam)
 	m_image->setAssociatedSensor(cam);
 }
 
-void bdr2Point5DimEditor::projectToImage(ccHObject * obj)
+ccHObject* bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 {
-	if (!getImage()) { return; }
+	if (!getImage()) { return nullptr; }
 	ccCameraSensor* cam = m_image->getAssociatedSensor();
-	if (!cam) { return; }
+	if (!cam) { return nullptr; }
 	
-	ccHObject* to_add = nullptr;
-	ccGenericPointCloud* point_clone = nullptr;
+	ccHObject* entity_in_image_2d = nullptr;
+	//! keep the index but project the point in associate cloud to 2d image
+	//! get the associate cloud
+	ccGenericPointCloud* associate_cloud = nullptr;
+
 	if (obj->isKindOf(CC_TYPES::POINT_CLOUD)) {
-		point_clone = ccHObjectCaster::ToGenericPointCloud(obj)->clone();
-		to_add = point_clone;
+		associate_cloud = ccHObjectCaster::ToGenericPointCloud(obj)->clone();
+		entity_in_image_2d = associate_cloud;
 	}
 	else if (obj->isA(CC_TYPES::MESH)) {
 		ccMesh* mesh_clone = ccHObjectCaster::ToMesh(obj)->cloneMesh();
-		mesh_clone->getAssociatedCloud();
+		associate_cloud = mesh_clone->getAssociatedCloud();
+		entity_in_image_2d = mesh_clone;
 	}
-	else if (obj->isA(CC_TYPES::POLY_LINE)) {
+	else if (obj->isKindOf(CC_TYPES::POLY_LINE)) {
 		ccPolyline* poly = ccHObjectCaster::ToPolyline(obj);
-		to_add = (poly ? new ccPolyline(*poly) : 0);
+		
+		ccPolyline* new_poly = new ccPolyline(*poly); if (!new_poly) return nullptr;
+		associate_cloud = dynamic_cast<ccPointCloud*>(new_poly->getAssociatedCloud());
+		if (!associate_cloud) { 
+			delete new_poly;
+			new_poly = nullptr;
+			return nullptr;
+		}
+
+		entity_in_image_2d = new_poly;
 	}
 	else if (obj->isA(CC_TYPES::LABEL_2D)) {
 
 	}
-	//! add to cam
-	if (to_add && point_clone) {
+	else if (obj->isA(CC_TYPES::ST_BLOCK)) {
+		//! get top
+		StBlock* block = ccHObjectCaster::ToStBlock(obj); if (!block) return nullptr;
+		ccFacet* top_facet = block->getTopFacet(); if (!top_facet) return nullptr;
+		ccPolyline* contour = top_facet->getContour(); if (!contour) return nullptr;
+		ccPolyline* new_poly = new ccPolyline(*contour); if (!new_poly) return nullptr;
 
-		to_add->setDisplay(m_glWindow);
-		cam->addChild(to_add);
+		associate_cloud = dynamic_cast<ccPointCloud*>(new_poly->getAssociatedCloud());
+		if (!associate_cloud) {
+			delete new_poly;
+			new_poly = nullptr;
+			return nullptr;
+		}
+
+		entity_in_image_2d = new_poly;
+	}
+
+	//! project to image
+	unsigned inside_image(0);
+	if (associate_cloud && entity_in_image_2d) {
+		associate_cloud->setGlobalShift(CCVector3d());
+		associate_cloud->setGlobalScale(0);
+		associate_cloud->setVisible(true);
+
+		for (size_t i = 0; i < associate_cloud->size(); i++) {
+			CCVector3* v = const_cast<CCVector3*>(associate_cloud->getPoint(i));
+			CCVector3 image_pt;
+			if (FromGlobalToImage(*v, image_pt)) {
+				inside_image++;
+			}			
+			image_pt.z = IMAGE_MARKER_DISPLAY_Z;
+			*v = image_pt;
+		}
+		// project even if the point is out of range, but remove that no point is inside
+		if (inside_image == 0) {
+			delete associate_cloud;
+			associate_cloud = nullptr;
+			delete entity_in_image_2d;
+			entity_in_image_2d = nullptr;
+		}
+	}
+	
+
+	//! add to cam
+	if (entity_in_image_2d) {
+		ccShiftedObject* shift = ccHObjectCaster::ToShifted(entity_in_image_2d);
+		if (shift) {
+			shift->setGlobalShift(CCVector3d());
+			shift->setGlobalScale(0);
+		}
+
+		entity_in_image_2d->setDisplay_recursive(m_glWindow);
+		entity_in_image_2d->setEnabled(true);
+		entity_in_image_2d->setLocked(false);
+		cam->addChild(entity_in_image_2d);
 		MainWindow* win = MainWindow::TheInstance(); assert(win);
-		win->addToDB(to_add, true, false, true, true, CC_TYPES::DB_IMAGE);
+		win->addToDB_Image(entity_in_image_2d, true, false, true, true);
+	}
+	return entity_in_image_2d;
+}
+
+// TODO: this function can be put in other classes, such as camera
+bool bdr2Point5DimEditor::projectBack(ccHObject* obj2D, ccHObject* obj3D)
+{
+	if (!m_image) { return false; }
+	
+	ccCameraSensor* cam = m_image->getAssociatedSensor();
+	CCVector3 camera_center;
+	cam->getActiveAbsoluteCenter(camera_center);
+
+	if (obj3D->isA(CC_TYPES::ST_BLOCK) && obj2D->isKindOf(CC_TYPES::POLY_LINE)) {
+		
+		StBlock* block = ccHObjectCaster::ToStBlock(obj3D);
+		ccPolyline* polyline = ccHObjectCaster::ToPolyline(obj2D); if (!polyline) return false;
+		
+		ccFacet* facet = block->getTopFacet(); if (!facet) return false;
+		std::vector<CCVector3> contours = block->getTop();
+
+		const PointCoordinateType *eq = facet->getPlaneEquation();
+		vcg::Plane3d plane;
+		plane.SetDirection({ eq[0],eq[1],eq[2] });
+		plane.SetOffset(eq[3]);
+
+		std::vector<CCVector3> top_points;
+		for (size_t i = 0; i < polyline->size(); i++) {
+			CCVector3 pt = *polyline->getPoint(i);
+			//! get world coordinate
+			CCVector3 pt_global;
+			CCVector2 image_coord(pt.x, m_image->getH() - pt.y);
+			if (!cam->fromImageCoordToGlobalCoord(image_coord, pt_global, 100)) {
+				return false;
+			}
+
+			vcg::Line3d line;
+			line.SetOrigin(stocker::parse_xyz(camera_center));
+			line.SetDirection(stocker::parse_xyz(pt_global - camera_center));
+
+			vcg::Point3d point;
+			if (!vcg::IntersectionLinePlane(line, plane, point)) {
+				return false;
+			}
+			top_points.push_back(CCVector3(vcgXYZ(point)));
+		}
+		if (top_points.size() < 3) return false;
+
+		//! project to the bottom
+		std::vector<CCVector3> bottom_points;
+		ccFacet* facet_bottom = block->getBottomFacet(); if (!facet_bottom) return false;
+		eq = facet_bottom->getPlaneEquation();
+		plane.SetDirection({ eq[0],eq[1],eq[2] });
+		plane.SetOffset(eq[3]);
+		for (auto & v : top_points) {
+			vcg::Line3d line;
+			line.SetOrigin(stocker::parse_xyz(v));
+			line.SetDirection({ 0,0,-1 });
+
+			vcg::Point3d point;
+			if (!vcg::IntersectionLinePlane(line, plane, point)) {
+				return false;
+			}
+			bottom_points.push_back(CCVector3(vcgXYZ(point)));
+		}
+		if (bottom_points.size() != top_points.size()) { return false; }
+
+		//! set to block
+		ccHObject* parent = block->getParent(); if (!parent) { return false; }
+		
+		StBlock* new_block = new StBlock(top_points, bottom_points);
+		new_block->setName(block->getName());
+		MainWindow::TheInstance()->removeFromDB(block);
+		
+		parent->addChild(new_block);
+		MainWindow::TheInstance()->addToDB_Build(new_block);
 	}
 }
 

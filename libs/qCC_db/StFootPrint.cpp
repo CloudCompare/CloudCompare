@@ -17,6 +17,8 @@
 
 //Always first
 #include "StFootPrint.h"
+#include "StBlock.h"
+#include "ccHObjectCaster.h"
 #include <iostream>
 
 StFootPrint::StFootPrint(GenericIndexedCloudPersist* associatedCloud)
@@ -83,6 +85,29 @@ void StFootPrint::setHeight(double height)
 	invalidateBoundingBox();
 }
 
+void StFootPrint::setBottom(double bottom)
+{
+	m_bottom = bottom;
+	for (StBlock* block : getBlocks()) {
+		if (block) {
+			block->setBottomHeight(bottom);
+		}
+	}
+	prepareDisplayForRefresh_recursive();
+}
+
+std::vector<StBlock*> StFootPrint::getBlocks()
+{
+	std::vector<StBlock*> blocks;
+	for (size_t i = 0; i < getChildrenNumber(); i++) {
+		StBlock* block = ccHObjectCaster::ToStBlock(getChild(i));
+		if (block) {
+			blocks.push_back(block);
+		}
+	}
+	return blocks;
+}
+
 void StFootPrint::drawMeOnly(CC_DRAW_CONTEXT & context)
 {
 	//call parent method
@@ -132,7 +157,7 @@ void StFootPrint::drawMeOnly(CC_DRAW_CONTEXT & context)
 			float v[3];
 			v[0] = p->x;
 			v[1] = p->y;
-			v[2] = m_top;
+			v[2] = m_highest;
 			ccGL::Vertex3v(glFunc, v);
 		}
 		if (m_isClosed)
@@ -141,7 +166,7 @@ void StFootPrint::drawMeOnly(CC_DRAW_CONTEXT & context)
 			float v[3];
 			v[0] = p->x;
 			v[1] = p->y;
-			v[2] = m_top;
+			v[2] = m_highest;
 			ccGL::Vertex3v(glFunc, v);
 		}
 		glFunc->glEnd();
@@ -168,7 +193,7 @@ bool StFootPrint::toFile_MeOnly(QFile & out) const
 	if (out.write((const char*)&m_hole, sizeof(bool)) < 0)
 		return WriteError();
 
-	if (out.write((const char*)&m_top, sizeof(double)) < 0)
+	if (out.write((const char*)&m_highest, sizeof(double)) < 0)
 		return WriteError();
 
 	if (out.write((const char*)&m_componentId, sizeof(int)) < 0)
@@ -195,7 +220,7 @@ bool StFootPrint::fromFile_MeOnly(QFile & in, short dataVersion, int flags)
 	if (in.read((char*)&m_hole, sizeof(bool)) < 0)
 		return ReadError();
 
-	if (in.read((char*)&m_top, sizeof(double)) < 0)
+	if (in.read((char*)&m_highest, sizeof(double)) < 0)
 		return ReadError();
 
 	if (in.read((char*)&m_componentId, sizeof(int)) < 0)

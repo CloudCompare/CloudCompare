@@ -886,7 +886,7 @@ void ccVolumeCalcTool::exportGridAsCloud() const
 	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (mainWindow)
 	{
-		mainWindow->addToDB(rasterCloud);
+		mainWindow->addToDB(rasterCloud, m_cloud1->getDBSourceType());
 		ccLog::Print(QString("[Volume] Cloud '%1' successfully exported").arg(rasterCloud->getName()));
 	}
 	else

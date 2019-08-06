@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>834</height>
+    <height>909</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -94,11 +94,20 @@
       <string>Language Translation</string>
      </property>
     </widget>
+    <widget class="QMenu" name="menuSet_Pivot_Display_State">
+     <property name="title">
+      <string>Set Pivot Display State</string>
+     </property>
+     <addaction name="actionSetPivotAlwaysOn"/>
+     <addaction name="actionSetPivotRotationOnly"/>
+     <addaction name="actionSetPivotOff"/>
+    </widget>
     <addaction name="actionFullScreen"/>
     <addaction name="actionExclusiveFullScreen"/>
     <addaction name="actionRefresh"/>
     <addaction name="actionToggleCenteredPerspective"/>
     <addaction name="actionToggleViewerBasedPerspective"/>
+    <addaction name="menuSet_Pivot_Display_State"/>
     <addaction name="actionShowCursor3DCoordinates"/>
     <addaction name="actionLockRotationAxis"/>
     <addaction name="actionEnterBubbleViewMode"/>
@@ -575,6 +584,7 @@
     <addaction name="actionShowSelectedImage"/>
     <addaction name="actionImageOverlay"/>
     <addaction name="actionProjectToImage"/>
+    <addaction name="actionSelectWorkingPlane"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -622,6 +632,74 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
+       <widget class="QWidget" name="Database">
+        <attribute name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/database.png</normaloff>:/CC/Stocker/images/stocker/database.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>Database</string>
+        </attribute>
+        <widget class="ccCustomQTreeView" name="dbMainTreeView">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>257</width>
+           <height>250</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>250</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(:/CC/images/QTreeView/vline.png) 0;
+}
+
+QTreeView::branch:has-siblings:adjoins-item {
+    border-image: url(:/CC/images/QTreeView/branch-more.png) 0;
+}
+
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(:/CC/images/QTreeView/branch-end.png) 0;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+        border-image: none;
+        image: url(:/CC/images/QTreeView/branch-closed.png);
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+        border-image: none;
+        image: url(:/CC/images/QTreeView/branch-open.png);
+}</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::InternalMove</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="uniformRowHeights">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </widget>
        <widget class="QWidget" name="Buildings">
         <attribute name="icon">
          <iconset resource="../icones.qrc">
@@ -632,7 +710,7 @@
         </attribute>
         <layout class="QVBoxLayout">
          <item>
-          <widget class="ccCustomQTreeView" name="dbTreeView">
+          <widget class="ccCustomQTreeView" name="dbBuildTreeView">
            <property name="minimumSize">
             <size>
              <width>150</width>
@@ -785,7 +863,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="minimumSize">
     <size>
      <width>109</width>
-     <height>210</height>
+     <height>259</height>
     </size>
    </property>
    <property name="floating">
@@ -803,7 +881,44 @@ QTreeView::branch:open:has-children:has-siblings  {
    <widget class="QWidget" name="dockWidgetContents_4">
     <layout class="QVBoxLayout">
      <item>
-      <widget class="QTreeView" name="propertiesTreeView">
+      <widget class="QTreeView" name="propertiesTreeView_Main">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="showDropIndicator" stdset="0">
+        <bool>false</bool>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::NoSelection</enum>
+       </property>
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
+       <property name="itemsExpandable">
+        <bool>false</bool>
+       </property>
+       <property name="allColumnsShowFocus">
+        <bool>true</bool>
+       </property>
+       <property name="expandsOnDoubleClick">
+        <bool>false</bool>
+       </property>
+       <attribute name="headerDefaultSectionSize">
+        <number>200</number>
+       </attribute>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTreeView" name="propertiesTreeView_Build">
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
@@ -1042,9 +1157,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionBDPlaneFromPoints"/>
    <addaction name="actionBDPlaneFromPolygon"/>
    <addaction name="actionBDPrimMakePlane"/>
+   <addaction name="actionSelectWorkingPlane"/>
    <addaction name="separator"/>
    <addaction name="actionBDFootPrintAuto"/>
    <addaction name="actionBDFootPrintManual"/>
+   <addaction name="actionProjectToImage"/>
    <addaction name="actionBDFootPrintPack"/>
    <addaction name="actionBDLoD1Generation"/>
    <addaction name="actionBD3D4EM"/>
@@ -3834,8 +3951,15 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionProjectToImage">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/imgedit.png</normaloff>:/CC/Stocker/images/stocker/imgedit.png</iconset>
+   </property>
    <property name="text">
     <string>Project To Image</string>
+   </property>
+   <property name="iconText">
+    <string>ToImage</string>
    </property>
   </action>
   <action name="actionDisplayWireframe">
@@ -3920,6 +4044,24 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>display global coord or local coord</string>
+   </property>
+  </action>
+  <action name="actionSelectWorkingPlane">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/editplane.png</normaloff>:/CC/Stocker/images/stocker/editplane.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select Working Plane</string>
+   </property>
+   <property name="iconText">
+    <string>Plane</string>
+   </property>
+   <property name="statusTip">
+    <string>Select a working plane for sketcher</string>
    </property>
   </action>
  </widget>

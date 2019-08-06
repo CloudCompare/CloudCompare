@@ -38,6 +38,9 @@
 //Last contour unique ID
 static std::vector<unsigned> s_lastContourUniqueIDs;
 
+// database
+static CC_TYPES::DB_SOURCE s_dbSource;
+
 //Contour extraction parameters
 static double s_maxEdgeLength = -1.0;
 static bool s_splitContours = false;
@@ -217,6 +220,7 @@ bool ccClippingBoxTool::addAssociatedEntity(ccHObject* entity)
 	{
 		restoreToolButton->setEnabled(false);
 		contourGroupBox->setEnabled(false);
+		s_dbSource = entity->getDBSourceType();
 	}
 
 	if (!m_clipBox->addAssociatedEntity(entity))
@@ -354,7 +358,7 @@ void ccClippingBoxTool::removeLastContour()
 	{
 		for (size_t i = 0; i < s_lastContourUniqueIDs.size(); ++i)
 		{
-			ccHObject* obj = mainWindow->db()->find(s_lastContourUniqueIDs[i]);
+			ccHObject* obj = mainWindow->db(s_dbSource)->find(s_lastContourUniqueIDs[i]);
 			if (obj)
 			{
 				//obj->prepareDisplayForRefresh();
@@ -458,7 +462,7 @@ void ccClippingBoxTool::exportSlice()
 			result->prepareDisplayForRefresh();
 			if (obj->getParent())
 				obj->getParent()->addChild(result);
-			MainWindow::TheInstance()->addToDB(result);
+			MainWindow::TheInstance()->addToDB(result, s_dbSource);
 		}
 	}
 }
@@ -1166,7 +1170,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		{
 			sliceGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());
 		}
-		MainWindow::TheInstance()->addToDB(sliceGroup);
+		MainWindow::TheInstance()->addToDB(sliceGroup, s_dbSource);
 	}
 	else if (!singleContourMode)
 	{
@@ -1187,7 +1191,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		{
 			contourGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());
 		}
-		MainWindow::TheInstance()->addToDB(contourGroup);
+		MainWindow::TheInstance()->addToDB(contourGroup, s_dbSource);
 
 		s_lastContourUniqueIDs.clear();
 		s_lastContourUniqueIDs.push_back(contourGroup->getUniqueID());

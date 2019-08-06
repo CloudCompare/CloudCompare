@@ -213,7 +213,22 @@
     <file>images/stocker/splitplane.png</file>
     <file>images/stocker/showface.png</file>
     <file>images/stocker/global.png</file>
+    <file>images/stocker/circlebycenter.png</file>
+    <file>images/stocker/circleby3points.png</file>
+    <file>images/stocker/arcby3points.png</file>
+    <file>images/stocker/rectangleby2corner.png</file>
+    <file>images/stocker/arcbycenter.png</file>
+    <file>images/stocker/polygon.png</file>
+    <file>images/stocker/polygonbycenter.png</file>
     <file>images/stocker/pointCoord.png</file>
+    <file>images/stocker/beziercurve.png</file>
+    <file>images/stocker/beziercurve3.png</file>
+    <file>images/stocker/bsplinecurve.png</file>
     <file>images/stocker/link.png</file>
+    <file>images/stocker/cursorBoard.png</file>
+    <file>images/stocker/cursorMove.png</file>
+    <file>images/stocker/cursorRemove.png</file>
+    <file>images/stocker/editplane.png</file>
+    <file>images/stocker/imgedit.png</file>
   </qresource>
 </RCC>

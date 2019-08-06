@@ -402,7 +402,7 @@ StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name) {
 	StPrimGroup* group = new StPrimGroup(building_name + BDDB_PRIMITIVE_SUFFIX);
 	if (group) {
 		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
 	return nullptr;
@@ -413,7 +413,7 @@ StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name) {
 	StBlockGroup* group = new StBlockGroup(building_name + BDDB_BLOCKGROUP_SUFFIX);
 	if (group) { 
 		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
 	return nullptr;
@@ -424,7 +424,7 @@ StPrimGroup * BDBaseHObject::GetHypothesisGroup(QString building_name) {
 	StPrimGroup* group = new StPrimGroup(building_name + BDDB_POLYFITHYPO_SUFFIX);
 	if (group) {
 		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
 	return nullptr;
@@ -437,7 +437,7 @@ ccHObject * BDBaseHObject::GetTodoGroup(QString building_name)
 	if (group) {
 		group->setDisplay(getDisplay());
 		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group); return group; }
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
 	return nullptr;
@@ -460,7 +460,7 @@ ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name)
 		todo_group->addChild(todo_point);
 		MainWindow* win = MainWindow::TheInstance();
 		assert(win);
-		win->addToDB(todo_point, false, false);
+		win->addToDB(todo_point, this->getDBSourceType(), false, false);
 		return todo_point;
 	}
 	return nullptr;
@@ -482,7 +482,7 @@ ccPointCloud * BDBaseHObject::GetTodoLine(QString buildig_name)
 		todo_group->addChild(todo_point);
 		MainWindow* win = MainWindow::TheInstance();
 		assert(win);
-		win->addToDB(todo_point, false, false);
+		win->addToDB(todo_point, this->getDBSourceType(), false, false);
 		return todo_point;
 	}
 	return nullptr;
@@ -675,7 +675,7 @@ void AddSegmentsToVertices(ccPointCloud* cloud, stocker::Polyline3d lines, QStri
 
 		cc_polyline->setClosed(false);
 		cloud->addChild(cc_polyline);
-		win->addToDB(cc_polyline, false, false);
+		win->addToDB(cc_polyline, cloud->getDBSourceType(), false, false);
 	}
 }
 
@@ -1150,7 +1150,7 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 	int index_new = parent->getChildIndex(newCloud);
 	parent->swapChildren(index_old, index_new);
 	MainWindow* win = MainWindow::TheInstance();
-	win->addToDB(newCloud);
+	win->addToDB(newCloud, planeObj->getDBSourceType());
 
 	win->removeFromDB(cloud);
 
@@ -1159,8 +1159,7 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 		contours_points_remained.pop_back();
 	} while (contours_points_remained.size() > 1);
 	ccHObject* outlines_add = AddOutlinesAsChild(contours_points_remained, BDDB_OUTLINE_PREFIX, newCloud);
-	win->addToDB(outlines_add);
-//	win->db()->removeElement(cloud);
+	win->addToDB(outlines_add, planeObj->getDBSourceType());
 	
 #endif // USE_STOCKER
 }
@@ -2218,8 +2217,9 @@ ccHObject::Container GenerateFootPrints_PP(ccHObject* prim_group)
 			footptObj->showColors(true);
 			footptObj->setName(name);
 			footptObj->setComponentId(compoId);
-			footptObj->setTop(top_height);
+			footptObj->setHighest(top_height);
 			footptObj->setBottom(bottom_height);
+			footptObj->setLowest(bottom_height);
 
 			foot_print_objs.push_back(footptObj);
 			block_group->addChild(footptObj);
@@ -2287,8 +2287,10 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 			footptObj->showColors(true);
 			footptObj->setName(name);
 			footptObj->setComponentId(compoId);
-			footptObj->setTop(top_height);
+			footptObj->setHighest(top_height);
 			footptObj->setBottom(bottom_height);
+			footptObj->setLowest(bottom_height);
+
 			footptObj->setPlaneNames(cur_plane_names);
 
 			foot_print_objs.push_back(footptObj);
@@ -2474,7 +2476,7 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 			if (j == 0) {
 				valid = true;
 				first_polygon = polygon;
-				footprint_height = ccHObjectCaster::ToStFootPrint(first_footprint)->getTop();
+				footprint_height = ccHObjectCaster::ToStFootPrint(first_footprint)->getHighest();
 			}
 			contours.push_back(ToContour(polygon, 0));
 		}
@@ -2552,14 +2554,16 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 				building_name.toStdString().c_str(), ".", model_name.toStdString().c_str(), ".obj");
 			builder_3d4em.SetOutputPath(output_path);
 		}
+
+		ftObj->setBottom(ground_height);	// TODO
 		builder_3d4em.SetGroundHeight(ground_height);
 
 		ccHObject::Container primObjs = GetNonVerticalPlaneClouds(prim_group_obj, 15);
 		for (auto & pt : polygon) {
-			pt.P0().Z() = ftObj->getBottom();
-			pt.P1().Z() = ftObj->getBottom();
+			pt.P0().Z() = ftObj->getLowest();
+			pt.P1().Z() = ftObj->getLowest();
 		}
-		std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(primObjs, polygon, ftObj->getTop());
+		std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(primObjs, polygon, ftObj->getHighest());
 		builder_3d4em.SetSegmentedPoints(points);
 
 		if (!builder_3d4em.BuildingReconstruction()) continue;
@@ -2588,7 +2592,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 				continue;
 			}
 			if (block_entity) {
-				block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(block_number));
+				block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(block_number++));
 				ftObj->addChild(block_entity);
 			}
 		}
@@ -2614,7 +2618,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* entity, double ground_height)
 		StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
 		footprintObjs = blockgroup_obj->getValidFootPrints();
 	}
-
+	
 	return LoD2FromFootPrint(buildingObj, footprintObjs, ground_height);
 }
 
@@ -2634,12 +2638,12 @@ void SubstituteFootPrintContour(StFootPrint* footptObj, stocker::Contour3d point
 	footptObj->initWith(vertices, *footptObj);
 	footptObj->addPointIndex(0);
 	footptObj->setClosed(true);
-	win->addToDB(vertices, false, false);
+	win->addToDB(vertices, footptObj->getDBSourceType(), false, false);
 
 	if (existing_cloud) {
-		win->db()->unselectAllEntities();
-		win->db()->selectEntity(existing_cloud);
-		win->db()->deleteSelectedEntities();
+		win->db(footptObj->getDBSourceType())->unselectAllEntities();
+		win->db(footptObj->getDBSourceType())->selectEntity(existing_cloud);
+		win->db(footptObj->getDBSourceType())->deleteSelectedEntities();
 	}
 }
 
@@ -2703,8 +2707,8 @@ void GetPlanesInsideFootPrint(ccHObject* footprint, ccHObject* prim_group, CCVec
 	std::vector<CCVector3> ftpts = footprintObj->getPoints(false);
 	Contour3d ftpts_stocker; for (auto & pt : ftpts) { ftpts_stocker.emplace_back(pt.x, pt.y, pt.z); }
 	Polyline2d footprint_polygon = MakeLoopPolylinefromContour(ToContour2d(ftpts_stocker));
-	double min_z = footprintObj->getBottom() - settings.y;
-	double max_z = footprintObj->getTop() + settings.y;
+	double min_z = footprintObj->getLowest() - settings.y;
+	double max_z = footprintObj->getHighest() + settings.y;
 
 	ccHObject::Container all_planes = primgroupObj->getValidPlanes();
 	for (ccHObject* plane : all_planes) {

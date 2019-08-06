@@ -42,6 +42,8 @@
 #include <list>
 #include <unordered_set>
 
+class QCursor;
+
 class QOpenGLDebugMessage;
 
 class ccBBox;
@@ -91,7 +93,7 @@ public:
 		//camera interactions
 		INTERACT_ROTATE          =  1,
 		INTERACT_PAN             =  2,
-		INTERACT_CTRL_PAN        =  4,
+		INTERACT_SHIFT_PAN        =  4,
 		INTERACT_ZOOM_CAMERA     =  8,
 		INTERACT_2D_ITEMS        = 16, //labels, etc.
 		INTERACT_CLICKABLE_ITEMS = 32, //hot zone
@@ -242,7 +244,7 @@ public:
 	virtual void updateZoom(float zoomFactor);
 
 	//! Sets pivot visibility
-	virtual void setPivotVisibility(PivotVisibility vis);
+	virtual void setPivotVisibility(PivotVisibility vis, bool save_setting = true);
 
 	//! Returns pivot visibility
 	virtual PivotVisibility getPivotVisibility() const;
@@ -555,6 +557,7 @@ public:
 
 	void toggleDrawBBox() { m_drawBBox = !m_drawBBox; };
 
+	//! TODO:
 	//! Sets bbox display type
 	virtual void setBBoxDisplayType(BBoxDisplayType box) { m_bboxDisplayType = box; }
 	//! Returns bbox display type
@@ -646,6 +649,14 @@ public: //stereo mode
 
 	//! Returns whether the rotation axis is locaked or not
 	bool isRotationAxisLocked() const { return m_rotationAxisLocked; }
+
+	void resetCursor();
+
+	void setRemoveCursor();
+
+	void setCrossCursor();
+
+	void setMoveCursor();
 
 
 public slots:
@@ -828,8 +839,6 @@ protected: //rendering
 	//we need to automatically bind our own afterwards!
 	//(Sadly QOpenGLWidget::makeCurrentmakeCurrent is not virtual)
 	void makeCurrent();
-
-	void resetCursor();
 
 	void drawCursor();
 
@@ -1380,6 +1389,10 @@ protected: //members
 
 	WindowEditorType m_windowEditorType;
 	BBoxDisplayType	m_bboxDisplayType;
+
+ 	QCursor *m_moveCursor;
+	QCursor *m_removeCursor;
+ 	QCursor *m_boardCursor;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

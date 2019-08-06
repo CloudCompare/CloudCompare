@@ -87,11 +87,17 @@ public:
 		\param autoRedraw whether to redraw the 3D view automatically or not (warning: if 'updateZoom' is true, the 3D view will always be redrawn)
 	**/
 	virtual void addToDB(	ccHObject* obj,
+							CC_TYPES::DB_SOURCE dest,
 							bool updateZoom = false,
 							bool autoExpandDBTree = true,
 							bool checkDimensions = false,
-							bool autoRedraw = true, 
-							DB_SOURCE dest = CC_TYPES::DB_BUILDING) = 0;
+							bool autoRedraw = true) = 0;
+
+	virtual void addToDB(ccHObject* obj,
+		bool updateZoom = false,
+		bool autoExpandDBTree = true,
+		bool checkDimensions = false,
+		bool autoRedraw = true) = 0;
 
 	//! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.
@@ -155,7 +161,11 @@ public:
 	virtual void forceConsoleDisplay() = 0;
 
 	//! Returns DB root (as a ccHObject)
+	virtual ccHObject* dbRootObject(CC_TYPES::DB_SOURCE rt) = 0;
+
 	virtual ccHObject* dbRootObject() = 0;
+
+	virtual CC_TYPES::DB_SOURCE getCurrentDB() = 0;
 
 	//! Forces redraw of all GL windows
 	/** \param only2D whether to redraw everything (false) or only the 2D layer (true)

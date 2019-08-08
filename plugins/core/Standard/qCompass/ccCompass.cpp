@@ -33,6 +33,7 @@
 #include <ccProgressDialog.h>
 
 #include "ccBox.h"
+#include "ccFacet.h"
 #include "ccCompass.h"
 #include "ccCompassDlg.h"
 #include "ccCompassInfo.h"
@@ -4207,9 +4208,14 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 		//write container
 		out->writeStartElement("CONTAINER"); //QString::asprintf("CONTAINER name = '%s' id = %d", object->getName(), object->getUniqueID())
 	}
-	else //we don't care about this object
+	else if (object->isA(CC_TYPES::FACET))
 	{
-		return 0;
+		//write container
+		out->writeStartElement("FACET");
+	}
+	else //just write name,id and metadata for unknown objects
+	{
+		out->writeStartElement("OBJECT");
 	}
 
 	//write name and oid attributes
@@ -4445,6 +4451,21 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 		}
 	}
 
+	//write facet data
+	if (object->isA(CC_TYPES::FACET))
+	{
+		//write orientation
+		ccFacet* f = static_cast<ccFacet*>(object);
+		out->writeTextElement("Nx", QString::asprintf("%f", f->getNormal().x));
+		out->writeTextElement("Ny", QString::asprintf("%f", f->getNormal().y));
+		out->writeTextElement("Nz", QString::asprintf("%f", f->getNormal().z));
+		out->writeTextElement("Cx", QString::asprintf("%f", f->getCenter().x));
+		out->writeTextElement("Cy", QString::asprintf("%f", f->getCenter().y));
+		out->writeTextElement("Cz", QString::asprintf("%f", f->getCenter().z));
+		out->writeTextElement("rms", QString::asprintf("%f", f->getRMS()));
+		out->writeTextElement("surface", QString::asprintf("%f", f->getSurface()));
+	}
+
 	//write children
 	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
@@ -4456,3 +4477,4 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 
 	return n;
 }
+

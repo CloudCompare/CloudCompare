@@ -388,8 +388,16 @@ bool StBlock::toFile_MeOnly(QFile& out) const
 	if (!ccGenericPrimitive::toFile_MeOnly(out))
 		return WriteError();
 
-	//parameters (dataVersion>=21)
-	QDataStream outStream(&out);
+	//we can't save the associated facet here
+	//so instead we save it's unique ID (dataVersion>=20)
+	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
+	uint32_t topUniqueID = (m_top_facet ? static_cast<uint32_t>(m_top_facet->getUniqueID()) : 0);
+	if (out.write((const char*)&topUniqueID, 4) < 0)
+		return WriteError();
+
+	uint32_t botUniqueID = (m_bottom_facet ? static_cast<uint32_t>(m_bottom_facet->getUniqueID()) : 0);
+	if (out.write((const char*)&botUniqueID, 4) < 0)
+		return WriteError();
 
 	//! top
 	if (out.write((const char*)m_top_normal.u, sizeof(PointCoordinateType) * 3) < 0)
@@ -416,8 +424,19 @@ bool StBlock::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
 		return ReadError();
 
-	//parameters (dataVersion>=21)
-	QDataStream inStream(&in);
+	//as the associated facet can't be saved directly
+	//we only store its unique ID (dataVersion>=20) --> we hope we will find it at loading time (i.e. this
+	//is the responsibility of the caller to make sure that all dependencies are saved together)
+	uint32_t vertUniqueID = 0;
+	if (in.read((char*)&vertUniqueID, 4) < 0)
+		return ReadError();
+	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_top_facet' pointer!!!
+	*(uint32_t*)(&m_top_facet) = vertUniqueID;
+
+	if (in.read((char*)&vertUniqueID, 4) < 0)
+		return ReadError();
+	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_bottom_facet' pointer!!!
+	*(uint32_t*)(&m_bottom_facet) = vertUniqueID;
 
 	//! top
 	if (in.read((char*)m_top_normal.u, sizeof(PointCoordinateType) * 3) < 0)

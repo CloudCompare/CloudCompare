@@ -368,7 +368,6 @@ bool bdr2Point5DimEditor::projectBack(ccHObject* obj2D, ccHObject* obj3D)
 		ccPolyline* polyline = ccHObjectCaster::ToPolyline(obj2D); if (!polyline) return false;
 		
 		ccFacet* facet = block->getTopFacet(); if (!facet) return false;
-		std::vector<CCVector3> contours = block->getTop();
 
 		const PointCoordinateType *eq = facet->getPlaneEquation();
 		vcg::Plane3d plane;
@@ -419,7 +418,7 @@ bool bdr2Point5DimEditor::projectBack(ccHObject* obj2D, ccHObject* obj3D)
 		//! set to block
 		ccHObject* parent = block->getParent(); if (!parent) { return false; }
 		
-		StBlock* new_block = new StBlock(top_points, bottom_points);
+		StBlock* new_block = StBlock::Create(top_points, bottom_points.front().z);
 		new_block->setName(block->getName());
 		MainWindow::TheInstance()->removeFromDB(block);
 		

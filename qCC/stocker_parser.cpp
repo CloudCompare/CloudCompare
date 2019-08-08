@@ -2341,12 +2341,12 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 		std::vector<CCVector3> foot_print_points = foot_print->getPoints(false);
 
 		std::vector<CCVector3> top_points;
-		std::vector<CCVector3> bottom_points;
+		//std::vector<CCVector3> bottom_points;
 		for (auto & pt : foot_print_points) {
 			top_points.push_back(CCVector3(pt.x, pt.y, height));
-			bottom_points.push_back(CCVector3(pt.x, pt.y, ground));
+			//bottom_points.push_back(CCVector3(pt.x, pt.y, ground));
 		}
-		StBlock* block_entity = new StBlock(top_points, bottom_points);
+		StBlock* block_entity = StBlock::Create(top_points, ground);
 		int biggest = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX);
 		block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(biggest + 1));
 		foot_print->addChild(block_entity);
@@ -2510,12 +2510,12 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 		int block_number = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX) + 1;
 		for (Contour3d roof_points : roof_polygons) {
 			std::vector<CCVector3> top_points;
-			std::vector<CCVector3> bottom_points;
+			//std::vector<CCVector3> bottom_points;
 			for (auto & pt : roof_points) {
 				top_points.push_back(CCVector3(vcgXYZ(pt)));
-				bottom_points.push_back(CCVector3(pt.X(), pt.Y(), ground_height));
+				//bottom_points.push_back(CCVector3(pt.X(), pt.Y(), ground_height));
 			}
-			StBlock* block_entity = new StBlock(top_points, bottom_points);
+			StBlock* block_entity = StBlock::Create(top_points, ground_height);
 			
 			block_entity->setName(BDDB_BLOCK_PREFIX + QString::number(block_number++));
 			first_footprint->addChild(block_entity);
@@ -2574,15 +2574,15 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 		int block_number = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX) + 1;
 		for (Contour3d & roof_points : roof_polygons) {
 			std::vector<CCVector3> top_points;
-			std::vector<CCVector3> bottom_points;
+			//std::vector<CCVector3> bottom_points;
 			for (auto & pt : roof_points) {
 				top_points.push_back(CCVector3(vcgXYZ(pt)));
-				bottom_points.push_back(CCVector3(pt.X(), pt.Y(), ground_height));
+				//bottom_points.push_back(CCVector3(pt.X(), pt.Y(), ground_height));
 			}
 
 			StBlock* block_entity = nullptr;
 			try	{
-				block_entity = new StBlock(top_points, bottom_points);
+				block_entity = StBlock::Create(top_points, ground_height);
 			}
 			catch (const std::exception& e)	{
 				if (block_entity) {

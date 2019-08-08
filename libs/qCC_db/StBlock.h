@@ -21,9 +21,12 @@
 //Local
 #include "ccGenericPrimitive.h"
 #include "ccFacet.h"
+#include "ccPlanarEntityInterface.h"
+
+class ccPlane;
 
 // block
-class QCC_DB_LIB_API StBlock : public ccGenericPrimitive
+class QCC_DB_LIB_API StBlock : public ccGenericPrimitive, public ccPlanarEntityInterface
 {
 public:
 
@@ -35,15 +38,22 @@ public:
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 	**/
-	StBlock(const std::vector<CCVector2>& profile,
+
+
+	StBlock(ccPlane * mainPlane, 
+		PointCoordinateType top_height, 
+		CCVector3 top_normal, 
 		PointCoordinateType bottom_height,
-		PointCoordinateType top_height,
-		const ccGLMatrix* transMat = 0,
+		CCVector3 bottom_normal,
 		QString name = QString("Block"));
 
-	StBlock(const std::vector<CCVector3>& top,
-		const std::vector<CCVector3>& bottom,
-		const ccGLMatrix* transMat = 0,
+	StBlock(ccPlane * mainPlane, 
+		ccFacet * top_facet,
+		ccFacet * bottom_facet,
+		QString name = QString("Block"));
+
+	static StBlock * Create(const std::vector<CCVector3>& top,
+		const PointCoordinateType bottom_height,
 		QString name = QString("Block"));
 
 	//! Simplified constructor
@@ -59,17 +69,21 @@ public:
 	virtual ccGenericPrimitive* clone() const override;
 	
 	//! Returns profile
-	std::vector<CCVector3> getTop() { return m_top; };
-	std::vector<CCVector3> getBottom() { return m_bottom; };
-	CCVector3 getCenterTop();
-	CCVector3 getCenterBottom();
-	std::vector<CCVector2> getProfile();
+// 	std::vector<CCVector3> getTop() { return m_top; };
+// 	std::vector<CCVector3> getBottom() { return m_bottom; };
+// 	CCVector3 getCenterTop();
+// 	CCVector3 getCenterBottom();
+//	std::vector<CCVector2> getProfile();
 
 	ccFacet* getTopFacet();
+	void setTopFacet(ccFacet* facet) { m_top_facet = facet; }
 	ccFacet* getBottomFacet();
+	void setBottomFacet(ccFacet* facet) { m_bottom_facet = facet; }
 
 	void setTopHeight(double val);
+	double getTopHeight() { return m_top_height; }
 	void setBottomHeight(double val);
+	double getBottomHeight() { return m_bottom_height; }
 
 protected:
 
@@ -77,12 +91,39 @@ protected:
 	virtual bool toFile_MeOnly(QFile& out) const override;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 	virtual bool buildUp() override;
+	bool buildFromFacet();
 
 // 	ccFacet* m_top;
 // 	ccFacet* m_bottom;
 
-	std::vector<CCVector3> m_top;
-	std::vector<CCVector3> m_bottom;
+// 	std::vector<CCVector3> m_top;
+// 	std::vector<CCVector3> m_bottom;
+
+	ccFacet* m_top_facet;
+	ccFacet* m_bottom_facet;
+
+protected:
+	ccPlane* m_mainPlane; // center, normal, profile
+	
+	//! top plane center=m_mainPlane.center+m_mainPlane.normal*m_top_height
+	CCVector3 getTopCenter(); 
+	double m_top_height;	
+	CCVector3 m_top_normal;
+
+	//! bottom plane center = m_mainPlane.center + m_mainPlane.normal*m_bottom_height
+	CCVector3 getBottomCenter(); 
+	double m_bottom_height;
+	CCVector3 m_bottom_normal;
+
+public:
+	//inherited from ccPlanarEntityInterface //! for planar entity
+	ccHObject* getPlane() override { return (ccHObject*)m_mainPlane; }
+	//inherited from ccPlanarEntityInterface
+	inline CCVector3 getNormal() const override;
+	//inherited from ccPlanarEntityInterface //! Returns the facet center
+	CCVector3 getCenter() const override;
+	//inherited from ccPlanarEntityInterface
+	void notifyPlanarEntityChanged(ccGLMatrix mat, bool trans) override;
 
 };
 

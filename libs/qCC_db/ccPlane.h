@@ -98,6 +98,8 @@ public:
 	**/
 	static ccPlane* Fit(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0, std::vector<CCVector3> * profile = 0);
 
+	static ccPlane* Fit(const std::vector<CCVector3> profiles);
+
 	//! Returns the equation of the plane
 	/** Equation:
 		N.P + constVal = 0

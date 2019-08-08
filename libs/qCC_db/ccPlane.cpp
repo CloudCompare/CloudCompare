@@ -221,6 +221,22 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	return plane;
 }
 
+ccPlane * ccPlane::Fit(const std::vector<CCVector3> profiles)
+{
+	if (profiles.size() < 3) {
+		return nullptr;
+	}
+	ccPointCloud* cloud = new ccPointCloud();
+	for (auto & pt : profiles) {
+		cloud->addPoint(pt);
+	}
+	double rms;
+	ccPlane* plane = ccPlane::Fit(cloud, &rms);
+	plane->setProfile(profiles);
+
+	return plane;
+}
+
 bool ccPlane::toFile_MeOnly(QFile& out) const
 {
 	if (!ccGenericPrimitive::toFile_MeOnly(out))

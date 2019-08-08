@@ -949,12 +949,12 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				{
 					ccHObject* facet = FindRobust(root, block, static_cast<unsigned>(facetID), CC_TYPES::FACET);
 					if (facet && facet->isA(CC_TYPES::FACET)) {
-						block->setTopFacet(ccHObjectCaster::ToFacet(facet));
+						block->setBottomFacet(ccHObjectCaster::ToFacet(facet));
 					}
 					else
 					{
 						//we have a problem here ;)
-						block->setTopFacet(0);
+						block->setBottomFacet(0);
 						currentObject = nullptr;
 						ccLog::Warning(QString("[BIN] Couldn't find origin points (ID=%1) for facet '%2' in the file!").arg(facetID).arg(block->getName()));
 					}

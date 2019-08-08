@@ -508,6 +508,11 @@ void StBlock::notifyPlanarEntityChanged(ccGLMatrix mat, bool trans)
 	m_bottom_normal = getBottomFacet()->getNormal();
 }
 
+void StBlock::getEquation(CCVector3 & N, PointCoordinateType & constVal) const
+{
+	m_mainPlane->getEquation(N, constVal);
+}
+
 //! onUpdateOf(ccFacet)
 
 bool StBlock::toFile_MeOnly(QFile& out) const

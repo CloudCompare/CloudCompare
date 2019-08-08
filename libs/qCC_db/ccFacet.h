@@ -77,6 +77,14 @@ public:
 	inline CCVector3 getNormal() const override { return CCVector3(m_planeEquation); }
 	//inherited from ccPlanarEntityInterface //! Returns the facet center
 	CCVector3 getCenter() const override { return m_center; }
+
+	//! Returns the equation of the plane
+	/** Equation:
+		N.P - constVal = 0
+		i.e. Nx.x + Ny.y + Nz.z - constVal = 0
+	**/
+	void getEquation(CCVector3& N, PointCoordinateType& constVal) const override;
+	
 	//inherited from ccPlanarEntityInterface
 	void notifyPlanarEntityChanged(ccGLMatrix mat, bool trans) override;
 

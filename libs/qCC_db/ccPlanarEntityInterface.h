@@ -32,6 +32,8 @@ public:
 
 	virtual ccHObject* getPlane() = 0;
 
+	virtual void getEquation(CCVector3& N, PointCoordinateType& constVal) const = 0;
+
 	//////////////////////////////////////////////////////////////////////////
 	bool getNormalEditState() { return m_editable; }
 	void normalEditState(bool edit) { m_editable = edit; }

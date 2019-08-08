@@ -105,7 +105,7 @@ public:
 		N.P + constVal = 0
 		i.e. Nx.x + Ny.y + Nz.z + constVal = 0
 	**/
-	void getEquation(CCVector3& N, PointCoordinateType& constVal) const;
+	void getEquation(CCVector3& N, PointCoordinateType& constVal) const override;
 
 	bool isVerticalToDirection(CCVector3 dir, double angle_degree = 15);
 

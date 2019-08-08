@@ -5,6 +5,7 @@
 #include <ccCone.h>
 #include "ccSphere.h"
 #include "ccTorus.h"
+#include "CCMiscTools.h"
 
 //Qt
 #include <QSharedPointer>
@@ -359,6 +360,8 @@ bool ccPlanarEntityInterface::move3D(const CCVector3d & u)
 	if (m_activeComponent < NORMAL_TORUS) {
 		return false;
 	}
+	//! 参考 bdrPlaneEditor里apply
+	//! get y , 在move2d里面即可
 
 	return true;
 }
@@ -392,11 +395,22 @@ void ccPlanarEntityInterface::setActiveComponent(int id)
 
 CCVector3 ccPlanarEntityInterface::projectTo3DGlobal(CCVector3 pt_3d)
 {
-	return CCVector3();
+	CCVector3 n; PointCoordinateType offset;
+	getEquation(n, offset);
+	PointCoordinateType k = pt_3d.dot(n) - offset;
+	return pt_3d - n * k;
 }
 
 CCVector2 ccPlanarEntityInterface::projectTo2DLocal(CCVector3 pt_3d)
 {
+	ccGenericPrimitive* prim;
+	prim->getTransformation();
+	getPlane()->getGLTransformation();
+
+	CCVector3 N = getNormal();
+	CCVector3 u, v;
+	CCLib::CCMiscTools::ComputeBaseVectors(N, u, v);
+
 	return CCVector2();
 }
 

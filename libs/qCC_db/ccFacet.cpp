@@ -819,6 +819,12 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 	return true;
 }
 
+void ccFacet::getEquation(CCVector3 & N, PointCoordinateType & constVal) const
+{
+	N = CCVector3(m_planeEquation[0], m_planeEquation[1], m_planeEquation[2]);
+	constVal = m_planeEquation[3];
+}
+
 void ccFacet::notifyPlanarEntityChanged(ccGLMatrix mat, bool trans)
 {
 	if (trans) {

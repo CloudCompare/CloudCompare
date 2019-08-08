@@ -126,6 +126,8 @@ public:
 	//inherited from ccPlanarEntityInterface
 	void notifyPlanarEntityChanged(ccGLMatrix mat, bool trans) override;
 
+	void getEquation(CCVector3& N, PointCoordinateType& constVal) const override;
+
 };
 
 #endif //ST_BLOCK_HEADER

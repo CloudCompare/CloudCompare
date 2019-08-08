@@ -256,6 +256,9 @@ CCVector3 StBlock::getBottomCenter()
 
 StBlock::StBlock(QString name/*="Block"*/)
 	: ccGenericPrimitive(name)
+	, m_mainPlane(nullptr)
+	, m_top_facet(nullptr)
+	, m_bottom_facet(nullptr)
 {
 }
 
@@ -402,7 +405,7 @@ bool StBlock::toFile_MeOnly(QFile& out) const
 
 	//! plane
 	if (!m_mainPlane->toFile(out)) {
-		return false;
+		return WriteError();
 	}
 
 	return true;
@@ -429,6 +432,14 @@ bool StBlock::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		return ReadError();
 
 	//! plane
+	if (!m_mainPlane) {
+		m_mainPlane = new ccPlane;
+	}
+
+	CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
+	if (classID != CC_TYPES::PLANE) {
+		return CorruptError();
+	}
 	if (!m_mainPlane->fromFile(in, dataVersion, flags)) {
 		return ReadError();
 	}

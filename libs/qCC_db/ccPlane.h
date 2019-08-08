@@ -109,8 +109,9 @@ public:
 
 	bool isVerticalToDirection(CCVector3 dir, double angle_degree = 15);
 
-	void setProfile(std::vector<CCVector3> profile) { m_profile = profile; }
+	void setProfile(std::vector<CCVector3> profile, bool update = false);
 	std::vector<CCVector3> getProfile() { return m_profile; }
+	CCVector3 getProfileCenter();
 
 protected:
 

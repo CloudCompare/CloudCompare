@@ -76,14 +76,20 @@ public:
 //	std::vector<CCVector2> getProfile();
 
 	ccFacet* getTopFacet();
-	void setTopFacet(ccFacet* facet) { m_top_facet = facet; }
+	void setTopFacet(ccFacet* facet);
 	ccFacet* getBottomFacet();
-	void setBottomFacet(ccFacet* facet) { m_bottom_facet = facet; }
+	void setBottomFacet(ccFacet* facet); 
 
 	void setTopHeight(double val);
 	double getTopHeight() { return m_top_height; }
 	void setBottomHeight(double val);
 	double getBottomHeight() { return m_bottom_height; }
+
+	std::vector<CCVector3> deduceTopPoints();
+	std::vector<CCVector3> deduceBottomPoints();
+
+	void updateFacet(ccFacet* facet);
+	void setFacetPoints(ccFacet* facet, std::vector<CCVector3> points, bool computePlane);
 
 protected:
 
@@ -91,13 +97,8 @@ protected:
 	virtual bool toFile_MeOnly(QFile& out) const override;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 	virtual bool buildUp() override;
+	void paramFromFacet();
 	bool buildFromFacet();
-
-// 	ccFacet* m_top;
-// 	ccFacet* m_bottom;
-
-// 	std::vector<CCVector3> m_top;
-// 	std::vector<CCVector3> m_bottom;
 
 	ccFacet* m_top_facet;
 	ccFacet* m_bottom_facet;

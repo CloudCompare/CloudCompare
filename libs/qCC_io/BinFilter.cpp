@@ -798,6 +798,47 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 						}
 					}
 				}
+
+				if (currentObject->isA(CC_TYPES::ST_BLOCK))
+				{
+					StBlock* block = ccHObjectCaster::ToStBlock(currentObject);
+					//top
+					{
+						intptr_t facetID = (intptr_t)block->getTopFacet();
+						if (facetID > 0)
+						{
+							ccHObject* facet = FindRobust(root, block, static_cast<unsigned>(facetID), CC_TYPES::FACET);
+							if (facet && facet->isA(CC_TYPES::FACET)) {
+								block->setTopFacet(ccHObjectCaster::ToFacet(facet));
+							}
+							else
+							{
+								//we have a problem here ;)
+								block->setTopFacet(0);
+								currentObject = nullptr;
+								ccLog::Warning(QString("[BIN] Couldn't find origin points (ID=%1) for facet '%2' in the file!").arg(facetID).arg(block->getName()));
+							}
+						}
+					}
+					//bottom
+					{
+						intptr_t facetID = (intptr_t)block->getBottomFacet();
+						if (facetID > 0)
+						{
+							ccHObject* facet = FindRobust(root, block, static_cast<unsigned>(facetID), CC_TYPES::FACET);
+							if (facet && facet->isA(CC_TYPES::FACET)) {
+								block->setBottomFacet(ccHObjectCaster::ToFacet(facet));
+							}
+							else
+							{
+								//we have a problem here ;)
+								block->setBottomFacet(0);
+								currentObject = nullptr;
+								ccLog::Warning(QString("[BIN] Couldn't find origin points (ID=%1) for facet '%2' in the file!").arg(facetID).arg(block->getName()));
+							}
+						}
+					}
+				}
 			}
 		}
 		else if (currentObject->isKindOf(CC_TYPES::POLY_LINE))
@@ -921,46 +962,6 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				label->setName(originalName);
 			}
 		}
-		else if (currentObject->isA(CC_TYPES::ST_BLOCK)) 
-		{
-			StBlock* block = ccHObjectCaster::ToStBlock(currentObject);
-			//top
-			{
-				intptr_t facetID = (intptr_t)block->getTopFacet();
-				if (facetID > 0)
-				{
-					ccHObject* facet = FindRobust(root, block, static_cast<unsigned>(facetID), CC_TYPES::FACET);
-					if (facet && facet->isA(CC_TYPES::FACET)) {
-						block->setTopFacet(ccHObjectCaster::ToFacet(facet));
-					}
-					else
-					{
-						//we have a problem here ;)
-						block->setTopFacet(0);
-						currentObject = nullptr;
-						ccLog::Warning(QString("[BIN] Couldn't find origin points (ID=%1) for facet '%2' in the file!").arg(facetID).arg(block->getName()));
-					}
-				}
-			}
-			//bottom
-			{
-				intptr_t facetID = (intptr_t)block->getBottomFacet();
-				if (facetID > 0)
-				{
-					ccHObject* facet = FindRobust(root, block, static_cast<unsigned>(facetID), CC_TYPES::FACET);
-					if (facet && facet->isA(CC_TYPES::FACET)) {
-						block->setBottomFacet(ccHObjectCaster::ToFacet(facet));
-					}
-					else
-					{
-						//we have a problem here ;)
-						block->setBottomFacet(0);
-						currentObject = nullptr;
-						ccLog::Warning(QString("[BIN] Couldn't find origin points (ID=%1) for facet '%2' in the file!").arg(facetID).arg(block->getName()));
-					}
-				}
-			}
-		}	
 		else if (currentObject->isA(CC_TYPES::FACET))
 		{
 			ccFacet* facet = ccHObjectCaster::ToFacet(currentObject);

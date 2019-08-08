@@ -35,6 +35,10 @@
 #include <string.h>
 #include <iostream>
 
+#include "vcg/space/intersection3.h"
+#include "vcg/space/plane3.h"
+#include "vcg/space/line3.h"
+
 //////////////////////////////////////////////////////////////////////////
 
 StBlock::StBlock(ccPlane* mainPlane,
@@ -57,14 +61,12 @@ StBlock::StBlock(ccPlane* mainPlane,
 	ccFacet* top_facet, ccFacet* bottom_facet,
 	QString name)
 	: m_mainPlane(mainPlane)
-	, m_top_facet(top_facet)
-	, m_bottom_facet(bottom_facet)
 	, ccGenericPrimitive(name, nullptr/*&mainPlane->getTransformation()*/)
 {
-	m_top_height = (top_facet->getCenter() - mainPlane->getCenter()).norm();
-	m_top_normal = top_facet->getNormal();
-	m_bottom_height = (bottom_facet->getCenter() - mainPlane->getCenter()).norm();
-	m_bottom_normal = bottom_facet->getNormal();
+	setTopFacet(top_facet);
+	setBottomFacet(bottom_facet);
+
+	paramFromFacet();
 
 	if (!buildFromFacet()) {
 		throw std::runtime_error("internal error");
@@ -146,6 +148,9 @@ bool StBlock::buildFromFacet()
 	assert(verts);
 	assert(m_triNormals);
 
+	verts->clear();
+	m_triNormals->clear();
+
 	// top & bottom faces normals
 	{
 		m_triNormals->addElement(ccNormalVectors::GetNormIndex(m_top_facet->getNormal().u));
@@ -217,41 +222,129 @@ bool StBlock::buildFromFacet()
 	return true;
 }
 
+void StBlock::updateFacet(ccFacet * facet)
+{
+	//! update normal and height
+	if (facet == m_top_facet || facet == m_bottom_facet) {
+		paramFromFacet();
+	}
+	else {
+		return;
+	}
+	
+	//! reset facet
+	buildUp();
+}
+
+void StBlock::setFacetPoints(ccFacet * facet, std::vector<CCVector3> points, bool computePlane)
+{
+	if (!(facet == m_top_facet) && !(facet == m_bottom_facet)) {
+		return;
+	}
+	facet->FormByContour(points, true, computePlane ? nullptr : facet->getPlaneEquation());
+
+	//! change the mainPlane
+	std::vector<CCVector3> plane_points = m_mainPlane->projectTo3DGlobal(points);
+	m_mainPlane->setProfile(plane_points, true);
+
+	if (facet == m_top_facet) {
+		std::vector<CCVector3> bottom_points;
+
+		std::vector<CCVector3> profiles = m_mainPlane->getProfile();
+		CCVector3 plane_normal = m_mainPlane->getNormal();
+
+		vcg::Plane3d bot_plane;
+		CCVector3 bot_center = getBottomCenter();
+		bot_plane.Init({ bot_center.x,bot_center.y,bot_center.z }, { m_bottom_normal.x,m_bottom_normal.y,m_bottom_normal.z });
+
+		for (auto & pt : profiles) {
+			vcg::Line3d line;
+			line.SetOrigin({ pt.x, pt.y, pt.z });
+			line.SetDirection({ plane_normal.x,plane_normal.y,plane_normal.z });
+
+			vcg::Point3d facet_pt;
+			if (!vcg::IntersectionLinePlane(line, bot_plane, facet_pt)) {
+				return;
+			}
+			bottom_points.push_back(CCVector3(facet_pt.X(), facet_pt.Y(), facet_pt.Z()));
+		}
+		m_bottom_facet->FormByContour(bottom_points);
+	}
+	else if (facet == m_bottom_facet) {
+		std::vector<CCVector3> top_points;
+
+		std::vector<CCVector3> profiles = m_mainPlane->getProfile();
+		CCVector3 plane_normal = m_mainPlane->getNormal();
+
+		vcg::Plane3d top_plane;
+		CCVector3 top_center = getTopCenter();
+		top_plane.Init({ top_center.x,top_center.y,top_center.z }, { m_top_normal.x,m_top_normal.y,m_top_normal.z });
+
+		for (auto & pt : profiles) {
+			vcg::Line3d line;
+			line.SetOrigin({ pt.x, pt.y, pt.z });
+			line.SetDirection({ plane_normal.x,plane_normal.y,plane_normal.z });
+
+			vcg::Point3d facet_pt;
+			if (!vcg::IntersectionLinePlane(line, top_plane, facet_pt)) {
+				return;
+			}
+			top_points.push_back(CCVector3(facet_pt.X(), facet_pt.Y(), facet_pt.Z()));
+		}
+		m_top_facet->FormByContour(top_points);
+	}
+
+	paramFromFacet();
+	buildFromFacet();
+}
+
 bool StBlock::buildUp()
 {
 // 	unsigned count = static_cast<unsigned>(m_top.size());
 // 	assert(count >= 3);
 
 	//! firstly, deduce top facet and bottom facet from height and normal
-	std::vector<CCVector3> top_points;
-	std::vector<CCVector3> bottom_points;
+	std::vector<CCVector3> top_points = deduceTopPoints();
+	std::vector<CCVector3> bottom_points = deduceBottomPoints();
+
+	if (top_points.size() < 3 || bottom_points.size() < 3) { return false; }
 
 	if (m_top_facet && m_bottom_facet) {
 		//! change the facet contours
-
+		m_top_facet->FormByContour(top_points, true);
+		m_bottom_facet->FormByContour(bottom_points, true);
+		m_bottom_facet->invertNormal();
 	}
 	else {
 		if (m_top_facet) { delete m_top_facet; m_top_facet = nullptr; }
 		if (m_bottom_facet) { delete m_bottom_facet; m_bottom_facet = nullptr; }
-		m_top_facet = ccFacet::CreateFromContour(top_points, "top", true);
-		m_bottom_facet = ccFacet::CreateFromContour(bottom_points, "bottom", true);
-		m_bottom_facet->invertNormal();
+		ccFacet* top_facet = ccFacet::CreateFromContour(top_points, "top", true);
+		ccFacet* bottom_facet = ccFacet::CreateFromContour(bottom_points, "bottom", true);
+		bottom_facet->invertNormal();
 
-		addChild(m_top_facet);
-		addChild(m_bottom_facet);
+		setTopFacet(top_facet);
+		setBottomFacet(bottom_facet);
 	}
  	
 	return buildFromFacet();
 }
 
+void StBlock::paramFromFacet()
+{
+	m_top_height = (m_top_facet->getCenter() - m_mainPlane->getProfileCenter()).norm();
+	m_top_normal = m_top_facet->getNormal();
+	m_bottom_height = (m_bottom_facet->getCenter() - m_mainPlane->getProfileCenter()).norm();
+	m_bottom_normal = m_bottom_facet->getNormal();
+}
+
 CCVector3 StBlock::getTopCenter()
 {
-	return m_mainPlane->getCenter() + m_mainPlane->getNormal() * m_top_height;
+	return m_mainPlane->getProfileCenter() + m_mainPlane->getNormal() * m_top_height;
 }
 
 CCVector3 StBlock::getBottomCenter()
 {
-	return m_mainPlane->getCenter() + m_mainPlane->getNormal() * m_bottom_height;
+	return m_mainPlane->getProfileCenter() + m_mainPlane->getNormal() * m_bottom_height;
 }
 
 StBlock::StBlock(QString name/*="Block"*/)
@@ -267,38 +360,18 @@ ccGenericPrimitive* StBlock::clone() const
 	return finishCloneJob(new StBlock(m_mainPlane, m_top_facet, m_bottom_facet, getName()));
 }
 
-// CCVector3 StBlock::getCenterTop()
-// {
-// 	CCVector3 center(0, 0, 0);
-// 	for (auto & pt : m_top)	{
-// 		center += pt;
-// 	}
-// 	center /= m_top.size();
-// 	return center;
-// }
-// 
-// CCVector3 StBlock::getCenterBottom()
-// {
-// 	CCVector3 center(0, 0, 0);
-// 	for (auto & pt : m_bottom) {
-// 		center += pt;
-// 	}
-// 	center /= m_bottom.size();
-// 	return center;
-// }
-
-// std::vector<CCVector2> StBlock::getProfile()
-// {
-// 	std::vector<CCVector2> profile;
-// 	for (auto & pt : m_top) {
-// 		profile.push_back(CCVector2(pt.x, pt.y));
-// 	}
-// 	return profile;
-// }
-
 ccFacet * StBlock::getTopFacet()
 {
 	return m_top_facet;
+}
+
+void StBlock::setTopFacet(ccFacet * facet)
+{
+	m_top_facet = facet;
+	if (m_top_facet && !m_top_facet->isAncestorOf(this) && !m_top_facet->getParent()) {
+		addChild(m_top_facet);
+	//	m_top_facet->addDependency(this, ccHObject::DP_NOTIFY_OTHER_ON_DELETE | ccHObject::DP_NOTIFY_OTHER_ON_UPDATE);
+	}
 }
 
 ccFacet * StBlock::getBottomFacet()
@@ -306,54 +379,108 @@ ccFacet * StBlock::getBottomFacet()
 	return m_bottom_facet;
 }
 
+void StBlock::setBottomFacet(ccFacet * facet)
+{
+	m_bottom_facet = facet;
+	if (m_bottom_facet && !m_bottom_facet->isAncestorOf(this)) {
+		addChild(m_bottom_facet);
+	//	m_bottom_facet->addDependency(this, ccHObject::DP_NOTIFY_OTHER_ON_DELETE | ccHObject::DP_NOTIFY_OTHER_ON_UPDATE);
+	}
+}
+
 void StBlock::setTopHeight(double val)
 {
 	double add = val - m_top_height;
+	m_top_height = val;
 
+	//! get top points
+	std::vector<CCVector3> top_points;
 	ccPointCloud* verts = vertices();
 	if (!verts) { return; }
 	for (unsigned int i = 0; i < verts->size() / 2; i++) {
 		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2));
-		P.z += add;
+		P += m_mainPlane->getNormal() * add;
+		top_points.push_back(P);
 	}
 	verts->invalidateBoundingBox();
 
 	ccFacet* top = getTopFacet();
 	if (!top) return;
-	ccPointCloud* cloud = top->getContourVertices();
-	if (!cloud) return;
-	for (unsigned int i = 0; i < cloud->size(); i++) {
-		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
-		P.z += add;
-	}
-	cloud->invalidateBoundingBox();
-
-	m_top_height = val;
+	top->FormByContour(top_points, true);
 }
 
 void StBlock::setBottomHeight(double val)
 {
 	double add = val - m_bottom_height;
-	
+	m_bottom_height = val;
+
+	//! get bottom points
+	std::vector<CCVector3> bot_points;
 	ccPointCloud* verts = vertices();
 	if (!verts) { return; }
 	for (unsigned int i = 0; i < verts->size() / 2; i++) {
 		CCVector3& P = const_cast<CCVector3&>(*verts->getPoint(i * 2 + 1));
-		P.z += add;
+		P += m_mainPlane->getNormal() * add;
+		bot_points.push_back(P);
 	}
 	verts->invalidateBoundingBox();
 
 	ccFacet* bottom = getBottomFacet();
 	if (!bottom) return;
-	ccPointCloud* cloud = bottom->getContourVertices();
-	if (!cloud) return;
-	for (unsigned int i = 0; i < cloud->size(); i++) {
-		CCVector3& P = const_cast<CCVector3&>(*cloud->getPoint(i));
-		P.z += add;
-	}
-	cloud->invalidateBoundingBox();
+	bottom->FormByContour(bot_points);
+}
 
-	m_bottom_height = val;
+std::vector<CCVector3> StBlock::deduceTopPoints()
+{
+	std::vector<CCVector3> top_points;
+
+	std::vector<CCVector3> profiles = m_mainPlane->getProfile();
+	CCVector3 plane_normal = m_mainPlane->getNormal();
+	if (profiles.size() < 3) { return top_points; }
+
+	vcg::Plane3d top_plane;
+	CCVector3 top_center = getTopCenter();
+	top_plane.Init({ top_center.x,top_center.y,top_center.z }, { m_top_normal.x,m_top_normal.y,m_top_normal.z });
+
+	for (auto & pt : profiles) {
+		vcg::Line3d line;
+		line.SetOrigin({ pt.x, pt.y, pt.z });
+		line.SetDirection({ plane_normal.x,plane_normal.y,plane_normal.z });
+
+		vcg::Point3d facet_pt;
+		if (!vcg::IntersectionLinePlane(line, top_plane, facet_pt)) {
+			top_points.clear(); return top_points;
+		}
+		top_points.push_back(CCVector3(facet_pt.X(), facet_pt.Y(), facet_pt.Z()));
+	}
+	return top_points;
+}
+
+std::vector<CCVector3> StBlock::deduceBottomPoints()
+{
+	std::vector<CCVector3> bottom_points;
+
+	std::vector<CCVector3> profiles = m_mainPlane->getProfile();
+	CCVector3 plane_normal = m_mainPlane->getNormal();
+	if (profiles.size() < 3) { return bottom_points; }
+
+	vcg::Plane3d bot_plane;
+	CCVector3 bot_center = getBottomCenter();
+	bot_plane.Init({ bot_center.x,bot_center.y,bot_center.z }, { m_bottom_normal.x,m_bottom_normal.y,m_bottom_normal.z });
+
+	for (auto & pt : profiles) {
+		vcg::Line3d line;
+		line.SetOrigin({ pt.x, pt.y, pt.z });
+		line.SetDirection({ plane_normal.x,plane_normal.y,plane_normal.z });
+
+		vcg::Point3d facet_pt;
+		if (!vcg::IntersectionLinePlane(line, bot_plane, facet_pt)) {
+			bottom_points.clear();
+			return bottom_points;
+		}
+		bottom_points.push_back(CCVector3(facet_pt.X(), facet_pt.Y(), facet_pt.Z()));
+	}
+	return bottom_points;
 }
 
 inline CCVector3 StBlock::getNormal() const

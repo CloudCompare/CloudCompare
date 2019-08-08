@@ -488,13 +488,15 @@ void bdrPlaneEditorDlg::updatePlane(ccPlanarEntityInterface* plane)
 		ccLog::Print(trans.toString(12, ' ')); //full precision
 	}
 
-	ccPlane* plane_ = static_cast<ccPlane*> (plane);
-	if (plane_) {
-		if (plane_->getXWidth() != width
-			|| plane_->getYWidth() != height)
-		{
-			plane_->setXWidth(width, false);
-			plane_->setYWidth(height, true);
+	if (plane->getPlane()->isA(CC_TYPES::PLANE)) {
+		ccPlane* plane_ = static_cast<ccPlane*> (plane->getPlane());
+		if (plane_) {
+			if (plane_->getXWidth() != width
+				|| plane_->getYWidth() != height)
+			{
+				plane_->setXWidth(width, false);
+				plane_->setYWidth(height, true);
+			}
 		}
 	}
 }

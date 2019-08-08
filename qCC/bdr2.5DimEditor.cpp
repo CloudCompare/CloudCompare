@@ -367,6 +367,8 @@ bool bdr2Point5DimEditor::projectBack(ccHObject* obj2D, ccHObject* obj3D)
 		StBlock* block = ccHObjectCaster::ToStBlock(obj3D);
 		ccPolyline* polyline = ccHObjectCaster::ToPolyline(obj2D); if (!polyline) return false;
 		
+		//! reset the block facets
+
 		ccFacet* facet = block->getTopFacet(); if (!facet) return false;
 
 		const PointCoordinateType *eq = facet->getPlaneEquation();
@@ -396,34 +398,36 @@ bool bdr2Point5DimEditor::projectBack(ccHObject* obj2D, ccHObject* obj3D)
 		}
 		if (top_points.size() < 3) return false;
 
-		//! project to the bottom
-		std::vector<CCVector3> bottom_points;
-		ccFacet* facet_bottom = block->getBottomFacet(); if (!facet_bottom) return false;
-		eq = facet_bottom->getPlaneEquation();
-		plane.SetDirection({ eq[0],eq[1],eq[2] });
-		plane.SetOffset(eq[3]);
-		for (auto & v : top_points) {
-			vcg::Line3d line;
-			line.SetOrigin(stocker::parse_xyz(v));
-			line.SetDirection({ 0,0,-1 });
+		block->setFacetPoints(facet, top_points, false);
 
-			vcg::Point3d point;
-			if (!vcg::IntersectionLinePlane(line, plane, point)) {
-				return false;
-			}
-			bottom_points.push_back(CCVector3(vcgXYZ(point)));
-		}
-		if (bottom_points.size() != top_points.size()) { return false; }
-
-		//! set to block
-		ccHObject* parent = block->getParent(); if (!parent) { return false; }
-		
-		StBlock* new_block = StBlock::Create(top_points, bottom_points.front().z);
-		new_block->setName(block->getName());
-		MainWindow::TheInstance()->removeFromDB(block);
-		
-		parent->addChild(new_block);
-		MainWindow::TheInstance()->addToDB_Build(new_block);
+// 		//! project to the bottom
+// 		std::vector<CCVector3> bottom_points;
+// 		ccFacet* facet_bottom = block->getBottomFacet(); if (!facet_bottom) return false;
+// 		eq = facet_bottom->getPlaneEquation();
+// 		plane.SetDirection({ eq[0],eq[1],eq[2] });
+// 		plane.SetOffset(eq[3]);
+// 		for (auto & v : top_points) {
+// 			vcg::Line3d line;
+// 			line.SetOrigin(stocker::parse_xyz(v));
+// 			line.SetDirection({ 0,0,-1 });
+// 
+// 			vcg::Point3d point;
+// 			if (!vcg::IntersectionLinePlane(line, plane, point)) {
+// 				return false;
+// 			}
+// 			bottom_points.push_back(CCVector3(vcgXYZ(point)));
+// 		}
+// 		if (bottom_points.size() != top_points.size()) { return false; }
+// 
+// 		//! set to block
+// 		ccHObject* parent = block->getParent(); if (!parent) { return false; }
+// 		
+// 		StBlock* new_block = StBlock::Create(top_points, bottom_points.front().z);
+// 		new_block->setName(block->getName());
+// 		MainWindow::TheInstance()->removeFromDB(block);
+// 		
+// 		parent->addChild(new_block);
+// 		MainWindow::TheInstance()->addToDB_Build(new_block);
 	}
 }
 

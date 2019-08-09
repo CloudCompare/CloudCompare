@@ -88,11 +88,11 @@ void StFootPrint::setHeight(double height)
 void StFootPrint::setBottom(double bottom)
 {
 	m_bottom = bottom;
-	for (StBlock* block : getBlocks()) {
-		if (block) {
-			block->setBottomHeight(bottom);
-		}
-	}
+// 	for (StBlock* block : getBlocks()) {
+// 		if (block) {
+// 			block->setBottomHeight(bottom);
+// 		}
+// 	}
 	prepareDisplayForRefresh_recursive();
 }
 

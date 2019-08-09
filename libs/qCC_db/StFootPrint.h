@@ -40,8 +40,13 @@ public:
 
 	bool reverseVertexOrder();
 
+	//! the average height of the roof footprint
 	inline double getHeight() const;
 	void setHeight(double height);	//! attention: will set all the points z to height
+
+	//! the bottom of footprint, same as the child block	// always set to ground height
+	inline double getBottom() const { return m_bottom; }
+	void setBottom(double bottom);
 
 	//! the highest plane point
 	inline double getHighest() const { return m_highest; }
@@ -50,10 +55,6 @@ public:
 	//! the lowest plane point
 	inline double getLowest() const { return m_lowest; }
 	void setLowest(double low) { m_lowest = low; }
-
-	//! the bottom of footprint, same as the child block
-	inline double getBottom() const { return m_bottom; }
-	void setBottom(double bottom);
 	
 	inline bool isHole() const { return m_hole; }
 	void setHoleState(bool state) { m_hole = state; }
@@ -74,9 +75,11 @@ protected:
 	virtual bool toFile_MeOnly(QFile& out) const override;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
+	double m_bottom;
+
 	double m_highest;
 	double m_lowest;
-	double m_bottom;
+	
 	bool m_hole;
 	int m_componentId;
 	QStringList m_plane_names;

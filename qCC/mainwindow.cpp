@@ -13603,7 +13603,8 @@ void MainWindow::doActionBDFootPrintAuto()
 		}
 
 		try {
-			ccHObject::Container footprints = GenerateFootPrints(prim_group);
+			stocker::BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
+			ccHObject::Container footprints = GenerateFootPrints(prim_group, build_unit.ground_height);
 			for (ccHObject* ft : footprints) {
 				if (ft && ft->isA(CC_TYPES::ST_FOOTPRINT)) {
 					SetGlobalShiftAndScale(ft);
@@ -13619,7 +13620,7 @@ void MainWindow::doActionBDFootPrintAuto()
 		ProgStep()
 	}
 	ProgEnd
-	doActionBDProjectSave();
+	//doActionBDProjectSave();
 	refreshAll();
 	UpdateUI();
 }
@@ -13841,11 +13842,11 @@ void MainWindow::doActionBDLoD1Generation()
 void MainWindow::doActionBDLoD2Generation()
 {
 	if (!haveSelection()) return;
-	if (!m_pbdr3d4emDlg)
-		m_pbdr3d4emDlg = new bdr3D4EMDlg(this);
-	
-	m_pbdr3d4emDlg->setModal(false);
-	m_pbdr3d4emDlg->setWindowModality(Qt::NonModal);
+// 	if (!m_pbdr3d4emDlg)
+// 		m_pbdr3d4emDlg = new bdr3D4EMDlg(this);
+// 	
+// 	m_pbdr3d4emDlg->setModal(false);
+// 	m_pbdr3d4emDlg->setWindowModality(Qt::NonModal);
 	//if (!m_pbdr3d4emDlg->exec()) return;	// TODO: TEMP!!! 20190731
 
 	ccHObject::Container sels = m_selectedEntities;
@@ -13871,19 +13872,19 @@ void MainWindow::doActionBDLoD2Generation()
 	for (ccHObject* bd_entity : building_entites) {
 		BDBaseHObject* baseObj = GetRootBDBase(bd_entity);
 
-		double height = DBL_MAX;
-		if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
-			height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
-		}
-		else /*if (m_pbdr3d4emDlg->GroundHeightMode() == 0)*/ {
-			height = baseObj->GetBuildingUnit(GetParentBuilding(bd_entity)->getName().toStdString()).ground_height;
-		}
+// 		double height = DBL_MAX;
+// 		if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
+// 			height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
+// 		}
+// 		else /*if (m_pbdr3d4emDlg->GroundHeightMode() == 0)*/ {
+// 			height = baseObj->GetBuildingUnit(GetParentBuilding(bd_entity)->getName().toStdString()).ground_height;
+// 		}
 
 		//ccHObject* bd_entity = entity->isA(CC_TYPES::ST_FOOTPRINT) ? entity : GetParentBuilding(entity);
 		//if (!bd_entity) return;
 		
 		try {
-			ccHObject* bd_model_obj = LoD2FromFootPrint(bd_entity, height);
+			ccHObject* bd_model_obj = LoD2FromFootPrint(bd_entity);
 			if (bd_model_obj) {
 				SetGlobalShiftAndScale(bd_model_obj);
 				bd_model_obj->setDisplay_recursive(bd_entity->getDisplay());

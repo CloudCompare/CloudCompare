@@ -118,7 +118,7 @@ protected:
 
 public:
 	//inherited from ccPlanarEntityInterface //! for planar entity
-	ccHObject* getPlane() override { return (ccHObject*)m_mainPlane; }
+	ccHObject* getPlane() override { return this; }
 	//inherited from ccPlanarEntityInterface
 	inline CCVector3 getNormal() const override;
 	//inherited from ccPlanarEntityInterface //! Returns the facet center

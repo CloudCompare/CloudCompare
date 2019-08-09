@@ -75,8 +75,9 @@ bdrPlaneEditorDlg::bdrPlaneEditorDlg(ccPickingHub* pickingHub, QWidget* parent)
 
 	connect(previewCheckBox, &QAbstractButton::clicked, this, &bdrPlaneEditorDlg::preview);
 	connect(restoreToolButton, &QAbstractButton::clicked, this, &bdrPlaneEditorDlg::restore);
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveParamsAndAccept()));
-	connect(buttonBox, SIGNAL(rejected()), this, SLOT(cancle()));
+	connect(applyToolButton, &QAbstractButton::clicked, this, &bdrPlaneEditorDlg::saveParamsAndAccept);
+// 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveParamsAndAccept()));
+// 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(cancle()));
 	
 	//auto disable picking mode on quit
 	connect(this, &QDialog::finished, [&]()
@@ -140,8 +141,8 @@ void bdrPlaneEditorDlg::saveParamsAndAccept()
 		}
 	}
 
-	disconnectPlane();
-	accept();
+// 	disconnectPlane();
+// 	accept();
 
 //	deleteLater();
 }
@@ -297,7 +298,7 @@ void bdrPlaneEditorDlg::restore()
 
 void bdrPlaneEditorDlg::cancle()
 {
-	restore();
+	//restore();
 	disconnectPlane();
 	
 	//deleteLater();
@@ -383,11 +384,15 @@ void bdrPlaneEditorDlg::initWithPlane(ccPlanarEntityInterface* plane)
 	//dipDirDoubleSpinBox->setValue(dipDir);
 	//upwardCheckBox->setChecked(N.z >= 0);
 
-	ccPlane* plane_ = static_cast<ccPlane*>(plane);
+	ccPlane* plane_ = ccHObjectCaster::ToPlane(plane->getPlane());
 	if (plane_) {
+		dimGroupBox->setVisible(true);
 		wDoubleSpinBox->setValue(plane_->getXWidth());
 		hDoubleSpinBox->setValue(plane_->getYWidth());
 		m_planePara.size = CCVector2(plane_->getXWidth(), plane_->getYWidth());
+	}
+	else {
+		dimGroupBox->setVisible(false);
 	}
 	
 	

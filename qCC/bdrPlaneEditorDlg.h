@@ -66,14 +66,14 @@ public slots:
 	void onDipDirChanged(double);
 	void onDipDirModified(bool);
 	void onNormalChanged(double);
+	void saveParamsAndAccept();
+	void restore();
+
 	void cancle();
 
 protected slots:
-	void saveParamsAndAccept();
 
 	void preview();
-	void restore();
-
 	void updateUI();
 
 protected:

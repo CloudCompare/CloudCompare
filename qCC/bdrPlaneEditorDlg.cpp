@@ -26,6 +26,7 @@
 //qCC_db
 #include <ccPlane.h>
 #include <ccFacet.h>
+#include "StBlock.h"
 #include <ccNormalVectors.h>
 
 //qCC_gl
@@ -346,6 +347,31 @@ void bdrPlaneEditorDlg::onItemPicked(const PickedItem& pi)
 	if (previewCheckBox->isChecked()) {
 		updateParams();
 	}
+
+	if (!m_associatedPlane) {
+		if (pi.entity->isA(CC_TYPES::ST_BLOCK)) {
+			StBlock* block = ccHObjectCaster::ToStBlock(pi.entity);
+			CCVector3 Na, Nb, Nc;
+			block->getTriangleNormals(pi.itemIndex, Na, Nb, Nc);
+			CCVector3 N = (Na + Nb + Nc) / 3;
+			N.normalize();
+			nxDoubleSpinBox->blockSignals(true);
+			nyDoubleSpinBox->blockSignals(true);
+			nzDoubleSpinBox->blockSignals(true);
+
+			nxDoubleSpinBox->setValue(N.x);
+			nyDoubleSpinBox->setValue(N.y);
+			nzDoubleSpinBox->setValue(N.z);
+			nxDoubleSpinBox->blockSignals(false);
+			nyDoubleSpinBox->blockSignals(false);
+			nzDoubleSpinBox->blockSignals(false);
+			onNormalChanged(0);
+			
+			//! create a plane for footprint
+			//StFootPrint* print = new StFootPrint();
+			//updatePlane(plane);
+		}
+	}
 }
 
 void bdrPlaneEditorDlg::initWithPlane(ccPlanarEntityInterface* plane)
@@ -487,14 +513,14 @@ void bdrPlaneEditorDlg::updatePlane(ccPlanarEntityInterface* plane)
 	
 	if (needToApplyRot || needToApplyTrans)
 	{
-		m_associatedPlane->getPlane()->applyGLTransformation_recursive(&trans);
+		plane->getPlane()->applyGLTransformation_recursive(&trans);
 
 		ccLog::Print("[Plane edit] Applied transformation matrix:");
 		ccLog::Print(trans.toString(12, ' ')); //full precision
 	}
 
 	if (plane->getPlane()->isA(CC_TYPES::PLANE)) {
-		ccPlane* plane_ = static_cast<ccPlane*> (plane->getPlane());
+		ccPlane* plane_ = ccHObjectCaster::ToPlane(plane->getPlane());
 		if (plane_) {
 			if (plane_->getXWidth() != width
 				|| plane_->getYWidth() != height)

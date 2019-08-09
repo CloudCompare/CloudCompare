@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>331</width>
+    <width>261</width>
     <height>392</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Plane properties</string>
+   <string>Plane Editor Panel</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -68,6 +68,12 @@
          </item>
          <item row="0" column="1">
           <widget class="QDoubleSpinBox" name="dipDoubleSpinBox">
+           <property name="minimumSize">
+            <size>
+             <width>60</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="suffix">
             <string notr="true">°</string>
            </property>
@@ -91,6 +97,12 @@
          </item>
          <item row="1" column="1">
           <widget class="QDoubleSpinBox" name="dipDirDoubleSpinBox">
+           <property name="minimumSize">
+            <size>
+             <width>60</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="suffix">
             <string notr="true">°</string>
            </property>
@@ -141,6 +153,18 @@
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QDoubleSpinBox" name="nxDoubleSpinBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="prefix">
             <string notr="true">Nx = </string>
            </property>
@@ -157,6 +181,12 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="nyDoubleSpinBox">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="prefix">
             <string notr="true">Ny = </string>
            </property>
@@ -173,6 +203,12 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="nzDoubleSpinBox">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="prefix">
             <string notr="true">Nz = </string>
            </property>
@@ -208,15 +244,21 @@
       <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
+      <item row="1" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
          <string>width</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="wDoubleSpinBox">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Plane width</string>
         </property>
@@ -234,15 +276,14 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>height</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="hDoubleSpinBox">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Plane height</string>
         </property>
@@ -260,6 +301,13 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>height</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -274,6 +322,12 @@
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="cyAxisDoubleSpinBox">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="prefix">
          <string notr="true">Y: </string>
         </property>
@@ -290,6 +344,12 @@
       </item>
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="cxAxisDoubleSpinBox">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="prefix">
          <string notr="true">X: </string>
         </property>
@@ -320,6 +380,12 @@
       </item>
       <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="czAxisDoubleSpinBox">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="prefix">
          <string notr="true">Z: </string>
         </property>
@@ -346,6 +412,19 @@
       <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="2">
+       <widget class="QToolButton" name="restoreToolButton">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>restore</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QCheckBox" name="previewCheckBox">
         <property name="sizePolicy">
@@ -369,19 +448,6 @@
         </property>
         <property name="text">
          <string>apply</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QToolButton" name="restoreToolButton">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>restore</string>
         </property>
        </widget>
       </item>

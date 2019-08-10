@@ -86,6 +86,14 @@ protected: //members
 		CCVector3 normal;
 		CCVector3 center;
 		CCVector2 size;
+		bool already_in_db;
+
+		void reset() {
+			normal = CCVector3(0, 0, 0);
+			center = CCVector3(0, 0, 0);
+			size = CCVector2(0, 0);
+			already_in_db = false;
+		}
 	};
 	planeParams m_planePara;
 

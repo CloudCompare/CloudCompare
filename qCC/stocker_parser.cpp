@@ -591,6 +591,7 @@ int GetNumberExcludePrefix(ccHObject * obj, QString prefix)
 
 int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix/*, CC_CLASS_ENUM type = CC_TYPES::OBJECT*/)
 {
+	if (!obj) { return -1; }
 	set<int> name_numbers;
 	for (size_t i = 0; i < obj->getChildrenNumber(); i++) {
 		QString name = obj->getChild(i)->getName();
@@ -2598,7 +2599,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 		if (!QFile::exists(QString(output_path))) continue;
 
 		std::vector<Contour3d> roof_polygons = builder_3d4em.GetRoofPolygons();
-		int block_number = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX) + 1;
+		int block_number = GetMaxNumberExcludeChildPrefix(ftObj, BDDB_BLOCK_PREFIX) + 1;
 		for (Contour3d & roof_points : roof_polygons) {
 			std::vector<CCVector3> top_points;
 			for (auto & pt : roof_points) {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>261</width>
-    <height>392</height>
+    <width>246</width>
+    <height>263</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,6 +20,21 @@
    <string>Plane Editor Panel</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>3</number>
+   </property>
+   <property name="leftMargin">
+    <number>3</number>
+   </property>
+   <property name="topMargin">
+    <number>3</number>
+   </property>
+   <property name="rightMargin">
+    <number>3</number>
+   </property>
+   <property name="bottomMargin">
+    <number>3</number>
+   </property>
    <item>
     <widget class="QGroupBox" name="centerGroupBox_2">
      <property name="title">
@@ -29,11 +44,14 @@
       <bool>true</bool>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="spacing">
+       <number>3</number>
+      </property>
       <property name="leftMargin">
        <number>0</number>
       </property>
       <property name="topMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
@@ -244,43 +262,36 @@
       <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <widget class="QLabel" name="label">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>3</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>3</number>
+      </property>
+      <property name="horizontalSpacing">
+       <number>3</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>6</number>
+      </property>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>width</string>
+         <string>height</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="wDoubleSpinBox">
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Plane width</string>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="minimum">
-         <double>0.000001000000000</double>
-        </property>
-        <property name="maximum">
-         <double>1000000.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>10.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
+      <item row="0" column="3">
        <widget class="QDoubleSpinBox" name="hDoubleSpinBox">
         <property name="minimumSize">
          <size>
-          <width>100</width>
+          <width>60</width>
           <height>0</height>
          </size>
         </property>
@@ -301,10 +312,35 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>height</string>
+         <string>width</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="wDoubleSpinBox">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Plane width</string>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="minimum">
+         <double>0.000001000000000</double>
+        </property>
+        <property name="maximum">
+         <double>1000000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>10.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -319,17 +355,46 @@
      <property name="flat">
       <bool>true</bool>
      </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="cyAxisDoubleSpinBox">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>3</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>3</number>
+      </property>
+      <item>
+       <widget class="QToolButton" name="pickCenterToolButton">
+        <property name="toolTip">
+         <string>Pick the plane center (click again to cancel)</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/ccPointPicking.png</normaloff>:/CC/images/ccPointPicking.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="czAxisDoubleSpinBox">
         <property name="minimumSize">
          <size>
-          <width>100</width>
+          <width>60</width>
           <height>0</height>
          </size>
         </property>
         <property name="prefix">
-         <string notr="true">Y: </string>
+         <string notr="true">Z: </string>
         </property>
         <property name="decimals">
          <number>8</number>
@@ -342,11 +407,11 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item>
        <widget class="QDoubleSpinBox" name="cxAxisDoubleSpinBox">
         <property name="minimumSize">
          <size>
-          <width>100</width>
+          <width>60</width>
           <height>0</height>
          </size>
         </property>
@@ -364,30 +429,16 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QToolButton" name="pickCenterToolButton">
-        <property name="toolTip">
-         <string>Pick the plane center (click again to cancel)</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../icones.qrc">
-          <normaloff>:/CC/images/ccPointPicking.png</normaloff>:/CC/images/ccPointPicking.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="czAxisDoubleSpinBox">
+      <item>
+       <widget class="QDoubleSpinBox" name="cyAxisDoubleSpinBox">
         <property name="minimumSize">
          <size>
-          <width>100</width>
+          <width>60</width>
           <height>0</height>
          </size>
         </property>
         <property name="prefix">
-         <string notr="true">Z: </string>
+         <string notr="true">Y: </string>
         </property>
         <property name="decimals">
          <number>8</number>

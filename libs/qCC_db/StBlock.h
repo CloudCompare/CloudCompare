@@ -75,6 +75,8 @@ public:
 // 	CCVector3 getCenterBottom();
 //	std::vector<CCVector2> getProfile();
 
+	ccPlane* getMainPlane() { return m_mainPlane; }
+
 	ccFacet* getTopFacet();
 	void setTopFacet(ccFacet* facet);
 	ccFacet* getBottomFacet();
@@ -92,6 +94,9 @@ public:
 	void setFacetPoints(ccFacet* facet, std::vector<CCVector3> points, bool computePlane);
 
 protected:
+
+	//inherited from ccDrawable
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const override;

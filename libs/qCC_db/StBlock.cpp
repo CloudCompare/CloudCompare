@@ -61,6 +61,10 @@ StBlock::StBlock(ccPlane* mainPlane,
 	ccFacet* top_facet, ccFacet* bottom_facet,
 	QString name)
 	: m_mainPlane(mainPlane)
+	, m_top_height(0)
+	, m_top_normal(0,0,1)
+	, m_bottom_height(0)
+	, m_bottom_normal(0,0,1)
 	, ccGenericPrimitive(name, nullptr/*&mainPlane->getTransformation()*/)
 {
 	setTopFacet(top_facet);
@@ -69,7 +73,7 @@ StBlock::StBlock(ccPlane* mainPlane,
 	paramFromFacet();
 
 	if (!buildFromFacet()) {
-		throw std::runtime_error("internal error");
+//		throw std::runtime_error("internal error");
 	}
 }
 
@@ -320,7 +324,9 @@ bool StBlock::buildUp()
 		if (m_bottom_facet) { delete m_bottom_facet; m_bottom_facet = nullptr; }
 		ccFacet* top_facet = ccFacet::CreateFromContour(top_points, "top", true);
 		ccFacet* bottom_facet = ccFacet::CreateFromContour(bottom_points, "bottom", true);
-		bottom_facet->invertNormal();
+		if (bottom_facet) {
+			bottom_facet->invertNormal();
+		}
 
 		setTopFacet(top_facet);
 		setBottomFacet(bottom_facet);
@@ -331,6 +337,9 @@ bool StBlock::buildUp()
 
 void StBlock::paramFromFacet()
 {
+	if (!m_top_facet || !m_bottom_facet || !m_mainPlane) {
+		return;
+	}
 	m_top_height = (m_top_facet->getCenter() - m_mainPlane->getProfileCenter()).norm();
 	m_top_normal = m_top_facet->getNormal();
 	m_bottom_height = (m_bottom_facet->getCenter() - m_mainPlane->getProfileCenter()).norm();
@@ -433,6 +442,9 @@ void StBlock::setBottomHeight(double val)
 std::vector<CCVector3> StBlock::deduceTopPoints()
 {
 	std::vector<CCVector3> top_points;
+	if (!m_mainPlane) {
+		return top_points;
+	}
 
 	std::vector<CCVector3> profiles = m_mainPlane->getProfile();
 	CCVector3 plane_normal = m_mainPlane->getNormal();
@@ -459,6 +471,9 @@ std::vector<CCVector3> StBlock::deduceTopPoints()
 std::vector<CCVector3> StBlock::deduceBottomPoints()
 {
 	std::vector<CCVector3> bottom_points;
+	if (!m_mainPlane) {
+		return bottom_points;
+	}
 
 	std::vector<CCVector3> profiles = m_mainPlane->getProfile();
 	CCVector3 plane_normal = m_mainPlane->getNormal();
@@ -514,6 +529,16 @@ void StBlock::getEquation(CCVector3 & N, PointCoordinateType & constVal) const
 }
 
 //! onUpdateOf(ccFacet)
+
+void StBlock::drawMeOnly(CC_DRAW_CONTEXT & context)
+{
+	if (isVisible()) {
+		ccGenericPrimitive::drawMeOnly(context);
+	}
+	if (getNormalEditState() && m_mainPlane && MACRO_Draw3D(context)) {
+		m_mainPlane->draw(context);
+	}
+}
 
 bool StBlock::toFile_MeOnly(QFile& out) const
 {

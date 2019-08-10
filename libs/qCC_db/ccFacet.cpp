@@ -816,6 +816,8 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 			}
 		}
 	}
+
+	emit planarEntityChanged();
 	return true;
 }
 

@@ -35,6 +35,8 @@
 //Qt
 #include <QDoubleValidator>
 
+#include "stocker_parser.h"
+
 //semi-persistent parameters
 static double s_dip = 0;
 static double s_dipDir = 0;
@@ -42,6 +44,18 @@ static double s_width = 10.0;
 static double s_height = 10.0;
 static bool s_upward = true;
 static CCVector3d s_center(0, 0, 0);
+
+inline ccPlane* getMainPlaneFromInterface(ccPlanarEntityInterface* plane) {
+	ccHObject* planeEnt = plane->getPlane();
+	ccPlane* plane_ = nullptr;
+	if (planeEnt->isA(CC_TYPES::PLANE)) {
+		plane_ = ccHObjectCaster::ToPlane(planeEnt);
+	}
+	else if (planeEnt->isA(CC_TYPES::ST_BLOCK)) {
+		plane_ = ccHObjectCaster::ToStBlock(planeEnt)->getMainPlane();
+	}
+	return plane_;
+}
 
 bdrPlaneEditorDlg::bdrPlaneEditorDlg(ccPickingHub* pickingHub, QWidget* parent)
 	: QDialog(parent)
@@ -122,6 +136,9 @@ void bdrPlaneEditorDlg::saveParamsAndAccept()
 	if (m_associatedPlane)
 	{
 		updateParams();
+		if (!m_planePara.already_in_db) {
+			m_planePara.already_in_db = true;
+		}
 	}
 	else //creation
 	{
@@ -220,6 +237,11 @@ void bdrPlaneEditorDlg::restore()
 	if (!m_associatedPlane) {
 		return;
 	}
+	if (m_associatedPlane && !m_planePara.already_in_db) {
+		MainWindow::TheInstance()->removeFromDB(m_associatedPlane->getPlane());
+		return;
+	}
+
 	CCVector3 Nd = m_planePara.normal;
 	CCVector3 Cd = m_planePara.center;
 	PointCoordinateType width = m_planePara.size.x;
@@ -351,6 +373,7 @@ void bdrPlaneEditorDlg::onItemPicked(const PickedItem& pi)
 	if (!m_associatedPlane) {
 		if (pi.entity->isA(CC_TYPES::ST_BLOCK)) {
 			StBlock* block = ccHObjectCaster::ToStBlock(pi.entity);
+			ccHObject* footprint = block->getParent();
 			CCVector3 Na, Nb, Nc;
 			block->getTriangleNormals(pi.itemIndex, Na, Nb, Nc);
 			CCVector3 N = (Na + Nb + Nc) / 3;
@@ -367,9 +390,25 @@ void bdrPlaneEditorDlg::onItemPicked(const PickedItem& pi)
 			nzDoubleSpinBox->blockSignals(false);
 			onNormalChanged(0);
 			
-			//! create a plane for footprint
-			//StFootPrint* print = new StFootPrint();
-			//updatePlane(plane);
+			MainWindow* main_window = MainWindow::TheInstance();
+			if (!main_window) { return; }
+			//! create a plane for footprint //FIXME: Maybe we should create a new footprint for this new canvas
+			ccPlane* new_plane = new ccPlane;
+			updatePlane(new_plane);
+			StBlock* new_block = new StBlock(new_plane, nullptr, nullptr);
+			int block_number = footprint ? (GetMaxNumberExcludeChildPrefix(footprint, BDDB_BLOCK_PREFIX) + 1) : 0;
+			new_block->setName(BDDB_BLOCK_PREFIX + QString::number(block_number));
+			new_block->setDisplay_recursive(block->getDisplay());
+			new_plane->setDisplay_recursive(block->getDisplay());
+			if (footprint) { footprint->addChild(new_block); }
+
+			
+			main_window->addToDB(new_block, block->getDBSourceType());
+			main_window->unselectAllInDB();
+			main_window->setSelectedInDB(new_block, true);
+			
+			initWithPlane(new_block);
+			m_planePara.already_in_db = false; // this is created inside this dialog, if restore, delete it!
 		}
 	}
 }
@@ -385,6 +424,7 @@ void bdrPlaneEditorDlg::initWithPlane(ccPlanarEntityInterface* plane)
 		m_associatedPlane = plane;
 		m_associatedPlane->normalEditState(true);
 		connect(m_associatedPlane, SIGNAL(planarEntityChanged()), this, SLOT(updateUI()));
+		m_planePara.already_in_db = true;
 	}
 	
 	CCVector3 N = plane->getNormal();
@@ -409,8 +449,8 @@ void bdrPlaneEditorDlg::initWithPlane(ccPlanarEntityInterface* plane)
 	//dipDoubleSpinBox->setValue(dip);
 	//dipDirDoubleSpinBox->setValue(dipDir);
 	//upwardCheckBox->setChecked(N.z >= 0);
-
-	ccPlane* plane_ = ccHObjectCaster::ToPlane(plane->getPlane());
+		
+	ccPlane* plane_ = getMainPlaneFromInterface(plane);
 	if (plane_) {
 		dimGroupBox->setVisible(true);
 		wDoubleSpinBox->setValue(plane_->getXWidth());
@@ -419,8 +459,7 @@ void bdrPlaneEditorDlg::initWithPlane(ccPlanarEntityInterface* plane)
 	}
 	else {
 		dimGroupBox->setVisible(false);
-	}
-	
+	}	
 	
 	CCVector3 C = plane->getCenter();
 	cxAxisDoubleSpinBox->setValue(C.x);
@@ -439,6 +478,7 @@ void bdrPlaneEditorDlg::disconnectPlane()
 		disconnect(m_associatedPlane, SIGNAL(planarEntityChanged), this, SLOT(updateUI));
 		m_associatedPlane = nullptr;
 	}
+	m_planePara.reset();
 }
 
 void bdrPlaneEditorDlg::updateUI()
@@ -519,15 +559,13 @@ void bdrPlaneEditorDlg::updatePlane(ccPlanarEntityInterface* plane)
 		ccLog::Print(trans.toString(12, ' ')); //full precision
 	}
 
-	if (plane->getPlane()->isA(CC_TYPES::PLANE)) {
-		ccPlane* plane_ = ccHObjectCaster::ToPlane(plane->getPlane());
-		if (plane_) {
-			if (plane_->getXWidth() != width
-				|| plane_->getYWidth() != height)
-			{
-				plane_->setXWidth(width, false);
-				plane_->setYWidth(height, true);
-			}
+	ccPlane* plane_ = getMainPlaneFromInterface(plane);
+	if (plane_) {
+		if (plane_->getXWidth() != width
+			|| plane_->getYWidth() != height)
+		{
+			plane_->setXWidth(width, false);
+			plane_->setYWidth(height, true);
 		}
 	}
 }

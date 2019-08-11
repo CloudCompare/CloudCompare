@@ -537,7 +537,7 @@ CCVector3 StBlock::getCenter() const
 	return m_mainPlane->getCenter();
 }
 
-void StBlock::notifyPlanarEntityChanged(ccGLMatrix mat, bool trans)
+void StBlock::notifyPlanarEntityChanged(ccGLMatrix mat)
 {
 	//! main plane
 	m_mainPlane->applyGLTransformation_recursive(&mat);

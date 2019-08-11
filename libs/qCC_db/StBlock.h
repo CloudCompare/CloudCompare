@@ -129,7 +129,7 @@ public:
 	//inherited from ccPlanarEntityInterface //! Returns the facet center
 	CCVector3 getCenter() const override;
 	//inherited from ccPlanarEntityInterface
-	void notifyPlanarEntityChanged(ccGLMatrix mat, bool trans) override;
+	void notifyPlanarEntityChanged(ccGLMatrix mat) override;
 	void normalEditState(bool edit) override;
 
 	void getEquation(CCVector3& N, PointCoordinateType& constVal) const override;

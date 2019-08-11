@@ -553,7 +553,8 @@ void bdrPlaneEditorDlg::updatePlane(ccPlanarEntityInterface* plane)
 	
 	if (needToApplyRot || needToApplyTrans)
 	{
-		plane->getPlane()->applyGLTransformation_recursive(&trans);
+		//plane->getPlane()->applyGLTransformation_recursive(&trans);
+		plane->notifyPlanarEntityChanged(trans);
 
 		ccLog::Print("[Plane edit] Applied transformation matrix:");
 		ccLog::Print(trans.toString(12, ' ')); //full precision

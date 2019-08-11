@@ -295,18 +295,23 @@ ccHObject* bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 	else if (obj->isA(CC_TYPES::ST_BLOCK)) {
 		//! get top
 		StBlock* block = ccHObjectCaster::ToStBlock(obj); if (!block) return nullptr;
-		ccFacet* top_facet = block->getTopFacet(); if (!top_facet) return nullptr;
-		ccPolyline* contour = top_facet->getContour(); if (!contour) return nullptr;
-		ccPolyline* new_poly = new ccPolyline(*contour); if (!new_poly) return nullptr;
+		ccFacet* top_facet = block->getTopFacet();
 
-		associate_cloud = dynamic_cast<ccPointCloud*>(new_poly->getAssociatedCloud());
-		if (!associate_cloud) {
-			delete new_poly;
-			new_poly = nullptr;
-			return nullptr;
+		if (top_facet) {
+			ccPolyline* contour = top_facet->getContour();
+			if (contour) {
+				ccPolyline* new_poly = new ccPolyline(*contour);
+				associate_cloud = dynamic_cast<ccPointCloud*>(new_poly->getAssociatedCloud());
+				if (!associate_cloud) {
+					delete new_poly;
+					new_poly = nullptr;
+					return nullptr;
+				}
+				entity_in_image_2d = new_poly;
+			}
 		}
-
-		entity_in_image_2d = new_poly;
+		else
+			entity_in_image_2d = nullptr;
 	}
 
 	//! project to image
@@ -368,13 +373,22 @@ bool bdr2Point5DimEditor::projectBack(ccHObject* obj2D, ccHObject* obj3D)
 		ccPolyline* polyline = ccHObjectCaster::ToPolyline(obj2D); if (!polyline) return false;
 		
 		//! reset the block facets
-
-		ccFacet* facet = block->getTopFacet(); if (!facet) return false;
-
-		const PointCoordinateType *eq = facet->getPlaneEquation();
 		vcg::Plane3d plane;
-		plane.SetDirection({ eq[0],eq[1],eq[2] });
-		plane.SetOffset(eq[3]);
+		
+		ccFacet* facet = block->getTopFacet(); 
+		{
+			CCVector3 n; PointCoordinateType offset;
+			if (facet) {
+				facet->getEquation(n, offset);
+			}
+			else {
+				facet = new ccFacet(0, "top");
+				block->setTopFacet(facet);
+				block->getEquation(n, offset);
+			}
+			plane.SetDirection({ n.x,n.y,n.z });
+			plane.SetOffset(offset);
+		}
 
 		std::vector<CCVector3> top_points;
 		for (size_t i = 0; i < polyline->size(); i++) {

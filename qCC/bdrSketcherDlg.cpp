@@ -845,6 +845,8 @@ void bdrSketcher::removeAllEntities()
 {
 	reset(false);
 
+	m_sections.clear();
+
 	//and we remove the remaining clouds (if any)
 	for (auto & cloud : m_clouds)
 	{
@@ -865,7 +867,7 @@ void bdrSketcher::setTraceViewMode(bool trace_image)
 	m_trace_image = trace_image;
 	if (trace_image) {
 		m_UI->importFromDBToolButton->setVisible(true);
-		m_UI->exportSectionsToolButton->setVisible(false);
+		m_UI->exportSectionsToolButton->setVisible(true);
 		m_UI->saveFootprintInsidetoolButton->setVisible(false);
 		m_UI->saveFootprintOutsidetoolButton->setVisible(false);
 		setFixedWidth(360);
@@ -898,6 +900,15 @@ void bdrSketcher::importEntities3D(std::vector<std::pair<ccHObject*, ccHObject*>
 		}
 		else { continue; }
 	}
+}
+
+std::vector<ccHObject*> bdrSketcher::getSections()
+{
+	std::vector<ccHObject*> section_entities;
+	for (auto & sect : m_sections) {
+		section_entities.push_back(sect.entity);
+	}
+	return section_entities;
 }
 
 void bdrSketcher::undo()
@@ -971,7 +982,7 @@ bool bdrSketcher::reset(bool askForConfirmation/*=true*/)
 		releasePolyline(&section);
 	}
 	
-	m_sections.clear();
+	//m_sections.clear();//XYLIU
 	m_undoCount.resize(0);
 	m_UI->undoToolButton->setEnabled(false);
 	m_UI->exportSectionsToolButton->setEnabled(false);
@@ -1744,8 +1755,8 @@ void bdrSketcher::exportSections()
 		ccLog::Warning("[bdrSketcher] All active sections are already in DB");
 		return;
 	}
-
-	ccHObject* destEntity = getExportGroup(s_polyExportGroupID, "Exported sections");
+	
+	ccHObject* destEntity = m_dest_obj ? m_dest_obj : getExportGroup(s_polyExportGroupID, "Exported sections");
 	assert(destEntity);
 
 	MainWindow* mainWin = MainWindow::TheInstance();

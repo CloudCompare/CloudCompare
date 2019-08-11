@@ -413,16 +413,7 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 	return material;
 }
 
-void ccPlane::notifyPlanarEntityChanged(ccGLMatrix mat, bool trans)
+void ccPlane::notifyPlanarEntityChanged(ccGLMatrix mat)
 {
-	if (trans) {
-		m_glTrans = m_glTrans * mat;
-	}
-	else {
-		//rotateGL(mat);
-		applyGLTransformation_recursive(&mat);
-		notifyNormalUpdate();
-	}
-	
-	refreshDisplay();
+	applyGLTransformation_recursive(&mat);
 }

@@ -252,11 +252,29 @@ void bdrImageEditorPanel::stopEditor(bool state)
 	}
 	//! reset gl
 	m_pbdrImshow->init2DView();
+	if (!m_pbdrImshow->getImage() || !m_pbdrImshow->getImage()->getAssociatedSensor()) {
+		return;
+	}
 
-	if (state) {
+	MainWindow* main_win = MainWindow::TheInstance(); assert(main_win);
+	if (state && !m_projected_2D_3D.empty()) {
 		//! reproject the entities back to 3d
 		for (ProjectedPair prj_2d_3d : m_projected_2D_3D) {
-			m_pbdrImshow->projectBack(prj_2d_3d.first, prj_2d_3d.second);
+			if (prj_2d_3d.first && prj_2d_3d.second) {
+				if (m_pbdrImshow->projectBack(prj_2d_3d.first, prj_2d_3d.second)) {
+					main_win->removeFromDB(prj_2d_3d.first);
+				}
+			}
+		}
+		ccHObject* dest_block = getTraceBlock(QString());
+		//ccCameraSensor* cam = m_pbdrImshow->getImage()->getAssociatedSensor();
+		for (size_t i = 0; i < dest_block->getChildrenNumber(); i++) {
+			ccHObject* child = dest_block->getChild(i);
+			if (child->isA(CC_TYPES::POLY_LINE)) {
+				if (m_pbdrImshow->projectBack(child, m_projected_2D_3D.front().second)) {
+					main_win->removeFromDB(child);
+				}
+			}
 		}
 	}
 }
@@ -278,7 +296,7 @@ void bdrImageEditorPanel::setProjection(std::vector<ccHObject*> project_entities
 	m_projected_2D_3D.clear();
 	for (ccHObject* ent : project_entities) {
 		ccHObject* projected = m_pbdrImshow->projectToImage(ent);
-		if (projected) {
+		if (/*projected*/1) {
 			m_projected_2D_3D.push_back(std::make_pair(projected, ent));
 		}
 	}

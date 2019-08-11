@@ -827,21 +827,14 @@ void ccFacet::getEquation(CCVector3 & N, PointCoordinateType & constVal) const
 	constVal = m_planeEquation[3];
 }
 
-void ccFacet::notifyPlanarEntityChanged(ccGLMatrix mat, bool trans)
+void ccFacet::notifyPlanarEntityChanged(ccGLMatrix mat)
 {
-	if (trans) {
-		m_glTrans = m_glTrans * mat;
-	}
-	else {
-		//rotateGL(mat);
-		applyGLTransformation_recursive(&mat);
-	}
-
+	//rotateGL(mat);
+	applyGLTransformation_recursive(&mat);
+	
 	//! notify the parent block to change this
 	StBlock* block = ccHObjectCaster::ToStBlock(getParent());
 	if (block) {
 		block->updateFacet(this);
 	}
-
-	refreshDisplay();
 }

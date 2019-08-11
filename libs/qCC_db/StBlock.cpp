@@ -51,7 +51,12 @@ StBlock::StBlock(ccPlane* mainPlane,
 	, m_bottom_height(bottom_height)
 	, m_bottom_normal(bottom_normal)
 	, ccGenericPrimitive(name, nullptr/*&mainPlane->getTransformation()*/)
+	, m_top_facet(nullptr)
+	, m_bottom_facet(nullptr)
 {
+	if (m_mainPlane) {
+		m_mainPlane->enableStippling(true);
+	}
 	if (!updateRepresentation()) {
 		throw std::runtime_error("internal error");
 	}
@@ -66,7 +71,12 @@ StBlock::StBlock(ccPlane* mainPlane,
 	, m_bottom_height(0)
 	, m_bottom_normal(0,0,1)
 	, ccGenericPrimitive(name, nullptr/*&mainPlane->getTransformation()*/)
+	, m_top_facet(nullptr)
+	, m_bottom_facet(nullptr)
 {
+	if (m_mainPlane) {
+		m_mainPlane->enableStippling(true);
+	}
 	setTopFacet(top_facet);
 	setBottomFacet(bottom_facet);
 
@@ -259,7 +269,8 @@ void StBlock::setFacetPoints(ccFacet * facet, std::vector<CCVector3> points, boo
 
 		vcg::Plane3d bot_plane;
 		CCVector3 bot_center = getBottomCenter();
-		bot_plane.Init({ bot_center.x,bot_center.y,bot_center.z }, { m_bottom_normal.x,m_bottom_normal.y,m_bottom_normal.z });
+		CCVector3 bot_normal = m_bottom_facet ? m_bottom_normal : m_mainPlane->getNormal();
+		bot_plane.Init({ bot_center.x,bot_center.y,bot_center.z }, { bot_normal.x,bot_normal.y,bot_normal.z });
 
 		for (auto & pt : profiles) {
 			vcg::Line3d line;
@@ -271,6 +282,10 @@ void StBlock::setFacetPoints(ccFacet * facet, std::vector<CCVector3> points, boo
 				return;
 			}
 			bottom_points.push_back(CCVector3(facet_pt.X(), facet_pt.Y(), facet_pt.Z()));
+		}
+		if (!m_bottom_facet) {
+			ccFacet* facet = new ccFacet(0, "bottom");
+			setBottomFacet(facet);
 		}
 		m_bottom_facet->FormByContour(bottom_points);
 	}
@@ -294,6 +309,10 @@ void StBlock::setFacetPoints(ccFacet * facet, std::vector<CCVector3> points, boo
 				return;
 			}
 			top_points.push_back(CCVector3(facet_pt.X(), facet_pt.Y(), facet_pt.Z()));
+		}
+		if (!m_top_facet) {
+			ccFacet* facet = new ccFacet(0, "top");
+			setTopFacet(facet);
 		}
 		m_top_facet->FormByContour(top_points);
 	}
@@ -376,6 +395,11 @@ ccFacet * StBlock::getTopFacet()
 
 void StBlock::setTopFacet(ccFacet * facet)
 {
+	if (m_top_facet && m_top_facet != facet) {
+		removeChild(m_top_facet);
+// 		delete m_top_facet;
+// 		m_top_facet = nullptr;
+	}
 	m_top_facet = facet;
 	if (m_top_facet && !m_top_facet->isAncestorOf(this) && !m_top_facet->getParent()) {
 		addChild(m_top_facet);
@@ -390,6 +414,11 @@ ccFacet * StBlock::getBottomFacet()
 
 void StBlock::setBottomFacet(ccFacet * facet)
 {
+	if (m_bottom_facet && m_bottom_facet != facet) {
+		removeChild(m_bottom_facet);
+// 		delete m_bottom_facet;
+// 		m_bottom_facet = nullptr;
+	}
 	m_bottom_facet = facet;
 	if (m_bottom_facet && !m_bottom_facet->isAncestorOf(this)) {
 		addChild(m_bottom_facet);
@@ -521,6 +550,12 @@ void StBlock::notifyPlanarEntityChanged(ccGLMatrix mat, bool trans)
 
 	//! for m_bottom_normal
 	m_bottom_normal = getBottomFacet()->getNormal();
+}
+
+void StBlock::normalEditState(bool edit)
+{ 
+	m_editable = edit; 
+	m_mainPlane->normalEditState(edit);
 }
 
 void StBlock::getEquation(CCVector3 & N, PointCoordinateType & constVal) const

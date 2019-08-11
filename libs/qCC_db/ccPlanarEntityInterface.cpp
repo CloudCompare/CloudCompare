@@ -347,7 +347,7 @@ bool ccPlanarEntityInterface::move2D(int x, int y, int dx, int dy, int screenWid
 	
 	//m_glTrans = ccGLMatrix(transMat.inverse().data()) * m_glTrans;
 	//enableGLTransformation(true);
-	notifyPlanarEntityChanged(ccGLMatrix(transMat.inverse().data()), false);
+	notifyPlanarEntityChanged(ccGLMatrix(transMat.inverse().data()));
 	emit planarEntityChanged();
 
 	m_lastOrientation = currentOrientation;

@@ -130,6 +130,7 @@ public:
 	CCVector3 getCenter() const override;
 	//inherited from ccPlanarEntityInterface
 	void notifyPlanarEntityChanged(ccGLMatrix mat, bool trans) override;
+	void normalEditState(bool edit) override;
 
 	void getEquation(CCVector3& N, PointCoordinateType& constVal) const override;
 

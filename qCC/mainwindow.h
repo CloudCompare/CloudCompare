@@ -602,6 +602,10 @@ private slots:
 
 	void doActionSelectWorkingPlane();
 
+	void doActionTogglePlaneEditState();
+
+	void doActionEditSelectedItem();
+
 private:
 	//! Shortcut: asks the user to select one cloud
 	/** \param defaultCloudEntity a cloud to select by default (optional)
@@ -792,6 +796,8 @@ private:
 	void doActionToggleDrawBBox();
 
 	void CreateImageEditor();
+
+	void CreateEditorPanel();
 
 	void Link3DAnd2DWindow();
 

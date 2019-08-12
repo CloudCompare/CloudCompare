@@ -72,6 +72,8 @@ public:
 
 	void importEntities3D(std::vector<std::pair<ccHObject*, ccHObject*>> entities);
 
+	std::vector<ccHObject*> getSections();
+
 protected:
 
 	void undo();

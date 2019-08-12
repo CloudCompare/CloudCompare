@@ -314,9 +314,10 @@ MainWindow::MainWindow()
 	// 	QWidget *tempWidget3 = new QWidget();
 	// 	m_UI->DockableConsole->setTitleBarWidget(tempWidget3);
 	// 	delete titleWidget; titleWidget = nullptr;
-
-	tabifyDockWidget(m_UI->DockableProperties, m_UI->DockableConsole);
+		
+	tabifyDockWidget(m_UI->DockableProperties, m_UI->DockablePanel);
 	tabifyDockWidget(m_UI->DockableProperties, m_UI->DockableImage);
+	tabifyDockWidget(m_UI->DockableProperties, m_UI->DockableConsole);
 	m_UI->DockableProperties->raise();
 
 	//db-main-tree
@@ -367,7 +368,9 @@ MainWindow::MainWindow()
 	m_UI->vboxLayout2->setContentsMargins(0, 0, 0, 0);
 	m_UI->vboxLayout3->setContentsMargins(0, 0, 0, 0);
 	m_UI->vboxLayout4->setContentsMargins(0, 0, 0, 0);
-	m_UI->verticalLayout->setContentsMargins(0, 0, 0, 0);
+	m_UI->verticalLayout->setContentsMargins(0, 0, 0, 0); 
+	m_UI->verticalLayout_2->setContentsMargins(0, 0, 0, 0);	
+	m_UI->verticalLayout_3->setContentsMargins(0, 0, 0, 0);
 
 	//////////////////////////////////////////////////////////////////////////
 	// TODO: status bar
@@ -427,6 +430,8 @@ MainWindow::MainWindow()
 	new3DView(true);
 
 	CreateImageEditor();
+
+	CreateEditorPanel();
 
 	setupInputDevices();
 
@@ -984,7 +989,9 @@ void MainWindow::connectActions()
 	connect(m_UI->ProjectTabWidget,					SIGNAL(currentChanged(int)), this, SLOT(doActionChangeTabTree(int)));
 	connect(m_UI->actionImageOverlay,				&QAction::triggered, this, &MainWindow::toggleImageOverlay);
 	connect(m_UI->actionProjectToImage,				&QAction::triggered, this, &MainWindow::doActionProjectToImage); 
-	connect(m_UI->actionSelectWorkingPlane,			&QAction::triggered, this, &MainWindow::doActionSelectWorkingPlane);
+	connect(m_UI->actionSelectWorkingPlane,			&QAction::triggered, this, &MainWindow::doActionSelectWorkingPlane); 
+	connect(m_UI->actionTogglePlaneEditState,		&QAction::triggered, this, &MainWindow::doActionTogglePlaneEditState);
+	connect(m_UI->actionEditSelectedItem,			&QAction::triggered, this, &MainWindow::doActionEditSelectedItem);
 }
 
 void MainWindow::doActionChangeTabTree(int index)
@@ -1047,6 +1054,14 @@ void MainWindow::CreateImageEditor()
 //	connect(m_pbdrImagePanel->displayBestToolButton, &QAbstractButton::clicked, this, &MainWindow::doActionShowBestImage);
 
 	connect(m_pbdrImagePanel, &bdrImageEditorPanel::imageDisplayed, this, &MainWindow::doActionShowSelectedImage);
+}
+
+void MainWindow::CreateEditorPanel()
+{
+	m_pbdrPlaneEditDlg = new bdrPlaneEditorDlg(m_pickingHub, this);
+	m_pbdrPlaneEditDlg->hide();
+
+	m_UI->verticalLayoutPanel->addWidget(m_pbdrPlaneEditDlg);
 }
 
 void MainWindow::Link3DAnd2DWindow()
@@ -13603,7 +13618,8 @@ void MainWindow::doActionBDFootPrintAuto()
 		}
 
 		try {
-			ccHObject::Container footprints = GenerateFootPrints(prim_group);
+			stocker::BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
+			ccHObject::Container footprints = GenerateFootPrints(prim_group, build_unit.ground_height);
 			for (ccHObject* ft : footprints) {
 				if (ft && ft->isA(CC_TYPES::ST_FOOTPRINT)) {
 					SetGlobalShiftAndScale(ft);
@@ -13619,7 +13635,7 @@ void MainWindow::doActionBDFootPrintAuto()
 		ProgStep()
 	}
 	ProgEnd
-	doActionBDProjectSave();
+	//doActionBDProjectSave();
 	refreshAll();
 	UpdateUI();
 }
@@ -13841,11 +13857,11 @@ void MainWindow::doActionBDLoD1Generation()
 void MainWindow::doActionBDLoD2Generation()
 {
 	if (!haveSelection()) return;
-	if (!m_pbdr3d4emDlg)
-		m_pbdr3d4emDlg = new bdr3D4EMDlg(this);
-	
-	m_pbdr3d4emDlg->setModal(false);
-	m_pbdr3d4emDlg->setWindowModality(Qt::NonModal);
+// 	if (!m_pbdr3d4emDlg)
+// 		m_pbdr3d4emDlg = new bdr3D4EMDlg(this);
+// 	
+// 	m_pbdr3d4emDlg->setModal(false);
+// 	m_pbdr3d4emDlg->setWindowModality(Qt::NonModal);
 	//if (!m_pbdr3d4emDlg->exec()) return;	// TODO: TEMP!!! 20190731
 
 	ccHObject::Container sels = m_selectedEntities;
@@ -13871,19 +13887,19 @@ void MainWindow::doActionBDLoD2Generation()
 	for (ccHObject* bd_entity : building_entites) {
 		BDBaseHObject* baseObj = GetRootBDBase(bd_entity);
 
-		double height = DBL_MAX;
-		if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
-			height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
-		}
-		else /*if (m_pbdr3d4emDlg->GroundHeightMode() == 0)*/ {
-			height = baseObj->GetBuildingUnit(GetParentBuilding(bd_entity)->getName().toStdString()).ground_height;
-		}
+// 		double height = DBL_MAX;
+// 		if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
+// 			height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
+// 		}
+// 		else /*if (m_pbdr3d4emDlg->GroundHeightMode() == 0)*/ {
+// 			height = baseObj->GetBuildingUnit(GetParentBuilding(bd_entity)->getName().toStdString()).ground_height;
+// 		}
 
 		//ccHObject* bd_entity = entity->isA(CC_TYPES::ST_FOOTPRINT) ? entity : GetParentBuilding(entity);
 		//if (!bd_entity) return;
 		
 		try {
-			ccHObject* bd_model_obj = LoD2FromFootPrint(bd_entity, height);
+			ccHObject* bd_model_obj = LoD2FromFootPrint(bd_entity);
 			if (bd_model_obj) {
 				SetGlobalShiftAndScale(bd_model_obj);
 				bd_model_obj->setDisplay_recursive(bd_entity->getDisplay());
@@ -14222,21 +14238,58 @@ void MainWindow::doActionProjectToImage()
 
 void MainWindow::doActionSelectWorkingPlane()
 {
-	if (m_pbdrPlaneEditDlg && !m_pbdrPlaneEditDlg->isHidden())	{
-		m_pbdrPlaneEditDlg->cancle();
-	}
-	if (!m_pbdrPlaneEditDlg)
-		m_pbdrPlaneEditDlg = new bdrPlaneEditorDlg(m_pickingHub, this);
 	
+}
+
+void MainWindow::doActionTogglePlaneEditState()
+{
+	if (!m_pbdrPlaneEditDlg) return;
+
+	//! if no selection and dialog shown, 
+	if (!m_pbdrPlaneEditDlg->isHidden()) {
+		m_pbdrPlaneEditDlg->cancle();
+		m_pbdrPlaneEditDlg->hide();
+		refreshAll();
+		return;
+	}
+
 	if (haveSelection())
 	{
 		ccPlanarEntityInterface* plane = ccHObjectCaster::ToPlanarEntity(m_selectedEntities.front());
 		if (plane) {
-			plane->showNormalVector(true);
 			m_pbdrPlaneEditDlg->initWithPlane(plane);
 			plane->getPlane()->refreshDisplay();
 		}
 	}
 
 	m_pbdrPlaneEditDlg->show();
+}
+
+void MainWindow::doActionEditSelectedItem()
+{
+	if (m_UI->DockablePanel->isHidden()) {
+		m_UI->DockablePanel->show();
+	}
+	if (!haveSelection()) { return; }
+
+	ccHObject* selected = m_selectedEntities.front();
+
+	if (selected->isA(CC_TYPES::PLANE) || selected->isA(CC_TYPES::FACET) || selected->isA(CC_TYPES::ST_BLOCK)) {
+		ccPlanarEntityInterface* plane = ccHObjectCaster::ToPlanarEntity(m_selectedEntities.front());
+		if (plane) {
+			if (m_pbdrPlaneEditDlg->isHidden()) {
+				m_pbdrPlaneEditDlg->initWithPlane(plane);
+				plane->getPlane()->refreshDisplay();
+				m_UI->actionTogglePlaneEditState->setChecked(true);
+				m_pbdrPlaneEditDlg->show();
+			}
+			else {
+				m_pbdrPlaneEditDlg->initWithPlane(plane);
+				plane->getPlane()->refreshDisplay();
+			}
+		}
+	}
+	else {
+
+	}
 }

@@ -168,6 +168,9 @@ ccPlanarEntityInterface* ccHObjectCaster::ToPlanarEntity(ccHObject* obj)
 		{
 			return static_cast<ccPlane*>(obj);
 		}
+		else if (obj->isA(CC_TYPES::ST_BLOCK)) {
+			return static_cast<StBlock*>(obj);
+		}
 	}
 	return nullptr;
 }

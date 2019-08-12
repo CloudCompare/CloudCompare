@@ -26,6 +26,7 @@
 //qCC_db
 #include <ccPlane.h>
 #include <ccFacet.h>
+#include "StBlock.h"
 #include <ccNormalVectors.h>
 
 //qCC_gl
@@ -34,6 +35,8 @@
 //Qt
 #include <QDoubleValidator>
 
+#include "stocker_parser.h"
+
 //semi-persistent parameters
 static double s_dip = 0;
 static double s_dipDir = 0;
@@ -41,6 +44,18 @@ static double s_width = 10.0;
 static double s_height = 10.0;
 static bool s_upward = true;
 static CCVector3d s_center(0, 0, 0);
+
+inline ccPlane* getMainPlaneFromInterface(ccPlanarEntityInterface* plane) {
+	ccHObject* planeEnt = plane->getPlane();
+	ccPlane* plane_ = nullptr;
+	if (planeEnt->isA(CC_TYPES::PLANE)) {
+		plane_ = ccHObjectCaster::ToPlane(planeEnt);
+	}
+	else if (planeEnt->isA(CC_TYPES::ST_BLOCK)) {
+		plane_ = ccHObjectCaster::ToStBlock(planeEnt)->getMainPlane();
+	}
+	return plane_;
+}
 
 bdrPlaneEditorDlg::bdrPlaneEditorDlg(ccPickingHub* pickingHub, QWidget* parent)
 	: QDialog(parent)
@@ -75,8 +90,9 @@ bdrPlaneEditorDlg::bdrPlaneEditorDlg(ccPickingHub* pickingHub, QWidget* parent)
 
 	connect(previewCheckBox, &QAbstractButton::clicked, this, &bdrPlaneEditorDlg::preview);
 	connect(restoreToolButton, &QAbstractButton::clicked, this, &bdrPlaneEditorDlg::restore);
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveParamsAndAccept()));
-	connect(buttonBox, SIGNAL(rejected()), this, SLOT(cancle()));
+	connect(applyToolButton, &QAbstractButton::clicked, this, &bdrPlaneEditorDlg::saveParamsAndAccept);
+// 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveParamsAndAccept()));
+// 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(cancle()));
 	
 	//auto disable picking mode on quit
 	connect(this, &QDialog::finished, [&]()
@@ -120,6 +136,9 @@ void bdrPlaneEditorDlg::saveParamsAndAccept()
 	if (m_associatedPlane)
 	{
 		updateParams();
+		if (!m_planePara.already_in_db) {
+			m_planePara.already_in_db = true;
+		}
 	}
 	else //creation
 	{
@@ -140,8 +159,8 @@ void bdrPlaneEditorDlg::saveParamsAndAccept()
 		}
 	}
 
-	disconnectPlane();
-	accept();
+// 	disconnectPlane();
+// 	accept();
 
 //	deleteLater();
 }
@@ -218,6 +237,11 @@ void bdrPlaneEditorDlg::restore()
 	if (!m_associatedPlane) {
 		return;
 	}
+	if (m_associatedPlane && !m_planePara.already_in_db) {
+		MainWindow::TheInstance()->removeFromDB(m_associatedPlane->getPlane());
+		return;
+	}
+
 	CCVector3 Nd = m_planePara.normal;
 	CCVector3 Cd = m_planePara.center;
 	PointCoordinateType width = m_planePara.size.x;
@@ -297,7 +321,7 @@ void bdrPlaneEditorDlg::restore()
 
 void bdrPlaneEditorDlg::cancle()
 {
-	restore();
+	//restore();
 	disconnectPlane();
 	
 	//deleteLater();
@@ -345,6 +369,48 @@ void bdrPlaneEditorDlg::onItemPicked(const PickedItem& pi)
 	if (previewCheckBox->isChecked()) {
 		updateParams();
 	}
+
+	if (!m_associatedPlane) {
+		if (pi.entity->isA(CC_TYPES::ST_BLOCK)) {
+			StBlock* block = ccHObjectCaster::ToStBlock(pi.entity);
+			ccHObject* footprint = block->getParent();
+			CCVector3 Na, Nb, Nc;
+			block->getTriangleNormals(pi.itemIndex, Na, Nb, Nc);
+			CCVector3 N = (Na + Nb + Nc) / 3;
+			N.normalize();
+			nxDoubleSpinBox->blockSignals(true);
+			nyDoubleSpinBox->blockSignals(true);
+			nzDoubleSpinBox->blockSignals(true);
+
+			nxDoubleSpinBox->setValue(N.x);
+			nyDoubleSpinBox->setValue(N.y);
+			nzDoubleSpinBox->setValue(N.z);
+			nxDoubleSpinBox->blockSignals(false);
+			nyDoubleSpinBox->blockSignals(false);
+			nzDoubleSpinBox->blockSignals(false);
+			onNormalChanged(0);
+			
+			MainWindow* main_window = MainWindow::TheInstance();
+			if (!main_window) { return; }
+			//! create a plane for footprint //FIXME: Maybe we should create a new footprint for this new canvas
+			ccPlane* new_plane = new ccPlane;
+			updatePlane(new_plane);
+			StBlock* new_block = new StBlock(new_plane, nullptr, nullptr);
+			int block_number = footprint ? (GetMaxNumberExcludeChildPrefix(footprint, BDDB_BLOCK_PREFIX) + 1) : 0;
+			new_block->setName(BDDB_BLOCK_PREFIX + QString::number(block_number));
+			new_block->setDisplay_recursive(block->getDisplay());
+			new_plane->setDisplay_recursive(block->getDisplay());
+			if (footprint) { footprint->addChild(new_block); }
+
+			
+			main_window->addToDB(new_block, block->getDBSourceType());
+			main_window->unselectAllInDB();
+			main_window->setSelectedInDB(new_block, true);
+			
+			initWithPlane(new_block);
+			m_planePara.already_in_db = false; // this is created inside this dialog, if restore, delete it!
+		}
+	}
 }
 
 void bdrPlaneEditorDlg::initWithPlane(ccPlanarEntityInterface* plane)
@@ -358,6 +424,7 @@ void bdrPlaneEditorDlg::initWithPlane(ccPlanarEntityInterface* plane)
 		m_associatedPlane = plane;
 		m_associatedPlane->normalEditState(true);
 		connect(m_associatedPlane, SIGNAL(planarEntityChanged()), this, SLOT(updateUI()));
+		m_planePara.already_in_db = true;
 	}
 	
 	CCVector3 N = plane->getNormal();
@@ -382,14 +449,17 @@ void bdrPlaneEditorDlg::initWithPlane(ccPlanarEntityInterface* plane)
 	//dipDoubleSpinBox->setValue(dip);
 	//dipDirDoubleSpinBox->setValue(dipDir);
 	//upwardCheckBox->setChecked(N.z >= 0);
-
-	ccPlane* plane_ = static_cast<ccPlane*>(plane);
+		
+	ccPlane* plane_ = getMainPlaneFromInterface(plane);
 	if (plane_) {
+		dimGroupBox->setVisible(true);
 		wDoubleSpinBox->setValue(plane_->getXWidth());
 		hDoubleSpinBox->setValue(plane_->getYWidth());
 		m_planePara.size = CCVector2(plane_->getXWidth(), plane_->getYWidth());
 	}
-	
+	else {
+		dimGroupBox->setVisible(false);
+	}	
 	
 	CCVector3 C = plane->getCenter();
 	cxAxisDoubleSpinBox->setValue(C.x);
@@ -408,6 +478,7 @@ void bdrPlaneEditorDlg::disconnectPlane()
 		disconnect(m_associatedPlane, SIGNAL(planarEntityChanged), this, SLOT(updateUI));
 		m_associatedPlane = nullptr;
 	}
+	m_planePara.reset();
 }
 
 void bdrPlaneEditorDlg::updateUI()
@@ -482,13 +553,14 @@ void bdrPlaneEditorDlg::updatePlane(ccPlanarEntityInterface* plane)
 	
 	if (needToApplyRot || needToApplyTrans)
 	{
-		m_associatedPlane->getPlane()->applyGLTransformation_recursive(&trans);
+		//plane->getPlane()->applyGLTransformation_recursive(&trans);
+		plane->notifyPlanarEntityChanged(trans);
 
 		ccLog::Print("[Plane edit] Applied transformation matrix:");
 		ccLog::Print(trans.toString(12, ' ')); //full precision
 	}
 
-	ccPlane* plane_ = static_cast<ccPlane*> (plane);
+	ccPlane* plane_ = getMainPlaneFromInterface(plane);
 	if (plane_) {
 		if (plane_->getXWidth() != width
 			|| plane_->getYWidth() != height)

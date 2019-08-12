@@ -5,6 +5,7 @@
 #include <ccCone.h>
 #include "ccSphere.h"
 #include "ccTorus.h"
+#include "CCMiscTools.h"
 
 //Qt
 #include <QSharedPointer>
@@ -277,7 +278,7 @@ void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, unsigned in
 		glFunc->glEnable(GL_LIGHT0);
 
 		//! draw normal
-		DrawUnitArrow(NORMAL_ARROW*(m_editable && pushName), pos, getNormal(), scale, color ? *color : ccColor::green, componentContext);
+		DrawUnitArrow(NORMAL_ARROW*pushName, pos, getNormal(), scale, color ? *color : ccColor::green, componentContext);
 
 		//! draw interactors
 		if (m_editable) {
@@ -346,7 +347,7 @@ bool ccPlanarEntityInterface::move2D(int x, int y, int dx, int dy, int screenWid
 	
 	//m_glTrans = ccGLMatrix(transMat.inverse().data()) * m_glTrans;
 	//enableGLTransformation(true);
-	notifyPlanarEntityChanged(ccGLMatrix(transMat.inverse().data()), false);
+	notifyPlanarEntityChanged(ccGLMatrix(transMat.inverse().data()));
 	emit planarEntityChanged();
 
 	m_lastOrientation = currentOrientation;
@@ -359,6 +360,8 @@ bool ccPlanarEntityInterface::move3D(const CCVector3d & u)
 	if (m_activeComponent < NORMAL_TORUS) {
 		return false;
 	}
+	//! 参考 bdrPlaneEditor里apply
+	//! get y , 在move2d里面即可
 
 	return true;
 }
@@ -388,4 +391,57 @@ void ccPlanarEntityInterface::setActiveComponent(int id)
 	default:
 		m_activeComponent = NONE;
 	}
+}
+
+CCVector3 ccPlanarEntityInterface::projectTo3DGlobal(CCVector3 pt_3d)
+{
+	CCVector3 n; PointCoordinateType offset;
+	getEquation(n, offset);
+	PointCoordinateType k = pt_3d.dot(n) - offset;
+	return pt_3d - n * k;
+}
+
+CCVector2 ccPlanarEntityInterface::projectTo2DLocal(CCVector3 pt_3d)
+{
+	ccGenericPrimitive* prim;
+	prim->getTransformation();
+	getPlane()->getGLTransformation();
+
+	CCVector3 N = getNormal();
+	CCVector3 u, v;
+	CCLib::CCMiscTools::ComputeBaseVectors(N, u, v);
+
+	return CCVector2();
+}
+
+CCVector3 ccPlanarEntityInterface::backprojectTo3DGlobal(CCVector2 pt_2d)
+{
+	return CCVector3();
+}
+
+std::vector<CCVector3> ccPlanarEntityInterface::projectTo3DGlobal(std::vector<CCVector3> pt_3d)
+{
+	std::vector<CCVector3> prjs;
+	for (auto & pt : pt_3d) {
+		prjs.push_back(projectTo3DGlobal(pt));
+	}
+	return prjs;
+}
+
+std::vector<CCVector2> ccPlanarEntityInterface::projectTo2DLocal(std::vector<CCVector3> pt_3d)
+{
+	std::vector<CCVector2> prjs;
+	for (auto & pt : pt_3d) {
+		prjs.push_back(projectTo2DLocal(pt));
+	}
+	return prjs;
+}
+
+std::vector<CCVector3> ccPlanarEntityInterface::backprojectTo3DGlobal(std::vector<CCVector2> pt_2d)
+{
+	std::vector<CCVector3> prjs;
+	for (auto & pt : pt_2d) {
+		prjs.push_back(backprojectTo3DGlobal(pt));
+	}
+	return prjs;
 }

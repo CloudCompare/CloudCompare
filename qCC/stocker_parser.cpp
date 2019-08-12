@@ -591,6 +591,7 @@ int GetNumberExcludePrefix(ccHObject * obj, QString prefix)
 
 int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix/*, CC_CLASS_ENUM type = CC_TYPES::OBJECT*/)
 {
+	if (!obj) { return -1; }
 	set<int> name_numbers;
 	for (size_t i = 0; i < obj->getChildrenNumber(); i++) {
 		QString name = obj->getChild(i)->getName();
@@ -2230,7 +2231,7 @@ ccHObject::Container GenerateFootPrints_PP(ccHObject* prim_group)
 	return foot_print_objs;
 }
 
-ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
+ccHObject::Container GenerateFootPrints(ccHObject* prim_group, double ground)
 {
 	ccHObject::Container foot_print_objs;
 	BDBaseHObject* baseObj = GetRootBDBase(prim_group);
@@ -2283,12 +2284,13 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group)
 			ccPointCloud* vertices = 0;
 			footptObj->initWith(vertices, *polyline);
 			footptObj->setAssociatedCloud(vertices);
+			vertices->setEnabled(false);
 			footptObj->setColor(ccColor::magenta);
 			footptObj->showColors(true);
 			footptObj->setName(name);
 			footptObj->setComponentId(compoId);
 			footptObj->setHighest(top_height);
-			footptObj->setBottom(bottom_height);
+			footptObj->setBottom(ground);
 			footptObj->setLowest(bottom_height);
 
 			footptObj->setPlaneNames(cur_plane_names);
@@ -2316,7 +2318,6 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 	}
 
 	QString building_name = GetBaseName(buildingObj->getName());
-	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
 	ccHObject* cloudObj = baseObj->GetOriginPointCloud(building_name, true);
 	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
 
@@ -2330,7 +2331,8 @@ ccHObject* LoD1FromFootPrint(ccHObject* buildingObj)
 		//! get height
 		Contour3d points_inside;
 		double height = foot_print->getHeight();
-		double ground = build_unit.ground_height;
+		double ground = foot_print->getBottom();
+
 		if (fabs(height - ground) < 1e-6) {
 			if (!DeduceFootPrintHeight(cloudObj, prim_group_obj, footprintObjs[i], points_inside, height)) {
 				std::cout << "cannot deduce height from footprint " << foot_print->getName().toStdString() << std::endl;
@@ -2427,7 +2429,7 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 	if (!baseObj) { return nullptr;	}
 	QString building_name = buildingObj->getName();
 	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
-	ccHObject* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
+	StPrimGroup* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
 	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
 	if (!prim_group_obj || !blockgroup_obj) { return nullptr; }
 
@@ -2467,6 +2469,7 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 		Polyline3d first_polygon; double footprint_height(-999999);
 		bool valid = false;
 		ccHObject* first_footprint = nullptr;
+		QStringList plane_names;
 		for (size_t j = 0; j < cur_component.size(); j++) {
 			first_footprint = footprintObjs[cur_component[j]];
 			if (!first_footprint->isEnabled()) {
@@ -2477,6 +2480,7 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 				valid = true;
 				first_polygon = polygon;
 				footprint_height = ccHObjectCaster::ToStFootPrint(first_footprint)->getHighest();
+				plane_names = ccHObjectCaster::ToStFootPrint(first_footprint)->getPlaneNames();
 			}
 			contours.push_back(ToContour(polygon, 0));
 		}
@@ -2497,8 +2501,20 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 			builder_3d4em.SetOutputPath(output_path);
 		}
 		builder_3d4em.SetGroundHeight(ground_height);
-
-		ccHObject::Container primObjs = GetNonVerticalPlaneClouds(prim_group_obj, 15);
+		
+		ccHObject::Container primObjs;
+		if (!plane_names.empty()) {
+			for (size_t pi = 0; pi < prim_group_obj->getChildrenNumber(); pi++) {
+				ccHObject* child_cloud = prim_group_obj->getChild(pi); if (!child_cloud) continue;
+				if (plane_names.indexOf(child_cloud->getName()) >= 0) {
+					primObjs.push_back(child_cloud);
+				}
+			}
+		}
+		else {
+			primObjs = GetNonVerticalPlaneClouds(prim_group_obj, 15);
+		}
+		if (primObjs.empty()) {	continue; }
 		std::vector<Contour3d> points = GetPointsFromCloudInsidePolygonsXY(primObjs, first_polygon, footprint_height);
 		builder_3d4em.SetSegmentedPoints(points);		
 
@@ -2524,7 +2540,7 @@ ccHObject* LoD2FromFootPrint_WholeProcess(ccHObject* buildingObj, ccHObject::Con
 	return blockgroup_obj;
 }
 
-ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footprintObjs, double ground_height)
+ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footprintObjs)
 {
 	if (!buildingObj || footprintObjs.empty()) { return nullptr; }
 	BDBaseHObject* baseObj = GetRootBDBase(buildingObj);
@@ -2555,10 +2571,22 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 			builder_3d4em.SetOutputPath(output_path);
 		}
 
-		ftObj->setBottom(ground_height);	// TODO
+		double ground_height = ftObj->getBottom();
 		builder_3d4em.SetGroundHeight(ground_height);
 
-		ccHObject::Container primObjs = GetNonVerticalPlaneClouds(prim_group_obj, 15);
+		ccHObject::Container primObjs;
+		QStringList plane_names = ftObj->getPlaneNames();
+		if (!plane_names.empty()) {
+			for (size_t pi = 0; pi < prim_group_obj->getChildrenNumber(); pi++) {
+				ccHObject* child_cloud = prim_group_obj->getChild(pi); if (!child_cloud) continue;
+				if (plane_names.indexOf(child_cloud->getName()) >= 0) {
+					primObjs.push_back(child_cloud);
+				}
+			}
+		}
+		else {
+			primObjs = GetNonVerticalPlaneClouds(prim_group_obj, 15);
+		}
 		for (auto & pt : polygon) {
 			pt.P0().Z() = ftObj->getLowest();
 			pt.P1().Z() = ftObj->getLowest();
@@ -2571,13 +2599,11 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 		if (!QFile::exists(QString(output_path))) continue;
 
 		std::vector<Contour3d> roof_polygons = builder_3d4em.GetRoofPolygons();
-		int block_number = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_BLOCK_PREFIX) + 1;
+		int block_number = GetMaxNumberExcludeChildPrefix(ftObj, BDDB_BLOCK_PREFIX) + 1;
 		for (Contour3d & roof_points : roof_polygons) {
 			std::vector<CCVector3> top_points;
-			//std::vector<CCVector3> bottom_points;
 			for (auto & pt : roof_points) {
 				top_points.push_back(CCVector3(vcgXYZ(pt)));
-				//bottom_points.push_back(CCVector3(pt.X(), pt.Y(), ground_height));
 			}
 
 			StBlock* block_entity = nullptr;
@@ -2601,7 +2627,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* buildingObj, ccHObject::Container footpr
 }
 
 #include <QMessageBox>
-ccHObject* LoD2FromFootPrint(ccHObject* entity, double ground_height)
+ccHObject* LoD2FromFootPrint(ccHObject* entity)
 {
 	ccHObject* buildingObj = nullptr;
 	ccHObject::Container footprintObjs;
@@ -2619,7 +2645,7 @@ ccHObject* LoD2FromFootPrint(ccHObject* entity, double ground_height)
 		footprintObjs = blockgroup_obj->getValidFootPrints();
 	}
 	
-	return LoD2FromFootPrint(buildingObj, footprintObjs, ground_height);
+	return LoD2FromFootPrint(buildingObj, footprintObjs);
 }
 
 void SubstituteFootPrintContour(StFootPrint* footptObj, stocker::Contour3d points)

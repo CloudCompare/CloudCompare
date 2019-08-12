@@ -32,9 +32,11 @@ public:
 
 	virtual ccHObject* getPlane() = 0;
 
-	//////////////////////////////////////////////////////////////////////////
+	virtual void getEquation(CCVector3& N, PointCoordinateType& constVal) const = 0;
 
-	void normalEditState(bool edit) { m_editable = edit; }
+	//////////////////////////////////////////////////////////////////////////
+	bool getNormalEditState() { return m_editable; }
+	virtual void normalEditState(bool edit) { m_editable = edit; }
 
 	//inherited from ccInteractor
  	bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight) override;
@@ -57,7 +59,14 @@ public:
 	**/
 	void setActiveComponent(int id);
 
-	virtual void notifyPlanarEntityChanged(ccGLMatrix mat, bool trans) = 0;
+	virtual void notifyPlanarEntityChanged(ccGLMatrix mat) = 0;
+
+	CCVector3 projectTo3DGlobal(CCVector3 pt_3d);
+	CCVector2 projectTo2DLocal(CCVector3 pt_3d);
+	CCVector3 backprojectTo3DGlobal(CCVector2 pt_2d);
+	std::vector<CCVector3> projectTo3DGlobal(std::vector<CCVector3> pt_3d);
+	std::vector<CCVector2> projectTo2DLocal(std::vector<CCVector3> pt_3d);
+	std::vector<CCVector3> backprojectTo3DGlobal(std::vector<CCVector2> pt_2d);
 
 signals:
 	void planarEntityChanged();

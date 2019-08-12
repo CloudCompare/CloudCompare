@@ -19,6 +19,8 @@
 #include "ccMesh.h"
 #include "ccPointCloud.h"
 #include "ccPolyline.h"
+#include "StBlock.h"
+#include "ccHObjectCaster.h"
 
 //CCLib
 #include <Delaunay2dMesh.h>
@@ -388,7 +390,7 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 		return;
 
 	//show normal vector
-	if (normalVectorIsShown() && m_contourPolyline)
+	if ((normalVectorIsShown() || getNormalEditState()) && m_contourPolyline)
 	{
 		PointCoordinateType scale = 0;
 		if (m_surface > 0) //the surface might be 0 if Delaunay 2.5D triangulation is not supported
@@ -628,8 +630,15 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 	if (hullPtsCount < 3)
 		return false;	
 
-	//create vertices
-	m_contourVertices = new ccPointCloud();
+	//create vertices	
+	if (m_contourVertices) {
+		m_contourVertices->clear();
+		m_contourVertices->detatchAllChildren();
+		detatchAllChildren();
+	}
+	else {
+		m_contourVertices = new ccPointCloud();
+	}
 	{
 		if (!m_contourVertices->reserve(hullPtsCount))
 		{
@@ -702,7 +711,12 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 	{
 		//we create the corresponding (3D) polyline
 		{
-			m_contourPolyline = new ccPolyline(m_contourVertices);
+			if (m_contourPolyline) {
+				m_contourPolyline->clear();
+				m_contourPolyline->detatchAllChildren();
+			}
+			else
+				m_contourPolyline = new ccPolyline(m_contourVertices);
 			if (m_contourPolyline->reserve(hullPtsCount))
 			{
 				m_contourPolyline->addPointIndex(0, hullPtsCount);
@@ -746,6 +760,10 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 				unsigned triCount = dm->size();
 				assert(triCount != 0);
 
+				if (m_polygonMesh) {
+					m_polygonMesh->clearTriNormals();
+					m_polygonMesh->resize(0);
+				}
 				m_polygonMesh = new ccMesh(m_contourVertices);
 				if (m_polygonMesh->reserve(triCount))
 				{
@@ -798,18 +816,25 @@ bool ccFacet::FormByContour(std::vector<CCVector3> contour_points, bool polygon,
 			}
 		}
 	}
+
+	emit planarEntityChanged();
 	return true;
 }
 
-void ccFacet::notifyPlanarEntityChanged(ccGLMatrix mat, bool trans)
+void ccFacet::getEquation(CCVector3 & N, PointCoordinateType & constVal) const
 {
-	if (trans) {
-		m_glTrans = m_glTrans * mat;
-	}
-	else {
-		//rotateGL(mat);
-		applyGLTransformation_recursive(&mat);
-	}
+	N = CCVector3(m_planeEquation[0], m_planeEquation[1], m_planeEquation[2]);
+	constVal = m_planeEquation[3];
+}
 
-	refreshDisplay();
+void ccFacet::notifyPlanarEntityChanged(ccGLMatrix mat)
+{
+	//rotateGL(mat);
+	applyGLTransformation_recursive(&mat);
+	
+	//! notify the parent block to change this
+	StBlock* block = ccHObjectCaster::ToStBlock(getParent());
+	if (block) {
+		block->updateFacet(this);
+	}
 }

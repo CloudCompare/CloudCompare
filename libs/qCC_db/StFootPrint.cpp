@@ -73,7 +73,13 @@ bool StFootPrint::reverseVertexOrder()
 
 inline double StFootPrint::getHeight() const
 {
-	return getPoint(0)->z;
+	if (size() < 1) { return 0; }
+	double z = 0;
+	for (unsigned int i = 0; i < size(); i++) {
+		CCVector3& P = const_cast<CCVector3&>(*getPoint(i));
+		z += P.z;
+	}
+	return z/size();
 }
 
 void StFootPrint::setHeight(double height)
@@ -88,11 +94,11 @@ void StFootPrint::setHeight(double height)
 void StFootPrint::setBottom(double bottom)
 {
 	m_bottom = bottom;
-	for (StBlock* block : getBlocks()) {
-		if (block) {
-			block->setBottomHeight(bottom);
-		}
-	}
+// 	for (StBlock* block : getBlocks()) {
+// 		if (block) {
+// 			block->setBottomHeight(bottom);
+// 		}
+// 	}
 	prepareDisplayForRefresh_recursive();
 }
 
@@ -157,7 +163,7 @@ void StFootPrint::drawMeOnly(CC_DRAW_CONTEXT & context)
 			float v[3];
 			v[0] = p->x;
 			v[1] = p->y;
-			v[2] = m_highest;
+			v[2] = m_bottom;
 			ccGL::Vertex3v(glFunc, v);
 		}
 		if (m_isClosed)
@@ -166,7 +172,7 @@ void StFootPrint::drawMeOnly(CC_DRAW_CONTEXT & context)
 			float v[3];
 			v[0] = p->x;
 			v[1] = p->y;
-			v[2] = m_highest;
+			v[2] = m_bottom;
 			ccGL::Vertex3v(glFunc, v);
 		}
 		glFunc->glEnd();
@@ -190,10 +196,13 @@ bool StFootPrint::toFile_MeOnly(QFile & out) const
 	if (out.write((const char*)&m_bottom, sizeof(double)) < 0)
 		return WriteError();
 
-	if (out.write((const char*)&m_hole, sizeof(bool)) < 0)
+	if (out.write((const char*)&m_highest, sizeof(double)) < 0)
 		return WriteError();
 
-	if (out.write((const char*)&m_highest, sizeof(double)) < 0)
+	if (out.write((const char*)&m_lowest, sizeof(double)) < 0)
+		return WriteError();
+
+	if (out.write((const char*)&m_hole, sizeof(bool)) < 0)
 		return WriteError();
 
 	if (out.write((const char*)&m_componentId, sizeof(int)) < 0)
@@ -217,10 +226,13 @@ bool StFootPrint::fromFile_MeOnly(QFile & in, short dataVersion, int flags)
 	if (in.read((char*)&m_bottom, sizeof(double)) < 0)
 		return ReadError();
 
-	if (in.read((char*)&m_hole, sizeof(bool)) < 0)
+	if (in.read((char*)&m_highest, sizeof(double)) < 0)
 		return ReadError();
 
-	if (in.read((char*)&m_highest, sizeof(double)) < 0)
+	if (in.read((char*)&m_lowest, sizeof(double)) < 0)
+		return ReadError();
+
+	if (in.read((char*)&m_hole, sizeof(bool)) < 0)
 		return ReadError();
 
 	if (in.read((char*)&m_componentId, sizeof(int)) < 0)

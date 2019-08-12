@@ -295,18 +295,23 @@ ccHObject* bdr2Point5DimEditor::projectToImage(ccHObject * obj)
 	else if (obj->isA(CC_TYPES::ST_BLOCK)) {
 		//! get top
 		StBlock* block = ccHObjectCaster::ToStBlock(obj); if (!block) return nullptr;
-		ccFacet* top_facet = block->getTopFacet(); if (!top_facet) return nullptr;
-		ccPolyline* contour = top_facet->getContour(); if (!contour) return nullptr;
-		ccPolyline* new_poly = new ccPolyline(*contour); if (!new_poly) return nullptr;
+		ccFacet* top_facet = block->getTopFacet();
 
-		associate_cloud = dynamic_cast<ccPointCloud*>(new_poly->getAssociatedCloud());
-		if (!associate_cloud) {
-			delete new_poly;
-			new_poly = nullptr;
-			return nullptr;
+		if (top_facet) {
+			ccPolyline* contour = top_facet->getContour();
+			if (contour) {
+				ccPolyline* new_poly = new ccPolyline(*contour);
+				associate_cloud = dynamic_cast<ccPointCloud*>(new_poly->getAssociatedCloud());
+				if (!associate_cloud) {
+					delete new_poly;
+					new_poly = nullptr;
+					return nullptr;
+				}
+				entity_in_image_2d = new_poly;
+			}
 		}
-
-		entity_in_image_2d = new_poly;
+		else
+			entity_in_image_2d = nullptr;
 	}
 
 	//! project to image
@@ -367,12 +372,23 @@ bool bdr2Point5DimEditor::projectBack(ccHObject* obj2D, ccHObject* obj3D)
 		StBlock* block = ccHObjectCaster::ToStBlock(obj3D);
 		ccPolyline* polyline = ccHObjectCaster::ToPolyline(obj2D); if (!polyline) return false;
 		
-		ccFacet* facet = block->getTopFacet(); if (!facet) return false;
-
-		const PointCoordinateType *eq = facet->getPlaneEquation();
+		//! reset the block facets
 		vcg::Plane3d plane;
-		plane.SetDirection({ eq[0],eq[1],eq[2] });
-		plane.SetOffset(eq[3]);
+		
+		ccFacet* facet = block->getTopFacet(); 
+		{
+			CCVector3 n; PointCoordinateType offset;
+			if (facet) {
+				facet->getEquation(n, offset);
+			}
+			else {
+				facet = new ccFacet(0, "top");
+				block->setTopFacet(facet);
+				block->getEquation(n, offset);
+			}
+			plane.SetDirection({ n.x,n.y,n.z });
+			plane.SetOffset(offset);
+		}
 
 		std::vector<CCVector3> top_points;
 		for (size_t i = 0; i < polyline->size(); i++) {
@@ -396,34 +412,36 @@ bool bdr2Point5DimEditor::projectBack(ccHObject* obj2D, ccHObject* obj3D)
 		}
 		if (top_points.size() < 3) return false;
 
-		//! project to the bottom
-		std::vector<CCVector3> bottom_points;
-		ccFacet* facet_bottom = block->getBottomFacet(); if (!facet_bottom) return false;
-		eq = facet_bottom->getPlaneEquation();
-		plane.SetDirection({ eq[0],eq[1],eq[2] });
-		plane.SetOffset(eq[3]);
-		for (auto & v : top_points) {
-			vcg::Line3d line;
-			line.SetOrigin(stocker::parse_xyz(v));
-			line.SetDirection({ 0,0,-1 });
+		block->setFacetPoints(facet, top_points, false);
 
-			vcg::Point3d point;
-			if (!vcg::IntersectionLinePlane(line, plane, point)) {
-				return false;
-			}
-			bottom_points.push_back(CCVector3(vcgXYZ(point)));
-		}
-		if (bottom_points.size() != top_points.size()) { return false; }
-
-		//! set to block
-		ccHObject* parent = block->getParent(); if (!parent) { return false; }
-		
-		StBlock* new_block = StBlock::Create(top_points, bottom_points.front().z);
-		new_block->setName(block->getName());
-		MainWindow::TheInstance()->removeFromDB(block);
-		
-		parent->addChild(new_block);
-		MainWindow::TheInstance()->addToDB_Build(new_block);
+// 		//! project to the bottom
+// 		std::vector<CCVector3> bottom_points;
+// 		ccFacet* facet_bottom = block->getBottomFacet(); if (!facet_bottom) return false;
+// 		eq = facet_bottom->getPlaneEquation();
+// 		plane.SetDirection({ eq[0],eq[1],eq[2] });
+// 		plane.SetOffset(eq[3]);
+// 		for (auto & v : top_points) {
+// 			vcg::Line3d line;
+// 			line.SetOrigin(stocker::parse_xyz(v));
+// 			line.SetDirection({ 0,0,-1 });
+// 
+// 			vcg::Point3d point;
+// 			if (!vcg::IntersectionLinePlane(line, plane, point)) {
+// 				return false;
+// 			}
+// 			bottom_points.push_back(CCVector3(vcgXYZ(point)));
+// 		}
+// 		if (bottom_points.size() != top_points.size()) { return false; }
+// 
+// 		//! set to block
+// 		ccHObject* parent = block->getParent(); if (!parent) { return false; }
+// 		
+// 		StBlock* new_block = StBlock::Create(top_points, bottom_points.front().z);
+// 		new_block->setName(block->getName());
+// 		MainWindow::TheInstance()->removeFromDB(block);
+// 		
+// 		parent->addChild(new_block);
+// 		MainWindow::TheInstance()->addToDB_Build(new_block);
 	}
 }
 

@@ -84,7 +84,7 @@ void ccPlane::drawMeOnly(CC_DRAW_CONTEXT& context)
 		ccGenericPrimitive::drawMeOnly(context);
 
 		//show normal vector
-		if (MACRO_Draw3D(context) && normalVectorIsShown())
+		if (MACRO_Draw3D(context) && (normalVectorIsShown() || getNormalEditState()))
 		{
 			PointCoordinateType scale = sqrt(m_xWidth * m_yWidth) / 2; //DGM: highly empirical ;)
 			glDrawNormal(context, getUniqueIDForDisplay(), m_transformation.getTranslationAsVec3D(), scale, nullptr);
@@ -132,6 +132,32 @@ bool ccPlane::isVerticalToDirection(CCVector3 dir, double angle_degree)
 		return true;
 	}
 	return false;
+}
+
+void ccPlane::setProfile(std::vector<CCVector3> profile, bool update)
+{
+	m_profile = profile;
+	
+	if (update) {
+		ccPlane* new_plane = ccPlane::Fit(profile);
+		if (new_plane) {
+			m_transformation = new_plane->getTransformation();
+			setXWidth(new_plane->getXWidth(), false);
+			setYWidth(new_plane->getYWidth(), true);
+			delete new_plane;
+			new_plane = nullptr;
+		}
+	}
+}
+
+CCVector3 ccPlane::getProfileCenter()
+{
+	CCVector3 center(0, 0, 0);
+	for (auto & pt : m_profile)	{
+		center += pt;
+	}
+	center /= m_profile.size();
+	return center;
 }
 
 ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*/, std::vector<CCVector3> * profile /*= 0*/)
@@ -387,16 +413,7 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 	return material;
 }
 
-void ccPlane::notifyPlanarEntityChanged(ccGLMatrix mat, bool trans)
+void ccPlane::notifyPlanarEntityChanged(ccGLMatrix mat)
 {
-	if (trans) {
-		m_glTrans = m_glTrans * mat;
-	}
-	else {
-		//rotateGL(mat);
-		applyGLTransformation_recursive(&mat);
-		notifyNormalUpdate();
-	}
-	
-	refreshDisplay();
+	applyGLTransformation_recursive(&mat);
 }

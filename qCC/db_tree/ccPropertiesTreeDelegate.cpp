@@ -164,7 +164,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_FOOTPRINT_TOP:
 		case OBJECT_BLOCK_TOP:
 		case OBJECT_BLOCK_BOTTOM:
-			return QSize(50, 24);
+			return QSize(30, 24);
 		case OBJECT_COLOR_SOURCE:
 		case OBJECT_POLYLINE_WIDTH:
 		case OBJECT_CURRENT_COLOR_RAMP:
@@ -434,7 +434,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 {
 	assert(_obj && m_model);
 
-	addSeparator( tr( "CC Object" ) );
+	addSeparator( tr( "General" ) );//CC Object
 
 	//name
 	appendRow(ITEM( tr( "Name" ) ), ITEM(_obj->getName(), Qt::ItemIsEditable, OBJECT_NAME));
@@ -2741,8 +2741,21 @@ void ccPropertiesTreeDelegate::updateFootprintPlanes()
 
 	ccHObject::Container planes = prim_group->getValidPlanes();
 	QStringList names;
-	for (ccHObject* pl : planes) {  names.append(GetPlaneCloud(pl)->getName()); }
 
+	//! update highest and lowest z
+	stocker::Contour3d cur_all_points;
+	for (ccHObject* pl : planes) {
+		names.append(GetPlaneCloud(pl)->getName());
+
+		stocker::Contour3d cur_points = GetPointsFromCloud(pl->getParent());
+		cur_all_points.insert(cur_all_points.end(), cur_points.begin(), cur_points.end());
+	}
+	Concurrency::parallel_sort(cur_all_points.begin(), cur_all_points.end(), [&](stocker::Vec3d l, stocker::Vec3d r) {return l.Z() < r.Z(); });
+	double top_height = cur_all_points.back().Z();
+	double bottom_height = cur_all_points.front().Z();
+
+	fp->setHighest(top_height);
+	fp->setLowest(bottom_height);
 	fp->setPlaneNames(names);
 	updateModel();
 }
@@ -2827,7 +2840,7 @@ void ccPropertiesTreeDelegate::fillWithStFootPrint(const StFootPrint *_obj)
 	addSeparator(tr("FootPrint"));
 
 	//footprint TOP height
-	appendRow(ITEM(tr("top height")), PERSISTENT_EDITOR(OBJECT_FOOTPRINT_TOP), true);
+	//appendRow(ITEM(tr("top height")), PERSISTENT_EDITOR(OBJECT_FOOTPRINT_TOP), true);
 
 	//footprint bottom height
 	appendRow(ITEM(tr("bottom height")), PERSISTENT_EDITOR(OBJECT_FOOTPRINT_BOTTOM), true);

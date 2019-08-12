@@ -77,7 +77,7 @@ public:
 	//inherited from ccPlanarEntityInterface
 	CCVector3 getNormal() const override { return m_transformation.getColumnAsVec3D(2); }
 
-	void notifyPlanarEntityChanged(ccGLMatrix mat, bool trans) override;
+	void notifyPlanarEntityChanged(ccGLMatrix mat) override;
 
 	//! Sets an image as texture
 	/** \return The created material (if successful)
@@ -105,12 +105,13 @@ public:
 		N.P + constVal = 0
 		i.e. Nx.x + Ny.y + Nz.z + constVal = 0
 	**/
-	void getEquation(CCVector3& N, PointCoordinateType& constVal) const;
+	void getEquation(CCVector3& N, PointCoordinateType& constVal) const override;
 
 	bool isVerticalToDirection(CCVector3 dir, double angle_degree = 15);
 
-	void setProfile(std::vector<CCVector3> profile) { m_profile = profile; }
+	void setProfile(std::vector<CCVector3> profile, bool update = false);
 	std::vector<CCVector3> getProfile() { return m_profile; }
+	CCVector3 getProfileCenter();
 
 protected:
 

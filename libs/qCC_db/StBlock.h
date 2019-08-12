@@ -75,29 +75,35 @@ public:
 // 	CCVector3 getCenterBottom();
 //	std::vector<CCVector2> getProfile();
 
+	ccPlane* getMainPlane() { return m_mainPlane; }
+
 	ccFacet* getTopFacet();
-	void setTopFacet(ccFacet* facet) { m_top_facet = facet; }
+	void setTopFacet(ccFacet* facet);
 	ccFacet* getBottomFacet();
-	void setBottomFacet(ccFacet* facet) { m_bottom_facet = facet; }
+	void setBottomFacet(ccFacet* facet); 
 
 	void setTopHeight(double val);
 	double getTopHeight() { return m_top_height; }
 	void setBottomHeight(double val);
 	double getBottomHeight() { return m_bottom_height; }
 
+	std::vector<CCVector3> deduceTopPoints();
+	std::vector<CCVector3> deduceBottomPoints();
+
+	void updateFacet(ccFacet* facet);
+	void setFacetPoints(ccFacet* facet, std::vector<CCVector3> points, bool computePlane);
+
 protected:
+
+	//inherited from ccDrawable
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const override;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 	virtual bool buildUp() override;
+	void paramFromFacet();
 	bool buildFromFacet();
-
-// 	ccFacet* m_top;
-// 	ccFacet* m_bottom;
-
-// 	std::vector<CCVector3> m_top;
-// 	std::vector<CCVector3> m_bottom;
 
 	ccFacet* m_top_facet;
 	ccFacet* m_bottom_facet;
@@ -117,13 +123,16 @@ protected:
 
 public:
 	//inherited from ccPlanarEntityInterface //! for planar entity
-	ccHObject* getPlane() override { return (ccHObject*)m_mainPlane; }
+	ccHObject* getPlane() override { return this; }
 	//inherited from ccPlanarEntityInterface
 	inline CCVector3 getNormal() const override;
 	//inherited from ccPlanarEntityInterface //! Returns the facet center
 	CCVector3 getCenter() const override;
 	//inherited from ccPlanarEntityInterface
-	void notifyPlanarEntityChanged(ccGLMatrix mat, bool trans) override;
+	void notifyPlanarEntityChanged(ccGLMatrix mat) override;
+	void normalEditState(bool edit) override;
+
+	void getEquation(CCVector3& N, PointCoordinateType& constVal) const override;
 
 };
 

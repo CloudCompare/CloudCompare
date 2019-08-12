@@ -269,7 +269,7 @@ void StBlock::setFacetPoints(ccFacet * facet, std::vector<CCVector3> points, boo
 
 		vcg::Plane3d bot_plane;
 		CCVector3 bot_center = getBottomCenter();
-		CCVector3 bot_normal = m_bottom_facet ? m_bottom_normal : m_mainPlane->getNormal();
+		CCVector3 bot_normal = m_bottom_facet ? m_bottom_normal : -plane_normal;
 		bot_plane.Init({ bot_center.x,bot_center.y,bot_center.z }, { bot_normal.x,bot_normal.y,bot_normal.z });
 
 		for (auto & pt : profiles) {
@@ -287,7 +287,8 @@ void StBlock::setFacetPoints(ccFacet * facet, std::vector<CCVector3> points, boo
 			ccFacet* facet = new ccFacet(0, "bottom");
 			setBottomFacet(facet);
 		}
-		m_bottom_facet->FormByContour(bottom_points);
+		m_bottom_facet->FormByContour(bottom_points, true);
+		m_bottom_facet->invertNormal();
 	}
 	else if (facet == m_bottom_facet) {
 		std::vector<CCVector3> top_points;
@@ -297,7 +298,8 @@ void StBlock::setFacetPoints(ccFacet * facet, std::vector<CCVector3> points, boo
 
 		vcg::Plane3d top_plane;
 		CCVector3 top_center = getTopCenter();
-		top_plane.Init({ top_center.x,top_center.y,top_center.z }, { m_top_normal.x,m_top_normal.y,m_top_normal.z });
+		CCVector3 top_normal = m_top_facet ? m_top_normal : plane_normal;
+		top_plane.Init({ top_center.x,top_center.y,top_center.z }, { top_normal.x,top_normal.y,top_normal.z });
 
 		for (auto & pt : profiles) {
 			vcg::Line3d line;
@@ -314,7 +316,7 @@ void StBlock::setFacetPoints(ccFacet * facet, std::vector<CCVector3> points, boo
 			ccFacet* facet = new ccFacet(0, "top");
 			setTopFacet(facet);
 		}
-		m_top_facet->FormByContour(top_points);
+		m_top_facet->FormByContour(top_points, true);
 	}
 
 	paramFromFacet();
@@ -465,7 +467,8 @@ void StBlock::setBottomHeight(double val)
 
 	ccFacet* bottom = getBottomFacet();
 	if (!bottom) return;
-	bottom->FormByContour(bot_points);
+	bottom->FormByContour(bot_points, true);
+	bottom->invertNormal();
 }
 
 std::vector<CCVector3> StBlock::deduceTopPoints()

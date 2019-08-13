@@ -486,6 +486,7 @@ MainWindow::~MainWindow()
 	{	
 		getGLWindow(i)->getSceneDB().clear();
 	}
+
 	m_cpeDlg = nullptr;
 	m_gsTool = nullptr;
 	m_seTool = nullptr;
@@ -497,10 +498,16 @@ MainWindow::~MainWindow()
 	m_pprDlg = nullptr;
 	m_pfDlg = nullptr;
 
+	m_pbdrPSDlg = nullptr;
 	m_pbdrl3dDlg = nullptr;
 	m_pbdrddtDlg = nullptr;
 	m_pbdrpfDlg = nullptr;
+	m_pbdrffDlg = nullptr;
 	m_pbdr3d4emDlg = nullptr;
+	
+	m_pbdrImshow = nullptr;
+	m_pbdrImagePanel = nullptr;
+	m_pbdrPlaneEditDlg = nullptr;
 
 	Logger::terminate();
 
@@ -12109,58 +12116,69 @@ void MainWindow::doActionBDPlaneSegmentation()
 	double cluster_eps = m_pbdrPSDlg->ClusterEpsilonDoubleSpinBox->value();
 
 	ProgStartNorm("Plane Segmentation", _container.size())
-	
-	if (m_pbdrPSDlg->PlaneSegRansacRadioButton->isChecked()) {
-		double normal_dev = cos(m_pbdrPSDlg->maxNormDevAngleSpinBox->value() * CC_DEG_TO_RAD);
-		double prob = m_pbdrPSDlg->probaDoubleSpinBox->value();
-//#pragma omp parallel for
-		for (int i = 0; i < _container.size(); i++) {
-			ccHObject* cloudObj = _container[i];
-			ccPointCloud* todo_point = nullptr;
-			if (baseObj) {
-				todo_point = baseObj->GetTodoPoint(GetBaseName(cloudObj->getName()));
+	for (int i = 0; i < _container.size(); i++) {
+		ccHObject* cloudObj = _container[i];
+		ccPointCloud* todo_point = nullptr;
+		if (baseObj) {
+			todo_point = baseObj->GetTodoPoint(GetBaseName(cloudObj->getName()));
+		}
+		else {
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(cloudObj);
+			if (pc) {
+				todo_point = new ccPointCloud("unassigned");
+				todo_point->setGlobalScale(pc->getGlobalScale());
+				todo_point->setGlobalShift(pc->getGlobalShift());
+				todo_point->setDisplay(pc->getDisplay());
+				todo_point->showColors(true);
+				if (pc->getParent())
+					pc->getParent()->addChild(todo_point);
+				addToDB(todo_point, pc->getDBSourceType(), false, false);
 			}
-			ccHObject* seged = PlaneSegmentationRansac(cloudObj,
+		}
+
+		ccHObject* seged = nullptr;
+		if (m_pbdrPSDlg->PlaneSegRansacRadioButton->isChecked()) {
+			double normal_dev = cos(m_pbdrPSDlg->maxNormDevAngleSpinBox->value() * CC_DEG_TO_RAD);
+			double prob = m_pbdrPSDlg->probaDoubleSpinBox->value();
+			seged = PlaneSegmentationRansac(cloudObj,
 				support_pts,
 				distance_eps,
 				cluster_eps,
 				normal_dev,
 				prob,
 				merge_threshold, split_threshold,
-				todo_point
-			);
-			if (seged) {
-				addToDB(seged, entity->getDBSourceType(), false, false);
-				cloudObj->setEnabled(false);
-			}
-//#pragma omp critical
-			ProgStep()
+				todo_point);
 		}
-	}
-	else if (m_pbdrPSDlg->PlaneSegRegionGrowRadioButton->isChecked()) {
-		double growing_radius = m_pbdrPSDlg->GrowingRadiusDoubleSpinBox->value();
-//#pragma omp parallel for
-		for (int i = 0; i < _container.size(); i++) {
-			ccHObject* cloudObj = _container[i];
-			ccPointCloud* todo_point = nullptr; // no unassigned points returned by line grow
-			if (baseObj) {
-				todo_point = baseObj->GetTodoPoint(GetBaseName(cloudObj->getName()));
-			}
-			ccHObject* seged = PlaneSegmentationRgGrow(cloudObj,
+		else if (m_pbdrPSDlg->PlaneSegRegionGrowRadioButton->isChecked()) {
+			double growing_radius = m_pbdrPSDlg->GrowingRadiusDoubleSpinBox->value();
+			seged = PlaneSegmentationRgGrow(cloudObj,
 				support_pts,
 				distance_eps,
 				cluster_eps,
 				growing_radius,
 				merge_threshold, split_threshold);
-			if (seged) {
-				addToDB(seged, entity->getDBSourceType(), false, false);
-				cloudObj->setEnabled(false);
-			}
-//#pragma omp critical
-			ProgStep()
 		}
-	}
+		else if (m_pbdrPSDlg->PlaneSegATPSRadioButton->isChecked()) {
+			double curvature_delta = m_pbdrPSDlg->APTSCurvatureSpinBox->value();
+			double nfa_epsilon = m_pbdrPSDlg->APTSNFASpinBox->value();
+			double normal_theta = m_pbdrPSDlg->APTSNormalSpinBox->value();
 
+			seged = PlaneSegmentationATPS(cloudObj,
+				support_pts, 
+				curvature_delta, 
+				distance_eps, 
+				cluster_eps,
+				nfa_epsilon,
+				normal_theta, 
+				todo_point);
+		}
+
+		if (seged) {
+			addToDB(seged, entity->getDBSourceType(), false, false);
+			cloudObj->setEnabled(false);
+		}
+		ProgStep()
+	}
 	ProgEnd
 
 	refreshAll();

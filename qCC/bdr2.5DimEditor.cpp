@@ -65,6 +65,8 @@ bdr2Point5DimEditor::~bdr2Point5DimEditor()
 		delete m_cursor_cross;
 		m_cursor_cross = nullptr;
 	}
+	auto & sc = m_glWindow->getSceneDB();
+	sc.clear();	// why cannot be deleted???	
 }
 
 void bdr2Point5DimEditor::clearAll()

@@ -12,6 +12,8 @@ include( contrib/GDALSupport.cmake )
 include( contrib/ShapeLibSupport.cmake )
 # Oculus support
 include( contrib/OculusSupport.cmake )
+# PlaneSegmentation support
+include( contrib/PCATPSSupport.cmake )
 
 function( target_link_contrib ) # 2 arguments: ARGV0 = project name / ARGV1 = shared lib export base folder (optional - '_debug' will be appended for debug configuration)
 
@@ -25,5 +27,7 @@ function( target_link_contrib ) # 2 arguments: ARGV0 = project name / ARGV1 = sh
 	target_link_SHAPE_LIB( ${ARGV0} )
 	#OCULUS support
 	#target_link_OCULUS_SDK( ${ARGV0} )
+
+	target_link_PCATPS( ${ARGV0} )
 
 endfunction()

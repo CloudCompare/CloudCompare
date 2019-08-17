@@ -23,6 +23,12 @@
 using PointCoordinateType = float;
 
 //! Type of a single scalar field value
+#if defined SCALAR_TYPE_DOUBLE
+using ScalarType = double;
+#elif defined SCALAR_TYPE_FLOAT
 using ScalarType = float;
+#else
+static_assert(false, "type for ScalarType has not been declared");
+#endif //SCALAR_TYPE_DOUBLE
 
 #endif //CC_TYPES_HEADER

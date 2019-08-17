@@ -1051,8 +1051,11 @@ bool ccGBLSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_deltaTheta, 1);
 	if (dataVersion < 38)
 	{
-		ccSerializationHelper::ScalarsFromDataStream(inStream, flags, &m_sensorRange, 1);
-		ccSerializationHelper::ScalarsFromDataStream(inStream, flags, &m_uncertainty, 1);
+		ScalarType sensorRange{}, uncertainty{};
+		ccSerializationHelper::ScalarsFromDataStream(inStream, flags, &sensorRange, 1);
+		ccSerializationHelper::ScalarsFromDataStream(inStream, flags, &uncertainty, 1);
+		m_sensorRange = static_cast<PointCoordinateType>(sensorRange);
+		m_uncertainty = static_cast<PointCoordinateType>(uncertainty);
 	}
 	else
 	{

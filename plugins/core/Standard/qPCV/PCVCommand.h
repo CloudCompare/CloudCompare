@@ -20,12 +20,25 @@
 
 #include "ccCommandLineInterface.h"
 
+class ccProgressDialog;
+class ccMainAppInterface;
+
+//qCC_db
+#include <ccHObject.h>
+
 class PCVCommand : public ccCommandLineInterface::Command
 {
 public:
 	PCVCommand();
 
 	~PCVCommand() override = default;
+
+	static bool Process(	const ccHObject::Container& candidates,
+							const std::vector<CCVector3>& rays,
+							bool meshIsClosed,
+							unsigned resolution,
+							ccProgressDialog* progressDlg = nullptr,
+							ccMainAppInterface* app = nullptr);
 
 	bool process(ccCommandLineInterface& cmd) override;
 };

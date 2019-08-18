@@ -10,6 +10,10 @@ v2.11 (Anoia) - (in development)
         In this case the first mesh vertices are used as compared cloud.
 	- New suboption for the -O -GLOBAL_SHIFT option: 'FIRST'
 		To use the first encountered (non null) global shift for all loaded entities (must be defined for all entities nevertheless ;)
+	- The PCV tool can now be accessed via the command line mode:
+		- Option -PCV (see https://www.cloudcompare.org/doc/wiki/index.php?title=Command_line_mode for sub-options)
+		- Can be called on any number of clouds or meshes
+		- (the tool was already accessible in V2.10, but in a very limited way)
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
   - Point picking:

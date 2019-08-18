@@ -32,6 +32,7 @@ ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent/*=nullptr*/)
 	try
 	{
 		m_options.push_back(Option(roughnessCheckBox, CCLib::GeometricalAnalysisTools::Roughness, 0));
+		m_options.push_back(Option(firstOrderMomentCheckBox, CCLib::GeometricalAnalysisTools::MomentOrder1, 0));
 		m_options.push_back(Option(curvMeanCheckBox, CCLib::GeometricalAnalysisTools::Curvature, CCLib::Neighbourhood::MEAN_CURV));
 		m_options.push_back(Option(curvGaussCheckBox, CCLib::GeometricalAnalysisTools::Curvature, CCLib::Neighbourhood::GAUSSIAN_CURV));
 		m_options.push_back(Option(curvNCRCheckBox, CCLib::GeometricalAnalysisTools::Curvature, CCLib::Neighbourhood::NORMAL_CHANGE_RATE));

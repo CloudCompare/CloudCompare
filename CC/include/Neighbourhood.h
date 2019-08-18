@@ -185,7 +185,9 @@ class CC_CORE_LIB_API Neighbourhood
 		double computeFeature(GeomFeature feature);
 
 		//! Computes the 1st order moment of a set of point (based on the eigenvalues)
-		/** \return 1st order moment at a given position P (between 0 and 1)
+		/** \return 1st order moment at a given position P
+			DGM: The article states that the result should be between 0 and 1,
+			but this is actually wrong (as (a + b)^2 can be > a^2 + b^2)
 		**/
 		ScalarType computeMomentOrder1(const CCVector3& P);
 

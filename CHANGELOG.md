@@ -49,6 +49,8 @@ v2.11 (Anoia) - (in development)
 	- ability to set the start and stop angles for the cone unrolling options
 	- new unrolling mode: 'Straightened cone' (the previous one has been renamed 'Straightened cone (fixed radius)'). This new mode unrolls the cone as a cylinder but with a varying radius.
 	- the 'Straightened cone' options are now using the real curvilinear abscissa (0 = cone apex)
+  - Tools > Others > Compute geometric features
+	- option to compute the 1st moment added
 
 - Changes
   - Command line tool:

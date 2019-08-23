@@ -210,7 +210,7 @@ void ccBoundingBoxEditorDlg::saveBoxAndAccept()
 {
 	if (oriGroupBox->isVisible())
 	{
-		CCVector3 X, Y, Z;
+		CCVector3d X, Y, Z;
 		getBoxAxes(X, Y, Z);
 		X.normalize();
 		Y.normalize();
@@ -305,13 +305,13 @@ void ccBoundingBoxEditorDlg::updateCurrentBBox(double dummy)
 	switch (pointTypeComboBox->currentIndex())
 	{
 	case 0: //A = min corner
-		m_currentBBox = ccBBox(A,A+W);
+		m_currentBBox = ccBBox(A, A + W);
 		break;
 	case 1: //A = center
-		m_currentBBox = ccBBox(A-W/2.0,A+W/2.0);
+		m_currentBBox = ccBBox(A - W / 2.0, A + W / 2.0);
 		break;
 	case 2: //A = max corner
-		m_currentBBox = ccBBox(A-W,A);
+		m_currentBBox = ccBBox(A - W, A);
 		break;
 	default:
 		assert(false);
@@ -375,7 +375,7 @@ void ccBoundingBoxEditorDlg::reflectChanges(int dummy)
 
 		CCVector3 W = m_currentBBox.getDiagVec();
 		//if 'square mode' is on, all width values should be the same!
-		assert(!keepSquare() || fabs(W.x-W.y)*1.0e-6 < 1.0 && fabs(W.x-W.z)*1.0e-6 < 1.0);
+		assert(!keepSquare() || fabs(W.x - W.y)*1.0e-6 < 1.0 && fabs(W.x - W.z)*1.0e-6 < 1.0);
 		dxDoubleSpinBox->setValue(W.x);
 		dyDoubleSpinBox->setValue(W.y);
 		dzDoubleSpinBox->setValue(W.z);
@@ -417,28 +417,28 @@ void ccBoundingBoxEditorDlg::setBoxAxes(const CCVector3& X, const CCVector3& Y, 
 	}
 }
 
-void ccBoundingBoxEditorDlg::getBoxAxes(CCVector3& X, CCVector3& Y, CCVector3& Z)
+void ccBoundingBoxEditorDlg::getBoxAxes(CCVector3d& X, CCVector3d& Y, CCVector3d& Z)
 {
-	X = CCVector3(	static_cast<PointCoordinateType>(xOriXDoubleSpinBox->value()),
-					static_cast<PointCoordinateType>(xOriYDoubleSpinBox->value()),
-					static_cast<PointCoordinateType>(xOriZDoubleSpinBox->value()) );
+	X = CCVector3d(	xOriXDoubleSpinBox->value(),
+					xOriYDoubleSpinBox->value(),
+					xOriZDoubleSpinBox->value() );
 
-	Y = CCVector3(	static_cast<PointCoordinateType>(yOriXDoubleSpinBox->value()),
-					static_cast<PointCoordinateType>(yOriYDoubleSpinBox->value()),
-					static_cast<PointCoordinateType>(yOriZDoubleSpinBox->value()) );
+	Y = CCVector3d(	yOriXDoubleSpinBox->value(),
+					yOriYDoubleSpinBox->value(),
+					yOriZDoubleSpinBox->value() );
 
-	Z = CCVector3(	static_cast<PointCoordinateType>(zOriXDoubleSpinBox->value()),
-					static_cast<PointCoordinateType>(zOriYDoubleSpinBox->value()),
-					static_cast<PointCoordinateType>(zOriZDoubleSpinBox->value()) );
+	Z = CCVector3d(	zOriXDoubleSpinBox->value(),
+					zOriYDoubleSpinBox->value(),
+					zOriZDoubleSpinBox->value() );
 }
 
 void ccBoundingBoxEditorDlg::onAxisValueChanged(double)
 {
-	CCVector3 X, Y, Z;
+	CCVector3d X, Y, Z;
 	getBoxAxes(X, Y, Z);
 
 	QDoubleSpinBox* vecSpinBoxes[3] = { 0, 0, 0 };
-	CCVector3 N(0, 0, 0);
+	CCVector3d N(0, 0, 0);
 	if (oriXCheckBox->isChecked())
 	{
 		N = Y.cross(Z);
@@ -465,7 +465,7 @@ void ccBoundingBoxEditorDlg::onAxisValueChanged(double)
 		assert(false);
 	}
 
-	for (int i=0; i<3; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		vecSpinBoxes[i]->blockSignals(true);
 		vecSpinBoxes[i]->setValue(N.u[i]);

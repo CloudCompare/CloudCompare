@@ -46,7 +46,7 @@ public:
 	void setBoxAxes(const CCVector3& X, const CCVector3& Y, const CCVector3& Z);
 
 	//! Returns the box axes
-	void getBoxAxes(CCVector3& X, CCVector3& Y, CCVector3& Z);
+	void getBoxAxes(CCVector3d& X, CCVector3d& Y, CCVector3d& Z);
 
 	//! Whether the warning about bounding box inclusion in the base one should be displayed or not
 	/** True by default.

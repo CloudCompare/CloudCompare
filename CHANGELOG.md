@@ -77,6 +77,7 @@ v2.11 (Anoia) - (in development)
 	- LAS classification flags were not always properly extracted/saved by the standard LAS filter (depending on the point format)
 	- Trace Polyline tool: when changing the OpenGL camera position while tracing a polyline AND using oversampling, strange spikes could appear
 	- the Unroll dialog was not enabling all the apex coordinate fields after switching from Cylinder to Cone mode
+	- the Clipping-box tool 'edit' dialog would sometimes move the box in an unepected way when opening and closing it without making any change
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

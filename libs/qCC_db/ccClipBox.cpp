@@ -411,7 +411,7 @@ bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 	//convert mouse position to vector (screen-centered)
 	CCVector3d currentOrientation = PointToVector(x, y, screenWidth, screenHeight);
 
-	ccGLMatrixd rotMat = ccGLMatrixd::FromToRotation(m_lastOrientation,currentOrientation);
+	ccGLMatrixd rotMat = ccGLMatrixd::FromToRotation(m_lastOrientation, currentOrientation);
 
 	CCVector3 C = m_box.getCenter();
 

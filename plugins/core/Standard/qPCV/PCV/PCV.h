@@ -70,7 +70,7 @@ public:
 		\param entityName entity name (optional)
 		\return success
 	**/
-	static bool Launch(	std::vector<CCVector3>& rays,
+	static bool Launch(	const std::vector<CCVector3>& rays,
 						CCLib::GenericCloud* vertices,
 						CCLib::GenericMesh* mesh = nullptr,
 						bool meshIsClosed = false,

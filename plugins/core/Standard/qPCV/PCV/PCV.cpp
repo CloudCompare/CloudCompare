@@ -229,7 +229,7 @@ int PCV::Launch(unsigned numberOfRays,
 	return static_cast<int>(rays.size());
 }
 
-bool PCV::Launch(std::vector<CCVector3>& rays,
+bool PCV::Launch(const std::vector<CCVector3>& rays,
 				 CCLib::GenericCloud* vertices,
 				 CCLib::GenericMesh* mesh/*=0*/,
 				 bool meshIsClosed/*=false*/,

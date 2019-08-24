@@ -17,13 +17,13 @@
 
 #include "qPCV.h"
 #include "ccPcvDlg.h"
+#include "PCVCommand.h"
 
 //CCLib
 #include <PCV.h>
 #include <ScalarField.h>
 
 //qCC_db
-#include <ccColorScalesManager.h>
 #include <ccGenericMesh.h>
 #include <ccGenericPointCloud.h>
 #include <ccHObjectCaster.h>
@@ -34,9 +34,6 @@
 //Qt
 #include <QMainWindow>
 #include <QProgressBar>
-
-
-constexpr const char* CC_PCV_FIELD_LABEL_NAME = "Illuminance (PCV)";
 
 //persistent settings during a single session
 static bool s_firstLaunch				= true;
@@ -177,7 +174,7 @@ void qPCV::doAction()
 	s_resSpinBoxValue			= dlg.resSpinBox->value();
 	s_closedMeshCheckBoxState	= dlg.closedMeshCheckBox->isChecked();
 
-	unsigned raysNumber = dlg.raysSpinBox->value();
+	unsigned rayCount = dlg.raysSpinBox->value();
 	unsigned resolution = dlg.resSpinBox->value();
 	bool meshIsClosed = (hasMeshes ? dlg.closedMeshCheckBox->isChecked() : false);
 	bool mode360 = !dlg.mode180CheckBox->isChecked();
@@ -207,7 +204,7 @@ void qPCV::doAction()
 	else
 	{
 		//generates light directions
-		if (!PCV::GenerateRays(raysNumber, rays, mode360))
+		if (!PCV::GenerateRays(rayCount, rays, mode360))
 		{
 			m_app->dispToConsole("Failed to generate the set of rays", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;
@@ -224,101 +221,7 @@ void qPCV::doAction()
 	ccProgressDialog pcvProgressCb(true, m_app->getMainWindow());
 	pcvProgressCb.setAutoClose(false);
 
-	size_t count = 0;
-	for (ccHObject* obj : candidates)
-	{
-		ccPointCloud* cloud = nullptr;
-		ccGenericMesh* mesh = nullptr;
-		QString objName( "unknown" );
-
-		assert(obj);
-		if (obj->isA(CC_TYPES::POINT_CLOUD))
-		{
-			//we need a real point cloud
-			cloud = ccHObjectCaster::ToPointCloud(obj);
-			objName = cloud->getName();
-		}
-		else if (obj->isKindOf(CC_TYPES::MESH))
-		{
-			mesh = ccHObjectCaster::ToGenericMesh(obj);
-			cloud = ccHObjectCaster::ToPointCloud(mesh->getAssociatedCloud());
-			objName = mesh->getName();
-		}
-		
-		if ( cloud == nullptr )
-		{
-			assert(cloud);
-			m_app->dispToConsole( tr( "Invalid object type" ), ccMainAppInterface::ERR_CONSOLE_MESSAGE );
-			continue;
-		}
-		
-		//we get the PCV field if it already exists
-		int sfIdx = cloud->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
-		
-		//otherwise we create it
-		if (sfIdx < 0)
-		{
-			sfIdx = cloud->addScalarField(CC_PCV_FIELD_LABEL_NAME);
-		}
-		
-		if (sfIdx < 0)
-		{
-			m_app->dispToConsole("Couldn't allocate a new scalar field for computing PCV field ! Try to free some memory ...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			return;
-		}
-		cloud->setCurrentScalarField(sfIdx);
-
-		QString objNameForPorgressDialog = objName;
-		if (candidates.size() > 1)
-		{
-			objNameForPorgressDialog += QStringLiteral("(%1/%2)").arg(++count).arg(candidates.size());
-		}
-
-		bool wasEnabled = obj->isEnabled();
-		bool wasVisible = obj->isVisible();
-		obj->setEnabled(true);
-		obj->setVisible(true);
-		bool success = PCV::Launch(rays, cloud, mesh, meshIsClosed, resolution, resolution, &pcvProgressCb, objNameForPorgressDialog);
-		obj->setEnabled(wasEnabled);
-		obj->setVisible(wasVisible);
-
-		if (!success)
-		{
-			cloud->deleteScalarField(sfIdx);
-			m_app->dispToConsole(tr("An error occurred during entity '%1' illumination!").arg(objName), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		}
-		else
-		{
-			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
-			if (sf)
-			{
-				sf->computeMinAndMax();
-				cloud->setCurrentDisplayedScalarField(sfIdx);
-				sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
-				if (obj->hasNormals() && obj->normalsShown())
-				{
-					m_app->dispToConsole(tr("Entity '%1' normals have been automatically disabled").arg(objName), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-				}
-				obj->showNormals(false);
-				obj->showSF(true);
-				if (obj != cloud)
-				{
-					cloud->showSF(true);
-				}
-				obj->prepareDisplayForRefresh_recursive();
-			}
-			else
-			{
-				assert(false);
-			}
-		}
-
-		if (pcvProgressCb.wasCanceled())
-		{
-			m_app->dispToConsole(tr("Process has been cancelled by the user"), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-			break;
-		}
-	}
+	PCVCommand::Process(candidates, rays, meshIsClosed, resolution, &pcvProgressCb, m_app);
 
 	pcvProgressCb.close();
 
@@ -326,4 +229,9 @@ void qPCV::doAction()
 	m_app->updateUI();
 	//currently selected entities appearance may have changed!
 	m_app->refreshAll();
+}
+
+void qPCV::registerCommands(ccCommandLineInterface* cmd)
+{
+	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new PCVCommand));
 }

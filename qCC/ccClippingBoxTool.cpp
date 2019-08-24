@@ -114,6 +114,21 @@ void ccClippingBoxTool::editBox()
 	ccGLMatrix transformation;
 	m_clipBox->get(box, transformation);
 
+	//shift the box to its real center
+	{
+		CCVector3 C = box.getCenter();
+		CCVector3 realC = transformation * C;
+		box += (realC - C);
+
+		ccGLMatrix transMat;
+		transMat.setTranslation(-realC);
+		transformation.clearTranslation();
+		transMat = transformation * transMat;
+		transMat.setTranslation(transMat.getTranslationAsVec3D() + realC);
+		transformation = transMat;
+	}
+
+
 	ccBoundingBoxEditorDlg bbeDlg(this);
 	bbeDlg.setBaseBBox(box, false);
 	bbeDlg.showInclusionWarning(false);
@@ -130,11 +145,10 @@ void ccClippingBoxTool::editBox()
 		return;
 
 	box = bbeDlg.getBox();
-	m_clipBox->setBox(box);
 
 	//construct the local box orientation matrix
 	{
-		CCVector3 X, Y, Z;
+		CCVector3d X, Y, Z;
 		bbeDlg.getBoxAxes(X, Y, Z);
 		//make sure the vectors define an orthogonal basis
 		Z = X.cross(Y);
@@ -143,19 +157,21 @@ void ccClippingBoxTool::editBox()
 		X.normalize();
 		Y.normalize();
 		Z.normalize();
-		ccGLMatrix rotMat;
+		ccGLMatrixd rotMat;
 		rotMat.setColumn(0, X);
 		rotMat.setColumn(1, Y);
 		rotMat.setColumn(2, Z);
 
 		CCVector3 C = box.getCenter();
-		ccGLMatrix transMat;
+		ccGLMatrixd transMat;
 		transMat.setTranslation(-C);
-		transMat = rotMat.inverse() * transMat;
-		transMat.setTranslation(transMat.getTranslationAsVec3D() + C);
+		transMat = rotMat * transMat;
+		transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
 
-		m_clipBox->setGLTransformation(transMat.inverse());
+		m_clipBox->setGLTransformation(ccGLMatrix(transMat.data()));
 	}
+
+	m_clipBox->setBox(box);
 
 	//onBoxModified(&box); //DGM: automatically called by 'm_clipBox'
 

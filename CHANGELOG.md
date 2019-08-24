@@ -10,6 +10,10 @@ v2.11 (Anoia) - (in development)
         In this case the first mesh vertices are used as compared cloud.
 	- New suboption for the -O -GLOBAL_SHIFT option: 'FIRST'
 		To use the first encountered (non null) global shift for all loaded entities (must be defined for all entities nevertheless ;)
+	- The PCV tool can now be accessed via the command line mode:
+		- Option -PCV (see https://www.cloudcompare.org/doc/wiki/index.php?title=Command_line_mode for sub-options)
+		- Can be called on any number of clouds or meshes
+		- (the tool was already accessible in V2.10, but in a very limited way)
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
   - Point picking:
@@ -49,6 +53,8 @@ v2.11 (Anoia) - (in development)
 	- ability to set the start and stop angles for the cone unrolling options
 	- new unrolling mode: 'Straightened cone' (the previous one has been renamed 'Straightened cone (fixed radius)'). This new mode unrolls the cone as a cylinder but with a varying radius.
 	- the 'Straightened cone' options are now using the real curvilinear abscissa (0 = cone apex)
+  - Tools > Others > Compute geometric features
+	- option to compute the 1st moment added
 
 - Changes
   - Command line tool:
@@ -71,6 +77,7 @@ v2.11 (Anoia) - (in development)
 	- LAS classification flags were not always properly extracted/saved by the standard LAS filter (depending on the point format)
 	- Trace Polyline tool: when changing the OpenGL camera position while tracing a polyline AND using oversampling, strange spikes could appear
 	- the Unroll dialog was not enabling all the apex coordinate fields after switching from Cylinder to Cone mode
+	- the Clipping-box tool 'edit' dialog would sometimes move the box in an unepected way when opening and closing it without making any change
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

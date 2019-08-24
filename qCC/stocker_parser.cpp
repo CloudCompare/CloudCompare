@@ -38,6 +38,10 @@
 using namespace stocker;
 #endif // USE_STOCKER
 
+#ifdef PCATPS_SUPPORT
+#include "PC_ATPS.h"
+#endif
+
 template <typename T1, typename T2>
 auto ccToPoints2(std::vector<T1> points, bool parallel = false)->std::vector<T2>
 {
@@ -76,9 +80,10 @@ auto ccToPoints3(std::vector<T1> points, bool parallel = false)->std::vector<T2>
 	return pointsTO;
 }
 
-stocker::Contour3d GetPointsFromCloud(ccHObject* entity) 
+template <typename T = stocker::Vec3d>
+auto GetPointsFromCloud(ccHObject* entity)->std::vector<T>
 {	
-	stocker::Contour3d points;
+	std::vector<T> points;
 	if (!entity) return points;
 	if (entity->isA(CC_TYPES::POINT_CLOUD)) {
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
@@ -93,8 +98,8 @@ stocker::Contour3d GetPointsFromCloud(ccHObject* entity)
 		StPrimGroup* primGroup = ccHObjectCaster::ToStPrimGroup(entity);
 		if (!primGroup) return points;				
 		ccHObject::Container plane_container = primGroup->getValidPlanes();
-		for (auto & pl : plane_container) {			
-			stocker::Contour3d cur_points = GetPointsFromCloud(pl->getParent());
+		for (auto & pl : plane_container) {
+			std::vector<T> cur_points = GetPointsFromCloud<T>(pl->getParent());
 			points.insert(points.end(), cur_points.begin(), cur_points.end());
 		}
 	}
@@ -680,7 +685,8 @@ void AddSegmentsToVertices(ccPointCloud* cloud, stocker::Polyline3d lines, QStri
 	}
 }
 
-ccPointCloud* AddPointsAsPointCloud(stocker::Contour3d points, QString name, ccColor::Rgb col= ccColor::white)
+template <typename T = stocker::Vec3d>
+ccPointCloud* AddPointsAsPointCloud(std::vector<T> points, QString name, ccColor::Rgb col= ccColor::white)
 {
 	if (points.empty()) { return nullptr; }
 	ccPointCloud* cloud = new ccPointCloud(name);
@@ -694,7 +700,8 @@ ccPointCloud* AddPointsAsPointCloud(stocker::Contour3d points, QString name, ccC
 	return cloud;
 }
 
-ccPointCloud* AddPointsAsPlane(stocker::Contour3d points, QString name, ccColor::Rgb col)
+template <typename T = stocker::Vec3d>
+ccPointCloud* AddPointsAsPlane(std::vector<T> points, QString name, ccColor::Rgb col)
 {	
 	ccPointCloud* plane_cloud = AddPointsAsPointCloud(points, name, col);
 	if (!plane_cloud)return nullptr;
@@ -759,7 +766,8 @@ ccPolyline* AddPolygonAsPolyline(stocker::Polyline3d polygon, QString name, ccCo
 	return AddPolygonAsPolyline(points, name, col, close);
 }
 
-StPrimGroup* AddPlanesPointsAsNewGroup(QString name, std::vector<stocker::Contour3d> planes_points)
+template <typename T = stocker::Vec3d>
+StPrimGroup* AddPlanesPointsAsNewGroup(QString name, std::vector<std::vector<T>> planes_points)
 {
 	StPrimGroup* group = new StPrimGroup(name);
 
@@ -887,6 +895,52 @@ ccHObject* PlaneSegmentationRansac(ccHObject* entity,
 	}
 
 	return group;	
+}
+
+/*
+	kappa_t: the minimum point number for a valid plane. (20)
+	delta_t: the threshold of curvature for multi-scale supervoxel segmentation. (0.05)
+	tau_t: the threshold of distance tolerance value for point-to-plane and plane-to-plane. (0.1)
+	gamma_t: the threshold of neighborhood for point-to-plane and plane-to-plane. (0.2)
+	epsilon_t: the threshold of NFA tolerance value for a-contrario rigorous planar supervoxel generation. (-3.0)
+	theta_t: the threshold of normal vector angle for hybrid region growing. (0.2618)
+*/
+ccHObject* PlaneSegmentationATPS(ccHObject* entity, 
+	int kappa_t, double delta_t, double tau_t, 
+	double gamma_t, double epsilon_t, double theta_t,
+	ccPointCloud* todo_cloud)
+{
+	ccPointCloud* entity_cloud = ccHObjectCaster::ToPointCloud(entity);
+		 
+	ATPS::ATPS_Plane atps_plane;
+	std::vector<ATPS::SVPoint3d> points = GetPointsFromCloud<ATPS::SVPoint3d>(entity_cloud);
+	std::vector<ATPS::SVPoint3d> unassigned_points;
+	std::vector<std::vector<ATPS::SVPoint3d>> planes_points;
+	atps_plane.set_parameters(kappa_t, delta_t, tau_t, gamma_t, epsilon_t, theta_t);
+	if (!atps_plane.ATPS_PlaneSegmentation(points, planes_points, unassigned_points)) {
+		return nullptr;
+	}
+	std::cout << entity_cloud->getName().toStdString() << ": plane segmentation done" << std::endl;
+
+	StPrimGroup* group = AddPlanesPointsAsNewGroup(GetBaseName(entity->getName()) + BDDB_PRIMITIVE_SUFFIX, planes_points);
+	group->setDisplay_recursive(entity->getDisplay());
+	ccHObject::Container group_clouds;
+	group->filterChildren(group_clouds, false, CC_TYPES::POINT_CLOUD, true);
+	for (auto & ent : group_clouds) {
+		ccPointCloud* ent_cld = ccHObjectCaster::ToPointCloud(ent);
+		ent_cld->setGlobalShift(entity_cloud->getGlobalShift());
+		ent_cld->setGlobalScale(entity_cloud->getGlobalScale());
+	}
+	entity->getParent()->addChild(group);
+	if (todo_cloud) {
+		for (auto & pt : unassigned_points) {
+			todo_cloud->addPoint(CCVector3(vcgXYZ(pt)));
+		}
+		todo_cloud->reserveTheRGBTable();
+		todo_cloud->setRGBColor(ccColor::black);
+	}
+
+	return group;
 }
 
 void RetrieveUnassignedPoints(ccHObject* original_cloud, ccHObject* prim_group, ccPointCloud* todo_point)

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>871</height>
+    <height>940</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -642,23 +642,17 @@
         <attribute name="title">
          <string>Database</string>
         </attribute>
-        <widget class="ccCustomQTreeView" name="dbMainTreeView">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>10</y>
-           <width>257</width>
-           <height>250</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>150</width>
-           <height>250</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QTreeView::branch:has-siblings:!adjoins-item {
+        <layout class="QVBoxLayout">
+         <item>
+          <widget class="ccCustomQTreeView" name="dbMainTreeView">
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>250</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QTreeView::branch:has-siblings:!adjoins-item {
     border-image: url(:/CC/images/QTreeView/vline.png) 0;
 }
 
@@ -681,26 +675,28 @@ QTreeView::branch:open:has-children:has-siblings  {
         border-image: none;
         image: url(:/CC/images/QTreeView/branch-open.png);
 }</string>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Plain</enum>
-         </property>
-         <property name="dragEnabled">
-          <bool>true</bool>
-         </property>
-         <property name="dragDropMode">
-          <enum>QAbstractItemView::InternalMove</enum>
-         </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::ExtendedSelection</enum>
-         </property>
-         <property name="uniformRowHeights">
-          <bool>true</bool>
-         </property>
-        </widget>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="dragEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::InternalMove</enum>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+           <property name="uniformRowHeights">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="Buildings">
         <attribute name="icon">

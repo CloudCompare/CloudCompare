@@ -47,8 +47,8 @@ class BDBaseHObject;
 class PolyFitObj;
 
 
-
-stocker::Contour3d GetPointsFromCloud(ccHObject* entity);
+template <typename T = stocker::Vec3d>
+auto GetPointsFromCloud(ccHObject* entity)->std::vector<T>;
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject * entity, stocker::Polyline3d polygon, double height);
 std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonsXY(ccHObject::Container entities, stocker::Polyline3d polygon, double height, bool skip_empty = true);
 std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonsXY(ccHObject* entity, stocker::Polyline3d polygon, double height, bool skip_empty = true);
@@ -71,13 +71,16 @@ ccPointCloud* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d 
 
 void AddSegmentsToVertices(ccPointCloud * cloud, stocker::Polyline3d lines, QString Prefix, ccColor::Rgb col);
 
-ccPointCloud * AddPointsAsPlane(stocker::Contour3d points, QString name, ccColor::Rgb col);
+template <typename T = stocker::Vec3d>
+ccPointCloud * AddPointsAsPlane(std::vector<T> points, QString name, ccColor::Rgb col);
 
 ccPointCloud* AddSegmentsAsPlane(stocker::Polyline3d lines, QString lines_prefix, ccColor::Rgb col, ccHObject* _exist_cloud = nullptr);
 
-StPrimGroup * AddPlanesPointsAsNewGroup(QString name, std::vector<stocker::Contour3d> planes_points);
+template <typename T = stocker::Vec3d>
+StPrimGroup * AddPlanesPointsAsNewGroup(QString name, std::vector<std::vector<T>> planes_points);
 
 ccHObject* PlaneSegmentationRansac(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double normal_threshold, double ransac_probability, double merge_threshold = -1, double split_threshold = -1, ccPointCloud* todo_cloud = nullptr);
+ccHObject * PlaneSegmentationATPS(ccHObject * entity, int kappa_t, double delta_t, double tau_t, double gamma_t, double epsilon_t, double theta_t, ccPointCloud * todo_cloud);
 void RetrieveUnassignedPoints(ccHObject * original_cloud, ccHObject * prim_group, ccPointCloud * todo_point);
 void RetrieveAssignedPoints(ccPointCloud * todo_cloud, ccPointCloud * plane_cloud, double distance_threshold);
 ccHObject* PlaneSegmentationRgGrow(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double growing_radius, double merge_threshold = -1, double split_threshold = -1);

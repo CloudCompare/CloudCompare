@@ -513,7 +513,7 @@ ccGLWindow::~ccGLWindow()
 	//we must unlink entities currently linked to this window
 	if (!m_globalDBRoot.empty()) {
 		for (ccHObject* v : m_globalDBRoot)	{
-			v->removeFromDisplay_recursive(this);
+			//v->removeFromDisplay_recursive(this);//FIXME
 		}
 	}
 	if (m_winDBRoot)

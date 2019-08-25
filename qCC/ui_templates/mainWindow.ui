@@ -410,6 +410,10 @@
      <addaction name="actionMatchScales"/>
      <addaction name="actionPointPairsAlign"/>
      <addaction name="actionRegister"/>
+     <addaction name="separator"/>
+     <addaction name="actionBBCenterToOrigin"/>
+     <addaction name="actionBBMinCornerToOrigin"/>
+     <addaction name="actionBBMaxCornerToOrigin"/>
     </widget>
     <widget class="QMenu" name="menuOther">
      <property name="title">
@@ -2964,6 +2968,30 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Compute geometric features (density, curvature, roughness, etc.)</string>
+   </property>
+  </action>
+  <action name="actionBBMinCornerToOrigin">
+   <property name="text">
+    <string>Move bounding-box min corner to origin</string>
+   </property>
+   <property name="toolTip">
+    <string>Move the bounding-box min corner to the origin</string>
+   </property>
+  </action>
+  <action name="actionBBMaxCornerToOrigin">
+   <property name="text">
+    <string>Move bounding-box max corner to origin</string>
+   </property>
+   <property name="toolTip">
+    <string>Move the bounding-box max corner to the origin</string>
+   </property>
+  </action>
+  <action name="actionBBCenterToOrigin">
+   <property name="text">
+    <string>Move bounding-box center to origin</string>
+   </property>
+   <property name="toolTip">
+    <string>Move the bounding-box center to the origin</string>
    </property>
   </action>
  </widget>

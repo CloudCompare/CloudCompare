@@ -4,6 +4,11 @@ CloudCompare Version History
 v2.11 (Anoia) - (in development)
 ----------------------
 
+- New features
+  - 3 methods to quickly change the coordinate system of one or several entities
+    - Tools > Registration > Move bounding-box center to origin
+    - Tools > Registration > Move bounding-box min corner to origin
+    - Tools > Registration > Move bounding-box max corner to origin
 - Improvements
   - Command line tool:
     - The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.

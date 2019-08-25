@@ -20,7 +20,6 @@
 //Local
 #include "ccBoundingBoxEditorDlg.h"
 #include "ccClippingBoxRepeatDlg.h"
-#include "ccContourExtractor.h"
 #include "ccCropTool.h"
 #include "ccGLWindow.h"
 #include "mainwindow.h"
@@ -38,11 +37,8 @@
 //Last contour unique ID
 static std::vector<unsigned> s_lastContourUniqueIDs;
 
-//Contour extraction parameters
+//Contour extraction parameters (global)
 static double s_maxEdgeLength = -1.0;
-static bool s_splitContours = false;
-static bool s_multiPass = false;
-static double s_defaultGap = 0.0;
 
 // persistent map of the previous box used for each entity
 struct ccClipBoxParams
@@ -542,6 +538,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 	bool extractContours,
 	PointCoordinateType maxEdgeLength,
 	std::vector<ccPolyline*>& outputContours,
+	ccContourExtractor::ContourType contourType,
 	PointCoordinateType gap/*=0*/,
 	bool multiPass/*=false*/,
 	bool splitContours/*=false*/,
@@ -921,15 +918,22 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 			}
 
 			//preferred dimension?
-			int preferredDim = -1;
-			if (repeatDimensionsSum == 1 && !projectOnBestFitPlane)
+			PointCoordinateType* preferredNormDir = nullptr;
+			PointCoordinateType* preferredUpDir = nullptr;
+			if (repeatDimensionsSum == 1)
 			{
 				for (int i = 0; i < 3; ++i)
+				{
 					if (repeatDimensions[i])
-						preferredDim = i;
+					{
+						ccGLMatrix invLocalTrans = localTrans.inverse();
+						if (!projectOnBestFitPlane) //otherwise the normal will be automatically computed
+							preferredNormDir = invLocalTrans.getColumn(i);
+						preferredUpDir = invLocalTrans.getColumn(i < 2 ? 2 : 0);
+						break;
+					}
+				}
 			}
-			ccGLMatrix invLocalTrans = localTrans.inverse();
-			PointCoordinateType* preferredOrientation = (preferredDim != -1 ? invLocalTrans.getColumn(preferredDim) : 0);
 
 			assert(cloudSliceCount <= outputSlices.size());
 
@@ -944,8 +948,10 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 					multiPass,
 					maxEdgeLength,
 					polys,
+					contourType,
 					splitContours,
-					preferredOrientation,
+					preferredNormDir,
+					preferredUpDir,
 					visualDebugMode))
 				{
 					if (!polys.empty())
@@ -1085,6 +1091,15 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	//random colors is only useful for mutliple slice/contour mode
 	repeatDlg.randomColorCheckBox->setEnabled(!singleContourMode);
 	
+	//Semi persistent contour extraction parameters
+	static bool s_splitContours = false;
+	static bool s_multiPass = false;
+	static double s_defaultGap = 0.0;
+	static int s_contourTypeIndex = 2; //full
+	static bool s_projectOnBestFitPlane = false;
+	static bool s_visualDebugMode = false;
+	static bool s_generateRandomColors = false;
+
 	//set default max edge length
 	if (s_maxEdgeLength < 0)
 		s_maxEdgeLength = m_clipBox->getBox().getDiagNorm() / 100.0;
@@ -1092,6 +1107,10 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	repeatDlg.splitContourCheckBox->setChecked(s_splitContours);
 	repeatDlg.multiPassCheckBox->setChecked(s_multiPass);
 	repeatDlg.gapDoubleSpinBox->setValue(s_defaultGap);
+	repeatDlg.contourTypeComboBox->setCurrentIndex(s_contourTypeIndex);
+	repeatDlg.projectOnBestFitCheckBox->setChecked(s_projectOnBestFitPlane);
+	repeatDlg.debugModeCheckBox->setChecked(s_visualDebugMode);
+	repeatDlg.randomColorCheckBox->setChecked(s_generateRandomColors);
 
 	if (!repeatDlg.exec())
 	{
@@ -1109,10 +1128,28 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	s_maxEdgeLength = repeatDlg.maxEdgeLengthDoubleSpinBox->value();
 	s_splitContours = repeatDlg.splitContourCheckBox->isChecked();
 	s_multiPass = repeatDlg.multiPassCheckBox->isChecked();
-	s_defaultGap = repeatDlg.gapDoubleSpinBox->value();
-	bool projectOnBestFitPlane = repeatDlg.projectOnBestFitCheckBox->isChecked();
-	bool visualDebugMode = repeatDlg.debugModeCheckBox->isChecked();
-	bool generateRandomColors = repeatDlg.randomColorCheckBox->isChecked();
+	s_contourTypeIndex = repeatDlg.contourTypeComboBox->currentIndex();
+	s_projectOnBestFitPlane = repeatDlg.projectOnBestFitCheckBox->isChecked();
+	s_visualDebugMode = repeatDlg.debugModeCheckBox->isChecked();
+	s_generateRandomColors = repeatDlg.randomColorCheckBox->isChecked();
+
+	ccContourExtractor::ContourType contourType = ccContourExtractor::ContourType::FULL;
+	switch (s_contourTypeIndex)
+	{
+	case 0:
+		contourType = ccContourExtractor::ContourType::LOWER;
+		break;
+	case 1:
+		contourType = ccContourExtractor::ContourType::UPPER;
+		break;
+	case 2:
+		contourType = ccContourExtractor::ContourType::FULL;
+		break;
+	default:
+		assert(false);
+		ccLog::Warning("Internal error: unhandled contour type");
+		break;
+	}
 
 	//whether to extract contours or not
 	if (!singleContourMode)
@@ -1136,12 +1173,13 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 									extractContours,
 									static_cast<PointCoordinateType>(s_maxEdgeLength),
 									outputContours,
+									contourType,
 									static_cast<PointCoordinateType>(s_defaultGap),
 									s_multiPass,
 									s_splitContours,
-									projectOnBestFitPlane,
-									visualDebugMode,
-									generateRandomColors,
+									s_projectOnBestFitPlane,
+									s_visualDebugMode,
+									s_generateRandomColors,
 									&pDlg
 									))
 	{

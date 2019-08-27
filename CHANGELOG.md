@@ -89,6 +89,7 @@ v2.11 (Anoia) - (in development)
 	- Trace Polyline tool: when changing the OpenGL camera position while tracing a polyline AND using oversampling, strange spikes could appear
 	- the Unroll dialog was not enabling all the apex coordinate fields after switching from Cylinder to Cone mode
 	- the Clipping-box tool 'edit' dialog would sometimes move the box in an unepected way when opening and closing it without making any change
+	- M3C2: the 'subsampling' option was not properly restored when loading the parameters from a file (if 'SubsampleEnabled = false')
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

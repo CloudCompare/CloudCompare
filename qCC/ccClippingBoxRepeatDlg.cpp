@@ -102,11 +102,14 @@ void ccClippingBoxRepeatDlg::onDimChecked(bool)
 		if (!projectOnBestFitCheckBox->isVisible())
 			projectOnBestFitCheckBox->setChecked(false);
 		projectOnBestFitCheckBox->setVisible(true);
+		contourTypeComboBox->setEnabled(true);
 	}
 	else
 	{
 		projectOnBestFitCheckBox->setVisible(false);
 		projectOnBestFitCheckBox->setChecked(true);
+		contourTypeComboBox->setCurrentIndex(2);
+		contourTypeComboBox->setEnabled(false);
 	}
 
 	buttonBox->button(QDialogButtonBox::Ok)->setEnabled(sum != 0);

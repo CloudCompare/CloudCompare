@@ -2342,7 +2342,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 		{
 			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
 			m_vboManager.state = vboSet::FAILED;
-			//recall the method
+			//call the method again
 			glChunkSFPointer(context, chunkIndex, decimStep, false);
 		}
 	}

@@ -725,15 +725,21 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 
 	CCLib::Neighbourhood Yk(points);
 	CCVector3 O, X, Y; //local base
-	bool useOXYasBase = false;
+	CCLib::Neighbourhood::InputVectorsUsage vectorsUsage = CCLib::Neighbourhood::None;
 
 	//we project the input points on a plane
 	std::vector<Vertex2D> points2D;
 	PointCoordinateType* planeEq = nullptr;
 	
+	if (preferredUpDir != nullptr)
+	{
+		Y = CCVector3(preferredUpDir);
+		vectorsUsage = CCLib::Neighbourhood::UseYAsUpDir;
+	}
+
 	//if the user has specified a default direction, we'll use it as 'projecting plane'
-	PointCoordinateType preferredPlaneEq[4] = {0, 0, 1, 0};
-	
+	PointCoordinateType preferredPlaneEq[4] = { 0, 0, 1, 0 };
+
 	if (preferredNormDim != nullptr)
 	{
 		const CCVector3* G = points->getPoint(0); //any point through which the plane passes is ok
@@ -744,16 +750,16 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 		preferredPlaneEq[3] = CCVector3::vdot(G->u, preferredPlaneEq);
 		planeEq = preferredPlaneEq;
 
-		if (preferredUpDir != 0)
+		if (preferredUpDir != nullptr)
 		{
 			O = *G;
-			Y = CCVector3(preferredUpDir);
+			//Y = CCVector3(preferredUpDir); //already done above
 			X = Y.cross(CCVector3(preferredNormDim));
-			useOXYasBase = true;
+			vectorsUsage = CCLib::Neighbourhood::UseOXYasBase;
 		}
 	}
 
-	if (!Yk.projectPointsOn2DPlane<Vertex2D>(points2D, planeEq, &O, &X, &Y, useOXYasBase))
+	if (!Yk.projectPointsOn2DPlane<Vertex2D>(points2D, planeEq, &O, &X, &Y, vectorsUsage))
 	{
 		ccLog::Warning("[ExtractFlatContour] Failed to project the points on the LS plane (not enough memory?)!");
 		return nullptr;
@@ -794,7 +800,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 			return nullptr;
 		}
 
-		unsigned i=0;
+		unsigned i = 0;
 		for (Hull2D::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it, ++i)
 		{
 			(*originalPointIndexes)[i] = (*it)->index;
@@ -848,14 +854,16 @@ bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* p
 											bool allowMultiPass,
 											PointCoordinateType maxEdgeLength,
 											std::vector<ccPolyline*>& parts,
+											ContourType contourType/*=FULL*/,
 											bool allowSplitting/*=true*/,
-											const PointCoordinateType* preferredDim/*=0*/,
+											const PointCoordinateType* preferredNormDir/*=nullptr*/,
+											const PointCoordinateType* preferredUpDir/*=nullptr*/,
 											bool enableVisualDebugMode/*=false*/)
 {
 	parts.clear();
 
 	//extract whole contour
-	ccPolyline* basePoly = ExtractFlatContour(points, allowMultiPass, maxEdgeLength, preferredDim, nullptr, FULL, nullptr, enableVisualDebugMode);
+	ccPolyline* basePoly = ExtractFlatContour(points, allowMultiPass, maxEdgeLength, preferredNormDir, preferredUpDir, contourType, nullptr, enableVisualDebugMode);
 	if (!basePoly)
 	{
 		return false;

@@ -787,8 +787,6 @@ void MainWindow::connectActions()
 	connect(m_UI->actionCrop,						&QAction::triggered, this, &MainWindow::doActionCrop);
 	connect(m_UI->actionEditGlobalShiftAndScale,	&QAction::triggered, this, &MainWindow::doActionEditGlobalShiftAndScale);
 	connect(m_UI->actionSubsample,					&QAction::triggered, this, &MainWindow::doActionSubsample);
-	connect(m_UI->actionMatchBBCenters,				&QAction::triggered, this, &MainWindow::doActionMatchBBCenters);
-	connect(m_UI->actionMatchScales,				&QAction::triggered, this, &MainWindow::doActionMatchScales);
 	connect(m_UI->actionDelete,						&QAction::triggered, m_buildingRoot,	&ccDBRoot::deleteSelectedEntities);	// TODO
 	connect(m_UI->actionGotoNextZoom,				&QAction::triggered, m_buildingRoot,	&ccDBRoot::gotoNextZoom);
 
@@ -803,8 +801,13 @@ void MainWindow::connectActions()
 	//connect(m_UI->actionCreateSurfaceBetweenTwoPolylines, &QAction::triggered, this, &MainWindow::doMeshTwoPolylines); //DGM: already connected to actionMeshTwoPolylines
 	connect(m_UI->actionExportCoordToSF,			&QAction::triggered, this, &MainWindow::doActionExportCoordToSF);
 	//"Tools > Registration" menu
+	connect(m_UI->actionMatchBBCenters,				&QAction::triggered, this, &MainWindow::doActionMatchBBCenters);
+	connect(m_UI->actionMatchScales,				&QAction::triggered, this, &MainWindow::doActionMatchScales);
 	connect(m_UI->actionRegister,					&QAction::triggered, this, &MainWindow::doActionRegister);
 	connect(m_UI->actionPointPairsAlign,			&QAction::triggered, this, &MainWindow::activateRegisterPointPairTool);
+	connect(m_UI->actionBBCenterToOrigin,			&QAction::triggered, this, &MainWindow::doActionMoveBBCenterToOrigin);
+	connect(m_UI->actionBBMinCornerToOrigin,		&QAction::triggered, this, &MainWindow::doActionMoveBBMinCornerToOrigin);
+	connect(m_UI->actionBBMaxCornerToOrigin,		&QAction::triggered, this, &MainWindow::doActionMoveBBMaxCornerToOrigin);
 	//"Tools > Distances" menu
 	connect(m_UI->actionCloudCloudDist,				&QAction::triggered, this, &MainWindow::doActionCloudCloudDist);
 	connect(m_UI->actionCloudMeshDist,				&QAction::triggered, this, &MainWindow::doActionCloudMeshDist);
@@ -6609,6 +6612,64 @@ void MainWindow::doActionSubsample()
 	}
 
 	refreshAll();
+	updateUI();
+}
+
+void MainWindow::doActionFastRegistration(FastRegistrationMode mode)
+{
+	//we need at least 1 entity
+	if (m_selectedEntities.empty())
+		return;
+
+	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
+	ccHObject::Container selectedEntities = m_selectedEntities;
+
+	for (ccHObject *entity : selectedEntities)
+	{
+		ccBBox box = entity->getBB_recursive();
+
+		CCVector3 T; //translation
+
+		switch (mode)
+		{
+		case MoveBBCenterToOrigin:
+			T = -box.getCenter();
+			break;
+		case MoveBBMinCornerToOrigin:
+			T = -box.minCorner();
+			break;
+		case MoveBBMaxCornerToOrigin:
+			T = -box.maxCorner();
+			break;
+		default:
+			assert(false);
+			return;
+		}
+
+		//transformation (used only for translation)
+		ccGLMatrix glTrans;
+		glTrans.setTranslation(T);
+
+		forceConsoleDisplay();
+		ccConsole::Print(QString("[Synchronize] Transformation matrix (%1):").arg(entity->getName()));
+		ccConsole::Print(glTrans.toString(12, ' ')); //full precision
+		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
+
+		//we temporarily detach entity, as it may undergo
+		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
+		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
+		entity->applyGLTransformation_recursive(&glTrans);
+		putObjectBackIntoDBTree(entity, objContext);
+
+		entity->prepareDisplayForRefresh_recursive();
+	}
+
+	//reselect previously selected entities!
+	if (m_ccRoot)
+		m_ccRoot->selectEntities(selectedEntities);
+
+	zoomOnSelectedEntities();
+
 	updateUI();
 }
 

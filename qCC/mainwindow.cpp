@@ -12516,20 +12516,21 @@ void MainWindow::doActionBDPrimBoundary()
 {
 	if (!haveSelection()) return;
 
-	QStringList methods;
-	methods.append("image based");
-	methods.append("ransac based");
-	bool ok;
-	QString used_method = QInputDialog::getItem(this, "Boundary extraction", "method", methods, 0, false, &ok);
-	if (!ok) return;
+// 	QStringList methods;
+// 	methods.append("image based");
+// 	methods.append("boundary points");
+// 	bool ok;
+//	QString used_method = QInputDialog::getItem(this, "Boundary extraction", "method", methods, 0, false, &ok);
+//	if (!ok) return;
 
 	double distance(0.5), minpts(10), radius(3);
-	if (used_method == "ransac based") {
-		ccAskThreeDoubleValuesDlg paraDlg("distance", "minpts", "radius", 0, 1.0e12, distance, minpts, radius, 6, "ransac", this);
-		if (!paraDlg.exec()) {
-			return;
-		}
-	}
+// 	if (used_method == "boundary points") 
+// 	{
+// 		ccAskThreeDoubleValuesDlg paraDlg("distance", "minpts", "radius", 0, 1.0e12, distance, minpts, radius, 6, "ransac", this);
+// 		if (!paraDlg.exec()) {
+// 			return;
+// 		}
+// 	}
 	ccHObject *entity = getSelectedEntities().front();
 	// plane or point cloud
 	ccHObject::Container plane_container = GetPlaneEntitiesBySelected(entity);
@@ -12542,16 +12543,13 @@ void MainWindow::doActionBDPrimBoundary()
 	for (auto & planeObj : plane_container) {
 		ccHObject* boundary = nullptr;		
 		try {
-			if (used_method == "ransac based")
-				boundary = DetectLineRansac(planeObj, distance, minpts, radius);
-			else
-				boundary = CalcPlaneBoundary(planeObj);
+			boundary = CalcPlaneBoundary(planeObj, distance, minpts, radius);
 		}
 		catch (std::runtime_error& e) {
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 			return;
 		}
-		if (boundary) { SetGlobalShiftAndScale(boundary); addToDB(boundary, planeObj->getDBSourceType(), false, false); }
+		if (boundary) { addToDB(boundary, planeObj->getDBSourceType(), false, false); }
 		ProgStep()
 	}
 	ProgEnd

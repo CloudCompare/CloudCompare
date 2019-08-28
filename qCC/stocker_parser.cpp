@@ -1045,10 +1045,10 @@ ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, 
 	return ccHObject::Container();
 }
 
-ccHObject* CalcPlaneBoundary(ccHObject* planeObj)
+ccHObject* CalcPlaneBoundary(ccHObject* planeObj, double distance, double minpts, double radius)
 {
 #ifdef USE_STOCKER
-	ccHObject* point_cloud_obj = GetPlaneCloud(planeObj);
+	ccPointCloud* point_cloud_obj = GetPlaneCloud(planeObj);
 	if (!point_cloud_obj) return nullptr;
 	/// get boundary points
 	Contour2d boundary_points_2d;
@@ -1064,27 +1064,31 @@ ccHObject* CalcPlaneBoundary(ccHObject* planeObj)
 		}
 	}
 
-	/// get boundary lines
+ 	Contour3d boundary_points_3d = Plpoint2dToPoint3d(plane_unit, boundary_points_2d);
+	//! add boundary points
+	ccPointCloud* boundary_points = new ccPointCloud(BDDB_BOUNDARY_PREFIX);
+	for (auto & pt : boundary_points_3d) {
+		boundary_points->addPoint(CCVector3(vcgXYZ(pt)));
+	}
+	boundary_points->setRGBColor(ccColor::yellow);
+	boundary_points->showColors(true);
+	point_cloud_obj->addChild(boundary_points);
+	boundary_points->setGlobalScale(point_cloud_obj->getGlobalScale());
+	boundary_points->setGlobalShift(point_cloud_obj->getGlobalShift());
+
+	/// get ransac based lines
+// 	Polyline3d bdry_lines_2d; IndexGroup indices;
+// 	LineRansacfromPoints(boundary_points_3d, bdry_lines_2d, indices, distance, minpts, radius);
+// 
+// 	ccHObject* line_vert_ransac = AddSegmentsAsChildVertices(boundary_points, bdry_lines_2d, "RansacLine", ccColor::red);
+
+	/// get image based boundary lines
 	Polyline3d detected_lines;
 	stocker::LineFromPlanePoints(cur_plane_points, detected_lines);
 
- 	Contour3d boundary_points_3d = Plpoint2dToPoint3d(plane_unit, boundary_points_2d);
-// 	IndexGroup line_index_group;
-// 	LineRansacfromPoints(boundary_points_3d, detected_lines, line_index_group, p2l_distance, boundary_minpts);
-
-	ccHObject* line_vert = AddSegmentsAsChildVertices(point_cloud_obj, detected_lines, BDDB_BOUNDARY_PREFIX, ccColor::yellow);
-
-	if (!line_vert) {
-		return nullptr;
-	}
-	ccPointCloud* line_cloud = ccHObjectCaster::ToPointCloud(line_vert);
-	for (auto & pt : boundary_points_3d) {
-		line_cloud->addPoint(CCVector3(vcgXYZ(pt)));
-	}
-	line_cloud->setRGBColor(ccColor::yellow);
-	line_cloud->showColors(true);
-
-	return line_vert;
+	ccHObject* line_vert_image = AddSegmentsAsChildVertices(boundary_points, detected_lines, "ImageBased", ccColor::yellow);
+	
+	return boundary_points;
 #endif // USE_STOCKER
 	return nullptr;
 }

@@ -15,7 +15,6 @@ endif()
 # Link project with dxflib library
 function( target_link_PCATPS )
 	if( ${OPTION_USE_PCATPS_LIB} )
-		message(STATUS "HH:${PROJECT_NAME} ${PCATPS_INCLUDE_DIR}")
 		target_include_directories( ${PROJECT_NAME} PUBLIC ${PCATPS_INCLUDE_DIR})
 		target_link_libraries( ${PROJECT_NAME} debug ${PCATPS_LIBRARY_DEBUG} optimized ${PCATPS_LIBRARY_RELEASE})	
 		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS PCATPS_SUPPORT )

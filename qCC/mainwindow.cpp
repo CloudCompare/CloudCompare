@@ -365,6 +365,7 @@ MainWindow::MainWindow()
 
 	m_UI->vboxLayout->setContentsMargins(0, 0, 0, 0);
 	m_UI->vboxLayout1->setContentsMargins(0, 0, 0, 0);
+	m_UI->vboxLayout1->setSpacing(0);
 	m_UI->vboxLayout2->setContentsMargins(0, 0, 0, 0);
 	m_UI->vboxLayout3->setContentsMargins(0, 0, 0, 0);
 	m_UI->vboxLayout4->setContentsMargins(0, 0, 0, 0);
@@ -1002,6 +1003,15 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSelectWorkingPlane,			&QAction::triggered, this, &MainWindow::doActionSelectWorkingPlane); 
 	connect(m_UI->actionTogglePlaneEditState,		&QAction::triggered, this, &MainWindow::doActionTogglePlaneEditState);
 	connect(m_UI->actionEditSelectedItem,			&QAction::triggered, this, &MainWindow::doActionEditSelectedItem);
+
+	connect(m_UI->NewDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionCreateDatabase);
+	connect(m_UI->OpenDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionCreateDatabase);
+	connect(m_UI->SaveDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionCreateDatabase);
+	QMenu* menuImport = new QMenu(m_UI->ImportDataToolButton);
+	menuImport->addAction(m_UI->actionOpen);
+	m_UI->ImportDataToolButton->setMenu(menuImport);
+//	connect(m_UI->ImportDataToolButton,				&QAbstractButton::clicked, this, &MainWindow::doActionImportData);
+	connect(m_UI->EditDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionEditDatabase);
 }
 
 void MainWindow::doActionChangeTabTree(int index)
@@ -12577,20 +12587,21 @@ void MainWindow::doActionBDPrimBoundary()
 {
 	if (!haveSelection()) return;
 
-	QStringList methods;
-	methods.append("image based");
-	methods.append("ransac based");
-	bool ok;
-	QString used_method = QInputDialog::getItem(this, "Boundary extraction", "method", methods, 0, false, &ok);
-	if (!ok) return;
+// 	QStringList methods;
+// 	methods.append("image based");
+// 	methods.append("boundary points");
+// 	bool ok;
+//	QString used_method = QInputDialog::getItem(this, "Boundary extraction", "method", methods, 0, false, &ok);
+//	if (!ok) return;
 
-	double distance(0.5), minpts(10), radius(3);
-	if (used_method == "ransac based") {
-		ccAskThreeDoubleValuesDlg paraDlg("distance", "minpts", "radius", 0, 1.0e12, distance, minpts, radius, 6, "ransac", this);
-		if (!paraDlg.exec()) {
-			return;
-		}
-	}
+ 	double distance(0.5), minpts(10), radius(3);
+// 	if (used_method == "boundary points") 
+// 	{
+// 		ccAskThreeDoubleValuesDlg paraDlg("distance", "minpts", "radius", 0, 1.0e12, distance, minpts, radius, 6, "ransac", this);
+// 		if (!paraDlg.exec()) {
+// 			return;
+// 		}
+// 	}
 	ccHObject *entity = getSelectedEntities().front();
 	// plane or point cloud
 	ccHObject::Container plane_container = GetPlaneEntitiesBySelected(entity);
@@ -12603,16 +12614,13 @@ void MainWindow::doActionBDPrimBoundary()
 	for (auto & planeObj : plane_container) {
 		ccHObject* boundary = nullptr;		
 		try {
-			if (used_method == "ransac based")
-				boundary = DetectLineRansac(planeObj, distance, minpts, radius);
-			else
-				boundary = CalcPlaneBoundary(planeObj);
+			boundary = CalcPlaneBoundary(planeObj, distance, minpts, radius);
 		}
 		catch (std::runtime_error& e) {
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 			return;
 		}
-		if (boundary) { SetGlobalShiftAndScale(boundary); addToDB(boundary, planeObj->getDBSourceType(), false, false); }
+		if (boundary) { addToDB(boundary, planeObj->getDBSourceType(), false, false); }
 		ProgStep()
 	}
 	ProgEnd
@@ -14372,3 +14380,25 @@ void MainWindow::doActionEditSelectedItem()
 
 	}
 }
+
+void MainWindow::doActionCreateDatabase()
+{
+
+}
+
+void MainWindow::doActionOpenDatabase()
+{
+}
+
+void MainWindow::doActionSaveDatabase()
+{
+}
+
+void MainWindow::doActionImportData()
+{
+}
+
+void MainWindow::doActionEditDatabase()
+{
+}
+

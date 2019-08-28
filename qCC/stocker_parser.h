@@ -85,7 +85,7 @@ void RetrieveUnassignedPoints(ccHObject * original_cloud, ccHObject * prim_group
 void RetrieveAssignedPoints(ccPointCloud * todo_cloud, ccPointCloud * plane_cloud, double distance_threshold);
 ccHObject* PlaneSegmentationRgGrow(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double growing_radius, double merge_threshold = -1, double split_threshold = -1);
 ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, double distance);
-ccHObject* CalcPlaneBoundary(ccHObject* planeObj);
+ccHObject* CalcPlaneBoundary(ccHObject* planeObj, double distance, double minpts, double radius);
 ccHObject * DetectLineRansac(ccHObject * entity, double distance, double minpts, double radius);
 ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha);
 void ShrinkPlaneToOutline(ccHObject* planeObj, double alpha, double distance_epsilon);

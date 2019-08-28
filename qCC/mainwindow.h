@@ -606,6 +606,14 @@ private slots:
 
 	void doActionEditSelectedItem();
 
+	void doActionCreateDatabase();
+	void doActionOpenDatabase();
+	void doActionSaveDatabase();
+	void doActionImportData();
+	void doActionEditDatabase();
+
+	
+
 private:
 	//! Shortcut: asks the user to select one cloud
 	/** \param defaultCloudEntity a cloud to select by default (optional)

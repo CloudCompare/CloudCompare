@@ -4758,6 +4758,30 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>E</string>
    </property>
   </action>
+  <action name="actionImportFile">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/importdatabase.png</normaloff>:/CC/Stocker/images/stocker/importdatabase.png</iconset>
+   </property>
+   <property name="text">
+    <string>ImportFile</string>
+   </property>
+   <property name="toolTip">
+    <string>import files to database</string>
+   </property>
+  </action>
+  <action name="actionImportFolder">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/importfolder.png</normaloff>:/CC/Stocker/images/stocker/importfolder.png</iconset>
+   </property>
+   <property name="text">
+    <string>ImportFolder</string>
+   </property>
+   <property name="toolTip">
+    <string>import files from the filefolder</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

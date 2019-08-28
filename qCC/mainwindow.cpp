@@ -166,6 +166,8 @@
 #include "polyfit/basic/logger.h"
 #endif // USE_STOCKER
 
+#include <QDate>
+
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance  = nullptr;
 
@@ -1005,12 +1007,14 @@ void MainWindow::connectActions()
 	connect(m_UI->actionEditSelectedItem,			&QAction::triggered, this, &MainWindow::doActionEditSelectedItem);
 
 	connect(m_UI->NewDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionCreateDatabase);
-	connect(m_UI->OpenDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionCreateDatabase);
-	connect(m_UI->SaveDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionCreateDatabase);
+	connect(m_UI->OpenDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionOpenDatabase);
+	connect(m_UI->SaveDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionSaveDatabase);
 	QMenu* menuImport = new QMenu(m_UI->ImportDataToolButton);
-	menuImport->addAction(m_UI->actionOpen);
+	//menuImport->addAction(m_UI->actionImportFile);
+	menuImport->addAction(m_UI->actionImportFolder);
 	m_UI->ImportDataToolButton->setMenu(menuImport);
-//	connect(m_UI->ImportDataToolButton,				&QAbstractButton::clicked, this, &MainWindow::doActionImportData);
+	m_UI->ImportDataToolButton->setDefaultAction(m_UI->actionImportFile);
+	connect(m_UI->actionImportFile,					&QAction::triggered, this, &MainWindow::doActionImportData);
 	connect(m_UI->EditDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionEditDatabase);
 }
 
@@ -14383,7 +14387,42 @@ void MainWindow::doActionEditSelectedItem()
 
 void MainWindow::doActionCreateDatabase()
 {
+	QString database_name = QInputDialog::getText(this, "new database", "Database name", QLineEdit::Normal, QDate::currentDate().toString("yyyy-MM-dd"));
+	//! create a database
+	DataBaseHObject* new_database = new DataBaseHObject(database_name);
+	//! point clouds
+	{
+		ccHObject* point_clouds = new ccHObject("point clouds");
+		new_database->addChild(point_clouds);
+	}
 
+	//! images
+	{
+		ccHObject* images = new ccHObject("images");
+		new_database->addChild(images);
+	}
+
+	//! miscellaneous
+	{
+		ccHObject* misc = new ccHObject("misc");
+		new_database->addChild(misc);
+	}
+
+	//! products
+	{
+		ccHObject* products = new ccHObject("products");
+		new_database->addChild(products);
+
+		ccHObject* groundFilter = new ccHObject("filtered");
+		products->addChild(groundFilter);
+		ccHObject* classified = new ccHObject("classified");
+		products->addChild(classified);
+		ccHObject* buildings = new ccHObject("buildings");
+		products->addChild(buildings);
+	}
+
+
+	addToDB_Main(new_database);
 }
 
 void MainWindow::doActionOpenDatabase()
@@ -14396,6 +14435,48 @@ void MainWindow::doActionSaveDatabase()
 
 void MainWindow::doActionImportData()
 {
+	//! any database?
+
+	 
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::LoadFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+	QString currentOpenDlgFilter = settings.value(ccPS::SelectedInputFilter(), BinFilter::GetFileFilter()).toString();
+
+	// Add all available file I/O filters (with import capabilities)
+	const QStringList filterStrings = FileIOFilter::ImportFilterList();
+	const QString &allFilter = filterStrings.at(0);
+
+	if (!filterStrings.contains(currentOpenDlgFilter))
+	{
+		currentOpenDlgFilter = allFilter;
+	}
+
+	//file choosing dialog
+	QStringList selectedFiles = QFileDialog::getOpenFileNames(this,
+		tr("Open file(s)"),
+		currentPath,
+		filterStrings.join(s_fileFilterSeparator),
+		&currentOpenDlgFilter,
+		CCFileDialogOptions());
+	if (selectedFiles.isEmpty())
+		return;
+
+	//save last loading parameters
+	currentPath = QFileInfo(selectedFiles[0]).absolutePath();
+	settings.setValue(ccPS::CurrentPath(), currentPath);
+	settings.setValue(ccPS::SelectedInputFilter(), currentOpenDlgFilter);
+	settings.endGroup();
+
+	if (currentOpenDlgFilter == allFilter)
+	{
+		currentOpenDlgFilter.clear(); //this way FileIOFilter will try to guess the file type automatically!
+	}
+
+	// TODO: add to database
+	//load files
+	addToDB(selectedFiles, CC_TYPES::DB_MAINDB, currentOpenDlgFilter);
 }
 
 void MainWindow::doActionEditDatabase()

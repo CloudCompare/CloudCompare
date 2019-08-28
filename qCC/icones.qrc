@@ -232,5 +232,6 @@
     <file>images/stocker/createdatabase.png</file>
     <file>images/stocker/importdatabase.png</file>
     <file>images/stocker/imgedit.png</file>
+    <file>images/stocker/importfolder.png</file>
   </qresource>
 </RCC>

@@ -41,6 +41,7 @@ using namespace stocker;
 #ifdef PCATPS_SUPPORT
 #include "PC_ATPS.h"
 #endif
+#include "stockerDatabase.h"
 
 template <typename T1, typename T2>
 auto ccToPoints2(std::vector<T1> points, bool parallel = false)->std::vector<T2>

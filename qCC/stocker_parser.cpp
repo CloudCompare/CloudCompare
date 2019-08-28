@@ -1580,7 +1580,7 @@ ccHObject * PolyfitGenerateHypothesis(ccHObject * primitive_group, PolyFitObj * 
 				CCLib::Neighbourhood YK(facet_entity->getContourVertices());
 				Contour2d contour_points_2d;
 				CCVector3 O, X, Y;
-				YK.projectPointsOn2DPlane<Vec2d>(contour_points_2d, plane_equation, &O, &X, &Y, false);
+				YK.projectPointsOn2DPlane<Vec2d>(contour_points_2d, plane_equation, &O, &X, &Y, CCLib::Neighbourhood::None);
 				stocker::Polyline2d facet_contour = MakeLoopPolylinefromContour(contour_points_2d);
 
 				Contour2d contour_points_2d_plane;

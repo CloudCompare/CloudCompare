@@ -18,8 +18,11 @@
 #ifndef CC_CLIPPING_BOX_TOOL_HEADER
 #define CC_CLIPPING_BOX_TOOL_HEADER
 
-//Local
+//common
 #include <ccOverlayDialog.h>
+
+//loncaol
+#include "ccContourExtractor.h"
 
 #include <ui_clippingBoxDlg.h>
 
@@ -95,6 +98,7 @@ public:
 		bool extractContours,
 		PointCoordinateType maxEdgeLength,
 		std::vector<ccPolyline*>& outputContours,
+		ccContourExtractor::ContourType contourType,
 		PointCoordinateType gap = 0,
 		bool multiPass = false,
 		bool splitContours = false,

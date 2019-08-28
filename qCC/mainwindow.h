@@ -506,6 +506,10 @@ private slots:
 	//! Creates a cloud with the (bounding-box) centers of all selected entities
 	void doActionCreateCloudFromEntCenters();
 
+	inline void doActionMoveBBCenterToOrigin()    { doActionFastRegistration(MoveBBCenterToOrigin); }
+	inline void doActionMoveBBMinCornerToOrigin() { doActionFastRegistration(MoveBBMinCornerToOrigin); }
+	inline void doActionMoveBBMaxCornerToOrigin() { doActionFastRegistration(MoveBBMaxCornerToOrigin); }
+
 	//////////////////////////////////////////////////////////////////////////
 	//! Building Reconstruction
 	/// Load Project
@@ -614,8 +618,17 @@ private:
 	**/
 	ccPointCloud* askUserToSelectACloud(ccHObject* defaultCloudEntity = nullptr, QString inviteMessage = QString());
 
-	void	toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY property );
-	void	clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY property );
+	enum FastRegistrationMode
+	{
+		MoveBBCenterToOrigin,
+		MoveBBMinCornerToOrigin,
+		MoveBBMaxCornerToOrigin
+	};
+
+	void doActionFastRegistration(FastRegistrationMode mode);
+
+	void toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY property );
+	void clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY property );
 	
 	void setView( CC_VIEW_ORIENTATION view ) override;
 	

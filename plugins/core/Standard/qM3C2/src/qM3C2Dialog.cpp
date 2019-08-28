@@ -538,8 +538,11 @@ void qM3C2Dialog::loadParamsFrom(const QSettings& settings)
 	cylHalfHeightDoubleSpinBox->setValue(searchDepth);
 	
 	cpSubsamplingDoubleSpinBox->setValue(subsampleRadius);
-	cpSubsampleRadioButton->setChecked(subsampleEnabled);
-	
+	if (subsampleEnabled)
+		cpSubsampleRadioButton->setChecked(true);
+	else
+		cpUseCloud1RadioButton->setChecked(true);
+
 	rmsCheckBox->setChecked(registrationErrorEnabled);
 	rmsDoubleSpinBox->setValue(registrationError);
 

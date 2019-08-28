@@ -36,8 +36,8 @@ const int SPIN_BOX_STEPS = 1000;
 sfEditDlg::sfEditDlg(QWidget* parent/*=0*/)
 	: QWidget(parent)
 	, Ui::SFEditDlg()
-	, m_associatedSF(0)
-	, m_associatedSFHisto(0)
+	, m_associatedSF(nullptr)
+	, m_associatedSFHisto(nullptr)
 {
 	setupUi(this);
 
@@ -46,7 +46,7 @@ sfEditDlg::sfEditDlg(QWidget* parent/*=0*/)
 		m_associatedSFHisto = new ccHistogramWindow();
 		QHBoxLayout* hboxLayout = new QHBoxLayout(histoFrame);
 		hboxLayout->addWidget(m_associatedSFHisto);
-		hboxLayout->setContentsMargins(0,0,0,0);
+		hboxLayout->setContentsMargins(0, 0, 0, 0);
 		m_associatedSFHisto->enableSFInteractionMode(true);
 		m_associatedSFHisto->xAxis->setTickLabels(false);
 		//m_associatedSFHisto->xAxis->setAutoSubTicks(false);
@@ -139,7 +139,7 @@ void sfEditDlg::fillDialogWith(ccScalarField* sf)
 			unsigned classNumber = static_cast<unsigned>(histogram.size());
 			if (classNumber == 0)
 				classNumber = 128;
-			m_associatedSFHisto->fromSF(m_associatedSF,classNumber,false);
+			m_associatedSFHisto->fromSF(m_associatedSF, classNumber, false);
 		}
 
 		/*** spinboxes ***/
@@ -152,33 +152,33 @@ void sfEditDlg::fillDialogWith(ccScalarField* sf)
 		if (!flatSF)
 		{
 			//Minimum displayed value
-			minValSpinBox->setRange(displayRange.min(),displayRange.stop());
-			minValSpinBox->setSingleStep(displayRange.maxRange()/SPIN_BOX_STEPS);
+			minValSpinBox->setRange(displayRange.min(), displayRange.stop());
+			minValSpinBox->setSingleStep(displayRange.maxRange() / SPIN_BOX_STEPS);
 			minValSpinBox->setValue(displayRange.start());
 
 			//Minimum color saturation value
-			minSatSpinBox->setRange(saturationRange.min(),saturationRange.stop());
-			minSatSpinBox->setSingleStep(saturationRange.maxRange()/SPIN_BOX_STEPS);
+			minSatSpinBox->setRange(saturationRange.min(), saturationRange.stop());
+			minSatSpinBox->setSingleStep(saturationRange.maxRange() / SPIN_BOX_STEPS);
 			minSatSpinBox->setValue(saturationRange.start());
 
 			// Maximum color saturation value slider
-			maxSatSpinBox->setRange(saturationRange.start(),saturationRange.max());
-			maxSatSpinBox->setSingleStep(saturationRange.maxRange()/SPIN_BOX_STEPS);
+			maxSatSpinBox->setRange(saturationRange.start(), saturationRange.max());
+			maxSatSpinBox->setSingleStep(saturationRange.maxRange() / SPIN_BOX_STEPS);
 			maxSatSpinBox->setValue(saturationRange.stop());
 
 			// Maximum displayed value slider
-			maxValSpinBox->setRange(displayRange.start(),displayRange.max());
-			maxValSpinBox->setSingleStep(displayRange.maxRange()/SPIN_BOX_STEPS);
+			maxValSpinBox->setRange(displayRange.start(), displayRange.max());
+			maxValSpinBox->setSingleStep(displayRange.maxRange() / SPIN_BOX_STEPS);
 			maxValSpinBox->setValue(displayRange.stop());
 		}
 		else
 		{
 			//unique value
 			double uniqueVal = displayRange.min();
-			minValSpinBox->setRange(uniqueVal,uniqueVal);
-			minSatSpinBox->setRange(uniqueVal,uniqueVal);
-			maxSatSpinBox->setRange(uniqueVal,uniqueVal);
-			maxValSpinBox->setRange(uniqueVal,uniqueVal);
+			minValSpinBox->setRange(uniqueVal, uniqueVal);
+			minSatSpinBox->setRange(uniqueVal, uniqueVal);
+			maxSatSpinBox->setRange(uniqueVal, uniqueVal);
+			maxValSpinBox->setRange(uniqueVal, uniqueVal);
 		}
 
 		minValSpinBox->blockSignals(false);

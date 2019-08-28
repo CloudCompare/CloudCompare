@@ -1015,6 +1015,7 @@ void MainWindow::connectActions()
 	m_UI->ImportDataToolButton->setMenu(menuImport);
 	m_UI->ImportDataToolButton->setDefaultAction(m_UI->actionImportFile);
 	connect(m_UI->actionImportFile,					&QAction::triggered, this, &MainWindow::doActionImportData);
+	connect(m_UI->actionImportFolder,				&QAction::triggered, this, &MainWindow::doActionImportFolder);
 	connect(m_UI->EditDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionEditDatabase);
 }
 
@@ -14436,7 +14437,23 @@ void MainWindow::doActionSaveDatabase()
 void MainWindow::doActionImportData()
 {
 	//! any database?
-
+	ccHObject* root = db(CC_TYPES::DB_MAINDB)->getRootEntity();
+	ccHObject* current_database = nullptr; ccHObject::Container dbs;
+	for (size_t i = 0; i < root->getChildrenNumber(); i++) {
+		if (isDatabaseProject(root->getChild(i))) {
+			dbs.push_back(root->getChild(i));
+		}
+	}
+	if (dbs.empty()) {
+		return;
+	}
+	if (dbs.size() > 1) {
+		current_database = askUserToSelect(CC_TYPES::ST_PROJECT);
+	}
+	else {
+		current_database = dbs.front();
+	}
+	if (!current_database) { return; }
 	 
 	//persistent settings
 	QSettings settings;
@@ -14451,6 +14468,11 @@ void MainWindow::doActionImportData()
 	if (!filterStrings.contains(currentOpenDlgFilter))
 	{
 		currentOpenDlgFilter = allFilter;
+	}
+
+	if (haveSelection()) {
+		ccHObject* selsect = m_selectedEntities.front();
+
 	}
 
 	//file choosing dialog
@@ -14477,6 +14499,49 @@ void MainWindow::doActionImportData()
 	// TODO: add to database
 	//load files
 	addToDB(selectedFiles, CC_TYPES::DB_MAINDB, currentOpenDlgFilter);
+}
+
+void MainWindow::doActionImportFolder()
+{
+	//! any database?
+	ccHObject* root = db(CC_TYPES::DB_MAINDB)->getRootEntity();
+	ccHObject* current_database = nullptr; ccHObject::Container dbs;
+	for (size_t i = 0; i < root->getChildrenNumber(); i++) {
+		if (isDatabaseProject(root->getChild(i))) {
+			dbs.push_back(root->getChild(i));
+		}
+	}
+	if (dbs.empty()) {
+		return;
+	}
+	if (dbs.size() > 1) {
+		current_database = askUserToSelect(CC_TYPES::ST_PROJECT);
+	}
+	else {
+		current_database = dbs.front();
+	}
+	if (!current_database) { return; }
+
+	if (!haveSelection()) {
+		return;
+	}
+	ccHObject* selsect = m_selectedEntities.front();
+	QString filename = QFileDialog::getExistingDirectory(this,
+		tr("Open Directory"),
+		"",
+		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	QDir dir(filename);
+	QStringList nameFilters;
+	if (selsect->getName() == "point clouds")
+		nameFilters << "*.las" << "*.laz" << "*.ply" << "*.obj";
+	else if (selsect->getName() == "images") {
+		nameFilters << "*.tif" << "*.tiff";
+	}
+	else return;
+	QStringList files = dir.entryList(nameFilters, QDir::Files | QDir::Readable, QDir::Name);
+
+	addToDB(files, CC_TYPES::DB_MAINDB);
 }
 
 void MainWindow::doActionEditDatabase()

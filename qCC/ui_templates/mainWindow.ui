@@ -4769,6 +4769,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="toolTip">
     <string>import files to database</string>
    </property>
+   <property name="statusTip">
+    <string>import files to database</string>
+   </property>
   </action>
   <action name="actionImportFolder">
    <property name="icon">
@@ -4779,6 +4782,9 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>ImportFolder</string>
    </property>
    <property name="toolTip">
+    <string>import files from the filefolder</string>
+   </property>
+   <property name="statusTip">
     <string>import files from the filefolder</string>
    </property>
   </action>

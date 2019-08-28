@@ -614,6 +614,7 @@ private slots:
 	void doActionOpenDatabase();
 	void doActionSaveDatabase();
 	void doActionImportData();
+	void doActionImportFolder();
 	void doActionEditDatabase();
 
 	

@@ -365,6 +365,7 @@ MainWindow::MainWindow()
 
 	m_UI->vboxLayout->setContentsMargins(0, 0, 0, 0);
 	m_UI->vboxLayout1->setContentsMargins(0, 0, 0, 0);
+	m_UI->vboxLayout1->setSpacing(0);
 	m_UI->vboxLayout2->setContentsMargins(0, 0, 0, 0);
 	m_UI->vboxLayout3->setContentsMargins(0, 0, 0, 0);
 	m_UI->vboxLayout4->setContentsMargins(0, 0, 0, 0);
@@ -999,6 +1000,15 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSelectWorkingPlane,			&QAction::triggered, this, &MainWindow::doActionSelectWorkingPlane); 
 	connect(m_UI->actionTogglePlaneEditState,		&QAction::triggered, this, &MainWindow::doActionTogglePlaneEditState);
 	connect(m_UI->actionEditSelectedItem,			&QAction::triggered, this, &MainWindow::doActionEditSelectedItem);
+
+	connect(m_UI->NewDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionCreateDatabase);
+	connect(m_UI->OpenDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionCreateDatabase);
+	connect(m_UI->SaveDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionCreateDatabase);
+	QMenu* menuImport = new QMenu(m_UI->ImportDataToolButton);
+	menuImport->addAction(m_UI->actionOpen);
+	m_UI->ImportDataToolButton->setMenu(menuImport);
+//	connect(m_UI->ImportDataToolButton,				&QAbstractButton::clicked, this, &MainWindow::doActionImportData);
+	connect(m_UI->EditDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionEditDatabase);
 }
 
 void MainWindow::doActionChangeTabTree(int index)
@@ -12523,7 +12533,7 @@ void MainWindow::doActionBDPrimBoundary()
 //	QString used_method = QInputDialog::getItem(this, "Boundary extraction", "method", methods, 0, false, &ok);
 //	if (!ok) return;
 
-	double distance(0.5), minpts(10), radius(3);
+ 	double distance(0.5), minpts(10), radius(3);
 // 	if (used_method == "boundary points") 
 // 	{
 // 		ccAskThreeDoubleValuesDlg paraDlg("distance", "minpts", "radius", 0, 1.0e12, distance, minpts, radius, 6, "ransac", this);
@@ -14309,3 +14319,25 @@ void MainWindow::doActionEditSelectedItem()
 
 	}
 }
+
+void MainWindow::doActionCreateDatabase()
+{
+
+}
+
+void MainWindow::doActionOpenDatabase()
+{
+}
+
+void MainWindow::doActionSaveDatabase()
+{
+}
+
+void MainWindow::doActionImportData()
+{
+}
+
+void MainWindow::doActionEditDatabase()
+{
+}
+

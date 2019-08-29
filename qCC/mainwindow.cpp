@@ -14526,12 +14526,12 @@ void MainWindow::doActionImportFolder()
 		return;
 	}
 	ccHObject* selsect = m_selectedEntities.front();
-	QString filename = QFileDialog::getExistingDirectory(this,
+	QString dirname = QFileDialog::getExistingDirectory(this,
 		tr("Open Directory"),
 		"",
 		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-	QDir dir(filename);
+	QStringList files;
 	QStringList nameFilters;
 	if (selsect->getName() == "point clouds")
 		nameFilters << "*.las" << "*.laz" << "*.ply" << "*.obj";
@@ -14539,7 +14539,14 @@ void MainWindow::doActionImportFolder()
 		nameFilters << "*.tif" << "*.tiff";
 	}
 	else return;
-	QStringList files = dir.entryList(nameFilters, QDir::Files | QDir::Readable, QDir::Name);
+
+	//QDir dir(dirname);
+	//files = dir.entryList(nameFilters, QDir::Files | QDir::Readable, QDir::Name);
+
+	QDirIterator dir_iter(dirname, nameFilters, QDir::Files | QDir::NoSymLinks | QDir::Readable, QDirIterator::Subdirectories);
+	while (dir_iter.hasNext()) {
+		files.append(dir_iter.next());
+	}
 
 	addToDB(files, CC_TYPES::DB_MAINDB);
 }

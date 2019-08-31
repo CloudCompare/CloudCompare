@@ -216,6 +216,11 @@ public:
 	//! set database
 	virtual inline void setDBSourceType(const CC_TYPES::DB_SOURCE tp) { m_dbSource = tp; }
 
+	//! Returns path
+	virtual inline QString getPath() const { return m_path; }
+	//! set path
+	virtual inline void setPath(const QString& tp) { m_path = tp; }
+
 	//! Returns object name
 	virtual inline QString getName() const { return m_name; }
 
@@ -355,6 +360,8 @@ protected:
 	QVariantMap m_metaData;
 
 	CC_TYPES::DB_SOURCE m_dbSource;
+
+	QString m_path;
 
 private:
 

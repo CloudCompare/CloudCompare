@@ -184,6 +184,7 @@ private:
 	void appendRow(QStandardItem* leftItem, QStandardItem* rightItem, bool openPersistentEditor = false);
 	void appendWideRow(QStandardItem* item, bool openPersistentEditor = true);
 
+	void fillWithDatabase(ccHObject*);
 	void fillWithHObject(ccHObject*);
 	void fillWithPointCloud(ccGenericPointCloud*);
 	void fillSFWithPointCloud(ccGenericPointCloud*);

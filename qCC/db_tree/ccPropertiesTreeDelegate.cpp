@@ -212,6 +212,14 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 		m_model->setHeaderData(1, Qt::Horizontal, tr( "State/Value" ));
 	}
 
+	if (m_currentObject->isHierarchy())
+	{
+		if (!m_currentObject->isA(CC_TYPES::VIEWPORT_2D_LABEL)) //don't need to display this kind of info for viewport labels!
+		{
+			fillWithDatabase(m_currentObject);
+		}
+	}
+
 	if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {		
 		fiilWithCameraGroup(m_currentObject);
 	}
@@ -430,19 +438,27 @@ void ccPropertiesTreeDelegate::fillWithMetaData(const ccObject* _obj)
 	}
 }
 
+void ccPropertiesTreeDelegate::fillWithDatabase(ccHObject * _obj)
+{
+	assert(_obj && m_model);
+
+	addSeparator(tr("Database"));
+
+	//name
+	appendRow(ITEM(tr("Name")), ITEM(_obj->getName(), Qt::ItemIsEditable, OBJECT_NAME));
+	appendRow(ITEM(tr("Path")), ITEM(_obj->getPath()));
+	appendRow(ITEM(tr("DBSource")), ITEM(QString::number(int(_obj->getDBSourceType()))));
+}
+
 void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 {
 	assert(_obj && m_model);
 
 	addSeparator( tr( "General" ) );//CC Object
 
-	//name
-	appendRow(ITEM( tr( "Name" ) ), ITEM(_obj->getName(), Qt::ItemIsEditable, OBJECT_NAME));
-	appendRow(ITEM(tr("DBSource")), ITEM(QString::number(int(_obj->getDBSourceType()))));
-
 	//visibility
 	if (!_obj->isVisiblityLocked())
-		appendRow(ITEM( tr( "Visible" ) ), CHECKABLE_ITEM(_obj->isVisible(), OBJECT_VISIBILITY));
+		appendRow(ITEM(tr("Visible")), CHECKABLE_ITEM(_obj->isVisible(), OBJECT_VISIBILITY));
 
 	//normals
 	if (_obj->hasNormals())

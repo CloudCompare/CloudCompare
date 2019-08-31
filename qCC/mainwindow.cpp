@@ -2017,6 +2017,7 @@ std::vector<ccHObject*> MainWindow::addToDB(const QStringList& filenames,
 				newGroup->setDisplay_recursive(destWin);
 			}
 			addToDB(newGroup, dest, true, true, false);
+			newGroup->setPath(filename);
 			loads.push_back(newGroup);
 
 			m_recentFiles->addFilePath(filename);
@@ -14388,50 +14389,194 @@ void MainWindow::doActionEditSelectedItem()
 
 void MainWindow::doActionCreateDatabase()
 {
-	QString database_name = QInputDialog::getText(this, "new database", "Database name", QLineEdit::Normal, QDate::currentDate().toString("yyyy-MM-dd"));
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::LoadFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+
+	QString database_name = QFileDialog::getExistingDirectory(this,
+		tr("Open Directory"),
+		QFileInfo(currentPath).absolutePath(),
+		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	
+	if (database_name.isEmpty()) {
+		return;
+	}
+
+	//save last loading parameters
+	currentPath = QFileInfo(database_name).absolutePath();
+	settings.setValue(ccPS::CurrentPath(), currentPath);
+	settings.endGroup();
+
+	//QString database_name = QInputDialog::getText(this, "new database", "Database name", QLineEdit::Normal, QDate::currentDate().toString("yyyy-MM-dd"));
 	//! create a database
-	DataBaseHObject* new_database = new DataBaseHObject(database_name);
+	DataBaseHObject* new_database = new DataBaseHObject(QFileInfo(database_name).completeBaseName());
+	new_database->setPath(QFileInfo(database_name).absoluteFilePath());
 	//! point clouds
 	{
 		ccHObject* point_clouds = new ccHObject("point clouds");
+		QString path = new_database->getPath() + "/points";
+		if (QDir().mkdir(path))
+			point_clouds->setPath(path);
+		else {
+			delete new_database; new_database = nullptr;
+			delete point_clouds; point_clouds = nullptr;
+			return;
+		}		
 		new_database->addChild(point_clouds);
 	}
 
 	//! images
 	{
 		ccHObject* images = new ccHObject("images");
+		QString path = new_database->getPath() + "/images";
+		if (QDir().mkdir(path))
+			images->setPath(path);
+		else {
+			delete new_database; new_database = nullptr;
+			delete images; images = nullptr;
+			return;
+		}
 		new_database->addChild(images);
 	}
 
 	//! miscellaneous
 	{
 		ccHObject* misc = new ccHObject("misc");
+		QString path = new_database->getPath() + "/misc";
+		if (QDir().mkdir(path))
+			misc->setPath(path);
+		else {
+			delete new_database; new_database = nullptr;
+			delete misc; misc = nullptr;
+			return;
+		}
 		new_database->addChild(misc);
 	}
 
 	//! products
 	{
 		ccHObject* products = new ccHObject("products");
+		QString path = new_database->getPath() + "/products";
+		if (QDir().mkdir(path))
+			products->setPath(path);
+		else {
+			delete new_database; new_database = nullptr;
+			delete products; products = nullptr;
+			return;
+		}
 		new_database->addChild(products);
 
 		ccHObject* groundFilter = new ccHObject("filtered");
-		products->addChild(groundFilter);
+		{
+			path = products->getPath() + "/filtered";
+			if (QDir().mkdir(path))
+				groundFilter->setPath(path);
+			else {
+				delete new_database; new_database = nullptr;
+				delete products; products = nullptr;
+				delete groundFilter; groundFilter = nullptr;
+				return;
+			}
+		}
 		ccHObject* classified = new ccHObject("classified");
-		products->addChild(classified);
+		{
+			path = products->getPath() + "/classified";
+			if (QDir().mkdir(path))
+				classified->setPath(path);
+			else {
+				delete new_database; new_database = nullptr;
+				delete products; products = nullptr;
+				delete classified; classified = nullptr;
+				return;
+			}
+		}
 		ccHObject* buildings = new ccHObject("buildings");
+		{
+			path = products->getPath() + "/buildings";
+			if (QDir().mkdir(path))
+				buildings->setPath(path);
+			else {
+				delete new_database; new_database = nullptr;
+				delete products; products = nullptr;
+				delete buildings; buildings = nullptr;
+				return;
+			}
+		}
+
+		products->addChild(groundFilter);
+		products->addChild(classified);
 		products->addChild(buildings);
 	}
-
 
 	addToDB_Main(new_database);
 }
 
 void MainWindow::doActionOpenDatabase()
 {
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::LoadFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+
+	QString database_name = QFileDialog::getExistingDirectory(this,
+		tr("Open Directory"),
+		QFileInfo(currentPath).absolutePath(),
+		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	//save last loading parameters
+	currentPath = QFileInfo(database_name).absolutePath();
+	settings.setValue(ccPS::CurrentPath(), currentPath);
+	settings.endGroup();
+
+	//! find the bin
+	QString bin_file = database_name + "/" + QFileInfo(database_name).completeBaseName() + ".bin";
+
+	CCVector3d loadCoordinatesShift(0, 0, 0);
+	bool loadCoordinatesTransEnabled = false;
+	FileIOFilter::LoadParameters parameters;
+	{
+		parameters.alwaysDisplayLoadDialog = true;
+		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
+		parameters.coordinatesShift = &loadCoordinatesShift;
+		parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
+		parameters.parentWidget = this;
+	}
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+
+	ccHObject* newGroup = FileIOFilter::LoadFromFile(bin_file, parameters, result, QString());
+	if (!newGroup) return;
+
+	DataBaseHObject* load_database = new DataBaseHObject(*newGroup);
+	load_database->setName(QFileInfo(database_name).completeBaseName());
+	load_database->setPath(QFileInfo(database_name).absoluteFilePath());
+	newGroup->transferChildren(*load_database);
+	
+	addToDB_Main(load_database);
+	refreshAll();
+	UpdateUI();
 }
 
 void MainWindow::doActionSaveDatabase()
 {
+	if (!haveSelection()) { return; }
+	ccHObject*sel = m_selectedEntities.front();
+	if (!isDatabaseProject(sel)) { return; }
+	QFileInfo prj_path(sel->getPath());
+	if (!prj_path.exists()) { return; }
+
+	//! save as bin
+	QString bin_file = prj_path.filePath() + "/" + prj_path.completeBaseName() + ".bin";
+
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	FileIOFilter::SaveParameters parameters;
+	{
+		parameters.alwaysDisplaySaveDialog = true;
+		parameters.parentWidget = MainWindow::TheInstance();
+	}
+
+	//specific case: BIN format			
+	result = FileIOFilter::SaveToFile(sel, bin_file, parameters, BinFilter::GetFileFilter());
 }
 
 void MainWindow::doActionImportData()
@@ -14525,7 +14670,7 @@ void MainWindow::doActionImportFolder()
 	if (!haveSelection()) {
 		return;
 	}
-	ccHObject* selsect = m_selectedEntities.front();
+	ccHObject* import_pool = m_selectedEntities.front();
 	QString dirname = QFileDialog::getExistingDirectory(this,
 		tr("Open Directory"),
 		"",
@@ -14533,9 +14678,9 @@ void MainWindow::doActionImportFolder()
 
 	QStringList files;
 	QStringList nameFilters;
-	if (selsect->getName() == "point clouds")
+	if (import_pool->getName() == "point clouds")
 		nameFilters << "*.las" << "*.laz" << "*.ply" << "*.obj";
-	else if (selsect->getName() == "images") {
+	else if (import_pool->getName() == "images") {
 		nameFilters << "*.tif" << "*.tiff";
 	}
 	else return;
@@ -14547,8 +14692,29 @@ void MainWindow::doActionImportFolder()
 	while (dir_iter.hasNext()) {
 		files.append(dir_iter.next());
 	}
+	ccHObject::Container loaded_files = addToDB(files, CC_TYPES::DB_MAINDB);
+	
+	if (import_pool->getName() == "point clouds") {
+		
+		for (ccHObject* lf : loaded_files) {
+			if (lf->isA(CC_TYPES::HIERARCHY_OBJECT)) {
+				ccHObject::Container loaded_objs;
+				lf->filterChildren(loaded_objs, false, CC_TYPES::POINT_CLOUD, true);
+				for (ccHObject* pc : loaded_objs) {
+					pc->getParent()->transferChild(pc, *import_pool);
+					pc->setPath(lf->getPath());
+				}
+				removeFromDB(lf, false);
+			}
+			else if (lf->isA(CC_TYPES::POINT_CLOUD)) {
+				assert(false);//! not happened
+			}
+		}
+	}
+	else if (import_pool->getName() == "images") {
 
-	addToDB(files, CC_TYPES::DB_MAINDB);
+	}
+	
 }
 
 void MainWindow::doActionEditDatabase()

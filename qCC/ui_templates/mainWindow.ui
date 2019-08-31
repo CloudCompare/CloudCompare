@@ -592,13 +592,22 @@
     <addaction name="actionSelectWorkingPlane"/>
     <addaction name="actionEditSelectedItem"/>
    </widget>
+   <widget class="QMenu" name="menuSegmentation_2">
+    <property name="title">
+     <string>Segmentation</string>
+    </property>
+    <addaction name="actionGroundFilteringBatch"/>
+    <addaction name="actionClassificationBatch"/>
+    <addaction name="actionBuildingSegmentationBatch"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTools"/>
    <addaction name="menuDisplay"/>
    <addaction name="menu3DViews"/>
-   <addaction name="menuHelp"/>
+   <addaction name="menuSegmentation_2"/>
    <addaction name="menuBDRecon"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QDockWidget" name="DockableDBTree">
    <property name="minimumSize">
@@ -1725,7 +1734,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>true</bool>
+    <bool>false</bool>
    </attribute>
    <addaction name="actionBDPlaneSegmentation"/>
    <addaction name="separator"/>
@@ -1857,6 +1866,23 @@ QTreeView::branch:open:has-children:has-siblings  {
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBarSegmentation">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>true</bool>
+   </attribute>
+   <addaction name="actionGroundFilteringBatch"/>
+   <addaction name="actionClassificationBatch"/>
+   <addaction name="actionBuildingSegmentationBatch"/>
   </widget>
   <action name="actionOpen">
    <property name="icon">
@@ -4786,6 +4812,63 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>import files from the filefolder</string>
+   </property>
+  </action>
+  <action name="actionGroundFilteringBatch">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/groundfiltering.png</normaloff>:/CC/Stocker/images/stocker/groundfiltering.png</iconset>
+   </property>
+   <property name="text">
+    <string>Ground Filtering</string>
+   </property>
+   <property name="iconText">
+    <string>Filter</string>
+   </property>
+   <property name="toolTip">
+    <string>segment ground points and off-ground points</string>
+   </property>
+   <property name="statusTip">
+    <string>segment ground points and off-ground points</string>
+   </property>
+  </action>
+  <action name="actionClassificationBatch">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/classification.png</normaloff>:/CC/Stocker/images/stocker/classification.png</iconset>
+   </property>
+   <property name="text">
+    <string>Classification</string>
+   </property>
+   <property name="iconText">
+    <string>Classify</string>
+   </property>
+   <property name="toolTip">
+    <string>point classification</string>
+   </property>
+   <property name="statusTip">
+    <string>point classification</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionBuildingSegmentationBatch">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/buildingblack.png</normaloff>:/CC/Stocker/images/stocker/buildingblack.png</iconset>
+   </property>
+   <property name="text">
+    <string>Building Segmentation</string>
+   </property>
+   <property name="iconText">
+    <string>Building</string>
+   </property>
+   <property name="toolTip">
+    <string>single building segmentation</string>
+   </property>
+   <property name="statusTip">
+    <string>single building segmentation</string>
    </property>
   </action>
  </widget>

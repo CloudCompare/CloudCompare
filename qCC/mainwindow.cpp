@@ -1017,6 +1017,11 @@ void MainWindow::connectActions()
 	connect(m_UI->actionImportFile,					&QAction::triggered, this, &MainWindow::doActionImportData);
 	connect(m_UI->actionImportFolder,				&QAction::triggered, this, &MainWindow::doActionImportFolder);
 	connect(m_UI->EditDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionEditDatabase);
+
+	//! Segmentation
+	connect(m_UI->actionGroundFilteringBatch, &QAction::triggered, this, &MainWindow::doActionGroundFilteringBatch);
+	connect(m_UI->actionClassificationBatch, &QAction::triggered, this, &MainWindow::doActionClassificationBatch);
+	connect(m_UI->actionBuildingSegmentationBatch, &QAction::triggered, this, &MainWindow::doActionBuildingSegmentaationBatch);
 }
 
 void MainWindow::doActionChangeTabTree(int index)
@@ -14579,6 +14584,32 @@ void MainWindow::doActionSaveDatabase()
 	result = FileIOFilter::SaveToFile(sel, bin_file, parameters, BinFilter::GetFileFilter());
 }
 
+void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool)
+{
+	ccHObject::Container loaded_files = addToDB(files, CC_TYPES::DB_MAINDB);
+
+	if (import_pool->getName() == "point clouds") {
+
+		for (ccHObject* lf : loaded_files) {
+			if (lf->isA(CC_TYPES::HIERARCHY_OBJECT)) {
+				ccHObject::Container loaded_objs;
+				lf->filterChildren(loaded_objs, false, CC_TYPES::POINT_CLOUD, true);
+				for (ccHObject* pc : loaded_objs) {
+					pc->getParent()->transferChild(pc, *import_pool);
+					pc->setPath(lf->getPath());
+				}
+				removeFromDB(lf, false);
+			}
+			else if (lf->isA(CC_TYPES::POINT_CLOUD)) {
+				assert(false);//! not happened
+			}
+		}
+	}
+	else if (import_pool->getName() == "images") {
+
+	}
+}
+
 void MainWindow::doActionImportData()
 {
 	//! any database?
@@ -14615,10 +14646,10 @@ void MainWindow::doActionImportData()
 		currentOpenDlgFilter = allFilter;
 	}
 
-	if (haveSelection()) {
-		ccHObject* selsect = m_selectedEntities.front();
-
+	if (!haveSelection()) {
+		return;
 	}
+	ccHObject* import_pool = m_selectedEntities.front();
 
 	//file choosing dialog
 	QStringList selectedFiles = QFileDialog::getOpenFileNames(this,
@@ -14641,9 +14672,7 @@ void MainWindow::doActionImportData()
 		currentOpenDlgFilter.clear(); //this way FileIOFilter will try to guess the file type automatically!
 	}
 
-	// TODO: add to database
-	//load files
-	addToDB(selectedFiles, CC_TYPES::DB_MAINDB, currentOpenDlgFilter);
+	addToDatabase(selectedFiles, import_pool);
 }
 
 void MainWindow::doActionImportFolder()
@@ -14692,32 +14721,26 @@ void MainWindow::doActionImportFolder()
 	while (dir_iter.hasNext()) {
 		files.append(dir_iter.next());
 	}
-	ccHObject::Container loaded_files = addToDB(files, CC_TYPES::DB_MAINDB);
 	
-	if (import_pool->getName() == "point clouds") {
-		
-		for (ccHObject* lf : loaded_files) {
-			if (lf->isA(CC_TYPES::HIERARCHY_OBJECT)) {
-				ccHObject::Container loaded_objs;
-				lf->filterChildren(loaded_objs, false, CC_TYPES::POINT_CLOUD, true);
-				for (ccHObject* pc : loaded_objs) {
-					pc->getParent()->transferChild(pc, *import_pool);
-					pc->setPath(lf->getPath());
-				}
-				removeFromDB(lf, false);
-			}
-			else if (lf->isA(CC_TYPES::POINT_CLOUD)) {
-				assert(false);//! not happened
-			}
-		}
-	}
-	else if (import_pool->getName() == "images") {
-
-	}
-	
+	addToDatabase(files, import_pool);
 }
 
 void MainWindow::doActionEditDatabase()
 {
+}
+
+void MainWindow::doActionGroundFilteringBatch()
+{
+
+}
+
+void MainWindow::doActionClassificationBatch()
+{
+
+}
+
+void MainWindow::doActionBuildingSegmentaationBatch()
+{
+
 }
 

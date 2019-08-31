@@ -178,6 +178,8 @@ public:
 	void addToDB_Image(ccHObject* obj, bool updateZoom = false, bool autoExpandDBTree = true, bool checkDimensions = false, bool autoRedraw = true) {
 		addToDB(obj, CC_TYPES::DB_IMAGE, updateZoom, autoExpandDBTree, checkDimensions, autoRedraw);
 	}
+
+	void addToDatabase(QStringList files, ccHObject* import_pool);
 	
 	void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
 	void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
@@ -616,6 +618,10 @@ private slots:
 	void doActionImportData();
 	void doActionImportFolder();
 	void doActionEditDatabase();
+
+	void doActionGroundFilteringBatch();
+	void doActionClassificationBatch();
+	void doActionBuildingSegmentaationBatch();
 
 	
 

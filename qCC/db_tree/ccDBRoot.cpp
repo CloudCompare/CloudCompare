@@ -1843,6 +1843,63 @@ void ccDBRoot::sortChildrenType()
 	sortSelectedEntitiesChildren(SORT_BY_TYPE);
 }
 
+void ccDBRoot::sortItemChildren(ccHObject* item, SortRules sortRule)
+{
+	unsigned childCount = (item ? item->getChildrenNumber() : 0);
+	if (childCount > 1)
+	{
+		//remove all children from DB tree
+		beginRemoveRows(/*selectedIndexes[i]*/index(item), 0, childCount - 1);
+
+		//row removal operation (end)
+		endRemoveRows();
+
+		//sort
+		for (unsigned k = 0; k < childCount - 1; ++k)
+		{
+			unsigned firstChildIndex = k;
+			ccHObject* firstChild = item->getChild(k);
+			QString firstChildName = firstChild->getName().toUpper();
+
+			for (unsigned j = k + 1; j < childCount; ++j)
+			{
+				bool swap = false;
+				QString currentName = item->getChild(j)->getName().toUpper();
+				switch (sortRule)
+				{
+				case SORT_A2Z:
+					swap = (firstChildName.compare(currentName) > 0);
+					break;
+				case SORT_Z2A:
+					swap = (firstChildName.compare(currentName) < 0);
+					break;
+				case SORT_BY_TYPE:
+					if (firstChild->getClassID() == item->getChild(j)->getClassID())
+						swap = (firstChildName.compare(currentName) > 0); //A2Z in second choice
+					else
+						swap = (firstChild->getClassID() > item->getChild(j)->getClassID());
+					break;
+				}
+
+				if (swap)
+				{
+					firstChildIndex = j;
+					firstChildName = currentName;
+				}
+			}
+
+			if (k != firstChildIndex)
+				item->swapChildren(k, firstChildIndex);
+		}
+
+		//add children back
+		beginInsertRows(selectedIndexes[i], 0, childCount - 1);
+
+		//row insertion operation (end)
+		endInsertRows();
+	}
+}
+
 void ccDBRoot::sortSelectedEntitiesChildren(SortRules sortRule)
 {
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
@@ -1854,6 +1911,8 @@ void ccDBRoot::sortSelectedEntitiesChildren(SortRules sortRule)
 	for (int i = 0; i < selCount; ++i)
 	{
 		ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
+		sortItemChildren(item, sortRule);
+#if 0
 		unsigned childCount = (item ? item->getChildrenNumber() : 0);
 		if (childCount > 1)
 		{
@@ -1907,6 +1966,7 @@ void ccDBRoot::sortSelectedEntitiesChildren(SortRules sortRule)
 			//row insertion operation (end)
 			endInsertRows();
 		}
+#endif
 	}
 }
 

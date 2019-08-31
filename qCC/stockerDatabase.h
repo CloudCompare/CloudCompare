@@ -73,6 +73,12 @@ public:
 	~DataBaseHObject() {}
 
 	using Container = std::vector<DataBaseHObject *>;
+
+public:
+	ccHObject* getProductGroup();
+	ccHObject* getProductFiltered();
+	ccHObject* getProductClassified();
+	ccHObject* getProductBuildingSeg();
 };
 
 class BDBaseHObject : public BDBaseHObject_
@@ -142,5 +148,10 @@ inline bool isBuildingProject(ccHObject* object) {
 inline bool isImageProject(ccHObject* object) {
 	return (object->isA(CC_TYPES::ST_PROJECT) && object->getDBSourceType() == CC_TYPES::DB_IMAGE);
 }
+
+DataBaseHObject* GetRootDataBase(ccHObject* obj);
+BDBaseHObject* GetRootBDBase(ccHObject* obj);
+BDImageBaseHObject* GetRootImageBase(ccHObject* obj);
+
 
 #endif

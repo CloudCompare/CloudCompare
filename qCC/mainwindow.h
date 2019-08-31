@@ -179,7 +179,7 @@ public:
 		addToDB(obj, CC_TYPES::DB_IMAGE, updateZoom, autoExpandDBTree, checkDimensions, autoRedraw);
 	}
 
-	void addToDatabase(QStringList files, ccHObject* import_pool);
+	void addToDatabase(QStringList files, ccHObject* import_pool, bool remove_exist = true, bool auto_sort = true);
 	
 	void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
 	void unregisterOverlayDialog(ccOverlayDialog* dlg) override;

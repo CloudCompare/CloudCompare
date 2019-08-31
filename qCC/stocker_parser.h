@@ -97,12 +97,7 @@ void UpdateConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj);
 
 ccHObject * PolyfitFaceSelection(ccHObject * hypothesis_group, PolyFitObj * polyfit_obj);
 
-
 StBuilding * GetParentBuilding(ccHObject * obj);
-
-bool IsBDBaseObj(ccHObject * obj);
-
-BDBaseHObject* GetRootBDBase(ccHObject* obj);
 
 ccPointCloud * GetPlaneCloud(ccHObject * planeObj);
 

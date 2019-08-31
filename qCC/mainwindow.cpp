@@ -11823,7 +11823,7 @@ BDBaseHObject::Container GetBDBaseProjx() {
 	vector<BDBaseHObject*> prjx;
 	for (size_t i = 0; i < root_entity->getChildrenNumber(); i++) {
 		ccHObject* child = root_entity->getChild(i);
-		if (IsBDBaseObj(child))	{
+		if (isBuildingProject(child))	{
 			prjx.push_back(static_cast<BDBaseHObject*>(child));
 		}
 	}
@@ -12152,7 +12152,7 @@ void MainWindow::doActionBDPlaneSegmentation()
 			dispToConsole(s_no_project_error, ERR_CONSOLE_MESSAGE);
 			return;
 		}
-		if (IsBDBaseObj(entity)) {
+		if (isBuildingProject(entity)) {
 			building_groups = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
 		}
 		else if (entity->isA(CC_TYPES::ST_BUILDING)){			
@@ -12275,7 +12275,7 @@ void MainWindow::doActionBDRetrieve()
 	//! retrieve unassigned points from original
 	ccHObject* select = m_selectedEntities.front();
 	ccHObject::Container buildings;
-	if (IsBDBaseObj(select)) {
+	if (isBuildingProject(select)) {
 		buildings = GetEnabledObjFromGroup(select, CC_TYPES::ST_BUILDING, true, false);
 	}
 	else if (select->isA(CC_TYPES::ST_BUILDING)) {
@@ -12360,7 +12360,7 @@ void MainWindow::doActionBDPrimIntersections()
 	
 	if (m_selectedEntities.size() == 1) {
 		ccHObject* entity = m_selectedEntities.front();
-		if (IsBDBaseObj(entity)) {
+		if (isBuildingProject(entity)) {
 			BDBaseHObject* baseObj = GetRootBDBase(entity);
 			ccHObject::Container buildings = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
 			for (ccHObject* bd : buildings)	{
@@ -12436,7 +12436,7 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 	BDBaseHObject* baseObj = GetRootBDBase(select);
 
 	ccHObject::Container buildings;
-	if (IsBDBaseObj(select)) {
+	if (isBuildingProject(select)) {
 		buildings = GetEnabledObjFromGroup(select, CC_TYPES::ST_BUILDING, true, false);
 	}
 	else if (select->isA(CC_TYPES::ST_BUILDING)) {			
@@ -12856,7 +12856,7 @@ void MainWindow::doActionBDPrimCreateGround()
 		if (entity->isA(CC_TYPES::ST_BUILDING)) {
 			building_group.push_back(entity);
 		}
-		else if (IsBDBaseObj(entity)) {
+		else if (isBuildingProject(entity)) {
 			building_group = GetEnabledObjFromGroup(entity, CC_TYPES::ST_BUILDING, true, false);
 		}
 		for (ccHObject* bd : building_group) {
@@ -14461,58 +14461,33 @@ void MainWindow::doActionCreateDatabase()
 
 	//! products
 	{
-		ccHObject* products = new ccHObject("products");
-		QString path = new_database->getPath() + "/products";
-		if (QDir().mkdir(path))
-			products->setPath(path);
-		else {
+		ccHObject* products = new_database->getProductGroup();
+		if (!products) {
 			delete new_database; new_database = nullptr;
-			delete products; products = nullptr;
 			return;
 		}
-		new_database->addChild(products);
 
-		ccHObject* groundFilter = new ccHObject("filtered");
-		{
-			path = products->getPath() + "/filtered";
-			if (QDir().mkdir(path))
-				groundFilter->setPath(path);
-			else {
-				delete new_database; new_database = nullptr;
+		ccHObject* groundFilter = new_database->getProductFiltered();
+		if (!groundFilter) {
 				delete products; products = nullptr;
-				delete groundFilter; groundFilter = nullptr;
+			delete new_database; new_database = nullptr;
 				return;
 			}
-		}
-		ccHObject* classified = new ccHObject("classified");
-		{
-			path = products->getPath() + "/classified";
-			if (QDir().mkdir(path))
-				classified->setPath(path);
-			else {
-				delete new_database; new_database = nullptr;
-				delete products; products = nullptr;
-				delete classified; classified = nullptr;
-				return;
-			}
-		}
-		ccHObject* buildings = new ccHObject("buildings");
-		{
-			path = products->getPath() + "/buildings";
-			if (QDir().mkdir(path))
-				buildings->setPath(path);
-			else {
-				delete new_database; new_database = nullptr;
-				delete products; products = nullptr;
-				delete buildings; buildings = nullptr;
-				return;
-			}
-		}
 
-		products->addChild(groundFilter);
-		products->addChild(classified);
-		products->addChild(buildings);
-	}
+		ccHObject* classified = new_database->getProductClassified();
+		if (!classified) {
+				delete products; products = nullptr;
+			delete new_database; new_database = nullptr;
+				return;
+			}
+
+		ccHObject* buildings = new_database->getProductBuildingSeg();
+		if (!buildings) {
+				delete products; products = nullptr;
+			delete new_database; new_database = nullptr;
+				return;
+			}
+		}
 
 	addToDB_Main(new_database);
 }
@@ -14584,17 +14559,28 @@ void MainWindow::doActionSaveDatabase()
 	result = FileIOFilter::SaveToFile(sel, bin_file, parameters, BinFilter::GetFileFilter());
 }
 
-void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool)
+void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool, bool remove_exist, bool auto_sort)
 {
 	ccHObject::Container loaded_files = addToDB(files, CC_TYPES::DB_MAINDB);
 
-	if (import_pool->getName() == "point clouds") {
+	if (import_pool->getName() == "point clouds" || 
+		import_pool->getName() == "filtered" ||
+		import_pool->getName() == "classified") {
 
 		for (ccHObject* lf : loaded_files) {
 			if (lf->isA(CC_TYPES::HIERARCHY_OBJECT)) {
 				ccHObject::Container loaded_objs;
 				lf->filterChildren(loaded_objs, false, CC_TYPES::POINT_CLOUD, true);
 				for (ccHObject* pc : loaded_objs) {
+					//! check for existed
+					if (remove_exist) {
+						for (size_t i = 0; i < import_pool->getChildrenNumber(); i++) {
+							ccHObject* child = import_pool->getChild(i);
+							if (child->getName() == pc->getName()) {
+								removeFromDB(child);
+							}
+						}
+					}
 					pc->getParent()->transferChild(pc, *import_pool);
 					pc->setPath(lf->getPath());
 				}
@@ -14607,6 +14593,10 @@ void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool)
 	}
 	else if (import_pool->getName() == "images") {
 
+	}
+
+	if (auto_sort) {
+		db(CC_TYPES::DB_MAINDB)->sortItemChildren(import_pool, ccDBRoot::SORT_A2Z);
 	}
 }
 

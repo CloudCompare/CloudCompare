@@ -21,11 +21,14 @@
 #include "ccHObjectCaster.h"
 #include "ccDBRoot.h"
 
+#include "mainwindow.h"
 #include "QFileInfo"
 #include <QImageReader>
 #include <QFileDialog>
 #include "FileIOFilter.h"
 #include <QDir>
+
+using namespace stocker;
 
 DataBaseHObject * GetRootDataBase(ccHObject * obj)
 {
@@ -52,11 +55,11 @@ BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	return nullptr;
 }
 
-BDBaseHObject* GetRootImageBase(ccHObject* obj) {
+BDImageBaseHObject* GetRootImageBase(ccHObject* obj) {
 	ccHObject* bd_obj_ = obj;
 	do {
 		if (isImageProject(bd_obj_)) {
-			return static_cast<BDBaseHObject*>(bd_obj_);
+			return static_cast<BDImageBaseHObject*>(bd_obj_);
 		}
 		bd_obj_ = bd_obj_->getParent();
 	} while (bd_obj_);
@@ -102,7 +105,7 @@ ccHObject* DataBaseHObject::getProductFiltered() {
 			find_obj->setPath(path);
 		else {
 			delete find_obj; find_obj = nullptr;
-			return;
+			return nullptr;
 		}
 		products->addChild(find_obj);
 	}
@@ -125,7 +128,7 @@ ccHObject* DataBaseHObject::getProductClassified() {
 			find_obj->setPath(path);
 		else {
 			delete find_obj; find_obj = nullptr;
-			return;
+			return nullptr;
 		}
 		products->addChild(find_obj);
 	}
@@ -148,7 +151,7 @@ ccHObject* DataBaseHObject::getProductBuildingSeg() {
 			find_obj->setPath(path);
 		else {
 			delete find_obj; find_obj = nullptr;
-			return;
+			return nullptr;
 		}
 		products->addChild(find_obj);
 	}

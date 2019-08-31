@@ -1021,7 +1021,7 @@ void MainWindow::connectActions()
 	//! Segmentation
 	connect(m_UI->actionGroundFilteringBatch, &QAction::triggered, this, &MainWindow::doActionGroundFilteringBatch);
 	connect(m_UI->actionClassificationBatch, &QAction::triggered, this, &MainWindow::doActionClassificationBatch);
-	connect(m_UI->actionBuildingSegmentationBatch, &QAction::triggered, this, &MainWindow::doActionBuildingSegmentaationBatch);
+	connect(m_UI->actionBuildingSegmentationBatch, &QAction::triggered, this, &MainWindow::doActionBuildingSegmentationBatch);
 }
 
 void MainWindow::doActionChangeTabTree(int index)
@@ -14729,7 +14729,7 @@ void MainWindow::doActionClassificationBatch()
 
 }
 
-void MainWindow::doActionBuildingSegmentaationBatch()
+void MainWindow::doActionBuildingSegmentationBatch()
 {
 
 }

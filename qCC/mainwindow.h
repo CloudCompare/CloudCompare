@@ -621,7 +621,7 @@ private slots:
 
 	void doActionGroundFilteringBatch();
 	void doActionClassificationBatch();
-	void doActionBuildingSegmentaationBatch();
+	void doActionBuildingSegmentationBatch();
 
 	
 

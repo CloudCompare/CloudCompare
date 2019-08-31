@@ -1241,7 +1241,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		}
 		else
 		{
-			sprintf(cloudName,"unnamed - Cloud #%u",k);
+			sprintf(cloudName,"unnamed #%u",k);// - Cloud
 		}
 
 		//Cloud name

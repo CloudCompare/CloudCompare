@@ -537,9 +537,9 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 	}
 
 	if (step == 1)
-		cloud->setName("unnamed - Cloud");
+		cloud->setName("unnamed"); //- Cloud
 	else
-		cloud->setName(QString("unnamed - Cloud (part %1)").arg(step));
+		cloud->setName(QString("unnamed (part %1)").arg(step));// - Cloud
 
 	cloudAttributesDescriptor cloudDesc;
 	cloudDesc.cloud = cloud;

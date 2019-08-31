@@ -221,15 +221,15 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 		ccPointCloud* cloud = new ccPointCloud();
 		if (container.getChildrenNumber() == 0)
 		{
-			cloud->setName("unnamed - Cloud");
+			cloud->setName("unnamed");// - Cloud
 		}
 		else
 		{
 			if (container.getChildrenNumber() == 1)
 			{
-				container.getChild(0)->setName("unnamed - Cloud 1"); //update previous cloud name!
+				container.getChild(0)->setName("unnamed 1"); //update previous cloud name! // - Cloud
 			}
-			cloud->setName(QString("unnamed - Cloud %1").arg(container.getChildrenNumber() + 1));
+			cloud->setName(QString("unnamed %1").arg(container.getChildrenNumber() + 1)); // - Cloud
 		}
 
 		unsigned gridSize = width * height;

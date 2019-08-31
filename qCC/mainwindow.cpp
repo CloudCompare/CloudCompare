@@ -14848,7 +14848,7 @@ void MainWindow::doActionClassificationBatch()
 			result_files.append(result_file);
 		}
 		//! generate gctsk
-		QString exe_path = QCoreApplication::applicationDirPath() + "/CLASSIFY/Classify_KNL.exe";
+		QString exe_path = QCoreApplication::applicationDirPath() + "/bin/CLASSIFY/Classify_KNL.exe";
 		QString gctsk_path = if_dir + "/classification.gctsk";
 		FILE* fp = fopen(gctsk_path.toStdString().c_str(), "w");
 		fprintf(fp, "%d\n", tasks.size());

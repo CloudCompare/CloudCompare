@@ -240,6 +240,7 @@ MainWindow::MainWindow()
 	, m_pbdrImagePanel(nullptr)
 	, m_pbdrPlaneEditDlg(nullptr)
 	, polyfit_obj(nullptr)
+	, m_GCSvr_prj_id(0)
 {
 	m_UI->setupUi( this );
 
@@ -14469,25 +14470,25 @@ void MainWindow::doActionCreateDatabase()
 
 		ccHObject* groundFilter = new_database->getProductFiltered();
 		if (!groundFilter) {
-				delete products; products = nullptr;
+			delete products; products = nullptr;
 			delete new_database; new_database = nullptr;
-				return;
-			}
+			return;
+		}
 
 		ccHObject* classified = new_database->getProductClassified();
 		if (!classified) {
-				delete products; products = nullptr;
+			delete products; products = nullptr;
 			delete new_database; new_database = nullptr;
-				return;
-			}
+			return;
+		}
 
 		ccHObject* buildings = new_database->getProductBuildingSeg();
 		if (!buildings) {
-				delete products; products = nullptr;
+			delete products; products = nullptr;
 			delete new_database; new_database = nullptr;
-				return;
-			}
+			return;
 		}
+	}
 
 	addToDB_Main(new_database);
 }
@@ -14719,14 +14720,162 @@ void MainWindow::doActionEditDatabase()
 {
 }
 
-void MainWindow::doActionGroundFilteringBatch()
+inline QString getCmdLine(QString prj_path, QString task_name, int prj_id)
+{
+	QString cmd;
+	QString runPath = QCoreApplication::applicationDirPath();
+	cmd.append(runPath).append("/RunTask.exe -i ").append(prj_path).append(" -l ").append("CLASSIFICATION").append(" -svrid ").append(QString::number(prj_id));
+	return cmd;
+}
+inline QString getCmdLine(ccHObject* obj, QString task_name, int prj_id)
+{
+	ccHObject* prj_obj = GetRootDataBase(obj);
+	QString prj_path = prj_obj->getPath();
+	if (!QFileInfo(prj_path).exists()) 
+		return QString();
+	else return getCmdLine(prj_path + "/", task_name, prj_id);
+}
+
+void LoadSettingsFiltering()
 {
 
 }
 
+void MainWindow::doActionGroundFilteringBatch()
+{
+	return;
+	if (!haveSelection()) {
+		return;
+	}
+	ccHObject* sel = m_selectedEntities.front();
+	DataBaseHObject* db_prj = GetRootDataBase(sel);
+	if (!db_prj) { return; }
+
+	ccHObject::Container tasks;
+	if (sel->isGroup()) {
+		tasks = GetEnabledObjFromGroup(sel, CC_TYPES::POINT_CLOUD, true, false);
+	}
+	else if (sel->isA(CC_TYPES::POINT_CLOUD)) {
+		tasks.push_back(sel);
+	}
+
+	QString output_suffix = ".las";
+	std::vector<std::pair<ccHObject*, QString>> tsk_results;
+	QStringList result_files;
+	{
+		//! generate tsk
+		QString if_dir = db_prj->getPath() + "/IF_FILTERING"; QDir().mkdir(if_dir);
+		QString tsk_dir = if_dir + "/TSK"; QDir().mkdir(tsk_dir);
+		QString output_dir = if_dir + "/OUTPUT"; QDir().mkdir(output_dir);
+		QStringList tsk_files;
+		for (ccHObject* tsk : tasks) {
+			QString tsk_file = tsk_dir + "/" + tsk->getName() + ".tsk";
+			QString result_file = output_dir + "/" + tsk->getName() + output_suffix;
+			FILE* fp = fopen(tsk_file.toStdString().c_str(), "w");
+			fprintf(fp, "%s\n", tsk->getPath().toStdString().c_str());
+			fprintf(fp, "%s\n", result_file.toStdString().c_str());
+			fclose(fp);
+			tsk_files.append(tsk_file);
+			tsk_results.push_back(std::make_pair(tsk, result_file));
+			result_files.append(result_file);
+		}
+		//! generate gctsk
+		QString exe_path = QCoreApplication::applicationDirPath() + "/FILTERING/filtering_knl.exe";
+		QString gctsk_path = if_dir + "/classification.gctsk";
+		FILE* fp = fopen(gctsk_path.toStdString().c_str(), "w");
+		fprintf(fp, "%d\n", tasks.size());
+		for (auto & tsk : tsk_files) {
+			fprintf(fp, "%s %s\n", exe_path.toStdString().c_str(), tsk.toStdString().c_str());
+		}
+		fclose(fp);
+	}
+
+	QString cmd = getCmdLine(sel, "FILTERING", m_GCSvr_prj_id);
+	if (cmd.isEmpty()) return;
+
+	// 	QProcess* process = new QProcess(this);
+	// 	process->start(cmd);
+	QProcess process;
+	process.execute(cmd);
+
+	for (auto & tsk_res : tsk_results) {
+		tsk_res.first;
+		tsk_res.second;
+	}
+
+	ccHObject* product_pool = db_prj->getProductClassified();
+	addToDatabase(result_files, product_pool);
+
+	refreshAll();
+	updateUI();
+}
+
 void MainWindow::doActionClassificationBatch()
 {
+	if (!haveSelection()) {
+		return;
+	}
+	ccHObject* sel = m_selectedEntities.front();
+	DataBaseHObject* db_prj = GetRootDataBase(sel);
+	if (!db_prj) { return; }
+	
+	ccHObject::Container tasks;
+	if (sel->isGroup()) {
+		tasks = GetEnabledObjFromGroup(sel, CC_TYPES::POINT_CLOUD, true, false);
+	}
+	else if (sel->isA(CC_TYPES::POINT_CLOUD)) {
+		tasks.push_back(sel);
+	}
 
+	QString output_suffix = ".las";
+	std::vector<std::pair<ccHObject*, QString>> tsk_results;
+	QStringList result_files;
+	{
+		//! generate tsk
+		QString if_dir = db_prj->getPath() + "/IF_CLASSIFICATION"; QDir().mkdir(if_dir);
+		QString tsk_dir = if_dir + "/TSK"; QDir().mkdir(tsk_dir);
+		QString output_dir = if_dir + "/OUTPUT"; QDir().mkdir(output_dir);
+		QStringList tsk_files;
+		for (ccHObject* tsk : tasks) {
+			QString tsk_file = tsk_dir + "/" + tsk->getName() + ".tsk";
+			QString result_file = output_dir + "/" + tsk->getName() + output_suffix;
+			FILE* fp = fopen(tsk_file.toStdString().c_str(), "w");
+			fprintf(fp, "%s\n", tsk->getPath().toStdString().c_str());
+			fprintf(fp, "%s\n", result_file.toStdString().c_str());
+			fclose(fp);
+			tsk_files.append(tsk_file);
+			tsk_results.push_back(std::make_pair(tsk, result_file));
+			result_files.append(result_file);
+		}
+		//! generate gctsk
+		QString exe_path = QCoreApplication::applicationDirPath() + "/CLASSIFY/Classify_KNL.exe";
+		QString gctsk_path = if_dir + "/classification.gctsk";
+		FILE* fp = fopen(gctsk_path.toStdString().c_str(), "w");
+		fprintf(fp, "%d\n", tasks.size());
+		for (auto & tsk : tsk_files) {
+			fprintf(fp, "%s %s\n", exe_path.toStdString().c_str(), tsk.toStdString().c_str());
+		}
+		fclose(fp);
+	}
+
+	QString cmd = getCmdLine(sel, "CLASSIFICATION", m_GCSvr_prj_id);
+	if (cmd.isEmpty()) return;
+
+// 	QProcess* process = new QProcess(this);
+// 	process->start(cmd);
+	QProcess process;
+	process.execute(cmd);
+
+	for (auto & tsk_res : tsk_results) {
+		tsk_res.first;
+		tsk_res.second;
+	}
+	
+	ccHObject* product_pool = db_prj->getProductClassified();
+	addToDatabase(result_files, product_pool);
+
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionBuildingSegmentationBatch()

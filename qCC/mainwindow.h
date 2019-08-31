@@ -841,6 +841,7 @@ private:
 	bdrPlaneEditorDlg* m_pbdrPlaneEditDlg;
 
 	PolyFitObj* polyfit_obj;
+	int m_GCSvr_prj_id;
 };
 
 #include "ccProgressDialog.h"

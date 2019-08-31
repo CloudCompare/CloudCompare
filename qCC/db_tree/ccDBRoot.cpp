@@ -1893,7 +1893,7 @@ void ccDBRoot::sortItemChildren(ccHObject* item, SortRules sortRule)
 		}
 
 		//add children back
-		beginInsertRows(selectedIndexes[i], 0, childCount - 1);
+		beginInsertRows(/*selectedIndexes[i]*/index(item), 0, childCount - 1);
 
 		//row insertion operation (end)
 		endInsertRows();

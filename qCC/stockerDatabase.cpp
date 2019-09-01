@@ -93,7 +93,7 @@ ccHObject* DataBaseHObject::getProductFiltered() {
 	if (!products) { return nullptr; }
 	ccHObject* find_obj = nullptr;
 	for (size_t i = 0; i < products->getChildrenNumber(); i++) {
-		ccHObject* child = getChild(i);
+		ccHObject* child = products->getChild(i);
 		if (child->isGroup() && child->getName() == "filtered") {
 			find_obj = child;
 		}
@@ -116,7 +116,7 @@ ccHObject* DataBaseHObject::getProductClassified() {
 	if (!products) { return nullptr; }
 	ccHObject* find_obj = nullptr;
 	for (size_t i = 0; i < products->getChildrenNumber(); i++) {
-		ccHObject* child = getChild(i);
+		ccHObject* child = products->getChild(i);
 		if (child->isGroup() && child->getName() == "classified") {
 			find_obj = child;
 		}
@@ -139,7 +139,7 @@ ccHObject* DataBaseHObject::getProductBuildingSeg() {
 	if (!products) { return nullptr; }
 	ccHObject* find_obj = nullptr;
 	for (size_t i = 0; i < products->getChildrenNumber(); i++) {
-		ccHObject* child = getChild(i);
+		ccHObject* child = products->getChild(i);
 		if (child->isGroup() && child->getName() == "buildings") {
 			find_obj = child;
 		}

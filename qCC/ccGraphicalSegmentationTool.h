@@ -78,8 +78,18 @@ public:
 	**/
 	void removeAllEntities(bool unallocateVisibilityArrays);
 
-	void setSegmentMode(int mode);
+	enum SegmentMode
+	{
+		SEGMENT_GENERAL,
+		SEGMENT_PLANE_CREATE,
+		SEGMENT_PLANE_SPLIT,
+		SEGMENT_CLASS_EDIT,
+		SEGMENT_BUILD_EIDT,
+	};
+	void setSegmentMode(SegmentMode mode);
 	int getSegmentMode() {	return m_segment_mode; }
+
+	void setDestinationGroup(ccHObject* obj) { m_destination = obj; }
 
 protected slots:
 
@@ -102,6 +112,8 @@ protected slots:
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
+
+	void createBuilding();
 
 protected:
 
@@ -140,8 +152,10 @@ protected:
 
 	//! Whether to delete hidden parts after segmentation
 	bool m_deleteHiddenParts;
+		
+	SegmentMode m_segment_mode;
 
-	int m_segment_mode;
+	ccHObject* m_destination;
 };
 
 #endif //CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER

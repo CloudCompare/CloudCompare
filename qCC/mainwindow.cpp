@@ -1021,9 +1021,12 @@ void MainWindow::connectActions()
 	connect(m_UI->EditDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionEditDatabase);
 
 	//! Segmentation
-	connect(m_UI->actionGroundFilteringBatch, &QAction::triggered, this, &MainWindow::doActionGroundFilteringBatch);
-	connect(m_UI->actionClassificationBatch, &QAction::triggered, this, &MainWindow::doActionClassificationBatch);
-	connect(m_UI->actionBuildingSegmentationBatch, &QAction::triggered, this, &MainWindow::doActionBuildingSegmentationBatch);
+	connect(m_UI->actionGroundFilteringBatch,		&QAction::triggered, this, &MainWindow::doActionGroundFilteringBatch);
+	connect(m_UI->actionClassificationBatch,		&QAction::triggered, this, &MainWindow::doActionClassificationBatch);
+	connect(m_UI->actionBuildingSegmentationBatch,	&QAction::triggered, this, &MainWindow::doActionBuildingSegmentationBatch);
+
+	connect(m_UI->actionBuildingSegmentEditor,		&QAction::triggered, this, &MainWindow::doActionBuildingSegmentEditor);
+	connect(m_UI->actionPointClassEditor,			&QAction::triggered, this, &MainWindow::doActionPointClassEditor);
 }
 
 void MainWindow::doActionChangeTabTree(int index)
@@ -10703,7 +10706,7 @@ void MainWindow::activateSegmentationMode()
 			m_gsTool->addEntity(entity);
 		}		
 	}
-	m_gsTool->setSegmentMode(0);
+	m_gsTool->setSegmentMode(ccGraphicalSegmentationTool::SEGMENT_GENERAL);
 
 	if (m_gsTool->getNumberOfValidEntities() == 0)
 	{
@@ -10893,10 +10896,10 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							//! XYLIU
 							switch (m_gsTool->getSegmentMode())
 							{
-							case 0:
+							case ccGraphicalSegmentationTool::SEGMENT_GENERAL:
 								entity->setName(entity->getName() + QString(".remaining"));
 								break;
-							case 1: 
+							case ccGraphicalSegmentationTool::SEGMENT_PLANE_CREATE:
 							{
 								int biggest = GetMaxNumberExcludeChildPrefix(objContext.parent, BDDB_PLANESEG_PREFIX);
 								segmentationResult->setName(BDDB_PLANESEG_PREFIX + QString::number(biggest + 1));
@@ -10912,7 +10915,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 								}
 								break;
 							}
-							case 2:
+							case ccGraphicalSegmentationTool::SEGMENT_PLANE_SPLIT:
 							{
 								//! get primitive group
 								StBuilding* cur_building = GetParentBuilding(objContext.parent);
@@ -10947,7 +10950,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						//keep original name(s)
 						segmentationResult->setName(entity->getName());
 						//! XYLIU
-						if (m_gsTool->getSegmentMode() == 1) {
+						if (m_gsTool->getSegmentMode() == ccGraphicalSegmentationTool::SEGMENT_PLANE_CREATE) {
 							ccPointCloud* segment_cloud = ccHObjectCaster::ToPointCloud(segmentationResult);
 							if (segment_cloud) {
 								segment_cloud->setRGBColor(segment_cloud->hasColors() ? segment_cloud->getPointColor(0) : ccColor::Generator::Random());
@@ -12808,7 +12811,7 @@ void MainWindow::doActionBDPrimSplitPlane()
 		dispToConsole("Please select the point cloud of a plane", ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	m_gsTool->setSegmentMode(1);
+	m_gsTool->setSegmentMode(ccGraphicalSegmentationTool::SEGMENT_PLANE_CREATE);
 
 	for (ccHObject *entity : getSelectedEntities())
 	{
@@ -13012,7 +13015,7 @@ void MainWindow::doActionBDPlaneFromPoints()
 
 	m_gsTool->linkWith(win);
 
-	m_gsTool->setSegmentMode(2);
+	m_gsTool->setSegmentMode(ccGraphicalSegmentationTool::SEGMENT_PLANE_SPLIT);
 
 	for (ccHObject *entity : getSelectedEntities())
 	{
@@ -14895,3 +14898,132 @@ void MainWindow::doActionBuildingSegmentationBatch()
 
 }
 
+void MainWindow::doActionPointClassEditor()
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (!win)
+		return;
+
+	if (!haveSelection())
+		return;
+
+	if (!m_gsTool)
+	{
+		m_gsTool = new ccGraphicalSegmentationTool(this);
+		connect(m_gsTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateSegmentationMode);
+
+		registerOverlayDialog(m_gsTool, Qt::TopRightCorner);
+	}
+
+	m_gsTool->linkWith(win);
+	for (ccHObject *entity : getSelectedEntities())
+	{
+		if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH)) {
+			m_gsTool->addEntity(entity);
+		}
+	}
+	m_gsTool->setSegmentMode(ccGraphicalSegmentationTool::SEGMENT_CLASS_EDIT);
+
+	if (m_gsTool->getNumberOfValidEntities() == 0)
+	{
+		ccConsole::Error("No segmentable entity in active window!");
+		return;
+	}
+
+	freezeUI(true);
+	m_UI->toolBarView->setDisabled(false);
+
+	//we disable all other windows
+	disableAllBut(win);
+
+	if (!m_gsTool->start())
+		deactivateSegmentationMode(false);
+	else
+		updateOverlayDialogsPlacement();
+}
+
+void MainWindow::deactivatePointClassEditor(bool)
+{
+}
+
+void MainWindow::doActionBuildingSegmentEditor()
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (!win)
+		return;
+
+	if (!haveSelection())
+		return;
+
+	if (!m_gsTool)
+	{
+		m_gsTool = new ccGraphicalSegmentationTool(this);
+		connect(m_gsTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateBuildingSegmentEditor);
+
+		registerOverlayDialog(m_gsTool, Qt::TopRightCorner);
+	}
+
+	m_gsTool->linkWith(win);
+
+	m_gsTool->setSegmentMode(ccGraphicalSegmentationTool::SEGMENT_BUILD_EIDT);
+
+	ccHObject* select = m_selectedEntities.front();	
+	if (!select->isA(CC_TYPES::POINT_CLOUD)) {
+		return;
+	}
+	DataBaseHObject* baseObj = GetRootDataBase(select);
+
+	ccHObject* building_group = nullptr;
+	if (baseObj) {
+		ccHObject* product_group = baseObj->getProductBuildingSeg();
+		building_group = findChildByName(product_group, false, select->getName(), true, CC_TYPES::HIERARCHY_OBJECT, true);
+	}
+	else {
+		building_group = new ccHObject(select->getName());
+		building_group->setDisplay(select->getDisplay());
+		addToDB_Main(building_group, false, false);
+	}
+	m_gsTool->setDestinationGroup(building_group);
+
+	for (ccHObject *entity : getSelectedEntities())
+	{
+		if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH)) {
+			m_gsTool->addEntity(entity);
+		}
+	}
+
+	if (m_gsTool->getNumberOfValidEntities() == 0)
+	{
+		ccConsole::Error("No editable entity in active window!");
+		return;
+	}
+
+	freezeUI(true);
+	m_UI->toolBarView->setDisabled(false);
+
+	//we disable all other windows
+	//disableAllBut(win);
+
+	if (!m_gsTool->start())
+		deactivateBuildingSegmentEditor(false);
+	else
+		updateOverlayDialogsPlacement();
+}
+
+void MainWindow::deactivateBuildingSegmentEditor(bool state)
+{
+	m_gsTool->setDestinationGroup(nullptr);
+
+	//we enable all GL windows
+	enableAll();
+
+	freezeUI(false);
+
+	updateUI();
+
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		win->redraw();
+	}
+}

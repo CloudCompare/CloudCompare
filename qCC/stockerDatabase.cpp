@@ -276,3 +276,59 @@ stocker::BuildUnit BDBaseHObject::GetBuildingUnit(std::string building_name) {
 	}
 	else return (*iter)->data;
 }
+
+ccHObject* findChildByName(ccHObject* parent,
+	bool recursive,
+	QString filter,
+	bool strict,
+	CC_CLASS_ENUM type_filter/*=CC_TYPES::OBJECT*/,
+	bool auto_create /*= false*/,
+	ccGenericGLDisplay* inDisplay/*=0*/)
+{
+	ccHObject::Container children;
+	parent->filterChildrenByName(children, recursive, filter, strict, type_filter, inDisplay);
+
+	if (children.empty()) {
+		if (auto_create) {
+			ccHObject* obj = ccHObject::New(type_filter, filter.toStdString().c_str());
+			if (parent->getDisplay()) {
+				obj->setDisplay(parent->getDisplay());
+			}
+			parent->addChild(obj);
+			MainWindow::TheInstance()->addToDB(obj, parent->getDBSourceType(), false, false);
+			return obj;
+		}
+		else
+			return nullptr;
+	}
+	else {
+		return children.front();
+	}
+}
+
+int GetNumberExcludePrefix(ccHObject * obj, QString prefix)
+{
+	QString name = obj->getName();
+	if (name.startsWith(prefix) && name.length() > prefix.length()) {
+		QString number = name.mid(prefix.length(), name.length());
+		return number.toInt();
+	}
+	return -1;
+}
+
+int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix/*, CC_CLASS_ENUM type = CC_TYPES::OBJECT*/)
+{
+	if (!obj) { return -1; }
+	set<int> name_numbers;
+	for (size_t i = 0; i < obj->getChildrenNumber(); i++) {
+		QString name = obj->getChild(i)->getName();
+		int number = GetNumberExcludePrefix(obj->getChild(i), prefix);
+		if (number >= 0) {
+			name_numbers.insert(number);
+		}
+	}
+	if (!name_numbers.empty()) {
+		return *name_numbers.rbegin();
+	}
+	return -1;
+}

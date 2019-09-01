@@ -598,7 +598,10 @@
     </property>
     <addaction name="actionGroundFilteringBatch"/>
     <addaction name="actionClassificationBatch"/>
+    <addaction name="actionPointClassEditor"/>
+    <addaction name="separator"/>
     <addaction name="actionBuildingSegmentationBatch"/>
+    <addaction name="actionBuildingSegmentEditor"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1527,7 +1530,10 @@ QTreeView::branch:open:has-children:has-siblings  {
    </attribute>
    <addaction name="actionGroundFilteringBatch"/>
    <addaction name="actionClassificationBatch"/>
+   <addaction name="actionPointClassEditor"/>
+   <addaction name="separator"/>
    <addaction name="actionBuildingSegmentationBatch"/>
+   <addaction name="actionBuildingSegmentEditor"/>
   </widget>
   <widget class="QToolBar" name="toolBarBDRecon">
    <property name="windowTitle">
@@ -4869,6 +4875,30 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>single building segmentation</string>
+   </property>
+  </action>
+  <action name="actionBuildingSegmentEditor">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/editor2.png</normaloff>:/CC/Stocker/images/stocker/editor2.png</iconset>
+   </property>
+   <property name="text">
+    <string>Building Segment Editor</string>
+   </property>
+   <property name="iconText">
+    <string>Editor</string>
+   </property>
+  </action>
+  <action name="actionPointClassEditor">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/editor2.png</normaloff>:/CC/Stocker/images/stocker/editor2.png</iconset>
+   </property>
+   <property name="text">
+    <string>Point Class Editor</string>
+   </property>
+   <property name="iconText">
+    <string>Editor</string>
    </property>
   </action>
  </widget>

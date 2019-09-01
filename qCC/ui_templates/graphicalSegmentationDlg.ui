@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>251</width>
+    <width>351</width>
     <height>26</height>
    </rect>
   </property>
@@ -127,6 +127,20 @@
     </widget>
    </item>
    <item>
+    <widget class="QToolButton" name="createBuildingToolButton">
+     <property name="toolTip">
+      <string>create a new building</string>
+     </property>
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Stocker/images/stocker/building.png</normaloff>:/CC/Stocker/images/stocker/building.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QToolButton" name="razButton">
      <property name="enabled">
       <bool>false</bool>
@@ -193,6 +207,19 @@
        <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
      </property>
     </widget>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
   <action name="actionSetRectangularSelection">

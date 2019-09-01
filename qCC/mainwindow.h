@@ -623,7 +623,10 @@ private slots:
 	void doActionClassificationBatch();
 	void doActionBuildingSegmentationBatch();
 
-	
+	void doActionPointClassEditor();
+	void deactivatePointClassEditor(bool);
+	void doActionBuildingSegmentEditor();	
+	void deactivateBuildingSegmentEditor(bool);
 
 private:
 	//! Shortcut: asks the user to select one cloud

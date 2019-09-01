@@ -46,6 +46,8 @@
 #define BDDB_TODOLINE_PREFIX		"TodoLine"
 #define BDDB_DEDUCED_PREFIX			"Deduced"
 
+#define BDDB_BUILDING_PREFIX		"bd"
+
 #define BDDB_CAMERA_SUFFIX			".camera"
 #define BDDB_ORIGIN_CLOUD_SUFFIX	".original"
 #define BDDB_PRIMITIVE_SUFFIX		".primitive"
@@ -153,5 +155,15 @@ DataBaseHObject* GetRootDataBase(ccHObject* obj);
 BDBaseHObject* GetRootBDBase(ccHObject* obj);
 BDImageBaseHObject* GetRootImageBase(ccHObject* obj);
 
+ccHObject * findChildByName(ccHObject * parent, bool recursive, QString filter, bool strict, CC_CLASS_ENUM type_filter = CC_TYPES::OBJECT, bool auto_create = false, ccGenericGLDisplay * inDisplay = 0);
+
+inline QString BuildingNameByNumber(int number) {
+	char name[256];
+	sprintf(name, "%s08d", BDDB_BUILDING_PREFIX, number);
+	return name;
+}
+
+//! return -1 if no child exists
+int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix);
 
 #endif

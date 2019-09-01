@@ -455,33 +455,6 @@ void filterCameraByName(ccHObject * camera_group, QStringList name_list)
 	}
 }
 
-int GetNumberExcludePrefix(ccHObject * obj, QString prefix)
-{
-	QString name = obj->getName();
-	if (name.startsWith(prefix) && name.length() > prefix.length()) {
-		QString number = name.mid(prefix.length(), name.length());
-		return number.toInt();
-	}
-	return -1;
-}
-
-int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix/*, CC_CLASS_ENUM type = CC_TYPES::OBJECT*/)
-{
-	if (!obj) { return -1; }
-	set<int> name_numbers;
-	for (size_t i = 0; i < obj->getChildrenNumber(); i++) {
-		QString name = obj->getChild(i)->getName();
-		int number = GetNumberExcludePrefix(obj->getChild(i), prefix);
-		if (number >= 0) {
-			name_numbers.insert(number);
-		}
-	}
-	if (!name_numbers.empty()) {
-		return *name_numbers.rbegin();
-	}
-	return -1;
-}
-
 ccPlane* FitPlaneAndAddChild(ccPointCloud* cloud)
 {
 	//	ccHObject* cc_plane = nullptr;

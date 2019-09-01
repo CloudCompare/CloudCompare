@@ -126,7 +126,6 @@
 #include "db_tree/ccDBRoot.h"
 #include "pluginManager/ccPluginUIManager.h"
 
-
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
 #include "devices/3dConnexion/cc3DMouseManager.h"
@@ -167,6 +166,8 @@
 #endif // USE_STOCKER
 
 #include <QDate>
+#include <QFuture>
+#include <QtConcurrent>
 
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance  = nullptr;
@@ -14743,6 +14744,7 @@ void LoadSettingsFiltering()
 
 void MainWindow::doActionGroundFilteringBatch()
 {
+	m_progressBar->hide();
 	return;
 	if (!haveSelection()) {
 		return;
@@ -14861,21 +14863,31 @@ void MainWindow::doActionClassificationBatch()
 	QString cmd = getCmdLine(sel, "CLASSIFICATION", m_GCSvr_prj_id);
 	if (cmd.isEmpty()) return;
 
-// 	QProcess* process = new QProcess(this);
-// 	process->start(cmd);
-	QProcess process;
-	process.execute(cmd);
-
-	for (auto & tsk_res : tsk_results) {
-		tsk_res.first;
-		tsk_res.second;
-	}
+	ccHObject* product_pool = db_prj->getProductClassified(); if (!product_pool) { return; }
 	
-	ccHObject* product_pool = db_prj->getProductClassified();
-	addToDatabase(result_files, product_pool);
+  	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+  	pDlg.reset(new ccProgressDialog(false, this));
+  	pDlg->setMethodTitle(QObject::tr("Classification"));
+  	pDlg->setInfo(QObject::tr("Please wait... classifying in progress"));
+  	pDlg->setRange(0, 0);
+  	pDlg->setModal(false);
+  	pDlg->start();
 
-	refreshAll();
-	updateUI();
+	m_progressBar->show();
+	m_progressBar->setRange(0, 0);
+
+	QFutureWatcher<void> executer;
+	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
+		addToDatabase(result_files, product_pool);
+		m_progressBar->hide();
+	});
+	QCoreApplication::processEvents();
+	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
+	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
+	pDlg->exec();
+	QCoreApplication::processEvents();
+	executer.waitForFinished();
+	QCoreApplication::processEvents();
 }
 
 void MainWindow::doActionBuildingSegmentationBatch()

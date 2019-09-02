@@ -618,6 +618,7 @@ private slots:
 	void doActionImportData();
 	void doActionImportFolder();
 	void doActionEditDatabase();
+	void doActionCreateBuildingProject();
 
 	void doActionGroundFilteringBatch();
 	void doActionClassificationBatch();

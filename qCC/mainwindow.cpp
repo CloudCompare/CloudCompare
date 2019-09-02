@@ -168,6 +168,7 @@
 #include <QDate>
 #include <QFuture>
 #include <QtConcurrent>
+#include <QFile>
 
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance  = nullptr;
@@ -1019,6 +1020,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionImportFile,					&QAction::triggered, this, &MainWindow::doActionImportData);
 	connect(m_UI->actionImportFolder,				&QAction::triggered, this, &MainWindow::doActionImportFolder);
 	connect(m_UI->EditDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionEditDatabase);
+	connect(m_UI->createBuildingProjectToolButton,	&QAbstractButton::clicked, this, &MainWindow::doActionCreateBuildingProject);
+	
 
 	//! Segmentation
 	connect(m_UI->actionGroundFilteringBatch,		&QAction::triggered, this, &MainWindow::doActionGroundFilteringBatch);
@@ -11835,6 +11838,90 @@ BDBaseHObject::Container GetBDBaseProjx() {
 	return prjx;
 }
 
+BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
+{
+	stocker::BlockProj block_prj; std::string error_info;
+	if (!stocker::LoadProject(Filename.toStdString(), block_prj, error_info)) {
+		//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return nullptr;
+	}
+	if (!stocker::BuildingPrepare(block_prj, error_info)) {
+		//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return nullptr;
+	}
+
+	QFileInfo prj_file(Filename);
+	QString prj_name = prj_file.completeBaseName();
+	if (!prj_name.startsWith(BDDB_PROJECTNAME_PREFIX)) {
+		prj_name = BDDB_PROJECTNAME_PREFIX + prj_name;
+	}
+
+	QString bin_file = prj_file.absolutePath() + "\\" + prj_name + ".bin";
+
+	CCVector3d loadCoordinatesShift(0, 0, 0);
+	bool loadCoordinatesTransEnabled = false;
+	FileIOFilter::LoadParameters parameters;
+	{
+		parameters.alwaysDisplayLoadDialog = widget ? true : false;
+		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
+		parameters.coordinatesShift = &loadCoordinatesShift;
+		parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
+		parameters.parentWidget = widget;
+	}
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+
+	BDBaseHObject* bd_grp = nullptr;
+	if (QFileInfo(bin_file).exists()) {
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(bin_file, parameters, result, QString());
+		if (newGroup) {
+			bd_grp = new BDBaseHObject(*newGroup);
+			bd_grp->setName(prj_name);
+			newGroup->transferChildren(*bd_grp);
+		}
+	}
+	if (!bd_grp) {
+		bd_grp = new BDBaseHObject(prj_name);
+		for (auto & bd : block_prj.m_builder.sbuild) {
+			if (bd->data.convex_hull_xy.empty()) { continue; }
+
+			QString building_name = bd->GetName().Str().c_str();
+			QFileInfo point_path(bd->data.file_path.ori_points.c_str());
+			ccHObject* newGroup = FileIOFilter::LoadFromFile(point_path.absoluteFilePath(), parameters, result, QString());
+			if (!newGroup) { continue; }
+			StBuilding* building = new StBuilding(*newGroup);
+			building->setName(building_name);
+			newGroup->transferChildren(*building);
+			ccHObject::Container clouds;
+			building->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+			for (ccHObject* cloud : clouds) {
+				if (cloud) {
+					static_cast<ccGenericPointCloud*>(cloud)->setName(building_name + BDDB_ORIGIN_CLOUD_SUFFIX);
+					if (cloud->hasColors()) {
+						cloud->showSF(false);
+						cloud->showColors(true);
+					}
+				}
+			}
+			bd_grp->addChild(building);
+		}
+	}
+	if (bd_grp) {
+		bd_grp->block_prj = block_prj;
+		if (bd_grp->getChildrenNumber() <= 0) {
+			return nullptr;
+		}
+		ccHObject* first_cloud_ent = bd_grp->GetOriginPointCloud(GetBaseName(bd_grp->getChild(0)->getName()), false);
+		if (!first_cloud_ent) {			
+			return nullptr;
+		}
+		ccPointCloud* first_cloud = ccHObjectCaster::ToPointCloud(first_cloud_ent);
+		bd_grp->global_shift = stocker::parse_xyz(first_cloud->getGlobalShift());
+		bd_grp->global_scale = first_cloud->getGlobalScale();
+	}
+
+	return bd_grp;
+}
+
 void MainWindow::doActionBDProjectLoad()
 {
 	//persistent settings
@@ -11854,94 +11941,17 @@ void MainWindow::doActionBDProjectLoad()
 	currentPath = QFileInfo(Filename).absolutePath();
 	settings.setValue(ccPS::CurrentPath(), currentPath);
 	settings.endGroup();
-		
-	stocker::BlockProj block_prj; std::string error_info;
-	if (!stocker::LoadProject(Filename.toStdString(), block_prj, error_info)) {
-		dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-	if (!stocker::BuildingPrepare(block_prj, error_info)) {
-		dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
 
-	switchDatabase(CC_TYPES::DB_BUILDING);
-	
-	QFileInfo prj_file(Filename);
-	QString prj_name = prj_file.completeBaseName();
-	if (!prj_name.startsWith(BDDB_PROJECTNAME_PREFIX)) {
-		prj_name = BDDB_PROJECTNAME_PREFIX + prj_name;
-	}
-
-	QString bin_file = prj_file.absolutePath() + "\\" + prj_name + ".bin";
-		
-	CCVector3d loadCoordinatesShift(0, 0, 0);
-	bool loadCoordinatesTransEnabled = false;
-	FileIOFilter::LoadParameters parameters;
-	{
-		parameters.alwaysDisplayLoadDialog = true;
-		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
-		parameters.coordinatesShift = &loadCoordinatesShift;
-		parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
-		parameters.parentWidget = this;
-	}
-	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-
-	BDBaseHObject* bd_grp = nullptr;
-	if (QFileInfo(bin_file).exists()) {
-		ccHObject* newGroup = FileIOFilter::LoadFromFile(bin_file, parameters, result, QString());
-		if (newGroup) {
-			bd_grp = new BDBaseHObject(*newGroup);
-			bd_grp->setName(prj_name);
-			newGroup->transferChildren(*bd_grp);
-		}		
-	}
-	if (!bd_grp) {
-		bd_grp = new BDBaseHObject(prj_name);		
-		for (auto & bd : block_prj.m_builder.sbuild) {
-			if (bd->data.convex_hull_xy.empty()) { continue; }
-
-			QString building_name = bd->GetName().Str().c_str();
-			QFileInfo point_path(bd->data.file_path.ori_points.c_str());
-			ccHObject* newGroup = FileIOFilter::LoadFromFile(point_path.absoluteFilePath(), parameters, result, QString());
-			if (!newGroup) { continue; }
-			StBuilding* building = new StBuilding(*newGroup);
-			building->setName(building_name);
-			newGroup->transferChildren(*building);			
-			ccHObject::Container clouds;
-			building->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
-			for (ccHObject* cloud : clouds)	{
-				if (cloud) {
-					static_cast<ccGenericPointCloud*>(cloud)->setName(building_name + BDDB_ORIGIN_CLOUD_SUFFIX);
-					if (cloud->hasColors()) {
-						cloud->showSF(false);
-						cloud->showColors(true);
-					}					
-				}
-			}
-			bd_grp->addChild(building);
-		}
-	}
+	BDBaseHObject* bd_grp = LoadBDReconProject(Filename, this);
 	if (bd_grp) {
-		bd_grp->block_prj = block_prj;
-		if (bd_grp->getChildrenNumber() <= 0) {
-			return;
-		}
-		ccHObject* first_cloud_ent = bd_grp->GetOriginPointCloud(GetBaseName(bd_grp->getChild(0)->getName()), false);
-		if (!first_cloud_ent) {
-			dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
-			return;
-		}
-		ccPointCloud* first_cloud = ccHObjectCaster::ToPointCloud(first_cloud_ent);
-		bd_grp->global_shift = stocker::parse_xyz(first_cloud->getGlobalShift());
-		bd_grp->global_scale = first_cloud->getGlobalScale();
-
+		switchDatabase(CC_TYPES::DB_BUILDING);
 		addToDB_Build(bd_grp);
 	}
 	else {
 		dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
 		return;
 	}
+
 	refreshAll();
 	UpdateUI();
 }
@@ -14422,79 +14432,59 @@ void MainWindow::doActionCreateDatabase()
 	//! create a database
 	DataBaseHObject* new_database = new DataBaseHObject(QFileInfo(database_name).completeBaseName());
 	new_database->setPath(QFileInfo(database_name).absoluteFilePath());
+	addToDB_Main(new_database);
+
 	//! point clouds
 	{
-		ccHObject* point_clouds = new ccHObject("point clouds");
-		QString path = new_database->getPath() + "/points";
-		if (QDir().mkdir(path))
-			point_clouds->setPath(path);
-		else {
-			delete new_database; new_database = nullptr;
-			delete point_clouds; point_clouds = nullptr;
+		ccHObject* points = new_database->getPointCloudGroup();
+		if (!points) {
 			return;
-		}		
-		new_database->addChild(point_clouds);
+		}
 	}
 
 	//! images
 	{
-		ccHObject* images = new ccHObject("images");
-		QString path = new_database->getPath() + "/images";
-		if (QDir().mkdir(path))
-			images->setPath(path);
-		else {
-			delete new_database; new_database = nullptr;
-			delete images; images = nullptr;
+		ccHObject* images = new_database->getImagesGroup();
+		if (!images) {
 			return;
 		}
-		new_database->addChild(images);
 	}
 
 	//! miscellaneous
 	{
-		ccHObject* misc = new ccHObject("misc");
-		QString path = new_database->getPath() + "/misc";
-		if (QDir().mkdir(path))
-			misc->setPath(path);
-		else {
-			delete new_database; new_database = nullptr;
-			delete misc; misc = nullptr;
+		ccHObject* misc = new_database->getMiscsGroup();
+		if (!misc) {
 			return;
 		}
-		new_database->addChild(misc);
 	}
 
 	//! products
 	{
 		ccHObject* products = new_database->getProductGroup();
 		if (!products) {
-			delete new_database; new_database = nullptr;
 			return;
 		}
 
 		ccHObject* groundFilter = new_database->getProductFiltered();
 		if (!groundFilter) {
-			delete products; products = nullptr;
-			delete new_database; new_database = nullptr;
 			return;
 		}
 
 		ccHObject* classified = new_database->getProductClassified();
 		if (!classified) {
-			delete products; products = nullptr;
-			delete new_database; new_database = nullptr;
 			return;
 		}
 
-		ccHObject* buildings = new_database->getProductBuildingSeg();
-		if (!buildings) {
-			delete products; products = nullptr;
-			delete new_database; new_database = nullptr;
+		ccHObject* segments = new_database->getProductSegmented();
+		if (!segments) {
+			return;
+		}
+
+		ccHObject* models = new_database->getProductModels();
+		if (!models) {
 			return;
 		}
 	}
-
-	addToDB_Main(new_database);
 }
 
 void MainWindow::doActionOpenDatabase()
@@ -14568,7 +14558,7 @@ void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool, bool 
 {
 	ccHObject::Container loaded_files = addToDB(files, CC_TYPES::DB_MAINDB);
 
-	if (import_pool->getName() == "point clouds" || 
+	if (import_pool->getName() == "pointClouds" || 
 		import_pool->getName() == "filtered" ||
 		import_pool->getName() == "classified") {
 
@@ -14700,9 +14690,13 @@ void MainWindow::doActionImportFolder()
 		"",
 		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
+	if (!QFileInfo(dirname).exists()) {
+		return;
+	}
+
 	QStringList files;
 	QStringList nameFilters;
-	if (import_pool->getName() == "point clouds")
+	if (import_pool->getName() == "pointClouds")
 		nameFilters << "*.las" << "*.laz" << "*.ply" << "*.obj";
 	else if (import_pool->getName() == "images") {
 		nameFilters << "*.tif" << "*.tiff";
@@ -14724,20 +14718,195 @@ void MainWindow::doActionEditDatabase()
 {
 }
 
+void MainWindow::doActionCreateBuildingProject()
+{
+	if (m_selectedEntities.size() != 1) {
+		return;
+	}
+
+	ccHObject* select = m_selectedEntities.front();
+	//! get point clouds from selection
+	ccHObject::Container point_clouds = GetEnabledObjFromGroup(select, CC_TYPES::POINT_CLOUD, true, false);
+	if (point_clouds.empty()) {
+		// TODO
+		return;
+	}
+
+	DataBaseHObject* dataObj = GetRootDataBase(select);
+	QString project_dir;
+	{
+		if (dataObj) {
+			QString databasePath = dataObj->getPath();
+			if (!databasePath.isEmpty()) {
+				QString dir = databasePath + "/" + "IF_BUILDINGRECON";
+				if (!StCreatDir(dir)) return;
+				project_dir = dir + "/" + select->getName();
+				if (!StCreatDir(project_dir)) return;
+			}
+		}
+		if (!QFileInfo(project_dir).exists()) {
+			//! get directory
+			//persistent settings
+			QSettings settings;
+			settings.beginGroup(ccPS::LoadFile());
+			QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+			project_dir = QFileDialog::getExistingDirectory(this,
+				tr("Open Directory"),
+				QFileInfo(currentPath).absolutePath(),
+				QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+		}
+		if (!QFileInfo(project_dir).exists()) { return; }
+	}
+
+	//! project name: 
+	BDBaseHObject* baseObj = new BDBaseHObject(select->getName());
+	QString bbprj_path = project_dir + "/" + baseObj->getName() + ".bbprj";
+
+	bool save_prj = false;
+	if (QFileInfo(bbprj_path).exists()) {
+		QMessageBox message_box(QMessageBox::Question,
+			tr("Project exists"),
+			tr("Are you sure you want to overwrite?"),
+			QMessageBox::Ok | QMessageBox::Cancel,
+			this);
+		if (message_box.exec() == QMessageBox::Ok) {
+			QDir(project_dir).removeRecursively();
+			save_prj = true;
+		}
+		else {
+			BDBaseHObject* bd_grp = LoadBDReconProject(bbprj_path, nullptr);
+			if (bd_grp) {
+				switchDatabase(CC_TYPES::DB_BUILDING);
+				addToDB_Build(bd_grp);
+				refreshAll(); UpdateUI();
+			}
+			else {
+				save_prj = true;
+			}
+			return;
+		}
+	}
+	if (!save_prj) {
+		return;
+	}
+
+	stocker::BlockProj block_prj;
+	stocker::BuilderOption options;
+	{
+		QString building_list = project_dir + "/buildings/building.txt";
+		{
+			QString building_dir = project_dir + "/buildings";
+			if (!StCreatDir(building_dir)) { return; }
+			FileIOFilter::SaveParameters parameters; {
+				parameters.alwaysDisplaySaveDialog = false;
+				parameters.parentWidget = this;
+			}
+
+			QStringList bd_paths;
+			for (ccHObject* pc : point_clouds) {
+				QString dir = building_dir + "/" + pc->getName(); if (!StCreatDir(dir)) return;
+				QString relative_path = pc->getName() + "/" + pc->getName() + ".ply"; // bd00000001/bd00000001.ply
+				QString absolute_path = building_dir + "/" + relative_path;
+				if (FileIOFilter::SaveToFile(pc, absolute_path, parameters, "PLY mesh (*.ply)") != CC_FERR_NO_ERROR) {
+					continue;
+				}
+				bd_paths.append(relative_path);
+			}
+			FILE* fp = fopen(building_list.toStdString().c_str(), "w");
+			if (!fp) {
+				return;
+			}
+			fprintf(fp, "%d\n", bd_paths.size());
+			for (QString p : bd_paths) {
+				fprintf(fp, "%s\n", p.toStdString().c_str());
+			}
+			fclose(fp);
+		}
+		QString image_list;
+		{
+
+		}
+		QString sfm_out;
+		{
+
+		}
+		options.prj_file.building_list = building_list.toStdString();
+		options.prj_file.image_list = image_list.toStdString();
+		options.prj_file.project_ini = bbprj_path.toStdString();
+		options.prj_file.root_dir = project_dir.toStdString();
+		options.prj_file.sfm_out = sfm_out.toStdString();
+
+		block_prj.m_options = options;
+		baseObj->block_prj = block_prj;
+	}	
+	
+	//! save .bbprj	
+	stocker::SaveProjectIni(bbprj_path.toStdString(), options);
+
+	BDBaseHObject* bd_grp = LoadBDReconProject(bbprj_path, nullptr);
+	if (bd_grp) {
+		switchDatabase(CC_TYPES::DB_BUILDING);
+		addToDB_Build(bd_grp);
+		refreshAll(); UpdateUI();
+	}
+	else {
+		dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+}
+
 inline QString getCmdLine(QString prj_path, QString task_name, int prj_id)
 {
 	QString cmd;
 	QString runPath = QCoreApplication::applicationDirPath();
-	cmd.append(runPath).append("/RunTask.exe -i ").append(prj_path).append(" -l ").append("CLASSIFICATION").append(" -svrid ").append(QString::number(prj_id));
+	cmd.append(runPath).append("/bin/RunTask.exe -i ").append(prj_path).append(" -l ").append(task_name).append(" -svrid ").append(QString::number(prj_id));
 	return cmd;
 }
-inline QString getCmdLine(ccHObject* obj, QString task_name, int prj_id)
+inline QString getCmdLine(ccHObject* db_prj, QString task_name, int prj_id)
 {
-	ccHObject* prj_obj = GetRootDataBase(obj);
-	QString prj_path = prj_obj->getPath();
+	QString prj_path = db_prj->getPath();
 	if (!QFileInfo(prj_path).exists()) 
 		return QString();
 	else return getCmdLine(prj_path + "/", task_name, prj_id);
+}
+
+inline QStringList createTasksFiles(DataBaseHObject* db_prj,
+	ccHObject::Container tasks,
+	QString if_dir_name,
+	QString exe_relative_path,
+	QString gcTsk_relative_path,
+	QString output_suffix, 
+	QString para_settings)
+{
+	QStringList result_files;
+
+	//! generate tsk
+	QString if_dir = db_prj->getPath() + "/" + if_dir_name; StCreatDir(if_dir);
+	QString tsk_dir = if_dir + "/TSK"; StCreatDir(tsk_dir);
+	QString output_dir = if_dir + "/OUTPUT"; StCreatDir(output_dir);
+	QStringList tsk_files;
+	for (ccHObject* tsk : tasks) {
+		QString tsk_file = tsk_dir + "/" + tsk->getName() + ".tsk";
+		QString result_file = output_dir + "/" + tsk->getName() + output_suffix;
+		FILE* fp = fopen(tsk_file.toStdString().c_str(), "w");
+		fprintf(fp, "%s\n", tsk->getPath().toStdString().c_str());
+		fprintf(fp, "%s\n", result_file.toStdString().c_str());
+		fprintf(fp, "%s\n", para_settings.toStdString().c_str());
+
+		fclose(fp);
+		tsk_files.append(tsk_file);
+		result_files.append(result_file);
+	}
+	//! generate gctsk
+	QString exe_path = QCoreApplication::applicationDirPath() + exe_relative_path;
+	QString gctsk_path = if_dir + gcTsk_relative_path;
+	FILE* fp = fopen(gctsk_path.toStdString().c_str(), "w");
+	fprintf(fp, "%d\n", tasks.size());
+	for (auto & tsk : tsk_files) {
+		fprintf(fp, "%s %s\n", exe_path.toStdString().c_str(), tsk.toStdString().c_str());
+	}
+	fclose(fp);
+	return result_files;
 }
 
 void LoadSettingsFiltering()
@@ -14769,9 +14938,9 @@ void MainWindow::doActionGroundFilteringBatch()
 	QStringList result_files;
 	{
 		//! generate tsk
-		QString if_dir = db_prj->getPath() + "/IF_FILTERING"; QDir().mkdir(if_dir);
-		QString tsk_dir = if_dir + "/TSK"; QDir().mkdir(tsk_dir);
-		QString output_dir = if_dir + "/OUTPUT"; QDir().mkdir(output_dir);
+		QString if_dir = db_prj->getPath() + "/IF_FILTERING"; StCreatDir(if_dir);
+		QString tsk_dir = if_dir + "/TSK"; StCreatDir(tsk_dir);
+		QString output_dir = if_dir + "/OUTPUT"; StCreatDir(output_dir);
 		QStringList tsk_files;
 		for (ccHObject* tsk : tasks) {
 			QString tsk_file = tsk_dir + "/" + tsk->getName() + ".tsk";
@@ -14825,45 +14994,30 @@ void MainWindow::doActionClassificationBatch()
 	if (!db_prj) { return; }
 	
 	ccHObject::Container tasks;
-	if (sel->isGroup()) {
-		tasks = GetEnabledObjFromGroup(sel, CC_TYPES::POINT_CLOUD, true, false);
-	}
-	else if (sel->isA(CC_TYPES::POINT_CLOUD)) {
-		tasks.push_back(sel);
+	{
+		if (sel->isGroup()) {
+			tasks = GetEnabledObjFromGroup(sel, CC_TYPES::POINT_CLOUD, true, false);
+		}
+		else if (sel->isA(CC_TYPES::POINT_CLOUD)) {
+			tasks.push_back(sel);
+		}
 	}
 
-	QString output_suffix = ".las";
-	std::vector<std::pair<ccHObject*, QString>> tsk_results;
 	QStringList result_files;
 	{
-		//! generate tsk
-		QString if_dir = db_prj->getPath() + "/IF_CLASSIFICATION"; QDir().mkdir(if_dir);
-		QString tsk_dir = if_dir + "/TSK"; QDir().mkdir(tsk_dir);
-		QString output_dir = if_dir + "/OUTPUT"; QDir().mkdir(output_dir);
-		QStringList tsk_files;
-		for (ccHObject* tsk : tasks) {
-			QString tsk_file = tsk_dir + "/" + tsk->getName() + ".tsk";
-			QString result_file = output_dir + "/" + tsk->getName() + output_suffix;
-			FILE* fp = fopen(tsk_file.toStdString().c_str(), "w");
-			fprintf(fp, "%s\n", tsk->getPath().toStdString().c_str());
-			fprintf(fp, "%s\n", result_file.toStdString().c_str());
-			fclose(fp);
-			tsk_files.append(tsk_file);
-			tsk_results.push_back(std::make_pair(tsk, result_file));
-			result_files.append(result_file);
-		}
-		//! generate gctsk
-		QString exe_path = QCoreApplication::applicationDirPath() + "/bin/CLASSIFY/Classify_KNL.exe";
-		QString gctsk_path = if_dir + "/classification.gctsk";
-		FILE* fp = fopen(gctsk_path.toStdString().c_str(), "w");
-		fprintf(fp, "%d\n", tasks.size());
-		for (auto & tsk : tsk_files) {
-			fprintf(fp, "%s %s\n", exe_path.toStdString().c_str(), tsk.toStdString().c_str());
-		}
-		fclose(fp);
+		//! parameters
+		QString para_settings;
+		//! filters
+		QString output_suffix = ".las";		
+		result_files = createTasksFiles(db_prj, tasks,
+			"IF_CLASSIFICATION",
+			"/bin/CLASSIFY/Classify_KNL.exe",
+			"/classification.gctsk",
+			output_suffix,
+			para_settings);
 	}
 
-	QString cmd = getCmdLine(sel, "CLASSIFICATION", m_GCSvr_prj_id);
+	QString cmd = getCmdLine(db_prj, "CLASSIFICATION", m_GCSvr_prj_id);
 	if (cmd.isEmpty()) return;
 
 	ccHObject* product_pool = db_prj->getProductClassified(); if (!product_pool) { return; }
@@ -14876,13 +15030,10 @@ void MainWindow::doActionClassificationBatch()
   	pDlg->setModal(false);
   	pDlg->start();
 
-	m_progressBar->show();
-	m_progressBar->setRange(0, 0);
-
 	QFutureWatcher<void> executer;
 	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
-		addToDatabase(result_files, product_pool);
-		m_progressBar->hide();
+		QStringList new_results = moveFilesToDir(result_files, product_pool->getPath());
+		addToDatabase(new_results, product_pool);
 	});
 	QCoreApplication::processEvents();
 	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
@@ -14895,7 +15046,73 @@ void MainWindow::doActionClassificationBatch()
 
 void MainWindow::doActionBuildingSegmentationBatch()
 {
+	if (!haveSelection()) {
+		return;
+	}
+	ccHObject* sel = m_selectedEntities.front();
+	DataBaseHObject* db_prj = GetRootDataBase(sel);
+	if (!db_prj) { return; }
 
+	ccHObject::Container tasks;
+	if (sel->isGroup()) {
+		tasks = GetEnabledObjFromGroup(sel, CC_TYPES::POINT_CLOUD, true, false);
+	}
+	else if (sel->isA(CC_TYPES::POINT_CLOUD)) {
+		tasks.push_back(sel);
+	}
+	
+	QStringList result_files;
+	{
+		//! parameters
+		QString para_settings;
+		// it's a directory
+		QString output_suffix;	
+		result_files = createTasksFiles(db_prj, tasks,
+			"IF_BUILDINGSEG",
+			"/bin/BUILDINGSEG/BUILDINGSEG_KNL.exe", 
+			"/BUILDINGSEG.gctsk",
+			output_suffix, para_settings);
+	}
+
+	QString cmd = getCmdLine(db_prj, "BUILDINGSEG", m_GCSvr_prj_id);
+	if (cmd.isEmpty()) return;
+
+	ccHObject* product_pool = db_prj->getProductSegmented(); if (!product_pool) { return; }
+
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	pDlg.reset(new ccProgressDialog(false, this));
+	pDlg->setMethodTitle(QObject::tr("Building Segmentation"));
+	pDlg->setInfo(QObject::tr("Please wait... building segmentation in progress"));
+	pDlg->setRange(0, 0);
+	pDlg->setModal(false);
+	pDlg->start();
+	
+	QFutureWatcher<void> executer;
+	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
+		//! get result files
+		QStringList nameFilters; nameFilters << "*.las" << "*.laz" << "*.ply" << "*.obj";
+		for (QString res : result_files) {
+			ccHObject* pool = getChildGroupByName(product_pool, QFileInfo(res).fileName());
+			if (pool) {
+				QStringList building_files = QDir(res).entryList(nameFilters, QDir::Files | QDir::Readable, QDir::Name);
+				QStringList new_results = moveFilesToDir(building_files, pool->getPath());
+				addToDatabase(new_results, pool);
+				int bd_num = GetMaxNumberExcludeChildPrefix(pool, BDDB_BUILDING_PREFIX);
+				for (size_t i = 0; i < pool->getChildrenNumber(); i++) {
+					ccHObject* child = pool->getChild(i);
+					QString name = BuildingNameByNumber(bd_num++);
+					child->setName(name);
+				}
+			}
+		}
+	});
+	QCoreApplication::processEvents();
+	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
+	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
+	pDlg->exec();
+	QCoreApplication::processEvents();
+	executer.waitForFinished();
+	QCoreApplication::processEvents();
 }
 
 void MainWindow::doActionPointClassEditor()
@@ -14975,7 +15192,7 @@ void MainWindow::doActionBuildingSegmentEditor()
 
 	ccHObject* building_group = nullptr;
 	if (baseObj) {
-		ccHObject* product_group = baseObj->getProductBuildingSeg();
+		ccHObject* product_group = baseObj->getProductSegmented();
 		building_group = findChildByName(product_group, false, select->getName(), true, CC_TYPES::HIERARCHY_OBJECT, true);
 	}
 	else {

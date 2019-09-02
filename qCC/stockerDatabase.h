@@ -77,10 +77,15 @@ public:
 	using Container = std::vector<DataBaseHObject *>;
 
 public:
+	ccHObject* getPointCloudGroup();
+	ccHObject* getImagesGroup();
+	ccHObject* getMiscsGroup();
 	ccHObject* getProductGroup();
+	ccHObject* getProductItem(QString name);
 	ccHObject* getProductFiltered();
 	ccHObject* getProductClassified();
-	ccHObject* getProductBuildingSeg();
+	ccHObject* getProductSegmented();
+	ccHObject* getProductModels();
 };
 
 class BDBaseHObject : public BDBaseHObject_
@@ -155,15 +160,21 @@ DataBaseHObject* GetRootDataBase(ccHObject* obj);
 BDBaseHObject* GetRootBDBase(ccHObject* obj);
 BDImageBaseHObject* GetRootImageBase(ccHObject* obj);
 
+ccHObject* getChildGroupByName(ccHObject* group, QString name, bool auto_create = true, bool add_to_db = true);
+
 ccHObject * findChildByName(ccHObject * parent, bool recursive, QString filter, bool strict, CC_CLASS_ENUM type_filter = CC_TYPES::OBJECT, bool auto_create = false, ccGenericGLDisplay * inDisplay = 0);
 
 inline QString BuildingNameByNumber(int number) {
 	char name[256];
-	sprintf(name, "%s08d", BDDB_BUILDING_PREFIX, number);
+	sprintf(name, "%s%08d", BDDB_BUILDING_PREFIX, number);
 	return name;
 }
 
 //! return -1 if no child exists
 int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix);
+
+bool StCreatDir(QString dir);
+
+QStringList moveFilesToDir(QStringList list, QString dir);
 
 #endif

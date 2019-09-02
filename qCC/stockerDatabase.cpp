@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "stockerDatabase.h"
+#include "ioctrl/StFileOperator.hpp"
 
 #include "ccHObject.h"
 #include "ccHObjectCaster.h"
@@ -67,95 +68,80 @@ BDImageBaseHObject* GetRootImageBase(ccHObject* obj) {
 	return nullptr;
 }
 
+ccHObject* getChildGroupByName(ccHObject* group, QString name, bool auto_create, bool add_to_db)
+{
+	ccHObject* find_obj = nullptr;
+	for (size_t i = 0; i < group->getChildrenNumber(); i++) {
+		ccHObject* child = group->getChild(i);
+		if (child->isGroup() && child->getName() == name) {
+			find_obj = child;
+		}
+	}
+	if (!find_obj && auto_create) {
+		find_obj = new ccHObject(name);
+		QString path = group->getPath() + "/" + name;
+		if (StCreatDir(path)) {
+			find_obj->setPath(path);
+		}
+		else {
+			delete find_obj; find_obj = nullptr;
+			return nullptr;
+		}
+		group->addChild(find_obj);
+		if (add_to_db) {
+			MainWindow::TheInstance()->addToDB(find_obj, group->getDBSourceType());
+		}
+	}
+	else {
+		QString path = find_obj->getPath();
+		if (path.isEmpty() ||
+			(!QFileInfo(path).exists() && !StCreatDir(path))) {
+			return nullptr;
+		}
+	}
+	return find_obj;
+}
+
+ccHObject * DataBaseHObject::getPointCloudGroup()
+{
+	return getChildGroupByName(this, "pointClouds");
+}
+
+ccHObject * DataBaseHObject::getImagesGroup()
+{
+	return getChildGroupByName(this, "images");
+}
+
+ccHObject * DataBaseHObject::getMiscsGroup()
+{
+	return getChildGroupByName(this, "miscs");
+}
+
 ccHObject* DataBaseHObject::getProductGroup() {
-	ccHObject* products = nullptr;
-	for (size_t i = 0; i < getChildrenNumber(); i++) {
-		ccHObject* child = getChild(i);
-		if (child->isGroup() && child->getName() == "products") {
-			products = child;
-		}
-	}
-	if (!products) {
-		products = new ccHObject("products");
-		QString path = getPath() + "/products";
-		if (QDir().mkdir(path))
-			products->setPath(path);
-		else {
-			delete products; products = nullptr;
-			return nullptr;
-		}
-		addChild(products);
-	}
-	return products;
+	return getChildGroupByName(this, "products");
 }
-ccHObject* DataBaseHObject::getProductFiltered() {
+
+ccHObject * DataBaseHObject::getProductItem(QString name)
+{
 	ccHObject* products = getProductGroup();
 	if (!products) { return nullptr; }
-	ccHObject* find_obj = nullptr;
-	for (size_t i = 0; i < products->getChildrenNumber(); i++) {
-		ccHObject* child = products->getChild(i);
-		if (child->isGroup() && child->getName() == "filtered") {
-			find_obj = child;
-		}
-	}
-	if (!find_obj) {
-		find_obj = new ccHObject("filtered");
-		QString path = products->getPath() + "/filtered";
-		if (QDir().mkdir(path))
-			find_obj->setPath(path);
-		else {
-			delete find_obj; find_obj = nullptr;
-			return nullptr;
-		}
-		products->addChild(find_obj);
-	}
-	return find_obj;
+	return getChildGroupByName(products, name);
 }
-ccHObject* DataBaseHObject::getProductClassified() {
-	ccHObject* products = getProductGroup();
-	if (!products) { return nullptr; }
-	ccHObject* find_obj = nullptr;
-	for (size_t i = 0; i < products->getChildrenNumber(); i++) {
-		ccHObject* child = products->getChild(i);
-		if (child->isGroup() && child->getName() == "classified") {
-			find_obj = child;
-		}
-	}
-	if (!find_obj) {
-		find_obj = new ccHObject("classified");
-		QString path = products->getPath() + "/classified";
-		if (QDir().mkdir(path))
-			find_obj->setPath(path);
-		else {
-			delete find_obj; find_obj = nullptr;
-			return nullptr;
-		}
-		products->addChild(find_obj);
-	}
-	return find_obj;
+ccHObject* DataBaseHObject::getProductFiltered() 
+{
+	return getProductItem("filtered");
 }
-ccHObject* DataBaseHObject::getProductBuildingSeg() {
-	ccHObject* products = getProductGroup();
-	if (!products) { return nullptr; }
-	ccHObject* find_obj = nullptr;
-	for (size_t i = 0; i < products->getChildrenNumber(); i++) {
-		ccHObject* child = products->getChild(i);
-		if (child->isGroup() && child->getName() == "buildings") {
-			find_obj = child;
-		}
-	}
-	if (!find_obj) {
-		find_obj = new ccHObject("buildings");
-		QString path = products->getPath() + "/buildings";
-		if (QDir().mkdir(path))
-			find_obj->setPath(path);
-		else {
-			delete find_obj; find_obj = nullptr;
-			return nullptr;
-		}
-		products->addChild(find_obj);
-	}
-	return find_obj;
+ccHObject* DataBaseHObject::getProductClassified() 
+{
+	return getProductItem("classified");
+}
+ccHObject * DataBaseHObject::getProductSegmented()
+{
+	return getProductItem("segmented");
+}
+ccHObject * DataBaseHObject::getProductModels()
+{
+	return getProductItem("models");
 }
 
 StBuilding* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {
@@ -331,4 +317,36 @@ int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix/*, CC_CLASS_E
 		return *name_numbers.rbegin();
 	}
 	return -1;
+}
+
+bool StCreatDir(QString dir)
+{
+	if (QDir(dir).exists()) {
+		return true;
+	}
+	return CreateDir(dir.toStdString().c_str());
+}
+
+QStringList moveFilesToDir(QStringList list, QString dir)
+{
+	QStringList new_files;
+	if (StCreatDir(dir)) {
+		for (size_t i = 0; i < list.size(); i++) {
+			QString & file = const_cast<QString&>(list[i]);
+			QFileInfo file_info(file);
+			QString new_file = dir + "/" + file_info.fileName();
+			if (QFile::copy(file, new_file)) {
+				QFile::remove(file);
+				new_files.append(new_file);
+			}
+			else {
+				new_files.append(file);
+			}
+		}
+	}
+	else {
+		return list;
+	}
+
+	return new_files;
 }

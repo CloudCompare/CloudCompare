@@ -73,6 +73,8 @@ class bdr2Point5DimEditor;
 class bdrImageEditorPanel;
 class bdrPlaneEditorDlg;
 
+class bdrSettingBDSegDlg;
+
 class PolyFitObj;
 
 class StDBMainRoot;
@@ -180,6 +182,7 @@ public:
 	}
 
 	void addToDatabase(QStringList files, ccHObject* import_pool, bool remove_exist = true, bool auto_sort = true);
+	ccHObject::Container addPointsToDatabase(QStringList files, ccHObject* import_pool, bool remove_exist = true, bool auto_sort = true);
 	
 	void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
 	void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
@@ -629,6 +632,11 @@ private slots:
 	void doActionBuildingSegmentEditor();	
 	void deactivateBuildingSegmentEditor(bool);
 
+	void doAactionSettingsGroundFiltering();
+	void doActionSettingsClassification();
+	void doActionSettingsBuildingSeg();
+	
+
 private:
 	//! Shortcut: asks the user to select one cloud
 	/** \param defaultCloudEntity a cloud to select by default (optional)
@@ -843,6 +851,8 @@ private:
 	bdr2Point5DimEditor* m_pbdrImshow;
 	bdrImageEditorPanel* m_pbdrImagePanel;
 	bdrPlaneEditorDlg* m_pbdrPlaneEditDlg;
+
+	bdrSettingBDSegDlg* m_pbdrSettingBDSegDlg;
 
 	PolyFitObj* polyfit_obj;
 	int m_GCSvr_prj_id;

@@ -115,6 +115,7 @@
 #include "ccUnrollDlg.h"
 #include "ccVolumeCalcTool.h"
 #include "ccWaveformDialog.h"
+#include "bdrSettingBDSegDlg.h"
 
 //other
 #include "ccCropTool.h"
@@ -243,6 +244,7 @@ MainWindow::MainWindow()
 	, m_pbdrPlaneEditDlg(nullptr)
 	, polyfit_obj(nullptr)
 	, m_GCSvr_prj_id(0)
+	, m_pbdrSettingBDSegDlg(nullptr)
 {
 	m_UI->setupUi( this );
 
@@ -429,6 +431,9 @@ MainWindow::MainWindow()
 	m_status_coord2D->setStatusTip("Image Coord");
 	m_status_coord2D->setMinimumWidth(150);
 	status_bar->addPermanentWidget(m_status_coord2D);
+	//////////////////////////////////////////////////////////////////////////
+
+	m_pbdrSettingBDSegDlg = new bdrSettingBDSegDlg(this);
 	//////////////////////////////////////////////////////////////////////////
 
 	connectActions();
@@ -1030,6 +1035,10 @@ void MainWindow::connectActions()
 
 	connect(m_UI->actionBuildingSegmentEditor,		&QAction::triggered, this, &MainWindow::doActionBuildingSegmentEditor);
 	connect(m_UI->actionPointClassEditor,			&QAction::triggered, this, &MainWindow::doActionPointClassEditor);
+
+	connect(m_UI->actionSettingsGroundFiltering, &QAction::triggered, this, &MainWindow::doAactionSettingsGroundFiltering);
+	connect(m_UI->actionSettingsClassification, &QAction::triggered, this, &MainWindow::doActionSettingsClassification);
+	connect(m_UI->actionSettingsBuildingSeg, &QAction::triggered, this, &MainWindow::doActionSettingsBuildingSeg);
 }
 
 void MainWindow::doActionChangeTabTree(int index)
@@ -14560,7 +14569,8 @@ void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool, bool 
 
 	if (import_pool->getName() == "pointClouds" || 
 		import_pool->getName() == "filtered" ||
-		import_pool->getName() == "classified") {
+		import_pool->getName() == "classified" || 
+		import_pool->getName() == "segmented") {
 
 		for (ccHObject* lf : loaded_files) {
 			if (lf->isA(CC_TYPES::HIERARCHY_OBJECT)) {
@@ -14594,6 +14604,43 @@ void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool, bool 
 		db(CC_TYPES::DB_MAINDB)->sortItemChildren(import_pool, ccDBRoot::SORT_A2Z);
 	}
 }
+
+ccHObject::Container MainWindow::addPointsToDatabase(QStringList files, ccHObject * import_pool, bool remove_exist, bool auto_sort)
+{
+	ccHObject::Container loaded_files = addToDB(files, CC_TYPES::DB_MAINDB);
+	ccHObject::Container trans_files;
+	for (ccHObject* lf : loaded_files) {
+		if (lf->isA(CC_TYPES::HIERARCHY_OBJECT)) {
+			ccHObject::Container loaded_objs;
+			lf->filterChildren(loaded_objs, false, CC_TYPES::POINT_CLOUD, true);
+			for (ccHObject* pc : loaded_objs) {
+				//! check for existed
+				if (remove_exist) {
+					for (size_t i = 0; i < import_pool->getChildrenNumber(); i++) {
+						ccHObject* child = import_pool->getChild(i);
+						if (child->getName() == pc->getName()) {
+							removeFromDB(child);
+						}
+					}
+				}
+				pc->getParent()->transferChild(pc, *import_pool);
+				pc->setPath(lf->getPath());
+				trans_files.push_back(pc);
+			}
+			removeFromDB(lf, false);
+		}
+		else if (lf->isA(CC_TYPES::POINT_CLOUD)) {
+			assert(false);//! not happened
+		}
+	}
+
+	if (auto_sort) {
+		db(CC_TYPES::DB_MAINDB)->sortItemChildren(import_pool, ccDBRoot::SORT_A2Z);
+	}
+	return trans_files;
+}
+
+//QStringList s_import_filters;
 
 void MainWindow::doActionImportData()
 {
@@ -14657,7 +14704,7 @@ void MainWindow::doActionImportData()
 		currentOpenDlgFilter.clear(); //this way FileIOFilter will try to guess the file type automatically!
 	}
 
-	addToDatabase(selectedFiles, import_pool);
+	addPointsToDatabase(selectedFiles, import_pool);
 }
 
 void MainWindow::doActionImportFolder()
@@ -14696,22 +14743,20 @@ void MainWindow::doActionImportFolder()
 
 	QStringList files;
 	QStringList nameFilters;
-	if (import_pool->getName() == "pointClouds")
-		nameFilters << "*.las" << "*.laz" << "*.ply" << "*.obj";
-	else if (import_pool->getName() == "images") {
-		nameFilters << "*.tif" << "*.tiff";
-	}
-	else return;
-
-	//QDir dir(dirname);
-	//files = dir.entryList(nameFilters, QDir::Files | QDir::Readable, QDir::Name);
+	// TODO: Dialog settings
+	//if (import_pool->getName() == "pointClouds")
+	nameFilters << "*.las" << "*.laz" << "*.ply" << "*.obj";
+// 	else if (import_pool->getName() == "images") {
+// 		nameFilters << "*.tif" << "*.tiff";
+// 	}
+	//else return;
 
 	QDirIterator dir_iter(dirname, nameFilters, QDir::Files | QDir::NoSymLinks | QDir::Readable, QDirIterator::Subdirectories);
 	while (dir_iter.hasNext()) {
 		files.append(dir_iter.next());
 	}
 	
-	addToDatabase(files, import_pool);
+	addPointsToDatabase(files, import_pool);
 }
 
 void MainWindow::doActionEditDatabase()
@@ -14739,9 +14784,10 @@ void MainWindow::doActionCreateBuildingProject()
 			QString databasePath = dataObj->getPath();
 			if (!databasePath.isEmpty()) {
 				QString dir = databasePath + "/" + "IF_BUILDINGRECON";
-				if (!StCreatDir(dir)) return;
-				project_dir = dir + "/" + select->getName();
-				if (!StCreatDir(project_dir)) return;
+				if (StCreatDir(dir)) {
+					project_dir = dir + "/" + select->getName();
+					if (!StCreatDir(project_dir)) project_dir.clear();
+				}
 			}
 		}
 		if (!QFileInfo(project_dir).exists()) {
@@ -14762,8 +14808,8 @@ void MainWindow::doActionCreateBuildingProject()
 	BDBaseHObject* baseObj = new BDBaseHObject(select->getName());
 	QString bbprj_path = project_dir + "/" + baseObj->getName() + ".bbprj";
 
-	bool save_prj = false;
-	if (QFileInfo(bbprj_path).exists()) {
+	bool save_prj = !QFileInfo(bbprj_path).exists();
+	if (!save_prj) {
 		QMessageBox message_box(QMessageBox::Question,
 			tr("Project exists"),
 			tr("Are you sure you want to overwrite?"),
@@ -14876,7 +14922,7 @@ inline QStringList createTasksFiles(DataBaseHObject* db_prj,
 	QString exe_relative_path,
 	QString gcTsk_relative_path,
 	QString output_suffix, 
-	QString para_settings)
+	QStringList para_settings)
 {
 	QStringList result_files;
 
@@ -14888,11 +14934,15 @@ inline QStringList createTasksFiles(DataBaseHObject* db_prj,
 	for (ccHObject* tsk : tasks) {
 		QString tsk_file = tsk_dir + "/" + tsk->getName() + ".tsk";
 		QString result_file = output_dir + "/" + tsk->getName() + output_suffix;
+		if (output_suffix.isEmpty() || output_suffix == "/" || output_suffix == "\\") {
+			StCreatDir(result_file);
+		}
 		FILE* fp = fopen(tsk_file.toStdString().c_str(), "w");
 		fprintf(fp, "%s\n", tsk->getPath().toStdString().c_str());
 		fprintf(fp, "%s\n", result_file.toStdString().c_str());
-		fprintf(fp, "%s\n", para_settings.toStdString().c_str());
-
+		for (QString para : para_settings) {
+			fprintf(fp, "%s\n", para.toStdString().c_str());
+		}
 		fclose(fp);
 		tsk_files.append(tsk_file);
 		result_files.append(result_file);
@@ -15006,7 +15056,7 @@ void MainWindow::doActionClassificationBatch()
 	QStringList result_files;
 	{
 		//! parameters
-		QString para_settings;
+		QStringList para_settings;
 		//! filters
 		QString output_suffix = ".las";		
 		result_files = createTasksFiles(db_prj, tasks,
@@ -15035,13 +15085,10 @@ void MainWindow::doActionClassificationBatch()
 		QStringList new_results = moveFilesToDir(result_files, product_pool->getPath());
 		addToDatabase(new_results, product_pool);
 	});
-	QCoreApplication::processEvents();
 	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
 	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
 	pDlg->exec();
-	QCoreApplication::processEvents();
 	executer.waitForFinished();
-	QCoreApplication::processEvents();
 }
 
 void MainWindow::doActionBuildingSegmentationBatch()
@@ -15064,9 +15111,10 @@ void MainWindow::doActionBuildingSegmentationBatch()
 	QStringList result_files;
 	{
 		//! parameters
-		QString para_settings;
+		if (!m_pbdrSettingBDSegDlg) { m_pbdrSettingBDSegDlg = new bdrSettingBDSegDlg(this); }
+		QStringList para_settings = m_pbdrSettingBDSegDlg->getParameters();
 		// it's a directory
-		QString output_suffix;	
+		QString output_suffix = "/";
 		result_files = createTasksFiles(db_prj, tasks,
 			"IF_BUILDINGSEG",
 			"/bin/BUILDINGSEG/BUILDINGSEG_KNL.exe", 
@@ -15092,27 +15140,33 @@ void MainWindow::doActionBuildingSegmentationBatch()
 		//! get result files
 		QStringList nameFilters; nameFilters << "*.las" << "*.laz" << "*.ply" << "*.obj";
 		for (QString res : result_files) {
-			ccHObject* pool = getChildGroupByName(product_pool, QFileInfo(res).fileName());
+			QString result_dir = res;
+			if (res.back() == "/" || res.back() == "\\") {
+				result_dir.chop(1);
+			}
+			ccHObject* pool = getChildGroupByName(product_pool, QFileInfo(result_dir).fileName());
 			if (pool) {
 				QStringList building_files = QDir(res).entryList(nameFilters, QDir::Files | QDir::Readable, QDir::Name);
-				QStringList new_results = moveFilesToDir(building_files, pool->getPath());
-				addToDatabase(new_results, pool);
-				int bd_num = GetMaxNumberExcludeChildPrefix(pool, BDDB_BUILDING_PREFIX);
-				for (size_t i = 0; i < pool->getChildrenNumber(); i++) {
-					ccHObject* child = pool->getChild(i);
-					QString name = BuildingNameByNumber(bd_num++);
-					child->setName(name);
+				for (size_t i = 0; i < building_files.size(); i++) {
+					QString & s = const_cast<QString&>(building_files.at(i));
+					s = result_dir + "/" + s;
 				}
+				QStringList new_results = moveFilesToDir(building_files, pool->getPath());
+				ccHObject::Container added_files = addPointsToDatabase(new_results, pool, true, false);
+				int bd_num = GetMaxNumberExcludeChildPrefix(pool, BDDB_BUILDING_PREFIX) + 1;
+				for (ccHObject* pc : added_files) {
+					pc->setName(BuildingNameByNumber(bd_num++));
+				}
+				db(pool->getDBSourceType())->sortItemChildren(pool, ccDBRoot::SORT_A2Z);
 			}
 		}
+		refreshAll();
+		updateUI();
 	});
-	QCoreApplication::processEvents();
 	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
 	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
 	pDlg->exec();
-	QCoreApplication::processEvents();
 	executer.waitForFinished();
-	QCoreApplication::processEvents();
 }
 
 void MainWindow::doActionPointClassEditor()
@@ -15193,7 +15247,8 @@ void MainWindow::doActionBuildingSegmentEditor()
 	ccHObject* building_group = nullptr;
 	if (baseObj) {
 		ccHObject* product_group = baseObj->getProductSegmented();
-		building_group = findChildByName(product_group, false, select->getName(), true, CC_TYPES::HIERARCHY_OBJECT, true);
+		building_group = getChildGroupByName(product_group, select->getName(), true, true);
+		//building_group = findChildByName(product_group, false, select->getName(), true, CC_TYPES::HIERARCHY_OBJECT, true);
 	}
 	else {
 		building_group = new ccHObject(select->getName());
@@ -15243,4 +15298,19 @@ void MainWindow::deactivateBuildingSegmentEditor(bool state)
 	{
 		win->redraw();
 	}
+}
+
+void MainWindow::doAactionSettingsGroundFiltering()
+{
+}
+
+void MainWindow::doActionSettingsClassification()
+{
+}
+
+void MainWindow::doActionSettingsBuildingSeg()
+{
+	if (!m_pbdrSettingBDSegDlg) m_pbdrSettingBDSegDlg = new bdrSettingBDSegDlg(this);
+	m_pbdrSettingBDSegDlg->setModal(false);
+	m_pbdrSettingBDSegDlg->show();
 }

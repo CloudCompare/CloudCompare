@@ -596,12 +596,21 @@
     <property name="title">
      <string>Segmentation</string>
     </property>
+    <widget class="QMenu" name="menuSettings">
+     <property name="title">
+      <string>Settings</string>
+     </property>
+     <addaction name="actionSettingsGroundFiltering"/>
+     <addaction name="actionSettingsClassification"/>
+     <addaction name="actionSettingsBuildingSeg"/>
+    </widget>
     <addaction name="actionGroundFilteringBatch"/>
     <addaction name="actionClassificationBatch"/>
     <addaction name="actionPointClassEditor"/>
     <addaction name="separator"/>
     <addaction name="actionBuildingSegmentationBatch"/>
     <addaction name="actionBuildingSegmentEditor"/>
+    <addaction name="menuSettings"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -4922,6 +4931,21 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="iconText">
     <string>Editor</string>
+   </property>
+  </action>
+  <action name="actionSettingsGroundFiltering">
+   <property name="text">
+    <string>Ground Filtering</string>
+   </property>
+  </action>
+  <action name="actionSettingsClassification">
+   <property name="text">
+    <string>Classification</string>
+   </property>
+  </action>
+  <action name="actionSettingsBuildingSeg">
+   <property name="text">
+    <string>Building Segmentation</string>
    </property>
   </action>
  </widget>

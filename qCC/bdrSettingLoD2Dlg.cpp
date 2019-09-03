@@ -30,28 +30,8 @@ bdrSettingLoD2Dlg::bdrSettingLoD2Dlg(QWidget* parent)
 {
 	setupUi(this);
 
-	connect(PointcloudFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browsePointcloudFilename);
-	connect(OutputFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browseOutputFilename);
 	connect(ConfigureFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browseConfigureFilename);
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
-}
-
-void bdrSettingLoD2Dlg::browsePointcloudFilename()
-{
-	QString Filename =
-		QFileDialog::getOpenFileName(this,
-			"Open PointCloud file",
-			PointcloudFilePathLineEdit->text(),
-			"Point Cloud (*.ply);;Las File (*.las *.laz)");
-
-	if (!Filename.isEmpty())
-		PointcloudFilePathLineEdit->setText(Filename);
-
-	if (OutputFilePathLineEdit->text().isEmpty()) {
-		QFileInfo filepath(Filename);
-		QString output_path = filepath.path() + "/" + filepath.completeBaseName() + ".obj";
-		OutputFilePathLineEdit->setText(output_path);
-	}
 }
 
 int bdrSettingLoD2Dlg::GroundHeightMode()
@@ -73,18 +53,6 @@ double bdrSettingLoD2Dlg::UserDefinedGroundHeight()
 	return GroundHeightUserDoubleSpinBox->value();
 }
 
-void bdrSettingLoD2Dlg::browseOutputFilename()
-{
-	QString Filename = 
-		QFileDialog::getSaveFileName(this, 
-			"Output model file", 
-			ConfigureFilePathLineEdit->text(),
-			"obj model file (*.obj)");
-
-	if (!Filename.isEmpty())
-		OutputFilePathLineEdit->setText(Filename);
-}
-
 void bdrSettingLoD2Dlg::browseConfigureFilename()
 {
 	QString Filename =
@@ -99,6 +67,5 @@ void bdrSettingLoD2Dlg::browseConfigureFilename()
 
 void bdrSettingLoD2Dlg::saveSettings()
 {
-	OutputFilePathLineEdit;
 	ConfigureFilePathLineEdit;
 }

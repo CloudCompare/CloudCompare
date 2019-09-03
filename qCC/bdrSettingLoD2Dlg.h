@@ -37,8 +37,6 @@ public:
 
 protected slots:
 
-	void browsePointcloudFilename();
-	void browseOutputFilename();
 	void browseConfigureFilename();
 	//! Saves (temporarily) the dialog parameters on acceptation
 	void saveSettings();

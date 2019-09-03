@@ -388,6 +388,7 @@ MainWindow::MainWindow()
 
 	m_progressBar = new QProgressBar; 
 	m_progressBar->setFixedWidth(500);
+//	m_progressBar->setWindowModality(Qt::NonModal);
 
 	m_progressButton = new QPushButton;
 	m_progressButton->setText("Cancel");
@@ -11856,10 +11857,10 @@ BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
 		//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return nullptr;
 	}
-	if (!stocker::BuildingPrepare(block_prj, error_info)) {
-		//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return nullptr;
-	}
+// 	if (!stocker::BuildingPrepare(block_prj, error_info)) {
+// 		//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+// 		return nullptr;
+// 	}
 
 	QFileInfo prj_file(Filename);
 	QString prj_name = prj_file.completeBaseName();
@@ -11893,7 +11894,7 @@ BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
 	if (!bd_grp) {
 		bd_grp = new BDBaseHObject(prj_name);
 		for (auto & bd : block_prj.m_builder.sbuild) {
-			if (bd->data.convex_hull_xy.empty()) { continue; }
+			//if (bd->data.convex_hull_xy.empty()) { continue; }
 
 			QString building_name = bd->GetName().Str().c_str();
 			QFileInfo point_path(bd->data.file_path.ori_points.c_str());
@@ -11903,16 +11904,26 @@ BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
 			building->setName(building_name);
 			newGroup->transferChildren(*building);
 			ccHObject::Container clouds;
-			building->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
-			for (ccHObject* cloud : clouds) {
-				if (cloud) {
-					static_cast<ccGenericPointCloud*>(cloud)->setName(building_name + BDDB_ORIGIN_CLOUD_SUFFIX);
-					if (cloud->hasColors()) {
-						cloud->showSF(false);
-						cloud->showColors(true);
-					}
-				}
+			building->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD); if (clouds.empty()) continue;
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(clouds.front()); if (!cloud) { continue; }
+			cloud->setName(building_name + BDDB_ORIGIN_CLOUD_SUFFIX);
+			if (cloud->hasColors()) {
+				cloud->showSF(false);
+				cloud->showColors(true);
 			}
+			
+			stocker::Contour3d points = GetPointsFromCloud(cloud);
+
+			//! prepare building by points
+			CCVector3d minbb, maxbb;
+			if (cloud->getGlobalBB(minbb, maxbb)) {
+				bd->data.bbox.Add({ minbb.x,minbb.y, minbb.z });
+				bd->data.bbox.Add({ maxbb.x,maxbb.y, maxbb.z });
+			}
+			if (!PrepareBuildingByPoints(block_prj, bd->data, points)) {
+				continue;
+			}
+
 			bd_grp->addChild(building);
 		}
 	}
@@ -11953,7 +11964,15 @@ void MainWindow::doActionBDProjectLoad()
 	settings.setValue(ccPS::CurrentPath(), currentPath);
 	settings.endGroup();
 
-	BDBaseHObject* bd_grp = LoadBDReconProject(Filename, this);
+	BDBaseHObject* bd_grp = nullptr;
+	try {
+		bd_grp = LoadBDReconProject(Filename, this);
+	}
+	catch (const std::exception& e) {
+		dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	std::cout << "building reconstruction project loaded" << std::endl;
 	if (bd_grp) {
 		switchDatabase(CC_TYPES::DB_BUILDING);
 		addToDB_Build(bd_grp);
@@ -13981,9 +14000,14 @@ void MainWindow::doActionBDLoD1Generation()
 void MainWindow::doActionBDLoD2Generation()
 {
 	if (!haveSelection()) return;
-// 	if (!m_pbdrSettingLoD2Dlg)
-// 		m_pbdrSettingLoD2Dlg = new bdrSettingLoD2Dlg(this);
-// 	
+	
+	if (!m_pbdrSettingLoD2Dlg) {
+		m_pbdrSettingLoD2Dlg = new bdrSettingLoD2Dlg(this);
+		if (!m_pbdrSettingLoD2Dlg->exec()) {
+			return;
+		}
+	}
+
 // 	m_pbdrSettingLoD2Dlg->setModal(false);
 // 	m_pbdrSettingLoD2Dlg->setWindowModality(Qt::NonModal);
 	//if (!m_pbdrSettingLoD2Dlg->exec()) return;	// TODO: TEMP!!! 20190731
@@ -14001,7 +14025,8 @@ void MainWindow::doActionBDLoD2Generation()
 			building_entites.insert(building_entites.end(), bds.begin(), bds.end());
 		}
 	}
-	
+	bool ask_for_overwrite = true;
+	bool overwrite_all = false;
 	if (building_entites.empty()) {
 		ccConsole::Error("No building in selection!");
 		return;
@@ -14018,9 +14043,80 @@ void MainWindow::doActionBDLoD2Generation()
 // 		else /*if (m_pbdrSettingLoD2Dlg->GroundHeightMode() == 0)*/ {
 // 			height = baseObj->GetBuildingUnit(GetParentBuilding(bd_entity)->getName().toStdString()).ground_height;
 // 		}
+		if (bd_entity->isA(CC_TYPES::ST_BUILDING)) {
+			QString building_name = bd_entity->getName();
+			//! check for footprints
+			StBlockGroup* blockGroup = baseObj->GetBlockGroup(building_name);
+			if (!blockGroup) {
+				continue;
+			}
+			ccHObject::Container fts = GetEnabledObjFromGroup(blockGroup, CC_TYPES::ST_FOOTPRINT, true, false);
+			bool found_footprints = !fts.empty();
+			bool conduct_get_ft = false;
+			if (found_footprints && ask_for_overwrite) {
+				//! ask for skip
+				QMessageBox::StandardButton button = QMessageBox::question(this,
+					"Footprints exist",
+					"overwrite the existing footprints? click no to use the existing footprints for lod2 generation",
+					QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll,
+					QMessageBox::YesToAll);
+				if (button == QMessageBox::Yes) {
+					ask_for_overwrite = true;
+					conduct_get_ft = true;
+				}
+				else if (button == QMessageBox::No) {
+					ask_for_overwrite = true;
+					conduct_get_ft = false;
+				}
+				else if (button == QMessageBox::YesToAll) {
+					ask_for_overwrite = false;
+					overwrite_all = true;
+					conduct_get_ft = true;
+				}
+				else if (button == QMessageBox::NoToAll) {
+					ask_for_overwrite = false;
+					overwrite_all = false;
+					conduct_get_ft = false;
+				}
+			}
+			else {
+				conduct_get_ft = found_footprints ? overwrite_all : true;
+			}
+			if (conduct_get_ft) {
+				blockGroup->removeAllChildren();
+				try
+				{
+					StPrimGroup* prim_group = baseObj->GetPrimitiveGroup(building_name);
+					if (!prim_group) {
+						dispToConsole("generate primitives first!", ERR_CONSOLE_MESSAGE);
+						return;
+					}
 
-		//ccHObject* bd_entity = entity->isA(CC_TYPES::ST_FOOTPRINT) ? entity : GetParentBuilding(entity);
-		//if (!bd_entity) return;
+					try {
+						stocker::BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
+						ccHObject::Container footprints = GenerateFootPrints(prim_group, build_unit.ground_height);
+						for (ccHObject* ft : footprints) {
+							if (ft && ft->isA(CC_TYPES::ST_FOOTPRINT)) {
+								SetGlobalShiftAndScale(ft);
+								ft->setDisplay_recursive(bd_entity->getDisplay());
+								addToDB(ft, baseObj->getDBSourceType(), false, false);
+							}
+						}
+					}
+					catch (const std::runtime_error& e) {
+						dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+						//return;
+					}
+				}
+				catch (const std::exception&)
+				{
+					continue;
+				}
+				if (m_pbdrSettingLoD2Dlg->PolygonPartitionGroupBox->isChecked()) {
+					PackFootprints(bd_entity);
+				}
+			}
+		}
 		
 		try {
 			ccHObject* bd_model_obj = LoD2FromFootPrint(bd_entity);
@@ -14122,7 +14218,16 @@ void MainWindow::doActionBDLoD2Generation()
 
 void MainWindow::doActionSettingsLoD2()
 {
-
+	if (!m_pbdrSettingLoD2Dlg) {
+		m_pbdrSettingLoD2Dlg = new bdrSettingLoD2Dlg(this);
+		m_pbdrSettingLoD2Dlg->setModal(false);
+	}
+	if (m_pbdrSettingLoD2Dlg->isHidden()) {
+		m_pbdrSettingLoD2Dlg->show();
+	}
+	else {
+		m_pbdrSettingLoD2Dlg->hide();
+	}
 }
 
 void MainWindow::doActionBDTextureMapping()

@@ -66,7 +66,7 @@ struct dbTreeSelectionInfo;
 class bdrLine3DppDlg;
 class bdrDeductionDlg;
 class bdrPolyFitDlg;
-class bdr3D4EMDlg;
+class bdrSettingLoD2Dlg;
 class bdrPlaneSegDlg;
 class bdrFacetFilterDlg;
 class bdr2Point5DimEditor;
@@ -582,6 +582,8 @@ private slots:
 	/// 3d4em
 	void doActionBDLoD2Generation();
 
+	void doActionSettingsLoD2();
+
 	void doActionBDTextureMapping();
 
 	void doActionBDConstrainedMesh();
@@ -847,7 +849,7 @@ private:
 	bdrDeductionDlg* m_pbdrddtDlg;
 	bdrPolyFitDlg* m_pbdrpfDlg;
 	bdrFacetFilterDlg* m_pbdrffDlg;
-	bdr3D4EMDlg* m_pbdr3d4emDlg;
+	bdrSettingLoD2Dlg* m_pbdrSettingLoD2Dlg;
 	bdr2Point5DimEditor* m_pbdrImshow;
 	bdrImageEditorPanel* m_pbdrImagePanel;
 	bdrPlaneEditorDlg* m_pbdrPlaneEditDlg;

@@ -18,18 +18,18 @@
 #ifndef BDR_3D4EM_DLG_HEADER
 #define BDR_3D4EM_DLG_HEADER
 
-#include "ui_bdr3D4EMDlg.h"
+#include "ui_bdrSettingLoD2Dlg.h"
 #include "mainwindow.h"
 
 //! Dialog for qRansacSD plugin
-class bdr3D4EMDlg : public QDialog, public Ui::BDR3D4EMDlg
+class bdrSettingLoD2Dlg : public QDialog, public Ui::bdrSettingLoD2Dlg
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	explicit bdr3D4EMDlg(QWidget* parent = 0);
+	explicit bdrSettingLoD2Dlg(QWidget* parent = 0);
 
 	int GroundHeightMode();
 	double UserDefinedGroundHeight();

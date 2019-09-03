@@ -156,7 +156,7 @@
 #include "bdrLine3DppDlg.h"
 #include "bdrDeductionDlg.h"
 #include "bdrPolyFitDlg.h"
-#include "bdr3D4EMDlg.h"
+#include "bdrSettingLoD2Dlg.h"
 #include "bdrFacetFilterDlg.h"
 #include "bdr2.5DimEditor.h"
 #include "bdrImageEditorPanel.h"
@@ -237,7 +237,7 @@ MainWindow::MainWindow()
 	, m_pbdrl3dDlg(nullptr)
 	, m_pbdrddtDlg(nullptr)
 	, m_pbdrpfDlg(nullptr)
-	, m_pbdr3d4emDlg(nullptr)
+	, m_pbdrSettingLoD2Dlg(nullptr)
 	, m_pbdrffDlg(nullptr)
 	, m_pbdrImshow(nullptr)	
 	, m_pbdrImagePanel(nullptr)
@@ -514,7 +514,7 @@ MainWindow::~MainWindow()
 	m_pbdrddtDlg = nullptr;
 	m_pbdrpfDlg = nullptr;
 	m_pbdrffDlg = nullptr;
-	m_pbdr3d4emDlg = nullptr;
+	m_pbdrSettingLoD2Dlg = nullptr;
 	
 	m_pbdrImshow = nullptr;
 	m_pbdrImagePanel = nullptr;
@@ -990,6 +990,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBDPolyFitSettings,			&QAction::triggered, this, &MainWindow::doActionBDPolyFitSettings);
 	connect(m_UI->actionBDLoD1Generation,			&QAction::triggered, this, &MainWindow::doActionBDLoD1Generation);
 	connect(m_UI->actionBD3D4EM,					&QAction::triggered, this, &MainWindow::doActionBDLoD2Generation);
+	connect(m_UI->actionSettingLoD2,				&QAction::triggered, this, &MainWindow::doActionSettingsLoD2);
+
 	connect(m_UI->actionBDTextureMapping,			&QAction::triggered, this, &MainWindow::doActionBDTextureMapping);
 	connect(m_UI->actionBDConstrainedMesh,			&QAction::triggered, this, &MainWindow::doActionBDConstrainedMesh);
 	connect(m_UI->actionBDDisplayPlaneOn,			&QAction::triggered, this, &MainWindow::doActionBDDisplayPlaneOn);
@@ -13979,12 +13981,12 @@ void MainWindow::doActionBDLoD1Generation()
 void MainWindow::doActionBDLoD2Generation()
 {
 	if (!haveSelection()) return;
-// 	if (!m_pbdr3d4emDlg)
-// 		m_pbdr3d4emDlg = new bdr3D4EMDlg(this);
+// 	if (!m_pbdrSettingLoD2Dlg)
+// 		m_pbdrSettingLoD2Dlg = new bdrSettingLoD2Dlg(this);
 // 	
-// 	m_pbdr3d4emDlg->setModal(false);
-// 	m_pbdr3d4emDlg->setWindowModality(Qt::NonModal);
-	//if (!m_pbdr3d4emDlg->exec()) return;	// TODO: TEMP!!! 20190731
+// 	m_pbdrSettingLoD2Dlg->setModal(false);
+// 	m_pbdrSettingLoD2Dlg->setWindowModality(Qt::NonModal);
+	//if (!m_pbdrSettingLoD2Dlg->exec()) return;	// TODO: TEMP!!! 20190731
 
 	ccHObject::Container sels = m_selectedEntities;
 	//doActionBDFootPrintAuto();	// TODO: TEMP!!!!
@@ -14010,10 +14012,10 @@ void MainWindow::doActionBDLoD2Generation()
 		BDBaseHObject* baseObj = GetRootBDBase(bd_entity);
 
 // 		double height = DBL_MAX;
-// 		if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
-// 			height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
+// 		if (m_pbdrSettingLoD2Dlg->GroundHeightMode() == 2) {
+// 			height = m_pbdrSettingLoD2Dlg->UserDefinedGroundHeight();
 // 		}
-// 		else /*if (m_pbdr3d4emDlg->GroundHeightMode() == 0)*/ {
+// 		else /*if (m_pbdrSettingLoD2Dlg->GroundHeightMode() == 0)*/ {
 // 			height = baseObj->GetBuildingUnit(GetParentBuilding(bd_entity)->getName().toStdString()).ground_height;
 // 		}
 
@@ -14062,8 +14064,8 @@ void MainWindow::doActionBDLoD2Generation()
 				std::vector<CCVector3> contour_points = contour_polygon->getPoints(false);
 				std::vector<stocker::Contour3d> bd_contour_points_;
 				stocker::Contour3d bd_contour_points;
-				if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
-					double user_defined_ground_height = m_pbdr3d4emDlg->UserDefinedGroundHeight();
+				if (m_pbdrSettingLoD2Dlg->GroundHeightMode() == 2) {
+					double user_defined_ground_height = m_pbdrSettingLoD2Dlg->UserDefinedGroundHeight();
 					for (auto & pt : contour_points) {
 						bd_contour_points.push_back(stocker::Vec3d(pt.x, pt.y, user_defined_ground_height));
 					}
@@ -14079,12 +14081,12 @@ void MainWindow::doActionBDLoD2Generation()
 		}
 	}
 
-	if (m_pbdr3d4emDlg->GroundHeightMode() == 2) {
-		builder_3d4em.SetGroundHeight(m_pbdr3d4emDlg->UserDefinedGroundHeight());
+	if (m_pbdrSettingLoD2Dlg->GroundHeightMode() == 2) {
+		builder_3d4em.SetGroundHeight(m_pbdrSettingLoD2Dlg->UserDefinedGroundHeight());
 	}
 
-	std::string output_path = m_pbdr3d4emDlg->OutputFilePathLineEdit->text().toStdString();
-	std::string ini_path = m_pbdr3d4emDlg->ConfigureFilePathLineEdit->text().toStdString();
+	std::string output_path = m_pbdrSettingLoD2Dlg->OutputFilePathLineEdit->text().toStdString();
+	std::string ini_path = m_pbdrSettingLoD2Dlg->ConfigureFilePathLineEdit->text().toStdString();
 	builder_3d4em.SetOutputPath(output_path.c_str());
 	builder_3d4em.SetConfigurationPath(ini_path.c_str());
 
@@ -14096,9 +14098,9 @@ void MainWindow::doActionBDLoD2Generation()
 
 	QDir::setCurrent(workingDir_current.absolutePath());
 
-	if (!m_pbdr3d4emDlg->PointcloudFilePathLineEdit->text().isEmpty()) {
+	if (!m_pbdrSettingLoD2Dlg->PointcloudFilePathLineEdit->text().isEmpty()) {
 		// load from file
-		std::string point_path = m_pbdr3d4emDlg->PointcloudFilePathLineEdit->text().toStdString();
+		std::string point_path = m_pbdrSettingLoD2Dlg->PointcloudFilePathLineEdit->text().toStdString();
 
 		builder_3d4em.SetBuildingPoints(point_path.c_str());
 	}
@@ -14116,6 +14118,11 @@ void MainWindow::doActionBDLoD2Generation()
 	//! restore the working directory
 	QDir::setCurrent(workingDir_old.absolutePath());
 #endif	
+}
+
+void MainWindow::doActionSettingsLoD2()
+{
+
 }
 
 void MainWindow::doActionBDTextureMapping()

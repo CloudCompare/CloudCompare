@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
-    <height>1023</height>
+    <width>1365</width>
+    <height>1024</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -38,7 +38,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1024</width>
+     <width>1365</width>
      <height>21</height>
     </rect>
    </property>
@@ -562,6 +562,15 @@
      <addaction name="actionSetPivotRotationOnly"/>
      <addaction name="actionSetPivotOff"/>
     </widget>
+    <widget class="QMenu" name="menuLoD2">
+     <property name="title">
+      <string>LoD2 Generation</string>
+     </property>
+     <addaction name="actionBD3D4EM"/>
+     <addaction name="actionAutomaticLoD2Generation"/>
+     <addaction name="separator"/>
+     <addaction name="actionSettingLoD2"/>
+    </widget>
     <addaction name="actionBDProjectLoad"/>
     <addaction name="actionBDProjectSave"/>
     <addaction name="separator"/>
@@ -574,7 +583,7 @@
     <addaction name="menuPrimitive"/>
     <addaction name="actionBDPlane_Deduction"/>
     <addaction name="separator"/>
-    <addaction name="actionBD3D4EM"/>
+    <addaction name="menuLoD2"/>
     <addaction name="menuPolyFit"/>
     <addaction name="separator"/>
     <addaction name="actionBDRetrieve"/>
@@ -1511,7 +1520,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </widget>
   <widget class="QToolBar" name="toolBarEditor">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Edit tools</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -1520,8 +1529,6 @@ QTreeView::branch:open:has-children:has-siblings  {
     <bool>false</bool>
    </attribute>
    <addaction name="actionSegment"/>
-   <addaction name="actionCrossSection"/>
-   <addaction name="actionSORFilter"/>
   </widget>
   <widget class="QToolBar" name="toolBarSFTools">
    <property name="enabled">
@@ -1549,7 +1556,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </widget>
   <widget class="QToolBar" name="toolBarSegmentation">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Segmentation tools</string>
    </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
@@ -1569,7 +1576,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </widget>
   <widget class="QToolBar" name="toolBarBDRecon">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Reconstruction tools</string>
    </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
@@ -1614,8 +1621,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   <widget class="QDockWidget" name="DockableProperties">
    <property name="minimumSize">
     <size>
-     <width>109</width>
-     <height>259</height>
+     <width>100</width>
+     <height>100</height>
     </size>
    </property>
    <property name="floating">
@@ -1634,9 +1641,15 @@ QTreeView::branch:open:has-children:has-siblings  {
     <number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_4">
-    <layout class="QVBoxLayout">
+    <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
-      <widget class="QTreeView" name="propertiesTreeView_Main">
+      <widget class="QTreeView" name="propertiesTreeView_Build">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
@@ -1673,7 +1686,7 @@ QTreeView::branch:open:has-children:has-siblings  {
       </widget>
      </item>
      <item>
-      <widget class="QTreeView" name="propertiesTreeView_Build">
+      <widget class="QTreeView" name="propertiesTreeView_Main">
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
@@ -1809,6 +1822,12 @@ QTreeView::branch:open:has-children:has-siblings  {
    </widget>
   </widget>
   <widget class="QDockWidget" name="DockablePanel">
+   <property name="minimumSize">
+    <size>
+     <width>87</width>
+     <height>100</height>
+    </size>
+   </property>
    <property name="allowedAreas">
     <set>Qt::BottomDockWidgetArea|Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
@@ -4946,6 +4965,20 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionSettingsBuildingSeg">
    <property name="text">
     <string>Building Segmentation</string>
+   </property>
+  </action>
+  <action name="actionAutomaticLoD2Generation">
+   <property name="text">
+    <string>Automatic</string>
+   </property>
+  </action>
+  <action name="actionSettingLoD2">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/setting.png</normaloff>:/CC/Stocker/images/stocker/setting.png</iconset>
+   </property>
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

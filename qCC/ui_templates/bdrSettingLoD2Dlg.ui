@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BDR3D4EMDlg</class>
- <widget class="QDialog" name="BDR3D4EMDlg">
+ <class>bdrSettingLoD2Dlg</class>
+ <widget class="QDialog" name="bdrSettingLoD2Dlg">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -196,7 +196,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>BDR3D4EMDlg</receiver>
+   <receiver>bdrSettingLoD2Dlg</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -212,7 +212,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>BDR3D4EMDlg</receiver>
+   <receiver>bdrSettingLoD2Dlg</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

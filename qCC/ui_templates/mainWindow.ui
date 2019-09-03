@@ -1622,7 +1622,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="minimumSize">
     <size>
      <width>100</width>
-     <height>100</height>
+     <height>259</height>
     </size>
    </property>
    <property name="floating">
@@ -4953,16 +4953,25 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionSettingsGroundFiltering">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Ground Filtering</string>
    </property>
   </action>
   <action name="actionSettingsClassification">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Classification</string>
    </property>
   </action>
   <action name="actionSettingsBuildingSeg">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Building Segmentation</string>
    </property>
@@ -4973,6 +4982,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
   </action>
   <action name="actionSettingLoD2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../icones.qrc">
      <normaloff>:/CC/Stocker/images/stocker/setting.png</normaloff>:/CC/Stocker/images/stocker/setting.png</iconset>

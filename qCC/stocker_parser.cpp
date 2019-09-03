@@ -2577,46 +2577,53 @@ void SubstituteFootPrintContour(StFootPrint* footptObj, stocker::Contour3d point
 
 bool PackFootprints(ccHObject* buildingObj)
 {
-	BDBaseHObject* baseObj = GetRootBDBase(buildingObj); if (!baseObj) return false;
-	QString building_name = buildingObj->getName();
-	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
-	StPrimGroup* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
-	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
-	if (!prim_group_obj || !blockgroup_obj) { return false; }
+	try {
+		BDBaseHObject* baseObj = GetRootBDBase(buildingObj); if (!baseObj) return false;
+		QString building_name = buildingObj->getName();
+		BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
+		StPrimGroup* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
+		StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
+		if (!prim_group_obj || !blockgroup_obj) { return false; }
 
-	//! get footprints
-	ccHObject::Container footprints = blockgroup_obj->getValidFootPrints();
-	std::vector<std::vector<Contour3d>> layers_planes_points;
-	std::vector<stocker::Contour3d> footprints_points;
-	for (ccHObject* ft_entity : footprints) {
-		StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(ft_entity);
-		QStringList plane_names = ftObj->getPlaneNames();
-		std::vector<Contour3d> planes_points;
-		for (auto & pl_name : plane_names) {
-			ccPlane* pl_entity = prim_group_obj->getPlaneByName(pl_name); if (!pl_entity) continue;
-			if (isVertical(pl_entity, 15)) continue;
-			ccPointCloud* plane_cloud = GetPlaneCloud(pl_entity); if (!plane_cloud) continue;
-			planes_points.push_back(GetPointsFromCloud(plane_cloud));
+		//! get footprints
+		ccHObject::Container footprints = blockgroup_obj->getValidFootPrints();
+		std::vector<std::vector<Contour3d>> layers_planes_points;
+		std::vector<stocker::Contour3d> footprints_points;
+		for (ccHObject* ft_entity : footprints) {
+			StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(ft_entity);
+			QStringList plane_names = ftObj->getPlaneNames();
+			std::vector<Contour3d> planes_points;
+			for (auto & pl_name : plane_names) {
+				ccPlane* pl_entity = prim_group_obj->getPlaneByName(pl_name); if (!pl_entity) continue;
+				if (isVertical(pl_entity, 15)) continue;
+				ccPointCloud* plane_cloud = GetPlaneCloud(pl_entity); if (!plane_cloud) continue;
+				planes_points.push_back(GetPointsFromCloud(plane_cloud));
+			}
+			layers_planes_points.push_back(planes_points);
+
+			Contour3d ft_pts;
+			for (auto & pt : ftObj->getPoints(false)) {
+				ft_pts.emplace_back(pt.x, pt.y, pt.z);
+			}
+			footprints_points.push_back(ft_pts);
 		}
-		layers_planes_points.push_back(planes_points);
+		if (!FootPrintsPlanarPartition(layers_planes_points, footprints_points)) return false;
+		if (footprints.size() != footprints_points.size())return false;
 
-		Contour3d ft_pts;
-		for (auto & pt : ftObj->getPoints(false)) {
-			ft_pts.emplace_back(pt.x, pt.y, pt.z);
+		for (auto & polygon : footprints_points) {
+			RepairPolygon(polygon, CC_DEG_TO_RAD * 5);
 		}
-		footprints_points.push_back(ft_pts);
-	}
-	if (!FootPrintsPlanarPartition(layers_planes_points, footprints_points)) return false;	
-	if (footprints.size() != footprints_points.size())return false;
 
-	for (auto & polygon : footprints_points) {
-		RepairPolygon(polygon, CC_DEG_TO_RAD * 5);
+		for (size_t i = 0; i < footprints.size(); i++) {
+			StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(footprints[i]);
+			SubstituteFootPrintContour(ftObj, footprints_points[i]);
+			ftObj->prepareDisplayForRefresh();
+		}
 	}
-	
-	for (size_t i = 0; i < footprints.size(); i++) {
-		StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(footprints[i]);
-		SubstituteFootPrintContour(ftObj, footprints_points[i]);
-		ftObj->prepareDisplayForRefresh();
+	catch (const std::exception&e) {
+		throw(std::runtime_error(e.what()));
+		STOCKER_ERROR_ASSERT(e.what());
+		return false;
 	}
 
 	return true;

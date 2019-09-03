@@ -74,6 +74,7 @@ class bdrImageEditorPanel;
 class bdrPlaneEditorDlg;
 
 class bdrSettingBDSegDlg;
+class bdrSettingGrdFilterDlg;
 
 class PolyFitObj;
 
@@ -855,6 +856,7 @@ private:
 	bdrPlaneEditorDlg* m_pbdrPlaneEditDlg;
 
 	bdrSettingBDSegDlg* m_pbdrSettingBDSegDlg;
+	bdrSettingGrdFilterDlg* m_pbdrSettingGrdFilterDlg;
 
 	PolyFitObj* polyfit_obj;
 	int m_GCSvr_prj_id;

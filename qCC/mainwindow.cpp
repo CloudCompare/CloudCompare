@@ -246,6 +246,7 @@ MainWindow::MainWindow()
 	, polyfit_obj(nullptr)
 	, m_GCSvr_prj_id(0)
 	, m_pbdrSettingBDSegDlg(nullptr)
+	, m_pbdrSettingGrdFilterDlg(nullptr)
 {
 	m_UI->setupUi( this );
 
@@ -15067,7 +15068,14 @@ inline QStringList createTasksFiles(DataBaseHObject* db_prj,
 			StCreatDir(result_file);
 		}
 		FILE* fp = fopen(tsk_file.toStdString().c_str(), "w");
-		fprintf(fp, "%s\n", tsk->getPath().toStdString().c_str());
+		fprintf(fp, "%s", tsk->getPath().toStdString().c_str());
+		if (if_dir_name == "IF_FILTERING") {
+			fprintf(fp, " ");
+		}
+		else {
+			fprintf(fp, "\n");
+		}
+		
 		fprintf(fp, "%s\n", result_file.toStdString().c_str());
 		for (QString para : para_settings) {
 			fprintf(fp, "%s\n", para.toStdString().c_str());
@@ -15128,6 +15136,7 @@ void MainWindow::doActionGroundFilteringBatch()
 	}
 
 	QString cmd = getCmdLine(db_prj, "FILTERING", m_GCSvr_prj_id);
+	std::cout << "cmd: " << cmd.toStdString() << std::endl;
 	if (cmd.isEmpty()) return;
 
 	ccHObject* product_pool = db_prj->getProductFiltered(); if (!product_pool) { return; }
@@ -15185,6 +15194,7 @@ void MainWindow::doActionClassificationBatch()
 	}
 
 	QString cmd = getCmdLine(db_prj, "CLASSIFICATION", m_GCSvr_prj_id);
+	std::cout << "cmd: " << cmd.toStdString() << std::endl;
 	if (cmd.isEmpty()) return;
 
 	ccHObject* product_pool = db_prj->getProductClassified(); if (!product_pool) { return; }
@@ -15240,6 +15250,7 @@ void MainWindow::doActionBuildingSegmentationBatch()
 	}
 
 	QString cmd = getCmdLine(db_prj, "BUILDINGSEG", m_GCSvr_prj_id);
+	std::cout << "cmd: " << cmd.toStdString() << std::endl;
 	if (cmd.isEmpty()) return;
 
 	ccHObject* product_pool = db_prj->getProductSegmented(); if (!product_pool) { return; }

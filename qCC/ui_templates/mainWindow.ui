@@ -621,6 +621,12 @@
     <addaction name="actionBuildingSegmentEditor"/>
     <addaction name="menuSettings"/>
    </widget>
+   <widget class="QMenu" name="menuSchedule">
+    <property name="title">
+     <string>Schedule</string>
+    </property>
+    <addaction name="actionScheduleProjectID"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTools"/>
@@ -629,6 +635,7 @@
    <addaction name="menuSegmentation_2"/>
    <addaction name="menuBDRecon"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuSchedule"/>
   </widget>
   <widget class="QDockWidget" name="DockableDBTree">
    <property name="minimumSize">
@@ -4991,6 +4998,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionScheduleProjectID">
+   <property name="text">
+    <string>Project ID</string>
    </property>
   </action>
  </widget>

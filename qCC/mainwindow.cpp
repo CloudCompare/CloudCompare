@@ -15455,3 +15455,12 @@ void MainWindow::doActionSettingsBuildingSeg()
 		m_pbdrSettingBDSegDlg->hide();
 	}
 }
+
+void MainWindow::doActionScheduleProjectID()
+{
+	bool ok;
+	int getint = QInputDialog::getInt(this, "Compute Kd-tree", "Max error per leaf cell:", m_GCSvr_prj_id, 0, 99, 1, &ok);
+	if (ok) {
+		m_GCSvr_prj_id = getint;
+	}
+}

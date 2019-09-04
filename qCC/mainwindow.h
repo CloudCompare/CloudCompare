@@ -639,6 +639,7 @@ private slots:
 	void doActionSettingsClassification();
 	void doActionSettingsBuildingSeg();
 	
+	void doActionScheduleProjectID();
 
 private:
 	//! Shortcut: asks the user to select one cloud

@@ -7963,7 +7963,17 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		ccPointCloud* pc = cloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud) : 0;
 
 		//we create a new group to store all CCs
-		ccHObject* ccGroup = new ccHObject(cloud->getName() + QString(" [CCs]"));
+		ccHObject* ccGroup = nullptr;
+		DataBaseHObject* db_prj = GetRootDataBase(cloud);
+		if (db_prj) {
+			ccHObject* product_pool = db_prj->getProductSegmented(); 
+			if (product_pool) {
+				ccGroup = getChildGroupByName(product_pool, cloud->getName());
+			}
+		}
+		if (!ccGroup) {
+			ccGroup = new ccHObject(cloud->getName() + QString(" [segments]"));
+		}
 
 		//for each component
 		for (size_t i = 0; i < components.size(); ++i)
@@ -7993,7 +8003,10 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 						compCloud->setGlobalScale(pc->getGlobalScale());
 					}
 					compCloud->setVisible(true);
-					compCloud->setName(QString("CC#%1").arg(ccGroup->getChildrenNumber()));
+					
+					QString name;
+					int bd_num = GetMaxNumberExcludeChildPrefix(ccGroup, BDDB_BUILDING_PREFIX) + 1;
+					compCloud->setName(BuildingNameByNumber(bd_num)/*QString("CC#%1").arg(ccGroup->getChildrenNumber())*/);
 
 					//we add new CC to group
 					ccGroup->addChild(compCloud);
@@ -11928,6 +11941,8 @@ BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
 					bd->data.bbox.Add({ minbb.x,minbb.y, minbb.z });
 					bd->data.bbox.Add({ maxbb.x,maxbb.y, maxbb.z });
 				}
+
+				//! TODO: BUG: the average spacing cannot be calculated
 				if (!PrepareBuildingByPoints(block_prj, bd->data, points)) {
 					continue;
 				}

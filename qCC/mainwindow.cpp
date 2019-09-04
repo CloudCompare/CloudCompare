@@ -14987,6 +14987,10 @@ void MainWindow::doActionCreateBuildingProject()
 
 	stocker::BlockProj block_prj;
 	stocker::BuilderOption options;
+
+	ProgStart("create building reconstruction project");
+
+	try
 	{
 		QString building_list = project_dir + "/buildings/building.txt";
 		{
@@ -15008,22 +15012,48 @@ void MainWindow::doActionCreateBuildingProject()
 				bd_paths.append(relative_path);
 			}
 			FILE* fp = fopen(building_list.toStdString().c_str(), "w");
-			if (!fp) {
-				return;
-			}
+			if (!fp) { ProgEnd return; }
 			fprintf(fp, "%d\n", bd_paths.size());
 			for (QString p : bd_paths) {
 				fprintf(fp, "%s\n", p.toStdString().c_str());
 			}
 			fclose(fp);
 		}
+
+		QString image_dir = project_dir + "/images";
+		if (!StCreatDir(image_dir)) { ProgEnd return; }
 		QString image_list;
 		{
-
+			if (image_list.isEmpty()) {
+				QString Filename =
+					QFileDialog::getOpenFileName(this,
+						"Open image list",
+						bbprj_path,
+						"image list (*.txt)");
+				if (QFileInfo(Filename).exists()) {
+					QStringList list; list.append(Filename);
+					QStringList file = copyFilesToDir(list, image_dir);
+					if (!file.isEmpty() && QFileInfo(file.front()).exists()) {
+						image_list = file.front();
+					}
+				}
+			}
 		}
+		
 		QString sfm_out;
 		{
-
+			QString Filename =
+				QFileDialog::getOpenFileName(this,
+					"Open sfm out",
+					bbprj_path,
+					"sfm out (*.out)");
+			if (QFileInfo(Filename).exists()) {
+				QStringList list; list.append(Filename);
+				QStringList file = copyFilesToDir(list, image_dir);
+				if (!file.isEmpty() && QFileInfo(file.front()).exists()) {
+					sfm_out = file.front();
+				}
+			}
 		}
 		options.prj_file.building_list = building_list.toStdString();
 		options.prj_file.image_list = image_list.toStdString();
@@ -15033,21 +15063,34 @@ void MainWindow::doActionCreateBuildingProject()
 
 		block_prj.m_options = options;
 		baseObj->block_prj = block_prj;
-	}	
-	
-	//! save .bbprj	
-	stocker::SaveProjectIni(bbprj_path.toStdString(), options);
 
-	BDBaseHObject* bd_grp = LoadBDReconProject(bbprj_path, nullptr);
-	if (bd_grp) {
-		switchDatabase(CC_TYPES::DB_BUILDING);
-		addToDB_Build(bd_grp);
-		refreshAll(); UpdateUI();
+		//! save .bbprj	
+		stocker::SaveProjectIni(bbprj_path.toStdString(), options);
+	}	
+	catch (const std::exception& e)
+	{
+		dispToConsole("error create project", ERR_CONSOLE_MESSAGE);
+		ProgEnd
 	}
-	else {
-		dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
-		return;
+	ProgEnd
+
+	ProgStart("loading building reconstruction project")
+	try {
+		BDBaseHObject* bd_grp = LoadBDReconProject(bbprj_path, nullptr);
+		if (bd_grp) {
+			switchDatabase(CC_TYPES::DB_BUILDING);
+			addToDB_Build(bd_grp);
+			refreshAll(); UpdateUI();
+		}
+		else {
+			dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
+			throw std::runtime_error("error load project");
+		}
 	}
+	catch (const std::exception& e) {
+		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+	}
+	ProgEnd
 }
 
 inline QString getCmdLine(QString prj_path, QString task_name, int prj_id)

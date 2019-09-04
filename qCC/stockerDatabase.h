@@ -176,5 +176,6 @@ int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix);
 bool StCreatDir(QString dir);
 
 QStringList moveFilesToDir(QStringList list, QString dir);
+QStringList copyFilesToDir(QStringList list, QString dir);
 
 #endif

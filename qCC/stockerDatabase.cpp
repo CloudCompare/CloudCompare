@@ -350,3 +350,26 @@ QStringList moveFilesToDir(QStringList list, QString dir)
 
 	return new_files;
 }
+
+QStringList copyFilesToDir(QStringList list, QString dir)
+{
+	QStringList new_files;
+	if (StCreatDir(dir)) {
+		for (size_t i = 0; i < list.size(); i++) {
+			QString & file = const_cast<QString&>(list[i]);
+			QFileInfo file_info(file);
+			QString new_file = dir + "/" + file_info.fileName();
+			if (QFile::copy(file, new_file)) {
+				new_files.append(new_file);
+			}
+			else {
+				new_files.append(file);
+			}
+		}
+	}
+	else {
+		return list;
+	}
+
+	return new_files;
+}

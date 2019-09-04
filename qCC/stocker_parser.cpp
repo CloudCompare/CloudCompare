@@ -2607,8 +2607,11 @@ bool PackFootprints(ccHObject* buildingObj)
 			}
 			footprints_points.push_back(ft_pts);
 		}
-		if (!FootPrintsPlanarPartition(layers_planes_points, footprints_points)) return false;
-		if (footprints.size() != footprints_points.size())return false;
+		std::vector<stocker::Contour3d> footprints_points_pp;
+		if (!FootPrintsPlanarPartition(layers_planes_points, footprints_points, footprints_points_pp)) return false;
+		if (footprints_points.size() == footprints_points_pp.size()) {
+			footprints_points = footprints_points_pp;
+		}
 
 		for (auto & polygon : footprints_points) {
 			RepairPolygon(polygon, CC_DEG_TO_RAD * 5);

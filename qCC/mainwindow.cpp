@@ -1044,6 +1044,10 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSettingsGroundFiltering, &QAction::triggered, this, &MainWindow::doAactionSettingsGroundFiltering);
 	connect(m_UI->actionSettingsClassification, &QAction::triggered, this, &MainWindow::doActionSettingsClassification);
 	connect(m_UI->actionSettingsBuildingSeg, &QAction::triggered, this, &MainWindow::doActionSettingsBuildingSeg);
+
+	//! schedule
+	connect(m_UI->actionScheduleProjectID, &QAction::triggered, this, &MainWindow::doActionScheduleProjectID);
+	
 }
 
 void MainWindow::doActionChangeTabTree(int index)

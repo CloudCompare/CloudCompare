@@ -37,7 +37,7 @@ QStringList bdrSettingBDSegDlg::getParameters()
 	//2 2nd class
 	char str[32]; sprintf(str, "%s", m_UI->BDClassLineEdit->text().toStdString().c_str());
 	char seps[] = " ";
-	char* token = token = strtok(str, seps);
+	char* token = strtok(str, seps);
 	std::vector<int> classes;
 	while (token != NULL) {
 		int class_number;

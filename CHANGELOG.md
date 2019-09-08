@@ -66,6 +66,9 @@ v2.11 (Anoia) - (in development)
 	- the 'Straightened cone' options are now using the real curvilinear abscissa (0 = cone apex)
   - Tools > Others > Compute geometric features
 	- option to compute the 1st moment added
+  - Stereo mode updated:
+	- New stereo mode (Generic stereo display) to handle more stereo displays (PluraView, etc.)
+	- New stereo parameters (screen/display size, distance to screen, and eye separation)
 
 - Changes
   - Command line tool:

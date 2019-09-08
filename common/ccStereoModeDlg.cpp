@@ -29,6 +29,7 @@ constexpr int COMBO_INDEX_RED_CYAN  = 2;
 constexpr int COMBO_INDEX_CYAN_RED  = 3;
 constexpr int COMBO_INDEX_NV_VISION = 4;
 constexpr int COMBO_INDEX_OCULUS    = 5;
+constexpr int COMBO_INDEX_GENERIC   = 6;
 
 ccStereoModeDlg::ccStereoModeDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
@@ -84,6 +85,14 @@ void ccStereoModeDlg::glassTypeChanged(int index)
 			Note: this mode works best in 'bubble view' mode"
 			);
 		break;
+	case COMBO_INDEX_GENERIC:
+		m_ui->paramsGroupBox->setEnabled(true);
+		m_ui->warningTextEdit->setVisible(true);
+		m_ui->warningTextEdit->setHtml(
+			"This mode works better with 'Auto-pick rotation center' (see left toolbar).\
+			Note: the current 3D view will be automatically displayed in exclusive full screen mode (<i>press F11 to quit this mode</i>)"
+		);
+		break;
 	default:
 		assert(false);
 		m_ui->paramsGroupBox->setEnabled(false);
@@ -118,14 +127,16 @@ ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const
 	case COMBO_INDEX_OCULUS:
 		params.glassType = ccGLWindow::StereoParams::OCULUS;
 		break;
+	case COMBO_INDEX_GENERIC:
+		params.glassType = ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY;
+		break;
 	}
 
-	//focal
-	params.autoFocal = m_ui->autoFocalCheckBox->isChecked();
-	params.focalDist = m_ui->focalDoubleSpinBox->value();
-
-	//eye separation
-	params.eyeSepFactor = m_ui->eyeSepDoubleSpinBox->value();
+	//viewport
+	params.screenWidth_mm = m_ui->screenWidthSpinBox->value();
+	params.screenDistance_mm = m_ui->screenDiistanceSpinBox->value();
+	params.eyeSeparation_mm = m_ui->eyeDistanceSpinBox->value();
+	params.stereoStrength = m_ui->stereoStrengthHorizontalSlider->sliderPosition();
 
 	return params;
 }
@@ -148,20 +159,27 @@ void ccStereoModeDlg::setParameters(const ccGLWindow::StereoParams& params)
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_CYAN_RED);
 		break;
 	case ccGLWindow::StereoParams::NVIDIA_VISION:
-		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_NV_VISION);
+		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_NV_VISION); //TODO FIXME
 		break;
 	case ccGLWindow::StereoParams::OCULUS:
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_OCULUS);
+		break;
+	case ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY:
+		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_GENERIC);
 		break;
 	default:
 		assert(false);
 		break;
 	}
 
-	//focal
-	m_ui->autoFocalCheckBox->setChecked(params.autoFocal);
-	m_ui->focalDoubleSpinBox->setValue(params.focalDist);
+	//viewport
+	m_ui->screenWidthSpinBox->setValue(params.screenWidth_mm);
+	m_ui->screenDiistanceSpinBox->setValue(params.screenDistance_mm);
+	m_ui->eyeDistanceSpinBox->setValue(params.eyeSeparation_mm);
+	m_ui->stereoStrengthHorizontalSlider->setSliderPosition(params.stereoStrength);
+}
 
-	//eye separation
-	m_ui->eyeSepDoubleSpinBox->setValue(params.eyeSepFactor);
+bool ccStereoModeDlg::updateFOV() const
+{
+	return m_ui->glassTypeComboBox->currentIndex() != COMBO_INDEX_OCULUS && m_ui->autoFocalCheckBox->isChecked();
 }

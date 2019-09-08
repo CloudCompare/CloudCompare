@@ -16,6 +16,7 @@ v2.11 (Anoia) - (in development)
 	  - The 'up' direction is always Z for slices normal to X or Y (the local X, Y or Z directions of the active cross-section)
 	  - The 'up' direction is X for slices normal to Z
 	- all parameters should now be properly remembered from one call to the other (during the same session)
+	- the current box/slice position can now be exported (resp. imported) to (resp. from) the clipboard via the 'Advanced' menu
   - Command line tool:
     - The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
         In this case the first mesh vertices are used as compared cloud.

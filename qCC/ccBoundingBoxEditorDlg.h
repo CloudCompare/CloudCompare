@@ -90,6 +90,9 @@ protected slots:
 	//! Slot called anytime a component of the box axes is modified
 	void onAxisValueChanged(double);
 
+	void fromClipboardClicked();
+	void toClipboardClicked();
+
 protected:
 
 	//! Checks if currentBox includes baseBox

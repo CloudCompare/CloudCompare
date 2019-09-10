@@ -336,9 +336,9 @@ ccHObject::Container GetBuildingEntitiesBySelected(ccHObject* select)
 	ccHObject::Container building_container;
 	if (!select) { return building_container; }
 
-	if (isBuildingProject(select)) {
-		BDBaseHObject* baseObj = GetRootBDBase(select); assert(baseObj);
-		building_container = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
+	if (isBuildingProject(select) || select->getClassID() == CC_TYPES::HIERARCHY_OBJECT) {
+		//BDBaseHObject* baseObj = GetRootBDBase(select); assert(baseObj);
+		building_container = GetEnabledObjFromGroup(select, CC_TYPES::ST_BUILDING, true, false);
 	}
 	else {
 		ccHObject* bd = GetParentBuilding(select);
@@ -2609,6 +2609,7 @@ bool PackFootprints(ccHObject* buildingObj)
 		}
 		std::vector<stocker::Contour3d> footprints_points_pp;
 		if (!FootPrintsPlanarPartition(layers_planes_points, footprints_points, footprints_points_pp)) return false;
+
 		if (footprints_points.size() == footprints_points_pp.size()) {
 			footprints_points = footprints_points_pp;
 		}
@@ -2617,10 +2618,12 @@ bool PackFootprints(ccHObject* buildingObj)
 			RepairPolygon(polygon, CC_DEG_TO_RAD * 5);
 		}
 
-		for (size_t i = 0; i < footprints.size(); i++) {
-			StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(footprints[i]);
-			SubstituteFootPrintContour(ftObj, footprints_points[i]);
-			ftObj->prepareDisplayForRefresh();
+		if (footprints_points.size() == footprints_points_pp.size()) {
+			for (size_t i = 0; i < footprints.size(); i++) {
+				StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(footprints[i]);
+				SubstituteFootPrintContour(ftObj, footprints_points[i]);
+				ftObj->prepareDisplayForRefresh();
+			}
 		}
 	}
 	catch (const std::exception&e) {

@@ -458,6 +458,7 @@
      <addaction name="actionComputeBestICPRmsMatrix"/>
      <addaction name="separator"/>
      <addaction name="actionEnableVisualDebugTraces"/>
+     <addaction name="actionClearEmptyItems"/>
     </widget>
     <widget class="QMenu" name="menuFit">
      <property name="title">
@@ -1832,7 +1833,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="minimumSize">
     <size>
      <width>87</width>
-     <height>100</height>
+     <height>109</height>
     </size>
    </property>
    <property name="allowedAreas">
@@ -5003,6 +5004,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionScheduleProjectID">
    <property name="text">
     <string>Project ID</string>
+   </property>
+  </action>
+  <action name="actionClearEmptyItems">
+   <property name="text">
+    <string>Clear empty items</string>
    </property>
   </action>
  </widget>

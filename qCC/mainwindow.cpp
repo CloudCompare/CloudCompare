@@ -1048,6 +1048,8 @@ void MainWindow::connectActions()
 	//! schedule
 	connect(m_UI->actionScheduleProjectID, &QAction::triggered, this, &MainWindow::doActionScheduleProjectID);
 	
+	connect(m_UI->actionClearEmptyItems, &QAction::triggered, this, &MainWindow::doActionClearEmptyItems);
+	
 }
 
 void MainWindow::doActionChangeTabTree(int index)
@@ -11875,9 +11877,11 @@ BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
 	try	{
 		stocker::BlockProj block_prj; std::string error_info;
 		if (!stocker::LoadProject(Filename.toStdString(), block_prj, error_info)) {
+			std::cout << error_info << std::endl;
 			//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return nullptr;
 		}
+		// TODO: do we need to prepare buildings if bin is already generated??
 		// 	if (!stocker::BuildingPrepare(block_prj, error_info)) {
 		// 		//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		// 		return nullptr;
@@ -13916,6 +13920,7 @@ void MainWindow::doActionBDFootPrintPack()
 	ccHObject* bd_entity = GetParentBuilding(entity);
 	if (!bd_entity) return;
 
+	ProgStart("polygon partition")
 	try	{
 		if (!PackFootprints(bd_entity)) {
 			return;
@@ -13925,6 +13930,7 @@ void MainWindow::doActionBDFootPrintPack()
 		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 		return;
 	}
+	ProgEnd
 
 	refreshAll();
 	UpdateUI();
@@ -14002,22 +14008,26 @@ void MainWindow::doActionBDLoD1Generation()
 	if (!haveSelection()) {
 		return;
 	}
-	ccHObject *entity = getSelectedEntities().front();
 
-	if (entity->isA(CC_TYPES::ST_FOOTPRINT)) {
-
+	ccHObject::Container building_entites;
+	for (ccHObject* ent : getSelectedEntities()) {
+		ccHObject::Container bds = GetBuildingEntitiesBySelected(ent);
+		building_entites.insert(building_entites.end(), bds.begin(), bds.end());
 	}
-	else {
-		//! select the building
-		StBuilding* building = GetParentBuilding(entity);
-		if (!building) { return; }
+	if (building_entites.empty()) {
+		return;
+	}
+	ProgStartNorm("lod1 generation", building_entites.size())
+	for (ccHObject* bd_entity : building_entites) {
+		StBuilding* building = ccHObjectCaster::ToStBuilding(bd_entity);
+		if (!building) { ProgStep() continue; }
 
 		try {
 			ccHObject* bd_model_obj = LoD1FromFootPrint(building);
 			if (bd_model_obj) {
 				SetGlobalShiftAndScale(bd_model_obj);
-				bd_model_obj->setDisplay_recursive(entity->getDisplay());
-				addToDB(bd_model_obj, entity->getDBSourceType(), false, false);
+				bd_model_obj->setDisplay_recursive(building->getDisplay());
+				addToDB(bd_model_obj, building->getDBSourceType(), false, false);
 			}
 		}
 		catch (std::runtime_error& e) {
@@ -14025,7 +14035,31 @@ void MainWindow::doActionBDLoD1Generation()
 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
 			return;
 		}
+		ProgStep()
 	}
+	ProgEnd
+// 	if (entity->isA(CC_TYPES::ST_FOOTPRINT)) {
+// 
+// 	}
+// 	else {
+// 		//! select the building
+// 		StBuilding* building = GetParentBuilding(entity);
+// 		if (!building) { return; }
+// 
+// 		try {
+// 			ccHObject* bd_model_obj = LoD1FromFootPrint(building);
+// 			if (bd_model_obj) {
+// 				SetGlobalShiftAndScale(bd_model_obj);
+// 				bd_model_obj->setDisplay_recursive(entity->getDisplay());
+// 				addToDB(bd_model_obj, entity->getDBSourceType(), false, false);
+// 			}
+// 		}
+// 		catch (std::runtime_error& e) {
+// 			dispToConsole("[BDRecon] cannot build lod1 model", ERR_CONSOLE_MESSAGE);
+// 			dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+// 			return;
+// 		}
+// 	}
 	refreshAll();
 	UpdateUI();
 }
@@ -14969,7 +15003,7 @@ void MainWindow::doActionCreateBuildingProject()
 			save_prj = true;
 		}
 		else {
-			BDBaseHObject* bd_grp = LoadBDReconProject(bbprj_path, nullptr);
+			BDBaseHObject* bd_grp = LoadBDReconProject(bbprj_path, this);
 			if (bd_grp) {
 				switchDatabase(CC_TYPES::DB_BUILDING);
 				addToDB_Build(bd_grp);
@@ -15067,16 +15101,13 @@ void MainWindow::doActionCreateBuildingProject()
 		//! save .bbprj	
 		stocker::SaveProjectIni(bbprj_path.toStdString(), options);
 	}	
-	catch (const std::exception& e)
-	{
+	catch (const std::exception& e) {
 		dispToConsole("error create project", ERR_CONSOLE_MESSAGE);
-		ProgEnd
+		ProgEnd return;
 	}
-	ProgEnd
 
-	ProgStart("loading building reconstruction project")
 	try {
-		BDBaseHObject* bd_grp = LoadBDReconProject(bbprj_path, nullptr);
+		BDBaseHObject* bd_grp = LoadBDReconProject(bbprj_path, this);
 		if (bd_grp) {
 			switchDatabase(CC_TYPES::DB_BUILDING);
 			addToDB_Build(bd_grp);
@@ -15525,4 +15556,25 @@ void MainWindow::doActionScheduleProjectID()
 	if (ok) {
 		m_GCSvr_prj_id = getint;
 	}
+}
+
+void MainWindow::doActionClearEmptyItems()
+{
+// 	if (!haveSelection()) {
+// 		return;
+// 	}
+// 	ccHObject* sel = m_selectedEntities.front();
+// 
+// 	ccHObject::Container children;
+// 	sel->filterChildren(children, true);
+// 	do {
+// 		sel->filterChildren(children, true);
+// 	} while (1);
+// 	for (ccHObject* child : children) {
+// 		if (child->isKindOf(CC_TYPES::MESH)) {
+// 			if (child)
+// 			{
+// 			}
+// 		}
+// 	}
 }

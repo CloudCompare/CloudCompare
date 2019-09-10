@@ -50,8 +50,9 @@
 using colorFieldType = double;
 //typedef boost::uint16_t colorFieldType;
 
-const char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
-const char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
+static const char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
+static const char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
+static const char s_e57PoseKey[] = "E57_pose";
 
 
 E57Filter::E57Filter()
@@ -145,18 +146,89 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 {
 	assert(cloud);
 
-	CCVector3d bbMin,bbMax;
-	if (!cloud->getGlobalBB(bbMin,bbMax))
-	{
-		ccLog::Error(QString("[E57Filter::SaveScan] Internal error: cloud '%1' has an invalid bounding box?!").arg(cloud->getName()));
-		return false;
-	}
-
 	unsigned pointCount = cloud->size();
 	if (pointCount == 0)
 	{
 		ccLog::Error(QString("[E57Filter::SaveScan] Cloud '%1' is empty!").arg(cloud->getName()));
 		return false;
+	}
+
+	ccGLMatrixd localPoseMat;
+	ccGLMatrixd shiftedPoseMat;
+	bool hasPoseMat = false;
+
+	double globalScale = 1.0;
+	bool isScaled = false;
+	{
+		globalScale = cloud->getGlobalScale();
+		assert(globalScale != 0);
+		isScaled = (globalScale != 1.0);
+
+		//restore initial pose (if any)
+		QString poseStr = cloud->getMetaData(s_e57PoseKey).toString();
+		if (!poseStr.isEmpty())
+		{
+			localPoseMat = ccGLMatrixd::FromString(poseStr, hasPoseMat);
+			if (hasPoseMat)
+			{
+				//apply transformation history
+				localPoseMat = ccGLMatrixd(cloud->getGLTransformationHistory().data()) * localPoseMat;
+			}
+			else
+			{
+				ccLog::Warning("[E57Filter::saveFile] Pose meta-data is invalid");
+			}
+		}
+
+		//we apply the global shift as a pose matrix
+		CCVector3d Tshift = cloud->getGlobalShift();
+		if (Tshift.norm2d() != 0)
+		{
+			shiftedPoseMat = localPoseMat;
+			shiftedPoseMat.setTranslation((-Tshift).u);
+			SavePoseInformation(scanNode, imf, shiftedPoseMat);
+		}
+		else if (hasPoseMat)
+		{
+			shiftedPoseMat = localPoseMat;
+			SavePoseInformation(scanNode, imf, shiftedPoseMat);
+		}
+
+	}
+
+	CCVector3d bbMin, bbMax;
+	if (hasPoseMat)
+	{
+		//we have to compute the rotated cloud bounding-box!
+		for (unsigned i = 0; i < pointCount; ++i)
+		{
+			const CCVector3* Plocal = cloud->getPointPersistentPtr(i);
+			CCVector3d Pg = CCVector3d::fromArray(Plocal->u) / globalScale;
+			Pg = shiftedPoseMat * Pg;
+			if (i != 0)
+			{
+				bbMin.x = std::min(bbMin.x, Pg.x);
+				bbMin.y = std::min(bbMin.y, Pg.y);
+				bbMin.z = std::min(bbMin.z, Pg.z);
+				bbMax.x = std::max(bbMax.x, Pg.x);
+				bbMax.y = std::max(bbMax.y, Pg.y);
+				bbMax.z = std::max(bbMax.z, Pg.z);
+			}
+			else
+			{
+				bbMax.x = bbMin.x = Pg.x;
+				bbMax.y = bbMin.y = Pg.y;
+				bbMax.z = bbMin.z = Pg.z;
+			}
+		}
+	}
+	else
+	{
+		if (!cloud->getGlobalBB(bbMin, bbMax))
+		{
+			ccLog::Error(QString("[E57Filter::SaveScan] Internal error: cloud '%1' has an invalid bounding box?!").arg(cloud->getName()));
+			return false;
+		}
 	}
 
 	//GUID
@@ -190,7 +262,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 
 	// Add temp/humidity to scan (TODO)
 	//scanNode.set("temperature",			e57::FloatNode(imf,temperature));
-	//scanNode.set("relativeHumidity",	e57::FloatNode(imf,relativeHumidity));
+	//scanNode.set("relativeHumidity",		e57::FloatNode(imf,relativeHumidity));
 	//scanNode.set("atmosphericPressure",	e57::FloatNode(imf,atmosphericPressure));
 
 	// No index bounds for unstructured clouds!
@@ -211,7 +283,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 				double minIndex = static_cast<double>(sf->getMin());
 				double maxIndex = static_cast<double>(sf->getMax());
 
-				double intMin,intMax;
+				double intMin, intMax;
 				double fracMin = modf(minIndex, &intMin);
 				double fracMax = modf(maxIndex, &intMax);
 
@@ -228,12 +300,12 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 
 						//DGM FIXME: should we really save this for an unstructured point cloud?
 						e57::StructureNode ibox = e57::StructureNode(imf);
-						ibox.set("rowMinimum",		e57::IntegerNode(imf,0));
-						ibox.set("rowMaximum",		e57::IntegerNode(imf,cloud->size()-1));
-						ibox.set("columnMinimum",	e57::IntegerNode(imf,0));
-						ibox.set("columnMaximum",	e57::IntegerNode(imf,0));
-						ibox.set("returnMinimum",	e57::IntegerNode(imf,minReturnIndex));
-						ibox.set("returnMaximum",	e57::IntegerNode(imf,maxReturnIndex));
+						ibox.set("rowMinimum",		e57::IntegerNode(imf, 0));
+						ibox.set("rowMaximum",		e57::IntegerNode(imf, cloud->size() - 1));
+						ibox.set("columnMinimum",	e57::IntegerNode(imf, 0));
+						ibox.set("columnMaximum",	e57::IntegerNode(imf, 0));
+						ibox.set("returnMinimum",	e57::IntegerNode(imf, minReturnIndex));
+						ibox.set("returnMaximum",	e57::IntegerNode(imf, maxReturnIndex));
 						scanNode.set("indexBounds", ibox);
 					}
 				}
@@ -250,7 +322,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		{
 			intensitySFIndex = cloud->getCurrentDisplayedScalarFieldIndex();
 			if (intensitySFIndex >= 0)
-				ccLog::Print("[E57] No 'intensity' scalar field found, we'll use the currently displayed one instead (%s)",cloud->getScalarFieldName(intensitySFIndex));
+				ccLog::Print("[E57] No 'intensity' scalar field found, we'll use the currently displayed one instead (%s)", cloud->getScalarFieldName(intensitySFIndex));
 		}
 		if (intensitySFIndex >= 0)
 		{
@@ -258,12 +330,12 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 			assert(intensitySF);
 
 			e57::StructureNode intbox = e57::StructureNode(imf);
-			intbox.set("intensityMinimum", e57::FloatNode(imf,intensitySF->getMin()));
-			intbox.set("intensityMaximum", e57::FloatNode(imf,intensitySF->getMax()));
+			intbox.set("intensityMinimum", e57::FloatNode(imf, intensitySF->getMin()));
+			intbox.set("intensityMaximum", e57::FloatNode(imf, intensitySF->getMax()));
 			scanNode.set("intensityLimits", intbox);
 
 			//look for 'invalid' scalar values
-			for (unsigned i=0;i<intensitySF->currentSize();++i)
+			for (unsigned i = 0; i < intensitySF->currentSize(); ++i)
 			{
 				ScalarType d = intensitySF->getValue(i);
 				if (!ccScalarField::ValidValue(d))
@@ -299,23 +371,6 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		bboxNode.set("zMinimum", e57::FloatNode(imf, bbMin.z));
 		bboxNode.set("zMaximum", e57::FloatNode(imf, bbMax.z));
 		scanNode.set("cartesianBounds", bboxNode);
-	}
-
-	double globalScale = 1.0;
-	bool isScaled = false;
-	{
-		globalScale = cloud->getGlobalScale();
-		assert(globalScale != 0);
-		isScaled = (globalScale != 1.0);
-		
-		//we apply the global shift as a pose matrix
-		CCVector3d Tshift = cloud->getGlobalShift();
-		if (Tshift.norm2d() != 0)
-		{
-			ccGLMatrixd poseMat;
-			poseMat.setTranslation((-Tshift).u);
-			SavePoseInformation(scanNode, imf, poseMat);
-		}
 	}
 
 	// Add start/stop acquisition times to scan (TODO)
@@ -461,6 +516,12 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		QApplication::processEvents();
 	}
 
+	ccGLMatrix inversePoseMat;
+	if (hasPoseMat)
+	{
+		inversePoseMat = ccGLMatrix(localPoseMat.inverse().data());
+	}
+
 	unsigned index = 0;
 	unsigned remainingPointCount = pointCount;
 	while (remainingPointCount != 0)
@@ -468,14 +529,14 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		unsigned thisChunkSize = std::min(remainingPointCount,chunkSize);
 
 		//load arrays
-		for (unsigned i=0; i<thisChunkSize; ++i, ++index)
+		for (unsigned i = 0; i < thisChunkSize; ++i, ++index)
 		{
 			const CCVector3* P = cloud->getPointPersistentPtr(index);
 			//CCVector3d Pglobal = cloud->toGlobal3d<PointCoordinateType>(*P);
-			CCVector3d Pglobal = CCVector3d::fromArray(P->u);
-			if (isScaled)
+			CCVector3d Pglobal = CCVector3d::fromArray(P->u) / globalScale;
+			if (hasPoseMat)
 			{
-				Pglobal /= globalScale;
+				Pglobal = inversePoseMat * Pglobal;
 			}
 			arrays.xData[i] = Pglobal.x;
 			arrays.yData[i] = Pglobal.y;
@@ -571,7 +632,7 @@ void SaveImage(const ccImage* image, const QString& scanGUID, e57::ImageFile& im
 		//acquisitionDateTime.set("isAtomicClockReferenced", e57::IntegerNode(imf, isAtomicClockReferenced));
 	}
 
-	// Create pose structure for scan (in any)
+	// Create pose structure for scan (if any)
 	if (image->isA(CC_TYPES::CALIBRATED_IMAGE))
 	{
 		const ccCameraSensor* sensor = static_cast<const ccImage*>(image)->getAssociatedSensor();
@@ -1480,7 +1541,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 
 	//prepare temporary structures
-	const unsigned chunkSize = std::min<unsigned>(pointCount,(1 << 20)); //we load the file in several steps to limit the memory consumption
+	const unsigned chunkSize = std::min<unsigned>(pointCount, (1 << 20)); //we load the file in several steps to limit the memory consumption
 	TempArrays arrays;
 	std::vector<e57::SourceDestBuffer> dbufs;
 
@@ -1683,7 +1744,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		QApplication::processEvents();
 	}
 
-	CCVector3d Pshift(0,0,0);
+	CCVector3d Pshift(0, 0, 0);
 	unsigned size = 0;
 	int64_t realCount = 0;
 	int64_t invalidCount = 0;
@@ -1872,6 +1933,9 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		cloud->applyGLTransformation_recursive(&poseMatf);
 		//this transformation is of no interest for the user
 		cloud->resetGLTransformationHistory_recursive();
+
+		//save the original pose matrix as meta-data
+		cloud->setMetaData(s_e57PoseKey, poseMat.toString(12, ' '));
 	}
 
 	return cloud;

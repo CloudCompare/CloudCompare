@@ -10278,7 +10278,10 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 	m_UI->actionExclusiveFullScreen->setChecked(win ? win->exclusiveFullScreen() : false);
 	m_UI->actionExclusiveFullScreen->blockSignals(false);
 
-	if (!state && win->stereoModeIsEnabled() && win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+	if (	!state
+		&&	win->stereoModeIsEnabled()
+		&&	(	win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION
+			||	win->getStereoParams().glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY ))
 	{
 		//auto disable stereo mode as NVidia Vision only works in full screen mode!
 		m_UI->actionEnableStereo->setChecked(false);
@@ -11515,7 +11518,8 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 		{
 			win->disableStereoMode();
 
-			if (win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+			if (	win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION
+				||	win->getStereoParams().glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
 			{
 				//disable (exclusive) full screen
 				m_UI->actionExclusiveFullScreen->setChecked(false);
@@ -11536,6 +11540,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			}
 
 			ccGLWindow::StereoParams params = smDlg.getParameters();
+			ccLog::Warning(QString("%1").arg(params.stereoStrength));
 #ifndef CC_GL_WINDOW_USE_QWINDOW
 			if (!params.isAnaglyph())
 			{
@@ -11554,15 +11559,25 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 				setCenteredPerspectiveView(win, false);
 			}
 
-			if (params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+			if (	params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION
+				||	params.glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
 			{
 				//force (exclusive) full screen
 				m_UI->actionExclusiveFullScreen->setChecked(true);
 			}
 
+			if (smDlg.updateFOV())
+			{
+				//set the right FOV
+				double fov_deg = 2 * std::atan(params.screenWidth_mm / (2.0 * params.screenDistance_mm)) * CC_RAD_TO_DEG;
+				ccLog::Print(QString("[Stereo] F.O.V. forced to %1 deg.").arg(fov_deg));
+				win->setFov(fov_deg);
+			}
+
 			if (!win->enableStereoMode(params))
 			{
-				if (params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+				if (	params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION
+					||	params.glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
 				{
 					//disable (exclusive) full screen
 					m_UI->actionExclusiveFullScreen->setChecked(false);

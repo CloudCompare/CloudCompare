@@ -16,6 +16,7 @@ v2.11 (Anoia) - (in development)
 	  - The 'up' direction is always Z for slices normal to X or Y (the local X, Y or Z directions of the active cross-section)
 	  - The 'up' direction is X for slices normal to Z
 	- all parameters should now be properly remembered from one call to the other (during the same session)
+	- the current box/slice position can now be exported (resp. imported) to (resp. from) the clipboard via the 'Advanced' menu
   - Command line tool:
     - The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
         In this case the first mesh vertices are used as compared cloud.
@@ -51,12 +52,12 @@ v2.11 (Anoia) - (in development)
 	- the computation speed should be improved when using a small projection radius (smarter selection of the octree level)
   - Others:
     - CC now saves the radius (parameter) after computing normals (as meta-data associated to the cloud)
-  - LAS:
+  - LAS files:
 	- the standard LAS Filter now handles the OVERLAP classification bit (for point format >= 6)
 	- improved/fixed management of classification and classification flags
 	- LAS offset (chosen at saving time) should be a little bit smarter (CC will try to keep the previous one,
 		or use the bounding-box min corner ONLY if the coordinates are too large)
-  - ASCII:
+  - ASCII files:
 	- CloudCompare can now load ASCII files with mixed whitespaces (spaces / tabs)
 	- the ASCII load dialog option has now an option to load numerical values with a comma as digit separator
 		('use comma as decimal character' checkbox)
@@ -66,7 +67,11 @@ v2.11 (Anoia) - (in development)
 	- the 'Straightened cone' options are now using the real curvilinear abscissa (0 = cone apex)
   - Tools > Others > Compute geometric features
 	- option to compute the 1st moment added
-
+  - Stereo mode updated:
+	- New stereo mode (Generic stereo display) to handle more stereo displays (PluraView, etc.)
+	- New stereo parameters (screen/display size, distance to screen, and eye separation)
+  - E57 files:
+    - after loading an E57 file, the scan (sensor) origin and orientation is stored as meta-data and should be properly restored and saved when exporting the scan(s) back to E57
 - Changes
   - Command line tool:
     - The `-FBX_EXPORT_FMT` command is now split. Use `-FBX -EXPORT_FMT`.

@@ -1317,7 +1317,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	/*************************/
 
 	//Main point cloud
-	ccPointCloud* cloud = new ccPointCloud("unnamed - Cloud");
+	ccPointCloud* cloud = new ccPointCloud("unnamed");//new ccPointCloud("unnamed - Cloud");
 
 	/* POINTS (X,Y,Z) */
 

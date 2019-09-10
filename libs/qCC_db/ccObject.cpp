@@ -154,6 +154,7 @@ bool ccObject::toFile(QFile& out) const
 	{
 		QDataStream outStream(&out);
 		outStream << m_name;
+		outStream << m_path;
 	}
 
 	//flags (dataVersion>=20)
@@ -281,6 +282,7 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags)
 	{
 		QDataStream inStream(&in);
 		inStream >> m_name;
+		inStream >> m_path;
 	}
 
 	//flags (dataVersion>=20)

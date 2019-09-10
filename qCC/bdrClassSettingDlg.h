@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                    CLOUDCOMPARE PLUGIN: qRANSAC_SD                     #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,27 +11,36 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                  COPYRIGHT: Daniel Girardeau-Montaut                   #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#include "bdrPolyFitDlg.h"
+#ifndef BDR_CLASS_SETTING_DLG_HEADER
+#define BDR_CLASS_SETTING_DLG_HEADER
 
-//local
-#include "mainwindow.h"
+#include "ui_bdrClassSettingDlg.h"
 
-#include <QFileDialog>
-#include <QToolButton>
-#include <QPushButton>
-
-bdrPolyFitDlg::bdrPolyFitDlg(QWidget* parent)
-	: QDialog(parent, Qt::Tool)
-	, Ui::BDRPolyFitDlg()
+namespace Ui
 {
-	setupUi(this);
-
-// 	connect(PointcloudFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browsePointcloudFilename);
-// 	connect(OutputDirFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browseOutputDirPath);
-// 	connect(ConfigureFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browseConfigureFilename);
-// 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
+	class bdrClassSettingDlg;
 }
+
+//! Section extraction tool
+class bdrClassSettingDlg : public QDialog
+{
+	Q_OBJECT
+
+public:
+
+	//! Default constructor
+	explicit bdrClassSettingDlg(QWidget* parent);
+	//! Destructor
+	~bdrClassSettingDlg() override;
+
+protected slots:
+
+private: //members
+	Ui::bdrClassSettingDlg	*m_UI;
+};
+
+#endif //BDR_TRACE_FOOTPRINT_HEADER

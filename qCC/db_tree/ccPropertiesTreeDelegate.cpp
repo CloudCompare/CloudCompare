@@ -212,6 +212,14 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 		m_model->setHeaderData(1, Qt::Horizontal, tr( "State/Value" ));
 	}
 
+	if (m_currentObject->isHierarchy())
+	{
+		if (!m_currentObject->isA(CC_TYPES::VIEWPORT_2D_LABEL)) //don't need to display this kind of info for viewport labels!
+		{
+			fillWithDatabase(m_currentObject);
+		}
+	}
+
 	if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {		
 		fiilWithCameraGroup(m_currentObject);
 	}
@@ -430,19 +438,27 @@ void ccPropertiesTreeDelegate::fillWithMetaData(const ccObject* _obj)
 	}
 }
 
+void ccPropertiesTreeDelegate::fillWithDatabase(ccHObject * _obj)
+{
+	assert(_obj && m_model);
+
+	addSeparator(tr("Database"));
+
+	//name
+	appendRow(ITEM(tr("Name")), ITEM(_obj->getName(), Qt::ItemIsEditable, OBJECT_NAME));
+	appendRow(ITEM(tr("Path")), ITEM(_obj->getPath()));
+	appendRow(ITEM(tr("DBSource")), ITEM(QString::number(int(_obj->getDBSourceType()))));
+}
+
 void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 {
 	assert(_obj && m_model);
 
 	addSeparator( tr( "General" ) );//CC Object
 
-	//name
-	appendRow(ITEM( tr( "Name" ) ), ITEM(_obj->getName(), Qt::ItemIsEditable, OBJECT_NAME));
-	appendRow(ITEM(tr("DBSource")), ITEM(QString::number(int(_obj->getDBSourceType()))));
-
 	//visibility
 	if (!_obj->isVisiblityLocked())
-		appendRow(ITEM( tr( "Visible" ) ), CHECKABLE_ITEM(_obj->isVisible(), OBJECT_VISIBILITY));
+		appendRow(ITEM(tr("Visible")), CHECKABLE_ITEM(_obj->isVisible(), OBJECT_VISIBILITY));
 
 	//normals
 	if (_obj->hasNormals())
@@ -1801,7 +1817,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	}
 	case OBJECT_SENSOR_DISPLAY_SCALE:
 	{
-		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {			
+		if (isImageProject(m_currentObject)) {
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject->getChild(i));
 				if (sensor) {
@@ -2034,7 +2050,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	break;
 	case OBJECT_SENSOR_DRAW_FRUSTUM:
 	{
-		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
+		if (isImageProject(m_currentObject)) {
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 				if (sensor) {
@@ -2055,7 +2071,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	break;
 	case OBJECT_SENSOR_DRAW_FRUSTUM_FRAME:
 	{
-		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
+		if (isImageProject(m_currentObject)) {
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 				if (sensor) {
@@ -2072,7 +2088,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	break;
 	case OBJECT_SENSOR_DRAW_FRUSTUM_PLANES:
 	{
-		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
+		if (isImageProject(m_currentObject)) {
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 				if (sensor) {
@@ -2091,7 +2107,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	break;
 	case OBJECT_SENSOR_DRAW_IMAGE:
 	{
-		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
+		if (isImageProject(m_currentObject)) {
 			if (item->checkState() != Qt::Checked) {
 				for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 					ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
@@ -2132,7 +2148,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	break;
 	case OBJECT_SENSOR_DRAW_BASEAXIS:
 	{
-		if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
+		if (isImageProject(m_currentObject)) {
 			for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 				ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject->getChild(i));
 				if (sensor) {
@@ -2536,8 +2552,7 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
 	if (!m_currentObject)
 		return;
 
-	if (m_currentObject->isA(CC_TYPES::ST_PROJECT) && m_currentObject->getDBSourceType() == CC_TYPES::DB_IMAGE) {
-	//if (m_currentObject->getName().endsWith(BDDB_CAMERA_SUFFIX)) {		
+	if (isImageProject(m_currentObject)) {
 		for (size_t i = 0; i < m_currentObject->getChildrenNumber(); i++) {
 			ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject->getChild(i));
 			if (sensor && sensor->getGraphicScale() != static_cast<PointCoordinateType>(val)) {

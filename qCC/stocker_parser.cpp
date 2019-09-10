@@ -41,6 +41,7 @@ using namespace stocker;
 #ifdef PCATPS_SUPPORT
 #include "PC_ATPS.h"
 #endif
+#include "stockerDatabase.h"
 
 template <typename T1, typename T2>
 auto ccToPoints2(std::vector<T1> points, bool parallel = false)->std::vector<T2>
@@ -302,7 +303,7 @@ ccHObject::Container GetPlaneEntitiesBySelected(ccHObject* select)
 	ccHObject::Container plane_container;
 	if (!select) { return plane_container; }
 	
-	if (IsBDBaseObj(select)) {
+	if (isBuildingProject(select)) {
 		BDBaseHObject* baseObj = GetRootBDBase(select); assert(baseObj);
 		ccHObject::Container buildings = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
 		for (ccHObject* bd : buildings) {
@@ -335,9 +336,9 @@ ccHObject::Container GetBuildingEntitiesBySelected(ccHObject* select)
 	ccHObject::Container building_container;
 	if (!select) { return building_container; }
 
-	if (IsBDBaseObj(select)) {
-		BDBaseHObject* baseObj = GetRootBDBase(select); assert(baseObj);
-		building_container = GetEnabledObjFromGroup(baseObj, CC_TYPES::ST_BUILDING, true, false);
+	if (isBuildingProject(select) || select->getClassID() == CC_TYPES::HIERARCHY_OBJECT) {
+		//BDBaseHObject* baseObj = GetRootBDBase(select); assert(baseObj);
+		building_container = GetEnabledObjFromGroup(select, CC_TYPES::ST_BUILDING, true, false);
 	}
 	else {
 		ccHObject* bd = GetParentBuilding(select);
@@ -391,124 +392,7 @@ vcg::Plane3d GetVcgPlane(ccHObject* planeObj)
 	return vcgPlane;
 }
 
-StBuilding* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_BUILDING, "", building_name, check_enable);
-	if (obj) return static_cast<StBuilding*>(obj);
-	return nullptr;
-}
-ccPointCloud * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check_enable) {
-	ccHObject* obj = GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name, check_enable);
-	if(obj) return static_cast<ccPointCloud*>(obj);
-	return nullptr;
-}
-StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_PRIMITIVE_SUFFIX, building_name, false);
-	if (obj) return static_cast<StPrimGroup*>(obj);
-	StPrimGroup* group = new StPrimGroup(building_name + BDDB_PRIMITIVE_SUFFIX);
-	if (group) {
-		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
-		else { delete group; group = nullptr; }
-	}
-	return nullptr;
-}
-StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_BLOCKGROUP, BDDB_BLOCKGROUP_SUFFIX, building_name, false);
-	if (obj) return static_cast<StBlockGroup*>(obj);
-	StBlockGroup* group = new StBlockGroup(building_name + BDDB_BLOCKGROUP_SUFFIX);
-	if (group) { 
-		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
-		else { delete group; group = nullptr; }
-	}
-	return nullptr;
-}
-StPrimGroup * BDBaseHObject::GetHypothesisGroup(QString building_name) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_POLYFITHYPO_SUFFIX, building_name, false);
-	if (obj) return static_cast<StPrimGroup*>(obj);
-	StPrimGroup* group = new StPrimGroup(building_name + BDDB_POLYFITHYPO_SUFFIX);
-	if (group) {
-		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
-		else { delete group; group = nullptr; }
-	}
-	return nullptr;
-}
-ccHObject * BDBaseHObject::GetTodoGroup(QString building_name)
-{
-	ccHObject* obj = GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_TODOGROUP_SUFFIX, building_name, false);
-	if (obj) return static_cast<StBlockGroup*>(obj);
-	StBlockGroup* group = new StBlockGroup(building_name + BDDB_TODOGROUP_SUFFIX);
-	if (group) {
-		group->setDisplay(getDisplay());
-		ccHObject* bd = GetBuildingGroup(building_name, false);
-		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
-		else { delete group; group = nullptr; }
-	}
-	return nullptr;
-}
-ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name)
-{
-	ccHObject* todo_group = GetTodoGroup(buildig_name);
-	if (!todo_group) { throw std::runtime_error("internal error"); return nullptr; }
-	ccHObject::Container todo_children;
-	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOPOINT_PREFIX, true, CC_TYPES::POINT_CLOUD);
-	if (!todo_children.empty()) {
-		return ccHObjectCaster::ToPointCloud(todo_children.front());
-	}
-	else {
-		ccPointCloud* todo_point = new ccPointCloud(BDDB_TODOPOINT_PREFIX);
-		todo_point->setGlobalScale(global_scale);
-		todo_point->setGlobalShift(CCVector3d(vcgXYZ(global_shift)));
-		todo_point->setDisplay(todo_group->getDisplay());
-		todo_point->showColors(true);
-		todo_group->addChild(todo_point);
-		MainWindow* win = MainWindow::TheInstance();
-		assert(win);
-		win->addToDB(todo_point, this->getDBSourceType(), false, false);
-		return todo_point;
-	}
-	return nullptr;
-}
-ccPointCloud * BDBaseHObject::GetTodoLine(QString buildig_name)
-{
-	ccHObject* todo_group = GetTodoGroup(buildig_name);
-	if (!todo_group) { throw std::runtime_error("internal error"); return nullptr; }
-	ccHObject::Container todo_children;
-	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOLINE_PREFIX, true, CC_TYPES::POINT_CLOUD);
-	if (!todo_children.empty()) {
-		return ccHObjectCaster::ToPointCloud(todo_children.front());
-	}
-	else {
-		ccPointCloud* todo_point = new ccPointCloud(BDDB_TODOLINE_PREFIX);
-		todo_point->setGlobalScale(global_scale);
-		todo_point->setGlobalShift(CCVector3d(vcgXYZ(global_shift)));
-		todo_point->setDisplay(getDisplay());
-		todo_group->addChild(todo_point);
-		MainWindow* win = MainWindow::TheInstance();
-		assert(win);
-		win->addToDB(todo_point, this->getDBSourceType(), false, false);
-		return todo_point;
-	}
-	return nullptr;
-}
-std::string BDBaseHObject::GetPathModelObj(std::string building_name)
-{
-	auto& bd = block_prj.m_builder.sbuild.find(stocker::BuilderBase::BuildNode::Create(building_name));
-	if (bd == block_prj.m_builder.sbuild.end())	{
-		throw std::runtime_error("cannot find building!" + building_name);
-	}
-	return std::string((*bd)->data.file_path.model_dir + building_name + MODEL_LOD3_OBJ_SUFFIX);
-}
 
-stocker::BuildUnit BDBaseHObject::GetBuildingUnit(std::string building_name) {
-	auto iter = block_prj.m_builder.sbuild.find(BuilderBase::BuildNode::Create(building_name));
-	if (iter == block_prj.m_builder.sbuild.end()) {
-		throw runtime_error("internal error: cannot find building");
-		return stocker::BuildUnit("invalid");
-	}
-	else return (*iter)->data;
-}
 StBuilding* GetParentBuilding(ccHObject* obj) {
 	ccHObject* bd_obj_ = obj;
 	do {
@@ -521,20 +405,7 @@ StBuilding* GetParentBuilding(ccHObject* obj) {
 	return nullptr;
 }
 
-bool IsBDBaseObj(ccHObject* obj) {
-	return obj->isA(CC_TYPES::ST_PROJECT);
-}
-BDBaseHObject* GetRootBDBase(ccHObject* obj) {
-	ccHObject* bd_obj_ = obj;
-	do {
-		if (IsBDBaseObj(bd_obj_)) {
-			return static_cast<BDBaseHObject*>(bd_obj_);
-		}
-		bd_obj_ = bd_obj_->getParent();
-	} while (bd_obj_);
 
-	return nullptr;
-}
 
 ccPointCloud* GetPlaneCloud(ccHObject* planeObj) {
 	return ccHObjectCaster::ToPointCloud(planeObj->isA(CC_TYPES::PLANE) ? planeObj->getParent() : planeObj);
@@ -582,33 +453,6 @@ void filterCameraByName(ccHObject * camera_group, QStringList name_list)
 		}
 		camera->redrawDisplay();
 	}
-}
-
-int GetNumberExcludePrefix(ccHObject * obj, QString prefix)
-{
-	QString name = obj->getName();
-	if (name.startsWith(prefix) && name.length() > prefix.length()) {
-		QString number = name.mid(prefix.length(), name.length());
-		return number.toInt();
-	}
-	return -1;
-}
-
-int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix/*, CC_CLASS_ENUM type = CC_TYPES::OBJECT*/)
-{
-	if (!obj) { return -1; }
-	set<int> name_numbers;
-	for (size_t i = 0; i < obj->getChildrenNumber(); i++) {
-		QString name = obj->getChild(i)->getName();
-		int number = GetNumberExcludePrefix(obj->getChild(i), prefix);
-		if (number >= 0) {
-			name_numbers.insert(number);
-		}
-	}
-	if (!name_numbers.empty()) {
-		return *name_numbers.rbegin();
-	}
-	return -1;
 }
 
 ccPlane* FitPlaneAndAddChild(ccPointCloud* cloud)
@@ -2733,46 +2577,59 @@ void SubstituteFootPrintContour(StFootPrint* footptObj, stocker::Contour3d point
 
 bool PackFootprints(ccHObject* buildingObj)
 {
-	BDBaseHObject* baseObj = GetRootBDBase(buildingObj); if (!baseObj) return false;
-	QString building_name = buildingObj->getName();
-	BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
-	StPrimGroup* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
-	StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
-	if (!prim_group_obj || !blockgroup_obj) { return false; }
+	try {
+		BDBaseHObject* baseObj = GetRootBDBase(buildingObj); if (!baseObj) return false;
+		QString building_name = buildingObj->getName();
+		BuildUnit build_unit = baseObj->GetBuildingUnit(building_name.toStdString());
+		StPrimGroup* prim_group_obj = baseObj->GetPrimitiveGroup(building_name);
+		StBlockGroup* blockgroup_obj = baseObj->GetBlockGroup(buildingObj->getName());
+		if (!prim_group_obj || !blockgroup_obj) { return false; }
 
-	//! get footprints
-	ccHObject::Container footprints = blockgroup_obj->getValidFootPrints();
-	std::vector<std::vector<Contour3d>> layers_planes_points;
-	std::vector<stocker::Contour3d> footprints_points;
-	for (ccHObject* ft_entity : footprints) {
-		StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(ft_entity);
-		QStringList plane_names = ftObj->getPlaneNames();
-		std::vector<Contour3d> planes_points;
-		for (auto & pl_name : plane_names) {
-			ccPlane* pl_entity = prim_group_obj->getPlaneByName(pl_name); if (!pl_entity) continue;
-			if (isVertical(pl_entity, 15)) continue;
-			ccPointCloud* plane_cloud = GetPlaneCloud(pl_entity); if (!plane_cloud) continue;
-			planes_points.push_back(GetPointsFromCloud(plane_cloud));
+		//! get footprints
+		ccHObject::Container footprints = blockgroup_obj->getValidFootPrints();
+		std::vector<std::vector<Contour3d>> layers_planes_points;
+		std::vector<stocker::Contour3d> footprints_points;
+		for (ccHObject* ft_entity : footprints) {
+			StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(ft_entity);
+			QStringList plane_names = ftObj->getPlaneNames();
+			std::vector<Contour3d> planes_points;
+			for (auto & pl_name : plane_names) {
+				ccPlane* pl_entity = prim_group_obj->getPlaneByName(pl_name); if (!pl_entity) continue;
+				if (isVertical(pl_entity, 15)) continue;
+				ccPointCloud* plane_cloud = GetPlaneCloud(pl_entity); if (!plane_cloud) continue;
+				planes_points.push_back(GetPointsFromCloud(plane_cloud));
+			}
+			layers_planes_points.push_back(planes_points);
+
+			Contour3d ft_pts;
+			for (auto & pt : ftObj->getPoints(false)) {
+				ft_pts.emplace_back(pt.x, pt.y, pt.z);
+			}
+			footprints_points.push_back(ft_pts);
 		}
-		layers_planes_points.push_back(planes_points);
+		std::vector<stocker::Contour3d> footprints_points_pp;
+		if (!FootPrintsPlanarPartition(layers_planes_points, footprints_points, footprints_points_pp)) return false;
 
-		Contour3d ft_pts;
-		for (auto & pt : ftObj->getPoints(false)) {
-			ft_pts.emplace_back(pt.x, pt.y, pt.z);
+		if (footprints_points.size() == footprints_points_pp.size()) {
+			footprints_points = footprints_points_pp;
 		}
-		footprints_points.push_back(ft_pts);
-	}
-	if (!FootPrintsPlanarPartition(layers_planes_points, footprints_points)) return false;	
-	if (footprints.size() != footprints_points.size())return false;
 
-	for (auto & polygon : footprints_points) {
-		RepairPolygon(polygon, CC_DEG_TO_RAD * 5);
+		for (auto & polygon : footprints_points) {
+			RepairPolygon(polygon, CC_DEG_TO_RAD * 5);
+		}
+
+		if (footprints_points.size() == footprints_points_pp.size()) {
+			for (size_t i = 0; i < footprints.size(); i++) {
+				StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(footprints[i]);
+				SubstituteFootPrintContour(ftObj, footprints_points[i]);
+				ftObj->prepareDisplayForRefresh();
+			}
+		}
 	}
-	
-	for (size_t i = 0; i < footprints.size(); i++) {
-		StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(footprints[i]);
-		SubstituteFootPrintContour(ftObj, footprints_points[i]);
-		ftObj->prepareDisplayForRefresh();
+	catch (const std::exception&e) {
+		throw(std::runtime_error(e.what()));
+		STOCKER_ERROR_ASSERT(e.what());
+		return false;
 	}
 
 	return true;

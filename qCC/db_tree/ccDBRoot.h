@@ -235,6 +235,10 @@ signals:
 	void dbIsNotEmptyAnymore();
 	void itemClicked();
 
+public:
+	//! Entities sorting schemes
+	enum SortRules { SORT_A2Z, SORT_Z2A, SORT_BY_TYPE };
+	void sortItemChildren(ccHObject* item, SortRules sortRule);
 protected:
 
 	//! Aligns the camera with the currently selected entity
@@ -244,9 +248,6 @@ protected:
 
 	//! Shows properties view for a given element
 	void showPropertiesView(ccHObject* obj);
-
-	//! Entities sorting schemes
-	enum SortRules { SORT_A2Z, SORT_Z2A, SORT_BY_TYPE };
 
 	//! Sorts selected entities children
 	void sortSelectedEntitiesChildren(SortRules rule);

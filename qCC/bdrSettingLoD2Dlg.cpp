@@ -15,7 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#include "bdr3D4EMDlg.h"
+#include "bdrSettingLoD2Dlg.h"
 
 //local
 #include "mainwindow.h"
@@ -24,37 +24,17 @@
 #include <QToolButton>
 #include <QPushButton>
 
-bdr3D4EMDlg::bdr3D4EMDlg(QWidget* parent)
+bdrSettingLoD2Dlg::bdrSettingLoD2Dlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
-	, Ui::BDR3D4EMDlg()
+	, Ui::bdrSettingLoD2Dlg()
 {
 	setupUi(this);
 
-	connect(PointcloudFilePathToolButton, &QAbstractButton::clicked, this, &bdr3D4EMDlg::browsePointcloudFilename);
-	connect(OutputFilePathToolButton, &QAbstractButton::clicked, this, &bdr3D4EMDlg::browseOutputFilename);
-	connect(ConfigureFilePathToolButton, &QAbstractButton::clicked, this, &bdr3D4EMDlg::browseConfigureFilename);
+	connect(ConfigureFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browseConfigureFilename);
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
 }
 
-void bdr3D4EMDlg::browsePointcloudFilename()
-{
-	QString Filename =
-		QFileDialog::getOpenFileName(this,
-			"Open PointCloud file",
-			PointcloudFilePathLineEdit->text(),
-			"Point Cloud (*.ply);;Las File (*.las *.laz)");
-
-	if (!Filename.isEmpty())
-		PointcloudFilePathLineEdit->setText(Filename);
-
-	if (OutputFilePathLineEdit->text().isEmpty()) {
-		QFileInfo filepath(Filename);
-		QString output_path = filepath.path() + "/" + filepath.completeBaseName() + ".obj";
-		OutputFilePathLineEdit->setText(output_path);
-	}
-}
-
-int bdr3D4EMDlg::GroundHeightMode()
+int bdrSettingLoD2Dlg::GroundHeightMode()
 {
 	if (GroundHeightLowestRadioButton->isChecked()) {
 		return 0;
@@ -68,24 +48,12 @@ int bdr3D4EMDlg::GroundHeightMode()
 	return 0;
 }
 
-double bdr3D4EMDlg::UserDefinedGroundHeight()
+double bdrSettingLoD2Dlg::UserDefinedGroundHeight()
 {
 	return GroundHeightUserDoubleSpinBox->value();
 }
 
-void bdr3D4EMDlg::browseOutputFilename()
-{
-	QString Filename = 
-		QFileDialog::getSaveFileName(this, 
-			"Output model file", 
-			ConfigureFilePathLineEdit->text(),
-			"obj model file (*.obj)");
-
-	if (!Filename.isEmpty())
-		OutputFilePathLineEdit->setText(Filename);
-}
-
-void bdr3D4EMDlg::browseConfigureFilename()
+void bdrSettingLoD2Dlg::browseConfigureFilename()
 {
 	QString Filename =
 		QFileDialog::getOpenFileName(this,
@@ -97,8 +65,7 @@ void bdr3D4EMDlg::browseConfigureFilename()
 		ConfigureFilePathLineEdit->setText(Filename);
 }
 
-void bdr3D4EMDlg::saveSettings()
+void bdrSettingLoD2Dlg::saveSettings()
 {
-	OutputFilePathLineEdit;
 	ConfigureFilePathLineEdit;
 }

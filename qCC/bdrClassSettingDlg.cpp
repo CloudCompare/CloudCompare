@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                    CLOUDCOMPARE PLUGIN: qRANSAC_SD                     #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,27 +11,21 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                  COPYRIGHT: Daniel Girardeau-Montaut                   #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#include "bdrPolyFitDlg.h"
+#include "bdrClassSettingDlg.h"
 
-//local
-#include "mainwindow.h"
-
-#include <QFileDialog>
-#include <QToolButton>
-#include <QPushButton>
-
-bdrPolyFitDlg::bdrPolyFitDlg(QWidget* parent)
-	: QDialog(parent, Qt::Tool)
-	, Ui::BDRPolyFitDlg()
+bdrClassSettingDlg::bdrClassSettingDlg(QWidget* parent)
+	: m_UI(new Ui::bdrClassSettingDlg)
 {
-	setupUi(this);
+	m_UI->setupUi(this);
 
-// 	connect(PointcloudFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browsePointcloudFilename);
-// 	connect(OutputDirFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browseOutputDirPath);
-// 	connect(ConfigureFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browseConfigureFilename);
-// 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
+}
+
+bdrClassSettingDlg::~bdrClassSettingDlg()
+{
+
+	delete m_UI;
 }

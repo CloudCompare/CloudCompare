@@ -1548,7 +1548,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 						loadedCloud->resize(loadedCloud->size());
 					}
 
-					QString chunkName("unnamed - Cloud");
+					QString chunkName("unnamed");// - Cloud
 					unsigned int n = container.getChildrenNumber();
 					if (n != 0)
 					{

@@ -232,5 +232,10 @@
     <file>images/stocker/createdatabase.png</file>
     <file>images/stocker/importdatabase.png</file>
     <file>images/stocker/imgedit.png</file>
+    <file>images/stocker/classification.png</file>
+    <file>images/stocker/groundfiltering.png</file>
+    <file>images/stocker/lod2.png</file>
+    <file>images/stocker/importfolder.png</file>
+    <file>images/stocker/buildingblack.png</file>
   </qresource>
 </RCC>

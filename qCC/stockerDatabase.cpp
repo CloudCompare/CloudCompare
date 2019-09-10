@@ -1,0 +1,375 @@
+//##########################################################################
+//#                                                                        #
+//#                              CLOUDCOMPARE                              #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 or later of the License.      #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                                                                        #
+//##########################################################################
+
+#include "stockerDatabase.h"
+#include "ioctrl/StFileOperator.hpp"
+
+#include "ccHObject.h"
+#include "ccHObjectCaster.h"
+#include "ccDBRoot.h"
+
+#include "mainwindow.h"
+#include "QFileInfo"
+#include <QImageReader>
+#include <QFileDialog>
+#include "FileIOFilter.h"
+#include <QDir>
+
+using namespace stocker;
+
+DataBaseHObject * GetRootDataBase(ccHObject * obj)
+{
+	ccHObject* bd_obj_ = obj;
+	do {
+		if (isDatabaseProject(bd_obj_)) {
+			return static_cast<DataBaseHObject*>(bd_obj_);
+		}
+		bd_obj_ = bd_obj_->getParent();
+	} while (bd_obj_);
+
+	return nullptr;
+}
+
+BDBaseHObject* GetRootBDBase(ccHObject* obj) {
+	ccHObject* bd_obj_ = obj;
+	do {
+		if (isBuildingProject(bd_obj_)) {
+			return static_cast<BDBaseHObject*>(bd_obj_);
+		}
+		bd_obj_ = bd_obj_->getParent();
+	} while (bd_obj_);
+
+	return nullptr;
+}
+
+BDImageBaseHObject* GetRootImageBase(ccHObject* obj) {
+	ccHObject* bd_obj_ = obj;
+	do {
+		if (isImageProject(bd_obj_)) {
+			return static_cast<BDImageBaseHObject*>(bd_obj_);
+		}
+		bd_obj_ = bd_obj_->getParent();
+	} while (bd_obj_);
+
+	return nullptr;
+}
+
+ccHObject* getChildGroupByName(ccHObject* group, QString name, bool auto_create, bool add_to_db)
+{
+	ccHObject* find_obj = nullptr;
+	for (size_t i = 0; i < group->getChildrenNumber(); i++) {
+		ccHObject* child = group->getChild(i);
+		if (child->isGroup() && child->getName() == name) {
+			find_obj = child;
+		}
+	}
+	if (!find_obj && auto_create) {
+		find_obj = new ccHObject(name);
+		QString path = group->getPath() + "/" + name;
+		if (StCreatDir(path)) {
+			find_obj->setPath(path);
+		}
+		else {
+			delete find_obj; find_obj = nullptr;
+			return nullptr;
+		}
+		group->addChild(find_obj);
+		if (add_to_db) {
+			MainWindow::TheInstance()->addToDB(find_obj, group->getDBSourceType());
+		}
+	}
+	else {
+		QString path = find_obj->getPath();
+		if (path.isEmpty() ||
+			(!QFileInfo(path).exists() && !StCreatDir(path))) {
+			return nullptr;
+		}
+	}
+	return find_obj;
+}
+
+ccHObject * DataBaseHObject::getPointCloudGroup()
+{
+	return getChildGroupByName(this, "pointClouds");
+}
+
+ccHObject * DataBaseHObject::getImagesGroup()
+{
+	return getChildGroupByName(this, "images");
+}
+
+ccHObject * DataBaseHObject::getMiscsGroup()
+{
+	return getChildGroupByName(this, "miscs");
+}
+
+ccHObject* DataBaseHObject::getProductGroup() {
+	return getChildGroupByName(this, "products");
+}
+
+ccHObject * DataBaseHObject::getProductItem(QString name)
+{
+	ccHObject* products = getProductGroup();
+	if (!products) { return nullptr; }
+	return getChildGroupByName(products, name);
+}
+ccHObject* DataBaseHObject::getProductFiltered() 
+{
+	return getProductItem("filtered");
+}
+ccHObject* DataBaseHObject::getProductClassified() 
+{
+	return getProductItem("classified");
+}
+ccHObject * DataBaseHObject::getProductSegmented()
+{
+	return getProductItem("segmented");
+}
+ccHObject * DataBaseHObject::getProductModels()
+{
+	return getProductItem("models");
+}
+
+StBuilding* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {
+	ccHObject* obj = GetHObj(CC_TYPES::ST_BUILDING, "", building_name, check_enable);
+	if (obj) return static_cast<StBuilding*>(obj);
+	return nullptr;
+}
+ccPointCloud * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check_enable) {
+	ccHObject* obj = GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name, check_enable);
+	if (obj) return static_cast<ccPointCloud*>(obj);
+	return nullptr;
+}
+StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name) {
+	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_PRIMITIVE_SUFFIX, building_name, false);
+	if (obj) return static_cast<StPrimGroup*>(obj);
+	StPrimGroup* group = new StPrimGroup(building_name + BDDB_PRIMITIVE_SUFFIX);
+	if (group) {
+		ccHObject* bd = GetBuildingGroup(building_name, false);
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
+		else { delete group; group = nullptr; }
+	}
+	return nullptr;
+}
+StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name) {
+	ccHObject* obj = GetHObj(CC_TYPES::ST_BLOCKGROUP, BDDB_BLOCKGROUP_SUFFIX, building_name, false);
+	if (obj) return static_cast<StBlockGroup*>(obj);
+	StBlockGroup* group = new StBlockGroup(building_name + BDDB_BLOCKGROUP_SUFFIX);
+	if (group) {
+		ccHObject* bd = GetBuildingGroup(building_name, false);
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
+		else { delete group; group = nullptr; }
+	}
+	return nullptr;
+}
+StPrimGroup * BDBaseHObject::GetHypothesisGroup(QString building_name) {
+	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_POLYFITHYPO_SUFFIX, building_name, false);
+	if (obj) return static_cast<StPrimGroup*>(obj);
+	StPrimGroup* group = new StPrimGroup(building_name + BDDB_POLYFITHYPO_SUFFIX);
+	if (group) {
+		ccHObject* bd = GetBuildingGroup(building_name, false);
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
+		else { delete group; group = nullptr; }
+	}
+	return nullptr;
+}
+ccHObject * BDBaseHObject::GetTodoGroup(QString building_name)
+{
+	ccHObject* obj = GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_TODOGROUP_SUFFIX, building_name, false);
+	if (obj) return static_cast<StBlockGroup*>(obj);
+	StBlockGroup* group = new StBlockGroup(building_name + BDDB_TODOGROUP_SUFFIX);
+	if (group) {
+		group->setDisplay(getDisplay());
+		ccHObject* bd = GetBuildingGroup(building_name, false);
+		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
+		else { delete group; group = nullptr; }
+	}
+	return nullptr;
+}
+ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name)
+{
+	ccHObject* todo_group = GetTodoGroup(buildig_name);
+	if (!todo_group) { throw std::runtime_error("internal error"); return nullptr; }
+	ccHObject::Container todo_children;
+	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOPOINT_PREFIX, true, CC_TYPES::POINT_CLOUD);
+	if (!todo_children.empty()) {
+		return ccHObjectCaster::ToPointCloud(todo_children.front());
+	}
+	else {
+		ccPointCloud* todo_point = new ccPointCloud(BDDB_TODOPOINT_PREFIX);
+		todo_point->setGlobalScale(global_scale);
+		todo_point->setGlobalShift(CCVector3d(vcgXYZ(global_shift)));
+		todo_point->setDisplay(todo_group->getDisplay());
+		todo_point->showColors(true);
+		todo_group->addChild(todo_point);
+		MainWindow* win = MainWindow::TheInstance();
+		assert(win);
+		win->addToDB(todo_point, this->getDBSourceType(), false, false);
+		return todo_point;
+	}
+	return nullptr;
+}
+ccPointCloud * BDBaseHObject::GetTodoLine(QString buildig_name)
+{
+	ccHObject* todo_group = GetTodoGroup(buildig_name);
+	if (!todo_group) { throw std::runtime_error("internal error"); return nullptr; }
+	ccHObject::Container todo_children;
+	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOLINE_PREFIX, true, CC_TYPES::POINT_CLOUD);
+	if (!todo_children.empty()) {
+		return ccHObjectCaster::ToPointCloud(todo_children.front());
+	}
+	else {
+		ccPointCloud* todo_point = new ccPointCloud(BDDB_TODOLINE_PREFIX);
+		todo_point->setGlobalScale(global_scale);
+		todo_point->setGlobalShift(CCVector3d(vcgXYZ(global_shift)));
+		todo_point->setDisplay(getDisplay());
+		todo_group->addChild(todo_point);
+		MainWindow* win = MainWindow::TheInstance();
+		assert(win);
+		win->addToDB(todo_point, this->getDBSourceType(), false, false);
+		return todo_point;
+	}
+	return nullptr;
+}
+std::string BDBaseHObject::GetPathModelObj(std::string building_name)
+{
+	auto& bd = block_prj.m_builder.sbuild.find(stocker::BuilderBase::BuildNode::Create(building_name));
+	if (bd == block_prj.m_builder.sbuild.end()) {
+		throw std::runtime_error("cannot find building!" + building_name);
+	}
+	return std::string((*bd)->data.file_path.model_dir + building_name + MODEL_LOD3_OBJ_SUFFIX);
+}
+
+stocker::BuildUnit BDBaseHObject::GetBuildingUnit(std::string building_name) {
+	auto iter = block_prj.m_builder.sbuild.find(BuilderBase::BuildNode::Create(building_name));
+	if (iter == block_prj.m_builder.sbuild.end()) {
+		throw runtime_error("internal error: cannot find building");
+		return stocker::BuildUnit("invalid");
+	}
+	else return (*iter)->data;
+}
+
+ccHObject* findChildByName(ccHObject* parent,
+	bool recursive,
+	QString filter,
+	bool strict,
+	CC_CLASS_ENUM type_filter/*=CC_TYPES::OBJECT*/,
+	bool auto_create /*= false*/,
+	ccGenericGLDisplay* inDisplay/*=0*/)
+{
+	ccHObject::Container children;
+	parent->filterChildrenByName(children, recursive, filter, strict, type_filter, inDisplay);
+
+	if (children.empty()) {
+		if (auto_create) {
+			ccHObject* obj = ccHObject::New(type_filter, filter.toStdString().c_str());
+			if (parent->getDisplay()) {
+				obj->setDisplay(parent->getDisplay());
+			}
+			parent->addChild(obj);
+			MainWindow::TheInstance()->addToDB(obj, parent->getDBSourceType(), false, false);
+			return obj;
+		}
+		else
+			return nullptr;
+	}
+	else {
+		return children.front();
+	}
+}
+
+int GetNumberExcludePrefix(ccHObject * obj, QString prefix)
+{
+	QString name = obj->getName();
+	if (name.startsWith(prefix) && name.length() > prefix.length()) {
+		QString number = name.mid(prefix.length(), name.length());
+		return number.toInt();
+	}
+	return -1;
+}
+
+int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix/*, CC_CLASS_ENUM type = CC_TYPES::OBJECT*/)
+{
+	if (!obj) { return -1; }
+	set<int> name_numbers;
+	for (size_t i = 0; i < obj->getChildrenNumber(); i++) {
+		QString name = obj->getChild(i)->getName();
+		int number = GetNumberExcludePrefix(obj->getChild(i), prefix);
+		if (number >= 0) {
+			name_numbers.insert(number);
+		}
+	}
+	if (!name_numbers.empty()) {
+		return *name_numbers.rbegin();
+	}
+	return -1;
+}
+
+bool StCreatDir(QString dir)
+{
+	if (QDir(dir).exists()) {
+		return true;
+	}
+	return CreateDir(dir.toStdString().c_str());
+}
+
+QStringList moveFilesToDir(QStringList list, QString dir)
+{
+	QStringList new_files;
+	if (StCreatDir(dir)) {
+		for (size_t i = 0; i < list.size(); i++) {
+			QString & file = const_cast<QString&>(list[i]);
+			QFileInfo file_info(file);
+			QString new_file = dir + "/" + file_info.fileName();
+			if (QFile::copy(file, new_file)) {
+				QFile::remove(file);
+				new_files.append(new_file);
+			}
+			else {
+				new_files.append(file);
+			}
+		}
+	}
+	else {
+		return list;
+	}
+
+	return new_files;
+}
+
+QStringList copyFilesToDir(QStringList list, QString dir)
+{
+	QStringList new_files;
+	if (StCreatDir(dir)) {
+		for (size_t i = 0; i < list.size(); i++) {
+			QString & file = const_cast<QString&>(list[i]);
+			QFileInfo file_info(file);
+			QString new_file = dir + "/" + file_info.fileName();
+			if (QFile::copy(file, new_file)) {
+				new_files.append(new_file);
+			}
+			else {
+				new_files.append(file);
+			}
+		}
+	}
+	else {
+		return list;
+	}
+
+	return new_files;
+}

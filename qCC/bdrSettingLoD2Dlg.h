@@ -15,23 +15,33 @@
 //#                                                                        #
 //##########################################################################
 
-#include "bdrPolyFitDlg.h"
+#ifndef BDR_3D4EM_DLG_HEADER
+#define BDR_3D4EM_DLG_HEADER
 
-//local
+#include "ui_bdrSettingLoD2Dlg.h"
 #include "mainwindow.h"
 
-#include <QFileDialog>
-#include <QToolButton>
-#include <QPushButton>
-
-bdrPolyFitDlg::bdrPolyFitDlg(QWidget* parent)
-	: QDialog(parent, Qt::Tool)
-	, Ui::BDRPolyFitDlg()
+//! Dialog for qRansacSD plugin
+class bdrSettingLoD2Dlg : public QDialog, public Ui::bdrSettingLoD2Dlg
 {
-	setupUi(this);
+	Q_OBJECT
 
-// 	connect(PointcloudFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browsePointcloudFilename);
-// 	connect(OutputDirFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browseOutputDirPath);
-// 	connect(ConfigureFilePathToolButton, &QAbstractButton::clicked, this, &bdrSettingLoD2Dlg::browseConfigureFilename);
-// 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
-}
+public:
+
+	//! Default constructor
+	explicit bdrSettingLoD2Dlg(QWidget* parent = 0);
+
+	int GroundHeightMode();
+	double UserDefinedGroundHeight();
+	double ground_height;
+
+protected slots:
+
+	void browseConfigureFilename();
+	//! Saves (temporarily) the dialog parameters on acceptation
+	void saveSettings();
+
+
+};
+
+#endif

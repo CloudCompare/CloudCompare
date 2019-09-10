@@ -66,12 +66,15 @@ struct dbTreeSelectionInfo;
 class bdrLine3DppDlg;
 class bdrDeductionDlg;
 class bdrPolyFitDlg;
-class bdr3D4EMDlg;
+class bdrSettingLoD2Dlg;
 class bdrPlaneSegDlg;
 class bdrFacetFilterDlg;
 class bdr2Point5DimEditor;
 class bdrImageEditorPanel;
 class bdrPlaneEditorDlg;
+
+class bdrSettingBDSegDlg;
+class bdrSettingGrdFilterDlg;
 
 class PolyFitObj;
 
@@ -178,6 +181,9 @@ public:
 	void addToDB_Image(ccHObject* obj, bool updateZoom = false, bool autoExpandDBTree = true, bool checkDimensions = false, bool autoRedraw = true) {
 		addToDB(obj, CC_TYPES::DB_IMAGE, updateZoom, autoExpandDBTree, checkDimensions, autoRedraw);
 	}
+
+	void addToDatabase(QStringList files, ccHObject* import_pool, bool remove_exist = true, bool auto_sort = true);
+	ccHObject::Container addPointsToDatabase(QStringList files, ccHObject* import_pool, bool remove_exist = true, bool auto_sort = true);
 	
 	void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
 	void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
@@ -577,6 +583,8 @@ private slots:
 	/// 3d4em
 	void doActionBDLoD2Generation();
 
+	void doActionSettingsLoD2();
+
 	void doActionBDTextureMapping();
 
 	void doActionBDConstrainedMesh();
@@ -614,9 +622,26 @@ private slots:
 	void doActionOpenDatabase();
 	void doActionSaveDatabase();
 	void doActionImportData();
+	void doActionImportFolder();
 	void doActionEditDatabase();
+	void doActionCreateBuildingProject();
 
+	void doActionGroundFilteringBatch();
+	void doActionClassificationBatch();
+	void doActionBuildingSegmentationBatch();
+
+	void doActionPointClassEditor();
+	void deactivatePointClassEditor(bool);
+	void doActionBuildingSegmentEditor();	
+	void deactivateBuildingSegmentEditor(bool);
+
+	void doAactionSettingsGroundFiltering();
+	void doActionSettingsClassification();
+	void doActionSettingsBuildingSeg();
 	
+	void doActionScheduleProjectID();
+
+	void doActionClearEmptyItems();
 
 private:
 	//! Shortcut: asks the user to select one cloud
@@ -828,12 +853,16 @@ private:
 	bdrDeductionDlg* m_pbdrddtDlg;
 	bdrPolyFitDlg* m_pbdrpfDlg;
 	bdrFacetFilterDlg* m_pbdrffDlg;
-	bdr3D4EMDlg* m_pbdr3d4emDlg;
+	bdrSettingLoD2Dlg* m_pbdrSettingLoD2Dlg;
 	bdr2Point5DimEditor* m_pbdrImshow;
 	bdrImageEditorPanel* m_pbdrImagePanel;
 	bdrPlaneEditorDlg* m_pbdrPlaneEditDlg;
 
+	bdrSettingBDSegDlg* m_pbdrSettingBDSegDlg;
+	bdrSettingGrdFilterDlg* m_pbdrSettingGrdFilterDlg;
+
 	PolyFitObj* polyfit_obj;
+	int m_GCSvr_prj_id;
 };
 
 #include "ccProgressDialog.h"

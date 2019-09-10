@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                    CLOUDCOMPARE PLUGIN: qRANSAC_SD                     #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,39 +11,42 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                  COPYRIGHT: Daniel Girardeau-Montaut                   #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#ifndef BDR_3D4EM_DLG_HEADER
-#define BDR_3D4EM_DLG_HEADER
+#ifndef BDR_CLASS_DISPLAY_DLG_HEADER
+#define BDR_CLASS_DISPLAY_DLG_HEADER
 
-#include "ui_bdr3D4EMDlg.h"
-#include "mainwindow.h"
+#include "ui_bdrClassDisplayDlg.h"
 
-//! Dialog for qRansacSD plugin
-class bdr3D4EMDlg : public QDialog, public Ui::BDR3D4EMDlg
+class ccGenericPointCloud;
+class ccPointCloud;
+class ccGLWindow;
+class ccPlane;
+class QToolButton;
+
+namespace Ui
+{
+	class bdrClassDisplayDlg;
+}
+
+//! Section extraction tool
+class bdrClassDisplayDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	explicit bdr3D4EMDlg(QWidget* parent = 0);
-
-	int GroundHeightMode();
-	double UserDefinedGroundHeight();
-	double ground_height;
+	explicit bdrClassDisplayDlg(QWidget* parent);
+	//! Destructor
+	~bdrClassDisplayDlg() override;
 
 protected slots:
 
-	void browsePointcloudFilename();
-	void browseOutputFilename();
-	void browseConfigureFilename();
-	//! Saves (temporarily) the dialog parameters on acceptation
-	void saveSettings();
-
-
+private: //members
+	Ui::bdrClassDisplayDlg	*m_UI;
 };
 
-#endif
+#endif //BDR_TRACE_FOOTPRINT_HEADER

@@ -607,15 +607,17 @@ public: //stereo mode
 							RED_CYAN = 3,
 							CYAN_RED = 4,
 							NVIDIA_VISION = 5,
-							OCULUS = 6
+							OCULUS = 6,
+							GENERIC_STEREO_DISPLAY = 7
 		};
 
 		//! Whether stereo-mode is 'analgyph' or real stereo mode
 		inline bool isAnaglyph() const { return glassType <= 4; }
-		
-		bool autoFocal;
-		double focalDist;
-		double eyeSepFactor;
+
+		int screenWidth_mm;
+		int screenDistance_mm;
+		int eyeSeparation_mm;
+		int stereoStrength;
 		GlassType glassType;
 	};
 
@@ -1367,9 +1369,6 @@ protected: //members
 	
 	//! Whether the pivot point is automatically picked at the center of the screen (when possible)
 	bool m_autoPickPivotAtCenter;
-
-	//! Candidate pivot point (will be used when the mouse is released)
-	CCVector3d m_autoPivotCandidate;
 
 	//! Deferred picking
 	QTimer m_deferredPickingTimer;

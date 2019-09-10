@@ -16,7 +16,12 @@
 //##########################################################################
 
 #include "ccBoundingBoxEditorDlg.h"
+
+//systems
 #include <limits>
+
+//Qt
+#include <QClipboard>
 
 //Box state at last dialog execution
 static ccBBox s_lastBBox;
@@ -69,6 +74,9 @@ ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 	connect(zOriXDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
 	connect(zOriYDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
 	connect(zOriZDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
+
+	connect(fromClipboardPushButton,	SIGNAL(clicked()),		this,	SLOT(fromClipboardClicked()));
+	connect(toClipboardPushButton,		SIGNAL(clicked()),		this,	SLOT(toClipboardClicked()));
 
 	defaultPushButton->setVisible(false);
 	lastPushButton->setVisible(s_lastBBox.isValid());
@@ -285,7 +293,7 @@ void ccBoundingBoxEditorDlg::updateZWidth(double value)
 	updateCurrentBBox(value);
 	if (keepSquare())
 	{
-		MakeSquare(m_currentBBox,pointTypeComboBox->currentIndex(),2);
+		MakeSquare(m_currentBBox, pointTypeComboBox->currentIndex(), 2);
 		reflectChanges();
 		//base box (if valid) should always be included!
 		if (m_baseBBox.isValid())
@@ -470,5 +478,62 @@ void ccBoundingBoxEditorDlg::onAxisValueChanged(double)
 		vecSpinBoxes[i]->blockSignals(true);
 		vecSpinBoxes[i]->setValue(N.u[i]);
 		vecSpinBoxes[i]->blockSignals(false);
+	}
+}
+
+void ccBoundingBoxEditorDlg::fromClipboardClicked()
+{
+	QClipboard* clipboard = QApplication::clipboard();
+	if (clipboard)
+	{
+		QString clipText = clipboard->text();
+		if (!clipText.isEmpty())
+		{
+			bool success = false;
+			ccGLMatrix matrix = ccGLMatrix::FromString(clipText, success);
+			if (success)
+			{
+				//set center
+				CCVector3 C = m_currentBBox.getCenter();
+				CCVector3 delta = matrix.getTranslationAsVec3D() - C;
+				m_currentBBox += delta;
+				reflectChanges();
+				//change axes
+				setBoxAxes(	matrix.getColumnAsVec3D(0),
+							matrix.getColumnAsVec3D(1),
+							matrix.getColumnAsVec3D(2) );
+			}
+			else
+			{
+				ccLog::Error("Failed to extract matrix from clipboard");
+			}
+		}
+		else
+		{
+			ccLog::Error("Clipboard is empty");
+
+		}
+	}
+}
+
+void ccBoundingBoxEditorDlg::toClipboardClicked()
+{
+	QClipboard* clipboard = QApplication::clipboard();
+	if (clipboard)
+	{
+		CCVector3 C = m_currentBBox.getCenter();
+
+		CCVector3d X, Y, Z;
+		getBoxAxes(X, Y, Z);
+
+		ccGLMatrix matrix;
+		matrix.setColumn(0, CCVector3::fromArray(X.u));
+		matrix.setColumn(1, CCVector3::fromArray(Y.u));
+		matrix.setColumn(2, CCVector3::fromArray(Z.u));
+		matrix.setTranslation(C);
+
+		clipboard->setText(matrix.toString());
+		ccLog::Print("Matrix saved to clipboard:");
+		ccLog::Print(matrix.toString(12, ' ')); //full precision
 	}
 }

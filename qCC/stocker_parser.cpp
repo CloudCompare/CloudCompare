@@ -82,7 +82,7 @@ auto ccToPoints3(std::vector<T1> points, bool parallel = false)->std::vector<T2>
 }
 
 template <typename T = stocker::Vec3d>
-auto GetPointsFromCloud(ccHObject* entity)->std::vector<T>
+auto GetPointsFromCloud(ccHObject* entity, bool global)->std::vector<T>
 {	
 	std::vector<T> points;
 	if (!entity) return points;
@@ -91,8 +91,9 @@ auto GetPointsFromCloud(ccHObject* entity)->std::vector<T>
 		if (!cloud) return points;
 
 		for (unsigned i = 0; i < cloud->size(); i++) {
-			CCVector3 pt = *cloud->getPoint(i);
-			points.push_back({ pt.x, pt.y, pt.z });
+			const CCVector3* pt = cloud->getPoint(i);
+			CCVector3d Pglobal = cloud->toGlobal3d<PointCoordinateType>(*pt);
+			points.push_back({ Pglobal.x, Pglobal.y, Pglobal.z });
 		}
 	}
 	else if (entity->isA(CC_TYPES::ST_PRIMGROUP)) {
@@ -100,7 +101,7 @@ auto GetPointsFromCloud(ccHObject* entity)->std::vector<T>
 		if (!primGroup) return points;				
 		ccHObject::Container plane_container = primGroup->getValidPlanes();
 		for (auto & pl : plane_container) {
-			std::vector<T> cur_points = GetPointsFromCloud<T>(pl->getParent());
+			std::vector<T> cur_points = GetPointsFromCloud<T>(pl->getParent(), global);
 			points.insert(points.end(), cur_points.begin(), cur_points.end());
 		}
 	}

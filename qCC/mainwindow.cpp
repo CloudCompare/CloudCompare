@@ -11952,7 +11952,7 @@ BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
 					cloud->showColors(true);
 				}
 
-				stocker::Contour3d points = GetPointsFromCloud(cloud);
+				stocker::Contour3d points = GetPointsFromCloud(cloud, true);
 
 				//! prepare building by points
 				CCVector3d minbb, maxbb;

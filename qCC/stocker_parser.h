@@ -43,7 +43,7 @@ class PolyFitObj;
 
 
 template <typename T = stocker::Vec3d>
-auto GetPointsFromCloud(ccHObject* entity)->std::vector<T>;
+auto GetPointsFromCloud(ccHObject* entity, bool global = false)->std::vector<T>;
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject * entity, stocker::Polyline3d polygon, double height);
 std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonsXY(ccHObject::Container entities, stocker::Polyline3d polygon, double height, bool skip_empty = true);
 std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonsXY(ccHObject* entity, stocker::Polyline3d polygon, double height, bool skip_empty = true);

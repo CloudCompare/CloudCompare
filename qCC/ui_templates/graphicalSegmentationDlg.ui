@@ -38,7 +38,7 @@
    <item>
     <widget class="QToolButton" name="pauseButton">
      <property name="toolTip">
-      <string>Pause segmentation</string>
+      <string>Pause segmentation (Space)</string>
      </property>
      <property name="statusTip">
       <string>Pause segmentation  (allow rotation/panning of 3D view)</string>
@@ -78,7 +78,7 @@
    <item>
     <widget class="QToolButton" name="selectionModelButton">
      <property name="toolTip">
-      <string>Polyline selection mode</string>
+      <string>Polyline selection mode (Tab)</string>
      </property>
      <property name="text">
       <string>polyline selection</string>
@@ -95,7 +95,7 @@
    <item>
     <widget class="QToolButton" name="inButton">
      <property name="toolTip">
-      <string>Segment In</string>
+      <string>Segment In (I)</string>
      </property>
      <property name="statusTip">
       <string>Segment (keep points inside)</string>
@@ -112,7 +112,7 @@
    <item>
     <widget class="QToolButton" name="outButton">
      <property name="toolTip">
-      <string>Segment Out</string>
+      <string>Segment Out (O)</string>
      </property>
      <property name="statusTip">
       <string>Segment (keep points outside)</string>
@@ -149,7 +149,7 @@
    <item>
     <widget class="QToolButton" name="validButton">
      <property name="toolTip">
-      <string>Confirm segmentation</string>
+      <string>Confirm segmentation (Enter)</string>
      </property>
      <property name="statusTip">
       <string>Confirm segmentation</string>
@@ -166,7 +166,7 @@
    <item>
     <widget class="QToolButton" name="validAndDeleteButton">
      <property name="toolTip">
-      <string>Confirm and delete hidden points</string>
+      <string>Confirm and delete hidden points (Del)</string>
      </property>
      <property name="statusTip">
       <string>Confirm and delete hidden points</string>
@@ -180,7 +180,7 @@
    <item>
     <widget class="QToolButton" name="cancelButton">
      <property name="toolTip">
-      <string>Cancel</string>
+      <string>Cancel (Esc)</string>
      </property>
      <property name="statusTip">
       <string>Cancel segentation</string>

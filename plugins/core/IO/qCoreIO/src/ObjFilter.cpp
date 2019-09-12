@@ -103,18 +103,17 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	if (!file.open(QFile::Text | QFile::WriteOnly))
 		return CC_FERR_WRITING;
 
-	unsigned numberOfTriangles = mesh->size();
-
-	//progress
+	//progress (start with vertices)
 	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
 		pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
-		pDlg->setInfo(QObject::tr("Triangles: %1").arg(numberOfTriangles));
+		pDlg->setInfo(QObject::tr("Writing %1 vertices").arg(nbPoints));
+		pDlg->setAutoClose(false); //don't close dialogue when progress bar is full
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfTriangles);
+	CCLib::NormalizedProgress nprogress(pDlg.data(), nbPoints);
 
 	QTextStream stream(&file);
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
@@ -133,6 +132,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		stream << "v " << Pglobal.x << " " << Pglobal.y << " " << Pglobal.z << endl;
 		if (file.error() != QFile::NoError)
 			return CC_FERR_WRITING;
+		if (pDlg && !nprogress.oneStep()) //update progress bar, check cancel requested
+			return CC_FERR_CANCELED_BY_USER;
 	}
 
 	//normals
@@ -145,14 +146,26 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		if (withTriNormals)
 		{
 			NormsIndexesTableType* normsTable = mesh->getTriNormsTable();
+
+			//reset save dialog
+			unsigned numTriangleNormals = normsTable->currentSize();
+			if (pDlg)
+				pDlg->setInfo(QObject::tr("Writing $1 triangle normals").arg(numTriangleNormals));
+			nprogress.scale(numTriangleNormals);
+			nprogress.reset();
+
 			if (normsTable)
 			{
-				for (unsigned i = 0; i < normsTable->currentSize(); ++i)
+				for (unsigned i = 0; i < numTriangleNormals; ++i)
 				{
 					const CCVector3& normalVec = ccNormalVectors::GetNormal(normsTable->getValue(i));
 					stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << endl;
 					if (file.error() != QFile::NoError)
 						return CC_FERR_WRITING;
+
+					//increment progress bar
+					if (pDlg && !nprogress.oneStep()) //cancel requested
+						return CC_FERR_CANCELED_BY_USER;
 				}
 			}
 			else
@@ -164,12 +177,24 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		//per-vertices normals
 		else //if (withVertNormals)
 		{
+			//reset save dialog
+			if (pDlg)
+				pDlg->setInfo(QObject::tr("Writing %1 vertex normals").arg(nbPoints));
+			nprogress.scale(nbPoints);
+			nprogress.reset();
+
 			for (unsigned i = 0; i < nbPoints; ++i)
 			{
 				const CCVector3& normalVec = vertices->getPointNormal(i);
 				stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << endl;
 				if (file.error() != QFile::NoError)
 					return CC_FERR_WRITING;
+
+				//increment progress bar
+				if (pDlg && !nprogress.oneStep()) //cancel requested
+				{
+					return CC_FERR_CANCELED_BY_USER;
+				}
 			}
 		}
 	}
@@ -179,6 +204,12 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	bool withMaterials = (materials && mesh->hasMaterials());
 	if (withMaterials)
 	{
+		//reset save dialog
+		if (pDlg)
+			pDlg->setInfo(QObject::tr("Writing %1 materials").arg(materials->size()));
+		nprogress.scale(1);
+		nprogress.reset();
+
 		//save mtl file
 		QStringList errors;
 		QString baseName = QFileInfo(filename).baseName();
@@ -199,6 +230,10 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		{
 			ccLog::Warning(QString("[OBJ][Material file writer] ")+errors[i]);
 		}
+
+		//increment progress bar
+		if (pDlg && !nprogress.oneStep()) //cancel requested
+			return CC_FERR_CANCELED_BY_USER;
 	}
 
 	//save texture coordinates
@@ -208,12 +243,27 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		TextureCoordsContainer* texCoords = mesh->getTexCoordinatesTable();
 		if (texCoords)
 		{
+			//reset save dialog
+			unsigned numTexCoords = texCoords->currentSize();
+			if (pDlg)
+			{
+				pDlg->setInfo(QObject::tr("Writing %1 texture coordinates").arg(numTexCoords));
+			}
+			nprogress.scale(numTexCoords);
+			nprogress.reset();
+
 			for (unsigned i=0; i<texCoords->currentSize(); ++i)
 			{
 				const TexCoords2D& tc = texCoords->getValue(i);
 				stream << "vt " << tc.tx << " " << tc.ty << endl;
 				if (file.error() != QFile::NoError)
 					return CC_FERR_WRITING;
+
+				//increment progress bar
+				if (pDlg && !nprogress.oneStep()) //cancel requested
+				{
+					return CC_FERR_CANCELED_BY_USER;
+				}
 			}
 		}
 		else
@@ -238,6 +288,16 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			subMeshes.push_back(mesh);
 		}
 	}
+
+	//reset save dialog for triangles
+	unsigned numTriangles = mesh->size();
+	if (pDlg)
+	{
+		pDlg->setInfo(QObject::tr("Writing %1 triangles").arg(numTriangles));
+		pDlg->setAutoClose(true); //(re-enable) close dialogue when progress bar is full
+	}
+	nprogress.scale(numTriangles);
+	nprogress.reset();
 
 	//mesh or sub-meshes
 	unsigned indexShift = 0;

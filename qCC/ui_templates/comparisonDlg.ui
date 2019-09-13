@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>420</width>
+    <width>442</width>
     <height>458</height>
    </rect>
   </property>
@@ -504,5 +504,22 @@ to help advanced users setting the general parameters</string>
   <include location="../icones.qrc"/>
   <include location="../icones.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>maxDistCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>maxSearchDistSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>93</x>
+     <y>170</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>298</x>
+     <y>171</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

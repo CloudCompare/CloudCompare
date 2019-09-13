@@ -2762,7 +2762,7 @@ void ccPropertiesTreeDelegate::updateFootprintPlanes()
 	for (ccHObject* pl : planes) {
 		names.append(GetPlaneCloud(pl)->getName());
 
-		stocker::Contour3d cur_points = GetPointsFromCloud(pl->getParent());
+		stocker::Contour3d cur_points = GetPointsFromCloud3d(pl->getParent());
 		cur_all_points.insert(cur_all_points.end(), cur_points.begin(), cur_points.end());
 	}
 	Concurrency::parallel_sort(cur_all_points.begin(), cur_all_points.end(), [&](stocker::Vec3d l, stocker::Vec3d r) {return l.Z() < r.Z(); });

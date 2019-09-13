@@ -11897,10 +11897,10 @@ BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
 			return nullptr;
 		}
 		// TODO: do we need to prepare buildings if bin is already generated??
-		// 	if (!stocker::BuildingPrepare(block_prj, error_info)) {
-		// 		//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		// 		return nullptr;
-		// 	}
+// 		if (!stocker::BuildingPrepare(block_prj, error_info)) {
+// 			//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+// 			return nullptr;
+// 		}
 
 		QFileInfo prj_file(Filename);
 		QString prj_name = prj_file.completeBaseName();
@@ -11952,35 +11952,48 @@ BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
 					cloud->showColors(true);
 				}
 
-				stocker::Contour3d points = GetPointsFromCloud(cloud);
-
-				//! prepare building by points
-				CCVector3d minbb, maxbb;
-				if (cloud->getGlobalBB(minbb, maxbb)) {
-					bd->data.bbox.Add({ minbb.x,minbb.y, minbb.z });
-					bd->data.bbox.Add({ maxbb.x,maxbb.y, maxbb.z });
-				}
-
-				//! TODO: BUG: the average spacing cannot be calculated
-				if (!PrepareBuildingByPoints(block_prj, bd->data, points)) {
-					continue;
-				}
-
 				bd_grp->addChild(building);
 			}
 		}
+		//! prepare buildings now
 		if (bd_grp) {
 			bd_grp->block_prj = block_prj;
-			if (bd_grp->getChildrenNumber() <= 0) {
-				return nullptr;
+			
+			bool first_cloud = false;
+			for (size_t i = 0; i < bd_grp->getChildrenNumber(); i++) {
+				StBuilding* bdObj = ccHObjectCaster::ToStBuilding(bd_grp->getChild(i));
+				if (!bdObj) continue;
+				try	{
+					stocker::BuildUnit build_unit = bd_grp->GetBuildingUnit(bdObj->getName().toStdString());
+
+					if (!LoadBuildingInfo(build_unit, build_unit.file_path.info)) {
+						ccPointCloud* cloud = bd_grp->GetOriginPointCloud(bdObj->getName(), false);
+						stocker::Contour3d points_global; stocker::Contour3f points_local;
+						if (!GetPointsFromCloud(cloud, points_global, points_local)) { continue; }
+
+						CCVector3d minbb, maxbb;
+						if (cloud->getGlobalBB(minbb, maxbb)) {
+							build_unit.bbox.Add({ minbb.x,minbb.y, minbb.z });
+							build_unit.bbox.Add({ maxbb.x,maxbb.y, maxbb.z });
+						}
+						if (!PrepareBuildingByPoints(bd_grp->block_prj, build_unit, points_global, points_local)) {
+							continue;
+						}
+					}
+
+					if (!first_cloud) {
+						ccPointCloud* cloud = bd_grp->GetOriginPointCloud(bdObj->getName(), false);
+						if (cloud) {
+							bd_grp->global_shift = stocker::parse_xyz(cloud->getGlobalShift());
+							bd_grp->global_scale = cloud->getGlobalScale();
+							first_cloud = true;
+						}
+					}
+				}
+				catch (const std::exception&) {
+					continue;
+				}
 			}
-			ccHObject* first_cloud_ent = bd_grp->GetOriginPointCloud(GetBaseName(bd_grp->getChild(0)->getName()), false);
-			if (!first_cloud_ent) {
-				return nullptr;
-			}
-			ccPointCloud* first_cloud = ccHObjectCaster::ToPointCloud(first_cloud_ent);
-			bd_grp->global_shift = stocker::parse_xyz(first_cloud->getGlobalShift());
-			bd_grp->global_scale = first_cloud->getGlobalScale();
 		}
 	}
 	catch (const std::exception&e) {
@@ -12596,7 +12609,7 @@ void MainWindow::doActionBDPrimAssignSharpLines()
 			for (auto & planeObj : plane_container) {
 				ccPlane* ccPlane = ccHObjectCaster::ToPlane(planeObj);
 				if (!ccPlane) continue;
-				stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
+				stocker::Contour3d cur_plane_points = GetPointsFromCloud3d(planeObj->getParent());
 				if (cur_plane_points.size() < 3) { continue; }
 				stocker::PlaneUnit plane = stocker::FormPlaneUnit(cur_plane_points, "temp", true);
 				stocker::Polyline3d cur_plane_sharps;
@@ -12977,7 +12990,7 @@ void MainWindow::doActionBDPrimCreateGround()
 			
 		}
 		else {
-			stocker::Contour3d planes_points = GetPointsFromCloud(primGroup);
+			stocker::Contour3d planes_points = GetPointsFromCloud3d(primGroup);
 			stocker::Contour3d ground_contour_3d = stocker::CalcBuildingGround(planes_points, 0.5, 3, 3);			
 			ground_height = ground_contour_3d.front().Z();
 			ground_convex = stocker::MakeLoopPolylinefromContour(stocker::ToContour2d(ground_contour_3d));
@@ -13220,7 +13233,7 @@ void MainWindow::doActionBDPlaneDeduction()
 			if (!Plane_Cloud->isEnabled()) { continue; }
 //			string plane_name = Plane_Cloud->getName().toStdString();			
 // 			// get plane
-// 			stocker::PlaneUnit plane_unit = stocker::FormPlaneUnit(GetPointsFromCloud(Plane_Cloud), plane_name, true);
+// 			stocker::PlaneUnit plane_unit = stocker::FormPlaneUnit(GetPointsFromCloud3d(Plane_Cloud), plane_name, true);
 // 			pool_plane.push_back(plane_unit);
 // 			// get boundary lines
 // 			ccHObject::Container boundary_container;
@@ -13245,7 +13258,7 @@ void MainWindow::doActionBDPlaneDeduction()
 
 			planes.push_back(vcgPlane);
 
-			stocker::Contour3d cur_plane_points = GetPointsFromCloud(Plane_Cloud);
+			stocker::Contour3d cur_plane_points = GetPointsFromCloud3d(Plane_Cloud);
 			planes_points.push_back(cur_plane_points);
 			used_points.insert(used_points.end(), cur_plane_points.begin(), cur_plane_points.end());
 
@@ -13449,7 +13462,7 @@ void MainWindow::doActionBDPolyFit()
 
 			planes.push_back(vcgPlane);
 
-			stocker::Contour3d cur_plane_points = GetPointsFromCloud(Plane_Cloud);
+			stocker::Contour3d cur_plane_points = GetPointsFromCloud3d(Plane_Cloud);
 			planes_points.push_back(cur_plane_points);
 
 			ccHObject::Container sharp_container;

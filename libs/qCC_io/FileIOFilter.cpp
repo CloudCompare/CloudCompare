@@ -353,7 +353,9 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	if (childCount != 0)
 	{
 		//we set the main container name as the full filename (with path)
-		container->setName(QString("%1 (%2)").arg(fi.fileName(),fi.absolutePath()));
+		//container->setName(QString("%1 (%2)").arg(fi.fileName(),fi.absolutePath()));
+		container->setName(fi.fileName());
+		container->setPath(fi.absoluteFilePath());
 		for (unsigned i = 0; i < childCount; ++i)
 		{
 			ccHObject* child = container->getChild(i);

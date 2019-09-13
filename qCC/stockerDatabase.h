@@ -30,7 +30,6 @@
 
 //class BDBaseHObject;
 
-#define BDDB_PROJECTNAME_PREFIX		""
 #define BDDB_PLANESEG_PREFIX		"Plane"
 #define BDDB_BOUNDARY_PREFIX		"Boundary"
 #define BDDB_INTERSECT_PREFIX		"Intersection"
@@ -127,7 +126,8 @@ public:
 
 	std::string GetPathModelObj(std::string building_name);
 
-	stocker::BuildUnit GetBuildingUnit(std::string building_name);
+	const stocker::BuildUnit GetBuildingUnit(std::string building_name);
+	stocker::BuilderBase::SpBuild GetBuildingSp(std::string building_name);
 };
 
 class BDImageBaseHObject : public BDBaseHObject_

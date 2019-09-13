@@ -254,13 +254,23 @@ std::string BDBaseHObject::GetPathModelObj(std::string building_name)
 	return std::string((*bd)->data.file_path.model_dir + building_name + MODEL_LOD3_OBJ_SUFFIX);
 }
 
-stocker::BuildUnit BDBaseHObject::GetBuildingUnit(std::string building_name) {
+const stocker::BuildUnit BDBaseHObject::GetBuildingUnit(std::string building_name) {
 	auto iter = block_prj.m_builder.sbuild.find(BuilderBase::BuildNode::Create(building_name));
 	if (iter == block_prj.m_builder.sbuild.end()) {
 		throw runtime_error("internal error: cannot find building");
 		return stocker::BuildUnit("invalid");
 	}
 	else return (*iter)->data;
+}
+
+stocker::BuilderBase::SpBuild BDBaseHObject::GetBuildingSp(std::string building_name)
+{
+	auto iter = block_prj.m_builder.sbuild.find(BuilderBase::BuildNode::Create(building_name));
+	if (iter == block_prj.m_builder.sbuild.end())
+		return nullptr;
+	else
+		return *iter;
+	//return stocker::BuilderSet::SpBuild();
 }
 
 ccHObject* findChildByName(ccHObject* parent,

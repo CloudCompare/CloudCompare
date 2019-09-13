@@ -136,7 +136,7 @@ auto GetPointsFromCloud3f(ccHObject* entity, bool global)->std::vector<T>
 	return points;
 }
 
-bool GetPointsFromCloud(ccHObject* entity, Contour3d &global, Contour3f &local)
+bool GetPointsFromCloud(ccHObject* entity, stocker::Contour3d &global, stocker::Contour3f &local)
 {
 	if (!entity) { return false; }
 	if (entity->isA(CC_TYPES::POINT_CLOUD)) {

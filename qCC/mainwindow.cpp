@@ -11964,19 +11964,19 @@ BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
 				StBuilding* bdObj = ccHObjectCaster::ToStBuilding(bd_grp->getChild(i));
 				if (!bdObj) continue;
 				try	{
-					stocker::BuildUnit build_unit = bd_grp->GetBuildingUnit(bdObj->getName().toStdString());
+					auto sp_build = bd_grp->GetBuildingSp(bdObj->getName().toStdString());
 
-					if (!LoadBuildingInfo(build_unit, build_unit.file_path.info)) {
+					if (!LoadBuildingInfo(sp_build->data, sp_build->data.file_path.info)) {
 						ccPointCloud* cloud = bd_grp->GetOriginPointCloud(bdObj->getName(), false);
 						stocker::Contour3d points_global; stocker::Contour3f points_local;
 						if (!GetPointsFromCloud(cloud, points_global, points_local)) { continue; }
 
 						CCVector3d minbb, maxbb;
 						if (cloud->getGlobalBB(minbb, maxbb)) {
-							build_unit.bbox.Add({ minbb.x,minbb.y, minbb.z });
-							build_unit.bbox.Add({ maxbb.x,maxbb.y, maxbb.z });
+							sp_build->data.bbox.Add({ minbb.x,minbb.y, minbb.z });
+							sp_build->data.bbox.Add({ maxbb.x,maxbb.y, maxbb.z });
 						}
-						if (!PrepareBuildingByPoints(bd_grp->block_prj, build_unit, points_global, points_local)) {
+						if (!PrepareBuildingByPoints(bd_grp->block_prj, sp_build->data, points_global, points_local)) {
 							continue;
 						}
 					}

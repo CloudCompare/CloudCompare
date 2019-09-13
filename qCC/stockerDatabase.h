@@ -127,7 +127,8 @@ public:
 
 	std::string GetPathModelObj(std::string building_name);
 
-	stocker::BuildUnit GetBuildingUnit(std::string building_name);
+	const stocker::BuildUnit GetBuildingUnit(std::string building_name);
+	stocker::BuilderBase::SpBuild GetBuildingSp(std::string building_name);
 };
 
 class BDImageBaseHObject : public BDBaseHObject_

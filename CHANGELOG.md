@@ -26,6 +26,7 @@ v2.11 (Anoia) - (in development)
 		- Option -PCV (see https://www.cloudcompare.org/doc/wiki/index.php?title=Command_line_mode for sub-options)
 		- Can be called on any number of clouds or meshes
 		- (the tool was already accessible in V2.10, but in a very limited way)
+	- the 'FWF_O' command (to load LAS files with associated waveform data) nows properly supports the '-GLOBAL_SHIFT' option
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
   - Point picking:
@@ -46,6 +47,7 @@ v2.11 (Anoia) - (in development)
 	- we now correctly handle faces with more than 4 vertices! (they should be properly tesselated)
 	- support of escaped lines ('\' at the end of the line)
 	- CC now accepts MTL files with the 'Tf' keyword (well, CC just ignores it and doesn't complain about a wrong MTL file anymore ;)
+	- enhanced progress report (thanks to https://gitlab.com/Epic_Wink)
   - Translation:
 	- new (argentinian) Spanish translation
   - M3C2:

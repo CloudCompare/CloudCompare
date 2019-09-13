@@ -154,6 +154,7 @@ public: //constructor
 		, m_autoSaveMode(true)
 		, m_addTimestamp(true)
 		, m_precision(12)
+		, m_coordinatesShiftWasEnabled(false)
 	{}
 	
 	virtual ~ccCommandLineInterface() = default;
@@ -326,6 +327,75 @@ public: //access to data
 	//! Returns the numerical precision
 	int numericalPrecision() const { return m_precision; }
 
+public: //Global shift management
+
+	//! Returns whether Global (coordinate) shift has already been defined
+	bool coordinatesShiftWasEnabled() const { return m_coordinatesShiftWasEnabled; }
+	//! Returns the Global (coordinate) shift (if already defined)
+	const CCVector3d& formerCoordinatesShift() const { return m_formerCoordinatesShift; }
+	//! Sets whether Global (coordinate) shift is defined or not
+	void storeCoordinatesShiftParams() { m_coordinatesShiftWasEnabled = m_loadingParameters.m_coordinatesShiftEnabled; m_formerCoordinatesShift = m_loadingParameters.m_coordinatesShift; }
+
+	static const char* COMMAND_OPEN_SHIFT_ON_LOAD()			{ return "GLOBAL_SHIFT"; }	//!< Global shift
+	static const char* COMMAND_OPEN_SHIFT_ON_LOAD_AUTO()	{ return "AUTO"; }			//!< "AUTO" keyword
+	static const char* COMMAND_OPEN_SHIFT_ON_LOAD_FIRST()	{ return "FIRST"; }			//!< "FIRST" keyword
+
+	bool nextCommandIsGlobalShift() const { return !arguments().empty() && IsCommand(arguments().front(), COMMAND_OPEN_SHIFT_ON_LOAD()); }
+
+	//! Check the current command line argument stack against the 'COMMAND_OPEN_SHIFT_ON_LOAD' keyword and process the following commands if necessary
+	/** \warning This method assumes the 'COMMAND_OPEN_SHIFT_ON_LOAD' argument has already been removed from the argument stack
+	**/
+	bool processGlobalShiftCommand()
+	{
+		if (arguments().empty())
+		{
+			return error(QObject::tr("Missing parameter: global shift vector or %1 or %2 after '%3'").arg(COMMAND_OPEN_SHIFT_ON_LOAD_AUTO(), COMMAND_OPEN_SHIFT_ON_LOAD_FIRST(), COMMAND_OPEN_SHIFT_ON_LOAD()));
+		}
+
+		QString firstParam = arguments().takeFirst();
+
+		m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
+		m_loadingParameters.m_coordinatesShiftEnabled = false;
+		m_loadingParameters.m_coordinatesShift = CCVector3d(0, 0, 0);
+
+		if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_AUTO())
+		{
+			//let CC handle the global shift automatically
+			m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+		}
+		else if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_FIRST())
+		{
+			//use the first encountered global shift value (if any)
+			m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+			m_loadingParameters.m_coordinatesShiftEnabled = m_coordinatesShiftWasEnabled;
+			m_loadingParameters.m_coordinatesShift = m_formerCoordinatesShift;
+		}
+		else if (arguments().size() < 2)
+		{
+			return error(QObject::tr("Missing parameter: global shift vector after '%1' (3 values expected)").arg(COMMAND_OPEN_SHIFT_ON_LOAD()));
+		}
+		else
+		{
+			bool ok = true;
+			CCVector3d shiftOnLoadVec;
+			shiftOnLoadVec.x = firstParam.toDouble(&ok);
+			if (!ok)
+				return error(QObject::tr("Invalid parameter: X coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD()));
+			shiftOnLoadVec.y = arguments().takeFirst().toDouble(&ok);
+			if (!ok)
+				return error(QObject::tr("Invalid parameter: Y coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD()));
+			shiftOnLoadVec.z = arguments().takeFirst().toDouble(&ok);
+			if (!ok)
+				return error(QObject::tr("Invalid parameter: Z coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD()));
+
+			//set the user defined shift vector as default shift information
+			m_loadingParameters.m_coordinatesShiftEnabled = true;
+			m_loadingParameters.m_coordinatesShift = shiftOnLoadVec;
+		}
+
+		return true;
+	}
+
 protected: //members
 
 	//! Currently opened point clouds and their filename
@@ -348,6 +418,12 @@ protected: //members
 
 	//! File loading parameters
 	CLLoadParameters m_loadingParameters;
+
+	//! Whether Global (coordinate) shift has already been defined
+	bool m_coordinatesShiftWasEnabled;
+	//! Global (coordinate) shift (if already defined)
+	CCVector3d m_formerCoordinatesShift;
+
 };
 
 #endif //CC_COMMAND_LINE_INTERFACE_HEADER

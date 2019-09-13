@@ -40,6 +40,19 @@ struct CommandLoadLASFWF : public ccCommandLineInterface::Command
 			return cmd.error(QString("Missing parameter: filename after \"-%1\"").arg(COMMAND_LOAD_FWF));
 		}
 
+		bool coordinatesShiftWasEnabled = cmd.coordinatesShiftWasEnabled();
+		if (cmd.nextCommandIsGlobalShift())
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			if (!cmd.processGlobalShiftCommand())
+			{
+				//error message already issued
+				return false;
+			}
+		}
+
 		//open specified file
 		QString filename(cmd.arguments().takeFirst());
 		cmd.print(QString("Opening file: '%1'").arg(filename));
@@ -51,7 +64,18 @@ struct CommandLoadLASFWF : public ccCommandLineInterface::Command
 			return cmd.error("Internal error: failed to load the LAS FWF I/O filter");
 		}
 
-		return cmd.importFile(filename, filter);
+		if (!cmd.importFile(filename, filter))
+		{
+			return false;
+		}
+
+		if (!coordinatesShiftWasEnabled)
+		{
+			//store semi-persistent parameters
+			cmd.storeCoordinatesShiftParams();
+		}
+
+		return true;
 	}
 };
 

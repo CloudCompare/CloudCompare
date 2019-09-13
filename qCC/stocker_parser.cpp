@@ -82,7 +82,7 @@ auto ccToPoints3(std::vector<T1> points, bool parallel = false)->std::vector<T2>
 }
 
 template <typename T = stocker::Vec3d>
-auto GetPointsFromCloud(ccHObject* entity, bool global)->std::vector<T>
+auto GetPointsFromCloud3d(ccHObject* entity, bool global)->std::vector<T>
 {	
 	std::vector<T> points;
 	if (!entity) return points;
@@ -101,12 +101,68 @@ auto GetPointsFromCloud(ccHObject* entity, bool global)->std::vector<T>
 		if (!primGroup) return points;				
 		ccHObject::Container plane_container = primGroup->getValidPlanes();
 		for (auto & pl : plane_container) {
-			std::vector<T> cur_points = GetPointsFromCloud<T>(pl->getParent(), global);
+			std::vector<T> cur_points = GetPointsFromCloud3d<T>(pl->getParent(), global);
 			points.insert(points.end(), cur_points.begin(), cur_points.end());
 		}
 	}
 	
 	return points;
+}
+template <typename T = vcg::Point3f>
+auto GetPointsFromCloud3f(ccHObject* entity, bool global)->std::vector<T>
+{
+	std::vector<T> points;
+	if (!entity) return points;
+	if (entity->isA(CC_TYPES::POINT_CLOUD)) {
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (!cloud) return points;
+
+		for (unsigned i = 0; i < cloud->size(); i++) {
+			const CCVector3* pt = cloud->getPoint(i);
+			CCVector3 Pglobal = cloud->toGlobal3pc()<PointCoordinateType>(*pt);
+			points.push_back({ Pglobal.x, Pglobal.y, Pglobal.z });
+		}
+	}
+	else if (entity->isA(CC_TYPES::ST_PRIMGROUP)) {
+		StPrimGroup* primGroup = ccHObjectCaster::ToStPrimGroup(entity);
+		if (!primGroup) return points;
+		ccHObject::Container plane_container = primGroup->getValidPlanes();
+		for (auto & pl : plane_container) {
+			std::vector<T> cur_points = GetPointsFromCloud3f<T>(pl->getParent(), global);
+			points.insert(points.end(), cur_points.begin(), cur_points.end());
+		}
+	}
+
+	return points;
+}
+
+bool GetPointsFromCloud(ccHObject* entity, Contour3d &global, Contour3f &local)
+{
+	if (!entity) { return false; }
+	if (entity->isA(CC_TYPES::POINT_CLOUD)) {
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (!cloud) return false;
+
+		for (unsigned i = 0; i < cloud->size(); i++) {
+			const CCVector3* pt = cloud->getPoint(i);
+			local.push_back({ pt->x, pt->y, pt->z });
+			CCVector3d Pglobal = cloud->toGlobal3d<PointCoordinateType>(*pt);
+			global.push_back({ Pglobal.x, Pglobal.y, Pglobal.z });
+		}
+	}
+	else if (entity->isA(CC_TYPES::ST_PRIMGROUP)) {
+		StPrimGroup* primGroup = ccHObjectCaster::ToStPrimGroup(entity);
+		if (!primGroup) return false;
+		ccHObject::Container plane_container = primGroup->getValidPlanes();
+		for (auto & pl : plane_container) {
+			Contour3d global_; Contour3f local_;
+			if (GetPointsFromCloud(GetPlaneCloud(pl), global_, local_)) {
+				global.insert(global.end(), global_.begin(), global_.end());
+				local.insert(local.end(), local_.begin(), local_.end());
+			}
+		}
+	}
+	return true;
 }
 
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker::Polyline3d polygon, double height)
@@ -129,7 +185,7 @@ stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker:
 	else if (!entity->isA(CC_TYPES::POINT_CLOUD)) return points;
 
 	if (polygon.empty()) {
-		return GetPointsFromCloud(entity);
+		return GetPointsFromCloud3d(entity);
 	}
 
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
@@ -758,7 +814,7 @@ ccHObject* PlaneSegmentationATPS(ccHObject* entity,
 	ccPointCloud* entity_cloud = ccHObjectCaster::ToPointCloud(entity);
 		 
 	ATPS::ATPS_Plane atps_plane;
-	std::vector<ATPS::SVPoint3d> points = GetPointsFromCloud<ATPS::SVPoint3d>(entity_cloud);
+	std::vector<ATPS::SVPoint3d> points = GetPointsFromCloud3d<ATPS::SVPoint3d>(entity_cloud);
 	std::vector<ATPS::SVPoint3d> unassigned_points;
 	std::vector<std::vector<ATPS::SVPoint3d>> planes_points;
 	atps_plane.set_parameters(kappa_t, delta_t, tau_t, gamma_t, epsilon_t, theta_t);
@@ -790,8 +846,8 @@ ccHObject* PlaneSegmentationATPS(ccHObject* entity,
 
 void RetrieveUnassignedPoints(ccHObject* original_cloud, ccHObject* prim_group, ccPointCloud* todo_point)
 {
-	Contour3d all_points = GetPointsFromCloud(original_cloud);
-	Contour3d used_points = GetPointsFromCloud(prim_group);
+	Contour3d all_points = GetPointsFromCloud3d(original_cloud);
+	Contour3d used_points = GetPointsFromCloud3d(prim_group);
 	Contour3d unassigned_points = stocker::GetUnassignedPoints(used_points, all_points);
 	std::cout << "found " << unassigned_points.size() << std::endl;
 	if (!todo_point) {
@@ -857,7 +913,7 @@ ccHObject::Container CalcPlaneIntersections(ccHObject::Container entity_planes, 
 	for (size_t i = 0; i < entity_planes.size(); i++) {
 		if (!entity_planes[i]->isEnabled()) continue;
 
-		stocker::Contour3d cur_plane_points = GetPointsFromCloud(entity_planes[i]->getParent());
+		stocker::Contour3d cur_plane_points = GetPointsFromCloud3d(entity_planes[i]->getParent());
 		if (cur_plane_points.size() < 3) continue;
 
 		char name[32]; sprintf(name, "%d", i);
@@ -897,7 +953,7 @@ ccHObject* CalcPlaneBoundary(ccHObject* planeObj, double distance, double minpts
 	if (!point_cloud_obj) return nullptr;
 	/// get boundary points
 	Contour2d boundary_points_2d;
-	Contour3d cur_plane_points = GetPointsFromCloud(point_cloud_obj);
+	Contour3d cur_plane_points = GetPointsFromCloud3d(point_cloud_obj);
 	PlaneUnit plane_unit = FormPlaneUnit(cur_plane_points, "temp", true);
 	Contour2d points_2d = Point3dToPlpoint2d(plane_unit, cur_plane_points);
 	vector<bool>bd_check;
@@ -945,7 +1001,7 @@ ccHObject* DetectLineRansac(ccHObject* entity, double distance, double minpts, d
 	if (!point_cloud_obj) return nullptr;
 	Contour3d cur_plane_points;
 	
-	cur_plane_points = GetPointsFromCloud(point_cloud_obj);
+	cur_plane_points = GetPointsFromCloud3d(point_cloud_obj);
 	
 	Polyline3d bdry_lines_2d; IndexGroup indices;
 	LineRansacfromPoints(cur_plane_points, bdry_lines_2d, indices, distance, minpts, radius);
@@ -987,7 +1043,7 @@ ccHObject* CalcPlaneOutlines(ccHObject* planeObj, double alpha)
 #ifdef USE_STOCKER
 	ccPointCloud* point_cloud_obj = GetPlaneCloud(planeObj);
 	if (!point_cloud_obj) return nullptr;
-	stocker::Contour3d cur_plane_points = GetPointsFromCloud(point_cloud_obj);
+	stocker::Contour3d cur_plane_points = GetPointsFromCloud3d(point_cloud_obj);
 	if (cur_plane_points.size() < 3) {
 		return nullptr;
 	}
@@ -1007,7 +1063,7 @@ void ShrinkPlaneToOutline(ccHObject * planeObj, double alpha, double distance_ep
 		std::cout << "failed to shrink plane" << planeObj->getName().toStdString() << std::endl;
 		return;
 	}
-	stocker::Contour3d cur_plane_points = GetPointsFromCloud(parent_cloud);
+	stocker::Contour3d cur_plane_points = GetPointsFromCloud3d(parent_cloud);
 	if (cur_plane_points.size() < 3) {
 		parent_cloud->setEnabled(false);
 		return;
@@ -1125,7 +1181,7 @@ ccHObject* PlaneFrameOptimization(ccHObject* planeObj, stocker::FrameOption opti
 	vcg::Plane3d vcgPlane = GetVcgPlane(planeObj);
 
 	// prepare plane points
-	Contour3d plane_points = GetPointsFromCloud(point_cloud_obj);
+	Contour3d plane_points = GetPointsFromCloud3d(point_cloud_obj);
 
 	// prepare boundary lines
 	Polyline3d boundary_lines; Contour3d boundary_points; {		
@@ -1242,7 +1298,7 @@ ccHObject * PlaneFrameLineGrow(ccHObject * planeObj, double alpha, double inters
 		}
 
 		if (outline_points.empty()) {
-			Contour3d plane_points = GetPointsFromCloud(point_cloud_obj);
+			Contour3d plane_points = GetPointsFromCloud3d(point_cloud_obj);
 			PolygonGeneralizationLineGrow_Plane(plane_points, frames_to_add.back(), alpha, false, intersection);
 		}
 		else {
@@ -1500,7 +1556,7 @@ void PolyfitComputeConfidence(ccHObject * hypothesis_group, PolyFitObj * polyfit
 	{
 		for (auto & planeObj : planeObjs) {
 			std::string plane_name = GetBaseName(planeObj->getParent()->getName()).toStdString();
-			stocker::Contour3d cur_plane_points = GetPointsFromCloud(planeObj->getParent());
+			stocker::Contour3d cur_plane_points = GetPointsFromCloud3d(planeObj->getParent());
 			PlaneUnit plane_unit_ = FormPlaneUnit(plane_name, GetVcgPlane(planeObj), cur_plane_points, true);
 			PlaneUnit* plane_unit = new PlaneUnit(plane_name, GetVcgPlane(planeObj), plane_unit_.convex_hull_prj); // TODO: delete or add to planedata in primitivegroup info
 
@@ -1899,7 +1955,7 @@ ccHObject* ConstrainedMesh(ccHObject* planeObj)
 		return nullptr;
 	}
 
-	Contour3d plane_points = GetPointsFromCloud(plane_cloud_obj);
+	Contour3d plane_points = GetPointsFromCloud3d(plane_cloud_obj);
 	PlaneUnit plane_unit = FormPlaneUnit(plane_points, "temp", true);
 	
 	Polyline3d plane_sharps;
@@ -2598,7 +2654,7 @@ bool PackFootprints(ccHObject* buildingObj)
 				ccPlane* pl_entity = prim_group_obj->getPlaneByName(pl_name); if (!pl_entity) continue;
 				if (isVertical(pl_entity, 15)) continue;
 				ccPointCloud* plane_cloud = GetPlaneCloud(pl_entity); if (!plane_cloud) continue;
-				planes_points.push_back(GetPointsFromCloud(plane_cloud));
+				planes_points.push_back(GetPointsFromCloud3d(plane_cloud));
 			}
 			layers_planes_points.push_back(planes_points);
 
@@ -2665,7 +2721,7 @@ void GetPlanesInsideFootPrint(ccHObject* footprint, ccHObject* prim_group, CCVec
 		Polyline2d plane_polygon = MakeLoopPolylinefromContour(ccToPoints2<CCVector3, Vec2d>(planeObj->getProfile(), true));
 		if (plane_polygon.empty()) continue;
 
-		Contour3d planes_points = GetPointsFromCloud(plane_cloud);
+		Contour3d planes_points = GetPointsFromCloud3d(plane_cloud);
 		if (planes_points.size() < settings.z) { continue; }
 		
 		//! vertical plane, center point to the footprint distance

@@ -70,6 +70,7 @@ public:
 			, parentWidget(nullptr)
 			, sessionStart(true)
 			, additionInfo(nullptr)
+			, fastLoad(false)
 		{}
 		
 		//! How to handle big coordinates
@@ -90,6 +91,8 @@ public:
 		bool sessionStart;
 		//! additional information
 		void* additionInfo;
+		//! load files faster
+		bool fastLoad;
 	};
 	
 	//! Generic saving parameters

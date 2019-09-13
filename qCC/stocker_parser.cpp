@@ -667,6 +667,22 @@ ccPolyline* AddPolygonAsPolyline(stocker::Polyline3d polygon, QString name, ccCo
 	return AddPolygonAsPolyline(points, name, col, close);
 }
 
+StFootPrint* AddPolygonAsFootprint(stocker::Contour3d polygon, QString name, ccColor::Rgb col, bool close)
+{
+	ccPolyline* polyline = AddPolygonAsPolyline(polygon, name, col, close);
+	StFootPrint* footptObj = new StFootPrint(0);
+	ccPointCloud* vertices = 0;
+	footptObj->initWith(vertices, *polyline);
+	footptObj->setAssociatedCloud(vertices);
+	footptObj->setColor(col);
+	footptObj->showColors(true);
+	footptObj->setName(name);
+
+	delete polyline;
+	polyline = nullptr;
+	return footptObj;
+}
+
 template <typename T = stocker::Vec3d>
 StPrimGroup* AddPlanesPointsAsNewGroup(QString name, std::vector<std::vector<T>> planes_points)
 {
@@ -2134,7 +2150,7 @@ ccHObject::Container GetNonVerticalPlaneClouds(ccHObject* stprim_group, double a
 	return primObjs;
 }
 
-ccHObject::Container GenerateFootPrints_PP(ccHObject* prim_group)
+ccHObject::Container GenerateFootPrints_PP(ccHObject* prim_group, double ground)
 {
 	ccHObject::Container foot_print_objs;
 	BDBaseHObject* baseObj = GetRootBDBase(prim_group);
@@ -2168,23 +2184,16 @@ ccHObject::Container GenerateFootPrints_PP(ccHObject* prim_group)
 			double top_height = components_top_heights[i][j];
 			double bottom_height = components_bottom_heights[i][j];
 			QString name = BDDB_FOOTPRINT_PREFIX + QString::number(++biggest);
-			ccPolyline* polyline = AddPolygonAsPolyline(foot_print, name, ccColor::magenta, true);
-			StFootPrint* footptObj = new StFootPrint(0);			
-			ccPointCloud* vertices = 0;
-			footptObj->initWith(vertices, *polyline);
-			footptObj->setAssociatedCloud(vertices);			
-			footptObj->setColor(ccColor::magenta);
-			footptObj->showColors(true);
-			footptObj->setName(name);
+			StFootPrint* footptObj = AddPolygonAsFootprint(foot_print, name, ccColor::magenta, true);
+			if (!footptObj) continue;
+
 			footptObj->setComponentId(compoId);
 			footptObj->setHighest(top_height);
-			footptObj->setBottom(bottom_height);
+			footptObj->setBottom(ground);
 			footptObj->setLowest(bottom_height);
 
 			foot_print_objs.push_back(footptObj);
 			block_group->addChild(footptObj);
-			delete polyline;
-			polyline = nullptr;
 		}
 	}
 	return foot_print_objs;
@@ -2236,17 +2245,11 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group, double ground)
 			double top_height = cur_all_points.back().Z();
 			double bottom_height = cur_all_points.front().Z();
 
-			//! construct the footprint			
+			//! construct the footprint
 			QString name = BDDB_FOOTPRINT_PREFIX + QString::number(++biggest);
-			ccPolyline* polyline = AddPolygonAsPolyline(foot_print, name, ccColor::magenta, true);
-			StFootPrint* footptObj = new StFootPrint(0);
-			ccPointCloud* vertices = 0;
-			footptObj->initWith(vertices, *polyline);
-			footptObj->setAssociatedCloud(vertices);
-			vertices->setEnabled(false);
-			footptObj->setColor(ccColor::magenta);
-			footptObj->showColors(true);
-			footptObj->setName(name);
+			StFootPrint* footptObj = AddPolygonAsFootprint(foot_print, name, ccColor::magenta, true);
+			if (!footptObj) continue;
+
 			footptObj->setComponentId(compoId);
 			footptObj->setHighest(top_height);
 			footptObj->setBottom(ground);
@@ -2256,8 +2259,6 @@ ccHObject::Container GenerateFootPrints(ccHObject* prim_group, double ground)
 
 			foot_print_objs.push_back(footptObj);
 			block_group->addChild(footptObj);
-			delete polyline;
-			polyline = nullptr;
 		}
 	}
 	return foot_print_objs;
@@ -2667,21 +2668,37 @@ bool PackFootprints(ccHObject* buildingObj)
 		std::vector<stocker::Contour3d> footprints_points_pp;
 		if (!FootPrintsPlanarPartition(layers_planes_points, footprints_points, footprints_points_pp)) return false;
 
-		if (footprints_points.size() == footprints_points_pp.size()) {
-			footprints_points = footprints_points_pp;
+		for (size_t i = 0; i < footprints.size(); i++) {
+			footprints[i]->setEnabled(false);
+			footprints[i]->setName("del-" + footprints[i]->getName());
+		}
+		int biggest = GetMaxNumberExcludeChildPrefix(blockgroup_obj, BDDB_FOOTPRINT_PREFIX);
+		for (size_t i = 0; i < footprints_points_pp.size(); i++) {
+			QString name = BDDB_FOOTPRINT_PREFIX + QString::number(++biggest);
+			StFootPrint* footptObj = AddPolygonAsFootprint(footprints_points_pp[i], "", ccColor::magenta, true);
+
+			footptObj->setComponentId(0);
+			footptObj->setHighest(build_unit.ground_height);
+			footptObj->setBottom(build_unit.ground_height);
+			footptObj->setLowest(build_unit.ground_height);
+			blockgroup_obj->addChild(footptObj);
 		}
 
-		for (auto & polygon : footprints_points) {
-			RepairPolygon(polygon, CC_DEG_TO_RAD * 5);
-		}
-
-		if (footprints_points.size() == footprints_points_pp.size()) {
-			for (size_t i = 0; i < footprints.size(); i++) {
-				StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(footprints[i]);
-				SubstituteFootPrintContour(ftObj, footprints_points[i]);
-				ftObj->prepareDisplayForRefresh();
-			}
-		}
+// 		if (footprints_points.size() == footprints_points_pp.size()) {
+// 			footprints_points = footprints_points_pp;
+// 		}
+// 
+// 		for (auto & polygon : footprints_points) {
+// 			RepairPolygon(polygon, CC_DEG_TO_RAD * 5);
+// 		}
+// 
+// 		if (footprints_points.size() == footprints_points_pp.size()) {
+// 			for (size_t i = 0; i < footprints.size(); i++) {
+// 				StFootPrint* ftObj = ccHObjectCaster::ToStFootPrint(footprints[i]);
+// 				SubstituteFootPrintContour(ftObj, footprints_points[i]);
+// 				ftObj->prepareDisplayForRefresh();
+// 			}
+// 		}
 	}
 	catch (const std::exception&e) {
 		throw(std::runtime_error(e.what()));

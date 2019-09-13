@@ -188,6 +188,8 @@ bool FastPlanarTextureMapping(ccHObject * planeObj);
 
 ccHObject * ConstrainedMesh(ccHObject * planeObj);
 
+ccHObject::Container GenerateFootPrints_PP(ccHObject * prim_group, double ground);
+
 ccHObject::Container GenerateFootPrints(ccHObject * prim_group, double ground);
 
 ccHObject * LoD1FromFootPrint(ccHObject * buildingObj);

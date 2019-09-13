@@ -13953,6 +13953,7 @@ void MainWindow::doActionBDFootPrintPack()
 		if (!PackFootprints(bd_entity)) {
 			return;
 		}
+		addToDB(bd_entity, bd_entity->getDBSourceType());
 	}
 	catch (const std::exception& e)	{
 		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);

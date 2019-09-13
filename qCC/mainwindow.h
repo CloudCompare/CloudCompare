@@ -516,6 +516,8 @@ private slots:
 	inline void doActionMoveBBMinCornerToOrigin() { doActionFastRegistration(MoveBBMinCornerToOrigin); }
 	inline void doActionMoveBBMaxCornerToOrigin() { doActionFastRegistration(MoveBBMaxCornerToOrigin); }
 
+	ccHObject * LoadBDReconProject(QString Filename);
+
 	//////////////////////////////////////////////////////////////////////////
 	//! Building Reconstruction
 	/// Load Project

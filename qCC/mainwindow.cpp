@@ -11886,27 +11886,19 @@ BDBaseHObject::Container GetBDBaseProjx() {
 	return prjx;
 }
 
-BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
+ccHObject* MainWindow::LoadBDReconProject(QString Filename)
 {
 	BDBaseHObject* bd_grp = nullptr;
 	try	{
 		stocker::BlockProj block_prj; std::string error_info;
 		if (!stocker::LoadProject(Filename.toStdString(), block_prj, error_info)) {
 			std::cout << error_info << std::endl;
-			//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return nullptr;
 		}
-		// TODO: do we need to prepare buildings if bin is already generated??
-// 		if (!stocker::BuildingPrepare(block_prj, error_info)) {
-// 			//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-// 			return nullptr;
-// 		}
 
 		QFileInfo prj_file(Filename);
 		QString prj_name = prj_file.completeBaseName();
-		if (!prj_name.startsWith(BDDB_PROJECTNAME_PREFIX)) {
-			prj_name = BDDB_PROJECTNAME_PREFIX + prj_name;
-		}
 
 		QString bin_file = prj_file.absolutePath() + "\\" + prj_name + ".bin";
 
@@ -11914,21 +11906,23 @@ BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
 		bool loadCoordinatesTransEnabled = false;
 		FileIOFilter::LoadParameters parameters;
 		{
-			parameters.alwaysDisplayLoadDialog = widget ? true : false;
+			parameters.alwaysDisplayLoadDialog = false;
 			parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
 			parameters.coordinatesShift = &loadCoordinatesShift;
 			parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
-			parameters.parentWidget = widget;
+			parameters.parentWidget = this;
 		}
 		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-
 		if (QFileInfo(bin_file).exists()) {
+			std::cout << "start loading "<< bin_file.toStdString() <<std::endl;
 			ccHObject* newGroup = FileIOFilter::LoadFromFile(bin_file, parameters, result, QString());
+			std::cout << bin_file.toStdString() << " loaded!" << std::endl;
 			if (newGroup) {
 				bd_grp = new BDBaseHObject(*newGroup);
 				bd_grp->setName(prj_name);
 				newGroup->transferChildren(*bd_grp);
+				std::cout << bin_file.toStdString() << " loaded" << std::endl;
 			}
 		}
 		if (!bd_grp) {
@@ -11965,6 +11959,9 @@ BDBaseHObject* LoadBDReconProject(QString Filename, QWidget* widget = nullptr)
 				if (!bdObj) continue;
 				try	{
 					auto sp_build = bd_grp->GetBuildingSp(bdObj->getName().toStdString());
+					if (!sp_build) {
+						continue;
+					}
 
 					if (!LoadBuildingInfo(sp_build->data, sp_build->data.file_path.info)) {
 						ccPointCloud* cloud = bd_grp->GetOriginPointCloud(bdObj->getName(), false);
@@ -12023,9 +12020,9 @@ void MainWindow::doActionBDProjectLoad()
 	settings.setValue(ccPS::CurrentPath(), currentPath);
 	settings.endGroup();
 
-	BDBaseHObject* bd_grp = nullptr;
+	ccHObject* bd_grp = nullptr;
 	try {
-		bd_grp = LoadBDReconProject(Filename, this);
+		bd_grp = LoadBDReconProject(Filename);
 	}
 	catch (const std::exception& e) {
 		dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
@@ -12050,9 +12047,6 @@ bool SaveProject(BDBaseHObject* proj)
 	try {
 		QFileInfo prj_file(proj->block_prj.m_options.prj_file.project_ini.c_str());
 		QString prj_name = prj_file.completeBaseName();
-		if (!prj_name.startsWith(BDDB_PROJECTNAME_PREFIX)) {
-			prj_name = BDDB_PROJECTNAME_PREFIX + prj_name;
-		}
 
 		QString selectedFilename = prj_file.absolutePath() + "\\" + prj_name + ".bin";
 
@@ -12363,6 +12357,10 @@ void MainWindow::doActionBDPlaneSegmentation()
 				nfa_epsilon,
 				normal_theta, 
 				todo_point);
+		}
+		if (todo_point->size() == 0) {
+			delete todo_point;
+			todo_point = false;
 		}
 
 		if (seged) {
@@ -15017,8 +15015,8 @@ void MainWindow::doActionCreateBuildingProject()
 	}
 
 	//! project name: 
-	BDBaseHObject* baseObj = new BDBaseHObject(select->getName());
-	QString bbprj_path = project_dir + "/" + baseObj->getName() + ".bbprj";
+//	BDBaseHObject* baseObj = new BDBaseHObject(select->getName());
+	QString bbprj_path = project_dir + "/" + select->getName() + ".bbprj";
 
 	bool save_prj = !QFileInfo(bbprj_path).exists();
 	if (!save_prj) {
@@ -15032,7 +15030,7 @@ void MainWindow::doActionCreateBuildingProject()
 			save_prj = true;
 		}
 		else {
-			BDBaseHObject* bd_grp = LoadBDReconProject(bbprj_path, this);
+			ccHObject* bd_grp = LoadBDReconProject(bbprj_path);
 			if (bd_grp) {
 				switchDatabase(CC_TYPES::DB_BUILDING);
 				addToDB_Build(bd_grp);
@@ -15125,7 +15123,7 @@ void MainWindow::doActionCreateBuildingProject()
 		options.prj_file.sfm_out = sfm_out.toStdString();
 
 		block_prj.m_options = options;
-		baseObj->block_prj = block_prj;
+		//baseObj->block_prj = block_prj;
 
 		//! save .bbprj	
 		stocker::SaveProjectIni(bbprj_path.toStdString(), options);
@@ -15136,7 +15134,7 @@ void MainWindow::doActionCreateBuildingProject()
 	}
 
 	try {
-		BDBaseHObject* bd_grp = LoadBDReconProject(bbprj_path, this);
+		ccHObject* bd_grp = LoadBDReconProject(bbprj_path);
 		if (bd_grp) {
 			switchDatabase(CC_TYPES::DB_BUILDING);
 			addToDB_Build(bd_grp);

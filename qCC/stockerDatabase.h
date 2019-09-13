@@ -30,7 +30,6 @@
 
 //class BDBaseHObject;
 
-#define BDDB_PROJECTNAME_PREFIX		""
 #define BDDB_PLANESEG_PREFIX		"Plane"
 #define BDDB_BOUNDARY_PREFIX		"Boundary"
 #define BDDB_INTERSECT_PREFIX		"Intersection"

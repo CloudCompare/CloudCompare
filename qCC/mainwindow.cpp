@@ -11979,9 +11979,41 @@ ccHObject* MainWindow::LoadBDReconProject(QString Filename)
 					sp_build->data.bbox.Add({ minbb.x,minbb.y, minbb.z });
 					sp_build->data.bbox.Add({ maxbb.x,maxbb.y, maxbb.z });
 				}
-				if (!stocker::PrepareBuildingByPoints(bd_grp->block_prj, sp_build->data, points_global, points_local)) {
-					continue;
+
+// 				if (!stocker::PrepareBuildingByPoints(bd_grp->block_prj, sp_build->data, points_global, points_local)) {
+// 					continue;
+// 				}
+
+				// TODO: save these paras to the StBuilding
+				sp_build->data.average_spacing = stocker::ComputeAverageSpacing3f(points_local, true);
+				stocker::Contour3d ground_contour = stocker::CalcBuildingGround(points_global, 0.1);
+				if (ground_contour.size() < 3) {
+					return false;
 				}
+				sp_build->data.ground_height = ground_contour.front().Z();
+				sp_build->data.convex_hull_xy = stocker::ToContour2d(ground_contour);
+				if (bd_grp->block_prj.m_options.with_image) {
+					for (auto & img : bd_grp->block_prj.m_builder.simage) {
+						bool img_check = false;
+						for (size_t i = 0; i < 8; i++) {
+							if (img->data.CheckInImg3d(sp_build->data.bbox.P(i))) {
+								img_check = true;
+								break;
+							}
+						}
+						if (img_check) {
+							sp_build->data.image_list.push_back(img->data.GetName().Str());
+							bd_grp->block_prj.m_builder.InsertImageBuild(img->data.GetName(), sp_build->data.GetName());
+						}
+					}
+				}
+
+				// TODO: still wrong sometimes, the file cannot be saved??
+// 				if (!SaveBuildingInfo(sp_build->data, sp_build->data.file_path.info)) {
+// 					cout << "failed to save building info: " << sp_build->data.GetName().Str() << endl;
+// 					return false;
+// 				}
+
 			}
 			else {
 				for (auto & img : sp_build->data.image_list) {

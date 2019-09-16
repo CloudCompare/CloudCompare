@@ -77,12 +77,6 @@ else()
 	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
 endif()
 
-# plane segmentation support
-if ( ${OPTION_USE_PCATPS_LIB} )
-	target_link_PCATPS( ${PROJECT_NAME} )	
-endif()
-
-
 # 3dConnexion devices support
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	target_link_3DXWARE( ${PROJECT_NAME} )
@@ -216,8 +210,12 @@ if(OPTION_USE_STOCKER)
 
 		target_link_libraries(${PROJECT_NAME} debug ${STOCKER_LIB_DEBUG} optimized ${STOCKER_LIB_RELEASE})
 	endforeach()
+
 	include( ../cmake/LASLibSupport.cmake )
 	target_link_LASLib( ${PROJECT_NAME} )
+
+	include( ../cmake/PCATPSSupport.cmake )
+	target_link_PCATPS( ${PROJECT_NAME} )
 	
 	target_include_directories(${PROJECT_NAME} 
 		PUBLIC	${STOCKER_INCLUDE_DIR}/modules/internal 

@@ -13,11 +13,11 @@ if( ${OPTION_USE_PCATPS_LIB} )
 endif()
 
 # Link project with dxflib library
-function( target_link_PCATPS )
+function( target_link_PCATPS ) # 1 argument: ARGV0 = project name
 	if( ${OPTION_USE_PCATPS_LIB} )
-		target_include_directories( ${PROJECT_NAME} PUBLIC ${PCATPS_INCLUDE_DIR})
-		target_link_libraries( ${PROJECT_NAME} debug ${PCATPS_LIBRARY_DEBUG} optimized ${PCATPS_LIBRARY_RELEASE})	
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS PCATPS_SUPPORT )
+		target_include_directories( ${ARGV0} PUBLIC ${PCATPS_INCLUDE_DIR})
+		target_link_libraries( ${ARGV0} debug ${PCATPS_LIBRARY_DEBUG} optimized ${PCATPS_LIBRARY_RELEASE})	
+		set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS PCATPS_SUPPORT )
 
 		file(COPY ${PCATPS_ROOT}/debug/PC_ATPS.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/debug/)
 		install( FILES ${PCATPS_ROOT}/debug/PC_ATPS.dll CONFIGURATIONS Debug DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}_debug)

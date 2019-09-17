@@ -11914,11 +11914,10 @@ ccHObject* MainWindow::LoadBDReconProject(QString Filename)
 		ccHObject* newGroup = loaded.empty() ? nullptr : loaded.front();
 
 		if (newGroup) {
-			bd_grp = new BDBaseHObject(*newGroup);
+			bd_grp = new BDBaseHObject(prj_name);
 			bd_grp->setName(prj_name);
 			newGroup->transferChildren(*bd_grp);
-			delete newGroup;
-			newGroup = nullptr;
+			removeFromDB(newGroup);
 			std::cout << bin_file.toStdString() << " loaded" << std::endl;
 		}
 	}
@@ -11938,7 +11937,7 @@ ccHObject* MainWindow::LoadBDReconProject(QString Filename)
 			for (size_t i = 0; i < names.size(); i++) {
 				ccHObject* newGroup = loaded[i]; if (!newGroup) { continue; }
 				QString building_name = names[i];
-				StBuilding* building = new StBuilding(*newGroup);
+				StBuilding* building = new StBuilding(building_name);
 				building->setName(building_name);
 				newGroup->transferChildren(*building);
 				ccHObject::Container clouds;
@@ -11949,8 +11948,7 @@ ccHObject* MainWindow::LoadBDReconProject(QString Filename)
 					cloud->showSF(false);
 					cloud->showColors(true);
 				}
-				delete newGroup;
-				newGroup = nullptr;
+				removeFromDB(newGroup);
 
 				bd_grp->addChild(building);
 			}
@@ -12010,10 +12008,10 @@ ccHObject* MainWindow::LoadBDReconProject(QString Filename)
 				}
 
 				// TODO: still wrong sometimes, the file cannot be saved??
-// 				if (!SaveBuildingInfo(sp_build->data, sp_build->data.file_path.info)) {
-// 					cout << "failed to save building info: " << sp_build->data.GetName().Str() << endl;
-// 					return false;
-// 				}
+				if (!SaveBuildingInfo(sp_build->data, sp_build->data.file_path.info)) {
+					cout << "failed to save building info: " << sp_build->data.GetName().Str() << endl;
+					return false;
+				}
 
 			}
 			else {
@@ -12031,6 +12029,7 @@ ccHObject* MainWindow::LoadBDReconProject(QString Filename)
 				}
 			}
 		}
+		std::cout << "building project prepared!" << std::endl;
 	}
 	
 	return bd_grp;
@@ -12061,8 +12060,10 @@ void MainWindow::doActionBDProjectLoad()
 	try	{
 		ccHObject* bd_grp = LoadBDReconProject(Filename);
 		if (bd_grp) {
+			std::cout << "add to database: " << bd_grp->getName().toStdString() << std::endl;
 			switchDatabase(CC_TYPES::DB_BUILDING);
-			addToDB_Build(bd_grp);
+			addToDB_Build(bd_grp, false, false, false, true);
+			std::cout << "database added" << std::endl;
 		}
 		else {
 			dispToConsole("error load project", ERR_CONSOLE_MESSAGE);

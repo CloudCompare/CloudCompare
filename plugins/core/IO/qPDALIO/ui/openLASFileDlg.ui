@@ -25,6 +25,57 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="fastloadCheckBox">
+            <property name="text">
+             <string>Fast Load</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="concaveCheckBox">
+            <property name="text">
+             <string>Concave Hull</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QFrame" name="rgbFrame">
          <layout class="QHBoxLayout">
           <property name="leftMargin">
@@ -40,29 +91,9 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QCheckBox" name="redCheckBox">
+           <widget class="QCheckBox" name="colorCheckBox">
             <property name="text">
-             <string notr="true">R</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="greenCheckBox">
-            <property name="text">
-             <string notr="true">G</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="blueCheckBox">
-            <property name="text">
-             <string notr="true">B</string>
+             <string notr="true">Color</string>
             </property>
             <property name="checked">
              <bool>true</bool>

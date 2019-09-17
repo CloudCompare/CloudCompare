@@ -641,7 +641,7 @@
   <widget class="QDockWidget" name="DockableDBTree">
    <property name="minimumSize">
     <size>
-     <width>248</width>
+     <width>276</width>
      <height>397</height>
     </size>
    </property>
@@ -1243,6 +1243,26 @@
              <property name="icon">
               <iconset resource="../icones.qrc">
                <normaloff>:/CC/Stocker/images/stocker/setting.png</normaloff>:/CC/Stocker/images/stocker/setting.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="loadSubstanceToolButton">
+             <property name="toolTip">
+              <string>load substance - original points, etc.</string>
+             </property>
+             <property name="text">
+              <string>...</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../icones.qrc">
+               <normaloff>:/CC/Stocker/images/stocker/pointon.png</normaloff>:/CC/Stocker/images/stocker/pointon.png</iconset>
              </property>
              <property name="iconSize">
               <size>

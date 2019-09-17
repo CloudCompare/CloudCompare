@@ -27,6 +27,7 @@
 #include <ccScalarField.h>
 #include <ccHObjectCaster.h>
 #include "ccColorScalesManager.h"
+#include "ccPolyline.h"
 
 //CCLib
 #include <CCPlatform.h>
@@ -1086,15 +1087,75 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 			return CC_FERR_CANCELED_BY_USER;
 		}
 
+		CCVector3d Pshift(0, 0, 0);
+		bool preserveCoordinateShift = true;
+		//backup input global parameters
+		ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
+		bool useLasOffset = false;
+		//set the lasOffset as default if none was provided
+		if (lasOffset.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
+		{
+			if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
+			{
+				useLasOffset = true;
+				Pshift = -lasOffset;
+				if (csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
+				{
+					parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
+				}
+			}
+		}
+
+		bool fastLoad = s_lasOpenDlg->fastloadCheckBox->isChecked();
+		if (fastLoad) {
+			ccPointCloud* vertices = new ccPointCloud("vertices"); // corner of xy boundingbox and min xyz, max xyz
+			ccPolyline* bounding_box = new ccPolyline(vertices);
+			if (!vertices->reserve(6) || !bounding_box->reserve(4)) {
+				delete vertices;
+				delete bounding_box;
+				return CC_FERR_NOT_ENOUGH_MEMORY;
+			}
+			double z = ((bbMin + bbMax) / 2).z;
+			vertices->addPoint(CCVector3(bbMin.x, bbMin.y, z));
+			vertices->addPoint(CCVector3(bbMax.x, bbMin.y, z));
+			vertices->addPoint(CCVector3(bbMax.x, bbMax.y, z));
+			vertices->addPoint(CCVector3(bbMin.x, bbMax.y, z));
+			bounding_box->addPointIndex(0, 4);
+			bounding_box->setClosed(true);
+			vertices->addPoint(CCVector3::fromArray(bbMin.u));
+			vertices->addPoint(CCVector3::fromArray(bbMax.u));
+			bounding_box->setGlobalShift(Pshift);
+			bounding_box->addChild(vertices);
+			bounding_box->setName("BoundingBox");
+
+			if (HandleGlobalShift(bbMin, Pshift, preserveCoordinateShift, parameters, useLasOffset))
+			{
+				if (preserveCoordinateShift)
+				{
+					bounding_box->setGlobalShift(Pshift);
+					for (size_t i = 0; i < vertices->size(); i++) {
+						CCVector3* pt = const_cast<CCVector3*>(vertices->getPoint(i));
+						*(pt) += CCVector3::fromArray(Pshift.u);
+					}
+				}
+				ccLog::Warning("[LAS] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+			}
+			
+			container.addChild(bounding_box);
+			return CC_FERR_NO_ERROR;
+		}
+
 		bool ignoreDefaultFields = s_lasOpenDlg->ignoreDefaultFieldsCheckBox->isChecked();
 
 		unsigned int short rgbColorMask[3] = { 0, 0, 0 };
-		if (s_lasOpenDlg->doLoad(LAS_RED))
-			rgbColorMask[0] = (~0);
-		if (s_lasOpenDlg->doLoad(LAS_GREEN))
-			rgbColorMask[1] = (~0);
-		if (s_lasOpenDlg->doLoad(LAS_BLUE))
-			rgbColorMask[2] = (~0);
+		if (s_lasOpenDlg->doLoad(LAS_RED)) {	//XYLIU, only one option
+			if (FieldIsPresent(file_info.m_dimNames, LAS_RED))
+				rgbColorMask[0] = (~0);
+			if (FieldIsPresent(file_info.m_dimNames, LAS_GREEN))
+				rgbColorMask[1] = (~0);
+			if (FieldIsPresent(file_info.m_dimNames, LAS_BLUE))
+				rgbColorMask[2] = (~0);
+		}
 		bool loadColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
 
 		//by default we read colors as triplets of 8 bits integers but we might dynamically change this
@@ -1244,9 +1305,9 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
 		ccPointCloud* loadedCloud = nullptr;
 		std::vector< LasField::Shared > fieldsToLoad;
-		CCVector3d Pshift(0, 0, 0);
-		bool preserveCoordinateShift = true;
-
+		
+// 		CCVector3d Pshift(0, 0, 0);
+// 		bool preserveCoordinateShift = true;
 		unsigned int fileChunkSize = 0;
 		unsigned int nbPointsRead = 0;
 
@@ -1310,22 +1371,22 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 								static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Y)),
 								static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Z)) );
 
-				//backup input global parameters
-				ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
-				bool useLasOffset = false;
-				//set the lasOffset as default if none was provided
-				if (lasOffset.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
-				{
-					    if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
-						{
-							useLasOffset = true;
-							Pshift = -lasOffset;
-							if (csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
-							{
-								parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
-							}
-						}
-				}
+// 				//backup input global parameters
+// 				ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
+// 				bool useLasOffset = false;
+// 				//set the lasOffset as default if none was provided
+// 				if (lasOffset.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
+// 				{
+// 					    if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
+// 						{
+// 							useLasOffset = true;
+// 							Pshift = -lasOffset;
+// 							if (csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
+// 							{
+// 								parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
+// 							}
+// 						}
+// 				}
 
 				if (HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters, useLasOffset))
 				{

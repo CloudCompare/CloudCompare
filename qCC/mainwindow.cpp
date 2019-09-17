@@ -1031,6 +1031,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionImportFolder,				&QAction::triggered, this, &MainWindow::doActionImportFolder);
 	connect(m_UI->EditDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionEditDatabase);
 	connect(m_UI->createBuildingProjectToolButton,	&QAbstractButton::clicked, this, &MainWindow::doActionCreateBuildingProject);
+	connect(m_UI->loadSubstanceToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionLoadSubstance);
 	
 
 	//! Segmentation
@@ -14692,6 +14693,7 @@ void MainWindow::doActionCreateDatabase()
 		if (!points) {
 			return;
 		}
+		points->setLocked(true);
 	}
 
 	//! images
@@ -14700,6 +14702,7 @@ void MainWindow::doActionCreateDatabase()
 		if (!images) {
 			return;
 		}
+		images->setLocked(true);
 	}
 
 	//! miscellaneous
@@ -14708,6 +14711,7 @@ void MainWindow::doActionCreateDatabase()
 		if (!misc) {
 			return;
 		}
+		misc->setLocked(true);
 	}
 
 	//! products
@@ -14716,26 +14720,31 @@ void MainWindow::doActionCreateDatabase()
 		if (!products) {
 			return;
 		}
+		products->setLocked(true);
 
 		ccHObject* groundFilter = new_database->getProductFiltered();
 		if (!groundFilter) {
 			return;
 		}
+		groundFilter->setLocked(true);
 
 		ccHObject* classified = new_database->getProductClassified();
 		if (!classified) {
 			return;
 		}
+		classified->setLocked(true);
 
 		ccHObject* segments = new_database->getProductSegmented();
 		if (!segments) {
 			return;
 		}
+		segments->setLocked(true);
 
 		ccHObject* models = new_database->getProductModels();
 		if (!models) {
 			return;
 		}
+		models->setLocked(true);
 	}
 }
 
@@ -14849,12 +14858,37 @@ void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool, bool 
 	}
 }
 
-ccHObject::Container MainWindow::addPointsToDatabase(QStringList files, ccHObject * import_pool, bool remove_exist, bool auto_sort)
+ccHObject::Container MainWindow::addPointsToDatabase(QStringList files, ccHObject * import_pool, bool remove_exist, bool auto_sort, bool fastLoad)
 {
 	ccHObject::Container loaded_files = addToDB(files, CC_TYPES::DB_MAINDB);
 	ccHObject::Container trans_files;
 	for (ccHObject* lf : loaded_files) {
 		if (!lf) { continue; }
+		if (fastLoad) {
+			if (lf->isA(CC_TYPES::HIERARCHY_OBJECT)) {
+				lf->setName(QFileInfo(lf->getName()).completeBaseName());
+				// TODO: check existing
+				if (remove_exist) {
+					for (size_t i = 0; i < import_pool->getChildrenNumber(); i++) {
+						ccHObject* child = import_pool->getChild(i);
+						if (child->getName() == lf->getName()) {
+							if (child->getPath() == lf->getPath()) {
+								delete child;
+								child = nullptr;
+							}
+							//removeFromDB(child);
+						}
+					}
+				}
+				if (lf->getParent()) {
+					lf->getParent()->transferChild(lf, *import_pool);
+				}
+				else {
+					import_pool->addChild(lf);
+				}
+			}
+			continue;
+		}
 		if (lf->isA(CC_TYPES::HIERARCHY_OBJECT)) {
 			ccHObject::Container loaded_objs;
 			lf->filterChildren(loaded_objs, false, CC_TYPES::POINT_CLOUD, true);
@@ -14949,7 +14983,7 @@ void MainWindow::doActionImportData()
 		currentOpenDlgFilter.clear(); //this way FileIOFilter will try to guess the file type automatically!
 	}
 
-	addPointsToDatabase(selectedFiles, import_pool);
+	addPointsToDatabase(selectedFiles, import_pool, true, true, true);
 }
 
 void MainWindow::doActionImportFolder()
@@ -15001,7 +15035,7 @@ void MainWindow::doActionImportFolder()
 		files.append(dir_iter.next());
 	}
 	
-	addPointsToDatabase(files, import_pool);
+	addPointsToDatabase(files, import_pool, true, true, true);
 }
 
 void MainWindow::doActionEditDatabase()
@@ -15168,7 +15202,7 @@ void MainWindow::doActionCreateBuildingProject()
 		ccHObject* bd_grp = LoadBDReconProject(bbprj_path);
 		if (bd_grp) {
 			switchDatabase(CC_TYPES::DB_BUILDING);
-			addToDB_Build(bd_grp);
+			addToDB_Build(bd_grp, false, false, false, true);
 			if (dataObj) {
 				dataObj->setEnabled(false);
 			}
@@ -15177,6 +15211,16 @@ void MainWindow::doActionCreateBuildingProject()
 	catch (const std::exception& e) {
 		STOCKER_ERROR_ASSERT(e.what());
 	}
+}
+
+void MainWindow::doActionLoadSubstance()
+{
+	if (!haveSelection()) { return; }
+	ccHObject* sel = m_selectedEntities.front();
+	if (!sel) { return; }
+	QStringList files;
+	files.append(sel->getPath());
+	addPointsToDatabase(files, sel, true, false, false);
 }
 
 inline QString getCmdLine(QString prj_path, QString task_name, int prj_id)
@@ -15300,7 +15344,8 @@ void MainWindow::doActionGroundFilteringBatch()
 	QFutureWatcher<void> executer;
 	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
 		QStringList new_results = moveFilesToDir(result_files, product_pool->getPath());
-		addToDatabase(new_results, product_pool);
+		addPointsToDatabase(new_results, product_pool, true, true, true);
+		//addToDatabase(new_results, product_pool);
 	});
 	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
 	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
@@ -15358,7 +15403,8 @@ void MainWindow::doActionClassificationBatch()
 	QFutureWatcher<void> executer;
 	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
 		QStringList new_results = moveFilesToDir(result_files, product_pool->getPath());
-		addToDatabase(new_results, product_pool);
+		addPointsToDatabase(new_results, product_pool, true, true, true);
+		//addToDatabase(new_results, product_pool);
 	});
 	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
 	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
@@ -15428,7 +15474,7 @@ void MainWindow::doActionBuildingSegmentationBatch()
 					s = result_dir + "/" + s;
 				}
 				QStringList new_results = moveFilesToDir(building_files, pool->getPath());
-				ccHObject::Container added_files = addPointsToDatabase(new_results, pool, true, false);
+				ccHObject::Container added_files = addPointsToDatabase(new_results, pool, true, false, false);
 				int bd_num = GetMaxNumberExcludeChildPrefix(pool, BDDB_BUILDING_PREFIX) + 1;
 				for (ccHObject* pc : added_files) {
 					pc->setName(BuildingNameByNumber(bd_num++));

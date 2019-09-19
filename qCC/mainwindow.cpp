@@ -1031,6 +1031,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionImportFolder,				&QAction::triggered, this, &MainWindow::doActionImportFolder);
 	connect(m_UI->EditDatabaseToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionEditDatabase);
 	connect(m_UI->createBuildingProjectToolButton,	&QAbstractButton::clicked, this, &MainWindow::doActionCreateBuildingProject);
+	connect(m_UI->loadSubstanceToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionLoadSubstance);
 	
 
 	//! Segmentation
@@ -1966,6 +1967,8 @@ void MainWindow::addToDBAuto(const QStringList& filenames)
 	ccHObject::Container loaded = addToDB(filenames, getCurrentDB(), QString(), win);
 	
 	for (ccHObject* obj : loaded) {
+		if (!obj) continue;
+			
 		ccHObject::Container pcs;
 		if (obj->isGroup()) {
 			pcs = GetEnabledObjFromGroup(obj, CC_TYPES::POINT_CLOUD, false);
@@ -2029,6 +2032,9 @@ std::vector<ccHObject*> MainWindow::addToDB(const QStringList& filenames,
 		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 		ccHObject* newGroup = FileIOFilter::LoadFromFile(filename, parameters, result, fileFilter);
 
+		//! add even if the new group is empty
+		loads.push_back(newGroup);
+
 		if (newGroup)
 		{
 			if (!options.normalsDisplayedByDefault)
@@ -2051,7 +2057,6 @@ std::vector<ccHObject*> MainWindow::addToDB(const QStringList& filenames,
 			}
 			addToDB(newGroup, dest, true, true, false);
 			newGroup->setPath(filename);
-			loads.push_back(newGroup);
 
 			m_recentFiles->addFilePath(filename);
 		}
@@ -2063,7 +2068,7 @@ std::vector<ccHObject*> MainWindow::addToDB(const QStringList& filenames,
 		}
 	}
 
-	QMainWindow::statusBar()->showMessage(QString("%1 file(s) loaded").arg(filenames.size()), 2000);
+//	QMainWindow::statusBar()->showMessage(QString("%1 file(s) loaded").arg(filenames.size()), 2000);
 	return loads;
 }
 
@@ -11889,52 +11894,50 @@ BDBaseHObject::Container GetBDBaseProjx() {
 ccHObject* MainWindow::LoadBDReconProject(QString Filename)
 {
 	BDBaseHObject* bd_grp = nullptr;
-	try	{
-		stocker::BlockProj block_prj; std::string error_info;
-		if (!stocker::LoadProject(Filename.toStdString(), block_prj, error_info)) {
-			std::cout << error_info << std::endl;
-			dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			return nullptr;
-		}
 
-		QFileInfo prj_file(Filename);
-		QString prj_name = prj_file.completeBaseName();
+	stocker::BlockProj block_prj; std::string error_info;
+	if (!stocker::LoadProject(Filename.toStdString(), block_prj, error_info)) {
+		std::cout << error_info << std::endl;
+		//dispToConsole(error_info.c_str(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return nullptr;
+	}
 
-		QString bin_file = prj_file.absolutePath() + "\\" + prj_name + ".bin";
+	QFileInfo prj_file(Filename);
+	QString prj_name = prj_file.completeBaseName();
 
-		CCVector3d loadCoordinatesShift(0, 0, 0);
-		bool loadCoordinatesTransEnabled = false;
-		FileIOFilter::LoadParameters parameters;
-		{
-			parameters.alwaysDisplayLoadDialog = false;
-			parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
-			parameters.coordinatesShift = &loadCoordinatesShift;
-			parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
-			parameters.parentWidget = this;
-		}
-		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	QString bin_file = prj_file.absolutePath() + "\\" + prj_name + ".bin";
 
-		if (QFileInfo(bin_file).exists()) {
-			std::cout << "start loading "<< bin_file.toStdString() <<std::endl;
-			ccHObject* newGroup = FileIOFilter::LoadFromFile(bin_file, parameters, result, QString());
-			std::cout << bin_file.toStdString() << " loaded!" << std::endl;
-			if (newGroup) {
-				bd_grp = new BDBaseHObject(*newGroup);
-				bd_grp->setName(prj_name);
-				newGroup->transferChildren(*bd_grp);
-				std::cout << bin_file.toStdString() << " loaded" << std::endl;
-			}
-		}
-		if (!bd_grp) {
+	if (QFileInfo(bin_file).exists()) {
+		std::cout << "start loading " << bin_file.toStdString() << std::endl;
+		QStringList files; files.append(bin_file);
+		ccHObject::Container loaded = addToDB_Build(files);
+		ccHObject* newGroup = loaded.empty() ? nullptr : loaded.front();
+
+		if (newGroup) {
 			bd_grp = new BDBaseHObject(prj_name);
-			for (auto & bd : block_prj.m_builder.sbuild) {
-				//if (bd->data.convex_hull_xy.empty()) { continue; }
+			bd_grp->setName(prj_name);
+			newGroup->transferChildren(*bd_grp);
+			removeFromDB(newGroup);
+			std::cout << bin_file.toStdString() << " loaded" << std::endl;
+		}
+	}
+	if (!bd_grp) {
 
-				QString building_name = bd->GetName().Str().c_str();
-				QFileInfo point_path(bd->data.file_path.ori_points.c_str());
-				ccHObject* newGroup = FileIOFilter::LoadFromFile(point_path.absoluteFilePath(), parameters, result, QString());
-				if (!newGroup) { continue; }
-				StBuilding* building = new StBuilding(*newGroup);
+		QStringList names; QStringList files;
+		for (auto & bd : block_prj.m_builder.sbuild) {
+			QString building_name = bd->GetName().Str().c_str(); names.append(building_name);
+			QFileInfo point_path(bd->data.file_path.ori_points.c_str()); files.append(point_path.absoluteFilePath());
+			std::cout << "file: " << point_path.absoluteFilePath().toStdString() << std::endl;
+		}
+		std::cout << "loading " << files.size() << " files" << std::endl;
+		ccHObject::Container loaded = addToDB_Build(files);
+		std::cout << files.size() << " files loaded" << std::endl;
+		if (loaded.size() == names.size()) {
+			bd_grp = new BDBaseHObject(prj_name);
+			for (size_t i = 0; i < names.size(); i++) {
+				ccHObject* newGroup = loaded[i]; if (!newGroup) { continue; }
+				QString building_name = names[i];
+				StBuilding* building = new StBuilding(building_name);
 				building->setName(building_name);
 				newGroup->transferChildren(*building);
 				ccHObject::Container clouds;
@@ -11945,58 +11948,90 @@ ccHObject* MainWindow::LoadBDReconProject(QString Filename)
 					cloud->showSF(false);
 					cloud->showColors(true);
 				}
+				removeFromDB(newGroup);
 
 				bd_grp->addChild(building);
 			}
 		}
-		//! prepare buildings now
-		if (bd_grp) {
-			bd_grp->block_prj = block_prj;
-			
-			bool first_cloud = false;
-			for (size_t i = 0; i < bd_grp->getChildrenNumber(); i++) {
-				StBuilding* bdObj = ccHObjectCaster::ToStBuilding(bd_grp->getChild(i));
-				if (!bdObj) continue;
-				try	{
-					auto sp_build = bd_grp->GetBuildingSp(bdObj->getName().toStdString());
-					if (!sp_build) {
-						continue;
-					}
+	}
+	//! prepare buildings now
+	if (bd_grp) {
+		bd_grp->block_prj = block_prj;
 
-					if (!LoadBuildingInfo(sp_build->data, sp_build->data.file_path.info)) {
-						ccPointCloud* cloud = bd_grp->GetOriginPointCloud(bdObj->getName(), false);
-						stocker::Contour3d points_global; stocker::Contour3f points_local;
-						if (!GetPointsFromCloud(cloud, points_global, points_local)) { continue; }
+		bool first_cloud = false;
+		for (size_t i = 0; i < bd_grp->getChildrenNumber(); i++) {
+			StBuilding* bdObj = ccHObjectCaster::ToStBuilding(bd_grp->getChild(i));
+			if (!bdObj) continue;
 
-						CCVector3d minbb, maxbb;
-						if (cloud->getGlobalBB(minbb, maxbb)) {
-							sp_build->data.bbox.Add({ minbb.x,minbb.y, minbb.z });
-							sp_build->data.bbox.Add({ maxbb.x,maxbb.y, maxbb.z });
+			auto sp_build = bd_grp->GetBuildingSp(bdObj->getName().toStdString());
+			if (!sp_build) {
+				continue;
+			}
+
+			if (!LoadBuildingInfo(sp_build->data, sp_build->data.file_path.info)) {
+				ccPointCloud* cloud = bd_grp->GetOriginPointCloud(bdObj->getName(), false);
+				stocker::Contour3d points_global; stocker::Contour3f points_local;
+				if (!GetPointsFromCloud(cloud, points_global, points_local)) { continue; }
+
+				CCVector3d minbb, maxbb;
+				if (cloud->getGlobalBB(minbb, maxbb)) {
+					sp_build->data.bbox.Add({ minbb.x,minbb.y, minbb.z });
+					sp_build->data.bbox.Add({ maxbb.x,maxbb.y, maxbb.z });
+				}
+
+// 				if (!stocker::PrepareBuildingByPoints(bd_grp->block_prj, sp_build->data, points_global, points_local)) {
+// 					continue;
+// 				}
+
+				// TODO: save these paras to the StBuilding
+				sp_build->data.average_spacing = stocker::ComputeAverageSpacing3f(points_local, true);
+				stocker::Contour3d ground_contour = stocker::CalcBuildingGround(points_global, 0.1);
+				if (ground_contour.size() < 3) {
+					return false;
+				}
+				sp_build->data.ground_height = ground_contour.front().Z();
+				sp_build->data.convex_hull_xy = stocker::ToContour2d(ground_contour);
+				if (bd_grp->block_prj.m_options.with_image) {
+					for (auto & img : bd_grp->block_prj.m_builder.simage) {
+						bool img_check = false;
+						for (size_t i = 0; i < 8; i++) {
+							if (img->data.CheckInImg3d(sp_build->data.bbox.P(i))) {
+								img_check = true;
+								break;
+							}
 						}
-						if (!PrepareBuildingByPoints(bd_grp->block_prj, sp_build->data, points_global, points_local)) {
-							continue;
-						}
-					}
-
-					if (!first_cloud) {
-						ccPointCloud* cloud = bd_grp->GetOriginPointCloud(bdObj->getName(), false);
-						if (cloud) {
-							bd_grp->global_shift = stocker::parse_xyz(cloud->getGlobalShift());
-							bd_grp->global_scale = cloud->getGlobalScale();
-							first_cloud = true;
+						if (img_check) {
+							sp_build->data.image_list.push_back(img->data.GetName().Str());
+							bd_grp->block_prj.m_builder.InsertImageBuild(img->data.GetName(), sp_build->data.GetName());
 						}
 					}
 				}
-				catch (const std::exception&) {
-					continue;
+
+				// TODO: still wrong sometimes, the file cannot be saved??
+				if (!SaveBuildingInfo(sp_build->data, sp_build->data.file_path.info)) {
+					cout << "failed to save building info: " << sp_build->data.GetName().Str() << endl;
+					return false;
+				}
+
+			}
+			else {
+				for (auto & img : sp_build->data.image_list) {
+					bd_grp->block_prj.m_builder.InsertImageBuild(img.c_str(), sp_build->data.GetName());
+				}
+			}
+
+			if (!first_cloud) {
+				ccPointCloud* cloud = bd_grp->GetOriginPointCloud(bdObj->getName(), false);
+				if (cloud) {
+					bd_grp->global_shift = stocker::parse_xyz(cloud->getGlobalShift());
+					bd_grp->global_scale = cloud->getGlobalScale();
+					first_cloud = true;
 				}
 			}
 		}
+		std::cout << "building project prepared!" << std::endl;
 	}
-	catch (const std::exception&e) {
-		throw(std::runtime_error(e.what()));
-		STOCKER_ERROR_ASSERT(e.what());
-	}
+	
 	return bd_grp;
 }
 
@@ -12020,26 +12055,26 @@ void MainWindow::doActionBDProjectLoad()
 	settings.setValue(ccPS::CurrentPath(), currentPath);
 	settings.endGroup();
 
-	ccHObject* bd_grp = nullptr;
-	try {
-		bd_grp = LoadBDReconProject(Filename);
+	//////////////////////////////////////////////////////////////////////////
+	 
+	try	{
+		ccHObject* bd_grp = LoadBDReconProject(Filename);
+		if (bd_grp) {
+			std::cout << "add to database: " << bd_grp->getName().toStdString() << std::endl;
+			switchDatabase(CC_TYPES::DB_BUILDING);
+			addToDB_Build(bd_grp, false, false, false, true);
+			std::cout << "database added" << std::endl;
+		}
+		else {
+			dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
+			return;
+		}
 	}
-	catch (const std::exception& e) {
-		dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
+	catch (const std::exception& e)
+	{
+		STOCKER_ERROR_ASSERT(e.what());
 		return;
 	}
-	std::cout << "building reconstruction project loaded" << std::endl;
-	if (bd_grp) {
-		switchDatabase(CC_TYPES::DB_BUILDING);
-		addToDB_Build(bd_grp);
-	}
-	else {
-		dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
-	refreshAll();
-	UpdateUI();
 }
 
 bool SaveProject(BDBaseHObject* proj)
@@ -14659,6 +14694,7 @@ void MainWindow::doActionCreateDatabase()
 		if (!points) {
 			return;
 		}
+		points->setLocked(true);
 	}
 
 	//! images
@@ -14667,6 +14703,7 @@ void MainWindow::doActionCreateDatabase()
 		if (!images) {
 			return;
 		}
+		images->setLocked(true);
 	}
 
 	//! miscellaneous
@@ -14675,6 +14712,7 @@ void MainWindow::doActionCreateDatabase()
 		if (!misc) {
 			return;
 		}
+		misc->setLocked(true);
 	}
 
 	//! products
@@ -14683,26 +14721,31 @@ void MainWindow::doActionCreateDatabase()
 		if (!products) {
 			return;
 		}
+		products->setLocked(true);
 
 		ccHObject* groundFilter = new_database->getProductFiltered();
 		if (!groundFilter) {
 			return;
 		}
+		groundFilter->setLocked(true);
 
 		ccHObject* classified = new_database->getProductClassified();
 		if (!classified) {
 			return;
 		}
+		classified->setLocked(true);
 
 		ccHObject* segments = new_database->getProductSegmented();
 		if (!segments) {
 			return;
 		}
+		segments->setLocked(true);
 
 		ccHObject* models = new_database->getProductModels();
 		if (!models) {
 			return;
 		}
+		models->setLocked(true);
 	}
 }
 
@@ -14783,6 +14826,7 @@ void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool, bool 
 		import_pool->getName() == "segmented") {
 
 		for (ccHObject* lf : loaded_files) {
+			if (!lf) { continue; }
 			if (lf->isA(CC_TYPES::HIERARCHY_OBJECT)) {
 				ccHObject::Container loaded_objs;
 				lf->filterChildren(loaded_objs, false, CC_TYPES::POINT_CLOUD, true);
@@ -14815,11 +14859,37 @@ void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool, bool 
 	}
 }
 
-ccHObject::Container MainWindow::addPointsToDatabase(QStringList files, ccHObject * import_pool, bool remove_exist, bool auto_sort)
+ccHObject::Container MainWindow::addPointsToDatabase(QStringList files, ccHObject * import_pool, bool remove_exist, bool auto_sort, bool fastLoad)
 {
 	ccHObject::Container loaded_files = addToDB(files, CC_TYPES::DB_MAINDB);
 	ccHObject::Container trans_files;
 	for (ccHObject* lf : loaded_files) {
+		if (!lf) { continue; }
+		if (fastLoad) {
+			if (lf->isA(CC_TYPES::HIERARCHY_OBJECT)) {
+				lf->setName(QFileInfo(lf->getName()).completeBaseName());
+				// TODO: check existing
+				if (remove_exist) {
+					for (size_t i = 0; i < import_pool->getChildrenNumber(); i++) {
+						ccHObject* child = import_pool->getChild(i);
+						if (child->getName() == lf->getName()) {
+							if (child->getPath() == lf->getPath()) {
+								delete child;
+								child = nullptr;
+							}
+							//removeFromDB(child);
+						}
+					}
+				}
+				if (lf->getParent()) {
+					lf->getParent()->transferChild(lf, *import_pool);
+				}
+				else {
+					import_pool->addChild(lf);
+				}
+			}
+			continue;
+		}
 		if (lf->isA(CC_TYPES::HIERARCHY_OBJECT)) {
 			ccHObject::Container loaded_objs;
 			lf->filterChildren(loaded_objs, false, CC_TYPES::POINT_CLOUD, true);
@@ -14914,7 +14984,7 @@ void MainWindow::doActionImportData()
 		currentOpenDlgFilter.clear(); //this way FileIOFilter will try to guess the file type automatically!
 	}
 
-	addPointsToDatabase(selectedFiles, import_pool);
+	addPointsToDatabase(selectedFiles, import_pool, true, true, true);
 }
 
 void MainWindow::doActionImportFolder()
@@ -14966,7 +15036,7 @@ void MainWindow::doActionImportFolder()
 		files.append(dir_iter.next());
 	}
 	
-	addPointsToDatabase(files, import_pool);
+	addPointsToDatabase(files, import_pool, true, true, true);
 }
 
 void MainWindow::doActionEditDatabase()
@@ -15018,8 +15088,7 @@ void MainWindow::doActionCreateBuildingProject()
 //	BDBaseHObject* baseObj = new BDBaseHObject(select->getName());
 	QString bbprj_path = project_dir + "/" + select->getName() + ".bbprj";
 
-	bool save_prj = !QFileInfo(bbprj_path).exists();
-	if (!save_prj) {
+	if (QFileInfo(bbprj_path).exists()) {
 		QMessageBox message_box(QMessageBox::Question,
 			tr("Project exists"),
 			tr("Are you sure you want to overwrite?"),
@@ -15027,29 +15096,27 @@ void MainWindow::doActionCreateBuildingProject()
 			this);
 		if (message_box.exec() == QMessageBox::Ok) {
 			QDir(project_dir).removeRecursively();
-			save_prj = true;
 		}
 		else {
-			ccHObject* bd_grp = LoadBDReconProject(bbprj_path);
-			if (bd_grp) {
-				switchDatabase(CC_TYPES::DB_BUILDING);
-				addToDB_Build(bd_grp);
-				refreshAll(); UpdateUI();
+			try {
+				ccHObject* bd_grp = LoadBDReconProject(bbprj_path);
+				if (bd_grp) {
+					switchDatabase(CC_TYPES::DB_BUILDING);
+					addToDB_Build(bd_grp);
+					if (dataObj) {
+						dataObj->setEnabled(false);
+					}
+				}
 			}
-			else {
-				save_prj = true;
+			catch (const std::exception& e) {
+				STOCKER_ERROR_ASSERT(e.what());
 			}
 			return;
 		}
 	}
-	if (!save_prj) {
-		return;
-	}
 
 	stocker::BlockProj block_prj;
 	stocker::BuilderOption options;
-
-	ProgStart("create building reconstruction project");
 
 	try
 	{
@@ -15073,7 +15140,7 @@ void MainWindow::doActionCreateBuildingProject()
 				bd_paths.append(relative_path);
 			}
 			FILE* fp = fopen(building_list.toStdString().c_str(), "w");
-			if (!fp) { ProgEnd return; }
+			if (!fp) { return; }
 			fprintf(fp, "%d\n", bd_paths.size());
 			for (QString p : bd_paths) {
 				fprintf(fp, "%s\n", p.toStdString().c_str());
@@ -15082,7 +15149,7 @@ void MainWindow::doActionCreateBuildingProject()
 		}
 
 		QString image_dir = project_dir + "/images";
-		if (!StCreatDir(image_dir)) { ProgEnd return; }
+		if (!StCreatDir(image_dir)) { return; }
 		QString image_list;
 		{
 			if (image_list.isEmpty()) {
@@ -15123,32 +15190,38 @@ void MainWindow::doActionCreateBuildingProject()
 		options.prj_file.sfm_out = sfm_out.toStdString();
 
 		block_prj.m_options = options;
-		//baseObj->block_prj = block_prj;
 
 		//! save .bbprj	
 		stocker::SaveProjectIni(bbprj_path.toStdString(), options);
 	}	
 	catch (const std::exception& e) {
-		dispToConsole("error create project", ERR_CONSOLE_MESSAGE);
-		ProgEnd return;
+		STOCKER_ERROR_ASSERT(e.what());
+		return;
 	}
 
 	try {
 		ccHObject* bd_grp = LoadBDReconProject(bbprj_path);
 		if (bd_grp) {
 			switchDatabase(CC_TYPES::DB_BUILDING);
-			addToDB_Build(bd_grp);
-			refreshAll(); UpdateUI();
-		}
-		else {
-			dispToConsole("error load project", ERR_CONSOLE_MESSAGE);
-			throw std::runtime_error("error load project");
+			addToDB_Build(bd_grp, false, false, false, true);
+			if (dataObj) {
+				dataObj->setEnabled(false);
+			}
 		}
 	}
 	catch (const std::exception& e) {
-		dispToConsole(e.what(), ERR_CONSOLE_MESSAGE);
+		STOCKER_ERROR_ASSERT(e.what());
 	}
-	ProgEnd
+}
+
+void MainWindow::doActionLoadSubstance()
+{
+	if (!haveSelection()) { return; }
+	ccHObject* sel = m_selectedEntities.front();
+	if (!sel) { return; }
+	QStringList files;
+	files.append(sel->getPath());
+	addPointsToDatabase(files, sel, true, false, false);
 }
 
 inline QString getCmdLine(QString prj_path, QString task_name, int prj_id)
@@ -15272,7 +15345,8 @@ void MainWindow::doActionGroundFilteringBatch()
 	QFutureWatcher<void> executer;
 	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
 		QStringList new_results = moveFilesToDir(result_files, product_pool->getPath());
-		addToDatabase(new_results, product_pool);
+		addPointsToDatabase(new_results, product_pool, true, true, true);
+		//addToDatabase(new_results, product_pool);
 	});
 	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
 	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
@@ -15330,7 +15404,8 @@ void MainWindow::doActionClassificationBatch()
 	QFutureWatcher<void> executer;
 	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
 		QStringList new_results = moveFilesToDir(result_files, product_pool->getPath());
-		addToDatabase(new_results, product_pool);
+		addPointsToDatabase(new_results, product_pool, true, true, true);
+		//addToDatabase(new_results, product_pool);
 	});
 	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
 	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
@@ -15400,7 +15475,7 @@ void MainWindow::doActionBuildingSegmentationBatch()
 					s = result_dir + "/" + s;
 				}
 				QStringList new_results = moveFilesToDir(building_files, pool->getPath());
-				ccHObject::Container added_files = addPointsToDatabase(new_results, pool, true, false);
+				ccHObject::Container added_files = addPointsToDatabase(new_results, pool, true, false, false);
 				int bd_num = GetMaxNumberExcludeChildPrefix(pool, BDDB_BUILDING_PREFIX) + 1;
 				for (ccHObject* pc : added_files) {
 					pc->setName(BuildingNameByNumber(bd_num++));

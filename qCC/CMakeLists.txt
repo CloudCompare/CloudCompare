@@ -77,12 +77,6 @@ else()
 	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
 endif()
 
-# plane segmentation support
-if ( ${OPTION_USE_PCATPS_LIB} )
-	target_link_PCATPS( ${PROJECT_NAME} )	
-endif()
-
-
 # 3dConnexion devices support
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	target_link_3DXWARE( ${PROJECT_NAME} )
@@ -193,7 +187,7 @@ if(OPTION_USE_STOCKER)
 	set(STOCKER_HOME $ENV{STOCKER_HOME} CACHE PATH "stocker home")
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_STOCKER USE_STOCKER_AS_DLL )
 	# TODO:
-	set(STOCKER_LIBS BuilderBase linear_solver polyfit_basic polyfit_math polyfit_model polyfit_method BuilderCore builderlod2 builderlod3)
+	set(STOCKER_LIBS BuilderBase linear_solver polyfit_basic polyfit_math polyfit_model polyfit_method BuilderCore builderlod2 builderlod3 builderpoly)
 	set(STOCKER_INCLUDE_DIR ${STOCKER_HOME}/include CACHE PATH "stocker include")
 	set(STOCKER_LIBRARY_DIR_DEBUG ${STOCKER_HOME}/lib/${PLATFORM}/Debug CACHE PATH "stocker lib dir")
 	set(STOCKER_LIBRARY_DIR_RELEASE ${STOCKER_HOME}/lib/${PLATFORM}/Release CACHE PATH "stocker lib dir")
@@ -216,8 +210,12 @@ if(OPTION_USE_STOCKER)
 
 		target_link_libraries(${PROJECT_NAME} debug ${STOCKER_LIB_DEBUG} optimized ${STOCKER_LIB_RELEASE})
 	endforeach()
+
 	include( ../cmake/LASLibSupport.cmake )
 	target_link_LASLib( ${PROJECT_NAME} )
+
+	include( ../cmake/PCATPSSupport.cmake )
+	target_link_PCATPS( ${PROJECT_NAME} )
 	
 	target_include_directories(${PROJECT_NAME} 
 		PUBLIC	${STOCKER_INCLUDE_DIR}/modules/internal 

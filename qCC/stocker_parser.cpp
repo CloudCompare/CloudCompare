@@ -89,11 +89,15 @@ auto GetPointsFromCloud3d(ccHObject* entity, bool global)->std::vector<T>
 	if (entity->isA(CC_TYPES::POINT_CLOUD)) {
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 		if (!cloud) return points;
-
 		for (unsigned i = 0; i < cloud->size(); i++) {
 			const CCVector3* pt = cloud->getPoint(i);
-			CCVector3d Pglobal = cloud->toGlobal3d<PointCoordinateType>(*pt);
-			points.push_back({ Pglobal.x, Pglobal.y, Pglobal.z });
+			if (global) {
+				CCVector3d Pglobal = cloud->toGlobal3d<PointCoordinateType>(*pt);
+				points.push_back({ Pglobal.x, Pglobal.y, Pglobal.z });
+			}
+			else {
+				points.push_back({ (*pt).x, (*pt).y, (*pt).z });
+			}
 		}
 	}
 	else if (entity->isA(CC_TYPES::ST_PRIMGROUP)) {

@@ -1001,7 +1001,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 			}
 			else if (cloudDesc.greyIndex >= 0)
 			{
-				col.r = col.r = col.b = static_cast<ColorCompType>(parts[cloudDesc.greyIndex].toInt());
+				col.r = col.g = col.b = static_cast<ColorCompType>(parts[cloudDesc.greyIndex].toInt());
 				cloudDesc.cloud->addRGBColor(col);
 			}
 

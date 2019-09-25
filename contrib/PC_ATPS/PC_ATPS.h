@@ -89,9 +89,17 @@ public:
 
 	ATPS_Plane(int kappa_, double delta_, double tau_, double gamma_, double epsilon_, double theta_);
 
-	//ATPS_Plane(const char* ini_path = NULL);
+	ATPS_Plane(const double res);
 
 	~ATPS_Plane();
+
+
+	int get_kappa();
+	double get_delta();
+	double get_tau();
+	double get_gamma();
+	double get_epsilon();
+	double get_theta();
 
 
 	void set_parameters(
@@ -108,7 +116,9 @@ public:
 	void set_epsilon(const double epsilon_);
 	void set_theta(const double theta_);
 
-	void set_points(const std::string pc_path, std::vector<SVPoint3d>& points);
+
+	bool set_points(const std::string pc_path, std::vector<SVPoint3d>& points, double& res);
+
 
 	bool ATPS_PlaneSegmentation(
 		const std::vector<SVPoint3d> points,
@@ -134,13 +144,15 @@ private:
 
 	/*
 	*---description of parameters---*
-	kappa_t: the minimum point number for a valid plane. (20)
+	kappa_t: the minimum point number for a valid plane. (1.0/res)
 	delta_t: the threshold of curvature for multi-scale supervoxel segmentation. (0.05)
-	tau_t: the threshold of distance tolerance value for point-to-plane and plane-to-plane. (0.1)
-	gamma_t: the threshold of neighborhood for point-to-plane and plane-to-plane. (0.2)
-	epsilon_t: the threshold of NFA tolerance value for a-contrario rigorous planar supervoxel generation. (-3.0)
-	theta_t: the threshold of normal vector angle for hybrid region growing. (0.2618)
+	tau_t: the threshold of distance tolerance value for point-to-plane and plane-to-plane. (0.12)
+	gamma_t: the threshold of neighborhood for point-to-plane and plane-to-plane. (res*7.0)
+	epsilon_t: the threshold of NFA tolerance value for a-contrario rigorous planar supervoxel generation. (0.0)
+	theta_t: the threshold of normal vector angle for hybrid region growing. (10.0)
 	*/
+
+	std::string input_path;
 };
 
 ATPS_NAMESPACE_END

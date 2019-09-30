@@ -123,7 +123,8 @@ public:
 	bool ATPS_PlaneSegmentation(
 		const std::vector<SVPoint3d> points,
 		std::vector<std::vector<SVPoint3d>>& planar_points,
-		std::vector<SVPoint3d>& nonplanar_points);
+		std::vector<SVPoint3d>& nonplanar_points, 
+		std::vector<std::vector<double>>& model_coefficients);
 
 
 private:
@@ -146,7 +147,7 @@ private:
 	*---description of parameters---*
 	kappa_t: the minimum point number for a valid plane. (1.0/res)
 	delta_t: the threshold of curvature for multi-scale supervoxel segmentation. (0.05)
-	tau_t: the threshold of distance tolerance value for point-to-plane and plane-to-plane. (0.12)
+	tau_t: the threshold of distance tolerance value for point-to-plane and plane-to-plane. (0.1)
 	gamma_t: the threshold of neighborhood for point-to-plane and plane-to-plane. (res*7.0)
 	epsilon_t: the threshold of NFA tolerance value for a-contrario rigorous planar supervoxel generation. (0.0)
 	theta_t: the threshold of normal vector angle for hybrid region growing. (10.0)

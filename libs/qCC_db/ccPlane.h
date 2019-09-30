@@ -96,9 +96,9 @@ public:
 		\param[out] rms plane fitting rms (optional)
 		\return plane primitive (if successful)
 	**/
-	static ccPlane* Fit(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0, std::vector<CCVector3> * profile = 0);
+	static ccPlane* Fit(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0, std::vector<CCVector3> * profile = 0, const PointCoordinateType* planeEquation = nullptr);
 
-	static ccPlane* Fit(const std::vector<CCVector3> profiles);
+	static ccPlane* Fit(const std::vector<CCVector3> profiles, const PointCoordinateType* planeEquation = nullptr);
 
 	//! Returns the equation of the plane
 	/** Equation:

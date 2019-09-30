@@ -160,7 +160,7 @@ CCVector3 ccPlane::getProfileCenter()
 	return center;
 }
 
-ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*/, std::vector<CCVector3> * profile /*= 0*/)
+ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*/, std::vector<CCVector3> * profile /*= 0*/, const PointCoordinateType* planeEquation /*= 0*/)
 {
 	//number of points
 	unsigned count = cloud->size();
@@ -173,11 +173,23 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	CCLib::Neighbourhood Yk(cloud);
 
 	//plane equation
-	const PointCoordinateType* theLSPlane = Yk.getLSPlane();
+	PointCoordinateType* theLSPlane = const_cast<PointCoordinateType*>(Yk.getLSPlane());
 	if (!theLSPlane)
 	{
 		ccLog::Warning("[ccPlane::Fit] Not enough points to fit a plane!");
 		return 0;
+	}
+	if (planeEquation) {
+		if (CCVector3(theLSPlane).dot(CCVector3(planeEquation)) < 0) {
+			theLSPlane[0] = -theLSPlane[0];
+			theLSPlane[1] = -theLSPlane[1];
+			theLSPlane[2] = -theLSPlane[2];
+			theLSPlane[3] = -theLSPlane[3];
+			const CCVector3* X = Yk.getLSPlaneX();
+			const CCVector3* Y = Yk.getLSPlaneY();
+			const CCVector3* N = Yk.getLSPlaneNormal();
+			Yk.setLSPlane(theLSPlane, -(*X), -(*Y), -(*N));
+		}
 	}
 
 	//get the centroid
@@ -247,7 +259,7 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	return plane;
 }
 
-ccPlane * ccPlane::Fit(const std::vector<CCVector3> profiles)
+ccPlane * ccPlane::Fit(const std::vector<CCVector3> profiles, const PointCoordinateType* planeEquation /*= 0*/)
 {
 	if (profiles.size() < 3) {
 		return nullptr;
@@ -256,8 +268,7 @@ ccPlane * ccPlane::Fit(const std::vector<CCVector3> profiles)
 	for (auto & pt : profiles) {
 		cloud->addPoint(pt);
 	}
-	double rms;
-	ccPlane* plane = ccPlane::Fit(cloud, &rms);
+	ccPlane* plane = ccPlane::Fit(cloud, nullptr, nullptr, planeEquation);
 	plane->setProfile(profiles);
 
 	return plane;

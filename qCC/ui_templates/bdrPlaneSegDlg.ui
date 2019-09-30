@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>317</width>
-    <height>512</height>
+    <width>322</width>
+    <height>613</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,12 +15,58 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="controlGroupBox">
+     <property name="title">
+      <string>Control</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Number of Point Clouds in the task</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="pcNumberLineEdit">
+        <property name="text">
+         <string>0</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="autoParaCheckBox">
+        <property name="text">
+         <string>Set Parameter Automatically</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QToolButton" name="autoParaToolButton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>23</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Get Deduced Params</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="generalGroupBox">
      <property name="autoFillBackground">
       <bool>false</bool>
      </property>
      <property name="title">
-      <string/>
+      <string>General Parameters</string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -171,7 +217,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_3">
+    <widget class="QGroupBox" name="methodGroupBox">
      <property name="title">
       <string>Method</string>
      </property>
@@ -247,7 +293,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Probability that no better candidate was overlooked during sampling (the lower the better!)</string>
+            <string>the threshold of NFA tolerance value for a-contrario rigorous planar supervoxel generation (the lower the better!)</string>
            </property>
            <property name="decimals">
             <number>6</number>
@@ -262,7 +308,7 @@
             <double>1.000000000000000</double>
            </property>
            <property name="value">
-            <double>-3.000000000000000</double>
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -373,7 +419,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Probability that no better candidate was overlooked during sampling (the lower the better!)</string>
+            <string>the threshold of normal vector angle for hybrid region growing (degree)</string>
+           </property>
+           <property name="suffix">
+            <string>°</string>
            </property>
            <property name="decimals">
             <number>6</number>
@@ -385,7 +434,7 @@
             <double>0.010000000000000</double>
            </property>
            <property name="value">
-            <double>0.261800000000000</double>
+            <double>10.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -788,10 +837,11 @@
     </widget>
    </item>
   </layout>
-  <zorder>groupBox_3</zorder>
+  <zorder>methodGroupBox</zorder>
   <zorder>buttonBox</zorder>
   <zorder>PlaneRefineGroupBox</zorder>
-  <zorder>groupBox</zorder>
+  <zorder>generalGroupBox</zorder>
+  <zorder>controlGroupBox</zorder>
  </widget>
  <resources/>
  <connections>
@@ -920,6 +970,38 @@
     <hint type="destinationlabel">
      <x>158</x>
      <y>434</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoParaCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>generalGroupBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>98</x>
+     <y>66</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>160</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoParaCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>methodGroupBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>98</x>
+     <y>66</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>160</x>
+     <y>348</y>
     </hint>
    </hints>
   </connection>

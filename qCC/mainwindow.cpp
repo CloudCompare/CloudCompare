@@ -12308,23 +12308,28 @@ void MainWindow::doActionBDPlaneSegmentation()
 		return;
 	}
 
-	// check have not normals
-	ccHObject::Container normal_container;
-	for (auto & cloudObj : _container) {
-		ccPointCloud* entity_cloud = ccHObjectCaster::ToPointCloud(cloudObj);
-		if (!entity_cloud->hasNormals()) {
-			normal_container.push_back(cloudObj);
-		}
-	}
-	if (!normal_container.empty()) {
-		if (!ccEntityAction::computeNormals(normal_container, this))
-			return;
-	}
 
 	if (!m_pbdrPSDlg) m_pbdrPSDlg = new bdrPlaneSegDlg(this);
+	m_pbdrPSDlg->setPointClouds(_container);
 	if (!m_pbdrPSDlg->exec()) {
 		return;
 	}
+
+	if (!m_pbdrPSDlg->PlaneSegATPSRadioButton->isChecked()) {
+		// check have not normals
+		ccHObject::Container normal_container;
+		for (auto & cloudObj : _container) {
+			ccPointCloud* entity_cloud = ccHObjectCaster::ToPointCloud(cloudObj);
+			if (!entity_cloud->hasNormals()) {
+				normal_container.push_back(cloudObj);
+			}
+		}
+		if (!normal_container.empty()) {
+			if (!ccEntityAction::computeNormals(normal_container, this))
+				return;
+		}
+	}
+
 	double merge_threshold(-1), split_threshold(-1);
 	if (m_pbdrPSDlg->MergeCheckBox->isChecked()) {
 		merge_threshold = m_pbdrPSDlg->MergeThresholdDoubleSpinBox->value();		
@@ -12384,18 +12389,21 @@ void MainWindow::doActionBDPlaneSegmentation()
 			double nfa_epsilon = m_pbdrPSDlg->APTSNFASpinBox->value();
 			double normal_theta = m_pbdrPSDlg->APTSNormalSpinBox->value();
 
-			seged = PlaneSegmentationATPS(cloudObj,
-				support_pts, 
-				curvature_delta, 
-				distance_eps, 
-				cluster_eps,
-				nfa_epsilon,
-				normal_theta, 
-				todo_point);
+			if (m_pbdrPSDlg->autoParaCheckBox->isChecked()) {
+				seged = PlaneSegmentationATPS(cloudObj, todo_point);
+			}
+			else {
+				seged = PlaneSegmentationATPS(cloudObj, todo_point,
+					&support_pts,
+					&curvature_delta,
+					&distance_eps,
+					&cluster_eps,
+					&nfa_epsilon,
+					&normal_theta);
+			}
 		}
 		if (todo_point->size() == 0) {
-			delete todo_point;
-			todo_point = false;
+			removeFromDB(todo_point);
 		}
 
 		if (seged) {

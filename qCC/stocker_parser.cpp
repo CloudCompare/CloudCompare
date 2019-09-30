@@ -123,7 +123,7 @@ auto GetPointsFromCloud3f(ccHObject* entity, bool global)->std::vector<T>
 
 		for (unsigned i = 0; i < cloud->size(); i++) {
 			const CCVector3* pt = cloud->getPoint(i);
-			CCVector3 Pglobal = cloud->toGlobal3pc()<PointCoordinateType>(*pt);
+			CCVector3 Pglobal = cloud->toGlobal3pc<PointCoordinateType>(*pt);
 			points.push_back({ Pglobal.x, Pglobal.y, Pglobal.z });
 		}
 	}
@@ -167,6 +167,21 @@ bool GetPointsFromCloud(ccHObject* entity, stocker::Contour3d &global, stocker::
 		}
 	}
 	return true;
+}
+
+double GetPointsAverageSpacing(ccHObject * pc)
+{
+	BDBaseHObject* bd_grp = GetRootBDBase(pc);
+	StBuilding* bd = GetParentBuilding(pc);
+	if (bd_grp && bd) {
+		stocker::BuildUnit bd_unit = bd_grp->GetBuildingUnit(bd->getName().toStdString());
+		if (bd_unit.GetName().Str() != "invalid" && bd_unit.average_spacing > 0) {
+			return bd_unit.average_spacing;
+		}
+	}
+	
+	stocker::Contour3f points_local = GetPointsFromCloud3f<Vec3f>(pc, false);
+	return points_local.size() >= 3 ? stocker::ComputeAverageSpacing3f(points_local, true) : 0.0f;
 }
 
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject* entity, stocker::Polyline3d polygon, double height)
@@ -516,13 +531,31 @@ void filterCameraByName(ccHObject * camera_group, QStringList name_list)
 	}
 }
 
-ccPlane* FitPlaneAndAddChild(ccPointCloud* cloud)
+ccPlane* FitPlaneAndAddChild(ccPointCloud* cloud, const vcg::Plane3d* plane_para /*= nullptr*/)
 {
-	//	ccHObject* cc_plane = nullptr;
-	double rms = 0; std::vector<CCVector3> c_hull;
-	ccPlane* pPlane = ccPlane::Fit(cloud, &rms, &c_hull);
+	ccPlane* pPlane = nullptr;
+	if (plane_para) {		
+		PointCoordinateType* planeEquation = new PointCoordinateType[4];
+		planeEquation[0] = plane_para->Direction().X();
+		planeEquation[1] = plane_para->Direction().Y();
+		planeEquation[2] = plane_para->Direction().Z();
+		planeEquation[3] = plane_para->Offset();
+		Contour3d points = GetPointsFromCloud3d(cloud, true);
+		PlaneUnit plane_unit = FormPlaneUnit("temp", *plane_para, points, true);
+		if (plane_unit.convex_hull_prj.size() >= 3) {
+			std::vector<CCVector3> cc_profile;
+			for (auto & pt : plane_unit.convex_hull_prj) {
+				cc_profile.push_back(CCVector3(vcgXYZ(pt)));
+			}
+			pPlane = ccPlane::Fit(cc_profile, planeEquation);
+		}
+	}
+	if (!pPlane) {
+		double rms = 0; std::vector<CCVector3> c_hull;
+		pPlane = ccPlane::Fit(cloud, &rms, &c_hull);
+	}
+	
 	if (pPlane) {
-		//		cc_plane = static_cast<ccHObject*>(pPlane);
 		if (cloud->hasColors()) {
 			pPlane->setColor(cloud->getPointColor(0));
 		}
@@ -606,14 +639,13 @@ ccPointCloud* AddPointsAsPointCloud(std::vector<T> points, QString name, ccColor
 }
 
 template <typename T = stocker::Vec3d>
-ccPointCloud* AddPointsAsPlane(std::vector<T> points, QString name, ccColor::Rgb col)
+ccPointCloud* AddPointsAsPlane(std::vector<T> points, QString name, ccColor::Rgb col, const vcg::Plane3d* plane_para /*= nullptr*/)
 {	
 	ccPointCloud* plane_cloud = AddPointsAsPointCloud(points, name, col);
 	if (!plane_cloud)return nullptr;
-
-
+		
 	//! add plane
-	ccPlane* plane = FitPlaneAndAddChild(plane_cloud);	
+	ccPlane* plane = FitPlaneAndAddChild(plane_cloud, plane_para);
 #ifdef DEBUG_TEST
 	CCVector3 n; float o; plane->getEquation(n, o);
 	std::cout << "cc plane: " << n.x << " " << n.y << " " << n.z << " " << o << std::endl;
@@ -688,14 +720,15 @@ StFootPrint* AddPolygonAsFootprint(stocker::Contour3d polygon, QString name, ccC
 }
 
 template <typename T = stocker::Vec3d>
-StPrimGroup* AddPlanesPointsAsNewGroup(QString name, std::vector<std::vector<T>> planes_points)
+StPrimGroup* AddPlanesPointsAsNewGroup(QString name, std::vector<std::vector<T>> planes_points, std::vector<vcg::Plane3d>* planes /*= nullptr*/)
 {
 	StPrimGroup* group = new StPrimGroup(name);
 
 	for (size_t i = 0; i < planes_points.size(); i++) {
 		ccPointCloud* plane_cloud = AddPointsAsPlane(planes_points[i],
 			BDDB_PLANESEG_PREFIX + QString::number(i),
-			ccColor::Generator::Random());
+			ccColor::Generator::Random(),
+			planes ? &((*planes)[i]) : nullptr);
 		if (plane_cloud) {
 			group->addChild(plane_cloud);
 		}
@@ -797,7 +830,7 @@ ccHObject* PlaneSegmentationRansac(ccHObject* entity,
 		}
 	}
 
-	StPrimGroup* group = AddPlanesPointsAsNewGroup(GetBaseName(entity->getName()) + BDDB_PRIMITIVE_SUFFIX, planes_points);
+	StPrimGroup* group = AddPlanesPointsAsNewGroup(GetBaseName(entity->getName()) + BDDB_PRIMITIVE_SUFFIX, planes_points, &planes);
 	group->setDisplay_recursive(entity->getDisplay());
 	ccHObject::Container group_clouds;
 	group->filterChildren(group_clouds, false, CC_TYPES::POINT_CLOUD, true);
@@ -826,24 +859,41 @@ ccHObject* PlaneSegmentationRansac(ccHObject* entity,
 	epsilon_t: the threshold of NFA tolerance value for a-contrario rigorous planar supervoxel generation. (-3.0)
 	theta_t: the threshold of normal vector angle for hybrid region growing. (0.2618)
 */
-ccHObject* PlaneSegmentationATPS(ccHObject* entity, 
-	int kappa_t, double delta_t, double tau_t, 
-	double gamma_t, double epsilon_t, double theta_t,
-	ccPointCloud* todo_cloud)
+ccHObject* PlaneSegmentationATPS(ccHObject* entity,
+	ccPointCloud* todo_cloud,
+	int* kappa_t, double* delta_t, double* tau_t, 
+	double* gamma_t, double* epsilon_t, double* theta_t)
 {
 	ccPointCloud* entity_cloud = ccHObjectCaster::ToPointCloud(entity);
 		 
 	ATPS::ATPS_Plane atps_plane;
+	if (kappa_t && delta_t && tau_t && gamma_t && epsilon_t && theta_t) {
+		atps_plane.set_parameters(*kappa_t, *delta_t, *tau_t, *gamma_t, *epsilon_t, *theta_t);
+	}
+	else {
+		double average_spacing = GetPointsAverageSpacing(entity_cloud);
+		atps_plane = ATPS::ATPS_Plane(average_spacing);
+	}
+
 	std::vector<ATPS::SVPoint3d> points = GetPointsFromCloud3d<ATPS::SVPoint3d>(entity_cloud);
 	std::vector<ATPS::SVPoint3d> unassigned_points;
 	std::vector<std::vector<ATPS::SVPoint3d>> planes_points;
-	atps_plane.set_parameters(kappa_t, delta_t, tau_t, gamma_t, epsilon_t, theta_t);
-	if (!atps_plane.ATPS_PlaneSegmentation(points, planes_points, unassigned_points)) {
+	std::vector<std::vector<double>> params;
+	if (!atps_plane.ATPS_PlaneSegmentation(points, planes_points, unassigned_points, params) || planes_points.size() != params.size()) {
 		return nullptr;
 	}
 	std::cout << entity_cloud->getName().toStdString() << ": plane segmentation done" << std::endl;
 
-	StPrimGroup* group = AddPlanesPointsAsNewGroup(GetBaseName(entity->getName()) + BDDB_PRIMITIVE_SUFFIX, planes_points);
+	std::vector<vcg::Plane3d> planes;
+	for (auto & pl : params) {
+		if (pl.size() != 4) {
+			std::cout << "plane param size not equals to 4" << std::endl;
+			return nullptr;
+		}
+		planes.push_back(vcg::Plane3d(-pl[3], { pl[0],pl[1],pl[2] }));
+	}
+
+	StPrimGroup* group = AddPlanesPointsAsNewGroup(GetBaseName(entity->getName()) + BDDB_PRIMITIVE_SUFFIX, planes_points, &planes);
 	group->setDisplay_recursive(entity->getDisplay());
 	ccHObject::Container group_clouds;
 	group->filterChildren(group_clouds, false, CC_TYPES::POINT_CLOUD, true);

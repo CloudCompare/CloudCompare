@@ -46,7 +46,11 @@ template <typename T = stocker::Vec3d>
 auto GetPointsFromCloud3d(ccHObject* entity, bool global = false)->std::vector<T>;
 template <typename T = vcg::Point3f>
 auto GetPointsFromCloud3f(ccHObject* entity, bool global = false)->std::vector<T>;
+stocker::Contour3f GetPointsFromCloud3f(ccHObject* entity, bool global = false);
 bool GetPointsFromCloud(ccHObject * entity, stocker::Contour3d & global, stocker::Contour3f & local);
+
+double GetPointsAverageSpacing(ccHObject* pc);
+
 stocker::Contour3d GetPointsFromCloudInsidePolygonXY(ccHObject * entity, stocker::Polyline3d polygon, double height);
 std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonsXY(ccHObject::Container entities, stocker::Polyline3d polygon, double height, bool skip_empty = true);
 std::vector<stocker::Contour3d> GetPointsFromCloudInsidePolygonsXY(ccHObject* entity, stocker::Polyline3d polygon, double height, bool skip_empty = true);
@@ -61,22 +65,22 @@ ccPlane * GetPlaneFromCloud(ccHObject * entity);
 ccPlane * GetPlaneFromPlaneOrCloud(ccHObject * entity);
 vcg::Plane3d GetVcgPlane(ccHObject * planeObj);
 
-ccPlane* FitPlaneAndAddChild(ccPointCloud* cloud);
+ccPlane* FitPlaneAndAddChild(ccPointCloud* cloud, const vcg::Plane3d* plane_para = nullptr);
 
 ccPointCloud* AddSegmentsAsChildVertices(ccHObject* entity, stocker::Polyline3d lines, QString name, ccColor::Rgb col);
 
 void AddSegmentsToVertices(ccPointCloud * cloud, stocker::Polyline3d lines, QString Prefix, ccColor::Rgb col);
 
 template <typename T = stocker::Vec3d>
-ccPointCloud * AddPointsAsPlane(std::vector<T> points, QString name, ccColor::Rgb col);
+ccPointCloud * AddPointsAsPlane(std::vector<T> points, QString name, ccColor::Rgb col, const vcg::Plane3d* plane_para = nullptr);
 
 ccPointCloud* AddSegmentsAsPlane(stocker::Polyline3d lines, QString lines_prefix, ccColor::Rgb col, ccHObject* _exist_cloud = nullptr);
 
 template <typename T = stocker::Vec3d>
-StPrimGroup * AddPlanesPointsAsNewGroup(QString name, std::vector<std::vector<T>> planes_points);
+StPrimGroup * AddPlanesPointsAsNewGroup(QString name, std::vector<std::vector<T>> planes_points, std::vector<vcg::Plane3d>* planes = nullptr);
 
 ccHObject* PlaneSegmentationRansac(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double normal_threshold, double ransac_probability, double merge_threshold = -1, double split_threshold = -1, ccPointCloud* todo_cloud = nullptr);
-ccHObject * PlaneSegmentationATPS(ccHObject * entity, int kappa_t, double delta_t, double tau_t, double gamma_t, double epsilon_t, double theta_t, ccPointCloud * todo_cloud);
+ccHObject * PlaneSegmentationATPS(ccHObject * entity, ccPointCloud * todo_cloud, int* kappa_t = nullptr, double* delta_t = nullptr, double* tau_t = nullptr, double* gamma_t = nullptr, double* epsilon_t = nullptr, double* theta_t = nullptr);
 void RetrieveUnassignedPoints(ccHObject * original_cloud, ccHObject * prim_group, ccPointCloud * todo_point);
 void RetrieveAssignedPoints(ccPointCloud * todo_cloud, ccPointCloud * plane_cloud, double distance_threshold);
 ccHObject* PlaneSegmentationRgGrow(ccHObject* entity, int min_pts, double distance_epsilon, double seed_raius, double growing_radius, double merge_threshold = -1, double split_threshold = -1);

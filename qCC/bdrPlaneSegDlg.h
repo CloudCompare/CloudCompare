@@ -30,15 +30,15 @@ public:
 
 	//! Default constructor
 	explicit bdrPlaneSegDlg(QWidget* parent = 0);
+	void setPointClouds(ccHObject::Container point_clouds);
 
 protected slots:
-	
+	void DeducePara();
+	void exitSafe();
+	void Execute();
 
 protected:
-	//! Saves (temporarily) the dialog parameters on acceptation
-	
-
-	MainWindow* m_win;
+	ccHObject::Container m_point_clouds;
 };
 
 #endif

@@ -4,9 +4,9 @@
 
 ## Prerequisites
 
-1.  Clone the main repository and its submodules from the main git(hub) server: <https://github.com/cloudcompare/trunk>
+1.  Clone the main repository and its submodules from the main git(hub) server: <https://github.com/cloudcompare/CloudCompare>
 
-    `git clone --recursive https://github.com/cloudcompare/trunk.git`
+    `git clone --recursive https://github.com/cloudcompare/CloudCompare.git`
 
 2.  Install [CMake](http://www.cmake.org) (3.0 or newer)
 3.  Install Qt (http://www.qt.io/ - for *Linux/Mac OS X*: qt-sdk)
@@ -14,13 +14,13 @@
 
 4. Make sure you have a C++11 compliant compiler (gcc 4.7+ / clang / Visual 2013 and newer)
 
-*To compile the project with older versions of Qt (from 4.8 to 5.4) or with a non C++11 compliant compiler, you'll have to stick with the https://github.com/cloudcompare/trunk/releases/tag/v2.6.3.1 version*
+*To compile the project with older versions of Qt (from 4.8 to 5.4) or with a non C++11 compliant compiler, you'll have to stick with the https://github.com/cloudcompare/CloudCompare/releases/tag/v2.6.3.1 version*
 
 ## Generating the project
 
 1. Launch CMake GUI (`cmake-qt-gui` on Linux, the CMake application on Mac OS X)
   - *(for more convenience, you should check the "Grouped" check-box)*
-  - set the `Where is the source code` field to your local repository (for instance `C:\CloudCompare\trunk`)
+  - set the `Where is the source code` field to your local repository (for instance `C:\CloudCompare\CloudCompare`)
   - set the `Where to build the binaries` field to ... almost anywhere you want **apart from the same folder as above or the *Program Files* folder (on Windows)**. (for instance: `C:\CloudCompare\build`)
   - click the `Configure` button
   - select the generator for the project  

@@ -4130,14 +4130,24 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 				//case LockedAxisMode:
 				{
 					static CCVector3d s_lastMouseOrientation;
-					if (!m_mouseMoved)
-					{
-						//on the first time, we must compute the previous orientation (the camera hasn't moved yet)
-						s_lastMouseOrientation = convertMousePositionToOrientation(m_lastMousePos.x(), m_lastMousePos.y());
-					}
-
 					CCVector3d currentMouseOrientation = convertMousePositionToOrientation(x, y);
-					rotMat = ccGLMatrixd::FromToRotation(s_lastMouseOrientation, currentMouseOrientation);
+
+					if (QApplication::keyboardModifiers() & Qt::ShiftModifier)
+					{
+						//rotate around the current viewport (roll camera)
+						double angle_rad = 2.0 * M_PI * dx/width();
+						rotMat.initFromParameters(angle_rad, CCVector3d(0, 0, 1), CCVector3d(0, 0, 0));
+					}
+					else
+					{
+						if (!m_mouseMoved)
+						{
+							//on the first time, we must compute the previous orientation (the camera hasn't moved yet)
+							s_lastMouseOrientation = convertMousePositionToOrientation(m_lastMousePos.x(), m_lastMousePos.y());
+						}
+						// unconstrained rotation following mouse position
+						rotMat = ccGLMatrixd::FromToRotation(s_lastMouseOrientation, currentMouseOrientation);
+					}
 
 					//if (rotationMode == LockedAxisMode)
 					//{

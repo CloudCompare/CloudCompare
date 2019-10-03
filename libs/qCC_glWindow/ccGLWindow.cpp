@@ -677,7 +677,7 @@ void ccGLWindow::handleLoggedMessage(const QOpenGLDebugMessage& message)
 	default:
 		sevStr = "notification";
 		break;
-	};
+	}
 
 	//Decode source
 	QString sourceStr;

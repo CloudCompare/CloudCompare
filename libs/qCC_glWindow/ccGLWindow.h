@@ -733,14 +733,14 @@ signals:
 	**/
 	void rotation(const ccGLMatrixd& rotMat);
 
-	//! Signal emitted when the left mouse button is cliked on the window
+	//! Signal emitted when the left mouse button is clicked on the window
 	/** See INTERACT_SIG_LB_CLICKED.
 		Arguments correspond to the clicked point coordinates (x,y) in
 		pixels relative to the window corner!
 	**/
 	void leftButtonClicked(int x, int y);
 
-	//! Signal emitted when the right mouse button is cliked on the window
+	//! Signal emitted when the right mouse button is clicked on the window
 	/** See INTERACT_SIG_RB_CLICKED.
 		Arguments correspond to the clicked point coordinates (x,y) in
 		pixels relative to the window corner!

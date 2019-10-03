@@ -104,7 +104,8 @@ public:
 		INTERACT_SIG_LB_CLICKED  = 256,      //left button clicked
 		INTERACT_SIG_MOUSE_MOVED = 512,      //mouse moved (only if a button is clicked)
 		INTERACT_SIG_BUTTON_RELEASED = 1024, //mouse button released
-		INTERACT_SEND_ALL_SIGNALS = INTERACT_SIG_RB_CLICKED | INTERACT_SIG_LB_CLICKED | INTERACT_SIG_MOUSE_MOVED | INTERACT_SIG_BUTTON_RELEASED,
+		INTERACT_SIG_MB_CLICKED  = 2048,     //middle button clicked
+		INTERACT_SEND_ALL_SIGNALS = INTERACT_SIG_RB_CLICKED | INTERACT_SIG_LB_CLICKED | INTERACT_SIG_MB_CLICKED| INTERACT_SIG_MOUSE_MOVED | INTERACT_SIG_BUTTON_RELEASED,
 	};
 	Q_DECLARE_FLAGS(INTERACTION_FLAGS, INTERACTION_FLAG)
 
@@ -773,6 +774,13 @@ signals:
 
 	//! Signal emitted when the exclusive fullscreen is toggled
 	void exclusiveFullScreenToggled(bool exclusive);
+
+	//! Signal emitted when the middle mouse button is clicked on the window
+	/** See INTERACT_SIG_MB_CLICKED.
+		Arguments correspond to the clicked point coordinates (x,y) in
+		pixels relative to the window corner!
+	**/
+	void middleButtonClicked(int x, int y);
 
 protected: //rendering
 

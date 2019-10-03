@@ -10,6 +10,7 @@ v2.11 (Anoia) - (in development)
     - Tools > Registration > Move bounding-box min corner to origin
     - Tools > Registration > Move bounding-box max corner to origin
   - Add smooth zoom when middle mouse button is pressed
+  - Roll view around view-vector when pressing SHIFT and left mouse button
 
 - Improvements
   - Clipping box tool:

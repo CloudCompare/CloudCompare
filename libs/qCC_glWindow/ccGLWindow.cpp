@@ -3846,6 +3846,14 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 			emit leftButtonClicked(event->x(), event->y());
 		}
 	}
+	if (event->buttons() & Qt::MiddleButton)
+	{
+		//middle click = zooming
+		if (m_interactionFlags & INTERACT_SIG_MB_CLICKED)
+		{
+			emit middleButtonClicked(event->x(), event->y());
+		}
+	}
 	else
 	{
 		event->ignore();
@@ -4248,6 +4256,14 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			}
 		}
 	}
+	else if ((event->buttons() & Qt::MiddleButton)) // zoom
+	{
+		//middle button = zooming
+		float pseudo_wheelDelta_deg = static_cast<float>(-dy);
+		onWheelEvent(pseudo_wheelDelta_deg);
+
+		emit mouseWheelRotated(pseudo_wheelDelta_deg);
+	}
 
 	m_mouseMoved = true;
 	m_lastMousePos = event->pos();
@@ -4448,6 +4464,14 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 		}
 
 		m_activeItems.clear();
+	}
+	else if (event->button() == Qt::MiddleButton)
+	{
+		if (mouseHasMoved)
+		{
+			event->accept();
+			toBeRefreshed();
+		}
 	}
 
 	refresh(false);

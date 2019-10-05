@@ -227,6 +227,7 @@
      <addaction name="actionSamplePointsOnMesh"/>
      <addaction name="actionSmoothMeshLaplacian"/>
      <addaction name="actionSubdivideMesh"/>
+     <addaction name="actionFlipMeshTriangles"/>
      <addaction name="separator"/>
      <addaction name="actionMeasureMeshSurface"/>
      <addaction name="actionMeasureMeshVolume"/>
@@ -303,6 +304,8 @@
      <addaction name="actionCreatePlane"/>
      <addaction name="actionFitPlaneProxy"/>
      <addaction name="actionEditPlane"/>
+     <addaction name="actionFlipPlane"/>
+     <addaction name="actionComparePlanes"/>
     </widget>
     <widget class="QMenu" name="menuGrid">
      <property name="title">
@@ -2992,6 +2995,30 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Move the bounding-box center to the origin</string>
+   </property>
+  </action>
+  <action name="actionFlipPlane">
+   <property name="text">
+    <string>Flip</string>
+   </property>
+   <property name="toolTip">
+    <string>Flip the selected plane</string>
+   </property>
+  </action>
+  <action name="actionComparePlanes">
+   <property name="text">
+    <string>Compare</string>
+   </property>
+   <property name="toolTip">
+    <string>Compare two planes (angle + distance)</string>
+   </property>
+  </action>
+  <action name="actionFlipMeshTriangles">
+   <property name="text">
+    <string>Flip triangles</string>
+   </property>
+   <property name="toolTip">
+    <string>Flip triangles (if vertices are ordered in the non-direct order)</string>
    </property>
   </action>
  </widget>

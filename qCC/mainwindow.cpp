@@ -534,6 +534,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSamplePointsOnMesh,			&QAction::triggered, this, &MainWindow::doActionSamplePointsOnMesh);
 	connect(m_UI->actionSmoothMeshLaplacian,		&QAction::triggered, this, &MainWindow::doActionSmoothMeshLaplacian);
 	connect(m_UI->actionSubdivideMesh,				&QAction::triggered, this, &MainWindow::doActionSubdivideMesh);
+	connect(m_UI->actionFlipMeshTriangles,			&QAction::triggered, this, &MainWindow::doActionFlipMeshTriangles);
 	connect(m_UI->actionMeasureMeshSurface,			&QAction::triggered, this, &MainWindow::doActionMeasureMeshSurface);
 	connect(m_UI->actionMeasureMeshVolume,			&QAction::triggered, this, &MainWindow::doActionMeasureMeshVolume);
 	connect(m_UI->actionFlagMeshVertices,			&QAction::triggered, this, &MainWindow::doActionFlagMeshVertices);
@@ -545,6 +546,8 @@ void MainWindow::connectActions()
 	//"Edit > Plane" menu
 	connect(m_UI->actionCreatePlane,				&QAction::triggered, this, &MainWindow::doActionCreatePlane);
 	connect(m_UI->actionEditPlane,					&QAction::triggered, this, &MainWindow::doActionEditPlane);
+	connect(m_UI->actionFlipPlane,					&QAction::triggered, this, &MainWindow::doActionFlipPlane);
+	connect(m_UI->actionComparePlanes,				&QAction::triggered, this, &MainWindow::doActionComparePlanes);
 	//"Edit > Sensor > Ground-Based lidar" menu
 	connect(m_UI->actionShowDepthBuffer,			&QAction::triggered, this, &MainWindow::doActionShowDepthBuffer);
 	connect(m_UI->actionExportDepthBuffer,			&QAction::triggered, this, &MainWindow::doActionExportDepthBuffer);
@@ -3081,6 +3084,7 @@ void MainWindow::doActionSubdivideMesh()
 
 	//ccProgressDialog pDlg(true, this);
 	//pDlg.setAutoClose(false);
+	bool warningIssued = false;
 
 	for ( ccHObject *entity : getSelectedEntities() )
 	{
@@ -3114,15 +3118,41 @@ void MainWindow::doActionSubdivideMesh()
 					ccConsole::Warning(QString("[Subdivide] Failed to subdivide mesh '%1' (not enough memory?)").arg(mesh->getName()));
 				}
 			}
-			else
+			else if (!warningIssued)
 			{
 				ccLog::Warning("[Subdivide] Works only on real meshes!");
+				warningIssued = true;
 			}
 		}
 	}
 
 	refreshAll();
 	updateUI();
+}
+
+void MainWindow::doActionFlipMeshTriangles()
+{
+	bool warningIssued = false;
+	for (ccHObject *entity : getSelectedEntities())
+	{
+		if (entity->isKindOf(CC_TYPES::MESH))
+		{
+			//single mesh?
+			if (entity->isA(CC_TYPES::MESH))
+			{
+				ccMesh* mesh = static_cast<ccMesh*>(entity);
+				mesh->flipTriangles();
+				mesh->prepareDisplayForRefresh();
+			}
+			else if (!warningIssued)
+			{
+				ccLog::Warning("[Flip triangles] Works only on real meshes!");
+				warningIssued = true;
+			}
+		}
+	}
+
+	refreshAll();
 }
 
 void MainWindow::doActionSmoothMeshLaplacian()
@@ -3422,8 +3452,8 @@ void MainWindow::doActionRegister()
 		return;
 	}
 
-	ccHObject *data = static_cast<ccHObject*>(m_selectedEntities[1]);
-	ccHObject *model = static_cast<ccHObject*>(m_selectedEntities[0]);
+	ccHObject* data = static_cast<ccHObject*>(m_selectedEntities[1]);
+	ccHObject* model = static_cast<ccHObject*>(m_selectedEntities[0]);
 
 	ccRegistrationDlg rDlg(data,model,this);
 	if (!rDlg.exec())
@@ -3482,18 +3512,18 @@ void MainWindow::doActionRegister()
 		//transformation matrix
 		{
 			summary << "Transformation matrix";
-			summary << transMat.toString(3,'\t'); //low precision, just for display
+			summary << transMat.toString(3, '\t'); //low precision, just for display
 			summary << "----------------";
 
 			ccLog::Print("[Register] Applied transformation matrix:");
-			ccLog::Print(transMat.toString(12,' ')); //full precision
+			ccLog::Print(transMat.toString(12, ' ')); //full precision
 			ccLog::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 		}
 
 		if (adjustScale)
 		{
 			QString scaleString = QString("Scale: %1 (already integrated in above matrix!)").arg(finalScale);
-			ccLog::Warning(QString("[Register] ")+scaleString);
+			ccLog::Warning(QString("[Register] ") + scaleString);
 			summary << scaleString;
 		}
 		else
@@ -3505,7 +3535,7 @@ void MainWindow::doActionRegister()
 		//overlap
 		summary << "----------------";
 		QString overlapString = QString("Theoretical overlap: %1%").arg(finalOverlap);
-		ccLog::Print(QString("[Register] ")+overlapString);
+		ccLog::Print(QString("[Register] ") + overlapString);
 		summary << overlapString;
 
 		summary << "----------------";
@@ -3603,7 +3633,7 @@ void MainWindow::doActionRegister()
 		}
 
 		//pop-up summary
-		QMessageBox::information(this,"Register info",summary.join("\n"));
+		QMessageBox::information(this, "Register info", summary.join("\n"));
 		forceConsoleDisplay();
 	}
 
@@ -3633,8 +3663,8 @@ void MainWindow::doAction4pcsRegister()
 		return;
 	}
 
-	ccGenericPointCloud *model = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0]);
-	ccGenericPointCloud *data = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[1]);
+	ccGenericPointCloud* model = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0]);
+	ccGenericPointCloud* data = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[1]);
 
 	ccAlignDlg aDlg(model, data);
 	if (!aDlg.exec())
@@ -10065,6 +10095,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionComputeGeometricFeature->setEnabled(atLeastOneCloud);
 	m_UI->actionRemoveDuplicatePoints->setEnabled(atLeastOneCloud);
 	m_UI->actionFitPlane->setEnabled(atLeastOneEntity);
+	m_UI->actionFitPlaneProxy->setEnabled(atLeastOneEntity);
 	m_UI->actionFitSphere->setEnabled(atLeastOneCloud);
 	m_UI->actionLevel->setEnabled(atLeastOneEntity);
 	m_UI->actionFitFacet->setEnabled(atLeastOneEntity);
@@ -10153,6 +10184,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	//actionCreatePlane->setEnabled(true);
 	m_UI->actionEditPlane->setEnabled(selInfo.planeCount == 1);
+	m_UI->actionFlipPlane->setEnabled(selInfo.planeCount != 0);
+	m_UI->actionComparePlanes->setEnabled(selInfo.planeCount == 2);
 
 	m_UI->actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
 
@@ -10600,4 +10633,75 @@ void MainWindow::doActionEditPlane()
 	ccPlaneEditDlg* peDlg = new ccPlaneEditDlg(m_pickingHub, this);
 	peDlg->initWithPlane(plane);
 	peDlg->show();
+}
+
+void MainWindow::doActionFlipPlane()
+{
+	if (!haveSelection())
+	{
+		assert(false);
+		return;
+	}
+
+	for (ccHObject* entity : m_selectedEntities)
+	{
+		ccPlane* plane = ccHObjectCaster::ToPlane(entity);
+		if (plane)
+		{
+			plane->flip();
+			plane->prepareDisplayForRefresh();
+		}
+	}
+
+	refreshAll();
+	updatePropertiesView();
+}
+
+void MainWindow::doActionComparePlanes()
+{
+	if (m_selectedEntities.size() != 2)
+	{
+		ccConsole::Error("Select 2 planes!");
+		return;
+	}
+
+	if (!m_selectedEntities[0]->isKindOf(CC_TYPES::PLANE) ||
+		!m_selectedEntities[1]->isKindOf(CC_TYPES::PLANE))
+	{
+		ccConsole::Error("Select 2 planes!");
+		return;
+	}
+
+	ccPlane* p1 = ccHObjectCaster::ToPlane(m_selectedEntities[0]);
+	ccPlane* p2 = ccHObjectCaster::ToPlane(m_selectedEntities[1]);
+
+	QStringList info;
+	info << QString("Plane 1: %1").arg(p1->getName());
+	ccLog::Print(QString("[Compare] ") + info.last());
+
+	info << QString("Plane 2: %1").arg(p2->getName());
+	ccLog::Print(QString("[Compare] ") + info.last());
+
+	CCVector3 N1, N2;
+	PointCoordinateType d1, d2;
+	p1->getEquation(N1, d1);
+	p2->getEquation(N2, d2);
+
+	double angle_rad = N1.angle_rad(N2);
+	info << QString("Angle P1/P2: %1 deg.").arg(angle_rad * CC_RAD_TO_DEG);
+	ccLog::Print(QString("[Compare] ") + info.last());
+
+	PointCoordinateType planeEq1[4] = { N1.x, N1.y, N1.z, d1 };
+	PointCoordinateType planeEq2[4] = { N2.x, N2.y, N2.z, d2 };
+	ScalarType distCenter1ToPlane2 = CCLib::DistanceComputationTools::computePoint2PlaneDistance(&p1->getCenter(), planeEq2);
+	info << QString("Distance Center(P1)/P2: %1").arg(distCenter1ToPlane2);
+	ccLog::Print(QString("[Compare] ") + info.last());
+
+	ScalarType distCenter2ToPlane1 = CCLib::DistanceComputationTools::computePoint2PlaneDistance(&p2->getCenter(), planeEq1);
+	info << QString("Distance Center(P2)/P1: %1").arg(distCenter2ToPlane1);
+	ccLog::Print(QString("[Compare] ") + info.last());
+
+	//pop-up summary
+	QMessageBox::information(this, "Plane comparison", info.join("\n"));
+	forceConsoleDisplay();
 }

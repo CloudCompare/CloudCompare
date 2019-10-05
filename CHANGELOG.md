@@ -11,6 +11,9 @@ v2.11 (Anoia) - (in development)
     - Tools > Registration > Move bounding-box max corner to origin
   - Add smooth zoom when middle mouse button is pressed
   - Roll view around view-vector when pressing SHIFT and left mouse button
+  - Edit > Plane > Flip: to flip the selected planes
+  - Edit > Plane > Compare: to compare the two selected planes (angle and relative distances)
+  - Edit > Mesh > Flip triangles: to flip the triangles (vertices) in case they are defined in the wrong order
 
 - Improvements
   - Clipping box tool:

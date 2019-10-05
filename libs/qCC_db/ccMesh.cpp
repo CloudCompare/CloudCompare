@@ -2574,12 +2574,19 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 void ccMesh::shiftTriangleIndexes(unsigned shift)
 {
-	for (size_t i = 0; i < m_triVertIndexes->size(); ++i)
+	for (CCLib::VerticesIndexes& ti : *m_triVertIndexes)
 	{
-		CCLib::VerticesIndexes& ti = m_triVertIndexes->at(i);
 		ti.i1 += shift;
 		ti.i2 += shift;
 		ti.i3 += shift;
+	}
+}
+
+void ccMesh::flipTriangles()
+{
+	for (CCLib::VerticesIndexes& ti : *m_triVertIndexes)
+	{
+		std::swap(ti.i2, ti.i3);
 	}
 }
 

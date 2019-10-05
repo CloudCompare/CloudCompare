@@ -63,9 +63,9 @@ public:
 		\return a copy of this entity
 	**/
 	ccMesh* cloneMesh(	ccGenericPointCloud* vertices = nullptr,
-								ccMaterialSet* clonedMaterials = nullptr,
-								NormsIndexesTableType* clonedNormsTable = nullptr,
-								TextureCoordsContainer* cloneTexCoords = nullptr);
+						ccMaterialSet* clonedMaterials = nullptr,
+						NormsIndexesTableType* clonedNormsTable = nullptr,
+						TextureCoordsContainer* cloneTexCoords = nullptr);
 
 	//! Creates a Delaunay 2.5D mesh from a point cloud
 	/** See CCLib::PointProjectionTools::computeTriangulation.
@@ -130,6 +130,11 @@ public:
 	/** \param shift index shift (positive)
 	**/
 	void shiftTriangleIndexes(unsigned shift);
+
+	//! Flips the triangle
+	/** Swaps the second and third vertices indexes
+	**/
+	void flipTriangles();
 
 	//! Adds a triangle to the mesh
 	/** \warning Bounding-box validity is broken after a call to this method.

@@ -301,3 +301,12 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 
 	return material;
 }
+
+void ccPlane::flip()
+{
+	ccGLMatrix reverseMat;
+	reverseMat.initFromParameters(static_cast<PointCoordinateType>(M_PI), CCVector3(1, 0, 0), CCVector3(0, 0, 0));
+
+	m_transformation = m_transformation * reverseMat;
+	updateRepresentation();
+}

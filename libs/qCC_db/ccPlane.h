@@ -100,6 +100,9 @@ public:
 	**/
 	void getEquation(CCVector3& N, PointCoordinateType& constVal) const;
 
+	//! Flips the plane
+	void flip();
+
 protected:
 
 	//inherited from ccDrawable

@@ -221,11 +221,13 @@ public:
 	//! Cross product operator
 	inline Vector3Tpl operator * (const Vector3Tpl& v) const { return cross(v); }
 	//! Dot product operator
-	inline Type operator && (const Vector3Tpl &v) const { return dot(v); }
+	inline Type operator && (const Vector3Tpl& v) const { return dot(v); }
 	//! Direct coordinate access
 	inline Type& operator [] (unsigned i) { return u[i]; }
 	//! Direct coordinate access (const)
 	inline const Type& operator [] (unsigned i) const { return u[i]; }
+	//! Returns the angle to another vector (in radians - in [0, pi]
+	Type angle_rad(const Vector3Tpl& v) const { return vangle_rad(u, v.u); }
 
 	static inline void vdivide(const Type p[], Type s, Type r[]) { r[0] = p[0] / s; r[1] = p[1] / s; r[2] = p[2] / s; }
 	static inline void vdivide(Type p[], Type s) { p[0] /= s; p[1] /= s; p[2] /= s; }
@@ -247,7 +249,7 @@ public:
 	static inline Type vnorm(const Type p[]) { return std::sqrt(vnorm2(p)); }
 	static inline Type vdistance(const Type p[], const Type q[]) { return std::sqrt(vdistance2(p, q)); }
 
-	static inline void vorthogonal(const Type p[], Type q[])
+	static void vorthogonal(const Type p[], Type q[])
 	{
 		if (std::abs(p[0]) <= std::abs(p[1]) && std::abs(p[0]) <= std::abs(p[2]))
 		{
@@ -262,6 +264,18 @@ public:
 			q[0] = p[1]; q[1] = -p[0]; q[2] = 0;
 		}
 		vnormalize(q);
+	}
+
+	static Type vangle_rad(const Type p[], const Type q[])
+	{
+		Type productNorm = vnorm(p) * vnorm(q);
+		if (productNorm < std::numeric_limits<Type>::epsilon())
+		{
+			return std::numeric_limits<Type>::quiet_NaN();
+		}
+
+		Type cosAngle = vdot(p, q) / productNorm;
+		return acos(std::max(std::min(cosAngle, static_cast<Type>(1.0)), static_cast<Type>(-1.0)));
 	}
 
 };

@@ -106,21 +106,6 @@ static const QString ENTITY_INDEX_0("ei0");
 static const QString ENTITY_INDEX_1("ei1");
 static const QString ENTITY_INDEX_2("ei2");
 
-//return angle between two vectors (in degrees)
-//warning: vectors will be normalized by default
-static double GetAngle_deg(CCVector3 AB, CCVector3 AC)
-{
-	AB.normalize();
-	AC.normalize();
-	double dotprod = AB.dot(AC);
-	//clamp value (just in case)
-	if (dotprod <= -1.0)
-		dotprod = -1.0;
-	else if (dotprod > 1.0)
-		dotprod = 1.0;
-	return acos(dotprod) * CC_RAD_TO_DEG;
-}
-
 QString cc2DLabel::GetSFValueAsString(const LabelInfo1& info, int precision)
 {
 	if (info.hasSF)
@@ -771,9 +756,9 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 	info.edges.u[2] = P1P3.normd();  //edge 3-1
 
 	//angle
-	info.angles.u[0] = GetAngle_deg( P1P2,  P1P3); //angleAtP1
-	info.angles.u[1] = GetAngle_deg( P2P3, -P1P2); //angleAtP2
-	info.angles.u[2] = GetAngle_deg(-P1P3, -P2P3); //angleAtP3 (should be equal to 180-a1-a2!)
+	info.angles.u[0] = P1P2.angle_rad( P1P3) * CC_RAD_TO_DEG; //angleAtP1
+	info.angles.u[1] = P2P3.angle_rad(-P1P2) * CC_RAD_TO_DEG; //angleAtP2
+	info.angles.u[2] = P1P3.angle_rad(-P2P3) * CC_RAD_TO_DEG; //angleAtP3 (should be equal to 180-a1-a2!)
 }
 
 QStringList cc2DLabel::getLabelContent(int precision) const

@@ -19,13 +19,16 @@
 
 //Qt
 #include <QMdiSubWindow>
+#include <QMessageBox>
 
 //qCC_gl
 #include <ccGLWidget.h>
 
+//qCC_db
+#include <ccSphere.h>
+
 //Plugins
 #include <ccMainAppInterface.h>
-
 
 ccPickingHub::ccPickingHub(ccMainAppInterface* app, QObject* parent/*=0*/)
 	: QObject(parent)
@@ -110,11 +113,27 @@ void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int 
 		item.itemIndex = itemIndex;
 		item.P3D = P3D;
 		item.uvw = uvw;
+
+		if (entity && entity->isA(CC_TYPES::SPHERE))
+		{
+			//whether the center of sphere entities should be used when a point is picked on the surface
+			static QMessageBox::StandardButton s_pickSphereCenter = QMessageBox::Yes;
+
+			if (s_pickSphereCenter != QMessageBox::YesToAll && s_pickSphereCenter != QMessageBox::NoToAll)
+			{
+				s_pickSphereCenter = QMessageBox::question(m_activeGLWindow, tr("Sphere picking"), tr("From now on, do you want to pick sphere centers instead of a point on their surface?"), QMessageBox::YesToAll | QMessageBox::Yes | QMessageBox::No | QMessageBox::NoToAll, QMessageBox::YesToAll);
+			}
+			if (s_pickSphereCenter == QMessageBox::Yes || s_pickSphereCenter == QMessageBox::YesToAll)
+			{
+				//replace the input point by the sphere center
+				item.P3D = static_cast<ccSphere*>(entity)->getOwnBB().getCenter();
+				item.entityCenter = true;
+			}
+		}
 	}
 
 	//copy the list of listeners, in case the user call 'removeListener' in 'onItemPicked'
 	std::set< ccPickingListener* > listeners = m_listeners;
-
 	for (ccPickingListener* l : listeners)
 	{
 		if (l)

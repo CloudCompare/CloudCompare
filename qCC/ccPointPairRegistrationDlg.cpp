@@ -58,9 +58,6 @@ static const int DEL_BUTTON_COL_INDEX	= 4;
 //minimum number of pairs to let the user click on the align button
 static const unsigned MIN_PAIRS_COUNT = 3;
 
-//whether the center of sphere entities should be used when a point is picked on the surface
-static QMessageBox::StandardButton s_pickSphereCenter = QMessageBox::Yes;
-
 ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(ccPickingHub* pickingHub, ccMainAppInterface* app, QWidget* parent/*=0*/)
 	: ccOverlayDialog(parent)
 	, m_alignedPoints("aligned points")
@@ -244,7 +241,7 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 
 bool ccPointPairRegistrationDlg::start()
 {
-	assert(!m_alignedEntities.emtpy());
+	assert(!m_alignedEntities.empty());
 	return ccOverlayDialog::start();
 }
 
@@ -554,20 +551,6 @@ void ccPointPairRegistrationDlg::onItemPicked(const PickedItem& pi)
 		return;
 
 	CCVector3d pIn = CCVector3d::fromArray(pi.P3D.u);
-
-	if (pi.entity->isA(CC_TYPES::SPHERE))
-	{
-		if (s_pickSphereCenter != QMessageBox::YesToAll && s_pickSphereCenter != QMessageBox::NoToAll)
-		{
-			s_pickSphereCenter = QMessageBox::question(this, tr("Sphere picking"), tr("From now on, do you want to pick sphere centers instead of a point on their surface?"), QMessageBox::YesToAll | QMessageBox::Yes | QMessageBox::No | QMessageBox::NoToAll, QMessageBox::YesToAll);
-		}
-		if (s_pickSphereCenter == QMessageBox::Yes || s_pickSphereCenter == QMessageBox::YesToAll)
-		{
-			//replace the input point by the sphere center
-			CCVector3 C = static_cast<ccSphere*>(pi.entity)->getOwnBB().getCenter();
-			pIn = CCVector3d::fromArray(C.u);
-		}
-	}
 
 	if (m_alignedEntities.contains(pi.entity))
 	{

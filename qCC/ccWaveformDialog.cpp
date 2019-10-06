@@ -430,6 +430,7 @@ void ccWaveDialog::onItemPicked(const PickedItem& pi)
 {
 	if (pi.entity == m_cloud)
 	{
+		assert(!pi.entityCenter);
 		m_gui->pointIndexSpinBox->setValue(static_cast<int>(pi.itemIndex));
 	}
 }

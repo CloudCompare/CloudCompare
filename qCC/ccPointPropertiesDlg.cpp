@@ -263,7 +263,7 @@ void ccPointPropertiesDlg::processPickedPoint(const PickedItem& picked)
 	assert(m_label);
 	assert(m_associatedWin);
 
-	switch(m_pickingMode)
+	switch (m_pickingMode)
 	{
 	case POINT_INFO:
 		m_label->clear();
@@ -281,9 +281,13 @@ void ccPointPropertiesDlg::processPickedPoint(const PickedItem& picked)
 	}
 
 	if (picked.entity->isKindOf(CC_TYPES::POINT_CLOUD))
-		m_label->addPickedPoint(static_cast<ccGenericPointCloud*>(picked.entity), picked.itemIndex);
+	{
+		m_label->addPickedPoint(static_cast<ccGenericPointCloud*>(picked.entity), picked.itemIndex, picked.entityCenter);
+	}
 	else if (picked.entity->isKindOf(CC_TYPES::MESH))
-		m_label->addPickedPoint(static_cast<ccGenericMesh*>(picked.entity), picked.itemIndex, CCVector2d(picked.uvw.x, picked.uvw.y));
+	{
+		m_label->addPickedPoint(static_cast<ccGenericMesh*>(picked.entity), picked.itemIndex, CCVector2d(picked.uvw.x, picked.uvw.y), picked.entityCenter);
+	}
 	else
 	{
 		assert(false);

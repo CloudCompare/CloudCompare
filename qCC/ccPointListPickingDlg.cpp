@@ -578,11 +578,11 @@ void ccPointListPickingDlg::processPickedPoint(const PickedItem& picked)
 	cc2DLabel* newLabel = new cc2DLabel();
 	if (picked.entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		newLabel->addPickedPoint(static_cast<ccGenericPointCloud*>(picked.entity), picked.itemIndex);
+		newLabel->addPickedPoint(static_cast<ccGenericPointCloud*>(picked.entity), picked.itemIndex, picked.entityCenter);
 	}
 	else if (picked.entity->isKindOf(CC_TYPES::MESH))
 	{
-		newLabel->addPickedPoint(static_cast<ccGenericMesh*>(picked.entity), picked.itemIndex, CCVector2d(picked.uvw.x, picked.uvw.y));
+		newLabel->addPickedPoint(static_cast<ccGenericMesh*>(picked.entity), picked.itemIndex, CCVector2d(picked.uvw.x, picked.uvw.y), picked.entityCenter);
 	}
 	else
 	{

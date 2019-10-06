@@ -44,6 +44,7 @@ v2.11 (Anoia) - (in development)
     - labels picked on a mesh can be used to re-orient the camera (right-click on the label entry in the DB)
     - note: for now, labels associated to meshes are not preserved when cloning or merging the meshes
     - points are now exclusively picked inside the current fustrum (no more points behind the camera)
+	- the center of sphere (entities) can now be picked (a popup will let the user choose to select the sphere center or a point on the surface)
   - Graphical segmentation:
     - points are now exclusively segmented inside/outside the frustrum
   - Plugins:

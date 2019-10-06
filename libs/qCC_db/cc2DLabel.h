@@ -80,7 +80,7 @@ public:
 		3 points = "triangle/plane' label (vertices position, area, normal)
 		\return false if 'full'
 	**/
-	bool addPickedPoint(ccGenericPointCloud* cloud, unsigned pointIndex);
+	bool addPickedPoint(ccGenericPointCloud* cloud, unsigned pointIndex, bool entityCenter = false);
 
 	//! Adds a point to this label
 	/** Adding a point to a label will automatically make it 'mutate'.
@@ -89,7 +89,7 @@ public:
 		3 points = "triangle/plane' label (vertices position, area, normal)
 		\return false if 'full'
 	**/
-	bool addPickedPoint(ccGenericMesh* mesh, unsigned triangleIndex, const CCVector2d& uv);
+	bool addPickedPoint(ccGenericMesh* mesh, unsigned triangleIndex, const CCVector2d& uv, bool entityCenter = false);
 
 	//! Whether to collapse label or not
 	inline void setCollapsed(bool state) { m_showFullBody = !state; }
@@ -126,6 +126,8 @@ public:
 		CCVector3d pos2D;
 		//! Barycentric coordinates (for triangles)
 		CCVector2d uv;
+		//! Entity center mode (index will be invalid)
+		bool entityCenterPoint;
 
 		//! Returns the point position (3D)
 		CCVector3 getPointPosition() const;
@@ -135,6 +137,10 @@ public:
 		unsigned getUniqueID() const;
 		//! Returns the associated entity (cloud or mesh)
 		ccHObject* entity() const;
+		//! Returns the item 'title' (either its index or 'Center' if it's a center point)
+		QString itemTitle() const;
+		//! Returns the point prefix ('Point' or 'Point@Tri' or 'IDXX Center')
+		QString prefix(const char* pointTag) const;
 
 		//! Default constructor
 		PickedPoint()
@@ -143,24 +149,27 @@ public:
 			, index(0)
 			, pos2D(0, 0, 0)
 			, uv(0, 0)
+			, entityCenterPoint(false)
 		{}
 
 		//! Constructor from a point and its index
-		PickedPoint(ccGenericPointCloud* _cloud, unsigned pointIndex)
+		PickedPoint(ccGenericPointCloud* _cloud, unsigned pointIndex, bool centerPoint = false)
 			: _cloud(_cloud)
 			, _mesh(nullptr)
 			, index(pointIndex)
 			, pos2D(0, 0, 0)
 			, uv(0, 0)
+			, entityCenterPoint(centerPoint)
 		{}
 
 		//! Constructor from a triangle, its index and barycentric coordinates
-		PickedPoint(ccGenericMesh* _mesh, unsigned triIindex, const CCVector2d& _uv)
+		PickedPoint(ccGenericMesh* _mesh, unsigned triIindex, const CCVector2d& _uv, bool centerPoint = false)
 			: _cloud(nullptr)
 			, _mesh(_mesh)
 			, index(triIindex)
 			, pos2D(0, 0, 0)
 			, uv(_uv)
+			, entityCenterPoint(centerPoint)
 		{}
 	};
 

@@ -856,7 +856,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					{
 						ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
 						assert(genCloud->size() > pp.index);
-						correctedPickedPoints.push_back(cc2DLabel::PickedPoint(genCloud, pp.index));
+						correctedPickedPoints.push_back(cc2DLabel::PickedPoint(genCloud, pp.index, pp.entityCenterPoint));
 					}
 					else
 					{
@@ -879,7 +879,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					{
 						ccGenericMesh* genMesh = ccHObjectCaster::ToGenericMesh(mesh);
 						assert(genMesh->size() > pp.index);
-						correctedPickedPoints.push_back(cc2DLabel::PickedPoint(genMesh, pp.index, pp.uv));
+						correctedPickedPoints.push_back(cc2DLabel::PickedPoint(genMesh, pp.index, pp.uv, pp.entityCenterPoint));
 					}
 					else
 					{
@@ -905,9 +905,9 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				for (const cc2DLabel::PickedPoint& cpp : correctedPickedPoints)
 				{
 					if (cpp._cloud)
-						label->addPickedPoint(cpp._cloud, cpp.index);
+						label->addPickedPoint(cpp._cloud, cpp.index, cpp.entityCenterPoint);
 					else if (cpp._mesh)
-						label->addPickedPoint(cpp._mesh, cpp.index, cpp.uv);
+						label->addPickedPoint(cpp._mesh, cpp.index, cpp.uv, cpp.entityCenterPoint);
 				}
 				label->setVisible(visible);
 				label->setName(originalName);

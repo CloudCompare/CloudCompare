@@ -38,6 +38,7 @@ public:
 		PickedItem()
 			: entity(nullptr)
 			, itemIndex(0)
+			, entityCenter(false)
 		{}
 
 		QPoint clickPoint; //position of the user click
@@ -45,6 +46,7 @@ public:
 		unsigned itemIndex; //e.g. point or triangle index
 		CCVector3 P3D; //picked point in 3D (if any)
 		CCVector3d uvw; //picked point barycentric coordinates (if picked on a triangle)
+		bool entityCenter; //the point doesn't correspond to a real 'item' but to the entity center
 	};
 
 	//! Method called whenever an item is picked

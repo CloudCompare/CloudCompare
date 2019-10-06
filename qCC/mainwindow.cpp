@@ -10698,8 +10698,8 @@ void MainWindow::doActionComparePlanes()
 	info << QString("Distance Center(P1)/P2: %1").arg(distCenter1ToPlane2);
 	ccLog::Print(QString("[Compare] ") + info.last());
 
-	ScalarType distCenter2ToPlane1 = CCLib::DistanceComputationTools::computePoint2PlaneDistance(&C2, planeEq1);
 	CCVector3 C2 = p2->getCenter();
+	ScalarType distCenter2ToPlane1 = CCLib::DistanceComputationTools::computePoint2PlaneDistance(&C2, planeEq1);
 	info << QString("Distance Center(P2)/P1: %1").arg(distCenter2ToPlane1);
 	ccLog::Print(QString("[Compare] ") + info.last());
 

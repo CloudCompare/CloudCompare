@@ -56,8 +56,8 @@ public:
 
 	//! Inits dialog
 	bool init(	ccGLWindow* win,
-				ccHObject* aligned,
-				ccHObject* reference = nullptr);
+				const ccHObject::Container& alignedEntities,
+				const ccHObject::Container* referenceEntities = nullptr);
 
 	//! Clears dialog
 	void clear();
@@ -80,10 +80,10 @@ public:
 
 protected slots:
 
-	//! Slot called to change aligned cloud visibility
-	void showAlignedCloud(bool);
-	//! Slot called to change reference cloud visibility
-	void showReferenceCloud(bool);
+	//! Slot called to change aligned entities visibility
+	void showAlignedEntities(bool);
+	//! Slot called to change reference entities visibility
+	void showReferenceEntities(bool);
 
 	//! Slot called to add a manual point to the 'align' set
 	void addManualAlignedPoint();
@@ -131,7 +131,7 @@ protected:
 	//! Resets the displayed title (3D view)
 	void resetTitle();
 
-	//! Original cloud context
+	//! Entity original context
 	struct EntityContext
 	{
 		//! Default constructor
@@ -147,14 +147,29 @@ protected:
 		bool wasSelected;
 	};
 
+	//! Set of contexts
+	struct EntityContexts : public QMap< ccHObject*, EntityContext >
+	{
+		void fill(const ccHObject::Container& entities);
+
+		void restoreAll()
+		{
+			for (EntityContext& ctx : *this)
+				ctx.restore();
+		}
+
+		bool isShifted;
+		CCVector3d shift;
+	};
+
 	//! Aligned entity
-	EntityContext m_aligned;
+	EntityContexts m_alignedEntities;
 
 	//! Aligned points set
 	ccPointCloud m_alignedPoints;
 	
 	//! Reference entity (if any)
-	EntityContext m_reference;
+	EntityContexts m_referenceEntities;
 
 	//! Reference points set
 	ccPointCloud m_refPoints;

@@ -22,7 +22,7 @@
         <string notr="true">background-color: red; color: white;</string>
        </property>
        <property name="text">
-        <string>show 'to align' cloud</string>
+        <string>show 'to align' entities</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -199,7 +199,7 @@
         <string notr="true">background-color: yellow;</string>
        </property>
        <property name="text">
-        <string>show 'reference' cloud</string>
+        <string>show 'reference' entities</string>
        </property>
        <property name="checked">
         <bool>true</bool>

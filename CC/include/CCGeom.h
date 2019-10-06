@@ -25,6 +25,7 @@
 
 //system
 #include <cmath>
+#include <limits>
 
 //! 2D Vector
 template <typename Type> class Vector2Tpl
@@ -196,7 +197,7 @@ public:
 	//! Returns vector norm (forces double precision output)
 	inline double normd() const { return std::sqrt(norm2d()); }
 	//! Sets vector norm to unity
-	inline void normalize() { double n = norm2d(); if (n > 0) *this /= static_cast<Type>(std::sqrt(n)); }
+	inline void normalize() { Type n = norm(); if (n > std::numeric_limits<Type>::epsilon()) *this /= n; }
 	//! Returns a normalized vector which is orthogonal to this one
 	inline Vector3Tpl orthogonal() const { Vector3Tpl ort; vorthogonal(u, ort.u); return ort; }
 

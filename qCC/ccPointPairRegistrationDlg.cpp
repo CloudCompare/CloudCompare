@@ -58,6 +58,9 @@ static const int DEL_BUTTON_COL_INDEX	= 4;
 //minimum number of pairs to let the user click on the align button
 static const unsigned MIN_PAIRS_COUNT = 3;
 
+//whether the center of sphere entities should be used when a point is picked on the surface
+static QMessageBox::StandardButton s_pickSphereCenter = QMessageBox::Yes;
+
 ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(ccPickingHub* pickingHub, ccMainAppInterface* app, QWidget* parent/*=0*/)
 	: ccOverlayDialog(parent)
 	, m_alignedPoints("aligned points")
@@ -411,9 +414,9 @@ void ccPointPairRegistrationDlg::addManualAlignedPoint()
 		shifted = !s_lastAlignePointIsGlobal;
 	}
 
-	CCVector3d P(s_last_ax,s_last_ay,s_last_az);
+	CCVector3d P(s_last_ax, s_last_ay, s_last_az);
 
-	addAlignedPoint(P,0,shifted);
+	addAlignedPoint(P, nullptr, shifted);
 }
 
 static double s_last_rx = 0;
@@ -550,15 +553,29 @@ void ccPointPairRegistrationDlg::onItemPicked(const PickedItem& pi)
 	if (!pi.entity)
 		return;
 
-	CCVector3d pin = CCVector3d::fromArray(pi.P3D.u);
+	CCVector3d pIn = CCVector3d::fromArray(pi.P3D.u);
+
+	if (pi.entity->isA(CC_TYPES::SPHERE))
+	{
+		if (s_pickSphereCenter != QMessageBox::YesToAll && s_pickSphereCenter != QMessageBox::NoToAll)
+		{
+			s_pickSphereCenter = QMessageBox::question(this, tr("Sphere picking"), tr("From now on, do you want to pick sphere centers instead of a point on their surface?"), QMessageBox::YesToAll | QMessageBox::Yes | QMessageBox::No | QMessageBox::NoToAll, QMessageBox::YesToAll);
+		}
+		if (s_pickSphereCenter == QMessageBox::Yes || s_pickSphereCenter == QMessageBox::YesToAll)
+		{
+			//replace the input point by the sphere center
+			CCVector3 C = static_cast<ccSphere*>(pi.entity)->getOwnBB().getCenter();
+			pIn = CCVector3d::fromArray(C.u);
+		}
+	}
 
 	if (m_alignedEntities.contains(pi.entity))
 	{
-		addAlignedPoint(pin, pi.entity, true); //picked points are always shifted by default
+		addAlignedPoint(pIn, pi.entity, true); //picked points are always shifted by default
 	}
 	else if (m_referenceEntities.contains(pi.entity))
 	{
-		addReferencePoint(pin, pi.entity, true); //picked points are always shifted by default
+		addReferencePoint(pIn, pi.entity, true); //picked points are always shifted by default
 	}
 	else
 	{
@@ -698,7 +715,7 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 	}
 
 	PointCoordinateType sphereRadius = -PC_ONE;
-	if (!convertToSphereCenter(Pin,entity,sphereRadius))
+	if (!convertToSphereCenter(Pin, entity, sphereRadius))
 		return false;
 
 	//transform the input point in the 'global world' by default
@@ -840,7 +857,7 @@ void ccPointPairRegistrationDlg::removeAlignedPoint(int index, bool autoRemoveDu
 	//auto-remove the other point?
 	if (	autoRemoveDualPoint
 		&&	index < static_cast<int>(m_refPoints.size())
-		&&	QMessageBox::question(0, tr("Remove dual point"), tr("Remove the equivalent reference point as well?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+		&&	QMessageBox::question(nullptr, tr("Remove dual point"), tr("Remove the equivalent reference point as well?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
 	{
 		removeRefPoint(index, false);
 	}
@@ -1049,9 +1066,9 @@ void ccPointPairRegistrationDlg::removeRefPoint(int index, bool autoRemoveDualPo
 	//auto-remove the other point?
 	if (	autoRemoveDualPoint
 		&&	index < static_cast<int>(m_alignedPoints.size())
-		&&	QMessageBox::question(0, "Remove dual point", "Remove the equivalent aligned point as well?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+		&&	QMessageBox::question(nullptr, "Remove dual point", "Remove the equivalent aligned point as well?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
 	{
-		removeAlignedPoint(index,false);
+		removeAlignedPoint(index, false);
 	}
 }
 

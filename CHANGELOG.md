@@ -18,6 +18,7 @@ v2.11 (Anoia) - (in development)
 - Improvements
   - Align (Point-pair based registration) tool
     - can now be used with several entities (both several aligned and several reference entities)
+	- option to pick the center of sphere entities as registration point(CC will ask whether to use the sphere center or not when picking a point anywhere on a sphere entity)
   - Clipping box tool:
     - option to select the extracted contour type (LOWER, UPPER or FULL)
 	  - The 'up' direction is always Z for slices normal to X or Y (the local X, Y or Z directions of the active cross-section)

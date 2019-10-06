@@ -10693,11 +10693,13 @@ void MainWindow::doActionComparePlanes()
 
 	PointCoordinateType planeEq1[4] = { N1.x, N1.y, N1.z, d1 };
 	PointCoordinateType planeEq2[4] = { N2.x, N2.y, N2.z, d2 };
-	ScalarType distCenter1ToPlane2 = CCLib::DistanceComputationTools::computePoint2PlaneDistance(&p1->getCenter(), planeEq2);
+	CCVector3 C1 = p1->getCenter();
+	ScalarType distCenter1ToPlane2 = CCLib::DistanceComputationTools::computePoint2PlaneDistance(&C1, planeEq2);
 	info << QString("Distance Center(P1)/P2: %1").arg(distCenter1ToPlane2);
 	ccLog::Print(QString("[Compare] ") + info.last());
 
-	ScalarType distCenter2ToPlane1 = CCLib::DistanceComputationTools::computePoint2PlaneDistance(&p2->getCenter(), planeEq1);
+	ScalarType distCenter2ToPlane1 = CCLib::DistanceComputationTools::computePoint2PlaneDistance(&C2, planeEq1);
+	CCVector3 C2 = p2->getCenter();
 	info << QString("Distance Center(P2)/P1: %1").arg(distCenter2ToPlane1);
 	ccLog::Print(QString("[Compare] ") + info.last());
 

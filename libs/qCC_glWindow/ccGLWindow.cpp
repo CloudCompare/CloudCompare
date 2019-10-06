@@ -1635,7 +1635,7 @@ void ccGLWindow::paintGL()
 
 	if (	m_autoPickPivotAtCenter
 		&&	!m_mouseMoved
-		&&	(renderingParams.hasAutoPivotCandidates[0] || m_stereoModeEnabled && renderingParams.hasAutoPivotCandidates[1])
+		&&	(renderingParams.hasAutoPivotCandidates[0] || (m_stereoModeEnabled && renderingParams.hasAutoPivotCandidates[1]))
 		&&	!renderingParams.nextLODState.inProgress)
 	{
 		CCVector3d pivot;

@@ -26,6 +26,7 @@
 //system
 #include <cmath>
 #include <limits>
+#include <algorithm>
 
 //! 2D Vector
 template <typename Type> class Vector2Tpl

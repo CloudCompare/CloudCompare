@@ -30,6 +30,7 @@
 //qCC_db
 #include <ccCameraSensor.h>
 #include <ccColorScalesManager.h>
+#include <ccGBLSensor.h>
 #include <ccImage.h>
 #include <ccLog.h>
 #include <ccPointCloud.h>
@@ -1520,6 +1521,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	ccGLMatrixd poseMat;
 	const bool validPoseMat = GetPoseInformation(scanNode, poseMat);
 	bool poseMatWasShifted = false;
+	ccGBLSensor* sensor = nullptr;
 
 	if (validPoseMat)
 	{
@@ -1538,6 +1540,9 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		}
 
 		//cloud->setGLTransformation(poseMat); //TODO-> apply it at the end instead! Otherwise we will loose original coordinates!
+
+		sensor = new ccGBLSensor();
+		sensor->setRigidTransformation(ccGLMatrix(poseMat.data()));
 	}
 
 	//prepare temporary structures
@@ -1606,7 +1611,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 
 	//normals
-	bool hasNormals = (header.pointFields.normXField
+	bool hasNormals = (  header.pointFields.normXField
 					  || header.pointFields.normYField
 					  || header.pointFields.normZField);
 	if (hasNormals)
@@ -1882,6 +1887,14 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			s_cancelRequestedByUser = true;
 			break;
 		}
+	}
+
+	if (sensor)
+	{
+		sensor->setVisible(false);
+		sensor->setEnabled(false);
+		sensor->setGraphicScale(cloud->getOwnBB().getDiagNorm() / 20);
+		cloud->addChild(sensor);
 	}
 
 	dataReader.close();

@@ -5426,7 +5426,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=0*/)
 bool ccPointCloud::orientNormalsTowardViewPoint( CCVector3 & VP, ccProgressDialog* pDlg)
 {
 	int progressIndex = 0;
-	for (unsigned pointIndex = 0; pointIndex < m_points.capacity(); ++pointIndex)
+	for (unsigned pointIndex = 0; pointIndex < m_points.size(); ++pointIndex)
 	{
 		const CCVector3* P = getPoint(pointIndex);
 		CCVector3 N = getPointNormal(pointIndex);

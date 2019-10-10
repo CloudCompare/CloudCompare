@@ -504,8 +504,8 @@ inline QString GetBaseName(QString name){ return name.mid(0, name.indexOf('.'));
 
 inline ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_ENUM type, bool check_enable = true, bool recursive = true)
 {
+	ccHObject::Container group;
 	if (entity) {
-		ccHObject::Container group;
 		entity->filterChildren(group, recursive, type, true, entity->getDisplay());
 		if (check_enable) {
 			ccHObject::Container group_enabled;
@@ -514,13 +514,10 @@ inline ccHObject::Container GetEnabledObjFromGroup(ccHObject* entity, CC_CLASS_E
 					group_enabled.push_back(gp);
 				}	
 			}
-			return group_enabled;
-		}
-		else {
-			return group;
+			swap(group, group_enabled);
 		}
 	}
-	return ccHObject::Container();
+	return group;
 }
 
 // project

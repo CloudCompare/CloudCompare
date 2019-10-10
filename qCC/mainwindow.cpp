@@ -117,6 +117,7 @@
 #include "ccWaveformDialog.h"
 #include "bdrSettingBDSegDlg.h"
 #include "bdrSettingGrdFilterDlg.h"
+#include "bdrProjectDlg.h"
 
 //other
 #include "ccCropTool.h"
@@ -247,6 +248,7 @@ MainWindow::MainWindow()
 	, m_GCSvr_prj_id(0)
 	, m_pbdrSettingBDSegDlg(nullptr)
 	, m_pbdrSettingGrdFilterDlg(nullptr)
+	, m_pbdrPrjDlg(nullptr)
 {
 	m_UI->setupUi( this );
 
@@ -2155,12 +2157,15 @@ void MainWindow::forceConsoleDisplay()
 	}
 }
 
-ccHObject* MainWindow::askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultCloudEntity/*=0*/, QString inviteMessage/*=QString()*/)
+ccHObject* MainWindow::askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultCloudEntity/*=0*/, QString inviteMessage/*=QString()*/, ccHObject* root /*= nullptr*/)
 {
 	ccHObject::Container entites;
-	ccDBRoot* root = db(getCurrentDB());
+	if (!root) {
+		ccDBRoot* db_root_ = db(getCurrentDB());
+		if (db_root_) root = db_root_->getRootEntity();
+	}
 	if (root) {
-		root->getRootEntity()->filterChildren(entites, true, type, true);
+		root->filterChildren(entites, true, type, true);
 	}
 	
 	if (entites.empty()) {
@@ -14769,6 +14774,10 @@ void MainWindow::doActionOpenDatabase()
 		QFileInfo(currentPath).absolutePath(),
 		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
+	if (!QFileInfo(database_name).exists())	{
+		return;
+	}
+
 	//save last loading parameters
 	currentPath = QFileInfo(database_name).absolutePath();
 	settings.setValue(ccPS::CurrentPath(), currentPath);
@@ -14929,27 +14938,36 @@ ccHObject::Container MainWindow::addPointsToDatabase(QStringList files, ccHObjec
 }
 
 //QStringList s_import_filters;
+ccHObject::Container MainWindow::getMainDatabases(bool check_enable)
+{
+	ccHObject* root = db(CC_TYPES::DB_MAINDB)->getRootEntity();
+	return GetEnabledObjFromGroup(root, CC_TYPES::ST_PROJECT, check_enable, true);
+}
+
+ccHObject* MainWindow::getCurrentMainDatabase(bool check_enable)
+{
+	ccHObject* baseObj = nullptr;
+	ccHObject::Container dbs = getMainDatabases(check_enable);
+	if (dbs.size() == 1 && dbs.front()) {
+		baseObj = dbs.front();
+	}
+	else if (dbs.size() > 1) {
+		if (haveSelection() && isDatabaseProject(getSelectedEntities().front())) {
+			baseObj = getSelectedEntities().front();
+		}
+		else {
+			baseObj = askUserToSelect(CC_TYPES::ST_PROJECT, dbs.front(), "please select the current active project", db(CC_TYPES::DB_MAINDB)->getRootEntity());
+		}
+	}
+	return baseObj;
+}
 
 void MainWindow::doActionImportData()
 {
-	//! any database?
-	ccHObject* root = db(CC_TYPES::DB_MAINDB)->getRootEntity();
-	ccHObject* current_database = nullptr; ccHObject::Container dbs;
-	for (size_t i = 0; i < root->getChildrenNumber(); i++) {
-		if (isDatabaseProject(root->getChild(i))) {
-			dbs.push_back(root->getChild(i));
-		}
-	}
-	if (dbs.empty()) {
+	if (!haveSelection()) {
 		return;
 	}
-	if (dbs.size() > 1) {
-		current_database = askUserToSelect(CC_TYPES::ST_PROJECT);
-	}
-	else {
-		current_database = dbs.front();
-	}
-	if (!current_database) { return; }
+	ccHObject* import_pool = m_selectedEntities.front();
 	 
 	//persistent settings
 	QSettings settings;
@@ -14961,16 +14979,9 @@ void MainWindow::doActionImportData()
 	const QStringList filterStrings = FileIOFilter::ImportFilterList();
 	const QString &allFilter = filterStrings.at(0);
 
-	if (!filterStrings.contains(currentOpenDlgFilter))
-	{
+	if (!filterStrings.contains(currentOpenDlgFilter)) {
 		currentOpenDlgFilter = allFilter;
 	}
-
-	if (!haveSelection()) {
-		return;
-	}
-	ccHObject* import_pool = m_selectedEntities.front();
-
 	//file choosing dialog
 	QStringList selectedFiles = QFileDialog::getOpenFileNames(this,
 		tr("Open file(s)"),
@@ -15049,6 +15060,22 @@ void MainWindow::doActionImportFolder()
 
 void MainWindow::doActionEditDatabase()
 {
+	if (!m_pbdrPrjDlg) { m_pbdrPrjDlg = new bdrProjectDlg(this); m_pbdrPrjDlg->setModal(true); }
+	//! check how many available projects in the window
+	ccHObject* projObj = getCurrentMainDatabase(true);
+	BDBaseHObject* proj = projObj ? static_cast<BDBaseHObject*>(projObj) : nullptr;
+	if (!proj) {
+		//! new
+		doActionCreateDatabase();
+		return;
+	}
+	
+	m_pbdrPrjDlg->linkWithProject(proj);
+	if (m_pbdrPrjDlg->exec()) {
+		//proj->load();
+	}
+	ccHObject* current_database = getCurrentMainDatabase(true);
+	if (!current_database) { return; }
 }
 
 void MainWindow::doActionCreateBuildingProject()

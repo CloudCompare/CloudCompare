@@ -76,6 +76,8 @@ class bdrPlaneEditorDlg;
 class bdrSettingBDSegDlg;
 class bdrSettingGrdFilterDlg;
 
+class bdrProjectDlg;
+
 class PolyFitObj;
 
 class StDBMainRoot;
@@ -237,6 +239,10 @@ public:
 
 	ccHObject* getCameraGroup(QString name);
 	void setStatusImageCoord(const CCVector3d & P, bool b3d);
+
+	ccHObject::Container getMainDatabases(bool check_enable);
+
+	ccHObject* getCurrentMainDatabase(bool check_enable);
 
 private slots:
 	//! Creates a new 3D GL sub-window
@@ -622,7 +628,7 @@ private slots:
 
 	void doActionCreateDatabase();
 	void doActionOpenDatabase();
-	void doActionSaveDatabase();
+	void doActionSaveDatabase();	
 	void doActionImportData();
 	void doActionImportFolder();
 	void doActionEditDatabase();
@@ -840,7 +846,7 @@ private:
 
 	//////////////////////////////////////////////////////////////////////////
 	// XYLIU
-	ccHObject* askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
+	ccHObject* askUserToSelect(CC_CLASS_ENUM type, ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString(), ccHObject* root = nullptr);
 
 	void doActionToggleDrawBBox();
 
@@ -863,6 +869,8 @@ private:
 
 	bdrSettingBDSegDlg* m_pbdrSettingBDSegDlg;
 	bdrSettingGrdFilterDlg* m_pbdrSettingGrdFilterDlg;
+
+	bdrProjectDlg* m_pbdrPrjDlg;
 
 	PolyFitObj* polyfit_obj;
 	int m_GCSvr_prj_id;

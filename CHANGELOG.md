@@ -35,6 +35,7 @@ v2.11 (Anoia) - (in development)
 		- Can be called on any number of clouds or meshes
 		- (the tool was already accessible in V2.10, but in a very limited way)
 	- the 'FWF_O' command (to load LAS files with associated waveform data) nows properly supports the '-GLOBAL_SHIFT' option
+	- no more popup will appear when loading a raster file via the command line mode in SILENT mode (raster is never loaded as a textured quad, and invalid points are always ignored and not loaded)
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
   - Point picking:

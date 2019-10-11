@@ -117,12 +117,15 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 			bool loadAsTexturedQuad = false;
 			if (colorBands >= 3)
 			{
-				loadAsTexturedQuad =
-					(QMessageBox::question(	parameters.parentWidget,
+				loadAsTexturedQuad = false;
+				if (parameters.parentWidget) //otherwise it means we are in command line mode --> no popup
+				{
+					loadAsTexturedQuad = (	QMessageBox::question(	parameters.parentWidget,
 											"Result type",
 											"Import raster as a cloud (yes) or a texture quad? (no)",
 											QMessageBox::Yes,
-											QMessageBox::No) == QMessageBox::No);
+											QMessageBox::No) == QMessageBox::No );
+				}
 			}
 
 			ccPointCloud* pc = new ccPointCloud();
@@ -509,7 +512,11 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 				{
 					//shall we remove the points with invalid heights?
 					static bool s_alwaysRemoveInvalidHeights = false;
-					int result = (s_alwaysRemoveInvalidHeights ? QMessageBox::Yes : QMessageBox::question(0, "Remove NaN points?", "This raster has pixels with invalid heights. Shall we remove them?", QMessageBox::Yes, QMessageBox::YesToAll, QMessageBox::No));
+					int result = QMessageBox::Yes;
+					if (parameters.parentWidget) //otherwise it means we are in command line mode --> no popup
+					{
+						result = (s_alwaysRemoveInvalidHeights ? QMessageBox::Yes : QMessageBox::question(0, "Remove NaN points?", "This raster has pixels with invalid heights. Shall we remove them?", QMessageBox::Yes, QMessageBox::YesToAll, QMessageBox::No));
+					}
 					if (result != QMessageBox::No)
 					{
 						if (result == QMessageBox::YesToAll)

@@ -422,7 +422,7 @@
         <enum>QTabWidget::Rounded</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab">
         <attribute name="title">
@@ -430,12 +430,18 @@
         </attribute>
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="0">
-          <widget class="QTableWidget" name="pointCloudsTableWidget">
+          <widget class="QTableWidget" name="pointsTableWidget">
            <property name="minimumSize">
             <size>
              <width>512</width>
              <height>300</height>
             </size>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
            </property>
            <property name="sortingEnabled">
             <bool>true</bool>
@@ -444,45 +450,8 @@
             <number>0</number>
            </property>
            <property name="columnCount">
-            <number>9</number>
+            <number>0</number>
            </property>
-           <column>
-            <property name="text">
-             <string>Index</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Name</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Level</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Assoc.Levels</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Points</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>GroupID</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Path</string>
-            </property>
-           </column>
-           <column/>
-           <column/>
           </widget>
          </item>
         </layout>
@@ -494,24 +463,146 @@
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="0">
           <widget class="QTableWidget" name="imagesTableWidget">
-           <property name="columnCount">
-            <number>10</number>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
            </property>
-           <column/>
-           <column/>
-           <column/>
-           <column/>
-           <column/>
-           <column/>
-           <column/>
-           <column/>
-           <column/>
-           <column/>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="columnCount">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_3">
+        <attribute name="title">
+         <string>数据库</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="0">
+          <widget class="QTableWidget" name="postgisTableWidget">
+           <property name="minimumSize">
+            <size>
+             <width>512</width>
+             <height>300</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="rowCount">
+            <number>0</number>
+           </property>
+           <property name="columnCount">
+            <number>0</number>
+           </property>
           </widget>
          </item>
         </layout>
        </widget>
       </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <item>
+        <widget class="QToolButton" name="selectAllToolButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>全部选择</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="toggleAllToolButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>全部反选</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="selectToolButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>选择</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="toggleToolButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>反选</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_5">

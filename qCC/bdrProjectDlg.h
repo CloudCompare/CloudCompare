@@ -9,9 +9,17 @@ enum importDataType
 {
 	IMPORT_POINTS,
 	IMPORT_IMAGES,
+	IMPORT_TYPE_END,
 };
-static const size_t data_list_column[] = { 9, 10 };
 
+
+enum listHeaderIdx
+{
+	ListCol_ID,
+	ListCol_Name,
+	ListCol_END,
+};
+static const char* listHeaderName[] = { "ID", "Name" };
 class listData
 {
 public:
@@ -20,6 +28,7 @@ public:
 		, m_groupID(-1)
 	{}
 	using Container = std::vector<listData*>;
+	static listData* New(importDataType type);
 public:
 	virtual importDataType getDataType() const { return IMPORT_POINTS; };
 	int m_index;
@@ -28,6 +37,17 @@ public:
 	QString m_path;
 protected:
 };
+
+enum pointsHeaderIdx
+{
+	PointsCol_PtsCnt = ListCol_END,
+	PointsCol_Level,
+	PointsCol_AssLv,
+	PointsCol_GroupID,
+	PointsCol_Path,
+	PointsCol_END,
+};
+static const char* pointsHeaderName[] = { "Points", "Level", "Assoc.Levels", "GroupID", "Path" };
 
 class pointsListData : public listData
 {
@@ -44,6 +64,20 @@ protected:
 private:
 };
 
+enum imagesHeaderIdx
+{
+	ImagesCol_PosXs = ListCol_END,
+	ImagesCol_PosYs,
+	ImagesCol_PosZs,
+	ImagesCol_PosPhi,
+	ImagesCol_PosOmega,
+	ImagesCol_PosKappa,
+	ImagesCol_GPSTime,
+	ImagesCol_GroupID,
+	ImagesCol_Path,
+	ImagesCol_End,
+};
+static const char* imagesHeaderName[] = { "Xs", "Ys", "Zs", "Phi", "Omega", "Kappa", "GPS time", "GroupID", "Path" };
 class imagesListData : public listData
 {
 public:
@@ -56,6 +90,9 @@ public:
 protected:
 private:
 };
+
+static const char** data_list_names[] = { pointsHeaderName, imagesHeaderName };
+static const size_t data_list_column[] = { PointsCol_END, ImagesCol_End };
 
 namespace Ui
 {
@@ -85,6 +122,8 @@ protected slots:
 
 	void onLevelChanged(int);
 	void onDataFilesChanged(int);
+	void onItemChanged(QTableWidgetItem* item);
+	void onSelectionChanged(QTableWidget* table);
 
 	void doActionSearch();
 	void doActionSearchCancle();
@@ -101,8 +140,9 @@ protected:
 	ccHObject* m_associateProject;
 
 	bool insertItemToTable(listData* data);
+	importDataType getCurrentTab();
 	QTableWidget* getTableWidget(importDataType type);
-	listData::Container getListDatas(importDataType type);
+	listData::Container& getListDatas(importDataType type);
 public:
 	void linkWithProject(ccHObject* proj);
 	bool loadProject(QString path);
@@ -112,7 +152,6 @@ public:
 	int getProjetcGroupID();
 	bool addDataToTable(QString path, importDataType data_type);
 
-	importDataType	m_import_data_type;
 	listData::Container m_points_data;
 	listData::Container m_images_data;
 };

@@ -5,6 +5,7 @@
 #include <QSettings>
 #include <QDirIterator>
 #include <QCheckBox>
+#include <QScrollBar>
 #include "ccPersistentSettings.h"
 #include "ccFileUtils.h"
 #include "ccHObject.h"
@@ -12,22 +13,62 @@
 #include "FileIOFilter.h"
 #include "FileIO.h"
 
+listData * listData::New(importDataType type)
+{
+	switch (type) {
+	case IMPORT_POINTS:
+		return new pointsListData();
+	case IMPORT_IMAGES:
+		return new imagesListData();
+	default:
+		break;
+	}
+	return nullptr;
+}
+
 
 bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	: m_UI(new Ui::bdrProjectDlg)
 	, m_associateProject(nullptr)
-	, m_import_data_type(IMPORT_POINTS)
 {
 	m_UI->setupUi(this);
 
 	m_UI->previewFrame->setVisible(false);
 	m_UI->previewInfoGroupBox->setVisible(false);
 	
-	m_UI->pointCloudsTableWidget->horizontalHeader()->sectionsMovable();
-	m_UI->pointCloudsTableWidget->horizontalHeader()->resizeSection(0, 50);
+	for (int i = 0; i < IMPORT_TYPE_END; i++) {
+		QTableWidget* tableWidget = getTableWidget(static_cast<importDataType>(i)); assert(tableWidget); if (!tableWidget) return;
+		//! fill the header names
+		tableWidget->setColumnCount(data_list_column[i]);
+		QStringList header_names;
+		for (int col_i = 0; col_i < ListCol_END; col_i++) {
+			header_names << listHeaderName[col_i];
+		}
+		for (int col_i = 0; col_i < data_list_column[i]; col_i++) {
+			header_names << data_list_names[i][col_i];
+		}
+		tableWidget->setHorizontalHeaderLabels(header_names);
 
-	m_UI->imagesTableWidget->horizontalHeader()->sectionsMovable();
-	m_UI->imagesTableWidget->horizontalHeader()->resizeSection(0, 50);
+		tableWidget->horizontalHeader()->sectionsMovable();
+		tableWidget->horizontalHeader()->setSectionResizeMode(ListCol_ID, QHeaderView::ResizeToContents);
+
+		tableWidget->setStyleSheet("selection-background-color:lightblue;");
+		tableWidget->horizontalScrollBar()->setStyleSheet("QScrollBar{background:transparent; height:10px;}"
+			"QScrollBar::handle{background:lightgray; border:2px solid transparent; border-radius:5px;}"
+			"QScrollBar::handle:hover{background:gray;}"
+			"QScrollBar::sub-line{background:transparent;}"
+			"QScrollBar::add-line{background:transparent;}");
+		tableWidget->verticalScrollBar()->setStyleSheet("QScrollBar{background:transparent; width: 10px;}"
+			"QScrollBar::handle{background:lightgray; border:2px solid transparent; border-radius:5px;}"
+			"QScrollBar::handle:hover{background:gray;}"
+			"QScrollBar::sub-line{background:transparent;}"
+			"QScrollBar::add-line{background:transparent;}");
+		
+		connect(tableWidget, &QTableWidget::itemChanged, this, &bdrProjectDlg::onItemChanged);
+		connect(tableWidget, &QTableWidget::itemSelectionChanged, this, [=]() { onSelectionChanged(tableWidget); });
+	}
+	m_UI->pointsTableWidget->setColumnWidth(PointsCol_Path, 200);
+	m_UI->imagesTableWidget->setColumnWidth(ImagesCol_Path, 200);
 
 	connect(m_UI->productLevelComboBox,			SIGNAL(currentIndexChanged(int)),	this, SLOT(onLevelChanged(int)));
 	connect(m_UI->dataFilesTabWidget,			SIGNAL(currentChanged(int)),		this, SLOT(onDataFilesChanged(int)));
@@ -38,12 +79,171 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	connect(m_UI->importDeleteToolButton,		&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionDelete);
 	connect(m_UI->searchToolButton,				&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionSearch);
 	connect(m_UI->searchCancleToolButton,		&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionSearchCancle);
+	connect(m_UI->selectAllToolButton,			&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionSelectAll);
+	connect(m_UI->toggleAllToolButton,			&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionToggleAll);
+	connect(m_UI->selectToolButton,				&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionSelect);
+	connect(m_UI->toggleToolButton,				&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionToggle);
+	
 }
 
 bdrProjectDlg::~bdrProjectDlg()
 {
 
 	delete m_UI;
+}
+
+void bdrProjectDlg::linkWithProject(ccHObject * proj)
+{
+	m_associateProject = proj;
+}
+
+QString bdrProjectDlg::getProjectPath()
+{
+	return m_UI->projDirLineEdit->text();
+}
+int bdrProjectDlg::getProjectID()
+{
+	return m_UI->projIDSpinBox->value();
+}
+int bdrProjectDlg::getProjetcGroupID()
+{
+	return m_UI->groupIDSpinBox->value();
+}
+
+importDataType bdrProjectDlg::getCurrentTab() {
+	return importDataType(m_UI->dataFilesTabWidget->currentIndex());
+}
+QTableWidget * bdrProjectDlg::getTableWidget(importDataType type)
+{
+	switch (type)
+	{
+	case IMPORT_POINTS:
+		return m_UI->pointsTableWidget;
+	case IMPORT_IMAGES:
+		return m_UI->imagesTableWidget;
+	default:
+		throw std::runtime_error("internal error");
+		assert(false);
+		break;
+	}
+	return nullptr;
+}
+std::vector<listData*>& bdrProjectDlg::getListDatas(importDataType type)
+{
+	switch (type)
+	{
+	case IMPORT_POINTS:
+		return m_points_data;
+	case IMPORT_IMAGES:
+		return m_images_data;
+	default:
+		throw std::runtime_error("internal error");
+		assert(false);
+		break;
+	}
+	return std::vector<listData*>();
+}
+
+void bdrProjectDlg::onLevelChanged(int)
+{
+}
+
+void bdrProjectDlg::onDataFilesChanged(int index)
+{
+
+}
+
+void bdrProjectDlg::onItemChanged(QTableWidgetItem * item)
+{
+	QTableWidget* tableWidget = item->tableWidget();
+	
+}
+
+void bdrProjectDlg::onSelectionChanged(QTableWidget * table)
+{
+	if (m_UI->previewFrame->isVisible()) {
+
+	}
+}
+
+bool bdrProjectDlg::insertItemToTable(listData * data)
+{
+	importDataType data_type = data->getDataType();
+	assert(data);
+	QTableWidget* tableWidget = getTableWidget(data_type);
+	if (!tableWidget) {
+		return false;
+	}
+
+	const int table_index = tableWidget->rowCount();
+
+	//! insert a new row
+	tableWidget->insertRow(table_index);
+	tableWidget->setVerticalHeaderItem(table_index, new QTableWidgetItem(QString::number(table_index + 1)));
+	for (size_t i = 0; i < data_list_column[data_type]; i++) {
+		tableWidget->setItem(table_index, i, new QTableWidgetItem);
+	}
+	//! fill index, and name
+	tableWidget->item(table_index, ListCol_ID)->setCheckState(Qt::Checked);
+	tableWidget->item(table_index, ListCol_ID)->setText(QString::number(data->m_index));
+	tableWidget->item(table_index, ListCol_Name)->setText(data->m_name);
+
+	switch (data_type)
+	{
+	case IMPORT_POINTS:
+	{
+		tableWidget->item(table_index, PointsCol_Path)->setText(data->m_path);
+// 		QComboBox* combox_level = new QComboBox();
+// 		combox_level->addItem("---");
+// 		tableWidget->setCellWidget(table_index, PointsCol_Level, combox_level);
+		break;
+	}
+	case IMPORT_IMAGES:
+		tableWidget->item(table_index, ImagesCol_Path)->setText(data->m_path);
+		break;
+	default:
+		assert(false);
+		break;
+	}
+	tableWidget->scrollToBottom();
+
+	return true;
+}
+
+bool bdrProjectDlg::addDataToTable(QString path, importDataType data_type)
+{
+	//! load data
+
+	listData::Container& list_datas = getListDatas(data_type);
+	listData* data = listData::New(data_type);
+	if (!data) { return false; }
+
+	//! fill the data
+	data->m_name = QFileInfo(path).completeBaseName();
+	data->m_path = path;
+	data->m_index = list_datas.empty() ? 0 : (list_datas.back()->m_index + 1);
+	data->m_groupID = getProjetcGroupID();
+
+	if (!data) { return false; }
+	try {
+		if (!insertItemToTable(data)) {
+			if (data) {
+				delete data;
+				data = nullptr;			
+			}
+			return false;
+		}
+	}
+	catch (const std::exception&) {
+		return false;
+	}
+	list_datas.push_back(data);
+	return true;
+}
+
+bool bdrProjectDlg::loadProject(QString path)
+{
+	return true;
 }
 
 void bdrProjectDlg::doActionOpenProject()
@@ -93,7 +293,7 @@ void bdrProjectDlg::doActionImportFile()
 	settings.endGroup();
 
 	for (auto file_path : selectedFiles) {
-		if (!addDataToTable(file_path, m_import_data_type)) {
+		if (!addDataToTable(file_path, getCurrentTab())) {
 
 		}
 	}
@@ -123,7 +323,7 @@ void bdrProjectDlg::doActionImportFolder()
 
 	QStringList files;
 	QStringList nameFilters;
-	switch (m_import_data_type)
+	switch (getCurrentTab())
 	{
 	case IMPORT_POINTS:
 		nameFilters << "*.las" << "*.laz" << "*.ply" << "*.obj" << "*.pcd";
@@ -141,7 +341,7 @@ void bdrProjectDlg::doActionImportFolder()
 	}
 
 	for (auto file_path : files) {
-		if (!addDataToTable(file_path, m_import_data_type)) {
+		if (!addDataToTable(file_path, getCurrentTab())) {
 
 		}
 	}
@@ -149,15 +349,6 @@ void bdrProjectDlg::doActionImportFolder()
 
 void bdrProjectDlg::doActionImportDatabase()
 {
-}
-
-void bdrProjectDlg::onLevelChanged(int)
-{
-}
-
-void bdrProjectDlg::onDataFilesChanged(int index)
-{
-	m_import_data_type = importDataType(index);
 }
 
 void bdrProjectDlg::doActionSearch()
@@ -174,18 +365,42 @@ void bdrProjectDlg::doActionDelete()
 
 void bdrProjectDlg::doActionSelectAll()
 {
+	QTableWidget* tableWidget = getTableWidget(getCurrentTab());
+	if (!tableWidget) { return; }
+	const int count = tableWidget->rowCount();
+	for (int i = 0; i < count; i++) {
+		tableWidget->item(i, ListCol_ID)->setCheckState(Qt::Checked);
+	}
 }
 
 void bdrProjectDlg::doActionToggleAll()
 {
+	QTableWidget* tableWidget = getTableWidget(getCurrentTab());
+	if (!tableWidget) { return; }
+	const int count = tableWidget->rowCount();
+	for (int i = 0; i < count; i++) {
+		tableWidget->item(i, ListCol_ID)->setCheckState(Qt::Unchecked);
+	}
 }
 
 void bdrProjectDlg::doActionSelect()
 {
+	QTableWidget* tableWidget = getTableWidget(getCurrentTab());
+	if (!tableWidget) { return; }
+	const int count = tableWidget->rowCount();
+	for (QTableWidgetItem* item : tableWidget->selectedItems())	{
+		item->setCheckState(Qt::Checked);
+	}
 }
 
 void bdrProjectDlg::doActionToggle()
 {
+	QTableWidget* tableWidget = getTableWidget(getCurrentTab());
+	if (!tableWidget) { return; }
+	const int count = tableWidget->rowCount();
+	for (QTableWidgetItem* item : tableWidget->selectedItems()) {
+		item->setCheckState((item->checkState() == Qt::Unchecked) ? Qt::Checked : Qt::Unchecked);
+	}
 }
 
 void bdrProjectDlg::acceptAndExit()
@@ -199,143 +414,5 @@ bool bdrProjectDlg::generateProject()
 	if (project_path.isEmpty()) {
 		return false;
 	}
-	return true;
-}
-
-bool bdrProjectDlg::insertItemToTable(listData * data)
-{
-	importDataType data_type = data->getDataType();
-	assert(data);
-	QTableWidget* tableWidget = getTableWidget(data_type);
-	if (!tableWidget) {
-		return false;
-	}
-
-	const int table_index = tableWidget->rowCount();
-	
-	tableWidget->setRowCount(table_index + 1);
-	tableWidget->setVerticalHeaderItem(table_index, new QTableWidgetItem);
-	tableWidget->setCellWidget(table_index, 0, new QCheckBox);
-
-	for (size_t i = 0; i < data_list_column[data_type]; i++) {
-		tableWidget->setItem(table_index, i, new QTableWidgetItem);
-	}
-	
-	tableWidget->verticalHeaderItem(table_index)->setText(QString::number(table_index + 1));
-	QCheckBox* index_checkbox = static_cast<QCheckBox*>(tableWidget->cellWidget(table_index, 0));
-	if (index_checkbox) index_checkbox->setText(QString::number(data->m_index)); else return false;
-	tableWidget->item(table_index, 1)->setText(data->m_name);
-	switch (data_type)
-	{
-	case IMPORT_POINTS:
-		tableWidget->item(table_index, 6)->setText(data->m_path);
-		break;
-	case IMPORT_IMAGES:
-		break;
-	default:
-		assert(false);
-		break;
-	}
-	tableWidget->scrollToBottom();
-
-	return true;
-}
-
-QTableWidget * bdrProjectDlg::getTableWidget(importDataType type)
-{
-	switch (type)
-	{
-	case IMPORT_POINTS:
-		return m_UI->pointCloudsTableWidget;
-	case IMPORT_IMAGES:
-		return m_UI->imagesTableWidget;
-	default:
-		throw std::runtime_error("internal error");
-		assert(false);
-		break;
-	}
-	return nullptr;
-}
-
-std::vector<listData*> bdrProjectDlg::getListDatas(importDataType type)
-{
-	switch (type)
-	{
-	case IMPORT_POINTS:
-		return m_points_data;
-	case IMPORT_IMAGES:
-		return m_images_data;
-	default:
-		throw std::runtime_error("internal error");
-		assert(false);
-		break;
-	}
-	return std::vector<listData*>();
-}
-
-void bdrProjectDlg::linkWithProject(ccHObject * proj)
-{
-	m_associateProject = proj;
-}
-
-bool bdrProjectDlg::loadProject(QString path)
-{
-	return true;
-}
-
-QString bdrProjectDlg::getProjectPath()
-{
-	return m_UI->projDirLineEdit->text();
-}
-
-int bdrProjectDlg::getProjectID()
-{
-	return m_UI->projIDSpinBox->value();
-}
-
-int bdrProjectDlg::getProjetcGroupID()
-{
-	return m_UI->groupIDSpinBox->value();
-}
-
-bool bdrProjectDlg::addDataToTable(QString path, importDataType data_type)
-{
-	listData::Container list_datas = getListDatas(data_type);
-	listData* data = nullptr;
-	switch (data_type)
-	{
-	case IMPORT_POINTS:
-		data = new pointsListData();
-		list_datas.push_back(data);
-		break;
-	case IMPORT_IMAGES:
-		data = new imagesListData();
-		list_datas.push_back(data);
-		break;
-	default:
-		return false;
-	}
-	//! load data
-	
-
-	//! fill the data
-	data->m_name = QFileInfo(path).completeBaseName();
-	data->m_path = path;
-	data->m_index = list_datas.empty() ? 0 : (list_datas.back()->m_index + 1);
-	data->m_groupID;
-
-	if (!data) { return false; }
-	try {
-		if (!insertItemToTable(data)) {
-			
-			list_datas.pop_back();
-			delete data;
-			data = nullptr;
-		}
-	}
-	catch (const std::exception&) {
-		return false;
-	}
-	
 	return true;
 }

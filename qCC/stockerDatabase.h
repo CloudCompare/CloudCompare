@@ -85,6 +85,10 @@ public:
 	ccHObject* getProductClassified();
 	ccHObject* getProductSegmented();
 	ccHObject* getProductModels();
+
+	static DataBaseHObject* Create(QString absolute_path);
+	bool load();
+	bool save();
 };
 
 class BDBaseHObject : public BDBaseHObject_
@@ -160,7 +164,7 @@ DataBaseHObject* GetRootDataBase(ccHObject* obj);
 BDBaseHObject* GetRootBDBase(ccHObject* obj);
 BDImageBaseHObject* GetRootImageBase(ccHObject* obj);
 
-ccHObject* getChildGroupByName(ccHObject* group, QString name, bool auto_create = true, bool add_to_db = true);
+ccHObject* getChildGroupByName(ccHObject* group, QString name, bool auto_create = true, bool add_to_db = false);
 
 ccHObject * findChildByName(ccHObject * parent, bool recursive, QString filter, bool strict, CC_CLASS_ENUM type_filter = CC_TYPES::OBJECT, bool auto_create = false, ccGenericGLDisplay * inDisplay = 0);
 

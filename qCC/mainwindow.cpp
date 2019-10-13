@@ -168,6 +168,8 @@
 #include "polyfit/basic/logger.h"
 #endif // USE_STOCKER
 
+#include "BlockDBaseIO.h"
+
 #include <QDate>
 #include <QFuture>
 #include <QtConcurrent>
@@ -14697,69 +14699,8 @@ void MainWindow::doActionCreateDatabase()
 
 	//QString database_name = QInputDialog::getText(this, "new database", "Database name", QLineEdit::Normal, QDate::currentDate().toString("yyyy-MM-dd"));
 	//! create a database
-	DataBaseHObject* new_database = new DataBaseHObject(QFileInfo(database_name).completeBaseName());
-	new_database->setPath(QFileInfo(database_name).absoluteFilePath());
+	DataBaseHObject* new_database = DataBaseHObject::Create(database_name);
 	addToDB_Main(new_database);
-
-	//! point clouds
-	{
-		ccHObject* points = new_database->getPointCloudGroup();
-		if (!points) {
-			return;
-		}
-		points->setLocked(true);
-	}
-
-	//! images
-	{
-		ccHObject* images = new_database->getImagesGroup();
-		if (!images) {
-			return;
-		}
-		images->setLocked(true);
-	}
-
-	//! miscellaneous
-	{
-		ccHObject* misc = new_database->getMiscsGroup();
-		if (!misc) {
-			return;
-		}
-		misc->setLocked(true);
-	}
-
-	//! products
-	{
-		ccHObject* products = new_database->getProductGroup();
-		if (!products) {
-			return;
-		}
-		products->setLocked(true);
-
-		ccHObject* groundFilter = new_database->getProductFiltered();
-		if (!groundFilter) {
-			return;
-		}
-		groundFilter->setLocked(true);
-
-		ccHObject* classified = new_database->getProductClassified();
-		if (!classified) {
-			return;
-		}
-		classified->setLocked(true);
-
-		ccHObject* segments = new_database->getProductSegmented();
-		if (!segments) {
-			return;
-		}
-		segments->setLocked(true);
-
-		ccHObject* models = new_database->getProductModels();
-		if (!models) {
-			return;
-		}
-		models->setLocked(true);
-	}
 }
 
 void MainWindow::doActionOpenDatabase()
@@ -14783,8 +14724,11 @@ void MainWindow::doActionOpenDatabase()
 	settings.setValue(ccPS::CurrentPath(), currentPath);
 	settings.endGroup();
 
-	//! find the bin
-	QString bin_file = database_name + "/" + QFileInfo(database_name).completeBaseName() + ".bin";
+	DataBaseHObject* load_database = DataBaseHObject::Create(database_name);
+
+	if (!load_database->load())	{
+		return;
+	}	
 
 	CCVector3d loadCoordinatesShift(0, 0, 0);
 	bool loadCoordinatesTransEnabled = false;
@@ -14798,6 +14742,8 @@ void MainWindow::doActionOpenDatabase()
 	}
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
+	//! find the bin
+	QString bin_file = database_name + "/" + QFileInfo(database_name).completeBaseName() + ".bin";
 	ccHObject* newGroup = FileIOFilter::LoadFromFile(bin_file, parameters, result, QString());
 	if (!newGroup) return;
 

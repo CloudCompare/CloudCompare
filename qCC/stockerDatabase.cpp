@@ -12,6 +12,8 @@
 #include "FileIOFilter.h"
 #include <QDir>
 
+#include "BlockDBaseIO.h"
+
 using namespace stocker;
 
 DataBaseHObject * GetRootDataBase(ccHObject * obj)
@@ -125,6 +127,96 @@ ccHObject * DataBaseHObject::getProductSegmented()
 ccHObject * DataBaseHObject::getProductModels()
 {
 	return getProductItem("models");
+}
+
+DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
+{
+	DataBaseHObject* new_database = new DataBaseHObject(QFileInfo(absolute_path).completeBaseName());
+	new_database->setPath(QFileInfo(absolute_path).absoluteFilePath());
+
+	//! point clouds
+	{
+		ccHObject* points = new_database->getPointCloudGroup();
+		if (!points) {
+			return;
+		}
+		points->setLocked(true);
+	}
+
+	//! images
+	{
+		ccHObject* images = new_database->getImagesGroup();
+		if (!images) {
+			return;
+		}
+		images->setLocked(true);
+	}
+
+	//! miscellaneous
+	{
+		ccHObject* misc = new_database->getMiscsGroup();
+		if (!misc) {
+			return;
+		}
+		misc->setLocked(true);
+	}
+
+	//! products
+	{
+		ccHObject* products = new_database->getProductGroup();
+		if (!products) {
+			return;
+		}
+		products->setLocked(true);
+
+		ccHObject* groundFilter = new_database->getProductFiltered();
+		if (!groundFilter) {
+			return;
+		}
+		groundFilter->setLocked(true);
+
+		ccHObject* classified = new_database->getProductClassified();
+		if (!classified) {
+			return;
+		}
+		classified->setLocked(true);
+
+		ccHObject* segments = new_database->getProductSegmented();
+		if (!segments) {
+			return;
+		}
+		segments->setLocked(true);
+
+		ccHObject* models = new_database->getProductModels();
+		if (!models) {
+			return;
+		}
+		models->setLocked(true);
+	}
+	return nullptr;
+}
+
+bool DataBaseHObject::load()
+{
+	QString xml_file = getPath() + "/" + QFileInfo(getPath()).completeBaseName() + ".xml";
+	BlockDB::BlockDBaseIO blkDBase;
+	if (!blkDBase.loadProject(xml_file.toLocal8Bit())) {
+		return false;
+	}
+	//! add 
+	return true;
+}
+
+bool DataBaseHObject::save()
+{
+	QString xml_file = getPath() + "/" + QFileInfo(getPath()).completeBaseName() + ".xml";
+	BlockDB::BlockDBaseIO blkDBase;
+
+
+	if (!blkDBase.saveProject(xml_file.toLocal8Bit())) {
+		return false;
+	}
+	return true;
 }
 
 StBuilding* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {

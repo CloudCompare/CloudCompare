@@ -25,7 +25,7 @@ bool LasPrjIO::WritePrjFile(PrjHdr sPrjHdr)
 	//char strExpPath[MAX_PATHNAME];	if (IsExist(m_strExpFilePath)) strcpy(strExpPath, m_strExpFilePath);	else{ GetExpFilePath(lpstrPath, strExpPath); Dos2Unix(strExpPath); }
 	//char strTskPath[MAX_PATHNAME];	if (IsExist(m_strTskFilePath)) strcpy(strTskPath, m_strTskFilePath);	else{ GetTskFilePath(lpstrPath, strTskPath); Dos2Unix(strTskPath); }
 
-	TRACE("输出xml文件！\n");
+	//TRACE("输出xml文件！\n");
 	
 	CMarkup xml;
 	char str_temp[64];
@@ -79,9 +79,7 @@ int LasPrjIO::WriteLasList(char* lasListPath, LasInfo sLasInfo)
 	fp = fopen(lasListPath, "w");
 	if (!fp)
 	{
-		char szMsg[1024];
-		std::sprintf(szMsg, "点云列表文件生成失败!");
-		AfxMessageBox(szMsg);
+		m_error_msg = "点云列表文件生成失败!";
 		return 0;
 	}
 	fprintf(fp, "%d\n", sLasInfo.size());
@@ -125,9 +123,7 @@ int LasPrjIO::WriteImgList(char* imgListPath, ImgInfo sImgInfo)
 		fp = fopen(imgListPath, "w");
 		if (!fp)
 		{
-			char szMsg[1024];
-			std::sprintf(szMsg, "影像列表文件生成失败!");
-			AfxMessageBox(szMsg);
+			m_error_msg = "影像列表文件生成失败!";
 			return 0;
 		}
 		fprintf(fp, "%d\n", vT.size());
@@ -155,9 +151,7 @@ int LasPrjIO::WriteImgList(char* imgListPath, ImgInfo sImgInfo)
 		fp = fopen(imgListPath, "w");
 		if (!fp)
 		{
-			char szMsg[1024];
-			std::sprintf(szMsg, "影像列表文件生成失败!");
-			AfxMessageBox(szMsg);
+			m_error_msg = "影像列表文件生成失败!";
 			return 0;
 		}
 		fprintf(fp, "%d\n", vT.size());
@@ -178,9 +172,7 @@ int LasPrjIO::WriteImgList(char* imgListPath, ImgInfo sImgInfo)
 		fp = fopen(imgListPath, "w");
 		if (!fp)
 		{
-			char szMsg[1024];
-			std::sprintf(szMsg, "影像列表文件生成失败!");
-			AfxMessageBox(szMsg);
+			m_error_msg = "影像列表文件生成失败!";
 			return 0;
 		}
 		fprintf(fp, "%d\n", sImgInfo.size());
@@ -207,9 +199,7 @@ int LasPrjIO::WriteCamFile(char* camPath, CameraInfo sCamInfo)
 	fp = fopen(camPath, "w");
 	if (!fp)
 	{
-		char szMsg[1024];
-		std::sprintf(szMsg, "相机文件生成失败!");
-		AfxMessageBox(szMsg);
+		m_error_msg = "相机文件生成失败!";
 		return 0;
 	}
 	//fprintf(fp, "%d\r\n", sCamInfo.CameraList.size());
@@ -242,9 +232,7 @@ int LasPrjIO::WritePosFile(char* posPath, ImgInfo sImgInfo)
 	fp = fopen(posPath, "w");
 	if (!fp)
 	{
-		char szMsg[1024];
-		std::sprintf(szMsg, "Pos文件生成失败!");
-		AfxMessageBox(szMsg);
+		m_error_msg = "Pos文件生成失败!";
 		return 0;
 	}
 	fprintf(fp, "%d\n", sImgInfo.size());
@@ -273,9 +261,7 @@ bool LasPrjIO::GeneratePrjFiles()
 	//生成xml工程文件
 	if (!WritePrjFile(m_PrjHdr))
 	{
-		char szMsg[1024];
-		std::sprintf(szMsg, "工程创建失败!");
-		AfxMessageBox(szMsg);
+		m_error_msg = "工程创建失败!";
 		return false;
 	}
 
@@ -283,9 +269,7 @@ bool LasPrjIO::GeneratePrjFiles()
 	if (WriteLasList(LasListPath, m_LasInfo)*WriteImgList(ImgListPath, m_ImgInfo)
 		*WriteCamFile(CamFilePath, m_CameraInfo)*WritePosFile(PosFilePath, m_ImgInfo) == 0)
 	{
-		char szMsg[1024];
-		std::sprintf(szMsg, "工程创建失败!");
-		AfxMessageBox(szMsg);
+		m_error_msg = "工程创建失败!";
 		return false;
 	}
 
@@ -307,75 +291,15 @@ void LasPrjIO::trim(char *strIn, char *strOut) {
 
 int LasPrjIO::ReadLasList(char* sLasLstPath, LasInfo& sLasInfo,PrjHdr& sPrjHdr)
 {	
-	strcpy(sPrjHdr.LasListPath, sLasLstPath);
-	int blkID = sPrjHdr.BlockID; //读取prjID对应的数据
-	FILE *flas;
-	flas = fopen(sLasLstPath, "r");
-	if (!flas)
-	{
-		char szMsg[1024];
-		sprintf(szMsg, "无法打开%s!", sLasLstPath);
-		AfxMessageBox(szMsg);
+	LasInfo lasInfo;
+	if (ReadLasList(sLasLstPath, lasInfo) != 0)
 		return 0;
+
+	for (auto & las_info : lasInfo) {
+		if (las_info.BlockID == sPrjHdr.BlockID) {
+			sLasInfo.push_back(las_info);
+		}
 	}
-	int nLasNum;
-	char szBuf[1024];
-	fgets(szBuf, 1024, flas);
-	sscanf(szBuf, "%d", &nLasNum);
-	//fgets(szBuf, 1024, flas);
-	//sscanf(szBuf, "%s", sPrjHdr.LasDir);
-
-	char LasName[_MAX_PATH];
-	char Lasdrive[_MAX_DRIVE];
-	char Lasdir[_MAX_DIR];
-	char Lasext[_MAX_EXT];
-	char Lasfname[_MAX_FNAME];
-	char szbuf[1024];
-	char szbuf2[1024];
-	char temp_left[1024];
-	char temp_middle[1024];
-	char temp_right[1024];
-	char char_temp[1024];
-	CString str_temp;
-
-	for (int i = 0; i<nLasNum; i++)
-	{
-		LasStrip lstemp;
-		//fgets(szBuf, 1024, flas);
-		//sscanf(szBuf, "%s",lstemp.szName);
-
-		fgets(szbuf2, 1024, flas);
-		trim(szbuf2, szbuf);  //去除路径首尾空格
-		str_temp = szbuf;
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(temp_right, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		lstemp.BlockID = atoi(temp_right);// las blockID
-
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;
-		str_temp.TrimRight();
-		strcpy(temp_right, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		lstemp.dzoffset = atof(temp_right); // dzoffset
-
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));  //dzoffset左侧
-		str_temp = char_temp;
-		str_temp.TrimRight();
-
-		strcpy(temp_left, str_temp.Left(str_temp.Find(' ')));
-		strcpy(temp_middle, str_temp.Right(str_temp.GetLength() - 1 - str_temp.Find(' ')));
-		lstemp.nIdx = atoi(temp_left);
-		//lstemp.BlockID = atoi(temp_right);
-		trim(temp_middle, lstemp.szPath);  //去除路径首尾空格
-
-		//sprintf(lstemp.szPath, "%s", temp_middle);
-
-		//fscanf(flas, "%d%s%d", &lstemp.nIdx,lstemp.szPath,&lstemp.BlockID);
-		_splitpath(lstemp.szPath, Lasdrive, Lasdir, Lasfname, Lasext);
-		sprintf(lstemp.szName, "%s%s", Lasfname, Lasext);
-		if (lstemp.BlockID == blkID)
-			sLasInfo.push_back(lstemp);				
-	}
-	fclose(flas);
 
 	return 1;
 }
@@ -388,9 +312,7 @@ int LasPrjIO::ReadLasList(char* sLasLstPath, LasInfo& sLasInfo)
 	flas = fopen(sLasLstPath, "r");
 	if (!flas)
 	{
-		char szMsg[1024];
-		sprintf(szMsg, "无法打开%s!", sLasLstPath);
-		AfxMessageBox(szMsg);
+		m_error_msg = std::string("无法打开: ") + sLasLstPath;
 		return 0;
 	}
 	int nLasNum;
@@ -470,101 +392,15 @@ int LasPrjIO::ReadLasList(char* sLasLstPath, LasInfo& sLasInfo)
 
 int LasPrjIO::ReadImgList(char* sImgLstPath, ImgInfo& sImgInfo,PrjHdr& sPrjHdr)
 {
-	strcpy(sPrjHdr.ImgListPath,sImgLstPath);
-	int blkID = sPrjHdr.BlockID;
-	FILE *fimg;
-	fimg = fopen(sImgLstPath, "r");
-	if (!fimg)
-	{
-		char szMsg[1024];
-		sprintf(szMsg, "无法打开%s!", sImgLstPath);
-		AfxMessageBox(szMsg);
+	ImgInfo imgInfo;
+	if (ReadImgList(sImgLstPath, imgInfo) != 0)
 		return 0;
-	}
-	int nImgNum;
-	//fscanf(fimg, "%d", &nImgNum);
 
-	char ImgName[_MAX_PATH];
-	char Imgdrive[_MAX_DRIVE];
-	char Imgdir[_MAX_DIR];
-	char Imgext[_MAX_EXT];
-	char Imgfname[_MAX_FNAME];
-	char szbuf[1024];
-	char szbuf2[1024];
-	char temp_left[1024];
-	char temp_middle[1024];
-	char temp_right[1024];
-	char char_temp[1024];
-	CString str_temp;
-
-	fgets(szbuf2, 1024, fimg);
-	sscanf(szbuf2, "%d", &nImgNum);
-	for (int i = 0; i < nImgNum; i++)
-	{
-		ImgData img_temp;
-		//fscanf(fimg, "%d%s%d", &img_temp.ImageID, img_temp.szImgPath, &img_temp.BlockID);
-
-		/*fgets(szbuf2, 1024, fimg);
-		trim(szbuf2, szbuf);
-		str_temp = szbuf;
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(temp_right, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;
-		strcpy(temp_left, str_temp.Left(str_temp.Find(' ')));
-		strcpy(temp_middle, str_temp.Right(str_temp.GetLength() - 1 - str_temp.Find(' ')));
-		img_temp.ImageID = atoi(temp_left);
-		img_temp.BlockID = atoi(temp_right);
-		trim(temp_middle, img_temp.szImgPath);  //去除路径首尾空格
-		_splitpath(img_temp.szImgPath, Imgdrive, Imgdir, Imgfname, Imgext);
-		sprintf(ImgName, "%s%s", Imgfname, Imgext);
-		sprintf(img_temp.szImgName, "%s", ImgName);*/
-
-		fgets(szbuf2, 1024, fimg);
-		trim(szbuf2, szbuf);
-		str_temp = szbuf;
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(temp_right, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.BlockID = atoi(temp_right); //blockid
-
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.CameraID = atof(char_temp); //camid
-
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(temp_left, str_temp.Left(str_temp.Find(' ')));
-		strcpy(temp_middle, str_temp.Right(str_temp.GetLength() - 1 - str_temp.Find(' ')));
-		img_temp.ImageID = atoi(temp_left);
-		trim(temp_middle, img_temp.szImgPath);  //去除路径首尾空格
-
-		_splitpath(img_temp.szImgPath, Imgdrive, Imgdir, Imgfname, Imgext);
-		sprintf(ImgName, "%s%s", Imgfname, Imgext);
-		sprintf(img_temp.szImgName, "%s", ImgName);
-
-		//sImgInfo.push_back(img_temp);
-		if (img_temp.BlockID == blkID)
-			sImgInfo.push_back(img_temp);
-	}
-
-	/*if (sImgInfo.size() == nImgNum)
-		for (int i = 0; i < nImgNum;i++)
-			fscanf(fimg, "%d%s%d", &sImgInfo[i].ImageID,sImgInfo[i].szImgName, &sImgInfo[i].BlockID);
-	else if (sImgInfo.size() == 0)
-	{		
-		for (int i = 0; i<nImgNum; i++)
-		{			
-			ImgData img_temp;
-			fscanf(fimg, "%d%s%d", &img_temp.ImageID,img_temp.szImgName, &img_temp.BlockID);
-			if (img_temp.BlockID==prjID)
-				sImgInfo.push_back(img_temp);					
+	for (auto & img_info : imgInfo) {
+		if (img_info.BlockID == sPrjHdr.BlockID) {
+			sImgInfo.push_back(img_info);
 		}
-	}*/
-	
-	fclose(fimg);
+	}
 
 	return 1;
 }
@@ -577,9 +413,7 @@ int LasPrjIO::ReadImgList(char* sImgLstPath, ImgInfo& sImgInfo)
 	fimg = fopen(sImgLstPath, "r");
 	if (!fimg)
 	{
-		char szMsg[1024];
-		sprintf(szMsg, "无法打开%s!", sImgLstPath);
-		AfxMessageBox(szMsg);
+		m_error_msg = std::string("无法打开: ") + sImgLstPath;
 		return 0;
 	}
 	int nImgNum;	
@@ -649,9 +483,7 @@ int LasPrjIO::ReadPosFile(char* sPosPath, ImgInfo& sImgInfo)
 	fpos = fopen(sPosPath, "r");
 	if (!fpos)
 	{
-		char szMsg[1024];
-		sprintf(szMsg, "无法打开%s!", sPosPath);
-		AfxMessageBox(szMsg);
+		m_error_msg = std::string("无法打开: ") + sPosPath;
 		return 0;
 	}
 	int nImgNum;
@@ -747,112 +579,6 @@ int LasPrjIO::ReadPosFile(char* sPosPath, ImgInfo& sImgInfo)
 	fclose(fpos);
 	return 1;
 }
-
-//int LasPrjIO::ReadCamFile(char* camPath, CameraInfo& sCamInfo)
-//{	
-//	//strcpy(sPrjHdr.CamParFilePath, camPath);
-//	FILE* fcam;
-//	fcam = fopen(camPath, "r");
-//	if (!fcam)
-//	{
-//		char szMsg[1024];
-//		std::sprintf(szMsg, "无法打开%s!", camPath);
-//		AfxMessageBox(szMsg);
-//		return 0;
-//	}
-//
-//	char str_temp[_MAX_PATH];
-//	char szbuf[1024];
-//	
-//	int count = 0;
-//	//CameraData cam_temp;
-//
-//	fgets(szbuf, 1024, fcam);	
-//	int camID = 0;
-//	while (true)
-//	{
-//		CameraData cam_temp;
-//		//sscanf(szBuf, "%s", &cam_temp.CameraName);
-//		//fscanf(fcam, "%s", temp);
-//		sscanf(szbuf, "%s", &cam_temp.CameraName);
-//		fgets(szbuf, 1024, fcam);
-//		sscanf(szbuf, "%lf", &cam_temp.pixelSize);
-//		fgets(szbuf, 1024, fcam);
-//		sscanf(szbuf, "%d", &cam_temp.width);
-//		fgets(szbuf, 1024, fcam);
-//		sscanf(szbuf, "%d", &cam_temp.height);
-//		fgets(szbuf, 1024, fcam);
-//		sscanf(szbuf, "%lf", &cam_temp.f);
-//
-//		istringstream stream;
-//		fgets(szbuf, 1024, fcam);
-//		stream.str(szbuf);
-//		stream >> str_temp;
-//		sscanf(str_temp, "%lf", &cam_temp.x0);
-//		stream >> str_temp;
-//		sscanf(str_temp, "%lf", &cam_temp.y0);
-//		stream.clear();
-//		stream.str("");
-//
-//
-//		fgets(szbuf, 1024, fcam);
-//		stream.str(szbuf);		
-//		count = 0;
-//		while (stream >> str_temp)
-//		{
-//			sscanf(str_temp, "%lf", &cam_temp.distortionPar[count]);
-//			count++;
-//		}
-//		stream.clear();
-//		stream.str("");
-//
-//		fgets(szbuf, 1024, fcam);
-//		//stream.clear();
-//		stream.str(szbuf);
-//		count = 0;
-//		while (stream >> str_temp)
-//		{
-//			sscanf(str_temp, "%lf", &cam_temp.CameraBias[count]);
-//			count++;
-//		}
-//		stream.clear();
-//		stream.str("");
-//
-//		fgets(szbuf, 1024, fcam);
-//		//stream.clear();
-//		stream.str(szbuf);
-//		//count = 0;
-//		while (stream >> str_temp)
-//		{
-//			sscanf(str_temp, "%lf", &cam_temp.CameraBias[count]);
-//			count++;
-//		}
-//		stream.clear();
-//		stream.str("");
-//
-//		//if (cam_temp.f == 0 && cam_temp.pixelSize == 0 && cam_temp.width == 0 && cam_temp.height == 0)
-//		//	break;
-//		cam_temp.CameraID = camID;
-//		sCamInfo.push_back(cam_temp);
-//		fgets(szbuf, 1024, fcam);
-//		if (feof(fcam))
-//			break;
-//		camID++;
-//		/*fscanf(fcam, "%f", cam_temp.pixelSize);
-//		fscanf(fcam, "%d", cam_temp.width);
-//		fscanf(fcam, "%d", cam_temp.height);
-//		fscanf(fcam, "%f", cam_temp.f);
-//		fscanf(fcam, "%f%f", cam_temp.x0, cam_temp.y0);
-//		for (int i = 0; i < 8; i++)
-//			fscanf(fcam, "%f", cam_temp.distortionPar[i]);
-//		for (int i = 0; i < 6; i++)
-//			fscanf(fcam, "%f", cam_temp.CameraBias[i]);*/		
-//	}
-//	fclose(fcam);
-//	
-//	return 1;
-//}
-
 int LasPrjIO::ReadCamFile(char* camPath, CameraInfo& sCamInfo)
 {
 	sCamInfo.clear();
@@ -921,7 +647,7 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 	CMarkup xml; CString strTagName = _T(""); CString strData = _T("");
 	if (!xml.Load(lpXMLPath))
 	{
-		AfxMessageBox("xml文件打开错误！");
+		m_error_msg = "xml文件打开错误!";
 		return false;
 	}
 
@@ -940,7 +666,7 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 		}
 		else
 		{
-			AfxMessageBox("不识别的xml文件！\n");
+			m_error_msg = "不识别的xml文件!";
 			return false;
 		}
 
@@ -953,7 +679,7 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 		}
 		else
 		{
-			AfxMessageBox("不识别的xml文件！\n");
+			m_error_msg = "不识别的xml文件!";
 			return false;
 		}
 
@@ -966,7 +692,7 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 		}
 		else
 		{
-			AfxMessageBox("不识别的xml文件！\n");
+			m_error_msg = "不识别的xml文件!";
 			return false;
 		}
 		//配准工程路径
@@ -979,7 +705,7 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 		}
 		else
 		{
-			AfxMessageBox("不识别的xml文件！\n");
+			m_error_msg = "不识别的xml文件!";
 			return false;
 		}
 
@@ -992,7 +718,7 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 		}
 		else
 		{
-			AfxMessageBox("不识别的xml文件！\n");
+			m_error_msg = "不识别的xml文件!";
 			return false;
 		}
 	}	
@@ -1010,13 +736,13 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 		TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
 		if (strData != "0220")
 		{
-			AfxMessageBox("不识别的xml文件！\n");
+			m_error_msg = "不识别的xml文件!";
 			return false;
 		}
 	}
 	else
 	{
-		AfxMessageBox("不识别的xml文件！\n");
+		m_error_msg = "不识别的xml文件!";
 		return false;
 	}
 	xml.FindElem();
@@ -1034,7 +760,7 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 	}
 	else
 	{
-		AfxMessageBox("不识别的xml文件！\n");
+		m_error_msg = "不识别的xml文件!";
 		return false;
 	}
 	xml.OutOfElem();
@@ -1052,7 +778,7 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 	}
 	else
 	{
-		AfxMessageBox("不识别的xml文件！\n");
+		m_error_msg = "不识别的xml文件!";
 		return false;
 	}
 
@@ -1066,7 +792,7 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 	}
 	else
 	{
-		AfxMessageBox("不识别的xml文件！\n");
+		m_error_msg = "不识别的xml文件!";
 		return false;
 	}
 	//
@@ -1080,7 +806,7 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 	}
 	else
 	{
-		AfxMessageBox("不识别的xml文件！\n");
+		m_error_msg = "不识别的xml文件!";
 		return false;
 	}
 	return true;
@@ -1090,9 +816,7 @@ int LasPrjIO::LoadPrjFiles(char* lpXMLPath)
 {
 	if (!ReadPrjFile(lpXMLPath,m_PrjHdr))
 	{
-		char szMsg[1024];
-		std::sprintf(szMsg, "工程XML文件读取失败!");
-		AfxMessageBox(szMsg);
+		m_error_msg = "工程XML文件读取失败!";
 		return 0;
 	}
 
@@ -1100,9 +824,7 @@ int LasPrjIO::LoadPrjFiles(char* lpXMLPath)
 	{
 		if (ReadLasList(m_PrjHdr.LasListPath, m_LasInfo, m_PrjHdr)== 0)
 		{
-			char szMsg[1024];
-			std::sprintf(szMsg, "工程数据载入失败!");
-			AfxMessageBox(szMsg);
+			m_error_msg = "工程数据载入失败!";
 			return 0;
 		}
 	}
@@ -1110,18 +832,14 @@ int LasPrjIO::LoadPrjFiles(char* lpXMLPath)
 	{
 		if (ReadImgList(m_PrjHdr.ImgListPath, m_ImgInfo, m_PrjHdr) == 0)
 		{
-			char szMsg[1024];
-			std::sprintf(szMsg, "工程数据载入失败!");
-			AfxMessageBox(szMsg);
+			m_error_msg = "工程数据载入失败!";
 			return 0;
 		}
 		if (ReadLasList(m_PrjHdr.LasListPath, m_LasInfo, m_PrjHdr)
 			*ReadCamFile(m_PrjHdr.CamParFilePath, m_CameraInfo)
 			*ReadPosFile(m_PrjHdr.PosFilePath, m_ImgInfo) == 0)
 		{
-			char szMsg[1024];
-			std::sprintf(szMsg, "工程数据载入失败!");
-			AfxMessageBox(szMsg);
+			m_error_msg = "工程数据载入失败!";
 			return 0;
 		}
 	}
@@ -1129,41 +847,11 @@ int LasPrjIO::LoadPrjFiles(char* lpXMLPath)
 	return 1;
 }
 
-//int LasPrjIO::LoadPrjFiles2(LPCSTR lpXMLPath, LasPrjIO* sLasPrjIO)
-//{
-//	if (!ReadPrjFile(lpXMLPath, sLasPrjIO->m_PrjHdr))
-//	{
-//		char szMsg[1024];
-//		std::sprintf(szMsg, "工程XML文件读取失败!");
-//		AfxMessageBox(szMsg);
-//		return 0;
-//	}
-//	if (ReadImgList(sLasPrjIO->m_PrjHdr.ImgListPath, sLasPrjIO->m_ImgInfo) == 0)
-//	{
-//		char szMsg[1024];
-//		std::sprintf(szMsg, "工程数据载入失败!");
-//		AfxMessageBox(szMsg);
-//		return 0;
-//	}
-//	if (ReadLasList(sLasPrjIO->m_PrjHdr.LasListPath, sLasPrjIO->m_LasInfo)
-//		*ReadCamFile(sLasPrjIO->m_PrjHdr.CamParFilePath, sLasPrjIO->m_CameraInfo)
-//		*ReadPosFile(sLasPrjIO->m_PrjHdr.PosFilePath, sLasPrjIO->m_ImgInfo) == 0)
-//	{
-//		char szMsg[1024];
-//		std::sprintf(szMsg, "工程数据载入失败!");
-//		AfxMessageBox(szMsg);
-//		return 0;
-//	}
-//	return 1;
-//}
-
 int LasPrjIO::LoadPrjFiles2(char* lpXMLPath)
 {
 	if (!ReadPrjFile(lpXMLPath, m_PrjHdr))
 	{
-		char szMsg[1024];
-		std::sprintf(szMsg, "工程XML文件读取失败!");
-		AfxMessageBox(szMsg);
+		m_error_msg = "工程XML文件读取失败!";
 		return 0;
 	}
 
@@ -1171,9 +859,7 @@ int LasPrjIO::LoadPrjFiles2(char* lpXMLPath)
 	{
 		if (ReadLasList(m_PrjHdr.LasListPath, m_LasInfo)== 0)
 		{
-			char szMsg[1024];
-			std::sprintf(szMsg, "工程数据载入失败!");
-			AfxMessageBox(szMsg);
+			m_error_msg = "工程数据载入失败!";
 			return 0;
 		}
 	}
@@ -1181,18 +867,14 @@ int LasPrjIO::LoadPrjFiles2(char* lpXMLPath)
 	{
 		if (ReadImgList(m_PrjHdr.ImgListPath, m_ImgInfo) == 0)
 		{
-			char szMsg[1024];
-			std::sprintf(szMsg, "工程数据载入失败!");
-			AfxMessageBox(szMsg);
+			m_error_msg = "工程数据载入失败!";
 			return 0;
 		}
 		if (ReadLasList(m_PrjHdr.LasListPath, m_LasInfo)
 			*ReadCamFile(m_PrjHdr.CamParFilePath, m_CameraInfo)
 			*ReadPosFile(m_PrjHdr.PosFilePath, m_ImgInfo) == 0)
 		{
-			char szMsg[1024];
-			std::sprintf(szMsg, "工程数据载入失败!");
-			AfxMessageBox(szMsg);
+			m_error_msg = "工程数据载入失败!";
 			return 0;
 		}
 	}
@@ -1250,7 +932,7 @@ int LasPrjIO::ReadDppFile(char* lpDppFPath,ImgInfo& vImg)
 	fDpp = fopen(lpDppFPath, "r");
 	if (fDpp == NULL)
 	{
-		AfxMessageBox("Can not open dpp file!");
+		m_error_msg = "Can not open dpp file!";
 		return 0;
 	}
 	int ImgCount = 0;
@@ -1336,9 +1018,7 @@ int LasPrjIO::ReadDPCamFile(char* lpDPCamFPath,CameraInfo& vCam)
 	fp = fopen(lpDPCamFPath, "r");
 	if (!fp)
 	{
-		char szMsg[1024];
-		sprintf(szMsg, "无法读取DPGrid工程相机文件!");
-		AfxMessageBox(szMsg);
+		m_error_msg = "无法读取DPGrid工程相机文件!";
 		return 0;
 	}
 	char szBuf[1024];
@@ -1512,9 +1192,7 @@ int LasPrjIO::ReadDPImgLocFile(char* lpDPImgLocFPath,ImgInfo& vImg)
 	fp = fopen(lpDPImgLocFPath, "r");
 	if (!fp)
 	{
-		char szMsg[1024];
-		sprintf(szMsg, "无法读取DPGrid工程影像路径文件!");
-		AfxMessageBox(szMsg);
+		m_error_msg = "无法读取DPGrid工程影像路径文件!";
 		return 0;
 	}
 	char szBuf[1024];
@@ -1559,9 +1237,7 @@ int LasPrjIO::ReadDPVpsFile(char* lpDPVpsFPath,ImgInfo& vImg)
 	fpos = fopen(lpDPVpsFPath, "r");
 	if (!fpos)
 	{
-		char szMsg[1024];
-		sprintf(szMsg, "无法读取DPGrid工程Pos文件!");
-		AfxMessageBox(szMsg);
+		m_error_msg = "无法读取DPGrid工程Pos文件!";
 		return 0;
 	}
 	char szBuf[1024];
@@ -1668,7 +1344,7 @@ int LasPrjIO::ReadDPDpiFile(char* lpDPDpiFPath, ImgData& Img,CameraInfo& vCam)
 	fDpi = fopen(lpDPDpiFPath, "r");
 	if (fDpi == NULL)
 	{
-		AfxMessageBox("无法读取DPGrid工程影像dpi文件!");
+		m_error_msg = "无法读取DPGrid工程影像dpi文件!";
 		return 0;
 	}
 	char szCamName[_MAX_PATH];

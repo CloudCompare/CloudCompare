@@ -88,6 +88,7 @@ public:
 	void UTMXYToLatLon(int nType, double dcentralM);
 	void GauXYToLatLon(int nType, double dcentralM);
 
+	std::string getErrorMsg() { return m_error_msg; }
 protected:
 	
 	int WriteLasList(char* lpstrPath, LasInfo sLasInfo);
@@ -120,5 +121,6 @@ private:
 	static const int m_MaxCamCount = 10; //最大相机数
 	static const int m_MaxImgCount = 10000;  //最大影像数
 	static const int m_MaxLasCount = 1000; //最大点云条带数
+	std::string m_error_msg;
 };
 

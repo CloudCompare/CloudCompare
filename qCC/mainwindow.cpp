@@ -14700,7 +14700,18 @@ void MainWindow::doActionCreateDatabase()
 	//QString database_name = QInputDialog::getText(this, "new database", "Database name", QLineEdit::Normal, QDate::currentDate().toString("yyyy-MM-dd"));
 	//! create a database
 	DataBaseHObject* new_database = DataBaseHObject::Create(database_name);
-	addToDB_Main(new_database);
+	if (new_database) {
+		//! project settings dialog
+		if (!m_pbdrPrjDlg) { m_pbdrPrjDlg = new bdrProjectDlg(this); m_pbdrPrjDlg->setModal(true); }
+		m_pbdrPrjDlg->linkWithProject(new_database);
+		if (m_pbdrPrjDlg->exec() && new_database->load()) {
+			addToDB_Main(new_database);
+		}
+		else {
+			delete new_database;
+			new_database = nullptr;
+		}
+	}
 }
 
 void MainWindow::doActionOpenDatabase()
@@ -14726,9 +14737,14 @@ void MainWindow::doActionOpenDatabase()
 
 	DataBaseHObject* load_database = DataBaseHObject::Create(database_name);
 
-	if (!load_database->load())	{
+	if (load_database->load()) {
+		addToDB_Main(load_database);
 		return;
 	}	
+	else if (load_database) {
+		delete load_database;
+		load_database = nullptr;
+	}
 
 	CCVector3d loadCoordinatesShift(0, 0, 0);
 	bool loadCoordinatesTransEnabled = false;
@@ -14747,7 +14763,7 @@ void MainWindow::doActionOpenDatabase()
 	ccHObject* newGroup = FileIOFilter::LoadFromFile(bin_file, parameters, result, QString());
 	if (!newGroup) return;
 
-	DataBaseHObject* load_database = new DataBaseHObject(*newGroup);
+	load_database = new DataBaseHObject(*newGroup);
 	load_database->setName(QFileInfo(database_name).completeBaseName());
 	load_database->setPath(QFileInfo(database_name).absoluteFilePath());
 	newGroup->transferChildren(*load_database);
@@ -14777,6 +14793,26 @@ void MainWindow::doActionSaveDatabase()
 
 	//specific case: BIN format			
 	result = FileIOFilter::SaveToFile(sel, bin_file, parameters, BinFilter::GetFileFilter());
+}
+
+void MainWindow::doActionEditDatabase()
+{
+	if (!m_pbdrPrjDlg) { m_pbdrPrjDlg = new bdrProjectDlg(this); m_pbdrPrjDlg->setModal(true); }
+	//! check how many available projects in the window
+	ccHObject* projObj = getCurrentMainDatabase(true);
+	BDBaseHObject* proj = projObj ? static_cast<BDBaseHObject*>(projObj) : nullptr;
+	if (!proj) {
+		//! new
+		doActionCreateDatabase();
+		return;
+	}
+	
+	m_pbdrPrjDlg->linkWithProject(proj);
+	if (m_pbdrPrjDlg->exec()) {
+		//proj->load();
+	}
+	ccHObject* current_database = getCurrentMainDatabase(true);
+	if (!current_database) { return; }
 }
 
 void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool, bool remove_exist, bool auto_sort)
@@ -15002,26 +15038,6 @@ void MainWindow::doActionImportFolder()
 	}
 	
 	addPointsToDatabase(files, import_pool, true, true, true);
-}
-
-void MainWindow::doActionEditDatabase()
-{
-	if (!m_pbdrPrjDlg) { m_pbdrPrjDlg = new bdrProjectDlg(this); m_pbdrPrjDlg->setModal(true); }
-	//! check how many available projects in the window
-	ccHObject* projObj = getCurrentMainDatabase(true);
-	BDBaseHObject* proj = projObj ? static_cast<BDBaseHObject*>(projObj) : nullptr;
-	if (!proj) {
-		//! new
-		doActionCreateDatabase();
-		return;
-	}
-	
-	m_pbdrPrjDlg->linkWithProject(proj);
-	if (m_pbdrPrjDlg->exec()) {
-		//proj->load();
-	}
-	ccHObject* current_database = getCurrentMainDatabase(true);
-	if (!current_database) { return; }
 }
 
 void MainWindow::doActionCreateBuildingProject()

@@ -138,7 +138,7 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 	{
 		ccHObject* points = new_database->getPointCloudGroup();
 		if (!points) {
-			return;
+			return nullptr;
 		}
 		points->setLocked(true);
 	}
@@ -147,7 +147,7 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 	{
 		ccHObject* images = new_database->getImagesGroup();
 		if (!images) {
-			return;
+			return nullptr;
 		}
 		images->setLocked(true);
 	}
@@ -156,7 +156,7 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 	{
 		ccHObject* misc = new_database->getMiscsGroup();
 		if (!misc) {
-			return;
+			return nullptr;
 		}
 		misc->setLocked(true);
 	}
@@ -165,35 +165,35 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 	{
 		ccHObject* products = new_database->getProductGroup();
 		if (!products) {
-			return;
+			return nullptr;
 		}
 		products->setLocked(true);
 
 		ccHObject* groundFilter = new_database->getProductFiltered();
 		if (!groundFilter) {
-			return;
+			return nullptr;
 		}
 		groundFilter->setLocked(true);
 
 		ccHObject* classified = new_database->getProductClassified();
 		if (!classified) {
-			return;
+			return nullptr;
 		}
 		classified->setLocked(true);
 
 		ccHObject* segments = new_database->getProductSegmented();
 		if (!segments) {
-			return;
+			return nullptr;
 		}
 		segments->setLocked(true);
 
 		ccHObject* models = new_database->getProductModels();
 		if (!models) {
-			return;
+			return nullptr;
 		}
 		models->setLocked(true);
 	}
-	return nullptr;
+	return new_database;
 }
 
 bool DataBaseHObject::load()

@@ -12,6 +12,15 @@
 #include <stdlib.h>
 #include <string.h> // memcpy, memset, strcmp...
 
+// XYLIU
+#ifndef MARKUP_STL
+#define MARKUP_STL
+#endif
+#ifndef _MBCS
+#define _MBCS
+#endif
+
+
 // Major build options
 // MARKUP_WCHAR wide char (2-byte UTF-16 on Windows, 4-byte UTF-32 on Linux and OS X)
 // MARKUP_MBCS ANSI/double-byte strings on Windows

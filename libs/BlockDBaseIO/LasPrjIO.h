@@ -5,6 +5,7 @@
 #include<string>
 #include<sstream>
 
+#ifndef USE_LASPRJIO_AS_LIB
 #ifdef _LasPrjIO_LIB_export
 #define _LasPrjIO_LIB	 __declspec(dllexport)
 #else
@@ -30,6 +31,10 @@
 
 #endif
 #endif
+#else
+#define _LasPrjIO_LIB
+#endif
+
 
 
 class _LasPrjIO_LIB LasPrjIO

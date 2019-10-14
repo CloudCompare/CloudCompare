@@ -130,8 +130,8 @@ private:
 		mDefaultIcons = { {}, QIcon(QStringLiteral(":/CC/images/dbLockSymbol.png")) };
 		
 		const int	hObjectIndex = mIconList.count();
-		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbHObjectSymbol.png")),
-							QIcon(QStringLiteral(":/CC/images/dbHObjectSymbolLocked.png")) } );
+		mIconList.append( { QIcon(QStringLiteral(":/CC/Stocker/images/stocker/layergroup.png")),
+							QIcon(QStringLiteral(":/CC/Stocker/images/stocker/layergroup_lock.png")) } );
 		
 		const int	cloudIndex = mIconList.count();
 		mIconList.append( { QIcon(QStringLiteral(":/CC/Stocker/images/stocker/pickpts.png")),
@@ -715,7 +715,7 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 				else if (item->getName().endsWith(BDDB_TODOGROUP_SUFFIX)) {
 					return QIcon(QStringLiteral(":/CC/Stocker/images/stocker/task.png"));
 				}
-				if ( item->getChildrenNumber() )
+				//if ( item->getChildrenNumber() )	//XYLIU
 				{
 					return gDBRootIcons->icon( item->getClassID(), locked );
 				}
@@ -732,6 +732,7 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 	case Qt::CheckStateRole:
 	{
 		// Don't include checkboxes for hierarchy objects if they have no children or only contain hierarchy objects (recursively)
+#if 0	//XYLIU
 		if ( item->getClassID() == CC_TYPES::HIERARCHY_OBJECT )
 		{
 			if ( item->getChildrenNumber() == 0 )
@@ -748,7 +749,7 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 				return {};
 			}
 		}
-		
+#endif
 		if (item->isEnabled())
 			return Qt::Checked;
 		else

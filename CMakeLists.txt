@@ -116,15 +116,7 @@ include( cmake/CMakeExternalLibs.cmake )
 include( contrib/AllSupport.cmake )
 
 FIND_PACKAGE(PostgreSQL)
-if(PostgreSQL_FOUND)
-	SET(PostgreSQL_DLL ${PostgreSQL_LIBRARY_DIRS}/libpq.dll CACHE PATH "Path to libpq.dll")
-	if (EXISTS ${PostgreSQL_DLL})
-		file(COPY ${PostgreSQL_DLL} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/debug/)
-		file(COPY ${PostgreSQL_DLL} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/release/)
-		install( FILES ${PostgreSQL_DLL} CONFIGURATIONS Release DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}_debug )
-		install( FILES ${PostgreSQL_DLL} CONFIGURATIONS Release DESTINATION ${CLOUDCOMPARE_DEST_FOLDER} )
-	endif()
-endif()
+
 
 # Libs requested by both qCC & ccViewer
 add_subdirectory( libs/CCFbo )

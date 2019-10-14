@@ -1,11 +1,25 @@
 #include "LasPrjIO.h"
 #include"Markup.h"
 #include"Exif.h"
-#include <afxwin.h>
 #include "omp.h" 
+#include <io.h>
+#include <windows.h>
 using namespace std;
 
 double pi = 3.14159265358979;
+
+inline std::vector<std::string> _splitString(char* str, const char* seps)
+{
+	std::vector<std::string> sub_strs;
+	char* token = strtok(str, seps);
+	while (token) {
+		std::string sub(token);
+		sub = sub.substr(0, sub.find_last_of("\t\r\n"));
+		sub_strs.push_back(sub);
+		token = strtok(NULL, seps);
+	}
+	return sub_strs;
+}
 
 LasPrjIO::LasPrjIO()
 {
@@ -292,7 +306,7 @@ void LasPrjIO::trim(char *strIn, char *strOut) {
 int LasPrjIO::ReadLasList(char* sLasLstPath, LasInfo& sLasInfo,PrjHdr& sPrjHdr)
 {	
 	LasInfo lasInfo;
-	if (ReadLasList(sLasLstPath, lasInfo) != 0)
+	if (ReadLasList(sLasLstPath, lasInfo) == 0)
 		return 0;
 
 	for (auto & las_info : lasInfo) {
@@ -306,8 +320,6 @@ int LasPrjIO::ReadLasList(char* sLasLstPath, LasInfo& sLasInfo,PrjHdr& sPrjHdr)
 
 int LasPrjIO::ReadLasList(char* sLasLstPath, LasInfo& sLasInfo)
 {
-	//strcpy(sPrjHdr.LasListPath, sLasLstPath);
-	//int blkID = sPrjHdr.BlockID; //读取prjID对应的数据
 	FILE *flas;
 	flas = fopen(sLasLstPath, "r");
 	if (!flas)
@@ -319,8 +331,6 @@ int LasPrjIO::ReadLasList(char* sLasLstPath, LasInfo& sLasInfo)
 	char szBuf[1024];
 	fgets(szBuf, 1024, flas);
 	sscanf(szBuf, "%d", &nLasNum);
-	//fgets(szBuf, 1024, flas);
-	//sscanf(szBuf, "%s", sPrjHdr.LasDir);
 
 	char LasName[_MAX_PATH];
 	char Lasdrive[_MAX_DRIVE];
@@ -328,62 +338,47 @@ int LasPrjIO::ReadLasList(char* sLasLstPath, LasInfo& sLasInfo)
 	char Lasext[_MAX_EXT];
 	char Lasfname[_MAX_FNAME];
 	char szbuf[1024];
-	char szbuf2[1024];
-	char temp_left[1024];
-	char temp_middle[1024];
-	char temp_right[1024];
-	char char_temp[1024];
-	CString str_temp;
+// 	char szbuf2[1024];
+// 	char temp_left[1024];
+// 	char temp_middle[1024];
+// 	char temp_right[1024];
+// 	char char_temp[1024];
+// 	CString str_temp;
 
 	for (int i = 0; i < nLasNum; i++)
 	{
 		LasStrip lstemp;
-		//fgets(szBuf, 1024, flas);
-		//sscanf(szBuf, "%s",lstemp.szName);
+		fgets(szBuf, 1024, flas);
+		sscanf(szBuf, "%d%s%lf%d", &lstemp.nIdx, lstemp.szPath, &lstemp.dzoffset, &lstemp.BlockID);
 		
-		//fgets(szbuf2, 1024, flas);
-		//trim(szbuf2, szbuf);
-		//str_temp = szbuf;
-		//str_temp.TrimRight();  //消除右侧空格
-		//strcpy(temp_right, str_temp.Right(str_temp.GetLength()-1-str_temp.ReverseFind(' ')));
-		//strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		//str_temp = char_temp;
-		//strcpy(temp_left, str_temp.Left(str_temp.Find(' ')));
-		//strcpy(temp_middle, str_temp.Right(str_temp.GetLength()-1-str_temp.Find(' ')));
-		//lstemp.nIdx = atoi(temp_left);
-		//lstemp.BlockID = atoi(temp_right);
-		//trim(temp_middle, lstemp.szPath);  //去除路径首尾空格
-
-		fgets(szbuf2, 1024, flas);
-		trim(szbuf2, szbuf);  //去除路径首尾空格
-		str_temp = szbuf;
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(temp_right, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		lstemp.BlockID = atoi(temp_right);// las blockID
-
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;
-		str_temp.TrimRight();
-		strcpy(temp_right, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		lstemp.dzoffset = atof(temp_right); // dzoffset
-
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));  //dzoffset左侧
-		str_temp = char_temp;
-		str_temp.TrimRight();
-
-		strcpy(temp_left, str_temp.Left(str_temp.Find(' ')));
-		strcpy(temp_middle, str_temp.Right(str_temp.GetLength() - 1 - str_temp.Find(' ')));
-		lstemp.nIdx = atoi(temp_left);
-		//lstemp.BlockID = atoi(temp_right);
-		trim(temp_middle, lstemp.szPath);  //去除路径首尾空格
+// 		fgets(szbuf2, 1024, flas);
+// 		trim(szbuf2, szbuf);  //去除路径首尾空格
+// 		str_temp = szbuf;
+// 		str_temp.TrimRight();  //消除右侧空格
+// 		strcpy(temp_right, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		lstemp.BlockID = atoi(temp_right);// las blockID
+// 
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 		str_temp = char_temp;
+// 		str_temp.TrimRight();
+// 		strcpy(temp_right, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		lstemp.dzoffset = atof(temp_right); // dzoffset
+// 
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));  //dzoffset左侧
+// 		str_temp = char_temp;
+// 		str_temp.TrimRight();
+// 
+// 		strcpy(temp_left, str_temp.Left(str_temp.Find(' ')));
+// 		strcpy(temp_middle, str_temp.Right(str_temp.GetLength() - 1 - str_temp.Find(' ')));
+// 		lstemp.nIdx = atoi(temp_left);
+// 		//lstemp.BlockID = atoi(temp_right);
+// 		trim(temp_middle, lstemp.szPath);  //去除路径首尾空格
 
 		//fscanf(flas, "%d%s%d", &lstemp.nIdx, lstemp.szPath, &lstemp.BlockID);
 		_splitpath(lstemp.szPath, Lasdrive, Lasdir, Lasfname, Lasext);
 		sprintf(lstemp.szName, "%s%s", Lasfname, Lasext);
 
 		sLasInfo.push_back(lstemp);
-		/*if (lstemp.BlockID == blkID)
-			sLasInfo.push_back(lstemp);*/
 	}
 	fclose(flas);
 
@@ -393,7 +388,7 @@ int LasPrjIO::ReadLasList(char* sLasLstPath, LasInfo& sLasInfo)
 int LasPrjIO::ReadImgList(char* sImgLstPath, ImgInfo& sImgInfo,PrjHdr& sPrjHdr)
 {
 	ImgInfo imgInfo;
-	if (ReadImgList(sImgLstPath, imgInfo) != 0)
+	if (ReadImgList(sImgLstPath, imgInfo) == 0)
 		return 0;
 
 	for (auto & img_info : imgInfo) {
@@ -407,8 +402,6 @@ int LasPrjIO::ReadImgList(char* sImgLstPath, ImgInfo& sImgInfo,PrjHdr& sPrjHdr)
 
 int LasPrjIO::ReadImgList(char* sImgLstPath, ImgInfo& sImgInfo)
 {
-	//strcpy(sPrjHdr.ImgListPath, sImgLstPath);
-	//int blkID = sPrjHdr.BlockID;
 	FILE *fimg;
 	fimg = fopen(sImgLstPath, "r");
 	if (!fimg)
@@ -419,57 +412,55 @@ int LasPrjIO::ReadImgList(char* sImgLstPath, ImgInfo& sImgInfo)
 	int nImgNum;	
 	//fscanf(fimg, "%d", &nImgNum);
 
-	char ImgName[_MAX_PATH];
+//	char ImgName[_MAX_PATH];
 	char Imgdrive[_MAX_DRIVE];
 	char Imgdir[_MAX_DIR];
 	char Imgext[_MAX_EXT];
 	char Imgfname[_MAX_FNAME];
 	char szbuf[1024];
-	char szbuf2[1024];
-	char temp_left[1024];
-	char temp_middle[1024];
-	char temp_right[1024];
-	char char_temp[1024];
-	CString str_temp;
+// 	char szbuf2[1024];
+// 	char temp_left[1024];
+// 	char temp_middle[1024];
+// 	char temp_right[1024];
+// 	char char_temp[1024];
+// 	CString str_temp;
 
-	fgets(szbuf2, 1024, fimg);
-	sscanf(szbuf2, "%d", &nImgNum);
+	fgets(szbuf, 1024, fimg);
+	sscanf(szbuf, "%d", &nImgNum);
 
 	for (int i = 0; i < nImgNum; i++)
 	{
 		ImgData img_temp;
 		//fscanf(fimg, "%d%s%d", &img_temp.ImageID, img_temp.szImgPath, &img_temp.BlockID);
 
-		fgets(szbuf2, 1024, fimg);
-		trim(szbuf2, szbuf);
-		str_temp = szbuf;
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(temp_right, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.BlockID = atoi(temp_right); //blockid
+		fgets(szbuf, 1024, fimg);
 
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp; 
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.CameraID = atof(char_temp); //camid
-		
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(temp_left, str_temp.Left(str_temp.Find(' ')));
-		strcpy(temp_middle, str_temp.Right(str_temp.GetLength() - 1 - str_temp.Find(' ')));
-		img_temp.ImageID = atoi(temp_left);
-		trim(temp_middle, img_temp.szImgPath);  //去除路径首尾空格
+		sscanf(szbuf, "%d%s%d%d", &img_temp.ImageID, img_temp.szImgPath, &img_temp.CameraID, &img_temp.BlockID);
 
+// 		trim(szbuf2, szbuf);
+// 		str_temp = szbuf;
+// 		str_temp.TrimRight();  //消除右侧空格
+// 		strcpy(temp_right, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.BlockID = atoi(temp_right); //blockid
+// 
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 		str_temp = char_temp; 
+// 		str_temp.TrimRight();  //消除右侧空格
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.CameraID = atof(char_temp); //camid
+// 		
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 		str_temp = char_temp;
+// 		str_temp.TrimRight();  //消除右侧空格
+// 		strcpy(temp_left, str_temp.Left(str_temp.Find(' ')));
+// 		strcpy(temp_middle, str_temp.Right(str_temp.GetLength() - 1 - str_temp.Find(' ')));
+// 		img_temp.ImageID = atoi(temp_left);
+// 		trim(temp_middle, img_temp.szImgPath);  //去除路径首尾空格
+// 
 		_splitpath(img_temp.szImgPath, Imgdrive, Imgdir, Imgfname, Imgext);
-		sprintf(ImgName, "%s%s", Imgfname, Imgext);
-		sprintf(img_temp.szImgName,"%s",ImgName);
+ 		sprintf(img_temp.szImgName, "%s%s", Imgfname, Imgext);
 
 		sImgInfo.push_back(img_temp);
-
-
-		/*if (img_temp.BlockID == blkID)
-			sImgInfo.push_back(img_temp);*/
 	}
 	fclose(fimg);
 
@@ -490,7 +481,7 @@ int LasPrjIO::ReadPosFile(char* sPosPath, ImgInfo& sImgInfo)
 	char szBuf[1024];
 	char szBuf2[1024];
 	char char_temp[1024];
-	CString str_temp;
+//	CString str_temp;
 
 	fgets(szBuf, 1024, fpos); 
 	sscanf(szBuf, "%d", &nImgNum);
@@ -498,49 +489,49 @@ int LasPrjIO::ReadPosFile(char* sPosPath, ImgInfo& sImgInfo)
 	for (int i = 0; i < nImgNum; i++)
 	{
 		ImgData img_temp;
-		
-		/*fscanf(fpos, "%s %lf %lf %lf %lf %lf %lf %lf",
+		fgets(szBuf2, 1024, fpos);
+		sscanf(szBuf2, "%s %lf %lf %lf %lf %lf %lf %lf",
 			img_temp.szImgName, &img_temp.gps_time,
 			&img_temp.Xs, &img_temp.Ys, &img_temp.Zs, &img_temp.Phi,
-			&img_temp.Omega, &img_temp.Kappa);*/
-		fgets(szBuf2, 1024, fpos);
-		trim(szBuf2, szBuf);
-		str_temp = szBuf; //kappa
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' '))); 
-		img_temp.Kappa = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;  //omega
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.Omega = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;  //Phi
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.Phi = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;  //Z
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.Zs = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;  //Y
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.Ys = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;  //X
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.Xs = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		str_temp = char_temp;  //gpstime
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.gps_time = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-		trim(char_temp, img_temp.szImgName);    //name
+			&img_temp.Omega, &img_temp.Kappa);
+		
+// 		trim(szBuf2, szBuf);
+// 		str_temp = szBuf; //kappa
+// 		str_temp.TrimRight();  //消除右侧空格
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' '))); 
+// 		img_temp.Kappa = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 		str_temp = char_temp;  //omega
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.Omega = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 		str_temp = char_temp;  //Phi
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.Phi = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 		str_temp = char_temp;  //Z
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.Zs = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 		str_temp = char_temp;  //Y
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.Ys = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 		str_temp = char_temp;  //X
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.Xs = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 		str_temp = char_temp;  //gpstime
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.gps_time = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 		trim(char_temp, img_temp.szImgName);    //name
 
 		//将外方位元素存入同名影像中
 		for (int j = 0; j < sImgInfo.size();j++)
@@ -643,8 +634,8 @@ int LasPrjIO::ReadCamFile(char* camPath, CameraInfo& sCamInfo)
 
 int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 {
-	TRACE("解析xml文件！\n");
-	CMarkup xml; CString strTagName = _T(""); CString strData = _T("");
+	//TRACE("解析xml文件！\n");
+	CMarkup xml; std::string strTagName, strData;
 	if (!xml.Load(lpXMLPath))
 	{
 		m_error_msg = "xml文件打开错误!";
@@ -661,8 +652,8 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 		{
 			strTagName = xml.GetTagName();
 			strData = xml.GetData();
-			TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
-			strcpy(sPrjHdr.PrjPath, strData);
+			//TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
+			strcpy(sPrjHdr.PrjPath, strData.c_str());
 		}
 		else
 		{
@@ -674,8 +665,8 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 		{
 			strTagName = xml.GetTagName();
 			strData = xml.GetData();
-			TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
-			sPrjHdr.ProjectID = atoi(strData);
+			//TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
+			sPrjHdr.ProjectID = atoi(strData.c_str());
 		}
 		else
 		{
@@ -687,8 +678,8 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 		{
 			strTagName = xml.GetTagName();
 			strData = xml.GetData();
-			TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
-			sPrjHdr.BlockID = atoi(strData);
+			//TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
+			sPrjHdr.BlockID = atoi(strData.c_str());
 		}
 		else
 		{
@@ -700,8 +691,8 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 		{
 			strTagName = xml.GetTagName();
 			strData = xml.GetData();
-			TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
-			strcpy(sPrjHdr.RegisPrjPath, strData);
+			//TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
+			strcpy(sPrjHdr.RegisPrjPath, strData.c_str());
 		}
 		else
 		{
@@ -713,8 +704,8 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 		{
 			strTagName = xml.GetTagName();
 			strData = xml.GetData();
-			TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
-			sPrjHdr.m_fDemGSD = atof(strData.GetBuffer());
+			//TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
+			sPrjHdr.m_fDemGSD = atof(strData.c_str());
 		}
 		else
 		{
@@ -733,7 +724,7 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 	{
 		strTagName = xml.GetTagName();
 		strData = xml.GetData();
-		TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
+		//TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
 		if (strData != "0220")
 		{
 			m_error_msg = "不识别的xml文件!";
@@ -753,10 +744,8 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 	{
 		strTagName = xml.GetTagName();
 		strData = xml.GetData();
-		TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
-		strcpy(sPrjHdr.LasListPath, strData);
-		//LasListPath = path_temp;
-		//TRACE("%s\n", LasListPath);
+		//TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
+		strcpy(sPrjHdr.LasListPath, strData.c_str());
 	}
 	else
 	{
@@ -772,8 +761,8 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 	{
 		strTagName = xml.GetTagName();
 		strData = xml.GetData();
-		TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
-		strcpy(sPrjHdr.ImgListPath, strData);
+		//TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
+		strcpy(sPrjHdr.ImgListPath, strData.c_str());
 		//ImgListPath = path_temp;
 	}
 	else
@@ -786,8 +775,8 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 	{
 		strTagName = xml.GetTagName();
 		strData = xml.GetData();
-		TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
-		strcpy(sPrjHdr.CamParFilePath, strData);
+		//TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
+		strcpy(sPrjHdr.CamParFilePath, strData.c_str());
 		//CamFilePath = path_temp;
 	}
 	else
@@ -800,8 +789,8 @@ int LasPrjIO::ReadPrjFile(char* lpXMLPath, PrjHdr& sPrjHdr)
 	{
 		strTagName = xml.GetTagName();
 		strData = xml.GetData();
-		TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
-		strcpy(sPrjHdr.PosFilePath, strData);
+		//TRACE("\n---tagName:%s,Data:%s--\n", strTagName, strData);
+		strcpy(sPrjHdr.PosFilePath, strData.c_str());
 		//PosFilePath = path_temp;
 	}
 	else
@@ -936,74 +925,90 @@ int LasPrjIO::ReadDppFile(char* lpDppFPath,ImgInfo& vImg)
 		return 0;
 	}
 	int ImgCount = 0;
+	
 	char strLine[1024];
-	CString str_temp;
+	::GetPrivateProfileString("IMAGE_INF", "imagesCount", 0, strLine, 1024, lpDppFPath);
+	sscanf(strLine, "%d", &ImgCount);
+	if (ImgCount == 0) {
+		return 1;
+	}
+	else if (ImgCount < 0) return 0;
+
+	std::string str_temp;
 	//for (int i = 0; i < 23; i++)
 	for (int i = 0; i < 30; i++)
 	{
-		fgets(strLine, 256, fDpp);
+		fgets(strLine, 1024, fDpp);
 		if (strcmp(strLine, "[IMAGE_INF]\n") == 0)
 			break;
 	}
-		
-	fgets(strLine, 1024, fDpp);
-	str_temp = strLine; 
-	str_temp.TrimRight();  //消除右侧空格
-	strcpy(strLine, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-	ImgCount = atoi(strLine);  //影像数目
 
-	fgets(strLine, 256, fDpp);
+	fgets(strLine, 1024, fDpp);
+	fgets(strLine, 1024, fDpp);
 
 	char strImgName[256];
 	char strImgID[256];
-	CString strName;
+	//CString strName;
 	for (int i = 0; i < ImgCount; i++)
 	{
 		ImgData Img_temp;
 		fgets(strLine, 1024, fDpp);
-		char szTemp[1024];
-		int nFlag = 1;
-		for (int j = 0; j < 3; j++)
-		{
-			str_temp = strLine;
-			str_temp.TrimRight();  //消除右侧空格
-			
-			if (j == 0)
-			{
-				//int a = str_temp.GetLength() - 1;
-				string stemp;
-				stemp = str_temp[str_temp.GetLength() - 1];
-				//sprintf(szTemp, "%s", str_temp[str_temp.GetLength() - 1]);
-				if (stemp == "=")
-				{
-					nFlag = -1;
-					break;
-				}
-			}
-
-			strcpy(strLine, str_temp.Left(/*str_temp.GetLength() - 1 - */str_temp.ReverseFind('\t')));
-		}
-
-		if (nFlag == -1)
+		std::vector<std::string> subSeps = _splitString(strLine, "=");
+		if (subSeps.size() < 2) {
 			continue;
+		}
+		strcpy(strImgID, subSeps[0].c_str());
+		sscanf(subSeps[1].c_str(), "%s", Img_temp.szImgName);
+		
+		subSeps = _splitString(strImgID, "_");
+		if (subSeps.size() < 2) {
+			continue;
+		}
+		sscanf(subSeps.back().c_str(), "%d", &Img_temp.ImageID);
+		Img_temp.ImageID++; //dpp文件影像id从0编号 Adjustment从1编号
 
-		str_temp = strLine;
-		str_temp.TrimRight();
-		strcpy(strImgID, str_temp.Left(str_temp.Find('=')));
-		strcpy(strImgName, str_temp.Right(str_temp.GetLength() - 1 - str_temp.Find('=')));
 
-		strName = strImgName;
-		strName.TrimRight();
-		strcpy(Img_temp.szImgName, strName); //影像名
-
-
-		str_temp = strImgID;
-		strcpy(strLine, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('_')));
-		/*str_temp = strLine;
-		strcpy(strLine, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('0')));*/
-
-		Img_temp.ImageID = atoi(strLine);  //影像ID
-		Img_temp.ImageID++;  //dpp文件影像id从0编号 Adjustment从1编号
+// 		char szTemp[1024];
+// 		int nFlag = 1;
+// 		for (int j = 0; j < 3; j++)
+// 		{
+// 			str_temp = strLine;
+// 			str_temp.TrimRight();  //消除右侧空格
+// 
+// 			if (j == 0)
+// 			{
+// 				//int a = str_temp.GetLength() - 1;
+// 				string stemp;
+// 				stemp = str_temp[str_temp.GetLength() - 1];
+// 				//sprintf(szTemp, "%s", str_temp[str_temp.GetLength() - 1]);
+// 				if (stemp == "=")
+// 				{
+// 					nFlag = -1;
+// 					break;
+// 				}
+// 			}
+// 
+// 			strcpy(strLine, str_temp.Left(/*str_temp.GetLength() - 1 - */str_temp.ReverseFind('\t')));
+// 		}
+// 
+// 		if (nFlag == -1)
+// 			continue;
+// 
+// 		str_temp = strLine;
+// 		str_temp.TrimRight();
+// 		strcpy(strImgID, str_temp.Left(str_temp.Find('=')));
+// 		strcpy(strImgName, str_temp.Right(str_temp.GetLength() - 1 - str_temp.Find('=')));
+// 
+// 		strName = strImgName;
+// 		strName.TrimRight();
+// 		strcpy(Img_temp.szImgName, strName); //影像名
+// 
+// 
+// 		str_temp = strImgID;
+// 		strcpy(strLine, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('_')));
+// 
+// 		Img_temp.ImageID = atoi(strLine);  //影像ID
+// 		Img_temp.ImageID++;  //dpp文件影像id从0编号 Adjustment从1编号
 
 		vImg.push_back(Img_temp);
 	}
@@ -1014,350 +1019,400 @@ int LasPrjIO::ReadDppFile(char* lpDppFPath,ImgInfo& vImg)
 
 int LasPrjIO::ReadDPCamFile(char* lpDPCamFPath,CameraInfo& vCam)
 {
-	FILE *fp;
-	fp = fopen(lpDPCamFPath, "r");
-	if (!fp)
-	{
+	char strTemp[1024];
+	int CamCount;
+	::GetPrivateProfileString("CAM_PAR", "camCount", "-1", strTemp, 1024, lpDPCamFPath);
+	sscanf(strTemp, "%d", &CamCount);
+	if (CamCount < 0) {
 		m_error_msg = "无法读取DPGrid工程相机文件!";
 		return 0;
 	}
-	char szBuf[1024];
-	CString str_temp;
-	char temp[1024];
-	int CamCount = 0;
-	fgets(szBuf, 1024, fp); //省略第一行
-	fgets(szBuf, 1024, fp);
-	str_temp = szBuf;
-	str_temp.TrimRight();  //消除右侧空格
-	strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-	CamCount = atoi(temp);
-	int fidcount = 0;
-	int tempI;
-	double tempF;
-	for (int i = 0; i < CamCount; i++)
-	{
+	for (int i = 0; i < CamCount; ++i) {
+		char app_name[32];
+		sprintf(app_name, "CAM_%d", i);
 		CameraData CamTemp;
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		str_temp = str_temp.Left(str_temp.GetLength() - 1 - str_temp.ReverseFind(']'));
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('_')));
-		CamTemp.CameraID = atoi(temp);  //相机ID
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		sprintf(CamTemp.CameraName, "%s", temp); //相机名
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		CamTemp.f = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		CamTemp.pixelSize = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		CamTemp.x0 = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		CamTemp.y0 = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		CamTemp.width = atoi(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		CamTemp.height = atoi(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		tempI = atoi(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		tempI = atoi(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		tempI = atoi(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		tempI = atoi(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		CamTemp.distortionPar[1] = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		CamTemp.distortionPar[2] = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		CamTemp.distortionPar[3] = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		CamTemp.distortionPar[4] = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		CamTemp.distortionPar[5] = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		tempF = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		tempF = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		tempF = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		tempF = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		tempF = atof(temp);
-
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();
-		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		fidcount = atoi(temp);
-		/*for (int j = 0; j < fidcount; j++)
-			fgets(szBuf, 1024, fp);*/
+		CamTemp.CameraID = i;
+		::GetPrivateProfileString(app_name, "CameraName", "", CamTemp.CameraName, 1024, lpDPCamFPath);
+		
+		::GetPrivateProfileString(app_name, "FocalLen_mm", "0", strTemp, 1024, lpDPCamFPath);	CamTemp.f = atof(strTemp);
+		::GetPrivateProfileString(app_name, "PixelSize_mm", "0", strTemp, 1024, lpDPCamFPath);	CamTemp.pixelSize = atof(strTemp);
+		::GetPrivateProfileString(app_name, "CenterX0_mm", "0", strTemp, 1024, lpDPCamFPath);	CamTemp.x0 = atof(strTemp);
+		::GetPrivateProfileString(app_name, "CenterY0_mm", "0", strTemp, 1024, lpDPCamFPath);	CamTemp.y0 = atof(strTemp);
+		::GetPrivateProfileString(app_name, "FrameWid_pxl", "0", strTemp, 1024, lpDPCamFPath);	CamTemp.width = atoi(strTemp);
+		::GetPrivateProfileString(app_name, "FrameHei_pxl", "0", strTemp, 1024, lpDPCamFPath);	CamTemp.height = atoi(strTemp);
+		::GetPrivateProfileString(app_name, "CameraType", "0", strTemp, 1024, lpDPCamFPath);	
+		::GetPrivateProfileString(app_name, "CameraOritent", "0", strTemp, 1024, lpDPCamFPath);	
+		::GetPrivateProfileString(app_name, "DistUnit", "0", strTemp, 1024, lpDPCamFPath);
+		::GetPrivateProfileString(app_name, "DistIter", "0", strTemp, 1024, lpDPCamFPath);
+		::GetPrivateProfileString(app_name, "DistPar_K1", "0", strTemp, 1024, lpDPCamFPath);	CamTemp.distortionPar[1] = atof(strTemp);
+		::GetPrivateProfileString(app_name, "DistPar_K2", "0", strTemp, 1024, lpDPCamFPath);	CamTemp.distortionPar[2] = atof(strTemp);
+		::GetPrivateProfileString(app_name, "DistPar_K3", "0", strTemp, 1024, lpDPCamFPath);	CamTemp.distortionPar[3] = atof(strTemp);
+		::GetPrivateProfileString(app_name, "DistPar_P1", "0", strTemp, 1024, lpDPCamFPath);	CamTemp.distortionPar[4] = atof(strTemp);
+		::GetPrivateProfileString(app_name, "DistPar_P2", "0", strTemp, 1024, lpDPCamFPath);	CamTemp.distortionPar[5] = atof(strTemp);
+		::GetPrivateProfileString(app_name, "DistPar_K1r", "0", strTemp, 1024, lpDPCamFPath);
+		::GetPrivateProfileString(app_name, "DistPar_K2r", "0", strTemp, 1024, lpDPCamFPath);
+		::GetPrivateProfileString(app_name, "DistPar_K3r", "0", strTemp, 1024, lpDPCamFPath);
+		::GetPrivateProfileString(app_name, "DistPar_P1r", "0", strTemp, 1024, lpDPCamFPath);
+		::GetPrivateProfileString(app_name, "DistPar_P2r", "0", strTemp, 1024, lpDPCamFPath);
+		::GetPrivateProfileString(app_name, "FidCount", "0", strTemp, 1024, lpDPCamFPath);
 
 		vCam.push_back(CamTemp);
 	}
-	fclose(fp);
+
+// 	FILE *fp;
+// 	fp = fopen(lpDPCamFPath, "r");
+// 	if (!fp)
+// 	{
+// 		m_error_msg = "无法读取DPGrid工程相机文件!";
+// 		return 0;
+// 	}
+// 	char szBuf[1024];
+// 	CString str_temp;
+// 	char temp[1024];
+// 	int CamCount = 0;
+// 	fgets(szBuf, 1024, fp); //省略第一行
+// 	fgets(szBuf, 1024, fp);
+// 	str_temp = szBuf;
+// 	str_temp.TrimRight();  //消除右侧空格
+// 	strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 	CamCount = atoi(temp);
+// 	int fidcount = 0;
+// 	int tempI;
+// 	double tempF;
+// 	for (int i = 0; i < CamCount; i++)
+// 	{
+// 		CameraData CamTemp;
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		str_temp = str_temp.Left(str_temp.GetLength() - 1 - str_temp.ReverseFind(']'));
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('_')));
+// 		CamTemp.CameraID = atoi(temp);  //相机ID
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		sprintf(CamTemp.CameraName, "%s", temp); //相机名
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		CamTemp.f = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		CamTemp.pixelSize = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		CamTemp.x0 = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		CamTemp.y0 = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		CamTemp.width = atoi(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		CamTemp.height = atoi(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		tempI = atoi(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		tempI = atoi(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		tempI = atoi(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		tempI = atoi(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		CamTemp.distortionPar[1] = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		CamTemp.distortionPar[2] = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		CamTemp.distortionPar[3] = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		CamTemp.distortionPar[4] = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		CamTemp.distortionPar[5] = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		tempF = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		tempF = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		tempF = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		tempF = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		tempF = atof(temp);
+// 
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();
+// 		strcpy(temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		fidcount = atoi(temp);
+// 		/*for (int j = 0; j < fidcount; j++)
+// 			fgets(szBuf, 1024, fp);*/
+// 
+// 		vCam.push_back(CamTemp);
+// 	}
+// 	fclose(fp);
 
 	return TRUE;
 }
 
 int LasPrjIO::ReadDPImgLocFile(char* lpDPImgLocFPath,ImgInfo& vImg)
 {
-	FILE *fp;
-	fp = fopen(lpDPImgLocFPath, "r");
-	if (!fp)
-	{
+	if (_access(lpDPImgLocFPath, 0) == -1) {
 		m_error_msg = "无法读取DPGrid工程影像路径文件!";
 		return 0;
 	}
-	char szBuf[1024];
-
-	fseek(fp, 0L, SEEK_END);
-	long end = ftell(fp);
-	fseek(fp, 0L, SEEK_SET);
-	long start = ftell(fp);
-	int ImgCount = 0;
-	CString str_temp;
-
-	fgets(szBuf, 1024, fp);
-	while (end != start)
-	{
-		ImgData Imgtemp;
-		fgets(szBuf, 1024, fp);
-		str_temp = szBuf;
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(Imgtemp.szImgPath, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		strcpy(Imgtemp.szImgName, str_temp.Left(str_temp.ReverseFind('=')));
-		
-		for (int i = 0; i < vImg.size(); i++)
-		{
-			if (strcmp(Imgtemp.szImgName, vImg[i].szImgName) == 0)
-			{
-				sprintf(vImg[i].szImgPath, "%s", Imgtemp.szImgPath);
-				break;
-			}
-				
-		}
-
-		start = ftell(fp);
+	for (auto & img : vImg) {
+		char strTemp[512];
+		::GetPrivateProfileString("IMGFILE_LOC", img.szImgName, img.szImgPath, strTemp, 512, lpDPImgLocFPath);
+		strcpy(img.szImgPath, strTemp);
 	}
-	fclose(fp);
+
+// 	FILE *fp;
+// 	fp = fopen(lpDPImgLocFPath, "r");
+// 	if (!fp)
+// 	{
+// 		m_error_msg = "无法读取DPGrid工程影像路径文件!";
+// 		return 0;
+// 	}
+// 	char szBuf[1024];
+// 
+// 	fseek(fp, 0L, SEEK_END);
+// 	long end = ftell(fp);
+// 	fseek(fp, 0L, SEEK_SET);
+// 	long start = ftell(fp);
+// 	int ImgCount = 0;
+// 	CString str_temp;
+// 
+// 	fgets(szBuf, 1024, fp);
+// 	while (end != start)
+// 	{
+// 		ImgData Imgtemp;
+// 		fgets(szBuf, 1024, fp);
+// 		str_temp = szBuf;
+// 		str_temp.TrimRight();  //消除右侧空格
+// 		strcpy(Imgtemp.szImgPath, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		strcpy(Imgtemp.szImgName, str_temp.Left(str_temp.ReverseFind('=')));
+// 		
+// 		for (int i = 0; i < vImg.size(); i++)
+// 		{
+// 			if (strcmp(Imgtemp.szImgName, vImg[i].szImgName) == 0)
+// 			{
+// 				sprintf(vImg[i].szImgPath, "%s", Imgtemp.szImgPath);
+// 				break;
+// 			}
+// 				
+// 		}
+// 
+// 		start = ftell(fp);
+// 	}
+// 	fclose(fp);
 
 	return 1;
 }
 
 int LasPrjIO::ReadDPVpsFile(char* lpDPVpsFPath,ImgInfo& vImg)
 {
-	FILE *fpos;
-	fpos = fopen(lpDPVpsFPath, "r");
-	if (!fpos)
-	{
+	if (_access(lpDPVpsFPath, 0) == -1) {
 		m_error_msg = "无法读取DPGrid工程Pos文件!";
 		return 0;
 	}
-	char szBuf[1024];
-
-	fseek(fpos, 0L, SEEK_END);
-	long end = ftell(fpos);
-	fseek(fpos, 0L, SEEK_SET);
-	long start = ftell(fpos);
-	//int ImgCount = 0;
-	//CString str_temp;
-
-	int nImgNum;
-	//char szBuf[1024];
-	char szBuf2[1024];
-	char char_temp[1024];
-	CString str_temp;
-
-	fgets(szBuf, 1024, fpos);
-	while (end != start)
-	{
-		ImgData img_temp;
-		fgets(szBuf2, 1024, fpos);
-		trim(szBuf2, szBuf);
-		str_temp = szBuf; //temp
-		str_temp.TrimRight();  //消除右侧空格
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		//img_temp.Kappa = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-
-		str_temp = char_temp;  //temp
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		//img_temp.Omega = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-
-		str_temp = char_temp;  //temp
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		//img_temp.Omega = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-
-		str_temp = char_temp;  //kappa
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.Kappa = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-
-		str_temp = char_temp;  //omega
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.Omega = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-
-		str_temp = char_temp;  //Phi
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.Phi = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-
-		str_temp = char_temp;  //Z
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.Zs = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-
-		str_temp = char_temp;  //Y
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
-		img_temp.Ys = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
-
-		str_temp = char_temp;  //X
-		str_temp.TrimRight(" ");
-		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-		img_temp.Xs = atof(char_temp);
-		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind('=')));
-
-		trim(char_temp, img_temp.szImgName);    //name
-
-		//将外方位元素存入同名影像中
-		for (int j = 0; j < vImg.size(); j++)
-			if (strcmp(vImg[j].szImgName, img_temp.szImgName) == 0)
-			{
-				//vImg[j].gps_time = img_temp.gps_time;
-				vImg[j].Xs = img_temp.Xs;
-				vImg[j].Ys = img_temp.Ys;
-				vImg[j].Zs = img_temp.Zs;
-				vImg[j].Phi = img_temp.Phi;
-				vImg[j].Omega = img_temp.Omega;
-				vImg[j].Kappa = img_temp.Kappa;
-				break;
-			}
-
-		start = ftell(fpos);
+	for (auto & img : vImg)	{
+		char strTemp[1024]; memset(strTemp, 0, 1024);
+		::GetPrivateProfileString("IMGFILE_LOC", img.szImgName, "", strTemp, 512, lpDPVpsFPath);
+		if (strlen(strTemp) > 0) {
+			sscanf(strTemp, "%lf%lf%lf%lf%lf%lf", &img.Xs, &img.Ys, &img.Zs, &img.Phi, &img.Omega, &img.Kappa);
+		}
 	}
-	fclose(fpos);
+
+// 	FILE *fpos;
+// 	fpos = fopen(lpDPVpsFPath, "r");
+// 	if (!fpos)
+// 	{
+// 		m_error_msg = "无法读取DPGrid工程Pos文件!";
+// 		return 0;
+// 	}
+// 	char szBuf[1024];
+// 
+// 	fseek(fpos, 0L, SEEK_END);
+// 	long end = ftell(fpos);
+// 	fseek(fpos, 0L, SEEK_SET);
+// 	long start = ftell(fpos);
+// 	//int ImgCount = 0;
+// 	//CString str_temp;
+// 
+// 	int nImgNum;
+// 	//char szBuf[1024];
+// 	char szBuf2[1024];
+// 	char char_temp[1024];
+// 	CString str_temp;
+// 
+// 	fgets(szBuf, 1024, fpos);
+// 	while (end != start)
+// 	{
+// 		ImgData img_temp;
+// 		fgets(szBuf2, 1024, fpos);
+// 		trim(szBuf2, szBuf);
+// 		str_temp = szBuf; //temp
+// 		str_temp.TrimRight();  //消除右侧空格
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		//img_temp.Kappa = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 
+// 		str_temp = char_temp;  //temp
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		//img_temp.Omega = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 
+// 		str_temp = char_temp;  //temp
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		//img_temp.Omega = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 
+// 		str_temp = char_temp;  //kappa
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.Kappa = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 
+// 		str_temp = char_temp;  //omega
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.Omega = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 
+// 		str_temp = char_temp;  //Phi
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.Phi = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 
+// 		str_temp = char_temp;  //Z
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.Zs = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 
+// 		str_temp = char_temp;  //Y
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind(' ')));
+// 		img_temp.Ys = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind(' ')));
+// 
+// 		str_temp = char_temp;  //X
+// 		str_temp.TrimRight(" ");
+// 		strcpy(char_temp, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 		img_temp.Xs = atof(char_temp);
+// 		strcpy(char_temp, str_temp.Left(str_temp.ReverseFind('=')));
+// 
+// 		trim(char_temp, img_temp.szImgName);    //name
+// 
+// 		//将外方位元素存入同名影像中
+// 		for (int j = 0; j < vImg.size(); j++)
+// 			if (strcmp(vImg[j].szImgName, img_temp.szImgName) == 0)
+// 			{
+// 				//vImg[j].gps_time = img_temp.gps_time;
+// 				vImg[j].Xs = img_temp.Xs;
+// 				vImg[j].Ys = img_temp.Ys;
+// 				vImg[j].Zs = img_temp.Zs;
+// 				vImg[j].Phi = img_temp.Phi;
+// 				vImg[j].Omega = img_temp.Omega;
+// 				vImg[j].Kappa = img_temp.Kappa;
+// 				break;
+// 			}
+// 
+// 		start = ftell(fpos);
+// 	}
+// 	fclose(fpos);
 
 	return 1;
 }
 
 int LasPrjIO::ReadDPDpiFile(char* lpDPDpiFPath, ImgData& Img,CameraInfo& vCam)
 {
-	FILE *fDpi;
-	fDpi = fopen(lpDPDpiFPath, "r");
-	if (fDpi == NULL)
-	{
-		m_error_msg = "无法读取DPGrid工程影像dpi文件!";
+	if (_access(lpDPDpiFPath, 0) == -1) {
+		m_error_msg = "无法读取DPGrid工程Pos文件!";
 		return 0;
 	}
-	char szCamName[_MAX_PATH];
-	char strLine[1024];
-	CString str_temp;
-	for (int i = 0; i < 6; i++)
-		fgets(strLine, 256, fDpi);
-
-	fgets(strLine, 1024, fDpi);
-	str_temp = strLine;
-	str_temp.TrimRight();  //消除右侧空格
-	strcpy(szCamName, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
-	
+	char szCamName[1024]; memset(szCamName, 0, 1024);
+	::GetPrivateProfileString("CMR_PAR", "CameraName", "", szCamName, 512, lpDPDpiFPath);
 	for (int i = 0; i < vCam.size(); i++)
 	{
 		if (strcmp(szCamName, vCam[i].CameraName) == 0)
@@ -1365,9 +1420,36 @@ int LasPrjIO::ReadDPDpiFile(char* lpDPDpiFPath, ImgData& Img,CameraInfo& vCam)
 			Img.CameraID = vCam[i].CameraID;
 			break;
 		}
-	}	
-
-	fclose(fDpi);
+	}
+	
+// 	FILE *fDpi;
+// 	fDpi = fopen(lpDPDpiFPath, "r");
+// 	if (fDpi == NULL)
+// 	{
+// 		m_error_msg = "无法读取DPGrid工程影像dpi文件!";
+// 		return 0;
+// 	}
+// 	char szCamName[_MAX_PATH];
+// 	char strLine[1024];
+// 	CString str_temp;
+// 	for (int i = 0; i < 6; i++)
+// 		fgets(strLine, 256, fDpi);
+// 
+// 	fgets(strLine, 1024, fDpi);
+// 	str_temp = strLine;
+// 	str_temp.TrimRight();  //消除右侧空格
+// 	strcpy(szCamName, str_temp.Right(str_temp.GetLength() - 1 - str_temp.ReverseFind('=')));
+// 	
+// 	for (int i = 0; i < vCam.size(); i++)
+// 	{
+// 		if (strcmp(szCamName, vCam[i].CameraName) == 0)
+// 		{
+// 			Img.CameraID = vCam[i].CameraID;
+// 			break;
+// 		}
+// 	}	
+// 
+// 	fclose(fDpi);
 
 	return 1;
 }

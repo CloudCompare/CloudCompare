@@ -77,6 +77,7 @@ public:
 	}
 	DataBaseHObject(const ccHObject& s) :
 		BDBaseHObject_(s) {
+		setPath(s.getPath());
 		setDBSourceType(CC_TYPES::DB_MAINDB);
 	}
 	~DataBaseHObject() {}

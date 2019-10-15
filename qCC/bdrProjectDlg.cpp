@@ -15,6 +15,7 @@
 #include "FileIOFilter.h"
 #include "FileIO.h"
 #include "bdr2.5DimEditor.h"
+#include "ccGLWindow.h"
 
 listData * listData::New(importDataType type)
 {
@@ -62,8 +63,15 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 {
 	m_UI->setupUi(this);
 
-	m_UI->previewFrame->setVisible(false);
-	m_UI->previewInfoGroupBox->setVisible(false);
+	m_UI->previewToolButton->setChecked(false);
+	m_UI->previewDockWidget->setVisible(false);
+
+	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
+
+	if (!m_preview) {
+		m_preview = new bdr2Point5DEditor();
+		m_preview->create2DView(m_UI->previewFrame);
+	}
 	
 	for (int i = 0; i < IMPORT_TYPE_END; i++) {
 		QTableWidget* tableWidget = getTableWidget(static_cast<importDataType>(i)); assert(tableWidget); if (!tableWidget) return;
@@ -102,6 +110,9 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	connect(m_UI->productLevelComboBox,			SIGNAL(currentIndexChanged(int)),	this, SLOT(onLevelChanged(int)));
 	connect(m_UI->dataFilesTabWidget,			SIGNAL(currentChanged(int)),		this, SLOT(onDataFilesChanged(int)));
 	connect(m_UI->buttonBox,					&QDialogButtonBox::accepted,		this, &bdrProjectDlg::acceptAndExit);
+	connect(m_UI->buttonBox,					&QDialogButtonBox::rejected,		this, &bdrProjectDlg::clear);
+	connect(m_UI->applyToolButton,				&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionApply);
+	
 	connect(m_UI->importLocalFileToolButton,	&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionImportFile);
 	connect(m_UI->importLocalFolderToolButton,	&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionImportFolder);
 	connect(m_UI->importDBToolButton,			&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionImportDatabase);
@@ -123,12 +134,23 @@ bdrProjectDlg::~bdrProjectDlg()
 	delete m_UI;
 }
 
+void bdrProjectDlg::clear()
+{
+	ccGLWindow* glWin = m_preview->getGLWindow();
+	if (glWin && m_ownProject) glWin->removeFromOwnDB(m_ownProject);
+	resetObjects();
+}
+
 void bdrProjectDlg::linkWithProject(DataBaseHObject * proj)
 {
 	if (m_associateProject != proj)	{
 		m_associateProject = proj;
 		//! CLEAR
 		resetObjects();
+		m_ownProject = new DataBaseHObject(*m_associateProject);
+		if (m_preview) {
+			m_preview->getGLWindow()->addToOwnDB(m_ownProject);
+		}
 		HObjectToList();
 	}
 }
@@ -154,6 +176,16 @@ int bdrProjectDlg::getProjetcGroupID()
 
 importDataType bdrProjectDlg::getCurrentTab() {
 	return importDataType(m_UI->dataFilesTabWidget->currentIndex());
+}
+importDataType bdrProjectDlg::getCurrentTab(QTableWidget * widget)
+{
+	if (widget == m_UI->pointsTableWidget) {
+		return IMPORT_POINTS;
+	}
+	else if (widget == m_UI->imagesTableWidget) {
+		return IMPORT_IMAGES;
+	}
+	return importDataType();
 }
 QTableWidget * bdrProjectDlg::getTableWidget(importDataType type)
 {
@@ -198,7 +230,46 @@ void bdrProjectDlg::onDataFilesChanged(int index)
 void bdrProjectDlg::onItemChanged(QTableWidgetItem * item)
 {
 	QTableWidget* tableWidget = item->tableWidget();
+	importDataType data_type = getCurrentTab(tableWidget);
 	
+	item->text();
+	
+	for (auto & data : getListDatas(data_type)) {
+		if (item->column() != ListCol_ID)
+		if (QString::number(data->m_index) == tableWidget->item(item->row(), ListCol_ID)->text()) {
+			if (item->column() == PointsCol_Path) {
+				data->m_path = item->text();
+			}
+			else if (item->column() == ListCol_Name) {
+				data->m_name = item->text();
+			}
+			switch (data_type)
+			{
+			case IMPORT_POINTS:
+			{
+				pointsListData* pd = static_cast<pointsListData*>(data);
+				if (item->column() == PointsCol_Level) {
+					pd->m_level = item->text();
+				}
+				else if (item->column() == PointsCol_GroupID) {
+					pd->m_groupID = item->text().toInt();
+				}
+				else if (item->column() == PointsCol_AssLv) {
+					//pd->m_assLevels = item->text();
+				}
+				pd->m_pointCnt;
+
+				break;
+			}
+			case IMPORT_IMAGES:
+				break;
+			case IMPORT_TYPE_END:
+				break;
+			default:
+				break;
+			}
+		}
+	}
 }
 
 void bdrProjectDlg::onSelectionChanged(QTableWidget * table)
@@ -229,6 +300,7 @@ void bdrProjectDlg::diaplayMessage(QString message, PRJ_ERROR_CODE error_code)
 
 void bdrProjectDlg::closeEvent(QCloseEvent * e)
 {
+	clear();
 	e->accept();
 }
 
@@ -317,7 +389,8 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 			pointsListData* pData = static_cast<pointsListData*>(data); if (!pData) continue;
 			ccHObject* object = pData->createObject();
 			if (object)	{
-				m_ownProject->addData(object, pData->getDataType(), pData->level);
+				std::cout << "load ok" << std::endl;
+				m_ownProject->addData(object, pData->getDataType(), pData->m_level);
 			}
 		}
 	}
@@ -346,7 +419,7 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 bool bdrProjectDlg::HObjectToList()
 {
 	resetLists();
-
+	m_associateProject;
 
 	return true;
 }
@@ -524,25 +597,46 @@ void bdrProjectDlg::doActionToggle()
 
 void bdrProjectDlg::doActionPreview()
 {
-	if (m_UI->previewToolButton->isChecked()) {
-		if (!m_preview)	{
-			m_preview = new bdr2Point5DEditor();
-			m_preview->create2DView(m_UI->previewFrame);
-		}
-	}
+	updatePreview();
 }
 
 void bdrProjectDlg::acceptAndExit()
 {
+	apply();
+
 	if (!generateProject()) {
 		diaplayMessage(QString::fromUtf8("无法生成工程文件"), PRJMSG_CRITICAL);
 		return;
 	}
 	else {
-		resetObjects();
+		clear();
 		
 		accept();
 	}
+}
+
+void bdrProjectDlg::doActionApply()
+{
+	apply();
+	
+	updatePreview();
+	m_preview->getGLWindow()->zoomGlobal();	
+}
+
+void bdrProjectDlg::updatePreview()
+{
+	if (m_preview && m_UI->previewToolButton->isChecked()) {
+		ccGLWindow* glWin = m_preview->getGLWindow();
+		if (glWin && m_ownProject) {
+			m_ownProject->setDisplay_recursive(glWin);
+			glWin->redraw();
+		}
+	}
+}
+
+void bdrProjectDlg::apply()
+{
+	ListToHObject();
 }
 
 bool bdrProjectDlg::generateProject()
@@ -556,7 +650,7 @@ bool bdrProjectDlg::generateProject()
 	if (project_path != m_associateProject->getPath()) {
 		m_associateProject->setPath(project_path);
 	}
-	if (ListToHObject() && m_ownProject) {
+	if (m_ownProject) {
 		return m_ownProject->save();
 	}
 	else {

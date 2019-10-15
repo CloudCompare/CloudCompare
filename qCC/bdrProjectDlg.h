@@ -64,8 +64,8 @@ public:
 	virtual importDataType getDataType() const override { return IMPORT_POINTS; }
 	virtual ccHObject* createObject() override;
 	size_t m_pointCnt;
-	QString level;
-	QStringList AssLevels;
+	QString m_level;
+	QStringList m_assLevels;
 protected:
 private:
 };
@@ -93,6 +93,7 @@ public:
 	~imagesListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_IMAGES; }
 	virtual ccHObject* createObject() override;
+	QString m_level;
 	double pos_x;
 protected:
 private:
@@ -119,7 +120,7 @@ public:
 	//! Destructor
 	~bdrProjectDlg() override;
 
-
+	void clear();
 protected slots:
 	
 	void doActionOpenProject();
@@ -141,6 +142,11 @@ protected slots:
 	void doActionToggle();
 	void doActionPreview();
 	void acceptAndExit();	
+	void doActionApply();
+
+	
+
+	void apply();
 
 private: //members
 	Ui::bdrProjectDlg	*m_UI;
@@ -148,6 +154,7 @@ private: //members
 
 	enum PRJ_ERROR_CODE { PRJMSG_STATUS, PRJMSG_WARNING, PRJMSG_ERROR, PRJMSG_CRITICAL };
 	void diaplayMessage(QString message, PRJ_ERROR_CODE error_code = PRJMSG_STATUS);
+	void updatePreview();
 protected:
 	void closeEvent(QCloseEvent *) override;
 
@@ -157,6 +164,7 @@ protected:
 
 	bool insertItemToTable(listData* data);
 	importDataType getCurrentTab();
+	importDataType getCurrentTab(QTableWidget* widget);
 	QTableWidget* getTableWidget(importDataType type);
 	listData::Container& getListDatas(importDataType type);
 public:

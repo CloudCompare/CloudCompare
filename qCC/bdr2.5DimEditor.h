@@ -22,7 +22,7 @@ public:
 
 	virtual void init2DView();
 	//! Creates the 2D view
-	void create2DView(QFrame* parentFrame);
+	virtual void create2DView(QFrame* parentFrame);
 
 	//! Updates the 2D display zoom	// left bottom
 	virtual void update2DDisplayZoom(ccBBox& box, CCVector3d up = CCVector3d(0, 1, 0));
@@ -31,14 +31,6 @@ public:
 protected:
 	//! 2D display
 	ccGLWindow* m_glWindow;
-
-	//! cursor
-	//			1	
-	//			|
-	//		2---0---4
-	//			|
-	//			3
-	ccPolyline* m_cursor_cross;
 };
 
 class bdr2Point5DimEditor : public bdr2Point5DEditor
@@ -53,8 +45,12 @@ public:
 	
 
 public:
-	virtual void clearAll() override;
+	
 	virtual void init2DView() override;
+	//! Creates the 2D view
+	virtual void create2DView(QFrame* parentFrame) override;
+	virtual void clearAll() override;
+
 	void setAssociate3DView(ccGLWindow* win);
 	ccGLWindow* getAssociate3DView() { return m_associate_3DView; }
 	void destroyAss3DView() { m_associate_3DView = nullptr; }
@@ -82,7 +78,13 @@ protected: //members
 
 	ccImage* m_image;
 	
-	
+	//! cursor
+	//			1	
+	//			|
+	//		2---0---4
+	//			|
+	//			3
+	ccPolyline* m_cursor_cross;
 };
 
 #endif //BDR_2_5D_EDITOR_HEADER

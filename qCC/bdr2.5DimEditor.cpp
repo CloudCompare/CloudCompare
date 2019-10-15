@@ -50,7 +50,6 @@
 
 bdr2Point5DEditor::bdr2Point5DEditor()
 	: m_glWindow(nullptr)
-	, m_cursor_cross(nullptr)
 {
 
 }
@@ -58,12 +57,7 @@ bdr2Point5DEditor::bdr2Point5DEditor()
 bdr2Point5DEditor::~bdr2Point5DEditor()
 {
 	clearAll();
-	if (m_cursor_cross) {
-		if (m_glWindow)
-			m_glWindow->removeFromOwnDB(m_cursor_cross);
-		delete m_cursor_cross;
-		m_cursor_cross = nullptr;
-	}
+	
 }
 
 void bdr2Point5DEditor::init2DView()
@@ -100,21 +94,6 @@ void bdr2Point5DEditor::create2DView(QFrame * parentFrame)
 	assert(m_glWindow && glWidget);
 
 	init2DView();
-
-	ccPointCloud* pc = new ccPointCloud();
-	for (size_t i = 0; i < 5; i++) { pc->addPoint(CCVector3(0, 0, 0)); }
-	m_cursor_cross = new ccPolyline(pc);
-
-	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(1);
-	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(2);
-	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(3);
-	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(4);
-	m_cursor_cross->setVisible(false);
-	m_cursor_cross->setDisplay(m_glWindow);
-	m_cursor_cross->setColor(ccColor::red);
-	m_cursor_cross->showColors(true);
-	m_cursor_cross->setWidth(1);
-	m_glWindow->addToOwnDB(m_cursor_cross);
 
 	//add window to the input frame (if any)
 	if (parentFrame)
@@ -164,13 +143,13 @@ void bdr2Point5DEditor::update2DDisplayZoom(ccBBox & box, CCVector3d up)
 
 void bdr2Point5DEditor::clearAll()
 {
-
 }
 
 bdr2Point5DimEditor::bdr2Point5DimEditor()
 	: bdr2Point5DEditor()
 	, m_associate_3DView(nullptr)
 	, m_image(nullptr)
+	, m_cursor_cross(nullptr)
 {
 }
 
@@ -180,8 +159,33 @@ bdr2Point5DimEditor::~bdr2Point5DimEditor()
 	// why cannot be deleted???	
 }
 
+void bdr2Point5DimEditor::create2DView(QFrame * parentFrame)
+{
+	bdr2Point5DEditor::create2DView(parentFrame);
+	ccPointCloud* pc = new ccPointCloud();
+	for (size_t i = 0; i < 5; i++) { pc->addPoint(CCVector3(0, 0, 0)); }
+	m_cursor_cross = new ccPolyline(pc);
+
+	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(1);
+	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(2);
+	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(3);
+	m_cursor_cross->addPointIndex(0); m_cursor_cross->addPointIndex(4);
+	m_cursor_cross->setVisible(false);
+	m_cursor_cross->setDisplay(m_glWindow);
+	m_cursor_cross->setColor(ccColor::red);
+	m_cursor_cross->showColors(true);
+	m_cursor_cross->setWidth(1);
+	m_glWindow->addToOwnDB(m_cursor_cross);
+}
+
 void bdr2Point5DimEditor::clearAll()
 {
+	if (m_cursor_cross) {
+		if (m_glWindow)
+			m_glWindow->removeFromOwnDB(m_cursor_cross);
+		delete m_cursor_cross;
+		m_cursor_cross = nullptr;
+	}
 	if (m_image) {
 		if (m_glWindow)
 			m_glWindow->removeFromOwnDB(m_image);

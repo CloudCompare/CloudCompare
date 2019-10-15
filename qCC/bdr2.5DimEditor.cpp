@@ -75,7 +75,7 @@ void bdr2Point5DEditor::init2DView()
 	params.colorScaleUseShader = false;
 	m_glWindow->setDisplayParameters(params, true);
 	m_glWindow->setPerspectiveState(false, true);
-	m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS);
+	m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_SIG_MOUSE_MOVED);
 	m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 	m_glWindow->displayOverlayEntities(true);
 	m_glWindow->setPivotVisibility(ccGLWindow::PIVOT_HIDE, false);

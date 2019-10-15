@@ -156,7 +156,6 @@ private: //members
 	void diaplayMessage(QString message, PRJ_ERROR_CODE error_code = PRJMSG_STATUS);
 	void updatePreview();
 protected:
-	void closeEvent(QCloseEvent *) override;
 
 	DataBaseHObject* m_associateProject;
 	DataBaseHObject* m_ownProject;
@@ -167,6 +166,10 @@ protected:
 	importDataType getCurrentTab(QTableWidget* widget);
 	QTableWidget* getTableWidget(importDataType type);
 	listData::Container& getListDatas(importDataType type);
+
+	//void mouseMoveEvent(QMouseEvent *event);
+	bool event(QEvent* evt) override;
+	void echoMouseMoved(int x, int y, Qt::MouseButtons buttons);
 public:
 	void linkWithProject(DataBaseHObject* proj);
 	bool generateProject();
@@ -181,6 +184,7 @@ public:
 	bool HObjectToList();
 	void resetLists();
 	void resetObjects();
+	bool isPreviewEnable();
 
 	listData::Container m_points_data;
 	listData::Container m_images_data;

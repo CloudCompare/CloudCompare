@@ -7270,7 +7270,7 @@ GLfloat ccGLWindow::getGLDepth(int x, int y, int extendToNeighbors/*=false*/)
 	makeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc) return 1.0f;//assert(glFunc);
 
 	//GLfloat z[9];
 	

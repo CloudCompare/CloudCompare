@@ -919,12 +919,14 @@ protected: //other methods
 	void setFontPointSize(int pixelSize);
 
 	//events handling
+public:
 	void mousePressEvent(QMouseEvent* event) override;
 	void mouseMoveEvent(QMouseEvent* event) override;
 	void mouseDoubleClickEvent(QMouseEvent* event) override;
 	void mouseReleaseEvent(QMouseEvent* event) override;
 	void wheelEvent(QWheelEvent* event) override;
 	bool event(QEvent* evt) override;
+protected:
 
 	bool initialize();
 	GLuint defaultQtFBO() const;
@@ -1078,8 +1080,10 @@ protected: //other methods
 	/** \return the (relative) depth or 1.0 if none is defined
 	**/
 	GLfloat getGLDepth(int x, int y, int extendToNeighbors = 0);
-	bool getClick3DPos(int x, int y, float depth, CCVector3d & P3D);
+
 public:
+	bool getClick3DPos(int x, int y, float depth, CCVector3d & P3D);
+
 	//! Returns the approximate 3D position of the clicked pixel
 	bool getClick3DPos(int x, int y, CCVector3d& P3D, int extend = 0);
 

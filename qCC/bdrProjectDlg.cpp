@@ -65,13 +65,19 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 
 	m_UI->previewToolButton->setChecked(false);
 	m_UI->previewDockWidget->setVisible(false);
+	m_UI->statusPreviewLabel->setText("");
+	m_UI->statusPrjLabel->setText("");
 
 	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
 
 	if (!m_preview) {
 		m_preview = new bdr2Point5DEditor();
 		m_preview->create2DView(m_UI->previewFrame);
+		connect(m_preview->getGLWindow(), &ccGLWindow::mouseMoved, this, &bdrProjectDlg::echoMouseMoved);
 	}
+	m_UI->previewFrame->setMouseTracking(true);
+	m_UI->previewDockWidget->setMouseTracking(true);
+	setMouseTracking(true);
 	
 	for (int i = 0; i < IMPORT_TYPE_END; i++) {
 		QTableWidget* tableWidget = getTableWidget(static_cast<importDataType>(i)); assert(tableWidget); if (!tableWidget) return;
@@ -125,7 +131,7 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	connect(m_UI->toggleToolButton,				&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionToggle);
 
 	connect(m_UI->previewToolButton,			&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionPreview);
-	
+
 }
 
 bdrProjectDlg::~bdrProjectDlg()
@@ -139,19 +145,22 @@ void bdrProjectDlg::clear()
 	ccGLWindow* glWin = m_preview->getGLWindow();
 	if (glWin && m_ownProject) glWin->removeFromOwnDB(m_ownProject);
 	resetObjects();
+	linkWithProject(nullptr);
 }
 
 void bdrProjectDlg::linkWithProject(DataBaseHObject * proj)
 {
 	if (m_associateProject != proj)	{
 		m_associateProject = proj;
-		//! CLEAR
-		resetObjects();
-		m_ownProject = new DataBaseHObject(*m_associateProject);
-		if (m_preview) {
-			m_preview->getGLWindow()->addToOwnDB(m_ownProject);
+		if (m_associateProject)	{
+			//! CLEAR
+			resetObjects();
+			m_ownProject = new DataBaseHObject(*m_associateProject);
+			if (m_preview) {
+				m_preview->getGLWindow()->addToOwnDB(m_ownProject);
+			}
+			HObjectToList();
 		}
-		HObjectToList();
 	}
 }
 
@@ -216,6 +225,78 @@ std::vector<listData*>& bdrProjectDlg::getListDatas(importDataType type)
 		break;
 	}
 	return std::vector<listData*>();
+}
+
+// void bdrProjectDlg::mouseMoveEvent(QMouseEvent * event)
+// {
+// 	if (m_preview&&m_preview->getGLWindow()) {
+// // 		bool m = m_preview->getGLWindow()->underMouse();
+// // 		if (m) {
+// // 			m_preview->getGLWindow()->mouseMoveEvent(event);
+// // 		}
+// 	}
+// }
+
+bool bdrProjectDlg::event(QEvent * evt)
+{
+	switch (evt->type())
+	{
+	case QEvent::Close:
+		clear();
+		evt->accept();
+		break;
+	default:
+		break;
+	}
+
+
+ 	if (isPreviewEnable()) {
+ 		ccGLWindow* gl = m_preview->getGLWindow();
+ 		switch (evt->type())
+ 		{
+ 		case QEvent::MouseMove:
+ 		{
+ 			QMouseEvent* event = static_cast<QMouseEvent*>(evt);
+ 			gl->mouseMoveEvent(event);
+ 			evt->accept();
+ 		}
+ 			break;
+ 		case QEvent::MouseButtonPress:
+ 		{
+ 			QMouseEvent* event = static_cast<QMouseEvent*>(evt);
+ 			gl->mousePressEvent(event); 
+ 			evt->accept();
+ 		}
+ 			break;
+ 		case QEvent::MouseButtonRelease:
+ 		{
+ 			QMouseEvent* event = static_cast<QMouseEvent*>(evt);
+ 			gl->mouseReleaseEvent(event);
+ 			evt->accept();
+ 		}
+ 			break;
+ 		case QEvent::Wheel:
+ 		{
+ 			QWheelEvent* event = static_cast<QWheelEvent*>(evt);
+ 			gl->wheelEvent(event);
+ 			evt->accept();
+ 		}
+ 			break;
+ 		default:
+ 			break;
+ 		}
+ 	}
+	
+	return QDialog::event(evt);
+}
+
+void bdrProjectDlg::echoMouseMoved(int x, int y, Qt::MouseButtons buttons)
+{
+	// set a ground map to echo mouse move
+// 	CCVector3d p;
+// 	m_preview->getGLWindow()->getClick3DPos(x, y, .0f, p);
+	m_UI->statusPreviewLabel->setText(QStringLiteral("%1,%2").arg(x).arg(y));
+
 }
 
 void bdrProjectDlg::onLevelChanged(int)
@@ -284,11 +365,13 @@ void bdrProjectDlg::diaplayMessage(QString message, PRJ_ERROR_CODE error_code)
 	switch (error_code)
 	{
 	case bdrProjectDlg::PRJMSG_STATUS:
-
+		m_UI->statusPrjLabel->setText("Info: " + message);
 		break;
 	case bdrProjectDlg::PRJMSG_WARNING:
+		m_UI->statusPrjLabel->setText("Warning: " + message);
 		break;
 	case bdrProjectDlg::PRJMSG_ERROR:
+		m_UI->statusPrjLabel->setText("Error: " + message);
 		break;
 	case bdrProjectDlg::PRJMSG_CRITICAL:
 		QMessageBox::critical(this, "Error!", message);
@@ -296,12 +379,6 @@ void bdrProjectDlg::diaplayMessage(QString message, PRJ_ERROR_CODE error_code)
 	default:
 		break;
 	}
-}
-
-void bdrProjectDlg::closeEvent(QCloseEvent * e)
-{
-	clear();
-	e->accept();
 }
 
 bool bdrProjectDlg::insertItemToTable(listData * data)
@@ -437,6 +514,11 @@ void bdrProjectDlg::resetObjects()
 		delete m_ownProject;
 		m_ownProject = nullptr;
 	}
+}
+
+bool bdrProjectDlg::isPreviewEnable()
+{
+	return m_preview && m_preview->getGLWindow() && m_UI->previewDockWidget->isVisible();
 }
 
 void bdrProjectDlg::doActionOpenProject()
@@ -625,7 +707,7 @@ void bdrProjectDlg::doActionApply()
 
 void bdrProjectDlg::updatePreview()
 {
-	if (m_preview && m_UI->previewToolButton->isChecked()) {
+	if (isPreviewEnable()) {
 		ccGLWindow* glWin = m_preview->getGLWindow();
 		if (glWin && m_ownProject) {
 			m_ownProject->setDisplay_recursive(glWin);

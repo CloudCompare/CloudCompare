@@ -33,14 +33,13 @@
   - on the first run you may have to manually set the **QT5_ROOT_PATH** variable. Make it point to your installation of Qt (on Windows it's where the 'bin' folder lies - e.g. *Qt\5.6\msvc2013_64*)
 
 2. Before clicking on the 'Generate' button, you may want to set some more options. If you expand the `OPTION` group, you'll be able to set some general options:
-  - `OPTION_BUILD_CC_VIEWER`: whether or not to build the ccViewer side project (ON by default)
-  - `OPTION_SUPPORT_MAC_PDMS_FORMAT`: to add support for PDMS .mac scripts (*CAD format*)
-  - `OPTION_USE_DXFLIB`: to add support for DXF files in CloudCompare/ccViewer with **dxflib** - see [below](#optional-setup-for-dxflib-support)
-  - `OPTION_USE_FBX_SDK`: to add support for FBX files in CloudCompare/ccViewer with the official **FBX SDK** - see [below](#optional-setup-for-fbx-sdk-support)
+  - `OPTION_BUILD_CCVIEWER`: whether or not to build the ccViewer side project (ON by default)
+  - `OPTION_USE_DXF_LIB`: to add support for DXF files in CloudCompare/ccViewer with **dxflib** - see [below](#optional-setup-for-dxflib-support)
+  - `PLUGIN_IO_QFBX`: to add support for FBX files in CloudCompare/ccViewer with the official **FBX SDK** - see [below](#optional-setup-for-fbx-sdk-support)
   - `OPTION_USE_GDAL`: to add support for a lot of raster files in CloudCompare/ccViewer with **GDAL** library - see [below](#optional-setup-for-gdal-support)
   - `PLUGIN_IO_QE57`: to add support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#optional-setup-for-libe57-support)
   - `OPTION_USE_SHAPE_LIB`: to add support for SHP files in CloudCompare/ccViewer
-  - `OPTION_PDAL_LAS`: to add support for LAS files in CloudCompare/ccViewer with **PDAL** - see [below](#optional-setup-for-las-using-pdal)
+  - `PLUGIN_IO_QPDAL`: to add support for LAS files in CloudCompare/ccViewer with **PDAL** - see [below](#optional-setup-for-las-using-pdal)
 
   The following are Windows-only options:
   - `OPTION_MP_BUILD`: for Visual Studio only *(multi-process build --> much faster but uses a lot of CPU power)*
@@ -112,7 +111,7 @@ If you want to use or debug plugins in DEBUG mode while using a single configura
 If you want to compile CloudCompare (and ccViewer) with LAS/LAZ files support, you'll need:
 
 1. [PDAL](https://pdal.io/)
-2. Set `OPTION_PDAL_LAS=TRUE`
+2. Set `PLUGIN_IO_QPDAL=TRUE`
 
 If your PDAL installation is not correctly picked up by CMake, 
 set the `PDAL_DIR` to the path containing `PDALConfig.cmake`.

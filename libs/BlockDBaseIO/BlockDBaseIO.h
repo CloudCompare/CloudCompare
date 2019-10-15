@@ -28,7 +28,12 @@ BLKDB_NAMESPACE_BEGIN
 
 enum BLOCK_TASK_TYPE
 {
-
+	TASK_TILE,
+	TASK_FILTER,
+	TASK_REGIS,
+	TASK_CLASS,
+	TASK_BDSEG,
+	TASK_RECON,
 };
 
 struct blkProjHdr
@@ -65,8 +70,10 @@ struct blkSceneInfo
 enum BLOCK_PtCldLevel
 {
 	PCLEVEL_UNO,
+	// ori
 	PCLEVEL_STRIP,
 	PCLEVEL_TILE,
+	// product
 	PCLEVEL_FILTER,
 	PCLEVEL_CLASS,
 	PCLEVEL_BUILD,
@@ -95,11 +102,20 @@ struct blkCameraInfo
 	double R0;
 };
 
+enum BLOCK_ImgLevel {
+	IMGLEVEL_UNO,
+	IMGLEVEL_STRIP,
+	IMGLEVEL_DOM,
+	IMGLEVEL_END,
+};
+static const char* g_strImageLevelName[] = { "uno","strip","dom" };
+
 struct blkImageInfo
 {
 	char sPath[_MAX_PATH];
 	char sName[_MAX_FNAME];
 	char sID[32];
+	BLOCK_ImgLevel level;
 	double gpsLat, gpsLon, gpsHeight;
 	double posXs, posYs, posZs, posPhi, posOmega, posKappa;
 	int stripID, attrib, cameraID, bFlag;

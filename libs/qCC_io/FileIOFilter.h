@@ -70,7 +70,7 @@ public:
 			, parentWidget(nullptr)
 			, sessionStart(true)
 			, additionInfo(nullptr)
-			, fastLoad(false)
+			, loadMode(-1)
 		{}
 		
 		//! How to handle big coordinates
@@ -92,7 +92,7 @@ public:
 		//! additional information
 		void* additionInfo;
 		//! load files faster
-		bool fastLoad;
+		int loadMode;
 	};
 	
 	//! Generic saving parameters

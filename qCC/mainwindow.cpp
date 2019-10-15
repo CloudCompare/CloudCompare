@@ -14685,7 +14685,7 @@ void MainWindow::doActionCreateDatabase()
 
 	QString database_name = QFileDialog::getExistingDirectory(this,
 		tr("Open Directory"),
-		QFileInfo(currentPath).absolutePath(),
+		QFileInfo(currentPath).absoluteFilePath(),
 		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	
 	if (database_name.isEmpty()) {
@@ -14693,7 +14693,7 @@ void MainWindow::doActionCreateDatabase()
 	}
 
 	//save last loading parameters
-	currentPath = QFileInfo(database_name).absolutePath();
+	currentPath = QFileInfo(database_name).absoluteFilePath();
 	settings.setValue(ccPS::CurrentPath(), currentPath);
 	settings.endGroup();
 
@@ -14704,6 +14704,7 @@ void MainWindow::doActionCreateDatabase()
 		//! project settings dialog
 		if (!m_pbdrPrjDlg) { m_pbdrPrjDlg = new bdrProjectDlg(this); m_pbdrPrjDlg->setModal(true); }
 		m_pbdrPrjDlg->linkWithProject(new_database);
+		m_pbdrPrjDlg->setProjectPath(new_database->getPath(), false);
 		if (m_pbdrPrjDlg->exec() && new_database->load()) {
 			addToDB_Main(new_database);
 		}
@@ -14798,21 +14799,20 @@ void MainWindow::doActionSaveDatabase()
 void MainWindow::doActionEditDatabase()
 {
 	if (!m_pbdrPrjDlg) { m_pbdrPrjDlg = new bdrProjectDlg(this); m_pbdrPrjDlg->setModal(true); }
-	//! check how many available projects in the window
-	ccHObject* projObj = getCurrentMainDatabase(true);
-	BDBaseHObject* proj = projObj ? static_cast<BDBaseHObject*>(projObj) : nullptr;
-	if (!proj) {
+	
+	ccHObject* current_database = getCurrentMainDatabase(true);
+	DataBaseHObject* projObj = current_database ? static_cast<DataBaseHObject*>(current_database) : nullptr;
+	if (!projObj) {
 		//! new
 		doActionCreateDatabase();
 		return;
 	}
 	
-	m_pbdrPrjDlg->linkWithProject(proj);
+	m_pbdrPrjDlg->linkWithProject(projObj);
+	m_pbdrPrjDlg->setProjectPath(projObj->getPath());
 	if (m_pbdrPrjDlg->exec()) {
-		//proj->load();
+		projObj->load();
 	}
-	ccHObject* current_database = getCurrentMainDatabase(true);
-	if (!current_database) { return; }
 }
 
 void MainWindow::addToDatabase(QStringList files, ccHObject * import_pool, bool remove_exist, bool auto_sort)

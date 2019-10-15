@@ -1105,6 +1105,31 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 			}
 		}
+		//! load fast without any prompt
+		if (parameters.loadMode == 0) {
+			ccPointCloud* vertices = new ccPointCloud("vertices"); // corner of xy boundingbox and min xyz, max xyz
+			ccPolyline* bounding_box = new ccPolyline(vertices);
+			if (!vertices->reserve(6) || !bounding_box->reserve(4)) {
+				delete vertices;
+				delete bounding_box;
+				return CC_FERR_NOT_ENOUGH_MEMORY;
+			}
+			double z = ((bbMin + bbMax) / 2).z;
+			vertices->addPoint(CCVector3(bbMin.x, bbMin.y, z));
+			vertices->addPoint(CCVector3(bbMax.x, bbMin.y, z));
+			vertices->addPoint(CCVector3(bbMax.x, bbMax.y, z));
+			vertices->addPoint(CCVector3(bbMin.x, bbMax.y, z));
+			bounding_box->addPointIndex(0, 4);
+			bounding_box->setClosed(true);
+			vertices->addPoint(CCVector3::fromArray(bbMin.u));
+			vertices->addPoint(CCVector3::fromArray(bbMax.u));
+			bounding_box->setGlobalShift(Pshift);
+			bounding_box->addChild(vertices);
+			bounding_box->setName("BoundingBox");
+
+			container.addChild(bounding_box);	//TODO: SET DISPLAYED BBOX
+			return CC_FERR_NO_ERROR;
+		}
 
 		bool fastLoad = s_lasOpenDlg->fastloadCheckBox->isChecked();
 		if (fastLoad) {

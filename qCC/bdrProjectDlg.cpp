@@ -6,12 +6,15 @@
 #include <QDirIterator>
 #include <QCheckBox>
 #include <QScrollBar>
+#include <QCloseEvent>
+#include <QMessageBox>
 #include "ccPersistentSettings.h"
 #include "ccFileUtils.h"
 #include "ccHObject.h"
 #include "ccHObjectCaster.h"
 #include "FileIOFilter.h"
 #include "FileIO.h"
+#include "bdr2.5DimEditor.h"
 
 listData * listData::New(importDataType type)
 {
@@ -26,10 +29,36 @@ listData * listData::New(importDataType type)
 	return nullptr;
 }
 
+ccHObject * listData::createObject()
+{
+	if (m_object) { delete m_object; m_object = nullptr; }
+	//! fast load
+	FileIOFilter::LoadParameters parameters;
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	{
+		parameters.alwaysDisplayLoadDialog = false;
+		parameters.loadMode = 0;
+	}
+
+	return FileIOFilter::LoadFromFile(m_path, parameters, result, QString());
+}
+
+ccHObject * pointsListData::createObject()
+{
+	return listData::createObject();
+}
+
+ccHObject * imagesListData::createObject()
+{
+	return listData::createObject();
+}
 
 bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	: m_UI(new Ui::bdrProjectDlg)
 	, m_associateProject(nullptr)
+	, m_ownProject(nullptr)
+	, m_postGIS(nullptr)
+	, m_preview(nullptr)
 {
 	m_UI->setupUi(this);
 
@@ -72,7 +101,7 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 
 	connect(m_UI->productLevelComboBox,			SIGNAL(currentIndexChanged(int)),	this, SLOT(onLevelChanged(int)));
 	connect(m_UI->dataFilesTabWidget,			SIGNAL(currentChanged(int)),		this, SLOT(onDataFilesChanged(int)));
-	connect(m_UI->buttonBox,					SIGNAL(accepted()),					this, SLOT(generateProject()));
+	connect(m_UI->buttonBox,					&QDialogButtonBox::accepted,		this, &bdrProjectDlg::acceptAndExit);
 	connect(m_UI->importLocalFileToolButton,	&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionImportFile);
 	connect(m_UI->importLocalFolderToolButton,	&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionImportFolder);
 	connect(m_UI->importDBToolButton,			&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionImportDatabase);
@@ -83,6 +112,8 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	connect(m_UI->toggleAllToolButton,			&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionToggleAll);
 	connect(m_UI->selectToolButton,				&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionSelect);
 	connect(m_UI->toggleToolButton,				&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionToggle);
+
+	connect(m_UI->previewToolButton,			&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionPreview);
 	
 }
 
@@ -92,14 +123,25 @@ bdrProjectDlg::~bdrProjectDlg()
 	delete m_UI;
 }
 
-void bdrProjectDlg::linkWithProject(ccHObject * proj)
+void bdrProjectDlg::linkWithProject(DataBaseHObject * proj)
 {
-	m_associateProject = proj;
+	if (m_associateProject != proj)	{
+		m_associateProject = proj;
+		//! CLEAR
+		resetObjects();
+		HObjectToList();
+	}
 }
 
 QString bdrProjectDlg::getProjectPath()
 {
 	return m_UI->projDirLineEdit->text();
+}
+void bdrProjectDlg::setProjectPath(QString path, bool enable)
+{
+	m_UI->projDirLineEdit->setText(path);
+	m_UI->projDirLineEdit->setEnabled(enable);
+	m_UI->projDirToolButton->setEnabled(enable);
 }
 int bdrProjectDlg::getProjectID()
 {
@@ -164,6 +206,30 @@ void bdrProjectDlg::onSelectionChanged(QTableWidget * table)
 	if (m_UI->previewFrame->isVisible()) {
 
 	}
+}
+
+void bdrProjectDlg::diaplayMessage(QString message, PRJ_ERROR_CODE error_code)
+{
+	switch (error_code)
+	{
+	case bdrProjectDlg::PRJMSG_STATUS:
+
+		break;
+	case bdrProjectDlg::PRJMSG_WARNING:
+		break;
+	case bdrProjectDlg::PRJMSG_ERROR:
+		break;
+	case bdrProjectDlg::PRJMSG_CRITICAL:
+		QMessageBox::critical(this, "Error!", message);
+		break;
+	default:
+		break;
+	}
+}
+
+void bdrProjectDlg::closeEvent(QCloseEvent * e)
+{
+	e->accept();
 }
 
 bool bdrProjectDlg::insertItemToTable(listData * data)
@@ -241,9 +307,63 @@ bool bdrProjectDlg::addDataToTable(QString path, importDataType data_type)
 	return true;
 }
 
-bool bdrProjectDlg::loadProject(QString path)
+bool bdrProjectDlg::ListToHObject(bool preview_control)
 {
+	//! points
+	bool update = !preview_control || (preview_control && 1);
+	if (update) {
+		for (listData* data : m_points_data) {
+			if (!data) continue;
+			pointsListData* pData = static_cast<pointsListData*>(data); if (!pData) continue;
+			ccHObject* object = pData->createObject();
+			if (object)	{
+				m_ownProject->addData(object, pData->getDataType(), pData->level);
+			}
+		}
+	}
+
+	//! images
+	update = !preview_control || (preview_control && 1);
+	if (update) {
+
+	}
+
+	//! miscs
+	update = !preview_control || (preview_control && 1);
+	if (preview_control && 1) {
+
+	}
+
+	//! postgis
+	update = !preview_control || (preview_control && 1);
+	if (0) {
+
+	}
+
 	return true;
+}
+
+bool bdrProjectDlg::HObjectToList()
+{
+	resetLists();
+
+
+	return true;
+}
+
+void bdrProjectDlg::resetLists()
+{
+	m_points_data.clear();
+	m_images_data.clear();
+	m_miscs_data.clear();
+}
+
+void bdrProjectDlg::resetObjects()
+{
+	if (m_ownProject) {
+		delete m_ownProject;
+		m_ownProject = nullptr;
+	}
 }
 
 void bdrProjectDlg::doActionOpenProject()
@@ -256,9 +376,8 @@ void bdrProjectDlg::doActionOpenProject()
 		tr("project directory"),
 		QFileInfo(currentPath).absolutePath(),
 		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-	if (!loadProject(path)) {
-		return;
-	}
+	
+
 	m_UI->projDirLineEdit->setText(path);
 }
 
@@ -403,16 +522,45 @@ void bdrProjectDlg::doActionToggle()
 	}
 }
 
+void bdrProjectDlg::doActionPreview()
+{
+	if (m_UI->previewToolButton->isChecked()) {
+		if (!m_preview)	{
+			m_preview = new bdr2Point5DEditor();
+			m_preview->create2DView(m_UI->previewFrame);
+		}
+	}
+}
+
 void bdrProjectDlg::acceptAndExit()
 {
-
+	if (!generateProject()) {
+		diaplayMessage(QString::fromUtf8("无法生成工程文件"), PRJMSG_CRITICAL);
+		return;
+	}
+	else {
+		resetObjects();
+		
+		accept();
+	}
 }
 
 bool bdrProjectDlg::generateProject()
 {
 	QString project_path = getProjectPath();
-	if (project_path.isEmpty()) {
+	if (project_path.isEmpty() || !QFileInfo(project_path).isDir()) {
+		diaplayMessage(QString::fromUtf8("请设置正确的工程文件夹路径"), PRJMSG_ERROR);
 		return false;
 	}
-	return true;
+	if (!m_associateProject) { return false; }
+	if (project_path != m_associateProject->getPath()) {
+		m_associateProject->setPath(project_path);
+	}
+	if (ListToHObject() && m_ownProject) {
+		return m_ownProject->save();
+	}
+	else {
+		return false;
+	}
 }
+

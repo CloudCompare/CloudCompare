@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include "FileIOFilter.h"
 #include <QDir>
+#include <QStringLiteral>
 
 #include "BlockDBaseIO.h"
 
@@ -194,6 +195,46 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 		models->setLocked(true);
 	}
 	return new_database;
+}
+
+bool DataBaseHObject::addData(ccHObject * obj, importDataType type, QString str_level)
+{
+	ccHObject* importObj = nullptr;
+	switch (type)
+	{
+	case IMPORT_POINTS:
+		BlockDB::BLOCK_PtCldLevel level;
+		for (size_t i = 0; i < BlockDB::PCLEVEL_END; i++) {
+			if (str_level == QString::fromLocal8Bit(BlockDB::g_strPtCldLevelName[i])) {
+				level = BlockDB::BLOCK_PtCldLevel(i);
+			}
+		}
+		if (level >= BlockDB::PCLEVEL_STRIP && level <= BlockDB::PCLEVEL_TILE) {
+			importObj = getPointCloudGroup();
+		}
+		else if (level == BlockDB::PCLEVEL_FILTER) {
+			importObj = getProductFiltered();
+		}
+		else if (level == BlockDB::PCLEVEL_CLASS) {
+			importObj = getProductClassified();
+		}
+		else if (level == BlockDB::PCLEVEL_BUILD) {
+			importObj = getProductSegmented();
+		}
+		
+		break;
+	case IMPORT_IMAGES:
+		importObj = getImagesGroup();
+		break;
+	case IMPORT_TYPE_END:
+		break;
+	default:
+		break;
+	}
+	if (importObj) {
+		importObj->addChild(obj);
+	}
+	return true;
 }
 
 bool DataBaseHObject::load()

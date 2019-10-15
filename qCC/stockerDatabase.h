@@ -27,6 +27,7 @@
 #include "StPrimGroup.h"
 
 #include "buildercore/StBuilder.h"
+#include "BlockDBaseIO.h"
 
 //class BDBaseHObject;
 
@@ -60,6 +61,13 @@
 #define BDDB_LOD3MODEL_SUFFIX		".lod3.model"
 #define BDDB_TODOGROUP_SUFFIX		".todo"
 
+enum importDataType
+{
+	IMPORT_POINTS,
+	IMPORT_IMAGES,
+	IMPORT_TYPE_END,
+};
+
 class DataBaseHObject : public BDBaseHObject_
 {
 public:
@@ -87,6 +95,7 @@ public:
 	ccHObject* getProductModels();
 
 	static DataBaseHObject* Create(QString absolute_path);
+	bool addData(ccHObject* obj, importDataType type, QString str_level);
 	bool load();
 	bool save();
 };

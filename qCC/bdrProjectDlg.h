@@ -1,17 +1,12 @@
 #ifndef BDR_PROJECT_DLG_HEADER
 #define BDR_PROJECT_DLG_HEADER
-
-#include "ui_bdrProjectDlg.h"
 #include <vector>
+#include "ui_bdrProjectDlg.h"
+
+#include "stocker_parser.h"
+
 class ccHObject;
-
-enum importDataType
-{
-	IMPORT_POINTS,
-	IMPORT_IMAGES,
-	IMPORT_TYPE_END,
-};
-
+class bdr2Point5DEditor;
 
 enum listHeaderIdx
 {
@@ -26,16 +21,26 @@ public:
 	listData()
 		: m_index(-1)
 		, m_groupID(-1)
+		, m_object(nullptr)
 	{}
+	~listData() {
+		if (m_object) {
+			delete m_object;
+			m_object = nullptr;
+		}
+	}
 	using Container = std::vector<listData*>;
 	static listData* New(importDataType type);
 public:
 	virtual importDataType getDataType() const { return IMPORT_POINTS; };
+	ccHObject* getObject() { return m_object; }
+	virtual ccHObject* createObject();
 	int m_index;
 	int m_groupID;
 	QString m_name;
 	QString m_path;
 protected:
+	ccHObject* m_object;
 };
 
 enum pointsHeaderIdx
@@ -57,6 +62,7 @@ public:
 	{}
 	~pointsListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_POINTS; }
+	virtual ccHObject* createObject() override;
 	size_t m_pointCnt;
 	QString level;
 	QStringList AssLevels;
@@ -86,11 +92,13 @@ public:
 	{}
 	~imagesListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_IMAGES; }
+	virtual ccHObject* createObject() override;
 	double pos_x;
 protected:
 private:
 };
 
+//! should be the same size of importDataType
 static const char** data_list_names[] = { pointsHeaderName, imagesHeaderName };
 static const size_t data_list_column[] = { PointsCol_END, ImagesCol_End };
 
@@ -131,29 +139,45 @@ protected slots:
 	void doActionToggleAll();
 	void doActionSelect();
 	void doActionToggle();
+	void doActionPreview();
 	void acceptAndExit();	
 
 private: //members
 	Ui::bdrProjectDlg	*m_UI;
+	bdr2Point5DEditor* m_preview;
 
+	enum PRJ_ERROR_CODE { PRJMSG_STATUS, PRJMSG_WARNING, PRJMSG_ERROR, PRJMSG_CRITICAL };
+	void diaplayMessage(QString message, PRJ_ERROR_CODE error_code = PRJMSG_STATUS);
 protected:
-	ccHObject* m_associateProject;
+	void closeEvent(QCloseEvent *) override;
+
+	DataBaseHObject* m_associateProject;
+	DataBaseHObject* m_ownProject;
+	ccHObject* m_postGIS;
 
 	bool insertItemToTable(listData* data);
 	importDataType getCurrentTab();
 	QTableWidget* getTableWidget(importDataType type);
 	listData::Container& getListDatas(importDataType type);
 public:
-	void linkWithProject(ccHObject* proj);
-	bool loadProject(QString path);
+	void linkWithProject(DataBaseHObject* proj);
 	bool generateProject();
 	QString getProjectPath();
+	void setProjectPath(QString path, bool enable = true);
 	int getProjectID();
 	int getProjetcGroupID();
 	bool addDataToTable(QString path, importDataType data_type);
+	//! set list data to HObject before preview and 
+	bool ListToHObject(bool preview_control = false);
+	//! set the list data from HObject
+	bool HObjectToList();
+	void resetLists();
+	void resetObjects();
 
 	listData::Container m_points_data;
 	listData::Container m_images_data;
+	listData::Container m_miscs_data;
+	listData::Container m_postgis_data;
 };
 
 #endif //BDR_PROJECT_DLG_HEADER

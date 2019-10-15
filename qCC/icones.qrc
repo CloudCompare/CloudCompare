@@ -155,6 +155,8 @@
   <qresource prefix="/CC/Stocker">
     <file>images/stocker/database.png</file>
     <file>images/stocker/editor1.png</file>
+    <file>images/stocker/layergroup.png</file>
+    <file>images/stocker/layergroup_lock.png</file>
     <file>images/stocker/editor2.png</file>
     <file>images/stocker/pen.png</file>
     <file>images/stocker/boundary.png</file>

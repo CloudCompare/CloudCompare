@@ -174,7 +174,7 @@
           </font>
          </property>
          <property name="title">
-          <string>文件筛选</string>
+          <string>文件过滤</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
@@ -245,6 +245,59 @@
             </item>
            </layout>
           </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>数据类型/等级</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="productLevelComboBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>
@@ -284,44 +337,7 @@
           <string>文件导入</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>9</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>产品等级</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="productLevelComboBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>23</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
+          <item row="4" column="0">
            <widget class="QToolButton" name="importLocalFileToolButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -345,7 +361,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="4" column="1">
            <widget class="QToolButton" name="importLocalFolderToolButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -369,7 +385,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="5" column="0">
            <widget class="QToolButton" name="importDBToolButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -393,7 +409,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="5" column="1">
            <widget class="QToolButton" name="importDeleteToolButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -424,6 +440,12 @@
      </item>
      <item>
       <widget class="QTabWidget" name="dataFilesTabWidget">
+       <property name="minimumSize">
+        <size>
+         <width>300</width>
+         <height>300</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <pointsize>10</pointsize>
@@ -436,8 +458,15 @@
         <number>0</number>
        </property>
        <widget class="QWidget" name="tab">
+        <attribute name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/pickpts.png</normaloff>:/CC/Stocker/images/stocker/pickpts.png</iconset>
+        </attribute>
         <attribute name="title">
          <string>点云</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>点云数据</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="0">
@@ -468,8 +497,15 @@
         </layout>
        </widget>
        <widget class="QWidget" name="tab_2">
+        <attribute name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/image.png</normaloff>:/CC/Stocker/images/stocker/image.png</iconset>
+        </attribute>
         <attribute name="title">
          <string>影像</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>影像数据</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="0">
@@ -488,15 +524,61 @@
         </layout>
        </widget>
        <widget class="QWidget" name="tab_3">
+        <attribute name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/global.png</normaloff>:/CC/Stocker/images/stocker/global.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>其他</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>相机、控制数据等</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_5">
+         <item row="0" column="0">
+          <widget class="QTableWidget" name="miscsTableWidget">
+           <property name="minimumSize">
+            <size>
+             <width>300</width>
+             <height>300</height>
+            </size>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="rowCount">
+            <number>0</number>
+           </property>
+           <property name="columnCount">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_4">
+        <attribute name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/database.png</normaloff>:/CC/Stocker/images/stocker/database.png</iconset>
+        </attribute>
         <attribute name="title">
          <string>数据库</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>PostGIS数据库</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout_4">
          <item row="0" column="0">
           <widget class="QTableWidget" name="postgisTableWidget">
            <property name="minimumSize">
             <size>
-             <width>512</width>
+             <width>300</width>
              <height>300</height>
             </size>
            </property>
@@ -787,7 +869,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../icones.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>previewToolButton</sender>

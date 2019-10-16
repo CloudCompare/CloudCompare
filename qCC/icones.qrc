@@ -238,6 +238,7 @@
     <file>images/stocker/groundfiltering.png</file>
     <file>images/stocker/lod2.png</file>
     <file>images/stocker/importfolder.png</file>
+    <file>images/stocker/image.png</file>
     <file>images/stocker/buildingblack.png</file>
   </qresource>
 </RCC>

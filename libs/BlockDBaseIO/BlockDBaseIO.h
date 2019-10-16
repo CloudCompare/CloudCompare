@@ -67,6 +67,14 @@ struct blkSceneInfo
 	double bound[6];//minX, minY, minZ, maxX, maxY, maxZ
 };
 
+enum blkDataType {
+	Blk_unset,
+	Blk_PtCld,
+	Blk_Image,
+	Blk_Camera,
+	Blk_Miscs,
+};
+
 enum BLOCK_PtCldLevel
 {
 	PCLEVEL_UNO,
@@ -81,19 +89,42 @@ enum BLOCK_PtCldLevel
 };
 static const char* g_strPtCldLevelName[] = { "uno","strip","tile","filter","class","build" };
 
-struct blkPtCldInfo
+class blkDataInfo
 {
+public:
+	blkDataInfo(){}
+	~blkDataInfo(){}
+
+	virtual blkDataType dataType() { return Blk_unset; }
+
 	char sPath[_MAX_PATH];
 	char sName[_MAX_FNAME];
 	char sID[32];
+};
+
+class blkPtCldInfo : public blkDataInfo
+{
+public:
+	blkPtCldInfo() 
+		: blkDataInfo() 
+	{}
+	~blkPtCldInfo() {}
+
+	virtual blkDataType dataType() override { return Blk_PtCld; }
+
 	BLOCK_PtCldLevel level;
 	blkSceneInfo scene_info;
 };
 
-struct blkCameraInfo
+class blkCameraInfo : public blkDataInfo
 {
-	char sName[32];
-	int cameraID;
+	blkCameraInfo()
+		: blkDataInfo()
+	{}
+	~blkCameraInfo() {}
+
+	virtual blkDataType dataType() override { return Blk_Camera; }
+	
 	double pixelSize;
 	int width, height;
 	double f, x0, y0;
@@ -110,11 +141,16 @@ enum BLOCK_ImgLevel {
 };
 static const char* g_strImageLevelName[] = { "uno","strip","dom" };
 
-struct blkImageInfo
+class blkImageInfo : public blkDataInfo
 {
-	char sPath[_MAX_PATH];
-	char sName[_MAX_FNAME];
-	char sID[32];
+public:
+	blkImageInfo()
+		: blkDataInfo()
+	{}
+	~blkImageInfo() {}
+
+	virtual blkDataType dataType() override { return Blk_Image; }
+
 	BLOCK_ImgLevel level;
 	double gpsLat, gpsLon, gpsHeight;
 	double posXs, posYs, posZs, posPhi, posOmega, posKappa;

@@ -24,6 +24,10 @@ listData * listData::New(importDataType type)
 		return new pointsListData();
 	case IMPORT_IMAGES:
 		return new imagesListData();
+	case IMPORT_MISCS:
+		return new miscsLiistData();
+	case IMPORT_POSTGIS:
+		return new postGISLiistData();
 	default:
 		break;
 	}
@@ -52,6 +56,16 @@ ccHObject * pointsListData::createObject()
 ccHObject * imagesListData::createObject()
 {
 	return listData::createObject();
+}
+
+ccHObject * miscsLiistData::createObject()
+{
+	return nullptr;
+}
+
+ccHObject * postGISLiistData::createObject()
+{
+	return nullptr;
 }
 
 bdrProjectDlg::bdrProjectDlg(QWidget* parent)
@@ -112,8 +126,7 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	}
 	m_UI->pointsTableWidget->setColumnWidth(PointsCol_Path, 200);
 	m_UI->imagesTableWidget->setColumnWidth(ImagesCol_Path, 200);
-
-	connect(m_UI->productLevelComboBox,			SIGNAL(currentIndexChanged(int)),	this, SLOT(onLevelChanged(int)));
+	
 	connect(m_UI->dataFilesTabWidget,			SIGNAL(currentChanged(int)),		this, SLOT(onDataFilesChanged(int)));
 	connect(m_UI->buttonBox,					&QDialogButtonBox::accepted,		this, &bdrProjectDlg::acceptAndExit);
 	connect(m_UI->buttonBox,					&QDialogButtonBox::rejected,		this, &bdrProjectDlg::clear);
@@ -132,6 +145,11 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 
 	connect(m_UI->previewToolButton,			&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionPreview);
 
+	// combox
+	{
+		connect(m_UI->productLevelComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onLevelChanged(int)));
+
+	}
 }
 
 bdrProjectDlg::~bdrProjectDlg()
@@ -194,6 +212,12 @@ importDataType bdrProjectDlg::getCurrentTab(QTableWidget * widget)
 	else if (widget == m_UI->imagesTableWidget) {
 		return IMPORT_IMAGES;
 	}
+	else if (widget == m_UI->miscsTableWidget) {
+		return IMPORT_MISCS;
+	}
+	else if (widget == m_UI->postgisTableWidget) {
+		return IMPORT_POSTGIS;
+	}
 	return importDataType();
 }
 QTableWidget * bdrProjectDlg::getTableWidget(importDataType type)
@@ -204,6 +228,10 @@ QTableWidget * bdrProjectDlg::getTableWidget(importDataType type)
 		return m_UI->pointsTableWidget;
 	case IMPORT_IMAGES:
 		return m_UI->imagesTableWidget;
+	case IMPORT_MISCS:
+		return m_UI->miscsTableWidget;
+	case IMPORT_POSTGIS:
+		return m_UI->postgisTableWidget;
 	default:
 		throw std::runtime_error("internal error");
 		assert(false);
@@ -219,6 +247,10 @@ std::vector<listData*>& bdrProjectDlg::getListDatas(importDataType type)
 		return m_points_data;
 	case IMPORT_IMAGES:
 		return m_images_data;
+	case IMPORT_MISCS:
+		return m_miscs_data;
+	case IMPORT_POSTGIS:
+		return m_postgis_data;
 	default:
 		throw std::runtime_error("internal error");
 		assert(false);
@@ -301,11 +333,27 @@ void bdrProjectDlg::echoMouseMoved(int x, int y, Qt::MouseButtons buttons)
 
 void bdrProjectDlg::onLevelChanged(int)
 {
+	// change the combox name
 }
 
 void bdrProjectDlg::onDataFilesChanged(int index)
 {
-
+	QStringList level_names;
+	switch (index)
+	{
+	case 0:
+		level_names << "strip" << "tile";
+	case 1:
+		level_names << "strip" << "dom";
+	case 2:
+		level_names << "CAM" << "DEM";
+	case 3:
+		level_names << "";
+	default:
+		break;
+	}
+	m_UI->productLevelComboBox->clear();
+	m_UI->productLevelComboBox->addItems(level_names);
 }
 
 void bdrProjectDlg::onItemChanged(QTableWidgetItem * item)
@@ -458,17 +506,19 @@ bool bdrProjectDlg::addDataToTable(QString path, importDataType data_type)
 
 bool bdrProjectDlg::ListToHObject(bool preview_control)
 {
+	m_ownProject->clear();
 	//! points
 	bool update = !preview_control || (preview_control && 1);
 	if (update) {
 		for (listData* data : m_points_data) {
 			if (!data) continue;
 			pointsListData* pData = static_cast<pointsListData*>(data); if (!pData) continue;
-			ccHObject* object = pData->createObject();
-			if (object)	{
-				std::cout << "load ok" << std::endl;
-				m_ownProject->addData(object, pData->getDataType(), pData->m_level);
-			}
+			ccHObject* object = pData->createObject();	// load file
+			if (!object) continue;
+			
+			BlockDB::blkPtCldInfo info;
+			m_ownProject->addData(object, pData->getDataType(), pData->m_level);
+
 		}
 	}
 
@@ -487,7 +537,7 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 	//! postgis
 	update = !preview_control || (preview_control && 1);
 	if (0) {
-
+		m_postGIS;
 	}
 
 	return true;

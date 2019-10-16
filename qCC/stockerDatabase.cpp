@@ -197,6 +197,15 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 	return new_database;
 }
 
+bool DataBaseHObject::addData(ccHObject * obj, BlockDB::blkDataInfo info)
+{
+	if (info.dataType() == BlockDB::Blk_unset) {
+		return false;
+	}
+	m_obj_blkInfo.insert(std::make_pair(obj, info));
+	return true;
+}
+
 bool DataBaseHObject::addData(ccHObject * obj, importDataType type, QString str_level)
 {
 	ccHObject* importObj = nullptr;
@@ -237,6 +246,11 @@ bool DataBaseHObject::addData(ccHObject * obj, importDataType type, QString str_
 	return true;
 }
 
+void DataBaseHObject::clear()
+{
+	removeAllChildren();
+}
+
 bool DataBaseHObject::load()
 {
 	QString xml_file = getPath() + "/" + QFileInfo(getPath()).completeBaseName() + ".xml";
@@ -245,6 +259,11 @@ bool DataBaseHObject::load()
 		return false;
 	}
 	//! add 
+	BlockDB::blkImageInfo* images = blkDBase.images();
+	blkDBase.images();
+	blkDBase.cameras();
+	
+
 	return true;
 }
 
@@ -253,6 +272,14 @@ bool DataBaseHObject::save()
 	QString xml_file = getPath() + "/" + QFileInfo(getPath()).completeBaseName() + ".xml";
 	BlockDB::BlockDBaseIO blkDBase;
 
+	getPointCloudGroup();
+	getImagesGroup();
+	
+	blkDBase.ptClds();
+	blkDBase.images();
+	blkDBase.cameras();
+
+	// other information in the prj.ini
 
 	if (!blkDBase.saveProject(xml_file.toLocal8Bit())) {
 		return false;

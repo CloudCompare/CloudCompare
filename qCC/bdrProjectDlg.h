@@ -32,7 +32,7 @@ public:
 	using Container = std::vector<listData*>;
 	static listData* New(importDataType type);
 public:
-	virtual importDataType getDataType() const { return IMPORT_POINTS; };
+	virtual importDataType getDataType() const { return IMPORT_TYPE_END; };
 	ccHObject* getObject() { return m_object; }
 	virtual ccHObject* createObject();
 	int m_index;
@@ -99,9 +99,46 @@ protected:
 private:
 };
 
+enum miscsHeaderIdx
+{
+	MiscsCol_Type = ListCol_END,
+	MiscsCol_Meta,
+	MiscsCol_Path,
+	MicscCol_End,
+};
+static const char* miscsHeaderName[] = { "Type", "Meta", "Path" };
+class miscsLiistData : public listData
+{
+public:
+	miscsLiistData()
+	{}
+	~miscsLiistData() {}
+	virtual importDataType getDataType() const override { return IMPORT_MISCS; }
+	virtual ccHObject* createObject() override;
+	QString m_meta;
+};
+
+enum postGISHeaderIdx
+{
+	PostgisCol_Meta = ListCol_END,
+	PostgisCol_Path,
+	PostgisCol_End,
+};
+static const char* postgisHeaderName[] = { "meta", "Path" };
+class postGISLiistData : public listData
+{
+public:
+	postGISLiistData()
+	{}
+	~postGISLiistData() {}
+	virtual importDataType getDataType() const override { return IMPORT_POSTGIS; }
+	virtual ccHObject* createObject() override;
+	QString m_meta;
+};
+
 //! should be the same size of importDataType
-static const char** data_list_names[] = { pointsHeaderName, imagesHeaderName };
-static const size_t data_list_column[] = { PointsCol_END, ImagesCol_End };
+static const char** data_list_names[] = { pointsHeaderName, imagesHeaderName, miscsHeaderName, postgisHeaderName };
+static const size_t data_list_column[] = { PointsCol_END, ImagesCol_End, MicscCol_End, PostgisCol_End };
 
 namespace Ui
 {

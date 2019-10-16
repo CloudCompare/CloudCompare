@@ -98,7 +98,7 @@ public:
 	ccHObject* getProductModels();
 
 	static DataBaseHObject* Create(QString absolute_path);
-	bool addData(ccHObject* obj, BlockDB::blkDataInfo info);
+	bool addData(ccHObject* obj, importDataType type, BlockDB::blkDataInfo info);
 	bool addData(ccHObject* obj, importDataType type, QString str_level);
 	void clear();
 	bool load();

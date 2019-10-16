@@ -34,7 +34,7 @@ public:
 public:
 	virtual importDataType getDataType() const { return IMPORT_TYPE_END; };
 	ccHObject* getObject() { return m_object; }
-	virtual ccHObject* createObject();
+	virtual ccHObject* createObject(BlockDB::blkDataInfo* info);
 	int m_index;
 	int m_groupID;
 	QString m_name;
@@ -62,7 +62,7 @@ public:
 	{}
 	~pointsListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_POINTS; }
-	virtual ccHObject* createObject() override;
+	virtual ccHObject* createObject(BlockDB::blkDataInfo* info) override;
 	size_t m_pointCnt;
 	QString m_level;
 	QStringList m_assLevels;
@@ -92,7 +92,7 @@ public:
 	{}
 	~imagesListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_IMAGES; }
-	virtual ccHObject* createObject() override;
+	virtual ccHObject* createObject(BlockDB::blkDataInfo* info) override;
 	QString m_level;
 	double pos_x;
 protected:
@@ -114,7 +114,7 @@ public:
 	{}
 	~miscsLiistData() {}
 	virtual importDataType getDataType() const override { return IMPORT_MISCS; }
-	virtual ccHObject* createObject() override;
+	virtual ccHObject* createObject(BlockDB::blkDataInfo* info) override;
 	QString m_meta;
 };
 
@@ -132,7 +132,7 @@ public:
 	{}
 	~postGISLiistData() {}
 	virtual importDataType getDataType() const override { return IMPORT_POSTGIS; }
-	virtual ccHObject* createObject() override;
+	virtual ccHObject* createObject(BlockDB::blkDataInfo* info) override;
 	QString m_meta;
 };
 
@@ -214,7 +214,7 @@ public:
 	void setProjectPath(QString path, bool enable = true);
 	int getProjectID();
 	int getProjetcGroupID();
-	bool addDataToTable(QString path, importDataType data_type);
+	listData* addFilePathToTable(QString path, importDataType data_type);
 	//! set list data to HObject before preview and 
 	bool ListToHObject(bool preview_control = false);
 	//! set the list data from HObject

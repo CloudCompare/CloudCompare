@@ -63,6 +63,14 @@ struct blkSceneInfo
 	double getMaxX() { return bound[3]; }
 	double getMaxY() { return bound[4]; }
 	double getMaxZ() { return bound[5]; }
+	void setMinMax(double minx, double miny, double minz, double maxx, double maxy, double maxz) {
+		bound[0] = minx;
+		bound[1] = miny;
+		bound[2] = minz;
+		bound[3] = maxx;
+		bound[4] = maxy;
+		bound[5] = maxz;
+	}
 	char sceneID[512];
 	double bound[6];//minX, minY, minZ, maxX, maxY, maxZ
 };
@@ -89,7 +97,7 @@ enum BLOCK_PtCldLevel
 };
 static const char* g_strPtCldLevelName[] = { "uno","strip","tile","filter","class","build" };
 
-class blkDataInfo
+class BLOCKDB_IO_LIB_API blkDataInfo
 {
 public:
 	blkDataInfo(){}
@@ -100,9 +108,10 @@ public:
 	char sPath[_MAX_PATH];
 	char sName[_MAX_FNAME];
 	char sID[32];
+	int nGroupID;
 };
 
-class blkPtCldInfo : public blkDataInfo
+class BLOCKDB_IO_LIB_API blkPtCldInfo : public blkDataInfo
 {
 public:
 	blkPtCldInfo() 
@@ -116,8 +125,9 @@ public:
 	blkSceneInfo scene_info;
 };
 
-class blkCameraInfo : public blkDataInfo
+class BLOCKDB_IO_LIB_API blkCameraInfo : public blkDataInfo
 {
+public:
 	blkCameraInfo()
 		: blkDataInfo()
 	{}
@@ -141,7 +151,7 @@ enum BLOCK_ImgLevel {
 };
 static const char* g_strImageLevelName[] = { "uno","strip","dom" };
 
-class blkImageInfo : public blkDataInfo
+class BLOCKDB_IO_LIB_API blkImageInfo : public blkDataInfo
 {
 public:
 	blkImageInfo()

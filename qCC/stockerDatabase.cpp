@@ -197,7 +197,7 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 	return new_database;
 }
 
-bool DataBaseHObject::addData(ccHObject * obj, BlockDB::blkDataInfo info)
+bool DataBaseHObject::addData(ccHObject * obj, importDataType type, BlockDB::blkDataInfo info)
 {
 	if (info.dataType() == BlockDB::Blk_unset) {
 		return false;

@@ -98,14 +98,13 @@ public:
 	ccHObject* getProductModels();
 
 	static DataBaseHObject* Create(QString absolute_path);
-	bool addData(ccHObject* obj, importDataType type, BlockDB::blkDataInfo info);
-	bool addData(ccHObject* obj, importDataType type, QString str_level);
+	bool addData(ccHObject* obj, importDataType type, BlockDB::blkDataInfo* info);
 	void clear();
 	bool load();
 	bool save();
 
 private:
-	std::map<ccHObject*, BlockDB::blkDataInfo> m_obj_blkInfo;
+	std::map<ccHObject*, BlockDB::blkDataInfo*> m_obj_blkInfo;
 };
 
 class BDBaseHObject : public BDBaseHObject_

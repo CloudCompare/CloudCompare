@@ -1,5 +1,6 @@
 #include "BlockDBaseIO.h"
 
+#include "LasPrjIO.h"
 #include "libpq-fe.h"
 
 BLKDB_NAMESPACE_BEGIN
@@ -39,7 +40,7 @@ int BlockDBaseIO::camerasNum() const { return m_camNum; }
 int & BlockDBaseIO::camerasNum() { return m_camNum; }
 blkProjHdr BlockDBaseIO::projHdr() const { return m_projHdr; }
 blkProjHdr & BlockDBaseIO::projHdr() { return m_projHdr; }
-blkPtCldInfo * BlockDBaseIO::ptClds() {	return m_ptClds; }
+// blkPtCldInfo * BlockDBaseIO::ptClds() {	return m_ptClds; }
 blkImageInfo * BlockDBaseIO::images() { return m_images; }
 blkCameraInfo * BlockDBaseIO::cameras() { return m_cameras; }
 
@@ -56,6 +57,64 @@ bool BlockDBaseIO::loadProject(const char * lpstrXmlPN)
 
 bool BlockDBaseIO::saveProject(const char * lpstrXmlPN)
 {
+	return true;
+}
+
+bool getImageGPSInfo(const char* path, double& Lat, double& Lon, double& Height)
+{
+	LasPrjIO las_prj;
+	return (las_prj.ReadImgGpsInfo(path, Lat, Lon, Height) == 1);
+}
+
+bool readPosFile(const char* path, std::vector<blkImageInfo>& images_pos)
+{
+	FILE *fpos;
+	fpos = fopen(path, "r");
+	if (!fpos) { return false; }
+
+	int nImgNum(-1);
+	char szBuf[1024];
+	char char_temp[1024];
+	//	CString str_temp;
+
+	fgets(szBuf, 1024, fpos);
+	sscanf(szBuf, "%d", &nImgNum);
+	if (nImgNum < 0) {
+		return false;
+	}
+
+	for (size_t i = 0; i < nImgNum; i++)
+	{
+		blkImageInfo info;
+		fgets(szBuf, 1024, fpos);
+		sscanf(szBuf, "%s %lf %lf %lf %lf %lf %lf %lf",
+			info.sName, &info.gps_time,
+			&info.posXs, &info.posYs, &info.posZs,
+			&info.posPhi, &info.posOmega, &info.posKappa);
+		images_pos.push_back(info);
+	}
+	fclose(fpos);
+
+	return true;
+}
+
+bool savePosFile(const char* path, const std::vector<blkImageInfo>& images_pos)
+{
+	FILE *fp;
+	fp = fopen(path, "w");
+	if (!fp)
+	{
+		return false;
+	}
+	fprintf(fp, "%d\n", images_pos.size());
+	for (int i = 0; i < images_pos.size(); i++)
+	{
+		fprintf(fp, "%s %.10lf %.5lf %.5lf %.5lf %.10lf %.10lf %.10lf\n", images_pos[i].sName, images_pos[i].gps_time,
+			images_pos[i].posXs, images_pos[i].posYs, images_pos[i].posZs, images_pos[i].posPhi,
+			images_pos[i].posOmega, images_pos[i].posKappa);
+	}
+
+	fclose(fp);
 	return true;
 }
 

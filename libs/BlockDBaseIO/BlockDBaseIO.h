@@ -100,26 +100,30 @@ static const char* g_strPtCldLevelName[] = { "uno","strip","tile","filter","clas
 class BLOCKDB_IO_LIB_API blkDataInfo
 {
 public:
-	blkDataInfo(){}
+	blkDataInfo(blkDataType type = Blk_unset)
+		: m_dataType(type)
+	{}
 	~blkDataInfo(){}
 
-	virtual blkDataType dataType() { return Blk_unset; }
+	virtual blkDataType dataType() { return m_dataType; }
+	virtual void fromString(std::string str) {}
+	virtual std::string toString() const { std::string str; return str; }
 
 	char sPath[_MAX_PATH];
 	char sName[_MAX_FNAME];
 	char sID[32];
 	int nGroupID;
+protected:
+	blkDataType m_dataType;
 };
 
 class BLOCKDB_IO_LIB_API blkPtCldInfo : public blkDataInfo
 {
 public:
 	blkPtCldInfo() 
-		: blkDataInfo() 
+		: blkDataInfo(Blk_PtCld)
 	{}
 	~blkPtCldInfo() {}
-
-	virtual blkDataType dataType() override { return Blk_PtCld; }
 
 	BLOCK_PtCldLevel level;
 	blkSceneInfo scene_info;
@@ -129,12 +133,13 @@ class BLOCKDB_IO_LIB_API blkCameraInfo : public blkDataInfo
 {
 public:
 	blkCameraInfo()
-		: blkDataInfo()
+		: blkDataInfo(Blk_Camera)
 	{}
 	~blkCameraInfo() {}
+		
+	void fromString(std::string str) override {}
+	std::string toString() const override { std::string str; return str; }
 
-	virtual blkDataType dataType() override { return Blk_Camera; }
-	
 	double pixelSize;
 	int width, height;
 	double f, x0, y0;
@@ -155,17 +160,43 @@ class BLOCKDB_IO_LIB_API blkImageInfo : public blkDataInfo
 {
 public:
 	blkImageInfo()
-		: blkDataInfo()
+		: blkDataInfo(Blk_Image)
 	{}
 	~blkImageInfo() {}
 
-	virtual blkDataType dataType() override { return Blk_Image; }
+	void fromString(std::string str) override {}
+	std::string toString() const override { std::string str; return str; }
 
 	BLOCK_ImgLevel level;
 	double gpsLat, gpsLon, gpsHeight;
 	double posXs, posYs, posZs, posPhi, posOmega, posKappa;
+	double gps_time;
 	int stripID, attrib, cameraID, bFlag;
 	blkSceneInfo scene_info;
+};
+
+enum BLOCK_MiscAPP {
+	MISCAPP_UNO,
+	MISCAPP_CAM,
+	MISCAPP_GCP,
+	MISCAPP_DEM,
+	MISCAPP_END,
+};
+static const char* g_strMiscAppName[] = { "uno", "CAM", "GCP", "DEM" };
+class BLOCKDB_IO_LIB_API blkMiscsInfo : public blkDataInfo
+{
+public:
+	blkMiscsInfo()
+		: blkDataInfo(Blk_Miscs)
+	{}
+	~blkMiscsInfo() {}
+
+	void fromString(std::string str) override {}
+	std::string toString() const override { std::string str; return str; }
+
+	BLOCK_MiscAPP meta_app;
+	std::string meta_key;
+	std::string meta_value;
 };
 
 class BLOCKDB_IO_LIB_API BlockDBaseIO
@@ -187,7 +218,8 @@ public:
 	blkProjHdr projHdr() const;
 	blkProjHdr& projHdr();
 
-	blkPtCldInfo* ptClds();
+	blkPtCldInfo** ptClds()  { return &m_ptClds; }
+	//blkPtCldInfo* ptClds() { return m_ptClds; }
 	blkImageInfo* images();
 	blkCameraInfo* cameras();
 

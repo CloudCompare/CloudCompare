@@ -294,6 +294,12 @@
                 <height>23</height>
                </size>
               </property>
+              <property name="editable">
+               <bool>false</bool>
+              </property>
+              <property name="currentText">
+               <string/>
+              </property>
              </widget>
             </item>
            </layout>

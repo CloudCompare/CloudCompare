@@ -539,3 +539,6 @@ public:
 };
 
 #endif //CC_HIERARCHY_OBJECT_HEADER
+
+
+typedef ccHObject StHObject;

@@ -26,7 +26,7 @@ listData * listData::New(importDataType type)
 	case IMPORT_IMAGES:
 		return new imagesListData();
 	case IMPORT_MISCS:
-		return new miscsLiistData();
+		return new miscsListData();
 	case IMPORT_POSTGIS:
 		return new postGISLiistData();
 	default:
@@ -35,28 +35,31 @@ listData * listData::New(importDataType type)
 	return nullptr;
 }
 
-ccHObject * listData::createObject(BlockDB::blkDataInfo* info)
+void listData::createObject(BlockDB::blkDataInfo* info)
 {
-	if (m_object) { delete m_object; m_object = nullptr; }
+	if (info) {
+		strcpy(info->sPath, m_path.toLocal8Bit());
+		strcpy(info->sName, m_name.toLocal8Bit());
+		sprintf(info->sID, "%d", m_index);
+		info->nGroupID = m_groupID;
+	}
+}
+
+void pointsListData::createObject(BlockDB::blkDataInfo* info)
+{
+	listData::createObject(info);
+
 	//! fast load
+	if (m_object) { delete m_object; m_object = nullptr; }
 	FileIOFilter::LoadParameters parameters;
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	{
 		parameters.alwaysDisplayLoadDialog = false;
 		parameters.loadMode = 0;
 	}
-	strcpy(info->sPath, m_path.toLocal8Bit());
-	strcpy(info->sName, m_name.toLocal8Bit());
-	sprintf(info->sID, "%d", m_index);
-	info->nGroupID = m_groupID;
-
-	return FileIOFilter::LoadFromFile(m_path, parameters, result, QString());
-}
-
-ccHObject * pointsListData::createObject(BlockDB::blkDataInfo* info)
-{
-	ccHObject* obj = listData::createObject(info);
-	if (obj && info) {
+	m_object = FileIOFilter::LoadFromFile(m_path, parameters, result, QString());
+	
+	if (m_object && info) {
 		BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
 		if (pInfo) {
 			// level
@@ -64,47 +67,81 @@ ccHObject * pointsListData::createObject(BlockDB::blkDataInfo* info)
 			for (size_t i = 0; i < BlockDB::PCLEVEL_END; i++) {
 				if (this->m_level == QString::fromLocal8Bit(BlockDB::g_strPtCldLevelName[i])) {
 					level = BlockDB::BLOCK_PtCldLevel(i);
+					break;
 				}
 			}
 			pInfo->level = level;
 
 			//! sceneID
-			ccBBox box = obj->getBB_recursive();
+			ccBBox box = m_object->getBB_recursive();
 			pInfo->scene_info.setMinMax(
 				box.minCorner().x, box.minCorner().y, box.minCorner().z, 
 				box.maxCorner().x, box.maxCorner().y, box.maxCorner().z);
 			strcpy(pInfo->scene_info.sceneID, pInfo->sName);
 		}
 	}
-	return obj;
 }
 
-ccHObject * imagesListData::createObject(BlockDB::blkDataInfo* info)
+void imagesListData::createObject(BlockDB::blkDataInfo* info)
 {
-	ccHObject* obj = listData::createObject(info);
-	if (obj && info) {
+	listData::createObject(info);
+
+	if (m_object) { delete m_object; m_object = nullptr; }
+	//! if pos is not given, deduce from exif
+	//! camera
+	//ccCameraSensor
+	//m_object = new ccCameraSensor;
+	
+	this->posXs;
+	this->posYs;
+	this->posZs;
+	this->posPhi;
+	this->posOmega;
+	this->posKappa;
+	
+	if (m_object && info) {
 		
 	}
-	return obj;
 }
 
-ccHObject * miscsLiistData::createObject(BlockDB::blkDataInfo* info)
+void miscsListData::createObject(BlockDB::blkDataInfo* info)
 {
-	ccHObject* obj = listData::createObject(info);
-	if (obj && info) {
+	if (!info) {
+		//if (this->m_meta)
+		{
+
+		}
+	}
+	listData::createObject(info);
+	{
 
 	}
-	return obj;
 }
 
-ccHObject * postGISLiistData::createObject(BlockDB::blkDataInfo* info)
+void postGISLiistData::createObject(BlockDB::blkDataInfo* info)
 {
-	ccHObject* obj = listData::createObject(info);
-	if (obj && info) {
+	listData::createObject(info);
+	
 
-	}
-	return obj;
 }
+
+class bdrTableWidgetItem : public QTableWidgetItem
+{
+public:
+	explicit bdrTableWidgetItem(int type = Type)
+		: QTableWidgetItem(type)
+		, m_list_data(nullptr)
+	{}
+	explicit bdrTableWidgetItem(const QString &text, int type = Type)
+		: QTableWidgetItem(text, type)
+		, m_list_data(nullptr)
+	{}
+	bdrTableWidgetItem(listData* data)
+		: QTableWidgetItem()
+		, m_list_data(data)
+	{}
+	listData* m_list_data;
+};
 
 bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	: m_UI(new Ui::bdrProjectDlg)
@@ -130,7 +167,17 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	m_UI->previewFrame->setMouseTracking(true);
 	m_UI->previewDockWidget->setMouseTracking(true);
 	setMouseTracking(true);
+
+	//! by default, display the level for points
+	QStringList level_names;
+	for (int i = 0; i < BlockDB::PCLEVEL_END; i++) {
+		level_names << BlockDB::g_strPtCldLevelName[i];
+	}
+	level_names << "All";
+	m_UI->productLevelComboBox->addItems(level_names);
+	m_UI->productLevelComboBox->setCurrentIndex(BlockDB::PCLEVEL_TILE);
 	
+	//! setup the widgets
 	for (int i = 0; i < IMPORT_TYPE_END; i++) {
 		QTableWidget* tableWidget = getTableWidget(static_cast<importDataType>(i)); assert(tableWidget); if (!tableWidget) return;
 		//! fill the header names
@@ -185,14 +232,13 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 
 	// combox
 	{
+		m_UI->productLevelComboBox->addItem("All");
 		connect(m_UI->productLevelComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onLevelChanged(int)));
-
 	}
 }
 
 bdrProjectDlg::~bdrProjectDlg()
 {
-
 	delete m_UI;
 }
 
@@ -202,6 +248,18 @@ void bdrProjectDlg::clear()
 	if (glWin && m_ownProject) glWin->removeFromOwnDB(m_ownProject);
 	resetObjects();
 	linkWithProject(nullptr);
+	
+	for (size_t i = 0; i < IMPORT_TYPE_END; i++) {
+		listData::Container& list_data = getListDatas((importDataType)i);
+		for (listData::Container::iterator it = list_data.begin(); it != list_data.end(); it++)	{
+			delete *it;
+		}
+		list_data.clear();
+		QTableWidget* tableWidget = getTableWidget((importDataType)i);
+		while (tableWidget->rowCount() > 0) {
+			tableWidget->removeRow(0);
+		}
+	}
 }
 
 void bdrProjectDlg::linkWithProject(DataBaseHObject * proj)
@@ -376,22 +434,50 @@ void bdrProjectDlg::onLevelChanged(int)
 
 void bdrProjectDlg::onDataFilesChanged(int index)
 {
+	//! clear
+	while (m_UI->productLevelComboBox->count() > 0) {
+		m_UI->productLevelComboBox->removeItem(0);
+	}
+
 	QStringList level_names;
 	switch (index)
 	{
 	case 0:
-		level_names << "All" << "strip" << "tile";
+		for (int i = 0; i < BlockDB::PCLEVEL_END; i++) {
+			level_names << BlockDB::g_strPtCldLevelName[i];
+		}
+		level_names << "All";
+		m_UI->productLevelComboBox->addItems(level_names);
+		m_UI->productLevelComboBox->setCurrentIndex(BlockDB::PCLEVEL_TILE);
+		break;
 	case 1:
-		level_names << "All" << "strip" << "dom";
+		for (int i = 0; i < BlockDB::IMGLEVEL_END; i++) {
+			level_names << BlockDB::g_strImageLevelName[i];
+		}
+		level_names << "All";
+		m_UI->productLevelComboBox->addItems(level_names);
+		m_UI->productLevelComboBox->setCurrentIndex(BlockDB::IMGLEVEL_STRIP);
+		break;
 	case 2:
-		level_names << "All" << "CAM" << "DEM";
+		for (int i = 0; i < BlockDB::MISCAPP_END; i++) {
+			level_names << BlockDB::g_strMiscAppName[i];
+		}
+		level_names << "All";
+		m_UI->productLevelComboBox->addItems(level_names);
+		m_UI->productLevelComboBox->setCurrentIndex(BlockDB::MISCAPP_CAM);
+		break;
 	case 3:
-		level_names << "All" << "";
+		level_names << "All";
+		m_UI->productLevelComboBox->addItems(level_names);
+		m_UI->productLevelComboBox->setCurrentIndex(0);
+		break;
 	default:
 		break;
 	}
-	m_UI->productLevelComboBox->clear();
-	m_UI->productLevelComboBox->addItems(level_names);
+	
+	
+	
+	
 }
 
 void bdrProjectDlg::onItemChanged(QTableWidgetItem * item)
@@ -399,46 +485,47 @@ void bdrProjectDlg::onItemChanged(QTableWidgetItem * item)
 	QTableWidget* tableWidget = item->tableWidget();
 	importDataType data_type = getCurrentTab(tableWidget);
 	
-	item->text();
+	bdrTableWidgetItem* bdItem = static_cast<bdrTableWidgetItem*>(tableWidget->item(item->row(), ListCol_ID));
 
-	//! don't change it by item
-	
-// 	for (auto & data : getListDatas(data_type)) {
-// 		if (item->column() != ListCol_ID)
-// 		if (QString::number(data->m_index) == tableWidget->item(item->row(), ListCol_ID)->text()) {
-// 			if (item->column() == PointsCol_Path) {
-// 				data->m_path = item->text();
-// 			}
-// 			else if (item->column() == ListCol_Name) {
-// 				data->m_name = item->text();
-// 			}
-// 			switch (data_type)
-// 			{
-// 			case IMPORT_POINTS:
-// 			{
-// 				pointsListData* pd = static_cast<pointsListData*>(data);
-// 				if (item->column() == PointsCol_Level) {
-// 					pd->m_level = item->text();
-// 				}
-// 				else if (item->column() == PointsCol_GroupID) {
-// 					pd->m_groupID = item->text().toInt();
-// 				}
-// 				else if (item->column() == PointsCol_AssLv) {
-// 					//pd->m_assLevels = item->text();
-// 				}
-// 				pd->m_pointCnt;
-// 
-// 				break;
-// 			}
-// 			case IMPORT_IMAGES:
-// 				break;
-// 			case IMPORT_TYPE_END:
-// 				break;
-// 			default:
-// 				break;
-// 			}
-// 		}
-// 	}
+ 	for (auto & data : getListDatas(data_type)) 
+	{
+		if (data->isDisplayed() && data == bdItem->m_list_data)
+		{
+ 			if (item->column() == PointsCol_Path) {
+ 				data->m_path = item->text();
+ 			}
+ 			else if (item->column() == ListCol_Name) {
+ 				data->m_name = item->text();
+ 			}
+ 			switch (data_type)
+ 			{
+ 			case IMPORT_POINTS:
+ 			{
+ 				pointsListData* pd = static_cast<pointsListData*>(data);
+ 				if (item->column() == PointsCol_Level) {
+ 					pd->m_level = item->text();
+ 				}
+ 				else if (item->column() == PointsCol_GroupID) {
+ 					pd->m_groupID = item->text().toInt();
+ 				}
+ 				else if (item->column() == PointsCol_AssLv) {
+					pd->m_assLevels = item->text().simplified().split(QChar(';'), QString::SkipEmptyParts);
+ 				}
+				else if (item->column() == PointsCol_PtsCnt) {
+					pd->m_pointCnt = item->text().toUInt();
+				}
+ 
+ 				break;
+ 			}
+ 			case IMPORT_IMAGES:
+ 				break;
+ 			case IMPORT_TYPE_END:
+ 				break;
+ 			default:
+ 				break;
+ 			}
+ 		}
+ 	}
 }
 
 void bdrProjectDlg::onSelectionChanged(QTableWidget * table)
@@ -478,13 +565,15 @@ bool bdrProjectDlg::insertItemToTable(listData * data)
 	if (!tableWidget) {
 		return false;
 	}
-
+	
 	const int table_index = tableWidget->rowCount();
 
 	//! insert a new row
 	tableWidget->insertRow(table_index);
 	tableWidget->setVerticalHeaderItem(table_index, new QTableWidgetItem(QString::number(table_index + 1)));
-	for (size_t i = 0; i < data_list_column[data_type]; i++) {
+
+	tableWidget->setItem(table_index, ListCol_ID, new bdrTableWidgetItem(data));
+	for (size_t i = ListCol_ID + 1; i < data_list_column[data_type]; i++) {
 		tableWidget->setItem(table_index, i, new QTableWidgetItem);
 	}
 	//! fill index, and name
@@ -498,22 +587,40 @@ bool bdrProjectDlg::insertItemToTable(listData * data)
 	{
 		tableWidget->item(table_index, PointsCol_Path)->setText(data->m_path);
 		tableWidget->item(table_index, PointsCol_GroupID)->setText(QString::number(data->m_groupID));
-		
-// 		QComboBox* combox_level = new QComboBox();
-// 		combox_level->addItem("---");
-// 		tableWidget->setCellWidget(table_index, PointsCol_Level, combox_level);
+		tableWidget->item(table_index, PointsCol_Level)->setText(data->m_level);
+
+		pointsListData* pData = static_cast<pointsListData*>(data);
+		tableWidget->item(table_index, PointsCol_PtsCnt)->setText(QString::number(pData->m_pointCnt));
+
+		QString al;	for (auto l : pData->m_assLevels.toSet()) { al += (l + ";"); }
+		tableWidget->item(table_index, PointsCol_AssLv)->setText(al);
+
 		break;
 	}
 	case IMPORT_IMAGES:
 	{
 		tableWidget->item(table_index, ImagesCol_Path)->setText(data->m_path);
-		tableWidget->item(table_index, PointsCol_GroupID)->setText(QString::number(data->m_groupID));
+		tableWidget->item(table_index, ImagesCol_GroupID)->setText(QString::number(data->m_groupID));
+		tableWidget->item(table_index, ImagesCol_Level)->setText(data->m_level);
+
+		imagesListData* pData = static_cast<imagesListData*>(data);
+		tableWidget->item(table_index, ImagesCol_PosXs)->setText(QString::number(pData->posXs));
+		tableWidget->item(table_index, ImagesCol_PosYs)->setText(QString::number(pData->posYs));
+		tableWidget->item(table_index, ImagesCol_PosZs)->setText(QString::number(pData->posZs));
+		tableWidget->item(table_index, ImagesCol_PosPhi)->setText(QString::number(pData->posPhi));
+		tableWidget->item(table_index, ImagesCol_PosOmega)->setText(QString::number(pData->posOmega));
+		tableWidget->item(table_index, ImagesCol_PosKappa)->setText(QString::number(pData->posKappa));		
+		tableWidget->item(table_index, ImagesCol_GpsLat)->setText(QString::number(pData->gpsLat));
+		tableWidget->item(table_index, ImagesCol_GpsLot)->setText(QString::number(pData->gpsLon));
+		tableWidget->item(table_index, ImagesCol_GpsHgt)->setText(QString::number(pData->gpsHeight));
 
 		break;
 	}
 	case IMPORT_MISCS:
 	{
-
+		tableWidget->item(table_index, ImagesCol_Path)->setText(data->m_path);
+		tableWidget->item(table_index, ImagesCol_GroupID)->setText(QString::number(data->m_groupID));
+		tableWidget->item(table_index, ImagesCol_Level)->setText(data->m_level);
 		break;
 	}
 	case IMPORT_POSTGIS:
@@ -525,6 +632,7 @@ bool bdrProjectDlg::insertItemToTable(listData * data)
 		assert(false);
 		break;
 	}
+	data->setDisplayed(true);
 	tableWidget->scrollToBottom();
 
 	return true;
@@ -544,17 +652,26 @@ listData* bdrProjectDlg::addFilePathToTable(QString path, importDataType data_ty
 	data->m_index = list_datas.empty() ? 0 : (list_datas.back()->m_index + 1);
 	data->m_groupID = getProjetcGroupID();
 
+	QString level_cb = m_UI->productLevelComboBox->currentText();
+	if (level_cb != "uno" && level_cb != "All") {
+		data->m_level = level_cb;
+	}
+
 	if (!data) { return false; }
 	try {
 		if (!insertItemToTable(data)) {
 			if (data) {
 				delete data;
-				data = nullptr;			
+				data = nullptr;
 			}
 			return false;
 		}
 	}
 	catch (const std::exception&) {
+		if (data) {
+			delete data;
+			data = nullptr;
+		}
 		return false;
 	}
 	list_datas.push_back(data);
@@ -563,32 +680,61 @@ listData* bdrProjectDlg::addFilePathToTable(QString path, importDataType data_ty
 
 bool bdrProjectDlg::ListToHObject(bool preview_control)
 {
+	DataBaseHObject* tempProj = nullptr;
+	auto failedExitprj = [&]() {
+		if (tempProj) {
+			delete tempProj;
+			tempProj = nullptr;
+		}
+	};
+	auto failedExit = [](void* itm) {
+		if (itm) {
+			delete itm;
+			itm = nullptr;
+		}
+	};
+	//TODO: set a new project, if success, transfer children
 	m_ownProject->clear();
 	//! points
 	bool update = !preview_control || (preview_control && 1);
 	if (update) {
-		for (listData* data : m_points_data) {
-			if (!data) continue;
+		for (listData* data : m_points_data) if (data) {
 			pointsListData* pData = static_cast<pointsListData*>(data); if (!pData) continue;
-			BlockDB::blkPtCldInfo info;
-			ccHObject* object = pData->createObject(&info);	// load file
-			if (!object) continue;
 			
-			m_ownProject->addData(object, pData->getDataType(), info);
-
+			BlockDB::blkPtCldInfo* info = new BlockDB::blkPtCldInfo;
+			pData->createObject(info); // load file
+			if (!pData->getObject()) { failedExitprj(); failedExit(info); continue; }
+						
+			m_ownProject->addData(pData->getObject(), pData->getDataType(), info);
 		}
 	}
 
 	//! images
 	update = !preview_control || (preview_control && 1);
 	if (update) {
+		for (listData* data : m_images_data) if (data) {
+			imagesListData* pData = static_cast<imagesListData*>(data); if (!pData) continue;
 
+			BlockDB::blkImageInfo* info = new BlockDB::blkImageInfo;
+			pData->createObject(info);
+			if (!pData->getObject()) { failedExitprj(); failedExit(info);  continue; }
+			
+			m_ownProject->addData(pData->getObject(), pData->getDataType(), info);
+		}
 	}
 
 	//! miscs
 	update = !preview_control || (preview_control && 1);
 	if (preview_control && 1) {
+		for (listData* data : m_miscs_data) if (data) {
+			miscsListData* pData = static_cast<miscsListData*>(data); if (!pData) continue;
 
+			BlockDB::blkMiscsInfo* info = new BlockDB::blkMiscsInfo;
+			pData->createObject(info);
+			if (!pData->getObject()) { failedExitprj(); failedExit(info); continue; }
+
+			m_ownProject->addData(pData->getObject(), pData->getDataType(), info);
+		}
 	}
 
 	//! postgis
@@ -734,14 +880,62 @@ void bdrProjectDlg::doActionImportDatabase()
 
 void bdrProjectDlg::doActionSearch()
 {
+	QTableWidget* tableWidget = getTableWidget(getCurrentTab());
+	listData::Container& list_datas = getListDatas(getCurrentTab());
+
+	QString search_field = m_UI->searchFieldLineEdit->text();
+	for (int i = tableWidget->rowCount() - 1; i >= 0; i--) {
+		bdrTableWidgetItem* item = static_cast<bdrTableWidgetItem*>(tableWidget->item(i, ListCol_ID));
+		
+		if (item && !tableWidget->item(i, ListCol_Name)->text().contains(search_field)) {
+			if (item->m_list_data) {
+				item->m_list_data->setDisplayed(false);
+			}
+			tableWidget->removeRow(i);
+		}
+	}
 }
 
 void bdrProjectDlg::doActionSearchCancle()
 {
+	QTableWidget* tableWidget = getTableWidget(getCurrentTab());
+	listData::Container& list_datas = getListDatas(getCurrentTab());
+	for (auto & data : list_datas) {
+		data->setDisplayed(false);
+	}
+	while (tableWidget->rowCount() > 0) {
+		tableWidget->removeRow(0);
+	}
+	for (auto & data : list_datas) {
+		insertItemToTable(data);
+	}
 }
 
 void bdrProjectDlg::doActionDelete()
 {
+	QTableWidget* tableWidget = getTableWidget(getCurrentTab());
+	int i = 0;
+	int count = tableWidget->rowCount();
+	do 
+	{
+		bdrTableWidgetItem* bdItem = static_cast<bdrTableWidgetItem*>(tableWidget->item(i, ListCol_ID));
+		if (bdItem->checkState() == Qt::Checked) {
+			listData::Container& list_datas = getListDatas(getCurrentTab());
+			for (listData::Container::iterator it = list_datas.begin(); it != list_datas.end(); it++) {
+				if (*it == bdItem->m_list_data) {
+					delete *it;
+					list_datas.erase(it--);
+					bdItem->m_list_data = nullptr;
+					
+					break;
+				}
+			}
+			tableWidget->removeRow(i--);
+			count--;
+		}
+
+		i++;
+	} while (i < count);
 }
 
 void bdrProjectDlg::doActionSelectAll()

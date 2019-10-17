@@ -22,6 +22,7 @@ public:
 		: m_index(-1)
 		, m_groupID(-1)
 		, m_object(nullptr)
+		, m_displayed(false)
 	{}
 	~listData() {
 		if (m_object) {
@@ -34,13 +35,18 @@ public:
 public:
 	virtual importDataType getDataType() const { return IMPORT_TYPE_END; };
 	ccHObject* getObject() { return m_object; }
-	virtual ccHObject* createObject(BlockDB::blkDataInfo* info);
+	virtual void createObject(BlockDB::blkDataInfo* info);
+	bool isDisplayed() { return m_displayed; }
+	void setDisplayed(bool dis) { m_displayed = dis; }
 	int m_index;
 	int m_groupID;
 	QString m_name;
 	QString m_path;
+	QString m_level;
 protected:
 	ccHObject* m_object;
+private:
+	bool m_displayed;
 };
 
 enum pointsHeaderIdx
@@ -62,9 +68,8 @@ public:
 	{}
 	~pointsListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_POINTS; }
-	virtual ccHObject* createObject(BlockDB::blkDataInfo* info) override;
+	virtual void createObject(BlockDB::blkDataInfo* info) override;
 	size_t m_pointCnt;
-	QString m_level;
 	QStringList m_assLevels;
 protected:
 private:
@@ -72,50 +77,59 @@ private:
 
 enum imagesHeaderIdx
 {
-	ImagesCol_PosXs = ListCol_END,
+	ImagesCol_CamName = ListCol_END,
+	ImagesCol_PosXs,
 	ImagesCol_PosYs,
 	ImagesCol_PosZs,
 	ImagesCol_PosPhi,
 	ImagesCol_PosOmega,
 	ImagesCol_PosKappa,
-	ImagesCol_GPSTime,
+	ImagesCol_GpsLat,
+	ImagesCol_GpsLot,
+	ImagesCol_GpsHgt,
+	ImagesCol_GpsTime,
 	ImagesCol_GroupID,
+	ImagesCol_Level,
 	ImagesCol_Path,
 	ImagesCol_End,
 };
-static const char* imagesHeaderName[] = { "Xs", "Ys", "Zs", "Phi", "Omega", "Kappa", "GPS time", "GroupID", "Path" };
+static const char* imagesHeaderName[] = { "CAM", "Xs", "Ys", "Zs", "Phi", "Omega", "Kappa", "GPS lat","GPS lot","GPS hgt", "GPS time", "GroupID", "level", "Path" };
 class imagesListData : public listData
 {
 public:
 	imagesListData()
-		: pos_x(0)
+		: posXs(0), posYs(0), posZs(0), posPhi(0), posOmega(0), posKappa(0)
+		, gpsLat(0), gpsLon(0), gpsHeight(0), gps_time(0)
 	{}
 	~imagesListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_IMAGES; }
-	virtual ccHObject* createObject(BlockDB::blkDataInfo* info) override;
-	QString m_level;
-	double pos_x;
+	virtual void createObject(BlockDB::blkDataInfo* info) override;
+	QString m_cam;
+	double posXs, posYs, posZs, posPhi, posOmega, posKappa;
+	double gpsLat, gpsLon, gpsHeight, gps_time;
 protected:
 private:
 };
 
 enum miscsHeaderIdx
 {
-	MiscsCol_Type = ListCol_END,
-	MiscsCol_Meta,
+	MiscsCol_Level = ListCol_END,
+	MiscsCol_MetaKey,
+	MiscsCol_MetaValue,
 	MiscsCol_Path,
 	MicscCol_End,
 };
-static const char* miscsHeaderName[] = { "Type", "Meta", "Path" };
-class miscsLiistData : public listData
+static const char* miscsHeaderName[] = { "Type", "Meta Key", "Meta Value", "Path" };
+class miscsListData : public listData
 {
 public:
-	miscsLiistData()
+	miscsListData()
 	{}
-	~miscsLiistData() {}
+	~miscsListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_MISCS; }
-	virtual ccHObject* createObject(BlockDB::blkDataInfo* info) override;
-	QString m_meta;
+	virtual void createObject(BlockDB::blkDataInfo* info) override;
+	QString m_meta_key;
+	QString m_meta_value;
 };
 
 enum postGISHeaderIdx
@@ -132,7 +146,7 @@ public:
 	{}
 	~postGISLiistData() {}
 	virtual importDataType getDataType() const override { return IMPORT_POSTGIS; }
-	virtual ccHObject* createObject(BlockDB::blkDataInfo* info) override;
+	virtual void createObject(BlockDB::blkDataInfo* info) override;
 	QString m_meta;
 };
 

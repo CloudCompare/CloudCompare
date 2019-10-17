@@ -230,6 +230,7 @@ bool DataBaseHObject::addData(ccHObject * obj, importDataType type, BlockDB::blk
 	case IMPORT_MISCS:
 		importObj = getMiscsGroup();
 		break;
+	case IMPORT_MODELS:
 	case IMPORT_POSTGIS:
 	case IMPORT_TYPE_END:
 		break;

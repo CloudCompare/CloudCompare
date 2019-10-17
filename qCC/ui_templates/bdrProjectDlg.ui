@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1163</width>
-    <height>705</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -239,7 +239,7 @@
                </font>
               </property>
               <property name="text">
-               <string>撤销</string>
+               <string>还原</string>
               </property>
              </widget>
             </item>
@@ -299,6 +299,36 @@
               </property>
               <property name="currentText">
                <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="levelFilterToolButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>过滤</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="levelSetupToolButton">
+              <property name="minimumSize">
+               <size>
+                <width>39</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>设置</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../icones.qrc">
+                <normaloff>:/CC/Stocker/images/stocker/doublerightarrow.png</normaloff>:/CC/Stocker/images/stocker/doublerightarrow.png</iconset>
               </property>
              </widget>
             </item>
@@ -367,6 +397,30 @@
             </property>
            </widget>
           </item>
+          <item row="5" column="1">
+           <widget class="QToolButton" name="importDeleteToolButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>23</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>删除</string>
+            </property>
+           </widget>
+          </item>
           <item row="4" column="1">
            <widget class="QToolButton" name="importLocalFolderToolButton">
             <property name="sizePolicy">
@@ -392,7 +446,7 @@
            </widget>
           </item>
           <item row="5" column="0">
-           <widget class="QToolButton" name="importDBToolButton">
+           <widget class="QToolButton" name="exportDBToolButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -401,41 +455,12 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>0</width>
               <height>23</height>
              </size>
             </property>
-            <property name="font">
-             <font>
-              <pointsize>9</pointsize>
-             </font>
-            </property>
             <property name="text">
-             <string>导入数据库</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QToolButton" name="importDeleteToolButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>23</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>9</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>删除</string>
+             <string>存入数据库</string>
             </property>
            </widget>
           </item>
@@ -500,6 +525,57 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="0">
+          <widget class="QGroupBox" name="groupBox_4">
+           <property name="title">
+            <string/>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_13">
+            <property name="leftMargin">
+             <number>6</number>
+            </property>
+            <property name="topMargin">
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>6</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="QToolButton" name="pointsTileToolButton">
+              <property name="text">
+               <string>点云分块</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="pointsBoundaryToolButton">
+              <property name="text">
+               <string>生成边界shp</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="tab_2">
@@ -527,6 +603,167 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="0">
+          <widget class="QGroupBox" name="groupBox">
+           <property name="title">
+            <string/>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_7">
+            <property name="leftMargin">
+             <number>6</number>
+            </property>
+            <property name="topMargin">
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>6</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
+            <item row="0" column="5">
+             <widget class="QToolButton" name="camImportToolButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>添加相机</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="6">
+             <widget class="QComboBox" name="caneraComboBox">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="7">
+             <widget class="QToolButton" name="cameraOptionsToolButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../icones.qrc">
+                <normaloff>:/CC/Stocker/images/stocker/setting.png</normaloff>:/CC/Stocker/images/stocker/setting.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="8">
+             <widget class="QToolButton" name="cameraSetupToolButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>设置</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../icones.qrc">
+                <normaloff>:/CC/Stocker/images/stocker/doublerightarrow.png</normaloff>:/CC/Stocker/images/stocker/doublerightarrow.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QToolButton" name="undistortToolButton">
+              <property name="text">
+               <string>畸变纠正</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="Line" name="line">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QToolButton" name="gpsInfoToolButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>载入GPS</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QToolButton" name="imageCoorCvtToolButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>坐标转换</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QToolButton" name="posFileToolButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>导入POS</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="tab_3">
@@ -535,7 +772,7 @@
           <normaloff>:/CC/Stocker/images/stocker/global.png</normaloff>:/CC/Stocker/images/stocker/global.png</iconset>
         </attribute>
         <attribute name="title">
-         <string>其他</string>
+         <string>控制</string>
         </attribute>
         <attribute name="toolTip">
          <string>相机、控制数据等</string>
@@ -566,9 +803,164 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="0">
+          <widget class="QGroupBox" name="groupBox_2">
+           <property name="title">
+            <string/>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="0,0,0">
+            <property name="leftMargin">
+             <number>6</number>
+            </property>
+            <property name="topMargin">
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>6</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="QToolButton" name="addGCPToolButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>添加控制点</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="addNewMiscToolButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>添加新项</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="tab_4">
+        <attribute name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/Stocker/images/stocker/buildingblack.png</normaloff>:/CC/Stocker/images/stocker/buildingblack.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>模型</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>模型数据</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_8">
+         <item row="0" column="0">
+          <widget class="QTableWidget" name="modelsTableWidget">
+           <property name="minimumSize">
+            <size>
+             <width>300</width>
+             <height>300</height>
+            </size>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="rowCount">
+            <number>0</number>
+           </property>
+           <property name="columnCount">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QGroupBox" name="groupBox_5">
+           <property name="title">
+            <string/>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <property name="leftMargin">
+             <number>6</number>
+            </property>
+            <property name="topMargin">
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>6</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="QToolButton" name="displayToolButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>显示边界</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_5">
         <attribute name="icon">
          <iconset resource="../icones.qrc">
           <normaloff>:/CC/Stocker/images/stocker/database.png</normaloff>:/CC/Stocker/images/stocker/database.png</iconset>
@@ -603,6 +995,81 @@
            <property name="columnCount">
             <number>0</number>
            </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QGroupBox" name="groupBox_3">
+           <property name="title">
+            <string/>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <property name="leftMargin">
+             <number>6</number>
+            </property>
+            <property name="topMargin">
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>6</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="QToolButton" name="importDBToolButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>新建连接</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="settingDBToolButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>连接设置</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
@@ -715,23 +1182,7 @@
           </size>
          </property>
          <property name="text">
-          <string>status2</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="statusPreviewLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>coord</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          <string>status</string>
          </property>
         </widget>
        </item>
@@ -798,7 +1249,7 @@
           </font>
          </property>
          <property name="text">
-          <string>预览</string>
+          <string>预览窗口</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -861,6 +1312,22 @@
          </property>
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="statusPreviewLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>coord</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>

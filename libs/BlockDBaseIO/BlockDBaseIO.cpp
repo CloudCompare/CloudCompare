@@ -3,7 +3,25 @@
 #include "LasPrjIO.h"
 #include "libpq-fe.h"
 
+#include <cfloat>
+
 BLKDB_NAMESPACE_BEGIN
+
+bool blkImageInfo::isValid()
+{
+	return _finite(posXs) && _finite(posYs) && _finite(posZs);
+}
+
+void blkImageInfo::setLevel(std::string _l)
+{
+	level = IMGLEVEL_UNO;
+	for (size_t i = 0; i < IMGLEVEL_END; i++) {
+		if (_l == g_strImageLevelName[i]) {
+			level = BLOCK_ImgLevel(i);
+			break;
+		}
+	}
+}
 
 BlockDBaseIO::BlockDBaseIO()
 	: m_PcNum(0)
@@ -129,3 +147,5 @@ bool connectPgsDB(const char* connInfo)
 }
 
 BLKDB_NAMESPACE_END
+
+

@@ -73,7 +73,15 @@ struct blkSceneInfo
 	}
 	char sceneID[512];
 	double bound[6];//minX, minY, minZ, maxX, maxY, maxZ
+
+	blkSceneInfo& operator = (const blkSceneInfo& B) {
+		strcpy(sceneID, B.sceneID);
+		for ( size_t i = 0; i < 6; i++) {
+			bound[i] = B.bound[i];
+		}
+	}
 };
+
 
 enum blkDataType {
 	Blk_unset,
@@ -103,9 +111,16 @@ public:
 	blkDataInfo(blkDataType type = Blk_unset)
 		: m_dataType(type)
 	{}
+	blkDataInfo(const blkDataInfo & info) {
+		strcpy(sPath, info.sPath);
+		strcpy(sName, info.sName);
+		strcpy(sID, info.sID);
+		nGroupID = info.nGroupID;
+		m_dataType = info.dataType();
+	}
 	~blkDataInfo(){}
 
-	virtual blkDataType dataType() { return m_dataType; }
+	virtual blkDataType dataType() const { return m_dataType; }
 	virtual void fromString(std::string str) {}
 	virtual std::string toString() const { std::string str; return str; }
 
@@ -123,6 +138,11 @@ public:
 	blkPtCldInfo() 
 		: blkDataInfo(Blk_PtCld)
 	{}
+	blkPtCldInfo(const blkPtCldInfo& info)
+		: blkDataInfo(info) {
+		level = info.level;
+		scene_info = info.scene_info;
+	}
 	~blkPtCldInfo() {}
 
 	BLOCK_PtCldLevel level;
@@ -135,6 +155,15 @@ public:
 	blkCameraInfo()
 		: blkDataInfo(Blk_Camera)
 	{}
+	blkCameraInfo(const blkCameraInfo& info)
+		: blkDataInfo(info) {
+		pixelSize = info.pixelSize; width = info.width;	height = info.height;
+		f = info.f;	x0 = info.x0; y0 = info.y0;	R0 = info.R0;
+		for (size_t i = 0; i < 8; i++)
+			distortionPar[i] = info.distortionPar[i];
+		for (size_t i = 0; i < 6; i++) 
+			cameraBias[i] = info.cameraBias[i];
+	}
 	~blkCameraInfo() {}
 		
 	void fromString(std::string str) override {}
@@ -162,7 +191,24 @@ public:
 	blkImageInfo()
 		: blkDataInfo(Blk_Image)
 	{}
+	blkImageInfo(const blkImageInfo & info)
+		: blkDataInfo(info) {
+		level = info.level;
+		gpsLat = info.gpsLat; gpsLon = info.gpsLon; gpsHeight = info.gpsHeight;
+		posXs = info.posXs, posYs = info.posYs, posZs = info.posZs;
+		posPhi = info.posPhi, posOmega = info.posOmega, posKappa = info.posKappa;
+		gps_time = info.gps_time;
+		cameraName = info.cameraName;
+		cameraID = info.cameraID;
+		stripID = info.stripID;
+		attrib = info.attrib;
+		bFlag = info.bFlag;
+		scene_info = info.scene_info;
+	}
 	~blkImageInfo() {}
+
+	bool isValid();
+	void setLevel(std::string _l);
 
 	void fromString(std::string str) override {}
 	std::string toString() const override { std::string str; return str; }
@@ -171,6 +217,7 @@ public:
 	double gpsLat, gpsLon, gpsHeight;
 	double posXs, posYs, posZs, posPhi, posOmega, posKappa;
 	double gps_time;
+	std::string cameraName;
 	int stripID, attrib, cameraID, bFlag;
 	blkSceneInfo scene_info;
 };
@@ -189,6 +236,12 @@ public:
 	blkMiscsInfo()
 		: blkDataInfo(Blk_Miscs)
 	{}
+	blkMiscsInfo(const blkMiscsInfo& info)
+		: blkDataInfo(info) {
+		meta_app = info.meta_app;
+		meta_key = info.meta_key;
+		meta_value = info.meta_value;
+	}
 	~blkMiscsInfo() {}
 
 	void fromString(std::string str) override {}
@@ -219,7 +272,7 @@ public:
 	blkProjHdr& projHdr();
 
 	blkPtCldInfo** ptClds()  { return &m_ptClds; }
-	//blkPtCldInfo* ptClds() { return m_ptClds; }
+	blkPtCldInfo* ptClds() const { return m_ptClds; }
 	blkImageInfo* images();
 	blkCameraInfo* cameras();
 

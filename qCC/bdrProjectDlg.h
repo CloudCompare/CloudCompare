@@ -35,6 +35,7 @@ public:
 public:
 	virtual importDataType getDataType() const { return IMPORT_TYPE_END; };
 	ccHObject* getObject() { return m_object; }
+	void setObject(ccHObject* obj) { m_object = obj; }
 	virtual void createObject(BlockDB::blkDataInfo* info);
 	bool isDisplayed() { return m_displayed; }
 	void setDisplayed(bool dis) { m_displayed = dis; }
@@ -98,8 +99,8 @@ class imagesListData : public listData
 {
 public:
 	imagesListData()
-		: posXs(0), posYs(0), posZs(0), posPhi(0), posOmega(0), posKappa(0)
-		, gpsLat(0), gpsLon(0), gpsHeight(0), gps_time(0)
+		: //posXs(0), posYs(0), posZs(0), posPhi(0), posOmega(0), posKappa(0), 
+		gpsLat(0), gpsLon(0), gpsHeight(0), gps_time(0)
 	{}
 	~imagesListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_IMAGES; }
@@ -107,6 +108,21 @@ public:
 	QString m_cam;
 	double posXs, posYs, posZs, posPhi, posOmega, posKappa;
 	double gpsLat, gpsLon, gpsHeight, gps_time;
+
+	void toBlkImageInfo(BlockDB::blkImageInfo* info) {
+		info->posXs = posXs;
+		info->posYs = posYs;
+		info->posZs = posZs;
+		info->posPhi = posPhi;
+		info->posOmega = posOmega;
+		info->posKappa = posKappa;
+		info->cameraName = m_cam.toStdString();
+		info->gpsLat = gpsLat;
+		info->gpsLon = gpsLon;
+		info->gpsHeight = gpsHeight;
+		info->setLevel(m_level.toStdString());
+	}
+
 protected:
 private:
 };
@@ -132,13 +148,36 @@ public:
 	QString m_meta_value;
 };
 
+enum modelsHeaderIdx
+{
+	ModelsCol_Level = ListCol_END,
+	ModelsCol_MetaKey,
+	ModelsCol_MetaValue,
+	ModelsCol_Path,
+	ModelsCol_End,
+};
+static const char* modelsHeaderName[] = { "Type", "Meta Key", "Meta Value", "Path" };
+class modelsListData : public listData
+{
+public:
+	modelsListData()
+	{}
+	~modelsListData() {}
+	virtual importDataType getDataType() const override { return IMPORT_MODELS; }
+	virtual void createObject(BlockDB::blkDataInfo* info) override;
+	QString m_meta_key;
+	QString m_meta_value;
+};
+
 enum postGISHeaderIdx
 {
-	PostgisCol_Meta = ListCol_END,
+	PostgisCol_Level = ListCol_END,
+	PostgisCol_MetaKey,
+	PostgisCol_MetaValue,
 	PostgisCol_Path,
 	PostgisCol_End,
 };
-static const char* postgisHeaderName[] = { "meta", "Path" };
+static const char* postgisHeaderName[] = { "Type", "Meta Key", "Meta Value", "Path" };
 class postGISLiistData : public listData
 {
 public:
@@ -148,6 +187,7 @@ public:
 	virtual importDataType getDataType() const override { return IMPORT_POSTGIS; }
 	virtual void createObject(BlockDB::blkDataInfo* info) override;
 	QString m_meta;
+	QString m_meta_value;
 };
 
 //! should be the same size of importDataType
@@ -240,7 +280,10 @@ public:
 	listData::Container m_points_data;
 	listData::Container m_images_data;
 	listData::Container m_miscs_data;
+	listData::Container m_models_data;
 	listData::Container m_postgis_data;
+
+	std::vector<BlockDB::blkCameraInfo>	m_cameras_data;
 };
 
 #endif //BDR_PROJECT_DLG_HEADER

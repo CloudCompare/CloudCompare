@@ -1,5 +1,6 @@
 #include "bdrProjectDlg.h"
 #include "stocker_parser.h"
+#include <cfloat>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QSettings>
@@ -27,6 +28,8 @@ listData * listData::New(importDataType type)
 		return new imagesListData();
 	case IMPORT_MISCS:
 		return new miscsListData();
+	case IMPORT_MODELS:
+		return new modelsListData();
 	case IMPORT_POSTGIS:
 		return new postGISLiistData();
 	default:
@@ -37,6 +40,7 @@ listData * listData::New(importDataType type)
 
 void listData::createObject(BlockDB::blkDataInfo* info)
 {
+	m_object = nullptr;
 	if (info) {
 		strcpy(info->sPath, m_path.toLocal8Bit());
 		strcpy(info->sName, m_name.toLocal8Bit());
@@ -50,7 +54,6 @@ void pointsListData::createObject(BlockDB::blkDataInfo* info)
 	listData::createObject(info);
 
 	//! fast load
-	if (m_object) { delete m_object; m_object = nullptr; }
 	FileIOFilter::LoadParameters parameters;
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	{
@@ -86,21 +89,19 @@ void imagesListData::createObject(BlockDB::blkDataInfo* info)
 {
 	listData::createObject(info);
 
-	if (m_object) { delete m_object; m_object = nullptr; }
 	//! if pos is not given, deduce from exif
 	//! camera
 	//ccCameraSensor
 	//m_object = new ccCameraSensor;
 	
-	this->posXs;
-	this->posYs;
-	this->posZs;
-	this->posPhi;
-	this->posOmega;
-	this->posKappa;
-	
-	if (m_object && info) {
+
+	if (info) {
+		BlockDB::blkImageInfo* pInfo = static_cast<BlockDB::blkImageInfo*>(info);
+		toBlkImageInfo(pInfo);
 		
+		if (pInfo->isValid()) {
+			m_object = new ccHObject(m_name);
+		}
 	}
 }
 
@@ -116,6 +117,10 @@ void miscsListData::createObject(BlockDB::blkDataInfo* info)
 	{
 
 	}
+}
+
+void modelsListData::createObject(BlockDB::blkDataInfo * info)
+{
 }
 
 void postGISLiistData::createObject(BlockDB::blkDataInfo* info)
@@ -311,6 +316,9 @@ importDataType bdrProjectDlg::getCurrentTab(QTableWidget * widget)
 	else if (widget == m_UI->miscsTableWidget) {
 		return IMPORT_MISCS;
 	}
+	else if (widget == m_UI->modelsTableWidget) {
+		return IMPORT_MODELS;
+	}
 	else if (widget == m_UI->postgisTableWidget) {
 		return IMPORT_POSTGIS;
 	}
@@ -326,6 +334,8 @@ QTableWidget * bdrProjectDlg::getTableWidget(importDataType type)
 		return m_UI->imagesTableWidget;
 	case IMPORT_MISCS:
 		return m_UI->miscsTableWidget;
+	case IMPORT_MODELS:
+		return m_UI->modelsTableWidget;
 	case IMPORT_POSTGIS:
 		return m_UI->postgisTableWidget;
 	default:
@@ -345,6 +355,8 @@ std::vector<listData*>& bdrProjectDlg::getListDatas(importDataType type)
 		return m_images_data;
 	case IMPORT_MISCS:
 		return m_miscs_data;
+	case IMPORT_MODELS:
+		return m_models_data;
 	case IMPORT_POSTGIS:
 		return m_postgis_data;
 	default:
@@ -467,6 +479,7 @@ void bdrProjectDlg::onDataFilesChanged(int index)
 		m_UI->productLevelComboBox->setCurrentIndex(BlockDB::MISCAPP_CAM);
 		break;
 	case 3:
+	case 4:
 		level_names << "All";
 		m_UI->productLevelComboBox->addItems(level_names);
 		m_UI->productLevelComboBox->setCurrentIndex(0);
@@ -604,15 +617,16 @@ bool bdrProjectDlg::insertItemToTable(listData * data)
 		tableWidget->item(table_index, ImagesCol_Level)->setText(data->m_level);
 
 		imagesListData* pData = static_cast<imagesListData*>(data);
-		tableWidget->item(table_index, ImagesCol_PosXs)->setText(QString::number(pData->posXs));
-		tableWidget->item(table_index, ImagesCol_PosYs)->setText(QString::number(pData->posYs));
-		tableWidget->item(table_index, ImagesCol_PosZs)->setText(QString::number(pData->posZs));
-		tableWidget->item(table_index, ImagesCol_PosPhi)->setText(QString::number(pData->posPhi));
-		tableWidget->item(table_index, ImagesCol_PosOmega)->setText(QString::number(pData->posOmega));
-		tableWidget->item(table_index, ImagesCol_PosKappa)->setText(QString::number(pData->posKappa));		
-		tableWidget->item(table_index, ImagesCol_GpsLat)->setText(QString::number(pData->gpsLat));
-		tableWidget->item(table_index, ImagesCol_GpsLot)->setText(QString::number(pData->gpsLon));
-		tableWidget->item(table_index, ImagesCol_GpsHgt)->setText(QString::number(pData->gpsHeight));
+		if (_finite(pData->posXs)) tableWidget->item(table_index, ImagesCol_PosXs)->setText(QString::number(pData->posXs));
+		if (_finite(pData->posYs)) tableWidget->item(table_index, ImagesCol_PosYs)->setText(QString::number(pData->posYs));
+		if (_finite(pData->posZs)) tableWidget->item(table_index, ImagesCol_PosZs)->setText(QString::number(pData->posZs));
+		if(_finite(pData->posPhi)) tableWidget->item(table_index, ImagesCol_PosPhi)->setText(QString::number(pData->posPhi));
+		if (_finite(pData->posOmega)) tableWidget->item(table_index, ImagesCol_PosOmega)->setText(QString::number(pData->posOmega));
+		if (_finite(pData->posKappa)) tableWidget->item(table_index, ImagesCol_PosKappa)->setText(QString::number(pData->posKappa));
+		if (_finite(pData->gpsLat)) tableWidget->item(table_index, ImagesCol_GpsLat)->setText(QString::number(pData->gpsLat));
+		if (_finite(pData->gpsLon)) tableWidget->item(table_index, ImagesCol_GpsLot)->setText(QString::number(pData->gpsLon));
+		if(_finite(pData->gpsHeight)) tableWidget->item(table_index, ImagesCol_GpsHgt)->setText(QString::number(pData->gpsHeight));
+		if (_finite(pData->gps_time)) tableWidget->item(table_index, ImagesCol_GpsHgt)->setText(QString::number(pData->gps_time));
 
 		break;
 	}
@@ -695,6 +709,7 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 	};
 	//TODO: set a new project, if success, transfer children
 	m_ownProject->clear();
+	
 	//! points
 	bool update = !preview_control || (preview_control && 1);
 	if (update) {
@@ -702,6 +717,7 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 			pointsListData* pData = static_cast<pointsListData*>(data); if (!pData) continue;
 			
 			BlockDB::blkPtCldInfo* info = new BlockDB::blkPtCldInfo;
+			pData->setObject(nullptr);
 			pData->createObject(info); // load file
 			if (!pData->getObject()) { failedExitprj(); failedExit(info); continue; }
 						
@@ -712,12 +728,27 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 	//! images
 	update = !preview_control || (preview_control && 1);
 	if (update) {
+		//! firstly, save the camera data
+		for (size_t i = 0; i < m_cameras_data.size(); i++) {
+			StHObject* camObj = new StHObject(m_cameras_data[i].sName);
+			camObj->setPath(m_cameras_data[i].sPath);
+			QString key = "CamPara";
+			QString value = m_cameras_data[i].toString().c_str();
+			camObj->setMetaData(key, value);
+			BlockDB::blkCameraInfo* info = new BlockDB::blkCameraInfo(m_cameras_data[i]);
+			m_ownProject->addData(camObj, IMPORT_MISCS, info);
+		}
 		for (listData* data : m_images_data) if (data) {
 			imagesListData* pData = static_cast<imagesListData*>(data); if (!pData) continue;
 
 			BlockDB::blkImageInfo* info = new BlockDB::blkImageInfo;
-			pData->createObject(info);
+			pData->setObject(nullptr); pData->createObject(info);
 			if (!pData->getObject()) { failedExitprj(); failedExit(info);  continue; }
+			for (auto & cam : m_cameras_data) {
+				if (info->cameraName==std::string(cam.sName)) {
+					sscanf(cam.sID, "%d", &info->cameraID);
+				}
+			}
 			
 			m_ownProject->addData(pData->getObject(), pData->getDataType(), info);
 		}
@@ -730,7 +761,7 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 			miscsListData* pData = static_cast<miscsListData*>(data); if (!pData) continue;
 
 			BlockDB::blkMiscsInfo* info = new BlockDB::blkMiscsInfo;
-			pData->createObject(info);
+			pData->setObject(nullptr); pData->createObject(info);
 			if (!pData->getObject()) { failedExitprj(); failedExit(info); continue; }
 
 			m_ownProject->addData(pData->getObject(), pData->getDataType(), info);
@@ -850,6 +881,7 @@ void bdrProjectDlg::doActionImportFolder()
 
 	QStringList files;
 	QStringList nameFilters;
+	// let user to set the filter
 	switch (getCurrentTab())
 	{
 	case IMPORT_POINTS:
@@ -859,6 +891,7 @@ void bdrProjectDlg::doActionImportFolder()
 		nameFilters << "*.jpg" << "*.tiff" << "*.tif" << "*.png" << "*.bmp";
 		break;
 	default:
+		nameFilters << "*.*";
 		break;
 	}
 
@@ -1009,10 +1042,12 @@ void bdrProjectDlg::doActionApply()
 void bdrProjectDlg::updatePreview()
 {
 	if (isPreviewEnable()) {
+		QApplication::processEvents();
 		ccGLWindow* glWin = m_preview->getGLWindow();
 		if (glWin && m_ownProject) {
 			m_ownProject->setDisplay_recursive(glWin);
 			glWin->redraw();
+			QApplication::processEvents();
 		}
 	}
 }
@@ -1040,4 +1075,5 @@ bool bdrProjectDlg::generateProject()
 		return false;
 	}
 }
+
 

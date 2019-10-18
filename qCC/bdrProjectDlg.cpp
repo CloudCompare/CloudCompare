@@ -813,8 +813,12 @@ void bdrProjectDlg::doActionOpenProject()
 
 	QString path = QFileDialog::getExistingDirectory(this,
 		tr("project directory"),
-		QFileInfo(currentPath).absolutePath(),
+		QFileInfo(currentPath).absoluteFilePath(),
 		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if (path.isEmpty()) {
+		return;
+	}
 	
 
 	m_UI->projDirLineEdit->setText(path);

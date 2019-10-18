@@ -79,6 +79,7 @@ struct blkSceneInfo
 		for ( size_t i = 0; i < 6; i++) {
 			bound[i] = B.bound[i];
 		}
+		return *this;
 	}
 };
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>pgConnDlg</class>
- <widget class="QDialog" name="pgConnDlg">
+ <class>bdrPGConnDlg</class>
+ <widget class="QDialog" name="bdrPGConnDlg">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -35,7 +35,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>pgConnDlg</receiver>
+   <receiver>bdrPGConnDlg</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -51,7 +51,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>pgConnDlg</receiver>
+   <receiver>bdrPGConnDlg</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -7,6 +7,11 @@
 
 class ccHObject;
 class bdr2Point5DEditor;
+class bdrViewerControlDlg;
+class bdrPosImportDlg;
+class bdrPGConnDlg;
+class bdrLasTilesDlg;
+class bdrCameraParaDlg;
 
 enum listHeaderIdx
 {
@@ -191,8 +196,8 @@ public:
 };
 
 //! should be the same size of importDataType
-static const char** data_list_names[] = { pointsHeaderName, imagesHeaderName, miscsHeaderName, postgisHeaderName };
-static const size_t data_list_column[] = { PointsCol_END, ImagesCol_End, MicscCol_End, PostgisCol_End };
+static const char** data_list_names[] = { pointsHeaderName, imagesHeaderName, miscsHeaderName, modelsHeaderName, postgisHeaderName };
+static const size_t data_list_column[] = { PointsCol_END, ImagesCol_End, MicscCol_End, ModelsCol_End, PostgisCol_End };
 
 namespace Ui
 {
@@ -272,7 +277,7 @@ public:
 	//! set list data to HObject before preview and 
 	bool ListToHObject(bool preview_control = false);
 	//! set the list data from HObject
-	bool HObjectToList();
+	bool HObjectToList(ccHObject* obj);
 	void resetLists();
 	void resetObjects();
 	bool isPreviewEnable();
@@ -284,6 +289,13 @@ public:
 	listData::Container m_postgis_data;
 
 	std::vector<BlockDB::blkCameraInfo>	m_cameras_data;
+
+	//! dialogs
+	bdrViewerControlDlg* m_viewerCtrlDlg;
+	bdrPosImportDlg* m_posImportDlg;
+	bdrPGConnDlg* m_pgConnDlg;
+	bdrLasTilesDlg*	m_lasTilesDlg;
+	bdrCameraParaDlg* m_camParaDlg;
 };
 
 #endif //BDR_PROJECT_DLG_HEADER

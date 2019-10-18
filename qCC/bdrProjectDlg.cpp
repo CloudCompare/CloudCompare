@@ -16,6 +16,11 @@
 #include "FileIOFilter.h"
 #include "FileIO.h"
 #include "bdr2.5DimEditor.h"
+#include "bdrViewerControlDlg.h"
+#include "bdrPosImportDlg.h"
+#include "bdrPGConnDlg.h"
+#include "bdrLasTilesDlg.h"
+#include "bdrCameraParaDlg.h"
 #include "ccGLWindow.h"
 #include "ccBBox.h"
 
@@ -240,6 +245,15 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 		m_UI->productLevelComboBox->addItem("All");
 		connect(m_UI->productLevelComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onLevelChanged(int)));
 	}
+
+	//////////////////////////////////////////////////////////////////////////
+	//! dialogs
+	m_viewerCtrlDlg = new bdrViewerControlDlg(this);
+	m_posImportDlg = new bdrPosImportDlg(this);
+	m_pgConnDlg = new bdrPGConnDlg(this);
+	m_camParaDlg = new bdrCameraParaDlg(this);
+	m_lasTilesDlg = new bdrLasTilesDlg(this);
+	m_UI->previewVerticalLayout->addWidget(m_viewerCtrlDlg);
 }
 
 bdrProjectDlg::~bdrProjectDlg()
@@ -278,7 +292,7 @@ void bdrProjectDlg::linkWithProject(DataBaseHObject * proj)
 			if (m_preview) {
 				m_preview->getGLWindow()->addToOwnDB(m_ownProject);
 			}
-			HObjectToList();
+			HObjectToList(m_associateProject);
 		}
 	}
 }
@@ -435,7 +449,7 @@ void bdrProjectDlg::echoMouseMoved(int x, int y, Qt::MouseButtons buttons)
 	// set a ground map to echo mouse move
 // 	CCVector3d p;
 // 	m_preview->getGLWindow()->getClick3DPos(x, y, .0f, p);
-	m_UI->statusPreviewLabel->setText(QStringLiteral("%1,%2").arg(x).arg(y));
+	//m_UI->statusPreviewLabel->setText(QStringLiteral("%1,%2").arg(x).arg(y));
 
 }
 
@@ -777,10 +791,11 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 	return true;
 }
 
-bool bdrProjectDlg::HObjectToList()
+bool bdrProjectDlg::HObjectToList(ccHObject* obj)
 {
 	resetLists();
-	m_associateProject;
+	if (!obj) { return false; }
+	
 
 	return true;
 }
@@ -819,9 +834,20 @@ void bdrProjectDlg::doActionOpenProject()
 	if (path.isEmpty()) {
 		return;
 	}
-	
-
-	m_UI->projDirLineEdit->setText(path);
+	resetObjects();
+	m_ownProject = new DataBaseHObject(QFileInfo(path).completeBaseName());
+	m_ownProject->setPath(path);
+	if (!m_ownProject->load()) {
+		delete m_ownProject;
+		m_ownProject = nullptr;
+		return;
+	}
+	if (HObjectToList(m_ownProject)) {
+		m_UI->projDirLineEdit->setText(path);
+		if (isPreviewEnable()) {
+			m_preview->getGLWindow()->redraw();
+		}
+	}
 }
 
 void bdrProjectDlg::doActionImportFile()

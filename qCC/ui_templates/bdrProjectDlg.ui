@@ -513,6 +513,9 @@
              <pointsize>9</pointsize>
             </font>
            </property>
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
            <property name="frameShape">
             <enum>QFrame::NoFrame</enum>
            </property>
@@ -659,10 +662,22 @@
             </item>
             <item row="0" column="6">
              <widget class="QComboBox" name="caneraComboBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
                 <height>23</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>150</width>
+                <height>16777215</height>
                </size>
               </property>
              </widget>
@@ -989,6 +1004,22 @@
              </widget>
             </item>
             <item>
+             <widget class="QToolButton" name="exportModelToolButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>导出模型</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="horizontalSpacer_4">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -1125,6 +1156,19 @@
               </property>
               <property name="text">
                <string>区域导入</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="queryDBToolButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>数据查询</string>
               </property>
              </widget>
             </item>
@@ -1334,6 +1378,9 @@
    </item>
    <item>
     <widget class="QDockWidget" name="previewDockWidget">
+     <property name="mouseTracking">
+      <bool>true</bool>
+     </property>
      <property name="floating">
       <bool>false</bool>
      </property>
@@ -1347,20 +1394,23 @@
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <layout class="QVBoxLayout" name="previewVerticalLayout">
-         <item>
-          <widget class="QGroupBox" name="previewInfoGroupBox">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="title">
-            <string/>
-           </property>
-           <property name="flat">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
+         <property name="spacing">
+          <number>0</number>
+         </property>
         </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="previewInfoGroupBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="title">
+          <string/>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QFrame" name="previewFrame">
@@ -1379,6 +1429,9 @@
            <height>512</height>
           </size>
          </property>
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -1396,7 +1449,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>coord</string>
+          <string>coord: 609019.12; 117635.44</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

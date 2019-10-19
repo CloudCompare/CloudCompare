@@ -71,6 +71,9 @@ enum importDataType
 	IMPORT_TYPE_END,
 };
 
+Q_DECLARE_METATYPE(BlockDB::blkDataInfo*)
+Q_DECLARE_METATYPE(BlockDB::blkCameraInfo)
+
 class DataBaseHObject : public BDBaseHObject_
 {
 public:

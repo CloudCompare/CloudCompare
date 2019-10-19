@@ -4,6 +4,7 @@
 #include "ui_bdrProjectDlg.h"
 
 #include "stocker_parser.h"
+#include "ccBBox.h"
 
 class ccHObject;
 class bdr2Point5DEditor;
@@ -77,6 +78,26 @@ public:
 	virtual void createObject(BlockDB::blkDataInfo* info) override;
 	size_t m_pointCnt;
 	QStringList m_assLevels;
+	void toBlkPointInfo(BlockDB::blkPtCldInfo* info) {
+		if (info) {
+			// level
+			BlockDB::BLOCK_PtCldLevel level;
+			for (size_t i = 0; i < BlockDB::PCLEVEL_END; i++) {
+				if (this->m_level == QString::fromLocal8Bit(BlockDB::g_strPtCldLevelName[i])) {
+					level = BlockDB::BLOCK_PtCldLevel(i);
+					break;
+				}
+			}
+			info->level = level;
+
+			//! sceneID
+			ccBBox box = m_object->getBB_recursive();
+			info->scene_info.setMinMax(
+				box.minCorner().x, box.minCorner().y, box.minCorner().z,
+				box.maxCorner().x, box.maxCorner().y, box.maxCorner().z);
+			strcpy(info->scene_info.sceneID, info->sName);
+		}
+	}
 protected:
 private:
 };
@@ -104,7 +125,7 @@ class imagesListData : public listData
 {
 public:
 	imagesListData()
-		: //posXs(0), posYs(0), posZs(0), posPhi(0), posOmega(0), posKappa(0), 
+		: posXs(NAN), posYs(NAN), posZs(NAN), posPhi(NAN), posOmega(NAN), posKappa(NAN),
 		gpsLat(0), gpsLon(0), gpsHeight(0), gps_time(0)
 	{}
 	~imagesListData() {}
@@ -115,17 +136,19 @@ public:
 	double gpsLat, gpsLon, gpsHeight, gps_time;
 
 	void toBlkImageInfo(BlockDB::blkImageInfo* info) {
-		info->posXs = posXs;
-		info->posYs = posYs;
-		info->posZs = posZs;
-		info->posPhi = posPhi;
-		info->posOmega = posOmega;
-		info->posKappa = posKappa;
-		info->cameraName = m_cam.toStdString();
-		info->gpsLat = gpsLat;
-		info->gpsLon = gpsLon;
-		info->gpsHeight = gpsHeight;
-		info->setLevel(m_level.toStdString());
+		if (info) {
+			info->posXs = posXs;
+			info->posYs = posYs;
+			info->posZs = posZs;
+			info->posPhi = posPhi;
+			info->posOmega = posOmega;
+			info->posKappa = posKappa;
+			info->cameraName = m_cam.toStdString();
+			info->gpsLat = gpsLat;
+			info->gpsLon = gpsLon;
+			info->gpsHeight = gpsHeight;
+			info->setLevel(m_level.toStdString());
+		}
 	}
 
 protected:
@@ -222,7 +245,8 @@ protected slots:
 	void doActionOpenProject();
 	void doActionImportFile();
 	void doActionImportFolder();
-	void doActionImportDatabase();
+	void doActionExportDB();
+	
 	void doActionDelete();
 
 	void onLevelChanged(int);
@@ -232,15 +256,47 @@ protected slots:
 
 	void doActionSearch();
 	void doActionSearchCancle();
+	void doActionLevelFilter();
+	void doActionLevelSetup();
+	// para
+	void doActionGroupIDSetup();
+	void doActionReorganizeIndex();
+
+	// points tab
+	void doActionLasTiles();
+	void doActionPointsBoundary();
+	void doActionSearchAssLevel();
+	// images tab
+	void doActionPosFile();
+	void doActionGpsInfo();
+	void doActionImgCoorCvt();
+	void doActionImageUndistort();
+	void clicked_CameraComboBox(int);
+	void doActionCameraOptions();
+	void doActionCameraSetup();
+	// miscs tab
+	void doActionAddGcp();
+	void doActionProductCoor();
+	void doActionAddNewMisc();
+	// models tab
+	void doActionDisplayModelBdry();
+	void doActionViewModel();
+	void doActionExportModel();
+	// postgis tab
+	void doActionImportDatabase();
+	void doActionSettingDatabase();
+	void doActionImportDBAll();
+	void doActionImportDBRegion();
+	void doActionQueryDB();
+
 	void doActionSelectAll();
 	void doActionToggleAll();
 	void doActionSelect();
 	void doActionToggle();
-	void doActionPreview();
-	void acceptAndExit();	
-	void doActionApply();
 
-	
+	void doActionPreview();
+	void acceptAndExit();
+	void doActionApply();
 
 	void apply();
 
@@ -281,14 +337,13 @@ public:
 	void resetLists();
 	void resetObjects();
 	bool isPreviewEnable();
+	std::vector<BlockDB::blkCameraInfo> getCameraData();
 
 	listData::Container m_points_data;
 	listData::Container m_images_data;
 	listData::Container m_miscs_data;
 	listData::Container m_models_data;
 	listData::Container m_postgis_data;
-
-	std::vector<BlockDB::blkCameraInfo>	m_cameras_data;
 
 	//! dialogs
 	bdrViewerControlDlg* m_viewerCtrlDlg;

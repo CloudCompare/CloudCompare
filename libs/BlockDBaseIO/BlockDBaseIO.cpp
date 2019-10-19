@@ -116,7 +116,7 @@ bool readPosFile(const char* path, std::vector<blkImageInfo>& images_pos)
 	return true;
 }
 
-bool savePosFile(const char* path, const std::vector<blkImageInfo>& images_pos)
+bool writePosFile(const char* path, const std::vector<blkImageInfo>& images_pos)
 {
 	FILE *fp;
 	fp = fopen(path, "w");

@@ -69,24 +69,7 @@ void pointsListData::createObject(BlockDB::blkDataInfo* info)
 	
 	if (m_object && info) {
 		BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
-		if (pInfo) {
-			// level
-			BlockDB::BLOCK_PtCldLevel level;
-			for (size_t i = 0; i < BlockDB::PCLEVEL_END; i++) {
-				if (this->m_level == QString::fromLocal8Bit(BlockDB::g_strPtCldLevelName[i])) {
-					level = BlockDB::BLOCK_PtCldLevel(i);
-					break;
-				}
-			}
-			pInfo->level = level;
-
-			//! sceneID
-			ccBBox box = m_object->getBB_recursive();
-			pInfo->scene_info.setMinMax(
-				box.minCorner().x, box.minCorner().y, box.minCorner().z, 
-				box.maxCorner().x, box.maxCorner().y, box.maxCorner().z);
-			strcpy(pInfo->scene_info.sceneID, pInfo->sName);
-		}
+		this->toBlkPointInfo(pInfo);
 	}
 }
 
@@ -153,6 +136,14 @@ public:
 	listData* m_list_data;
 };
 
+bool isRowChecked(QTableWidget* tableWidget, int row) {
+	return tableWidget->item(row, ListCol_ID)->checkState() == Qt::Checked;
+}
+listData* getRowListData(QTableWidget* tableWidget, int row) {
+	bdrTableWidgetItem* bdItem = static_cast<bdrTableWidgetItem*>(tableWidget->item(row, ListCol_ID));
+	return bdItem ? bdItem->m_list_data : nullptr;
+}
+
 bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	: m_UI(new Ui::bdrProjectDlg)
 	, m_associateProject(nullptr)
@@ -164,14 +155,13 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 
 	m_UI->previewToolButton->setChecked(false);
 	m_UI->previewDockWidget->setVisible(false);
-	m_UI->statusPreviewLabel->setText("");
-	m_UI->statusPrjLabel->setText("");
 
 	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
 
 	if (!m_preview) {
 		m_preview = new bdr2Point5DEditor();
 		m_preview->create2DView(m_UI->previewFrame);
+		m_preview->getGLWindow()->displayOverlayEntities(false);
 		connect(m_preview->getGLWindow(), &ccGLWindow::mouseMoved, this, &bdrProjectDlg::echoMouseMoved);
 	}
 	m_UI->previewFrame->setMouseTracking(true);
@@ -229,7 +219,8 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	
 	connect(m_UI->importLocalFileToolButton,	&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionImportFile);
 	connect(m_UI->importLocalFolderToolButton,	&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionImportFolder);
-	connect(m_UI->importDBToolButton,			&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionImportDatabase);
+	connect(m_UI->exportDBToolButton,			&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionExportDB);
+	
 	connect(m_UI->importDeleteToolButton,		&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionDelete);
 	connect(m_UI->searchToolButton,				&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionSearch);
 	connect(m_UI->searchCancleToolButton,		&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionSearchCancle);
@@ -245,15 +236,49 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 		m_UI->productLevelComboBox->addItem("All");
 		connect(m_UI->productLevelComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onLevelChanged(int)));
 	}
+	connect(m_UI->levelFilterToolButton,		&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionLevelFilter);
+	connect(m_UI->levelSetupToolButton,			&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionLevelSetup);
+
+	connect(m_UI->groupIDSetupToolButton,		&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionGroupIDSetup);
+	connect(m_UI->reorganizeIndexToolButton,	&QAbstractButton::clicked,			this, &bdrProjectDlg::doActionReorganizeIndex);
 
 	//////////////////////////////////////////////////////////////////////////
 	//! dialogs
-	m_viewerCtrlDlg = new bdrViewerControlDlg(this);
+	m_viewerCtrlDlg = new bdrViewerControlDlg(this, m_preview->getGLWindow());
 	m_posImportDlg = new bdrPosImportDlg(this);
 	m_pgConnDlg = new bdrPGConnDlg(this);
 	m_camParaDlg = new bdrCameraParaDlg(this);
 	m_lasTilesDlg = new bdrLasTilesDlg(this);
 	m_UI->previewVerticalLayout->addWidget(m_viewerCtrlDlg);
+
+	//////////////////////////////////////////////////////////////////////////
+	// points tab
+	connect(m_UI->pointsTileToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionLasTiles);
+	connect(m_UI->pointsBoundaryToolButton,		&QAbstractButton::clicked, this, &bdrProjectDlg::doActionPointsBoundary);
+	connect(m_UI->searchAssLevelToolButton,		&QAbstractButton::clicked, this, &bdrProjectDlg::doActionSearchAssLevel);
+	// iamges tab
+	connect(m_UI->posFileToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionPosFile);
+	connect(m_UI->gpsInfoToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionGpsInfo);
+	connect(m_UI->imageCoorCvtToolButton,		&QAbstractButton::clicked, this, &bdrProjectDlg::doActionImgCoorCvt);
+	connect(m_UI->undistortToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionImageUndistort);
+	m_UI->cameraComboBox->addItem(QString::fromLocal8Bit("添加相机"));
+	connect(m_UI->cameraComboBox,				SIGNAL(activated(int)),	   this, SLOT(clicked_CameraComboBox(int)));
+	connect(m_UI->cameraOptionsToolButton,		&QAbstractButton::clicked, this, &bdrProjectDlg::doActionCameraOptions);
+	connect(m_UI->cameraSetupToolButton,		&QAbstractButton::clicked, this, &bdrProjectDlg::doActionCameraSetup);
+	// miscs tab
+	connect(m_UI->addGCPToolButton,				&QAbstractButton::clicked, this, &bdrProjectDlg::doActionAddGcp);
+	connect(m_UI->productCoorToolButton,		&QAbstractButton::clicked, this, &bdrProjectDlg::doActionProductCoor);
+	connect(m_UI->addNewMiscToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionAddNewMisc);
+	// models tab
+	connect(m_UI->displayModelBdryToolButton,	&QAbstractButton::clicked, this, &bdrProjectDlg::doActionDisplayModelBdry);
+	connect(m_UI->viewModelToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionViewModel);
+	connect(m_UI->exportModelToolButton,		&QAbstractButton::clicked, this, &bdrProjectDlg::doActionExportModel);
+	// postgis tab
+	connect(m_UI->importDBToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionImportDatabase);
+	connect(m_UI->settingDBToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionSettingDatabase);
+	connect(m_UI->importFromDBAllToolButton,	&QAbstractButton::clicked, this, &bdrProjectDlg::doActionImportDBAll);
+	connect(m_UI->importFromDBRegionToolButton, &QAbstractButton::clicked, this, &bdrProjectDlg::doActionImportDBRegion);
+	connect(m_UI->queryDBToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionQueryDB);	
 }
 
 bdrProjectDlg::~bdrProjectDlg()
@@ -513,46 +538,50 @@ void bdrProjectDlg::onItemChanged(QTableWidgetItem * item)
 	importDataType data_type = getCurrentTab(tableWidget);
 	
 	bdrTableWidgetItem* bdItem = static_cast<bdrTableWidgetItem*>(tableWidget->item(item->row(), ListCol_ID));
+	listData* data = bdItem->m_list_data;
 
- 	for (auto & data : getListDatas(data_type)) 
+	if (!data || !data->isDisplayed()) return;
+	
+	if (item->column() == ListCol_ID) {
+		data->m_index = item->text().toInt();
+		return;
+	}
+	else if (item->column() == ListCol_Name) {
+		data->m_name = item->text();
+		return;
+	}
+
+	switch (data_type)
 	{
-		if (data->isDisplayed() && data == bdItem->m_list_data)
-		{
- 			if (item->column() == PointsCol_Path) {
- 				data->m_path = item->text();
- 			}
- 			else if (item->column() == ListCol_Name) {
- 				data->m_name = item->text();
- 			}
- 			switch (data_type)
- 			{
- 			case IMPORT_POINTS:
- 			{
- 				pointsListData* pd = static_cast<pointsListData*>(data);
- 				if (item->column() == PointsCol_Level) {
- 					pd->m_level = item->text();
- 				}
- 				else if (item->column() == PointsCol_GroupID) {
- 					pd->m_groupID = item->text().toInt();
- 				}
- 				else if (item->column() == PointsCol_AssLv) {
-					pd->m_assLevels = item->text().simplified().split(QChar(';'), QString::SkipEmptyParts);
- 				}
-				else if (item->column() == PointsCol_PtsCnt) {
-					pd->m_pointCnt = item->text().toUInt();
-				}
- 
- 				break;
- 			}
- 			case IMPORT_IMAGES:
- 				break;
- 			case IMPORT_TYPE_END:
- 				break;
- 			default:
- 				break;
- 			}
- 		}
- 	}
+	case IMPORT_POINTS: {
+		pointsListData* pd = static_cast<pointsListData*>(data);
+		if (item->column() == PointsCol_Level) {
+			pd->m_level = item->text();
+		}
+		else if (item->column() == PointsCol_GroupID) {
+			pd->m_groupID = item->text().toInt();
+		}
+		else if (item->column() == PointsCol_AssLv) {
+			pd->m_assLevels = item->text().simplified().split(QChar(';'), QString::SkipEmptyParts);
+		}
+		else if (item->column() == PointsCol_PtsCnt) {
+			pd->m_pointCnt = item->text().toUInt();
+		}
+		else if (item->column() == PointsCol_Path) {
+			pd->m_path = item->text();
+			return;
+		}
+		break;
+	}
+	case IMPORT_IMAGES: {
+
+	}
+		break;
+	case IMPORT_TYPE_END:
+		break;
+	default:
+		break;
+	}
 }
 
 void bdrProjectDlg::onSelectionChanged(QTableWidget * table)
@@ -605,7 +634,8 @@ bool bdrProjectDlg::insertItemToTable(listData * data)
 	}
 	//! fill index, and name
 	tableWidget->item(table_index, ListCol_ID)->setCheckState(Qt::Checked);
-	tableWidget->item(table_index, ListCol_ID)->setText(QString::number(data->m_index));
+	tableWidget->item(table_index, ListCol_ID)->setText(QString::number(data->m_index));	
+	tableWidget->item(table_index, ListCol_ID)->setFlags(tableWidget->item(table_index, ListCol_ID)->flags() & ~Qt::ItemIsEditable);
 	tableWidget->item(table_index, ListCol_Name)->setText(data->m_name);
 
 	switch (data_type)
@@ -743,13 +773,14 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 	update = !preview_control || (preview_control && 1);
 	if (update) {
 		//! firstly, save the camera data
-		for (size_t i = 0; i < m_cameras_data.size(); i++) {
-			StHObject* camObj = new StHObject(m_cameras_data[i].sName);
-			camObj->setPath(m_cameras_data[i].sPath);
+		std::vector<BlockDB::blkCameraInfo> camData = getCameraData();
+		for (size_t i = 0; i < camData.size(); i++) {
+			StHObject* camObj = new StHObject(camData[i].sName);
+			camObj->setPath(camData[i].sPath);
 			QString key = "CamPara";
-			QString value = m_cameras_data[i].toString().c_str();
+			QString value = camData[i].toString().c_str();
 			camObj->setMetaData(key, value);
-			BlockDB::blkCameraInfo* info = new BlockDB::blkCameraInfo(m_cameras_data[i]);
+			BlockDB::blkCameraInfo* info = new BlockDB::blkCameraInfo(camData[i]);
 			m_ownProject->addData(camObj, IMPORT_MISCS, info);
 		}
 		for (listData* data : m_images_data) if (data) {
@@ -758,8 +789,8 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 			BlockDB::blkImageInfo* info = new BlockDB::blkImageInfo;
 			pData->setObject(nullptr); pData->createObject(info);
 			if (!pData->getObject()) { failedExitprj(); failedExit(info);  continue; }
-			for (auto & cam : m_cameras_data) {
-				if (info->cameraName==std::string(cam.sName)) {
+			for (auto & cam : camData) {
+				if (info->cameraName == std::string(cam.sName)) {
 					sscanf(cam.sID, "%d", &info->cameraID);
 				}
 			}
@@ -818,6 +849,18 @@ void bdrProjectDlg::resetObjects()
 bool bdrProjectDlg::isPreviewEnable()
 {
 	return m_preview && m_preview->getGLWindow() && m_UI->previewDockWidget->isVisible();
+}
+
+std::vector<BlockDB::blkCameraInfo> bdrProjectDlg::getCameraData()
+{
+	std::vector<BlockDB::blkCameraInfo> camData;
+	for (size_t i = 0; i < m_UI->cameraComboBox->count() - 1; i++) {
+		QVariant v = m_UI->cameraComboBox->itemData(i);
+		if (v.canConvert<BlockDB::blkCameraInfo>())	{
+			camData.push_back(v.value<BlockDB::blkCameraInfo>());
+		}
+	}
+	return camData;
 }
 
 void bdrProjectDlg::doActionOpenProject()
@@ -937,8 +980,35 @@ void bdrProjectDlg::doActionImportFolder()
 	}
 }
 
-void bdrProjectDlg::doActionImportDatabase()
+void bdrProjectDlg::doActionExportDB()
 {
+}
+
+void bdrProjectDlg::doActionDelete()
+{
+	QTableWidget* tableWidget = getTableWidget(getCurrentTab());
+	int i = 0;
+	int count = tableWidget->rowCount();
+	do
+	{
+		bdrTableWidgetItem* bdItem = static_cast<bdrTableWidgetItem*>(tableWidget->item(i, ListCol_ID));
+		if (bdItem->checkState() == Qt::Checked) {
+			listData::Container& list_datas = getListDatas(getCurrentTab());
+			for (listData::Container::iterator it = list_datas.begin(); it != list_datas.end(); it++) {
+				if (*it == bdItem->m_list_data) {
+					delete *it;
+					list_datas.erase(it--);
+					bdItem->m_list_data = nullptr;
+
+					break;
+				}
+			}
+			tableWidget->removeRow(i--);
+			count--;
+		}
+
+		i++;
+	} while (i < count);
 }
 
 void bdrProjectDlg::doActionSearch()
@@ -974,31 +1044,214 @@ void bdrProjectDlg::doActionSearchCancle()
 	}
 }
 
-void bdrProjectDlg::doActionDelete()
+void bdrProjectDlg::doActionLevelFilter()
 {
-	QTableWidget* tableWidget = getTableWidget(getCurrentTab());
-	int i = 0;
-	int count = tableWidget->rowCount();
-	do 
-	{
-		bdrTableWidgetItem* bdItem = static_cast<bdrTableWidgetItem*>(tableWidget->item(i, ListCol_ID));
-		if (bdItem->checkState() == Qt::Checked) {
-			listData::Container& list_datas = getListDatas(getCurrentTab());
-			for (listData::Container::iterator it = list_datas.begin(); it != list_datas.end(); it++) {
-				if (*it == bdItem->m_list_data) {
-					delete *it;
-					list_datas.erase(it--);
-					bdItem->m_list_data = nullptr;
-					
-					break;
+}
+
+void bdrProjectDlg::doActionLevelSetup()
+{
+}
+
+void bdrProjectDlg::doActionGroupIDSetup()
+{
+}
+
+void bdrProjectDlg::doActionReorganizeIndex()
+{
+	// TODO: temporarily for display
+	importDataType data_type = getCurrentTab();
+	listData::Container& list_datas = getListDatas(data_type);
+	listData* data = listData::New(data_type);
+	if (!data) { return; }
+
+	//! fill the data
+	data->m_index = list_datas.empty() ? 0 : (list_datas.back()->m_index + 1);
+	data->m_groupID = getProjetcGroupID();
+
+	QString level_cb = m_UI->productLevelComboBox->currentText();
+	if (level_cb != "uno" && level_cb != "All") {
+		data->m_level = level_cb;
+	}
+	if (insertItemToTable(data)) {
+		list_datas.push_back(data);
+	}
+	else {
+		delete data;
+		data = nullptr;
+	}
+}
+
+void bdrProjectDlg::doActionLasTiles()
+{
+	if (m_lasTilesDlg->exec()) {
+		//! add tiled points to the list
+	}
+}
+
+void bdrProjectDlg::doActionPointsBoundary()
+{
+}
+
+void bdrProjectDlg::doActionSearchAssLevel()
+{
+}
+
+void bdrProjectDlg::doActionPosFile()
+{
+	if (m_posImportDlg->exec()) {
+		//! search pos to list
+		std::vector<BlockDB::blkImageInfo> ImagePosInfo = m_posImportDlg->getImagePosInfo();
+		if (!ImagePosInfo.empty()) {
+			std::vector<bool> pos_checked(false, ImagePosInfo.size());
+			QTableWidget* tableWidget = getTableWidget(IMPORT_IMAGES);
+			for (size_t i = 0; i < tableWidget->rowCount(); i++) {
+				if (isRowChecked(tableWidget, i)) {
+					for (size_t j = 0; j < ImagePosInfo.size(); ++j) {
+						if (pos_checked[j]) continue; BlockDB::blkImageInfo info = ImagePosInfo[j];
+						if (tableWidget->item(i, ListCol_Name)->text().contains(QFileInfo(info.sName).baseName())) {
+							if (_finite(info.posXs)) tableWidget->item(i, ImagesCol_PosXs)->setText(QString::number(info.posXs));
+							if (_finite(info.posYs)) tableWidget->item(i, ImagesCol_PosYs)->setText(QString::number(info.posYs));
+							if (_finite(info.posZs)) tableWidget->item(i, ImagesCol_PosZs)->setText(QString::number(info.posZs));
+							if (_finite(info.posPhi)) tableWidget->item(i, ImagesCol_PosPhi)->setText(QString::number(info.posPhi));
+							if (_finite(info.posOmega))	tableWidget->item(i, ImagesCol_PosOmega)->setText(QString::number(info.posOmega));
+							if (_finite(info.posKappa))	tableWidget->item(i, ImagesCol_PosKappa)->setText(QString::number(info.posKappa));
+							if (_finite(info.gps_time))	tableWidget->item(i, ImagesCol_GpsTime)->setText(QString::number(info.gps_time));
+
+							break;
+						}
+					}
 				}
 			}
-			tableWidget->removeRow(i--);
-			count--;
 		}
+	}
+}
 
-		i++;
-	} while (i < count);
+void bdrProjectDlg::doActionGpsInfo()
+{
+	ccProgressDialog pdlg;
+	//for (size_t i = 0; i < ; i++)
+	{
+		//getImageGPSInfo()
+	}
+}
+
+void bdrProjectDlg::doActionImgCoorCvt()
+{
+}
+
+void bdrProjectDlg::doActionImageUndistort()
+{
+}
+
+void bdrProjectDlg::clicked_CameraComboBox(int index)
+{
+	if (index == m_UI->cameraComboBox->count() - 1) {
+		m_camParaDlg->setCameraData(getCameraData());
+		if (m_camParaDlg->exec()) {
+			BlockDB::blkCameraInfo info = m_camParaDlg->getCameraInfo();
+			
+			m_UI->cameraComboBox->insertItem(m_UI->cameraComboBox->count() - 1, QString::fromLocal8Bit(info.sName), QVariant::fromValue(info));
+			m_UI->cameraComboBox->setCurrentIndex(m_UI->cameraComboBox->count() - 2);
+		}
+	}
+}
+
+void bdrProjectDlg::doActionCameraOptions()
+{
+	QVariant v = m_UI->cameraComboBox->currentData();
+	if (v.canConvert<BlockDB::blkCameraInfo>()) {
+		BlockDB::blkCameraInfo info = v.value<BlockDB::blkCameraInfo>();
+		m_camParaDlg->setCameraInfo(info);
+		if (m_camParaDlg->exec()) {
+			info = m_camParaDlg->getCameraInfo();
+			m_UI->cameraComboBox->setItemData(m_UI->cameraComboBox->currentIndex(), QVariant::fromValue(info));
+		}
+	}
+}
+
+void bdrProjectDlg::doActionCameraSetup()
+{
+	if (m_UI->cameraComboBox->currentIndex() == m_UI->cameraComboBox->count() - 1) {
+		QMessageBox::critical(this, "Error!", QString::fromLocal8Bit("请先添加相机"));
+		return;
+	}
+	QTableWidget* tableWidget = getTableWidget(IMPORT_IMAGES);
+	QString camName = m_UI->cameraComboBox->currentText();
+	for (size_t i = 0; i < tableWidget->rowCount(); i++) {
+		if (isRowChecked(tableWidget, i)) {
+			tableWidget->item(i, ImagesCol_CamName)->setText(camName);
+		}
+	}
+}
+
+void bdrProjectDlg::doActionAddGcp()
+{
+}
+
+void bdrProjectDlg::doActionProductCoor()
+{
+}
+
+void bdrProjectDlg::doActionAddNewMisc()
+{
+	importDataType data_type = IMPORT_MISCS;
+	listData::Container& list_datas = getListDatas(data_type);
+	listData* data = listData::New(data_type);
+	if (!data) { return; }
+
+	//! fill the data
+	data->m_index = list_datas.empty() ? 0 : (list_datas.back()->m_index + 1);
+	data->m_groupID = getProjetcGroupID();
+
+	QString level_cb = m_UI->productLevelComboBox->currentText();
+	if (level_cb != "uno" && level_cb != "All") {
+		data->m_level = level_cb;
+	}
+	if (insertItemToTable(data)) {
+		list_datas.push_back(data);
+	}
+	else {
+		delete data;
+		data = nullptr;
+	}
+}
+
+void bdrProjectDlg::doActionDisplayModelBdry()
+{
+}
+
+void bdrProjectDlg::doActionViewModel()
+{
+}
+
+void bdrProjectDlg::doActionExportModel()
+{
+}
+
+void bdrProjectDlg::doActionImportDatabase()
+{
+	if (m_pgConnDlg->exec()) {
+
+	}
+}
+
+void bdrProjectDlg::doActionSettingDatabase()
+{
+	if (m_pgConnDlg->exec()) {
+
+	}
+}
+
+void bdrProjectDlg::doActionImportDBAll()
+{
+}
+
+void bdrProjectDlg::doActionImportDBRegion()
+{
+}
+
+void bdrProjectDlg::doActionQueryDB()
+{
 }
 
 void bdrProjectDlg::doActionSelectAll()

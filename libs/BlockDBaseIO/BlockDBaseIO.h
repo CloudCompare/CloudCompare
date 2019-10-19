@@ -15,6 +15,7 @@
 #endif
 //system
 #include <string>
+#include <vector>
 
 BLKDB_NAMESPACE_BEGIN
 
@@ -287,6 +288,12 @@ private:
 	blkCameraInfo*	m_cameras;
 	blkProjHdr		m_projHdr;
 };
+
+BLOCKDB_IO_LIB_API bool getImageGPSInfo(const char * path, double & Lat, double & Lon, double & Height);
+
+BLOCKDB_IO_LIB_API bool readPosFile(const char * path, std::vector<blkImageInfo>& images_pos);
+
+BLOCKDB_IO_LIB_API bool writePosFile(const char * path, const std::vector<blkImageInfo>& images_pos);
 
 BLOCKDB_IO_LIB_API bool connectPgsDB(const char* connInfo);
 

@@ -10,10 +10,15 @@ bdrLasTilesDlg::bdrLasTilesDlg(QWidget* parent)
 {
 	m_UI->setupUi(this);
 
-	connect(m_UI->buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
+	connect(m_UI->buttonBox, SIGNAL(accepted()), this, SLOT(AcceptAndExit()));
+	connect(m_UI->previewToolButton, &QAbstractButton::clicked, this, &bdrLasTilesDlg::doActioinPreview);
 }
 
-void bdrLasTilesDlg::saveSettings()
+void bdrLasTilesDlg::AcceptAndExit()
 {
 
+}
+
+void bdrLasTilesDlg::doActioinPreview()
+{
 }

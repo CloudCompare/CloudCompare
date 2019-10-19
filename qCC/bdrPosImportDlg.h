@@ -2,6 +2,7 @@
 #define BDR_POSIMPORT_DLG_HEADER
 
 #include "ui_bdrPosImportDlg.h"
+#include "BlockDBaseIO.h"
 
 namespace Ui
 {
@@ -21,8 +22,12 @@ private:
 
 protected slots:
 
-	void saveSettings();
+	void AcceptAndExit();
 
+public:
+	QString getPosPath();
+
+	std::vector<BlockDB::blkImageInfo> getImagePosInfo();
 
 };
 

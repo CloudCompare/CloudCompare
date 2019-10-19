@@ -10,10 +10,16 @@ bdrPGConnDlg::bdrPGConnDlg(QWidget* parent)
 {
 	m_UI->setupUi(this);
 
-	connect(m_UI->buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
+	connect(m_UI->buttonBox, SIGNAL(accepted()), this, SLOT(AcceptAndExit()));
+	connect(m_UI->testConnectToolButton, &QPushButton::clicked, this, &bdrPGConnDlg::doActionTestConnection);
 }
 
-void bdrPGConnDlg::saveSettings()
+void bdrPGConnDlg::AcceptAndExit()
 {
 
+}
+
+bool bdrPGConnDlg::doActionTestConnection()
+{
+	return true;
 }

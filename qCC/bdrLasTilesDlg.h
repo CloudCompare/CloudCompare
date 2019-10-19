@@ -21,9 +21,9 @@ private:
 
 protected slots:
 
-	void saveSettings();
+	void AcceptAndExit();
 
-
+	void doActioinPreview();
 };
 
 #endif

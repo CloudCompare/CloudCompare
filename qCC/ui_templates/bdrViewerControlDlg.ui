@@ -35,7 +35,7 @@
    <item>
     <widget class="QToolButton" name="zoomGlobalToolButton">
      <property name="toolTip">
-      <string>Show all images or current view</string>
+      <string>全局显示</string>
      </property>
      <property name="text">
       <string>All</string>
@@ -134,7 +134,7 @@
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
-       <normaloff>:/CC/Stocker/images/stocker/doublerightarrow.png</normaloff>:/CC/Stocker/images/stocker/doublerightarrow.png</iconset>
+       <normaloff>:/CC/Stocker/images/stocker/refresh.png</normaloff>:/CC/Stocker/images/stocker/refresh.png</iconset>
      </property>
      <property name="autoRaise">
       <bool>true</bool>

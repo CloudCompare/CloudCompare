@@ -238,6 +238,16 @@ bool DataBaseHObject::addData(ccHObject * obj, importDataType type, BlockDB::blk
 		break;
 	}
 	return importObj && importObj->addChild(obj);
+
+
+// 	m_object->setMetaData("BlkDataInfo", QVariant::fromValue(info));
+// 	
+// 	if (m_object->hasMetaData("BlkDataInfo")) {
+// 		QVariant v = m_object->getMetaData("BlkDataInfo");
+// 		if (v.canConvert<BlockDB::blkDataInfo*>()) {
+// 			BlockDB::blkPtCldInfo* pin = static_cast<BlockDB::blkPtCldInfo*>(v.value<BlockDB::blkDataInfo*>());
+// 		}
+// 	}
 }
 
 void DataBaseHObject::clear()

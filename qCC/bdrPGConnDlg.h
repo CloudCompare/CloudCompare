@@ -21,8 +21,10 @@ private:
 
 protected slots:
 
-	void saveSettings();
+	void AcceptAndExit();
 
+
+	bool doActionTestConnection();
 
 };
 

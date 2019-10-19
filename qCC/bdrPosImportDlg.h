@@ -23,6 +23,7 @@ private:
 protected slots:
 
 	void AcceptAndExit();
+	void doActionOpenFile();
 
 public:
 	QString getPosPath();

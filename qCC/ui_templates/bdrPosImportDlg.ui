@@ -32,7 +32,7 @@
        </size>
       </property>
      </widget>
-     <widget class="QToolButton" name="toolButton">
+     <widget class="QToolButton" name="openFileToolButton">
       <property name="text">
        <string>...</string>
       </property>

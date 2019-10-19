@@ -193,7 +193,7 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 
 		tableWidget->horizontalHeader()->sectionsMovable();
 		tableWidget->horizontalHeader()->setSectionResizeMode(ListCol_ID, QHeaderView::ResizeToContents);
-
+		
 		tableWidget->setStyleSheet("selection-background-color:lightblue;");
 		tableWidget->horizontalScrollBar()->setStyleSheet("QScrollBar{background:transparent; height:10px;}"
 			"QScrollBar::handle{background:lightgray; border:2px solid transparent; border-radius:5px;}"
@@ -661,16 +661,16 @@ bool bdrProjectDlg::insertItemToTable(listData * data)
 		tableWidget->item(table_index, ImagesCol_Level)->setText(data->m_level);
 
 		imagesListData* pData = static_cast<imagesListData*>(data);
-		if (_finite(pData->posXs)) tableWidget->item(table_index, ImagesCol_PosXs)->setText(QString::number(pData->posXs));
-		if (_finite(pData->posYs)) tableWidget->item(table_index, ImagesCol_PosYs)->setText(QString::number(pData->posYs));
-		if (_finite(pData->posZs)) tableWidget->item(table_index, ImagesCol_PosZs)->setText(QString::number(pData->posZs));
-		if(_finite(pData->posPhi)) tableWidget->item(table_index, ImagesCol_PosPhi)->setText(QString::number(pData->posPhi));
-		if (_finite(pData->posOmega)) tableWidget->item(table_index, ImagesCol_PosOmega)->setText(QString::number(pData->posOmega));
-		if (_finite(pData->posKappa)) tableWidget->item(table_index, ImagesCol_PosKappa)->setText(QString::number(pData->posKappa));
-		if (_finite(pData->gpsLat)) tableWidget->item(table_index, ImagesCol_GpsLat)->setText(QString::number(pData->gpsLat));
-		if (_finite(pData->gpsLon)) tableWidget->item(table_index, ImagesCol_GpsLot)->setText(QString::number(pData->gpsLon));
-		if(_finite(pData->gpsHeight)) tableWidget->item(table_index, ImagesCol_GpsHgt)->setText(QString::number(pData->gpsHeight));
-		if (_finite(pData->gps_time)) tableWidget->item(table_index, ImagesCol_GpsHgt)->setText(QString::number(pData->gps_time));
+		if (_finite(pData->posXs)) tableWidget->item(table_index, ImagesCol_PosXs)->setText(QString::number(pData->posXs, 'f', 6));
+		if (_finite(pData->posYs)) tableWidget->item(table_index, ImagesCol_PosYs)->setText(QString::number(pData->posYs, 'f', 6));
+		if (_finite(pData->posZs)) tableWidget->item(table_index, ImagesCol_PosZs)->setText(QString::number(pData->posZs, 'f', 6));
+		if(_finite(pData->posPhi)) tableWidget->item(table_index, ImagesCol_PosPhi)->setText(QString::number(pData->posPhi, 'f', 6));
+		if (_finite(pData->posOmega)) tableWidget->item(table_index, ImagesCol_PosOmega)->setText(QString::number(pData->posOmega, 'f', 6));
+		if (_finite(pData->posKappa)) tableWidget->item(table_index, ImagesCol_PosKappa)->setText(QString::number(pData->posKappa, 'f', 6));
+		if (_finite(pData->gpsLat)) tableWidget->item(table_index, ImagesCol_GpsLat)->setText(QString::number(pData->gpsLat, 'f', 6));
+		if (_finite(pData->gpsLon)) tableWidget->item(table_index, ImagesCol_GpsLot)->setText(QString::number(pData->gpsLon, 'f', 6));
+		if(_finite(pData->gpsHeight)) tableWidget->item(table_index, ImagesCol_GpsHgt)->setText(QString::number(pData->gpsHeight, 'f', 6));
+		if (_finite(pData->gps_time)) tableWidget->item(table_index, ImagesCol_GpsHgt)->setText(QString::number(pData->gps_time, 'f', 6));
 
 		break;
 	}
@@ -928,6 +928,7 @@ void bdrProjectDlg::doActionImportFile()
 
 		}
 	}
+	getTableWidget(getCurrentTab())->resizeColumnToContents(ListCol_Name);
 }
 
 void bdrProjectDlg::doActionImportFolder()
@@ -978,6 +979,7 @@ void bdrProjectDlg::doActionImportFolder()
 
 		}
 	}
+	getTableWidget(getCurrentTab())->resizeColumnToContents(ListCol_Name);
 }
 
 void bdrProjectDlg::doActionExportDB()
@@ -1102,20 +1104,20 @@ void bdrProjectDlg::doActionPosFile()
 		//! search pos to list
 		std::vector<BlockDB::blkImageInfo> ImagePosInfo = m_posImportDlg->getImagePosInfo();
 		if (!ImagePosInfo.empty()) {
-			std::vector<bool> pos_checked(false, ImagePosInfo.size());
+			std::vector<bool> pos_checked(ImagePosInfo.size(), false);
 			QTableWidget* tableWidget = getTableWidget(IMPORT_IMAGES);
 			for (size_t i = 0; i < tableWidget->rowCount(); i++) {
 				if (isRowChecked(tableWidget, i)) {
 					for (size_t j = 0; j < ImagePosInfo.size(); ++j) {
 						if (pos_checked[j]) continue; BlockDB::blkImageInfo info = ImagePosInfo[j];
 						if (tableWidget->item(i, ListCol_Name)->text().contains(QFileInfo(info.sName).baseName())) {
-							if (_finite(info.posXs)) tableWidget->item(i, ImagesCol_PosXs)->setText(QString::number(info.posXs));
-							if (_finite(info.posYs)) tableWidget->item(i, ImagesCol_PosYs)->setText(QString::number(info.posYs));
-							if (_finite(info.posZs)) tableWidget->item(i, ImagesCol_PosZs)->setText(QString::number(info.posZs));
-							if (_finite(info.posPhi)) tableWidget->item(i, ImagesCol_PosPhi)->setText(QString::number(info.posPhi));
-							if (_finite(info.posOmega))	tableWidget->item(i, ImagesCol_PosOmega)->setText(QString::number(info.posOmega));
-							if (_finite(info.posKappa))	tableWidget->item(i, ImagesCol_PosKappa)->setText(QString::number(info.posKappa));
-							if (_finite(info.gps_time))	tableWidget->item(i, ImagesCol_GpsTime)->setText(QString::number(info.gps_time));
+							if (_finite(info.posXs)) tableWidget->item(i, ImagesCol_PosXs)->setText(QString::number(info.posXs, 'f', 6));
+							if (_finite(info.posYs)) tableWidget->item(i, ImagesCol_PosYs)->setText(QString::number(info.posYs, 'f', 6));
+							if (_finite(info.posZs)) tableWidget->item(i, ImagesCol_PosZs)->setText(QString::number(info.posZs, 'f', 6));
+							if (_finite(info.posPhi)) tableWidget->item(i, ImagesCol_PosPhi)->setText(QString::number(info.posPhi, 'f', 6));
+							if (_finite(info.posOmega))	tableWidget->item(i, ImagesCol_PosOmega)->setText(QString::number(info.posOmega, 'f', 6));
+							if (_finite(info.posKappa))	tableWidget->item(i, ImagesCol_PosKappa)->setText(QString::number(info.posKappa, 'f', 6));
+							if (_finite(info.gps_time))	tableWidget->item(i, ImagesCol_GpsTime)->setText(QString::number(info.gps_time, 'f', 6));
 
 							break;
 						}
@@ -1358,5 +1360,3 @@ bool bdrProjectDlg::generateProject()
 		return false;
 	}
 }
-
-

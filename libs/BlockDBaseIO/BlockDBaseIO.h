@@ -192,6 +192,15 @@ class BLOCKDB_IO_LIB_API blkImageInfo : public blkDataInfo
 public:
 	blkImageInfo()
 		: blkDataInfo(Blk_Image)
+		, level(IMGLEVEL_STRIP)
+		, gpsLat(0)
+		, posXs(0)
+		, posPhi(0)
+		, gps_time(0)
+		, cameraID(0)
+		, stripID(0)
+		, attrib(0)
+		, bFlag(0)
 	{}
 	blkImageInfo(const blkImageInfo & info)
 		: blkDataInfo(info) {
@@ -205,7 +214,6 @@ public:
 		stripID = info.stripID;
 		attrib = info.attrib;
 		bFlag = info.bFlag;
-		scene_info = info.scene_info;
 	}
 	~blkImageInfo() {}
 
@@ -221,7 +229,6 @@ public:
 	double gps_time;
 	std::string cameraName;
 	int stripID, attrib, cameraID, bFlag;
-	blkSceneInfo scene_info;
 };
 
 enum BLOCK_MiscAPP {

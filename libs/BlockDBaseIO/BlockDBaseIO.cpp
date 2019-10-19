@@ -100,7 +100,7 @@ bool readPosFile(const char* path, std::vector<blkImageInfo>& images_pos)
 	if (nImgNum < 0) {
 		return false;
 	}
-
+	std::vector<blkImageInfo> data;
 	for (size_t i = 0; i < nImgNum; i++)
 	{
 		blkImageInfo info;
@@ -109,8 +109,9 @@ bool readPosFile(const char* path, std::vector<blkImageInfo>& images_pos)
 			info.sName, &info.gps_time,
 			&info.posXs, &info.posYs, &info.posZs,
 			&info.posPhi, &info.posOmega, &info.posKappa);
-		images_pos.push_back(info);
+		data.push_back(info);
 	}
+	images_pos = data;
 	fclose(fpos);
 
 	return true;

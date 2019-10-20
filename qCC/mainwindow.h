@@ -635,6 +635,8 @@ private slots:
 	void doActionCreateBuildingProject();
 	void doActionLoadSubstance();
 
+	void doActionImageLiDARRegistration();
+
 	void doActionGroundFilteringBatch();
 	void doActionClassificationBatch();
 	void doActionBuildingSegmentationBatch();

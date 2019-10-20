@@ -1037,6 +1037,7 @@ void MainWindow::connectActions()
 	connect(m_UI->createBuildingProjectToolButton,	&QAbstractButton::clicked, this, &MainWindow::doActionCreateBuildingProject);
 	connect(m_UI->loadSubstanceToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionLoadSubstance);
 	
+	connect(m_UI->actionImageLiDARRegistration, &QAction::triggered, this, &MainWindow::doActionImageLiDARRegistration);
 
 	//! Segmentation
 	connect(m_UI->actionGroundFilteringBatch,		&QAction::triggered, this, &MainWindow::doActionGroundFilteringBatch);

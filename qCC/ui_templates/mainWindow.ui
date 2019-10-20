@@ -628,12 +628,19 @@
     </property>
     <addaction name="actionScheduleProjectID"/>
    </widget>
+   <widget class="QMenu" name="menuImage">
+    <property name="title">
+     <string>Image</string>
+    </property>
+    <addaction name="actionImageLiDARRegistration"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTools"/>
    <addaction name="menuDisplay"/>
    <addaction name="menu3DViews"/>
    <addaction name="menuSegmentation_2"/>
+   <addaction name="menuImage"/>
    <addaction name="menuBDRecon"/>
    <addaction name="menuHelp"/>
    <addaction name="menuSchedule"/>
@@ -1593,7 +1600,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>true</bool>
+    <bool>false</bool>
    </attribute>
    <addaction name="actionGroundFilteringBatch"/>
    <addaction name="actionClassificationBatch"/>
@@ -1601,6 +1608,21 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="separator"/>
    <addaction name="actionBuildingSegmentationBatch"/>
    <addaction name="actionBuildingSegmentEditor"/>
+  </widget>
+  <widget class="QToolBar" name="toolBarRegistration">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>true</bool>
+   </attribute>
+   <addaction name="actionImageLiDARRegistration"/>
   </widget>
   <widget class="QToolBar" name="toolBarBDRecon">
    <property name="windowTitle">
@@ -5029,6 +5051,18 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionClearEmptyItems">
    <property name="text">
     <string>Clear empty items</string>
+   </property>
+  </action>
+  <action name="actionImageLiDARRegistration">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Stocker/images/stocker/link.png</normaloff>:/CC/Stocker/images/stocker/link.png</iconset>
+   </property>
+   <property name="text">
+    <string>Registration</string>
+   </property>
+   <property name="iconText">
+    <string>Regis</string>
    </property>
   </action>
  </widget>

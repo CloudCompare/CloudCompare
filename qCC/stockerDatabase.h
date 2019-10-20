@@ -74,19 +74,28 @@ enum importDataType
 Q_DECLARE_METATYPE(BlockDB::blkDataInfo*)
 Q_DECLARE_METATYPE(BlockDB::blkCameraInfo)
 
+#define BLK_DATA_METAKEY "BlkDataInfo"
+
 class DataBaseHObject : public BDBaseHObject_
 {
 public:
-	DataBaseHObject(QString name = QString()) :
-		BDBaseHObject_(name) {
+	DataBaseHObject(QString name = QString()) 
+		: BDBaseHObject_(name)
+		, m_blkData(new BlockDB::BlockDBaseIO)
+	{
 		setDBSourceType(CC_TYPES::DB_MAINDB);
 	}
-	DataBaseHObject(const ccHObject& s) :
-		BDBaseHObject_(s) {
+	DataBaseHObject(const ccHObject& s) 
+		: BDBaseHObject_(s) 
+		, m_blkData(new BlockDB::BlockDBaseIO) 
+	{
 		setPath(s.getPath());
 		setDBSourceType(CC_TYPES::DB_MAINDB);
 	}
-	~DataBaseHObject() {}
+	~DataBaseHObject() {
+		if (m_blkData) { delete m_blkData; m_blkData = nullptr; }
+	}
+	virtual inline void setPath(const QString& tp) override;
 
 	using Container = std::vector<DataBaseHObject *>;
 
@@ -102,15 +111,16 @@ public:
 	ccHObject* getProductModels();
 
 	static DataBaseHObject* Create(QString absolute_path);
-	bool addData(ccHObject* obj, importDataType type, BlockDB::blkDataInfo* info);
+	bool addData(ccHObject* obj, BlockDB::blkDataInfo* info, bool exist_info);
+	bool addDataExist(BlockDB::blkDataInfo* info);
 	void clear();
 	bool load();
 	bool save();
 
 	BlockDB::BlockDBaseIO* m_blkData;
-private:
-	std::map<ccHObject*, BlockDB::blkDataInfo*> m_obj_blkInfo;
 };
+
+ccHObject * createObjectFromBlkDataInfo(BlockDB::blkDataInfo * info);
 
 class BDBaseHObject : public BDBaseHObject_
 {

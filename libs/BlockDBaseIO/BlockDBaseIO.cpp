@@ -2,6 +2,7 @@
 
 #include "LasPrjIO.h"
 #include "libpq-fe.h"
+#include "StFileOperator.hpp"
 
 #include <cfloat>
 #include <windows.h>
@@ -40,7 +41,7 @@ bool blkSceneInfo::setStrSceneInfo(std::string str)
 	}
 	strcpy(sceneID, seps.front().c_str());
 	for (size_t i = 0; i < 6; i++) {
-		sscanf(seps[i - 1].c_str(), "%lf", &bound[i]);
+		sscanf(seps[i + 1].c_str(), "%lf", &bound[i]);
 	}
 	return true;
 }
@@ -374,9 +375,9 @@ std::string blkImageInfo::getStrExtraTag(std::string * key) const
 	return std::string(info);
 }
 
-BlockDBaseIO::BlockDBaseIO(const char * dirPath)
+BlockDBaseIO::BlockDBaseIO(const char * path)
 {
-	strcpy(m_project_path, dirPath);
+	setPath(path);
 }
 
 BlockDBaseIO::~BlockDBaseIO()
@@ -432,28 +433,28 @@ bool BlockDBaseIO::loadProject()
 
 bool BlockDBaseIO::saveProject(bool save_regisprj)
 {
-	char drive[_MAX_DRIVE], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
-	_splitpath(m_project_path, drive, dir, name, ext);
 	char lpstrXmlPN[_MAX_PATH]; strcpy(lpstrXmlPN, m_project_path);
-	sprintf(m_projHdr.sDirPath, "%s%s", drive, dir);
-	sprintf(m_projHdr.sName, "%s", name);
 
-	if (_access(lpstrXmlPN, 2) == -1) {
+	CreateDir(m_projHdr.sDirPath);
+	FILE* fp = fopen(lpstrXmlPN, "w");
+	if (!fp) {
 		m_error_info = "cannot save to: " + std::string(lpstrXmlPN);
 		return false;
 	}
 	// deduce the dir
 	if (strlen(m_projHdr.lasListPath) == 0) sprintf(m_projHdr.lasListPath, "%s/%s", m_projHdr.sDirPath, "Data/points/LasFile.ini");
+	CreateDir(GetFileDirectory(m_projHdr.lasListPath));
 	if (strlen(m_projHdr.imgListPath) == 0) sprintf(m_projHdr.imgListPath, "%s/%s", m_projHdr.sDirPath, "Data/images/ImgFile.ini");
+	CreateDir(GetFileDirectory(m_projHdr.imgListPath));
 	if (strlen(m_projHdr.camParPath) == 0) sprintf(m_projHdr.camParPath, "%s/%s", m_projHdr.sDirPath, "Data/images/CamFile.ini");
-	if (strlen(m_projHdr.posListPath) == 0) sprintf(m_projHdr.posListPath, "%s/%s", m_projHdr.sDirPath, "Data/images/PosFile.txt");
+	CreateDir(GetFileDirectory(m_projHdr.camParPath));
 
 	//! save files
 	if (!savePoints(m_ptClds, m_projHdr.lasListPath)) {
 		m_error_info = g_error_info + "\nSave point clouds failed";
 		return false;
 	}
-	if (!saveImages(m_images, m_cameras, m_projHdr.imgListPath, m_projHdr.camParPath, m_projHdr.posListPath)) {
+	if (!saveImages(m_images, m_cameras, m_projHdr.imgListPath, m_projHdr.camParPath)) {
 		m_error_info = g_error_info + "\nSave images failed";
 		return false;
 	}
@@ -473,7 +474,6 @@ bool BlockDBaseIO::saveProject(bool save_regisprj)
 	::WritePrivateProfileString("DATA_FILE_INFO", "LASList", m_projHdr.lasListPath,  lpstrXmlPN);
 	::WritePrivateProfileString("DATA_FILE_INFO", "IMGList", m_projHdr.imgListPath,  lpstrXmlPN);
 	::WritePrivateProfileString("DATA_FILE_INFO", "CAMList", m_projHdr.camParPath, lpstrXmlPN);
-	::WritePrivateProfileString("DATA_FILE_INFO", "POSList", m_projHdr.posListPath,  lpstrXmlPN);
 
 	if (save_regisprj) {
 		char regis_path[_MAX_PATH];
@@ -540,7 +540,6 @@ bool BlockDBaseIO::saveRegistrationProject(const char * path)
 		for (size_t di = 0; di < 6; di++) {
 			cam_data.CameraBias[di] = info.cameraBias[di];
 		}
-		cam_data.R0 = info.R0;
 
 		regis_xml.m_CameraInfo.push_back(cam_data);
 	}
@@ -593,6 +592,24 @@ bool BlockDBaseIO::saveRegistrationProject(const char * path)
 	return true;
 }
 
+void BlockDBaseIO::clear()
+{
+	m_ptClds.clear();
+	m_images.clear();
+	m_cameras.clear();
+	m_meta_info.clear();
+
+}
+
+void BlockDBaseIO::setPath(const char * path)
+{
+	strcpy(m_project_path, path);
+	char drive[_MAX_DRIVE], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
+	_splitpath(m_project_path, drive, dir, name, ext);
+	sprintf(m_projHdr.sDirPath, "%s%s", drive, dir);
+	sprintf(m_projHdr.sName, "%s", name);
+}
+
 bool BlockDBaseIO::getMetaValue(std::string key, std::string & value)
 {
 	return _getMetaValue(m_meta_info, key, value);
@@ -602,6 +619,28 @@ bool BlockDBaseIO::addMetaValue(std::string key, std::string value)
 {
 	m_meta_info.insert(std::make_pair(key, value));
 	return true;
+}
+
+blkDataInfo* BlockDBaseIO::addData(blkDataInfo * info)
+{
+	if (!info) return nullptr;
+
+	switch (info->dataType())
+	{
+	case Blk_PtCld:
+		m_ptClds.push_back(*static_cast<blkPtCldInfo*>(info));
+		return &m_ptClds.back();
+	case Blk_Image:
+		m_images.push_back(*static_cast<blkImageInfo*>(info));
+		return &m_images.back();
+	case Blk_Camera:
+		m_cameras.push_back(*static_cast<blkCameraInfo*>(info));
+		return &m_cameras.back();
+	case Blk_Miscs:
+	default:
+		break;
+	}
+	return nullptr;
 }
 
 bool loadMetaListFile(const char* path, char* prefix, std::vector<strMetaMap>& meta_info)
@@ -638,14 +677,14 @@ bool loadMetaListFile(const char* path, char* prefix, std::vector<strMetaMap>& m
 
 bool saveMetaListFile(const char* path, const char* prefix, const std::vector<strMetaMap> & meta_info, bool overwrite)
 {
+	CreateDir(GetFileDirectory(path));
 	if (overwrite) {
 		FILE* fp = fopen(path, "w");
 		if (!fp) { g_error_info = "cannot save to: " + std::string(path); return false; }
 		fclose(fp);
 	}
-	else if (_access(path, 2) == -1) {
-		g_error_info = "cannot save to: " + std::string(path);
-		return false;
+	else if (_access(GetFileDirectory(path), 0) == -1) {
+		g_error_info = "wrong directory" + std::string(path); return false;
 	}
 
 	char strValue[1024];
@@ -670,6 +709,36 @@ bool saveMetaListFile(const char* path, const char* prefix, const std::vector<st
 		meta_key += key + ";";
 	}
 	::WritePrivateProfileString("FILE_HEADER", "METAKEY", meta_key.c_str(), path);
+
+	return true;
+}
+
+bool loadImages(std::vector<blkImageInfo>& images, std::vector<blkCameraInfo>& cameras,
+	const char* img_list, const char* cam_list)
+{
+	char prefix[1024];
+	std::vector<strMetaMap> meta_info_img;
+	if (!loadMetaListFile(img_list, prefix, meta_info_img)) {
+		return false;
+	}
+
+	for (auto & meta_info : meta_info_img) {
+		blkImageInfo info;
+		if (info.pullFromMeta(meta_info) || info.isValid())
+			images.push_back(info);
+	}
+
+	std::vector<strMetaMap> meta_info_cam;
+	if (!loadMetaListFile(cam_list, prefix, meta_info_cam)) {
+		return false;
+	}
+
+	for (auto & meta_info : meta_info_cam) {
+		blkCameraInfo info;
+		if (info.pullFromMeta(meta_info) || info.isValid()) {
+			cameras.push_back(info);
+		}
+	}
 
 	return true;
 }
@@ -712,54 +781,6 @@ bool saveImages(const std::vector<blkImageInfo>& images, const std::vector<blkCa
 		&& saveMetaListFile(cam_list, "CAM_", meta_info_cam, true);
 }
 
-bool loadImages(std::vector<blkImageInfo>& images, std::vector<blkCameraInfo>& cameras,
-	const char* img_list, const char* cam_list)
-{
-	char prefix[1024];
-	std::vector<strMetaMap> meta_info_img;
-	if (!loadMetaListFile(img_list, prefix, meta_info_img)) {
-		return false;
-	}
-
-	for (auto & meta_info : meta_info_img) {
-		blkImageInfo info;
-		if (info.pullFromMeta(meta_info) || info.isValid())
-			images.push_back(info);
-	}
-
-	std::vector<strMetaMap> meta_info_cam;
-	if (!loadMetaListFile(cam_list, prefix, meta_info_cam)) {
-		return false;
-	}
-
-	for (auto & meta_info : meta_info_cam) {
-		blkCameraInfo info;
-		if (info.pullFromMeta(meta_info) || info.isValid()) {
-			cameras.push_back(info);
-		}
-	}
-
-	return true;
-}
-
-bool savePoints(const std::vector<blkPtCldInfo>& ptClds, const char* path)
-{
-	FILE* fp = fopen(path, "w");
-	if (!fp) {
-		g_error_info = "failed to save points to: " + std::string(path);
-		return false;
-	}
-	fclose(fp);
-	
-	std::vector<strMetaMap> meta_info;
-	for (auto & pc : ptClds) {
-		strMetaMap info;
-		pc.pushToMeta(info);
-		meta_info.push_back(info);
-	}
-	return saveMetaListFile(path, "LAS_", meta_info, true);
-}
-
 bool loadPoints(std::vector<blkPtCldInfo>& ptClds, const char* path)
 {
 	char prefix[1024];
@@ -775,6 +796,17 @@ bool loadPoints(std::vector<blkPtCldInfo>& ptClds, const char* path)
 	}
 
 	return true;
+}
+
+bool savePoints(const std::vector<blkPtCldInfo>& ptClds, const char* path)
+{	
+	std::vector<strMetaMap> meta_info;
+	for (auto & pc : ptClds) {
+		strMetaMap info;
+		pc.pushToMeta(info);
+		meta_info.push_back(info);
+	}
+	return saveMetaListFile(path, "LAS_", meta_info, true);
 }
 
 bool getImageGPSInfo(const char* path, double& Lat, double& Lon, double& Height)

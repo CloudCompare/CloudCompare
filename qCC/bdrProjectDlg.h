@@ -31,10 +31,10 @@ public:
 		, m_displayed(false)
 	{}
 	~listData() {
-		if (m_object) {
-			delete m_object;
-			m_object = nullptr;
-		}
+// 		if (m_object) {
+// 			delete m_object;
+// 			m_object = nullptr;
+// 		}
 	}
 	using Container = std::vector<listData*>;
 	static listData* New(importDataType type);
@@ -81,21 +81,7 @@ public:
 	void toBlkPointInfo(BlockDB::blkPtCldInfo* info) {
 		if (info) {
 			// level
-			BlockDB::BLOCK_PtCldLevel level;
-			for (size_t i = 0; i < BlockDB::PCLEVEL_END; i++) {
-				if (this->m_level == QString::fromLocal8Bit(BlockDB::g_strPtCldLevelName[i])) {
-					level = BlockDB::BLOCK_PtCldLevel(i);
-					break;
-				}
-			}
-			info->level = level;
-
-			//! sceneID
-			ccBBox box = m_object->getBB_recursive();
-			info->scene_info.setMinMax(
-				box.minCorner().x, box.minCorner().y, box.minCorner().z,
-				box.maxCorner().x, box.maxCorner().y, box.maxCorner().z);
-			strcpy(info->scene_info.sceneID, info->sName);
+			info->setStrLevel(m_level.toStdString());
 		}
 	}
 protected:

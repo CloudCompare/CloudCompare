@@ -45,7 +45,6 @@ listData * listData::New(importDataType type)
 
 void listData::createObject(BlockDB::blkDataInfo* info)
 {
-	m_object = nullptr;
 	if (info) {
 		strcpy(info->sPath, m_path.toLocal8Bit());
 		strcpy(info->sName, m_name.toLocal8Bit());
@@ -58,18 +57,19 @@ void pointsListData::createObject(BlockDB::blkDataInfo* info)
 {
 	listData::createObject(info);
 
-	//! fast load
-	FileIOFilter::LoadParameters parameters;
-	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	{
-		parameters.alwaysDisplayLoadDialog = false;
-		parameters.loadMode = 0;
-	}
-	m_object = FileIOFilter::LoadFromFile(m_path, parameters, result, QString());
-	
-	if (m_object && info) {
+	if (info) {
 		BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
 		this->toBlkPointInfo(pInfo);
+		m_object = createObjectFromBlkDataInfo(pInfo);
+
+		//! sceneID
+		if (m_object) {
+			ccBBox box = m_object->getBB_recursive();
+			pInfo->scene_info.setMinMax(
+				box.minCorner().x, box.minCorner().y, box.minCorner().z,
+				box.maxCorner().x, box.maxCorner().y, box.maxCorner().z);
+			strcpy(pInfo->scene_info.sceneID, pInfo->sName);
+		}
 	}
 }
 
@@ -77,19 +77,10 @@ void imagesListData::createObject(BlockDB::blkDataInfo* info)
 {
 	listData::createObject(info);
 
-	//! if pos is not given, deduce from exif
-	//! camera
-	//ccCameraSensor
-	//m_object = new ccCameraSensor;
-	
-
 	if (info) {
 		BlockDB::blkImageInfo* pInfo = static_cast<BlockDB::blkImageInfo*>(info);
-		toBlkImageInfo(pInfo);
-		
-		if (pInfo->isValid()) {
-			m_object = new ccHObject(m_name);
-		}
+		this->toBlkImageInfo(pInfo);
+		m_object = createObjectFromBlkDataInfo(pInfo);		
 	}
 }
 
@@ -313,7 +304,8 @@ void bdrProjectDlg::linkWithProject(DataBaseHObject * proj)
 		if (m_associateProject)	{
 			//! CLEAR
 			resetObjects();
-			m_ownProject = new DataBaseHObject(*m_associateProject);
+			m_ownProject = new DataBaseHObject(m_associateProject->getName());
+			m_ownProject->setPath(m_associateProject->getPath());
 			if (m_preview) {
 				m_preview->getGLWindow()->addToOwnDB(m_ownProject);
 			}
@@ -781,12 +773,12 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 		for (listData* data : m_points_data) if (data) {
 			pointsListData* pData = static_cast<pointsListData*>(data); if (!pData) continue;
 			
-			BlockDB::blkPtCldInfo* info = new BlockDB::blkPtCldInfo;
+			BlockDB::blkPtCldInfo info;
 			pData->setObject(nullptr);
-			pData->createObject(info); // load file
-			if (!pData->getObject()) { failedExitprj(); failedExit(info); continue; }
+			pData->createObject(&info); // load file
+			if (!pData->getObject()) { failedExitprj(); continue; }
 						
-			m_ownProject->addData(pData->getObject(), pData->getDataType(), info);
+			m_ownProject->addData(pData->getObject(), &info, false);
 		}
 	}
 
@@ -796,19 +788,17 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 		//! firstly, save the camera data
 		std::vector<BlockDB::blkCameraInfo> camData = getCameraData();
 		for (size_t i = 0; i < camData.size(); i++) {
-			StHObject* camObj = new StHObject(camData[i].sName);
-			camObj->setPath(camData[i].sPath);
-			BlockDB::blkCameraInfo* info = new BlockDB::blkCameraInfo(camData[i]);
-			m_ownProject->addData(camObj, IMPORT_MISCS, info);
+			StHObject* camObj = createObjectFromBlkDataInfo(&camData[i]);
+			m_ownProject->addData(camObj, &camData[i], false);
 		}
 		for (listData* data : m_images_data) if (data) {
 			imagesListData* pData = static_cast<imagesListData*>(data); if (!pData) continue;
 
-			BlockDB::blkImageInfo* info = new BlockDB::blkImageInfo;
-			pData->setObject(nullptr); pData->createObject(info);
-			if (!pData->getObject()) { failedExitprj(); failedExit(info);  continue; }
+			BlockDB::blkImageInfo info;
+			pData->setObject(nullptr); pData->createObject(&info);
+			if (!pData->getObject()) { failedExitprj(); continue; }
 						
-			m_ownProject->addData(pData->getObject(), pData->getDataType(), info);
+			m_ownProject->addData(pData->getObject(), &info, false);
 		}
 	}
 
@@ -818,11 +808,11 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 		for (listData* data : m_miscs_data) if (data) {
 			miscsListData* pData = static_cast<miscsListData*>(data); if (!pData) continue;
 
-			BlockDB::blkMiscsInfo* info = new BlockDB::blkMiscsInfo;
-			pData->setObject(nullptr); pData->createObject(info);
-			if (!pData->getObject()) { failedExitprj(); failedExit(info); continue; }
+			BlockDB::blkMiscsInfo info;
+			pData->setObject(nullptr); pData->createObject(&info);
+			if (!pData->getObject()) { failedExitprj(); continue; }
 
-			m_ownProject->addData(pData->getObject(), pData->getDataType(), info);
+			m_ownProject->addData(pData->getObject(), &info, false);
 		}
 	}
 

@@ -173,6 +173,7 @@ class BLOCKDB_IO_LIB_API blkPtCldInfo : public blkDataInfo
 public:
 	blkPtCldInfo() 
 		: blkDataInfo(Blk_PtCld)
+		, level(PCLEVEL_TILE)
 	{}
 	blkPtCldInfo(const blkPtCldInfo& info)
 		: blkDataInfo(info) {
@@ -329,28 +330,34 @@ public:
 class BLOCKDB_IO_LIB_API BlockDBaseIO
 {
 public:
-	BlockDBaseIO() = delete;
-	BlockDBaseIO(const char* dirPath);
+	BlockDBaseIO() {}
+	BlockDBaseIO(const char* path);
 	~BlockDBaseIO();
 
 	bool loadProject();
 	bool saveProject(bool save_regisprj = false);
 	bool saveRegistrationProject(const char* path);
 
+	void clear();
+
+	void setPath(const char * path);
+
 	blkProjHdr projHdr() const { return m_projHdr; }
 	blkProjHdr& projHdr() { return m_projHdr; }
 
-	std::vector<blkPtCldInfo> getPtClds() { return m_ptClds; }
+	std::vector<blkPtCldInfo>& getPtClds() { return m_ptClds; }
 	void setPtClds(const std::vector<blkPtCldInfo> & data) { m_ptClds = data; }
-	std::vector<blkImageInfo> getImages() { return m_images; }
+	std::vector<blkImageInfo>& getImages() { return m_images; }
 	void setImages(const std::vector<blkImageInfo> & data) { m_images = data; }
-	std::vector<blkCameraInfo> getCameras() { return m_cameras; }
+	std::vector<blkCameraInfo>& getCameras() { return m_cameras; }
 	void setCameras(const std::vector<blkCameraInfo> & data) { m_cameras = data; }
 
 	std::string getErrorInfo() { return m_error_info; }
 
 	bool getMetaValue(std::string key, std::string& value);
 	bool addMetaValue(std::string key, std::string value);
+
+	blkDataInfo* addData(blkDataInfo* info);
 private:
 
 	std::vector<blkPtCldInfo>			m_ptClds;
@@ -376,6 +383,14 @@ BLOCKDB_IO_LIB_API inline bool _getMetaValue(std::map<T1,T2> meta, const T1& key
 	}
 }
 
+BLOCKDB_IO_LIB_API bool loadMetaListFile(const char * path, char * prefix, std::vector<strMetaMap> & meta_info);
+
+BLOCKDB_IO_LIB_API bool saveMetaListFile(const char * path, const char * prefix, const std::vector<strMetaMap>& meta_info, bool overwrite);
+
+BLOCKDB_IO_LIB_API bool loadImages(std::vector<blkImageInfo>& images, std::vector<blkCameraInfo>& cameras, const char * img_list, const char * cam_list);
+BLOCKDB_IO_LIB_API bool saveImages(const std::vector<blkImageInfo>& images, const std::vector<blkCameraInfo>& cameras, const char * img_list, const char * cam_list);
+BLOCKDB_IO_LIB_API bool loadPoints(std::vector<blkPtCldInfo>& ptClds, const char* path);
+BLOCKDB_IO_LIB_API bool savePoints(const std::vector<blkPtCldInfo>& ptClds, const char* path);
 BLOCKDB_IO_LIB_API bool getImageGPSInfo(const char * path, double & Lat, double & Lon, double & Height);
 
 BLOCKDB_IO_LIB_API bool loadPosFile(const char * path, std::vector<blkImageInfo>& images_pos);
@@ -383,11 +398,6 @@ BLOCKDB_IO_LIB_API bool loadPosFile(const char * path, std::vector<blkImageInfo>
 BLOCKDB_IO_LIB_API bool savePosFile(const char * path, const std::vector<blkImageInfo>& images_pos);
 
 BLOCKDB_IO_LIB_API bool connectPgsDB(const char* connInfo);
-
-BLOCKDB_IO_LIB_API bool loadMetaListFile(const char * path, char * prefix, std::vector<strMetaMap> & meta_info);
-
-BLOCKDB_IO_LIB_API bool saveMetaListFile(const char * path, const char * prefix, const std::vector<strMetaMap>& meta_info, bool overwrite);
-
 
 BLKDB_NAMESPACE_END
 

@@ -88,6 +88,15 @@ ccHObject* getChildGroupByName(ccHObject* group, QString name, bool auto_create,
 	return find_obj;
 }
 
+inline void DataBaseHObject::setPath(const QString & tp)
+{
+	m_path = tp;
+	QString prj_path = getPath() + "/" + QFileInfo(getPath()).completeBaseName() + ".bprj";
+	if (m_blkData) {
+		m_blkData->setPath(prj_path.toLocal8Bit());
+	}
+}
+
 ccHObject * DataBaseHObject::getPointCloudGroup()
 {
 	return getChildGroupByName(this, "pointClouds");
@@ -128,6 +137,41 @@ ccHObject * DataBaseHObject::getProductSegmented()
 ccHObject * DataBaseHObject::getProductModels()
 {
 	return getProductItem("models");
+}
+
+ccHObject* createObjectFromBlkDataInfo(BlockDB::blkDataInfo* info)
+{
+	ccHObject* object = nullptr;
+	if (!info || !info->isValid()) return object;
+	switch (info->dataType())
+	{
+	case BlockDB::Blk_PtCld: {
+		//! fast load
+		FileIOFilter::LoadParameters parameters;
+		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+		{
+			parameters.alwaysDisplayLoadDialog = false;
+			parameters.loadMode = 0;
+		}
+		object = FileIOFilter::LoadFromFile(QString::fromLocal8Bit(info->sPath), parameters, result, QString());
+	}
+		break;
+	case BlockDB::Blk_Image:
+		object = new ccHObject(QString::fromLocal8Bit(info->sName));
+		object->setPath(QString::fromLocal8Bit(info->sPath));
+		break;
+	case BlockDB::Blk_Camera:
+		object = new ccHObject(QString::fromLocal8Bit(info->sName));
+		object->setPath(QString::fromLocal8Bit(info->sPath));
+		break;
+	case BlockDB::Blk_Miscs:
+		object = new ccHObject(QString::fromLocal8Bit(info->sName));
+		object->setPath(QString::fromLocal8Bit(info->sPath));
+		break;
+	default:
+		break;
+	}
+	return object;
 }
 
 DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
@@ -197,26 +241,35 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 	return new_database;
 }
 
-bool DataBaseHObject::addData(ccHObject * obj, importDataType type, BlockDB::blkDataInfo* info)
+bool DataBaseHObject::addData(ccHObject * obj, BlockDB::blkDataInfo* info, bool exist_info)
 {
+	if (!info) {
+		return false;
+	}
 	if (info->dataType() == BlockDB::Blk_unset) {
 		return false;
 	}
-	m_obj_blkInfo.insert(std::make_pair(obj, info));
+	if (m_blkData) {
+		BlockDB::blkDataInfo* added_info = !exist_info ? m_blkData->addData(info) : info;
+		if (added_info)	{
+			obj->setMetaData(BLK_DATA_METAKEY, QVariant::fromValue(added_info));
 
-// 	obj->setMetaData("BlkDataInfo", QVariant::fromValue(info));
+// 			if (obj->hasMetaData("BlkDataInfo")) {
+// 				QVariant v = obj->getMetaData("BlkDataInfo");
+// 				if (v.canConvert<BlockDB::blkDataInfo*>()) {
+// 					BlockDB::blkPtCldInfo* pin = static_cast<BlockDB::blkPtCldInfo*>(v.value<BlockDB::blkDataInfo*>());
 // 
-// 	if (obj->hasMetaData("BlkDataInfo")) {
-// 		QVariant v = obj->getMetaData("BlkDataInfo");
-// 		if (v.canConvert<BlockDB::blkDataInfo*>()) {
-// 			BlockDB::blkPtCldInfo* pin = static_cast<BlockDB::blkPtCldInfo*>(v.value<BlockDB::blkDataInfo*>());
-// 		}
-// 	}
-	
+// 					if (pin == &m_blkData->getPtClds().back()) {
+// 						auto test = pin->scene_info;
+// 					}
+// 				}
+// 			}
+		}
+	}
 	ccHObject* importObj = nullptr;
-	switch (type)
+	switch (info->dataType())
 	{
-	case IMPORT_POINTS: {
+	case BlockDB::Blk_PtCld: {
 		BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
 		BlockDB::BLOCK_PtCldLevel level = pInfo->level;
 		if (level >= BlockDB::PCLEVEL_STRIP && level <= BlockDB::PCLEVEL_TILE) {
@@ -233,15 +286,14 @@ bool DataBaseHObject::addData(ccHObject * obj, importDataType type, BlockDB::blk
 		}
 	}
 		break;
-	case IMPORT_IMAGES:
+	case BlockDB::Blk_Image:
 		importObj = getImagesGroup();
 		break;
-	case IMPORT_MISCS:
+	case BlockDB::Blk_Camera:
 		importObj = getMiscsGroup();
 		break;
-	case IMPORT_MODELS:
-	case IMPORT_POSTGIS:
-	case IMPORT_TYPE_END:
+	case BlockDB::Blk_Miscs:
+		importObj = getMiscsGroup();
 		break;
 	default:
 		break;
@@ -249,26 +301,50 @@ bool DataBaseHObject::addData(ccHObject * obj, importDataType type, BlockDB::blk
 	return importObj && importObj->addChild(obj);
 }
 
+bool DataBaseHObject::addDataExist(BlockDB::blkDataInfo * info)
+{
+	ccHObject* obj = createObjectFromBlkDataInfo(info);
+	if (!obj) { return false; }
+	
+	return addData(obj, info, true);
+}
+
 void DataBaseHObject::clear()
 {
-	for (auto & obj : m_obj_blkInfo) {
-		delete obj.second;
+	if (m_blkData) {
+		m_blkData->clear();
 	}
-	m_obj_blkInfo.clear();
 	removeAllChildren();
 }
 
 bool DataBaseHObject::load()
 {
-	QString xml_file = getPath() + "/" + QFileInfo(getPath()).completeBaseName() + ".xml";
-	BlockDB::BlockDBaseIO blkDBase;
-	if (!blkDBase.loadProject(xml_file.toLocal8Bit())) {
-		return false;
+	if (!m_blkData)	{
+		m_blkData = new BlockDB::BlockDBaseIO;
+		setPath(getPath());
 	}
-	//! add 
-	BlockDB::blkImageInfo* images = blkDBase.images();
-	blkDBase.images();
-	blkDBase.cameras();
+	if (!m_blkData->loadProject()) { 
+		std::cout << "cannot load project from: " + m_blkData->getErrorInfo() << std::endl;
+		return false; 
+	}
+	for (auto & info : m_blkData->getPtClds()) {
+		addDataExist(&info);
+	}
+	for (auto & info : m_blkData->getImages()) {
+		addDataExist(&info);
+	}
+	for (auto & info : m_blkData->getCameras()) {
+		addDataExist(&info);
+	}
+
+	// 	BlockDB::BlockDBaseIO blkDBase;
+// 	if (!blkDBase.loadProject(xml_file.toLocal8Bit())) {
+// 		return false;
+// 	}
+// 	//! add 
+// 	BlockDB::blkImageInfo* images = blkDBase.images();
+// 	blkDBase.images();
+// 	blkDBase.cameras();
 	
 
 	return true;
@@ -277,75 +353,53 @@ bool DataBaseHObject::load()
 bool DataBaseHObject::save()
 {
 	QString xml_file = getPath() + "/" + QFileInfo(getPath()).completeBaseName() + ".xml";
-	BlockDB::BlockDBaseIO blkDBase;
+//	BlockDB::BlockDBaseIO blkDBase(xml_file.toLocal8Bit());
 
 	//! collect block data
 	
-	std::vector<BlockDB::blkPtCldInfo> pointsData;
-	std::vector<BlockDB::blkImageInfo> imagesData;
-	std::vector<BlockDB::blkCameraInfo> camerasData;
-	std::vector<BlockDB::blkMiscsInfo> miscsData;
-	for (auto & obj_info : m_obj_blkInfo) {
-		if (obj_info.first) {	// maybe deleted ??
-			BlockDB::blkDataInfo* info = obj_info.second;
-
-			switch (info->dataType())
-			{
-			case BlockDB::Blk_unset: {
-				std::cout << "unknown data type" << std::endl;
-			}
-				break;
-			case BlockDB::Blk_PtCld: {
-				BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
-				pointsData.push_back(*pInfo);
-			}
-				break;
-			case BlockDB::Blk_Image: {
-				BlockDB::blkImageInfo* pInfo = static_cast<BlockDB::blkImageInfo*>(info);
-				imagesData.push_back(*pInfo);
-			}
-				break;
-			case BlockDB::Blk_Camera: {
-				BlockDB::blkCameraInfo* pInfo = static_cast<BlockDB::blkCameraInfo*>(info);
-				camerasData.push_back(*pInfo);
-			}
-				break;
-			case BlockDB::Blk_Miscs: {
-				BlockDB::blkMiscsInfo* pInfo = static_cast<BlockDB::blkMiscsInfo*>(info);
-				miscsData.push_back(*pInfo);
-			}
-				break;
-			default:
-				break;
-			}
-		}
-	}
-
-	//! points
-	(blkDBase.ptClds());
-	{
-		if (!pointsData.empty()) {
-			blkDBase.ptCldsNum() = pointsData.size();
-			*(blkDBase.ptClds()) = new BlockDB::blkPtCldInfo[pointsData.size()];
-			for (size_t i = 0; i < pointsData.size(); i++) {
-				*(blkDBase.ptClds())[i] = pointsData[i];
-			}
-		}
-	}
-
-	{
-		if (!imagesData.empty()) {
-			BlockDB::blkImageInfo* images = blkDBase.images();
-			images = new BlockDB::blkImageInfo[imagesData.size()];
-		}
-	}
-
-	blkDBase.images();
-	blkDBase.cameras();
-
+// 	std::vector<BlockDB::blkPtCldInfo> pointsData;
+// 	std::vector<BlockDB::blkImageInfo> imagesData;
+// 	std::vector<BlockDB::blkCameraInfo> camerasData;
+// 	std::vector<BlockDB::blkMiscsInfo> miscsData;
+// 	for (auto & obj_info : m_obj_blkInfo) {
+// 		if (obj_info.first) {	// maybe deleted ??
+// 			BlockDB::blkDataInfo* info = obj_info.second;
+// 
+// 			switch (info->dataType())
+// 			{
+// 			case BlockDB::Blk_unset: {
+// 				std::cout << "unknown data type" << std::endl;
+// 			}
+// 				break;
+// 			case BlockDB::Blk_PtCld: {
+// 				BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
+// 				pointsData.push_back(*pInfo);
+// 			}
+// 				break;
+// 			case BlockDB::Blk_Image: {
+// 				BlockDB::blkImageInfo* pInfo = static_cast<BlockDB::blkImageInfo*>(info);
+// 				imagesData.push_back(*pInfo);
+// 			}
+// 				break;
+// 			case BlockDB::Blk_Camera: {
+// 				BlockDB::blkCameraInfo* pInfo = static_cast<BlockDB::blkCameraInfo*>(info);
+// 				camerasData.push_back(*pInfo);
+// 			}
+// 				break;
+// 			case BlockDB::Blk_Miscs: {
+// 				BlockDB::blkMiscsInfo* pInfo = static_cast<BlockDB::blkMiscsInfo*>(info);
+// 				miscsData.push_back(*pInfo);
+// 			}
+// 				break;
+// 			default:
+// 				break;
+// 			}
+// 		}
+// 	}
 	// other information in the prj.ini
 
-	if (!blkDBase.saveProject(xml_file.toLocal8Bit())) {
+	if (!m_blkData->saveProject()) {
+		std::cout << m_blkData->getErrorInfo() << std::endl;
 		return false;
 	}
 	return true;

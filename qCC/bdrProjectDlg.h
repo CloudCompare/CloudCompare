@@ -125,8 +125,8 @@ class imagesListData : public listData
 {
 public:
 	imagesListData()
-		: posXs(NAN), posYs(NAN), posZs(NAN), posPhi(NAN), posOmega(NAN), posKappa(NAN),
-		gpsLat(0), gpsLon(0), gpsHeight(0), gps_time(0)
+		: posXs(NAN), posYs(NAN), posZs(NAN), posPhi(NAN), posOmega(NAN), posKappa(NAN)
+		, gpsLat(NAN), gpsLon(NAN), gpsHeight(NAN), gps_time(NAN)
 	{}
 	~imagesListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_IMAGES; }
@@ -147,7 +147,7 @@ public:
 			info->gpsLat = gpsLat;
 			info->gpsLon = gpsLon;
 			info->gpsHeight = gpsHeight;
-			info->setLevel(m_level.toStdString());
+			info->setStrLevel(m_level.toStdString());
 		}
 	}
 
@@ -160,10 +160,11 @@ enum miscsHeaderIdx
 	MiscsCol_Level = ListCol_END,
 	MiscsCol_MetaKey,
 	MiscsCol_MetaValue,
+	MiscsCol_GroupID,
 	MiscsCol_Path,
 	MicscCol_End,
 };
-static const char* miscsHeaderName[] = { "Type", "Meta Key", "Meta Value", "Path" };
+static const char* miscsHeaderName[] = { "Type", "Meta Key", "Meta Value", "GroupID", "Path" };
 class miscsListData : public listData
 {
 public:
@@ -179,12 +180,14 @@ public:
 enum modelsHeaderIdx
 {
 	ModelsCol_Level = ListCol_END,
+	ModelsCol_Origin,
 	ModelsCol_MetaKey,
 	ModelsCol_MetaValue,
+	ModelsCol_GroupID,
 	ModelsCol_Path,
 	ModelsCol_End,
 };
-static const char* modelsHeaderName[] = { "Type", "Meta Key", "Meta Value", "Path" };
+static const char* modelsHeaderName[] = { "Type", "Origin", "Meta Key", "Meta Value", "GroupID", "Path" };
 class modelsListData : public listData
 {
 public:
@@ -193,6 +196,7 @@ public:
 	~modelsListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_MODELS; }
 	virtual void createObject(BlockDB::blkDataInfo* info) override;
+	QString m_origin;
 	QString m_meta_key;
 	QString m_meta_value;
 };
@@ -214,7 +218,7 @@ public:
 	~postGISLiistData() {}
 	virtual importDataType getDataType() const override { return IMPORT_POSTGIS; }
 	virtual void createObject(BlockDB::blkDataInfo* info) override;
-	QString m_meta;
+	QString m_meta_key;
 	QString m_meta_value;
 };
 

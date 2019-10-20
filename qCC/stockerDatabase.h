@@ -107,6 +107,7 @@ public:
 	bool load();
 	bool save();
 
+	BlockDB::BlockDBaseIO* m_blkData;
 private:
 	std::map<ccHObject*, BlockDB::blkDataInfo*> m_obj_blkInfo;
 };

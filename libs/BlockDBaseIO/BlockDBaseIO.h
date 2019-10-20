@@ -16,6 +16,7 @@
 //system
 #include <string>
 #include <vector>
+#include <map>
 
 BLKDB_NAMESPACE_BEGIN
 
@@ -27,6 +28,12 @@ BLKDB_NAMESPACE_BEGIN
 #define _MAX_FNAME 256
 #endif
 
+#define PRODUCT_DIR "Product"
+#define IF_PROCESS_DIR "IF_PROCESS"
+#define REGISPRJ_PATH_KEY "RegisPrjPath"
+
+typedef std::map<std::string, std::string> strMetaMap;
+
 enum BLOCK_TASK_TYPE
 {
 	TASK_TILE,
@@ -36,28 +43,47 @@ enum BLOCK_TASK_TYPE
 	TASK_BDSEG,
 	TASK_RECON,
 };
+static const char* g_strTaskTagName[] = { "TILE", "FILTER", "REGIS", "CLASS", "BDSEG", "RECON" };
+static const char* g_strTaskDirName[] = { "Tiles", "Filtering", "Registration", "Classification", "Segmentation", "Reconstruction" };
 
 struct blkProjHdr
 {
-	char sPath[_MAX_PATH];
+	blkProjHdr()
+		: projectID(0)
+		, groupID(0)
+	{
+		memset(sDirPath, 0, _MAX_PATH);
+		memset(sName, 0, _MAX_FNAME);
+		memset(camParPath, 0, _MAX_PATH);
+		memset(imgListPath, 0, _MAX_PATH);
+		memset(lasListPath, 0, _MAX_PATH);
+		memset(camParPath, 0, _MAX_PATH);
+	}
+	char sDirPath[_MAX_PATH];
 	char sName[_MAX_FNAME];
 
 	int projectID;
-	int GroupID;
+	int groupID;
 
+	char lasListPath[_MAX_PATH];
 	char camParPath[_MAX_PATH];
 	char imgListPath[_MAX_PATH];
-	char lasListPath[_MAX_PATH];
 
 	char m_strProdGCDPN[_MAX_PATH];
 	char m_strGcpGCDPN[_MAX_PATH];
 	char m_str7parPN[_MAX_PATH];
-
-	char m_strTaskIni[_MAX_PATH];
 };
 
 struct blkSceneInfo
 {
+	blkSceneInfo() {
+		memset(sceneID, 0, 512);
+		memset(bound, 0, sizeof(double) * 6);
+	}
+
+	bool setStrSceneInfo(std::string str);
+	std::string getStrSceneInfo(std::string* key = nullptr) const;
+
 	double getMinX() { return bound[0]; }
 	double getMinY() { return bound[1]; }
 	double getMinZ() { return bound[2]; }
@@ -112,7 +138,12 @@ class BLOCKDB_IO_LIB_API blkDataInfo
 public:
 	blkDataInfo(blkDataType type = Blk_unset)
 		: m_dataType(type)
-	{}
+		, nGroupID(0)
+	{
+		memset(sPath, 0, _MAX_PATH);
+		memset(sName, 0, _MAX_FNAME);
+		memset(sID, 0, 32);
+	}
 	blkDataInfo(const blkDataInfo & info) {
 		strcpy(sPath, info.sPath);
 		strcpy(sName, info.sName);
@@ -123,8 +154,11 @@ public:
 	~blkDataInfo(){}
 
 	virtual blkDataType dataType() const { return m_dataType; }
-	virtual void fromString(std::string str) {}
-	virtual std::string toString() const { std::string str; return str; }
+
+	virtual bool isValid() { return strlen(sName) > 0; }
+
+	virtual void pushToMeta(strMetaMap& meta_info) const;
+	virtual bool pullFromMeta(const strMetaMap& meta_info);
 
 	char sPath[_MAX_PATH];
 	char sName[_MAX_FNAME];
@@ -147,6 +181,16 @@ public:
 	}
 	~blkPtCldInfo() {}
 
+	virtual bool isValid() override;
+
+	virtual void pushToMeta(strMetaMap& meta_info) const override;
+	virtual bool pullFromMeta(const strMetaMap& meta_info) override;
+
+	bool setStrLevel(std::string str);
+	std::string getStrLevel(std::string* key = nullptr) const;
+	bool setStrSceneInfo(std::string str);
+	std::string getStrSceneInfo(std::string* key = nullptr) const;
+
 	BLOCK_PtCldLevel level;
 	blkSceneInfo scene_info;
 };
@@ -156,27 +200,44 @@ class BLOCKDB_IO_LIB_API blkCameraInfo : public blkDataInfo
 public:
 	blkCameraInfo()
 		: blkDataInfo(Blk_Camera)
-	{}
+		, pixelSize(0)
+		, width(0)
+		, height(0)
+		, f(0), x0(0), y0(0)
+	{
+		memset(distortionPar, 0, sizeof(double) * 8);
+		memset(cameraBias, 0, sizeof(double) * 6);
+	}
 	blkCameraInfo(const blkCameraInfo& info)
 		: blkDataInfo(info) {
 		pixelSize = info.pixelSize; width = info.width;	height = info.height;
-		f = info.f;	x0 = info.x0; y0 = info.y0;	R0 = info.R0;
+		f = info.f;	x0 = info.x0; y0 = info.y0;
 		for (size_t i = 0; i < 8; i++)
 			distortionPar[i] = info.distortionPar[i];
 		for (size_t i = 0; i < 6; i++) 
 			cameraBias[i] = info.cameraBias[i];
 	}
 	~blkCameraInfo() {}
-		
-	void fromString(std::string str) override {}
-	std::string toString() const override { std::string str; return str; }
+
+	virtual bool isValid() override;
+
+	virtual void pushToMeta(strMetaMap& meta_info) const override;
+	virtual bool pullFromMeta(const strMetaMap& meta_info) override;
+
+	bool setStrPixSize(std::string str);
+	std::string getStrPixSize(std::string* key = nullptr) const;
+	bool setStrFrameSize(std::string str);
+	std::string getStrFrameSize(std::string* key = nullptr) const;
+	bool setStrFxy(std::string str);
+	std::string getStrFxy(std::string* key = nullptr) const;
+	bool setStrDistPar(std::string str);
+	std::string getStrDistPar(std::string* key = nullptr) const;
 
 	double pixelSize;
 	int width, height;
 	double f, x0, y0;
 	double distortionPar[8];
-	double cameraBias[6];
-	double R0;
+	double cameraBias[6];//disabled, not used
 };
 
 enum BLOCK_ImgLevel {
@@ -193,11 +254,10 @@ public:
 	blkImageInfo()
 		: blkDataInfo(Blk_Image)
 		, level(IMGLEVEL_STRIP)
-		, gpsLat(0)
-		, posXs(0)
-		, posPhi(0)
+		, gpsLat(0), gpsLon(0), gpsHeight(0)
+		, posXs(0), posYs(0), posZs(0)
+		, posPhi(0), posOmega(0), posKappa(0)
 		, gps_time(0)
-		, cameraID(0)
 		, stripID(0)
 		, attrib(0)
 		, bFlag(0)
@@ -210,25 +270,33 @@ public:
 		posPhi = info.posPhi, posOmega = info.posOmega, posKappa = info.posKappa;
 		gps_time = info.gps_time;
 		cameraName = info.cameraName;
-		cameraID = info.cameraID;
 		stripID = info.stripID;
 		attrib = info.attrib;
 		bFlag = info.bFlag;
 	}
 	~blkImageInfo() {}
 
-	bool isValid();
-	void setLevel(std::string _l);
+	virtual bool isValid() override;
 
-	void fromString(std::string str) override {}
-	std::string toString() const override { std::string str; return str; }
+	virtual void pushToMeta(strMetaMap& meta_info) const override;
+	virtual bool pullFromMeta(const strMetaMap& meta_info) override;
 
-	BLOCK_ImgLevel level;
-	double gpsLat, gpsLon, gpsHeight;
-	double posXs, posYs, posZs, posPhi, posOmega, posKappa;
-	double gps_time;
-	std::string cameraName;
-	int stripID, attrib, cameraID, bFlag;
+	bool setStrLevel(std::string str);
+	std::string getStrLevel(std::string* key = nullptr) const;
+	bool setStrGPS(std::string str);
+	std::string getStrGPS(std::string* key = nullptr) const;
+	bool setStrPOS(std::string str);
+	std::string getStrPOS(std::string* key = nullptr) const;
+	bool setStrCamera(std::string str);
+	std::string getStrCamera(std::string* key = nullptr) const;
+	bool setStrExtraTag(std::string str);
+	std::string getStrExtraTag(std::string* key = nullptr) const;
+
+	BLOCK_ImgLevel level;	//level
+	double gpsLat, gpsLon, gpsHeight;	//gps
+	double gps_time, posXs, posYs, posZs, posPhi, posOmega, posKappa;	//pos
+	std::string cameraName;		//camera
+	int stripID, attrib, bFlag;	//extra int tag
 };
 
 enum BLOCK_MiscAPP {
@@ -253,9 +321,6 @@ public:
 	}
 	~blkMiscsInfo() {}
 
-	void fromString(std::string str) override {}
-	std::string toString() const override { std::string str; return str; }
-
 	BLOCK_MiscAPP meta_app;
 	std::string meta_key;
 	std::string meta_value;
@@ -264,46 +329,67 @@ public:
 class BLOCKDB_IO_LIB_API BlockDBaseIO
 {
 public:
-	BlockDBaseIO();
+	BlockDBaseIO() = delete;
+	BlockDBaseIO(const char* dirPath);
 	~BlockDBaseIO();
 
-	bool loadProject(const char* lpstrXmlPN);
-	bool saveProject(const char* lpstrXmlPN);
+	bool loadProject();
+	bool saveProject(bool save_regisprj = false);
+	bool saveRegistrationProject(const char* path);
 
-	int ptCldsNum() const;
-	int& ptCldsNum();
-	int imagesNum() const;
-	int& imagesNum();
-	int camerasNum() const;
-	int& camerasNum();
+	blkProjHdr projHdr() const { return m_projHdr; }
+	blkProjHdr& projHdr() { return m_projHdr; }
 
-	blkProjHdr projHdr() const;
-	blkProjHdr& projHdr();
+	std::vector<blkPtCldInfo> getPtClds() { return m_ptClds; }
+	void setPtClds(const std::vector<blkPtCldInfo> & data) { m_ptClds = data; }
+	std::vector<blkImageInfo> getImages() { return m_images; }
+	void setImages(const std::vector<blkImageInfo> & data) { m_images = data; }
+	std::vector<blkCameraInfo> getCameras() { return m_cameras; }
+	void setCameras(const std::vector<blkCameraInfo> & data) { m_cameras = data; }
 
-	blkPtCldInfo** ptClds()  { return &m_ptClds; }
-	blkPtCldInfo* ptClds() const { return m_ptClds; }
-	blkImageInfo* images();
-	blkCameraInfo* cameras();
+	std::string getErrorInfo() { return m_error_info; }
 
+	bool getMetaValue(std::string key, std::string& value);
+	bool addMetaValue(std::string key, std::string value);
 private:
-	int m_PcNum;
-	int m_ImgNum;
-	int m_camNum;
 
-	blkPtCldInfo*	m_ptClds;
-	blkImageInfo*	m_images;
-	blkCameraInfo*	m_cameras;
-	blkProjHdr		m_projHdr;
+	std::vector<blkPtCldInfo>			m_ptClds;
+	std::vector<blkImageInfo>			m_images;
+	std::vector<blkCameraInfo>			m_cameras;
+	blkProjHdr							m_projHdr;
+	std::map<std::string, std::string>	m_meta_info;
+
+	std::string m_error_info;
+	char m_project_path[_MAX_PATH];
 };
+
+template<typename T1 = std::string, typename T2 = std::string>
+BLOCKDB_IO_LIB_API inline bool _getMetaValue(std::map<T1,T2> meta, const T1& key, T2 & value)
+{
+	auto it = meta.find(key);
+	if (it == meta.end()) {
+		return false;
+	}
+	else {
+		value = it->second;
+		return key == it->first;
+	}
+}
 
 BLOCKDB_IO_LIB_API bool getImageGPSInfo(const char * path, double & Lat, double & Lon, double & Height);
 
-BLOCKDB_IO_LIB_API bool readPosFile(const char * path, std::vector<blkImageInfo>& images_pos);
+BLOCKDB_IO_LIB_API bool loadPosFile(const char * path, std::vector<blkImageInfo>& images_pos);
 
-BLOCKDB_IO_LIB_API bool writePosFile(const char * path, const std::vector<blkImageInfo>& images_pos);
+BLOCKDB_IO_LIB_API bool savePosFile(const char * path, const std::vector<blkImageInfo>& images_pos);
 
 BLOCKDB_IO_LIB_API bool connectPgsDB(const char* connInfo);
+
+BLOCKDB_IO_LIB_API bool loadMetaListFile(const char * path, char * prefix, std::vector<strMetaMap> & meta_info);
+
+BLOCKDB_IO_LIB_API bool saveMetaListFile(const char * path, const char * prefix, const std::vector<strMetaMap>& meta_info, bool overwrite);
+
 
 BLKDB_NAMESPACE_END
 
 #endif //BLOCK_DBASE_IO_HEADER
+

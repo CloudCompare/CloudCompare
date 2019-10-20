@@ -1361,7 +1361,7 @@
           </font>
          </property>
          <property name="text">
-          <string>全部选择</string>
+          <string>全部勾选</string>
          </property>
         </widget>
        </item>
@@ -1397,7 +1397,7 @@
           </font>
          </property>
          <property name="text">
-          <string>选择</string>
+          <string>勾选</string>
          </property>
         </widget>
        </item>

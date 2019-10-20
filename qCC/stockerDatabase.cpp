@@ -203,6 +203,15 @@ bool DataBaseHObject::addData(ccHObject * obj, importDataType type, BlockDB::blk
 		return false;
 	}
 	m_obj_blkInfo.insert(std::make_pair(obj, info));
+
+// 	obj->setMetaData("BlkDataInfo", QVariant::fromValue(info));
+// 
+// 	if (obj->hasMetaData("BlkDataInfo")) {
+// 		QVariant v = obj->getMetaData("BlkDataInfo");
+// 		if (v.canConvert<BlockDB::blkDataInfo*>()) {
+// 			BlockDB::blkPtCldInfo* pin = static_cast<BlockDB::blkPtCldInfo*>(v.value<BlockDB::blkDataInfo*>());
+// 		}
+// 	}
 	
 	ccHObject* importObj = nullptr;
 	switch (type)
@@ -238,16 +247,6 @@ bool DataBaseHObject::addData(ccHObject * obj, importDataType type, BlockDB::blk
 		break;
 	}
 	return importObj && importObj->addChild(obj);
-
-
-// 	m_object->setMetaData("BlkDataInfo", QVariant::fromValue(info));
-// 	
-// 	if (m_object->hasMetaData("BlkDataInfo")) {
-// 		QVariant v = m_object->getMetaData("BlkDataInfo");
-// 		if (v.canConvert<BlockDB::blkDataInfo*>()) {
-// 			BlockDB::blkPtCldInfo* pin = static_cast<BlockDB::blkPtCldInfo*>(v.value<BlockDB::blkDataInfo*>());
-// 		}
-// 	}
 }
 
 void DataBaseHObject::clear()

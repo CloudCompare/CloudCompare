@@ -664,26 +664,47 @@ bool bdrProjectDlg::insertItemToTable(listData * data)
 		if (_finite(pData->posXs)) tableWidget->item(table_index, ImagesCol_PosXs)->setText(QString::number(pData->posXs, 'f', 6));
 		if (_finite(pData->posYs)) tableWidget->item(table_index, ImagesCol_PosYs)->setText(QString::number(pData->posYs, 'f', 6));
 		if (_finite(pData->posZs)) tableWidget->item(table_index, ImagesCol_PosZs)->setText(QString::number(pData->posZs, 'f', 6));
-		if(_finite(pData->posPhi)) tableWidget->item(table_index, ImagesCol_PosPhi)->setText(QString::number(pData->posPhi, 'f', 6));
+		if (_finite(pData->posPhi)) tableWidget->item(table_index, ImagesCol_PosPhi)->setText(QString::number(pData->posPhi, 'f', 6));
 		if (_finite(pData->posOmega)) tableWidget->item(table_index, ImagesCol_PosOmega)->setText(QString::number(pData->posOmega, 'f', 6));
 		if (_finite(pData->posKappa)) tableWidget->item(table_index, ImagesCol_PosKappa)->setText(QString::number(pData->posKappa, 'f', 6));
 		if (_finite(pData->gpsLat)) tableWidget->item(table_index, ImagesCol_GpsLat)->setText(QString::number(pData->gpsLat, 'f', 6));
 		if (_finite(pData->gpsLon)) tableWidget->item(table_index, ImagesCol_GpsLot)->setText(QString::number(pData->gpsLon, 'f', 6));
-		if(_finite(pData->gpsHeight)) tableWidget->item(table_index, ImagesCol_GpsHgt)->setText(QString::number(pData->gpsHeight, 'f', 6));
+		if (_finite(pData->gpsHeight)) tableWidget->item(table_index, ImagesCol_GpsHgt)->setText(QString::number(pData->gpsHeight, 'f', 6));
 		if (_finite(pData->gps_time)) tableWidget->item(table_index, ImagesCol_GpsHgt)->setText(QString::number(pData->gps_time, 'f', 6));
 
 		break;
 	}
 	case IMPORT_MISCS:
 	{
-		tableWidget->item(table_index, ImagesCol_Path)->setText(data->m_path);
-		tableWidget->item(table_index, ImagesCol_GroupID)->setText(QString::number(data->m_groupID));
-		tableWidget->item(table_index, ImagesCol_Level)->setText(data->m_level);
+		tableWidget->item(table_index, MiscsCol_Path)->setText(data->m_path);
+		tableWidget->item(table_index, MiscsCol_GroupID)->setText(QString::number(data->m_groupID));
+		tableWidget->item(table_index, MiscsCol_Level)->setText(data->m_level);
+
+		miscsListData* pData = static_cast<miscsListData*>(data);
+		tableWidget->item(table_index, MiscsCol_MetaKey)->setText(pData->m_meta_key);
+		tableWidget->item(table_index, MiscsCol_MetaValue)->setText(pData->m_meta_value);
+		break;
+	}
+	case IMPORT_MODELS:
+	{
+		tableWidget->item(table_index, ModelsCol_Path)->setText(data->m_path);
+		tableWidget->item(table_index, ModelsCol_GroupID)->setText(QString::number(data->m_groupID));
+		tableWidget->item(table_index, ModelsCol_Level)->setText(data->m_level);
+
+		modelsListData* pData = static_cast<modelsListData*>(data);
+		tableWidget->item(table_index, ModelsCol_Origin)->setText(pData->m_origin);
+		tableWidget->item(table_index, ModelsCol_MetaKey)->setText(pData->m_meta_key);
+		tableWidget->item(table_index, ModelsCol_MetaValue)->setText(pData->m_meta_value);
 		break;
 	}
 	case IMPORT_POSTGIS:
 	{
+		tableWidget->item(table_index, PostgisCol_Path)->setText(data->m_path);
+		tableWidget->item(table_index, PostgisCol_Level)->setText(data->m_level);
 
+		postGISLiistData* pData = static_cast<postGISLiistData*>(data);
+		tableWidget->item(table_index, PostgisCol_MetaKey)->setText(pData->m_meta_key);
+		tableWidget->item(table_index, PostgisCol_MetaValue)->setText(pData->m_meta_value);
 		break;
 	}
 	default:
@@ -777,9 +798,6 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 		for (size_t i = 0; i < camData.size(); i++) {
 			StHObject* camObj = new StHObject(camData[i].sName);
 			camObj->setPath(camData[i].sPath);
-			QString key = "CamPara";
-			QString value = camData[i].toString().c_str();
-			camObj->setMetaData(key, value);
 			BlockDB::blkCameraInfo* info = new BlockDB::blkCameraInfo(camData[i]);
 			m_ownProject->addData(camObj, IMPORT_MISCS, info);
 		}
@@ -789,12 +807,7 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 			BlockDB::blkImageInfo* info = new BlockDB::blkImageInfo;
 			pData->setObject(nullptr); pData->createObject(info);
 			if (!pData->getObject()) { failedExitprj(); failedExit(info);  continue; }
-			for (auto & cam : camData) {
-				if (info->cameraName == std::string(cam.sName)) {
-					sscanf(cam.sID, "%d", &info->cameraID);
-				}
-			}
-			
+						
 			m_ownProject->addData(pData->getObject(), pData->getDataType(), info);
 		}
 	}

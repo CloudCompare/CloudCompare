@@ -53,6 +53,6 @@ QString bdrPosImportDlg::getPosPath()
 std::vector<BlockDB::blkImageInfo> bdrPosImportDlg::getImagePosInfo()
 {
 	std::vector<BlockDB::blkImageInfo> cam;
-	BlockDB::readPosFile(getPosPath().toLocal8Bit(), cam);
+	BlockDB::loadPosFile(getPosPath().toLocal8Bit(), cam);
 	return cam;
 }

@@ -349,7 +349,7 @@ int LasPrjIO::ReadLasList(char* sLasLstPath, LasInfo& sLasInfo)
 	{
 		LasStrip lstemp;
 		fgets(szBuf, 1024, flas);
-		sscanf(szBuf, "%d%s%lf%d", &lstemp.nIdx, lstemp.szPath, &lstemp.dzoffset, &lstemp.BlockID);
+		sscanf(szBuf, "%d%s%f%d\n", &lstemp.nIdx, lstemp.szPath, &lstemp.dzoffset, &lstemp.BlockID);
 		
 // 		fgets(szbuf2, 1024, flas);
 // 		trim(szbuf2, szbuf);  //去除路径首尾空格

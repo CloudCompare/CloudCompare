@@ -1889,14 +1889,6 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		}
 	}
 
-	if (sensor)
-	{
-		sensor->setVisible(false);
-		sensor->setEnabled(false);
-		sensor->setGraphicScale(cloud->getOwnBB().getDiagNorm() / 20);
-		cloud->addChild(sensor);
-	}
-
 	dataReader.close();
 
 	if (realCount == 0)
@@ -1949,6 +1941,14 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 
 		//save the original pose matrix as meta-data
 		cloud->setMetaData(s_e57PoseKey, poseMat.toString(12, ' '));
+	}
+
+	if (sensor) //add the sensor at the end, after calling applyGLTransformation_recursive!
+	{
+		sensor->setVisible(false);
+		sensor->setEnabled(false);
+		sensor->setGraphicScale(cloud->getOwnBB().getDiagNorm() / 20);
+		cloud->addChild(sensor);
 	}
 
 	return cloud;

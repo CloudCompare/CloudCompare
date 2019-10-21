@@ -289,6 +289,7 @@ private: //members
 
 	enum PRJ_ERROR_CODE { PRJMSG_STATUS, PRJMSG_WARNING, PRJMSG_ERROR, PRJMSG_CRITICAL };
 	void diaplayMessage(QString message, PRJ_ERROR_CODE error_code = PRJMSG_STATUS);
+	void diaplayMessage(const char * message, PRJ_ERROR_CODE error_code = PRJMSG_STATUS);
 	void updatePreview();
 protected:
 

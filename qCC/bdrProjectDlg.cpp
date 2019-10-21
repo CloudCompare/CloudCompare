@@ -347,7 +347,7 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	connect(m_UI->settingDBToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionSettingDatabase);
 	connect(m_UI->importFromDBAllToolButton,	&QAbstractButton::clicked, this, &bdrProjectDlg::doActionImportDBAll);
 	connect(m_UI->importFromDBRegionToolButton, &QAbstractButton::clicked, this, &bdrProjectDlg::doActionImportDBRegion);
-	connect(m_UI->queryDBToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionQueryDB);	
+	connect(m_UI->queryDBToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionQueryDB);
 }
 
 bdrProjectDlg::~bdrProjectDlg()
@@ -740,6 +740,10 @@ void bdrProjectDlg::diaplayMessage(QString message, PRJ_ERROR_CODE error_code)
 	default:
 		break;
 	}
+}
+void bdrProjectDlg::diaplayMessage(const char* message, PRJ_ERROR_CODE error_code)
+{
+	diaplayMessage(QString::fromLocal8Bit(message), error_code);
 }
 
 bool bdrProjectDlg::insertItemToTable(listData * data)
@@ -1488,7 +1492,7 @@ void bdrProjectDlg::acceptAndExit()
 	apply();
 
 	if (!generateProject()) {
-		diaplayMessage(QString::fromUtf8("无法生成工程文件"), PRJMSG_CRITICAL);
+		diaplayMessage("无法生成工程文件", PRJMSG_CRITICAL);
 		return;
 	}
 	else {
@@ -1528,7 +1532,7 @@ bool bdrProjectDlg::generateProject()
 {
 	QString project_path = getProjectPath();
 	if (project_path.isEmpty() || !QFileInfo(project_path).isDir()) {
-		diaplayMessage(QString::fromUtf8("请设置正确的工程文件夹路径"), PRJMSG_ERROR);
+		diaplayMessage("请设置正确的工程文件夹路径", PRJMSG_ERROR);
 		return false;
 	}
 	if (!m_associateProject) { return false; }

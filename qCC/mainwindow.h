@@ -243,6 +243,7 @@ public:
 	ccHObject::Container getMainDatabases(bool check_enable);
 
 	ccHObject* getCurrentMainDatabase(bool check_enable);
+	ccHObject* getCurrentMainDatabase();
 
 private slots:
 	//! Creates a new 3D GL sub-window

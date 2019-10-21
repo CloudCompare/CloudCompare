@@ -14948,6 +14948,15 @@ ccHObject* MainWindow::getCurrentMainDatabase(bool check_enable)
 	return baseObj;
 }
 
+ccHObject * MainWindow::getCurrentMainDatabase()
+{
+	ccHObject* baseObj = getCurrentMainDatabase(true);
+	if (!baseObj) {
+		baseObj = getCurrentMainDatabase(false);
+	}
+	return baseObj;
+}
+
 void MainWindow::doActionImportData()
 {
 	if (!haveSelection()) {
@@ -15292,14 +15301,12 @@ inline QStringList createTasksFiles(DataBaseHObject* db_prj,
 
 void MainWindow::doActionImageLiDARRegistration()
 {
-	ccHObject* current = getCurrentMainDatabase(true);
-	if (!current) { current = getCurrentMainDatabase(false); }
-	if (!current) { ccLog::Error("请先载入工程!"); ccLog::Error(QString::fromLocal8Bit("请先载入工程!")); return; }
+	DataBaseHObject* baseObj = ToDatabaseProject(getCurrentMainDatabase());
+	if (!baseObj) { ccLog::Error(QString::fromLocal8Bit("请先载入工程!")); return; }
 
-	DataBaseHObject* baseObj = static_cast<DataBaseHObject*>(current);
-	if (baseObj && baseObj->m_blkData) {
+	if (baseObj->m_blkData) {
 		if (!baseObj->m_blkData->saveProject(true)) {
-			ccLog::Error("无法生成配准工程!");
+			ccLog::Error(QString::fromLocal8Bit("无法生成配准工程!"));
 			return;
 		}
 	}
@@ -15314,6 +15321,9 @@ void LoadSettingsFiltering()
 
 void MainWindow::doActionGroundFilteringBatch()
 {
+	DataBaseHObject* baseObj = ToDatabaseProject(getCurrentMainDatabase());
+	if (!baseObj) { ccLog::Error(QString::fromLocal8Bit("请先载入工程!")); return; }
+
 	if (!haveSelection()) {
 		return;
 	}

@@ -334,56 +334,76 @@ bool DataBaseHObject::load()
 	}
 	clear();
 
-	std::cout << "loading project" << getPath().toStdString() << std::endl;
-	if (!m_blkData->loadProject()) { 
-		std::cout << "cannot load project: " + m_blkData->getErrorInfo() << std::endl;
-		return false; 
+	try	{
+		std::cout << "loading project" << getPath().toStdString() << std::endl;
+		if (!m_blkData->loadProject()) {
+			std::cout << "cannot load project: " + m_blkData->getErrorInfo() << std::endl;
+			return false;
+		}
+		std::cout << "project loaded" << std::endl;
 	}
-	std::cout << "project loaded" << std::endl;
-	StHObject* group = getPointCloudGroup();
-	if (group) {
-		group->setPath(QFileInfo(m_blkData->projHdr().lasListPath).absolutePath());
+	catch (const std::exception& e) {
+		STOCKER_ERROR_ASSERT(e.what());
+		return false;
 	}
-	else return false;
-	
-	for (auto & info : m_blkData->getPtClds()) {
-		addDataExist(&info);
-	}
-	std::cout << QString::number(group->getChildrenNumber()).toStdString() << " point clouds added" << std::endl;
 
-	group = getImagesGroup();
-	if (group) {
-		group->setPath(QFileInfo(m_blkData->projHdr().imgListPath).absolutePath());
-	}
-	else return false;
+	try {
+		StHObject* group = getPointCloudGroup();
+		if (group) {
+			group->setPath(QFileInfo(m_blkData->projHdr().lasListPath).absolutePath());
+		}
+		else return false;
 
-	for (auto & info : m_blkData->getImages()) {
-		addDataExist(&info);
-	}
-	std::cout << QString::number(group->getChildrenNumber()).toStdString() << " images added" << std::endl;
+		for (auto & info : m_blkData->getPtClds()) {
+			addDataExist(&info);
+		}
+		std::cout << QString::number(group->getChildrenNumber()).toStdString() << " point clouds added" << std::endl;
 
-	int cam_count(0);
-	for (auto & info : m_blkData->getCameras()) {
-		if (addDataExist(&info))
-			cam_count++;
-	}
-	std::cout << cam_count << " cameras added" << std::endl;
+		group = getImagesGroup();
+		if (group) {
+			group->setPath(QFileInfo(m_blkData->projHdr().imgListPath).absolutePath());
+		}
+		else return false;
 
-	group = getMiscsGroup();
-	if (group) {
-		group->setPath(QFileInfo(m_blkData->projHdr().m_strProdGCDPN).absolutePath());
+		for (auto & info : m_blkData->getImages()) {
+			addDataExist(&info);
+		}
+		std::cout << QString::number(group->getChildrenNumber()).toStdString() << " images added" << std::endl;
+
+		int cam_count(0);
+		for (auto & info : m_blkData->getCameras()) {
+			if (addDataExist(&info))
+				cam_count++;
+		}
+		std::cout << cam_count << " cameras added" << std::endl;
+
+		group = getMiscsGroup();
+		if (group) {
+			group->setPath(QFileInfo(m_blkData->projHdr().m_strProdGCDPN).absolutePath());
+		}
+		else return false;
 	}
-	else return false;
+	catch (const std::exception& e) {
+		STOCKER_ERROR_ASSERT(e.what());
+		return false;
+	}
 
 	return true;
 }
 
 bool DataBaseHObject::save()
 {	
-	if (!m_blkData->saveProject()) {
-		std::cout << m_blkData->getErrorInfo() << std::endl;
+	try	{
+		if (!m_blkData->saveProject()) {
+			std::cout << m_blkData->getErrorInfo() << std::endl;
+			return false;
+		}
+	}
+	catch (const std::exception& e) {
+		STOCKER_ERROR_ASSERT(e.what());
 		return false;
 	}
+	
 	return true;
 }
 

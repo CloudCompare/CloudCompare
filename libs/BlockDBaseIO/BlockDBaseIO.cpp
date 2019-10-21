@@ -23,6 +23,7 @@ BLKDB_NAMESPACE_BEGIN
 
 #define prj_file_tag "BLK_PRJ"
 #define prj_file_ver "1.0"
+#define META_SPLIT ";"
 
 static std::string g_error_info;
 
@@ -438,8 +439,19 @@ bool BlockDBaseIO::loadProject()
 	}
 
 	//! load meta
-	
-
+	try {
+		char strkeys[2048];
+		::GetPrivateProfileString("META_INFO", "METAKEY", "", strkeys, 2048, lpstrXmlPN);
+		auto keys = _splitString(strkeys, META_SPLIT);
+		for (auto & key : keys) {
+			::GetPrivateProfileString("META_INFO", key.c_str(), "", strkeys, 2048, lpstrXmlPN);
+			addMetaValue(key, strkeys);
+		}
+	}
+	catch (const std::exception&) {
+		throw std::runtime_error("not enough memory?");
+		return false;
+	}
 	return true;
 }
 
@@ -517,9 +529,18 @@ bool BlockDBaseIO::saveProject(bool save_regisprj)
 		}
 	}
 
+	// write meta info
+	::WritePrivateProfileString("META_INFO", "METAKEY", "", lpstrXmlPN);
+	std::set<std::string> keys;
 	for (auto & meta : m_meta_info) {
 		::WritePrivateProfileString("META_INFO", meta.first.c_str(), meta.second.c_str(), lpstrXmlPN);
+		keys.insert(meta.first);
 	}
+	std::string all_keys; 
+	for (auto key : keys) {
+		all_keys += key + ";";
+	}
+	::WritePrivateProfileString("META_INFO", "METAKEY", all_keys.c_str(), lpstrXmlPN);
 
 	return true;
 }

@@ -51,9 +51,22 @@ enum BLOCK_TASK_TYPE
 	TASK_CLASS,
 	TASK_BDSEG,
 	TASK_RECON,
+	TASK_END,
+};
+enum BLOCK_TASK_ID
+{
+	TASK_ID_TILE,
+	TASK_ID_FILTER,
+	TASK_ID_REGIS,
+	TASK_ID_CLASS,
+	TASK_ID_BDSEG,
+	TASK_ID_RECON,
+	TASK_ID_END,
 };
 static const char* g_strTaskTagName[] = { "TILE", "FILTER", "REGIS", "CLASS", "BDSEG", "RECON" };
 static const char* g_strTaskDirName[] = { "Tiles", "Filtering", "Registration", "Classification", "Segmentation", "Reconstruction" };
+
+static const char* g_strTaskName[] = { "Tiles", "Filtering", "Registration", "Classification", "Segmentation", "Reconstruction" };
 
 struct blkProjHdr
 {

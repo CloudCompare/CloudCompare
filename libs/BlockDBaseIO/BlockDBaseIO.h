@@ -1,3 +1,12 @@
+/*
+File	:		BlockDBaseIO.h
+Brief	:		The header file of BlockDBase
+
+Author	:		Xinyi Liu
+Date	:		2019/10/20
+E-mail	:		liuxy0319@outlook.com
+*/
+
 #ifndef BLOCK_DBASE_IO_HEADER
 #define BLOCK_DBASE_IO_HEADER
 

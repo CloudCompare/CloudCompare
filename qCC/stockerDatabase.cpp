@@ -1,7 +1,7 @@
 #include "stockerDatabase.h"
 #include "ioctrl/StFileOperator.hpp"
 
-#include "ccHObject.h"
+#include "cctHObject.h"
 #include "ccHObjectCaster.h"
 #include "ccDBRoot.h"
 
@@ -17,9 +17,9 @@
 
 using namespace stocker;
 
-DataBaseHObject * GetRootDataBase(ccHObject * obj)
+DataBaseHObject * GetRootDataBase(StHObject * obj)
 {
-	ccHObject* bd_obj_ = obj;
+	StHObject* bd_obj_ = obj;
 	do {
 		if (isDatabaseProject(bd_obj_)) {
 			return static_cast<DataBaseHObject*>(bd_obj_);
@@ -30,8 +30,8 @@ DataBaseHObject * GetRootDataBase(ccHObject * obj)
 	return nullptr;
 }
 
-BDBaseHObject* GetRootBDBase(ccHObject* obj) {
-	ccHObject* bd_obj_ = obj;
+BDBaseHObject* GetRootBDBase(StHObject* obj) {
+	StHObject* bd_obj_ = obj;
 	do {
 		if (isBuildingProject(bd_obj_)) {
 			return static_cast<BDBaseHObject*>(bd_obj_);
@@ -42,8 +42,8 @@ BDBaseHObject* GetRootBDBase(ccHObject* obj) {
 	return nullptr;
 }
 
-BDImageBaseHObject* GetRootImageBase(ccHObject* obj) {
-	ccHObject* bd_obj_ = obj;
+BDImageBaseHObject* GetRootImageBase(StHObject* obj) {
+	StHObject* bd_obj_ = obj;
 	do {
 		if (isImageProject(bd_obj_)) {
 			return static_cast<BDImageBaseHObject*>(bd_obj_);
@@ -54,17 +54,17 @@ BDImageBaseHObject* GetRootImageBase(ccHObject* obj) {
 	return nullptr;
 }
 
-ccHObject* getChildGroupByName(ccHObject* group, QString name, bool auto_create, bool add_to_db)
+StHObject* getChildGroupByName(StHObject* group, QString name, bool auto_create, bool add_to_db)
 {
-	ccHObject* find_obj = nullptr;
+	StHObject* find_obj = nullptr;
 	for (size_t i = 0; i < group->getChildrenNumber(); i++) {
-		ccHObject* child = group->getChild(i);
+		StHObject* child = group->getChild(i);
 		if (child->isGroup() && child->getName() == name) {
 			find_obj = child;
 		}
 	}
 	if (!find_obj && auto_create) {
-		find_obj = new ccHObject(name);
+		find_obj = new StHObject(name);
 		QString path = group->getPath() + "/" + name;
 		if (StCreatDir(path)) {
 			find_obj->setPath(path);
@@ -97,51 +97,51 @@ inline void DataBaseHObject::setPath(const QString & tp)
 	}
 }
 
-ccHObject * DataBaseHObject::getPointCloudGroup()
+StHObject * DataBaseHObject::getPointCloudGroup()
 {
 	return getChildGroupByName(this, "pointClouds");
 }
 
-ccHObject * DataBaseHObject::getImagesGroup()
+StHObject * DataBaseHObject::getImagesGroup()
 {
 	return getChildGroupByName(this, "images");
 }
 
-ccHObject * DataBaseHObject::getMiscsGroup()
+StHObject * DataBaseHObject::getMiscsGroup()
 {
 	return getChildGroupByName(this, "miscs");
 }
 
-ccHObject* DataBaseHObject::getProductGroup() {
+StHObject* DataBaseHObject::getProductGroup() {
 	return getChildGroupByName(this, "products");
 }
 
-ccHObject * DataBaseHObject::getProductItem(QString name)
+StHObject * DataBaseHObject::getProductItem(QString name)
 {
-	ccHObject* products = getProductGroup();
+	StHObject* products = getProductGroup();
 	if (!products) { return nullptr; }
 	return getChildGroupByName(products, name);
 }
-ccHObject* DataBaseHObject::getProductFiltered() 
+StHObject* DataBaseHObject::getProductFiltered() 
 {
 	return getProductItem("filtered");
 }
-ccHObject* DataBaseHObject::getProductClassified() 
+StHObject* DataBaseHObject::getProductClassified() 
 {
 	return getProductItem("classified");
 }
-ccHObject * DataBaseHObject::getProductSegmented()
+StHObject * DataBaseHObject::getProductSegmented()
 {
 	return getProductItem("segmented");
 }
-ccHObject * DataBaseHObject::getProductModels()
+StHObject * DataBaseHObject::getProductModels()
 {
 	return getProductItem("models");
 }
 
-ccHObject* createObjectFromBlkDataInfo(BlockDB::blkDataInfo* info)
+StHObject* createObjectFromBlkDataInfo(BlockDB::blkDataInfo* info)
 {
-	ccHObject* object = nullptr;
+	StHObject* object = nullptr;
 	if (!info || !info->isValid()) return object;
 	switch (info->dataType())
 	{
@@ -157,15 +157,15 @@ ccHObject* createObjectFromBlkDataInfo(BlockDB::blkDataInfo* info)
 	}
 		break;
 	case BlockDB::Blk_Image:
-		object = new ccHObject(QString::fromLocal8Bit(info->sName));
+		object = new StHObject(QString::fromLocal8Bit(info->sName));
 		object->setPath(QString::fromLocal8Bit(info->sPath));
 		break;
 	case BlockDB::Blk_Camera:
-		object = new ccHObject(QString::fromLocal8Bit(info->sName));
+		object = new StHObject(QString::fromLocal8Bit(info->sName));
 		object->setPath(QString::fromLocal8Bit(info->sPath));
 		break;
 	case BlockDB::Blk_Miscs:
-		object = new ccHObject(QString::fromLocal8Bit(info->sName));
+		object = new StHObject(QString::fromLocal8Bit(info->sName));
 		object->setPath(QString::fromLocal8Bit(info->sPath));
 		break;
 	default:
@@ -181,7 +181,7 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 
 	//! point clouds
 	{
-		ccHObject* points = new_database->getPointCloudGroup();
+		StHObject* points = new_database->getPointCloudGroup();
 		if (!points) {
 			return nullptr;
 		}
@@ -190,7 +190,7 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 
 	//! images
 	{
-		ccHObject* images = new_database->getImagesGroup();
+		StHObject* images = new_database->getImagesGroup();
 		if (!images) {
 			return nullptr;
 		}
@@ -199,7 +199,7 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 
 	//! miscellaneous
 	{
-		ccHObject* misc = new_database->getMiscsGroup();
+		StHObject* misc = new_database->getMiscsGroup();
 		if (!misc) {
 			return nullptr;
 		}
@@ -208,31 +208,31 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 
 	//! products
 	{
-		ccHObject* products = new_database->getProductGroup();
+		StHObject* products = new_database->getProductGroup();
 		if (!products) {
 			return nullptr;
 		}
 		products->setLocked(true);
 
-		ccHObject* groundFilter = new_database->getProductFiltered();
+		StHObject* groundFilter = new_database->getProductFiltered();
 		if (!groundFilter) {
 			return nullptr;
 		}
 		groundFilter->setLocked(true);
 
-		ccHObject* classified = new_database->getProductClassified();
+		StHObject* classified = new_database->getProductClassified();
 		if (!classified) {
 			return nullptr;
 		}
 		classified->setLocked(true);
 
-		ccHObject* segments = new_database->getProductSegmented();
+		StHObject* segments = new_database->getProductSegmented();
 		if (!segments) {
 			return nullptr;
 		}
 		segments->setLocked(true);
 
-		ccHObject* models = new_database->getProductModels();
+		StHObject* models = new_database->getProductModels();
 		if (!models) {
 			return nullptr;
 		}
@@ -241,7 +241,7 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 	return new_database;
 }
 
-bool DataBaseHObject::addData(ccHObject * obj, BlockDB::blkDataInfo* info, bool exist_info)
+bool DataBaseHObject::addData(StHObject * obj, BlockDB::blkDataInfo* info, bool exist_info)
 {
 	if (!info) {
 		return false;
@@ -266,7 +266,7 @@ bool DataBaseHObject::addData(ccHObject * obj, BlockDB::blkDataInfo* info, bool 
 // 			}
 		}
 	}
-	ccHObject* importObj = nullptr;
+	StHObject* importObj = nullptr;
 	switch (info->dataType())
 	{
 	case BlockDB::Blk_PtCld: {
@@ -303,7 +303,7 @@ bool DataBaseHObject::addData(ccHObject * obj, BlockDB::blkDataInfo* info, bool 
 
 bool DataBaseHObject::addDataExist(BlockDB::blkDataInfo * info)
 {
-	ccHObject* obj = createObjectFromBlkDataInfo(info);
+	StHObject* obj = createObjectFromBlkDataInfo(info);
 	if (!obj) { return false; }
 	
 	return addData(obj, info, true);
@@ -360,56 +360,56 @@ bool DataBaseHObject::save()
 }
 
 StBuilding* BDBaseHObject::GetBuildingGroup(QString building_name, bool check_enable) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_BUILDING, "", building_name, check_enable);
+	StHObject* obj = GetHObj(CC_TYPES::ST_BUILDING, "", building_name, check_enable);
 	if (obj) return static_cast<StBuilding*>(obj);
 	return nullptr;
 }
 ccPointCloud * BDBaseHObject::GetOriginPointCloud(QString building_name, bool check_enable) {
-	ccHObject* obj = GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name, check_enable);
+	StHObject* obj = GetHObj(CC_TYPES::POINT_CLOUD, BDDB_ORIGIN_CLOUD_SUFFIX, building_name, check_enable);
 	if (obj) return static_cast<ccPointCloud*>(obj);
 	return nullptr;
 }
 StPrimGroup * BDBaseHObject::GetPrimitiveGroup(QString building_name) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_PRIMITIVE_SUFFIX, building_name, false);
+	StHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_PRIMITIVE_SUFFIX, building_name, false);
 	if (obj) return static_cast<StPrimGroup*>(obj);
 	StPrimGroup* group = new StPrimGroup(building_name + BDDB_PRIMITIVE_SUFFIX);
 	if (group) {
-		ccHObject* bd = GetBuildingGroup(building_name, false);
+		StHObject* bd = GetBuildingGroup(building_name, false);
 		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
 	return nullptr;
 }
 StBlockGroup * BDBaseHObject::GetBlockGroup(QString building_name) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_BLOCKGROUP, BDDB_BLOCKGROUP_SUFFIX, building_name, false);
+	StHObject* obj = GetHObj(CC_TYPES::ST_BLOCKGROUP, BDDB_BLOCKGROUP_SUFFIX, building_name, false);
 	if (obj) return static_cast<StBlockGroup*>(obj);
 	StBlockGroup* group = new StBlockGroup(building_name + BDDB_BLOCKGROUP_SUFFIX);
 	if (group) {
-		ccHObject* bd = GetBuildingGroup(building_name, false);
+		StHObject* bd = GetBuildingGroup(building_name, false);
 		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
 	return nullptr;
 }
 StPrimGroup * BDBaseHObject::GetHypothesisGroup(QString building_name) {
-	ccHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_POLYFITHYPO_SUFFIX, building_name, false);
+	StHObject* obj = GetHObj(CC_TYPES::ST_PRIMGROUP, BDDB_POLYFITHYPO_SUFFIX, building_name, false);
 	if (obj) return static_cast<StPrimGroup*>(obj);
 	StPrimGroup* group = new StPrimGroup(building_name + BDDB_POLYFITHYPO_SUFFIX);
 	if (group) {
-		ccHObject* bd = GetBuildingGroup(building_name, false);
+		StHObject* bd = GetBuildingGroup(building_name, false);
 		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
 	return nullptr;
 }
-ccHObject * BDBaseHObject::GetTodoGroup(QString building_name)
+StHObject * BDBaseHObject::GetTodoGroup(QString building_name)
 {
-	ccHObject* obj = GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_TODOGROUP_SUFFIX, building_name, false);
+	StHObject* obj = GetHObj(CC_TYPES::HIERARCHY_OBJECT, BDDB_TODOGROUP_SUFFIX, building_name, false);
 	if (obj) return static_cast<StBlockGroup*>(obj);
 	StBlockGroup* group = new StBlockGroup(building_name + BDDB_TODOGROUP_SUFFIX);
 	if (group) {
 		group->setDisplay(getDisplay());
-		ccHObject* bd = GetBuildingGroup(building_name, false);
+		StHObject* bd = GetBuildingGroup(building_name, false);
 		if (bd) { bd->addChild(group); MainWindow::TheInstance()->addToDB(group, this->getDBSourceType()); return group; }
 		else { delete group; group = nullptr; }
 	}
@@ -417,12 +417,12 @@ ccHObject * BDBaseHObject::GetTodoGroup(QString building_name)
 }
 ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name)
 {
-	ccHObject* todo_group = GetTodoGroup(buildig_name);
+	StHObject* todo_group = GetTodoGroup(buildig_name);
 	if (!todo_group) { throw std::runtime_error("internal error"); return nullptr; }
-	ccHObject::Container todo_children;
+	StHObject::Container todo_children;
 	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOPOINT_PREFIX, true, CC_TYPES::POINT_CLOUD);
 	if (!todo_children.empty()) {
-		return ccHObjectCaster::ToPointCloud(todo_children.front());
+		return StHObjectCaster::ToPointCloud(todo_children.front());
 	}
 	else {
 		ccPointCloud* todo_point = new ccPointCloud(BDDB_TODOPOINT_PREFIX);
@@ -440,12 +440,12 @@ ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name)
 }
 ccPointCloud * BDBaseHObject::GetTodoLine(QString buildig_name)
 {
-	ccHObject* todo_group = GetTodoGroup(buildig_name);
+	StHObject* todo_group = GetTodoGroup(buildig_name);
 	if (!todo_group) { throw std::runtime_error("internal error"); return nullptr; }
-	ccHObject::Container todo_children;
+	StHObject::Container todo_children;
 	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOLINE_PREFIX, true, CC_TYPES::POINT_CLOUD);
 	if (!todo_children.empty()) {
-		return ccHObjectCaster::ToPointCloud(todo_children.front());
+		return StHObjectCaster::ToPointCloud(todo_children.front());
 	}
 	else {
 		ccPointCloud* todo_point = new ccPointCloud(BDDB_TODOLINE_PREFIX);
@@ -488,7 +488,7 @@ stocker::BuilderBase::SpBuild BDBaseHObject::GetBuildingSp(std::string building_
 	//return stocker::BuilderSet::SpBuild();
 }
 
-ccHObject* findChildByName(ccHObject* parent,
+StHObject* findChildByName(StHObject* parent,
 	bool recursive,
 	QString filter,
 	bool strict,
@@ -496,12 +496,12 @@ ccHObject* findChildByName(ccHObject* parent,
 	bool auto_create /*= false*/,
 	ccGenericGLDisplay* inDisplay/*=0*/)
 {
-	ccHObject::Container children;
+	StHObject::Container children;
 	parent->filterChildrenByName(children, recursive, filter, strict, type_filter, inDisplay);
 
 	if (children.empty()) {
 		if (auto_create) {
-			ccHObject* obj = ccHObject::New(type_filter, filter.toStdString().c_str());
+			StHObject* obj = StHObject::New(type_filter, filter.toStdString().c_str());
 			if (parent->getDisplay()) {
 				obj->setDisplay(parent->getDisplay());
 			}
@@ -517,7 +517,7 @@ ccHObject* findChildByName(ccHObject* parent,
 	}
 }
 
-int GetNumberExcludePrefix(ccHObject * obj, QString prefix)
+int GetNumberExcludePrefix(StHObject * obj, QString prefix)
 {
 	QString name = obj->getName();
 	if (name.startsWith(prefix) && name.length() > prefix.length()) {
@@ -527,7 +527,7 @@ int GetNumberExcludePrefix(ccHObject * obj, QString prefix)
 	return -1;
 }
 
-int GetMaxNumberExcludeChildPrefix(ccHObject * obj, QString prefix/*, CC_CLASS_ENUM type = CC_TYPES::OBJECT*/)
+int GetMaxNumberExcludeChildPrefix(StHObject * obj, QString prefix/*, CC_CLASS_ENUM type = CC_TYPES::OBJECT*/)
 {
 	if (!obj) { return -1; }
 	set<int> name_numbers;

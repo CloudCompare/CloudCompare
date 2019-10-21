@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 File	:		bdrProjectDlg.h
 Brief	:		The header file of bdrProjectDlg
 
@@ -330,7 +330,7 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	connect(m_UI->gpsInfoToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionGpsInfo);
 	connect(m_UI->imageCoorCvtToolButton,		&QAbstractButton::clicked, this, &bdrProjectDlg::doActionImgCoorCvt);
 	connect(m_UI->undistortToolButton,			&QAbstractButton::clicked, this, &bdrProjectDlg::doActionImageUndistort);
-	m_UI->cameraComboBox->addItem(QString::fromLocal8Bit("Ìí¼ÓÏà»ú"));
+	m_UI->cameraComboBox->addItem(QString::fromLocal8Bit("æ·»åŠ ç›¸æœº"));
 	connect(m_UI->cameraComboBox,				SIGNAL(activated(int)),	   this, SLOT(clicked_CameraComboBox(int)));
 	connect(m_UI->cameraOptionsToolButton,		&QAbstractButton::clicked, this, &bdrProjectDlg::doActionCameraOptions);
 	connect(m_UI->cameraSetupToolButton,		&QAbstractButton::clicked, this, &bdrProjectDlg::doActionCameraSetup);
@@ -1360,7 +1360,7 @@ void bdrProjectDlg::doActionCameraOptions()
 void bdrProjectDlg::doActionCameraSetup()
 {
 	if (m_UI->cameraComboBox->currentIndex() == m_UI->cameraComboBox->count() - 1) {
-		QMessageBox::critical(this, "Error!", QString::fromLocal8Bit("ÇëÏÈÌí¼ÓÏà»ú"));
+		QMessageBox::critical(this, "Error!", QString::fromLocal8Bit("è¯·å…ˆæ·»åŠ ç›¸æœº"));
 		return;
 	}
 	QTableWidget* tableWidget = getTableWidget(IMPORT_IMAGES);
@@ -1492,7 +1492,7 @@ void bdrProjectDlg::acceptAndExit()
 	apply();
 
 	if (!generateProject()) {
-		diaplayMessage("ÎŞ·¨Éú³É¹¤³ÌÎÄ¼ş", PRJMSG_CRITICAL);
+		diaplayMessage("æ— æ³•ç”Ÿæˆå·¥ç¨‹æ–‡ä»¶", PRJMSG_CRITICAL);
 		return;
 	}
 	else {
@@ -1532,7 +1532,7 @@ bool bdrProjectDlg::generateProject()
 {
 	QString project_path = getProjectPath();
 	if (project_path.isEmpty() || !QFileInfo(project_path).isDir()) {
-		diaplayMessage("ÇëÉèÖÃÕıÈ·µÄ¹¤³ÌÎÄ¼ş¼ĞÂ·¾¶", PRJMSG_ERROR);
+		diaplayMessage("è¯·è®¾ç½®æ­£ç¡®çš„å·¥ç¨‹æ–‡ä»¶å¤¹è·¯å¾„", PRJMSG_ERROR);
 		return false;
 	}
 	if (!m_associateProject) { return false; }
